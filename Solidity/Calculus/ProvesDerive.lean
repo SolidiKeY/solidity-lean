@@ -1,4 +1,5 @@
 import Solidity.Calculus.LeafDerive
+import Solidity.Calculus.AllLeft
 
 /-!
 # `sol_prove` on a scoped sequent: `⊢ φ` as one kernel evaluation
@@ -749,10 +750,47 @@ namespace Seq
 
 open Lean Elab Tactic Meta
 
+/-- The most literals `allLeft` instantiates a leaf's `∀` premises with
+(Lean only: `Calculus/AllLeft.lean`). -/
+def allLeftBudget : Nat := 4
+
+/-- The literal a quoted term indexes with, `(p, v)`, where it is an index
+(`at`, `atIn`, `mat`) at a literal. -/
+def litIndex? (e : Expr) : Option (Expr × Expr) := do
+  let y ← if e.isAppOfArity ``Tm.app2 8 &&
+      ((e.getArg! 5).isAppOf ``Op2.at || (e.getArg! 5).isAppOf ``Op2.mat) then some (e.getArg! 7)
+    else if e.isAppOfArity ``Tm.app3 10 && (e.getArg! 6).isAppOf ``Op3.atIn then some (e.getArg! 8)
+    else none
+  guard (y.isAppOfArity ``Tm.app0 4 && (y.getArg! 3).isAppOfArity ``Op0.lit 3)
+  let o := y.getArg! 3
+  return (o.getArg! 1, o.getArg! 2)
+
+/-- `allLeft`'s instances for the leaf `H ⊢ φ` (both quoted): the literals
+the leaf indexes with, at most `allLeftBudget` of them, as a quoted
+`List InstLit`; `none` where `H` has no `∀` premise or the leaf no such
+literal. -/
+def allLeftLits (H φ : Expr) : MetaM (Option Expr) := do
+  unless (H.find? fun e => e.isAppOfArity ``Hyps.pre 5 && (e.getArg! 4).isAppOf ``Fml.all).isSome do
+    return none
+  let acc ← IO.mkRef (#[] : Array (Expr × Expr))
+  for e in [H, φ] do
+    forEachExpr e fun x => do
+      if let some l := litIndex? x then
+        let ls ← acc.get
+        if ls.size < allLeftBudget && !ls.contains l then acc.set (ls.push l)
+  let ls ← acc.get
+  if ls.isEmpty then return none
+  let ty := mkConst ``InstLit
+  let mk (l : Expr × Expr) : Expr :=
+    mkApp4 (mkConst ``Sigma.mk [0, 0]) (mkConst ``PrimTy) (mkConst ``PrimTy.Denote) l.1 l.2
+  return some (← mkListLit ty (ls.toList.map mk))
+
 /-- `sol_leaf` on the main goal, a leaf `H ⊢ φ` of the outer scope:
 `Proves.closeValid`, the goal left `⊨ ψ` with `ψ` the wrapped sequent
 computed and quoted (`Symex.normValid`); no modality left
-(`Fml.modalFree`, checked by the kernel). -/
+(`Fml.modalFree`, checked by the kernel).  Where a premise of `H` is a `∀`,
+each such premise is instantiated first (`allLeft`, `Hyps.instAll_valid`)
+at the literals the leaf indexes with (`allLeftLits`). -/
 def leafValid : TacticM Unit := withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
@@ -765,7 +803,14 @@ def leafValid : TacticM Unit := withMainContext do
     catch _ => throwError "sol_leaf: a modality is left in the leaf"
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Valid) C ψ) (← g.getTag)
   g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, g', hm])
-  replaceMainGoal [← Symex.normValid g'.mvarId!]
+  match ← allLeftLits H φ with
+  | none => replaceMainGoal [← Symex.normValid g'.mvarId!]
+  | some ts =>
+    let H' := mkAppN (mkConst ``Hyps.instAll) #[C, nilCtx, ts, Γ, H]
+    let g'' ← mkFreshExprSyntheticOpaqueMVar
+      (mkApp2 (mkConst ``Valid) C (mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H', φ])) (← g.getTag)
+    g'.mvarId!.assign (mkAppN (mkConst ``Hyps.instAll_valid) #[C, ts, Γ, H, φ, g''])
+    replaceMainGoal [← Symex.normValid g''.mvarId!]
 
 end Seq
 

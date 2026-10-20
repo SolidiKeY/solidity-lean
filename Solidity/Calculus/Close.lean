@@ -72,6 +72,16 @@ def scopedGoal : TacticM Bool := withMainContext do
     if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return true
   return false
 
+/-- A pushed state's global part is the state's (`rfl`): `sol_close`
+reads two reads of one global part, through states of different locals,
+as one (`dsimp`, so the heap typing the reads depend on is unchanged). -/
+theorem glob_push {C : Contract} {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).glob = σ.glob := rfl
+
+/-- A pushed state's heap typing is the state's (`rfl`). -/
+theorem H_push {C : Contract} {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).H = σ.H := rfl
+
 end Close
 
 /-- The first pass of `sol_close`: evaluate, and name every write with what
@@ -122,6 +132,9 @@ macro "sol_close" : tactic => `(tactic|
     -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
     -- state: every premise introduced, every conjunct its own goal
     all_goals (repeat' (first | intro _ | apply And.intro))
+    -- one global part read through states of different locals
+    -- (`allLeftHide`'s instances, `Calculus/AllLeft.lean`)
+    all_goals (try dsimp only [Close.glob_push, Close.H_push] at *)
     -- `Int.tmod_lt_of_pos`, `Int.lt_tmod_of_pos`: solkey's `smod_lessPositiveDenom`,
     -- `smod_NumPos` and `smod_NumNeg`, a remainder within a positive divisor;
     -- `Int.tmod_nonneg`, `Close.tmod_nonpos`: `smod_geZero`, its sign the
