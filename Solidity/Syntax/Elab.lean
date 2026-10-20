@@ -620,6 +620,83 @@ def freshenBlocks (avoid live : List String) (ss : List RawStmt) : Except String
   (freshenList false live [] ss).run'
     (RawStmt.namesList ss ++ RawStmt.declsList ss ++ live ++ avoid)
 
+/-! ### Recursion
+
+A function is recursive when its body reaches a call of itself, through the
+bodies (and modifiers) of the functions it calls.  A call of a recursive
+function is `Stmt.callRec`: its body elaborated once per frame, lazily, in a
+frame whose names every frame shares (`ElabScope.recs`). -/
+
+/-- The functions an expression calls, by name. -/
+partial def RawExpr.callees (e : RawExpr) : List String :=
+  match e with
+  | .call g as => g :: as.flatMap RawExpr.callees
+  | .named g _ as => g :: as.flatMap RawExpr.callees
+  | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => a.callees
+  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => a.callees ++ b.callees
+  | .ternary c a b => c.callees ++ a.callees ++ b.callees
+  | .modular _ a b k => a.callees ++ b.callees ++ k.callees
+  | .tuple as => as.flatMap RawExpr.callees
+  | .num _ | .name _ | .bool _ | .env _ => []
+
+/-- The functions a block calls, at any depth: a statement `g(a);` too. -/
+def RawStmt.calleesList (ss : List RawStmt) : List String :=
+  ss.flatMap (RawStmt.flatMapDeep fun s =>
+    (match s with | .call (.name g) _ => [g] | _ => []) ++ s.exprs.flatMap RawExpr.callees)
+
+/-- The functions a function's body and its modifiers call. -/
+def FunDecl.callees (d : FunDecl) : List String :=
+  RawStmt.calleesList d.body ++
+    d.mods.flatMap fun m => RawStmt.calleesList m.body ++ m.args.flatMap RawExpr.callees
+
+/-- The functions of `funs` reachable from `f` by one call or more. -/
+def reachable (funs : List (Name × FunDecl)) (f : String) : List String := Id.run do
+  let mut seen : List String := []
+  let mut todo : List String := ((lookupBy f funs).map FunDecl.callees).getD []
+  for _ in [0:funs.length + 1] do
+    let next := todo.filter (fun g => !seen.contains g && (lookupBy g funs).isSome)
+    if next.isEmpty then break
+    seen := seen ++ next.eraseDups
+    todo := next.flatMap fun g => ((lookupBy g funs).map FunDecl.callees).getD []
+  return seen
+
+/-- Whether `f` calls itself, directly or through other functions of `funs`. -/
+def isRecursive (funs : List (Name × FunDecl)) (f : String) : Bool :=
+  (reachable funs f).contains f
+
+/-- The functions mutually recursive with `f` (`f` among them, if recursive). -/
+def recPartners (funs : List (Name × FunDecl)) (f : String) : List String :=
+  (reachable funs f).filter fun g => (reachable funs g).contains f
+
+/-- A frame of a recursive call's unrolling, its contract forgotten
+(`ElabScope` does not know it): the body below, behind its thunk. -/
+structure RecThunk where
+  ctr : Contract
+  frame : Ctx
+  thunk : Unit → Prog ctr frame frame
+
+instance {C : Contract} {F : Ctx} : Inhabited (Unit → Prog C F F) := ⟨fun _ => Prog.recBase⟩
+
+private unsafe def RecThunk.getImpl (C : Contract) (F : Ctx) (r : RecThunk) :
+    Unit → Prog C F F :=
+  unsafeCast r.thunk
+
+/-- The thunk at the elaborator's contract, which is the one it was made at
+(the elaborator elaborates one contract; the kernel checks what is quoted). -/
+@[implemented_by RecThunk.getImpl]
+opaque RecThunk.get (C : Contract) (F : Ctx) (r : RecThunk) : Unit → Prog C F F
+
+/-- A recursive function whose body is being elaborated, at one frame of its
+unrolling: its parameters' and return variables' names, which every frame
+shares, the frame's context, how many frames are left below, and the body of
+the frame below (`Stmt.callRec`). -/
+structure RecFrame where
+  name : String
+  params : List Var
+  rets : List Var
+  depth : Nat
+  below : RecThunk
+
 /-- The elaborator's locals in scope as a named context: `old` is a
 specification's storage snapshot.  A name is read as the file's
 `FreshNames` spells it (`acc` may be `sp1`). -/
@@ -1058,6 +1135,9 @@ structure ElabScope where
   contract inlines, a name no frame has, so that a callee reading it is not
   run (`receiveSelfBody`). -/
   selfValue : RawExpr := .num 0
+  /-- The recursive functions whose bodies are being elaborated, innermost
+  first: a call of one is the frame below (`elabCallRet`). -/
+  recs : List RecFrame := []
 
 /-- Elaboration threads the locals in scope, newest first, and the index of
 the next variable a capture declares, and reads its scope (`ElabScope`). -/
@@ -2377,11 +2457,31 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
   let funs := (← read).funs
   let selfFrame := selfFrame || (← read).selfFrame
+  -- a call of a recursive function whose body is being elaborated: the frame
+  -- below, its names the frame's (`ElabScope.recs`)
+  let recs := (← read).recs
+  let site := if ctor then none else recs.find? (·.name == f)
+  let recursive := !ctor && (site.isSome || isRecursive C.funs f)
   -- the callee and the functions its body may call: the constructor (`elabCtor`)
-  -- may call every function, a function those declared before it
+  -- may call every function, a function those declared before it, and a
+  -- recursive function those it is mutually recursive with too
   let (d, scope) ← if ctor then pure (C.ctor.getD { params := [], body := [] }, C.funs) else
     let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
-    pure ((funs[i]?.map (·.2)).getD default, funs.take i)
+    let d := (funs[i]?.map (·.2)).getD default
+    if recursive then
+      let j := (C.funs.findIdx? (·.1 == f)).getD 0
+      let partners := recPartners C.funs f
+      pure (d, C.funs.take j ++ (C.funs.drop j).filter (partners.contains ·.1))
+    else pure (d, funs.take i)
+  if recursive && d.rets.length > 1 then
+    throw s!"{f} is recursive and returns several values: not supported"
+  -- a parameter's or return variable's name: fresh, or the recursive frame's
+  let pickName (base : String) (frameNames : RecFrame → List Var) (j : Nat) : ElabM Var :=
+    match site with
+    | some rf => match (frameNames rf)[j]? with
+      | some x => pure x
+      | none => throw s!"internal: {f}'s recursive frame has no name {j}"
+    | none => freshCapture base
   unless d.params.length == args.length do
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let Γ ← ctx
@@ -2392,6 +2492,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let mut ρ : List (String × String) := []
   -- the frame: the parameters, then the return variables, each newest first
   let mut Γp : ECtx := []
+  let mut pj := 0
+  let mut pnames : List Var := []
   for ((n, T), a) in d.params.zip args do
     match T with
     | .prim p =>
@@ -2400,7 +2502,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let w := (lookupBy n d.widths).getD 256
       ElabM.lift (fitCheck C Γ p w a)
       let e ← checkIn C Γn p a
-      let x ← freshCapture "se"
+      let x ← pickName "se" (·.params) pj
+      pnames := pnames ++ [x]
       targs := ⟨_, targs.2.snoc p x e⟩
       ρ := (n, toString x) :: ρ
       Γp := (toString x, .val p w) :: Γp
@@ -2408,18 +2511,21 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       match lookupBy n d.paramLocs with
       | some .storage =>
         let e ← ElabM.lift (checkPath C Γn (.ref R) a)
-        let x ← freshCapture "sp"
+        let x ← pickName "sp" (·.params) pj
+        pnames := pnames ++ [x]
         targs := ⟨_, targs.2.snocStorage R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := (toString x, .alias R) :: Γp
       | some .memory =>
         let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
-        let x ← freshCapture "mv"
+        let x ← pickName "mv" (·.params) pj
+        pnames := pnames ++ [x]
         targs := ⟨_, targs.2.snocMemory R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := (toString x, .mem R) :: Γp
       | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
       | none => throw s!"{f}: reference parameter {n} needs a data location"
+    pj := pj + 1
   let mut mret : Option (RefTy × Var × Bool) := none
   let mut mrets : List (PrimTy × Var × Nat) := []
   let mut Γr : ECtx := []
@@ -2430,6 +2536,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | [], some _ => throw s!"{f} returns no value"
     | [(n, .ref R)], none => do
       if targets then throw s!"{f} returns a {Ty.ref R}, which a tuple assignment does not take"
+      if recursive then throw s!"{f} is recursive and returns a reference: not supported"
       if d.retMem && d.retStorage then throw s!"{f}: its return has two data locations"
       if d.retStorage then
         let r ← freshCapture "sp"
@@ -2452,7 +2559,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         unless q = p do throw s!"{f} returns a {p.toStr}, not a {q.toStr}"
       let w := (lookupBy n d.widths).getD 256
       if resW < w then throw s!"{f} returns a {tyName p w}, where a {tyName p resW} is expected"
-      let r ← freshCapture "se"
+      let r ← pickName "se" (·.rets) 0
       ρ := (n, toString r) :: ρ
       Γr := [(toString r, .val p w)]
       if targets then
@@ -2472,25 +2579,59 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         mrets := mrets ++ [(p, r, w)]
       if targets then pure (RetKind.rets (mrets.map fun (p, r, _) => (p, r))) else pure RetKind.none
   let Γf := Γr ++ Γp
-  let body ← renameStmts ρ d.body
-  let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
-  let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
-  let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
-  -- a constructor's initializers: after its parameters are bound, before its
-  -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
-  let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
-  -- an external call of the contract to itself: its frame's environment
-  let selfValue := (← read).selfValue
-  let body := if selfFrame then body.map (RawStmt.selfFrame selfValue) else body
-  -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
-  let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
-  let k₁ := (← get).2
-  modify fun (_, k) => (Γf, k)
-  let P ← withReader (fun sc =>
-      { sc with funs := scope, top := false, selfFrame := selfFrame,
-                inlined := (k₀, k₁) :: sc.inlined })
-    (elabStmtsP body)
-  modify fun (_, k) => (Γ, k)
+  let rnames : List Var := match kind with
+    | .val _ r => [r]
+    | .rets l => l.map (·.2)
+    | _ => []
+  -- the body: at a recursive function's call in its own body, the frame
+  -- below (`ElabScope.recs`); for a recursive function, its body elaborated
+  -- per frame, lazily (`recUnroll`, `Stmt.callRec`); otherwise inlined
+  let mut P : SProg C := []
+  let mut recBody : Option (Nat × ((F : Ctx) → List Var → ElabM (Unit → Prog C F F))) := none
+  if let some rf := site then
+    recBody := some (rf.depth, fun F _ =>
+      if rf.below.frame == F then pure (rf.below.get C F)
+      else throw s!"internal: {f}'s recursive frame has another context")
+  else
+    let body ← renameStmts ρ d.body
+    let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
+    let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
+    let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
+    -- a constructor's initializers: after its parameters are bound, before its
+    -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
+    let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
+    -- an external call of the contract to itself: its frame's environment
+    let selfValue := (← read).selfValue
+    let body := if selfFrame then body.map (RawStmt.selfFrame selfValue) else body
+    -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
+    let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
+    let k₁ := (← get).2
+    if recursive then
+      recBody := some (recDepth, fun F ns => do
+        let sc ← read
+        let frame (n : Nat) (bt : Unit → Prog C F F) : Except String (Prog C F F × Nat) := do
+          let rf : RecFrame :=
+            { name := f, params := pnames, rets := rnames, depth := n, below := ⟨C, F, bt⟩ }
+          let sc' : ElabScope :=
+            { sc with funs := scope, top := false, selfFrame := selfFrame,
+                      inlined := (k₀, k₁) :: sc.inlined, recs := rf :: sc.recs }
+          let (Q, (_, kEnd)) ← ((elabStmtsP body).run sc').run (Γf, k₁)
+          let ⟨_, b⟩ ← SProg.chain ns F Q
+          pure (.cons (.block b) .nil, kEnd)
+        -- elaborated once here, for its errors and the names it takes
+        let (_, kEnd) ← ElabM.lift (frame (recDepth - 1) fun _ => Prog.recBase)
+        modify fun (Γc, _) => (Γc, kEnd)
+        pure fun _ => recUnroll Prog.recBase
+          (fun n bt => match frame n bt with
+            | .ok (Q, _) => Q
+            | .error _ => Prog.recBase) recDepth)
+    else
+      modify fun (_, k) => (Γf, k)
+      P ← withReader (fun sc =>
+          { sc with funs := scope, top := false, selfFrame := selfFrame,
+                    inlined := (k₀, k₁) :: sc.inlined })
+        (elabStmtsP body)
+      modify fun (_, k) => (Γ, k)
   -- the call's context: the caller's, with `res` pushed when the statement
   -- before the call declares it
   let ⟨ps, as⟩ := targs
@@ -2504,18 +2645,29 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       -- their defaults
       let (decls, _) := mrets.foldl (fun (acc : SProg C × NCtx) (p, r, _) =>
         (acc.1 ++ [.of acc.2 (.declLocal p r none)], (r, .val p) :: acc.2)) ([], ECtx.toNCtx Γp)
-      let ⟨_, b⟩ ← ElabM.lift (SProg.chain as.names ([] ++ ps) (decls ++ P))
-      pure (.of Γs (.call f as .none b))
+      match recBody with
+      | some (n, mk) => pure (.of Γs (.callRec f n as .none (← mk ([] ++ ps) as.names)))
+      | none =>
+        let ⟨_, b⟩ ← ElabM.lift (SProg.chain as.names ([] ++ ps) (decls ++ P))
+        pure (.of Γs (.call f as .none b))
     | .val p r =>
       let res' ← match res with
         | some (x, _) => do pure (some (← ElabM.lift (Γs.idx x (.val p))))
         | none => pure none
-      let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.val p] ++ ps) P)
-      pure (.of Γs (.call f as (.val p r res') b))
+      match recBody with
+      | some (n, mk) =>
+        pure (.of Γs (.callRec f n as (.val p r res') (← mk ([.val p] ++ ps) (r :: as.names))))
+      | none =>
+        let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.val p] ++ ps) P)
+        pure (.of Γs (.call f as (.val p r res') b))
     | .rets l =>
       let ⟨ρs, bs⟩ := Binders.ofList l
-      let ⟨_, b⟩ ← ElabM.lift (SProg.chain (bs.names ++ as.names) (ρs ++ ps) P)
-      pure (.of Γs (.call f as (.rets bs) b))
+      match recBody with
+      | some (n, mk) =>
+        pure (.of Γs (.callRec f n as (.rets bs) (← mk (ρs ++ ps) (bs.names ++ as.names))))
+      | none =>
+        let ⟨_, b⟩ ← ElabM.lift (SProg.chain (bs.names ++ as.names) (ρs ++ ps) P)
+        pure (.of Γs (.call f as (.rets bs) b))
     | .mem R r =>
       -- a memory return variable: declared on entry, a fresh default object
       let ⟨hm⟩ ← ElabM.lift (memOk R)
