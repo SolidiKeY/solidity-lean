@@ -163,9 +163,20 @@ flattenedArithmetic? 2048                 reads to fresh atoms, alias constraint
 The two new stages are in `Calculus/CondLift.lean`; the certificate's
 `sentence` is now over `source.leaf.elim.condSimp.liftCond condLiftFuel`
 (`condLiftFuel = 64`), with `LFml.condSimp_holds` and
-`LFml.liftCond_holds` in the transport.  Every formula the pipeline accepted
-before is unchanged by them (it had no `kite`/`ite` in an equation, since the
-compiler refused those), and every existing example still checks.
+`LFml.liftCond_holds` in the transport.  On a leaf with no conditional
+(`LFml.conds φ = 0`) both new stages are the identity
+(`LFml.liftCond_condSimp_of_conds`, `Calculus/LiftTotality.lean`), so such a
+leaf reaches the later stages as before; the compiler refuses a
+conditional, so a leaf the pipeline accepted before had none in an
+equation.  Before lifting, `LFml.liftCondB` lifts within `liftBudget`
+nodes (1023 binders, the prefix's limit, and 2048, the flattener's node
+budget) and the leaf is refused as soon as the lift would exceed it, so a
+leaf with many conditionals is refused after bounded work rather than after
+an exponential lift.  It refuses no leaf in `Fml.exactBounded`
+(`LFml.liftCondB_isSome`), so `auto_complete` keeps its hypotheses.  The examples that
+read the pipeline (`Examples/AutoComplete.lean`,
+`Examples/DependentReduction.lean`, `Examples/CompleteVerification.lean`,
+`Examples/Verify.lean`) are checked by the build.
 
 ### (a) Lifting the elimination's conditionals
 
@@ -275,11 +286,12 @@ over 256-bit codes overflows the language server's stack, so the positive
 verdict there is the compiled one and the refutation is checked at its
 codes (`not_valid_of_codes`).
 
-Coverage: every formula of `Examples/ProgramReduction.lean`,
-`Examples/ParameterReduction.lean` and `Examples/CheckedLinear.lean` is in
-`Fml.inExact` exactly when `dependentReduction?` accepts it; the
-exceptions are the formulas with declaration premises, which the tools
-remove first (`DeclarationReduction.dependent?`).
+Coverage, observed by hand when M4 landed and not pinned: the formulas of
+`Examples/ProgramReduction.lean`, `Examples/ParameterReduction.lean` and
+`Examples/CheckedLinear.lean` were in `Fml.inExact` exactly when
+`dependentReduction?` accepted them, but for the formulas with declaration
+premises, which the tools remove first (`DeclarationReduction.dependent?`).
+What is proved is one direction, `dependentReduction?_isSome`.
 
 ### What is narrowed, and what blocks the rest
 
@@ -313,6 +325,8 @@ The recognizer `LTm.src?` and the term sizes and weights the checks read
 (`LTm.nodes`, `LTm.words`, `LTm.conds`, `LTm.total`) are `match`-based, as
 are the recognizers they mirror (`ReadExpr.ofTerm?`, `flattenFuel?`): a
 deviation from G0's condition 1, cheap on the leaves the checks see.
+The budgeted lift (`LFml.liftCondB`) recurses on `LFml`, which has no
+index, and counts nodes by `LFml.fits`/`LTm.fits` (recursors).
 
 To prove totality the recognizers' helpers became public: `flattenFuel?`,
 `flattenFormulaFuel?` (`Calculus/FlattenReads.lean`), `SPath.viewFuel?`,
@@ -324,5 +338,53 @@ To prove totality the recognizers' helpers became public: `flattenFuel?`,
 
 `Tm.size`, `Upd.length`, `Upd.tmSize`, `Fml.tmSize`, `Stmt.size` count
 nodes, never a type.  Every rule writes at most two elements an update
-(`Stmt.step_upds_le`), and every term it emits is at most
-`16 * s.size + 16` (`Stmt.step_tmSize_le`), one lemma per arm.
+(`Stmt.step_upds_le`), and the terms of its premise's updates and formulas
+(`Premise.upds`, `Premise.fmls`) are each at most `16 * s.size + 16`
+(`Stmt.step_tmSize_le`), one lemma per arm.  The terms inside a program a
+rule emits (a premise's continuation) are not bounded by it.
+
+## Review (2026-10-20)
+
+A read-only review pass (finder and skeptic per area) confirmed six
+findings; each is fixed.
+
+1. **G0 breach.** `Fml.isCTPrem` and `Fml.assumesCT`
+   (`Calculus/DecideCleanTail.lean`) took the context-indexed `Fml C Γ`
+   apart by `match` inside `Seq.checkCore`, which the kernel evaluates.
+   Now by `Fml.casesOn` with structural recursion, each with a compiled
+   `match` twin (`Fml.isCTPremM`, `Fml.assumesCTM`, `implemented_by`) and
+   a link theorem (`Fml.isCTPrem_eq_isCTPremM`,
+   `Fml.assumesCT_eq_assumesCTM`); `isCTPrem_holds`/`assumesCT_holds` are
+   proved through the twins.
+2. **Exponential lift before refusal.** `dependentReduction?` lifted every
+   leaf whole before the flattener's size check.  It now runs
+   `LFml.liftCondB condLiftFuel liftBudget` first, which stops as soon as
+   the lift exceeds `liftBudget` (1023 + 2048 nodes), and refuses there
+   (`Calculus/DependentReduction.lean`; `LFml.liftCondB_eq`: it is the lift
+   where the lift fits).  `LFml.liftCondB_isSome` (`Calculus/AutoComplete.lean`,
+   via `LTm.fits_eq_fitsCap`, `LFml.fits_eq_fitsCap`,
+   `LFml.nodes_stripAll`) shows it accepts every leaf in `Fml.exactBounded`,
+   so `dependentReduction?_isSome` and `auto_complete` keep their
+   hypotheses.
+3. **Monotonicity under the clean-tail premise.** `checkCore` offered a leaf
+   with the premise only `decideMemCT`; it now tries
+   `decideMemCT || decideMem` (`Seq.checkCore_valid` updated, O6 in
+   `docs/options.md` reworded).
+4. **Unpinned claims in M4.** "Unchanged by `condSimp`/`liftCond`" is now
+   `LFml.liftCond_condSimp_of_conds` (`Calculus/LiftTotality.lean`), on
+   leaves with no conditional; the coverage observation over
+   `ProgramReduction`/`ParameterReduction`/`CheckedLinear` is marked as
+   unpinned; "every example still checks" became the list of examples the
+   build checks.
+5. **Panic pattern.** `Walk.valSubterms` (`Calculus/RewriteSyntax.lean`)
+   and `Tm.toNilQ?` (`Calculus/SeqRewrite.lean`) tested
+   `ty.isAppOfArity ``Tm 3 && (← whnf (ty.getArg! 2))…`, whose `(← …)`
+   `do` lifts ahead of the test; the tests are nested now.  The other
+   `&& (← …)`/`|| (← …)` sites were checked: none reads an argument its
+   left side guards.
+6. **Nits.** `Calculus/PrintStmt.lean` drops the redundant
+   `&& value.isApp` after `isAppOf ``Simple.local``, and its comment now
+   names the tests it explains; M5's claim narrowed to what `Stmt.step_tmSize_le` covers (a
+   premise's updates and formulas); the punctuation of the
+   `Semantics/StorageWt.lean` and `Typing/Values.lean` rows of
+   `docs/module-map.md`.

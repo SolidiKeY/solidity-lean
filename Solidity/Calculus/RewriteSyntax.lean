@@ -432,8 +432,10 @@ partial def Walk.valSubterms (t : Expr) (acc : Array Expr := #[]) : MetaM (Array
   let mut acc := acc
   if !acc.contains t && t.getAppFn.constName?.any (·.getPrefix == ``Tm) then
     let ty ← whnf (← inferType t)
-    if ty.isAppOfArity ``Tm 3 && (← whnf (ty.getArg! 2)).isAppOf ``Srt.val then
-      acc := acc.push t
+    -- nested: `do` would lift the `(← …)` out of `&&`, ahead of the test
+    if ty.isAppOfArity ``Tm 3 then
+      if (← whnf (ty.getArg! 2)).isAppOf ``Srt.val then
+        acc := acc.push t
   for a in t.getAppArgs do acc ← Walk.valSubterms a acc
   return acc
 

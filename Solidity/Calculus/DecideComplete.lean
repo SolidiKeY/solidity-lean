@@ -44,10 +44,12 @@ reduction does not read it; else whether it closes it: within `closeSize`
 nodes and within `stackSize` storage updates on the same pushed-in leaf,
 or `concreteSize` and `concreteDepth` where its histories are concrete
 (`LFml.boundsOk`, tested before the elimination), and closed by
-`LFml.decideMem`. -/
+`LFml.decideMem`; where the leaf assumes clean tails (`Fml.assumesCT`), by
+`LFml.decideMemCT` or else by `LFml.decideMem`, so the premise never loses a
+leaf the plain closer closes. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    l.boundsOk && bif ψ.assumesCT then l.decideMemCT else l.decideMem
+    l.boundsOk && bif ψ.assumesCT then l.decideMemCT || l.decideMem else l.decideMem
 
 /-- What `checkCore` closes is valid: `Valid.of_toLS` and
 `LFml.decideMem_valid`; under the premise `cleanTail(storage) = true`,
@@ -59,7 +61,9 @@ theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Valid �
   cases hct : ψ.assumesCT
   · rw [hct, cond_false] at hc
     exact Valid.of_toLS hl (LFml.decideMem_valid hc)
-  · rw [hct, cond_true] at hc
+  · rw [hct, cond_true, Bool.or_eq_true] at hc
+    rcases hc with hc | hc
+    case inr => exact Valid.of_toLS hl (LFml.decideMem_valid hc)
     intro τ
     by_cases hg : TSto.CleanTails τ.storage.obs
     · exact (Fml.toLS_sound ψ true hl τ AEnv.dflt (Agrees.init τ AEnv.dflt)

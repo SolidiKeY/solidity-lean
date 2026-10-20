@@ -618,6 +618,72 @@ theorem LFml.liftedExact_lift (ψ : LFml C) (h : ψ.inExact = true) :
     rw [h2]
     exact hc q (LFml.liftCond_params _ _ q hq')
 
+/-! ## The node budget -/
+
+/-- `n - c` where `c ≤ n`: the fuel `fits` leaves after `c` nodes. -/
+def fitsCap (c n : Nat) : Option Nat := if c ≤ n then some (n - c) else none
+
+theorem fitsCap_zero : (some : Nat → Option Nat) = fitsCap 0 := by
+  funext m; simp only [fitsCap, Nat.zero_le, if_true, Nat.sub_zero]
+
+theorem fitsNode_fitsCap (c n : Nat) : fitsNode n (fitsCap c) = fitsCap (c + 1) n := by
+  cases n with
+  | zero => simp only [fitsNode, fitsCap, Nat.le_zero, Nat.add_one_ne_zero, if_false]
+  | succ n =>
+    simp only [fitsNode, fitsCap, Nat.add_le_add_iff_right, Nat.add_sub_add_right]
+
+theorem fitsCap_bind (a b m : Nat) : (fitsCap a m).bind (fitsCap b) = fitsCap (a + b) m := by
+  unfold fitsCap
+  by_cases ha : a ≤ m
+  · by_cases hb : b ≤ m - a
+    · rw [if_pos ha, Option.bind_some, if_pos hb, if_pos (by omega), Nat.sub_sub]
+    · rw [if_pos ha, Option.bind_some, if_neg hb, if_neg (by omega)]
+  · rw [if_neg ha, if_neg (by omega)]; rfl
+
+/-- **`fits` counts nodes**: `t.fits n` is the fuel left after `t.nodes`,
+`none` past it. -/
+theorem LTm.fits_eq_fitsCap {s : Srt} (t : LTm C s) : t.fits = fitsCap t.nodes := by
+  rw [LTm.fits_eq_fitsM]
+  induction t with
+  | var | app0 | err => funext n; simp only [LTm.fitsM, LTm.nodes, fitsCap_zero, fitsNode_fitsCap]
+  | app1 _ _ ih | obsW _ ih | obsL _ ih | obsH _ ih =>
+    funext n; simp only [LTm.fitsM, LTm.nodes, ih, fitsNode_fitsCap]
+  | app2 _ _ _ ihx ihy | index _ _ _ ihx ihy | seq _ _ ihx ihy | orElse _ _ ihx ihy =>
+    funext n; simp only [LTm.fitsM, LTm.nodes, ihx, ihy, fitsCap_bind, fitsNode_fitsCap]
+  | app3 _ _ _ _ ihx ihy ihz =>
+    funext n; simp only [LTm.fitsM, LTm.nodes, ihx, ihy, ihz, fitsCap_bind, fitsNode_fitsCap]
+  | kite _ _ _ _ iha ihb iht ihe =>
+    funext n; simp only [LTm.fitsM, LTm.nodes, iha, ihb, iht, ihe, fitsCap_bind, fitsNode_fitsCap]
+
+theorem LFml.fits_eq_fitsCap (φ : LFml C) : φ.fits = fitsCap φ.nodes := by
+  rw [LFml.fits_eq_fitsM]
+  induction φ with
+  | tt => funext n; simp only [LFml.fitsM, LFml.nodes, fitsCap_zero, fitsNode_fitsCap]
+  | eq a b =>
+    funext n
+    simp only [LFml.fitsM, LFml.nodes, LTm.fits_eq_fitsCap, fitsCap_bind, fitsNode_fitsCap]
+  | not _ ih | all _ _ _ ih => funext n; simp only [LFml.fitsM, LFml.nodes, ih, fitsNode_fitsCap]
+  | and _ _ ihx ihy | imp _ _ ihx ihy =>
+    funext n; simp only [LFml.fitsM, LFml.nodes, ihx, ihy, fitsCap_bind, fitsNode_fitsCap]
+
+theorem LFml.nodes_stripAll : ∀ φ : LFml C, φ.nodes = φ.allDepth + φ.stripAll.2.nodes
+  | .all k p φ => by
+    have := LFml.nodes_stripAll φ
+    simp only [LFml.nodes, LFml.allDepth, LFml.stripAll]
+    omega
+  | .tt | .eq _ _ | .not _ | .and _ _ | .imp _ _ => by
+    simp only [LFml.allDepth, LFml.stripAll, Nat.zero_add]
+
+/-- **The budget refuses nothing in the bounds**: a leaf whose lifted
+prefix is shorter than 1024 and whose lifted body has at most 511 nodes
+(`Fml.exactBounded`) is lifted within `liftBudget`. -/
+theorem LFml.liftCondB_isSome (ψ : LFml C) (hd : (ψ.liftCond condLiftFuel).allDepth < 1024)
+    (hn : (ψ.liftCond condLiftFuel).stripAll.2.nodes ≤ 511) :
+    (ψ.liftCondB condLiftFuel liftBudget).isSome = true := by
+  rw [LFml.liftCondB_eq, LFml.fits_eq_fitsCap, fitsCap,
+    if_pos (by rw [LFml.nodes_stripAll]; simp only [liftBudget]; omega)]
+  rfl
+
 /-! ## Totality and completeness -/
 
 /-- **The automatic decision never refuses its fragment.** -/
@@ -645,7 +711,13 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
       exact hcov
     obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp
       (flattenedArithmetic?_isSome u.body hs' (hub ▸ hn) (hub ▸ hw))
-    simp only [dependentReduction?, hd, hr, hu, Option.bind_eq_bind, Option.bind_some]
+    have hcap := LFml.liftCondB_isSome _ hdepth hn
+    have hnone : (r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget).isNone = false := by
+      cases hX : r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget with
+      | none => rw [hX] at hcap; cases hcap
+      | some _ => rfl
+    simp only [dependentReduction?, hd, hr, hu, Option.bind_eq_bind, Option.bind_some, hnone,
+      Bool.false_eq_true, if_false]
     rw [dif_pos hc, hF]
     rfl
 

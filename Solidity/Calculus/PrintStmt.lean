@@ -306,7 +306,8 @@ def ppDeferredExprS (ns : List Expr) (code value : Expr) :
   if (← optSome? decl.appArg!).isSome then return none
   let ns := decl.getArg! 3 :: ns
   let tail ← whnf code.appArg!
-  -- `(← …)` lifts out of `&&`, so the shape is tested first
+  -- Each shape is tested on its own line, before the `(← …)` that reads its
+  -- argument: `do` lifts a `(← …)` out of `&&`, ahead of the test.
   unless tail.isAppOfArity ``Prog.cons 6 do return none
   unless (← whnf tail.appArg!).isAppOf ``Prog.nil do return none
   let value ← whnf value
@@ -314,7 +315,7 @@ def ppDeferredExprS (ns : List Expr) (code value : Expr) :
   let value ← whnf value.appArg!
   unless value.isAppOf ``Val.simple do return none
   let value ← whnf value.appArg!
-  unless value.isAppOf ``Simple.local && value.isApp do return none
+  unless value.isAppOf ``Simple.local do return none
   unless (← whnf value.appArg!).isAppOf ``Idx.here do return none
   match_expr (← whnf (tail.getArg! 4)) with
   | Stmt.assignIncDec _ _ _ i op _ l _ =>

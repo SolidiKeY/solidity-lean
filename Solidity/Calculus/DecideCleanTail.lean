@@ -48,28 +48,73 @@ variable {C : Contract}
 abbrev _root_.Solidity.Tm.cleanTailSt {Γ : Ctx} : Tm C Γ (.val .bool) :=
   .app1 .cleanTail (.app0 .storage)
 
-/-- The formula is the premise `cleanTail(storage) = true`, or a
-conjunction with it. -/
-def _root_.Solidity.Fml.isCTPrem {Γ : Ctx} : Fml C Γ → Bool
+/-- `Fml.isCTPrem`'s compiled twin. -/
+def _root_.Solidity.Fml.isCTPremM {Γ : Ctx} : Fml C Γ → Bool
   | .eq a b => a.beqR (Tm.cleanTailSt (C := C) (Γ := Γ)) &&
       b.beqR (Tm.app0 (.lit (p := .bool) true) : Tm C Γ (.val .bool))
-  | .and φ ψ => φ.isCTPrem || ψ.isCTPrem
+  | .and φ ψ => φ.isCTPremM || ψ.isCTPremM
+  | _ => false
+
+/-- The formula is the premise `cleanTail(storage) = true`, or a
+conjunction with it.  By the recursor (Gate G0): `Seq.checkCore` runs it in
+the kernel. -/
+@[implemented_by Fml.isCTPremM]
+def _root_.Solidity.Fml.isCTPrem : {Γ : Ctx} → Fml C Γ → Bool
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := false)
+    (eq := fun {Γ'} {_} a b => a.beqR (Tm.cleanTailSt (C := C) (Γ := Γ')) &&
+      b.beqR (Tm.app0 (.lit (p := .bool) true) : Tm C Γ' (.val .bool)))
+    (wellFormed := fun _ => false) (not := fun _ => false)
+    (and := fun φ ψ => Fml.isCTPrem φ || Fml.isCTPrem ψ)
+    (imp := fun _ _ => false) (upd := fun _ _ _ => false)
+    (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
+    (all := fun _ _ _ => false) (bind := fun _ _ _ _ => false)
+    (anon := fun _ _ => false)
+  termination_by structural _ φ => φ
+
+theorem _root_.Solidity.Fml.isCTPrem_eq_isCTPremM {Γ : Ctx} (φ : Fml C Γ) :
+    φ.isCTPrem = φ.isCTPremM := by
+  induction φ with
+  | and φ ψ ihφ ihψ => rw [Fml.isCTPremM, ← ihφ, ← ihψ]; rfl
+  | _ => rfl
+
+/-- `Fml.assumesCT`'s compiled twin. -/
+def _root_.Solidity.Fml.assumesCTM {Γ : Ctx} : Fml C Γ → Bool
+  | .imp φ ψ => φ.isCTPremM || ψ.assumesCTM
+  | .and φ ψ => φ.assumesCTM && ψ.assumesCTM
+  | .all _ _ φ => φ.assumesCTM
   | _ => false
 
 /-- **The leaf assumes clean tails**: the premise is a premise of its spine
-of implications (each of a conjunction's sides, under a quantifier). -/
-def _root_.Solidity.Fml.assumesCT {Γ : Ctx} : Fml C Γ → Bool
-  | .imp φ ψ => φ.isCTPrem || ψ.assumesCT
-  | .and φ ψ => φ.assumesCT && ψ.assumesCT
-  | .all _ _ φ => φ.assumesCT
-  | _ => false
+of implications (each of a conjunction's sides, under a quantifier).  By
+the recursor (Gate G0). -/
+@[implemented_by Fml.assumesCTM]
+def _root_.Solidity.Fml.assumesCT : {Γ : Ctx} → Fml C Γ → Bool
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := false) (eq := fun _ _ => false)
+    (wellFormed := fun _ => false) (not := fun _ => false)
+    (and := fun φ ψ => Fml.assumesCT φ && Fml.assumesCT ψ)
+    (imp := fun φ ψ => Fml.isCTPrem φ || Fml.assumesCT ψ) (upd := fun _ _ _ => false)
+    (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
+    (all := fun _ _ φ => Fml.assumesCT φ) (bind := fun _ _ _ _ => false)
+    (anon := fun _ _ => false)
+  termination_by structural _ φ => φ
+
+theorem _root_.Solidity.Fml.assumesCT_eq_assumesCTM {Γ : Ctx} (φ : Fml C Γ) :
+    φ.assumesCT = φ.assumesCTM := by
+  induction φ with
+  | imp φ ψ _ ihψ => rw [Fml.assumesCTM, ← Fml.isCTPrem_eq_isCTPremM φ, ← ihψ]; rfl
+  | and φ ψ ihφ ihψ => rw [Fml.assumesCTM, ← ihφ, ← ihψ]; rfl
+  | all x p φ ih => rw [Fml.assumesCTM, ← ih]; rfl
+  | _ => rfl
 
 theorem _root_.Solidity.Fml.isCTPrem_holds {Γ : Ctx} (φ : Fml C Γ) :
     φ.isCTPrem = true → ∀ σ : State C Γ, holds σ φ → TSto.CleanTails σ.storage.obs := by
+  rw [Fml.isCTPrem_eq_isCTPremM]
   induction φ with
   | eq a b =>
     intro h σ hφ
-    simp only [Fml.isCTPrem, Bool.and_eq_true] at h
+    simp only [Fml.isCTPremM, Bool.and_eq_true] at h
     have ea := Tm.sigma_eq_of_beqR h.1
     have eb := Tm.sigma_eq_of_beqR h.2
     cases ea
@@ -77,30 +122,31 @@ theorem _root_.Solidity.Fml.isCTPrem_holds {Γ : Ctx} (φ : Fml C Γ) :
     exact holds_cleanTail.1 hφ
   | and φ ψ ihφ ihψ =>
     intro h σ hφ
-    simp only [Fml.isCTPrem, Bool.or_eq_true] at h
+    simp only [Fml.isCTPremM, Bool.or_eq_true] at h
     rcases h with h | h
     · exact ihφ h σ hφ.1
     · exact ihψ h σ hφ.2
-  | _ => intro h; simp only [Fml.isCTPrem, Bool.false_eq_true] at h
+  | _ => intro h; simp only [Fml.isCTPremM, Bool.false_eq_true] at h
 
 /-- **Vacuity**: a leaf that assumes clean tails holds where they are not. -/
 theorem _root_.Solidity.Fml.assumesCT_holds {Γ : Ctx} (φ : Fml C Γ) :
     φ.assumesCT = true → ∀ σ : State C Γ, ¬ TSto.CleanTails σ.storage.obs → holds σ φ := by
+  rw [Fml.assumesCT_eq_assumesCTM]
   induction φ with
   | imp φ ψ _ ihψ =>
     intro h σ hn hφ
-    simp only [Fml.assumesCT, Bool.or_eq_true] at h
+    simp only [Fml.assumesCTM, Bool.or_eq_true] at h
     rcases h with h | h
-    · exact absurd (Fml.isCTPrem_holds φ h σ hφ) hn
+    · exact absurd (Fml.isCTPrem_holds φ ((Fml.isCTPrem_eq_isCTPremM φ).trans h) σ hφ) hn
     · exact ihψ h σ hn
   | and φ ψ ihφ ihψ =>
     intro h σ hn
-    simp only [Fml.assumesCT, Bool.and_eq_true] at h
+    simp only [Fml.assumesCTM, Bool.and_eq_true] at h
     exact ⟨ihφ h.1 σ hn, ihψ h.2 σ hn⟩
   | all x p φ ih =>
     intro h σ hn v
     exact ih h _ hn
-  | _ => intro h; simp only [Fml.assumesCT, Bool.false_eq_true] at h
+  | _ => intro h; simp only [Fml.assumesCTM, Bool.false_eq_true] at h
 
 /-! ## The guards of a path -/
 

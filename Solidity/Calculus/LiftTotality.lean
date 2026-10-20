@@ -621,4 +621,87 @@ theorem LFml.liftCond_params : ∀ (n : Nat) (φ : LFml C) q, q ∈ (φ.liftCond
         rw [hb] at h
         exact List.mem_append.mp h
 
+/-! ## Conditional-free leaves are kept -/
+
+/-- The conditionals of a formula's equations. -/
+def LFml.conds : LFml C → Nat
+  | .tt => 0
+  | .eq a b => a.conds + b.conds
+  | .not φ | .all _ _ φ => φ.conds
+  | .and φ ψ | .imp φ ψ => φ.conds + ψ.conds
+
+theorem LTm.mkApp3_of_iteN {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b)
+    (z : LTm C c) (h : o.iteN = 0) : LTm.mkApp3 o x y z = .app3 o x y z := by
+  cases o <;> first | rfl | (simp only [Op3.iteN] at h; omega)
+
+theorem LTm.app3Split_none {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b)
+    (z : LTm C c) (h : o.iteN = 0) : LTm.app3Split o x y z none none none = none := by
+  cases o <;> first | rfl | (simp only [Op3.iteN] at h; omega)
+
+/-- **Folding keeps a term with no conditional.** -/
+theorem LTm.condSimp_of_conds {s : Srt} (t : LTm C s) (h : t.conds = 0) : t.condSimp = t := by
+  rw [LTm.condSimp_eq_condSimpM]
+  induction t with
+  | var | app0 | err => rfl
+  | app1 o x ih | obsW x ih | obsL x ih | obsH x ih =>
+    simp only [LTm.conds] at h; simp only [LTm.condSimpM, ih h]
+  | app2 o x y ihx ihy | index _ x y ihx ihy | seq x y ihx ihy | orElse x y ihx ihy =>
+    simp only [LTm.conds] at h; simp only [LTm.condSimpM, ihx (by omega), ihy (by omega)]
+  | app3 o x y z ihx ihy ihz =>
+    simp only [LTm.conds] at h
+    simp only [LTm.condSimpM, ihx (by omega), ihy (by omega), ihz (by omega)]
+    exact LTm.mkApp3_of_iteN o x y z (by omega)
+  | kite => simp only [LTm.conds] at h; omega
+
+/-- **A term with no conditional has none to lift.** -/
+theorem LTm.condSplit_of_conds {s : Srt} (t : LTm C s) (h : t.conds = 0) : t.condSplit = none := by
+  rw [LTm.condSplit_eq_condSplitM]
+  induction t with
+  | var | app0 | err => rfl
+  | app1 o x ih | obsW x ih | obsL x ih | obsH x ih =>
+    simp only [LTm.conds] at h; simp only [LTm.condSplitM, ih h]; rfl
+  | app2 o x y ihx ihy | index _ x y ihx ihy | seq x y ihx ihy | orElse x y ihx ihy =>
+    simp only [LTm.conds] at h; simp only [LTm.condSplitM, ihx (by omega), ihy (by omega)]; rfl
+  | app3 o x y z ihx ihy ihz =>
+    simp only [LTm.conds] at h
+    simp only [LTm.condSplitM, ihx (by omega), ihy (by omega), ihz (by omega)]
+    exact LTm.app3Split_none o x y z (by omega)
+  | kite => simp only [LTm.conds] at h; omega
+
+/-- **Folding keeps a leaf with no conditional.** -/
+theorem LFml.condSimp_of_conds : ∀ (φ : LFml C), φ.conds = 0 → φ.condSimp = φ
+  | .tt, _ => rfl
+  | .eq a b, h => by
+    simp only [LFml.conds] at h
+    simp only [LFml.condSimp, LTm.condSimp_of_conds a (by omega), LTm.condSimp_of_conds b (by omega)]
+  | .not φ, h | .all _ _ φ, h => by
+    simp only [LFml.conds] at h; simp only [LFml.condSimp, LFml.condSimp_of_conds φ h]
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [LFml.conds] at h
+    simp only [LFml.condSimp, LFml.condSimp_of_conds φ (by omega), LFml.condSimp_of_conds ψ (by omega)]
+
+theorem LFml.mapEq_liftEq_of_conds (n : Nat) : ∀ (φ : LFml C), φ.conds = 0 →
+    φ.mapEq (LFml.liftEq (LFml.liftCond n)) = φ
+  | .tt, _ => rfl
+  | .eq a b, h => by
+    simp only [LFml.conds] at h
+    simp only [LFml.mapEq, LFml.liftEq, LTm.condSplit_of_conds a (by omega),
+      LTm.condSplit_of_conds b (by omega)]
+  | .not φ, h | .all _ _ φ, h => by
+    simp only [LFml.conds] at h; simp only [LFml.mapEq, LFml.mapEq_liftEq_of_conds n φ h]
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [LFml.conds] at h
+    simp only [LFml.mapEq, LFml.mapEq_liftEq_of_conds n φ (by omega),
+      LFml.mapEq_liftEq_of_conds n ψ (by omega)]
+
+/-- **Lifting and folding keep a leaf with no conditional**: on it the two
+stages `dependentReduction?` added are the identity, so such a leaf reaches
+the later stages as before. -/
+theorem LFml.liftCond_condSimp_of_conds (n : Nat) (φ : LFml C) (h : φ.conds = 0) :
+    (φ.condSimp).liftCond n = φ := by
+  rw [LFml.condSimp_of_conds φ h]
+  cases n with
+  | zero => rfl
+  | succ n => exact LFml.mapEq_liftEq_of_conds n φ h
+
 end Solidity.Decide
