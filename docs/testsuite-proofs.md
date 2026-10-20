@@ -312,7 +312,7 @@ struct members, left alone): the fixture does not exercise that path.
 
 After the M2 review, the import refuses what it used to read past and would
 change a function's meaning: a modifier, a `constant` or `immutable` state
-variable, an overloaded name or one named `report`, an inheriting contract;
+variable (since inlined where its value is fixed, `docs/solc-alignment.md`), an overloaded name or one named `report`, an inheriting contract;
 expressions of literals only are folded in exact rational arithmetic, as
 solc does (`7 / 2 * 2` is `7`); named arguments go in parameter order; a
 pushed member is hoisted only where that keeps solc's order; a struct

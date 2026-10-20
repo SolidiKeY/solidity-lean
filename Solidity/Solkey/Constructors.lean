@@ -91,8 +91,7 @@ the update of solkey's specified constructor problem (solkey's unspecified
 one writes `{storage := mtSt || net := mtSt}`). -/
 
 /--
-info: 3 functions (2 diamond, 0 box, 0 skip, 1 specified): 2 elaborated, 0 skipped, 0 excluded, 1 unsupported
-unsupported receive: EtherWallet.sol:14: a `receive` function
+info: 3 functions (1 diamond, 0 box, 0 skip, 1 specified, 1 internal): 3 elaborated, 0 skipped, 0 excluded, 0 unsupported
 -/
 #guard_msgs in
 #eval IO.println (Solidity.Frontend.ImportRow.summary Solkey.EtherWallet.report)
@@ -112,7 +111,7 @@ theorem Solkey.EtherWallet.constructor.proved : ⊢ Solkey.EtherWallet.construct
 
 /--
 info: 3 functions: 1 derived, 0 pending, 2 other
-unsupported receive
+internal receive
 specified withdraw
 pending:
 -/

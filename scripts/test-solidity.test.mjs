@@ -272,7 +272,7 @@ test("constant and enum declarations are imported without storage slots", () => 
   assert.equal(status.boundsFalsePost, 'pending');
   assert.equal(status.otherValueTypes, 'proved');
   assert.equal(status.falsePost, 'pending');
-  assert.equal(status.immutableGap, 'unsupported');
+  assert.equal(status.immutableGap, 'proved');
 });
 
 test("enum NatSpec names respect declaration scope and preserve false obligations", () => {
@@ -570,9 +570,9 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   assert.equal(rows.viaBase, undefined); // inherited helpers have no new independent row
   const init = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"InitDiamond"});
   assert.deepEqual(init.errors, []);
-  // Exact deployment and all constructor assertions are checked in the kernel
-  // by Examples/Tactics/Inheritance.lean; automatic symbolic closure is open.
-  assert.equal(init.results.find(r => r.function === "constructor").status, "pending");
+  // The closer reads the deployment's empty storage (`SFun.mt`), so the
+  // constructor's assertions close automatically too.
+  assert.equal(init.results.find(r => r.function === "constructor").status, "proved");
 });
 
 test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
