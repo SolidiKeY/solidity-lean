@@ -132,6 +132,11 @@ solc over KeY.
 
 ## Using the calculus
 
+For paper derivations with separate captures and checked LaTeX/JSON output,
+use `Solidity.Tools.ProgramTrace` (`#latex_program`, `docs/latex.md`), rather
+than copying exporter internals. Disabling grouping alone does not split a
+native `CaptureAll` rule.
+
 A formula is written in `dl!{ … }` over a named contract (`local instance :
 InContract := ⟨StandardExample⟩`), which reads it as a scoped `Fml C []`;
 under `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) its

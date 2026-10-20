@@ -374,7 +374,11 @@ import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.LatexTerm
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey
+import Solidity.Calculus.Elementary
+import Solidity.Tools.Elementary
+import Solidity.Tools.ProgramTrace
 import Solidity.Examples.Tactics.Latex
+import Solidity.Examples.Tactics.ProgramTrace
 import Solidity.Examples.Tactics.PushReceiver
 import Solidity.Examples.Tactics.PushSource
 import Solidity.Examples.Tactics.MemoryPush

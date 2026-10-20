@@ -440,6 +440,11 @@ statements to LaTeX strings/files, with the commands' options (`latexOpt`);
 (`scripts/latex-chains.sh`).
 `Tools/LatexSolkey.lean` exports a generated derivation (`#latex_derivation`),
 and a `solc_import`ed function's obligation (`scripts/latex-sol.sh`).
+`Calculus/Elementary.lean` proves individual capture and raw update laws;
+`Tools/Elementary.lean` builds their bounded capture/update traces;
+`Tools/ProgramTrace.lean` exposes checked formula/chain/obligation traces,
+ordered read continuations and LaTeX/JSON commands (`#latex_program`,
+`#program_trace_json_file`); `Examples/Tactics/ProgramTrace.lean` checks them.
 `Examples/Tactics/Latex.lean` pins the output of both backends, including
 proved chains and the derivation of `tests/solc/FixedLength.sol`.
 

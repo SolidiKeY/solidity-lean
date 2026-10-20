@@ -25,6 +25,81 @@ local instance : InContract := ⟨StandardExample⟩
 The output is a math fragment: put it inside `\[ ... \]`.  A chain, a
 derivation or a line longer than the width is an `aligned` environment.
 
+## Checked program traces for paper sessions
+
+Use `Solidity.Tools.ProgramTrace` when authoring a derivation that needs
+separate source, receiver and index captures. The older
+`#latex_derivation (collapse := []) (groups := false)` exposes native strategy
+steps, but a native `CaptureAll` step can still introduce several captures.
+`#latex_program` refines those supported steps with semantic proofs and
+submits the composed `Fml.Leads` proof to the kernel before exporting.
+
+```lean
+import Solidity.Tools.ProgramTrace
+import Solidity.Calculus.Surface
+
+open Solidity
+open scoped Solidity.Scoped
+local instance : InContract := ⟨StandardExample⟩
+
+#latex_program (macros := true) (labels := tag)
+  dl!{ [ alice.account.balance = 10; ] true }
+#latex_program_file "/tmp/read.tex" (macros := true) reads [findOnSave]
+  dl!{ ∀ uint v; { storage := save(storage, alice.age, 42) }
+    [ v = alice.age; ] v == 42 }
+#program_trace_json_file "/tmp/read.json" reads [findOnSave]
+  dl!{ ∀ uint v; { storage := save(storage, alice.age, 42) }
+    [ v = alice.age; ] v == 42 }
+```
+
+The input can also be a solc function such as `Solc.C.f` or a chain theorem
+such as `Solidity.Examples.Chains.Storage.AgeWrite.chain` after importing its
+module. For a chain, the command regenerates a program trace from its first
+line. Parameters remain arbitrary, concrete setup updates remain intact,
+and the theorem's written rewrite suffix is not replayed automatically.
+Request a read continuation with `reads [law1, law2, ...]`: every law is
+applied once, in order, and its before/after pair is included in the output.
+A failed law reports its position, the actual endpoint and applicable
+requested laws. The output file is written only after all checks pass.
+
+Program traces always disable output grouping, collapse, premise removal
+and side lines, so each recorded pair receives its own arrow. `macros`,
+`width`, `labels` and `sorts` retain their usual meaning. `(past := false)`
+stops before update composition; otherwise updates are composed one pair at
+a time, with shadowed storage writes removed in their own step. Only merges
+whose rendered endpoints are byte-identical are omitted; they stay in the
+proof and are counted by `administrativeMerges` in JSON. Composition follows
+the native merge search's update spine, including implication consequents;
+it does not normalize every branch of a conjunction.
+
+The JSON contains `schemaVersion`, `relation`, `checkedDeclaration`,
+`granularity`, `first`, `last`, `administrativeMerges`, and `steps`. Each step
+has a zero-based `index`, `rule`, `before` and `after` (LaTeX fragments).
+Renderers can consume these pairs without parsing an `aligned` environment.
+The declaration name identifies the theorem in that Lean run; the JSON is
+display data, not a portable proof certificate.
+
+**Semantic boundary.** The checked theorem says that the final formula
+implies the initial formula in every typed state. It does not close the final
+leaf or verify later TeX edits. Storage/memory value, receiver and index
+captures, memory-reference field captures, and update-pair composition are
+refined. Other strategy rules keep their native granularity. Frontend
+lowering, implicit bounds checks and proposed source syntax are not extra
+execution steps; document those separately. Exhausting a trace budget or
+stopping at a modality-dependent program is an error.
+
+For custom exporters, `Solidity.ProgramTrace.generate first mergeUpdates
+maxSteps maxMergePlans` returns a `Trace` with `first`, `last`, `steps`,
+`proof` and `administrativeMerges`. The defaults are 800 program steps and
+400 merge plans. Call `trace.continueWith laws`, then `trace.check params
+levelParams` before `trace.toLatex options` or `trace.toJson checked options`.
+The public laws in `Calculus/Elementary.lean` can also be used directly for
+individual captures under either modality. Custom scripts no longer need to
+copy the paper's capture proofs, elementary exporter or proof-registration
+code. `Trace.check` validates the aggregate first/last theorem; callers that
+manually change `steps` must justify those edits separately. Generated
+commands keep the intermediate lines and proof composition together.
+
 ## What is rendered, and how
 
 Scoped terms, updates and formulas are read from their `Expr`
@@ -97,6 +172,9 @@ for it.
 scripts/latex-sol.sh Counter.sol Counter.add                  # the obligation
 scripts/latex-sol.sh --derivation --macros Counter.sol Counter.add
 scripts/latex-sol.sh --derivation --opts '(labels := tag) (past := false)' C.sol C.f
+scripts/latex-sol.sh --program --macros C.sol C.f   # checked capture/update trace
+scripts/latex-sol.sh --json C.sol C.f              # checked before/after pairs
+scripts/latex-sol.sh --program --reads 'findOnSave' C.sol C.f
 ```
 
 The script compiles the file with solkey's pinned solc
@@ -135,3 +213,35 @@ obligation (with `fixedCopy`) and its derivation to the end of the program
 (`past := false`), the worked chain of the same copy whole, to `true`
 (`#latex_decl` of `Examples/Chains/FixedLength.lean`'s `CopyLength.chain`), the symbol table's
 coverage and the fallback's warning.
+
+`Examples/Tactics/ProgramTrace.lean` checks capture order, distinct
+intermediate formulas, read continuation, JSON rows, arbitrary theorem
+parameters, kernel submission and budget failure.
+
+## Program-trace API milestone (2026-10-20)
+
+This API extracts the reusable capture/update layer from the paper's long
+single-step session (`Show one Lean API step at a time`). It keeps the native
+calculus and default LaTeX commands unchanged. The paper's source-to-TeX
+audits, formula links, highlighting and lowering proofs remain document
+responsibilities.
+
+The read-only finder/skeptic pass identified capture refinement under
+preconditions and branches, ambient parameter closure, an exact-budget
+off-by-one, and storage-shadow refinement beneath a precondition. These are
+fixed and covered by the regression module. The review also clarified that
+the public aggregate proof check does not certify manually edited step data.
+
+Validation: the default library and TestSuite builds pass, and the sort
+check passes against the frozen 377-taclet/131-read migration snapshot.
+All four new modules have no diagnostic errors or warnings; the storage and
+memory index-capture theorems use only `propext`, `Classical.choice` and
+`Quot.sound`. Both new Solidity wrapper modes pass on the fixed-array fixture;
+the JSON's seven program pairs retain continuous endpoints. A deliberately
+failed read continuation leaves an existing output file unchanged.
+
+The unpinned `./run-lean.sh` sort stage currently finds the adjacent SolKey
+checkout's unannotated `localValueDelete` read (381 taclets). Existing broad
+hygiene failures remain: 25 ignored scratch-module orphans and six missing
+paths in vendored LeanTeX documentation. All new modules are reachable, and
+the changed documentation introduces no missing paths.
