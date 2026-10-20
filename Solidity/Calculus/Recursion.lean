@@ -642,10 +642,13 @@ where it does not close. -/
 elab "rec_auto" : tactic => do
   let g ← getMainGoal
   let rest := (← getGoals).erase g
-  -- the driver is bounded by its fuel, each step by the heartbeats
-  -- (`Recursion.tryOn`)
-  let open_ ← withTheReader Core.Context ({ · with maxHeartbeats := 0 }) <|
-    Recursion.autoGoal g 32
+  -- each step has its own heartbeats (`Recursion.tryOn`); the driver, which
+  -- spans at most `fuel` of them, the same budget `fuel` times over, so a
+  -- runaway fails within a bound (AGENTS.md: bound every search)
+  let fuel := 32
+  let open_ ← withTheReader Core.Context
+      (fun c => { c with maxHeartbeats := c.maxHeartbeats * fuel }) <|
+    withCurrHeartbeats <| Recursion.autoGoal g fuel
   unless open_.isEmpty do
     throwError "rec_auto: a goal is left open{indentExpr (← open_.head!.getType)}"
   setGoals rest
