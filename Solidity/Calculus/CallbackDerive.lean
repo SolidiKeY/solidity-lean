@@ -13,7 +13,8 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
 * a `transfer`, a `send` or a `try` that hands control to a callee that
   calls back: its callback taclet (`transferWithCallbackBox`,
   `sendWithCallbackBox`, `tryCallWithCallbackBox`; under the diamond
-  `sendWithCallbackDiamond`), solkey's goals;
+  `sendWithCallbackDiamond`), solkey's goals; a self-call `try`
+  `tryCallSelfBox`'s, read with callbacks (`ProvesC.trySelf`, Lean);
 * a gas-limited send (`pay` unset): `sendNoCallbackBox`'s or
   `sendNoCallbackDiamond`'s goals (`ProvesC.sendDet`, `ProvesC.sendDetD`); a
   block that calls back: its body (`ProvesC.block`); an internal call with no
@@ -82,9 +83,12 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               #[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendD)
                 .$(mkIdent `sendWithCallbackDiamond):ident)]]
           | some ``Stmt.tryCall =>
+            -- a self-call (`self = true`): `tryCallSelfBox`'s goals with callbacks
+            let selfApp ← `(tactic| apply $(← ProofTree.short ``ProvesC.trySelf)
+              .$(mkIdent `tryCallSelfBox):ident)
             let app ← `(tactic| apply $(← ProofTree.short ``ProvesC.tryCall)
               .$(mkIdent `tryCallWithCallbackBox):ident)
-            pure #[#[← ProofTree.takeApart app]]
+            pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
           | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
           | _ => pure #[]

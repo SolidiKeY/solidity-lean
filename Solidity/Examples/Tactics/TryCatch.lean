@@ -290,7 +290,7 @@ theorem selfCall_noCallback : ¬ ValidT .noCallback selfCall := by
   have H := h (State.init Pinger) _
     (.cons (execOfRun rfl rfl)
       (.cons (ExecS.tryOk (st := pinger 0 0 42) (nt := []) (vs := []) (rest := [])
-        ?exit ?resume rfl .nil) .nil))
+        ?exit ?resume rfl .nil nofun) .nil))
   case exit => trivial
   case resume => trivial
   have H2 := H _ ExecF.nil

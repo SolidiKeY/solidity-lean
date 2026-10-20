@@ -407,8 +407,20 @@ behind `require(a != this)`, as a second self rule.
 (`trySelfOk`, `trySelfHalt`, `trySelfViolated`): the callee's run as an
 inlined call, then the success block; its other outcomes are the existing
 `tryError`/`tryPanic`/`tryOther`.  So the deterministic run is still one
-of the callback runs (`Stmt.exec_run`), and `ProvesC` has no rule for a
-self-call `try` (its `tryCallWithCallbackBox` takes `self = false`).
+of the callback runs (`Stmt.exec_run`).  A self-call reaches the oracle's
+`tryOk` (any state the callee may leave) only where the run does: at an
+address other than `0` and the contract's (`tryOk`'s last premise).
+
+`ProvesC.trySelf` (`Calculus/Callback.lean`, sound by `holdsC_trySelfCb`,
+`Calculus/CallbackSound.lean`; Lean only) is `tryCallSelfBox` read with
+callbacks, as `ProvesC.tryCall` reads `tryCallNoCallbackBox`: the invariant
+where control leaves ("invariant on exit"); `tryCallSelfBox`'s self goal,
+the callee inlined, whose own `try`s and payments may call back; the other
+receiver's goal after `{havoc}` with the invariant assumed; each `catch`
+goal from the caller's state.  `sol_prove`'s walk tries it before
+`tryCallWithCallbackBox` (`Calculus/CallbackDerive.lean`), so the runner's
+`ValidT .noCallback` reading (O7) proves a self-call `try` whose callee
+writes storage.
 
 **The runner.** `scripts/test-solidity.mjs --self-address A` declares every
 obligation with the premise `address(this) == A` (`Problem.selfPre`,
