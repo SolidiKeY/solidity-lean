@@ -372,4 +372,230 @@ theorem Storage.save_grows {st st' : Storage C} {U : Ty} {q : SRef C U} {new : S
   · rw [SFields.get_set_ne st qh rh (Ne.symm e)]
     exact hr
 
+/-! ## The storage operations keep clean tails -/
+
+theorem cleanTailH_stripOK : cleanTailH.StripOK := fun {E} _ _ _ _ _ =>
+  SList.ordinaryDefault_nil (E := E)
+
+theorem cleanTailH_ovOK : cleanTailH.OvOK := by
+  intro E m n oel osh nel nsh ho _ hoel _ _
+  change (SList.ofList _).OrdinaryDefault
+  rw [SList.ordinaryDefault_ofList]
+  intro w hw
+  rcases List.mem_append.mp hw with hw | hw
+  · obtain ⟨u, hu, rfl⟩ := List.mem_map.mp hw
+    exact SVal.defaultOf_ordinaryDefault u (SVec.all_iff.mp hoel u (List.mem_of_mem_drop hu))
+  · exact (SList.ordinaryDefault_iff osh).1 ho w (List.mem_of_mem_drop hw)
+
+/-- A copy out of memory has no slot past an end. -/
+theorem SVal.plain_ct {T : Ty} {v : SVal T} (h : v.Plain) : v.All cleanTailH :=
+  SVal.all_mono' (P := cleanTailH) (Q := plainH)
+    (fun _ _ _ hsh => by
+      change _ = _ at hsh
+      subst hsh
+      exact trivial)
+    (fun _ _ _ => trivial) (fun _ _ h => h.elim) v h
+
+/-- Every value of a mapping type is an ordinary default: no clearing
+reaches a mapping's entries. -/
+theorem SVal.ordinaryDefault_of_isMapping {E : Ty} (hE : E.isMapping = true) (v : SVal E) :
+    v.OrdinaryDefault := by
+  cases v with
+  | prim _ => exact nomatch hE
+  | struct _ => exact nomatch hE
+  | array _ _ _ => exact nomatch hE
+  | fixed _ => exact nomatch hE
+  | map m d => exact SVal.ordinaryDefault_map m d
+
+theorem pushSlot_ct {E : Ty} {sh : List (SVal E)} (h : ∀ w ∈ sh, w.All cleanTailH)
+    (hd : ∀ w ∈ sh, w.OrdinaryDefault) :
+    (pushSlot E sh).1.All cleanTailH ∧ (∀ w ∈ (pushSlot E sh).2, w.All cleanTailH) ∧
+      ∀ w ∈ (pushSlot E sh).2, w.OrdinaryDefault := by
+  cases sh with
+  | nil =>
+    exact ⟨SVal.dflt_cleanTail E, fun _ h => by simp only [pushSlot, List.not_mem_nil] at h,
+      fun _ h => by simp only [pushSlot, List.not_mem_nil] at h⟩
+  | cons c rest =>
+    refine ⟨?_, fun w hw => h w (List.mem_cons_of_mem _ hw),
+      fun w hw => hd w (List.mem_cons_of_mem _ hw)⟩
+    show (if E.isPrimitive then SVal.dflt E else c).All cleanTailH
+    split
+    · exact SVal.dflt_cleanTail E
+    · exact h c List.mem_cons_self
+
+namespace Storage
+
+theorem save_ct {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
+    (hs : st.All cleanTailH) (hn : new.All cleanTailH) (hl : st.LiveAll r)
+    (h : st.save r new = some st') : st'.All cleanTailH := by
+  obtain ⟨v', hv, rfl⟩ := save_eq_some h
+  exact SFields.all_set r.hroot hs (SVal.saveM_ct r.path (root_all r hs) hn hl hv)
+
+theorem write_ct {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
+    (hs : st.All cleanTailH) (hn : new.All cleanTailH) (hl : st.LiveAll r)
+    (h : st.write r new = some st') : st'.All cleanTailH := by
+  unfold Storage.write at h
+  split at h
+  · exact save_ct hs hn hl h
+  · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+    obtain ⟨old, hold, h⟩ := h
+    exact save_ct hs (SVal.overlay_all cleanTailH_stripOK cleanTailH_delOK cleanTailH_ovOK
+      old new (find_all hs hold) hn) hl h
+
+theorem delete_ct {st st' : Storage C} {U : Ty} {r : SRef C U}
+    (hs : st.All cleanTailH) (hl : st.LiveAll r) (h : st.delete r = some st') :
+    st'.All cleanTailH := by
+  simp only [Storage.delete, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨old, hold, h⟩ := h
+  exact save_ct hs (SVal.defaultOf_all cleanTailH_delOK (find_all hs hold)) hl h
+
+theorem push_ct {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {val : SVal E → Option (SVal E)} (hs : st.All cleanTailH) (hl : st.LiveAll r)
+    (hval : ∀ s x, s.All cleanTailH → val s = some x → x.All cleanTailH)
+    (h : st.push r val = some st') : st'.All cleanTailH := by
+  unfold Storage.push at h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨v, hv, h⟩ := h
+  have hvA := find_all hs hv
+  cases v with
+  | array e sh hn =>
+    simp only [SVal.view_array] at h
+    obtain ⟨x, hx, h⟩ := h
+    split at h
+    · simp only [SVal.All] at hvA
+      have hsl := pushSlot_ct (SList.all_iff.mp hvA.2.2)
+        ((SList.ordinaryDefault_iff sh).1 hvA.1)
+      have hxA := hval _ x hsl.1 hx
+      refine save_ct hs ?_ hl h
+      simp only [SVal.All]
+      refine ⟨?_, SVec.all_ofList.mpr fun w hw => ?_, SList.all_ofList.mpr hsl.2.1⟩
+      · change (SList.ofList _).OrdinaryDefault
+        rw [SList.ordinaryDefault_ofList]
+        exact hsl.2.2
+      · rcases List.mem_append.mp hw with hw | hw
+        · exact SVec.all_iff.mp hvA.2.1 w hw
+        · rw [List.mem_singleton.mp hw]; exact hxA
+    · exact nomatch h
+
+theorem pushPlace_ct {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (hs : st.All cleanTailH) (hl : st.LiveAll r)
+    (h : st.pushPlace r = some (st', k)) : st'.All cleanTailH :=
+  push_ct hs hl (fun _ _ hx e => Option.some.inj e ▸ hx) (Storage.push_of_pushPlace h)
+
+theorem pop_ct {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {keep : Bool}
+    (hs : st.All cleanTailH) (hl : st.LiveAll r) (hkeep : keep = true → E.isMapping = true)
+    (h : st.pop keep r = some st') : st'.All cleanTailH := by
+  unfold Storage.pop at h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨v, hv, h⟩ := h
+  have hvA := find_all hs hv
+  cases v with
+  | array e sh hn =>
+    simp only [SVal.view_array] at h
+    split at h
+    · exact nomatch h
+    · rename_i last rest hrev
+      simp only [SVal.All] at hvA
+      have hlast : last ∈ e.toList := by
+        rw [← List.mem_reverse, hrev]; exact List.mem_cons_self
+      have hlA := SVec.all_iff.mp hvA.2.1 last hlast
+      have hy : (if keep then last else last.defaultOf).All cleanTailH := by
+        split
+        · exact hlA
+        · exact SVal.defaultOf_all cleanTailH_delOK hlA
+      have hyD : (if keep then last else last.defaultOf).OrdinaryDefault := by
+        split
+        · rename_i hk; exact SVal.ordinaryDefault_of_isMapping (hkeep hk) last
+        · exact SVal.defaultOf_ordinaryDefault last hlA
+      refine save_ct hs ?_ hl h
+      simp only [SVal.All]
+      refine ⟨?_,
+        SVec.all_ofList.mpr fun w hw => SVec.all_iff.mp hvA.2.1 w (List.dropLast_subset _ hw),
+        SList.all_ofList.mpr fun w hw => ?_⟩
+      · dsimp only [cleanTailH]
+        rw [SList.ordinaryDefault_ofList]
+        intro w hw
+        rcases List.mem_cons.mp hw with hw | hw
+        · rw [hw]; exact hyD
+        · exact (SList.ordinaryDefault_iff sh).1 hvA.1 w hw
+      · rcases List.mem_cons.mp hw with hw | hw
+        · rw [hw]; exact hy
+        · exact SList.all_iff.mp hvA.2.2 w hw
+
+/-! ### … and keep live references live -/
+
+theorem save_prim_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.prim q)}
+    {new : SVal (.prim q)} (h : st.save r new = some st') : st.Grows st' :=
+  save_grows h fun _ _ => SVal.growsTo_prim _ _
+
+theorem write_prim_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.prim q)}
+    {new : SVal (.prim q)} (h : st.write r new = some st') : st.Grows st' := by
+  unfold Storage.write at h
+  split at h
+  · exact save_prim_grows h
+  · rename_i hp; exact absurd rfl hp
+
+theorem delete_prim_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.prim q)}
+    (h : st.delete r = some st') : st.Grows st' := by
+  simp only [Storage.delete, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨_, _, h⟩ := h
+  exact save_prim_grows h
+
+theorem push_grows {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {val : SVal E → Option (SVal E)} (h : st.push r val = some st') : st.Grows st' := by
+  unfold Storage.push at h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨v, hv, h⟩ := h
+  cases v with
+  | array e sh hn =>
+    simp only [SVal.view_array] at h
+    obtain ⟨x, _, h⟩ := h
+    split at h
+    · refine save_grows h fun old ho => ?_
+      rw [hv] at ho
+      cases ho
+      exact SVal.growsTo_push e sh hn x _ _
+    · exact nomatch h
+
+theorem pushPlace_grows {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st.Grows st' :=
+  push_grows (Storage.push_of_pushPlace h)
+
+theorem pop_words_grows {st st' : Storage C} {q : PrimTy} {r : SRef C (.ref (.array (.prim q)))}
+    {keep : Bool} (h : st.pop keep r = some st') : st.Grows st' := by
+  unfold Storage.pop at h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+  obtain ⟨v, hv, h⟩ := h
+  cases v with
+  | array e sh hn =>
+    simp only [SVal.view_array] at h
+    split at h
+    · exact nomatch h
+    · refine save_grows h fun old ho => ?_
+      rw [hv] at ho
+      cases ho
+      exact SVal.growsTo_words _ _ _ _ _ _
+
+/-- The slot a push appends is live. -/
+theorem pushPlace_liveAll {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (hl : st.LiveAll r) (h : st.pushPlace r = some (st', k)) :
+    st'.LiveAll (r.index (.arr .dyn) k) := by
+  obtain ⟨n, e, sh, hn, hcap, rfl, hf⟩ := Storage.pushPlace_shape h
+  have hl' : st'.LiveAll r := pushPlace_grows h r hl
+  change (st'.get r.hroot).LiveAll (r.path.append (Path.index (.arr .dyn) (lenU n hn)))
+  refine SVal.liveAll_append _ _ _ hl' fun y hy => ?_
+  have hsame : y = SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+      (.ofList (pushSlot E sh.toList).2) (SVec.snoc_lt_bound e _ hcap) := by
+    apply Option.some.inj
+    exact hy.symm.trans (by rw [← SVal.find_eq_findM]; exact hf)
+  subst y
+  rw [Path.index_dyn]
+  simp only [SVal.LiveAll]
+  refine ⟨?_, fun _ _ => trivial⟩
+  simp only [lenU, Int.toNat_natCast, List.length_append, List.length_singleton,
+    SVec.length_toList]
+  omega
+
+end Storage
+
 end Solidity
