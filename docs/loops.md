@@ -587,3 +587,35 @@ past `concreteDepth` (40) too, and its push at `next(storage, array2d)`
 is an exposing `pushSlot` of a `uint[]` element, which no length fact makes
 known (the exposed slot is the dangling one above); the same holds of
 `nests.push()`.
+
+**After the lane** (`a97fba7f`), the runner on the four:
+
+| Function | Before | After |
+|---|---|---|
+| `pushNoArgs2dLoop` | error, timeout at `whnf`, 68 s, 6.8 GB | error, timeout at `whnf`, 67 s, 6.6 GB (kernel check 465k hb instead of 658k; not valid under `.solc` tails, `pending` at best) |
+| `multiArrayFillByPushLoops` | no answer in 900 s | error, timeout at "`sol_prove`'s compiled walk, after its 1024-step stage", 112 s, 1.6 GB |
+| `binomialFaithfulRowsSmall` | error, timeout at `isDefEq`, 90 s | error, timeout "after its 8192-step stage", 64 s, 1.6 GB |
+| `binomialRowsNine` | error, timeout at `isDefEq`, 80 s | error, timeout "after its 8192-step stage", 66 s, 1.6 GB |
+
+With the early-read bound in, the regression files again: `Loops` 24.5 s,
+`LoopsImport` 13.6 s, `Derived17` 103.1 s and 100.0 s (two runs; peak RSS
+3.0, 1.7 and 8.4 GB), `Examples/Tactics/Decide.lean` clean, and
+`scripts/test-solidity.test.mjs`' failures the same four assertions as an
+earlier master run (its solc/open test, 51 rows, passes).
+
+**What is left.**  None of the four closes within the default budget, and
+none can by the cheap routes:
+
+- `pushNoArgs2dLoop` is not valid under `⊢` (the dangling `uint[]` above);
+  under `ValidTail .clean` it is, and its walk would still need the
+  kernel's 465k heartbeats cut to well under 100k: the walk carrying the
+  closer's state (proposal (a)), since what is left is the refutations'
+  `wrap`/`toLS` over the whole context at each split, the leaves, and the
+  steps, each linear in the context.
+- `multiArrayFillByPushLoops` needs a closer for exposed slots: its loops'
+  guards read a recycled `Nest`'s unknown lengths, whose reads branch
+  sevenfold per exposing update.
+- The binomials need the memory's terms shared (a DAG-aware or
+  value-naming reduction): under the diamond each refutation proves every
+  allocation's landing obligation, and those terms double with each write
+  that reads the memory twice.
