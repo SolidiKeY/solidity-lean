@@ -442,7 +442,7 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
     // (`keccakAt`); a symbolic word's packed bytes read back (`hornerU?`)
     'literalHash', 'twoAllocationsHashEqual', 'packedAddressBytes', 'packedWordReassembled',
     // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
-    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner',
+    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner', 'sha256Literal', 'ripemd160Literal',
     // `abi.decode` of a struct of values, a `T[k]`, a tuple with a struct
     'decodeStruct', 'decodeFixed', 'decodeTuple'])
     assert.equal(status[name], 'proved', name);

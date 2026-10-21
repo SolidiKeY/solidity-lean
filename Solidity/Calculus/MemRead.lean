@@ -2428,7 +2428,8 @@ end Walk
 /-! ## The hash of a byte string read off the memory (Lean only)
 
 Where a byte string's length and every byte read down the memory to
-literals (`lenAtN`, `memReadN`), `keccak256` of it is `keccakBytes` of
+literals (`lenAtN`, `memReadN`), a hash of it (`keccak256`, `sha256`,
+`ripemd160`: `HashKind.apply`) is that function of
 those bytes, which the kernel evaluates; no solkey taclet reads a hash
 (solkey's `keccak256` is uninterpreted). -/
 
@@ -2507,26 +2508,26 @@ def keccakWords (rd : PrimTy.uint.Denote → Option PrimTy.uint.Denote) :
 def keccakMaxBytes : Nat := 64
 
 /-- **The hash of a byte string read off the memory** (Lean only): where
-its length and every byte read down the memory to literals, `keccak256` is
-evaluated on them (`keccakBytes`); where the memory does not return, the
+its length and every byte read down the memory to literals, the hash `k` is
+evaluated on them (`HashKind.apply`); where the memory does not return, the
 symbol as it was. -/
-def keccakAt (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) : LTm C (.val .uint) :=
+def keccakAt (k : HashKind) (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) : LTm C (.val .uint) :=
   match (lenAtN memFuel X t).litIn? with
   | some n =>
     if n.1.toNat ≤ keccakMaxBytes then
       match keccakWords (fun iv => (memReadN memFuel X (.app2 (.mat .dyn) t (.lit iv))).litIn?)
           n.1.toNat 0 with
       | some vs => .orElse (.seq (seqMemL X (lenAtN memFuel X t))
-          (.lit (keccakBytes (vs.map (·.1))))) (.app2 .keccak X t)
-      | none => .app2 .keccak X t
-    else .app2 .keccak X t
-  | none => .app2 .keccak X t
+          (.lit (k.apply (vs.map (·.1))))) (.app2 (.hash k) X t)
+      | none => .app2 (.hash k) X t
+    else .app2 (.hash k) X t
+  | none => .app2 (.hash k) X t
 
-/-- `keccakAt` at a byte string, the symbol elsewhere. -/
-def keccakRes {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) : LTm C (.val .uint) :=
+/-- `keccakAt` at a byte string, the symbol elsewhere; any hashing builtin `k` (`HashKind.apply`). -/
+def keccakRes (k : HashKind) {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) : LTm C (.val .uint) :=
   match R, t with
-  | .array (.prim .uint), t => keccakAt X t
-  | _, t => .app2 .keccak X t
+  | .array (.prim .uint), t => keccakAt k X t
+  | _, t => .app2 (.hash k) X t
 
 theorem eval_read_mat (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))))
     (iv : PrimTy.uint.Denote) (μ : Grown g.H (fun _ => Unit)) (id : Nat)
@@ -2590,8 +2591,8 @@ theorem keccakWords_spec (rd : PrimTy.uint.Denote → Option PrimTy.uint.Denote)
           rw [show i + (j + 1) = i + 1 + j by omega]
           exact this
 
-theorem keccakAt_eval (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) :
-    (keccakAt X t).eval g ν = (LTm.app2 .keccak X t).eval g ν := by
+theorem keccakAt_eval (k : HashKind) (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) :
+    (keccakAt k X t).eval g ν = (LTm.app2 (.hash k) X t).eval g ν := by
   unfold keccakAt
   split
   · rename_i n hn
@@ -2600,7 +2601,7 @@ theorem keccakAt_eval (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))
       · rename_i vs hvs
         rw [LTm.eval_orElse]
         cases hL : ((LTm.seq (seqMemL X (lenAtN memFuel X t))
-            (.lit (keccakBytes (vs.map (·.1))))).eval g ν : Option PrimTy.uint.Denote) with
+            (.lit (k.apply (vs.map (·.1))))).eval g ν : Option PrimTy.uint.Denote) with
         | none => rfl
         | some x =>
           show some x = _
@@ -2614,7 +2615,7 @@ theorem keccakAt_eval (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))
             | some ℓ =>
               rw [hℓ] at hL
               simp only [Option.bind_some] at hL
-              have hx : x = keccakBytes (vs.map (·.1)) := (Option.some.inj hL).symm
+              have hx : x = k.apply (vs.map (·.1)) := (Option.some.inj hL).symm
               have hℓn := LTm.litIn?_eval _ hn hℓ
               rw [lenAtN_eval memFuel X t μ hX] at hℓ
               obtain ⟨μ', id, r, hX', ht, hr, hlen⟩ := eval_mlen_some X t hℓ
@@ -2643,21 +2644,21 @@ theorem keccakAt_eval (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))
                 rw [hj, List.getElem?_eq_getElem h1] at e
                 exact LTm.litIn?_eval _ hrd e
               rw [LTm.eval_app2, hX, ht, hx]
-              show some (keccakBytes (vs.map (·.1))) = some (μ.keccakId _ id)
-              unfold Grown.keccakId
+              show some (k.apply (vs.map (·.1))) = some (μ.hashId k _ id)
+              unfold Grown.hashId
               rw [hr]
-              show _ = some (keccakBytes (MObj.words _ (μ.heap.get r)))
+              show _ = some (k.apply (MObj.words _ (μ.heap.get r)))
               rw [← hE, MObj.elems_dyn]
               rfl
       · rfl
     · rfl
   · rfl
 
-theorem keccakRes_eval {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) :
-    (keccakRes X t).eval g ν = (LTm.app2 .keccak X t).eval g ν := by
+theorem keccakRes_eval (k : HashKind) {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) :
+    (keccakRes k X t).eval g ν = (LTm.app2 (.hash k) X t).eval g ν := by
   unfold keccakRes
   split
-  · exact keccakAt_eval X _
+  · exact keccakAt_eval k X _
   · rfl
 
 end Keccak
@@ -2675,7 +2676,7 @@ def _root_.Solidity.Op2.memRes {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y 
   | .read, X, b => memReadN memFuel X b
   | .iread, X, b => memIReadN memFuel X b
   | .mlen, X, t => seqMemL X (lenAtN memFuel X t)
-  | .keccak, X, t => keccakRes X t
+  | .hash k, X, t => keccakRes k X t
   | o, x, y => .app2 o x y
 
 theorem Op2.memRes_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
@@ -2689,7 +2690,7 @@ theorem Op2.memRes_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C
     cases hx : (x.eval g ν : Option (Grown g.H (fun _ => Unit))) with
     | none => rw [LTm.eval_app2_none _ _ _ hx]; rfl
     | some μ => exact lenAtN_eval memFuel x y μ hx
-  case keccak => simp only [Op2.memRes]; exact keccakRes_eval x y
+  case hash k => simp only [Op2.memRes]; exact keccakRes_eval k x y
   all_goals simp only [Op2.memRes]
 
 /-- `LTm.memRes`'s compiled twin. -/

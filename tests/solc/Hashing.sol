@@ -109,6 +109,15 @@ contract Hashing {
     function ripemd160Parameter(bytes memory b) public pure {
         assert(ripemd160(b) == ripemd160(b));
     }
+    // of a byte string built here, under the diamond: evaluated (`keccakAt`)
+    function sha256Literal() public pure {
+        bytes memory b = "abc";
+        assert(sha256(b) == bytes32(0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad));
+    }
+    function ripemd160Literal() public pure {
+        bytes memory b = "abc";
+        assert(ripemd160(b) == bytes20(0x8eb208f7e05d987a9b044a8e98c6b087f15a0bfc));
+    }
     // `ecrecover`: the precompile's 128 bytes, an address, uninterpreted where
     // the signature is well formed (`ecrecoverBytes`); run in
     // `Examples/Tactics/Hashing.lean`

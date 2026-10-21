@@ -171,6 +171,18 @@ theorem ripemd160Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160
   sol_symex
   sol_decide
 
+/-- Under the diamond, of a byte string built here: read off the memory and
+evaluated (`keccakAt` at the kind, `HashKind.apply`), as `keccak256`. -/
+theorem sha256AbcDiamond : ⊨ dl!{ ⟨ bytes memory b = "abc"; bytes32 h = sha256(b); uint u = uint(h); ⟩
+    u == 0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad } := by
+  sol_symex
+  sol_decide
+
+theorem ripemd160TwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes memory c = "ab";
+    bytes20 h = ripemd160(b); bytes20 g = ripemd160(c); ⟩ h == g } := by
+  sol_symex
+  sol_decide
+
 /-! ## 2 · The ABI -/
 
 /-- `abi.encode(uint, bool)`: two words, big-endian. -/
