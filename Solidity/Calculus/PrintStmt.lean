@@ -1013,6 +1013,11 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
     let some xi ← ppVar? x | escape
     let some T ← primName? p | escape
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
+  | Fml.allocAll _ _ x A φ =>
+    let x := x.consumeMData
+    let some xi ← ppVar? x | escape
+    unless ← isDefEq A (mkConst ``bytesR) do return ← escape
+    `(dl_fml| ∀ fresh bytes $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
   | Fml.and _ _ φ ψ =>
     if let some ((na, a), (nb, b)) ← iffPartsS ns e then
       return ← `(dl_fml| $(← ppFmlS na a):dl_fml ↔ $(← ppFmlS nb b):dl_fml)

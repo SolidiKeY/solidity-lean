@@ -390,6 +390,9 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       let φ ← expandFml r φ
       let ψ ← expandFml r ψ
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
+  | stx@`(dl_fml| ∀ fresh $_:ident $_:ident; $_:dl_fml) =>
+      Macro.throwErrorAt stx "`∀ fresh bytes r; φ` is what `catchDataBox` leaves for another \
+        contract's data, not a formula to write (`Fml.allocAll`)"
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
         `dl[C]{ … }` is read scoped, over the typed run (`Prog.run`)"

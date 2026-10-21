@@ -876,8 +876,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   // a custom error's data: its selector folded as solc folds it, its
   // argument's word (`revert E(7)`, `RevertStatement`)
   // and a reason past a custom error of a symbolic argument (`RevPart.notError`)
+  // another contract's reason and raw data: any bytes (`Fml.allocAll`)
   for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData",
-    "reasonPastCustom"]) {
+    "reasonPastCustom", "externalReason", "externalData"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });

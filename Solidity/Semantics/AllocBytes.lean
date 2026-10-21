@@ -111,7 +111,7 @@ theorem Objs.get_snoc_top {H : HTy} {R : RefTy} (o : MObj H R) :
     (Rs : List RefTy) → (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
       Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o
   | [], _, _ => rfl
-  | _ :: Rs, os, h => Objs.get_snoc_top o Rs os.2 _
+  | _ :: Rs, os, _ => Objs.get_snoc_top o Rs os.2 _
 
 theorem Objs.set_snoc_top {H : HTy} {R : RefTy} (o o' : MObj H R) :
     (Rs : List RefTy) → (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →

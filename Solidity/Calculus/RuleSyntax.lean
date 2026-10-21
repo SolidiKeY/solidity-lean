@@ -222,6 +222,10 @@ syntax:55 dl_term:56 " > " dl_term:56 : dl_fml
 syntax:55 dl_term:56 " >= " dl_term:56 : dl_fml
 /-- `∀ uint a; φ`: KeY's `\forall`, over the values of a primitive type. -/
 syntax:25 "∀ " ident ident "; " dl_fml:25 : dl_fml
+/-- `∀ fresh bytes r; φ`: `φ` for every fresh memory object of any contents
+(`Fml.allocAll`, Lean only): what `catchDataBox` leaves for another
+contract's data; printed, not written. -/
+syntax:25 "∀ " &"fresh" ident ident "; " dl_fml:25 : dl_fml
 /-- `∃ uint a; φ`: `¬(∀ uint a; ¬φ)`. -/
 syntax:25 "∃ " ident ident "; " dl_fml:25 : dl_fml
 syntax:50 dl_fml:55 " && " dl_fml:50 : dl_fml

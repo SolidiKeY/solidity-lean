@@ -107,6 +107,31 @@ contract RevertData {
         require(x > 1, "small");
     }
 
+    // another contract's reason is any bytes: the clause for every fresh
+    // `bytes` (`Fml.allocAll`), its length read as any `uint`
+    /// @custom:key box
+    function externalReason(address a) public view {
+        try RevertData(a).boom() {
+        } catch Error(string memory r) {
+            if (bytes(r).length > 3) {
+                assert(bytes(r).length >= 4);
+            }
+        } catch {
+        }
+    }
+
+    // another contract's raw data, bound and its length branched on
+    /// @custom:key box
+    function externalData(address a) public view {
+        try RevertData(a).plain(1) {
+        } catch (bytes memory d) {
+            uint n = d.length;
+            if (n == 0) {
+                assert(d.length == 0);
+            }
+        }
+    }
+
     // a custom error of a symbolic argument cannot decode as `Error`: the
     // `Error` clause binds the reason
     /// @custom:key box
