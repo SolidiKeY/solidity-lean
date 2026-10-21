@@ -7,16 +7,18 @@ import Solidity.Tools.Run
 /-!
 # `keccak256`, `abi.*`, `concat` and string-keyed mappings
 
-`keccak256` is an uninterpreted function of the bytes (`keccakOf`,
-`Semantics/Heap.lean`; `docs/semantic-gaps.md`, "Hashing and the ABI"): a
-proof knows only that equal bytes hash equal, and the closer sees that of
-one byte string read twice (`keccak256(memory, b)`, the same term).
+`keccak256` is Keccak-256 of the bytes (`keccakBytes`,
+`Semantics/Heap.lean`, computed by `Keccak.lean`; `docs/semantic-gaps.md`,
+"Hashing and the ABI"), kept from unfolding: the closers read a hash as an
+atom, equal bytes hashing equal (`keccak256(memory, b)` of one byte string
+read twice, the same term), and a proof evaluates the hash of literal bytes
+in the kernel (`decide +kernel`).
 `abi.encode`, `abi.encodePacked`, `string.concat` and `bytes.concat` are
 fresh memory `bytes` of solc's layout, written byte by byte (`abiEncode`,
 `Syntax/Elab.lean`), and `abi.decode` reads words back, reverting on a value
 out of its type's range.  A `mapping(string => V)` is keyed by the hash.
 
-* §1 — `keccak256`;
+* §1 — `keccak256`, its value computed (`#run`, `decide +kernel`);
 * §2 — `abi.encode`, `abi.encodePacked` proved; `abi.decode`, a dynamic
   encoding and the `concat`s run (`#run`);
 * §3 — a mapping keyed by `string`.
@@ -44,6 +46,31 @@ theorem hashString : ⊨ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(by
     bytes32 g = keccak256(bytes(s)); ] h == g } := by
   sol_symex
   sol_decide
+
+/-- The hash is Keccak-256: of `"abc"`, by evaluation in the kernel (well
+under a second for an input of one block). -/
+theorem keccakAbc : (keccakBytes [97, 98, 99]).1 =
+    0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45 := by
+  decide +kernel
+
+/-- So a selector hashed at run time is the one the elaborator folds:
+`bytes4(keccak256("f(uint256)"))` is `this.f.selector`, `0xb3de648b`. -/
+def Sel : Contract := contract!{
+  function f(uint x) returns (uint r) { r = x; }
+  function sel() returns (bool same, uint s) {
+    bytes4 h = bytes4(keccak256("f(uint256)"));
+    s = uint32(h);
+    same = h == this.f.selector;
+  }
+}
+
+/--
+info: ok
+returns (true, 3017696395)
+-/
+#guard_msgs in #run Sel.sel()
+
+#guard Keccak.selector "f(uint256)" == 0xb3de648b
 
 /-! ## 2 · The ABI -/
 

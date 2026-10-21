@@ -2000,6 +2000,8 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
     match bytesTy? f with
     | some n => some n
     | none => do
+      -- the builtin `keccak256` is a `bytes32`
+      if f == "keccak256" && (lookupBy f C.funs).isNone then return 32
       let d ← lookupBy f C.funs
       let (r, .prim _) ← d.ret | none
       lookupBy (r ++ "#bytes") d.widths
