@@ -56,6 +56,13 @@ too. -/
 def Hyps.freshC {Γ₀ Γ : Ctx} (I : Fml C []) (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) : Nat :=
   H.fresh (.and (Fml.closedAt I) φ)
 
+/-- A call's result assigned to its target, if it has one, under the
+callee's parameters and return variable (`callStep`'s, `Calculus/Blocks.lean`). -/
+def Prog.callResult {Γ ps : Ctx} {p : PrimTy} :
+    Option (Idx Γ (.val p)) → Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ))
+  | none => .nil
+  | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
+
 /-- `ProvesC I pay H φ`: the calculus proves `φ` in the context `H` when a
 callee may call back into a contract with invariant `I`, from every `try`
 and value call and, when `pay` is set, from every `transfer` and `send`. -/
@@ -240,6 +247,38 @@ not. -/
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
         (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of one value (`y = f(x)`) whose body may
+  call back: the parameters declared, the return variable at its default,
+  the body as a block, the result assigned to its target, the frame popped
+  (`callStep`'s program). -/
+  | callVal {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))}
+      {body : Prog C ([.val p] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declLocal p r none)
+          (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res))))
+        (.pop .capture (.push (Ext.append Γ ps)) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.val p r res) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of a storage reference whose body may
+  call back: the return alias unset, the body as a block, the parameters
+  thinned out from under the alias. -/
+  | callStorage {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+      {ω : Prog C (.alias R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declStorage R r none)
+          (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+        (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.storage R r) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of a memory reference whose body may
+  call back: the return object allocated at its default, the body as a
+  block, the parameters thinned out from under the object. -/
+  | callMem {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+      {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+      {ω : Prog C (.mem R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declMem R r none hd hm)
+          (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
+        (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)
   /-- **`transferWithCallbackBox`**: the invariant after the booking ("invariant
   on exit", `{U} I`), and the rest resumed after the callback, from any state
   the callee may leave in which the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/

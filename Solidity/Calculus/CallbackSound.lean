@@ -1088,6 +1088,190 @@ theorem holdsC_callNone {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State
   obtain ⟨u, hu, rfl⟩ := ExecS.callNone_inline he
   exact COut.thenF_drop _ (h _ hu)
 
+/-- **A call of one value, with callbacks, is its inlined body**
+(`Premise.sound_callVal`'s program): the parameters declared, the return
+variable at its default, the body lifted under them as a block, the result
+assigned to its target, the frame popped. -/
+theorem ExecS.callVal_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
+    {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))} {body : Prog C ([.val p] ++ ps) Γf}
+    {o : COut C σ.H Γ} (he : ExecS J σ (.call f args (.val p r res) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declLocal p r none)
+        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res)))) u ∧
+      o = u.map (Out.drop (.push (Ext.append Γ ps))) := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · have hp' : ExecP J (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.val p :: ps) Γ)
+      (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a))
+      (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env) hp'
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a)).lift
+        (Thin.atop (.val p :: ps) Γ)
+        (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env))
+      (Y := σ.withEnv (TEnv.append (.val p :: ps) (PrimTy.dflt p, a)
+        σ.env)) rfl rfl
+      (State.withEnv_append_lift (ps := .val p :: ps) σ (PrimTy.dflt p, a)).symm
+      (block_of_execP hw)
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps a σ.env))
+      (s := .declLocal p r none) rfl (Stmt.runSt_declLocal_none p r _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.val p :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    cases o' with
+    | halt e =>
+      exact ⟨.halt e, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.halt hb)), rfl⟩
+    | violated =>
+      exact ⟨.violated, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.violated hb)), rfl⟩
+    | ok x =>
+      let y := (Out.drop body.ext x).lift (Thin.atop (.val p :: ps) Γ)
+        (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env)
+      have hb' : ExecS J (σ.withEnv (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env))
+          (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (.ok y) := hb
+      have ht := ExecP.of_run (J := J) (τ := y.st)
+        (P := (Prog.callResult res : Prog C (.val p :: (ps ++ Γ)) _)) (by cases res <;> rfl)
+      refine ⟨_, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.cons hb' ht)), ?_⟩
+      cases res with
+      | none =>
+        refine congrArg COut.ok (Out.eq_of_st ?_)
+        simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop,
+          State.withEnv, CallRet.leaveT, y]
+        erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
+      | some j =>
+        refine congrArg COut.ok (Out.eq_of_st ?_)
+        rw [show (Ext.append Γ ps).push = Ext.append Γ (LTy.val p :: ps) from rfl]
+        simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop,
+          State.withEnv, State.setLocal, show (j.under ps).there = j.under (LTy.val p :: ps) from rfl,
+          TEnv.drop_set_under, CallRet.leaveT, y]
+        erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
+        rfl
+
+/-- **A call of a storage reference, with callbacks, is its inlined body**
+(`Premise.sound_callStorage`'s program): the parameters declared, the
+return alias unset, the body lifted under them as a block, the parameters
+thinned out from under the alias. -/
+theorem ExecS.callStorage_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+    {o : COut C σ.H (.alias R :: Γ)} (he : ExecS J σ (.call f args (.storage R r) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declStorage R r none)
+        (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil))) u ∧
+      o = u.map fun x => ⟨x.st.thin (.keep (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · have hp' : ExecP J (σ.withEnv (Δ := .alias R :: ps) (none, a)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.alias R :: ps) Γ)
+      (σ.withEnv (Δ := .alias R :: ps) (none, a))
+      (TEnv.append (.alias R :: ps) (none, a) σ.env) hp'
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv (Δ := .alias R :: ps) (none, a)).lift
+        (Thin.atop (.alias R :: ps) Γ) (TEnv.append (.alias R :: ps) (none, a) σ.env))
+      (Y := σ.withEnv (TEnv.append (.alias R :: ps) (none, a) σ.env)) rfl rfl
+      (State.withEnv_append_lift (ps := .alias R :: ps) σ (none, a)).symm
+      (block_of_execP hw)
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps a σ.env))
+      (s := .declStorage R r none) rfl (Stmt.runSt_declStorage_none R r _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.alias R :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    refine ⟨_, Args.execP_declsThen args _ σ a ha
+      (by simpa only [map_cat_refl] using ExecP.cons hd (singleton_iff.mpr hb)), ?_⟩
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, TRun.callLeave, State.lift, State.drop, State.thin,
+        State.withEnv, CallRet.leaveT]
+      erw [TEnv.thin_put_keepAllAtop (rs := [.alias R]) (r := (none, ()))]
+      rfl
+    | halt => rfl
+    | violated => rfl
+
+/-- **A call of a memory reference, with callbacks, is its inlined body**
+(`Premise.sound_callMem`'s program): the parameters declared, the return
+object allocated at its default, the body lifted under them as a block,
+the parameters thinned out from under the object. -/
+theorem ExecS.callMem_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+    {o : COut C σ.H (.mem R :: Γ)} (he : ExecS J σ (.call f args (.mem R r hd hm) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declMem R r none hd hm)
+        (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil))) u ∧
+      o = u.map fun x => ⟨x.st.thin (.keep (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · let g := (σ.withEnv a).allocDefaultG R hm
+    let τ := σ.withEnv (TEnv.append ps a σ.env)
+    have hp' : ExecP J (g.st.push (t := .mem R) (some g.val)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.mem R :: ps) Γ)
+      (g.st.push (t := .mem R) (some g.val))
+      (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)) hp'
+    have hY : (g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+          (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)) =
+        (τ.allocDefaultG R hm).st.push (t := .mem R) (some (τ.allocDefaultG R hm).val) := by
+      show _ = ((σ.withEnv (TEnv.append ps a σ.env)).allocDefaultG R hm).st.push (t := .mem R)
+        (some ((σ.withEnv (TEnv.append ps a σ.env)).allocDefaultG R hm).val)
+      rw [State.withEnv_append_lift σ a, State.allocDefaultG_lift]
+      simp only [g, Grew.lift, State.lift, State.push, Thin.atop, State.withEnv, TEnv.put]
+      rfl
+    have hb := ExecS.transport (H := g.st.H)
+      (X := (g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+          (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)))
+      (Y := (τ.allocDefaultG R hm).st.push (t := .mem R) (some (τ.allocDefaultG R hm).val))
+      rfl rfl hY (block_of_execP hw)
+    obtain ⟨_, hd'⟩ := ExecS.det_ok (J := J) (σ := τ)
+      (s := .declMem R r none hd hm) rfl (Stmt.runSt_declMem_none R r hd hm _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.mem R :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    refine ⟨_, Args.execP_declsThen args _ σ a ha (ExecP.cons hd' (singleton_iff.mpr hb)), ?_⟩
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop, State.thin,
+        State.withEnv, CallRet.leaveT]
+      erw [TEnv.thin_keep_put_atop]
+      rfl
+    | halt => rfl
+    | violated => rfl
+
+/-- **A call of one value, with callbacks**: its inlined body, the result
+assigned, the frame popped. -/
+theorem holdsC_callVal {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))}
+    {body : Prog C ([.val p] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declLocal p r none)
+        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res))))
+      (.pop .capture (.push (Ext.append Γ ps)) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.val p r res) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callVal_inline he
+  exact COut.thenF_drop _ (h _ hu)
+
+/-- **A call of a storage reference, with callbacks**: its inlined body, the
+parameters thinned out from under the alias. -/
+theorem holdsC_callStorage {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+    {ω : Prog C (.alias R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declStorage R r none)
+        (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+      (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.storage R r) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callStorage_inline he
+  exact COut.thenF_thin _ (h _ hu)
+
+/-- **A call of a memory reference, with callbacks**: its inlined body, the
+parameters thinned out from under the object. -/
+theorem holdsC_callMem {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+    {ω : Prog C (.mem R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declMem R r none hd hm)
+        (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
+      (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callMem_inline he
+  exact COut.thenF_thin _ (h _ hu)
+
 end Calls
 
 /-! ## Soundness -/
@@ -1160,6 +1344,10 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | block _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_block h) σ (ih σ)
   | callNone _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callNone h) σ (ih σ)
   | callRets _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callRets h) σ (ih σ)
+  | callVal _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callVal h) σ (ih σ)
+  | callStorage _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callStorage h) σ (ih σ)
+  | callMem _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callMem h) σ (ih σ)
   | callback d _ _ ihx ihr =>
     cases d
     exact fun σ => Hyps.wrapC_and _ (fun τ a b => holdsC_transferCb hI hT _ _ a b) σ
