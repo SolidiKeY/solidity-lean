@@ -84,6 +84,15 @@ run_elab do
     throwError "JSON lost its semantic boundary"
   unless (json.getObjValAs? (Array Json) "steps").toOption.map (·.size) == some trace.steps.size do
     throwError "JSON dropped a checked step"
+  let options : Latex.Options := { definitions := [("find", "def:find"), ("save", "def:save")] }
+  let linkedJson ← trace.toJson checked options
+  let .ok targets := linkedJson.getObjVal? "definitionTargets" | throwError "missing target metadata"
+  unless (targets.getObjValAs? String "find").toOption == some "def:find" do
+    throwError "JSON lost the symbol's definition target"
+  let tex ← trace.toLatex options
+  unless (tex.splitOn "\\hyperlink{def:find}").length > 1 &&
+      (tex.splitOn "\\hyperlink{def:save}").length > 1 do
+    throwError "checked trace lost its symbol links"
 
 /-- error: read law 1/1 (findOnSave) does not apply; applicable requested laws: []
 current endpoint:

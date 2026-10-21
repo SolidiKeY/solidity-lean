@@ -72,6 +72,9 @@ structure Options where
   /-- Whether a generated derivation goes on past the program (the rewrites
   to its last line), or stops where the strategy does. -/
   past : Bool := true
+  /-- Visible symbol keys and exact document destinations. Only mapped heads
+  become links; the empty list preserves the original output. -/
+  definitions : List (String × String) := []
   deriving Inhabited
 
 def Options.macros (o : Options) : Bool := o.backend == .macros
@@ -91,9 +94,17 @@ register_option latex.sol.width : Nat := {
   descr := "the width at which the LaTeX export breaks a line"
 }
 
+register_option latex.sol.definitions : String := {
+  defValue := "[]"
+  descr := "internal JSON map set by #latex_definition_targets"
+}
+
 /-- The options `set_option latex.sol.*` gives. -/
 def Options.ofCore (o : Lean.Options) : Options :=
-  { backend := if latex.sol.macros.get o then .macros else .plain, width := latex.sol.width.get o }
+  { backend := if latex.sol.macros.get o then .macros else .plain
+    width := latex.sol.width.get o
+    definitions := ((Json.parse (latex.sol.definitions.get o)).bind
+      (fromJson? (α := List (String × String)))).toOption.getD [] }
 
 /-! ## Text -/
 
@@ -333,6 +344,24 @@ def symbols : Array Sym := #[
   ⟨``UpdElem.netMt, "\\mathit{net}", "\\net", none⟩,
   ⟨``UpdElem.setBalance, "\\mathit{selfBalance}", "\\selfBalance", none⟩]
 
+/-- The visible name of a table entry, shared by its typed variants (`len`
+and `findIn` both print `find`). Paths, literals and invisible adapters have
+no function head to link. -/
+def Sym.definitionKey? (s : Sym) : Option String :=
+  if s.plain.startsWith "\\mathit{" && s.plain.endsWith "}" then
+    some ((s.plain.drop 8).dropRight 1)
+  else none
+
+/-- Keys accepted in a document's definition map. -/
+def definitionKeys : Array String :=
+  ((symbols.filterMap Sym.definitionKey?).toList ++ ["store", "at", "atMap"]).eraseDups.toArray
+
+/-- Exact hyperref destination names, restricted to literal ASCII characters
+so they cannot introduce TeX commands or group delimiters. -/
+def validDefinitionTarget (s : String) : Bool :=
+  !s.isEmpty && s.toList.all (fun c =>
+    (c.toNat < 128 && c.isAlphanum) || ":_./-".contains c)
+
 /-- The inductives whose every constructor needs a row of `symbols`. -/
 def symbolFamilies : List Lean.Name :=
   [``Op0, ``Op1, ``Op2, ``Op3, ``Tm, ``Rhs, ``UpdElem]
@@ -362,11 +391,31 @@ def pr {α : Type} (k : Delab.PrM α) : RM α := liftM (k.run { blockEnds := tru
 
 /-- The spelling of the symbol `c` in the backend; `\mathsf{c}` and a warning
 where it has none. -/
-def symOf (c : Lean.Name) : RM String := do
+def bareSymOf (c : Lean.Name) : RM String := do
   let some s := symbols.find? (·.ctor == c) | do
     warn s!"no LaTeX spelling for {c}: printed as \\mathsf"
     return "\\mathsf{" ++ escape (c.getString!) ++ "}"
   return if ← macrosM then s.macroS else s.plain
+
+/-- Link one printed function head, leaving its arguments and layout widths
+alone. The direct MetaM API rejects unsafe targets by warning and leaving
+the spelling unchanged; command options reject them before rendering. -/
+def definitionLink (key text : String) : RM String := do
+  let some (_, target) := (← read).definitions.find? (·.1 == key) | return text
+  unless validDefinitionTarget target do
+    warn s!"invalid definition target for {key}: link omitted"
+    return text
+  return "\\hyperlink{" ++ target ++ "}{" ++ text ++ "}"
+
+def symbolLink (c : Lean.Name) (text : String) : RM String := do
+  if c == ``Tm.netOf && (← macrosM) then return ← definitionLink "select" text
+  let some row := symbols.find? (·.ctor == c) | return text
+  let some key := row.definitionKey? | return text
+  definitionLink key text
+
+/-- A symbol's spelling, linked to its configured document definition. -/
+def symOf (c : Lean.Name) : RM String := do
+  symbolLink c (← bareSymOf c)
 
 /-- A macro or plain spelling: the macro, else `\mathit{plain}`. -/
 def spell (plain macroS : String) : RM String := do
@@ -394,14 +443,29 @@ def tySort (T : Expr) : RM String := do
 /-- A symbol over its sort: `\TFind{\intS}` in the macros backend, `\mathit{find}_{\mathsf{int}}`
 in the plain backend; without sorts, the symbol. -/
 def sortedSym (c : Lean.Name) (sort : RM String) : RM String := do
-  let s ← symOf c
-  unless (← read).sorts do return s
+  let s ← bareSymOf c
+  unless (← read).sorts do return ← symbolLink c s
   let some row := symbols.find? (·.ctor == c) | return s
   let srt ← sort
   if ← macrosM then
-    if let some m := row.sorted then return m ++ "{" ++ srt ++ "}"
-    return s
-  return s ++ "_{" ++ srt ++ "}"
+    if let some m := row.sorted then return ← symbolLink c (m ++ "{" ++ srt ++ "}")
+    return ← symbolLink c s
+  symbolLink c (s ++ "_{" ++ srt ++ "}")
+
+/-- Preserve the paper's composite macro when it needs no links; expose its
+select/at/net heads when mapped. Keep the macro's existing layout width. -/
+def netSelectDoc (arg : Doc) : RM Doc := do
+  unless ← macrosM do return .app (.tx (← symOf ``Op1.net) 3) #[arg]
+  unless (← read).definitions.any (fun d => ["select", "at", "net"].contains d.1) do
+    return .cat #[.tx "\\netSelect{" 10, .whole arg, .tx "}"]
+  -- The existing netSelect macro always includes its sort, even when the
+  -- ordinary symbol renderer has sorts disabled. Preserve that spelling.
+  let select ← withReader (fun o => { o with sorts := true })
+    (sortedSym ``Tm.netOf (primSort (mkConst ``PrimTy.int)))
+  let net ← symOf ``Op1.net
+  let atHead ← definitionLink "at" "\\at"
+  return .cat #[.tx select 6, .tx ("(" ++ net ++ ", " ++ atHead ++ "(") 4,
+    .whole arg, .tx "))" 1]
 
 /-! ## Terms -/
 
@@ -455,6 +519,11 @@ def fieldDoc (p : Doc) (f : Doc) : RM Doc := do
 /-- `p · at(i)` in the macros backend (`atMap` for a mapping), `p[i]` in the plain backend. -/
 def indexDoc (p i : Doc) (map : Bool := false) : RM Doc := do
   if ← macrosM then
+    let key := if map then "atMap" else "at"
+    if (← read).definitions.any (·.1 == key) then
+      let head ← definitionLink key ("\\" ++ key)
+      return .cat #[.tx "\\pField{" 1, .whole p, .tx "}{" 1, .tx head 2,
+        .tx "(" 1, .whole i, .tx ")}" 1]
     let m := if map then "\\pIndexMap{" else "\\pIndex{"
     return .cat #[.tx m, .whole p, .tx "}{" 4, .whole i, .tx "}"]
   return .cat #[p, .tx "[", .nest i, .tx "]"]
@@ -484,7 +553,7 @@ partial def tmP (ns : List Expr) (e : Expr) : RM (Doc × Nat) := do
     let a ← tm ns a
     if ← macrosM then
       return ← atom (.app (.tx (← sortedSym ``Tm.netOf (primSort (mkConst ``PrimTy.int))) 6)
-        #[.ident x.getId.toString, .app (.tx "\\at" 2) #[a]])
+        #[.ident x.getId.toString, .app (.tx (← definitionLink "at" "\\at") 2) #[a]])
     atom (.app (.tx (← symOf ``Tm.netOf) 3) #[.ident x.getId.toString, a])
   | .bumped _ _ t => atom (.cat #[← tm ns t, .tx "\\oplus\\oplus" 2])
   | .other => atom (← unknownTm e)
@@ -554,7 +623,7 @@ partial def symDoc (ns : List Expr) (e : Expr) (k : Lean.Name) (oargs xs : Array
     | some ``UnOp.toUint => atom (.cat #[.tx "\\mathit{uint}(" 5, .whole (← x 0), .tx ")" 1])
     | _ => atom (← unknownTm e)
   | ``Op1.net =>
-    if mac then return ← atom (.cat #[.tx "\\netSelect{" 10, .whole (← x 0), .tx "}" 1])
+    if mac then return ← atom (← netSelectDoc (← x 0))
     plainApp
   | ``Op1.field | ``Op1.fieldIn | ``Op1.mfield =>
     let f := if k == ``Op1.fieldIn then oargs[2]! else oargs[1]!
@@ -690,11 +759,11 @@ def elemDoc (ns ms : List Expr) (e : Expr) : RM Doc := do
   | ``UpdElem.net | ``UpdElem.pay | ``UpdElem.netMt =>
     let r ← tm ns args[3]!
     let mac ← macrosM
-    let sel : Doc := if mac then .cat #[.tx "\\netSelect{" 10, .whole r, .tx "}"]
-      else .app (.tx "\\mathit{net}" 3) #[r]
+    let sel ← netSelectDoc r
+    let storeHead ← definitionLink "store" (if mac then "\\store" else "\\mathit{store}")
+    let atHead ← definitionLink "at" (if mac then "\\at" else "\\mathit{at}")
     let store (base : Doc) (v : Doc) : Doc :=
-      .app (.tx (if mac then "\\store" else "\\mathit{store}") 5)
-        #[base, .app (.tx (if mac then "\\at" else "\\mathit{at}") 2) #[r], v]
+      .app (.tx storeHead 5) #[base, .app (.tx atHead 2) #[r], v]
     let net : Doc := .tx (← symOf ``Op1.net) 3
     match c with
     | ``UpdElem.net =>
@@ -817,8 +886,12 @@ partial def fml (ns : List Expr) (e : Expr) : RM Doc := do
         return .bin (← side nl l) (cmpTeX sym) 2 (← side nr r)
     return .bin (← side ns a) "=" 1 (← side ns b)
   | Fml.wellFormed _ _ s =>
-    if mac then return .cat #[.tx "\\wellformed{" 11, .whole (← tm ns s), .tx "}"]
-    return .app (.kw "wt") #[← tm ns s]
+    if mac then
+      if (← read).definitions.any (·.1 == "wt") then
+        return .cat #[.tx (← definitionLink "wt" "\\wellformedSym") 11, .tx "(" 0,
+          .whole (← tm ns s), .tx ")" 1]
+      return .cat #[.tx "\\wellformed{" 11, .whole (← tm ns s), .tx "}"]
+    return .app (.tx (← definitionLink "wt" "\\mathit{wt}") 2) #[← tm ns s]
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | unknownFml e
