@@ -58,8 +58,8 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); open: `mapping(string => …)`/`mapping(bytes => …)` keys, a byte type as a struct member, `bytes.concat`/`string.concat`, `calldata` |
-| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode` | semantics: builtins | open |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; open: a byte type as a struct member, `calldata` |
+| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of a dynamic type, an `address`/enum packed at its own width |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | open |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
@@ -253,17 +253,16 @@ solc's left-aligned layout, which is storage layout, out of scope; its
 theorems are unchanged.
 
 **Left open, with the reason.**
-- `mapping(string => V)`, `mapping(bytes => V)`: a key is a `PrimTy` value
-  (`RefTy.mapping`, `Selector.key`), and a byte string is not one; solc
-  keys by `keccak256` of the bytes, which the model does not have.  It
-  needs a byte-string key sort through `Storage`, `Seg` and the closer.
+- `mapping(string => V)`, `mapping(bytes => V)`: landed with the hash
+  ("Hashing and the ABI"): the key is `keccak256` of the bytes.
 - Revert data (`require(c, "msg")`, `revert("msg")`, `catch Error(string
   memory r)` binding `r`): a reverting run carries no data (`THalt.revert`),
   and an external call's `ExtResult.error` none; carrying a reason changes
   `THalt`, `TRun.tryCall`, the transaction table and every proof over a
   halt.  The `Error` branch is chosen, its `r` is not bound.
-- `bytes.concat`, `string.concat`, `abi.*`, `keccak256` (above),
-  `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
+- `bytes.concat`, `string.concat`, `abi.*`, `keccak256`: landed
+  ("Hashing and the ABI").
+- `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
   `bytesN` word is left-aligned there), `calldata` (refused for every type),
   a `bytes`/`string` member of a struct (`StructEnc` spells no byte types).
 
@@ -292,3 +291,90 @@ theorems are unchanged.
   `MemoryPush`, `StorageReturns`, `PushBindings`, the TestSuite's row count
   617 against the pinned 551); `OmittedTypes.readsString` moved from
   `unsupported` to `pending` (the copy above).
+
+## Hashing and the ABI (lane `open-hash`)
+
+**What solkey does.** Nothing to follow: no `.key` file has a hash or an
+ABI symbol, and solkey's `docs/limitations.md` lists `keccak256`, `abi.*`
+among what it refuses (`No KeYSolidityType for bytes32`).  The model
+follows solc.
+
+**`keccak256` is an uninterpreted function of the bytes.**  It is
+`keccakBytes : List Int → uint` (`Semantics/Heap.lean`), an `opaque`
+constant (not an axiom: the kernel knows it exists and never unfolds it),
+applied to a memory array's elements (`Heap.keccak`, `MObj.words`).  A proof
+can use only that it is a function: equal byte sequences hash equal.  In the
+syntax it is `Val.keccak` (`Syntax/Scoped.lean`), in the signature the
+binary symbol `Op2.keccak : mem × ident R → val uint` (`Signature.lean`),
+read in the Theory as the typed evaluation (the memory island, as `size`
+is: `Op2.denote`), its rule the Lean-only `LeanTaclet.keccakAssignment`
+(`v = keccak256(mpath)` is `{ v := keccak256(memory, mpath) }`), sound by
+`sound_setLocal` and `Val.lower_evalT`; the EVM compiler leaves it out of
+its fragment (`valIn`).  The elaborator lowers `keccak256(b)`
+(`Syntax/Elab.lean`, `hoist`): `b` a memory `bytes`/`string` (a storage one
+copied first), the hash into a fresh `bytes32`.
+
+*Collision resistance is not assumed.*  It cannot be stated as injectivity
+(a function from all byte strings into `2^256` values has collisions, so
+`∀ a b, keccak a = keccak b → a = b` is false and would make every claim
+vacuous).  A proof that needs two particular inputs to hash apart takes
+`keccakBytes a ≠ keccakBytes b` as a premise, for those two.  So the model
+proves what holds for every function of the bytes, and no more: two
+different strings may land on one slot of a string-keyed mapping, as two
+colliding strings would in solc.
+
+*`#run`* computes a stand-in (`keccakStandIn`, an FNV-style fold) so that it
+tells inputs apart; it is not Keccak-256, and no proof sees it.
+
+**The closer.**  `keccak256(memory, b)` is total (`Op2.total`): an identity
+that names no object hashes `0`, which no program reads.  A hash is an atom
+compared by its terms, so one byte string hashed twice is one value, and a
+string parameter's hash is the same before and after storage writes.  Under
+`⟨⟩`, a hash of a byte string the function built (a literal, an encoding)
+reads a memory of writes, which the closer cannot show returns (`Facts.returns`
+needs every argument to): such an obligation closes under `[]`
+(`/// @custom:key box`) and stays open under `⟨⟩`; two literals of the same
+bytes are two allocations, two terms, not shown equal.  Both need a
+reduction of the hashed object to its literal bytes (a symbol carrying
+them, read off the memory's writes as `size` is read, `lenAtN`): left open.
+
+**`mapping(string => V)`, `mapping(bytes => V)`** is a `mapping(uint => V)`
+with the marker row `{}#hash` (`hashKeyRows`, `Syntax.lean`); `m[s]` is read
+`m[keccak256(bytes(s))]` before the statement (`bytesPure`).  solc's slot is
+`keccak256(s . p)`, storage layout, out of scope; the model keys by the
+hash of the bytes, the same up to the hash.
+
+**The ABI** (`abiEncode`, `abiDecodeAt`, `Syntax/Elab.lean`) is Solidity's
+semantics, computed into a fresh memory `bytes` with the array writes the
+model has (`new bytes(n)`, then each byte; a byte string's bytes copied by a
+loop):
+- `abi.encode(v₁, …)`: a 32-byte head per argument; a value type its word
+  big-endian (`uintN`/`address`/enum right-aligned, `intN` sign-extended,
+  `bool` `0`/`1`, `bytesN` left-aligned); a `bytes`/`string` its offset in
+  the head, its length and its bytes, padded to 32, in the tail.
+- `abi.encodePacked(…)`, `bytes.concat(…)`, `string.concat(…)`: each value
+  at its own width, a byte string's bytes bare.  An `address` and an enum
+  are `uint`s to the model, so they pack at 32 bytes, not solc's 20 and 1.
+- `abi.decode(d, (T, …))` of value types: `d` at least `32·n` bytes, each
+  word read back; a word out of `T`'s range reverts as solc's decoder does
+  (a high byte not `0`, or not the sign's, a `bool` above `1`).  A dynamic
+  `T` is refused.
+A value is read at its static type (`AbiKind`, `abiKind`).
+
+**Costs.**  `Val`, `Op2` and the Lean rules have one constructor more:
+every `casesOn` over them one arm more, and the `#replay_toStep`/
+`#replay_ruleExists` plans grew with it (`storageIndexWriteCaptureAllNonSimpleIndex`
+1800 → 1922 goals).  An encoding is a statement per byte: symbolic proofs
+over 32-byte words are slow (`abi.decode` of two words took minutes and
+the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
+(`#run`) and proves the layouts of small encodings.
+
+**Left open.**
+- The `⟨⟩` closer on a locally built byte string's hash, and literal
+  strings hashed equal across allocations (above).
+- `abi.decode` of `bytes`/`string`/arrays; `abi.encode` of arrays and
+  structs; `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall`.
+- A byte type as a struct member (`StructEnc`, `AST.lean`, spells none: its
+  decoder and `structWidths` would read `bytesN`, `bytes`, `string` as
+  `valueRows?`/`dynBytesRows` do).
+- `sha256`, `ripemd160`, `ecrecover`.

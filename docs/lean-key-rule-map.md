@@ -15,8 +15,8 @@ gap, in exactly one category (`claimedTaclets_count = 342`,
 `unclaimedTaclets_count = 35`, 0 pending). The pending-name list is empty;
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
-The existing `LeanTaclet` layer (`leanTaclets`) has eighteen rules,
-`addmodAssignment`, `mulmodAssignment`, `functionCallArgCapture`,
+The existing `LeanTaclet` layer (`leanTaclets`) has nineteen rules,
+`addmodAssignment`, `mulmodAssignment`, `keccakAssignment`, `functionCallArgCapture`,
 `tryCallDiamond`, `transferDiamond`, `assumeFalse`, `loopExit`,
 `whileClose`, `whileNoVariantDiamond`, `pushCompoundUnfoldReceiver`,
 `pushIncrementUnfoldReceiver`, `storageMemorySourceSave`,
@@ -290,6 +290,12 @@ native terms. These are **Lean-only**, excluded recursively from
 `Stmt.inSolkey` even in initializers and path indices. They are outside the
 verified EVM compiler fragment. Their regression and imported proof are
 `Examples/Tactics/ModularArithmetic.lean` and `TestSuite/Derived18.lean`.
+
+`LeanTaclet.keccakAssignment` (`v = keccak256(mpath)` is
+`{ v := keccak256(memory, mpath) }`, `Op2.keccak`) has no solkey taclet:
+solkey has no hash (`docs/semantic-gaps.md`, "Hashing and the ABI").
+**Lean-only**, excluded from `Stmt.inSolkey` (`Val.keyValue`) and from the
+EVM compiler's fragment.
 
 Pattern per `⊕ ∈ {Add, Sub, Mul, Div, Mod}`; one constructor per receiver
 shape, `op` free. Mapping and array stay **separate** here, unlike increments.
