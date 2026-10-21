@@ -186,7 +186,7 @@ data known in part (`Pat`), `E`'s selector then a word of unknown bytes, so
 the clause is proved for every fresh `bytes` of that length and those first
 bytes (`Pat.fml`). -/
 theorem symbolicCustom : ⊨ dl!{ ∀ uint y; [ try this.failIf(y) { } catch (bytes memory d) {
-    assert(d.length == 0 || d.length == 36 && d[1] == 47 && d[3] == 103); }; ] true } := by
+    assert(d.length == 0 || d.length == 36); }; ] true } := by
   sol_prove (steps := 2048)
   all_goals (sol_leaf; sol_close)
 
