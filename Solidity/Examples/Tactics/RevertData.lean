@@ -131,4 +131,50 @@ theorem plainData : ⊨ dl!{ [ try this.plain(1) { } catch (bytes memory d) {
   sol_symex
   sol_decide
 
+/-! ## Custom errors
+
+`revert E(7)` in a self-call's callee reverts with `E`'s selector, folded as
+solc folds it (`0x002ff067`, the first four bytes of the Keccak-256 of
+`E(uint256)`), then the argument's ABI word: a literal's, so the rule reads
+the datum's 36 bytes. -/
+
+/-- A callee that reverts with a custom error. -/
+def Custom : Contract := contract!{
+  error E(uint256 code);
+  uint last;
+  function failE() { revert E(7); }
+  function failIf(uint x) { require(x > 3, E(x)); }
+}
+
+#guard Keccak.selector "E(uint256)" == 0x002ff067
+
+section Custom
+
+local instance : InContract := ⟨Custom⟩
+
+/-- info: Except.ok "last = 36" -/
+#guard_msgs in
+#eval (Prog.runT { State.init Custom with tx := { selfAddress := ⟨7, rfl⟩ } }
+    (sol[Custom]{ try this.failE() { } catch (bytes memory d) { last = d.length; } })).map
+  fun τ => Tools.fmtStorageLine Custom τ.storage
+
+/-- info: Except.ok "last = 1" -/
+#guard_msgs in
+#eval (Prog.runT { State.init Custom with tx := { selfAddress := ⟨7, rfl⟩ } }
+    (sol[Custom]{ try this.failIf(1) { } catch (bytes memory d) { last = d[35]; } })).map
+  fun τ => Tools.fmtStorageLine Custom τ.storage
+
+/-- **A custom error's data reaches `catch (bytes memory d)`**: its selector
+and its argument. -/
+theorem customData : ⊨ dl!{ [ try this.failE() { } catch (bytes memory d) {
+    assert(d.length == 0 || d.length == 36);
+    if (d.length == 36) {
+      assert(d[0] == 0); assert(d[1] == 47); assert(d[2] == 240); assert(d[3] == 103);
+      assert(d[34] == 0); assert(d[35] == 7);
+    } }; ] true } := by
+  sol_symex
+  sol_prove
+
+end Custom
+
 end Solidity.Examples.Tactics.RevertData
