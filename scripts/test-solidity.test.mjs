@@ -438,14 +438,14 @@ test("function types: values in locals, parameters, returns, storage, struct mem
     'memberCall', 'elementCall', 'callResultCall',
     // an external function's selector, folded as solc folds it; a dispatch
     // that recurses (`Stmt.callRec`)
-    'ext', 'externalSelector', 'recursionThroughValue'])
+    'ext', 'externalSelector', 'recursionThroughValue',
+    // an external value's `address * 2^32 + selector` read back to its
+    // address (`Facts.cancelDiv`)
+    'externalValue'])
     assert.equal(status[name], 'proved', name);
   // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
   assert.equal(status.unassignedDiamond, 'pending');
   assert.equal(status.falsePost, 'pending');
-  // an external value's `address * 2^32 + selector` read back: a closer limit
-  // (the quotient of a word built from `address(this)`), not a semantic gap
-  assert.equal(status.externalValue, 'pending');
 });
 
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {

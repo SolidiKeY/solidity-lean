@@ -102,6 +102,8 @@ contract ExternalFunctionTypes {
     // external function values: the address and the selector
     /// @custom:key box
     function ext(uint x) external pure returns (uint) { return 2 * x; }
+    // under the box: a `try` (the call through `h`) has no diamond rule
+    /// @custom:key box
     function externalValue(uint8 small) public view {
         uint x = small;
         function (uint) external pure returns (uint) h = this.ext;

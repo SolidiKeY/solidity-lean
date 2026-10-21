@@ -367,6 +367,15 @@ theorem evalT_add {p : PrimTy} {hp : BinOp.add.accepts p = true} {u w v : p.Deno
     simp only [BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Option.bind_some] at h
     exact ofInt?_ival h
 
+theorem evalT_mul {p : PrimTy} {hp : BinOp.mul.accepts p = true} {u w v : p.Denote}
+    (h : BinOp.evalT .mul hp u w = some v) :
+    PrimTy.ival v = PrimTy.ival u * PrimTy.ival w := by
+  cases p with
+  | bool => exact absurd hp (by decide)
+  | uint | int =>
+    simp only [BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Option.bind_some] at h
+    exact ofInt?_ival h
+
 theorem evalT_sub {p : PrimTy} {hp : BinOp.sub.accepts p = true} {u w v : p.Denote}
     (h : BinOp.evalT .sub hp u w = some v) :
     PrimTy.ival v = PrimTy.ival u - PrimTy.ival w := by
@@ -1116,6 +1125,31 @@ theorem LTm.castTo?_eq {s s' : Srt} {t : LTm C s} {t' : LTm C s'} (h : t.castTo?
     cases h; rfl
   · cases h
 
+/-- The operands of a product. -/
+def Op2.mulArgs {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : Option (EqF C) :=
+  match o, x, y with
+  | @Op2.binop _ .mul p _, x, y => some ⟨p, x, y⟩
+  | _, _, _ => none
+
+/-- The operands of a product. -/
+def LTm.mulArgs? {s : Srt} (t : LTm C s) : Option (EqF C) :=
+  match t with
+  | .app2 o x y => Op2.mulArgs o x y
+  | _ => none
+
+theorem LTm.mulArgs?_eq {s : Srt} {t : LTm C s} {e : EqF C} (h : t.mulArgs? = some e) :
+    ∃ hp : BinOp.mul.accepts e.p = true,
+      (⟨s, t⟩ : (s : Srt) × LTm C s) = ⟨.val e.p, .app2 (.binop .mul hp) e.l e.r⟩ := by
+  cases t with
+  | app2 o x y =>
+    cases o with
+    | @binop op p hp =>
+      cases op <;> simp only [LTm.mulArgs?, Op2.mulArgs, reduceCtorEq, Option.some.injEq] at h
+      subst h
+      exact ⟨hp, rfl⟩
+    | _ => simp only [LTm.mulArgs?, Op2.mulArgs, reduceCtorEq] at h
+  | _ => simp only [LTm.mulArgs?, reduceCtorEq] at h
+
 /-- `(a + b) - b`, cancelled to `a` where the sum returns. -/
 def Facts.cancel (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val p)) :=
   match x.addArgs? with
@@ -1228,6 +1262,92 @@ theorem Facts.cancelAdd_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
           | int =>
             show some va = PrimTy.int.ofInt? (PrimTy.ival vx + PrimTy.ival vb)
             rw [hd]; exact (ofInt?_ival_self rfl va).symm
+    · cases h
+  · cases h
+
+/-- `(a * k + c) / k`, cancelled to `a` at `uint` where the sum returns,
+`k` and `c` literals with `c < k` (Lean only): an external function value,
+packed as `address * 2^32 + selector`, read back to its address
+(`docs/semantic-gaps.md`, "Function types"). -/
+def Facts.cancelDiv (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val p)) :=
+  match x.addArgs?, y.litV? with
+  | some e, some k =>
+    match e.l.mulArgs?, e.r.litV? with
+    | some m, some c =>
+      match m.r.litV? with
+      | some k' =>
+        if p == .uint && PrimTy.ival k' == PrimTy.ival k && decide (0 ≤ PrimTy.ival c) &&
+            decide (PrimTy.ival c < PrimTy.ival k) && F.returns x then m.l.castTo? else none
+      | none => none
+    | _, _ => none
+  | _, _ => none
+
+theorem Facts.cancelDiv_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    (hs : BinOp.div.accepts p = true) {x y a : LTm C (.val p)} (h : F.cancelDiv x y = some a) :
+    (a.eval g ν : Option p.Denote) = (LTm.app2 (.binop .div hs) x y).eval g ν := by
+  unfold Facts.cancelDiv at h
+  split at h
+  · rename_i e k he hk
+    split at h
+    · rename_i m c hm hc
+      split at h
+      · rename_i k' hk'
+        split at h
+        · rename_i hb
+          simp only [Bool.and_eq_true, beq_iff_eq, decide_eq_true_eq] at hb
+          obtain ⟨⟨⟨⟨hpu, hkk⟩, hc0⟩, hck⟩, hret⟩ := hb
+          subst hpu
+          obtain ⟨hp, hx⟩ := LTm.addArgs?_eq he
+          obtain ⟨q, l, r⟩ := e
+          cases hx
+          obtain ⟨hpm, hl⟩ := LTm.mulArgs?_eq hm
+          obtain ⟨q2, ml, mr⟩ := m
+          cases hl
+          cases LTm.castTo?_eq h
+          obtain rfl := LTm.eq_of_litV? hk
+          dsimp only at hk' hc hret ⊢
+          have hr := LTm.eq_of_litV? hc
+          have hmr := LTm.eq_of_litV? hk'
+          rw [hr, hmr] at hret ⊢
+          obtain ⟨vx, hvx⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF _ hret)
+          cases hl : (ml.eval g ν : Option PrimTy.uint.Denote) with
+          | none =>
+            rw [LTm.eval_app2, LTm.eval_app2, hl, Op2.eval_none_left, Op2.eval_none_left] at hvx
+            cases hvx
+          | some va =>
+            have e1 : (LTm.app2 (Op2.binop BinOp.mul hpm) ml (LTm.lit k')).eval g ν =
+                BinOp.evalT .mul hpm va k' := by
+              rw [LTm.eval_app2, hl, Op2.eval_eq_evalM]; rfl
+            cases hm' : (BinOp.evalT .mul hpm va k' : Option PrimTy.uint.Denote) with
+            | none =>
+              rw [LTm.eval_app2, e1.trans hm', Op2.eval_none_left] at hvx; cases hvx
+            | some vm =>
+              have e2 : (LTm.app2 (Op2.binop BinOp.add hp)
+                  (LTm.app2 (Op2.binop BinOp.mul hpm) ml (LTm.lit k')) (LTm.lit c)).eval g ν =
+                  BinOp.evalT .add hp vm c := by
+                rw [LTm.eval_app2, e1, hm', Op2.eval_eq_evalM]; rfl
+              rw [e2] at hvx
+              have hmul := evalT_mul hm'
+              have hadd := evalT_add hvx
+              rw [LTm.eval_app2, e2, hvx, Op2.eval_eq_evalM]
+              show some va = BinOp.evalT .div hs vx k
+              have hva : 0 ≤ PrimTy.ival va := by
+                have h2 := va.2
+                simp only [PrimTy.inRange, decide_eq_true_eq] at h2
+                exact h2.1
+              have hk0 : PrimTy.ival k ≠ 0 := by omega
+              have hq : Int.tdiv (PrimTy.ival vx) (PrimTy.ival k) = PrimTy.ival va := by
+                rw [hadd, hmul, hkk, Int.tdiv_eq_ediv_of_nonneg (by
+                  have : 0 ≤ PrimTy.ival va * PrimTy.ival k := Int.mul_nonneg hva (by omega)
+                  omega), Int.add_comm, Int.add_mul_ediv_right _ _ hk0,
+                  Int.ediv_eq_zero_of_lt hc0 hck, Int.zero_add]
+              simp only [BinOp.evalT, BinOp.evalNum, BinOp.arithInt]
+              show some va = (if PrimTy.ival k = 0 then none
+                else some (Int.tdiv (PrimTy.ival vx) (PrimTy.ival k))).bind PrimTy.uint.ofInt?
+              rw [if_neg hk0, hq, Option.bind_some]
+              exact (ofInt?_ival_self rfl va).symm
+        · cases h
+      · cases h
     · cases h
   · cases h
 
@@ -1348,8 +1468,8 @@ theorem evalT_two_mul {p : PrimTy} {x : LTm C (.val p)} (hx : isTwo x = true)
 returns, `a == b`/`a != b` on terms apart (`Facts.apart`), `x == true`/
 `x == false` as `x`/`!x` (`eqBoolLit`), `x < x + c` (`Facts.ltSucc`), a
 comparison of terms whose ranges decide it, `(a + b) - b` and
-`(a - b) + b` (`Facts.cancel`, `Facts.cancelAdd`), and `2 * y` as `y + y`
-(`isTwo`). -/
+`(a - b) + b` (`Facts.cancel`, `Facts.cancelAdd`), `(a * k + c) / k`
+(`Facts.cancelDiv`), and `2 * y` as `y + y` (`isTwo`). -/
 def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     LTm C s :=
   match o, x, y with
@@ -1391,6 +1511,10 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
     | none => Decide.fold2 (.binop .add h) x y
   | .binop .mul h, x, y =>
     if isTwo x then Decide.fold2 (.binop .add h) y y else Decide.fold2 (.binop .mul h) x y
+  | .binop .div h, x, y =>
+    match F.cancelDiv x y with
+    | some t => t
+    | none => Decide.fold2 (.binop .div h) x y
   | o, x, y => Decide.fold2 o x y
 
 theorem Facts.cmpFold_sound {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
@@ -1512,6 +1636,12 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
       · rename_i hx
         rw [Decide.fold2_eval]
         exact evalT_two_mul hx h y
+      · exact Decide.fold2_eval g ν _ x y
+    case div =>
+      simp only [Facts.fold2]
+      split
+      · rename_i t ht
+        exact Facts.cancelDiv_eval hF h ht
       · exact Decide.fold2_eval g ν _ x y
     all_goals simp only [Facts.fold2]; exact Decide.fold2_eval g ν _ x y
   all_goals simp only [Facts.fold2]; exact Decide.fold2_eval g ν _ x y
