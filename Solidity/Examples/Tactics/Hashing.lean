@@ -17,9 +17,9 @@ fresh memory `bytes` of solc's layout, written byte by byte (`abiEncode`,
 out of its type's range.  A `mapping(string => V)` is keyed by the hash.
 
 * §1 — `keccak256`;
-* §2 — `abi.encode`, `abi.encodePacked`, `abi.decode`;
-* §3 — `string.concat`, `bytes.concat`;
-* §4 — a mapping keyed by `string`.
+* §2 — `abi.encode`, `abi.encodePacked` proved; `abi.decode`, a dynamic
+  encoding and the `concat`s run (`#run`);
+* §3 — a mapping keyed by `string`.
 -/
 
 namespace Solidity.Examples.Tactics.Hashing
@@ -30,7 +30,10 @@ open scoped Scoped
 
 /-! ## 1 · `keccak256` -/
 
-/-- One byte string hashed twice: the same value, the hash a function. -/
+/-- One byte string hashed twice: the same value, the hash a function.
+Under the box: `sol_decide` reads a hash as an atom, and does not show that
+one of a memory it wrote returns (`docs/semantic-gaps.md`, "Hashing and
+the ABI"). -/
 theorem hashTwice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = keccak256(b);
     bytes32 g = keccak256(b); ] h == g } := by
   sol_symex
@@ -127,7 +130,7 @@ returns (5, 121)
 -/
 #guard_msgs in #run Codec.concat()
 
-/-! ## 4 · A mapping keyed by `string` -/
+/-! ## 3 · A mapping keyed by `string` -/
 
 /-- `mapping(string => uint)`: a `mapping(uint => uint)` keyed by the hash
 (`hashKeyRows`). -/

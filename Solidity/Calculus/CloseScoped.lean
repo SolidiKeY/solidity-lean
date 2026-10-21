@@ -99,6 +99,9 @@ theorem push_selfBalance {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
 theorem push_tx {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).tx = σ.tx := rfl
 theorem setLocal_storage {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).storage = σ.storage := rfl
+theorem setLocal_keccakId {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H)
+    (R : RefTy) (id : Nat) :
+    (σ.setLocal i v).glob.memT.keccakId R id = σ.glob.memT.keccakId R id := rfl
 theorem setLocal_net {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).net = σ.net := rfl
 theorem setLocal_selfBalance {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
@@ -397,6 +400,12 @@ theorem withMem_selfBalance {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Un
     (g.withMem μ).1.selfBalance = g.1.selfBalance := rfl
 theorem withMem_tx {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) :
     (g.withMem μ).1.tx = g.1.tx := rfl
+theorem withStorage_keccakId {H : HTy} (g : GlobT C H) (st : Storage C) (R : RefTy) (id : Nat) :
+    (g.withStorage st).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
+theorem withNet_keccakId {H : HTy} (g : GlobT C H) (nt : Ledger) (R : RefTy) (id : Nat) :
+    (g.withNet nt).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
+theorem withBalance_keccakId {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) (R : RefTy)
+    (id : Nat) : (g.withBalance b).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
 theorem withNet_storage {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.storage = g.1.storage := rfl
 theorem withNet_net {H : HTy} (g : GlobT C H) (nt : Ledger) :
@@ -913,7 +922,8 @@ attribute [close_rw_s]
   CloseS.envVal_msgSender CloseS.envVal_msgValue CloseS.envVal_timestamp
   CloseS.envVal_selfBalance CloseS.envVal_selfAddress
   CloseS.Landed.storage_eq CloseS.Landed.net_eq CloseS.Landed.selfBalance_eq CloseS.Landed.tx_eq
-  CloseS.Landed.keccakId_eq CloseS.push_keccakId
+  CloseS.Landed.keccakId_eq CloseS.push_keccakId CloseS.setLocal_keccakId
+  CloseS.withStorage_keccakId CloseS.withNet_keccakId CloseS.withBalance_keccakId
   CloseS.Landed.locV_eq
   CloseS.set_push_here CloseS.set_push_there CloseS.drop_refl' CloseS.drop_push' CloseS.thin_refl'
   CloseS.thin_keep' CloseS.thin_drop'

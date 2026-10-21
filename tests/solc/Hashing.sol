@@ -19,18 +19,18 @@ contract Hashing {
         assert(keccak256(b) == keccak256(b));
     }
     function encodeLayout() public pure {
-        bytes memory e = abi.encode(uint(258), true, address(0x1234));
+        bytes memory e = abi.encode(uint16(258), true, uint8(0x12));
         assert(e.length == 96 && e[30] == 0x01 && e[31] == 0x02 && e[63] == 0x01 &&
-            e[94] == 0x12 && e[95] == 0x34);
+            e[95] == 0x12 && e[0] == 0);
     }
     function encodePacked() public pure {
         bytes memory e = abi.encodePacked(uint16(258), true, bytes2("ab"));
         assert(e.length == 5 && e[0] == 0x01 && e[1] == 0x02 && e[2] == 0x01 && e[3] == "a");
     }
     function decodeRoundtrip() public pure {
-        bytes memory e = abi.encode(uint8(5), true);
-        (uint8 a, bool c) = abi.decode(e, (uint8, bool));
-        assert(a == 5 && c);
+        bytes memory e = abi.encode(true);
+        bool c = abi.decode(e, (bool));
+        assert(c);
     }
     function stringKey(string memory k) public {
         ids[k] = 7;

@@ -1683,6 +1683,15 @@ def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
     pure (.call "uint8" [.binop .div (.binop .mod (.binop .shr b sh) (.num 256))
       (.ternary (.binop .lt i (.num n)) (.num 1) (.num 0))])
 
+/-- The mark of a `bytesN` argument of `abi.encode`/`encodePacked`/
+`bytes.concat`, put by `bytesPure` (which rewrites the value to a `uint`)
+and read by `hoist`. -/
+def abiBytesMark (n : Nat) : String := s!"#abiBytes{n}"
+
+/-- The width a mark names. -/
+def abiBytesMark? (f : String) : Option Nat :=
+  if f.startsWith "#abiBytes" then (f.drop 9).toNat? else none
+
 /-- Solc's operations on `bytesN` that are not `uint8N`'s, as `uint`
 operations (`docs/semantic-gaps.md`, "Bytes and strings"): a conversion, an
 index, `.length`, a literal of bytes, an implicit widening; read bottom up,
@@ -1702,6 +1711,13 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
     if dynBytesTy f then
       let [a] := as' | throw s!"a conversion {f}(…) takes one argument"
       return a
+    -- an argument of the ABI's that is a `bytesN`: marked, its width lost to
+    -- the rewrite (`abiBytesMark`)
+    if encodeBuiltin f && (lookupBy f C.funs).isNone then
+      return .call f ((as.zip as').map fun (o, a) =>
+        match bytesOf? C Γ o with
+        | some n => .call (abiBytesMark n) [a]
+        | none => a)
     match lookupBy f C.funs with
     | some d =>
       if d.params.length != as.length then return .call f as'
@@ -2852,10 +2868,15 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       return (P ++ Q ++ R, .name y)
     if builtin && (f == "abi.encode" || f == "abi.encodePacked" || f == "string.concat" ||
         f == "bytes.concat") then
-      -- a literal byte string is not allocated: its bytes are written in place
+      -- a `bytesN` marked (`abiBytesMark`); a literal byte string is not
+      -- allocated: its bytes are written in place
+      let marks := args.map fun | .call g [_] => abiBytesMark? g | _ => none
+      let args := args.map fun a => match a with
+        | .call g [x] => if (abiBytesMark? g).isSome then x else a
+        | _ => a
       let (P, args') ← hoistArgs (args.map fun a => if a.bytesLit?.isSome then .num 0 else a)
       let args := (args.zip args').map fun (a, a') => if a.bytesLit?.isSome then a else a'
-      let (Q, e) ← abiEncode (f == "abi.encode") (f == "string.concat") args
+      let (Q, e) ← abiEncode (f == "abi.encode") (f == "string.concat") args marks
       return (P ++ Q, e)
     if builtin && f == "abi.decode" then
       let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
@@ -3030,13 +3051,16 @@ partial def abiKind (a : RawExpr) : ElabM AbiKind := do
 /-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
 `string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
-partial def abiEncode (std strs : Bool) (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
+partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option Nat)) :
+    ElabM (SProg C × RawExpr) := do
   let mut P : SProg C := []
   -- each argument read once: its word in a fresh `uint` (a literal's known),
   -- a byte string in a memory local with its length (a literal's bytes known)
   let mut parts : List (AbiKind × String × String × Option (List Nat)) := []
-  for a in args do
-    let k ← abiKind a
+  for (a, mark) in args.zip marks do
+    let k ← match mark with
+      | some n => pure (AbiKind.bytesN n)
+      | none => abiKind a
     if strs && k != .dyn then throw "string.concat takes `string`s"
     match k, a.bytesLit? with
     | .dyn, some bs => parts := parts ++ [(k, "", "", some bs)]
