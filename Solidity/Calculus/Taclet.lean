@@ -809,6 +809,10 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
   assumeFalse "."
   recursiveCallUnfold "."
   loopExit "."
+  revertDataBox "."
+  revertDataDiamond "."
+  catchDataBox "."
+  catchDataDiamond "."
 
 /-! ## The rule `Stmt.step` fires -/
 

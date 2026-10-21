@@ -981,6 +981,32 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | assumeFalse :
       dl[LeanTaclet C k]{ ⟨[ assume(false); ]⟩ ⇝ true }
 
+  /-- A revert with data (`Stmt.revertData`, `docs/semantic-gaps.md`, "Revert
+  data") closes as `revert();` does: the box to `true`, the diamond to
+  `false`.  Neither modality reads the data; a `catch` does
+  (`catchDataBox`).  solkey keeps no revert data. -/
+  | revertDataBox {Γ : Ctx} {d : List (RevPart C Γ)} :
+      LeanTaclet C k .box (.revertData d) (.done true)
+  | revertDataDiamond {Γ : Ctx} {d : List (RevPart C Γ)} :
+      LeanTaclet C k .diamond (.revertData d) (.done false)
+
+  /-- A `catch` clause binding the data (`Stmt.catchData`): for a self-call
+  whose callee's data are literal, a goal per datum the clause may bind, the
+  datum written as a literal in front of the clause; another receiver's
+  reason, any bytes, closes to `false` (`catchDataStep`).  solkey binds no
+  data. -/
+  | catchDataBox {Γ ρ ps Γf Γ₁ : Ctx} {call : ExtCall C Γ} {rets : Binders ρ}
+      {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind}
+      {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} :
+      LeanTaclet C k .box (.catchData call rets selfArgs selfBody self kind x body)
+        (catchDataStep .box call selfBody self kind x body)
+  /-- A `catch` clause binding the data, under the diamond: `false`, as any
+  `try`. -/
+  | catchDataDiamond {Γ ρ ps Γf Γ₁ : Ctx} {call : ExtCall C Γ} {rets : Binders ρ}
+      {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind}
+      {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} :
+      LeanTaclet C k .diamond (.catchData call rets selfArgs selfBody self kind x body) (.done false)
+
   /-- A recursive call (`Stmt.callRec`, `docs/kernel-port.md`, "Recursion")
   is the call of its body, the next frame of its unrolling, which the next
   step expands as any call (`internalCallExpand`, `functionBodyExpand`).
