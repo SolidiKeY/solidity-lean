@@ -3,6 +3,7 @@ import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
 import Solidity.Semantics.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Semantics.CallbackCapture
 
 /-!
 # The callback taclets on scoped statements
@@ -122,6 +123,17 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
       (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.unfold P e))
       (hs : s.forksIn pay = false)
       (hP : P.callsBack pay = false)
+      (h : ProvesC I pay Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A capture (`ifElseUnfold`, `whileUnwind`, `transfer_unfold_…`,
+  `send_unfold_…`) whose rest may call back: the side condition is on the
+  capture alone, which declares a value and hands control to nobody, so the
+  statement runs, with callbacks, as the captured program
+  (`Stmt.CapturesAs`, `Semantics/CallbackCapture.lean`). -/
+  | capture {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
+      (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.unfold P e))
+      (hc : s.CapturesAs pay P e)
       (h : ProvesC I pay Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- `storagePushValue_unfold_leftCallReceiver`, including callbacks in the

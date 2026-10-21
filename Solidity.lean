@@ -32,6 +32,7 @@ import Solidity.Semantics.DeferredSource
 import Solidity.Semantics.DeferredCallback
 import Solidity.Semantics.CallbackWk
 import Solidity.Semantics.CallbackUnwk
+import Solidity.Semantics.CallbackCapture
 import Solidity.Semantics.DeferredCorrespondence
 import Solidity.Semantics.NativeDeferredCallback
 import Solidity.Semantics.RunFuel

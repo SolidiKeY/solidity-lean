@@ -298,6 +298,16 @@ theorem holdsC_unfoldReceiver {ps Γf Γv : Ctx} {E : Ty} {f : Name}
   obtain ⟨u, hu, rfl⟩ := (NativeDeferred.capture_iff k f args r body code value).mpr he
   exact COut.thenF_drop _ (h _ hu)
 
+/-- **A capture, with callbacks**: whatever the rest calls, the statement
+runs as the captured program (`Stmt.CapturesAs`), its fresh locals popped. -/
+theorem holdsC_capture {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
+    (hc : s.CapturesAs pay P e)
+    (h : holdsC I pay σ (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons s ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨o', ho', rfl⟩ := hc _ rfl σ o₁ he
+  exact COut.thenF_drop _ (h _ ho')
+
 /-- **A hidden binder over a program that pays nothing, with callbacks.** -/
 theorem holdsC_bind {s : Stmt C Γ Γ'} {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'}
     (hs : s.forksIn pay = false) (hP : Prog.callsBack pay P = false)
@@ -1087,6 +1097,8 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | unfold d hs hP _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_unfold hs hP
       (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | capture _ hc _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_capture hc h) σ (ih σ)
   | unfoldReceiver _ _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_unfoldReceiver h) σ (ih σ)
   | bind d hs hP _ ih =>
