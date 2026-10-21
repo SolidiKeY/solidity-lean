@@ -126,6 +126,7 @@ import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.CallbackDerive
+import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.SequentNotation
