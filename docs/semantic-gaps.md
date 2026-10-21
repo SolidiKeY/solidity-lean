@@ -829,3 +829,16 @@ scripts/test-solidity.test.mjs` passes (7 tests).  Landed: Keccak-256 as
 `RevertStatement` ("Revert data"), `catch Error` past a custom error of
 symbolic data, `Facts.cancelDiv` ("Function types"), a storage array copy's
 length ("Bytes and strings").
+
+**Lane `open-closer` checked** (2026-10-21): `lean_build` of the default
+targets; `node --test --test-name-pattern="recursion|hash|revert|bytes|solc/open"
+scripts/test-solidity.test.mjs` passes (6 tests, 680 s).  Landed: products
+of bounded integers by solkey's `multiply_2_inEq0` (`sol_close_nonlin`,
+`Recursion.sol`'s `sum`, `sumThree`); a symbolic word's packed bytes read
+back and reassembled (`hornerU?`, `Facts.arithOk` on `uint` shifts,
+remainders and products, `Facts.modSmall`; "Hashing and the ABI"); a
+locally built byte string's hash evaluated under `⟨⟩` (`keccakAt`).  Left
+open with their numbers: a fresh object's bytes ("Revert data"), the four
+`SolcLoopsOpen` functions (`docs/loops.md`).  `TestSuite/Derived15`'s
+`invariantVariantSkipsBreakIteration` replay: 200045 heartbeats (in units
+of `maxHeartbeats`) before and after, its 205000 override unchanged.
