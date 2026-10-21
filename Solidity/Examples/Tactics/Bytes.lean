@@ -260,11 +260,10 @@ theorem firstOf : ⊨ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint 
 /-! ## 6 · Calldata slices
 
 `b[i:j]` of a calldata array is a view of it (`RawStmt.sliceViews`,
-`Syntax/Elab.lean`): its offset and length are two locals, checked
-`i <= j && j <= b.length` (a revert otherwise), a read `t[k]` is
-`b[i + k]` where `k < t.length` (a revert otherwise: a checked
-subtraction underflows), and `t.length` is
-`j - i`.  No copy, no loop: what reads a slice is proved as any read. -/
+`Syntax/Elab.lean`): its start and end in `b`, checked `i <= j &&
+j <= b.length` (a revert otherwise); a read `t[k]` is `b[i + k]` where
+`i + k < j` (a revert otherwise), and `t.length` is `j - i`.  No copy, no
+loop: what reads a slice is proved as any read. -/
 
 /-- Slices of a calldata parameter. -/
 def Sl : Contract := contract!{
