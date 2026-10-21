@@ -1208,6 +1208,7 @@ theorem assignLocalPush_agrees {p : PrimTy} (i : Idx Î“ (.val p)) (b : SPath C Î
       | none => rfl
       | some st => cases h
     | panic => exact h
+    | revertWith _ => exact h
     | diverge => trivial
     | exhausted => trivial
 
