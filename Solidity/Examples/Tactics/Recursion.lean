@@ -257,6 +257,11 @@ theorem payDownNoPanic : ValidT .noCallback dl!{ [ payDown(to); ] true } := by
 /-- The same, automatically. -/
 theorem payDownAuto : ValidT .noCallback dl!{ [ payDown(to); ] true } := by rec_auto_c
 
+/-- Under the diamond: no frame reverts (the bottom one is exhausted, which
+the diamond accepts); the walk's first-order leaves under the induction's
+free frame closed by `sol_leaf` at placeholders (`Symex.placeholders`). -/
+theorem payDownEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } := by rec_auto_c
+
 /-- info: 'Solidity.Examples.Tactics.Recursion.payDownNoPanic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms payDownNoPanic
 
