@@ -136,13 +136,14 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Op
         (cond (x H (.not c)) (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
           (both (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))))
             (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ)) b)))
-    (fun bs y A _ P ω => both (each (fun br => r H k
+    (fun bs Q y A _ P ω => both (each (fun br => r H k
       (Option.casesOn (motive := fun _ => Fml C Γ) br.hyp
         (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))
         fun c => .imp c
           (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ))
             φ)))) bs)
-      (r H k (.allocAll y A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)))
+      (r H k (.modal m Q .nil
+        (.allocAll y A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))))
       b) ω
 
 /-- A premise `¬X` whose `X` reads a program (a self-call's `catch` goal,
@@ -500,7 +501,7 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
         (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
       exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
   | inline P e => exact .inline (hR := hR) hd (hr _ _ _ _ _ h hl)
-  | allocBranches bs y A P =>
+  | allocBranches bs Q y A P =>
     have := both_sound h hl (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
       (hr _ _)
     exact .allocBranches (hR := hR) hd this.1 this.2

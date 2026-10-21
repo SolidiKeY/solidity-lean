@@ -354,22 +354,27 @@ def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
   | some bs => litBytes x bs body
   | none => .cons .revert (litBytes x [] body)
 
-/-- `Stmt.catchData` (`catchDataBox`, Lean only): for a self-call whose
-callee's data are known (`CatchKind.datas`), a goal per datum, the receiver
-the contract (`require(a != 0); require(a == address(this));`) and the
-datum bound as a literal in front of the clause (`catchLit`); the receiver
-another, `false` (`assert(false);`: another contract's reason is any bytes,
-which no formula quantifies).  Otherwise, and under the diamond, `false`. -/
+/-- `Stmt.catchData` (`catchDataBox`, Lean only), under the box: for a
+self-call whose callee's data are known (`CatchKind.datas`), a goal per
+datum, the receiver the contract (`require(a != 0); require(a ==
+address(this));`) and the datum bound as a literal in front of the clause
+(`catchLit`); then, the receiver another (`require(a != 0); require(a !=
+address(this));`), the clause for every fresh `bytes` of any contents
+(`Premise.allocBranches`, `Fml.allocAll`): another contract's data is any
+bytes.  Where the callee's data are not known (a word that is not literal, a
+recursive call, a panic's code), or the call is not to the contract's own
+function, the clause for every fresh `bytes` behind `require(a != 0);`
+alone.  Under the diamond, `false`. -/
 def catchDataStep (m : Modality) {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ) (sbody : Prog C (ρ ++ ps) Γf)
     (self : Bool) (kind : CatchKind) (x : Var) (body : Prog C (.mem bytesR :: Γ) Γ₁) :
     Premise C Γ Γ :=
   match m, self, kind.datas sbody with
   | .box, true, some ds =>
-    .branches (ds.map (fun d => (⟨Binders.nil, .cons (.require call.hasCode)
-        (.cons (.require call.isSelf) (catchLit x kind d body)), none⟩ : Branch C Γ)) ++
-      [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.notSelf)
-        (.cons (.assert (.simple (.bool false))) .nil)), none⟩])
-  | _, _, _ => .done false
+    .allocBranches (ds.map (fun d => (⟨Binders.nil, .cons (.require call.hasCode)
+        (.cons (.require call.isSelf) (catchLit x kind d body)), none⟩ : Branch C Γ)))
+      (.cons (.require call.hasCode) (.cons (.require call.notSelf) .nil)) x bytesR body
+  | .box, _, _ => .allocBranches [] (.cons (.require call.hasCode) .nil) x bytesR body
+  | .diamond, _, _ => .done false
 
 /-! ## The loop frame -/
 

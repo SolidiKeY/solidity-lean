@@ -643,8 +643,9 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
   | .check c => return mk ``Premise.check #[← qFml Γ c]
   | .done b => return mk ``Premise.done #[← qCtx Γ', toExpr b]
   | .branches bs => return mk ``Premise.branches #[← qBranches Γ bs]
-  | @Premise.allocBranches _ _ bs x A Γ₁ P =>
-    return mk ``Premise.allocBranches #[← qBranches Γ bs, toExpr x, toExpr A, ← qCtx Γ₁,
+  | @Premise.allocBranches _ _ bs Q x A Γ₁ P =>
+    return mk ``Premise.allocBranches #[← qBranches Γ bs, ← qProg Γ Γ Q, toExpr x, toExpr A,
+      ← qCtx Γ₁,
       ← qProg (.mem A :: Γ) Γ₁ P]
   | .cases fs us => do
     let fTy ← fam ``Fml Γ

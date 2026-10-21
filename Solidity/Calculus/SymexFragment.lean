@@ -1216,7 +1216,7 @@ theorem Premise.fml_frag (m : Modality) {Γ Γ' Γ₁ Γ₀ : Ctx} (P : Premise 
       exact ⟨⟨hS U hU, hE.2 U hU⟩, Fml.modalK_frag m ω κ hω hκ hφ⟩
   | inv => exact hS.elim
   | inline P h => exact ⟨hS, ⟨hω, hκ⟩, hφ⟩
-  | allocBranches _ _ _ _ => exact hS.elim
+  | allocBranches _ _ _ _ _ => exact hS.elim
   | guardedUpdates c U V =>
     exact ⟨⟨hE.1, ⟨hS.1, hE.2.1⟩, ⟨hS.2, hE.2.2⟩, Fml.modalK_frag m ω κ hω hκ hφ⟩,
       ⟨hE.1, by simp only [Prog.Frag, Stmt.Frag, hω, Bool.and_self], hκ, hφ⟩⟩

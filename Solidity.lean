@@ -24,6 +24,7 @@ import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
+import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk

@@ -231,7 +231,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     · intro ψ hψ
       obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hψ
       exact ih b hb σ
-  | @allocBranches Γ Γ₁ Γ₂ Γ₃ H m s ω κ φ bs x A P d _ _ _ ih iha =>
+  | @allocBranches Γ Γ₁ Γ₂ Γ₃ H m s ω κ φ bs x A Q P d _ _ _ ih iha =>
     intro σ
     refine H.wrap_step hS d σ ?_
     refine H.wrap_conj σ _ (by simp only [ne_eq, List.append_eq_nil_iff, List.map_eq_nil_iff,

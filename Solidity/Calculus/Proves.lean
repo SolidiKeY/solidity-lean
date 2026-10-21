@@ -424,15 +424,15 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   another contract's data. -/
   | allocBranches {Γ Γ₁ Γ₂ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {bs : List (Branch C Γ)} {x : Var}
-      {A : RefTy} {P : Prog C (.mem A :: Γ) Γ₃}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .allocBranches bs x A P)
+      {A : RefTy} {Q : Prog C Γ Γ} {P : Prog C (.mem A :: Γ) Γ₃}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .allocBranches bs Q x A P)
       (h : ∀ b ∈ bs, Proves C R Γ₀ H
         (Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
           (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
           fun c => .imp c
             (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))))
-      (ha : Proves C R Γ₀ H
-        (.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)))
+      (ha : Proves C R Γ₀ H (.modal m Q .nil
+        (.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, then

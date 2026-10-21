@@ -968,10 +968,30 @@ def catchBytes {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs :
     | _ => .error .revert
 
 /-- What a clause of `kind` binds of the data: the `Error` reason decoded,
-or the data itself. -/
+or the data itself; nothing (the clause is not reached) where it has `2^256`
+bytes or more, which no array holds (a length is a `uint`) and no
+transaction carries. -/
 def _root_.Solidity.CatchKind.decode : CatchKind → List UInt8 → Option (List UInt8)
-  | .reason, d => Semantics.decodeError d
-  | .raw, d => some d
+  | .reason, d => (Semantics.decodeError d).filter fun bs => decide (bs.length < 2 ^ 256)
+  | .raw, d => if d.length < 2 ^ 256 then some d else none
+
+/-- What a clause binds is shorter than `2^256` bytes. -/
+theorem _root_.Solidity.CatchKind.decode_lt {kind : CatchKind} {d bs : List UInt8}
+    (h : kind.decode d = some bs) : bs.length < 2 ^ 256 := by
+  cases kind with
+  | reason =>
+    obtain ⟨_, h⟩ := Option.filter_eq_some_iff.1 h
+    exact of_decide_eq_true h
+  | raw =>
+    simp only [CatchKind.decode] at h
+    split at h
+    · cases h; assumption
+    · cases h
+
+/-- An `Error` clause binds the decoded reason. -/
+theorem _root_.Solidity.CatchKind.decode_reason {d bs : List UInt8}
+    (h : CatchKind.reason.decode d = some bs) : Semantics.decodeError d = some bs :=
+  (Option.filter_eq_some_iff.1 h).1
 
 /-- `Stmt.catchData`: the data bound as a fresh `bytes` (`litBytesT`), then
 the body, its locals popped; a revert where there is no such data (the

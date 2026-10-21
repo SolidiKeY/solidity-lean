@@ -303,10 +303,11 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   holds, append then save; otherwise run `revert();` before the rest. -/
   | guardedUpdates {Δ : Ctx} (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) :
       Premise C Γ Γ
-  /-- `branches`' goals, then `P` in the statement's place for every fresh
-memory object `x : A` of any contents (`Fml.allocAll`), its scope ended:
-a `catch` clause binding another contract's data (`catchDataBox`). -/
-  | allocBranches (bs : List (Branch C Γ)) (x : Var) (A : RefTy) {Γ₁ : Ctx}
+  /-- `branches`' goals, then, after `Q` (the `require`s it is reached
+behind), `P` in the statement's place for every fresh memory object `x : A`
+of any contents (`Fml.allocAll`), its scope ended: a `catch` clause binding
+another contract's data (`catchDataBox`). -/
+  | allocBranches (bs : List (Branch C Γ)) (Q : Prog C Γ Γ) (x : Var) (A : RefTy) {Γ₁ : Ctx}
       (P : Prog C (.mem A :: Γ) Γ₁) : Premise C Γ Γ
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
@@ -382,12 +383,13 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ)
     (fun c U V ω => .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))
       (.imp (.not c) (.modal m (.cons .revert ω) κ φ)))
-    (fun bs x A _ P ω => Fml.conj (bs.map (fun b =>
+    (fun bs Q x A _ P ω => Fml.conj (bs.map (fun b =>
       Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
         (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
         fun c => .imp c
           (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) ++
-      [.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)])) ω
+      [.modal m Q .nil
+        (.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))])) ω
 
 /-! ### Equations
 
