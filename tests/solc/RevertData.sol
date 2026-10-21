@@ -5,6 +5,9 @@ pragma solidity ^0.8.4;
 // self-call's `require(c, "m")` / `revert("m")` reason is decoded into
 // `catch Error(string memory r)`, and `catch (bytes memory d)` binds the raw
 // data.  Only a callee declared before its caller is run (docs/options.md O8).
+// The callees are `pure`: a callee that may write the state puts the obligation
+// in the callback reading (O7), whose leaves do not close a memory array's
+// length yet.
 contract RevertData {
     uint last;
 
@@ -14,11 +17,10 @@ contract RevertData {
     }
 
     /// @custom:key skip
-    function check(uint x) external {
+    function check(uint x) external pure {
         if (x > 3) {
             revert("big");
         }
-        last = x;
     }
 
     /// @custom:key skip
@@ -31,9 +33,10 @@ contract RevertData {
     function reasonBytes() public view {
         try this.boom() {
         } catch Error(string memory r) {
-            assert(bytes(r).length == 4);
-            assert(bytes(r)[0] == "b");
-            assert(bytes(r)[3] == "m");
+            bytes memory b = bytes(r);
+            assert(b.length == 4);
+            assert(b[0] == bytes1(0x62));
+            assert(b[3] == bytes1(0x6d));
         } catch {
         }
     }
