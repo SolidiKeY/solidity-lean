@@ -499,12 +499,11 @@ test("recursion: calls by their contracts, proved by induction over the frames",
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['countdown', 'sumTo', 'sumToSix', 'even', 'odd', 'evenFour',
-    'fib', 'fibOne', 'divmod', 'divmodSeven']) {
+    'fib', 'fibOne', 'divmod', 'divmodSeven',
+    // the triangular sum's step is nonlinear (`multiply_2_inEq0`)
+    'sum', 'sumThree']) {
     assert.equal(status[name], 'proved', name);
   }
-  // the triangular sum's step is nonlinear, past the closer
-  assert.equal(status.sum, 'pending');
-  assert.equal(status.sumThree, 'pending');
   assert.equal(status.falsePost, 'pending');
   // under the callback reading (O7): the countdown after a value call does
   // not call back (`ProvesC.recValid`); a recursion that calls back by its

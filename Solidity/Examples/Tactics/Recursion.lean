@@ -292,6 +292,35 @@ theorem payDownDirectEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } 
 
 end PayDownDirect
 
+/-! ## A nonlinear contract
+
+The triangular sum's step is `(n - 1) * n / 2 + n == n * (n + 1) / 2`,
+and its range checks bound `n * (n + 1)` by `n <= 1000`: `sol_close`'s last
+alternative adds solkey's `multiply_2_inEq0` of the bounds of the
+products' atoms (`Calculus/CloseNonlin.lean`). -/
+
+def Triangular : Contract := contract!{
+  uint a;
+  requires n <= 1000;
+  ensures r == n * (n + 1) / 2;
+  function tri(uint n) returns (uint r) {
+    if (n == 0) { return 0; }
+    return n + tri(n - 1);
+  }
+}
+
+section Triangular
+
+local instance : InContract := ⟨Triangular⟩
+
+/-- `tri`'s contract, by induction over the frames. -/
+theorem triSpec : ⊨ spec!{tri} := by rec_auto
+
+/-- Its caller: `tri(3)` is `6`. -/
+theorem triThree : ⊨ dl!{ [ uint z = tri(3); ] z == 6 } := by rec_auto
+
+end Triangular
+
 /-- info: 'Solidity.Examples.Tactics.Recursion.addSum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms addSum
 
