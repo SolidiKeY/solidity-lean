@@ -301,12 +301,59 @@ theorem holdsC_unfoldReceiver {ps Γf Γv : Ctx} {E : Ty} {f : Name}
 /-- **A capture, with callbacks**: whatever the rest calls, the statement
 runs as the captured program (`Stmt.CapturesAs`), its fresh locals popped. -/
 theorem holdsC_capture {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
-    (hc : s.CapturesAs pay P e)
+    (hc : s.CapturesAs pay m P e)
     (h : holdsC I pay σ (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
     holdsC I pay σ (.modal m (.cons s ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
-  obtain ⟨o', ho', rfl⟩ := hc _ rfl σ o₁ he
-  exact COut.thenF_drop _ (h _ ho')
+  rcases hc _ rfl σ o₁ he with ⟨err, rfl, hm, hp⟩ | ⟨o', ho', rfl⟩
+  · exact ⟨hm, hp⟩
+  · exact COut.thenF_drop _ (h _ ho')
+
+/-- `loopExit`'s "unwound to the end", `{ b := cond } (b = FALSE)`: the
+condition evaluates to `false`. -/
+theorem loopExit_cond {Γ : Ctx} (x : Var) {c : Val C Γ .bool} {σ : State C Γ}
+    (h : holds σ (.upd .diamond (Upd.nil.decl x (.val (p := .bool) c.lower))
+      (Fml.isBool (Tm.pvV (p := .bool) .here) false))) : c.evalT σ = .ok false := by
+  have hglob : (Upd.nil.decl x (.val (p := .bool) c.lower)).globT σ =
+      (c.lower.eval σ).bind fun _ => some σ.globG := rfl
+  cases hc : c.evalT σ with
+  | error e =>
+    rw [Val.lower_eval_error c σ hc] at hglob
+    exact (h.of_noExh hglob (Upd.exh_of_pushFree (by
+      simp only [Upd.pushFree, Rhs.pushFree, Val.lower_pushFree, Bool.and_self]))).elim
+  | ok v =>
+    have hcl : (Rhs.val (p := .bool) c.lower).eval σ =
+        some (LTy.VDen.ofT (H := σ.H) (.val .bool) v) := by
+      show c.lower.eval σ = _
+      exact Val.lower_eval_ok c σ hc
+    have hv : v = false :=
+      (holds_isBool_pvV _ _ _).1 (h.of_lands (Upd.lands_decl (Upd.lands_nil σ) x hcl))
+    rw [hv]
+
+/-- **`loopExit` with callbacks**, under the box: a loop whose condition is
+`false` ends where it is, or, its body calling back, diverges. -/
+theorem holdsC_loopExit {Γb : Ctx} {c : Val C Γ' .bool} {body : Prog C Γ' Γb} {σ : State C Γ'}
+    (hc : c.evalT σ = .ok false) (h : holdsC I pay σ (Fml.modalK .box ω κ φ)) :
+    holdsC I pay σ (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ) := by
+  cases hb : body.callsBack pay with
+  | false =>
+    refine holdsC_cons_det hb (fun τ hτ => ?_) (fun e he => ?_)
+    · rw [Stmt.runSt_loop_unfold, hc] at hτ
+      cases hτ
+      exact h
+    · rw [Stmt.runSt_loop_unfold, hc] at he
+      cases he
+  | true =>
+    refine holdsC_cons fun o₁ he => ?_
+    have hl : CallbackUnwk.LoopExec (I.stateInv pay) (.unwind 0) c body σ o₁ :=
+      CallbackUnwk.asLoop he
+    cases hl with
+    | det hf => exact absurd (hb.symm.trans hf) (by decide)
+    | halt _ hc' => rw [hc] at hc'; cases hc'
+    | exit _ _ => exact COut.after_seq (holdsC_modalK σ ω κ φ h)
+    | iter _ hc' => rw [hc] at hc'; cases hc'
+    | stop _ hc' => rw [hc] at hc'; cases hc'
+    | diverge _ => exact ⟨trivial, nofun⟩
 
 /-- **A hidden binder over a program that pays nothing, with callbacks.** -/
 theorem holdsC_bind {s : Stmt C Γ Γ'} {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'}
@@ -1097,6 +1144,10 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | unfold d hs hP _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_unfold hs hP
       (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | loopExit _ _ ihT ihE =>
+    refine fun σ => Hyps.wrapC_and _ ?_ σ (ihT σ) (ihE σ)
+    exact fun τ a b => holdsC_loopExit
+      (loopExit_cond _ ((holdsC_iff_holds _ rfl τ).1 b)) (a b)
   | capture _ hc _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_capture hc h) σ (ih σ)
   | unfoldReceiver _ _ ih =>

@@ -65,8 +65,9 @@ def ctorC? (c : Lean.Name) : Option (Lean.Name × Nat) :=
    (``Proves.split, (``ProvesC.split, 0)), (``Proves.done, (``ProvesC.done, 1))].lookup c
 
 /-- The captures whose rest may call back (`Semantics/CallbackCapture.lean`),
-each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`. -/
-def captureLemmas : Array Lean.Name := #[`ite]
+each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`.
+Each with the number of `rfl`s its own side conditions take. -/
+def captureLemmas : Array (Lean.Name × Nat) := #[(`ite, 0), (`loop, 1)]
 
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
@@ -129,9 +130,12 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               -- a capture whose rest calls back: `ProvesC.capture`, its
               -- side condition the capture's lemma (`Stmt.CapturesAs`)
               let cap ← if c == ``Proves.unfold then
-                  captureLemmas.mapM fun l => do
+                  captureLemmas.mapM fun (l, k) => do
                     let fc ← ProofTree.short ``ProvesC.capture
-                    pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
+                    if k == 0 then pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
+                    else
+                      let rs := (List.replicate k rflT).toArray
+                      pure #[← `(tactic| apply $fc $d (.$(mkIdent l):ident $rs*))]
                 else pure #[]
               pure (#[#[← `(tactic| apply $f $d $rfls*)],
                 #[← `(tactic| apply $f (by exact $d) $rfls*)]] ++ cap)
