@@ -69,9 +69,54 @@ contract Calldata {
         assert(ys[0] == xs[0]);
     }
 
-    // a slice: refused (a copy element by element, a loop)
+    // a slice: a view, its offset and length (`RawStmt.sliceViews`); it
+    // reverts on a base shorter than its start, so the box
+    /// @custom:key box
     function tail(bytes calldata b) external pure returns (uint) {
         bytes calldata t = b[4:];
         return t.length;
+    }
+
+    // its length, under the diamond where the bounds hold
+    function sliceLength(bytes calldata b, uint i, uint j) external pure {
+        require(i <= j && j <= b.length);
+        bytes calldata t = b[i:j];
+        assert(t.length == j - i);
+    }
+
+    // a read of the view is a read of the base past its offset
+    /// @custom:key box
+    function sliceRead(uint[] calldata xs, uint k) external pure {
+        uint[] calldata t = xs[1:];
+        require(k < t.length);
+        assert(t[k] == xs[k + 1]);
+    }
+
+    // in range, a read returns; a slice of a slice adds the offsets
+    function sliceReturns(uint[] calldata xs) external pure returns (uint) {
+        require(xs.length >= 8);
+        return xs[2:][3:5][1];
+    }
+
+    // past the view, the read reverts though it is inside the base
+    /// @custom:key box
+    function slicePast(uint[] calldata xs) external pure {
+        require(xs.length >= 8);
+        uint[] calldata t = xs[2:4];
+        uint y = t[2];
+        assert(y != y);
+    }
+
+    // the decoder reads the view in place: the selector skipped
+    /// @custom:key box
+    function decodeAfterSelector(bytes calldata b) external pure {
+        require(b.length == 36);
+        uint x = abi.decode(b[4:], (uint));
+        assert(x == abi.decode(b[4:36], (uint)));
+    }
+
+    // a slice hashed: refused (it would be copied)
+    function sliceHashed(bytes calldata b) external pure returns (bytes32) {
+        return keccak256(b[4:]);
     }
 }

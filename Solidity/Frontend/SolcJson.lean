@@ -1036,11 +1036,18 @@ partial def expr (j : Json) : PM String := do
   | "FunctionCall" => call j
   | "NewExpression" =>
     pure s!"new {← PM.lift (tyText (← get).structs (← PM.lift (J.get j "typeName")))}"
-  -- a calldata slice is a view of the caller's data, which the model would
-  -- copy into a fresh memory array, element by element: a loop, which the
-  -- runner proves only by an invariant (docs/semantic-gaps.md, "Bytes and
-  -- strings")
-  | "IndexRangeAccess" => unsupported "a calldata slice `b[i:j]` (a copy element by element, a loop)"
+  -- a calldata slice, a view of the caller's data: `sol{}` reads it as one
+  -- (`RawStmt.sliceViews`; docs/semantic-gaps.md, "Bytes and strings")
+  | "IndexRangeAccess" =>
+    let b ← operand (← PM.lift (J.get j "baseExpression")) false
+    let i ← match J.opt j "startExpression" with
+      | some e => expr e
+      | none => pure ""
+    let k ← match J.opt j "endExpression" with
+      | some e => expr e
+      | none => pure ""
+    if i.isEmpty && k.isEmpty then pure s!"{b}[0:]"
+    else pure s!"{b}[{i}:{k}]"
   | k => unsupported s!"the expression `{k}`"
 
 /-- An assignment's text, `l op r`; a nested assignment on the right

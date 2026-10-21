@@ -415,18 +415,20 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
-test("calldata: read-only memory parameters, a written copy refused, slices refused", () => {
+test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
   const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
-    'readAlias', 'localAlias'])
+    'readAlias', 'localAlias',
+    // a slice is a view: its offset and length (`RawStmt.sliceViews`)
+    'tail', 'sliceLength', 'sliceRead', 'sliceReturns', 'slicePast', 'decodeAfterSelector'])
     assert.equal(status[name], 'proved', name);
-  // a memory copy written (solc copies, the model would share), a slice
+  // a memory copy written (solc copies, the model would share), a slice hashed
   assert.equal(status.writesCopy, 'unsupported');
-  assert.equal(status.tail, 'unsupported');
+  assert.equal(status.sliceHashed, 'unsupported');
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {

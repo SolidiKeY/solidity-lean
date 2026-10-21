@@ -1731,7 +1731,13 @@ where
         $(quote code) $(pnc.getD otherB) $otherB)
 
 macro_rules
-  | `(sol_raw!{ $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
+  | `(sol_raw!{ $[$ss:sol_stmt;]* }) => do
+      let body ← `([$(← ss.mapM expandStmt),*])
+      -- a slice read as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
+      if ss.any (fun s => (s.raw.find? fun s =>
+          [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome) then
+        `($(mkIdent `Solidity.RawStmt.sliceViews) $body)
+      else pure body
 
 end Expand
 
