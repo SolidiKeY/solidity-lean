@@ -224,7 +224,7 @@ private def defineImportedContract (name : Lean.Name) (contractSyntax : Syntax) 
   synthesizeSyntheticMVarsNoPostponing
   let original ← instantiateMVars original
   let original ← whnf original
-  unless original.isAppOfArity ``Contract.mk 8 do
+  unless original.isAppOfArity ``Contract.mk 9 do
     throwError "solc_import: expected a contract literal"
   let mut fields : Array Expr := #[]
   for arg in original.getAppArgs do

@@ -868,7 +868,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
-  for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData"]) {
+  // a custom error's data: its selector folded as solc folds it, its
+  // argument's word (`revert E(7)`, `RevertStatement`)
+  for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });

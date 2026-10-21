@@ -1385,6 +1385,16 @@ partial def stmt1 (j : Json) : PM (List String) := do
     pure [s!"{← loopSpec j}for ({init}; {c}; {upd}) {← block (← PM.lift (J.get j "body"))}"]
   | "Break" => pure ["break"]
   | "Continue" => pure ["continue"]
+  -- `revert E(a, b);`: the custom error by its name, declared as a member
+  -- (`errorMembers`)
+  | "RevertStatement" =>
+    let call ← PM.lift (J.get j "errorCall")
+    let callee ← PM.lift (J.get call "expression")
+    unless J.kind callee == "Identifier" do
+      unsupported "a custom error named through a member access"
+    let some e := J.str? callee "name" | unsupported "a custom error with no name"
+    let as ← (← PM.lift (J.arr call "arguments")).mapM expr
+    pure [s!"revert {e}({", ".intercalate as})"]
   | k => unsupported s!"the statement `{k}`"
 
 /-- A loop's specification, the `/// @custom:key` clauses above it that the
@@ -1869,7 +1879,16 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- the contract's own structs, declared: a struct whose members do not print
   -- leaves out what uses it, as an unreadable struct does
   let structMembers := ownStructs.filterMap fun o => (ownStructMembers S [o]).toOption.bind (·.head?)
-  let mut members : List String := invariants ++ enumMembers ++ structMembers
+  -- the custom errors, the contract's and the file's, as `contract!`
+  -- members: a `revert E(…)` folds its selector from the declared types
+  let errorMembers : List String := ((nodes ++ units).filter (J.kind · == "ErrorDefinition")).filterMap
+    fun e => do
+      let n ← J.str? e "name"
+      let ps ← (J.opt e "parameters").bind fun ps => (J.arrD ps "parameters").toList.mapM fun p =>
+        ((J.get p "typeName").toOption.bind fun t => (tyText S t).toOption)
+      pure s!"error {n}({", ".intercalate ps});"
+  let mut members : List String := invariants ++ enumMembers ++ structMembers ++
+    errorMembers.eraseDups
   -- the variables kept: name, `sol` type, declaration
   let mut kept : List (String × String × Json) := []
   let mut dropped : List (Int × String × Gap) := []
@@ -2407,7 +2426,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
       | _ => none
   let initMembers := match initGap, inits with
-    | none, .ok ms => invariants ++ enumMembers ++ structMembers ++ ms
+    | none, .ok ms => invariants ++ enumMembers ++ structMembers ++ errorMembers.eraseDups ++ ms
     | _, _ => members
   let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)

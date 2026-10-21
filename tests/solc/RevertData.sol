@@ -11,6 +11,9 @@ pragma solidity ^0.8.4;
 contract RevertData {
     uint last;
 
+    error E(uint256 code);
+    error F();
+
     /// @custom:key skip
     function boom() external pure {
         require(false, "boom");
@@ -58,6 +61,41 @@ contract RevertData {
         try this.plain(1) {
         } catch (bytes memory d) {
             assert(d.length == 0);
+        }
+    }
+
+    /// @custom:key skip
+    function failE() external pure {
+        revert E(7);
+    }
+
+    /// @custom:key skip
+    function failIf(uint x) external pure {
+        require(x > 3, E(x));
+    }
+
+    /// @custom:key skip
+    function failF() external pure {
+        revert F();
+    }
+
+    // a custom error's data: its selector, `F()`'s 0x28811f59, folded as
+    // solc folds it
+    /// @custom:key box
+    function customSelector() public view {
+        try this.failF() {
+        } catch (bytes memory d) {
+            assert(d.length == 0 || d.length == 4 && d[0] == bytes1(0x28) && d[3] == bytes1(0x59));
+        }
+    }
+
+    // a custom error's data: its selector (`E(uint256)`'s, 0x002ff067), then
+    // its argument's word
+    /// @custom:key box
+    function customData() public view {
+        try this.failE() {
+        } catch (bytes memory d) {
+            assert(d.length == 0 || d[3] == bytes1(0x67) && d[35] == bytes1(0x07));
         }
     }
 }
