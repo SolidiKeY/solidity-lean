@@ -144,4 +144,35 @@ contract Hashing {
         (uint a, Pt memory q) = abi.decode(d, (uint, Pt));
         return a + q.x;
     }
+    // nested types (`AbiTy`): a static nested struct in the head, loop-free,
+    // proved; an array of arrays and a struct with a `uint[]` member, head
+    // and tail recursively, written and read by loops (run in
+    // `Examples/Tactics/Hashing.lean`, `Codec3`)
+    struct In { uint8 x; bool y; }
+    struct Out { uint8 a; In i; }
+    function encodeStaticNested() public pure {
+        Out memory o;
+        o.a = 1; o.i.x = 2; o.i.y = true;
+        bytes memory e = abi.encode(o);
+        assert(e.length == 96 && e[31] == 0x01 && e[63] == 0x02 && e[95] == 0x01);
+    }
+    struct Dyn { uint a; uint[] xs; }
+    /// @custom:key box
+    function encodeNested(uint[][] memory x) public pure returns (uint) {
+        return abi.encode(x).length;
+    }
+    /// @custom:key box
+    function encodeDynStruct(Dyn memory s) public pure returns (uint) {
+        return abi.encode(s).length;
+    }
+    /// @custom:key box
+    function decodeNested(bytes memory d) public pure returns (uint) {
+        uint[][] memory y = abi.decode(d, (uint[][]));
+        return y.length;
+    }
+    /// @custom:key box
+    function decodeDynStruct(bytes memory d) public pure returns (uint) {
+        Dyn memory s = abi.decode(d, (Dyn));
+        return s.a;
+    }
 }

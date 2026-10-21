@@ -446,8 +446,17 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
     // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
     'sha256Parameter', 'ripemd160Parameter', 'recoverSigner', 'sha256Literal', 'ripemd160Literal',
     // `abi.decode` of a struct of values, a `T[k]`, a tuple with a struct
-    'decodeStruct', 'decodeFixed', 'decodeTuple'])
+    'decodeStruct', 'decodeFixed', 'decodeTuple',
+    // a static nested struct, in the head (`AbiTy`)
+    'encodeStaticNested'])
     assert.equal(status[name], 'proved', name);
+  // nested dynamic types elaborate (not `unsupported`); head and tail are
+  // written and read by loops with no invariant, which the walk unrolls
+  // past its budget: run in `Examples/Tactics/Hashing.lean` (`Codec3`)
+  for (const name of ['encodeNested', 'encodeDynStruct', 'decodeNested', 'decodeDynStruct']) {
+    assert.ok(name in status, name);
+    assert.notEqual(status[name], 'unsupported', name);
+  }
 });
 
 test("function types: values in locals, parameters, returns, storage, struct members, external", () => {
