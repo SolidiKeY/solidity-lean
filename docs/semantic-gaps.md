@@ -751,10 +751,14 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   `symbolicCustom`, the rule pinned.
 - *Cost.*  `Fml`, `Hyps` and `Premise` have one constructor more: every
   fold gained an arm (about 60 sites, mostly the `anon` arm copied).
-  Checking times did not move beyond noise (see the lane's report: the
-  example files within a second or two, the build's slow modules within
-  ±10%).  `Examples/Tactics/RevertData.lean` is 41 s in the build (its new
-  `symbolicCustom` walks three clauses × four goals).
+  Checking times did not move beyond noise: opened in the language server
+  before and after, `Examples/Tactics/TryCatch.lean` 9 s / 6 s,
+  `Examples/Tactics/Decide.lean` 15 s / 15 s; the build's slow modules
+  (`Memory`, `CallbackStrategy`, `Recursion`) within run-to-run noise.
+  `Examples/Tactics/RevertData.lean` went from 30 s to 47 s for its new
+  examples (`symbolicCustom` walks three clauses × four goals).  Checked
+  (2026-10-21): `lean_build` of the default targets; `node --test
+  --test-name-pattern="revert|self|solc/open"` passes (4 tests).
 
 **Left open, with the reason.**
 - A reason that is not a literal (`revert(string.concat(…))`, a rethrown
