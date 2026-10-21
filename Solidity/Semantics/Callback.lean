@@ -174,42 +174,6 @@ theorem TRun.callFrom_eq {Γ Γ' ps rs Γf : Ctx} (ret : CallRet Γ rs Γ') (hb 
 
 /-! ## Which statements the callback reading sees -/
 
-mutual
-
-/-- Whether a `transfer`, a `send` or a `try` occurs in the statement, in a
-branch, a block, a loop or a callee included. -/
-def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
-  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
-    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
-    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
-    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
-    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
-    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
-    (push := fun _ _ _ => false) (pop := fun _ => false)
-    (transfer := fun _ _ => true) (send := fun _ _ _ _ => true)
-    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
-    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
-    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
-    (ite := fun _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els)
-    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
-    (call := fun _ _ _ body => Prog.hasTransfer body)
-    (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
-    (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
-    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
-    -- every frame of the unrolling (`Prog.hasTransfer_recUnroll`)
-    (callRec := fun _ _ _ _ body => Prog.hasTransfer (body ()))
-    (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
-    (revertData := fun _ => false)
-    (catchData := fun _ _ _ sbody _ _ _ body => Prog.hasTransfer sbody || Prog.hasTransfer body)
-  termination_by structural _ _ s => s
-
-def Prog.hasTransfer : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
-  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P false
-      (fun s P => Stmt.hasTransfer s || Prog.hasTransfer P)
-  termination_by structural _ _ P => P
-
-end
-
 /-- The statements the relation does not take from `Stmt.run`: a
 `transfer`, a `send`, a `try`, the two that run others by a choice (`if`, a
 call), and a loop or a block whose body pays. -/
@@ -736,7 +700,9 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       (e = .revert ∨ ∃ d, e = .revertWith d) → ExecP J σ other o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop other.ext))
-  /-- A self-call whose callee panics: the `Panic` clause, any code bound. -/
+  /-- A self-call whose callee panics: the `Panic` clause, with the code its
+  data carries (`TRun.tryCall`), any code where it panics by a halt of its own
+  (the transaction's, `TRun.selfPanicCode`). -/
   | trySelfPanic {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
@@ -744,7 +710,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {o : COut C σ.H Γ₃} {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
       ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) →
-      (e = .panic ∨ ∃ d, e = .revertWith d) →
+      (e = .panic ∨ ∃ d, e = .revertWith d ∧ Semantics.decodePanic d = some v) →
       ExecP J (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) pnc o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop ((Ext.append Γ κ).trans pnc.ext)))
@@ -1119,12 +1085,12 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
               · exact .inl (.trySelfError hz hs hc h)
               · exact .inr (.trySelfError (o := .violated) hz hs hc h)
             · split
-              · rename_i v _
+              · rename_i v hv
                 rw [← COut.map_ofRes]
                 rcases Prog.exec_run J pnc
                   (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env)) with h | h
-                · exact .inl (.trySelfPanic hz hs hc (.inr ⟨d, rfl⟩) h)
-                · exact .inr (.trySelfPanic (o := .violated) hz hs hc (.inr ⟨d, rfl⟩) h)
+                · exact .inl (.trySelfPanic hz hs hc (.inr ⟨d, rfl, hv⟩) h)
+                · exact .inr (.trySelfPanic (o := .violated) hz hs hc (.inr ⟨d, rfl, hv⟩) h)
               · rw [← COut.map_ofRes]
                 rcases Prog.exec_run J other σ with h | h
                 · exact .inl (.trySelfOther hz hs hc (.inr ⟨d, rfl⟩) h)

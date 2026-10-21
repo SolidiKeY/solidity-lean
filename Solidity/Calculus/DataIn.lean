@@ -692,6 +692,61 @@ theorem Prog.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
 
 end
 
+/-- Data known in part that `Pat.notPanic` keeps decodes as no `Panic`. -/
+theorem Pat.notPanic_decode {p : Pat} {d : List UInt8} (hp : p.notPanic = true)
+    (hm : p.Matches d) : Semantics.decodePanic d = none := by
+  unfold Semantics.decodePanic
+  split
+  · rename_i h
+    exfalso
+    obtain ⟨h4, h36⟩ := h
+    simp only [Pat.notPanic, bne_iff_ne, ne_eq, Bool.or_eq_true, decide_eq_true_eq,
+      List.any_eq_true, List.mem_range] at hp
+    rcases hp with hl | ⟨i, hi, hb⟩
+    · exact hl (hm.1 ▸ h36)
+    · split at hb
+      · rename_i b hpi
+        have hd := hm.2 i b hpi
+        have hs : Semantics.panicSelector[i]? = some b := by
+          rw [← h4, List.getElem?_take_of_lt hi, hd]
+        have : Semantics.panicSelector[i]! = b := by
+          rw [getElem!_def, hs]
+        rw [this] at hb
+        simp only [bne_self_eq_false, Bool.false_eq_true] at hb
+      · exact absurd hb Bool.false_ne_true
+  · rfl
+
+/-- **A self-call's callee panics with a code it lists** (`Prog.panicCodes`,
+`trySelfStep`'s `Panic` goal): the call halts by no panic of its own, and
+data it reverts with that decode as `Panic` carry one of the codes. -/
+theorem Prog.panicCodes_call {Γ ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf}
+    {ks : List Semantics.Word} (hK : sbody.panicCodes = some ks) (sargs : Args C Γ ps)
+    (rets : Binders ρ) (σ : State C Γ) {e : THalt}
+    (h : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e) :
+    e ≠ .panic ∧ ∀ d v, e = .revertWith d → Semantics.decodePanic d = some v → v ∈ ks := by
+  unfold Prog.panicCodes at hK
+  split at hK
+  · cases hK
+  rename_i hat
+  simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at hat
+  split at hK
+  · rename_i S hS
+    split at hK
+    · rename_i hall
+      cases hK
+      refine ⟨fun he => ?_, fun d v hd hv => ?_⟩
+      · subst he
+        exact TRun.call_noPanic sargs (.rets rets) sbody.ext sbody.runR
+          (fun τ => Prog.run_noPanic sbody hat.1 τ) σ h
+      · subst hd
+        rcases TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d h
+            (.inl rfl) with hm | ⟨p, hp, hm⟩
+        · exact List.mem_filterMap.2 ⟨d, hm, hv⟩
+        · rw [Pat.notPanic_decode (List.all_eq_true.1 hall p hp) hm] at hv
+          cases hv
+    · cases hK
+  · cases hK
+
 /-- A panic's data matches `Panic`'s, whatever its code. -/
 theorem Pat.matches_panic (c : Nat) : Pat.panic.Matches (Semantics.encodePanic c) :=
   (Pat.matches_lit Semantics.panicSelector).append (Pat.matches_word c)

@@ -238,37 +238,6 @@ def ExtCall.selfFails {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders
   .not (.modal .diamond (.cons (.require call.isSelf)
     (.cons (.call call.fn sargs (.rets rets) sbody) .nil)) .nil .tt)
 
-/-- `try …` whose callee is the contract's own (`self`, `docs/options.md`
-O8) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
-the callee's body inlined with the returned values as its targets and the
-success block after it; the receiver another, the success block for every
-value of the returned data; and each `catch` block from the state the call
-was made in, where the call does not end normally as a self-call
-(`ExtCall.selfFails`).  At address `0` both success goals hold vacuously
-(the `require`s revert). -/
-def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
-    (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
-    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
-    (sbody : Prog C (ρ ++ ps) Γf) : Premise C Γ Γ :=
-  let up := (call.wk (Thin.ofExt (Ext.append Γ ρ)))
-  let nx := some (call.selfFails rets sargs sbody)
-  .branches [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.isSelf)
-      (.cons (.call call.fn sargs (.rets rets) sbody) ok)), none⟩,
-    ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok), none⟩,
-    ⟨Binders.nil, err, nx⟩, ⟨code.binders, pnc, nx⟩, ⟨Binders.nil, other, nx⟩]
-
-/-- A `try`'s rule (`Stmt.step`): `tryStep` for another contract's callee,
-`trySelfStep` under the box for the contract's own; `false` under the
-diamond either way. -/
-def tryStepS (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
-    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
-    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
-    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) : Premise C Γ Γ :=
-  match self, m with
-  | false, m => tryStep m rets ok err code pnc other
-  | true, .box => trySelfStep call rets ok err code pnc other sargs sbody
-  | true, .diamond => .done false
-
 /-! ## Revert data -/
 
 /-- Two lists of what may be, each `none` where it is not known. -/
@@ -388,6 +357,82 @@ def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option DSet
   | .reason, P => P.revertDatas false
   | .raw, P => (P.revertDatas true).map fun S =>
     ([] :: S.1, (if P.asserts then [Pat.panic] else []) ++ S.2)
+
+/-- Data known in part that no `Panic(uint256)` data matches: not its
+length, or a known byte of the selector that is not `Panic`'s. -/
+def Pat.notPanic (p : Pat) : Bool :=
+  p.length != 36 || (List.range 4).any fun i => match p[i]? with
+    | some (some b) => b != Semantics.panicSelector[i]!
+    | _ => false
+
+/-- **The codes a self-call's callee may panic with** (`trySelfStep`): the
+`Panic` codes of the data its body lists (`Stmt.revertDatas`, solc's `0x01`
+for a failed `assert`, `0x11` for an overflow in `checked { … }`, each the
+callee's `revert` of `Panic`'s data), where they are known: the body raises
+no panic of its own (`Prog.asserts`, whose code is the transaction's,
+`TRun.selfPanicCode`), calls nobody back (`Prog.hasTransfer`: a callee that
+calls back is read with any code, `ExecS.trySelfPanic`), lists its data,
+and none of its data known in part may be `Panic`'s (`Pat.notPanic`).
+`none` where they are not known. -/
+def Prog.panicCodes {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Option (List Semantics.Word) :=
+  if P.asserts || P.hasTransfer then none else
+  match P.revertDatas true with
+  | some S => if S.2.all Pat.notPanic then some (S.1.filterMap Semantics.decodePanic) else none
+  | none => none
+
+/-- `c == k₁ || … || c == kₙ`, of the `Panic` code `c` bound on top. -/
+def codeGuard {Γ : Ctx} : List Semantics.Word → Val C (.val .uint :: Γ) .bool
+  | [] => .simple (.bool false)
+  | [k] => .binop .eqB rfl rfl (.simple (.local .here)) (.simple (.lit k.1 k.2))
+  | k :: ks => .binop .or rfl rfl
+      (.binop .eqB rfl rfl (.simple (.local .here)) (.simple (.lit k.1 k.2))) (codeGuard ks)
+
+/-- The `Panic` clause of a self-call, behind the codes its callee may
+panic with (`Prog.panicCodes`): where the receiver is the contract, the
+clause is reached with one of them, and at another receiver with the
+oracle's code, any.  So `require(a != address(this) || c == k₁ || …);` in
+front of it where the clause binds the code `c`, `require(a !=
+address(this));` where it binds none and the callee panics with none; the
+clause where the codes are not known. -/
+def CodeBinder.guard {Γ Γ₃ : Ctx} (call : ExtCall C Γ) : {κ : Ctx} → CodeBinder κ →
+    Option (List Semantics.Word) → Prog C (κ ++ Γ) Γ₃ → Prog C (κ ++ Γ) Γ₃
+  | _, _, Option.none, P => P
+  | _, .some _, Option.some ks, P => .cons (.require (.binop .or rfl rfl
+      (call.wk (Thin.ofExt (Ext.append Γ [.val .uint]))).notSelf (codeGuard ks))) P
+  | _, .none, Option.some [], P => .cons (.require call.notSelf) P
+  | _, .none, Option.some (_ :: _), P => P
+
+/-- `try …` whose callee is the contract's own (`self`, `docs/options.md`
+O8) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
+the callee's body inlined with the returned values as its targets and the
+success block after it; the receiver another, the success block for every
+value of the returned data; and each `catch` block from the state the call
+was made in, where the call does not end normally as a self-call
+(`ExtCall.selfFails`).  At address `0` both success goals hold vacuously
+(the `require`s revert). -/
+def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) : Premise C Γ Γ :=
+  let up := (call.wk (Thin.ofExt (Ext.append Γ ρ)))
+  let nx := some (call.selfFails rets sargs sbody)
+  .branches [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.isSelf)
+      (.cons (.call call.fn sargs (.rets rets) sbody) ok)), none⟩,
+    ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok), none⟩,
+    ⟨Binders.nil, err, nx⟩, ⟨code.binders, code.guard call sbody.panicCodes pnc, nx⟩,
+    ⟨Binders.nil, other, nx⟩]
+
+/-- A `try`'s rule (`Stmt.step`): `tryStep` for another contract's callee,
+`trySelfStep` under the box for the contract's own; `false` under the
+diamond either way. -/
+def tryStepS (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) : Premise C Γ Γ :=
+  match self, m with
+  | false, m => tryStep m rets ok err code pnc other
+  | true, .box => trySelfStep call rets ok err code pnc other sargs sbody
+  | true, .diamond => .done false
 
 /-- The clause after the datum `d` is bound (`catchDataBox`'s goal for it):
 what a clause of `kind` binds of it allocated as a literal (`litBytes`) in

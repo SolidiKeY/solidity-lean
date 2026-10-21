@@ -91,7 +91,46 @@ def Prog.asserts {Γ Γ' : Ctx} : Prog C Γ Γ' → Bool
   | .cons s P => Stmt.asserts s || Prog.asserts P
 end
 
+/-! ## Which statements may pay (`Semantics/Callback.lean` reads it) -/
+
+mutual
+
+/-- Whether a `transfer`, a `send` or a `try` occurs in the statement, in a
+branch, a block, a loop or a callee included. -/
+def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
+    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
+    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => true) (send := fun _ _ _ _ => true)
+    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
+    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
+    (call := fun _ _ _ body => Prog.hasTransfer body)
+    (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
+    (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
+    -- every frame of the unrolling (`Prog.hasTransfer_recUnroll`)
+    (callRec := fun _ _ _ _ body => Prog.hasTransfer (body ()))
+    (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
+    (revertData := fun _ => false)
+    (catchData := fun _ _ _ sbody _ _ _ body => Prog.hasTransfer sbody || Prog.hasTransfer body)
+  termination_by structural _ _ s => s
+
+def Prog.hasTransfer : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P false
+      (fun s P => Stmt.hasTransfer s || Prog.hasTransfer P)
+  termination_by structural _ _ P => P
+
+end
+
 /-! ## Results that do not panic -/
+
 
 theorem TRes.NoPanic.ok {α : Type} (a : α) : TRes.NoPanic (Except.ok a : TRes α) :=
   fun h => nomatch h
