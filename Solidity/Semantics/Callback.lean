@@ -1,4 +1,5 @@
 import Solidity.Semantics.RunFrame
+import Solidity.Semantics.NoPanic
 
 /-!
 # The callback semantics of `transfer`, typed
@@ -198,6 +199,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     -- not unfolded: its frames may pay
     (callRec := fun _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
+    (revertData := fun _ => false)
+    (catchData := fun _ _ _ sbody _ _ _ body => Prog.hasTransfer sbody || Prog.hasTransfer body)
   termination_by structural _ _ s => s
 
 def Prog.hasTransfer : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -230,6 +233,8 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
     (callRec := fun _ _ _ _ _ => true)
+    (revertData := fun _ => false)
+    (catchData := fun _ _ _ sbody _ _ _ body => Prog.hasTransfer sbody || Prog.hasTransfer body)
 
 /-- Whether a `transfer` occurs in a program of the frames. -/
 def Frames.hasTransfer : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Bool
@@ -296,6 +301,8 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (block := fun body => Prog.callsBack pay body)
     -- not unfolded: its frames may call back
     (callRec := fun _ _ _ _ _ => true)
+    (revertData := fun _ => false)
+    (catchData := fun _ _ _ sbody _ _ _ body => Prog.callsBack pay sbody || Prog.callsBack pay body)
   termination_by structural _ _ s => s
 
 def Prog.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -365,6 +372,8 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
     (callRec := fun _ _ _ _ _ => true)
+    (revertData := fun _ => false)
+    (catchData := fun _ _ _ sbody _ _ _ body => Prog.callsBack pay sbody || Prog.callsBack pay body)
 
 mutual
 
@@ -383,6 +392,11 @@ theorem Stmt.callsBack_true : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     rw [Prog.callsBack_true body, Prog.callsBack_true code]
   | _, _, .loop _ _ body => Prog.callsBack_true body
   | _, _, .block body => Prog.callsBack_true body
+  | _, _, .catchData _ _ _ sbody _ _ _ body => by
+    show (Prog.callsBack true sbody || Prog.callsBack true body) =
+      (Prog.hasTransfer sbody || Prog.hasTransfer body)
+    rw [Prog.callsBack_true sbody, Prog.callsBack_true body]
+  | _, _, .revertData _ => rfl
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
   | _, _, .assignLocalPush .. | _, _, .pushOpAssign .. | _, _, .pushIncDec .. | _, _, .push ..
@@ -418,6 +432,11 @@ theorem Stmt.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (s : Stm
     rw [Prog.callsBack_of_hasTransfer body h.1, Prog.callsBack_of_hasTransfer code h.2]; rfl
   | _, _, .loop _ _ body, h => Prog.callsBack_of_hasTransfer body h
   | _, _, .block body, h => Prog.callsBack_of_hasTransfer body h
+  | _, _, .catchData _ _ _ sbody _ _ _ body, h => by
+    simp only [Stmt.hasTransfer, Bool.or_eq_false_iff] at h
+    show (Prog.callsBack pay sbody || Prog.callsBack pay body) = false
+    rw [Prog.callsBack_of_hasTransfer sbody h.1, Prog.callsBack_of_hasTransfer body h.2]; rfl
+  | _, _, .revertData _, _ => rfl
   | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h
   | _, _, .callRec .., h => nomatch h
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _
@@ -444,7 +463,7 @@ theorem Stmt.forksIn_true {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : s.forksIn true = 
   cases s
   case loop _ _ body => exact Prog.callsBack_true body
   case block body => exact Prog.callsBack_true body
-  all_goals rfl
+  all_goals first | rfl | simp only [Stmt.forksIn, Stmt.forks, Prog.callsBack_true]
 
 /-- A statement that forks under no reading forks under none. -/
 theorem Stmt.forksIn_of_forks {pay : Bool} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} (h : s.forks = false) :
@@ -452,6 +471,10 @@ theorem Stmt.forksIn_of_forks {pay : Bool} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} (h
   cases s
   case loop _ _ body => exact Prog.callsBack_of_hasTransfer body h
   case block body => exact Prog.callsBack_of_hasTransfer body h
+  case catchData =>
+    simp only [Stmt.forks, Bool.or_eq_false_iff] at h
+    simp only [Stmt.forksIn, Prog.callsBack_of_hasTransfer _ h.1, Prog.callsBack_of_hasTransfer _ h.2,
+      Bool.or_self]
   all_goals first | rfl | exact nomatch h
 
 /-! ## Runs with callbacks -/
@@ -646,15 +669,18 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
       ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) → e ≠ .revert → e ≠ .panic →
+        (∀ d, e ≠ .revertWith d) →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true) (.halt e)
-  /-- A self-call whose callee reverts: the `Error` clause, from the
-  caller's state (the callee's effects undone). -/
+  /-- A self-call whose callee reverts with data: the `Error` clause, from the
+  caller's state (the callee's effects undone); taken when the data decodes
+  as `Error(string)` (`TRun.tryCall`), here for any data. -/
   | trySelfError {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
-      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₂} :
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₂}
+      {d : List UInt8} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt .revert) → ExecP J σ err o →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt (.revertWith d)) → ExecP J σ err o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop err.ext))
   /-- A self-call whose callee reverts: the catch-all, from the caller's
@@ -662,9 +688,11 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   | trySelfOther {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
-      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₄} :
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₄}
+      {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt .revert) → ExecP J σ other o →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) →
+      (e = .revert ∨ ∃ d, e = .revertWith d) → ExecP J σ other o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop other.ext))
   /-- A self-call whose callee panics: the `Panic` clause, any code bound. -/
@@ -672,9 +700,10 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {v : Word}
-      {o : COut C σ.H Γ₃} :
+      {o : COut C σ.H Γ₃} {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt .panic) →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) →
+      (e = .panic ∨ ∃ d, e = .revertWith d) →
       ExecP J (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) pnc o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop ((Ext.append Γ κ).trans pnc.ext)))
@@ -715,6 +744,23 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   | block {Γ Γ₁ : Ctx} {σ : State C Γ} {body : Prog C Γ Γ₁} {o : COut C σ.H Γ₁} :
       Prog.callsBack J.pay body = true → ExecP J σ body o →
         ExecS J σ (.block body) (o.map (Out.drop body.ext))
+  /-- A `catch` clause binding the data whose callee or body may call back
+(`Stmt.catchData`): it halts as any statement may, or binds some data — any:
+the data a callee that called back reverts with is not the run's to say —
+and runs its body, its locals popped. -/
+  | catchDataHalt {Γ ρ ps Γf Γ₁ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
+      {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind}
+      {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} {e : THalt} :
+      (Prog.callsBack J.pay sbody || Prog.callsBack J.pay body) = true → e ≠ .panic →
+        ExecS J σ (.catchData call rets sargs sbody self kind x body) (.halt e)
+  | catchDataBody {Γ ρ ps Γf Γ₁ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
+      {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind}
+      {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} {bs : List UInt8}
+      {o₁ : Out C σ.H (.mem bytesR :: Γ)} {o : COut C o₁.st.H Γ₁} :
+      (Prog.callsBack J.pay sbody || Prog.callsBack J.pay body) = true →
+      TRun.litBytesT bs TRun.nil σ = .ok o₁ → ExecP J o₁.st body o →
+        ExecS J σ (.catchData call rets sargs sbody self kind x body)
+          (o.map fun o' => ⟨o'.st.drop ((Ext.push .refl).trans body.ext), o₁.ext.trans o'.ext⟩)
 
 /-- `ExecP J σ P o`: the same, for a sequence. -/
 inductive ExecP (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Prog C Γ Γ' →
@@ -1020,23 +1066,36 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
           cases e with
           | revert =>
             dsimp only
+            rw [← COut.map_ofRes]
+            rcases Prog.exec_run J other σ with h | h
+            · exact .inl (.trySelfOther hz hs hc (.inl rfl) h)
+            · exact .inr (.trySelfOther (o := .violated) hz hs hc (.inl rfl) h)
+          | revertWith d =>
+            dsimp only
             split
             · rw [← COut.map_ofRes]
               rcases Prog.exec_run J err σ with h | h
               · exact .inl (.trySelfError hz hs hc h)
               · exact .inr (.trySelfError (o := .violated) hz hs hc h)
-            · rw [← COut.map_ofRes]
-              rcases Prog.exec_run J other σ with h | h
-              · exact .inl (.trySelfOther hz hs hc h)
-              · exact .inr (.trySelfOther (o := .violated) hz hs hc h)
+            · split
+              · rename_i v _
+                rw [← COut.map_ofRes]
+                rcases Prog.exec_run J pnc
+                  (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env)) with h | h
+                · exact .inl (.trySelfPanic hz hs hc (.inr ⟨d, rfl⟩) h)
+                · exact .inr (.trySelfPanic (o := .violated) hz hs hc (.inr ⟨d, rfl⟩) h)
+              · rw [← COut.map_ofRes]
+                rcases Prog.exec_run J other σ with h | h
+                · exact .inl (.trySelfOther hz hs hc (.inr ⟨d, rfl⟩) h)
+                · exact .inr (.trySelfOther (o := .violated) hz hs hc (.inr ⟨d, rfl⟩) h)
           | panic =>
             rw [← COut.map_ofRes]
             rcases Prog.exec_run J pnc
               (σ.withEnv (TEnv.append _ (code.decodeT (TRun.selfPanicCode call σ)) σ.env)) with h | h
-            · exact .inl (.trySelfPanic hz hs hc h)
-            · exact .inr (.trySelfPanic (o := .violated) hz hs hc h)
-          | diverge => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
-          | exhausted => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
+            · exact .inl (.trySelfPanic hz hs hc (.inl rfl) h)
+            · exact .inr (.trySelfPanic (o := .violated) hz hs hc (.inl rfl) h)
+          | diverge => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide) nofun)
+          | exhausted => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide) nofun)
       · exact .inr (ExecS.trySelfViolated hz hs hc)
     rename_i hns
     have hg : self = true → (call.addr.evalT σ).1 ≠ 0 ∧
@@ -1130,6 +1189,40 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       rcases Prog.exec_run J body σ with h | h
       · exact .inl (.block ht h)
       · exact .inr (.block (o := .violated) ht h)
+  | Γ, _, @Stmt.catchData _ _ _ _ _ Γ₁ c rets sargs sbody self kind x body, σ => by
+    cases hf : (Stmt.catchData c rets sargs sbody self kind x body).forksIn J.pay with
+    | false => exact .inl (.det hf)
+    | true =>
+      show ExecS J σ _ (.ofRes (TRun.catchData c rets sargs sbody.ext sbody.runR self kind
+        body.ext body.runR σ)) ∨ _
+      unfold TRun.catchData
+      cases hb : TRun.catchBytes c rets sargs sbody.ext sbody.runR self σ with
+      | error e => exact .inl (.catchDataHalt hf (TRun.catchBytes_ne_panic hb))
+      | ok d =>
+        simp only [bind, Except.bind]
+        cases kind.decode d with
+        | none => exact .inl (.catchDataHalt hf nofun)
+        | some bs =>
+          dsimp only
+          rw [TRun.litBytesT_seq]
+          unfold TRun.seq
+          cases hl : TRun.litBytesT bs TRun.nil σ with
+          | error e =>
+            refine .inl (.catchDataHalt hf fun hp => ?_)
+            subst hp
+            exact TRun.litBytesT_noPanic (k := TRun.nil) (fun _ => TRes.NoPanic.ok _) bs σ hl
+          | ok o₁ =>
+            dsimp only
+            have hm : ∀ r : TRes (Out C o₁.st.H Γ₁),
+                (COut.ofRes ((r.map fun o' => (⟨o'.st, o₁.ext.trans o'.ext⟩ : Out C σ.H Γ₁)).map
+                  fun o => (⟨o.st.drop ((Ext.push .refl).trans body.ext), o.ext⟩ : Out C σ.H Γ))) =
+                (COut.ofRes r).map fun o' =>
+                  ⟨o'.st.drop ((Ext.push .refl).trans body.ext), o₁.ext.trans o'.ext⟩ := by
+              intro r; cases r <;> rfl
+            rw [hm]
+            rcases Prog.exec_run J body o₁.st with h | h
+            · exact .inl (.catchDataBody hf hl h)
+            · exact .inr (.catchDataBody (o := .violated) hf hl h)
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _ | _, _, .declLocal .., _
   | _, _, .declStorage .., _ | _, _, .opAssign .., _ | _, _, .incDec .., _
   | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _ | _, _, .push .., _
@@ -1137,7 +1230,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
   | _, _, .pop .., _ | _, _, .declMem .., _
   | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _ | _, _, .assignMem .., _
   | _, _, .delete .., _ | _, _, .deleteMem .., _ | _, _, .assignNew .., _ | _, _, .require .., _
-  | _, _, .assert .., _ | _, _, .revert, _ | _, _, .assumeFalse, _ => .inl (.det rfl)
+  | _, _, .assert .., _ | _, _, .revert, _ | _, _, .assumeFalse, _
+  | _, _, .revertData .., _ => .inl (.det rfl)
 
 /-- The same, for a sequence. -/
 theorem Prog.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → ∀ σ : State C Γ,
@@ -1309,6 +1403,12 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
     cases h with
     | det _ => rfl
     | block hb _ => rw [hb] at ht; cases ht
+  | _, _, .catchData .., ht, _, _, h => by
+    cases h with
+    | det _ => rfl
+    | catchDataHalt hb _ | catchDataBody hb _ _ =>
+      have ht' : (Prog.callsBack J.pay _ || Prog.callsBack J.pay _) = false := ht
+      rw [ht'] at hb; cases hb
   | _, _, .assign .., _, _, _, h | _, _, .rebind .., _, _, _, h
   | _, _, .assignLocal .., _, _, _, h | _, _, .declLocal .., _, _, _, h
   | _, _, .declStorage .., _, _, _, h | _, _, .opAssign .., _, _, _, h
@@ -1320,7 +1420,8 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
   | _, _, .assignMem .., _, _, _, h | _, _, .delete .., _, _, _, h
   | _, _, .deleteMem .., _, _, _, h | _, _, .assignNew .., _, _, _, h
   | _, _, .require .., _, _, _, h | _, _, .assert .., _, _, _, h
-  | _, _, .revert, _, _, _, h | _, _, .assumeFalse, _, _, _, h => by cases h; rfl
+  | _, _, .revert, _, _, _, h | _, _, .assumeFalse, _, _, _, h
+  | _, _, .revertData .., _, _, _, h => by cases h; rfl
 
 /-- The same, for a sequence. -/
 theorem Prog.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →

@@ -1195,6 +1195,66 @@ theorem Prog.run_litBytes {Γ Γ₁ : Ctx} (x : Var) (bs : List UInt8)
   · rw [litBytes, TRun.litBytesT, dif_neg hn, dif_neg hn]
     rfl
 
+/-- A sequence, then a third step: the first, then the other two. -/
+theorem TRun.seq_assoc {Γ₁ Γ₂ Γ₃ : Ctx} (a : TStep C Γ Γ₁) (b : TStep C Γ₁ Γ₂) (c : TStep C Γ₂ Γ₃) :
+    TRun.seq (TRun.seq a b) c = TRun.seq a (TRun.seq b c) := by
+  funext σ
+  simp only [TRun.seq]
+  cases a σ with
+  | error => rfl
+  | ok o₁ =>
+    dsimp only
+    cases b o₁.st with
+    | error => rfl
+    | ok o₂ =>
+      dsimp only [Except.map]
+      cases c o₂.st <;> rfl
+
+/-- The empty step, then `k`: `k`. -/
+theorem TRun.seq_nil {Γ₁ : Ctx} (k : TStep C Γ Γ₁) : TRun.seq TRun.nil k = k := by
+  funext σ
+  simp only [TRun.seq, TRun.nil]
+  cases k σ <;> rfl
+
+/-- A literal's writes, then `k`: the writes alone, then `k`. -/
+theorem TRun.litWritesT_seq {Γ₁ : Ctx} (k : TStep C (.mem bytesR :: Γ) Γ₁) :
+    (bs : List UInt8) → (i : Nat) →
+      TRun.litWritesT bs i k = TRun.seq (TRun.litWritesT bs i TRun.nil) k
+  | [], _ => (TRun.seq_nil k).symm
+  | b :: bs, i => by
+    by_cases hi : i < 2 ^ 256
+    · simp only [TRun.litWritesT, dif_pos hi]
+      rw [TRun.seq_assoc, TRun.litWritesT_seq k bs (i + 1)]
+    · simp only [TRun.litWritesT, dif_neg hi]
+      exact (TRun.seq_nil k).symm
+
+/-- A literal's allocation, then `k`: the allocation alone, then `k`. -/
+theorem TRun.litBytesT_seq {Γ₁ : Ctx} (bs : List UInt8) (k : TStep C (.mem bytesR :: Γ) Γ₁) :
+    TRun.litBytesT bs k = TRun.seq (TRun.litBytesT bs TRun.nil) k := by
+  by_cases hn : bs.length < 2 ^ 256
+  · simp only [TRun.litBytesT, dif_pos hn]
+    rw [TRun.seq_assoc, TRun.litWritesT_seq k bs 0]
+  · simp only [TRun.litBytesT, dif_neg hn]
+    rw [TRun.seq_assoc, TRun.seq_nil]
+
+/-- The data read for a `catch` clause is never a panic: a callee's panic is
+its `Panic` data. -/
+theorem TRun.catchBytes_ne_panic {ρ ps Γf : Ctx} {c : ExtCall C Γ} {rets : Binders ρ}
+    {sargs : Args C Γ ps} {hs : Ext (ρ ++ ps) Γf} {sbody : TStep C (ρ ++ ps) Γf} {self : Bool}
+    {σ : State C Γ} {e : THalt} (h : TRun.catchBytes c rets sargs hs sbody self σ = .error e) :
+    e ≠ .panic := by
+  intro hp
+  subst hp
+  unfold TRun.catchBytes at h
+  split at h
+  · cases h
+  split at h
+  · split at h
+    all_goals first | cases h | skip
+    rename_i hpp _
+    exact hpp rfl
+  · split at h <;> cases h
+
 /-! ### Equations -/
 
 section Equations
