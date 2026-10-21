@@ -893,6 +893,44 @@ theorem holds_allocAll (σ : State C Γ) (x : Var) (R : RefTy) (φ : Fml C (.mem
     holds σ (.allocAll x R φ) ↔
       ∀ o : MObj σ.H R, holds ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ :=
   Iff.rfl
+/-- **A fresh array of `n` elements** (`new T[](n)`, `copySt(memory,
+newArr(n))`) read at its own identity: its length is `n`
+(`newArrT_copy_len`; Lean only). -/
+theorem lenU_withMem_newArr {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit))
+    (E : Ty) (n : PrimTy.uint.Denote) (h : (RefTy.array E).newArrOk = true)
+    (hU : (Ty.ref (.array E)).mapFree = true) :
+    (g.withMem (μ.then ((newArrT (.array E) n h).copyStToM μ.heap hU))).val.memT.heap.lenU
+      ((newArrT (.array E) n h).copyStToM μ.heap hU).val = n := by
+  apply Subtype.ext
+  show ((((newArrT (.array E) n h).copyStToM μ.heap hU).heap.len
+    ((newArrT (.array E) n h).copyStToM μ.heap hU).val .dyn : Nat) : Int) = n.val
+  rw [newArrT_copy_len]
+  have := n.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at this
+  omega
+
+/-- `τ` is `σ` over a grown heap that keeps `σ`'s objects (`Fml.grow`). -/
+def _root_.Solidity.State.GrowOf (σ τ : State C Γ) : Prop :=
+  ∃ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap ∧ τ = (σ.adopt g).1
+
+/-- **A heap grown keeping its objects** (`Fml.grow`): every state that
+reads `σ`'s storage, ledger, funds, transaction and locals, and grew from
+it.  The state is a variable, so the closer reads it through these
+equations, not through the adopted heap. -/
+theorem holds_grow (σ : State C Γ) (φ : Fml C Γ) :
+    holds σ (.grow φ) ↔ ∀ τ : State C Γ, τ.storage = σ.storage → τ.net = σ.net →
+      τ.selfBalance = σ.selfBalance → τ.tx = σ.tx → τ.locV = σ.locV → σ.GrowOf τ →
+        holds τ φ := by
+  refine ⟨fun h τ _ _ _ _ _ ⟨g, hk, e⟩ => e ▸ h g hk, fun h g hk => ?_⟩
+  exact h _ rfl rfl rfl rfl (State.locV_adopt σ g) ⟨g, hk, rfl⟩
+theorem adopt_storage {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
+    (σ.adopt g).1.storage = σ.storage := rfl
+theorem adopt_net {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
+    (σ.adopt g).1.net = σ.net := rfl
+theorem adopt_selfBalance {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
+    (σ.adopt g).1.selfBalance = σ.selfBalance := rfl
+theorem adopt_tx {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
+    (σ.adopt g).1.tx = σ.tx := rfl
 theorem alloc_storage {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
     (σ.alloc o).1.storage = σ.storage := rfl
 theorem alloc_net {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) : (σ.alloc o).1.net = σ.net := rfl
@@ -957,7 +995,7 @@ attribute [close_rw_s]
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
-  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon
+  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon CloseS.lenU_withMem_newArr
   CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
@@ -1152,7 +1190,8 @@ grew, `State.alloc`): only then are `sol_close`'s lemmas on fresh objects
 added to its sets, so a leaf with none takes the same path as without them. -/
 def allocInGoal : TacticM Bool := do
   let t ← instantiateMVars (← getMainTarget)
-  return (t.find? fun e => e.isConstOf ``Fml.allocAll || e.isConstOf ``State.alloc).isSome
+  return (t.find? fun e => e.isConstOf ``Fml.allocAll || e.isConstOf ``State.alloc ||
+    e.isConstOf ``Fml.grow || e.isConstOf ``State.adopt).isSome
 
 /-- `sol_close`'s lemmas on a fresh object (`Fml.allocAll`), outside
 `close_rw_s`: `allocInGoal` adds them. -/
@@ -1160,7 +1199,7 @@ def allocLemmas : TacticM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
   #[``CloseS.holds_allocAll, ``CloseS.alloc_storage, ``CloseS.alloc_net,
     ``CloseS.alloc_selfBalance, ``CloseS.alloc_tx, ``CloseS.locV_alloc, ``CloseS.alloc_snd_id,
     ``CloseS.push_lenId, ``CloseS.alloc_lenId, ``CloseS.push_readT, ``CloseS.alloc_readT_index,
-    ``CloseS.push_readId, ``CloseS.alloc_readId_index].mapM fun n =>
+    ``CloseS.push_readId, ``CloseS.alloc_readId_index, ``CloseS.holds_grow].mapM fun n =>
       `(Lean.Parser.Tactic.simpLemma| $(mkIdent n):ident)
 
 /-- The extra lemmas where the goal reads a fresh object, none elsewhere. -/

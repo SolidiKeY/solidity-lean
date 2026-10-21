@@ -291,7 +291,7 @@ def goalParts (g : MVarId) : MetaM (Option (Expr × Expr × Expr)) := do
   -- a definition under the context (`FunContract.obligation`) unfolded, and peeled
   for _ in [0:8] do
     let χ' ← whnfD χ
-    if [``Fml.all, ``Fml.imp, ``Fml.bind, ``Fml.upd, ``Fml.havoc].any χ'.isAppOf then
+    if [``Fml.all, ``Fml.imp, ``Fml.bind, ``Fml.upd, ``Fml.havoc, ``Fml.grow].any χ'.isAppOf then
       (H, Γ, χ) ← Contract.peel C H Γ χ'
     else
       χ := χ'
@@ -320,6 +320,7 @@ partial def splitPrefix (φ : Expr) : MetaM (Expr × (Expr → Expr)) := do
   else if φ.isAppOfArity ``Fml.all 5 then under 4
   else if φ.isAppOfArity ``Fml.bind 6 then under 5
   else if φ.isAppOfArity ``Fml.havoc 3 then under 2
+  else if φ.isAppOfArity ``Fml.grow 3 then under 2
   else return (φ, id)
 
 /-- `sol_symex_rec` on one goal, with fuel. -/

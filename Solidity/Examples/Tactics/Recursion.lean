@@ -3,6 +3,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RecursionCallback
+import Solidity.Calculus.MemContract
 
 /-!
 # Recursive functions
@@ -76,9 +77,11 @@ example : (match Prog.run (State.ofStorage (Storage.init RecursionExample)) runC
 
 /-- **Reference returns**: a recursive function may return a storage alias
 or a fresh memory object.  A storage return's body binds the alias to a
-path (`Stmt.rebind`, within `view`), so it has a contract (`pickAuto`); a
-memory return's allocates and writes, which no mutability's frame keeps, so
-it runs but has no contract (`docs/kernel-port.md`, "Recursion"). -/
+path (`Stmt.rebind`, within `view`), so it has a contract (`pickNoPanic`); a
+memory return's that allocates and binds has one over a grown heap
+(`buildLen`, below); `mk` writes into its object (`p.age = 7`), which no
+frame here keeps, so it runs but has no contract (`docs/kernel-port.md`,
+"Recursion"). -/
 def RefReturns : Contract := contract!{
   uint[] values;
   function pick(uint n) returns (uint[] storage r) {
@@ -125,6 +128,62 @@ theorem pickNoPanic : ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true 
   case post => sol_symex; sol_close
 
 end Refs
+
+
+/-! ## A memory return by contract
+
+`build(n)` returns a fresh array of `n` elements: each frame allocates
+(`new uint[](n)`) and binds its return, and the frame below's array is
+garbage once its length is read, so the body is within `view` as a body that
+allocates (`Prog.withinM`, `Calculus/RunFrameMem.lean`).  Its contract
+`ensures r.length == n` is used at the recursive call: "post"
+(`Fml.callPostM`) reads the call at a heap grown from the caller's that
+keeps its objects (`{grow}`, `Fml.grow`), the returned array any object of
+it of which `ensures` holds, so the frame's `assert` reads the length of
+the frame below's array off the contract (`Calculus/MemContract.lean`). -/
+
+def Build : Contract := contract!{
+  uint a;
+  function build(uint n) returns (uint[] memory r) {
+    if (n == 0) { r = new uint[](0); return r; }
+    uint[] memory s = build(n - 1);
+    assert(s.length == n - 1);
+    r = new uint[](n);
+    return r;
+  }
+}
+
+section Build
+
+local instance : InContract := ⟨Build⟩
+
+/-- **A recursive memory return by its contract**: `build(3)` is an array
+of length `3`, and no frame fails its `assert`; the contract by induction
+over the frames (`RecContractM.unroll`), the frame's own call by the
+hypothesis (`rec_contract_mem`). -/
+theorem buildLen : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
+  rec_contract_mem_by .view cdlIn![uint n]{ true }
+    cdlIn![uint n, old, oldNet, uint[] memory r]{ r.length == n }
+  case hc =>
+    apply RecContractM.unroll
+    intro k t ih
+    refine ⟨FunContract.forall_mem (hd := rfl) (hm := rfl) ?_, ?_, rfl⟩
+    · apply FunContract.ofValidCtx [.user "n"]
+      sol_symex_rec
+      case h₁ => sol_close
+      case h₂ =>
+        rec_contract_mem ih
+        case pre => sol_symex; sol_close
+        case post => sol_symex; sol_close
+    · simp only [Prog.withinM, Stmt.withinM, ih.2.1, Bool.and_true]
+      rfl
+  case pre => sol_symex; sol_close
+  case post => sol_symex; sol_close
+
+/-- info: 'Solidity.Examples.Tactics.Recursion.buildLen' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms buildLen
+
+end Build
 
 /-! ## By contract, proved by induction over the frames -/
 

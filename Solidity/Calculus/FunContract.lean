@@ -986,6 +986,8 @@ syntax ident ident : cdl_local
 syntax ident " memory " ident : cdl_local
 /-- A storage array's alias (`uint[] storage r`): a storage return. -/
 syntax ident noWs "[" "]" &"storage" ident : cdl_local
+/-- A memory array (`uint[] memory r`): a memory return. -/
+syntax ident noWs "[" "]" " memory " ident : cdl_local
 syntax ident : cdl_local
 
 /-- `cdlIn[C | uint x, old, oldNet, uint r]{ φ }`: `φ` read at the locals
@@ -1017,6 +1019,13 @@ elab_rules : term
           | "bool" => `(PrimTy.bool)
           | s => throwErrorAt t "cdlIn: a storage array of uint, int, address or bool, not {s}"
         `(($(quote x.getId.toString), LTy.alias (RefTy.array (Ty.prim $p))))
+      | `(cdl_local| $t:ident[] memory $x:ident) => do
+        let p : Lean.Term ← match t.getId.toString with
+          | "uint" | "address" => `(PrimTy.uint)
+          | "int" => `(PrimTy.int)
+          | "bool" => `(PrimTy.bool)
+          | s => throwErrorAt t "cdlIn: a memory array of uint, int, address or bool, not {s}"
+        `(($(quote x.getId.toString), LTy.mem (RefTy.array (Ty.prim $p))))
       | `(cdl_local| $t:ident memory $x:ident) =>
         `(($(quote x.getId.toString), LTy.mem (RefTy.struct $(quote t.getId.toString))))
       | `(cdl_local| $x:ident) => match x.getId.toString with
@@ -1056,6 +1065,8 @@ partial def peel (C H Γ φ : Expr) : MetaM (Expr × Expr × Expr) := do
     peel C (mkAppN (mkConst ``Hyps.upd) #[C, nil, Γ, a[2]!, H, a[3]!, a[4]!]) a[2]! a[5]!
   else if φ.isAppOfArity ``Fml.havoc 3 then
     peel C (mkAppN (mkConst ``Hyps.havoc) #[C, nil, Γ, H]) Γ a[2]!
+  else if φ.isAppOfArity ``Fml.grow 3 then
+    peel C (mkAppN (mkConst ``Hyps.grow) #[C, nil, Γ, H]) Γ a[2]!
   else return (H, Γ, φ)
 
 /-- `core_contract` on `⊨ φ`: the call at the head of `φ`'s first box,
