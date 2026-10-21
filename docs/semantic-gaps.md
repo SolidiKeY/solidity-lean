@@ -326,17 +326,21 @@ colliding strings would in solc.
 *`#run`* computes a stand-in (`keccakStandIn`, an FNV-style fold) so that it
 tells inputs apart; it is not Keccak-256, and no proof sees it.
 
-**The closer.**  `keccak256(memory, b)` is total (`Op2.total`): an identity
-that names no object hashes `0`, which no program reads.  A hash is an atom
-compared by its terms, so one byte string hashed twice is one value, and a
-string parameter's hash is the same before and after storage writes.  Under
-`⟨⟩`, a hash of a byte string the function built (a literal, an encoding)
-reads a memory of writes, which the closer cannot show returns (`Facts.returns`
-needs every argument to): such an obligation closes under `[]`
-(`/// @custom:key box`) and stays open under `⟨⟩`; two literals of the same
-bytes are two allocations, two terms, not shown equal.  Both need a
-reduction of the hashed object to its literal bytes (a symbol carrying
-them, read off the memory's writes as `size` is read, `lenAtN`): left open.
+**The closers.**  `keccak256(memory, b)` is total (`Op2.total`): an
+identity that names no object hashes `0`, which no program reads.
+`sol_decide` reads a hash as an atom compared by its terms; `sol_close` by
+its object (`Grown.keccakId`, carried past local, storage and ledger updates:
+`CloseS.Landed.keccakId_eq`, `withStorage_keccakId`, …).  So one byte string
+hashed twice is one value, and a string parameter's hash is the same before
+and after storage writes (`tests/solc/Hashing.sol`, `hashParameter`,
+`stringKey`).  Under `⟨⟩`, a hash of a byte string the function built (a
+literal, an encoding) is closed by neither: `sol_decide` does not show that a
+hash of a memory it wrote returns (`Facts.returns` asks it of every
+argument), `sol_close` does not show the writes land; such an obligation
+closes under `[]` (`/// @custom:key box`).  Two literals of the same bytes
+are two allocations, two terms, not shown equal.  Both need a reduction of
+the hashed object to its literal bytes (a symbol carrying them, read off the
+memory's writes as `size` is, `lenAtN`): left open.
 
 **`mapping(string => V)`, `mapping(bytes => V)`** is a `mapping(uint => V)`
 with the marker row `{}#hash` (`hashKeyRows`, `Syntax.lean`); `m[s]` is read
