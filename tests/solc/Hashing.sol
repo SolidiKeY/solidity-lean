@@ -41,4 +41,35 @@ contract Hashing {
         bytes memory t = bytes.concat("x", "yz");
         assert(bytes(s).length == 5 && t.length == 3);
     }
+    // a selector before the arguments: a literal signature's folded as solc
+    // folds it (`f(uint256)` is 0xb3de648b)
+    function encodeWithSignature() public pure {
+        bytes memory e = abi.encodeWithSignature("f(uint256)", 1);
+        assert(e.length == 36 && e[0] == 0xb3 && e[3] == 0x8b && e[35] == 0x01);
+    }
+    function encodeWithSelector() public pure {
+        bytes memory e = abi.encodeWithSelector(bytes4(0x01020304), true);
+        assert(e.length == 36 && e[1] == 0x02 && e[35] == 0x01);
+    }
+    function f(uint x) public pure returns (uint) { return x; }
+    function encodeCall() public view {
+        bytes memory e = abi.encodeCall(this.f, (2));
+        assert(e.length == 36 && e[0] == 0xb3 && e[35] == 0x02);
+    }
+    // an enum packs at one byte (an address at 20: `Codec2.packedWidths` of
+    // `Examples/Tactics/Hashing.lean`)
+    enum Color { Red, Green }
+    function packedEnum() public pure {
+        bytes memory e = abi.encodePacked(Color.Green, uint8(7));
+        assert(e.length == 2 && e[0] == 0x01 && e[1] == 0x07);
+    }
+    // a struct of values: its members' words inline in the head (arrays and a
+    // decoded byte string are read element by element: run in
+    // `Examples/Tactics/Hashing.lean`, `Codec2`)
+    struct Pt { uint x; bool y; }
+    function encodeStruct() public pure {
+        Pt memory p = Pt(3, true);
+        bytes memory e = abi.encode(p);
+        assert(e.length == 64 && e[31] == 0x03 && e[63] == 0x01);
+    }
 }

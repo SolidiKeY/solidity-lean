@@ -3280,14 +3280,21 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let sel := match sel with
         | .call g [x] => if (abiBytesMark? g).isSome then x else sel
         | _ => sel
-      let (P, e) ← hoist (.call "abi.encode" rest)
-      let (Q, r) ← hoist (.call "bytes.concat" [.call (abiBytesMark 4) [sel], e])
-      return (P ++ Q, r)
+      let (P, sel) ← hoist sel
+      -- a `bytesN` argument marked (`abiBytesMark`), a literal byte string in place
+      let marks ← abiMarks rest
+      let rest := rest.map fun a => match a with
+        | .call g [x] => if (abiBytesMark? g).isSome then x else a
+        | _ => a
+      let (Q, rest') ← hoistArgs (rest.map fun a => if a.bytesLit?.isSome then .num 0 else a)
+      let rest := (rest.zip rest').map fun (a, a') => if a.bytesLit?.isSome then a else a'
+      let (R, e) ← abiEncode true false rest marks (sel := some sel)
+      return (P ++ Q ++ R, e)
     if builtin && (f == "abi.encode" || f == "abi.encodePacked" || f == "string.concat" ||
         f == "bytes.concat") then
       -- a `bytesN` marked (`abiBytesMark`); a literal byte string is not
       -- allocated: its bytes are written in place
-      let marks := args.map fun | .call g [_] => abiBytesMark? g | _ => none
+      let marks ← abiMarks args
       let args := args.map fun a => match a with
         | .call g [x] => if (abiBytesMark? g).isSome then x else a
         | _ => a
@@ -3514,6 +3521,20 @@ partial def abiKind (a : RawExpr) : ElabM AbiKind := do
   | .ok _ => throw s!"{a.toStr}: a value of this type is not ABI-encoded here"
   | .error e => throw e
 
+/-- The kinds of `abi.encode`'s arguments that their capture would lose,
+read before it: a `bytesN` marked (`abiBytesMark`), an `address`, an enum
+(`markOf?`). -/
+partial def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
+  let Γ ← ctx
+  pure (args.map fun a => match a with
+    | .call g [_] =>
+      match abiBytesMark? g with
+      | some n => some (.bytesN n)
+      | none => if (lookupBy g C.enums).isSome then some (.uint 8) else none
+    | a =>
+      if (markOf? C Γ "#address" a).isSome then some (.uint 160)
+      else if (markOf? C Γ "#enum" a).isSome then some (.uint 8) else none)
+
 /-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
 `n` head words: the offset `o` that word holds, the length `L` at `o`, then
 the `L` bytes after it copied into a fresh memory `bytes`, each read checked
@@ -3540,9 +3561,20 @@ partial def abiDecodeBytes (T d : String) (h n : Nat) : ElabM (SProg C × String
 /-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
 `string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
-partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option Nat)) :
-    ElabM (SProg C × RawExpr) := do
+partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+    (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) := do
   let mut P : SProg C := []
+  -- a selector's four bytes first (`abi.encodeWithSelector`), every other
+  -- position after them; the head's offsets are the arguments' own
+  let base : Nat := if sel.isSome then 4 else 0
+  let selW : Option String ← match sel with
+    | none => pure none
+    | some e => match e.litVal? with
+      | some v => pure (some ("#" ++ toString v.toNat))
+      | none => do
+        let w := toString (← freshCapture "se")
+        P := P ++ (← elabStmtsP [.decl (.named "uint") w (some e)])
+        pure (some w)
   -- each argument read once: its word in a fresh `uint` (a literal's known),
   -- a byte string in a memory local with its length (a literal's bytes known),
   -- an array or a struct as the place it is (its elements read in order), an
@@ -3550,7 +3582,7 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
   let mut parts : List (AbiKind × String × String × Option (List Nat) × RawExpr) := []
   for (a, mark) in args.zip marks do
     let k ← match mark with
-      | some n => pure (AbiKind.bytesN n)
+      | some k => pure k
       | none => abiKind a
     if strs && k != .dyn then throw "string.concat takes `string`s"
     match k, a.bytesLit? with
@@ -3570,7 +3602,12 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
       if !std then throw s!"{a.toStr}: abi.encodePacked of a struct (solc refuses it)"
       parts := parts ++ [(k, "", "", none, a)]
     | _, _ =>
-      match k.litWord? a with
+      -- an enum's member is its literal position
+      let Γn ← nctx
+      let lit : Option Nat := match a with
+        | .field b g => enumLit? C Γn b g
+        | _ => none
+      match lit.orElse fun _ => k.litWord? a with
       | some v => parts := parts ++ [(k, "#" ++ toString v, "", none, a)]
       | none =>
         let w := toString (← freshCapture "se")
@@ -3594,12 +3631,15 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
       | .arr _ => if std then .binop .add acc ((words L).addN 32) else .binop .add acc (words L)
       | .tuple _ => acc
       | _ => if std then acc else acc.addN k.packedWidth)
-    (.num (if std then 32 * head else 0))
+    (.num (base + if std then 32 * head else 0))
   let mut S : List RawStmt := [.decl (.named "uint") tot (some total),
     .declMemory (.named "bytes") r (some (.newArr (.named "bytes") (.name tot)))]
   -- `o`: where the next tail (`std`) or the next value (packed) starts
   let o := toString (← freshCapture "se")
   S := S ++ [.decl (.named "uint") o (some (.num (if std then 32 * head else 0)))]
+  if let some w := selW then S := S ++ abiWrite r (.num 0) w 4
+  -- `o` at its place in `r`, after the selector
+  let atO (k : Nat) : RawExpr := (RawExpr.name o).addN (base + k)
   -- a byte string's bytes at `p`: a literal's written, another's copied
   let bytesAt (p : RawExpr) (x L : String) (lit : Option (List Nat)) : ElabM (List RawStmt) := do
     match lit with
@@ -3624,35 +3664,35 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
       match k with
       | .dyn =>
         let lenW : List RawStmt := match lit with
-          | some bs => abiLitBytes r (.name o) bs.length 32
-          | none => abiBytes r (.name o) (.name L) 32
-        S := S ++ abiBytes r (.num hpos) (.name o) 32 ++ lenW ++
-          (← bytesAt ((RawExpr.name o).addN 32) x L lit) ++
+          | some bs => abiLitBytes r (atO 0) bs.length 32
+          | none => abiBytes r (atO 0) (.name L) 32
+        S := S ++ abiBytes r (.num (base + hpos)) (.name o) 32 ++ lenW ++
+          (← bytesAt (atO 32) x L lit) ++
           [.assign (.name o) (.binop .add ((RawExpr.name o).addN 32) (pad (len L lit)))]
       | .arr ek =>
-        S := S ++ abiBytes r (.num hpos) (.name o) 32 ++ abiBytes r (.name o) (.name L) 32 ++
-          (← elemsAt ((RawExpr.name o).addN 32) ek a L) ++
+        S := S ++ abiBytes r (.num (base + hpos)) (.name o) 32 ++ abiBytes r (atO 0) (.name L) 32 ++
+          (← elemsAt (atO 32) ek a L) ++
           [.assign (.name o) (.binop .add ((RawExpr.name o).addN 32) (words L))]
       | .fixed ek n =>
-        for j in [0:n] do S := S ++ (← wordAt (.num (hpos + 32 * j)) ek (.index a (.num j)))
+        for j in [0:n] do S := S ++ (← wordAt (.num (base + hpos + 32 * j)) ek (.index a (.num j)))
       | .tuple s =>
         for ((f, ek), j) in ((AbiKind.ofStruct s).getD []).zipIdx do
-          S := S ++ (← wordAt (.num (hpos + 32 * j)) ek (.field a f))
-      | _ => S := S ++ abiStatic r hpos k x
+          S := S ++ (← wordAt (.num (base + hpos + 32 * j)) ek (.field a f))
+      | _ => S := S ++ abiStatic r (base + hpos) k x
     else
       match k with
       | .dyn =>
-        S := S ++ (← bytesAt (.name o) x L lit) ++
+        S := S ++ (← bytesAt (atO 0) x L lit) ++
           [.assign (.name o) (.binop .add (.name o) (len L lit))]
       -- an array's elements packed each in a word, with no length (solc's)
       | .arr ek =>
-        S := S ++ (← elemsAt (.name o) ek a L) ++
+        S := S ++ (← elemsAt (atO 0) ek a L) ++
           [.assign (.name o) (.binop .add (.name o) (words L))]
       | .fixed ek n =>
-        for j in [0:n] do S := S ++ (← wordAt ((RawExpr.name o).addN (32 * j)) ek (.index a (.num j)))
+        for j in [0:n] do S := S ++ (← wordAt (atO (32 * j)) ek (.index a (.num j)))
         S := S ++ [.assign (.name o) ((RawExpr.name o).addN (32 * n))]
       | _ =>
-        S := S ++ abiWrite r (.name o) x k.packedWidth ++
+        S := S ++ abiWrite r (atO 0) x k.packedWidth ++
           [.assign (.name o) ((RawExpr.name o).addN k.packedWidth)]
     hpos := hpos + 32 * k.headWords
   pure (P ++ (← elabStmtsP S), .name r)

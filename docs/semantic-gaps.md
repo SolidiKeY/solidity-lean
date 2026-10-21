@@ -58,9 +58,9 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; open: a byte type as a struct member, `calldata` |
-| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of a dynamic type, an `address`/enum packed at its own width |
-| function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); open: external function types (calls through them refused), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`), a dispatch that would recurse, reference parameters in a function type |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); open: `calldata` |
+| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
+| function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
@@ -183,6 +183,22 @@ its members and widths (and its nested structs) are, else names it its own
 the `struct` members, and a struct constructor call is printed
 (`structConstructorCall`, positional or named).
 
+**Byte and function types as members** (lane `open-left2`).  A member's type
+is spelled as written: `bytesN`, `bytes`, `string`, `address` and a function
+type (`function(uint)returns(uint)`, `spellFnTy`).  The decoder reads a
+`bytesN` as a `uint`, `bytes`/`string` as a `uint[]`, a function type as a
+`uint` (`StructEnc.fnRest`), a byte string's mapping key as a `uint` (its
+hash); `StructEnc.widths` gives each the rows a local of its type has
+(`valueRowsOf`: `h#bytes ↦ 32`, `b[]`/`b[]#bytes`, `name#string`,
+`f#function(…)`, `a#address`), so `structWidths` carries them and a member is
+read and written as a local of its type (`Examples/Tactics/Bytes.lean` §4,
+`tests/solc/Bytes.sol`).  A table struct carries no `address` marker:
+`expandStructs` and the solc import compare widths without it, so a
+contract's struct of the table's name and members keeps the table's name.
+The solc import reads the byte types in a struct check (`tyOf`,
+`narrowShape`).  A struct literal's byte-string argument at a `bytesN`
+member stays a literal, aligned by the member's write.
+
 **Left out.** A struct recursive through an array stays refused (no finite
 rank); structs keep the table's structural identity, so two contracts'
 same-named, same-membered structs are one type (solc's are distinct, but no
@@ -263,8 +279,9 @@ theorems are unchanged.
 - `bytes.concat`, `string.concat`, `abi.*`, `keccak256`: landed
   ("Hashing and the ABI").
 - `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
-  `bytesN` word is left-aligned there), `calldata` (refused for every type),
-  a `bytes`/`string` member of a struct (`StructEnc` spells no byte types).
+  `bytesN` word is left-aligned there), `calldata` (refused for every type).
+- A byte type as a struct member: closed ("Struct table", "Byte and function
+  types as members").
 
 **Status.** (updated as slices land)
 - Slice 1, `bytesN` in `sol{}`: landed.  `bytesTy?`, `valueRows?`, the
@@ -357,12 +374,37 @@ loop):
   `bool` `0`/`1`, `bytesN` left-aligned); a `bytes`/`string` its offset in
   the head, its length and its bytes, padded to 32, in the tail.
 - `abi.encodePacked(…)`, `bytes.concat(…)`, `string.concat(…)`: each value
-  at its own width, a byte string's bytes bare.  An `address` and an enum
-  are `uint`s to the model, so they pack at 32 bytes, not solc's 20 and 1.
+  at its own width, a byte string's bytes bare.  An `address` packs at 20
+  bytes and an enum at one: both are `uint`s to the model, told apart by a
+  marker row beside the width (`addressRows`, `enumRows`: `a#address ↦ 20`,
+  `e#enum ↦ 1`, which `sameShape` ignores), read before the arguments are
+  captured (`abiMarks`, `markOf?`); `msg.sender` and `address(this)` are
+  addresses, an enum's member and conversion enums (the solc import prints
+  a member packed as `E(n)`).
+- An array of values and a struct of values (lane `open-left2`): `abi.encode`
+  writes a `T[]` as an offset in the head and its length and elements' words
+  in the tail (a loop over the elements), a `T[n]` and a struct of value
+  members as their words in the head; `abi.encodePacked` writes an array's
+  elements each in a word, with no length, and refuses a struct, as solc
+  does.  An element's kind is read off the array's rows (`AbiKind.ofValue`).
+- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
+  `abi.encodeCall(g, (…))`: the selector's four bytes, then `abi.encode(…)`
+  of the rest (`abiEncode`'s `sel`).  A selector is folded at elaboration as
+  solc folds it, the first four bytes of the Keccak-256 of the canonical
+  signature (`Keccak.lean`, checked against solc's `evm.methodIdentifiers`):
+  a literal signature's, and `g`'s for a function of the contract, its
+  signature read off its parameters' markers (`fnSignature?`: `address`,
+  `bytesN`, `string`/`bytes`, an enum `uint8`, a struct as its members'
+  tuple, a function type `function`).  A signature that is not a literal is
+  hashed at run time: the first four bytes of its uninterpreted `keccak256`.
+  The run-time hash and the folded one are not shown equal (`keccakBytes`
+  is opaque), which costs completeness, not soundness.
 - `abi.decode(d, (T, …))` of value types: `d` at least `32·n` bytes, each
   word read back; a word out of `T`'s range reverts as solc's decoder does
-  (a high byte not `0`, or not the sign's, a `bool` above `1`).  A dynamic
-  `T` is refused.
+  (a high byte not `0`, or not the sign's, a `bool` above `1`).  A `bytes`
+  or a `string` (lane `open-left2`, `abiDecodeBytes`): the offset its head
+  word holds, the length there, the bytes after it copied into a fresh
+  memory `bytes`, an offset or a length past the data reverting.
 A value is read at its static type (`AbiKind`, `abiKind`).
 
 **Costs.**  `Val`, `Op2` and the Lean rules have one constructor more:
@@ -376,12 +418,23 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 **Left open.**
 - The `⟨⟩` closer on a locally built byte string's hash, and literal
   strings hashed equal across allocations (above).
-- `abi.decode` of `bytes`/`string`/arrays; `abi.encode` of arrays and
-  structs; `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall`.
-- A byte type as a struct member (`StructEnc`, `AST.lean`, spells none: its
-  decoder and `structWidths` would read `bytesN`, `bytes`, `string` as
-  `valueRows?`/`dynBytesRows` do).
+- `abi.decode` of arrays and structs: the grammar writes no type that is not
+  a name in `abi.decode(d, (T))` (`uint[]` is not an expression), and the
+  import prints only elementary types there.
+- `abi.encode` of nested arrays, of arrays of structs and of structs with a
+  reference member (refused by `abiKind`).
+- An array encoded or a byte string decoded is a loop over its elements:
+  the runner proves no such obligation (no invariant), so they are run
+  (`Codec2`, `Examples/Tactics/Hashing.lean`); `abi.encodePacked` of a
+  symbolic `address` writes its 20 bytes through shifts the closer does not
+  read back (an enum's member, a literal, does).
+- `abi.encodeCall` of a function this contract does not declare (an
+  interface's): its signature is not known to `sol{}`.
 - `sha256`, `ripemd160`, `ecrecover`.
+
+**Lane `open-left2` checked** (2026-10-21): `tests/solc/Hashing.sol`'s
+`encodeWithSignature`, `encodeWithSelector`, `encodeCall`, `packedEnum`,
+`encodeStruct` proved; `Codec2` runs (`Examples/Tactics/Hashing.lean`).
 
 **Checked** (2026-10-21): `lean_build` of the default targets;
 `node --test --test-name-pattern="hash|bytes|solc/open"
@@ -432,9 +485,9 @@ read by the elaborator onto `uint`.
   the members so: a function after those it names as values, and a function
   that calls through a value after every function named as a value
   (`callsOf`, `Frontend/SolcJson.lean`).
-- A struct member of a function type is its tag, a `uint` (`spellTy`; the
-  struct table spells no function type, so the member keeps no marker): it
-  is called through a local of the type (`g = hold.f; g(x);`).
+- A struct member of a function type is its tag, a `uint` with its marker:
+  the struct spells the type (`spellTy`, "Struct table"), so `hold.f(x)`
+  dispatches as a local of the type does.
 - The solc import prints a `FunctionTypeName` (`tyText`) and a function
   named as a value by its (renamed) name.
 
@@ -445,19 +498,51 @@ read by the elaborator onto `uint`.
 with no function value pays one lookup per call of a name that is not a
 function.
 
+**Closed in lane `open-left2`.**
+- *A call through a value that is not a name* (`s.f(x)`, `fs[i](x)`,
+  `choose(b)(x)`): `sol{}` writes it `#callValue(callee, args…)`
+  (`callValueName`; `choose(b)(x)` by its own grammar rule, `solCallCall`),
+  and the elaborator evaluates the callee first into a fresh local of its
+  function type (`fnTyOfExpr`: a struct member's or an element's marker, a
+  call's return's), then calls that local as a name (`callValue`).  A
+  struct's member now keeps its type's marker (the struct spells it,
+  "Struct table").  The import prints such a callee as an operand
+  (`isValueCallee`), a call's value parenthesised.
+- *External function types*: a value is an address and a selector, packed
+  as the ABI's `bytes24` packs them, `address * 2^32 + selector`, a `uint`
+  (`fnPure`).  `this.g` and `r.g` for a function `g` of the contract are
+  `r * 2^32 + selector(g)`, the selector folded by Keccak-256 as solc folds
+  it (`fnSelector?`, "Hashing and the ABI"); `h.address` is `h / 2^32`,
+  `h.selector` `h - h / 2^32 * 2^32`, `this.g.selector` the literal.  A call
+  `h(a)` is an external call to `h.address` (`Stmt.tryCall`, every failure
+  reverting the caller as a call outside a `try` does), dispatched on the
+  selector over the contract's functions of `h`'s type (`extDispatch`), so
+  that a call to `this` of one declared before the caller runs it (O8);
+  any other selector is a call the model names `#selector`, the selector its
+  first argument, whose response the world picks as for any external call.
+  `r.g(a)` in an expression (`this.g(a)` too) is such an external call
+  (`extCallStmt`).  The model's checks: `Examples/Tactics/FunctionTypes.lean`
+  §3 runs them (`viaThis(3)` is `6` through the self-call) and pins the
+  signature of a function of every marked type against solc's selector.
+  The closer does not read `(address(this) * 2^32 + s) / 2^32` back to
+  `address(this)` (`ExternalFunctionTypes.externalValue` pending): a closer
+  limit, not a semantic one.
+- *A dispatch that recurses*: a call through a value is a call of each
+  function it may reach (`FunDecl.valueCallees`: the functions of the
+  callee's type a value may name, every function named as a value where the
+  type is not known), so a function that reaches itself through a value is
+  recursive (`isRecursiveC`, `recPartnersC`), its calls and the dispatch's
+  candidates among its partners `Stmt.callRec`'s ("Recursion",
+  `docs/kernel-port.md`).  As every dispatch of a type lists every function
+  of it named as a value, one recursive such function makes every dispatch
+  of the type recursive (`tests/solc/FunctionTypes.sol` keeps it in a
+  contract of its own).
+
 **Left open, with the reason.**
-- External function types (`function (uint) external returns (uint)`):
-  address and selector; printed by the import, a call through one refused.
-  Its call would be an external call (`Stmt.tryCall`'s), from a pair the
-  model has no value for.
-- A call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
-  `choose(b)(x)`): the grammar calls a name; the import leaves the function
-  out (`unsupported`).  Capture it in a local first.
-- A dispatch that would recurse (a function of the signature calling through
-  a value of it): the candidate is not declared before the caller, refused
-  as above.  Recursion through values would need `Stmt.callRec` for the
-  dispatch's candidates, and the recursion analysis (`isRecursive`) to see
-  a call through a value as a call of each candidate.
+- A value of an external function the contract does not declare (`I(a).g`
+  of an interface): its signature, hence its selector, is unknown to
+  `sol{}`; the import prints the member as written, which elaborates only
+  for the contract's own functions.
 - Reference parameters or returns in a function type (`function (uint[]
   memory)`): refused (`fnCompTy?`, the import's `tyText`).
 - A closer limit met on the way, not a function-type one: a stored value

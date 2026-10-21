@@ -413,12 +413,16 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
-test("hashing: keccak256, abi.encode/encodePacked/decode, string keys, concat", () => {
+test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
   const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['equalStringsHashEqual', 'hashParameter', 'encodeLayout', 'encodePacked',
-    'decodeRoundtrip', 'stringKey', 'concatLengths']) assert.equal(status[name], 'proved', name);
+    'decodeRoundtrip', 'stringKey', 'concatLengths',
+    // a selector before the arguments, folded as solc folds it; an enum
+    // packed at one byte; a struct of values in the head
+    'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct'])
+    assert.equal(status[name], 'proved', name);
 });
 
 test("function types: values in locals, parameters, returns, storage, struct members, external", () => {

@@ -1108,6 +1108,15 @@ partial def call (j : Json) : PM String := do
     -- elaborator captures first (`callValueName`)
     let valueCallee := !isSuperMember f && !staticBase && !attached && isValueCallee f
     let as ← args.mapM expr
+    -- `abi.encodePacked` packs an enum at one byte: a member, printed as its
+    -- position, is printed as the enum's conversion `E(n)` so that it keeps
+    -- its type (`markOf?`)
+    let as := if J.kind f == "MemberAccess" && J.str? f "memberName" == some "encodePacked" then
+        (args.zip as).map fun (a, t) =>
+          if (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
+            s!"{(((J.tyStr a).drop 5).splitOn ".").getLast!}({t})"
+          else t
+      else as
     let name ← if let some n := superName then pure n
       else if staticBase then
         match (J.ref? f).bind (lookupBy · (← get).staticNames) with
