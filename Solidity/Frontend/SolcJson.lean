@@ -2155,14 +2155,18 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- named more often than called: named as a value
   let valuesOf (f : Json) : List Int :=
     let hs := heads f
-    (refs f).eraseDups.filter fun r => (refs f).count r > hs.count r
-  let taken : List Int := (funs.flatMap valuesOf).eraseDups
+    let rs := refs f
+    rs.eraseDups.filter fun r => rs.count r > hs.count r
   let callsValue (f : Json) : Bool := (J.nodes f).any fun n =>
     J.kind n == "FunctionCall" && J.str? n "kind" == some "functionCall" &&
       (J.opt n "expression").any fun e => J.kind e == "Identifier" && (J.ref? e).any varIds.contains
+  -- once per function: its values, and whether it calls through one
+  let valueRows : List (Int × List Int × Bool) := funs.filterMap fun f =>
+    (J.id? f).map fun i => (i, valuesOf f, callsValue f)
+  let taken : List Int := (valueRows.flatMap (·.2.1)).eraseDups
   let callsOf : List (Int × List Int) := callsOf.map fun (i, cs) =>
-    match funs.find? (J.id? · == some i) with
-    | some f => (i, (cs ++ valuesOf f ++ (if callsValue f then taken.filter (· != i) else [])).eraseDups)
+    match lookupBy i valueRows with
+    | some (vs, cv) => (i, (cs ++ vs ++ (if cv then taken.filter (· != i) else [])).eraseDups)
     | none => (i, cs)
   let calls (i : Int) : List Int := (lookupBy i callsOf).getD []
   let byId : List (Int × SolcFun) := (funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)
