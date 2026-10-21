@@ -1137,7 +1137,8 @@ section LitBytes
 variable {C : Contract}
 
 theorem PrimTy.inRange_uint_of_lt {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
-  simp only [PrimTy.inRange, decide_eq_true_eq]; omega
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  exact ⟨Int.natCast_nonneg n, Int.ofNat_lt.mpr h⟩
 
 /-- `x[i]`, at the local `x` on top. -/
 def litLoc {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) : MLoc C (.mem bytesR :: Γ) (.prim .uint) :=
@@ -1145,7 +1146,7 @@ def litLoc {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) : MLoc C (.mem bytesR :: Γ) 
 
 /-- A byte, as the `uint` a `bytes1[]` element holds. -/
 def litSrc {Γ : Ctx} (b : UInt8) : MSrc C Γ (.prim .uint) :=
-  .val (.simple (.lit (b.toNat : Int) (PrimTy.inRange_uint_of_lt (by have := b.toNat_lt; omega))))
+  .val (.simple (.lit (b.toNat : Int) (PrimTy.inRange_uint_of_lt (Nat.lt_trans b.toNat_lt (by decide)))))
 
 /-- `x[i] = b;`, `b` a byte, at the local `x` on top. -/
 def litWrite {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) (b : UInt8) :

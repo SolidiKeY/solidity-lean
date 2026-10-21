@@ -795,6 +795,28 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
   | val | copy | copyMem => cases hshape
   | fixedCopy => simp only [Stmt.step, pushStep, hsp, ↓reduceIte]
 
+/-- A revert with data under the box: `true`, as `revert();`. -/
+theorem LeanTaclet.revertDataBox.toStep {d : List (RevPart C Γ)} :
+    Stmt.step k .box (.revertData d) = .done true := rfl
+
+/-- A revert with data under the diamond: `false`. -/
+theorem LeanTaclet.revertDataDiamond.toStep {d : List (RevPart C Γ)} :
+    Stmt.step k .diamond (.revertData d) = .done false := rfl
+
+/-- A `catch` clause binding the data under the box: `catchDataStep`. -/
+theorem LeanTaclet.catchDataBox.toStep {ρ ps Γf Γ₁ : Ctx} {call : ExtCall C Γ}
+    {rets : Binders ρ} {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool}
+    {kind : CatchKind} {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} :
+    Stmt.step k .box (.catchData call rets selfArgs selfBody self kind x body) =
+      catchDataStep .box call selfBody self kind x body := rfl
+
+/-- A `catch` clause binding the data under the diamond: `false`. -/
+theorem LeanTaclet.catchDataDiamond.toStep {ρ ps Γf Γ₁ : Ctx} {call : ExtCall C Γ}
+    {rets : Binders ρ} {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool}
+    {kind : CatchKind} {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} :
+    Stmt.step k .diamond (.catchData call rets selfArgs selfBody self kind x body) = .done false :=
+  rfl
+
 #replay_toStep LeanTaclet
   addmodAssignment "."
   mulmodAssignment "."
@@ -809,10 +831,6 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
   assumeFalse "."
   recursiveCallUnfold "."
   loopExit "."
-  revertDataBox "."
-  revertDataDiamond "."
-  catchDataBox "."
-  catchDataDiamond "."
 
 /-! ## The rule `Stmt.step` fires -/
 

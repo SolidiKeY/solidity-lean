@@ -1022,9 +1022,12 @@ theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : 
         rw [hr] at h; cases h
         have h2 := hok _ o' h1.1 hr
         exact ⟨h2.1.drop _, fun hg' => Storage.Grows.trans (h1.2 hg') (h2.2 hg')⟩
+    · exact hoth.drop h₄ σ o hσ h
     · split at h
       · exact herr.drop h₂ σ o hσ h
-      · exact hoth.drop h₄ σ o hσ h
+      · split at h
+        · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
+        · exact hoth.drop h₄ σ o hσ h
     · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
     · cases h
   split at h
@@ -1422,6 +1425,42 @@ theorem ckeeps_assignMem {g : Bool} {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
   cases h
   exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
 
+theorem ckeeps_litWritesT {g : Bool} {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : CKeeps g k) : (bs : List UInt8) → (i : Nat) → CKeeps g (TRun.litWritesT bs i k)
+  | [], _ => hk
+  | b :: bs, i => by
+    unfold TRun.litWritesT
+    split
+    · exact CKeeps.seq (ckeeps_assignMem _ _) (ckeeps_litWritesT hk bs (i + 1))
+    · exact hk
+
+theorem ckeeps_litBytesT {g : Bool} {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : CKeeps g k) (bs : List UInt8) : CKeeps g (TRun.litBytesT bs k) := by
+  unfold TRun.litBytesT
+  split
+  · exact CKeeps.seq (ckeeps_declMem _ _ _) (ckeeps_litWritesT hk bs 0)
+  · exact CKeeps.seq (ckeeps_declMem _ _ _) hk
+
+/-- A `catch` clause binding the data keeps clean tails as its body does:
+the data is a fresh memory object, the callee's run read for its data only. -/
+theorem ckeeps_catchData {g : Bool} {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
+    (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) {body : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hb : CKeeps g body) : CKeeps g (TRun.catchData c rets sargs hs sbody self kind h₁ body) := by
+  intro σ o hσ h
+  unfold TRun.catchData at h
+  obtain ⟨d, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h
+  · exact (ckeeps_litBytesT hb _).drop _ σ o hσ h
+
+/-- A revert with data ends in no state. -/
+theorem ckeeps_revertData {g : Bool} (d : List (RevPart C Γ)) : CKeeps g (TRun.revertData d) := by
+  intro σ o _ h
+  unfold TRun.revertData at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+
 theorem ckeeps_delete {g : Bool} {T : Ty} (l : Loc C Γ T)
     (hT : T.isPrimitive = true ∨ (g = false ∧ Γ.hasAlias = false)) :
     CKeeps g (TRun.delete l) := by
@@ -1534,6 +1573,8 @@ def Stmt.ctSafe : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool → Bool
         Prog.ctSafe other outer && Prog.ctSafe sbody g)
     (callRec := fun _ _ _ _ _ => false)
     (loop := fun _ _ body => Prog.ctSafe body outer) (block := fun body => Prog.ctSafe body outer)
+    (revertData := fun _ => true)
+    (catchData := fun _ _ _ _ _ _ _ body => Prog.ctSafe body outer)
   termination_by structural _ _ s => s
 
 def Prog.ctSafe : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool → Bool
@@ -1705,6 +1746,10 @@ theorem Stmt.keeps_ct : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (outer : Bool
       · rw [Ctx.hasAlias_append _ hg, Bool.or_true]
   | _, _, .loop _ c body, outer, h => CKeeps.loop c body.ext (Prog.keeps_ct body outer h)
   | _, _, .block body, outer, h => CKeeps.block body.ext (Prog.keeps_ct body outer h)
+  | _, _, .revertData d, _, _ => ckeeps_revertData d
+  | _, _, .catchData c rets sargs sbody self kind _ body, outer, h =>
+    ckeeps_catchData c rets sargs sbody.ext sbody.runR self kind body.ext
+      (Prog.keeps_ct body outer h)
 
 /-- **A block that exposes nothing keeps clean tails.** -/
 theorem Prog.keeps_ct : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (outer : Bool) →

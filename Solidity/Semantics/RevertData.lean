@@ -81,8 +81,10 @@ and one word. -/
 def decodePanic (d : RevertData) : Option Word :=
   if d.take 4 = panicSelector ∧ d.length = 36 then
     let n := bytesNat (d.drop 4)
-    if h : (n : Int) < 2 ^ 256 then some ⟨n, by
-      simp only [PrimTy.inRange, decide_eq_true_eq]; omega⟩ else none
+    if h : n < 2 ^ 256 then some ⟨n, by
+      simp only [PrimTy.inRange, decide_eq_true_eq]
+      exact ⟨Int.natCast_nonneg n, Int.ofNat_lt.mpr h⟩⟩
+    else none
   else none
 
 /-- A reason encoded decodes back. -/
