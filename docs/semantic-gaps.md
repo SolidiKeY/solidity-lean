@@ -393,7 +393,10 @@ a hash compares with its literal value (`tests/solc/Hashing.sol`,
 `equalStringsHashEqual` now under `⟨⟩`, `literalHash`,
 `twoAllocationsHashEqual`; `Examples/Tactics/Hashing.lean`,
 `hashTwiceDiamond`, `abcHash`, `twoAllocations`).  A byte string with a
-symbolic byte or length keeps its hash an atom.
+symbolic byte or length keeps its hash an atom.  The clause is at every hashing builtin (`Op2.hash k`, `HashKind.apply`):
+`sha256` and `ripemd160` of a literal string built here close under `⟨⟩`
+too (`sha256Literal`, `ripemd160Literal`; `sha256AbcDiamond`,
+`ripemd160TwiceDiamond`).
 
 **`mapping(string => V)`, `mapping(bytes => V)`** is a `mapping(uint => V)`
 with the marker row `{}#hash` (`hashKeyRows`, `Syntax.lean`); `m[s]` is read

@@ -116,7 +116,7 @@ contract Hashing {
     }
     function ripemd160Literal() public pure {
         bytes memory b = "abc";
-        assert(ripemd160(b) == bytes20(0x8eb208f7e05d987a9b044a8e98c6b087f15a0bfc));
+        assert(uint160(ripemd160(b)) == 814647003348588794217809277549781461204094028796);
     }
     // `ecrecover`: the precompile's 128 bytes, an address, uninterpreted where
     // the signature is well formed (`ecrecoverBytes`); run in
