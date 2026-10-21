@@ -365,6 +365,8 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     -- every frame of the unrolling (a run deeper than it is exhausted)
     (callRec := fun _ _ args ret body =>
       args.readsIn μ && ret.noMem && Prog.within μ (body ()))
+    (revertData := fun d => d.all fun p => match p with | .word v => v.readsIn μ | _ => true)
+    (catchData := fun _ _ _ _ _ _ _ _ => false)
   termination_by structural _ _ s => s
 
 def Prog.within (μ : Mutability) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -399,6 +401,8 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (callReceiver := fun _ _ _ _ _ => [])
     (callReceiverPush := fun _ _ _ _ code _ => Prog.writesAt d code)
     (callRec := fun _ _ _ ret _ => ret.writesAt d)
+    (revertData := fun _ => [])
+    (catchData := fun _ _ _ _ _ _ _ body => Prog.writesAt (d + 1) body)
   termination_by structural _ _ s => s
 
 def Prog.writesAt (d : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List (LTy × Nat)

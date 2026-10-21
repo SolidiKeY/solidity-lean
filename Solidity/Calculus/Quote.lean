@@ -343,6 +343,19 @@ partial def qStmtH (hs : List Name) (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr
   | .assert c => sctor ``Stmt.assert #[Γe, ← qVal Γ .bool c]
   | .revert => sctor ``Stmt.revert #[Γe]
   | .assumeFalse => sctor ``Stmt.assumeFalse #[Γe]
+  | .revertData d => do
+    let ty := mkApp2 (mkConst ``RevPart) (← contract) Γe
+    let parts ← d.mapM fun
+      | .bytes bs => ctor ``RevPart.bytes Γ #[toExpr bs]
+      | .sel sig => ctor ``RevPart.sel Γ #[toExpr sig]
+      | @RevPart.word _ _ p v => do ctor ``RevPart.word Γ #[toExpr p, ← qVal Γ p v]
+    sctor ``Stmt.revertData #[Γe, parts.foldr
+      (fun x acc => mkApp3 (mkConst ``List.cons [levelZero]) ty x acc)
+      (mkApp (mkConst ``List.nil [levelZero]) ty)]
+  | @Stmt.catchData _ _ ρ ps Γf Γ₁ call rets sargs sbody self kind x body =>
+    sctor ``Stmt.catchData #[Γe, ← qCtx ρ, ← qCtx ps, ← qCtx Γf, ← qCtx Γ₁,
+      ← qExtCall Γ call, ← qBinders ρ rets, ← qArgs Γ ps sargs, ← qProgH hs (ρ ++ ps) Γf sbody,
+      toExpr self, CatchKind.quote kind, toExpr x, ← qProgH hs (.mem bytesR :: Γ) Γ₁ body]
   | @Stmt.call _ _ _ ps rs Γf f args ret body =>
     sctor ``Stmt.call #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, ← qCtx Γf, toExpr f,
       ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProgH hs (rs ++ ps) Γf body]
