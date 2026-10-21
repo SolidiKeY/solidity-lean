@@ -64,6 +64,10 @@ def ctorC? (c : Lean.Name) : Option (Lean.Name × Nat) :=
    (``Proves.unfold, (``ProvesC.unfold, 2)), (``Proves.bind, (``ProvesC.bind, 2)),
    (``Proves.split, (``ProvesC.split, 0)), (``Proves.done, (``ProvesC.done, 1))].lookup c
 
+/-- The captures whose rest may call back (`Semantics/CallbackCapture.lean`),
+each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`. -/
+def captureLemmas : Array Lean.Name := #[`ite]
+
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
   let ty ← instantiateMVars (← g.getType)
@@ -122,8 +126,15 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
                 else `(term| (.$(mkIdent `lean):ident .$rule:ident))
               let rfls := (List.replicate n rflT).toArray
               let f ← ProofTree.short cC
-              pure #[#[← `(tactic| apply $f $d $rfls*)],
-                #[← `(tactic| apply $f (by exact $d) $rfls*)]]
+              -- a capture whose rest calls back: `ProvesC.capture`, its
+              -- side condition the capture's lemma (`Stmt.CapturesAs`)
+              let cap ← if c == ``Proves.unfold then
+                  captureLemmas.mapM fun l => do
+                    let fc ← ProofTree.short ``ProvesC.capture
+                    pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
+                else pure #[]
+              pure (#[#[← `(tactic| apply $f $d $rfls*)],
+                #[← `(tactic| apply $f (by exact $d) $rfls*)]] ++ cap)
             | none => pure #[]
           | none => pure #[]
         -- a transfer calls back only where `pay` is set: `transferNoCallbackBox`

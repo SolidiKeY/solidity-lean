@@ -62,8 +62,8 @@ end CallbackCapture
 open CallbackCapture in
 /-- **`ifElseUnfold` with callbacks**: `if (nse) S₁ else S₂` runs as
 `bool se = nse; if (se) S₁ else S₂`, whatever its branches call. -/
-theorem Stmt.CapturesAs.ite {pay : Bool} {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (x : Var)
-    (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
+theorem Stmt.CapturesAs.ite {pay : Bool} {Γ Γ₁ Γ₂ : Ctx} {c : Val C Γ .bool} {x : Var}
+    {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} :
     (Stmt.ite c thn els).CapturesAs pay
       (.cons (.declLocal .bool x (some c))
         (.cons (.ite (.simple (.local .here)) (thn.wk (.drop .refl)).2.2

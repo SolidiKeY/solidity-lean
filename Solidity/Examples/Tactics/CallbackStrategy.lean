@@ -147,6 +147,65 @@ theorem callEnds :
       ⟨ (bool ok, ) = to.call{value: 5}(""); ⟩ fails <= pings } := by
   sol_prove
 
+/-! ## A captured condition, its branch calling back
+
+`if (pings > 0)` is `bool se = pings > 0; if (se)` (`ifElseUnfold`): the
+capture declares a value and calls nobody, so it fires though the branch
+calls back (`ProvesC.capture`, `Stmt.CapturesAs.ite`). -/
+
+/-- An `if` on a condition that is not a local, its branch a value call. -/
+theorem payIfPinged :
+    ValidT .noCallback dl[Pinger]{ [ if (pings > 0) { (bool ok, ) = to.call{value: 1}(""); }; ]
+      true } := by
+  sol_prove
+
+/-- The same, the invariant kept across the callback. -/
+theorem payIfPingedInv :
+    ValidC pingInv dl[Pinger]{ fails <= pings →
+      [ if (pings > fails) { (bool ok, ) = to.call{value: 1}(""); pings += 1; }; ]
+        fails <= pings } := by
+  sol_prove
+
+/-! Its walk: `ifElseUnfold` by `ProvesC.capture`, then `ifElseSplit`. -/
+
+/--
+info: Try this:
+  refine ProvesC.validT ?_
+    try simp only [TransferSem.inv, TransferSem.pay]
+    apply ProvesC.allIntro
+    apply ProvesC.capture (.key .ifElseUnfold) .ite
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.unfold (.key .binopUnfoldLeft) rfl rfl
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.update (.key .storageRootReadSelect) rfl
+    apply ProvesC.update (.key .binopAssignment) rfl
+    apply ProvesC.updIntro
+    apply ProvesC.split (.key .ifElseSplit)
+    · apply ProvesC.update (.key .valueDeclSkip) rfl
+      apply ProvesC.send .sendWithCallbackBox
+      · refine ProvesC.plain ?_ rfl
+        refine Proves.updIntro ?_
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      · refine ProvesC.plain ?_ rfl
+        refine Proves.updIntro ?_
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      · refine ProvesC.plain ?_ rfl
+        refine Proves.updIntro ?_
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+    · refine ProvesC.plain ?_ rfl
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      exact Proves.closeTrue rfl
+-/
+#guard_msgs in
+example :
+    ValidT .noCallback dl[Pinger]{ [ if (pings > 0) { (bool ok, ) = to.call{value: 1}(""); }; ]
+      true } := by
+  sol_derive?
+
 /-! ## The invariant a specification declares
 
 `invariant[C]` is `C`'s `invariant` clauses as the `Invariant C` a callee
