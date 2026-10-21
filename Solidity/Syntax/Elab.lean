@@ -771,9 +771,12 @@ def RawStmt.mapBlocksM {m : Type → Type} [Monad m] (f : List RawStmt → m (Li
 two `uint` locals, its offset `t$o` into the base array and its length
 `t$n`, after solc's check `i <= j && j <= b.length` (a revert otherwise;
 `j` is `b.length` where it is left out, `i` is `0`).  A slice of a slice
-adds its offset.  Then `t[k]` is `b[k < t$n ? t$o + k : b.length]` (an
-index past the view reverts, as solc's `Panic(0x32)`, which the model reads
-as a revert), `t.length` is `t$n`, and `abi.decode(t, …)` decodes the view
+adds its offset.  Then `t[k]` is `b[t$o + ((t$n - 1) - ((t$n - 1) - k))]`:
+the checked subtractions underflow exactly where `k >= t$n`, so an index
+past the view reverts where solc's `Panic(0x32)` does (the model reads
+both panics as a revert), and the index is `t$o + k` otherwise; inside
+`unchecked`, where they would wrap, `b[k < t$n ? t$o + k : b.length]`.
+`t.length` is `t$n`, and `abi.decode(t, …)` decodes the view
 in place (`#sliceV(b, t$o, t$n)`, `ByteSrc`).  So a read, a length and a
 decoding are loop-free.  A slice used any other way (handed to a function,
 hashed, copied to memory, an index with an effect, a slice opened in a loop
@@ -789,9 +792,12 @@ structure SliceView where
 /-- The hidden builtin a view is decoded through: `#sliceV(b, o, n)`. -/
 def sliceViewName : String := "#sliceV"
 
-/-- The views open, a counter for the names of inline slices, and the
-statements the current statement's slices open before it. -/
-abbrev SliceM := StateM (List (String × SliceView) × Nat × Array RawStmt)
+/-- Inside `unchecked`; the views open, a counter for the names of inline
+slices, and the statements the current statement's slices open before it. -/
+abbrev SliceSt := List (String × SliceView) × Nat × Array RawStmt
+
+@[inherit_doc SliceSt]
+abbrev SliceM := StateT Bool (StateM SliceSt)
 
 instance : Inhabited (SliceM RawExpr) := ⟨pure default⟩
 
@@ -817,7 +823,7 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
   if i.hasIncDec || j.hasIncDec then return none
   let some (base, off0, L) ← (match b with
       | .name x => do
-        match lookupBy x (← get).1 with
+        match lookupBy x (← getThe SliceSt).1 with
         | some v => pure (some (v.base, some v.off, RawExpr.name v.len))
         | none => pure (some (x, none, RawExpr.field (.name x) "length"))
       | b@(.call "#slice" _) => do
@@ -832,30 +838,33 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
      .require (.binop .le (.name o) (.name n)), .require (.binop .le (.name n) L),
      .assign (.name n) (.binop .sub (.name n) (.name o))] ++
     (off0.map fun o0 => RawStmt.assign (.name o) (.binop .add (.name o0) (.name o))).toList
-  modify fun (vs, k, pre) => (vs, k, pre ++ ss.toArray)
+  modifyThe SliceSt fun (vs, k, pre) => (vs, k, pre ++ ss.toArray)
   return some { base, off := o, len := n }
 
 /-- The view an expression is: a view's name, or a slice opened here. -/
 partial def sliceViewOf? : RawExpr → SliceM (Option SliceView)
-  | .name x => return lookupBy x (← get).1
+  | .name x => return lookupBy x (← getThe SliceSt).1
   | .call "#slice" [b, i, j] => do
-    let (_, k, _) ← get
-    modify fun (vs, _, pre) => (vs, k + 1, pre)
+    let (_, k, _) ← getThe SliceSt
+    modifyThe SliceSt fun (vs, _, pre) => (vs, k + 1, pre)
     sliceOpen s!"slice${k}" b i j
   | _ => pure none
 
 /-- One node (`RawExpr.mapM`): a view's index, length and decoding read
 through the view; any other use of a slice refused. -/
 partial def sliceNode (e : RawExpr) : SliceM RawExpr := do
-  let views := (← get).1
+  let views := (← getThe SliceSt).1
   match e with
   | .index v k =>
     if !sliceViewish views v then return e
     let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
     let k ← k.mapM sliceNode
     if k.hasIncDec then return sliceRefuse "indexed by an expression with an effect"
-    return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
-      (.binop .add (.name sv.off) k) (.field (.name sv.base) "length"))
+    if ← getThe Bool then
+      return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
+        (.binop .add (.name sv.off) k) (.field (.name sv.base) "length"))
+    let m : RawExpr := .binop .sub (.name sv.len) (.num 1)
+    return .index (.name sv.base) (.binop .add (.name sv.off) (.binop .sub m (.binop .sub m k)))
   | .field v "length" =>
     if !sliceViewish views v then return e
     let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
@@ -878,33 +887,36 @@ end
 /-- `RawStmt.sliceViews` on a block (above). -/
 partial def sliceStmts (ss : List RawStmt) : SliceM (List RawStmt) := do
   let out ← ss.mapM fun s => do
-    modify fun (vs, k, _) => (vs, k, #[])
+    modifyThe SliceSt fun (vs, k, _) => (vs, k, #[])
     match s with
     | .declMemory _ t (some (.call "#slice" [b, i, j])) =>
       match ← sliceOpen t b i j with
       | some v =>
-        let (vs, k, pre) ← get
-        set ((t, v) :: vs, k, (#[] : Array RawStmt))
+        let (vs, k, pre) ← getThe SliceSt
+        set (σ := SliceSt) ((t, v) :: vs, k, (#[] : Array RawStmt))
         return pre.toList
       | none => return [RawStmt.eval [sliceRefuse "whose base or bounds are not read here"]]
     | s =>
       let s ← s.mapExprsM (·.mapM sliceNode)
-      let pre := (← get).2.2
+      let pre := (← getThe SliceSt).2.2
       -- a loop's condition is read again on each iteration: no slice opened in it
       if !pre.isEmpty && (s matches .whileLoop .. | .doWhile .. | .loop .. | .forLoop ..) then
         return [RawStmt.eval [sliceRefuse "opened in a loop's condition"]]
+      let u ← getThe Bool
       let s ← s.mapBlocksM fun b => do
-        let (vs, k, pre) ← get
+        let (vs, k, pre) ← getThe SliceSt
+        if s matches .unchecked _ then set (σ := Bool) true
         let b ← sliceStmts b
-        let (_, k', _) ← get
-        set (vs, max k k', pre)
+        set (σ := Bool) u
+        let (_, k', _) ← getThe SliceSt
+        set (σ := SliceSt) (vs, max k k', pre)
         pure b
       return pre.toList ++ [s]
   return out.flatten
 
 /-- **A body's calldata slices read as views** (above). -/
 def RawStmt.sliceViews (ss : List RawStmt) : List RawStmt :=
-  (sliceStmts ss).run' ([], 0, #[])
+  ((sliceStmts ss).run' false).run' ([], 0, #[])
 
 /-- Every read of the name `x` renamed `y`, at any depth. -/
 partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=

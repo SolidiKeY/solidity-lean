@@ -2060,7 +2060,7 @@ def expandFun (enums : TyEnv)
   let body ← expandStmt.expandBlock b
   -- a body with a slice reads it as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
   let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome
-    then `(RawStmt.sliceViews $body) else pure body
+    then `($(mkIdent `Solidity.RawStmt.sliceViews) $body) else pure body
   `(($(strLit f),
     ({ params := [$ps,*], paramLocs := [$locs,*], rets := [$rets,*], retMem := $(quote retMem),
        retStorage := $(quote retStorage), body := $body,
