@@ -120,7 +120,9 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
             pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
           -- a loop at its unwinding bound, under the box (`loopExit`)
-          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit]]
+          -- a loop by its invariant, under the box (`whileInvariantBox`)
+          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit],
+              #[← `(tactic| apply $(← ProofTree.short ``ProvesC.invBox) $rflT)]]
           | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets],
               #[← ap ``ProvesC.callVal], #[← ap ``ProvesC.callStorage], #[← ap ``ProvesC.callMem]]
           | _ => pure #[]
