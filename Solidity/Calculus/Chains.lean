@@ -222,7 +222,7 @@ def Frames.keyStrs (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → 
 /-- The slot a formula is, if it is one: `{anon(…)}` over a slot's mark
 (`Fml.slotMark`; `Fml.chainSlot`, `Fml.slotC`). -/
 def Fml.slot? {Γ : Ctx} : Fml C Γ → Option Nat
-  | .anon _ φ => φ.slotMark?
+  | .anon _ φ | .allocAll .. φ => φ.slotMark?
   | _ => none
 
 /-- **A line's comparison key**, the positions named by `ns`: its terms and

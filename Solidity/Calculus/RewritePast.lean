@@ -1414,7 +1414,7 @@ theorem Fml.absorbBinds_holds : {Δ : Ctx} → (φ : Fml C Δ) → (σ : State C
     exact Modality.forallB_imp (fun w hw => Fml.absorbBinds_holds ψ _ hw) h'
   | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h | _, .and .., _, h
   | _, .imp .., _, h | _, .upd .., _, h | _, .modal .., _, h | _, .havoc _, _, h
-  | _, .all .., _, h | _, .anon .., _, h => h
+  | _, .all .., _, h | _, .anon .., _, h | _, .allocAll .., _, h => h
 
 /-- `{U}_m φ` merged with the update `φ` begins with once the hidden binders
 in front of it are absorbed into it, innermost first (`Fml.absorbBinds`): a
@@ -1486,7 +1486,7 @@ theorem Fml.merge2P_sound {m : Modality} {reorder : Bool} : {Γ Δ : Ctx} → (U
         · cases h
   | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .wellFormed _, _, h | _, _, _, .not _, _, h
   | _, _, _, .and .., _, h | _, _, _, .imp .., _, h | _, _, _, .modal .., _, h
-  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h => nomatch h
+  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h | _, _, _, .allocAll .., _, h => nomatch h
 
 /-- `sequentialToParallel` past the program on the updates at positions `k`
 and `k + 1` of the line's update spine, under its quantifiers and hidden
@@ -1522,7 +1522,7 @@ theorem Fml.mergeAtP_sound (reorder : Bool) : {Γ : Ctx} → (k : Nat) → (φ :
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.mergeAtP_sound reorder k φ hψ σ' a
   | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .wellFormed _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
-  | _, k, .anon .., _, h => by
+  | _, k, .anon .., _, h | _, k, .allocAll .., _, h => by
     cases k <;> cases h
 
 theorem Fml.mergeRunP_sound {Γ : Ctx} (reorder : Bool) (k : Nat) : (n : Nat) → (φ : Fml C Γ) →
@@ -1840,7 +1840,7 @@ theorem Fml.substSt_holds {S : Tm C Γ .st} (hL : U.Lands σ₀ g σ₁)
     cases h
     exact imp_congr (Fml.substSt_holds hL hr hst hmem φ hφ) (Fml.substSt_holds hL hr hst hmem ψ hψ)
   | .upd .., _, h | .modal .., _, h | .havoc _, _, h | .all .., _, h | .bind .., _, h
-  | .anon .., _, h => by cases h
+  | .anon .., _, h | .allocAll .., _, h => by cases h
 
 /-- `[{storage := S}] φ ⇝ φ[S/storage]` on the update in front. -/
 def Fml.applyStTop {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
@@ -2511,7 +2511,7 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact forall_congr' fun v => Fml.thinFO?_holds (.keep h) φ hφ' (σ.push (t := .val p) v)
   | _, _, _, .upd .., _, hφ, _ | _, _, _, .modal .., _, hφ, _ | _, _, _, .havoc _, _, hφ, _
-  | _, _, _, .bind .., _, hφ, _ | _, _, _, .anon .., _, hφ, _ => by cases hφ
+  | _, _, _, .bind .., _, hφ, _ | _, _, _, .anon .., _, hφ, _ | _, _, _, .allocAll .., _, hφ, _ => by cases hφ
 
 /-- A formula of `Γ` read in `Γ'`: first-order where it is read both ways
 (under `¬`, left of `→`), and through updates and binders elsewhere. -/
@@ -2583,7 +2583,7 @@ theorem Fml.thinS?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C 
     exact Modality.forallB_intro fun v =>
       Fml.thinS?_holds (.keep h) φ hφ' (σ.push v) (Modality.forallB_all hs v)
   | _, _, _, .modal .., _, hφ, _, _ | _, _, _, .havoc _, _, hφ, _, _
-  | _, _, _, .anon .., _, hφ, _, _ => by cases hφ
+  | _, _, _, .anon .., _, hφ, _, _ | _, _, _, .allocAll .., _, hφ, _, _ => by cases hφ
 
 end Thinning
 
@@ -2795,7 +2795,7 @@ theorem Fml.simpPastAt_sound (every absorb : Bool) : {Γ : Ctx} → (n : Nat) �
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.simpPastAt_sound every absorb n φ hψ σ' a
   | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .wellFormed _, _, h | _, n, .not _, _, h
   | _, n, .and .., _, h | _, n, .imp .., _, h | _, n, .modal .., _, h | _, n, .havoc _, _, h
-  | _, n, .anon .., _, h => by
+  | _, n, .anon .., _, h | _, n, .allocAll .., _, h => by
     cases n <;> cases h
 
 /-- **`simplifyUpdate`** past the program, at position `n` of the spine

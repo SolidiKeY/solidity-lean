@@ -83,6 +83,7 @@ def Fml.evalEqs : Bool → {Γ : Ctx} → Fml C Γ → Fml C Γ
   | goal, _, .bind m x t φ => .bind m x t (Fml.evalEqs goal φ)
   | goal, _, .havoc φ => .havoc (Fml.evalEqs goal φ)
   | goal, _, .anon xs φ => .anon xs (Fml.evalEqs goal φ)
+  | goal, _, .allocAll x A φ => .allocAll x A (Fml.evalEqs goal φ)
   | _, _, φ => φ
 
 /-- The update of `Fml.eqCap` returns where both sides do. -/
@@ -169,6 +170,9 @@ theorem Fml.evalEqs_sound : (goal : Bool) → {Γ : Ctx} → (φ : Fml C Γ) →
   | goal, _, .anon xs φ, σ =>
     ⟨fun hg h b => (Fml.evalEqs_sound goal φ _).1 hg (h b),
       fun hg => forall_congr' fun b => (Fml.evalEqs_sound goal φ _).2 hg⟩
+  | goal, _, .allocAll x A φ, σ =>
+    ⟨fun hg h o => (Fml.evalEqs_sound goal φ _).1 hg (h o),
+      fun hg => forall_congr' fun o => (Fml.evalEqs_sound goal φ _).2 hg⟩
   | _, _, .tt, _ | _, _, .wellFormed _, _ | _, _, .modal .., _ => ⟨fun _ => id, fun _ => Iff.rfl⟩
 
 /-- A formula is valid where its closer's leaf is. -/

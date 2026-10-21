@@ -149,7 +149,7 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
       cases e
       exact forall_congr' fun v => holds_wkFO h.keep φ hφ (σ.push (t := .val p) v)
   | .upd .., _, e, _ | .modal .., _, e, _ | .havoc _, _, e, _ | .bind .., _, e, _
-  | .anon .., _, e, _ => nomatch e
+  | .anon .., _, e, _ | .allocAll .., _, e, _ => nomatch e
 
 /-- What a formula says on the thinned state, its weakening says (`true`
 where it does not weaken). -/

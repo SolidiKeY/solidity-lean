@@ -603,7 +603,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
-  | _, σ, .anon _ φ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .anon _ φ | _, σ, .allocAll .. φ => forall_congr' fun _ => holds_eraseNames _ φ
 
 /-- `φ ~~> L` past the program: `φ` leads to a line `B` that is the line
 written `L` up to its binders' names (`Fml.eraseNames`).  The line written

@@ -107,6 +107,7 @@ def Hyps.instAll {Γ₀ : Ctx} (ts : List InstLit) : {Γ : Ctx} → Hyps C Γ₀
   | _, .all H x p => (H.instAll ts).all x p
   | _, .bind H m x t => (H.instAll ts).bind m x t
   | _, .anon H xs => (H.instAll ts).anon xs
+  | _, .allocAll H x A => (H.instAll ts).allocAll x A
 
 /-- What the instances give, the context gives. -/
 theorem Hyps.instAll_mono {Γ₀ : Ctx} (ts : List InstLit) : {Γ : Ctx} → (H : Hyps C Γ₀ Γ) →
@@ -129,6 +130,9 @@ theorem Hyps.instAll_mono {Γ₀ : Ctx} (ts : List InstLit) : {Γ : Ctx} → (H 
       (fun _ hτ => Modality.forallB_imp (fun _ a => h _ a) hτ) σ hσ
   | _, .anon H xs, φ, ψ, h, σ, hσ =>
     Hyps.instAll_mono ts H (φ := .anon xs φ) (ψ := .anon xs ψ) (fun _ hτ b => h _ (hτ b)) σ hσ
+  | _, .allocAll H x A, φ, ψ, h, σ, hσ =>
+    Hyps.instAll_mono ts H (φ := .allocAll x A φ) (ψ := .allocAll x A ψ)
+      (fun _ hτ o => h _ (hτ o)) σ hσ
 
 /-- **`allLeft` at a leaf**: the sequent with its `∀` premises instantiated
 is valid only where the sequent is. -/

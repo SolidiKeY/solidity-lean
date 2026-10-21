@@ -416,7 +416,7 @@ theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : 
   | _, .havoc φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .all _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .bind _ _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
-  | _, .anon _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .anon _ φ, _ | _, .allocAll .. φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
 
 theorem Fml.eval3_sound (dom : TDom) {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ) :
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ) := by
@@ -726,7 +726,7 @@ theorem Fml.peel_eq (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → 
   | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
   | _, .bind _ _ .oldNet _, _ | _, .bind _ _ .kint _, _ | _, .tt, _ | _, .eq .., _
   | _, .wellFormed _, _ | _, .not _, _ | _, .and .., _ | _, .imp .., _ | _, .upd .., _
-  | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ => rfl
+  | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ | _, .allocAll .., _ => rfl
 
 /-- What fails under the peeled binders fails under the binders: each is a
 `∀` (or a hidden binder, read as one) of the values it is peeled at. -/
@@ -748,7 +748,7 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Semantics.CallValue)) : {Γ 
   | _, _, .bind _ _ .oldNet _, h | _, _, .bind _ _ .kint _, h | _, _, .tt, h | _, _, .eq .., h
   | _, _, .wellFormed _, h
   | _, _, .not _, h | _, _, .and .., h | _, _, .imp .., h | _, _, .upd .., h
-  | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
+  | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h | _, _, .allocAll .., h => h
 
 /-- `φ` read under its leading parameters bound to `vals` (`Fml.peel`). -/
 def Fml.eval3Peel (dom : TDom) (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C Γ)

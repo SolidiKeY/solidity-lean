@@ -62,6 +62,8 @@ def holdsC (I : Fml C []) (pay : Bool) : {Γ : Ctx} → State C Γ → Fml C Γ 
   | _, σ, .all _ p φ => ∀ v : p.Denote, holdsC I pay (σ.push (t := .val p) v) φ
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holdsC I pay (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holdsC I pay (σ.anon xs b) φ
+  | _, σ, .allocAll _ A φ => ∀ o : MObj σ.H A,
+      holdsC I pay ((σ.alloc o).1.push (t := .mem A) (some (σ.alloc o).2)) φ
 
 /-- A first-order formula has no program, so no payment. -/
 theorem Fml.hasTransfer_of_FO : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true → φ.hasTransfer = false
@@ -74,8 +76,8 @@ theorem Fml.hasTransfer_of_FO : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true 
     rw [Fml.hasTransfer_of_FO φ h'.1, Fml.hasTransfer_of_FO ψ h'.2]
     rfl
   | _, .all _ _ φ, h => Fml.hasTransfer_of_FO φ h
-  | _, .upd .., h | _, .modal .., h | _, .havoc _, h | _, .bind .., h | _, .anon .., h =>
-    (Bool.false_ne_true h).elim
+  | _, .upd .., h | _, .modal .., h | _, .havoc _, h | _, .bind .., h | _, .anon .., h
+  | _, .allocAll .., h => (Bool.false_ne_true h).elim
 
 /-- A first-order formula hands control to nobody. -/
 theorem Fml.callsBack_of_FO {pay : Bool} : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true →
@@ -89,8 +91,8 @@ theorem Fml.callsBack_of_FO {pay : Bool} : {Γ : Ctx} → (φ : Fml C Γ) → φ
     rw [Fml.callsBack_of_FO φ h'.1, Fml.callsBack_of_FO ψ h'.2]
     rfl
   | _, .all _ _ φ, h => Fml.callsBack_of_FO φ h
-  | _, .upd .., h | _, .modal .., h | _, .havoc _, h | _, .bind .., h | _, .anon .., h =>
-    (Bool.false_ne_true h).elim
+  | _, .upd .., h | _, .modal .., h | _, .havoc _, h | _, .bind .., h | _, .anon .., h
+  | _, .allocAll .., h => (Bool.false_ne_true h).elim
 
 /-- Frames with no payment and no `try` hand control to nobody. -/
 theorem Frames.callsBack_of_hasTransfer {pay : Bool} {Γ₀ : Ctx} :
@@ -107,7 +109,8 @@ theorem Fml.callsBack_of_hasTransfer {pay : Bool} : {Γ : Ctx} → (φ : Fml C �
     φ.hasTransfer = false → φ.callsBack pay = false
   | _, .tt, _ | _, .eq _ _, _ | _, .wellFormed _, _ => rfl
   | _, .not φ, h | _, .upd _ _ φ, h | _, .havoc φ, h | _, .all _ _ φ, h
-  | _, .bind _ _ _ φ, h | _, .anon _ φ, h => Fml.callsBack_of_hasTransfer φ h
+  | _, .bind _ _ _ φ, h | _, .anon _ φ, h | _, .allocAll _ _ φ, h =>
+    Fml.callsBack_of_hasTransfer φ h
   | _, .and φ ψ, h | _, .imp φ ψ, h => by
     have h' : (φ.hasTransfer || ψ.hasTransfer) = false := h
     rw [Bool.or_eq_false_iff] at h'
@@ -264,6 +267,7 @@ theorem holdsC_iff_holds {I : Fml C []} {pay : Bool} : {Γ : Ctx} → (φ : Fml 
     show m.forallB _ ↔ m.forallB _
     rw [e]
   | _, .anon _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
+  | _, .allocAll _ _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
 
 /-- **A modal formula true with callbacks is true without**, when its
 postcondition has no program paying: the deterministic run, through the

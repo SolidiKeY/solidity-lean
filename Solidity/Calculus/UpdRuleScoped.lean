@@ -1085,6 +1085,7 @@ def Fml.rwAtSM (top : UpdRw C) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
   | _, .all x p φ => (Fml.rwAtSM top φ).map (.all x p)
   | _, .bind m x t φ => (Fml.rwAtSM top φ).map (.bind m x t)
   | _, .anon xs φ => (Fml.rwAtSM top φ).map (.anon xs)
+  | _, .allocAll x A φ => (Fml.rwAtSM top φ).map (.allocAll x A)
   | _, .tt | _, .eq .. | _, .wellFormed _ | _, .not _ => none
 
 /-- `top` at the first update where it fits, outermost first, then left to
@@ -1109,7 +1110,7 @@ theorem Fml.rwAtS_eq_rwAtSM (top : UpdRw C) {Γ : Ctx} (φ : Fml C Γ) :
   induction φ with
   | tt | eq | wellFormed | not => rfl
   | upd m U φ ih | modal m P κ φ ih | havoc φ ih | all x p φ ih | bind m x t φ ih
-  | anon xs φ ih => simp only [Fml.rwAtSM, ← ih]; rfl
+  | anon xs φ ih | allocAll x A φ ih => simp only [Fml.rwAtSM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.rwAtSM, ← ihφ, ← ihψ]; rfl
 
 /-- A rewrite that gives what it rewrites, applied where it fits first,
@@ -1152,6 +1153,9 @@ theorem Fml.rwAtSM_sound {top : UpdRw C} (htop : top.Sound) :
   | _, .anon _ φ, ψ, h, σ, hψ => by
     obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun b => Fml.rwAtSM_sound htop φ h' _ (hψ b)
+  | _, .allocAll _ _ φ, ψ, h, σ, hψ => by
+    obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact fun o => Fml.rwAtSM_sound htop φ h' _ (hψ o)
   | _, .tt, _, h, _, _ | _, .eq .., _, h, _, _ | _, .wellFormed _, _, h, _, _
   | _, .not _, _, h, _, _ => by simp only [Fml.rwAtSM, reduceCtorEq] at h
 
@@ -1224,6 +1228,7 @@ def Fml.simpUpdsSM : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .all x p φ => .all x p (Fml.simpUpdsSM φ)
   | _, .bind m x t φ => .bind m x t (Fml.simpUpdsSM φ)
   | _, .anon xs φ => .anon xs (Fml.simpUpdsSM φ)
+  | _, .allocAll x A φ => .allocAll x A (Fml.simpUpdsSM φ)
   | _, φ => φ
 
 /-- Merge every stack of updates at the positive positions and drop what is
@@ -1241,7 +1246,7 @@ theorem Fml.simpUpdsS_eq_simpUpdsSM {Γ : Ctx} (φ : Fml C Γ) : φ.simpUpdsS = 
   induction φ with
   | tt | eq | wellFormed | not => rfl
   | upd m U φ ih | modal m P κ φ ih | havoc φ ih | all x p φ ih | bind m x t φ ih
-  | anon xs φ ih => simp only [Fml.simpUpdsSM, ← ih]; rfl
+  | anon xs φ ih | allocAll x A φ ih => simp only [Fml.simpUpdsSM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.simpUpdsSM, ← ihφ, ← ihψ]; rfl
 
 /-- What `Upd.skipS` returns gives `{U} φ`. -/
@@ -1265,7 +1270,7 @@ theorem Fml.cleanBM_holds : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ, holds σ 
   | _, .upd m U φ, σ, h => Fml.cleanS_holds m U φ σ h
   | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h | _, .and .., _, h
   | _, .imp .., _, h | _, .modal .., _, h | _, .havoc _, _, h | _, .all .., _, h
-  | _, .anon .., _, h => h
+  | _, .anon .., _, h | _, .allocAll .., _, h => h
 
 theorem Fml.mkUpdS_holds {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ)
     (σ : State C Γ) (h : holds σ (Fml.mkUpdS m U φ)) : holds σ (.upd m U φ) := by
@@ -1287,6 +1292,7 @@ theorem Fml.simpUpdsSM_holds : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ, holds 
   | _, .all _ _ φ, _, h => fun v => Fml.simpUpdsSM_holds φ _ (h v)
   | _, .bind _ _ _ φ, _, h => fun v => Fml.simpUpdsSM_holds φ _ (h v)
   | _, .anon _ φ, _, h => fun b => Fml.simpUpdsSM_holds φ _ (h b)
+  | _, .allocAll _ _ φ, _, h => fun o => Fml.simpUpdsSM_holds φ _ (h o)
   | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h => h
 
 /-- **`Fml.simpUpdsS` gives a formula that gives the original.**

@@ -137,10 +137,10 @@ theorem Fml.belowS_sound
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.belowS_sound hf n φ hψ σ' a
   | _, 0, .tt, _, h | _, 0, .eq .., _, h | _, 0, .wellFormed _, _, h | _, 0, .not _, _, h
   | _, 0, .and .., _, h | _, 0, .imp .., _, h | _, 0, .upd .., _, h | _, 0, .modal .., _, h
-  | _, 0, .havoc _, _, h | _, 0, .anon .., _, h => hf h
+  | _, 0, .havoc _, _, h | _, 0, .anon .., _, h | _, 0, .allocAll .., _, h => hf h
   | _, _ + 1, .tt, _, h | _, _ + 1, .eq .., _, h | _, _ + 1, .wellFormed _, _, h
   | _, _ + 1, .not _, _, h | _, _ + 1, .and .., _, h | _, _ + 1, .imp .., _, h
-  | _, _ + 1, .modal .., _, h | _, _ + 1, .havoc _, _, h | _, _ + 1, .anon .., _, h => by cases h
+  | _, _ + 1, .modal .., _, h | _, _ + 1, .havoc _, _, h | _, _ + 1, .anon .., _, h | _, _ + 1, .allocAll .., _, h => by cases h
 
 /-- A rewrite of the update in front is one of the line. -/
 theorem Fml.atUpd_sound {g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)}
@@ -150,7 +150,7 @@ theorem Fml.atUpd_sound {g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml 
   | _, .upd _ _ _, _, h => hg h
   | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h | _, .and .., _, h
   | _, .imp .., _, h | _, .modal .., _, h | _, .havoc _, _, h | _, .all .., _, h
-  | _, .bind .., _, h | _, .anon .., _, h => by cases h
+  | _, .bind .., _, h | _, .anon .., _, h | _, .allocAll .., _, h => by cases h
 
 end Where
 
@@ -770,19 +770,19 @@ theorem Fml.lawAlongS_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.Eva
   | _, .and .., .tt, _ | _, .and .., .eq .., _ | _, .and .., .wellFormed _, _
   | _, .and .., .not _, _ | _, .and .., .imp .., _ | _, .and .., .upd .., _
   | _, .and .., .modal .., _ | _, .and .., .havoc _, _ | _, .and .., .all .., _
-  | _, .and .., .bind .., _ | _, .and .., .anon .., _
+  | _, .and .., .bind .., _ | _, .and .., .anon .., _ | _, .and .., .allocAll .., _
   | _, .imp .., .tt, _ | _, .imp .., .eq .., _ | _, .imp .., .wellFormed _, _
   | _, .imp .., .not _, _ | _, .imp .., .and .., _ | _, .imp .., .upd .., _
   | _, .imp .., .modal .., _ | _, .imp .., .havoc _, _ | _, .imp .., .all .., _
-  | _, .imp .., .bind .., _ | _, .imp .., .anon .., _
+  | _, .imp .., .bind .., _ | _, .imp .., .anon .., _ | _, .imp .., .allocAll .., _
   | _, .not .., .tt, _ | _, .not .., .eq .., _ | _, .not .., .wellFormed _, _
   | _, .not .., .and .., _ | _, .not .., .imp .., _ | _, .not .., .upd .., _
   | _, .not .., .modal .., _ | _, .not .., .havoc _, _ | _, .not .., .all .., _
-  | _, .not .., .bind .., _ | _, .not .., .anon .., _
+  | _, .not .., .bind .., _ | _, .not .., .anon .., _ | _, .not .., .allocAll .., _
   | _, .upd _, .tt, _ | _, .upd _, .eq .., _ | _, .upd _, .wellFormed _, _
   | _, .upd _, .not _, _ | _, .upd _, .and .., _ | _, .upd _, .imp .., _
   | _, .upd _, .modal .., _ | _, .upd _, .havoc _, _ | _, .upd _, .all .., _
-  | _, .upd _, .bind .., _ | _, .upd _, .anon .., _
+  | _, .upd _, .bind .., _ | _, .upd _, .anon .., _ | _, .upd _, .allocAll .., _
   | _, .opaque, _, _ => Iff.rfl
 
 /-- The law along the skeleton, where it rewrites something. -/
@@ -1039,16 +1039,16 @@ theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : State C Γ} (σ : Stat
     imp_congr (Fml.litPVAlong_holds σ hok l a) (Fml.litPVAlong_holds σ hok r b)
   | .not _ s, .not a => not_congr (Fml.litPVAlong_holds σ hok s a)
   | .lit, .tt | .lit, .not _ | .lit, .and .. | .lit, .imp .. | .lit, .upd .. | .lit, .modal ..
-  | .lit, .havoc _ | .lit, .all .. | .lit, .bind .. | .lit, .anon .. => Iff.rfl
+  | .lit, .havoc _ | .lit, .all .. | .lit, .bind .. | .lit, .anon .. | .lit, .allocAll .. => Iff.rfl
   | .and .., .tt | .and .., .eq .. | .and .., .wellFormed _ | .and .., .not _ | .and .., .imp ..
   | .and .., .upd .. | .and .., .modal .. | .and .., .havoc _ | .and .., .all ..
-  | .and .., .bind .. | .and .., .anon .. => Iff.rfl
+  | .and .., .bind .. | .and .., .anon .. | .and .., .allocAll .. => Iff.rfl
   | .imp .., .tt | .imp .., .eq .. | .imp .., .wellFormed _ | .imp .., .not _ | .imp .., .and ..
   | .imp .., .upd .. | .imp .., .modal .. | .imp .., .havoc _ | .imp .., .all ..
-  | .imp .., .bind .. | .imp .., .anon .. => Iff.rfl
+  | .imp .., .bind .. | .imp .., .anon .. | .imp .., .allocAll .. => Iff.rfl
   | .not .., .tt | .not .., .eq .. | .not .., .wellFormed _ | .not .., .and .. | .not .., .imp ..
   | .not .., .upd .. | .not .., .modal .. | .not .., .havoc _ | .not .., .all ..
-  | .not .., .bind .. | .not .., .anon .. => Iff.rfl
+  | .not .., .bind .. | .not .., .anon .. | .not .., .allocAll .. => Iff.rfl
   | .upd _, _ | .opaque, _ => Iff.rfl
 
 /-- `applyOnPV` under `{U}_m φ`, `φ` of skeleton `s`. -/

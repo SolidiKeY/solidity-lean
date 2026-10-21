@@ -527,7 +527,7 @@ def Fml.Frag : {Γ : Ctx} → Fml C Γ → Prop
   | _, .havoc φ => φ.Frag
   | _, .all _ _ φ => φ.Frag
   | _, .bind _ _ _ φ => φ.Frag
-  | _, .anon _ φ => φ.Frag
+  | _, .anon _ φ | _, .allocAll .. φ => φ.Frag
 
 variable {Γ : Ctx}
 

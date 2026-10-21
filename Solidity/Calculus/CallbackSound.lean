@@ -1209,6 +1209,7 @@ def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀
   | _, .all H x p => .all (Hyps.openInv H) x p
   | _, .bind H m x t => .bind (Hyps.openInv H) m x t
   | _, .anon H xs => .anon (Hyps.openInv H) xs
+  | _, .allocAll H x A => .allocAll (Hyps.openInv H) x A
 
 theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
     (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
@@ -1343,6 +1344,9 @@ theorem Hyps.wrap_openInv {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | anon H xs ih =>
     intro φ ψ h
     exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) fun τ f b => h _ (f b)
+  | allocAll H x A ih =>
+    intro φ ψ h
+    exact ih (φ := .allocAll x A φ) (ψ := .allocAll x A ψ) fun τ f o => h _ (f o)
 
 /-- **The invariant assumed, opened**: at a leaf, each assumed invariant read
 at its scope, a closed first-order formula the closer reads. -/

@@ -213,7 +213,7 @@ def Fml.inSolkey : {Γ : Ctx} → Fml C Γ → Bool
   | _, .and φ ψ | _, .imp φ ψ => Fml.inSolkey φ && Fml.inSolkey ψ
   | _, .upd _ _ φ => Fml.inSolkey φ
   | _, .modal m P κ φ => Prog.inSolkey m P && Frames.inSolkey m κ && Fml.inSolkey φ
-  | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ => Fml.inSolkey φ
+  | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll .. φ => Fml.inSolkey φ
 
 /-- The programs and conditions of a premise are in the fragment.  A `try`'s
 clauses (`branches`) and a loop's invariant rule (`inv`) are not: neither
