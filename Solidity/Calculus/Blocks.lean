@@ -391,24 +391,34 @@ def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
   | some bs => litBytes x bs body
   | none => .cons .revert (litBytes x [] body)
 
+/-- `n` as a `uint` literal, modulo `2^256` (no `bytes` is that long):
+`uintOfNat` below the bound, a literal the closers fold. -/
+def Pat.word (n : Nat) : PrimTy.uint.Denote :=
+  PrimTy.ofLit .uint ((n % 2 ^ 256 : Nat) : Int) (PrimTy.inRange_uint_of_lt (Nat.mod_lt _ (Nat.two_pow_pos 256)))
+
+theorem Pat.word_eq {n : Nat} (h : n < 2 ^ 256) : Pat.word n = uintOfNat n := by
+  rw [uintOfNat_eq_lenU h]
+  unfold Pat.word lenU PrimTy.ofLit
+  simp only [Nat.mod_eq_of_lt h]
+
 /-- `x.length`, the fresh `bytes` on top. -/
 def Pat.lenTm {Γ : Ctx} : Tm C (.mem bytesR :: Γ) (.val .uint) :=
   .app2 (.mlen (E := .prim .uint)) (.app0 .memory) (.pvI .here)
 
 /-- `x[i]`, the fresh `bytes` on top. -/
 def Pat.byteTm {Γ : Ctx} (i : Nat) : Tm C (.mem bytesR :: Γ) (.val .uint) :=
-  .app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (.app0 (.lit (uintOfNat i))))
+  .app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (.app0 (.lit (Pat.word i))))
 
 /-- The bytes known from position `i` on, as equations. -/
 def Pat.byteFmls {Γ : Ctx} : Pat → Nat → List (Fml C (.mem bytesR :: Γ))
   | [], _ => []
   | none :: p, i => Pat.byteFmls p (i + 1)
-  | some b :: p, i => .eq (Pat.byteTm i) (.app0 (.lit (uintOfNat b.toNat))) :: Pat.byteFmls p (i + 1)
+  | some b :: p, i => .eq (Pat.byteTm i) (.app0 (.lit (Pat.word b.toNat))) :: Pat.byteFmls p (i + 1)
 
 /-- **What a datum known in part says of the fresh `bytes` on top**: its
 length, and its known bytes. -/
 def Pat.fml {Γ : Ctx} (p : Pat) : Fml C (.mem bytesR :: Γ) :=
-  Fml.conj (.eq Pat.lenTm (.app0 (.lit (uintOfNat p.length))) :: Pat.byteFmls p 0)
+  Fml.conj (.eq Pat.lenTm (.app0 (.lit (Pat.word p.length))) :: Pat.byteFmls p 0)
 
 /-- What a clause of `kind` may assume of the bytes it binds of a datum
 known in part: the raw data its length and known bytes; of an `Error`

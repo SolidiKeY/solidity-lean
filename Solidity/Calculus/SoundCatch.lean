@@ -101,11 +101,11 @@ theorem Pat.byteTm_eval (σ : State C Γ) (bs : List UInt8) (hn : bs.length < 2 
       some (uintOfNat b.toNat) := by
   have hi : i < 2 ^ 256 := Nat.lt_trans (List.getElem?_eq_some_iff.1 hb).1 hn
   show (σ.alloc (bytesObj σ.H bs hn)).1.glob.memT.readT
-    (MAddrT.index ((σ.alloc (bytesObj σ.H bs hn)).2 : HRef _ bytesR).id .dyn (uintOfNat i)) = _
+    (MAddrT.index ((σ.alloc (bytesObj σ.H bs hn)).2 : HRef _ bytesR).id .dyn (Pat.word i)) = _
   simp only [Grown.readT, MAddrT.resolve, HRef.ofId?_self, Option.map_some, bind, Option.bind]
   show Heap.index (σ.heap.alloc (bytesObj σ.H bs hn)).1 (σ.heap.alloc (bytesObj σ.H bs hn)).2 .dyn
-    (uintOfNat i) = _
-  simp only [Heap.index, Heap.get_alloc, MObj.elems_dyn, MObj.wk, uintOfNat_val hi,
+    (Pat.word i) = _
+  simp only [Heap.index, Heap.get_alloc, MObj.elems_dyn, MObj.wk, Pat.word_eq hi, uintOfNat_val hi,
     Int.toNat_natCast, List.getElem?_map, hb, Option.map_some]
   rw [uintOfNat_eq_lenU (Nat.lt_trans b.toNat_lt (by decide))]
   rfl
@@ -121,7 +121,8 @@ theorem Pat.byteFmls_holds (σ : State C Γ) {bs : List UInt8} (hn : bs.length <
     intro ψ hψ
     rcases List.mem_cons.1 hψ with rfl | hψ
     · exact (holds_eq_of_eval (Pat.byteTm_eval σ bs hn i c
-        (by simpa only [Nat.add_zero] using h 0 c rfl)) rfl).2 rfl
+        (by simpa only [Nat.add_zero] using h 0 c rfl)) rfl).2
+        (Pat.word_eq (Nat.lt_trans c.toNat_lt (by decide))).symm
     · exact Pat.byteFmls_holds σ hn p (i + 1) (fun j b hj => by
         have := h (j + 1) b (by simpa only [List.getElem?_cons_succ] using hj)
         rwa [show i + (j + 1) = i + 1 + j by omega] at this) ψ hψ
@@ -133,7 +134,7 @@ theorem Pat.fml_holds (σ : State C Γ) {p : Pat} {bs : List UInt8} (hn : bs.len
   rw [Pat.fml, holds_conj]
   intro ψ hψ
   rcases List.mem_cons.1 hψ with rfl | hψ
-  · exact (holds_eq_of_eval (Pat.lenTm_eval σ bs hn) rfl).2 (by rw [hm.1])
+  · exact (holds_eq_of_eval (Pat.lenTm_eval σ bs hn) rfl).2 (by rw [hm.1, Pat.word_eq hn])
   · exact Pat.byteFmls_holds σ hn p 0 (fun j b hj => by rw [Nat.zero_add]; exact hm.2 j b hj) ψ hψ
 
 /-- The goal for data of any contents (`Premise.allocBranches`,

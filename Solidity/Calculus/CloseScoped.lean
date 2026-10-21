@@ -906,6 +906,34 @@ theorem alloc_snd_id {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
     ((σ.alloc o).2 : HRef (σ.alloc o).1.H R).id = σ.H.length := rfl
 theorem push_lenId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (E : Ty) (id : Nat) :
     (σ.push v).glob.memT.lenId E id = σ.glob.memT.lenId E id := rfl
+theorem push_readT {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {T : Ty} (a : MAddrT T) :
+    (σ.push v).glob.memT.readT a = σ.glob.memT.readT a := rfl
+/-- An element of the fresh array of words: its list's. -/
+theorem alloc_readT_index {p : PrimTy} (σ : State C Γ) (o : MObj σ.H (.array (.prim p)))
+    (k : PrimTy.uint.Denote) :
+    ((σ.alloc o).1.glob.memT.readT (T := .prim p) (MAddrT.index σ.H.length .dyn k) :
+      Option p.Denote) =
+      ((o : {l : List (MVal σ.H (.prim p)) // l.length < 2 ^ 256}).1[k.1.toNat]? :
+        Option p.Denote) := by
+  rw [← alloc_snd_id σ o]
+  simp only [Grown.readT, MAddrT.resolve, HRef.ofId?_self, Option.map_some, bind, Option.bind]
+  show Heap.index (σ.heap.alloc o).1 (σ.heap.alloc o).2 .dyn k = _
+  simp only [Heap.index, Heap.get_alloc, MObj.elems_dyn, MObj.wk, List.getElem?_map]
+  cases (o : {l : List (MVal σ.H (.prim p)) // l.length < 2 ^ 256}).1[k.1.toNat]? <;> rfl
+theorem push_readId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {T : Ty} (a : MAddrT T) :
+    (σ.push v).glob.memT.readId a = σ.glob.memT.readId a := rfl
+/-- An element of the fresh array of words, as the closer reads it: its
+list's. -/
+theorem alloc_readId_index {p : PrimTy} (σ : State C Γ) (o : MObj σ.H (.array (.prim p)))
+    (k : PrimTy.uint.Denote) :
+    ((σ.alloc o).1.glob.memT.readId (T := .prim p) (MAddrT.index σ.H.length .dyn k) :
+      Option p.Denote) =
+      ((o : {l : List (MVal σ.H (.prim p)) // l.length < 2 ^ 256}).1[k.1.toNat]? :
+        Option p.Denote) := by
+  unfold Grown.readId
+  rw [alloc_readT_index]
+  cases ((o : {l : List (MVal σ.H (.prim p)) // l.length < 2 ^ 256}).1[k.1.toNat]? :
+    Option p.Denote) <;> rfl
 /-- The fresh array's length: its list's (a free value, the object any). -/
 theorem alloc_lenId {E : Ty} (σ : State C Γ) (o : MObj σ.H (.array E)) :
     (σ.alloc o).1.glob.memT.lenId E σ.H.length =
@@ -931,7 +959,8 @@ attribute [close_rw_s]
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon CloseS.holds_allocAll
   CloseS.alloc_storage CloseS.alloc_net CloseS.alloc_selfBalance CloseS.alloc_tx CloseS.locV_alloc
-  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId
+  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId CloseS.push_readT CloseS.alloc_readT_index
+  CloseS.push_readId CloseS.alloc_readId_index
   CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
