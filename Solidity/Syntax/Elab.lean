@@ -771,11 +771,11 @@ def RawStmt.mapBlocksM {m : Type → Type} [Monad m] (f : List RawStmt → m (Li
 two `uint` locals, its offset `t$o` into the base array and its length
 `t$n`, after solc's check `i <= j && j <= b.length` (a revert otherwise;
 `j` is `b.length` where it is left out, `i` is `0`).  A slice of a slice
-adds its offset.  Then `t[k]` is `b[t$o + ((t$n - 1) - ((t$n - 1) - k))]`:
-the checked subtractions underflow exactly where `k >= t$n`, so an index
-past the view reverts where solc's `Panic(0x32)` does (the model reads
-both panics as a revert), and the index is `t$o + k` otherwise; inside
-`unchecked`, where they would wrap, `b[k < t$n ? t$o + k : b.length]`.
+adds its offset.  Then `t[k]` is `b[k < t$n ? t$o + k : (t$n - 1) - k]`:
+past the view the checked subtraction underflows, so the index reverts
+where solc's `Panic(0x32)` does (the model reads both panics as a
+revert); inside `unchecked`, where it would wrap, the index is `b.length`
+there, past the base.
 `t.length` is `t$n`, and `abi.decode(t, …)` decodes the view
 in place (`#sliceV(b, t$o, t$n)`, `ByteSrc`).  So a read, a length and a
 decoding are loop-free.  A slice used any other way (handed to a function,
@@ -863,8 +863,8 @@ partial def sliceNode (e : RawExpr) : SliceM RawExpr := do
     if ← getThe Bool then
       return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
         (.binop .add (.name sv.off) k) (.field (.name sv.base) "length"))
-    let m : RawExpr := .binop .sub (.name sv.len) (.num 1)
-    return .index (.name sv.base) (.binop .add (.name sv.off) (.binop .sub m (.binop .sub m k)))
+    return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
+      (.binop .add (.name sv.off) k) (.binop .sub (.binop .sub (.name sv.len) (.num 1)) k))
   | .field v "length" =>
     if !sliceViewish views v then return e
     let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"

@@ -262,8 +262,8 @@ theorem firstOf : ⊨ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint 
 `b[i:j]` of a calldata array is a view of it (`RawStmt.sliceViews`,
 `Syntax/Elab.lean`): its offset and length are two locals, checked
 `i <= j && j <= b.length` (a revert otherwise), a read `t[k]` is
-`b[i + k]` where `k < t.length` (a revert otherwise, by a checked
-subtraction), and `t.length` is
+`b[i + k]` where `k < t.length` (a revert otherwise: a checked
+subtraction underflows), and `t.length` is
 `j - i`.  No copy, no loop: what reads a slice is proved as any read. -/
 
 /-- Slices of a calldata parameter. -/
@@ -286,7 +286,7 @@ theorem sliceRead : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](3); a[1] = 6; a
 /-- An index past the view reverts, though it is inside the base. -/
 theorem slicePast : ⊨ dl[Sl]{ [ uint[] memory a = new uint[](3); uint v = pick(a, 2); ] false } := by
   sol_symex
-  sol_close
+  sol_decide
 
 /-- The length of a view: `j - i`. -/
 theorem sliceLength : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](5); uint v = len(a, 1, 4); ⟩
