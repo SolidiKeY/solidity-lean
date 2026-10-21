@@ -249,7 +249,7 @@ def Val.MemFree : {p : PrimTy} → Val C Γ p → Bool
   | _, .len b _ => b.MemFree
   | _, .mlen _ _ => false
   | _, .modular _ a b k => a.MemFree && b.MemFree && k.MemFree
-  | _, .keccak _ _ => false
+  | _, .hash _ _ _ => false
 
 end
 
@@ -353,7 +353,7 @@ theorem Val.memFree_wk {Γ Δ : Ctx} (h : Thin Γ Δ) :
   | _, .mlen _ _ => rfl
   | _, .modular _ a b k => by
     simp only [Val.wk, Val.MemFree, Val.memFree_wk h a, Val.memFree_wk h b, Val.memFree_wk h k]
-  | _, .keccak _ _ => rfl
+  | _, .hash _ _ _ => rfl
 
 end
 
@@ -673,7 +673,7 @@ theorem VHole.step_saveLike {p : PrimTy} (lhs : VHole C Γ p) (hl : lhs.MemFree 
   | len b hp => exact hcap
   | mlen b hp => exact absurd he Bool.false_ne_true
   | modular => exact hcap
-  | keccak b hp => exact absurd he Bool.false_ne_true
+  | hash k b hp => exact absurd he Bool.false_ne_true
 
 theorem VHole.lower_saveLike {p : PrimTy} (lhs : VHole C Γ p) (hl : lhs.MemFree = true)
     {other : Premise C Γ Γ} (ho : other.SaveLike) (e : Val C Γ p) (he : e.MemFree = true) :
@@ -831,7 +831,7 @@ theorem localStep_saveLike {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
     · exact Premise.saveLike_captureSP _ hv (by simp only [Stmt.Frag, Val.MemFree, SPath.MemFree])
   | mlen b hp => exact absurd hv Bool.false_ne_true
   | modular op a b n => exact Premise.saveLike_setLocal i _
-  | keccak b hp => exact absurd hv Bool.false_ne_true
+  | hash k b hp => exact absurd hv Bool.false_ne_true
 
 theorem rebindStep_saveLike {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R)
     (hr : r.MemFree = true) : (rebindStep k i r).SaveLike := by

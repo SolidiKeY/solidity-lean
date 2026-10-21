@@ -525,7 +525,7 @@ theorem Val.lower_pushFree : {p : PrimTy} → (v : Val C Γ p) → v.lower.pushF
   | _, .mlen b _ => by
     simp only [Val.lower, Tm.castV_pushFree, Tm.pushFree, Op2.pushFree, MPath.lower_pushFree b,
       Bool.and_self]
-  | _, .keccak b _ => by
+  | _, .hash _ b _ => by
     simp only [Val.lower, Tm.castV_pushFree, Tm.pushFree, Op2.pushFree, MPath.lower_pushFree b,
       Bool.and_self]
 

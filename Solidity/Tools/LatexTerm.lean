@@ -314,7 +314,7 @@ def symbols : Array Sym := #[
   ⟨``Op2.sfindIn, "\\mathit{find}", "\\find", some "\\TFind"⟩,
   ⟨``Op2.zbin, "", "", none⟩, ⟨``Op2.zcmp, "", "", none⟩,
   -- Lean only: solkey has no hash
-  ⟨``Op2.keccak, "\\mathit{keccak256}", "\\mathit{keccak256}", none⟩,
+  ⟨``Op2.hash, "\\mathit{hash}", "\\mathit{hash}", none⟩,
   -- Op3
   ⟨``Op3.ite, "", "", none⟩,
   ⟨``Op3.save, "\\mathit{save}", "\\save", none⟩,

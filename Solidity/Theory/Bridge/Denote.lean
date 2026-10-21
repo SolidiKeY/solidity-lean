@@ -126,7 +126,7 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .sfindIn, _, _, ds, dp => ds.find dp
   | .zbin op _, _, _, da, db => do some (op.evalZ (← da) (← db))
   | .zcmp op _, _, _, da, db => do some (op.cmpZ (← da) (← db))
-  | .keccak, x, y, _, _ => Op2.eval g .keccak x y
+  | .hash k, x, y, _, _ => Op2.eval g (.hash k) x y
 
 /-- A ternary symbol in the Theory, its arguments' denotations given. -/
 def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.TDen C → s.TDen C
@@ -306,7 +306,7 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
       | some w =>
         have hw : db = some w := hy w rfl
         rw [hw]; exact hv
-  | read | mlen | keccak => exact hv'
+  | read | mlen | hash _ => exact hv'
   | copyMem =>
     simp only [Srt.Bridge]
     rw [Op2.denote, hv']

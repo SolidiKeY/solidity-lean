@@ -184,7 +184,7 @@ def Val.mayHalt {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Bool
     a.mayHalt || b.mayHalt || [BinOp.pow, .div, .mod, .shl, .shr].contains op
   | _, .unop _ _ _ a => a.mayHalt
   | _, .ternary c a b => c.mayHalt || a.mayHalt || b.mayHalt
-  | _, .readMem _ | _, .len .. | _, .mlen .. | _, .modular .. | _, .keccak .. => true
+  | _, .readMem _ | _, .len .. | _, .mlen .. | _, .modular .. | _, .hash .. => true
 
 mutual
 
@@ -208,7 +208,7 @@ def Val.guard {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Option (Val C Γ .boo
   | _, .len b _ => b.guard
   | _, .mlen b _ => b.guard
   | _, .modular _ a b k => andO a.guard (andO b.guard k.guard)
-  | _, .keccak b _ => b.guard
+  | _, .hash _ b _ => b.guard
 
 def SPath.guard {Γ : Ctx} : {T : Ty} → SPath C Γ T → Option (Val C Γ .bool)
   | _, .alias _ => none

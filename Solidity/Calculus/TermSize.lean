@@ -147,7 +147,7 @@ def Val.size : {p : PrimTy} → Val C Γ p → Nat
   | _, .len b _ => 1 + b.size
   | _, .mlen b _ => 1 + b.size
   | _, .modular _ a b k => 1 + a.size + b.size + k.size
-  | _, .keccak b _ => 1 + b.size
+  | _, .hash _ b _ => 1 + b.size
 
 end
 
@@ -338,7 +338,7 @@ theorem Val.lower_size : {p : PrimTy} → (v : Val C Γ p) → v.lower.size ≤ 
   | _, .mlen b _ => by
     have := MPath.lower_size b
     simp only [Val.lower, Tm.size_castV, Tm.size, Val.size]; omega
-  | _, .keccak b _ => by
+  | _, .hash _ b _ => by
     have := MPath.lower_size b
     simp only [Val.lower, Tm.size_castV, Tm.size, Val.size]; omega
   | _, .modular _ a b k => by
@@ -395,7 +395,7 @@ theorem Val.size_up {t : LTy} : {p : PrimTy} → (v : Val C Γ p) → (v.up (t :
   | _, .mlen b _ => by simp only [Val.up, Val.size, MPath.size_up b]
   | _, .modular _ a b k => by
     simp only [Val.up, Val.size, Val.size_up a, Val.size_up b, Val.size_up k]
-  | _, .keccak b _ => by simp only [Val.up, Val.size, MPath.size_up b]
+  | _, .hash _ b _ => by simp only [Val.up, Val.size, MPath.size_up b]
 
 end
 
@@ -706,7 +706,7 @@ theorem localStep_bounded {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
     | var mv hm => exact .upd1 (UpdElem.setLocal_size i _)
     | loc l => bnil
   | modular op a b m => exact .upd1 (UpdElem.setLocal_size i _)
-  | keccak b hp => exact .upd1 (UpdElem.setLocal_size i _)
+  | hash k b hp => exact .upd1 (UpdElem.setLocal_size i _)
 
 theorem rebindStep_bounded {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
     (rebindStep k i r).Bounded (6 * r.size + 3) := by

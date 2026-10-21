@@ -127,7 +127,7 @@ theorem Op2.eval_drel {a b s : Srt} (o : Op2 C a b s) (hat : o.isAt = false)
     Srt.DRel s (o.eval g₁ x₁ y₁) (o.eval g₂ x₂ y₂) := by
   cases o with
   | «at» it => cases hat
-  | read | mlen | keccak | copyMem | iread | copy =>
+  | read | mlen | hash _ | copyMem | iread | copy =>
     cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
       reduceCtorEq, Option.some.injEq] at hx
     · cases hy; rfl

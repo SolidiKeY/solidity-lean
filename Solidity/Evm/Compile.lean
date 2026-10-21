@@ -124,7 +124,7 @@ def valIn {Γ : Ctx} (F : Frag Γ) : {p : PrimTy} → Solidity.Val C Γ p → Bo
   | _, @Solidity.Val.unop _ _ p _ op _ _ a => unInFrag op p && valIn F a
   | _, .ternary c a b => valIn F c && valIn F a && valIn F b
   | _, .len b _ => spathIn F false b
-  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .keccak .. => false
+  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .hash .. => false
 end
 
 /-- The storage location an `op=` target names, if it is one. -/
@@ -314,7 +314,7 @@ def compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} → Solidity.Val C Γ p → L
     compileVal b c ++ [.iszero, .jumpi ((compileVal b x).length + 1)] ++ compileVal b x ++
       [.jump (compileVal b y).length] ++ compileVal b y
   | _, .len q _ => compileSPath b q ++ [.sload]
-  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .keccak .. => []
+  | _, .readMem _ | _, .mlen .. | _, .modular .. | _, .hash .. => []
 end
 
 /-- `b.push(…)`: the array's slot, the value (a word, or a static value's

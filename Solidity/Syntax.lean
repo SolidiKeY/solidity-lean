@@ -540,9 +540,16 @@ into a fresh local of its function type before the call (`hoist`,
 `Syntax/Elab.lean`). -/
 def callValueName : String := "#callValue"
 
-/-- `keccak256(b)` once `hoist` has made `b` a memory path: the member
-`b.#keccak256`, which no source can write (`Val.keccak`). -/
-def keccakMember : String := "#keccak256"
+/-- `keccak256(b)` (`sha256(b)`, …) once `hoist` has made `b` a memory path:
+the member `b.#keccak256`, which no source can write (`Val.hash`). -/
+def hashMember (k : HashKind) : String := "#" ++ k.toStr
+
+/-- A hashing builtin's name (`HashKind.ofName?`). -/
+def isHashName (f : String) : Bool := (HashKind.ofName? f).isSome
+
+/-- The hash a member names, if it is one (`hashMember`). -/
+def hashMember? (f : String) : Option HashKind :=
+  if f.startsWith "#" then HashKind.ofName? (f.drop 1) else none
 
 /-- The literal of the bytes `bs`. -/
 def RawExpr.bytesLit (bs : List Nat) : RawExpr := .call bytesLitName (bs.map .num)
@@ -1153,7 +1160,7 @@ def encodeBuiltin (f : String) : Bool :=
 /-- A builtin that reads byte strings whole: `keccak256`, the ABI's, the
 `concat`s (and `#abiDecode`, `abi.decode`'s lowering). -/
 def byteBuiltin (f : String) : Bool :=
-  encodeBuiltin f || ["keccak256", "abi.decode", "#abiDecode"].contains f
+  encodeBuiltin f || ["keccak256", "sha256", "ripemd160", "abi.decode", "#abiDecode"].contains f
 
 /-- `f`, a function's name: an identifier with no member access. -/
 def funName? (f : TSyntax `sol_expr) : Option String :=

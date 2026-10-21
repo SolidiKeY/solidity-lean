@@ -925,6 +925,28 @@ def ModOp.ofName? : String → Option ModOp
   | "mulmod" => some .mulmod
   | _ => none
 
+/-- The builtins that hash a memory byte string whole, by the function they
+compute (`HashKind.apply`, `Semantics/Heap.lean`; `docs/semantic-gaps.md`,
+"Hashing and the ABI"): `keccak256`, the precompiles `sha256` and
+`ripemd160`, and `ecrecover`, whose bytes are its four arguments' ABI words. -/
+inductive HashKind where
+  | keccak | sha256 | ripemd160 | ecrecover
+  deriving DecidableEq, Repr, Lean.ToExpr, Inhabited
+
+/-- The builtin's name, as Solidity spells it. -/
+def HashKind.toStr : HashKind → String
+  | .keccak => "keccak256"
+  | .sha256 => "sha256"
+  | .ripemd160 => "ripemd160"
+  | .ecrecover => "ecrecover"
+
+def HashKind.ofName? : String → Option HashKind
+  | "keccak256" => some .keccak
+  | "sha256" => some .sha256
+  | "ripemd160" => some .ripemd160
+  | "ecrecover" => some .ecrecover
+  | _ => none
+
 /-- Binary operators of the KeY calculus (`solidityProgramRules.key`):
 arithmetic (`addition` .. `modulo`), comparisons (`lessThan` ..
 `greaterEqual`) and boolean connectives (`boolEquality`, `boolInequality`,

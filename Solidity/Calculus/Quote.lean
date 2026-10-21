@@ -152,8 +152,8 @@ partial def qVal (Γ : Ctx) : (p : PrimTy) → Val C Γ p → QM Expr
     ctor ``Val.mlen Γ #[toExpr p, toExpr E, ← qMPath Γ _ b, rflPrim p]
   | _, .modular op a b k => do
     ctor ``Val.modular Γ #[toExpr op, ← qVal Γ .uint a, ← qVal Γ .uint b, ← qVal Γ .uint k]
-  | p, @Val.keccak _ _ _ R b _ => do
-    ctor ``Val.keccak Γ #[toExpr p, toExpr R, ← qMPath Γ _ b, rflPrim p]
+  | p, @Val.hash _ _ _ R k b _ => do
+    ctor ``Val.hash Γ #[toExpr p, toExpr R, toExpr k, ← qMPath Γ _ b, rflPrim p]
 
 end
 
@@ -479,7 +479,8 @@ def qOp2 : {a b s : Srt} → Op2 C a b s → QM Expr
   | _, _, _, @Op2.len _ E => do return mkApp2 (mkConst ``Op2.len) (← contract) (toExpr E)
   | _, _, _, @Op2.read _ p => do return mkApp2 (mkConst ``Op2.read) (← contract) (toExpr p)
   | _, _, _, @Op2.mlen _ E => do return mkApp2 (mkConst ``Op2.mlen) (← contract) (toExpr E)
-  | _, _, _, @Op2.keccak _ R => do return mkApp2 (mkConst ``Op2.keccak) (← contract) (toExpr R)
+  | _, _, _, @Op2.hash _ R k => do
+    return mkApp3 (mkConst ``Op2.hash) (← contract) (toExpr R) (toExpr k)
   | _, _, _, @Op2.at _ R k V it => do
     return mkAppN (mkConst ``Op2.at) #[← contract, toExpr R, toExpr k, toExpr V, IndexTy.quote it]
   | _, _, _, @Op2.nextIn _ E => do return mkApp2 (mkConst ``Op2.nextIn) (← contract) (toExpr E)

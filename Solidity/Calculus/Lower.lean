@@ -103,7 +103,7 @@ def Val.lower : {p : PrimTy} → Val C Γ p → Tm C Γ (.val p)
   | _, .len b hp => Tm.castV hp.symm (.app2 .len (.app0 .storage) b.lower)
   | _, .mlen b hp => Tm.castV hp.symm (.app2 .mlen (.app0 .memory) b.lower)
   | _, .modular op a b k => .app3 (.modular op) a.lower b.lower k.lower
-  | _, .keccak b hp => Tm.castV hp.symm (.app2 .keccak (.app0 .memory) b.lower)
+  | _, .hash k b hp => Tm.castV hp.symm (.app2 (.hash k) (.app0 .memory) b.lower)
 
 end
 

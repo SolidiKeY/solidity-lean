@@ -967,7 +967,7 @@ def Val.vars {Γ : Ctx} (ns : List Var) : {p : PrimTy} → Val C Γ p → List V
   | _, .readMem l => l.vars ns
   | _, .len b _ => b.vars ns
   | _, .mlen b _ => b.vars ns
-  | _, .keccak b _ => b.vars ns
+  | _, .hash _ b _ => b.vars ns
   | _, .modular _ a b k => a.vars ns ++ b.vars ns ++ k.vars ns
 
 end
@@ -1199,8 +1199,8 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       else throw s!"member access .{f} on an array"
     | .mpath (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.mlen b rfl))
-      -- `keccak256(b)`, as `hoist` leaves it (`keccakMember`)
-      else if f == keccakMember then pure (.val .uint (.keccak b rfl))
+      -- `keccak256(b)`, `sha256(b)`, …, as `hoist` leaves it (`hashMember`)
+      else if let some k := hashMember? f then pure (.val .uint (.hash k b rfl))
       else throw s!"member access .{f} on an array"
     -- a fixed-size array's length is its type's: the literal, as solc folds
     -- it.  A base that indexes is evaluated first (it may revert), so
@@ -2001,7 +2001,8 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
     | some n => some n
     | none => do
       -- the builtin `keccak256` is a `bytes32`
-      if f == "keccak256" && (lookupBy f C.funs).isNone then return 32
+      if (f == "keccak256" || f == "sha256") && (lookupBy f C.funs).isNone then return 32
+      if f == "ripemd160" && (lookupBy f C.funs).isNone then return 20
       let d ← lookupBy f C.funs
       let (r, .prim _) ← d.ret | none
       lookupBy (r ++ "#bytes") d.widths
@@ -3125,6 +3126,37 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
     | _, _ => throw s!"`{e}`: a custom error's reference argument is not modelled"
   pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
 
+/-- `keccak256(b)`, `sha256(b)`, `ripemd160(b)`: of a memory `bytes` (a
+storage one copied first), into a fresh `bytes32` (`Val.hash`);
+`ripemd160`'s `bytes20` is that word's first 20 bytes (`ripemd160Bytes`).
+`ecrecover(h, v, r, s)`: of the precompile's input, the four arguments' ABI
+words (`abi.encode`), an `address` (`ecrecoverBytes`). -/
+def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (abiMemBytes : RawExpr → ElabM (SProg C × String))
+    (elabStmtsP : List RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr) :
+    ElabM (SProg C × RawExpr) := do
+  let k := (HashKind.ofName? f).getD .keccak
+  if f == "ecrecover" then
+    let [_, _, _, _] := args | throw "ecrecover takes four arguments"
+    let (P, a) ← hoist (.call "abi.encode" args)
+    let (Q, b) ← abiMemBytes a
+    let y := toString (← freshCapture "se")
+    let R ← elabStmtsP [.decl (.named "uint256") y
+      (some (.field (.name b) (hashMember .ecrecover)))]
+    let z := toString (← freshCapture "se")
+    let R' ← elabStmtsP [.decl (.named "address") z
+      (some (.call "address" [.call "uint160" [.name y]]))]
+    return (P ++ Q ++ R ++ R', .name z)
+  let [a] := args | throw s!"{f} takes one argument"
+  let (P, a) ← hoist a
+  let (Q, b) ← abiMemBytes a
+  let y := toString (← freshCapture "se")
+  let R ← elabStmtsP [.decl (.named "bytes32") y (some (.field (.name b) (hashMember k)))]
+  unless f == "ripemd160" do return (P ++ Q ++ R, .name y)
+  let z := toString (← freshCapture "se")
+  let R' ← elabStmtsP [.decl (.named "bytes20") z (some (.call "bytes20" [.name y]))]
+  return (P ++ Q ++ R ++ R', .name z)
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -3294,15 +3326,9 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
     let builtin := (← read).funs.all (·.1 != f)
-    -- `keccak256(b)`: of a memory `bytes` (a storage one copied first), into
-    -- a fresh `bytes32` (`Val.keccak`)
-    if builtin && f == "keccak256" then
-      let [a] := args | throw "keccak256 takes one argument"
-      let (P, a) ← hoist a
-      let (Q, b) ← abiMemBytes a
-      let y := toString (← freshCapture "se")
-      let R ← elabStmtsP [.decl (.named "bytes32") y (some (.field (.name b) keccakMember))]
-      return (P ++ Q ++ R, .name y)
+    -- the hashing builtins (`hoistHash`)
+    -- the hashing builtins (`hoistHashWith`)
+    if builtin && isHashName f then return ← hoistHashWith C hoist abiMemBytes elabStmtsP f args
     -- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
     -- `abi.encodeCall(g, (…))`: the selector's four bytes, then `abi.encode(…)`
     -- of the rest; a literal signature's selector and a function's folded as

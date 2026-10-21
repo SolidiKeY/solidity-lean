@@ -1617,8 +1617,8 @@ theorem Op2.denote_congrP {a b s : Srt} (o : Op2 C a b s) (hr : gâ‚€.SameRest gâ
     exact Srt.sameO_val.1 (Op2.eval_sameP .read hr (.inr rfl) hx hy)
   | mlen =>
     exact Srt.sameO_val.1 (Op2.eval_sameP .mlen hr (.inr rfl) hx hy)
-  | keccak =>
-    exact Srt.sameO_val.1 (Op2.eval_sameP .keccak hr (.inr rfl) hx hy)
+  | hash k =>
+    exact Srt.sameO_val.1 (Op2.eval_sameP (.hash k) hr (.inr rfl) hx hy)
   | copyMem =>
     have he := Srt.sameO_sv.1 (Op2.eval_sameP .copyMem hr (.inr rfl) hx hy)
     simp only [Op2.denote]

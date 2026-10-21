@@ -705,7 +705,7 @@ theorem Val.lower_elimOk : {p : PrimTy} → (v : Val C Γ p) → v.MemFree = tru
   | _, .readMem _, h => absurd h Bool.false_ne_true
   | _, .len b hp, h => Tm.ElimOk.castV hp.symm (.app2 rfl (.app0 rfl) (SPath.lower_elimOk b h))
   | _, .mlen _ _, h => absurd h Bool.false_ne_true
-  | _, .keccak _ _, h => absurd h Bool.false_ne_true
+  | _, .hash _ _ _, h => absurd h Bool.false_ne_true
   | _, .modular _ a b k, h => by
     simp only [Val.MemFree, Bool.and_eq_true] at h
     exact .app3 rfl (Val.lower_elimOk a h.1.1) (Val.lower_elimOk b h.1.2) (Val.lower_elimOk k h.2)
@@ -1014,7 +1014,7 @@ theorem localStep_elimOk {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
     · trivial
   | mlen b hp => exact absurd hv Bool.false_ne_true
   | modular op a b n => exact Premise.elimOk_setLocal i _ hv
-  | keccak b hp => exact absurd hv Bool.false_ne_true
+  | hash k b hp => exact absurd hv Bool.false_ne_true
 
 theorem rebindStep_elimOk {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R)
     (hr : r.MemFree = true) : (rebindStep k i r).ElimOk := by

@@ -86,8 +86,10 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | len {p : PrimTy} {E : Ty} (b : SPath C Γ (.array E)) (hp : p = .uint) : Val C Γ p
   | mlen {p : PrimTy} {E : Ty} (b : MPath C Γ (.array E)) (hp : p = .uint) : Val C Γ p
   | modular (op : ModOp) (a b k : Val C Γ .uint) : Val C Γ .uint
-  /-- `keccak256(b)` of a memory `bytes` (`Heap.keccak`): uninterpreted. -/
-  | keccak {p : PrimTy} {R : RefTy} (b : MPath C Γ (.ref R)) (hp : p = .uint) : Val C Γ p
+  /-- `keccak256(b)`, `sha256(b)`, … of a memory `bytes` (`Heap.hash`): the
+  hash `k` computes of its bytes. -/
+  | hash {p : PrimTy} {R : RefTy} (k : HashKind) (b : MPath C Γ (.ref R)) (hp : p = .uint) :
+      Val C Γ p
 
 end
 
@@ -162,7 +164,7 @@ def Val.isSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
 /-- Whether this expression needs a Lean-only assignment rule at its root:
 native modular arithmetic, `keccak256`. -/
 def Val.isLeanOnly {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
-  | .modular .. | .keccak .. => true
+  | .modular .. | .hash .. => true
   | _ => false
 
 def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
@@ -494,7 +496,7 @@ def Val.toStr {Γ : Ctx} {p : PrimTy} (ns : List Var) : Val C Γ p → (top : Bo
   | .len b _, _ => s!"{b.toStr ns}.length"
   | .mlen b _, _ => s!"{b.toStr ns}.length"
   | .modular op a b k, _ => s!"{op.toStr}({a.toStr ns true}, {b.toStr ns true}, {k.toStr ns true})"
-  | .keccak b _, _ => s!"keccak256({b.toStr ns})"
+  | .hash k b _, _ => s!"{k.toStr}({b.toStr ns})"
 
 end
 
@@ -717,7 +719,7 @@ def Val.readsLocal {Γ : Ctx} (n : Nat) : {p : PrimTy} → Val C Γ p → Bool
   | _, .len b _ => b.readsLocal n
   | _, .mlen b _ => b.readsLocal n
   | _, .modular _ a b k => a.readsLocal n || b.readsLocal n || k.readsLocal n
-  | _, .keccak b _ => b.readsLocal n
+  | _, .hash _ b _ => b.readsLocal n
 
 end
 
@@ -930,7 +932,7 @@ def Val.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} : Val C Γ p → Val C Δ
   | .len b hp => .len (b.wk h) hp
   | .mlen b hp => .mlen (b.wk h) hp
   | .modular op a b k => .modular op (a.wk h) (b.wk h) (k.wk h)
-  | .keccak b hp => .keccak (b.wk h) hp
+  | .hash k b hp => .hash k (b.wk h) hp
 
 end
 

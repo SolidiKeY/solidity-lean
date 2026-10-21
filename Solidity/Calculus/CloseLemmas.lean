@@ -249,9 +249,9 @@ theorem Op2.eval_nextIn {E : Ty} (x : Option (Storage C))
 theorem Op2.eval_mlen {E : Ty} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
     Op2.eval g (.mlen (E := E)) x y = x.bind fun m => y.bind fun id =>
       (HRef.ofId? m.H' (.array E) id).bind fun r => some (m.heap.lenU r) := rfl
-theorem Op2.eval_keccak {R : RefTy} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
-    Op2.eval g (.keccak (R := R)) x y = x.bind fun m => y.bind fun id =>
-      some (m.keccakId R id) := rfl
+theorem Op2.eval_hash {k : HashKind} {R : RefTy} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
+    Op2.eval g (.hash (R := R) k) x y = x.bind fun m => y.bind fun id =>
+      some (m.hashId k R id) := rfl
 theorem Op2.eval_copyMem {R : RefTy} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
     Op2.eval g (.copyMem (R := R)) x y = x.bind fun m => y.bind fun id =>
       (HRef.ofId? m.H' R id).bind fun r =>
