@@ -230,6 +230,7 @@ theorem compound_pair_agrees {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssi
             exact Or.inr ⟨σ.withStorage st', hu, applyV_none_of_applyP_none _ _ hv,
               saveOp_exh op hop hp b se _⟩
           | panic => rw [ht] at hv; exact hv.elim
+          | revertWith _ => rw [ht] at hv; exact hv.elim
           | diverge => exact ((opStoreT_ends _ op _ _).1 ht).elim
           | exhausted => exact ((opStoreT_ends _ op _ _).2 ht).elim
 
