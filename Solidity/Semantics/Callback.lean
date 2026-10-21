@@ -196,8 +196,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
     (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
-    -- not unfolded: its frames may pay
-    (callRec := fun _ _ _ _ _ => true)
+    -- every frame of the unrolling (`Prog.hasTransfer_recUnroll`)
+    (callRec := fun _ _ _ _ body => Prog.hasTransfer (body ()))
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
     (revertData := fun _ => false)
     (catchData := fun _ _ _ sbody _ _ _ body => Prog.hasTransfer sbody || Prog.hasTransfer body)
@@ -299,8 +299,8 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
-    -- not unfolded: its frames may call back
-    (callRec := fun _ _ _ _ _ => true)
+    -- every frame of the unrolling (`Prog.callsBack_recUnroll`)
+    (callRec := fun _ _ _ _ body => Prog.callsBack pay (body ()))
     (revertData := fun _ => false)
     (catchData := fun _ _ _ sbody _ _ _ body => Prog.callsBack pay sbody || Prog.callsBack pay body)
   termination_by structural _ _ s => s
@@ -348,6 +348,31 @@ theorem Fml.callsBack_modal {pay : Bool} {Γ Γ' Γ₀ : Ctx} (m : Modality) (P 
     (κ : Frames C Γ' Γ₀) (φ : Fml C Γ₀) :
     Fml.callsBack pay (.modal m P κ φ) =
       (Prog.callsBack pay P || κ.callsBack pay || φ.callsBack pay) := rfl
+
+theorem Stmt.callsBack_callRec {pay : Bool} {Γ Γ' ps rs : Ctx} (f : Name) (d : Nat)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    Stmt.callsBack pay (.callRec f d args ret body) = Prog.callsBack pay (body ()) := rfl
+
+theorem Stmt.hasTransfer_callRec {Γ Γ' ps rs : Ctx} (f : Name) (d : Nat)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    Stmt.hasTransfer (.callRec f d args ret body) = Prog.hasTransfer (body ()) := rfl
+
+/-- **No frame of an unrolling calls back** where each frame calls back only
+where the frame below does: read off one frame, the recursive site a hole
+(`recUnroll_induct`), not off the `recDepth` frames. -/
+theorem Prog.callsBack_recUnroll {pay : Bool} {F : Ctx}
+    {step : Nat → (Unit → Prog C F F) → Prog C F F}
+    (hs : ∀ n (t : Unit → Prog C F F), Prog.callsBack pay (t ()) = false →
+      Prog.callsBack pay (step n t) = false) (d : Nat) :
+    Prog.callsBack pay (recUnroll Prog.recBase step d) = false :=
+  recUnroll_induct (fun b => Prog.callsBack pay b = false) rfl hs d
+
+/-- `Prog.callsBack_recUnroll` for `hasTransfer`. -/
+theorem Prog.hasTransfer_recUnroll {F : Ctx} {step : Nat → (Unit → Prog C F F) → Prog C F F}
+    (hs : ∀ n (t : Unit → Prog C F F), Prog.hasTransfer (t ()) = false →
+      Prog.hasTransfer (step n t) = false) (d : Nat) :
+    Prog.hasTransfer (recUnroll Prog.recBase step d) = false :=
+  recUnroll_induct (fun b => Prog.hasTransfer b = false) rfl hs d
 
 /-- `Stmt.forks` when only a `try` and a value call hand control unless `pay`
 is set: a `transfer` or a `send` then runs as `Stmt.run` (`forksIn_true`). -/
@@ -397,13 +422,14 @@ theorem Stmt.callsBack_true : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
       (Prog.hasTransfer sbody || Prog.hasTransfer body)
     rw [Prog.callsBack_true sbody, Prog.callsBack_true body]
   | _, _, .revertData _ => rfl
+  | _, _, .callRec _ _ _ _ body => Prog.callsBack_true (body ())
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
   | _, _, .assignLocalPush .. | _, _, .pushOpAssign .. | _, _, .pushIncDec .. | _, _, .push ..
   | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .assumeFalse | _, _, .tryCall .. | _, _, .callRec .. => rfl
+  | _, _, .revert | _, _, .assumeFalse | _, _, .tryCall .. => rfl
 
 theorem Prog.callsBack_true : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     P.callsBack true = P.hasTransfer
@@ -437,8 +463,8 @@ theorem Stmt.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (s : Stm
     show (Prog.callsBack pay sbody || Prog.callsBack pay body) = false
     rw [Prog.callsBack_of_hasTransfer sbody h.1, Prog.callsBack_of_hasTransfer body h.2]; rfl
   | _, _, .revertData _, _ => rfl
-  | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h
-  | _, _, .callRec .., h => nomatch h
+  | _, _, .callRec _ _ _ _ body, h => Prog.callsBack_of_hasTransfer (body ()) h
+  | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h => nomatch h
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _
   | _, _, .declLocal .., _ | _, _, .declStorage .., _ | _, _, .opAssign .., _
   | _, _, .incDec .., _ | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _
@@ -1327,6 +1353,23 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
       rw [TRun.call_eq, ha]
       show _ = COut.ofRes (TRun.callFrom ret body.ext body.runR σ (ret.enterT (σ.withEnv a)))
       rw [TRun.callFrom_eq, COut.map_ofRes]
+  | _, _, .callRec f d args ret body, ht, σ, _, h => by
+    have ht : Prog.callsBack J.pay (body ()) = false := ht
+    cases h with
+    | det _ => rfl
+    | callRec hc =>
+      show _ = COut.ofRes (TRun.call _ _ _ _ _)
+      cases hc with
+      | det _ => rfl
+      | callArgs ha =>
+        rw [TRun.call_eq, ha]
+        rfl
+      | @callBody _ _ _ _ _ _ _ _ _ _ a _ ha h =>
+        rw [Prog.eq_run J (body ()) ht h]
+        rw [TRun.call_eq, ha]
+        show _ = COut.ofRes (TRun.callFrom ret (body ()).ext (body ()).runR σ
+          (ret.enterT (σ.withEnv a)))
+        rw [TRun.callFrom_eq, COut.map_ofRes]
   | _, _, .callReceiver f args r body op, ht, σ, _, h => by
     cases h with
     | det _ => rfl
