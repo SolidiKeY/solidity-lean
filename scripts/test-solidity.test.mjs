@@ -468,7 +468,9 @@ test("recursion: calls by their contracts, proved by induction over the frames",
   // tests/solc/Recursion.sol: each recursive call by its callee's
   // `/// @custom:key` contract (`true`/`true` without one), the contract by
   // induction over the frames (`rec_auto`, docs/kernel-port.md "Recursion")
-  const report = runSolidityTests(["tests/solc/Recursion.sol"], {build:false});
+  // in batches: the whole contract as one Lean call ran ~270 s against the
+  // 300 s per-call limit, and timed out under load
+  const report = runSolidityTests(["tests/solc/Recursion.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['countdown', 'sumTo', 'sumToSix', 'even', 'odd', 'evenFour',
