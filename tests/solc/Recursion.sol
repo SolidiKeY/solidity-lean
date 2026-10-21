@@ -83,8 +83,7 @@ contract Recursion {
     // a recursion that calls back in every frame: its call by the contract
     // `true`/`true` over the callback runs, by induction over the frames
     function payDown(address to) public {
-        bool more = a > 0;
-        if (more) {
+        if (a > 0) {
             a = a - 1;
             (bool ok, ) = payable(to).call{value: 0}("");
             payDown(to);
