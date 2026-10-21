@@ -136,15 +136,14 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Op
         (cond (x H (.not c)) (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
           (both (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))))
             (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ)) b)))
-    (fun bs Q y A _ P ω => both (each (fun br => r H k
+    (fun bs y A _ P gs ω => cond gs.isEmpty none (both (each (fun br => r H k
       (Option.casesOn (motive := fun _ => Fml C Γ) br.hyp
         (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))
         fun c => .imp c
           (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ))
             φ)))) bs)
-      (r H k (.modal m Q .nil
-        (.allocAll y A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))))
-      b) ω
+      (each (fun g => r H k (Fml.allocGoal m g.1 y A g.2
+        (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))) gs) b)) ω
 
 /-- A premise `¬X` whose `X` reads a program (a self-call's `catch` goal,
 `ExtCall.selfFails`): `X`, which the walk proves instead of the goal
@@ -501,10 +500,13 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
         (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
       exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
   | inline P e => exact .inline (hR := hR) hd (hr _ _ _ _ _ h hl)
-  | allocBranches bs Q y A P =>
-    have := both_sound h hl (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
-      (hr _ _)
-    exact .allocBranches (hR := hR) hd this.1 this.2
+  | allocBranches bs y A P gs =>
+    cases hb : gs.isEmpty
+    · simp only [premise, hb, cond_false] at h
+      have := both_sound h hl (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
+        (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
+      exact .allocBranches (hR := hR) hd hb this.1 this.2
+    · simp only [premise, hb, cond_true, reduceCtorEq] at h
 
 variable {leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)}
   (hleaf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) ls, leaf H φ = some ls →

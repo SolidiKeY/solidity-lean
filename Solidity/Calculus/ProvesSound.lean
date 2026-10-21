@@ -231,18 +231,20 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     · intro ψ hψ
       obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hψ
       exact ih b hb σ
-  | @allocBranches Γ Γ₁ Γ₂ Γ₃ H m s ω κ φ bs x A Q P d _ _ _ ih iha =>
+  | @allocBranches Γ Γ₁ Γ₂ Γ₃ H m s ω κ φ bs x A P gs d hne _ _ _ ih iha =>
     intro σ
     refine H.wrap_step hS d σ ?_
-    refine H.wrap_conj σ _ (by simp only [ne_eq, List.append_eq_nil_iff, List.map_eq_nil_iff,
-      List.cons_ne_self, and_false, not_false_eq_true]) ?_
-    intro ψ hψ
-    rcases List.mem_append.mp hψ with hm | ha
-    · obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hm
-      exact ih b hb σ
-    · rw [List.mem_singleton] at ha
-      subst ha
-      exact iha σ
+    refine H.wrap_conj σ _ ?_ ?_
+    · cases gs with
+      | nil => exact nomatch hne
+      | cons _ _ => simp only [ne_eq, List.append_eq_nil_iff, List.map_eq_nil_iff,
+          reduceCtorEq, and_false, not_false_eq_true]
+    · intro ψ hψ
+      rcases List.mem_append.mp hψ with hm | ha
+      · obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hm
+        exact ih b hb σ
+      · obtain ⟨g, hg, rfl⟩ := List.mem_map.mp ha
+        exact iha g hg σ
   | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ _ ihF ihU =>
     intro σ
     refine H.wrap_step hS d σ ?_

@@ -275,11 +275,39 @@ def optCat {α : Type} : Option (List α) → Option (List α) → Option (List 
   | some a, some b => some (a ++ b)
   | _, _ => none
 
+/-- A datum known in part: each byte known (`some b`) or not (a byte of a
+word that is not literal). -/
+abbrev Pat := List (Option UInt8)
+
+/-- The data `p` stands for: its length, its known bytes. -/
+def Pat.Matches (p : Pat) (d : List UInt8) : Prop :=
+  p.length = d.length ∧ ∀ (i : Nat) (b : UInt8), p[i]? = some (some b) → d[i]? = some b
+
+/-- What a program's reverts may carry: literal data, and data known in
+part (`Pat`). -/
+abbrev DSet := List (List UInt8) × List Pat
+
+/-- `d` is one of the data `S` lists. -/
+def DSet.Mem (S : DSet) (d : List UInt8) : Prop := d ∈ S.1 ∨ ∃ p ∈ S.2, p.Matches d
+
+/-- Two sets of what may be, each `none` where it is not known. -/
+def optCatD : Option DSet → Option DSet → Option DSet
+  | some a, some b => some (a.1 ++ b.1, a.2 ++ b.2)
+  | _, _ => none
+
 /-- The bytes of `revert(d)` when they are literal. -/
 def RevPart.litData {Γ : Ctx} : List (RevPart C Γ) → Option (List UInt8)
   | [] => some []
   | .bytes bs :: d => (RevPart.litData d).map (bs ++ ·)
   | _ :: _ => none
+
+/-- The bytes of `revert(d)` known in part: a literal's, each value's ABI
+word unknown (32 bytes); `none` with a selector not folded. -/
+def RevPart.pat? {Γ : Ctx} : List (RevPart C Γ) → Option Pat
+  | [] => some []
+  | .bytes bs :: d => (RevPart.pat? d).map (bs.map some ++ ·)
+  | .word _ :: d => (RevPart.pat? d).map (List.replicate 32 none ++ ·)
+  | .sel _ :: _ => none
 
 /-- Data whose first part is literal bytes that do not begin with `Error`'s
 selector (a custom error's): it cannot reach a `catch Error(string memory
@@ -288,51 +316,60 @@ def RevPart.notError {Γ : Ctx} : List (RevPart C Γ) → Bool
   | .bytes bs :: _ => decide (4 ≤ bs.length) && !decide (bs.take 4 = Semantics.errorSelector)
   | _ => false
 
+/-- What `revert(d)` may carry: nothing a clause keeps (without `raw`, data
+that cannot decode as `Error`), its literal bytes, or its bytes known in
+part. -/
+def RevPart.datas {Γ : Ctx} (raw : Bool) (d : List (RevPart C Γ)) : Option DSet :=
+  if !raw && RevPart.notError d then some ([], []) else
+  match RevPart.litData d with
+  | some bs => some ([bs], [])
+  | none => (RevPart.pat? d).map fun p => ([], [p])
+
 mutual
 
 /-- **The data a program's revert may carry** (`docs/semantic-gaps.md`,
-"Revert data"): the literal `revert(d)`s in it, in a branch, a block, a
-loop, a called body or a `try`'s clauses (a self-call's callee reverts into
-its `try`, not past it); a revert with no data besides.  `none` where one
-is not literal (a custom error's arguments, a recursive call, which is not
-unfolded), and, with `raw`, where it may panic (`assert`: the data of a
-panic is its code, the transaction's).  Without `raw` (what a `catch
-Error(string memory r)` may bind), a datum that cannot decode as `Error`
-(`RevPart.notError`) is left out, literal or not.  Sound by
-`Prog.run_dataS`. -/
-def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option (List (List UInt8))
-  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Option (List (List UInt8))) s
-    (assign := fun _ _ => some []) (rebind := fun _ _ => some []) (assignLocal := fun _ _ => some [])
-    (declLocal := fun _ _ _ => some []) (declStorage := fun _ _ _ => some [])
-    (opAssign := fun _ _ _ _ _ => some []) (incDec := fun _ _ _ => some [])
-    (assignIncDec := fun _ _ _ _ _ => some []) (assignLocalPush := fun _ _ => some [])
-    (pushOpAssign := fun _ _ _ _ _ => some []) (pushIncDec := fun _ _ _ => some [])
-    (push := fun _ _ _ => some []) (pop := fun _ => some [])
-    (transfer := fun _ _ => some []) (send := fun _ _ _ _ => some [])
-    (declMem := fun _ _ _ _ _ => some []) (rebindMem := fun _ _ => some [])
-    (assignFromMem := fun _ _ => some []) (assignMem := fun _ _ => some [])
-    (delete := fun _ => some []) (deleteMem := fun _ _ => some []) (assignNew := fun _ _ _ => some [])
-    (ite := fun _ thn els => optCat (Prog.revertDatas raw thn) (Prog.revertDatas raw els))
-    (require := fun _ => some []) (assert := fun _ => if raw then none else some [])
-    (revert := some []) (assumeFalse := some [])
+"Revert data"): the `revert(d)`s in it (`RevPart.datas`: literal, or known
+in part), in a branch, a block, a loop, a called body or a `try`'s clauses
+(a self-call's callee reverts into its `try`, not past it); a revert with
+no data besides.  `none` at a recursive call, which is not unfolded, and,
+with `raw`, where it may panic (`assert`: the data of a panic is its code,
+the transaction's).  Without `raw` (what a `catch Error(string memory r)`
+may bind), a datum that cannot decode as `Error` (`RevPart.notError`) is
+left out, literal or not.  Sound by `Prog.run_dataS`. -/
+def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option DSet
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Option DSet) s
+    (assign := fun _ _ => some ([], [])) (rebind := fun _ _ => some ([], []))
+    (assignLocal := fun _ _ => some ([], []))
+    (declLocal := fun _ _ _ => some ([], [])) (declStorage := fun _ _ _ => some ([], []))
+    (opAssign := fun _ _ _ _ _ => some ([], [])) (incDec := fun _ _ _ => some ([], []))
+    (assignIncDec := fun _ _ _ _ _ => some ([], [])) (assignLocalPush := fun _ _ => some ([], []))
+    (pushOpAssign := fun _ _ _ _ _ => some ([], [])) (pushIncDec := fun _ _ _ => some ([], []))
+    (push := fun _ _ _ => some ([], [])) (pop := fun _ => some ([], []))
+    (transfer := fun _ _ => some ([], [])) (send := fun _ _ _ _ => some ([], []))
+    (declMem := fun _ _ _ _ _ => some ([], [])) (rebindMem := fun _ _ => some ([], []))
+    (assignFromMem := fun _ _ => some ([], [])) (assignMem := fun _ _ => some ([], []))
+    (delete := fun _ => some ([], [])) (deleteMem := fun _ _ => some ([], []))
+    (assignNew := fun _ _ _ => some ([], []))
+    (ite := fun _ thn els => optCatD (Prog.revertDatas raw thn) (Prog.revertDatas raw els))
+    (require := fun _ => some ([], [])) (assert := fun _ => if raw then none else some ([], []))
+    (revert := some ([], [])) (assumeFalse := some ([], []))
     (call := fun _ _ _ body => Prog.revertDatas raw body)
     (tryCall := fun _ _ ok err _ pnc other _ _ _ =>
-      optCat (optCat (Prog.revertDatas raw ok) (Prog.revertDatas raw err))
-        (optCat (Prog.revertDatas raw pnc) (Prog.revertDatas raw other)))
+      optCatD (optCatD (Prog.revertDatas raw ok) (Prog.revertDatas raw err))
+        (optCatD (Prog.revertDatas raw pnc) (Prog.revertDatas raw other)))
     (loop := fun _ _ body => Prog.revertDatas raw body)
     (block := fun body => Prog.revertDatas raw body)
     (callReceiver := fun _ _ _ body _ => Prog.revertDatas raw body)
     (callReceiverPush := fun _ _ _ body code _ =>
-      optCat (Prog.revertDatas raw body) (Prog.revertDatas raw code))
+      optCatD (Prog.revertDatas raw body) (Prog.revertDatas raw code))
     (callRec := fun _ _ _ _ _ => none)
-    (revertData := fun d =>
-      if !raw && RevPart.notError d then some [] else (RevPart.litData d).map ([·]))
+    (revertData := fun d => RevPart.datas raw d)
     (catchData := fun _ _ _ _ _ _ _ body => Prog.revertDatas raw body)
   termination_by structural _ _ s => s
 
-def Prog.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Option (List (List UInt8))
-  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Option (List (List UInt8))) P (some [])
-      (fun s P => optCat (Stmt.revertDatas raw s) (Prog.revertDatas raw P))
+def Prog.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Option DSet
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Option DSet) P (some ([], []))
+      (fun s P => optCatD (Stmt.revertDatas raw s) (Prog.revertDatas raw P))
   termination_by structural _ _ P => P
 
 end
@@ -340,13 +377,13 @@ end
 /-- The data a clause of `kind` may be reached with when the contract's own
 callee `sbody` fails: the data its body lists, a revert with none among
 them for the raw data (the `Error` clause is not reached with none). -/
-def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option (List (List UInt8))
+def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option DSet
   | .reason, P => P.revertDatas false
-  | .raw, P => (P.revertDatas true).map ([] :: ·)
+  | .raw, P => (P.revertDatas true).map fun S => ([] :: S.1, S.2)
 
 /-- The clause after the datum `d` is bound (`catchDataBox`'s goal for it):
 what a clause of `kind` binds of it allocated as a literal (`litBytes`) in
-front of `body`; a revert where it binds nothing of it (an `Error` clause
+front of the clause; a revert where it binds nothing of it (an `Error` clause
 at data that does not decode). -/
 def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
     (body : Prog C (.mem bytesR :: Γ) Γ₁) : Prog C Γ Γ₁ :=
@@ -354,26 +391,55 @@ def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
   | some bs => litBytes x bs body
   | none => .cons .revert (litBytes x [] body)
 
+/-- `x.length`, the fresh `bytes` on top. -/
+def Pat.lenTm {Γ : Ctx} : Tm C (.mem bytesR :: Γ) (.val .uint) :=
+  .app2 (.mlen (E := .prim .uint)) (.app0 .memory) (.pvI .here)
+
+/-- `x[i]`, the fresh `bytes` on top. -/
+def Pat.byteTm {Γ : Ctx} (i : Nat) : Tm C (.mem bytesR :: Γ) (.val .uint) :=
+  .app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (.app0 (.lit (uintOfNat i))))
+
+/-- The bytes known from position `i` on, as equations. -/
+def Pat.byteFmls {Γ : Ctx} : Pat → Nat → List (Fml C (.mem bytesR :: Γ))
+  | [], _ => []
+  | none :: p, i => Pat.byteFmls p (i + 1)
+  | some b :: p, i => .eq (Pat.byteTm i) (.app0 (.lit (uintOfNat b.toNat))) :: Pat.byteFmls p (i + 1)
+
+/-- **What a datum known in part says of the fresh `bytes` on top**: its
+length, and its known bytes. -/
+def Pat.fml {Γ : Ctx} (p : Pat) : Fml C (.mem bytesR :: Γ) :=
+  Fml.conj (.eq Pat.lenTm (.app0 (.lit (uintOfNat p.length))) :: Pat.byteFmls p 0)
+
+/-- What a clause of `kind` may assume of the bytes it binds of a datum
+known in part: the raw data its length and known bytes; of an `Error`
+reason, nothing (its decoding is any bytes). -/
+def CatchKind.patFml {Γ : Ctx} : CatchKind → Pat → Option (Fml C (.mem bytesR :: Γ))
+  | .raw, p => some p.fml
+  | .reason, _ => none
+
 /-- `Stmt.catchData` (`catchDataBox`, Lean only), under the box: for a
-self-call whose callee's data are known (`CatchKind.datas`), a goal per
-datum, the receiver the contract (`require(a != 0); require(a ==
-address(this));`) and the datum bound as a literal in front of the clause
-(`catchLit`); then, the receiver another (`require(a != 0); require(a !=
-address(this));`), the clause for every fresh `bytes` of any contents
-(`Premise.allocBranches`, `Fml.allocAll`): another contract's data is any
-bytes.  Where the callee's data are not known (a word that is not literal, a
-recursive call, a panic's code), or the call is not to the contract's own
-function, the clause for every fresh `bytes` behind `require(a != 0);`
+self-call whose callee's data are known (`CatchKind.datas`), the receiver
+the contract (`require(a != 0); require(a == address(this));`), a goal per
+literal datum, bound as a literal in front of the clause (`catchLit`), and
+one per datum known in part, the clause for every fresh `bytes` of the
+datum's length and known bytes (`Pat.fml`, `Fml.allocAll`); then, the
+receiver another (`require(a != 0); require(a != address(this));`), the
+clause for every fresh `bytes` of any contents: another contract's data is
+any bytes.  Where the callee's data are not known (a recursive call, a
+panic's code, a selector not folded), or the call is not to the contract's
+own function, the clause for every fresh `bytes` behind `require(a != 0);`
 alone.  Under the diamond, `false`. -/
 def catchDataStep (m : Modality) {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ) (sbody : Prog C (ρ ++ ps) Γf)
     (self : Bool) (kind : CatchKind) (x : Var) (body : Prog C (.mem bytesR :: Γ) Γ₁) :
     Premise C Γ Γ :=
   match m, self, kind.datas sbody with
   | .box, true, some ds =>
-    .allocBranches (ds.map (fun d => (⟨Binders.nil, .cons (.require call.hasCode)
-        (.cons (.require call.isSelf) (catchLit x kind d body)), none⟩ : Branch C Γ)))
-      (.cons (.require call.hasCode) (.cons (.require call.notSelf) .nil)) x bytesR body
-  | .box, _, _ => .allocBranches [] (.cons (.require call.hasCode) .nil) x bytesR body
+    .allocBranches (ds.1.map (fun d => (⟨Binders.nil, .cons (.require call.hasCode)
+        (.cons (.require call.isSelf) (catchLit x kind d body)), none⟩ : Branch C Γ))) x bytesR body
+      (ds.2.map (fun p => (.cons (.require call.hasCode) (.cons (.require call.isSelf) .nil),
+          kind.patFml p)) ++
+        [(.cons (.require call.hasCode) (.cons (.require call.notSelf) .nil), none)])
+  | .box, _, _ => .allocBranches [] x bytesR body [(.cons (.require call.hasCode) .nil, none)]
   | .diamond, _, _ => .done false
 
 /-! ## The loop frame -/

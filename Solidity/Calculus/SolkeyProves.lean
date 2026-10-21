@@ -50,7 +50,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | cases d hne _ _ _ ihF ihU => exact .cases d hne ihF ihU
   | inv d _ _ _ _ ihI ihT ihE => exact .inv d ihI ihT ihE
   | inline d _ _ ih => exact .inline d ih
-  | allocBranches d _ _ _ ih iha => exact .allocBranches d ih iha
+  | allocBranches d hne _ _ _ ih iha => exact .allocBranches d hne ih iha
   | empty _ ih => exact .empty ih
   | closeTrue h => exact .closeTrue h
   | closeFalse _ ih => exact .closeFalse ih
@@ -173,7 +173,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | inv d _ _ _ _ _ _ _ =>
     obtain ⟨hs, _⟩ := Fml.inSolkey_modal_cons hφ
     exact absurd (Stmt.premise_inSolkey_of_step hs d) Bool.false_ne_true
-  | allocBranches d _ _ _ _ _ =>
+  | allocBranches d _ _ _ _ _ _ =>
     obtain ⟨hs, _⟩ := Fml.inSolkey_modal_cons hφ
     exact absurd (Stmt.premise_inSolkey_of_step hs d) Bool.false_ne_true
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
@@ -229,7 +229,7 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
   induction h with
   | update _ _ hR _ | updates _ _ hR _ | guardedUpdates _ _ _ hR _ _ | unfold _ _ hR _ | bind _ _ hR _ | split _ _ _ hR _ _ | check _ _ _ hR _ _
   | done _ _ hR _ | branches _ _ _ hR _ | cases _ _ _ _ hR _ _ | inv _ _ _ _ hR _ _ _
-  | inline _ _ hR _ | allocBranches _ _ _ hR _ _ =>
+  | inline _ _ hR _ | allocBranches _ _ _ _ hR _ _ =>
     have h' : (!RuleSet.admits .solkey _ _) = true := hφ
     rw [hR] at h'
     exact absurd h' Bool.false_ne_true

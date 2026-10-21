@@ -241,7 +241,8 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then condOf? H s else pure none
     let ctorId ← short ctor
-    let tac ← if premise == ``Premise.branches || premise == ``Premise.cases then
+    let tac ← if premise == ``Premise.branches || premise == ``Premise.cases ||
+        premise == ``Premise.allocBranches then
         `(tactic| apply $ctorId:ident $d:term rfl)
       else `(tactic| apply $ctorId:ident $d:term)
     return #[{ name, se,
@@ -299,9 +300,14 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
         else
           let gs ← runOn g mv.tacs
           if mv.branches then
-            match gs with
-            | g' :: rest => (fun (more, gs) => some (mv.tacs ++ more, gs ++ rest)) <$> splitBranches g'
-            | _ => pure (some (mv.tacs, gs))
+            -- each goal `∀ b ∈ bs, …` taken apart (`allocBranches` has two)
+            let mut tacs := mv.tacs
+            let mut out := #[]
+            for g' in gs do
+              let (more, gs') ← splitBranches g'
+              tacs := tacs ++ more
+              out := out ++ gs'.toArray
+            pure (some (tacs, out.toList))
           else pure (some (mv.tacs, gs))
       catch _ => s.restore; pure none
     let some (tacs, gs) := applied | continue

@@ -303,12 +303,21 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   holds, append then save; otherwise run `revert();` before the rest. -/
   | guardedUpdates {Δ : Ctx} (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) :
       Premise C Γ Γ
-  /-- `branches`' goals, then, after `Q` (the `require`s it is reached
-behind), `P` in the statement's place for every fresh memory object `x : A`
-of any contents (`Fml.allocAll`), its scope ended: a `catch` clause binding
-another contract's data (`catchDataBox`). -/
-  | allocBranches (bs : List (Branch C Γ)) (Q : Prog C Γ Γ) (x : Var) (A : RefTy) {Γ₁ : Ctx}
-      (P : Prog C (.mem A :: Γ) Γ₁) : Premise C Γ Γ
+  /-- `branches`' goals, then for each `(Q, h)` of `gs`, after `Q` (the
+`require`s it is reached behind), `P` in the statement's place for every
+fresh memory object `x : A` of any contents (`Fml.allocAll`) of which `h`
+holds, its scope ended (`Fml.allocGoal`): a `catch` clause binding data
+known only in part, or another contract's, any bytes (`catchDataBox`). -/
+  | allocBranches (bs : List (Branch C Γ)) (x : Var) (A : RefTy) {Γ₁ : Ctx}
+      (P : Prog C (.mem A :: Γ) Γ₁) (gs : List (Prog C Γ Γ × Option (Fml C (.mem A :: Γ)))) :
+      Premise C Γ Γ
+
+/-- `⟨ Q ⟩ ∀ fresh x : A. h → G`: after `Q`, `G` for every fresh object
+`x` of any contents of which `h` holds (`Premise.allocBranches`' goal). -/
+def Fml.allocGoal {Γ : Ctx} (m : Modality) (Q : Prog C Γ Γ) (x : Var) (A : RefTy)
+    (h : Option (Fml C (.mem A :: Γ))) (G : Fml C (.mem A :: Γ)) : Fml C Γ :=
+  .modal m Q .nil (.allocAll x A
+    (Option.casesOn (motive := fun _ => Fml C (.mem A :: Γ)) h G fun c => .imp c G))
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
 storage too (`hv`): solkey's `#loopAnon`. -/
@@ -383,13 +392,13 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ)
     (fun c U V ω => .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))
       (.imp (.not c) (.modal m (.cons .revert ω) κ φ)))
-    (fun bs Q x A _ P ω => Fml.conj (bs.map (fun b =>
+    (fun bs x A _ P gs ω => Fml.conj (bs.map (fun b =>
       Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
         (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
         fun c => .imp c
           (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) ++
-      [.modal m Q .nil
-        (.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))])) ω
+      gs.map fun g => Fml.allocGoal m g.1 x A g.2
+        (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ))) ω
 
 /-! ### Equations
 

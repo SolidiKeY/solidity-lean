@@ -643,10 +643,20 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
   | .check c => return mk ``Premise.check #[← qFml Γ c]
   | .done b => return mk ``Premise.done #[← qCtx Γ', toExpr b]
   | .branches bs => return mk ``Premise.branches #[← qBranches Γ bs]
-  | @Premise.allocBranches _ _ bs Q x A Γ₁ P =>
-    return mk ``Premise.allocBranches #[← qBranches Γ bs, ← qProg Γ Γ Q, toExpr x, toExpr A,
-      ← qCtx Γ₁,
-      ← qProg (.mem A :: Γ) Γ₁ P]
+  | @Premise.allocBranches _ _ bs x A Γ₁ P gs => do
+    let pTy := mkAppN (mkConst ``Prog) #[← contract, ← qCtx Γ, ← qCtx Γ]
+    let hTy := mkApp (mkConst ``Option [levelZero]) (← fam ``Fml (.mem A :: Γ))
+    let gTy := mkApp2 (mkConst ``Prod [levelZero, levelZero]) pTy hTy
+    let mut l := mkApp (mkConst ``List.nil [levelZero]) gTy
+    for (Q, h) in gs.reverse do
+      let hE ← match h with
+        | none => pure (mkApp (mkConst ``Option.none [levelZero]) (← fam ``Fml (.mem A :: Γ)))
+        | some c => pure (mkApp2 (mkConst ``Option.some [levelZero]) (← fam ``Fml (.mem A :: Γ))
+            (← qFml (.mem A :: Γ) c))
+      let e := mkAppN (mkConst ``Prod.mk [levelZero, levelZero]) #[pTy, hTy, ← qProg Γ Γ Q, hE]
+      l := mkApp3 (mkConst ``List.cons [levelZero]) gTy e l
+    return mk ``Premise.allocBranches #[← qBranches Γ bs, toExpr x, toExpr A, ← qCtx Γ₁,
+      ← qProg (.mem A :: Γ) Γ₁ P, l]
   | .cases fs us => do
     let fTy ← fam ``Fml Γ
     let uTy := mkAppN (mkConst ``Upd) #[← contract, ← qCtx Γ, ← qCtx Γ]

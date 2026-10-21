@@ -16,14 +16,50 @@ program lists (`Prog.run_dataS`): what `catchDataBox`'s goals range over
 
 namespace Solidity
 
-variable {C : Contract} {K : List UInt8 → Prop} {S : List (List UInt8)}
+variable {C : Contract} {K : List UInt8 → Prop} {S : DSet}
 
 /-! ## Typed results -/
 
 /-- A typed result whose data, if it reverts with some that `K` keeps, is
-one of `S`. -/
-def TRes.DataS {α : Type} (K : List UInt8 → Prop) (S : List (List UInt8)) (t : TRes α) : Prop :=
-  ∀ d, t = .error (.revertWith d) → K d → d ∈ S
+one of `S` (`DSet.Mem`: literal, or matching a datum known in part). -/
+def TRes.DataS {α : Type} (K : List UInt8 → Prop) (S : DSet) (t : TRes α) : Prop :=
+  ∀ d, t = .error (.revertWith d) → K d → S.Mem d
+
+theorem DSet.mem_left (A B : DSet) : ∀ d, A.Mem d → DSet.Mem (A.1 ++ B.1, A.2 ++ B.2) d
+  | _, .inl h => .inl (List.mem_append_left _ h)
+  | _, .inr ⟨p, hp, hm⟩ => .inr ⟨p, List.mem_append_left _ hp, hm⟩
+
+theorem DSet.mem_right (A B : DSet) : ∀ d, B.Mem d → DSet.Mem (A.1 ++ B.1, A.2 ++ B.2) d
+  | _, .inl h => .inl (List.mem_append_right _ h)
+  | _, .inr ⟨p, hp, hm⟩ => .inr ⟨p, List.mem_append_right _ hp, hm⟩
+
+/-- Data known in part, appended, stand for the data appended. -/
+theorem Pat.Matches.append {p q : Pat} {d e : List UInt8} (hp : p.Matches d) (hq : q.Matches e) :
+    (p ++ q).Matches (d ++ e) := by
+  refine ⟨by simp only [List.length_append, hp.1, hq.1], fun i b h => ?_⟩
+  by_cases hi : i < p.length
+  · rw [List.getElem?_append_left hi] at h
+    rw [List.getElem?_append_left (hp.1 ▸ hi)]
+    exact hp.2 i b h
+  · have hi' : p.length ≤ i := Nat.le_of_not_lt hi
+    rw [List.getElem?_append_right hi'] at h
+    rw [List.getElem?_append_right (hp.1 ▸ hi'), ← hp.1]
+    exact hq.2 _ b h
+
+/-- Literal bytes stand for themselves. -/
+theorem Pat.matches_lit (bs : List UInt8) : Pat.Matches (bs.map some) bs :=
+  ⟨List.length_map _, fun i b h => by
+    rw [List.getElem?_map] at h
+    cases hb : bs[i]? with
+    | none => rw [hb] at h; cases h
+    | some c => rw [hb] at h; cases h; rfl⟩
+
+/-- A word of unknown bytes stands for any word. -/
+theorem Pat.matches_word (n : Nat) : Pat.Matches (List.replicate 32 none) (Semantics.wordBytes n) :=
+  ⟨by simp only [List.length_replicate, Semantics.wordBytes, List.length_map, List.length_range],
+    fun i b h => by
+      rw [List.getElem?_replicate] at h
+      split at h <;> cases h⟩
 
 /-- The data a clause keeps: every datum for the raw data, one that decodes
 as `Error` for `catch Error(string memory r)`. -/
@@ -57,8 +93,8 @@ theorem map {α γ : Type} {t : TRes α} (h : t.DataS K S) (k : α → γ) : TRe
 theorem ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).DataS K S := by
   cases x <;> exact fun _ h => nomatch h
 
-theorem mono {α : Type} {t : TRes α} {S' : List (List UInt8)} (h : t.DataS K S) (hS : S ⊆ S') :
-    t.DataS K S' := fun d hd hk => hS (h d hd hk)
+theorem mono {α : Type} {t : TRes α} {S' : DSet} (h : t.DataS K S)
+    (hS : ∀ d, S.Mem d → S'.Mem d) : t.DataS K S' := fun d hd hk => hS d (h d hd hk)
 
 end TRes.DataS
 
@@ -351,17 +387,54 @@ theorem RevPart.mapM_litData (σ : State C Γ) : (d : List (RevPart C Γ)) → {
   | .word _ :: _, _, h => nomatch h
 
 theorem revertData_dataS (d : List (RevPart C Γ)) {bs : List UInt8}
-    (hd : RevPart.litData d = some bs) (σ : State C Γ) : (revertData d σ).DataS K [bs] := by
+    (hd : RevPart.litData d = some bs) (σ : State C Γ) : (revertData d σ).DataS K ([bs], []) := by
   unfold revertData
   obtain ⟨ps, hm, hf⟩ := RevPart.mapM_litData σ d hd
   rw [hm]
-  show TRes.DataS K [bs] (Except.error (THalt.ofData ps.flatten) : TRes (Out C σ.H Γ))
+  show TRes.DataS K ([bs], []) (Except.error (THalt.ofData ps.flatten) : TRes (Out C σ.H Γ))
   rw [hf]
   intro d' h
   cases bs with
   | nil => exact nomatch h
-  | cons b bs => cases h; exact fun _ => List.mem_singleton_self _
+  | cons b bs => cases h; exact fun _ => .inl (List.mem_singleton_self _)
 
+/-- The parts of `revert(d)` evaluated, when they are known in part: bytes
+the pattern stands for. -/
+theorem RevPart.mapM_pat (σ : State C Γ) : (d : List (RevPart C Γ)) → {p : Pat} →
+    RevPart.pat? d = some p → ∀ ps, d.mapM (fun q => q.evalT σ) = .ok ps → p.Matches ps.flatten
+  | [], _, h, ps, hm => by cases h; cases hm; exact ⟨rfl, fun _ _ h => nomatch h⟩
+  | .bytes b :: d, p, h, ps, hm => by
+    simp only [RevPart.pat?, Option.map_eq_some_iff] at h
+    obtain ⟨p', hd, rfl⟩ := h
+    rw [List.mapM_cons] at hm
+    cases hr : d.mapM (fun q => q.evalT σ) with
+    | error e => rw [hr] at hm; cases hm
+    | ok ps' =>
+      rw [hr] at hm
+      cases hm
+      rw [List.flatten_cons]
+      exact (Pat.matches_lit b).append (RevPart.mapM_pat σ d hd ps' hr)
+  | .word v :: d, p, h, ps, hm => by
+    simp only [RevPart.pat?, Option.map_eq_some_iff] at h
+    obtain ⟨p', hd, rfl⟩ := h
+    rw [List.mapM_cons] at hm
+    cases hv : v.evalT σ with
+    | error e =>
+      have : (RevPart.word v).evalT σ = .error e := by
+        show (do let x ← v.evalT σ; pure _) = _; rw [hv]; rfl
+      rw [this] at hm; cases hm
+    | ok x =>
+      have : (RevPart.word v).evalT σ = .ok (Semantics.wordBytes (PrimTy.toWord x).1.toNat) := by
+        show (do let x ← v.evalT σ; pure _) = _; rw [hv]; rfl
+      rw [this] at hm
+      cases hr : d.mapM (fun q => q.evalT σ) with
+      | error e => rw [hr] at hm; cases hm
+      | ok ps' =>
+        rw [hr] at hm
+        cases hm
+        rw [List.flatten_cons]
+        exact (Pat.matches_word _).append (RevPart.mapM_pat σ d hd ps' hr)
+  | .sel _ :: _, _, h, _, _ => nomatch h
 /-- An evaluated part carries no data: only a value's evaluation can fail,
 and it only reverts. -/
 theorem RevPart.mapM_revertOnly (σ : State C Γ) (l : List (RevPart C Γ)) :
@@ -380,7 +453,7 @@ theorem RevPart.mapM_revertOnly (σ : State C Γ) (l : List (RevPart C Γ)) :
 `catch Error(string memory r)` keeps. -/
 theorem revertData_dataS_notError (d : List (RevPart C Γ)) (hd : RevPart.notError d = true)
     (σ : State C Γ) (hK : ∀ d', K d' → (Semantics.decodeError d').isSome = true) :
-    (revertData d σ).DataS K [] := by
+    (revertData d σ).DataS K ([], []) := by
   unfold revertData
   cases hm : d.mapM (fun p : RevPart C Γ => p.evalT σ) with
   | error e =>
@@ -417,6 +490,29 @@ theorem revertData_dataS_notError (d : List (RevPart C Γ)) (hd : RevPart.notErr
         have htake : (bs ++ ps'.flatten).take 4 = bs.take 4 := List.take_append_of_le_length hd.1
         simp only [Semantics.decodeError, htake, if_neg hd.2, Option.isSome_none,
           Bool.false_eq_true] at hdec
+
+/-- `revert(d)` of data known in part reverts with data the pattern stands
+for. -/
+theorem revertData_dataS_pat (d : List (RevPart C Γ)) {p : Pat}
+    (hd : RevPart.pat? d = some p) (σ : State C Γ) : (revertData d σ).DataS K ([], [p]) := by
+  unfold revertData
+  cases hm : d.mapM (fun q : RevPart C Γ => q.evalT σ) with
+  | error e =>
+    intro d' h _
+    have he := RevPart.mapM_revertOnly σ d e hm
+    subst he
+    cases h
+  | ok ps =>
+    intro d' h _
+    change (Except.error (THalt.ofData ps.flatten) : TRes (Out C σ.H Γ)) =
+      .error (.revertWith d') at h
+    have hd' : d' = ps.flatten := by
+      unfold THalt.ofData at h
+      split at h
+      · cases h
+      · cases h; rfl
+    subst hd'
+    exact .inr ⟨p, List.mem_singleton_self _, RevPart.mapM_pat σ d hd ps hm⟩
 
 theorem litWritesT_dataS {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
     (hk : ∀ σ, (k σ).DataS K S) : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
@@ -469,9 +565,9 @@ end TRun
 
 /-! ## A program's data is one it lists -/
 
-theorem optCat_eq_some {α : Type} {a b : Option (List α)} {S : List α} (h : optCat a b = some S) :
-    ∃ Sa Sb, a = some Sa ∧ b = some Sb ∧ S = Sa ++ Sb := by
-  cases a <;> cases b <;> simp only [optCat, reduceCtorEq, Option.some.injEq] at h
+theorem optCatD_eq_some {a b : Option DSet} {S : DSet} (h : optCatD a b = some S) :
+    ∃ Sa Sb, a = some Sa ∧ b = some Sb ∧ S = (Sa.1 ++ Sb.1, Sa.2 ++ Sb.2) := by
+  cases a <;> cases b <;> simp only [optCatD, reduceCtorEq, Option.some.injEq] at h
   exact ⟨_, _, rfl, rfl, h.symm⟩
 
 mutual
@@ -479,7 +575,7 @@ mutual
 /-- **The data a statement's run reverts with is one it lists**
 (`Stmt.revertDatas`). -/
 theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    {S : List (List UInt8)} → s.revertDatas raw = some S → ∀ σ : State C Γ,
+    {S : DSet} → s.revertDatas raw = some S → ∀ σ : State C Γ,
       (s.run σ).DataS (dataKeep raw) S
   | _, _, .assign l r, _, _, σ => (r.valueT_dataS σ).bind fun _ => (l.resolveT_dataS σ).bind
       fun _ => (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
@@ -523,11 +619,11 @@ theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .deleteMem p _, _, _, σ => TRun.deleteMem_dataS p σ
   | _, _, .assignNew l n h, _, _, σ => TRun.assignNew_dataS l n h σ
   | _, _, .ite c thn els, _, h, σ => by
-    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCat_eq_some
-      (show optCat (Prog.revertDatas raw thn) (Prog.revertDatas raw els) = some _ from h)
+    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCatD_eq_some
+      (show optCatD (Prog.revertDatas raw thn) (Prog.revertDatas raw els) = some _ from h)
     exact TRun.ite_dataS c _ _ _ _ (fun σ => (Prog.run_dataS raw thn h₁ σ).mono
-      (List.subset_append_left _ _)) (fun σ => (Prog.run_dataS raw els h₂ σ).mono
-      (List.subset_append_right _ _)) σ
+      (DSet.mem_left _ _)) (fun σ => (Prog.run_dataS raw els h₂ σ).mono
+      (DSet.mem_right _ _)) σ
   | _, _, .require c, _, _, σ => TRun.require_dataS c σ
   | _, _, .assert c, _, _, σ => TRun.assert_dataS c σ
   | _, _, .revert, _, _, _ => TRes.DataS.revert
@@ -538,32 +634,32 @@ theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .callReceiver _ args r body op, _, h, σ =>
     TRun.callReceiver_dataS args r _ _ op (Prog.run_dataS raw body h) σ
   | _, _, .callReceiverPush _ args r body code value, _, h, σ => by
-    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCat_eq_some
-      (show optCat (Prog.revertDatas raw body) (Prog.revertDatas raw code) = some _ from h)
+    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCatD_eq_some
+      (show optCatD (Prog.revertDatas raw body) (Prog.revertDatas raw code) = some _ from h)
     exact TRun.callReceiverPush_dataS args r _ _ _ _ value
-      (fun σ => (Prog.run_dataS raw body h₁ σ).mono (List.subset_append_left _ _))
-      (fun σ => (Prog.run_dataS raw code h₂ σ).mono (List.subset_append_right _ _)) σ
+      (fun σ => (Prog.run_dataS raw body h₁ σ).mono (DSet.mem_left _ _))
+      (fun σ => (Prog.run_dataS raw code h₂ σ).mono (DSet.mem_right _ _)) σ
   | _, _, .tryCall call rets ok err code pnc other sargs sbody self, _, h, σ => by
-    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCat_eq_some
-      (show optCat (optCat (Prog.revertDatas raw ok) (Prog.revertDatas raw err))
-        (optCat (Prog.revertDatas raw pnc) (Prog.revertDatas raw other)) = some _ from h)
-    obtain ⟨Sa, Sb, ha, hb, rfl⟩ := optCat_eq_some h₁
-    obtain ⟨Sc, Sd, hc, hd, rfl⟩ := optCat_eq_some h₂
+    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCatD_eq_some
+      (show optCatD (optCatD (Prog.revertDatas raw ok) (Prog.revertDatas raw err))
+        (optCatD (Prog.revertDatas raw pnc) (Prog.revertDatas raw other)) = some _ from h)
+    obtain ⟨Sa, Sb, ha, hb, rfl⟩ := optCatD_eq_some h₁
+    obtain ⟨Sc, Sd, hc, hd, rfl⟩ := optCatD_eq_some h₂
     exact TRun.tryCall_dataS call rets _ _ _ _ code _ _ _ _ sargs _ _ self
-      (fun σ => (Prog.run_dataS raw ok ha σ).mono fun _ hx =>
-        List.mem_append.2 (.inl (List.mem_append.2 (.inl hx))))
-      (fun σ => (Prog.run_dataS raw err hb σ).mono fun _ hx =>
-        List.mem_append.2 (.inl (List.mem_append.2 (.inr hx))))
-      (fun σ => (Prog.run_dataS raw pnc hc σ).mono fun _ hx =>
-        List.mem_append.2 (.inr (List.mem_append.2 (.inl hx))))
-      (fun σ => (Prog.run_dataS raw other hd σ).mono fun _ hx =>
-        List.mem_append.2 (.inr (List.mem_append.2 (.inr hx))))
+      (fun σ => (Prog.run_dataS raw ok ha σ).mono fun d hx =>
+        DSet.mem_left _ _ d (DSet.mem_left _ _ d hx))
+      (fun σ => (Prog.run_dataS raw err hb σ).mono fun d hx =>
+        DSet.mem_left _ _ d (DSet.mem_right _ _ d hx))
+      (fun σ => (Prog.run_dataS raw pnc hc σ).mono fun d hx =>
+        DSet.mem_right _ _ d (DSet.mem_left _ _ d hx))
+      (fun σ => (Prog.run_dataS raw other hd σ).mono fun d hx =>
+        DSet.mem_right _ _ d (DSet.mem_right _ _ d hx))
       σ
   | _, _, .loop _ c body, _, h, σ => TRun.loop_dataS c _ _ (Prog.run_dataS raw body h) σ
   | _, _, .block body, _, h, σ => TRun.block_dataS _ _ (Prog.run_dataS raw body h) σ
   | _, _, .revertData d, _, h, σ => by
-    have h' : (if !raw && RevPart.notError d then some [] else (RevPart.litData d).map ([·])) =
-        some _ := h
+    have h' : RevPart.datas raw d = some _ := h
+    unfold RevPart.datas at h'
     split at h'
     · rename_i hn
       simp only [Bool.and_eq_true, Bool.not_eq_true'] at hn
@@ -572,23 +668,27 @@ theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
         rcases hk with hk | hk
         · rw [hn.1] at hk; cases hk
         · exact hk)
-    · simp only [Option.map_eq_some_iff] at h'
-      obtain ⟨bs, hbs, rfl⟩ := h'
-      exact TRun.revertData_dataS d hbs σ
+    · split at h'
+      · rename_i bs hbs
+        cases h'
+        exact TRun.revertData_dataS d hbs σ
+      · simp only [Option.map_eq_some_iff] at h'
+        obtain ⟨p, hp, rfl⟩ := h'
+        exact TRun.revertData_dataS_pat d hp σ
   | _, _, .catchData c rets sargs sbody self kind _ body, _, h, σ =>
     TRun.catchData_dataS c rets sargs _ _ self kind _ _ (Prog.run_dataS raw body h) σ
 
 /-- **The data a sequence's run reverts with is one it lists.** -/
 theorem Prog.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    {S : List (List UInt8)} → P.revertDatas raw = some S → ∀ σ : State C Γ,
+    {S : DSet} → P.revertDatas raw = some S → ∀ σ : State C Γ,
       (P.run σ).DataS (dataKeep raw) S
   | _, _, .nil, _, _, _ => TRes.DataS.ok _
   | _, _, .cons s P, _, h, σ => by
-    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCat_eq_some
-      (show optCat (Stmt.revertDatas raw s) (Prog.revertDatas raw P) = some _ from h)
+    obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCatD_eq_some
+      (show optCatD (Stmt.revertDatas raw s) (Prog.revertDatas raw P) = some _ from h)
     exact TRun.seq_dataS _ _ (fun σ => (Stmt.run_dataS raw s h₁ σ).mono
-      (List.subset_append_left _ _)) (fun σ => (Prog.run_dataS raw P h₂ σ).mono
-      (List.subset_append_right _ _)) σ
+      (DSet.mem_left _ _)) (fun σ => (Prog.run_dataS raw P h₂ σ).mono
+      (DSet.mem_right _ _)) σ
 
 end
 
@@ -596,11 +696,11 @@ mutual
 
 /-- A program whose data is known with `raw` has no `assert`: it does not
 panic (`Prog.run_noPanic`). -/
-theorem Stmt.asserts_of_revertDatas : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → {S : List (List UInt8)} →
+theorem Stmt.asserts_of_revertDatas : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → {S : DSet} →
     s.revertDatas true = some S → s.asserts = false
   | _, _, .ite _ thn els, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCat_eq_some
-      (show optCat (Prog.revertDatas true thn) (Prog.revertDatas true els) = some _ from h)
+    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
+      (show optCatD (Prog.revertDatas true thn) (Prog.revertDatas true els) = some _ from h)
     simp only [Stmt.asserts, Prog.asserts_of_revertDatas thn h₁, Prog.asserts_of_revertDatas els h₂,
       Bool.or_self]
   | _, _, .assert _, _, h => nomatch h
@@ -610,16 +710,16 @@ theorem Stmt.asserts_of_revertDatas : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .callReceiver _ _ _ body _, _, h => by
     simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
   | _, _, .callReceiverPush _ _ _ body code _, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCat_eq_some
-      (show optCat (Prog.revertDatas true body) (Prog.revertDatas true code) = some _ from h)
+    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
+      (show optCatD (Prog.revertDatas true body) (Prog.revertDatas true code) = some _ from h)
     simp only [Stmt.asserts, Prog.asserts_of_revertDatas body h₁, Prog.asserts_of_revertDatas code h₂,
       Bool.or_self]
   | _, _, .tryCall _ _ ok err _ pnc other _ _ _, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCat_eq_some
-      (show optCat (optCat (Prog.revertDatas true ok) (Prog.revertDatas true err))
-        (optCat (Prog.revertDatas true pnc) (Prog.revertDatas true other)) = some _ from h)
-    obtain ⟨_, _, ha, hb, _⟩ := optCat_eq_some h₁
-    obtain ⟨_, _, hc, hd, _⟩ := optCat_eq_some h₂
+    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
+      (show optCatD (optCatD (Prog.revertDatas true ok) (Prog.revertDatas true err))
+        (optCatD (Prog.revertDatas true pnc) (Prog.revertDatas true other)) = some _ from h)
+    obtain ⟨_, _, ha, hb, _⟩ := optCatD_eq_some h₁
+    obtain ⟨_, _, hc, hd, _⟩ := optCatD_eq_some h₂
     simp only [Stmt.asserts, Prog.asserts_of_revertDatas ok ha, Prog.asserts_of_revertDatas err hb,
       Prog.asserts_of_revertDatas pnc hc, Prog.asserts_of_revertDatas other hd, Bool.or_self]
   | _, _, .loop _ _ body, _, h => by
@@ -639,12 +739,12 @@ theorem Stmt.asserts_of_revertDatas : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .require _, _, _ | _, _, .revert, _, _ | _, _, .assumeFalse, _, _
   | _, _, .revertData _, _, _ => rfl
 
-theorem Prog.asserts_of_revertDatas : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {S : List (List UInt8)} →
+theorem Prog.asserts_of_revertDatas : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {S : DSet} →
     P.revertDatas true = some S → P.asserts = false
   | _, _, .nil, _, _ => rfl
   | _, _, .cons s P, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCat_eq_some
-      (show optCat (Stmt.revertDatas true s) (Prog.revertDatas true P) = some _ from h)
+    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
+      (show optCatD (Stmt.revertDatas true s) (Prog.revertDatas true P) = some _ from h)
     simp only [Prog.asserts, Stmt.asserts_of_revertDatas s h₁, Prog.asserts_of_revertDatas P h₂,
       Bool.or_self]
 
