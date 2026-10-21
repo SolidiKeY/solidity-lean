@@ -2596,30 +2596,47 @@ def abiCopy (r x j L : String) (o : RawExpr) : List RawStmt :=
 /-- `(L + 31) / 32 * 32`: a length padded to whole words. -/
 def abiPad (L : RawExpr) : RawExpr := .binop .mul (.binop .div (L.addN 31) (.num 32)) (.num 32)
 
-/-- The checks and the value of `abi.decode` at the type `T` of the word
-`w` (a `uint`): a value out of the type's range reverts, as solc's decoder
-does.  `none` for a type it does not decode. -/
-def abiDecodeAt (T : String) (w : RawExpr) : Option (List RawExpr × RawExpr) :=
-  if T == "bool" then some ([.binop .lt w (.num 2)], .binop .eqB w (.num 1))
-  else if T == "address" then some ([.binop .lt w (.num (2 ^ 160))], w)
-  else if T == "uint" || T == "uint256" then some ([], w)
-  else if T == "int" || T == "int256" then some ([], .call "int256" [w])
-  else match narrowTy? T, bytesTy? T with
-    | some (.uint, n), _ => some ([.binop .lt w (.num (2 ^ n))], .call T [w])
-    | some (.int, n), _ =>
-      some ([.binop .or (.binop .lt w (.num (2 ^ (n - 1))))
-        (.binop .ge w (.num (2 ^ 256 - 2 ^ (n - 1))))], .call T [w])
-    | _, some n =>
-      if n == 32 then some ([], .call T [w])
-      else some ([.binop .eqB (.binop .mod w (.num (2 ^ (256 - 8 * n)))) (.num 0)],
-        .call T [.binop .shr w (.num (256 - 8 * n))])
-    | _, _ => none
+/-- `d[o]`, a byte of `d`. -/
+def abiByte (d : String) (o : Nat) : RawExpr := .index (.name d) (.num o)
 
-/-- The word at byte `o` of `d`, read big-endian: `((d[o] * 256 + d[o+1]) * 256 + …)`. -/
-def abiWordAt (d : String) (o : Nat) : RawExpr :=
-  (List.range 32).foldl (fun acc j =>
-    let b : RawExpr := .index (.name d) (.num (o + j))
-    if j == 0 then b else .binop .add (.binop .mul acc (.num 256)) b) (.num 0)
+/-- The `m` bytes of `d` from `o` read big-endian into the `uint` local `w`:
+`w = d[o]; w = w * 256 + d[o + 1]; …`. -/
+def abiAssemble (d w : String) (o m : Nat) : List RawStmt :=
+  .decl (.named "uint") w (some (abiByte d o)) ::
+    (List.range (m - 1)).map fun j =>
+      .assign (.name w) (.binop .add (.binop .mul (.name w) (.num 256)) (abiByte d (o + j + 1)))
+
+/-- `require(d[p] == 0)` for each `p` of `ps`. -/
+def abiZeros (d : String) (ps : List Nat) : List RawStmt :=
+  ps.map fun p => .require (.binop .eqB (abiByte d p) (.num 0))
+
+/-- `abi.decode` of the word at byte `o` of `d` at the type `T`: its checks
+(solc's decoder reverts on a word out of the type's range: a high byte not
+zero, or not the sign's, a `bool` above `1`), the bytes it reads into the
+local `w`, and its value.  `none` for a type it does not decode.  A narrow
+type reads only its own bytes into `w`; the others it compares with `0`
+one by one. -/
+def abiDecodeAt (T : String) (d w : String) (o : Nat) : Option (List RawStmt × RawExpr) :=
+  let unsigned (m : Nat) (v : RawExpr) : List RawStmt × RawExpr :=
+    (abiZeros d ((List.range (32 - m)).map (o + ·)) ++ abiAssemble d w (o + 32 - m) m, v)
+  if T == "bool" then
+    some (abiZeros d ((List.range 31).map (o + ·)) ++
+      [.require (.binop .lt (abiByte d (o + 31)) (.num 2))], .binop .eqB (abiByte d (o + 31)) (.num 1))
+  else if T == "address" then some (unsigned 20 (.name w))
+  else if T == "uint" || T == "uint256" then some (abiAssemble d w o 32, .name w)
+  else if T == "int" || T == "int256" then some (abiAssemble d w o 32, .call "int256" [.name w])
+  else match narrowTy? T, bytesTy? T with
+    | some (.uint, n), _ => some (unsigned (n / 8) (.call T [.name w]))
+    | some (.int, n), _ =>
+      let m := n / 8
+      -- the high bytes are the sign's: `0xff` below a byte of `128` or more
+      let sign : RawExpr := .ternary (.binop .ge (abiByte d (o + 32 - m)) (.num 128)) (.num 255) (.num 0)
+      some ((List.range (32 - m)).map (fun p => .require (.binop .eqB (abiByte d (o + p)) sign)) ++
+        abiAssemble d w (o + 32 - m) m, .call T [.name w])
+    | _, some n =>
+      some (abiZeros d ((List.range (32 - n)).map (o + n + ·)) ++ abiAssemble d w o n,
+        .call T [.name w])
+    | _, _ => none
 
 /-- The name of the hidden builtin `abi.decode` of one component is lowered
 through: `#abiDecode(d, T, i, n)`, the `i`-th of `n` words of `d` read at `T`. -/
@@ -2818,11 +2835,10 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let (Q, d) ← abiMemBytes b
       let w := toString (← freshCapture "se")
       let x := toString (← freshCapture "se")
-      let some (checks, v) := abiDecodeAt T (.name w) |
+      let some (reads, v) := abiDecodeAt T d w (32 * i) |
         throw s!"abi.decode at {T}: only value types are decoded"
-      let R ← elabStmtsP ([.require (.binop .ge (.field (.name d) "length") (.num (32 * n))),
-        .decl (.named "uint") w (some (abiWordAt d (32 * i)))] ++
-        checks.map .require ++ [.decl (.named T) x (some v)])
+      let R ← elabStmtsP ([.require (.binop .ge (.field (.name d) "length") (.num (32 * n)))] ++
+        reads ++ [.decl (.named T) x (some v)])
       return (P ++ Q ++ R, .name x)
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"

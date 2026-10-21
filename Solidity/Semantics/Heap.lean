@@ -443,32 +443,46 @@ end CopyMem
 /-! ## `keccak256`
 
 solc's `keccak256(bytes memory b)` is a function of the bytes of `b`.  The
-model does not compute it: `keccakOf` is an **uninterpreted** function of a
-stored value (`opaque`: the kernel never unfolds it, so the only fact a proof
-has about it is that it is a function, equal arguments giving equal
-results).  At `bytes`/`string` (a `bytes1[]`, `docs/semantic-gaps.md`,
-"Bytes and strings") the argument is a memory array's copy (`copyMToSt`),
-which holds exactly its elements: the function of the byte sequence.
+model does not compute it: `keccakBytes` is an **uninterpreted** function of
+the byte sequence (`opaque`: the kernel never unfolds it, so the only fact a
+proof has about it is that it is a function, equal sequences giving equal
+hashes).  A `bytes`/`string` is a `bytes1[]` (`docs/semantic-gaps.md`,
+"Bytes and strings"), so the sequence is the array object's elements
+(`MObj.words`).
 
-Collision resistance is not assumed: no injectivity can be (a function into
-`2^256` values from all byte strings has collisions), so a proof that needs
-two particular inputs to hash apart takes it as a premise
-(`docs/semantic-gaps.md`, "Hashing").  The compiled code (`#run`) uses a
-stand-in that is not Keccak (`keccakStandIn`), which no proof sees. -/
+Collision resistance is not assumed, and no injectivity can be (a function
+from all byte strings into `2^256` values has collisions): a proof that
+needs two particular inputs to hash apart takes it as a premise
+(`docs/semantic-gaps.md`, "Hashing and the ABI").  The compiled code
+(`#run`) uses a stand-in that is not Keccak (`keccakStandIn`), which no
+proof sees. -/
 
-/-- A compiled stand-in for `keccakOf`: the value's description hashed
-(FNV-1a), only so that `#run` tells inputs apart.  Not Keccak-256. -/
-def keccakStandIn {T : Ty} (_v : SVal T) : PrimTy.uint.Denote :=
-  (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
+/-- A compiled stand-in for `keccakBytes`, only so that `#run` tells byte
+strings apart: an FNV-style fold, not Keccak-256. -/
+def keccakStandIn (bs : List Int) : PrimTy.uint.Denote :=
+  let h : Nat := bs.foldl (fun h b => (h ^^^ (b.toNat + 1)) * 1099511628211 % 2 ^ 256)
+    14695981039346656037
+  if hh : h < 2 ^ 256 then
+    (⟨h, by simp only [PrimTy.inRange, decide_eq_true_eq]; omega⟩ :
+      {n : Int // PrimTy.uint.inRange n = true})
+  else (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
-/-- `keccak256` of a stored value: uninterpreted (see above). -/
+/-- `keccak256` of a byte sequence: uninterpreted (see above). -/
 @[implemented_by keccakStandIn]
-opaque keccakOf {T : Ty} : SVal T → PrimTy.uint.Denote :=
+opaque keccakBytes : List Int → PrimTy.uint.Denote :=
   fun _ => (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
-/-- `keccak256(mv)` of a memory object: of its contents (`copyMToSt`). -/
+/-- The words of an array object of `uint`s, in order: a `bytes`' bytes;
+nothing for any other object (the elaborator hashes byte strings only). -/
+def MObj.words {H : HTy} : (R : RefTy) → MObj H R → List Int
+  | .array (.prim .uint), o =>
+    (o : {l : List (MVal H (.prim .uint)) // l.length < 2 ^ 256}).1.map fun v =>
+      (v : PrimTy.uint.Denote).1
+  | _, _ => []
+
+/-- `keccak256(mv)` of a memory object: of its bytes (`MObj.words`). -/
 def Heap.keccak {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) : PrimTy.uint.Denote :=
-  keccakOf (MVal.copyMToSt hp (T := .ref R) r)
+  keccakBytes (MObj.words R (hp.get r))
 
 /-- The empty heap. -/
 def Heap.empty : Heap [] := ()

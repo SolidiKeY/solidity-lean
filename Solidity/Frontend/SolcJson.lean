@@ -998,6 +998,26 @@ partial def call (j : Json) : PM String := do
     return s!"({← operand c false} ? {← call a} : {← call b})"
   if J.kind f == "MemberAccess" then
     let member := (J.str? f "memberName").getD ""
+    -- `string.concat(…)`, `bytes.concat(…)`: a builtin of the type's name
+    if member == "concat" then
+      if let some owner := J.opt f "expression" then
+        if J.kind owner == "ElementaryTypeNameExpression" then
+          let n ← PM.lift (J.str (← PM.lift (J.get owner "typeName")) "name")
+          return s!"{n}.concat({", ".intercalate (← args.mapM expr)})"
+    -- `abi.decode(b, (T, U))`: the types written as names
+    if member == "decode" && (J.opt f "expression").any (fun o =>
+        J.kind o == "Identifier" && J.str? o "name" == some "abi") then
+      match args with
+      | [b, ts] =>
+        let tyName (t : Json) : PM String := do
+          unless J.kind t == "ElementaryTypeNameExpression" do
+            unsupported "abi.decode to a type other than a value type"
+          PM.lift (J.str (← PM.lift (J.get t "typeName")) "name")
+        let names ← match J.kind ts, J.arr? ts "components" with
+          | "TupleExpression", some cs => cs.toList.mapM tyName
+          | _, _ => do pure [← tyName ts]
+        return s!"abi.decode({← expr b}, ({", ".intercalate names}))"
+      | _ => unsupported "abi.decode with other than two arguments"
     if member == "wrap" || member == "unwrap" then
       if let some owner := J.opt f "expression" then
         if let some t := (J.ref? owner).bind (lookupBy · (← get).valueTypes) then
