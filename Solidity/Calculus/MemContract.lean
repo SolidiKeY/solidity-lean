@@ -166,4 +166,112 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
 
 end Sound
 
+/-! ## A recursive memory return -/
+
+section Rec
+
+variable {ps : Ctx} {R : RefTy} {m : Modality}
+
+/-- **A recursive function's contract, its memory return allocated**: the
+contract at every call returning `[.mem R]`, the body within `μ` as a body
+that allocates (`Prog.withinM`), the parameters unwritten. -/
+def RecContractM (μ : Mutability) (b : Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) (req : Fml C ps)
+    (ens : Fml C ([.mem R] ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
+  (∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.mem R] Γ'), FunContract ret b req ens m) ∧
+    Prog.withinM μ b = true ∧ writesRets 1 b = true
+
+/-- A contract at a call that returns a memory object is one at every such
+call: each enters the body with a fresh default object, whatever its name. -/
+theorem FunContract.forall_mem {Γf : Ctx} {b : Prog C ([.mem R] ++ ps) Γf} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true}
+    (h : FunContract (Γ := []) (CallRet.mem R (.user "r") hd hm) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.mem R] Γ'), FunContract ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | mem => exact h
+  | rets bs => cases bs
+
+/-- The bottom frame meets every contract: it is exhausted. -/
+theorem RecContractM.base (μ : Mutability) (req : Fml C ps) (ens : Fml C ([.mem R] ++ (Olds ++ ps)))
+    (m : Modality) :
+    RecContractM μ (Prog.recBase : Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) req ens m :=
+  ⟨fun _ _ _ => ⟨by cases m <;> first | trivial | rfl, nofun⟩, rfl, rfl⟩
+
+/-- **Induction over the unrolling**, a memory return: a contract every
+frame meets where the frame below does holds of the recursive call's body. -/
+theorem RecContractM.unroll {μ : Mutability} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
+    {step : Nat → (Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) →
+      Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)}
+    (hs : ∀ n (t : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)),
+      RecContractM μ (t ()) req ens m → RecContractM μ (step n t) req ens m) (d : Nat) :
+    RecContractM μ (recUnroll Prog.recBase step d) req ens m :=
+  recUnroll_induct (fun b => RecContractM μ b req ens m) (RecContractM.base μ req ens m) hs d
+
+variable {Γ Γ₂ Γ₀ : Ctx}
+
+/-- **A recursive call of a memory return that allocates, by its callee's
+contract**: the goals "pre" and "post" (`Fml.callPostM`). -/
+theorem useRecContractM {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {d : Nat}
+    {args : Args C Γ ps} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)}
+    {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))} (hc : RecContractM μ (body ()) req ens m)
+    («pre» : Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m))) :
+    Valid (H.wrap (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
+  H.wrap_and (φ := Fml.callPre args req m) (ψ := Fml.callPostM μ args R r ens ω κ φ m)
+    (χ := .modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)
+    (fun _ h₁ h₂ => (holds_callMemM (f := f) (hd := hd) (hm := hm) (hc.1 _) hc.2.1 hc.2.2 h₁ h₂ :
+      holds _ (.modal m (.cons (.call f args (.mem R r hd hm) (body ())) ω) κ φ)))
+    σ («pre» σ) («post» σ)
+
+/-- **A call of a memory return that allocates, by its callee's contract**
+(not recursive): `useContract` with "post" `Fml.callPostM`. -/
+theorem useContractM_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {Γf : Ctx}
+    {args : Args C Γ ps} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+    {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
+    (hc : FunContract (CallRet.mem (Γ := Γ) R r hd hm) body req ens m)
+    («pre» : Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
+    (hμ : Prog.withinM μ body = true := by rfl) (hw : writesRets 1 body = true := by rfl) :
+    Valid (H.wrap (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
+  H.wrap_and (fun _ h₁ h₂ => holds_callMemM hc hμ hw h₁ h₂) σ («pre» σ) («post» σ)
+
+end Rec
+
+/-! ## Tactics -/
+
+open Lean Elab Tactic Meta in
+/-- `rec_contract_mem_by μ req ens`: the recursive call of a memory return
+at the head of the goal's box by the contract `req`/`ens` of mutability
+`μ` (`useRecContractM`), the goals `hc` (the contract,
+`RecContractM.unroll`), "pre" and "post" left. -/
+elab "rec_contract_mem_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : tactic =>
+  withMainContext do
+  let g ← getMainGoal
+  let some (_, H, χ) ← Recursion.goalParts g
+    | throwError "rec_contract_mem_by: expected a goal `⊨ φ`"
+  unless ← Recursion.headRecCall χ do
+    throwError "rec_contract_mem_by: no recursive call at the head of the box{indentExpr χ}"
+  let HS ← Term.exprToSyntax H
+  evalTactic (← `(tactic| refine useRecContractM (H := $HS) (μ := $μ) (req := ?req) (ens := ?ens)
+    ?hc ?pre ?post))
+  evalTactic (← `(tactic| case req => exact $req))
+  evalTactic (← `(tactic| case ens => exact $ens))
+
+open Lean Elab Tactic Meta in
+/-- `rec_contract_mem h`: the recursive call of a memory return at the head
+of the goal's box by the contract `h : RecContractM μ (t ()) req ens`. -/
+elab "rec_contract_mem " h:term : tactic => withMainContext do
+  let g ← getMainGoal
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_mem: expected `⊨ φ`"
+  unless ← Recursion.headRecCall χ do
+    throwError "rec_contract_mem: no recursive call at the head of the box{indentExpr χ}"
+  let HS ← Term.exprToSyntax H
+  evalTactic (← `(tactic| refine useRecContractM (H := $HS) $h ?pre ?post))
+
 end Solidity
