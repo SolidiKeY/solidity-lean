@@ -525,8 +525,8 @@ nested struct is loop-free, and proved. -/
 /-- Nested encodings and their decodings. -/
 def Codec3 : Contract := contract!{
   struct S { uint a; uint[] xs; bytes b; }
-  struct In { uint x; bool y; }
-  struct Out { uint a; In i; }
+  struct In { uint8 x; bool y; }
+  struct Out { uint8 a; In i; }
   function nested() returns (uint l, uint w0, uint w1, uint w2, uint w3, uint w4, uint w5,
       uint w6, uint w7, uint w8) {
     uint[][] memory x = new uint[][](2);
@@ -635,7 +635,8 @@ section Codec3
 
 local instance : InContract := ⟨Codec3⟩
 
-/-- A static nested struct: its members' words in the head, loop-free. -/
+/-- A static nested struct: its members' words in the head, loop-free (narrow
+members: a byte each to write, within the closer's bounds). -/
 theorem staticNested : ⊨ spec!{staticNested} := by
   sol_symex
   sol_decide
