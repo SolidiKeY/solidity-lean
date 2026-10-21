@@ -922,4 +922,153 @@ elab "sol_no_callback" : tactic => do
     throwError "sol_no_callback: a statement may call back{indentExpr (← g.getType)}"
   setGoals ((← getGoals).filter (· != g))
 
+namespace RecursionCallback
+
+open Lean Elab Tactic Meta
+
+/-- The hypotheses of the context that are a `RecContractC`. -/
+def recHypsC : MetaM (List LocalDecl) := do
+  (← getLCtx).decls.toList.filterMapM fun d? => do
+    let some d := d? | return none
+    if d.isImplementationDetail then return none
+    let ty ← instantiateMVars d.type
+    return if ty.isAppOf ``RecContractC then some d else none
+
+/-- The recursive call at the head of a `ProvesC` goal's box. -/
+def headCallC? (g : MVarId) : MetaM (Option (String × Expr)) := g.withContext do
+  let ty ← whnfR (← instantiateMVars (← g.getType))
+  unless ty.isAppOf ``ProvesC do return none
+  Recursion.headCall? (← whnfD ty.appArg!)
+
+/-- "post" opened, so that the walk sees its `{havoc}` (`ProvesC.havocIntro`). -/
+def openPost (g : MVarId) : TacticM MVarId := do
+  let some [g'] ← Recursion.tryOn g (evalTactic (← `(tactic|
+      dsimp only [Fml.callPost, Fml.anonC, Fml.callResult])))
+    | return g
+  return g'
+
+mutual
+
+/-- `rec_auto_c` on the goal `g` (`ValidT`, `ValidC` or `ProvesC`): the walk
+of `ProvesC` (`sol_prove`), each recursive call it stops at by a contract
+(`autoCallC`).  The goals left (`[]` where it is proved). -/
+partial def autoGoalC (g : MVarId) (fuel : Nat) : TacticM (List MVarId) := g.withContext do
+  let out ← IO.mkRef (none : Option (List MVarId))
+  let some _ ← Recursion.tryOn g (do
+      let some (_, leaves) ← CallbackWalk.run g true | throwError "not a goal with callbacks"
+      out.set (some leaves))
+    | return [g]
+  let some leaves ← out.get | return [g]
+  for l in leaves do
+    if ← l.isAssigned then continue
+    let some (f, s) ← withCurrHeartbeats (headCallC? l) | return [l]
+    unless (← autoCallC l f s fuel).isEmpty do return [l]
+  return []
+
+/-- The recursive call `s` of `f` at the head of the `ProvesC` goal `g`: read
+without callbacks where nothing in the sequent calls back
+(`ProvesC.recValid`, `rec_auto`); else by a hypothesis about its body (an
+induction's, `ProvesC.recContract`); else by the source's contract of `f`,
+else by `true`/`true`, proved by induction over the frames (`inductC`) at
+the first mutability its body is within. -/
+partial def autoCallC (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
+    TacticM (List MVarId) := g.withContext do
+  if fuel == 0 then return [g]
+  if let some [] ← Recursion.tryOn g (evalTactic (← `(tactic|
+      (refine ProvesC.recValid ?_ (by sol_no_callback); rec_auto)))) then return []
+  let ty ← whnfR (← instantiateMVars (← g.getType))
+  let C := ty.getArg! 0
+  let body := s.getArg! 9
+  let goals (gs : List MVarId) : TacticM Bool := do
+    for g' in gs do
+      if ← g'.isAssigned then continue
+      unless (← autoGoalC (← openPost g') (fuel - 1)).isEmpty do return false
+    return true
+  for d in ← recHypsC do
+    let b := (← instantiateMVars d.type).getArg! 6
+    unless ← withCurrHeartbeats <| withReducible (isDefEq b (mkApp body (mkConst ``Unit.unit)))
+    do continue
+    let st ← saveState
+    let hS ← Term.exprToSyntax d.toExpr
+    let some gs ← Recursion.tryOn g (evalTactic (← `(tactic|
+        refine ProvesC.recContract $hS (by rfl) (by rfl) ?_ ?_)))
+      | continue
+    if ← goals gs then return []
+    st.restore
+  let spec ← withCurrHeartbeats <| Recursion.specContract? C f
+  let cands : List (Option (Expr × Expr)) := (spec.map some).toList ++ [none]
+  for c in cands do
+    let (reqS, ensS) ← match c with
+      | some (req, ens) => pure ((← Term.exprToSyntax req), (← Term.exprToSyntax ens))
+      | none => pure ((← `(.tt)), (← `(.tt)))
+    for μ in [← `(Mutability.pure), ← `(Mutability.view), ← `(Mutability.nonpayable)] do
+      let st ← saveState
+      let some gs ← Recursion.tryOn g (evalTactic (← `(tactic|
+          refine ProvesC.recContract (μ := $μ) (req := $reqS) (ens := $ensS)
+            ?_ (by rfl) (by rfl) ?_ ?_)))
+        | continue
+      let some hc := ← gs.findM? fun g' => do
+          return (← instantiateMVars (← g'.getType)).isAppOf ``RecContractC
+        | st.restore; continue
+      match ← inductC hc (s.getArg! 8) (fuel - 1) with
+      | .notWithin => st.restore; continue
+      | .failed => st.restore; break
+      | .proved =>
+        if ← goals (gs.erase hc) then return []
+        st.restore; break
+  return [g]
+
+/-- A `RecContractC` of a recursive call's body by induction over its
+frames (`RecContractC.unroll`), as `Recursion.induct`. -/
+partial def inductC (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Recursion.Induct :=
+  g.withContext do
+  let some [g₁] ← Recursion.tryOn g (evalTactic (← `(tactic|
+      (apply RecContractC.unroll; intro n t ih))))
+    | return .failed
+  g₁.withContext do
+  let mut g₂ := g₁
+  for d in (← recHypsC) ++ (← Recursion.recHyps) do
+    let hS ← Term.exprToSyntax d.toExpr
+    let some [g'] ← Recursion.tryOn g₂ (evalTactic (← `(tactic| have := ($hS).2.1)))
+      | return .failed
+    g₂ := g'
+  let some gs ← Recursion.tryOn g₂ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩)))
+    | return .failed
+  let [gc, gw, gr] := gs | return .failed
+  unless ← Recursion.proveWithin gw do return .notWithin
+  let some [] ← Recursion.tryOn gr (evalTactic (← `(tactic| first | rfl | decide)))
+    | return .failed
+  let tac ← if ret.isAppOf ``CallRet.rets then do
+      let bs ← Term.exprToSyntax ret.appArg!
+      `(tactic| (
+        (first | apply FunContractC.forall_rets $bs (by decide) | apply FunContractC.forall_val)
+        apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))
+    else `(tactic| (
+        (first | apply FunContractC.forall_none | apply FunContractC.forall_val)
+        apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))
+  let some [gc'] ← Recursion.tryOn gc (evalTactic tac) | return .failed
+  return if (← autoGoalC gc' fuel).isEmpty then .proved else .failed
+
+end
+
+end RecursionCallback
+
+open Lean Elab Tactic Meta in
+/-- `rec_auto_c`: `rec_auto` under the callback reading (`ValidT`, `ValidC`,
+`ProvesC`): the walk of `ProvesC` (`sol_prove`), each recursive call it
+stops at read without callbacks where nothing calls back
+(`ProvesC.recValid`), else by a contract over the callback runs
+(`ProvesC.recContract`), proved by induction over the frames.  Fails, the
+goal unchanged, where it does not close. -/
+elab "rec_auto_c" : tactic => do
+  let g ← getMainGoal
+  let rest := (← getGoals).erase g
+  let fuel := 32
+  let open_ ← withTheReader Core.Context
+      (fun c => { c with maxHeartbeats := c.maxHeartbeats * fuel }) <|
+    withCurrHeartbeats <| RecursionCallback.autoGoalC g fuel
+  unless open_.isEmpty do
+    throwError "rec_auto_c: a goal is left open{indentExpr (← open_.head!.getType)}"
+  setGoals rest
+
 end Solidity
