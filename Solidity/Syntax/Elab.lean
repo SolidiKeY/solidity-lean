@@ -767,11 +767,12 @@ def RawStmt.mapBlocksM {m : Type → Type} [Monad m] (f : List RawStmt → m (Li
 
 `b[i:j]` of a calldata array is a view of it, as solc reads it: no copy.
 `RawStmt.sliceViews` rewrites a body before it is elaborated (the
-`contract!` macro applies it to a body that has a slice): a slice opens
-two `uint` locals, its offset `t$o` into the base array and its length
-`t$n`, after solc's check `i <= j && j <= b.length` (a revert otherwise;
-`j` is `b.length` where it is left out, `i` is `0`).  A slice of a slice
-adds its offset.  Then `t[k]` is `b[k < t$n ? t$o + k : (t$n - 1) - k]`:
+`contract!` and `sol_raw!` macros apply it to a body that has a slice): a
+slice opens `uint` locals, its start `t$s` and end `t$e`, then after
+solc's check `t$s <= t$e && t$e <= b.length` (a revert otherwise; `j` is
+`b.length` where it is left out, `i` is `0`) its length `t$n`; a slice of
+a slice its offset into the base, `t$o`, the outer one's plus its start.
+Each is assigned once.  Then `t[k]` is `b[k < t$n ? t$o + k : (t$n - 1) - k]`:
 past the view the checked subtraction underflows, so the index reverts
 where solc's `Panic(0x32)` does (the model reads both panics as a
 revert); inside `unchecked`, where it would wrap, the index is `b.length`
@@ -831,15 +832,18 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
         | some v => pure (some (v.base, some v.off, RawExpr.name v.len))
         | none => pure none
       | _ => pure none) | return none
-  let o := t ++ "$o"
+  -- each local assigned once: the closers read a local by its one value
+  let st := t ++ "$s"
+  let e := t ++ "$e"
   let n := t ++ "$n"
+  let o := t ++ "$o"
   let ss : List RawStmt :=
-    [.decl (.named "uint") o (some i), .decl (.named "uint") n (some j),
-     .require (.binop .le (.name o) (.name n)), .require (.binop .le (.name n) L),
-     .assign (.name n) (.binop .sub (.name n) (.name o))] ++
-    (off0.map fun o0 => RawStmt.assign (.name o) (.binop .add (.name o0) (.name o))).toList
+    [.decl (.named "uint") st (some i), .decl (.named "uint") e (some j),
+     .require (.binop .le (.name st) (.name e)), .require (.binop .le (.name e) L),
+     .decl (.named "uint") n (some (.binop .sub (.name e) (.name st)))] ++
+    (off0.map fun o0 => RawStmt.decl (.named "uint") o (some (.binop .add (.name o0) (.name st)))).toList
   modifyThe SliceSt fun (vs, k, pre) => (vs, k, pre ++ ss.toArray)
-  return some { base, off := o, len := n }
+  return some { base, off := if off0.isSome then o else st, len := n }
 
 /-- The view an expression is: a view's name, or a slice opened here. -/
 partial def sliceViewOf? : RawExpr → SliceM (Option SliceView)
@@ -2111,7 +2115,8 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
       as.findSome? (narrowWholeAt? Γ)
     -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
     -- no other array)
-    else if (lookupBy f C.funs).isNone && byteBuiltin f then as.findSome? (narrowBase? Γ)
+    else if (lookupBy f C.funs).isNone && (byteBuiltin f || f == sliceViewName) then
+      as.findSome? (narrowBase? Γ)
     else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
     as.zipIdx.findSome? fun (a, i) =>

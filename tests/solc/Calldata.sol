@@ -107,12 +107,13 @@ contract Calldata {
         assert(y != y);
     }
 
-    // the decoder reads the view in place: the selector skipped
+    // the decoder reads the view in place: a view shorter than a word
+    // reverts though its base is not
     /// @custom:key box
-    function decodeAfterSelector(bytes calldata b) external pure {
-        require(b.length == 36);
+    function decodeShortView(bytes calldata b) external pure {
+        require(b.length == 34);
         uint x = abi.decode(b[4:], (uint));
-        assert(x == abi.decode(b[4:36], (uint)));
+        assert(false);
     }
 
     // a slice hashed: refused (it would be copied)

@@ -478,6 +478,39 @@ returns (5, 3, 11)
 /-- info: revert -/
 #guard_msgs in #run Codec2.decodeBadLength()
 
+/-! ### A calldata slice decoded in place
+
+`abi.decode(b[4:], …)` decodes the view (`#sliceV`, `ByteSrc`,
+`Syntax/Elab.lean`): its offsets are the view's, its length the view's,
+its bytes the base's past the view's start.  No copy. -/
+
+/-- A selector skipped, the words after it decoded. -/
+def SliceCodec : Contract := contract!{
+  function afterSel(bytes calldata b) returns (uint x, uint y) {
+    (x, y) = abi.decode(b[4:], (uint, uint));
+  }
+  function single(bytes calldata b) returns (uint x) { x = abi.decode(b[4:36], (uint)); }
+  function both() returns (uint x, uint y, uint z) {
+    bytes memory e = abi.encodeWithSelector(bytes4(0x12345678), 7, 9);
+    (x, y) = afterSel(e);
+    z = single(e);
+  }
+  function short() returns (uint z) {
+    bytes memory e = abi.encode(7);
+    z = single(e);
+  }
+}
+
+/--
+info: ok
+returns (7, 9, 7)
+-/
+#guard_msgs in #run SliceCodec.both()
+
+-- the slice past its base: a revert
+/-- info: revert -/
+#guard_msgs in #run SliceCodec.short()
+
 /-! ## 3 · A mapping keyed by `string` -/
 
 /-- `mapping(string => uint)`: a `mapping(uint => uint)` keyed by the hash
