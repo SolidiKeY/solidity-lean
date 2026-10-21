@@ -770,3 +770,11 @@ scripts/test-solidity.test.mjs` passes (5 tests, 271 s); `tests/solc/RevertData.
 three functions proved (4 s); `Examples/Tactics/RevertData.lean`'s proofs by
 `sol_symex; sol_decide`.  A named `catch` reason the clause does not read
 binds nothing, so no existing program changes.
+
+**Lane `open-k2` checked** (2026-10-21): `lean_build` of the default
+targets; `node --test --test-name-pattern="hash|revert|function types|bytes|self|solc/open"
+scripts/test-solidity.test.mjs` passes (7 tests).  Landed: Keccak-256 as
+`keccakBytes` ("Hashing and the ABI"), custom error data and the import's
+`RevertStatement` ("Revert data"), `catch Error` past a custom error of
+symbolic data, `Facts.cancelDiv` ("Function types"), a storage array copy's
+length ("Bytes and strings").
