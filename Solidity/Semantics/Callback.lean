@@ -227,7 +227,8 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ _ _ => true)
     (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
-    (call := fun _ _ _ _ => true)
+    -- a call forks where its body does (`docs/options.md`, O3)
+    (call := fun _ _ _ body => Prog.hasTransfer body)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
@@ -390,7 +391,9 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ _ _ => true)
     (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
-    (call := fun _ _ _ _ => true)
+    -- a call forks where its body does: one whose callee calls nobody back
+    -- runs as `Stmt.run` (`ExecS.det`), as its body then does
+    (call := fun _ _ _ body => Prog.callsBack pay body)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
@@ -489,6 +492,7 @@ theorem Stmt.forksIn_true {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : s.forksIn true = 
   cases s
   case loop _ _ body => exact Prog.callsBack_true body
   case block body => exact Prog.callsBack_true body
+  case call => exact Prog.callsBack_true _
   all_goals first | rfl | simp only [Stmt.forksIn, Stmt.forks, Prog.callsBack_true]
 
 /-- A statement that forks under no reading forks under none. -/
@@ -497,11 +501,20 @@ theorem Stmt.forksIn_of_forks {pay : Bool} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} (h
   cases s
   case loop _ _ body => exact Prog.callsBack_of_hasTransfer body h
   case block body => exact Prog.callsBack_of_hasTransfer body h
+  case call => exact Prog.callsBack_of_hasTransfer _ h
   case catchData =>
     simp only [Stmt.forks, Bool.or_eq_false_iff] at h
     simp only [Stmt.forksIn, Prog.callsBack_of_hasTransfer _ h.1, Prog.callsBack_of_hasTransfer _ h.2,
       Bool.or_self]
   all_goals first | rfl | exact nomatch h
+
+/-- A statement that does not fork calls nobody back: what `forksIn` reads
+at its head, `callsBack` reads in it, a branch's and a recursive call's
+apart, which always fork. -/
+theorem Stmt.callsBack_of_forksIn {pay : Bool} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    (h : s.forksIn pay = false) : s.callsBack pay = false := by
+  cases s
+  all_goals first | rfl | exact h | exact nomatch h
 
 /-! ## Runs with callbacks -/
 
@@ -1509,6 +1522,46 @@ theorem ExecP.eq_run {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {P : Prog
     {o : COut C σ.H Γ'} (h : ExecP J σ P o) (ht : Prog.callsBack J.pay P = false) :
     o = .ofRes (Prog.run σ P) :=
   Prog.eq_run J P ht h
+
+/-- A sequence that pays nothing runs with callbacks as it runs. -/
+theorem ExecP.of_run {J : StateInv C} {Γ Γ' : Ctx} {τ : State C Γ} {P : Prog C Γ Γ'}
+    (hP : Prog.callsBack J.pay P = false) : ExecP J τ P (.ofRes (Prog.run τ P)) := by
+  rcases Prog.exec_run J P τ with h | h
+  · exact h
+  · have := ExecP.eq_run h hP
+    revert this
+    cases Prog.run τ P <;> exact fun h => nomatch h
+
+/-- **A statement that does not fork has one callback run**, its typed run
+(a call among them, where its callee calls nobody back). -/
+theorem ExecS.eq_run_of_forksIn {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ}
+    {s : Stmt C Γ Γ'} {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forksIn J.pay = false) :
+    o = .ofRes (s.run σ) :=
+  ExecS.eq_run h (Stmt.callsBack_of_forksIn hs)
+
+/-- **A call's callback runs**: its arguments halt, or its body runs in its
+frame; where the body calls nobody back (`ExecS.det`), as its typed run. -/
+theorem ExecS.call_cases {J : StateInv C} {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf}
+    {o : COut C σ.H Γ'} (he : ExecS J σ (.call f args ret body) o) :
+    (∃ e, args.evalT σ = .error e ∧ o = .halt e) ∨
+    ∃ (a : TEnv C σ.H ps) (o' : COut C (ret.enterT (σ.withEnv a)).st.H Γf),
+      args.evalT σ = .ok a ∧ ExecP J (ret.enterT (σ.withEnv a)).st body o' ∧
+      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) := by
+  cases he with
+  | callArgs ha => exact .inl ⟨_, ha, rfl⟩
+  | callBody ha hp => exact .inr ⟨_, _, ha, hp, rfl⟩
+  | det hf =>
+    have hb : Prog.callsBack J.pay body = false := hf
+    show (∃ e, _ ∧ COut.ofRes (TRun.call args ret body.ext body.runR σ) = _) ∨
+      ∃ a o', _ ∧ _ ∧ COut.ofRes (TRun.call args ret body.ext body.runR σ) = _
+    rw [TRun.call_eq]
+    cases ha : args.evalT σ with
+    | error e => exact .inl ⟨e, rfl, rfl⟩
+    | ok a =>
+      refine .inr ⟨a, _, rfl, ExecP.of_run hb, ?_⟩
+      show COut.ofRes (TRun.callFrom ret body.ext body.runR σ (ret.enterT (σ.withEnv a))) = _
+      rw [TRun.callFrom_eq, ← COut.map_ofRes]
 
 /-- The same, for frames. -/
 theorem ExecF.eq_run {J : StateInv C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ} {κ : Frames C Γ Γ₀}

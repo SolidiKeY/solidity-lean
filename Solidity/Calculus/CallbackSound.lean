@@ -3,6 +3,7 @@ import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.Sound
 import Solidity.Calculus.UpdateRules
 import Solidity.Semantics.NativeDeferredCallback
+import Solidity.Semantics.CallbackFrame
 
 /-!
 # The calculus with callbacks is sound
@@ -165,15 +166,6 @@ section Rules
 
 variable {I : Fml C []} {m : Modality} {Γ Γ' Γ₁ Γ₀ : Ctx} {σ : State C Γ}
   {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
-
-/-- A sequence that pays nothing runs with callbacks as it runs. -/
-theorem ExecP.of_run {J : StateInv C} {Δ : Ctx} {τ : State C Δ} {P : Prog C Δ Γ'}
-    (hP : Prog.callsBack J.pay P = false) : ExecP J τ P (.ofRes (Prog.run τ P)) := by
-  rcases Prog.exec_run J P τ with h | h
-  · exact h
-  · have := ExecP.eq_run h hP
-    revert this
-    cases Prog.run τ P <;> exact fun h => nomatch h
 
 /-- Two outcomes that end alike, up to the halt, are read alike after the
 frames. -/
@@ -971,11 +963,9 @@ theorem ExecS.callNone_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name} {ar
     (he : ExecS J σ (.call f args .none body) o) :
     ∃ u, ExecP J σ (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) u ∧
       o = u.map (Out.drop (Ext.append Γ ps)) := by
-  cases he with
-  | det h => exact nomatch h
-  | callArgs ha => exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
-  | @callBody _ _ _ _ _ _ _ _ _ _ a o' ha hp =>
-    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop ps Γ) (σ.withEnv a)
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop ps Γ) (σ.withEnv a)
       (TEnv.append ps a σ.env) hp
     have hb := ExecS.transport (H := σ.H)
       (X := (σ.withEnv a).lift (Thin.atop ps Γ) (TEnv.append ps a σ.env))
@@ -1015,11 +1005,8 @@ theorem ExecS.call_inv {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {ar
     (∃ e, args.evalT σ = .error e ∧ o = .halt e) ∨
     ∃ (a : TEnv C σ.H ps) (o' : COut C (ret.enterT (σ.withEnv a)).st.H Γf),
       args.evalT σ = .ok a ∧ ExecP J (ret.enterT (σ.withEnv a)).st body o' ∧
-      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) := by
-  cases he with
-  | det h => exact nomatch h
-  | callArgs ha => exact .inl ⟨_, ha, rfl⟩
-  | callBody ha hp => exact .inr ⟨_, _, ha, hp, rfl⟩
+      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) :=
+  ExecS.call_cases he
 
 /-- **A call of several results, with callbacks, is its inlined body**
 (`Premise.sound_callRets`' program): the parameters declared, the return

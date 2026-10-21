@@ -134,6 +134,7 @@ import Solidity.Calculus.Sequents
 import Solidity.Calculus.SequentNotation
 import Solidity.Calculus.SolSpec
 import Solidity.Semantics.Callback
+import Solidity.Semantics.CallbackFrame
 import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.RuleKit
 import Solidity.Calculus.PrintedRules
