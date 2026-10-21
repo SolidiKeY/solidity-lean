@@ -418,7 +418,7 @@ test("hashing: keccak256, abi.encode/encodePacked/decode, string keys, concat", 
     'decodeRoundtrip', 'stringKey', 'concatLengths']) assert.equal(status[name], 'proved', name);
 });
 
-test("function types: values in locals, parameters, returns, storage and struct members", () => {
+test("function types: values in locals, parameters, returns, storage, struct members, external", () => {
   // tests/solc/FunctionTypes.sol: a value is its function's tag, a call
   // through it a dispatch over the functions of its signature
   // (docs/semantic-gaps.md, "Function types")
@@ -426,11 +426,19 @@ test("function types: values in locals, parameters, returns, storage and struct 
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['applyAndCompose', 'localValue', 'storedByFlag', 'returnedValue',
-    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality'])
+    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality',
+    // calls through values that are not names (`callValueName`)
+    'memberCall', 'elementCall', 'callResultCall',
+    // an external function's selector, folded as solc folds it; a dispatch
+    // that recurses (`Stmt.callRec`)
+    'ext', 'externalSelector', 'recursionThroughValue'])
     assert.equal(status[name], 'proved', name);
   // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
   assert.equal(status.unassignedDiamond, 'pending');
   assert.equal(status.falsePost, 'pending');
+  // an external value's `address * 2^32 + selector` read back: a closer limit
+  // (the quotient of a word built from `address(this)`), not a semantic gap
+  assert.equal(status.externalValue, 'pending');
 });
 
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {

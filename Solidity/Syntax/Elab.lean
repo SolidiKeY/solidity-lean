@@ -3609,7 +3609,7 @@ partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × 
       pure [← extCallStmt r g args rs res]
     | none => do
       let some ty := fnTyOfExpr C Γe h | throw s!"{h.toStr}(…): the callee is not a function value"
-      let y := toString (← freshCapture "fv")
+      let y := toString (← freshCapture "se")
       let call : RawStmt := match res with
         | some (x, _) => .assign (.name (toString x)) (.call y args)
         | none => .call (.name y) args

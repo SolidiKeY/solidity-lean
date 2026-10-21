@@ -82,7 +82,8 @@ contract FunctionTypes {
     function memberCall(uint8 small) public {
         uint x = small;
         hold.f = triple;
-        assert(hold.f(x) == 3 * x);
+        uint y = hold.f(x);
+        assert(y == 3 * x);
     }
     function elementCall(uint8 small) public {
         uint x = small;
@@ -93,8 +94,13 @@ contract FunctionTypes {
         uint x = small;
         assert(choose(true)(x) == 2 * x);
     }
+}
 
+// External function values: an address and a selector, packed as the ABI's
+// `bytes24`; a call through one an external call to the address.
+contract ExternalFunctionTypes {
     // external function values: the address and the selector
+    /// @custom:key box
     function ext(uint x) external pure returns (uint) { return 2 * x; }
     function externalValue(uint8 small) public view {
         uint x = small;
@@ -106,6 +112,11 @@ contract FunctionTypes {
         assert(this.ext.selector == bytes4(0x0be5edb6));
     }
 
+}
+
+// A dispatch that recurses, in a contract of its own: every dispatch over
+// `function (uint) pure returns (uint)` lists `countThrough`, which recurses.
+contract RecursiveFunctionValues {
     // a dispatch that recurses: `countThrough` calls itself through `applyRec`
     function applyRec(function (uint) pure returns (uint) h, uint x) internal pure returns (uint) {
         return h(x);
