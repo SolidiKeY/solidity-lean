@@ -130,6 +130,109 @@ returns (5, 121)
 -/
 #guard_msgs in #run Codec.concat()
 
+/-- More of the ABI: a selector before the arguments, an `address` and an
+enum packed at their own widths, arrays and structs, a `bytes` decoded. -/
+def Codec2 : Contract := contract!{
+  enum E { A, B, C }
+  struct Pt { uint x; bool y; }
+  function g(uint x, address a) { }
+  function withSelector() returns (uint l, bytes1 b0, bytes1 b35) {
+    bytes memory e = abi.encodeWithSelector(bytes4(0x12345678), 7);
+    l = e.length; b0 = e[0]; b35 = e[35];
+  }
+  function withSignature() returns (uint l, bytes1 b0, bytes1 b3) {
+    bytes memory e = abi.encodeWithSignature("transfer(address,uint256)", 9, 5);
+    l = e.length; b0 = e[0]; b3 = e[3];
+  }
+  function withCall() returns (uint l, bytes1 b0, bytes1 b67) {
+    bytes memory e = abi.encodeCall(g, (4, 8));
+    l = e.length; b0 = e[0]; b67 = e[67];
+  }
+  function packedWidths() returns (uint l, bytes1 a, bytes1 c) {
+    address x = 7;
+    bytes memory e = abi.encodePacked(x, E.C);
+    l = e.length; a = e[19]; c = e[20];
+  }
+  function arrays() returns (uint l, bytes1 off, bytes1 n, bytes1 b, uint pl) {
+    uint[] memory xs = new uint[](2);
+    xs[0] = 5; xs[1] = 6;
+    bytes memory e = abi.encode(xs);
+    l = e.length; off = e[31]; n = e[63]; b = e[127];
+    pl = abi.encodePacked(xs).length;
+  }
+  function structs() returns (uint l, bytes1 x, bytes1 y) {
+    Pt memory p;
+    p.x = 3; p.y = true;
+    bytes memory e = abi.encode(p);
+    l = e.length; x = e[31]; y = e[63];
+  }
+  function decodeBytes() returns (uint a, uint l, bytes1 c) {
+    bytes memory e = abi.encode(7, "hi");
+    bytes memory b;
+    (a, b) = abi.decode(e, (uint, bytes));
+    l = b.length; c = b[1];
+  }
+  function decodeOutOfRange() returns (uint l) {
+    bytes memory e = abi.encode(1000);
+    bytes memory b = abi.decode(e, (bytes));
+    l = b.length;
+  }
+}
+
+-- `abi.encodeWithSelector`: the selector's four bytes, then the words
+/--
+info: ok
+returns (36, 18, 7)
+-/
+#guard_msgs in #run Codec2.withSelector()
+
+-- `abi.encodeWithSignature`: a literal signature's selector, `0xa9059cbb`
+/--
+info: ok
+returns (68, 169, 187)
+-/
+#guard_msgs in #run Codec2.withSignature()
+
+-- `abi.encodeCall(g, (…))`: `g(uint256,address)`'s selector, solc's
+-- `0xa4394e36` (the `address` read off its marker)
+/--
+info: ok
+returns (68, 164, 8)
+-/
+#guard_msgs in #run Codec2.withCall()
+
+-- `abi.encodePacked` of an `address` takes 20 bytes, of an enum one
+/--
+info: ok
+returns (21, 7, 2)
+-/
+#guard_msgs in #run Codec2.packedWidths()
+
+-- a dynamic array: its offset, length and words; packed, its words alone
+/--
+info: ok
+returns (128, 32, 2, 6, 64)
+-/
+#guard_msgs in #run Codec2.arrays()
+
+-- a struct of values: its members' words in the head
+/--
+info: ok
+returns (64, 3, 1)
+-/
+#guard_msgs in #run Codec2.structs()
+
+-- `abi.decode` of `bytes`: the offset, the length, the bytes
+/--
+info: ok
+returns (7, 2, 105)
+-/
+#guard_msgs in #run Codec2.decodeBytes()
+
+-- an offset past the data reverts, as solc's decoder does
+/-- info: revert -/
+#guard_msgs in #run Codec2.decodeOutOfRange()
+
 /-! ## 3 · A mapping keyed by `string` -/
 
 /-- `mapping(string => uint)`: a `mapping(uint => uint)` keyed by the hash
