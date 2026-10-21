@@ -209,6 +209,29 @@ not. -/
           (.fresh "se" (H.freshC I (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)))
           (.val (p := .bool) c.lower)) (.isBool (.pvV (p := .bool) .here) false))) :
       ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)
+  /-- **`whileInvariantBox` with callbacks** (`Proves.inv`'s goals, under the
+  box): the invariant now ("invariant initially valid"); from every state
+  the body's frame allows (`{anon(xs)}`, with `{havoc}` when the body may
+  write the storage: a body that calls back pays, so its frame has it), the
+  invariant holding, the body to the invariant where the condition holds
+  ("body preserves invariant"), the rest where it does not ("use case").
+  Whatever the body calls: a callback leaves a state the frame allows. -/
+  | invBox {Γ Γb Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {Iv : Val C Γ .bool}
+      {dec : Option (Val C Γ .uint)} {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool}
+      {body : Prog C Γ Γb} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
+      (hf : body.frame = some (xs, hv))
+      (init : ProvesC I pay Γ₀ H ((invFml Iv qs).invHyp (loopBreak brk c)))
+      (thn : ProvesC I pay Γ₀ ((((H.anonHavoc xs hv).pre ((invFml Iv qs).invHyp (loopBreak brk c))).upd
+          .box (Upd.nil.decl (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body)
+            ω) κ φ))) (.val (p := .bool) c.lower))).pre (.isBool (.pvV (p := .bool) .here) true))
+        (.upd .box (Upd.nil.pop (.push .refl)) (.modalK .box body (.pop .block body.ext .nil)
+          (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))))
+      (els : ProvesC I pay Γ₀ ((((H.anonHavoc xs hv).pre ((invFml Iv qs).invHyp (loopBreak brk c))).upd
+          .box (Upd.nil.decl (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body)
+            ω) κ φ))) (.val (p := .bool) c.lower))).pre (.isBool (.pvV (p := .bool) .here) false))
+        (.upd .box (Upd.nil.pop (.push .refl)) (.modalK .box ω κ φ))) :
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ)
   /-- **`sendNoCallbackBox`**, a send that does not call back (`pay` unset,
   the 2300-gas stipend): the rest after the booking and `pv := true` ("send
   succeeded"), and after `pv := false` ("send failed"), no `{havoc}`. -/

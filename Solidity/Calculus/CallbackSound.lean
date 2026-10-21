@@ -1274,6 +1274,206 @@ theorem holdsC_callMem {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State 
 
 end Calls
 
+/-! ## A loop by its invariant, with callbacks
+
+`whileInvariantBox` read over the callback runs (`ProvesC.invBox`): every
+loop head is a state the body's frame allows from the first
+(`ExecP.frame`: a callback replaces only the storage and the ledger, which a
+body that calls back may write, `Prog.frame`'s `hv`), so the premise read
+under `{anon(xs)}` (`{havoc}`) holds there (`holdsC_anonHavoc`); the
+invariant holds at every head by induction over the iterations
+(`ExecS.loop_box`: the typed run's where the body calls nobody back,
+`CallbackUnwk.LoopExec`'s otherwise).  Under the box only: a loop whose body
+calls back may diverge (`ExecS.loopDiverge`), which no diamond accepts
+(`holdsC_diamond_loop`). -/
+
+section Inv
+
+variable {I : Fml C []} {J : StateInv C}
+
+/-- **A state in a loop body's frame is one its anonymised premise covers**,
+with callbacks (`holds_anonHavoc`). -/
+theorem holdsC_anonHavoc {Γ : Ctx} {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Bool} {W : List (LTy × Nat)}
+    (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
+    (hg : TGFrame (frameMut hv) σ τ) (ha : TLocAgree 0 W σ.env τ.env) {ψ : Fml C Γ}
+    (h : holdsC I pay σ (Fml.anonHavoc xs hv ψ)) : holdsC I pay τ ψ := by
+  obtain ⟨b, hb⟩ := State.eq_anonHavoc hxs hg ha
+  cases hv with
+  | false =>
+    have hk := hg.keeps (by simp only [frameMut]; decide)
+    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2]; rfl
+    rw [hτ]
+    exact h b
+  | true =>
+    rw [hb]
+    exact h b τ.storage τ.net
+
+/-- **Induction over a loop's callback runs**, under the box: `P` holds at
+the first head and at every head an iteration from a head in `P` goes on
+in, where the condition is `true`; where it is `false`, `Q` holds. -/
+theorem ExecS.loop_box {Γ Γb : Ctx} {a : LoopAnn C Γ} {c : Val C Γ .bool} {body : Prog C Γ Γb}
+    {σ : State C Γ} (P Q : State C Γ → Prop) (h0 : P σ)
+    (hexit : ∀ τ, P τ → c.evalT τ = .ok false → Q τ)
+    (hstep : ∀ τ, P τ → c.evalT τ = .ok true → ∀ o, ExecP J τ body o →
+      (o.map (Out.drop body.ext)).after .box P) :
+    ∀ o, ExecS J σ (.loop a c body) o → o.after .box Q := by
+  intro o he
+  cases hb : body.callsBack J.pay with
+  | false =>
+    rw [ExecS.eq_run_of_forksIn he hb]
+    show (COut.ofRes (TLoop.run (fun o : Out C σ.H Γ => (Prog.run o.st body).map
+      fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+      (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩)).after .box Q
+    refine TLoop.run_induct (P := fun x : Out C σ.H Γ => P x.st)
+      (Q := fun r => (COut.ofRes r).after .box Q) h0 (fun x hx => ?_) ⟨trivial, nofun⟩
+    unfold TLoop.step
+    dsimp only
+    cases hc : c.evalT x.st with
+    | error e =>
+      refine ⟨trivial, fun h => ?_⟩
+      cases h
+      exact Val.evalT_noPanic x.st c hc
+    | ok v =>
+      cases v with
+      | false => exact hexit _ hx hc
+      | true =>
+        have hs := hstep _ hx hc _ (ExecP.of_run (J := J) (τ := x.st) (P := body) hb)
+        dsimp only
+        cases hr : Prog.run x.st body with
+        | error e => rw [hr] at hs; exact hs
+        | ok y => rw [hr] at hs; exact hs
+  | true =>
+    have hl : CallbackUnwk.LoopExec J a c body σ o := CallbackUnwk.asLoop he
+    clear he
+    induction hl with
+    | det hf => exact absurd (hb.symm.trans hf) (by decide)
+    | halt _ hc =>
+      refine ⟨trivial, fun h => ?_⟩
+      cases h
+      exact Val.evalT_noPanic _ c hc
+    | exit _ hc => exact hexit _ h0 hc
+    | @iter τ υ o' _ hc hp _ ih =>
+      have h1 : P (υ.st.drop body.ext) := hstep _ h0 hc _ hp
+      exact (COut.after_map_cat _ _ Q).2 (ih h1)
+    | @stop τ o' _ hc hp hn =>
+      have h1 := hstep _ h0 hc _ hp
+      cases o' with
+      | ok => cases hn
+      | halt e => exact h1
+      | violated => exact h1.elim
+    | diverge _ => exact ⟨trivial, nofun⟩
+
+/-- A run through no frame: its outcome read after it. -/
+theorem COut.thenF_nil {H : HTy} {Γ : Ctx} {m : Modality} {p : State C Γ → Prop}
+    (o : COut C H Γ) (h : o.thenF J .nil m p) : o.after m p := by
+  cases o with
+  | ok o => exact h _ .nil
+  | halt _ => exact h
+  | violated => exact h
+
+/-- **`whileInvariantBox` with callbacks**: the invariant now ("invariant
+initially valid"); from every state the body's frame allows where it holds,
+the body to the invariant where the condition holds ("body preserves
+invariant"), the rest where it does not ("use case"); with a break test, a
+body that broke goes on to the rest. -/
+theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Option (Val C Γ .uint)}
+    {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool} {body : Prog C Γ Γb}
+    {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Bool} {k : Nat} (hf : body.frame = some (xs, hv)) {σ : State C Γ}
+    (hI : holdsC I pay σ ((invFml Iv qs).invHyp (loopBreak brk c)))
+    (hX : holdsC I pay σ (Fml.anonHavoc xs hv (.imp ((invFml Iv qs).invHyp (loopBreak brk c))
+      (.upd .box (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+        (.and (.imp (.isBool (.pvV (p := .bool) .here) true)
+          (.upd .box (Upd.nil.pop (.push .refl)) (Fml.modalK .box body (.pop .block body.ext .nil)
+            (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))))
+          (.imp (.isBool (.pvV (p := .bool) .here) false)
+            (.upd .box (Upd.nil.pop (.push .refl)) (Fml.modalK .box ω κ φ)))))))) :
+    holdsC I pay σ (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ) := by
+  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  have hB := breakTest_loopBreak brk c
+  -- the premise at a head the frame allows, the condition read
+  have hY : ∀ τ : State C Γ, TGFrame (frameMut hv) σ τ →
+      TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env →
+      holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c)) → ∀ v : Bool, c.evalT τ = .ok v →
+      (v = true → holdsC I pay τ (Fml.modalK .box body (.pop .block body.ext .nil)
+          (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))) ∧
+      (v = false → holdsC I pay τ (Fml.modalK .box ω κ φ)) := by
+    intro τ hg hag hIτ v hc
+    have hcl : (Rhs.val (p := .bool) c.lower).eval τ =
+        some (LTy.VDen.ofT (H := τ.H) (.val .bool) v) := by
+      show c.lower.eval τ = _
+      exact Val.lower_eval_ok c τ hc
+    obtain ⟨hT, hF⟩ := (holdsC_anonHavoc hxs hg hag hX hIτ).of_lands
+      (Upd.lands_decl (Upd.lands_nil τ) (fse k) hcl)
+    refine ⟨fun hv => ?_, fun hv => ?_⟩
+    · subst hv
+      exact Upd.afterT.of_lands (hT ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+    · subst hv
+      exact Upd.afterT.of_lands (hF ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+  refine holdsC_cons fun o₁ he => ?_
+  have hL := ExecS.loop_box (J := I.stateInv pay)
+    (P := fun τ => (TGFrame (frameMut hv) σ τ ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
+        holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c))) ∨
+      (c.evalT τ = .ok false ∧ holdsC I pay τ (Fml.modalK .box ω κ φ)))
+    (Q := fun τ => holdsC I pay τ (Fml.modalK .box ω κ φ)) (.inl ⟨TGFrame.refl σ, TLocAgree.refl _, hI⟩)
+    (fun τ hτ hc => by
+      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨_, hR⟩
+      · exact (hY τ hg hag hIτ false hc).2 rfl
+      · exact hR)
+    (fun τ hτ hc o hp => by
+      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨hc', _⟩
+      · have hA := holdsC_modalK τ body _ _ ((hY τ hg hag hIτ true hc).1 rfl) o hp
+        have hA' := COut.thenF_nil _ (COut.thenF_drop _ hA)
+        cases o with
+        | halt e => exact hA'
+        | violated => exact hA'.elim
+        | ok υ =>
+          have hpost : holdsC I pay (υ.st.drop body.ext)
+              (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)) := hA'
+          obtain ⟨hg', ha'⟩ := ExecP.frame hp hwμ 0 υ rfl
+          have hfr : TGFrame (frameMut hv) σ (υ.st.drop body.ext) := hg.trans (hg'.withEnv _)
+          have hag' : TLocAgree 0 (Prog.writesAt 0 body) σ.env (υ.st.drop body.ext).env :=
+            hag.trans ha'
+          show _ ∨ _
+          cases hBr : loopBreak brk c with
+          | none =>
+            rw [hBr] at hpost
+            exact .inl ⟨hfr, hag', hpost⟩
+          | some Bf =>
+            rw [hBr] at hpost
+            obtain ⟨x, rfl, hx⟩ := hB _ hBr
+            by_cases hbk : holdsC I pay (υ.st.drop body.ext)
+                (Fml.isBool (Tm.pvV (p := .bool) x) true)
+            · refine .inr ⟨hx _ (by rw [← (holds_isBool_pvV x _ true).1 hbk]; rfl), ?_⟩
+              exact Upd.afterT.of_lands
+                (hpost.2 (Upd.afterT_intro (fun he => by
+                    have hl := (Upd.lands_pop_nil (C := C) Ext.refl (υ.st.drop body.ext)).1
+                    rw [he] at hl; cases hl)
+                  fun _ σ' hL => (Upd.Lands.eq (Upd.lands_pop_nil _ _) hL) ▸ hbk))
+                (Upd.lands_pop_nil _ _)
+            · refine .inl ⟨hfr, hag', ?_⟩
+              exact ⟨hpost.1 (fun hb' => hbk (Upd.afterT.of_lands hb' (Upd.lands_pop_nil _ _))),
+                hbk⟩
+      · rw [hc'] at hc; cases hc)
+    o₁ he
+  cases o₁ with
+  | ok τ => exact COut.after_seq (holdsC_modalK τ.st ω κ φ hL)
+  | halt e => exact hL
+  | violated => exact hL.elim
+
+/-- **A diamond over a loop whose body calls back never holds**: the loop
+may diverge (`ExecS.loopDiverge`, the over-approximation a box accepts),
+whatever its invariant or variant, so no diamond rule over it is sound
+(`docs/options.md`, O3). -/
+theorem holdsC_diamond_loop {Γ Γb Γ₁ Γ₀ : Ctx} {a : LoopAnn C Γ} {c : Val C Γ .bool}
+    {body : Prog C Γ Γb} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} {σ : State C Γ}
+    (hb : body.callsBack pay = true) :
+    ¬ holdsC I pay σ (.modal .diamond (.cons (.loop a c body) ω) κ φ) := fun h =>
+  nomatch (h _ (.halt (.loopDiverge hb))).1
+
+end Inv
+
 /-! ## Soundness -/
 
 theorem holdsC_and_intro {I : Fml C []} {Γ : Ctx} {τ : State C Γ} {φ ψ : Fml C Γ}
@@ -1319,6 +1519,26 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     refine fun σ => Hyps.wrapC_and _ ?_ σ (ihT σ) (ihE σ)
     exact fun τ a b => holdsC_loopExit
       (loopExit_cond _ ((holdsC_iff_holds _ rfl τ).1 b)) (a b)
+  | @invBox Γ Γb Γ₁ Γ₂ H Iv dec brk qs c body ω κ φ xs hv hf _ _ _ ihI ihT ihE =>
+    intro σ
+    let A0 : Fml C Γ := (invFml Iv qs).invHyp (loopBreak brk c)
+    let U : Upd C Γ (.val .bool :: Γ) := Upd.nil.decl
+      (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ)))
+      (.val (p := .bool) c.lower)
+    let cT : Fml C (.val .bool :: Γ) := .isBool (.pvV (p := .bool) .here) true
+    let cF : Fml C (.val .bool :: Γ) := .isBool (.pvV (p := .bool) .here) false
+    let A : Fml C (.val .bool :: Γ) := .upd .box (Upd.nil.pop (.push .refl))
+      (.modalK .box body (.pop .block body.ext .nil)
+        (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))
+    let B : Fml C (.val .bool :: Γ) := .upd .box (Upd.nil.pop (.push .refl)) (.modalK .box ω κ φ)
+    have hX : holdsC I pay σ ((H.anonHavoc xs hv).wrap
+        (.imp A0 (.upd .box U (.and (.imp cT A) (.imp cF B))))) :=
+      (H.anonHavoc xs hv).wrapC_and (φ := .imp A0 (.upd .box U (.imp cT A)))
+        (ψ := .imp A0 (.upd .box U (.imp cF B)))
+        (χ := .imp A0 (.upd .box U (.and (.imp cT A) (.imp cF B))))
+        (fun _ x y hI => Upd.afterT_and (x hI) (y hI) fun _ f g => ⟨f, g⟩) σ (ihT σ) (ihE σ)
+    rw [Hyps.wrap_anonHavoc] at hX
+    exact H.wrapC_and (fun _ a b => holdsC_invBox hf a b) σ (ihI σ) hX
   | capture _ hc _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_capture hc h) σ (ih σ)
   | unfoldReceiver _ _ ih =>
