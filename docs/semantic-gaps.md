@@ -61,7 +61,7 @@ contract's invariant.
 | `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; open: a byte type as a struct member, `calldata` |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of a dynamic type, an `address`/enum packed at its own width |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); open: external function types (calls through them refused), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`), a dispatch that would recurse, reference parameters in a function type |
-| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
+| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`); open: another contract's reason (the calculus goal is `false`), a custom error's data (dropped), a reason not literal, the callback reading's leaves on the bound array |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
@@ -256,10 +256,8 @@ theorems are unchanged.
 - `mapping(string => V)`, `mapping(bytes => V)`: landed with the hash
   ("Hashing and the ABI"): the key is `keccak256` of the bytes.
 - Revert data (`require(c, "msg")`, `revert("msg")`, `catch Error(string
-  memory r)` binding `r`): a reverting run carries no data (`THalt.revert`),
-  and an external call's `ExtResult.error` none; carrying a reason changes
-  `THalt`, `TRun.tryCall`, the transaction table and every proof over a
-  halt.  The `Error` branch is chosen, its `r` is not bound.
+  memory r)` binding `r`): landed for a self-call's literal reasons
+  ("Revert data" below).
 - `bytes.concat`, `string.concat`, `abi.*`, `keccak256`: landed
   ("Hashing and the ABI").
 - `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
@@ -555,3 +553,61 @@ callees.
   constructors now read the callee's data) and the EVM proof carry the two
   statements.  `stmt_sim` stays within its 11000 heartbeats: the statements
   outside the fragment are ruled out by one lemma (`stmt_sim_outside`).
+- Slice 2, the elaborator: landed.  `require(c, "m")` and `revert("m")`
+  are `RawStmt.requireMsg`/`revertMsg`: `require(c)`/`revert()` as before,
+  but in a self-call's callee (`ElabScope.selfFrame`) `if (c) { } else {
+  revert(d); }` with `d` `Error(m)`'s encoding (`RevertBytes.lean`, below the
+  syntax so the elaborator writes it).  `catch Error(string memory r)` and
+  `catch (bytes memory d)` with a name: the macro writes a marker
+  declaration first (`catch$reason`, `catch$data`), which the `try`'s
+  elaboration turns into `Stmt.catchData` (`RawStmt.catchBinder?`,
+  `Blk.toCatchData`); a missing `Error` or `Panic` clause is the catch-all's
+  block, its binder with it (raw data).
+- Slice 3, the calculus's goals as the walks read them: one goal per raw
+  datum the callee lists (`catchLit` decodes it), so the list is literal
+  after `List.map`/`++` are flattened, which the walks do for
+  `catchDataBox` only (`ProofTree.flattenLemmas`), leaving every other
+  printed walk as it was.
+- Examples: `Examples/Tactics/RevertData.lean` (`boomReason`: the reason of
+  `require(false, "boom")` bound to `r`, its four bytes proved; two reasons;
+  raw data; the run on a concrete state), `tests/solc/RevertData.sol`
+  (three functions proved).
+
+**Left open, with the reason.**
+- Another contract's reason (`ExtResult.error r`, `.other d`): the run binds
+  it, but the calculus's goal is `false` — a reason is any bytes, and no
+  formula quantifies a fresh memory object of any contents.  Lifting it
+  needs a binder over byte strings (a new `Fml` constructor, or the
+  heap-extension invariance of `holds`).
+- Custom errors: `revert E(a)` and `require(c, E(a))` still drop their data
+  (`RevPart.sel`/`.word` and `customSelector` are in the run and the rule,
+  `Stmt.revertDatas` reads a non-literal datum as unknown, so a `catch` of
+  one has the `false` goal); the elaborator does not write them yet, nor
+  does the solc import read a `RevertStatement`.
+- A reason that is not a literal (`revert(string.concat(…))`, a rethrown
+  `bytes`): the run carries it, the rule's goal is `false`.
+- `Panic` data: a self-call's panic binds the transaction's code (`1`
+  without one) as before; the model panics on `assert` (`0x01`) and on an
+  overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the
+  other codes (`0x12` division, `0x21` enum, `0x32` index, `0x41`
+  allocation, `0x51` function value) are reverts in the model, with no data.
+  A raw `catch (bytes memory d)` of a callee that may panic has the `false`
+  goal (its data is the transaction's code).
+- A raw datum always includes the empty one (an evaluator's revert), so a
+  `catch (bytes memory d)` goal holds for `d` empty too.
+- The callback reading (`ValidT`): `catchData` forks when its callee or
+  body may call back (`ExecS.catchDataBody` binds any data then); its leaves
+  do not close a memory array's length (a limit of the callback closer, met
+  by any memory program), so the solc test's callees are `pure`.
+- Error data larger than the closer's bounds: `Error("boom")`'s 100 raw
+  bytes written as literals pass `sol_decide`'s bounds (`boomData` is the
+  empty case).
+
+**Costs.**  `Stmt` has two constructors more, `THalt` one: every statement
+fold, run lemma, typing invariant and callback lemma gained an arm, and
+`stmt_sim` stays within its pinned 11000 heartbeats only because the
+statements outside the EVM fragment are now ruled out by one lemma.  The
+self-call `try`'s callee is copied once more per named clause (`catchData`
+carries it); the rule's goals add one literal allocation (a statement per
+byte of the decoded reason).  Programs with no named clause and no
+self-call reason elaborate as before.
