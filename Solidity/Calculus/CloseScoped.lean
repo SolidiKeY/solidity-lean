@@ -957,11 +957,7 @@ attribute [close_rw_s]
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
-  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon CloseS.holds_allocAll
-  CloseS.alloc_storage CloseS.alloc_net CloseS.alloc_selfBalance CloseS.alloc_tx CloseS.locV_alloc
-  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId CloseS.push_readT
-  CloseS.alloc_readT_index
-  CloseS.push_readId CloseS.alloc_readId_index
+  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon
   CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
@@ -1151,20 +1147,56 @@ def onScoped (tac : TacticM Syntax) : Tactic := fun _ => do
   unless ← Close.scopedGoal do throwUnsupportedSyntax
   evalTactic (← tac)
 
+/-- Whether the goal reads a fresh object (`Fml.allocAll`, or the state it
+grew, `State.alloc`): only then are `sol_close`'s lemmas on fresh objects
+added to its sets, so a leaf with none takes the same path as without them. -/
+def allocInGoal : TacticM Bool := do
+  let t ← instantiateMVars (← getMainTarget)
+  return (t.find? fun e => e.isConstOf ``Fml.allocAll || e.isConstOf ``State.alloc).isSome
+
+/-- `sol_close`'s lemmas on a fresh object (`Fml.allocAll`), outside
+`close_rw_s`: `allocInGoal` adds them. -/
+def allocLemmas : TacticM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
+  #[``CloseS.holds_allocAll, ``CloseS.alloc_storage, ``CloseS.alloc_net,
+    ``CloseS.alloc_selfBalance, ``CloseS.alloc_tx, ``CloseS.locV_alloc, ``CloseS.alloc_snd_id,
+    ``CloseS.push_lenId, ``CloseS.alloc_lenId, ``CloseS.push_readT, ``CloseS.alloc_readT_index,
+    ``CloseS.push_readId, ``CloseS.alloc_readId_index].mapM fun n =>
+      `(Lean.Parser.Tactic.simpLemma| $(mkIdent n):ident)
+
+/-- The extra lemmas where the goal reads a fresh object, none elsewhere. -/
+def allocExtra : TacticM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) := do
+  if ← allocInGoal then allocLemmas else pure #[]
+
 @[tactic Solidity.tacticSol_close_eval, tactic Solidity.tacticSol_close_mt_eval]
-def evalSolCloseEvalS : Tactic := onScoped `(tactic| simp only [close_rw_s])
+def evalSolCloseEvalS : Tactic := onScoped do
+  let ex ← allocExtra
+  if ex.isEmpty then `(tactic| simp only [close_rw_s])
+  else `(tactic| simp only [close_rw_s, $ex,*])
 
 @[tactic Solidity.tacticSol_close_facts]
-def evalSolCloseFactsS : Tactic := onScoped `(tactic|
-  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw_s])
+def evalSolCloseFactsS : Tactic := onScoped do
+  let ex ← allocExtra
+  if ex.isEmpty then `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw_s])
+  else `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw_s, $ex,*])
 
 @[tactic Solidity.tacticSol_close_reads]
-def evalSolCloseReadsS : Tactic := onScoped `(tactic|
-  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
+def evalSolCloseReadsS : Tactic := onScoped do
+  let ex ← allocExtra
+  if ex.isEmpty then `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
+  else `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only
+      [close_rw_s, close_rw_s_last, $ex,*])
 
 @[tactic Solidity.tacticSol_close_reads_all]
-def evalSolCloseReadsAllS : Tactic := onScoped `(tactic|
-  simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
+def evalSolCloseReadsAllS : Tactic := onScoped do
+  let ex ← allocExtra
+  if ex.isEmpty then `(tactic|
+    simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
+  else `(tactic|
+    simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last, $ex,*])
 
 /-- Typed values occurring under projections, including dependent anonymous locals.
 Inspect at most 8,192 local declarations/expression nodes and add at most
