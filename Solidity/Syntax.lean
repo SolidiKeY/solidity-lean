@@ -752,6 +752,8 @@ syntax:max (name := solSliceTo) sol_expr:max "[" ":" sol_expr "]" : sol_expr
 /-- `T[]` where a type stands in an expression: `abi.decode(d, (uint[]))`
 (`RawExpr.name "uint[]"`). -/
 syntax:max (name := solArrTyExpr) atomic(ident "[" "]") : sol_expr
+/-- `T[][]` where a type stands in an expression: `abi.decode(d, (uint[][]))`. -/
+syntax:max (name := solArrTyExpr2) atomic(ident "[" "]" "[" "]") : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
 /-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
 `return` of several values (`RawExpr.tuple`). -/
@@ -1326,6 +1328,7 @@ where
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
   | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[]")))
+  | `(sol_expr| $x:ident [ ] [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[][]")))
   | `(sol_expr| $e:sol_expr [ $i:sol_expr : $j:sol_expr ]) => do
       `(RawExpr.call "#slice" [$(← expandExpr e), $(← expandExpr i), $(← expandExpr j)])
   | `(sol_expr| $e:sol_expr [ $i:sol_expr : ]) => do

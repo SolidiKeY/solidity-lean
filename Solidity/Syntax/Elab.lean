@@ -1942,6 +1942,13 @@ def placeShape (Γ : ECtx) (e : RawExpr) : List (String × Nat) :=
   | some (tb, k, .ref _) => shapeUnder tb k
   | _ => []
 
+/-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
+partial def abiTyExpr? : RawExpr → Option RawTy
+  | .name t =>
+    if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
+  | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
+  | _ => none
+
 /-- The narrow positions of a value of reference type: a place's
 (`placeShape`), a `new`'s type's, a function's return's, a conditional's
 first branch's (`narrowWholeAt?` admits one whose branches agree). -/
@@ -1955,9 +1962,7 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
       match as with
       | _ :: .name T :: _ =>
         if dynBytesTy T then dynBytesRowsOf T
-        else if T.endsWith "[]" then
-          ((elabTyW C (.array (.named (T.dropRight 2)))).toOption.map (·.2)).getD []
-        else ((elabTyW C (.named T)).toOption.map (·.2)).getD []
+        else (((abiTyExpr? (.name T)).bind fun T => (elabTyW C T).toOption).map (·.2)).getD []
       -- `T[k]` (`abiDecodeWith`)
       | _ :: .index (.name T) (.num k) :: _ =>
         ((elabTyW C (.fixed (.named T) k)).toOption.map (·.2)).getD []
@@ -3547,6 +3552,352 @@ def AbiKind.tyName : AbiKind → String
   | .bytesN n => s!"bytes{n}"
   | _ => "uint256"
 
+/-! ### The ABI of nested types (lane `open-abi2`)
+
+`abi.encode` and `abi.decode` of an array of references (`uint[][]`,
+`bytes[]`, `S[]`), of a struct with a reference member (a `uint[]`, a
+`bytes`, a struct), and of a fixed array of either: solc's layout, head and
+tail recursively (the ABI specification's `enc`).  A dynamic component is
+an offset in its tuple's head, relative to the tuple's start, and its
+encoding in the tail; a static one its words in the head; an array a
+length word and then the tuple of its elements.  `AbiTy` is the type
+read off a place's `Ty` and its rows (`AbiTy.of`); the writer and the
+reader below are statements with a loop per sequence (`abiSeqWriteGen`,
+`abiSeqReadGen`), a size computed before the buffer is allocated
+(`abiSizeGen`), each word the decoder reads checked within the data
+first.  The types the flat encoder and decoder already read (`AbiKind`)
+stay theirs (`AbiTy.flat`). -/
+
+/-- An ABI type, nested. -/
+inductive AbiTy where
+  | val (k : AbiKind)
+  /-- `bytes` or `string`. -/
+  | bytes
+  | arr (t : AbiTy)
+  | fixed (t : AbiTy) (n : Nat)
+  /-- A struct, by its name, and its members. -/
+  | tuple (s : String) (ms : List (String × AbiTy))
+  deriving Inhabited
+
+/-- Whether its encoding is in a tail (solc's dynamic types). -/
+partial def AbiTy.dynamic : AbiTy → Bool
+  | .val _ => false
+  | .bytes | .arr _ => true
+  | .fixed t _ => t.dynamic
+  | .tuple _ ms => ms.any (·.2.dynamic)
+
+/-- The bytes it takes in its tuple's head. -/
+partial def AbiTy.headSize (t : AbiTy) : Nat :=
+  if t.dynamic then 32 else
+    match t with
+    | .fixed t n => n * t.headSize
+    | .tuple _ ms => (ms.map (·.2.headSize)).sum
+    | _ => 32
+
+/-- What the flat encoder and decoder read (`AbiKind`). -/
+def AbiTy.flat : AbiTy → Bool
+  | .val _ | .bytes | .arr (.val _) | .fixed (.val _) _ => true
+  | .tuple _ ms => ms.all (·.2 matches .val _)
+  | _ => false
+
+/-- The ABI type of a `Ty` whose rows (`placeShape`, `structWidths`) are
+keyed below `k`: `none` for a mapping. -/
+partial def AbiTy.of (T : Ty) (ws : List (String × Nat)) (k : String) : Option AbiTy :=
+  match T with
+  | .prim p => some (.val (AbiKind.ofValue p ws k))
+  | .ref (.array t) =>
+    if lookupBy (k ++ "[]#bytes") ws == some 1 then some .bytes
+    else (AbiTy.of t ws (k ++ "[]")).map .arr
+  | .ref (.fixed t n) => (AbiTy.of t ws (k ++ "[]")).map (.fixed · n)
+  | .ref (.struct s) =>
+    ((structDef s).mapM fun (f, T) => (AbiTy.of T (structWidths s) f).map (f, ·)).map (.tuple s)
+  | .ref (.mapping ..) => none
+
+/-- The type a decoded value of `T` (rows `ws` below `k`) is declared at. -/
+partial def abiRawTy (T : Ty) (ws : List (String × Nat)) (k : String) : RawTy :=
+  match T with
+  | .prim p =>
+    match AbiKind.ofValue p ws k with
+    | .uint 160 => if (lookupBy (k ++ "#address") ws).isSome then .named "address" else .named "uint160"
+    | kk => .named kk.tyName
+  | .ref (.array t) =>
+    if lookupBy (k ++ "[]#bytes") ws == some 1 then
+      .named (if (lookupBy (k ++ "#string") ws).isSome then "string" else "bytes")
+    else .array (abiRawTy t ws (k ++ "[]"))
+  | .ref (.fixed t n) => .fixed (abiRawTy t ws (k ++ "[]")) n
+  | .ref (.struct s) => .named s
+  | .ref (.mapping ..) => .named "uint"
+
+/-- The element type of an array type. -/
+def RawTy.elem : RawTy → RawTy
+  | .array t | .fixed t _ => t
+  | t => t
+
+/-- A struct member's declared type (`abiRawTy` of its rows). -/
+def abiMemberTy (s f : String) : RawTy :=
+  match lookupBy f (structDef s) with
+  | some T => abiRawTy T (structWidths s) f
+  | none => .named "uint"
+
+/-- A fresh `uint` local's name. -/
+def abiFresh : ElabM String := do pure (toString (← freshCapture "se"))
+
+mutual
+
+/-- The size in bytes of `v`'s encoding at `t`: the statements computing it,
+and it. -/
+partial def abiSizeGen (t : AbiTy) (v : RawExpr) : ElabM (List RawStmt × RawExpr) := do
+  if !t.dynamic then return ([], .num t.headSize)
+  match t with
+  | .bytes => pure ([], (abiPad (.field v "length")).addN 32)
+  | .arr e =>
+    if !e.dynamic then
+      pure ([], (RawExpr.binop .mul (.num e.headSize) (.field v "length")).addN 32)
+    else
+      let (ss, n) ← abiSeqSizeGen e (.field v "length") (.index v)
+      pure (ss, n.addN 32)
+  | .fixed e n => abiSeqSizeGen e (.num n) (.index v)
+  | .tuple _ ms => abiTupleSizeGen (ms.map fun (f, mt) => (mt, .field v f))
+  | _ => pure ([], .num 32)
+
+/-- Of `L` dynamic elements: their offsets and their encodings. -/
+partial def abiSeqSizeGen (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr) :
+    ElabM (List RawStmt × RawExpr) := do
+  let acc ← abiFresh
+  let i ← abiFresh
+  let (ss, n) ← abiSizeGen e (elem (.name i))
+  pure ([.decl (.named "uint") acc (some (.binop .mul (.num 32) L)),
+    .decl (.named "uint") i (some (.num 0)),
+    .whileLoop {} (.binop .lt (.name i) L)
+      (ss ++ [.assign (.name acc) (.binop .add (.name acc) n),
+        .assign (.name i) (.binop .add (.name i) (.num 1))])], .name acc)
+
+/-- Of a tuple: its head and its dynamic components' tails. -/
+partial def abiTupleSizeGen (ms : List (AbiTy × RawExpr)) : ElabM (List RawStmt × RawExpr) := do
+  let mut ss : List RawStmt := []
+  let mut tot : RawExpr := .num (ms.map (·.1.headSize)).sum
+  for (mt, mv) in ms do
+    if mt.dynamic then
+      let (s1, n) ← abiSizeGen mt mv
+      ss := ss ++ s1
+      tot := .binop .add tot n
+  pure (ss, tot)
+
+end
+
+mutual
+
+/-- The encoding of `v` at `t`, written into `r` from the position `p` (a
+local). -/
+partial def abiWriteGen (r : String) (t : AbiTy) (v : RawExpr) (p : String) :
+    ElabM (List RawStmt) := do
+  match t with
+  | .val k =>
+    let w ← abiFresh
+    pure (.decl (.named "uint") w (some (k.word v)) :: abiEncodeStaticE r (.name p) k (.name w))
+  | .bytes =>
+    let L ← abiFresh
+    let j ← abiFresh
+    let start : RawExpr := (RawExpr.name p).addN 32
+    pure ([.decl (.named "uint") L (some (.field v "length"))] ++ abiBytes r (.name p) (.name L) 32 ++
+      [.decl (.named "uint") j (some (.num 0)),
+       .whileLoop {} (.binop .lt (.name j) (.name L))
+         [.assign (.index (.name r) (.binop .add start (.name j))) (.index v (.name j)),
+          .assign (.name j) (.binop .add (.name j) (.num 1))]])
+  | .arr e =>
+    let L ← abiFresh
+    let q ← abiFresh
+    pure ([.decl (.named "uint") L (some (.field v "length"))] ++ abiBytes r (.name p) (.name L) 32 ++
+      [.decl (.named "uint") q (some ((RawExpr.name p).addN 32))] ++
+      (← abiSeqWriteGen r e (.name L) (.index v) q))
+  | .fixed e n => abiSeqWriteGen r e (.num n) (.index v) p
+  | .tuple _ ms => abiTupleWriteGen r (ms.map fun (f, mt) => (mt, .field v f)) p
+
+/-- `L` elements as a tuple from `q`: each in place if static, else an
+offset from `q` and its encoding in the tail. -/
+partial def abiSeqWriteGen (r : String) (e : AbiTy) (L : RawExpr) (elem : RawExpr → RawExpr)
+    (q : String) : ElabM (List RawStmt) := do
+  let i ← abiFresh
+  let pos ← abiFresh
+  let next := RawStmt.assign (.name i) (.binop .add (.name i) (.num 1))
+  if !e.dynamic then
+    let body ← abiWriteGen r e (elem (.name i)) pos
+    return [.decl (.named "uint") i (some (.num 0)),
+      .whileLoop {} (.binop .lt (.name i) L)
+        ([.decl (.named "uint") pos
+          (some (.binop .add (.name q) (.binop .mul (.num e.headSize) (.name i))))] ++ body ++ [next])]
+  let c ← abiFresh
+  let off ← abiFresh
+  let body ← abiWriteGen r e (elem (.name i)) c
+  let (ss, n) ← abiSizeGen e (elem (.name i))
+  pure [.decl (.named "uint") c (some (.binop .add (.name q) (.binop .mul (.num 32) L))),
+    .decl (.named "uint") i (some (.num 0)),
+    .whileLoop {} (.binop .lt (.name i) L)
+      ([.decl (.named "uint") pos (some (.binop .add (.name q) (.binop .mul (.num 32) (.name i)))),
+        .decl (.named "uint") off (some (.binop .sub (.name c) (.name q)))] ++
+        abiBytes r (.name pos) (.name off) 32 ++ body ++ ss ++
+        [.assign (.name c) (.binop .add (.name c) n), next])]
+
+/-- A tuple's components from `p`: the head in order, each dynamic one's
+offset from `p` there and its encoding at the tail's end. -/
+partial def abiTupleWriteGen (r : String) (ms : List (AbiTy × RawExpr)) (p : String) :
+    ElabM (List RawStmt) := do
+  let c ← abiFresh
+  let mut ss : List RawStmt :=
+    [.decl (.named "uint") c (some ((RawExpr.name p).addN (ms.map (·.1.headSize)).sum))]
+  let mut hp := 0
+  for (mt, mv) in ms do
+    let hpos ← abiFresh
+    ss := ss ++ [.decl (.named "uint") hpos (some ((RawExpr.name p).addN hp))]
+    if mt.dynamic then
+      let off ← abiFresh
+      let (s1, n) ← abiSizeGen mt mv
+      ss := ss ++ [.decl (.named "uint") off (some (.binop .sub (.name c) (.name p)))] ++
+        abiBytes r (.name hpos) (.name off) 32 ++ (← abiWriteGen r mt mv c) ++ s1 ++
+        [.assign (.name c) (.binop .add (.name c) n)]
+    else
+      ss := ss ++ (← abiWriteGen r mt mv hpos)
+    hp := hp + mt.headSize
+  pure ss
+
+end
+
+/-- **`abi.encode` of nested types** (above; `abiEncode`, outside its
+`mutual` block, `abiKind` and the rest handed in): `none` where every
+argument is flat, the flat encoder's.  An argument's type is its place's
+(`AbiTy.of`), a value's its kind (`abiKind`, or its mark), a literal byte
+string put in memory first. -/
+def abiEncodeNested? (abiKind : RawExpr → ElabM AbiKind)
+    (abiMemBytes : RawExpr → ElabM (SProg C × String))
+    (elabStmtsP : List RawStmt → ElabM (SProg C))
+    (args : List RawExpr) (marks : List (Option AbiKind)) (sel : Option RawExpr) :
+    ElabM (Option (SProg C × RawExpr)) := do
+  let Γ ← ctx
+  let tyOf (a : RawExpr) : Option AbiTy :=
+    match synth C Γ.toNCtx a with
+    | .ok (.mpath (.ref R) _) | .ok (.path (.ref R) _) => AbiTy.of (.ref R) (placeShape C Γ a) ""
+    | _ => none
+  unless args.any (fun a => (tyOf a).any (!·.flat)) do return none
+  let mut P : SProg C := []
+  let mut ms : List (AbiTy × RawExpr) := []
+  for (a, mark) in args.zip marks do
+    match mark with
+    | some k => ms := ms ++ [(.val k, a)]
+    | none =>
+      if a.bytesLit?.isSome then
+        let (Q, x) ← abiMemBytes a
+        P := P ++ Q
+        ms := ms ++ [(.bytes, .name x)]
+      else match synth C (← nctx) a with
+        | .ok (.mpath (.ref _) _) | .ok (.path (.ref _) _) =>
+          let some t := tyOf a | throw s!"{a.toStr}: a mapping is not ABI-encoded"
+          ms := ms ++ [(t, a)]
+        | .ok _ => ms := ms ++ [(.val (← abiKind a), a)]
+        | .error e => throw e
+  let r := toString (← freshCapture "mv")
+  let tot ← abiFresh
+  let p ← abiFresh
+  let base : Nat := if sel.isSome then 4 else 0
+  let (sz, n) ← abiTupleSizeGen ms
+  let selW : List RawStmt ← match sel with
+    | none => pure []
+    | some e => do
+      let w ← abiFresh
+      pure (.decl (.named "uint") w (some e) :: abiBytes r (.num 0) (.name w) 4)
+  let S : List RawStmt := sz ++ [.decl (.named "uint") tot (some (n.addN base)),
+    .declMemory (.named "bytes") r (some (.newArr (.named "bytes") (.name tot))),
+    .decl (.named "uint") p (some (.num base))] ++ selW ++ (← abiTupleWriteGen r ms p)
+  return some (P ++ (← elabStmtsP S), .name r)
+
+/-- The word at `o` of `d` read at the kind `k`, checked within the data
+first: the statements, and its value. -/
+def abiWordAt (d : ByteSrc) (k : AbiKind) (o : RawExpr) : ElabM (List RawStmt × RawExpr) := do
+  let w ← abiFresh
+  let some (reads, v) := abiDecodeAt k.tyName d w o | throw "internal: a kind abi.decode reads"
+  pure (.require (.binop .le (o.addN 32) d.len) :: reads, v)
+
+mutual
+
+/-- `abi.decode` of a value of `t` declared `T` whose encoding starts at `p`
+in `d`: its statements, ending in `put` of it. -/
+partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
+    (put : RawExpr → RawStmt) : ElabM (List RawStmt) := do
+  match t with
+  | .val k =>
+    let (ss, v) ← abiWordAt d k p
+    pure (ss ++ [put v])
+  | .bytes =>
+    let (s1, L) ← abiWordAt d (.uint 256) p
+    let n ← abiFresh
+    let x := toString (← freshCapture "mv")
+    let j ← abiFresh
+    let start : RawExpr := p.addN 32
+    pure (s1 ++ [.decl (.named "uint") n (some L),
+      .require (.binop .le (.binop .add start (.name n)) d.len),
+      .declMemory T x (some (.newArr T (.name n))),
+      .decl (.named "uint") j (some (.num 0)),
+      .whileLoop {} (.binop .lt (.name j) (.name n))
+        [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
+         .assign (.name j) (.binop .add (.name j) (.num 1))],
+      put (.name x)])
+  | .arr e =>
+    let (s1, L) ← abiWordAt d (.uint 256) p
+    let n ← abiFresh
+    let x := toString (← freshCapture "mv")
+    pure (s1 ++ [.decl (.named "uint") n (some L),
+      .declMemory T x (some (.newArr T (.name n)))] ++
+      (← abiSeqReadGen d e T.elem (.name n) (p.addN 32) fun i v => .assign (.index (.name x) i) v) ++
+      [put (.name x)])
+  | .fixed e m =>
+    let x := toString (← freshCapture "mv")
+    pure (.declMemory T x none ::
+      (← abiSeqReadGen d e T.elem (.num m) p fun i v => .assign (.index (.name x) i) v) ++
+      [put (.name x)])
+  | .tuple s ms =>
+    let x := toString (← freshCapture "mv")
+    let mut ss : List RawStmt := [.declMemory T x none]
+    let mut hp := 0
+    for (f, mt) in ms do
+      let hpos : RawExpr := p.addN hp
+      let putF (v : RawExpr) : RawStmt := .assign (.field (.name x) f) v
+      if mt.dynamic then
+        let (s1, off) ← abiWordAt d (.uint 256) hpos
+        let at0 ← abiFresh
+        ss := ss ++ s1 ++ [.decl (.named "uint") at0 (some (.binop .add p off))] ++
+          (← abiReadGen d mt (abiMemberTy s f) (.name at0) putF)
+      else
+        ss := ss ++ (← abiReadGen d mt (abiMemberTy s f) hpos putF)
+      hp := hp + mt.headSize
+    pure (ss ++ [put (.name x)])
+
+/-- `L` elements from `q`, each in place if static, else at the offset its
+head word holds from `q`; `put i v` stores the `i`-th. -/
+partial def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
+    (put : RawExpr → RawExpr → RawStmt) : ElabM (List RawStmt) := do
+  let i ← abiFresh
+  let pos ← abiFresh
+  let qn ← abiFresh
+  let next := RawStmt.assign (.name i) (.binop .add (.name i) (.num 1))
+  let posE : RawExpr := .binop .add (.name qn) (.binop .mul (.num e.headSize) (.name i))
+  let body ← if !e.dynamic then abiReadGen d e T (.name pos) (put (.name i)) else do
+    let (s1, off) ← abiWordAt d (.uint 256) (.name pos)
+    let at0 ← abiFresh
+    pure (s1 ++ [.decl (.named "uint") at0 (some (.binop .add (.name qn) off))] ++
+      (← abiReadGen d e T (.name at0) (put (.name i))))
+  pure [.decl (.named "uint") qn (some q), .decl (.named "uint") i (some (.num 0)),
+    .whileLoop {} (.binop .lt (.name i) L)
+      ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])]
+
+end
+
+/-- The ABI type of `abi.decode`'s component written `Te`, and its declared
+type, where it is not flat (`decodeKind?`'s). -/
+def abiDecodeTy? (Te : RawExpr) : Option (AbiTy × RawTy) := do
+  let T ← abiTyExpr? Te
+  let (ty, ws) ← (elabTyW C T).toOption
+  let t ← AbiTy.of ty ws ""
+  if t.flat then none else some (t, T)
+
 /-- The kind of `abi.decode`'s component written `T` that is not a value
 type or a byte string: `T[]`, `T[k]` of a value type `T`, a struct of value
 members. -/
@@ -3562,7 +3913,10 @@ def decodeKind? (T : RawExpr) : Option AbiKind :=
 
 /-- The words a component written `T` takes in the head. -/
 def decodeHeadWords (T : RawExpr) : Nat :=
-  ((decodeKind? C T).map AbiKind.headWords).getD 1
+  match decodeKind? C T, abiDecodeTy? C T with
+  | some k, _ => k.headWords
+  | none, some (t, _) => t.headSize / 32
+  | none, none => 1
 
 /-- `(T a, U b) = abi.decode(x, (T, U))`'s components, each at the word
 its predecessors' head words leave (`decodeHeadWords`): the head's words, and
@@ -3629,9 +3983,19 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
         throw s!"abi.decode at {T}: only value types are decoded"
       let R ← elabStmtsP ([enough] ++ reads ++ [.decl (.named T) x (some v)])
       return (P ++ Q ++ R, .name x)
-  let some k := decodeKind? C Te |
-    throw s!"abi.decode at {Te.toStr}: a value type, a byte string, an array of values or a \
-      struct of values"
+  let some k := decodeKind? C Te | do
+    -- a nested type: head and tail recursively (`abiReadGen`)
+    let some (t, T) := abiDecodeTy? C Te |
+      throw s!"abi.decode at {Te.toStr}: a value type, a byte string, an array or a struct"
+    let x := toString (← freshCapture "mv")
+    let p : RawExpr := .num (32 * i)
+    let S ← if t.dynamic then do
+        let (s1, off) ← abiWordAt d (.uint 256) p
+        let at0 ← abiFresh
+        pure (s1 ++ [.decl (.named "uint") at0 (some off)] ++
+          (← abiReadGen d t T (.name at0) fun v => .declMemory T x (some v)))
+      else abiReadGen d t T p fun v => .declMemory T x (some v)
+    return (P ++ Q ++ (← elabStmtsP ([enough] ++ S)), .name x)
   let x := toString (← freshCapture "mv")
   -- the word at `o` read at the kind `kk` into a fresh local, then `put` of it
   let word (kk : AbiKind) (o : RawExpr) (put : RawExpr → RawStmt) : ElabM (List RawStmt) := do
@@ -4173,6 +4537,9 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
 fresh memory `bytes` of solc's layout (`AbiKind`). -/
 partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
     (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) := do
+  -- nested types, head and tail recursively (`abiEncodeNested?`)
+  if std then
+    if let some r ← abiEncodeNested? C abiKind abiMemBytes elabStmtsP args marks sel then return r
   let mut P : SProg C := []
   -- a selector's four bytes first (`abi.encodeWithSelector`), every other
   -- position after them; the head's offsets are the arguments' own
