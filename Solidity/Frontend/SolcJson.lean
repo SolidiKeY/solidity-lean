@@ -356,7 +356,11 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
     let n ← (j.getObjValAs? String "name")
     match PrimTy.ofName? n, narrowTy? n with
     | some p, _ | none, some (p, _) => pure (.prim p)
-    | none, none => throw s!"type `{n}`"
+    | none, none =>
+      -- a `bytesN` is a `uint`, `bytes` and `string` a `uint[]` (`valueRows?`)
+      if (bytesTy? n).isSome then pure .uint
+      else if dynBytesTy n then pure (.ref (.array .uint))
+      else throw s!"type `{n}`"
   | "UserDefinedTypeName" =>
     if let some id := (J.ref? j).orElse fun _ => (J.opt j "pathNode").bind J.ref? then
       match lookupBy s!"#solc{id}" S with
@@ -376,7 +380,10 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
       | some n => pure (.ref (.fixed b n))
       | none => throw s!"array length `{v}`"
   | "Mapping" =>
-    match ← tyOf S (← j.getObjVal? "keyType") with
+    let key ← j.getObjVal? "keyType"
+    -- a byte string as a key: its `keccak256`, a `uint` (`hashKeyRows`)
+    let keyTy ← if dynBytesTy ((J.str? key "name").getD "") then pure Ty.uint else tyOf S key
+    match keyTy with
     | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType"))))
     | t => throw s!"mapping key `{t.toStr}`"
   -- a function type's value is a tag (`fnTy?`)
@@ -388,14 +395,17 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
 partial def narrowShape (j : Json) : List (String × Nat) :=
   match J.kind j with
   | "ElementaryTypeName" =>
-    match narrowTy? ((J.str? j "name").getD "") with
-    | some (_, n) => [("", n)]
-    | none => []
+    let n := (J.str? j "name").getD ""
+    if dynBytesTy n then dynBytesRows else ((valueRows? n).map (·.2)).getD []
   | "ArrayTypeName" =>
     ((J.opt j "baseType").map narrowShape).getD [] |>.map fun (k, n) => ("[]" ++ k, n)
   | "Mapping" =>
-    (((J.opt j "keyType").map narrowShape).getD [] |>.map fun (_, n) => ("{}", n)) ++
+    let key := (J.opt j "keyType").getD .null
+    (if dynBytesTy ((J.str? key "name").getD "") then hashKeyRows
+      else narrowShape key |>.map fun (k, n) => ("{}" ++ k, n)) ++
       (((J.opt j "valueType").map narrowShape).getD [] |>.map fun (k, n) => ("[]" ++ k, n))
+  -- a function type's marker: no struct of the table has one
+  | "FunctionTypeName" => [("#function", 0)]
   | _ => []
 
 /-- Does the type node name the struct `s`? -/

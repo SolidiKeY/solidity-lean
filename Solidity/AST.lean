@@ -276,8 +276,8 @@ def block : Nat → List Char → Option (List Char × List Char)
       | some (a, b) => some (c :: a, b)
       | none => none
 
-/-- A primitive type by its name: `PrimTy.ofName?`'s, or a narrow `uintN`,
-`intN` (its width is `structWidths`'s). -/
+/-- A primitive type by its name: `PrimTy.ofName?`'s, a narrow `uintN`,
+`intN`, or a `bytesN`, a `uint` (its width and marker are `structWidths`'s). -/
 def primOf (n : List Char) : Option PrimTy :=
   match PrimTy.ofName? (String.mk n) with
   | some p => some p
@@ -285,7 +285,40 @@ def primOf (n : List Char) : Option PrimTy :=
     match n with
     | 'u' :: 'i' :: 'n' :: 't' :: ds@(_ :: _) => if ds.all Char.isDigit then some .uint else none
     | 'i' :: 'n' :: 't' :: ds@(_ :: _) => if ds.all Char.isDigit then some .int else none
+    | 'b' :: 'y' :: 't' :: 'e' :: 's' :: ds@(_ :: _) =>
+      if ds.all Char.isDigit then some .uint else none
     | _ => none
+
+/-- `bytes` and `string`, each a `bytes1[]`: a `uint[]` 8 bits wide. -/
+def dynBytes (n : List Char) : Bool := n == "bytes".data || n == "string".data
+
+/-- What follows the `)` that closes depth `d` (a function type's
+parameter or return list). -/
+def closeParen : Nat → List Char → Option (List Char)
+  | _, [] => none
+  | d, c :: cs =>
+    if c == ')' then (match d with | 0 => some cs | e + 1 => closeParen e cs)
+    else if c == '(' then closeParen (d + 1) cs
+    else closeParen d cs
+
+/-- `cs` after the prefix `p`, if it starts with it. -/
+def dropPrefix? : List Char → List Char → Option (List Char)
+  | [], cs => some cs
+  | p :: ps, c :: cs => if p == c then dropPrefix? ps cs else none
+  | _ :: _, [] => none
+
+/-- What follows a function type's spelling after its `function(`:
+`uint)external returns(uint)` less `uint)`, `external`, `returns(uint)`. -/
+def fnRest (cs : List Char) : Option (List Char) := do
+  let r ← closeParen 0 cs
+  let r := (dropPrefix? "external".data r).getD r
+  match dropPrefix? "returns(".data r with
+  | some r' => closeParen 0 r'
+  | none => some r
+
+/-- `string=>` or `bytes=>` at the head of a mapping: what follows. -/
+def hashKey? (cs : List Char) : Option (List Char) :=
+  (dropPrefix? "string=>".data cs).orElse fun _ => dropPrefix? "bytes=>".data cs
 
 /-- The array suffixes `[]`, `[n]` after a type. -/
 def suffixes : Nat → Ty → List Char → Ty × List Char
@@ -301,12 +334,23 @@ def suffixes : Nat → Ty → List Char → Ty × List Char
 def parseTy : Nat → List Char → Option (Ty × List Char)
   | 0, _ => none
   | k + 1, 'm' :: 'a' :: 'p' :: 'p' :: 'i' :: 'n' :: 'g' :: '(' :: cs =>
-    match parseTy k cs with
-    | some (.prim K, '=' :: '>' :: cs') =>
+    -- a byte string as a key: its `keccak256`, a `uint`
+    let key : Option (PrimTy × List Char) := match hashKey? cs with
+      | some cs' => some (.uint, cs')
+      | none => match parseTy k cs with
+        | some (.prim K, '=' :: '>' :: cs') => some (K, cs')
+        | _ => none
+    match key with
+    | some (K, cs') =>
       match parseTy k cs' with
       | some (V, ')' :: rest) => some (suffixes rest.length (.ref (.mapping K V)) rest)
       | _ => none
-    | _ => none
+    | none => none
+  -- a function type: its value a `uint` (`fnTy?`)
+  | _ + 1, 'f' :: 'u' :: 'n' :: 'c' :: 't' :: 'i' :: 'o' :: 'n' :: '(' :: cs =>
+    match fnRest cs with
+    | some rest => some (suffixes rest.length (.prim .uint) rest)
+    | none => none
   | k + 1, cs =>
     match ident cs with
     | ([], _) => none
@@ -318,7 +362,7 @@ def parseTy : Nat → List Char → Option (Ty × List Char)
     | (n, rest) =>
       let T : Ty := match primOf n with
         | some p => .prim p
-        | none => .ref (.struct (String.mk n))
+        | none => if dynBytes n then .ref (.array (.prim .uint)) else .ref (.struct (String.mk n))
       some (suffixes rest.length T rest)
 
 /-- The members `f:T;…}`. -/
@@ -607,6 +651,18 @@ def narrowWidth (n : List Char) : Option Nat :=
   | 'i' :: 'n' :: 't' :: ds => w ds
   | _ => none
 
+/-- The rows a value type adds at its own position, as `valueRows?`
+(`Syntax.lean`) gives them: a narrow integer's width, a `bytesN`'s width
+below 256 bits and its marker `#bytes`, a function type's marker. -/
+def valueRowsOf (t : List Char) : List (String × Nat) :=
+  match t with
+  | 'f' :: 'u' :: 'n' :: 'c' :: 't' :: 'i' :: 'o' :: 'n' :: '(' :: _ => [("#" ++ String.mk t, 0)]
+  | 'b' :: 'y' :: 't' :: 'e' :: 's' :: ds =>
+    if !ds.isEmpty && ds.all Char.isDigit && 1 ≤ natOf ds && natOf ds ≤ 32 then
+      (if natOf ds < 32 then [("", 8 * natOf ds)] else []) ++ [("#bytes", natOf ds)]
+    else []
+  | _ => (narrowWidth t).toList.map fun n => ("", n)
+
 /-- The narrow positions of a spelled type, keyed as `structWidths` keys them. -/
 def shapeOf : Nat → List Char → List (String × Nat)
   | 0, _ => []
@@ -619,10 +675,11 @@ def shapeOf : Nat → List Char → List (String × Nat)
       | 'm' :: 'a' :: 'p' :: 'p' :: 'i' :: 'n' :: 'g' :: '(' :: cs =>
         match splitTop '=' 0 [] cs.dropLast with
         | [kt, '>' :: vt] =>
-          ((narrowWidth kt).toList.map fun n => ("{}", n)) ++
+          (if dynBytes kt then [("{}#hash", 1)] else
+            (valueRowsOf kt).map fun (p, n) => ("{}" ++ p, n)) ++
             (shapeOf k vt).map fun (p, n) => ("[]" ++ p, n)
         | _ => []
-      | _ => (narrowWidth t).toList.map fun n => ("", n)
+      | _ => if dynBytes t then [("[]", 8), ("[]#bytes", 1)] else valueRowsOf t
 
 /-- A spelled struct's narrow members (`structWidths`). -/
 def widths (s : Name) : List (String × Nat) :=

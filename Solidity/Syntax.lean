@@ -1757,8 +1757,9 @@ partial def expandMemberTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM Term :=
 (`Semantics.StructEnc`): a primitive type by its name, a narrow one as
 written, a struct by its name in the table. -/
 partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
-  -- a member of function type is its tag, a `uint` (its marker is not kept)
-  if T.raw.isOfKind ``solFnTy then return "uint"
+  -- a member of function type: its spelling, a `uint` with its marker
+  -- (`Semantics.StructEnc.valueRowsOf`)
+  if T.raw.isOfKind ``solFnTy then return ← spellFnTy T
   match T with
   | `(sol_ty| address payable) => pure "uint"
   | `(sol_ty| $x:ident) =>
@@ -1768,7 +1769,8 @@ partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
     match PrimTy.ofName? n with
     | some p => return p.toStr
     | none =>
-      if (narrowTy? n).isSome then return n
+      -- a narrow integer, a `bytesN` (a `uint` and its marker), `bytes`, `string`
+      if (narrowTy? n).isSome || (bytesTy? n).isSome || dynBytesTy n then return n
       if (structDef n).isEmpty then Macro.throwErrorAt x (unknownStructMsg n)
       return n
   | `(sol_ty| $E:sol_ty []) => return (← spellTy env E) ++ "[]"

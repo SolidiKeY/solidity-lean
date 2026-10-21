@@ -16,7 +16,9 @@ postcondition reads a `bytesN` as that number.
 
 * §1 — `bytesN`: literals, comparisons, bitwise operators, indexing,
   `.length`, conversions;
-* §2 — `bytesN` in state variables, arrays, mapping keys and functions.
+* §2 — `bytesN` in state variables, arrays, mapping keys and functions;
+* §3 — `bytes` and `string`;
+* §4 — byte types as struct members.
 -/
 
 namespace Solidity.Examples.Tactics.Bytes
@@ -169,6 +171,35 @@ theorem stringFunctions : ⊨ dl[Texts]{ ⟨ uint n = len("abcd"); string memory
 /-- `delete` empties a `string` in storage. -/
 theorem deleteString : ⊨ dl[Texts]{ ⟨ name = "x"; delete name; uint l = bytes(name).length; ⟩
     l == 0 } := by
+  sol_symex
+  sol_decide
+
+/-! ## 4 · Byte types as struct members
+
+A contract's own struct spells its members (`Semantics.StructEnc`), a byte
+type as written: its members are a `uint` or a `uint[]` and carry the
+markers a local of their type carries (`Semantics.structWidths`), so a
+member is read and written as a local of its type is. -/
+
+/-- A contract whose struct has byte members. -/
+def Records : Contract := contract!{
+  struct Rec { bytes32 h; bytes2 tag; bytes b; string name; }
+  Rec rec;
+}
+
+example : Semantics.structWidths "Rec{h:bytes32;tag:bytes2;b:bytes;name:string}" =
+    [("h#bytes", 32), ("tag", 16), ("tag#bytes", 2), ("b[]", 8), ("b[]#bytes", 1),
+     ("name[]", 8), ("name[]#bytes", 1)] := by decide
+
+/-- A `bytesN` member: a literal left-aligned, indexed as a local. -/
+theorem memberBytesN : ⊨ dl[Records]{ ⟨ rec.tag = "ab"; bytes1 c = rec.tag[1];
+    uint l = rec.tag.length; ⟩ c == 98 && l == 2 } := by
+  sol_symex
+  sol_close
+
+/-- A `string` member: a literal copied to storage, its length and bytes. -/
+theorem memberString : ⊨ dl[Records]{ ⟨ rec.name = "hi"; uint l = bytes(rec.name).length;
+    rec.b.push("x"); bytes1 x = rec.b[0]; ⟩ l == 2 && x == 120 } := by
   sol_symex
   sol_decide
 
