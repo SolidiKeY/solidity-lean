@@ -643,6 +643,82 @@ theorem holdsC_selfFails_halt {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bi
     rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
   exact holdsC_not_diamond he (ExecP.require_true hi (ExecP.halt (P := .nil) hc))
 
+/-- **A self-call's callee panics with a code it lists, with callbacks**
+(`Prog.panicCodes`): a callee whose codes are known calls nobody back, so
+its callback run is its run (`ExecS.eq_run`, `Prog.panicCodes_call`). -/
+theorem Prog.panicCodes_exec {J : StateInv C} {ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf}
+    {ks : List Semantics.Word} (hK : sbody.panicCodes = some ks) {f : Name}
+    (sargs : Args C Γ ps) (rets : Binders ρ) (σ : State C Γ) {e : THalt}
+    (hc : ExecS J σ (.call f sargs (.rets rets) sbody) (.halt e)) :
+    e ≠ .panic ∧ ∀ d v, e = .revertWith d → Semantics.decodePanic d = some v → v ∈ ks := by
+  have ht : Stmt.callsBack J.pay (.call f sargs (.rets rets) sbody) = false :=
+    Prog.callsBack_of_hasTransfer sbody (Prog.panicCodes_hasTransfer hK)
+  have he := ExecS.eq_run hc ht
+  have hr : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e := by
+    change COut.halt e = COut.ofRes (TRun.call sargs (.rets rets) sbody.ext sbody.runR σ) at he
+    revert he
+    cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    | ok _ => intro he; cases he
+    | error e' => intro he; cases he; rfl
+  exact Prog.panicCodes_call hK sargs rets σ hr
+
+/-- **The guarded `Panic` clause with callbacks** (`CodeBinder.guard`):
+where the receiver is another contract, or `c` is one of the codes the
+callee may panic with, the guard passes, and the clause's goal is its
+block's. -/
+theorem holdsC_tryPanicG {κc Γ₃ Γ₂ Γ₀ : Ctx} (call : ExtCall C Γ) (code : CodeBinder κc)
+    (K : Option (List Semantics.Word)) (pnc : Prog C (κc ++ Γ) Γ₃) (σ : State C Γ)
+    (c : Semantics.Word) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (hc : ∀ ks, K = some ks → (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1 ∨ c ∈ ks)
+    (h : holdsC I pay σ (code.binders.all (Fml.modalK .box (code.guard call K pnc)
+      (.pop .block ((Ext.append Γ κc).trans (code.guard call K pnc).ext) (.seq ω κ)) φ))) :
+    holdsC I pay (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))
+      (.modal .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ) := by
+  have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h
+  cases K with
+  | none => cases code <;> exact holdsC_modalK _ _ _ φ h₂
+  | some ks =>
+    cases code with
+    | none =>
+      cases ks with
+      | nil =>
+        have hn : call.notSelf.evalT
+            (σ.withEnv (TEnv.append [] (CodeBinder.none.decodeT (H := σ.H) c) σ.env)) =
+            .ok true := by
+          show Except.ok (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = _
+          rcases hc [] rfl with hs | hs
+          · rw [decide_eq_false hs]; rfl
+          · exact absurd hs List.not_mem_nil
+        have h₃ := holdsC_modalK _ _ _ φ h₂
+        dsimp only [CodeBinder.guard] at h₃
+        rw [show (Ext.append Γ []).trans (Prog.cons (.require call.notSelf) pnc).ext =
+          (Ext.append Γ []).trans pnc.ext from Subsingleton.elim _ _] at h₃
+        intro o hP
+        have h₄ := h₃ _ (ExecP.require_true hn hP)
+        rwa [COut.thenF_map_cat] at h₄
+      | cons _ _ => exact holdsC_modalK _ _ _ φ h₂
+    | some x =>
+      have ha := ExtCall.addr_wk_append call σ (ρ := [.val .uint])
+        ((CodeBinder.some x).decodeT (H := σ.H) c)
+      have hg : (Val.binop .or rfl rfl (call.wk (Thin.ofExt (Ext.append Γ [.val .uint]))).notSelf
+          (codeGuard ks)).evalT (σ.withEnv (TEnv.append [.val .uint]
+            ((CodeBinder.some x).decodeT (H := σ.H) c) σ.env)) = .ok true := by
+        refine Val.or_evalT_true _ _ _ (by rw [ExtCall.notSelf_evalT]) ?_
+        rcases hc ks rfl with hs | hs
+        · refine .inl ?_
+          rw [ha]
+          show (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = true
+          rw [decide_eq_false hs]
+          rfl
+        · exact .inr (codeGuard_evalT _ ks hs)
+      have h₃ := holdsC_modalK _ _ _ φ h₂
+      dsimp only [CodeBinder.guard] at h₃
+      rw [show (Ext.append Γ [.val .uint]).trans (Prog.cons (.require _) pnc).ext =
+        (Ext.append Γ [.val .uint]).trans pnc.ext from Subsingleton.elim _ _] at h₃
+      intro o hP
+      have h₄ := h₃ _ (ExecP.require_true hg hP)
+      rwa [COut.thenF_map_cat] at h₄
+
 /-- **`tryCallSelfBox` is sound with callbacks** (Lean, `docs/options.md`
 O8): the invariant where control leaves; the receiver the contract, the
 callee's body inlined (its runs with callbacks) then the success block; the
@@ -671,7 +747,8 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     (herr : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
       (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ))))
     (hpnc : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (code.binders.all
-      (Fml.modalK .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ))))
+      (Fml.modalK .box (code.guard call sbody.panicCodes pnc) (.pop .block
+        ((Ext.append Γ κc).trans (code.guard call sbody.panicCodes pnc).ext) (.seq ω κ)) φ))))
     (hoth : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
       (Fml.modalK .box other (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ)))) :
     holdsC I pay σ (.modal .box (.cons (.tryCall call rets ok err code pnc other sargs sbody true)
@@ -711,9 +788,9 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
   | tryPanic hsf hP =>
     rename_i v o
-    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v)
+    have h₂ := holdsC_tryPanicG call code _ pnc σ v ω κ φ (fun _ _ => .inl (hsf rfl))
       (hpnc (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl)))
-    exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
+    exact COut.thenF_drop _ (h₂ o hP)
   | tryOther hsf hP =>
     have hoth := hoth (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl))
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
@@ -724,10 +801,17 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
   | trySelfPanic _hz hs hc he hP =>
     rename_i v e₀ o
-    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v)
+    have hK : ∀ ks, sbody.panicCodes = some ks →
+        (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1 ∨ v ∈ ks := by
+      intro ks hks
+      obtain ⟨hp, hd⟩ := Prog.panicCodes_exec hks sargs rets σ hc
+      rcases he with rfl | ⟨d, rfl, hv⟩
+      · exact absurd rfl hp
+      · exact .inr (hd d v rfl hv)
+    have h₂ := holdsC_tryPanicG call code _ pnc σ v ω κ φ hK
       (hpnc (holdsC_selfFails_halt call rets sargs sbody σ hs
-        (by rcases he with rfl | ⟨_, rfl⟩ <;> nofun) hc))
-    exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
+        (by rcases he with rfl | ⟨_, rfl, _⟩ <;> nofun) hc))
+    exact COut.thenF_drop _ (h₂ o hP)
   | trySelfOther _ hs hc he hP =>
     have hoth := hoth (holdsC_selfFails_halt call rets sargs sbody σ hs
       (by rcases he with rfl | ⟨_, rfl⟩ <;> nofun) hc)

@@ -747,6 +747,16 @@ theorem Prog.panicCodes_call {Γ ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf
     · cases hK
   · cases hK
 
+/-- A callee whose codes are known pays nobody (`Prog.panicCodes`). -/
+theorem Prog.panicCodes_hasTransfer {Γ Γ' : Ctx} {P : Prog C Γ Γ'} {ks : List Semantics.Word}
+    (hK : P.panicCodes = some ks) : P.hasTransfer = false := by
+  unfold Prog.panicCodes at hK
+  split at hK
+  · cases hK
+  · rename_i h
+    simp only [Bool.or_eq_true, not_or, Bool.not_eq_true] at h
+    exact h.2
+
 /-- A panic's data matches `Panic`'s, whatever its code. -/
 theorem Pat.matches_panic (c : Nat) : Pat.panic.Matches (Semantics.encodePanic c) :=
   (Pat.matches_lit Semantics.panicSelector).append (Pat.matches_word c)
