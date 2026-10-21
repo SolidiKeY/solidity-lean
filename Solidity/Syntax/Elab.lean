@@ -1660,7 +1660,8 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
 /-- External function values and their members, as `uint`s: `r.g` (`g` a
 function of `C`, `r` an address or `this`) is `r * 2^32 + selector(g)`;
 `h.selector` of an external function value `h` is `h % 2^32`, `h.address`
-`h / 2^32` (`r.g.selector` the literal, `r.g.address` `r`).  The callee of
+`h / 2^32` (`r.g.selector` the literal, `r.g.address` `r`), the remainder
+written `h - h / 2^32 * 2^32`.  The callee of
 a call through a value (`callValueName`) is left as written. -/
 partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .call f (h :: as) =>
@@ -1679,8 +1680,10 @@ partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
       if let some ty := fnTyOfExpr C Γ e then
         if let some (_, _, true) := fnParts? ty then
           let e' ← fnPure Γ e
-          return if m == "selector" then .binop .mod e' (.num selShift)
-            else .binop .div e' (.num selShift)
+          -- the selector as `h - h / 2^32 * 2^32`, which the closers read as
+          -- linear arithmetic over the quotient (a remainder they do not)
+          let a : RawExpr := .binop .div e' (.num selShift)
+          return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
     match extMember? C Γ (.field e m) with
     | some (r, g) =>
       let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
@@ -3550,7 +3553,7 @@ partial def extCallStmt (r : RawExpr) (g : String) (as : List RawExpr) (rs : Lis
 /-- **A call through an external function value** `h(a)`, `h` of the
 external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
 so the call is an external call to `h / 2^32` (`extCallStmt`), dispatched on
-the selector `h % 2^32` over the functions of `C` of that type, so that one
+the selector `h - h / 2^32 * 2^32` over the functions of `C` of that type, so that one
 to `this` runs the function (`Stmt.tryCall`'s `self`, O8); any other
 selector is a call the model names `#selector`, its first argument the
 selector, whose response the world chooses as for any external call. -/
@@ -3562,7 +3565,8 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
   let a := toString (← freshCapture "se")
   let sl := toString (← freshCapture "se")
   let mut pre : List RawStmt := [.decl (.named "address") a (some (.binop .div (.name h) (.num selShift))),
-    .decl (.named "uint") sl (some (.binop .mod (.name h) (.num selShift)))]
+    .decl (.named "uint") sl
+      (some (.binop .sub (.name h) (.binop .mul (.name a) (.num selShift))))]
   let mut as : List RawExpr := []
   for (x, c) in args.zip ps do
     if x.isPure then as := as ++ [x] else

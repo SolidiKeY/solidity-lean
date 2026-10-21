@@ -198,9 +198,15 @@ theorem memberBytesN : ⊨ dl[Records]{ ⟨ rec.tag = "ab"; bytes1 c = rec.tag[1
   sol_symex
   sol_close
 
-/-- A `string` member: a literal copied to storage, its length and bytes. -/
-theorem memberString : ⊨ dl[Records]{ ⟨ rec.name = "hi"; uint l = bytes(rec.name).length;
-    rec.b.push("x"); bytes1 x = rec.b[0]; ⟩ l == 2 && x == 120 } := by
+/-- A `string` member: a literal copied to storage, its length. -/
+theorem memberString : ⊨ dl[Records]{ ⟨ rec.name = "hi"; uint l = bytes(rec.name).length; ⟩
+    l == 2 } := by
+  sol_symex
+  sol_decide
+
+/-- A `bytes` member pushed to: an element a `bytes1`. -/
+theorem memberBytes : ⊨ dl[Records]{ ⟨ rec.b = "a"; rec.b.push("x"); bytes1 x = rec.b[1]; ⟩
+    x == 120 } := by
   sol_symex
   sol_decide
 

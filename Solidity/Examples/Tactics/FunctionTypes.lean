@@ -40,9 +40,11 @@ def Ops : Contract := contract!{
   function runOp(uint x) returns (uint r) { r = op(x); }
   struct Holder { uint k; function (uint) pure returns (uint) f; }
   Holder hold;
+  function (uint) pure returns (uint)[] fs;
 }
 
-example : Ops.widths = [("op#function(uint)returns(uint)", 0)] := rfl
+example : Ops.widths =
+    [("op#function(uint)returns(uint)", 0), ("fs[]#function(uint)returns(uint)", 0)] := rfl
 
 /-- A parameter's and a return's marker, keyed by its name as a width is. -/
 example : (Ops.funs.map fun (n, d) => (n, d.widths)) =
@@ -81,10 +83,29 @@ theorem stored : ⊨ dl!{ ⟨ setOp(true); uint y = runOp(5); ⟩ y == 10 } := b
   sol_symex
   sol_close
 
-/-- A struct member of a function type is its tag, a `uint` (the table
-spells no function type): called through a local of the type. -/
+/-- A struct member of a function type is its tag, a `uint` with its
+marker (the struct spells its type, `Semantics.StructEnc`): called through
+a local of the type. -/
 theorem member : ⊨ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uint) g = hold.f;
     uint y = g(3); ⟩ y == 9 } := by
+  sol_symex
+  sol_close
+
+/-- A call through a value that is not a name (`callValueName`): the
+callee is captured into a fresh local of its type first, then called as a
+name is.  A struct member, `hold.f(3)`: -/
+theorem memberCall : ⊨ dl!{ ⟨ hold.f = triple; uint y = hold.f(3); ⟩ y == 9 } := by
+  sol_symex
+  sol_close
+
+/-- An array element, `fs[0](4)`. -/
+theorem elementCall : ⊨ dl!{ ⟨ fs.push(triple); fs[0] = double; uint y = fs[0](4); ⟩
+    y == 8 } := by
+  sol_symex
+  sol_decide
+
+/-- A call's value, `choose(true)(4)`, and a call statement through a member. -/
+theorem callCall : ⊨ dl!{ ⟨ uint y = choose(true)(4); hold.f = double; hold.f(1); ⟩ y == 8 } := by
   sol_symex
   sol_close
 
@@ -112,10 +133,74 @@ theorem equality : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = double; 
   sol_symex
   sol_close
 
-/-! ## 3 · What is refused -/
+/-! ## 3 · External function values
 
-/-- error: Solidity elaboration failed: h(…): a call through an external function value is not modelled (docs/semantic-gaps.md, "Function types") -/
-#guard_msgs in #check sol{ function (uint) external returns (uint) h; uint y = h(1); }
+A value of an external function type is an address and a selector, packed
+as the ABI's `bytes24` packs them: `address * 2^32 + selector` (`fnPure`).
+`this.g` is the contract's address and `g`'s selector, the first four bytes
+of the Keccak-256 of its signature, folded as solc folds it
+(`fnSelector?`); a call through such a value is an external call to its
+address, dispatched on its selector, so that a call to `this` of a function
+declared before the caller runs it (O8, `extDispatch`). -/
+
+/-- A contract that takes its own functions as external values. -/
+def Ext : Contract := contract!{
+  function double(uint x) returns (uint r) { r = 2 * x; }
+  function viaThis(uint x) returns (uint r) {
+    function (uint) external returns (uint) h = this.double;
+    r = h(x);
+  }
+}
+
+-- solc's selector of `double(uint256)`
+#guard fnSelector? Ext "double" == some 0xeee97206
+
+/-- The last local's value after a run of `P` from `Ext`'s initial state at
+the address `7` (a call to address `0` reverts: no code there). -/
+def runLast {Γ : Ctx} (P : Prog Ext [] (.val .uint :: Γ)) : Option Int :=
+  let σ := State.ofStorage (Storage.init Ext)
+  match Prog.run { σ with tx := { σ.tx with selfAddress := ⟨7, by decide⟩ } } P with
+  | .ok o => some (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+  | .error _ => none
+
+-- `h.selector` of `this.double` is its selector, `h.address` the contract's
+#guard runLast (sol[Ext]{ function (uint) external returns (uint) h = this.double;
+    uint s = h.selector; }) == some 0xeee97206
+#guard runLast (sol[Ext]{ function (uint) external returns (uint) h = this.double;
+    uint a = h.address; }) == some 7
+
+-- a call through `this.double` runs `double`: a self-call (O8)
+#guard runLast (sol[Ext]{ uint y = viaThis(3); }) == some 6
+
+/-- `this.double` and the value it names, as the elaborator writes them. -/
+example : Prog.toStr [] (sol[Ext]{ function (uint) external returns (uint) h = this.double;
+    uint s = h.selector; }) =
+    "uint h = (address(this) * 4294967296) + 4008276486; \
+     uint s = h - ((h / 4294967296) * 4294967296);" := rfl
+
+/-! ## 4 · Recursion through a value
+
+A call through a value is a call of each function it may reach
+(`FunDecl.valueCallees`), so a function that calls itself through a value
+is recursive (`isRecursiveC`) and its calls are `Stmt.callRec`'s
+(`Examples/Tactics/Recursion.lean`). -/
+
+def RecValues : Contract := contract!{
+  function apply(function (uint) returns (uint) h, uint x) returns (uint r) { r = h(x); }
+  function fact(uint n) returns (uint r) {
+    if (n == 0) { r = 1; } else { r = n * apply(fact, n - 1); }
+  }
+}
+
+#guard isRecursiveC RecValues "fact" && isRecursiveC RecValues "apply"
+
+-- `fact(3)` through `apply` is `6` (run, as `#run` runs it)
+#guard (match Prog.run (State.ofStorage (Storage.init RecValues))
+      (sol[RecValues]{ uint z = fact(3); }) with
+    | .ok o => some (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+    | .error _ => none) == some 6
+
+/-! ## 5 · What is refused -/
 
 /-- error: Solidity elaboration failed: h(…): a function type with a uint[] parameter or return is not modelled (docs/semantic-gaps.md, "Function types") -/
 #guard_msgs in #check sol{ function (uint[]) pure h; h(1); }
