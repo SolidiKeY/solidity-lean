@@ -193,6 +193,7 @@ import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
 import Solidity.Examples.Tactics.Revert
+import Solidity.Examples.Tactics.RevertData
 import Solidity.Examples.Tactics.Values
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
