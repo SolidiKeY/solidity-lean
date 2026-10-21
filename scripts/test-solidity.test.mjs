@@ -893,3 +893,17 @@ test("an obligation whose callee may write the state is read with callbacks", ()
   assert.equal(status.storageLost, "pending");
   assert.equal(status.valueCallLost, "pending");
 });
+
+test("callbacks: value calls through a function and loops of them, by their invariant", () => {
+  // docs/options.md O3: a call forks where its body does, `y = f(x)` whose
+  // callee pays is inlined under callbacks (`ProvesC.callVal`), and a loop
+  // whose body calls back is proved by its invariant (`ProvesC.invBox`)
+  const report = runSolidityTests(["tests/solc/CallbackCalls.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.valueThroughCall, "proved");
+  assert.equal(status.loopOfCalls, "proved");
+  assert.equal(status.loopOfValueCalls, "proved");
+  assert.equal(status.storageLostThroughCall, "pending");
+  assert.equal(status.storageLostInLoop, "pending");
+});
