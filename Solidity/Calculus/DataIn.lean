@@ -692,62 +692,8 @@ theorem Prog.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
 
 end
 
-mutual
-
-/-- A program whose data is known with `raw` has no `assert`: it does not
-panic (`Prog.run_noPanic`). -/
-theorem Stmt.asserts_of_revertDatas : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → {S : DSet} →
-    s.revertDatas true = some S → s.asserts = false
-  | _, _, .ite _ thn els, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
-      (show optCatD (Prog.revertDatas true thn) (Prog.revertDatas true els) = some _ from h)
-    simp only [Stmt.asserts, Prog.asserts_of_revertDatas thn h₁, Prog.asserts_of_revertDatas els h₂,
-      Bool.or_self]
-  | _, _, .assert _, _, h => nomatch h
-  | _, _, .callRec .., _, h => nomatch h
-  | _, _, .call _ _ _ body, _, h => by
-    simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
-  | _, _, .callReceiver _ _ _ body _, _, h => by
-    simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
-  | _, _, .callReceiverPush _ _ _ body code _, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
-      (show optCatD (Prog.revertDatas true body) (Prog.revertDatas true code) = some _ from h)
-    simp only [Stmt.asserts, Prog.asserts_of_revertDatas body h₁, Prog.asserts_of_revertDatas code h₂,
-      Bool.or_self]
-  | _, _, .tryCall _ _ ok err _ pnc other _ _ _, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
-      (show optCatD (optCatD (Prog.revertDatas true ok) (Prog.revertDatas true err))
-        (optCatD (Prog.revertDatas true pnc) (Prog.revertDatas true other)) = some _ from h)
-    obtain ⟨_, _, ha, hb, _⟩ := optCatD_eq_some h₁
-    obtain ⟨_, _, hc, hd, _⟩ := optCatD_eq_some h₂
-    simp only [Stmt.asserts, Prog.asserts_of_revertDatas ok ha, Prog.asserts_of_revertDatas err hb,
-      Prog.asserts_of_revertDatas pnc hc, Prog.asserts_of_revertDatas other hd, Bool.or_self]
-  | _, _, .loop _ _ body, _, h => by
-    simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
-  | _, _, .block body, _, h => by
-    simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
-  | _, _, .catchData _ _ _ _ _ _ _ body, _, h => by
-    simp only [Stmt.asserts]; exact Prog.asserts_of_revertDatas body h
-  | _, _, .assign .., _, _ | _, _, .rebind .., _, _ | _, _, .assignLocal .., _, _
-  | _, _, .declLocal .., _, _ | _, _, .declStorage .., _, _ | _, _, .opAssign .., _, _
-  | _, _, .incDec .., _, _ | _, _, .assignIncDec .., _, _ | _, _, .assignLocalPush .., _, _
-  | _, _, .push .., _, _ | _, _, .pop _, _, _ | _, _, .transfer .., _, _
-  | _, _, .pushOpAssign .., _, _ | _, _, .pushIncDec .., _, _
-  | _, _, .send .., _, _ | _, _, .declMem .., _, _
-  | _, _, .rebindMem .., _, _ | _, _, .assignFromMem .., _, _ | _, _, .assignMem .., _, _
-  | _, _, .delete _, _, _ | _, _, .deleteMem .., _, _ | _, _, .assignNew .., _, _
-  | _, _, .require _, _, _ | _, _, .revert, _, _ | _, _, .assumeFalse, _, _
-  | _, _, .revertData _, _, _ => rfl
-
-theorem Prog.asserts_of_revertDatas : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {S : DSet} →
-    P.revertDatas true = some S → P.asserts = false
-  | _, _, .nil, _, _ => rfl
-  | _, _, .cons s P, _, h => by
-    obtain ⟨_, _, h₁, h₂, _⟩ := optCatD_eq_some
-      (show optCatD (Stmt.revertDatas true s) (Prog.revertDatas true P) = some _ from h)
-    simp only [Prog.asserts, Stmt.asserts_of_revertDatas s h₁, Prog.asserts_of_revertDatas P h₂,
-      Bool.or_self]
-
-end
+/-- A panic's data matches `Panic`'s, whatever its code. -/
+theorem Pat.matches_panic (c : Nat) : Pat.panic.Matches (Semantics.encodePanic c) :=
+  (Pat.matches_lit Semantics.panicSelector).append (Pat.matches_word c)
 
 end Solidity

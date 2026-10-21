@@ -898,10 +898,10 @@ def Blk.toCatchData {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders �
 /-- A statement inside `checked { … }` or `ignoringOverflow { … }`: its
 guard's statement first, the programs it holds guarded (`Stmt.guard`,
 `Stmt.withOF`). -/
-def SStmt.withOF (o : OFMode) (s : SStmt C) : SProg C :=
+def SStmt.withOF (o : OFMode) (sf : Bool) (s : SStmt C) : SProg C :=
   match s.s.guard with
-  | none => [⟨s.Γ, s.Γ', s.s.withOF o⟩]
-  | some g => [.of s.Γ (o.guardStmt g), ⟨s.Γ, s.Γ', s.s.withOF o⟩]
+  | none => [⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
+  | some g => [.of s.Γ (o.guardStmt g sf), ⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
 
 /-- `P` then `Q`. -/
 def Prog.join {Γ Δ Ε : Ctx} : Prog C Γ Δ → Prog C Δ Ε → Prog C Γ Ε
@@ -2284,8 +2284,9 @@ def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
   if 256 ≤ n then return []
   let Γ ← nctx
   let c ← checkIn C Γ .bool (inTyCond p n e)
+  let sf := (← read).selfFrame
   pure [.of Γ (match (← read).overflow with
-    | some o => o.guardStmt c
+    | some o => o.guardStmt c sf
     | none => .require c)]
 
 /-- The slot `b.push()` appended: `b[b.length - 1]`. -/
@@ -4997,6 +4998,10 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     pure [.of Γ (.require (← checkIn C Γ .bool c))]
   | .assert c => do
     let Γ ← nctx
+    -- in a self-call's callee, where a `catch` reads it: `Panic(0x01)`'s data
+    if (← read).selfFrame then
+      return [.of Γ (.ite (← checkIn C Γ .bool c) .nil
+        (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))]
     pure [.of Γ (.assert (← checkIn C Γ .bool c))]
   | .revert => do pure [.of (← nctx) .revert]
   -- revert data, where a `try` reads it: in a self-call's callee
@@ -5028,7 +5033,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       else throw "`checked { … }` and `ignoringOverflow { … }` do not nest in each other"
     | none =>
       let P ← withReader (fun sc => { sc with overflow := some o }) (elabBranch ss)
-      pure (P.flatMap (SStmt.withOF o))
+      let sf := (← read).selfFrame
+      pure (P.flatMap (SStmt.withOF o sf))
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`
     let funs := (← read).funs
