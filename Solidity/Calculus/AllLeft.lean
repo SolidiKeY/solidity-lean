@@ -15,10 +15,16 @@ hiding a premise only strengthens the sequent (`Hyps.instAll_mono`).
 
 Lean only: which terms.  KeY's strategy picks ground terms of the sequent;
 here a term is a literal (it returns in every state and reads the same in
-every scope, so it moves to the premise's scope unchanged), and the ones
-`Seq.leafValid` offers are the literals the leaf indexes an array or a
-mapping with (`at`, `atIn`, `mat`), at most `Seq.allLeftBudget` of them
-(`Calculus/ProvesDerive.lean`).  The premise is hidden because the
+every scope, so it moves to the premise's scope unchanged) or a local of the
+premise's scope, named by its position from the outermost (`InstLit.loc`: a
+parameter keeps it below the locals pushed after it, so the leaf's index
+names the premise's local).  The ones `Seq.leafValid` offers are the
+literals and the locals the leaf indexes an array or a mapping with (`at`,
+`atIn`, `mat`), at most `Seq.allLeftBudget` of them
+(`Calculus/ProvesDerive.lean`).  A local pushed below the premise (a loop
+counter after the premise was stated) is no local of its scope and is not
+offered.  A conjunction of premises is split where one conjunct has an
+instance (`Fml.instRest`).  The premise is hidden because the
 closers cannot use it: `sol_close`'s `grind` fails on a goal that keeps a
 `∀` over a bounded index beside its instance, and `sol_decide` does not
 instantiate.  A `∀` premise with no instance is kept.  An instance is read in the
