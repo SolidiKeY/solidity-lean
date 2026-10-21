@@ -71,6 +71,13 @@ theorem Solkey.TestSuite.invariantCountsToBound.proved : ⊢ Solkey.TestSuite.in
     sol_leaf
     sol_close
 
+-- This replay sat at 199,882 of its 200,000 heartbeats before `Fml.allocAll`
+-- (docs/semantic-gaps.md, "Revert data"): one more formula constructor costs
+-- every case split over a formula, ~0.06% here.  `sol_close` could not be made
+-- cheaper without changing how its leaves close (measured: the cost is simp
+-- walking the dependent state terms, not lemma attempts), so this one replay
+-- gets the smallest override with a little room (AGENTS.md, "Lean notes").
+set_option maxHeartbeats 205000 in
 theorem Solkey.TestSuite.invariantVariantSkipsBreakIteration.proved : ⊢ Solkey.TestSuite.invariantVariantSkipsBreakIteration.problem := by
   sol_prove
   case leaf1 =>
