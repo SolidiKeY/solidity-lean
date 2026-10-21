@@ -260,6 +260,45 @@ returns (7, 2, 105)
 /-- info: revert -/
 #guard_msgs in #run Codec2.decodeOutOfRange()
 
+/-- **A symbolic word written byte by byte, read back**: `abi.encodePacked`
+writes `uint8(x >> 8k)` per byte; the closer reads a byte back (`x >> 0` as
+`x`, `(t % m) % n` and `((t % 2^m) >> j) % 2^w` narrowed) and reassembles
+Horner's `r * 256 + b` (`hornerU?`, `Calculus/Closer.lean`, Lean only). -/
+def Packed : Contract := contract!{
+  function addressLast(address a) {
+    bytes memory e = abi.encodePacked(a);
+    assert(uint8(e[19]) == uint8(uint160(a)));
+  }
+  function addressFirst(address a) {
+    bytes memory e = abi.encodePacked(a);
+    assert(uint8(e[0]) == uint8(uint160(a) >> 152));
+  }
+  function wordReassembled(uint a) {
+    bytes memory e = abi.encodePacked(uint64(a));
+    uint r = uint8(e[0]); r = r * 256 + uint8(e[1]); r = r * 256 + uint8(e[2]); r = r * 256 + uint8(e[3]); r = r * 256 + uint8(e[4]); r = r * 256 + uint8(e[5]); r = r * 256 + uint8(e[6]); r = r * 256 + uint8(e[7]);
+    assert(r == a % 18446744073709551616);
+  }
+}
+
+section Packed
+
+local instance : InContract := ⟨Packed⟩
+
+theorem addressLast : ⊨ spec!{addressLast} := by
+  sol_symex
+  sol_decide
+
+theorem addressFirst : ⊨ spec!{addressFirst} := by
+  sol_symex
+  sol_decide
+
+/-- Eight bytes reassembled; twenty (an `address`) are past `Seq.closeSize`. -/
+theorem wordReassembled : ⊨ spec!{wordReassembled} := by
+  sol_symex
+  sol_decide
+
+end Packed
+
 /-! ## 3 · A mapping keyed by `string` -/
 
 /-- `mapping(string => uint)`: a `mapping(uint => uint)` keyed by the hash
