@@ -105,6 +105,17 @@ theorem FunContract.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] ++
     cases bs with
     | snoc bs q x => cases bs; exact h
 
+/-- A contract at a call that returns a storage alias is one at every such
+call: each enters the body with the alias unset, whatever its name. -/
+theorem FunContract.forall_storage {Γf : Ctx} {R : RefTy} {b : Prog C ([.alias R] ++ ps) Γf}
+    {req : Fml C ps} {ens : Fml C ([.alias R] ++ (Olds ++ ps))}
+    (h : FunContract (Γ := []) (CallRet.storage R (.user "r")) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.alias R] Γ'), FunContract ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | storage => exact h
+  | rets bs => cases bs
+
 theorem Binders.defaultsT_eq {H : HTy} : {ρ : Ctx} → (bs bs' : Binders ρ) →
     (Binders.defaultsT (C := C) (H := H) bs) = Binders.defaultsT bs'
   | _, .nil, .nil => rfl
@@ -399,7 +410,10 @@ macro "rec_induct" : tactic => `(tactic| (
   intro n t ih
   refine ⟨?c, ?w, rfl⟩
   case c =>
-    first | apply FunContract.forall_none | apply FunContract.forall_val
+    first
+      | apply FunContract.forall_none
+      | apply FunContract.forall_val
+      | apply FunContract.forall_storage
     apply FunContract.ofValidCtx []
     rec_step ih
   case w =>
@@ -598,7 +612,10 @@ partial def induct (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Induct := g.
         (first | apply FunContract.forall_rets $bs (by decide) | apply FunContract.forall_val)
         apply FunContract.ofValidCtx []))
     else `(tactic| (
-        (first | apply FunContract.forall_none | apply FunContract.forall_val)
+        (first
+          | apply FunContract.forall_none
+          | apply FunContract.forall_val
+          | apply FunContract.forall_storage)
         apply FunContract.ofValidCtx []))
   let some [gc'] ← tryOn gc (evalTactic tac) | return .failed
   return if (← autoGoal gc' fuel).isEmpty then .proved else .failed

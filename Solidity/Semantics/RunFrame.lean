@@ -537,7 +537,33 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
     obtain ⟨hg, ha⟩ := Prog.run_frame body hw d h'
     exact ⟨hg.withEnv _, ha⟩
-  | _, _, .rebind .., hw, _, _, _, _ | _, _, .declStorage .., hw, _, _, _, _
+  | _, _, .rebind i r, hw, d, σ, o, h => by
+    cases r with
+    | push => cases hw
+    | path p =>
+      change TRun.rebind i (.path p) σ = .ok o at h
+      simp only [TRun.rebind, ARhs.evalT] at h
+      obtain ⟨⟨st, ref⟩, hr, h⟩ := tbind_ok_inv h
+      obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+      cases hr
+      cases h
+      exact ⟨TGFrame.setLocal (σ.withStorage σ.storage) i _, TLocAgree.set i _ _⟩
+  | _, _, .declStorage R _ init, hw, d, σ, o, h => by
+    change TRun.declStorage R init σ = .ok o at h
+    cases init with
+    | none =>
+      cases h
+      exact ⟨TGFrame.push (t := .alias R) σ _, TLocAgree.refl _⟩
+    | some r =>
+      cases r with
+      | push => cases hw
+      | path p =>
+        simp only [TRun.declStorage, ARhs.evalT] at h
+        obtain ⟨⟨st, ref⟩, hr, h⟩ := tbind_ok_inv h
+        obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+        cases hr
+        cases h
+        exact ⟨TGFrame.push (t := .alias R) (σ.withStorage σ.storage) _, TLocAgree.refl _⟩
   | _, _, .assignLocalPush .., hw, _, _, _, _
   | _, _, .pushOpAssign .., hw, _, _, _, _ | _, _, .pushIncDec .., hw, _, _, _, _
   | _, _, .push .., hw, _, _, _, _ | _, _, .pop _, hw, _, _, _, _

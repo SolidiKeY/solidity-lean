@@ -557,6 +557,12 @@ is one. -/
 def Idx.outer {Γ' : Ctx} {t : LTy} (d : Nat) (i : Idx Γ' t) : List (LTy × Nat) :=
   if d ≤ i.toNat then [(t, i.toNat - d)] else []
 
+/-- A storage alias's right-hand side a callee of mutability `μ` may bind:
+a path, which reads the storage (not `pure`), not a push, which writes it. -/
+def ARhs.pathIn {R : RefTy} (μ : Mutability) : ARhs C Γ R → Bool
+  | .path _ => μ != .pure
+  | .push .. => false
+
 /-- The locals the call writes in its caller: where its result lands. -/
 def CallRet.writesAt (d : Nat) {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : List (LTy × Nat) :=
   CallRet.casesOn (motive := fun _ _ _ => List (LTy × Nat)) r []
@@ -577,12 +583,16 @@ mutual
 `pure`), or storage and the ledger (`nonpayable`). -/
 def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
-    (assign := fun _ _ => μ == .nonpayable) (rebind := fun _ _ => false)
+    -- a storage alias bound to a path: a local written, the path read
+    -- (`docs/kernel-port.md`, "Recursion": a storage return's contract)
+    (assign := fun _ _ => μ == .nonpayable) (rebind := fun _ r => r.pathIn μ)
     (assignLocal := fun _ r => r.readsIn μ)
     (declLocal := fun _ _ init => match init with
       | none => true
       | some e => e.readsIn μ)
-    (declStorage := fun _ _ _ => false)
+    (declStorage := fun _ _ init => match init with
+      | none => true
+      | some r => r.pathIn μ)
     (opAssign := fun _ _ _ l r => r.readsIn μ && l.writableIn μ)
     (incDec := fun _ _ l => l.writableIn μ) (assignIncDec := fun _ _ _ l _ => l.writableIn μ)
     (assignLocalPush := fun _ _ => false)
@@ -626,7 +636,7 @@ by type and position there (master's `Stmt.writes` at `ad728b16`, less the
 locals `s`'s own scopes declare). -/
 def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × Nat)
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => List (LTy × Nat)) s
-    (assign := fun _ _ => []) (rebind := fun _ _ => []) (assignLocal := fun i _ => i.outer d)
+    (assign := fun _ _ => []) (rebind := fun i _ => i.outer d) (assignLocal := fun i _ => i.outer d)
     (declLocal := fun _ _ _ => []) (declStorage := fun _ _ _ => [])
     (opAssign := fun _ _ _ l _ => l.writesAt d) (incDec := fun _ _ l => l.writesAt d)
     (assignIncDec := fun i _ _ l _ => i.outer d ++ l.writesAt d)

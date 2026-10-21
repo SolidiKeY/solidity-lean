@@ -978,10 +978,13 @@ def elabFmlAtC (ns : List (String × LTy)) (φ : RawFml) :
 end Notation
 
 /-- A local of `cdlIn`: its type and name (`uint x`, a struct's memory
-return `Person memory p`), or a snapshot (`old`, `oldNet`). -/
+return `Person memory p`, a storage array's alias `uint[] storage r`), or a
+snapshot (`old`, `oldNet`). -/
 declare_syntax_cat cdl_local
 syntax ident ident : cdl_local
 syntax ident " memory " ident : cdl_local
+/-- A storage array's alias (`uint[] storage r`): a storage return. -/
+syntax ident noWs "[" "]" &"storage" ident : cdl_local
 syntax ident : cdl_local
 
 /-- `cdlIn[C | uint x, old, oldNet, uint r]{ φ }`: `φ` read at the locals
@@ -1006,6 +1009,13 @@ elab_rules : term
           | s => throwErrorAt t
             "cdlIn: a local of a contract is a uint, int, address or bool, not {s}"
         `(($(quote x.getId.toString), LTy.val $p))
+      | `(cdl_local| $t:ident[] storage $x:ident) => do
+        let p : Lean.Term ← match t.getId.toString with
+          | "uint" | "address" => `(PrimTy.uint)
+          | "int" => `(PrimTy.int)
+          | "bool" => `(PrimTy.bool)
+          | s => throwErrorAt t "cdlIn: a storage array of uint, int, address or bool, not {s}"
+        `(($(quote x.getId.toString), LTy.alias (RefTy.array (Ty.prim $p))))
       | `(cdl_local| $t:ident memory $x:ident) =>
         `(($(quote x.getId.toString), LTy.mem (RefTy.struct $(quote t.getId.toString))))
       | `(cdl_local| $x:ident) => match x.getId.toString with

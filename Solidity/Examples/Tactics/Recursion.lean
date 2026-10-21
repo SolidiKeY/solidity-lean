@@ -75,8 +75,10 @@ example : (match Prog.run (State.ofStorage (Storage.init RecursionExample)) runC
   decide +kernel
 
 /-- **Reference returns**: a recursive function may return a storage alias
-or a fresh memory object; such a call runs, but has no contract (its body
-has no mutability, `docs/kernel-port.md`, "Recursion"). -/
+or a fresh memory object.  A storage return's body binds the alias to a
+path (`Stmt.rebind`, within `view`), so it has a contract (`pickAuto`); a
+memory return's allocates and writes, which no mutability's frame keeps, so
+it runs but has no contract (`docs/kernel-port.md`, "Recursion"). -/
 def RefReturns : Contract := contract!{
   uint[] values;
   function pick(uint n) returns (uint[] storage r) {
@@ -97,6 +99,32 @@ example : (match Prog.run (State.ofStorage (Storage.init RefReturns)) refCore wi
     | .ok o => some (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
     | .error _ => none) = some 7 := by
   decide +kernel
+
+section Refs
+
+local instance : InContract := ⟨RefReturns⟩
+
+/-- **A recursive storage return by its contract**: `pick`'s body binds its
+alias to a path (`r = values;`, and `r = pick(n - 1);` to the frame
+below's, `Stmt.rebind`), within `view`, so it has a contract
+(`FunContract.forall_storage`), proved by induction over the frames: the
+call does not panic, from any `n`.  (An `ensures` that reads the returned
+alias, `r.length`, is past the closers, which read no alias local in a
+leaf.) -/
+theorem pickNoPanic : ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true } := by
+  rec_contract_by .view cdlIn![uint n]{ true } cdlIn![uint n, old, oldNet, uint[] storage r]{ true }
+  case hc =>
+    apply RecContract.unroll
+    intro k t ih
+    refine ⟨FunContract.forall_storage ?_, ?_, rfl⟩
+    · apply FunContract.ofValidCtx [.user "n"]
+      rec_step ih
+    · simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
+      first | rfl | decide
+  case pre => sol_symex; sol_close
+  case post => sol_symex; sol_close
+
+end Refs
 
 /-! ## By contract, proved by induction over the frames -/
 
