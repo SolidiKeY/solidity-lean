@@ -25,6 +25,70 @@ local instance : InContract := ⟨StandardExample⟩
 The output is a math fragment: put it inside `\[ ... \]`.  A chain, a
 derivation or a line longer than the width is an `aligned` environment.
 
+## Go to definition in the paper
+
+Map a rendered symbol to the exact destination of its definition. With
+`hyperref` loaded, every exported occurrence of that operator becomes a link:
+
+```lean
+-- Defaults for subsequent exports in this section or namespace:
+#latex_definition_targets [
+  (find, "formula:findPathRule"),
+  (select, "formula:selectOnStoreRule")]
+
+#latex_expr (macros := true) dl!{ find(select(storage, alice), age) = 42 }
+```
+
+The result contains
+`\hyperlink{formula:findPathRule}{\TFind{\intS}}` and
+`\hyperlink{formula:selectOnStoreRule}{\TSelect{\Struct}}`. Only the
+operator and its sort are clickable; each argument keeps its own independent
+links. Link markup does not change the renderer's measured widths or break
+points. These are symbol-definition links; the paper's derivation-arrow
+links can continue to identify the rule applied at each step.
+
+The pre-licenciate paper already defines those two destinations at its
+displayed equations: its `\FormulaAnchor{name}` creates `formula:name`,
+and its named-rule macros create the corresponding anchors automatically.
+For a new definition, put `\FormulaAnchor{definition-find}` at its displayed
+formula and map `find` to `"formula:definition-find"`. In another document,
+`\hypertarget{definition:find}{}` supplies a target named `definition:find`.
+The destination is chosen by the document author; Lean does not infer which
+of several defining equations to use, or check that a target exists in the
+compiled document. Check the LaTeX build for missing-destination warnings.
+
+For one export, pass `(definitions := [(find, "definition:find")])`.
+This replaces the default map; `(definitions := [])` disables inherited
+links. Maps set by `#latex_definition_targets` are restored on leaving the
+section or namespace. No links are emitted by default.
+
+Keys are visible renderer names, not Lean constructor names: `find` covers
+primitive reads, struct reads and lengths; `select` also covers the typed
+selection variants (the paper's macro spells it `selectSt`). Other keys
+include `save`, `read`, `write`, `delAt`, `delValue`, `copySt`, `copyMem`,
+`freshId`, `addM`, `store`, `at`, `atMap`, `wt` and `cleanTail`.
+`Solidity.Latex.definitionKeys` lists every accepted key. Unknown or duplicate
+keys and unsafe destination strings are errors. Destination strings accept
+ASCII letters, digits, `:`, `_`, `.`, `/` and `-`.
+
+The map works in plain and macro output, declarations, chains, generated
+derivations, checked program traces, and calculus formulas nested in ordinary
+mathematics. Program-trace JSON also includes a `definitionTargets` object,
+so a document renderer can retain the same navigation map. From a Solidity
+file, use the existing option passthrough:
+
+```sh
+scripts/latex-sol.sh --program --macros \
+  --opts '(definitions := [(find, "formula:findPathRule")])' C.sol C.f
+```
+
+In the MetaM API, set `Options.definitions : List (String × String)`.
+Links affect presentation only; proof terms and trace validity are unchanged.
+This covers exported mathematical symbols. Handwritten TeX and literal
+Solidity listings need their own document markup; re-exporting a formula
+does not edit them. Avoid additionally patching linked operator macros with
+their own hyperlinks, which would create nested PDF links.
+
 ## Checked program traces for paper sessions
 
 Use `Solidity.Tools.ProgramTrace` when authoring a derivation that needs
@@ -73,7 +137,8 @@ the native merge search's update spine, including implication consequents;
 it does not normalize every branch of a conjunction.
 
 The JSON contains `schemaVersion`, `relation`, `checkedDeclaration`,
-`granularity`, `first`, `last`, `administrativeMerges`, and `steps`. Each step
+`granularity`, `first`, `last`, `administrativeMerges`, `definitionTargets`,
+and `steps`. Each step
 has a zero-based `index`, `rule`, `before` and `after` (LaTeX fragments).
 Renderers can consume these pairs without parsing an `aligned` environment.
 The declaration name identifies the theorem in that Lean run; the JSON is
@@ -126,8 +191,9 @@ it; `plain` writes `\mathit{fixedCopy}(…)`.  Code goes into `\code{…}`
 
 **Options.**  The commands take them before their argument; the defaults
 come from `set_option latex.sol.macros true` and `set_option latex.sol.width n`
-(`#latex`, LeanTeX's command, takes only those; so does a calculus term nested
-in ordinary mathematics, which gets the backend and width of its command).
+and `#latex_definition_targets`. `#latex`, LeanTeX's command, reads these
+defaults; calculus terms nested in ordinary mathematics inherit their
+command's backend, width and definition map.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -140,6 +206,7 @@ in ordinary mathematics, which gets the backend and width of its command).
 | `(sides := b)` | on for macros | before a law's rewrite, a side line `t \rightsquigarrow t' \qquad (conditions)`: the instance and the law's side conditions (`diverges(p, q)`, `r' \ne r`, …), but those that only compute on values (`… = some v` with no term in it) or test a term against itself (`sameSegs(p, p)`) |
 | `(sorts := b)` | `true` | sort subscripts |
 | `(past := b)` | `true` | a generated derivation goes on past the program (the rewrites to its last line) |
+| `(definitions := [(symbol, "destination"), …])` | empty, or the scoped map | link mapped operator heads to exact PDF destinations; `[]` disables links |
 
 The filter (`collapse`, `groups`, `premise`) applies to generated
 derivations; a chain proved as a theorem keeps its links as written.
@@ -245,3 +312,22 @@ checkout's unannotated `localValueDelete` read (381 taclets). Existing broad
 hygiene failures remain: 25 ignored scratch-module orphans and six missing
 paths in vendored LeanTeX documentation. All new modules are reachable, and
 the changed documentation introduces no missing paths.
+
+## Definition-navigation milestone (2026-10-21)
+
+Added explicit symbol-to-destination maps, scoped defaults, sorted and
+unsorted operator links in both backends, and additive trace JSON metadata.
+The read-only finder/skeptic review found a lost per-export map in nested
+LeanTeX mathematics and a lost sort when expanding the ledger's composite
+macro with `sorts := false`. Both are fixed and pinned. Regression checks
+also cover section restoration, disabling inherited links, typed find
+aliases, nested heads, composite index/ledger/wellformed macros, unchanged
+layout measures, duplicate keys and unsafe destinations.
+
+The default library and TestSuite builds pass, as does the frozen SolKey
+sort check (377 taclets, 131 read-bearing annotations). A four-page demo
+compiled twice without missing destinations or overfull boxes. PDF object
+inspection confirmed three disjoint operator annotations resolving to their
+intended definition displays on pages 2, 3 and 4; the rendered pages were
+visually checked. The existing scratch-orphan and vendor-documentation
+failures described above remain unrelated.

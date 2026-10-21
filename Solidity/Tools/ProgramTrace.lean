@@ -105,6 +105,7 @@ def Trace.toJson (trace : Trace) (checked : Lean.Name) (o : Latex.Options := {})
   return Json.mkObj [
     ("schemaVersion", Lean.toJson (1 : Nat)), ("relation", Lean.toJson "Fml.Leads"),
     ("checkedDeclaration", Lean.toJson checked.toString),
+    ("definitionTargets", Json.mkObj (o.definitions.map fun (key, target) => (key, Lean.toJson target))),
     ("granularity", Lean.toJson "supported captures and update pairs; other native strategy steps"),
     ("first", Lean.toJson (← exprLatex trace.first o)), ("last", Lean.toJson (← exprLatex trace.last o)),
     ("administrativeMerges", Lean.toJson trace.administrativeMerges), ("steps", .arr rows)]

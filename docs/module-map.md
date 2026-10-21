@@ -439,6 +439,9 @@ collapsed bookkeeping, `\Gamma`, labels, a law's side line) and declaration
 statements to LaTeX strings/files, with the commands' options (`latexOpt`);
 `#latex_chains_files` writes every worked chain under a namespace
 (`scripts/latex-chains.sh`).
+Definition navigation uses `Options.definitions` and the scoped
+`#latex_definition_targets` map: typed symbol aliases share their visible
+key, and only operator heads receive internal PDF links (`docs/latex.md`).
 `Tools/LatexSolkey.lean` exports a generated derivation (`#latex_derivation`),
 and a `solc_import`ed function's obligation (`scripts/latex-sol.sh`).
 `Calculus/Elementary.lean` proves individual capture and raw update laws;

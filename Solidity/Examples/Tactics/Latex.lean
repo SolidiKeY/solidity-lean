@@ -230,4 +230,102 @@ info: \mathsf{succ}
 run_cmd Lean.Elab.Command.liftTermElabM do
   Lean.logInfo (← Solidity.Latex.runRM {} (Solidity.Latex.symOf ``Nat.succ))
 
+-- A link surrounds only the operator (and its sort), never its arguments.
+/-- info: \hyperlink{formula:findPathRule}{\mathit{find}_{\mathsf{int}}}(\mathit{storage}, \mathit{alice}.\mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (width := 300) (definitions := [(find, "formula:findPathRule")])
+  dl!{ find(storage, alice.age) = 42 }
+
+/-- info: \hyperlink{formula:findPathRule}{\TFind{\intS}}(\storage, \pField{\mathit{alice}}{\mathit{age}}) = 42 -/
+#guard_msgs in
+#latex_expr (macros := true) (width := 300) (definitions := [(find, "formula:findPathRule")])
+  dl!{ find(storage, alice.age) = 42 }
+
+/-- info: \hyperlink{definition:find}{\find}(\storage, \pField{\mathit{alice}}{\mathit{age}}) = 42 -/
+#guard_msgs in
+#latex_expr (macros := true) (sorts := false) (width := 300)
+  (definitions := [(find, "definition:find")]) dl!{ find(storage, alice.age) = 42 }
+
+section
+#latex_definition_targets [(select, "formula:selectOnStoreRule")]
+
+/-- info: \TFind{\intS}(\hyperlink{formula:selectOnStoreRule}{\TSelect{\Struct}}(\storage, \mathit{alice}), \mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (macros := true) (width := 300) dl!{ find(select(storage, alice), age) = 42 }
+
+-- An explicit empty map disables inherited links for this export.
+/-- info: \TFind{\intS}(\TSelect{\Struct}(\storage, \mathit{alice}), \mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (macros := true) (width := 300) (definitions := [])
+  dl!{ find(select(storage, alice), age) = 42 }
+end
+
+-- Definition maps are scoped; leaving the section restores the default.
+/-- info: \TFind{\intS}(\TSelect{\Struct}(\storage, \mathit{alice}), \mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (macros := true) (width := 300) dl!{ find(select(storage, alice), age) = 42 }
+
+/-- error: duplicate definition symbol find -/
+#guard_msgs in
+#latex_definition_targets [(find, "definition:find"), (find, "other:find")]
+
+/-- error: definition destination must be nonempty and contain only ASCII letters, digits, :, _, ., / or - -/
+#guard_msgs in
+#latex_expr (definitions := [(find, "bad}target")]) dl!{ true }
+
+set_option hygiene false in
+run_elab do
+  let first ← Lean.Elab.Term.elabTerm (← `(dl!{
+    find(select(save(storage, alice.age, 42), alice), age) = 42 })) none
+  let opts : Solidity.Latex.Options := { width := 45 }
+  let linked := { opts with definitions := [("find", "def:find"), ("select", "def:select"), ("save", "def:save")] }
+  let before ← Solidity.Latex.runRM opts (Solidity.Latex.fml [] first)
+  let after ← Solidity.Latex.runRM linked (Solidity.Latex.fml [] first)
+  unless before.width == after.width && (before.lines 45).size == (after.lines 45).size do
+    throwError "definition links changed layout widths or wrapping"
+  let tex := after.flat
+  unless (tex.splitOn "\\hyperlink{").length == 4 do
+    throwError "nested find/select/save heads were missed or linked twice"
+
+run_elab do
+  let opts : Solidity.Latex.Options := { definitions := [("find", "def:find")] }
+  for ctor in [``Op2.find, ``Op2.findIn, ``Op2.sfind, ``Op2.sfindIn, ``Op2.len] do
+    let text ← Solidity.Latex.runRM opts (Solidity.Latex.symOf ctor)
+    unless text.startsWith "\\hyperlink{def:find}" do
+      throwError "typed find variant lost its definition target"
+
+-- These paper macros hide operator heads; links expose them without changing
+-- their layout measure or the netSelect macro's always-present sort.
+run_elab do
+  let plain : Solidity.Latex.Options := { backend := .macros, sorts := false }
+  let linked := { plain with definitions := [("select", "def:select"), ("at", "def:at"), ("atMap", "def:atMap")] }
+  let arg := Solidity.Latex.Doc.ident "a"
+  let before ← Solidity.Latex.runRM plain (Solidity.Latex.netSelectDoc arg)
+  let after ← Solidity.Latex.runRM linked (Solidity.Latex.netSelectDoc arg)
+  unless before.width == after.width && after.flat.startsWith "\\hyperlink{def:select}{\\TSelect{\\intS}}" do
+    throwError "linking netSelect changed its sort or layout"
+  for map in [false, true] do
+    let before ← Solidity.Latex.runRM plain (Solidity.Latex.indexDoc arg arg map)
+    let after ← Solidity.Latex.runRM linked (Solidity.Latex.indexDoc arg arg map)
+    let target := if map then "def:atMap" else "def:at"
+    unless before.width == after.width && (after.flat.splitOn ("\\hyperlink{" ++ target ++ "}")).length == 2 do
+      throwError "an indexed path changed layout or lost its operator link"
+
+/-- info: \hyperlink{def:wt}{\wellformedSym}(\storage) -/
+#guard_msgs in
+#latex_expr (macros := true) (definitions := [(wt, "def:wt")]) dl!{ wt(storage) }
+
+/-- info: \forall \_n : \mathbb{N},\ \models \hyperlink{def:find}{\mathit{find}_{\mathsf{int}}}(\mathit{storage}, \mathit{alice}.\mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (width := 300) (definitions := [(find, "def:find")])
+  (∀ _n : Nat, Valid dl!{ find(storage, alice.age) = 42 })
+
+section
+#latex_definition_targets [(find, "def:find")]
+/-- info: \forall \_n : \mathbb{N},\ \models \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{alice}.\mathit{age}) = 42 -/
+#guard_msgs in
+#latex_expr (width := 300) (definitions := [])
+  (∀ _n : Nat, Valid dl!{ find(storage, alice.age) = 42 })
+end
+
 end Solidity.Examples.Tactics.Latex
