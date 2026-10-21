@@ -61,7 +61,7 @@ contract's invariant.
 | `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); open: `calldata` |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
-| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`); open: another contract's reason (the calculus goal is `false`), a custom error's data (dropped), a reason not literal, the callback reading's leaves on the bound array |
+| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats, the callback reading's leaves on the bound array |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | closed: a recursion that does not call back is read without callbacks (`sol_no_callback`, `ProvesC.recValid`), one that does by a contract over the callback runs (`RecContractC`, `ProvesC.recContract`), by induction over the frames; `rec_auto_c`, the runner (`docs/kernel-port.md`, "Recursion") |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
@@ -626,10 +626,8 @@ the data has `Error`'s selector and decodes, `r` the decoded string;
   `Prog.run_dataIn`, an induction over the run as `Semantics/NoPanic.lean`'s);
   one goal per possible datum, `require(a == address(this));` and the
   string literal's allocation in front of `body`; and the other receiver's
-  goal is `false` (an external reason is arbitrary, which no formula of
-  the calculus quantifies: a fresh memory object of any contents).  So the
-  calculus proves what a `catch` does with the reason a contract's own
-  callee gives, and nothing about another contract's reason.  Under the box
+  goal is the clause for every fresh `bytes` of any contents (`Fml.allocAll`,
+  lane `open-alloc`, below; it was `false` before).  Under the box
   only (`catchDataDiamond` is `false`), and without callbacks: with a
   callee that may call back, the `ProvesC` rule is `false`.
 - *Panic codes.*  `THalt.panic` keeps no code: the model panics on a failed
@@ -701,50 +699,86 @@ file's (`errorMembers`), and a `RevertStatement` as `revert E(…)`.  Tests:
 through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
 (`customData`, the run of `require(x > 3, E(x))`).
 
+**Lane `open-alloc`: any bytes, and data known in part.**
+
+- *The binder.*  `Fml.allocAll x R φ` (`Calculus/Fml.lean`, Lean only):
+  `φ` for every fresh memory object `x : R` of any contents, read in the
+  state the heap grown by it (`holds σ (allocAll x R φ) ↔ ∀ o : MObj σ.H R,
+  holds ((σ.alloc o).1.push (some (σ.alloc o).2)) φ`; `holdsC` alike).  The
+  hidden binder at a memory type (`Fml.bind`) ranges over the references
+  of the heap the state has, so it could not say this; `allocAll` grows the
+  heap itself, so no heap-extension invariance is asked of any formula.
+  Printed `∀ fresh bytes x; φ`, refused when written (`dl{}` reads it as
+  `{ havoc }`: a rule's goal, not a formula to write).
+- *The sequent.*  `Hyps.allocAll` and the rule `Proves.allocIntro`
+  (KeY's `allRight` over a fresh object), sound by the context's wrapping
+  as `allIntro` is; the walk (`Seq.runK`), the tree, `sol_derive?` take it
+  (`allocRight`).  The premise `Premise.allocBranches bs x A P gs`: the
+  blocks `bs` (`branches`' goals) and, for each `(Q, h)` of `gs`,
+  `Fml.allocGoal`: after the `require`s `Q`, `P` for every fresh `x` of
+  which `h` holds (`⟨ Q ⟩ ∀ fresh x. h → ⟨ P ⟩ …`); `Proves.allocBranches`.
+- *The rule.*  `catchDataStep` under the box: a self-call whose callee's
+  data are known gives a goal per literal datum (as before), one per datum
+  known in part (`Pat`: each byte known or not; a custom error's argument
+  is 32 unknown bytes, `RevPart.pat?`), the clause for every fresh `bytes`
+  of the pattern's length and known bytes (`Pat.fml`, a raw clause; an
+  `Error` clause assumes nothing), behind `require(a == address(this))`,
+  and the any-bytes goal behind `require(a != 0); require(a !=
+  address(this));`.  Another contract's call, or a callee whose data are not
+  known (a recursive call, a selector not folded, a panic's code), gives
+  the any-bytes goal behind `require(a != 0);` alone.
+- *The analysis.*  `Stmt.revertDatas raw : Option DSet`: literal data and
+  patterns (`DSet.Mem`, `Pat.Matches`), sound by `Prog.run_dataS` as
+  before (`TRun.revertData_dataS_pat`).
+- *Soundness.*  The run allocates a datum as `litBytes` does (`new
+  bytes(n)`, a write per byte); `TRun.litBytesT_alloc`
+  (`Semantics/AllocBytes.lean`) shows it ends in the state `allocAll` reads
+  at the object of the bytes, so the any-bytes goal and the pattern goals
+  give the clause (`catch_alloc_sound`, `Pat.fml_holds`).  A datum of
+  `2^256` bytes or more is bound by no clause: `CatchKind.decode` returns
+  none there (no transaction carries it), the clause not reached.
+- *The closers.*  `sol_decide` reads `allocAll` as `false` at a goal and
+  `true` at a premise (`Fml.toLS`): a goal behind `require(a != address(this))`
+  with `a` the contract closes, as before.  `sol_close` reads it
+  semantically (`CloseS.holds_allocAll`): the object `o` a variable, its
+  length `lenU o.1.length` (`CloseS.alloc_lenId`), its words `o.1[i]?`
+  (`CloseS.alloc_readId_index`), every other read the state's
+  (`CloseS.locV_alloc`, `alloc_storage`, …).
+- *Tests.*  `tests/solc/RevertData.sol`: `externalReason` (another
+  contract's reason, its length branched on), `externalData` (raw data),
+  `customSymbolic` (`require(x > 3, E(x))`'s data known in part, its
+  length); `Examples/Tactics/RevertData.lean`: `externalReason`,
+  `symbolicCustom`, the rule pinned.
+- *Cost.*  `Fml`, `Hyps` and `Premise` have one constructor more: every
+  fold gained an arm (about 60 sites, mostly the `anon` arm copied).
+  Checking times did not move beyond noise (see the lane's report: the
+  example files within a second or two, the build's slow modules within
+  ±10%).  `Examples/Tactics/RevertData.lean` is 41 s in the build (its new
+  `symbolicCustom` walks three clauses × four goals).
+
 **Left open, with the reason.**
-- Another contract's reason (`ExtResult.error r`, `.other d`): the run binds
-  it, but the calculus's goal is `false`.  The reason is any bytes, a fresh
-  memory object of any contents, and no formula ranges over one: the hidden
-  binder at a memory type (`Fml.bind`, `Calculus/Logic.lean`) ranges over
-  the references of the *current* heap (decision 17'), and the
-  heap-extension invariance of `holds` the slice named does not give it
-  either — `holds σ (bind x φ)` says nothing of an object the heap does not
-  hold yet, and after the allocation the binder ranges over one object more,
-  so monotonicity goes the wrong way for the binder itself.  What it needs:
-  a binder `Fml.allocAll x φ` ("for every byte list, `φ` after allocating
-  it"), its `holds` clause and soundness, a `Proves` rule that introduces it
-  and a memory atom for an object of unknown contents the leaf reduction
-  reads (`Fml.toLS`, `MemRead.lean`: a length and bytes as atoms), and an
-  arm in every formula fold (`Step`, `ChainKit`, `SeqRewrite`, `AllLeft`,
-  the printers and quoters).  Not done in lane `open-k2`.
 - A reason that is not a literal (`revert(string.concat(…))`, a rethrown
-  `bytes`): `sol{}` writes `revert("…")` of a literal only, and `RevPart`
-  has no memory part; even with one, the datum is an object of the
-  *callee's* heap, which the caller's goal cannot name once the frame is
-  gone: the binder above again.
-- Data with symbolic *words* (a custom error's argument that is not a
-  literal, `require(x > 3, E(x))`; a callee that may panic, whose data is
-  `Panic` and the transaction's code) has the `false` goal for a `catch
-  (bytes memory d)`.  This one is expressible without a new binder: a goal
-  per datum *pattern* (literal bytes and word slots), a value binder per
-  word slot (`Branch`'s binders), the datum allocated with the slot's bytes
-  as `(w >> 8k) % 256`; `TRes.DataS` (`Calculus/DataIn.lean`) would read
-  "matches a pattern of `S`" instead of "is in `S`", and
-  `Premise.sound_catchDataBox` instantiate the binders with the run's words.
-  Not done in lane `open-k2`.  What landed: for `catch Error(string memory
-  r)` such a datum is left out when its literal first part is not `Error`'s
-  selector (`RevPart.notError`), since it cannot decode as `Error`;
-  `TRes.DataS` keeps only the data the clause can bind (`dataKeep`), sound by
-  `TRun.revertData_dataS_notError`.  So a callee with `revert E(x)` and
-  `require(c, "m")` has its reason read (`reasonPastCustom`,
-  `Examples/Tactics/RevertData.lean`'s `mixedReason`).
+  `bytes`): `sol{}` refuses it ("a string literal"), and `RevPart` has no
+  memory part.  With one, the datum would be the any-bytes goal and no
+  more: no formula reads the data a program halts with (neither modality
+  reads a revert's data), and the object is in the callee's frame, which
+  its revert discards, so the caller's goal has no term for its bytes.
+  Premises about it would need a modality over revert outcomes.
+- A fresh object's bytes read in the clause cost `sol_close` past its
+  heartbeats when the premises read bytes too (`symbolicCustom` reads the
+  length); `sol_decide` does not read `allocAll` (it would need an atom of
+  an object's contents in `LTm`/`AEnv`).
+- The callback reading: an `allocAll` goal whose rest may call back has
+  no `ProvesC` rule (`Calculus/Callback.lean` gives none); where nothing
+  calls back the walk goes on by `ProvesC.plain`.
 - `Panic` data: a self-call's panic binds the transaction's code (`1`
   without one) as before; the model panics on `assert` (`0x01`) and on an
   overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the
   other codes (`0x12` division, `0x21` enum, `0x32` index, `0x41`
   allocation, `0x51` function value) are reverts in the model, with no data.
-  A raw `catch (bytes memory d)` of a callee that may panic has the `false`
-  goal (its data is the transaction's code).
+  A raw `catch (bytes memory d)` of a callee that may panic has the
+  any-bytes goal only (its data is the transaction's code; `Panic`'s
+  selector then a word would be a `Pat`, not done).
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
 - The callback reading (`ValidT`): `catchData` forks when its callee or
