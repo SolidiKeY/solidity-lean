@@ -3,6 +3,7 @@ import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.Sound
 import Solidity.Calculus.UpdateRules
 import Solidity.Semantics.NativeDeferredCallback
+import Solidity.Semantics.CallbackFrame
 
 /-!
 # The calculus with callbacks is sound
@@ -165,15 +166,6 @@ section Rules
 
 variable {I : Fml C []} {m : Modality} {Γ Γ' Γ₁ Γ₀ : Ctx} {σ : State C Γ}
   {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
-
-/-- A sequence that pays nothing runs with callbacks as it runs. -/
-theorem ExecP.of_run {J : StateInv C} {Δ : Ctx} {τ : State C Δ} {P : Prog C Δ Γ'}
-    (hP : Prog.callsBack J.pay P = false) : ExecP J τ P (.ofRes (Prog.run τ P)) := by
-  rcases Prog.exec_run J P τ with h | h
-  · exact h
-  · have := ExecP.eq_run h hP
-    revert this
-    cases Prog.run τ P <;> exact fun h => nomatch h
 
 /-- Two outcomes that end alike, up to the halt, are read alike after the
 frames. -/
@@ -971,11 +963,9 @@ theorem ExecS.callNone_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name} {ar
     (he : ExecS J σ (.call f args .none body) o) :
     ∃ u, ExecP J σ (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) u ∧
       o = u.map (Out.drop (Ext.append Γ ps)) := by
-  cases he with
-  | det h => exact nomatch h
-  | callArgs ha => exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
-  | @callBody _ _ _ _ _ _ _ _ _ _ a o' ha hp =>
-    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop ps Γ) (σ.withEnv a)
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop ps Γ) (σ.withEnv a)
       (TEnv.append ps a σ.env) hp
     have hb := ExecS.transport (H := σ.H)
       (X := (σ.withEnv a).lift (Thin.atop ps Γ) (TEnv.append ps a σ.env))
@@ -1015,11 +1005,8 @@ theorem ExecS.call_inv {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {ar
     (∃ e, args.evalT σ = .error e ∧ o = .halt e) ∨
     ∃ (a : TEnv C σ.H ps) (o' : COut C (ret.enterT (σ.withEnv a)).st.H Γf),
       args.evalT σ = .ok a ∧ ExecP J (ret.enterT (σ.withEnv a)).st body o' ∧
-      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) := by
-  cases he with
-  | det h => exact nomatch h
-  | callArgs ha => exact .inl ⟨_, ha, rfl⟩
-  | callBody ha hp => exact .inr ⟨_, _, ha, hp, rfl⟩
+      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) :=
+  ExecS.call_cases he
 
 /-- **A call of several results, with callbacks, is its inlined body**
 (`Premise.sound_callRets`' program): the parameters declared, the return
@@ -1101,7 +1088,391 @@ theorem holdsC_callNone {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State
   obtain ⟨u, hu, rfl⟩ := ExecS.callNone_inline he
   exact COut.thenF_drop _ (h _ hu)
 
+/-- **A call of one value, with callbacks, is its inlined body**
+(`Premise.sound_callVal`'s program): the parameters declared, the return
+variable at its default, the body lifted under them as a block, the result
+assigned to its target, the frame popped. -/
+theorem ExecS.callVal_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
+    {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))} {body : Prog C ([.val p] ++ ps) Γf}
+    {o : COut C σ.H Γ} (he : ExecS J σ (.call f args (.val p r res) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declLocal p r none)
+        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res)))) u ∧
+      o = u.map (Out.drop (.push (Ext.append Γ ps))) := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · have hp' : ExecP J (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.val p :: ps) Γ)
+      (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a))
+      (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env) hp'
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv (Δ := .val p :: ps) (PrimTy.dflt p, a)).lift
+        (Thin.atop (.val p :: ps) Γ)
+        (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env))
+      (Y := σ.withEnv (TEnv.append (.val p :: ps) (PrimTy.dflt p, a)
+        σ.env)) rfl rfl
+      (State.withEnv_append_lift (ps := .val p :: ps) σ (PrimTy.dflt p, a)).symm
+      (block_of_execP hw)
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps a σ.env))
+      (s := .declLocal p r none) rfl (Stmt.runSt_declLocal_none p r _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.val p :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    cases o' with
+    | halt e =>
+      exact ⟨.halt e, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.halt hb)), rfl⟩
+    | violated =>
+      exact ⟨.violated, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.violated hb)), rfl⟩
+    | ok x =>
+      let y := (Out.drop body.ext x).lift (Thin.atop (.val p :: ps) Γ)
+        (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env)
+      have hb' : ExecS J (σ.withEnv (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env))
+          (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (.ok y) := hb
+      have ht := ExecP.of_run (J := J) (τ := y.st)
+        (P := (Prog.callResult res : Prog C (.val p :: (ps ++ Γ)) _)) (by cases res <;> rfl)
+      refine ⟨_, Args.execP_declsThen args _ σ a ha
+        (by simpa only [map_cat_refl] using ExecP.cons hd (ExecP.cons hb' ht)), ?_⟩
+      cases res with
+      | none =>
+        refine congrArg COut.ok (Out.eq_of_st ?_)
+        simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop,
+          State.withEnv, CallRet.leaveT, y]
+        erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
+      | some j =>
+        refine congrArg COut.ok (Out.eq_of_st ?_)
+        rw [show (Ext.append Γ ps).push = Ext.append Γ (LTy.val p :: ps) from rfl]
+        simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop,
+          State.withEnv, State.setLocal, show (j.under ps).there = j.under (LTy.val p :: ps) from rfl,
+          TEnv.drop_set_under, CallRet.leaveT, y]
+        erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
+        rfl
+
+/-- **A call of a storage reference, with callbacks, is its inlined body**
+(`Premise.sound_callStorage`'s program): the parameters declared, the
+return alias unset, the body lifted under them as a block, the parameters
+thinned out from under the alias. -/
+theorem ExecS.callStorage_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+    {o : COut C σ.H (.alias R :: Γ)} (he : ExecS J σ (.call f args (.storage R r) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declStorage R r none)
+        (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil))) u ∧
+      o = u.map fun x => ⟨x.st.thin (.keep (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · have hp' : ExecP J (σ.withEnv (Δ := .alias R :: ps) (none, a)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.alias R :: ps) Γ)
+      (σ.withEnv (Δ := .alias R :: ps) (none, a))
+      (TEnv.append (.alias R :: ps) (none, a) σ.env) hp'
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv (Δ := .alias R :: ps) (none, a)).lift
+        (Thin.atop (.alias R :: ps) Γ) (TEnv.append (.alias R :: ps) (none, a) σ.env))
+      (Y := σ.withEnv (TEnv.append (.alias R :: ps) (none, a) σ.env)) rfl rfl
+      (State.withEnv_append_lift (ps := .alias R :: ps) σ (none, a)).symm
+      (block_of_execP hw)
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps a σ.env))
+      (s := .declStorage R r none) rfl (Stmt.runSt_declStorage_none R r _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.alias R :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    refine ⟨_, Args.execP_declsThen args _ σ a ha
+      (by simpa only [map_cat_refl] using ExecP.cons hd (singleton_iff.mpr hb)), ?_⟩
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, TRun.callLeave, State.lift, State.drop, State.thin,
+        State.withEnv, CallRet.leaveT]
+      erw [TEnv.thin_put_keepAllAtop (rs := [.alias R]) (r := (none, ()))]
+      rfl
+    | halt => rfl
+    | violated => rfl
+
+/-- **A call of a memory reference, with callbacks, is its inlined body**
+(`Premise.sound_callMem`'s program): the parameters declared, the return
+object allocated at its default, the body lifted under them as a block,
+the parameters thinned out from under the object. -/
+theorem ExecS.callMem_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+    {o : COut C σ.H (.mem R :: Γ)} (he : ExecS J σ (.call f args (.mem R r hd hm) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.declMem R r none hd hm)
+        (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil))) u ∧
+      o = u.map fun x => ⟨x.st.thin (.keep (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
+  rcases ExecS.call_cases he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · let g := (σ.withEnv a).allocDefaultG R hm
+    let τ := σ.withEnv (TEnv.append ps a σ.env)
+    have hp' : ExecP J (g.st.push (t := .mem R) (some g.val)) body o' := hp
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop (.mem R :: ps) Γ)
+      (g.st.push (t := .mem R) (some g.val))
+      (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)) hp'
+    have hY : (g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+          (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)) =
+        (τ.allocDefaultG R hm).st.push (t := .mem R) (some (τ.allocDefaultG R hm).val) := by
+      show _ = ((σ.withEnv (TEnv.append ps a σ.env)).allocDefaultG R hm).st.push (t := .mem R)
+        (some ((σ.withEnv (TEnv.append ps a σ.env)).allocDefaultG R hm).val)
+      rw [State.withEnv_append_lift σ a, State.allocDefaultG_lift]
+      simp only [g, Grew.lift, State.lift, State.push, Thin.atop, State.withEnv, TEnv.put]
+      rfl
+    have hb := ExecS.transport (H := g.st.H)
+      (X := (g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+          (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env)))
+      (Y := (τ.allocDefaultG R hm).st.push (t := .mem R) (some (τ.allocDefaultG R hm).val))
+      rfl rfl hY (block_of_execP hw)
+    obtain ⟨_, hd'⟩ := ExecS.det_ok (J := J) (σ := τ)
+      (s := .declMem R r none hd hm) rfl (Stmt.runSt_declMem_none R r hd hm _)
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop (.mem R :: ps) Γ)) hr).eq_lifted
+    rw [hl] at hb
+    refine ⟨_, Args.execP_declsThen args _ σ a ha (ExecP.cons hd' (singleton_iff.mpr hb)), ?_⟩
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, Out.cat, TRun.callLeave, State.lift, State.drop, State.thin,
+        State.withEnv, CallRet.leaveT]
+      erw [TEnv.thin_keep_put_atop]
+      rfl
+    | halt => rfl
+    | violated => rfl
+
+/-- **A call of one value, with callbacks**: its inlined body, the result
+assigned, the frame popped. -/
+theorem holdsC_callVal {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))}
+    {body : Prog C ([.val p] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declLocal p r none)
+        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res))))
+      (.pop .capture (.push (Ext.append Γ ps)) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.val p r res) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callVal_inline he
+  exact COut.thenF_drop _ (h _ hu)
+
+/-- **A call of a storage reference, with callbacks**: its inlined body, the
+parameters thinned out from under the alias. -/
+theorem holdsC_callStorage {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+    {ω : Prog C (.alias R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declStorage R r none)
+        (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+      (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.storage R r) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callStorage_inline he
+  exact COut.thenF_thin _ (h _ hu)
+
+/-- **A call of a memory reference, with callbacks**: its inlined body, the
+parameters thinned out from under the object. -/
+theorem holdsC_callMem {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+    {ω : Prog C (.mem R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (.cons (.declMem R r none hd hm)
+        (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
+      (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callMem_inline he
+  exact COut.thenF_thin _ (h _ hu)
+
 end Calls
+
+/-! ## A loop by its invariant, with callbacks
+
+`whileInvariantBox` read over the callback runs (`ProvesC.invBox`): every
+loop head is a state the body's frame allows from the first
+(`ExecP.frame`: a callback replaces only the storage and the ledger, which a
+body that calls back may write, `Prog.frame`'s `hv`), so the premise read
+under `{anon(xs)}` (`{havoc}`) holds there (`holdsC_anonHavoc`); the
+invariant holds at every head by induction over the iterations
+(`ExecS.loop_box`: the typed run's where the body calls nobody back,
+`CallbackUnwk.LoopExec`'s otherwise).  Under the box only: a loop whose body
+calls back may diverge (`ExecS.loopDiverge`), which no diamond accepts
+(`holdsC_diamond_loop`). -/
+
+section Inv
+
+variable {I : Fml C []} {J : StateInv C}
+
+/-- **A state in a loop body's frame is one its anonymised premise covers**,
+with callbacks (`holds_anonHavoc`). -/
+theorem holdsC_anonHavoc {Γ : Ctx} {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Bool} {W : List (LTy × Nat)}
+    (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
+    (hg : TGFrame (frameMut hv) σ τ) (ha : TLocAgree 0 W σ.env τ.env) {ψ : Fml C Γ}
+    (h : holdsC I pay σ (Fml.anonHavoc xs hv ψ)) : holdsC I pay τ ψ := by
+  obtain ⟨b, hb⟩ := State.eq_anonHavoc hxs hg ha
+  cases hv with
+  | false =>
+    have hk := hg.keeps (by simp only [frameMut]; decide)
+    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2]; rfl
+    rw [hτ]
+    exact h b
+  | true =>
+    rw [hb]
+    exact h b τ.storage τ.net
+
+/-- **Induction over a loop's callback runs**, under the box: `P` holds at
+the first head and at every head an iteration from a head in `P` goes on
+in, where the condition is `true`; where it is `false`, `Q` holds. -/
+theorem ExecS.loop_box {Γ Γb : Ctx} {a : LoopAnn C Γ} {c : Val C Γ .bool} {body : Prog C Γ Γb}
+    {σ : State C Γ} (P Q : State C Γ → Prop) (h0 : P σ)
+    (hexit : ∀ τ, P τ → c.evalT τ = .ok false → Q τ)
+    (hstep : ∀ τ, P τ → c.evalT τ = .ok true → ∀ o, ExecP J τ body o →
+      (o.map (Out.drop body.ext)).after .box P) :
+    ∀ o, ExecS J σ (.loop a c body) o → o.after .box Q := by
+  intro o he
+  cases hb : body.callsBack J.pay with
+  | false =>
+    rw [ExecS.eq_run_of_forksIn he hb]
+    show (COut.ofRes (TLoop.run (fun o : Out C σ.H Γ => (Prog.run o.st body).map
+      fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+      (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩)).after .box Q
+    refine TLoop.run_induct (P := fun x : Out C σ.H Γ => P x.st)
+      (Q := fun r => (COut.ofRes r).after .box Q) h0 (fun x hx => ?_) ⟨trivial, nofun⟩
+    unfold TLoop.step
+    dsimp only
+    cases hc : c.evalT x.st with
+    | error e =>
+      refine ⟨trivial, fun h => ?_⟩
+      cases h
+      exact Val.evalT_noPanic x.st c hc
+    | ok v =>
+      cases v with
+      | false => exact hexit _ hx hc
+      | true =>
+        have hs := hstep _ hx hc _ (ExecP.of_run (J := J) (τ := x.st) (P := body) hb)
+        dsimp only
+        cases hr : Prog.run x.st body with
+        | error e => rw [hr] at hs; exact hs
+        | ok y => rw [hr] at hs; exact hs
+  | true =>
+    have hl : CallbackUnwk.LoopExec J a c body σ o := CallbackUnwk.asLoop he
+    clear he
+    induction hl with
+    | det hf => exact absurd (hb.symm.trans hf) (by decide)
+    | halt _ hc =>
+      refine ⟨trivial, fun h => ?_⟩
+      cases h
+      exact Val.evalT_noPanic _ c hc
+    | exit _ hc => exact hexit _ h0 hc
+    | @iter τ υ o' _ hc hp _ ih =>
+      have h1 : P (υ.st.drop body.ext) := hstep _ h0 hc _ hp
+      exact (COut.after_map_cat _ _ Q).2 (ih h1)
+    | @stop τ o' _ hc hp hn =>
+      have h1 := hstep _ h0 hc _ hp
+      cases o' with
+      | ok => cases hn
+      | halt e => exact h1
+      | violated => exact h1.elim
+    | diverge _ => exact ⟨trivial, nofun⟩
+
+/-- A run through no frame: its outcome read after it. -/
+theorem COut.thenF_nil {H : HTy} {Γ : Ctx} {m : Modality} {p : State C Γ → Prop}
+    (o : COut C H Γ) (h : o.thenF J .nil m p) : o.after m p := by
+  cases o with
+  | ok o => exact h _ .nil
+  | halt _ => exact h
+  | violated => exact h
+
+/-- **`whileInvariantBox` with callbacks**: the invariant now ("invariant
+initially valid"); from every state the body's frame allows where it holds,
+the body to the invariant where the condition holds ("body preserves
+invariant"), the rest where it does not ("use case"); with a break test, a
+body that broke goes on to the rest. -/
+theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Option (Val C Γ .uint)}
+    {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool} {body : Prog C Γ Γb}
+    {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Bool} {k : Nat} (hf : body.frame = some (xs, hv)) {σ : State C Γ}
+    (hI : holdsC I pay σ ((invFml Iv qs).invHyp (loopBreak brk c)))
+    (hX : holdsC I pay σ (Fml.anonHavoc xs hv (.imp ((invFml Iv qs).invHyp (loopBreak brk c))
+      (.upd .box (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+        (.and (.imp (.isBool (.pvV (p := .bool) .here) true)
+          (.upd .box (Upd.nil.pop (.push .refl)) (Fml.modalK .box body (.pop .block body.ext .nil)
+            (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))))
+          (.imp (.isBool (.pvV (p := .bool) .here) false)
+            (.upd .box (Upd.nil.pop (.push .refl)) (Fml.modalK .box ω κ φ)))))))) :
+    holdsC I pay σ (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ) := by
+  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  have hB := breakTest_loopBreak brk c
+  -- the premise at a head the frame allows, the condition read
+  have hY : ∀ τ : State C Γ, TGFrame (frameMut hv) σ τ →
+      TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env →
+      holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c)) → ∀ v : Bool, c.evalT τ = .ok v →
+      (v = true → holdsC I pay τ (Fml.modalK .box body (.pop .block body.ext .nil)
+          (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))) ∧
+      (v = false → holdsC I pay τ (Fml.modalK .box ω κ φ)) := by
+    intro τ hg hag hIτ v hc
+    have hcl : (Rhs.val (p := .bool) c.lower).eval τ =
+        some (LTy.VDen.ofT (H := τ.H) (.val .bool) v) := by
+      show c.lower.eval τ = _
+      exact Val.lower_eval_ok c τ hc
+    obtain ⟨hT, hF⟩ := (holdsC_anonHavoc hxs hg hag hX hIτ).of_lands
+      (Upd.lands_decl (Upd.lands_nil τ) (fse k) hcl)
+    refine ⟨fun hv => ?_, fun hv => ?_⟩
+    · subst hv
+      exact Upd.afterT.of_lands (hT ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+    · subst hv
+      exact Upd.afterT.of_lands (hF ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+  refine holdsC_cons fun o₁ he => ?_
+  have hL := ExecS.loop_box (J := I.stateInv pay)
+    (P := fun τ => (TGFrame (frameMut hv) σ τ ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
+        holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c))) ∨
+      (c.evalT τ = .ok false ∧ holdsC I pay τ (Fml.modalK .box ω κ φ)))
+    (Q := fun τ => holdsC I pay τ (Fml.modalK .box ω κ φ)) (.inl ⟨TGFrame.refl σ, TLocAgree.refl _, hI⟩)
+    (fun τ hτ hc => by
+      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨_, hR⟩
+      · exact (hY τ hg hag hIτ false hc).2 rfl
+      · exact hR)
+    (fun τ hτ hc o hp => by
+      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨hc', _⟩
+      · have hA := holdsC_modalK τ body _ _ ((hY τ hg hag hIτ true hc).1 rfl) o hp
+        have hA' := COut.thenF_nil _ (COut.thenF_drop _ hA)
+        cases o with
+        | halt e => exact hA'
+        | violated => exact hA'.elim
+        | ok υ =>
+          have hpost : holdsC I pay (υ.st.drop body.ext)
+              (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)) := hA'
+          obtain ⟨hg', ha'⟩ := ExecP.frame hp hwμ 0 υ rfl
+          have hfr : TGFrame (frameMut hv) σ (υ.st.drop body.ext) := hg.trans (hg'.withEnv _)
+          have hag' : TLocAgree 0 (Prog.writesAt 0 body) σ.env (υ.st.drop body.ext).env :=
+            hag.trans ha'
+          show _ ∨ _
+          cases hBr : loopBreak brk c with
+          | none =>
+            rw [hBr] at hpost
+            exact .inl ⟨hfr, hag', hpost⟩
+          | some Bf =>
+            rw [hBr] at hpost
+            obtain ⟨x, rfl, hx⟩ := hB _ hBr
+            by_cases hbk : holdsC I pay (υ.st.drop body.ext)
+                (Fml.isBool (Tm.pvV (p := .bool) x) true)
+            · refine .inr ⟨hx _ (by rw [← (holds_isBool_pvV x _ true).1 hbk]; rfl), ?_⟩
+              exact Upd.afterT.of_lands
+                (hpost.2 (Upd.afterT_intro (fun he => by
+                    have hl := (Upd.lands_pop_nil (C := C) Ext.refl (υ.st.drop body.ext)).1
+                    rw [he] at hl; cases hl)
+                  fun _ σ' hL => (Upd.Lands.eq (Upd.lands_pop_nil _ _) hL) ▸ hbk))
+                (Upd.lands_pop_nil _ _)
+            · refine .inl ⟨hfr, hag', ?_⟩
+              exact ⟨hpost.1 (fun hb' => hbk (Upd.afterT.of_lands hb' (Upd.lands_pop_nil _ _))),
+                hbk⟩
+      · rw [hc'] at hc; cases hc)
+    o₁ he
+  cases o₁ with
+  | ok τ => exact COut.after_seq (holdsC_modalK τ.st ω κ φ hL)
+  | halt e => exact hL
+  | violated => exact hL.elim
+
+/-- **A diamond over a loop whose body calls back never holds**: the loop
+may diverge (`ExecS.loopDiverge`, the over-approximation a box accepts),
+whatever its invariant or variant, so no diamond rule over it is sound
+(`docs/options.md`, O3). -/
+theorem holdsC_diamond_loop {Γ Γb Γ₁ Γ₀ : Ctx} {a : LoopAnn C Γ} {c : Val C Γ .bool}
+    {body : Prog C Γ Γb} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} {σ : State C Γ}
+    (hb : body.callsBack pay = true) :
+    ¬ holdsC I pay σ (.modal .diamond (.cons (.loop a c body) ω) κ φ) := fun h =>
+  nomatch (h _ (.halt (.loopDiverge hb))).1
+
+end Inv
 
 /-! ## Soundness -/
 
@@ -1148,6 +1519,26 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     refine fun σ => Hyps.wrapC_and _ ?_ σ (ihT σ) (ihE σ)
     exact fun τ a b => holdsC_loopExit
       (loopExit_cond _ ((holdsC_iff_holds _ rfl τ).1 b)) (a b)
+  | @invBox Γ Γb Γ₁ Γ₂ H Iv dec brk qs c body ω κ φ xs hv hf _ _ _ ihI ihT ihE =>
+    intro σ
+    let A0 : Fml C Γ := (invFml Iv qs).invHyp (loopBreak brk c)
+    let U : Upd C Γ (.val .bool :: Γ) := Upd.nil.decl
+      (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ)))
+      (.val (p := .bool) c.lower)
+    let cT : Fml C (.val .bool :: Γ) := .isBool (.pvV (p := .bool) .here) true
+    let cF : Fml C (.val .bool :: Γ) := .isBool (.pvV (p := .bool) .here) false
+    let A : Fml C (.val .bool :: Γ) := .upd .box (Upd.nil.pop (.push .refl))
+      (.modalK .box body (.pop .block body.ext .nil)
+        (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))
+    let B : Fml C (.val .bool :: Γ) := .upd .box (Upd.nil.pop (.push .refl)) (.modalK .box ω κ φ)
+    have hX : holdsC I pay σ ((H.anonHavoc xs hv).wrap
+        (.imp A0 (.upd .box U (.and (.imp cT A) (.imp cF B))))) :=
+      (H.anonHavoc xs hv).wrapC_and (φ := .imp A0 (.upd .box U (.imp cT A)))
+        (ψ := .imp A0 (.upd .box U (.imp cF B)))
+        (χ := .imp A0 (.upd .box U (.and (.imp cT A) (.imp cF B))))
+        (fun _ x y hI => Upd.afterT_and (x hI) (y hI) fun _ f g => ⟨f, g⟩) σ (ihT σ) (ihE σ)
+    rw [Hyps.wrap_anonHavoc] at hX
+    exact H.wrapC_and (fun _ a b => holdsC_invBox hf a b) σ (ihI σ) hX
   | capture _ hc _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_capture hc h) σ (ih σ)
   | unfoldReceiver _ _ ih =>
@@ -1173,6 +1564,10 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | block _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_block h) σ (ih σ)
   | callNone _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callNone h) σ (ih σ)
   | callRets _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callRets h) σ (ih σ)
+  | callVal _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callVal h) σ (ih σ)
+  | callStorage _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callStorage h) σ (ih σ)
+  | callMem _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callMem h) σ (ih σ)
   | callback d _ _ ihx ihr =>
     cases d
     exact fun σ => Hyps.wrapC_and _ (fun τ a b => holdsC_transferCb hI hT _ _ a b) σ

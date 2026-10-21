@@ -234,13 +234,31 @@ reading (`ValidT`) on branch `open-reccb` (`rec_auto_c`, row "Callbacks
 | The runner | An obligation with a recursive call (`Frontend/Testing.lean`), plain or a specification's (`cspec`), is stated as `Valid` and proved by `rec_auto` (`Calculus/Recursion.lean`): the strategy up to each recursive call (`sol_symex_rec`), each call by a hypothesis about its body (an induction step's frame below), else by its callee's contract from the source (`recSpecContract`), else by `true`/`true`; a contract by induction over the frames at the first of `pure`, `view`, `nonpayable` the body is within (a failure past that is final: a more permissive mutability only weakens "post"); the leaves by `sol_close`, else the specification closer, with `Int.tmod` read as `%` at a nonnegative dividend and `bool` locals split.  Every step has its own heartbeats (`Recursion.tryOn`: the option's `maxHeartbeats`, counted from the step's start), the driver between steps none (it does no search of its own), and the nesting is bounded (fuel 32).  The search (`⊢`) is not run on it: it does no induction.  `functionsRecursiveUnbounded` (`⟨ f(); ⟩ true`) proves unannotated, `tests/solc/Recursion.sol` by its clauses. |
 | Callbacks (O7) | `Calculus/RecursionCallback.lean`.  **A recursion that does not call back**: `callsBack` of a `callRec` is its body's, read off one frame (`sol_no_callback`), so `validT_noCallback_iff` applies and `rec_auto` proves it; past a callee that calls back, `ProvesC.recValid` reads the sequent at a recursive call without callbacks where nothing in it calls back (`holdsC_iff_holds`).  **A recursion that calls back**: `RecContractC` is `RecContract` over the callback runs (`FunContractC`: every `ExecP` run of the body from a frame where `requires` holds keeps the invariant, does not panic and ends where `ensures` holds), proved by the same induction (`RecContractC.unroll`), each frame's obligation by `ProvesC` (`FunContractC.ofProvesC`, through `Prog.exec_wk` under the snapshots); `ProvesC.recContract` (Lean only) proves the call by it, its goals "pre" and "post", sound by `holdsC_callRecContract` with the frame of a callback run (`ExecS.frame`: a callback only replaces the storage and the ledger, which a `nonpayable` body may write).  Both are `ProvesC.recCall`, a recursive call at the head of the box by a lemma about its readings; `ProvesC.havocIntro` takes "post"'s `{havoc}` into the context, and `sol_leaf` closes a leaf that mentions the induction's free frame (`Symex.placeholders`).  `rec_auto_c` is `rec_auto`'s twin on `ValidT`: the walk of `ProvesC` (`sol_prove`), each recursive call it stops at by `recValid`, else by a hypothesis, the source's contract or `true`/`true` at the first of `pure`, `view`, `nonpayable` (`Examples/Tactics/Recursion.lean`: `callThenCount`, `payDownNoPanic`, `payDownAuto`).  The runner proves a recursive row read with callbacks by `rec_auto_c` (`tests/solc/Recursion.sol`'s `callThenCount`, `payDown`). |
 
-**What is left.** Under the callback reading, a contract of a reference
-return (`CallRet.isValues`).  (A recursive body whose `if` has a condition
+**What is left.** A contract of a reference return (`CallRet.isValues`
+under the callback reading; below).  (A recursive body whose `if` has a condition
 that is not a local and a branch that calls back is closed: the capture is
 `ProvesC.capture`, `docs/options.md` O3, and `tests/solc/Recursion.sol`'s
 `payDown` reads `if (a > 0)` directly; `payDownDirect`,
 `Examples/Tactics/Recursion.lean`.)  A recursive
-function of a reference return runs but has no contract.  A contract assumes no invariant
+function of a reference return runs but has no contract, with callbacks or
+without, and the reason is the frame, not the reading: a contract asks its
+body to be within a mutability (`RecContract`, `RecContractC`: "post"
+anonymises the locals the body writes and, `nonpayable`, the storage and
+the ledger, from `Stmt.run_frame`/`ExecS.frame`), and a body that sets a
+reference return is within none (`Stmt.within`).  A memory return is a
+fresh object the body allocates and writes (`declMem`, `assignMem`, a
+recursive call's `CallRet.noMem`), and the frame keeps the heap and its
+typing (`TGFrame.H`, `TGFrame.heap`); "post" would need a heap frame: the
+heap grown, the objects the body may write anonymised, the returned one
+read by `ens` — and no formula havocs the heap (`Fml.havoc` replaces the
+storage and the ledger).  A storage return is an alias the body rebinds
+(`r = xs`, `r = f(n - 1)`: `Stmt.rebind`, outside every mutability), so its
+frame would have to list the alias as a written local and read the path it
+is rebound to, which `Stmt.run_frame` has no case for; "post"'s binder for
+it is there (`Fml.callResult`'s `.storage`), and so is the deterministic
+call rule (`holds_callStorage`), but no contract for it can be proved.  The
+inlined call of either is covered with callbacks (`ProvesC.callStorage`,
+`ProvesC.callMem`, `docs/options.md` O3).  A contract assumes no invariant
 of the contract (`invariant`), so a clause that needs one past a recursive
 call stays open.  `Stmt.within` of a body with two recursive calls of
 itself is exponential in compiled code (`rec_auto` proves it by `simp`,

@@ -143,11 +143,8 @@ theorem call_cases {Γ Γ' ps rs Γf : Ctx} (J : StateInv C) (σ : State C Γ)
     {o : COut C σ.H Γ'} (he : ExecS J σ (.call f args ret body) o) :
     (∃ err, args.evalT σ = .error err ∧ o = .halt err) ∨
     (∃ a u, args.evalT σ = .ok a ∧ ExecP J (ret.enterT (σ.withEnv a)).st body u ∧
-      o = u.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a)))) := by
-  cases he with
-  | det hf => cases hf
-  | callArgs ha => exact .inl ⟨_, ha, rfl⟩
-  | callBody ha hp => exact .inr ⟨_, _, ha, hp, rfl⟩
+      o = u.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a)))) :=
+  ExecS.call_cases he
 
 theorem call_unwk {Γ Γ' ps rs Γf : Ctx} (J : StateInv C) (f : Name) (args : Args C Γ ps)
     (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) : UWkS J (.call f args ret body) := by

@@ -19,9 +19,11 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
   `tryCallSelfBox`'s, read with callbacks (`ProvesC.trySelf`, Lean);
 * a gas-limited send (`pay` unset): `sendNoCallbackBox`'s or
   `sendNoCallbackDiamond`'s goals (`ProvesC.sendDet`, `ProvesC.sendDetD`); a
-  block that calls back: its body (`ProvesC.block`); an internal call with no
-  value returned or with a tuple's (`ProvesC.callNone`, `ProvesC.callRets`):
-  its body inlined; `assertSimple` (`ProvesC.assert`);
+  block that calls back: its body (`ProvesC.block`); an internal call, its
+  body inlined whatever it returns (`ProvesC.callNone`, `ProvesC.callRets`,
+  `ProvesC.callVal`, `ProvesC.callStorage`, `ProvesC.callMem`);
+  `assertSimple` (`ProvesC.assert`); a loop by its invariant under the box
+  (`ProvesC.invBox`);
 * any other statement: the rule `Stmt.step` fires (`ProofTree.ruleAt?`), as
   `Proves` takes it, when the statement hands control to nobody
   (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`);
@@ -32,11 +34,8 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
 What is left is a leaf: `sol_prove` closes a `Proves` leaf by `sol_leaf`
 and `sol_close`, the invariant assumed opened first where that is needed
 (`Proves.openInv`), and leaves the rest as goals.  While something in the
-sequent calls back, these shapes have no rule of `ProvesC` and stay leaves:
-a loop by its invariant (`Proves.inv` has no counterpart), a loop at its
-bound under the diamond, and an internal call that returns one value
-(`y = f(x)`) or a memory or storage one (`Stmt.forksIn` counts every call
-as forking).
+sequent calls back, a loop whose body calls back has no diamond rule: it
+may diverge (`holdsC_diamond_loop`), so such a goal stays a leaf.
 
 Nothing here is trusted: every step is an `apply` the kernel checks.
 -/
@@ -120,8 +119,11 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
             pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
           -- a loop at its unwinding bound, under the box (`loopExit`)
-          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit]]
-          | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
+          -- a loop by its invariant, under the box (`whileInvariantBox`)
+          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit],
+              #[← `(tactic| apply $(← ProofTree.short ``ProvesC.invBox) $rflT)]]
+          | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets],
+              #[← ap ``ProvesC.callVal], #[← ap ``ProvesC.callStorage], #[← ap ``ProvesC.callMem]]
           | _ => pure #[]
         -- the rule `Stmt.step` fires, on a statement that hands control to nobody
         let k := mkAppN (mkConst ``Hyps.freshC) #[ty.getArg! 0, ty.getArg! 3, ty.getArg! 4, I, H, φ]

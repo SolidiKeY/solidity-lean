@@ -20,7 +20,8 @@ their goals labelled by their no-callback twins' labels.
 `ProvesC I pay H φ` is the callback judgement on scoped sequents:
 the ordinary rules on a statement that runs no other and hands control to no
 callee that calls back (`Stmt.forksIn pay`: a `try` and a value call always,
-a `transfer` and a `send` when `pay` is set, `docs/options.md`), a split, the
+a `transfer` and a `send` when `pay` is set, a call where its body does,
+`docs/options.md`), a split, the
 callback taclets with solkey's goals ("invariant on exit", the rest resumed
 under `{havoc}` with the invariant assumed), and the plain calculus
 (`Proves`) on a goal where nothing calls back (`Fml.callsBack pay`); and the
@@ -55,6 +56,13 @@ def Fml.closedAt {Γ : Ctx} (I : Fml C []) : Fml C Γ :=
 too. -/
 def Hyps.freshC {Γ₀ Γ : Ctx} (I : Fml C []) (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) : Nat :=
   H.fresh (.and (Fml.closedAt I) φ)
+
+/-- A call's result assigned to its target, if it has one, under the
+callee's parameters and return variable (`callStep`'s, `Calculus/Blocks.lean`). -/
+def Prog.callResult {Γ ps : Ctx} {p : PrimTy} :
+    Option (Idx Γ (.val p)) → Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ))
+  | none => .nil
+  | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
 
 /-- `ProvesC I pay H φ`: the calculus proves `φ` in the context `H` when a
 callee may call back into a contract with invariant `I`, from every `try`
@@ -202,6 +210,29 @@ not. -/
           (.fresh "se" (H.freshC I (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)))
           (.val (p := .bool) c.lower)) (.isBool (.pvV (p := .bool) .here) false))) :
       ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)
+  /-- **`whileInvariantBox` with callbacks** (`Proves.inv`'s goals, under the
+  box): the invariant now ("invariant initially valid"); from every state
+  the body's frame allows (`{anon(xs)}`, with `{havoc}` when the body may
+  write the storage: a body that calls back pays, so its frame has it), the
+  invariant holding, the body to the invariant where the condition holds
+  ("body preserves invariant"), the rest where it does not ("use case").
+  Whatever the body calls: a callback leaves a state the frame allows. -/
+  | invBox {Γ Γb Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {Iv : Val C Γ .bool}
+      {dec : Option (Val C Γ .uint)} {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool}
+      {body : Prog C Γ Γb} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
+      (hf : body.frame = some (xs, hv))
+      (init : ProvesC I pay Γ₀ H ((invFml Iv qs).invHyp (loopBreak brk c)))
+      (thn : ProvesC I pay Γ₀ ((((H.anonHavoc xs hv).pre ((invFml Iv qs).invHyp (loopBreak brk c))).upd
+          .box (Upd.nil.decl (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body)
+            ω) κ φ))) (.val (p := .bool) c.lower))).pre (.isBool (.pvV (p := .bool) .here) true))
+        (.upd .box (Upd.nil.pop (.push .refl)) (.modalK .box body (.pop .block body.ext .nil)
+          (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))))
+      (els : ProvesC I pay Γ₀ ((((H.anonHavoc xs hv).pre ((invFml Iv qs).invHyp (loopBreak brk c))).upd
+          .box (Upd.nil.decl (fse (H.freshC I (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body)
+            ω) κ φ))) (.val (p := .bool) c.lower))).pre (.isBool (.pvV (p := .bool) .here) false))
+        (.upd .box (Upd.nil.pop (.push .refl)) (.modalK .box ω κ φ))) :
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ)
   /-- **`sendNoCallbackBox`**, a send that does not call back (`pay` unset,
   the 2300-gas stipend): the rest after the booking and `pv := true` ("send
   succeeded"), and after `pv := false` ("send failed"), no `{havoc}`. -/
@@ -240,6 +271,38 @@ not. -/
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
         (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of one value (`y = f(x)`) whose body may
+  call back: the parameters declared, the return variable at its default,
+  the body as a block, the result assigned to its target, the frame popped
+  (`callStep`'s program). -/
+  | callVal {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {p : PrimTy} {r : Var} {res : Option (Idx Γ (.val p))}
+      {body : Prog C ([.val p] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declLocal p r none)
+          (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (Prog.callResult res))))
+        (.pop .capture (.push (Ext.append Γ ps)) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.val p r res) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of a storage reference whose body may
+  call back: the return alias unset, the body as a block, the parameters
+  thinned out from under the alias. -/
+  | callStorage {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+      {ω : Prog C (.alias R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declStorage R r none)
+          (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+        (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.storage R r) body) ω) κ φ)
+  /-- `internalCallExpand` of a call of a memory reference whose body may
+  call back: the return object allocated at its default, the body as a
+  block, the parameters thinned out from under the object. -/
+  | callMem {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {R : RefTy} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+      {hm : (Ty.ref R).mapFree = true} {body : Prog C ([.mem R] ++ ps) Γf}
+      {ω : Prog C (.mem R :: Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (.cons (.declMem R r none hd hm)
+          (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
+        (.drop (.keep (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)
   /-- **`transferWithCallbackBox`**: the invariant after the booking ("invariant
   on exit", `{U} I`), and the rest resumed after the callback, from any state
   the callee may leave in which the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/

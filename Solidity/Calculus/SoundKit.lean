@@ -664,27 +664,15 @@ theorem TRes.eq_of_map_st {H : HTy} {Δ : Ctx} {r r' : TRes (Out C H Δ)}
 /-- A statement that runs no other by a choice and pays nothing has one
 callback run, its typed run. -/
 theorem ExecS.det_inv {Γ Γ' : Ctx} {σ : State C Γ} {J : StateInv C} {s : Stmt C Γ Γ'}
-    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.run σ) := by
-  cases h with
-  | det _ => rfl
-  | catchDataHalt hb _ | catchDataBody hb _ _ =>
-    simp only [Stmt.forks, Bool.or_eq_false_iff] at hs
-    simp only [Prog.callsBack_of_hasTransfer _ hs.1, Prog.callsBack_of_hasTransfer _ hs.2,
-      Bool.or_self, Bool.false_eq_true] at hb
-  | _ =>
-    simp only [Stmt.forks] at hs
-    first
-    | simp only [Bool.true_eq_false] at hs
-    | simp_all only [Prog.callsBack_of_hasTransfer _ hs, Bool.false_eq_true]
+    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.run σ) :=
+  ExecS.eq_run_of_forksIn h (Stmt.forksIn_of_forks hs)
 
 /-- The same, where only a `try` calls back unless `J.pay`
 (`Stmt.forksIn`). -/
 theorem ExecS.detIn_inv {Γ Γ' : Ctx} {σ : State C Γ} {J : StateInv C} {s : Stmt C Γ Γ'}
     {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forksIn J.pay = false) :
-    o = .ofRes (s.run σ) := by
-  cases h with
-  | det _ => rfl
-  | _ => simp_all only [Stmt.forksIn, Bool.true_eq_false, Bool.false_eq_true]
+    o = .ofRes (s.run σ) :=
+  ExecS.eq_run_of_forksIn h hs
 
 /-- **A statement that runs no other by a choice runs with callbacks as a
 branch that pays nothing**, where it runs so without. -/
