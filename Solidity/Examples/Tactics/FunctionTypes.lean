@@ -155,6 +155,20 @@ def Ext : Contract := contract!{
 -- solc's selector of `double(uint256)`
 #guard fnSelector? Ext "double" == some 0xeee97206
 
+/-- A signature's types, read off the markers: an own struct is the tuple
+of its members, an enum `uint8`, a function type `function`. -/
+def Sig : Contract := contract!{
+  struct P { address a; uint8 b; }
+  enum E { A }
+  function g(P memory p, E e, bytes4 s, string memory t, bytes memory u, int16 i,
+      uint8[] memory xs, function (uint) external returns (uint) h) { }
+}
+
+-- solc's signature and selector (`evm.methodIdentifiers`)
+#guard fnSignature? Sig "g" ==
+  some "g((address,uint8),uint8,bytes4,string,bytes,int16,uint8[],function)"
+#guard fnSelector? Sig "g" == some 0xa1570dcc
+
 /-- The last local's value after a run of `P` from `Ext`'s initial state at
 the address `7` (a call to address `0` reverts: no code there). -/
 def runLast {Γ : Ctx} (P : Prog Ext [] (.val .uint :: Γ)) : Option Int :=

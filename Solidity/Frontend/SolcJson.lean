@@ -820,7 +820,18 @@ def isBaseMember (contracts : List Int) (f : Json) : Bool :=
 /-- Is the node a member that names an external function, `r.f` in `r.f(a)`? -/
 def isExternalMember (f : Json) : Bool :=
   J.kind f == "MemberAccess" && (J.tyStr f).startsWith "function " &&
-    ((J.tyStr f).splitOn " external").length > 1
+    ((J.tyStr f).splitOn " external").length > 1 &&
+    -- a struct's member of an external function type is a value, not a call
+    !(J.opt f "expression").any (fun b => (J.tyStr b).startsWith "struct ")
+
+/-- Is the callee a function value that is not a name: a struct's member, an
+element, a call's value, a parenthesised one (`callValueName`)? -/
+def isValueCallee (f : Json) : Bool :=
+  !(J.kind f == "Identifier") && !isExternalMember f && (J.tyStr f).startsWith "function (" &&
+    (["IndexAccess", "FunctionCall", "TupleExpression"].contains (J.kind f) ||
+      (J.kind f == "MemberAccess" &&
+        (J.opt f "expression").any fun b =>
+          (J.tyStr b).startsWith "struct " && !((J.tyStr b).splitOn "[").length > 1))
 
 def isSuperMember (f : Json) : Bool :=
   J.kind f == "MemberAccess" && (J.opt f "expression").any fun receiver =>
@@ -1093,14 +1104,9 @@ partial def call (j : Json) : PM String := do
         pure ((← PM.lift (J.get f "expression")) :: args)
       else pure args
     -- a call through a function value that is not a name (a member, an
-    -- element, a call's value): the grammar calls a name only
-    if !(J.kind f == "Identifier") && !isExternalMember f && !isSuperMember f && !staticBase &&
-        !attached && (J.tyStr f).startsWith "function (" &&
-        (["IndexAccess", "Conditional", "FunctionCall", "TupleExpression"].contains (J.kind f) ||
-          (J.kind f == "MemberAccess" &&
-            (J.opt f "expression").any fun b =>
-              (J.tyStr b).startsWith "struct " && !((J.tyStr b).splitOn "[").length > 1)) then
-      unsupported "a call through a function value that is not a name"
+    -- element, a call's value): the callee printed as an operand, which the
+    -- elaborator captures first (`callValueName`)
+    let valueCallee := !isSuperMember f && !staticBase && !attached && isValueCallee f
     let as ← args.mapM expr
     let name ← if let some n := superName then pure n
       else if staticBase then
@@ -1112,6 +1118,7 @@ partial def call (j : Json) : PM String := do
         let r ← expr (← PM.lift (J.get f "expression"))
         let r := if r.front.isDigit then s!"address({r})" else r
         pure s!"{r}.{← PM.lift (J.str f "memberName")}"
+      else if valueCallee && J.kind f == "FunctionCall" then pure s!"({← expr f})"
       else expr f
     pure s!"{name}({", ".intercalate as})"
   | "structConstructorCall" =>
@@ -2187,8 +2194,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     if J.kind n == "VariableDeclaration" then J.id? n else none
   let heads (f : Json) : List Int := (J.nodes f).filterMap fun n =>
     if J.kind n == "FunctionCall" then (J.opt n "expression").bind J.ref? else none
+  -- `this.g` named as an external value too (`extDispatch` runs `g` when
+  -- declared before the caller)
   let refs (f : Json) : List Int := (J.nodes f).filterMap fun n =>
-    if J.kind n == "Identifier" then (J.ref? n).filter ids.contains else none
+    if J.kind n == "Identifier" || J.kind n == "MemberAccess" then (J.ref? n).filter ids.contains
+    else none
   -- named more often than called: named as a value
   let valuesOf (f : Json) : List Int :=
     let hs := heads f
@@ -2196,7 +2206,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     rs.eraseDups.filter fun r => rs.count r > hs.count r
   let callsValue (f : Json) : Bool := (J.nodes f).any fun n =>
     J.kind n == "FunctionCall" && J.str? n "kind" == some "functionCall" &&
-      (J.opt n "expression").any fun e => J.kind e == "Identifier" && (J.ref? e).any varIds.contains
+      (J.opt n "expression").any fun e =>
+        (J.kind e == "Identifier" && (J.ref? e).any varIds.contains) || isValueCallee e
   -- once per function: its values, and whether it calls through one
   let valueRows : List (Int × List Int × Bool) := funs.filterMap fun f =>
     (J.id? f).map fun i => (i, valuesOf f, callsValue f)
