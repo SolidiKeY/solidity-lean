@@ -782,36 +782,59 @@ open Lean Elab Tactic Meta
 (Lean only: `Calculus/AllLeft.lean`). -/
 def allLeftBudget : Nat := 4
 
-/-- The literal a quoted term indexes with, `(p, v)`, where it is an index
-(`at`, `atIn`, `mat`) at a literal. -/
-def litIndex? (e : Expr) : Option (Expr × Expr) := do
+/-- The length of a quoted context written as a list, `none` otherwise. -/
+partial def ctxLen? (e : Expr) : Option Nat :=
+  if e.isAppOfArity ``List.nil 1 then some 0
+  else if e.isAppOfArity ``List.cons 3 then (ctxLen? (e.getArg! 2)).map (· + 1)
+  else none
+
+/-- The depth of a quoted position (`Idx.there` counted). -/
+partial def idxDepth? (e : Expr) : Option Nat :=
+  if e.isAppOf ``Idx.here then some 0
+  else if e.isAppOfArity ``Idx.there 4 then (idxDepth? (e.getArg! 3)).map (· + 1)
+  else none
+
+/-- The candidate a quoted term indexes with, as a quoted `InstLit`, where it
+is an index (`at`, `atIn`, `mat`) at a literal or at a local (counted from
+the outermost, `InstLit.loc`: a parameter keeps its position below the
+locals pushed after it). -/
+def litIndex? (e : Expr) : Option Expr := do
   let y ← if e.isAppOfArity ``Tm.app2 8 &&
       ((e.getArg! 5).isAppOf ``Op2.at || (e.getArg! 5).isAppOf ``Op2.mat) then some (e.getArg! 7)
     else if e.isAppOfArity ``Tm.app3 10 && (e.getArg! 6).isAppOf ``Op3.atIn then some (e.getArg! 8)
     else none
-  guard (y.isAppOfArity ``Tm.app0 4 && (y.getArg! 3).isAppOfArity ``Op0.lit 3)
-  let o := y.getArg! 3
-  return (o.getArg! 1, o.getArg! 2)
+  if y.isAppOfArity ``Tm.app0 4 && (y.getArg! 3).isAppOfArity ``Op0.lit 3 then
+    let o := y.getArg! 3
+    return mkApp2 (mkConst ``InstLit.lit) (o.getArg! 1) (o.getArg! 2)
+  guard (y.isAppOfArity ``Tm.pvV 4)
+  let n ← ctxLen? (y.getArg! 1)
+  let d ← idxDepth? (y.getArg! 3)
+  guard (d < n)
+  return mkApp (mkConst ``InstLit.loc) (mkNatLit (n - 1 - d))
+
+/-- A quoted premise that is a `∀`, or a conjunction with one. -/
+partial def hasAll (a : Expr) : Bool :=
+  a.isAppOf ``Fml.all || (a.isAppOfArity ``Fml.and 4 && (hasAll (a.getArg! 2) || hasAll (a.getArg! 3)))
 
 /-- `allLeft`'s instances for the leaf `H ⊢ φ` (both quoted): the literals
-the leaf indexes with, at most `allLeftBudget` of them, as a quoted
-`List InstLit`; `none` where `H` has no `∀` premise or the leaf no such
-literal. -/
+and the locals the leaf indexes with, at most `allLeftBudget` of them, as a
+quoted `List InstLit`; `none` where `H` has no `∀` premise (or a conjunction
+with one) or the leaf no such index. -/
 def allLeftLits (H φ : Expr) : MetaM (Option Expr) := do
-  unless (H.find? fun e => e.isAppOfArity ``Hyps.pre 5 && (e.getArg! 4).isAppOf ``Fml.all).isSome do
+  unless (H.find? fun e => e.isAppOfArity ``Hyps.pre 5 && hasAll (e.getArg! 4)).isSome do
     return none
-  let acc ← IO.mkRef (#[] : Array (Expr × Expr))
+  let acc ← IO.mkRef (#[] : Array Expr)
   for e in [H, φ] do
-    forEachExpr e fun x => do
+    -- not inside a `∀`'s body: its own index is its bound variable
+    forEachExpr' e fun x => do
+      if x.isAppOf ``Fml.all then return false
       if let some l := litIndex? x then
         let ls ← acc.get
         if ls.size < allLeftBudget && !ls.contains l then acc.set (ls.push l)
+      return true
   let ls ← acc.get
   if ls.isEmpty then return none
-  let ty := mkConst ``InstLit
-  let mk (l : Expr × Expr) : Expr :=
-    mkApp4 (mkConst ``Sigma.mk [0, 0]) (mkConst ``PrimTy) (mkConst ``PrimTy.Denote) l.1 l.2
-  return some (← mkListLit ty (ls.toList.map mk))
+  return some (← mkListLit (mkConst ``InstLit) ls.toList)
 
 /-- `sol_leaf` on the main goal, a leaf `H ⊢ φ` of the outer scope:
 `Proves.closeValid`, the goal left `⊨ ψ` with `ψ` the wrapped sequent

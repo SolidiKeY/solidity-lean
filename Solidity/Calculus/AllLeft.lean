@@ -30,41 +30,114 @@ namespace Solidity
 
 variable {C : Contract}
 
-/-- A literal of some value type: a candidate instance. -/
-abbrev InstLit : Type := (p : PrimTy) × p.Denote
+/-- A candidate instance: a literal of some value type, or the local at the
+position `n` counted from the outermost (a parameter the leaf indexes with:
+pushing locals leaves its position), read at the binder's type. -/
+inductive InstLit : Type where
+  | lit (p : PrimTy) (v : p.Denote)
+  | loc (n : Nat)
 
-/-- `{\subst x; v}φ`: the instance of `∀ p x. φ` at the literal `v`; `none`
-where `Fml.substU` does not read the body. -/
-def Fml.instLit {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) (v : p.Denote) :
+/-- The `n`th local of `Γ`, where it is a value of type `p`. -/
+def Idx.valAt? : (Γ : Ctx) → (p : PrimTy) → Nat → Option (Idx Γ (.val p))
+  | [], _, _ => none
+  | .val q :: _, p, 0 => if h : q = p then some (h ▸ .here) else none
+  | _ :: _, _, 0 => none
+  | _ :: Γ, p, n + 1 => (Idx.valAt? Γ p n).map .there
+
+/-- `{\subst x; t}φ`: the instance of `∀ p x. φ` at the term `t` of the
+premise's scope; `none` where `Fml.substU` does not read the body. -/
+def Fml.instTm {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) (t : Tm C Γ (.val p)) :
     Option (Fml C Γ) :=
-  Fml.substU ((Upd.nil : Upd C Γ Γ).decl x (.val (.app0 (.lit v)))) φ
+  Fml.substU ((Upd.nil : Upd C Γ Γ).decl x (.val t)) φ
 
-/-- **An instance of a premise that holds holds** (`allLeft`). -/
+/-- `{\subst x; v}φ`: the instance at the literal `v`. -/
+abbrev Fml.instLit {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) (v : p.Denote) :
+    Option (Fml C Γ) :=
+  Fml.instTm x p φ (.app0 (.lit v))
+
+/-- **An instance of a premise that holds holds** (`allLeft`), at a term
+that returns `v`. -/
+theorem Fml.instTm_holds {Γ : Ctx} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
+    {t : Tm C Γ (.val p)} {φ' : Fml C Γ} (h : Fml.instTm x p φ t = some φ') (σ : State C Γ)
+    {v : p.Denote} (hv : (Rhs.val t).eval σ = some (LTy.VDen.ofT (H := σ.H) (.val p) v))
+    (hall : holds σ (.all x p φ)) : holds σ φ' :=
+  (Fml.substU_holds (Upd.lands_decl (Upd.lands_nil σ) x hv) φ h).2 (hall v)
+
 theorem Fml.instLit_holds {Γ : Ctx} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
     {v : p.Denote} {φ' : Fml C Γ} (h : Fml.instLit x p φ v = some φ') (σ : State C Γ)
     (hall : holds σ (.all x p φ)) : holds σ φ' :=
-  (Fml.substU_holds (Upd.lands_decl (Upd.lands_nil σ) x (v := v) rfl) φ h).2 (hall v)
+  Fml.instTm_holds h σ (v := v) rfl hall
 
-/-- The instances of `∀ p x. φ` at the literals `ts` of its type. -/
+/-- The instance of `∀ p x. φ` at the candidate `c`, where it has the
+binder's type. -/
+def Fml.instAt {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
+    InstLit → Option (Fml C Γ)
+  | .lit q v => if h : q = p then Fml.instLit x p φ (h ▸ v) else none
+  | .loc n => if n < Γ.length then
+      (Idx.valAt? Γ p (Γ.length - 1 - n)).bind fun i => Fml.instTm x p φ (.pvV i)
+    else none
+
+theorem Fml.instAt_holds {Γ : Ctx} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
+    (c : InstLit) {φ' : Fml C Γ} (h : Fml.instAt x p φ c = some φ') (σ : State C Γ)
+    (hall : holds σ (.all x p φ)) : holds σ φ' := by
+  cases c with
+  | lit q v =>
+    simp only [Fml.instAt] at h
+    split at h
+    · exact Fml.instLit_holds h σ hall
+    · cases h
+  | loc n =>
+    simp only [Fml.instAt] at h
+    split at h
+    · obtain ⟨i, -, h⟩ := Option.bind_eq_some_iff.1 h
+      exact Fml.instTm_holds h σ rfl hall
+    · cases h
+
+/-- The instances of `∀ p x. φ` at the candidates `ts` of its type. -/
 def Fml.instances {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ))
     (ts : List InstLit) : List (Fml C Γ) :=
-  ts.filterMap fun t => if h : t.1 = p then Fml.instLit x p φ (h ▸ t.2) else none
+  ts.filterMap (Fml.instAt x p φ)
 
-/-- The instances of a premise: none unless it is a `∀`. -/
+/-- The instances of a premise: a `∀`'s, and a conjunction's conjuncts'. -/
 def Fml.instancesOf {Γ : Ctx} (ts : List InstLit) : Fml C Γ → List (Fml C Γ)
   | .all x p φ => Fml.instances x p φ ts
+  | .and a b => Fml.instancesOf ts a ++ Fml.instancesOf ts b
   | _ => []
 
-theorem Fml.instancesOf_holds {Γ : Ctx} (ts : List InstLit) (a : Fml C Γ) (σ : State C Γ)
-    (ha : holds σ a) : ∀ b ∈ a.instancesOf ts, holds σ b := by
-  cases a with
-  | all x p φ =>
-    intro b hb
+theorem Fml.instancesOf_holds {Γ : Ctx} (ts : List InstLit) : (a : Fml C Γ) → (σ : State C Γ) →
+    holds σ a → ∀ b ∈ a.instancesOf ts, holds σ b
+  | .all x p φ, σ, ha, b, hb => by
     obtain ⟨t, -, ht⟩ := List.mem_filterMap.1 hb
-    split at ht
-    · exact Fml.instLit_holds ht σ ha
-    · cases ht
-  | _ => intro b hb; cases hb
+    exact Fml.instAt_holds t ht σ ha
+  | .and a b, σ, ha, c, hc => by
+    rcases List.mem_append.1 hc with hc | hc
+    · exact Fml.instancesOf_holds ts a σ ha.1 c hc
+    · exact Fml.instancesOf_holds ts b σ ha.2 c hc
+  | .tt, _, _, _, hb | .eq _ _, _, _, _, hb | .wellFormed _, _, _, _, hb | .not _, _, _, _, hb
+  | .imp _ _, _, _, _, hb | .upd _ _ _, _, _, _, hb | .modal _ _ _ _, _, _, _, hb
+  | .havoc _, _, _, _, hb | .bind _ _ _ _, _, _, _, hb | .anon _ _, _, _, _, hb
+  | .allocAll _ _ _, _, _, _, hb => by cases hb
+
+/-- What a premise with instances keeps beside them: its conjuncts that are
+not a `∀` with an instance. -/
+def Fml.instRest {Γ : Ctx} (ts : List InstLit) : Fml C Γ → List (Fml C Γ)
+  | .and a b => Fml.instRest ts a ++ Fml.instRest ts b
+  | a => if (a.instancesOf ts).isEmpty then [a] else []
+
+theorem Fml.instRest_holds {Γ : Ctx} (ts : List InstLit) : (a : Fml C Γ) → (σ : State C Γ) →
+    holds σ a → ∀ b ∈ a.instRest ts, holds σ b
+  | .and a b, σ, ha, c, hc => by
+    rcases List.mem_append.1 hc with hc | hc
+    · exact Fml.instRest_holds ts a σ ha.1 c hc
+    · exact Fml.instRest_holds ts b σ ha.2 c hc
+  | .tt, _, ha, _, hb | .eq _ _, _, ha, _, hb | .wellFormed _, _, ha, _, hb | .not _, _, ha, _, hb
+  | .imp _ _, _, ha, _, hb | .upd _ _ _, _, ha, _, hb | .modal _ _ _ _, _, ha, _, hb
+  | .havoc _, _, ha, _, hb | .bind _ _ _ _, _, ha, _, hb | .anon _ _, _, ha, _, hb
+  | .allocAll _ _ _, _, ha, _, hb | .all _ _ _, _, ha, _, hb => by
+    unfold Fml.instRest at hb
+    split at hb
+    · rw [List.mem_singleton.1 hb]; exact ha
+    · cases hb
 
 /-- The premises `as` added to the context, the first one first. -/
 def Hyps.pres {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) : List (Fml C Γ) → Hyps C Γ₀ Γ
@@ -86,7 +159,7 @@ theorem holds_foldr_imp {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
 /-- A premise in the context as `allLeftHide` leaves it: a `∀` with an
 instance at `ts` replaced by its instances, any other premise kept. -/
 def Fml.instOrSelf {Γ : Ctx} (ts : List InstLit) (a : Fml C Γ) : List (Fml C Γ) :=
-  if (a.instancesOf ts).isEmpty then [a] else a.instancesOf ts
+  if (a.instancesOf ts).isEmpty then [a] else a.instRest ts ++ a.instancesOf ts
 
 theorem Fml.instOrSelf_holds {Γ : Ctx} (ts : List InstLit) (a : Fml C Γ) (σ : State C Γ)
     (ha : holds σ a) : ∀ b ∈ a.instOrSelf ts, holds σ b := by
@@ -95,7 +168,10 @@ theorem Fml.instOrSelf_holds {Γ : Ctx} (ts : List InstLit) (a : Fml C Γ) (σ :
   · intro b hb
     rw [List.mem_singleton.1 hb]
     exact ha
-  · exact Fml.instancesOf_holds ts a σ ha
+  · intro b hb
+    rcases List.mem_append.1 hb with hb | hb
+    · exact Fml.instRest_holds ts a σ ha b hb
+    · exact Fml.instancesOf_holds ts a σ ha b hb
 
 /-- **`allLeftHide` on a context**: each `∀` premise replaced by its
 instances at the literals `ts` (kept where it has none). -/

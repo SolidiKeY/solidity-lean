@@ -395,7 +395,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'memoryParamPanics', 'memoryWraps', 'modifierParam', 'pushArithInRange', 'pushArithPanics',
     'ternaryAliasPanics', 'ternaryAliasInRange', 'ternaryArgumentPanics',
     // its elements' range is a premise (`Problem.callPre`), instantiated (`allLeftHide`)
-    'abiElementInRange',
+    'abiElementInRange', 'abiElementAtParameter',
     // push arithmetic inside `unchecked` wraps at the element's width
     'pushArithUncheckedWraps', 'pushArithUncheckedAdds', 'pushDecrementUncheckedWraps',
     'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
