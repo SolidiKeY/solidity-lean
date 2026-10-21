@@ -541,3 +541,17 @@ existing program changes shape: data is computed only in self-call
 callees.
 
 **Status.** (updated as slices land)
+- Slice 1, the run and the calculus: landed.  `THalt.revertWith`,
+  `ExtResult.error`/`.other` payloads, `Semantics/RevertData.lean` (the
+  `Error`/`Panic` encodings and decoders, `customSelector`),
+  `Stmt.revertData`, `Stmt.catchData` (`TRun.catchBytes`,
+  `TRun.litBytesT`), the self-call dispatch on the data (`TRun.tryCall`),
+  the rules `revertDataBox`/`revertDataDiamond`/`catchDataBox`/
+  `catchDataDiamond` (`catchDataStep`, `Stmt.revertDatas`), sound by
+  `sound_revertData` and `Premise.sound_catchDataBox`
+  (`Calculus/SoundCatch.lean`, from `Prog.run_dataS`,
+  `Calculus/DataIn.lean`); every run lemma, typing invariant, callback
+  reading (`ExecS.catchDataHalt`/`catchDataBody`, the self-call `try`
+  constructors now read the callee's data) and the EVM proof carry the two
+  statements.  `stmt_sim` stays within its 11000 heartbeats: the statements
+  outside the fragment are ruled out by one lemma (`stmt_sim_outside`).
