@@ -314,11 +314,19 @@ ABI symbol, and solkey's `docs/limitations.md` lists `keccak256`, `abi.*`
 among what it refuses (`No KeYSolidityType for bytes32`).  The model
 follows solc.
 
-**`keccak256` is an uninterpreted function of the bytes.**  It is
-`keccakBytes : List Int → uint` (`Semantics/Heap.lean`), an `opaque`
-constant (not an axiom: the kernel knows it exists and never unfolds it),
-applied to a memory array's elements (`Heap.keccak`, `MObj.words`).  A proof
-can use only that it is a function: equal byte sequences hash equal.  In the
+**`keccak256` is Keccak-256 of the bytes** (lane `open-k2`).  It is
+`keccakBytes : List Int → uint` (`Semantics/Heap.lean`), defined from
+`Keccak.keccak256Nat` (`Keccak.lean`, the hash the elaborator folds
+selectors with, written so that the kernel evaluates it: lanes as `Nat`s,
+structural recursion only), applied to a memory array's elements
+(`Heap.keccak`, `MObj.words`).  It is `@[irreducible]`: the closers and
+`simp` read a hash as an atom, a function of its bytes, and never start
+computing one; a proof that wants the hash of literal bytes evaluates it in
+the kernel (`decide +kernel`, under a second for one block:
+`Examples/Tactics/Hashing.lean`, `keccakAbc`).  `#run` computes the real
+hash, so `bytes4(keccak256("f(uint256)"))` is `this.f.selector` (`Sel`; the
+elaborator reads `keccak256(…)` as a `bytes32`, `bytesOf?`, so `bytes4(…)`
+keeps its high bytes).  In the
 syntax it is `Val.keccak` (`Syntax/Scoped.lean`), in the signature the
 binary symbol `Op2.keccak : mem × ident R → val uint` (`Signature.lean`),
 read in the Theory as the typed evaluation (the memory island, as `size`
@@ -332,14 +340,14 @@ copied first), the hash into a fresh `bytes32`.
 *Collision resistance is not assumed.*  It cannot be stated as injectivity
 (a function from all byte strings into `2^256` values has collisions, so
 `∀ a b, keccak a = keccak b → a = b` is false and would make every claim
-vacuous).  A proof that needs two particular inputs to hash apart takes
-`keccakBytes a ≠ keccakBytes b` as a premise, for those two.  So the model
-proves what holds for every function of the bytes, and no more: two
-different strings may land on one slot of a string-keyed mapping, as two
-colliding strings would in solc.
-
-*`#run`* computes a stand-in (`keccakStandIn`, an FNV-style fold) so that it
-tells inputs apart; it is not Keccak-256, and no proof sees it.
+vacuous).  A proof that needs two particular symbolic inputs to hash apart
+takes `keccakBytes a ≠ keccakBytes b` as a premise, for those two; two
+literal inputs it may hash by evaluation instead.  So the closers prove what
+holds for every function of the bytes: two different strings may land on
+one slot of a string-keyed mapping, as two colliding strings would in solc.
+Soundness does not rest on the hash being Keccak (an argument for every
+function of the bytes holds for this one); the real function only adds the
+facts evaluation gives.
 
 **The closers.**  `keccak256(memory, b)` is total (`Op2.total`): an
 identity that names no object hashes `0`, which no program reads.
@@ -394,9 +402,8 @@ loop):
   signature read off its parameters' markers (`fnSignature?`: `address`,
   `bytesN`, `string`/`bytes`, an enum `uint8`, a struct as its members'
   tuple, a function type `function`).  A signature that is not a literal is
-  hashed at run time: the first four bytes of its uninterpreted `keccak256`.
-  The run-time hash and the folded one are not shown equal (`keccakBytes`
-  is opaque), which costs completeness, not soundness.
+  hashed at run time: the first four bytes of its `keccak256`, the same
+  function, so the two agree (`#run`; a proof evaluates a literal's hash).
 - `abi.decode(d, (T, …))` of value types: `d` at least `32·n` bytes, each
   word read back; a word out of `T`'s range reverts as solc's decoder does
   (a high byte not `0`, or not the sign's, a `bool` above `1`).  A `bytes`
@@ -415,7 +422,14 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 
 **Left open.**
 - The `⟨⟩` closer on a locally built byte string's hash, and literal
-  strings hashed equal across allocations (above).
+  strings hashed equal across allocations (above): both need a closer
+  clause that reads an object's bytes back off the memory term's writes
+  (all literal, at literal indices, covering its length) into a literal
+  list; with it, the hash's argument returns and, the hash now being
+  computable, its value is `keccakBytes` of that list, evaluated inside the
+  closer's kernel-evaluated test.  No semantic gap remains; the clause is
+  not written (`MemRead.lean` reads one address at a time, not an object's
+  whole contents).
 - `abi.decode` of arrays and structs: the grammar writes no type that is not
   a name in `abi.decode(d, (T))` (`uint[]` is not an expression), and the
   import prints only elementary types there.
@@ -425,7 +439,11 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   the runner proves no such obligation (no invariant), so they are run
   (`Codec2`, `Examples/Tactics/Hashing.lean`); `abi.encodePacked` of a
   symbolic `address` writes its 20 bytes through shifts the closer does not
-  read back (an enum's member, a literal, does).
+  read back (an enum's member, a literal, does): a byte `(a >> 8k) % 256` of
+  a symbolic `a` is an atom to `sol_decide`, and reassembling the word from
+  its bytes (`Σ b_k · 256^k = a`) is nonlinear arithmetic the closer's
+  linear fragment (`Calculus/LinearDecision.lean`) does not decide; no
+  solkey taclet reads it (KeY has no byte layout).  Left open.
 - `abi.encodeCall` of a function this contract does not declare (an
   interface's): its signature is not known to `sol{}`.
 - `sha256`, `ripemd160`, `ecrecover`.
@@ -522,9 +540,12 @@ function.
   (`extCallStmt`).  The model's checks: `Examples/Tactics/FunctionTypes.lean`
   §3 runs them (`viaThis(3)` is `6` through the self-call) and pins the
   signature of a function of every marked type against solc's selector.
-  The closer does not read `(address(this) * 2^32 + s) / 2^32` back to
-  `address(this)` (`ExternalFunctionTypes.externalValue` pending): a closer
-  limit, not a semantic one.
+  The closer reads `(address(this) * 2^32 + s) / 2^32` back to
+  `address(this)` (`Facts.cancelDiv`, Lean only: `(a * k + c) / k` is `a` at
+  `uint` for literals `0 ≤ c < k` where the sum returns), so
+  `ExternalFunctionTypes.externalValue` is proved, under the box (lane
+  `open-k2`; the call through `h` is a `try`, which has no diamond rule: it
+  was pending under the default diamond before the quotient was read).
 - *A dispatch that recurses*: a call through a value is a call of each
   function it may reach (`FunDecl.valueCallees`: the functions of the
   callee's type a value may name, every function named as a value where the
@@ -658,19 +679,56 @@ callees.
   raw data; the run on a concrete state), `tests/solc/RevertData.sol`
   (three functions proved).
 
+**Custom errors** (lane `open-k2`): landed.  `error E(uint8 a, address b);`
+is kept as a declaration of its parameters (`Contract.errors`, a `FunDecl`
+with no body, its width rows the markers a signature is read from).
+`revert E(a, b)` and `require(c, E(a))` are `RawStmt.revertErr`/
+`requireErr`: as before where no `try` reads the data (`revert();`,
+`RawStmt.requireWith`), and in a self-call's callee `Stmt.revertData` with
+`E`'s selector folded as solc folds it (`errorSignature?`, the canonical
+signature off the markers, `revertErrParts`; `customSelector` is the
+Keccak-256 one, `RevertBytes.lean`), then each argument's ABI word, a
+literal's folded to its bytes so that `Stmt.revertDatas` reads the datum.
+The solc import prints the `ErrorDefinition`s, the contract's and the
+file's (`errorMembers`), and a `RevertStatement` as `revert E(…)`.  Tests:
+`tests/solc/RevertData.sol` `customSelector` (`F()`'s four bytes) and
+`customData` (`E(7)`: the selector `0x002ff067` and the word, 36 bytes, read
+through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
+(`customData`, the run of `require(x > 3, E(x))`).
+
 **Left open, with the reason.**
 - Another contract's reason (`ExtResult.error r`, `.other d`): the run binds
-  it, but the calculus's goal is `false` — a reason is any bytes, and no
-  formula quantifies a fresh memory object of any contents.  Lifting it
-  needs a binder over byte strings (a new `Fml` constructor, or the
-  heap-extension invariance of `holds`).
-- Custom errors: `revert E(a)` and `require(c, E(a))` still drop their data
-  (`RevPart.sel`/`.word` and `customSelector` are in the run and the rule,
-  `Stmt.revertDatas` reads a non-literal datum as unknown, so a `catch` of
-  one has the `false` goal); the elaborator does not write them yet, nor
-  does the solc import read a `RevertStatement`.
+  it, but the calculus's goal is `false`.  The reason is any bytes, a fresh
+  memory object of any contents, and no formula ranges over one: the hidden
+  binder at a memory type (`Fml.bind`, `Calculus/Logic.lean`) ranges over
+  the references of the *current* heap (decision 17'), and the
+  heap-extension invariance of `holds` the slice named does not give it
+  either — `holds σ (bind x φ)` says nothing of an object the heap does not
+  hold yet, and after the allocation the binder ranges over one object more,
+  so monotonicity goes the wrong way for the binder itself.  What it needs:
+  a binder `Fml.allocAll x φ` ("for every byte list, `φ` after allocating
+  it"), its `holds` clause and soundness, a `Proves` rule that introduces it
+  and a memory atom for an object of unknown contents the leaf reduction
+  reads (`Fml.toLS`, `MemRead.lean`: a length and bytes as atoms), and an
+  arm in every formula fold (`Step`, `ChainKit`, `SeqRewrite`, `AllLeft`,
+  the printers and quoters).  Not done in lane `open-k2`.
 - A reason that is not a literal (`revert(string.concat(…))`, a rethrown
-  `bytes`): the run carries it, the rule's goal is `false`.
+  `bytes`): `sol{}` writes `revert("…")` of a literal only, and `RevPart`
+  has no memory part; even with one, the datum is an object of the
+  *callee's* heap, which the caller's goal cannot name once the frame is
+  gone: the binder above again.
+- Data with symbolic *words* (a custom error's argument that is not a
+  literal, `require(x > 3, E(x))`; a callee that may panic, whose data is
+  `Panic` and the transaction's code) has the `false` goal for a `catch
+  (bytes memory d)`.  This one is expressible without a new binder: a goal
+  per datum *pattern* (literal bytes and word slots), a value binder per
+  word slot (`Branch`'s binders), the datum allocated with the slot's bytes
+  as `(w >> 8k) % 256`; `TRes.DataS` (`Calculus/DataIn.lean`) would read
+  "matches a pattern of `S`" instead of "is in `S`", and
+  `Premise.sound_catchDataBox` instantiate the binders with the run's words.
+  Not done in lane `open-k2`; a `catch Error(string memory r)` of such a
+  callee is unaffected (its `Error` datum is literal, the custom one does
+  not decode as `Error`).
 - `Panic` data: a self-call's panic binds the transaction's code (`1`
   without one) as before; the model panics on `assert` (`0x01`) and on an
   overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the

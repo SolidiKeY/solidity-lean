@@ -293,7 +293,8 @@ verified EVM compiler fragment. Their regression and imported proof are
 
 `LeanTaclet.keccakAssignment` (`v = keccak256(mpath)` is
 `{ v := keccak256(memory, mpath) }`, `Op2.keccak`) has no solkey taclet:
-solkey has no hash (`docs/semantic-gaps.md`, "Hashing and the ABI").
+solkey has no hash (`docs/semantic-gaps.md`, "Hashing and the ABI"); the hash
+is Keccak-256 (`keccakBytes`, `Keccak.lean`), kept from unfolding.
 **Lean-only**, excluded from `Stmt.inSolkey` (`Val.keyValue`) and from the
 EVM compiler's fragment.
 
@@ -520,6 +521,7 @@ storage has the shape its contract declares, so no clause reads a layout.
 | `polySimp_*` on `(a + b) - b`, `(a - b) + b` | closer clauses `Facts.cancel`, `Facts.cancelAdd` | partly | the sum or difference cancelled to `a` where it returns |
 | — (KeY's polynomial normal form) | closer clause `isTwo` in `Facts.fold2` (`evalT_two_mul`) | Lean only | `2 * a` read as `a + a`: both check the one integer `2·a` against the range |
 | — | closer clause `Facts.ltSucc` | Lean only | `a < a + c` for a positive literal `c` reads `true` where the sum returns |
+| — | closer clause `Facts.cancelDiv` | Lean only | `(a * k + c) / k` read as `a` at `uint` for literals `0 <= c < k` where the sum returns (`Facts.cancelDiv_eval`): an external function value `address * 2^32 + selector` read back to its address (`docs/semantic-gaps.md`, "Function types") |
 | — (a guard is Lean's) | closer clause `kiteBool?` | Lean only | `c = true ? true : false` read as `c` |
 | — (a guard is Lean's) | closer clauses `kiteAssert`, `assertArg?`, `Facts.addAsserts` | Lean only | a guard `kite(c, true, a, err)` that returns, like `assert(c)`, gives the premise `c = true` |
 | `inEqSimp_*` on differences, `polySimp_*` in general | — | open | no bound on `y - x` for two symbolic terms, no polynomial normal form |
