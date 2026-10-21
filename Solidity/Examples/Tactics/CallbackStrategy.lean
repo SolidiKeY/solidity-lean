@@ -206,6 +206,21 @@ example :
       true } := by
   sol_derive?
 
+/-! ## A loop whose body calls back
+
+Unwound (`whileUnwind`, `ProvesC.capture` with `Stmt.CapturesAs.loop`: the
+loop runs as its unwinding, or diverges, which the box accepts) to its
+bound (`loopExit`, `ProvesC.loopExit`). -/
+
+/-- Two pings, each a value call. -/
+theorem pingTwice :
+    ValidC pingInv dl[Pinger]{ fails <= pings →
+      [ uint i = 0;
+        /// @custom:key unwind 2
+        while (i < 2) { (bool ok, ) = to.call{value: 1}(""); i = i + 1; }; ]
+        fails <= pings } := by
+  sol_prove
+
 /-! ## The invariant a specification declares
 
 `invariant[C]` is `C`'s `invariant` clauses as the `Invariant C` a callee

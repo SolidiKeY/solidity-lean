@@ -1,5 +1,6 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.CallbackSound
+import Solidity.Calculus.WalkSyntax
 
 /-!
 # The strategy with callbacks: `sol_derive` and `sol_prove` on `ValidT`
@@ -113,6 +114,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               .$(mkIdent `tryCallWithCallbackBox):ident)
             pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
+          -- a loop at its unwinding bound, under the box (`loopExit`)
+          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit]]
           | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
           | _ => pure #[]
         -- the rule `Stmt.step` fires, on a statement that hands control to nobody
@@ -123,7 +126,10 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
             match ctorC? c with
             | some (cC, n) =>
               let rule := mkIdent (Lean.Name.mkSimple r.getString!)
-              let d ← if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
+              -- `whileUnwind`'s mode is read off the loop (`core_while_unwind`)
+              let d ← if r == ``Taclet.whileUnwind then
+                  `(term| (.$(mkIdent `key):ident (by core_while_unwind)))
+                else if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
                 else `(term| (.$(mkIdent `lean):ident .$rule:ident))
               let rfls := (List.replicate n rflT).toArray
               let f ← ProofTree.short cC
