@@ -909,4 +909,6 @@ test("callbacks: value calls through a function and loops of them, by their inva
   assert.equal(status.loopOfValueCalls, "proved");
   assert.equal(status.storageLostThroughCall, "pending");
   assert.equal(status.storageLostInLoop, "pending");
+  // a loop whose body is a `try`, by its invariant (the `try`'s frame)
+  assert.equal(status.loopOfTries, "proved");
 });

@@ -62,4 +62,24 @@ contract CallbackCalls {
         }
         assert(pings == 0);
     }
+
+    function tick(uint x) external pure returns (uint) {
+        return x + 1;
+    }
+
+    // a loop whose body is a `try` by its invariant: the `try` has a frame
+    // (`Stmt.within`), its clauses' writes and the callee's havoc
+    /// @custom:key box
+    function loopOfTries(address p, uint n) public {
+        uint i = 0;
+        /// @custom:key invariant i <= n
+        while (i < n) {
+            try CallbackCalls(p).tick(i) returns (uint r) {
+                i = i + 1;
+            } catch {
+                i = i + 1;
+            }
+        }
+        assert(i == n);
+    }
 }
