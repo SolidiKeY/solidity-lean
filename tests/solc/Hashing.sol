@@ -9,12 +9,20 @@ pragma solidity ^0.8.0;
 contract Hashing {
     mapping(string => uint) ids;
 
-    // one string hashed twice: the hash is a function (under the box: the
-    // closer does not show a locally built string's hash returns)
-    /// @custom:key box
+    // one string hashed twice: the hash is a function; under the diamond
+    // the closer reads the bytes off the memory and evaluates the hash
     function equalStringsHashEqual() public pure {
         string memory s = "ab";
         assert(keccak256(bytes(s)) == keccak256(bytes(s)));
+    }
+    function literalHash() public pure {
+        bytes memory b = "abc";
+        assert(keccak256(b) == bytes32(0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45));
+    }
+    function twoAllocationsHashEqual() public pure {
+        bytes memory b = "ab";
+        bytes memory c = "ab";
+        assert(keccak256(b) == keccak256(c));
     }
     function hashParameter(bytes memory b) public pure {
         assert(keccak256(b) == keccak256(b));
@@ -23,6 +31,26 @@ contract Hashing {
         bytes memory e = abi.encode(uint16(258), true, uint8(0x12));
         assert(e.length == 96 && e[30] == 0x01 && e[31] == 0x02 && e[63] == 0x01 &&
             e[95] == 0x12 && e[0] == 0);
+    }
+    // a symbolic address written byte by byte, read back (`hornerU?`,
+    // `modShrModU?`, `Calculus/Closer.lean`)
+    function packedAddressBytes(address a) public pure {
+        bytes memory e = abi.encodePacked(a);
+        assert(uint8(e[19]) == uint8(uint160(a)));
+    }
+    // eight bytes reassembled by Horner's rule (an address's twenty are past
+    // the closer's bounds, `Seq.closeSize`)
+    function packedWordReassembled(uint64 x) public pure {
+        bytes memory e = abi.encodePacked(x);
+        uint r = uint8(e[0]);
+        r = r * 256 + uint8(e[1]);
+        r = r * 256 + uint8(e[2]);
+        r = r * 256 + uint8(e[3]);
+        r = r * 256 + uint8(e[4]);
+        r = r * 256 + uint8(e[5]);
+        r = r * 256 + uint8(e[6]);
+        r = r * 256 + uint8(e[7]);
+        assert(r == x);
     }
     function encodePacked() public pure {
         bytes memory e = abi.encodePacked(uint16(258), true, bytes2("ab"));
@@ -80,6 +108,15 @@ contract Hashing {
     }
     function ripemd160Parameter(bytes memory b) public pure {
         assert(ripemd160(b) == ripemd160(b));
+    }
+    // of a byte string built here, under the diamond: evaluated (`keccakAt`)
+    function sha256Literal() public pure {
+        bytes memory b = "abc";
+        assert(sha256(b) == bytes32(0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad));
+    }
+    function ripemd160Literal() public pure {
+        bytes memory b = "abc";
+        assert(uint160(ripemd160(b)) == 814647003348588794217809277549781461204094028796);
     }
     // `ecrecover`: the precompile's 128 bytes, an address, uninterpreted where
     // the signature is well formed (`ecrecoverBytes`); run in

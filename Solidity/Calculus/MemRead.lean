@@ -2425,6 +2425,244 @@ theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (
 
 end Walk
 
+/-! ## The hash of a byte string read off the memory (Lean only)
+
+Where a byte string's length and every byte read down the memory to
+literals (`lenAtN`, `memReadN`), a hash of it (`keccak256`, `sha256`,
+`ripemd160`: `HashKind.apply`) is that function of
+those bytes, which the kernel evaluates; no solkey taclet reads a hash
+(solkey's `keccak256` is uninterpreted). -/
+
+section Keccak
+
+variable {g : State C []} {ν : AEnv}
+
+/-- The literal a term comes to where it returns: a literal, under at most
+`n` sequences or guards (`guardL`'s `kite c true a err`).  By recursion on
+`n`, so that the kernel evaluates it. -/
+def LTm.litInN {p : PrimTy} : Nat → LTm C (.val p) → Option p.Denote
+  | 0, _ => none
+  | n + 1, t =>
+    match t with
+    | .app0 (.lit v) => some v
+    | .seq _ a => LTm.litInN n a
+    | .kite _ _ t e => if e.isErr then LTm.litInN n t else none
+    | _ => none
+
+/-- `litInN` within the memory's fuel. -/
+def LTm.litIn? {p : PrimTy} (t : LTm C (.val p)) : Option p.Denote := LTm.litInN memFuel t
+
+theorem LTm.litInN_eval {p : PrimTy} (n : Nat) : ∀ (t : LTm C (.val p)) {v : p.Denote},
+    LTm.litInN n t = some v → ∀ {x : p.Denote}, (t.eval g ν : Option p.Denote) = some x → x = v := by
+  induction n with
+  | zero => intro t v h; cases h
+  | succ n ih =>
+    intro t v h x hx
+    unfold LTm.litInN at h
+    split at h
+    · cases h
+      exact (Option.some.inj hx).symm
+    · rename_i d a
+      rw [LTm.eval_seq] at hx
+      cases hd : d.eval g ν with
+      | none => rw [hd] at hx; cases hx
+      | some _ =>
+        rw [hd, Option.bind_some] at hx
+        exact ih a h hx
+    · rename_i q a b t e
+      split at h
+      · rename_i he
+        rw [LTm.eval_kite] at hx
+        cases ha : (a.eval g ν : Option q.Denote) with
+        | none => rw [ha] at hx; cases hx
+        | some u =>
+          rw [ha, Option.bind_some] at hx
+          cases hb : (b.eval g ν : Option q.Denote) with
+          | none => rw [hb] at hx; cases hx
+          | some w =>
+            rw [hb, Option.bind_some] at hx
+            split at hx
+            · exact ih t h hx
+            · rw [LTm.eval_of_isErr g ν he] at hx; cases hx
+      · cases h
+    · cases h
+
+theorem LTm.litIn?_eval {p : PrimTy} (t : LTm C (.val p)) {v : p.Denote} (h : t.litIn? = some v)
+    {x : p.Denote} (hx : (t.eval g ν : Option p.Denote) = some x) : x = v :=
+  LTm.litInN_eval memFuel t h hx
+
+/-- The bytes `i, i+1, …, i+k-1` of the byte string `t` in `X`, each read
+down the memory (`memReadN`) to a literal. -/
+def keccakWords (rd : PrimTy.uint.Denote → Option PrimTy.uint.Denote) :
+    Nat → Nat → Option (List PrimTy.uint.Denote)
+  | 0, _ => some []
+  | k + 1, i =>
+    match rd (uintOfNat i) with
+    | some v =>
+      match keccakWords rd k (i + 1) with
+      | some vs => some (v :: vs)
+      | none => none
+    | none => none
+
+/-- The most bytes a hash is read for. -/
+def keccakMaxBytes : Nat := 64
+
+/-- **The hash of a byte string read off the memory** (Lean only): where
+its length and every byte read down the memory to literals, the hash `k` is
+evaluated on them (`HashKind.apply`); where the memory does not return, the
+symbol as it was. -/
+def keccakAt (k : HashKind) (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) : LTm C (.val .uint) :=
+  match (lenAtN memFuel X t).litIn? with
+  | some n =>
+    if n.1.toNat ≤ keccakMaxBytes then
+      match keccakWords (fun iv => (memReadN memFuel X (.app2 (.mat .dyn) t (.lit iv))).litIn?)
+          n.1.toNat 0 with
+      | some vs => .orElse (.seq (seqMemL X (lenAtN memFuel X t))
+          (.lit (k.apply (vs.map (·.1))))) (.app2 (.hash k) X t)
+      | none => .app2 (.hash k) X t
+    else .app2 (.hash k) X t
+  | none => .app2 (.hash k) X t
+
+/-- `keccakAt` at a byte string, the symbol elsewhere; any hashing builtin `k` (`HashKind.apply`). -/
+def keccakRes (k : HashKind) {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) : LTm C (.val .uint) :=
+  match R, t with
+  | .array (.prim .uint), t => keccakAt k X t
+  | _, t => .app2 (.hash k) X t
+
+theorem eval_read_mat (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))))
+    (iv : PrimTy.uint.Denote) (μ : Grown g.H (fun _ => Unit)) (id : Nat)
+    (hX : X.eval g ν = some μ) (ht : t.eval g ν = some id) :
+    ((LTm.app2 .read X (.app2 (.mat .dyn) t (.lit iv))).eval g ν : Option PrimTy.uint.Denote) =
+      (HRef.ofId? μ.H' (.array (.prim .uint)) id).bind fun r => μ.heap.index r .dyn iv := by
+  rw [LTm.eval_app2, LTm.eval_app2, hX, ht]
+  show (μ.readT (MAddrT.index id .dyn iv)) = _
+  unfold Grown.readT
+  rw [MAddrT.resolve_eq_resolveM]
+  simp only [MAddrT.resolveM]
+  cases HRef.ofId? μ.H' (.array (.prim .uint)) id <;> rfl
+
+theorem eval_mlen_some (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint))))
+    {ℓ : PrimTy.uint.Denote} (h : ((LTm.app2 .mlen X t).eval g ν : Option PrimTy.uint.Denote) = some ℓ) :
+    ∃ μ id r, X.eval g ν = some μ ∧ t.eval g ν = some id ∧
+      HRef.ofId? μ.H' (.array (.prim .uint)) id = some r ∧ μ.heap.lenU r = ℓ := by
+  rw [LTm.eval_app2, Op2.eval_eq_evalM] at h
+  cases hX : X.eval g ν with
+  | none => rw [hX] at h; cases h
+  | some μ =>
+    cases ht : t.eval g ν with
+    | none => rw [hX, ht] at h; cases h
+    | some id =>
+      rw [hX, ht] at h
+      change (HRef.ofId? μ.H' (.array (.prim .uint)) id).bind (fun r => some (μ.heap.lenU r)) =
+        some ℓ at h
+      cases hr : HRef.ofId? μ.H' (.array (.prim .uint)) id with
+      | none => rw [hr] at h; cases h
+      | some r =>
+        rw [hr] at h
+        exact ⟨μ, id, r, rfl, rfl, hr, Option.some.inj h⟩
+
+theorem keccakWords_spec (rd : PrimTy.uint.Denote → Option PrimTy.uint.Denote) (k : Nat) :
+    ∀ (i : Nat) (vs : List PrimTy.uint.Denote), keccakWords rd k i = some vs →
+      vs.length = k ∧ ∀ (j : Nat) (hj : j < vs.length), rd (uintOfNat (i + j)) = some vs[j] := by
+  induction k with
+  | zero =>
+    intro i vs h
+    cases h
+    exact ⟨rfl, fun j hj => absurd hj (Nat.not_lt_zero _)⟩
+  | succ k ih =>
+    intro i vs h
+    unfold keccakWords at h
+    cases hv : rd (uintOfNat i) with
+    | none => rw [hv] at h; cases h
+    | some v =>
+      rw [hv] at h
+      cases hws : keccakWords rd k (i + 1) with
+      | none => rw [hws] at h; cases h
+      | some ws =>
+        rw [hws] at h
+        cases h
+        obtain ⟨hlen, hall⟩ := ih (i + 1) ws hws
+        refine ⟨by simp only [List.length_cons, hlen], ?_⟩
+        intro j hj
+        cases j with
+        | zero => exact hv
+        | succ j =>
+          have := hall j (by simp only [List.length_cons] at hj; omega)
+          rw [show i + (j + 1) = i + 1 + j by omega]
+          exact this
+
+theorem keccakAt_eval (k : HashKind) (X : LTm C .mem) (t : LTm C (.ident (.array (.prim .uint)))) :
+    (keccakAt k X t).eval g ν = (LTm.app2 (.hash k) X t).eval g ν := by
+  unfold keccakAt
+  split
+  · rename_i n hn
+    split
+    · split
+      · rename_i vs hvs
+        rw [LTm.eval_orElse]
+        cases hL : ((LTm.seq (seqMemL X (lenAtN memFuel X t))
+            (.lit (k.apply (vs.map (·.1))))).eval g ν : Option PrimTy.uint.Denote) with
+        | none => rfl
+        | some x =>
+          show some x = _
+          rw [LTm.eval_seq, seqMemL_eval, LTm.eval_seq] at hL
+          cases hX : X.eval g ν with
+          | none => rw [hX] at hL; cases hL
+          | some μ =>
+            rw [hX, Option.bind_some] at hL
+            cases hℓ : ((lenAtN memFuel X t).eval g ν : Option PrimTy.uint.Denote) with
+            | none => rw [hℓ] at hL; cases hL
+            | some ℓ =>
+              rw [hℓ] at hL
+              simp only [Option.bind_some] at hL
+              have hx : x = k.apply (vs.map (·.1)) := (Option.some.inj hL).symm
+              have hℓn := LTm.litIn?_eval _ hn hℓ
+              rw [lenAtN_eval memFuel X t μ hX] at hℓ
+              obtain ⟨μ', id, r, hX', ht, hr, hlen⟩ := eval_mlen_some X t hℓ
+              rw [hX] at hX'
+              cases hX'
+              obtain ⟨hvl, hall⟩ := keccakWords_spec _ _ 0 vs hvs
+              -- the object's bytes are `vs`
+              have hE : MObj.elems .dyn (μ.heap.get r) = vs := by
+                have hl : (MObj.elems .dyn (μ.heap.get r)).length = n.1.toNat := by
+                  have h1 : (μ.heap.lenU r).1 = ((μ.heap.len r .dyn : Nat) : Int) := rfl
+                  rw [hlen, hℓn] at h1
+                  unfold Heap.len at h1
+                  omega
+                apply List.ext_getElem (by rw [hl, hvl])
+                intro j h1 h2
+                have hrd := hall j h2
+                rw [Nat.zero_add] at hrd
+                have e := eval_read_mat (g := g) (ν := ν) X t (uintOfNat j) μ id hX ht
+                rw [← memReadN_eval memFuel] at e
+                rw [hr, Option.bind_some] at e
+                unfold Heap.index at e
+                have hj : (uintOfNat j).1.toNat = j := by
+                  have hn256 := uint_lt n
+                  have hjn : j < n.1.toNat := hl ▸ h1
+                  rw [uintOfNat_val (by omega)]; rfl
+                rw [hj, List.getElem?_eq_getElem h1] at e
+                exact LTm.litIn?_eval _ hrd e
+              rw [LTm.eval_app2, hX, ht, hx]
+              show some (k.apply (vs.map (·.1))) = some (μ.hashId k _ id)
+              unfold Grown.hashId
+              rw [hr]
+              show _ = some (k.apply (MObj.words _ (μ.heap.get r)))
+              rw [← hE, MObj.elems_dyn]
+              rfl
+      · rfl
+    · rfl
+  · rfl
+
+theorem keccakRes_eval (k : HashKind) {R : RefTy} (X : LTm C .mem) (t : LTm C (.ident R)) :
+    (keccakRes k X t).eval g ν = (LTm.app2 (.hash k) X t).eval g ν := by
+  unfold keccakRes
+  split
+  · exact keccakAt_eval k X _
+  · rfl
+
+end Keccak
+
 /-! ## The pass -/
 
 section Pass
@@ -2438,6 +2676,7 @@ def _root_.Solidity.Op2.memRes {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y 
   | .read, X, b => memReadN memFuel X b
   | .iread, X, b => memIReadN memFuel X b
   | .mlen, X, t => seqMemL X (lenAtN memFuel X t)
+  | .hash k, X, t => keccakRes k X t
   | o, x, y => .app2 o x y
 
 theorem Op2.memRes_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
@@ -2451,6 +2690,7 @@ theorem Op2.memRes_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C
     cases hx : (x.eval g ν : Option (Grown g.H (fun _ => Unit))) with
     | none => rw [LTm.eval_app2_none _ _ _ hx]; rfl
     | some μ => exact lenAtN_eval memFuel x y μ hx
+  case hash k => simp only [Op2.memRes]; exact keccakRes_eval k x y
   all_goals simp only [Op2.memRes]
 
 /-- `LTm.memRes`'s compiled twin. -/

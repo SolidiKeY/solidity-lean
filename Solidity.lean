@@ -143,6 +143,7 @@ import Solidity.Calculus.Hyp
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.CloseLemmas
+import Solidity.Calculus.CloseNonlin
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseScoped
 import Solidity.Calculus.CloseFrame

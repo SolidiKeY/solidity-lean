@@ -1,6 +1,7 @@
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.CloseLemmas
+import Solidity.Calculus.CloseNonlin
 
 /-!
 # Closing the first-order goal: `sol_close`
@@ -140,7 +141,13 @@ macro "sol_close" : tactic => `(tactic|
            | omega
            | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
                Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])))
+               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
+      -- last, where nothing above closed and a product of two non-literal
+      -- integers is left: solkey's `multiply_2_inEq0` of their atoms' bounds
+      -- (`Calculus/CloseNonlin.lean`)
+      | (sol_close_nonlin
+         grind [Int.tmod_lt_of_pos, Int.lt_tmod_of_pos, Int.tmod_nonneg, Close.tmod_nonpos,
+           Int.tdiv_eq_ediv_of_nonneg])))
 
 /-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
 evaluators unfolded over a deployment's storage. -/

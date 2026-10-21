@@ -19,8 +19,8 @@ contract Recursion {
         return n + sum(n - 1);
     }
 
-    // open: the step is nonlinear (`n + (n - 1) * n / 2`), which the closer
-    // (`omega`, `grind`) does not prove, so neither does the caller
+    // the step is nonlinear (`n + (n - 1) * n / 2`), its range checks bound
+    // `n * (n + 1)`: solkey's `multiply_2_inEq0` (`Calculus/CloseNonlin.lean`)
     function sumThree() public pure { assert(sum(3) == 6); }
 
     // a sum the closer proves: `x + n`, one at a time

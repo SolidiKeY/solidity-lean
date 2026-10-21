@@ -619,3 +619,22 @@ none can by the cheap routes:
   value-naming reduction): under the diamond each refutation proves every
   allocation's landing obligation, and those terms double with each write
   that reads the memory twice.
+
+**Lane `open-closer` (2026-10-21), the runner on the four again** (after
+the closer's nonlinear, byte and hash clauses; `node scripts/test-solidity.mjs
+--json --no-build --function f`, wall time with the build cached):
+
+| Function | Result | Wall |
+|---|---|---:|
+| `pushNoArgs2dLoop` | error, timeout at `whnf` (200000 heartbeats) | 55 s |
+| `binomialFaithfulRowsSmall` | error, timeout "after its 8192-step stage" | 57 s |
+| `binomialRowsNine` | error, timeout "after its 8192-step stage" | 58 s |
+| `multiArrayFillByPushLoops` | error, timeout "after its 512-step stage" | 38 s |
+
+None is within reach of a closer clause: the first is the walk's kernel
+check (465k heartbeats of a 200k budget, above), the binomials the
+unshared memory terms of their refutations, and `multiArrayFillByPushLoops`
+the unknown lengths of recycled slots its guards read (its search now
+stops after the 512-step stage, in 38 s, where `a97fba7f` stopped after the
+1024-step one in 112 s; still a timeout).  What is left stays the list
+above.

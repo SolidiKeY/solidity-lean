@@ -47,6 +47,43 @@ theorem hashString : ⊨ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(by
   sol_symex
   sol_decide
 
+/-- **Under the diamond**: the closer reads the byte string off the memory
+(its length and each byte down the writes, all literal: `keccakAt`,
+`Calculus/MemRead.lean`, Lean only) and evaluates the hash, so it returns. -/
+theorem hashTwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes32 h = keccak256(b);
+    bytes32 g = keccak256(b); ⟩ h == g } := by
+  sol_symex
+  sol_decide
+
+/-- Hashes evaluated in the closer: `keccak256("abc")` is its Keccak-256,
+and two allocations of `"ab"` hash equal. -/
+def LocalHash : Contract := contract!{
+  function abc() {
+    bytes memory b = "abc";
+    bytes32 h = keccak256(b);
+    assert(uint(h) == 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45);
+  }
+  function twoAllocations() {
+    bytes memory b = "ab";
+    bytes memory c = "ab";
+    assert(keccak256(b) == keccak256(c));
+  }
+}
+
+section LocalHash
+
+local instance : InContract := ⟨LocalHash⟩
+
+theorem abcHash : ⊨ spec!{abc} := by
+  sol_symex
+  sol_decide
+
+theorem twoAllocations : ⊨ spec!{twoAllocations} := by
+  sol_symex
+  sol_decide
+
+end LocalHash
+
 /-- The hash is Keccak-256: of `"abc"`, by evaluation in the kernel (well
 under a second for an input of one block). -/
 theorem keccakAbc : (keccakBytes [97, 98, 99]).1 =
@@ -131,6 +168,18 @@ theorem sha256Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = sha256(b);
 
 theorem ripemd160Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160(b);
     bytes20 g = ripemd160(b); ] h == g } := by
+  sol_symex
+  sol_decide
+
+/-- Under the diamond, of a byte string built here: read off the memory and
+evaluated (`keccakAt` at the kind, `HashKind.apply`), as `keccak256`. -/
+theorem sha256AbcDiamond : ⊨ dl!{ ⟨ bytes memory b = "abc"; bytes32 h = sha256(b); uint u = uint(h); ⟩
+    u == 0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad } := by
+  sol_symex
+  sol_decide
+
+theorem ripemd160TwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes memory c = "ab";
+    bytes20 h = ripemd160(b); bytes20 g = ripemd160(c); ⟩ h == g } := by
   sol_symex
   sol_decide
 
@@ -355,6 +404,45 @@ returns (7, 2, 105)
 -- an offset past the data reverts, as solc's decoder does
 /-- info: revert -/
 #guard_msgs in #run Codec2.decodeOutOfRange()
+
+/-- **A symbolic word written byte by byte, read back**: `abi.encodePacked`
+writes `uint8(x >> 8k)` per byte; the closer reads a byte back (`x >> 0` as
+`x`, `(t % m) % n` and `((t % 2^m) >> j) % 2^w` narrowed) and reassembles
+Horner's `r * 256 + b` (`hornerU?`, `Calculus/Closer.lean`, Lean only). -/
+def Packed : Contract := contract!{
+  function addressLast(address a) {
+    bytes memory e = abi.encodePacked(a);
+    assert(uint8(e[19]) == uint8(uint160(a)));
+  }
+  function addressFirst(address a) {
+    bytes memory e = abi.encodePacked(a);
+    assert(uint8(e[0]) == uint8(uint160(a) >> 152));
+  }
+  function wordReassembled(uint a) {
+    bytes memory e = abi.encodePacked(uint64(a));
+    uint r = uint8(e[0]); r = r * 256 + uint8(e[1]); r = r * 256 + uint8(e[2]); r = r * 256 + uint8(e[3]); r = r * 256 + uint8(e[4]); r = r * 256 + uint8(e[5]); r = r * 256 + uint8(e[6]); r = r * 256 + uint8(e[7]);
+    assert(r == a % 18446744073709551616);
+  }
+}
+
+section Packed
+
+local instance : InContract := ⟨Packed⟩
+
+theorem addressLast : ⊨ spec!{addressLast} := by
+  sol_symex
+  sol_decide
+
+theorem addressFirst : ⊨ spec!{addressFirst} := by
+  sol_symex
+  sol_decide
+
+/-- Eight bytes reassembled; twenty (an `address`) are past `Seq.closeSize`. -/
+theorem wordReassembled : ⊨ spec!{wordReassembled} := by
+  sol_symex
+  sol_decide
+
+end Packed
 
 -- `abi.decode` of a `uint[]`: its offset, its length, its words (a loop)
 /--
