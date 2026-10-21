@@ -285,4 +285,187 @@ The call is inlined under callbacks (`ProvesC.callRets`). -/
 theorem withdraw_spec : ValidC invariant[Bank] spec[Bank]{withdraw} := by
   sol_prove
 
+/-! ## Calls whose callee calls back
+
+A call forks where its body does (`Stmt.forksIn`): one whose callee pays is
+inlined under callbacks, as `internalCallExpand` inlines it, whatever it
+returns: one value (`ProvesC.callVal`), a storage reference
+(`ProvesC.callStorage`) or a memory one (`ProvesC.callMem`). -/
+
+/-- A pinger whose helpers pay. -/
+def Payer : Contract := contract!{
+  uint pings;
+  uint[] xs;
+  function payOne(address t, uint x) returns (uint) {
+    (bool ok, ) = t.call{value: 1}("");
+    return x + 1;
+  }
+  function payXs(address t) returns (uint[] storage r) {
+    (bool ok, ) = t.call{value: 1}("");
+    r = xs;
+  }
+  function payMem(address t) returns (uint[2] memory r) {
+    (bool ok, ) = t.call{value: 1}("");
+    r[0] = 3;
+  }
+}
+
+/-- `uint y = f(x)` where `f` pays: the result survives the callback. -/
+theorem payOneReturns :
+    ValidT .noCallback dl[Payer]{ [ uint y = payOne(to, 1); assert(y == 2); ] true } := by
+  sol_prove
+
+/-- A storage reference returned past a callback. -/
+theorem payXsReturns :
+    ValidT .noCallback dl[Payer]{ [ uint[] storage s = payXs(to); s.push(1); ] true } := by
+  sol_prove
+
+/-- A memory reference returned past a callback: the callee's write is
+read back (a callback changes no memory). -/
+theorem payMemReturns :
+    ValidT .noCallback dl[Payer]{ [ uint[2] memory s = payMem(to); assert(s[0] == 3); ] true } := by
+  sol_prove
+
+/-! Its walk: the call inlined (`ProvesC.callVal`), the value call's goals. -/
+
+/--
+info: Try this:
+  refine ProvesC.validT ?_
+    try simp only [TransferSem.inv, TransferSem.pay]
+    apply ProvesC.allIntro
+    apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.callVal
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.update (.key .localValueAssign) rfl
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.update (.key .localValueAssign) rfl
+    apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.block
+    apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.send .sendWithCallbackBox
+    · refine ProvesC.plain ?_ rfl
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      exact Proves.closeTrue rfl
+    · refine ProvesC.plain ?_ rfl
+      apply Proves.update (Taclet.step_eq .binopAssignment)
+      refine Proves.updIntro ?_
+      apply Proves.update (Taclet.step_eq .localValueAssign)
+      refine Proves.updIntro ?_
+      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
+      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+      apply Proves.update (Taclet.step_eq .binopAssignment)
+      apply Proves.check (Taclet.step_eq .assertSimple)
+      case thn =>
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      case els =>
+        sol_leaf
+        sol_close
+    · refine ProvesC.plain ?_ rfl
+      apply Proves.update (Taclet.step_eq .binopAssignment)
+      refine Proves.updIntro ?_
+      apply Proves.update (Taclet.step_eq .localValueAssign)
+      refine Proves.updIntro ?_
+      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
+      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+      apply Proves.update (Taclet.step_eq .binopAssignment)
+      apply Proves.check (Taclet.step_eq .assertSimple)
+      case thn =>
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      case els =>
+        sol_leaf
+        sol_close
+-/
+#guard_msgs in
+example : ValidT .noCallback dl[Payer]{ [ uint y = payOne(to, 1); assert(y == 2); ] true } := by
+  sol_derive?
+
+/-! ## A loop by its invariant whose body calls back
+
+`whileInvariantBox` with callbacks (`ProvesC.invBox`): the body's frame
+havocs the storage (it pays), and the invariant reads locals only, which a
+callback keeps. -/
+
+/-- `n` value calls, the counter at `n` after. -/
+theorem pingN :
+    ValidT .noCallback dl[Pinger]{ [ uint n = pings; uint i = 0;
+      /// @custom:key invariant i <= n
+      while (i < n) { (bool ok, ) = to.call{value: 1}(""); i = i + 1; }; assert(i == n); ]
+      true } := by
+  sol_prove
+
+/--
+info: Try this:
+  refine ProvesC.validT ?_
+    try simp only [TransferSem.inv, TransferSem.pay]
+    apply ProvesC.allIntro
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.update (.key .storageRootReadSelect) rfl
+    apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+    apply ProvesC.update (.key .localValueAssign) rfl
+    apply ProvesC.invBox rfl
+    · refine ProvesC.plain ?_ rfl
+      sol_leaf
+      sol_close
+    · apply ProvesC.updIntro
+      apply ProvesC.update (.key .valueDeclSkip) rfl
+      apply ProvesC.send .sendWithCallbackBox
+      · refine ProvesC.plain ?_ rfl
+        refine Proves.updIntro ?_
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      · refine ProvesC.plain ?_ rfl
+        apply Proves.update (Taclet.step_eq .binopAssignment)
+        refine Proves.updIntro ?_
+        sol_leaf
+        sol_close
+      · refine ProvesC.plain ?_ rfl
+        apply Proves.update (Taclet.step_eq .binopAssignment)
+        refine Proves.updIntro ?_
+        sol_leaf
+        sol_close
+    · refine ProvesC.plain ?_ rfl
+      refine Proves.updIntro ?_
+      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
+      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+      apply Proves.update (Taclet.step_eq .binopAssignment)
+      apply Proves.check (Taclet.step_eq .assertSimple)
+      case thn =>
+        refine Proves.updIntro ?_
+        exact Proves.closeTrue rfl
+      case els =>
+        sol_leaf
+        sol_close
+-/
+#guard_msgs in
+example :
+    ValidT .noCallback dl[Pinger]{ [ uint n = pings; uint i = 0;
+      /// @custom:key invariant i <= n
+      while (i < n) { (bool ok, ) = to.call{value: 1}(""); i = i + 1; }; assert(i == n); ]
+      true } := by
+  sol_derive?
+
+/-- The contract's invariant kept across every iteration's callback: the
+loop's invariant restates it, since the frame havocs the storage. -/
+theorem pingNInv :
+    ValidC pingInv dl[Pinger]{ fails <= pings → [ uint i = 0;
+      /// @custom:key invariant fails <= pings
+      while (i < 3) { (bool ok, ) = to.call{value: 1}(""); pings += 1; i = i + 1; }; ]
+      fails <= pings } := by
+  sol_prove
+
+/-! ## No diamond over a loop that calls back
+
+A loop whose body calls back may diverge (`ExecS.loopDiverge`): the diamond
+over it never holds, by its invariant and variant or at its unwinding bound
+(`holdsC_diamond_loop`), so `ProvesC` has no diamond loop rule. -/
+
+example {Γ Γb Γ₁ Γ₀ : Ctx} {a : LoopAnn Pinger Γ} {c : Val Pinger Γ .bool}
+    {body : Prog Pinger Γ Γb} {ω : Prog Pinger Γ Γ₁} {κ : Frames Pinger Γ₁ Γ₀}
+    {φ : Fml Pinger Γ₀} (σ : State Pinger Γ) (hb : body.callsBack true = true) :
+    ¬ holdsC pingInv.fml true σ (.modal .diamond (.cons (.loop a c body) ω) κ φ) :=
+  holdsC_diamond_loop hb
+
 end Solidity.Examples.Tactics.CallbackStrategy
