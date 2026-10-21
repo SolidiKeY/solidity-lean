@@ -1,4 +1,5 @@
 import Solidity.Semantics.Storage
+import Solidity.Keccak
 
 /-!
 # Typed heap
@@ -442,35 +443,32 @@ end CopyMem
 
 /-! ## `keccak256`
 
-solc's `keccak256(bytes memory b)` is a function of the bytes of `b`.  The
-model does not compute it: `keccakBytes` is an **uninterpreted** function of
-the byte sequence (`opaque`: the kernel never unfolds it, so the only fact a
-proof has about it is that it is a function, equal sequences giving equal
-hashes).  A `bytes`/`string` is a `bytes1[]` (`docs/semantic-gaps.md`,
-"Bytes and strings"), so the sequence is the array object's elements
-(`MObj.words`).
+solc's `keccak256(bytes memory b)` is Keccak-256 of the bytes of `b`, and so
+is the model's: `keccakBytes` is `Keccak.keccak256Nat` (`Keccak.lean`, the
+function the elaborator folds selectors with), so `#run` computes the real
+hash and `bytes4(keccak256("f(uint256)"))` is `f`'s selector.  It is
+`@[irreducible]`: the closers and `simp` read a hash as an atom (a function
+of its bytes, equal sequences giving equal hashes) and never start computing
+one; a proof that wants the value of the hash of literal bytes evaluates it
+in the kernel (`decide +kernel`, which unfolds it, under a second for a
+short input).  A `bytes`/`string` is a `bytes1[]`
+(`docs/semantic-gaps.md`, "Bytes and strings"), so the sequence is the array
+object's elements (`MObj.words`), each a byte (taken modulo `256`, which the
+narrow elements already are).
 
 Collision resistance is not assumed, and no injectivity can be (a function
 from all byte strings into `2^256` values has collisions): a proof that
-needs two particular inputs to hash apart takes it as a premise
-(`docs/semantic-gaps.md`, "Hashing and the ABI").  The compiled code
-(`#run`) uses a stand-in that is not Keccak (`keccakStandIn`), which no
-proof sees. -/
+needs two particular inputs to hash apart takes it as a premise, or computes
+both hashes when the inputs are literal (`docs/semantic-gaps.md`, "Hashing
+and the ABI"). -/
 
-/-- A compiled stand-in for `keccakBytes`, only so that `#run` tells byte
-strings apart: an FNV-style fold, not Keccak-256. -/
-def keccakStandIn (bs : List Int) : PrimTy.uint.Denote :=
-  let h : Nat := bs.foldl (fun h b => (h ^^^ (b.toNat + 1)) * 1099511628211 % 2 ^ 256)
-    14695981039346656037
+/-- `keccak256` of a byte sequence: Keccak-256 of its bytes (see above). -/
+@[irreducible] def keccakBytes (bs : List Int) : PrimTy.uint.Denote :=
+  let h : Nat := Keccak.keccak256Nat (bs.map fun b => b.toNat % 256)
   if hh : h < 2 ^ 256 then
     (⟨h, by simp only [PrimTy.inRange, decide_eq_true_eq]; omega⟩ :
       {n : Int // PrimTy.uint.inRange n = true})
   else (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
-
-/-- `keccak256` of a byte sequence: uninterpreted (see above). -/
-@[implemented_by keccakStandIn]
-opaque keccakBytes : List Int → PrimTy.uint.Denote :=
-  fun _ => (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
 /-- The words of an array object of `uint`s, in order: a `bytes`' bytes;
 nothing for any other object (the elaborator hashes byte strings only). -/

@@ -1,3 +1,5 @@
+import Solidity.Keccak
+
 /-!
 # Revert data as bytes
 
@@ -8,11 +10,9 @@ with nothing but Lean's core below them, so that the elaborator writes a
 `revert("m")` return `abi.encodeWithSelector(0x08c379a0, "m")`
 (`Error(string)`), a panic `Panic(uint256)` (`0x4e487b71`) and its code.
 
-`Error`'s and `Panic`'s selectors are Solidity's fixed values; with
-`keccak256` uninterpreted (`keccakBytes`) the model cannot compute a custom
-error's, so `customSelector` is an uninterpreted function of the signature:
-two signatures have different selectors only under a premise that says so,
-as two inputs of `keccak256` hash apart only under one.
+`Error`'s and `Panic`'s selectors are Solidity's fixed values; a custom
+error's is computed as solc computes it, the first four bytes of the
+Keccak-256 of its canonical signature (`customSelector`, `Keccak.lean`).
 -/
 
 namespace Solidity.Semantics
@@ -26,14 +26,8 @@ def errorSelector : List UInt8 := [0x08, 0xc3, 0x79, 0xa0]
 /-- `bytes4(keccak256("Panic(uint256)"))`. -/
 def panicSelector : List UInt8 := [0x4e, 0x48, 0x7b, 0x71]
 
-/-- A compiled stand-in for `customSelector`, only so that `#run` tells
-signatures apart; it is not Keccak, and no proof sees it. -/
-def customSelectorStandIn (sig : String) : UInt32 :=
-  sig.foldl (fun h c => (h ^^^ c.toNat.toUInt32) * 16777619) 2166136261
-
-/-- A custom error's selector, `bytes4(keccak256(sig))`: uninterpreted. -/
-@[implemented_by customSelectorStandIn]
-opaque customSelector : String → UInt32
+/-- A custom error's selector, `bytes4(keccak256(sig))`. -/
+def customSelector (sig : String) : UInt32 := UInt32.ofNat (Keccak.selector sig)
 
 /-- A selector's four bytes, big-endian. -/
 def selectorBytes (s : UInt32) : List UInt8 :=

@@ -225,6 +225,13 @@ inductive RawStmt where
   /-- `require(c, "m");`: `require(c);`, but where a `try` reads the data
   (as `revertMsg`) `if (c) { } else { revert("m"); }`. -/
   | requireMsg (c : RawExpr) (msg : String)
+  /-- `revert E(a, b);`: a revert with the custom error `E`'s data (its
+  selector, then `abi.encode(a, b)`) where a `try` reads it, `revert();`
+  elsewhere, as `revertMsg`. -/
+  | revertErr (e : String) (args : List RawExpr)
+  /-- `require(c, E(a, b));`: `RawStmt.requireWith c [a, b]`, but where a
+  `try` reads the data `if (c) { eval(a, b) } else { revert E(a, b); }`. -/
+  | requireErr (c : RawExpr) (e : String) (args : List RawExpr)
   /-- `assume(false);`: a run assumed away (`Stmt.assumeFalse`). -/
   | assumeFalse
   /-- `return e;`, `return;`: in a function's body, lowered away when it is
@@ -394,6 +401,10 @@ structure Contract where
   (`Semantics.StructEnc`; the plain name when the table's struct of that
   name has those members). -/
   structs : List (Name × Name) := []
+  /-- `error E(uint8 a, address b);`: its custom errors, each a declaration
+  of its parameters only (their types and width rows, as a function's), from
+  which a `revert E(…)` computes its selector (`errorSignature?`). -/
+  errors : List (Name × FunDecl) := []
   deriving Repr, Inhabited
 
 namespace Contract
@@ -954,10 +965,10 @@ syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
 /-- `require(c, "msg");`: `require(c);`, the reason kept where a `try` reads
 it (`RawStmt.requireMsg`). -/
 syntax (name := solRequireMsg) &"require" "(" sol_expr ", " str ")" : sol_stmt
-/-- `require(c, Err(a));`: `RawStmt.requireWith`. -/
+/-- `require(c, Err(a));`: `RawStmt.requireErr`. -/
 syntax (name := solRequireErr) &"require" "(" sol_expr ", " ident "(" sol_expr,* ")" ")" : sol_stmt
-/-- `revert Err(a);`: `revert();`, since a revert undoes whatever evaluating
-`a` did. -/
+/-- `revert Err(a);`: `RawStmt.revertErr`; `revert();` where no `try` reads
+the data, since a revert undoes whatever evaluating `a` did. -/
 syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
 /-- `revert("msg");`: `revert();`, the reason kept where a `try` reads it
 (`RawStmt.revertMsg`). -/
@@ -1370,8 +1381,10 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireMsg =>
     let some m := s.raw[4].isStrLit? | Macro.throwErrorAt s.raw[4] "a string literal"
     `(RawStmt.requireMsg $(← expandExpr ⟨s.raw[2]⟩) $(quote m))
-  | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
-  | ``solRevertErr => `(RawStmt.revert)
+  | ``solRequireErr =>
+    `(RawStmt.requireErr $(← expandExpr ⟨s.raw[2]⟩) $(quote s.raw[4].getId.toString)
+      [$(← exprs s.raw[6]),*])
+  | ``solRevertErr => `(RawStmt.revertErr $(quote s.raw[1].getId.toString) [$(← exprs s.raw[3]),*])
   | ``solRevertMsg =>
     let some m := s.raw[2].isStrLit? | Macro.throwErrorAt s.raw[2] "a string literal"
     `(RawStmt.revertMsg $(quote m))
@@ -2056,6 +2069,7 @@ macro_rules
         | _ => pure ()
       let mut rows := #[]
       let mut widthRows : Array Lean.Term := #[]
+      let mut errRows : Array Lean.Term := #[]
       let mut funs := #[]
       -- the clauses read since the last function: they specify the next one
       let mut reqs : Array Lean.Term := #[]
@@ -2111,9 +2125,20 @@ macro_rules
                           skip := $(Lean.quote skip) } : FunSpec))
           funs := funs.push (← expandFun env mods f ps.getElems as b spec)
           reqs := #[]; enss := #[]; skip := false; asg := none
+        | `(sol_member| error $e:ident ( $ps:sol_eparam,* ) ;) =>
+          -- its parameters, typed as a function's (`Contract.errors`)
+          let mut prs : Array Lean.Term := #[]
+          let mut ews : Array Lean.Term := #[]
+          let pes := ps.getElems
+          for i in [0:pes.size] do
+            let n := s!"_e{i}"
+            let (t, w) ← expandStateTyW env ⟨pes[i]!.raw[0]⟩
+            for (k, b) in w do ews := ews.push (← `(($(Lean.quote (n ++ k)), $(Lean.quote b))))
+            prs := prs.push (← `(($(Lean.quote n), $t)))
+          errRows := errRows.push
+            (← `(($(strLit e), ({ params := [$prs,*], widths := [$ews,*], body := [] } : FunDecl))))
         | `(sol_member| modifier $_:ident $[( $_:sol_param,* )]? $_:sol_block)
         | `(sol_member| event $_:ident ( $_:sol_eparam,* ) ;)
-        | `(sol_member| error $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| enum $_:ident { $_:ident,* })
         | `(sol_member| struct $_:ident { $[$_:sol_ty $_:ident ;]* }) => pure ()
         | _ => Lean.Macro.throwUnsupported
@@ -2125,7 +2150,7 @@ macro_rules
         | none => `(none)
       `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
            widths := [$widthRows,*], ctor := $ctorT, inits := [$initRows,*],
-           structs := [$structRows,*] } : Contract))
+           structs := [$structRows,*], errors := [$errRows,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with

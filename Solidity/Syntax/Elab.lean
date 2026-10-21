@@ -475,6 +475,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i | .ret i => i.toList
   | .declStoragePush _ _ b | .declPush _ _ b | .delete b | .incDec _ b | .pushIncDec _ b | .require b | .assert b
   | .ite b _ _ | .requireMsg b _ => [b]
+  | .revertErr _ as => as
+  | .requireErr c _ as => c :: as
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
@@ -530,6 +532,8 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .revert => pure .revert
   | .revertMsg m => pure (.revertMsg m)
   | .requireMsg b m => return .requireMsg (← f b) m
+  | .revertErr e as => return .revertErr e (← as.mapM f)
+  | .requireErr c e as => return .requireErr (← f c) e (← as.mapM f)
   | .assumeFalse => pure .assumeFalse
   | .unchecked b => pure (.unchecked b)
   | .checked o b => pure (.checked o b)
@@ -1647,6 +1651,12 @@ def fnSignature? (g : String) : Option String := do
   let d ← lookupBy g C.funs
   let ps ← d.params.mapM fun (n, T) => abiTyName d.widths n T
   pure s!"{g}({",".intercalate ps})"
+
+/-- The custom error `e` of `C` and its canonical signature, `E(uint256,address)`. -/
+def errorSignature? (e : String) : Option (FunDecl × String) := do
+  let d ← lookupBy e C.errors
+  let ps ← d.params.mapM fun (n, T) => abiTyName d.widths n T
+  pure (d, s!"{e}({",".intercalate ps})")
 
 /-- The selector of the function `g` of `C` (`Keccak.selector`). -/
 def fnSelector? (g : String) : Option Nat := (fnSignature? C g).map Keccak.selector
@@ -3096,6 +3106,23 @@ def abiDecodeAt (T : String) (d w : String) (o : RawExpr) : Option (List RawStmt
 through: `#abiDecode(d, T, i, n)`, the `i`-th of `n` words of `d` read at `T`. -/
 def abiDecodeName : String := "#abiDecode"
 
+/-- `revert E(a, b)`'s data, where a `try` reads it: `E`'s selector, folded
+as solc folds it (`errorSignature?`), then each argument's ABI word, a
+literal's folded to its bytes. -/
+def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
+    ElabM (List (RevPart C Γ.ctx)) := do
+  let some (d, sig) := errorSignature? C e |
+    throw s!"`{e}` is not an error this contract declares with value parameters"
+  unless d.params.length == args.length do
+    throw s!"`{e}` takes {d.params.length} arguments, given {args.length}"
+  let parts ← (d.params.zip args).mapM fun ((_, T), a) => do
+    match T, a with
+    | .prim _, .num n => pure (RevPart.bytes (Semantics.wordBytes n))
+    | .prim _, .bool b => pure (RevPart.bytes (Semantics.wordBytes (if b then 1 else 0)))
+    | .prim p, a => pure (RevPart.word (← checkIn C Γ p a))
+    | _, _ => throw s!"`{e}`: a custom error's reference argument is not modelled"
+  pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -4497,6 +4524,15 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
+  -- custom errors (`revert E(a)`, `require(c, E(a))`): their data only where
+  -- a `try` reads it, as `revertMsg`'s
+  let self := (← read).selfFrame
+  let s : RawStmt := match s with
+    | .revertErr .. => if self then s else .revert
+    | .requireErr c e as =>
+      if self then .ite c (if as.all RawExpr.isPure then [] else [.eval as]) [.revertErr e as]
+      else RawStmt.requireWith c as
+    | s => s
   -- a call statement through a value that is not a name, `s.f(x);`
   -- (`callValueName`); `push`, `pop` and `transfer` are the receivers' own
   let s := match s with
@@ -4945,6 +4981,15 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
   | .requireMsg c m => do
     if (← read).selfFrame then elabStmt1 (.ite c [] [.revertMsg m])
     else elabStmt1 (.require c)
+  -- `revert E(a, b)`: `E`'s selector, folded as solc folds it
+  -- (`errorSignature?`), then each argument's ABI word (a literal's folded)
+  | .revertErr e args => do
+    unless (← read).selfFrame do return [.of (← nctx) .revert]
+    -- the arguments' captures first (`hoistArgs`), left to right
+    let (P, args) ← hoistArgs args
+    let Γ ← nctx
+    pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
+  | .requireErr c _ args => elabStmt1 (RawStmt.requireWith c args)
   | .assumeFalse => do pure [.of (← nctx) .assumeFalse]
   | .eval _ => pure []
   | .unchecked ss => do
