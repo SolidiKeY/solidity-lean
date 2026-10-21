@@ -210,7 +210,7 @@ def Tri.afterT {α : Type} (m : Modality) (k : α → Tri) : TRes α → Tri
   | .error .panic => .ff
   | .error .diverge => .unknown
   | .error .exhausted => .tt
-  | .error .revert => match m with
+  | .error .revert | .error (.revertWith _) => match m with
     | .box => .tt
     | .diamond => .ff
 
@@ -341,6 +341,11 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
           Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,
           false_implies]
       | revert =>
+        rw [← happ.eq nofun]
+        cases m <;> simp only [Tri.afterT, Modality.afterRunTR, Modality.onTHalt, ne_eq,
+          Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,
+          and_true, not_true_eq_false, imp_self]
+      | revertWith _ =>
         rw [← happ.eq nofun]
         cases m <;> simp only [Tri.afterT, Modality.afterRunTR, Modality.onTHalt, ne_eq,
           Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,

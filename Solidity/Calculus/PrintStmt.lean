@@ -473,6 +473,30 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.assert _ _ c => `(sol_stmt| assert($(← ppExprS ns c)))
   | Stmt.revert _ _ => `(sol_stmt| revert())
   | Stmt.assumeFalse _ _ => `(sol_stmt| assume(false))
+  -- a revert with data (`revertDataBox`): the data, a schema variable or
+  -- escaped
+  | Stmt.revertData _ _ d =>
+    let some dn ← fvarName? d | escape
+    `(sol_stmt| $(mkIdent `revert):ident ( $(nameIdent dn):ident ))
+  -- a `catch` clause binding the data (`catchDataBox`): the binding, then the
+  -- clause, one block
+  | Stmt.catchData _ _ _ _ _ _ c _ _ _ _ kind x body =>
+    let src ← match ← fvarName? c with
+      | some cn => `(sol_expr| $(nameIdent cn):ident)
+      | none => match ← ppExtCallS ns c with
+        | some e => pure e
+        | none => return ← escape
+    let fn : Ident := match_expr (← instantiateMVars kind).consumeMData with
+      | CatchKind.reason => mkIdent `reason
+      | _ => mkIdent `data
+    let some xi ← ppVar? x | escape
+    let decl ← `(sol_stmt| bytes memory $xi:ident = $fn:ident ( $src:sol_expr ))
+    let b ← match ← fvarName? body with
+      | some bn => pure #[← `(sol_stmt| $(nameIdent bn):ident)]
+      | none => match ← ppItemsS (← progExprPieces (x :: ns) body) with
+        | some ss => pure ss
+        | none => return ← escape
+    `(sol_stmt| { $[$(#[decl] ++ b);]* })
   | Stmt.callReceiver _ _ _ _ _ f args r body op =>
     let some recv ← ppCallReceiverExprS ns f args r body | escape
     let some st ← ppReceiverOpS ns recv op | escape
