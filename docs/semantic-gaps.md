@@ -804,14 +804,25 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
 - The callback reading: an `allocAll` goal whose rest may call back has
   no `ProvesC` rule (`Calculus/Callback.lean` gives none); where nothing
   calls back the walk goes on by `ProvesC.plain`.
-- `Panic` data: a self-call's panic binds the transaction's code (`1`
-  without one) as before; the model panics on `assert` (`0x01`) and on an
-  overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the
-  other codes (`0x12` division, `0x21` enum, `0x32` index, `0x41`
-  allocation, `0x51` function value) are reverts in the model, with no data.
-  A raw `catch (bytes memory d)` of a callee that may panic has the
-  any-bytes goal only (its data is the transaction's code; `Panic`'s
-  selector then a word would be a `Pat`, not done).
+- `Panic` data (lane `open-small`): in the callee a self-call `try` runs, a
+  failed `assert` reverts with `Panic(0x01)`'s data and a failed check in
+  `checked { … }` with `Panic(0x11)`'s (`elabStmt1`'s `assert`,
+  `OFMode.guardStmt` with `self`), solc's codes; the `try` dispatches on the
+  data, so `catch Panic(uint c)` binds the code in the run, and the data are
+  literal to `Stmt.revertDatas`, so a raw `catch (bytes memory d)` gets them
+  (`tests/solc/RevertData.sol` `panicData`, `Examples/Tactics/RevertData.lean`
+  `Panics`).  A callee that still may panic (an `assert` written in a
+  program not elaborated as a self-call's callee) lists `Pat.panic`, the
+  selector then a word of unknown bytes (`CatchKind.datas`, sound by
+  `Pat.matches_panic`), where it had only the any-bytes goal.  Left open:
+  the rule's `Panic` goal binds any code (`trySelfStep`), so a proof about
+  `c` needs a goal per code the callee's data carries — a `catchDataBox`
+  for the code, its soundness over `Prog.run_dataS` and the callback reading
+  (`holdsC_trySelfCb`); reading the code off the raw data in the clause
+  instead (32 bytes assembled) is past `sol_decide`'s bounds.  The other
+  codes (`0x12` division, `0x21` enum, `0x32` index, `0x41` allocation,
+  `0x51` function value) and an overflow outside `checked { … }` are reverts
+  in the model, with no data (the solkey reading).
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
 - The callback reading (`ValidT`): `catchData` forks when its callee or

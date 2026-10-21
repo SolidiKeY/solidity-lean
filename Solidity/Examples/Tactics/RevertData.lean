@@ -210,4 +210,44 @@ theorem externalReason : ⊨ dl!{ ∀ uint a; [ try address(a).boom() { } catch 
   · sol_leaf
     sol_close
 
+/-! ## Panic data
+
+In the callee a self-call `try` runs, a failed `assert` reverts with
+`Panic(0x01)`'s data and a failed check in `checked { … }` with
+`Panic(0x11)`'s (`OFMode.guardStmt`), solc's codes: the `try` dispatches on
+the data, so `catch Panic(uint c)` binds the code in the run, and `catch
+(bytes memory d)` the selector and the code's word, data the callee lists.
+The rule's `Panic` goal still binds any code (`trySelfStep`). -/
+
+namespace Panics
+
+def Pan : Contract := contract!{
+  uint last;
+  function failAssert(uint x) { assert(x < 3); }
+  function overflow(uint x) { checked { last = x + 1; } }
+}
+
+local instance : InContract := ⟨Pan⟩
+
+private def σ₇ : State Pan [] := { State.init Pan with tx := { selfAddress := ⟨7, rfl⟩ } }
+
+/-- info: Except.ok "last = 1" -/
+#guard_msgs in
+#eval (Prog.runT σ₇ (sol[Pan]{ try this.failAssert(5) { last = 1; } catch Panic(uint c) {
+    last = c; } catch { last = 9; } })).map fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- info: Except.ok "last = 17" -/
+#guard_msgs in
+#eval (Prog.runT σ₇ (sol[Pan]{ try this.overflow(115792089237316195423570985008687907853269984665640564039457584007913129639935) {
+    last = 1; } catch Panic(uint c) { last = c; } catch { last = 9; } })).map
+  fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- The raw data: `Panic`'s selector (`0x4e487b71`), then the code's word. -/
+theorem panicSelector : ⊨ dl!{ [ try this.failAssert(5) { } catch (bytes memory d) {
+    assert(d.length == 0 || d[0] == 78 && d[3] == 113 && d[35] == 1); }; ] true } := by
+  sol_symex
+  sol_decide
+
+end Panics
+
 end Solidity.Examples.Tactics.RevertData

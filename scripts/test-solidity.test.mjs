@@ -882,7 +882,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData",
     "reasonPastCustom", "externalReason", "externalData",
     // a custom error of a symbolic argument: its data known in part (`Pat`)
-    "customSymbolic"]) {
+    "customSymbolic",
+    // a callee that may panic: `Panic(0x01)`'s data, read raw
+    "panicData"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });

@@ -152,4 +152,18 @@ contract RevertData {
         } catch {
         }
     }
+
+    /// @custom:key skip
+    function failAssert(uint x) external pure {
+        assert(x < 3);
+    }
+
+    // a callee that may panic, its raw data: `Panic`'s selector, then the code
+    /// @custom:key box
+    function panicData(uint x) public view {
+        try this.failAssert(x) {
+        } catch (bytes memory d) {
+            assert(d.length == 0 || d.length == 36);
+        }
+    }
 }
