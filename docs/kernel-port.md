@@ -235,9 +235,11 @@ reading (`ValidT`) on branch `open-reccb` (`rec_auto_c`, row "Callbacks
 | Callbacks (O7) | `Calculus/RecursionCallback.lean`.  **A recursion that does not call back**: `callsBack` of a `callRec` is its body's, read off one frame (`sol_no_callback`), so `validT_noCallback_iff` applies and `rec_auto` proves it; past a callee that calls back, `ProvesC.recValid` reads the sequent at a recursive call without callbacks where nothing in it calls back (`holdsC_iff_holds`).  **A recursion that calls back**: `RecContractC` is `RecContract` over the callback runs (`FunContractC`: every `ExecP` run of the body from a frame where `requires` holds keeps the invariant, does not panic and ends where `ensures` holds), proved by the same induction (`RecContractC.unroll`), each frame's obligation by `ProvesC` (`FunContractC.ofProvesC`, through `Prog.exec_wk` under the snapshots); `ProvesC.recContract` (Lean only) proves the call by it, its goals "pre" and "post", sound by `holdsC_callRecContract` with the frame of a callback run (`ExecS.frame`: a callback only replaces the storage and the ledger, which a `nonpayable` body may write).  Both are `ProvesC.recCall`, a recursive call at the head of the box by a lemma about its readings; `ProvesC.havocIntro` takes "post"'s `{havoc}` into the context, and `sol_leaf` closes a leaf that mentions the induction's free frame (`Symex.placeholders`).  `rec_auto_c` is `rec_auto`'s twin on `ValidT`: the walk of `ProvesC` (`sol_prove`), each recursive call it stops at by `recValid`, else by a hypothesis, the source's contract or `true`/`true` at the first of `pure`, `view`, `nonpayable` (`Examples/Tactics/Recursion.lean`: `callThenCount`, `payDownNoPanic`, `payDownAuto`).  The runner proves a recursive row read with callbacks by `rec_auto_c` (`tests/solc/Recursion.sol`'s `callThenCount`, `payDown`). |
 
 **What is left.** Under the callback reading, a contract of a reference
-return (`CallRet.isValues`), and a recursive body whose `if` has a condition
-that is not a local and a branch that calls back (`ProvesC.unfold` takes no
-capture of a statement that calls back, `docs/options.md` O3).  A recursive
+return (`CallRet.isValues`).  (A recursive body whose `if` has a condition
+that is not a local and a branch that calls back is closed: the capture is
+`ProvesC.capture`, `docs/options.md` O3, and `tests/solc/Recursion.sol`'s
+`payDown` reads `if (a > 0)` directly; `payDownDirect`,
+`Examples/Tactics/Recursion.lean`.)  A recursive
 function of a reference return runs but has no contract.  A contract assumes no invariant
 of the contract (`invariant`), so a clause that needs one past a recursive
 call stays open.  `Stmt.within` of a body with two recursive calls of

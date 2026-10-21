@@ -173,6 +173,49 @@ theorem callToKeepsInv_valid :
       [ (bool ok, ) = to.call{value: 5}(""); sent = ok; ] balance + paidOut == deposited } :=
   fun σ v => holds_of_holdsC_imp (callToKeepsInv σ v) rfl rfl
 
+/-! ## A captured condition
+
+`if (balance > 0)` is not a local: `ifElseUnfold` captures it (`bool se =
+balance > 0; if (se) …`).  The capture declares a value and calls nobody,
+so it fires though the branch calls back: `ProvesC.capture`, its side
+condition on the capture alone (`Stmt.CapturesAs.ite`). -/
+
+/-- `callTo` under a condition on the storage. -/
+theorem callIfFunded :
+    ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
+      [ if (balance > 0) { (bool ok, ) = to.call{value: 5}(""); sent = ok; }; ]
+        balance + paidOut == deposited } := by
+  apply ProvesC.valid
+  apply ProvesC.allIntro
+  apply ProvesC.intro
+  apply ProvesC.capture (.key .ifElseUnfold) .ite
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.unfold (.key .binopUnfoldLeft) rfl rfl
+  apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply ProvesC.update (.key .storageRootReadSelect) rfl
+  apply ProvesC.update (.key .binopAssignment) rfl
+  apply ProvesC.updIntro
+  apply ProvesC.split (.key .ifElseSplit)
+  · apply ProvesC.update (.key .valueDeclSkip) rfl
+    apply ProvesC.send .sendWithCallbackBox
+    · apply ProvesC.plain _ rfl
+      sol_derive
+      sol_leaf
+      sol_close
+    · apply ProvesC.plain _ rfl
+      sol_derive
+      refine Proves.openInv ?_
+      sol_leaf
+      sol_close
+    · apply ProvesC.plain _ rfl
+      sol_derive
+      sol_leaf
+      sol_close
+  · apply ProvesC.plain _ rfl
+    sol_derive
+    sol_leaf
+    sol_close
+
 /-! ## The counterexample, a typed run with callbacks
 
 From a vault holding `5` for its customer, the interaction-first withdrawal

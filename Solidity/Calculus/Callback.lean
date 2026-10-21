@@ -3,6 +3,7 @@ import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
 import Solidity.Semantics.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Semantics.CallbackCapture
 
 /-!
 # The callback taclets on scoped statements
@@ -124,6 +125,17 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
       (hP : P.callsBack pay = false)
       (h : ProvesC I pay Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A capture (`ifElseUnfold`, `whileUnwind`, `transfer_unfold_…`,
+  `send_unfold_…`) whose rest may call back: the side condition is on the
+  capture alone, which declares a value and hands control to nobody, so the
+  statement runs, with callbacks, as the captured program
+  (`Stmt.CapturesAs`, `Semantics/CallbackCapture.lean`). -/
+  | capture {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
+      (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.unfold P e))
+      (hc : s.CapturesAs pay m P e)
+      (h : ProvesC I pay Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- `storagePushValue_unfold_leftCallReceiver`, including callbacks in the
   getter or deferred operand. Both captured aliases end with this statement. -/
   | unfoldReceiver {Γ Γv ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality}
@@ -175,6 +187,21 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
       (thn : ProvesC I pay Γ₀ (H.pre (Fml.isBool v.lower true)) (.modalK m ω κ φ))
       (els : ProvesC I pay Γ₀ H (Fml.isBool v.lower true)) :
       ProvesC I pay Γ₀ H (.modal m (.cons (.assert (.simple v)) ω) κ φ)
+  /-- **`loopExit` with callbacks**, under the box: a loop at its
+unwinding bound ends there, whatever its body calls ("loop exited", the
+condition `false` assumed; "unwound to the end", that it is).  A loop whose
+body calls back may diverge, which the box accepts and the diamond does
+not. -/
+  | loopExit {Γ Γ₁ Γ₂ Γb : Ctx} {H : Hyps C Γ₀ Γ} {c : Val C Γ .bool} {body : Prog C Γ Γb}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (thn : ProvesC I pay Γ₀ (H.pre (.upd .diamond (Upd.nil.decl
+          (.fresh "se" (H.freshC I (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)))
+          (.val (p := .bool) c.lower)) (.isBool (.pvV (p := .bool) .here) false)))
+        (.modalK .box ω κ φ))
+      (els : ProvesC I pay Γ₀ H (.upd .diamond (Upd.nil.decl
+          (.fresh "se" (H.freshC I (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)))
+          (.val (p := .bool) c.lower)) (.isBool (.pvV (p := .bool) .here) false))) :
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)
   /-- **`sendNoCallbackBox`**, a send that does not call back (`pay` unset,
   the 2300-gas stipend): the rest after the booking and `pv := true` ("send
   succeeded"), and after `pv := false` ("send failed"), no `{havoc}`. -/

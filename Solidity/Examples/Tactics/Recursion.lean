@@ -267,6 +267,31 @@ theorem payDownEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } := by 
 
 end PayDown
 
+/-- `payDown` with its condition not captured by hand: `if (a > 0)` is
+captured by `ifElseUnfold` under callbacks (`ProvesC.capture`), though the
+branch calls back. -/
+def PayDownDirect : Contract := contract!{
+  uint a;
+  function payDown(uint to) {
+    if (a > 0) { a = a - 1; (bool ok, ) = to.call{value: 0}(""); payDown(to); }
+  }
+}
+
+section PayDownDirect
+
+local instance : InContract := ⟨PayDownDirect⟩
+
+/-- **`payDown` on `if (a > 0)`, with callbacks.** -/
+theorem payDownDirect : ValidT .noCallback dl!{ [ payDown(to); ] true } := by rec_auto_c
+
+/-- Under the diamond. -/
+theorem payDownDirectEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } := by rec_auto_c
+
+/-- info: 'Solidity.Examples.Tactics.Recursion.payDownDirect' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms payDownDirect
+
+end PayDownDirect
+
 /-- info: 'Solidity.Examples.Tactics.Recursion.addSum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms addSum
 

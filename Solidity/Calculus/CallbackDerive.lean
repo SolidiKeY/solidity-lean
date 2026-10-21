@@ -1,5 +1,7 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.CallbackSound
+import Solidity.Calculus.WalkSyntax
+import Solidity.Calculus.CapturePayments
 
 /-!
 # The strategy with callbacks: `sol_derive` and `sol_prove` on `ValidT`
@@ -22,16 +24,19 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
   its body inlined; `assertSimple` (`ProvesC.assert`);
 * any other statement: the rule `Stmt.step` fires (`ProofTree.ruleAt?`), as
   `Proves` takes it, when the statement hands control to nobody
-  (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`).
+  (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`);
+  a capture whose rest calls back (`ifElseUnfold`, `whileUnwind`, a
+  payment's operand) by `ProvesC.capture`, its side condition one of
+  `captureLemmas`; a loop at its bound under the box (`ProvesC.loopExit`).
 
 What is left is a leaf: `sol_prove` closes a `Proves` leaf by `sol_leaf`
 and `sol_close`, the invariant assumed opened first where that is needed
 (`Proves.openInv`), and leaves the rest as goals.  While something in the
-sequent calls back, three shapes have no rule of `ProvesC` and stay leaves:
-a loop by its invariant or at its unwinding bound (`Proves.inv`,
-`Proves.check` have no counterpart), a loop unwound whose body calls back,
-and an internal call that returns one value (`y = f(x)`) or a memory or
-storage one (`Stmt.forksIn` counts every call as forking).
+sequent calls back, these shapes have no rule of `ProvesC` and stay leaves:
+a loop by its invariant (`Proves.inv` has no counterpart), a loop at its
+bound under the diamond, and an internal call that returns one value
+(`y = f(x)`) or a memory or storage one (`Stmt.forksIn` counts every call
+as forking).
 
 Nothing here is trusted: every step is an `apply` the kernel checks.
 -/
@@ -63,6 +68,12 @@ def ctorC? (c : Lean.Name) : Option (Lean.Name × Nat) :=
    (``Proves.guardedUpdates, (``ProvesC.guardedUpdates, 1)),
    (``Proves.unfold, (``ProvesC.unfold, 2)), (``Proves.bind, (``ProvesC.bind, 2)),
    (``Proves.split, (``ProvesC.split, 0)), (``Proves.done, (``ProvesC.done, 1))].lookup c
+
+/-- The captures whose rest may call back (`Semantics/CallbackCapture.lean`),
+each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`.
+Each with the number of `rfl`s its own side conditions take. -/
+def captureLemmas : Array (Lean.Name × Nat) :=
+  #[(`ite, 0), (`loop, 1), (`transferAmt, 1), (`transferRecv, 1), (`sendAmt, 1), (`sendRecv, 1)]
 
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
@@ -108,6 +119,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               .$(mkIdent `tryCallWithCallbackBox):ident)
             pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
+          -- a loop at its unwinding bound, under the box (`loopExit`)
+          | some ``Stmt.loop => pure #[#[← ap ``ProvesC.loopExit]]
           | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
           | _ => pure #[]
         -- the rule `Stmt.step` fires, on a statement that hands control to nobody
@@ -118,12 +131,25 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
             match ctorC? c with
             | some (cC, n) =>
               let rule := mkIdent (Lean.Name.mkSimple r.getString!)
-              let d ← if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
+              -- `whileUnwind`'s mode is read off the loop (`core_while_unwind`)
+              let d ← if r == ``Taclet.whileUnwind then
+                  `(term| (.$(mkIdent `key):ident (by core_while_unwind)))
+                else if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
                 else `(term| (.$(mkIdent `lean):ident .$rule:ident))
               let rfls := (List.replicate n rflT).toArray
               let f ← ProofTree.short cC
-              pure #[#[← `(tactic| apply $f $d $rfls*)],
-                #[← `(tactic| apply $f (by exact $d) $rfls*)]]
+              -- a capture whose rest calls back: `ProvesC.capture`, its
+              -- side condition the capture's lemma (`Stmt.CapturesAs`)
+              let cap ← if c == ``Proves.unfold then
+                  captureLemmas.mapM fun (l, k) => do
+                    let fc ← ProofTree.short ``ProvesC.capture
+                    if k == 0 then pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
+                    else
+                      let rs := (List.replicate k rflT).toArray
+                      pure #[← `(tactic| apply $fc $d (.$(mkIdent l):ident $rs*))]
+                else pure #[]
+              pure (#[#[← `(tactic| apply $f $d $rfls*)],
+                #[← `(tactic| apply $f (by exact $d) $rfls*)]] ++ cap)
             | none => pure #[]
           | none => pure #[]
         -- a transfer calls back only where `pay` is set: `transferNoCallbackBox`

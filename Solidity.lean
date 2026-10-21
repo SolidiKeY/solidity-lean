@@ -33,6 +33,7 @@ import Solidity.Semantics.DeferredSource
 import Solidity.Semantics.DeferredCallback
 import Solidity.Semantics.CallbackWk
 import Solidity.Semantics.CallbackUnwk
+import Solidity.Semantics.CallbackCapture
 import Solidity.Semantics.DeferredCorrespondence
 import Solidity.Semantics.NativeDeferredCallback
 import Solidity.Semantics.RunFuel
@@ -126,6 +127,7 @@ import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound
+import Solidity.Calculus.CapturePayments
 import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.Surface
