@@ -611,3 +611,10 @@ self-call `try`'s callee is copied once more per named clause (`catchData`
 carries it); the rule's goals add one literal allocation (a statement per
 byte of the decoded reason).  Programs with no named clause and no
 self-call reason elaborate as before.
+
+**Checked** (2026-10-21): `lean_build` of the default targets;
+`node --test --test-name-pattern="revert|self|callbacks|solc/open"
+scripts/test-solidity.test.mjs` passes (5 tests, 271 s); `tests/solc/RevertData.sol`'s
+three functions proved (4 s); `Examples/Tactics/RevertData.lean`'s proofs by
+`sol_symex; sol_decide`.  A named `catch` reason the clause does not read
+binds nothing, so no existing program changes.
