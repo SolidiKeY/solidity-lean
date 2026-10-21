@@ -506,8 +506,11 @@ test("recursion: calls by their contracts, proved by induction over the frames",
   assert.equal(status.sum, 'pending');
   assert.equal(status.sumThree, 'pending');
   assert.equal(status.falsePost, 'pending');
-  // under the callback reading (O7) no rule steps over a recursive call
-  assert.equal(status.callThenCount, 'pending');
+  // under the callback reading (O7): the countdown after a value call does
+  // not call back (`ProvesC.recValid`); a recursion that calls back by its
+  // contract over the callback runs (`ProvesC.recContract`, `rec_auto_c`)
+  assert.equal(status.callThenCount, 'proved');
+  assert.equal(status.payDown, 'proved');
 });
 
 test("root primitive push bindings and empty user calls parse unambiguously", () => {

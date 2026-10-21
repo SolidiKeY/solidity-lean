@@ -796,11 +796,23 @@ def leafValid : TacticM Unit := withMainContext do
   let ty ← instantiateMVars (← g.getType)
   let_expr Proves C R Γ₀ Γ H φ := ty | throwError "sol_leaf: not a scoped sequent"
   unless (← whnfR Γ₀).isAppOf ``List.nil do throwError "sol_leaf: not a sequent of the outer scope"
-  if ty.hasFVar || ty.hasMVar then throwError "sol_leaf: the sequent mentions a local or a metavariable"
+  -- a local the strategy only carries (an induction step's frame below, a
+  -- thunk, `Symex.placeholders`) is fine: `Symex.normValid` computes past it
+  if ty.hasMVar then throwError "sol_leaf: the sequent mentions a local or a metavariable"
+  if ty.hasFVar then
+    let xs := (Lean.collectFVars {} ty).fvarIds.map mkFVar
+    if (← Symex.placeholders xs).isNone then
+      throwError "sol_leaf: the sequent mentions a local or a metavariable"
   let nilCtx := ctxE []
   let ψ := mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H, φ]
-  let hm ← try Decide.trueLemma (mkApp3 (mkConst ``Fml.modalFree) C nilCtx ψ)
-    catch _ => throwError "sol_leaf: a modality is left in the leaf"
+  let mf := mkApp3 (mkConst ``Fml.modalFree) C nilCtx ψ
+  let hm ← if ty.hasFVar then do
+      -- not a closed auxiliary lemma: `rfl`, the locals carried along
+      unless ← withTransparency .all <| isDefEq mf (mkConst ``Bool.true) do
+        throwError "sol_leaf: a modality is left in the leaf"
+      mkEqRefl (mkConst ``Bool.true)
+    else try Decide.trueLemma mf
+      catch _ => throwError "sol_leaf: a modality is left in the leaf"
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Valid) C ψ) (← g.getTag)
   g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, g', hm])
   match ← allLeftLits H φ with

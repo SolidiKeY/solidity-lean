@@ -2,6 +2,7 @@ import Solidity.Frontend.Problems
 import Solidity.Calculus.SolSpec
 import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Recursion
+import Solidity.Calculus.RecursionCallback
 
 /-!
 # Testing imported Solidity files
@@ -18,7 +19,10 @@ others as `⊢ N.f.problem`, whose `Valid` is the same reading there
 (`validT_noCallback_iff`).  One with a recursive call (`Stmt.callRec`) is
 stated as `Valid N.f.problem` and proved by `rec_auto`, each recursive call
 by the contract `true`/`true` proved by induction over its frames
-(`docs/kernel-port.md`, "Recursion"): the search does no induction.
+(`docs/kernel-port.md`, "Recursion"): the search does no induction.  Whether
+it calls back is read off one frame of each unrolling (`sol_no_callback`);
+where it does, it is stated as `ValidT .noCallback N.f.problem` and proved
+by `rec_auto_c` (`Calculus/RecursionCallback.lean`).
 -/
 
 namespace Solidity.Frontend
@@ -46,6 +50,20 @@ private def callsBackE (N p : Lean.Name) : TermElabM Bool := do
   let e ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false $(mkCIdent p)))
   let v ← withTransparency .all <| whnf e
   return !v.isConstOf ``Bool.false
+
+/-- Whether the obligation `p`, which has a recursive call, provably hands
+control to no callee under `transferSemantics:noCallback`: `sol_no_callback`
+reads each unrolling off one frame (its `whnf` would unroll them). -/
+private def noCallbackRecE (N p : Lean.Name) : TermElabM Bool := do
+  let φ ← Symex.evaluable (mkConst p)
+  let ty ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false
+    $(← Term.exprToSyntax φ) = false))
+  let g ← mkFreshExprSyntheticOpaqueMVar ty
+  let tac ← `(tactic| sol_no_callback)
+  tryCatchRuntimeEx (do
+      let gs ← Tactic.run g.mvarId! (Tactic.evalTactic tac)
+      return gs.isEmpty)
+    fun _ => pure false
 
 /-- Whether `e`, or a declaration of the import `N` it names, has a
 recursive call (`Stmt.callRec`). -/
@@ -94,8 +112,6 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
-      let cb ← if r.tag == .specified || !r.writingCall then pure false
-        else callsBackE N (f ++ `problem)
       -- a specification's obligation, scoped
       let spec? ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
@@ -110,13 +126,33 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       let recursive ← match spec? with
         | some φ => hasCallRec N φ
         | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
-      -- under the callback reading (O7) a recursive call is a point where
-      -- control may leave (`Stmt.hasTransfer`, conservative: its frames are
-      -- not unfolded), which no rule of `ProvesC` steps over, and a contract
-      -- (`FunContract`) reads the run without callbacks (`docs/kernel-port.md`,
-      -- "Recursion")
+      -- the callback reading (O7): a recursive call's frames read off one
+      -- (`sol_no_callback`), not unrolled by `whnf`
+      let cb ← if r.tag == .specified || !r.writingCall then pure false
+        else if recursive then pure !(← noCallbackRecE N (f ++ `problem))
+        else callsBackE N (f ++ `problem)
+      -- a recursive call that may call back, or past a callee that may:
+      -- `rec_auto_c`, each call read without callbacks where nothing calls
+      -- back, else by a contract over the callback runs (`ProvesC.recContract`)
       if recursive && cb then
-        return ("pending", "a recursive call under the callback reading (O7): no contract rule", .solc)
+        let ty ← elabClosed (← `(ValidT (C := $(mkCIdent N)) .noCallback
+          $(mkCIdent (f ++ `problem))))
+        -- the walk reads the formula by its value; the kernel unfolds it
+        let goalTy := mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem)))
+        let g ← mkFreshExprSyntheticOpaqueMVar goalTy
+        let tac ← `(tactic| rec_auto_c)
+        let pendingMsg := "a recursive call under the callback reading (O7) its contract does not prove"
+        let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
+            fun _ => pure none
+          | return ("pending", pendingMsg, .solc)
+        unless goals.isEmpty do return ("pending", pendingMsg, .solc)
+        let proof ← instantiateMVars g
+        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
+        let name := f ++ `tested
+        addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
+        unless (← collectAxioms name).all (standardAxioms.contains ·) do
+          return ("pending", pendingMsg, .solc)
+        return ("proved", "", .solc)
       if recursive then
         let (ty, goalTy) := match spec? with
           | some φ => (mkApp2 (mkConst ``Valid) C φ, mkApp2 (mkConst ``Valid) C φ)

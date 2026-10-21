@@ -2,6 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.Recursion
+import Solidity.Calculus.RecursionCallback
 
 /-!
 # Recursive functions
@@ -182,6 +183,89 @@ theorem divmodSeven : ⊨ dl!{ [ uint q; uint r; (q, r) = divmod(7, 2); ] r < 2 
 example : ⊨ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
   fail_if_success sol_symex
   rec_auto
+
+/-! ## Under the callback reading
+
+`docs/kernel-port.md`, "Recursion", row "Callbacks (O7)".  Whether a
+recursive call calls back is read off one frame of its unrolling
+(`sol_no_callback`, `Prog.callsBack_recUnroll`): where none does, the
+formula reads as without callbacks (`validT_noCallback_iff`) and `rec_auto`
+proves it.  Past a callback, `rec_auto_c` walks `ProvesC` and proves a
+recursive call by `ProvesC.recValid` where nothing calls back, else by a
+contract over the callback runs (`ProvesC.recContract`, `RecContractC`). -/
+
+/-- The countdown hands control to no callee: one frame read, the frame
+below by hypothesis. -/
+example : Fml.callsBack false dl!{ [ countdown(); ] true } = false := by sol_no_callback
+
+/-- So does a sum and a mutual recursion, even where payments call back. -/
+example : Fml.callsBack true dl!{ [ uint z = add(3, 4); bool e = even(z); ] true } = false := by
+  sol_no_callback
+
+/-- **The countdown with callbacks**: nothing calls back, so the callback
+reading is the plain one. -/
+theorem countdownT : ValidT .noCallback dl!{ [ countdown(); ] true } := by
+  rw [validT_noCallback_iff (by sol_no_callback)]
+  rec_auto
+
+/-- **A value call, then the countdown** (`tests/solc/Recursion.sol`'s
+`callThenCount`): the callee may call back, the countdown after it does
+not (`ProvesC.recValid`). -/
+theorem callThenCount :
+    ValidT .noCallback dl!{ [ (bool ok, ) = to.call{value: 0}(""); countdown(); ] true } := by
+  rec_auto_c
+
+/-- A recursive function that calls back: a value call in every frame. -/
+def PayDown : Contract := contract!{
+  uint a;
+  function payDown(uint to) {
+    bool more = a > 0;
+    if (more) { a = a - 1; (bool ok, ) = to.call{value: 0}(""); payDown(to); }
+  }
+}
+
+section PayDown
+
+local instance : InContract := ⟨PayDown⟩
+
+/-- **A recursive call that calls back, by its contract over the callback
+runs** (`ProvesC.recContract`): `true`/`true` at `nonpayable`, proved by
+induction over the frames (`RecContractC.unroll`), each frame's obligation
+by the walk of `ProvesC` and its call of the frame below by the hypothesis
+`ih`; "post" opened so that the walk sees its `{havoc}`. -/
+theorem payDownNoPanic : ValidT .noCallback dl!{ [ payDown(to); ] true } := by
+  refine ProvesC.validT ?_
+  simp only [TransferSem.inv, TransferSem.pay]
+  apply ProvesC.allIntro
+  refine ProvesC.recContract (μ := .nonpayable) (req := .tt) (ens := .tt) ?hc ?hr ?hk ?pre ?post
+  case hc =>
+    apply RecContractC.unroll
+    intro n t ih
+    refine ⟨FunContractC.forall_none ?_, ?_, rfl⟩
+    · apply FunContractC.ofProvesC [] rfl rfl rfl
+      sol_prove
+      all_goals
+        refine ProvesC.recContract ih (by rfl) (by rfl) ?_ ?_
+        all_goals (dsimp only [Fml.callPost, Fml.anonC, Fml.callResult]; sol_prove)
+    · simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
+      rfl
+  case hr => rfl
+  case hk => rfl
+  case pre => sol_prove
+  case post => dsimp only [Fml.callPost, Fml.anonC, Fml.callResult]; sol_prove
+
+/-- The same, automatically. -/
+theorem payDownAuto : ValidT .noCallback dl!{ [ payDown(to); ] true } := by rec_auto_c
+
+/-- Under the diamond: no frame reverts (the bottom one is exhausted, which
+the diamond accepts); the walk's first-order leaves under the induction's
+free frame closed by `sol_leaf` at placeholders (`Symex.placeholders`). -/
+theorem payDownEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } := by rec_auto_c
+
+/-- info: 'Solidity.Examples.Tactics.Recursion.payDownNoPanic' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms payDownNoPanic
+
+end PayDown
 
 /-- info: 'Solidity.Examples.Tactics.Recursion.addSum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms addSum

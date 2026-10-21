@@ -2,6 +2,7 @@ import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
 import Solidity.Semantics.Callback
+import Solidity.Calculus.CallbackHolds
 
 /-!
 # The callback taclets on scoped statements
@@ -76,6 +77,10 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   /-- `allRight`. -/
   | allIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
       (h : ProvesC I pay Γ₀ (H.all x p) φ) : ProvesC I pay Γ₀ H (.all x p φ)
+  /-- `{havoc}` in front of the formula joins the context (Lean only: what
+"post" of a contract forgets, `Fml.anonC`). -/
+  | havocIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ProvesC I pay Γ₀ H.havoc φ) :
+      ProvesC I pay Γ₀ H (.havoc φ)
   /-- An update in front of the formula joins the context. -/
   | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (h : ProvesC I pay Γ₀ (H.upd m U) φ) : ProvesC I pay Γ₀ H (.upd m U φ)
@@ -313,6 +318,20 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
             (.modalK .box b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))) :
       ProvesC I pay Γ₀ H (.modal .box (.cons (.tryCall call rets body errorBody code panicBody
         otherBody selfArgs selfBody true) ω) κ φ)
+
+  /-- **A recursive call by a lemma** (Lean, `docs/kernel-port.md`,
+  "Recursion"): a recursive call at the head of the box, where every reading
+  of the goals `goals` is one of the call's: a contract proved by induction
+  over the frames (`ProvesC.recContract`, `Calculus/RecursionCallback.lean`),
+  or the call read without callbacks where nothing calls back
+  (`ProvesC.recValid`). -/
+  | recCall {Γ Γ' ps rs Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name} {d : Nat}
+      {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} (goals : List (Fml C Γ))
+      (hc : ∀ τ, (∀ ψ ∈ goals, holdsC I pay τ (H.wrap ψ)) →
+        holdsC I pay τ (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)))
+      (h : ∀ ψ ∈ goals, ProvesC I pay Γ₀ H ψ) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.callRec f d args ret body) ω) κ φ)
 
 end Solidity
 

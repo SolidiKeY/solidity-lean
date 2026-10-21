@@ -71,8 +71,14 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   let ap (n : Lean.Name) : MetaM (TSyntax `tactic) := do
     `(tactic| apply $(← ProofTree.short n))
   let plain ← `(tactic| refine $(← ProofTree.short ``ProvesC.plain) ?_ $(mkIdent `rfl):ident)
+  -- not `plain` on a recursive call (no rule of `Proves` steps over it, and
+  -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
+  -- it): the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
+  let φi ← instantiateMVars φ0
+  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Fml.havoc).isSome
   let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with
+    | some ``Fml.havoc => pure #[#[← ap ``ProvesC.havocIntro]]
     | some ``Fml.imp => pure #[#[← ap ``ProvesC.intro]]
     | some ``Fml.all => pure #[#[← ap ``ProvesC.allIntro]]
     | some ``Fml.upd => pure #[#[← ap ``ProvesC.updIntro]]
@@ -130,7 +136,7 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
           | _ => pure #[]
         pure (own ++ ordinary ++ after)
     | _ => pure #[]
-  return #[#[plain]] ++ rest
+  return (if noPlain then #[] else #[#[plain]]) ++ rest
 
 /-- A `Proves` leaf closed as `sol_prove` closes one: `sol_leaf` and
 `sol_close` (`sol_spec_close` for a specification's), the invariant opened

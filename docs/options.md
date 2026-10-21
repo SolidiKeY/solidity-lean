@@ -43,7 +43,9 @@ forks where `Stmt.forksIn pay` says, a `transfer` or a `send` only when
 those runs (`Calculus/CallbackHolds.lean`), and `holdsT ts` is `holdsC` at the
 semantics' invariant and flag. `ValidT .noCallback φ` is therefore no longer
 `Valid φ`: it is when `φ` has no `try` and no value call
-(`validT_noCallback_iff`, `Fml.callsBack`).
+(`validT_noCallback_iff`, `Fml.callsBack`).  A recursive call's
+`callsBack` is its body's, every frame of the unrolling: proved off one
+frame (`sol_no_callback`, `Prog.callsBack_recUnroll`), never evaluated.
 
 `Valid` (`holds`, the deterministic run) keeps its meaning: every callee
 keeps the contract's state. It is solkey's `noCallback` reading, bug 5
@@ -148,6 +150,13 @@ premise's own soundness at `false`, `holdsC_done`), `ProvesC.assert`
 (`assertSimple`), `ProvesC.sendDet` (`sendNoCallbackBox` for a gas-limited
 send under `noCallback`: no `{havoc}`), `ProvesC.block` (a block that calls
 back, by `ExecS.block`).
+
+**Recursive calls** (`Calculus/RecursionCallback.lean`): `plain` is not
+tried on a sequent with a recursive call (or a `{havoc}`, which `Proves` has
+no rule for; `ProvesC.havocIntro` takes it into the context): the walk
+stops at the call, which `rec_auto_c` proves by `ProvesC.recValid` where
+nothing calls back, else by a contract over the callback runs
+(`ProvesC.recContract`; `docs/kernel-port.md`, "Recursion").
 
 **Not covered** (while something in the sequent calls back; where nothing
 does, `plain` hands the goal to `Proves`, which covers all of them): a loop
@@ -349,7 +358,9 @@ a plain obligation as `ValidT .noCallback N.f.problem` where both hold:
   value that does not reduce counts as calling back).
 
 It is proved by `sol_prove` (O3), the goal read at the obligation's value
-and the declaration stated at `N.f.problem`. Elsewhere it stays
+and the declaration stated at `N.f.problem`; one with a recursive call by
+`rec_auto_c`, whether it calls back read off one frame of each unrolling
+(`sol_no_callback`). Elsewhere it stays
 `⊢ N.f.problem`: with nothing calling back `Valid` is the reading
 (`validT_noCallback_iff`).
 
