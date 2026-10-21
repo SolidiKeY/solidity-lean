@@ -22,6 +22,7 @@ import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Heap
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
+import Solidity.Semantics.RevertData
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
@@ -64,6 +65,8 @@ import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundPush
 import Solidity.Calculus.SoundCalls
+import Solidity.Calculus.DataIn
+import Solidity.Calculus.SoundCatch
 import Solidity.Calculus.SoundLoops
 import Solidity.Calculus.SoundCapture
 import Solidity.Calculus.SoundLocal
