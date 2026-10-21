@@ -887,3 +887,10 @@ scripts/test-solidity.test.mjs` passes (7 tests).  Landed: Keccak-256 as
 `RevertStatement` ("Revert data"), `catch Error` past a custom error of
 symbolic data, `Facts.cancelDiv` ("Function types"), a storage array copy's
 length ("Bytes and strings").
+
+**Lane `open-small` checked** (2026-10-21): `lean_build` of the default
+targets; `node --test --test-name-pattern="calldata|hash|revert|loop|callbacks|solc/open"
+scripts/test-solidity.test.mjs` passes (7 tests).  Landed: a `try`'s loop
+frame ("Open"), `sha256`/`ripemd160`/`ecrecover` and `abi.decode` of arrays
+and structs ("Hashing and the ABI"), `calldata` ("Bytes and strings"),
+`Panic` data in self-call callees ("Revert data").
