@@ -386,8 +386,8 @@ def Fml.callPost (μ : Mutability) (args : Args C Γ ps) {rs Γ' : Ctx} (ret : C
 
 /-- Return locals that "post" reads off the body's end: value returns and
 the exported storage alias. A memory return keeps its fresh entry object.
-The existing `Prog.within` restriction still excludes alias rebinding in
-function contracts; ordinary inlined calls have no such restriction. -/
+A body may rebind an alias to a path (`Stmt.within`'s `rebind`, `view`
+and `nonpayable`), the exported one among them. -/
 def CallRet.nVals {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Nat :=
   CallRet.casesOn (motive := fun _ _ _ => Nat) r 0 (fun _ _ _ => 1) (fun {rs} _ => rs.length)
     (fun _ _ _ _ => 0) (fun _ _ => 1)

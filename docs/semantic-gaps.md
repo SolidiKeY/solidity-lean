@@ -509,9 +509,14 @@ EVM).  Tests: `tests/solc/Hashing.sol` (`sha256Parameter`,
 `ripemd160Parameter`, `recoverSigner`), `Examples/Tactics/Hashing.lean`
 (`sha256Abc`, `ripemd160Abc`, `recoverBadV`, the runs, `sha256Twice`).
 Cost: `Val`, `Op2` and the Lean rules keep their constructor counts; every
-match on `keccak` gained the kind (`.hash _ b _`).  `hoist` is at its
-heartbeat limit: the lowering is a function outside its `mutual` block,
-handed the recursive calls.
+match on `keccak` gained the kind (`.hash _ b _`).  The lowering is a
+function outside `hoist`'s `mutual` block, handed the recursive calls.
+(Lane `open-refret` split that block: its large arms, `hoist`,
+`abiEncode`, `elabCallRet`, `hoistStmt`, `elabStmtP` and `elabStmt1`, are
+defined before it, each over the record of the block's functions
+(`ElabRec`, tied by `elabRec`); the block went from about 190k heartbeats,
+most of them its compilation as one unit, to under 55k, and the largest arm,
+`elabCallRetWith`, takes under 90k on its own.)
 
 **Lane `open-left2` checked** (2026-10-21): `tests/solc/Hashing.sol`'s
 `encodeWithSignature`, `encodeWithSelector`, `encodeCall`, `packedEnum`,
