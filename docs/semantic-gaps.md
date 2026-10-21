@@ -465,3 +465,79 @@ function.
   (`op(x)` after `if (b) op = double; else op = triple;`) times out in the
   runner's search; at a literal argument it is proved (`storedByFlag`).
 
+
+## Revert data (lane `open-revert`)
+
+**What solkey does.** Nothing to follow: solkey's `try` rule
+(`tryCallNoCallbackBox`) binds no data in its `catch` goals, and a revert
+is a halt with no payload.  The model follows solc.
+
+**Solidity's semantics.**  A revert returns data: `require(c)` and
+`revert()` none; `require(c, "m")` and `revert("m")`
+`abi.encodeWithSelector(0x08c379a0, "m")` (`Error(string)`); a panic
+`Panic(uint256)` (`0x4e487b71`) and its code; `revert E(a, b)` `E`'s
+selector and `abi.encode(a, b)`.  `catch Error(string memory r)` runs when
+the data has `Error`'s selector and decodes, `r` the decoded string;
+`catch Panic(uint c)` likewise; `catch (bytes memory d)` with the raw data;
+`catch { }` with nothing.
+
+**Design.**
+- *The run.*  `THalt` gains `revertWith (d : List UInt8)`: a revert with
+  data; `revert` is the empty one (`THalt.ofData` keeps `revertWith []` out).
+  A new statement `Stmt.revertData parts` reverts with its data, the parts
+  literal bytes, a custom error's selector (`errorSelector`, uninterpreted
+  per signature) or an ABI word of a value; its rules are `revert`'s
+  (`revertDataBox`: `true`, `revertDataDiamond`: `false`, Lean only).  The
+  modalities read no data: a box accepts every revert, a diamond none.
+  `ExtResult.error` and `.other` carry the reason and the data an external
+  callee returns.
+- *Where data is computed.*  Neither modality reads a top-level revert's
+  data, so the elaborator emits `Stmt.revertData` only where a `try` can
+  read it: in the callee a self-call `try` runs (`trySelfBody`, the
+  elaborator's `selfFrame`), and its calls.  Elsewhere `require(c, "m")`,
+  `revert("m")`, `revert E(a)` stay `require(c)`/`revert()` as before, so
+  no other proof changes shape.
+- *Dispatch.*  A self-call whose callee reverts goes to `catch Error` when
+  its data decodes as `Error(string)`, to `catch Panic` when it decodes as
+  `Panic(uint256)` (the code bound), to the catch-all otherwise (empty data
+  included); the transaction's table no longer chooses (it did, before:
+  the model kept no data).  An external call's outcome is the table's.
+- *Binding.*  `Stmt.tryCall`'s shape does not change.  A named `Error`
+  reason or catch-all data is bound by a new block statement
+  `Stmt.catchData call … kind x body` that the elaborator writes as the
+  clause's body: it reads the data the call would revert with, from the
+  state the `try` started in (the callee's run again, deterministic, for a
+  self-call; the table's entry otherwise), allocates it as a memory
+  `bytes`/`string` (decoded for `Error`), binds `x` and runs `body`, its
+  locals popped.  Since the clause runs from that same state, the binding is
+  the data of the very call that failed.
+- *The calculus.*  `catchDataBox` (Lean only): for a self-call, the data a
+  callee can revert with is read off its body when every `revertData` in
+  it is literal (`Prog.revertDatas`, an over-approximation, sound by
+  `Prog.run_dataIn`, an induction over the run as `Semantics/NoPanic.lean`'s);
+  one goal per possible datum, `require(a == address(this));` and the
+  string literal's allocation in front of `body`; and the other receiver's
+  goal is `false` (an external reason is arbitrary, which no formula of
+  the calculus quantifies: a fresh memory object of any contents).  So the
+  calculus proves what a `catch` does with the reason a contract's own
+  callee gives, and nothing about another contract's reason.  Under the box
+  only (`catchDataDiamond` is `false`), and without callbacks: with a
+  callee that may call back, the `ProvesC` rule is `false`.
+- *Panic codes.*  `THalt.panic` keeps no code: the model panics on a failed
+  `assert` (`0x01`) and on an overflow inside `checked { … }` (solc's
+  `0x11`, read as an assertion, `docs/options.md` O2); division by zero
+  (`0x12`), an enum out of range (`0x21`), an index out of range (`0x32`),
+  a too-large allocation (`0x41`) and an unset function value (`0x51`)
+  revert in the model (the solkey reading).  A self-call's `Panic` clause
+  binds the table's code, `1` without one, as before.
+
+**Expected cost.**  Two `Stmt` constructors (every statement fold, the
+rule table, the soundness dispatch, the callback reading, the printers and
+quoters gain an arm, as `assumeFalse` did), one `THalt` constructor (every
+case split over a halt: few, most proofs are generic in the halt), the
+self-call `try` dispatch in `TRun.tryCall` and its soundness
+(`Premise.sound_trySelfBox`, `holdsC_trySelfCb`).  No proof over an
+existing program changes shape: data is computed only in self-call
+callees.
+
+**Status.** (updated as slices land)
