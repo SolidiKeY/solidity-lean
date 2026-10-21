@@ -73,10 +73,21 @@ contract Recursion {
 
     function falsePost() public pure { assert(sumTo(3, 3) == 7); }
 
-    // open: under the callback reading (O7) a recursive call is a point where
-    // control may leave, which no rule steps over (docs/kernel-port.md)
+    // under the callback reading (O7): the value call's callee may call
+    // back; the countdown after it does not (docs/kernel-port.md, "Recursion")
     function callThenCount(address to) public {
         (bool ok, ) = payable(to).call{value: 0}("");
         countdown();
+    }
+
+    // a recursion that calls back in every frame: its call by the contract
+    // `true`/`true` over the callback runs, by induction over the frames
+    function payDown(address to) public {
+        bool more = a > 0;
+        if (more) {
+            a = a - 1;
+            (bool ok, ) = payable(to).call{value: 0}("");
+            payDown(to);
+        }
     }
 }
