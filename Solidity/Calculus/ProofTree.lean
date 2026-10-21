@@ -123,10 +123,18 @@ def forallMemLemmas : MetaM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
   #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
     ``and_true].mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
 
+/-- The lemmas that flatten a list of goals a function built, as
+`catchDataBox`'s (`catchDataStep`: a goal per datum, mapped over appended
+lists). -/
+def flattenLemmas : MetaM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
+  #[``List.map_append, ``List.map_cons, ``List.map_nil, ``List.cons_append,
+    ``List.nil_append, ``List.append_nil].mapM fun n => do
+      `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
+
 /-- The line `app` of a rule of labelled goals (`∀ f ∈ fs, …`), its goals
 taken apart, one goal per outcome. -/
-def takeApart (app : TSyntax `tactic) : MetaM (TSyntax `tactic) := do
-  let lemmas ← forallMemLemmas
+def takeApart (app : TSyntax `tactic) (flatten : Bool := false) : MetaM (TSyntax `tactic) := do
+  let lemmas ← if flatten then pure ((← flattenLemmas) ++ (← forallMemLemmas)) else forallMemLemmas
   `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))
 
 /-- The operator a statement applies, its first `BinOp`, `UnOp` or `IncDec`

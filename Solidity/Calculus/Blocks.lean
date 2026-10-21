@@ -326,17 +326,27 @@ def Prog.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Option 
 
 end
 
-/-- What a clause of `kind` may bind when the contract's own callee `sbody`
-fails: the `Error` reasons its data decode to, or the data itself, a revert
-with none among them. -/
+/-- The data a clause of `kind` may be reached with when the contract's own
+callee `sbody` fails: the data its body lists, a revert with none among
+them for the raw data (the `Error` clause is not reached with none). -/
 def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option (List (List UInt8))
-  | .reason, P => (P.revertDatas false).map (·.filterMap Semantics.decodeError)
+  | .reason, P => P.revertDatas false
   | .raw, P => (P.revertDatas true).map ([] :: ·)
+
+/-- The clause after the datum `d` is bound (`catchDataBox`'s goal for it):
+what a clause of `kind` binds of it allocated as a literal (`litBytes`) in
+front of `body`; a revert where it binds nothing of it (an `Error` clause
+at data that does not decode). -/
+def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
+    (body : Prog C (.mem bytesR :: Γ) Γ₁) : Prog C Γ Γ₁ :=
+  match kind.decode d with
+  | some bs => litBytes x bs body
+  | none => .cons .revert (litBytes x [] body)
 
 /-- `Stmt.catchData` (`catchDataBox`, Lean only): for a self-call whose
 callee's data are known (`CatchKind.datas`), a goal per datum, the receiver
 the contract (`require(a != 0); require(a == address(this));`) and the
-datum written as a literal in front of the clause (`litBytes`); the receiver
+datum bound as a literal in front of the clause (`catchLit`); the receiver
 another, `false` (`assert(false);`: another contract's reason is any bytes,
 which no formula quantifies).  Otherwise, and under the diamond, `false`. -/
 def catchDataStep (m : Modality) {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ) (sbody : Prog C (ρ ++ ps) Γf)
@@ -344,8 +354,8 @@ def catchDataStep (m : Modality) {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ
     Premise C Γ Γ :=
   match m, self, kind.datas sbody with
   | .box, true, some ds =>
-    .branches (ds.map (fun bs => (⟨Binders.nil, .cons (.require call.hasCode)
-        (.cons (.require call.isSelf) (litBytes x bs body)), none⟩ : Branch C Γ)) ++
+    .branches (ds.map (fun d => (⟨Binders.nil, .cons (.require call.hasCode)
+        (.cons (.require call.isSelf) (catchLit x kind d body)), none⟩ : Branch C Γ)) ++
       [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.notSelf)
         (.cons (.assert (.simple (.bool false))) .nil)), none⟩])
   | _, _, _ => .done false

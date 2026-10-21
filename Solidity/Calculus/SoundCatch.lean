@@ -30,8 +30,8 @@ theorem Semantics.decodeError_encodePanic (c : Nat) :
     List.take_zero, List.nil_append]
   rfl
 
-/-- The data a self-call's callee reverts with, bound by a clause of `kind`, is
-one `kind.datas` lists. -/
+/-- The data a self-call's callee reverts with, where a clause of `kind`
+binds something of it, is one `kind.datas` lists. -/
 theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (kind : CatchKind) (σ : State C Γ)
     {ds : List (List UInt8)} (hd : kind.datas sbody = some ds) {d bs : List UInt8}
@@ -41,12 +41,10 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
       | .error (.revertWith d) => .ok d
       | .error .panic => .ok (Semantics.encodePanic (TRun.selfPanicCode call σ).1.toNat)
       | .error e => .error e : TRes (List UInt8)) = .ok d)
-    (hk : kind.decode d = some bs) : bs ∈ ds := by
+    (hk : kind.decode d = some bs) : d ∈ ds := by
   cases kind with
   | reason =>
-    have hd' : ((sbody.revertDatas false).map (·.filterMap Semantics.decodeError)) = some ds := hd
-    simp only [Option.map_eq_some_iff] at hd'
-    obtain ⟨S, hS, rfl⟩ := hd'
+    have hS : sbody.revertDatas false = some ds := hd
     have hk' : Semantics.decodeError d = some bs := hk
     revert hb
     cases hc : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
@@ -56,8 +54,7 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
       | revert => intro hb; cases hb; exact absurd hk' (by simp [Semantics.decodeError])
       | revertWith d' =>
         intro hb; cases hb
-        have hm := TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS false sbody hS) σ d hc
-        exact List.mem_filterMap.2 ⟨d, hm, hk'⟩
+        exact TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS false sbody hS) σ d hc
       | panic =>
         intro hb; cases hb
         rw [Semantics.decodeError_encodePanic] at hk'
@@ -67,8 +64,6 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
     have hd' : ((sbody.revertDatas true).map ([] :: ·)) = some ds := hd
     simp only [Option.map_eq_some_iff] at hd'
     obtain ⟨S, hS, rfl⟩ := hd'
-    have hk' : some d = some bs := hk
-    cases hk'
     revert hb
     cases hc : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
     | ok => intro hb; cases hb
@@ -133,12 +128,14 @@ theorem Premise.sound_catchDataBox {ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ)
           rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
         have hbs := catchBytes_self_mem call rets sargs sbody kind σ hd hb hk
         have hψ : holds σ (Fml.modalK .box (.cons (.require call.hasCode)
-            (.cons (.require call.isSelf) (litBytes x bs body)))
+            (.cons (.require call.isSelf) (catchLit x kind d body)))
             (.pop .block ((Ext.append Γ []).trans (Prog.cons (.require call.hasCode)
-              (.cons (.require call.isSelf) (litBytes x bs body))).ext) (.seq ω κ)) φ) :=
-          hall _ (List.mem_map.2 ⟨_, List.mem_append_left _ (List.mem_map.2 ⟨bs, hbs, rfl⟩), rfl⟩)
+              (.cons (.require call.isSelf) (catchLit x kind d body))).ext) (.seq ω κ)) φ) :=
+          hall _ (List.mem_map.2 ⟨_, List.mem_append_left _ (List.mem_map.2 ⟨d, hbs, rfl⟩), rfl⟩)
+        have hl : catchLit x kind d body = litBytes x bs body := by
+          unfold catchLit; rw [hk]
         have h0 := holds_modalK_pop σ _ _ ω κ φ hψ
-        rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi] at h0
+        rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi, hl] at h0
         have e : Prog.runSt σ (litBytes x bs body) = (TRun.litBytesT bs body.runR σ).map (·.st) := by
           show (Prog.run σ (litBytes x bs body)).map (·.st) = _
           rw [Prog.run_litBytes]

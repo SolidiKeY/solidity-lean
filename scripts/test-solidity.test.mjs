@@ -847,6 +847,17 @@ test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", (
   }
 });
 
+test("revert data: a self-call's reason reaches catch Error, raw data catch (tests/solc/RevertData.sol)", () => {
+  // docs/semantic-gaps.md, "Revert data": the reason is bound by `catchData`,
+  // one goal per datum the callee lists (`catchDataBox`)
+  const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData"]) {
+    assert.equal(rows[fn], "proved", fn);
+  }
+});
+
 test("an obligation whose callee may write the state is read with callbacks", () => {
   // docs/options.md O7: `ValidT .noCallback` where a `try` of a callee not
   // declared view/pure or a low-level call is reached, `⊢` elsewhere
