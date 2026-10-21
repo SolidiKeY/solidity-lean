@@ -1679,7 +1679,14 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     -- `abi.decode` of a byte string (`abiDecodeBytes`)
     if (f == "abi.decode" || f == "#abiDecode") && (lookupBy f C.funs).isNone then
       match as with
-      | _ :: .name T :: _ => if dynBytesTy T then dynBytesRowsOf T else []
+      | _ :: .name T :: _ =>
+        if dynBytesTy T then dynBytesRowsOf T
+        else if T.endsWith "[]" then
+          ((elabTyW C (.array (.named (T.dropRight 2)))).toOption.map (·.2)).getD []
+        else ((elabTyW C (.named T)).toOption.map (·.2)).getD []
+      -- `T[k]` (`abiDecodeWith`)
+      | _ :: .index (.name T) (.num k) :: _ =>
+        ((elabTyW C (.fixed (.named T) k)).toOption.map (·.2)).getD []
       | _ => []
     else
     match lookupBy f C.funs with
@@ -3227,6 +3234,126 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
     | _, _ => throw s!"`{e}`: a custom error's reference argument is not modelled"
   pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
 
+/-- A value type's ABI kind, by its name (`abi.decode`'s components). -/
+def valueKind? (t : String) : Option AbiKind :=
+  if t == "bool" then some .bool
+  else if t == "address" then some (.uint 160)
+  else if t == "uint" || t == "uint256" then some (.uint 256)
+  else if t == "int" || t == "int256" then some (.int 256)
+  else match narrowTy? t, bytesTy? t with
+    | some (.uint, n), _ => some (.uint n)
+    | some (.int, n), _ => some (.int n)
+    | _, some n => some (.bytesN n)
+    | _, _ => none
+
+/-- The value type name a kind decodes at (`abiDecodeAt`): an address as a
+`uint160`, which an `address` takes. -/
+def AbiKind.tyName : AbiKind → String
+  | .bool => "bool"
+  | .uint n => s!"uint{n}"
+  | .int n => s!"int{n}"
+  | .bytesN n => s!"bytes{n}"
+  | _ => "uint256"
+
+/-- The kind of `abi.decode`'s component written `T` that is not a value
+type or a byte string: `T[]`, `T[k]` of a value type `T`, a struct of value
+members. -/
+def decodeKind? (T : RawExpr) : Option AbiKind :=
+  match T with
+  | .name t =>
+    if t.endsWith "[]" then (valueKind? (t.dropRight 2)).map .arr
+    else match C.structName? t with
+      | some s => if (AbiKind.ofStruct s).isSome then some (.tuple s) else none
+      | none => none
+  | .index (.name t) (.num m) => (valueKind? t).map (.fixed · m)
+  | _ => none
+
+/-- The words a component written `T` takes in the head. -/
+def decodeHeadWords (T : RawExpr) : Nat :=
+  ((decodeKind? C T).map AbiKind.headWords).getD 1
+
+/-- `(T a, U b) = abi.decode(x, (T, U))`'s components, each at the word
+its predecessors' head words leave (`decodeHeadWords`): the head's words, and
+the `i`-th component's `#abiDecode`. -/
+def abiDecodeHeads (x : String) (ts : List RawExpr) : Nat × (Nat → RawExpr) :=
+  let ws := ts.map (decodeHeadWords C)
+  let n := ws.foldl (· + ·) 0
+  (n, fun i => .call abiDecodeName [.name x, ts[i]!, .num ((ws.take i).foldl (· + ·) 0), .num n])
+
+/-- **`abi.decode`** (`hoist`, outside its `mutual` block for its size, the
+recursive calls handed in): `abi.decode(b, (T))` is `#abiDecode(b, T, 0,
+n)`, and `#abiDecode(b, T, i, n)` the component at word `i` of a head of
+`n` words.  A value type is its word read back, a word out of the type's
+range reverting (`abiDecodeAt`); a `bytes`/`string` its offset, length and
+bytes (`abiDecodeBytes`); a struct of values and a `T[k]` their words in
+the head, a member or an element each; a `T[]` its offset in the head, its
+length there and its elements' words after it, read by a loop into a fresh
+`new T[](length)`, an offset or a length past the data reverting, as
+solc's decoder does. -/
+def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (abiMemBytes : RawExpr → ElabM (SProg C × String))
+    (elabStmtsP : List RawStmt → ElabM (SProg C))
+    (abiDecodeBytes : String → String → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
+  if f == "abi.decode" then
+    let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
+    if T matches .tuple _ then
+      throw "abi.decode: one type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
+    return ← hoist (.call abiDecodeName [b, T, .num 0, .num (decodeHeadWords C T)])
+  let [b, Te, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
+  let (P, b) ← hoist b
+  let (Q, d) ← abiMemBytes b
+  let len : RawExpr := .field (.name d) "length"
+  let enough : RawStmt := .require (.binop .ge len (.num (32 * n)))
+  if let .name T := Te then
+    -- a byte string: its offset in the head, its length and bytes in the tail
+    if dynBytesTy T then
+      let (R, x) ← abiDecodeBytes T d (32 * i) n
+      return (P ++ Q ++ R, .name x)
+    if (valueKind? T).isSome then
+      let w := toString (← freshCapture "se")
+      let x := toString (← freshCapture "se")
+      let some (reads, v) := abiDecodeAt T d w (.num (32 * i)) |
+        throw s!"abi.decode at {T}: only value types are decoded"
+      let R ← elabStmtsP ([enough] ++ reads ++ [.decl (.named T) x (some v)])
+      return (P ++ Q ++ R, .name x)
+  let some k := decodeKind? C Te |
+    throw s!"abi.decode at {Te.toStr}: a value type, a byte string, an array of values or a \
+      struct of values"
+  let x := toString (← freshCapture "mv")
+  -- the word at `o` read at the kind `kk` into a fresh local, then `put` of it
+  let word (kk : AbiKind) (o : RawExpr) (put : RawExpr → RawStmt) : ElabM (List RawStmt) := do
+    let w := toString (← freshCapture "se")
+    let some (reads, v) := abiDecodeAt kk.tyName d w o | throw "internal: a member's kind"
+    pure (reads ++ [put v])
+  let S ← match k, Te with
+    | .tuple s, .name t => do
+      let ms := (AbiKind.ofStruct s).getD []
+      let reads ← ms.zipIdx.mapM fun ((g, kk), j) =>
+        word kk (.num (32 * (i + j))) (.assign (.field (.name x) g))
+      pure ([enough, .declMemory (.named t) x none] ++ reads.flatten)
+    | .fixed kk m, .index (.name t) _ => do
+      let reads ← (List.range m).mapM fun j =>
+        word kk (.num (32 * (i + j))) (.assign (.index (.name x) (.num j)))
+      pure ([enough, .declMemory (.fixed (.named t) m) x none] ++ reads.flatten)
+    | .arr kk, .name t => do
+      let et := t.dropRight 2
+      let o := toString (← freshCapture "se")
+      let L := toString (← freshCapture "se")
+      let j := toString (← freshCapture "se")
+      let start : RawExpr := (RawExpr.name o).addN 32
+      let body ← word kk (.binop .add start (.binop .mul (.name j) (.num 32)))
+        (.assign (.index (.name x) (.name j)))
+      pure ([enough] ++ abiAssemble d o (.num (32 * i)) 32 ++
+        [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
+        [.require (.binop .le (.binop .add start (.binop .mul (.name L) (.num 32))) len),
+         .declMemory (.array (.named et)) x (some (.newArr (.array (.named et)) (.name L))),
+         .decl (.named "uint") j (some (.num 0)),
+         .whileLoop {} (.binop .lt (.name j) (.name L))
+           (body ++ [.assign (.name j) (.binop .add (.name j) (.num 1))])])
+    | _, _ => throw s!"abi.decode at {Te.toStr}: not decoded"
+  return (P ++ Q ++ (← elabStmtsP S), .name x)
+
 /-- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
 `abi.encodeCall(g, (…))`: the selector, as an expression, and the rest of
 the arguments (`hoist`, outside its `mutual` block for its size). -/
@@ -3488,25 +3615,9 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let args := (args.zip args').map fun (a, a') => if a.bytesLit?.isSome then a else a'
       let (Q, e) ← abiEncode (f == "abi.encode") (f == "string.concat") args marks
       return (P ++ Q, e)
-    if builtin && f == "abi.decode" then
-      let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
-      let .name T := T | throw "abi.decode: one value type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
-      return ← hoist (.call abiDecodeName [b, .name T, .num 0, .num 1])
-    if builtin && f == abiDecodeName then
-      let [b, .name T, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
-      let (P, b) ← hoist b
-      let (Q, d) ← abiMemBytes b
-      let w := toString (← freshCapture "se")
-      let x := toString (← freshCapture "se")
-      -- a byte string: its offset in the head, its length and bytes in the tail
-      if dynBytesTy T then
-        let (R, x) ← abiDecodeBytes T d (32 * i) n
-        return (P ++ Q ++ R, .name x)
-      let some (reads, v) := abiDecodeAt T d w (.num (32 * i)) |
-        throw s!"abi.decode at {T}: only value types are decoded"
-      let R ← elabStmtsP ([.require (.binop .ge (.field (.name d) "length") (.num (32 * n)))] ++
-        reads ++ [.decl (.named T) x (some v)])
-      return (P ++ Q ++ R, .name x)
+    -- `abi.decode(b, (T))`, `#abiDecode(b, T, i, n)` (`abiDecodeWith`)
+    if builtin && (f == "abi.decode" || f == abiDecodeName) then
+      return ← abiDecodeWith C hoist abiMemBytes elabStmtsP abiDecodeBytes f args
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -4689,16 +4800,19 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   if let some (d, ts) := decode? then
     if (← read).funs.all (·.1 != "abi.decode") then
       let x := toString (← freshCapture "mv")
-      let n := ts.length
-      let one (i : Nat) : RawExpr := .call abiDecodeName [.name x, ts[i]!, .num i, .num n]
+      let (n, one) := abiDecodeHeads C x ts
       let rest : List RawStmt ← match s with
         | .tupleDecl vs _ => do
-          unless vs.length == n do throw s!"abi.decode gives {n} values, not {vs.length}"
+          unless vs.length == ts.length do
+            throw s!"abi.decode gives {ts.length} values, not {vs.length}"
           pure (vs.zipIdx.filterMap fun (v, i) => v.map fun (T, y) =>
             match T with
-            | .named t => if dynBytesTy t then .declMemory T y (some (one i)) else .decl T y (some (one i))
-            | _ => .decl T y (some (one i)))
+            | .named t =>
+              if dynBytesTy t || (C.structName? t).isSome then .declMemory T y (some (one i))
+              else .decl T y (some (one i))
+            | _ => .declMemory T y (some (one i)))
         | .tupleAssign ls _ => do
+          let n := ts.length
           unless ls.length == n do throw s!"abi.decode gives {n} values, not {ls.length}"
           pure (ls.zipIdx.filterMap fun (l, i) => l.map fun l => .assign l (one i))
         | _ => pure []

@@ -439,7 +439,9 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
     // packed at one byte; a struct of values in the head
     'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct',
     // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
-    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner'])
+    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner',
+    // `abi.decode` of a struct of values, a `T[k]`, a tuple with a struct
+    'decodeStruct', 'decodeFixed', 'decodeTuple'])
     assert.equal(status[name], 'proved', name);
 });
 

@@ -88,4 +88,23 @@ contract Hashing {
     function recoverSigner(bytes32 h, uint8 v, bytes32 r, bytes32 s) public pure returns (address) {
         return ecrecover(h, v, r, s);
     }
+    // `abi.decode` of a struct of values and of a `T[k]`: their words in the
+    // head, each read back (a word out of range reverting); of a `T[]`, its
+    // offset, length and words, read by a loop (run in
+    // `Examples/Tactics/Hashing.lean`, `Codec2`)
+    /// @custom:key box
+    function decodeStruct(bytes memory d) public pure returns (uint) {
+        Pt memory q = abi.decode(d, (Pt));
+        return q.x;
+    }
+    /// @custom:key box
+    function decodeFixed(bytes memory d) public pure returns (uint) {
+        uint8[2] memory zs = abi.decode(d, (uint8[2]));
+        return zs[1];
+    }
+    /// @custom:key box
+    function decodeTuple(bytes memory d) public pure returns (uint) {
+        (uint a, Pt memory q) = abi.decode(d, (uint, Pt));
+        return a + q.x;
+    }
 }

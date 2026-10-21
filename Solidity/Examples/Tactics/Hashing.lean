@@ -266,6 +266,40 @@ def Codec2 : Contract := contract!{
     bytes memory b = abi.decode(e, (bytes));
     l = b.length;
   }
+  function decodeArray() returns (uint n, uint a, uint b) {
+    uint[] memory xs = new uint[](2);
+    xs[0] = 5; xs[1] = 6;
+    bytes memory e = abi.encode(xs);
+    uint[] memory ys = abi.decode(e, (uint[]));
+    n = ys.length; a = ys[0]; b = ys[1];
+  }
+  function decodeStruct() returns (uint x, bool y) {
+    Pt memory p;
+    p.x = 3; p.y = true;
+    Pt memory q = abi.decode(abi.encode(p), (Pt));
+    x = q.x; y = q.y;
+  }
+  function decodeFixed() returns (uint a, uint b) {
+    uint8[2] memory zs = abi.decode(abi.encode(8, 9), (uint8[2]));
+    a = zs[0]; b = zs[1];
+  }
+  function decodeTuple() returns (uint n, uint x, uint k) {
+    uint[] memory xs = new uint[](1);
+    xs[0] = 4;
+    Pt memory p;
+    p.x = 3; p.y = true;
+    bytes memory e = abi.encode(xs, p, 11);
+    (uint[] ys, Pt q, uint z) = abi.decode(e, (uint[], Pt, uint));
+    n = ys.length + ys[0]; x = q.x; k = z;
+  }
+  function decodeBadBool() returns (bool y) {
+    Pt memory q = abi.decode(abi.encode(3, 2), (Pt));
+    y = q.y;
+  }
+  function decodeBadLength() returns (uint n) {
+    uint[] memory ys = abi.decode(abi.encode(32, 1000), (uint[]));
+    n = ys.length;
+  }
 }
 
 -- `abi.encodeWithSelector`: the selector's four bytes, then the words
@@ -321,6 +355,40 @@ returns (7, 2, 105)
 -- an offset past the data reverts, as solc's decoder does
 /-- info: revert -/
 #guard_msgs in #run Codec2.decodeOutOfRange()
+
+-- `abi.decode` of a `uint[]`: its offset, its length, its words (a loop)
+/--
+info: ok
+returns (2, 5, 6)
+-/
+#guard_msgs in #run Codec2.decodeArray()
+
+-- of a struct of values and of a `T[k]`: their words in the head
+/--
+info: ok
+returns (3, true)
+-/
+#guard_msgs in #run Codec2.decodeStruct()
+
+/--
+info: ok
+returns (8, 9)
+-/
+#guard_msgs in #run Codec2.decodeFixed()
+
+-- several components, each at the word its predecessors leave
+/--
+info: ok
+returns (5, 3, 11)
+-/
+#guard_msgs in #run Codec2.decodeTuple()
+
+-- a member out of its type's range, a length past the data: a revert
+/-- info: revert -/
+#guard_msgs in #run Codec2.decodeBadBool()
+
+/-- info: revert -/
+#guard_msgs in #run Codec2.decodeBadLength()
 
 /-! ## 3 · A mapping keyed by `string` -/
 

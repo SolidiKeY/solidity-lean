@@ -742,6 +742,9 @@ syntax:max str : sol_expr
 syntax:max &"hex" str : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
 syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
+/-- `T[]` where a type stands in an expression: `abi.decode(d, (uint[]))`
+(`RawExpr.name "uint[]"`). -/
+syntax:max (name := solArrTyExpr) atomic(ident "[" "]") : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
 /-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
 `return` of several values (`RawExpr.tuple`). -/
@@ -1315,6 +1318,7 @@ where
   | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
+  | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[]")))
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
   | `(sol_expr| ! $a) => do `(RawExpr.unop .not $(← expandExpr a))
   | `(sol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))
