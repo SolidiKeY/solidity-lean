@@ -2566,7 +2566,7 @@ def RawExpr.addN (a : RawExpr) (n : Nat) : RawExpr :=
 def abiBytes (r : String) (o w : RawExpr) (m : Nat) : List RawStmt :=
   (List.range m).map fun j =>
     .assign (.index (.name r) (o.addN j))
-      (.binop .mod (.binop .shr w (.num (8 * (m - 1 - j)))) (.num 256))
+      (.call "uint8" [.binop .shr w (.num (8 * (m - 1 - j)))])
 
 /-- The word a value of kind `k` is encoded as, a `uint`. -/
 def AbiKind.word (k : AbiKind) (e : RawExpr) : RawExpr :=
@@ -3564,13 +3564,15 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
       let (Q, l) ← hoist l
       pure (P ++ Pc ++ Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
-      if (castTy? f).isSome || (lookupBy f C.enums).isSome then hoistAssign l r
+      if (castTy? f).isSome || (lookupBy f C.enums).isSome ||
+          (byteBuiltin f && (← read).funs.all (·.1 != f)) then hoistAssign l r
       else
         let (P, args) ← hoistCallArgs f args
         pure (P, .assign l (.call f args))
     | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
-    if (castTy? f).isSome || (lookupBy f C.enums).isSome then
+    if (castTy? f).isSome || (lookupBy f C.enums).isSome ||
+        (byteBuiltin f && (← read).funs.all (·.1 != f)) then
       let (P, r) ← hoist (.call f args)
       return (P, .decl T x (some r))
     let (P, args) ← hoistCallArgs f args

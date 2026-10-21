@@ -248,7 +248,8 @@ inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
   /-- `a < b`, …, `a == b` on KeY's `int`. -/
   | zcmp (op : BinOp) (h : op.zCmp = true) : Op2 C .kint .kint (.val .bool)
   /-- `keccak256(m, i)`: the hash of the object `i` in `m` (`Heap.keccak`),
-  uninterpreted.  Lean only: solkey has no hash. -/
+  uninterpreted; total, `0` at an identity that names no object of its type
+  (which no program reads).  Lean only: solkey has no hash. -/
   | keccak {R : RefTy} : Op2 C .mem (.ident R) (.val .uint)
 
 /-- Ternary symbols. -/
@@ -432,7 +433,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | .zcmp op _, x, y => do some (op.cmpZ (← x) (← y))
   | @Op2.keccak _ R, x, y => do
     let m ← x
-    some (m.heap.keccak (← HRef.ofId? m.H' R (← y)))
+    some (((HRef.ofId? m.H' R (← y)).map m.heap.keccak).getD (PrimTy.dflt .uint))
 
 /-- A binary symbol on the typed global part. -/
 @[implemented_by Op2.evalM]
@@ -476,7 +477,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun op _ x y => do some (op.cmpZ (← x) (← y)))
     (fun {R} x y => do
       let m ← x
-      some (m.heap.keccak (← HRef.ofId? m.H' R (← y))))
+      some (((HRef.ofId? m.H' R (← y)).map m.heap.keccak).getD (PrimTy.dflt .uint)))
 
 theorem Op2.eval_eq_evalM (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     o.eval g = o.evalM g := by
