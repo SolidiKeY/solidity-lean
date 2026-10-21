@@ -26,7 +26,7 @@ namespace Solidity
 open Lean Meta Elab
 
 /-- `@[sol_eqns l₁ … lₙ]`: the equation lemmas of a definition, named by hand. -/
-syntax (name := solEqns) "sol_eqns" (ppSpace ident)* : attr
+syntax (name := sol_eqns) "sol_eqns" (ppSpace ident)* : attr
 
 /-- The hand-named equation lemmas of each definition that has them. -/
 initialize eqnsAttr : ParametricAttribute (Array Name) ←
