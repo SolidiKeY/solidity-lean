@@ -66,7 +66,7 @@ theorem Fml.inSolkey_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p
   | _, .and φ ψ | _, .imp φ ψ => by
     simp only [Fml.rwEqC_and, Fml.rwEqC_imp, Fml.inSolkey, Fml.inSolkey_rwEqC q φ,
       Fml.inSolkey_rwEqC q ψ]
-  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll .. φ =>
+  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ =>
     Fml.inSolkey_rwEqC q φ
   | _, .modal m P κ φ => by
     simp only [Fml.rwEqC_modal, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]

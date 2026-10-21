@@ -144,6 +144,11 @@ theorem Fml.stepFocusR_anon {xs : List ((t : LTy) × Idx Γ t)} {φ φ' : Fml C 
     (h : φ.stepFocusR k = some (f, φ')) : (Fml.anon xs φ).stepFocusR k = some (f, .anon xs φ') :=
   Focus.map_some (Fml.anon xs) h
 
+theorem Fml.stepFocusR_allocAll {x : Var} {A : RefTy} {φ φ' : Fml C (.mem A :: Γ)} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) :
+    (Fml.allocAll x A φ).stepFocusR k = some (f, .allocAll x A φ') :=
+  Focus.map_some (Fml.allocAll x A) h
+
 /-- A formula with no modality takes no step: a postcondition
 (`Post.inactive`). -/
 theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false →
@@ -165,6 +170,7 @@ theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = 
   | _, .all x p φ, h => Focus.map_none (Fml.all x p) (Fml.stepFocusR_eq_none φ h)
   | _, .bind m x t φ, h => Focus.map_none (Fml.bind m x t) (Fml.stepFocusR_eq_none φ h)
   | _, .anon xs φ, h => Focus.map_none (Fml.anon xs) (Fml.stepFocusR_eq_none φ h)
+  | _, .allocAll x A φ, h => Focus.map_none (Fml.allocAll x A) (Fml.stepFocusR_eq_none φ h)
 
 /-- The strategy's step is the line `stepFocusR` leaves. -/
 theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
@@ -199,6 +205,9 @@ theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
     exact (Focus.map_snd (Fml.bind m x t) _).trans (congrArg (Option.map (Fml.bind m x t)) ih)
   | anon xs φ ih =>
     exact (Focus.map_snd (Fml.anon xs) _).trans (congrArg (Option.map (Fml.anon xs)) ih)
+  | allocAll x A φ ih =>
+    exact (Focus.map_snd (Fml.allocAll x A) _).trans
+      (congrArg (Option.map (Fml.allocAll x A)) ih)
 
 /-! ### `Fml.active` and `Fml.maxIdx` along the connectives
 
@@ -434,6 +443,9 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
   | _, .anon xs φ, f, ψ, h, σ, hψ => by
     obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.anon xs) h
     exact fun b => Fml.stepFocusR_sound φ h₁ _ (hψ b)
+  | _, .allocAll x A φ, f, ψ, h, σ, hψ => by
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.allocAll x A) h
+    exact fun o => Fml.stepFocusR_sound φ h₁ _ (hψ o)
 
 variable {Γ : Ctx} {φ ψ : Fml C Γ}
 
@@ -533,6 +545,7 @@ def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .all _ p φ => .all (.user "_") p (Fml.eraseNames φ)
   | _, .bind m _ t φ => .bind m (.user "_") t (Fml.eraseNames φ)
   | _, .anon xs φ => .anon xs (Fml.eraseNames φ)
+  | _, .allocAll _ A φ => .allocAll (.user "_") A (Fml.eraseNames φ)
   | _, φ => φ
 
 theorem Upd.exhAny_eraseNames {Γ : Ctx} (σ : State C Γ) :
@@ -603,7 +616,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
-  | _, σ, .anon _ φ | _, σ, .allocAll .. φ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .anon _ φ | _, σ, .allocAll _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
 
 /-- `φ ~~> L` past the program: `φ` leads to a line `B` that is the line
 written `L` up to its binders' names (`Fml.eraseNames`).  The line written

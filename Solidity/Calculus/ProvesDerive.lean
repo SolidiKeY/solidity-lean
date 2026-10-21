@@ -85,6 +85,7 @@ def _root_.Solidity.Hyps.maxIdxH {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ 
       (fun H x _ => max (Hyps.maxIdxH H) x.idx)
       (fun H _ x _ => max (Hyps.maxIdxH H) x.idx)
       (fun H _ => Hyps.maxIdxH H)
+      (fun H x _ => max (Hyps.maxIdxH H) x.idx)
   termination_by structural _ H => H
 
 /-- The fresh index of a step on `φ` behind a context whose largest index
@@ -134,7 +135,15 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Op
       cond (x H c) (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ) b)
         (cond (x H (.not c)) (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
           (both (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))))
-            (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ)) b))) ω
+            (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ)) b)))
+    (fun bs y A _ P ω => both (each (fun br => r H k
+      (Option.casesOn (motive := fun _ => Fml C Γ) br.hyp
+        (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))
+        fun c => .imp c
+          (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ))
+            φ)))) bs)
+      (r H k (.allocAll y A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)))
+      b) ω
 
 /-- A premise `¬X` whose `X` reads a program (a self-call's `catch` goal,
 `ExtCall.selfFails`): `X`, which the walk proves instead of the goal
@@ -198,7 +207,8 @@ def runK (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Opti
       (havoc := fun ψ H => (leaf H (.havoc ψ)).map (·, b))
       (all := fun x p ψ H => runK R leaf rf n (H.all x p) (max k x.idx) ψ b)
       (bind := fun m x t ψ H => runK R leaf rf n (H.bind m x t) (max k x.idx) ψ b)
-      (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) (allocAll := fun x A ψ H => (leaf H (.allocAll x A ψ)).map (·, b)) H
+      (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) 
+      (allocAll := fun x A ψ H => runK R leaf rf n (H.allocAll x A) (max k x.idx) ψ b) H
 
 /-- The walk of the sequent `H ⊢ φ` (`runK` from `H`'s largest index). -/
 def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
@@ -267,6 +277,10 @@ partial def qHyps (Γ₀ : Ctx) (np : Option Nat) : (Γ : Ctx) → Hyps C Γ₀ 
   | Γ, .anon H xs => do
     let args := #[← contract, ← qCtx Γ₀, ← qCtx Γ, ← qHyps Γ₀ np Γ H, ← qIdxList Γ xs]
     return Lean.mkAppN (Lean.mkConst ``Hyps.anon) args
+  | _, @Hyps.allocAll _ _ Γ H x A => do
+    let args := #[← contract, ← qCtx Γ₀, ← qCtx Γ, ← qHyps Γ₀ np Γ H, Lean.toExpr x,
+      Lean.toExpr A]
+    return Lean.mkAppN (Lean.mkConst ``Hyps.allocAll) args
 
 end Quote
 
@@ -323,7 +337,8 @@ def _root_.Solidity.Upd.storageWrites {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ �
 def _root_.Solidity.Hyps.storageWrites {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Nat
   | _, .nil => 0
   | _, .upd H _ U => H.storageWrites + U.storageWrites
-  | _, .pre H _ | _, .havoc H | _, .all H _ _ | _, .bind H _ _ _ | _, .anon H _ => H.storageWrites
+  | _, .pre H _ | _, .havoc H | _, .all H _ _ | _, .bind H _ _ _ | _, .anon H _
+  | _, .allocAll H _ _ => H.storageWrites
 
 /-- `#solkey_scan`'s view of `⊢ φ` (`Frontend/Problems.lean`): how many
 leaves the walk leaves, closed by `sol_prove`'s closer (`leafS`) or
@@ -413,6 +428,11 @@ theorem _root_.Solidity.Hyps.maxIdx_wrap {Γ₀ : Ctx} :
     show max H.maxIdxH (max x.idx φ.maxIdx) = _
     omega
   | _, .anon H xs, φ => Hyps.maxIdx_wrap H (.anon xs φ)
+  | _, .allocAll H x A, φ => by
+    show (H.wrap (.allocAll x A φ)).maxIdx = max (max H.maxIdxH x.idx) φ.maxIdx
+    rw [Hyps.maxIdx_wrap H]
+    show max H.maxIdxH (max x.idx φ.maxIdx) = _
+    omega
 
 /-- `Hyps.fresh` is `freshK` at the context's largest index. -/
 theorem _root_.Solidity.Hyps.fresh_eq_freshK {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
@@ -480,6 +500,10 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
         (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
       exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
   | inline P e => exact .inline (hR := hR) hd (hr _ _ _ _ _ h hl)
+  | allocBranches bs y A P =>
+    have := both_sound h hl (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
+      (hr _ _)
+    exact .allocBranches (hR := hR) hd this.1 this.2
 
 variable {leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)}
   (hleaf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) ls, leaf H φ = some ls →
@@ -565,6 +589,7 @@ theorem runK_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ)
     | all x p ψ => exact .allIntro (ih _ _ _ _ _ h hl)
     | bind m x t ψ => exact .bindIntro (ih _ _ _ _ _ h hl)
     | anon => exact leaf_sound hleaf h hl
+    | allocAll x A ψ => exact .allocIntro (ih _ _ _ _ _ h hl)
 
 include hrf in
 /-- **The walk is a derivation.** -/

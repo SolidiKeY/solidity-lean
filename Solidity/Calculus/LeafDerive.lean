@@ -141,7 +141,8 @@ def _root_.Solidity.Hyps.groundInSM {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ 
     match U.groundStepS xs with
     | some ys => H.groundInSM ys
     | none => false
-  | _, .all H _ _, xs@(_ :: _) | _, .bind H _ _ _, xs@(_ :: _) =>
+  | _, .all H _ _, xs@(_ :: _) | _, .bind H _ _ _, xs@(_ :: _)
+  | _, .allocAll H _ _, xs@(_ :: _) =>
     !xs.contains 0 && H.groundInSM (xs.map (· - 1))
   | _, .anon H ys, xs@(_ :: _) =>
     !ys.any (fun y => xs.contains y.2.toNatR) && H.groundInSM xs
@@ -161,7 +162,8 @@ def _root_.Solidity.Hyps.groundInS {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : 
     (fun _ ih xs => xs.isEmpty || ih xs)
     (fun _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1))))
     (fun _ _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1))))
-    (fun _ ys ih xs => xs.isEmpty || (!ys.any (fun y => xs.contains y.2.toNatR) && ih xs)) H xs
+    (fun _ ys ih xs => xs.isEmpty || (!ys.any (fun y => xs.contains y.2.toNatR) && ih xs))
+    (fun _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1)))) H xs
 
 theorem _root_.Solidity.Hyps.groundInS_eq_groundInSM {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ)
     (xs : List Nat) : H.groundInS xs = H.groundInSM xs := by
@@ -175,7 +177,7 @@ theorem _root_.Solidity.Hyps.groundInS_eq_groundInSM {Γ₀ Γ : Ctx} (H : Hyps 
     cases xs with
     | nil => rfl
     | cons x xs => simp only [Hyps.groundInSM, ← ih]; rfl
-  | all H x p ih | bind H m x t ih =>
+  | all H x p ih | bind H m x t ih | allocAll H x _ ih =>
     cases xs with
     | nil => rfl
     | cons x xs => simp only [Hyps.groundInSM, ← ih]; rfl
@@ -217,7 +219,7 @@ def _root_.Solidity.Fml.litPos {Γ : Ctx} (φ : Fml C Γ) : Option (List Nat) :=
       | some u, some v => some (u ++ v)
       | _, _ => none)
     (fun _ _ _ _ => none) (fun _ _ _ _ _ => none) (fun _ _ => none) (fun _ _ _ _ => none)
-    (fun _ _ _ _ _ => none) (fun _ _ _ => none) φ
+    (fun _ _ _ _ _ => none) (fun _ _ _ => none) (fun _ _ _ _ => none) φ
 
 theorem _root_.Solidity.Fml.litPos_eq_litPosM {Γ : Ctx} (φ : Fml C Γ) :
     φ.litPos = φ.litPosM := by

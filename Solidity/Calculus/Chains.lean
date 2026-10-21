@@ -222,7 +222,7 @@ def Frames.keyStrs (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → 
 /-- The slot a formula is, if it is one: `{anon(…)}` over a slot's mark
 (`Fml.slotMark`; `Fml.chainSlot`, `Fml.slotC`). -/
 def Fml.slot? {Γ : Ctx} : Fml C Γ → Option Nat
-  | .anon _ φ | .allocAll .. φ => φ.slotMark?
+  | .anon _ φ | .allocAll _ _ φ => φ.slotMark?
   | _ => none
 
 /-- **A line's comparison key**, the positions named by `ns`: its terms and
@@ -252,6 +252,7 @@ def Fml.lineKey : {Γ : Ctx} → List Var → Fml C Γ → LineKey
     | .all x p φ => .all x p (φ.lineKey (x :: ns))
     | .bind _ x _ φ => φ.lineKey (x :: ns)
     | .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.lineKey ns)
+    | .allocAll x _ φ => .anon [x] (φ.lineKey (x :: ns))
 
 /-- The key of `φ` (`Fml.lineKey`), its context named `ns`, quoted: what a
 written line's reading is compared with (`readingMatches`). -/

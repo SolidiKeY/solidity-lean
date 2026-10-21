@@ -915,7 +915,12 @@ partial def fml (ns : List Expr) (e : Expr) : RM Doc := do
     | none => return body
   | Fml.havoc _ _ φ =>
     return .cat #[.tx "\\{" 1, .tx (← spell "havoc" "\\havoc") 5, .tx "\\}" 1, .brk, ← fmlArg ns φ]
-  | Fml.anon _ _ xs φ | Fml.allocAll .. _ xs φ =>
+  | Fml.allocAll _ _ x _ φ =>
+    let x := x.consumeMData
+    let some xi ← ppVar? x | unknownFml e
+    return .cat #[.tx "\\forall " 1, .tx "\\mathsf{fresh}" 5, .tx "\\," 1,
+      .ident xi.getId.toString, .tx ";\\ " 2, ← fml (x :: ns) φ]
+  | Fml.anon _ _ xs φ =>
     let some xs ← listElems? xs | unknownFml e
     let ids ← xs.mapM fun x => do
       let n ← Delab.idxName ns (← whnf x).appArg!
