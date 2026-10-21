@@ -715,6 +715,27 @@ theorem inFrag_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (F : Frag
     inFrag F (.tryCall c rets ok err code pnc other sargs sbody self) = none := by
   unfold inFrag; rfl
 
+/-- The statements outside the fragment that `stmt_sim` rules out at once. -/
+def Stmt.evmOutside {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
+  | .send .. | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem ..
+  | .assignNew .. | .loop .. | .assignLocalPush .. | .pushOpAssign .. | .pushIncDec ..
+  | .callReceiver .. | .callReceiverPush .. | .callRec .. | .revertData .. | .catchData .. => true
+  | _ => false
+
+/-- Those statements are outside the fragment (stated apart, as
+`inFrag_tryCall`, so that `stmt_sim` does not unfold `inFrag` on each). -/
+theorem inFrag_outside {Γ Γ' : Ctx} (F : Frag Γ) (s : Solidity.Stmt C Γ Γ')
+    (h : Stmt.evmOutside s = true) : inFrag F s = none := by
+  cases s <;> first | (cases h; done) | rfl | (unfold inFrag; rfl)
+
+/-- `stmt_sim` of a statement outside the fragment: vacuous. -/
+theorem stmt_sim_outside {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') (h : Stmt.evmOutside s = true)
+    {L b : Nat} {F : Frag Γ} {F' : Frag Γ'} {σ : State C Γ} {m : Machine} :
+    Sim C L b F σ m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
+      StmtOut C (L + Stmt.pushes s) b F' (Stmt.shrinks s) (Stmt.pays s) (Stmt.asserts s)
+        (Solidity.Stmt.run σ s) (run (compileStmt b s) m) m :=
+  fun _ hw _ => Option.noConfusion ((inFrag_outside _ _ h).symm.trans hw)
+
 set_option maxHeartbeats 11000 in
 mutual
 
@@ -762,21 +783,24 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
     exact block_sim body (prog_sim body hm hb hL)
   | _, _, .call f args ret body => fun hm hw hL =>
     call_family f args ret body hm hw fun hb hm₂ => prog_sim body hm₂ hb hL
-  | _, _, .send .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .declMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .rebindMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .assignFromMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .assignMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .deleteMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .assignNew .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .send a0 a1 a2 a3 => stmt_sim_outside (.send a0 a1 a2 a3) rfl
+  | _, _, .declMem a0 a1 a2 a3 a4 => stmt_sim_outside (.declMem a0 a1 a2 a3 a4) rfl
+  | _, _, .rebindMem a0 a1 => stmt_sim_outside (.rebindMem a0 a1) rfl
+  | _, _, .assignFromMem a0 a1 => stmt_sim_outside (.assignFromMem a0 a1) rfl
+  | _, _, .assignMem a0 a1 => stmt_sim_outside (.assignMem a0 a1) rfl
+  | _, _, .deleteMem a0 a1 => stmt_sim_outside (.deleteMem a0 a1) rfl
+  | _, _, .assignNew a0 a1 a2 => stmt_sim_outside (.assignNew a0 a1 a2) rfl
   | _, _, .tryCall .. => fun _ hw _ => by rw [inFrag_tryCall] at hw; cases hw
-  | _, _, .loop .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .assignLocalPush .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .pushOpAssign .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .pushIncDec .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .callReceiver .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .callReceiverPush .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .callRec .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .loop a0 a1 a2 => stmt_sim_outside (.loop a0 a1 a2) rfl
+  | _, _, .assignLocalPush a0 a1 => stmt_sim_outside (.assignLocalPush a0 a1) rfl
+  | _, _, .pushOpAssign a0 a1 a2 a3 a4 => stmt_sim_outside (.pushOpAssign a0 a1 a2 a3 a4) rfl
+  | _, _, .pushIncDec a0 a1 a2 => stmt_sim_outside (.pushIncDec a0 a1 a2) rfl
+  | _, _, .callReceiver a0 a1 a2 a3 a4 => stmt_sim_outside (.callReceiver a0 a1 a2 a3 a4) rfl
+  | _, _, .callReceiverPush a0 a1 a2 a3 a4 a5 => stmt_sim_outside (.callReceiverPush a0 a1 a2 a3 a4 a5) rfl
+  | _, _, .callRec a0 a1 a2 a3 a4 => stmt_sim_outside (.callRec a0 a1 a2 a3 a4) rfl
+  | _, _, .revertData a0 => stmt_sim_outside (.revertData a0) rfl
+  | _, _, .catchData c rets sargs sbody self kind x body =>
+    stmt_sim_outside (.catchData c rets sargs sbody self kind x body) rfl
 
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}

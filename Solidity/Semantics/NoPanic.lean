@@ -396,10 +396,22 @@ theorem catchData_noPanic {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Bin
     (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) (body : TStep C (.mem bytesR :: Γ) Γ₁)
     (hbody : ∀ σ, (body σ).NoPanic) (σ : State C Γ) :
     (catchData c rets sargs hs sbody self kind h₁ body σ).NoPanic := by
-  unfold catchData
-  split
-  · exact TRes.NoPanic.revert
-  · exact (litBytesT_noPanic hbody _ σ).map _
+  unfold catchData catchBytes
+  refine TRes.NoPanic.bind ?_ fun d => ?_
+  · split
+    · exact TRes.NoPanic.revert
+    split
+    · split
+      · exact TRes.NoPanic.revert
+      · exact TRes.NoPanic.ok _
+      · exact TRes.NoPanic.ok _
+      · exact TRes.NoPanic.ok _
+      · rename_i e _ _ _ h4 _
+        exact fun h => h4 (by cases h; rfl)
+    · split <;> first | exact TRes.NoPanic.ok _ | exact TRes.NoPanic.revert
+  · split
+    · exact TRes.NoPanic.revert
+    · exact (litBytesT_noPanic hbody _ σ).map _
 
 end TRun
 

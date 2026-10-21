@@ -243,6 +243,9 @@ def Stmt.size : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     1 + call.size + ok.size + err.size + pnc.size + other.size + sargs.size + sbody.size
   | _, _, .loop a c body => 1 + a.size + c.size + body.size
   | _, _, .block body => 1 + body.size
+  | _, _, .revertData _ => 1
+  | _, _, .catchData call _ sargs sbody _ _ _ body =>
+    1 + call.size + sargs.size + sbody.size + body.size
   | _, _, .pushOpAssign _ _ _ b r => 1 + b.size + r.size
   | _, _, .pushIncDec _ _ b => 1 + b.size
   | _, _, .callReceiver _ args _ body op => 1 + args.size + body.size + op.size
@@ -1490,6 +1493,11 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
   | callReceiverPush f args r body code value =>
     exact ReceiverValue.step_bounded k f args r body (.deferred code value) _
   | callRec f d args ret body => bnil
+  | revertData d => cases m <;> bnil
+  | catchData call rets sargs sbody self kind x body =>
+    show (catchDataStep m call sbody self kind x body).Bounded _
+    unfold catchDataStep
+    split <;> bnil
 
 /-- **A rule writes at most two elements an update.** -/
 theorem Stmt.step_upds_le {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :

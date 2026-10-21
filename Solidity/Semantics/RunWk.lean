@@ -1447,6 +1447,7 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
         (body.wk (.keep h)).2.2.ext (body.wk (.keep h)).2.2.runR (τ.lift h d))
     unfold TRun.catchData
     rw [TRun.catchBytes_wk]
+    refine TWkRel.bind_same _ fun dt => ?_
     split
     · rfl
     · exact TWkRel.drop (Thin.Over.trans (.push (.refl h)) (Prog.wk_over body (.keep h)))

@@ -943,28 +943,29 @@ def litBytesT {Γ₁ : Ctx} (bs : List UInt8) (k : TStep C (.mem bytesR :: Γ) �
       rfl) (litWritesT bs 0 k)
   else seq (declMem bytesR none rfl) k
 
-/-- The data the call `call` reverts with, read from the state the `try`
+/-- The data the call `c` reverts with, read from the state the `try`
 started in: at address `0`, none (the `try` reverts there); for a
 self-call, the callee's run again (an `Error` reason or custom error as it
 reverts, no data for a bare revert, `Panic` and the code the run binds for
-a panic); otherwise the transaction's entry.  `none` where the call does
-not fail. -/
+a panic, the callee's halt where it exhausts or diverges); otherwise the
+transaction's entry.  A revert where the call does not fail. -/
 def catchBytes {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps)
     (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (σ : State C Γ) :
-    Option (List UInt8) :=
-  if (c.addr.evalT σ).1 = 0 then none else
+    TRes (List UInt8) :=
+  if (c.addr.evalT σ).1 = 0 then .error .revert else
   if self && decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) then
     match call sargs (.rets rets) hs sbody σ with
-    | .error .revert => some []
-    | .error (.revertWith d) => some d
-    | .error .panic => some (Semantics.encodePanic (selfPanicCode c σ).1.toNat)
-    | _ => none
+    | .ok _ => .error .revert
+    | .error .revert => .ok []
+    | .error (.revertWith d) => .ok d
+    | .error .panic => .ok (Semantics.encodePanic (selfPanicCode c σ).1.toNat)
+    | .error e => .error e
   else
     match lookupBy (c.keyT σ) σ.tx.ext with
-    | some (.error r) => some (Semantics.encodeError r)
-    | some (.panic c) => some (Semantics.encodePanic c.1.toNat)
-    | some (.other d) => some d
-    | _ => none
+    | some (.error r) => .ok (Semantics.encodeError r)
+    | some (.panic p) => .ok (Semantics.encodePanic p.1.toNat)
+    | some (.other d) => .ok d
+    | _ => .error .revert
 
 /-- What a clause of `kind` binds of the data: the `Error` reason decoded,
 or the data itself. -/
@@ -978,8 +979,9 @@ clause is not reached so). -/
 def catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps)
     (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (kind : CatchKind)
     (h₁ : Ext (.mem bytesR :: Γ) Γ₁) (body : TStep C (.mem bytesR :: Γ) Γ₁) : TStep C Γ Γ :=
-  fun σ =>
-    match (catchBytes c rets sargs hs sbody self σ).bind kind.decode with
+  fun σ => do
+    let d ← catchBytes c rets sargs hs sbody self σ
+    match kind.decode d with
     | none => .error .revert
     | some bs => (litBytesT bs body σ).map fun o => ⟨o.st.drop ((Ext.push .refl).trans h₁), o.ext⟩
 

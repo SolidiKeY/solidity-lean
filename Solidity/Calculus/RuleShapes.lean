@@ -605,7 +605,9 @@ are a `try` whose callee is the contract's own function, run in its frame
 (`docs/options.md` O8): solkey's `try` never runs a callee. `recursiveCallUnfold`
 is a recursive call read as the call of its body's next frame
 (`Stmt.callRec`), where solkey inlines without end. `keccakAssignment` reads
-`keccak256`, which solkey does not have. The list is checked against the
+`keccak256`, which solkey does not have. `revertDataBox`, `revertDataDiamond`,
+`catchDataBox` and `catchDataDiamond` read revert data, which solkey does not
+keep (`docs/semantic-gaps.md`, "Revert data"). The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
@@ -616,7 +618,9 @@ def leanTaclets : List Lean.Name :=
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
     ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave,
-    ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond, ``LeanTaclet.recursiveCallUnfold]
+    ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond, ``LeanTaclet.recursiveCallUnfold,
+    ``LeanTaclet.revertDataBox, ``LeanTaclet.revertDataDiamond, ``LeanTaclet.catchDataBox,
+    ``LeanTaclet.catchDataDiamond]
 
 #check_constructor_table LeanTaclet, leanTaclets
 
