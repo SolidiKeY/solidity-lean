@@ -115,6 +115,7 @@ import Solidity.Calculus.Spec
 import Solidity.Calculus.Deploy
 import Solidity.Calculus.FunContract
 import Solidity.Calculus.Recursion
+import Solidity.Calculus.RunFrameMem
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Derive
 import Solidity.Calculus.LeafDerive
