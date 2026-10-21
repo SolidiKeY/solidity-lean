@@ -91,7 +91,8 @@ theorem Pat.lenTm_eval (σ : State C Γ) (bs : List UInt8) (hn : bs.length < 2 ^
   show (σ.alloc (bytesObj σ.H bs hn)).1.glob.memT.lenId (.prim .uint)
     ((σ.alloc (bytesObj σ.H bs hn)).2 : HRef _ bytesR).id = _
   rw [Grown.lenId_ref (σ.alloc (bytesObj σ.H bs hn)).1.glob.memT (σ.alloc (bytesObj σ.H bs hn)).2]
-  show some (Heap.lenU (σ.heap.alloc (bytesObj σ.H bs hn)).1 (σ.heap.alloc (bytesObj σ.H bs hn)).2) = _
+  show some (Heap.lenU (σ.heap.alloc (bytesObj σ.H bs hn)).1
+    (σ.heap.alloc (bytesObj σ.H bs hn)).2) = _
   simp only [Heap.lenU, Heap.len, Heap.get_alloc, MObj.elems_dyn, MObj.wk, List.length_map]
   rw [uintOfNat_eq_lenU hn]
 
@@ -261,8 +262,9 @@ theorem Premise.sound_catchDataBox {ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ)
     simp only [Bool.true_and, decide_eq_true_eq] at hs
     have hn' : call.notSelf.evalT σ = .ok true := by
       rw [ExtCall.notSelf_evalT]; simp only [hs, decide_false, Bool.not_false]
-    exact catch_alloc_sound σ _ (by rw [Prog.runSt_require_true hc, Prog.runSt_require_true hn']; rfl)
-      x body ω κ φ bs hn none none_holds
+    exact catch_alloc_sound σ _
+      (by rw [Prog.runSt_require_true hc, Prog.runSt_require_true hn']; rfl) x body ω κ φ bs hn
+      none none_holds
       (hall _ (List.mem_append_right _ (List.mem_map.2 ⟨_, List.mem_append_right _
         (List.mem_singleton_self _), rfl⟩)))
 

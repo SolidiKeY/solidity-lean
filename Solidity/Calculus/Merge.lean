@@ -91,7 +91,8 @@ theorem Fml.merge2_leads {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) �
     · cases h
   | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .wellFormed _, _, h | _, _, _, .not _, _, h
   | _, _, _, .and .., _, h | _, _, _, .imp .., _, h | _, _, _, .modal .., _, h
-  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h | _, _, _, .allocAll .., _, h => nomatch h
+  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h
+  | _, _, _, .allocAll .., _, h => nomatch h
 
 theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
     φ.mergeAt k = some ψ → ∀ σ, holds σ ψ → holds σ φ

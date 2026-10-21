@@ -959,7 +959,8 @@ attribute [close_rw_s]
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon CloseS.holds_allocAll
   CloseS.alloc_storage CloseS.alloc_net CloseS.alloc_selfBalance CloseS.alloc_tx CloseS.locV_alloc
-  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId CloseS.push_readT CloseS.alloc_readT_index
+  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId CloseS.push_readT
+  CloseS.alloc_readT_index
   CloseS.push_readId CloseS.alloc_readId_index
   CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool

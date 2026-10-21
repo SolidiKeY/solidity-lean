@@ -1103,7 +1103,8 @@ def Fml.rwAtS (top : UpdRw C) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
     (upd := fun m U φ ih => (top m U φ).orElse fun _ => ih.map (.upd m U))
     (modal := fun m P κ _ ih => ih.map (.modal m P κ)) (havoc := fun _ ih => ih.map .havoc)
     (all := fun x p _ ih => ih.map (.all x p)) (bind := fun m x t _ ih => ih.map (.bind m x t))
-    (anon := fun xs _ ih => ih.map (.anon xs)) (allocAll := fun x A _ ih => ih.map (.allocAll x A)) φ
+    (anon := fun xs _ ih => ih.map (.anon xs))
+    (allocAll := fun x A _ ih => ih.map (.allocAll x A)) φ
 
 theorem Fml.rwAtS_eq_rwAtSM (top : UpdRw C) {Γ : Ctx} (φ : Fml C Γ) :
     φ.rwAtS top = φ.rwAtSM top := by
@@ -1204,7 +1205,8 @@ def Fml.cleanB {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
     (and := fun φ ψ _ _ => .and φ ψ) (imp := fun φ ψ _ _ => .imp φ ψ)
     (upd := fun m U φ _ => Fml.cleanS m U φ) (modal := fun m P κ φ _ => .modal m P κ φ)
     (havoc := fun φ _ => .havoc φ) (all := fun x p φ _ => .all x p φ)
-    (bind := fun m x t _ ih => .bind m x t ih) (anon := fun xs φ _ => .anon xs φ) (allocAll := fun x A φ _ => .allocAll x A φ) φ
+    (bind := fun m x t _ ih => .bind m x t ih) (anon := fun xs φ _ => .anon xs φ)
+    (allocAll := fun x A φ _ => .allocAll x A φ) φ
 
 theorem Fml.cleanB_eq_cleanBM {Γ : Ctx} (φ : Fml C Γ) : φ.cleanB = φ.cleanBM := by
   induction φ with
@@ -1240,7 +1242,8 @@ def Fml.simpUpdsS {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
     (and := fun _ _ ihφ ihψ => .and ihφ ihψ) (imp := fun φ _ _ ihψ => .imp φ ihψ)
     (upd := fun m U _ ih => Fml.mkUpdS m U ih) (modal := fun m P κ _ ih => .modal m P κ ih)
     (havoc := fun _ ih => .havoc ih) (all := fun x p _ ih => .all x p ih)
-    (bind := fun m x t _ ih => .bind m x t ih) (anon := fun xs _ ih => .anon xs ih) (allocAll := fun x A _ ih => .allocAll x A ih) φ
+    (bind := fun m x t _ ih => .bind m x t ih) (anon := fun xs _ ih => .anon xs ih)
+    (allocAll := fun x A _ ih => .allocAll x A ih) φ
 
 theorem Fml.simpUpdsS_eq_simpUpdsSM {Γ : Ctx} (φ : Fml C Γ) : φ.simpUpdsS = φ.simpUpdsSM := by
   induction φ with

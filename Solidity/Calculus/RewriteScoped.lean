@@ -140,7 +140,8 @@ theorem Fml.belowS_sound
   | _, 0, .havoc _, _, h | _, 0, .anon .., _, h | _, 0, .allocAll .., _, h => hf h
   | _, _ + 1, .tt, _, h | _, _ + 1, .eq .., _, h | _, _ + 1, .wellFormed _, _, h
   | _, _ + 1, .not _, _, h | _, _ + 1, .and .., _, h | _, _ + 1, .imp .., _, h
-  | _, _ + 1, .modal .., _, h | _, _ + 1, .havoc _, _, h | _, _ + 1, .anon .., _, h | _, _ + 1, .allocAll .., _, h => by cases h
+  | _, _ + 1, .modal .., _, h | _, _ + 1, .havoc _, _, h | _, _ + 1, .anon .., _, h
+  | _, _ + 1, .allocAll .., _, h => by cases h
 
 /-- A rewrite of the update in front is one of the line. -/
 theorem Fml.atUpd_sound {g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)}

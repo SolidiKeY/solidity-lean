@@ -77,7 +77,8 @@ def Fml.wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) : Option (Fml C Δ) 
     (imp := fun φ ψ _ h => do pure (.imp (← Fml.wkFO h φ) (← Fml.wkFO h ψ)))
     (upd := fun _ _ _ _ _ => none) (modal := fun _ _ _ _ _ _ => none)
     (havoc := fun _ _ _ => none) (all := fun x p φ _ h => (Fml.wkFO h.keep φ).map (.all x p))
-    (bind := fun _ _ _ _ _ _ => none) (anon := fun _ _ _ _ => none) (allocAll := fun _ _ _ _ _ => none) Δ h
+    (bind := fun _ _ _ _ _ _ => none) (anon := fun _ _ _ _ => none)
+    (allocAll := fun _ _ _ _ _ => none) Δ h
   termination_by structural φ
 
 section WkFOEqns

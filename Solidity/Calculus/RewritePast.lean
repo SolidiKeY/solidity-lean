@@ -1486,7 +1486,8 @@ theorem Fml.merge2P_sound {m : Modality} {reorder : Bool} : {Γ Δ : Ctx} → (U
         · cases h
   | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .wellFormed _, _, h | _, _, _, .not _, _, h
   | _, _, _, .and .., _, h | _, _, _, .imp .., _, h | _, _, _, .modal .., _, h
-  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h | _, _, _, .allocAll .., _, h => nomatch h
+  | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h
+  | _, _, _, .allocAll .., _, h => nomatch h
 
 /-- `sequentialToParallel` past the program on the updates at positions `k`
 and `k + 1` of the line's update spine, under its quantifiers and hidden
@@ -2511,7 +2512,8 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact forall_congr' fun v => Fml.thinFO?_holds (.keep h) φ hφ' (σ.push (t := .val p) v)
   | _, _, _, .upd .., _, hφ, _ | _, _, _, .modal .., _, hφ, _ | _, _, _, .havoc _, _, hφ, _
-  | _, _, _, .bind .., _, hφ, _ | _, _, _, .anon .., _, hφ, _ | _, _, _, .allocAll .., _, hφ, _ => by cases hφ
+  | _, _, _, .bind .., _, hφ, _ | _, _, _, .anon .., _, hφ, _
+  | _, _, _, .allocAll .., _, hφ, _ => by cases hφ
 
 /-- A formula of `Γ` read in `Γ'`: first-order where it is read both ways
 (under `¬`, left of `→`), and through updates and binders elsewhere. -/

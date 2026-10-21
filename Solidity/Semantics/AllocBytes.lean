@@ -78,7 +78,8 @@ theorem Grown.alloc_prims_eq {H : HTy} (hp : Heap H) {n : Nat}
 /-- `new bytes(n)`'s object, copied: one fresh object of `n` zero words. -/
 theorem SVal.copyStToM_zeros {H : HTy} (hp : Heap H) (n : Nat) (hn : n < 2 ^ 256)
     (h : (Ty.ref bytesR).mapFree = true) (hk) :
-    SVal.copyStToM hp (.array (SVec.ofList (List.replicate n (SVal.dflt (.prim .uint)))) .nil hk) h =
+    SVal.copyStToM hp
+        (.array (SVec.ofList (List.replicate n (SVal.dflt (.prim .uint)))) .nil hk) h =
       Grown.alloc ⟨List.prefix_refl H, hp, zerosObj H n hn⟩ := by
   rw [SVal.copyStToM_array]
   have e : List.replicate n (SVal.dflt (.prim .uint)) =
@@ -118,7 +119,8 @@ theorem Objs.set_snoc_top {H : HTy} {R : RefTy} (o o' : MObj H R) :
       Objs.set (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h o' = Objs.snoc o' Rs os
   | [], _, _ => rfl
   | _ :: Rs, os, h => by
-    show (os.1, Objs.set (Rs ++ [R]) (Objs.snoc o Rs os.2) Rs.length _ o') = (os.1, Objs.snoc o' Rs os.2)
+    show (os.1, Objs.set (Rs ++ [R]) (Objs.snoc o Rs os.2) Rs.length _ o') =
+      (os.1, Objs.snoc o' Rs os.2)
     rw [Objs.set_snoc_top o o' Rs os.2]
 
 end Solidity
@@ -129,7 +131,8 @@ variable {C : Contract} {Γ : Ctx}
 
 /-- A byte's word, as `litSrc` writes it. -/
 def byteWord (b : UInt8) : PrimTy.uint.Denote :=
-  PrimTy.ofLit .uint (b.toNat : Int) (PrimTy.inRange_uint_of_lt (Nat.lt_trans b.toNat_lt (by decide)))
+  PrimTy.ofLit .uint (b.toNat : Int)
+    (PrimTy.inRange_uint_of_lt (Nat.lt_trans b.toNat_lt (by decide)))
 
 theorem Heap.get_alloc_self {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
@@ -163,7 +166,8 @@ theorem MObj.wk_bytes_len {H H' : HTy} (e : H <+: H') (o : MObj H bytesR) :
   simp only [MObj.elems_dyn, MObj.wk, List.length_map]
 
 theorem TRun.assignMem_litWrite (σ : State C Γ) (o : MObj σ.H bytesR) (i : Nat) (hi : i < 2 ^ 256)
-    (b : UInt8) (hl : i < (o : {l : List (MVal σ.H (.prim .uint)) // l.length < 2 ^ 256}).1.length) :
+    (b : UInt8)
+    (hl : i < (o : {l : List (MVal σ.H (.prim .uint)) // l.length < 2 ^ 256}).1.length) :
     TRun.assignMem (litLoc i hi) (litSrc b) (σ.allocPush o) =
       .ok ⟨σ.allocPush (MObj.setElem .dyn o i (byteWord b)), List.prefix_refl _⟩ := by
   have hg : TEnv.get Idx.here (σ.allocPush o).env = (some (σ.alloc o).2 : Option (HRef _ bytesR)) :=

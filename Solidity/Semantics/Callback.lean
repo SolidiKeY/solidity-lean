@@ -253,7 +253,8 @@ def Fml.hasTransfer : {Γ : Ctx} → Fml C Γ → Bool
     (upd := fun _ _ φ => Fml.hasTransfer φ)
     (modal := fun _ P κ φ => Prog.hasTransfer P || κ.hasTransfer || Fml.hasTransfer φ)
     (havoc := fun φ => Fml.hasTransfer φ) (all := fun _ _ φ => Fml.hasTransfer φ)
-    (bind := fun _ _ _ φ => Fml.hasTransfer φ) (anon := fun _ φ => Fml.hasTransfer φ) (allocAll := fun _ _ φ => Fml.hasTransfer φ)
+    (bind := fun _ _ _ φ => Fml.hasTransfer φ) (anon := fun _ φ => Fml.hasTransfer φ)
+    (allocAll := fun _ _ φ => Fml.hasTransfer φ)
   termination_by structural _ φ => φ
 
 theorem Prog.hasTransfer_cons {Γ Γ₁ Γ' : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ') :
@@ -335,7 +336,8 @@ def Fml.callsBack (pay : Bool) : {Γ : Ctx} → Fml C Γ → Bool
     (upd := fun _ _ φ => Fml.callsBack pay φ)
     (modal := fun _ P κ φ => Prog.callsBack pay P || κ.callsBack pay || Fml.callsBack pay φ)
     (havoc := fun φ => Fml.callsBack pay φ) (all := fun _ _ φ => Fml.callsBack pay φ)
-    (bind := fun _ _ _ φ => Fml.callsBack pay φ) (anon := fun _ φ => Fml.callsBack pay φ) (allocAll := fun _ _ φ => Fml.callsBack pay φ)
+    (bind := fun _ _ _ φ => Fml.callsBack pay φ) (anon := fun _ φ => Fml.callsBack pay φ)
+    (allocAll := fun _ _ φ => Fml.callsBack pay φ)
   termination_by structural _ φ => φ
 
 theorem Fml.callsBack_and {pay : Bool} {Γ : Ctx} (φ ψ : Fml C Γ) :

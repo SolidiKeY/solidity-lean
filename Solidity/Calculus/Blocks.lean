@@ -394,7 +394,8 @@ def catchLit {Γ Γ₁ : Ctx} (x : Var) (kind : CatchKind) (d : List UInt8)
 /-- `n` as a `uint` literal, modulo `2^256` (no `bytes` is that long):
 `uintOfNat` below the bound, a literal the closers fold. -/
 def Pat.word (n : Nat) : PrimTy.uint.Denote :=
-  PrimTy.ofLit .uint ((n % 2 ^ 256 : Nat) : Int) (PrimTy.inRange_uint_of_lt (Nat.mod_lt _ (Nat.two_pow_pos 256)))
+  PrimTy.ofLit .uint ((n % 2 ^ 256 : Nat) : Int)
+    (PrimTy.inRange_uint_of_lt (Nat.mod_lt _ (Nat.two_pow_pos 256)))
 
 theorem Pat.word_eq {n : Nat} (h : n < 2 ^ 256) : Pat.word n = uintOfNat n := by
   rw [uintOfNat_eq_lenU h]
