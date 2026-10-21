@@ -1157,10 +1157,11 @@ def encodeBuiltin (f : String) : Bool :=
   ["abi.encode", "abi.encodePacked", "string.concat", "bytes.concat", "abi.encodeWithSelector",
     "abi.encodeWithSignature", "abi.encodeCall"].contains f
 
-/-- A builtin that reads byte strings whole: `keccak256`, the ABI's, the
-`concat`s (and `#abiDecode`, `abi.decode`'s lowering). -/
+/-- A builtin that reads byte strings whole: the hashes, the ABI's, the
+`concat`s (and `#abiDecode`, `abi.decode`'s lowering); `ecrecover`, whose
+arguments it encodes. -/
 def byteBuiltin (f : String) : Bool :=
-  encodeBuiltin f || ["keccak256", "sha256", "ripemd160", "abi.decode", "#abiDecode"].contains f
+  encodeBuiltin f || isHashName f || ["abi.decode", "#abiDecode"].contains f
 
 /-- `f`, a function's name: an identifier with no member access. -/
 def funName? (f : TSyntax `sol_expr) : Option String :=

@@ -16,7 +16,7 @@ gap, in exactly one category (`claimedTaclets_count = 342`,
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
 The existing `LeanTaclet` layer (`leanTaclets`) has nineteen rules,
-`addmodAssignment`, `mulmodAssignment`, `keccakAssignment`, `functionCallArgCapture`,
+`addmodAssignment`, `mulmodAssignment`, `hashAssignment`, `functionCallArgCapture`,
 `tryCallDiamond`, `transferDiamond`, `assumeFalse`, `loopExit`,
 `whileClose`, `whileNoVariantDiamond`, `pushCompoundUnfoldReceiver`,
 `pushIncrementUnfoldReceiver`, `storageMemorySourceSave`,
@@ -291,10 +291,14 @@ native terms. These are **Lean-only**, excluded recursively from
 verified EVM compiler fragment. Their regression and imported proof are
 `Examples/Tactics/ModularArithmetic.lean` and `TestSuite/Derived18.lean`.
 
-`LeanTaclet.keccakAssignment` (`v = keccak256(mpath)` is
-`{ v := keccak256(memory, mpath) }`, `Op2.keccak`) has no solkey taclet:
-solkey has no hash (`docs/semantic-gaps.md`, "Hashing and the ABI"); the hash
-is Keccak-256 (`keccakBytes`, `Keccak.lean`), kept from unfolding.
+`LeanTaclet.hashAssignment` (`v = hash(mpath)` is
+`{ v := hash(memory, mpath) }`, `Op2.hash`, the hash `hh : HashKind` a schema
+variable: `keccak256`, `sha256`, `ripemd160`, `ecrecover`) has no solkey
+taclet: solkey has no hash (`docs/semantic-gaps.md`, "Hashing and the ABI");
+the hashes are Keccak-256, SHA-256 and RIPEMD-160 (`keccakBytes`,
+`sha256Bytes`, `ripemd160Bytes`; `Keccak.lean`, `Hashes.lean`), kept from
+unfolding, and `ecrecover` an address uninterpreted where the signature is
+well formed (`ecrecoverBytes`).
 **Lean-only**, excluded from `Stmt.inSolkey` (`Val.keyValue`) and from the
 EVM compiler's fragment.
 

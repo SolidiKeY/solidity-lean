@@ -1914,7 +1914,10 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
   -- an element or a member: its declared width (`uint8[] values`, `p.a` of a
   -- `Packed p`)
   | .index e k => (pathWidth? C Γ (.index e k)).orElse fun _ => some (.uint, 256)
-  | .field e f => (pathWidth? C Γ (.field e f)).orElse fun _ => some (.uint, 256)
+  -- `ripemd160`'s and `ecrecover`'s word is below `2^160` (`hashMember`)
+  | .field e f =>
+    if hashMember? f matches some .ripemd160 | some .ecrecover then some (.uint, 160)
+    else (pathWidth? C Γ (.field e f)).orElse fun _ => some (.uint, 256)
   | _ => some (.uint, 256)
 
 /-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
@@ -3127,8 +3130,8 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
   pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
 
 /-- `keccak256(b)`, `sha256(b)`, `ripemd160(b)`: of a memory `bytes` (a
-storage one copied first), into a fresh `bytes32` (`Val.hash`);
-`ripemd160`'s `bytes20` is that word's first 20 bytes (`ripemd160Bytes`).
+storage one copied first), into a fresh `bytes32` (`Val.hash`), a
+`bytes20` for `ripemd160` (`ripemd160Bytes`, below `2^160`).
 `ecrecover(h, v, r, s)`: of the precompile's input, the four arguments' ABI
 words (`abi.encode`), an `address` (`ecrecoverBytes`). -/
 def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
@@ -3141,21 +3144,16 @@ def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
     let (P, a) ← hoist (.call "abi.encode" args)
     let (Q, b) ← abiMemBytes a
     let y := toString (← freshCapture "se")
-    let R ← elabStmtsP [.decl (.named "uint256") y
+    let R ← elabStmtsP [.decl (.named "address") y
       (some (.field (.name b) (hashMember .ecrecover)))]
-    let z := toString (← freshCapture "se")
-    let R' ← elabStmtsP [.decl (.named "address") z
-      (some (.call "address" [.call "uint160" [.name y]]))]
-    return (P ++ Q ++ R ++ R', .name z)
+    return (P ++ Q ++ R, .name y)
   let [a] := args | throw s!"{f} takes one argument"
   let (P, a) ← hoist a
   let (Q, b) ← abiMemBytes a
   let y := toString (← freshCapture "se")
-  let R ← elabStmtsP [.decl (.named "bytes32") y (some (.field (.name b) (hashMember k)))]
-  unless f == "ripemd160" do return (P ++ Q ++ R, .name y)
-  let z := toString (← freshCapture "se")
-  let R' ← elabStmtsP [.decl (.named "bytes20") z (some (.call "bytes20" [.name y]))]
-  return (P ++ Q ++ R ++ R', .name z)
+  let T := if f == "ripemd160" then "bytes20" else "bytes32"
+  let R ← elabStmtsP [.decl (.named T) y (some (.field (.name b) (hashMember k)))]
+  return (P ++ Q ++ R, .name y)
 
 mutual
 

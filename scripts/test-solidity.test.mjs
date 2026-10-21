@@ -415,7 +415,7 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
-test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
+test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
   const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
@@ -423,7 +423,9 @@ test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys
     'decodeRoundtrip', 'stringKey', 'concatLengths',
     // a selector before the arguments, folded as solc folds it; an enum
     // packed at one byte; a struct of values in the head
-    'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct'])
+    'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct',
+    // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
+    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner'])
     assert.equal(status[name], 'proved', name);
 });
 

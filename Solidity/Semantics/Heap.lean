@@ -485,11 +485,9 @@ precompile at address `2`; `@[irreducible]` as `keccakBytes` is. -/
   uintOfNat (Hashes.sha256Nat (bs.map fun b => b.toNat % 256))
 
 /-- `ripemd160` of a byte sequence: RIPEMD-160 of its bytes (`Hashes.lean`),
-the precompile at address `3`, as a `bytes32` whose first 20 bytes are the
-hash (the elaborator reads the `bytes20` off it, as `bytes20(b)` of a
-`bytes32` does). -/
+the precompile at address `3`, below `2^160`: a `bytes20`. -/
 @[irreducible] def ripemd160Bytes (bs : List Int) : PrimTy.uint.Denote :=
-  uintOfNat (Hashes.ripemd160Nat (bs.map fun b => b.toNat % 256) * 2 ^ 96)
+  uintOfNat (Hashes.ripemd160Nat (bs.map fun b => b.toNat % 256))
 
 /-- The address a valid signature recovers to: uninterpreted.  Elliptic-curve
 recovery over secp256k1 is not computed; an `opaque` constant is a function

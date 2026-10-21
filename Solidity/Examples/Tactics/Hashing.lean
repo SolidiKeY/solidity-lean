@@ -72,6 +72,68 @@ returns (true, 3017696395)
 
 #guard Keccak.selector "f(uint256)" == 0xb3de648b
 
+/-! ### `sha256`, `ripemd160`, `ecrecover`
+
+The precompiles hash as `keccak256` does, a symbol of the memory
+(`Val.hash`, `HashKind`): `sha256` is SHA-256 and `ripemd160` RIPEMD-160
+of the bytes (`Hashes.lean`, `@[irreducible]` program-level functions as
+`keccakBytes` is), `ecrecover(h, v, r, s)` an address of the precompile's
+four words, `0` where the signature is malformed and uninterpreted
+(`ecrecoverKey`, an `opaque` function) where it is not. -/
+
+/-- SHA-256 of `"abc"`, by evaluation in the kernel. -/
+theorem sha256Abc : (sha256Bytes [97, 98, 99]).1 =
+    0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad := by
+  decide +kernel
+
+/-- RIPEMD-160 of `"abc"`, a `bytes20`. -/
+theorem ripemd160Abc : (ripemd160Bytes [97, 98, 99]).1 = 0x8eb208f7e05d987a9b044a8e98c6b087f15a0bfc := by
+  decide +kernel
+
+def Prec : Contract := contract!{
+  function sha() returns (bytes32 r) { r = sha256("abc"); }
+  function rmd() returns (bytes20 r) { r = ripemd160("abc"); }
+  function rec(bytes32 h, uint8 v, bytes32 r, bytes32 s) returns (address a) {
+    a = ecrecover(h, v, r, s);
+  }
+}
+
+/--
+info: ok
+returns 84342368487090800366523834928142263660104883695016514377462985829716817089965
+-/
+#guard_msgs in #run Prec.sha()
+
+/--
+info: ok
+returns 814647003348588794217809277549781461204094028796
+-/
+#guard_msgs in #run Prec.rmd()
+
+/-- `v` neither `27` nor `28`: the zero address, as solc returns (the four
+words `1, 29, 2, 3`). -/
+theorem recoverBadV : ecrecoverBytes ((List.range 128).map fun i =>
+    if i = 31 then 1 else if i = 63 then 29 else if i = 95 then 2 else if i = 127 then 3 else 0) =
+    uintOfNat 0 := by
+  decide +kernel
+
+/--
+info: ok
+returns 0
+-/
+#guard_msgs in #run Prec.rec(1, 29, 2, 3)
+
+/-- One byte string hashed twice: the same value. -/
+theorem sha256Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = sha256(b);
+    bytes32 g = sha256(b); ] h == g } := by
+  sol_symex
+  sol_decide
+
+theorem ripemd160Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160(b);
+    bytes20 g = ripemd160(b); ] h == g } := by
+  sol_symex
+  sol_decide
+
 /-! ## 2 · The ABI -/
 
 /-- `abi.encode(uint, bool)`: two words, big-endian. -/

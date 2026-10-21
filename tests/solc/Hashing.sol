@@ -73,4 +73,19 @@ contract Hashing {
         bytes memory e = abi.encode(p);
         assert(e.length == 64 && e[31] == 0x03 && e[63] == 0x01);
     }
+    // `sha256` and `ripemd160`, the precompiles: SHA-256 and RIPEMD-160 of
+    // the bytes (`Hashes.lean`), atoms to the closers as `keccak256` is
+    function sha256Parameter(bytes memory b) public pure {
+        assert(sha256(b) == sha256(b));
+    }
+    function ripemd160Parameter(bytes memory b) public pure {
+        assert(ripemd160(b) == ripemd160(b));
+    }
+    // `ecrecover`: the precompile's 128 bytes, an address, uninterpreted where
+    // the signature is well formed (`ecrecoverBytes`); run in
+    // `Examples/Tactics/Hashing.lean`
+    /// @custom:key box
+    function recoverSigner(bytes32 h, uint8 v, bytes32 r, bytes32 s) public pure returns (address) {
+        return ecrecover(h, v, r, s);
+    }
 }

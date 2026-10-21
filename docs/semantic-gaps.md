@@ -335,11 +335,11 @@ the kernel (`decide +kernel`, under a second for one block:
 hash, so `bytes4(keccak256("f(uint256)"))` is `this.f.selector` (`Sel`; the
 elaborator reads `keccak256(…)` as a `bytes32`, `bytesOf?`, so `bytes4(…)`
 keeps its high bytes).  In the
-syntax it is `Val.keccak` (`Syntax/Scoped.lean`), in the signature the
-binary symbol `Op2.keccak : mem × ident R → val uint` (`Signature.lean`),
+syntax it is `Val.hash .keccak` (`Syntax/Scoped.lean`), in the signature the
+binary symbol `Op2.hash .keccak : mem × ident R → val uint` (`Signature.lean`),
 read in the Theory as the typed evaluation (the memory island, as `size`
-is: `Op2.denote`), its rule the Lean-only `LeanTaclet.keccakAssignment`
-(`v = keccak256(mpath)` is `{ v := keccak256(memory, mpath) }`), sound by
+is: `Op2.denote`), its rule the Lean-only `LeanTaclet.hashAssignment`
+(`v = hash(mpath)` is `{ v := hash(memory, mpath) }`), sound by
 `sound_setLocal` and `Val.lower_evalT`; the EVM compiler leaves it out of
 its fragment (`valIn`).  The elaborator lowers `keccak256(b)`
 (`Syntax/Elab.lean`, `hoist`): `b` a memory `bytes`/`string` (a storage one
@@ -454,7 +454,33 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   solkey taclet reads it (KeY has no byte layout).  Left open.
 - `abi.encodeCall` of a function this contract does not declare (an
   interface's): its signature is not known to `sol{}`.
-- `sha256`, `ripemd160`, `ecrecover`.
+- `sha256`, `ripemd160`, `ecrecover`: closed (lane `open-small`, below).
+
+**`sha256`, `ripemd160`, `ecrecover`** (lane `open-small`).  One symbol for
+every hash: `Val.hash k`, `Op2.hash k` and the rule `hashAssignment`, the kind
+`k : HashKind` (`AST.lean`) a parameter, not a constructor each, so no fold
+grows an arm; `keccak256` is `k = .keccak`.  `HashKind.apply`
+(`Semantics/Heap.lean`) is the function of the bytes: `sha256` SHA-256 and
+`ripemd160` RIPEMD-160 (`Hashes.lean`, written as `Keccak.lean` is, over
+`Nat`s with structural recursion only, checked against the standard
+vectors; `sha256Bytes`, `ripemd160Bytes` `@[irreducible]`, evaluated in the
+kernel by `decide +kernel` and by `#run`), `ripemd160`'s value a `bytes20`
+(below `2^160`).  `ecrecover(h, v, r, s)` is lowered to `abi.encode(h, v, r,
+s)`, the precompile's 128 bytes, then the hash `.ecrecover` into an
+`address` (`hoistHashWith`, `Syntax/Elab.lean`): `ecrecoverBytes` is `0`
+where the precompile fails (`v` not `27` or `28`, `r` or `s` outside
+`[1, n)` for secp256k1's order `n`), as solc returns the zero address, and
+otherwise `ecrecoverKey h v r s mod 2^160`, an `opaque` function: no proof
+unfolds it, so what is proved holds of every recovery function (no axiom);
+`#run` evaluates it to `0`.  Assumed: nothing about which address a valid
+signature recovers to (it may be `0`, as the point at infinity is on the
+EVM).  Tests: `tests/solc/Hashing.sol` (`sha256Parameter`,
+`ripemd160Parameter`, `recoverSigner`), `Examples/Tactics/Hashing.lean`
+(`sha256Abc`, `ripemd160Abc`, `recoverBadV`, the runs, `sha256Twice`).
+Cost: `Val`, `Op2` and the Lean rules keep their constructor counts; every
+match on `keccak` gained the kind (`.hash _ b _`).  `hoist` is at its
+heartbeat limit: the lowering is a function outside its `mutual` block,
+handed the recursive calls.
 
 **Lane `open-left2` checked** (2026-10-21): `tests/solc/Hashing.sol`'s
 `encodeWithSignature`, `encodeWithSelector`, `encodeCall`, `packedEnum`,
