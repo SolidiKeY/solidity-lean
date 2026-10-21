@@ -77,7 +77,8 @@ contract Calldata {
         return t.length;
     }
 
-    // its length, under the diamond where the bounds hold
+    // its length where the bounds hold
+    /// @custom:key box
     function sliceLength(bytes calldata b, uint i, uint j) external pure {
         require(i <= j && j <= b.length);
         bytes calldata t = b[i:j];
@@ -92,10 +93,11 @@ contract Calldata {
         assert(t[k] == xs[k + 1]);
     }
 
-    // in range, a read returns; a slice of a slice adds the offsets
-    function sliceReturns(uint[] calldata xs) external pure returns (uint) {
+    // a slice of a slice adds the offsets
+    /// @custom:key box
+    function sliceOfSlice(uint[] calldata xs) external pure {
         require(xs.length >= 8);
-        return xs[2:][3:5][1];
+        assert(xs[2:][3:5][1] == xs[6]);
     }
 
     // past the view, the read reverts though it is inside the base

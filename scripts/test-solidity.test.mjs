@@ -424,7 +424,7 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
     'readAlias', 'localAlias',
     // a slice is a view: its offset and length (`RawStmt.sliceViews`)
-    'tail', 'sliceLength', 'sliceRead', 'sliceReturns', 'slicePast', 'decodeShortView'])
+    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
     assert.equal(status[name], 'proved', name);
   // a memory copy written (solc copies, the model would share), a slice hashed
   assert.equal(status.writesCopy, 'unsupported');

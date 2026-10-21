@@ -772,11 +772,15 @@ slice opens `uint` locals, its start `t$s` and end `t$e`, then after
 solc's check `t$s <= t$e && t$e <= b.length` (a revert otherwise; `j` is
 `b.length` where it is left out, `i` is `0`) its length `t$n`; a slice of
 a slice its offset into the base, `t$o`, the outer one's plus its start.
-Each is assigned once.  Then `t[k]` is `b[k < t$n ? t$o + k : (t$n - 1) - k]`:
-past the view the checked subtraction underflows, so the index reverts
-where solc's `Panic(0x32)` does (the model reads both panics as a
-revert); inside `unchecked`, where it would wrap, the index is `b.length`
-there, past the base.
+Each is assigned once.  Then `t[k]` is `b[t$o + k]` after `require(k <
+t$n)` before the statement, where every evaluation of the statement reads
+it (the closers' cost is in branches; solc's `Panic(0x32)` and the
+model's revert are one outcome, and every effect before it in the
+statement is undone with it).  Where it is read only on a condition (a
+conditional's branch, the right operand of `&&`/`||`, a loop's
+condition) it is `b[k < t$n ? t$o + k : (t$n - 1) - k]`, past the view
+the checked subtraction underflowing, a revert too; inside `unchecked`,
+where it would wrap, the index there is `b.length`, past the base.
 `t.length` is `t$n`, and `abi.decode(t, …)` decodes the view
 in place (`#sliceV(b, t$o, t$n)`, `ByteSrc`).  So a read, a length and a
 decoding are loop-free.  A slice used any other way (handed to a function,
@@ -793,12 +797,14 @@ structure SliceView where
 /-- The hidden builtin a view is decoded through: `#sliceV(b, o, n)`. -/
 def sliceViewName : String := "#sliceV"
 
-/-- Inside `unchecked`; the views open, a counter for the names of inline
-slices, and the statements the current statement's slices open before it. -/
+/-- Inside `unchecked`, and evaluated only on a condition (a conditional's
+branch, the right operand of `&&`/`||`, a loop's condition); the views
+open, a counter for the names of inline slices, and the statements the
+current statement's slices open before it. -/
 abbrev SliceSt := List (String × SliceView) × Nat × Array RawStmt
 
 @[inherit_doc SliceSt]
-abbrev SliceM := StateT Bool (StateM SliceSt)
+abbrev SliceM := StateT (Bool × Bool) (StateM SliceSt)
 
 instance : Inhabited (SliceM RawExpr) := ⟨pure default⟩
 
@@ -812,6 +818,14 @@ def sliceViewish (views : List (String × SliceView)) : RawExpr → Bool
   | .name x => (lookupBy x views).isSome
   | .call f _ => f == "#slice"
   | _ => false
+
+/-- `x` evaluated only on a condition (above). -/
+def sliceCond {α : Type} (x : SliceM α) : SliceM α := do
+  let u ← getThe (Bool × Bool)
+  set (σ := Bool × Bool) (u.1, true)
+  let r ← x
+  set (σ := Bool × Bool) u
+  return r
 
 mutual
 
@@ -864,11 +878,26 @@ partial def sliceNode (e : RawExpr) : SliceM RawExpr := do
     let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
     let k ← k.mapM sliceNode
     if k.hasIncDec then return sliceRefuse "indexed by an expression with an effect"
-    if ← getThe Bool then
+    let (unchecked, cond) ← getThe (Bool × Bool)
+    -- read on every evaluation of the statement: the check before it, the
+    -- index branch-free (the closers' cost is in the branches)
+    if !cond then
+      modifyThe SliceSt fun (vs, n, pre) => (vs, n, pre.push (.require (.binop .lt k (.name sv.len))))
+      return .index (.name sv.base) (.binop .add (.name sv.off) k)
+    if unchecked then
       return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
         (.binop .add (.name sv.off) k) (.field (.name sv.base) "length"))
     return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
       (.binop .add (.name sv.off) k) (.binop .sub (.binop .sub (.name sv.len) (.num 1)) k))
+  | .ternary c a b => do
+    let c ← c.mapM sliceNode
+    let (a, b) ← sliceCond do pure (← a.mapM sliceNode, ← b.mapM sliceNode)
+    return .ternary c a b
+  | .binop op a b =>
+    if !(op matches .and | .or) then return e
+    let a ← a.mapM sliceNode
+    let b ← sliceCond (b.mapM sliceNode)
+    return .binop op a b
   | .field v "length" =>
     if !sliceViewish views v then return e
     let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
@@ -901,17 +930,21 @@ partial def sliceStmts (ss : List RawStmt) : SliceM (List RawStmt) := do
         return pre.toList
       | none => return [RawStmt.eval [sliceRefuse "whose base or bounds are not read here"]]
     | s =>
-      let s ← s.mapExprsM (·.mapM sliceNode)
+      -- a loop's condition is read on each iteration: a view read there
+      -- checked in place
+      let loop := s matches .whileLoop .. | .doWhile .. | .loop .. | .forLoop ..
+      let s ← if loop then sliceCond (s.mapExprsM (·.mapM sliceNode))
+        else s.mapExprsM (·.mapM sliceNode)
       let pre := (← getThe SliceSt).2.2
       -- a loop's condition is read again on each iteration: no slice opened in it
-      if !pre.isEmpty && (s matches .whileLoop .. | .doWhile .. | .loop .. | .forLoop ..) then
+      if !pre.isEmpty && loop then
         return [RawStmt.eval [sliceRefuse "opened in a loop's condition"]]
-      let u ← getThe Bool
+      let u ← getThe (Bool × Bool)
       let s ← s.mapBlocksM fun b => do
         let (vs, k, pre) ← getThe SliceSt
-        if s matches .unchecked _ then set (σ := Bool) true
+        if s matches .unchecked _ then set (σ := Bool × Bool) (true, u.2)
         let b ← sliceStmts b
-        set (σ := Bool) u
+        set (σ := Bool × Bool) u
         let (_, k', _) ← getThe SliceSt
         set (σ := SliceSt) (vs, max k k', pre)
         pure b
@@ -920,7 +953,7 @@ partial def sliceStmts (ss : List RawStmt) : SliceM (List RawStmt) := do
 
 /-- **A body's calldata slices read as views** (above). -/
 def RawStmt.sliceViews (ss : List RawStmt) : List RawStmt :=
-  ((sliceStmts ss).run' false).run' ([], 0, #[])
+  ((sliceStmts ss).run' (false, false)).run' ([], 0, #[])
 
 /-- Every read of the name `x` renamed `y`, at any depth. -/
 partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=
