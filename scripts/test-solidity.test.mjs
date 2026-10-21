@@ -878,7 +878,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   // and a reason past a custom error of a symbolic argument (`RevPart.notError`)
   // another contract's reason and raw data: any bytes (`Fml.allocAll`)
   for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData",
-    "reasonPastCustom", "externalReason", "externalData"]) {
+    "reasonPastCustom", "externalReason", "externalData",
+    // a custom error of a symbolic argument: its data known in part (`Pat`)
+    "customSymbolic"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });

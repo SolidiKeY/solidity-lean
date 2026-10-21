@@ -99,6 +99,16 @@ contract RevertData {
         }
     }
 
+    // a custom error of a symbolic argument: its data known in part
+    // (`Pat`), `E`'s selector then a word of unknown bytes, so its length
+    /// @custom:key box
+    function customSymbolic(uint y) public view {
+        try this.failIf(y) {
+        } catch (bytes memory d) {
+            assert(d.length == 0 || d.length == 36);
+        }
+    }
+
     /// @custom:key skip
     function mixed(uint x) external pure {
         if (x > 5) {
