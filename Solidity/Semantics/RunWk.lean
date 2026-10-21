@@ -1310,29 +1310,36 @@ theorem TRun.catchBytes_wk {Γ Δ ρ ps Γf : Ctx} (h : Thin Γ Δ) (τ : State 
     | ok => exact hc.elim
     | error e' => cases hc; cases e <;> rfl
 
-theorem TRun.litWritesT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) : (bs : List UInt8) → (i : Nat) →
+theorem TRun.litWritesT_wk {Γ Δ Γ₁ Δ₁ : Ctx} (h : Thin Γ Δ) {h₁ : Thin Γ₁ Δ₁}
+    {k : TStep C (.mem bytesR :: Γ) Γ₁} {k' : TStep C (.mem bytesR :: Δ) Δ₁}
+    (hk : ∀ (a : State C (.mem bytesR :: Γ)) (d' : TEnv C a.H (.mem bytesR :: Δ)),
+      TWkRel h₁ (TEnv.off (.keep h) d') (k a) (k' (a.lift (.keep h) d'))) :
+    (bs : List UInt8) → (i : Nat) →
     (τ : State C (.mem bytesR :: Γ)) → (d : TEnv C τ.H (.mem bytesR :: Δ)) →
-    TWkRel (.keep h) (TEnv.off (.keep h) d) (TRun.litWritesT bs i τ)
-      (TRun.litWritesT bs i (τ.lift (.keep h) d))
-  | [], _, τ, d => ⟨d, (offWk_self _ _).symm, rfl⟩
+    TWkRel h₁ (TEnv.off (.keep h) d) (TRun.litWritesT bs i k τ)
+      (TRun.litWritesT bs i k' (τ.lift (.keep h) d))
+  | [], _, τ, d => hk τ d
   | b :: bs, i, τ, d => by
     unfold TRun.litWritesT
     split
     · rename_i hi
       exact TWkRel.seq (TWkRel.of_eq (TRun.assignMem_wk (.keep h) τ d (litLoc i hi) (litSrc b)))
-        fun a d' => TRun.litWritesT_wk h bs (i + 1) a d'
-    · exact ⟨d, (offWk_self _ _).symm, rfl⟩
+        fun a d' => TRun.litWritesT_wk h hk bs (i + 1) a d'
+    · exact hk τ d
 
-theorem TRun.litBytesT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ)
-    (bs : List UInt8) :
-    TWkRel (.keep h) (TEnv.off h d) (TRun.litBytesT bs τ) (TRun.litBytesT bs (τ.lift h d)) := by
+theorem TRun.litBytesT_wk {Γ Δ Γ₁ Δ₁ : Ctx} (h : Thin Γ Δ) {h₁ : Thin Γ₁ Δ₁}
+    {k : TStep C (.mem bytesR :: Γ) Γ₁} {k' : TStep C (.mem bytesR :: Δ) Δ₁}
+    (hk : ∀ (a : State C (.mem bytesR :: Γ)) (d' : TEnv C a.H (.mem bytesR :: Δ)),
+      TWkRel h₁ (TEnv.off (.keep h) d') (k a) (k' (a.lift (.keep h) d')))
+    (τ : State C Γ) (d : TEnv C τ.H Δ) (bs : List UInt8) :
+    TWkRel h₁ (TEnv.off h d) (TRun.litBytesT bs k τ) (TRun.litBytesT bs k' (τ.lift h d)) := by
   unfold TRun.litBytesT
   split
   · rename_i hn
     exact TWkRel.seq (TWkRel.of_top (TRun.declMem_wk h τ d bytesR
         (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl)) rfl))
-      fun a d' => TRun.litWritesT_wk h bs 0 a d'
-  · exact TWkRel.of_top (TRun.declMem_wk h τ d bytesR none rfl)
+      fun a d' => TRun.litWritesT_wk h hk bs 0 a d'
+  · exact TWkRel.seq (TWkRel.of_top (TRun.declMem_wk h τ d bytesR none rfl)) hk
 
 theorem TRun.callReceiverPush_eq_seq {Γ ps Γf Γv : Ctx} {E : Ty}
     (args : Args C Γ ps) (r : Var) (hb : Ext ([.alias (.array E)] ++ ps) Γf)
@@ -1443,7 +1450,7 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
     split
     · rfl
     · exact TWkRel.drop (Thin.Over.trans (.push (.refl h)) (Prog.wk_over body (.keep h)))
-        (TWkRel.seq (TRun.litBytesT_wk h τ d _) fun a d' => Prog.run_wk body (.keep h) a d')
+        (TRun.litBytesT_wk h (fun a d' => Prog.run_wk body (.keep h) a d') τ d _)
   | _, _, .ite c thn els, _, h, τ, d => by
     show TWkRel h _ (TRun.ite c thn.ext thn.runR els.ext els.runR τ)
       (TRun.ite (c.wk h) (thn.wk h).2.2.ext (thn.wk h).2.2.runR (els.wk h).2.2.ext

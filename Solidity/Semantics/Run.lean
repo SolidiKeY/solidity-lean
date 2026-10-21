@@ -928,19 +928,20 @@ def revertData (d : List (RevPart C Γ)) : TStep C Γ Γ := fun σ => do
   let bs ← d.mapM (·.evalT σ)
   .error (THalt.ofData bs.flatten)
 
-/-- The writes of a literal's bytes (`litWrites`), run. -/
-def litWritesT : List UInt8 → Nat → TStep C (.mem bytesR :: Γ) (.mem bytesR :: Γ)
-  | [], _ => nil
-  | b :: bs, i => if hi : i < 2 ^ 256 then
-      seq (assignMem (litLoc i hi) (litSrc b)) (litWritesT bs (i + 1))
-    else nil
+/-- The writes of a literal's bytes, then `k` (`litWrites`), run. -/
+def litWritesT {Γ₁ : Ctx} : List UInt8 → Nat → TStep C (.mem bytesR :: Γ) Γ₁ →
+    TStep C (.mem bytesR :: Γ) Γ₁
+  | [], _, k => k
+  | b :: bs, i, k => if hi : i < 2 ^ 256 then
+      seq (assignMem (litLoc i hi) (litSrc b)) (litWritesT bs (i + 1) k)
+    else k
 
-/-- A literal's bytes allocated (`litBytes`), run. -/
-def litBytesT (bs : List UInt8) : TStep C Γ (.mem bytesR :: Γ) :=
+/-- A literal's bytes allocated, then `k` (`litBytes`), run. -/
+def litBytesT {Γ₁ : Ctx} (bs : List UInt8) (k : TStep C (.mem bytesR :: Γ) Γ₁) : TStep C Γ Γ₁ :=
   if hn : bs.length < 2 ^ 256 then
     seq (declMem bytesR (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl))
-      rfl) (litWritesT bs 0)
-  else declMem bytesR none rfl
+      rfl) (litWritesT bs 0 k)
+  else seq (declMem bytesR none rfl) k
 
 /-- The data the call `call` reverts with, read from the state the `try`
 started in: at address `0`, none (the `try` reverts there); for a
@@ -980,7 +981,7 @@ def catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sa
   fun σ =>
     match (catchBytes c rets sargs hs sbody self σ).bind kind.decode with
     | none => .error .revert
-    | some bs => (seq (litBytesT bs) body σ).map fun o => ⟨o.st.drop ((Ext.push .refl).trans h₁), o.ext⟩
+    | some bs => (litBytesT bs body σ).map fun o => ⟨o.st.drop ((Ext.push .refl).trans h₁), o.ext⟩
 
 end TRun
 
@@ -1163,6 +1164,34 @@ theorem Prog.runR_eq : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runR P = 
     rw [Stmt.runR_eq s, Prog.runR_eq P]
 
 end
+
+/-- A literal's writes run as `TRun.litWritesT`. -/
+theorem Prog.runC_litWrites {Γ Γ₁ : Ctx} (k : Prog C (.mem bytesR :: Γ) Γ₁) :
+    (bs : List UInt8) → (i : Nat) →
+      Prog.runC (litWrites bs i k) = TRun.litWritesT bs i (Prog.runC k)
+  | [], _ => rfl
+  | b :: bs, i => by
+    by_cases hi : i < 2 ^ 256
+    · rw [litWrites, TRun.litWritesT, dif_pos hi, dif_pos hi]
+      show TRun.seq (Stmt.runC _) (Prog.runC _) = _
+      rw [Prog.runC_litWrites k bs (i + 1)]
+      rfl
+    · rw [litWrites, TRun.litWritesT, dif_neg hi, dif_neg hi]
+
+/-- **A literal's allocation runs as `TRun.litBytesT`**: the run of the
+statements `Stmt.catchData`'s rule writes in front of its clause. -/
+theorem Prog.run_litBytes {Γ Γ₁ : Ctx} (x : Var) (bs : List UInt8)
+    (k : Prog C (.mem bytesR :: Γ) Γ₁) (σ : State C Γ) :
+    Prog.run σ (litBytes x bs k) = TRun.litBytesT bs k.runR σ := by
+  show Prog.runR _ σ = _
+  rw [Prog.runR_eq, Prog.runR_eq]
+  by_cases hn : bs.length < 2 ^ 256
+  · rw [litBytes, TRun.litBytesT, dif_pos hn, dif_pos hn]
+    show TRun.seq (Stmt.runC _) (Prog.runC _) σ = _
+    rw [Prog.runC_litWrites]
+    rfl
+  · rw [litBytes, TRun.litBytesT, dif_neg hn, dif_neg hn]
+    rfl
 
 /-! ### Equations -/
 

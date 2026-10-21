@@ -1152,18 +1152,20 @@ def litWrite {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) (b : UInt8) :
     Stmt C (.mem bytesR :: Γ) (.mem bytesR :: Γ) :=
   .assignMem (litLoc i hi) (litSrc b)
 
-/-- The writes of a literal's bytes, from position `i` on. -/
-def litWrites {Γ : Ctx} : List UInt8 → Nat → Prog C (.mem bytesR :: Γ) (.mem bytesR :: Γ)
-  | [], _ => .nil
-  | b :: bs, i => if hi : i < 2 ^ 256 then .cons (litWrite i hi b) (litWrites bs (i + 1)) else .nil
+/-- The writes of a literal's bytes, from position `i` on, then `k`. -/
+def litWrites {Γ Γ₁ : Ctx} : List UInt8 → Nat → Prog C (.mem bytesR :: Γ) Γ₁ →
+    Prog C (.mem bytesR :: Γ) Γ₁
+  | [], _, k => k
+  | b :: bs, i, k => if hi : i < 2 ^ 256 then .cons (litWrite i hi b) (litWrites bs (i + 1) k) else k
 
-/-- `bytes memory x = new bytes(n);` and the writes: a literal's bytes,
-`n` its length (below `2^256`, else none). -/
-def litBytes {Γ : Ctx} (x : Var) (bs : List UInt8) : Prog C Γ (.mem bytesR :: Γ) :=
+/-- `bytes memory x = new bytes(n);`, the writes of a literal's bytes (`n`
+its length, below `2^256`), then `k`. -/
+def litBytes {Γ Γ₁ : Ctx} (x : Var) (bs : List UInt8) (k : Prog C (.mem bytesR :: Γ) Γ₁) :
+    Prog C Γ Γ₁ :=
   if hn : bs.length < 2 ^ 256 then
     .cons (.declMem bytesR x (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl))
-      rfl rfl) (litWrites bs 0)
-  else .cons (.declMem bytesR x none rfl rfl) .nil
+      rfl rfl) (litWrites bs 0 k)
+  else .cons (.declMem bytesR x none rfl rfl) k
 
 end LitBytes
 

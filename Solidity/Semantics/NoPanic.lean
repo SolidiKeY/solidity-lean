@@ -371,23 +371,25 @@ theorem revertData_noPanic (d : List (RevPart C Γ)) (σ : State C Γ) :
   refine (hm d).bind fun bs => ?_
   cases h : bs.flatten <;> exact fun h' => nomatch h'
 
-theorem litWritesT_noPanic : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
-    (litWritesT bs i σ).NoPanic
-  | [], _, _ => TRes.NoPanic.ok _
+theorem litWritesT_noPanic {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : ∀ σ, (k σ).NoPanic) : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
+    (litWritesT bs i k σ).NoPanic
+  | [], _, σ => hk σ
   | b :: bs, i, σ => by
     unfold litWritesT
     split
     · exact seq_noPanic _ _ (fun σ => (MSrc.mvalT_revertOnly σ _).noPanic.bind fun _ =>
         (MLoc.addrT_noPanic σ _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-          TRes.NoPanic.ok _) (litWritesT_noPanic bs (i + 1)) σ
-    · exact TRes.NoPanic.ok _
+          TRes.NoPanic.ok _) (litWritesT_noPanic hk bs (i + 1)) σ
+    · exact hk σ
 
-theorem litBytesT_noPanic (bs : List UInt8) (σ : State C Γ) : (litBytesT bs σ).NoPanic := by
+theorem litBytesT_noPanic {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : ∀ σ, (k σ).NoPanic) (bs : List UInt8) (σ : State C Γ) : (litBytesT bs k σ).NoPanic := by
   unfold litBytesT
   split
   · exact seq_noPanic _ _ (fun σ => (MRhs.evalT_noPanic σ _).bind fun _ => TRes.NoPanic.ok _)
-      (litWritesT_noPanic bs 0) σ
-  · exact TRes.NoPanic.ok _
+      (litWritesT_noPanic hk bs 0) σ
+  · exact seq_noPanic _ _ (fun _ => TRes.NoPanic.ok _) hk σ
 
 theorem catchData_noPanic {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
@@ -397,7 +399,7 @@ theorem catchData_noPanic {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Bin
   unfold catchData
   split
   · exact TRes.NoPanic.revert
-  · exact (seq_noPanic _ _ (litBytesT_noPanic _) hbody σ).map _
+  · exact (litBytesT_noPanic hbody _ σ).map _
 
 end TRun
 
