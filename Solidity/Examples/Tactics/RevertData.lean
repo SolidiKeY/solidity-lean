@@ -184,7 +184,10 @@ theorem mixedReason : ⊨ dl!{ ∀ uint x; [ try this.mixed(x) { } catch Error(s
 /-- **A custom error of a symbolic argument** (`require(x > 3, E(x))`): its
 data known in part (`Pat`), `E`'s selector then a word of unknown bytes, so
 the clause is proved for every fresh `bytes` of that length and those first
-bytes (`Pat.fml`). -/
+bytes (`Pat.fml`, printed `∀ fresh bytes d; (d.length = 36 ∧ read(memory,
+d[0]) = 0 ∧ …) → …`).  The closer reads the fresh object semantically
+(`sol_close`, `CloseS.holds_allocAll`); its bytes read in the clause too
+cost it past its heartbeats, so the clause here reads the length. -/
 theorem symbolicCustom : ⊨ dl!{ ∀ uint y; [ try this.failIf(y) { } catch (bytes memory d) {
     assert(d.length == 0 || d.length == 36); }; ] true } := by
   sol_prove (steps := 2048)
