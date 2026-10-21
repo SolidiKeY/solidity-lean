@@ -26,7 +26,7 @@ variable {C : Contract} {Γ : Ctx}
 theorem Semantics.decodeError_encodePanic (c : Nat) :
     Semantics.decodeError (Semantics.encodePanic c) = none := by
   simp only [Semantics.decodeError, Semantics.encodePanic, Semantics.panicSelector,
-    Semantics.errorSelector, List.take_append_of_le_length, List.cons_append, List.take_succ_cons,
+    Semantics.errorSelector, List.cons_append, List.take_succ_cons,
     List.take_zero, List.nil_append]
   rfl
 

@@ -1097,6 +1097,19 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       let s ← if (← getOptions).getBool `pp.sol.ic then `(sol_stmt| expand_function_body(ic))
         else `(sol_stmt| expand_function_body(fbs))
       return some (← `(dl_premise| ⟨[ $s:sol_stmt; ]⟩))
+  -- `catchDataBox`'s goals (`catchDataStep`): the clause after each datum the
+  -- callee may revert with, bound as `x`; another receiver's, `false`
+  if e.isAppOfArity ``catchDataStep 13 then
+    let a := e.getAppArgs
+    if ← [a[7]!, a[8]!, a[9]!, a[10]!, a[12]!].allM fun x =>
+        return (← instantiateMVars x).consumeMData.isFVar then
+      let some xi ← ppVar? a[11]! | return none
+      let some bn ← fvarName? a[12]! | return none
+      let d := mkIdent `d
+      let g1 ← `(dl_branch| "datum": ∀ $d:ident. [ { bytes memory $xi:ident = $d:ident;
+        $(nameIdent bn):ident; } ])
+      let g2 ← `(dl_branch| "another receiver": [ { assert(false); } ])
+      return some (← `(dl_premise| $g1:dl_branch ; $g2:dl_branch))
   let unfold (ns : List Expr) (P : Expr) : PrM (Option (TSyntax `dl_premise)) := do
     let some ss ← ppProgS ns P | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))

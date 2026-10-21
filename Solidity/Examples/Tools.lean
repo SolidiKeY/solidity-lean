@@ -257,7 +257,7 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /--
 info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 19 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 23 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/
@@ -415,5 +415,6 @@ write lands in `alice`, printed from the typed storage (`fmtRoot`). -/
 #eval (Prog.runT State.exampleStore (sol[StandardExample]{
     Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10); })).map fun τ =>
   Tools.fmtRoot τ.storage "alice"
+
 
 end Solidity.Examples.Tools
