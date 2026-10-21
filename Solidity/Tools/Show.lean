@@ -86,6 +86,9 @@ def fmtTx {C : Contract} {Γ : Ctx} (σ : State C Γ) : List String :=
 (`THalt.exhausted`, which the untyped run did not tell apart). -/
 def fmtHalt : THalt → String
   | .revert => "revert"
+  | .revertWith d => s!"revert with data 0x{String.mk (d.flatMap fun b =>
+      let h (n : Nat) : Char := "0123456789abcdef".toList.getD n '0'
+      [h (b.toNat / 16), h (b.toNat % 16)])}"
   | .panic => "panic (an `assert` failed)"
   | .diverge | .exhausted => "diverge (a loop that never ends)"
 

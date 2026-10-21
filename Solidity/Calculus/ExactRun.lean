@@ -66,6 +66,7 @@ theorem Upd.afterT_run_iff {Γ Δ : Ctx} (σ : State C Γ) (s : Stmt C Γ Δ) (U
     rw [hs] at ha he
     cases e with
     | panic => cases ha
+    | revertWith _ => cases ha
     | diverge => exact (he.1 rfl).elim
     | exhausted => exact (he.2 rfl).elim
     | revert =>

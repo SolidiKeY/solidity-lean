@@ -473,6 +473,30 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.assert _ _ c => `(sol_stmt| assert($(← ppExprS ns c)))
   | Stmt.revert _ _ => `(sol_stmt| revert())
   | Stmt.assumeFalse _ _ => `(sol_stmt| assume(false))
+  -- a revert with data (`revertDataBox`): the data, a schema variable or
+  -- escaped
+  | Stmt.revertData _ _ d =>
+    let some dn ← fvarName? d | escape
+    `(sol_stmt| $(mkIdent `revert):ident ( $(nameIdent dn):ident ))
+  -- a `catch` clause binding the data (`catchDataBox`): the binding, then the
+  -- clause, one block
+  | Stmt.catchData _ _ _ _ _ _ c _ _ _ _ kind x body =>
+    let src ← match ← fvarName? c with
+      | some cn => `(sol_expr| $(nameIdent cn):ident)
+      | none => match ← ppExtCallS ns c with
+        | some e => pure e
+        | none => return ← escape
+    let fn : Ident := match_expr (← instantiateMVars kind).consumeMData with
+      | CatchKind.reason => mkIdent `reason
+      | _ => mkIdent `data
+    let some xi ← ppVar? x | escape
+    let decl ← `(sol_stmt| bytes memory $xi:ident = $fn:ident ( $src:sol_expr ))
+    let b ← match ← fvarName? body with
+      | some bn => pure #[← `(sol_stmt| $(nameIdent bn):ident)]
+      | none => match ← ppItemsS (← progExprPieces (x :: ns) body) with
+        | some ss => pure ss
+        | none => return ← escape
+    `(sol_stmt| { $[$(#[decl] ++ b);]* })
   | Stmt.callReceiver _ _ _ _ _ f args r body op =>
     let some recv ← ppCallReceiverExprS ns f args r body | escape
     let some st ← ppReceiverOpS ns recv op | escape
@@ -1073,6 +1097,19 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       let s ← if (← getOptions).getBool `pp.sol.ic then `(sol_stmt| expand_function_body(ic))
         else `(sol_stmt| expand_function_body(fbs))
       return some (← `(dl_premise| ⟨[ $s:sol_stmt; ]⟩))
+  -- `catchDataBox`'s goals (`catchDataStep`): the clause after each datum the
+  -- callee may revert with, bound as `x`; another receiver's, `false`
+  if e.isAppOfArity ``catchDataStep 13 then
+    let a := e.getAppArgs
+    if ← [a[7]!, a[8]!, a[9]!, a[10]!, a[12]!].allM fun x =>
+        return (← instantiateMVars x).consumeMData.isFVar then
+      let some xi ← ppVar? a[11]! | return none
+      let some bn ← fvarName? a[12]! | return none
+      let d := mkIdent `d
+      let g1 ← `(dl_branch| "datum": ∀ $d:ident. [ { bytes memory $xi:ident = $d:ident;
+        $(nameIdent bn):ident; } ])
+      let g2 ← `(dl_branch| "another receiver": [ { assert(false); } ])
+      return some (← `(dl_premise| $g1:dl_branch ; $g2:dl_branch))
   let unfold (ns : List Expr) (P : Expr) : PrM (Option (TSyntax `dl_premise)) := do
     let some ss ← ppProgS ns P | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))

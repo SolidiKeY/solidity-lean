@@ -1074,11 +1074,11 @@ theorem Premise.sound_tryOracle {ρ κc Γ₁ Γe Γ₃ Γ₄ Γ₂ Γ₀ : Ctx}
           let (r, _) ← rets.decodeT (H := σ.H) vs
           (ok.runR (σ.withEnv (TEnv.append ρ r σ.env))).map fun o =>
             ⟨o.st.drop ((Ext.append Γ ρ).trans ok.ext), o.ext⟩
-        | some .error => (err.runR σ).map fun o => ⟨o.st.drop err.ext, o.ext⟩
+        | some (.error _) => (err.runR σ).map fun o => ⟨o.st.drop err.ext, o.ext⟩
         | some (.panic c) =>
           (pnc.runR (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))).map
             fun o => ⟨o.st.drop ((Ext.append Γ κc).trans pnc.ext), o.ext⟩
-        | some .other => (other.runR σ).map fun o => ⟨o.st.drop other.ext, o.ext⟩ :
+        | some (.other _) => (other.runR σ).map fun o => ⟨o.st.drop other.ext, o.ext⟩ :
           TRes (Out C σ.H Γ)).map (·.st)).bind fun υ =>
             (Prog.runSt υ ω).bind (Frames.runSt · κ)) := by
   cases lookupBy (call.keyT σ) σ.tx.ext with
@@ -1095,9 +1095,9 @@ theorem Premise.sound_tryOracle {ρ κc Γ₁ Γe Γ₃ Γ₄ Γ₂ Γ₀ : Ctx}
         dsimp only
         rw [TRes.map_st _ _ (State.drop ((Ext.append Γ ρ).trans ok.ext)) fun _ => rfl]
         exact h1 r
-    | error => exact holds_tryClause err σ ω κ φ h2
+    | error _ => exact holds_tryClause err σ ω κ φ h2
     | panic c => exact holds_tryPanic code pnc σ c ω κ φ h3
-    | other => exact holds_tryClause other σ ω κ φ h4
+    | other _ => exact holds_tryClause other σ ω κ φ h4
 
 /-- `tryCallNoCallbackBox`: under the box, a goal per clause, each for every
 typed value its outcome binds (another contract's callee; at address `0`
@@ -1123,14 +1123,12 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
   exact Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ
     (fun r => holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)) h2 h3 h4
 
-/-- A program that reverts or panics satisfies no diamond. -/
+/-- A program that halts other than by exhaustion satisfies no diamond. -/
 theorem not_holds_diamond {Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
-    (φ : Fml C Γ₀) {e : THalt} (he : e = .revert ∨ e = .panic) (h : Prog.runSt σ P = .error e) :
+    (φ : Fml C Γ₀) {e : THalt} (he : e ≠ .exhausted) (h : Prog.runSt σ P = .error e) :
     ¬ holds σ (.modal .diamond P κ φ) := by
   rw [holds_modal_iff, h]
-  rcases he with rfl | rfl
-  · exact fun h' => nomatch h'.1
-  · exact fun h' => h'.2 rfl
+  exact fun h' => he h'.1
 
 /-- **`tryCallSelfBox`** (Lean): the receiver the contract, the inlined
 callee and then the success block; another, the oracle's success block,
@@ -1163,7 +1161,7 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     have hi : call.isSelf.evalT σ = .ok true := by
       rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
     have hnx : ∀ e, TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e →
-        (e = .revert ∨ e = .panic) → holds σ (call.selfFails rets sargs sbody) := by
+        e ≠ .exhausted → holds σ (call.selfFails rets sargs sbody) := by
       intro e he hk
       refine not_holds_diamond σ _ _ _ hk ?_
       rw [Prog.runSt_require_true hi, Prog.runSt_cons]
@@ -1191,18 +1189,21 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     | error e =>
       intro hnx _
       cases e with
-      | revert =>
+      | revert => exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl nofun))
+      | revertWith d =>
         dsimp only
         split
-        · exact holds_tryClause err σ ω κ φ (h2 (hnx _ rfl (.inl rfl)))
-        · exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl (.inl rfl)))
-      | panic => exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl (.inr rfl)))
+        · exact holds_tryClause err σ ω κ φ (h2 (hnx _ rfl nofun))
+        · split
+          · exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl nofun))
+          · exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl nofun))
+      | panic => exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl nofun))
       | diverge => exact afterRunTR_box_error (by decide)
       | exhausted => exact afterRunTR_box_error (by decide)
   · rename_i hs
     simp only [Bool.true_and, decide_eq_true_eq] at hs
     have hnx : holds σ (call.selfFails rets sargs sbody) :=
-      not_holds_diamond σ _ _ _ (.inl rfl) (Prog.runSt_require_false
+      not_holds_diamond σ _ _ _ (e := .revert) nofun (Prog.runSt_require_false
         (by rw [ExtCall.isSelf_evalT]; simp only [hs, decide_false]) _)
     refine Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ (fun r => ?_)
       (h2 hnx) (h3 hnx) (h4 hnx)

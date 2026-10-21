@@ -325,9 +325,12 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (hI : I.V
       cases hr : ok o₁.st with
       | error => rw [hr] at h; cases h
       | ok o' => rw [hr] at h; cases h; exact (hok _ o' h1 hr).drop _
+    · exact hoth.drop h₄ σ o hσ h
     · split at h
       · exact herr.drop h₂ σ o hσ h
-      · exact hoth.drop h₄ σ o hσ h
+      · split at h
+        · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
+        · exact hoth.drop h₄ σ o hσ h
     · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
     · cases h
   split at h

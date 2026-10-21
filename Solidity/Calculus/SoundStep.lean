@@ -31,7 +31,7 @@ variable {C : Contract}
 `try`, loops. -/
 def Stmt.isBlockArm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, .call .. | _, _, .callReceiver .. | _, _, .callReceiverPush ..
-  | _, _, .tryCall .. | _, _, .loop .. => true
+  | _, _, .tryCall .. | _, _, .loop .. | _, _, .catchData .. => true
   | _, _, _ => false
 
 /-- **The rule of every statement but a block's is sound over the typed
@@ -74,6 +74,8 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | assert c => exact assertStep_sound σ k c p hp
   | revert => cases m <;> cases hp <;> exact sound_revert σ
   | assumeFalse => cases hp; exact sound_assumeFalse σ
+  | revertData d => cases m <;> cases hp <;> exact sound_revertData σ d
+  | catchData => cases hb
   | call => cases hb
   | callReceiver => cases hb
   | callReceiverPush => cases hb

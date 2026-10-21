@@ -113,6 +113,12 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
       ReceiverValue.step k f args r body (.deferred code value))
     -- recursiveCallUnfold (Lean only): the call of its body
     (callRec := fun f _ args ret body => .unfold (.cons (.call f args ret (body ())) .nil) .refl)
+    -- revertDataBox, revertDataDiamond (Lean)
+    (revertData := fun _ => match m with
+      | .box => .done true
+      | .diamond => .done false)
+    -- catchDataBox, catchDataDiamond (Lean)
+    (catchData := fun call _ _ sbody self kind x body => catchDataStep m call sbody self kind x body)
 
 /-! ## Fresh names: one above every index in the formula -/
 
@@ -153,6 +159,10 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     -- the body's names are read when it is unfolded
     (callRec := fun _ _ args ret _ =>
       (args.names ++ ret.names).foldl (fun n x => max n x.idx) 0)
+    (revertData := fun _ => 0)
+    (catchData := fun _ _ sargs sbody _ _ x body =>
+      max x.idx (max ((sargs.names).foldl (fun n x => max n x.idx) 0)
+        (max (Prog.maxIdx sbody) (Prog.maxIdx body))))
   termination_by structural _ _ s => s
 
 /-- The largest index of a name a block binds. -/

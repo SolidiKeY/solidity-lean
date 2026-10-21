@@ -1,5 +1,6 @@
 import Solidity.Semantics.State
 import Solidity.Semantics.Ops
+import Solidity.Semantics.RevertData
 
 /-!
 # The typed run
@@ -59,7 +60,21 @@ inductive THalt where
   | panic
   | diverge
   | exhausted
+  /-- A revert with data a `catch` may read (`Stmt.revertData`,
+  `docs/semantic-gaps.md`, "Revert data"); `revert` is the one with none
+  (`THalt.ofData`). -/
+  | revertWith (d : List UInt8)
   deriving Repr, DecidableEq, Inhabited
+
+/-- A revert with the data `d`: `revert` when there is none. -/
+def THalt.ofData : List UInt8 → THalt
+  | [] => .revert
+  | d => .revertWith d
+
+/-- The data a halt returns: a revert's, none for the others. -/
+def THalt.data : THalt → List UInt8
+  | .revertWith d => d
+  | _ => []
 
 abbrev TRes (α : Type) := Except THalt α
 
@@ -837,10 +852,11 @@ own function run in a frame of its own when the receiver is the contract
 itself and the elaborator found the callee (`self`, `docs/options.md` O8);
 otherwise the clause the transaction's outcome picks.  Either way the
 clause's locals are popped.  A self-call that reverts goes to the `Error`
-clause when the transaction's entry says the call ends in `Error`, to the
-catch-all otherwise (the model keeps no revert data); one that panics, to
-the `Panic` clause with the entry's code, `1` without one; one that
-exhausts or diverges halts the caller alike. -/
+clause when its data decodes as `Error(string)`, to the `Panic` clause when
+it decodes as `Panic(uint256)`, to the catch-all otherwise (no data
+included, `docs/semantic-gaps.md`, "Revert data"); one that panics, to the
+`Panic` clause with the entry's code, `1` without one; one that exhausts or
+diverges halts the caller alike. -/
 def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁)
     (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (code : CodeBinder κ)
@@ -852,10 +868,16 @@ def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (
     match TRun.call sargs (.rets rets) hs sbody σ with
     | .ok o => (ok o.st).map fun o' =>
       ⟨o'.st.drop ((Ext.append Γ ρ).trans h₁), o.ext.trans o'.ext⟩
-    | .error .revert =>
-      match lookupBy (call.keyT σ) σ.tx.ext with
-      | some .error => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
-      | _ => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
+    | .error .revert => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
+    | .error (.revertWith d) =>
+      match Semantics.decodeError d with
+      | some _ => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
+      | none =>
+        match Semantics.decodePanic d with
+        | some c =>
+          (pnc (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) c) σ.env))).map
+            fun o => ⟨o.st.drop ((Ext.append Γ κ).trans h₃), o.ext⟩
+        | none => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
     | .error .panic =>
       (pnc (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) (selfPanicCode call σ)) σ.env))).map
         fun o => ⟨o.st.drop ((Ext.append Γ κ).trans h₃), o.ext⟩
@@ -867,11 +889,11 @@ def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (
     let (r, _) ← rets.decodeT (H := σ.H) vs
     (ok (σ.withEnv (TEnv.append ρ r σ.env))).map fun o =>
       ⟨o.st.drop ((Ext.append Γ ρ).trans h₁), o.ext⟩
-  | some .error => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
+  | some (.error _) => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
   | some (.panic c) =>
     (pnc (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) c) σ.env))).map fun o =>
       ⟨o.st.drop ((Ext.append Γ κ).trans h₃), o.ext⟩
-  | some .other => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
+  | some (.other _) => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
 
 /-- `while`: the body's locals popped every iteration, the heap's extension
 carried from the loop's start. -/
@@ -892,6 +914,76 @@ def seq {Γ₁ Γ₂ : Ctx} (s : TStep C Γ Γ₁) (P : TStep C Γ₁ Γ₂) : T
 
 /-- The empty sequence. -/
 def nil : TStep C Γ Γ := fun σ => .ok ⟨σ, List.prefix_refl _⟩
+
+/-- A part of revert data, its bytes. -/
+def _root_.Solidity.RevPart.evalT (σ : State C Γ) : RevPart C Γ → TRes (List UInt8)
+  | .bytes bs => pure bs
+  | .sel sig => pure (Semantics.selectorBytes (Semantics.customSelector sig))
+  | .word v => do
+    let x ← v.evalT σ
+    pure (Semantics.wordBytes (PrimTy.toWord x).1.toNat)
+
+/-- `revert(d)`: the parts in order, then a revert with their bytes. -/
+def revertData (d : List (RevPart C Γ)) : TStep C Γ Γ := fun σ => do
+  let bs ← d.mapM (·.evalT σ)
+  .error (THalt.ofData bs.flatten)
+
+/-- The writes of a literal's bytes, then `k` (`litWrites`), run. -/
+def litWritesT {Γ₁ : Ctx} : List UInt8 → Nat → TStep C (.mem bytesR :: Γ) Γ₁ →
+    TStep C (.mem bytesR :: Γ) Γ₁
+  | [], _, k => k
+  | b :: bs, i, k => if hi : i < 2 ^ 256 then
+      seq (assignMem (litLoc i hi) (litSrc b)) (litWritesT bs (i + 1) k)
+    else k
+
+/-- A literal's bytes allocated, then `k` (`litBytes`), run. -/
+def litBytesT {Γ₁ : Ctx} (bs : List UInt8) (k : TStep C (.mem bytesR :: Γ) Γ₁) : TStep C Γ Γ₁ :=
+  if hn : bs.length < 2 ^ 256 then
+    seq (declMem bytesR (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl))
+      rfl) (litWritesT bs 0 k)
+  else seq (declMem bytesR none rfl) k
+
+/-- The data the call `c` reverts with, read from the state the `try`
+started in: at address `0`, none (the `try` reverts there); for a
+self-call, the callee's run again (an `Error` reason or custom error as it
+reverts, no data for a bare revert, `Panic` and the code the run binds for
+a panic, the callee's halt where it exhausts or diverges); otherwise the
+transaction's entry.  A revert where the call does not fail. -/
+def catchBytes {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps)
+    (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (σ : State C Γ) :
+    TRes (List UInt8) :=
+  if (c.addr.evalT σ).1 = 0 then .error .revert else
+  if self && decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) then
+    match call sargs (.rets rets) hs sbody σ with
+    | .ok _ => .error .revert
+    | .error .revert => .ok []
+    | .error (.revertWith d) => .ok d
+    | .error .panic => .ok (Semantics.encodePanic (selfPanicCode c σ).1.toNat)
+    | .error e => .error e
+  else
+    match lookupBy (c.keyT σ) σ.tx.ext with
+    | some (.error r) => .ok (Semantics.encodeError r)
+    | some (.panic p) => .ok (Semantics.encodePanic p.1.toNat)
+    | some (.other d) => .ok d
+    | _ => .error .revert
+
+/-- What a clause of `kind` binds of the data: the `Error` reason decoded,
+or the data itself. -/
+def _root_.Solidity.CatchKind.decode : CatchKind → List UInt8 → Option (List UInt8)
+  | .reason, d => Semantics.decodeError d
+  | .raw, d => some d
+
+/-- `Stmt.catchData`: the data bound as a fresh `bytes` (`litBytesT`), then
+the body, its locals popped; a revert where there is no such data (the
+clause is not reached so). -/
+def catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps)
+    (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (kind : CatchKind)
+    (h₁ : Ext (.mem bytesR :: Γ) Γ₁) (body : TStep C (.mem bytesR :: Γ) Γ₁) : TStep C Γ Γ :=
+  fun σ => do
+    let d ← catchBytes c rets sargs hs sbody self σ
+    match kind.decode d with
+    | none => .error .revert
+    | some bs => (litBytesT bs body σ).map fun o => ⟨o.st.drop ((Ext.push .refl).trans h₁), o.ext⟩
 
 end TRun
 
@@ -938,6 +1030,9 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .loop _ c body => TRun.loop c body.ext (Prog.runC body)
   | _, _, .block body => TRun.block body.ext (Prog.runC body)
   | _, _, .callRec _ _ args ret body => TRun.call args ret (body ()).ext (Prog.runC (body ()))
+  | _, _, .revertData d => TRun.revertData d
+  | _, _, .catchData c rets sargs sbody self kind _ body =>
+    TRun.catchData c rets sargs sbody.ext (Prog.runC sbody) self kind body.ext (Prog.runC body)
 
 /-- The compiled typed run of a sequence. -/
 def Prog.runC : {Γ Γ' : Ctx} → Prog C Γ Γ' → TStep C Γ Γ'
@@ -972,6 +1067,9 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
+    (fun d => TRun.revertData d)
+    (fun c rets sargs sbody self kind _ body ihS ihB =>
+      TRun.catchData c rets sargs sbody.ext ihS self kind body.ext ihB)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence, by its recursor. -/
@@ -1000,6 +1098,9 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
+    (fun d => TRun.revertData d)
+    (fun c rets sargs sbody self kind _ body ihS ihB =>
+      TRun.catchData c rets sargs sbody.ext ihS self kind body.ext ihB)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 /-- The typed run of a statement from `σ`: the state it leaves, or how it
@@ -1045,6 +1146,10 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
   | _, _, .block body => by
     show TRun.block body.ext body.runR = TRun.block body.ext body.runC
     rw [Prog.runR_eq body]
+  | _, _, .catchData c rets sargs sbody self kind _ body => by
+    show TRun.catchData c rets sargs sbody.ext sbody.runR self kind body.ext body.runR =
+      TRun.catchData c rets sargs sbody.ext sbody.runC self kind body.ext body.runC
+    rw [Prog.runR_eq sbody, Prog.runR_eq body]
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
   | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
@@ -1052,7 +1157,7 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .assumeFalse => rfl
+  | _, _, .revert | _, _, .assumeFalse | _, _, .revertData _ => rfl
 
 theorem Prog.runR_eq : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runR P = Prog.runC P
   | _, _, .nil => rfl
@@ -1061,6 +1166,94 @@ theorem Prog.runR_eq : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.runR P = 
     rw [Stmt.runR_eq s, Prog.runR_eq P]
 
 end
+
+/-- A literal's writes run as `TRun.litWritesT`. -/
+theorem Prog.runC_litWrites {Γ Γ₁ : Ctx} (k : Prog C (.mem bytesR :: Γ) Γ₁) :
+    (bs : List UInt8) → (i : Nat) →
+      Prog.runC (litWrites bs i k) = TRun.litWritesT bs i (Prog.runC k)
+  | [], _ => rfl
+  | b :: bs, i => by
+    by_cases hi : i < 2 ^ 256
+    · rw [litWrites, TRun.litWritesT, dif_pos hi, dif_pos hi]
+      show TRun.seq (Stmt.runC _) (Prog.runC _) = _
+      rw [Prog.runC_litWrites k bs (i + 1)]
+      rfl
+    · rw [litWrites, TRun.litWritesT, dif_neg hi, dif_neg hi]
+
+/-- **A literal's allocation runs as `TRun.litBytesT`**: the run of the
+statements `Stmt.catchData`'s rule writes in front of its clause. -/
+theorem Prog.run_litBytes {Γ Γ₁ : Ctx} (x : Var) (bs : List UInt8)
+    (k : Prog C (.mem bytesR :: Γ) Γ₁) (σ : State C Γ) :
+    Prog.run σ (litBytes x bs k) = TRun.litBytesT bs k.runR σ := by
+  show Prog.runR _ σ = _
+  rw [Prog.runR_eq, Prog.runR_eq]
+  by_cases hn : bs.length < 2 ^ 256
+  · rw [litBytes, TRun.litBytesT, dif_pos hn, dif_pos hn]
+    show TRun.seq (Stmt.runC _) (Prog.runC _) σ = _
+    rw [Prog.runC_litWrites]
+    rfl
+  · rw [litBytes, TRun.litBytesT, dif_neg hn, dif_neg hn]
+    rfl
+
+/-- A sequence, then a third step: the first, then the other two. -/
+theorem TRun.seq_assoc {Γ₁ Γ₂ Γ₃ : Ctx} (a : TStep C Γ Γ₁) (b : TStep C Γ₁ Γ₂) (c : TStep C Γ₂ Γ₃) :
+    TRun.seq (TRun.seq a b) c = TRun.seq a (TRun.seq b c) := by
+  funext σ
+  simp only [TRun.seq]
+  cases a σ with
+  | error => rfl
+  | ok o₁ =>
+    dsimp only
+    cases b o₁.st with
+    | error => rfl
+    | ok o₂ =>
+      dsimp only [Except.map]
+      cases c o₂.st <;> rfl
+
+/-- The empty step, then `k`: `k`. -/
+theorem TRun.seq_nil {Γ₁ : Ctx} (k : TStep C Γ Γ₁) : TRun.seq TRun.nil k = k := by
+  funext σ
+  simp only [TRun.seq, TRun.nil]
+  cases k σ <;> rfl
+
+/-- A literal's writes, then `k`: the writes alone, then `k`. -/
+theorem TRun.litWritesT_seq {Γ₁ : Ctx} (k : TStep C (.mem bytesR :: Γ) Γ₁) :
+    (bs : List UInt8) → (i : Nat) →
+      TRun.litWritesT bs i k = TRun.seq (TRun.litWritesT bs i TRun.nil) k
+  | [], _ => (TRun.seq_nil k).symm
+  | b :: bs, i => by
+    by_cases hi : i < 2 ^ 256
+    · simp only [TRun.litWritesT, dif_pos hi]
+      rw [TRun.seq_assoc, TRun.litWritesT_seq k bs (i + 1)]
+    · simp only [TRun.litWritesT, dif_neg hi]
+      exact (TRun.seq_nil k).symm
+
+/-- A literal's allocation, then `k`: the allocation alone, then `k`. -/
+theorem TRun.litBytesT_seq {Γ₁ : Ctx} (bs : List UInt8) (k : TStep C (.mem bytesR :: Γ) Γ₁) :
+    TRun.litBytesT bs k = TRun.seq (TRun.litBytesT bs TRun.nil) k := by
+  by_cases hn : bs.length < 2 ^ 256
+  · simp only [TRun.litBytesT, dif_pos hn]
+    rw [TRun.seq_assoc, TRun.litWritesT_seq k bs 0]
+  · simp only [TRun.litBytesT, dif_neg hn]
+    rw [TRun.seq_assoc, TRun.seq_nil]
+
+/-- The data read for a `catch` clause is never a panic: a callee's panic is
+its `Panic` data. -/
+theorem TRun.catchBytes_ne_panic {ρ ps Γf : Ctx} {c : ExtCall C Γ} {rets : Binders ρ}
+    {sargs : Args C Γ ps} {hs : Ext (ρ ++ ps) Γf} {sbody : TStep C (ρ ++ ps) Γf} {self : Bool}
+    {σ : State C Γ} {e : THalt} (h : TRun.catchBytes c rets sargs hs sbody self σ = .error e) :
+    e ≠ .panic := by
+  intro hp
+  subst hp
+  unfold TRun.catchBytes at h
+  split at h
+  · cases h
+  split at h
+  · split at h
+    all_goals first | cases h | skip
+    rename_i hpp _
+    exact hpp rfl
+  · split at h <;> cases h
 
 /-! ### Equations -/
 

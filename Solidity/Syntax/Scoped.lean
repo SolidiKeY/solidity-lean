@@ -265,6 +265,29 @@ def LoopUnwind.after {C : Contract} {Γ : Ctx} : LoopUnwind → LoopAnn C Γ
   | .bounded n => .unwind n
   | .automatic => .auto
 
+/-! ## Revert data -/
+
+/-- A part of the data `Stmt.revertData` reverts with
+(`docs/semantic-gaps.md`, "Revert data"): literal bytes (an `Error(string)`
+encoding of a literal reason), a custom error's selector (`customSelector`,
+uninterpreted per signature), or a value as its ABI word. -/
+inductive RevPart (C : Contract) (Γ : Ctx) where
+  | bytes (bs : List UInt8)
+  | sel (sig : String)
+  | word {p : PrimTy} (v : Val C Γ p)
+
+/-- What a `catch` clause binds of the data (`Stmt.catchData`): the reason
+`catch Error(string memory r)` decodes, or the raw data of `catch (bytes
+memory d)`. -/
+inductive CatchKind where
+  | reason
+  | raw
+  deriving Repr, DecidableEq, Inhabited
+
+/-- A memory `bytes`/`string`: `bytes1[]`, an array of `uint`s holding a byte
+each (`docs/semantic-gaps.md`, "Bytes and strings"). -/
+abbrev bytesR : RefTy := .array (.prim .uint)
+
 /-! ## Statements -/
 
 /-- The array operation after a storage-returning receiver call. Its source
@@ -374,6 +397,18 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   (`TRun.call`, `Stmt.run_callRec`); `d` is read by the quoters only. -/
   | callRec {Γ Γ' ps rs : Ctx} (f : Name) (d : Nat) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
       (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) : Stmt C Γ Γ'
+  /-- `revert(d)`: a revert with the data `d` (Lean only, `docs/semantic-gaps.md`,
+  "Revert data"): `require(c, "m")`, `revert("m")` and `revert E(a)` in the
+  callee a self-call `try` runs, where a `catch` may read it. -/
+  | revertData {Γ : Ctx} (d : List (RevPart C Γ)) : Stmt C Γ Γ
+  /-- A `catch` clause that names the data (Lean only): `x` bound to what the
+  call `call` reverts with (`kind`: the decoded `Error` reason, or the raw
+  data), read from the state the `try` started in — for a self-call the
+  callee's run again (`sargs`, `sbody` as `Stmt.tryCall`'s), otherwise the
+  transaction's entry — then `body`, its locals popped. -/
+  | catchData {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps)
+      (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) (kind : CatchKind) (x : Var)
+      (body : Prog C (.mem bytesR :: Γ) Γ₁) : Stmt C Γ Γ
 
 /-- A sequence of statements, each read where the one before leaves. -/
 inductive Prog (C : Contract) : Ctx → Ctx → Type where
@@ -719,6 +754,17 @@ def Prog.receiverExpr? {Γ Γv : Ctx} {E : Ty} (ns : List Var)
     else none
   | _, _ => none
 
+/-- Bytes as a hex literal. -/
+def hexStr (bs : List UInt8) : String :=
+  let hex (n : Nat) : Char := "0123456789abcdef".toList.getD n '0'
+  "hex\"" ++ String.mk (bs.flatMap fun b => [hex (b.toNat / 16), hex (b.toNat % 16)]) ++ "\""
+
+/-- A part of revert data. -/
+def RevPart.toStr {Γ : Ctx} (ns : List Var) : RevPart C Γ → String
+  | .bytes bs => hexStr bs
+  | .sel sig => s!"selector(\"{sig}\")"
+  | .word v => s!"abi.encode({v.toStr ns true})"
+
 mutual
 
 def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
@@ -763,6 +809,12 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .assert c => s!"assert({c.toStr ns true});"
   | .revert => "revert();"
   | .assumeFalse => "assume(false);"
+  | .revertData d => s!"revert({", ".intercalate (d.map (·.toStr ns))});"
+  | .catchData c _ _ _ _ kind x body =>
+    let src := match kind with
+      | .reason => s!"string memory {x} = reason({c.fn})"
+      | .raw => s!"bytes memory {x} = data({c.fn})"
+    braced (s!"{src};" :: Prog.toStrs 0 (x :: ns) body)
   | .call f args ret _ =>
     let call := callStr ns f args
     match ret with
@@ -958,6 +1010,11 @@ def CallRet.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {rs Γ' : Ctx} → CallRet Γ rs
   | _, _, .mem R r hd hm => ⟨.mem R :: Δ, .keep h, .mem R r hd hm⟩
   | _, _, .storage R r => ⟨.alias R :: Δ, .keep h, .storage R r⟩
 
+def RevPart.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : RevPart C Γ → RevPart C Δ
+  | .bytes bs => .bytes bs
+  | .sel sig => .sel sig
+  | .word v => .word (v.wk h)
+
 mutual
 
 /-- Weakening a statement: the output context is computed, with the
@@ -996,6 +1053,9 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
   | _, .assert c => ⟨Δ, h, .assert (c.wk h)⟩
   | _, .revert => ⟨Δ, h, .revert⟩
   | _, .assumeFalse => ⟨Δ, h, .assumeFalse⟩
+  | _, .revertData d => ⟨Δ, h, .revertData (d.map (·.wk h))⟩
+  | _, .catchData c rets sargs sbody self kind x body =>
+    ⟨Δ, h, .catchData (c.wk h) rets (sargs.wk h) sbody self kind x (body.wk (.keep h)).2.2⟩
   | _, .call f args ret body =>
     let ⟨Δ', h', ret'⟩ := ret.wk h
     ⟨Δ', h', .call f (args.wk h) ret' body⟩
@@ -1056,6 +1116,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
     (fun _ _ _ _ _ => .refl)
     (fun _ _ _ _ _ _ => .refl)
     (fun _ _ _ ret _ => ret.ext)
+    (fun _ => .refl) (fun _ _ _ _ _ _ _ _ => .refl)
 
 def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
   | _, _, P => Prog.casesOn (motive_2 := fun Γ Γ' _ => Ext Γ Γ') P .refl
@@ -1063,6 +1124,51 @@ def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
   termination_by structural _ _ P => P
 
 end Pushes
+
+/-! ## A byte string's literal
+
+The statements a literal `bytes memory x = hex"…";` elaborates to: a fresh
+array of its length, then each byte written (`docs/semantic-gaps.md`,
+"Bytes and strings").  `Stmt.catchData` allocates the data it binds as
+these do, and its rule writes them in front of the clause. -/
+
+section LitBytes
+
+variable {C : Contract}
+
+theorem PrimTy.inRange_uint_of_lt {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  exact ⟨Int.natCast_nonneg n, Int.ofNat_lt.mpr h⟩
+
+/-- `x[i]`, at the local `x` on top. -/
+def litLoc {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) : MLoc C (.mem bytesR :: Γ) (.prim .uint) :=
+  .index .dyn (.var .here rfl) (.simple (.lit (i : Int) (PrimTy.inRange_uint_of_lt hi)))
+
+/-- A byte, as the `uint` a `bytes1[]` element holds. -/
+def litSrc {Γ : Ctx} (b : UInt8) : MSrc C Γ (.prim .uint) :=
+  .val (.simple (.lit (b.toNat : Int) (PrimTy.inRange_uint_of_lt (Nat.lt_trans b.toNat_lt (by decide)))))
+
+/-- `x[i] = b;`, `b` a byte, at the local `x` on top. -/
+def litWrite {Γ : Ctx} (i : Nat) (hi : i < 2 ^ 256) (b : UInt8) :
+    Stmt C (.mem bytesR :: Γ) (.mem bytesR :: Γ) :=
+  .assignMem (litLoc i hi) (litSrc b)
+
+/-- The writes of a literal's bytes, from position `i` on, then `k`. -/
+def litWrites {Γ Γ₁ : Ctx} : List UInt8 → Nat → Prog C (.mem bytesR :: Γ) Γ₁ →
+    Prog C (.mem bytesR :: Γ) Γ₁
+  | [], _, k => k
+  | b :: bs, i, k => if hi : i < 2 ^ 256 then .cons (litWrite i hi b) (litWrites bs (i + 1) k) else k
+
+/-- `bytes memory x = new bytes(n);`, the writes of a literal's bytes (`n`
+its length, below `2^256`), then `k`. -/
+def litBytes {Γ Γ₁ : Ctx} (x : Var) (bs : List UInt8) (k : Prog C (.mem bytesR :: Γ) Γ₁) :
+    Prog C Γ Γ₁ :=
+  if hn : bs.length < 2 ^ 256 then
+    .cons (.declMem bytesR x (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl))
+      rfl rfl) (litWrites bs 0 k)
+  else .cons (.declMem bytesR x none rfl rfl) k
+
+end LitBytes
 
 /-! ## An example
 

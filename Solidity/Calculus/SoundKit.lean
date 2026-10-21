@@ -247,7 +247,7 @@ def Upd.PairAgrees {Δ : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') (σ : State C
   | .ok o => U.PairLands V σ o.st
   | .error .revert => U.PairFails V σ
   | .error .exhausted => True
-  | .error .panic | .error .diverge => False
+  | .error .panic | .error .diverge | .error (.revertWith _) => False
 
 /-- Agreement with the typed run supplies both modal run conditions for
 `a.push() += x`, without an additional storage invariant. -/
@@ -273,7 +273,7 @@ theorem Premise.updatesRuns_of_agrees {Δ : Ctx} {U : Upd C Γ Δ} {V : Upd C Δ
       cases e' with
       | revert => exact ⟨nofun, fun _ _ => ha⟩
       | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
-      | panic | diverge => exact ha.elim
+      | panic | diverge | revertWith _ => exact ha.elim
 
 /-- `{U} {V} ⟨ ω κ ⟩ φ` is sound when both updates agree with the run;
 in `a.push() += x`, arithmetic reads the newly appended slot. -/
@@ -666,6 +666,10 @@ theorem ExecS.det_inv {Γ Γ' : Ctx} {σ : State C Γ} {J : StateInv C} {s : Stm
     {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.run σ) := by
   cases h with
   | det _ => rfl
+  | catchDataHalt hb _ | catchDataBody hb _ _ =>
+    simp only [Stmt.forks, Bool.or_eq_false_iff] at hs
+    simp only [Prog.callsBack_of_hasTransfer _ hs.1, Prog.callsBack_of_hasTransfer _ hs.2,
+      Bool.or_self, Bool.false_eq_true] at hb
   | _ =>
     simp only [Stmt.forks] at hs
     first
@@ -810,6 +814,7 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
         unfold Upd.applyP at ha'
         exact Option.map_eq_none_iff.1 ha'
       | panic => exact ha.elim
+      | revertWith _ => exact ha.elim
       | diverge => exact ⟨nofun, fun hm _ => absurd ht (hd hm)⟩
       | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
 

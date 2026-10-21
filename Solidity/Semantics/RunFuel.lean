@@ -157,9 +157,12 @@ theorem tryCall_approx {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (ec : ExtCal
     · rw [← h]
       split
       · exact (hok _).map _
+      · exact (hoth _).map _
       · split
         · exact (herr _).map _
-        · exact (hoth _).map _
+        · split
+          · exact (hpnc _).map _
+          · exact (hoth _).map _
       · exact (hpnc _).map _
       · exact .refl _
   split
@@ -182,6 +185,43 @@ theorem seq_approx {Γ₁ Γ₂ : Ctx} {s s' : TStep C Γ Γ₁} {P P' : TStep C
       cases s' σ with
       | error e => exact .refl _
       | ok o => exact (hP o.st).map _
+
+theorem litWritesT_approx {Γ₁ : Ctx} {k k' : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : TStep.Approx k k') : (bs : List UInt8) → (i : Nat) →
+    TStep.Approx (litWritesT bs i k) (litWritesT bs i k')
+  | [], _ => hk
+  | b :: bs, i => by
+    unfold litWritesT
+    split
+    · exact seq_approx (fun _ => .refl _) (litWritesT_approx hk bs (i + 1))
+    · exact hk
+
+theorem litBytesT_approx {Γ₁ : Ctx} {k k' : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : TStep.Approx k k') (bs : List UInt8) : TStep.Approx (litBytesT bs k) (litBytesT bs k') := by
+  unfold litBytesT
+  split
+  · exact seq_approx (fun _ => .refl _) (litWritesT_approx hk bs 0)
+  · exact seq_approx (fun _ => .refl _) hk
+
+theorem catchData_approx {ρ ps Γf Γ₁ : Ctx} (ec : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) {sb sb' : TStep C (ρ ++ ps) Γf} (self : Bool)
+    (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) {f g : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hsb : TStep.Approx sb sb') (hfg : TStep.Approx f g) :
+    TStep.Approx (catchData ec rets sargs hs sb self kind h₁ f)
+      (catchData ec rets sargs hs sb' self kind h₁ g) := fun σ => by
+  unfold catchData
+  refine TRes.Approx.bind ?_ fun d => ?_
+  · unfold catchBytes
+    split
+    · exact .refl _
+    split
+    · rcases call_approx sargs (.rets rets) hs hsb σ with h | h
+      · rw [h]; exact .inl rfl
+      · rw [h]; exact .refl _
+    · exact .refl _
+  · split
+    · exact .refl _
+    · exact (litBytesT_approx hfg _ σ).map _
 
 end TRun
 
@@ -231,6 +271,9 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .block body => TRun.block body.ext (Prog.runFC n body)
   | _, _, .callRec _ _ args ret body =>
     TRun.call args ret (body ()).ext (Prog.runFC n (body ()))
+  | _, _, .revertData d => TRun.revertData d
+  | _, _, .catchData c rets sargs sbody self kind _ body =>
+    TRun.catchData c rets sargs sbody.ext (Prog.runFC n sbody) self kind body.ext (Prog.runFC n body)
 
 /-- The compiled typed run with fuel of a sequence. -/
 def Prog.runFC (n : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → TStep C Γ Γ'
@@ -266,6 +309,9 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
+    (fun d => TRun.revertData d)
+    (fun c rets sargs sbody self kind _ body ihS ihB =>
+      TRun.catchData c rets sargs sbody.ext ihS self kind body.ext ihB)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence with fuel, by its recursor. -/
@@ -294,6 +340,9 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
+    (fun d => TRun.revertData d)
+    (fun c rets sargs sbody self kind _ body ihS ihB =>
+      TRun.catchData c rets sargs sbody.ext ihS self kind body.ext ihB)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 mutual
@@ -332,6 +381,10 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .block body => by
     show TRun.block body.ext (body.runF n) = TRun.block body.ext (body.runFC n)
     rw [Prog.runF_eq n body]
+  | _, _, .catchData c rets sargs sbody self kind _ body => by
+    show TRun.catchData c rets sargs sbody.ext (sbody.runF n) self kind body.ext (body.runF n) =
+      TRun.catchData c rets sargs sbody.ext (sbody.runFC n) self kind body.ext (body.runFC n)
+    rw [Prog.runF_eq n sbody, Prog.runF_eq n body]
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
   | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
@@ -339,7 +392,7 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .assumeFalse => rfl
+  | _, _, .revert | _, _, .assumeFalse | _, _, .revertData _ => rfl
 
 theorem Prog.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     Prog.runF n P = Prog.runFC n P
@@ -381,6 +434,9 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
       (Prog.runF_approx n other) (Prog.runF_approx n sbody)
   | _, _, .loop _ c body => TRun.loopF_approx n c body.ext (Prog.runF_approx n body)
   | _, _, .block body => TRun.block_approx body.ext (Prog.runF_approx n body)
+  | _, _, .catchData c rets sargs sbody self kind _ body =>
+    TRun.catchData_approx c rets sargs sbody.ext self kind body.ext (Prog.runF_approx n sbody)
+      (Prog.runF_approx n body)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
   | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
@@ -388,7 +444,7 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .assumeFalse => fun _ => .refl _
+  | _, _, .revert | _, _, .assumeFalse | _, _, .revertData _ => fun _ => .refl _
 
 theorem Prog.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     TStep.Approx (Prog.runF n P) (Prog.runR P)

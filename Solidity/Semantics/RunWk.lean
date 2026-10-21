@@ -1276,6 +1276,71 @@ theorem TRun.call_wk {Γ Δ Γ' ps rs Γf : Ctx} (h : Thin Γ Δ) (τ : State C 
   rw [CallRet.enterT_wk]
   exact TRun.callFrom_wk h τ d ret hb body _
 
+theorem RevPart.evalT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) :
+    (p : RevPart C Γ) → (p.wk h).evalT (τ.lift h d) = p.evalT τ
+  | .bytes _ => rfl
+  | .sel _ => rfl
+  | .word v => by simp only [RevPart.wk, RevPart.evalT, Val.evalT_wk]
+
+theorem TRun.catchBytes_wk {Γ Δ ρ ps Γf : Ctx} (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ)
+    (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) :
+    TRun.catchBytes (c.wk h) rets (sargs.wk h) hs sbody self (τ.lift h d) =
+      TRun.catchBytes c rets sargs hs sbody self τ := by
+  unfold TRun.catchBytes
+  have ha : (c.wk h).addr.evalT (τ.lift h d) = c.addr.evalT τ := Simple.evalT_wk h τ d _
+  rw [ha, ExtCall.keyT_wk, show (τ.lift h d).tx = τ.tx from rfl]
+  have hp : TRun.selfPanicCode (c.wk h) (τ.lift h d) = TRun.selfPanicCode c τ := by
+    unfold TRun.selfPanicCode
+    rw [ExtCall.keyT_wk]
+    rfl
+  rw [hp]
+  have hc := TRun.call_wk h τ d sargs (.rets rets) hs sbody
+  change TWkRel (Thin.keepAll _ h) _ _
+    (TRun.call (sargs.wk h) (.rets rets) hs sbody (τ.lift h d)) at hc
+  revert hc
+  generalize TRun.call sargs (.rets rets) hs sbody τ = r₀
+  generalize TRun.call (sargs.wk h) (.rets rets) hs sbody (τ.lift h d) = r
+  intro hc
+  cases r₀ with
+  | ok a => cases r with
+    | error => exact hc.elim
+    | ok b => rfl
+  | error e => cases r with
+    | ok => exact hc.elim
+    | error e' => cases hc; cases e <;> rfl
+
+theorem TRun.litWritesT_wk {Γ Δ Γ₁ Δ₁ : Ctx} (h : Thin Γ Δ) {h₁ : Thin Γ₁ Δ₁}
+    {k : TStep C (.mem bytesR :: Γ) Γ₁} {k' : TStep C (.mem bytesR :: Δ) Δ₁}
+    (hk : ∀ (a : State C (.mem bytesR :: Γ)) (d' : TEnv C a.H (.mem bytesR :: Δ)),
+      TWkRel h₁ (TEnv.off (.keep h) d') (k a) (k' (a.lift (.keep h) d'))) :
+    (bs : List UInt8) → (i : Nat) →
+    (τ : State C (.mem bytesR :: Γ)) → (d : TEnv C τ.H (.mem bytesR :: Δ)) →
+    TWkRel h₁ (TEnv.off (.keep h) d) (TRun.litWritesT bs i k τ)
+      (TRun.litWritesT bs i k' (τ.lift (.keep h) d))
+  | [], _, τ, d => hk τ d
+  | b :: bs, i, τ, d => by
+    unfold TRun.litWritesT
+    split
+    · rename_i hi
+      exact TWkRel.seq (TWkRel.of_eq (TRun.assignMem_wk (.keep h) τ d (litLoc i hi) (litSrc b)))
+        fun a d' => TRun.litWritesT_wk h hk bs (i + 1) a d'
+    · exact hk τ d
+
+theorem TRun.litBytesT_wk {Γ Δ Γ₁ Δ₁ : Ctx} (h : Thin Γ Δ) {h₁ : Thin Γ₁ Δ₁}
+    {k : TStep C (.mem bytesR :: Γ) Γ₁} {k' : TStep C (.mem bytesR :: Δ) Δ₁}
+    (hk : ∀ (a : State C (.mem bytesR :: Γ)) (d' : TEnv C a.H (.mem bytesR :: Δ)),
+      TWkRel h₁ (TEnv.off (.keep h) d') (k a) (k' (a.lift (.keep h) d')))
+    (τ : State C Γ) (d : TEnv C τ.H Δ) (bs : List UInt8) :
+    TWkRel h₁ (TEnv.off h d) (TRun.litBytesT bs k τ) (TRun.litBytesT bs k' (τ.lift h d)) := by
+  unfold TRun.litBytesT
+  split
+  · rename_i hn
+    exact TWkRel.seq (TWkRel.of_top (TRun.declMem_wk h τ d bytesR
+        (some (.newArr (.lit (bs.length : Int) (PrimTy.inRange_uint_of_lt hn)) rfl)) rfl))
+      fun a d' => TRun.litWritesT_wk h hk bs 0 a d'
+  · exact TWkRel.seq (TWkRel.of_top (TRun.declMem_wk h τ d bytesR none rfl)) hk
+
 theorem TRun.callReceiverPush_eq_seq {Γ ps Γf Γv : Ctx} {E : Ty}
     (args : Args C Γ ps) (r : Var) (hb : Ext ([.alias (.array E)] ++ ps) Γf)
     (body : TStep C ([.alias (.array E)] ++ ps) Γf) (he : Ext Γ Γv)
@@ -1369,6 +1434,24 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
   | _, _, .assert c, _, h, τ, d => TWkRel.of_eq (TRun.assert_wk h τ d c)
   | _, _, .revert, _, h, τ, d => rfl
   | _, _, .assumeFalse, _, h, τ, d => rfl
+  | _, _, .revertData ps, _, h, τ, d => by
+    show TWkRel h _ (TRun.revertData ps τ) (TRun.revertData (ps.map (·.wk h)) (τ.lift h d))
+    unfold TRun.revertData
+    rw [List.mapM_map]
+    simp only [Function.comp_def, RevPart.evalT_wk h τ d]
+    exact TWkRel.bind_same _ fun _ => rfl
+  | _, _, .catchData c rets sargs sbody self kind _ body, _, h, τ, d => by
+    show TWkRel h (TEnv.off h d)
+      (TRun.catchData c rets sargs sbody.ext sbody.runR self kind body.ext body.runR τ)
+      (TRun.catchData (c.wk h) rets (sargs.wk h) sbody.ext sbody.runR self kind
+        (body.wk (.keep h)).2.2.ext (body.wk (.keep h)).2.2.runR (τ.lift h d))
+    unfold TRun.catchData
+    rw [TRun.catchBytes_wk]
+    refine TWkRel.bind_same _ fun dt => ?_
+    split
+    · rfl
+    · exact TWkRel.drop (Thin.Over.trans (.push (.refl h)) (Prog.wk_over body (.keep h)))
+        (TRun.litBytesT_wk h (fun a d' => Prog.run_wk body (.keep h) a d') τ d _)
   | _, _, .ite c thn els, _, h, τ, d => by
     show TWkRel h _ (TRun.ite c thn.ext thn.runR els.ext els.runR τ)
       (TRun.ite (c.wk h) (thn.wk h).2.2.ext (thn.wk h).2.2.runR (els.wk h).2.2.ext
@@ -1467,11 +1550,14 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
         | error e' =>
           cases hc
           cases e with
-          | revert =>
+          | revert => exact hoth
+          | revertWith dt =>
             dsimp only
             split
             · exact herr
-            · exact hoth
+            · split
+              · exact hpnc _
+              · exact hoth
           | panic =>
             have hp : TRun.selfPanicCode (call.wk h) (τ.lift h d) = TRun.selfPanicCode call τ := by
               unfold TRun.selfPanicCode
@@ -1486,9 +1572,9 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
       | some o =>
         cases o with
         | ok vs => exact TWkRel.bind_same _ fun ⟨r, _⟩ => hok r
-        | error => exact herr
+        | error _ => exact herr
         | panic c => exact hpnc c
-        | other => exact hoth
+        | other _ => exact hoth
   | _, _, .loop a c body, _, h, τ, d => by
     apply TWkRel.of_eq
     show TLoop.run (fun o : Out C τ.H _ => ((body.wk h).2.2.runR o.st).map

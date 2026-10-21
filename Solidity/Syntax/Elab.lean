@@ -1,6 +1,7 @@
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Checked
 import Solidity.Keccak
+import Solidity.RevertBytes
 
 /-!
 # The elaborator
@@ -473,7 +474,7 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .assign l r | .assignPush l r | .opAssign _ l r | .pushOpAssign _ l r | .assignIncDec l _ r => [l, r]
   | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i | .ret i => i.toList
   | .declStoragePush _ _ b | .declPush _ _ b | .delete b | .incDec _ b | .pushIncDec _ b | .require b | .assert b
-  | .ite b _ _ => [b]
+  | .ite b _ _ | .requireMsg b _ => [b]
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
@@ -481,7 +482,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .send (some _) _ r a _ => [r, a]
   | .tupleDecl _ r => [r]
   | .tupleAssign ts r => ts.filterMap id ++ [r]
-  | .revert | .assumeFalse | .unchecked _ | .checked .. | .block _ | .brk | .cont | .hole => []
+  | .revert | .revertMsg _ | .assumeFalse | .unchecked _ | .checked .. | .block _ | .brk | .cont
+  | .hole => []
   | .whileLoop a c _ | .doWhile a _ c | .loop a c _ => a.exprs ++ [c]
   | .forLoop a _ c _ _ => a.exprs ++ c.toList
 
@@ -526,6 +528,8 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .call g as => return .call (← f g) (← as.mapM f)
   | .eval as => return .eval (← as.mapM f)
   | .revert => pure .revert
+  | .revertMsg m => pure (.revertMsg m)
+  | .requireMsg b m => return .requireMsg (← f b) m
   | .assumeFalse => pure .assumeFalse
   | .unchecked b => pure (.unchecked b)
   | .checked o b => pure (.checked o b)
@@ -861,6 +865,31 @@ abbrev SStmt.of (Γ : NCtx) {Γ' : Ctx} (s : Stmt C Γ.ctx Γ') : SStmt C := ⟨
 
 /-- A block read in `Γ`, and the context it leaves. -/
 abbrev Blk (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
+
+/-- A `catch` clause whose first statement binds the call's data (the marker
+`expandTry` writes for `catch Error(string memory r)` and `catch (bytes
+memory d)`): its kind, the declaration it is elaborated from, the rest. -/
+partial def RawStmt.catchBinder? : List RawStmt → Option CatchKind × List RawStmt
+  | .declMemory T x (some (.name n)) :: rest =>
+    if n == "catch$reason" || n == "catch$data" then
+      -- a name the clause does not read binds nothing: the clause as written
+      if rest.any (·.anyDeep fun s => s.exprs.any (·.mentions x)) then
+        (some (if n == "catch$reason" then .reason else .raw), .declMemory T x none :: rest)
+      else (none, rest)
+    else (none, .declMemory T x (some (.name n)) :: rest)
+  | ss => (none, ss)
+
+/-- A `catch` clause elaborated with its binder declared first, as
+`Stmt.catchData` (`docs/semantic-gaps.md`, "Revert data"): the declaration's
+local bound to the call's data, the rest of the clause its body. -/
+def Blk.toCatchData {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) (kind : CatchKind) :
+    Blk C Γ → Except String (Blk C Γ)
+  | ⟨_, .cons (.declMem R x none _ _) rest⟩ =>
+    if h : R = bytesR then
+      pure ⟨Γ, .cons (.catchData call rets sargs sbody self kind x (h ▸ rest)) .nil⟩
+    else throw s!"a `catch` clause binds `bytes memory` or `string memory`, not {Ty.toStr (.ref R)}"
+  | _ => throw "internal: a `catch` binder elaborated to no declaration"
 
 /-- A statement inside `checked { … }` or `ignoringOverflow { … }`: its
 guard's statement first, the programs it holds guarded (`Stmt.guard`,
@@ -4394,7 +4423,7 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
   | s@(.declPush ..) | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
-  | s@(.assert _) | s@(.tryCall ..) => do
+  | s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
       if (← read).funs.any (·.1 == f) then
@@ -4908,6 +4937,14 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let Γ ← nctx
     pure [.of Γ (.assert (← checkIn C Γ .bool c))]
   | .revert => do pure [.of (← nctx) .revert]
+  -- revert data, where a `try` reads it: in a self-call's callee
+  | .revertMsg m => do
+    if (← read).selfFrame then
+      pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
+    else pure [.of (← nctx) .revert]
+  | .requireMsg c m => do
+    if (← read).selfFrame then elabStmt1 (.ite c [] [.revertMsg m])
+    else elabStmt1 (.require c)
   | .assumeFalse => do pure [.of (← nctx) .assumeFalse]
   | .eval _ => pure []
   | .unchecked ss => do
@@ -4954,18 +4991,35 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let ok ← ElabM.lift (SProg.chain (bs.names ++ Γ.names) (ρ ++ Γ.ctx) ok)
     let (_, k) ← get
     set (Γe, k)
-    let err ← elabScope Γ err
-    if let some c := code then declare C c (.val .uint)
-    let pnc ← elabStmtsP pnc
-    let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ.names) (κ ++ Γ.ctx) pnc)
+    -- a clause naming the data binds it (`Stmt.catchData`), read as the call
+    let ⟨ps, Γf, sargs, sbody, self⟩ : (ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps ×
+        Prog C (ρ ++ ps) Γf × Bool := match sb with
+      | some ⟨ps, Γf, sargs, sbody⟩ => ⟨ps, Γf, sargs, sbody, true⟩
+      | none => ⟨[], ρ ++ [], .nil, .nil, false⟩
+    let call : ExtCall C Γ.ctx := ⟨addr', g, args'⟩
+    let clause (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
+      match RawStmt.catchBinder? ss with
+      | (some kind, ss) =>
+        ElabM.lift ((← elabScope Γ ss).toCatchData call bs sargs sbody self kind)
+      | (none, ss) => elabScope Γ ss
+    let err ← clause err
     let (_, k) ← get
     set (Γe, k)
-    let other ← elabScope Γ other
-    match sb with
-    | some ⟨_, _, sargs, sbody⟩ =>
-      pure (Q ++ [.of Γ (.tryCall ⟨addr', g, args'⟩ bs ok.2 err.2 cb pnc.2 other.2 sargs sbody true)])
-    | none =>
-      pure (Q ++ [.of Γ (.tryCall ⟨addr', g, args'⟩ bs ok.2 err.2 cb pnc.2 other.2 .nil .nil false)])
+    let pnc : Blk C (κ ++ Γ.ctx) ← match (RawStmt.catchBinder? pnc).1 with
+      -- the catch-all's block in the `Panic` clause's place (no code bound)
+      | some _ => do
+        if h : κ = [] then
+          let P ← clause pnc
+          pure (by subst h; exact P)
+        else throw "a `Panic` clause that binds the data"
+      | none => do
+        if let some c := code then declare C c (.val .uint)
+        let pnc ← elabStmtsP (RawStmt.catchBinder? pnc).2
+        ElabM.lift (SProg.chain (cb.names ++ Γ.names) (κ ++ Γ.ctx) pnc)
+    let (_, k) ← get
+    set (Γe, k)
+    let other ← clause other
+    pure (Q ++ [.of Γ (.tryCall call bs ok.2 err.2 cb pnc.2 other.2 sargs sbody self)])
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,

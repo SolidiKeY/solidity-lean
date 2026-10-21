@@ -1,6 +1,7 @@
 import Solidity.Calculus.SoundStep
 import Solidity.Calculus.SoundCalls
 import Solidity.Calculus.SoundLoops
+import Solidity.Calculus.SoundCatch
 
 /-!
 # Every rule of `Stmt.step` over the typed state
@@ -38,6 +39,8 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
   | tryCall call rets ok err code pnc other sargs sbody self =>
     exact Stmt.sound_tryCall k m call rets ok err code pnc other sargs sbody self σ p hp
   | loop a c body => exact Stmt.sound_loop k m a c body σ p hp
+  | catchData call rets sargs sbody self kind x body =>
+    exact Stmt.sound_catchData k m call rets sargs sbody self kind x body σ p hp
   | _ => exact Stmt.stepSound_arms k m _ rfl σ p hp
 
 /-- **Every rule the strategy fires is sound over the typed state**, in

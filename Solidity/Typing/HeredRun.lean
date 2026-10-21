@@ -766,6 +766,51 @@ theorem keeps_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
 
 end Leaves
 
+section LitBytes
+
+variable {P : Hered} {Γ : Ctx}
+
+theorem keeps_litWritesT {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : (heredInv C P).TKeeps k) :
+    (bs : List UInt8) → (i : Nat) → (heredInv C P).TKeeps (TRun.litWritesT bs i k)
+  | [], _ => hk
+  | b :: bs, i => by
+    unfold TRun.litWritesT
+    split
+    · exact RunInv.tkeeps_seq (keeps_assignMem _ _) (keeps_litWritesT hk bs (i + 1))
+    · exact hk
+
+theorem keeps_litBytesT {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : (heredInv C P).TKeeps k) (bs : List UInt8) :
+    (heredInv C P).TKeeps (TRun.litBytesT bs k) := by
+  unfold TRun.litBytesT
+  split
+  · exact RunInv.tkeeps_seq (keeps_declMem _ _ _) (keeps_litWritesT hk bs 0)
+  · exact RunInv.tkeeps_seq (keeps_declMem _ _ _) hk
+
+/-- A `catch` clause binding the data keeps a hereditary predicate as its
+body does: the data is a fresh memory object. -/
+theorem keeps_catchData {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
+    (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) {body : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hb : (heredInv C P).TKeeps body) :
+    (heredInv C P).TKeeps (TRun.catchData c rets sargs hs sbody self kind h₁ body) := by
+  intro σ o hσ h
+  unfold TRun.catchData at h
+  obtain ⟨d, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h
+  · exact (keeps_litBytesT hb _).drop _ σ o hσ h
+
+/-- A revert with data ends in no state. -/
+theorem keeps_revertData (d : List (RevPart C Γ)) : (heredInv C P).TKeeps (TRun.revertData d) := by
+  intro σ o _ h
+  unfold TRun.revertData at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+
+end LitBytes
+
 section Run
 
 variable {P : Hered} {G : Ty → Prop}
@@ -840,6 +885,9 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
       (Prog.keeps_all hP hG other) (Prog.keeps_all hP hG sbody)
   | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_all hP hG body)
   | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_all hP hG body)
+  | _, _, .revertData d => keeps_revertData d
+  | _, _, .catchData c rets sargs sbody self kind _ body =>
+    keeps_catchData c rets sargs sbody.ext sbody.runR self kind body.ext (Prog.keeps_all hP hG body)
 
 /-- **A hereditary predicate, block level.** -/
 theorem Prog.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) :

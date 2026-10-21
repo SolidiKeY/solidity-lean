@@ -21,12 +21,13 @@ variable {C : Contract}
 /-! ## A typed result against a term's reading -/
 
 /-- A typed result against an `Option` reading: the value through `f`,
-`none` for a `revert`; a `panic` against nothing; a `diverge` or an
+`none` for a `revert`; a `panic` or a revert with data against nothing; a `diverge` or an
 `exhausted` against anything. -/
 def TRes.AgreesO {α β : Type} (f : α → β) : TRes α → Option β → Prop
   | .ok a, u => u = some (f a)
   | .error .revert, u => u = none
   | .error .panic, _ => False
+  | .error (.revertWith _), _ => False
   | .error .diverge, _ => True
   | .error .exhausted, _ => True
 
@@ -42,6 +43,7 @@ theorem bind {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) {k : α → 
   match t, h with
   | .ok a, h => subst h; exact hk a
   | .error .revert, h => subst h; rfl
+  | .error (.revertWith _), h => exact h.elim
   | .error .diverge, _ => trivial
   | .error .exhausted, _ => trivial
 
@@ -50,6 +52,7 @@ theorem map {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) {k : α → �
   match t, h with
   | .ok a, h => subst h; exact congrArg some (hk a)
   | .error .revert, h => subst h; rfl
+  | .error (.revertWith _), h => exact h.elim
   | .error .diverge, _ => trivial
   | .error .exhausted, _ => trivial
 
@@ -66,6 +69,7 @@ theorem congr {f' : α → β} {t : TRes α} {u : Option β} (h : TRes.AgreesO f
   match t, h with
   | .ok a, h => subst h; exact congrArg some (hf a)
   | .error .revert, h => exact h
+  | .error (.revertWith _), h => exact h.elim
   | .error .diverge, _ => trivial
   | .error .exhausted, _ => trivial
 

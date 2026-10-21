@@ -529,7 +529,12 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
   | _, _, .declMem .., hw, _, _, _, _ | _, _, .rebindMem .., hw, _, _, _, _
   | _, _, .assignFromMem .., hw, _, _, _, _ | _, _, .assignMem .., hw, _, _, _, _
   | _, _, .deleteMem .., hw, _, _, _, _ | _, _, .assignNew .., hw, _, _, _, _
-  | _, _, .tryCall .., hw, _, _, _, _ => by cases hw
+  | _, _, .tryCall .., hw, _, _, _, _ | _, _, .catchData .., hw, _, _, _, _ => by cases hw
+  | _, _, .revertData ps, _, _, σ, o, h => by
+    change TRun.revertData ps σ = .ok o at h
+    unfold TRun.revertData at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
 
 /-- **A program within `μ` runs within `μ`'s frame.** -/
 theorem Prog.run_frame : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.within μ P = true → (d : Nat) →

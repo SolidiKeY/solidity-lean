@@ -37,6 +37,11 @@ theorem callsBack_stmt {pay : Bool} : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     change (body.callsBack pay || (code.wk h).2.2.callsBack pay) =
       (body.callsBack pay || code.callsBack pay)
     rw [callsBack_prog code h]
+  | _, _, .catchData _ _ _ sbody _ _ _ body, _, h => by
+    change (sbody.callsBack pay || (body.wk (.keep h)).2.2.callsBack pay) =
+      (sbody.callsBack pay || body.callsBack pay)
+    rw [callsBack_prog body (.keep h)]
+  | _, _, .revertData _, _, _ => rfl
   | _, _, .assign .., _, _ | _, _, .rebind .., _, _ | _, _, .assignLocal .., _, _
   | _, _, .declLocal .., _, _ | _, _, .declStorage .., _, _
   | _, _, .opAssign .., _, _ | _, _, .incDec .., _, _
@@ -74,6 +79,9 @@ theorem forksIn_stmt {pay : Bool} {Γ Γ' Δ : Ctx} (s : Stmt C Γ Γ') (h : Thi
   cases s <;> try rfl
   case loop a c body => exact callsBack_prog body h
   case block body => exact callsBack_prog body h
+  case catchData =>
+    show (_ || (Prog.wk _ _).2.2.callsBack pay) = (_ || Prog.callsBack pay _)
+    rw [callsBack_prog]
 
 theorem forks_stmt {Γ Γ' Δ : Ctx} (s : Stmt C Γ Γ') (h : Thin Γ Δ) :
     (s.wk h).2.2.forks = s.forks := by
@@ -452,11 +460,11 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
       rw [COut.map_dropCat, COut.map_dropCat]
       exact CWkRel.cat _ d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
         (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
-  | trySelfHalt hz hs hc h1 h2 =>
+  | trySelfHalt hz hs hc h1 h2 h3 =>
     obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
     cases v <;> cases hr
     exact ⟨_, ExecS.trySelfHalt (call := call.wk h) (by rw [ha]; exact hz)
-      (by rw [ha]; exact hs) hv h1 h2, rfl⟩
+      (by rw [ha]; exact hs) hv h1 h2 h3, rfl⟩
   | trySelfViolated hz hs hc =>
     obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
     cases v <;> try cases hr
@@ -486,14 +494,14 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
     obtain ⟨u, hu, hr⟩ := herr h σ d hp
     exact ⟨_, ExecS.trySelfError (call := call.wk h) (by rw [ha]; exact hz)
       (by rw [ha]; exact hs) hv hu, CWkRel.drop (Prog.wk_over err h) hr⟩
-  | trySelfOther hz hs hc hp =>
+  | trySelfOther hz hs hc he hp =>
     obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := hoth h σ d hp
     exact ⟨_, ExecS.trySelfOther (call := call.wk h) (by rw [ha]; exact hz)
-      (by rw [ha]; exact hs) hv hu, CWkRel.drop (Prog.wk_over other h) hr⟩
-  | trySelfPanic hz hs hc hp =>
-    rename_i v u
+      (by rw [ha]; exact hs) hv he hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+  | trySelfPanic hz hs hc he hp =>
+    rename_i v u e₀
     obtain ⟨w, hw, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
     cases w <;> cases hr
     obtain ⟨u', hu, hr⟩ := hpnc (Thin.keepAll κ h)
@@ -501,7 +509,7 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
     simp only [State.lift, State.withEnv] at hu
     rw [TEnv.put_keepAll h κ (code.decodeT v) (code.decodeT v) σ.env d] at hu
     refine ⟨_, ExecS.trySelfPanic (call := call.wk h) (v := v) (by rw [ha]; exact hz)
-      (by rw [ha]; exact hs) hw hu, ?_⟩
+      (by rw [ha]; exact hs) hw he hu, ?_⟩
     simpa only [TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
   | tryPanic hsf hp =>
@@ -516,6 +524,39 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
   | tryOther hsf hp =>
     obtain ⟨u, hu, hr⟩ := hoth h σ d hp
     exact ⟨_, ExecS.tryOther (by rw [ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+
+/-- A `catch` clause binding the data, weakened: its data is the same bytes,
+allocated alike (`TRun.litBytesT_wk`), its body weakened under the bound
+local. -/
+theorem catchData_wk {Γ ρ ps Γf Γ₁ : Ctx} (J : StateInv C) (call : ExtCall C Γ)
+    (rets : Binders ρ) (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (self : Bool)
+    (kind : CatchKind) (x : Var) (body : Prog C (.mem bytesR :: Γ) Γ₁) (hb : WkP J body) :
+    WkS J (.catchData call rets sargs sbody self kind x body) := by
+  intro Δ h σ d o he
+  cases he with
+  | det hf => exact det_wk J _ h σ d hf
+  | catchDataHalt hc hne =>
+    refine ⟨_, ExecS.catchDataHalt ?_ hne, rfl⟩
+    show (Prog.callsBack J.pay sbody || (body.wk (.keep h)).2.2.callsBack J.pay) = true
+    rw [callsBack_prog body (.keep h)]; exact hc
+  | catchDataBody hc hl hp =>
+    rename_i bs o₁ u
+    have hw := TRun.litBytesT_wk (k := TRun.nil) (k' := TRun.nil) (h₁ := .keep h) h
+      (fun a d' => ⟨d', (offWk_self _ _).symm, rfl⟩) σ d bs
+    rw [hl] at hw
+    revert hw
+    cases hl' : TRun.litBytesT bs TRun.nil (σ.lift h d) with
+    | error => intro hw; exact hw.elim
+    | ok o₁' =>
+      intro hw
+      obtain ⟨d', hd, rfl⟩ := hw
+      obtain ⟨u', hu, hr⟩ := hb (.keep h) o₁.st d' hp
+      refine ⟨_, ExecS.catchDataBody ?_ hl' hu, ?_⟩
+      · show (Prog.callsBack J.pay sbody || (body.wk (.keep h)).2.2.callsBack J.pay) = true
+        rw [callsBack_prog body (.keep h)]; exact hc
+      · rw [COut.map_dropCat, COut.map_dropCat]
+        exact CWkRel.cat _ d' hd (CWkRel.drop (Thin.Over.trans (.push (.refl h))
+          (Prog.wk_over body (.keep h))) hr)
 
 theorem CWkRel.isOk {Γ Δ : Ctx} {H : HTy} {h : Thin Γ Δ}
     {off : List ((t : LTy) × t.TDenote C H)} {o : COut C H Γ} {o' : COut C H Δ}
@@ -605,6 +646,8 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
     tryCall_wk J call rets ok err code pnc other sargs sbody self
       (prog_wk J ok) (prog_wk J err) (prog_wk J pnc) (prog_wk J other)
+  | _, _, .catchData call rets sargs sbody self kind x body =>
+    catchData_wk J call rets sargs sbody self kind x body (prog_wk J body)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal ..
   | _, _, .declLocal .. | _, _, .declStorage ..
   | _, _, .opAssign .. | _, _, .incDec ..
@@ -614,7 +657,8 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .declMem .. | _, _, .rebindMem ..
   | _, _, .assignFromMem .. | _, _, .assignMem ..
   | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
-  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse => by
+  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse
+  | _, _, .revertData .. => by
     intro h σ d o he
     cases he with
     | det hf => exact det_wk J _ h σ d hf

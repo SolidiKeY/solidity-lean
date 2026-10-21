@@ -201,7 +201,8 @@ tagged by the constructor's arguments (`thn`, `els`), with `rfl` for a
 non-emptiness check (`hne`); and `refine c d ?_ … ?_`, where a side
 condition of the rule needs the goal to be elaborated.  A rule of labelled
 goals (`cases`, `branches`) is the `apply` with its goals taken apart. -/
-def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tactic))) := do
+def ctorTacs (c : Lean.Name) (d : Lean.Term) (flatten : Bool := false) :
+    MetaM (Array (Array (TSyntax `tactic))) := do
   let names ← ctorArgs c
   let f ← ProofTree.short c
   let rflId := mkIdent `rfl
@@ -213,7 +214,7 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
   -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
   -- line, one goal per outcome, as today's walk writes it
   if c == ``Proves.cases || c == ``Proves.branches then
-    return #[#[← ProofTree.takeApart app],
+    return #[#[← ProofTree.takeApart app flatten],
       #[← `(tactic| refine $f $d $args*)]]
   return #[#[app], #[← `(tactic| refine $f $d $args*)]]
 
@@ -249,7 +250,7 @@ def shortTac (c : Lean.Name) (r : Lean.Name) (lean box : Bool) :
   -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
   -- line, one goal per outcome, as today's walk writes it
   if c == ``Proves.cases || c == ``Proves.branches then
-    return some (← ProofTree.takeApart app)
+    return some (← ProofTree.takeApart app (r == `catchDataBox))
   return some app
 
 /-- The steps that may apply at the goal `g`, each as tactics, in the order
@@ -299,13 +300,14 @@ def movesAt (g : MVarId) (short : Bool := false) :
     -- a rule whose line `apply` cannot match (a read into a hole, whose
     -- `fill` does not reduce while unifying): the taclet elaborated after
     -- the goal (`by exact`), as `core_rule` does, so the line keeps its name
-    let late ← ctorTacs c (← `(term| (by exact $d)))
+    let flatten := rName == `catchDataBox
+    let late ← ctorTacs c (← `(term| (by exact $d))) flatten
     -- and where the taclet's side conditions are decided before its schema
     -- variables are read off the goal (a read into a hole after a hidden
     -- binder), the premise `Stmt.step` computes, by `rfl`; the line names
     -- no rule, so the rule's solkey name follows it as a comment
-    let byStep ← ctorTacs c (← `(term| $(mkIdent `rfl):ident))
-    let explicit := plain ((← ctorTacs c d) ++ late.extract (late.size - 1) late.size) ++
+    let byStep ← ctorTacs c (← `(term| $(mkIdent `rfl):ident)) flatten
+    let explicit := plain ((← ctorTacs c d flatten) ++ late.extract (late.size - 1) late.size) ++
       (byStep.extract (byStep.size - 1) byStep.size).map (·, some rName.toString)
     if short then
       let box := (← whnf m).isConstOf ``Modality.box

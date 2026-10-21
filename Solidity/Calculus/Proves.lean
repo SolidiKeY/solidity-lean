@@ -76,7 +76,8 @@ variable {C : Contract}
 (`functionCallArgCapture`), a payment or a `try` under the diamond
 (`transferDiamond`, `tryCallDiamond`), a `try` of the contract's own function
 (`tryCallSelfBox`), an exhausted loop bound (`loopExit`),
-`assume(false)` (`assumeFalse`), a recursive call (`recursiveCallUnfold`) and
+`assume(false)` (`assumeFalse`), a recursive call (`recursiveCallUnfold`), revert
+data (`revertDataBox`, `catchDataBox`) and
 unsupported invariant shapes have Lean's
 rules only (`LeanTaclet.keyStep`).
 Automatic and positive-bound loops use `whileUnwind`; framed invariants use
@@ -105,6 +106,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
     (callRec := fun _ _ _ _ _ => false)
+    (revertData := fun _ => false) (catchData := fun _ _ _ _ _ _ _ _ => false)
 
 /-- Whether the rule set `R` has the rule `Stmt.step` fires on `s` under `m`:
 `.all` every rule, `.solkey` solkey's (`Stmt.keyStep`). -/

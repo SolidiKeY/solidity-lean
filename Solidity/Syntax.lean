@@ -218,6 +218,13 @@ inductive RawStmt where
   | require (c : RawExpr)
   | assert (c : RawExpr)
   | revert
+  /-- `revert("m");`: a revert with `Error(m)`'s data where a `try` reads it
+  (the callee of a self-call `try`, `Stmt.revertData`), `revert();`
+  elsewhere (`docs/semantic-gaps.md`, "Revert data"). -/
+  | revertMsg (msg : String)
+  /-- `require(c, "m");`: `require(c);`, but where a `try` reads the data
+  (as `revertMsg`) `if (c) { } else { revert("m"); }`. -/
+  | requireMsg (c : RawExpr) (msg : String)
   /-- `assume(false);`: a run assumed away (`Stmt.assumeFalse`). -/
   | assumeFalse
   /-- `return e;`, `return;`: in a function's body, lowered away when it is
@@ -944,14 +951,16 @@ writes where an operation leaves its range (`Stmt.assumeFalse`). -/
 syntax (name := solAssumeFalse) &"assume" "(" &"false" ")" : sol_stmt
 /-- `emit E(a, b);`: the arguments evaluated (`RawStmt.eval`), the log dropped. -/
 syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
-/-- `require(c, "msg");`: `require(c);`. -/
+/-- `require(c, "msg");`: `require(c);`, the reason kept where a `try` reads
+it (`RawStmt.requireMsg`). -/
 syntax (name := solRequireMsg) &"require" "(" sol_expr ", " str ")" : sol_stmt
 /-- `require(c, Err(a));`: `RawStmt.requireWith`. -/
 syntax (name := solRequireErr) &"require" "(" sol_expr ", " ident "(" sol_expr,* ")" ")" : sol_stmt
 /-- `revert Err(a);`: `revert();`, since a revert undoes whatever evaluating
 `a` did. -/
 syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
-/-- `revert("msg");`: `revert();`. -/
+/-- `revert("msg");`: `revert();`, the reason kept where a `try` reads it
+(`RawStmt.revertMsg`). -/
 syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
 /-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
 syntax (name := solHole) "_" : sol_stmt
@@ -1358,9 +1367,14 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solReturnNone => `(RawStmt.ret none)
   | ``solTry => expandTry s
   | ``solEmit => `(RawStmt.eval [$(← exprs s.raw[3]),*])
-  | ``solRequireMsg => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
+  | ``solRequireMsg =>
+    let some m := s.raw[4].isStrLit? | Macro.throwErrorAt s.raw[4] "a string literal"
+    `(RawStmt.requireMsg $(← expandExpr ⟨s.raw[2]⟩) $(quote m))
   | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
-  | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
+  | ``solRevertErr => `(RawStmt.revert)
+  | ``solRevertMsg =>
+    let some m := s.raw[2].isStrLit? | Macro.throwErrorAt s.raw[2] "a string literal"
+    `(RawStmt.revertMsg $(quote m))
   | ``solHole => `(RawStmt.hole)
   | ``solBreak => `(RawStmt.brk)
   | ``solContinue => `(RawStmt.cont)
@@ -1655,11 +1669,20 @@ where
     for c in r[4].getArgs do
       let c := if c.getKind == nullKind && c.getNumArgs == 1 then c[0] else c
       match c.getKind with
-      | ``solCatchError => err := some (← expandBlock ⟨c[5]⟩)
+      | ``solCatchError =>
+        let b ← expandBlock ⟨c[5]⟩
+        -- a named reason: bound by `catchData` (`catchBinder`)
+        err := some (← match (← tparam c[3]) with
+          | (T, some x) => `(RawStmt.declMemory $T $(quote x) (some (.name "catch$reason")) :: $b)
+          | (_, none) => pure b)
       | ``solCatchPanic =>
         pnc := some (← expandBlock ⟨c[5]⟩)
         code := (← tparam c[3]).2
-      | ``solCatchData => other := some (← expandBlock ⟨c[4]⟩)
+      | ``solCatchData =>
+        let b ← expandBlock ⟨c[4]⟩
+        other := some (← match (← tparam c[2]) with
+          | (T, some x) => `(RawStmt.declMemory $T $(quote x) (some (.name "catch$data")) :: $b)
+          | (_, none) => pure b)
       | ``solCatchAll => other := some (← expandBlock ⟨c[1]⟩)
       | _ => Macro.throwErrorAt c "a `catch` clause"
     let otherB ← match other with

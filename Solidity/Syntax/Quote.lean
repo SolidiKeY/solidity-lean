@@ -242,6 +242,15 @@ def ReceiverOp.quote {E : Ty} : ReceiverOp C Γ E → Lean.Expr
       optE (mkAppN (mkConst ``Src) #[c, Γe, toExpr E]) (v.map (Src.quote c Γe)), rflTrue]
   | .pop => mkAppN (mkConst ``ReceiverOp.pop) #[c, Γe, toExpr E]
 
+def RevPart.quote : RevPart C Γ → Lean.Expr
+  | .bytes bs => mkAppN (mkConst ``RevPart.bytes) #[c, Γe, toExpr bs]
+  | .sel sig => mkAppN (mkConst ``RevPart.sel) #[c, Γe, toExpr sig]
+  | @RevPart.word _ _ p v => mkAppN (mkConst ``RevPart.word) #[c, Γe, toExpr p, Val.quote c Γe v]
+
+def CatchKind.quote : CatchKind → Lean.Expr
+  | .reason => mkConst ``CatchKind.reason
+  | .raw => mkConst ``CatchKind.raw
+
 end Parts
 
 mutual
@@ -326,6 +335,20 @@ def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr →
   | _, _, Γe, _, .assert cv => mkAppN (mkConst ``Stmt.assert) #[c, Γe, Val.quote c Γe cv]
   | _, _, Γe, _, .revert => mkAppN (mkConst ``Stmt.revert) #[c, Γe]
   | _, _, Γe, _, .assumeFalse => mkAppN (mkConst ``Stmt.assumeFalse) #[c, Γe]
+  | _, _, Γe, _, .revertData d =>
+    mkAppN (mkConst ``Stmt.revertData) #[c, Γe,
+      let ty := mkAppN (mkConst ``RevPart) #[c, Γe]
+      (d.map (RevPart.quote c Γe)).foldr (fun x acc => mkAppN (mkConst ``List.cons [0]) #[ty, x, acc])
+        (mkAppN (mkConst ``List.nil [0]) #[ty])]
+  | Γ, _, Γe, _, @Stmt.catchData _ _ ρ ps Γf Γ₁ call rets sargs sbody self kind x body =>
+    let (ase, pse) := Args.quote c Γe sargs
+    let fre := ctxOnto pse ρ
+    let Γfe := ctxFrom (ρ ++ ps) fre Γf
+    let bΓe := ctxOnto Γe [.mem bytesR]
+    let Γ₁e := ctxFrom (.mem bytesR :: Γ) bΓe Γ₁
+    mkAppN (mkConst ``Stmt.catchData) #[c, Γe, ctxE ρ, pse, Γfe, Γ₁e,
+      ExtCall.quote c Γe call, Binders.quote rets, ase, Prog.quote hs fre Γfe sbody, toExpr self,
+      CatchKind.quote kind, toExpr x, Prog.quote hs bΓe Γ₁e body]
   | _, _, Γe, Γ'e, @Stmt.call _ _ _ ps rs Γf f args ret body =>
     let (ase, pse) := Args.quote c Γe args
     let fre := ctxOnto pse rs

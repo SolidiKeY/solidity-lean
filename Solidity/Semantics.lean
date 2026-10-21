@@ -71,13 +71,14 @@ inductive Selector where
 abbrev Word := PrimTy.uint.Denote
 
 /-- How an external call ends, as its caller sees it: it returns these
-words, or it reverts with `Error(string)`, with `Panic(uint256)` and this
-code, or in another way. -/
+words, or it reverts with `Error(string)` and this reason, with
+`Panic(uint256)` and this code, or in another way, with this data (bytes,
+`docs/semantic-gaps.md`, "Revert data"). -/
 inductive ExtResult where
   | ok (data : List Word)
-  | error
+  | error (reason : List UInt8)
   | panic (code : Word)
-  | other
+  | other (data : List UInt8)
   deriving Repr, DecidableEq
 
 /-- A typed value of some primitive type: an argument retains its Solidity

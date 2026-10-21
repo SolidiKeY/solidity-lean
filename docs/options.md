@@ -384,8 +384,10 @@ And `callWithoutCodeReverts` relies on address `0` having no code.
    (`Stmt.tryCall`'s `self`): its body runs as an inlined call with targets
    (`TRun.call … (.rets rets)`), in a frame of its own; on success the
    success clause runs from the callee's state with the returned values
-   bound; a revert runs the `Error` clause when the transaction's entry for
-   the call is `Error`, the catch-all otherwise (no revert data is kept);
+   bound; a revert runs the `Error` clause when its data decodes as
+   `Error(string)`, the `Panic` clause when it decodes as `Panic(uint256)`,
+   the catch-all otherwise (`docs/semantic-gaps.md`, "Revert data": the
+   callee's copy keeps its reasons, a named clause binds them);
    a panic runs the `Panic` clause with the entry's code, `1` without one;
    exhaustion and divergence halt the caller.  Storage, ledger and heap are
    the caller's on every failure: a halted run has no state to keep;

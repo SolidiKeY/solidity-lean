@@ -80,6 +80,8 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
         Prog.inSolkey m code && value.keyPushSource && value.keyValue)
     -- `recursiveCallUnfold` is Lean's
     (callRec := fun _ _ _ _ _ => false)
+    -- revert data is Lean's
+    (revertData := fun _ => false) (catchData := fun _ _ _ _ _ _ _ _ => false)
   termination_by structural _ _ s => s
 
 /-- Every statement of the block is in the fragment. -/
@@ -191,7 +193,7 @@ theorem Stmt.keyStep_of_inSolkey {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ
       show (r.keyPushSource || !b.isSimple) = true
       rw [show r.keyPushSource = true from (Bool.and_eq_true _ _ ▸ hv).1]
       rfl
-  | assumeFalse | callRec => exact absurd h Bool.false_ne_true
+  | assumeFalse | callRec | revertData | catchData => exact absurd h Bool.false_ne_true
   | _ => rfl
 
 /-! ## Solkey's rules keep the fragment -/
@@ -316,6 +318,7 @@ theorem Stmt.inSolkey_wk (m : Modality) {Γ Δ : Ctx} (h : Thin Γ Δ) :
     show Prog.inSolkey m (body.wk h).2.2 = _
     rw [Prog.inSolkey_wk m h body]; rfl
   | _, .callRec _ _ _ ret _ => by cases ret <;> rfl
+  | _, .revertData _ | _, .catchData .. => rfl
   | _, .declLocal _ _ v | _, .declStorage _ _ v | _, .declMem _ _ v _ _
   | _, .push _ v _ => by
     cases v <;> simp only [Stmt.wk, Stmt.inSolkey, Option.map_none, Option.map_some,

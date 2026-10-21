@@ -379,10 +379,11 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
       rw [COut.map_dropCat, COut.map_dropCat]
       exact CWkRel.cat a d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
         (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
-  | trySelfHalt hz hs hc h1 h2 =>
+  | trySelfHalt hz hs hc h1 h2 h3 =>
     obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
     cases v <;> cases hr
-    exact ⟨_, ExecS.trySelfHalt (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv h1 h2, rfl⟩
+    exact ⟨_, ExecS.trySelfHalt (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv h1 h2 h3,
+      rfl⟩
   | trySelfViolated hz hs hc =>
     obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
     cases v <;> try cases hr
@@ -424,14 +425,14 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
     obtain ⟨u, hu, hr⟩ := herr h τ hp
     exact ⟨_, ExecS.trySelfError (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu,
       CWkRel.drop (Prog.wk_over err h) hr⟩
-  | trySelfOther hz hs hc hp =>
+  | trySelfOther hz hs hc he hp =>
     obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := hoth h τ hp
-    exact ⟨_, ExecS.trySelfOther (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu,
+    exact ⟨_, ExecS.trySelfOther (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv he hu,
       CWkRel.drop (Prog.wk_over other h) hr⟩
-  | trySelfPanic hz hs hc hp =>
-    rename_i v u'
+  | trySelfPanic hz hs hc he hp =>
+    rename_i v u' e₀
     obtain ⟨w, hw, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
     cases w <;> cases hr
     obtain ⟨u, hu, hr⟩ := hpnc (Thin.keepAll κ h)
@@ -439,9 +440,48 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
     dsimp only [State.thin, State.withEnv] at hu
     rw [thin_keepAll h κ (code.decodeT v) τ.env] at hu
     refine ⟨_, ExecS.trySelfPanic (v := v) (by rw [← ha]; exact hz) (by rw [← ha]; exact hs)
-      hw hu, ?_⟩
+      hw he hu, ?_⟩
     simpa only [State.withEnv, TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
+
+/-- A `catch` clause binding the data, unweakened: the same bytes allocated
+(`TRun.litBytesT_wk`), its body unweakened under the bound local. -/
+theorem catchData_unwk {Γ ρ ps Γf Γ₁ : Ctx} (J : StateInv C) (call : ExtCall C Γ)
+    (rets : Binders ρ) (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (self : Bool)
+    (kind : CatchKind) (x : Var) (body : Prog C (.mem bytesR :: Γ) Γ₁) (hb : UWkP J body) :
+    UWkS J (.catchData call rets sargs sbody self kind x body) := by
+  intro Δ h τ o' he
+  cases he with
+  | det hf => exact det_unwk J _ h τ hf
+  | catchDataHalt hc hne =>
+    refine ⟨_, ExecS.catchDataHalt ?_ hne, rfl⟩
+    have hc' : (Prog.callsBack J.pay sbody || (body.wk (.keep h)).2.2.callsBack J.pay) = true := hc
+    rwa [callsBack_prog body (.keep h)] at hc'
+  | catchDataBody hc hl hp =>
+    rename_i bs o₁ u
+    have hc' : (Prog.callsBack J.pay sbody || (body.wk (.keep h)).2.2.callsBack J.pay) = true := hc
+    rw [callsBack_prog body (.keep h)] at hc'
+    have hw := TRun.litBytesT_wk (k := TRun.nil) (k' := TRun.nil) (h₁ := .keep h) h
+      (fun a d' => ⟨d', (offWk_self _ _).symm, rfl⟩) (τ.thin h) τ.env bs
+    dsimp only [State.lift, State.thin, State.withEnv] at hw
+    rw [TEnv.put_thin h τ.env] at hw
+    change TWkRel _ _ (TRun.litBytesT bs TRun.nil (τ.thin h)) (TRun.litBytesT bs TRun.nil τ) at hw
+    rw [hl] at hw
+    revert hw
+    cases hl' : TRun.litBytesT bs TRun.nil (τ.thin h) with
+    | error => intro hw; exact hw.elim
+    | ok a =>
+      intro hw
+      obtain ⟨d', hd, he1⟩ := hw
+      cases he1
+      obtain ⟨u₀, hu, hr⟩ := hb (.keep h) _ hp
+      dsimp only [State.thin, State.lift, State.withEnv] at hu hr
+      rw [TEnv.thin_put] at hu
+      rw [TEnv.off_put] at hr
+      refine ⟨_, ExecS.catchDataBody hc' hl' hu, ?_⟩
+      rw [COut.map_dropCat, COut.map_dropCat]
+      exact CWkRel.cat a d' hd (CWkRel.drop (Thin.Over.trans (.push (.refl h))
+        (Prog.wk_over body (.keep h))) hr)
 
 theorem cons_cases {Γ Γ₁ Γ₂ : Ctx} (J : StateInv C) (σ : State C Γ)
     (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) {o : COut C σ.H Γ₂}
@@ -470,6 +510,8 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
     tryCall_unwk J call rets ok err code pnc other sargs sbody self
       (prog_unwk J ok) (prog_unwk J err) (prog_unwk J pnc) (prog_unwk J other)
+  | _, _, .catchData call rets sargs sbody self kind x body =>
+    catchData_unwk J call rets sargs sbody self kind x body (prog_unwk J body)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal ..
   | _, _, .declLocal .. | _, _, .declStorage ..
   | _, _, .opAssign .. | _, _, .incDec ..
@@ -479,7 +521,8 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .declMem .. | _, _, .rebindMem ..
   | _, _, .assignFromMem .. | _, _, .assignMem ..
   | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
-  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse => by
+  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse
+  | _, _, .revertData .. => by
     intro h τ o' he
     rw [he.eq_run rfl]
     exact det_unwk J _ h τ rfl

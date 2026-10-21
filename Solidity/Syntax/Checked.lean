@@ -310,6 +310,8 @@ def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
   | .callReceiver _ args _ _ _ => args.guard
   | .callReceiverPush _ args _ _ _ _ => args.guard
   | .callRec _ _ args _ _ => args.guard
+  | .revertData d => d.foldl (fun g p => match p with | .word v => andO g v.guard | _ => g) none
+  | .catchData .. => none
 
 /-! ## The transformation -/
 
@@ -349,6 +351,8 @@ def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) : Stmt C Γ Γ' → Stmt C Γ Γ'
     .callReceiverPush f args r (body.withOF o) ((code.withOF o).snocGuard o value.guard) value
   -- every frame of the unrolling guarded, lazily
   | .callRec f d args ret body => .callRec f d args ret fun u => (body u).withOF o
+  | .catchData c rets sargs sbody self kind x body =>
+    .catchData c rets sargs (sbody.withOF o) self kind x (body.withOF o)
   | s => s
 
 /-- **A program, guarded**: each statement preceded by its guard's

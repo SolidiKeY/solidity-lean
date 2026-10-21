@@ -1208,6 +1208,7 @@ theorem assignLocalPush_agrees {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C �
       | none => rfl
       | some st => cases h
     | panic => exact h
+    | revertWith _ => exact h
     | diverge => trivial
     | exhausted => trivial
 
@@ -1337,6 +1338,22 @@ theorem sound_revert :
     Premise.Sound m (.revert : Stmt C Γ Γ) (.done (m == .box)) σ :=
   Premise.sound_done σ _ fun h =>
     ⟨by cases m <;> first | rfl | exact absurd h (by decide), .revert, rfl, by decide⟩
+
+/-- `revertDataBox`, `revertDataDiamond` (Lean): a revert with data closes
+as `revert();` does. -/
+theorem sound_revertData (d : List (RevPart C Γ)) :
+    Premise.Sound m (.revertData d : Stmt C Γ Γ) (.done (m == .box)) σ := by
+  refine Premise.sound_done σ _ fun h => ⟨by cases m <;> first | rfl | exact absurd h (by decide), ?_⟩
+  show ∃ e, ((TRun.revertData d σ).map (·.st)) = .error e ∧ e ≠ .panic
+  unfold TRun.revertData
+  cases hm : d.mapM (·.evalT σ) with
+  | error e =>
+    refine ⟨e, rfl, fun he => ?_⟩
+    subst he
+    exact TRun.revertData_noPanic d σ (by unfold TRun.revertData; rw [hm]; rfl)
+  | ok bs =>
+    refine ⟨THalt.ofData bs.flatten, rfl, ?_⟩
+    cases bs.flatten <;> nofun
 
 /-- `assumeFalse` (Lean): `assume(false);` closes to `true`. -/
 theorem sound_assumeFalse :

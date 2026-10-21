@@ -256,7 +256,7 @@ theorem netSendRun : netAfter start sendNineCore 9 = some (-5) := by decide +ker
 
 /-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
 theorem netSendRefusedRun :
-    ((Prog.run { start with tx := { ext := [(sendKey ⟨9, rfl⟩ ⟨5, rfl⟩, .error)] } } sendNineCore).toOption.map
+    ((Prog.run { start with tx := { ext := [(sendKey ⟨9, rfl⟩ ⟨5, rfl⟩, .error [])] } } sendNineCore).toOption.map
       fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, (TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
       some (0, false) := by
   decide +kernel

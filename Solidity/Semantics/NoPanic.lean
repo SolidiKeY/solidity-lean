@@ -77,6 +77,8 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
   | .tryCall _ _ ok err _ pnc other _ _ _ =>
     Prog.asserts ok || Prog.asserts err || Prog.asserts pnc || Prog.asserts other
   | .loop _ _ body => Prog.asserts body
+  | .catchData _ _ _ _ _ _ _ body => Prog.asserts body
+  | .revertData _ => false
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .transfer ..
   | .pushOpAssign .. | .pushIncDec ..
@@ -317,12 +319,15 @@ theorem tryCall_noPanic {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (c : ExtCal
   split
   · split
     · exact (hok _).map _
+    · exact (hother σ).map _
     · split
       · exact (herr σ).map _
-      · exact (hother σ).map _
+      · split
+        · exact (hpnc _).map _
+        · exact (hother σ).map _
     · exact (hpnc _).map _
-    · rename_i e h1 h2 _
-      exact fun h => h2 (by cases h; rfl)
+    · rename_i e _ _ h3 _
+      exact fun h => h3 (by cases h; rfl)
   split
   · exact TRes.NoPanic.revert
   · exact (Binders.decodeT_noPanic rets _).bind fun _ => (hok _).map _
@@ -348,6 +353,65 @@ theorem seq_noPanic {Γ₁ Γ₂ : Ctx} (s : TStep C Γ Γ₁) (P : TStep C Γ�
   · exact (hP _).map _
   · rename_i e he
     exact fun h' => hs σ (by cases h'; exact he)
+
+theorem revertData_noPanic (d : List (RevPart C Γ)) (σ : State C Γ) :
+    (revertData d σ).NoPanic := by
+  unfold revertData
+  have hm : ∀ l : List (RevPart C Γ), (l.mapM (fun p : RevPart C Γ => p.evalT σ)).NoPanic := by
+    intro l
+    induction l with
+    | nil => exact TRes.NoPanic.ok _
+    | cons a l ih =>
+      rw [List.mapM_cons]
+      refine TRes.NoPanic.bind ?_ fun _ => ih.bind fun _ => TRes.NoPanic.ok _
+      cases a with
+      | bytes => exact TRes.NoPanic.ok _
+      | sel => exact TRes.NoPanic.ok _
+      | word v => exact (v.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
+  refine (hm d).bind fun bs => ?_
+  cases h : bs.flatten <;> exact fun h' => nomatch h'
+
+theorem litWritesT_noPanic {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : ∀ σ, (k σ).NoPanic) : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
+    (litWritesT bs i k σ).NoPanic
+  | [], _, σ => hk σ
+  | b :: bs, i, σ => by
+    unfold litWritesT
+    split
+    · exact seq_noPanic _ _ (fun σ => (MSrc.mvalT_revertOnly σ _).noPanic.bind fun _ =>
+        (MLoc.addrT_noPanic σ _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
+          TRes.NoPanic.ok _) (litWritesT_noPanic hk bs (i + 1)) σ
+    · exact hk σ
+
+theorem litBytesT_noPanic {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
+    (hk : ∀ σ, (k σ).NoPanic) (bs : List UInt8) (σ : State C Γ) : (litBytesT bs k σ).NoPanic := by
+  unfold litBytesT
+  split
+  · exact seq_noPanic _ _ (fun σ => (MRhs.evalT_noPanic σ _).bind fun _ => TRes.NoPanic.ok _)
+      (litWritesT_noPanic hk bs 0) σ
+  · exact seq_noPanic _ _ (fun _ => TRes.NoPanic.ok _) hk σ
+
+theorem catchData_noPanic {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
+    (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) (body : TStep C (.mem bytesR :: Γ) Γ₁)
+    (hbody : ∀ σ, (body σ).NoPanic) (σ : State C Γ) :
+    (catchData c rets sargs hs sbody self kind h₁ body σ).NoPanic := by
+  unfold catchData catchBytes
+  refine TRes.NoPanic.bind ?_ fun d => ?_
+  · split
+    · exact TRes.NoPanic.revert
+    split
+    · split
+      · exact TRes.NoPanic.revert
+      · exact TRes.NoPanic.ok _
+      · exact TRes.NoPanic.ok _
+      · exact TRes.NoPanic.ok _
+      · rename_i e _ _ _ h4 _
+        exact fun h => h4 (by cases h; rfl)
+    · split <;> first | exact TRes.NoPanic.ok _ | exact TRes.NoPanic.revert
+  · split
+    · exact TRes.NoPanic.revert
+    · exact (litBytesT_noPanic hbody _ σ).map _
 
 end TRun
 
@@ -407,6 +471,10 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .assert _, h, _ => nomatch h
   | _, _, .revert, _, _ => TRes.NoPanic.revert
   | _, _, .assumeFalse, _, _ => nofun
+  | _, _, .revertData d, _, σ => TRun.revertData_noPanic d σ
+  | _, _, .catchData c rets sargs sbody self kind _ body, h, σ => by
+    simp only [Stmt.asserts] at h
+    exact TRun.catchData_noPanic c rets sargs _ _ self kind _ _ (Prog.run_noPanic body h) σ
   | _, _, .callRec .., h, _ => nomatch h
   | _, _, .call _ args ret body, h, σ => by
     simp only [Stmt.asserts] at h
