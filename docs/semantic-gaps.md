@@ -382,3 +382,9 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   decoder and `structWidths` would read `bytesN`, `bytes`, `string` as
   `valueRows?`/`dynBytesRows` do).
 - `sha256`, `ripemd160`, `ecrecover`.
+
+**Checked** (2026-10-21): `lean_build` of the default targets;
+`node --test --test-name-pattern="hash|bytes|solc/open"
+scripts/test-solidity.test.mjs` passes (4 tests); `tests/solc/Hashing.sol`'s
+seven functions proved, `decodeRoundtrip` (one `bool` word) in 30 s, the
+others in 1–3 s.
