@@ -3194,7 +3194,12 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
     let flds := C.structFields f
     if (← read).funs.all (·.1 != f) && !flds.isEmpty then
-      let (P, args) ← hoistArgs args
+      -- a literal of bytes at a value member (a `bytesN`) stays a literal,
+      -- which the member's write aligns (`bytesStmt`)
+      let keep (a : RawExpr) (i : Nat) : Bool :=
+        a.bytesLit?.isSome && (flds[i]?.any fun (_, T) => T matches .prim _)
+      let (P, args') ← hoistArgs (args.zipIdx.map fun (a, i) => if keep a i then .num 0 else a)
+      let args := (args.zipIdx.zip args').map fun ((a, i), a') => if keep a i then a else a'
       unless flds.length == args.length do
         throw s!"{f} has {flds.length} members, not {args.length}"
       let x := toString (← freshCapture "mv")

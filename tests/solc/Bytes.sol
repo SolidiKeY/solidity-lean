@@ -10,6 +10,10 @@ contract Bytes {
     mapping(bytes32 => uint) votes;
     bytes data;
     string name;
+    // a struct with byte members: the contract's own, spelling them
+    struct Rec { bytes32 h; bytes2 tag; bytes b; string label; }
+    Rec rec;
+    mapping(string => Rec) recs;
 
     function literals() public pure {
         bytes2 a = "a";
@@ -74,5 +78,22 @@ contract Bytes {
     }
     function memoryParameter(bytes memory m) public pure {
         if (m.length > 0) assert(uint8(m[0]) <= 255);
+    }
+    // byte types as struct members: read and written as locals of their types
+    function structMembers() public {
+        rec.tag = "ab";
+        rec.h = "z";
+        assert(rec.tag[1] == "b" && rec.tag.length == 2 && rec.h[0] == "z");
+        rec.label = "hi";
+        assert(bytes(rec.label).length == 2);
+    }
+    function structMemberBytes() public {
+        rec.b = "a";
+        rec.b.push("x");
+        assert(rec.b.length == 2 && rec.b[1] == "x");
+    }
+    function memoryStructLiteral() public pure {
+        Rec memory r = Rec("k", "ab", "xyz", "s");
+        assert(r.tag == "ab" && r.b.length == 3 && r.b[2] == "z");
     }
 }
