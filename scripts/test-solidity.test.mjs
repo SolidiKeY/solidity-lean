@@ -872,7 +872,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   // a custom error's data: its selector folded as solc folds it, its
   // argument's word (`revert E(7)`, `RevertStatement`)
-  for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData"]) {
+  // and a reason past a custom error of a symbolic argument (`RevPart.notError`)
+  for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData",
+    "reasonPastCustom"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });

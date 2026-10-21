@@ -98,4 +98,23 @@ contract RevertData {
             assert(d.length == 0 || d[3] == bytes1(0x67) && d[35] == bytes1(0x07));
         }
     }
+
+    /// @custom:key skip
+    function mixed(uint x) external pure {
+        if (x > 5) {
+            revert E(x);
+        }
+        require(x > 1, "small");
+    }
+
+    // a custom error of a symbolic argument cannot decode as `Error`: the
+    // `Error` clause binds the reason
+    /// @custom:key box
+    function reasonPastCustom(uint x) public view {
+        try this.mixed(x) {
+        } catch Error(string memory r) {
+            assert(bytes(r).length == 5);
+        } catch {
+        }
+    }
 }
