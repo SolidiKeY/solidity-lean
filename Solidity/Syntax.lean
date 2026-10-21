@@ -927,14 +927,16 @@ writes where an operation leaves its range (`Stmt.assumeFalse`). -/
 syntax (name := solAssumeFalse) &"assume" "(" &"false" ")" : sol_stmt
 /-- `emit E(a, b);`: the arguments evaluated (`RawStmt.eval`), the log dropped. -/
 syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
-/-- `require(c, "msg");`: `require(c);`. -/
+/-- `require(c, "msg");`: `require(c);`, the reason kept where a `try` reads
+it (`RawStmt.requireMsg`). -/
 syntax (name := solRequireMsg) &"require" "(" sol_expr ", " str ")" : sol_stmt
 /-- `require(c, Err(a));`: `RawStmt.requireWith`. -/
 syntax (name := solRequireErr) &"require" "(" sol_expr ", " ident "(" sol_expr,* ")" ")" : sol_stmt
 /-- `revert Err(a);`: `revert();`, since a revert undoes whatever evaluating
 `a` did. -/
 syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
-/-- `revert("msg");`: `revert();`. -/
+/-- `revert("msg");`: `revert();`, the reason kept where a `try` reads it
+(`RawStmt.revertMsg`). -/
 syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
 /-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
 syntax (name := solHole) "_" : sol_stmt

@@ -852,12 +852,15 @@ abbrev Blk (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
 /-- A `catch` clause whose first statement binds the call's data (the marker
 `expandTry` writes for `catch Error(string memory r)` and `catch (bytes
 memory d)`): its kind, the declaration it is elaborated from, the rest. -/
-def RawStmt.catchBinder? : List RawStmt → Option (CatchKind × List RawStmt)
+partial def RawStmt.catchBinder? : List RawStmt → Option CatchKind × List RawStmt
   | .declMemory T x (some (.name n)) :: rest =>
-    if n == "catch$reason" then some (.reason, .declMemory T x none :: rest)
-    else if n == "catch$data" then some (.raw, .declMemory T x none :: rest)
-    else none
-  | _ => none
+    if n == "catch$reason" || n == "catch$data" then
+      -- a name the clause does not read binds nothing: the clause as written
+      if rest.any (·.anyDeep fun s => s.exprs.any (·.mentions x)) then
+        (some (if n == "catch$reason" then .reason else .raw), .declMemory T x none :: rest)
+      else (none, rest)
+    else (none, .declMemory T x (some (.name n)) :: rest)
+  | ss => (none, ss)
 
 /-- A `catch` clause elaborated with its binder declared first, as
 `Stmt.catchData` (`docs/semantic-gaps.md`, "Revert data"): the declaration's
@@ -4423,13 +4426,13 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let call : ExtCall C Γ.ctx := ⟨addr', g, args'⟩
     let clause (ss : List RawStmt) : ElabM (Blk C Γ.ctx) := do
       match RawStmt.catchBinder? ss with
-      | some (kind, ss) =>
+      | (some kind, ss) =>
         ElabM.lift ((← elabScope Γ ss).toCatchData call bs sargs sbody self kind)
-      | none => elabScope Γ ss
+      | (none, ss) => elabScope Γ ss
     let err ← clause err
     let (_, k) ← get
     set (Γe, k)
-    let pnc : Blk C (κ ++ Γ.ctx) ← match RawStmt.catchBinder? pnc with
+    let pnc : Blk C (κ ++ Γ.ctx) ← match (RawStmt.catchBinder? pnc).1 with
       -- the catch-all's block in the `Panic` clause's place (no code bound)
       | some _ => do
         if h : κ = [] then
@@ -4438,7 +4441,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
         else throw "a `Panic` clause that binds the data"
       | none => do
         if let some c := code then declare C c (.val .uint)
-        let pnc ← elabStmtsP pnc
+        let pnc ← elabStmtsP (RawStmt.catchBinder? pnc).2
         ElabM.lift (SProg.chain (cb.names ++ Γ.names) (κ ++ Γ.ctx) pnc)
     let (_, k) ← get
     set (Γe, k)

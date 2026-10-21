@@ -62,6 +62,13 @@ info: "try address(address(this)).boom() { } catch Error(string memory) { { stri
 #eval Prog.toStr [] (sol[Reverter]{ try this.boom() { } catch Error(string memory r) {
     last = r.length; } catch { last = 9; } })
 
+/-- A name the clause does not read binds nothing: the clause as written
+(so another contract's `try` with a named, unread reason proves as before). -/
+example : Prog.toStr [] (sol[Reverter]{ try address(7).boom() { } catch Error(string memory r) {
+    last = 2; } catch { } }) =
+  "try address(7).boom() { } catch Error(string memory) { last = 2; } \
+    catch Panic(uint) { } catch { }" := rfl
+
 /-! ## The run
 
 From a state whose own address is `7`, `boom()` reverts with `Error("boom")`
