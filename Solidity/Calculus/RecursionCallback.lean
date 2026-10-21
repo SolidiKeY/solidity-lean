@@ -241,6 +241,197 @@ end
 
 end Frame
 
+/-! ## A contract over the callback runs
+
+`FunContract` over `ExecP` instead of `Prog.run`: from a typed state of the
+frame where `requires` holds, every callback run of the body, entered as the
+call enters it, keeps the invariant, does not panic and, if it ends, ends
+where `ensures` holds.  `RecContractC` is `RecContract` so, proved by the
+same induction over the frames (`RecContractC.unroll`). -/
+
+section ContractC
+
+open DeferredSource.Callback (map_cat_refl singleton_iff block_of_execP)
+
+variable {I : Fml C []} {pay : Bool} {Γ Γ' ps rs Γf : Ctx} {m : Modality}
+
+/-- **A function contract with callbacks** (`FunContract`, over `ExecP`). -/
+def FunContractC (I : Fml C []) (pay : Bool) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf)
+    (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
+  ∀ σ : State C ps, holds σ req → ∀ o, ExecP (I.stateInv pay) (ret.enterT σ).st body o →
+    (o.map (Out.drop body.ext)).after m (fun τ => holds (τ.withOlds rs σ.net σ.storage) ens)
+
+/-- **A recursive function's contract with callbacks** (`RecContract`): the
+contract at every call returning `rs`, the body within `μ`, the parameters
+unwritten. -/
+def RecContractC (I : Fml C []) (pay : Bool) (μ : Mutability) (b : Prog C (rs ++ ps) (rs ++ ps))
+    (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
+  (∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContractC I pay ret b req ens m) ∧
+    Prog.within μ b = true ∧ writesRets rs.length b = true
+
+/-- The bottom frame meets every contract: it is exhausted. -/
+theorem RecContractC.base (μ : Mutability) (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps)))
+    (m : Modality) :
+    RecContractC I pay μ (Prog.recBase : Prog C (rs ++ ps) (rs ++ ps)) req ens m := by
+  refine ⟨fun ret σ _ o h => ?_, rfl, rfl⟩
+  cases h with
+  | cons hs _ => cases hs
+  | halt hs =>
+    cases hs with
+    | det _ => exact ⟨by cases m <;> first | trivial | rfl, nofun⟩
+  | violated hs => cases hs
+
+/-- **Induction over the unrolling**, with callbacks. -/
+theorem RecContractC.unroll {μ : Mutability} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
+    {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
+    (hs : ∀ n (t : Unit → Prog C (rs ++ ps) (rs ++ ps)),
+      RecContractC I pay μ (t ()) req ens m → RecContractC I pay μ (step n t) req ens m)
+    (d : Nat) : RecContractC I pay μ (recUnroll Prog.recBase step d) req ens m :=
+  recUnroll_induct (fun b => RecContractC I pay μ b req ens m) (RecContractC.base μ req ens m) hs d
+
+/-- A contract at a call that returns nothing is one at every such call. -/
+theorem FunContractC.forall_none {Γf : Ctx} {b : Prog C ([] ++ ps) Γf} {req : Fml C ps}
+    {ens : Fml C ([] ++ (Olds ++ ps))}
+    (h : FunContractC (Γ := []) I pay CallRet.none b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [] Γ'), FunContractC I pay ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | none => exact h
+  | rets bs => cases bs; exact h
+
+/-- A contract at a call that returns one value is one at every such call. -/
+theorem FunContractC.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] ++ ps) Γf}
+    {req : Fml C ps} {ens : Fml C ([.val p] ++ (Olds ++ ps))}
+    (h : FunContractC (Γ := []) I pay (CallRet.val p (.user "r") Option.none) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.val p] Γ'), FunContractC I pay ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | val => exact h
+  | rets bs =>
+    cases bs with
+    | snoc bs q x => cases bs; exact h
+
+/-- A contract at a call that returns several values is one at every such
+call. -/
+theorem FunContractC.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : Fml C ps}
+    {ens : Fml C (rs ++ (Olds ++ ps))} (bs : Binders rs) (h2 : 2 ≤ rs.length)
+    (h : FunContractC (Γ := []) I pay (CallRet.rets bs) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContractC I pay ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | none => simp at h2
+  | val => simp at h2
+  | mem => simp at h2
+  | storage => simp at h2
+  | rets bs' =>
+    intro σ hσ
+    have := h σ hσ
+    simp only [CallRet.enterT] at this ⊢
+    rw [Binders.defaultsT_eq bs bs'] at this
+    exact this
+
+/-- What a formula says past `snapOld` with callbacks, it says of the
+snapshots. -/
+theorem holdsC_snapOld {Δ : Ctx} {X : Fml C (Olds ++ Δ)} {σ : State C Δ}
+    (h : holdsC I pay σ (.upd .box snapOld X)) : holdsC I pay σ.snap X := by
+  refine Upd.afterT.of_lands (U := snapOld) h (g := σ.globG) ⟨rfl, rfl, fun i => ?_⟩
+  cases i with
+  | here => rfl
+  | there i =>
+    cases i with
+    | here => rfl
+    | there j => rfl
+
+/-- **The return variables declared, with callbacks**: the rest runs from
+the frame the call enters (`CallRet.enterT`). -/
+theorem CallRet.execP_declsThen {J : StateInv C} {Δ : Ctx} (ret : CallRet Γ rs Γ')
+    (rest : Prog C (rs ++ ps) Δ) (σ : State C ps) {u : COut C (ret.enterT σ).st.H Δ}
+    (h : ExecP J (ret.enterT σ).st rest u) :
+    ExecP J σ (ret.declsThen rest) (u.map (Out.cat (ret.enterT σ))) := by
+  cases ret with
+  | none => simpa only [CallRet.enterT, map_cat_refl] using h
+  | val p r res =>
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declLocal p r Option.none) rfl
+      (Stmt.runSt_declLocal_none p r σ)
+    exact ExecP.cons hd h
+  | rets bs =>
+    have h' : ExecP J σ (bs.declsThen rest) u := Binders.execP_declsThen bs rest σ h
+    simpa only [CallRet.enterT, map_cat_refl] using h'
+  | mem R r hd hm =>
+    obtain ⟨_, hd'⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declMem R r Option.none hd hm) rfl
+      (Stmt.runSt_declMem_none R r hd hm σ)
+    exact ExecP.cons hd' h
+  | storage R r =>
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ) (s := .declStorage R r Option.none) rfl
+      (Stmt.runSt_declStorage_none R r σ)
+    exact ExecP.cons hd h
+
+/-- A callback run from a state equal to another, of the same heap. -/
+theorem ExecP.transport' {J : StateInv C} {Δ Δ' : Ctx} {P : Prog C Δ Δ'} {X Y : State C Δ}
+    (e : X = Y) (hH : Y.H = X.H) {u : COut C X.H Δ'} (h : ExecP J X P u) :
+    ExecP J Y P (hH ▸ u) := by
+  subst e
+  exact h
+
+/-- A frame's outcome lifted under the snapshots, read past them
+(`State.lift_thinOlds`). -/
+theorem Out.lift_thinOlds_st {H : HTy} (n : Ledger) (s : Storage C) (A : TEnv C H rs)
+    (B : TEnv C H ps) (y : Out C H (rs ++ ps)) :
+    (Out.lift (thinOlds rs ps) (TEnv.append rs A (TEnv.olds n s B)) y).st =
+      y.st.withOlds rs n s := by
+  simp only [Out.lift]
+  rw [TEnv.append_wk]
+  exact State.lift_thinOlds _ _ _ _ _
+
+/-- What the obligation's run says of its frame's outcome, lifted under the
+snapshots, the contract says of the outcome. -/
+theorem after_of_thenF_lift {J : StateInv C} {H₀ : HTy} {Δ : Ctx} (E : Out C H₀ Δ)
+    {n : Ledger} {s : Storage C} {A : TEnv C E.st.H rs} {B : TEnv C E.st.H ps}
+    {ens : Fml C (rs ++ (Olds ++ ps))} (hens : ens.callsBack pay = false)
+    (w : COut C E.st.H (rs ++ ps))
+    (h : ((w.map (Out.lift (thinOlds rs ps) (TEnv.append rs A (TEnv.olds n s B)))).map
+      (Out.cat E)).thenF J .nil m (fun x => holdsC I pay x ens)) :
+    w.after m (fun τ => holds (τ.withOlds rs n s) ens) := by
+  cases w with
+  | ok y =>
+    have h' := h _ .nil
+    change holdsC I pay (Out.lift (thinOlds rs ps) (TEnv.append rs A (TEnv.olds n s B)) y).st ens
+      at h'
+    rw [Out.lift_thinOlds_st] at h'
+    exact (holdsC_iff_holds ens hens _).1 h'
+  | halt e => exact h
+  | violated => exact h
+
+/-- **A contract from its obligation, read with callbacks**
+(`FunContract.ofValid`): the body's callback runs are those of the
+obligation's block, under the snapshots (`Prog.exec_wk`). -/
+theorem FunContractC.ofHoldsC {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf}
+    {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))} (hreq : req.callsBack pay = false)
+    (hens : ens.callsBack pay = false)
+    (h : ∀ σ : State C ps, holdsC I pay σ (FunContract.obligation ret body req ens m)) :
+    FunContractC I pay ret body req ens m := by
+  intro σ hr o hp
+  have h1 : holdsC I pay σ (.upd .box snapOld (.modal m
+      (ret.declsThen (.cons (.block (body.wk (thinOlds rs ps)).2.2) .nil)) .nil ens)) :=
+    h σ ((holdsC_iff_holds req hreq σ).2 hr)
+  have h2 := holdsC_snapOld h1
+  obtain ⟨o', hw, hrel⟩ := Prog.exec_wk (I.stateInv pay) body (thinOlds rs ps) (ret.enterT σ).st
+    (TEnv.append rs (TEnv.take rs (ret.enterT σ).st.env)
+      (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (ret.enterT σ).st.env))) hp
+  have eX := (State.lift_thinOlds (ret.enterT σ).st (TEnv.take rs (ret.enterT σ).st.env) σ.net
+    σ.storage (TEnv.drop (Ext.append ps rs) (ret.enterT σ).st.env)).trans
+      (CallRet.enterT_snap ret σ).symm
+  have hb := singleton_iff.mpr (block_of_execP hw)
+  have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (thinOlds rs ps)) hrel).eq_lifted
+  cases ret
+  all_goals
+    have hb' := ExecP.transport' eX rfl hb
+    have h3 := h2 _ (CallRet.execP_declsThen _ _ σ.snap hb')
+    rw [hl] at h3
+    exact after_of_thenF_lift _ hens _ h3
+
+end ContractC
+
 namespace RecursionCallback
 
 open Lean Elab Tactic Meta
