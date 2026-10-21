@@ -5,7 +5,7 @@ the others link to it.
 
 | Document | Holds |
 |---|---|
-| [latex.md](latex.md) | LeanTeX paper notation and the Lean string/file export API. |
+| [latex.md](latex.md) | LeanTeX paper notation, symbol-definition links, checked traces and the Lean LaTeX/JSON export API. |
 | [module-map.md](module-map.md) | One row per module: where things live. |
 | [rule-repair.md](rule-repair.md) | Semantics-first rule repair, lazy reads, rejection gates, proof budgets and soundness integration. |
 | [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, the design decisions, what is still open. |

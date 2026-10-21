@@ -58,7 +58,12 @@ reading, as solkey proves them.
 | `notRun` | Contract process interrupted before this function completed. |
 
 The JSON report is `{results, errors}`. Each result includes the absolute source
-path, contract, function, signature, tag, status, reason and elapsed milliseconds.
+path, contract, function, signature, tag, status, reason, reading and elapsed
+milliseconds.  `reading` is the tails reading the obligation was stated under
+(`docs/options.md`, O6): `clean` (`⊢ cleanTail(storage) = true → N.f.problem`)
+for a plain obligation of a contract every function of which exposes nothing
+(`Prog.exposesNone`), so that clean tails are its invariant; `solc` otherwise,
+and for specifications, obligations that call back and recursive ones.
 Large contracts run in batches of 32 imported rows. `batchSize` selects the
 JavaScript API batch size, and `onProgress` receives each retained batch.
 Runtime and heartbeat exceptions report `error`, distinct from ordinary

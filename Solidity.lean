@@ -195,6 +195,7 @@ import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.CheckedBlock
 import Solidity.Examples.Tactics.Bytes
 import Solidity.Examples.Tactics.Hashing
+import Solidity.Examples.Tactics.FunctionTypes
 import Solidity.Examples.Tactics.SignedCasts
 import Solidity.Examples.Tactics.SolcOpen
 import Solidity.Examples.Tactics.CleanTail
@@ -261,6 +262,7 @@ import Solidity.Typing.Fits
 import Solidity.Typing.Constructibility
 import Solidity.Typing.CanonTest
 import Solidity.Typing.CleanTail
+import Solidity.Typing.CleanTailRun
 import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
 import Solidity.Theory.Typed.Leaves
@@ -375,7 +377,11 @@ import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.LatexTerm
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey
+import Solidity.Calculus.Elementary
+import Solidity.Tools.Elementary
+import Solidity.Tools.ProgramTrace
 import Solidity.Examples.Tactics.Latex
+import Solidity.Examples.Tactics.ProgramTrace
 import Solidity.Examples.Tactics.PushReceiver
 import Solidity.Examples.Tactics.PushSource
 import Solidity.Examples.Tactics.MemoryPush

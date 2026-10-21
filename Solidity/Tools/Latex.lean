@@ -423,8 +423,10 @@ ordinary mathematical printers. -/
 def exprLatex (e : Expr) (o : Options := {}) : MetaM String := do
   if let some s ← calculusLatex? o e then return s
   -- a calculus term nested in ordinary mathematics (`ppCalculus`) reads the
-  -- backend and the width from the options; the derivation options do not reach it
-  withOptions (fun co => latex.sol.width.set (latex.sol.macros.set co o.macros) o.width)
+  -- presentation options from the caller, including explicit map overrides.
+  withOptions (fun co => latex.sol.definitions.set
+    (latex.sol.width.set (latex.sol.macros.set co o.macros) o.width)
+    (Lean.toJson o.definitions).compress)
     (run_latexPP e {})
 
 /-- Export a declaration's statement, retaining hypotheses. As in fm-04,
@@ -446,6 +448,32 @@ def declLatex (n : Lean.Name) (binders : Bool := false) (o : Options := {}) : Me
 `(labels := none | over | tag)`, `(collapse := [r, …])`, `(groups := b)`,
 `(premise := b)`, `(sides := b)`, `(sorts := b)`, `(past := b)`. -/
 syntax latexOpt := atomic("(" ident " := ") term ")"
+
+/-- A document's explicit symbol-to-destination map. These identifiers are
+renderer keys, not names resolved in the current Lean namespace. -/
+def elabDefinitionTargets (v : Term) : CoreM (List (String × String)) := do
+  let `([$xs,*]) := v |
+    throwErrorAt v "expected [(find, \"destination\"), (select, \"destination\"), ...]"
+  let mut targets : List (String × String) := []
+  for x in xs.getElems do
+    let `(($key:ident, $target:str)) := x |
+      throwErrorAt x "expected (symbol, \"destination\")"
+    let keyName := key.getId.toString
+    unless definitionKeys.contains keyName do
+      throwErrorAt key "unknown definition symbol {keyName}; available: {definitionKeys}"
+    if targets.any (·.1 == keyName) then
+      throwErrorAt key "duplicate definition symbol {keyName}"
+    unless validDefinitionTarget target.getString do
+      throwErrorAt target "definition destination must be nonempty and contain only ASCII letters, digits, :, _, ., / or -"
+    targets := targets ++ [(keyName, target.getString)]
+  return targets
+
+/-- Set the default definition map in the current section or namespace.
+An export's `(definitions := ...)` replaces this map; `[]` disables links. -/
+elab "#latex_definition_targets " targets:term : command => do
+  let targets ← Command.liftCoreM (elabDefinitionTargets targets)
+  Command.modifyScope fun s =>
+    { s with opts := latex.sol.definitions.set s.opts (Lean.toJson targets).compress }
 
 /-- The options of a command, over those `set_option latex.sol.*` gives. -/
 def elabOpts (opts : Array (TSyntax ``latexOpt)) : CoreM Options := do
@@ -479,8 +507,9 @@ def elabOpts (opts : Array (TSyntax ``latexOpt)) : CoreM Options := do
     | "sides" => o := { o with sides := some (← bool) }
     | "sorts" => o := { o with sorts := ← bool }
     | "past" => o := { o with past := ← bool }
+    | "definitions" => o := { o with definitions := ← elabDefinitionTargets v }
     | s => throwErrorAt k "unknown option {s}: macros, width, labels, collapse, groups, premise, \
-        sides, sorts, past"
+        sides, sorts, past, definitions"
   return o
 
 /-- `#latex_decl (opts) n`: a declaration's statement. -/

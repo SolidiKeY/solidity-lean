@@ -334,6 +334,18 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     let k := if k == "bool" then "uint" else k
     let v ← tyText S (← J.get j "valueType")
     pure s!"mapping({k} => {v})"
+  | "FunctionTypeName" =>
+    -- an internal function type, its tag a `uint` (`fnTy?`); an external
+    -- one is printed too, and a call through it refused by the elaborator
+    let ps := ((J.opt j "parameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
+    let rs := ((J.opt j "returnParameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
+    if (ps ++ rs).any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
+      throw (.unsupported "a function type with a reference parameter or return")
+    let ps ← ps.mapM fun p => do tyText S (← J.get p "typeName")
+    let rs ← rs.mapM fun p => do tyText S (← J.get p "typeName")
+    let ext := if J.str? j "visibility" == some "external" then " external" else ""
+    let ret := if rs.isEmpty then "" else s!" returns ({", ".intercalate rs})"
+    pure s!"function ({", ".intercalate ps}){ext}{ret}"
   | k => throw (.unsupported s!"type node `{k}`")
 
 /-- A type node as a `Ty`, to compare a struct's members with the table: a
@@ -367,6 +379,8 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
     match ← tyOf S (← j.getObjVal? "keyType") with
     | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType"))))
     | t => throw s!"mapping key `{t.toStr}`"
+  -- a function type's value is a tag (`fnTy?`)
+  | "FunctionTypeName" => pure .uint
   | k => throw s!"type node `{k}`"
 
 /-- The narrow positions of a type node, keyed by their path below it as
@@ -1066,6 +1080,15 @@ partial def call (j : Json) : PM String := do
     let args ← if attached then do
         pure ((← PM.lift (J.get f "expression")) :: args)
       else pure args
+    -- a call through a function value that is not a name (a member, an
+    -- element, a call's value): the grammar calls a name only
+    if !(J.kind f == "Identifier") && !isExternalMember f && !isSuperMember f && !staticBase &&
+        !attached && (J.tyStr f).startsWith "function (" &&
+        (["IndexAccess", "Conditional", "FunctionCall", "TupleExpression"].contains (J.kind f) ||
+          (J.kind f == "MemberAccess" &&
+            (J.opt f "expression").any fun b =>
+              (J.tyStr b).startsWith "struct " && !((J.tyStr b).splitOn "[").length > 1)) then
+      unsupported "a call through a function value that is not a name"
     let as ← args.mapM expr
     let name ← if let some n := superName then pure n
       else if staticBase then
@@ -2145,6 +2168,31 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id))
         |>.toList.flatMap (fun m => callees ids m freeFunctions functionAliases baseContracts (supersOf m))
     (i, (callees ids f freeFunctions functionAliases baseContracts (supersOf f) ++ modCalls ++ (if ctorId == some i then initCalls else [])).eraseDups)
+  -- function values (`fnDispatch`): a function named as a value comes before
+  -- the function naming it, and before every function that calls through a
+  -- value (a variable of a function type), whose dispatch inlines it
+  let varIds : List Int := (J.nodes c).filterMap fun n =>
+    if J.kind n == "VariableDeclaration" then J.id? n else none
+  let heads (f : Json) : List Int := (J.nodes f).filterMap fun n =>
+    if J.kind n == "FunctionCall" then (J.opt n "expression").bind J.ref? else none
+  let refs (f : Json) : List Int := (J.nodes f).filterMap fun n =>
+    if J.kind n == "Identifier" then (J.ref? n).filter ids.contains else none
+  -- named more often than called: named as a value
+  let valuesOf (f : Json) : List Int :=
+    let hs := heads f
+    let rs := refs f
+    rs.eraseDups.filter fun r => rs.count r > hs.count r
+  let callsValue (f : Json) : Bool := (J.nodes f).any fun n =>
+    J.kind n == "FunctionCall" && J.str? n "kind" == some "functionCall" &&
+      (J.opt n "expression").any fun e => J.kind e == "Identifier" && (J.ref? e).any varIds.contains
+  -- once per function: its values, and whether it calls through one
+  let valueRows : List (Int × List Int × Bool) := funs.filterMap fun f =>
+    (J.id? f).map fun i => (i, valuesOf f, callsValue f)
+  let taken : List Int := (valueRows.flatMap (·.2.1)).eraseDups
+  let callsOf : List (Int × List Int) := callsOf.map fun (i, cs) =>
+    match lookupBy i valueRows with
+    | some (vs, cv) => (i, (cs ++ vs ++ (if cv then taken.filter (· != i) else [])).eraseDups)
+    | none => (i, cs)
   let calls (i : Int) : List Int := (lookupBy i callsOf).getD []
   let byId : List (Int × SolcFun) := (funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)
   let nameAt (i : Int) : String := ((lookupBy i byId).map (·.name)).getD "?"

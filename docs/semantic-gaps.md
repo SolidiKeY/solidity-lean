@@ -60,12 +60,12 @@ contract's invariant.
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
 | `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; open: a byte type as a struct member, `calldata` |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of a dynamic type, an `address`/enum packed at its own width |
-| function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | open |
+| function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); open: external function types (calls through them refused), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`), a dispatch that would recurse, reference parameters in a function type |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
-| clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | open: an option the runner does not offer |
+| clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
-| the four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | open: `pushNoArgs2dLoop` is false under the default `.solc` tails and holds under `ValidTail .clean` (O6); the others are closer cost (exposed recycled slots, unshared memory terms); `docs/loops.md`, "Open loops lane" |
+| the four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner now states (the contract exposes nothing, `reading: clean`), but its 43 unrolled pushes run past the search's heartbeats; the others are closer cost (exposed recycled slots, unshared memory terms); `docs/loops.md`, "Open loops lane" |
 | a quotient `x / k` of a parameter left open (constructors and functions alike) | closer | closed: `sol_close`'s arithmetic reads a quotient of a nonnegative dividend as `div` (`Int.tdiv_eq_ediv_of_nonneg`, solkey's `sdiv_axiom`; `Calculus/Close.lean`, `tests/solc/CtorDivision.sol`) |
 | narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  A tuple of references stays refused whatever its types (`elabTuple`) |
 | a struct the struct table does not list (a contract's own, or the table's name with other members) | semantics, solc import | closed: a contract's own struct is the table's struct whose name spells its members ("Struct table" below; `contract!{ struct S { … } }`, `Examples/Tactics/OwnStructs.lean`, `tests/solc/OwnStructs.sol`); a struct recursive through an array stays refused, a library's struct its caller cannot see stays a row |
@@ -388,3 +388,80 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 scripts/test-solidity.test.mjs` passes (4 tests); `tests/solc/Hashing.sol`'s
 seven functions proved, `decodeRoundtrip` (one `bool` word) in 30 s, the
 others in 1–3 s.
+
+## Function types (lane `open-fntypes`)
+
+**What solkey does.** Nothing to follow: solkey's `SolidityInfo` has no
+function type.  The model follows solc (`docs/solc-alignment.md`).
+
+**Design: a tag and a dispatch, by the elaborator.**  The internal
+functions a contract can name are finite and known at elaboration, so a
+value of an internal function type is a `uint`, the *tag* of a function: its
+position in `Contract.funs`, from `1`; `0`, the default, is unassigned.  As
+for `bytesN`, no low module changes (`AST.lean`, `Semantics/`, `Calculus/`,
+`Theory/`, `Evm/` and their proofs are untouched): the type is a spelling
+read by the elaborator onto `uint`.
+
+- `function (uint) pure returns (uint)` is a `sol_ty` (`solFnTy`,
+  `Syntax.lean`) spelled `function(uint)returns(uint)` (`fnTyStr`; the
+  mutability dropped, `external` kept); a position of that type carries a
+  marker row beside its width, `k#function(uint)returns(uint) ↦ 0`
+  (`valueRows?`), in `Contract.widths`, `FunDecl.widths` and a value local's
+  shape entry, as a `bytesN` carries `k#bytes`.
+- A function named as a value is its tag (`fnTag`, in `synth`).  So
+  assignment, a parameter, a return, storage, a ternary, `delete` (the tag
+  `0`) and `==`/`!=` (the same function, the same tag) are the `uint` ones.
+- A call `h(a)` through a name of a function type (a local, a parameter, a
+  state variable: `fnTyOf?`) is a dispatch over the contract's functions of
+  `h`'s signature (`FunDecl.sigTy?`, compared after `canonFnTy`: `uint256`,
+  `address` and an enum are `uint`): `if (h == 1) { r = g₁(a); } else if …
+  else { revert(); }` (`fnDispatch`, `Syntax/Elab.lean`), each branch an
+  ordinary inlined call, the arguments that are not pure captured first.
+  Calling an unassigned value is solc's `Panic(0x51)`; the model reads it as
+  a revert, as it reads an index out of range's `Panic(0x32)`, so a box
+  obligation holds over it and a diamond does not.
+- **Which functions a dispatch lists.**  Calls are inlined, and a function
+  may call only those declared before it, so the dispatch inside a function
+  lists the functions of the signature declared before it.  One declared
+  after it that the contract names as a value somewhere (`fnTaken`) could be
+  reached, and is refused ("declare the functions of type … first").  One
+  that the contract never names as a value could only get a tag from a
+  `sol{ … }` program outside the contract: `fnTag` refuses that value when a
+  function declared before it calls through a value (`fnReachable`), so a
+  dispatch never leaves out a reachable function.  The solc import orders
+  the members so: a function after those it names as values, and a function
+  that calls through a value after every function named as a value
+  (`callsOf`, `Frontend/SolcJson.lean`).
+- A struct member of a function type is its tag, a `uint` (`spellTy`; the
+  struct table spells no function type, so the member keeps no marker): it
+  is called through a local of the type (`g = hold.f; g(x);`).
+- The solc import prints a `FunctionTypeName` (`tyText`) and a function
+  named as a value by its (renamed) name.
+
+**What changes.** `Syntax.lean` (the type's grammar and spelling,
+`fnParts?`, `canonFnTy`, the marker rows), `Syntax/Elab.lean` (`fnTag`,
+`fnTyOf?`, `fnDispatch`, a callee's local renamed in a call's head too:
+`RawExpr.rename`), `Frontend/SolcJson.lean`.  The elaboration of a program
+with no function value pays one lookup per call of a name that is not a
+function.
+
+**Left open, with the reason.**
+- External function types (`function (uint) external returns (uint)`):
+  address and selector; printed by the import, a call through one refused.
+  Its call would be an external call (`Stmt.tryCall`'s), from a pair the
+  model has no value for.
+- A call through a value that is not a name (`s.f(x)`, `fs[i](x)`,
+  `choose(b)(x)`): the grammar calls a name; the import leaves the function
+  out (`unsupported`).  Capture it in a local first.
+- A dispatch that would recurse (a function of the signature calling through
+  a value of it): the candidate is not declared before the caller, refused
+  as above.  Recursion through values would need `Stmt.callRec` for the
+  dispatch's candidates, and the recursion analysis (`isRecursive`) to see
+  a call through a value as a call of each candidate.
+- Reference parameters or returns in a function type (`function (uint[]
+  memory)`): refused (`fnCompTy?`, the import's `tyText`).
+- A closer limit met on the way, not a function-type one: a stored value
+  chosen by a flag and called at a symbolic argument
+  (`op(x)` after `if (b) op = double; else op = triple;`) times out in the
+  runner's search; at a literal argument it is proved (`storedByFlag`).
+

@@ -189,13 +189,15 @@ test("value push captures complex receivers once", () => {
   const status = Object.fromEntries(report.results.map(r => [r.function,r.status]));
   // An empty push of a reference element saves only the length and exposes the
   // old slot as it is (solkey d85018517f's `storagePushLengthSave`, e2319c57):
-  // a claim about the pushed row fails from a well-formed entry state
-  // (`nested_dirty`, `Examples/Tactics/PushReceiver.lean`), as solkey's
-  // SYMBOLIC_TAIL_OPENS stay open. The runs from the initial state are pinned there.
-  for (const fn of ['nested','falsePost','oldTargetIndex','falseTargetIndex'])
+  // a claim about the pushed row fails from a well-formed entry state with a
+  // dirty tail (`nested_dirty`, `Examples/Tactics/PushReceiver.lean`). The
+  // contract exposes nothing (`Prog.exposesNone`), so its tails stay clean
+  // and the obligations are stated under `cleanTail(storage)` (O6).
+  assert.ok(report.results.every(r => r.reading === 'clean'));
+  for (const fn of ['nested','effectfulReceiver','oldTargetIndex'])
+    assert.equal(status[fn],'proved',fn);
+  for (const fn of ['falsePost','falseTargetIndex'])
     assert.equal(status[fn],'pending',fn);
-  // its search runs out of heartbeats on the open leaves
-  assert.notEqual(status.effectfulReceiver,'proved');
 });
 
 test("push source captures preserve values, independent copies and mutable source names", () => {
@@ -204,13 +206,14 @@ test("push source captures preserve values, independent copies and mutable sourc
   const report = runSolidityTests(["tests/solc/PushSources.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
   // Each source row is read from `rows.push()`'s exposed old slot (length-only
-  // empty push, see "value push captures complex receivers once"): open, but for
-  // the field written in place and the source index that reverts.
+  // empty push, see "value push captures complex receivers once"), clean: the
+  // contract exposes nothing (O6, `reading: clean`).
+  assert.ok(report.results.every(r => r.reading === 'clean'));
   assert.deepEqual(report.results.map(r => [r.function,r.status]), [
-    ['primitive','pending'], ['primitiveField','proved'], ['primitiveFalse','pending'],
-    ['referenceCopy','pending'], ['referenceFalse','pending'], ['selfCopy','pending'],
-    ['effectfulSource','pending'], ['complexReceiver','pending'], ['badSourceIndex','proved'],
-    ['freshSourceNames','pending']
+    ['primitive','proved'], ['primitiveField','proved'], ['primitiveFalse','pending'],
+    ['referenceCopy','proved'], ['referenceFalse','pending'], ['selfCopy','proved'],
+    ['effectfulSource','proved'], ['complexReceiver','proved'], ['badSourceIndex','proved'],
+    ['freshSourceNames','proved']
   ]);
 });
 
@@ -219,13 +222,12 @@ test("memory push copies atomically and resolves a changing receiver once", () =
   assert.deepEqual(report.errors, []);
   // `receiverUsesLength` indexes by `cube[0].length` after `cube.push()`, an
   // exposed old row (length-only empty push, see "value push captures complex
-  // receivers once"): its claim is open, and its search runs out of heartbeats.
+  // receivers once"), clean: the contract exposes nothing (O6).
+  assert.ok(report.results.every(r => r.reading === 'clean'));
   const status = report.results.map(r => [r.function,r.status]);
-  assert.notEqual(status[4][1], 'proved');
-  status[4][1] = 'open';
   assert.deepEqual(status, [
     ['arrayCopy','proved'], ['arrayFalse','pending'], ['structCopy','proved'],
-    ['recycledSlot','proved'], ['receiverUsesLength','open'], ['receiverFalse','pending'],
+    ['recycledSlot','proved'], ['receiverUsesLength','proved'], ['receiverFalse','pending'],
     ['complexMemorySource','proved'], ['complexMemoryFalse','pending'],
     ['badMemorySource','proved']
   ]);
@@ -234,12 +236,14 @@ test("memory push copies atomically and resolves a changing receiver once", () =
 test("storage-return bindings retain alias identity, effects and caller memory", () => {
   const report = runSolidityTests(["tests/solc/StorageReturns.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
-  // `returnsIndexed` reads the rows of `rows.push()`: open since the
-  // length-only empty push (see "value push captures complex receivers once").
+  // `returnsIndexed` reads the rows of `rows.push()`, exposed by the
+  // length-only empty push (see "value push captures complex receivers once"),
+  // clean: no row is shrunk while an alias is held (O6, `reading: clean`).
+  assert.ok(report.results.filter(r => r.status !== 'internal').every(r => r.reading === 'clean'));
   assert.deepEqual(report.results.map(r => [r.function,r.status]), [
     ['valuesRef','internal'], ['otherRef','internal'], ['rowRef','internal'],
     ['allocatedRef','internal'], ['rejectedRef','internal'],
-    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','pending'],
+    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','proved'],
     ['heapGrowth','proved'], ['calleeReverts','proved'], ['falseCopy','pending'],
     ['receiverPush','proved'], ['receiverPushValue','proved'], ['receiverPop','proved'],
     ['receiverReadsAfterGetter','proved'], ['receiverReadsBeforeGetterFalse','pending'],
@@ -414,6 +418,21 @@ test("hashing: keccak256, abi.encode/encodePacked/decode, string keys, concat", 
     'decodeRoundtrip', 'stringKey', 'concatLengths']) assert.equal(status[name], 'proved', name);
 });
 
+test("function types: values in locals, parameters, returns, storage and struct members", () => {
+  // tests/solc/FunctionTypes.sol: a value is its function's tag, a call
+  // through it a dispatch over the functions of its signature
+  // (docs/semantic-gaps.md, "Function types")
+  const report = runSolidityTests(["tests/solc/FunctionTypes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['applyAndCompose', 'localValue', 'storedByFlag', 'returnedValue',
+    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality'])
+    assert.equal(status[name], 'proved', name);
+  // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
+  assert.equal(status.unassignedDiamond, 'pending');
+  assert.equal(status.falsePost, 'pending');
+});
+
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
   const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
   assert.deepEqual(report.errors, []);
@@ -457,7 +476,9 @@ test("recursion: calls by their contracts, proved by induction over the frames",
   // tests/solc/Recursion.sol: each recursive call by its callee's
   // `/// @custom:key` contract (`true`/`true` without one), the contract by
   // induction over the frames (`rec_auto`, docs/kernel-port.md "Recursion")
-  const report = runSolidityTests(["tests/solc/Recursion.sol"], {build:false});
+  // in batches: the whole contract as one Lean call ran ~270 s against the
+  // 300 s per-call limit, and timed out under load
+  const report = runSolidityTests(["tests/solc/Recursion.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['countdown', 'sumTo', 'sumToSix', 'even', 'odd', 'evenFour',
@@ -479,9 +500,11 @@ test("root primitive push bindings and empty user calls parse unambiguously", ()
   assert.equal(status.rootBinding, 'proved');
   assert.equal(status.falsePost, 'pending');
   // A pushed reference slot is exposed as it is (length-only empty push, see
-  // "value push captures complex receivers once"): its contents are open.
+  // "value push captures complex receivers once"), clean: the contract exposes
+  // nothing (O6, `reading: clean`).
+  assert.ok(report.results.filter(r => r.status !== 'internal').every(r => r.reading === 'clean'));
   for (const name of ['fixedReturn', 'dynamicReturn', 'structReturn']) {
-    assert.equal(status[name], 'pending', name);
+    assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falseReferencePost, 'pending');
 });
