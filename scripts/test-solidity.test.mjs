@@ -423,7 +423,10 @@ test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys
     'decodeRoundtrip', 'stringKey', 'concatLengths',
     // a selector before the arguments, folded as solc folds it; an enum
     // packed at one byte; a struct of values in the head
-    'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct'])
+    'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct',
+    // a locally built byte string's hash under the diamond, evaluated
+    // (`keccakAt`); a symbolic word's packed bytes read back (`hornerU?`)
+    'literalHash', 'twoAllocationsHashEqual', 'packedAddressBytes', 'packedWordReassembled'])
     assert.equal(status[name], 'proved', name);
 });
 

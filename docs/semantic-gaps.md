@@ -59,14 +59,15 @@ contract's invariant.
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
 | `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); open: `calldata` |
-| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
+| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); the closer under `⟨⟩` on a hash of a byte string built in the function, evaluated (`keccakAt`), and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); open: `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats, the callback reading's leaves on the bound array |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | closed: a recursion that does not call back is read without callbacks (`sol_no_callback`, `ProvesC.recValid`), one that does by a contract over the callback runs (`RecContractC`, `ProvesC.recContract`), by induction over the frames; `rec_auto_c`, the runner (`docs/kernel-port.md`, "Recursion") |
 | a capture whose rest calls back under the callback reading (`if (nse)` with a branch that calls back, a loop unwound whose body does, a payment's non-simple operand) | calculus | closed: `ProvesC.capture`, the side condition on the capture alone (`Stmt.CapturesAs`), and `ProvesC.loopExit` under the box (`docs/options.md` O3) |
 | a loop by its invariant and a call returning a value or a reference, while something calls back (`ValidT`) | calculus | closed (`docs/options.md` O3): a call forks where its body does (`Stmt.forksIn`), and one whose callee calls back is inlined under callbacks whatever it returns (`ProvesC.callVal`, `callStorage`, `callMem`); a loop by its invariant under the box (`ProvesC.invBox`, the body's frame read over its callback runs, `ExecP.frame`); `tests/solc/CallbackCalls.sol`.  Not open but refused: a diamond over a loop whose body calls back never holds, the loop's callback runs including a divergence (`ExecS.loopDiverge`, `holdsC_diamond_loop`), whatever its bound, invariant or variant |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
-| closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
+| closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`) | closer limit, not a semantic gap | closed (lane `open-closer`): `sol_close`'s last alternative adds solkey's `multiply_2_inEq0` of the literal bounds of the atoms of a leaf's products (`sol_close_nonlin`, `Calculus/CloseNonlin.lean`), only where a product of two non-literal integers is left; `tests/solc/Recursion.sol`'s `sum` and `sumThree`, `Examples/Tactics/Recursion.lean` (`triSpec`) |
+| closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | open |
 | the four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner now states (the contract exposes nothing, `reading: clean`), but its 43 unrolled pushes run past the search's heartbeats; the others are closer cost (exposed recycled slots, unshared memory terms); `docs/loops.md`, "Open loops lane" |
 | a quotient `x / k` of a parameter left open (constructors and functions alike) | closer | closed: `sol_close`'s arithmetic reads a quotient of a nonnegative dividend as `div` (`Int.tdiv_eq_ediv_of_nonneg`, solkey's `sdiv_axiom`; `Calculus/Close.lean`, `tests/solc/CtorDivision.sol`) |
 | narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  A tuple of references stays refused whatever its types (`elabTuple`) |
@@ -364,13 +365,18 @@ its object (`Grown.keccakId`, carried past local, storage and ledger updates:
 hashed twice is one value, and a string parameter's hash is the same before
 and after storage writes (`tests/solc/Hashing.sol`, `hashParameter`,
 `stringKey`).  Under `⟨⟩`, a hash of a byte string the function built (a
-literal, an encoding) is closed by neither: `sol_decide` does not show that a
-hash of a memory it wrote returns (`Facts.returns` asks it of every
-argument), `sol_close` does not show the writes land; such an obligation
-closes under `[]` (`/// @custom:key box`).  Two literals of the same bytes
-are two allocations, two terms, not shown equal.  Both need a reduction of
-the hashed object to its literal bytes (a symbol carrying them, read off the
-memory's writes as `size` is, `lenAtN`): left open.
+literal, an encoding) is read off the memory (lane `open-closer`):
+`sol_decide`'s memory pass reads the object's length (`lenAtN`) and each of
+its bytes (`memReadN`) down the writes, and where all are literals (at most
+`keccakMaxBytes`, 64) the hash is `keccakBytes` of them, which the kernel
+evaluates (`keccakAt`, `keccakAt_eval`, `Calculus/MemRead.lean`, Lean only;
+`orElse` the symbol where the memory does not return).  So the hash returns
+under the diamond, two allocations of the same literal bytes hash equal, and
+a hash compares with its literal value (`tests/solc/Hashing.sol`,
+`equalStringsHashEqual` now under `⟨⟩`, `literalHash`,
+`twoAllocationsHashEqual`; `Examples/Tactics/Hashing.lean`,
+`hashTwiceDiamond`, `abcHash`, `twoAllocations`).  A byte string with a
+symbolic byte or length keeps its hash an atom.
 
 **`mapping(string => V)`, `mapping(bytes => V)`** is a `mapping(uint => V)`
 with the marker row `{}#hash` (`hashKeyRows`, `Syntax.lean`); `m[s]` is read
@@ -428,15 +434,6 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 (`#run`) and proves the layouts of small encodings.
 
 **Left open.**
-- The `⟨⟩` closer on a locally built byte string's hash, and literal
-  strings hashed equal across allocations (above): both need a closer
-  clause that reads an object's bytes back off the memory term's writes
-  (all literal, at literal indices, covering its length) into a literal
-  list; with it, the hash's argument returns and, the hash now being
-  computable, its value is `keccakBytes` of that list, evaluated inside the
-  closer's kernel-evaluated test.  No semantic gap remains; the clause is
-  not written (`MemRead.lean` reads one address at a time, not an object's
-  whole contents).
 - `abi.decode` of arrays and structs: the grammar writes no type that is not
   a name in `abi.decode(d, (T))` (`uint[]` is not an expression), and the
   import prints only elementary types there.
@@ -444,13 +441,17 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   reference member (refused by `abiKind`).
 - An array encoded or a byte string decoded is a loop over its elements:
   the runner proves no such obligation (no invariant), so they are run
-  (`Codec2`, `Examples/Tactics/Hashing.lean`); `abi.encodePacked` of a
-  symbolic `address` writes its 20 bytes through shifts the closer does not
-  read back (an enum's member, a literal, does): a byte `(a >> 8k) % 256` of
-  a symbolic `a` is an atom to `sol_decide`, and reassembling the word from
-  its bytes (`Σ b_k · 256^k = a`) is nonlinear arithmetic the closer's
-  linear fragment (`Calculus/LinearDecision.lean`) does not decide; no
-  solkey taclet reads it (KeY has no byte layout).  Left open.
+  (`Codec2`, `Examples/Tactics/Hashing.lean`).  `abi.encodePacked` of a
+  symbolic word writes its bytes as `(a >> 8k) % 256`; the closer reads a
+  byte back (lane `open-closer`: `x >> 0` as `x`, `(t % m) % n` and
+  `((t % 2^m) >> j) % 2^w` narrowed, `bitsShr`/`bitsMod`; a `uint`'s shift
+  and remainder by a positive literal return, `Facts.arithOk`) and
+  reassembles bytes read by Horner's rule, `r * 256 + b`, to the word modulo
+  their width (`hornerU?`, Lean only: KeY has no byte layout;
+  `tests/solc/Hashing.sol`, `packedAddressBytes`, `packedWordReassembled`
+  for a `uint64`).  An `address`'s twenty bytes reassembled are past the
+  closer's bounds (`Seq.closeSize`, 24000 nodes: each `r` repeats the reads
+  of the twenty-write memory), eight are within them.
 - `abi.encodeCall` of a function this contract does not declare (an
   interface's): its signature is not known to `sol{}`.
 - `sha256`, `ripemd160`, `ecrecover`.

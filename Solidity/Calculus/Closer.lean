@@ -328,6 +328,11 @@ def Facts.rangeOp (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y
     some ((F.rangeLeaf x).1 + (F.rangeLeaf y).1, (F.rangeLeaf x).2 + (F.rangeLeaf y).2)
   | .binop .sub _, x, y =>
     some ((F.rangeLeaf x).1 - (F.rangeLeaf y).2, (F.rangeLeaf x).2 - (F.rangeLeaf y).1)
+  -- Lean only: a `uint`'s remainder by a positive literal is below it
+  | @Op2.binop _ .mod .uint _, _, y =>
+    match y.litV? with
+    | some c => if 0 < PrimTy.ival c then some (0, PrimTy.ival c - 1) else none
+    | none => none
   | _, _, _ => none
 
 theorem ofInt?_ival {p : PrimTy} {n : Int} {v : p.Denote} (h : p.ofInt? n = some v) :
@@ -414,6 +419,35 @@ theorem Facts.rangeOp_sound {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op
           first
             | (rw [evalT_add h']; constructor <;> omega)
             | (rw [evalT_sub h']; constructor <;> omega)
+    case mod =>
+      cases q <;> simp only [Facts.rangeOp, reduceCtorEq] at hr
+      cases hs
+      split at hr
+      · rename_i c hc
+        split at hr
+        · rename_i hc0
+          simp only [Option.some.injEq] at hr
+          subst hr
+          obtain rfl := LTm.eq_of_litV? hc
+          cases hx : (x.eval g ν : Option PrimTy.uint.Denote) with
+          | none => rw [hx] at h; cases h
+          | some u =>
+            rw [hx] at h
+            have h' : binopT .mod hop u (some c) = some v := h
+            unfold binopT at h'
+            simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum,
+              BinOp.arithInt] at h'
+            have hu := PrimTy.ival_mem u
+            simp only [PrimTy.ival, PrimTy.lo] at hu hc0
+            rw [if_neg (by omega), Option.bind_some] at h'
+            have hv := ofInt?_ival h'
+            simp only [PrimTy.ival] at hv
+            show InR (0, c.val - 1) (v : PrimTy.uint.Denote).1
+            rw [hv, Int.tmod_eq_emod_of_nonneg hu.1]
+            unfold InR
+            exact ⟨Int.emod_nonneg _ (by omega), by have := Int.emod_lt_of_pos u.1 hc0; omega⟩
+        · cases hr
+      · cases hr
     all_goals simp only [Facts.rangeOp, reduceCtorEq] at hr
   all_goals simp only [Facts.rangeOp, reduceCtorEq] at hr
 
@@ -450,6 +484,16 @@ def Facts.arithOk (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y
   | @Op2.binop _ .sub p _, x, y =>
     p.isNumeric && decide (p.lo ≤ (F.range x).1 - (F.range y).2) &&
       decide ((F.range x).2 - (F.range y).1 ≤ p.hi)
+  -- Lean only: a product of `uint`s whose ranges keep it in range, a `uint`
+  -- shifted right, or its remainder by a positive literal
+  | @Op2.binop _ .mul .uint _, x, y =>
+    decide (0 ≤ (F.range x).1) && decide (0 ≤ (F.range y).1) &&
+      decide ((F.range x).2 * (F.range y).2 ≤ PrimTy.uint.hi)
+  | @Op2.binop _ .shr .uint _, _, _ => true
+  | @Op2.binop _ .mod .uint _, _, y =>
+    match y.litV? with
+    | some c => decide (0 < PrimTy.ival c)
+    | none => false
   | _, _, _ => false
 
 theorem Facts.arithOk_isSome {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C a b s)
@@ -473,6 +517,54 @@ theorem Facts.arithOk_isSome {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : O
         simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum, BinOp.arithInt]
         exact ofInt?_isSome rfl (by simp only [PrimTy.ival] at ru rw'; omega)
           (by simp only [PrimTy.ival] at ru rw'; omega)
+    case mul =>
+      cases q <;> simp only [Facts.arithOk, Bool.false_eq_true] at h
+      simp only [Bool.and_eq_true, decide_eq_true_eq] at h
+      obtain ⟨⟨h1, h2⟩, h3⟩ := h
+      have ru := F.range_sound hF x hx
+      have rw' := F.range_sound hF y hy
+      unfold InR at ru rw'
+      show (binopT .mul hop u (some w)).isSome = true
+      unfold binopT
+      simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum, BinOp.arithInt]
+      simp only [PrimTy.ival] at ru rw'
+      have hm : (u : PrimTy.uint.Denote).1 * (w : PrimTy.uint.Denote).1 ≤ (F.range x).2 * (F.range y).2 :=
+        Int.mul_le_mul ru.2 rw'.2 (by omega) (by omega)
+      exact ofInt?_isSome rfl (by simp only [PrimTy.lo]; exact Int.mul_nonneg (by omega) (by omega))
+        (by omega)
+    case shr =>
+      cases q <;> simp only [Facts.arithOk, Bool.false_eq_true] at h
+      show (binopT .shr hop u (some w)).isSome = true
+      unfold binopT
+      simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum, BinOp.arithInt]
+      have hu := (PrimTy.ival_mem u)
+      simp only [PrimTy.ival, PrimTy.lo, PrimTy.hi] at hu
+      split
+      · have h2 : (0 : Int) < 2 ^ (w : PrimTy.uint.Denote).1.toNat := Int.pow_pos (by decide)
+        exact ofInt?_isSome rfl (by simp only [PrimTy.lo]; exact Int.ediv_nonneg hu.1 (Int.le_of_lt h2))
+          (by have := Int.ediv_le_self (2 ^ (w : PrimTy.uint.Denote).1.toNat) hu.1
+              simp only [PrimTy.hi]; omega)
+      · rw [if_neg (by omega)]
+        exact ofInt?_isSome rfl (by simp only [PrimTy.lo]; omega) (by simp only [PrimTy.hi]; omega)
+    case mod =>
+      cases q <;> simp only [Facts.arithOk, Bool.false_eq_true] at h
+      split at h
+      · rename_i c hc
+        simp only [decide_eq_true_eq] at h
+        obtain rfl := LTm.eq_of_litV? hc
+        have hw : w = c := (Option.some.inj hy).symm
+        subst hw
+        show (binopT .mod hop u (some w)).isSome = true
+        unfold binopT
+        simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum, BinOp.arithInt]
+        have hu := (PrimTy.ival_mem u)
+        have hwr := (PrimTy.ival_mem w)
+        simp only [PrimTy.ival, PrimTy.lo, PrimTy.hi] at hu hwr h
+        rw [if_neg (by omega), Option.bind_some, Int.tmod_eq_emod_of_nonneg hu.1]
+        exact ofInt?_isSome rfl (by simp only [PrimTy.lo]; exact Int.emod_nonneg _ (by omega))
+          (by have := Int.emod_lt_of_pos (u : PrimTy.uint.Denote).1 h
+              simp only [PrimTy.hi]; omega)
+      · cases h
     all_goals simp only [Facts.arithOk, Bool.false_eq_true] at h
   all_goals simp only [Facts.arithOk, Bool.false_eq_true] at h
 
@@ -2104,6 +2196,66 @@ theorem modShrModU?_eval (hp : BinOp.mod.accepts .uint = true) {x y a : LTm C (.
     · cases h
   · cases h
 
+/-- `x % c` read as `x` at `uint` where `x`'s range lies below the
+positive literal `c` (Lean only): a word reassembled from its bytes, of a
+type narrower than its modulus. -/
+def Facts.modSmall (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val p)) :=
+  match y.litV? with
+  | some c =>
+    if p == .uint && decide (0 < PrimTy.ival c) && decide (0 ≤ (F.range x).1) &&
+        decide ((F.range x).2 < PrimTy.ival c) then some x else none
+  | none => none
+
+theorem Facts.modSmall_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    (hs : BinOp.mod.accepts p = true) {x y a : LTm C (.val p)} (h : F.modSmall x y = some a) :
+    (a.eval g ν : Option p.Denote) = (LTm.app2 (.binop .mod hs) x y).eval g ν := by
+  unfold Facts.modSmall at h
+  split at h
+  · rename_i c hc
+    split at h
+    · rename_i hb
+      cases h
+      simp only [Bool.and_eq_true, beq_iff_eq, decide_eq_true_eq] at hb
+      obtain ⟨⟨⟨hpu, hc0⟩, hlo⟩, hhi⟩ := hb
+      subst hpu
+      obtain rfl := LTm.eq_of_litV? hc
+      rw [eval_uop .mod hs (fun _ => rfl)]
+      cases hx : (x.eval g ν : Option PrimTy.uint.Denote) with
+      | none => rfl
+      | some u =>
+        have hr := F.range_sound hF x hx
+        unfold InR at hr
+        simp only [PrimTy.ival] at hr hc0 hhi
+        show some u = (BinOp.arithInt .mod u.1 c.1).bind PrimTy.uint.ofInt?
+        simp only [BinOp.arithInt, if_neg (Int.ne_of_gt hc0), Option.bind_some,
+          Int.tmod_eq_emod_of_nonneg (by omega : 0 ≤ u.1)]
+        rw [Int.emod_eq_of_lt (by omega : 0 ≤ u.1) (by omega : u.1 < c.1)]
+        exact (uint_ofInt?_ival u).symm
+    · cases h
+  · cases h
+
+/-- A remainder `a % c` read again by `Facts.modSmall`. -/
+def Facts.reMod (F : Facts C) (t : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  match t.uArgs? .mod with
+  | some (a, b) =>
+    match F.modSmall a b with
+    | some r => r
+    | none => t
+  | none => t
+
+theorem Facts.reMod_eval {F : Facts C} (hF : F.Ok g ν) (t : LTm C (.val .uint)) :
+    ((F.reMod t).eval g ν : Option PrimTy.uint.Denote) = t.eval g ν := by
+  unfold Facts.reMod
+  split
+  · rename_i a b ht
+    obtain ⟨hp, hte⟩ := LTm.uArgs?_eq ht
+    cases hte
+    split
+    · rename_i r hr
+      exact Facts.modSmall_eval hF hp hr
+    · rfl
+  · rfl
+
 /-- The bit clauses at a numeric type: only `uint` is read. -/
 def bitsAdd {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val p)) :=
   match p, x, y with
@@ -2147,6 +2299,18 @@ theorem bitsShr_eval {p : PrimTy} (h : BinOp.shr.accepts p = true) {x y a : LTm 
   cases p with
   | uint => exact shrZeroU?_eval h ha
   | _ => cases ha
+
+/-- `Facts.reMod` at a numeric type: only `uint` is read. -/
+def Facts.reModP (F : Facts C) {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
+  match p, t with
+  | .uint, t => F.reMod t
+  | _, t => t
+
+theorem Facts.reModP_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (t : LTm C (.val p)) :
+    ((F.reModP t).eval g ν : Option p.Denote) = t.eval g ν := by
+  cases p with
+  | uint => exact Facts.reMod_eval hF t
+  | _ => rfl
 
 /-- A binary symbol folded: on literals, `a == a`, `a != a` on a term that
 returns, `a == b`/`a != b` on terms apart (`Facts.apart`), `x == true`/
@@ -2195,7 +2359,7 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
     | some t => t
     | none =>
       match bitsAdd x y with
-      | some t => t
+      | some t => F.reModP t
       | none => Decide.fold2 (.binop .add h) x y
   | .binop .mul h, x, y =>
     if isTwo x then Decide.fold2 (.binop .add h) y y else Decide.fold2 (.binop .mul h) x y
@@ -2206,7 +2370,10 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
   | .binop .mod h, x, y =>
     match bitsMod x y with
     | some t => t
-    | none => Decide.fold2 (.binop .mod h) x y
+    | none =>
+      match F.modSmall x y with
+      | some t => t
+      | none => Decide.fold2 (.binop .mod h) x y
   | .binop .shr h, x, y =>
     match bitsShr x y with
     | some t => t
@@ -2327,7 +2494,7 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
         exact Facts.cancelAdd_eval hF h ht
       · split
         · rename_i t ht
-          exact bitsAdd_eval h ht
+          exact (Facts.reModP_eval hF t).trans (bitsAdd_eval h ht)
         · exact Decide.fold2_eval g ν _ x y
     case mul =>
       simp only [Facts.fold2]
@@ -2347,7 +2514,10 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
       split
       · rename_i t ht
         exact bitsMod_eval h ht
-      · exact Decide.fold2_eval g ν _ x y
+      · split
+        · rename_i t ht
+          exact Facts.modSmall_eval hF h ht
+        · exact Decide.fold2_eval g ν _ x y
     case shr =>
       simp only [Facts.fold2]
       split
