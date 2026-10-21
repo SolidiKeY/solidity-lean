@@ -22,6 +22,7 @@ import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Heap
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
+import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.NoPanic
