@@ -3526,14 +3526,15 @@ read before it: a `bytesN` marked (`abiBytesMark`), an `address`, an enum
 (`markOf?`). -/
 partial def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
   let Γ ← ctx
+  let marked (a : RawExpr) : Option AbiKind :=
+    if (markOf? C Γ "#address" a).isSome then some (.uint 160)
+    else if (markOf? C Γ "#enum" a).isSome then some (.uint 8) else none
   pure (args.map fun a => match a with
     | .call g [_] =>
       match abiBytesMark? g with
       | some n => some (.bytesN n)
-      | none => if (lookupBy g C.enums).isSome then some (.uint 8) else none
-    | a =>
-      if (markOf? C Γ "#address" a).isSome then some (.uint 160)
-      else if (markOf? C Γ "#enum" a).isSome then some (.uint 8) else none)
+      | none => marked a
+    | a => marked a)
 
 /-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
 `n` head words: the offset `o` that word holds, the length `L` at `o`, then
