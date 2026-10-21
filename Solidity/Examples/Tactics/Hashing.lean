@@ -47,6 +47,43 @@ theorem hashString : ⊨ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(by
   sol_symex
   sol_decide
 
+/-- **Under the diamond**: the closer reads the byte string off the memory
+(its length and each byte down the writes, all literal: `keccakAt`,
+`Calculus/MemRead.lean`, Lean only) and evaluates the hash, so it returns. -/
+theorem hashTwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes32 h = keccak256(b);
+    bytes32 g = keccak256(b); ⟩ h == g } := by
+  sol_symex
+  sol_decide
+
+/-- Hashes evaluated in the closer: `keccak256("abc")` is its Keccak-256,
+and two allocations of `"ab"` hash equal. -/
+def LocalHash : Contract := contract!{
+  function abc() {
+    bytes memory b = "abc";
+    bytes32 h = keccak256(b);
+    assert(uint(h) == 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45);
+  }
+  function twoAllocations() {
+    bytes memory b = "ab";
+    bytes memory c = "ab";
+    assert(keccak256(b) == keccak256(c));
+  }
+}
+
+section LocalHash
+
+local instance : InContract := ⟨LocalHash⟩
+
+theorem abcHash : ⊨ spec!{abc} := by
+  sol_symex
+  sol_decide
+
+theorem twoAllocations : ⊨ spec!{twoAllocations} := by
+  sol_symex
+  sol_decide
+
+end LocalHash
+
 /-- The hash is Keccak-256: of `"abc"`, by evaluation in the kernel (well
 under a second for an input of one block). -/
 theorem keccakAbc : (keccakBytes [97, 98, 99]).1 =
