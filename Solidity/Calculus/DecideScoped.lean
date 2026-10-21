@@ -484,7 +484,7 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → Bool → SymS C Γ → Fml C Γ �
   | _, pos, ρ, .bind _ _ t φ =>
     if pos then (φ.toLSM pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none
   | _, pos, _, .anon .. => if pos then none else some .tt
-  | _, pos, _, .allocAll .. => if pos then none else some .tt
+  | _, pos, _, .allocAll .. => if pos then some .ff else some .tt
 
 /-- **A scoped formula with its updates pushed in**, at the polarity `pos`
 (`false` under a negation or on the left of an implication, where only a
@@ -508,7 +508,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml 
     (fun _ p _ ih pos ρ => (ih pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ')
     (fun _ _ t _ ih pos ρ => if pos then (ih pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none)
     (fun _ _ _ pos _ => if pos then none else some .tt)
-    (fun _ _ _ _ pos _ => if pos then none else some .tt) _ φ pos ρ
+    (fun _ _ _ _ pos _ => if pos then some .ff else some .tt) _ φ pos ρ
 
 theorem _root_.Solidity.Fml.toLS_eq_toLSM {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml C Γ) :
     φ.toLS pos ρ = φ.toLSM pos ρ := by

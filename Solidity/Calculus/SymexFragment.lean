@@ -654,9 +654,7 @@ theorem Fml.Frag.toLS {φ : Fml C Γ} (hφ : φ.Frag) :
     · simp only [Option.some.injEq] at h; subst h; exact trivial
   | allocAll x A φ ih =>
     simp only [Fml.toLSM] at h
-    split at h
-    · simp only [reduceCtorEq] at h
-    · simp only [Option.some.injEq] at h; subst h; exact trivial
+    split at h <;> (simp only [Option.some.injEq] at h; subst h; exact trivial)
 
 /-- **Its reduction mentions no storage**: every read of a write
 eliminates to the observation atoms. -/

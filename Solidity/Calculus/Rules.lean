@@ -993,8 +993,8 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   /-- A `catch` clause binding the data (`Stmt.catchData`): for a self-call
   whose callee's data are literal, a goal per datum the clause may bind, the
   datum written as a literal in front of the clause; another receiver's
-  reason, any bytes, closes to `false` (`catchDataStep`).  solkey binds no
-  data. -/
+  reason, any bytes, the clause for every fresh `bytes` of any contents
+  (`Fml.allocAll`, `catchDataStep`).  solkey binds no data. -/
   | catchDataBox {Γ ρ ps Γf Γ₁ : Ctx} {call : ExtCall C Γ} {rets : Binders ρ}
       {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind}
       {x : Var} {body : Prog C (.mem bytesR :: Γ) Γ₁} :

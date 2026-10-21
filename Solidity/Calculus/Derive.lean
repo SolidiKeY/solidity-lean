@@ -213,7 +213,7 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) (flatten : Bool := false) :
   let app ← `(tactic| apply $f $d $rfls*)
   -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
   -- line, one goal per outcome, as today's walk writes it
-  if c == ``Proves.cases || c == ``Proves.branches then
+  if c == ``Proves.cases || c == ``Proves.branches || c == ``Proves.allocBranches then
     return #[#[← ProofTree.takeApart app flatten],
       #[← `(tactic| refine $f $d $args*)]]
   return #[#[app], #[← `(tactic| refine $f $d $args*)]]
@@ -280,6 +280,7 @@ def movesAt (g : MVarId) (short : Bool := false) :
     return plain #[#[both]]
   | some ``Fml.upd => plain <$> alias `updIntro ``Proves.updIntro
   | some ``Fml.bind => plain <$> one ``Proves.bindIntro
+  | some ``Fml.allocAll => plain <$> one ``Proves.allocIntro
   | some ``Fml.tt =>
     if short then return #[]
     return plain

@@ -102,7 +102,8 @@ def provesCtor (premise : Lean.Name) : Option Lean.Name :=
    (``Premise.bind, ``Proves.bind), (``Premise.split, ``Proves.split),
    (``Premise.check, ``Proves.check), (``Premise.done, ``Proves.done),
    (``Premise.branches, ``Proves.branches), (``Premise.cases, ``Proves.cases),
-   (``Premise.inv, ``Proves.inv), (``Premise.inline, ``Proves.inline)].lookup premise
+   (``Premise.inv, ``Proves.inv), (``Premise.inline, ``Proves.inline),
+   (``Premise.allocBranches, ``Proves.allocBranches)].lookup premise
 
 /-- The rule the strategy fires on the first statement of the program `P`
 under `m`, the sequent's fresh names `k` (`Hyps.fresh`): the statement,
@@ -225,6 +226,8 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     return #[{ name := `updIntro, tacs := #[← `(tactic| apply $(← short ``Proves.updIntro))] }]
   | Fml.bind _ _ _ _ _ _ =>
     return #[{ name := `bindIntro, tacs := #[← `(tactic| apply $(← short ``Proves.bindIntro))] }]
+  | Fml.allocAll _ _ _ _ _ =>
+    return #[{ name := `allocRight, tacs := #[← `(tactic| apply $(← short ``Proves.allocIntro))] }]
   | Fml.modal _ _ _ _ m P _ _ =>
     let P ← whnf P
     if P.isAppOf ``Prog.nil then
@@ -241,14 +244,15 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let tac ← if premise == ``Premise.branches || premise == ``Premise.cases then
         `(tactic| apply $ctorId:ident $d:term rfl)
       else `(tactic| apply $ctorId:ident $d:term)
-    return #[{ name, se, branches := premise == ``Premise.branches,
+    return #[{ name, se,
+               branches := premise == ``Premise.branches || premise == ``Premise.allocBranches,
                cases := premise == ``Premise.cases, tacs := #[tac] }]
   | _ => return #[]
 
 /-- After `apply branches r`: the goal `∀ b ∈ bs, …` taken apart, one goal
 per outcome. -/
 def splitBranches (g : MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId) := do
-  let lemmas ← forallMemLemmas
+  let lemmas := (← flattenLemmas) ++ (← forallMemLemmas)
   let simp ← `(tactic| simp only [$lemmas,*])
   let gs ← runOn g #[simp]
   let [g'] := gs | return (#[simp], gs)
@@ -296,7 +300,7 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
           let gs ← runOn g mv.tacs
           if mv.branches then
             match gs with
-            | [g'] => (fun (more, gs) => some (mv.tacs ++ more, gs)) <$> splitBranches g'
+            | g' :: rest => (fun (more, gs) => some (mv.tacs ++ more, gs ++ rest)) <$> splitBranches g'
             | _ => pure (some (mv.tacs, gs))
           else pure (some (mv.tacs, gs))
       catch _ => s.restore; pure none

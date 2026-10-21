@@ -96,7 +96,7 @@ info: @LeanTaclet.catchDataBox : ∀ {C : Contract} {k : Nat} {Γ ρ ps Γf Γ�
   {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {self : Bool} {kind : CatchKind} {x : Var}
   {body : Prog C (LTy.mem bytesR :: Γ) Γ₁},
   dl[LeanTaclet C k]{ [ {bytes memory x = data(call);body;}; ] ⇝
-    "datum": ∀ d. [ {bytes memory x = d;body;} ] ; "another receiver": [ {assert(false);} ] }
+    "datum": ∀ d. [ {bytes memory x = d;body;} ] ; "another receiver": ∀ fresh. [ {bytes memory x = fresh;body;} ] }
 -/
 #guard_msgs in #check @LeanTaclet.catchDataBox
 
@@ -182,5 +182,20 @@ theorem mixedReason : ⊨ dl!{ ∀ uint x; [ try this.mixed(x) { } catch Error(s
   sol_decide
 
 end Custom
+
+/-! ## Another contract's reason
+
+At another receiver the reason is any bytes: the rule's last goal is the
+clause for every fresh `bytes` of any contents (`Fml.allocAll`, printed
+`∀ fresh r`), behind `require(a != 0); require(a != address(this));`.  The
+clause is proved for every reason, its length a `uint` the closer reads as
+any other. -/
+
+/-- **Another contract's reason**, its length read. -/
+theorem externalReason : ⊨ dl!{ ∀ uint a; [ try address(a).boom() { } catch Error(string memory r) {
+    if (r.length > 3) { assert(r.length >= 4); } } catch { }; ] true } := by
+  sol_prove (steps := 256)
+  · sol_leaf
+    sol_close
 
 end Solidity.Examples.Tactics.RevertData

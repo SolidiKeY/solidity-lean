@@ -1098,7 +1098,8 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
         else `(sol_stmt| expand_function_body(fbs))
       return some (← `(dl_premise| ⟨[ $s:sol_stmt; ]⟩))
   -- `catchDataBox`'s goals (`catchDataStep`): the clause after each datum the
-  -- callee may revert with, bound as `x`; another receiver's, `false`
+  -- callee may revert with, bound as `x`; another receiver's, any bytes
+  -- (`Fml.allocAll`, a fresh object `fresh`)
   if e.isAppOfArity ``catchDataStep 13 then
     let a := e.getAppArgs
     if ← [a[7]!, a[8]!, a[9]!, a[10]!, a[12]!].allM fun x =>
@@ -1108,7 +1109,9 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       let d := mkIdent `d
       let g1 ← `(dl_branch| "datum": ∀ $d:ident. [ { bytes memory $xi:ident = $d:ident;
         $(nameIdent bn):ident; } ])
-      let g2 ← `(dl_branch| "another receiver": [ { assert(false); } ])
+      let fr := mkIdent `fresh
+      let g2 ← `(dl_branch| "another receiver": ∀ $fr:ident. [ { bytes memory $xi:ident = $fr:ident;
+        $(nameIdent bn):ident; } ])
       return some (← `(dl_premise| $g1:dl_branch ; $g2:dl_branch))
   let unfold (ns : List Expr) (P : Expr) : PrM (Option (TSyntax `dl_premise)) := do
     let some ss ← ppProgS ns P | return none

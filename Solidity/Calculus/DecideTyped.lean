@@ -1315,10 +1315,10 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     · rename_i hp
       cases h'
       exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
-  | _, .allocAll .., pos, _, _, h, _, _, _, _ => by
-    have h' : (if pos then none else some LFml.tt) = some _ := h
+  | _, .allocAll .., pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (if pos then some LFml.ff else some LFml.tt) = some ψ := h
     split at h'
-    · cases h'
+    · cases h'; exact ⟨fun _ hψ => (hψ trivial).elim, fun hp => by subst hp; contradiction⟩
     · rename_i hp
       cases h'
       exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩

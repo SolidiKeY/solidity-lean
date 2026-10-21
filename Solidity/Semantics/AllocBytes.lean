@@ -59,11 +59,6 @@ def zerosObj (H : HTy) (n : Nat) (hn : n < 2 ^ 256) : MObj H bytesR :=
   (⟨List.replicate n (PrimTy.dflt .uint), by rw [List.length_replicate]; exact hn⟩ :
     {l : List (MVal H (.prim .uint)) // l.length < 2 ^ 256})
 
-theorem Grown.alloc_of_eq {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R)
-    (g : Grown H (MObj · R)) (hg : g = ⟨List.prefix_refl H, hp, o⟩) :
-    Grown.alloc g = Grown.alloc ⟨List.prefix_refl H, hp, o⟩ := by
-  subst hg; rfl
-
 theorem SVec.copyStToM_prims' {H : HTy} (hp : Heap H) {p : PrimTy}
     (L : List (SVal (.prim p))) (l : List p.Denote) (h : (Ty.prim p).mapFree = true)
     (hL : L = l.map fun v => (SVal.prim v : SVal (.prim p))) :
@@ -112,19 +107,19 @@ end Solidity
 
 namespace Solidity
 
-theorem Objs.get_snoc_last {H : HTy} {R : RefTy} (o : MObj H R) :
+theorem Objs.get_snoc_top {H : HTy} {R : RefTy} (o : MObj H R) :
     (Rs : List RefTy) → (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
       Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o
   | [], _, _ => rfl
-  | _ :: Rs, os, h => Objs.get_snoc_last o Rs os.2 _
+  | _ :: Rs, os, h => Objs.get_snoc_top o Rs os.2 _
 
-theorem Objs.set_snoc_last {H : HTy} {R : RefTy} (o o' : MObj H R) :
+theorem Objs.set_snoc_top {H : HTy} {R : RefTy} (o o' : MObj H R) :
     (Rs : List RefTy) → (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
       Objs.set (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h o' = Objs.snoc o' Rs os
   | [], _, _ => rfl
   | _ :: Rs, os, h => by
     show (os.1, Objs.set (Rs ++ [R]) (Objs.snoc o Rs os.2) Rs.length _ o') = (os.1, Objs.snoc o' Rs os.2)
-    rw [Objs.set_snoc_last o o' Rs os.2]
+    rw [Objs.set_snoc_top o o' Rs os.2]
 
 end Solidity
 
@@ -138,11 +133,11 @@ def byteWord (b : UInt8) : PrimTy.uint.Denote :=
 
 theorem Heap.get_alloc_self {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
-  Objs.get_snoc_last _ H _ _
+  Objs.get_snoc_top _ H _ _
 
 theorem Heap.set_alloc_self {H : HTy} {R : RefTy} (hp : Heap H) (o o' : MObj H R) :
     (hp.alloc o).1.set (hp.alloc o).2 (MObj.wk (List.prefix_append H [R]) R o') = (hp.alloc o').1 :=
-  Objs.set_snoc_last _ _ H _ _
+  Objs.set_snoc_top _ _ H _ _
 
 theorem State.allocPush_withHeap {R : RefTy} (σ : State C Γ) (o o' : MObj σ.H R) :
     (σ.allocPush o).withHeap (σ.heap.alloc o').1 = σ.allocPush o' := rfl

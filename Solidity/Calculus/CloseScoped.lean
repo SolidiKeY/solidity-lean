@@ -887,6 +887,32 @@ theorem holds_bind_kint (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (
     holds σ (.bind m x .kint φ) ↔ ∀ v : Int, holds (σ.push (t := .kint) v) φ := Iff.rfl
 theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
     holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
+/-- A fresh object of any contents: one more object, its reference the new
+local (`Fml.allocAll`). -/
+theorem holds_allocAll (σ : State C Γ) (x : Var) (R : RefTy) (φ : Fml C (.mem R :: Γ)) :
+    holds σ (.allocAll x R φ) ↔
+      ∀ o : MObj σ.H R, holds ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ :=
+  Iff.rfl
+theorem alloc_storage {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
+    (σ.alloc o).1.storage = σ.storage := rfl
+theorem alloc_net {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) : (σ.alloc o).1.net = σ.net := rfl
+theorem alloc_selfBalance {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
+    (σ.alloc o).1.selfBalance = σ.selfBalance := rfl
+theorem alloc_tx {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) : (σ.alloc o).1.tx = σ.tx := rfl
+theorem locV_alloc {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
+    (σ.alloc o).1.locV = σ.locV := State.locV_adopt σ _
+/-- The fresh object's identity: the next one. -/
+theorem alloc_snd_id {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
+    ((σ.alloc o).2 : HRef (σ.alloc o).1.H R).id = σ.H.length := rfl
+theorem push_lenId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (E : Ty) (id : Nat) :
+    (σ.push v).glob.memT.lenId E id = σ.glob.memT.lenId E id := rfl
+/-- The fresh array's length: its list's (a free value, the object any). -/
+theorem alloc_lenId {E : Ty} (σ : State C Γ) (o : MObj σ.H (.array E)) :
+    (σ.alloc o).1.glob.memT.lenId E σ.H.length =
+      some (lenU (o : {l : List (MVal σ.H E) // l.length < 2 ^ 256}).1.length o.2) := by
+  rw [← alloc_snd_id σ o, Grown.lenId_ref (σ.alloc o).1.glob.memT (σ.alloc o).2]
+  show some (Heap.lenU (σ.heap.alloc o).1 (σ.heap.alloc o).2) = _
+  simp only [Heap.lenU, Heap.len, Heap.get_alloc, MObj.elems_dyn, MObj.wk, List.length_map]
 
 end Leaf
 
@@ -903,7 +929,9 @@ attribute [close_rw_s]
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
-  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon
+  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon CloseS.holds_allocAll
+  CloseS.alloc_storage CloseS.alloc_net CloseS.alloc_selfBalance CloseS.alloc_tx CloseS.locV_alloc
+  CloseS.alloc_snd_id CloseS.push_lenId CloseS.alloc_lenId
   CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
@@ -1030,7 +1058,7 @@ is definitionally `Fml.evalEqs goal φ`; a formula whose head does not reduce
 to a connective is left under `Fml.evalEqs`. -/
 private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
   let heads := [``Fml.tt, ``Fml.eq, ``Fml.wellFormed, ``Fml.not, ``Fml.and, ``Fml.imp, ``Fml.upd,
-    ``Fml.modal, ``Fml.havoc, ``Fml.all, ``Fml.bind, ``Fml.anon]
+    ``Fml.modal, ``Fml.havoc, ``Fml.all, ``Fml.bind, ``Fml.anon, ``Fml.allocAll]
   let φ ← whnfR φ
   let φ ← if heads.any φ.isAppOf then pure φ else whnfD φ
   let f := φ.getAppFn
@@ -1064,7 +1092,7 @@ private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
   | some ``Fml.imp, 4 =>
     return mkAppN f #[args[0]!, args[1]!, ← evalEqsE false args[2]!, ← evalEqsE goal args[3]!]
   | some ``Fml.upd, 6 | some ``Fml.all, 5 | some ``Fml.bind, 6 | some ``Fml.havoc, 3
-  | some ``Fml.anon, 4 => last goal
+  | some ``Fml.anon, 4 | some ``Fml.allocAll, 5 => last goal
   | some ``Fml.tt, _ | some ``Fml.wellFormed, _ | some ``Fml.modal, _ => return φ
   | _, _ => mkAppM ``Fml.evalEqs #[toExpr goal, φ]
 
