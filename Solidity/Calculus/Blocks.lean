@@ -542,7 +542,11 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (ite := fun c thn els => c.readsIn μ && Prog.within μ thn && Prog.within μ els)
     (require := fun c => c.readsIn μ) (assert := fun c => c.readsIn μ) (revert := true) (assumeFalse := true)
     (call := fun _ args ret body => args.readsIn μ && ret.noMem && Prog.within μ body)
-    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
+    -- a `try` pays (its callee may write the storage, and call back), its
+    -- clauses and a self-call's callee within `μ`, nothing allocated
+    (tryCall := fun _ _ ok err _ pnc other sargs sbody _ =>
+      μ == .nonpayable && sargs.readsIn μ && Prog.within μ sbody && Prog.within μ ok &&
+        Prog.within μ err && Prog.within μ pnc && Prog.within μ other)
     (loop := fun _ c body => c.readsIn μ && Prog.within μ body)
     (block := fun body => Prog.within μ body)
     (callReceiver := fun _ _ _ _ _ => false)
@@ -581,7 +585,10 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (assignNew := fun _ _ _ => [])
     (ite := fun _ thn els => Prog.writesAt d thn ++ Prog.writesAt d els)
     (require := fun _ => []) (assert := fun _ => []) (revert := []) (assumeFalse := [])
-    (call := fun _ _ ret _ => ret.writesAt d) (tryCall := fun _ _ _ _ _ _ _ _ _ _ => [])
+    (call := fun _ _ ret _ => ret.writesAt d)
+    (tryCall := fun {Γ ρ κ _ _ _ _ _ _} _ _ ok err _ pnc other _ _ _ =>
+      Prog.writesAt (d + (Ext.append Γ ρ).depth) ok ++ Prog.writesAt d err ++
+        Prog.writesAt (d + (Ext.append Γ κ).depth) pnc ++ Prog.writesAt d other)
     (loop := fun _ _ body => Prog.writesAt d body) (block := fun body => Prog.writesAt d body)
     (callReceiver := fun _ _ _ _ _ => [])
     (callReceiverPush := fun _ _ _ _ code _ => Prog.writesAt d code)
