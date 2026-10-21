@@ -634,7 +634,7 @@ the closer's nonlinear, byte and hash clauses; `node scripts/test-solidity.mjs
 None is within reach of a closer clause: the first is the walk's kernel
 check (465k heartbeats of a 200k budget, above), the binomials the
 unshared memory terms of their refutations, and `multiArrayFillByPushLoops`
-the unknown lengths of recycled slots its guards read, which now end its
-search at the 512-step stage (the clauses added no refutation it could use;
-its earlier 1024-step stage was the same budget spent later).  What is left
-stays the list above.
+the unknown lengths of recycled slots its guards read (its search now
+stops after the 512-step stage, in 38 s, where `a97fba7f` stopped after the
+1024-step one in 112 s; still a timeout).  What is left stays the list
+above.
