@@ -281,6 +281,13 @@ def RevPart.litData {Γ : Ctx} : List (RevPart C Γ) → Option (List UInt8)
   | .bytes bs :: d => (RevPart.litData d).map (bs ++ ·)
   | _ :: _ => none
 
+/-- Data whose first part is literal bytes that do not begin with `Error`'s
+selector (a custom error's): it cannot reach a `catch Error(string memory
+r)`, whatever its other parts. -/
+def RevPart.notError {Γ : Ctx} : List (RevPart C Γ) → Bool
+  | .bytes bs :: _ => decide (4 ≤ bs.length) && !decide (bs.take 4 = Semantics.errorSelector)
+  | _ => false
+
 mutual
 
 /-- **The data a program's revert may carry** (`docs/semantic-gaps.md`,
@@ -289,7 +296,10 @@ loop, a called body or a `try`'s clauses (a self-call's callee reverts into
 its `try`, not past it); a revert with no data besides.  `none` where one
 is not literal (a custom error's arguments, a recursive call, which is not
 unfolded), and, with `raw`, where it may panic (`assert`: the data of a
-panic is its code, the transaction's).  Sound by `Prog.run_dataIn`. -/
+panic is its code, the transaction's).  Without `raw` (what a `catch
+Error(string memory r)` may bind), a datum that cannot decode as `Error`
+(`RevPart.notError`) is left out, literal or not.  Sound by
+`Prog.run_dataS`. -/
 def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option (List (List UInt8))
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Option (List (List UInt8))) s
     (assign := fun _ _ => some []) (rebind := fun _ _ => some []) (assignLocal := fun _ _ => some [])
@@ -315,7 +325,8 @@ def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option 
     (callReceiverPush := fun _ _ _ body code _ =>
       optCat (Prog.revertDatas raw body) (Prog.revertDatas raw code))
     (callRec := fun _ _ _ _ _ => none)
-    (revertData := fun d => (RevPart.litData d).map ([·]))
+    (revertData := fun d =>
+      if !raw && RevPart.notError d then some [] else (RevPart.litData d).map ([·]))
     (catchData := fun _ _ _ _ _ _ _ body => Prog.revertDatas raw body)
   termination_by structural _ _ s => s
 

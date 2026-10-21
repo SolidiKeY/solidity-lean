@@ -16,54 +16,60 @@ program lists (`Prog.run_dataS`): what `catchDataBox`'s goals range over
 
 namespace Solidity
 
-variable {C : Contract} {S : List (List UInt8)}
+variable {C : Contract} {K : List UInt8 → Prop} {S : List (List UInt8)}
 
 /-! ## Typed results -/
 
-/-- A typed result whose data, if it reverts with some, is one of `S`. -/
-def TRes.DataS {α : Type} (S : List (List UInt8)) (t : TRes α) : Prop :=
-  ∀ d, t = .error (.revertWith d) → d ∈ S
+/-- A typed result whose data, if it reverts with some that `K` keeps, is
+one of `S`. -/
+def TRes.DataS {α : Type} (K : List UInt8 → Prop) (S : List (List UInt8)) (t : TRes α) : Prop :=
+  ∀ d, t = .error (.revertWith d) → K d → d ∈ S
+
+/-- The data a clause keeps: every datum for the raw data, one that decodes
+as `Error` for `catch Error(string memory r)`. -/
+def dataKeep (raw : Bool) (d : List UInt8) : Prop :=
+  raw = true ∨ (Semantics.decodeError d).isSome = true
 
 namespace TRes.DataS
 
-theorem ok {α : Type} (a : α) : TRes.DataS S (Except.ok a : TRes α) := fun _ h => nomatch h
+theorem ok {α : Type} (a : α) : TRes.DataS K S (Except.ok a : TRes α) := fun _ h => nomatch h
 
-theorem revert {α : Type} : TRes.DataS S (Except.error .revert : TRes α) := fun _ h => nomatch h
+theorem revert {α : Type} : TRes.DataS K S (Except.error .revert : TRes α) := fun _ h => nomatch h
 
-theorem exhausted {α : Type} : TRes.DataS S (Except.error .exhausted : TRes α) :=
+theorem exhausted {α : Type} : TRes.DataS K S (Except.error .exhausted : TRes α) :=
   fun _ h => nomatch h
 
-theorem diverge {α : Type} : TRes.DataS S (Except.error .diverge : TRes α) := fun _ h => nomatch h
+theorem diverge {α : Type} : TRes.DataS K S (Except.error .diverge : TRes α) := fun _ h => nomatch h
 
-theorem panic {α : Type} : TRes.DataS S (Except.error .panic : TRes α) := fun _ h => nomatch h
+theorem panic {α : Type} : TRes.DataS K S (Except.error .panic : TRes α) := fun _ h => nomatch h
 
-theorem bind {α γ : Type} {t : TRes α} (h : t.DataS S) {k : α → TRes γ}
-    (hk : ∀ a, (k a).DataS S) : (t >>= k).DataS S := by
+theorem bind {α γ : Type} {t : TRes α} (h : t.DataS K S) {k : α → TRes γ}
+    (hk : ∀ a, (k a).DataS K S) : (t >>= k).DataS K S := by
   match t with
   | .ok a => exact hk a
   | .error e => exact fun d h' => h d (by cases h'; rfl)
 
-theorem map {α γ : Type} {t : TRes α} (h : t.DataS S) (k : α → γ) : TRes.DataS S (t.map k) := by
+theorem map {α γ : Type} {t : TRes α} (h : t.DataS K S) (k : α → γ) : TRes.DataS K S (t.map k) := by
   match t with
   | .ok _ => exact fun _ h' => nomatch h'
   | .error e => exact fun d h' => h d (by cases (h' : Except.error e = .error (.revertWith d)); rfl)
 
-theorem ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).DataS S := by
+theorem ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).DataS K S := by
   cases x <;> exact fun _ h => nomatch h
 
-theorem mono {α : Type} {t : TRes α} {S' : List (List UInt8)} (h : t.DataS S) (hS : S ⊆ S') :
-    t.DataS S' := fun d hd => hS (h d hd)
+theorem mono {α : Type} {t : TRes α} {S' : List (List UInt8)} (h : t.DataS K S) (hS : S ⊆ S') :
+    t.DataS K S' := fun d hd hk => hS (h d hd hk)
 
 end TRes.DataS
 
-theorem TRes.RevertOnly.dataS {α : Type} {t : TRes α} (h : t.RevertOnly) : t.DataS S :=
+theorem TRes.RevertOnly.dataS {α : Type} {t : TRes α} (h : t.RevertOnly) : t.DataS K S :=
   fun _ h' => nomatch h _ h'
 
 /-- A loop whose body and condition carry data of `S` carries data of `S`. -/
 theorem TLoop.run_dataS {α : Type} {body : α → TRes α} {c : α → TRes Bool}
-    (hb : ∀ a, (body a).DataS S) (hc : ∀ a, (c a).DataS S) (σ : α) :
-    (TLoop.run body c σ).DataS S := by
-  refine TLoop.run_induct (P := fun _ => True) (Q := TRes.DataS S) trivial (fun τ _ => ?_)
+    (hb : ∀ a, (body a).DataS K S) (hc : ∀ a, (c a).DataS K S) (σ : α) :
+    (TLoop.run body c σ).DataS K S := by
+  refine TLoop.run_induct (P := fun _ => True) (Q := TRes.DataS K S) trivial (fun τ _ => ?_)
     TRes.DataS.diverge
   unfold TLoop.step
   cases hc' : c τ with
@@ -83,16 +89,16 @@ section Eval
 variable {Γ : Ctx}
 
 theorem SPath.resolveT_dataS (σ : State C Γ) {T : Ty} (b : SPath C Γ T) :
-    (b.resolveT σ).DataS S := (SPath.resolveT_revertOnly σ b).dataS
+    (b.resolveT σ).DataS K S := (SPath.resolveT_revertOnly σ b).dataS
 theorem Loc.resolveT_dataS (σ : State C Γ) {T : Ty} (l : Loc C Γ T) :
-    (l.resolveT σ).DataS S := (Loc.resolveT_revertOnly σ l).dataS
+    (l.resolveT σ).DataS K S := (Loc.resolveT_revertOnly σ l).dataS
 theorem MPath.mvalT_dataS (σ : State C Γ) {T : Ty} (b : MPath C Γ T) :
-    (b.mvalT σ).DataS S := (MPath.mvalT_revertOnly σ b).dataS
+    (b.mvalT σ).DataS K S := (MPath.mvalT_revertOnly σ b).dataS
 theorem MLoc.addrT_dataS (σ : State C Γ) {T : Ty} (l : MLoc C Γ T) :
-    (l.addrT σ).DataS S := (MLoc.addrT_revertOnly σ l).dataS
+    (l.addrT σ).DataS K S := (MLoc.addrT_revertOnly σ l).dataS
 theorem Val.evalT_dataS (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) :
-    (v.evalT σ).DataS S := (Val.evalT_revertOnly σ v).dataS
-theorem Src.valueT_dataS (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).DataS S :=
+    (v.evalT σ).DataS K S := (Val.evalT_revertOnly σ v).dataS
+theorem Src.valueT_dataS (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).DataS K S :=
   (Src.valueT_revertOnly σ r).dataS
 
 end Eval
@@ -103,37 +109,37 @@ section Ops
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-theorem ARhs.evalT_dataS {R : RefTy} : (r : ARhs C Γ R) → (r.evalT σ).DataS S
+theorem ARhs.evalT_dataS {R : RefTy} : (r : ARhs C Γ R) → (r.evalT σ).DataS K S
   | .path p => (p.resolveT_dataS σ).bind fun _ => TRes.DataS.ok _
   | .push b _ => (b.resolveT_dataS σ).bind fun r => by
     show (if σ.storage.full r then .error .exhausted else do
       let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
-      pure (st, r.index (.arr .dyn) n) : TRes _).DataS S
+      pure (st, r.index (.arr .dyn) n) : TRes _).DataS K S
     split
     · exact TRes.DataS.exhausted
     · exact (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
 
-theorem MRhs.evalT_dataS {R : RefTy} (r : MRhs C Γ R) : (r.evalT σ).DataS S :=
+theorem MRhs.evalT_dataS {R : RefTy} (r : MRhs C Γ R) : (r.evalT σ).DataS K S :=
   (MRhs.evalT_revertOnly σ r).dataS
 theorem opStoreT_dataS (op : BinOp) {p : PrimTy} (r : SRef C (.prim p)) (v : p.Denote) :
-    (opStoreT σ op r v).DataS S := (opStoreT_revertOnly σ op r v).dataS
+    (opStoreT σ op r v).DataS K S := (opStoreT_revertOnly σ op r v).dataS
 theorem opMemT_dataS (op : BinOp) {p : PrimTy} (a : MAddr σ.H (.prim p)) (v : p.Denote) :
-    (opMemT σ op a v).DataS S := (opMemT_revertOnly σ op a v).dataS
+    (opMemT σ op a v).DataS K S := (opMemT_revertOnly σ op a v).dataS
 theorem OpLoc.storeT_dataS (op : BinOp) {p : PrimTy} (l : OpLoc C Γ p) (v : p.Denote) :
-    (l.storeT σ op v).DataS S := (OpLoc.storeT_revertOnly σ op l v).dataS
+    (l.storeT σ op v).DataS K S := (OpLoc.storeT_revertOnly σ op l v).dataS
 theorem bumpStoreT_dataS (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
-    (bumpStoreT σ op r).DataS S := (bumpStoreT_revertOnly σ op r).dataS
+    (bumpStoreT σ op r).DataS K S := (bumpStoreT_revertOnly σ op r).dataS
 theorem bumpMemT_dataS (op : IncDec) {p : PrimTy} (a : MAddr σ.H (.prim p)) :
-    (bumpMemT σ op a).DataS S := (bumpMemT_revertOnly σ op a).dataS
+    (bumpMemT σ op a).DataS K S := (bumpMemT_revertOnly σ op a).dataS
 theorem OpLoc.bumpT_dataS (op : IncDec) {p : PrimTy} (l : OpLoc C Γ p) :
-    (l.bumpT σ op).DataS S := (OpLoc.bumpT_revertOnly σ op l).dataS
-theorem Args.evalT_dataS {ps : Ctx} (as : Args C Γ ps) : (as.evalT σ).DataS S :=
+    (l.bumpT σ op).DataS K S := (OpLoc.bumpT_revertOnly σ op l).dataS
+theorem Args.evalT_dataS {ps : Ctx} (as : Args C Γ ps) : (as.evalT σ).DataS K S :=
   (Args.evalT_revertOnly σ as).dataS
 
 end Ops
 
 theorem Binders.decodeT_dataS {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) →
-    (vs : List Semantics.Word) → (Binders.decodeT (C := C) (H := H) bs vs).DataS S
+    (vs : List Semantics.Word) → (Binders.decodeT (C := C) (H := H) bs vs).DataS K S
   | _, .nil, _ => TRes.DataS.ok _
   | _, .snoc bs p _, vs => (Binders.decodeT_dataS bs vs).bind fun (_, rest) => by
     dsimp only
@@ -153,7 +159,7 @@ variable {Γ : Ctx}
 
 /-- `values.push() += e` may revert or exhaust, but cancarry no data. -/
 theorem pushOpAssign_dataS {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
-    (r : Val C Γ p) (σ : State C Γ) : (pushOpAssign op b r σ).DataS S := by
+    (r : Val C Γ p) (σ : State C Γ) : (pushOpAssign op b r σ).DataS K S := by
   unfold pushOpAssign
   refine (r.evalT_dataS σ).bind fun value => (b.resolveT_dataS σ).bind fun ref => ?_
   split
@@ -162,7 +168,7 @@ theorem pushOpAssign_dataS {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.p
 
 /-- `values.push()++` and `--values.push()` may revert or exhaust, but cancarry no data. -/
 theorem pushIncDec_dataS {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p)))
-    (σ : State C Γ) : (pushIncDec op b σ).DataS S := by
+    (σ : State C Γ) : (pushIncDec op b σ).DataS K S := by
   unfold pushIncDec
   refine (b.resolveT_dataS σ).bind fun ref => ?_
   split
@@ -171,7 +177,7 @@ theorem pushIncDec_dataS {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.pr
       (bumpStoreT_dataS _ op _).bind fun _ => TRes.DataS.ok _
 
 theorem push_dataS {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
-    (σ : State C Γ) : (push b v σ).DataS S := by
+    (σ : State C Γ) : (push b v σ).DataS K S := by
   unfold push
   refine (b.resolveT_dataS σ).bind fun ref => ?_
   cases v with
@@ -188,7 +194,7 @@ theorem push_dataS {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
     · exact (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
 
 theorem clearT_dataS (σ : State C Γ) : {T : Ty} → (a : MAddr σ.H T) →
-    (hm : T.mapFree = true) → (clearT σ a hm).DataS S
+    (hm : T.mapFree = true) → (clearT σ a hm).DataS K S
   | .prim _, _, _ => (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
   | .ref R, a, hm => by
     simp only [clearT]
@@ -197,14 +203,14 @@ theorem clearT_dataS (σ : State C Γ) : {T : Ty} → (a : MAddr σ.H T) →
     · exact TRes.DataS.revert
 
 theorem deleteMem_dataS {T : Ty} (p : MPath C Γ T) (σ : State C Γ) :
-    (deleteMem p σ).DataS S := by
+    (deleteMem p σ).DataS K S := by
   unfold deleteMem
   cases p with
   | var _ _ => exact TRes.DataS.ok _
   | loc l => exact (l.addrT_dataS σ).bind fun a => clearT_dataS σ a l.mapFree
 
 theorem assignNew_dataS {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
-    (h : R.newArrOk = true) (σ : State C Γ) : (assignNew l n h σ).DataS S := by
+    (h : R.newArrOk = true) (σ : State C Γ) : (assignNew l n h σ).DataS K S := by
   unfold assignNew
   cases l with
   | store l => exact (l.resolveT_dataS _).bind fun _ => (TRes.DataS.ofOpt _).bind fun _ =>
@@ -213,15 +219,15 @@ theorem assignNew_dataS {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
       TRes.DataS.ok _
 
 theorem ite_dataS {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁) (thn : TStep C Γ Γ₁)
-    (h₂ : Ext Γ Γ₂) (els : TStep C Γ Γ₂) (ht : ∀ σ, (thn σ).DataS S)
-    (he : ∀ σ, (els σ).DataS S) (σ : State C Γ) : (ite c h₁ thn h₂ els σ).DataS S := by
+    (h₂ : Ext Γ Γ₂) (els : TStep C Γ Γ₂) (ht : ∀ σ, (thn σ).DataS K S)
+    (he : ∀ σ, (els σ).DataS K S) (σ : State C Γ) : (ite c h₁ thn h₂ els σ).DataS K S := by
   unfold ite
   refine (c.evalT_dataS σ).bind fun v => ?_
   split
   · exact (ht σ).map _
   · exact (he σ).map _
 
-theorem require_dataS (c : Val C Γ .bool) (σ : State C Γ) : (require c σ).DataS S := by
+theorem require_dataS (c : Val C Γ .bool) (σ : State C Γ) : (require c σ).DataS K S := by
   unfold require
   refine (c.evalT_dataS σ).bind fun v => ?_
   split
@@ -229,13 +235,13 @@ theorem require_dataS (c : Val C Γ .bool) (σ : State C Γ) : (require c σ).Da
   · exact TRes.DataS.revert
 
 theorem call_dataS {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
-    (hb : Ext (rs ++ ps) Γf) (body : TStep C (rs ++ ps) Γf) (hbody : ∀ σ, (body σ).DataS S)
-    (σ : State C Γ) : (call args ret hb body σ).DataS S := by
+    (hb : Ext (rs ++ ps) Γf) (body : TStep C (rs ++ ps) Γf) (hbody : ∀ σ, (body σ).DataS K S)
+    (σ : State C Γ) : (call args ret hb body σ).DataS K S := by
   unfold call
   exact (Args.evalT_dataS σ args).bind fun _ => (hbody _).bind fun _ => TRes.DataS.ok _
 
 theorem receiverOp_dataS {E : Ty} (op : ReceiverOp C Γ E)
-    (b : SPath C Γ (.array E)) (σ : State C Γ) : (receiverOp op b σ).DataS S := by
+    (b : SPath C Γ (.array E)) (σ : State C Γ) : (receiverOp op b σ).DataS K S := by
   cases op with
   | push v _ => exact push_dataS b v σ
   | pop =>
@@ -245,8 +251,8 @@ theorem receiverOp_dataS {E : Ty} (op : ReceiverOp C Γ E)
 theorem callReceiver_dataS {ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
     (hb : Ext ([.alias (.array E)] ++ ps) Γf)
     (body : TStep C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E)
-    (hbody : ∀ σ, (body σ).DataS S) (σ : State C Γ) :
-    (callReceiver args r hb body op σ).DataS S := by
+    (hbody : ∀ σ, (body σ).DataS K S) (σ : State C Γ) :
+    (callReceiver args r hb body op σ).DataS K S := by
   unfold callReceiver
   exact (call_dataS args (.storage (.array E) r) hb body hbody σ).bind fun o =>
     (receiverOp_dataS _ _ o.st).bind fun _ => TRes.DataS.ok _
@@ -256,8 +262,8 @@ theorem callReceiverPush_dataS {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps)
     (hb : Ext ([.alias (.array E)] ++ ps) Γf)
     (body : TStep C ([.alias (.array E)] ++ ps) Γf)
     (he : Ext Γ Γv) (code : TStep C Γ Γv) (value : Src C Γv E)
-    (hbody : ∀ σ, (body σ).DataS S) (hcode : ∀ σ, (code σ).DataS S) (σ : State C Γ) :
-    (callReceiverPush args r hb body he code value σ).DataS S := by
+    (hbody : ∀ σ, (body σ).DataS K S) (hcode : ∀ σ, (code σ).DataS K S) (σ : State C Γ) :
+    (callReceiverPush args r hb body he code value σ).DataS K S := by
   unfold callReceiverPush afterReceiverPrefix pushAfterPrefix
   apply (call_dataS args (.storage (.array E) r) hb body hbody σ).bind
   intro a
@@ -273,18 +279,18 @@ theorem callReceiverPush_dataS {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps)
   · exact (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
 
 theorem loop_dataS {Γ₁ : Ctx} (c : Val C Γ .bool) (h : Ext Γ Γ₁) (body : TStep C Γ Γ₁)
-    (hbody : ∀ σ, (body σ).DataS S) (σ : State C Γ) : (loop c h body σ).DataS S := by
+    (hbody : ∀ σ, (body σ).DataS K S) (σ : State C Γ) : (loop c h body σ).DataS K S := by
   unfold loop
   exact TLoop.run_dataS (fun o : Out C σ.H Γ => (hbody o.st).map _)
     (fun o : Out C σ.H Γ => c.evalT_dataS o.st) _
 
 theorem block_dataS {Γ₁ : Ctx} (h : Ext Γ Γ₁) (body : TStep C Γ Γ₁)
-    (hbody : ∀ σ, (body σ).DataS S) (σ : State C Γ) : (block h body σ).DataS S :=
+    (hbody : ∀ σ, (body σ).DataS K S) (σ : State C Γ) : (block h body σ).DataS K S :=
   (hbody σ).map _
 
 theorem seq_dataS {Γ₁ Γ₂ : Ctx} (s : TStep C Γ Γ₁) (P : TStep C Γ₁ Γ₂)
-    (hs : ∀ σ, (s σ).DataS S) (hP : ∀ σ, (P σ).DataS S) (σ : State C Γ) :
-    (seq s P σ).DataS S := by
+    (hs : ∀ σ, (s σ).DataS K S) (hP : ∀ σ, (P σ).DataS K S) (σ : State C Γ) :
+    (seq s P σ).DataS K S := by
   unfold seq
   split
   · exact (hP _).map _
@@ -292,7 +298,7 @@ theorem seq_dataS {Γ₁ Γ₂ : Ctx} (s : TStep C Γ Γ₁) (P : TStep C Γ₁ 
     exact fun d h' => hs σ d (by cases h'; exact he)
 
 
-theorem assert_dataS (c : Val C Γ .bool) (σ : State C Γ) : (assert c σ).DataS S := by
+theorem assert_dataS (c : Val C Γ .bool) (σ : State C Γ) : (assert c σ).DataS K S := by
   unfold assert
   refine (c.evalT_dataS σ).bind fun v => ?_
   split
@@ -304,10 +310,10 @@ theorem tryCall_dataS {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (c : ExtCall 
     (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (code : CodeBinder κ)
     (h₃ : Ext (κ ++ Γ) Γ₃) (pnc : TStep C (κ ++ Γ) Γ₃)
     (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
-    (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (hok : ∀ σ, (ok σ).DataS S)
-    (herr : ∀ σ, (err σ).DataS S) (hpnc : ∀ σ, (pnc σ).DataS S)
-    (hother : ∀ σ, (other σ).DataS S) (σ : State C Γ) :
-    (tryCall c rets h₁ ok h₂ err code h₃ pnc h₄ other sargs hs sbody self σ).DataS S := by
+    (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (hok : ∀ σ, (ok σ).DataS K S)
+    (herr : ∀ σ, (err σ).DataS K S) (hpnc : ∀ σ, (pnc σ).DataS K S)
+    (hother : ∀ σ, (other σ).DataS K S) (σ : State C Γ) :
+    (tryCall c rets h₁ ok h₂ err code h₃ pnc h₄ other sargs hs sbody self σ).DataS K S := by
   unfold tryCall
   split
   · exact TRes.DataS.revert
@@ -345,20 +351,76 @@ theorem RevPart.mapM_litData (σ : State C Γ) : (d : List (RevPart C Γ)) → {
   | .word _ :: _, _, h => nomatch h
 
 theorem revertData_dataS (d : List (RevPart C Γ)) {bs : List UInt8}
-    (hd : RevPart.litData d = some bs) (σ : State C Γ) : (revertData d σ).DataS [bs] := by
+    (hd : RevPart.litData d = some bs) (σ : State C Γ) : (revertData d σ).DataS K [bs] := by
   unfold revertData
   obtain ⟨ps, hm, hf⟩ := RevPart.mapM_litData σ d hd
   rw [hm]
-  show TRes.DataS [bs] (Except.error (THalt.ofData ps.flatten) : TRes (Out C σ.H Γ))
+  show TRes.DataS K [bs] (Except.error (THalt.ofData ps.flatten) : TRes (Out C σ.H Γ))
   rw [hf]
   intro d' h
   cases bs with
   | nil => exact nomatch h
-  | cons b bs => cases h; exact List.mem_singleton_self _
+  | cons b bs => cases h; exact fun _ => List.mem_singleton_self _
+
+/-- An evaluated part carries no data: only a value's evaluation can fail,
+and it only reverts. -/
+theorem RevPart.mapM_revertOnly (σ : State C Γ) (l : List (RevPart C Γ)) :
+    (l.mapM (fun p : RevPart C Γ => p.evalT σ)).RevertOnly := by
+  induction l with
+  | nil => exact TRes.RevertOnly.ok _
+  | cons a l ih =>
+    rw [List.mapM_cons]
+    refine TRes.RevertOnly.bind ?_ fun _ => ih.bind fun _ => TRes.RevertOnly.ok _
+    cases a with
+    | bytes => exact TRes.RevertOnly.ok _
+    | sel => exact TRes.RevertOnly.ok _
+    | word v => exact (Val.evalT_revertOnly σ v).bind fun _ => TRes.RevertOnly.ok _
+
+/-- A datum that cannot decode as `Error` (`RevPart.notError`) is none a
+`catch Error(string memory r)` keeps. -/
+theorem revertData_dataS_notError (d : List (RevPart C Γ)) (hd : RevPart.notError d = true)
+    (σ : State C Γ) (hK : ∀ d', K d' → (Semantics.decodeError d').isSome = true) :
+    (revertData d σ).DataS K [] := by
+  unfold revertData
+  cases hm : d.mapM (fun p : RevPart C Γ => p.evalT σ) with
+  | error e =>
+    intro d' h _
+    have he := RevPart.mapM_revertOnly σ d e hm
+    subst he
+    cases h
+  | ok ps =>
+    intro d' h hk
+    have hdec := hK d' hk
+    match d, hd with
+    | .bytes bs :: rest, hd =>
+      simp only [RevPart.notError, Bool.and_eq_true, decide_eq_true_eq, Bool.not_eq_true',
+        decide_eq_false_iff_not] at hd
+      rw [List.mapM_cons] at hm
+      cases hr : rest.mapM (fun p : RevPart C Γ => p.evalT σ) with
+      | error e' =>
+        rw [hr] at hm
+        cases hm
+      | ok ps' =>
+        rw [hr] at hm
+        cases hm
+        have hflat : (bs :: ps').flatten = bs ++ ps'.flatten := List.flatten_cons
+        change (Except.error (THalt.ofData (bs :: ps').flatten) : TRes (Out C σ.H Γ)) =
+          .error (.revertWith d') at h
+        rw [hflat] at h
+        have hd' : d' = bs ++ ps'.flatten := by
+          unfold THalt.ofData at h
+          split at h
+          · cases h
+          · cases h; rfl
+        subst hd'
+        exfalso
+        have htake : (bs ++ ps'.flatten).take 4 = bs.take 4 := List.take_append_of_le_length hd.1
+        simp only [Semantics.decodeError, htake, if_neg hd.2, Option.isSome_none,
+          Bool.false_eq_true] at hdec
 
 theorem litWritesT_dataS {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
-    (hk : ∀ σ, (k σ).DataS S) : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
-    (litWritesT bs i k σ).DataS S
+    (hk : ∀ σ, (k σ).DataS K S) : (bs : List UInt8) → (i : Nat) → (σ : State C (.mem bytesR :: Γ)) →
+    (litWritesT bs i k σ).DataS K S
   | [], _, σ => hk σ
   | b :: bs, i, σ => by
     unfold litWritesT
@@ -369,7 +431,7 @@ theorem litWritesT_dataS {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
     · exact hk σ
 
 theorem litBytesT_dataS {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
-    (hk : ∀ σ, (k σ).DataS S) (bs : List UInt8) (σ : State C Γ) : (litBytesT bs k σ).DataS S := by
+    (hk : ∀ σ, (k σ).DataS K S) (bs : List UInt8) (σ : State C Γ) : (litBytesT bs k σ).DataS K S := by
   unfold litBytesT
   split
   · exact seq_dataS _ _ (fun σ => (MRhs.evalT_dataS σ _).bind fun _ => TRes.DataS.ok _)
@@ -378,7 +440,7 @@ theorem litBytesT_dataS {Γ₁ : Ctx} {k : TStep C (.mem bytesR :: Γ) Γ₁}
 
 theorem catchBytes_dataS {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
-    (σ : State C Γ) : (catchBytes c rets sargs hs sbody self σ).DataS S := by
+    (σ : State C Γ) : (catchBytes c rets sargs hs sbody self σ).DataS K S := by
   unfold catchBytes
   split
   · exact TRes.DataS.revert
@@ -395,8 +457,8 @@ theorem catchBytes_dataS {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ
 theorem catchData_dataS {ρ ps Γf Γ₁ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf) (sbody : TStep C (ρ ++ ps) Γf) (self : Bool)
     (kind : CatchKind) (h₁ : Ext (.mem bytesR :: Γ) Γ₁) (body : TStep C (.mem bytesR :: Γ) Γ₁)
-    (hbody : ∀ σ, (body σ).DataS S) (σ : State C Γ) :
-    (catchData c rets sargs hs sbody self kind h₁ body σ).DataS S := by
+    (hbody : ∀ σ, (body σ).DataS K S) (σ : State C Γ) :
+    (catchData c rets sargs hs sbody self kind h₁ body σ).DataS K S := by
   unfold catchData
   refine (catchBytes_dataS c rets sargs hs sbody self σ).bind fun d => ?_
   split
@@ -417,7 +479,8 @@ mutual
 /-- **The data a statement's run reverts with is one it lists**
 (`Stmt.revertDatas`). -/
 theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    {S : List (List UInt8)} → s.revertDatas raw = some S → ∀ σ : State C Γ, (s.run σ).DataS S
+    {S : List (List UInt8)} → s.revertDatas raw = some S → ∀ σ : State C Γ,
+      (s.run σ).DataS (dataKeep raw) S
   | _, _, .assign l r, _, _, σ => (r.valueT_dataS σ).bind fun _ => (l.resolveT_dataS σ).bind
       fun _ => (TRes.DataS.ofOpt _).bind fun _ => TRes.DataS.ok _
   | _, _, .rebind _ r, _, _, σ => (r.evalT_dataS σ).bind fun _ => TRes.DataS.ok _
@@ -499,16 +562,26 @@ theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .loop _ c body, _, h, σ => TRun.loop_dataS c _ _ (Prog.run_dataS raw body h) σ
   | _, _, .block body, _, h, σ => TRun.block_dataS _ _ (Prog.run_dataS raw body h) σ
   | _, _, .revertData d, _, h, σ => by
-    have h' : (RevPart.litData d).map ([·]) = some _ := h
-    simp only [Option.map_eq_some_iff] at h'
-    obtain ⟨bs, hbs, rfl⟩ := h'
-    exact TRun.revertData_dataS d hbs σ
+    have h' : (if !raw && RevPart.notError d then some [] else (RevPart.litData d).map ([·])) =
+        some _ := h
+    split at h'
+    · rename_i hn
+      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hn
+      cases h'
+      exact TRun.revertData_dataS_notError d hn.2 σ (fun _ hk => by
+        rcases hk with hk | hk
+        · rw [hn.1] at hk; cases hk
+        · exact hk)
+    · simp only [Option.map_eq_some_iff] at h'
+      obtain ⟨bs, hbs, rfl⟩ := h'
+      exact TRun.revertData_dataS d hbs σ
   | _, _, .catchData c rets sargs sbody self kind _ body, _, h, σ =>
     TRun.catchData_dataS c rets sargs _ _ self kind _ _ (Prog.run_dataS raw body h) σ
 
 /-- **The data a sequence's run reverts with is one it lists.** -/
 theorem Prog.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    {S : List (List UInt8)} → P.revertDatas raw = some S → ∀ σ : State C Γ, (P.run σ).DataS S
+    {S : List (List UInt8)} → P.revertDatas raw = some S → ∀ σ : State C Γ,
+      (P.run σ).DataS (dataKeep raw) S
   | _, _, .nil, _, _, _ => TRes.DataS.ok _
   | _, _, .cons s P, _, h, σ => by
     obtain ⟨S₁, S₂, h₁, h₂, rfl⟩ := optCat_eq_some

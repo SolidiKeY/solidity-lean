@@ -144,6 +144,7 @@ def Custom : Contract := contract!{
   uint last;
   function failE() { revert E(7); }
   function failIf(uint x) { require(x > 3, E(x)); }
+  function mixed(uint x) { if (x > 5) { revert E(x); } require(x > 1, "small"); }
 }
 
 #guard Keccak.selector "E(uint256)" == 0x002ff067
@@ -174,6 +175,14 @@ theorem customData : ⊨ dl!{ [ try this.failE() { } catch (bytes memory d) {
     } }; ] true } := by
   sol_symex
   sol_prove
+
+/-- A callee that reverts with a custom error of a symbolic argument and
+with a reason: the custom datum cannot decode as `Error`
+(`RevPart.notError`), so `catch Error(string memory r)` binds the reason. -/
+theorem mixedReason : ⊨ dl!{ ∀ uint x; [ try this.mixed(x) { } catch Error(string memory r) {
+    assert(r.length == 5); assert(r[0] == 115); } catch { }; ] true } := by
+  sol_symex
+  sol_decide
 
 end Custom
 

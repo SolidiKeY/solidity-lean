@@ -55,6 +55,7 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
       | revertWith d' =>
         intro hb; cases hb
         exact TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS false sbody hS) σ d hc
+          (.inr (by rw [hk']; rfl))
       | panic =>
         intro hb; cases hb
         rw [Semantics.decodeError_encodePanic] at hk'
@@ -73,7 +74,7 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
       | revertWith d' =>
         intro hb; cases hb
         exact List.mem_cons_of_mem _
-          (TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d hc)
+          (TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d hc (.inl rfl))
       | panic =>
         intro _
         exact absurd hc (TRun.call_noPanic sargs (.rets rets) _ _
