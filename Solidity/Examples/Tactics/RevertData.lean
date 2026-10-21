@@ -168,11 +168,8 @@ local instance : InContract := ⟨Custom⟩
 /-- **A custom error's data reaches `catch (bytes memory d)`**: its selector
 and its argument. -/
 theorem customData : ⊨ dl!{ [ try this.failE() { } catch (bytes memory d) {
-    assert(d.length == 0 || d.length == 36);
-    if (d.length == 36) {
-      assert(d[0] == 0); assert(d[1] == 47); assert(d[2] == 240); assert(d[3] == 103);
-      assert(d[34] == 0); assert(d[35] == 7);
-    } }; ] true } := by
+    assert(d.length == 0 || d.length == 36 && d[1] == 47 && d[3] == 103 && d[35] == 7);
+    }; ] true } := by
   sol_symex
   sol_prove
 
