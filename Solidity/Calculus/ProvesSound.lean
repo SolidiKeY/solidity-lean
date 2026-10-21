@@ -74,7 +74,11 @@ scoped macro "hyps_wrap_and" : tactic => `(tactic| (
   | allocAll H x A ih =>
     intro φ ψ χ h
     exact ih (φ := .allocAll x A φ) (ψ := .allocAll x A ψ) (χ := .allocAll x A χ)
-      fun τ f g o => h _ (f o) (g o)))
+      fun τ f g o => h _ (f o) (g o)
+  | grow H ih =>
+    intro φ ψ χ h
+    exact ih (φ := .grow φ) (ψ := .grow ψ) (χ := .grow χ) fun τ f g st nt =>
+      h _ (f st nt) (g st nt)))
 
 end Hyps
 
@@ -133,6 +137,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     exact ih (φ := .bind m x t φ) hb fun τ v => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
   | allocAll H x A ih => intro φ hb h; exact ih (φ := .allocAll x A φ) hb fun τ _ => h _
+  | grow H ih => intro φ hb h; exact ih (φ := .grow φ) hb fun τ _ _ => h _
 
 theorem Hyps.wrap_binds {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     (bs : List (Modality × Var × LTy)) → (φ : Fml C (Binds.ctx bs Γ)) →
@@ -166,6 +171,7 @@ theorem Hyps.wrap_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) 
   | _, .bind H m x t, φ => Hyps.wrap_rwEqC q H (.bind m x t φ)
   | _, .anon H xs, φ => Hyps.wrap_rwEqC q H (.anon xs φ)
   | _, .allocAll H x A, φ => Hyps.wrap_rwEqC q H (.allocAll x A φ)
+  | _, .grow H, φ => Hyps.wrap_rwEqC q H (.grow φ)
 
 /-! ## Soundness -/
 

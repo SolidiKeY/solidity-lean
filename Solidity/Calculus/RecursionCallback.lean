@@ -335,7 +335,7 @@ theorem Fml.callsBack_wkFO : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (φ : Fml C 
       have := Fml.callsBack_wkFO h.keep φ hφ
       exact this
   | _, _, _, .upd .., _, e | _, _, _, .modal .., _, e | _, _, _, .havoc _, _, e
-  | _, _, _, .bind .., _, e | _, _, _, .anon .., _, e | _, _, _, .allocAll .., _, e => nomatch e
+  | _, _, _, .bind .., _, e | _, _, _, .anon .., _, e | _, _, _, .allocAll .., _, e | _, _, _, .grow .., _, e => nomatch e
 
 theorem Fml.callsBack_wkD {Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) :
     (φ.wkD h).callsBack pay = false := by

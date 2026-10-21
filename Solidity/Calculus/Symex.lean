@@ -84,6 +84,9 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
   | allocAll x A φ ih =>
     step_under (Fml.allocAll x A)
     exact fun o => ih hφ _ (hχ o)
+  | grow φ ih =>
+    step_under Fml.grow
+    exact fun st nt => ih hφ _ (hχ st nt)
 
 /-- `n` steps are sound. -/
 theorem symex_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, holds σ (symex n φ) → holds σ φ
@@ -150,6 +153,7 @@ def Fml.stepAtS (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
     (bind := fun m x t φ => (Fml.stepAtS k φ).map (.bind m x t))
     (anon := fun xs φ => (Fml.stepAtS k φ).map (.anon xs))
     (allocAll := fun x A φ => (Fml.stepAtS k φ).map (.allocAll x A))
+    (grow := fun φ => (Fml.stepAtS k φ).map .grow)
   termination_by structural _ φ => φ
 
 /-- `Fml.stepAtS` by the recursor, which the kernel unfolds (`Fml.stepR`). -/
@@ -167,7 +171,8 @@ def Fml.stepRS (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
     (all := fun x p _ ih => ih.map (.all x p))
     (bind := fun m x t _ ih => ih.map (.bind m x t))
     (anon := fun xs _ ih => ih.map (.anon xs))
-    (allocAll := fun x A _ ih => ih.map (.allocAll x A)) φ
+    (allocAll := fun x A _ ih => ih.map (.allocAll x A))
+    (grow := fun _ ih => ih.map .grow) φ
 
 /-- The recursor's stepper is the compiled one. -/
 theorem Fml.stepRS_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepRS k φ = Fml.stepAtS k φ := by
@@ -185,6 +190,7 @@ theorem Fml.stepRS_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepRS k φ = F
   | bind m x t φ ih => show (Fml.stepRS k φ).map (Fml.bind m x t) = _; rw [ih]; rfl
   | anon xs φ ih => show (Fml.stepRS k φ).map (Fml.anon xs) = _; rw [ih]; rfl
   | allocAll x A φ ih => show (Fml.stepRS k φ).map (Fml.allocAll x A) = _; rw [ih]; rfl
+  | grow φ ih => show (Fml.stepRS k φ).map Fml.grow = _; rw [ih]; rfl
 
 /-- One step of the stopping strategy, its fresh names as `Fml.step`'s. -/
 def Fml.stepS {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) := φ.stepRS φ.fresh
@@ -248,6 +254,10 @@ theorem Fml.stepRS_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1
       (show (Fml.stepRS k φ).map (Fml.allocAll x A) = some χ from h)
     exact fun o => ih hφ _ (hχ o)
+  | grow φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map Fml.grow = some χ from h)
+    exact fun st nt => ih hφ _ (hχ st nt)
 
 /-- `n` steps of the stopping strategy are sound. -/
 theorem symexS_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, holds σ (symexS n φ) → holds σ φ

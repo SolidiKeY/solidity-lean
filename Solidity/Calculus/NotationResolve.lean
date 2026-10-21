@@ -48,7 +48,7 @@ def Fml.active : {Γ : Ctx} → Fml C Γ → Bool
     (imp := fun φ ψ => Fml.active φ || Fml.active ψ) (upd := fun _ _ φ => Fml.active φ)
     (modal := fun _ _ _ _ => true) (havoc := fun φ => Fml.active φ)
     (all := fun _ _ φ => Fml.active φ) (bind := fun _ _ _ φ => Fml.active φ)
-    (anon := fun _ φ => Fml.active φ) (allocAll := fun _ _ φ => Fml.active φ)
+    (anon := fun _ φ => Fml.active φ) (allocAll := fun _ _ φ => Fml.active φ) (grow := fun φ => Fml.active φ)
   termination_by structural _ φ => φ
 
 /-- A postcondition at the context `Γ`: a formula that binds no fresh name

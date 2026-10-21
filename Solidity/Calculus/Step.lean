@@ -198,6 +198,7 @@ def Fml.maxIdx : {Γ : Ctx} → Fml C Γ → Nat
     (havoc := fun φ => Fml.maxIdx φ) (all := fun x _ φ => max x.idx (Fml.maxIdx φ))
     (bind := fun _ x _ φ => max x.idx (Fml.maxIdx φ)) (anon := fun _ φ => Fml.maxIdx φ)
     (allocAll := fun x _ φ => max x.idx (Fml.maxIdx φ))
+    (grow := fun φ => Fml.maxIdx φ)
   termination_by structural _ φ => φ
 
 /-- Roots at the calculus's fresh prefixes, such as `source9`, reserve their
@@ -249,6 +250,7 @@ def Fml.stepAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
     (bind := fun m x t φ => (Fml.stepAt k φ).map (.bind m x t))
     (anon := fun xs φ => (Fml.stepAt k φ).map (.anon xs))
     (allocAll := fun x A φ => (Fml.stepAt k φ).map (.allocAll x A))
+    (grow := fun φ => (Fml.stepAt k φ).map .grow)
   termination_by structural _ φ => φ
 
 /-- `Fml.stepAt` by the recursor, which the kernel unfolds with no
@@ -267,7 +269,8 @@ def Fml.stepR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
     (all := fun x p _ ih => ih.map (.all x p))
     (bind := fun m x t _ ih => ih.map (.bind m x t))
     (anon := fun xs _ ih => ih.map (.anon xs))
-    (allocAll := fun x A _ ih => ih.map (.allocAll x A)) φ
+    (allocAll := fun x A _ ih => ih.map (.allocAll x A))
+    (grow := fun _ ih => ih.map .grow) φ
 
 /-- The recursor's stepper is the compiled one. -/
 theorem Fml.stepR_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepR k φ = Fml.stepAt k φ := by
@@ -285,6 +288,7 @@ theorem Fml.stepR_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepR k φ = Fml
   | bind m x t φ ih => show (Fml.stepR k φ).map (Fml.bind m x t) = _; rw [ih]; rfl
   | anon xs φ ih => show (Fml.stepR k φ).map (Fml.anon xs) = _; rw [ih]; rfl
   | allocAll x A φ ih => show (Fml.stepR k φ).map (Fml.allocAll x A) = _; rw [ih]; rfl
+  | grow φ ih => show (Fml.stepR k φ).map Fml.grow = _; rw [ih]; rfl
 
 /-- One step, its fresh names above every index in the formula. -/
 def Fml.step {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) := φ.stepR φ.fresh

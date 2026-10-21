@@ -78,7 +78,8 @@ def Fml.wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) : Option (Fml C Δ) 
     (upd := fun _ _ _ _ _ => none) (modal := fun _ _ _ _ _ _ => none)
     (havoc := fun _ _ _ => none) (all := fun x p φ _ h => (Fml.wkFO h.keep φ).map (.all x p))
     (bind := fun _ _ _ _ _ _ => none) (anon := fun _ _ _ _ => none)
-    (allocAll := fun _ _ _ _ _ => none) Δ h
+    (allocAll := fun _ _ _ _ _ => none)
+    (grow := fun _ _ _ => none) Δ h
   termination_by structural φ
 
 section WkFOEqns
@@ -150,7 +151,7 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
       cases e
       exact forall_congr' fun v => holds_wkFO h.keep φ hφ (σ.push (t := .val p) v)
   | .upd .., _, e, _ | .modal .., _, e, _ | .havoc _, _, e, _ | .bind .., _, e, _
-  | .anon .., _, e, _ | .allocAll .., _, e, _ => nomatch e
+  | .anon .., _, e, _ | .allocAll .., _, e, _ | .grow .., _, e, _ => nomatch e
 
 /-- What a formula says on the thinned state, its weakening says (`true`
 where it does not weaken). -/

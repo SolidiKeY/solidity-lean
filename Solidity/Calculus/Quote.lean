@@ -611,6 +611,7 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   | .bind m x t φ => sctor ``Fml.bind #[Γe, toExpr m, toExpr x, qLTy t, ← qFml (t :: Γ) φ]
   | .anon xs φ => do sctor ``Fml.anon #[Γe, ← qIdxList Γ xs, ← qFml Γ φ]
   | .allocAll x A φ => sctor ``Fml.allocAll #[Γe, toExpr x, toExpr A, ← qFml (.mem A :: Γ) φ]
+  | .grow φ => sctor ``Fml.grow #[Γe, ← qFml Γ φ]
 
 /-- A list of a `try`'s blocks (`Premise.branches`). -/
 def qBranches (Γ : Ctx) (bs : List (Branch C Γ)) : QM Expr := do

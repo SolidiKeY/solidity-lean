@@ -1308,7 +1308,7 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     · rename_i hp
       cases h'
       exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
-  | _, .anon .., pos, _, _, h, _, _, _, _ => by
+  | _, .anon .., pos, _, _, h, _, _, _, _ | _, .grow .., pos, _, _, h, _, _, _, _ => by
     have h' : (if pos then none else some LFml.tt) = some _ := h
     split at h'
     · cases h'

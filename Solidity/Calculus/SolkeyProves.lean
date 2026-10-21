@@ -70,7 +70,7 @@ theorem Fml.inSolkey_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p
       Fml.inSolkey_rwEqC q ψ]
   | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ =>
     Fml.inSolkey_rwEqC q φ
-  | _, .allocAll _ _ _ => rfl
+  | _, .allocAll _ _ _ | _, .grow _ => rfl
   | _, .modal m P κ φ => by
     simp only [Fml.rwEqC_modal, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]
 
@@ -220,6 +220,7 @@ theorem Hyps.modalFree_wrap {Γ₀ : Ctx} : {Γ : Ctx} → (H : Hyps C Γ₀ Γ)
   | _, .bind H _ _ _, _, h => Hyps.modalFree_wrap H (φ := .bind _ _ _ _) h
   | _, .anon H _, _, h => Hyps.modalFree_wrap H (φ := .anon _ _) h
   | _, .allocAll H _ _, _, h => Hyps.modalFree_wrap H (φ := .allocAll _ _ _) h
+  | _, .grow H, _, h => Hyps.modalFree_wrap H (φ := .grow _) h
 
 /-- **A step `⊢ₖ` cannot take leaves it nothing but `closeFalse`**: a
 derivation by solkey's rules of a modality whose first statement has no rule

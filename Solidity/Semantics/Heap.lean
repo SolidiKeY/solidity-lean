@@ -148,6 +148,11 @@ def alloc {R : RefTy} (hp : Heap H) (o : MObj H R) : Heap (H ++ [R]) × HRef (H 
 
 end Heap
 
+/-- `hp'`, over a grown typing, holds every object of `hp`, its references
+weakened. -/
+def Heap.Keeps {H H' : HTy} (e : H <+: H') (hp : Heap H) (hp' : Heap H') : Prop :=
+  ∀ {R : RefTy} (r : HRef H R), hp'.get (r.wk e) = MObj.wk e R (hp.get r)
+
 /-! ## Members and elements -/
 
 /-- The value of the first member named `f` (`lookupBy`). -/

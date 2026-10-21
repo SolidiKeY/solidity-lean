@@ -89,6 +89,8 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
   | _, σ, .allocAll _ R φ => ∀ o : MObj σ.H R,
       holds ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
+  | _, σ, .grow φ => ∀ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap →
+      holds (σ.adopt g).1 φ
 
 /-- An equation of `holds`, read by the typed readers. -/
 theorem holds_eq {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :

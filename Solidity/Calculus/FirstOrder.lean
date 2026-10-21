@@ -22,7 +22,7 @@ def Fml.FO : {Γ : Ctx} → Fml C Γ → Bool
     (and := fun φ ψ => Fml.FO φ && Fml.FO ψ) (imp := fun φ ψ => Fml.FO φ && Fml.FO ψ)
     (upd := fun _ _ _ => false) (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
     (all := fun _ _ φ => Fml.FO φ) (bind := fun _ _ _ _ => false) (anon := fun _ _ => false)
-    (allocAll := fun _ _ _ => false)
+    (allocAll := fun _ _ _ => false) (grow := fun _ => false)
   termination_by structural _ φ => φ
 
 /-- `Idx.name`, by the recursor: the head of the names after as many tails as

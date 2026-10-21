@@ -136,7 +136,8 @@ def _root_.Solidity.Upd.groundStepS {Γ Δ : Ctx} (U : Upd C Γ Δ) : List Nat �
 def _root_.Solidity.Hyps.groundInSM {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → List Nat → Bool
   | _, _, [] => true
   | _, .nil, _ :: _ => false
-  | _, .pre H _, xs@(_ :: _) | _, .havoc H, xs@(_ :: _) => H.groundInSM xs
+  | _, .pre H _, xs@(_ :: _) | _, .havoc H, xs@(_ :: _) | _, .grow H, xs@(_ :: _) =>
+    H.groundInSM xs
   | _, .upd H _ U, xs@(_ :: _) =>
     match U.groundStepS xs with
     | some ys => H.groundInSM ys
@@ -163,13 +164,14 @@ def _root_.Solidity.Hyps.groundInS {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : 
     (fun _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1))))
     (fun _ _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1))))
     (fun _ ys ih xs => xs.isEmpty || (!ys.any (fun y => xs.contains y.2.toNatR) && ih xs))
-    (fun _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1)))) H xs
+    (fun _ _ _ ih xs => xs.isEmpty || (!xs.contains 0 && ih (xs.map (· - 1))))
+    (fun _ ih xs => xs.isEmpty || ih xs) H xs
 
 theorem _root_.Solidity.Hyps.groundInS_eq_groundInSM {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ)
     (xs : List Nat) : H.groundInS xs = H.groundInSM xs := by
   induction H generalizing xs with
   | nil => cases xs <;> rfl
-  | pre H a ih | havoc H ih =>
+  | pre H a ih | havoc H ih | grow H ih =>
     cases xs with
     | nil => rfl
     | cons x xs => simp only [Hyps.groundInSM, ← ih]; rfl
@@ -219,7 +221,7 @@ def _root_.Solidity.Fml.litPos {Γ : Ctx} (φ : Fml C Γ) : Option (List Nat) :=
       | some u, some v => some (u ++ v)
       | _, _ => none)
     (fun _ _ _ _ => none) (fun _ _ _ _ _ => none) (fun _ _ => none) (fun _ _ _ _ => none)
-    (fun _ _ _ _ _ => none) (fun _ _ _ => none) (fun _ _ _ _ => none) φ
+    (fun _ _ _ _ _ => none) (fun _ _ _ => none) (fun _ _ _ _ => none) (fun _ _ => none) φ
 
 theorem _root_.Solidity.Fml.litPos_eq_litPosM {Γ : Ctx} (φ : Fml C Γ) :
     φ.litPos = φ.litPosM := by

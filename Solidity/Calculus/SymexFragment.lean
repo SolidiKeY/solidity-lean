@@ -527,7 +527,7 @@ def Fml.Frag : {Γ : Ctx} → Fml C Γ → Prop
   | _, .havoc φ => φ.Frag
   | _, .all _ _ φ => φ.Frag
   | _, .bind _ _ _ φ => φ.Frag
-  | _, .anon _ φ | _, .allocAll _ _ φ => φ.Frag
+  | _, .anon _ φ | _, .allocAll _ _ φ | _, .grow φ => φ.Frag
 
 variable {Γ : Ctx}
 
@@ -655,6 +655,11 @@ theorem Fml.Frag.toLS {φ : Fml C Γ} (hφ : φ.Frag) :
   | allocAll x A φ ih =>
     simp only [Fml.toLSM] at h
     split at h <;> (simp only [Option.some.injEq] at h; subst h; exact trivial)
+  | grow φ ih =>
+    simp only [Fml.toLSM] at h
+    split at h
+    · simp only [reduceCtorEq] at h
+    · simp only [Option.some.injEq] at h; subst h; exact trivial
 
 /-- **Its reduction mentions no storage**: every read of a write
 eliminates to the observation atoms. -/
@@ -1272,6 +1277,10 @@ theorem Fml.stepR_frag (k : Nat) {Γ : Ctx} {φ : Fml C Γ} (hφ : φ.Frag) :
     exact (ih hφ h' : φ'.Frag)
   | allocAll x A φ ih =>
     change (Fml.stepR k φ).map (Fml.allocAll x A) = some ψ at h
+    obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.mp h
+    exact (ih hφ h' : φ'.Frag)
+  | grow φ ih =>
+    change (Fml.stepR k φ).map Fml.grow = some ψ at h
     obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.mp h
     exact (ih hφ h' : φ'.Frag)
 

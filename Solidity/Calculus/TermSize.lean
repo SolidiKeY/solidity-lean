@@ -107,7 +107,7 @@ def Fml.tmSize : {Γ : Ctx} → Fml C Γ → Nat
   | _, .havoc φ => 1 + φ.tmSize
   | _, .all _ _ φ => 1 + φ.tmSize
   | _, .bind _ _ _ φ => 1 + φ.tmSize
-  | _, .anon _ φ | _, .allocAll _ _ φ => 1 + φ.tmSize
+  | _, .anon _ φ | _, .allocAll _ _ φ | _, .grow φ => 1 + φ.tmSize
 
 /-! ## Sizes of statements -/
 

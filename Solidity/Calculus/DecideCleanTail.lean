@@ -70,7 +70,7 @@ def _root_.Solidity.Fml.isCTPrem : {Γ : Ctx} → Fml C Γ → Bool
     (imp := fun _ _ => false) (upd := fun _ _ _ => false)
     (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
     (all := fun _ _ _ => false) (bind := fun _ _ _ _ => false)
-    (anon := fun _ _ => false) (allocAll := fun _ _ _ => false)
+    (anon := fun _ _ => false) (allocAll := fun _ _ _ => false) (grow := fun _ => false)
   termination_by structural _ φ => φ
 
 theorem _root_.Solidity.Fml.isCTPrem_eq_isCTPremM {Γ : Ctx} (φ : Fml C Γ) :
@@ -98,7 +98,7 @@ def _root_.Solidity.Fml.assumesCT : {Γ : Ctx} → Fml C Γ → Bool
     (imp := fun φ ψ => Fml.isCTPrem φ || Fml.assumesCT ψ) (upd := fun _ _ _ => false)
     (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
     (all := fun _ _ φ => Fml.assumesCT φ) (bind := fun _ _ _ _ => false)
-    (anon := fun _ _ => false) (allocAll := fun _ _ _ => false)
+    (anon := fun _ _ => false) (allocAll := fun _ _ _ => false) (grow := fun _ => false)
   termination_by structural _ φ => φ
 
 theorem _root_.Solidity.Fml.assumesCT_eq_assumesCTM {Γ : Ctx} (φ : Fml C Γ) :

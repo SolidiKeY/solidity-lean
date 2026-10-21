@@ -72,7 +72,8 @@ noncomputable def Fml.stepFocusR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     (all := fun x p _ ih => ih.map fun (f, φ') => (f, .all x p φ'))
     (bind := fun m x t _ ih => ih.map fun (f, φ') => (f, .bind m x t φ'))
     (anon := fun xs _ ih => ih.map fun (f, φ') => (f, .anon xs φ'))
-    (allocAll := fun x A _ ih => ih.map fun (f, φ') => (f, .allocAll x A φ')) φ
+    (allocAll := fun x A _ ih => ih.map fun (f, φ') => (f, .allocAll x A φ'))
+    (grow := fun _ ih => ih.map fun (f, φ') => (f, .grow φ')) φ
 
 section Equations
 
@@ -172,6 +173,7 @@ theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = 
   | _, .bind m x t φ, h => Focus.map_none (Fml.bind m x t) (Fml.stepFocusR_eq_none φ h)
   | _, .anon xs φ, h => Focus.map_none (Fml.anon xs) (Fml.stepFocusR_eq_none φ h)
   | _, .allocAll x A φ, h => Focus.map_none (Fml.allocAll x A) (Fml.stepFocusR_eq_none φ h)
+  | _, .grow φ, h => Focus.map_none Fml.grow (Fml.stepFocusR_eq_none φ h)
 
 /-- The strategy's step is the line `stepFocusR` leaves. -/
 theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
@@ -209,6 +211,8 @@ theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
   | allocAll x A φ ih =>
     exact (Focus.map_snd (Fml.allocAll x A) _).trans
       (congrArg (Option.map (Fml.allocAll x A)) ih)
+  | grow φ ih =>
+    exact (Focus.map_snd Fml.grow _).trans (congrArg (Option.map Fml.grow) ih)
 
 /-! ### `Fml.active` and `Fml.maxIdx` along the connectives
 
@@ -447,6 +451,9 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
   | _, .allocAll x A φ, f, ψ, h, σ, hψ => by
     obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.allocAll x A) h
     exact fun o => Fml.stepFocusR_sound φ h₁ _ (hψ o)
+  | _, .grow φ, f, ψ, h, σ, hψ => by
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some Fml.grow h
+    exact fun st nt => Fml.stepFocusR_sound φ h₁ _ (hψ st nt)
 
 variable {Γ : Ctx} {φ ψ : Fml C Γ}
 
@@ -547,6 +554,7 @@ def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .bind m _ t φ => .bind m (.user "_") t (Fml.eraseNames φ)
   | _, .anon xs φ => .anon xs (Fml.eraseNames φ)
   | _, .allocAll _ A φ => .allocAll (.user "_") A (Fml.eraseNames φ)
+  | _, .grow φ => .grow (Fml.eraseNames φ)
   | _, φ => φ
 
 theorem Upd.exhAny_eraseNames {Γ : Ctx} (σ : State C Γ) :
@@ -618,6 +626,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .anon _ φ | _, σ, .allocAll _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .grow φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
 
 /-- `φ ~~> L` past the program: `φ` leads to a line `B` that is the line
 written `L` up to its binders' names (`Fml.eraseNames`).  The line written

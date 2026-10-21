@@ -1084,7 +1084,7 @@ is definitionally `Fml.evalEqs goal φ`; a formula whose head does not reduce
 to a connective is left under `Fml.evalEqs`. -/
 private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
   let heads := [``Fml.tt, ``Fml.eq, ``Fml.wellFormed, ``Fml.not, ``Fml.and, ``Fml.imp, ``Fml.upd,
-    ``Fml.modal, ``Fml.havoc, ``Fml.all, ``Fml.bind, ``Fml.anon, ``Fml.allocAll]
+    ``Fml.modal, ``Fml.havoc, ``Fml.all, ``Fml.bind, ``Fml.anon, ``Fml.allocAll, ``Fml.grow]
   let φ ← whnfR φ
   let φ ← if heads.any φ.isAppOf then pure φ else whnfD φ
   let f := φ.getAppFn
@@ -1118,7 +1118,7 @@ private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
   | some ``Fml.imp, 4 =>
     return mkAppN f #[args[0]!, args[1]!, ← evalEqsE false args[2]!, ← evalEqsE goal args[3]!]
   | some ``Fml.upd, 6 | some ``Fml.all, 5 | some ``Fml.bind, 6 | some ``Fml.havoc, 3
-  | some ``Fml.anon, 4 | some ``Fml.allocAll, 5 => last goal
+  | some ``Fml.anon, 4 | some ``Fml.allocAll, 5 | some ``Fml.grow, 3 => last goal
   | some ``Fml.tt, _ | some ``Fml.wellFormed, _ | some ``Fml.modal, _ => return φ
   | _, _ => mkAppM ``Fml.evalEqs #[toExpr goal, φ]
 

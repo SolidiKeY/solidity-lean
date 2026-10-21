@@ -92,7 +92,7 @@ theorem Fml.merge2_leads {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) �
   | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .wellFormed _, _, h | _, _, _, .not _, _, h
   | _, _, _, .and .., _, h | _, _, _, .imp .., _, h | _, _, _, .modal .., _, h
   | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h
-  | _, _, _, .allocAll .., _, h => nomatch h
+  | _, _, _, .allocAll .., _, h | _, _, _, .grow .., _, h => nomatch h
 
 theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
     φ.mergeAt k = some ψ → ∀ σ, holds σ ψ → holds σ φ
@@ -110,7 +110,7 @@ theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.mergeAt_leads k φ hψ σ' a
   | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .wellFormed _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
-  | _, k, .anon .., _, h | _, k, .allocAll .., _, h => by
+  | _, k, .anon .., _, h | _, k, .allocAll .., _, h | _, k, .grow .., _, h => by
     cases k <;> cases h
 
 theorem Fml.mergeRun_leads (k : Nat) : (n : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →

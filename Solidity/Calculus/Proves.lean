@@ -203,6 +203,8 @@ inductive Hyps (C : Contract) (Γ₀ : Ctx) : Ctx → Type where
   | anon {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) : Hyps C Γ₀ Γ
   /-- `∀ fresh x : A. …` (`Fml.allocAll`) -/
   | allocAll {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (A : RefTy) : Hyps C Γ₀ (.mem A :: Γ)
+  /-- `{grow} …` (`Fml.grow`) -/
+  | grow {Γ : Ctx} (H : Hyps C Γ₀ Γ) : Hyps C Γ₀ Γ
 
 /-- The hidden binders `bs` joined to the context, the first one first. -/
 def Hyps.binds {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → (bs : List (Modality × Var × LTy)) →
@@ -219,6 +221,7 @@ def Fml.modalFree : {Γ : Ctx} → Fml C Γ → Bool
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.modalFree φ)
     (all := fun _ _ φ => Fml.modalFree φ) (bind := fun _ _ _ φ => Fml.modalFree φ)
     (anon := fun _ φ => Fml.modalFree φ) (allocAll := fun _ _ φ => Fml.modalFree φ)
+    (grow := fun φ => Fml.modalFree φ)
   termination_by structural _ φ => φ
 
 /-- The context put back in front of a formula. -/
@@ -231,7 +234,8 @@ def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fm
       (fun H x p φ => Hyps.wrap H (.all x p φ))
       (fun H m x t φ => Hyps.wrap H (.bind m x t φ))
       (fun H xs φ => Hyps.wrap H (.anon xs φ))
-      (fun H x A φ => Hyps.wrap H (.allocAll x A φ)) φ
+      (fun H x A φ => Hyps.wrap H (.allocAll x A φ))
+      (fun H φ => Hyps.wrap H (.grow φ)) φ
   termination_by structural _ H => H
 
 /-- The fresh index of a step on the goal `φ`: one above every index in the
@@ -256,7 +260,7 @@ def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
         | .box => Hyps.boxOnly H)
       (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
       (fun H _ _ _ => Hyps.boxOnly H)
-      (fun H _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
+      (fun H _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H => Hyps.boxOnly H)
   termination_by structural _ H => H
 
 /-- `{anon(xs)}`, and `{anon(xs)} {havoc}` when the loop's frame writes the
@@ -276,6 +280,7 @@ def Hyps.rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ :
   | _, .bind H m x t => .bind (Hyps.rwEqCM q H) m x t
   | _, .anon H xs => .anon (Hyps.rwEqCM q H) xs
   | _, .allocAll H x A => .allocAll (Hyps.rwEqCM q H) x A
+  | _, .grow H => .grow (Hyps.rwEqCM q H)
 
 /-- A Theory rewrite of the context (`Fml.rwEqC`): in every precondition;
 an update, a `havoc`, a quantifier or a binder stays as it is.  By the
@@ -288,7 +293,7 @@ def Hyps.rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ Γ
   Hyps.rec (motive := fun Γ _ => Hyps C Γ₀ Γ) .nil (fun _ a ih => .pre ih (a.rwEqC q))
     (fun _ m U ih => .upd ih m U) (fun _ ih => .havoc ih) (fun _ x p ih => .all ih x p)
     (fun _ m x t ih => .bind ih m x t) (fun _ xs ih => .anon ih xs)
-    (fun _ x A ih => .allocAll ih x A) H
+    (fun _ x A ih => .allocAll ih x A) (fun _ ih => .grow ih) H
 
 /-- The recursor's rewrite is the twin's. -/
 theorem Hyps.rwEqC_eq_rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ Γ : Ctx}
@@ -297,7 +302,7 @@ theorem Hyps.rwEqC_eq_rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val
   | nil => rfl
   | pre H a ih => simp only [Hyps.rwEqCM, ← ih, ← Fml.rwEqC_eq_rwEqCM]; rfl
   | upd H m U ih | havoc H ih | all H x p ih | bind H m x t ih | anon H xs ih
-  | allocAll H x A ih =>
+  | allocAll H x A ih | grow H ih =>
     simp only [Hyps.rwEqCM, ← ih]; rfl
 
 /-- `H ⊢ φ`: the calculus proves `φ` in the context `H` (with `R`, solkey's

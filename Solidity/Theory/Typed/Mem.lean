@@ -282,11 +282,6 @@ theorem Heap.get_alloc {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
     (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
   Objs.get_snoc_last _ H _ _
 
-/-- `hp'`, over a grown typing, holds every object of `hp`, its references
-weakened. -/
-def Heap.Keeps {H H' : HTy} (e : H <+: H') (hp : Heap H) (hp' : Heap H') : Prop :=
-  ∀ {R : RefTy} (r : HRef H R), hp'.get (r.wk e) = MObj.wk e R (hp.get r)
-
 theorem Heap.Keeps.refl {H : HTy} (hp : Heap H) : Heap.Keeps (List.prefix_refl H) hp hp :=
   fun r => (MObj.wk_refl _ (hp.get r)).symm
 

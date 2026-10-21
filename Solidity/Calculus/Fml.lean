@@ -223,6 +223,11 @@ inductive Fml (C : Contract) : Ctx → Type where
 grown by one object of type `R`, `x` its reference (Lean only: a `catch`
 clause's data from another contract, any bytes, `catchDataBox`). -/
   | allocAll {Γ : Ctx} (x : Var) (R : RefTy) (φ : Fml C (.mem R :: Γ)) : Fml C Γ
+  /-- `{grow} φ`: `φ` in every heap grown from the state's that keeps each
+of its objects (`Heap.Keeps`), the locals weakened along it (Lean only: what
+a callee that allocates leaves of memory, a memory return's contract,
+`Calculus/MemContract.lean`). -/
+  | grow {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ
 
 /-- `false` is `¬true`. -/
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt

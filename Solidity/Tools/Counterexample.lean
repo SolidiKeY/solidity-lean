@@ -247,7 +247,7 @@ def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
     if (dom.bind σ t).any fun v => φ.eval3C dom (σ.push v) = .ff then .ff else .unknown
   | _, σ, .anon xs φ =>
     if φ.eval3C dom (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown
-  | _, _, .allocAll .. => .unknown
+  | _, _, .allocAll .. | _, _, .grow .. => .unknown
 
 theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ,
     (φ.eval3C dom σ = .tt → holds σ φ) ∧ (φ.eval3C dom σ = .ff → ¬ holds σ φ)
@@ -383,6 +383,8 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
       exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ _).2 h (hall _)⟩
     · exact ⟨nofun, nofun⟩
   | _, .allocAll .., _ => ⟨nofun, nofun⟩
+  | _, .grow _, _ => ⟨fun h => by simp only [Fml.eval3C, reduceCtorEq] at h,
+      fun h => by simp only [Fml.eval3C, reduceCtorEq] at h⟩
 
 /-- **`holds`, evaluated**, by its recursor (Gate G0 conditions 1 and 2):
 what the kernel runs in a certificate.  Compiled as `Fml.eval3C`. -/
@@ -406,6 +408,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
     (fun xs _ ih σ =>
       if ih (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown)
     (fun _ _ _ _ _ => .unknown)
+    (fun _ _ _ => .unknown)
     φ σ
 
 theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ,
@@ -420,7 +423,7 @@ theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : 
   | _, .all _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .bind _ _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .anon _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
-  | _, .allocAll .., _ => rfl
+  | _, .allocAll .., _ | _, .grow .., _ => rfl
 
 theorem Fml.eval3_sound (dom : TDom) {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ) :
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ) := by
@@ -722,6 +725,7 @@ def Fml.peel (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C
         (fun φ _ => ⟨_, σ, .bind m x .kint φ⟩) φ ih)
     (fun xs φ _ σ => ⟨_, σ, .anon xs φ⟩)
     (fun x A φ _ σ => ⟨_, σ, .allocAll x A φ⟩)
+    (fun φ _ σ => ⟨_, σ, .grow φ⟩)
     φ σ
 
 theorem Fml.peel_eq (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → (φ : Fml C Γ) →
@@ -731,7 +735,7 @@ theorem Fml.peel_eq (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → 
   | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
   | _, .bind _ _ .oldNet _, _ | _, .bind _ _ .kint _, _ | _, .tt, _ | _, .eq .., _
   | _, .wellFormed _, _ | _, .not _, _ | _, .and .., _ | _, .imp .., _ | _, .upd .., _
-  | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ | _, .allocAll .., _ => rfl
+  | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ | _, .allocAll .., _ | _, .grow .., _ => rfl
 
 /-- What fails under the peeled binders fails under the binders: each is a
 `∀` (or a hidden binder, read as one) of the values it is peeled at. -/
@@ -753,7 +757,7 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Semantics.CallValue)) : {Γ 
   | _, _, .bind _ _ .oldNet _, h | _, _, .bind _ _ .kint _, h | _, _, .tt, h | _, _, .eq .., h
   | _, _, .wellFormed _, h
   | _, _, .not _, h | _, _, .and .., h | _, _, .imp .., h | _, _, .upd .., h
-  | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h | _, _, .allocAll .., h => h
+  | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h | _, _, .allocAll .., h | _, _, .grow .., h => h
 
 /-- `φ` read under its leading parameters bound to `vals` (`Fml.peel`). -/
 def Fml.eval3Peel (dom : TDom) (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C Γ)
