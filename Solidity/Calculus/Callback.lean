@@ -77,6 +77,10 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   /-- `allRight`. -/
   | allIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
       (h : ProvesC I pay Γ₀ (H.all x p) φ) : ProvesC I pay Γ₀ H (.all x p φ)
+  /-- `{havoc}` in front of the formula joins the context (Lean only: what
+"post" of a contract forgets, `Fml.anonC`). -/
+  | havocIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ProvesC I pay Γ₀ H.havoc φ) :
+      ProvesC I pay Γ₀ H (.havoc φ)
   /-- An update in front of the formula joins the context. -/
   | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (h : ProvesC I pay Γ₀ (H.upd m U) φ) : ProvesC I pay Γ₀ H (.upd m U φ)

@@ -816,15 +816,15 @@ theorem holdsC_callRecContract {μ : Mutability} {f : Name} {d : Nat} {args : Ar
 /-- **`useContract` at a recursive call, with callbacks** (Lean,
 `ProvesC.recCall`): the goals "pre" and "post", the contract over the
 callback runs proved by induction over the frames (`RecContractC.unroll`). -/
-theorem ProvesC.recContract {Γ₀ : Ctx} {H : Hyps C Γ₀ Γ} {μ : Mutability} {f : Name} {d : Nat}
+theorem ProvesC.recContract {Δ₀ : Ctx} {H : Hyps C Δ₀ Γ} {μ : Mutability} {f : Name} {d : Nat}
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
     (hc : RecContractC I pay μ (body ()) req ens m) (hreq : req.callsBack pay = false)
     (hk : ret.isValues = true)
-    («pre» : ProvesC I pay Γ₀ H (Fml.callPre args req m))
-    («post» : ProvesC I pay Γ₀ H (Fml.callPost μ args ret ens ω κ φ m)) :
-    ProvesC I pay Γ₀ H (.modal m (.cons (.callRec f d args ret body) ω) κ φ) :=
+    («pre» : ProvesC I pay Δ₀ H (Fml.callPre args req m))
+    («post» : ProvesC I pay Δ₀ H (Fml.callPost μ args ret ens ω κ φ m)) :
+    ProvesC I pay Δ₀ H (.modal m (.cons (.callRec f d args ret body) ω) κ φ) :=
   .recCall [Fml.callPre args req m, Fml.callPost μ args ret ens ω κ φ m]
     (fun τ h => Hyps.wrapC_and H (fun _ a b => holdsC_callRecContract hc hreq hk a b) τ
       (h _ List.mem_cons_self) (h _ (List.mem_cons_of_mem _ List.mem_cons_self)))
@@ -833,6 +833,37 @@ theorem ProvesC.recContract {Γ₀ : Ctx} {H : Hyps C Γ₀ Γ} {μ : Mutability
       rcases hψ with rfl | rfl
       · exact «pre»
       · exact «post»)
+
+theorem holdsC_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
+    (∀ σ : State C [], holdsC I pay σ (Fml.allCtx ps ns φ)) → ∀ σ : State C ps, holdsC I pay σ φ
+  | [], _, _, h, σ => h σ
+  | .val p :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .all (ns.headD (.user "p")) p φ) h (σ.withEnv σ.env.2) σ.env.1
+  | .alias R :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) (.alias R) φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .mem R :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) (.mem R) φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .old :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .old φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .oldNet :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .oldNet φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .kint :: ps, ns, φ, h, σ =>
+    holdsC_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .kint φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+
+/-- **A contract with callbacks from a derivation of its obligation**
+(`FunContract.ofValidCtx`), the frame's parameters bound (`Fml.allCtx`). -/
+theorem FunContractC.ofProvesC {Γ Γ' : Ctx} (ns : List Var) {ret : CallRet Γ rs Γ'}
+    {body : Prog C (rs ++ ps) Γf} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
+    (hI : I.FO = true) (hreq : req.callsBack pay = false) (hens : ens.callsBack pay = false)
+    (h : ProvesC I pay [] .nil (Fml.allCtx ps ns (FunContract.obligation ret body req ens m))) :
+    FunContractC I pay ret body req ens m :=
+  FunContractC.ofHoldsC hreq hens
+    (holdsC_allCtx ps ns (ProvesC.sound_of hI (Fml.hasTransfer_of_FO I hI) h))
 
 end RuleC
 

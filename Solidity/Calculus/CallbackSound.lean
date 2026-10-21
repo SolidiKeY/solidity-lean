@@ -1072,6 +1072,7 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     exact fun σ => Hyps.wrapC_mono (ψ := .imp a φ) _ (fun _ h _ => h) σ (ih σ)
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
+  | havocIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
   | update d hs _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_update hs
