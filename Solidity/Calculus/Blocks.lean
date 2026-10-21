@@ -408,8 +408,9 @@ the callee's body inlined with the returned values as its targets and the
 success block after it; the receiver another, the success block for every
 value of the returned data; and each `catch` block from the state the call
 was made in, where the call does not end normally as a self-call
-(`ExtCall.selfFails`).  At address `0` both success goals hold vacuously
-(the `require`s revert). -/
+(`ExtCall.selfFails`), the `Panic` block behind the codes the callee may
+panic with (`CodeBinder.guard`, `Prog.panicCodes`).  At address `0` both
+success goals hold vacuously (the `require`s revert). -/
 def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
     (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)

@@ -217,7 +217,9 @@ In the callee a self-call `try` runs, a failed `assert` reverts with
 `Panic(0x11)`'s (`OFMode.guardStmt`), solc's codes: the `try` dispatches on
 the data, so `catch Panic(uint c)` binds the code in the run, and `catch
 (bytes memory d)` the selector and the code's word, data the callee lists.
-The rule's `Panic` goal still binds any code (`trySelfStep`). -/
+The rule's `Panic` goal is behind the codes the callee may panic with
+(`Prog.panicCodes`, `CodeBinder.guard`): `require(a != address(this) || c
+== 1);`, so the clause reads the code. -/
 
 namespace Panics
 
@@ -241,6 +243,20 @@ private def σ₇ : State Pan [] := { State.init Pan with tx := { selfAddress :=
 #eval (Prog.runT σ₇ (sol[Pan]{ try this.overflow(115792089237316195423570985008687907853269984665640564039457584007913129639935) {
     last = 1; } catch Panic(uint c) { last = c; } catch { last = 9; } })).map
   fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- **The code a failed `assert` panics with** (`trySelfStep`'s `Panic`
+goal): the callee's data lists `Panic(0x01)` only, so the clause proves
+`c == 1`. -/
+theorem assertCode : ⊨ dl!{ [ try this.failAssert(5) { } catch Panic(uint c) {
+    assert(c == 1); } catch { }; ] true } := by
+  sol_symex
+  sol_close
+
+/-- The same with an overflow in `checked { … }`: `Panic(0x11)`. -/
+theorem overflowCode : ⊨ dl!{ ∀ uint y; [ try this.overflow(y) { } catch Panic(uint c) {
+    assert(c == 17); } catch { }; ] true } := by
+  sol_symex
+  sol_close
 
 /-- The raw data: `Panic`'s selector (`0x4e487b71`), then the code's word. -/
 theorem panicSelector : ⊨ dl!{ [ try this.failAssert(5) { } catch (bytes memory d) {

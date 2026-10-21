@@ -291,6 +291,11 @@ syntax (str ": ")? ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
 the call does not end normally as a call to the contract itself
 (`ExtCall.selfFails`).  Printed only: no taclet is declared with it. -/
 syntax (str ": ")? &"fails" "(" ident ")" " → " ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
+/-- A self-call's `Panic` goal (`trySelfStep`, `CodeBinder.guard`, Lean):
+`panics(selfBody) →`, where the receiver is another contract or the code is
+one the callee may panic with (`Prog.panicCodes`).  Printed only. -/
+syntax (str ": ")? &"fails" "(" ident ")" " → " ("∀ " ident ". ")? &"panics" "(" ident ")" " → "
+  "[ " sol_block " ]" : dl_branch
 /-- Goals, one per branch (`Premise.branches`), separated by `;`. -/
 syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
 /-- One goal of `Premise.cases`, with solkey's label: a formula to prove, or
