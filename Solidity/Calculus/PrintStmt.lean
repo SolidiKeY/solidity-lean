@@ -1202,12 +1202,28 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
           let some (pairs, names) ← bindersS? xs | return none
           unless pairs.isEmpty do return none
           pure (none, names)
-      let blk ← ppBlockOf (← progPiecesS (names ++ ns) (b.getArg! 5)).1
+      -- a self-call's `Panic` clause behind its callee's codes
+      -- (`CodeBinder.guard`), schematic: `panics(selfBody) →`
+      let P0 := (← instantiateMVars (b.getArg! 5)).consumeMData
+      let (P0, panics?) ← do
+        if P0.isAppOfArity ``CodeBinder.guard 8 then
+          let K := (← instantiateMVars (P0.getArg! 6)).consumeMData
+          let K' ← whnf K
+          if K'.isAppOf ``Option.none || K'.isAppOf ``Option.some then pure (P0, none)
+          else if K.isAppOf ``Prog.panicCodes && K.getAppNumArgs > 0 then
+            match ← fvarName? K.appArg! with
+            | some sb => pure (P0.getArg! 7, some (nameIdent sb))
+            | none => pure (P0, none)
+          else pure (P0, none)
+        else pure (P0, none)
+      let blk ← ppBlockOf (← progPiecesS (names ++ ns) P0).1
       let x? := x?.map fun x => nameIdent x
-      out := out.push (← match selfCall?, box with
-        | some c, _ => `(dl_branch| $[$l:str :]? fails($c:ident) → $[∀ $x?:ident .]? [ $blk ])
-        | none, true => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
-        | none, false => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
+      out := out.push (← match selfCall?, panics?, box with
+        | some c, some sb, _ =>
+          `(dl_branch| $[$l:str :]? fails($c:ident) → $[∀ $x?:ident .]? panics($sb:ident) → [ $blk ])
+        | some c, none, _ => `(dl_branch| $[$l:str :]? fails($c:ident) → $[∀ $x?:ident .]? [ $blk ])
+        | none, _, true => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
+        | none, _, false => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))

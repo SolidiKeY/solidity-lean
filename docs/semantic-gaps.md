@@ -48,7 +48,7 @@ contract's invariant.
 
 | Gap | Kind | Status |
 |---|---|---|
-| recursion (`functionsRecursiveUnbounded`) | semantics, calculus | closed: `Stmt.callRec`, unrolled to the EVM's 1024 frames, proved by contract over the frames (`docs/kernel-port.md`, "Recursion"); the runner proves a recursive call by its callee's `/// @custom:key` contract, else `true`/`true` (`rec_auto`, `tests/solc/Recursion.sol`); several returns to a tuple's targets; a reference return runs but has no contract (a body that sets one is within no mutability, `docs/kernel-port.md` "Recursion", "What is left"); under the callback reading (O7) by `rec_auto_c` (`Calculus/RecursionCallback.lean`), an `if` on a condition that is not a local included (`ProvesC.capture`, `docs/options.md` O3) |
+| recursion (`functionsRecursiveUnbounded`) | semantics, calculus | closed: `Stmt.callRec`, unrolled to the EVM's 1024 frames, proved by contract over the frames (`docs/kernel-port.md`, "Recursion"); the runner proves a recursive call by its callee's `/// @custom:key` contract, else `true`/`true` (`rec_auto`, `tests/solc/Recursion.sol`); several returns to a tuple's targets; a storage return by contract (its body rebinds the alias to a path, within `view`: `Stmt.within`'s `rebind`/`declStorage`, `Examples/Tactics/Recursion.lean`'s `pickKeeps`); a memory return runs but has no contract (a body that allocates is within no mutability, `docs/kernel-port.md` "Recursion", "What is left"); under the callback reading (O7) by `rec_auto_c` (`Calculus/RecursionCallback.lean`), an `if` on a condition that is not a local included (`ProvesC.capture`, `docs/options.md` O3) |
 | a `catch` goal when the callee cannot fail (`tryCatchExactReturn`) | calculus | closed: each self-call `catch` goal assumes `fails(call)`, the walks prove the callee's diamond instead (`notLeft`; `docs/options.md` O8) |
 | a value call to `this` runs `receive` (`callRunsReceive`) | semantics | closed: a self-call `try` of `receive` behind `r == address(this)` (`elabValueCall`, O8); `callKeepsStorageUnsound` stays pending, false on the EVM |
 | `msg.value` bounded by the ether supply (`msgValueArith`) | chain fact | closed: `msg.value < 2^128` (`Problem.callPre`) |
@@ -555,9 +555,14 @@ EVM).  Tests: `tests/solc/Hashing.sol` (`sha256Parameter`,
 `ripemd160Parameter`, `recoverSigner`), `Examples/Tactics/Hashing.lean`
 (`sha256Abc`, `ripemd160Abc`, `recoverBadV`, the runs, `sha256Twice`).
 Cost: `Val`, `Op2` and the Lean rules keep their constructor counts; every
-match on `keccak` gained the kind (`.hash _ b _`).  `hoist` is at its
-heartbeat limit: the lowering is a function outside its `mutual` block,
-handed the recursive calls.
+match on `keccak` gained the kind (`.hash _ b _`).  The lowering is a
+function outside `hoist`'s `mutual` block, handed the recursive calls.
+(Lane `open-refret` split that block: its large arms, `hoist`,
+`abiEncode`, `elabCallRet`, `hoistStmt`, `elabStmtP` and `elabStmt1`, are
+defined before it, each over the record of the block's functions
+(`ElabRec`, tied by `elabRec`); the block went from about 190k heartbeats,
+most of them its compilation as one unit, to under 55k, and the largest arm,
+`elabCallRetWith`, takes under 90k on its own.)
 
 **Lane `open-left2` checked** (2026-10-21): `tests/solc/Hashing.sol`'s
 `encodeWithSignature`, `encodeWithSelector`, `encodeCall`, `packedEnum`,
@@ -742,7 +747,9 @@ the data has `Error`'s selector and decodes, `r` the decoded string;
   (`0x12`), an enum out of range (`0x21`), an index out of range (`0x32`),
   a too-large allocation (`0x41`) and an unset function value (`0x51`)
   revert in the model (the solkey reading).  A self-call's `Panic` clause
-  binds the table's code, `1` without one, as before.
+  binds the table's code, `1` without one, as before; its rule's goal is
+  behind the codes its callee's data carries (`Prog.panicCodes`,
+  `docs/options.md` O8, "The `Panic` goal per code").
 
 **Expected cost.**  Two `Stmt` constructors (every statement fold, the
 rule table, the soundness dispatch, the callback reading, the printers and
@@ -901,12 +908,13 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   `Panics`).  A callee that still may panic (an `assert` written in a
   program not elaborated as a self-call's callee) lists `Pat.panic`, the
   selector then a word of unknown bytes (`CatchKind.datas`, sound by
-  `Pat.matches_panic`), where it had only the any-bytes goal.  Left open:
-  the rule's `Panic` goal binds any code (`trySelfStep`), so a proof about
-  `c` needs a goal per code the callee's data carries — a `catchDataBox`
-  for the code, its soundness over `Prog.run_dataS` and the callback reading
-  (`holdsC_trySelfCb`); reading the code off the raw data in the clause
-  instead (32 bytes assembled) is past `sol_decide`'s bounds.  The other
+  `Pat.matches_panic`), where it had only the any-bytes goal.  Closed
+  (lane `open-refret`): the rule's `Panic` goal is behind the codes the
+  callee's data carries (`trySelfStep`, `CodeBinder.guard`:
+  `require(a != address(this) || c == 1);`), sound over `Prog.run_dataS`
+  and with callbacks (`holdsC_trySelfCb`, a callee that pays nobody), so
+  `catch Panic(uint c)` proves `c == 1` (`RevertData.lean`'s `assertCode`,
+  `overflowCode`); `docs/options.md` O8.  The other
   codes (`0x12` division, `0x21` enum, `0x32` index, `0x41` allocation,
   `0x51` function value) and an overflow outside `checked { … }` are reverts
   in the model, with no data (the solkey reading).

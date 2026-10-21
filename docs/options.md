@@ -515,6 +515,28 @@ say why they are reached: `tryError`, `tryPanic`, `tryOther` only at
 another address for a self-call, `trySelfError`, `trySelfPanic`,
 `trySelfOther` after the callee's run halts (`Semantics/Callback.lean`).
 
+**The `Panic` goal per code.** The `Panic` block is behind the codes its
+callee may panic with (`CodeBinder.guard`, `Prog.panicCodes`,
+`Calculus/Blocks.lean`; printed `panics(selfBody) →`): `require(a !=
+address(this) || c == k₁ || …);` in front of it, the `kᵢ` the `Panic` codes
+of the data the callee lists (`Stmt.revertDatas`: `0x01` for a failed
+`assert`, `0x11` for an overflow in `checked { … }`), `require(a !=
+address(this));` where the clause binds no code and the callee panics with
+none.  The codes are known where the callee raises no panic of its own
+(`Prog.asserts`), pays nobody (`Prog.hasTransfer`), lists its data and none
+of its data known in part may be `Panic`'s (`Pat.notPanic`); elsewhere the
+goal binds any code, as before.  At another receiver the code is the
+oracle's, which the `a != address(this)` disjunct admits.  Sound by
+`Prog.panicCodes_call` (`Prog.run_dataS`, `Prog.run_noPanic`) in
+`Premise.sound_trySelfBox` (`holds_tryPanicG`), and with callbacks by
+`Prog.panicCodes_exec` (a callee that pays nobody runs as its run,
+`ExecS.eq_run`) in `holdsC_trySelfCb` (`holdsC_tryPanicG`):
+`ExecS.trySelfPanic` binds the code its data carries
+(`Semantics.decodePanic`), any code only after a panic of the callee's own.
+`Examples/Tactics/RevertData.lean`'s `assertCode` proves `c == 1` in
+`catch Panic(uint c)` of a callee with `assert(x < 3)`, `overflowCode`
+`c == 17` of an overflow in `checked { … }`.
+
 **A value call to `this`.** `(bool ok, ) = r.call{value: v}("")` with the
 contract's `receive` declared before the caller is elaborated as `bool se =
 r == address(this); if (se) { try this.receive{value: v}() { ok = true; }

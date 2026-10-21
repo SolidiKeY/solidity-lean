@@ -4085,30 +4085,130 @@ def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
   let R ← elabStmtsP [.decl (.named T) y (some (.field (.name b) (hashMember k)))]
   return (P ++ Q ++ R, .name y)
 
-mutual
+/-- The kind of an argument of `abi.encode` (`AbiKind`), by its static type. -/
+def abiKind (a : RawExpr) : ElabM AbiKind := do
+  if a.bytesLit?.isSome then return .dyn
+  let Γ ← ctx
+  match synth C (← nctx) a with
+  | .ok (.val .bool _) => pure .bool
+  | .ok (.val .int _) => pure (.int (widthIn C Γ a))
+  | .ok (.val .uint _) =>
+    match bytesOf? C Γ a with
+    | some n => pure (.bytesN n)
+    | none =>
+      -- an `address` at 20 bytes, an enum at one (`addressRows`, `enumRows`)
+      match markOf? C Γ "#address" a, markOf? C Γ "#enum" a with
+      | some n, _ | none, some n => pure (.uint (8 * n))
+      | none, none => pure (.uint (widthIn C Γ a))
+  | .ok (.mpath (.ref R) _) | .ok (.path (.ref R) _) =>
+    let ws := placeShape C Γ a
+    match R with
+    | .array (.prim p) =>
+      if p == .uint && lookupBy "[]#bytes" ws == some 1 then pure .dyn
+      else pure (.arr (.ofValue p ws "[]"))
+    | .fixed (.prim p) n => pure (.fixed (.ofValue p ws "[]") n)
+    | .struct s =>
+      if (AbiKind.ofStruct s).isSome then pure (.tuple s)
+      else throw s!"{a.toStr}: a struct with a member that is not a value is not ABI-encoded here"
+    | _ => throw s!"{a.toStr}: an array of references or a mapping is not ABI-encoded here"
+  | .ok _ => throw s!"{a.toStr}: a value of this type is not ABI-encoded here"
+  | .error e => throw e
 
-/-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
-conditional of references, are evaluated before the statement that holds
-them, in solc's order (an assignment's right-hand side before its target, a
-binary operator's right operand before its left, an index's base before the
-index: an operand read before an effect is captured with `captureExpr`),
-into fresh locals (KeY's captures): `values[i++] = 1;`
-is `uint se1; se1 = i++; values[se1] = 1;`, and
-`Person storage p = c ? alice : bob;` is
-`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
-Person storage p = sp1;`, the alias declared before the branches, which are
-scopes.  A memory one is `Person memory mv1 = mx;
-if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
-indexes nothing (`MPath.indexFree`, a read that cannot revert on a set
-local; an unset one, which only a hidden binder holds (decision 17'),
-reverts there where solc reads the other branch), or, when both index, to
-a fresh default object (`Person memory mv1;`, an object nothing reaches),
-and rebound in each branch.  Under the right
-operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
-narrow check is captured where solc evaluates it, under a test of its own: `a
-&& b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
-`uint se; if (c) { se = a; } else { se = b; }`. -/
-partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
+/-- The kinds of `abi.encode`'s arguments that their capture would lose,
+read before it: a `bytesN` marked (`abiBytesMark`), an `address`, an enum
+(`markOf?`). -/
+def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
+  let Γ ← ctx
+  let marked (a : RawExpr) : Option AbiKind :=
+    if (markOf? C Γ "#address" a).isSome then some (.uint 160)
+    else if (markOf? C Γ "#enum" a).isSome then some (.uint 8) else none
+  pure (args.map fun a => match a with
+    | .call g [_] =>
+      match abiBytesMark? g with
+      | some n => some (.bytesN n)
+      | none => marked a
+    | a => marked a)
+
+/-- `try r.g(as) returns (T v) { x = v; } catch { revert(); }`: an external
+call whose every failure reverts the caller, as a call outside a `try` does,
+its one return landing in `res`; the types of `ps → rs`. -/
+def extCallStmt (r : RawExpr) (g : String) (as : List RawExpr) (rs : List String)
+    (res : Option (Var × PrimTy)) : ElabM RawStmt := do
+  let mut rets : List (RawTy × String) := []
+  for t in rs do rets := rets ++ [(.named t, toString (← freshCapture "se"))]
+  let ok : List RawStmt := match res, rets with
+    | some (x, _), [(_, v)] => [.assign (.name (toString x)) (.name v)]
+    | _, _ => []
+  pure (.tryCall r g as rets ok [.revert] none [.revert] [.revert])
+
+/-- `ElabRec`'s default (`elabRec` is `partial`): an elaboration that fails. -/
+local instance {α : Type} : Inhabited (ElabM α) := ⟨fun _ _ => .error ""⟩
+
+/-- **The elaborator's recursion, as a record**: the functions of the
+`mutual` block below that its large arms call.  Those arms are defined
+before the block (`hoistWith`, `abiEncodeWith`, `elabCallRetWith`,
+`hoistStmtWith`, `elabStmtPWith`, `elabStmt1With`), each taking this record,
+and the block ties them (`elabRec`): the block's own declarations stay
+small, so that it elaborates and compiles well inside its heartbeats, and
+each arm is a command of its own.  Behaviour is the block's: the record's
+fields are the block's functions. -/
+structure ElabRec where
+  hoist : RawExpr → ElabM (SProg C × RawExpr)
+  hoistBinop : (op : BinOp) → (a b : RawExpr) → ElabM (SProg C × RawExpr)
+  hoistTop : RawExpr → ElabM (SProg C × RawExpr)
+  hoistAssign : (l r : RawExpr) → ElabM (SProg C × RawStmt)
+  hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
+  abiMemBytes : (a : RawExpr) → ElabM (SProg C × String)
+  abiDecodeBytes : (T : String) → (d : ByteSrc) → (h n : Nat) → ElabM (SProg C × String)
+  abiEncode : (std strs : Bool) → (args : List RawExpr) → (marks : List (Option AbiKind)) →
+    (sel : Option RawExpr := none) → ElabM (SProg C × RawExpr)
+  hoistCallArgs : (f : String) → (args : List RawExpr) → ElabM (SProg C × List RawExpr)
+  fnDispatch : (h ty : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
+  callValue : (h : RawExpr) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
+  elabCall : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
+    (resW : Nat := 256) → (resNew : Bool := false) → ElabM (SProg C)
+  elabMemCall : (f : String) → (args : List RawExpr) → (R : RefTy) →
+    (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) →
+    ElabM (SProg C)
+  elabStorageCall : (f : String) → (args : List RawExpr) → (R : RefTy) →
+    (bind : (Γ : NCtx) → Var → Except String (SStmt C)) → ElabM (SProg C)
+  elabCallReceiver : (f : String) → (args : List RawExpr) →
+    (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) → ElabM (SProg C)
+  elabCallReceiverPush : (f : String) → (args : List RawExpr) → (a : RawExpr) → ElabM (SProg C)
+  trySelfBody : (g : String) → {Γ : NCtx} → (args : List (ExtArg C Γ.ctx)) → (ρ : Ctx) →
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf))
+  elabValueCall : (Γ : NCtx) → (ix : Idx Γ.ctx (.val .bool)) → (okName : RawExpr) →
+    (e a : RawExpr) → ElabM (SProg C)
+  elabCtor : (args : List RawExpr) → ElabM (SProg C)
+  hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
+  elabStmtP : (s : RawStmt) → ElabM (SProg C)
+  elabStmt1 : RawStmt → ElabM (SProg C)
+  loopExpr : (Γ : NCtx) → (p : PrimTy) → (e : RawExpr) → (what : String) → ElabM (Val C Γ.ctx p)
+  loopQ : (Γ : NCtx) → RawInv → ElabM (LoopQ C Γ.ctx)
+  elabStmtsP : List RawStmt → ElabM (SProg C)
+  elabBranch : (ss : List RawStmt) → ElabM (SProg C)
+  elabScope : (Γ : NCtx) → (ss : List RawStmt) → ElabM (Blk C Γ.ctx)
+  elabTuple : (ts : List (Option RawExpr)) → (rhs : RawExpr) → (direct : Bool := false) →
+    ElabM (SProg C)
+  deriving Inhabited
+
+/-- `hoist`, outside its `mutual` block (`elabRec`). -/
+def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s0 =>
+  let hoist := @ElabRec.hoist C rc
+  let hoistBinop := @ElabRec.hoistBinop C rc
+  let hoistArgs := @ElabRec.hoistArgs C rc
+  let abiMemBytes := @ElabRec.abiMemBytes C rc
+  let abiDecodeBytes := @ElabRec.abiDecodeBytes C rc
+  let abiEncode := @ElabRec.abiEncode C rc
+  let hoistCallArgs := @ElabRec.hoistCallArgs C rc
+  let elabCall := @ElabRec.elabCall C rc
+  let elabMemCall := @ElabRec.elabMemCall C rc
+  let elabStorageCall := @ElabRec.elabStorageCall C rc
+  let elabStmtsP := @ElabRec.elabStmtsP C rc
+  let abiMarks := abiMarks C
+  match s0 with
   | .field e f => do
     let (P, e) ← hoist e
     -- `rows[i].length` of a fixed-size `rows[i]`: the base is evaluated (and
@@ -4397,146 +4497,12 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     pure (Q, l)
   | e => pure ([], e)
 
-/-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
-i` is `1 + 1`), the left one's after it, and the right one held before an
-effect of the left. -/
-partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let (Q, b) ← hoist b
-  if a.hasIncDec then
-    let (Qc, b) ← captureExpr C b
-    let (P, a) ← hoist a
-    pure (Q ++ Qc ++ P, .binop op a b)
-  else if a.hasIdxLen || a.hasCast || hasNarrow C (← ctx) a then
-    -- captures that may only revert: the right operand need not be held
-    let (P, a) ← hoist a
-    pure (Q ++ P, .binop op a b)
-  else pure (Q, .binop op a b)
-
-/-- `hoist`, but an operation at the top is left to the statement, which
-checks its narrow width after the write (`narrowPost`). -/
-partial def hoistTop : RawExpr → ElabM (SProg C × RawExpr)
-  | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
-  | .unop op a => do
-    let (P, a) ← hoist a
-    pure (P, .unop op a)
-  | e => hoist e
-
-/-- `l = r;`: the right-hand side's captures, then the target's; an operation at
-the top of `r` stays there when `l` is a variable (`hoistTop`). -/
-partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
-  let (P, r) ← if l matches .name _ then hoistTop r else hoist r
-  -- a storage reference into a memory object's member or element: copied
-  -- into a fresh memory object first, before the target's index (solkey's
-  -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
-  let (P, r) ← do
-    let Γ ← nctx
-    -- the target's shape: its indices, which may have effects, read as `0`
-    let rec shape : RawExpr → RawExpr
-      | .index e _ => .index (shape e) (.num 0)
-      | .field e f => .field (shape e) f
-      | e => e
-    match synth C Γ (shape l), synth C Γ r with
-    | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
-      match hm : (Ty.ref R).mapFree with
-      | true =>
-        let x ← captureRef C "mv" (.mem R) r
-        pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
-      | false => throw "a copy into memory of a type that holds a mapping"
-    | _, _ => pure (P, r)
-  let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
-  let (Q, l) ← hoist l
-  pure (P ++ Pc ++ Q, .assign l r)
-
-/-- A call's arguments, left to right: one read before a later argument's
-effect is captured first, as a binary operator's operand is. -/
-partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
-  | [] => pure ([], [])
-  | a :: as => do
-    let (P, a) ← hoist a
-    let (Pc, a) ← if as.any (·.hasIncDec) then captureExpr C a else pure ([], a)
-    let (Q, as) ← hoistArgs as
-    pure (P ++ Pc ++ Q, a :: as)
-
-/-- A byte string as a memory local: a memory one bound to a fresh name, a
-storage one copied into a fresh memory `bytes` (solc's conversion). -/
-partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
-  if let .name x := a then
-    if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
-  let x := toString (← freshCapture "mv")
-  pure (← elabStmtsP [.declMemory (.named "bytes") x (some a)], x)
-
-/-- The kind of an argument of `abi.encode` (`AbiKind`), by its static type. -/
-partial def abiKind (a : RawExpr) : ElabM AbiKind := do
-  if a.bytesLit?.isSome then return .dyn
-  let Γ ← ctx
-  match synth C (← nctx) a with
-  | .ok (.val .bool _) => pure .bool
-  | .ok (.val .int _) => pure (.int (widthIn C Γ a))
-  | .ok (.val .uint _) =>
-    match bytesOf? C Γ a with
-    | some n => pure (.bytesN n)
-    | none =>
-      -- an `address` at 20 bytes, an enum at one (`addressRows`, `enumRows`)
-      match markOf? C Γ "#address" a, markOf? C Γ "#enum" a with
-      | some n, _ | none, some n => pure (.uint (8 * n))
-      | none, none => pure (.uint (widthIn C Γ a))
-  | .ok (.mpath (.ref R) _) | .ok (.path (.ref R) _) =>
-    let ws := placeShape C Γ a
-    match R with
-    | .array (.prim p) =>
-      if p == .uint && lookupBy "[]#bytes" ws == some 1 then pure .dyn
-      else pure (.arr (.ofValue p ws "[]"))
-    | .fixed (.prim p) n => pure (.fixed (.ofValue p ws "[]") n)
-    | .struct s =>
-      if (AbiKind.ofStruct s).isSome then pure (.tuple s)
-      else throw s!"{a.toStr}: a struct with a member that is not a value is not ABI-encoded here"
-    | _ => throw s!"{a.toStr}: an array of references or a mapping is not ABI-encoded here"
-  | .ok _ => throw s!"{a.toStr}: a value of this type is not ABI-encoded here"
-  | .error e => throw e
-
-/-- The kinds of `abi.encode`'s arguments that their capture would lose,
-read before it: a `bytesN` marked (`abiBytesMark`), an `address`, an enum
-(`markOf?`). -/
-partial def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
-  let Γ ← ctx
-  let marked (a : RawExpr) : Option AbiKind :=
-    if (markOf? C Γ "#address" a).isSome then some (.uint 160)
-    else if (markOf? C Γ "#enum" a).isSome then some (.uint 8) else none
-  pure (args.map fun a => match a with
-    | .call g [_] =>
-      match abiBytesMark? g with
-      | some n => some (.bytesN n)
-      | none => marked a
-    | a => marked a)
-
-/-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
-`n` head words: the offset `o` that word holds, the length `L` at `o`, then
-the `L` bytes after it copied into a fresh memory `bytes`, each read checked
-in range as solc's decoder checks it (an offset or a length past the data
-reverts). -/
-partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) := do
-  let o := toString (← freshCapture "se")
-  let L := toString (← freshCapture "se")
-  let x := toString (← freshCapture "mv")
-  let j := toString (← freshCapture "se")
-  let len : RawExpr := d.len
-  let start : RawExpr := (RawExpr.name o).addN 32
-  let S : List RawStmt :=
-    [.require (.binop .ge len (.num (32 * n)))] ++ abiAssemble d o (.num h) 32 ++
-    [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
-    [.require (.binop .le (.binop .add start (.name L)) len),
-     .declMemory (.named T) x (some (.newArr (.named T) (.name L))),
-     .decl (.named "uint") j (some (.num 0)),
-     .whileLoop {} (.binop .lt (.name j) (.name L))
-       [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
-        .assign (.name j) (.binop .add (.name j) (.num 1))]]
-  pure (← elabStmtsP S, x)
-
-/-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
-`string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
-fresh memory `bytes` of solc's layout (`AbiKind`). -/
-partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+/-- `abiEncode`, outside its `mutual` block (`elabRec`). -/
+def abiEncodeWith (rc : ElabRec C) (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
     (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) := do
+  let abiMemBytes := @ElabRec.abiMemBytes C rc
+  let elabStmtsP := @ElabRec.elabStmtsP C rc
+  let abiKind := abiKind C
   -- nested types, head and tail recursively (`abiEncodeNested?`)
   if std then
     if let some r ← abiEncodeNested? C abiKind abiMemBytes elabStmtsP args marks sel then return r
@@ -4674,287 +4640,14 @@ partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Opt
     hpos := hpos + 32 * k.headWords
   pure (P ++ (← elabStmtsP S), .name r)
 
-/-- Prepare a reference call in argument order. Storage-to-memory conversion
-copies at the argument's evaluation point; every reference's identity and
-each scalar read are held before a later argument can change them. Calls
-with only value parameters retain the ordinary capture policy. -/
-partial def hoistCallArgs (f : String) (args : List RawExpr) :
-    ElabM (SProg C × List RawExpr) := do
-  let funs := (← read).funs
-  let d := if f == "constructor" then C.ctor else lookupBy f funs
-  let some d := d | return ← hoistArgs args
-  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
-  unless d.params.length == args.length do
-    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
-  let mut P : SProg C := []
-  let mut prepared : List RawExpr := []
-  for ((n, T), a) in d.params.zip args do
-    -- a reference argument's narrow positions, on the expression as written,
-    -- before a capture names it (`elabCallRet` checks the capture again)
-    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
-    let (Q, a) ← hoist a
-    P := P ++ Q
-    let Γ ← nctx
-    let (Q, a) ← match T with
-      | .prim p => do
-        if (lookupBy n d.paramLocs).isSome then
-          throw s!"{f}: data location on value parameter {n}"
-        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
-        captureExpr C a
-      | .ref R => do
-        let stable ← match a with
-          | .name n => match Var.ofName n with
-            | .fresh _ i => do
-              let sc ← read
-              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
-                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
-            | _ => pure false
-          | _ => pure false
-        match lookupBy n d.paramLocs with
-        | some .storage =>
-          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
-          if stable then pure ([], a) else do
-          let x ← captureRef C "sp" (.alias R) a
-          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
-        | some .memory | some .calldata =>
-          let rhs ← ElabM.lift (elabMRhs C Γ R a)
-          if stable && (rhs matches .alias _) then pure ([], a) else do
-          let x ← captureRef C "mv" (.mem R) a
-          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
-        | none => throw s!"{f}: reference parameter {n} needs a data location"
-    P := P ++ Q
-    prepared := prepared ++ [a]
-  pure (P, prepared)
-
-/-- **A call through a function value** `h(a)`, `h` of the function type
-`ty` (`fnTyOf?`): the arguments that are not pure captured, left to right,
-then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
-if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
-`Panic(0x51)`, which the model reads as a revert, as it reads an index out
-of range's `Panic(0x32)` (`Storage.checkIndex`, the solkey reading).  A function
-of `ty` this one may not call (declared after it) is refused when it is named
-as a value in the contract; one that is not cannot reach here (`fnTag`).
-With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
-partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
-  let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
-  if ext then return ← extDispatch h ty ps rs args res resW resNew
-  unless ps.length == args.length do
-    throw s!"{h} takes {ps.length} arguments, not {args.length}"
-  -- a reference parameter or return: no function's signature is spelled so
-  -- (`FunDecl.sigTy?`), so the dispatch would list none
-  if let some c := (ps ++ rs).find? fun c => (fnCompTy? C c).isNone then
-    throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
-      (docs/semantic-gaps.md, \"Function types\")"
-  let scope := (← read).funs
-  let taken := fnTaken C
-  let mut cands : List (String × Nat) := []
-  for ((g, d), i) in C.funs.zipIdx do
-    if FunDecl.sigTy? C d == some ty && fnReachable C g then
-      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
-      else if taken.contains g then
-        throw s!"{h}(…) may call {g}, which is not declared before this function: \
-          declare the functions of type {ty} first"
-  let mut pre : List RawStmt := []
-  let mut as : List RawExpr := []
-  for (a, c) in args.zip ps do
-    if a.isPure then as := as ++ [a] else
-      let y := toString (← freshCapture "se")
-      pre := pre ++ [.decl (.named c) y (some a)]
-      as := as ++ [.name y]
-  let call (g : String) : RawStmt := match res with
-    | some (x, _) => .assign (.name (toString x)) (.call g as)
-    | none => .call (.name g) as
-  let disp := cands.foldr (fun (g, t) els =>
-    [RawStmt.ite (.binop .eqB (.name h) (.num t)) [call g] els]) [RawStmt.revert]
-  let (Γ0, _) ← get
-  if resNew then
-    if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch (pre ++ disp)
-  modify fun (_, k) => (Γ0, k)
-  pure P
-
-/-- `try r.g(as) returns (T v) { x = v; } catch { revert(); }`: an external
-call whose every failure reverts the caller, as a call outside a `try` does,
-its one return landing in `res`; the types of `ps → rs`. -/
-partial def extCallStmt (r : RawExpr) (g : String) (as : List RawExpr) (rs : List String)
-    (res : Option (Var × PrimTy)) : ElabM RawStmt := do
-  let mut rets : List (RawTy × String) := []
-  for t in rs do rets := rets ++ [(.named t, toString (← freshCapture "se"))]
-  let ok : List RawStmt := match res, rets with
-    | some (x, _), [(_, v)] => [.assign (.name (toString x)) (.name v)]
-    | _, _ => []
-  pure (.tryCall r g as rets ok [.revert] none [.revert] [.revert])
-
-/-- **A call through an external function value** `h(a)`, `h` of the
-external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
-so the call is an external call to `h / 2^32` (`extCallStmt`), dispatched on
-the selector `h - h / 2^32 * 2^32` over the functions of `C` of that type, so that one
-to `this` runs the function (`Stmt.tryCall`'s `self`, O8); any other
-selector is a call the model names `#selector`, its first argument the
-selector, whose response the world chooses as for any external call. -/
-partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawExpr)
-    (res : Option (Var × PrimTy)) (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
-  unless ps.length == args.length do
-    throw s!"{h} takes {ps.length} arguments, not {args.length}"
-  if 1 < rs.length then throw s!"{h}(…): an external function value of several returns"
-  let a := toString (← freshCapture "se")
-  let sl := toString (← freshCapture "se")
-  let mut pre : List RawStmt := [.decl (.named "address") a (some (.binop .div (.name h) (.num selShift))),
-    .decl (.named "uint") sl
-      (some (.binop .sub (.name h) (.binop .mul (.name a) (.num selShift))))]
-  let mut as : List RawExpr := []
-  for (x, c) in args.zip ps do
-    if x.isPure then as := as ++ [x] else
-      let y := toString (← freshCapture "se")
-      pre := pre ++ [.decl (.named c) y (some x)]
-      as := as ++ [.name y]
-  let mut cands : List (String × Nat) := []
-  for (g, d) in C.funs do
-    if FunDecl.extTy? C d == some ty then
-      if let some sel := fnSelector? C g then cands := cands ++ [(g, sel)]
-  let other ← extCallStmt (.name a) "#selector" (.name sl :: as) rs res
-  let mut disp : List RawStmt := [other]
-  for (g, sel) in cands.reverse do
-    disp := [.ite (.binop .eqB (.name sl) (.num sel)) [← extCallStmt (.name a) g as rs res] disp]
-  let (Γ0, _) ← get
-  if resNew then
-    if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch (pre ++ disp)
-  modify fun (_, k) => (Γ0, k)
-  pure P
-
-/-- **A call through a value that is not a name** (`callValueName`):
-`s.f(x)`, `fs[i](x)`, `choose(b)(x)`.  The callee is evaluated first, into
-a fresh local of its function type (`fnTyOfExpr`), then called as a name is
-(`fnDispatch`); `r.g(x)` for a function `g` of `C` is an external call
-(`extCallStmt`), `this.g(x)` the contract's own (O8). -/
-partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
-  -- a function's or a function value's name in parentheses
-  if let .name g := h then
-    if (← read).funs.any (·.1 == g) || (fnTyOf? C (← ctx) g).isSome then
-      return (← elabCallRet g args res resW (resNew := resNew)).1
-  let Γe ← ctx
-  let stmts : List RawStmt ← match extMember? C Γe h with
-    | some (r, g) => do
-      let some d := lookupBy g C.funs | throw s!"{g} is not a function of the contract"
-      let rs ← d.rets.mapM fun (n, T) => match T with
-        | .prim p => pure (declTyName d.widths n p)
-        | _ => throw s!"{h.toStr}(…): an external call returns values"
-      pure [← extCallStmt r g args rs res]
-    | none => do
-      let some ty := fnTyOfExpr C Γe h | throw s!"{h.toStr}(…): the callee is not a function value"
-      let y := toString (← freshCapture "se")
-      let call : RawStmt := match res with
-        | some (x, _) => .assign (.name (toString x)) (.call y args)
-        | none => .call (.name y) args
-      pure [.decl (.named ty) y (some h), call]
-  let (Γ0, _) ← get
-  if resNew then
-    if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch stmts
-  modify fun (_, k) => (Γ0, k)
-  pure P
-
-/-- **A call, inlined** (KeY's `FunctionBodyStatement`, then its body): `f`
-is found among the functions the scope may call, its arguments are checked
-at its parameters' types in the caller's scope, and its body is elaborated in
-a scope of its own — its parameters and its return variable, every local
-renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — with
-the functions declared before `f`, so no call recurses.  `res` is the local
-the returned value lands in, with its type. -/
-partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) (resNew : Bool := false) : ElabM (SProg C) := do
-  pure (← elabCallRet f args res resW (resNew := resNew)).1
-
-/-- A call of `f`, which returns a memory reference of type `R`, and `bind Γ r`,
-the statement that binds the callee's return variable `r` where the call
-is, read in the caller's context `Γ` with `r` pushed: `Account memory mv1 =
-mv2;`, `m = mv2;` (the module docstring). -/
-partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
-    (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) :
-    ElabM (SProg C) := do
-  let (P, r, _) ← elabCallRet f args none
-  match r with
-  | some ⟨Γ, R', r, storage⟩ =>
-    if storage then throw s!"{f} returns a storage reference, not a memory reference"
-    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
-    let ⟨hm⟩ ← ElabM.lift (memOk R)
-    pure (P ++ [← ElabM.lift (bind Γ r hm)])
-  | none => throw s!"{f} does not return a memory reference"
-
-/-- Bind the alias exported by a storage-returning call, without a copy or
-an allocation. The return variable is the newest local after the call. -/
-partial def elabStorageCall (f : String) (args : List RawExpr) (R : RefTy)
-    (bind : (Γ : NCtx) → Var → Except String (SStmt C)) : ElabM (SProg C) := do
-  let (P, result, _) ← elabCallRet f args none
-  match result with
-  | some ⟨Γ, R', r, storage⟩ =>
-    unless storage do throw s!"{f} returns a memory reference, not a storage reference"
-    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
-    pure (P ++ [← ElabM.lift (bind Γ r)])
-  | none => throw s!"{f} does not return a storage reference"
-
-/-- Retain `f().push(e)` or `f().pop()` as the calculus's native receiver
-statement. The callee is elaborated in its frame, without exporting a caller local. -/
-partial def elabCallReceiver (f : String) (args : List RawExpr)
-    (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
-    ElabM (SProg C) := do
-  let (P, _, _) ← elabCallRet f args none
-  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
-  match s with
-  | .call f args (.storage (.array E) r) body =>
-    pure [.of Γ (.callReceiver f args r body (← op Γ E))]
-  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
-
-/-- Keep an effectful operand inside `f().push(e)`, in a private caller scope.
-Its prefix is expanded only after the getter has been captured by the taclet. -/
-partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr) :
-    ElabM (SProg C) := do
-  let caller ← ctx
-  let (P, _, _) ← elabCallRet f args none
-  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
-  match s with
-  | .call f args (.storage (.array E) r) body =>
-    let (Q, a) ← hoist a
-    let Γv ← nctx
-    let value ← (match E with
-      | .prim p => do pure (Src.val (← checkIn C Γv p a))
-      | .ref R => do
-        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γv a) then
-          pure (Src.copyMem (← ElabM.lift (checkMPath C Γv (.ref R) a)))
-        else ElabM.lift (checkStorageCopy C Γv R a)
-      : ElabM (Src C Γv.ctx E))
-    let result ← if Q.isEmpty then do
-      let h ← ElabM.lift (Γv.wkTo Γ)
-      pure (.of Γ (.callReceiver f args r body (.push (some (value.wk h)) rfl)))
-    else do
-      let ⟨Δ, code⟩ ← ElabM.lift (SProg.chain Γ.names Γ.ctx Q)
-      let some h := Γv.thinInto (code.outNames Γ.names) Δ |
-        throw "internal: a deferred receiver operand left an unmatched local scope"
-      pure (.of Γ (.callReceiverPush f args r body code (value.wk h)))
-    modify fun (_, k) => (caller, k)
-    pure [result]
-  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
-
-/-- `elabCall`, and the fresh return variable of a callee that returns a
-memory reference, with its type and the caller's context: the call's frame
-declares it (a fresh default object, `CallRet.mem`) and leaves it to the
-caller, which binds it after the call (`elabMemCall`).  With `targets`, the
-call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
-`FunctionBodyStatement` with targets: it returns every return value
-(`CallRet.rets`, one or several), which the caller reads after the call —
-their fresh variables, types and widths.  A callee of several returns called
-as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
-its body and returns nothing.  With `resNew`, the local `res` is declared by
-the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
-the call is read in the context it pushes, its arguments where `res` is not
-yet in scope. -/
-partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+/-- `elabCallRet`, outside its `mutual` block (`elabRec`). -/
+def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
+  let fnDispatch := @ElabRec.fnDispatch C rc
+  let callValue := @ElabRec.callValue C rc
+  let elabStmtsP := @ElabRec.elabStmtsP C rc
   let funs := (← read).funs
   -- a call through a value that is not a name (`callValue`)
   if !ctor && f == callValueName then
@@ -5207,119 +4900,14 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 
-/-- **The body a `try` runs when its receiver is the contract itself**
-(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
-call with targets (`elabCallRet`), its environment the frame's
-(`RawStmt.selfFrame`), when `g` is a function declared before this one whose
-parameters take the arguments' types and whose return variables are the
-`try`'s `ρ`; `none` otherwise (another contract's function, or one this
-function may not call: the restriction that keeps the run structural). -/
-partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
-    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
-  let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
-  unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
-  unless d.rets.all (fun (_, T) => T matches .prim _) do return none
-  let raw := args.map fun a => Simple.toRaw C Γ.names a.2
-  let r ← tryCatch (do
-      let (P, _, _) ← elabCallRet g raw none (targets := true) (selfFrame := true)
-      pure (some P)) fun _ => pure none
-  let some [st] := r | pure none
-  if h : st.Γ.ctx = Γ.ctx then
-    pure (Stmt.selfCall? C ρ (h ▸ st.s))
-  else pure none
-
-/-- **The body a value call runs when its receiver is the contract itself**
-(`(bool ok, ) = payable(this).call{value: v}("")`, `docs/options.md` O8):
-the contract's `receive`, declared before this function, inlined as a call
-with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
-`msg.value` its one parameter, which the call passes `v` (raw, read in the
-caller's scope).  `none` where there is no such `receive`, or where it does
-not elaborate so: a function it calls reads `msg.value` (its frame does not
-have the parameter). -/
-partial def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
-    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
-  let funs := (← read).funs
-  let some (_, d) := funs.find? (·.1 == "receive") | pure none
-  unless d.params.isEmpty && d.rets.isEmpty && d.mods.isEmpty do return none
-  -- the parameter `msg.value` reads, a name no source declares
-  let receiveValueParam := "msgValue$"
-  let pv := RawExpr.name receiveValueParam
-  let ps : List (Name × Ty) := [(receiveValueParam, .prim .uint)]
-  let d' : FunDecl := { d with params := ps, body := d.body.map (RawStmt.selfFrame pv) }
-  let funs' := funs.map fun (n, e) => if n == "receive" then (n, d') else (n, e)
-  let r ← tryCatch (do
-      let nested : RawExpr := .name (receiveValueParam ++ "nested")
-      let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
-        (elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
-      pure (some P)) fun _ => pure none
-  let some [st] := r | pure none
-  if h : st.Γ.ctx = Γ.ctx then
-    pure (Stmt.selfCall? C [] (h ▸ st.s))
-  else pure none
-
-/-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
-`ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
-se = r == address(this); if (se) { try this.receive{value: v}() { ok = true; } catch { ok
-= false; } } else { … the call … }`, the self-call a `try` the contract runs
-(`Stmt.tryCall`'s `self`), every failure `ok = false` with the state the
-caller's; otherwise the call alone. -/
-partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
-    (e a : RawExpr) : ElabM (SProg C) := do
-  let plain : ElabM (SProg C) := do
-    pure [.of Γ (.send ix (← checkIn C Γ .uint e) (← checkIn C Γ .uint a) true)]
-  unless (← read).funs.any (·.1 == "receive") do return ← plain
-  let st ← get
-  let (P, ⟨Γr, addr⟩) ← simpleOf C .uint e
-  let Γ1 ← nctx
-  let addr1 := addr.wk (← ElabM.lift (Γr.wkTo Γ1))
-  -- the test captured, as `ifElseSplit` takes a simple condition
-  let c : Val C Γ1.ctx .bool :=
-    .binop .eqB rfl rfl (.simple addr1) (.simple (.env .selfAddress rfl))
-  let x ← captureAs C "se" (.val .bool)
-  let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
-  let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
-  let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
-  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBody (Γ := Γ') a | set st; plain
-  let v ← checkIn C Γ' .uint a
-  let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
-  let (Γe, _) ← get
-  let okP ← elabStmtsP (setOk true)
-  let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
-  let (_, k) ← get
-  set (Γe, k)
-  let err ← elabScope Γ' (setOk false)
-  let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
-  let pnc ← elabStmtsP (setOk false)
-  let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
-  let (_, k) ← get
-  set (Γe, k)
-  let other ← elabScope Γ' (setOk false)
-  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
-  let tryS : Stmt C Γ'.ctx Γ'.ctx :=
-    .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
-  pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
-    .of Γ' (.ite (.simple (.local ixc)) (.cons tryS .nil)
-      (.cons (.send ix' (.simple addr') v true) .nil))])
-
-/-- **`constructor(args);`**, a deployment (solkey's obligation's
-`constructor(x̄)@C;`): the constructor inlined as any call is
-(`elabCallRet`), the state variables' initializers prepended to its body
-after its parameters are bound; with no `constructor` declared, the implicit
-one, of no parameters and no body.  It returns to no targets
-(`CallRet.rets []`), a `FunctionBodyStatement` as solkey's is
-(`functionBodyExpand`).  Only a program's own statements deploy, never an
-inlined body (no function calls the constructor), and not a branch, a loop
-or a block (`elabBranch`), which would deploy again or only sometimes. -/
-partial def elabCtor (args : List RawExpr) : ElabM (SProg C) := do
-  unless (← read).top do
-    throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
-  pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
-
-/-- The captures a statement's own expressions need (`hoist`), and the
-statement left: a right-hand side before the left-hand side, as the
-interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
-own. -/
-partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
+/-- `hoistStmt`, outside its `mutual` block (`elabRec`). -/
+def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := fun s0 =>
+  let hoist := @ElabRec.hoist C rc
+  let hoistTop := @ElabRec.hoistTop C rc
+  let hoistAssign := @ElabRec.hoistAssign C rc
+  let hoistArgs := @ElabRec.hoistArgs C rc
+  let hoistCallArgs := @ElabRec.hoistCallArgs C rc
+  match s0 with
   | .pushOpAssign op b r => do
     let (P, r) ← hoist r
     let (Pc, r) ← if b.hasIncDec then captureExpr C r else pure ([], r)
@@ -5438,10 +5026,11 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
     pure (Q, .eval [])
   | s => pure ([], s)
 
-/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
-(`hoistStmt`), then the statement,
-whose compound target may need a capture of its own. -/
-partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
+/-- `elabStmtP`, outside its `mutual` block (`elabRec`). -/
+def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
+  let hoistStmt := @ElabRec.hoistStmt C rc
+  let elabStmt1 := @ElabRec.elabStmt1 C rc
+  let elabStmtsP := @ElabRec.elabStmtsP C rc
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
   -- custom errors (`revert E(a)`, `require(c, E(a))`): their data only where
   -- a `try` reads it, as `revertMsg`'s
@@ -5590,8 +5179,26 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   | _ => pure ()
   pure P
 
-/-- A statement whose expressions have no effect left. -/
-partial def elabStmt1 : RawStmt → ElabM (SProg C)
+/-- `elabStmt1`, outside its `mutual` block (`elabRec`). -/
+def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
+  let hoistArgs := @ElabRec.hoistArgs C rc
+  let elabCall := @ElabRec.elabCall C rc
+  let elabMemCall := @ElabRec.elabMemCall C rc
+  let elabStorageCall := @ElabRec.elabStorageCall C rc
+  let elabCallReceiver := @ElabRec.elabCallReceiver C rc
+  let elabCallReceiverPush := @ElabRec.elabCallReceiverPush C rc
+  let trySelfBody := @ElabRec.trySelfBody C rc
+  let elabValueCall := @ElabRec.elabValueCall C rc
+  let elabCtor := @ElabRec.elabCtor C rc
+  let elabStmtP := @ElabRec.elabStmtP C rc
+  let elabStmt1 := @ElabRec.elabStmt1 C rc
+  let loopExpr := @ElabRec.loopExpr C rc
+  let loopQ := @ElabRec.loopQ C rc
+  let elabStmtsP := @ElabRec.elabStmtsP C rc
+  let elabBranch := @ElabRec.elabBranch C rc
+  let elabScope := @ElabRec.elabScope C rc
+  let elabTuple := @ElabRec.elabTuple C rc
+  match s0 with
   | .pushOpAssign op b r => do
     let ⟨Γ, t⟩ ← synthM C b
     let .path (.ref (.array (.prim p))) path := t
@@ -5992,6 +5599,561 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     set (Γe, k)
     let other ← clause other
     pure (Q ++ [.of Γ (.tryCall call bs ok.2 err.2 cb pnc.2 other.2 sargs sbody self)])
+
+mutual
+
+/-- The record of the block's functions (`ElabRec`), which ties the arms
+defined before it. -/
+partial def elabRec (_ : Unit) : ElabRec C where
+  hoist := hoist
+  hoistBinop := hoistBinop
+  hoistTop := hoistTop
+  hoistAssign := hoistAssign
+  hoistArgs := hoistArgs
+  abiMemBytes := abiMemBytes
+  abiDecodeBytes := abiDecodeBytes
+  abiEncode := @abiEncode
+  hoistCallArgs := hoistCallArgs
+  fnDispatch := fnDispatch
+  callValue := callValue
+  elabCall := @elabCall
+  elabMemCall := elabMemCall
+  elabStorageCall := elabStorageCall
+  elabCallReceiver := elabCallReceiver
+  elabCallReceiverPush := elabCallReceiverPush
+  trySelfBody := @trySelfBody
+  elabValueCall := elabValueCall
+  elabCtor := elabCtor
+  hoistStmt := hoistStmt
+  elabStmtP := elabStmtP
+  elabStmt1 := elabStmt1
+  loopExpr := loopExpr
+  loopQ := loopQ
+  elabStmtsP := elabStmtsP
+  elabBranch := elabBranch
+  elabScope := elabScope
+  elabTuple := @elabTuple
+
+/-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
+conditional of references, are evaluated before the statement that holds
+them, in solc's order (an assignment's right-hand side before its target, a
+binary operator's right operand before its left, an index's base before the
+index: an operand read before an effect is captured with `captureExpr`),
+into fresh locals (KeY's captures): `values[i++] = 1;`
+is `uint se1; se1 = i++; values[se1] = 1;`, and
+`Person storage p = c ? alice : bob;` is
+`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
+Person storage p = sp1;`, the alias declared before the branches, which are
+scopes.  A memory one is `Person memory mv1 = mx;
+if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
+indexes nothing (`MPath.indexFree`, a read that cannot revert on a set
+local; an unset one, which only a hidden binder holds (decision 17'),
+reverts there where solc reads the other branch), or, when both index, to
+a fresh default object (`Person memory mv1;`, an object nothing reaches),
+and rebound in each branch.  Under the right
+operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
+narrow check is captured where solc evaluates it, under a test of its own: `a
+&& b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
+`uint se; if (c) { se = a; } else { se = b; }`. -/
+partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
+  hoistWith C (elabRec ()) s0
+
+/-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
+i` is `1 + 1`), the left one's after it, and the right one held before an
+effect of the left. -/
+partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let (Q, b) ← hoist b
+  if a.hasIncDec then
+    let (Qc, b) ← captureExpr C b
+    let (P, a) ← hoist a
+    pure (Q ++ Qc ++ P, .binop op a b)
+  else if a.hasIdxLen || a.hasCast || hasNarrow C (← ctx) a then
+    -- captures that may only revert: the right operand need not be held
+    let (P, a) ← hoist a
+    pure (Q ++ P, .binop op a b)
+  else pure (Q, .binop op a b)
+
+/-- `hoist`, but an operation at the top is left to the statement, which
+checks its narrow width after the write (`narrowPost`). -/
+partial def hoistTop : RawExpr → ElabM (SProg C × RawExpr)
+  | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
+  | .unop op a => do
+    let (P, a) ← hoist a
+    pure (P, .unop op a)
+  | e => hoist e
+
+/-- `l = r;`: the right-hand side's captures, then the target's; an operation at
+the top of `r` stays there when `l` is a variable (`hoistTop`). -/
+partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
+  let (P, r) ← if l matches .name _ then hoistTop r else hoist r
+  -- a storage reference into a memory object's member or element: copied
+  -- into a fresh memory object first, before the target's index (solkey's
+  -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
+  let (P, r) ← do
+    let Γ ← nctx
+    -- the target's shape: its indices, which may have effects, read as `0`
+    let rec shape : RawExpr → RawExpr
+      | .index e _ => .index (shape e) (.num 0)
+      | .field e f => .field (shape e) f
+      | e => e
+    match synth C Γ (shape l), synth C Γ r with
+    | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
+      match hm : (Ty.ref R).mapFree with
+      | true =>
+        let x ← captureRef C "mv" (.mem R) r
+        pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
+      | false => throw "a copy into memory of a type that holds a mapping"
+    | _, _ => pure (P, r)
+  let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
+  let (Q, l) ← hoist l
+  pure (P ++ Pc ++ Q, .assign l r)
+
+/-- A call's arguments, left to right: one read before a later argument's
+effect is captured first, as a binary operator's operand is. -/
+partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
+  | [] => pure ([], [])
+  | a :: as => do
+    let (P, a) ← hoist a
+    let (Pc, a) ← if as.any (·.hasIncDec) then captureExpr C a else pure ([], a)
+    let (Q, as) ← hoistArgs as
+    pure (P ++ Pc ++ Q, a :: as)
+
+/-- A byte string as a memory local: a memory one bound to a fresh name, a
+storage one copied into a fresh memory `bytes` (solc's conversion). -/
+partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
+  if let .name x := a then
+    if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
+  let x := toString (← freshCapture "mv")
+  pure (← elabStmtsP [.declMemory (.named "bytes") x (some a)], x)
+
+
+
+/-- `abi.decode` of a `bytes` or a `string` at the head word `h` of `d`, of
+`n` head words: the offset `o` that word holds, the length `L` at `o`, then
+the `L` bytes after it copied into a fresh memory `bytes`, each read checked
+in range as solc's decoder checks it (an offset or a length past the data
+reverts). -/
+partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) := do
+  let o := toString (← freshCapture "se")
+  let L := toString (← freshCapture "se")
+  let x := toString (← freshCapture "mv")
+  let j := toString (← freshCapture "se")
+  let len : RawExpr := d.len
+  let start : RawExpr := (RawExpr.name o).addN 32
+  let S : List RawStmt :=
+    [.require (.binop .ge len (.num (32 * n)))] ++ abiAssemble d o (.num h) 32 ++
+    [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
+    [.require (.binop .le (.binop .add start (.name L)) len),
+     .declMemory (.named T) x (some (.newArr (.named T) (.name L))),
+     .decl (.named "uint") j (some (.num 0)),
+     .whileLoop {} (.binop .lt (.name j) (.name L))
+       [.assign (.index (.name x) (.name j)) (abiByte d (.binop .add start (.name j))),
+        .assign (.name j) (.binop .add (.name j) (.num 1))]]
+  pure (← elabStmtsP S, x)
+
+/-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
+`string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
+fresh memory `bytes` of solc's layout (`AbiKind`). -/
+partial def abiEncode (std strs : Bool) (args : List RawExpr) (marks : List (Option AbiKind))
+    (sel : Option RawExpr := none) : ElabM (SProg C × RawExpr) :=
+  abiEncodeWith C (elabRec ()) std strs args marks sel
+
+/-- Prepare a reference call in argument order. Storage-to-memory conversion
+copies at the argument's evaluation point; every reference's identity and
+each scalar read are held before a later argument can change them. Calls
+with only value parameters retain the ordinary capture policy. -/
+partial def hoistCallArgs (f : String) (args : List RawExpr) :
+    ElabM (SProg C × List RawExpr) := do
+  let funs := (← read).funs
+  let d := if f == "constructor" then C.ctor else lookupBy f funs
+  let some d := d | return ← hoistArgs args
+  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
+  unless d.params.length == args.length do
+    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
+  let mut P : SProg C := []
+  let mut prepared : List RawExpr := []
+  for ((n, T), a) in d.params.zip args do
+    -- a reference argument's narrow positions, on the expression as written,
+    -- before a capture names it (`elabCallRet` checks the capture again)
+    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
+    let (Q, a) ← hoist a
+    P := P ++ Q
+    let Γ ← nctx
+    let (Q, a) ← match T with
+      | .prim p => do
+        if (lookupBy n d.paramLocs).isSome then
+          throw s!"{f}: data location on value parameter {n}"
+        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
+        captureExpr C a
+      | .ref R => do
+        let stable ← match a with
+          | .name n => match Var.ofName n with
+            | .fresh _ i => do
+              let sc ← read
+              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
+                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
+            | _ => pure false
+          | _ => pure false
+        match lookupBy n d.paramLocs with
+        | some .storage =>
+          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+          if stable then pure ([], a) else do
+          let x ← captureRef C "sp" (.alias R) a
+          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
+        | some .memory | some .calldata =>
+          let rhs ← ElabM.lift (elabMRhs C Γ R a)
+          if stable && (rhs matches .alias _) then pure ([], a) else do
+          let x ← captureRef C "mv" (.mem R) a
+          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
+        | none => throw s!"{f}: reference parameter {n} needs a data location"
+    P := P ++ Q
+    prepared := prepared ++ [a]
+  pure (P, prepared)
+
+/-- **A call through a function value** `h(a)`, `h` of the function type
+`ty` (`fnTyOf?`): the arguments that are not pure captured, left to right,
+then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
+if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
+`Panic(0x51)`, which the model reads as a revert, as it reads an index out
+of range's `Panic(0x32)` (`Storage.checkIndex`, the solkey reading).  A function
+of `ty` this one may not call (declared after it) is refused when it is named
+as a value in the contract; one that is not cannot reach here (`fnTag`).
+With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
+partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
+  let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
+  if ext then return ← extDispatch h ty ps rs args res resW resNew
+  unless ps.length == args.length do
+    throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  -- a reference parameter or return: no function's signature is spelled so
+  -- (`FunDecl.sigTy?`), so the dispatch would list none
+  if let some c := (ps ++ rs).find? fun c => (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
+      (docs/semantic-gaps.md, \"Function types\")"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let mut pre : List RawStmt := []
+  let mut as : List RawExpr := []
+  for (a, c) in args.zip ps do
+    if a.isPure then as := as ++ [a] else
+      let y := toString (← freshCapture "se")
+      pre := pre ++ [.decl (.named c) y (some a)]
+      as := as ++ [.name y]
+  let call (g : String) : RawStmt := match res with
+    | some (x, _) => .assign (.name (toString x)) (.call g as)
+    | none => .call (.name g) as
+  let disp := cands.foldr (fun (g, t) els =>
+    [RawStmt.ite (.binop .eqB (.name h) (.num t)) [call g] els]) [RawStmt.revert]
+  let (Γ0, _) ← get
+  if resNew then
+    if let some (x, p) := res then declare C (toString x) (.val p resW)
+  let P ← elabBranch (pre ++ disp)
+  modify fun (_, k) => (Γ0, k)
+  pure P
+
+
+/-- **A call through an external function value** `h(a)`, `h` of the
+external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
+so the call is an external call to `h / 2^32` (`extCallStmt`), dispatched on
+the selector `h - h / 2^32 * 2^32` over the functions of `C` of that type, so that one
+to `this` runs the function (`Stmt.tryCall`'s `self`, O8); any other
+selector is a call the model names `#selector`, its first argument the
+selector, whose response the world chooses as for any external call. -/
+partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawExpr)
+    (res : Option (Var × PrimTy)) (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
+  unless ps.length == args.length do
+    throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  if 1 < rs.length then throw s!"{h}(…): an external function value of several returns"
+  let a := toString (← freshCapture "se")
+  let sl := toString (← freshCapture "se")
+  let mut pre : List RawStmt := [.decl (.named "address") a (some (.binop .div (.name h) (.num selShift))),
+    .decl (.named "uint") sl
+      (some (.binop .sub (.name h) (.binop .mul (.name a) (.num selShift))))]
+  let mut as : List RawExpr := []
+  for (x, c) in args.zip ps do
+    if x.isPure then as := as ++ [x] else
+      let y := toString (← freshCapture "se")
+      pre := pre ++ [.decl (.named c) y (some x)]
+      as := as ++ [.name y]
+  let mut cands : List (String × Nat) := []
+  for (g, d) in C.funs do
+    if FunDecl.extTy? C d == some ty then
+      if let some sel := fnSelector? C g then cands := cands ++ [(g, sel)]
+  let other ← extCallStmt (.name a) "#selector" (.name sl :: as) rs res
+  let mut disp : List RawStmt := [other]
+  for (g, sel) in cands.reverse do
+    disp := [.ite (.binop .eqB (.name sl) (.num sel)) [← extCallStmt (.name a) g as rs res] disp]
+  let (Γ0, _) ← get
+  if resNew then
+    if let some (x, p) := res then declare C (toString x) (.val p resW)
+  let P ← elabBranch (pre ++ disp)
+  modify fun (_, k) => (Γ0, k)
+  pure P
+
+/-- **A call through a value that is not a name** (`callValueName`):
+`s.f(x)`, `fs[i](x)`, `choose(b)(x)`.  The callee is evaluated first, into
+a fresh local of its function type (`fnTyOfExpr`), then called as a name is
+(`fnDispatch`); `r.g(x)` for a function `g` of `C` is an external call
+(`extCallStmt`), `this.g(x)` the contract's own (O8). -/
+partial def callValue (h : RawExpr) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
+  -- a function's or a function value's name in parentheses
+  if let .name g := h then
+    if (← read).funs.any (·.1 == g) || (fnTyOf? C (← ctx) g).isSome then
+      return (← elabCallRet g args res resW (resNew := resNew)).1
+  let Γe ← ctx
+  let stmts : List RawStmt ← match extMember? C Γe h with
+    | some (r, g) => do
+      let some d := lookupBy g C.funs | throw s!"{g} is not a function of the contract"
+      let rs ← d.rets.mapM fun (n, T) => match T with
+        | .prim p => pure (declTyName d.widths n p)
+        | _ => throw s!"{h.toStr}(…): an external call returns values"
+      pure [← extCallStmt r g args rs res]
+    | none => do
+      let some ty := fnTyOfExpr C Γe h | throw s!"{h.toStr}(…): the callee is not a function value"
+      let y := toString (← freshCapture "se")
+      let call : RawStmt := match res with
+        | some (x, _) => .assign (.name (toString x)) (.call y args)
+        | none => .call (.name y) args
+      pure [.decl (.named ty) y (some h), call]
+  let (Γ0, _) ← get
+  if resNew then
+    if let some (x, p) := res then declare C (toString x) (.val p resW)
+  let P ← elabBranch stmts
+  modify fun (_, k) => (Γ0, k)
+  pure P
+
+/-- **A call, inlined** (KeY's `FunctionBodyStatement`, then its body): `f`
+is found among the functions the scope may call, its arguments are checked
+at its parameters' types in the caller's scope, and its body is elaborated in
+a scope of its own — its parameters and its return variable, every local
+renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — with
+the functions declared before `f`, so no call recurses.  `res` is the local
+the returned value lands in, with its type. -/
+partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (resNew : Bool := false) : ElabM (SProg C) := do
+  pure (← elabCallRet f args res resW (resNew := resNew)).1
+
+/-- A call of `f`, which returns a memory reference of type `R`, and `bind Γ r`,
+the statement that binds the callee's return variable `r` where the call
+is, read in the caller's context `Γ` with `r` pushed: `Account memory mv1 =
+mv2;`, `m = mv2;` (the module docstring). -/
+partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) :
+    ElabM (SProg C) := do
+  let (P, r, _) ← elabCallRet f args none
+  match r with
+  | some ⟨Γ, R', r, storage⟩ =>
+    if storage then throw s!"{f} returns a storage reference, not a memory reference"
+    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
+    let ⟨hm⟩ ← ElabM.lift (memOk R)
+    pure (P ++ [← ElabM.lift (bind Γ r hm)])
+  | none => throw s!"{f} does not return a memory reference"
+
+/-- Bind the alias exported by a storage-returning call, without a copy or
+an allocation. The return variable is the newest local after the call. -/
+partial def elabStorageCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : (Γ : NCtx) → Var → Except String (SStmt C)) : ElabM (SProg C) := do
+  let (P, result, _) ← elabCallRet f args none
+  match result with
+  | some ⟨Γ, R', r, storage⟩ =>
+    unless storage do throw s!"{f} returns a memory reference, not a storage reference"
+    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
+    pure (P ++ [← ElabM.lift (bind Γ r)])
+  | none => throw s!"{f} does not return a storage reference"
+
+/-- Retain `f().push(e)` or `f().pop()` as the calculus's native receiver
+statement. The callee is elaborated in its frame, without exporting a caller local. -/
+partial def elabCallReceiver (f : String) (args : List RawExpr)
+    (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
+    ElabM (SProg C) := do
+  let (P, _, _) ← elabCallRet f args none
+  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match s with
+  | .call f args (.storage (.array E) r) body =>
+    pure [.of Γ (.callReceiver f args r body (← op Γ E))]
+  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
+
+/-- Keep an effectful operand inside `f().push(e)`, in a private caller scope.
+Its prefix is expanded only after the getter has been captured by the taclet. -/
+partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr) :
+    ElabM (SProg C) := do
+  let caller ← ctx
+  let (P, _, _) ← elabCallRet f args none
+  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match s with
+  | .call f args (.storage (.array E) r) body =>
+    let (Q, a) ← hoist a
+    let Γv ← nctx
+    let value ← (match E with
+      | .prim p => do pure (Src.val (← checkIn C Γv p a))
+      | .ref R => do
+        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γv a) then
+          pure (Src.copyMem (← ElabM.lift (checkMPath C Γv (.ref R) a)))
+        else ElabM.lift (checkStorageCopy C Γv R a)
+      : ElabM (Src C Γv.ctx E))
+    let result ← if Q.isEmpty then do
+      let h ← ElabM.lift (Γv.wkTo Γ)
+      pure (.of Γ (.callReceiver f args r body (.push (some (value.wk h)) rfl)))
+    else do
+      let ⟨Δ, code⟩ ← ElabM.lift (SProg.chain Γ.names Γ.ctx Q)
+      let some h := Γv.thinInto (code.outNames Γ.names) Δ |
+        throw "internal: a deferred receiver operand left an unmatched local scope"
+      pure (.of Γ (.callReceiverPush f args r body code (value.wk h)))
+    modify fun (_, k) => (caller, k)
+    pure [result]
+  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
+
+/-- `elabCall`, and the fresh return variable of a callee that returns a
+memory reference, with its type and the caller's context: the call's frame
+declares it (a fresh default object, `CallRet.mem`) and leaves it to the
+caller, which binds it after the call (`elabMemCall`).  With `targets`, the
+call is a tuple assignment's right-hand side (`elabTuple`), KeyTaclets'
+`FunctionBodyStatement` with targets: it returns every return value
+(`CallRet.rets`, one or several), which the caller reads after the call —
+their fresh variables, types and widths.  A callee of several returns called
+as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
+its body and returns nothing.  With `resNew`, the local `res` is declared by
+the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
+the call is read in the context it pushes, its arguments where `res` is not
+yet in scope. -/
+partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
+    (selfFrame : Bool := false) :
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) :=
+  elabCallRetWith C (elabRec ()) f args res resW targets ctor resNew selfFrame
+
+/-- **The body a `try` runs when its receiver is the contract itself**
+(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
+call with targets (`elabCallRet`), its environment the frame's
+(`RawStmt.selfFrame`), when `g` is a function declared before this one whose
+parameters take the arguments' types and whose return variables are the
+`try`'s `ρ`; `none` otherwise (another contract's function, or one this
+function may not call: the restriction that keeps the run structural). -/
+partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
+  let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
+  unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
+  unless d.rets.all (fun (_, T) => T matches .prim _) do return none
+  let raw := args.map fun a => Simple.toRaw C Γ.names a.2
+  let r ← tryCatch (do
+      let (P, _, _) ← elabCallRet g raw none (targets := true) (selfFrame := true)
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    pure (Stmt.selfCall? C ρ (h ▸ st.s))
+  else pure none
+
+/-- **The body a value call runs when its receiver is the contract itself**
+(`(bool ok, ) = payable(this).call{value: v}("")`, `docs/options.md` O8):
+the contract's `receive`, declared before this function, inlined as a call
+with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
+`msg.value` its one parameter, which the call passes `v` (raw, read in the
+caller's scope).  `none` where there is no such `receive`, or where it does
+not elaborate so: a function it calls reads `msg.value` (its frame does not
+have the parameter). -/
+partial def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
+  let funs := (← read).funs
+  let some (_, d) := funs.find? (·.1 == "receive") | pure none
+  unless d.params.isEmpty && d.rets.isEmpty && d.mods.isEmpty do return none
+  -- the parameter `msg.value` reads, a name no source declares
+  let receiveValueParam := "msgValue$"
+  let pv := RawExpr.name receiveValueParam
+  let ps : List (Name × Ty) := [(receiveValueParam, .prim .uint)]
+  let d' : FunDecl := { d with params := ps, body := d.body.map (RawStmt.selfFrame pv) }
+  let funs' := funs.map fun (n, e) => if n == "receive" then (n, d') else (n, e)
+  let r ← tryCatch (do
+      let nested : RawExpr := .name (receiveValueParam ++ "nested")
+      let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
+        (elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    pure (Stmt.selfCall? C [] (h ▸ st.s))
+  else pure none
+
+/-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
+`ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
+se = r == address(this); if (se) { try this.receive{value: v}() { ok = true; } catch { ok
+= false; } } else { … the call … }`, the self-call a `try` the contract runs
+(`Stmt.tryCall`'s `self`), every failure `ok = false` with the state the
+caller's; otherwise the call alone. -/
+partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
+    (e a : RawExpr) : ElabM (SProg C) := do
+  let plain : ElabM (SProg C) := do
+    pure [.of Γ (.send ix (← checkIn C Γ .uint e) (← checkIn C Γ .uint a) true)]
+  unless (← read).funs.any (·.1 == "receive") do return ← plain
+  let st ← get
+  let (P, ⟨Γr, addr⟩) ← simpleOf C .uint e
+  let Γ1 ← nctx
+  let addr1 := addr.wk (← ElabM.lift (Γr.wkTo Γ1))
+  -- the test captured, as `ifElseSplit` takes a simple condition
+  let c : Val C Γ1.ctx .bool :=
+    .binop .eqB rfl rfl (.simple addr1) (.simple (.env .selfAddress rfl))
+  let x ← captureAs C "se" (.val .bool)
+  let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
+  let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
+  let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
+  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBody (Γ := Γ') a | set st; plain
+  let v ← checkIn C Γ' .uint a
+  let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
+  let (Γe, _) ← get
+  let okP ← elabStmtsP (setOk true)
+  let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
+  let (_, k) ← get
+  set (Γe, k)
+  let err ← elabScope Γ' (setOk false)
+  let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
+  let pnc ← elabStmtsP (setOk false)
+  let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
+  let (_, k) ← get
+  set (Γe, k)
+  let other ← elabScope Γ' (setOk false)
+  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
+  let tryS : Stmt C Γ'.ctx Γ'.ctx :=
+    .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
+  pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
+    .of Γ' (.ite (.simple (.local ixc)) (.cons tryS .nil)
+      (.cons (.send ix' (.simple addr') v true) .nil))])
+
+/-- **`constructor(args);`**, a deployment (solkey's obligation's
+`constructor(x̄)@C;`): the constructor inlined as any call is
+(`elabCallRet`), the state variables' initializers prepended to its body
+after its parameters are bound; with no `constructor` declared, the implicit
+one, of no parameters and no body.  It returns to no targets
+(`CallRet.rets []`), a `FunctionBodyStatement` as solkey's is
+(`functionBodyExpand`).  Only a program's own statements deploy, never an
+inlined body (no function calls the constructor), and not a branch, a loop
+or a block (`elabBranch`), which would deploy again or only sometimes. -/
+partial def elabCtor (args : List RawExpr) : ElabM (SProg C) := do
+  unless (← read).top do
+    throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
+  pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
+
+/-- The captures a statement's own expressions need (`hoist`), and the
+statement left: a right-hand side before the left-hand side, as the
+interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
+own. -/
+partial def hoistStmt (s0 : RawStmt) : ElabM (SProg C × RawStmt) :=
+  hoistStmtWith C (elabRec ()) s0
+
+/-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
+(`hoistStmt`), then the statement,
+whose compound target may need a capture of its own. -/
+partial def elabStmtP (s : RawStmt) : ElabM (SProg C) :=
+  elabStmtPWith C (elabRec ()) s
+
+/-- A statement whose expressions have no effect left. -/
+partial def elabStmt1 (s0 : RawStmt) : ElabM (SProg C) :=
+  elabStmt1With C (elabRec ()) s0
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,

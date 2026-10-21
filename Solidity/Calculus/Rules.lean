@@ -948,9 +948,11 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   callee).  The receiver the contract itself, the callee's body inlined with
   the returned values as its targets, then the success block; the receiver
   another, the success block for every value of the returned data; each
-  `catch` block from the state the call was made in.  The `require`s are the
-  case split: a goal whose receiver is not the case reverts, as one at
-  address `0` does (`trySelfStep`). -/
+  `catch` block from the state the call was made in, the `Panic` block
+  behind the codes the callee may panic with (`panics(selfBody)`,
+  `CodeBinder.guard`).  The `require`s are the case split: a goal whose
+  receiver is not the case reverts, as one at address `0` does
+  (`trySelfStep`). -/
   | tryCallSelfBox {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} {call : ExtCall C Γ} {rets : Binders ρ}
       {body : Prog C (ρ ++ Γ) Γ₁} {errorBody : Prog C Γ Γ₂} {code : CodeBinder κ}
       {panicBody : Prog C (κ ++ Γ) Γ₃} {otherBody : Prog C Γ Γ₄} {selfArgs : Args C Γ ps}

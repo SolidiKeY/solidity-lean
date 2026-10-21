@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundArms
+import Solidity.Calculus.DataIn
 import Solidity.Calculus.SoundCapture
 import Solidity.Calculus.SoundStore
 import Solidity.Calculus.SoundKit
@@ -1050,6 +1051,110 @@ theorem holds_tryPanic {κc Γ₃ Γ₂ Γ₀ : Ctx} (code : CodeBinder κc) (pn
   exact holds_modalK_pop _ pnc _ ω κ φ
     (holds_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h)
 
+/-- `c == k`, of the code `c` bound on top. -/
+theorem codeEq_evalT {Γ : Ctx} (σ : State C (.val .uint :: Γ)) (k : Semantics.Word) :
+    (Val.binop (C := C) .eqB rfl rfl (.simple (.local .here)) (.simple (.lit k.1 k.2)) :
+      Val C (.val .uint :: Γ) .bool).evalT σ =
+      .ok (decide (((Simple.local (C := C) (Γ := .val .uint :: Γ) (p := .uint) .here).evalT σ).1
+        = k.1)) := rfl
+
+/-- A code the guard lists passes it (`codeGuard`). -/
+theorem codeGuard_evalT {Γ : Ctx} (σ : State C (.val .uint :: Γ)) :
+    (ks : List Semantics.Word) →
+      (Simple.local (C := C) (Γ := .val .uint :: Γ) (p := .uint) .here).evalT σ ∈ ks →
+      (codeGuard ks).evalT σ = .ok true
+  | [], h => absurd h List.not_mem_nil
+  | [k], h => by
+    rw [List.mem_singleton] at h
+    unfold codeGuard
+    rw [codeEq_evalT, h, decide_eq_true rfl]
+  | k :: k' :: ks, h => by
+    unfold codeGuard
+    rw [Val.evalT, codeEq_evalT]
+    by_cases hk : ((Simple.local (C := C) (Γ := .val .uint :: Γ) (p := .uint) .here).evalT σ).1
+        = k.1
+    · rw [decide_eq_true hk]
+      rfl
+    · have h' : (Simple.local (C := C) (Γ := .val .uint :: Γ) (p := .uint) .here).evalT σ ∈
+          k' :: ks := by
+        rcases List.mem_cons.1 h with h | h
+        · exact absurd (congrArg Subtype.val h) hk
+        · exact h
+      rw [decide_eq_false hk]
+      simp only [bind, Except.bind, BinOp.shortT, boolT]
+      rw [codeGuard_evalT σ (k' :: ks) h']
+      rfl
+
+/-- `a || b` holds where `a` does, or `a` is evaluated and `b` holds. -/
+theorem Val.or_evalT_true {Δ : Ctx} (τ : State C Δ) (a b : Val C Δ .bool) {x : Bool}
+    (ha : a.evalT τ = .ok x) (hb : x = true ∨ b.evalT τ = .ok true) :
+    (Val.binop .or rfl rfl a b).evalT τ = .ok true := by
+  rw [Val.evalT, ha]
+  cases x with
+  | true => rfl
+  | false =>
+    rcases hb with hb | hb
+    · cases hb
+    · simp only [bind, Except.bind, BinOp.shortT, boolT, Bool.false_eq_true, ↓reduceIte]
+      rw [hb]
+      rfl
+
+/-- **The guarded `Panic` clause** (`CodeBinder.guard`, `trySelfStep`) run
+with the code `c`, under the box: where the receiver is another contract,
+or `c` is one of the codes the callee may panic with, the guard passes. -/
+theorem holds_tryPanicG {κc Γ₃ Γ₂ Γ₀ : Ctx} (call : ExtCall C Γ) (code : CodeBinder κc)
+    (K : Option (List Semantics.Word)) (pnc : Prog C (κc ++ Γ) Γ₃) (σ : State C Γ)
+    (c : Semantics.Word) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (hc : ∀ ks, K = some ks → (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1 ∨ c ∈ ks)
+    (h : holds σ (code.binders.all (Fml.modalK .box (code.guard call K pnc)
+      (.pop .block ((Ext.append Γ κc).trans (code.guard call K pnc).ext) (.seq ω κ)) φ))) :
+    Modality.afterRunTR .box (holds · φ)
+      ((((pnc.runR (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))).map
+          fun o => (⟨o.st.drop ((Ext.append Γ κc).trans pnc.ext), o.ext⟩ : Out C σ.H Γ)).map
+            (·.st)).bind fun υ => (Prog.runSt υ ω).bind (Frames.runSt · κ)) := by
+  rw [TRes.map_st _ _ (State.drop ((Ext.append Γ κc).trans pnc.ext)) fun _ => rfl]
+  have h' := holds_modalK_pop _ _ _ ω κ φ
+    (holds_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h)
+  cases K with
+  | none => cases code <;> exact h'
+  | some ks =>
+    cases code with
+    | none =>
+      cases ks with
+      | nil =>
+        have hn : call.notSelf.evalT
+            (σ.withEnv (TEnv.append [] (CodeBinder.none.decodeT (H := σ.H) c) σ.env)) =
+            .ok true := by
+          show Except.ok (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = _
+          rcases hc [] rfl with hs | hs
+          · rw [decide_eq_false hs]; rfl
+          · exact absurd hs List.not_mem_nil
+        dsimp only [CodeBinder.guard] at h'
+        rw [show (Ext.append Γ []).trans (Prog.cons (.require call.notSelf) pnc).ext =
+          (Ext.append Γ []).trans pnc.ext from Subsingleton.elim _ _,
+          Prog.runSt_require_true hn] at h'
+        exact h'
+      | cons _ _ => exact h'
+    | some x =>
+      have ha := ExtCall.addr_wk_append call σ (ρ := [.val .uint])
+        ((CodeBinder.some x).decodeT (H := σ.H) c)
+      have hg : (Val.binop .or rfl rfl (call.wk (Thin.ofExt (Ext.append Γ [.val .uint]))).notSelf
+          (codeGuard ks)).evalT (σ.withEnv (TEnv.append [.val .uint]
+            ((CodeBinder.some x).decodeT (H := σ.H) c) σ.env)) = .ok true := by
+        refine Val.or_evalT_true _ _ _ (by rw [ExtCall.notSelf_evalT]) ?_
+        rcases hc ks rfl with hs | hs
+        · refine .inl ?_
+          rw [ha]
+          show (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = true
+          rw [decide_eq_false hs]
+          rfl
+        · exact .inr (codeGuard_evalT _ ks hs)
+      dsimp only [CodeBinder.guard] at h'
+      rw [show (Ext.append Γ [.val .uint]).trans (Prog.cons (.require _) pnc).ext =
+        (Ext.append Γ [.val .uint]).trans pnc.ext from Subsingleton.elim _ _,
+        Prog.runSt_require_true hg] at h'
+      exact h'
+
 /-- The oracle's reading of a `try` (`TRun.tryCall` past the self-call):
 under the box, a goal per clause, each for every typed value its outcome
 binds; `h1` the success clause's goal at the values bound. -/
@@ -1063,8 +1168,10 @@ theorem Premise.sound_tryOracle {ρ κc Γ₁ Γe Γ₃ Γ₄ Γ₂ Γ₀ : Ctx}
           (Prog.runSt υ ω).bind (Frames.runSt · κ)))
     (h2 : holds σ (Binders.nil.all (Fml.modalK .box err
       (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ)))
-    (h3 : holds σ (code.binders.all (Fml.modalK .box pnc
-      (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ)))
+    (h3 : ∀ c : Semantics.Word, Modality.afterRunTR .box (holds · φ)
+      ((((pnc.runR (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))).map
+          fun o => (⟨o.st.drop ((Ext.append Γ κc).trans pnc.ext), o.ext⟩ : Out C σ.H Γ)).map
+            (·.st)).bind fun υ => (Prog.runSt υ ω).bind (Frames.runSt · κ)))
     (h4 : holds σ (Binders.nil.all (Fml.modalK .box other
       (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ))) :
     Modality.afterRunTR .box (holds · φ)
@@ -1096,7 +1203,7 @@ theorem Premise.sound_tryOracle {ρ κc Γ₁ Γe Γ₃ Γ₄ Γ₂ Γ₀ : Ctx}
         rw [TRes.map_st _ _ (State.drop ((Ext.append Γ ρ).trans ok.ext)) fun _ => rfl]
         exact h1 r
     | error _ => exact holds_tryClause err σ ω κ φ h2
-    | panic c => exact holds_tryPanic code pnc σ c ω κ φ h3
+    | panic c => exact h3 c
     | other _ => exact holds_tryClause other σ ω κ φ h4
 
 /-- `tryCallNoCallbackBox`: under the box, a goal per clause, each for every
@@ -1121,7 +1228,8 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
   · exact afterRunTR_box_error (by decide)
   rw [if_neg (by simp only [Bool.false_and, Bool.false_eq_true, not_false_eq_true])]
   exact Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ
-    (fun r => holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)) h2 h3 h4
+    (fun r => holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)) h2
+    (fun c => holds_tryPanic code pnc σ c ω κ φ h3) h4
 
 /-- A program that halts other than by exhaustion satisfies no diamond. -/
 theorem not_holds_diamond {Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
@@ -1176,18 +1284,27 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi, Prog.runSt_cons] at h0'
     change Modality.afterRunTR .box _ (((((TRun.call sargs (.rets rets) sbody.ext sbody.runR
       σ).map (·.st)).bind fun τ => Prog.runSt τ ok).map _).bind _) at h0'
-    revert h0' hnx
+    have hK : ∀ e, TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e →
+        ∀ c : Semantics.Word, (e = .panic ∨ ∃ d, e = .revertWith d ∧
+          Semantics.decodePanic d = some c) →
+        ∀ ks, sbody.panicCodes = some ks →
+          (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1 ∨ c ∈ ks := by
+      intro e he c hc ks hks
+      obtain ⟨hp, hd⟩ := Prog.panicCodes_call hks sargs rets σ he
+      rcases hc with rfl | ⟨d, rfl, hv⟩
+      · exact absurd rfl hp
+      · exact .inr (hd d c rfl hv)
+    revert h0' hnx hK
     cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
     | ok o =>
-      intro _
-      intro h0'
+      intro _ h0' _
       dsimp only
       rw [show ((Except.ok o : TRes (Out C σ.H (ρ ++ Γ))).map (·.st)).bind
         (fun τ => Prog.runSt τ ok) = (ok.runR o.st).map (·.st) from rfl] at h0'
       revert h0'
       cases ok.runR o.st <;> exact id
     | error e =>
-      intro hnx _
+      intro hnx _ hK
       cases e with
       | revert => exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl nofun))
       | revertWith d =>
@@ -1195,9 +1312,13 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
         split
         · exact holds_tryClause err σ ω κ φ (h2 (hnx _ rfl nofun))
         · split
-          · exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl nofun))
+          · rename_i c hc
+            exact holds_tryPanicG call code _ pnc σ _ ω κ φ
+              (hK _ rfl c (.inr ⟨d, rfl, hc⟩)) (h3 (hnx _ rfl nofun))
           · exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl nofun))
-      | panic => exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl nofun))
+      | panic =>
+        exact holds_tryPanicG call code _ pnc σ _ ω κ φ (hK _ rfl _ (.inl rfl))
+          (h3 (hnx _ rfl nofun))
       | diverge => exact afterRunTR_box_error (by decide)
       | exhausted => exact afterRunTR_box_error (by decide)
   · rename_i hs
@@ -1206,7 +1327,9 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
       not_holds_diamond σ _ _ _ (e := .revert) nofun (Prog.runSt_require_false
         (by rw [ExtCall.isSelf_evalT]; simp only [hs, decide_false]) _)
     refine Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ (fun r => ?_)
-      (h2 hnx) (h3 hnx) (h4 hnx)
+      (h2 hnx) (fun c => holds_tryPanicG call code _ pnc σ c ω κ φ
+        (fun _ _ => .inl hs) (h3 hnx))
+      (h4 hnx)
     have h1' := holds_modalK_pop _ _ _ ω κ φ (holds_binders_all rets σ _ r h1)
     have hc' : (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode.evalT
         (σ.withEnv (TEnv.append ρ r σ.env)) = .ok true := by

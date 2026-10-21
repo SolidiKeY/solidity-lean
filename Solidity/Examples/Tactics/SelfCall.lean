@@ -49,7 +49,10 @@ open scoped Scoped
 
 Its two success goals print their blocks escaped (`‹body›`): the
 `require`s and the inlined callee in front of `body` are not schema
-variables (`trySelfStep`); its `catch` goals behind `fails(call)`. -/
+variables (`trySelfStep`); its `catch` goals behind `fails(call)`, the
+`Panic` goal also behind `panics(selfBody)`: the receiver another contract,
+or the code one the callee may panic with (`Prog.panicCodes`,
+`CodeBinder.guard`, a `require` in front of the clause). -/
 
 /--
 info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} {call : ExtCall C Γ}
@@ -58,7 +61,8 @@ info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ 
   dl[LeanTaclet C k]{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
     ] ⇝
     "self call succeeded": [ ‹body› ] ; "call succeeded": ∀ rets. [ ‹body› ] ;
-      "Error caught": fails(call) → [ errorBody ] ; "Panic caught": fails(call) → ∀ code. [ panicBody ] ;
+      "Error caught": fails(call) → [ errorBody ] ;
+      "Panic caught": fails(call) → ∀ code. panics(selfBody) → [ panicBody ] ;
       "other failure caught": fails(call) → [ otherBody ] }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallSelfBox
