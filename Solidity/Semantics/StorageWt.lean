@@ -81,12 +81,12 @@ theorem SMap.allB_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest :
 end AllB
 
 attribute [irreducible] SVal.allB SFields.allB SList.allB SVec.allB SMap.allB
-attribute [eqns SVal.allB_prim SVal.allB_struct SVal.allB_array SVal.allB_fixed SVal.allB_map]
+attribute [sol_eqns SVal.allB_prim SVal.allB_struct SVal.allB_array SVal.allB_fixed SVal.allB_map]
   SVal.allB
-attribute [eqns SFields.allB_nil SFields.allB_cons] SFields.allB
-attribute [eqns SList.allB_nil SList.allB_cons] SList.allB
-attribute [eqns SVec.allB_nil SVec.allB_cons] SVec.allB
-attribute [eqns SMap.allB_nil SMap.allB_cons] SMap.allB
+attribute [sol_eqns SFields.allB_nil SFields.allB_cons] SFields.allB
+attribute [sol_eqns SList.allB_nil SList.allB_cons] SList.allB
+attribute [sol_eqns SVec.allB_nil SVec.allB_cons] SVec.allB
+attribute [sol_eqns SMap.allB_nil SMap.allB_cons] SMap.allB
 
 /-! ## The three tests -/
 

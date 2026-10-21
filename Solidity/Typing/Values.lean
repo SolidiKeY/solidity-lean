@@ -316,11 +316,11 @@ theorem SMap.All_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : 
 end All
 
 attribute [irreducible] SVal.All SFields.All SList.All SVec.All SMap.All
-attribute [eqns SVal.All_prim SVal.All_struct SVal.All_array SVal.All_fixed SVal.All_map] SVal.All
-attribute [eqns SFields.All_nil SFields.All_cons] SFields.All
-attribute [eqns SList.All_nil SList.All_cons] SList.All
-attribute [eqns SVec.All_nil SVec.All_cons] SVec.All
-attribute [eqns SMap.All_nil SMap.All_cons] SMap.All
+attribute [sol_eqns SVal.All_prim SVal.All_struct SVal.All_array SVal.All_fixed SVal.All_map] SVal.All
+attribute [sol_eqns SFields.All_nil SFields.All_cons] SFields.All
+attribute [sol_eqns SList.All_nil SList.All_cons] SList.All
+attribute [sol_eqns SVec.All_nil SVec.All_cons] SVec.All
+attribute [sol_eqns SMap.All_nil SMap.All_cons] SMap.All
 
 section AllLemmas
 

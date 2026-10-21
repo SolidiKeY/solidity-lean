@@ -559,7 +559,7 @@ theorem SRef.labels_eq {C : Contract} {T : Ty} (r : SRef C T) :
   rfl
 
 attribute [irreducible] SRef.labels
-attribute [eqns SRef.labels_eq] SRef.labels
+attribute [sol_eqns SRef.labels_eq] SRef.labels
 
 /-- A storage location's segments: a reference's, a dangling location's
 path alone. -/

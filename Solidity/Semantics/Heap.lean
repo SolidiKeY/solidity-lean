@@ -179,7 +179,7 @@ theorem MObj.elems_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) 
     MObj.elems .fixed o = (o : {l : List (MVal H E) // l.length = n}).1 := rfl
 
 attribute [irreducible] MObj.elems
-attribute [eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
+attribute [sol_eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
 
 /-- An array object with element `i` replaced. -/
 def MObj.setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) :
@@ -203,7 +203,7 @@ theorem MObj.setElem_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)
       (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.fixed E n)) := rfl
 
 attribute [irreducible] MObj.setElem
-attribute [eqns MObj.setElem_dyn MObj.setElem_fixed] MObj.setElem
+attribute [sol_eqns MObj.setElem_dyn MObj.setElem_fixed] MObj.setElem
 
 namespace Heap
 
@@ -372,11 +372,11 @@ theorem SVec.copyStToM_cons {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (v : SVal
         ⟨MVal.wk g₂.ext E g₁.val :: g₂.val.1, congrArg (· + 1) g₂.val.2⟩⟩ := rfl
 
 attribute [irreducible] SVal.copyStToM SFields.copyStToM SList.copyStToM SVec.copyStToM
-attribute [eqns SVal.copyStToM_prim SVal.copyStToM_struct SVal.copyStToM_array
+attribute [sol_eqns SVal.copyStToM_prim SVal.copyStToM_struct SVal.copyStToM_array
   SVal.copyStToM_fixed SVal.copyStToM_map] SVal.copyStToM
-attribute [eqns SFields.copyStToM_nil SFields.copyStToM_cons] SFields.copyStToM
-attribute [eqns SList.copyStToM_nil SList.copyStToM_cons] SList.copyStToM
-attribute [eqns SVec.copyStToM_nil SVec.copyStToM_cons] SVec.copyStToM
+attribute [sol_eqns SFields.copyStToM_nil SFields.copyStToM_cons] SFields.copyStToM
+attribute [sol_eqns SList.copyStToM_nil SList.copyStToM_cons] SList.copyStToM
+attribute [sol_eqns SVec.copyStToM_nil SVec.copyStToM_cons] SVec.copyStToM
 
 /-- A fresh default object (`allocDefault`). -/
 def Heap.allocDefault {H : HTy} (hp : Heap H) (R : RefTy) (h : (Ty.ref R).mapFree = true) :

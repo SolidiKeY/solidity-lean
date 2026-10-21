@@ -1,0 +1,35 @@
+name = "solidity-bridge"
+version = "0.1.0"
+defaultTargets = ["SolidityBridge"]
+# As the core's: its outputs are hard links into Lake's artifact cache, read
+# only, and only a workspace with the cache on replaces them when it rebuilds.
+enableArtifactCache = true
+
+# The core (`..`) has no dependencies and keeps none (`../AGENTS.md`): this
+# package is where Mathlib and CSLib meet it. Both are pinned to the core's
+# toolchain, v4.24.0; CSLib e1fea78 is its last commit on v4.24.0.
+
+[[require]]
+name = "solidity-lean"
+path = ".."
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.24.0"
+
+[[require]]
+name = "cslib"
+git = "https://github.com/leanprover/cslib"
+rev = "e1fea784d55eae30275c205291f12a1b4868eed3"
+
+[[lean_lib]]
+name = "SolidityBridge"
+weakLeanArgs = ["--tstack=131072"]
+
+# CSLib's proof theory (inference systems, logical equivalence, natural
+# deduction), backported from its Lean 4.30 release (`vendor/CslibBackport/VENDOR.md`).
+[[lean_lib]]
+name = "CslibBackport"
+srcDir = "vendor"
+globs = ["CslibBackport.+"]
