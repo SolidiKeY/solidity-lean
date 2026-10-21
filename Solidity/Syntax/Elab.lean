@@ -661,6 +661,21 @@ def roStmt (ro : List String) (s : RawStmt) : Except String (List String) := do
   | .declMemory _ x (some e) => pure (if mention e then x :: ro else ro)
   | _ => pure ro
 
+/-- The name of a slice's refusal (`RawStmt.sliceViews`), its reason the
+argument's name; `calldataCheck` reports it. -/
+def sliceRefusedName : String := "#sliceRefused"
+
+/-- The reason of the first slice refused in the body (`RawStmt.sliceViews`). -/
+def sliceRefusal? (body : List RawStmt) : Option String :=
+  (body.flatMap (RawStmt.flatMapDeep fun s => s.exprs)).findSome? fun e =>
+    let found := e.any fun | .call f _ => f == sliceRefusedName | _ => false
+    if !found then none else
+      some <| Id.run do
+        let mut r := "a calldata slice"
+        for x in (e.names) do
+          if x.startsWith "a calldata slice" then r := x
+        return r
+
 /-- **What a body does with its `calldata` parameters `ro`** (above): a
 write through one, or through a memory name bound to one, is refused; so is
 returning one where the function returns a memory reference (`rets`, its
@@ -668,6 +683,7 @@ reference returns), and passing one to a callee's `memory` parameter the
 callee writes.  `fuel` bounds the callees followed. -/
 partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro rets : List String)
     (body : List RawStmt) : Except String Unit := do
+  if let some r := sliceRefusal? body then throw r
   if ro.isEmpty then return
   let ss := body.flatMap (RawStmt.flatMapDeep fun s => [s])
   -- the names bound to the object, to a fixed point (a loop may bind late)
@@ -731,6 +747,164 @@ def RawStmt.mapBlocks (f : List RawStmt → List RawStmt) : RawStmt → RawStmt
   | .loop a c b => .loop a c (f b)
   | .forLoop a i c u b => .forLoop a (f i) c (f u) (f b)
   | s => s
+
+/-- `mapBlocks` in a monad, the blocks in order. -/
+def RawStmt.mapBlocksM {m : Type → Type} [Monad m] (f : List RawStmt → m (List RawStmt)) :
+    RawStmt → m RawStmt
+  | .ite c t e => return .ite c (← f t) (← f e)
+  | .unchecked b => return .unchecked (← f b)
+  | .checked o b => return .checked o (← f b)
+  | .block b => return .block (← f b)
+  | .tryCall r g as rets ok err code pnc other =>
+    return .tryCall r g as rets (← f ok) (← f err) code (← f pnc) (← f other)
+  | .whileLoop a c b => return .whileLoop a c (← f b)
+  | .doWhile a b c => return .doWhile a (← f b) c
+  | .loop a c b => return .loop a c (← f b)
+  | .forLoop a i c u b => return .forLoop a (← f i) c (← f u) (← f b)
+  | s => pure s
+
+/-! ### Calldata slices
+
+`b[i:j]` of a calldata array is a view of it, as solc reads it: no copy.
+`RawStmt.sliceViews` rewrites a body before it is elaborated (the
+`contract!` macro applies it to a body that has a slice): a slice opens
+two `uint` locals, its offset `t$o` into the base array and its length
+`t$n`, after solc's check `i <= j && j <= b.length` (a revert otherwise;
+`j` is `b.length` where it is left out, `i` is `0`).  A slice of a slice
+adds its offset.  Then `t[k]` is `b[k < t$n ? t$o + k : b.length]` (an
+index past the view reverts, as solc's `Panic(0x32)`, which the model reads
+as a revert), `t.length` is `t$n`, and `abi.decode(t, …)` decodes the view
+in place (`#sliceV(b, t$o, t$n)`, `ByteSrc`).  So a read, a length and a
+decoding are loop-free.  A slice used any other way (handed to a function,
+hashed, copied to memory, an index with an effect, a slice opened in a loop
+condition) is refused (`sliceRefusedName`, reported by `calldataCheck`). -/
+
+/-- A slice's view: its base array, and the locals of its offset and length. -/
+structure SliceView where
+  base : String
+  off : String
+  len : String
+  deriving Inhabited
+
+/-- The hidden builtin a view is decoded through: `#sliceV(b, o, n)`. -/
+def sliceViewName : String := "#sliceV"
+
+/-- The views open, a counter for the names of inline slices, and the
+statements the current statement's slices open before it. -/
+abbrev SliceM := StateM (List (String × SliceView) × Nat × Array RawStmt)
+
+instance : Inhabited (SliceM RawExpr) := ⟨pure default⟩
+
+/-- A refusal in place of an expression, its reason the argument. -/
+def sliceRefuse (why : String) : RawExpr :=
+  .call sliceRefusedName [.name s!"a calldata slice {why}: refused (docs/semantic-gaps.md, \
+    \"Bytes and strings\")"]
+
+/-- Whether an expression is a slice or names a view. -/
+def sliceViewish (views : List (String × SliceView)) : RawExpr → Bool
+  | .name x => (lookupBy x views).isSome
+  | .call f _ => f == "#slice"
+  | _ => false
+
+mutual
+
+/-- The view `t` of `b[i:j]`: its checks and locals pushed before the
+statement; `none` where it is not opened (a base that is not a name or a
+view, a bound with an effect). -/
+partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView) := do
+  let i ← i.mapM sliceNode
+  let j ← j.mapM sliceNode
+  if i.hasIncDec || j.hasIncDec then return none
+  let some (base, off0, L) ← (match b with
+      | .name x => do
+        match lookupBy x (← get).1 with
+        | some v => pure (some (v.base, some v.off, RawExpr.name v.len))
+        | none => pure (some (x, none, RawExpr.field (.name x) "length"))
+      | b@(.call "#slice" _) => do
+        match ← sliceViewOf? b with
+        | some v => pure (some (v.base, some v.off, RawExpr.name v.len))
+        | none => pure none
+      | _ => pure none) | return none
+  let o := t ++ "$o"
+  let n := t ++ "$n"
+  let ss : List RawStmt :=
+    [.decl (.named "uint") o (some i), .decl (.named "uint") n (some j),
+     .require (.binop .le (.name o) (.name n)), .require (.binop .le (.name n) L),
+     .assign (.name n) (.binop .sub (.name n) (.name o))] ++
+    (off0.map fun o0 => RawStmt.assign (.name o) (.binop .add (.name o0) (.name o))).toList
+  modify fun (vs, k, pre) => (vs, k, pre ++ ss.toArray)
+  return some { base, off := o, len := n }
+
+/-- The view an expression is: a view's name, or a slice opened here. -/
+partial def sliceViewOf? : RawExpr → SliceM (Option SliceView)
+  | .name x => return lookupBy x (← get).1
+  | .call "#slice" [b, i, j] => do
+    let (_, k, _) ← get
+    modify fun (vs, _, pre) => (vs, k + 1, pre)
+    sliceOpen s!"slice${k}" b i j
+  | _ => pure none
+
+/-- One node (`RawExpr.mapM`): a view's index, length and decoding read
+through the view; any other use of a slice refused. -/
+partial def sliceNode (e : RawExpr) : SliceM RawExpr := do
+  let views := (← get).1
+  match e with
+  | .index v k =>
+    if !sliceViewish views v then return e
+    let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
+    let k ← k.mapM sliceNode
+    if k.hasIncDec then return sliceRefuse "indexed by an expression with an effect"
+    return .index (.name sv.base) (.ternary (.binop .lt k (.name sv.len))
+      (.binop .add (.name sv.off) k) (.field (.name sv.base) "length"))
+  | .field v "length" =>
+    if !sliceViewish views v then return e
+    let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
+    return .name sv.len
+  | .call "abi.decode" (v :: rest) =>
+    if !sliceViewish views v then return e
+    let some sv ← sliceViewOf? v | return sliceRefuse "whose base or bounds are not read here"
+    return .call "abi.decode" (.call sliceViewName [.name sv.base, .name sv.off, .name sv.len] :: rest)
+  | .call "#slice" _ =>
+    return sliceRefuse "used other than indexed, its `.length` read or decoded (`abi.decode`)"
+  | .name x =>
+    if (lookupBy x views).isSome then
+      return sliceRefuse s!"`{x}` used other than indexed, its `.length` read or decoded \
+        (`abi.decode`)"
+    return e
+  | e => pure e
+
+end
+
+/-- `RawStmt.sliceViews` on a block (above). -/
+partial def sliceStmts (ss : List RawStmt) : SliceM (List RawStmt) := do
+  let out ← ss.mapM fun s => do
+    modify fun (vs, k, _) => (vs, k, #[])
+    match s with
+    | .declMemory _ t (some (.call "#slice" [b, i, j])) =>
+      match ← sliceOpen t b i j with
+      | some v =>
+        let (vs, k, pre) ← get
+        set ((t, v) :: vs, k, (#[] : Array RawStmt))
+        return pre.toList
+      | none => return [RawStmt.eval [sliceRefuse "whose base or bounds are not read here"]]
+    | s =>
+      let s ← s.mapExprsM (·.mapM sliceNode)
+      let pre := (← get).2.2
+      -- a loop's condition is read again on each iteration: no slice opened in it
+      if !pre.isEmpty && (s matches .whileLoop .. | .doWhile .. | .loop .. | .forLoop ..) then
+        return [RawStmt.eval [sliceRefuse "opened in a loop's condition"]]
+      let s ← s.mapBlocksM fun b => do
+        let (vs, k, pre) ← get
+        let b ← sliceStmts b
+        let (_, k', _) ← get
+        set (vs, max k k', pre)
+        pure b
+      return pre.toList ++ [s]
+  return out.flatten
+
+/-- **A body's calldata slices read as views** (above). -/
+def RawStmt.sliceViews (ss : List RawStmt) : List RawStmt :=
+  (sliceStmts ss).run' ([], 0, #[])
 
 /-- Every read of the name `x` renamed `y`, at any depth. -/
 partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=
@@ -3169,18 +3343,32 @@ def abiCopy (r x j L : String) (o : RawExpr) : List RawStmt :=
 /-- `(L + 31) / 32 * 32`: a length padded to whole words. -/
 def abiPad (L : RawExpr) : RawExpr := .binop .mul (.binop .div (L.addN 31) (.num 32)) (.num 32)
 
-/-- `d[o]`, a byte of `d`. -/
-def abiByte (d : String) (o : RawExpr) : RawExpr := .index (.name d) o
+/-- The bytes a decoder reads: a memory `bytes` named `d`, or a view of it
+(a calldata slice, `#sliceV`): its bytes from the offset `off`, `len` of
+them. -/
+structure ByteSrc where
+  d : String
+  off : Option RawExpr := none
+  len? : Option RawExpr := none
+
+instance : Coe String ByteSrc := ⟨fun d => { d }⟩
+
+/-- How many bytes it has. -/
+def ByteSrc.len (s : ByteSrc) : RawExpr := s.len?.getD (.field (.name s.d) "length")
+
+/-- `d[o]`, a byte of `d` (of the view: `d[off + o]`). -/
+def abiByte (d : ByteSrc) (o : RawExpr) : RawExpr :=
+  .index (.name d.d) (match d.off with | some b => .binop .add b o | none => o)
 
 /-- The `m` bytes of `d` from `o` read big-endian into the `uint` local `w`:
 `w = d[o]; w = w * 256 + d[o + 1]; …`. -/
-def abiAssemble (d w : String) (o : RawExpr) (m : Nat) : List RawStmt :=
+def abiAssemble (d : ByteSrc) (w : String) (o : RawExpr) (m : Nat) : List RawStmt :=
   .decl (.named "uint") w (some (abiByte d o)) ::
     (List.range (m - 1)).map fun j =>
       .assign (.name w) (.binop .add (.binop .mul (.name w) (.num 256)) (abiByte d (o.addN (j + 1))))
 
 /-- `require(d[o + p] == 0)` for each `p` of `ps`. -/
-def abiZeros (d : String) (o : RawExpr) (ps : List Nat) : List RawStmt :=
+def abiZeros (d : ByteSrc) (o : RawExpr) (ps : List Nat) : List RawStmt :=
   ps.map fun p => .require (.binop .eqB (abiByte d (o.addN p)) (.num 0))
 
 /-- `abi.decode` of the word at byte `o` of `d` at the type `T`: its checks
@@ -3189,7 +3377,7 @@ zero, or not the sign's, a `bool` above `1`), the bytes it reads into the
 local `w`, and its value.  `none` for a type it does not decode.  A narrow
 type reads only its own bytes into `w`; the others it compares with `0`
 one by one. -/
-def abiDecodeAt (T : String) (d w : String) (o : RawExpr) : Option (List RawStmt × RawExpr) :=
+def abiDecodeAt (T : String) (d : ByteSrc) (w : String) (o : RawExpr) : Option (List RawStmt × RawExpr) :=
   let unsigned (m : Nat) (v : RawExpr) : List RawStmt × RawExpr :=
     (abiZeros d o (List.range (32 - m)) ++ abiAssemble d w (o.addN (32 - m)) m, v)
   if T == "bool" then
@@ -3275,10 +3463,16 @@ def decodeHeadWords (T : RawExpr) : Nat :=
 /-- `(T a, U b) = abi.decode(x, (T, U))`'s components, each at the word
 its predecessors' head words leave (`decodeHeadWords`): the head's words, and
 the `i`-th component's `#abiDecode`. -/
-def abiDecodeHeads (x : String) (ts : List RawExpr) : Nat × (Nat → RawExpr) :=
+def abiDecodeHeads (x : String) (ts : List RawExpr) (d : RawExpr := .name x) :
+    Nat × (Nat → RawExpr) :=
   let ws := ts.map (decodeHeadWords C)
   let n := ws.foldl (· + ·) 0
-  (n, fun i => .call abiDecodeName [.name x, ts[i]!, .num ((ws.take i).foldl (· + ·) 0), .num n])
+  (n, fun i => .call abiDecodeName [d, ts[i]!, .num ((ws.take i).foldl (· + ·) 0), .num n])
+
+/-- A calldata slice's view (`#sliceV`): decoded in place, not bound. -/
+def RawExpr.isSliceView : RawExpr → Bool
+  | .call f _ => f == sliceViewName
+  | _ => false
 
 /-- **`abi.decode`** (`hoist`, outside its `mutual` block for its size, the
 recursive calls handed in): `abi.decode(b, (T))` is `#abiDecode(b, T, 0,
@@ -3293,7 +3487,7 @@ solc's decoder does. -/
 def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
     (abiMemBytes : RawExpr → ElabM (SProg C × String))
     (elabStmtsP : List RawStmt → ElabM (SProg C))
-    (abiDecodeBytes : String → String → Nat → Nat → ElabM (SProg C × String))
+    (abiDecodeBytes : String → ByteSrc → Nat → Nat → ElabM (SProg C × String))
     (f : String) (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
   if f == "abi.decode" then
     let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
@@ -3301,9 +3495,19 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
       throw "abi.decode: one type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
     return ← hoist (.call abiDecodeName [b, T, .num 0, .num (decodeHeadWords C T)])
   let [b, Te, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
-  let (P, b) ← hoist b
-  let (Q, d) ← abiMemBytes b
-  let len : RawExpr := .field (.name d) "length"
+  -- a calldata slice's view (`RawStmt.sliceViews`): its base read in place
+  let (P, Q, d) ← (match b with
+    | .call f [.name base, .name o, .name L] =>
+      if f == sliceViewName then pure ([], [], ByteSrc.mk base (some (.name o)) (some (.name L)))
+      else do
+        let (P, b) ← hoist b
+        let (Q, d) ← abiMemBytes b
+        pure (P, Q, (d : ByteSrc))
+    | b => do
+      let (P, b) ← hoist b
+      let (Q, d) ← abiMemBytes b
+      pure (P, Q, (d : ByteSrc)) : ElabM (SProg C × SProg C × ByteSrc))
+  let len : RawExpr := d.len
   let enough : RawStmt := .require (.binop .ge len (.num (32 * n)))
   if let .name T := Te then
     -- a byte string: its offset in the head, its length and bytes in the tail
@@ -3838,12 +4042,12 @@ partial def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
 the `L` bytes after it copied into a fresh memory `bytes`, each read checked
 in range as solc's decoder checks it (an offset or a length past the data
 reverts). -/
-partial def abiDecodeBytes (T d : String) (h n : Nat) : ElabM (SProg C × String) := do
+partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg C × String) := do
   let o := toString (← freshCapture "se")
   let L := toString (← freshCapture "se")
   let x := toString (← freshCapture "mv")
   let j := toString (← freshCapture "se")
-  let len : RawExpr := .field (.name d) "length"
+  let len : RawExpr := d.len
   let start : RawExpr := (RawExpr.name o).addN 32
   let S : List RawStmt :=
     [.require (.binop .ge len (.num (32 * n)))] ++ abiAssemble d o (.num h) 32 ++
@@ -4800,7 +5004,7 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   if let some (d, ts) := decode? then
     if (← read).funs.all (·.1 != "abi.decode") then
       let x := toString (← freshCapture "mv")
-      let (n, one) := abiDecodeHeads C x ts
+      let (n, one) := abiDecodeHeads C x ts (if d.isSliceView then d else .name x)
       let rest : List RawStmt ← match s with
         | .tupleDecl vs _ => do
           unless vs.length == ts.length do
@@ -4816,7 +5020,7 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
           unless ls.length == n do throw s!"abi.decode gives {n} values, not {ls.length}"
           pure (ls.zipIdx.filterMap fun (l, i) => l.map fun l => .assign l (one i))
         | _ => pure []
-      return ← elabStmtsP (.declMemory (.named "bytes") x (some d) :: rest)
+      return ← elabStmtsP ((if d.isSliceView then [] else [.declMemory (.named "bytes") x (some d)]) ++ rest)
   -- solc's operations on byte types, as the `uint` ones (`bytesPure`)
   let s ← ElabM.lift (bytesStmt C (← ctx) s)
   -- push arithmetic inside `unchecked`: the appended slot starts at `0`, so
