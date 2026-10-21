@@ -1,6 +1,7 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.WalkSyntax
+import Solidity.Calculus.CapturePayments
 
 /-!
 # The strategy with callbacks: `sol_derive` and `sol_prove` on `ValidT`
@@ -68,7 +69,8 @@ def ctorC? (c : Lean.Name) : Option (Lean.Name × Nat) :=
 /-- The captures whose rest may call back (`Semantics/CallbackCapture.lean`),
 each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`.
 Each with the number of `rfl`s its own side conditions take. -/
-def captureLemmas : Array (Lean.Name × Nat) := #[(`ite, 0), (`loop, 1)]
+def captureLemmas : Array (Lean.Name × Nat) :=
+  #[(`ite, 0), (`loop, 1), (`transferAmt, 1), (`transferRecv, 1), (`sendAmt, 1), (`sendRecv, 1)]
 
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do

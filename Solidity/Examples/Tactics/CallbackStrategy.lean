@@ -206,6 +206,26 @@ example :
       true } := by
   sol_derive?
 
+/-! ## A payment's operand captured
+
+`to.transfer(balance)` is `uint se = balance; to.transfer(se)`
+(`transfer_unfold_rightSndArgument`), the capture firing though the
+transfer calls back (`Stmt.CapturesAs.transferAmt`); a value call's amount
+the same (`send_unfold_rightSndArgument`, `Stmt.CapturesAs.sendAmt`). -/
+
+/-- A transfer of a state variable, with callbacks. -/
+theorem transferBalance :
+    ValidC vaultInv dl!{ balance + paidOut == deposited →
+      [ to.transfer(balance); ] balance + paidOut == deposited } := by
+  sol_prove
+
+/-- A value call of a state variable's amount. -/
+theorem callBalance :
+    ValidC vaultInv dl!{ balance + paidOut == deposited →
+      [ (bool ok, ) = to.call{value: balance}(""); sent = ok; ]
+        balance + paidOut == deposited } := by
+  sol_prove
+
 /-! ## A loop whose body calls back
 
 Unwound (`whileUnwind`, `ProvesC.capture` with `Stmt.CapturesAs.loop`: the
