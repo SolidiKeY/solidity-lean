@@ -97,7 +97,7 @@ def Fml.stepFocusAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Focus C × F
     (havoc := fun φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .havoc φ'))
     (all := fun x p φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .all x p φ'))
     (bind := fun m x t φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .bind m x t φ'))
-    (anon := fun xs φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .anon xs φ'))
+    (anon := fun xs φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .anon xs φ')) (allocAll := fun x A φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .allocAll x A φ'))
   termination_by structural _ φ => φ
 
 /-- A focus, quoted. -/

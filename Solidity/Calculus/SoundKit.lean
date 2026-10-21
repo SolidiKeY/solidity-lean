@@ -595,6 +595,7 @@ theorem Premise.Runs.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p 
   | cases _ _ => exact h
   | inv _ _ _ _ _ _ _ _ _ _ => exact h
   | inline _ _ => exact h
+  | allocBranches _ _ _ _ => exact h
 
 /-- **An update** (`Premise.sound_updateH`'s conditions). -/
 theorem Premise.sound_update {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)

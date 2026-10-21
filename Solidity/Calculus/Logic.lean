@@ -87,6 +87,8 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .all _ p φ => ∀ v : p.Denote, holds (σ.push (t := .val p) v) φ
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
+  | _, σ, .allocAll _ R φ => ∀ o : MObj σ.H R,
+      holds ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
 
 /-- An equation of `holds`, read by the typed readers. -/
 theorem holds_eq {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :

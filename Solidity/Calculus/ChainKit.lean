@@ -71,7 +71,7 @@ noncomputable def Fml.stepFocusR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     (havoc := fun _ ih => ih.map fun (f, φ') => (f, .havoc φ'))
     (all := fun x p _ ih => ih.map fun (f, φ') => (f, .all x p φ'))
     (bind := fun m x t _ ih => ih.map fun (f, φ') => (f, .bind m x t φ'))
-    (anon := fun xs _ ih => ih.map fun (f, φ') => (f, .anon xs φ')) φ
+    (anon := fun xs _ ih => ih.map fun (f, φ') => (f, .anon xs φ')) (allocAll := fun x A _ ih => ih.map fun (f, φ') => (f, .allocAll x A φ')) φ
 
 section Equations
 

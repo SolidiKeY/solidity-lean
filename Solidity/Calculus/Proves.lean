@@ -201,6 +201,8 @@ inductive Hyps (C : Contract) (Γ₀ : Ctx) : Ctx → Type where
   | bind {Γ : Ctx} (H : Hyps C Γ₀ Γ) (m : Modality) (x : Var) (t : LTy) : Hyps C Γ₀ (t :: Γ)
   /-- `{anon(xs)} …` -/
   | anon {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) : Hyps C Γ₀ Γ
+  /-- `∀ fresh x : A. …` (`Fml.allocAll`) -/
+  | allocAll {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (A : RefTy) : Hyps C Γ₀ (.mem A :: Γ)
 
 /-- The hidden binders `bs` joined to the context, the first one first. -/
 def Hyps.binds {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → (bs : List (Modality × Var × LTy)) →
@@ -216,7 +218,7 @@ def Fml.modalFree : {Γ : Ctx} → Fml C Γ → Bool
     (imp := fun φ ψ => Fml.modalFree φ && Fml.modalFree ψ) (upd := fun _ _ φ => Fml.modalFree φ)
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.modalFree φ)
     (all := fun _ _ φ => Fml.modalFree φ) (bind := fun _ _ _ φ => Fml.modalFree φ)
-    (anon := fun _ φ => Fml.modalFree φ)
+    (anon := fun _ φ => Fml.modalFree φ) (allocAll := fun _ _ φ => Fml.modalFree φ)
   termination_by structural _ φ => φ
 
 /-- The context put back in front of a formula. -/
@@ -228,7 +230,8 @@ def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fm
       (fun H φ => Hyps.wrap H (.havoc φ))
       (fun H x p φ => Hyps.wrap H (.all x p φ))
       (fun H m x t φ => Hyps.wrap H (.bind m x t φ))
-      (fun H xs φ => Hyps.wrap H (.anon xs φ)) φ
+      (fun H xs φ => Hyps.wrap H (.anon xs φ))
+      (fun H x A φ => Hyps.wrap H (.allocAll x A φ)) φ
   termination_by structural _ H => H
 
 /-- The fresh index of a step on the goal `φ`: one above every index in the
@@ -253,7 +256,7 @@ def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
         | .box => Hyps.boxOnly H)
       (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
       (fun H _ _ _ => Hyps.boxOnly H)
-      (fun H _ => Hyps.boxOnly H)
+      (fun H _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
   termination_by structural _ H => H
 
 /-- `{anon(xs)}`, and `{anon(xs)} {havoc}` when the loop's frame writes the
@@ -272,6 +275,7 @@ def Hyps.rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ :
   | _, .all H x p => .all (Hyps.rwEqCM q H) x p
   | _, .bind H m x t => .bind (Hyps.rwEqCM q H) m x t
   | _, .anon H xs => .anon (Hyps.rwEqCM q H) xs
+  | _, .allocAll H x A => .allocAll (Hyps.rwEqCM q H) x A
 
 /-- A Theory rewrite of the context (`Fml.rwEqC`): in every precondition;
 an update, a `havoc`, a quantifier or a binder stays as it is.  By the
@@ -283,7 +287,8 @@ def Hyps.rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ Γ
     Hyps C Γ₀ Γ :=
   Hyps.rec (motive := fun Γ _ => Hyps C Γ₀ Γ) .nil (fun _ a ih => .pre ih (a.rwEqC q))
     (fun _ m U ih => .upd ih m U) (fun _ ih => .havoc ih) (fun _ x p ih => .all ih x p)
-    (fun _ m x t ih => .bind ih m x t) (fun _ xs ih => .anon ih xs) H
+    (fun _ m x t ih => .bind ih m x t) (fun _ xs ih => .anon ih xs)
+    (fun _ x A ih => .allocAll ih x A) H
 
 /-- The recursor's rewrite is the twin's. -/
 theorem Hyps.rwEqC_eq_rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ Γ : Ctx}
@@ -291,7 +296,8 @@ theorem Hyps.rwEqC_eq_rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val
   induction H with
   | nil => rfl
   | pre H a ih => simp only [Hyps.rwEqCM, ← ih, ← Fml.rwEqC_eq_rwEqCM]; rfl
-  | upd H m U ih | havoc H ih | all H x p ih | bind H m x t ih | anon H xs ih =>
+  | upd H m U ih | havoc H ih | all H x p ih | bind H m x t ih | anon H xs ih
+  | allocAll H x A ih =>
     simp only [Hyps.rwEqCM, ← ih]; rfl
 
 /-- `H ⊢ φ`: the calculus proves `φ` in the context `H` (with `R`, solkey's
@@ -324,6 +330,10 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   /-- The hidden binder joins the context (Lean only). -/
   | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {x : Var} {t : LTy}
       {φ : Fml C (t :: Γ)} (h : Proves C R Γ₀ (H.bind m x t) φ) : Proves C R Γ₀ H (.bind m x t φ)
+  /-- A fresh object of any contents joins the context (`allocRight`, Lean
+  only: KeY's `allRight` over a fresh object). -/
+  | allocIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {A : RefTy} {φ : Fml C (.mem A :: Γ)}
+      (h : Proves C R Γ₀ (H.allocAll x A) φ) : Proves C R Γ₀ H (.allocAll x A φ)
   /-- A taclet that produces an update: the update joins the context, the
   rest of the program goes on. -/
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
@@ -407,6 +417,22 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
           (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
           fun c => .imp c
             (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))))
+      (hR : R.admits m s = true := by rule_admits) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- `branches`' goals, then the block `P` for every fresh object `x : A`
+  of any contents (`Premise.allocBranches`): a `catch` clause binding
+  another contract's data. -/
+  | allocBranches {Γ Γ₁ Γ₂ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {bs : List (Branch C Γ)} {x : Var}
+      {A : RefTy} {P : Prog C (.mem A :: Γ) Γ₃}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .allocBranches bs x A P)
+      (h : ∀ b ∈ bs, Proves C R Γ₀ H
+        (Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
+          (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
+          fun c => .imp c
+            (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))))
+      (ha : Proves C R Γ₀ H
+        (.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, then

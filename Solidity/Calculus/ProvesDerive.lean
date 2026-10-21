@@ -145,7 +145,7 @@ def _root_.Solidity.Fml.negModal? {Γ : Ctx} (a : Fml C Γ) : Option (Fml C Γ) 
     (wellFormed := fun _ => none) (not := fun X => cond X.modalFree none (some X))
     (and := fun _ _ => none) (imp := fun _ _ => none) (upd := fun _ _ _ => none)
     (modal := fun _ _ _ _ => none) (havoc := fun _ => none) (all := fun _ _ _ => none)
-    (bind := fun _ _ _ _ => none) (anon := fun _ _ => none)
+    (bind := fun _ _ _ _ => none) (anon := fun _ _ => none) (allocAll := fun _ _ _ => none)
 
 theorem _root_.Solidity.Fml.negModal?_eq {Γ : Ctx} {a X : Fml C Γ} (h : a.negModal? = some X) :
     a = .not X := by
@@ -198,7 +198,7 @@ def runK (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Opti
       (havoc := fun ψ H => (leaf H (.havoc ψ)).map (·, b))
       (all := fun x p ψ H => runK R leaf rf n (H.all x p) (max k x.idx) ψ b)
       (bind := fun m x t ψ H => runK R leaf rf n (H.bind m x t) (max k x.idx) ψ b)
-      (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
+      (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) (allocAll := fun x A ψ H => (leaf H (.allocAll x A ψ)).map (·, b)) H
 
 /-- The walk of the sequent `H ⊢ φ` (`runK` from `H`'s largest index). -/
 def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))

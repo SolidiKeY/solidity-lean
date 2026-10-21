@@ -708,6 +708,7 @@ def Fml.rwEqCM (q : Tm C [] (.val p) × Tm C [] (.val p)) : {Γ : Ctx} → Fml C
   | _, .all x p φ => .all x p (Fml.rwEqCM q φ)
   | _, .bind m x t φ => .bind m x t (Fml.rwEqCM q φ)
   | _, .anon xs φ => .anon xs (Fml.rwEqCM q φ)
+  | _, .allocAll x A φ => .allocAll x A (Fml.rwEqCM q φ)
 
 /-- Every equation of a formula, rewritten: both sides by `Tm.sideC`,
 through every connective, update, quantifier and hidden binder, and into the
@@ -720,7 +721,7 @@ def Fml.rwEqC (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ : Ctx} (φ : Fml C 
     (imp := fun _ _ ihφ ihψ => .imp ihφ ihψ) (upd := fun m U _ ih => .upd m U ih)
     (modal := fun m P κ _ ih => .modal m P κ ih) (havoc := fun _ ih => .havoc ih)
     (all := fun x p _ ih => .all x p ih) (bind := fun m x t _ ih => .bind m x t ih)
-    (anon := fun xs _ ih => .anon xs ih) φ
+    (anon := fun xs _ ih => .anon xs ih) (allocAll := fun x A _ ih => .allocAll x A ih) φ
 
 section Clauses
 
@@ -742,13 +743,15 @@ theorem Fml.rwEqC_bind (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ))
     (Fml.bind m x t φ).rwEqC q = .bind m x t (φ.rwEqC q) := rfl
 theorem Fml.rwEqC_anon (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
     (Fml.anon xs φ).rwEqC q = .anon xs (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_allocAll (x : Var) (A : RefTy) (φ : Fml C (.mem A :: Γ)) :
+    (Fml.allocAll x A φ).rwEqC q = .allocAll x A (φ.rwEqC q) := rfl
 
 /-- The recursor's rewrite is the twin's. -/
 theorem Fml.rwEqC_eq_rwEqCM (φ : Fml C Γ) : φ.rwEqC q = φ.rwEqCM q := by
   induction φ with
   | tt | eq | wellFormed => rfl
   | not φ ih | upd m U φ ih | modal m P κ φ ih | havoc φ ih | all x p φ ih | bind m x t φ ih
-  | anon xs φ ih => simp only [Fml.rwEqCM, ← ih]; rfl
+  | anon xs φ ih | allocAll x A φ ih => simp only [Fml.rwEqCM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.rwEqCM, ← ihφ, ← ihψ]; rfl
 
 end Clauses
@@ -797,6 +800,9 @@ theorem Fml.rwEqC_holds {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq
   | _, .anon xs φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
     simp only [Fml.rwEqC_anon, holds, ih]
+  | _, .allocAll x A φ, σ => by
+    have ih := Fml.rwEqC_holds hq φ
+    simp only [Fml.rwEqC_allocAll, holds, ih]
 
 end RwEq
 

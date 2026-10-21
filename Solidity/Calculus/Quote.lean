@@ -609,6 +609,21 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   | .all x p φ => sctor ``Fml.all #[Γe, toExpr x, toExpr p, ← qFml (.val p :: Γ) φ]
   | .bind m x t φ => sctor ``Fml.bind #[Γe, toExpr m, toExpr x, qLTy t, ← qFml (t :: Γ) φ]
   | .anon xs φ => do sctor ``Fml.anon #[Γe, ← qIdxList Γ xs, ← qFml Γ φ]
+  | .allocAll x A φ => sctor ``Fml.allocAll #[Γe, toExpr x, toExpr A, ← qFml (.mem A :: Γ) φ]
+
+/-- A list of a `try`'s blocks (`Premise.branches`). -/
+def qBranches (Γ : Ctx) (bs : List (Branch C Γ)) : QM Expr := do
+  let brTy := mkApp2 (mkConst ``Branch) (← contract) (← qCtx Γ)
+  let mut l := mkApp (mkConst ``List.nil [levelZero]) brTy
+  for b in bs.reverse do
+    let fTy ← fam ``Fml Γ
+    let hyp ← match b.hyp with
+      | none => pure (mkApp (mkConst ``Option.none [levelZero]) fTy)
+      | some c => pure (mkApp2 (mkConst ``Option.some [levelZero]) fTy (← qFml Γ c))
+    let e := mkAppN (mkConst ``Branch.mk) #[← contract, ← qCtx Γ, ← qCtx b.ρ, ← qCtx b.Γ₁,
+      ← qBinders b.ρ b.bs, ← qProg (b.ρ ++ Γ) b.Γ₁ b.P, hyp]
+    l := mkApp3 (mkConst ``List.cons [levelZero]) brTy e l
+  return l
 
 def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
   let pre := #[← contract, ← qCtx Γ]
@@ -627,18 +642,10 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
       ← qProg Γ Γ₁ P, ← qProg Γ Γ₂ Q]
   | .check c => return mk ``Premise.check #[← qFml Γ c]
   | .done b => return mk ``Premise.done #[← qCtx Γ', toExpr b]
-  | .branches bs => do
-    let brTy := mkApp2 (mkConst ``Branch) (← contract) (← qCtx Γ)
-    let mut l := mkApp (mkConst ``List.nil [levelZero]) brTy
-    for b in bs.reverse do
-      let fTy ← fam ``Fml Γ
-      let hyp ← match b.hyp with
-        | none => pure (mkApp (mkConst ``Option.none [levelZero]) fTy)
-        | some c => pure (mkApp2 (mkConst ``Option.some [levelZero]) fTy (← qFml Γ c))
-      let e := mkAppN (mkConst ``Branch.mk) #[← contract, ← qCtx Γ, ← qCtx b.ρ, ← qCtx b.Γ₁,
-        ← qBinders b.ρ b.bs, ← qProg (b.ρ ++ Γ) b.Γ₁ b.P, hyp]
-      l := mkApp3 (mkConst ``List.cons [levelZero]) brTy e l
-    return mk ``Premise.branches #[l]
+  | .branches bs => return mk ``Premise.branches #[← qBranches Γ bs]
+  | @Premise.allocBranches _ _ bs x A Γ₁ P =>
+    return mk ``Premise.allocBranches #[← qBranches Γ bs, toExpr x, toExpr A, ← qCtx Γ₁,
+      ← qProg (.mem A :: Γ) Γ₁ P]
   | .cases fs us => do
     let fTy ← fam ``Fml Γ
     let uTy := mkAppN (mkConst ``Upd) #[← contract, ← qCtx Γ, ← qCtx Γ]

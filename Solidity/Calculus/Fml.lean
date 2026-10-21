@@ -219,6 +219,10 @@ inductive Fml (C : Contract) : Ctx → Type where
   | bind {Γ : Ctx} (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) : Fml C Γ
   /-- `{anon(xs)} φ` -/
   | anon {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) : Fml C Γ
+  /-- `φ` for every fresh memory object `x : R` of any contents: the heap
+grown by one object of type `R`, `x` its reference (Lean only: a `catch`
+clause's data from another contract, any bytes, `catchDataBox`). -/
+  | allocAll {Γ : Ctx} (x : Var) (R : RefTy) (φ : Fml C (.mem R :: Γ)) : Fml C Γ
 
 /-- `false` is `¬true`. -/
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
@@ -299,6 +303,11 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   holds, append then save; otherwise run `revert();` before the rest. -/
   | guardedUpdates {Δ : Ctx} (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) :
       Premise C Γ Γ
+  /-- `branches`' goals, then `P` in the statement's place for every fresh
+memory object `x : A` of any contents (`Fml.allocAll`), its scope ended:
+a `catch` clause binding another contract's data (`catchDataBox`). -/
+  | allocBranches (bs : List (Branch C Γ)) (x : Var) (A : RefTy) {Γ₁ : Ctx}
+      (P : Prog C (.mem A :: Γ) Γ₁) : Premise C Γ Γ
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
 storage too (`hv`): solkey's `#loopAnon`. -/
@@ -372,7 +381,13 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
         (.imp c' (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))))))))
     (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ)
     (fun c U V ω => .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))
-      (.imp (.not c) (.modal m (.cons .revert ω) κ φ))) ω
+      (.imp (.not c) (.modal m (.cons .revert ω) κ φ)))
+    (fun bs x A _ P ω => Fml.conj (bs.map (fun b =>
+      Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
+        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
+        fun c => .imp c
+          (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) ++
+      [.allocAll x A (.modalK m P (.pop .block ((Ext.push .refl).trans P.ext) (.seq ω κ)) φ)])) ω
 
 /-! ### Equations
 

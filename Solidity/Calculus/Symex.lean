@@ -145,7 +145,7 @@ def Fml.stepAtS (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
     (havoc := fun φ => (Fml.stepAtS k φ).map .havoc)
     (all := fun x p φ => (Fml.stepAtS k φ).map (.all x p))
     (bind := fun m x t φ => (Fml.stepAtS k φ).map (.bind m x t))
-    (anon := fun xs φ => (Fml.stepAtS k φ).map (.anon xs))
+    (anon := fun xs φ => (Fml.stepAtS k φ).map (.anon xs)) (allocAll := fun x A φ => (Fml.stepAtS k φ).map (.allocAll x A))
   termination_by structural _ φ => φ
 
 /-- `Fml.stepAtS` by the recursor, which the kernel unfolds (`Fml.stepR`). -/
@@ -162,7 +162,7 @@ def Fml.stepRS (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
     (havoc := fun _ ih => ih.map .havoc)
     (all := fun x p _ ih => ih.map (.all x p))
     (bind := fun m x t _ ih => ih.map (.bind m x t))
-    (anon := fun xs _ ih => ih.map (.anon xs)) φ
+    (anon := fun xs _ ih => ih.map (.anon xs)) (allocAll := fun x A _ ih => ih.map (.allocAll x A)) φ
 
 /-- The recursor's stepper is the compiled one. -/
 theorem Fml.stepRS_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepRS k φ = Fml.stepAtS k φ := by

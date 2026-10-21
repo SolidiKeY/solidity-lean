@@ -1315,6 +1315,13 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     · rename_i hp
       cases h'
       exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
+  | _, .allocAll .., pos, _, _, h, _, _, _, _ => by
+    have h' : (if pos then none else some LFml.tt) = some _ := h
+    split at h'
+    · cases h'
+    · rename_i hp
+      cases h'
+      exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
   | _, .all x p φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
     have h' : (φ.toLS pos (ρ.pushQ p)).map (fun φ' => LFml.all ρ.next p φ') = some ψ := h
     rw [Option.map_eq_some_iff] at h'

@@ -70,7 +70,11 @@ scoped macro "hyps_wrap_and" : tactic => `(tactic| (
       Modality.forallB_and (fun _ a b => h _ a b) f g
   | anon H xs ih =>
     intro φ ψ χ h
-    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)))
+    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)
+  | allocAll H x A ih =>
+    intro φ ψ χ h
+    exact ih (φ := .allocAll x A φ) (ψ := .allocAll x A ψ) (χ := .allocAll x A χ)
+      fun τ f g o => h _ (f o) (g o)))
 
 end Hyps
 
@@ -128,6 +132,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     intro φ hb h
     exact ih (φ := .bind m x t φ) hb fun τ v => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
+  | allocAll H x A ih => intro φ hb h; exact ih (φ := .allocAll x A φ) hb fun τ _ => h _
 
 theorem Hyps.wrap_binds {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     (bs : List (Modality × Var × LTy)) → (φ : Fml C (Binds.ctx bs Γ)) →
@@ -160,6 +165,7 @@ theorem Hyps.wrap_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) 
   | _, .all H x p, φ => Hyps.wrap_rwEqC q H (.all x p φ)
   | _, .bind H m x t, φ => Hyps.wrap_rwEqC q H (.bind m x t φ)
   | _, .anon H xs, φ => Hyps.wrap_rwEqC q H (.anon xs φ)
+  | _, .allocAll H x A, φ => Hyps.wrap_rwEqC q H (.allocAll x A φ)
 
 /-! ## Soundness -/
 
@@ -188,6 +194,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
+  | allocIntro _ ih => exact ih
   | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ _ ih =>
     exact fun σ => H.wrap_step hS d σ (ih σ)
   | @updates Γ Δ Γ' Γ₁ Γ₂ H m s ω κ φ U V d _ _ ih =>
@@ -224,6 +231,18 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     · intro ψ hψ
       obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hψ
       exact ih b hb σ
+  | @allocBranches Γ Γ₁ Γ₂ Γ₃ H m s ω κ φ bs x A P d _ _ _ ih iha =>
+    intro σ
+    refine H.wrap_step hS d σ ?_
+    refine H.wrap_conj σ _ (by simp only [ne_eq, List.append_eq_nil_iff, List.map_eq_nil_iff,
+      List.cons_ne_self, and_false, not_false_eq_true]) ?_
+    intro ψ hψ
+    rcases List.mem_append.mp hψ with hm | ha
+    · obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hm
+      exact ih b hb σ
+    · rw [List.mem_singleton] at ha
+      subst ha
+      exact iha σ
   | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ _ ihF ihU =>
     intro σ
     refine H.wrap_step hS d σ ?_
