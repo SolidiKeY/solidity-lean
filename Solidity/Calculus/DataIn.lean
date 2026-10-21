@@ -700,7 +700,7 @@ theorem Pat.notPanic_decode {p : Pat} {d : List UInt8} (hp : p.notPanic = true)
   · rename_i h
     exfalso
     obtain ⟨h4, h36⟩ := h
-    simp only [Pat.notPanic, bne_iff_ne, ne_eq, Bool.or_eq_true, decide_eq_true_eq,
+    simp only [Pat.notPanic, bne_iff_ne, ne_eq, Bool.or_eq_true,
       List.any_eq_true, List.mem_range] at hp
     rcases hp with hl | ⟨i, hi, hb⟩
     · exact hl (hm.1 ▸ h36)
