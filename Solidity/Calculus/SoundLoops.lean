@@ -62,6 +62,7 @@ theorem Val.lower_eval_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e 
   cases e with
   | revert => exact h'
   | panic => exact h'.elim
+  | revertWith _ => exact h'.elim
   | diverge => exact absurd rfl hnd.1
   | exhausted => exact absurd rfl hnd.2
 
