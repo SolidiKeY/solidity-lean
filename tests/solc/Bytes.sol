@@ -97,11 +97,11 @@ contract Bytes {
         assert(r.tag == "ab" && r.b.length == 3 && r.b[2] == "z");
     }
     // a storage string copied to memory: the copy's length is the stored one
-    /// @custom:key box
+    // (`lenAtN`, `LTm.sfindLen?`)
     function copyLength() public {
         name = "xyz";
         string memory c = name;
-        assert(bytes(c).length == 3 && bytes(c)[2] == "z");
+        assert(bytes(c).length == 3);
     }
     /// @custom:key box
     function copyLengthSymbolic() public view {

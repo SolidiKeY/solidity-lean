@@ -1100,9 +1100,23 @@ def LTm.newArrLen? {U : Ty} (S : LTm C (.sv U)) : Option (LTm C (.val .uint)) :=
   | .app1 o x => o.newArrArg x
   | _ => none
 
+/-- `len(s, p)` of `sfind(s, p)` at an array path (Lean only): the length a
+copy of the stored array keeps. -/
+def _root_.Solidity.Op2.sfindLen {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.val .uint)) :=
+  match o, x, y with
+  | @Op2.sfind _ (.ref (.array _)), x, y => some (.app2 .len x y)
+  | _, _, _ => none
+
+def LTm.sfindLen? {U : Ty} (S : LTm C (.sv U)) : Option (LTm C (.val .uint)) :=
+  match S with
+  | .app2 o x y => o.sfindLen x y
+  | _ => none
+
 /-- **An array's length, walked down a memory that returns**: a write keeps every length, an allocation and a copy
 every older array's; a fresh dynamic array's is `0`, a copy of
-`new T[](n)`'s is `n`.  By the recursor on the depth. -/
+`new T[](n)`'s is `n`, a copy of a stored array's its stored length
+(`len(s, p)`, Lean only: solkey copies no storage array to memory).  By the recursor on the depth. -/
 def lenAtN (n : Nat) : {E : Ty} → LTm C .mem → LTm C (.ident (.array E)) → LTm C (.val .uint) :=
   Nat.rec (motive := fun _ => {E : Ty} → LTm C .mem → LTm C (.ident (.array E)) →
       LTm C (.val .uint))
@@ -1124,7 +1138,10 @@ def lenAtN (n : Nat) : {E : Ty} → LTm C .mem → LTm C (.ident (.array E)) →
             if m'.beqR m && S'.beqR S then
               match S'.newArrLen? with
               | some x => x
-              | none => .app2 .mlen X t
+              | none =>
+                match S'.sfindLen? with
+                | some x => x
+                | none => .app2 .mlen X t
             else .app2 .mlen X t
           | _ => .app2 .mlen X t
       | .other => .app2 .mlen X t) n
@@ -1152,7 +1169,10 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
             if m'.beqR m && S'.beqR S then
               match S'.newArrLen? with
               | some x => x
-              | none => .app2 .mlen X t
+              | none =>
+                match S'.sfindLen? with
+                | some x => x
+                | none => .app2 .mlen X t
             else .app2 .mlen X t
           | _ => .app2 .mlen X t
       | .other => .app2 .mlen X t : LTm C (.val .uint)).eval g ν = _
@@ -1258,7 +1278,52 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
                 | _ => simp only [LTm.newArrLen?, reduceCtorEq] at hx
               | app1 o x' => cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq] at ht
               | _ => simp only [LTm.identView, reduceCtorEq] at ht
-            · rfl
+            · split
+              · rename_i x _ hx
+                simp only [Bool.and_eq_true] at hc
+                obtain ⟨hmm, hSS⟩ := hc
+                cases LTm.sigma_eq_of_beqR hmm
+                obtain ⟨hUU, hS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hSS)
+                cases hUU
+                cases eq_of_heq hS
+                cases t with
+                | app2 o x' y' =>
+                  cases o <;> simp only [LTm.identView, Op2.identV, reduceCtorEq,
+                    IdentV.copy.injEq] at ht
+                  obtain ⟨rfl, rfl, hy⟩ := ht
+                  cases eq_of_heq hy
+                  cases y' with
+                  | app2 o st q =>
+                    cases o <;> simp only [LTm.sfindLen?, Op2.sfindLen, reduceCtorEq,
+                      Option.some.injEq] at hx
+                    subst hx
+                    have hv' := hv
+                    rw [LTm.eval_app2, Op2.eval_eq_evalM] at hv'
+                    simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_eq_some_iff] at hv'
+                    obtain ⟨s₀, hs₀, r₀, hr₀, hf⟩ := hv'
+                    have hlen : ((LTm.app2 Op2.len st q).eval g ν : Option PrimTy.uint.Denote) =
+                        Storage.len s₀ r₀ := by
+                      rw [LTm.eval_app2, Op2.eval_eq_evalM, hs₀, hr₀]; rfl
+                    rw [hlen, LTm.mlen_evalT, hX, Option.bind_some, LTm.eval_app2, hm, hv,
+                      Op2.eval_eq_evalM]
+                    show (Storage.len s₀ r₀ : Option PrimTy.uint.Denote) = Option.map
+                      (fun r => (SVal.copyStToM μ₀.heap v hU).heap.lenU r)
+                      (HRef.ofId? (SVal.copyStToM μ₀.heap v hU).H' _
+                        (SVal.copyStToM μ₀.heap v hU).val.id)
+                    rw [HRef.ofId?_self (r := ((SVal.copyStToM μ₀.heap v hU).val : HRef _ _)),
+                      Option.map_some]
+                    unfold Storage.len
+                    rw [hf]
+                    show some (Solidity.lenU (SVal.view v : ArrView _).n (SVal.view v : ArrView _).hn) = _
+                    refine congrArg some (Subtype.ext ?_)
+                    show ((SVal.view v : ArrView _).n : Int) =
+                      ((SVal.copyStToM μ₀.heap v hU).heap.len (SVal.copyStToM μ₀.heap v hU).val
+                        .dyn : Int)
+                    rw [SVal.copyStToM_array_len]
+                  | _ => simp only [LTm.sfindLen?, reduceCtorEq] at hx
+                | app1 o x' => cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq] at ht
+                | _ => simp only [LTm.identView, reduceCtorEq] at ht
+              · rfl
           · rfl
         · rfl
     · rfl

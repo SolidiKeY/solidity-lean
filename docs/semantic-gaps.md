@@ -297,8 +297,13 @@ theorems are unchanged.
   literal's `hexValue` (a number's stays noise, so no fixture changes);
   `tests/solc/Bytes.sol`, its 12 functions proved.
 - A closer limit met on the way, not a byte one: a storage array copied to a
-  memory local (`string memory c = name;`) and the copy's length read is not
-  closed by `sol_close`/`sol_decide`.
+  memory local (`string memory c = name;`) and the copy's length read.
+  Closed in lane `open-k2`: the length of a copy of `sfind(s, p)` is
+  `len(s, p)` (`lenAtN`, `LTm.sfindLen?`, `SVal.copyStToM_array_len`; Lean
+  only), so `tests/solc/Bytes.sol`'s `copyLength` (diamond) and
+  `copyLengthSymbolic` are proved.  An element of such a copy
+  (`bytes(c)[2]`) is still not read back: `copyFieldRd?` reads a struct
+  member of a copy of storage, not an array element.
 - The examples on memory close with `sol_decide`, not `sol_close`.
 - Checked (2026-10-20): `lean_build` of the default targets; the solc suite
   (`node --test scripts/test-solidity.test.mjs`) fails 6 tests that fail

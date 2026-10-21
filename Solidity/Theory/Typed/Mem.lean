@@ -778,6 +778,18 @@ theorem newArrT_copy_len {H : HTy} (hp : Heap H) (E : Ty) (n : PrimTy.uint.Denot
   rw [MObj.elems_dyn]
   exact (SVec.copyStToM hp _ _).val.2.trans (List.length_replicate ..)
 
+/-- **A copy of a stored array has its live length** (`copyStToM` copies
+the live elements, not the shadow). -/
+theorem SVal.copyStToM_array_len {H : HTy} (hp : Heap H) {E : Ty} (v : SVal (.ref (.array E)))
+    (hU : (Ty.ref (.array E)).mapFree = true) :
+    (v.copyStToM hp hU).heap.len (v.copyStToM hp hU).val .dyn = (SVal.view v : ArrView E).n := by
+  cases v with
+  | array e sh hn =>
+    rw [SVal.copyStToM_array]
+    refine (Grown.alloc_len _ .dyn).trans ?_
+    rw [MObj.elems_dyn]
+    exact (SVec.copyStToM hp e _).val.2
+
 /-- A fresh array's element is a default in range and absent past its end.
 This is the typed observation behind allocation's initialized memory reads. -/
 theorem newArrT_find_at {E V : Ty} (n k : PrimTy.uint.Denote)

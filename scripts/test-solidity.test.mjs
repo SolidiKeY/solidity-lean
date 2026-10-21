@@ -409,7 +409,9 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     'stateAndKeys', 'parameter', 'memoryBytes', 'stringToBytes', 'storagePushPop', 'storageString',
     'memoryParameter',
     // byte types as struct members (the struct spells them, `StructEnc`)
-    'structMembers', 'structMemberBytes', 'memoryStructLiteral'])
+    'structMembers', 'structMemberBytes', 'memoryStructLiteral',
+    // a storage array copied to memory: the copy's length (`LTm.sfindLen?`)
+    'copyLength', 'copyLengthSymbolic'])
     assert.equal(status[name], 'proved', name);
 });
 
