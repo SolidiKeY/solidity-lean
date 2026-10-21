@@ -51,7 +51,7 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 | Module | What it defines |
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
-| `Eqns.lean` | `attribute [eqns l₁ … lₙ] f`: hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |
+| `Eqns.lean` | `attribute [sol_eqns l₁ … lₙ] f` (Mathlib's `@[eqns]`, named apart for `Bridge/`): hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |
 | `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table (a contract's own struct a name spelling its members, `StructEnc`, kept by `structDefEnc`'s check; `structDef_rec`), operators, `Var`; the association lists (`lookupBy`, `setBy`, `nodupKeysB`) and their laws (`lookupBy_setBy_self`, …, moved here at W10.5.6). |
 | `Syntax.lean` | The grammar behind `sol[C]{…}` and `contract!{…}` (`sol_stmt`, `sol_expr`, `sol_ty`; the raw syntax `RawStmt`, `RawExpr`), `Contract`/`FunDecl`, the index types of the typed syntax (`ArrTy`, `IndexTy`), and the quoters' helpers (`rflTrue`, `rflSome`, …); the typed syntax is `Syntax/Scoped.lean`'s. |
 | `Scope.lean` | The scoped syntax's contexts: `LTy`, `Ctx := List LTy`, positions `Idx`, suffixes `Ext` (scope ends), thinnings `Thin` (weakening), `Binders`. |
