@@ -163,6 +163,7 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
     return (s!"\{ anon({", ".intercalate (xs.map fun x => toString (x.2.name ns))}) } {← arg ns ψ 50}",
       1024)
   | .bind _ x _ ψ => Fml.showP (x :: ns) ψ
+  | .allocAll x _ ψ => return (s!"∀ fresh {x}; {← sub (x :: ns) ψ 25}", 25)
   | .modal m P κ ψ =>
     let items := (← showStmts c ns P) ++ (← κ.items c (P.outNames ns))
     let body ← arg (κ.outNames (P.outNames ns)) ψ 50

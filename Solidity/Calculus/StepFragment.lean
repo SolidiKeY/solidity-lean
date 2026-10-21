@@ -503,6 +503,7 @@ def Premise.SaveLike {Γ' : Ctx} : Premise C Γ Γ' → Prop
   | .inv .. => False
   | .inline P _ => P.Frag = true
   | .guardedUpdates _ U V => U.SaveLike ∧ V.SaveLike
+  | .allocBranches .. => False
 
 theorem Premise.SaveLike.upds {Γ' : Ctx} {P : Premise C Γ Γ'} (h : P.SaveLike) :
     ∀ U ∈ P.upds, U.2.2.SaveLike := by

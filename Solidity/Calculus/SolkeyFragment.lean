@@ -213,7 +213,8 @@ def Fml.inSolkey : {Γ : Ctx} → Fml C Γ → Bool
   | _, .and φ ψ | _, .imp φ ψ => Fml.inSolkey φ && Fml.inSolkey ψ
   | _, .upd _ _ φ => Fml.inSolkey φ
   | _, .modal m P κ φ => Prog.inSolkey m P && Frames.inSolkey m κ && Fml.inSolkey φ
-  | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ => Fml.inSolkey φ
+  | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ => Fml.inSolkey φ
+  | _, .allocAll .. => false
 
 /-- The programs and conditions of a premise are in the fragment.  A `try`'s
 clauses (`branches`) and a loop's invariant rule (`inv`) are not: neither
@@ -224,7 +225,7 @@ def Premise.inSolkey (m : Modality) {Γ Γ' : Ctx} : Premise C Γ Γ' → Bool
   | .unfold P _ | .bind _ _ P | .inline P _ => Prog.inSolkey m P
   | .split _ c c' P Q => c.inSolkey && c'.inSolkey && Prog.inSolkey m P && Prog.inSolkey m Q
   | .check c => c.inSolkey
-  | .branches _ | .inv .. => false
+  | .branches _ | .inv .. | .allocBranches .. => false
   | .cases fs _ => fs.all Fml.inSolkey
 
 theorem Frames.exit_inSolkey (m : Modality) {Γ Γ₀ : Ctx} (κ : Frames C Γ Γ₀) :

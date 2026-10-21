@@ -652,6 +652,11 @@ theorem Fml.Frag.toLS {φ : Fml C Γ} (hφ : φ.Frag) :
     split at h
     · simp only [reduceCtorEq] at h
     · simp only [Option.some.injEq] at h; subst h; exact trivial
+  | allocAll x A φ ih =>
+    simp only [Fml.toLSM] at h
+    split at h
+    · simp only [reduceCtorEq] at h
+    · simp only [Option.some.injEq] at h; subst h; exact trivial
 
 /-- **Its reduction mentions no storage**: every read of a write
 eliminates to the observation atoms. -/
@@ -792,6 +797,7 @@ def Premise.ElimOk {Γ' : Ctx} : Premise C Γ Γ' → Prop
   | .inv .. => False
   | .inline .. => True
   | .guardedUpdates c U V => c.Frag ∧ U.ElimOk ∧ V.ElimOk
+  | .allocBranches .. => False
 
 theorem Upd.ElimOk.stores {Δ : Ctx} :
     {U : Upd C Γ Δ} → U.ElimOk → ∀ t ∈ U.stores, t.ElimOk
@@ -1210,6 +1216,7 @@ theorem Premise.fml_frag (m : Modality) {Γ Γ' Γ₁ Γ₀ : Ctx} (P : Premise 
       exact ⟨⟨hS U hU, hE.2 U hU⟩, Fml.modalK_frag m ω κ hω hκ hφ⟩
   | inv => exact hS.elim
   | inline P h => exact ⟨hS, ⟨hω, hκ⟩, hφ⟩
+  | allocBranches _ _ _ _ => exact hS.elim
   | guardedUpdates c U V =>
     exact ⟨⟨hE.1, ⟨hS.1, hE.2.1⟩, ⟨hS.2, hE.2.2⟩, Fml.modalK_frag m ω κ hω hκ hφ⟩,
       ⟨hE.1, by simp only [Prog.Frag, Stmt.Frag, hω, Bool.and_self], hκ, hφ⟩⟩
@@ -1263,6 +1270,10 @@ theorem Fml.stepR_frag (k : Nat) {Γ : Ctx} {φ : Fml C Γ} (hφ : φ.Frag) :
     exact (ih hφ h' : φ'.Frag)
   | anon xs φ ih =>
     change (Fml.stepR k φ).map (Fml.anon xs) = some ψ at h
+    obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.mp h
+    exact (ih hφ h' : φ'.Frag)
+  | allocAll x A φ ih =>
+    change (Fml.stepR k φ).map (Fml.allocAll x A) = some ψ at h
     obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.mp h
     exact (ih hφ h' : φ'.Frag)
 

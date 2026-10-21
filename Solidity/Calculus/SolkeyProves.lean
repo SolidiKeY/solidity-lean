@@ -37,6 +37,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | allIntro _ ih => exact .allIntro ih
   | updIntro _ ih => exact .updIntro ih
   | bindIntro _ ih => exact .bindIntro ih
+  | allocIntro _ ih => exact .allocIntro ih
   | update d _ _ ih => exact .update d ih
   | updates d _ _ ih => exact .updates d ih
   | guardedUpdates d _ _ _ ihT ihE => exact .guardedUpdates d ihT ihE
@@ -49,6 +50,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | cases d hne _ _ _ ihF ihU => exact .cases d hne ihF ihU
   | inv d _ _ _ _ ihI ihT ihE => exact .inv d ihI ihT ihE
   | inline d _ _ ih => exact .inline d ih
+  | allocBranches d _ _ _ ih iha => exact .allocBranches d ih iha
   | empty _ ih => exact .empty ih
   | closeTrue h => exact .closeTrue h
   | closeFalse _ ih => exact .closeFalse ih
@@ -66,8 +68,9 @@ theorem Fml.inSolkey_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p
   | _, .and φ ψ | _, .imp φ ψ => by
     simp only [Fml.rwEqC_and, Fml.rwEqC_imp, Fml.inSolkey, Fml.inSolkey_rwEqC q φ,
       Fml.inSolkey_rwEqC q ψ]
-  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ =>
+  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ =>
     Fml.inSolkey_rwEqC q φ
+  | _, .allocAll _ _ _ => rfl
   | _, .modal m P κ φ => by
     simp only [Fml.rwEqC_modal, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]
 
@@ -111,6 +114,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | allIntro _ ih => exact .allIntro (ih hφ)
   | updIntro _ ih => exact .updIntro (ih hφ)
   | bindIntro _ ih => exact .bindIntro (ih hφ)
+  | allocIntro _ _ => exact absurd hφ Bool.false_ne_true
   | update d _ _ ih =>
     obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
     exact .update d (ih hω) (Stmt.keyStep_of_inSolkey hs)
@@ -169,6 +173,9 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | inv d _ _ _ _ _ _ _ =>
     obtain ⟨hs, _⟩ := Fml.inSolkey_modal_cons hφ
     exact absurd (Stmt.premise_inSolkey_of_step hs d) Bool.false_ne_true
+  | allocBranches d _ _ _ _ _ =>
+    obtain ⟨hs, _⟩ := Fml.inSolkey_modal_cons hφ
+    exact absurd (Stmt.premise_inSolkey_of_step hs d) Bool.false_ne_true
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
     obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
     have hP : Prog.inSolkey m P = true := Stmt.premise_inSolkey_of_step hs d
@@ -212,6 +219,7 @@ theorem Hyps.modalFree_wrap {Γ₀ : Ctx} : {Γ : Ctx} → (H : Hyps C Γ₀ Γ)
   | _, .all H _ _, _, h => Hyps.modalFree_wrap H (φ := .all _ _ _) h
   | _, .bind H _ _ _, _, h => Hyps.modalFree_wrap H (φ := .bind _ _ _ _) h
   | _, .anon H _, _, h => Hyps.modalFree_wrap H (φ := .anon _ _) h
+  | _, .allocAll H _ _, _, h => Hyps.modalFree_wrap H (φ := .allocAll _ _ _) h
 
 /-- **A step `⊢ₖ` cannot take leaves it nothing but `closeFalse`**: a
 derivation by solkey's rules of a modality whose first statement has no rule
@@ -221,11 +229,12 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
   induction h with
   | update _ _ hR _ | updates _ _ hR _ | guardedUpdates _ _ _ hR _ _ | unfold _ _ hR _ | bind _ _ hR _ | split _ _ _ hR _ _ | check _ _ _ hR _ _
   | done _ _ hR _ | branches _ _ _ hR _ | cases _ _ _ _ hR _ _ | inv _ _ _ _ hR _ _ _
-  | inline _ _ hR _ =>
+  | inline _ _ hR _ | allocBranches _ _ _ hR _ _ =>
     have h' : (!RuleSet.admits .solkey _ _) = true := hφ
     rw [hR] at h'
     exact absurd h' Bool.false_ne_true
-  | intro | notLeft | hideLeft | andIntro | allIntro | updIntro | bindIntro | empty | closeTrue =>
+  | intro | notLeft | hideLeft | andIntro | allIntro | updIntro | bindIntro | allocIntro | empty
+  | closeTrue =>
     exact absurd hφ Bool.false_ne_true
   | closeFalse h _ => exact h
   | @closeHolds Γ H φ _ hm =>
