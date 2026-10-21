@@ -18,7 +18,8 @@ postcondition reads a `bytesN` as that number.
   `.length`, conversions;
 * §2 — `bytesN` in state variables, arrays, mapping keys and functions;
 * §3 — `bytes` and `string`;
-* §4 — byte types as struct members.
+* §4 — byte types as struct members;
+* §5 — `calldata` parameters.
 -/
 
 namespace Solidity.Examples.Tactics.Bytes
@@ -222,5 +223,37 @@ theorem memberBytes : ⊨ dl[Records]{ ⟨ rec.b = "a"; rec.b.push("x"); bytes1 
     x == 120 } := by
   sol_symex
   sol_decide
+
+/-! ## 5 · `calldata` parameters
+
+A `calldata` parameter is a memory parameter the body does not write
+(`calldataCheck`, `Syntax/Elab.lean`): solc refuses a write to calldata and
+copies it to memory where it is bound there, which the model's memory
+binding would share, so a write through it, through a memory name bound to
+it, or by a callee it is handed to as `memory`, is refused. -/
+
+/-- Functions with `calldata` parameters. -/
+def Cd : Contract := contract!{
+  function first(uint[] calldata xs) returns (uint r) { r = xs[0]; }
+  function poke(uint[] calldata xs) { xs[0] = 1; }
+  function copyWrite(uint[] calldata xs) { uint[] memory m = xs; m[0] = 1; }
+  function bump(uint[] memory ys) { ys[0] = 7; }
+  function hand(uint[] calldata xs) { bump(xs); }
+}
+
+/-- Read as a memory parameter. -/
+theorem firstOf : ⊨ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint v = first(a); ]
+    v == 5 } := by
+  sol_symex
+  sol_decide
+
+/-- error: Solidity elaboration failed: xs[0]: a write through calldata or a memory binding of it: solc refuses the first and copies calldata to memory for the second, where the model would share the object -/
+#guard_msgs in #check sol[Cd]{ uint[] memory a = new uint[](2); poke(a); }
+
+/-- error: Solidity elaboration failed: m[0]: a write through calldata or a memory binding of it: solc refuses the first and copies calldata to memory for the second, where the model would share the object -/
+#guard_msgs in #check sol[Cd]{ uint[] memory a = new uint[](2); copyWrite(a); }
+
+/-- error: Solidity elaboration failed: bump: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it -/
+#guard_msgs in #check sol[Cd]{ uint[] memory a = new uint[](2); hand(a); }
 
 end Solidity.Examples.Tactics.Bytes

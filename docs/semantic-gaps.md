@@ -58,7 +58,7 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); open: `calldata` |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); open: calldata slices `b[i:j]` (refused) |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats, the callback reading's leaves on the bound array |
@@ -280,7 +280,23 @@ theorems are unchanged.
 - `bytes.concat`, `string.concat`, `abi.*`, `keccak256`: landed
   ("Hashing and the ABI").
 - `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
-  `bytesN` word is left-aligned there), `calldata` (refused for every type).
+  `bytesN` word is left-aligned there).
+- `calldata` (lane `open-small`): closed.  A `calldata` parameter (`uint[]
+  calldata xs`, `bytes`, `string`, a struct) and a `calldata` local are
+  memory ones the body does not write (`calldataCheck`, `Syntax/Elab.lean`;
+  the import prints them `memory`, `Frontend/Import.lean`): solc refuses a
+  write to calldata, and copies calldata where it is bound to memory (`T
+  memory m = xs;`, an argument to a `memory` parameter, a `memory` return),
+  which the model's memory binding would share.  So, before the body is
+  elaborated, a write through a calldata name or a memory name bound to one
+  is refused, as is returning one as `memory` and handing one to a callee's
+  `memory` parameter the callee writes: what is left only reads the object,
+  where sharing and copying agree.  An array parameter's elements are in
+  their ABI range as a memory one's (`elemRanges`).  Slices `b[i:j]` are
+  refused: a slice is a view of the caller's data, which the model would copy
+  element by element, a loop with no invariant, so no obligation over it
+  would be proved.  Tests: `tests/solc/Calldata.sol`,
+  `Examples/Tactics/Bytes.lean` §5.
 - A byte type as a struct member: closed ("Struct table", "Byte and function
   types as members").
 

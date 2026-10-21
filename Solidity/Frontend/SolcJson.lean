@@ -1013,6 +1013,11 @@ partial def expr (j : Json) : PM String := do
   | "FunctionCall" => call j
   | "NewExpression" =>
     pure s!"new {← PM.lift (tyText (← get).structs (← PM.lift (J.get j "typeName")))}"
+  -- a calldata slice is a view of the caller's data, which the model would
+  -- copy into a fresh memory array, element by element: a loop, which the
+  -- runner proves only by an invariant (docs/semantic-gaps.md, "Bytes and
+  -- strings")
+  | "IndexRangeAccess" => unsupported "a calldata slice `b[i:j]` (a copy element by element, a loop)"
   | k => unsupported s!"the expression `{k}`"
 
 /-- An assignment's text, `l op r`; a nested assignment on the right
@@ -1216,6 +1221,9 @@ def declText (d : Json) : PM String := do
   let loc ← match J.opt d "storageLocation" with
     | some (.str "storage") => pure " storage"
     | some (.str "memory") => pure " memory"
+    -- a calldata local: a memory one bound to calldata, read only
+    -- (`calldataCheck`)
+    | some (.str "calldata") => pure " memory"
     | _ => pure ""
   let name ← nameOf d
   if let some source := J.str? d "name" then
@@ -2173,10 +2181,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
         let t ← J.opt p "typeName"
         -- `bytes`/`string`: a `bytes1[]`, each element below `2^8`
-        if J.kind t == "ElementaryTypeName" && J.str? p "storageLocation" == some "memory" &&
+        let mem := J.str? p "storageLocation" == some "memory" ||
+          J.str? p "storageLocation" == some "calldata"
+        if J.kind t == "ElementaryTypeName" && mem &&
             dynBytesTy ((J.str? t "name").getD "") then
           return (x, 0, 255, none)
-        guard (J.kind t == "ArrayTypeName" && J.str? p "storageLocation" == some "memory")
+        guard (J.kind t == "ArrayTypeName" && mem)
         let b ← J.opt t "baseType"
         let len : Option Nat := (J.opt t "length").bind fun l => (J.str? l "value").bind (·.toNat?)
         guard ((J.opt t "length").isNone || len.isSome)

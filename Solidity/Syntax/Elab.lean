@@ -149,10 +149,10 @@ def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
       else .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .val p ((lookupBy n d.widths).getD 256))])
     | .ref R => match lookupBy n d.paramLocs with
       | some .storage => .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .alias R)])
-      | some .memory =>
+      -- a `calldata` one a memory one the body does not write (`calldataCheck`)
+      | some .memory | some .calldata =>
         if (Ty.ref R).mapFree then .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .mem R)])
         else .error s!"memory parameter {n} holds a mapping"
-      | some .calldata => .error s!"calldata parameter {n} is not supported"
       | none => .error s!"reference parameter {n} needs a data location"
   pure rows.flatten
 
@@ -598,6 +598,103 @@ def RawStmt.decls (s : RawStmt) : List String :=
 
 def RawStmt.declsList (ss : List RawStmt) : List String :=
   ss.flatMap RawStmt.decls
+
+/-! ### `calldata` parameters
+
+A `calldata` parameter is a memory parameter the body does not write
+(`docs/semantic-gaps.md`, "Bytes and strings"): solc refuses a write to
+calldata, and a copy of it to memory (`T memory m = xs;`, an argument to a
+`memory` parameter, a `memory` return) is a copy there, where the model's
+memory binding shares the object.  So the elaborator reads it as a memory
+local and refuses, before the body is elaborated (`calldataCheck`), a write
+through it and through every memory name bound to it, a binding of it
+returned, and an argument of it to a callee's `memory` parameter the callee
+writes: what is left only reads the object, where sharing and copying agree. -/
+
+/-- The names of a function's reference returns. -/
+def FunDecl.refRets (d : FunDecl) : List String :=
+  d.rets.filterMap fun (x, T) => if T matches .ref _ then some x else none
+
+/-- Its `calldata` parameters. -/
+def FunDecl.calldataParams (d : FunDecl) : List String :=
+  d.paramLocs.filterMap fun (x, l) => if l == .calldata then some x else none
+
+/-- Why a write through calldata is refused. -/
+def roMsg : String :=
+  "a write through calldata or a memory binding of it: solc refuses the first and copies \
+    calldata to memory for the second, where the model would share the object"
+
+/-- The name a write target is rooted at: `x` of `x[i].f`. -/
+def RawExpr.root? : RawExpr → Option String
+  | .name x => some x
+  | .index e _ | .field e _ => e.root?
+  | _ => none
+
+/-- A write through one of the names `ro` (not a binding of the name itself). -/
+def roWrite (ro : List String) (l : RawExpr) : Bool :=
+  !(l matches .name _) && (l.root?.any ro.contains)
+
+/-- The writes inside an expression (`(x[0] = 1)`, `x[0]++`) through `ro`. -/
+def RawExpr.roWrites (ro : List String) (e : RawExpr) : Bool :=
+  e.any fun
+    | .assign l _ | .opAssign _ l _ | .incDec _ l => roWrite ro l
+    | _ => false
+
+/-- What `calldataCheck` refuses in one statement (not its blocks), and the
+names it binds to the read-only object. -/
+def roStmt (ro : List String) (s : RawStmt) : Except String (List String) := do
+  let mention (e : RawExpr) : Bool := ro.any e.mentions
+  if s.exprs.any (RawExpr.roWrites ro) then
+    throw roMsg
+  match s with
+  | .assign l r =>
+    if roWrite ro l then throw s!"{l.toStr}: {roMsg}"
+    pure (match l with | .name x => if mention r then x :: ro else ro | _ => ro)
+  | .opAssign _ l _ | .incDec _ l | .assignIncDec _ _ l | .delete l =>
+    if roWrite ro l then throw s!"{l.toStr}: {roMsg}" else pure ro
+  | .tupleAssign ts _ =>
+    if ts.any (·.any (roWrite ro)) then throw roMsg else pure ro
+  | .call (.field b m) _ =>
+    if (m == "push" || m == "pop") && b.root?.any ro.contains then
+      throw s!"{b.toStr}.{m}: {roMsg}"
+    else pure ro
+  | .declMemory _ x (some e) => pure (if mention e then x :: ro else ro)
+  | _ => pure ro
+
+/-- **What a body does with its `calldata` parameters `ro`** (above): a
+write through one, or through a memory name bound to one, is refused; so is
+returning one where the function returns a memory reference (`rets`, its
+reference returns), and passing one to a callee's `memory` parameter the
+callee writes.  `fuel` bounds the callees followed. -/
+partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro rets : List String)
+    (body : List RawStmt) : Except String Unit := do
+  if ro.isEmpty then return
+  let ss := body.flatMap (RawStmt.flatMapDeep fun s => [s])
+  -- the names bound to the object, to a fixed point (a loop may bind late)
+  let mut ro := ro
+  for _ in [0:3] do
+    for s in ss do ro ← roStmt ro s
+  let mention (e : RawExpr) : Bool := ro.any e.mentions
+  if let some r := rets.find? ro.contains then
+    throw s!"the memory return {r} bound to calldata: solc copies it, the model would share it"
+  for s in ss do
+    if let .ret (some e) := s then
+      if !rets.isEmpty && mention e then
+        throw "calldata returned as memory: solc copies it, the model would share it"
+    -- a call statement's callee, as the expression it would be
+    let es := match s with
+      | .call (.name g) as => RawExpr.call g as :: s.exprs
+      | _ => s.exprs
+    for e in es do
+      for (g, d) in funs do
+        let offends := e.any fun
+          | .call g' as => g' == g && (d.params.zip as).any fun ((p, _), a) =>
+              lookupBy p d.paramLocs == some .memory && mention a &&
+                (fuel == 0 || (calldataCheck funs (fuel - 1) [p] (d.refRets) d.body).isOk == false)
+          | _ => false
+        if offends then
+          throw s!"{g}: calldata passed to a `memory` parameter it writes: solc copies it, \
+            the model would share it"
 
 /-- The largest index among the fresh variables a raw statement writes. -/
 def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
@@ -3130,6 +3227,35 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
     | _, _ => throw s!"`{e}`: a custom error's reference argument is not modelled"
   pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
 
+/-- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
+`abi.encodeCall(g, (…))`: the selector, as an expression, and the rest of
+the arguments (`hoist`, outside its `mutual` block for its size). -/
+def encodeSelector? (Γ : ECtx) (f : String) (args : List RawExpr) :
+    Except String (Option (RawExpr × List RawExpr)) :=
+  match f, args with
+  | "abi.encodeWithSelector", s :: rest => pure (some (s, rest))
+  | "abi.encodeWithSignature", s :: rest =>
+    match s.bytesLit? with
+    | some bs => pure (some (.num (Keccak.selector (String.mk (bs.map Char.ofNat))), rest))
+    | none => pure (some (.binop .shr (.call "keccak256" [s]) (.num 224), rest))
+  | "abi.encodeCall", [g, t] => do
+    let rest := match t with
+      | .tuple as => as
+      | a => [a]
+    match g with
+    | .name g =>
+      match fnSelector? C g with
+      | some sel => pure (some (.num sel, rest))
+      | none =>
+        if let some ty := fnTyOf? C Γ g then
+          if let some (_, _, true) := fnParts? ty then
+            let a : RawExpr := .binop .div (.name g) (.num selShift)
+            return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
+        throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
+          function value"
+    | _ => throw "abi.encodeCall(f, …): f a function of the contract or a function value"
+  | _, _ => pure none
+
 /-- `keccak256(b)`, `sha256(b)`, `ripemd160(b)`: of a memory `bytes` (a
 storage one copied first), into a fresh `bytes32` (`Val.hash`), a
 `bytes20` for `ripemd160` (`ripemd160Bytes`, below `2^160`).
@@ -3325,7 +3451,6 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
     let builtin := (← read).funs.all (·.1 != f)
-    -- the hashing builtins (`hoistHash`)
     -- the hashing builtins (`hoistHashWith`)
     if builtin && isHashName f then return ← hoistHashWith C hoist abiMemBytes elabStmtsP f args
     -- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
@@ -3335,29 +3460,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     -- bytes of its `keccak256`
     if builtin && (f == "abi.encodeWithSelector" || f == "abi.encodeWithSignature" ||
         f == "abi.encodeCall") then
-      let some (sel, rest) ← (match f, args with
-        | "abi.encodeWithSelector", s :: rest => pure (some (s, rest))
-        | "abi.encodeWithSignature", s :: rest =>
-          match s.bytesLit? with
-          | some bs => pure (some (.num (Keccak.selector (String.mk (bs.map Char.ofNat))), rest))
-          | none => pure (some (.binop .shr (.call "keccak256" [s]) (.num 224), rest))
-        | "abi.encodeCall", [g, t] => do
-          let rest := match t with
-            | .tuple as => as
-            | a => [a]
-          match g with
-          | .name g =>
-            match fnSelector? C g with
-            | some sel => pure (some (.num sel, rest))
-            | none =>
-              if let some ty := fnTyOf? C (← ctx) g then
-                if let some (_, _, true) := fnParts? ty then
-                  let a : RawExpr := .binop .div (.name g) (.num selShift)
-                  return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
-              throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
-                function value"
-          | _ => throw "abi.encodeCall(f, …): f a function of the contract or a function value"
-        | _, _ => pure none : ElabM (Option (RawExpr × List RawExpr)))
+      let some (sel, rest) ← ElabM.lift (encodeSelector? C (← ctx) f args)
         | throw s!"{f}: its selector or signature first"
       -- a `bytes4` already marked (`bytesPure`) is marked once
       let sel := match sel with
@@ -3823,12 +3926,11 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
           if stable then pure ([], a) else do
           let x ← captureRef C "sp" (.alias R) a
           pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
-        | some .memory =>
+        | some .memory | some .calldata =>
           let rhs ← ElabM.lift (elabMRhs C Γ R a)
           if stable && (rhs matches .alias _) then pure ([], a) else do
           let x ← captureRef C "mv" (.mem R) a
           pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
-        | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
         | none => throw s!"{f}: reference parameter {n} needs a data location"
     P := P ++ Q
     prepared := prepared ++ [a]
@@ -4091,6 +4193,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let partners := recPartnersC C f
       pure (d, C.funs.take j ++ (C.funs.drop j).filter (partners.contains ·.1))
     else pure (d, funs.take i)
+  ElabM.lift (calldataCheck scope 8 d.calldataParams d.refRets d.body)
   -- a recursive function's frame is one context, `rs ++ ps`, at every call:
   -- a call of several returns returns to its targets (`CallRet.rets`)
   if recursive && d.rets.length > 1 && !targets then
@@ -4137,7 +4240,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         targs := ⟨_, targs.2.snocStorage R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .alias R) :: Γp
-      | some .memory =>
+      | some .memory | some .calldata =>
         ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
         let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
         let x ← pickName "mv" (·.params) pj
@@ -4145,7 +4248,6 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         targs := ⟨_, targs.2.snocMemory R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .mem R) :: Γp
-      | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
       | none => throw s!"{f}: reference parameter {n} needs a data location"
     pj := pj + 1
   let mut mret : Option (RefTy × Var × Bool) := none

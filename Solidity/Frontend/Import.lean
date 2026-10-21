@@ -493,7 +493,9 @@ def elabSolcImport : CommandElab := fun stx => do
         [(f.line, s!"{f.name}({", ".intercalate (f.params.map Prod.fst)})")]
       -- its return variables first, at their defaults
       let ss := (retNames f).map (fun (x, t) => (f.line, s!"{t} {x}")) ++ ss
-      let params := f.params.map fun (x, t) => s!"{t} {x}; "
+      -- a `calldata` parameter a memory local (`calldataCheck`, below)
+      let params := f.params.map fun (x, t) =>
+        s!"{if t.endsWith " calldata" then t.dropRight 9 ++ " memory" else t} {x}; "
       let text := "sol_raw!{ " ++ String.join params ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
@@ -531,7 +533,11 @@ def elabSolcImport : CommandElab := fun stx => do
       let (raw, st) ← ((lowerBodyLoops rets rets.length raw).run { funs := C.funs }).run
         (Γ, RawStmt.maxIdxs raw + 1)
       pure ((← if lower then lowerReturns rets raw else pure raw), st)
-    let scope := paramCtx C params
+    -- its `calldata` parameters read only (`calldataCheck`)
+    let cd := f.params.filterMap fun (x, t) => if t.endsWith " calldata" then some x else none
+    let refRets := (retNames f).filterMap fun (x, t) =>
+      if t.endsWith " memory" || t.endsWith " storage" then some x else none
+    let scope := (calldataCheck C.funs 8 cd refRets raw).bind fun _ => paramCtx C params
     if let .ok Γ := scope then rows := rows.set! k { rows[k]! with paramTypes := (ECtx.toNCtx Γ).ctx }
     match scope >>= lowered with
     | .error m => rows := fail (at_ f 0 m)
