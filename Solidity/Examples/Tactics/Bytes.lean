@@ -154,7 +154,8 @@ def Texts : Contract := contract!{
 }
 
 example : Texts.widths =
-    [("data[]", 8), ("data[]#bytes", 1), ("name[]", 8), ("name[]#bytes", 1)] := rfl
+    [("data[]", 8), ("data[]#bytes", 1), ("name[]", 8), ("name[]#bytes", 1), ("name#string", 1)] :=
+  rfl
 
 /-- A literal copied to storage, then pushed to and popped. -/
 theorem storagePushPop : ⊨ dl[Texts]{ ⟨ data = "ab"; data.push("c"); uint l = data.length;
@@ -189,7 +190,7 @@ def Records : Contract := contract!{
 
 example : Semantics.structWidths "Rec{h:bytes32;tag:bytes2;b:bytes;name:string}" =
     [("h#bytes", 32), ("tag", 16), ("tag#bytes", 2), ("b[]", 8), ("b[]#bytes", 1),
-     ("name[]", 8), ("name[]#bytes", 1)] := by decide
+     ("name[]", 8), ("name[]#bytes", 1), ("name#string", 1)] := by decide
 
 /-- A `bytesN` member: a literal left-aligned, indexed as a local. -/
 theorem memberBytesN : ⊨ dl[Records]{ ⟨ rec.tag = "ab"; bytes1 c = rec.tag[1];

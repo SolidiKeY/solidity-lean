@@ -477,12 +477,22 @@ def bytesTy? (s : String) : Option Nat :=
 /-- `bytes` and `string`, both a `bytes1[]`. -/
 def dynBytesTy (s : String) : Bool := s == "bytes" || s == "string"
 
+/-- The marker of an `address` (`valueRows?`): its width in bytes. -/
+def addressRows : List (String × Nat) := [("#address", 20)]
+
+/-- The marker of an enum (`expandStateTyW`, `elabTyW`): a `uint` of one
+byte in the ABI, `uint8` in a signature. -/
+def enumRows : List (String × Nat) := [("#enum", 1)]
+
 /-- The width rows a value type adds at its own position (`""`): a narrow
 integer's width, a `bytesN`'s width below 256 bits and its marker, a function
 type's marker ("Function types" below); with the primitive type it is read
 as. -/
 def valueRows? (s : String) : Option (PrimTy × List (String × Nat)) :=
   if s.startsWith "function(" then some (.uint, [("#" ++ s, 0)]) else
+  -- an `address`: a `uint` and its marker, which the ABI reads (20 bytes
+  -- packed, `address` in a signature)
+  if s == "address" then some (.uint, addressRows) else
   match narrowTy? s, bytesTy? s with
   | some (p, n), _ => some (p, [("", n)])
   | none, some n => some (.uint, (if n < 32 then [("", 8 * n)] else []) ++ [("#bytes", n)])
@@ -496,10 +506,21 @@ def hashKeyRows : List (String × Nat) := [("{}#hash", 1)]
 /-- The rows of `bytes` and `string`: elements 8 bits wide, each a `bytes1`. -/
 def dynBytesRows : List (String × Nat) := [("[]", 8), ("[]#bytes", 1)]
 
+/-- The rows of `bytes` or `string` (`dynBytesTy`): a `string` marked so
+too, which only a signature reads (`string`, not `bytes`). -/
+def dynBytesRowsOf (s : String) : List (String × Nat) :=
+  if s == "string" then dynBytesRows ++ [("#string", 1)] else dynBytesRows
+
 /-- The name of a literal of bytes (`"ab"`, `hex"6162"`) as an expression:
 a call no function can be the callee of, read at the type it meets
 (`bytesPure`, `Syntax/Elab.lean`). -/
 def bytesLitName : String := "#bytes"
+
+/-- The name of a call through a value that is not a name, `s.f(x)`,
+`fs[i](x)`, `choose(b)(x)`: `#callValue(callee, args…)`, the callee captured
+into a fresh local of its function type before the call (`hoist`,
+`Syntax/Elab.lean`). -/
+def callValueName : String := "#callValue"
 
 /-- `keccak256(b)` once `hoist` has made `b` a memory path: the member
 `b.#keccak256`, which no source can write (`Val.keccak`). -/
@@ -791,6 +812,9 @@ so that a call with no member after it is left to the readings above. -/
 syntax:max (name := solCallMember) sol_expr:max atomic("(" sol_expr,* ")" ".") ident : sol_expr
 /-- A call's storage reference indexed, `matrixRef()[i]`: the call before the index. -/
 syntax:max (name := solCallIndex) sol_expr:max atomic("(" sol_expr,* ")" "[") sol_expr "]" : sol_expr
+/-- A call of a call's value, `choose(b)(x)`: a function value returned
+(`callValueName`). -/
+syntax:max (name := solCallCall) sol_expr:max atomic("(" sol_expr,* ")" "(") sol_expr,* ")" : sol_expr
 
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
@@ -1096,13 +1120,15 @@ def expandIdent (x : Ident) : MacroM Term := do
 /-- `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`,
 `bytes.concat`: builtins the elaborator lowers (`abiEncode`, `Syntax/Elab.lean`). -/
 def builtinMember (n g : String) : Bool :=
-  (n == "abi" && ["encode", "encodePacked", "decode"].contains g) ||
+  (n == "abi" && ["encode", "encodePacked", "decode", "encodeWithSelector",
+    "encodeWithSignature", "encodeCall"].contains g) ||
     ((n == "string" || n == "bytes") && g == "concat")
 
 /-- A builtin whose value is a fresh memory `bytes`: `abi.encode`,
 `abi.encodePacked`, the two `concat`s. -/
 def encodeBuiltin (f : String) : Bool :=
-  ["abi.encode", "abi.encodePacked", "string.concat", "bytes.concat"].contains f
+  ["abi.encode", "abi.encodePacked", "string.concat", "bytes.concat", "abi.encodeWithSelector",
+    "abi.encodeWithSignature", "abi.encodeCall"].contains f
 
 /-- A builtin that reads byte strings whole: `keccak256`, the ABI's, the
 `concat`s (and `#abiDecode`, `abi.decode`'s lowering). -/
@@ -1283,13 +1309,18 @@ where
       fieldChain (← expandCall f as.getElems callMsg) (nameParts g.getId)
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandCall f as.getElems callMsg) $(← expandExpr k))
+  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) ( $bs:sol_expr,* )) => do
+      `(RawExpr.call callValueName
+        [$(← expandCall f as.getElems callMsg), $(← bs.getElems.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => expandCall f as.getElems callMsg
   | _ => Macro.throwUnsupported
   -- `f(a, b)`, a call of the function `f` (or a struct's constructor, `msg`
   -- says which): `RawExpr.call`
   expandCall (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (msg : String) :
       MacroM Term := do
-  let some g := funName? f | Macro.throwErrorAt f msg
+  let some g := funName? f |
+      -- a callee that is not a name: a function value (`callValueName`)
+    `(RawExpr.call callValueName [$(← expandExpr f), $(← as.mapM expandExpr),*])
   `(RawExpr.call $(quote g) [$(← as.mapM expandExpr),*])
 
 partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
@@ -1761,11 +1792,13 @@ partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
   -- (`Semantics.StructEnc.valueRowsOf`)
   if T.raw.isOfKind ``solFnTy then return ← spellFnTy T
   match T with
-  | `(sol_ty| address payable) => pure "uint"
+  -- an `address` as written: a `uint` and its marker
+  | `(sol_ty| address payable) => pure "address"
   | `(sol_ty| $x:ident) =>
     let n := x.getId.toString
     if env.enums.contains n then return "uint"
     if let some e := lookupBy n env.structs then return e
+    if n == "address" then return n
     match PrimTy.ofName? n with
     | some p => return p.toStr
     | none =>
@@ -1803,8 +1836,9 @@ def expandStructs (enums : List String) (decls : Array (Ident × Array (TSyntax 
         Macro.throwErrorAt S s!"struct {n}: its members do not spell a struct: {enc}"
       if let some f := dupKey? fs then
         Macro.throwErrorAt S s!"struct {n}: identifier already declared: member {f}"
-      let e := if structDef n == fs && structWidths n == Semantics.StructEnc.widths enc then n
-        else enc
+      -- the table's structs carry no `address` marker (`addressRows`)
+      let ws := (Semantics.StructEnc.widths enc).filter (·.1.endsWith "#address" == false)
+      let e := if structDef n == fs && structWidths n == ws then n else enc
       unless structDef e == fs do
         Macro.throwErrorAt S s!"struct {n}: nested past the struct table's rank bound \
           (`structRankCap`)"
@@ -1836,14 +1870,21 @@ parameter's and a return's type are read so too (`expandParamsW`). -/
 partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     MacroM (Term × List (String × Nat)) := do
   let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × List (String × Nat)) := match K with
-    | `(sol_ty| $x:ident) => valueRows? x.getId.toString
+    | `(sol_ty| $x:ident) =>
+      if enums.enums.contains x.getId.toString then some (.uint, enumRows)
+      else valueRows? x.getId.toString
+    | `(sol_ty| address payable) => some (.uint, addressRows)
     | _ => none
   -- a function type: its tag, a `uint`, and its marker (`valueRows?`)
   if T.raw.isOfKind ``solFnTy then
     return (← `(Ty.uint), ((valueRows? (← spellFnTy T)).map (·.2)).getD [])
   match T with
+  | `(sol_ty| address payable) => return (← `(Ty.uint), addressRows)
   | `(sol_ty| $x:ident) =>
-    if dynBytesTy x.getId.toString then return (← `(Ty.array Ty.uint), dynBytesRows)
+    if dynBytesTy x.getId.toString then
+      return (← `(Ty.array Ty.uint), dynBytesRowsOf x.getId.toString)
+    -- an enum: a `uint` and its marker (`enumRows`)
+    if enums.enums.contains x.getId.toString then return (← `(Ty.uint), enumRows)
     match valueRows? x.getId.toString with
     | some (.int, ws) => pure (← `(Ty.int), ws)
     | some (_, ws) => pure (← `(Ty.uint), ws)

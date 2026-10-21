@@ -653,10 +653,12 @@ def narrowWidth (n : List Char) : Option Nat :=
 
 /-- The rows a value type adds at its own position, as `valueRows?`
 (`Syntax.lean`) gives them: a narrow integer's width, a `bytesN`'s width
-below 256 bits and its marker `#bytes`, a function type's marker. -/
+below 256 bits and its marker `#bytes`, a function type's marker, an
+`address`'s. -/
 def valueRowsOf (t : List Char) : List (String × Nat) :=
   match t with
   | 'f' :: 'u' :: 'n' :: 'c' :: 't' :: 'i' :: 'o' :: 'n' :: '(' :: _ => [("#" ++ String.mk t, 0)]
+  | ['a', 'd', 'd', 'r', 'e', 's', 's'] => [("#address", 20)]
   | 'b' :: 'y' :: 't' :: 'e' :: 's' :: ds =>
     if !ds.isEmpty && ds.all Char.isDigit && 1 ≤ natOf ds && natOf ds ≤ 32 then
       (if natOf ds < 32 then [("", 8 * natOf ds)] else []) ++ [("#bytes", natOf ds)]
@@ -679,7 +681,9 @@ def shapeOf : Nat → List Char → List (String × Nat)
             (valueRowsOf kt).map fun (p, n) => ("{}" ++ p, n)) ++
             (shapeOf k vt).map fun (p, n) => ("[]" ++ p, n)
         | _ => []
-      | _ => if dynBytes t then [("[]", 8), ("[]#bytes", 1)] else valueRowsOf t
+      | _ =>
+        if t == "string".data then [("[]", 8), ("[]#bytes", 1), ("#string", 1)]
+        else if dynBytes t then [("[]", 8), ("[]#bytes", 1)] else valueRowsOf t
 
 /-- A spelled struct's narrow members (`structWidths`). -/
 def widths (s : Name) : List (String × Nat) :=

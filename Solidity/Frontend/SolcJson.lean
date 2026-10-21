@@ -396,7 +396,9 @@ partial def narrowShape (j : Json) : List (String × Nat) :=
   match J.kind j with
   | "ElementaryTypeName" =>
     let n := (J.str? j "name").getD ""
-    if dynBytesTy n then dynBytesRows else ((valueRows? n).map (·.2)).getD []
+    -- an `address`'s marker is not compared: the table's structs carry none
+    if dynBytesTy n then dynBytesRowsOf n
+    else (((valueRows? n).map (·.2)).getD []).filter (·.1 != "#address")
   | "ArrayTypeName" =>
     ((J.opt j "baseType").map narrowShape).getD [] |>.map fun (k, n) => ("[]" ++ k, n)
   | "Mapping" =>
