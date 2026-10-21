@@ -3459,7 +3459,10 @@ def ByteSrc.len (s : ByteSrc) : RawExpr := s.len?.getD (.field (.name s.d) "leng
 
 /-- `d[o]`, a byte of `d` (of the view: `d[off + o]`). -/
 def abiByte (d : ByteSrc) (o : RawExpr) : RawExpr :=
-  .index (.name d.d) (match d.off with | some b => .binop .add b o | none => o)
+  .index (.name d.d) (match d.off, o with
+    | some (.num b), .num c => .num (b + c)
+    | some b, o => .binop .add b o
+    | none, o => o)
 
 /-- The `m` bytes of `d` from `o` read big-endian into the `uint` local `w`:
 `w = d[o]; w = w * 256 + d[o + 1]; …`. -/
@@ -3610,7 +3613,10 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
       let (Q, d) ← abiMemBytes b
       pure (P, Q, (d : ByteSrc)) : ElabM (SProg C × SProg C × ByteSrc))
   let len : RawExpr := d.len
-  let enough : RawStmt := .require (.binop .ge len (.num (32 * n)))
+  -- a view of a literal length too short: the revert itself, no read after it
+  let enough : RawStmt := match len with
+    | .num l => if l < 32 * n then .revert else .require (.binop .ge len (.num (32 * n)))
+    | _ => .require (.binop .ge len (.num (32 * n)))
   if let .name T := Te then
     -- a byte string: its offset in the head, its length and bytes in the tail
     if dynBytesTy T then

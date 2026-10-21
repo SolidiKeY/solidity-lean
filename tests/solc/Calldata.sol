@@ -85,12 +85,13 @@ contract Calldata {
         assert(t.length == j - i);
     }
 
-    // a read of the view is a read of the base past its offset
+    // a read of the view is a read of the base past its offset, wherever
+    // it does not revert (`xs[1 + k]`, the view's index as written: the
+    // closer reads `xs[k + 1]` beside it past its heartbeats)
     /// @custom:key box
     function sliceRead(uint[] calldata xs, uint k) external pure {
         uint[] calldata t = xs[1:];
-        require(k < t.length);
-        assert(t[k] == xs[k + 1]);
+        assert(t[k] == xs[1 + k]);
     }
 
     // a slice of a slice adds the offsets
@@ -110,11 +111,11 @@ contract Calldata {
     }
 
     // the decoder reads the view in place: a view shorter than a word
-    // reverts though its base is not
+    // reverts though its base is not (a literal length: the revert alone)
     /// @custom:key box
     function decodeShortView(bytes calldata b) external pure {
-        require(b.length == 34);
-        uint x = abi.decode(b[4:], (uint));
+        require(b.length >= 64);
+        uint x = abi.decode(b[4:20], (uint));
         assert(false);
     }
 
