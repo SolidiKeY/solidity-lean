@@ -406,6 +406,14 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     'memoryParameter']) assert.equal(status[name], 'proved', name);
 });
 
+test("hashing: keccak256, abi.encode/encodePacked/decode, string keys, concat", () => {
+  const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['equalStringsHashEqual', 'hashParameter', 'encodeLayout', 'encodePacked',
+    'decodeRoundtrip', 'stringKey', 'concatLengths']) assert.equal(status[name], 'proved', name);
+});
+
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
   const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
   assert.deepEqual(report.errors, []);

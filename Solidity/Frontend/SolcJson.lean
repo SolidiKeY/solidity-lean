@@ -1151,6 +1151,11 @@ contract (`SolJSONParser.requireTupleValue`). -/
 def tupleValue (v : Json) : PM String := do
   if isTuple v then tuple v
   else if isNamedCall v (← get).freeFunctions (← get).baseContracts then expr v
+  -- `abi.decode(d, (T, U))`: the elaborator decodes each component
+  else if J.kind v == "FunctionCall" && (J.opt v "expression").any (fun f =>
+      J.kind f == "MemberAccess" && J.str? f "memberName" == some "decode" &&
+        (J.opt f "expression").any (fun o => J.kind o == "Identifier" && J.str? o "name" == some "abi"))
+  then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
 

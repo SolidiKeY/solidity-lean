@@ -394,6 +394,13 @@ def Grown.writeT {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T)
   let hp ← m.heap.writeAddr (← a.resolve m.H') (← MvT.toMVal m.H' T v)
   some ⟨m.ext, hp, ()⟩
 
+/-- `keccak256(m, i)` by identity, the result independent of the heap typing
+(as `Grown.lenId`): the hash of the object `i` (`Heap.keccak`), `0` where
+`i` names no object of type `R`. -/
+def Grown.keccakId {H : HTy} (m : Grown H (fun _ => Unit)) (R : RefTy) (id : Nat) :
+    PrimTy.uint.Denote :=
+  ((HRef.ofId? m.H' R id).map m.heap.keccak).getD (PrimTy.dflt .uint)
+
 /-- `Op2.eval` by `match`, its compiled form. -/
 def Op2.evalM (g : State C []) {a b s : Srt} :
     Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)
@@ -433,7 +440,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | .zcmp op _, x, y => do some (op.cmpZ (← x) (← y))
   | @Op2.keccak _ R, x, y => do
     let m ← x
-    some (((HRef.ofId? m.H' R (← y)).map m.heap.keccak).getD (PrimTy.dflt .uint))
+    some (m.keccakId R (← y))
 
 /-- A binary symbol on the typed global part. -/
 @[implemented_by Op2.evalM]
@@ -477,7 +484,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun op _ x y => do some (op.cmpZ (← x) (← y)))
     (fun {R} x y => do
       let m ← x
-      some (((HRef.ofId? m.H' R (← y)).map m.heap.keccak).getD (PrimTy.dflt .uint)))
+      some (m.keccakId R (← y)))
 
 theorem Op2.eval_eq_evalM (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     o.eval g = o.evalM g := by

@@ -91,6 +91,8 @@ typing (a premise read before a local and a goal read after it read one
 length, `allLeftHide`'s instances among them). -/
 theorem push_lenU {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {E : Ty}
     (r : HRef σ.H (.array E)) : (σ.push v).glob.memT.heap.lenU r = σ.glob.memT.heap.lenU r := rfl
+theorem push_keccakId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (R : RefTy) (id : Nat) :
+    (σ.push v).glob.memT.keccakId R id = σ.glob.memT.keccakId R id := rfl
 theorem push_net {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).net = σ.net := rfl
 theorem push_selfBalance {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).selfBalance = σ.selfBalance := rfl
@@ -256,6 +258,9 @@ theorem eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))
 theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     (Tm.app2 .mlen m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       g.lenId E id := rfl
+theorem eval_keccak {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    (Tm.app2 .keccak m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
+      some (g.keccakId R id) := rfl
 theorem eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
     (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       (HRef.ofId? g.H' R id).bind fun r => some (MVal.copyMToSt g.heap (T := .ref R) r) := rfl
@@ -790,6 +795,9 @@ theorem Landed.selfBalance_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x 
     x.val.selfBalance = g.selfBalance := congrArg State.selfBalance x.glob_eq
 theorem Landed.tx_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ) :
     x.val.tx = g.tx := congrArg State.tx x.glob_eq
+theorem Landed.keccakId_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ)
+    (R : RefTy) (id : Nat) : x.val.glob.memT.keccakId R id = g.memT.keccakId R id := by
+  rw [x.glob_eq]
 
 /-- `p` of every typed state that lands on `g` and `ℓ`: a constant, not a
 binder, so that `simp` tries no binder lemma at it (`forall_const` and its
@@ -905,6 +913,7 @@ attribute [close_rw_s]
   CloseS.envVal_msgSender CloseS.envVal_msgValue CloseS.envVal_timestamp
   CloseS.envVal_selfBalance CloseS.envVal_selfAddress
   CloseS.Landed.storage_eq CloseS.Landed.net_eq CloseS.Landed.selfBalance_eq CloseS.Landed.tx_eq
+  CloseS.Landed.keccakId_eq CloseS.push_keccakId
   CloseS.Landed.locV_eq
   CloseS.set_push_here CloseS.set_push_there CloseS.drop_refl' CloseS.drop_push' CloseS.thin_refl'
   CloseS.thin_keep' CloseS.thin_drop'
@@ -942,6 +951,7 @@ attribute [close_rw_s]
   CloseS.eval_nextIn CloseS.eval_mat
   CloseS.eval_ite CloseS.eval_save CloseS.eval_push
   CloseS.eval_memory CloseS.eval_alloc CloseS.eval_addM CloseS.eval_read CloseS.eval_mlen
+  CloseS.eval_keccak
   CloseS.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt CloseS.eval_write
   SVal.view_prim
   -- runs
