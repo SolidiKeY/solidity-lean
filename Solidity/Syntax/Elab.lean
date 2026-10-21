@@ -768,33 +768,34 @@ def RawStmt.mapBlocksM {m : Type → Type} [Monad m] (f : List RawStmt → m (Li
 `b[i:j]` of a calldata array is a view of it, as solc reads it: no copy.
 `RawStmt.sliceViews` rewrites a body before it is elaborated (the
 `contract!` and `sol_raw!` macros apply it to a body that has a slice).  A
-view is its base, its offset `o` into it and its length `n`, after solc's
-check `i <= j && j <= b.length` (a revert otherwise; `j` is `b.length`
-where it is left out, `i` is `0`).  A bound that is a literal or the
-base's length (a calldata array's is fixed) is kept as it is; any other
-is a local assigned once (`t$view$s`, `t$view$e`, then `t$view$n`), since
-every local and every check costs the closers.  A slice of a slice adds
-its offset to the outer one's (`t$view$o`).  Then `t[k]` is `b[o + k]`
-after `require(k < n)` before the statement, where every evaluation of
-the statement reads it (solc's `Panic(0x32)` and the model's revert are
-one outcome, and every effect before it in the statement is undone with
-it); where it is read only on a condition (a conditional's branch, the
-right operand of `&&`/`||`, a loop's condition) it is `b[k < n ? o + k :
-(n - 1) - k]`, past the view the checked subtraction underflowing, a
+view is its base and where it starts and ends in it, `o` and `f`, after
+solc's checks `i <= j` and `j` within the sliced array (a revert
+otherwise; `j` is the array's length where it is left out, `i` is `0`).
+A bound that is a literal or the base's length (a calldata array's is
+fixed) is kept as it is; any other is a local assigned once (`t$view$s`,
+`t$view$e`, and a slice of a slice's `t$view$o`, `t$view$f`, its bounds
+plus the outer one's start), since every local, every subtraction and
+every check costs the closers.  Then `t[k]` is `b[o + k]` after
+`require(o + k < f)` before the statement, where every evaluation of the
+statement reads it (solc's `Panic(0x32)` and the model's revert are one
+outcome, and every effect before it in the statement is undone with it);
+where it is read only on a condition (a conditional's branch, the right
+operand of `&&`/`||`, a loop's condition) it is `b[o + k < f ? o + k :
+(f - 1) - (o + k)]`, past the view the checked subtraction underflowing, a
 revert too; inside `unchecked`, where that would wrap, the index there is
-`b.length`, past the base.  `t.length` is `n`, and `abi.decode(t, …)`
-decodes the view in place (`#sliceV(b, o, n)`, `ByteSrc`).  So a read, a
+`b.length`, past the base.  `t.length` is `f - o`, and `abi.decode(t, …)`
+decodes the view in place (`#sliceV(b, o, f - o)`, `ByteSrc`).  So a read, a
 length and a decoding are loop-free.  A slice used any other way (handed
 to a function, hashed, copied to memory, indexed by an expression with an
 effect, opened in a loop's condition, its base assigned while it is open)
 is refused (`sliceRefusedName`, reported by `calldataCheck`). -/
 
-/-- A slice's view: its base array, its offset into it and its length (a
-literal, the base's length, or a local assigned once). -/
+/-- A slice's view: its base array, and where it starts and ends in it
+(each a literal, the base's length, or a local assigned once). -/
 structure SliceView where
   base : String
   off : RawExpr
-  len : RawExpr
+  fin : RawExpr
   deriving Inhabited
 
 /-- The hidden builtin a view is decoded through: `#sliceV(b, o, n)`. -/
@@ -822,11 +823,23 @@ def sliceViewish (views : List (String × SliceView)) : RawExpr → Bool
   | .call f _ => f == "#slice"
   | _ => false
 
-/-- `o + k`, `k` where `o` is `0`. -/
+/-- `o + k`, folded where a side is a literal. -/
 def sliceAdd (o k : RawExpr) : RawExpr :=
-  match o with
-  | .num 0 => k
-  | o => .binop .add o k
+  match o, k with
+  | .num 0, k => k
+  | o, .num 0 => o
+  | .num a, .num b => .num (a + b)
+  | o, k => .binop .add o k
+
+/-- `e - o`, folded where `o` is `0` or both are literals. -/
+def sliceSub (e o : RawExpr) : RawExpr :=
+  match e, o with
+  | e, .num 0 => e
+  | .num a, .num b => .num (a - b)
+  | e, o => .binop .sub e o
+
+/-- Its length. -/
+def SliceView.len (v : SliceView) : RawExpr := sliceSub v.fin v.off
 
 /-- `x` evaluated only on a condition (above). -/
 def sliceCond {α : Type} (x : SliceM α) : SliceM α := do
@@ -845,56 +858,46 @@ partial def sliceOpen (t : String) (b i j : RawExpr) : SliceM (Option SliceView)
   let i ← i.mapM sliceNode
   let j ← j.mapM sliceNode
   if i.hasIncDec || j.hasIncDec then return none
-  let some (base, off0, L) ← (match b with
+  -- the outer view, in the base's coordinates (the base itself: `0` to its length)
+  let some outer ← (match b with
       | .name x => do
         match lookupBy x (← getThe SliceSt).1 with
-        | some v => pure (some (v.base, some v.off, v.len))
-        | none => pure (some (x, none, RawExpr.field (.name x) "length"))
-      | b@(.call "#slice" _) => do
-        match ← sliceViewOf? b with
-        | some v => pure (some (v.base, some v.off, v.len))
-        | none => pure none
+        | some v => pure (some v)
+        | none => pure (some { base := x, off := .num 0, fin := .field (.name x) "length" })
+      | b@(.call "#slice" _) => sliceViewOf? b
       | _ => pure none) | return none
+  let base := outer.base
   -- a bound kept as it is where it is a literal or the base's length (a
   -- calldata array's is fixed), else a local assigned once: the closers
   -- read a local by its one value, and every local and check costs them
-  let lenB : RawExpr := .field (.name base) "length"
   let fixed : RawExpr → Bool
     | .num _ => true
     | .field (.name x) "length" => x == base
     -- a view's own local, assigned once
     | .name x => (x.splitOn "$view$").length > 1
     | _ => false
-  let mut ss : Array RawStmt := #[]
-  let mut st := i
-  unless fixed i do
-    ss := ss.push (.decl (.named "uint") (t ++ "$view$s") (some i)); st := .name (t ++ "$view$s")
-  let mut e := j
-  unless fixed j do
-    ss := ss.push (.decl (.named "uint") (t ++ "$view$e") (some j)); e := .name (t ++ "$view$e")
+  let bind (sfx : String) (x : RawExpr) (ss : Array RawStmt) : RawExpr × Array RawStmt :=
+    if fixed x then (x, ss)
+    else (.name (t ++ "$view$" ++ sfx), ss.push (.decl (.named "uint") (t ++ "$view$" ++ sfx) (some x)))
   let same : RawExpr → RawExpr → Bool
     | .num a, .num c => a == c
     | .name x, .name y => x == y
     | .field (.name x) "length", .field (.name y) "length" => x == y
     | _, _ => false
-  match st, e with
-  | .num a, .num c => if a > c then ss := ss.push (.require (.bool false))
-  | .num 0, _ => pure ()
-  | _, _ => ss := ss.push (.require (.binop .le st e))
-  unless same e L do ss := ss.push (.require (.binop .le e L))
-  let mut n : RawExpr := .name (t ++ "$view$n")
-  match st, e with
-  | .num 0, e' => n := e'
-  | .num a, .num c => n := .num (c - a)
-  | a, c => ss := ss.push (.decl (.named "uint") (t ++ "$view$n") (some (.binop .sub c a)))
-  let mut off : RawExpr := .name (t ++ "$view$o")
-  match off0, st with
-  | none, a => off := a
-  | some o0, .num 0 => off := o0
-  | some (.num a), .num c => off := .num (a + c)
-  | some o0, a => ss := ss.push (.decl (.named "uint") (t ++ "$view$o") (some (.binop .add o0 a)))
+  let (st, ss) := bind "s" i #[]
+  let (e, ss) := bind "e" j ss
+  -- solc's checks: `i <= j`, `j` within the outer view (`off + j <= fin`)
+  let ss := match st, e with
+    | .num a, .num c => if a > c then ss.push (.require (.bool false)) else ss
+    | .num 0, _ => ss
+    | _, _ => ss.push (.require (.binop .le st e))
+  let eB := sliceAdd outer.off e
+  let ss := if same eB outer.fin then ss else ss.push (.require (.binop .le eB outer.fin))
+  -- the view in the base's coordinates
+  let (off, ss) := bind "o" (sliceAdd outer.off st) ss
+  let (fin, ss) := bind "f" eB ss
   modifyThe SliceSt fun (vs, k, pre) => (vs, k, pre ++ ss)
-  return some { base, off, len := n }
+  return some { base, off, fin }
 
 /-- The view an expression is: a view's name, or a slice opened here. -/
 partial def sliceViewOf? : RawExpr → SliceM (Option SliceView)
@@ -918,14 +921,14 @@ partial def sliceNode (e : RawExpr) : SliceM RawExpr := do
     let (unchecked, cond) ← getThe (Bool × Bool)
     -- read on every evaluation of the statement: the check before it, the
     -- index branch-free (the closers' cost is in the branches)
+    let ix := sliceAdd sv.off k
     if !cond then
-      modifyThe SliceSt fun (vs, n, pre) => (vs, n, pre.push (.require (.binop .lt k sv.len)))
-      return .index (.name sv.base) (sliceAdd sv.off k)
+      modifyThe SliceSt fun (vs, n, pre) => (vs, n, pre.push (.require (.binop .lt ix sv.fin)))
+      return .index (.name sv.base) ix
     if unchecked then
-      return .index (.name sv.base) (.ternary (.binop .lt k sv.len)
-        (sliceAdd sv.off k) (.field (.name sv.base) "length"))
-    return .index (.name sv.base) (.ternary (.binop .lt k sv.len)
-      (sliceAdd sv.off k) (.binop .sub (.binop .sub sv.len (.num 1)) k))
+      return .index (.name sv.base) (.ternary (.binop .lt ix sv.fin) ix (.field (.name sv.base) "length"))
+    return .index (.name sv.base) (.ternary (.binop .lt ix sv.fin) ix
+      (.binop .sub (.binop .sub sv.fin (.num 1)) ix))
   | .ternary c a b => do
     let c ← c.mapM sliceNode
     let (a, b) ← sliceCond do pure (← a.mapM sliceNode, ← b.mapM sliceNode)
