@@ -64,7 +64,8 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
         cases hk'
       | diverge | exhausted => intro hb; cases hb
   | raw =>
-    have hd' : ((sbody.revertDatas true).map fun S => ([] :: S.1, S.2)) = some ds := hd
+    have hd' : ((sbody.revertDatas true).map fun S =>
+      ([] :: S.1, (if sbody.asserts then [Pat.panic] else []) ++ S.2)) = some ds := hd
     simp only [Option.map_eq_some_iff] at hd'
     obtain ⟨S, hS, rfl⟩ := hd'
     revert hb
@@ -76,13 +77,17 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
       | revertWith d' =>
         intro hb; cases hb
         rcases TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d hc
-          (.inl rfl) with h | h
+          (.inl rfl) with h | ⟨p, hp, hm⟩
         · exact .inl (List.mem_cons_of_mem _ h)
-        · exact .inr h
+        · exact .inr ⟨p, List.mem_append_right _ hp, hm⟩
       | panic =>
-        intro _
-        exact absurd hc (TRun.call_noPanic sargs (.rets rets) _ _
-          (Prog.run_noPanic sbody (Prog.asserts_of_revertDatas sbody hS)) σ)
+        intro hb; cases hb
+        cases ha : sbody.asserts with
+        | false =>
+          exact absurd hc (TRun.call_noPanic sargs (.rets rets) _ _ (Prog.run_noPanic sbody ha) σ)
+        | true =>
+          exact .inr ⟨Pat.panic, by simp only [ha, if_true, List.cons_append, List.nil_append,
+            List.mem_cons, true_or], Pat.matches_panic _⟩
       | diverge | exhausted => intro hb; cases hb
 
 theorem Pat.lenTm_eval (σ : State C Γ) (bs : List UInt8) (hn : bs.length < 2 ^ 256) :

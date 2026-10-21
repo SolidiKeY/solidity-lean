@@ -415,7 +415,21 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
-test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
+test("calldata: read-only memory parameters, a written copy refused, slices refused", () => {
+  // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
+  // memory parameter the body does not write (`calldataCheck`)
+  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
+    'readAlias', 'localAlias'])
+    assert.equal(status[name], 'proved', name);
+  // a memory copy written (solc copies, the model would share), a slice
+  assert.equal(status.writesCopy, 'unsupported');
+  assert.equal(status.tail, 'unsupported');
+});
+
+test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
   const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
@@ -426,7 +440,11 @@ test("hashing: keccak256, abi.encode/encodePacked/decode, selectors, string keys
     'encodeWithSignature', 'encodeWithSelector', 'f', 'encodeCall', 'packedEnum', 'encodeStruct',
     // a locally built byte string's hash under the diamond, evaluated
     // (`keccakAt`); a symbolic word's packed bytes read back (`hornerU?`)
-    'literalHash', 'twoAllocationsHashEqual', 'packedAddressBytes', 'packedWordReassembled'])
+    'literalHash', 'twoAllocationsHashEqual', 'packedAddressBytes', 'packedWordReassembled',
+    // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
+    'sha256Parameter', 'ripemd160Parameter', 'recoverSigner',
+    // `abi.decode` of a struct of values, a `T[k]`, a tuple with a struct
+    'decodeStruct', 'decodeFixed', 'decodeTuple'])
     assert.equal(status[name], 'proved', name);
 });
 
@@ -882,7 +900,9 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
   for (const fn of ["reasonBytes", "reasonOfBranch", "emptyData", "customSelector", "customData",
     "reasonPastCustom", "externalReason", "externalData",
     // a custom error of a symbolic argument: its data known in part (`Pat`)
-    "customSymbolic"]) {
+    "customSymbolic",
+    // a callee that may panic: `Panic(0x01)`'s data, read raw
+    "panicData"]) {
     assert.equal(rows[fn], "proved", fn);
   }
 });
@@ -911,4 +931,6 @@ test("callbacks: value calls through a function and loops of them, by their inva
   assert.equal(status.loopOfValueCalls, "proved");
   assert.equal(status.storageLostThroughCall, "pending");
   assert.equal(status.storageLostInLoop, "pending");
+  // a loop whose body is a `try`, by its invariant (the `try`'s frame)
+  assert.equal(status.loopOfTries, "proved");
 });

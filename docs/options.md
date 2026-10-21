@@ -206,8 +206,12 @@ and the ledger, which that frame may write (`ExecP.frame`,
 callee may change it does not keep unless it restates the contract's
 invariant (`Examples/Tactics/CallbackStrategy.lean`, `pingNInv`).  Sound by
 `holdsC_invBox`, by induction over the iterations (`ExecS.loop_box`).  A
-body with a `try` has no frame (`Stmt.within`), with callbacks or without
-(`whileClose`).
+body with a `try` has a frame (`Stmt.within`): a `try` pays (its callee may
+write the storage and the ledger, and call back), so it is within
+`nonpayable` only, when its clauses and a self-call's callee are, and it
+writes the caller's locals its clauses write (`Stmt.run_frame`,
+`ExecS.frame`; `tests/solc/CallbackCalls.sol`, `loopOfTries`).  A clause
+that binds the data (`catchData`) allocates, so it has none (`whileClose`).
 
 **No diamond over a loop that calls back**: its callback runs include a
 divergence (`ExecS.loopDiverge`, an over-approximation: the relation is

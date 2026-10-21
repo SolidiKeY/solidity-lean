@@ -161,7 +161,7 @@ def _root_.Solidity.Op2.isBinop {a b s : Srt} (o : Op2 C a b s) : Bool :=
     (copyMem := false) (iread := false) (copy := fun _ => false)
     (mat := fun _ => false) (copySt := fun _ => false) (findIn := false)
     (delAtIn := false) (sfindIn := false) (zbin := fun _ _ => false)
-    (zcmp := fun _ _ => false) (keccak := false)
+    (zcmp := fun _ _ => false) (hash := fun _ => false)
 
 /-- `LTm.dropSeq`'s compiled twin. -/
 def LTm.dropSeqM : {s : Srt} → LTm C s → LTm C s
@@ -229,7 +229,7 @@ def _root_.Solidity.Op2.ctPass {a b s : Srt} (o : Op2 C a b s) : Bool :=
     (copyMem := false) (iread := false) (copy := fun _ => false)
     (mat := fun _ => false) (copySt := fun _ => false) (findIn := false)
     (delAtIn := false) (sfindIn := false) (zbin := fun _ _ => false)
-    (zcmp := fun _ _ => false) (keccak := false)
+    (zcmp := fun _ _ => false) (hash := fun _ => false)
 
 /-- `LTm.ctGuards`' compiled twin. -/
 def LTm.ctGuardsM : {s : Srt} → LTm C s → List (LTm C (.val .bool))

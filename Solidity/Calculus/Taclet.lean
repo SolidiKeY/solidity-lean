@@ -820,7 +820,7 @@ theorem LeanTaclet.catchDataDiamond.toStep {ρ ps Γf Γ₁ : Ctx} {call : ExtCa
 #replay_toStep LeanTaclet
   addmodAssignment "."
   mulmodAssignment "."
-  keccakAssignment "."
+  hashAssignment "."
   pushMemorySourceCapture "2."
   pushCompoundUnfoldReceiver "2."
   pushIncrementUnfoldReceiver "2."

@@ -2744,7 +2744,7 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     | some z => exact len_rep g ν hx hy
   | read => rfl
   | mlen => rfl
-  | keccak => rfl
+  | hash _ => rfl
   | «at» it =>
     refine pathAtIn_core g ν it SFun.init (some g.storage) rfl
       (fun st h => by cases h; exact initRd_rep g ν) hx hy ?_

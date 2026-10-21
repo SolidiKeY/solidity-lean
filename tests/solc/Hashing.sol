@@ -101,4 +101,38 @@ contract Hashing {
         bytes memory e = abi.encode(p);
         assert(e.length == 64 && e[31] == 0x03 && e[63] == 0x01);
     }
+    // `sha256` and `ripemd160`, the precompiles: SHA-256 and RIPEMD-160 of
+    // the bytes (`Hashes.lean`), atoms to the closers as `keccak256` is
+    function sha256Parameter(bytes memory b) public pure {
+        assert(sha256(b) == sha256(b));
+    }
+    function ripemd160Parameter(bytes memory b) public pure {
+        assert(ripemd160(b) == ripemd160(b));
+    }
+    // `ecrecover`: the precompile's 128 bytes, an address, uninterpreted where
+    // the signature is well formed (`ecrecoverBytes`); run in
+    // `Examples/Tactics/Hashing.lean`
+    /// @custom:key box
+    function recoverSigner(bytes32 h, uint8 v, bytes32 r, bytes32 s) public pure returns (address) {
+        return ecrecover(h, v, r, s);
+    }
+    // `abi.decode` of a struct of values and of a `T[k]`: their words in the
+    // head, each read back (a word out of range reverting); of a `T[]`, its
+    // offset, length and words, read by a loop (run in
+    // `Examples/Tactics/Hashing.lean`, `Codec2`)
+    /// @custom:key box
+    function decodeStruct(bytes memory d) public pure returns (uint) {
+        Pt memory q = abi.decode(d, (Pt));
+        return q.x;
+    }
+    /// @custom:key box
+    function decodeFixed(bytes memory d) public pure returns (uint) {
+        uint8[2] memory zs = abi.decode(d, (uint8[2]));
+        return zs[1];
+    }
+    /// @custom:key box
+    function decodeTuple(bytes memory d) public pure returns (uint) {
+        (uint a, Pt memory q) = abi.decode(d, (uint, Pt));
+        return a + q.x;
+    }
 }

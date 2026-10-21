@@ -233,12 +233,12 @@ theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
     refine TRes.AgreesO.bind (MPath.lower_mvalT b) fun r => ?_
     simp only [HRef.ofId?_id, Option.bind_some]
     rfl
-  | _, .keccak b hp => by
+  | _, .hash k b hp => by
     subst hp
-    show TRes.AgreesO _ (do let r ← b.mvalT σ; pure (σ.heap.keccak r))
-      ((b.lower.eval σ).bind fun id => some (σ.glob.memT.keccakId _ id))
+    show TRes.AgreesO _ (do let r ← b.mvalT σ; pure (σ.heap.hash k r))
+      ((b.lower.eval σ).bind fun id => some (σ.glob.memT.hashId k _ id))
     refine TRes.AgreesO.bind (MPath.lower_mvalT b) fun r => ?_
-    simp only [Grown.keccakId, HRef.ofId?_id, Option.map_some, Option.getD_some]
+    simp only [Grown.hashId, HRef.ofId?_id, Option.map_some, Option.getD_some]
     rfl
 
   | _, .modular op a b k => by

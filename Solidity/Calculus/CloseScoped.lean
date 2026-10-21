@@ -91,17 +91,17 @@ typing (a premise read before a local and a goal read after it read one
 length, `allLeftHide`'s instances among them). -/
 theorem push_lenU {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {E : Ty}
     (r : HRef σ.H (.array E)) : (σ.push v).glob.memT.heap.lenU r = σ.glob.memT.heap.lenU r := rfl
-theorem push_keccakId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (R : RefTy) (id : Nat) :
-    (σ.push v).glob.memT.keccakId R id = σ.glob.memT.keccakId R id := rfl
+theorem push_hashId {k : HashKind} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (R : RefTy) (id : Nat) :
+    (σ.push v).glob.memT.hashId k R id = σ.glob.memT.hashId k R id := rfl
 theorem push_net {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).net = σ.net := rfl
 theorem push_selfBalance {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).selfBalance = σ.selfBalance := rfl
 theorem push_tx {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).tx = σ.tx := rfl
 theorem setLocal_storage {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).storage = σ.storage := rfl
-theorem setLocal_keccakId {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H)
+theorem setLocal_hashId {k : HashKind} {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H)
     (R : RefTy) (id : Nat) :
-    (σ.setLocal i v).glob.memT.keccakId R id = σ.glob.memT.keccakId R id := rfl
+    (σ.setLocal i v).glob.memT.hashId k R id = σ.glob.memT.hashId k R id := rfl
 theorem setLocal_net {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).net = σ.net := rfl
 theorem setLocal_selfBalance {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
@@ -261,9 +261,9 @@ theorem eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))
 theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     (Tm.app2 .mlen m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       g.lenId E id := rfl
-theorem eval_keccak {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
-    (Tm.app2 .keccak m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
-      some (g.keccakId R id) := rfl
+theorem eval_hash {k : HashKind} {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    (Tm.app2 (.hash k) m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
+      some (g.hashId k R id) := rfl
 theorem eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
     (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       (HRef.ofId? g.H' R id).bind fun r => some (MVal.copyMToSt g.heap (T := .ref R) r) := rfl
@@ -400,12 +400,12 @@ theorem withMem_selfBalance {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Un
     (g.withMem μ).1.selfBalance = g.1.selfBalance := rfl
 theorem withMem_tx {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) :
     (g.withMem μ).1.tx = g.1.tx := rfl
-theorem withStorage_keccakId {H : HTy} (g : GlobT C H) (st : Storage C) (R : RefTy) (id : Nat) :
-    (g.withStorage st).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
-theorem withNet_keccakId {H : HTy} (g : GlobT C H) (nt : Ledger) (R : RefTy) (id : Nat) :
-    (g.withNet nt).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
-theorem withBalance_keccakId {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) (R : RefTy)
-    (id : Nat) : (g.withBalance b).1.memT.keccakId R id = g.1.memT.keccakId R id := rfl
+theorem withStorage_hashId {k : HashKind} {H : HTy} (g : GlobT C H) (st : Storage C) (R : RefTy) (id : Nat) :
+    (g.withStorage st).1.memT.hashId k R id = g.1.memT.hashId k R id := rfl
+theorem withNet_hashId {k : HashKind} {H : HTy} (g : GlobT C H) (nt : Ledger) (R : RefTy) (id : Nat) :
+    (g.withNet nt).1.memT.hashId k R id = g.1.memT.hashId k R id := rfl
+theorem withBalance_hashId {k : HashKind} {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) (R : RefTy)
+    (id : Nat) : (g.withBalance b).1.memT.hashId k R id = g.1.memT.hashId k R id := rfl
 theorem withNet_storage {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.storage = g.1.storage := rfl
 theorem withNet_net {H : HTy} (g : GlobT C H) (nt : Ledger) :
@@ -804,8 +804,8 @@ theorem Landed.selfBalance_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x 
     x.val.selfBalance = g.selfBalance := congrArg State.selfBalance x.glob_eq
 theorem Landed.tx_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ) :
     x.val.tx = g.tx := congrArg State.tx x.glob_eq
-theorem Landed.keccakId_eq {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ)
-    (R : RefTy) (id : Nat) : x.val.glob.memT.keccakId R id = g.memT.keccakId R id := by
+theorem Landed.hashId_eq {k : HashKind} {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ)
+    (R : RefTy) (id : Nat) : x.val.glob.memT.hashId k R id = g.memT.hashId k R id := by
   rw [x.glob_eq]
 
 /-- `p` of every typed state that lands on `g` and `ℓ`: a constant, not a
@@ -976,8 +976,8 @@ attribute [close_rw_s]
   CloseS.envVal_msgSender CloseS.envVal_msgValue CloseS.envVal_timestamp
   CloseS.envVal_selfBalance CloseS.envVal_selfAddress
   CloseS.Landed.storage_eq CloseS.Landed.net_eq CloseS.Landed.selfBalance_eq CloseS.Landed.tx_eq
-  CloseS.Landed.keccakId_eq CloseS.push_keccakId CloseS.setLocal_keccakId
-  CloseS.withStorage_keccakId CloseS.withNet_keccakId CloseS.withBalance_keccakId
+  CloseS.Landed.hashId_eq CloseS.push_hashId CloseS.setLocal_hashId
+  CloseS.withStorage_hashId CloseS.withNet_hashId CloseS.withBalance_hashId
   CloseS.Landed.locV_eq
   CloseS.set_push_here CloseS.set_push_there CloseS.drop_refl' CloseS.drop_push' CloseS.thin_refl'
   CloseS.thin_keep' CloseS.thin_drop'
@@ -1015,7 +1015,7 @@ attribute [close_rw_s]
   CloseS.eval_nextIn CloseS.eval_mat
   CloseS.eval_ite CloseS.eval_save CloseS.eval_push
   CloseS.eval_memory CloseS.eval_alloc CloseS.eval_addM CloseS.eval_read CloseS.eval_mlen
-  CloseS.eval_keccak
+  CloseS.eval_hash
   CloseS.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt CloseS.eval_write
   SVal.view_prim
   -- runs

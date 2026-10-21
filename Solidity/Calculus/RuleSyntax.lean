@@ -749,9 +749,18 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
       | _ => Macro.throwUnsupported
     `(Val.modular $op $(← schemaAt Γ .val a) $(← schemaAt Γ .val b) $(← schemaAt Γ .val k))
   | stx@`(sol_expr| $f:ident($a:sol_expr)) => do
-    unless f.getId.eraseMacroScopes.toString == "keccak256" do Macro.throwUnsupported
-    unless pos == .val do posError stx "`keccak256`" pos
-    `(Val.keccak $(← schemaAt Γ .mpath a) $(schemaIdent "hk"))
+    -- `hash(b)`: a hashing builtin, its kind the schema variable `hh`;
+    -- `keccak256(b)`, `sha256(b)`, … one of them
+    let fn := f.getId.eraseMacroScopes.toString
+    let k : Lean.Term ← if fn == "hash" then pure (schemaIdent "hh") else
+      match HashKind.ofName? fn with
+      | some .keccak => pure (Lean.mkCIdent ``HashKind.keccak)
+      | some .sha256 => pure (Lean.mkCIdent ``HashKind.sha256)
+      | some .ripemd160 => pure (Lean.mkCIdent ``HashKind.ripemd160)
+      | some .ecrecover => pure (Lean.mkCIdent ``HashKind.ecrecover)
+      | none => Macro.throwUnsupported
+    unless pos == .val do posError stx "a hash" pos
+    `(Val.hash $k $(← schemaAt Γ .mpath a) $(schemaIdent "hk"))
   | stx@`(sol_expr| $a:sol_expr ⊕ $b:sol_expr) => do
     unless pos == .val do posError stx "an operator application" pos
     `(Val.binop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
@@ -1187,7 +1196,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $a:sol_expr )) => do
     -- `v = keccak256(mpath)`: a value, not a call
     if let `(sol_expr| $g:ident) := f then
-      if g.getId.eraseMacroScopes.toString == "keccak256" then
+      let fn := g.getId.eraseMacroScopes.toString
+      if fn == "hash" || (HashKind.ofName? fn).isSome then
         let e ← `(sol_expr| $f:sol_expr ( $a:sol_expr ))
         return ← schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $e:sol_expr))
     let some (b, "send") ← callRecv? f | Macro.throwErrorAt f "only `r.send(a)` is a call assigned"
@@ -1554,9 +1564,10 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     | "mulmod", #[a, b, k], .val =>
       `(Term.modular ModOp.mulmod $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b)
         $(← schemaTerm Γ .val k))
-    | "keccak256", #[m, i], .val =>
-      if Γ.isCore then `(Term.keccakH $(schemaIdent "hk") $(← me m) $(← schemaTerm Γ .ident i))
-      else `(Term.keccak $(← me m) $(← schemaTerm Γ .ident i))
+    | "hash", #[m, i], .val =>
+      if Γ.isCore then
+        `(Term.hashH $(schemaIdent "hh") $(schemaIdent "hk") $(← me m) $(← schemaTerm Γ .ident i))
+      else `(Term.hash $(schemaIdent "hh") $(← me m) $(← schemaTerm Γ .ident i))
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
     | "select", #[s, r], .storage | "selectSt", #[s, r], .storage =>
       let `(dl_term| $r:ident) := r | tposError r "a member name" .storage

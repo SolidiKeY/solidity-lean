@@ -311,7 +311,7 @@ theorem toList_cons {E : Ty} (v : SVal E) (rest : SList E) :
     (SList.cons v rest).toList = v :: rest.toList := rfl
 
 attribute [irreducible] toList
-attribute [eqns toList_nil toList_cons] toList
+attribute [sol_eqns toList_nil toList_cons] toList
 
 theorem toList_eq_toListM {E : Ty} : (l : SList E) → l.toList = l.toListM
   | .nil => by rw [toList_nil, toListM]
@@ -350,7 +350,7 @@ theorem toList_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
     (SVec.cons v rest).toList = v :: rest.toList := rfl
 
 attribute [irreducible] toList
-attribute [eqns toList_nil toList_cons] toList
+attribute [sol_eqns toList_nil toList_cons] toList
 
 theorem toList_eq_toListM {E : Ty} : {n : Nat} → (l : SVec E n) → l.toList = l.toListM
   | _, .nil => by rw [toList_nil, toListM]
@@ -412,7 +412,7 @@ theorem set_cons_succ {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) (i : Nat
     (SVec.cons v rest).set (i + 1) x = .cons v (rest.set i x) := rfl
 
 attribute [irreducible] set
-attribute [eqns set_nil set_cons_zero set_cons_succ] set
+attribute [sol_eqns set_nil set_cons_zero set_cons_succ] set
 
 theorem set_eq_setM {E : Ty} : {n : Nat} → (l : SVec E n) → (i : Nat) → (x : SVal E) →
     l.set i x = l.setM i x
@@ -460,7 +460,7 @@ theorem toList_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : SM
     (SMap.cons k v rest).toList = (k, v) :: rest.toList := rfl
 
 attribute [irreducible] toList
-attribute [eqns toList_nil toList_cons] toList
+attribute [sol_eqns toList_nil toList_cons] toList
 
 theorem toList_eq_toListM {K : PrimTy} {V : Ty} : (m : SMap K V) → m.toList = m.toListM
   | .nil => by rw [toList_nil, toListM]
@@ -777,7 +777,7 @@ theorem labels_key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) :
     (Path.key (K := K) k p).labels = .key ⟨K, k⟩ :: p.labels := rfl
 
 attribute [irreducible] labels
-attribute [eqns labels_nil labels_field labels_at labels_atF labels_key] labels
+attribute [sol_eqns labels_nil labels_field labels_at labels_atF labels_key] labels
 
 /-- `append` by `match`, its compiled form. -/
 def appendM : {T U W : Ty} → Path T U → Path U W → Path T W
@@ -806,7 +806,7 @@ theorem append_key {K : PrimTy} {V U W : Ty} (k : K.Denote) (p : Path V U) (q : 
     (Path.key (K := K) k p).append q = .key k (p.append q) := rfl
 
 attribute [irreducible] append
-attribute [eqns append_nil append_field append_at append_atF append_key] append
+attribute [sol_eqns append_nil append_field append_at append_atF append_key] append
 
 theorem append_eq_appendM : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
     p.append q = p.appendM q
@@ -846,7 +846,7 @@ theorem index_fixed {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) :
     index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i .nil := rfl
 
 attribute [irreducible] index
-attribute [eqns index_map index_dyn index_fixed] index
+attribute [sol_eqns index_map index_dyn index_fixed] index
 
 /-- The label of an index: a mapping's key, an array's index. -/
 def _root_.Solidity.IndexTy.label {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
@@ -1109,11 +1109,11 @@ theorem SVec.defaultOf_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
     (SVec.cons v rest).defaultOf = .cons v.defaultOf rest.defaultOf := rfl
 
 attribute [irreducible] SVal.defaultOf SFields.defaultOf SList.defaultOf SVec.defaultOf
-attribute [eqns SVal.defaultOf_prim SVal.defaultOf_struct SVal.defaultOf_array
+attribute [sol_eqns SVal.defaultOf_prim SVal.defaultOf_struct SVal.defaultOf_array
   SVal.defaultOf_fixed SVal.defaultOf_map] SVal.defaultOf
-attribute [eqns SFields.defaultOf_nil SFields.defaultOf_cons] SFields.defaultOf
-attribute [eqns SList.defaultOf_nil SList.defaultOf_cons] SList.defaultOf
-attribute [eqns SVec.defaultOf_nil SVec.defaultOf_cons] SVec.defaultOf
+attribute [sol_eqns SFields.defaultOf_nil SFields.defaultOf_cons] SFields.defaultOf
+attribute [sol_eqns SList.defaultOf_nil SList.defaultOf_cons] SList.defaultOf
+attribute [sol_eqns SVec.defaultOf_nil SVec.defaultOf_cons] SVec.defaultOf
 
 mutual
 theorem SVal.defaultOf_eq_defaultOfM : {T : Ty} → (v : SVal T) → v.defaultOf = v.defaultOfM
@@ -1220,11 +1220,11 @@ theorem SVec.strip_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
     (SVec.cons v rest).strip = .cons v.strip rest.strip := rfl
 
 attribute [irreducible] SVal.strip SFields.strip SList.strip SVec.strip
-attribute [eqns SVal.strip_prim SVal.strip_struct SVal.strip_array SVal.strip_fixed
+attribute [sol_eqns SVal.strip_prim SVal.strip_struct SVal.strip_array SVal.strip_fixed
   SVal.strip_map] SVal.strip
-attribute [eqns SFields.strip_nil SFields.strip_cons] SFields.strip
-attribute [eqns SList.strip_nil SList.strip_cons] SList.strip
-attribute [eqns SVec.strip_nil SVec.strip_cons] SVec.strip
+attribute [sol_eqns SFields.strip_nil SFields.strip_cons] SFields.strip
+attribute [sol_eqns SList.strip_nil SList.strip_cons] SList.strip
+attribute [sol_eqns SVec.strip_nil SVec.strip_cons] SVec.strip
 
 mutual
 theorem SVal.strip_eq_stripM : {T : Ty} → (v : SVal T) → v.strip = v.stripM
@@ -1379,10 +1379,10 @@ theorem SVec.overlayOn_cons_cons {E : Ty} {n : Nat} (o : SVal E) (os : List (SVa
     SVec.overlayOn (o :: os) (.cons v rest) = .cons (o.overlay v) (SVec.overlayOn os rest) := rfl
 
 attribute [irreducible] SVal.overlay SFields.overlay SVec.overlayOn
-attribute [eqns SVal.overlay_prim SVal.overlay_struct SVal.overlay_array SVal.overlay_fixed
+attribute [sol_eqns SVal.overlay_prim SVal.overlay_struct SVal.overlay_array SVal.overlay_fixed
   SVal.overlay_map] SVal.overlay
-attribute [eqns SFields.overlay_nil SFields.overlay_cons] SFields.overlay
-attribute [eqns SVec.overlayOn_nil SVec.overlayOn_nil_cons SVec.overlayOn_cons_cons]
+attribute [sol_eqns SFields.overlay_nil SFields.overlay_cons] SFields.overlay
+attribute [sol_eqns SVec.overlayOn_nil SVec.overlayOn_nil_cons SVec.overlayOn_cons_cons]
   SVec.overlayOn
 
 /-- `SVec.overlayOn` over no old slots: the new elements as nothing wrote
@@ -1513,14 +1513,14 @@ theorem SMap.beq_cons_cons {K : PrimTy} {U : Ty} (k k' : K.Denote) (v w : SVal U
   rfl
 
 attribute [irreducible] SVal.beq SFields.beq SList.beq SVec.beqL SMap.beq
-attribute [eqns SVal.beq_prim SVal.beq_struct SVal.beq_array SVal.beq_fixed SVal.beq_map]
+attribute [sol_eqns SVal.beq_prim SVal.beq_struct SVal.beq_array SVal.beq_fixed SVal.beq_map]
   SVal.beq
-attribute [eqns SFields.beq_nil SFields.beq_cons] SFields.beq
-attribute [eqns SList.beq_nil_nil SList.beq_nil_cons SList.beq_cons_nil SList.beq_cons_cons]
+attribute [sol_eqns SFields.beq_nil SFields.beq_cons] SFields.beq
+attribute [sol_eqns SList.beq_nil_nil SList.beq_nil_cons SList.beq_cons_nil SList.beq_cons_cons]
   SList.beq
-attribute [eqns SVec.beqL_nil_nil SVec.beqL_nil_cons SVec.beqL_cons_nil SVec.beqL_cons_cons]
+attribute [sol_eqns SVec.beqL_nil_nil SVec.beqL_nil_cons SVec.beqL_cons_nil SVec.beqL_cons_cons]
   SVec.beqL
-attribute [eqns SMap.beq_nil_nil SMap.beq_nil_cons SMap.beq_cons_nil SMap.beq_cons_cons] SMap.beq
+attribute [sol_eqns SMap.beq_nil_nil SMap.beq_nil_cons SMap.beq_cons_nil SMap.beq_cons_cons] SMap.beq
 
 mutual
 theorem SVal.eq_of_beq : {T : Ty} → (v w : SVal T) → v.beq w = true → v = w

@@ -486,7 +486,7 @@ classified in `printedOrigins` as KeY rules outside the paper's table. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.addmodAssignment, .leanOnly .calculus),
   (``LeanTaclet.mulmodAssignment, .leanOnly .calculus),
-  (``LeanTaclet.keccakAssignment, .leanOnly .calculus),
+  (``LeanTaclet.hashAssignment, .leanOnly .calculus),
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
   (``LeanTaclet.transferDiamond, .leanOnly .calculus),

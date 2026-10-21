@@ -604,15 +604,15 @@ of an internal storage assignment. `tryCallSelfBox` and `tryCallSelfDiamond`
 are a `try` whose callee is the contract's own function, run in its frame
 (`docs/options.md` O8): solkey's `try` never runs a callee. `recursiveCallUnfold`
 is a recursive call read as the call of its body's next frame
-(`Stmt.callRec`), where solkey inlines without end. `keccakAssignment` reads
-`keccak256`, which solkey does not have. `revertDataBox`, `revertDataDiamond`,
+(`Stmt.callRec`), where solkey inlines without end. `hashAssignment` reads
+the hashing builtins, which solkey does not have. `revertDataBox`, `revertDataDiamond`,
 `catchDataBox` and `catchDataDiamond` read revert data, which solkey does not
 keep (`docs/semantic-gaps.md`, "Revert data"). The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
 def leanTaclets : List Lean.Name :=
-  [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment, ``LeanTaclet.keccakAssignment,
+  [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment, ``LeanTaclet.hashAssignment,
     ``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
     ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,

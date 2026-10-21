@@ -109,6 +109,68 @@ returns (true, 3017696395)
 
 #guard Keccak.selector "f(uint256)" == 0xb3de648b
 
+/-! ### `sha256`, `ripemd160`, `ecrecover`
+
+The precompiles hash as `keccak256` does, a symbol of the memory
+(`Val.hash`, `HashKind`): `sha256` is SHA-256 and `ripemd160` RIPEMD-160
+of the bytes (`Hashes.lean`, `@[irreducible]` program-level functions as
+`keccakBytes` is), `ecrecover(h, v, r, s)` an address of the precompile's
+four words, `0` where the signature is malformed and uninterpreted
+(`ecrecoverKey`, an `opaque` function) where it is not. -/
+
+/-- SHA-256 of `"abc"`, by evaluation in the kernel. -/
+theorem sha256Abc : (sha256Bytes [97, 98, 99]).1 =
+    0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad := by
+  decide +kernel
+
+/-- RIPEMD-160 of `"abc"`, a `bytes20`. -/
+theorem ripemd160Abc : (ripemd160Bytes [97, 98, 99]).1 = 0x8eb208f7e05d987a9b044a8e98c6b087f15a0bfc := by
+  decide +kernel
+
+def Prec : Contract := contract!{
+  function sha() returns (bytes32 r) { r = sha256("abc"); }
+  function rmd() returns (bytes20 r) { r = ripemd160("abc"); }
+  function rec(bytes32 h, uint8 v, bytes32 r, bytes32 s) returns (address a) {
+    a = ecrecover(h, v, r, s);
+  }
+}
+
+/--
+info: ok
+returns 84342368487090800366523834928142263660104883695016514377462985829716817089965
+-/
+#guard_msgs in #run Prec.sha()
+
+/--
+info: ok
+returns 814647003348588794217809277549781461204094028796
+-/
+#guard_msgs in #run Prec.rmd()
+
+/-- `v` neither `27` nor `28`: the zero address, as solc returns (the four
+words `1, 29, 2, 3`). -/
+theorem recoverBadV : ecrecoverBytes ((List.range 128).map fun i =>
+    if i = 31 then 1 else if i = 63 then 29 else if i = 95 then 2 else if i = 127 then 3 else 0) =
+    uintOfNat 0 := by
+  decide +kernel
+
+/--
+info: ok
+returns 0
+-/
+#guard_msgs in #run Prec.rec(1, 29, 2, 3)
+
+/-- One byte string hashed twice: the same value. -/
+theorem sha256Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = sha256(b);
+    bytes32 g = sha256(b); ] h == g } := by
+  sol_symex
+  sol_decide
+
+theorem ripemd160Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160(b);
+    bytes20 g = ripemd160(b); ] h == g } := by
+  sol_symex
+  sol_decide
+
 /-! ## 2 · The ABI -/
 
 /-- `abi.encode(uint, bool)`: two words, big-endian. -/
@@ -241,6 +303,40 @@ def Codec2 : Contract := contract!{
     bytes memory b = abi.decode(e, (bytes));
     l = b.length;
   }
+  function decodeArray() returns (uint n, uint a, uint b) {
+    uint[] memory xs = new uint[](2);
+    xs[0] = 5; xs[1] = 6;
+    bytes memory e = abi.encode(xs);
+    uint[] memory ys = abi.decode(e, (uint[]));
+    n = ys.length; a = ys[0]; b = ys[1];
+  }
+  function decodeStruct() returns (uint x, bool y) {
+    Pt memory p;
+    p.x = 3; p.y = true;
+    Pt memory q = abi.decode(abi.encode(p), (Pt));
+    x = q.x; y = q.y;
+  }
+  function decodeFixed() returns (uint a, uint b) {
+    uint8[2] memory zs = abi.decode(abi.encode(8, 9), (uint8[2]));
+    a = zs[0]; b = zs[1];
+  }
+  function decodeTuple() returns (uint n, uint x, uint k) {
+    uint[] memory xs = new uint[](1);
+    xs[0] = 4;
+    Pt memory p;
+    p.x = 3; p.y = true;
+    bytes memory e = abi.encode(xs, p, 11);
+    (uint[] ys, Pt q, uint z) = abi.decode(e, (uint[], Pt, uint));
+    n = ys.length + ys[0]; x = q.x; k = z;
+  }
+  function decodeBadBool() returns (bool y) {
+    Pt memory q = abi.decode(abi.encode(3, 2), (Pt));
+    y = q.y;
+  }
+  function decodeBadLength() returns (uint n) {
+    uint[] memory ys = abi.decode(abi.encode(32, 1000), (uint[]));
+    n = ys.length;
+  }
 }
 
 -- `abi.encodeWithSelector`: the selector's four bytes, then the words
@@ -335,6 +431,40 @@ theorem wordReassembled : ⊨ spec!{wordReassembled} := by
   sol_decide
 
 end Packed
+
+-- `abi.decode` of a `uint[]`: its offset, its length, its words (a loop)
+/--
+info: ok
+returns (2, 5, 6)
+-/
+#guard_msgs in #run Codec2.decodeArray()
+
+-- of a struct of values and of a `T[k]`: their words in the head
+/--
+info: ok
+returns (3, true)
+-/
+#guard_msgs in #run Codec2.decodeStruct()
+
+/--
+info: ok
+returns (8, 9)
+-/
+#guard_msgs in #run Codec2.decodeFixed()
+
+-- several components, each at the word its predecessors leave
+/--
+info: ok
+returns (5, 3, 11)
+-/
+#guard_msgs in #run Codec2.decodeTuple()
+
+-- a member out of its type's range, a length past the data: a revert
+/-- info: revert -/
+#guard_msgs in #run Codec2.decodeBadBool()
+
+/-- info: revert -/
+#guard_msgs in #run Codec2.decodeBadLength()
 
 /-! ## 3 · A mapping keyed by `string` -/
 

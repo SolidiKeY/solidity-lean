@@ -1,4 +1,5 @@
 import Solidity.Calculus.Arms
+import Solidity.Semantics.NoPanic
 
 /-!
 # The rules of the statements that hold blocks
@@ -331,9 +332,9 @@ mutual
 "Revert data"): the `revert(d)`s in it (`RevPart.datas`: literal, or known
 in part), in a branch, a block, a loop, a called body or a `try`'s clauses
 (a self-call's callee reverts into its `try`, not past it); a revert with
-no data besides.  `none` at a recursive call, which is not unfolded, and,
-with `raw`, where it may panic (`assert`: the data of a panic is its code,
-the transaction's).  Without `raw` (what a `catch Error(string memory r)`
+no data besides.  `none` at a recursive call, which is not unfolded.  An
+`assert` reverts with no data: what a panic binds is `CatchKind.datas`'s.
+Without `raw` (what a `catch Error(string memory r)`
 may bind), a datum that cannot decode as `Error` (`RevPart.notError`) is
 left out, literal or not.  Sound by `Prog.run_dataS`. -/
 def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option DSet
@@ -351,7 +352,7 @@ def Stmt.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option 
     (delete := fun _ => some ([], [])) (deleteMem := fun _ _ => some ([], []))
     (assignNew := fun _ _ _ => some ([], []))
     (ite := fun _ thn els => optCatD (Prog.revertDatas raw thn) (Prog.revertDatas raw els))
-    (require := fun _ => some ([], [])) (assert := fun _ => if raw then none else some ([], []))
+    (require := fun _ => some ([], [])) (assert := fun _ => some ([], []))
     (revert := some ([], [])) (assumeFalse := some ([], []))
     (call := fun _ _ _ body => Prog.revertDatas raw body)
     (tryCall := fun _ _ ok err _ pnc other _ _ _ =>
@@ -374,12 +375,19 @@ def Prog.revertDatas (raw : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Option 
 
 end
 
+/-- `Panic(uint256)`'s data, its code not known: the selector, then a word
+(`Semantics.encodePanic`). -/
+def Pat.panic : Pat := Semantics.panicSelector.map some ++ List.replicate 32 none
+
 /-- The data a clause of `kind` may be reached with when the contract's own
 callee `sbody` fails: the data its body lists, a revert with none among
-them for the raw data (the `Error` clause is not reached with none). -/
+them for the raw data (the `Error` clause is not reached with none), and,
+where the body may panic (`Prog.asserts`), `Panic`'s selector and a code
+(`Pat.panic`: the code is the transaction's, `TRun.selfPanicCode`). -/
 def CatchKind.datas {Γ Γ' : Ctx} : CatchKind → Prog C Γ Γ' → Option DSet
   | .reason, P => P.revertDatas false
-  | .raw, P => (P.revertDatas true).map fun S => ([] :: S.1, S.2)
+  | .raw, P => (P.revertDatas true).map fun S =>
+    ([] :: S.1, (if P.asserts then [Pat.panic] else []) ++ S.2)
 
 /-- The clause after the datum `d` is bound (`catchDataBox`'s goal for it):
 what a clause of `kind` binds of it allocated as a literal (`litBytes`) in
@@ -463,7 +471,7 @@ variable {Γ : Ctx}
 def Val.readsState : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple (.env ..) => true
   | _, .simple _ => false
-  | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .keccak .. => true
+  | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .hash .. => true
   | _, .binop _ _ _ a b => a.readsState || b.readsState
   | _, .modular _ a b k => a.readsState || b.readsState || k.readsState
   | _, .unop _ _ _ a => a.readsState
@@ -542,7 +550,11 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (ite := fun c thn els => c.readsIn μ && Prog.within μ thn && Prog.within μ els)
     (require := fun c => c.readsIn μ) (assert := fun c => c.readsIn μ) (revert := true) (assumeFalse := true)
     (call := fun _ args ret body => args.readsIn μ && ret.noMem && Prog.within μ body)
-    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
+    -- a `try` pays (its callee may write the storage, and call back), its
+    -- clauses and a self-call's callee within `μ`, nothing allocated
+    (tryCall := fun _ _ ok err _ pnc other sargs sbody _ =>
+      μ == .nonpayable && sargs.readsIn μ && Prog.within μ sbody && Prog.within μ ok &&
+        Prog.within μ err && Prog.within μ pnc && Prog.within μ other)
     (loop := fun _ c body => c.readsIn μ && Prog.within μ body)
     (block := fun body => Prog.within μ body)
     (callReceiver := fun _ _ _ _ _ => false)
@@ -581,7 +593,10 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (assignNew := fun _ _ _ => [])
     (ite := fun _ thn els => Prog.writesAt d thn ++ Prog.writesAt d els)
     (require := fun _ => []) (assert := fun _ => []) (revert := []) (assumeFalse := [])
-    (call := fun _ _ ret _ => ret.writesAt d) (tryCall := fun _ _ _ _ _ _ _ _ _ _ => [])
+    (call := fun _ _ ret _ => ret.writesAt d)
+    (tryCall := fun {Γ ρ κ _ _ _ _ _ _} _ _ ok err _ pnc other _ _ _ =>
+      Prog.writesAt (d + (Ext.append Γ ρ).depth) ok ++ Prog.writesAt d err ++
+        Prog.writesAt (d + (Ext.append Γ κ).depth) pnc ++ Prog.writesAt d other)
     (loop := fun _ _ body => Prog.writesAt d body) (block := fun body => Prog.writesAt d body)
     (callReceiver := fun _ _ _ _ _ => [])
     (callReceiverPush := fun _ _ _ _ code _ => Prog.writesAt d code)

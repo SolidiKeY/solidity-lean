@@ -1,5 +1,6 @@
 import Solidity.Semantics.Storage
 import Solidity.Keccak
+import Solidity.Hashes
 
 /-!
 # Typed heap
@@ -179,7 +180,7 @@ theorem MObj.elems_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) 
     MObj.elems .fixed o = (o : {l : List (MVal H E) // l.length = n}).1 := rfl
 
 attribute [irreducible] MObj.elems
-attribute [eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
+attribute [sol_eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
 
 /-- An array object with element `i` replaced. -/
 def MObj.setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) :
@@ -203,7 +204,7 @@ theorem MObj.setElem_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)
       (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.fixed E n)) := rfl
 
 attribute [irreducible] MObj.setElem
-attribute [eqns MObj.setElem_dyn MObj.setElem_fixed] MObj.setElem
+attribute [sol_eqns MObj.setElem_dyn MObj.setElem_fixed] MObj.setElem
 
 namespace Heap
 
@@ -372,11 +373,11 @@ theorem SVec.copyStToM_cons {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (v : SVal
         ⟨MVal.wk g₂.ext E g₁.val :: g₂.val.1, congrArg (· + 1) g₂.val.2⟩⟩ := rfl
 
 attribute [irreducible] SVal.copyStToM SFields.copyStToM SList.copyStToM SVec.copyStToM
-attribute [eqns SVal.copyStToM_prim SVal.copyStToM_struct SVal.copyStToM_array
+attribute [sol_eqns SVal.copyStToM_prim SVal.copyStToM_struct SVal.copyStToM_array
   SVal.copyStToM_fixed SVal.copyStToM_map] SVal.copyStToM
-attribute [eqns SFields.copyStToM_nil SFields.copyStToM_cons] SFields.copyStToM
-attribute [eqns SList.copyStToM_nil SList.copyStToM_cons] SList.copyStToM
-attribute [eqns SVec.copyStToM_nil SVec.copyStToM_cons] SVec.copyStToM
+attribute [sol_eqns SFields.copyStToM_nil SFields.copyStToM_cons] SFields.copyStToM
+attribute [sol_eqns SList.copyStToM_nil SList.copyStToM_cons] SList.copyStToM
+attribute [sol_eqns SVec.copyStToM_nil SVec.copyStToM_cons] SVec.copyStToM
 
 /-- A fresh default object (`allocDefault`). -/
 def Heap.allocDefault {H : HTy} (hp : Heap H) (R : RefTy) (h : (Ty.ref R).mapFree = true) :
@@ -478,9 +479,52 @@ def MObj.words {H : HTy} : (R : RefTy) → MObj H R → List Int
       (v : PrimTy.uint.Denote).1
   | _, _ => []
 
-/-- `keccak256(mv)` of a memory object: of its bytes (`MObj.words`). -/
-def Heap.keccak {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) : PrimTy.uint.Denote :=
-  keccakBytes (MObj.words R (hp.get r))
+/-- `sha256` of a byte sequence: SHA-256 of its bytes (`Hashes.lean`), the
+precompile at address `2`; `@[irreducible]` as `keccakBytes` is. -/
+@[irreducible] def sha256Bytes (bs : List Int) : PrimTy.uint.Denote :=
+  uintOfNat (Hashes.sha256Nat (bs.map fun b => b.toNat % 256))
+
+/-- `ripemd160` of a byte sequence: RIPEMD-160 of its bytes (`Hashes.lean`),
+the precompile at address `3`, below `2^160`: a `bytes20`. -/
+@[irreducible] def ripemd160Bytes (bs : List Int) : PrimTy.uint.Denote :=
+  uintOfNat (Hashes.ripemd160Nat (bs.map fun b => b.toNat % 256))
+
+/-- The address a valid signature recovers to: uninterpreted.  Elliptic-curve
+recovery over secp256k1 is not computed; an `opaque` constant is a function
+no proof can unfold, so what is proved of it holds of every function of the
+four words (no axiom: `#print axioms` lists none for it), and `#run`
+evaluates it to `0`. -/
+opaque ecrecoverKey : Nat → Nat → Nat → Nat → Nat
+
+/-- secp256k1's group order: a signature's `r` and `s` lie in `[1, n)`. -/
+def secp256k1N : Nat := 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+
+/-- `ecrecover(h, v, r, s)` of its 128 bytes, the four ABI words (the
+precompile at address `1`): `0` where the precompile fails (`v` not `27` or
+`28`, `r` or `s` outside `[1, n)`, or the input not four words), where solc
+returns the zero address; else an address, uninterpreted
+(`ecrecoverKey`, modulo `2^160`).  What is assumed is only that: a valid
+signature recovers to some address, maybe `0` too, as on the EVM where the
+point at infinity also recovers none. -/
+def ecrecoverBytes (bs : List Int) : PrimTy.uint.Denote :=
+  let ns := bs.map fun b => b.toNat % 256
+  let w (i : Nat) : Nat := Hashes.ofBytes ((ns.drop (32 * i)).take 32)
+  if ns.length = 128 ∧ (w 1 = 27 ∨ w 1 = 28) ∧ 0 < w 2 ∧ w 2 < secp256k1N ∧ 0 < w 3 ∧
+      w 3 < secp256k1N then
+    uintOfNat (ecrecoverKey (w 0) (w 1) (w 2) (w 3) % 2 ^ 160)
+  else uintOfNat 0
+
+/-- The function a hashing builtin computes of the bytes. -/
+def HashKind.apply : HashKind → List Int → PrimTy.uint.Denote
+  | .keccak => keccakBytes
+  | .sha256 => sha256Bytes
+  | .ripemd160 => ripemd160Bytes
+  | .ecrecover => ecrecoverBytes
+
+/-- A hashing builtin of a memory object: of its bytes (`MObj.words`). -/
+def Heap.hash {H : HTy} {R : RefTy} (hp : Heap H) (k : HashKind) (r : HRef H R) :
+    PrimTy.uint.Denote :=
+  k.apply (MObj.words R (hp.get r))
 
 /-- The empty heap. -/
 def Heap.empty : Heap [] := ()

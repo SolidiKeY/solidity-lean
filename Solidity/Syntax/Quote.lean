@@ -127,8 +127,8 @@ def Val.quote : {p : PrimTy} → Val C Γ p → Lean.Expr
     mkAppN (mkConst ``Val.mlen) #[c, Γe, toExpr p, toExpr E', MPath.quote b, rflPrim p]
   | _, .modular op a b k =>
     mkAppN (mkConst ``Val.modular) #[c, Γe, toExpr op, Val.quote a, Val.quote b, Val.quote k]
-  | p, @Val.keccak _ _ _ R b _ =>
-    mkAppN (mkConst ``Val.keccak) #[c, Γe, toExpr p, toExpr R, MPath.quote b, rflPrim p]
+  | p, @Val.hash _ _ _ R k b _ =>
+    mkAppN (mkConst ``Val.hash) #[c, Γe, toExpr p, toExpr R, toExpr k, MPath.quote b, rflPrim p]
 
 end
 

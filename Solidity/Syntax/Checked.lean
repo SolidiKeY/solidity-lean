@@ -1,4 +1,5 @@
 import Solidity.Syntax.Scoped
+import Solidity.RevertBytes
 
 /-!
 # `checked { … }`: an overflow is an assertion failure
@@ -184,7 +185,7 @@ def Val.mayHalt {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Bool
     a.mayHalt || b.mayHalt || [BinOp.pow, .div, .mod, .shl, .shr].contains op
   | _, .unop _ _ _ a => a.mayHalt
   | _, .ternary c a b => c.mayHalt || a.mayHalt || b.mayHalt
-  | _, .readMem _ | _, .len .. | _, .mlen .. | _, .modular .. | _, .keccak .. => true
+  | _, .readMem _ | _, .len .. | _, .mlen .. | _, .modular .. | _, .hash .. => true
 
 mutual
 
@@ -208,7 +209,7 @@ def Val.guard {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Option (Val C Γ .boo
   | _, .len b _ => b.guard
   | _, .mlen b _ => b.guard
   | _, .modular _ a b k => andO a.guard (andO b.guard k.guard)
-  | _, .keccak b _ => b.guard
+  | _, .hash _ b _ => b.guard
 
 def SPath.guard {Γ : Ctx} : {T : Ty} → SPath C Γ T → Option (Val C Γ .bool)
   | _, .alias _ => none
@@ -321,55 +322,63 @@ def Prog.snocS {Γ Γ₁ : Ctx} : Prog C Γ Γ₁ → Stmt C Γ₁ Γ₁ → Pro
   | .cons t P, s => .cons t (P.snocS s)
 
 /-- The statement a guard is owed by: `assert(g);` when checking, `if (g) {}
-else { assume(false); }` when ignoring. -/
-def OFMode.guardStmt {Γ : Ctx} : OFMode → Val C Γ .bool → Stmt C Γ Γ
-  | .checking, g => .assert g
-  | .ignoring, g => .ite g .nil (.cons .assumeFalse .nil)
+else { assume(false); }` when ignoring.  In the callee a self-call `try`
+runs (`self`), where a `catch` reads the data, a failed check reverts with
+solc's `Panic(0x11)` data (`docs/semantic-gaps.md`, "Revert data"): the
+`try` takes a panic and that revert alike, and binds the code. -/
+def OFMode.guardStmt {Γ : Ctx} (o : OFMode) (g : Val C Γ .bool) (self : Bool := false) :
+    Stmt C Γ Γ :=
+  match o, self with
+  | .checking, false => .assert g
+  | .checking, true => .ite g .nil (.cons (.revertData [.bytes (Semantics.encodePanic 0x11)]) .nil)
+  | .ignoring, _ => .ite g .nil (.cons .assumeFalse .nil)
 
 /-- `P`, then the guard's statement where a guard is due. -/
-def Prog.snocGuard {Γ Γ₁ : Ctx} (o : OFMode) (P : Prog C Γ Γ₁) :
+def Prog.snocGuard {Γ Γ₁ : Ctx} (o : OFMode) (self : Bool) (P : Prog C Γ Γ₁) :
     Option (Val C Γ₁ .bool) → Prog C Γ Γ₁
   | none => P
-  | some g => P.snocS (o.guardStmt g)
+  | some g => P.snocS (o.guardStmt g self)
 
 mutual
 
 /-- A statement with the programs it holds guarded: a loop's condition
 guarded again at the end of its body, the source of a deferred push at the
 end of its prefix. -/
-def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) : Stmt C Γ Γ' → Stmt C Γ Γ'
-  | .ite c thn els => .ite c (thn.withOF o) (els.withOF o)
-  | .call f args ret body => .call f args ret (body.withOF o)
+def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) (sf : Bool) : Stmt C Γ Γ' → Stmt C Γ Γ'
+  | .ite c thn els => .ite c (thn.withOF o sf) (els.withOF o sf)
+  | .call f args ret body => .call f args ret (body.withOF o sf)
   | .tryCall call rets ok err code pnc other sargs sbody self =>
-    .tryCall call rets (ok.withOF o) (err.withOF o) code (pnc.withOF o) (other.withOF o)
-      sargs (sbody.withOF o) self
+    .tryCall call rets (ok.withOF o sf) (err.withOF o sf) code (pnc.withOF o sf)
+      (other.withOF o sf) sargs (sbody.withOF o (sf || self)) self
   | .loop a c body =>
-    .loop a c ((body.withOF o).snocGuard o ((c.wk (Thin.ofExt body.ext)).guard))
-  | .block body => .block (body.withOF o)
-  | .callReceiver f args r body op => .callReceiver f args r (body.withOF o) op
+    .loop a c ((body.withOF o sf).snocGuard o sf ((c.wk (Thin.ofExt body.ext)).guard))
+  | .block body => .block (body.withOF o sf)
+  | .callReceiver f args r body op => .callReceiver f args r (body.withOF o sf) op
   | .callReceiverPush f args r body code value =>
-    .callReceiverPush f args r (body.withOF o) ((code.withOF o).snocGuard o value.guard) value
+    .callReceiverPush f args r (body.withOF o sf) ((code.withOF o sf).snocGuard o sf value.guard)
+      value
   -- every frame of the unrolling guarded, lazily
-  | .callRec f d args ret body => .callRec f d args ret fun u => (body u).withOF o
+  | .callRec f d args ret body => .callRec f d args ret fun u => (body u).withOF o sf
   | .catchData c rets sargs sbody self kind x body =>
-    .catchData c rets sargs (sbody.withOF o) self kind x (body.withOF o)
+    .catchData c rets sargs (sbody.withOF o (sf || self)) self kind x (body.withOF o sf)
   | s => s
 
 /-- **A program, guarded**: each statement preceded by its guard's
-statement (`Stmt.guard`, `OFMode.guardStmt`). -/
-def Prog.withOF {Γ Γ' : Ctx} (o : OFMode) : Prog C Γ Γ' → Prog C Γ Γ'
+statement (`Stmt.guard`, `OFMode.guardStmt`); `sf` in a self-call's
+callee. -/
+def Prog.withOF {Γ Γ' : Ctx} (o : OFMode) (sf : Bool) : Prog C Γ Γ' → Prog C Γ Γ'
   | .nil => .nil
   | .cons s P =>
     match s.guard with
-    | none => .cons (s.withOF o) (P.withOF o)
-    | some g => .cons (o.guardStmt g) (.cons (s.withOF o) (P.withOF o))
+    | none => .cons (s.withOF o sf) (P.withOF o sf)
+    | some g => .cons (o.guardStmt g sf) (.cons (s.withOF o sf) (P.withOF o sf))
 
 end
 
 /-- `checked { … }`'s program. -/
-abbrev Prog.checkOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .checking
+abbrev Prog.checkOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .checking false
 
 /-- `ignoringOverflow { … }`'s program. -/
-abbrev Prog.ignoreOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .ignoring
+abbrev Prog.ignoreOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .ignoring false
 
 end Solidity

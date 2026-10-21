@@ -540,9 +540,16 @@ into a fresh local of its function type before the call (`hoist`,
 `Syntax/Elab.lean`). -/
 def callValueName : String := "#callValue"
 
-/-- `keccak256(b)` once `hoist` has made `b` a memory path: the member
-`b.#keccak256`, which no source can write (`Val.keccak`). -/
-def keccakMember : String := "#keccak256"
+/-- `keccak256(b)` (`sha256(b)`, …) once `hoist` has made `b` a memory path:
+the member `b.#keccak256`, which no source can write (`Val.hash`). -/
+def hashMember (k : HashKind) : String := "#" ++ k.toStr
+
+/-- A hashing builtin's name (`HashKind.ofName?`). -/
+def isHashName (f : String) : Bool := (HashKind.ofName? f).isSome
+
+/-- The hash a member names, if it is one (`hashMember`). -/
+def hashMember? (f : String) : Option HashKind :=
+  if f.startsWith "#" then HashKind.ofName? (f.drop 1) else none
 
 /-- The literal of the bytes `bs`. -/
 def RawExpr.bytesLit (bs : List Nat) : RawExpr := .call bytesLitName (bs.map .num)
@@ -735,6 +742,9 @@ syntax:max str : sol_expr
 syntax:max &"hex" str : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
 syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
+/-- `T[]` where a type stands in an expression: `abi.decode(d, (uint[]))`
+(`RawExpr.name "uint[]"`). -/
+syntax:max (name := solArrTyExpr) atomic(ident "[" "]") : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
 /-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
 `return` of several values (`RawExpr.tuple`). -/
@@ -1150,10 +1160,11 @@ def encodeBuiltin (f : String) : Bool :=
   ["abi.encode", "abi.encodePacked", "string.concat", "bytes.concat", "abi.encodeWithSelector",
     "abi.encodeWithSignature", "abi.encodeCall"].contains f
 
-/-- A builtin that reads byte strings whole: `keccak256`, the ABI's, the
-`concat`s (and `#abiDecode`, `abi.decode`'s lowering). -/
+/-- A builtin that reads byte strings whole: the hashes, the ABI's, the
+`concat`s (and `#abiDecode`, `abi.decode`'s lowering); `ecrecover`, whose
+arguments it encodes. -/
 def byteBuiltin (f : String) : Bool :=
-  encodeBuiltin f || ["keccak256", "abi.decode", "#abiDecode"].contains f
+  encodeBuiltin f || isHashName f || ["abi.decode", "#abiDecode"].contains f
 
 /-- `f`, a function's name: an identifier with no member access. -/
 def funName? (f : TSyntax `sol_expr) : Option String :=
@@ -1307,6 +1318,7 @@ where
   | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
+  | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[]")))
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
   | `(sol_expr| ! $a) => do `(RawExpr.unop .not $(← expandExpr a))
   | `(sol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))

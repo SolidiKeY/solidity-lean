@@ -178,7 +178,7 @@ theorem Val.lower_wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {p : PrimTy} → (v : Val 
   | _, .modular _ a b k => by
     simp only [Val.wk, Val.lower, Val.lower_wk h a, Val.lower_wk h b, Val.lower_wk h k,
       Tm.wk_app3]
-  | _, .keccak b hp => by
+  | _, .hash _ b hp => by
     simp only [Val.wk, Val.lower, MPath.lower_wk h b, Tm.castV_wk, Tm.wk_app2, Tm.wk_app0]
 
 end

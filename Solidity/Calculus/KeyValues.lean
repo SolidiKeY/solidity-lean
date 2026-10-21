@@ -38,7 +38,7 @@ def Val.keyValue {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .unop _ _ _ a => a.keyValue
   | .ternary c a b => c.keyValue && a.keyValue && b.keyValue
   | .len b _ | .mlen b _ => b.keyValue
-  | .modular .. | .keccak .. => false
+  | .modular .. | .hash .. => false
 
 end
 
@@ -112,7 +112,7 @@ theorem MLoc.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} :
 
 theorem Val.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} :
     (e : Val C Γ p) → (e.wk h).keyValue = e.keyValue
-  | .simple _ | .modular .. | .keccak .. => rfl
+  | .simple _ | .modular .. | .hash .. => rfl
   | .read l => Loc.keyValue_wk h l
   | .readMem l => MLoc.keyValue_wk h l
   | .binop _ _ _ a b => by

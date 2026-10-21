@@ -58,13 +58,14 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); open: `calldata` |
-| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); the closer under `⟨⟩` on a hash of a byte string built in the function, evaluated (`keccakAt`), and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); open: `abi.decode` of arrays and structs, `abi.encode` of nested arrays and of structs with reference members |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); open: calldata slices `b[i:j]` (refused) |
+| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); `sha256`, `ripemd160` computed and `ecrecover` an address uninterpreted where the signature is well formed, `abi.decode` of `T[]`, `T[k]` and structs of values (lane `open-small`); a locally built byte string's hash evaluated (`keccakAt`) and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.encode`/`abi.decode` of nested arrays and of structs with reference members |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats (about 400k of 200k, "Revert data", lane `open-closer`), the callback reading's leaves on the bound array |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | closed: a recursion that does not call back is read without callbacks (`sol_no_callback`, `ProvesC.recValid`), one that does by a contract over the callback runs (`RecContractC`, `ProvesC.recContract`), by induction over the frames; `rec_auto_c`, the runner (`docs/kernel-port.md`, "Recursion") |
 | a capture whose rest calls back under the callback reading (`if (nse)` with a branch that calls back, a loop unwound whose body does, a payment's non-simple operand) | calculus | closed: `ProvesC.capture`, the side condition on the capture alone (`Stmt.CapturesAs`), and `ProvesC.loopExit` under the box (`docs/options.md` O3) |
 | a loop by its invariant and a call returning a value or a reference, while something calls back (`ValidT`) | calculus | closed (`docs/options.md` O3): a call forks where its body does (`Stmt.forksIn`), and one whose callee calls back is inlined under callbacks whatever it returns (`ProvesC.callVal`, `callStorage`, `callMem`); a loop by its invariant under the box (`ProvesC.invBox`, the body's frame read over its callback runs, `ExecP.frame`); `tests/solc/CallbackCalls.sol`.  Not open but refused: a diamond over a loop whose body calls back never holds, the loop's callback runs including a divergence (`ExecS.loopDiverge`, `holdsC_diamond_loop`), whatever its bound, invariant or variant |
+| a loop body containing a `try` (no frame: `whileClose`) | calculus | closed: a `try` is within `nonpayable` when its clauses and a self-call's callee are, writing what its clauses write of the caller's locals (`Stmt.within`, `Stmt.writesAt`; `Stmt.run_frame`, `ExecS.frame` with the callee's havoc under callbacks), so the invariant rules apply, with or without callbacks (`tests/solc/CallbackCalls.sol`, `loopOfTries`); a `catch` that binds the data allocates and stays without a frame |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`) | closer limit, not a semantic gap | closed (lane `open-closer`): `sol_close`'s last alternative adds solkey's `multiply_2_inEq0` of the literal bounds of the atoms of a leaf's products (`sol_close_nonlin`, `Calculus/CloseNonlin.lean`), only where a product of two non-literal integers is left; `tests/solc/Recursion.sol`'s `sum` and `sumThree`, `Examples/Tactics/Recursion.lean` (`triSpec`) |
 | closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | open |
@@ -280,7 +281,23 @@ theorems are unchanged.
 - `bytes.concat`, `string.concat`, `abi.*`, `keccak256`: landed
   ("Hashing and the ABI").
 - `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
-  `bytesN` word is left-aligned there), `calldata` (refused for every type).
+  `bytesN` word is left-aligned there).
+- `calldata` (lane `open-small`): closed.  A `calldata` parameter (`uint[]
+  calldata xs`, `bytes`, `string`, a struct) and a `calldata` local are
+  memory ones the body does not write (`calldataCheck`, `Syntax/Elab.lean`;
+  the import prints them `memory`, `Frontend/Import.lean`): solc refuses a
+  write to calldata, and copies calldata where it is bound to memory (`T
+  memory m = xs;`, an argument to a `memory` parameter, a `memory` return),
+  which the model's memory binding would share.  So, before the body is
+  elaborated, a write through a calldata name or a memory name bound to one
+  is refused, as is returning one as `memory` and handing one to a callee's
+  `memory` parameter the callee writes: what is left only reads the object,
+  where sharing and copying agree.  An array parameter's elements are in
+  their ABI range as a memory one's (`elemRanges`).  Slices `b[i:j]` are
+  refused: a slice is a view of the caller's data, which the model would copy
+  element by element, a loop with no invariant, so no obligation over it
+  would be proved.  Tests: `tests/solc/Calldata.sol`,
+  `Examples/Tactics/Bytes.lean` §5.
 - A byte type as a struct member: closed ("Struct table", "Byte and function
   types as members").
 
@@ -335,11 +352,11 @@ the kernel (`decide +kernel`, under a second for one block:
 hash, so `bytes4(keccak256("f(uint256)"))` is `this.f.selector` (`Sel`; the
 elaborator reads `keccak256(…)` as a `bytes32`, `bytesOf?`, so `bytes4(…)`
 keeps its high bytes).  In the
-syntax it is `Val.keccak` (`Syntax/Scoped.lean`), in the signature the
-binary symbol `Op2.keccak : mem × ident R → val uint` (`Signature.lean`),
+syntax it is `Val.hash .keccak` (`Syntax/Scoped.lean`), in the signature the
+binary symbol `Op2.hash .keccak : mem × ident R → val uint` (`Signature.lean`),
 read in the Theory as the typed evaluation (the memory island, as `size`
-is: `Op2.denote`), its rule the Lean-only `LeanTaclet.keccakAssignment`
-(`v = keccak256(mpath)` is `{ v := keccak256(memory, mpath) }`), sound by
+is: `Op2.denote`), its rule the Lean-only `LeanTaclet.hashAssignment`
+(`v = hash(mpath)` is `{ v := hash(memory, mpath) }`), sound by
 `sound_setLocal` and `Val.lower_evalT`; the EVM compiler leaves it out of
 its fragment (`valIn`).  The elaborator lowers `keccak256(b)`
 (`Syntax/Elab.lean`, `hoist`): `b` a memory `bytes`/`string` (a storage one
@@ -434,9 +451,24 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 (`#run`) and proves the layouts of small encodings.
 
 **Left open.**
-- `abi.decode` of arrays and structs: the grammar writes no type that is not
-  a name in `abi.decode(d, (T))` (`uint[]` is not an expression), and the
-  import prints only elementary types there.
+- `abi.decode` of arrays and structs: closed (lane `open-small`).  `sol{}`
+  writes `T[]` where a type stands in an expression (`solArrTyExpr`,
+  `RawExpr.name "uint[]"`), `T[k]` and a struct by name as before, and a
+  tuple declaration's reference components without a location (the import
+  prints them so, `abiTyText`); `abiDecodeWith` (`Syntax/Elab.lean`, outside
+  `hoist`'s `mutual` block) reads a struct of values and a `T[k]` off their
+  words in the head (`AbiKind.headWords`: a component sits at the word its
+  predecessors leave, `abiDecodeHeads`), a member or an element each, a word
+  out of its type's range reverting (`abiDecodeAt`), and a `T[]` off its
+  offset, its length there and its elements' words after it, read by a loop
+  into `new T[](length)`, an offset or a length past the data reverting as
+  solc's decoder does.  Tests: `tests/solc/Hashing.sol` (`decodeStruct`,
+  `decodeFixed`, `decodeTuple`, proved), `Examples/Tactics/Hashing.lean`
+  (`Codec2`: an array, a struct, a `T[k]`, a tuple, a bad `bool`, a bad
+  length, run).  An array decoded is a loop with no invariant: the runner
+  proves no obligation over it (as for an array encoded).  Arrays of
+  references and structs with reference members stay refused, as on the
+  encode side.
 - `abi.encode` of nested arrays, of arrays of structs and of structs with a
   reference member (refused by `abiKind`).
 - An array encoded or a byte string decoded is a loop over its elements:
@@ -454,7 +486,33 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   of the twenty-write memory), eight are within them.
 - `abi.encodeCall` of a function this contract does not declare (an
   interface's): its signature is not known to `sol{}`.
-- `sha256`, `ripemd160`, `ecrecover`.
+- `sha256`, `ripemd160`, `ecrecover`: closed (lane `open-small`, below).
+
+**`sha256`, `ripemd160`, `ecrecover`** (lane `open-small`).  One symbol for
+every hash: `Val.hash k`, `Op2.hash k` and the rule `hashAssignment`, the kind
+`k : HashKind` (`AST.lean`) a parameter, not a constructor each, so no fold
+grows an arm; `keccak256` is `k = .keccak`.  `HashKind.apply`
+(`Semantics/Heap.lean`) is the function of the bytes: `sha256` SHA-256 and
+`ripemd160` RIPEMD-160 (`Hashes.lean`, written as `Keccak.lean` is, over
+`Nat`s with structural recursion only, checked against the standard
+vectors; `sha256Bytes`, `ripemd160Bytes` `@[irreducible]`, evaluated in the
+kernel by `decide +kernel` and by `#run`), `ripemd160`'s value a `bytes20`
+(below `2^160`).  `ecrecover(h, v, r, s)` is lowered to `abi.encode(h, v, r,
+s)`, the precompile's 128 bytes, then the hash `.ecrecover` into an
+`address` (`hoistHashWith`, `Syntax/Elab.lean`): `ecrecoverBytes` is `0`
+where the precompile fails (`v` not `27` or `28`, `r` or `s` outside
+`[1, n)` for secp256k1's order `n`), as solc returns the zero address, and
+otherwise `ecrecoverKey h v r s mod 2^160`, an `opaque` function: no proof
+unfolds it, so what is proved holds of every recovery function (no axiom);
+`#run` evaluates it to `0`.  Assumed: nothing about which address a valid
+signature recovers to (it may be `0`, as the point at infinity is on the
+EVM).  Tests: `tests/solc/Hashing.sol` (`sha256Parameter`,
+`ripemd160Parameter`, `recoverSigner`), `Examples/Tactics/Hashing.lean`
+(`sha256Abc`, `ripemd160Abc`, `recoverBadV`, the runs, `sha256Twice`).
+Cost: `Val`, `Op2` and the Lean rules keep their constructor counts; every
+match on `keccak` gained the kind (`.hash _ b _`).  `hoist` is at its
+heartbeat limit: the lowering is a function outside its `mutual` block,
+handed the recursive calls.
 
 **Lane `open-left2` checked** (2026-10-21): `tests/solc/Hashing.sol`'s
 `encodeWithSignature`, `encodeWithSelector`, `encodeCall`, `packedEnum`,
@@ -788,14 +846,25 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
 - The callback reading: an `allocAll` goal whose rest may call back has
   no `ProvesC` rule (`Calculus/Callback.lean` gives none); where nothing
   calls back the walk goes on by `ProvesC.plain`.
-- `Panic` data: a self-call's panic binds the transaction's code (`1`
-  without one) as before; the model panics on `assert` (`0x01`) and on an
-  overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the
-  other codes (`0x12` division, `0x21` enum, `0x32` index, `0x41`
-  allocation, `0x51` function value) are reverts in the model, with no data.
-  A raw `catch (bytes memory d)` of a callee that may panic has the
-  any-bytes goal only (its data is the transaction's code; `Panic`'s
-  selector then a word would be a `Pat`, not done).
+- `Panic` data (lane `open-small`): in the callee a self-call `try` runs, a
+  failed `assert` reverts with `Panic(0x01)`'s data and a failed check in
+  `checked { … }` with `Panic(0x11)`'s (`elabStmt1`'s `assert`,
+  `OFMode.guardStmt` with `self`), solc's codes; the `try` dispatches on the
+  data, so `catch Panic(uint c)` binds the code in the run, and the data are
+  literal to `Stmt.revertDatas`, so a raw `catch (bytes memory d)` gets them
+  (`tests/solc/RevertData.sol` `panicData`, `Examples/Tactics/RevertData.lean`
+  `Panics`).  A callee that still may panic (an `assert` written in a
+  program not elaborated as a self-call's callee) lists `Pat.panic`, the
+  selector then a word of unknown bytes (`CatchKind.datas`, sound by
+  `Pat.matches_panic`), where it had only the any-bytes goal.  Left open:
+  the rule's `Panic` goal binds any code (`trySelfStep`), so a proof about
+  `c` needs a goal per code the callee's data carries — a `catchDataBox`
+  for the code, its soundness over `Prog.run_dataS` and the callback reading
+  (`holdsC_trySelfCb`); reading the code off the raw data in the clause
+  instead (32 bytes assembled) is past `sol_decide`'s bounds.  The other
+  codes (`0x12` division, `0x21` enum, `0x32` index, `0x41` allocation,
+  `0x51` function value) and an overflow outside `checked { … }` are reverts
+  in the model, with no data (the solkey reading).
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
 - The callback reading (`ValidT`): `catchData` forks when its callee or
@@ -842,3 +911,10 @@ open with their numbers: a fresh object's bytes ("Revert data"), the four
 `SolcLoopsOpen` functions (`docs/loops.md`).  `TestSuite/Derived15`'s
 `invariantVariantSkipsBreakIteration` replay: 200045 heartbeats (in units
 of `maxHeartbeats`) before and after, its 205000 override unchanged.
+
+**Lane `open-small` checked** (2026-10-21): `lean_build` of the default
+targets; `node --test --test-name-pattern="calldata|hash|revert|loop|callbacks|solc/open"
+scripts/test-solidity.test.mjs` passes (7 tests).  Landed: a `try`'s loop
+frame ("Open"), `sha256`/`ripemd160`/`ecrecover` and `abi.decode` of arrays
+and structs ("Hashing and the ABI"), `calldata` ("Bytes and strings"),
+`Panic` data in self-call callees ("Revert data").

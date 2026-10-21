@@ -149,10 +149,10 @@ def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
       else .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .val p ((lookupBy n d.widths).getD 256))])
     | .ref R => match lookupBy n d.paramLocs with
       | some .storage => .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .alias R)])
-      | some .memory =>
+      -- a `calldata` one a memory one the body does not write (`calldataCheck`)
+      | some .memory | some .calldata =>
         if (Ty.ref R).mapFree then .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .mem R)])
         else .error s!"memory parameter {n} holds a mapping"
-      | some .calldata => .error s!"calldata parameter {n} is not supported"
       | none => .error s!"reference parameter {n} needs a data location"
   pure rows.flatten
 
@@ -599,6 +599,103 @@ def RawStmt.decls (s : RawStmt) : List String :=
 def RawStmt.declsList (ss : List RawStmt) : List String :=
   ss.flatMap RawStmt.decls
 
+/-! ### `calldata` parameters
+
+A `calldata` parameter is a memory parameter the body does not write
+(`docs/semantic-gaps.md`, "Bytes and strings"): solc refuses a write to
+calldata, and a copy of it to memory (`T memory m = xs;`, an argument to a
+`memory` parameter, a `memory` return) is a copy there, where the model's
+memory binding shares the object.  So the elaborator reads it as a memory
+local and refuses, before the body is elaborated (`calldataCheck`), a write
+through it and through every memory name bound to it, a binding of it
+returned, and an argument of it to a callee's `memory` parameter the callee
+writes: what is left only reads the object, where sharing and copying agree. -/
+
+/-- The names of a function's reference returns. -/
+def FunDecl.refRets (d : FunDecl) : List String :=
+  d.rets.filterMap fun (x, T) => if T matches .ref _ then some x else none
+
+/-- Its `calldata` parameters. -/
+def FunDecl.calldataParams (d : FunDecl) : List String :=
+  d.paramLocs.filterMap fun (x, l) => if l == .calldata then some x else none
+
+/-- Why a write through calldata is refused. -/
+def roMsg : String :=
+  "a write through calldata or a memory binding of it: solc refuses the first and copies \
+    calldata to memory for the second, where the model would share the object"
+
+/-- The name a write target is rooted at: `x` of `x[i].f`. -/
+def RawExpr.root? : RawExpr → Option String
+  | .name x => some x
+  | .index e _ | .field e _ => e.root?
+  | _ => none
+
+/-- A write through one of the names `ro` (not a binding of the name itself). -/
+def roWrite (ro : List String) (l : RawExpr) : Bool :=
+  !(l matches .name _) && (l.root?.any ro.contains)
+
+/-- The writes inside an expression (`(x[0] = 1)`, `x[0]++`) through `ro`. -/
+def RawExpr.roWrites (ro : List String) (e : RawExpr) : Bool :=
+  e.any fun
+    | .assign l _ | .opAssign _ l _ | .incDec _ l => roWrite ro l
+    | _ => false
+
+/-- What `calldataCheck` refuses in one statement (not its blocks), and the
+names it binds to the read-only object. -/
+def roStmt (ro : List String) (s : RawStmt) : Except String (List String) := do
+  let mention (e : RawExpr) : Bool := ro.any e.mentions
+  if s.exprs.any (RawExpr.roWrites ro) then
+    throw roMsg
+  match s with
+  | .assign l r =>
+    if roWrite ro l then throw s!"{l.toStr}: {roMsg}"
+    pure (match l with | .name x => if mention r then x :: ro else ro | _ => ro)
+  | .opAssign _ l _ | .incDec _ l | .assignIncDec _ _ l | .delete l =>
+    if roWrite ro l then throw s!"{l.toStr}: {roMsg}" else pure ro
+  | .tupleAssign ts _ =>
+    if ts.any (·.any (roWrite ro)) then throw roMsg else pure ro
+  | .call (.field b m) _ =>
+    if (m == "push" || m == "pop") && b.root?.any ro.contains then
+      throw s!"{b.toStr}.{m}: {roMsg}"
+    else pure ro
+  | .declMemory _ x (some e) => pure (if mention e then x :: ro else ro)
+  | _ => pure ro
+
+/-- **What a body does with its `calldata` parameters `ro`** (above): a
+write through one, or through a memory name bound to one, is refused; so is
+returning one where the function returns a memory reference (`rets`, its
+reference returns), and passing one to a callee's `memory` parameter the
+callee writes.  `fuel` bounds the callees followed. -/
+partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro rets : List String)
+    (body : List RawStmt) : Except String Unit := do
+  if ro.isEmpty then return
+  let ss := body.flatMap (RawStmt.flatMapDeep fun s => [s])
+  -- the names bound to the object, to a fixed point (a loop may bind late)
+  let mut ro := ro
+  for _ in [0:3] do
+    for s in ss do ro ← roStmt ro s
+  let mention (e : RawExpr) : Bool := ro.any e.mentions
+  if let some r := rets.find? ro.contains then
+    throw s!"the memory return {r} bound to calldata: solc copies it, the model would share it"
+  for s in ss do
+    if let .ret (some e) := s then
+      if !rets.isEmpty && mention e then
+        throw "calldata returned as memory: solc copies it, the model would share it"
+    -- a call statement's callee, as the expression it would be
+    let es := match s with
+      | .call (.name g) as => RawExpr.call g as :: s.exprs
+      | _ => s.exprs
+    for e in es do
+      for (g, d) in funs do
+        let offends := e.any fun
+          | .call g' as => g' == g && (d.params.zip as).any fun ((p, _), a) =>
+              lookupBy p d.paramLocs == some .memory && mention a &&
+                (fuel == 0 || (calldataCheck funs (fuel - 1) [p] (d.refRets) d.body).isOk == false)
+          | _ => false
+        if offends then
+          throw s!"{g}: calldata passed to a `memory` parameter it writes: solc copies it, \
+            the model would share it"
+
 /-- The largest index among the fresh variables a raw statement writes. -/
 def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
   (s.flatMapDeep fun s =>
@@ -898,10 +995,10 @@ def Blk.toCatchData {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders �
 /-- A statement inside `checked { … }` or `ignoringOverflow { … }`: its
 guard's statement first, the programs it holds guarded (`Stmt.guard`,
 `Stmt.withOF`). -/
-def SStmt.withOF (o : OFMode) (s : SStmt C) : SProg C :=
+def SStmt.withOF (o : OFMode) (sf : Bool) (s : SStmt C) : SProg C :=
   match s.s.guard with
-  | none => [⟨s.Γ, s.Γ', s.s.withOF o⟩]
-  | some g => [.of s.Γ (o.guardStmt g), ⟨s.Γ, s.Γ', s.s.withOF o⟩]
+  | none => [⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
+  | some g => [.of s.Γ (o.guardStmt g sf), ⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
 
 /-- `P` then `Q`. -/
 def Prog.join {Γ Δ Ε : Ctx} : Prog C Γ Δ → Prog C Δ Ε → Prog C Γ Ε
@@ -967,7 +1064,7 @@ def Val.vars {Γ : Ctx} (ns : List Var) : {p : PrimTy} → Val C Γ p → List V
   | _, .readMem l => l.vars ns
   | _, .len b _ => b.vars ns
   | _, .mlen b _ => b.vars ns
-  | _, .keccak b _ => b.vars ns
+  | _, .hash _ b _ => b.vars ns
   | _, .modular _ a b k => a.vars ns ++ b.vars ns ++ k.vars ns
 
 end
@@ -1199,8 +1296,8 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       else throw s!"member access .{f} on an array"
     | .mpath (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.mlen b rfl))
-      -- `keccak256(b)`, as `hoist` leaves it (`keccakMember`)
-      else if f == keccakMember then pure (.val .uint (.keccak b rfl))
+      -- `keccak256(b)`, `sha256(b)`, …, as `hoist` leaves it (`hashMember`)
+      else if let some k := hashMember? f then pure (.val .uint (.hash k b rfl))
       else throw s!"member access .{f} on an array"
     -- a fixed-size array's length is its type's: the literal, as solc folds
     -- it.  A base that indexes is evaluated first (it may revert), so
@@ -1582,7 +1679,14 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     -- `abi.decode` of a byte string (`abiDecodeBytes`)
     if (f == "abi.decode" || f == "#abiDecode") && (lookupBy f C.funs).isNone then
       match as with
-      | _ :: .name T :: _ => if dynBytesTy T then dynBytesRowsOf T else []
+      | _ :: .name T :: _ =>
+        if dynBytesTy T then dynBytesRowsOf T
+        else if T.endsWith "[]" then
+          ((elabTyW C (.array (.named (T.dropRight 2)))).toOption.map (·.2)).getD []
+        else ((elabTyW C (.named T)).toOption.map (·.2)).getD []
+      -- `T[k]` (`abiDecodeWith`)
+      | _ :: .index (.name T) (.num k) :: _ =>
+        ((elabTyW C (.fixed (.named T) k)).toOption.map (·.2)).getD []
       | _ => []
     else
     match lookupBy f C.funs with
@@ -1914,7 +2018,10 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
   -- an element or a member: its declared width (`uint8[] values`, `p.a` of a
   -- `Packed p`)
   | .index e k => (pathWidth? C Γ (.index e k)).orElse fun _ => some (.uint, 256)
-  | .field e f => (pathWidth? C Γ (.field e f)).orElse fun _ => some (.uint, 256)
+  -- `ripemd160`'s and `ecrecover`'s word is below `2^160` (`hashMember`)
+  | .field e f =>
+    if hashMember? f matches some .ripemd160 | some .ecrecover then some (.uint, 160)
+    else (pathWidth? C Γ (.field e f)).orElse fun _ => some (.uint, 256)
   | _ => some (.uint, 256)
 
 /-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
@@ -2001,7 +2108,8 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
     | some n => some n
     | none => do
       -- the builtin `keccak256` is a `bytes32`
-      if f == "keccak256" && (lookupBy f C.funs).isNone then return 32
+      if (f == "keccak256" || f == "sha256") && (lookupBy f C.funs).isNone then return 32
+      if f == "ripemd160" && (lookupBy f C.funs).isNone then return 20
       let d ← lookupBy f C.funs
       let (r, .prim _) ← d.ret | none
       lookupBy (r ++ "#bytes") d.widths
@@ -2280,8 +2388,9 @@ def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
   if 256 ≤ n then return []
   let Γ ← nctx
   let c ← checkIn C Γ .bool (inTyCond p n e)
+  let sf := (← read).selfFrame
   pure [.of Γ (match (← read).overflow with
-    | some o => o.guardStmt c
+    | some o => o.guardStmt c sf
     | none => .require c)]
 
 /-- The slot `b.push()` appended: `b[b.length - 1]`. -/
@@ -3125,6 +3234,181 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
     | _, _ => throw s!"`{e}`: a custom error's reference argument is not modelled"
   pure (.bytes (Semantics.selectorBytes (Semantics.customSelector sig)) :: parts)
 
+/-- A value type's ABI kind, by its name (`abi.decode`'s components). -/
+def valueKind? (t : String) : Option AbiKind :=
+  if t == "bool" then some .bool
+  else if t == "address" then some (.uint 160)
+  else if t == "uint" || t == "uint256" then some (.uint 256)
+  else if t == "int" || t == "int256" then some (.int 256)
+  else match narrowTy? t, bytesTy? t with
+    | some (.uint, n), _ => some (.uint n)
+    | some (.int, n), _ => some (.int n)
+    | _, some n => some (.bytesN n)
+    | _, _ => none
+
+/-- The value type name a kind decodes at (`abiDecodeAt`): an address as a
+`uint160`, which an `address` takes. -/
+def AbiKind.tyName : AbiKind → String
+  | .bool => "bool"
+  | .uint n => s!"uint{n}"
+  | .int n => s!"int{n}"
+  | .bytesN n => s!"bytes{n}"
+  | _ => "uint256"
+
+/-- The kind of `abi.decode`'s component written `T` that is not a value
+type or a byte string: `T[]`, `T[k]` of a value type `T`, a struct of value
+members. -/
+def decodeKind? (T : RawExpr) : Option AbiKind :=
+  match T with
+  | .name t =>
+    if t.endsWith "[]" then (valueKind? (t.dropRight 2)).map .arr
+    else match C.structName? t with
+      | some s => if (AbiKind.ofStruct s).isSome then some (.tuple s) else none
+      | none => none
+  | .index (.name t) (.num m) => (valueKind? t).map (.fixed · m)
+  | _ => none
+
+/-- The words a component written `T` takes in the head. -/
+def decodeHeadWords (T : RawExpr) : Nat :=
+  ((decodeKind? C T).map AbiKind.headWords).getD 1
+
+/-- `(T a, U b) = abi.decode(x, (T, U))`'s components, each at the word
+its predecessors' head words leave (`decodeHeadWords`): the head's words, and
+the `i`-th component's `#abiDecode`. -/
+def abiDecodeHeads (x : String) (ts : List RawExpr) : Nat × (Nat → RawExpr) :=
+  let ws := ts.map (decodeHeadWords C)
+  let n := ws.foldl (· + ·) 0
+  (n, fun i => .call abiDecodeName [.name x, ts[i]!, .num ((ws.take i).foldl (· + ·) 0), .num n])
+
+/-- **`abi.decode`** (`hoist`, outside its `mutual` block for its size, the
+recursive calls handed in): `abi.decode(b, (T))` is `#abiDecode(b, T, 0,
+n)`, and `#abiDecode(b, T, i, n)` the component at word `i` of a head of
+`n` words.  A value type is its word read back, a word out of the type's
+range reverting (`abiDecodeAt`); a `bytes`/`string` its offset, length and
+bytes (`abiDecodeBytes`); a struct of values and a `T[k]` their words in
+the head, a member or an element each; a `T[]` its offset in the head, its
+length there and its elements' words after it, read by a loop into a fresh
+`new T[](length)`, an offset or a length past the data reverting, as
+solc's decoder does. -/
+def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (abiMemBytes : RawExpr → ElabM (SProg C × String))
+    (elabStmtsP : List RawStmt → ElabM (SProg C))
+    (abiDecodeBytes : String → String → Nat → Nat → ElabM (SProg C × String))
+    (f : String) (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
+  if f == "abi.decode" then
+    let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
+    if T matches .tuple _ then
+      throw "abi.decode: one type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
+    return ← hoist (.call abiDecodeName [b, T, .num 0, .num (decodeHeadWords C T)])
+  let [b, Te, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
+  let (P, b) ← hoist b
+  let (Q, d) ← abiMemBytes b
+  let len : RawExpr := .field (.name d) "length"
+  let enough : RawStmt := .require (.binop .ge len (.num (32 * n)))
+  if let .name T := Te then
+    -- a byte string: its offset in the head, its length and bytes in the tail
+    if dynBytesTy T then
+      let (R, x) ← abiDecodeBytes T d (32 * i) n
+      return (P ++ Q ++ R, .name x)
+    if (valueKind? T).isSome then
+      let w := toString (← freshCapture "se")
+      let x := toString (← freshCapture "se")
+      let some (reads, v) := abiDecodeAt T d w (.num (32 * i)) |
+        throw s!"abi.decode at {T}: only value types are decoded"
+      let R ← elabStmtsP ([enough] ++ reads ++ [.decl (.named T) x (some v)])
+      return (P ++ Q ++ R, .name x)
+  let some k := decodeKind? C Te |
+    throw s!"abi.decode at {Te.toStr}: a value type, a byte string, an array of values or a \
+      struct of values"
+  let x := toString (← freshCapture "mv")
+  -- the word at `o` read at the kind `kk` into a fresh local, then `put` of it
+  let word (kk : AbiKind) (o : RawExpr) (put : RawExpr → RawStmt) : ElabM (List RawStmt) := do
+    let w := toString (← freshCapture "se")
+    let some (reads, v) := abiDecodeAt kk.tyName d w o | throw "internal: a member's kind"
+    pure (reads ++ [put v])
+  let S ← match k, Te with
+    | .tuple s, .name t => do
+      let ms := (AbiKind.ofStruct s).getD []
+      let reads ← ms.zipIdx.mapM fun ((g, kk), j) =>
+        word kk (.num (32 * (i + j))) (.assign (.field (.name x) g))
+      pure ([enough, .declMemory (.named t) x none] ++ reads.flatten)
+    | .fixed kk m, .index (.name t) _ => do
+      let reads ← (List.range m).mapM fun j =>
+        word kk (.num (32 * (i + j))) (.assign (.index (.name x) (.num j)))
+      pure ([enough, .declMemory (.fixed (.named t) m) x none] ++ reads.flatten)
+    | .arr kk, .name t => do
+      let et := t.dropRight 2
+      let o := toString (← freshCapture "se")
+      let L := toString (← freshCapture "se")
+      let j := toString (← freshCapture "se")
+      let start : RawExpr := (RawExpr.name o).addN 32
+      let body ← word kk (.binop .add start (.binop .mul (.name j) (.num 32)))
+        (.assign (.index (.name x) (.name j)))
+      pure ([enough] ++ abiAssemble d o (.num (32 * i)) 32 ++
+        [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
+        [.require (.binop .le (.binop .add start (.binop .mul (.name L) (.num 32))) len),
+         .declMemory (.array (.named et)) x (some (.newArr (.array (.named et)) (.name L))),
+         .decl (.named "uint") j (some (.num 0)),
+         .whileLoop {} (.binop .lt (.name j) (.name L))
+           (body ++ [.assign (.name j) (.binop .add (.name j) (.num 1))])])
+    | _, _ => throw s!"abi.decode at {Te.toStr}: not decoded"
+  return (P ++ Q ++ (← elabStmtsP S), .name x)
+
+/-- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
+`abi.encodeCall(g, (…))`: the selector, as an expression, and the rest of
+the arguments (`hoist`, outside its `mutual` block for its size). -/
+def encodeSelector? (Γ : ECtx) (f : String) (args : List RawExpr) :
+    Except String (Option (RawExpr × List RawExpr)) :=
+  match f, args with
+  | "abi.encodeWithSelector", s :: rest => pure (some (s, rest))
+  | "abi.encodeWithSignature", s :: rest =>
+    match s.bytesLit? with
+    | some bs => pure (some (.num (Keccak.selector (String.mk (bs.map Char.ofNat))), rest))
+    | none => pure (some (.binop .shr (.call "keccak256" [s]) (.num 224), rest))
+  | "abi.encodeCall", [g, t] => do
+    let rest := match t with
+      | .tuple as => as
+      | a => [a]
+    match g with
+    | .name g =>
+      match fnSelector? C g with
+      | some sel => pure (some (.num sel, rest))
+      | none =>
+        if let some ty := fnTyOf? C Γ g then
+          if let some (_, _, true) := fnParts? ty then
+            let a : RawExpr := .binop .div (.name g) (.num selShift)
+            return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
+        throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
+          function value"
+    | _ => throw "abi.encodeCall(f, …): f a function of the contract or a function value"
+  | _, _ => pure none
+
+/-- `keccak256(b)`, `sha256(b)`, `ripemd160(b)`: of a memory `bytes` (a
+storage one copied first), into a fresh `bytes32` (`Val.hash`), a
+`bytes20` for `ripemd160` (`ripemd160Bytes`, below `2^160`).
+`ecrecover(h, v, r, s)`: of the precompile's input, the four arguments' ABI
+words (`abi.encode`), an `address` (`ecrecoverBytes`). -/
+def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (abiMemBytes : RawExpr → ElabM (SProg C × String))
+    (elabStmtsP : List RawStmt → ElabM (SProg C)) (f : String) (args : List RawExpr) :
+    ElabM (SProg C × RawExpr) := do
+  let k := (HashKind.ofName? f).getD .keccak
+  if f == "ecrecover" then
+    let [_, _, _, _] := args | throw "ecrecover takes four arguments"
+    let (P, a) ← hoist (.call "abi.encode" args)
+    let (Q, b) ← abiMemBytes a
+    let y := toString (← freshCapture "se")
+    let R ← elabStmtsP [.decl (.named "address") y
+      (some (.field (.name b) (hashMember .ecrecover)))]
+    return (P ++ Q ++ R, .name y)
+  let [a] := args | throw s!"{f} takes one argument"
+  let (P, a) ← hoist a
+  let (Q, b) ← abiMemBytes a
+  let y := toString (← freshCapture "se")
+  let T := if f == "ripemd160" then "bytes20" else "bytes32"
+  let R ← elabStmtsP [.decl (.named T) y (some (.field (.name b) (hashMember k)))]
+  return (P ++ Q ++ R, .name y)
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -3294,15 +3578,8 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
     let builtin := (← read).funs.all (·.1 != f)
-    -- `keccak256(b)`: of a memory `bytes` (a storage one copied first), into
-    -- a fresh `bytes32` (`Val.keccak`)
-    if builtin && f == "keccak256" then
-      let [a] := args | throw "keccak256 takes one argument"
-      let (P, a) ← hoist a
-      let (Q, b) ← abiMemBytes a
-      let y := toString (← freshCapture "se")
-      let R ← elabStmtsP [.decl (.named "bytes32") y (some (.field (.name b) keccakMember))]
-      return (P ++ Q ++ R, .name y)
+    -- the hashing builtins (`hoistHashWith`)
+    if builtin && isHashName f then return ← hoistHashWith C hoist abiMemBytes elabStmtsP f args
     -- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
     -- `abi.encodeCall(g, (…))`: the selector's four bytes, then `abi.encode(…)`
     -- of the rest; a literal signature's selector and a function's folded as
@@ -3310,29 +3587,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     -- bytes of its `keccak256`
     if builtin && (f == "abi.encodeWithSelector" || f == "abi.encodeWithSignature" ||
         f == "abi.encodeCall") then
-      let some (sel, rest) ← (match f, args with
-        | "abi.encodeWithSelector", s :: rest => pure (some (s, rest))
-        | "abi.encodeWithSignature", s :: rest =>
-          match s.bytesLit? with
-          | some bs => pure (some (.num (Keccak.selector (String.mk (bs.map Char.ofNat))), rest))
-          | none => pure (some (.binop .shr (.call "keccak256" [s]) (.num 224), rest))
-        | "abi.encodeCall", [g, t] => do
-          let rest := match t with
-            | .tuple as => as
-            | a => [a]
-          match g with
-          | .name g =>
-            match fnSelector? C g with
-            | some sel => pure (some (.num sel, rest))
-            | none =>
-              if let some ty := fnTyOf? C (← ctx) g then
-                if let some (_, _, true) := fnParts? ty then
-                  let a : RawExpr := .binop .div (.name g) (.num selShift)
-                  return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
-              throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
-                function value"
-          | _ => throw "abi.encodeCall(f, …): f a function of the contract or a function value"
-        | _, _ => pure none : ElabM (Option (RawExpr × List RawExpr)))
+      let some (sel, rest) ← ElabM.lift (encodeSelector? C (← ctx) f args)
         | throw s!"{f}: its selector or signature first"
       -- a `bytes4` already marked (`bytesPure`) is marked once
       let sel := match sel with
@@ -3360,25 +3615,9 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let args := (args.zip args').map fun (a, a') => if a.bytesLit?.isSome then a else a'
       let (Q, e) ← abiEncode (f == "abi.encode") (f == "string.concat") args marks
       return (P ++ Q, e)
-    if builtin && f == "abi.decode" then
-      let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
-      let .name T := T | throw "abi.decode: one value type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
-      return ← hoist (.call abiDecodeName [b, .name T, .num 0, .num 1])
-    if builtin && f == abiDecodeName then
-      let [b, .name T, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
-      let (P, b) ← hoist b
-      let (Q, d) ← abiMemBytes b
-      let w := toString (← freshCapture "se")
-      let x := toString (← freshCapture "se")
-      -- a byte string: its offset in the head, its length and bytes in the tail
-      if dynBytesTy T then
-        let (R, x) ← abiDecodeBytes T d (32 * i) n
-        return (P ++ Q ++ R, .name x)
-      let some (reads, v) := abiDecodeAt T d w (.num (32 * i)) |
-        throw s!"abi.decode at {T}: only value types are decoded"
-      let R ← elabStmtsP ([.require (.binop .ge (.field (.name d) "length") (.num (32 * n)))] ++
-        reads ++ [.decl (.named T) x (some v)])
-      return (P ++ Q ++ R, .name x)
+    -- `abi.decode(b, (T))`, `#abiDecode(b, T, i, n)` (`abiDecodeWith`)
+    if builtin && (f == "abi.decode" || f == abiDecodeName) then
+      return ← abiDecodeWith C hoist abiMemBytes elabStmtsP abiDecodeBytes f args
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -3798,12 +4037,11 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
           if stable then pure ([], a) else do
           let x ← captureRef C "sp" (.alias R) a
           pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
-        | some .memory =>
+        | some .memory | some .calldata =>
           let rhs ← ElabM.lift (elabMRhs C Γ R a)
           if stable && (rhs matches .alias _) then pure ([], a) else do
           let x ← captureRef C "mv" (.mem R) a
           pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
-        | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
         | none => throw s!"{f}: reference parameter {n} needs a data location"
     P := P ++ Q
     prepared := prepared ++ [a]
@@ -4066,6 +4304,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let partners := recPartnersC C f
       pure (d, C.funs.take j ++ (C.funs.drop j).filter (partners.contains ·.1))
     else pure (d, funs.take i)
+  ElabM.lift (calldataCheck scope 8 d.calldataParams d.refRets d.body)
   -- a recursive function's frame is one context, `rs ++ ps`, at every call:
   -- a call of several returns returns to its targets (`CallRet.rets`)
   if recursive && d.rets.length > 1 && !targets then
@@ -4112,7 +4351,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         targs := ⟨_, targs.2.snocStorage R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .alias R) :: Γp
-      | some .memory =>
+      | some .memory | some .calldata =>
         ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
         let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
         let x ← pickName "mv" (·.params) pj
@@ -4120,7 +4359,6 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         targs := ⟨_, targs.2.snocMemory R x e⟩
         ρ := (n, toString x) :: ρ
         Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .mem R) :: Γp
-      | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
       | none => throw s!"{f}: reference parameter {n} needs a data location"
     pj := pj + 1
   let mut mret : Option (RefTy × Var × Bool) := none
@@ -4562,16 +4800,19 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   if let some (d, ts) := decode? then
     if (← read).funs.all (·.1 != "abi.decode") then
       let x := toString (← freshCapture "mv")
-      let n := ts.length
-      let one (i : Nat) : RawExpr := .call abiDecodeName [.name x, ts[i]!, .num i, .num n]
+      let (n, one) := abiDecodeHeads C x ts
       let rest : List RawStmt ← match s with
         | .tupleDecl vs _ => do
-          unless vs.length == n do throw s!"abi.decode gives {n} values, not {vs.length}"
+          unless vs.length == ts.length do
+            throw s!"abi.decode gives {ts.length} values, not {vs.length}"
           pure (vs.zipIdx.filterMap fun (v, i) => v.map fun (T, y) =>
             match T with
-            | .named t => if dynBytesTy t then .declMemory T y (some (one i)) else .decl T y (some (one i))
-            | _ => .decl T y (some (one i)))
+            | .named t =>
+              if dynBytesTy t || (C.structName? t).isSome then .declMemory T y (some (one i))
+              else .decl T y (some (one i))
+            | _ => .declMemory T y (some (one i)))
         | .tupleAssign ls _ => do
+          let n := ts.length
           unless ls.length == n do throw s!"abi.decode gives {n} values, not {ls.length}"
           pure (ls.zipIdx.filterMap fun (l, i) => l.map fun l => .assign l (one i))
         | _ => pure []
@@ -4973,6 +5214,10 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     pure [.of Γ (.require (← checkIn C Γ .bool c))]
   | .assert c => do
     let Γ ← nctx
+    -- in a self-call's callee, where a `catch` reads it: `Panic(0x01)`'s data
+    if (← read).selfFrame then
+      return [.of Γ (.ite (← checkIn C Γ .bool c) .nil
+        (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))]
     pure [.of Γ (.assert (← checkIn C Γ .bool c))]
   | .revert => do pure [.of (← nctx) .revert]
   -- revert data, where a `try` reads it: in a self-call's callee
@@ -5004,7 +5249,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       else throw "`checked { … }` and `ignoringOverflow { … }` do not nest in each other"
     | none =>
       let P ← withReader (fun sc => { sc with overflow := some o }) (elabBranch ss)
-      pure (P.flatMap (SStmt.withOF o))
+      let sf := (← read).selfFrame
+      pure (P.flatMap (SStmt.withOF o sf))
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`
     let funs := (← read).funs

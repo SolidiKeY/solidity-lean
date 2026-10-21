@@ -74,7 +74,7 @@ def Val.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Val C Γ p → Val C (t :: Γ) p
   | .len b hp => .len b.up hp
   | .mlen b hp => .mlen b.up hp
   | .modular op a b k => .modular op a.up b.up k.up
-  | .keccak b hp => .keccak b.up hp
+  | .hash k b hp => .hash k b.up hp
 
 /-- A quantified invariant clause under one more local. -/
 def LoopQ.up {Γ : Ctx} {t : LTy} (q : LoopQ C Γ) : LoopQ C (t :: Γ) := q.wk (.drop .refl)
@@ -130,7 +130,7 @@ theorem Val.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} :
     show Val.modular op a.up b.up k.up =
       Val.modular op (a.wk Solidity.up) (b.wk Solidity.up) (k.wk Solidity.up)
     rw [Val.up_eq a, Val.up_eq b, Val.up_eq k]
-  | .keccak b hp => congrArg (Val.keccak · hp) (MPath.up_eq b)
+  | .hash k b hp => congrArg (Val.hash k · hp) (MPath.up_eq b)
 
 end
 

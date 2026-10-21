@@ -348,6 +348,29 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     pure s!"function ({", ".intercalate ps}){ext}{ret}"
   | k => throw (.unsupported s!"type node `{k}`")
 
+
+/-- A type written where `abi.decode` reads one, `(uint[], S)`: an
+elementary type's name, `T[]` and `T[k]` of one (`IndexAccess`), a struct by
+its name in the table (`Identifier`); the elaborator decodes them
+(`abiDecodeWith`). -/
+partial def abiTyText (S : Structs) (t : Json) : Except Gap String := do
+  match J.kind t with
+  | "ElementaryTypeNameExpression" => J.str (← J.get t "typeName") "name"
+  | "IndexAccess" =>
+    let b ← abiTyText S (← J.get t "baseExpression")
+    match J.opt t "indexExpression" with
+    | none | some .null => pure s!"{b}[]"
+    | some k =>
+      match (J.str? k "value").bind (·.toNat?) with
+      | some n => pure s!"{b}[{n}]"
+      | none => throw (.unsupported "abi.decode to an array whose length is not a literal")
+  | "Identifier" =>
+    match (J.ref? t).bind fun id => lookupBy s!"#solc{id}" S with
+    | some (.ok m) => pure m
+    | _ => throw (.unsupported "abi.decode to a type other than a value type, an array of values \
+        or a struct")
+  | _ => throw (.unsupported "abi.decode to a type other than a value type, an array of values \
+      or a struct")
 /-- A type node as a `Ty`, to compare a struct's members with the table: a
 narrow type is its `uint`/`int` (its width is `narrowShape`'s). -/
 partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := do
@@ -1013,6 +1036,11 @@ partial def expr (j : Json) : PM String := do
   | "FunctionCall" => call j
   | "NewExpression" =>
     pure s!"new {← PM.lift (tyText (← get).structs (← PM.lift (J.get j "typeName")))}"
+  -- a calldata slice is a view of the caller's data, which the model would
+  -- copy into a fresh memory array, element by element: a loop, which the
+  -- runner proves only by an invariant (docs/semantic-gaps.md, "Bytes and
+  -- strings")
+  | "IndexRangeAccess" => unsupported "a calldata slice `b[i:j]` (a copy element by element, a loop)"
   | k => unsupported s!"the expression `{k}`"
 
 /-- An assignment's text, `l op r`; a nested assignment on the right
@@ -1046,10 +1074,7 @@ partial def call (j : Json) : PM String := do
         J.kind o == "Identifier" && J.str? o "name" == some "abi") then
       match args with
       | [b, ts] =>
-        let tyName (t : Json) : PM String := do
-          unless J.kind t == "ElementaryTypeNameExpression" do
-            unsupported "abi.decode to a type other than a value type"
-          PM.lift (J.str (← PM.lift (J.get t "typeName")) "name")
+        let tyName (t : Json) : PM String := do PM.lift (abiTyText (← get).structs t)
         let names ← match J.kind ts, J.arr? ts "components" with
           | "TupleExpression", some cs => cs.toList.mapM tyName
           | _, _ => do pure [← tyName ts]
@@ -1216,6 +1241,9 @@ def declText (d : Json) : PM String := do
   let loc ← match J.opt d "storageLocation" with
     | some (.str "storage") => pure " storage"
     | some (.str "memory") => pure " memory"
+    -- a calldata local: a memory one bound to calldata, read only
+    -- (`calldataCheck`)
+    | some (.str "calldata") => pure " memory"
     | _ => pure ""
   let name ← nameOf d
   if let some source := J.str? d "name" then
@@ -1302,7 +1330,11 @@ partial def stmt1 (j : Json) : PM (List String) := do
     let ds ← PM.lift (J.arr j "declarations")
     if ds.length ≥ 2 then
       -- `(uint a, , bool b) = v`
-      let ts ← ds.mapM fun d => if d == .null then pure "" else declText d
+      -- a component's location left out: `sol{}`'s tuple declaration writes
+      -- none, and the elaborator reads a reference component as memory
+      let ts ← ds.mapM fun d => if d == .null then pure "" else do
+        let t ← declText d
+        pure (t.replace " memory " " ")
       let some v := J.opt j "initialValue" | unsupported "a declaration of several variables, \
         with no value"
       return [s!"({", ".intercalate ts}) = {← tupleValue v}"]
@@ -2173,10 +2205,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
         let t ← J.opt p "typeName"
         -- `bytes`/`string`: a `bytes1[]`, each element below `2^8`
-        if J.kind t == "ElementaryTypeName" && J.str? p "storageLocation" == some "memory" &&
+        let mem := J.str? p "storageLocation" == some "memory" ||
+          J.str? p "storageLocation" == some "calldata"
+        if J.kind t == "ElementaryTypeName" && mem &&
             dynBytesTy ((J.str? t "name").getD "") then
           return (x, 0, 255, none)
-        guard (J.kind t == "ArrayTypeName" && J.str? p "storageLocation" == some "memory")
+        guard (J.kind t == "ArrayTypeName" && mem)
         let b ← J.opt t "baseType"
         let len : Option Nat := (J.opt t "length").bind fun l => (J.str? l "value").bind (·.toNat?)
         guard ((J.opt t "length").isNone || len.isSome)

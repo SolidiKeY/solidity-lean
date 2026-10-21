@@ -157,7 +157,7 @@ def Op2.agreesB {a b s : Srt} : Op2 C a b s → Bool
 /-- A memory read, which the Theory reads by the interpreter whatever its
 operands (`Op2.denote`). -/
 def Op2.memReadB {a b s : Srt} : Op2 C a b s → Bool
-  | .read | .mlen | .keccak => true
+  | .read | .mlen | .hash _ => true
   | _ => false
 
 /-- The conditional. -/
@@ -266,7 +266,7 @@ theorem Tm.agreeB_sound {s : Srt} (t : Tm C Γ s) : t.agreeB = true → Tm.Agree
       exact Tm.denote_of_total (Tm.totB_total h)
     | read => exact fun _ => rfl
     | mlen => exact fun _ => rfl
-    | keccak => exact fun _ => rfl
+    | hash _ => exact fun _ => rfl
     | _ => first | trivial | simp only [Tm.agreeB, Op2.agreesB, Op2.memReadB, Tm.totB,
         Op2.isFind, Bool.false_and, Bool.false_or, Bool.false_eq_true] at h
   | app3 o c x y ihc ihx ihy =>

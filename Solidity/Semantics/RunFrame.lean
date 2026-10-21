@@ -341,6 +341,21 @@ theorem CallRet.leaveT_frame {Γ' rs : Ctx} (ret : CallRet Γ rs Γ') (hm : ret.
 
 end Ops
 
+/-- A `try` clause run with `ρ` bound over a state `τ` in `σ`'s frame (the
+caller's, or one a callback left), its locals popped: in `σ`'s frame, writing
+what the clause writes of the caller's locals. -/
+theorem TGFrame.clause {μ : Mutability} {Γ ρ Γ' : Ctx} {σ τ : State C Γ} (hτ : TGFrame μ σ τ)
+    (d : Nat) {W : List (LTy × Nat)} (r : TEnv C τ.H ρ) (hP : Ext (ρ ++ Γ) Γ')
+    {o : Out C τ.H Γ'}
+    (h : TGFrame μ (τ.withEnv (TEnv.append ρ r τ.env)) o.st ∧
+      TLocAgree (d + (Ext.append Γ ρ).depth) W (TEnv.append ρ r τ.env) (TEnv.drop hP o.st.env)) :
+    TGFrame μ σ (o.st.drop ((Ext.append Γ ρ).trans hP)) ∧
+      TLocAgree d W τ.env (TEnv.drop ((Ext.append Γ ρ).trans hP) o.st.env) := by
+  refine ⟨((hτ.trans (TGFrame.env τ _)).trans h.1).withEnv _, ?_⟩
+  have := TLocAgree.drop (Ext.append Γ ρ) h.2
+  rw [TEnv.drop_append] at this
+  rwa [TEnv.drop_trans]
+
 /-! ## A program within its frame -/
 
 section Progs
@@ -529,7 +544,84 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
   | _, _, .declMem .., hw, _, _, _, _ | _, _, .rebindMem .., hw, _, _, _, _
   | _, _, .assignFromMem .., hw, _, _, _, _ | _, _, .assignMem .., hw, _, _, _, _
   | _, _, .deleteMem .., hw, _, _, _, _ | _, _, .assignNew .., hw, _, _, _, _
-  | _, _, .tryCall .., hw, _, _, _, _ | _, _, .catchData .., hw, _, _, _, _ => by cases hw
+  | _, _, .catchData .., hw, _, _, _, _ => by cases hw
+  | Γ, _, .tryCall (ρ := ρ) (κ := κ) call rets ok err code pnc other sargs sbody self,
+      hw, d, σ, o, h => by
+    have hw' : ((μ == .nonpayable) && sargs.readsIn μ && Prog.within μ sbody &&
+        Prog.within μ ok && Prog.within μ err && Prog.within μ pnc &&
+        Prog.within μ other) = true := hw
+    simp only [Bool.and_eq_true] at hw'
+    obtain ⟨⟨⟨⟨⟨⟨-, -⟩, hsb⟩, hok⟩, herr⟩, hpnc⟩, hoth⟩ := hw'
+    change TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR
+        other.ext other.runR sargs sbody.ext sbody.runR self σ = .ok o at h
+    -- a clause run from `σ` with `ρ'` bound, its locals popped
+    have bound : ∀ {ρ' Γ' : Ctx} (P : Prog C (ρ' ++ Γ) Γ') (r : TEnv C σ.H ρ')
+        {o' : Out C σ.H Γ'},
+        TGFrame μ (σ.withEnv (TEnv.append ρ' r σ.env)) o'.st ∧
+          TLocAgree (d + (Ext.append Γ ρ').depth) (Prog.writesAt (d + (Ext.append Γ ρ').depth) P)
+            (TEnv.append ρ' r σ.env) (TEnv.drop P.ext o'.st.env) →
+        TGFrame μ σ (o'.st.drop ((Ext.append Γ ρ').trans P.ext)) ∧
+          TLocAgree d (Prog.writesAt (d + (Ext.append Γ ρ').depth) P) σ.env
+            (TEnv.drop ((Ext.append Γ ρ').trans P.ext) o'.st.env) :=
+      fun {_ _} P r {_} h => TGFrame.clause (TGFrame.refl σ) d r P.ext h
+    have plain : ∀ {Γ' : Ctx} (P : Prog C Γ Γ') {o' : Out C σ.H Γ'},
+        TGFrame μ σ o'.st ∧
+          TLocAgree d (Prog.writesAt d P) σ.env (TEnv.drop P.ext o'.st.env) →
+        TGFrame μ σ (o'.st.drop P.ext) ∧
+          TLocAgree d (Prog.writesAt d P) σ.env (TEnv.drop P.ext o'.st.env) :=
+      by intro Γ' P o' h; exact ⟨h.1.withEnv _, h.2⟩
+    unfold TRun.tryCall at h
+    split at h
+    · cases h
+    split at h
+    · split at h
+      · rename_i o₁ hc
+        obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        rw [TRun.call_eq] at hc
+        obtain ⟨a, _, hc⟩ := tbind_ok_inv hc
+        unfold TRun.callFrom at hc
+        obtain ⟨o₂, hb, hc⟩ := tbind_ok_inv hc
+        cases hc
+        have he := CallRet.enterT_frame (μ := μ) (CallRet.rets (Γ := Γ) rets) rfl
+          (σ.withEnv a)
+        obtain ⟨hg, -⟩ := Prog.run_frame sbody hsb 0 hb
+        have hg' := ((TGFrame.env σ a).trans he).trans hg
+        have hl := CallRet.leaveT_frame (CallRet.rets (Γ := Γ) rets) rfl
+          (((CallRet.rets rets).enterT (σ.withEnv a)).ext.trans o₂.ext) hg'.H σ.env
+          (TEnv.take ρ (TEnv.drop sbody.ext o₂.st.env)) d
+        obtain ⟨hg₂, ha₂⟩ := Prog.run_frame ok hok (d + (Ext.append Γ ρ).depth) h'
+        refine ⟨((hg'.withEnv _).trans hg₂).withEnv _, ?_⟩
+        show TLocAgree d (_ ++ _ ++ _ ++ _) σ.env (TEnv.drop ((Ext.append Γ ρ).trans ok.ext) _)
+        rw [TEnv.drop_trans]
+        have hl' : TLocAgree d (Prog.writesAt (d + (Ext.append Γ ρ).depth) ok) σ.env
+            (TEnv.drop (Ext.append Γ ρ) (CallRet.leaveT (TEnv.wk _ Γ σ.env) (CallRet.rets rets)
+              (TEnv.take ρ (TEnv.drop sbody.ext o₂.st.env)))) :=
+          TLocAgree.mono (W := []) (fun _ h => absurd h List.not_mem_nil) hl
+        exact (hl'.trans (TLocAgree.drop (Ext.append Γ ρ) ha₂)).left.left.left
+      · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(plain other (Prog.run_frame other hoth d h')).1, (plain other (Prog.run_frame other hoth d h')).2.right⟩
+      · split at h
+        · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+          exact ⟨(plain err (Prog.run_frame err herr d h')).1, (plain err (Prog.run_frame err herr d h')).2.right.left.left⟩
+        · split at h
+          · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+            exact ⟨(bound pnc _ (Prog.run_frame pnc hpnc _ h')).1, (bound pnc _ (Prog.run_frame pnc hpnc _ h')).2.right.left⟩
+          · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+            exact ⟨(plain other (Prog.run_frame other hoth d h')).1, (plain other (Prog.run_frame other hoth d h')).2.right⟩
+      · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(bound pnc _ (Prog.run_frame pnc hpnc _ h')).1, (bound pnc _ (Prog.run_frame pnc hpnc _ h')).2.right.left⟩
+      · cases h
+    · split at h
+      · cases h
+      · obtain ⟨⟨r, _⟩, _, h⟩ := tbind_ok_inv h
+        obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(bound ok r (Prog.run_frame ok hok _ h')).1, (bound ok r (Prog.run_frame ok hok _ h')).2.left.left.left⟩
+      · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(plain err (Prog.run_frame err herr d h')).1, (plain err (Prog.run_frame err herr d h')).2.right.left.left⟩
+      · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(bound pnc _ (Prog.run_frame pnc hpnc _ h')).1, (bound pnc _ (Prog.run_frame pnc hpnc _ h')).2.right.left⟩
+      · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+        exact ⟨(plain other (Prog.run_frame other hoth d h')).1, (plain other (Prog.run_frame other hoth d h')).2.right⟩
   | _, _, .revertData ps, _, _, σ, o, h => by
     change TRun.revertData ps σ = .ok o at h
     unfold TRun.revertData at h

@@ -94,7 +94,8 @@ inductive Op2Code where
   | pushSlot (E : Ty) | pop (E : Ty) | shrink (E : Ty) | extend (E : Ty) | sfind (T : Ty)
   | copyMem (R : RefTy) | iread (R : RefTy) | copy (R : RefTy) | mat (R : RefTy) (E : Ty)
   | copySt (T : Ty) | findIn (s : Name) (p : PrimTy) | delAtIn (s : Name) (T : Ty)
-  | sfindIn (s : Name) (T : Ty) | zbin (op : BinOp) | zcmp (op : BinOp) | keccak (R : RefTy)
+  | sfindIn (s : Name) (T : Ty) | zbin (op : BinOp) | zcmp (op : BinOp)
+  | hash (k : HashKind) (R : RefTy)
   deriving DecidableEq
 
 /-- A ternary symbol's constructor and types, its proofs dropped. -/
@@ -151,7 +152,7 @@ def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code
   | @Op2.sfindIn _ s T => .sfindIn s T
   | .zbin op _ => .zbin op
   | .zcmp op _ => .zcmp op
-  | @Op2.keccak _ R => .keccak R
+  | @Op2.hash _ R k => .hash k R
 
 /-- A ternary symbol's code. -/
 def Op3.code {a b c s : Srt} : Op3 C a b c s → Op3Code
