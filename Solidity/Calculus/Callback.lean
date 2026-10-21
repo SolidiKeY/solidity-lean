@@ -20,7 +20,8 @@ their goals labelled by their no-callback twins' labels.
 `ProvesC I pay H φ` is the callback judgement on scoped sequents:
 the ordinary rules on a statement that runs no other and hands control to no
 callee that calls back (`Stmt.forksIn pay`: a `try` and a value call always,
-a `transfer` and a `send` when `pay` is set, `docs/options.md`), a split, the
+a `transfer` and a `send` when `pay` is set, a call where its body does,
+`docs/options.md`), a split, the
 callback taclets with solkey's goals ("invariant on exit", the rest resumed
 under `{havoc}` with the invariant assumed), and the plain calculus
 (`Proves`) on a goal where nothing calls back (`Fml.callsBack pay`); and the

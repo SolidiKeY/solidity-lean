@@ -183,15 +183,47 @@ its unwinding bound ends there or, its body calling back, diverges
 (`holdsC_loopExit`).  So a bounded loop whose body calls back is proved
 by unwinding (`Examples/Tactics/CallbackStrategy.lean`, `pingTwice`).
 
+**Calls** fork where their body does (`Stmt.forksIn`, `Stmt.forks`): a
+call whose callee calls nobody back runs as `Stmt.run` (`ExecS.det`), and
+its callback runs are still the body's in its frame (`ExecS.call_cases`).
+One whose callee calls back is inlined under callbacks as
+`internalCallExpand` inlines it, whatever it returns: none
+(`ProvesC.callNone`), a tuple's targets (`ProvesC.callRets`), one value
+(`ProvesC.callVal`, `y = f(x)`: the result assigned past the body,
+`Prog.callResult`), a storage reference (`ProvesC.callStorage`) or a memory
+one (`ProvesC.callMem`), each sound by its callback runs
+(`ExecS.callVal_inline`, `callStorage_inline`, `callMem_inline`).  A callee
+read by its contract under callbacks is a recursive one's
+(`ProvesC.recContract`); an internal call's contract (`FunContractC`) is not
+used by the walk, which inlines.
+
+**A loop by its invariant** (`ProvesC.invBox`, `whileInvariantBox`'s goals,
+under the box): the body's goal is read over its callback runs, from every
+state the body's frame allows (`{anon(xs)}`, `{havoc}`): a body that calls
+back pays, so its frame has `hv`, and a callback replaces only the storage
+and the ledger, which that frame may write (`ExecP.frame`,
+`Semantics/CallbackFrame.lean`).  The invariant is the loop's own: what the
+callee may change it does not keep unless it restates the contract's
+invariant (`Examples/Tactics/CallbackStrategy.lean`, `pingNInv`).  Sound by
+`holdsC_invBox`, by induction over the iterations (`ExecS.loop_box`).  A
+body with a `try` has no frame (`Stmt.within`), with callbacks or without
+(`whileClose`).
+
+**No diamond over a loop that calls back**: its callback runs include a
+divergence (`ExecS.loopDiverge`, an over-approximation: the relation is
+inductive and does not tell a loop that ends from one that does not), so a
+diamond over it never holds (`holdsC_diamond_loop`), at its unwinding bound
+or by an invariant and a variant (`decreases`) alike.  This is correct, not
+a gap of the rules: no diamond rule over such a loop could be sound.  A
+variant would be read only by a divergence clause that asks for an
+unbounded chain of iterations (or a fuel-indexed run), a change to
+`ExecS` and to every lemma by cases on it.
+
 **Not covered** (while something in the sequent calls back; where nothing
-does, `plain` hands the goal to `Proves`, which covers all of them): a loop
-by its invariant (`Proves.inv` has no `ProvesC` counterpart), a loop at its
-unwinding bound under the diamond (a loop whose body calls back may diverge,
-`ExecS.loopDiverge`), and an internal call that returns one value (`y =
-f(x)`: `Stmt.forksIn` counts every call as forking, and O4's call rules take
-only `CallRet.none` and `.rets`; its `localValueDeclInitDrop` is
-`ProvesC.bind`, whose assignment is the call itself, not a capture).  These
-stay leaves.
+does, `plain` hands the goal to `Proves`, which covers all of them): a
+diamond over a loop whose body calls back (above), and a recursive call
+returning a reference (`CallRet.isValues`; `docs/kernel-port.md`,
+"Recursion").  These stay leaves.
 
 ## O4. Diamonds, calls, and the invariant a specification declares
 
