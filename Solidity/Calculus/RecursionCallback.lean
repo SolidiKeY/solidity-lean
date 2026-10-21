@@ -432,6 +432,216 @@ theorem FunContractC.ofHoldsC {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps
 
 end ContractC
 
+/-! ## The rule, with callbacks
+
+`holds_callContract`'s argument over `holdsC`: "pre" and "post" read with
+callbacks, the call's runs by the contract (`FunContractC`) and their frame
+(`ExecP.frame`), the rest from what "post" says past the call. -/
+
+section RuleC
+
+variable {I : Fml C []} {pay : Bool} {Γ ps rs Γ' Γf Γ₂ Γ₀ : Ctx} {m : Modality}
+
+/-- A first-order formula weakened hands control to nobody. -/
+theorem Fml.callsBack_wkFO : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (φ : Fml C Γ) →
+    {φ' : Fml C Δ} → φ.wkFO h = some φ' → φ'.callsBack pay = false
+  | _, _, _, .tt, _, e => by cases e; rfl
+  | _, _, _, .eq _ _, _, e => by cases e; rfl
+  | _, _, _, .wellFormed _, _, e => by cases e; rfl
+  | _, _, h, .not φ, _, e => by
+    cases hφ : φ.wkFO h with
+    | none => simp only [Fml.wkFO_not, hφ, Option.map_none, reduceCtorEq] at e
+    | some φ' =>
+      simp only [Fml.wkFO_not, hφ, Option.map_some, Option.some.injEq] at e
+      cases e
+      have := Fml.callsBack_wkFO h φ hφ
+      exact this
+  | _, _, h, .and φ ψ, _, e => by
+    cases hφ : φ.wkFO h with
+    | none => simp only [Fml.wkFO_and, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
+    | some φ' =>
+      cases hψ : ψ.wkFO h with
+      | none =>
+        simp only [Fml.wkFO_and, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
+          reduceCtorEq] at e
+      | some ψ' =>
+        simp only [Fml.wkFO_and, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
+          Option.some.injEq] at e
+        cases e
+        show (φ'.callsBack pay || ψ'.callsBack pay) = false
+        rw [Fml.callsBack_wkFO h φ hφ, Fml.callsBack_wkFO h ψ hψ]; rfl
+  | _, _, h, .imp φ ψ, _, e => by
+    cases hφ : φ.wkFO h with
+    | none => simp only [Fml.wkFO_imp, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
+    | some φ' =>
+      cases hψ : ψ.wkFO h with
+      | none =>
+        simp only [Fml.wkFO_imp, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
+          reduceCtorEq] at e
+      | some ψ' =>
+        simp only [Fml.wkFO_imp, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
+          Option.some.injEq] at e
+        cases e
+        show (φ'.callsBack pay || ψ'.callsBack pay) = false
+        rw [Fml.callsBack_wkFO h φ hφ, Fml.callsBack_wkFO h ψ hψ]; rfl
+  | _, _, h, .all x p φ, _, e => by
+    cases hφ : φ.wkFO h.keep with
+    | none => simp only [Fml.wkFO_all, hφ, Option.map_none, reduceCtorEq] at e
+    | some φ' =>
+      simp only [Fml.wkFO_all, hφ, Option.map_some, Option.some.injEq] at e
+      cases e
+      have := Fml.callsBack_wkFO h.keep φ hφ
+      exact this
+  | _, _, _, .upd .., _, e | _, _, _, .modal .., _, e | _, _, _, .havoc _, _, e
+  | _, _, _, .bind .., _, e | _, _, _, .anon .., _, e => nomatch e
+
+theorem Fml.callsBack_wkD {Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) :
+    (φ.wkD h).callsBack pay = false := by
+  unfold Fml.wkD
+  cases e : φ.wkFO h with
+  | none => rfl
+  | some φ' => exact Fml.callsBack_wkFO h φ e
+
+/-- What a weakened `ensures` says, with callbacks, it says on the thinned
+state. -/
+theorem holdsC_wkD {Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) (σ : State C Δ)
+    (hφ : holds (σ.thin h) φ) : holdsC I pay σ (φ.wkD h) :=
+  (holdsC_iff_holds _ (Fml.callsBack_wkD h φ) σ).2 (holds_wkD h φ σ hφ)
+
+/-- The arguments read, then `X` on the parameters declared, with callbacks. -/
+theorem holdsC_declsThen {args : Args C Γ ps} {X : Fml C (ps ++ Γ)} {σ : State C Γ}
+    (h : holdsC I pay σ (.modal m (args.declsThen .nil) .nil X)) :
+    (∀ e, args.evalT σ = .error e → m.onTHalt e ∧ e ≠ .panic) ∧
+      ∀ a, args.evalT σ = .ok a → holdsC I pay (σ.withEnv (TEnv.append ps a σ.env)) X := by
+  refine ⟨fun e he => h _ (Args.execP_declsThen_halt args _ σ he), fun a ha => ?_⟩
+  exact h _ (Args.execP_declsThen args _ σ a ha .nil) _ .nil
+
+/-- "pre", with callbacks: the arguments read, `requires` of the
+parameters. -/
+theorem holdsC_callPre {args : Args C Γ ps} {req : Fml C ps} {σ : State C Γ}
+    (h : holdsC I pay σ (Fml.callPre args req m)) :
+    (∀ e, args.evalT σ = .error e → m.onTHalt e ∧ e ≠ .panic) ∧
+      ∀ a, args.evalT σ = .ok a → holdsC I pay (σ.withEnv a) req := by
+  refine ⟨fun e he => h _ (Args.execP_declsThen_halt args _ σ he), fun a ha => ?_⟩
+  have h1 : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).thin (Thin.atop ps Γ)) req :=
+    h _ (Args.execP_declsThen args _ σ a ha .nil) _ (.drop .nil)
+  rwa [show (σ.withEnv (TEnv.append ps a σ.env)).thin (Thin.atop ps Γ) = σ.withEnv a by
+    simp only [State.thin, State.withEnv, TEnv.thin_atop_append]] at h1
+
+/-- "post", opened with callbacks. -/
+theorem holdsC_callPost {μ : Mutability} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
+    {ens : Fml C (rs ++ (Olds ++ ps))} {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
+    {σ : State C Γ} (h : holdsC I pay σ (Fml.callPost μ args ret ens ω κ φ m))
+    (a : TEnv C σ.H ps) (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger)
+    (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net) :
+    holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt)
+      (Fml.callResult ret ens ω κ φ m) := by
+  have hX := holdsC_snapOld ((holdsC_declsThen h).2 a ha)
+  cases μ with
+  | nonpayable => exact hX st nt
+  | pure =>
+    obtain ⟨rfl, rfl⟩ := hk (by decide)
+    exact hX
+  | view =>
+    obtain ⟨rfl, rfl⟩ := hk (by decide)
+    exact hX
+
+/-- Frames run from a state equal to another, of the same heap. -/
+theorem ExecF.transport' {J : StateInv C} {Δ : Ctx} {κ : Frames C Δ Γ₀} {X Y : State C Δ}
+    (e : X = Y) (hH : Y.H = X.H) {u : COut C X.H Γ₀} (h : ExecF J X κ u) :
+    ExecF J Y κ (hH ▸ u) := by
+  subst e
+  exact h
+
+/-- **A recursive call by its contract, with callbacks**, up to what it
+leaves (`holds_call_of`): the arguments read, the body entered and ended
+where `ensures` holds and within its frame, the rest after the call leaves. -/
+theorem holdsC_callRec_of {μ : Mutability} {f : Name} {d : Nat} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)} {ω : Prog C Γ' Γ₂}
+    {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
+    (hc : FunContractC I pay ret (body ()) req ens m) (hμ : Prog.within μ (body ()) = true)
+    (hreq : req.callsBack pay = false) {σ : State C Γ}
+    (hpre : holdsC I pay σ (Fml.callPre args req m))
+    (hpost : holdsC I pay σ (Fml.callPost μ args ret ens ω κ φ m))
+    (k : ∀ (a : TEnv C σ.H ps), args.evalT σ = .ok a →
+      ∀ (o : Out C (ret.enterT (σ.withEnv a)).st.H (rs ++ ps)),
+      holds (State.withOlds rs (σ.withEnv a).net (σ.withEnv a).storage
+        (State.drop (body ()).ext o.st)) ens →
+      TGFrame μ (ret.enterT (σ.withEnv a)).st o.st →
+      TLocAgree 0 (Prog.writesAt 0 (body ())) (ret.enterT (σ.withEnv a)).st.env
+        (TEnv.drop (body ()).ext o.st.env) →
+      holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+        (Fml.callResult ret ens ω κ φ m) →
+      (COut.ok (TRun.callLeave ret (body ()).ext σ (ret.enterT (σ.withEnv a)) o)).thenF
+        (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ)) :
+    holdsC I pay σ (.modal m (.cons (.callRec f d args ret body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  have he' : ExecS (I.stateInv pay) σ (.call f args ret (body ())) o₁ := by
+    cases he with
+    | det h => exact nomatch h
+    | callRec h => exact h
+  rcases ExecS.call_inv he' with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact (holdsC_callPre hpre).1 e ha
+  · have hr := (holdsC_iff_holds req hreq _).1 ((holdsC_callPre hpre).2 a ha)
+    have hct := hc (σ.withEnv a) hr o' hp
+    have hfr := ExecP.frame hp hμ 0
+    cases o' with
+    | ok x =>
+      obtain ⟨hg, hag⟩ := hfr x rfl
+      refine k a ha x hct hg hag (holdsC_callPost hpost a ha x.st.storage x.st.net fun hn => ?_)
+      have hk := hg.keeps hn
+      cases ret <;> exact hk
+    | halt e => exact hct
+    | violated => exact hct.elim
+
+/-- The continuation of a call with no result, with callbacks
+(`holds_callNone`). -/
+theorem holdsC_callNone_k {μ : Mutability} {args : Args C Γ ps} {body : Prog C ([] ++ ps) Γf}
+    {ω : Prog C Γ Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {ens : Fml C ([] ++ (Olds ++ ps))}
+    (hw : writesRets 0 body = true) {σ : State C Γ} (a : TEnv C σ.H ps)
+    (o : Out C ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st.H Γf)
+    (hens : holds (State.withOlds [] (σ.withEnv a).net (σ.withEnv a).storage
+      (State.drop body.ext o.st)) ens)
+    (hg : TGFrame μ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st o.st)
+    (hag : TLocAgree 0 (Prog.writesAt 0 body) ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st.env
+      (TEnv.drop body.ext o.st.env))
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+      (Fml.callResult .none ens ω κ φ m)) :
+    (COut.ok (TRun.callLeave .none body.ext σ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)) o)).thenF
+      (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ) := by
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  have hps : TEnv.drop body.ext env = a :=
+    TLocAgree.drop_eq (ρ := []) hag hw
+  have hens' : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net)
+      (ens.wkD (Thin.atop (Olds ++ ps) Γ)) := by
+    apply holdsC_wkD
+    have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds []
+        σ.net σ.storage = State.thin (Thin.atop (Olds ++ ps) Γ)
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      show TEnv.olds σ.net σ.storage (TEnv.drop body.ext env) =
+        TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env))
+      rw [TEnv.thin_atop_append, hps]
+    exact hst ▸ hens
+  have hM := hX hens'
+  have hT : State.drop (Ext.append Γ (Olds ++ ps))
+      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) =
+      (TRun.callLeave .none body.ext σ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a))
+        ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
+    simp only [TRun.callLeave]
+    rw [TEnv.wk_self]
+    exact State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+      htx.symm
+  intro o'' hf
+  exact hM _ .nil o'' (.pop (ExecF.transport' hT.symm rfl hf))
+
+end RuleC
+
 namespace RecursionCallback
 
 open Lean Elab Tactic Meta
