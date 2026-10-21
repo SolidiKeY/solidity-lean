@@ -158,15 +158,40 @@ stops at the call, which `rec_auto_c` proves by `ProvesC.recValid` where
 nothing calls back, else by a contract over the callback runs
 (`ProvesC.recContract`; `docs/kernel-port.md`, "Recursion").
 
+**Captures whose rest calls back** (`ProvesC.capture`,
+`Semantics/CallbackCapture.lean`, `Calculus/CapturePayments.lean`).
+`ProvesC.unfold` and `ProvesC.bind` ask that neither the statement nor the
+program it unfolds to call back: their soundness reads both as their
+deterministic runs.  That is too strict for a capture, whose captured part
+declares a value and hands control to nobody: `if (nse) S` with a branch
+that calls back, a loop unwound whose body calls back, a payment whose
+receiver or amount is not simple.  `ProvesC.capture` puts the side
+condition on the capture alone: `Stmt.CapturesAs pay m s P e`, every run of
+`s` with callbacks is one of the captured program `P`'s, its fresh locals
+popped, or a halt `m` accepts that is no panic.  One lemma per shape proves
+it, from the forward weakening of callback runs (`Prog.exec_wk`): `.ite`
+(`ifElseUnfold`), `.loop` (`whileUnwind`, a body that calls back: the loop
+may diverge, so under the box only), `.transferAmt`, `.transferRecv`,
+`.sendAmt`, `.sendRecv` (`transfer_unfold_…`, `send_unfold_…`, where the
+payment calls back: `pay`, or a value call's `full`).  The walk tries
+`ProvesC.capture` after `ProvesC.unfold` (`CallbackWalk.captureLemmas`).
+A `require`'s, an `assert`'s and a ternary's captures leave a statement
+that calls nobody, so `ProvesC.unfold` already took them.
+
+`ProvesC.loopExit` is `loopExit` with callbacks, under the box: a loop at
+its unwinding bound ends there or, its body calling back, diverges
+(`holdsC_loopExit`).  So a bounded loop whose body calls back is proved
+by unwinding (`Examples/Tactics/CallbackStrategy.lean`, `pingTwice`).
+
 **Not covered** (while something in the sequent calls back; where nothing
 does, `plain` hands the goal to `Proves`, which covers all of them): a loop
-by its invariant or at its unwinding bound (`Proves.inv`, `Proves.check`
-have no `ProvesC` counterpart), a loop unwound whose body calls back, an
-internal call that returns one value (`y = f(x)`: `Stmt.forksIn` counts
-every call as forking, and O4's call rules take only `CallRet.none` and
-`.rets`), and a transfer or a send whose operands are not simple (their
-capture rules fire only where the statement does not call back).  These stay
-leaves.
+by its invariant (`Proves.inv` has no `ProvesC` counterpart), a loop at its
+unwinding bound under the diamond (a loop whose body calls back may diverge,
+`ExecS.loopDiverge`), and an internal call that returns one value (`y =
+f(x)`: `Stmt.forksIn` counts every call as forking, and O4's call rules take
+only `CallRet.none` and `.rets`; its `localValueDeclInitDrop` is
+`ProvesC.bind`, whose assignment is the call itself, not a capture).  These
+stay leaves.
 
 ## O4. Diamonds, calls, and the invariant a specification declares
 

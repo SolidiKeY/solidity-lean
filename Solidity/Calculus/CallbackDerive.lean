@@ -24,16 +24,19 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
   its body inlined; `assertSimple` (`ProvesC.assert`);
 * any other statement: the rule `Stmt.step` fires (`ProofTree.ruleAt?`), as
   `Proves` takes it, when the statement hands control to nobody
-  (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`).
+  (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`);
+  a capture whose rest calls back (`ifElseUnfold`, `whileUnwind`, a
+  payment's operand) by `ProvesC.capture`, its side condition one of
+  `captureLemmas`; a loop at its bound under the box (`ProvesC.loopExit`).
 
 What is left is a leaf: `sol_prove` closes a `Proves` leaf by `sol_leaf`
 and `sol_close`, the invariant assumed opened first where that is needed
 (`Proves.openInv`), and leaves the rest as goals.  While something in the
-sequent calls back, three shapes have no rule of `ProvesC` and stay leaves:
-a loop by its invariant or at its unwinding bound (`Proves.inv`,
-`Proves.check` have no counterpart), a loop unwound whose body calls back,
-and an internal call that returns one value (`y = f(x)`) or a memory or
-storage one (`Stmt.forksIn` counts every call as forking).
+sequent calls back, these shapes have no rule of `ProvesC` and stay leaves:
+a loop by its invariant (`Proves.inv` has no counterpart), a loop at its
+bound under the diamond, and an internal call that returns one value
+(`y = f(x)`) or a memory or storage one (`Stmt.forksIn` counts every call
+as forking).
 
 Nothing here is trusted: every step is an `apply` the kernel checks.
 -/
