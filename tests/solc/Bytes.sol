@@ -96,4 +96,16 @@ contract Bytes {
         Rec memory r = Rec("k", "ab", "xyz", "s");
         assert(r.tag == "ab" && r.b.length == 3 && r.b[2] == "z");
     }
+    // a storage string copied to memory: the copy's length is the stored one
+    /// @custom:key box
+    function copyLength() public {
+        name = "xyz";
+        string memory c = name;
+        assert(bytes(c).length == 3 && bytes(c)[2] == "z");
+    }
+    /// @custom:key box
+    function copyLengthSymbolic() public view {
+        string memory c = name;
+        assert(bytes(c).length == bytes(name).length);
+    }
 }

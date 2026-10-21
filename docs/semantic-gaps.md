@@ -726,9 +726,12 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   as `(w >> 8k) % 256`; `TRes.DataS` (`Calculus/DataIn.lean`) would read
   "matches a pattern of `S`" instead of "is in `S`", and
   `Premise.sound_catchDataBox` instantiate the binders with the run's words.
-  Not done in lane `open-k2`; a `catch Error(string memory r)` of such a
-  callee is unaffected (its `Error` datum is literal, the custom one does
-  not decode as `Error`).
+  Not done in lane `open-k2`.  The same goal is `false` for every named
+  clause of such a callee, `catch Error(string memory r)` too:
+  `Stmt.revertDatas` reads the whole body's data as unknown as soon as one
+  datum is not literal, although a datum whose literal selector is not
+  `Error`'s cannot reach that clause (dropping it would need the decoding
+  argument in `catchBytes_self_mem`).
 - `Panic` data: a self-call's panic binds the transaction's code (`1`
   without one) as before; the model panics on `assert` (`0x01`) and on an
   overflow in `checked { … }` (`0x11` in solc, an assertion here) only, the
