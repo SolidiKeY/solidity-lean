@@ -117,6 +117,9 @@ theorem equality : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = double; 
 /-- error: Solidity elaboration failed: h(…): a call through an external function value is not modelled (docs/semantic-gaps.md, "Function types") -/
 #guard_msgs in #check sol{ function (uint) external returns (uint) h; uint y = h(1); }
 
+/-- error: Solidity elaboration failed: h(…): a function type with a uint[] parameter or return is not modelled (docs/semantic-gaps.md, "Function types") -/
+#guard_msgs in #check sol{ function (uint[]) pure h; h(1); }
+
 /-- A function declared after a caller that calls through a value of its
 type, and named as a value in the contract, is refused: the caller's
 dispatch could not inline it. -/

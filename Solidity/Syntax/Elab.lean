@@ -2988,12 +2988,17 @@ as a value in the contract; one that is not cannot reach here (`fnTag`).
 With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
 partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
-  let some (ps, _, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
+  let some (ps, rs, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
   if ext then
     throw s!"{h}(…): a call through an external function value is not modelled \
       (docs/semantic-gaps.md, \"Function types\")"
   unless ps.length == args.length do
     throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  -- a reference parameter or return: no function's signature is spelled so
+  -- (`FunDecl.sigTy?`), so the dispatch would list none
+  if let some c := (ps ++ rs).find? fun c => (fnCompTy? C c).isNone then
+    throw s!"{h}(…): a function type with a {c} parameter or return is not modelled \
+      (docs/semantic-gaps.md, \"Function types\")"
   let scope := (← read).funs
   let taken := fnTaken C
   let mut cands : List (String × Nat) := []
