@@ -175,6 +175,19 @@ theorem deleteString : ⊨ dl[Texts]{ ⟨ name = "x"; delete name; uint l = byte
   sol_symex
   sol_decide
 
+/-- A stored `string` copied to memory: the copy has its stored length
+(`lenAtN`, `LTm.sfindLen?`). -/
+theorem copyLength : ⊨ dl[Texts]{ ⟨ name = "xyz"; string memory c = name;
+    uint l = bytes(c).length; ⟩ l == 3 } := by
+  sol_symex
+  sol_decide
+
+/-- The same of a stored `string` of any length. -/
+theorem copyLengthAny : ⊨ dl[Texts]{ [ string memory c = name; uint l = bytes(c).length;
+    uint m = bytes(name).length; ] l == m } := by
+  sol_symex
+  sol_decide
+
 /-! ## 4 · Byte types as struct members
 
 A contract's own struct spells its members (`Semantics.StructEnc`), a byte

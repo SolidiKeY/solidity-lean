@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 // keccak256, the ABI and string-keyed mappings (docs/semantic-gaps.md,
-// "Hashing and the ABI"): keccak256 an uninterpreted function of the bytes,
+// "Hashing and the ABI"): keccak256 Keccak-256 of the bytes (an atom to the
+// closers, evaluated on literal bytes),
 // abi.encode/encodePacked fresh memory bytes of solc's layout, abi.decode its
 // inverse, a mapping(string => V) keyed by the hash.
 

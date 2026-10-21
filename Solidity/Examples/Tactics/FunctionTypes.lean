@@ -192,6 +192,13 @@ example : Prog.toStr [] (sol[Ext]{ function (uint) external returns (uint) h = t
     "uint h = (address(this) * 4294967296) + 4008276486; \
      uint s = h - ((h / 4294967296) * 4294967296);" := rfl
 
+/-- `h.address` of `this.double` is the contract's address: the closer reads
+`(address(this) * 2^32 + s) / 2^32` back (`Facts.cancelDiv`, Lean only). -/
+theorem addressOfValue : ⊨ dl[Ext]{ [ function (uint) external returns (uint) h = this.double;
+    uint a = h.address; uint t = address(this); ] a == t } := by
+  sol_symex
+  sol_decide
+
 /-! ## 4 · Recursion through a value
 
 A call through a value is a call of each function it may reach
