@@ -85,10 +85,12 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
   -- it): the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
   let φi ← instantiateMVars φ0
-  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Fml.havoc).isSome
+  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Fml.havoc ||
+    e.isConstOf ``Fml.grow).isSome
   let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with
     | some ``Fml.havoc => pure #[#[← ap ``ProvesC.havocIntro]]
+    | some ``Fml.grow => pure #[#[← ap ``ProvesC.growIntro]]
     | some ``Fml.imp => pure #[#[← ap ``ProvesC.intro]]
     | some ``Fml.all => pure #[#[← ap ``ProvesC.allIntro]]
     | some ``Fml.upd => pure #[#[← ap ``ProvesC.updIntro]]

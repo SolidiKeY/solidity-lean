@@ -90,6 +90,10 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
 "post" of a contract forgets, `Fml.anonC`). -/
   | havocIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ProvesC I pay Γ₀ H.havoc φ) :
       ProvesC I pay Γ₀ H (.havoc φ)
+  /-- `{grow}` in front of the formula joins the context (Lean only: what
+"post" of a memory return that allocates leaves of memory, `Fml.callPostM`). -/
+  | growIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ProvesC I pay Γ₀ H.grow φ) :
+      ProvesC I pay Γ₀ H (.grow φ)
   /-- An update in front of the formula joins the context. -/
   | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (h : ProvesC I pay Γ₀ (H.upd m U) φ) : ProvesC I pay Γ₀ H (.upd m U φ)

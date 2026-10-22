@@ -1,5 +1,6 @@
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.CallbackDerive
+import Solidity.Calculus.CallbackFrameMem
 
 /-!
 # Recursive calls under the callback reading
@@ -751,6 +752,168 @@ theorem ProvesC.recContract {Δ₀ : Ctx} {H : Hyps C Δ₀ Γ} {μ : Mutability
       · exact «pre»
       · exact «post»)
 
+
+/-! ## A memory return that allocates, with callbacks
+
+`useRecContractM` (`Calculus/MemContract.lean`) over the callback runs: the
+body's callback runs grow the heap keeping the caller's objects
+(`ExecP.frameM`, `Calculus/CallbackFrameMem.lean`), so "post" is
+`Fml.callPostM`'s, `{grow}` and the returned object bound. -/
+
+section MemC
+
+variable {R : RefTy}
+
+/-- **A recursive memory return's contract with callbacks**
+(`RecContractM`, over `ExecP`). -/
+def RecContractCM (I : Fml C []) (pay : Bool) (μ : Mutability)
+    (b : Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) (req : Fml C ps)
+    (ens : Fml C ([.mem R] ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
+  (∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.mem R] Γ'), FunContractC I pay ret b req ens m) ∧
+    Prog.withinM μ b = true ∧ writesRets 1 b = true
+
+/-- A contract at a call that returns a memory object is one at every such
+call, with callbacks. -/
+theorem FunContractC.forall_mem {Γf : Ctx} {b : Prog C ([.mem R] ++ ps) Γf} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true}
+    (h : FunContractC (Γ := []) I pay (CallRet.mem R (.user "r") hd hm) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.mem R] Γ'), FunContractC I pay ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | mem => exact h
+  | rets bs => cases bs
+
+theorem RecContractCM.base (μ : Mutability) (req : Fml C ps)
+    (ens : Fml C ([.mem R] ++ (Olds ++ ps))) (m : Modality) :
+    RecContractCM I pay μ (Prog.recBase : Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) req ens m := by
+  refine ⟨fun ret σ _ o h => ?_, rfl, rfl⟩
+  cases h with
+  | cons hs _ => cases hs
+  | halt hs =>
+    cases hs with
+    | det _ => exact ⟨by cases m <;> first | trivial | rfl, nofun⟩
+  | violated hs => cases hs
+
+/-- **Induction over the unrolling**, a memory return with callbacks. -/
+theorem RecContractCM.unroll {μ : Mutability} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
+    {step : Nat → (Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) →
+      Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)}
+    (hs : ∀ n (t : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)),
+      RecContractCM I pay μ (t ()) req ens m → RecContractCM I pay μ (step n t) req ens m)
+    (d : Nat) : RecContractCM I pay μ (recUnroll Prog.recBase step d) req ens m :=
+  recUnroll_induct (fun b => RecContractCM I pay μ b req ens m)
+    (RecContractCM.base μ req ens m) hs d
+
+/-- **A recursive memory return that allocates, by its contract, with
+callbacks** (`holds_callMemM` over the callback runs). -/
+theorem holdsC_callMemM {μ : Mutability} {f : Name} {d : Nat} {args : Args C Γ ps} {r : Var}
+    {hd : (Ty.ref R).defaultOkS = true} {hm : (Ty.ref R).mapFree = true}
+    {body : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)} {ω : Prog C (.mem R :: Γ) Γ₂}
+    {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
+    {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
+    (hc : RecContractCM I pay μ (body ()) req ens m) (hreq : req.callsBack pay = false)
+    {σ : State C Γ} (hpre : holdsC I pay σ (Fml.callPre args req m))
+    (hpost : holdsC I pay σ (Fml.callPostM μ args R r ens ω κ φ m)) :
+    holdsC I pay σ (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  have he' : ExecS (I.stateInv pay) σ (.call f args (.mem R r hd hm) (body ())) o₁ := by
+    cases he with
+    | det h => exact nomatch h
+    | callRec h => exact h
+  rcases ExecS.call_inv he' with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact (holdsC_callPre hpre).1 e ha
+  · have hr := (holdsC_iff_holds req hreq _).1 ((holdsC_callPre hpre).2 a ha)
+    have hct := hc.1 _ (σ.withEnv a) hr o' hp
+    cases o' with
+    | halt e => exact hct
+    | violated => exact hct.elim
+    | ok x =>
+      obtain ⟨hg, hag⟩ := ExecP.frameM hp hc.2.1 0 x rfl
+      have e₀ : σ.H <+: x.st.H :=
+        ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext.trans x.ext
+      have hfr : TGFrameM μ σ x.st e₀ := ((TGFrameM.env σ a (List.prefix_refl _)).trans
+        (CallRet.enterT_frameM (μ := μ) (CallRet.mem (Γ := Γ) R r hd hm) (σ.withEnv a))
+        ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext).trans hg e₀
+      have hX := holdsC_snapOld ((holdsC_declsThen hpost).2 a ha)
+      have hX' : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage
+          x.st.net) (Fml.callResultM R r ens ω κ φ m) := by
+        cases μ with
+        | nonpayable => exact hX x.st.storage x.st.net
+        | pure =>
+          obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
+          rw [h1, h2]; exact hX
+        | view =>
+          obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
+          rw [h1, h2]; exact hX
+      have hY := hX' (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit) hfr.keeps
+        (TEnv.drop (body ()).ext x.st.env).1
+      have hps : (TEnv.drop (body ()).ext x.st.env : TEnv C x.st.H (.mem R :: ps)).2 =
+          TEnv.wk e₀ ps a := by
+        rw [TLocAgreeM.params_eq (e := ((CallRet.mem (Γ := Γ) R r hd hm).enterT
+          (σ.withEnv a)).st.env) hag hc.2.2]
+        exact TEnv.wk_trans _ _ ps a
+      have hst : State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net).adopt
+            (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R)
+              (TEnv.drop (body ()).ext x.st.env).1) =
+          State.withOlds [.mem R] (σ.withEnv a).net (σ.withEnv a).storage
+            (State.drop (body ()).ext x.st) := by
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        show ((TEnv.drop (body ()).ext x.st.env).1, TEnv.thin (Thin.atop (Olds ++ ps) Γ)
+          (TEnv.wk e₀ (Olds ++ (ps ++ Γ))
+            (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) =
+          ((TEnv.drop (body ()).ext x.st.env).1, TEnv.olds σ.net σ.storage
+            (TEnv.drop (body ()).ext x.st.env : TEnv C x.st.H (.mem R :: ps)).2)
+        rw [hps]
+        show (_, TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ)
+          (TEnv.wk e₀ (ps ++ Γ) (TEnv.append ps a σ.env)))) = _
+        rw [TEnv.append_wk, TEnv.thin_atop_append]
+      have hens' := holdsC_wkD (I := I) (pay := pay) (Thin.atop (.mem R :: (Olds ++ ps)) Γ) ens _
+        (by rw [hst]; exact hct)
+      have hM := hY hens'
+      have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net).adopt
+            (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R)
+              (TEnv.drop (body ()).ext x.st.env).1) =
+          (TRun.callLeave (.mem R r hd hm) (body ()).ext σ
+            ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)) x).st := by
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        show ((TEnv.drop (body ()).ext x.st.env).1,
+          TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
+            (TEnv.wk e₀ (Olds ++ (ps ++ Γ))
+              (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) =
+          ((TEnv.drop (body ()).ext x.st.env).1, TEnv.wk e₀ Γ σ.env)
+        rw [TEnv.thin_ofExt]
+        show (_, TEnv.drop (Ext.append Γ ps) (TEnv.wk e₀ (ps ++ Γ) (TEnv.append ps a σ.env))) = _
+        rw [TEnv.append_wk, TEnv.drop_append]
+      intro o'' hf
+      exact hM _ .nil o'' (.drop (ExecF.transport' hT.symm rfl hf))
+
+/-- **`useRecContractM` with callbacks** (Lean, `ProvesC.recCall`): a
+recursive memory return that allocates, by its contract over the callback
+runs, its goals "pre" and "post" (`Fml.callPostM`). -/
+theorem ProvesC.recContractM {Δ₀ : Ctx} {H : Hyps C Δ₀ Γ} {μ : Mutability} {f : Name} {d : Nat}
+    {args : Args C Γ ps} {r : Var} {hd : (Ty.ref R).defaultOkS = true}
+    {hm : (Ty.ref R).mapFree = true} {body : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)}
+    {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
+    {req : Fml C ps} {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
+    (hc : RecContractCM I pay μ (body ()) req ens m) (hreq : req.callsBack pay = false)
+    («pre» : ProvesC I pay Δ₀ H (Fml.callPre args req m))
+    («post» : ProvesC I pay Δ₀ H (Fml.callPostM μ args R r ens ω κ φ m)) :
+    ProvesC I pay Δ₀ H (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ) :=
+  .recCall [Fml.callPre args req m, Fml.callPostM μ args R r ens ω κ φ m]
+    (fun τ h => Hyps.wrapC_and H (fun _ a b => holdsC_callMemM hc hreq a b) τ
+      (h _ List.mem_cons_self) (h _ (List.mem_cons_of_mem _ List.mem_cons_self)))
+    (fun ψ hψ => by
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hψ
+      rcases hψ with rfl | rfl
+      · exact «pre»
+      · exact «post»)
+
+end MemC
+
 theorem holdsC_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
     (∀ σ : State C [], holdsC I pay σ (Fml.allCtx ps ns φ)) → ∀ σ : State C ps, holdsC I pay σ φ
   | [], _, _, h, σ => h σ
@@ -849,7 +1012,7 @@ def recHypsC : MetaM (List LocalDecl) := do
     let some d := d? | return none
     if d.isImplementationDetail then return none
     let ty ← instantiateMVars d.type
-    return if ty.isAppOf ``RecContractC then some d else none
+    return if ty.isAppOf ``RecContractC || ty.isAppOf ``RecContractCM then some d else none
 
 /-- The recursive call at the head of a `ProvesC` goal's box. -/
 def headCallC? (g : MVarId) : MetaM (Option (String × Expr)) := g.withContext do
@@ -860,7 +1023,7 @@ def headCallC? (g : MVarId) : MetaM (Option (String × Expr)) := g.withContext d
 /-- "post" opened, so that the walk sees its `{havoc}` (`ProvesC.havocIntro`). -/
 def openPost (g : MVarId) : TacticM MVarId := do
   let some [g'] ← Recursion.tryOn g (evalTactic (← `(tactic|
-      dsimp only [Fml.callPost, Fml.anonC, Fml.callResult])))
+      dsimp only [Fml.callPost, Fml.callPostM, Fml.anonC, Fml.callResult, Fml.callResultM])))
     | return g
   return g'
 
@@ -901,14 +1064,19 @@ partial def autoCallC (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
       if ← g'.isAssigned then continue
       unless (← autoGoalC (← openPost g') (fuel - 1)).isEmpty do return false
     return true
+  -- a memory return that allocates: its contract over a grown heap
+  let mem := (s.getArg! 8).isAppOf ``CallRet.mem
   for d in ← recHypsC do
-    let b := (← instantiateMVars d.type).getArg! 6
+    let dty ← instantiateMVars d.type
+    let b := dty.getArg! 6
     unless ← withCurrHeartbeats <| withReducible (isDefEq b (mkApp body (mkConst ``Unit.unit)))
     do continue
     let st ← saveState
     let hS ← Term.exprToSyntax d.toExpr
-    let some gs ← Recursion.tryOn g (evalTactic (← `(tactic|
-        refine ProvesC.recContract $hS (by rfl) (by rfl) ?_ ?_)))
+    let tac ← if dty.isAppOf ``RecContractCM then
+        `(tactic| refine ProvesC.recContractM $hS (by rfl) ?_ ?_)
+      else `(tactic| refine ProvesC.recContract $hS (by rfl) (by rfl) ?_ ?_)
+    let some gs ← Recursion.tryOn g (evalTactic tac)
       | continue
     if ← goals gs then return []
     st.restore
@@ -920,12 +1088,16 @@ partial def autoCallC (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
       | none => pure ((← `(.tt)), (← `(.tt)))
     for μ in [← `(Mutability.pure), ← `(Mutability.view), ← `(Mutability.nonpayable)] do
       let st ← saveState
-      let some gs ← Recursion.tryOn g (evalTactic (← `(tactic|
-          refine ProvesC.recContract (μ := $μ) (req := $reqS) (ens := $ensS)
-            ?_ (by rfl) (by rfl) ?_ ?_)))
+      let tac ← if mem then
+          `(tactic| refine ProvesC.recContractM (μ := $μ) (req := $reqS) (ens := $ensS)
+            ?_ (by rfl) ?_ ?_)
+        else `(tactic| refine ProvesC.recContract (μ := $μ) (req := $reqS) (ens := $ensS)
+            ?_ (by rfl) (by rfl) ?_ ?_)
+      let some gs ← Recursion.tryOn g (evalTactic tac)
         | continue
       let some hc := ← gs.findM? fun g' => do
-          return (← instantiateMVars (← g'.getType)).isAppOf ``RecContractC
+          let ty ← instantiateMVars (← g'.getType)
+          return ty.isAppOf ``RecContractC || ty.isAppOf ``RecContractCM
         | st.restore; continue
       match ← inductC hc (s.getArg! 8) (fuel - 1) with
       | .notWithin => st.restore; continue
@@ -939,6 +1111,7 @@ partial def autoCallC (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
 frames (`RecContractC.unroll`), as `Recursion.induct`. -/
 partial def inductC (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Recursion.Induct :=
   g.withContext do
+  if (← instantiateMVars (← g.getType)).isAppOf ``RecContractCM then return ← inductCM g fuel
   let some [g₁] ← Recursion.tryOn g (evalTactic (← `(tactic|
       (apply RecContractC.unroll; intro n t ih))))
     | return .failed
@@ -967,6 +1140,34 @@ partial def inductC (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Recursion.I
           | apply FunContractC.forall_storage)
         apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))
   let some [gc'] ← Recursion.tryOn gc (evalTactic tac) | return .failed
+  return if (← autoGoalC gc' fuel).isEmpty then .proved else .failed
+
+/-- `inductC` for a memory return that allocates (`RecContractCM.unroll`). -/
+partial def inductCM (g : MVarId) (fuel : Nat) : TacticM Recursion.Induct := g.withContext do
+  let some [g₁] ← Recursion.tryOn g (evalTactic (← `(tactic|
+      (apply RecContractCM.unroll; intro n t ih))))
+    | return .failed
+  g₁.withContext do
+  let mut g₂ := g₁
+  for d in (← recHypsC) ++ (← Recursion.recHyps) do
+    let hS ← Term.exprToSyntax d.toExpr
+    let some [g'] ← Recursion.tryOn g₂ (evalTactic (← `(tactic| have := ($hS).2.1)))
+      | return .failed
+    g₂ := g'
+  let some gs ← Recursion.tryOn g₂ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩)))
+    | return .failed
+  let [gc, gw, gr] := gs | return .failed
+  let some [] ← Recursion.tryOn gw (evalTactic (← `(tactic| (
+      simp only [Prog.withinM_nil, Prog.withinM_cons, Stmt.withinM, Stmt.within, MRhs.allocIn,
+        Bool.and_true, Bool.true_and, Bool.and_self, Bool.or_true, Bool.true_or, *]
+      all_goals first | rfl | decide))))
+    | return .notWithin
+  let some [] ← Recursion.tryOn gr (evalTactic (← `(tactic| first | rfl | decide)))
+    | return .failed
+  let some [gc'] ← Recursion.tryOn gc (evalTactic (← `(tactic| (
+      apply FunContractC.forall_mem (hd := rfl) (hm := rfl)
+      apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))))
+    | return .failed
   return if (← autoGoalC gc' fuel).isEmpty then .proved else .failed
 
 end

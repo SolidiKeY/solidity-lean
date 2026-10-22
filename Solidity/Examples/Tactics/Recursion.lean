@@ -440,6 +440,35 @@ theorem pickPayNoPanic : ValidT .noCallback dl!{ [ uint[] storage s = pickPay(m,
 
 end PickPay
 
+/-- A recursive memory return that calls back: a value call in every frame,
+then the array allocated. -/
+def BuildPay : Contract := contract!{
+  uint a;
+  ensures r.length == n;
+  function buildPay(uint n, uint to) returns (uint[] memory r) {
+    (bool ok, ) = to.call{value: 0}("");
+    if (n == 0) { r = new uint[](0); return r; }
+    uint[] memory s = buildPay(n - 1, to);
+    assert(s.length == n - 1);
+    r = new uint[](n);
+    return r;
+  }
+}
+
+section BuildPay
+
+local instance : InContract := ⟨BuildPay⟩
+
+/-- **A memory return by its contract, with callbacks**
+(`ProvesC.recContractM`, `holdsC_callMemM`): the contract over the callback
+runs and a grown heap (`RecContractCM`, `ExecP.frameM`), by induction over
+the frames; the frame's `assert` reads the frame below's array off it. -/
+theorem buildPayLen :
+    ValidT .noCallback dl!{ [ uint[] memory q = buildPay(3, to); ] q.length == 3 } := by
+  rec_auto_c
+
+end BuildPay
+
 /-- `payDown` with its condition not captured by hand: `if (a > 0)` is
 captured by `ifElseUnfold` under callbacks (`ProvesC.capture`), though the
 branch calls back. -/
