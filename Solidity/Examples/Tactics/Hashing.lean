@@ -20,7 +20,8 @@ out of its type's range.  A `mapping(string => V)` is keyed by the hash.
 
 * §1 — `keccak256`, its value computed (`#run`, `decide +kernel`);
 * §2 — `abi.encode`, `abi.encodePacked` proved; `abi.decode`, a dynamic
-  encoding and the `concat`s run (`#run`);
+  encoding and the `concat`s run (`#run`); a calldata slice decoded in
+  place; nested types (`#run`, a static nested struct proved);
 * §3 — a mapping keyed by `string`.
 -/
 
@@ -477,6 +478,170 @@ returns (5, 3, 11)
 
 /-- info: revert -/
 #guard_msgs in #run Codec2.decodeBadLength()
+
+/-! ### A calldata slice decoded in place
+
+`abi.decode(b[4:], …)` decodes the view (`#sliceV`, `ByteSrc`,
+`Syntax/Elab.lean`): its offsets are the view's, its length the view's,
+its bytes the base's past the view's start.  No copy. -/
+
+/-- A selector skipped, the words after it decoded. -/
+def SliceCodec : Contract := contract!{
+  function afterSel(bytes calldata b) returns (uint x, uint y) {
+    (x, y) = abi.decode(b[4:], (uint, uint));
+  }
+  function single(bytes calldata b) returns (uint x) { x = abi.decode(b[4:36], (uint)); }
+  function both() returns (uint x, uint y, uint z) {
+    bytes memory e = abi.encodeWithSelector(bytes4(0x12345678), 7, 9);
+    (x, y) = afterSel(e);
+    z = single(e);
+  }
+  function short() returns (uint z) {
+    bytes memory e = abi.encode(7);
+    z = single(e);
+  }
+}
+
+/--
+info: ok
+returns (7, 9, 7)
+-/
+#guard_msgs in #run SliceCodec.both()
+
+-- the slice past its base: a revert
+/-- info: revert -/
+#guard_msgs in #run SliceCodec.short()
+
+/-! ### Nested types
+
+An array of references, a struct with a reference member, a fixed array of
+either: head and tail recursively, as the ABI specification's `enc` writes
+them (`AbiTy`, `abiTupleWriteGen`, `abiReadGen`, `Syntax/Elab.lean`).  A
+dynamic component is an offset in its tuple's head, from the tuple's
+start, and its encoding in the tail.  An array is written and read by a
+loop, so these run (`#run`, the bytes solc's encoder gives); a static
+nested struct is loop-free, and proved. -/
+
+/-- Nested encodings and their decodings. -/
+def Codec3 : Contract := contract!{
+  struct S { uint a; uint[] xs; bytes b; }
+  struct In { uint8 x; bool y; }
+  struct Out { uint8 a; In i; }
+  function nested() returns (uint l, uint w0, uint w1, uint w2, uint w3, uint w4, uint w5,
+      uint w6, uint w7, uint w8) {
+    uint[][] memory x = new uint[][](2);
+    uint[] memory u = new uint[](2); u[0] = 1; u[1] = 2;
+    uint[] memory v = new uint[](1); v[0] = 3;
+    x[0] = u; x[1] = v;
+    bytes memory e = abi.encode(x);
+    l = e.length; w0 = uint8(e[31]); w1 = uint8(e[63]); w2 = uint8(e[95]); w3 = uint8(e[127]);
+    w4 = uint8(e[159]); w5 = uint8(e[191]); w6 = uint8(e[223]); w7 = uint8(e[255]);
+    w8 = uint8(e[287]);
+  }
+  function structs() returns (uint l, uint w0, uint w1, uint w2, uint w3, uint w4, uint w5,
+      uint w6, uint h, uint i) {
+    S memory s;
+    s.a = 7;
+    uint[] memory u = new uint[](1); u[0] = 5;
+    s.xs = u;
+    s.b = "hi";
+    bytes memory e = abi.encode(s);
+    l = e.length; w0 = uint8(e[31]); w1 = uint8(e[63]); w2 = uint8(e[95]); w3 = uint8(e[127]);
+    w4 = uint8(e[159]); w5 = uint8(e[191]); w6 = uint8(e[223]); h = uint8(e[224]); i = uint8(e[225]);
+  }
+  function byteStrings() returns (uint l, uint w0, uint w1, uint a, uint w2, uint c) {
+    bytes[] memory x = new bytes[](2);
+    x[0] = "ab"; x[1] = "c";
+    bytes memory e = abi.encode(x);
+    l = e.length; w0 = uint8(e[95]); w1 = uint8(e[159]); a = uint8(e[160]); w2 = uint8(e[223]);
+    c = uint8(e[224]);
+  }
+  function roundtrip() returns (uint a, uint b, uint c, uint d, uint f, uint g) {
+    uint[][] memory x = new uint[][](2);
+    uint[] memory u = new uint[](2); u[0] = 1; u[1] = 2;
+    uint[] memory v = new uint[](1); v[0] = 3;
+    x[0] = u; x[1] = v;
+    uint[][] memory y = abi.decode(abi.encode(x), (uint[][]));
+    a = y.length; b = y[0].length; c = y[1][0];
+    S memory s;
+    s.a = 7;
+    s.xs = u;
+    s.b = "hi";
+    S memory t = abi.decode(abi.encode(s), (S));
+    d = t.a; f = t.xs[1]; g = uint8(t.b[1]);
+  }
+  function tupled() returns (uint a, uint b, uint c) {
+    uint[][] memory x = new uint[][](1);
+    uint[] memory u = new uint[](1); u[0] = 4;
+    x[0] = u;
+    bytes memory e = abi.encode(x, 9);
+    (uint[][] y, uint z) = abi.decode(e, (uint[][], uint));
+    a = y[0][0]; b = z; c = e.length;
+  }
+  function badOffset() returns (uint n) {
+    uint[][] memory y = abi.decode(abi.encode(32, 1000), (uint[][]));
+    n = y.length;
+  }
+  function staticNested() {
+    Out memory o;
+    o.a = 1; o.i.x = 2; o.i.y = true;
+    bytes memory e = abi.encode(o);
+    assert(e.length == 96 && uint8(e[31]) == 1 && uint8(e[63]) == 2 && uint8(e[95]) == 1);
+  }
+}
+
+-- `[[1, 2], [3]]`: its offset, its length, the elements' offsets from
+-- after the length, each element's length and words (solc's bytes)
+/--
+info: ok
+returns (288, 32, 2, 64, 160, 2, 1, 2, 1, 3)
+-/
+#guard_msgs in #run Codec3.nested()
+
+-- a struct with a `uint[]` and a `bytes` member: an offset, then the
+-- struct's head (`a`, two offsets from its start) and its tails
+/--
+info: ok
+returns (256, 32, 7, 96, 160, 1, 5, 2, 104, 105)
+-/
+#guard_msgs in #run Codec3.structs()
+
+-- `bytes[]`: each element an offset, then its length and padded bytes
+/--
+info: ok
+returns (256, 64, 2, 97, 1, 99)
+-/
+#guard_msgs in #run Codec3.byteStrings()
+
+-- decoded back: the arrays' lengths and elements, the struct's members
+/--
+info: ok
+returns (2, 2, 3, 7, 2, 105)
+-/
+#guard_msgs in #run Codec3.roundtrip()
+
+-- a nested array beside a value, decoded as a tuple
+/--
+info: ok
+returns (4, 9, 192)
+-/
+#guard_msgs in #run Codec3.tupled()
+
+-- a length past the data: the next word read past it reverts
+/-- info: revert -/
+#guard_msgs in #run Codec3.badOffset()
+
+section Codec3
+
+local instance : InContract := ⟨Codec3⟩
+
+/-- A static nested struct: its members' words in the head, loop-free (narrow
+members: a byte each to write, within the closer's bounds). -/
+theorem staticNested : ⊨ spec!{staticNested} := by
+  sol_symex
+  sol_decide
+
+end Codec3
 
 /-! ## 3 · A mapping keyed by `string` -/
 

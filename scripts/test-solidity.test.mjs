@@ -395,7 +395,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'memoryParamPanics', 'memoryWraps', 'modifierParam', 'pushArithInRange', 'pushArithPanics',
     'ternaryAliasPanics', 'ternaryAliasInRange', 'ternaryArgumentPanics',
     // its elements' range is a premise (`Problem.callPre`), instantiated (`allLeftHide`)
-    'abiElementInRange',
+    'abiElementInRange', 'abiElementAtParameter',
     // push arithmetic inside `unchecked` wraps at the element's width
     'pushArithUncheckedWraps', 'pushArithUncheckedAdds', 'pushDecrementUncheckedWraps',
     'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
@@ -415,18 +415,20 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     assert.equal(status[name], 'proved', name);
 });
 
-test("calldata: read-only memory parameters, a written copy refused, slices refused", () => {
+test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
   const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
-    'readAlias', 'localAlias'])
+    'readAlias', 'localAlias',
+    // a slice is a view: its offset and length (`RawStmt.sliceViews`)
+    'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
     assert.equal(status[name], 'proved', name);
-  // a memory copy written (solc copies, the model would share), a slice
+  // a memory copy written (solc copies, the model would share), a slice hashed
   assert.equal(status.writesCopy, 'unsupported');
-  assert.equal(status.tail, 'unsupported');
+  assert.equal(status.sliceHashed, 'unsupported');
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
@@ -444,8 +446,17 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
     // the precompiles: SHA-256, RIPEMD-160, an address recovered (`HashKind`)
     'sha256Parameter', 'ripemd160Parameter', 'recoverSigner', 'sha256Literal', 'ripemd160Literal',
     // `abi.decode` of a struct of values, a `T[k]`, a tuple with a struct
-    'decodeStruct', 'decodeFixed', 'decodeTuple'])
+    'decodeStruct', 'decodeFixed', 'decodeTuple',
+    // a static nested struct, in the head (`AbiTy`)
+    'encodeStaticNested'])
     assert.equal(status[name], 'proved', name);
+  // nested dynamic types elaborate (not `unsupported`); head and tail are
+  // written and read by loops with no invariant, which the walk unrolls
+  // past its budget: run in `Examples/Tactics/Hashing.lean` (`Codec3`)
+  for (const name of ['encodeNested', 'encodeDynStruct', 'decodeNested', 'decodeDynStruct']) {
+    assert.ok(name in status, name);
+    assert.notEqual(status[name], 'unsupported', name);
+  }
 });
 
 test("function types: values in locals, parameters, returns, storage, struct members, external", () => {

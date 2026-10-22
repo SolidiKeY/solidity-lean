@@ -58,8 +58,8 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); open: calldata slices `b[i:j]` (refused) |
-| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); `sha256`, `ripemd160` computed and `ecrecover` an address uninterpreted where the signature is well formed, `abi.decode` of `T[]`, `T[k]` and structs of values (lane `open-small`); a locally built byte string's hash evaluated (`keccakAt`) and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, `abi.encode`/`abi.decode` of nested arrays and of structs with reference members |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); calldata slices `b[i:j]` as views, reads, `.length` and `abi.decode` loop-free (lane `open-abi2`, `RawStmt.sliceViews`; `tests/solc/Calldata.sol`, `Examples/Tactics/Bytes.lean` §6); a slice handed on, hashed or copied stays refused |
+| `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); `sha256`, `ripemd160` computed and `ecrecover` an address uninterpreted where the signature is well formed, `abi.decode` of `T[]`, `T[k]` and structs of values (lane `open-small`); a locally built byte string's hash evaluated (`keccakAt`) and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); nested types, head and tail recursively (lane `open-abi2`, `AbiTy`: `uint[][]`, `bytes[]`, a struct with a `uint[]`/`bytes`/struct member, run in `Codec3`; a static nested struct proved, `encodeStaticNested`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, runner proofs over a nested encoding (its loops have no invariant) |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats (about 400k of 200k, "Revert data", lane `open-closer`), the callback reading's leaves on the bound array |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | closed: a recursion that does not call back is read without callbacks (`sol_no_callback`, `ProvesC.recValid`), one that does by a contract over the callback runs (`RecContractC`, `ProvesC.recContract`; a storage return's alias bound, `holdsC_callStorage_k`; a memory return over a grown heap, `RecContractCM`, `ProvesC.recContractM`, `ExecP.frameM`), by induction over the frames; `rec_auto_c`, the runner (`docs/kernel-port.md`, "Recursion") |
@@ -68,12 +68,12 @@ contract's invariant.
 | a loop body containing a `try` (no frame: `whileClose`) | calculus | closed: a `try` is within `nonpayable` when its clauses and a self-call's callee are, writing what its clauses write of the caller's locals (`Stmt.within`, `Stmt.writesAt`; `Stmt.run_frame`, `ExecS.frame` with the callee's havoc under callbacks), so the invariant rules apply, with or without callbacks (`tests/solc/CallbackCalls.sol`, `loopOfTries`); a `catch` that binds the data allocates and stays without a frame |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`) | closer limit, not a semantic gap | closed (lane `open-closer`): `sol_close`'s last alternative adds solkey's `multiply_2_inEq0` of the literal bounds of the atoms of a leaf's products (`sol_close_nonlin`, `Calculus/CloseNonlin.lean`), only where a product of two non-literal integers is left; `tests/solc/Recursion.sol`'s `sum` and `sumThree`, `Examples/Tactics/Recursion.lean` (`triSpec`) |
-| closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | open |
+| closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | closed for a local of the premise's scope (lane `open-abi2`): `allLeftHide` offers the literals and the locals the leaf indexes with (`InstLit.loc`, a position counted from the outermost, `Calculus/AllLeft.lean`), a conjunction of premises split around its `∀`s (`Fml.instRest`); `NarrowNested.abiElementAtParameter` (`xs[i]` at a parameter `i`).  Open: a loop counter, a local pushed after the premise, is not a term of the premise's scope; an invariant states its element's range instead |
 | the four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner now states (the contract exposes nothing, `reading: clean`), but its 43 unrolled pushes run past the search's heartbeats; the others are closer cost (exposed recycled slots, unshared memory terms); `docs/loops.md`, "Open loops lane" (remeasured in lane `open-closer`: 55 s, 57 s, 58 s, 38 s, all four still timeouts) |
 | a quotient `x / k` of a parameter left open (constructors and functions alike) | closer | closed: `sol_close`'s arithmetic reads a quotient of a nonnegative dividend as `div` (`Int.tdiv_eq_ediv_of_nonneg`, solkey's `sdiv_axiom`; `Calculus/Close.lean`, `tests/solc/CtorDivision.sol`) |
 | narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  A tuple of references stays refused whatever its types (`elabTuple`) |
 | a struct the struct table does not list (a contract's own, or the table's name with other members) | semantics, solc import | closed: a contract's own struct is the table's struct whose name spells its members ("Struct table" below; `contract!{ struct S { … } }`, `Examples/Tactics/OwnStructs.lean`, `tests/solc/OwnStructs.sol`); a struct recursive through an array stays refused, a library's struct its caller cannot see stays a row |
-| a public function's memory array of narrow elements: ABI decoding reverts on one out of range | chain fact | closed: the obligation assumes each element in range (`Problem.callPre`, `SolcFun.elemRanges`), and `sol_leaf` instantiates the quantified premise at the literal indices the leaf reads (`allLeftHide`, `Calculus/AllLeft.lean`; `NarrowNested.abiElementInRange`).  An index that is not a literal (a parameter, a loop counter) is not offered |
+| a public function's memory array of narrow elements: ABI decoding reverts on one out of range | chain fact | closed: the obligation assumes each element in range (`Problem.callPre`, `SolcFun.elemRanges`), and `sol_leaf` instantiates the quantified premise at the literal indices the leaf reads (`allLeftHide`, `Calculus/AllLeft.lean`; `NarrowNested.abiElementInRange`).  A parameter index is offered too (`InstLit.loc`, lane `open-abi2`, `abiElementAtParameter`); a loop counter is not (row above) |
 | push arithmetic inside `unchecked` (`small.push() -= 1`, `small.push()--`) | elaborator | closed: the appended slot starts at `0`, so the statement pushes `0 op r` wrapped at the element's width (`r` for `+=`, `0` for `*=`, `r`'s negation modulo `2^N` for `-=`, a signed minimum itself; a literal folded), `r` evaluated once before the push (`elabStmtP`, `Syntax/Elab.lean`; `tests/solc/NarrowNested.sol`) |
 | struct constructor calls in the solc import (`S(1, 2)`, `S({a: 1, b: 2})`) | frontend | closed: printed as written (`structConstructorCall`, `Frontend/SolcJson.lean`), which `sol{}` lowers to a fresh memory struct's member writes, narrow members checked (`tests/solc/StructLiterals.sol`); a contract's own struct by its spelled name (below) |
 | the narrow shape error names a capture (`mv1`) | elaborator | closed: a reference argument's shape is checked as written, before `hoistCallArgs` captures it (`Examples/Tactics/Checked.lean`) |
@@ -294,10 +294,28 @@ theorems are unchanged.
   `memory` parameter the callee writes: what is left only reads the object,
   where sharing and copying agree.  An array parameter's elements are in
   their ABI range as a memory one's (`elemRanges`).  Slices `b[i:j]` are
-  refused: a slice is a view of the caller's data, which the model would copy
-  element by element, a loop with no invariant, so no obligation over it
-  would be proved.  Tests: `tests/solc/Calldata.sol`,
-  `Examples/Tactics/Bytes.lean` §5.
+  views (lane `open-abi2`), below.  Tests: `tests/solc/Calldata.sol`,
+  `Examples/Tactics/Bytes.lean` §5–6.
+- Calldata slices `b[i:j]` (lane `open-abi2`): a view of the caller's data,
+  as solc reads it, not a copy (a copy is a loop with no invariant, so no
+  obligation over it would be proved).  `RawStmt.sliceViews`
+  (`Syntax/Elab.lean`, applied by the `contract!` and `sol_raw!` macros to a
+  body with a slice, outside `hoist`) rewrites the body: a view is its base
+  and its start and end in it, after solc's checks `i <= j <= length` (a
+  revert); a bound that is not a literal or the base's length a local
+  assigned once.  `t[k]` is `b[o + k]` after `require(o + k < f)` where
+  every evaluation of the statement reads it (a checked subtraction that
+  underflows past the view where only a branch does: solc's `Panic(0x32)`
+  and the model's revert are one outcome), `t.length` is `f - o`, and
+  `abi.decode(t, …)` decodes the view in place (`#sliceV`, `ByteSrc`).  A
+  slice of a slice adds the offsets.  So reads, lengths and decodings are
+  loop-free and proved (`sliceRead`, `sliceOfSlice`, `slicePast`,
+  `sliceLength`, `decodeShortView`).  A slice handed to a function,
+  hashed, copied, indexed by an expression with an effect, or whose base
+  is assigned while it is open is refused (`sliceRefusedName`, reported by
+  `calldataCheck`).  The closer is the cost: a read beside a second guard
+  on the same length (`require(k + 1 < xs.length)` with the view's own
+  check) is past its heartbeats, so `sliceRead` reads `xs[1 + k]`.
 - A byte type as a struct member: closed ("Struct table", "Byte and function
   types as members").
 
@@ -469,11 +487,8 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
   `decodeFixed`, `decodeTuple`, proved), `Examples/Tactics/Hashing.lean`
   (`Codec2`: an array, a struct, a `T[k]`, a tuple, a bad `bool`, a bad
   length, run).  An array decoded is a loop with no invariant: the runner
-  proves no obligation over it (as for an array encoded).  Arrays of
-  references and structs with reference members stay refused, as on the
-  encode side.
-- `abi.encode` of nested arrays, of arrays of structs and of structs with a
-  reference member (refused by `abiKind`).
+  proves no obligation over it (as for an array encoded).
+- Nested types: closed (lane `open-abi2`, below).
 - An array encoded or a byte string decoded is a loop over its elements:
   the runner proves no such obligation (no invariant), so they are run
   (`Codec2`, `Examples/Tactics/Hashing.lean`).  `abi.encodePacked` of a
@@ -490,6 +505,33 @@ the closer's bounds), so `Examples/Tactics/Hashing.lean` runs the decoder
 - `abi.encodeCall` of a function this contract does not declare (an
   interface's): its signature is not known to `sol{}`.
 - `sha256`, `ripemd160`, `ecrecover`: closed (lane `open-small`, below).
+
+**Nested types** (lane `open-abi2`).  `abi.encode` and `abi.decode` of an
+array of references (`uint[][]`, `bytes[]`, `S[]`), of a struct with a
+reference member (a `uint[]`, a `bytes`, a struct) and of a fixed array of
+either follow the ABI specification's `enc`, head and tail recursively: a
+dynamic component is an offset in its tuple's head, from the tuple's
+start, and its encoding in the tail; a static one its words in the head;
+an array its length and then the tuple of its elements.  `AbiTy`
+(`Syntax/Elab.lean`) is the type read off a place's `Ty` and its rows
+(`AbiTy.of`), or off the type written in `abi.decode` (`abiTyExpr?`,
+`T[][]` in `sol{}`: `solArrTyExpr2`); the writer computes the size first
+(`abiSizeGen`), allocates, and writes (`abiTupleWriteGen`, a loop per
+sequence), the reader allocates each reference and checks each word it
+reads within the data (`abiReadGen`, `abiWordAt`), an offset or a length
+past it reverting.  Both are functions outside `hoist`'s `mutual` block,
+`abiEncode` handing over where an argument is not flat
+(`abiEncodeNested?`), `abiDecodeWith` where `decodeKind?` has no kind
+(`abiDecodeTy?`); the flat cases stay the flat encoder's.  A decoded
+calldata slice is read in place (`ByteSrc`).  Tests:
+`Examples/Tactics/Hashing.lean` (`Codec3`: `[[1, 2], [3]]`, a struct with
+a `uint[]` and a `bytes` member, a `bytes[]`, their round trips, a tuple
+with a nested array, a bad length, run against solc's bytes; a static
+nested struct proved, `staticNested`), `tests/solc/Hashing.sol`
+(`encodeStaticNested` proved; `encodeNested`, `encodeDynStruct`,
+`decodeNested`, `decodeDynStruct` elaborate, and the walk unrolls their
+loops past its budget, no invariant).  `abi.encodePacked` of a nested type
+stays refused, as solc refuses it.
 
 **`sha256`, `ripemd160`, `ecrecover`** (lane `open-small`).  One symbol for
 every hash: `Val.hash k`, `Op2.hash k` and the rule `hashAssignment`, the kind

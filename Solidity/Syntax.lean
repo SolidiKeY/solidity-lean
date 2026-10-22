@@ -742,9 +742,18 @@ syntax:max str : sol_expr
 syntax:max &"hex" str : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
 syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
+/-- `b[i:j]`, `b[i:]`, `b[:j]`: a slice of a calldata array, a view of it
+(`RawStmt.sliceViews`, `Syntax/Elab.lean`): `RawExpr.call "#slice" [b, i, j]`. -/
+syntax:max (name := solSlice) sol_expr:max "[" sol_expr ":" sol_expr "]" : sol_expr
+@[inherit_doc solSlice]
+syntax:max (name := solSliceFrom) sol_expr:max "[" sol_expr ":" "]" : sol_expr
+@[inherit_doc solSlice]
+syntax:max (name := solSliceTo) sol_expr:max "[" ":" sol_expr "]" : sol_expr
 /-- `T[]` where a type stands in an expression: `abi.decode(d, (uint[]))`
 (`RawExpr.name "uint[]"`). -/
 syntax:max (name := solArrTyExpr) atomic(ident "[" "]") : sol_expr
+/-- `T[][]` where a type stands in an expression: `abi.decode(d, (uint[][]))`. -/
+syntax:max (name := solArrTyExpr2) atomic(ident "[" "]" "[" "]") : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
 /-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
 `return` of several values (`RawExpr.tuple`). -/
@@ -1319,6 +1328,14 @@ where
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
   | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[]")))
+  | `(sol_expr| $x:ident [ ] [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[][]")))
+  | `(sol_expr| $e:sol_expr [ $i:sol_expr : $j:sol_expr ]) => do
+      `(RawExpr.call "#slice" [$(← expandExpr e), $(← expandExpr i), $(← expandExpr j)])
+  | `(sol_expr| $e:sol_expr [ $i:sol_expr : ]) => do
+      let b ← expandExpr e
+      `(RawExpr.call "#slice" [$b, $(← expandExpr i), RawExpr.field $b "length"])
+  | `(sol_expr| $e:sol_expr [ : $j:sol_expr ]) => do
+      `(RawExpr.call "#slice" [$(← expandExpr e), RawExpr.num 0, $(← expandExpr j)])
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
   | `(sol_expr| ! $a) => do `(RawExpr.unop .not $(← expandExpr a))
   | `(sol_expr| - $a) => do `(RawExpr.unop .neg $(← expandExpr a))
@@ -1717,7 +1734,13 @@ where
         $(quote code) $(pnc.getD otherB) $otherB)
 
 macro_rules
-  | `(sol_raw!{ $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
+  | `(sol_raw!{ $[$ss:sol_stmt;]* }) => do
+      let body ← `([$(← ss.mapM expandStmt),*])
+      -- a slice read as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
+      if ss.any (fun s => (s.raw.find? fun s =>
+          [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome) then
+        `($(mkIdent `Solidity.RawStmt.sliceViews) $body)
+      else pure body
 
 end Expand
 
@@ -2044,6 +2067,9 @@ def expandFun (enums : TyEnv)
       apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb [$mws,*] [$mlocs,*]))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
+  -- a body with a slice reads it as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
+  let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome
+    then `($(mkIdent `Solidity.RawStmt.sliceViews) $body) else pure body
   `(($(strLit f),
     ({ params := [$ps,*], paramLocs := [$locs,*], rets := [$rets,*], retMem := $(quote retMem),
        retStorage := $(quote retStorage), body := $body,

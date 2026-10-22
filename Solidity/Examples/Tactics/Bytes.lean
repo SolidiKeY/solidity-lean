@@ -19,7 +19,8 @@ postcondition reads a `bytesN` as that number.
 * §2 — `bytesN` in state variables, arrays, mapping keys and functions;
 * §3 — `bytes` and `string`;
 * §4 — byte types as struct members;
-* §5 — `calldata` parameters.
+* §5 — `calldata` parameters;
+* §6 — calldata slices, views.
 -/
 
 namespace Solidity.Examples.Tactics.Bytes
@@ -255,5 +256,55 @@ theorem firstOf : ⊨ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint 
 
 /-- error: Solidity elaboration failed: bump: calldata passed to a `memory` parameter it writes: solc copies it, the model would share it -/
 #guard_msgs in #check sol[Cd]{ uint[] memory a = new uint[](2); hand(a); }
+
+/-! ## 6 · Calldata slices
+
+`b[i:j]` of a calldata array is a view of it (`RawStmt.sliceViews`,
+`Syntax/Elab.lean`): its start and end in `b`, checked `i <= j &&
+j <= b.length` (a revert otherwise); a read `t[k]` is `b[i + k]` where
+`i + k < j` (a revert otherwise), and `t.length` is `j - i`.  No copy, no
+loop: what reads a slice is proved as any read. -/
+
+/-- Slices of a calldata parameter. -/
+def Sl : Contract := contract!{
+  function pick(uint[] calldata xs, uint k) returns (uint r) { uint[] memory t = xs[1:]; r = t[k]; }
+  function len(uint[] calldata xs, uint i, uint j) returns (uint r) { r = xs[i:j].length; }
+  function inner(uint[] calldata xs) returns (uint r) {
+    uint[] memory t = xs[1:3]; uint[] memory u = t[1:]; r = u[0];
+  }
+  function first(uint[] memory ys) returns (uint r) { r = ys[0]; }
+  function handOn(uint[] calldata xs) returns (uint r) { uint[] memory t = xs[1:]; r = first(t); }
+}
+
+/-- A read of the view is a read of the base, past the offset. -/
+theorem sliceRead : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](3); a[1] = 6; a[2] = 7;
+    uint v = pick(a, 1); ⟩ v == 7 } := by
+  sol_symex
+  sol_decide
+
+/-- An index past the view reverts, though it is inside the base. -/
+theorem slicePast : ⊨ dl[Sl]{ [ uint[] memory a = new uint[](3); uint v = pick(a, 2); ] false } := by
+  sol_symex
+  sol_decide
+
+/-- The length of a view: `j - i`. -/
+theorem sliceLength : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](5); uint v = len(a, 1, 4); ⟩
+    v == 3 } := by
+  sol_symex
+  sol_decide
+
+/-- A slice past its base, or with its bounds crossed, reverts. -/
+theorem sliceBounds : ⊨ dl[Sl]{ [ uint[] memory a = new uint[](5); uint v = len(a, 4, 6); ] false } := by
+  sol_symex
+  sol_decide
+
+/-- A slice of a slice adds the offsets. -/
+theorem sliceOfSlice : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](4); a[2] = 9;
+    uint v = inner(a); ⟩ v == 9 } := by
+  sol_symex
+  sol_decide
+
+/-- error: Solidity elaboration failed: a calldata slice `t` used other than indexed, its `.length` read or decoded (`abi.decode`): refused (docs/semantic-gaps.md, "Bytes and strings") -/
+#guard_msgs in #check sol[Sl]{ uint[] memory a = new uint[](2); uint v = handOn(a); }
 
 end Solidity.Examples.Tactics.Bytes

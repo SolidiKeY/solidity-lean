@@ -184,4 +184,8 @@ contract NarrowNested {
     function abiElementInRange(uint8[] memory xs) public pure {
         if (xs.length > 0) { assert(xs[0] <= 255); }
     }
+    // the same premise instantiated at a parameter index (`InstLit.loc`)
+    function abiElementAtParameter(uint8[] memory xs, uint i) public pure {
+        if (i < xs.length) { assert(xs[i] <= 255); }
+    }
 }
