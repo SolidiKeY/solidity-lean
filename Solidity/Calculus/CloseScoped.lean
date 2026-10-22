@@ -1295,6 +1295,15 @@ def evalSolCloseAliasGuard : Tactic := fun _ => withMainContext do
   unless hit.isSome do throwError "sol_close_alias_guard: no equation reads a storage alias"
 
 macro_rules
+  | `(tactic| sol_close_witness) => `(tactic| (
+    -- the landed states opened here: `sol_close`'s own `CloseS.landedAll_def`
+    -- is quoted in `Calculus/Close.lean`, before the name exists, and reads nothing
+    (try simp only [CloseS.landedAll_def])
+    intros
+    refine ⟨⟨_, by decide⟩, rfl, ?_⟩
+    try dsimp only))
+
+macro_rules
   | `(tactic| sol_close_alias) => `(tactic| (
     sol_close_alias_guard
     sol_close_unwrap_th

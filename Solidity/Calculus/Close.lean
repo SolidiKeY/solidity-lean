@@ -111,6 +111,10 @@ alias at the path it holds (`sol_close_denote`).  Fails where it does not
 close the leaf. -/
 syntax "sol_close_alias" : tactic
 
+/-- A value read back, `∃ a, t = a.val ∧ φ a` with `t` a literal: the
+witness `t`, in range by `decide`.  Fails on any other goal. -/
+syntax "sol_close_witness" : tactic
+
 /-- Expose typed ranges and existential read witnesses before the final arithmetic pass. -/
 syntax (name := tacticSol_close_enrich) "sol_close_enrich" : tactic
 
@@ -144,6 +148,9 @@ macro "sol_close" : tactic => `(tactic|
     all_goals (try intros)
     -- a bounds check returns `()`: nothing is left to choose
     all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    -- a value read back (`∃ a, t = a.val ∧ φ a`): the witness is `t`, its
+    -- bounds of a literal by `decide`
+    all_goals (try sol_close_witness)
     -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
     -- state: every premise introduced, every conjunct its own goal
     all_goals (repeat' (first | intro _ | apply And.intro))

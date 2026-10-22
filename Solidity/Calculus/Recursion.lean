@@ -682,16 +682,18 @@ partial def inductM (g : MVarId) (fuel : Nat) : TacticM Induct := g.withContext 
   let some [g₁] ← tryOn g (evalTactic (← `(tactic| (apply RecContractM.unroll; intro n t ih))))
     | return .failed
   g₁.withContext do
-  let mut g₂ := g₁
+  -- the frame's own within facts, for `simp` (named: a `*` would hand `simp`
+  -- the contract hypotheses too, and it does not stop)
+  let mut hs : Array (TSyntax `term) := #[]
   for d in ← recHyps do
     let hS ← Term.exprToSyntax d.toExpr
-    let some [g'] ← tryOn g₂ (evalTactic (← `(tactic| have := ($hS).2.1))) | return .failed
-    g₂ := g'
-  let some gs ← tryOn g₂ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩))) | return .failed
+    hs := hs.push (← `(($hS).2.1))
+  let some gs ← tryOn g₁ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩))) | return .failed
   let [gc, gw, gr] := gs | return .failed
+  let hsS : Array (TSyntax `Lean.Parser.Tactic.simpLemma) ← hs.mapM fun h => `(Lean.Parser.Tactic.simpLemma| $h:term)
   let some [] ← tryOn gw (evalTactic (← `(tactic| (
       simp only [Prog.withinW_cons, Stmt.withinW, MRhs.allocIn,
-        Bool.and_true, Bool.true_and, Bool.and_self, Bool.or_true, Bool.true_or, *]
+        Bool.and_true, Bool.true_and, Bool.and_self, Bool.or_true, Bool.true_or, $hsS,*]
       all_goals first | rfl | decide))))
     | return .notWithin
   let some [] ← tryOn gr (evalTactic (← `(tactic| first | rfl | decide))) | return .failed
