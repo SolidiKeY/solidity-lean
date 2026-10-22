@@ -909,6 +909,26 @@ theorem lenU_withMem_newArr {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Un
   simp only [PrimTy.inRange, decide_eq_true_eq] at this
   omega
 
+/-- A storage read in the Theory, by its operands' Theory values (`Op2.denote`,
+`Op0.denote`): what `sol_close_denote` reads a storage alias's `ensures`
+by. -/
+theorem denote_len {E : Ty} (σ : State C Γ) (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .len s q).denote σ = lenW ((s.denote σ).len (q.denote σ)) := rfl
+theorem denote_find {p : PrimTy} (σ : State C Γ) (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
+    (Tm.app2 .find s q).denote σ = some ((s.denote σ).word (q.denote σ)) := rfl
+theorem denote_storage (σ : State C Γ) :
+    (Tm.app0 .storage : Tm C Γ .st).denote σ = σ.storage.obs := rfl
+theorem denote_root (σ : State C Γ) (r : Name) {T : Ty} (h : C.rootType r = some T) :
+    (Tm.app0 (.root r h) : Tm C Γ (.path T)).denote σ = .ref (SRef.ofRoot r h) := rfl
+theorem denote_pvP {R : RefTy} (σ : State C Γ) (i : Idx Γ (.alias R)) :
+    (Tm.pvP i).denote σ =
+      Option.elim (σ.locV (.alias R) i) (SLoc.dangling _ .nil) (SLoc.ref (T := .ref R)) := by
+  have e : σ.locV (.alias R) i = (TEnv.get i σ.env : Option (SRef C (.ref R))) := rfl
+  rw [e]
+  simp only [Tm.denote]
+  cases (TEnv.get i σ.env : Option (SRef C (.ref R))) <;> rfl
+
 /-- `τ` is `σ` over a grown heap that keeps `σ`'s objects (`Fml.grow`). -/
 def _root_.Solidity.State.GrowOf (σ τ : State C Γ) : Prop :=
   ∃ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap ∧ τ = (σ.adopt g).1
@@ -1180,6 +1200,25 @@ def evalSolCloseUnwrapS : Tactic := fun _ => withMainContext do
   for g' in gs do g'.setTag tag
   replaceMainGoal gs
 
+/-- `sol_close_unwrap_th`: `sol_close_unwrap` with no equation strengthened
+(`Valid.of_evalEqsTh`): one that reads a storage alias stays a Theory
+equation, for `sol_close_denote`. -/
+@[tactic Solidity.tacticSol_close_unwrap_th]
+def evalSolCloseUnwrapThS : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOf ``Solidity.Valid do throwUnsupportedSyntax
+  let tag ← g.getTag
+  let g₂ ← try
+      let φ' ← evalEqsE false ty.appArg!
+      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Valid.of_evalEqsTh) | failure
+      let ty₁ ← instantiateMVars (← g₁.getType)
+      g₁.replaceTargetDefEq (mkApp ty₁.appFn! φ')
+    catch _ => pure g
+  let gs ← g₂.apply (← mkConstWithFreshMVarLevels ``CloseS.valid_of_holds)
+  for g' in gs do g'.setTag tag
+  replaceMainGoal gs
+
 /-- Run `tac` where the goal is a scoped leaf's, else step aside. -/
 def onScoped (tac : TacticM Syntax) : Tactic := fun _ => do
   unless ← Close.scopedGoal do throwUnsupportedSyntax
@@ -1236,6 +1275,60 @@ def evalSolCloseReadsAllS : Tactic := onScoped do
     simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
   else `(tactic|
     simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last, $ex,*])
+
+/-- Whether the goal or a hypothesis reads a storage alias local inside a
+Theory value (`Tm.denote` of a term with `Tm.pvP`). -/
+def aliasDenoteLeft : TacticM Bool := withMainContext do
+  let hit (e : Expr) : Bool := (e.find? fun x =>
+    x.isAppOf ``Tm.denote && (x.find? (·.isConstOf ``Tm.pvP)).isSome).isSome
+  if hit (← instantiateMVars (← getMainTarget)) then return true
+  for d in ← getLCtx do
+    if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return true
+  return false
+
+@[tactic Solidity.tacticSol_close_alias_guard]
+def evalSolCloseAliasGuard : Tactic := fun _ => withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  unless ty.isAppOf ``Solidity.Valid do throwError "sol_close_alias_guard: not a scoped leaf"
+  let hasPvP (e : Expr) : Bool := (e.find? (·.isConstOf ``Tm.pvP)).isSome
+  let hit := ty.find? fun x => x.isAppOfArity ``Fml.eq 5 && hasPvP x
+  unless hit.isSome do throwError "sol_close_alias_guard: no equation reads a storage alias"
+
+macro_rules
+  | `(tactic| sol_close_alias) => `(tactic| (
+    sol_close_alias_guard
+    sol_close_unwrap_th
+    intro σ
+    sol_close_eval
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals (try simp only [CloseS.landedAll_def])
+    all_goals try (intros; sol_close_reads_all)
+    all_goals try (subst_vars; sol_close_reads_all)
+    all_goals (try intros)
+    all_goals sol_close_denote))
+
+@[tactic Solidity.tacticSol_close_denote]
+def evalSolCloseDenote : Tactic := fun _ => withMainContext do
+  unless ← aliasDenoteLeft do throwError "sol_close_denote: no alias read left as a Theory value"
+  -- the equations of Theory values in scope, back into the goal: read alike
+  -- with it, nothing else rewritten (the landed states others depend on)
+  let mut hs : Array FVarId := #[]
+  for d in ← getLCtx do
+    if d.isImplementationDetail then continue
+    let ty ← instantiateMVars d.type
+    if ty.isEq && (ty.find? (·.isAppOf ``Tm.denote)).isSome then hs := hs.push d.fvarId
+  let (_, g) ← (← getMainGoal).revert hs
+  replaceMainGoal [g]
+  -- read in the Theory, the alias at the path it holds: an `ensures` the
+  -- frame below gave and the frame's own read alike
+  evalTactic (← `(tactic| (
+    simp (config := { maxSteps := 100000 }) only [CloseS.denote_len, CloseS.denote_find,
+      CloseS.denote_storage, CloseS.denote_root, CloseS.denote_pvP, Option.elim_some,
+      CloseS.Landed.locV_eq, CloseS.Landed.storage_eq, State.locV_push, CloseS.push_here,
+      CloseS.push_there, CloseS.push_storage, CloseS.glob_storage]
+    all_goals intros
+    all_goals first | rfl | assumption)))
 
 /-- Typed values occurring under projections, including dependent anonymous locals.
 Inspect at most 8,192 local declarations/expression nodes and add at most

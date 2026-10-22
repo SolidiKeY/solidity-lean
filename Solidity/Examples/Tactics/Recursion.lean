@@ -112,8 +112,7 @@ alias to a path (`r = values;`, and `r = pick(n - 1);` to the frame
 below's, `Stmt.rebind`), within `view`, so it has a contract
 (`FunContract.forall_storage`), proved by induction over the frames: the
 call does not panic, from any `n`.  (An `ensures` that reads the returned
-alias, `r.length`, is past the closers, which read no alias local in a
-leaf.) -/
+alias, `r.length`, is `pickLen`'s.) -/
 theorem pickNoPanic : ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true } := by
   rec_contract_by .view cdlIn![uint n]{ true } cdlIn![uint n, old, oldNet, uint[] storage r]{ true }
   case hc =>
@@ -124,6 +123,29 @@ theorem pickNoPanic : ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true 
       rec_step ih
     · simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
       first | rfl | decide
+  case pre => sol_symex; sol_close
+  case post => sol_symex; sol_close
+
+/-- **An `ensures` that reads the returned alias** (`r.length`): the
+frame's own `ensures` and the one the frame below gave are read in the
+Theory, the alias at the path it holds (`sol_close_alias`,
+`sol_close_denote`), so the hypothesis closes the frame's; the caller reads
+`s.length` off the contract alike.  (Read through a value local, `uint l =
+s.length; … l == …`, the length is the interpreter's, which the Theory's
+`ensures` does not give: an alias the contract leaves may hold a path that is
+no array.) -/
+theorem pickLen :
+    ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
+  rec_contract_by .view cdlIn![uint n]{ true }
+    cdlIn![uint n, old, oldNet, uint[] storage r]{ r.length == values.length }
+  case hc =>
+    apply RecContract.unroll
+    intro k t ih
+    refine ⟨FunContract.forall_storage ?_, ?_, rfl⟩
+    · apply FunContract.ofValidCtx [.user "n"]
+      rec_step ih
+    · simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
+      rfl
   case pre => sol_symex; sol_close
   case post => sol_symex; sol_close
 

@@ -90,6 +90,27 @@ syntax "sol_close_reads" : tactic
 /-- `sol_close_reads` on the goal and every hypothesis. -/
 syntax "sol_close_reads_all" : tactic
 
+/-- An equation left as Theory values (`Tm.denote`) that reads a storage
+alias local (`Tm.pvP`, which no `Tm.agreeB` admits: an unset alias reads
+`dangling`): each side read in the Theory at the path the alias holds
+(`CloseS.denote_len`, `CloseS.denote_pvP`), so an `ensures` the frame below
+gave closes the frame's own.  Fails where no such equation is left. -/
+syntax "sol_close_denote" : tactic
+
+/-- `sol_close_unwrap` with no equation strengthened: an equation that reads
+a storage alias stays a Theory equation (`Valid.of_evalEqsTh`). -/
+syntax "sol_close_unwrap_th" : tactic
+
+/-- Fails unless an equation of the leaf reads a storage alias (`Tm.pvP`):
+an `ensures` of a returned alias, assumed or owed. -/
+syntax "sol_close_alias_guard" : tactic
+
+/-- `sol_close` on a leaf whose equations read a storage alias
+(`sol_close_alias_guard`): read in the Theory (`sol_close_unwrap_th`), the
+alias at the path it holds (`sol_close_denote`).  Fails where it does not
+close the leaf. -/
+syntax "sol_close_alias" : tactic
+
 /-- Expose typed ranges and existential read witnesses before the final arithmetic pass. -/
 syntax (name := tacticSol_close_enrich) "sol_close_enrich" : tactic
 
@@ -107,8 +128,11 @@ elab_rules : tactic
 steps of the same names).  Run `sol_symex` first; with no goal left it does
 nothing. -/
 macro "sol_close" : tactic => `(tactic|
-  all_goals
-   (sol_close_unwrap
+  all_goals first
+  -- a leaf whose equations read a storage alias (an `ensures` of a returned
+  -- alias): read in the Theory, the alias at the path it holds; else as below
+  | sol_close_alias
+  |(sol_close_unwrap
     intro σ
     sol_close_eval
     all_goals try sol_close_facts

@@ -183,4 +183,10 @@ theorem Fml.evalEqs_sound : (goal : Bool) → {Γ : Ctx} → (φ : Fml C Γ) →
 theorem Valid.of_evalEqs {φ : Fml C []} (h : Valid (Fml.evalEqs true φ)) : Valid φ :=
   fun σ => (Fml.evalEqs_sound true φ σ).1 rfl (h σ)
 
+/-- A formula is valid where its leaf read with no equation strengthened is
+(every one marked where its sides agree, else kept as the Theory reads it):
+`sol_close_unwrap_th`'s. -/
+theorem Valid.of_evalEqsTh {φ : Fml C []} (h : Valid (Fml.evalEqs false φ)) : Valid φ :=
+  fun σ => ((Fml.evalEqs_sound false φ σ).2 rfl).1 (h σ)
+
 end Solidity
