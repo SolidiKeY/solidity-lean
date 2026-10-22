@@ -8,6 +8,31 @@ cannot prove is `pending` with a reason (`scripts/test-solidity.test.mjs`
 pins them). `docs/solc-alignment.md` is where the model follows solc over
 KeY; this file is the work list.
 
+## Status (2026-10-22)
+
+Every row of the language's semantics below is closed: the run models it,
+the elaborator and the solc import accept it, and `tests/solc/` pins a
+proof of solc's behaviour for it.  What is left is not a gap in the
+semantics but in what the calculus and its closers prove automatically,
+each with the reason recorded in its section:
+
+- **Calculus.** A computed or rethrown revert reason (`revert(string.concat(…))`,
+  `catch (bytes memory d) { revert(d); }`) is bound as any byte string: no
+  formula reads the data a run halts with, which would need a third
+  modality over revert outcomes, with no solkey taclet to follow ("Revert
+  data").  A diamond over a loop whose body calls back is unsound by
+  design (`holdsC_diamond_loop`, `docs/options.md` O3).
+- **Closer and search cost.** The four `SolcLoopsOpen` functions
+  (`docs/loops.md`); an array's length after an element write under
+  `{grow}`; a fresh object's bytes under `allocAll` read by `sol_decide`;
+  quantifier instances at loop counters; reassembling a full address's 20
+  bytes; loops without an invariant (ABI arrays, `T[]` decoding), which no
+  strategy proves without one.
+- **Known defect.** `sol_close` names `CloseS.landedAll_def` before it is
+  declared, so that one `simp only` step never fires (`docs/kernel-port.md`);
+  fixing it changes `sol_close` everywhere, so it is left for a measured
+  change of its own.
+
 ## Out of scope: the EVM inside Solidity
 
 The model is Solidity's semantics, not the machine's. These are left out on
