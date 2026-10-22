@@ -153,6 +153,17 @@ theorem FunContractC.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] +
     cases bs with
     | snoc bs q x => cases bs; exact h
 
+/-- A contract at a call that returns a storage alias is one at every such
+call. -/
+theorem FunContractC.forall_storage {Γf : Ctx} {R : RefTy} {b : Prog C ([.alias R] ++ ps) Γf}
+    {req : Fml C ps} {ens : Fml C ([.alias R] ++ (Olds ++ ps))}
+    (h : FunContractC (Γ := []) I pay (CallRet.storage R (.user "r")) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.alias R] Γ'), FunContractC I pay ret b req ens m := by
+  intro Γ Γ' ret
+  cases ret with
+  | storage => exact h
+  | rets bs => cases bs
+
 /-- A contract at a call that returns several values is one at every such
 call. -/
 theorem FunContractC.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : Fml C ps}
@@ -626,11 +637,73 @@ theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
   intro o'' hf
   exact hM _ .nil o'' (.drop (ExecF.transport' hT.symm rfl hf))
 
-/-- A call whose result is values: none, one, or a tuple's (the returns a
-recursive function's contract reads, `CallRet.nVals`). -/
+/-- The continuation of a call of a storage return, with callbacks
+(`holds_callStorage`): the alias the callee leaves bound, `ensures` of it. -/
+theorem holdsC_callStorage_k {μ : Mutability} {R : RefTy} {r : Var}
+    {body : Prog C ([.alias R] ++ ps) Γf} {ω : Prog C (.alias R :: Γ) Γ₂}
+    {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {ens : Fml C ([.alias R] ++ (Olds ++ ps))}
+    (hw : writesRets 1 body = true) {σ : State C Γ} (a : TEnv C σ.H ps)
+    (o : Out C ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st.H Γf)
+    (hens : holds (State.withOlds [.alias R] (σ.withEnv a).net (σ.withEnv a).storage
+      (State.drop body.ext o.st)) ens)
+    (hg : TGFrame μ ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st o.st)
+    (hag : TLocAgree 0 (Prog.writesAt 0 body)
+      ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st.env (TEnv.drop body.ext o.st.env))
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+      (Fml.callResult (.storage R r) ens ω κ φ m)) :
+    (COut.ok (TRun.callLeave (.storage R r) body.ext σ
+      ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)) o)).thenF
+      (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ) := by
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  have hps : (TEnv.drop body.ext env).2 = a :=
+    TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
+  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+      (t := .alias R) (TEnv.drop body.ext env).1)
+      (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) := by
+    apply holdsC_wkD
+    have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
+        σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+            (TEnv.drop body.ext env).1) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
+        ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
+          (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
+      rw [TEnv.thin_atop_append, hps]
+    exact hst ▸ hens
+  have hM := hX (TEnv.drop body.ext env).1 hens'
+  have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+        (TEnv.drop body.ext env).1) =
+      (TRun.callLeave (.storage R r) body.ext σ
+        ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a))
+        ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
+    simp only [TRun.callLeave]
+    rw [TEnv.wk_self]
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    change ((TEnv.drop body.ext env).1,
+      TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
+        (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
+      ((TEnv.drop body.ext env).1, σ.env)
+    rw [TEnv.thin_ofExt]
+    change ((TEnv.drop body.ext env).1,
+      TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = ((TEnv.drop body.ext env).1, σ.env)
+    rw [TEnv.drop_append]
+  intro o'' hf
+  exact hM _ .nil o'' (.drop (ExecF.transport' hT.symm rfl hf))
+
+/-- A call whose result a contract under the callback reading reads: values
+(none, one, or a tuple's, `CallRet.nVals`) or a storage alias; a memory
+return's contract is over a grown heap (`Calculus/MemContract.lean`), which
+the callback runs' frame does not give (`ExecS.frame`). -/
 def CallRet.isValues {Γ rs Γ' : Ctx} : CallRet Γ rs Γ' → Bool
-  | .none | .val .. | .rets _ => true
-  | .mem .. | .storage .. => false
+  | .none | .val .. | .rets _ | .storage .. => true
+  | .mem .. => false
 
 /-- **A recursive call by its contract is sound with callbacks**
 (`holds_callContract`, the callee's runs with callbacks). -/
@@ -652,8 +725,10 @@ theorem holdsC_callRecContract {μ : Mutability} {f : Name} {d : Nat} {args : Ar
   | rets =>
     exact holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost
       fun a _ o h₁ h₂ h₃ h₄ => holdsC_callRets_k hc.2.2 a o h₁ h₂ h₃ h₄
+  | storage =>
+    exact holdsC_callRec_of (hc.1 _) hc.2.1 hreq hpre hpost
+      fun a _ o h₁ h₂ h₃ h₄ => holdsC_callStorage_k hc.2.2 a o h₁ h₂ h₃ h₄
   | mem => exact nomatch hk
-  | storage => exact nomatch hk
 
 /-- **`useContract` at a recursive call, with callbacks** (Lean,
 `ProvesC.recCall`): the goals "pre" and "post", the contract over the
@@ -886,7 +961,10 @@ partial def inductC (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Recursion.I
         (first | apply FunContractC.forall_rets $bs (by decide) | apply FunContractC.forall_val)
         apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))
     else `(tactic| (
-        (first | apply FunContractC.forall_none | apply FunContractC.forall_val)
+        (first
+          | apply FunContractC.forall_none
+          | apply FunContractC.forall_val
+          | apply FunContractC.forall_storage)
         apply FunContractC.ofProvesC [] (by rfl) (by rfl) (by rfl)))
   let some [gc'] ← Recursion.tryOn gc (evalTactic tac) | return .failed
   return if (← autoGoalC gc' fuel).isEmpty then .proved else .failed

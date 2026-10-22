@@ -415,6 +415,31 @@ theorem payDownEnds : ValidT .noCallback dl!{ ⟨ payDown(to); ⟩ true } := by 
 
 end PayDown
 
+/-- A recursive storage return that calls back: a value call in every
+frame, then the alias bound. -/
+def PickPay : Contract := contract!{
+  uint[] values;
+  function pickPay(uint n, uint to) returns (uint[] storage r) {
+    (bool ok, ) = to.call{value: 0}("");
+    if (n == 0) { r = values; return r; }
+    return pickPay(n - 1, to);
+  }
+}
+
+section PickPay
+
+local instance : InContract := ⟨PickPay⟩
+
+/-- **A storage return by its contract, with callbacks**
+(`ProvesC.recContract`, `holdsC_callStorage_k`): the callee may be called
+back in every frame, so its contract is over the callback runs
+(`RecContractC`, `FunContractC.forall_storage`), proved by induction over
+the frames. -/
+theorem pickPayNoPanic : ValidT .noCallback dl!{ [ uint[] storage s = pickPay(m, to); ] true } := by
+  rec_auto_c
+
+end PickPay
+
 /-- `payDown` with its condition not captured by hand: `if (a > 0)` is
 captured by `ifElseUnfold` under callbacks (`ProvesC.capture`), though the
 branch calls back. -/
