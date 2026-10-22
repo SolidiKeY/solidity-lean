@@ -122,7 +122,7 @@ theorem Fml.instancesOf_holds {Γ : Ctx} (ts : List InstLit) : (a : Fml C Γ) �
   | .tt, _, _, _, hb | .eq _ _, _, _, _, hb | .wellFormed _, _, _, _, hb | .not _, _, _, _, hb
   | .imp _ _, _, _, _, hb | .upd _ _ _, _, _, _, hb | .modal _ _ _ _, _, _, _, hb
   | .havoc _, _, _, _, hb | .bind _ _ _ _, _, _, _, hb | .anon _ _, _, _, _, hb
-  | .allocAll _ _ _, _, _, _, hb => by cases hb
+  | .allocAll _ _ _, _, _, _, hb | .grow _, _, _, _, hb => by cases hb
 
 /-- What a premise with instances keeps beside them: its conjuncts that are
 not a `∀` with an instance. -/
@@ -139,7 +139,7 @@ theorem Fml.instRest_holds {Γ : Ctx} (ts : List InstLit) : (a : Fml C Γ) → (
   | .tt, _, ha, _, hb | .eq _ _, _, ha, _, hb | .wellFormed _, _, ha, _, hb | .not _, _, ha, _, hb
   | .imp _ _, _, ha, _, hb | .upd _ _ _, _, ha, _, hb | .modal _ _ _ _, _, ha, _, hb
   | .havoc _, _, ha, _, hb | .bind _ _ _ _, _, ha, _, hb | .anon _ _, _, ha, _, hb
-  | .allocAll _ _ _, _, ha, _, hb | .all _ _ _, _, ha, _, hb => by
+  | .allocAll _ _ _, _, ha, _, hb | .all _ _ _, _, ha, _, hb | .grow _, _, ha, _, hb => by
     unfold Fml.instRest at hb
     split at hb
     · rw [List.mem_singleton.1 hb]; exact ha
