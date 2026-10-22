@@ -117,6 +117,7 @@ import Solidity.Calculus.FunContract
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RunFrameMem
 import Solidity.Calculus.MemContract
+import Solidity.Calculus.CallbackFrameMem
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Derive
 import Solidity.Calculus.LeafDerive
