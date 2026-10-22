@@ -48,7 +48,7 @@ contract's invariant.
 
 | Gap | Kind | Status |
 |---|---|---|
-| recursion (`functionsRecursiveUnbounded`) | semantics, calculus | closed: `Stmt.callRec`, unrolled to the EVM's 1024 frames, proved by contract over the frames (`docs/kernel-port.md`, "Recursion"); the runner proves a recursive call by its callee's `/// @custom:key` contract, else `true`/`true` (`rec_auto`, `tests/solc/Recursion.sol`); several returns to a tuple's targets; a storage return by contract (its body rebinds the alias to a path, within `view`: `Stmt.within`'s `rebind`/`declStorage`, `Examples/Tactics/Recursion.lean`'s `pickNoPanic`), an `ensures` that reads the returned alias read in the Theory (`sol_close_alias`, `pickLen`); a memory return that allocates by contract over a grown heap (`Stmt.withinM`, `Fml.grow`, `useRecContractM`, `buildLen`, lane `open-memret`); a reference return's source `ensures` (`recSpecContract`, `pickAuto`, `buildAuto`); under the callback reading (O7) by `rec_auto_c` (`Calculus/RecursionCallback.lean`), storage and memory returns included (`pickPayNoPanic`, `buildPayLen`), an `if` on a condition that is not a local included (`ProvesC.capture`, `docs/options.md` O3); open: a memory return whose body writes into an object (`docs/kernel-port.md` "Recursion", "What is left") |
+| recursion (`functionsRecursiveUnbounded`) | semantics, calculus | closed: `Stmt.callRec`, unrolled to the EVM's 1024 frames, proved by contract over the frames (`docs/kernel-port.md`, "Recursion"); the runner proves a recursive call by its callee's `/// @custom:key` contract, else `true`/`true` (`rec_auto`, `tests/solc/Recursion.sol`); several returns to a tuple's targets; a storage return by contract (its body rebinds the alias to a path, within `view`: `Stmt.within`'s `rebind`/`declStorage`, `Examples/Tactics/Recursion.lean`'s `pickNoPanic`), an `ensures` that reads the returned alias read in the Theory (`sol_close_alias`, `pickLen`); a memory return that allocates by contract over a grown heap (`Stmt.withinM`, `Fml.grow`, `useRecContractM`, `buildLen`, lane `open-memret`); a reference return's source `ensures` (`recSpecContract`, `pickAuto`, `buildAuto`); under the callback reading (O7) by `rec_auto_c` (`Calculus/RecursionCallback.lean`), storage and memory returns included (`pickPayNoPanic`, `buildPayLen`), an `if` on a condition that is not a local included (`ProvesC.capture`, `docs/options.md` O3); a memory return whose body writes its own objects (`Stmt.withinW`, `Calculus/RunFrameOwn.lean`, `mkAge`); open: such writes under the callback reading, a memory parameter, a length past an element write in the closer (`docs/kernel-port.md` "Recursion", "What is left") |
 | a `catch` goal when the callee cannot fail (`tryCatchExactReturn`) | calculus | closed: each self-call `catch` goal assumes `fails(call)`, the walks prove the callee's diamond instead (`notLeft`; `docs/options.md` O8) |
 | a value call to `this` runs `receive` (`callRunsReceive`) | semantics | closed: a self-call `try` of `receive` behind `r == address(this)` (`elabValueCall`, O8); `callKeepsStorageUnsound` stays pending, false on the EVM |
 | `msg.value` bounded by the ether supply (`msgValueArith`) | chain fact | closed: `msg.value < 2^128` (`Problem.callPre`) |
@@ -832,13 +832,38 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   --test-name-pattern="revert|self|solc/open"` passes (4 tests).
 
 **Left open, with the reason.**
-- A reason that is not a literal (`revert(string.concat(…))`, a rethrown
-  `bytes`): `sol{}` refuses it ("a string literal"), and `RevPart` has no
-  memory part.  With one, the datum would be the any-bytes goal and no
-  more: no formula reads the data a program halts with (neither modality
-  reads a revert's data), and the object is in the callee's frame, which
-  its revert discards, so the caller's goal has no term for its bytes.
-  Premises about it would need a modality over revert outcomes.
+- A reason that is not a literal (`revert(string.concat("x", s))`, a
+  rethrown `catch (bytes memory d) { revert(d); }` in a self-call's
+  callee).  Re-examined in lane `open-memret`, not implemented; what it
+  takes, layer by layer:
+  1. *Syntax.* `sol{}` refuses a reason that is not a literal ("a string
+     literal", `Syntax.lean`'s `solRequireMsg`), and `RevPart` (`Syntax/Scoped.lean`) has
+     literal bytes, a selector and a word only.  A `RevPart.mem (x : Idx Γ
+     (.mem .bytes))` — the bytes of a memory local at the revert — is one
+     constructor of `Stmt`'s data, so every fold over `Stmt` gains an arm
+     (`Stmt.within*`, `writesAt`, the printers, `Stmt.run`'s halt).
+  2. *Run.* The halted run would carry those bytes, read off the callee's
+     heap as it halts; the heap itself is discarded, so the data must be
+     copied out as values (`THalt.revertWith` carries bytes already).
+  3. *Calculus.* The `try`'s rule (`catchDataBox`, `Calculus/Blocks.lean`)
+     enumerates the callee's data statically (`Stmt.revertDatas`, a `Pat`
+     per `revert`); a computed datum has no pattern, so the clause would
+     bind it as any bytes (`Fml.allocAll`), the any-bytes goal of today.
+     To prove facts about it the caller's goal needs a term for what the
+     callee halts with, and no formula reads a halt's data: `[·]` and `⟨·⟩`
+     read normal outcomes only.  The reading needed is a third modality,
+     `[s]ʳ(d. φ)`: every run of `s` that reverts does so with data `d`
+     such that `φ`, `φ` read in the state the callee reverts in (its
+     memory, so `d`'s bytes are `string.concat("x", s)`'s); the `try`'s
+     rule then splits the callee into `[body] success` and
+     `[body]ʳ(d. clause)`.  This is a new `Fml` constructor with a rule for
+     every statement (solkey has no taclet to transcribe: KeY's Solidity
+     calculus reads no revert data) and a soundness case for each; the
+     `{grow}` reading of this lane (`Fml.grow`) carries the heap the
+     callee leaves, but a revert leaves none.
+  The cost is the obstacle: `Fml.grow` added one constructor and about
+  forty fold arms (`Derived15`'s near-limit replay re-checked under it); a
+  revert modality is that plus a rule per statement, so it is its own lane.
 - A fresh object's bytes read in the clause cost `sol_close` past its
   heartbeats when the premises read bytes too (`symbolicCustom` reads the
   length); `sol_decide` does not read `allocAll` (it would need an atom of

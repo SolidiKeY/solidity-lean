@@ -467,6 +467,11 @@ And `callWithoutCodeReverts` relies on address `0` having no code.
    the caller's on every failure: a halted run has no state to keep;
 3. otherwise the oracle, as before.
 
+A callee whose reason is not a literal (`revert(string.concat(…))`, a
+rethrown `bytes`) is refused by `sol{}`; what reading it would take (a
+revert-outcome modality) is `docs/semantic-gaps.md`, "Revert data", "Left
+open".
+
 **The frame.** The elaborator (`trySelfBody`, `Syntax/Elab.lean`) inlines
 the callee as an internal call with targets and rewrites its environment
 (`RawStmt.selfFrame`): `msg.sender` is `address(this)`, `msg.value` is `0`

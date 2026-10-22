@@ -222,7 +222,7 @@ reading (`ValidT`) on branch `open-reccb` (`rec_auto_c`, row "Callbacks
 |---|---|
 | Where a recursive callee's body lives | In the call, behind a thunk: `Stmt.callRec f d args ret (body : Unit → Prog C (rs ++ ps) (rs ++ ps))`, the body a block (so its frame is `rs ++ ps` on both sides).  A `Unit →` field is strictly positive, so `Stmt` stays an ordinary inductive and `Stmt.run` structural (the recursor's hypothesis for the field is `∀ u, motive (body u)`): the run is `TRun.call` of `body ()` (`Stmt.run_callRec`, by `rfl`).  No printer, quoter or analysis forces the thunk but where it must (below), so a body that calls itself costs one frame, not the unrolling. |
 | What the body is | `recUnroll Prog.recBase step recDepth` (`Syntax/Scoped.lean`): `recDepth` frames, frame `n + 1` the body with its own recursive calls `callRec f n args' ret' (fun _ => frame n)`, the bottom one `assume(false);` (exhausted).  The EVM's stack holds 1024 words and every internal call's frame at least its return address, so no run nests deeper than 1024: a deeper one overflows the stack and halts, which the model reads as the bottom frame's `exhausted`, and both modalities accept exhaustion (decision 15).  So the unrolling over-approximates the EVM soundly (below the bound the run is exact; the EVM may overflow earlier, every frame holding more than its return address, and a mutually recursive callee's count starts again at each frame of its caller, which only makes the bound looser), and nothing about a fixed point is needed.  **The diamond of a recursive call is no termination claim**: it accepts the exhausted bottom frame, so `⟨ f(); ⟩ false` holds of `function f() { f(); }`; it says the call neither reverts nor panics (where a loop that does not end is `diverge`, which the diamond rejects).  KeY's diamond would need a `decreases`.  `d` is the frames left; only the quoters read it. |
-| Elaboration | `elabCallRet` (`Syntax/Elab.lean`): a function is recursive when its body (or a modifier's) reaches a call of itself (`isRecursive`, over the contract's functions).  Its call allocates the frame's names once, and the body is elaborated per frame, lazily: `frame n bt` elaborates the raw body under `ElabScope.recs`, where a call of the same function (or of one mutually recursive with it) is `callRec f n … bt` with the frame's own names (`RecFrame`; the thunk's contract erased, `RecThunk`), its errors read once at the call.  A recursive body may call the functions declared before it and the ones mutually recursive with it (`recPartners`).  Every frame of the unrolling is one context, `rs ++ ps`, at every call: a call of several returns returns to a tuple's targets (`CallRet.rets`, the targets fresh at each call, since they are declared in the caller's context too), and is refused as a statement (`f(a);` would declare the returns inside the frame, another context); a reference return is `CallRet.mem`/`CallRet.storage` with the frame `[.mem R] ++ ps`/`[.alias R] ++ ps`.  Such a call runs (the unrolling is the same); a storage return has a contract (its alias rebound to a path, within `view`), a memory return one over a grown heap where its body allocates without writing an object (`Stmt.withinM`, `useRecContractM`): "Reference returns by contract" below. |
+| Elaboration | `elabCallRet` (`Syntax/Elab.lean`): a function is recursive when its body (or a modifier's) reaches a call of itself (`isRecursive`, over the contract's functions).  Its call allocates the frame's names once, and the body is elaborated per frame, lazily: `frame n bt` elaborates the raw body under `ElabScope.recs`, where a call of the same function (or of one mutually recursive with it) is `callRec f n … bt` with the frame's own names (`RecFrame`; the thunk's contract erased, `RecThunk`), its errors read once at the call.  A recursive body may call the functions declared before it and the ones mutually recursive with it (`recPartners`).  Every frame of the unrolling is one context, `rs ++ ps`, at every call: a call of several returns returns to a tuple's targets (`CallRet.rets`, the targets fresh at each call, since they are declared in the caller's context too), and is refused as a statement (`f(a);` would declare the returns inside the frame, another context); a reference return is `CallRet.mem`/`CallRet.storage` with the frame `[.mem R] ++ ps`/`[.alias R] ++ ps`.  Such a call runs (the unrolling is the same); a storage return has a contract (its alias rebound to a path, within `view`), a memory return one over a grown heap where its body allocates, and writes only its own objects (`Stmt.withinM`, `Stmt.withinW`, `useRecContractM`): "Reference returns by contract" below. |
 | Quoting | A thunk is not data, so both quoters (`Syntax/Quote.lean`, `Calculus/Quote.lean`) quote a `callRec` by forcing its body once and writing `fun _ => recUnroll Prog.recBase (fun n bt => Q) d`, where `Q` is the forced body with every call of the same function written `callRec f n … bt` (`hs`, the functions whose unrolling is being quoted, by de Bruijn index).  Mutual recursion nests: the inner function's unrolling is under the outer's binders.  The kernel re-checks every quoted term. |
 | The strategy | `recursiveCallUnfold` (Lean only): `callRec` is the call of its body's next frame, which `internalCallExpand`/`functionBodyExpand` expand as any call.  It is exact, so sound, but it does not end with a symbolic argument: it splits every `if` whatever its condition, and with concrete arguments it is just as deep (the closer prunes branches only at the leaves).  So the strategy the tactics run does not fire it: `Fml.stepS`/`symexS` (`Calculus/Symex.lean`) are `Fml.step`/`symex` but at a box whose first statement is a recursive call, which they leave and go on with the rest of the formula.  `sol_step` there fails ("no modality left, or a recursive call at the head of each"), and `sol_symex` fails naming the call (`the strategy stops at the recursive call `f``): it is proved by its contract.  The rule stays (`Stmt.step`, a walk's `unfold`, `#step`). |
 | Proofs | KeY's way: `useRecContract` (`useContract` at a `callRec`, `Calculus/Recursion.lean`) with a `RecContract` (the `FunContract` at every call that returns `rs`, the body within its mutability, the parameters unwritten), proved for every frame by `RecContract.unroll`: the bottom frame meets every contract, and a frame meets it where the frame below does.  `FunContract` and its rule take the modality (`m`, the box by default), so a diamond contract is one too.  No `decreases`, under either modality: both accept the exhausted bottom frame, and the unrolling is finite, so the induction is over the frames, not a measure (a diamond `⟨ f(); ⟩ true` of a countdown from any `a` holds: below 1024 frames it ends, above them it is exhausted, as on the EVM).  In the step the frame below is a free thunk `t`; `sol_symex_rec` runs the strategy up to each call of it (conjunctions split) and `rec_contract ih` proves the call by the hypothesis.  A contract from the source: `recSpecContract` reads a function's `requires`/`ensures` (`FunDecl.spec`, `spec!{f}`'s compiler) as `req` over the parameters and `ens` over the return variables (`\result`, `result_<name>`), `old`/`oldNet` and the parameters; it assumes no range, layout or invariant (a contract holds from every typed state of the frame).  A call that returns to targets (`CallRet.rets`) is one of every call: `FunContract.forall_val`, `FunContract.forall_rets` (its targets' names do not matter, `Binders.defaultsT_eq`).  Mutual recursion: `odd`'s unrolling sits in each frame of `even`'s, its own calls of `even` the outer frame below, so `even`'s step proves the call of `odd` by `odd`'s contract by an induction of its own, whose step's call of `even` is the outer hypothesis; the body's mutability goes through the nested unrolling by `Prog.within_recUnroll`. |  The compiled strategy runs a goal with a free thunk at a placeholder body (`Prog.recSentinel`, `Symex.placeholders`), quoted back as the variable: `Meta.reduce` is far too slow for it. |
@@ -273,24 +273,44 @@ frame alike (`ExecP.frameM`, `Calculus/CallbackFrameMem.lean`),
 global part and the locals as they were (`CloseS.holds_grow`,
 `State.GrowOf`), and a fresh array's length (`CloseS.lenU_withMem_newArr`).
 
-**What is left.**  A body that *writes* into an object (`p.age = 7`,
-`xs[i] = v`, a memory push, `delete` of a member) is outside
-`Stmt.withinM`: the write keeps the caller's objects only where it reaches
-none of them, which needs the run invariant step (1) of the design names in
-full: every memory reference in the callee's frame, and every reference
-inside an object it allocated, points into the objects it allocated (no
-memory parameter, or a caller's object reachable from one), preserved by
-every statement (`MLoc.addrT` and `MPath.mvalT` through own objects, an
-allocation's contents referring to new objects only, a nested call's
-returned object and its closure its own); `RefReturns.mk` of
-`Examples/Tactics/Recursion.lean` runs but has no contract.  An
-`ensures` of a returned alias read through a value local (`uint l =
-s.length; … l == …`) is the interpreter's length, which the Theory's
-`ensures` does not give (an alias the contract leaves may hold a path that
-is no array).  A leaf that reads `xs.length + 1` of an array returned under
-`{grow}` makes the kernel recurse too deep in `sol_close`'s proof
-(`buildLen` asserts `s.length == n - 1` instead).  A contract assumes no
-invariant of the contract (`invariant`), so a clause that needs one past a
+*A memory return whose body writes its own objects* (`p.age = 7` into the
+object it allocated, or into one a recursive call returned) has a contract
+too: the run invariant of the design's step (1) in full
+(`Calculus/RunFrameOwn.lean`).  `TEnv.Own b`: every memory reference in
+the frame's locals points at or past the heap's length `b` when the frame
+began, and `Heap.OwnAbove b`: so does every reference inside an object at
+or past `b` (`MVal.Own`, `MObj.Own`); a write through an own reference
+(`MLoc.addrT_own`, `Heap.writeAddr_own`) changes only objects past `b`, so
+the frame keeps every object below `b` (`Heap.KeepsBelow`, `TGFrameW`), the
+caller's.  `Stmt.withinW` admits, over `Stmt.withinM`, an assignment into
+memory (`assignMem`) and a loop, the frame's parameters free of memory
+references (`Ctx.memFree`); `Stmt.run_frameW` is the frame, `TGFrameW.toM`
+the grown frame "post" reads, so `holds_callMemM`, `RecContractM` and
+`useRecContractM` take a `withinW` body (`mkAge`, `rec_auto`).  The closer
+reads a value read back off a write (`sol_close_witness`: `∃ a, 7 = a.val ∧
+…`, the witness the literal).
+
+**What is left.**  Under the callback reading `RecContractCM` still asks
+`Stmt.withinM` (no write into an object): `ExecS.frameM` has no `withinW`
+twin.  A body with a memory parameter, or a `try` call, is outside
+`Stmt.withinW`.  A frame that writes an element and returns the array
+(`r = new uint[](2); r[0] = 3;`, `ensures r.length == 2`) is in
+`withinW`, but `sol_close` does not read a length past an element write
+(`CloseS.wp_box_writeT` gives the written address and the apart ones, not
+`Grown.writeT_lenU`), and the frame below's call followed by `s[1] = 5`
+runs `sol_close` out of heartbeats.  An `ensures` of a returned alias read
+through a value local (`uint l = s.length; … l == …`) is the interpreter's
+length, which the Theory's `ensures` does not give (an alias the contract
+leaves may hold a path that is no array).  A leaf that reads
+`xs.length + 1` of an array returned under `{grow}` makes the kernel
+recurse too deep in `sol_close`'s proof (`buildLen` asserts
+`s.length == n - 1` instead).  `sol_close` (`Calculus/Close.lean`) quotes
+`CloseS.landedAll_def` before the name is declared, so its own
+`simp only [CloseS.landedAll_def]` step resolves nothing (hygiene) and the
+landed states are opened by later steps only; the steps whose names live
+in `Calculus/CloseScoped.lean` are `macro_rules` there
+(`sol_close_alias`, `sol_close_witness`).  A contract assumes no invariant
+of the contract (`invariant`), so a clause that needs one past a
 recursive call stays open.  `Stmt.within` of a body with two recursive calls
 of itself is exponential in compiled code (`rec_auto` proves it by `simp`,
 frame by frame, so `fib` is linear there).
