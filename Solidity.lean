@@ -116,6 +116,7 @@ import Solidity.Calculus.Deploy
 import Solidity.Calculus.FunContract
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RunFrameMem
+import Solidity.Calculus.RunFrameOwn
 import Solidity.Calculus.MemContract
 import Solidity.Calculus.CallbackFrameMem
 import Solidity.Calculus.Symex

@@ -1,5 +1,5 @@
 import Solidity.Calculus.FunContract
-import Solidity.Calculus.RunFrameMem
+import Solidity.Calculus.RunFrameOwn
 
 /-!
 # A memory return by contract
@@ -7,8 +7,9 @@ import Solidity.Calculus.RunFrameMem
 `useContract`'s "post" for a memory return (`Fml.callResult`'s `.mem`)
 declares the fresh default object the callee is entered with: right for a
 callee within a mutability, which allocates nothing and so returns that
-object as it was.  A callee that allocates (`Stmt.withinM`,
-`Calculus/RunFrameMem.lean`) returns any object of a heap it grew, and leaves
+object as it was.  A callee that allocates and writes only its own objects
+(`Stmt.withinW`, `Calculus/RunFrameOwn.lean`; no memory parameter,
+`Ctx.memFree`) returns any object of a heap it grew, and leaves
 garbage beside it.  Its "post" reads the call where it ends
 (`docs/kernel-port.md`, "Recursion", "What is left", steps 2 and 3):
 
@@ -83,7 +84,8 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
     {body : Prog C ([.mem R] ++ ps) Γf} {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀}
     {φ : Fml C Γ₀} {req : Fml C ps} {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
     (hc : FunContract (CallRet.mem (Γ := Γ) R r hd hm) body req ens m)
-    (hμ : Prog.withinM μ body = true) (hw : writesRets 1 body = true) {σ : State C Γ}
+    (hμ : Prog.withinW μ body = true) (hw : writesRets 1 body = true)
+    (hpm : Ctx.memFree ps = true) {σ : State C Γ}
     (hpre : holds σ (Fml.callPre args req m))
     (hpost : holds σ (Fml.callPostM μ args R r ens ω κ φ m)) :
     holds σ (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ) := by
@@ -105,12 +107,18 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
       exact ⟨hct.1, fun hp => hct.2 (by cases hp; rfl)⟩
     | ok o =>
       rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      obtain ⟨hg, hag⟩ := Prog.run_frameM body hμ 0 hB
+      -- the callee writes only the objects it allocates (`Prog.run_frameW`)
+      obtain ⟨he₁, hh₁, hb₁⟩ := CallRet.enterT_own (b := σ.H.length)
+        (CallRet.mem (Γ := Γ) R r hd hm) (σ.withEnv a) (Nat.le_refl _)
+        (TEnv.Own.memFree hpm a) (Heap.ownAbove_length σ.heap)
+      obtain ⟨hg, hag, -, -⟩ := Prog.run_frameW body hμ 0 σ.H.length hB hb₁ he₁ hh₁
       have e₀ : σ.H <+: o.st.H :=
         ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext.trans o.ext
-      have hfr : TGFrameM μ σ o.st e₀ := ((TGFrameM.env σ a (List.prefix_refl _)).trans
-        (CallRet.enterT_frameM (μ := μ) (CallRet.mem (Γ := Γ) R r hd hm) (σ.withEnv a))
-        ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext).trans hg e₀
+      have hfr : TGFrameM μ σ o.st e₀ := TGFrameW.toM
+        (((TGFrameW.ofM (TGFrameM.env σ a (List.prefix_refl _))).trans
+          (TGFrameW.ofM (CallRet.enterT_frameM (μ := μ) (CallRet.mem (Γ := Γ) R r hd hm)
+            (σ.withEnv a)))
+          ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext).trans hg e₀)
       have hX := holds_snapOld ((holds_declsThen hpost).2 a hA)
       have hX' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
           (Fml.callResultM R r ens ω κ φ m) := by
@@ -174,11 +182,12 @@ variable {ps : Ctx} {R : RefTy} {m : Modality}
 
 /-- **A recursive function's contract, its memory return allocated**: the
 contract at every call returning `[.mem R]`, the body within `μ` as a body
-that allocates (`Prog.withinM`), the parameters unwritten. -/
+that allocates and writes only its own objects (`Prog.withinW`,
+`Calculus/RunFrameOwn.lean`), the parameters unwritten. -/
 def RecContractM (μ : Mutability) (b : Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)) (req : Fml C ps)
     (ens : Fml C ([.mem R] ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
   (∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.mem R] Γ'), FunContract ret b req ens m) ∧
-    Prog.withinM μ b = true ∧ writesRets 1 b = true
+    Prog.withinW μ b = true ∧ writesRets 1 b = true
 
 /-- A contract at a call that returns a memory object is one at every such
 call: each enters the body with a fresh default object, whatever its name. -/
@@ -219,11 +228,12 @@ theorem useRecContractM {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {d : Nat
     {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C ([.mem R] ++ (Olds ++ ps))} (hc : RecContractM μ (body ()) req ens m)
     («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m))) :
+    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
+    (hpm : Ctx.memFree ps = true := by rfl) :
     Valid (H.wrap (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
   H.wrap_and (φ := Fml.callPre args req m) (ψ := Fml.callPostM μ args R r ens ω κ φ m)
     (χ := .modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)
-    (fun _ h₁ h₂ => (holds_callMemM (f := f) (hd := hd) (hm := hm) (hc.1 _) hc.2.1 hc.2.2 h₁ h₂ :
+    (fun _ h₁ h₂ => (holds_callMemM (f := f) (hd := hd) (hm := hm) (hc.1 _) hc.2.1 hc.2.2 hpm h₁ h₂ :
       holds _ (.modal m (.cons (.call f args (.mem R r hd hm) (body ())) ω) κ φ)))
     σ («pre» σ) («post» σ)
 
@@ -237,9 +247,10 @@ theorem useContractM_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {�
     (hc : FunContract (CallRet.mem (Γ := Γ) R r hd hm) body req ens m)
     («pre» : Valid (H.wrap (Fml.callPre args req m)))
     («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
-    (hμ : Prog.withinM μ body = true := by rfl) (hw : writesRets 1 body = true := by rfl) :
+    (hμ : Prog.withinW μ body = true := by rfl) (hw : writesRets 1 body = true := by rfl)
+    (hpm : Ctx.memFree ps = true := by rfl) :
     Valid (H.wrap (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
-  H.wrap_and (fun _ h₁ h₂ => holds_callMemM hc hμ hw h₁ h₂) σ («pre» σ) («post» σ)
+  H.wrap_and (fun _ h₁ h₂ => holds_callMemM hc hμ hw hpm h₁ h₂) σ («pre» σ) («post» σ)
 
 end Rec
 

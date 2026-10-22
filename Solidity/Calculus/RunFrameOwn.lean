@@ -588,6 +588,25 @@ theorem Args.evalT_own {b : Nat} {Γ : Ctx} (σ : State C Γ) (he : TEnv.Own b �
       exact MPath.mvalT_own σ he hh p hv
     | there j => exact Args.evalT_own σ he hh as hr j r' hr'
 
+/-- No memory local: the parameters of a callee whose frame is its own. -/
+def Ctx.memFree : Ctx → Bool
+  | [] => true
+  | .mem _ :: _ => false
+  | _ :: ps => Ctx.memFree ps
+
+theorem TEnv.Own.memFree {b : Nat} : {ps : Ctx} → Ctx.memFree ps = true → (e : TEnv C H ps) →
+    TEnv.Own b e
+  | [], _, e => TEnv.Own.nil e
+  | .mem _ :: _, h, _ => by simp only [Ctx.memFree, Bool.false_eq_true] at h
+  | .val _ :: _, h, e => TEnv.Own.cons (by intro R h; cases h) (TEnv.Own.memFree (ps := _) (by exact h) e.2)
+  | .alias _ :: _, h, e => TEnv.Own.cons (by intro R h; cases h) (TEnv.Own.memFree (ps := _) (by exact h) e.2)
+  | .old :: _, h, e => TEnv.Own.cons (by intro R h; cases h) (TEnv.Own.memFree (ps := _) (by exact h) e.2)
+  | .oldNet :: _, h, e => TEnv.Own.cons (by intro R h; cases h) (TEnv.Own.memFree (ps := _) (by exact h) e.2)
+  | .kint :: _, h, e => TEnv.Own.cons (by intro R h; cases h) (TEnv.Own.memFree (ps := _) (by exact h) e.2)
+
+theorem Heap.ownAbove_length (hp : Heap H) : Heap.OwnAbove H.length hp := fun r hr =>
+  absurd r.id_lt (Nat.not_lt_of_le hr)
+
 theorem TEnv.Own.append {b : Nat} : (ρ : Ctx) → {Γ : Ctx} → (r : TEnv C H ρ) → (e : TEnv C H Γ) →
     TEnv.Own b r → TEnv.Own b e → TEnv.Own b (TEnv.append ρ r e)
   | [], _, _, _, _, he => he

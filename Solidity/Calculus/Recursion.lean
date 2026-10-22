@@ -677,7 +677,7 @@ partial def induct (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Induct := g.
   return if (← autoGoal gc' fuel).isEmpty then .proved else .failed
 
 /-- `induct` for a memory return that allocates (`RecContractM.unroll`): the
-frame within the mutability as a body that allocates (`Prog.withinM`). -/
+frame within the mutability as a body that writes only its own objects (`Prog.withinW`). -/
 partial def inductM (g : MVarId) (fuel : Nat) : TacticM Induct := g.withContext do
   let some [g₁] ← tryOn g (evalTactic (← `(tactic| (apply RecContractM.unroll; intro n t ih))))
     | return .failed
@@ -690,7 +690,7 @@ partial def inductM (g : MVarId) (fuel : Nat) : TacticM Induct := g.withContext 
   let some gs ← tryOn g₂ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩))) | return .failed
   let [gc, gw, gr] := gs | return .failed
   let some [] ← tryOn gw (evalTactic (← `(tactic| (
-      simp only [Prog.withinM_nil, Prog.withinM_cons, Stmt.withinM, Stmt.within, MRhs.allocIn,
+      simp only [Prog.withinW_cons, Stmt.withinW, MRhs.allocIn,
         Bool.and_true, Bool.true_and, Bool.and_self, Bool.or_true, Bool.true_or, *]
       all_goals first | rfl | decide))))
     | return .notWithin

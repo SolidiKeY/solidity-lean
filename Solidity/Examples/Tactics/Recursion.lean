@@ -197,7 +197,7 @@ theorem buildLen : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := b
         rec_contract_mem ih
         case pre => sol_symex; sol_close
         case post => sol_symex; sol_close
-    · simp only [Prog.withinM, Stmt.withinM, ih.2.1, Bool.and_true]
+    · simp only [Prog.withinW, Stmt.withinW, ih.2.1, Bool.and_true]
       rfl
   case pre => sol_symex; sol_close
   case post => sol_symex; sol_close
