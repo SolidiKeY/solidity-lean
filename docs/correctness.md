@@ -35,6 +35,11 @@ exhaustion, but reject panic. Diamonds accept a successful postcondition
 or exhaustion. Callback readings additionally reject invariant violation.
 These are model choices, not claims that execution terminates or has gas.
 
+Whole-contract properties compose successful deployment and interface calls
+in the [lifetime layer](lifetime.md). Its `AG`, `EF` and `AGEF` describe
+transaction-boundary safety and possible reachability; commits require actual
+successful outcomes, so an exhausted diamond does not witness reachability.
+
 ## October 2026 audit repairs
 
 Transfers and sends check both available funds and the transaction's

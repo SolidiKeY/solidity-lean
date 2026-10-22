@@ -41,3 +41,9 @@ certificates.
 
 Changes to the run that follow solc over KeY are recorded in
 `docs/solc-alignment.md`.
+
+Contract-specific transaction reachability is `Semantics/Lifetime.lean`
+(`docs/lifetime.md`): successful constructor first, then an explicit interface.
+Keep it distinct from `Typing/Reachability.lean`'s arbitrary-program storage
+constructibility and `ReachableBy`'s storage-only preservation. Its commits need
+actual successful runs; exhaustion and callback havoc are not witnesses.

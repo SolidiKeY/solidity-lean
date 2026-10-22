@@ -26,6 +26,7 @@ import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
+import Solidity.Semantics.Lifetime
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
@@ -60,6 +61,7 @@ import Solidity.Calculus.KeyValues
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
 import Solidity.Calculus.Correct
+import Solidity.Calculus.Lifetime
 import Solidity.Calculus.CorrectCallback
 import Solidity.Calculus.TermWk
 import Solidity.Calculus.EvalEqs
@@ -423,3 +425,4 @@ import Solidity.Examples.Tactics.EvaluationOrder
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.ArrayShapeCopy
 import Solidity.Examples.Tactics.Inheritance
+import Solidity.Examples.Tactics.Lifetime

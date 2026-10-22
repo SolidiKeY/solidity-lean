@@ -12,6 +12,7 @@ the others link to it.
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, and its update and theory symbols, to Lean names. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
 | [correctness.md](correctness.md) | Direct `Spec` correctness, strict equations, proved calculus bridges, callbacks and October audit repairs. |
+| [lifetime.md](lifetime.md) | Constructor-rooted transaction traces, whole-contract safety, possible reachability, invariant induction, payment/rollback and observation limits. |
 | [bridge.md](bridge.md) | Optional Mathlib/CSLib and external EVM word adapters, correctness theorems, build command and exact scope. |
 | [key-equality.md](key-equality.md) | One equation, KeY's `=`: no definedness test, `wt(s)` a predicate, conditions read by the program, how the closers read an equation. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
