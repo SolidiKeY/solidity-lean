@@ -588,6 +588,29 @@ theorem Args.evalT_own {b : Nat} {Γ : Ctx} (σ : State C Γ) (he : TEnv.Own b �
       exact MPath.mvalT_own σ he hh p hv
     | there j => exact Args.evalT_own σ he hh as hr j r' hr'
 
+theorem TEnv.Own.append {b : Nat} : (ρ : Ctx) → {Γ : Ctx} → (r : TEnv C H ρ) → (e : TEnv C H Γ) →
+    TEnv.Own b r → TEnv.Own b e → TEnv.Own b (TEnv.append ρ r e)
+  | [], _, _, _, _, he => he
+  | _ :: ρ, _, r, e, hr, he => fun i x hx => by
+    cases i with
+    | here => exact hr .here x hx
+    | there j => exact TEnv.Own.append ρ r.2 e (fun i' => hr (.there i')) he j x hx
+
+theorem TEnv.Own.take {b : Nat} : (ρ : Ctx) → {Γ : Ctx} → (e : TEnv C H (ρ ++ Γ)) →
+    TEnv.Own b e → TEnv.Own b (TEnv.take ρ e)
+  | [], _, _, _ => TEnv.Own.nil _
+  | _ :: ρ, _, e, he => fun i x hx => by
+    cases i with
+    | here => exact he .here x hx
+    | there j => exact TEnv.Own.take ρ e.2 (fun i' => he (.there i')) j x hx
+
+/-- A reference read at one heap typing as at an equal one: its identity. -/
+theorem HRef.heq_some_id {R : RefTy} (hH : H' = H) {x : Option (HRef H' R)} {y : Option (HRef H R)}
+    (h : HEq x y) {r : HRef H' R} (hx : x = some r) : ∃ r' : HRef H R, y = some r' ∧ r'.id = r.id := by
+  subst hH
+  cases h
+  exact ⟨r, hx, rfl⟩
+
 end Locals
 
 /-! ## The frame -/
@@ -693,5 +716,355 @@ theorem Prog.withinW_recUnroll {μ : Mutability} {F : Ctx}
       Prog.withinW μ (step n t) = true) (d : Nat) :
     Prog.withinW μ (recUnroll Prog.recBase step d) = true :=
   recUnroll_induct (fun b => Prog.withinW μ b = true) rfl hs d
+
+/-! ## Calls and leaves -/
+
+section Calls
+
+variable {μ : Mutability} {b : Nat} {Γ : Ctx}
+
+theorem Binders.own {H : HTy} : {ρ : Ctx} → Binders ρ → (x : TEnv C H ρ) → TEnv.Own b x
+  | _, .nil, x => TEnv.Own.nil x
+  | _, .snoc bs _ _, x => TEnv.Own.cons (by intro R h; cases h) (Binders.own bs x.2)
+
+/-- A call's frame entered from an own state: own, a memory return's object
+fresh. -/
+theorem CallRet.enterT_own {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps)
+    (hb : b ≤ τ.H.length) (he : TEnv.Own b τ.env) (hh : Heap.OwnAbove b τ.heap) :
+    TEnv.Own b (ret.enterT τ).st.env ∧ Heap.OwnAbove b (ret.enterT τ).st.heap ∧
+      b ≤ (ret.enterT τ).st.H.length := by
+  cases ret with
+  | none => exact ⟨he, hh, hb⟩
+  | val p r res => exact ⟨TEnv.Own.cons (by intro R h; cases h) he, hh, hb⟩
+  | rets bs => exact ⟨TEnv.Own.append _ _ _ (Binders.own bs _) he, hh, hb⟩
+  | mem R r hd hm =>
+    have ho := SVal.own_copyStToM (SVal.dflt (.ref R)) hm τ.heap
+    refine ⟨?_, Heap.OwnAbove.grow (SVal.keeps_copyStToM _ hm τ.heap) hh ho.1 hb,
+      Nat.le_trans hb (List.IsPrefix.length_le (τ.allocDefaultG R hm).ext)⟩
+    intro _ i x hx
+    cases i with
+    | here =>
+      have e : (τ.allocDefaultG R hm).val = x := Option.some.inj hx
+      subst e
+      exact Nat.le_trans hb ho.2
+    | there j => exact TEnv.Own.wk _ he j x hx
+  | storage R r => exact ⟨TEnv.Own.cons (by intro R' h; cases h) he, hh, hb⟩
+
+/-- What a call leaves its caller's own locals: own. -/
+theorem CallRet.leaveT_own {Γ' rs : Ctx} (ret : CallRet Γ rs Γ') {H : HTy} (e : TEnv C H Γ)
+    (x : TEnv C H rs) (he : TEnv.Own b e) (hx : TEnv.Own b x) : TEnv.Own b (ret.leaveT e x) := by
+  cases ret with
+  | none => exact he
+  | val p r res =>
+    cases res with
+    | none => exact he
+    | some j => exact TEnv.Own.set he j _ (by intro R h; cases h)
+  | rets bs => exact TEnv.Own.append _ x e hx he
+  | mem R r hd hm =>
+    intro _ i y hy
+    cases i with
+    | here => exact hx .here y hy
+    | there j => exact he j y hy
+  | storage R r => exact TEnv.Own.cons (by intro R' h; cases h) he
+
+/-- A statement within `μ` that writes no memory local and pushes none: by
+`Stmt.run_frame`, own where it started. -/
+theorem Stmt.run_frameW_leaf {Γ' : Ctx} (s : Stmt C Γ Γ') (hw : s.within μ = true)
+    (hW : ∀ x ∈ s.writesAt 0, ∀ R, x.1 ≠ .mem R)
+    (hpush : ∀ {R : RefTy} (j : Idx Γ' (.mem R)), ∃ i : Idx Γ (.mem R), j = i.ext s.ext)
+    (d : Nat) {σ : State C Γ} {o : Out C σ.H Γ'} (h : s.run σ = .ok o)
+    (he : TEnv.Own b σ.env) (hh : Heap.OwnAbove b σ.heap) :
+    TGFrameW μ b σ o.st o.ext ∧
+      TLocAgreeM o.ext d (s.writesAt d) σ.env (TEnv.drop s.ext o.st.env) ∧
+      TEnv.Own b o.st.env ∧ Heap.OwnAbove b o.st.heap := by
+  obtain ⟨hg, ha⟩ := Stmt.run_frame s hw d h
+  obtain ⟨-, ha0⟩ := Stmt.run_frame s hw 0 h
+  refine ⟨TGFrameW.ofM (TGFrameM.ofFrame hg _), TLocAgreeM.ofAgree hg.H ha, ?_,
+    Heap.OwnAbove.of_heq hg.H hg.heap hh⟩
+  intro R j r hr
+  obtain ⟨i, rfl⟩ := hpush j
+  rw [TEnv.get_ext_drop] at hr
+  have hni : (LTy.mem R, i.toNat - 0) ∉ s.writesAt 0 := fun hm => hW _ hm R rfl
+  obtain ⟨r', hr', hid⟩ := HRef.heq_some_id hg.H (ha0 _ i (Nat.zero_le _) hni) hr
+  rw [← hid]
+  exact he i r' hr'
+
+end Calls
+
+/-! ## A program that writes only own objects, within its frame -/
+
+section Progs
+
+variable {μ : Mutability}
+
+theorem Idx.outer_ty {Γ : Ctx} {t : LTy} {d : Nat} (i : Idx Γ t) {x : LTy × Nat}
+    (hx : x ∈ i.outer d) : x.1 = t := by
+  unfold Idx.outer at hx
+  split at hx
+  · rcases List.mem_singleton.1 hx with rfl
+    rfl
+  · exact absurd hx List.not_mem_nil
+
+theorem OpLoc.writesAt_ty {Γ : Ctx} {p : PrimTy} {d : Nat} (l : OpLoc C Γ p) {x : LTy × Nat}
+    (hx : x ∈ l.writesAt d) : x.1 = .val p := by
+  cases l with
+  | «local» i => exact Idx.outer_ty i hx
+  | _ => exact absurd hx List.not_mem_nil
+
+theorem Idx.ext_refl_eq {Γ : Ctx} {t : LTy} (i : Idx Γ t) : i.ext .refl = i := rfl
+
+mutual
+
+/-- **A statement that writes only its own objects runs within its frame**:
+from a state whose memory locals and objects from `b` on are own, every
+object below `b` kept, the state own after. -/
+theorem Stmt.run_frameW : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.withinW μ = true → (d b : Nat) →
+    {σ : State C Γ} → {o : Out C σ.H Γ'} → s.run σ = .ok o → b ≤ σ.H.length →
+    TEnv.Own b σ.env → Heap.OwnAbove b σ.heap →
+      TGFrameW μ b σ o.st o.ext ∧
+        TLocAgreeM o.ext d (s.writesAt d) σ.env (TEnv.drop s.ext o.st.env) ∧
+        TEnv.Own b o.st.env ∧ Heap.OwnAbove b o.st.heap
+  | _, _, .assign .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .rebind i _, hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rw [Idx.outer_ty i hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .assignLocal i _, hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rw [Idx.outer_ty i hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .declLocal .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => by cases j with | there i => exact ⟨i, rfl⟩) d h he hh
+  | _, _, .declStorage .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => by cases j with | there i => exact ⟨i, rfl⟩) d h he hh
+  | _, _, .opAssign _ _ _ l _, hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rw [OpLoc.writesAt_ty l hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .incDec _ _ l, hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rw [OpLoc.writesAt_ty l hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .assignIncDec i _ _ l _, hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rcases List.mem_append.1 hx with hx | hx
+        · rw [Idx.outer_ty i hx] at e; cases e
+        · rw [OpLoc.writesAt_ty l hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .transfer .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .send pv .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx R e => by
+        rw [Idx.outer_ty pv hx] at e; cases e)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .delete .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .require .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .assert .., hw, d, _, _, _, h, _, he, hh =>
+    Stmt.run_frameW_leaf _ (by exact hw) (fun _ hx => absurd hx List.not_mem_nil)
+      (fun j => ⟨j, rfl⟩) d h he hh
+  | _, _, .revert, _, _, _, _, _, h, _, _, _ | _, _, .assumeFalse, _, _, _, _, _, h, _, _, _ => by
+    cases h
+  | _, _, .revertData ps, _, _, _, σ, _, h, _, _, _ => by
+    change TRun.revertData ps σ = .ok _ at h
+    unfold TRun.revertData at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+  | _, _, .declMem R _ init _ hm, hw, d, b, σ, o, h, hb, he, hh => by
+    change TRun.declMem R init hm σ = .ok o at h
+    cases init with
+    | none =>
+      cases h
+      have ho := SVal.own_copyStToM (SVal.dflt (.ref R)) hm σ.heap
+      refine ⟨TGFrameW.ofM ((TGFrameM.adopt (μ := μ) σ _
+          (State.keeps_allocDefaultG σ R hm)).withEnv _), TLocAgreeM.wk _ _, ?_,
+        Heap.OwnAbove.grow (SVal.keeps_copyStToM _ hm σ.heap) hh ho.1 hb⟩
+      intro _ i x hx
+      cases i with
+      | here =>
+        have e : (σ.allocDefaultG R hm).val = x := Option.some.inj hx
+        subst e
+        exact Nat.le_trans hb ho.2
+      | there j => exact TEnv.Own.wk _ he j x hx
+    | some r =>
+      simp only [TRun.declMem] at h
+      obtain ⟨g, hg, h⟩ := tbind_ok_inv h
+      cases h
+      obtain ⟨hk, hh', he', hv⟩ := MRhs.evalT_own σ he hh hb r hg
+      obtain ⟨hf, ha⟩ := MRhs.evalT_frame μ d r hg
+      refine ⟨TGFrameW.ofM (hf.withEnv _), ha, ?_, hh'⟩
+      intro _ i x hx
+      cases i with
+      | here =>
+        have e : g.val = x := Option.some.inj hx
+        subst e
+        exact hv
+      | there j => exact he' j x hx
+  | _, _, .rebindMem i r, hw, d, b, σ, o, h, hb, he, hh => by
+    change TRun.rebindMem i r σ = .ok o at h
+    simp only [TRun.rebindMem] at h
+    obtain ⟨g, hg, h⟩ := tbind_ok_inv h
+    cases h
+    obtain ⟨hk, hh', he', hv⟩ := MRhs.evalT_own σ he hh hb r hg
+    obtain ⟨hf, ha⟩ := MRhs.evalT_frame μ d r hg
+    refine ⟨TGFrameW.ofM (hf.withEnv _), (ha.mono fun _ hx => absurd hx List.not_mem_nil).trans
+      (TLocAgreeM.set i _ _ (List.prefix_refl _)), ?_, hh'⟩
+    refine TEnv.Own.set he' i _ ?_
+    intro _ ht x hx
+    cases ht
+    cases hx
+    exact hv
+  | _, _, .assignMem l r, _, d, b, σ, o, h, hb, he, hh => by
+    change TRun.assignMem l r σ = .ok o at h
+    simp only [TRun.assignMem] at h
+    obtain ⟨mv, hmv, h⟩ := tbind_ok_inv h
+    obtain ⟨a, ha, h⟩ := tbind_ok_inv h
+    obtain ⟨hp, hw', h⟩ := tbind_ok_inv h
+    cases h
+    obtain ⟨hk, hh'⟩ := Heap.writeAddr_own σ.heap hh a (MLoc.addrT_own σ he hh l ha) mv
+      (MSrc.mvalT_own σ he hh r hmv) (TRes.ofOpt_ok hw')
+    exact ⟨⟨hk, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩,
+      TLocAgreeM.ofAgree rfl (TLocAgree.refl _), he, hh'⟩
+  | _, _, .ite c thn els, hw, d, b, σ, o, h, hb, he, hh => by
+    have hw' : (c.readsIn μ && Prog.withinW μ thn && Prog.withinW μ els) = true := hw
+    simp only [Bool.and_eq_true] at hw'
+    change TRun.ite c thn.ext thn.runR els.ext els.runR σ = .ok o at h
+    simp only [TRun.ite] at h
+    obtain ⟨v, _, h⟩ := tbind_ok_inv h
+    split at h
+    · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+      obtain ⟨hg, ha, he', hh'⟩ := Prog.run_frameW thn hw'.1.2 d b h' hb he hh
+      exact ⟨hg.withEnv _, ha.left, TEnv.Own.drop _ he', hh'⟩
+    · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+      obtain ⟨hg, ha, he', hh'⟩ := Prog.run_frameW els hw'.2 d b h' hb he hh
+      exact ⟨hg.withEnv _, ha.right, TEnv.Own.drop _ he', hh'⟩
+  | _, _, .block body, hw, d, b, σ, o, h, hb, he, hh => by
+    change (body.runR σ).map (fun o => ⟨o.st.drop body.ext, o.ext⟩) = .ok o at h
+    obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+    obtain ⟨hg, ha, he', hh'⟩ := Prog.run_frameW body hw d b h' hb he hh
+    exact ⟨hg.withEnv _, ha, TEnv.Own.drop _ he', hh'⟩
+  | Γ, _, .call _ args ret body, hw, d, b, σ, o, h, hb, he, hh => by
+    have hw' : (args.readsIn μ && Prog.withinW μ body) = true := hw
+    simp only [Bool.and_eq_true] at hw'
+    change TRun.call args ret body.ext body.runR σ = .ok o at h
+    rw [TRun.call_eq] at h
+    obtain ⟨a, haa, h⟩ := tbind_ok_inv h
+    unfold TRun.callFrom at h
+    obtain ⟨o', hbd, h⟩ := tbind_ok_inv h
+    cases h
+    have hea : TEnv.Own b a := Args.evalT_own σ he hh args haa
+    obtain ⟨he₁, hh₁, hb₁⟩ := CallRet.enterT_own (b := b) ret (σ.withEnv a) hb hea hh
+    have hen := CallRet.enterT_frameM (μ := μ) ret (σ.withEnv a)
+    obtain ⟨hg, -, he₂, hh₂⟩ := Prog.run_frameW body hw'.2 0 b hbd hb₁ he₁ hh₁
+    refine ⟨(((TGFrameW.ofM (TGFrameM.env σ a (List.prefix_refl _))).trans (TGFrameW.ofM hen)
+        (ret.enterT (σ.withEnv a)).ext).trans hg _).withEnv _,
+      CallRet.leaveT_frameM ret _ σ.env _ d, ?_, hh₂⟩
+    exact CallRet.leaveT_own ret _ _ (TEnv.Own.wk _ he)
+      (TEnv.Own.take _ _ (TEnv.Own.drop _ he₂))
+  | Γ, _, .callRec _ _ args ret body, hw, d, b, σ, o, h, hb, he, hh => by
+    have hw' : (args.readsIn μ && Prog.withinW μ (body ())) = true := hw
+    simp only [Bool.and_eq_true] at hw'
+    change TRun.call args ret (body ()).ext (body ()).runR σ = .ok o at h
+    rw [TRun.call_eq] at h
+    obtain ⟨a, haa, h⟩ := tbind_ok_inv h
+    unfold TRun.callFrom at h
+    obtain ⟨o', hbd, h⟩ := tbind_ok_inv h
+    cases h
+    have hea : TEnv.Own b a := Args.evalT_own σ he hh args haa
+    obtain ⟨he₁, hh₁, hb₁⟩ := CallRet.enterT_own (b := b) ret (σ.withEnv a) hb hea hh
+    have hen := CallRet.enterT_frameM (μ := μ) ret (σ.withEnv a)
+    obtain ⟨hg, -, he₂, hh₂⟩ := Prog.run_frameW (body ()) hw'.2 0 b hbd hb₁ he₁ hh₁
+    refine ⟨(((TGFrameW.ofM (TGFrameM.env σ a (List.prefix_refl _))).trans (TGFrameW.ofM hen)
+        (ret.enterT (σ.withEnv a)).ext).trans hg _).withEnv _,
+      CallRet.leaveT_frameM ret _ σ.env _ d, ?_, hh₂⟩
+    exact CallRet.leaveT_own ret _ _ (TEnv.Own.wk _ he)
+      (TEnv.Own.take _ _ (TEnv.Own.drop _ he₂))
+  | _, _, .loop _ c body, hw, d, b, σ, o, h, hb, he, hh => by
+    have hw' : (c.readsIn μ && Prog.withinW μ body) = true := hw
+    rw [Bool.and_eq_true] at hw'
+    change TLoop.run (fun o : Out C σ.H _ => (body.runR o.st).map
+        fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩) (fun o => c.evalT o.st)
+        ⟨σ, List.prefix_refl _⟩ = .ok o at h
+    refine TLoop.run_induct
+      (P := fun a : Out C σ.H _ =>
+        TGFrameW μ b σ a.st a.ext ∧ TLocAgreeM a.ext d (Prog.writesAt d body) σ.env a.st.env ∧
+          TEnv.Own b a.st.env ∧ Heap.OwnAbove b a.st.heap ∧ b ≤ a.st.H.length)
+      (Q := fun r => ∀ o, r = .ok o →
+        TGFrameW μ b σ o.st o.ext ∧ TLocAgreeM o.ext d (Prog.writesAt d body) σ.env o.st.env ∧
+          TEnv.Own b o.st.env ∧ Heap.OwnAbove b o.st.heap)
+      ⟨TGFrameW.ofM (TGFrameM.ofFrame (TGFrame.refl σ) _),
+        TLocAgreeM.ofAgree rfl (TLocAgree.refl _), he, hh, hb⟩
+      (fun a ha => ?_) (fun _ h => by cases h) o h
+    unfold TLoop.step
+    dsimp only
+    cases c.evalT a.st with
+    | error => dsimp only; intro _ h; cases h
+    | ok v =>
+      cases v with
+      | false => dsimp only; intro _ h; cases h; exact ⟨ha.1, ha.2.1, ha.2.2.1, ha.2.2.2.1⟩
+      | true =>
+        dsimp only
+        cases hbd : (body.runR a.st).map
+            (fun o' => (⟨o'.st.drop body.ext, a.ext.trans o'.ext⟩ : Out C σ.H _)) with
+        | error => dsimp only; intro _ h; cases h
+        | ok a' =>
+          dsimp only
+          obtain ⟨o', hb', rfl⟩ := tmap_ok_inv hbd
+          obtain ⟨hg, ha', he', hh'⟩ :=
+            Prog.run_frameW body hw'.2 d b hb' ha.2.2.2.2 ha.2.2.1 ha.2.2.2.1
+          refine ⟨ha.1.trans (hg.withEnv (TEnv.drop body.ext o'.st.env)) (a.ext.trans o'.ext),
+            ha.2.1.trans ha', TEnv.Own.drop _ he', hh',
+            Nat.le_trans ha.2.2.2.2 (List.IsPrefix.length_le o'.ext)⟩
+  | _, _, .assignLocalPush .., hw, _, _, _, _, _, _, _, _
+  | _, _, .pushOpAssign .., hw, _, _, _, _, _, _, _, _
+  | _, _, .pushIncDec .., hw, _, _, _, _, _, _, _, _
+  | _, _, .push .., hw, _, _, _, _, _, _, _, _ | _, _, .pop _, hw, _, _, _, _, _, _, _, _
+  | _, _, .assignFromMem .., hw, _, _, _, _, _, _, _, _
+  | _, _, .deleteMem .., hw, _, _, _, _, _, _, _, _
+  | _, _, .assignNew .., hw, _, _, _, _, _, _, _, _
+  | _, _, .tryCall .., hw, _, _, _, _, _, _, _, _
+  | _, _, .callReceiver .., hw, _, _, _, _, _, _, _, _
+  | _, _, .callReceiverPush .., hw, _, _, _, _, _, _, _, _
+  | _, _, .catchData .., hw, _, _, _, _, _, _, _, _ => by cases hw
+
+/-- **A program that writes only its own objects runs within its frame.** -/
+theorem Prog.run_frameW : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.withinW μ P = true →
+    (d b : Nat) → {σ : State C Γ} → {o : Out C σ.H Γ'} → Prog.run σ P = .ok o →
+    b ≤ σ.H.length → TEnv.Own b σ.env → Heap.OwnAbove b σ.heap →
+      TGFrameW μ b σ o.st o.ext ∧
+        TLocAgreeM o.ext d (Prog.writesAt d P) σ.env (TEnv.drop P.ext o.st.env) ∧
+        TEnv.Own b o.st.env ∧ Heap.OwnAbove b o.st.heap
+  | _, _, .nil, _, _, _, σ, _, h, _, he, hh => by
+    cases h
+    exact ⟨TGFrameW.ofM (TGFrameM.ofFrame (TGFrame.refl σ) _),
+      TLocAgreeM.ofAgree rfl (TLocAgree.refl _), he, hh⟩
+  | _, _, .cons s P, hw, d, b, σ, o, h, hb, he, hh => by
+    rw [Prog.withinW_cons, Bool.and_eq_true] at hw
+    change TRun.seq s.runR P.runR σ = .ok o at h
+    unfold TRun.seq at h
+    split at h
+    · rename_i o₁ hs
+      obtain ⟨o₂, h₂, rfl⟩ := tmap_ok_inv h
+      obtain ⟨hg₁, ha₁, he₁, hh₁⟩ := Stmt.run_frameW s hw.1 d b hs hb he hh
+      obtain ⟨hg₂, ha₂, he₂, hh₂⟩ := Prog.run_frameW P hw.2 (d + s.ext.depth) b h₂
+        (Nat.le_trans hb (List.IsPrefix.length_le o₁.ext)) he₁ hh₁
+      refine ⟨hg₁.trans hg₂ _, ?_, he₂, hh₂⟩
+      show TLocAgreeM _ d (Stmt.writesAt d s ++ Prog.writesAt (d + s.ext.depth) P) σ.env
+        (TEnv.drop (s.ext.trans P.ext) o₂.st.env)
+      rw [TEnv.drop_trans]
+      exact ha₁.left.trans (TLocAgreeM.drop s.ext ha₂).right
+    · cases h
+
+end
+
+end Progs
 
 end Solidity
