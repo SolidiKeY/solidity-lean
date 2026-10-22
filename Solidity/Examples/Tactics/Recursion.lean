@@ -469,6 +469,30 @@ theorem buildPayLen :
 
 end BuildPay
 
+/-- A recursive memory return whose frame writes into the object it
+allocated: a body that writes only its own objects (`Stmt.withinW`). -/
+def MakeAge : Contract := contract!{
+  uint a;
+  ensures p.age == 7;
+  function mk(uint n) returns (Person memory p) {
+    if (n == 0) { p.age = 7; return p; }
+    return mk(n - 1);
+  }
+}
+
+section MakeAge
+
+local instance : InContract := ⟨MakeAge⟩
+
+/-- **A memory return whose frame writes its own object** (`RecContractM`
+with `Prog.withinW`, `Stmt.run_frameW`): the write `p.age = 7` lands in the
+frame's own allocation, so the caller's objects are kept and the returned
+object read off the contract. -/
+theorem mkAge : ⊨ dl!{ [ Person memory q = mk(2); uint z = q.age; ] z == 7 } := by
+  rec_auto
+
+end MakeAge
+
 /-- `payDown` with its condition not captured by hand: `if (a > 0)` is
 captured by `ifElseUnfold` under callbacks (`ProvesC.capture`), though the
 branch calls back. -/
