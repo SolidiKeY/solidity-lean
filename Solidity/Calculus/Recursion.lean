@@ -1,4 +1,5 @@
 import Solidity.Calculus.FunContract
+import Solidity.Calculus.MemContract
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Spec
 import Solidity.Calculus.SurfaceSpec
@@ -227,7 +228,16 @@ def recSpecContract (C : Contract) (f : String) :
   let ps := d.params.filterMap fun (n, T) => match T with
     | .prim p => some (n, p)
     | _ => none
-  let rets ← d.rets.mapM fun (n, T) => match T with
+  -- a single reference return, read by its name (`r.length`): a storage
+  -- return's alias, a memory return's object
+  let refRet : Option (Name × LocalTy) ← match d.rets with
+    | [(n, .ref R)] =>
+      if d.retStorage then pure (some (n, LocalTy.alias R))
+      else if d.retMem then pure (some (n, LocalTy.mem R))
+      else (throw (refReturnMsg f (.ref R)) : Except String (Option (Name × LocalTy)))
+    | _ => pure none
+  let rets : List (Name × String × PrimTy) ← if refRet.isSome then pure [] else
+    d.rets.mapM fun (n, T) => match T with
     | .prim p => pure (n, if d.rets.length == 1 then "result" else s!"result_{n}", p)
     | T => throw (refReturnMsg f T)
   let res := match rets with
@@ -239,12 +249,18 @@ def recSpecContract (C : Contract) (f : String) :
     locals := ps
     refs := Γ.filter (fun (_, t) => t matches .alias _ | .mem _)
     result := none }
-  let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
+  let post : SpecCtx C := { pre with
+    ensures := true
+    result := res
+    rets := rets
+    refs := pre.refs ++ refRet.toList }
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
   let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
   let Δ : NCtx := ECtx.toNCtx Γ
   -- the last return innermost (`Binders.ofList`)
-  let R : NCtx := (rets.map fun (_, v, p) => (Var.ofName v, LTy.val p)).reverse
+  let R : NCtx := match refRet with
+    | some r => ECtx.toNCtx [r]
+    | none => (rets.map fun (_, v, p) => (Var.ofName v, LTy.val p)).reverse
   let O : NCtx := [(oldNetVar, .oldNet), (oldVar, .old)]
   let req ← NRead.conj reqs Δ
   let ens ← NRead.conj enss (R ++ (O ++ Δ))
@@ -388,6 +404,35 @@ elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : 
   evalTactic (← `(tactic| case ens => exact $ens))
 
 open Lean Elab Tactic Meta in
+/-- `rec_contract_mem_by μ req ens`: the recursive call of a memory return
+at the head of the goal's box by the contract `req`/`ens` of mutability
+`μ` (`useRecContractM`), the goals `hc` (the contract,
+`RecContractM.unroll`), "pre" and "post" left. -/
+elab "rec_contract_mem_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : tactic =>
+  withMainContext do
+  let g ← getMainGoal
+  let some (_, H, χ) ← Recursion.goalParts g
+    | throwError "rec_contract_mem_by: expected a goal `⊨ φ`"
+  unless ← Recursion.headRecCall χ do
+    throwError "rec_contract_mem_by: no recursive call at the head of the box{indentExpr χ}"
+  let HS ← Term.exprToSyntax H
+  evalTactic (← `(tactic| refine useRecContractM (H := $HS) (μ := $μ) (req := ?req) (ens := ?ens)
+    ?hc ?pre ?post))
+  evalTactic (← `(tactic| case req => exact $req))
+  evalTactic (← `(tactic| case ens => exact $ens))
+
+open Lean Elab Tactic Meta in
+/-- `rec_contract_mem h`: the recursive call of a memory return at the head
+of the goal's box by the contract `h : RecContractM μ (t ()) req ens`. -/
+elab "rec_contract_mem " h:term : tactic => withMainContext do
+  let g ← getMainGoal
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_mem: expected `⊨ φ`"
+  unless ← Recursion.headRecCall χ do
+    throwError "rec_contract_mem: no recursive call at the head of the box{indentExpr χ}"
+  let HS ← Term.exprToSyntax H
+  evalTactic (← `(tactic| refine useRecContractM (H := $HS) $h ?pre ?post))
+
+open Lean Elab Tactic Meta in
 /-- `rec_head`: fails unless the head of the goal's box is a recursive call. -/
 elab "rec_head" : tactic => withMainContext do
   let some (_, _, χ) ← Recursion.goalParts (← getMainGoal) | throwError "rec_head: not `⊨ φ`"
@@ -489,7 +534,7 @@ def recHyps : MetaM (List LocalDecl) := do
     let some d := d? | return none
     if d.isImplementationDetail then return none
     let ty ← instantiateMVars d.type
-    return if ty.isAppOf ``RecContract then some d else none
+    return if ty.isAppOf ``RecContract || ty.isAppOf ``RecContractM then some d else none
 
 /-- A leaf: `sol_close`, else a specification's closer. -/
 def closeLeaf (g : MVarId) : TacticM Bool := do
@@ -543,6 +588,9 @@ partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
   if fuel == 0 then return [g]
   let some (C, H, _) ← withCurrHeartbeats <| goalParts g | return [g]
   let body := s.getArg! 9
+  -- a memory return that allocates: its contract over a grown heap
+  -- (`useRecContractM`, `Calculus/MemContract.lean`)
+  let mem := (s.getArg! 8).isAppOf ``CallRet.mem
   -- a hypothesis about the frame below
   for d in ← recHyps do
     let b := (← instantiateMVars d.type).getArg! 4
@@ -551,8 +599,10 @@ partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
     let st ← saveState
     let hS ← Term.exprToSyntax d.toExpr
     let HS ← Term.exprToSyntax H
-    let some gs ← tryOn g (evalTactic (← `(tactic|
-        refine useRecContract (H := $HS) $hS ?_ ?_ (by rfl))))
+    let tac ← if (← instantiateMVars d.type).isAppOf ``RecContractM then
+        `(tactic| refine useRecContractM (H := $HS) $hS ?_ ?_)
+      else `(tactic| refine useRecContract (H := $HS) $hS ?_ ?_ (by rfl))
+    let some gs ← tryOn g (evalTactic tac)
       | continue
     if ← allProved gs (fuel - 1) then return []
     st.restore
@@ -565,12 +615,16 @@ partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
       | none => pure ((← `(.tt)), (← `(.tt)))
     for μ in [← `(Mutability.pure), ← `(Mutability.view), ← `(Mutability.nonpayable)] do
       let st ← saveState
-      let some gs ← tryOn g (evalTactic (← `(tactic|
-          refine useRecContract (H := $HS) (μ := $μ) (req := $reqS) (ens := $ensS)
-            ?_ ?_ ?_ (by rfl))))
+      let tac ← if mem then
+          `(tactic| refine useRecContractM (H := $HS) (μ := $μ) (req := $reqS) (ens := $ensS)
+            ?_ ?_ ?_)
+        else `(tactic| refine useRecContract (H := $HS) (μ := $μ) (req := $reqS) (ens := $ensS)
+            ?_ ?_ ?_ (by rfl))
+      let some gs ← tryOn g (evalTactic tac)
         | continue
       let some hc := ← gs.findM? fun g' => do
-          return (← instantiateMVars (← g'.getType)).isAppOf ``RecContract
+          let ty ← instantiateMVars (← g'.getType)
+          return ty.isAppOf ``RecContract || ty.isAppOf ``RecContractM
         | st.restore; continue
       match ← induct hc (s.getArg! 8) (fuel - 1) with
       | .notWithin => st.restore; continue
@@ -593,6 +647,7 @@ writes its return variables only, and its obligation by `autoGoal`, the
 frame below's calls by the hypothesis.  `ret` is the call's, whose binders
 name a contract at several returns. -/
 partial def induct (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Induct := g.withContext do
+  if (← instantiateMVars (← g.getType)).isAppOf ``RecContractM then return ← inductM g fuel
   let some [g₁] ← tryOn g (evalTactic (← `(tactic| (apply RecContract.unroll; intro n t ih))))
     | return .failed
   g₁.withContext do
@@ -619,6 +674,31 @@ partial def induct (g : MVarId) (ret : Expr) (fuel : Nat) : TacticM Induct := g.
           | apply FunContract.forall_storage)
         apply FunContract.ofValidCtx []))
   let some [gc'] ← tryOn gc (evalTactic tac) | return .failed
+  return if (← autoGoal gc' fuel).isEmpty then .proved else .failed
+
+/-- `induct` for a memory return that allocates (`RecContractM.unroll`): the
+frame within the mutability as a body that allocates (`Prog.withinM`). -/
+partial def inductM (g : MVarId) (fuel : Nat) : TacticM Induct := g.withContext do
+  let some [g₁] ← tryOn g (evalTactic (← `(tactic| (apply RecContractM.unroll; intro n t ih))))
+    | return .failed
+  g₁.withContext do
+  let mut g₂ := g₁
+  for d in ← recHyps do
+    let hS ← Term.exprToSyntax d.toExpr
+    let some [g'] ← tryOn g₂ (evalTactic (← `(tactic| have := ($hS).2.1))) | return .failed
+    g₂ := g'
+  let some gs ← tryOn g₂ (evalTactic (← `(tactic| refine ⟨?_, ?_, ?_⟩))) | return .failed
+  let [gc, gw, gr] := gs | return .failed
+  let some [] ← tryOn gw (evalTactic (← `(tactic| (
+      simp only [Prog.withinM_nil, Prog.withinM_cons, Stmt.withinM, Stmt.within, MRhs.allocIn,
+        Bool.and_true, Bool.true_and, Bool.and_self, Bool.or_true, Bool.true_or, *]
+      all_goals first | rfl | decide))))
+    | return .notWithin
+  let some [] ← tryOn gr (evalTactic (← `(tactic| first | rfl | decide))) | return .failed
+  let some [gc'] ← tryOn gc (evalTactic (← `(tactic| (
+      apply FunContract.forall_mem (hd := rfl) (hm := rfl)
+      apply FunContract.ofValidCtx []))))
+    | return .failed
   return if (← autoGoal gc' fuel).isEmpty then .proved else .failed
 
 /-- `Prog.within μ b = true`, `b` a frame: its statements by `simp`, the

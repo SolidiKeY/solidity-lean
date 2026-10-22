@@ -1,4 +1,4 @@
-import Solidity.Calculus.Recursion
+import Solidity.Calculus.FunContract
 import Solidity.Calculus.RunFrameMem
 
 /-!
@@ -243,35 +243,5 @@ theorem useContractM_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {�
 
 end Rec
 
-/-! ## Tactics -/
-
-open Lean Elab Tactic Meta in
-/-- `rec_contract_mem_by μ req ens`: the recursive call of a memory return
-at the head of the goal's box by the contract `req`/`ens` of mutability
-`μ` (`useRecContractM`), the goals `hc` (the contract,
-`RecContractM.unroll`), "pre" and "post" left. -/
-elab "rec_contract_mem_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : tactic =>
-  withMainContext do
-  let g ← getMainGoal
-  let some (_, H, χ) ← Recursion.goalParts g
-    | throwError "rec_contract_mem_by: expected a goal `⊨ φ`"
-  unless ← Recursion.headRecCall χ do
-    throwError "rec_contract_mem_by: no recursive call at the head of the box{indentExpr χ}"
-  let HS ← Term.exprToSyntax H
-  evalTactic (← `(tactic| refine useRecContractM (H := $HS) (μ := $μ) (req := ?req) (ens := ?ens)
-    ?hc ?pre ?post))
-  evalTactic (← `(tactic| case req => exact $req))
-  evalTactic (← `(tactic| case ens => exact $ens))
-
-open Lean Elab Tactic Meta in
-/-- `rec_contract_mem h`: the recursive call of a memory return at the head
-of the goal's box by the contract `h : RecContractM μ (t ()) req ens`. -/
-elab "rec_contract_mem " h:term : tactic => withMainContext do
-  let g ← getMainGoal
-  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_mem: expected `⊨ φ`"
-  unless ← Recursion.headRecCall χ do
-    throwError "rec_contract_mem: no recursive call at the head of the box{indentExpr χ}"
-  let HS ← Term.exprToSyntax H
-  evalTactic (← `(tactic| refine useRecContractM (H := $HS) $h ?pre ?post))
 
 end Solidity

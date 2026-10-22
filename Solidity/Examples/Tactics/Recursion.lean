@@ -207,6 +207,45 @@ theorem buildLen : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := b
 
 end Build
 
+/-! ## Reference returns by the source's contracts
+
+A reference return's `ensures` reads it by name (`r.length`):
+`recSpecContract` reads a storage return as its alias and a memory return as
+its object, and `rec_auto` proves the call by it, a memory return's over a
+grown heap (`useRecContractM`), each contract by induction over the frames. -/
+
+def RefSpec : Contract := contract!{
+  uint[] values;
+  ensures r.length == values.length;
+  function pick(uint n) returns (uint[] storage r) {
+    if (n == 0) { r = values; return r; }
+    return pick(n - 1);
+  }
+  ensures r.length == n;
+  function build(uint n) returns (uint[] memory r) {
+    if (n == 0) { r = new uint[](0); return r; }
+    uint[] memory s = build(n - 1);
+    assert(s.length == n - 1);
+    r = new uint[](n);
+    return r;
+  }
+}
+
+section RefSpec
+
+local instance : InContract := ⟨RefSpec⟩
+
+/-- `pick`'s source contract, the returned alias's length. -/
+theorem pickAuto :
+    ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
+  rec_auto
+
+/-- `build`'s source contract, the returned array's length. -/
+theorem buildAuto : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
+  rec_auto
+
+end RefSpec
+
 /-! ## By contract, proved by induction over the frames -/
 
 /-- **The countdown never fails its assertion**, whatever `a` is: the box
