@@ -10,7 +10,7 @@ lists the two gaps this lane closes in Lean: bug 5 (a `try` and a
 `arithmeticSemanticsCheckingOF`, `arithmeticSemanticsIgnoringOF`; O2 and O5
 are the last two, the run outside both blocks the first).
 
-Lean states an option in the theorem, not in a setting: the reading is an
+Lean states a calculus option in the theorem, not in a setting: the reading is an
 argument of the validity the theorem proves (`ValidT ts φ`, `ValidC I φ pay`,
 the notations `⊨[I]`, `⊨ₙ[I]`, `⊨ₜ[m]` of `Theorems.lean`), so a proof under one option
 can never be read as one under another.
@@ -25,6 +25,7 @@ can never be read as one under another.
 | O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
 | O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
+| O9 | configurable expression order: legacy and Solidity via IR | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -112,10 +113,8 @@ again, so a guard halts where reading them halts, in the state the
 statement reads them in. Each guard's formula holds exactly when its
 operation stays in range, at any bound: `Syntax/CheckedExact.lean` proves
 that of the formulas restated over `Int`, not of `rangeU`/`rangeI` as
-terms. One order is not followed: an operand whose read may halt that
-comes before another operand's guarded operation other than as a binary
-operator's left operand (a path's base before its index, an earlier
-argument, `addmod`'s first operands) is not read first, so where the run
+terms. One order is not followed: a path's base whose read may halt before
+its index's guarded operation is not read first, so where the run
 reverts at that read the block asserts the guard first, failing inside
 `checked` and assuming the run away inside `ignoringOverflow`.
 
@@ -620,3 +619,42 @@ against the code; fixed on the branch:
 * Not changed: a call with non-simple arguments under callbacks is inlined
   without `functionCallArgCapture` first (sound; the walk's rule names
   differ from `Proves`').
+
+## O9. Expression evaluation order
+
+`Contract.evalOrder : EvalOrder` selects the schedule used while elaborating
+expressions. Its default preserves the legacy schedule. To select Solidity's
+IR code generator's source-order expressions, define a named contract:
+
+```lean
+def IR : Contract := { MyContract with evalOrder := .viaIR }
+```
+
+Use `IR` in `sol[IR]{ … }`, `dl[IR]{ … }` or the local `InContract` instance.
+For imported functions, append `evalOrder .viaIR` to `solc_import`, after
+`testing` when present. The imported contract retains that configuration.
+
+The preset is two flags: `binaryLeftToRight` and `modularLeftToRight`.
+`hoistPair` shares the capture policy between binary schedules, preserving
+operand positions and saving an earlier read before a later effect. The
+modular flag uses the existing argument-capture pass in source order; the
+legacy branch retains its early zero-modulus guard. Ordinary calls and indices
+remain left to right, assignments evaluate their source before their target,
+and short-circuit operators and conditional branches retain their conditional
+evaluation. Inlined callees inherit the configuration.
+
+This is an expression-order choice, not all of `--via-ir`: constructor and
+modifier differences remain as documented in [solc-alignment.md](solc-alignment.md).
+Solidity [describes source order as an intention, not a guarantee](https://docs.soliditylang.org/en/latest/ir-breaking-changes.html#semantic-only-changes).
+Yul itself evaluates function arguments right to left; that is a different
+schedule from Solidity source compiled through IR.
+
+`Examples/Tactics/EvaluationOrder.lean` pins both schedules by kernel-checked
+runs, including nested calls, modular arguments, failure priority, conditional
+evaluation, a calculus proof and an imported contract.
+
+**Review.** A read-only finder/skeptic pass confirmed that an earlier failing
+array read could be postponed past a later narrow-overflow assertion. The
+shared `captureBefore` now saves that read before explicit guards, for binary
+operands and argument lists in either schedule. Four kernel regressions cover
+`checked`, `ignoringOverflow`, IR modular arguments and the legacy direction.

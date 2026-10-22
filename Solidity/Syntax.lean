@@ -375,6 +375,16 @@ makes the call graph acyclic (as `structRank` does the struct table's), so
 inlining a call, which is what the elaborator does and KeY's
 `internalCallExpand` and `functionBodyExpand` do, ends. -/
 
+/-- Operand scheduling during elaboration. Calls, indices, short-circuit
+operators and assignment targets keep their existing sequencing. -/
+structure EvalOrder where
+  binaryLeftToRight : Bool := false
+  modularLeftToRight : Bool := false
+  deriving Repr, Inhabited
+
+/-- Solidity's IR code generator evaluates ordinary expressions in source order. -/
+def EvalOrder.viaIR : EvalOrder := ⟨true, true⟩
+
 structure Contract where
   vars : List (Name × Ty)
   funs : List (Name × FunDecl) := []
@@ -405,6 +415,8 @@ structure Contract where
   of its parameters only (their types and width rows, as a function's), from
   which a `revert E(…)` computes its selector (`errorSignature?`). -/
   errors : List (Name × FunDecl) := []
+  /-- The elaborator's operand schedule, retained by every use of this contract. -/
+  evalOrder : EvalOrder := {}
   deriving Repr, Inhabited
 
 namespace Contract

@@ -53,6 +53,12 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 
 ## Evaluation order
 
+The default below models legacy codegen. `Contract.evalOrder := .viaIR`
+selects source-order binary expressions and `addmod`/`mulmod` arguments;
+[options.md](options.md#o9-expression-evaluation-order) gives the configuration
+and its limits. This choice is retained by the named contract, including when
+its callees are inlined or its source is imported.
+
 Native `addmod(a,b,k)` and `mulmod(a,b,k)` retain all three unsigned
 operands and compute the intermediate sum/product as an unbounded integer,
 then reduce modulo `k`; they do not perform checked `uint256` addition or

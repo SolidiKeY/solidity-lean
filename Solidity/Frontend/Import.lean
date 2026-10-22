@@ -190,7 +190,8 @@ def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
   lowerLoops (some rets) raw
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
-  (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")? : command
+  (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")?
+  (&"evalOrder" term)? : command
 
 /-- A large imported function table, compiled in bounded list segments.
 For example, the testing import retains all of TestSuite's public functions.
@@ -224,7 +225,7 @@ private def defineImportedContract (name : Lean.Name) (contractSyntax : Syntax) 
   synthesizeSyntheticMVarsNoPostponing
   let original ← instantiateMVars original
   let original ← whnf original
-  unless original.isAppOfArity ``Contract.mk 9 do
+  unless original.isAppOf ``Contract.mk do
     throwError "solc_import: expected a contract literal"
   let mut fields : Array Expr := #[]
   for arg in original.getAppArgs do
@@ -472,6 +473,8 @@ def elabSolcImport : CommandElab := fun stx => do
     | some e, _, _ =>
       logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
   let ctStx ← ofExcept (parse `term (contractText memberList))
+  let ctStx ← if stx[8].isNone then pure ctStx else
+    liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)

@@ -17,7 +17,7 @@ justifies it.  A local shadows nothing: a declaration may not reuse the name
 of a local in scope or of a state variable.
 
 The passes on the raw syntax come first and are untouched by the typing:
-solc's evaluation order (`hoist`, `captureExpr`: a value read before a later
+the contract's evaluation order (`hoist`, `captureExpr`: a value read before a later
 operand's effect is held in a fresh local), the narrow and cast captures,
 loops (`lowerLoops`), `return`s (`lowerReturns`), modifiers (`wrapMods`), a
 callee's locals renamed fresh (`renameStmts`, `ElabScope.inlined`), named
@@ -2754,8 +2754,8 @@ def enumCapture (n : Nat) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   pure ([.of Γ (.declLocal .uint x (some v)), .of Γ' (.assert c)], e')
 
 /-- `e`'s value, or the reference it names, held in a fresh local before a
-later operand's effect: `x = i++ + i;` reads the right `i` first (solc
-evaluates a binary operator's right operand first), so it is
+later operand's effect: under the default legacy schedule, `x = i++ + i;`
+reads the right `i` first, so it is
 `uint se1 = i; uint se2; se2 = i++; x = se2 + se1;`.  A literal needs no
 capture, nor does a name bound to a reference (an effect cannot rebind it).
 Nor does a capture already made, which holds its value: a fresh name the
@@ -2783,6 +2783,13 @@ def captureExpr (e : RawExpr) : ElabM (SProg C × RawExpr) := do
     let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
     let x ← captureAs C "se" (.val p (widthIn C (← ctx) e))
     return ([.of Γ (.declLocal p x (some v))], .name (toString x))
+
+/-- Hold an earlier read before a later effect or explicit overflow guard.
+Even a guard without a state change may panic or assume the run away, so an
+earlier failing read must happen first. -/
+def captureBefore (e : RawExpr) (later : List RawExpr) : ElabM (SProg C × RawExpr) := do
+  let checks := (← read).overflow.isSome && later.any (hasNarrow C (← ctx))
+  if later.any (·.hasIncDec) || checks then captureExpr C e else pure ([], e)
 
 /-! ### Inlining a call -/
 
@@ -4329,6 +4336,10 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- Reject a statically zero modulus before captures can hide the literal.
     if let .ok (.simple (.lit n _)) := check C (← nctx) .uint k then
       if n == 0 then throw s!"{op.toStr}: arithmetic modulo zero"
+    if C.evalOrder.modularLeftToRight then
+      let (P, args) ← hoistArgs [a, b, k]
+      let [a, b, k] := args | throw "internal: modular argument capture changed arity"
+      return (P, .modular op a b k)
     -- Legacy solc checks the modulus before evaluating the other arguments.
     -- Save it once: an operand's later effects may change its source.
     let (P, k) ← hoist k
@@ -5636,8 +5647,8 @@ partial def elabRec (_ : Unit) : ElabRec C where
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
 conditional of references, are evaluated before the statement that holds
-them, in solc's order (an assignment's right-hand side before its target, a
-binary operator's right operand before its left, an index's base before the
+them, in the contract's order (an assignment's right-hand side before its target, a
+binary operator's right operand first by default, its left under `.viaIR`, an index's base before the
 index: an operand read before an effect is captured with `captureExpr`),
 into fresh locals (KeY's captures): `values[i++] = 1;`
 is `uint se1; se1 = i++; values[se1] = 1;`, and
@@ -5658,20 +5669,21 @@ narrow check is captured where solc evaluates it, under a test of its own: `a
 partial def hoist (s0 : RawExpr) : ElabM (SProg C × RawExpr) :=
   hoistWith C (elabRec ()) s0
 
-/-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
-i` is `1 + 1`), the left one's after it, and the right one held before an
-effect of the left. -/
+/-- Two operands in evaluation order: hold the first read before the second
+operand's effects or explicit overflow guards. -/
+partial def hoistPair (first last : RawExpr) : ElabM (SProg C × RawExpr × RawExpr) := do
+  let (P, first) ← hoist first
+  let (Pc, first) ← captureBefore C first [last]
+  let (Q, last) ← if last.hasIncDec || last.hasIdxLen || last.hasCast || hasNarrow C (← ctx) last
+    then hoist last else pure ([], last)
+  pure (P ++ Pc ++ Q, first, last)
+
+/-- Binary operands follow the contract's schedule; their positions in the
+operator stay fixed, including for subtraction and comparisons. -/
 partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr) := do
-  let (Q, b) ← hoist b
-  if a.hasIncDec then
-    let (Qc, b) ← captureExpr C b
-    let (P, a) ← hoist a
-    pure (Q ++ Qc ++ P, .binop op a b)
-  else if a.hasIdxLen || a.hasCast || hasNarrow C (← ctx) a then
-    -- captures that may only revert: the right operand need not be held
-    let (P, a) ← hoist a
-    pure (Q ++ P, .binop op a b)
-  else pure (Q, .binop op a b)
+  let ltr := C.evalOrder.binaryLeftToRight
+  let (P, first, last) ← if ltr then hoistPair a b else hoistPair b a
+  pure (P, if ltr then .binop op first last else .binop op last first)
 
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
@@ -5714,7 +5726,7 @@ partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
   | [] => pure ([], [])
   | a :: as => do
     let (P, a) ← hoist a
-    let (Pc, a) ← if as.any (·.hasIncDec) then captureExpr C a else pure ([], a)
+    let (Pc, a) ← captureBefore C a as
     let (Q, as) ← hoistArgs as
     pure (P ++ Pc ++ Q, a :: as)
 

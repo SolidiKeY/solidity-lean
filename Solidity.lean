@@ -415,6 +415,7 @@ import Solidity.Examples.Tactics.PushSuffixGuards
 import Solidity.Examples.Tactics.PushSuffixRules
 import Solidity.Examples.Tactics.PushSuffixSource
 import Solidity.Examples.Tactics.ModularArithmetic
+import Solidity.Examples.Tactics.EvaluationOrder
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.ArrayShapeCopy
 import Solidity.Examples.Tactics.Inheritance
