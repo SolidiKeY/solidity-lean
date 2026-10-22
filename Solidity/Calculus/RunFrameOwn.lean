@@ -440,4 +440,258 @@ theorem TEnv.Own.set {b : Nat} {Γ : Ctx} {t : LTy} {e : TEnv C H Γ} (h : TEnv.
 
 end ReadWrite
 
+/-! ## What the run reads of own objects -/
+
+section Paths
+
+variable {Γ : Ctx}
+
+theorem TRes.ofOpt_ok {α : Type} {o : Option α} {a : α} (h : TRes.ofOpt o = .ok a) : o = some a := by
+  cases o with
+  | none => cases h
+  | some x => cases h; rfl
+
+mutual
+/-- **A memory path of an own state reads an own slot.** -/
+theorem MPath.mvalT_own {b : Nat} (σ : State C Γ) (he : TEnv.Own b σ.env)
+    (hh : Heap.OwnAbove b σ.heap) : {T : Ty} → (p : MPath C Γ T) → {v : MVal σ.H T} →
+      p.mvalT σ = .ok v → MVal.Own b T v
+  | _, .var i _, v, h => by
+    simp only [MPath.mvalT] at h
+    split at h
+    · rename_i r hr
+      have e : r = v := Except.ok.inj h
+      subst e
+      exact he i r hr
+    · cases h
+  | _, .loc l, v, h => by
+    simp only [MPath.mvalT] at h
+    obtain ⟨a, ha, h⟩ := tbind_ok_inv h
+    exact Heap.readAddr_own σ.heap hh a (MLoc.addrT_own σ he hh l ha) (TRes.ofOpt_ok h)
+
+/-- **A memory location of an own state is at an own object.** -/
+theorem MLoc.addrT_own {b : Nat} (σ : State C Γ) (he : TEnv.Own b σ.env)
+    (hh : Heap.OwnAbove b σ.heap) : {T : Ty} → (l : MLoc C Γ T) → {a : MAddr σ.H T} →
+      l.addrT σ = .ok a → a.Own b
+  | _, .field p _ _, a, h => by
+    simp only [MLoc.addrT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    cases h
+    exact MPath.mvalT_own σ he hh p hr
+  | _, .index _ p _, a, h => by
+    simp only [MLoc.addrT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨k, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact MPath.mvalT_own σ he hh p hr
+end
+
+theorem MSrc.mvalT_own {b : Nat} (σ : State C Γ) (he : TEnv.Own b σ.env)
+    (hh : Heap.OwnAbove b σ.heap) {T : Ty} (r : MSrc C Γ T) {v : MVal σ.H T}
+    (h : r.mvalT σ = .ok v) : MVal.Own b T v := by
+  cases r with
+  | val => trivial
+  | ref p => exact MPath.mvalT_own σ he hh p h
+
+/-- **A memory right-hand side of an own state** keeps every object, the heap
+own, and binds an own reference. -/
+theorem MRhs.evalT_own {b : Nat} {R : RefTy} (σ : State C Γ) (he : TEnv.Own b σ.env)
+    (hh : Heap.OwnAbove b σ.heap) (hb : b ≤ σ.H.length) (r : MRhs C Γ R)
+    {g : Grew C Γ σ.H (HRef · R)} (h : r.evalT σ = .ok g) :
+    Heap.Keeps g.ext σ.heap g.st.heap ∧ Heap.OwnAbove b g.st.heap ∧ TEnv.Own b g.st.env ∧
+      b ≤ g.val.id := by
+  cases r with
+  | alias p =>
+    simp only [MRhs.evalT] at h
+    obtain ⟨v, hv, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨Heap.Keeps.refl _, hh, he, MPath.mvalT_own σ he hh p hv⟩
+  | copy p hm =>
+    simp only [MRhs.evalT] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨sv, _, h⟩ := tbind_ok_inv h
+    cases h
+    have ho := SVal.own_copyStToM sv hm σ.heap
+    exact ⟨SVal.keeps_copyStToM sv hm σ.heap,
+      Heap.OwnAbove.grow (SVal.keeps_copyStToM sv hm σ.heap) hh ho.1 hb,
+      TEnv.Own.wk _ he, Nat.le_trans hb ho.2⟩
+  | newArr n hn =>
+    simp only [MRhs.evalT] at h
+    cases h
+    have ho := SVal.own_copyStToM (newArrT R (n.evalT σ) hn) (RefTy.mapFree_of_newArrOk hn) σ.heap
+    exact ⟨SVal.keeps_copyStToM _ _ σ.heap,
+      Heap.OwnAbove.grow (SVal.keeps_copyStToM _ _ σ.heap) hh ho.1 hb,
+      TEnv.Own.wk _ he, Nat.le_trans hb ho.2⟩
+
+end Paths
+
+/-! ## The locals' references -/
+
+section Locals
+
+variable {H H' : HTy}
+
+theorem TEnv.Own.drop {b : Nat} {Γ Δ : Ctx} (h : Ext Γ Δ) {e : TEnv C H Δ} (he : TEnv.Own b e) :
+    TEnv.Own b (TEnv.drop h e) := fun i r hr => by
+  rw [← TEnv.get_ext_drop] at hr
+  exact he _ r hr
+
+theorem TEnv.Own.cons {b : Nat} {Γ : Ctx} {t : LTy} (ht : ∀ R, t ≠ .mem R)
+    {e : TEnv C H (t :: Γ)} (he : TEnv.Own b e.2) : TEnv.Own b e := fun {R} i r hr => by
+  cases i with
+  | here => exact absurd rfl (ht R)
+  | there j => exact he j r hr
+
+theorem TEnv.Own.nil {b : Nat} (e : TEnv C H []) : TEnv.Own b e := fun i => nomatch i
+
+/-- Locals that agree but where `W` lists them, none of them a memory local:
+the memory locals as they were. -/
+theorem TEnv.Own.of_agree {b : Nat} {Γ : Ctx} {W : List (LTy × Nat)} {e e' : TEnv C H Γ}
+    (hag : TLocAgree 0 W e e') (hW : ∀ x ∈ W, ∀ R, x.1 ≠ .mem R) (he : TEnv.Own b e) :
+    TEnv.Own b e' := fun {R} i r hr => by
+  have hni : (LTy.mem R, i.toNat - 0) ∉ W := fun hm => hW _ hm R rfl
+  have := eq_of_heq (hag _ i (Nat.zero_le _) hni)
+  rw [this] at hr
+  exact he i r hr
+
+theorem Heap.OwnAbove.of_heq {b : Nat} {hp : Heap H} {hp' : Heap H'} (hH : H' = H)
+    (hh : HEq hp' hp) (ho : Heap.OwnAbove b hp) : Heap.OwnAbove b hp' := by
+  subst hH
+  cases hh
+  exact ho
+
+theorem Args.evalT_own {b : Nat} {Γ : Ctx} (σ : State C Γ) (he : TEnv.Own b σ.env)
+    (hh : Heap.OwnAbove b σ.heap) : {ps : Ctx} → (args : Args C Γ ps) → {a : TEnv C σ.H ps} →
+      args.evalT σ = .ok a → TEnv.Own b a
+  | _, .nil, _, _ => TEnv.Own.nil _
+  | _, .snoc as _ _ e, a, h => by
+    change (do let r ← Args.evalT σ as; let v ← e.evalT σ; pure (v, r)) = Except.ok a at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨v, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact TEnv.Own.cons (by intro R h; cases h) (Args.evalT_own σ he hh as hr)
+  | _, .snocStorage as _ _ e, a, h => by
+    change (do let r ← Args.evalT σ as; let v ← e.resolveT σ; pure (some v, r)) = Except.ok a at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨v, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact TEnv.Own.cons (by intro R h; cases h) (Args.evalT_own σ he hh as hr)
+  | _, .snocMemory as _ _ p, a, h => by
+    change (do let r ← Args.evalT σ as; let v ← p.mvalT σ; pure (some v, r)) = Except.ok a at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨v, hv, h⟩ := tbind_ok_inv h
+    cases h
+    intro i r' hr'
+    cases i with
+    | here =>
+      cases hr'
+      exact MPath.mvalT_own σ he hh p hv
+    | there j => exact Args.evalT_own σ he hh as hr j r' hr'
+
+end Locals
+
+/-! ## The frame -/
+
+/-- **What a run that writes only own objects leaves of the global part**:
+every object below `b` kept, the funds and the transaction, and, unless `μ`
+is `nonpayable`, the storage and the ledger. -/
+structure TGFrameW (μ : Mutability) (b : Nat) {Γ Δ : Ctx} (σ : State C Γ) (τ : State C Δ)
+    (e : σ.H <+: τ.H) : Prop where
+  keeps : Heap.KeepsBelow b e σ.heap τ.heap
+  selfBalance : τ.selfBalance = σ.selfBalance
+  tx : τ.tx = σ.tx
+  keepsSt : μ ≠ .nonpayable → τ.storage = σ.storage ∧ τ.net = σ.net
+
+namespace TGFrameW
+
+variable {μ : Mutability} {b : Nat} {Γ Δ Ε : Ctx}
+
+theorem trans {σ : State C Γ} {τ : State C Δ} {υ : State C Ε} {e₁ : σ.H <+: τ.H}
+    {e₂ : τ.H <+: υ.H} (h₁ : TGFrameW μ b σ τ e₁) (h₂ : TGFrameW μ b τ υ e₂) (e : σ.H <+: υ.H) :
+    TGFrameW μ b σ υ e :=
+  ⟨Heap.KeepsBelow.trans h₁.keeps h₂.keeps, h₂.selfBalance.trans h₁.selfBalance,
+    h₂.tx.trans h₁.tx, fun hμ => ⟨(h₂.keepsSt hμ).1.trans (h₁.keepsSt hμ).1,
+      (h₂.keepsSt hμ).2.trans (h₁.keepsSt hμ).2⟩⟩
+
+theorem ofM {σ : State C Γ} {τ : State C Δ} {e : σ.H <+: τ.H} (h : TGFrameM μ σ τ e) :
+    TGFrameW μ b σ τ e :=
+  ⟨Heap.Keeps.keepsBelow h.keeps, h.selfBalance, h.tx, h.keepsSt⟩
+
+theorem withEnv {σ : State C Γ} {τ : State C Δ} {e : σ.H <+: τ.H} (h : TGFrameW μ b σ τ e)
+    (env : TEnv C τ.H Ε) : TGFrameW μ b σ (τ.withEnv env) e :=
+  ⟨h.keeps, h.selfBalance, h.tx, h.keepsSt⟩
+
+/-- Every object below the entry's heap length kept: every object. -/
+theorem toM {σ : State C Γ} {τ : State C Δ} {e : σ.H <+: τ.H}
+    (h : TGFrameW μ σ.H.length σ τ e) : TGFrameM μ σ τ e :=
+  ⟨Heap.KeepsBelow.keeps h.keeps, h.selfBalance, h.tx, h.keepsSt⟩
+
+end TGFrameW
+
+/-! ## Which bodies -/
+
+mutual
+
+/-- **A statement a callee of mutability `μ` may run writing its own
+objects**: `Stmt.withinM`'s allocations and rebinds, a write into a memory
+object (`assignMem`), a statement within `μ` that writes no memory local,
+and `if`, a block, a loop or a call over such statements. -/
+def Stmt.withinW (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => μ == .nonpayable) (rebind := fun _ r => r.pathIn μ)
+    (assignLocal := fun _ r => r.readsIn μ)
+    (declLocal := fun _ _ init => match init with
+      | none => true
+      | some e => e.readsIn μ)
+    (declStorage := fun _ _ init => match init with
+      | none => true
+      | some r => r.pathIn μ)
+    (opAssign := fun _ _ _ l r => r.readsIn μ && l.writableIn μ)
+    (incDec := fun _ _ l => l.writableIn μ) (assignIncDec := fun _ _ _ l _ => l.writableIn μ)
+    (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => μ == .nonpayable) (send := fun _ _ _ _ => μ == .nonpayable)
+    (declMem := fun _ _ init _ _ => match init with
+      | none => true
+      | some r => r.allocIn μ)
+    (rebindMem := fun _ r => r.allocIn μ)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => true)
+    (delete := fun _ => μ == .nonpayable) (deleteMem := fun _ _ => false)
+    (assignNew := fun _ _ _ => false)
+    (ite := fun c thn els => c.readsIn μ && Prog.withinW μ thn && Prog.withinW μ els)
+    (require := fun c => c.readsIn μ) (assert := fun c => c.readsIn μ) (revert := true)
+    (assumeFalse := true)
+    (call := fun _ args _ body => args.readsIn μ && Prog.withinW μ body)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
+    (loop := fun _ c body => c.readsIn μ && Prog.withinW μ body)
+    (block := fun body => Prog.withinW μ body)
+    (callReceiver := fun _ _ _ _ _ => false)
+    (callReceiverPush := fun _ _ _ _ _ _ => false)
+    (callRec := fun _ _ args _ body => args.readsIn μ && Prog.withinW μ (body ()))
+    (revertData := fun d => d.all fun p => match p with | .word v => v.readsIn μ | _ => true)
+    (catchData := fun _ _ _ _ _ _ _ _ => false)
+  termination_by structural _ _ s => s
+
+/-- `Stmt.withinW` of every statement. -/
+def Prog.withinW (μ : Mutability) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P true
+      (fun s P => Stmt.withinW μ s && Prog.withinW μ P)
+  termination_by structural _ _ P => P
+
+end
+
+theorem Prog.withinW_cons {μ : Mutability} {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) :
+    Prog.withinW μ (.cons s P) = (Stmt.withinW μ s && Prog.withinW μ P) :=
+  rfl
+
+/-- Every frame of an unrolling is within `μ` where each frame is from the
+one below. -/
+theorem Prog.withinW_recUnroll {μ : Mutability} {F : Ctx}
+    {step : Nat → (Unit → Prog C F F) → Prog C F F}
+    (hs : ∀ n (t : Unit → Prog C F F), Prog.withinW μ (t ()) = true →
+      Prog.withinW μ (step n t) = true) (d : Nat) :
+    Prog.withinW μ (recUnroll Prog.recBase step d) = true :=
+  recUnroll_induct (fun b => Prog.withinW μ b = true) rfl hs d
+
 end Solidity
