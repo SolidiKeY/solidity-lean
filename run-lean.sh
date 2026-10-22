@@ -3,6 +3,16 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+with_bridge=0
+if [[ $# -gt 0 ]]; then
+  if [[ $# -eq 1 && "$1" == --bridge ]]; then
+    with_bridge=1
+  else
+    echo "Usage: $0 [--bridge]" >&2
+    exit 2
+  fi
+fi
+
 cd "$repo_root"
 # elan first: it reads lean-toolchain (v4.24.0) natively. The lean-vscode nix
 # shims only resolve toolchains present in the nix store (4.29.1) and would
@@ -14,6 +24,9 @@ lake build
 # import reports a function that stops elaborating as a row, so only its
 # pinned report (`#guard_msgs` in Solidity/Solkey/TestSuite.lean) catches it.
 lake build SolkeyTestSuite
+if [[ "$with_bridge" -eq 1 ]]; then
+  ./scripts/check-bridge.sh
+fi
 # Keep the sort-annotation table honest against the solkey taclet file:
 # drift fails the build. Skipped with a warning when no checkout is beside
 # this repository -- see scripts/check-solkey.sh.

@@ -42,7 +42,7 @@ def Fml.strategy (C : Contract) (Γ : Ctx) : ReductionSystem (Fml C Γ) where
 
 /-- A derivation `φ ~*> ψ` is a multi-step reduction. -/
 theorem Fml.Steps.mred {φ ψ : Fml C Γ} : Fml.Steps φ ψ → (Fml.strategy C Γ).MRed φ ψ
-  | .refl _ => .refl
+  | .refl _ => Relation.ReflTransGen.refl
   | .cons s c => Relation.ReflTransGen.head s c.mred
 
 /-- Every multi-step reduction has a derivation. -/
@@ -59,13 +59,13 @@ theorem Fml.steps_iff_mred {φ ψ : Fml C Γ} :
 
 /-- `symex n` reduces along the strategy. -/
 theorem symex_mred : (n : Nat) → (φ : Fml C Γ) → (Fml.strategy C Γ).MRed φ (symex n φ)
-  | 0, _ => .refl
+  | 0, _ => Relation.ReflTransGen.refl
   | n + 1, φ => by
     unfold symex
     split
     · rename_i ψ h
       exact Relation.ReflTransGen.head h (symex_mred n ψ)
-    · exact .refl
+    · exact Relation.ReflTransGen.refl
 
 /-- **The strategy is deterministic**: `Fml.step` is a function. -/
 theorem Fml.strategy_deterministic {φ ψ χ : Fml C Γ}

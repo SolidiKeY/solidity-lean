@@ -48,6 +48,9 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 
 ## The language
 
+The separate dependency-bearing package is indexed in [bridge.md](bridge.md).
+Its root is `Bridge/SolidityBridge.lean`; it never enters the core import graph.
+
 | Module | What it defines |
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |

@@ -40,3 +40,17 @@ jobs:
           axiom-audit: "true"
           axiom-audit-root: "Solidity"
           axiom-audit-allow: "propext,Classical.choice,Quot.sound"
+
+  bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build optional bridge
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: "Bridge"
+          use-mathlib-cache: "true"
+          test: "false"
+          lint: "false"
+      - name: Verify pinned reference sources and bridge gate
+        run: ./scripts/check-bridge.sh

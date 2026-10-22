@@ -89,14 +89,14 @@ def Carrier.as (s : Srt) : Carrier C g → Option (Rd g s)
   | .inr _ => none
 
 @[simp] theorem Carrier.as_mk (s : Srt) (r : Rd g s) : (Carrier.mk s r).as s = some r := by
-  simp [Carrier.mk, Carrier.as]
+  simp only [Carrier.as, Carrier.mk, ↓reduceDIte]
 
 instance : Nonempty (Carrier C g) := ⟨.inr []⟩
 
 /-- The symbols' interpretation in the global part `g`: a symbol reads its
 arguments at its sorts by `OpN.denote` and `OpN.eval`; ill-sorted, it
 returns its first argument. -/
-def funMap (g : State C []) : {n : ℕ} → Fn C n → (Fin n → Carrier C g) → Carrier C g
+noncomputable def funMap (g : State C []) : {n : ℕ} → Fn C n → (Fin n → Carrier C g) → Carrier C g
   | 0, ⟨s, o⟩, _ => .mk s (o.denote g, o.eval g)
   | 1, ⟨a, s, o⟩, xs => match (xs 0).as a with
     | some (d, e) => .mk s (o.denote g d, o.eval g e)
@@ -106,7 +106,7 @@ def funMap (g : State C []) : {n : ℕ} → Fn C n → (Fin n → Carrier C g) �
     | _, _ => xs 0
   | 2, .inr (), xs => match xs 0, (xs 1).as (.val .uint) with
     | .inr l, some (d, e) =>
-      .mk .kint (d.map fun n => (lookupBy n l).getD 0, e.bind (Tm.netOfT l))
+      .mk .kint (d.map fun n => (Semantics.lookupBy n l).getD 0, e.bind (Tm.netOfT l))
     | _, _ => xs 0
   | 3, ⟨a, b, c, s, o⟩, xs => match (xs 0).as a, (xs 1).as b, (xs 2).as c with
     | some (d, e), some (d', e'), some (d'', e'') =>
@@ -128,7 +128,7 @@ def relMap : {n : ℕ} → Rl n → (Fin n → Carrier C g) → Prop
   | _ + 3, r, _ => nomatch r
 
 /-- **The structure of the global part `g`**. -/
-instance structure (g : State C []) : (lang C).Structure (Carrier C g) where
+noncomputable instance stateStructure (g : State C []) : (lang C).Structure (Carrier C g) where
   funMap := funMap g
   RelMap := relMap
 
@@ -158,7 +158,7 @@ def envVal (g : State C []) : (Γ : Ctx) → TEnv C g.H Γ → Fin Γ.length →
   | t :: Γ, e => Fin.snoc (α := fun _ => Carrier C g) (envVal g Γ e.2) (LTy.elt g t e.1)
 
 theorem envVal_pos {Γ : Ctx} {t : LTy} (e : TEnv C g.H Γ) (i : Idx Γ t) :
-    envVal g Γ e i.pos = LTy.elt g t (TEnv.get i e) := by
+    envVal g Γ e (Idx.pos i) = LTy.elt g t (TEnv.get i e) := by
   induction i with
   | here => simp only [envVal, Idx.pos, Fin.snoc_last]; rfl
   | there i ih => simp only [envVal, Idx.pos, Fin.snoc_castSucc]; exact ih e.2
@@ -191,36 +191,43 @@ def _root_.Solidity.Tm.toTerm : {s : Srt} → Tm C Γ s → (lang C).Term (Empty
 theorem _root_.Solidity.Tm.realize_toTerm (σ : State C Γ) (v : Empty → Carrier C σ.glob) :
     {s : Srt} → (t : Tm C Γ s) →
       t.toTerm.realize (Sum.elim v (val σ)) = .mk s (t.denote σ, t.eval σ)
-  | _, .pvV i => (envVal_pos σ.env i).trans rfl
-  | _, .pvP i => (envVal_pos σ.env i).trans rfl
-  | _, .pvS i => (envVal_pos σ.env i).trans rfl
-  | _, .pvI i => (envVal_pos σ.env i).trans rfl
-  | _, .pvZ i => (envVal_pos σ.env i).trans rfl
+  | _, .pvV i => (envVal_pos (g := σ.glob) σ.env i).trans rfl
+  | _, .pvP i => by
+    simp only [Tm.toTerm, Term.realize, Sum.elim_inr]
+    rw [show val σ (Idx.pos i) = LTy.elt σ.glob _ (TEnv.get i σ.env)
+      from envVal_pos (g := σ.glob) σ.env i]
+    cases h : TEnv.get i σ.env <;> simp only [LTy.elt, Tm.denote, Tm.eval, h]
+  | _, .pvS i => (envVal_pos (g := σ.glob) σ.env i).trans rfl
+  | _, .pvI i => (envVal_pos (g := σ.glob) σ.env i).trans rfl
+  | _, .pvZ i => (envVal_pos (g := σ.glob) σ.env i).trans rfl
   | _, .netOf i a => by
     have ha := Tm.realize_toTerm σ v a
+    simp only [Tm.toTerm, Term.realize]
     show funMap σ.glob (n := 2) (.inr ()) _ = _
-    simp only [Tm.toTerm, Term.realize, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Sum.elim_inr, ha]
-    rw [show val σ (Idx.pos i) = .inr (TEnv.get i σ.env) from envVal_pos σ.env i]
-    simp only [funMap, Carrier.as_mk]
+    simp only [funMap, Matrix.cons_val_zero, Matrix.cons_val_one, Term.realize_var,
+      Sum.elim_inr, ha, Carrier.as_mk]
+    rw [show val σ (Idx.pos i) = .inr (TEnv.get i σ.env) from envVal_pos (g := σ.glob) σ.env i]
     rfl
   | _, .app0 o => rfl
   | _, .app1 o x => by
     have hx := Tm.realize_toTerm σ v x
+    simp only [Tm.toTerm, Term.realize]
     show funMap σ.glob (n := 1) _ _ = _
     simp only [Matrix.cons_val_zero, hx, funMap, Carrier.as_mk]
     rfl
   | _, .app2 o x y => by
     have hx := Tm.realize_toTerm σ v x
     have hy := Tm.realize_toTerm σ v y
+    simp only [Tm.toTerm, Term.realize]
     show funMap σ.glob (n := 2) _ _ = _
-    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hx, hy, funMap,
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, hx, hy, funMap,
       Carrier.as_mk]
     rfl
   | _, .app3 o x y z => by
     have hx := Tm.realize_toTerm σ v x
     have hy := Tm.realize_toTerm σ v y
     have hz := Tm.realize_toTerm σ v z
+    simp only [Tm.toTerm, Term.realize]
     show funMap σ.glob (n := 3) _ _ = _
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
       Matrix.head_cons, Matrix.tail_cons, hx, hy, hz, funMap, Carrier.as_mk]
@@ -242,13 +249,13 @@ def _root_.Solidity.Fml.toBF : {Γ : Ctx} → Fml C Γ → Option ((lang C).Boun
   | Γ, .all _ p φ => φ.toBF.map fun a => BoundedFormula.all
       ((Relations.boundedFormula₁ (L := lang C) (show Rl 1 from .val p)
         (.var (.inr (Fin.last Γ.length)))).imp a)
-  | _, .upd .. | _, .modal .. | _, .havoc .. | _, .bind .. | _, .anon .. | _, .allocAll .. =>
+  | _, .upd .. | _, .modal .. | _, .havoc .. | _, .bind .. | _, .anon .. | _, .allocAll .. | _, .grow .. =>
     none
 
 /-- The translation is defined exactly on the first-order fragment. -/
 theorem _root_.Solidity.Fml.toBF_isSome : {Γ : Ctx} → (φ : Fml C Γ) → φ.toBF.isSome = φ.FO
   | _, .tt | _, .eq .. | _, .wellFormed .. => rfl
-  | _, .upd .. | _, .modal .. | _, .havoc .. | _, .bind .. | _, .anon .. | _, .allocAll .. => rfl
+  | _, .upd .. | _, .modal .. | _, .havoc .. | _, .bind .. | _, .anon .. | _, .allocAll .. | _, .grow .. => rfl
   | _, .not φ => by
     rw [show (Fml.not φ).FO = φ.FO from rfl, ← Fml.toBF_isSome φ]
     simp only [Fml.toBF, Option.isSome_map]
@@ -280,7 +287,7 @@ theorem _root_.Solidity.Fml.realize_toBF {Γ : Ctx} (σ : State C Γ) (φ : Fml 
     cases h
     rw [holds_eq, BoundedFormula.realize_rel₂, Tm.realize_toTerm, Tm.realize_toTerm]
     show _ ↔ relMap (n := 2) _ _
-    simp only [relMap, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+    simp only [relMap, Matrix.cons_val_zero, Matrix.cons_val_one,
       Carrier.as_mk]
   | wellFormed s =>
     cases h
@@ -320,7 +327,7 @@ theorem _root_.Solidity.Fml.realize_toBF {Γ : Ctx} (σ : State C Γ) (φ : Fml 
       refine hφ (LTy.elt σ.glob (.val p) w) ?_
       simp only [BoundedFormula.realize_rel₁, Term.realize_var, Sum.elim_inr]
       exact ⟨w, by simp only [Matrix.cons_val_zero, Fin.snoc_last]; rfl⟩
-  | upd | modal | havoc | bind | anon | allocAll => cases h
+  | upd | modal | havoc | bind | anon | allocAll | grow => cases h
 
 /-! ## The Theory -/
 
@@ -346,11 +353,22 @@ theorem mem_of_models {ψ : (lang C).Sentence}
     (h : ∀ M : Theory.ModelType.{0, 0, 0} (SolTheory C), M ⊨ ψ) : ψ ∈ SolTheory C :=
   fun g => h (Theory.ModelType.of (SolTheory C) (Carrier C g))
 
+/-- A semantic consequence of the contract theory uses finitely many of its
+sentences (Mathlib compactness). This is finite support of first-order
+entailment, not completeness of the program calculus. -/
+theorem finite_support {ψ : (lang C).Sentence} (h : SolTheory C ⊨ᵇ ψ) :
+    ∃ T₀ : Finset (lang C).Sentence,
+      (T₀ : (lang C).Theory) ⊆ SolTheory C ∧ (T₀ : (lang C).Theory) ⊨ᵇ ψ :=
+  FirstOrder.Language.Theory.models_iff_finset_models.mp h
+
 /-- A sentence realizes in a closed state as its formula holds there. -/
 theorem holds_iff_realize (σ : State C []) {φ : Fml C []} {ψ : (lang C).Sentence}
     (h : φ.toBF = some ψ) : holds σ φ ↔ Carrier C σ.glob ⊨ ψ := by
-  rw [Fml.realize_toBF σ φ h default]
-  exact iff_of_eq (congrArg _ (Subsingleton.elim _ _))
+  rw [Fml.realize_toBF σ φ h Empty.elim]
+  change BoundedFormula.Realize ψ Empty.elim (val σ) ↔
+    BoundedFormula.Realize ψ default default
+  have hv : val σ = (default : Fin 0 → Carrier C σ.glob) := funext fun i => Fin.elim0 i
+  rw [hv, show (Empty.elim : Empty → Carrier C σ.glob) = default from funext fun e => e.elim]
 
 /-- A closed state is its own global part. -/
 theorem glob_eq (σ : State C []) : σ.glob = σ := rfl

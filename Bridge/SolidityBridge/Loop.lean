@@ -40,12 +40,16 @@ variable {body c}
 @[simp] theorem mem_stepP_inl {σ : α} {r : TRes α} :
     Sum.inl r ∈ stepP body c σ ↔ step body c σ = .inr r := by
   simp only [stepP, Part.mem_some_iff]
-  cases step body c σ <;> simp
+  cases step body c σ with
+  | inl => simp only [Sum.swap_inl, reduceCtorEq]
+  | inr => simp only [Sum.swap_inr, Sum.inl.injEq, eq_comm, Sum.inr.injEq]
 
 @[simp] theorem mem_stepP_inr {σ τ : α} :
     Sum.inr τ ∈ stepP body c σ ↔ step body c σ = .inl τ := by
   simp only [stepP, Part.mem_some_iff]
-  cases step body c σ <;> simp [eq_comm]
+  cases step body c σ with
+  | inl => simp only [Sum.swap_inl, Sum.inr.injEq, eq_comm, Sum.inl.injEq]
+  | inr => simp only [Sum.swap_inr, eq_comm, reduceCtorEq]
 
 /-- An iteration count that is done is in the first-return map. -/
 theorem mem_fix_of_iterN {n : Nat} {σ : α} {r : TRes α} (h : iterN body c n σ = .inr r) :
@@ -127,7 +131,7 @@ theorem exists_mred_of_mem_fix {σ : α} {r : TRes α} (h : r ∈ (stepP body c)
     (C := fun σ => ∃ τ, (rs body c).MRed σ τ ∧ step body c τ = .inr r) h ?_
   intro σ' hσ' ih
   rcases PFun.mem_fix_iff.1 hσ' with h1 | ⟨τ, hτ, _⟩
-  · exact ⟨σ', .refl, mem_stepP_inl.1 h1⟩
+  · exact ⟨σ', Relation.ReflTransGen.refl, mem_stepP_inl.1 h1⟩
   · obtain ⟨υ, hυ, hs⟩ := ih τ hτ
     exact ⟨υ, Relation.ReflTransGen.head (mem_stepP_inr.1 hτ) hυ, hs⟩
 
@@ -155,6 +159,52 @@ theorem run_cases (σ : α) :
 theorem rs_deterministic {σ τ τ' : α} (h : (rs body c).Red σ τ) (h' : (rs body c).Red σ τ') :
     τ = τ' :=
   Sum.inl.inj (h.symm.trans h')
+
+/-! ## Independent invariant and termination arguments -/
+
+/-- Invariant reasoning from Mathlib's fixpoint induction. The hypotheses
+speak only of one iteration, not the core's loop induction theorem. -/
+theorem fix_invariant {I : α → Prop} {Q : TRes α → Prop}
+    (keep : ∀ σ τ, I σ → step body c σ = .inl τ → I τ)
+    (stop : ∀ σ r, I σ → step body c σ = .inr r → Q r)
+    {σ : α} {r : TRes α} (h : r ∈ (stepP body c).fix σ) (hI : I σ) : Q r := by
+  refine PFun.fixInduction (C := fun σ => I σ → Q r) h ?_ hI
+  intro s hs ih hIs
+  rcases PFun.mem_fix_iff.1 hs with hstop | ⟨t, hnext, _⟩
+  · exact stop s r hIs (mem_stepP_inl.1 hstop)
+  · exact ih t hnext (keep s t hIs (mem_stepP_inr.1 hnext))
+
+/-- A well-founded continuation relation makes Mathlib's first-return map
+defined. Terminal errors count as returns; successful termination needs a
+separate postcondition, supplied by `fix_invariant`. -/
+theorem fix_defined_of_wellFounded {rel : α → α → Prop} (wf : WellFounded rel)
+    (decreases : ∀ σ τ, step body c σ = .inl τ → rel τ σ) (σ : α) :
+    ((stepP body c).fix σ).Dom := by
+  induction σ using wf.induction with
+  | h s ih =>
+    cases hs : step body c s with
+    | inr r => exact Part.dom_iff_mem.2 ⟨r, PFun.fix_stop (mem_stepP_inl.2 hs)⟩
+    | inl t =>
+      obtain ⟨r, hr⟩ := Part.dom_iff_mem.1 (ih t (decreases s t hs))
+      exact Part.dom_iff_mem.2 ⟨r, PFun.mem_fix_iff.2 (.inr ⟨t, mem_stepP_inr.2 hs, hr⟩)⟩
+
+/-- A natural-number variant rules out infinite continuation. -/
+theorem fix_defined_of_variant (v : α → Nat)
+    (decreases : ∀ σ τ, step body c σ = .inl τ → v τ < v σ) (σ : α) :
+    ((stepP body c).fix σ).Dom :=
+  fix_defined_of_wellFounded (measure v).wf decreases σ
+
+/-- Total correctness obtained from library fixpoint induction and a
+well-founded variant, including the model's exact terminal outcome. -/
+theorem run_correct_of_variant {I : α → Prop} {Q : TRes α → Prop}
+    (v : α → Nat) (decreases : ∀ σ τ, step body c σ = .inl τ → v τ < v σ)
+    (keep : ∀ σ τ, I σ → step body c σ = .inl τ → I τ)
+    (stop : ∀ σ r, I σ → step body c σ = .inr r → Q r)
+    {σ : α} (hI : I σ) : Q (run body c σ) := by
+  have hd := fix_defined_of_variant v decreases σ
+  have hm := Part.get_mem hd
+  rw [run_eq_of_mem_fix hm]
+  exact fix_invariant keep stop hm hI
 
 end TLoop
 

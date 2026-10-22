@@ -33,3 +33,15 @@ weakLeanArgs = ["--tstack=131072"]
 name = "CslibBackport"
 srcDir = "vendor"
 globs = ["CslibBackport.+"]
+
+# The upstream EVM state and instruction transformers; its opcode modules
+# are verbatim. See vendor/EvmYul/VENDOR.md for the JSON compatibility patch.
+[[lean_lib]]
+name = "EvmYul"
+srcDir = "vendor"
+globs = ["EvmYul.+"]
+
+[[lean_lib]]
+name = "Conform"
+srcDir = "vendor"
+globs = ["Conform.Wheels"]

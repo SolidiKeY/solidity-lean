@@ -122,6 +122,7 @@ inductive FCtx (C : Contract) : Ctx → Ctx → Type where
   | bind {Γ Δ : Ctx} (m : Modality) (x : Var) (t : LTy) (c : FCtx C (t :: Γ) Δ) : FCtx C Γ Δ
   | anon {Γ Δ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (c : FCtx C Γ Δ) : FCtx C Γ Δ
   | allocAll {Γ Δ : Ctx} (x : Var) (R : RefTy) (c : FCtx C (.mem R :: Γ) Δ) : FCtx C Γ Δ
+  | grow {Γ Δ : Ctx} (c : FCtx C Γ Δ) : FCtx C Γ Δ
 
 /-- The hole filled. -/
 def FCtx.fill {Δ : Ctx} (φ : Fml C Δ) : {Γ : Ctx} → FCtx C Γ Δ → Fml C Γ
@@ -138,6 +139,7 @@ def FCtx.fill {Δ : Ctx} (φ : Fml C Δ) : {Γ : Ctx} → FCtx C Γ Δ → Fml C
   | _, .bind m x t c => .bind m x t (c.fill φ)
   | _, .anon xs c => .anon xs (c.fill φ)
   | _, .allocAll x R c => .allocAll x R (c.fill φ)
+  | _, .grow c => .grow (c.fill φ)
 
 /-- Two formulas equivalent: they hold in the same states. -/
 def Fml.Equiv {Γ : Ctx} (φ ψ : Fml C Γ) : Prop := ∀ σ : State C Γ, holds σ φ ↔ holds σ ψ
@@ -158,6 +160,7 @@ theorem Fml.fill_eq {Δ : Ctx} {φ ψ : Fml C Δ} (e : ∀ σ, holds σ φ = hol
   | _, .bind _ _ _ c => fun σ => by simp only [FCtx.fill, holds, Fml.fill_eq e c]
   | _, .anon _ c => fun σ => by simp only [FCtx.fill, holds, Fml.fill_eq e c]
   | _, .allocAll _ _ c => fun σ => by simp only [FCtx.fill, holds, Fml.fill_eq e c]
+  | _, .grow c => fun σ => by simp only [FCtx.fill, holds, Fml.fill_eq e c]
 
 /-- **Equivalence is a congruence for every context**, a hole under an
 update, a modality or a binder among them: `holds` reads a subformula only
@@ -246,17 +249,17 @@ noncomputable instance : BooleanAlgebra (Lindenbaum C Γ) := by
   exact Function.Injective.booleanAlgebra sem sem_injective
     (fun a b => Quotient.inductionOn₂ a b fun φ ψ => Set.ext fun σ => by
       show (¬holds σ φ → holds σ ψ) ↔ _
-      simp only [Set.mem_union, Set.mem_setOf_eq]
+      change (¬holds σ φ → holds σ ψ) ↔ holds σ φ ∨ holds σ ψ
       tauto)
     (fun a b => Quotient.inductionOn₂ a b fun _ _ => rfl)
     (Set.ext fun _ => ⟨fun _ => trivial, fun _ => trivial⟩)
-    (Set.ext fun _ => ⟨fun h => h trivial, fun h => h.elim⟩)
+    (Set.ext fun _ => by change (¬True) ↔ False; exact ⟨fun h => h trivial, False.elim⟩)
     (fun a => Quotient.inductionOn a fun _ => rfl)
     (fun a b => Quotient.inductionOn₂ a b fun _ _ => rfl)
     (fun a b => Quotient.inductionOn₂ a b fun φ ψ => Set.ext fun σ => by
       show (holds σ φ → holds σ ψ) ↔ _
-      simp only [himp_eq, Set.mem_union, Set.mem_compl_iff, Set.mem_setOf_eq,
-        Set.sup_eq_union, Set.compl_eq]
+      simp only [himp_eq, Set.mem_union, Set.mem_compl_iff,
+        Set.sup_eq_union]
       tauto)
 
 /-- The order is inclusion of meanings: `sem` is an order embedding. -/
@@ -264,7 +267,7 @@ theorem mk_le_mk {φ ψ : Fml C Γ} : mk φ ≤ mk ψ ↔ ∀ σ, holds σ φ �
 
 /-- **A class is the top exactly when its formulas hold everywhere.** -/
 theorem mk_eq_top {φ : Fml C Γ} : mk φ = ⊤ ↔ ∀ σ, holds σ φ :=
-  eq_top_iff.trans ⟨fun h σ => h trivial, fun h σ _ => h σ⟩
+  eq_top_iff.trans ⟨fun h _ => h trivial, fun h σ _ => h σ⟩
 
 /-- `Fml.Leads` is the reverse order. -/
 theorem leads_iff {φ ψ : Fml C Γ} : Fml.Leads φ ψ ↔ mk ψ ≤ mk φ := Iff.rfl
@@ -322,9 +325,9 @@ theorem derivation_sound {T : PL.Theory (Fml C Γ)} (hT : Sound T) {Δ : PL.Ctx 
   | andE₂ _ ih => exact fun σ hΔ => (ih σ hΔ).2
   | orI₁ _ ih => exact fun σ hΔ hn => absurd (ih σ hΔ) hn
   | orI₂ _ ih => exact fun σ hΔ _ => ih σ hΔ
-  | orE _ _ _ ih ih₁ ih₂ =>
+  | @orE Δ A B D _ _ _ ih ih₁ ih₂ =>
     intro σ hΔ
-    by_cases ha : Holds σ _
+    by_cases ha : Holds σ A
     · exact ih₁ σ fun B hB => (Finset.mem_insert.1 hB).elim (· ▸ ha) (hΔ B)
     · exact ih₂ σ fun B hB => (Finset.mem_insert.1 hB).elim (· ▸ ih σ hΔ ha) (hΔ B)
   | implI _ _ ih =>
@@ -355,7 +358,7 @@ open Classical in
 /-- **What natural deduction derives from the calculus's theorems is
 valid.** -/
 theorem valid_of_derivable {R : RuleSet} {A : Proposition (Fml C [])}
-    (h : DerivableIn (provedTheory R) A) : Fml.Valid (interp A) :=
+    (h : DerivableIn (provedTheory (C := C) R) A) : Fml.Valid (interp A) :=
   let ⟨D⟩ := h
   fun σ => derivation_sound (sound_provedTheory R) D σ fun _ h => absurd h (Finset.notMem_empty _)
 
@@ -371,17 +374,18 @@ def skeleton : Fml C Γ → Proposition (Fml C Γ)
 theorem holds_skeleton (σ : State C Γ) : (φ : Fml C Γ) → (Holds σ (skeleton φ) ↔ holds σ φ)
   | .not φ => by
     show (holds σ (interp (skeleton φ)) → ¬True) ↔ ¬holds σ φ
-    rw [holds_skeleton σ φ]
+    rw [show holds σ (interp (skeleton φ)) ↔ holds σ φ from holds_skeleton σ φ]
     exact ⟨fun h h' => h h' trivial, fun h h' _ => h h'⟩
   | .and φ ψ => and_congr (holds_skeleton σ φ) (holds_skeleton σ ψ)
   | .imp φ ψ => imp_congr (holds_skeleton σ φ) (holds_skeleton σ ψ)
   | .tt | .eq .. | .wellFormed .. | .upd .. | .modal .. | .havoc .. | .all .. | .bind ..
-  | .anon .. | .allocAll .. => Iff.rfl
+  | .anon .. | .allocAll .. | .grow .. => Iff.rfl
 
+open Classical in
 /-- **A formula whose skeleton natural deduction derives from the
 calculus's theorems is valid.** -/
 theorem valid_of_skeleton {R : RuleSet} {φ : Fml C []}
-    (h : DerivableIn (provedTheory R) (skeleton φ)) : Fml.Valid φ :=
+    (h : DerivableIn (provedTheory (C := C) R) (skeleton φ)) : Fml.Valid φ :=
   fun σ => (holds_skeleton σ φ).1 (valid_of_derivable h σ)
 
 end NatDed

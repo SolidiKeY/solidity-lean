@@ -1,4 +1,5 @@
 import Solidity.Evm.Machine
+import Solidity.Evm.Correct
 import Cslib.Foundations.Semantics.LTS.Basic
 
 /-!
@@ -130,6 +131,53 @@ theorem exec_eq_halt_iff {c : List Instr} {k : Nat} {m : Machine} {o : Out}
   · rintro ⟨μs, i, c', m₁, h, hi⟩
     rw [show Evm.exec c k m = Cfg.exec ⟨c, k, m⟩ from rfl, MTr.exec_eq h]
     simp only [Cfg.exec, Evm.exec, hi, hbind]
+
+/-! ## Compiler correctness as machine traces -/
+
+section Compiler
+
+variable {C : Contract} {L b : Nat} {Γ Γ' : Ctx} {F : Frag Γ} {F' : Frag Γ'}
+  {σ : State C Γ} {m : Machine} {P : Solidity.Prog C Γ Γ'}
+
+/-- Every successful CSLib trace of compiled code has a corresponding typed
+source run. This direction permits payments. -/
+theorem compile_trace_sound (hP : inFragP F P = some F') (hm : Sim C L b F σ m)
+    (hL : L + Prog.pushes P ≤ Lmax) {m' : Machine} {μs : List (Option Instr)}
+    (htr : lts.MTr ⟨compileProg b P, 0, m⟩ μs ⟨[], 0, m'⟩) :
+    ∃ o, Solidity.Prog.run σ P = .ok o ∧
+      Sim C (L + Prog.pushes P) b F' o.st m' :=
+  compile_box hP hm hL (exec_eq_ok_iff.mpr ⟨μs, htr⟩)
+
+/-- A successful source run has a successful instruction trace when payments
+cannot be refused. Inlined calls are included wherever `inFragP` admits them. -/
+theorem compile_trace_complete (hP : inFragP F P = some F') (hm : Sim C L b F σ m)
+    (hL : L + Prog.pushes P ≤ Lmax) (hpay : Prog.pays P = false)
+    {o : Solidity.Out C σ.H Γ'} (hrun : Solidity.Prog.run σ P = .ok o) :
+    ∃ m' μs, lts.MTr ⟨compileProg b P, 0, m⟩ μs ⟨[], 0, m'⟩ ∧
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m' := by
+  rcases compile_exact hP hm hL hpay with ⟨o', m', hsrc, htgt, hstk, hsim⟩ | ⟨hbad, _⟩
+  · have ho : o' = o := Except.ok.inj (hsrc.symm.trans hrun)
+    subst o'
+    obtain ⟨μs, htr⟩ := exec_eq_ok_iff.mp htgt
+    exact ⟨m', μs, htr, hstk, hsim⟩
+  · rcases hbad with hr | ⟨_, hr⟩ <;> rw [hrun] at hr <;> cases hr
+
+/-- Exact successful termination correspondence, stated using CSLib traces.
+This is a trace theorem for the existing compiler, not a bisimulation with
+an independently implemented EVM. -/
+theorem compile_terminates_iff (hP : inFragP F P = some F') (hm : Sim C L b F σ m)
+    (hL : L + Prog.pushes P ≤ Lmax) (hpay : Prog.pays P = false) :
+    (∃ m' μs, lts.MTr ⟨compileProg b P, 0, m⟩ μs ⟨[], 0, m'⟩) ↔
+      ∃ o, Solidity.Prog.run σ P = .ok o := by
+  constructor
+  · rintro ⟨m', μs, htr⟩
+    obtain ⟨o, ho, _⟩ := compile_trace_sound hP hm hL htr
+    exact ⟨o, ho⟩
+  · rintro ⟨o, ho⟩
+    obtain ⟨m', μs, htr, _, _⟩ := compile_trace_complete hP hm hL hpay ho
+    exact ⟨m', μs, htr⟩
+
+end Compiler
 
 end Evm
 
