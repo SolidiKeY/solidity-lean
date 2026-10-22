@@ -51,12 +51,12 @@ open scoped Scoped
 delete ledger.balances[1]; uint gone = ledger.balances[1];
 uint kept = ledger.balances[2]; uint before = ledger.nonce;` -/
 theorem ledgerWriteThenDelete :
-    ⊨ dl!{ [ ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
+    ⊨ᶠ dl!{ [ ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
              delete ledger.balances[1];
              uint gone = ledger.balances[1]; uint kept = ledger.balances[2];
              uint before = ledger.nonce; ]
            gone == 0 && kept == 20 && before == 5 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .storageFieldWriteSave
   -- `ledger.balances[1] = 10;`: source, receiver `ledger.balances`, index
   apply unfold .storageIndexWriteCaptureAllComplexRecv
@@ -102,8 +102,8 @@ theorem ledgerWriteThenDelete :
   sol_decide
 
 /-- `delete ledger;` is `storageRootDelete`: one update. -/
-theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := by
-  apply Proves.valid
+theorem deleteLedger : ⊨ᶠ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := by
+  apply Proves.fmlValid
   apply update .storageFieldWriteSave
   apply update .storageRootDelete
   apply empty

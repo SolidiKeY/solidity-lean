@@ -18,10 +18,10 @@ case tree over key equalities.  It eliminates the writes
 (`Calculus/MemRead.lean`), and closes what is left with the closer
 (`Calculus/Closer.lean`); the kernel evaluates all of it once
 (`Seq.checkCore_valid`).  Each step is sound over the typed state
-(`Valid.of_toLS`, `Calculus/DecideTyped.lean`), not an equivalence, so a
+(`Fml.Valid.of_toLS`, `Calculus/DecideTyped.lean`), not an equivalence, so a
 goal `sol_decide` does not close may still be valid.
 
-Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
+Every goal is stated with `⊨ᶠ`, which (under `open scoped Scoped`) ranges
 over typed states: a parameter is a word of its type, in range, and the
 storage holds the layout its contract declares (`balances` is a mapping,
 `alice.account.balance` a `uint`).  Under the box a write that halts proves
@@ -48,12 +48,12 @@ where the keys meet and `5` where they do not.  `sol_close` closes it too,
 from the two cases the formula states (W9.8.4: a case `k == j` makes the
 two typed references one). -/
 theorem twoKeysBothWays :
-    ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
+    ⊨ᶠ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
            ((k == j → y == 6) ∧ (k != j → y == 5)) } := by
   sol_symex
   sol_decide
 
-example : ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
+example : ⊨ᶠ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
     ((k == j → y == 6) ∧ (k != j → y == 5)) } := by
   sol_symex
   sol_close
@@ -62,7 +62,7 @@ example : ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
 reads `5`.  No hypothesis names `k = j`, so `sol_close` has no fact to
 rewrite with and does not close it. -/
 theorem sameValueEitherKey :
-    ⊨ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
+    ⊨ᶠ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
   sol_symex
   fail_if_success sol_close
   sol_decide
@@ -70,7 +70,7 @@ theorem sameValueEitherKey :
 /-- `a != b → balances[a] = 1; balances[b] = 2;` — the frame across two
 keys the formula tells apart. -/
 theorem twoKeys :
-    ⊨ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
+    ⊨ᶠ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
   sol_symex
   sol_decide
 
@@ -82,14 +82,14 @@ A key can be a read itself, of the storage as the writes left it. -/
 the key `balances[a]` holds after both writes: `b` when `a ≠ b`, `a` when
 they are equal, and in both cases the entry there is `a`. -/
 theorem keyThroughKey :
-    ⊨ dl!{ [ balances[a] = b; balances[b] = a; ] balances[balances[a]] == a } := by
+    ⊨ᶠ dl!{ [ balances[a] = b; balances[b] = a; ] balances[balances[a]] == a } := by
   sol_symex
   sol_decide
 
 /-- `balances[a] = 5; people[balances[a]].age = 7;` — the index of `people`
 is a read of `balances`. -/
 theorem nestedKey :
-    ⊨ dl!{ [ balances[a] = 5; people[balances[a]].age = 7; ] people[5].age == 7 } := by
+    ⊨ᶠ dl!{ [ balances[a] = 5; people[balances[a]].age = 7; ] people[5].age == 7 } := by
   sol_symex
   sol_decide
 
@@ -100,7 +100,7 @@ reads of `balances[a]` and `balances[b]` as they are; `a == b` makes them
 one. -/
 
 theorem sameKeySameWord :
-    ⊨ dl!{ balances[a] == c → balances[b] == d → a == b → c == d } := by
+    ⊨ᶠ dl!{ balances[a] == c → balances[b] == d → a == b → c == d } := by
   sol_decide
 
 /-! ## A swap, and a branch -/
@@ -108,14 +108,14 @@ theorem sameKeySameWord :
 /-- `uint t = balances[a]; uint u = balances[b]; balances[a] = u;
 balances[b] = t;` — the two entries swapped, `a = b` included. -/
 theorem swap :
-    ⊨ dl!{ [ uint t = balances[a]; uint u = balances[b]; balances[a] = u; balances[b] = t; ]
+    ⊨ᶠ dl!{ [ uint t = balances[a]; uint u = balances[b]; balances[a] = u; balances[b] = t; ]
            (balances[a] == u && balances[b] == t) } := by
   sol_symex
   sol_decide
 
 /-- mini-solkey's `whichWriteWins`: the branch agrees with the key split. -/
 theorem whichWriteWins :
-    ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; uint x = 0;
+    ⊨ᶠ dl!{ [ balances[a] = 1; balances[b] = 2; uint x = 0;
              if (a == b) { x = 2; } else { x = 1; }; ] balances[a] == x } := by
   sol_symex
   sol_decide
@@ -129,19 +129,19 @@ what was there (`find_defaultOf`): `0` for a `uint` that held one. -/
 the deleted struct reads `0`.  `sol_close` reads it too (W9.8.4: the typed
 delete's member below, `SVal.find_defaultOf_field`). -/
 theorem deleteBelow :
-    ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]
+    ⊨ᶠ dl!{ [ alice.account.balance = 100; delete alice.account; ]
            alice.account.balance == 0 } := by
   sol_symex
   sol_decide
 
-example : ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]
+example : ⊨ᶠ dl!{ [ alice.account.balance = 100; delete alice.account; ]
     alice.account.balance == 0 } := by
   sol_symex
   sol_close
 
 /-- The same through a local, and a member beside the deleted one kept. -/
 theorem deleteBelowAndBeside :
-    ⊨ dl!{ [ alice.account.balance = 100; alice.age = 30; delete alice.account;
+    ⊨ᶠ dl!{ [ alice.account.balance = 100; alice.age = 30; delete alice.account;
              uint y = alice.account.balance; uint z = alice.age; ] (y == 0 && z == 30) } := by
   sol_symex
   sol_decide
@@ -150,7 +150,7 @@ theorem deleteBelowAndBeside :
 default of its declared type, `0`.  (The premise `wt(storage)` once stood
 in for the typing the erased storage dropped.) -/
 theorem deleteWithoutWrite :
-    ⊨ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
+    ⊨ᶠ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
   sol_prove
 
 /-- `people[a].age = 1; people[b].age = 2; delete people[a];` — the element
@@ -158,7 +158,7 @@ deleted reads `0` below it, and the other keeps its value when the indices
 differ (mini-solkey's `deleteEntry_decide`).  `sol_close` does not finish it
 within the default heartbeats. -/
 theorem deleteEntry :
-    ⊨ dl!{ [ people[a].age = 1; people[b].age = 2; delete people[a]; ]
+    ⊨ᶠ dl!{ [ people[a].age = 1; people[b].age = 2; delete people[a]; ]
            (people[a].age == 0 && (a != b → people[b].age == 2)) } := by
   sol_symex
   sol_decide
@@ -166,7 +166,7 @@ theorem deleteEntry :
 /-- `balances[k] = 5; balances[j] = 6; delete balances[j];` — the entry
 beside the deleted one keeps its value, and the deleted one is `0`. -/
 theorem deleteEntryBeside :
-    ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; delete balances[j]; uint r = balances[k]; ]
+    ⊨ᶠ dl!{ [ balances[k] = 5; balances[j] = 6; delete balances[j]; uint r = balances[k]; ]
            ((k != j → r == 5) ∧ (k == j → r == 0)) } := by
   sol_symex
   sol_decide
@@ -181,13 +181,13 @@ the closer reads the later ones under them. -/
 
 /-- `uint y = values[5];` then `values[3] = 1;` — where `values[5]` is
 there, `values` is longer than `5`, so `values[3]` is there to write. -/
-theorem belowAnIndex : ⊨ dl!{ [ uint y = values[5]; ] ⟨ values[3] = 1; ⟩ true } := by
+theorem belowAnIndex : ⊨ᶠ dl!{ [ uint y = values[5]; ] ⟨ values[3] = 1; ⟩ true } := by
   sol_symex
   sol_decide
 
 /-- `uint y = matrix[i][j];` then `matrix[i][0] = 1;` — the row
 `matrix[i]` has an element, so it has a first one. -/
-theorem firstOfARow : ⊨ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 1; ⟩ true } := by
+theorem firstOfARow : ⊨ᶠ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 1; ⟩ true } := by
   sol_symex
   sol_decide
 
@@ -202,21 +202,21 @@ error: Solidity elaboration failed: operator - does not take uint
 /-- `uint y = alice.account.balance;` then `delete alice.account;` — a read
 above one that returns: `alice.account` is there, so it can be deleted. -/
 theorem aboveARead :
-    ⊨ dl!{ [ uint y = alice.account.balance; ] ⟨ delete alice.account; ⟩ true } := by
+    ⊨ᶠ dl!{ [ uint y = alice.account.balance; ] ⟨ delete alice.account; ⟩ true } := by
   sol_symex
   sol_decide
 
 /-- `uint y = values[3]; uint n = values.length;` — `values[3]` is below
 the length. -/
 theorem lengthAboveIndex :
-    ⊨ dl!{ [ uint y = values[3]; uint n = values.length; ] n != 3 } := by
+    ⊨ᶠ dl!{ [ uint y = values[3]; uint n = values.length; ] n != 3 } := by
   sol_symex
   sol_decide
 
 /-- `uint y = values[i]; uint n = values.length; bool c = i < n;` — an
 index read in bounds, the bound being the length. -/
 theorem indexBelowLength :
-    ⊨ dl!{ [ uint y = values[i]; uint n = values.length; bool c = i < n; ] c == true } := by
+    ⊨ᶠ dl!{ [ uint y = values[i]; uint n = values.length; bool c = i < n; ] c == true } := by
   sol_symex
   sol_decide
 
@@ -224,7 +224,7 @@ theorem indexBelowLength :
 values.length;` — a `delete` empties a dynamic array and keeps a
 fixed-size one's length. -/
 theorem lengthAfterDelete :
-    ⊨ dl!{ [ values[2] = 7; uint n = values.length; delete values; uint m = values.length; ]
+    ⊨ᶠ dl!{ [ values[2] = 7; uint n = values.length; delete values; uint m = values.length; ]
            (m != 0 → m == n) } := by
   sol_symex
   sol_decide
@@ -237,7 +237,7 @@ reduction; the locals of the formula are read as they are. -/
 /-- `a == 1 → ⟨ uint x = a; uint y = x + 1; ⟩ y == 2` — valid, since `a`
 returns and `a + 1` is in range. -/
 theorem diamondLocals :
-    ⊨ dl!{ a == 1 → ⟨ uint x = a; uint y = x + 1; ⟩ y == 2 } := by
+    ⊨ᶠ dl!{ a == 1 → ⟨ uint x = a; uint y = x + 1; ⟩ y == 2 } := by
   sol_symex
   sol_decide
 
@@ -248,12 +248,12 @@ as a name bound to anything (no value, a `bool`), where neither formula
 below is valid. -/
 
 /-- `⟨ uint x = a; ⟩ x == a` — `a` returns. -/
-theorem parameterReturns : ⊨ dl!{ ⟨ uint x = a; ⟩ x == a } := by
+theorem parameterReturns : ⊨ᶠ dl!{ ⟨ uint x = a; ⟩ x == a } := by
   sol_symex
   sol_decide
 
 /-- `a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1` — `a + 1` does not overflow. -/
-theorem parameterInRange : ⊨ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1 } := by
+theorem parameterInRange : ⊨ᶠ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1 } := by
   sol_symex
   sol_decide
 
@@ -266,13 +266,13 @@ reduction, left as the goal. -/
 
 /-- `⟨ uint x = a; ⟩ x >= 0` — the order a `uint` parameter's range gives
 is the closer's. -/
-theorem closerOnReduction : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
+theorem closerOnReduction : ⊨ᶠ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
   sol_symex
   sol_decide_close
 
 /-- info: ∀ uint pos(0); ∀ uint pos(1); true = true ∧ (pos(0) >= 0) = true -/
 #guard_msgs in
-example : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
+example : ⊨ᶠ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
   sol_symex
   sol_reduce?
   exact Solidity.Decide.LFml.decideMem_valid rfl
@@ -286,14 +286,14 @@ pushed in element by element, each read before the update.  A premise
 
 /-- `values[0] = x++;` — the slot holds the old `x`, and `x` the next. -/
 theorem postIncrementParallel :
-    ⊨ dl!{ a < 10 → [ uint x = a; values[0] = x++; ] (x == a + 1 && values[0] == a) } := by
+    ⊨ᶠ dl!{ a < 10 → [ uint x = a; values[0] = x++; ] (x == a + 1 && values[0] == a) } := by
   sol_symex
   sol_decide
 
 /-- `deleteWithoutWrite` by the closer alone: `alice.account` is at its
 declared type, so its member reads `0` after the `delete`. -/
 theorem deleteWithoutWriteScoped :
-    ⊨ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
+    ⊨ᶠ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
   sol_symex
   sol_decide_close
 
@@ -306,26 +306,26 @@ subtree, read through its source. -/
 
 /-- `values.push(3);` — the array is not empty after it. -/
 theorem pushLength :
-    ⊨ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
+    ⊨ᶠ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
   sol_symex
   sol_decide
 
 /-- `values.push(3);` — the pushed word is the last element. -/
 theorem pushReadBack :
-    ⊨ dl!{ [ values.push(3); uint r = values[values.length - 1]; ] r == 3 } := by
+    ⊨ᶠ dl!{ [ values.push(3); uint r = values[values.length - 1]; ] r == 3 } := by
   sol_symex
   sol_decide
 
 /-- A `pop` after a `push` gives the length back. -/
 theorem pushPopLength :
-    ⊨ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint m = values.length; ]
+    ⊨ᶠ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint m = values.length; ]
            m == n } := by
   sol_symex
   sol_decide
 
 /-- `alice = bob;` — a member of the copy is the source's. -/
 theorem copyReadsSource :
-    ⊨ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
+    ⊨ᶠ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
   sol_symex
   sol_decide
 
@@ -337,12 +337,12 @@ typed reading closes them. -/
 
 /-- `alice = bob;` — the copy's member is the source's, with nothing in the
 program reading `bob.age` first. -/
-theorem copyFrame : ⊨ dl!{ [ alice = bob; ] alice.age == bob.age } := by
+theorem copyFrame : ⊨ᶠ dl!{ [ alice = bob; ] alice.age == bob.age } := by
   sol_symex
   sol_decide
 
 /-- `balances` is a mapping: every key is there to write. -/
-theorem mappingEveryKey : ⊨ dl!{ [ uint y = balances[k]; ] ⟨ balances[j] = 1; ⟩ true } := by
+theorem mappingEveryKey : ⊨ᶠ dl!{ [ uint y = balances[k]; ] ⟨ balances[j] = 1; ⟩ true } := by
   sol_symex
   sol_decide
 
@@ -353,7 +353,7 @@ Neither is valid. -/
 /-- Without `a != b` the frame fails where `a = b`. -/
 example : True := by
   fail_if_success
-    have : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
+    have : ⊨ᶠ dl!{ [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
       sol_symex
       sol_decide
   trivial
@@ -361,7 +361,7 @@ example : True := by
 /-- An empty array has no last element. -/
 example : True := by
   fail_if_success
-    have : ⊨ dl!{ [ uint n = values.length; ] ⟨ values[n - 1] = 0; ⟩ true } := by
+    have : ⊨ᶠ dl!{ [ uint n = values.length; ] ⟨ values[n - 1] = 0; ⟩ true } := by
       sol_symex
       sol_decide
   trivial
@@ -387,7 +387,7 @@ uint after = ledger.nonce; uint survives = ledger.balances[2];`.
 the interpreter for the last two.  What `survives` is depends on what
 `ledger.balances` is in the state, below. -/
 theorem ledger :
-    ⊨ dl!{ [ ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
+    ⊨ᶠ dl!{ [ ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
              delete ledger.balances[1];
              uint gone = ledger.balances[1]; uint kept = ledger.balances[2];
              uint before = ledger.nonce;
@@ -403,7 +403,7 @@ entries, and `ledger.balances` is the mapping `TestSuite` declares, so
 `survives` is `20` (`survivesMappingOnly`); the disjunction once stated
 what the erased storage allowed. -/
 theorem survives :
-    ⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
+    ⊨ᶠ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
            (survives != 20 → survives == 0) } := by
   sol_symex
   sol_decide
@@ -411,7 +411,7 @@ theorem survives :
 /-- **`survives` is `20`**: `ledger.balances` is the mapping `TestSuite`
 declares, whose entries a `delete` keeps. -/
 theorem survivesMappingOnly :
-    ⊨ dl!{ wt(storage) →
+    ⊨ᶠ dl!{ wt(storage) →
       [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
         survives == 20 } := by
   sol_prove
@@ -420,7 +420,7 @@ theorem survivesMappingOnly :
 /-- `fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1];` —
 `fixedValues` is a `uint[3]`, whose elements a `delete` resets in place. -/
 theorem fixedDelete :
-    ⊨ dl!{ [ fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1]; ]
+    ⊨ᶠ dl!{ [ fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1]; ]
            (x != 7 → x == 0) } := by
   sol_symex
   sol_decide
@@ -438,26 +438,26 @@ value is ever built, so a long `new` costs what a short one does. -/
 /-- `Person memory carol; carol.age = 5;` — the pair, a member write, and
 the read of it (`readOnWrite`). -/
 theorem memoryFieldWriteRead :
-    ⊨ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
   sol_symex
   sol_decide
 
 /-- A member nothing wrote is its default (`initMember`). -/
 theorem memoryFieldDefault :
-    ⊨ dl!{ [ Person memory carol; uint x = carol.age; ] x == 0 } := by
+    ⊨ᶠ dl!{ [ Person memory carol; uint x = carol.age; ] x == 0 } := by
   sol_symex
   sol_decide
 
 /-- A write and a read at an index that is no literal: one `kite` on the
 index, the write's guard the length. -/
 theorem memoryIndexSymbolic :
-    ⊨ dl!{ [ uint[] memory xs = new uint[](3); xs[i] = 7; uint y = xs[i]; ] y == 7 } := by
+    ⊨ᶠ dl!{ [ uint[] memory xs = new uint[](3); xs[i] = 7; uint y = xs[i]; ] y == 7 } := by
   sol_symex
   sol_decide
 
 /-- A million elements: the length is read off `new`, nothing allocated. -/
 theorem memoryNewLarge :
-    ⊨ dl!{ [ uint[] memory xs = new uint[](1000000); xs[5] = 7; uint y = xs[5];
+    ⊨ᶠ dl!{ [ uint[] memory xs = new uint[](1000000); xs[5] = 7; uint y = xs[5];
              uint l = xs.length; ] (y == 7 ∧ l == 1000000) } := by
   sol_symex
   sol_decide
@@ -465,7 +465,7 @@ theorem memoryNewLarge :
 /-- `delete carol.account;` writes a fresh default `Account` into the member
 (`memoryFieldDeleteReference`): its balance reads `0` again. -/
 theorem memoryDeleteRefFresh :
-    ⊨ dl!{ [ Person memory carol; Account memory acc = carol.account; acc.balance = 9;
+    ⊨ᶠ dl!{ [ Person memory carol; Account memory acc = carol.account; acc.balance = 9;
              delete carol.account; uint b = carol.account.balance; ] b == 0 } := by
   sol_symex
   sol_decide
@@ -474,7 +474,7 @@ theorem memoryDeleteRefFresh :
 (`memoryStorageCopy`); a later write to `alice` is not seen (`readFromCopyToStorage`
 reads the storage of the copy). -/
 theorem memoryStorageCopyRead :
-    ⊨ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30;
+    ⊨ᶠ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30;
              uint x = carol.age; ] x == 27 } := by
   sol_symex
   sol_decide
@@ -483,7 +483,7 @@ theorem memoryStorageCopyRead :
 copy of `carol` laid over `alice`); the storage reads what was copied
 (`findOnCopy`), so a later write to `carol` is not seen. -/
 theorem memoryToStorageRead :
-    ⊨ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
              uint x = alice.age; ] x == 42 } := by
   sol_symex
   sol_decide

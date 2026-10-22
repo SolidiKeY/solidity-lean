@@ -9,7 +9,7 @@ import Solidity.Calculus.CloseFrame
 /-!
 # The scoped strategy as a walk: `sol_derive`, and `sol_close` on a leaf
 
-`sol_prove` on a goal `Valid φ` is the walk of `⊢` (`Proves.valid`, then
+`sol_prove` on a goal `Fml.Valid φ` is the walk of `⊢` (`Proves.fmlValid`, then
 `Calculus/ProvesDerive.lean`'s `Seq.prove`, decision 89 extended): the
 strategy and the closer as one kernel evaluation, the leaves it leaves
 the walk's own sequents.  This module has what that walk shares with
@@ -49,7 +49,7 @@ open Lean Elab Tactic Meta
 def budget : Nat := 20000
 
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
-lines: `sol_leaf` (the sequent as `⊨ ψ`, `Calculus/ProvesDerive.lean`), then
+lines: `sol_leaf` (the sequent as `⊨ᶠ ψ`, `Calculus/ProvesDerive.lean`), then
 `sol_decide` on the scoped leaf, then
 `sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`).  A leaf past
 the closer's bounds (`small = false`) gets no step that reduces it, only
@@ -167,7 +167,7 @@ close).
 
 Under `open scoped Solidity.Scoped` (`Walk.surfaceOn`) `sol_derive?`
 writes today's short walk instead, which the scope's macros read
-(`Calculus/WalkSyntax.lean`): `apply Proves.valid`, solkey's aliases
+(`Calculus/WalkSyntax.lean`): `apply Proves.fmlValid`, solkey's aliases
 (`apply impRight`, `apply allRight`, `apply emptyModality`), one `apply
 update .r` (`unfold`, `splitBox`, `split`, `done`, `Proves.check`, `cases`,
 `branches`, `invBox`, the `…Lean` forms) per rule, `sol_leaf; sol_close` at
@@ -421,16 +421,16 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
       | _, _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
     return out
 
-/-- The walk from the goal `g` (`Valid φ` starts with `Proves.valid`):
+/-- The walk from the goal `g` (`Fml.Valid φ` starts with `Proves.fmlValid`):
 its lines, and the leaves it leaves. -/
 def run (g : MVarId) (close : Bool := false) (short : Bool := false) :
     TacticM (Array String × List MVarId) := do
   let (pre, g) ← match ← Symex.validGoal? g with
     | some _ =>
-      let t ← if short then `(tactic| apply $(mkIdent `Proves.valid))
-        else `(tactic| refine $(← ProofTree.short ``Proves.valid)
+      let t ← if short then `(tactic| apply $(mkIdent `Proves.fmlValid))
+        else `(tactic| refine $(← ProofTree.short ``Proves.fmlValid)
           ($(mkIdent `R) := $(← ProofTree.short ``RuleSet.all)) ?_)
-      let [g'] ← ProofTree.runOn g #[t] | throwError "sol_derive: `refine Proves.valid ?_` failed"
+      let [g'] ← ProofTree.runOn g #[t] | throwError "sol_derive: `refine Proves.fmlValid ?_` failed"
       pure ((← ProofTree.tacLines t), g')
     | none => pure (#[], g)
   let fuel ← IO.mkRef Derive.fuel
@@ -438,10 +438,10 @@ def run (g : MVarId) (close : Bool := false) (short : Bool := false) :
   let lines ← walk fuel leaves g close short
   return (pre ++ lines, (← leaves.get).toList)
 
-/-- A scoped goal: `Valid φ` or `H ⊢ φ` over `Proves`. -/
+/-- A scoped goal: `Fml.Valid φ` or `H ⊢ φ` over `Proves`. -/
 def isCoreGoal (g : MVarId) : MetaM Bool := do
   let ty ← instantiateMVars (← g.getType)
-  return ty.isAppOf ``Valid || ty.isAppOf ``Proves
+  return ty.isAppOf ``Fml.Valid || ty.isAppOf ``Proves
 
 end Walk
 

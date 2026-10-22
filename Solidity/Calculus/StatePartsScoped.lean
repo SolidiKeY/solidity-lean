@@ -377,17 +377,26 @@ theorem UpdElem.globT_mapF (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx} (e : UpdElem 
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     have ht : σ₁.tx = σ₀.tx := hF.rest.tx
-    show ((r'.eval σ₀).bind fun addr => (a'.eval σ₀).bind fun amt =>
-        some (G₀.withNet (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net
-          else Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1)
-            G₀.1.net))).map (·.1) =
-      ((r.eval σ₁).bind fun addr => (a.eval σ₁).bind fun amt =>
-        some (G₁.withNet (if addr.1 = σ₁.tx.selfAddress.1 then G₁.1.net
-          else Semantics.setBy addr ((Semantics.lookupBy addr G₁.1.net).getD 0 - amt.1)
-            G₁.1.net))).map (·.1)
-    rw [Srt.sameO_val.1 (hF.tm r hr), Srt.sameO_val.1 (hF.tm a ha), ht, hG]
+    have hb : σ₁.selfBalance = σ₀.selfBalance :=
+      hF.rest.bal
+    simp only [UpdElem.globT_eq_globTM, UpdElem.globTM]
+    rw [Srt.sameO_val.1 (hF.tm r hr),
+      Srt.sameO_val.1 (hF.tm a ha)]
+    have hpaid : ∀ addr amt, (G₀.paid σ₀ addr amt).1 = (G₁.paid σ₁ addr amt).1 := by
+      intro addr amt
+      have hn : (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net else
+          Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1) G₀.1.net) =
+          (if addr.1 = σ₁.tx.selfAddress.1 then G₁.1.net else
+          Semantics.setBy addr ((Semantics.lookupBy addr G₁.1.net).getD 0 - amt.1) G₁.1.net) := by
+        rw [ht, hG]
+      simp only [GlobT.paid, State.pay, ht, hb]
+      rw [show (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net else
+          Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1) G₀.1.net) = _ from hn]
+      simp only [ht]
+      exact GlobT.withBalance_congr (GlobT.withNet_congr hG _) _
     cases r.eval σ₁ <;> cases a.eval σ₁ <;>
-      first | rfl | exact congrArg some (GlobT.withNet_congr hG _)
+      simp only [Option.bind_none, Option.bind_some, Option.map_none] <;>
+      first | rfl | exact congrArg some (hpaid _ _)
   | netMt r a =>
     simp only [UpdElem.mapF] at h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
@@ -1372,8 +1381,8 @@ theorem Fml.mergeAtS_sound {r : MergeNameS} {Γ : Ctx} (φ : Fml C Γ) {ψ : Fml
   Fml.rwAtS_sound r.top_sound φ h σ hψ
 
 /-- A scoped formula is valid where a merge of it is. -/
-theorem Valid.of_mergeAtS {r : MergeNameS} {φ ψ : Fml C []} (hr : φ.mergeAtS r = some ψ)
-    (h : Valid ψ) : Valid φ :=
+theorem Fml.Valid.of_mergeAtS {r : MergeNameS} {φ ψ : Fml C []} (hr : φ.mergeAtS r = some ψ)
+    (h : Fml.Valid ψ) : Fml.Valid φ :=
   fun σ => Fml.mergeAtS_sound φ hr σ (h σ)
 
 end Solidity

@@ -6,7 +6,7 @@ import Solidity.Tools.Inspect
 # The flip switch, pinned
 
 `open scoped Solidity.Scoped` (`Calculus/Surface.lean`): today's
-text read scoped, `dl!{ … }` a `Fml C []`, `⊨` scoped validity, `⊢`
+text read scoped, `dl!{ … }` a `Fml C []`, `⊨ᶠ` scoped validity, `⊢`
 the scoped sequent, and the commands on it.  Outside the scope a formula
 with a modality reads scoped too (W8.2).  The callback taclets print as today's
 (`Calculus/Callback.lean`).
@@ -31,8 +31,8 @@ open scoped Scoped
 /-- info: dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
-/-- info: ⊨ dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Prop -/
-#guard_msgs in #check ⊨ dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
+/-- info: ⊨ᶠ dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Prop -/
+#guard_msgs in #check ⊨ᶠ dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
 /-- info: dl{ ⟹ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Prop -/
 #guard_msgs in #check ⊢ dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
@@ -65,8 +65,7 @@ end Scoped
 
 /--
 info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
-  dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝
-    { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝ { pay(sadr,se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 

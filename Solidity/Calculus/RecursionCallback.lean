@@ -71,12 +71,12 @@ end Eqns
 
 /-- **A recursive call that does not call back**, read without callbacks
 (`ProvesC.recCall`, no goal): where nothing in the sequent calls back, the
-two readings agree (`holdsC_iff_holds`), and `rec_auto` proves it `Valid`. -/
+two readings agree (`holdsC_iff_holds`), and `rec_auto` proves it `Fml.Valid`. -/
 theorem ProvesC.recValid {I : Fml C []} {pay : Bool} {Γ Γ' ps rs Γ₁ Γ₂ : Ctx} {H : Hyps C [] Γ}
     {m : Modality} {f : Name} {d : Nat} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
     {body : Unit → Prog C (rs ++ ps) (rs ++ ps)} {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂}
     {φ : Fml C Γ₂}
-    (h : Valid (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)))
+    (h : Fml.Valid (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)))
     (hφ : (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)).callsBack pay = false) :
     ProvesC I pay [] H (.modal m (.cons (.callRec f d args ret body) ω) κ φ) :=
   .recCall [] (fun τ _ => (holdsC_iff_holds _ hφ τ).2 (h τ)) nofun
@@ -386,18 +386,21 @@ theorem holdsC_callPre {args : Args C Γ ps} {req : Fml C ps} {σ : State C Γ}
 theorem holdsC_callPost {μ : Mutability} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
     {ens : Fml C (rs ++ (Olds ++ ps))} {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {σ : State C Γ} (h : holdsC I pay σ (Fml.callPost μ args ret ens ω κ φ m))
-    (a : TEnv C σ.H ps) (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger)
-    (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net) :
-    holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt)
+    (a : TEnv C σ.H ps) (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote)
+    (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net)
+    (hb : μ ≠ .nonpayable → sb = σ.selfBalance) :
+    holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt sb)
       (Fml.callResult ret ens ω κ φ m) := by
   have hX := holdsC_snapOld ((holdsC_declsThen h).2 a ha)
   cases μ with
-  | nonpayable => exact hX st nt
+  | nonpayable => exact hX st nt sb
   | pure =>
     obtain ⟨rfl, rfl⟩ := hk (by decide)
+    obtain rfl := hb (by decide)
     exact hX
   | view =>
     obtain ⟨rfl, rfl⟩ := hk (by decide)
+    obtain rfl := hb (by decide)
     exact hX
 
 /-- Frames run from a state equal to another, of the same heap. -/
@@ -424,7 +427,7 @@ theorem holdsC_callRec_of {μ : Mutability} {f : Name} {d : Nat} {args : Args C 
       TGFrame μ (ret.enterT (σ.withEnv a)).st o.st →
       TLocAgree 0 (Prog.writesAt 0 (body ())) (ret.enterT (σ.withEnv a)).st.env
         (TEnv.drop (body ()).ext o.st.env) →
-      holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+      holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
         (Fml.callResult ret ens ω κ φ m) →
       (COut.ok (TRun.callLeave ret (body ()).ext σ (ret.enterT (σ.withEnv a)) o)).thenF
         (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ)) :
@@ -442,9 +445,12 @@ theorem holdsC_callRec_of {μ : Mutability} {f : Name} {d : Nat} {args : Args C 
     cases o' with
     | ok x =>
       obtain ⟨hg, hag⟩ := hfr x rfl
-      refine k a ha x hct hg hag (holdsC_callPost hpost a ha x.st.storage x.st.net fun hn => ?_)
-      have hk := hg.keeps hn
-      cases ret <;> exact hk
+      refine k a ha x hct hg hag (holdsC_callPost hpost a ha x.st.storage x.st.net
+        x.st.selfBalance (fun hn => ?_) (fun hn => ?_))
+      · have hk := hg.keeps hn
+        cases ret <;> exact hk
+      · have hb := hg.selfBalance hn
+        cases ret <;> exact hb
     | halt e => exact hct
     | violated => exact hct.elim
 
@@ -459,7 +465,7 @@ theorem holdsC_callNone_k {μ : Mutability} {body : Prog C ([] ++ ps) Γf}
     (hg : TGFrame μ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st o.st)
     (hag : TLocAgree 0 (Prog.writesAt 0 body) ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st.env
       (TEnv.drop body.ext o.st.env))
-    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
       (Fml.callResult .none ens ω κ φ m)) :
     (COut.ok (TRun.callLeave .none body.ext σ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)) o)).thenF
       (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ) := by
@@ -471,25 +477,25 @@ theorem holdsC_callNone_k {μ : Mutability} {body : Prog C ([] ++ ps) Γf}
   cases hheap
   have hps : TEnv.drop body.ext env = a :=
     TLocAgree.drop_eq (ρ := []) hag hw
-  have hens' : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net)
+  have hens' : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb)
       (ens.wkD (Thin.atop (Olds ++ ps) Γ)) := by
     apply holdsC_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds []
         σ.net σ.storage = State.thin (Thin.atop (Olds ++ ps) Γ)
-          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show TEnv.olds σ.net σ.storage (TEnv.drop body.ext env) =
         TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env))
       rw [TEnv.thin_atop_append, hps]
     exact hst ▸ hens
   have hM := hX hens'
   have hT : State.drop (Ext.append Γ (Olds ++ ps))
-      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) =
+      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb) =
       (TRun.callLeave .none body.ext σ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a))
         ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
     simp only [TRun.callLeave]
     rw [TEnv.wk_self]
-    exact State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+    exact State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl rfl
       htx.symm
   intro o'' hf
   exact hM _ .nil o'' (.pop (ExecF.transport' hT.symm rfl hf))
@@ -506,7 +512,7 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
     (hg : TGFrame μ ((CallRet.val p r res).enterT (σ.withEnv a)).st o.st)
     (hag : TLocAgree 0 (Prog.writesAt 0 body) ((CallRet.val p r res).enterT (σ.withEnv a)).st.env
       (TEnv.drop body.ext o.st.env))
-    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
       (Fml.callResult (.val p r res) ens ω κ φ m)) :
     (COut.ok (TRun.callLeave (.val p r res) body.ext σ
       ((CallRet.val p r res).enterT (σ.withEnv a)) o)).thenF
@@ -519,15 +525,15 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
   cases hheap
   have hps : (TEnv.drop body.ext env).2 = a :=
     TLocAgree.drop_eq (ρ := [.val p]) (e := (PrimTy.dflt p, a)) hag hw
-  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push
       (t := .val p) (TEnv.drop body.ext env).1)
       (ens.wkD (Thin.atop (.val p :: (Olds ++ ps)) Γ)) := by
     apply holdsC_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.val p]
         σ.net σ.storage = State.thin (Thin.atop (.val p :: (Olds ++ ps)) Γ)
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
             (TEnv.drop body.ext env).1) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
         ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
           (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
@@ -538,19 +544,19 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
   cases res with
   | none =>
     have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
           (TEnv.drop body.ext env).1) =
         (TRun.callLeave (.val p r Option.none) body.ext σ
           ((CallRet.val p r Option.none).enterT (σ.withEnv a))
           ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
       simp only [TRun.callLeave]
       rw [TEnv.wk_self]
-      exact State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+      exact State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl rfl
         htx.symm
     exact hM _ .nil o'' (.pop (ExecF.transport' hT.symm rfl hf))
   | some j =>
     have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
           (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
             (TEnv.drop body.ext env).1) =
         (TRun.callLeave (.val p r (some j)) body.ext σ
@@ -558,7 +564,7 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
           ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
       simp only [TRun.callLeave]
       rw [TEnv.wk_self]
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
       show TEnv.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
         (TEnv.set (j.under (.val p :: (Olds ++ ps))) _ _) = _
       rw [TEnv.drop_set_under]
@@ -566,7 +572,7 @@ theorem holdsC_callVal_k {μ : Mutability} {p : PrimTy} {r : Var}
       rw [TEnv.drop_append]
       rfl
     obtain ⟨_, hd⟩ := ExecS.det_ok (J := I.stateInv pay)
-      (σ := ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+      (σ := ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
         (TEnv.drop body.ext env).1)
       (s := .assignLocal (j.under (Olds ++ ps)).there (.simple (.local .here))) rfl rfl
     exact hM _ (ExecP.cons hd .nil) o'' (.pop (ExecF.transport' hT.symm rfl hf))
@@ -582,7 +588,7 @@ theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
     (hg : TGFrame μ ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st o.st)
     (hag : TLocAgree 0 (Prog.writesAt 0 body)
       ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st.env (TEnv.drop body.ext o.st.env))
-    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
       (Fml.callResult (.rets bs) ens ω κ φ m)) :
     (COut.ok (TRun.callLeave (.rets bs) body.ext σ
       ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)) o)).thenF
@@ -598,17 +604,17 @@ theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
   have hX' := holdsC_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
     (.modal m .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
       (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
-  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
       (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-        ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env))
+        ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env))
       (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))) := by
     apply holdsC_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds rs
         σ.net σ.storage = State.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
             (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
           (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env))) =
         TEnv.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
@@ -621,14 +627,14 @@ theorem holdsC_callRets_k {μ : Mutability} {bs : Binders rs}
     exact hst ▸ hens
   have hM := hX' hens'
   have hT : State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
         (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) =
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) =
       (TRun.callLeave (.rets bs) body.ext σ ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a))
         ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
     simp only [TRun.callLeave]
     rw [TEnv.wk_self]
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     show TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
         (TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
           TEnv.append rs _ σ.env
@@ -650,7 +656,7 @@ theorem holdsC_callStorage_k {μ : Mutability} {R : RefTy} {r : Var}
     (hg : TGFrame μ ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st o.st)
     (hag : TLocAgree 0 (Prog.writesAt 0 body)
       ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st.env (TEnv.drop body.ext o.st.env))
-    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+    (hX : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
       (Fml.callResult (.storage R r) ens ω κ φ m)) :
     (COut.ok (TRun.callLeave (.storage R r) body.ext σ
       ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)) o)).thenF
@@ -663,15 +669,15 @@ theorem holdsC_callStorage_k {μ : Mutability} {R : RefTy} {r : Var}
   cases hheap
   have hps : (TEnv.drop body.ext env).2 = a :=
     TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
-  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+  have hens' : holdsC I pay (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push
       (t := .alias R) (TEnv.drop body.ext env).1)
       (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) := by
     apply holdsC_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
         σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .alias R)
             (TEnv.drop body.ext env).1) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
         ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
           (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
@@ -679,14 +685,14 @@ theorem holdsC_callStorage_k {μ : Mutability} {R : RefTy} {r : Var}
     exact hst ▸ hens
   have hM := hX (TEnv.drop body.ext env).1 hens'
   have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .alias R)
         (TEnv.drop body.ext env).1) =
       (TRun.callLeave (.storage R r) body.ext σ
         ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a))
         ⟨⟨st, σ.H, σ.heap, env, net, sb, tx⟩, ext⟩).st := by
     simp only [TRun.callLeave]
     rw [TEnv.wk_self]
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     change ((TEnv.drop body.ext env).1,
       TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
         (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
@@ -838,15 +844,15 @@ theorem holdsC_callMemM {μ : Mutability} {f : Name} {d : Nat} {args : Args C Γ
         ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext).trans hg e₀
       have hX := holdsC_snapOld ((holdsC_declsThen hpost).2 a ha)
       have hX' : holdsC I pay ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage
-          x.st.net) (Fml.callResultM R r ens ω κ φ m) := by
+          x.st.net x.st.selfBalance) (Fml.callResultM R r ens ω κ φ m) := by
         cases μ with
-        | nonpayable => exact hX x.st.storage x.st.net
+        | nonpayable => exact hX x.st.storage x.st.net x.st.selfBalance
         | pure =>
           obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
-          rw [h1, h2]; exact hX
+          rw [h1, h2, hfr.selfBalance (by decide)]; exact hX
         | view =>
           obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
-          rw [h1, h2]; exact hX
+          rw [h1, h2, hfr.selfBalance (by decide)]; exact hX
       have hY := hX' (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit) hfr.keeps
         (TEnv.drop (body ()).ext x.st.env).1
       have hps : (TEnv.drop (body ()).ext x.st.env : TEnv C x.st.H (.mem R :: ps)).2 =
@@ -855,12 +861,12 @@ theorem holdsC_callMemM {μ : Mutability} {f : Name} {d : Nat} {args : Args C Γ
           (σ.withEnv a)).st.env) hag hc.2.2]
         exact TEnv.wk_trans _ _ ps a
       have hst : State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
-          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net).adopt
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net x.st.selfBalance).adopt
             (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R)
               (TEnv.drop (body ()).ext x.st.env).1) =
           State.withOlds [.mem R] (σ.withEnv a).net (σ.withEnv a).storage
             (State.drop (body ()).ext x.st) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl hfr.tx.symm
         show ((TEnv.drop (body ()).ext x.st.env).1, TEnv.thin (Thin.atop (Olds ++ ps) Γ)
           (TEnv.wk e₀ (Olds ++ (ps ++ Γ))
             (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) =
@@ -874,12 +880,12 @@ theorem holdsC_callMemM {μ : Mutability} {f : Name} {d : Nat} {args : Args C Γ
         (by rw [hst]; exact hct)
       have hM := hY hens'
       have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net).adopt
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc x.st.storage x.st.net x.st.selfBalance).adopt
             (⟨e₀, x.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R)
               (TEnv.drop (body ()).ext x.st.env).1) =
           (TRun.callLeave (.mem R r hd hm) (body ()).ext σ
             ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)) x).st := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl hfr.tx.symm
         show ((TEnv.drop (body ()).ext x.st.env).1,
           TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
             (TEnv.wk e₀ (Olds ++ (ps ++ Γ))

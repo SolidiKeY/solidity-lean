@@ -40,7 +40,7 @@ theorem withdrawSafe :
 
 /--
 info: Try this:
-  refine ProvesC.valid ?_
+  refine ProvesC.fmlValid ?_
     apply ProvesC.allIntro
     apply ProvesC.intro
     apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl

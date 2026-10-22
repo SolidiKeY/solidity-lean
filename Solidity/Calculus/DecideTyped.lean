@@ -23,7 +23,7 @@ transaction are `g₀`'s.
 * A formula pushed in implies the formula at the positive polarity and
   follows from it at the negative one (`Fml.toLS_sound`).
 
-`Valid.of_reduceS` puts it together with the elimination
+`Fml.Valid.of_reduceS` puts it together with the elimination
 (`LFml.elim_holds`, `Calculus/DecideEval.lean`).
 -/
 
@@ -730,26 +730,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
       exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
-  | pay r a =>
-    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
-    obtain ⟨r', hr', a', ha', h⟩ := h
-    cases h
-    have hdr := Tm.toL_drel hA r r' hr'
-    have hda := Tm.toL_drel hA a a' ha'
-    refine ⟨?_, ?_, hFρ, rfl⟩
-    · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
-      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
-      cases (r.eval τ : Option PrimTy.uint.Denote)
-      · rfl
-      · simp only [Option.bind_some]
-        rw [seqL_tt_drel hda]
-        cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
-    · intro q hq
-      have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
-          (fun g' => some (g', ℓ))) = some q := hq
-      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
-      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
-      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
+  | pay r a => cases h
   | netMt r a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
     obtain ⟨r', hr', a', ha', h⟩ := h
@@ -814,11 +795,7 @@ theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     obtain ⟨r', -, a', -, h⟩ := h
     cases h
     exact ⟨hFρ, rfl⟩
-  | pay r a =>
-    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
-    obtain ⟨r', -, a', -, h⟩ := h
-    cases h
-    exact ⟨hFρ, rfl⟩
+  | pay r a => cases h
   | netMt r a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
     obtain ⟨r', -, a', -, h⟩ := h
@@ -1355,15 +1332,15 @@ end Fml
 
 /-- **A leaf whose reduction, before the elimination, is valid, is
 valid** (`Fml.toLS_sound`). -/
-theorem _root_.Solidity.Valid.of_toLS {φ : Fml C []} {ψ : LFml C}
-    (h : φ.toLS true SymS.init = some ψ) (hψ : ψ.Valid) : Valid φ := fun τ =>
+theorem _root_.Solidity.Fml.Valid.of_toLS {φ : Fml C []} {ψ : LFml C}
+    (h : φ.toLS true SymS.init = some ψ) (hψ : ψ.Valid) : Fml.Valid φ := fun τ =>
   (Fml.toLS_sound φ true h τ AEnv.dflt (Agrees.init τ AEnv.dflt) SymS.Fresh.init).1 rfl
     (hψ τ AEnv.dflt)
 
 /-- **`sol_decide`'s reduction is sound**: a scoped leaf whose reduction is
 valid is valid. -/
-theorem _root_.Solidity.Valid.of_reduceS {φ : Fml C []} {ψ : LFml C} (h : φ.reduceS = some ψ)
-    (hψ : ψ.Valid) : Valid φ := by
+theorem _root_.Solidity.Fml.Valid.of_reduceS {φ : Fml C []} {ψ : LFml C} (h : φ.reduceS = some ψ)
+    (hψ : ψ.Valid) : Fml.Valid φ := by
   intro τ
   unfold Fml.reduceS at h
   rw [Option.map_eq_some_iff] at h

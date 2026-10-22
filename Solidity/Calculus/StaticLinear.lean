@@ -220,7 +220,7 @@ namespace StaticReduction
 
 /-- A successful complete arithmetic decision proves the source formula. -/
 theorem valid_of_decide {φ : Fml C []} (r : StaticReduction φ)
-    (h : r.arithmetic.guarded.decide = true) : Valid φ :=
+    (h : r.arithmetic.guarded.decide = true) : Fml.Valid φ :=
   fun σ => (r.meaning σ).1
     ((r.arithmetic.valid_iff.2 ((AFml.decide_iff _).1 h)) _)
 
@@ -239,7 +239,7 @@ def countermodel {φ : Fml C []} (r : StaticReduction φ)
 /-- A complete supported-fragment verdict with an original-formula proof
 or an actual typed state that falsifies the original formula. -/
 def verify {φ : Fml C []} (r : StaticReduction φ) :
-    Sum (PLift (Valid φ)) { σ : State C [] // ¬ holds σ φ } := by
+    Sum (PLift (Fml.Valid φ)) { σ : State C [] // ¬ holds σ φ } := by
   match Layout.verify r.refs r.distinct r.arithmetic with
   | .inl h => exact .inl ⟨fun σ => (r.meaning σ).1 (h.down σ.storage)⟩
   | .inr cm =>
@@ -251,7 +251,7 @@ end StaticReduction
 /-- `none` is unsupported; each returned verdict is exact. No candidate
 pool or finite witness bound is used after successful recognition. -/
 def staticVerify? (φ : Fml C []) :
-    Option (Sum (PLift (Valid φ)) { σ : State C [] // ¬ holds σ φ }) :=
+    Option (Sum (PLift (Fml.Valid φ)) { σ : State C [] // ¬ holds σ φ }) :=
   (staticReduction? φ).map StaticReduction.verify
 
 end Solidity.Decide

@@ -487,7 +487,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .pop b, _, σ => (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind
       fun _ => TRes.NoPanic.ok _
   | _, _, .transfer r a, _, σ => (r.evalT_noPanic σ).bind fun _ => (a.evalT_noPanic σ).bind
-      fun _ => TRes.NoPanic.ok _
+      fun _ => by split; exact TRes.NoPanic.ok _; exact TRes.NoPanic.revert
   | _, _, .send _ r a _, _, σ => (r.evalT_noPanic σ).bind fun _ => (a.evalT_noPanic σ).bind
       fun _ => TRes.NoPanic.ok _
   | _, _, .declMem R _ init _ _, _, σ => by

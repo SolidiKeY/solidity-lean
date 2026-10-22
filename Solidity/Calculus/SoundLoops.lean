@@ -204,12 +204,12 @@ theorem holds_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
   cases hv with
   | false =>
     have hk := hg.keeps (by simp only [frameMut]; decide)
-    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2]; rfl
+    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2, hg.selfBalance (by simp only [frameMut]; decide)]; rfl
     rw [hτ]
     exact h b
   | true =>
     rw [hb]
-    exact h b τ.storage τ.net
+    exact h b τ.storage τ.net τ.selfBalance
 
 /-- The loop's run from `σ`, read through its states, then the rest. -/
 abbrev loopThen {Γ₂ Γ₀ : Ctx} (σ : State C Γ) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀)

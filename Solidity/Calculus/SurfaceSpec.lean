@@ -37,10 +37,10 @@ return.
 where `B` books `msg.value`, KeY's
 `net := store(net, at(msg.sender), net(msg.sender) + msg.value) ‖ selfBalance := selfBalance + msg.value`.
 
-The parameters are free locals, so `⊨` ranges over every argument; `R`
+The parameters are free locals, so `⊨ᶠ` ranges over every argument; `R`
 gives each its type's range, since a free local also ranges over values of
 other types and over none (solkey's parameters are KeY `int`s, unbounded,
-and need no such fact).  `L` is the contract's layout (`layoutFmls`): `⊨`
+and need no such fact).  `L` is the contract's layout (`layoutFmls`): `⊨ᶠ`
 also ranges over storages the contract never has.  `M` is what `msg.value`
 is: `>= 0`, or `== 0` for a function that is not `payable`.  `I` is the
 contract's invariants, assumed and owed (solkey's `CInv(storage, net)`).
@@ -175,7 +175,7 @@ def rangeFml (t : NTerm C) : PrimTy → NRead C
 /-- **The layout, as premises**: every word the declared state holds is a
 value of its type, `0 <= count <= 2^256 - 1`, and so at every key of a
 mapping, `∀ uint k1; 0 <= balances[k1] ∧ …` (not inside an array).  Every
-storage the contract reaches has them; `⊨` ranges over every storage, where
+storage the contract reaches has them; `⊨ᶠ` ranges over every storage, where
 `balances` may be no mapping (`balances[a] == \old(balances[a])` is then
 false: a side is undefined) or hold a `bool` (which `delete` resets to
 `false`, not `0`).  solkey's reads are total and typed, and need none. -/

@@ -5,7 +5,7 @@ import Solidity.Calculus.Lands
 
 The scoped formulas of `Calculus/Fml.lean` read over the typed state
 (`State`, `Semantics/State.lean`) and the typed run (`Prog.run`,
-`Frames.run`): `holds`, `Valid`.
+`Frames.run`): `holds`, `Fml.Valid`.
 
 * A term in an equation is read in the typed Theory (`Tm.denote`,
   `Calculus/Lands.lean`, KeY's total model), a typed value as its
@@ -83,7 +83,7 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
   | _, σ, .upd m U φ => U.afterT m σ (holds · φ)
   | _, σ, .modal m P κ φ => m.afterRunTR (holds · φ) (Prog.runFrames σ P κ)
-  | _, σ, .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
+  | _, σ, .havoc φ => ∀ st nt sb, holds (σ.havoc st nt sb) φ
   | _, σ, .all _ p φ => ∀ v : p.Denote, holds (σ.push (t := .val p) v) φ
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
@@ -137,8 +137,8 @@ theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
   | .oldNet => ⟨[]⟩
   | .kint => ⟨(0 : Int)⟩
 
-/-- Valid over the typed states: true in every typed state of the empty
+/-- Fml.Valid over the typed states: true in every typed state of the empty
 context. -/
-def Valid (φ : Fml C []) : Prop := ∀ σ : State C [], holds σ φ
+def Fml.Valid (φ : Fml C []) : Prop := ∀ σ : State C [], holds σ φ
 
 end Solidity

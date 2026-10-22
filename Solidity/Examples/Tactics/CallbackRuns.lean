@@ -21,7 +21,7 @@ without, when only `P` pays.
 
 The calculus with callbacks (`ProvesC`, `Calculus/Callback.lean`) on a
 send: solkey's three goals of `sendWithCallbackBox`, each closed in the
-plain calculus, the invariant `true`, read as `ValidC` by `ProvesC.valid`
+plain calculus, the invariant `true`, read as `ValidC` by `ProvesC.fmlValid`
 (`Calculus/CallbackSound.lean`).
 -/
 
@@ -55,7 +55,7 @@ local instance : InContract := ⟨StandardExample⟩
 /-- With no payment the two readings agree (`holdsC_iff_holds`), whatever
 the invariant. -/
 example (I : Invariant StandardExample) :
-    ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ Valid cdl!{ [ uint x = 1; ] x == 1 } :=
+    ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ Fml.Valid cdl!{ [ uint x = 1; ] x == 1 } :=
   ⟨fun h σ => (holdsC_iff_holds _ rfl σ).1 (h σ), fun h σ => (holdsC_iff_holds _ rfl σ).2 (h σ)⟩
 
 /-- KeY's `transferSemantics` option: under `noCallback` only a `try` and a
@@ -67,25 +67,24 @@ example (I : Invariant StandardExample) (φ : Fml StandardExample []) :
   ⟨validT_noCallback, validT_withCallback⟩
 
 example : ValidT .noCallback cdl!{ [ uint x = 1; ] x == 1 } ↔
-    Valid cdl!{ [ uint x = 1; ] x == 1 } :=
+    Fml.Valid cdl!{ [ uint x = 1; ] x == 1 } :=
   validT_noCallback_iff rfl
 
 /-- A payment true with callbacks is true without: the deterministic run
 is a callback run (`valid_of_validC`, from `Prog.exec_run`). -/
 example (I : Invariant StandardExample) (a : Fml StandardExample []) (P : Prog StandardExample [] [])
     (H : ValidC I (.imp a (.modal .box P .nil .tt))) (ha : a.hasTransfer = false) :
-    Valid (.imp a (.modal .box P .nil .tt)) :=
+    Fml.Valid (.imp a (.modal .box P .nil .tt)) :=
   valid_of_validC H (Fml.callsBack_of_hasTransfer a ha) rfl
 
 /-! ## The calculus with callbacks -/
 
 /--
 trace: case h.h.exit
-⊢ dl{ ∀ uint to ⟹ᶜ[Fml.tt] { net := if(to = this) then net else store(net, at(to), net(to) - 5) } true }
+⊢ dl{ ∀ uint to ⟹ᶜ[Fml.tt] { pay(to,5) } true }
 
 case h.h.ok
-⊢ dl{ ∀ uint to, { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }, { havoc },
-    true ⟹ᶜ[Fml.tt] true }
+⊢ dl{ ∀ uint to, { pay(to,5) ‖ ok := true }, { havoc }, true ⟹ᶜ[Fml.tt] true }
 
 case h.h.failed
 ⊢ dl{ ∀ uint to, { ok := false } ⟹ᶜ[Fml.tt] true }
@@ -100,9 +99,9 @@ example : ProvesC .tt true [] .nil cdl!{ [ ok = to.send(5); ] true } := by
   all_goals exact .plain (.closeTrue rfl) rfl
 
 /-- The derivation proves the send valid with callbacks, whatever a callee
-that keeps the invariant does (`ProvesC.valid`). -/
+that keeps the invariant does (`ProvesC.fmlValid`). -/
 example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
-  apply ProvesC.valid
+  apply ProvesC.fmlValid
   apply ProvesC.allIntro
   apply ProvesC.bindIntro
   apply ProvesC.send .sendWithCallbackBox

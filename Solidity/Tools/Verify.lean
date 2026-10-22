@@ -5,7 +5,7 @@ import Solidity.Tools.CompleteVerification
 
 `#verify C.f` states the obligation of the function `f` of the contract `C`,
 scoped (`cspec[C]{f}`, `Calculus/Spec.lean`: `spec[C]{f}` under `open
-scoped Solidity.Scoped`), as `⊨` of it (`Valid`). It first tries exact
+scoped Solidity.Scoped`), as `⊨ᶠ` of it (`Fml.Valid`). It first tries exact
 declaration/input compilation and complete
 arithmetic decision (`CompleteVerification.lean`), with both verdicts checked
 against that original obligation. A proof is offered with `sol_exact`.
@@ -21,7 +21,7 @@ the kernel checked it; none found leaves the function open (`gaveUp`), with the 
 Each stage has its own ambient `maxHeartbeats` allowance; a timed-out exact
 stage falls back, and a timed-out proof leaves heuristic refutation available.
 A verdict is only as strong as its word: `✓` is a proof the kernel checked
-(and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ spec[C]{f}` of
+(and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ᶠ spec[C]{f}` of
 the scoped obligation, `✗ (tested)` a state in which the typed run runs the
 call and a postcondition evaluates to false, with the premises that `eval3` cannot
 decide (a `\forall` over a `uint`) true by the generator's construction.
@@ -71,7 +71,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
     (fun _ => pure none)
   saved.restore
   if let some v := complete then return v
-  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Valid) cE φE)
+  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Fml.Valid) cE φE)
   let tac ← `(tactic| sol_spec_try)
   let run : TermElabM (Except String (List MVarId)) := do
     pure (.ok (← Tactic.run goal.mvarId! (Tactic.evalTactic tac)))
@@ -95,12 +95,12 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
     | .ok (_, none) => return .gaveUp gs note
 
 /-- The theorem a proved `f` of the contract `c` is: the scoped obligation
-`#verify` proved, written `⊨ spec[C]{f}` where `open scoped
+`#verify` proved, written `⊨ᶠ spec[C]{f}` where `open scoped
 Solidity.Scoped` is in effect (`inScope`; `spec[C]{f}` is then
-`cspec[C]{f}`), `valid% cspec[C]{f}` (`Valid`) elsewhere. -/
+`cspec[C]{f}`), `valid% cspec[C]{f}` (`Fml.Valid`) elsewhere. -/
 def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) (exactDecision : Bool := false) : String :=
   let tactic := if exactDecision then "sol_exact" else "sol_spec"
-  if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by {tactic}"
+  if inScope then s!"theorem {f}_spec : ⊨ᶠ spec[{c}]\{{f}} := by {tactic}"
   else s!"theorem {f}_spec : valid% cspec[{c}]\{{f}} := by {tactic}"
 
 /-- The report of a verdict: one line, then the witness or the first goal

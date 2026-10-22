@@ -21,7 +21,7 @@ theorem resumed_allocation_captured :
       observed (finishAt (allocatingPaymentAt []) (SRef.ofRoot "values" rfl) u) = some 9 ∧
       heapLength (finishAt (allocatingPaymentAt []) (SRef.ofRoot "values" rfl) u) = some 1 := by
     refine ⟨_, ExecP.cons
-      (ExecS.transferResume (J := keep) (st := changed) (nt := []) rfl rfl trivial trivial)
+      (ExecS.transferResume (J := keep) (st := changed) (nt := []) (sb := ⟨0, by decide⟩) rfl rfl trivial trivial)
       (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
     decide +kernel
   obtain ⟨u, hu, hobs, hheap⟩ := hp

@@ -24,7 +24,7 @@ written remains (decision 11, resolved at W8). Formulas are `Fml C Γ`
 reduces a scoped leaf by position and closes it there
 (`Calculus/DecideScoped.lean`, `Calculus/DecideTyped.lean`), `sol_close`
 reads a leaf's parameters at their types, `sol_prove`'s leaves on `⊢` and
-on `⊨` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
+on `⊨ᶠ` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
 `sol_upd`/`sol_merge` rewrite the scoped leaf, and a chain rewrites while
 the program is open (`Calculus/RewriteScoped.lean`) and past it
 (`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
@@ -132,6 +132,10 @@ solc over KeY.
 
 ## Using the calculus
 
+Public `⊨` reads `Spec` only; internal formula validity is `Fml.Valid`
+(`⊨ᶠ`). `Proves.valid` and `ProvesC.valid` bridge proofs of `Spec.toFml`
+to direct correctness. See `docs/correctness.md`.
+
 For paper derivations with separate captures and checked LaTeX/JSON output,
 use `Solidity.Tools.ProgramTrace` (`#latex_program`, `docs/latex.md`), rather
 than copying exporter internals. Disabling grouping alone does not split a
@@ -155,18 +159,18 @@ these once; `.claude/rules/derivations.md` is the convention.
 `#taclet storageFieldWriteSave` (or a KeY name as a string) prints it with the
 solkey taclets it transcribes and its soundness theorem. Every statement has
 exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
-`⊨ dl!{ pre → [ program ] post }`:
+`⊨ᶠ dl!{ pre → [ program ] post }`:
 
 - **by the strategy**: `sol_symex; sol_close` (`sol_decide` for reads of
   writes; `sol_spec` for a `spec!{f}` obligation); `sol_prove` on a goal
   read with callbacks (`ValidT`, `ValidC`; `docs/options.md`). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
-- **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`
+- **by a walk**: `apply Proves.fmlValid`, then one `apply` per rule — `intro`
   (solkey's `impRight`), `update r`, `unfold r`, `split r` (KeY's two
   goals `thn`/`els`; `splitBox r` is the same rule), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
   since `check` is also the elaborator's), `done r`, `empty`
   (`emptyModality`), `allIntro` (`allRight`) — and
-  `sol_leaf; sol_close` at each leaf (`sol_leaf`: the sequent as `⊨ ψ`,
+  `sol_leaf; sol_close` at each leaf (`sol_leaf`: the sequent as `⊨ᶠ ψ`,
   scoped; `sol_decide` or `sol_spec_close` in place of `sol_close`).
   `sol_derive?` writes
   the solkey names (`impRight`, `emptyModality`, `allRight`).
@@ -185,7 +189,7 @@ step, `~*>` several, and the rewrite links
 while the program is open, `Calculus/RewritePast.lean` past it).
 `Fml.Via.leads` makes a chain `A ~~> E` (`Fml.Via.leadsK`/`Fml.LeadsK`
 when it ends on a written last line, the same up to its binders' names;
-`Fml.LeadsK.valid h hL` proves `A` from it and `Valid L`), and `Fml.Leads.via` composes
+`Fml.LeadsK.valid h hL` proves `A` from it and `Fml.Valid L`), and `Fml.Leads.via` composes
 segments of a long one. `#derivation φ` prints the strategy's lines, in the
 rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
 writes the whole chain, the program and then one rewrite a link to a last

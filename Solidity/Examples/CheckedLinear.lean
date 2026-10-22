@@ -101,7 +101,7 @@ def closedFailureReduction : StaticReduction closedFailure :=
 
 /-- Two identically failed closed computations are equal: KeY's `=` reads
 both sides in the Theory, where they halt alike. -/
-theorem closedFailure_valid : Valid closedFailure := fun _ => rfl
+theorem closedFailure_valid : Fml.Valid closedFailure := fun _ => rfl
 
 def declaredClaim : Fml Bank [] := .imp (declaration_facts[Bank]) arithmeticClaim
 def declaredReduction : StaticReduction declaredClaim := declaration_checked_reduce[declaredClaim]

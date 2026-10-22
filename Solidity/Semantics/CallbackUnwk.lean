@@ -187,8 +187,8 @@ theorem thin_self {Γ Δ : Ctx} (h : Thin Γ Δ) (τ : State C Δ) :
 
 theorem havoc_rel {Γ Δ : Ctx} {H : HTy} {h : Thin Γ Δ}
     {off : List ((t : LTy) × t.TDenote C H)} {a : Out C H Γ} {b : Out C H Δ}
-    (hr : CWkRel h off (.ok a) (.ok b)) (st : Storage C) (nt : Ledger) :
-    CWkRel h off (.ok ⟨a.st.havoc st nt, a.ext⟩) (.ok ⟨b.st.havoc st nt, b.ext⟩) := by
+    (hr : CWkRel h off (.ok a) (.ok b)) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    CWkRel h off (.ok ⟨a.st.havoc st nt sb, a.ext⟩) (.ok ⟨b.st.havoc st nt sb, b.ext⟩) := by
   obtain ⟨d', hd, rfl⟩ := hr
   exact ⟨d', hd, rfl⟩
 
@@ -243,9 +243,9 @@ theorem transfer_unwk {Γ : Ctx} (J : StateInv C) (r amt : Val C Γ .uint) :
   | @transferViolated _ _ _ _ b hpay hp hj =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
     exact ⟨_, .transferViolated hpay ha (fun hk => hj ((inv_rel hr J).mp hk)), trivial⟩
-  | @transferResume _ _ _ _ b st nt hpay hp hj hk =>
+  | @transferResume _ _ _ _ b st nt sb hpay hp hj hk =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
-    have hr' := havoc_rel hr st nt
+    have hr' := havoc_rel hr st nt sb
     exact ⟨_, ExecS.transferResume hpay ha ((inv_rel hr J).mpr hj) ((inv_rel hr' J).mpr hk), hr'⟩
 
 theorem send_unwk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
@@ -253,16 +253,43 @@ theorem send_unwk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
   intro Δ h τ o' he
   cases he with
   | det hf => exact det_unwk J _ h τ hf
-  | sendHalt hpay hp => exact ⟨_, .sendHalt hpay (transfer_error h τ r amt hp), rfl⟩
+  | sendHalt hpay hp =>
+    have hs := TRun.send_wk h (τ.thin h) τ.env pv r amt
+    dsimp only [State.lift, State.thin, State.withEnv] at hs
+    rw [TEnv.put_thin h τ.env, hp] at hs
+    change Except.error _ = liftedT h τ.env (TRun.send pv r amt (τ.thin h)) at hs
+    cases ha : TRun.send pv r amt (τ.thin h) with
+    | error e => rw [ha] at hs; cases hs; exact ⟨_, .sendHalt hpay ha, rfl⟩
+    | ok o => rw [ha] at hs; cases hs
+  | sendRefused hpay hp =>
+    have hp' := hp
+    simp only [TRun.send, val_thin, bind, Except.bind] at hp'
+    cases hr : r.evalT (τ.thin h) with
+    | error e => rw [hr] at hp'; cases hp'
+    | ok addr =>
+      rw [hr] at hp'
+      cases ha : amt.evalT (τ.thin h) with
+      | error e => rw [ha] at hp'; cases hp'
+      | ok amount =>
+        rw [ha] at hp'
+        have hb := congrArg (fun o : Out C τ.H Δ => TEnv.get (C := C) (H := o.st.H) (pv.wk h) o.st.env)
+          (Except.ok.inj hp')
+        have hc : (τ.thin h).canPay addr amount = false := by
+          simpa only [sendT, State.setLocal, State.withEnv, TEnv.get_set] using hb
+        refine ⟨_, ExecS.sendRefused hpay ?_, local_rel (thin_self h τ) pv false⟩
+        simp only [TRun.send, hr, ha, bind, Except.bind, pure, Except.pure]
+        unfold sendT
+        rw [hc]
+        rfl
   | sendFailed hpay hp =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
     exact ⟨_, ExecS.sendFailed hpay ha, local_rel (thin_self h τ) pv false⟩
   | sendViolated hpay hp hj =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
     exact ⟨_, .sendViolated hpay ha (fun hk => hj ((inv_rel hr J).mp hk)), trivial⟩
-  | @sendResume _ _ _ _ _ _ b st nt hpay hp hj hk =>
+  | @sendResume _ _ _ _ _ _ b st nt sb hpay hp hj hk =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
-    have hr' := havoc_rel hr st nt
+    have hr' := havoc_rel hr st nt sb
     exact ⟨_, ExecS.sendResume hpay ha ((inv_rel hr J).mpr hj) ((inv_rel hr' J).mpr hk),
       local_rel hr' pv true⟩
 
@@ -391,13 +418,13 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
   | tryDecode hd => exact ⟨_, .tryDecode hd, rfl⟩
   | tryViolated hj => exact ⟨_, .tryViolated (fun hk => hj ((at_thin J h τ).mp hk)), trivial⟩
   | tryOk hj hk hd hp hg =>
-    rename_i st nt vs rest r u'
+    rename_i st nt sb vs rest r u'
     obtain ⟨u, hu, hr⟩ := hok (Thin.keepAll ρ h)
-      ((τ.havoc st nt).withEnv (TEnv.append ρ r τ.env)) hp
+      ((τ.havoc st nt sb).withEnv (TEnv.append ρ r τ.env)) hp
     dsimp only [State.thin, State.withEnv, State.havoc] at hu
     rw [thin_keepAll h ρ r τ.env] at hu
-    refine ⟨_, ExecS.tryOk (J := J) (st := st) (nt := nt) (vs := vs) (rest := rest)
-      ((at_thin J h τ).mpr hj) ((at_thin J h (τ.havoc st nt)).mpr hk) hd hu
+    refine ⟨_, ExecS.tryOk (J := J) (st := st) (nt := nt) (sb := sb) (vs := vs) (rest := rest)
+      ((at_thin J h τ).mpr hj) ((at_thin J h (τ.havoc st nt sb)).mpr hk) hd hu
       (by rw [← ha]; exact hg), ?_⟩
     simpa only [State.withEnv, TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h ρ).trans (Prog.wk_over ok (Thin.keepAll ρ h))) hr)

@@ -16,7 +16,7 @@ theorem allocation_recovered :
       ((pushBlock (allocatingPaymentAt _) .here).wk (.drop .refl)).2.2 u ∧
         observed u = some 9 ∧ heapLength u = some 1 := by
     refine ⟨_, ExecS.block rfl
-      (ExecP.cons (ExecS.transferResume (st := changed) (nt := []) rfl rfl trivial trivial)
+      (ExecP.cons (ExecS.transferResume (st := changed) (nt := []) (sb := ⟨0, by decide⟩) rfl rfl trivial trivial)
         (ExecP.cons (ExecS.det rfl) (ExecP.cons (ExecS.det rfl) ExecP.nil))), ?_⟩
     decide +kernel
   obtain ⟨u, hu, hobs, hheap⟩ := hn
@@ -45,7 +45,7 @@ theorem paying_loop_recovered :
   have hn : ∃ u, ExecS keep ((State.init CallbackContract).push (t := .alias (.array .uint)) none)
       (payingLoop.wk (.drop .refl)).2.2 u ∧ heapLength u = some 1 := by
     refine ⟨_, ExecS.loopIter rfl rfl
-      (ExecP.cons (ExecS.transferResume (J := keep) (st := changed) (nt := []) rfl rfl trivial trivial)
+      (ExecP.cons (ExecS.transferResume (J := keep) (st := changed) (nt := []) (sb := ⟨0, by decide⟩) rfl rfl trivial trivial)
         (ExecP.cons (ExecS.det rfl) ExecP.nil)) (ExecS.loopExit rfl ?_), ?_⟩
     · rfl
     · decide +kernel
@@ -65,7 +65,7 @@ theorem prefix_scope_recovered :
         heapLength (u.map (Out.drop ((allocatingPaymentAt []).code.wk (.drop .refl)).2.2.ext)) =
           some 1 := by
     refine ⟨_, ExecP.cons
-      (ExecS.transferResume (J := keep) (st := changed) (nt := []) rfl rfl trivial trivial)
+      (ExecS.transferResume (J := keep) (st := changed) (nt := []) (sb := ⟨0, by decide⟩) rfl rfl trivial trivial)
       (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
     decide +kernel
   obtain ⟨u, hu, hh⟩ := hn

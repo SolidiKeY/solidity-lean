@@ -54,7 +54,7 @@ example : dl![m]{ { sp1 := bob.account ‖ storage := save(storage, alice.accoun
 
 /-- `delete alice.account;` resets `alice.account.token.value`, closed on the
 expanded line. -/
-theorem deleteValue : ⊨ dl!{ [ delete alice.account; ] alice.account.token.value == 0 } := by
+theorem deleteValue : ⊨ᶠ dl!{ [ delete alice.account; ] alice.account.token.value == 0 } := by
   refine Fml.Via.valid (show dl!{ [ delete alice.account; ] alice.account.token.value == 0 }
       ~[storageFieldDelete]~> dl![.box]{ { storage := delAt(storage, alice.account) }
         alice.account.token.value == 0 }
@@ -65,7 +65,7 @@ theorem deleteValue : ⊨ dl!{ [ delete alice.account; ] alice.account.token.val
   sol_decide
 
 /-- `values.push(5);` leaves `5` last, closed on the expanded line. -/
-theorem pushValue : ⊨ dl!{ [ values.push(5); ] values[values.length - 1] == 5 } := by
+theorem pushValue : ⊨ᶠ dl!{ [ values.push(5); ] values[values.length - 1] == 5 } := by
   refine Fml.Via.valid (show dl!{ [ values.push(5); ] values[values.length - 1] == 5 }
       ~[storagePushValueSave]~> dl![.box]{
         { storage := save(save(storage, values[values.length], 5), values.length, values.length + 1) }
@@ -79,7 +79,7 @@ theorem pushValue : ⊨ dl!{ [ values.push(5); ] values[values.length - 1] == 5 
 /-- `alice.account = bob.account;` copies `balance`, closed on the expanded
 line. -/
 theorem copyValue :
-    ⊨ dl!{ [ alice.account = bob.account; ] alice.account.balance == bob.account.balance } := by
+    ⊨ᶠ dl!{ [ alice.account = bob.account; ] alice.account.balance == bob.account.balance } := by
   refine Fml.Via.valid (show dl!{ [ alice.account = bob.account; ] alice.account.balance == bob.account.balance }
       ~*> dl![.box]{ { sp1 := bob.account } { storage := save(storage, alice.account, find(storage, sp1)) }
         alice.account.balance == bob.account.balance }

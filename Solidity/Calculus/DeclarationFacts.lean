@@ -252,7 +252,7 @@ def elabDeclarationFacts : Term.TermElab := fun stx _ => do
 elab "sol_decl_facts" : tactic => withMainContext do
   let goal ← getMainGoal
   let ty ← goal.getType
-  if ty.isAppOfArity ``Solidity.Valid 2 then
+  if ty.isAppOfArity ``Solidity.Fml.Valid 2 then
     goal.assign (← prove ty.appArg!)
   else if ty.isAppOfArity ``holds 4 then
     goal.assign (mkApp (← prove ty.appArg!) ty.appFn!.appArg!)

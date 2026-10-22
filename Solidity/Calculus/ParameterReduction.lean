@@ -101,7 +101,7 @@ structure Countermodel {φ : Fml C []} (r : ParameterReduction φ) where
 theorem Countermodel.refutes {φ : Fml C []} {r : ParameterReduction φ} (cm : r.Countermodel) :
     ¬ holds cm.state φ := fun h => cm.falseInstance ((r.meaning cm.state).2 h cm.atoms)
 
-theorem valid_iff {φ : Fml C []} (r : ParameterReduction φ) : Valid φ ↔ r.arithmetic.Valid := by
+theorem valid_iff {φ : Fml C []} (r : ParameterReduction φ) : Fml.Valid φ ↔ r.arithmetic.Valid := by
   constructor
   · intro h vs
     let model : Storage C × AEnv := Parameters.realize r.parameters r.refs vs
@@ -132,7 +132,7 @@ def countermodelOfCheck {φ : Fml C []} (r : ParameterReduction φ)
     (h : r.arithmetic.formula.check vs.codes = false) : r.Countermodel :=
   r.countermodelOf ⟨vs, fun hv => Bool.false_ne_true (h ▸ (AFml.check_iff _ _).2 hv)⟩
 
-def verify {φ : Fml C []} (r : ParameterReduction φ) : Sum (PLift (Valid φ)) r.Countermodel :=
+def verify {φ : Fml C []} (r : ParameterReduction φ) : Sum (PLift (Fml.Valid φ)) r.Countermodel :=
   match r.arithmetic.verify with
   | .inl h => .inl ⟨fun σ => (r.meaning σ).1 (fun _ => h.down _)⟩
   | .inr cm => .inr (r.countermodelOf cm)

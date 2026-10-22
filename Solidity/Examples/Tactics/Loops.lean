@@ -393,7 +393,7 @@ run_meta do
 under the diamond: the strategy fires `whileUnwind` three times, and
 `loopExit` owes `i < 3` false. -/
 theorem countTo3Diamond :
-    ⊨ dl!{ ⟨ uint i = 0;
+    ⊨ᶠ dl!{ ⟨ uint i = 0;
              /// @custom:key unwind 3
              while (i < 3) { i++; }; ⟩ i == 3 } := by
   sol_symex
@@ -401,7 +401,7 @@ theorem countTo3Diamond :
 
 /-- A loop with an explicit zero bound is not unwound: it ends where its condition is
 false on entry. -/
-theorem notEntered : ⊨ dl!{ ⟨ uint i = 5;
+theorem notEntered : ⊨ᶠ dl!{ ⟨ uint i = 5;
     /// @custom:key unwind 0
     while (i < 3) { i++; }; ⟩ i == 5 } := by
   sol_symex
@@ -477,7 +477,7 @@ open scoped Scoped
 `do { … } while (false)` runs its body once, and the `continue` it skips
 would have jumped to the false condition. -/
 theorem doWhileFalseRunsBodyOnce :
-    ⊨ dl!{ ⟨ uint i = 0; uint r = 0;
+    ⊨ᶠ dl!{ ⟨ uint i = 0; uint r = 0;
              /// @custom:key unwind 1
              do { if (i > 0) { continue; } i = i + 1; } while (false);
              r = 42; assert(i == 1); assert(r == 42); ⟩ true } := by
@@ -488,7 +488,7 @@ theorem doWhileFalseRunsBodyOnce :
 solkey's `@custom:key box`: a loop over an array of length `3` writes
 `i + 1` at each index. -/
 theorem forLoopOverArray :
-    ⊨ dl!{ [ require(values.length == 3); uint i;
+    ⊨ᶠ dl!{ [ require(values.length == 3); uint i;
              /// @custom:key unwind 3
              for (i = 0; i < values.length; i++) { values[i] = i + 1; };
              assert(i == 3); assert(values[0] == 1); assert(values[1] == 2);
@@ -538,7 +538,7 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 ends at `n`.  The `require` states `n >= 0`, which the leaf's closer
 reads as a fact. -/
 theorem countToN :
-    ⊨ dl!{ [ require(n >= 0); uint i = 0;
+    ⊨ᶠ dl!{ [ require(n >= 0); uint i = 0;
              /// @custom:key invariant i <= n
              while (i < n) { i = i + 1; }; ] i == n } := by
   sol_symex
@@ -547,7 +547,7 @@ theorem countToN :
 /-- A sum with a closed form, solkey's `invariantClosedFormSum`: adding `2`
 `n` times leaves `2 * n`. -/
 theorem sumClosedForm :
-    ⊨ dl!{ [ require(n >= 0); uint s = 0; uint i = 0;
+    ⊨ᶠ dl!{ [ require(n >= 0); uint s = 0; uint i = 0;
              /// @custom:key invariant i <= n && s == 2 * i
              while (i < n) { s = s + 2; i = i + 1; }; ] s == n + n } := by
   sol_symex
@@ -556,7 +556,7 @@ theorem sumClosedForm :
 /-- `countToN` under the diamond: `n - i` decreases while the loop goes on, so
 it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
 theorem countToNDiamond :
-    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
+    ⊨ᶠ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
              /// @custom:key invariant 0 <= i && i <= n
              /// @custom:key decreases n - i
              while (i < n) { i = i + 1; }; ⟩ i == n } := by
@@ -566,7 +566,7 @@ theorem countToNDiamond :
 /-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
 the one after the `break` included. -/
 theorem breakKeepsBound :
-    ⊨ dl!{ [ uint i = 0;
+    ⊨ᶠ dl!{ [ uint i = 0;
              /// @custom:key invariant i <= 10
              while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
   sol_symex
@@ -576,7 +576,7 @@ theorem breakKeepsBound :
 (`\forall uint q; a -> c`, `LoopQ`): every number below `i` is below `n` at
 every head. -/
 theorem countWithPrefix :
-    ⊨ dl!{ [ require(n >= 0); uint i = 0;
+    ⊨ᶠ dl!{ [ require(n >= 0); uint i = 0;
              /// @custom:key invariant i <= n
              /// @custom:key invariant \forall uint q; q < i -> q < n
              while (i < n) { i = i + 1; }; ] i == n } := by

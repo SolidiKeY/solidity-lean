@@ -223,9 +223,9 @@ example : ∀ φ : Post StandardExample [.val .uint], dl!{ ⟨ x = 1; ⟩ φ } =
   trace_state
   rfl
 
--- `⊨` and `⊧` of a name alone are Lean's to print.
-/-- info: fun φ => (⊨ φ) ∧ ∀ (σ : State StandardExample []), σ ⊧ φ : Fml StandardExample [] → Prop -/
-#guard_msgs in #check fun (φ : Fml StandardExample []) => (⊨ φ) ∧ ∀ σ, σ ⊧ φ
+-- `⊨ᶠ` and `⊧` of a name alone are Lean's to print.
+/-- info: fun φ => (⊨ᶠ φ) ∧ ∀ (σ : State StandardExample []), σ ⊧ φ : Fml StandardExample [] → Prop -/
+#guard_msgs in #check fun (φ : Fml StandardExample []) => (⊨ᶠ φ) ∧ ∀ σ, σ ⊧ φ
 
 /-! ### Chain-only spellings -/
 

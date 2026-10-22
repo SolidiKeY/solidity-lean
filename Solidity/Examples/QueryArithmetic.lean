@@ -103,7 +103,7 @@ scoped source claim, without a user-supplied occurrence assignment. -/
 def sourceCounterstate : { σ : State Bank [] // ¬ holds σ claim } :=
   reduction.countermodelFromQuery (State.init Bank) [] ⟨counterstore.val, counterstore.property⟩
 
-theorem invalid : ¬ Valid claim := fun h => sourceCounterstate.property (h sourceCounterstate.val)
+theorem invalid : ¬ Fml.Valid claim := fun h => sourceCounterstate.property (h sourceCounterstate.val)
 
 def aliasLaw : Query Bank Bool :=
   .read three fun k => .read (balance k) fun v =>

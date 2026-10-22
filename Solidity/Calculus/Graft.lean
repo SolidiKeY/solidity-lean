@@ -848,18 +848,26 @@ theorem UpdElem.globT_substH (hL : U.Lands σ₀ g σ₁)
       obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
       cases h
       have ht : σ₁.tx = σ₀.tx := congrArg State.tx (hL.glob_of_envOnly hg)
-      show ((r'.eval σ₀).bind fun addr => (a'.eval σ₀).bind fun amt =>
-          some (G₀.withNet (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net
-            else Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1)
-              G₀.1.net))).map (·.1) =
-        ((r.eval σ₁).bind fun addr => (a.eval σ₁).bind fun amt =>
-          some (G₁.withNet (if addr.1 = σ₁.tx.selfAddress.1 then G₁.1.net
-            else Semantics.setBy addr ((Semantics.lookupBy addr G₁.1.net).getD 0 - amt.1)
-              G₁.1.net))).map (·.1)
+      have hb : σ₁.selfBalance = σ₀.selfBalance :=
+        congrArg State.selfBalance (hL.glob_of_envOnly hg)
+      simp only [UpdElem.globT_eq_globTM, UpdElem.globTM]
       rw [Srt.sameO_val.1 (Tm.eval_substH hL hst r hr),
-        Srt.sameO_val.1 (Tm.eval_substH hL hst a ha), ht, hG]
+        Srt.sameO_val.1 (Tm.eval_substH hL hst a ha)]
+      have hpaid : ∀ addr amt, (G₀.paid σ₀ addr amt).1 = (G₁.paid σ₁ addr amt).1 := by
+        intro addr amt
+        have hn : (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net else
+            Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1) G₀.1.net) =
+            (if addr.1 = σ₁.tx.selfAddress.1 then G₁.1.net else
+            Semantics.setBy addr ((Semantics.lookupBy addr G₁.1.net).getD 0 - amt.1) G₁.1.net) := by
+          rw [ht, hG]
+        simp only [GlobT.paid, State.pay, ht, hb]
+        rw [show (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net else
+            Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1) G₀.1.net) = _ from hn]
+        simp only [ht]
+        exact GlobT.withBalance_congr (GlobT.withNet_congr hG _) _
       cases r.eval σ₁ <;> cases a.eval σ₁ <;>
-        first | rfl | exact congrArg some (GlobT.withNet_congr hG _)
+        simp only [Option.bind_none, Option.bind_some, Option.map_none] <;>
+        first | rfl | exact congrArg some (hpaid _ _)
     · cases h
   | netMt r a =>
     simp only [UpdElem.substH] at h

@@ -662,7 +662,7 @@ theorem keeps_transfer (r a : Val C Γ .uint) : (heredInv C P).TKeeps (TRun.tran
   unfold TRun.transfer at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
-  cases h
+  split at h <;> cases h
   exact hσ
 
 omit hP hG in
@@ -673,11 +673,7 @@ theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   cases h
-  unfold sendT
-  split
-  · exact RunInv.HoldsT.setLocal (I := heredInv C P) (σ := σ.pay _ _) hσ pv trivial
-  · exact hσ.setLocal pv trivial
-  · exact hσ.setLocal pv trivial
+  exact hσ.setLocal pv trivial
 
 omit hP hG in
 theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree = true) :

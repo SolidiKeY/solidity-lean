@@ -85,7 +85,7 @@ theorem deployValue : Mini.deployT sol{ constructor(7); } { msgValue := ⟨1, rf
 /-- For every argument, a deployment leaves `x` initialized, `y` the
 argument, and `z` as the empty storage has it. -/
 theorem deployMini :
-    ⊨ dl!{ ∀ uint a;
+    ⊨ᶠ dl!{ ∀ uint a;
       { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
         selfBalance := msg.value }
       ⟨ constructor(a); ⟩ (x == 5 ∧ y == a ∧ z == 0) } := by
@@ -103,7 +103,7 @@ info: dl{
 
 /-- Under the box, from any storage: the roots it reads are the ones the
 deployment writes, so no `mtSt` is needed. -/
-theorem deployMiniBox : ⊨ dl!{ ∀ uint a; [ constructor(a); ] (x == 5 ∧ y == a) } := by
+theorem deployMiniBox : ⊨ᶠ dl!{ ∀ uint a; [ constructor(a); ] (x == 5 ∧ y == a) } := by
   sol_symex
   sol_close
 
@@ -134,12 +134,12 @@ info: \programVariables {
 #guard_msgs in #eval IO.println (Problem.text "Mini" "constructor" problem!{ constructor })
 
 /-- The obligation, derived: every argument deploys. -/
-theorem miniProblem : ⊨ problem!{ constructor } := by
+theorem miniProblem : ⊨ᶠ problem!{ constructor } := by
   sol_prove
 
 /-- `constructor(7);` deploys from every deployer, read off its derived
 obligation. -/
-theorem miniDeploy : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+theorem miniDeploy : ⊨ᶠ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
   sol_prove
 
@@ -249,19 +249,19 @@ def Held : Contract := contract!{
 }
 
 -- a read at a free key of the empty storage: its default
-example : ⊨ dl[Held]{ ∀ uint k; { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+example : ⊨ᶠ dl[Held]{ ∀ uint k; { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(); ⟩ held[k] == 0 } := by
   sol_symex
   sol_close_mt
 
 -- a member of a struct root of the empty storage: its default
-example : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+example : ⊨ᶠ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(); ⟩ alice.age == 0 } := by
   sol_symex
   sol_close_mt
 
 -- the root the constructor writes is read
-example : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+example : ⊨ᶠ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(); ⟩ n == 1 } := by
   sol_symex
   sol_close_mt
@@ -301,7 +301,7 @@ def Back : Contract := contract!{
 
 /-- The deployment reads its defaults and initializers back, under checked
 arithmetic, and its array empty. -/
-theorem backProblem : ⊨ problem[Back]{ constructor } := by
+theorem backProblem : ⊨ᶠ problem[Back]{ constructor } := by
   sol_prove
 
 end Solidity.Examples.Tactics.Constructors
@@ -350,11 +350,11 @@ error: Solidity elaboration failed: constructor: the contract or its constructor
 #guard_msgs in #check problem!{ constructor }
 
 /-- The constructor establishes the invariant and its `ensures`. -/
-theorem spec_constructor : ⊨ spec!{ constructor } := by
+theorem spec_constructor : ⊨ᶠ spec!{ constructor } := by
   sol_spec
 
 /-- `increment()` keeps the invariant. -/
-theorem spec_increment : ⊨ spec!{ increment } := by
+theorem spec_increment : ⊨ᶠ spec!{ increment } := by
   sol_spec
 
 /-! A `requires` of a constructor that reads the state is refused (Lean
@@ -437,7 +437,7 @@ example : (match (dl[Booked]{ { oldNet := mtSt } true } : Fml Booked []) with
     | .upd _ (.decl (t := .oldNet) .nil _ .saveNetMt) _ => true
     | _ => false) = true := rfl
 
-theorem booked_constructor : ⊨ spec[Booked]{ constructor } := by
+theorem booked_constructor : ⊨ᶠ spec[Booked]{ constructor } := by
   sol_symex
   sol_close_mt
 

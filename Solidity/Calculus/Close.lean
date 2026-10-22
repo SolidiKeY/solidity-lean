@@ -37,7 +37,7 @@ What does not close, and why:
   split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
   stays open (it is false at `k = j`);
 * two memory objects: nothing says that two allocations are different
-  objects, since `⊨` includes states whose heap already holds an object at
+  objects, since `⊨ᶠ` includes states whose heap already holds an object at
   `nextId`;
 * a read of an array a push wrote, the array known only by its shape:
   `[ uint n = values.length; values.push(42); ] values.length == n + 1`
@@ -59,13 +59,13 @@ namespace Close
 
 open Lean Elab Tactic Meta in
 /-- Whether the main goal is a scoped leaf's: it or its context reads a
-typed state (`Solidity.State`, `Valid`, `holds`), or what the scoped closer
+typed state (`Solidity.State`, `Fml.Valid`, `holds`), or what the scoped closer
 leaves of one past an update (`CloseS.Landed`, `CloseS.LandedAll`: a
 premise `Nonempty (Landed …)` once the rest reads no landed state).  `Calculus/CloseScoped.lean`'s steps run on such a goal only,
 reading it with `close_rw_s`. -/
 def scopedGoal : TacticM Bool := withMainContext do
   let names : List Lean.Name :=
-    [`Solidity.State, `Solidity.Valid, `Solidity.holds, `Solidity.CloseS.Landed,
+    [`Solidity.State, `Solidity.Fml.Valid, `Solidity.holds, `Solidity.CloseS.Landed,
      `Solidity.CloseS.LandedAll]
   let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
   if hit (← instantiateMVars (← getMainTarget)) then return true
@@ -98,7 +98,7 @@ gave closes the frame's own.  Fails where no such equation is left. -/
 syntax "sol_close_denote" : tactic
 
 /-- `sol_close_unwrap` with no equation strengthened: an equation that reads
-a storage alias stays a Theory equation (`Valid.of_evalEqsTh`). -/
+a storage alias stays a Theory equation (`Fml.Valid.of_evalEqsTh`). -/
 syntax "sol_close_unwrap_th" : tactic
 
 /-- Fails unless an equation of the leaf reads a storage alias (`Tm.pvP`):
@@ -118,7 +118,7 @@ syntax "sol_close_witness" : tactic
 /-- Expose typed ranges and existential read witnesses before the final arithmetic pass. -/
 syntax (name := tacticSol_close_enrich) "sol_close_enrich" : tactic
 
-/-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as `holds`
+/-- `sol_close`'s first step: a scoped leaf (`Fml.Valid ψ`) read as `holds`
 in every typed state (`Calculus/CloseScoped.lean`); any other goal is
 left as it is. -/
 syntax "sol_close_unwrap" : tactic

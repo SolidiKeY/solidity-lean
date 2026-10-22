@@ -896,11 +896,11 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
     rcases val_sim a (hm.push _) hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
     · obtain ⟨y, rfl, hy1⟩ := hra
       rw [run_append_ok hruna]
-      have hres : Solidity.TRun.transfer r a σ =
-          .ok ⟨σ.pay vr y.1, List.prefix_refl _⟩ := by
-        simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind, pure, Except.pure,
-          hx1, hy1]
-      rw [hres]
+      have hc : σ.canPay vr va =
+          (decide (y.1 ≤ m.bal m.self) && m.accepts x y) := by
+        simp only [State.canPay, hm.funds, hy1, Int.ofNat_le]
+        exact congrArg (fun z => decide (y.1 ≤ m.bal m.self) && z)
+          (hm.oracle vr va x y hx1 hy1)
       obtain ⟨-, -, -, hself⟩ := hm.env
       have hpay : ∀ c : Fin W, netAt (σ.pay vr y.1).net c.1 =
           if x = m.self then netAt σ.net c.1 else if c = x then netAt σ.net x.1 - y.1
@@ -916,23 +916,34 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
           rw [if_neg (fun h => hxs h.symm)]
           exact hm.netSelf
       by_cases hrf : m.bal m.self < y.1 ∨ m.accepts x y = false
-      · refine .refused rfl ⟨by simp only [run, assertTop, List.cons_append, List.nil_append,
-          Machine.push, exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next, Out.ok_bind,
-          exec_nil, Out.revert_bind],
-          ⟨σ.pay vr y.1, List.prefix_refl _⟩, { m with bal := upd m.bal x (m.bal x + y.1) }, rfl,
-          ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-          hm.book vr y.1 _ _ (fun c hcs => ?_) hns⟩
-        have h1 := hm.net c hcs
-        rw [hpay c]
-        simp only [upd]
-        by_cases hxs : x = m.self
-        · simp only [hxs, hcs, ↓reduceIte]; exact h1
-        · by_cases hcx : c = x
-          · subst hcx; simp only [hxs, ↓reduceIte]; omega
-          · simp only [hxs, hcx, ↓reduceIte]; exact h1
-      · by_cases hxe : x = m.self
+      · have hn : σ.canPay vr va = false := by
+          rw [hc]
+          rcases hrf with hrf | hrf
+          · simp only [show ¬ y.1 ≤ m.bal m.self by omega, decide_false, Bool.false_and]
+          · simp only [hrf, Bool.and_false]
+        refine .inr ⟨?_, ?_⟩
+        · simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind, hn,
+            Bool.false_eq_true, ↓reduceIte]
+          rfl
+        · simp only [run, assertTop, List.cons_append, List.nil_append,
+            Machine.push, exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next,
+            Out.ok_bind, exec_nil, Out.revert_bind]
+      · have hrf' : y.1 ≤ m.bal m.self ∧ m.accepts x y = true := by
+          simp only [not_or, Bool.not_eq_false] at hrf
+          exact ⟨by omega, hrf.2⟩
+        have hn : σ.canPay vr va = true := by simp only [hc, hrf'.1, decide_true, hrf'.2, Bool.and_self]
+        have hres : Solidity.TRun.transfer r a σ =
+            .ok ⟨σ.pay vr y.1, List.prefix_refl _⟩ := by
+          simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind, hn,
+            ↓reduceIte, hy1]
+          rfl
+        rw [hres]
+        have hbal := balance_pay σ vr y.1 (by rw [hm.funds]; exact_mod_cast hrf'.1)
+        rw [hx1, hself] at hbal
+        simp only [Int.ofNat_inj, Fin.val_inj] at hbal
+        by_cases hxe : x = m.self
         · have hb := hm.book _ _ m.bal m.bal₀ (fun c hcs => by
-            rw [hpay c, if_pos hxe]; exact hm.net c hcs) hns
+            rw [hpay c, if_pos hxe]; exact hm.net c hcs) hns (by rw [hbal, if_pos hxe, hm.funds])
           refine .inl ⟨⟨σ.pay vr y.1, List.prefix_refl _⟩, m, rfl, ?_, rfl, Keeps.refl m, hb⟩
           subst hxe
           simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
@@ -941,7 +952,7 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
         · simp only [not_or, Bool.not_eq_false] at hrf
           refine .inl ⟨⟨σ.pay vr y.1, List.prefix_refl _⟩, { m with bal := pay m.bal m.self x y.1 },
             rfl, ?_, rfl, ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-            hm.book vr y.1 _ m.bal₀ (fun c hcs => ?_) hns⟩
+            hm.book vr y.1 _ m.bal₀ (fun c hcs => ?_) hns ?_⟩
           · simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
               exec_cons_zero, Instr.step, hrf, Bool.true_eq_false, or_self, ↓reduceIte, hxe,
               Out.ok_bind, Nat.succ_ne_self, exec_cons_succ, exec_nil]
@@ -951,6 +962,9 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
             by_cases hcx : c = x
             · subst hcx; simp only [↓reduceIte]; omega
             · simp only [hcx, hcs, ↓reduceIte]; exact h1
+          · rw [hbal, if_neg hxe, hm.funds]
+            simp only [pay, upd, hxe, if_neg (Ne.symm hxe), ↓reduceIte]
+            omega
     · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind],
         run_append_revert hruna⟩
   · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, bind, Except.bind],

@@ -31,7 +31,7 @@ def intervalCountermodel : intervalReduction.Countermodel :=
   intervalReduction.countermodelOfCheck (⟨18, by decide +kernel⟩, ()) (by decide +kernel)
 
 /-- The extracted value 18 also admits a cheap explicit source certificate. -/
-theorem interval_invalid : ¬ Valid intervalClaim :=
+theorem interval_invalid : ¬ Fml.Valid intervalClaim :=
   fun h => intervalCountermodel.refutes (h intervalCountermodel.state)
 
 def signedClaim : Fml Bank [] := dl!{ ∀ int z; z < 0 → z <= 0 }

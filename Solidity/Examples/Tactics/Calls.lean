@@ -55,14 +55,14 @@ info: @Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {
 
 /-- `uint y = addOne(4);` — `addOne(uint x) returns (uint r) { r = x + 1; }`,
 inlined: `uint x' = 4; uint r'; r' = x' + 1; y = r';`. -/
-theorem callAddOne : ⊨ dl!{ ⟨ uint y = addOne(4); ⟩ y == 5 } := by
+theorem callAddOne : ⊨ᶠ dl!{ ⟨ uint y = addOne(4); ⟩ y == 5 } := by
   sol_symex
   sol_close
 
 /-- The same, one rule at a time: the declaration of `y`, the call inlined,
 then the body's statements. -/
-theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
-  apply Proves.valid
+theorem callAddOneWalk : ⊨ᶠ dl!{ [ uint y = addOne(4); ] y == 5 } := by
+  apply Proves.fmlValid
   apply update .valueDeclSkip        -- uint y;
   apply unfold .internalCallExpand   -- y = addOne(4);
   apply unfold .localValueDeclInitDrop
@@ -77,19 +77,19 @@ theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
 
 /-- `uint y = double(3);` — `return x + x;` is an assignment to the return
 variable. -/
-theorem callDouble : ⊨ dl!{ ⟨ uint y = double(3); ⟩ y == 6 } := by
+theorem callDouble : ⊨ᶠ dl!{ ⟨ uint y = double(3); ⟩ y == 6 } := by
   sol_symex
   sol_close
 
 /-- `uint y = addTwo(3);` — `addTwo` calls `addOne` twice: the inner calls
 are inlined in its body. -/
-theorem callNested : ⊨ dl!{ ⟨ uint y = addTwo(3); ⟩ y == 5 } := by
+theorem callNested : ⊨ᶠ dl!{ ⟨ uint y = addTwo(3); ⟩ y == 5 } := by
   sol_symex
   sol_close
 
 /-- `uint z = larger(a, b);` — a `return` in each branch of the body's last
 `if`. -/
-theorem callLarger : ⊨ dl!{ ⟨ uint z = larger(3, 7); ⟩ z == 7 } := by
+theorem callLarger : ⊨ᶠ dl!{ ⟨ uint z = larger(3, 7); ⟩ z == 7 } := by
   sol_symex
   sol_close
 
@@ -97,14 +97,14 @@ theorem callLarger : ⊨ dl!{ ⟨ uint z = larger(3, 7); ⟩ z == 7 } := by
 
 /-- `uint y = addOne(x + 1);` — the argument is captured before the call
 (`functionCallArgCapture`), then the body is inlined. -/
-theorem callCapture : ⊨ dl!{ x == 1 → ⟨ uint y = addOne(x + 1); ⟩ y == 3 } := by
+theorem callCapture : ⊨ᶠ dl!{ x == 1 → ⟨ uint y = addOne(x + 1); ⟩ y == 3 } := by
   sol_symex
   sol_close
 
 /-- The same, one rule at a time: the capture, its declaration, the call,
 the body. -/
-theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3 } := by
-  apply Proves.valid
+theorem callCaptureWalk : ⊨ᶠ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3 } := by
+  apply Proves.fmlValid
   apply intro
   apply update .valueDeclSkip            -- uint y;
   apply unfoldLean .functionCallArgCapture   -- y = addOne(x + 1);  ⇝  uint se = x + 1; y = addOne(se);
@@ -123,7 +123,7 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
 
 /-- `if (x > 0) { y = addOne(1); } else { y = double(1); }`: a call in each branch. -/
 theorem callInBranch :
-    ⊨ dl!{ [ uint y; if (x > 0) { y = addOne(1); } else { y = double(1); }; ] y == 2 } := by
+    ⊨ᶠ dl!{ [ uint y; if (x > 0) { y = addOne(1); } else { y = double(1); }; ] y == 2 } := by
   sol_symex
   sol_close
 
@@ -132,12 +132,12 @@ theorem callInBranch :
 set_option maxHeartbeats 2000000 in
 /-- `credit(k, 5);` — the callee writes storage: two compound assignments. -/
 theorem callCredit :
-    ⊨ dl!{ [ uint b = balances[k]; credit(k, 5); uint c = balances[k]; ] c == b + 5 } := by
+    ⊨ᶠ dl!{ [ uint b = balances[k]; credit(k, 5); uint c = balances[k]; ] c == b + 5 } := by
   sol_symex
   sol_close
 
 /-- `bump(); bump();` — a call with no parameters and no return value, twice. -/
-theorem callBumpTwice : ⊨ dl!{ [ uint c = count; bump(); bump(); uint d = count; ] d == c + 2 } := by
+theorem callBumpTwice : ⊨ᶠ dl!{ [ uint c = count; bump(); bump(); uint d = count; ] d == c + 2 } := by
   sol_symex
   sol_close
 
@@ -195,17 +195,17 @@ def Returns : Contract := contract!{
 
 /-- `if (x > 10) { return 10; }; return x;` is
 `if (x > 10) { r = 10; } else { r = x; }`. -/
-theorem clampHigh : ⊨ dl[Returns]{ ⟨ uint y = clamp(42); ⟩ y == 10 } := by
+theorem clampHigh : ⊨ᶠ dl[Returns]{ ⟨ uint y = clamp(42); ⟩ y == 10 } := by
   sol_symex
   sol_close
 
-theorem clampLow : ⊨ dl[Returns]{ ⟨ uint y = clamp(7); ⟩ y == 7 } := by
+theorem clampLow : ⊨ᶠ dl[Returns]{ ⟨ uint y = clamp(7); ⟩ y == 7 } := by
   sol_symex
   sol_close
 
 /-- The statements after the `if` declare `c`: they move into the `else`
 branch, where the declaration is the branch's own. -/
-theorem pickFallThrough : ⊨ dl[Returns]{ ⟨ uint y = pick(0, 4); ⟩ y == 5 } := by
+theorem pickFallThrough : ⊨ᶠ dl[Returns]{ ⟨ uint y = pick(0, 4); ⟩ y == 5 } := by
   sol_symex
   sol_close
 
@@ -213,14 +213,14 @@ set_option maxHeartbeats 2000000 in
 /-- `withdraw` returns `false` early and writes nothing when the balance is
 short. -/
 theorem withdrawShort :
-    ⊨ dl[Returns]{ [ uint b = balances[k]; bool ok = withdraw(k, b + 1); uint c = balances[k]; ]
+    ⊨ᶠ dl[Returns]{ [ uint b = balances[k]; bool ok = withdraw(k, b + 1); uint c = balances[k]; ]
       (ok == false ∧ c == b) } := by
   sol_symex
   sol_close
 
 /-- The `return` in `clamp` ends `clamp`, not `clampPlusOne`, which adds one
 after the call. -/
-theorem returnEndsCallee : ⊨ dl[Returns]{ ⟨ uint y = clampPlusOne(42); ⟩ y == 11 } := by
+theorem returnEndsCallee : ⊨ᶠ dl[Returns]{ ⟨ uint y = clampPlusOne(42); ⟩ y == 11 } := by
   sol_symex
   sol_close
 
@@ -240,27 +240,27 @@ operator's right operand first, a call's arguments left to right, and an
 operand read before a call is captured first. -/
 
 /-- `uint z = incr(a) + 1;` -/
-theorem callPlusOne : ⊨ dl[Returns]{ ⟨ uint z = incr(4) + 1; ⟩ z == 6 } := by
+theorem callPlusOne : ⊨ᶠ dl[Returns]{ ⟨ uint z = incr(4) + 1; ⟩ z == 6 } := by
   sol_symex
   sol_close
 
 /-- `uint z = incr(a) + incr(b);`: two calls in one expression. -/
-theorem callPlusCall : ⊨ dl[Returns]{ ⟨ uint z = incr(1) + incr(2); ⟩ z == 5 } := by
+theorem callPlusCall : ⊨ᶠ dl[Returns]{ ⟨ uint z = incr(1) + incr(2); ⟩ z == 5 } := by
   sol_symex
   sol_close
 
 /-- `uint z = incr(incr(1));`: a call as another's argument. -/
-theorem callOfCall : ⊨ dl[Returns]{ ⟨ uint z = incr(incr(1)); ⟩ z == 3 } := by
+theorem callOfCall : ⊨ᶠ dl[Returns]{ ⟨ uint z = incr(incr(1)); ⟩ z == 3 } := by
   sol_symex
   sol_close
 
 /-- `require(incr(a) > 0);`: a call in a condition. -/
-theorem callInRequire : ⊨ dl[Returns]{ ⟨ require(incr(0) > 0); uint z = 1; ⟩ z == 1 } := by
+theorem callInRequire : ⊨ᶠ dl[Returns]{ ⟨ require(incr(0) > 0); uint z = 1; ⟩ z == 1 } := by
   sol_symex
   sol_close
 
 /-- `return incr(x) * 2;`: a call inside a returned expression. -/
-theorem callInReturn : ⊨ dl[Returns]{ ⟨ uint z = twiceIncr(3); ⟩ z == 8 } := by
+theorem callInReturn : ⊨ᶠ dl[Returns]{ ⟨ uint z = twiceIncr(3); ⟩ z == 8 } := by
   sol_symex
   sol_close
 
@@ -312,12 +312,12 @@ def calleeStr {C : Contract} : {Γ Γ' : Ctx} → Prog C Γ Γ' → String
 #guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = localRead(1); } : Prog Mutated [] _))
 
 /-- `bumpRead(1)` is `1 + 1`, as the caller's `a++ + a` is. -/
-theorem callLocalReadBeforeEffect : ⊨ dl[Mutated]{ ⟨ uint y = bumpRead(1); ⟩ y == 2 } := by
+theorem callLocalReadBeforeEffect : ⊨ᶠ dl[Mutated]{ ⟨ uint y = bumpRead(1); ⟩ y == 2 } := by
   sol_symex
   sol_close
 
 /-- The same of a callee's declared local. -/
-theorem callDeclReadBeforeEffect : ⊨ dl[Mutated]{ ⟨ uint y = localRead(1); ⟩ y == 2 } := by
+theorem callDeclReadBeforeEffect : ⊨ᶠ dl[Mutated]{ ⟨ uint y = localRead(1); ⟩ y == 2 } := by
   sol_symex
   sol_close
 
@@ -371,24 +371,24 @@ def Tuples : Contract := contract!{
 
 /-- A named return that the body never assigns is its type's default, as in
 solc: the call declares it at `0`. -/
-theorem namedReturnDefault : ⊨ dl[Tuples]{ ⟨ uint y = zero(); ⟩ y == 0 } := by
+theorem namedReturnDefault : ⊨ᶠ dl[Tuples]{ ⟨ uint y = zero(); ⟩ y == 0 } := by
   sol_symex
   sol_close
 
 theorem tupleReturnPair :
-    ⊨ dl[Tuples]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); ⟩ (lo == 2 ∧ hi == 5) } := by
+    ⊨ᶠ dl[Tuples]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); ⟩ (lo == 2 ∧ hi == 5) } := by
   sol_symex
   sol_close
 
 /-- `return (y, x);` reads the return variables it writes: through
 temporaries. -/
 theorem tupleReturnReadsReturnVariables :
-    ⊨ dl[Tuples]{ ⟨ (uint x, uint y) = returnSwapped(); ⟩ (x == 2 ∧ y == 1) } := by
+    ⊨ᶠ dl[Tuples]{ ⟨ (uint x, uint y) = returnSwapped(); ⟩ (x == 2 ∧ y == 1) } := by
   sol_symex
   sol_close
 
 theorem tupleReturnDiscardsComponents :
-    ⊨ dl[Tuples]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1); ⟩
+    ⊨ᶠ dl[Tuples]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1); ⟩
       (lo == 1 ∧ sum == 4 ∧ same == false) } := by
   sol_symex
   sol_close
@@ -397,19 +397,19 @@ theorem tupleReturnDiscardsComponents :
 untyped, `docs/intrinsic.md` "What is left", and there the write to
 `total` may fail). -/
 theorem tupleReturnAssignsExisting :
-    ⊨ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by
+    ⊨ᶠ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by
   sol_symex
   sol_close
 
 theorem tupleAssignmentRotates :
-    ⊨ dl[Tuples]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
+    ⊨ᶠ dl[Tuples]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
       (first, second, third) = (second, third, first); ⟩
       (first == 2 ∧ second == 3 ∧ third == 1) } := by
   sol_symex
   sol_close
 
 theorem tupleDeclaration :
-    ⊨ dl[Tuples]{ ⟨ (uint first, , bool third) = (4, 5, true); ⟩ (first == 4 ∧ third == true) } := by
+    ⊨ᶠ dl[Tuples]{ ⟨ (uint first, , bool third) = (4, 5, true); ⟩ (first == 4 ∧ third == true) } := by
   sol_symex
   sol_close
 
@@ -427,19 +427,19 @@ does not reduce in the kernel here). -/
     (sol[Tuples]{ (uint x, ) = (1, 1 / total); } : Prog Tuples [] _)).toBool == false
 
 theorem returnLeavesNestedBlocks :
-    ⊨ dl[Tuples]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0); ⟩
+    ⊨ᶠ dl[Tuples]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0); ⟩
       (one == 1 ∧ five == 5) } := by
   sol_symex
   sol_close
 
 theorem returnOrFallThroughNamed :
-    ⊨ dl[Tuples]{ ⟨ uint stopped = returnOrFallThrough(true); uint finished = returnOrFallThrough(false); ⟩
+    ⊨ᶠ dl[Tuples]{ ⟨ uint stopped = returnOrFallThrough(true); uint finished = returnOrFallThrough(false); ⟩
       (stopped == 5 ∧ finished == 6) } := by
   sol_symex
   sol_close
 
 /-- A block's declaration is its own: the name is free again after it. -/
-theorem blockScope : ⊨ dl[Tuples]{ [ { uint w = 1; total = w; }; uint w = 2; ] (total == 1 ∧ w == 2) } := by
+theorem blockScope : ⊨ᶠ dl[Tuples]{ [ { uint w = 1; total = w; }; uint w = 2; ] (total == 1 ∧ w == 2) } := by
   sol_symex
   sol_close
 

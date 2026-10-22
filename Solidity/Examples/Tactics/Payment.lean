@@ -7,8 +7,8 @@ import Solidity.Tools.Inspect
 # Payment: `transfer` and `send`, as `⊢` walks
 
 `sadr.transfer(se);` has one rule, under the box, `transferNoCallbackBox`,
-which books the payment on the ledger and nothing else: the update
-`{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) }`,
+which records the hypothetical successful payment and its balance debit: the update
+`{ pay(sadr, se) }`,
 `sadr`'s entry down by the amount unless `sadr` is the contract itself,
 which books nothing (solkey's `\if(sadr = self)`).  Under the diamond a
 payment has no rule (`LeanTaclet.transferDiamond` closes it to `false`).
@@ -41,7 +41,7 @@ open scoped Scoped
 
 /--
 info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
-  dl{ [ sadr .transfer(se); ] ⇝ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  dl{ [ sadr .transfer(se); ] ⇝ { pay(sadr,se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.transferNoCallbackBox
 
@@ -53,25 +53,25 @@ sequent (`Calculus/Sequents.lean`); the chain, from the receiver `3`, is
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply update .transferNoCallbackBox
   show sequent!{ ∀ uint to,
-      { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
+      { pay(to, 5) } ⟹ true }
   apply empty
   show sequent!{ ∀ uint to,
-      { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
+      { pay(to, 5) } ⟹ true }
   sol_leaf
   sol_close
 
-/-! ## 3 · Valid for every receiver and amount
+/-! ## 3 · Fml.Valid for every receiver and amount
 
 The worked chains (`Chains/Payment.lean`) start from one concrete receiver
 and amount; the strategy proves the boxes for all of them. -/
 
 /-- `[ to.transfer(x + 2); ] true`, for every `to` and `x`. -/
-theorem transferSumValid : ⊨ dl!{ [ to.transfer(x + 2); ] true } := by
+theorem transferSumValid : ⊨ᶠ dl!{ [ to.transfer(x + 2); ] true } := by
   sol_symex
   sol_close
 
 /-- `[ owner.transfer(5); ] true`, in every storage. -/
-theorem transferOwnerValid : ⊨ dl!{ [ owner.transfer(5); ] true } := by
+theorem transferOwnerValid : ⊨ᶠ dl!{ [ owner.transfer(5); ] true } := by
   sol_symex
   sol_close
 
@@ -81,8 +81,7 @@ theorem transferOwnerValid : ⊨ dl!{ [ owner.transfer(5); ] true } := by
 info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
   {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl{ [ pv = sadr .send(se); ] ⇝
-    "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
-      "send failed": { pv := false } ⟨[ ]⟩ }
+    "send succeeded": { pay(sadr,se) ‖ pv := true } ⟨[ ]⟩ ; "send failed": { pv := false } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.sendNoCallbackBox
 
@@ -90,9 +89,7 @@ info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : 
 info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
   {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl{ ⟨ pv = sadr .send(se); ⟩ ⇝
-    "non-negative amount": 0 <= se ;
-      "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[
-        ]⟩ ;
+    "non-negative amount": 0 <= se ; "send succeeded": { pay(sadr,se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.sendNoCallbackDiamond
@@ -106,7 +103,7 @@ theorem sendBox : ⊢ dl!{ [ ok = to.send(5); ] true } := by
   simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
   refine ⟨?_, ?_⟩
   · show sequent!{ ∀ uint to,
-        { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true } ⟹ true }
+        { pay(to, 5) ‖ ok := true } ⟹ true }
     apply empty
     sol_leaf
     sol_close
@@ -118,7 +115,7 @@ theorem sendBox : ⊢ dl!{ [ ok = to.send(5); ] true } := by
 /-- `[ ok = owner.send(x + 2); ] true`: a storage receiver and an amount
 that is not simple, both captured first (`send_unfold_leftFstReceiver`,
 `send_unfold_rightSndArgument`). -/
-theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
+theorem sendCapturedValid : ⊨ᶠ dl!{ [ ok = owner.send(x + 2); ] true } := by
   sol_symex
   sol_close
 
@@ -150,7 +147,7 @@ theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := b
   simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
   refine ⟨?_, ?_⟩
   · show sequent!{ { to := 9 },
-        { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }
+        { pay(to, 5) ‖ ok := true }
         ⟹ true }
     apply empty
     sol_leaf

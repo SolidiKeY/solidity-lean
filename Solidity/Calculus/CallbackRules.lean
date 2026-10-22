@@ -26,18 +26,18 @@ inductive CallbackTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
   | transferWithCallbackBox :
       dl[CallbackTaclet C k]{ [ sadr.transfer(se); ] ⇝
-        { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+        { pay(sadr, se) } ⟨[ ]⟩ }
   | sendWithCallbackBox :
       dl[CallbackTaclet C k]{ [ pv = sadr.send(se); ] ⇝
           "send succeeded":
-            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            { pay(sadr, se) ‖ pv := true }
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
   | sendWithCallbackDiamond :
       dl[CallbackTaclet C k]{ ⟨ pv = sadr.send(se); ⟩ ⇝
           "non-negative amount": 0 <= se
         ; "send succeeded":
-            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            { pay(sadr, se) ‖ pv := true }
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
   | tryCallWithCallbackBox :

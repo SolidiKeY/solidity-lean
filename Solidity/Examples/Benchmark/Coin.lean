@@ -76,7 +76,7 @@ theorem ctor : ⊢ dl!{ [ constructor(); ] minter == msg.sender } := by
 minter.  (That no one holds a coin, a read at a free key of the empty
 storage, is outside `sol_close_mt`; `deployRun` shows it of one run.) -/
 theorem deployMinter :
-    ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+    ⊨ᶠ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
         selfBalance := msg.value }
       ⟨ constructor(); ⟩ minter == msg.sender } := by
   sol_symex

@@ -58,7 +58,7 @@ theorem holds_closeN {σ : State C []} {useAll : Bool} :
 for every value of its parameters, its program runs under `m` from
 `State.deploy` with the parameters bound, and does not panic. -/
 theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {Γ' : Ctx}
-    {P : Prog C (paramsN xs).ctx Γ'} (h : Valid (Problem.ctorFml m xs P)) (tx : TTx)
+    {P : Prog C (paramsN xs).ctx Γ'} (h : Fml.Valid (Problem.ctorFml m xs P)) (tx : TTx)
     (e : TEnv C (State.deploy C tx).H (paramsN xs).ctx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames ((State.deploy C tx).withEnv e) P .nil) := by
   exact Upd.afterT.of_lands (holds_closeN (paramsN xs) (h (State.deploy C tx)) e)
@@ -68,7 +68,7 @@ theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {Γ' 
 deployment**: its program runs under `m` from `State.deploy`, and does not
 panic. -/
 theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] Γ'}
-    (h : Valid (Problem.ctorFml m [] P)) (tx : TTx) :
+    (h : Fml.Valid (Problem.ctorFml m [] P)) (tx : TTx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames (State.deploy C tx) P .nil) := by
   exact Upd.afterT.of_lands (h (State.deploy C tx)) (Problem.deployUpd_lands C tx (Δ := []) ())
 
@@ -80,7 +80,7 @@ theorem Prog.runFrames_nil {Γ Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') 
 deployment**: its program runs under `m` at `Contract.deployT`, and does not
 panic; a constructor that is not `payable` is sent no value. -/
 theorem Problem.deploy_of_valid_nil {m : Modality} {Γ' : Ctx} {P : Prog C [] Γ'}
-    (h : Valid (Problem.ctorFml m [] P)) (tx : TTx)
+    (h : Fml.Valid (Problem.ctorFml m [] P)) (tx : TTx)
     (hpay : (C.ctor.map (·.payable)).getD false = true ∨ tx.msgValue.1 = 0) :
     m.afterRunTR (fun _ => True) (Contract.deployT C P tx) := by
   have e : Contract.deployT C P tx = Prog.runFrames (State.deploy C tx) P .nil := by

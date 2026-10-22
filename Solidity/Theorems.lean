@@ -29,17 +29,17 @@ typed run has no stuck outcome, so `compiler_correct` covers every case.  Its pr
 
 | Notation | Reads | Is |
 |---|---|---|
-| `⊨ φ` | `φ` is valid | `Valid φ`: `φ` holds in every typed state |
+| `⊨ᶠ φ` | `φ` is valid | `Fml.Valid φ`: `φ` holds in every typed state |
 | `σ ⊧ φ` | `φ` holds in `σ` | `holds σ φ` |
-| `H ⊨ φ` | `φ` is valid under the context `H` | `∀ σ, holds σ (H.wrap φ)` |
+| `H ⊨ᶠ φ` | `φ` is valid under the context `H` | `∀ σ, holds σ (H.wrap φ)` |
 | `H ⊢ φ`, `⊢ φ` | the calculus derives `φ` | `Proves C .all Γ₀ H φ` |
 | `H ⊢ₖ φ`, `⊢ₖ φ` | solkey's rules alone derive `φ` | `Proves C .solkey Γ₀ H φ` |
 | `s ⇝[k, m] p` | a rule rewrites `s` to `p` | `Rule C k m s p` |
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
 | `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Premise.Sound m s p σ` |
-| `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer`, `send` and `try` may call back into a contract with invariant `I` | `ProvesC I true`, `ValidC I φ true` |
-| `⊢ₙ[I] φ`, `⊨ₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` and a value call call back | `ProvesC I false`, `ValidC I φ false` |
-| `⊨ₜ[m] φ` | `φ` is valid under the tail mode `m`: `.clean` assumes the starting storage's array tails clean (`docs/options.md`, O6) | `ValidTail m φ` |
+| `⊢[I] φ`, `⊨ᶠ[I] φ` | the same, when `transfer`, `send` and `try` may call back into a contract with invariant `I` | `ProvesC I true`, `ValidC I φ true` |
+| `⊢ₙ[I] φ`, `⊨ᶠₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` and a value call call back | `ProvesC I false`, `ValidC I φ false` |
+| `⊨ᶠₜ[m] φ` | `φ` is valid under the tail mode `m`: `.clean` assumes the starting storage's array tails clean (`docs/options.md`, O6) | `ValidTail m φ` |
 | `(P, σ) ⇓ o` | `P` run from `σ` ends in `o` | `Prog.run σ P = .ok o` |
 | `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
@@ -58,7 +58,7 @@ namespace Main
 Each symbol is a name for what it abbreviates, so that the statements below
 print back in it. -/
 
-/-- `H ⊨ φ`: valid under the context `H`, in every typed state of its outer
+/-- `H ⊨ᶠ φ`: valid under the context `H`, in every typed state of its outer
 scope. -/
 abbrev ValidUnder {C : Contract} {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) :
     Prop :=
@@ -112,7 +112,7 @@ abbrev Represents (C : Contract) (L b : Nat) {Γ : Ctx} (F : Evm.Frag Γ)
     (σ : State C Γ) (m : Evm.Machine) : Prop :=
   Evm.Sim C L b F σ m
 
-scoped notation:25 H:26 " ⊨ " φ:26 => ValidUnder H φ
+scoped notation:25 H:26 " ⊨ᶠ " φ:26 => ValidUnder H φ
 scoped notation:25 H:26 " ⊢ " φ:26 => Derives H φ
 scoped notation:25 "⊢ " φ:26 => Derives Hyps.nil φ
 scoped notation:25 H:26 " ⊢ₖ " φ:26 => DerivesK H φ
@@ -121,10 +121,10 @@ scoped notation:50 s:51 " ⇝[" k ", " m "] " p:51 => Rewrites s k m p
 scoped notation:50 s:51 " ⇝ₖ[" k ", " m "] " p:51 => RewritesK s k m p
 scoped notation:50 p:51 " ≃[" m ", " σ "] " s:51 => DoesAs p m σ s
 scoped notation:25 "⊢[" I "] " φ:26 => ProvesC (Invariant.fml I) true [] Hyps.nil φ
-scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ true
+scoped notation:25 "⊨ᶠ[" I "] " φ:26 => ValidC I φ true
 scoped notation:25 "⊢ₙ[" I "] " φ:26 => ProvesC (Invariant.fml I) false [] Hyps.nil φ
-scoped notation:25 "⊨ₙ[" I "] " φ:26 => ValidC I φ false
-scoped notation:25 "⊨ₜ[" m "] " φ:26 => ValidTail m φ
+scoped notation:25 "⊨ᶠₙ[" I "] " φ:26 => ValidC I φ false
+scoped notation:25 "⊨ᶠₜ[" m "] " φ:26 => ValidTail m φ
 scoped notation:50 c:51 " ⇓ " o:51 => Runs c o
 scoped notation:max "⟦" P "⟧" b:max => Evm.compileProg b P
 scoped notation:50 c:51 " ⇓ₘ " m':51 => MRuns c m'
@@ -132,10 +132,10 @@ scoped notation:50 c:51 " ↯ₘ" => MReverts c
 scoped notation:50 F:51 " ⊩ " P " ⊣ " F':51 => Compiles F P F'
 scoped notation:50 σ:51 " ≈[" C ", " L ", " b ", " F "] " m:51 => Represents C L b F σ m
 
-/-- `Valid φ` prints as `⊨ φ`. -/
-@[scoped app_unexpander Valid]
+/-- `Fml.Valid φ` prints as `⊨ᶠ φ`. -/
+@[scoped app_unexpander Fml.Valid]
 def unexpandValid : Lean.PrettyPrinter.Unexpander
-  | `($_ $φ) => `(⊨ $φ)
+  | `($_ $φ) => `(⊨ᶠ $φ)
   | _ => throw ()
 
 variable {C : Contract} {k : Nat} {m : Modality} {Γ Γ' Γ₀ : Ctx} {s : Stmt C Γ Γ'}
@@ -205,16 +205,16 @@ theorem solkey_lt_calculus : ∃ φ : Fml C [], (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
 
 /-- **Soundness**: what the calculus derives is valid.  A derivation leaves
 for the logic (`close`) only once no modality is left in its sequent. -/
-theorem soundness : H ⊢ φ → H ⊨ φ :=
+theorem soundness : H ⊢ φ → H ⊨ᶠ φ :=
   Proves.sound
 
 /-- **Soundness**, from no assumptions. -/
-theorem soundness' {φ : Fml C []} : ⊢ φ → ⊨ φ :=
+theorem soundness' {φ : Spec C []} : ⊢ φ.toFml → ⊨ φ :=
   Proves.valid
 
 /-- **solkey's rules are sound**: what they derive alone is valid, a
 derivation of `⊢ₖ` being one of `⊢` (`Proves.toAll`). -/
-theorem solkey_soundness {φ : Fml C []} : ⊢ₖ φ → ⊨ φ :=
+theorem solkey_soundness {φ : Spec C []} : ⊢ₖ φ.toFml → ⊨ φ :=
   fun h => Proves.valid h.toAll
 
 /-- **With callbacks**: when every `transfer`, `send` or `try` may call back
@@ -222,27 +222,27 @@ into a contract with a first-order invariant `I` (KeY's `CInv`, of the
 storage and the ledger), what that calculus derives is valid for that
 reading.  Its transfer rule has two sequents as premises, the second after a
 `{havoc}`; its send rule a third, the send refused. -/
-theorem callback_soundness {I : Invariant C} {φ : Fml C []} :
-    ⊢[I] φ → ⊨[I] φ :=
+theorem callback_soundness {I : Invariant C} {φ : Spec C []} :
+    ⊢[I] φ.toFml → ⊨[I] φ :=
   ProvesC.valid
 
 /-- **Under `transferSemantics:noCallback`**: a `transfer` and a `send`
 forward too little gas to call back, a `try` and a value call do not (solkey's bug 5,
 `docs/options.md`), its callee keeping `I`. -/
-theorem noCallback_soundness {I : Invariant C} {φ : Fml C []} :
-    ⊢ₙ[I] φ → ⊨ₙ[I] φ :=
+theorem noCallback_soundness {I : Invariant C} {φ : Spec C []} :
+    ⊢ₙ[I] φ.toFml → ⊨ₙ[I] φ :=
   ProvesC.valid
 
 /-- With no `try` and no value call left, `noCallback` is the deterministic
 reading. -/
 theorem noCallback_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
-    (⊨ₙ[I] φ) ↔ ⊨ φ :=
+    (⊨ᶠₙ[I] φ) ↔ ⊨ᶠ φ :=
   validC_false_iff h
 
 /-- **Clean array tails** (O6): what is valid under `.clean` holds in every
 state whose storage's arrays keep only ordinary defaults past their live
 ends, the initial one among them. -/
-theorem cleanTail_holds {φ : Fml C []} (h : ⊨ₜ[.clean] φ) (σ : State C [])
+theorem cleanTail_holds {φ : Fml C []} (h : ⊨ᶠₜ[.clean] φ) (σ : State C [])
     (hσ : σ.storage.CleanTail) : σ ⊧ φ :=
   h.holds_of_clean σ hσ
 

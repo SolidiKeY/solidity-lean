@@ -9,7 +9,7 @@ closer each add an elaborator to the same syntax: `sol_step`, `sol_symex`,
 `sol_derive`, `sol_derive?`, `sol_chain?`, `sol_prove` and `sol_prove?`.
 The elaborators are `Calculus/Symex.lean`'s (`sol_step`, `sol_symex`),
 `Calculus/Derive.lean`'s (`sol_derive?`), `Calculus/ProvesDerive.lean`'s
-(`sol_prove`, on `⊢ φ` and on `Valid φ`) and `Calculus/Closers.lean`'s
+(`sol_prove`, on `⊢ φ` and on `Fml.Valid φ`) and `Calculus/Closers.lean`'s
 (`sol_prove?`).  The syntax kinds keep their names
 (`Solidity.tacticSol_step`, `Solidity.ProofTree.tacticSol_derive?`, …), which
 the elaborators are registered under.  Moved out of `Symex.lean`
@@ -47,7 +47,7 @@ modality left; what is left is for `close`. -/
 syntax (name := tacticSol_derive) "sol_derive" : tactic
 
 /-- `sol_prove`: the strategy as one kernel evaluation, on a goal `Γ ⊢ φ` or
-`⊨ φ`; one goal `leafᵢ` per leaf the closer leaves. -/
+`⊨ᶠ φ`; one goal `leafᵢ` per leaf the closer leaves. -/
 syntax (name := tacticSol_prove) "sol_prove" ("(" &"steps" ":=" num ")")? : tactic
 
 /-- `sol_prove?`: `sol_prove`, each leaf closed by the first tactic that

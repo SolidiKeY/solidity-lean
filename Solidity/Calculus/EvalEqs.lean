@@ -166,8 +166,8 @@ theorem Fml.evalEqs_sound : (goal : Bool) → {Γ : Ctx} → (φ : Fml C Γ) →
       fun hg => ⟨Modality.forallB_imp (fun _ => ((Fml.evalEqs_sound goal φ _).2 hg).1),
         Modality.forallB_imp (fun _ => ((Fml.evalEqs_sound goal φ _).2 hg).2)⟩⟩
   | goal, _, .havoc φ, σ =>
-    ⟨fun hg h st nt => (Fml.evalEqs_sound goal φ _).1 hg (h st nt),
-      fun hg => forall_congr' fun st => forall_congr' fun nt => (Fml.evalEqs_sound goal φ _).2 hg⟩
+    ⟨fun hg h st nt sb => (Fml.evalEqs_sound goal φ _).1 hg (h st nt sb),
+      fun hg => forall_congr' fun st => forall_congr' fun nt => forall_congr' fun sb => (Fml.evalEqs_sound goal φ _).2 hg⟩
   | goal, _, .anon xs φ, σ =>
     ⟨fun hg h b => (Fml.evalEqs_sound goal φ _).1 hg (h b),
       fun hg => forall_congr' fun b => (Fml.evalEqs_sound goal φ _).2 hg⟩
@@ -180,13 +180,13 @@ theorem Fml.evalEqs_sound : (goal : Bool) → {Γ : Ctx} → (φ : Fml C Γ) →
   | _, _, .tt, _ | _, _, .wellFormed _, _ | _, _, .modal .., _ => ⟨fun _ => id, fun _ => Iff.rfl⟩
 
 /-- A formula is valid where its closer's leaf is. -/
-theorem Valid.of_evalEqs {φ : Fml C []} (h : Valid (Fml.evalEqs true φ)) : Valid φ :=
+theorem Fml.Valid.of_evalEqs {φ : Fml C []} (h : Fml.Valid (Fml.evalEqs true φ)) : Fml.Valid φ :=
   fun σ => (Fml.evalEqs_sound true φ σ).1 rfl (h σ)
 
 /-- A formula is valid where its leaf read with no equation strengthened is
 (every one marked where its sides agree, else kept as the Theory reads it):
 `sol_close_unwrap_th`'s. -/
-theorem Valid.of_evalEqsTh {φ : Fml C []} (h : Valid (Fml.evalEqs false φ)) : Valid φ :=
+theorem Fml.Valid.of_evalEqsTh {φ : Fml C []} (h : Fml.Valid (Fml.evalEqs false φ)) : Fml.Valid φ :=
   fun σ => ((Fml.evalEqs_sound false φ σ).2 rfl).1 (h σ)
 
 end Solidity

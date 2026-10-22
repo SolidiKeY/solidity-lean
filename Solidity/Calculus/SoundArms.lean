@@ -912,23 +912,26 @@ theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array
 
 theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
     (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =
-      (r.eval σ).bind fun addr => (a.eval σ).map fun amt =>
-        (g.withNet (if addr.1 = σ.tx.selfAddress.1 then g.1.net
-          else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net), ℓ) := by
+      (r.eval σ).bind fun addr => (a.eval σ).bind fun amt =>
+        some (g.paid σ addr amt, ℓ) := by
   rw [UpdElem.applyV_eq_applyVM]
   show ((UpdElem.pay r a : UpdElem C Γ Δ).globT σ g).bind _ = _
   rw [UpdElem.globT_eq_globTM]
-  show (((r.eval σ).bind fun addr => (a.eval σ).bind fun amt => some _).bind _) = _
-  cases r.eval σ with
-  | none => rfl
-  | some x => cases a.eval σ <;> rfl
+  cases hr : r.eval σ with
+  | none => simp only [UpdElem.globTM, hr, Option.bind_none]
+  | some addr =>
+    cases ha : a.eval σ with
+    | none => simp only [UpdElem.globTM, hr, ha, Option.bind_some, Option.bind_none]
+    | some amt => simp only [UpdElem.globTM, hr, ha, Option.bind_some]
 
-theorem transferBox_agrees (sadr se : Simple C Γ .uint) :
+theorem transferBox_agrees (sadr se : Simple C Γ .uint)
+    (hp : σ.canPay (sadr.evalT σ) (se.evalT σ) = true) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
       (TRun.transfer (.simple sadr) (.simple se) σ) ((Upd.nil.snoc (UpdElem.payTo sadr se)).applyP σ) := by
   rw [UpdElem.payTo, applyP_snoc, applyV_nil, Option.bind_some, applyV_pay, Simple.lower_evalT,
     Simple.lower_evalT]
-  rfl
+  simp only [TRun.transfer, Val.evalT, bind, Except.bind, Option.bind_some]
+  rw [hp]; rfl
 
 /-- `pv = a.send(v);`'s outcome, by the updates of `sendNoCallback*`. -/
 theorem send_sim (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) :
@@ -936,22 +939,26 @@ theorem send_sim (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) :
         Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))],
       U.applyP σ = some ((sendT σ pv (sadr.evalT σ) (se.evalT σ)).st.glob,
           (sendT σ pv (sadr.evalT σ) (se.evalT σ)).st.locV) := by
-  have e₁ : ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
-      (.local pv (.val (Tm.lit (p := .bool) true)))).applyP σ =
-        some (((σ.pay (sadr.evalT σ) (se.evalT σ).1).setLocal pv (true : Bool)).glob,
-          ((σ.pay (sadr.evalT σ) (se.evalT σ).1).setLocal pv (true : Bool)).locV) := by
-    rw [applyP_snoc, UpdElem.payTo]
-    show ((((UpdElem.pay sadr.lower se.lower : UpdElem C Γ Γ).applyV σ σ.globG σ.locV)).bind _) = _
-    rw [applyV_pay, Simple.lower_evalT, Simple.lower_evalT, State.locV_setLocal]
+  cases hp : σ.canPay (sadr.evalT σ) (se.evalT σ) with
+  | false =>
+    have hs : sendT σ pv (sadr.evalT σ) (se.evalT σ) =
+        ⟨σ.setLocal pv false, List.prefix_refl _⟩ := by unfold sendT; rw [hp]; rfl
+    rw [hs]
+    refine ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self ..), ?_⟩
+    rw [applyP_local1, State.locV_setLocal]
     rfl
-  have e₂ : (Upd.nil.snoc (.local pv (.val (Tm.lit (C := C) (Γ := Γ) (p := .bool) false)))).applyP
-      σ = some ((σ.setLocal pv (false : Bool)).glob, (σ.setLocal pv (false : Bool)).locV) := by
-    rw [applyP_local1, State.locV_setLocal]; rfl
-  unfold sendT
-  split
-  · exact ⟨_, List.mem_cons_self .., e₁⟩
-  · exact ⟨_, List.mem_cons_self .., e₁⟩
-  · exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self ..), e₂⟩
+  | true =>
+    have hs : sendT σ pv (sadr.evalT σ) (se.evalT σ) =
+        ⟨(σ.pay (sadr.evalT σ) (se.evalT σ).1).setLocal pv true, List.prefix_refl _⟩ := by
+      unfold sendT; rw [hp]; rfl
+    rw [hs]
+    refine ⟨_, List.mem_cons_self .., ?_⟩
+    rw [applyP_snoc, UpdElem.payTo]
+    show (((UpdElem.pay sadr.lower se.lower : UpdElem C Γ Γ).applyV σ σ.globG σ.locV).bind _) = _
+    rw [applyV_pay, Simple.lower_evalT, Simple.lower_evalT]
+    simp only [Option.bind_some]
+    rw [State.locV_setLocal]
+    rfl
 
 end Agrees2
 
@@ -1244,8 +1251,26 @@ theorem sound_assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ
 
 /-- `transferNoCallbackBox`: `{net := …}`. -/
 theorem sound_transferBox (sadr se : Simple C Γ .uint) :
-    Premise.Runs m (.transfer (.simple sadr) (.simple se)) (.upd1 (UpdElem.payTo sadr se)) σ :=
-  Premise.sound_update_typed σ (transferBox_agrees σ sadr se) fun _ => TRes.NoDiv.ok _
+    Premise.Runs .box (.transfer (.simple sadr) (.simple se))
+      (.upd1 (UpdElem.payTo sadr se)) σ := by
+  cases hp : σ.canPay (sadr.evalT σ) (se.evalT σ) with
+  | true =>
+    exact Premise.sound_update_typed σ (transferBox_agrees σ sadr se hp) (fun h => nomatch h)
+  | false =>
+    have hr : Stmt.runSt σ (.transfer (.simple sadr) (.simple se)) = .error .revert := by
+      change Except.map (fun o : Out C σ.H Γ => o.st)
+        (TRun.transfer (.simple sadr) (.simple se) σ) = .error .revert
+      simp only [TRun.transfer, Val.evalT, bind, Except.bind, hp,
+        Bool.false_eq_true, ↓reduceIte]
+      rfl
+    constructor
+    · intro τ h
+      rw [hr] at h
+      cases h
+    · intro e he
+      rw [hr] at he
+      cases he
+      exact ⟨by decide, fun h => nomatch h⟩
 
 /-- `transferDiamond` (Lean): the goal fails. -/
 theorem sound_done_false {Γ' : Ctx} (s : Stmt C Γ Γ') : Premise.Sound m s (.done false) σ :=

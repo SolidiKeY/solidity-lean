@@ -38,8 +38,8 @@ open scoped Scoped
 copy holds the storage value, and the memory read finds it
 (`memoryStorageCopy`, then `memoryFieldRead`). -/
 theorem storageToMemoryRootCopy :
-    ⊨ dl!{ [ alice.age = 34; Person memory carol = alice; uint v = carol.age; ] v == 34 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ alice.age = 34; Person memory carol = alice; uint v = carol.age; ] v == 34 } := by
+  apply Proves.fmlValid
   apply update .storageFieldWriteSave
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
@@ -54,9 +54,9 @@ theorem storageToMemoryRootCopy :
 acc.balance;` — the same at a member source, which is aliased first
 (`memoryStorageCopyUnfold`). -/
 theorem storageToMemoryMemberCopy :
-    ⊨ dl!{ [ alice.account.balance = 10; Account memory acc = alice.account;
+    ⊨ᶠ dl!{ [ alice.account.balance = 10; Account memory acc = alice.account;
              uint v = acc.balance; ] v == 10 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .storageFieldWrite_unfold_leftFst
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
@@ -78,9 +78,9 @@ theorem storageToMemoryMemberCopy :
 is aliased (`memoryStorageCopyUnfold`, whose alias's own right-hand side is a
 Step 1 read), then copied. -/
 theorem storageToMemoryNonsimplePath :
-    ⊨ dl!{ [ alice.account.token.value = 3; Token memory t = alice.account.token;
+    ⊨ᶠ dl!{ [ alice.account.token.value = 3; Token memory t = alice.account.token;
              uint v = t.value; ] v == 3 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .storageFieldWrite_unfold_leftFst
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
@@ -108,7 +108,7 @@ theorem storageToMemoryNonsimplePath :
 not an alias: the later storage write is not seen through `carol`
 (`storage-to-memory.key`). -/
 theorem storageToMemoryIsCopy :
-    ⊨ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30; uint v = carol.age; ]
+    ⊨ᶠ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30; uint v = carol.age; ]
            v == 27 } := by
   sol_symex
   sol_close
@@ -116,7 +116,7 @@ theorem storageToMemoryIsCopy :
 /-- `Person memory carol; carol = alice;` — the assignment form of the copy
 (`memoryStorageCopy` on `mv = sp;`), a copy again. -/
 theorem storageToMemoryAssign :
-    ⊨ dl!{ [ alice.age = 30; Person memory carol; carol = alice; alice.age = 5;
+    ⊨ᶠ dl!{ [ alice.age = 30; Person memory carol; carol = alice; alice.age = 5;
              uint v = carol.age; ] v == 30 } := by
   sol_symex
   sol_close
@@ -126,7 +126,7 @@ then copied (`memoryStorageCopyUnfold`), and the copy is again not an alias.
 (solkey's `memoryStorageCopyUnfold` example copies `people[i]`; that program
 closes the same way, at four times the cost.) -/
 theorem storageToMemoryUnfold :
-    ⊨ dl!{ [ bob.account.balance = 7; Account memory acc = bob.account;
+    ⊨ᶠ dl!{ [ bob.account.balance = 7; Account memory acc = bob.account;
              bob.account.balance = 9; uint v = acc.balance; ] v == 7 } := by
   sol_symex
   sol_close
@@ -137,9 +137,9 @@ theorem storageToMemoryUnfold :
 written from memory stores the object's value (`memoryToStorageStoreRoot`),
 and the storage read finds it. -/
 theorem memoryToStorageRootCopy :
-    ⊨ dl!{ [ Person memory carol; carol.age = 34; alice = carol; uint v = alice.age; ]
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = 34; alice = carol; uint v = alice.age; ]
            v == 34 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWrite
   apply update .memoryToStorageStoreRoot
@@ -153,9 +153,9 @@ theorem memoryToStorageRootCopy :
 /-- `acc.balance = 10; alice.account = acc; uint v = alice.account.balance;` —
 from a memory local, at a storage *field* (`memoryToStorageFieldCopyRoot`). -/
 theorem memoryToStorageFromAlias :
-    ⊨ dl!{ [ Account memory acc = bob.account; acc.balance = 10; alice.account = acc;
+    ⊨ᶠ dl!{ [ Account memory acc = bob.account; acc.balance = 10; alice.account = acc;
              uint v = alice.account.balance; ] v == 10 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
@@ -177,9 +177,9 @@ theorem memoryToStorageFromAlias :
 *member* as the source: no alias is introduced for it, the rule copies the
 member's object directly (`memoryToStorageFieldCopyRoot`). -/
 theorem memoryToStorageFromMemberSource :
-    ⊨ dl!{ [ Person memory carol = bob; carol.account.balance = 50;
+    ⊨ᶠ dl!{ [ Person memory carol = bob; carol.account.balance = 50;
              alice.account = carol.account; uint v = alice.account.balance; ] v == 50 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryFieldWrite_unfold_leftFst
@@ -200,9 +200,9 @@ theorem memoryToStorageFromMemberSource :
 path, so it is the target that is aliased
 (`memoryToStorageField_unfold_leftFst`); the memory source is simple. -/
 theorem memoryToStorageNonsimplePath :
-    ⊨ dl!{ [ Token memory t = bob.account.token; t.value = 99; alice.account.token = t;
+    ⊨ᶠ dl!{ [ Token memory t = bob.account.token; t.value = 99; alice.account.token = t;
              uint v = alice.account.token.value; ] v == 99 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
@@ -231,7 +231,7 @@ theorem memoryToStorageNonsimplePath :
 /-- `carol.age = 8; alice = carol; carol.age = 9;` — a copy, not an alias: the
 later memory write is not seen in storage (`memory-to-storage.key`). -/
 theorem memoryToStorageIsCopy :
-    ⊨ dl!{ [ Person memory carol = bob; carol.age = 8; alice = carol; carol.age = 9;
+    ⊨ᶠ dl!{ [ Person memory carol = bob; carol.age = 8; alice = carol; carol.age = 9;
              uint v = alice.age; ] v == 8 } := by
   sol_symex
   sol_close
@@ -240,7 +240,7 @@ set_option maxHeartbeats 1000000 in
 /-- `people[i] = carol;` — into an array element
 (`memoryToStorageIndexArrayCopyRoot`), a copy again. -/
 theorem memoryToStorageIndexArray :
-    ⊨ dl!{ [ Person memory carol = bob; carol.age = 6; people[i] = carol; carol.age = 8;
+    ⊨ᶠ dl!{ [ Person memory carol = bob; carol.age = 6; people[i] = carol; carol.age = 8;
              uint v = people[i].age; ] v == 6 } := by
   sol_symex
   sol_close
@@ -248,7 +248,7 @@ theorem memoryToStorageIndexArray :
 /-- `folks[k] = carol;` — into a mapping entry
 (`memoryToStorageIndexMappingCopyRoot`). -/
 theorem memoryToStorageIndexMapping :
-    ⊨ dl!{ [ Person memory carol; carol.age = 6; folks[k] = carol; uint v = folks[k].age; ]
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = 6; folks[k] = carol; uint v = folks[k].age; ]
            v == 6 } := by
   sol_symex
   sol_close

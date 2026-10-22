@@ -99,8 +99,8 @@ theorem symex_leads (n : Nat) (φ : Fml C Γ) : Fml.Leads φ (symex n φ) :=
   Fml.mred_leads (symex_mred n φ)
 
 /-- A formula that reduces to a valid one is valid. -/
-theorem Fml.valid_of_mred {φ ψ : Fml C []} (h : (Fml.strategy C []).MRed φ ψ) (hψ : Valid ψ) :
-    Valid φ :=
+theorem Fml.valid_of_mred {φ ψ : Fml C []} (h : (Fml.strategy C []).MRed φ ψ) (hψ : Fml.Valid ψ) :
+    Fml.Valid φ :=
   fun σ => Fml.mred_leads h σ (hψ σ)
 
 /-! ## Chains, runs of a labelled transition system -/

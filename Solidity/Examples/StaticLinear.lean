@@ -75,7 +75,7 @@ example : paused.read declaredCounterstate.val.storage = true := by decide +kern
 def userRequirement : Fml Bank [] := dl!{ paused == false → paused == false }
 def requiredReduction : StaticReduction userRequirement :=
   declaration_static_reduce[userRequirement]
-example : Valid userRequirement := requiredReduction.valid_of_decide (by decide +kernel)
+example : Fml.Valid userRequirement := requiredReduction.valid_of_decide (by decide +kernel)
 
 example : True := by
   fail_if_success
@@ -86,8 +86,8 @@ example : True := by
 example : paused.read boolCounterstate.val.storage = true := by decide +kernel
 
 example : (staticReduction? (dl!{ balances[balances[3]] == 7 })).isNone = true := by decide +kernel
-/-- Checked failure in a closed unsigned expression is not a default literal. -/
-example : (staticReduction? (dl!{ 0 - 1 == 0 })).isNone = true := by decide +kernel
+/-- Checked failure involving a storage read is not a default literal. -/
+example : (staticReduction? (dl!{ balances[3] - 1 == 0 })).isNone = true := by decide +kernel
 example : (staticReduction? (dl!{ balances[3] + 1 == 7 })).isNone = true := by decide +kernel
 example : (staticReduction? (dl!{ ∀ uint k; balances[k] == 0 })).isNone = true := by decide +kernel
 example : (staticReduction? (dl!{ [balances[3] = 7;] balances[3] == 7 })).isNone = true := by decide +kernel

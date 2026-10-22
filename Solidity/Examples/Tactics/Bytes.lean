@@ -33,52 +33,52 @@ open scoped Scoped
 
 /-- A string literal is left-aligned: `"a"` at `bytes2` is `0x6100`; `hex"…"`
 spells the bytes. -/
-theorem literals : ⊨ dl!{ ⟨ bytes2 a = "a"; bytes2 b = "ab"; bytes2 c = hex"6162"; ⟩
+theorem literals : ⊨ᶠ dl!{ ⟨ bytes2 a = "a"; bytes2 b = "ab"; bytes2 c = hex"6162"; ⟩
     a == 24832 && b == 24930 && c == 24930 } := by
   sol_symex
   sol_close
 
 /-- Comparison is lexicographic on the bytes: `"ab" < "b"` at `bytes2`. -/
-theorem compare : ⊨ dl!{ ⟨ bytes2 a = "ab"; bytes2 b = "b"; bool lt = a < b; bool eq = a == "ab"; ⟩
+theorem compare : ⊨ᶠ dl!{ ⟨ bytes2 a = "ab"; bytes2 b = "b"; bool lt = a < b; bool eq = a == "ab"; ⟩
     lt == true && eq == true } := by
   sol_symex
   sol_close
 
 /-- `b[i]` is the byte `i` from the left, a `bytes1`; `.length` is `N`. -/
-theorem index : ⊨ dl!{ ⟨ bytes2 b = "ab"; bytes1 x = b[0]; bytes1 y = b[1]; uint l = b.length; ⟩
+theorem index : ⊨ᶠ dl!{ ⟨ bytes2 b = "ab"; bytes1 x = b[0]; bytes1 y = b[1]; uint l = b.length; ⟩
     x == 97 && y == 98 && l == 2 } := by
   sol_symex
   sol_close
 
 /-- At an index that is not a literal, the byte is read through a shift. -/
-theorem indexVar : ⊨ dl!{ ⟨ bytes2 b = "ab"; uint i = 1; bytes1 y = b[i]; ⟩ y == 98 } := by
+theorem indexVar : ⊨ᶠ dl!{ ⟨ bytes2 b = "ab"; uint i = 1; bytes1 y = b[i]; ⟩ y == 98 } := by
   sol_symex
   sol_decide
 
 /-- An index out of range reverts, as an array's does. -/
-theorem indexOutOfRange : ⊨ dl!{ [ bytes2 b = "ab"; uint i = 2; bytes1 x = b[i]; ] false } := by
+theorem indexOutOfRange : ⊨ᶠ dl!{ [ bytes2 b = "ab"; uint i = 2; bytes1 x = b[i]; ] false } := by
   sol_symex
   sol_close
 
-example : ¬ (⊨ dl!{ ⟨ bytes2 b = "ab"; uint i = 2; bytes1 x = b[i]; ⟩ true }) :=
+example : ¬ (⊨ᶠ dl!{ ⟨ bytes2 b = "ab"; uint i = 2; bytes1 x = b[i]; ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
 /-- A conversion to a shorter `bytesM` keeps the left bytes, to a longer one
 pads on the right; an implicit widening pads too. -/
-theorem conversions : ⊨ dl!{ ⟨ bytes2 b = "ab"; bytes1 s = bytes1(b); bytes4 w = bytes4(b);
+theorem conversions : ⊨ᶠ dl!{ ⟨ bytes2 b = "ab"; bytes1 s = bytes1(b); bytes4 w = bytes4(b);
     bytes4 v = b; ⟩ s == 97 && w == 1633812480 && v == 1633812480 } := by
   sol_symex
   sol_close
 
 /-- `uintM` and `bytesN` of the same size convert as the number. -/
-theorem toUint : ⊨ dl!{ ⟨ bytes2 b = "ab"; uint16 u = uint16(b); bytes2 c = bytes2(u); ⟩
+theorem toUint : ⊨ᶠ dl!{ ⟨ bytes2 b = "ab"; uint16 u = uint16(b); bytes2 c = bytes2(u); ⟩
     u == 24930 && c == b } := by
   sol_symex
   sol_close
 
 /-- Bitwise operators act on the bytes: `~` at `bytes1`, `<<` cut to the
 size, `&`. -/
-theorem bitwise : ⊨ dl!{ ⟨ bytes1 a = hex"0f"; bytes1 n = ~a; bytes2 b = "ab"; bytes2 l = b << 8;
+theorem bitwise : ⊨ᶠ dl!{ ⟨ bytes1 a = hex"0f"; bytes1 n = ~a; bytes2 b = "ab"; bytes2 l = b << 8;
     bytes2 m = b & hex"ff00"; ⟩ n == 240 && l == 25088 && m == 24832 } := by
   sol_symex
   sol_close
@@ -104,21 +104,21 @@ example : Tags.widths =
      ("votes{}#bytes", 32), ("names[]", 16), ("names[]#bytes", 2)] := rfl
 
 /-- A state variable, and a mapping's value of `bytes2`. -/
-theorem stateVar : ⊨ dl[Tags]{ ⟨ id = "abcd"; bytes1 c = id[3]; ⟩ c == 100 } := by
+theorem stateVar : ⊨ᶠ dl[Tags]{ ⟨ id = "abcd"; bytes1 c = id[3]; ⟩ c == 100 } := by
   sol_symex
   sol_close
 
-theorem element : ⊨ dl[Tags]{ ⟨ names[1] = "xy"; bytes1 d = names[1][1]; ⟩ d == 121 } := by
+theorem element : ⊨ᶠ dl[Tags]{ ⟨ names[1] = "xy"; bytes1 d = names[1][1]; ⟩ d == 121 } := by
   sol_symex
   sol_close
 
 /-- A literal key at `bytes32` is left-aligned too. -/
-theorem mappingKey : ⊨ dl[Tags]{ ⟨ votes["a"] = 1; bytes32 k = "a"; uint v = votes[k]; ⟩ v == 1 } := by
+theorem mappingKey : ⊨ᶠ dl[Tags]{ ⟨ votes["a"] = 1; bytes32 k = "a"; uint v = votes[k]; ⟩ v == 1 } := by
   sol_symex
   sol_close
 
 /-- A parameter and a return: `first("abcd")` is `"a"`, `widen("ab")` pads. -/
-theorem functions : ⊨ dl[Tags]{ ⟨ bytes1 r = first("abcd"); bytes4 w = widen("ab"); ⟩
+theorem functions : ⊨ᶠ dl[Tags]{ ⟨ bytes1 r = first("abcd"); bytes4 w = widen("ab"); ⟩
     r == 97 && w == 1633812480 } := by
   sol_symex
   sol_close
@@ -130,20 +130,20 @@ A `bytes1[]`: a `uint[]` whose elements are 8 bits wide and marked `bytes1`
 literal where one stands is a fresh memory array of its bytes. -/
 
 /-- A literal in memory: its length and its bytes. -/
-theorem memoryLiteral : ⊨ dl!{ ⟨ bytes memory b = "abc"; uint l = b.length; bytes1 c = b[1]; ⟩
+theorem memoryLiteral : ⊨ᶠ dl!{ ⟨ bytes memory b = "abc"; uint l = b.length; bytes1 c = b[1]; ⟩
     l == 3 && c == 98 } := by
   sol_symex
   sol_decide
 
 /-- `bytes(s)` of a `string` is the same array; an element written takes a
 `bytes1`. -/
-theorem stringToBytes : ⊨ dl!{ ⟨ string memory s = "hi"; bytes memory b = bytes(s); b[0] = "H";
+theorem stringToBytes : ⊨ᶠ dl!{ ⟨ string memory s = "hi"; bytes memory b = bytes(s); b[0] = "H";
     bytes1 c = b[0]; uint l = b.length; ⟩ c == 72 && l == 2 } := by
   sol_symex
   sol_decide
 
 /-- An index past the end reverts. -/
-theorem memoryOutOfRange : ⊨ dl!{ [ bytes memory b = new bytes(2); bytes1 c = b[2]; ] false } := by
+theorem memoryOutOfRange : ⊨ᶠ dl!{ [ bytes memory b = new bytes(2); bytes1 c = b[2]; ] false } := by
   sol_symex
   sol_decide
 
@@ -160,32 +160,32 @@ example : Texts.widths =
   rfl
 
 /-- A literal copied to storage, then pushed to and popped. -/
-theorem storagePushPop : ⊨ dl[Texts]{ ⟨ data = "ab"; data.push("c"); uint l = data.length;
+theorem storagePushPop : ⊨ᶠ dl[Texts]{ ⟨ data = "ab"; data.push("c"); uint l = data.length;
     bytes1 z = data[2]; data.pop(); uint m = data.length; ⟩ l == 3 && z == 99 && m == 2 } := by
   sol_symex
   sol_decide
 
 /-- A `string` parameter and return, in memory. -/
-theorem stringFunctions : ⊨ dl[Texts]{ ⟨ uint n = len("abcd"); string memory h = hello();
+theorem stringFunctions : ⊨ᶠ dl[Texts]{ ⟨ uint n = len("abcd"); string memory h = hello();
     uint k = bytes(h).length; ⟩ n == 4 && k == 5 } := by
   sol_symex
   sol_decide
 
 /-- `delete` empties a `string` in storage. -/
-theorem deleteString : ⊨ dl[Texts]{ ⟨ name = "x"; delete name; uint l = bytes(name).length; ⟩
+theorem deleteString : ⊨ᶠ dl[Texts]{ ⟨ name = "x"; delete name; uint l = bytes(name).length; ⟩
     l == 0 } := by
   sol_symex
   sol_decide
 
 /-- A stored `string` copied to memory: the copy has its stored length
 (`lenAtN`, `LTm.sfindLen?`). -/
-theorem copyLength : ⊨ dl[Texts]{ ⟨ name = "xyz"; string memory c = name;
+theorem copyLength : ⊨ᶠ dl[Texts]{ ⟨ name = "xyz"; string memory c = name;
     uint l = bytes(c).length; ⟩ l == 3 } := by
   sol_symex
   sol_decide
 
 /-- The same of a stored `string` of any length. -/
-theorem copyLengthAny : ⊨ dl[Texts]{ [ string memory c = name; uint l = bytes(c).length;
+theorem copyLengthAny : ⊨ᶠ dl[Texts]{ [ string memory c = name; uint l = bytes(c).length;
     uint m = bytes(name).length; ] l == m } := by
   sol_symex
   sol_decide
@@ -208,19 +208,19 @@ example : Semantics.structWidths "Rec{h:bytes32;tag:bytes2;b:bytes;name:string}"
      ("name[]", 8), ("name[]#bytes", 1), ("name#string", 1)] := by decide
 
 /-- A `bytesN` member: a literal left-aligned, indexed as a local. -/
-theorem memberBytesN : ⊨ dl[Records]{ ⟨ rec.tag = "ab"; bytes1 c = rec.tag[1];
+theorem memberBytesN : ⊨ᶠ dl[Records]{ ⟨ rec.tag = "ab"; bytes1 c = rec.tag[1];
     uint l = rec.tag.length; ⟩ c == 98 && l == 2 } := by
   sol_symex
   sol_close
 
 /-- A `string` member: a literal copied to storage, its length. -/
-theorem memberString : ⊨ dl[Records]{ ⟨ rec.name = "hi"; uint l = bytes(rec.name).length; ⟩
+theorem memberString : ⊨ᶠ dl[Records]{ ⟨ rec.name = "hi"; uint l = bytes(rec.name).length; ⟩
     l == 2 } := by
   sol_symex
   sol_decide
 
 /-- A `bytes` member pushed to: an element a `bytes1`. -/
-theorem memberBytes : ⊨ dl[Records]{ ⟨ rec.b = "a"; rec.b.push("x"); bytes1 x = rec.b[1]; ⟩
+theorem memberBytes : ⊨ᶠ dl[Records]{ ⟨ rec.b = "a"; rec.b.push("x"); bytes1 x = rec.b[1]; ⟩
     x == 120 } := by
   sol_symex
   sol_decide
@@ -243,7 +243,7 @@ def Cd : Contract := contract!{
 }
 
 /-- Read as a memory parameter. -/
-theorem firstOf : ⊨ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint v = first(a); ]
+theorem firstOf : ⊨ᶠ dl[Cd]{ [ uint[] memory a = new uint[](2); a[0] = 5; uint v = first(a); ]
     v == 5 } := by
   sol_symex
   sol_decide
@@ -277,29 +277,29 @@ def Sl : Contract := contract!{
 }
 
 /-- A read of the view is a read of the base, past the offset. -/
-theorem sliceRead : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](3); a[1] = 6; a[2] = 7;
+theorem sliceRead : ⊨ᶠ dl[Sl]{ ⟨ uint[] memory a = new uint[](3); a[1] = 6; a[2] = 7;
     uint v = pick(a, 1); ⟩ v == 7 } := by
   sol_symex
   sol_decide
 
 /-- An index past the view reverts, though it is inside the base. -/
-theorem slicePast : ⊨ dl[Sl]{ [ uint[] memory a = new uint[](3); uint v = pick(a, 2); ] false } := by
+theorem slicePast : ⊨ᶠ dl[Sl]{ [ uint[] memory a = new uint[](3); uint v = pick(a, 2); ] false } := by
   sol_symex
   sol_decide
 
 /-- The length of a view: `j - i`. -/
-theorem sliceLength : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](5); uint v = len(a, 1, 4); ⟩
+theorem sliceLength : ⊨ᶠ dl[Sl]{ ⟨ uint[] memory a = new uint[](5); uint v = len(a, 1, 4); ⟩
     v == 3 } := by
   sol_symex
   sol_decide
 
 /-- A slice past its base, or with its bounds crossed, reverts. -/
-theorem sliceBounds : ⊨ dl[Sl]{ [ uint[] memory a = new uint[](5); uint v = len(a, 4, 6); ] false } := by
+theorem sliceBounds : ⊨ᶠ dl[Sl]{ [ uint[] memory a = new uint[](5); uint v = len(a, 4, 6); ] false } := by
   sol_symex
   sol_decide
 
 /-- A slice of a slice adds the offsets. -/
-theorem sliceOfSlice : ⊨ dl[Sl]{ ⟨ uint[] memory a = new uint[](4); a[2] = 9;
+theorem sliceOfSlice : ⊨ᶠ dl[Sl]{ ⟨ uint[] memory a = new uint[](4); a[2] = 9;
     uint v = inner(a); ⟩ v == 9 } := by
   sol_symex
   sol_decide

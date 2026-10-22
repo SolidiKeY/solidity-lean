@@ -23,7 +23,7 @@ Solidity source ──(1) sol{…} / contract!{…}──▶ Prog C ──(2) Pr
 ```
 
 Proved: the rules are sound for (2) (`Stmt.sound` with `Rule.toStep`, `Proves.sound`,
-`ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`)
+`ProvesC.sound_of`/`ProvesC.fmlValid`); the repository's compiler agrees with (2) (`compile_correct`)
 on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
 state it simulates.  (2) is never stuck, by construction: the typed run halts
 only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
@@ -149,7 +149,7 @@ lemma set for I.
 ## Deterministic checks
 
 **A. The trusted base, in CI.** `#print axioms` on `Stmt.sound` (`Calculus/Sound.lean`), `Proves.sound`,
-`Proves.valid`, `ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
+`Proves.fmlValid`, `ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
 `Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
 the closure (`Calculus/RuleShapes.lean:44` uses them; the
 closure decides). A day; every other check assumes it (L4).
@@ -323,7 +323,7 @@ Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`
 `Rule.iff_step`, `Rule.premise_unique`). Symbolic execution is fuelled
 (`symex n`): a program it does not finish leaves a modality, which
 `sol_prove` rejects; its progress and termination (`Fml.active_iff_step`,
-`symex_terminates`) were retired at W4 `calc-del` (`docs/intrinsic.md`). Not proved: `⊨ φ ↔ ⊨ symex n φ`
+`symex_terminates`) were retired at W4 `calc-del` (`docs/intrinsic.md`). Not proved: `⊨ᶠ φ ↔ ⊨ᶠ symex n φ`
 (`symex_sound` is one direction). How much of Solidity the fragment covers is a
 measurement (F, `docs/corpus-parity.md`), not a theorem.
 
@@ -341,7 +341,7 @@ invariants.
 
 **N. Reflective decision procedures.** A tactic cannot be proved complete; a function
 `dec : LFml → Bool` with `dec ψ = true ↔ ∀ σ, ψ.holds σ` can, and `sol_decide`'s
-reduction is sound (`Valid.of_reduceS`) and its reads' elimination an equivalence
+reduction is sound (`Fml.Valid.of_reduceS`) and its reads' elimination an equivalence
 (`LFml.valid_iff_cons`; the last step is `omega | grind`). Replace that step by fragment: key equalities and
 reads-of-writes (congruence closure over symbolic keys; small; first), linear arithmetic
 over bounded integers, then nonlinear, `**` and bitwise on 256-bit words (finite, so

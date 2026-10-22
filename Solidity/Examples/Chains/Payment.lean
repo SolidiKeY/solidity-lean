@@ -10,7 +10,7 @@ import Solidity.Calculus.Surface
 The calculus's worked examples of `transfer` (the paper's payment section), each one chain term under the
 box, the only modality with a transfer rule (`Calculus/Chains.lean`, `.claude/rules/derivations.md`).
 `transferNoCallbackBox` books the payment on the ledger and nothing else: the update
-`{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) }`, `sadr`'s entry down by
+`{ pay(sadr, se) }`, `sadr`'s entry down by
 the amount unless `sadr` is the contract itself, which books nothing.  The receiver's capture is a
 `uint pv`, not an `address payable`.
 
@@ -46,9 +46,9 @@ namespace Transfer5
 receiver in it. -/
 theorem chain (φ : Post StandardExample [.val .uint]) :
     dl![.box]{ { to := 3 } ⟨[ to.transfer(5); ]⟩ φ }
-    ~*> dl![.box]{ { to := 3 } { net := if(to = this) then net else store(net, at(to), net(to) - 5) } φ }
+    ~*> dl![.box]{ { to := 3 } { pay(to, 5) } φ }
     ~[sequentialToParallel]~>
-      dl![.box]{ { to := 3 ‖ net := if(3 = this) then net else store(net, at(3), net(3) - 5) } φ } := by
+      dl![.box]{ { to := 3 ‖ pay(3, 5) } φ } := by
   sol_chain
 #last_line chain
 
@@ -67,11 +67,11 @@ theorem chain (φ : Post StandardExample [.val .uint, .val .uint]) :
       dl![.box]{ { to := 3 ‖ x := 7 } ⟨[ uint pv = x + 2; to.transfer(pv); ]⟩ φ }
     ~*> dl![.box]{ { to := 3 ‖ x := 7 } { pv := x + 2 } ⟨[ to.transfer(pv); ]⟩ φ }
     ~*> dl![.box]{ { to := 3 ‖ x := 7 } { pv := x + 2 }
-        { net := if(to = this) then net else store(net, at(to), net(to) - pv) } φ }
+        { pay(to, pv) } φ }
     ~[sequentialToParallel]~> dl![.box]{ { to := 3 ‖ x := 7 ‖ pv := 7 + 2 ‖
-        net := if(3 = this) then net else store(net, at(3), net(3) - (7 + 2)) } φ }
+        pay(3, 7 + 2) } φ }
     ~[add_literals]~> dl![.box]{ { to := 3 ‖ x := 7 ‖ pv := 9 ‖
-        net := if(3 = this) then net else store(net, at(3), net(3) - 9) } φ } := by
+        pay(3, 9) } φ } := by
   sol_chain
 #last_line chain
 
@@ -90,14 +90,13 @@ theorem chain :
       dl![.box]{ { storage := save(storage, owner, 3) } ⟨[ uint pv = owner; pv.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { storage := save(storage, owner, 3) } { pv := find(storage, owner) } ⟨[ pv.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { storage := save(storage, owner, 3) } { pv := find(storage, owner) }
-        { net := if(pv = this) then net else store(net, at(pv), net(pv) - 5) } φ }
+        { pay(pv, 5) } φ }
     ~[sequentialToParallel]~> dl![.box]{
         { storage := save(storage, owner, 3) ‖ pv := find(save(storage, owner, 3), owner) ‖
-          net := if(find(save(storage, owner, 3), owner) = this) then net else
-            store(net, at(find(save(storage, owner, 3), owner)), net(find(save(storage, owner, 3), owner)) - 5) }
+          pay(find(save(storage, owner, 3), owner), 5) }
         φ }
     ~[findOnSave]~> dl![.box]{ { storage := save(storage, owner, 3) ‖ pv := 3 ‖
-        net := if(3 = this) then net else store(net, at(3), net(3) - 5) } φ } := by
+        pay(3, 5) } φ } := by
   sol_chain
 #last_line chain
 

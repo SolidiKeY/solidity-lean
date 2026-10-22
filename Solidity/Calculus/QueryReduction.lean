@@ -364,7 +364,7 @@ namespace ReadReduction
 /-- The complete source-to-read-query pipeline is an equivalence on the
 recognized fragment, over all original states and all typed parameters. -/
 theorem valid_iff {φ : Fml C []} (r : ReadReduction φ) :
-    Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (rd : (q : Ref C) → q.Value),
+    Fml.Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (rd : (q : Ref C) → q.Value),
       (r.sentence.query g AEnv.dflt args).run rd = true := by
   constructor
   · intro h g

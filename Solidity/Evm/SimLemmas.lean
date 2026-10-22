@@ -629,6 +629,20 @@ theorem netAt_pay {C : Contract} {Γ : Ctx} (τ : State C Γ)
       simp only [Semantics.lookupBy_setBy_self, if_true, Option.getD_some, Ledger.lookup_entries]
     · simp only [Semantics.lookupBy_setBy_ne h2, h2, if_false]
 
+/-- Paying within the available funds subtracts exactly, without wrapping. -/
+theorem balance_pay {C : Contract} {Γ : Ctx} (σ : State C Γ)
+    (x : PrimTy.uint.Denote) (y : Nat) (hy : (y : Int) ≤ σ.selfBalance.1) :
+    (σ.pay x y).selfBalance.1 =
+      if x.1 = σ.tx.selfAddress.1 then σ.selfBalance.1 else σ.selfBalance.1 - y := by
+  unfold State.pay
+  split
+  · rfl
+  · rw [uintOfNat_val]
+    · exact Int.toNat_of_nonneg (by omega)
+    · have hb := σ.selfBalance.2
+      simp only [PrimTy.inRange, decide_eq_true_eq] at hb
+      omega
+
 variable {C : Contract} {L : Nat}
 
 /-- A primitive storage value is read as the word at its slot: `alice.age`

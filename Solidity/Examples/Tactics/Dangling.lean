@@ -28,7 +28,7 @@ def survivesPush : Fml StandardExample [] := dl!{ wt(storage) → [
     r.age = 5; persons.push(); ] persons[0].age == 5 }
 
 /-- The push exposes the slot as the dangling alias left it. -/
-theorem survivesPush_holds : Valid survivesPush := by
+theorem survivesPush_holds : Fml.Valid survivesPush := by
   unfold survivesPush
   sol_prove
 
@@ -38,7 +38,7 @@ def survivesDiamond : Fml StandardExample [] := dl!{ wt(storage) → ⟨
     r.age = 5; persons.push(); ⟩ persons[0].age == 5 }
 
 /-- The push exposes the slot as the dangling alias left it. -/
-theorem survivesDiamond_holds : Valid survivesDiamond := by
+theorem survivesDiamond_holds : Fml.Valid survivesDiamond := by
   unfold survivesDiamond
   sol_prove
 
@@ -48,7 +48,7 @@ def survivesDelete : Fml StandardExample [] := dl!{ wt(storage) → [
     r.age = 5; delete persons; persons.push(); ] persons[0].age == 5 }
 
 /-- The push exposes the slot as the dangling alias left it. -/
-theorem survivesDelete_holds : Valid survivesDelete := by
+theorem survivesDelete_holds : Fml.Valid survivesDelete := by
   unfold survivesDelete
   sol_prove
 
@@ -58,7 +58,7 @@ def survivesCopy : Fml StandardExample [] := dl!{ wt(storage) → [
     persons.pop(); r.age = 5; persons = people; persons.push(); ] persons[0].age == 5 }
 
 /-- The push exposes the slot as the dangling alias left it. -/
-theorem survivesCopy_holds : Valid survivesCopy := by
+theorem survivesCopy_holds : Fml.Valid survivesCopy := by
   unfold survivesCopy
   sol_prove
 
@@ -68,7 +68,7 @@ def innerReappears : Fml StandardExample [] := dl!{ wt(storage) → [
     ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 }
 
 /-- The push exposes the slot as the dangling alias left it. -/
-theorem innerReappears_holds : Valid innerReappears := by
+theorem innerReappears_holds : Fml.Valid innerReappears := by
   unfold innerReappears
   sol_prove
 

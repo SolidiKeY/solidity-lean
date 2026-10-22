@@ -80,11 +80,11 @@ theorem Calculus.derivable_sound {R : RuleSet} {Γ₀ : Ctx} {j : Seq C Γ₀}
   let ⟨d⟩ := h
   ⟨Calculus.sound d⟩
 
-/-- `⊢ φ` derivable is `Valid φ`. -/
+/-- `⊢ φ` derivable is `Fml.Valid φ`. -/
 theorem Calculus.valid {R : RuleSet} {φ : Fml C []}
-    (h : DerivableIn (Calculus R) (Seq.closed φ)) : Valid φ :=
+    (h : DerivableIn (Calculus R) (Seq.closed φ)) : Fml.Valid φ :=
   let ⟨d⟩ := h
-  Proves.valid d
+  Proves.fmlValid d
 
 /-- **solkey's rules are a sub-system of the calculus.** -/
 theorem Calculus.solkey_le {Γ₀ : Ctx} {j : Seq C Γ₀} (d : Calculus .solkey⇓j) :
@@ -274,7 +274,7 @@ end Lindenbaum
 /-- **A derivable formula is the top of the Lindenbaum algebra.** -/
 theorem Proves.mk_eq_top {R : RuleSet} {φ : Fml C []} (d : Proves C R [] .nil φ) :
     Lindenbaum.mk φ = ⊤ :=
-  Lindenbaum.mk_eq_top.2 d.valid
+  Lindenbaum.mk_eq_top.2 d.fmlValid
 
 /-- **The strategy only goes down** in the Lindenbaum algebra: a reduct
 implies what it reduces from (`Fml.mred_leads`). -/
@@ -348,14 +348,14 @@ instance (R : RuleSet) : PL.Theory.IsClassical (provedTheory (C := C) R) :=
 
 theorem sound_provedTheory (R : RuleSet) : Sound (provedTheory (C := C) R) := by
   rintro A (⟨φ, rfl, d⟩ | h) σ
-  · exact d.valid σ
+  · exact d.fmlValid σ
   · exact sound_CPL A h σ
 
 open Classical in
 /-- **What natural deduction derives from the calculus's theorems is
 valid.** -/
 theorem valid_of_derivable {R : RuleSet} {A : Proposition (Fml C [])}
-    (h : DerivableIn (provedTheory R) A) : Valid (interp A) :=
+    (h : DerivableIn (provedTheory R) A) : Fml.Valid (interp A) :=
   let ⟨D⟩ := h
   fun σ => derivation_sound (sound_provedTheory R) D σ fun _ h => absurd h (Finset.notMem_empty _)
 
@@ -381,7 +381,7 @@ theorem holds_skeleton (σ : State C Γ) : (φ : Fml C Γ) → (Holds σ (skelet
 /-- **A formula whose skeleton natural deduction derives from the
 calculus's theorems is valid.** -/
 theorem valid_of_skeleton {R : RuleSet} {φ : Fml C []}
-    (h : DerivableIn (provedTheory R) (skeleton φ)) : Valid φ :=
+    (h : DerivableIn (provedTheory R) (skeleton φ)) : Fml.Valid φ :=
   fun σ => (holds_skeleton σ φ).1 (valid_of_derivable h σ)
 
 end NatDed

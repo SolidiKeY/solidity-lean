@@ -59,6 +59,8 @@ import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.KeyValues
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
+import Solidity.Calculus.Correct
+import Solidity.Calculus.CorrectCallback
 import Solidity.Calculus.TermWk
 import Solidity.Calculus.EvalEqs
 import Solidity.Calculus.TermAgree
@@ -415,6 +417,8 @@ import Solidity.Examples.Tactics.PushSuffixGuards
 import Solidity.Examples.Tactics.PushSuffixRules
 import Solidity.Examples.Tactics.PushSuffixSource
 import Solidity.Examples.Tactics.ModularArithmetic
+import Solidity.Examples.Tactics.RunnerAudit
+import Solidity.Examples.Tactics.AuditRepairs
 import Solidity.Examples.Tactics.EvaluationOrder
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.ArrayShapeCopy

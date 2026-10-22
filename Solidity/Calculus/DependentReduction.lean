@@ -168,7 +168,7 @@ def arithmetic {φ : Fml C []} (r : DependentReduction φ) :
   r.body.encoding.arithmetic
 
 theorem body_valid_iff {φ : Fml C []} (r : DependentReduction φ) :
-    Valid φ ↔ r.sentence.body.Valid := by
+    Fml.Valid φ ↔ r.sentence.body.Valid := by
   constructor
   · intro h g ν
     exact (r.body.flattening.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
@@ -180,11 +180,11 @@ theorem body_valid_iff {φ : Fml C []} (r : DependentReduction φ) :
       ((LFml.condSimp_holds g _ _).mp
         ((LFml.liftCond_holds g _ _ _).mp (r.sentence.close g AEnv.dflt (h g)))))
 
-theorem valid_iff {φ : Fml C []} (r : DependentReduction φ) : Valid φ ↔ r.arithmetic.Valid :=
+theorem valid_iff {φ : Fml C []} (r : DependentReduction φ) : Fml.Valid φ ↔ r.arithmetic.Valid :=
   r.body_valid_iff.trans r.body.valid_iff
 
 theorem valid_of_decide {φ : Fml C []} (r : DependentReduction φ)
-    (h : r.arithmetic.guarded.decide = true) : Valid φ :=
+    (h : r.arithmetic.guarded.decide = true) : Fml.Valid φ :=
   r.valid_iff.mpr (r.arithmetic.valid_iff.mpr ((AFml.decide_iff _).mp h))
 
 structure Countermodel {φ : Fml C []} (r : DependentReduction φ) where
@@ -210,10 +210,10 @@ def countermodelOfCodes {φ : Fml C []} (r : DependentReduction φ) (xs : List N
     (fun hv => Bool.false_ne_true (h ▸ (AFml.check_iff _ _).mpr hv)))
 
 theorem not_valid_of_codes {φ : Fml C []} (r : DependentReduction φ) (xs : List Nat)
-    (h : r.checkCodes xs = false) : ¬ Valid φ :=
+    (h : r.checkCodes xs = false) : ¬ Fml.Valid φ :=
   fun hv => (r.countermodelOfCodes xs h).refutes (hv (r.countermodelOfCodes xs h).state)
 
-def verify {φ : Fml C []} (r : DependentReduction φ) : Sum (PLift (Valid φ)) r.Countermodel :=
+def verify {φ : Fml C []} (r : DependentReduction φ) : Sum (PLift (Fml.Valid φ)) r.Countermodel :=
   match r.arithmetic.verify with
   | .inl h => .inl ⟨r.valid_iff.mpr h.down⟩
   | .inr cm => .inr (r.countermodelOf cm)

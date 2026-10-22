@@ -171,7 +171,7 @@ theorem pingNoCode : (Prog.run (State.init Pinger) pingNoCodeCore).halt? = some 
 /-- Whatever the call does, one of the two counters goes up: the success
 block and each `catch` block are a goal. -/
 theorem pingCounts :
-    ⊨ dl!{ pings == 0 ∧ fails == 0 →
+    ⊨ᶠ dl!{ pings == 0 ∧ fails == 0 →
       [ uint a = 7; try I(a).ping() { pings += 1; } catch { fails += 1; }; ]
         pings + fails == 1 } := by
   sol_symex
@@ -180,7 +180,7 @@ theorem pingCounts :
 /-- The returned value is a value of its type, whatever the callee returned:
 data that does not decode reverts in the caller. -/
 theorem getStores :
-    ⊨ dl!{ [ try I(7).get() returns (uint v) { last = v; pings = v; } catch { last = 0; pings = 0; }; ]
+    ⊨ᶠ dl!{ [ try I(7).get() returns (uint v) { last = v; pings = v; } catch { last = 0; pings = 0; }; ]
         last == pings } := by
   sol_symex
   sol_close
@@ -188,8 +188,8 @@ theorem getStores :
 /-- One rule at a time: `tryCallNoCallbackBox` leaves a goal per clause, the
 success block's for every value of `v` (`allRight`). -/
 theorem getWalk :
-    ⊨ dl!{ [ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ] true } := by
+  apply Proves.fmlValid
   apply branches .tryCallNoCallbackBox <;>
       (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
         and_true]) <;>
@@ -209,7 +209,7 @@ theorem getWalk :
 contract, and the success block may assume it of whatever state the callee
 leaves.  The calculus with callbacks is `Calculus/Callback.lean`'s
 `ProvesC`, sound against `ValidC` for a first-order invariant
-(`ProvesC.valid`, `Calculus/CallbackSound.lean`); the success block's
+(`ProvesC.fmlValid`, `Calculus/CallbackSound.lean`); the success block's
 goal reads the invariant assumed at its scope (`Proves.openInv`), past the
 callee's `{havoc}`. -/
 
@@ -222,7 +222,7 @@ changes nothing. -/
 theorem pingKeepsInv :
     ValidC pingInv dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } := by
-  apply ProvesC.valid
+  apply ProvesC.fmlValid
   apply ProvesC.intro
   apply ProvesC.tryCall .tryCallWithCallbackBox
   · -- invariant on exit
@@ -247,7 +247,7 @@ theorem pingKeepsInv :
 /-- What holds with callbacks holds without: the deterministic run is one of
 the runs with callbacks. -/
 theorem pingKeepsInv_valid :
-    ⊨ dl!{ fails <= pings →
+    ⊨ᶠ dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } :=
   valid_of_validC pingKeepsInv rfl rfl
 
@@ -256,7 +256,7 @@ theorem pingKeepsInv_valid :
 A `try` hands its callee all the gas, so the callee may call back into the
 contract, the contract itself included (`try this.f()`), whatever
 `transferSemantics` says: that option is about `transfer` and `send`, whose
-2300 gas cannot call back.  `⊨` reads every callee as keeping this
+2300 gas cannot call back.  `⊨ᶠ` reads every callee as keeping this
 contract's state, as solkey's `tryCallNoCallbackBox` does, and proves
 `last == 0` past a call that may write `last`; `ValidT .noCallback` lets the
 callee leave any state that keeps the invariant (`⊤` unless given), and
@@ -266,7 +266,7 @@ refutes it (`docs/options.md`). -/
 def selfCall : Fml Pinger [] := dl!{ [ last = 0; try I(7).ping() { } catch { }; ] last == 0 }
 
 /-- Read as every callee keeping the state, the call changes nothing. -/
-theorem selfCall_valid : ⊨ dl!{ [ last = 0; try I(7).ping() { } catch { }; ] last == 0 } := by
+theorem selfCall_valid : ⊨ᶠ dl!{ [ last = 0; try I(7).ping() { } catch { }; ] last == 0 } := by
   sol_symex
   sol_close
 
@@ -289,7 +289,7 @@ theorem selfCall_noCallback : ¬ ValidT .noCallback selfCall := by
   intro h
   have H := h (State.init Pinger) _
     (.cons (execOfRun rfl rfl)
-      (.cons (ExecS.tryOk (st := pinger 0 0 42) (nt := []) (vs := []) (rest := [])
+      (.cons (ExecS.tryOk (st := pinger 0 0 42) (nt := []) (sb := ⟨0, rfl⟩) (vs := []) (rest := [])
         ?exit ?resume rfl .nil nofun) .nil))
   case exit => trivial
   case resume => trivial

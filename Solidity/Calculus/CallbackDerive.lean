@@ -286,7 +286,7 @@ def start (g : MVarId) : TacticM (Option (Array String × MVarId)) := do
     if ty.isAppOf ``ValidT then
       some <$> `(tactic| refine $(← ProofTree.short ``ProvesC.validT) ?_)
     else if ty.isAppOf ``ValidC then
-      some <$> `(tactic| refine $(← ProofTree.short ``ProvesC.valid) ?_)
+      some <$> `(tactic| refine $(← ProofTree.short ``ProvesC.fmlValid) ?_)
     else if ty.isAppOf ``ProvesC then pure none
     else return none
   let (pre, g) ← match t? with

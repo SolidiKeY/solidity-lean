@@ -37,13 +37,13 @@ open scoped Scoped
 Under the box: `sol_decide` reads a hash as an atom, and does not show that
 one of a memory it wrote returns (`docs/semantic-gaps.md`, "Hashing and
 the ABI"). -/
-theorem hashTwice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = keccak256(b);
+theorem hashTwice : ⊨ᶠ dl!{ [ bytes memory b = "ab"; bytes32 h = keccak256(b);
     bytes32 g = keccak256(b); ] h == g } := by
   sol_symex
   sol_decide
 
 /-- A `string` hashed through `bytes(s)`, the identity. -/
-theorem hashString : ⊨ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(bytes(s));
+theorem hashString : ⊨ᶠ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(bytes(s));
     bytes32 g = keccak256(bytes(s)); ] h == g } := by
   sol_symex
   sol_decide
@@ -51,7 +51,7 @@ theorem hashString : ⊨ dl!{ [ string memory s = "ab"; bytes32 h = keccak256(by
 /-- **Under the diamond**: the closer reads the byte string off the memory
 (its length and each byte down the writes, all literal: `keccakAt`,
 `Calculus/MemRead.lean`, Lean only) and evaluates the hash, so it returns. -/
-theorem hashTwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes32 h = keccak256(b);
+theorem hashTwiceDiamond : ⊨ᶠ dl!{ ⟨ bytes memory b = "ab"; bytes32 h = keccak256(b);
     bytes32 g = keccak256(b); ⟩ h == g } := by
   sol_symex
   sol_decide
@@ -75,11 +75,11 @@ section LocalHash
 
 local instance : InContract := ⟨LocalHash⟩
 
-theorem abcHash : ⊨ spec!{abc} := by
+theorem abcHash : ⊨ᶠ spec!{abc} := by
   sol_symex
   sol_decide
 
-theorem twoAllocations : ⊨ spec!{twoAllocations} := by
+theorem twoAllocations : ⊨ᶠ spec!{twoAllocations} := by
   sol_symex
   sol_decide
 
@@ -162,24 +162,24 @@ returns 0
 #guard_msgs in #run Prec.rec(1, 29, 2, 3)
 
 /-- One byte string hashed twice: the same value. -/
-theorem sha256Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes32 h = sha256(b);
+theorem sha256Twice : ⊨ᶠ dl!{ [ bytes memory b = "ab"; bytes32 h = sha256(b);
     bytes32 g = sha256(b); ] h == g } := by
   sol_symex
   sol_decide
 
-theorem ripemd160Twice : ⊨ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160(b);
+theorem ripemd160Twice : ⊨ᶠ dl!{ [ bytes memory b = "ab"; bytes20 h = ripemd160(b);
     bytes20 g = ripemd160(b); ] h == g } := by
   sol_symex
   sol_decide
 
 /-- Under the diamond, of a byte string built here: read off the memory and
 evaluated (`keccakAt` at the kind, `HashKind.apply`), as `keccak256`. -/
-theorem sha256AbcDiamond : ⊨ dl!{ ⟨ bytes memory b = "abc"; bytes32 h = sha256(b); uint u = uint(h); ⟩
+theorem sha256AbcDiamond : ⊨ᶠ dl!{ ⟨ bytes memory b = "abc"; bytes32 h = sha256(b); uint u = uint(h); ⟩
     u == 0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad } := by
   sol_symex
   sol_decide
 
-theorem ripemd160TwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes memory c = "ab";
+theorem ripemd160TwiceDiamond : ⊨ᶠ dl!{ ⟨ bytes memory b = "ab"; bytes memory c = "ab";
     bytes20 h = ripemd160(b); bytes20 g = ripemd160(c); ⟩ h == g } := by
   sol_symex
   sol_decide
@@ -187,14 +187,14 @@ theorem ripemd160TwiceDiamond : ⊨ dl!{ ⟨ bytes memory b = "ab"; bytes memory
 /-! ## 2 · The ABI -/
 
 /-- `abi.encode(uint, bool)`: two words, big-endian. -/
-theorem encodeLayout : ⊨ dl!{ ⟨ bytes memory e = abi.encode(258, true); uint l = e.length;
+theorem encodeLayout : ⊨ᶠ dl!{ ⟨ bytes memory e = abi.encode(258, true); uint l = e.length;
     bytes1 a = e[30]; bytes1 b = e[31]; bytes1 c = e[63]; bytes1 z = e[0]; ⟩
     l == 64 && a == 1 && b == 2 && c == 1 && z == 0 } := by
   sol_symex
   sol_decide
 
 /-- `abi.encodePacked`: each value in its own width, a `bytes2` left-aligned. -/
-theorem encodePacked : ⊨ dl!{ ⟨ uint16 x = 258; bytes2 t = "ab";
+theorem encodePacked : ⊨ᶠ dl!{ ⟨ uint16 x = 258; bytes2 t = "ab";
     bytes memory e = abi.encodePacked(x, true, t); uint l = e.length;
     bytes1 a = e[0]; bytes1 b = e[1]; bytes1 c = e[2]; bytes1 d = e[3]; ⟩
     l == 5 && a == 1 && b == 2 && c == 1 && d == 97 } := by
@@ -430,16 +430,16 @@ section Packed
 
 local instance : InContract := ⟨Packed⟩
 
-theorem addressLast : ⊨ spec!{addressLast} := by
+theorem addressLast : ⊨ᶠ spec!{addressLast} := by
   sol_symex
   sol_decide
 
-theorem addressFirst : ⊨ spec!{addressFirst} := by
+theorem addressFirst : ⊨ᶠ spec!{addressFirst} := by
   sol_symex
   sol_decide
 
 /-- Eight bytes reassembled; twenty (an `address`) are past `Seq.closeSize`. -/
-theorem wordReassembled : ⊨ spec!{wordReassembled} := by
+theorem wordReassembled : ⊨ᶠ spec!{wordReassembled} := by
   sol_symex
   sol_decide
 
@@ -637,7 +637,7 @@ local instance : InContract := ⟨Codec3⟩
 
 /-- A static nested struct: its members' words in the head, loop-free (narrow
 members: a byte each to write, within the closer's bounds). -/
-theorem staticNested : ⊨ spec!{staticNested} := by
+theorem staticNested : ⊨ᶠ spec!{staticNested} := by
   sol_symex
   sol_decide
 
@@ -654,7 +654,7 @@ def Names : Contract := contract!{
 example : Names.widths = [("ids{}#hash", 1)] := rfl
 
 /-- Set and read back under one key. -/
-theorem setGet : ⊨ dl[Names]{ [ string memory k = "alice"; ids[k] = 7; uint v = ids[k]; ] v == 7 } := by
+theorem setGet : ⊨ᶠ dl[Names]{ [ string memory k = "alice"; ids[k] = 7; uint v = ids[k]; ] v == 7 } := by
   sol_symex
   sol_decide
 

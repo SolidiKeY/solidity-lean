@@ -621,9 +621,8 @@ theorem OpLoc.bumpT_wk (op : IncDec) {p : PrimTy} (l : OpLoc C Γ p) :
 
 theorem sendT_lift (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.Denote) :
     sendT (τ.lift h d) (pv.wk h) addr amt = Out.lift h d (sendT τ pv addr amt) := by
-  unfold sendT
-  rw [show (τ.lift h d).tx = τ.tx from rfl]
-  split <;> simp only [State.lift_pay, State.lift_setLocal] <;> lift_fin
+  simp only [sendT, State.canPay, State.pay, State.lift, State.withEnv,
+    State.setLocal, Out.lift, TEnv.set_put, TEnv.wk_self]
 
 theorem clearT_lift : {T : Ty} → (a : MAddr τ.H T) → (hm : T.mapFree = true) →
     TRun.clearT (τ.lift h d) a hm = liftedT h d (TRun.clearT τ a hm)
@@ -781,8 +780,13 @@ theorem TRun.assignLocalPush_wk {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C 
 
 theorem TRun.transfer_wk (r a : Val C Γ .uint) :
     TRun.transfer (r.wk h) (a.wk h) (τ.lift h d) = liftedT h d (TRun.transfer r a τ) := by
-  simp only [TRun.transfer, Val.evalT_wk, liftedT_bind, State.lift_pay]
-  lift_fin
+  simp only [TRun.transfer, Val.evalT_wk, liftedT_bind]
+  congr 1
+  funext addr
+  congr 1
+  funext amt
+  change (if τ.canPay addr amt then _ else _) = _
+  split <;> first | rfl | lift_fin
 
 theorem TRun.send_wk (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     TRun.send (pv.wk h) (r.wk h) (a.wk h) (τ.lift h d) = liftedT h d (TRun.send pv r a τ) := by

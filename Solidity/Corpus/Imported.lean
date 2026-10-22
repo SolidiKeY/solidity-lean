@@ -71,7 +71,7 @@ stated over the typed run of that program, as every other corpus row is
 (`Corpus/Basic.lean`): `N.f.problem` is `wt(storage) → ⟨ Q ⟩ true`, and
 `Q`'s typed run from the initial state ends normally, or is exhausted
 (`Runs`, decision 15).  It is the scoped
-`⊢`'s soundness (`Proves.valid`) at that state, whose storage is
+`⊢`'s soundness (`Proves.fmlValid`) at that state, whose storage is
 well-formed (`initState_wt`); nothing is left to evaluate. -/
 
 namespace Solidity.Corpus
@@ -97,7 +97,7 @@ is `initStorage_wt`'s. -/
 theorem runs_of_proved {m : Modality} {Γ' : Ctx} {Q : Prog C [] Γ'}
     (h : Proves C .all [] .nil (Problem.fml m [] Q))
     (hw : holds (State.init C) (Fml.wt C)) : Runs m (State.init C) Q :=
-  h.valid (State.init C) hw
+  h.fmlValid (State.init C) hw
 
 /-- A derived diamond obligation with no parameters holds at the initial
 state (`runs_of_proved`). -/
@@ -117,7 +117,7 @@ theorem box_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
 
 /-! A corollary of `Corpus/TestSuite.lean` uses the axioms of its `⊢`
 theorem, which `TestSuite/Report.lean`'s pin checks, of `initState_wt`,
-pinned there on one corollary, and of these two, through `Proves.valid`. -/
+pinned there on one corollary, and of these two, through `Proves.fmlValid`. -/
 
 /--
 info: 'Solidity.Corpus.diamond_of_proved' depends on axioms: [propext, Classical.choice, Quot.sound]

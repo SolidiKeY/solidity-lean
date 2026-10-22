@@ -27,14 +27,14 @@ local instance : InContract := ⟨Grid⟩
 open scoped Scoped
 
 /-- Writes through a row alias reach the fixed matrix. -/
-theorem gridAliasSharesWrites : ⊨ dl!{ wt(storage) → ⟨
+theorem gridAliasSharesWrites : ⊨ᶠ dl!{ wt(storage) → ⟨
     delete grid; grid[0][0] = 11; grid[0][1] = 12; grid[1][0] = 21; grid[1][1] = 22;
     uint[2] storage row = grid[0]; row[0] = 41; ⟩ grid[0][0] == 41 && grid[1][1] == 22 } := by
   sol_prove
 
 /-- Thirteen pushes after a delete: fourteen storage updates, past
 `normalizationDepth`. -/
-theorem valuesPastDepth : ⊨ dl!{ wt(storage) → ⟨
+theorem valuesPastDepth : ⊨ᶠ dl!{ wt(storage) → ⟨
     delete values; values.push(1); values.push(2); values.push(3); values.push(4);
     values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
     values.push(10); values.push(11); values.push(12); values.push(13); ⟩

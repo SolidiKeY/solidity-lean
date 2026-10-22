@@ -38,14 +38,14 @@ open scoped Scoped
 
 /-- `12 & 10` is `8`, `12 | 10` is `14`, `12 ^ 10` is `6`. -/
 theorem bitwise :
-    ⊨ dl!{ ⟨ uint a = 12; uint b = 10; uint x = a & b; uint y = a | b; uint z = a ^ b; ⟩
+    ⊨ᶠ dl!{ ⟨ uint a = 12; uint b = 10; uint x = a & b; uint y = a | b; uint z = a ^ b; ⟩
       x == 8 && y == 14 && z == 6 } := by
   sol_symex
   sol_close
 
 /-- `~0` is `2^256 - 1`, and `~x` of it is `0` again. -/
 theorem complement :
-    ⊨ dl!{ ⟨ uint a = 0; uint x = ~a; uint y = ~x; ⟩
+    ⊨ᶠ dl!{ ⟨ uint a = 0; uint x = ~a; uint y = ~x; ⟩
       x == 115792089237316195423570985008687907853269984665640564039457584007913129639935 &&
       y == 0 } := by
   sol_symex
@@ -54,7 +54,7 @@ theorem complement :
 /-- `1 << 255` is `2^255`; one more shift wraps it to `0`, and a shift by `256`
 or more is `0`; `x >> 3` divides by `8`. -/
 theorem shifts :
-    ⊨ dl!{ ⟨ uint a = 1; uint n = 255; uint x = a << n; uint y = x << a; uint z = a << 300;
+    ⊨ᶠ dl!{ ⟨ uint a = 1; uint n = 255; uint x = a << n; uint y = x << a; uint z = a << 300;
              uint w = 100 >> 3; ⟩
       x == 57896044618658097711785492504343953926634992332820282019728792003956564819968 &&
       y == 0 && z == 0 && w == 12 } := by
@@ -65,7 +65,7 @@ theorem shifts :
 `1 | (6 & 3)`, `5 ^ 3 & 1` is `5 ^ (3 & 1)`, and `a & 1 == 0` compares
 `a & 1`. -/
 theorem precedence :
-    ⊨ dl!{ ⟨ uint a = 1; uint b = 2; uint x = a + b << 3; uint y = a | 6 & 3;
+    ⊨ᶠ dl!{ ⟨ uint a = 1; uint b = 2; uint x = a + b << 3; uint y = a | 6 & 3;
              uint z = 5 ^ 3 & a; bool c = b & a == 0; ⟩
       x == 24 && y == 3 && z == 4 && c == true } := by
   sol_symex
@@ -73,14 +73,14 @@ theorem precedence :
 
 /-- The compound forms: `x &= 6; x |= 1; x ^= 3; x <<= 2; x >>= 1;` from `13`. -/
 theorem compound :
-    ⊨ dl!{ ⟨ uint x = 13; x &= 6; x |= 1; x ^= 3; x <<= 2; x >>= 1; ⟩ x == 12 } := by
+    ⊨ᶠ dl!{ ⟨ uint x = 13; x &= 6; x |= 1; x ^= 3; x <<= 2; x >>= 1; ⟩ x == 12 } := by
   sol_symex
   sol_close
 
 /-- A compound target in storage, its index captured once: `balances[i++] |= 4;`
 reads and writes `balances[0]`, and bumps `i` once. -/
 theorem compoundStorage :
-    ⊨ dl!{ [ uint i = 0; balances[0] = 3; balances[i++] |= 4; uint r = balances[0]; ]
+    ⊨ᶠ dl!{ [ uint i = 0; balances[0] = 3; balances[i++] |= 4; uint r = balances[0]; ]
       r == 7 && i == 1 } := by
   sol_symex
   sol_close
@@ -93,7 +93,7 @@ The checked `x + 1` at `2^256 - 1` reverts, and has no terminating run
 
 /-- `unchecked { x = x + 1; }` at `2^256 - 1` gives `0`. -/
 theorem uncheckedAdd :
-    ⊨ dl!{ ⟨ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    ⊨ᶠ dl!{ ⟨ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
              unchecked { x = x + 1; }; ⟩ x == 0 } := by
   sol_symex
   sol_close
@@ -101,7 +101,7 @@ theorem uncheckedAdd :
 /-- `0 - 1` wraps to `2^256 - 1`; `x++` and `x -= 2` wrap too; `2 ** 256` is `0`
 and `2 ** 255 * 2` is `0`. -/
 theorem uncheckedWrap :
-    ⊨ dl!{ ⟨ uint x = 0; uint y; uint z = 2; uint p;
+    ⊨ᶠ dl!{ ⟨ uint x = 0; uint y; uint z = 2; uint p;
              unchecked { y = x - 1; y++; x -= 2; p = z ** 256 + z ** 255 * z; }; ⟩
       y == 0 &&
       x == 115792089237316195423570985008687907853269984665640564039457584007913129639934 &&
@@ -110,7 +110,7 @@ theorem uncheckedWrap :
   sol_close
 
 /-- Division inside `unchecked` still reverts on a zero divisor. -/
-example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
+example : ¬ (⊨ᶠ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail
     (h (State.init _)) (by decide +kernel)
 
@@ -128,7 +128,7 @@ example : Prog.toStr [] (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
 `-3 & -6` is `-8`, `-4267 >> 1` is `-2134` (toward `-∞`), and a negative
 shifted past its width is `-1`. -/
 theorem signedBitwise :
-    ⊨ dl!{ ⟨ int x = -3; int m = -6; int a = x & 6; int b = x & m; int y = -4267;
+    ⊨ᶠ dl!{ ⟨ int x = -3; int m = -6; int a = x & 6; int b = x & m; int y = -4267;
              int c = y >> 1; int d = y >> 256; ⟩
       a == 4 && b + 8 == 0 && c + 2134 == 0 && d + 1 == 0 } := by
   sol_prove
@@ -137,14 +137,14 @@ theorem signedBitwise :
 (`Calculus/CloseLemmas.lean`): `x & 0` is `0`, `x & x` is `x`, and
 `x & 1` is a parity, `0` or `1`. -/
 theorem bitAndSymbolic :
-    ⊨ dl!{ ∀ int x; ⟨ int a = x & 0; int b = x & x; int p = x & 1; ⟩
+    ⊨ᶠ dl!{ ∀ int x; ⟨ int a = x & 0; int b = x & x; int p = x & 1; ⟩
       a == 0 && b == x && p >= 0 && p < 2 } := by
   sol_prove; sol_leaf; sol_close
 
 /-- `%` on a symbolic `int` (solkey's `smodMultiple`, `smod_geZero`): a
 multiple of `7` leaves no remainder, and a remainder has the dividend's sign. -/
 theorem signedRemainder :
-    ⊨ dl!{ ∀ int x; [ int m = x * 7; int r = m % 7; int s = x % 5; ]
+    ⊨ᶠ dl!{ ∀ int x; [ int m = x * 7; int r = m % 7; int s = x % 5; ]
       r == 0 && (x >= 0 → s >= 0) && (x <= 0 → s <= 0) } := by
   sol_prove; sol_leaf; sol_close
 

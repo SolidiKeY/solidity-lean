@@ -15,9 +15,9 @@ A plain obligation whose formula hands control to a callee that may call
 back (`Fml.callsBack false`: a `try`, a value call) is stated as
 `ValidT .noCallback N.f.problem`, the callee changing the state as it may
 (`docs/options.md`, O7), and proved by `sol_prove`'s walk of `ProvesC`; the
-others as `⊢ N.f.problem`, whose `Valid` is the same reading there
+others as `⊢ N.f.problem`, whose `Fml.Valid` is the same reading there
 (`validT_noCallback_iff`).  One with a recursive call (`Stmt.callRec`) is
-stated as `Valid N.f.problem` and proved by `rec_auto`, each recursive call
+stated as `Fml.Valid N.f.problem` and proved by `rec_auto`, each recursive call
 by the contract `true`/`true` proved by induction over its frames
 (`docs/kernel-port.md`, "Recursion"): the search does no induction.  Whether
 it calls back is read off one frame of each unrolling (`sol_no_callback`);
@@ -46,16 +46,16 @@ private def elabClosed (t : Term) : TermElabM Expr := do
 /-- Whether the obligation `p` may hand control to a callee that calls back
 under `transferSemantics:noCallback` (`Fml.callsBack false`), read off its
 value; `true` where it does not reduce. -/
-private def callsBackE (N p : Lean.Name) : TermElabM Bool := do
-  let e ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false $(mkCIdent p)))
+private def callsBackE (N : Lean.Name) (φ : Expr) : TermElabM Bool := do
+  let e ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false $(← Term.exprToSyntax φ)))
   let v ← withTransparency .all <| whnf e
   return !v.isConstOf ``Bool.false
 
 /-- Whether the obligation `p`, which has a recursive call, provably hands
 control to no callee under `transferSemantics:noCallback`: `sol_no_callback`
 reads each unrolling off one frame (its `whnf` would unroll them). -/
-private def noCallbackRecE (N p : Lean.Name) : TermElabM Bool := do
-  let φ ← Symex.evaluable (mkConst p)
+private def noCallbackRecE (N : Lean.Name) (φ : Expr) : TermElabM Bool := do
+  let φ ← Symex.evaluable φ
   let ty ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false
     $(← Term.exprToSyntax φ) = false))
   let g ← mkFreshExprSyntheticOpaqueMVar ty
@@ -128,17 +128,19 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
         | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
       -- the callback reading (O7): a recursive call's frames read off one
       -- (`sol_no_callback`), not unrolled by `whnf`
-      let cb ← if r.tag == .specified || !r.writingCall then pure false
-        else if recursive then pure !(← noCallbackRecE N (f ++ `problem))
-        else callsBackE N (f ++ `problem)
+      let obligation := spec?.getD (mkConst (f ++ `problem))
+      let cb ← if recursive then pure !(← noCallbackRecE N obligation)
+        else callsBackE N obligation
+      let callbackTy (φ : Expr) : TermElabM Expr := do
+        elabClosed (← `(ValidT (C := $(mkCIdent N))
+          (.noCallback invariant[$(mkCIdent N)]) $(← Term.exprToSyntax φ)))
       -- a recursive call that may call back, or past a callee that may:
       -- `rec_auto_c`, each call read without callbacks where nothing calls
       -- back, else by a contract over the callback runs (`ProvesC.recContract`)
       if recursive && cb then
-        let ty ← elabClosed (← `(ValidT (C := $(mkCIdent N)) .noCallback
-          $(mkCIdent (f ++ `problem))))
+        let ty ← callbackTy obligation
         -- the walk reads the formula by its value; the kernel unfolds it
-        let goalTy := mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem)))
+        let goalTy := mkApp ty.appFn! (← Symex.evaluable obligation)
         let g ← mkFreshExprSyntheticOpaqueMVar goalTy
         let tac ← `(tactic| rec_auto_c)
         let pendingMsg := "a recursive call under the callback reading (O7) its contract does not prove"
@@ -155,11 +157,11 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
         return ("proved", "", .solc)
       if recursive then
         let (ty, goalTy) := match spec? with
-          | some φ => (mkApp2 (mkConst ``Valid) C φ, mkApp2 (mkConst ``Valid) C φ)
-          | none => (mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem)), mkConst ``True)
+          | some φ => (mkApp2 (mkConst ``Fml.Valid) C φ, mkApp2 (mkConst ``Fml.Valid) C φ)
+          | none => (mkApp2 (mkConst ``Fml.Valid) C (mkConst (f ++ `problem)), mkConst ``True)
         -- the walk reads the formula by its value; the kernel unfolds it
         let goalTy ← if spec?.isSome then pure goalTy else
-          pure (mkApp2 (mkConst ``Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
+          pure (mkApp2 (mkConst ``Fml.Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
         let g ← mkFreshExprSyntheticOpaqueMVar goalTy
         let tac ← `(tactic| rec_auto)
         let pendingMsg := "a recursive call its callee's contract does not prove"
@@ -182,15 +184,14 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       let premised (φ : Expr) : Expr :=
         if mode == .clean then mkAppN (mkConst ``Fml.imp) #[C, ctxE [],
           mkApp2 (mkConst ``Fml.cleanTail) C (ctxE []), φ] else φ
-      let (ty, goalTy) ← if let some φ := spec? then do
-          let ty := mkApp2 (mkConst ``Valid) C φ
+      let (ty, goalTy) ← if cb then do
+          -- Specifications use their actual formula too: they need not have
+          -- a generated `problem` declaration.
+          let ty ← callbackTy obligation
+          pure (ty, mkApp ty.appFn! (← Symex.evaluable obligation))
+        else if let some φ := spec? then do
+          let ty := mkApp2 (mkConst ``Fml.Valid) C φ
           pure (ty, ty)
-        else if cb then do
-          -- the faithful reading: the callee may change the state
-          let ty ← elabClosed (← `(ValidT (C := $(mkCIdent N)) .noCallback
-            $(mkCIdent (f ++ `problem))))
-          -- the walk reads the formula by its value; the kernel unfolds it
-          pure (ty, mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem))))
         else if mode == .clean then do
           -- the walk reads the formula by its value; the kernel unfolds it
           pure (ProofTree.provesE C (premised problem),
@@ -199,14 +200,14 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
           let ty := ProofTree.provesE C problem
           pure (ty, ty)
       let g ← mkFreshExprSyntheticOpaqueMVar goalTy
-      let goals ← if r.tag == .specified then do
-          let tac ← `(tactic| sol_spec_try)
-          Tactic.run g.mvarId! (Tactic.evalTactic tac)
-        else if cb then do
+      let goals ← if cb then do
           let tac ← `(tactic| sol_prove)
           -- only whether a leaf is left is reported: stop at the first
           withOptions (·.setBool `sol.prove.stopAtOpen true) <|
             Tactic.run g.mvarId! (Tactic.evalTactic tac)
+        else if r.tag == .specified then do
+          let tac ← `(tactic| sol_spec_try)
+          Tactic.run g.mvarId! (Tactic.evalTactic tac)
         else do
           let out ← IO.mkRef (none : Option Derive.Search)
           let _ ← Tactic.run g.mvarId! do

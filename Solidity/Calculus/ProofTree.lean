@@ -29,7 +29,7 @@ What the scoped calculus adds is not a node:
 
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
 box updates), else as a walk ends: `sol_leaf` takes the sequent, its
-context in front, to `⊨ ψ` (`Proves.closeValid`), which the scoped
+context in front, to `⊨ᶠ ψ` (`Proves.closeValid`), which the scoped
 `sol_close` closes on the typed state, `holds` itself, an update's rest
 read in the states it lands on (`closeTacs`, `Calculus/CloseScoped.lean`),
 then by the tactics `Config.closers` lists.  `sol_leaf` takes a leaf behind updates of
@@ -64,7 +64,7 @@ theorem emptyModality {Γ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {κ 
 
 end Proves
 
-/-- `sol_leaf`: a leaf `H ⊢ φ` that `sol_prove` left, as `⊨ ψ` with `ψ`
+/-- `sol_leaf`: a leaf `H ⊢ φ` that `sol_prove` left, as `⊨ᶠ ψ` with `ψ`
 the sequent wrapped (`Proves.closeHolds`); `sol_leaf_wt` is the same
 since W10.4 (a typed storage needs no layout).  Elaborated in
 `Calculus/ProvesDerive.lean` (`Seq.leafValid`); declared here, where a
@@ -89,7 +89,7 @@ def closeTrueTacs : MetaM (Array (TSyntax `tactic)) := do
   return #[← `(tactic| exact $(← short ``Proves.closeTrue) rfl)]
 
 /-- The tactics a leaf is closed by, as a walk ends: `sol_leaf` at the
-empty outer scope (a tree's goal is `[] ⊢ φ`), the sequent as `⊨ ψ`, then
+empty outer scope (a tree's goal is `[] ⊢ φ`), the sequent as `⊨ᶠ ψ`, then
 the scoped `sol_close` (`Calculus/CloseScoped.lean`). -/
 def closeTacs : MetaM (Array (TSyntax `tactic)) := do
   return #[← `(tactic| sol_leaf), ← `(tactic| sol_close)]

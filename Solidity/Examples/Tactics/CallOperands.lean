@@ -120,7 +120,7 @@ on a member chain returns, bound and written (the printed
 `bucket.tokens.push().value = valueVal;`, whose member of `push()` is
 refused: a member of a call is one of a function's value). -/
 theorem bucketPushSlotWrite :
-    ⊨ dl[TestSuite]{ [ Token storage t = bucket.tokens.push(); t.value = 11; ]
+    ⊨ᶠ dl[TestSuite]{ [ Token storage t = bucket.tokens.push(); t.value = 11; ]
       t.value == 11 } := by
   sol_symex
   sol_close
@@ -130,7 +130,7 @@ valid, but the strategy leaves it open: the push's write is not read back
 (`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
 example : True := by
   fail_if_success
-    have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
+    have : ⊨ᶠ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
       sol_symex
       sol_close
   trivial
@@ -149,12 +149,12 @@ example : Prog.toStr [] (sol{ total = makeValue(); } : Prog Operands [] _) =
 
 /-- `values[i] = makeValue();` — the element holds `makeValue()`'s value. -/
 theorem arrayIndexWriteCall :
-    ⊨ dl!{ [ values[i] = makeValue(); uint x = values[i]; ] x == seed } := by
+    ⊨ᶠ dl!{ [ values[i] = makeValue(); uint x = values[i]; ] x == seed } := by
   sol_symex
   sol_close
 
 /-- `total = makeValue();` -/
-theorem rootWriteCall : ⊨ dl!{ [ total = makeValue(); ] total == seed } := by
+theorem rootWriteCall : ⊨ᶠ dl!{ [ total = makeValue(); ] total == seed } := by
   sol_symex
   sol_close
 
@@ -176,7 +176,7 @@ example : dl!{ ⟨ uint[] memory carolValues = values; carolValues[i] = makeValu
 
 /-- `carolValues[i] = makeValue();` — the element holds `makeValue()`'s value. -/
 theorem memoryIndexWriteCall :
-    ⊨ dl!{ [ uint[] memory carolValues = values; carolValues[i] = makeValue();
+    ⊨ᶠ dl!{ [ uint[] memory carolValues = values; carolValues[i] = makeValue();
              uint x = carolValues[i]; ] x == seed } := by
   sol_symex
   sol_close
@@ -202,7 +202,7 @@ example : dl!{ ⟨ uint[] memory carolValues = values; carolValues[++i] = makeVa
 /-- `carolValues[++i] = makeValue();` — the element at the incremented index
 holds `makeValue()`'s value. -/
 theorem memoryIndexWriteCallIncrement :
-    ⊨ dl!{ [ uint[] memory carolValues = values; carolValues[++i] = makeValue();
+    ⊨ᶠ dl!{ [ uint[] memory carolValues = values; carolValues[++i] = makeValue();
              uint x = carolValues[i]; ] x == seed } := by
   sol_symex
   sol_close
@@ -264,7 +264,7 @@ example : Prog.toStr [] (sol[MemCalls]{ Person memory p; p = choosePersonMem(); 
 
 /-- A declaration from a memory-returning call: the copy of `alice`. -/
 theorem memCallDecl :
-    ⊨ dl[MemCalls]{ [ alice.age = 34; Person memory p = choosePersonMem(); uint v = p.age; ]
+    ⊨ᶠ dl[MemCalls]{ [ alice.age = 34; Person memory p = choosePersonMem(); uint v = p.age; ]
       v == 34 } := by
   sol_symex
   sol_close
@@ -272,7 +272,7 @@ theorem memCallDecl :
 /-- The write through a bound result: the member holds what
 `makeAccount` built. -/
 theorem memCallMemberWrite :
-    ⊨ dl[MemCalls]{ [ Person memory p = choosePersonMem(); p.account = makeAccount();
+    ⊨ᶠ dl[MemCalls]{ [ Person memory p = choosePersonMem(); p.account = makeAccount();
       uint b = p.account.balance; ] b == 100 } := by
   sol_symex
   sol_close

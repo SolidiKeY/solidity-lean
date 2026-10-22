@@ -856,7 +856,7 @@ inductive NUpdElem (C : Contract) where
   | selfBalance (op : IntOp) (a : NTerm C)
   /-- `net := store(net, at(r), net(r) ± a)` -/
   | net (r : NTerm C) (op : IntOp) (a : NTerm C)
-  /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)` -/
+  /-- `pay(r, a)` -/
   | pay (r a : NTerm C)
   /-- `oldNet := net` -/
   | saveNet (x : Var)

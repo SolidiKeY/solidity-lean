@@ -40,7 +40,7 @@ example : Prog.toStr [] (sol{ uint x = 1; uint p = D(x); }) =
     "uint x = 1; uint se1 = x; assert(se1 < 2); uint p = se1;" := rfl
 
 /-- `enum_from_uint.sol`: `D(0)` is `D.Left`. -/
-theorem enumFromUint : ⊨ dl!{ ⟨ uint x = 0; uint p = D(x); assert(p == D.Left); ⟩ true } := by
+theorem enumFromUint : ⊨ᶠ dl!{ ⟨ uint x = 0; uint p = D(x); assert(p == D.Left); ⟩ true } := by
   sol_symex
   sol_close
 
@@ -48,7 +48,7 @@ theorem enumFromUint : ⊨ dl!{ ⟨ uint x = 0; uint p = D(x); assert(p == D.Lef
 
 /-- `checked_called_by_unchecked.sol`: the checked `add16(0xe000, 0x1000)`
 is `0xf000`, and adding `0x1000` to it unchecked wraps to `0`. -/
-theorem checkedCalledByUnchecked : ⊨ dl!{ ⟨ uint16 a = 57344; uint16 b = 4096; uint16 c = 4096;
+theorem checkedCalledByUnchecked : ⊨ᶠ dl!{ ⟨ uint16 a = 57344; uint16 b = 4096; uint16 c = 4096;
     uint16 r; unchecked { r = add16(a, b) + c; }; assert(r == 0); ⟩ true } := by
   sol_symex
   sol_close
@@ -59,7 +59,7 @@ theorem checkedCalledByUnchecked : ⊨ dl!{ ⟨ uint16 a = 57344; uint16 b = 409
 example : Prog.toStr [] (sol{ uint8 a = type(uint8).max; uint e = type(D).max; }) =
     "uint se1 = 255; uint a = se1; uint e = 1;" := rfl
 
-theorem typeBounds : ⊨ dl!{ ⟨ uint8 a = type(uint8).max; int8 b = type(int8).min;
+theorem typeBounds : ⊨ᶠ dl!{ ⟨ uint8 a = type(uint8).max; int8 b = type(int8).min;
     uint e = type(D).max; uint f = type(D).min; int8 m = -128; int g = type(int).min + 1;
     assert(a == 255); assert(b == m); assert(e == D.Right); assert(f == D.Left);
     assert(g + 57896044618658097711785492504343953926634992332820282019728792003956564819967 == 0); ⟩
@@ -69,7 +69,7 @@ theorem typeBounds : ⊨ dl!{ ⟨ uint8 a = type(uint8).max; int8 b = type(int8)
 
 /-- `type(uint8).max + 1` is a `uint8` addition: it overflows although `y` is a
 `uint` (`SourceTypes.sol`'s `narrowOverflowPanics`). -/
-theorem typeMaxOverflows : ⊨ dl!{ [ uint y = type(uint8).max + 1; ] false } := by
+theorem typeMaxOverflows : ⊨ᶠ dl!{ [ uint y = type(uint8).max + 1; ] false } := by
   sol_symex
   sol_close
 
@@ -93,25 +93,25 @@ theorem ternaryLiteral_reverts : (Prog.run (State.init Open) (sol{ bool t = true
 
 /-- So the port's diamond is not valid. -/
 theorem ternaryLiteralOverflow :
-    ¬ (⊨ dl!{ ⟨ bool t = true; bool f = false; uint16 r = (t ? 63 : 255) + (f ? 63 : 255);
+    ¬ (⊨ᶠ dl!{ ⟨ bool t = true; bool f = false; uint16 r = (t ? 63 : 255) + (f ? 63 : 255);
       assert(r == 318); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
 
 /-- Inside `unchecked` the `uint8` sum wraps: `63 + 255` is `62`. -/
-theorem ternaryLiteralWraps : ⊨ dl!{ ⟨ bool t = true; bool f = false; uint16 r;
+theorem ternaryLiteralWraps : ⊨ᶠ dl!{ ⟨ bool t = true; bool f = false; uint16 r;
     unchecked { r = (t ? 63 : 255) + (f ? 63 : 255); }; assert(r == 62); ⟩ true } := by
   sol_symex
   sol_close
 
 /-- A literal that needs more bits widens the conditional: `t ? 63 : 256` is a
 `uint16`, and so is the sum. -/
-theorem ternaryLiteralWide : ⊨ dl!{ ⟨ bool t = true; bool f = false;
+theorem ternaryLiteralWide : ⊨ᶠ dl!{ ⟨ bool t = true; bool f = false;
     uint16 r = (t ? 63 : 256) + (f ? 63 : 255); assert(r == 318); ⟩ true } := by
   sol_symex
   sol_close
 
 /-- Negative literals make it an `int`: `t ? -1 : -127` is an `int8`. -/
-theorem ternaryLiteralSigned : ⊨ dl!{ ⟨ bool t = true; int16 r = t ? -1 : -127; int e = -1;
+theorem ternaryLiteralSigned : ⊨ᶠ dl!{ ⟨ bool t = true; int16 r = t ? -1 : -127; int e = -1;
     assert(r == e); ⟩ true } := by
   sol_symex
   sol_close

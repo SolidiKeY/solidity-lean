@@ -449,14 +449,47 @@ def RawStmt.renameQInv (ρ : List (String × String)) : RawStmt → RawStmt
   | .forLoop a i c u b => .forLoop { a with qinv := a.qinv.map (RawInv.rename ρ) } i c u b
   | s => s
 
+/-- Exact rational arithmetic for a whole literal expression. Intermediate
+negative or fractional values are not checked at the target word type. -/
+def RawExpr.constRat? : RawExpr → Option (Int × Int)
+  | .num n => some (n, 1)
+  | .unop .neg a => do
+    let (n, d) ← a.constRat?
+    pure (-n, d)
+  | .binop op a b => do
+    let (an, ad) ← a.constRat?
+    let (bn, bd) ← b.constRat?
+    match op with
+    | .add => pure (an * bd + bn * ad, ad * bd)
+    | .sub => pure (an * bd - bn * ad, ad * bd)
+    | .mul => pure (an * bn, ad * bd)
+    | .div => if bn == 0 then none else pure (an * bd, ad * bn)
+    | _ => none
+  | _ => none
+
+/-- Fold an integral constant once, before capturing or typing its operands. -/
+def RawExpr.foldConst (e : RawExpr) : Except String RawExpr :=
+  match e.constRat? with
+  | none => pure e
+  | some (n, d) =>
+    if d == 0 || n % d != 0 then throw "a non-integral rational constant"
+    else let v := n / d
+         pure (if v < 0 then .unop .neg (.num v.natAbs) else .num v.toNat)
+
 /-- An expression inside `unchecked { … }`: `+ - * **` wrap (`+%` …).  An
 `++`/`−−` inside it is an error: its capture (`hoist`) is checked. -/
 def RawExpr.uncheck : RawExpr → Except String RawExpr :=
-  RawExpr.mapM fun
+  RawExpr.mapM fun e => do
+    let e ← e.foldConst
+    match e with
     | .binop op a b =>
       let op' : BinOp := match op with
         | .add => .addW | .sub => .subW | .mul => .mulW | .pow => .powW | op => op
       pure (.binop op' a b)
+    | .opAssign op l r =>
+      let op' : BinOp := match op with
+        | .add => .addW | .sub => .subW | .mul => .mulW | .pow => .powW | op => op
+      pure (.opAssign op' l r)
     | .incDec .. => throw "`++` or `−−` inside an expression in `unchecked`"
     | e => pure e
 
@@ -1604,6 +1637,11 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       pure (.mpath E (.loc (.index .fixed b (← check Γ .uint k))))
     | t => throw s!"{e.toStr} is indexed, but it is a {t.ty}, not a mapping or an array"
   | .binop op a b => do
+    if let some (n, d) := (RawExpr.binop op a b).constRat? then
+      if d == 0 || n % d != 0 then throw "a non-integral rational constant"
+      let v := n / d
+      if v < 0 then return .val .int (.simple (← litAt C Γ .int v))
+      else return .val .uint (.simple (← litAt C Γ .uint v))
     -- the operand type: the first operand that is not a literal gives it
     let t ← if a.isLit then synth Γ b else synth Γ a
     let some ⟨p, _⟩ := t.toVal? |
@@ -1656,7 +1694,10 @@ def check (Γ : NCtx) (p : PrimTy) : RawExpr → Except String (Val C Γ.ctx p)
   -- so does arithmetic on literals alone: `int e = -5 + 2;`; an operand out
   -- of `p`'s range is folded as solc folds a constant (`foldLit?`):
   -- `uint x = 2**256 - 1` written out is the literal `2**256 - 1`
-  | .binop op a b =>
+  | .binop op a b => do
+    if let some (n, d) := (RawExpr.binop op a b).constRat? then
+      if d == 0 || n % d != 0 then throw "a non-integral rational constant"
+      return .simple (← litAt C Γ p (n / d))
     if a.isLit && b.isLit && op.isArith then
       match h : op.accepts p with
       | true =>
@@ -4215,6 +4256,8 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
   let elabStorageCall := @ElabRec.elabStorageCall C rc
   let elabStmtsP := @ElabRec.elabStmtsP C rc
   let abiMarks := abiMarks C
+  do
+  let s0 ← s0.foldConst
   match s0 with
   | .field e f => do
     let (P, e) ← hoist e
@@ -4998,15 +5041,9 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
         return (P, .call (.field (.call f getterArgs) m) args)
     -- the receiver first, then the arguments
     let (P, e) ← hoist e
-    let (Pc, e) ← if args.any (·.hasIncDec) && !(e matches .name _) then captureExpr C e
-      else pure ([], e)
-    let mut Q := P ++ Pc
-    let mut args' := []
-    for a in args do
-      let (Q', a) ← hoist a
-      Q := Q ++ Q'
-      args' := args' ++ [a]
-    pure (Q, .call (.field e m) args')
+    let (Pc, e) ← captureBefore C e args
+    let (Q, args) ← hoistArgs args
+    pure (P ++ Pc ++ Q, .call (.field e m) args)
   | .call (.name f) args => do
     if (← read).funs.all (·.1 != f) then
       if let some op := ModOp.ofName? f then
@@ -5023,8 +5060,7 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   | .send T x r a g => do
     -- the receiver first, then the amount, as `transfer`'s
     let (P, r) ← hoist r
-    let (Pc, r) ← if a.hasIncDec && !(r matches .name _) then captureExpr C r
-      else pure ([], r)
+    let (Pc, r) ← captureBefore C r [a]
     let (Q, a) ← hoist a
     pure (P ++ Pc ++ Q, .send T x r a g)
   | .eval args => do
@@ -5687,7 +5723,9 @@ partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (SProg C × RawExpr)
 
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
-partial def hoistTop : RawExpr → ElabM (SProg C × RawExpr)
+partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let e ← e.foldConst
+  match e with
   | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
   | .unop op a => do
     let (P, a) ← hoist a

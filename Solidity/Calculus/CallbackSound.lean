@@ -1,5 +1,6 @@
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Calculus.CorrectCallback
 import Solidity.Calculus.Sound
 import Solidity.Calculus.UpdateRules
 import Solidity.Semantics.NativeDeferredCallback
@@ -13,7 +14,7 @@ what it derives holds, its context in front, when every `try` and value call,
 and with `pay` every payment, may call back into the contract and the callee
 leaves the invariant as it found it
 (`holdsC`, `ValidC`, `Calculus/CallbackHolds.lean`).  `ProvesC.sound_of`
-and `ProvesC.valid` take the invariant first-order (`Fml.FO`, a contract
+and `ProvesC.fmlValid` take the invariant first-order (`Fml.FO`, a contract
 invariant of the storage and the ledger; `Invariant.fo` carries it): "the invariant holds" is then a
 fact of what the state's terms read (`State.ReadsAs`: its global part and
 its locals erased), which the callee's run and the updates preserve.
@@ -484,6 +485,13 @@ theorem transfer_booking (sadr se : Simple C Γ .uint) {o₁ : Out C σ.H Γ}
   (Stmt.runs 0 .box (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) rfl σ).1
     o₁.st (by show (TRun.transfer _ _ σ).map _ = _; rw [h]; rfl)
 
+/-- Simple payment operands only halt when the payment is refused. -/
+private theorem transfer_halt (sadr se : Simple C Γ .uint) {e : THalt}
+    (h : TRun.transfer (.simple sadr) (.simple se) σ = .error e) : e = .revert := by
+  change (if σ.canPay (sadr.evalT σ) (se.evalT σ) then _ else _) = _ at h
+  split at h <;> cases h
+  rfl
+
 /-- **`transferWithCallbackBox` is sound with callbacks**: the invariant on
 exit after the booking, and the rest resumed after the callback, from any
 state the callee leaves in which the invariant holds. -/
@@ -496,22 +504,28 @@ theorem holdsC_transferCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   refine holdsC_cons fun o₁ he => ?_
   cases he with
   | det _ =>
-    -- `transferSemantics:noCallback`: the callee keeps the state, a resumption
-    obtain ⟨o₂, h⟩ : ∃ o₂, TRun.transfer (.simple sadr) (.simple se) σ = .ok o₂ := ⟨_, rfl⟩
     change COut.thenF _ _ _ _ (COut.ofRes (TRun.transfer _ _ σ))
-    rw [h]
-    have hL := (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec
-    have hJ := (holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx hL)
-    exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hr hL o₂.st.storage
-      o₂.st.net ((holdsC_closedAt_iff hI hT _).2 hJ)))
-  | transferHalt _ h => nomatch h
+    cases h : TRun.transfer (.simple sadr) (.simple se) σ with
+    | error e =>
+      have he := transfer_halt sadr se h
+      cases he
+      exact ⟨trivial, by decide⟩
+    | ok o₂ =>
+      have hL := (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec
+      have hJ := (holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx hL)
+      exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hr hL o₂.st.storage
+        o₂.st.net o₂.st.selfBalance ((holdsC_closedAt_iff hI hT _).2 hJ)))
+  | transferHalt _ h =>
+    have he := transfer_halt sadr se h
+    cases he
+    exact ⟨trivial, by decide⟩
   | transferViolated _ h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
       (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec))).elim
   | transferResume _hp h hJ hJ' =>
-    rename_i st nt o₂
+    rename_i st nt sb o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ
-      (Upd.afterT.of_lands hr (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec st nt
+      (Upd.afterT.of_lands hr (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec st nt sb
         ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`sendWithCallbackBox` is sound with callbacks**: the invariant on exit
@@ -533,29 +547,29 @@ theorem holdsC_sendCb {m : Modality} (hI : I.FO = true) (hT : I.hasTransfer = fa
   | det _ =>
     -- `transferSemantics:noCallback`: booked or refused, the callee keeping the state
     change COut.thenF _ _ _ _ (COut.ofRes (TRun.send pv (.simple sadr) (.simple se) σ))
-    rcases TRun.send_cases pv (.simple sadr) (.simple se) σ with ⟨e, ht, _⟩ | ⟨o₂, ht, hs | hs⟩
-    · exact nomatch ht
+    rcases TRun.send_cases pv (.simple sadr) (.simple se) σ with ⟨e, hs⟩ | ⟨o₂, ht, hs⟩ | hs
+    · exact nomatch hs
     · rw [hs]
       have hL := (Upd.lands_of_applyP (transfer_booking sadr se ht)).choose_spec
       have hJ := (holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx hL)
       exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
-        (Upd.lands_snoc_local hL pv (v := (true : Bool)) rfl) o₂.st.storage o₂.st.net
+        (Upd.lands_snoc_local hL pv (v := (true : Bool)) rfl) o₂.st.storage o₂.st.net o₂.st.selfBalance
         ((holdsC_closedAt_iff hI hT _).2 hJ)))
     · rw [hs]
       exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hf
         (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl)))
   | sendHalt _ h => nomatch h
-  | sendFailed _ h =>
+  | sendFailed _ h | sendRefused _ h =>
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hf
       (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl)))
   | sendViolated _ h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
       (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec))).elim
   | sendResume _hp h hJ hJ' =>
-    rename_i st nt o₂
+    rename_i st nt sb o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
       (Upd.lands_snoc_local (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec pv
-        (v := (true : Bool)) rfl) st nt ((holdsC_closedAt_iff hI hT _).2 hJ')))
+        (v := (true : Bool)) rfl) st nt sb ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`tryCallWithCallbackBox` is sound with callbacks**: the invariant where
 control leaves; the call's success, from any state the callee leaves in which
@@ -584,9 +598,9 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | tryDecode hd => exact ⟨trivial, fun he => rets.decodeT_ne_panic _ (he ▸ hd)⟩
   | tryViolated hn => exact (hn ((holdsC_closedAt_iff hI hT σ).1 hx)).elim
   | tryOk hJ hJ' hd hP _hg =>
-    rename_i st nt _ _ r o
-    have h₁ := hok st nt ((holdsC_closedAt_iff hI hT _).2 hJ')
-    have h₂ := holdsC_binders_all rets (σ.havoc st nt) _ r h₁
+    rename_i st nt sb _ _ r o
+    have h₁ := hok st nt sb ((holdsC_closedAt_iff hI hT _).2 hJ')
+    have h₂ := holdsC_binders_all rets (σ.havoc st nt sb) _ r h₁
     exact COut.thenF_drop _ (holdsC_modalK _ ok _ φ h₂ o hP)
   | tryError _ hP =>
     rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
@@ -737,13 +751,9 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
         (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
           (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok).ext)
         (.seq ω κ)) φ)))
-    (hok : holdsC I pay σ (.havoc (.imp (Fml.closedAt I) (rets.all (Fml.modalK .box
-      (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
-        (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok))
-      (.pop .block ((Ext.append Γ ρ).trans
-        (Prog.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
-          (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext)
-        (.seq ω κ)) φ)))))
+    (hok : holdsC I pay σ (.imp (Fml.isBool call.notSelf.lower true)
+      (.havoc (.imp (Fml.closedAt I) (rets.all (Fml.modalK .box ok
+      (.pop .block ((Ext.append Γ ρ).trans ok.ext) (.seq ω κ)) φ))))))
     (herr : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
       (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ))))
     (hpnc : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (code.binders.all
@@ -760,28 +770,17 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | tryDecode hd => exact ⟨trivial, fun he => rets.decodeT_ne_panic _ (he ▸ hd)⟩
   | tryViolated hn => exact (hn ((holdsC_closedAt_iff hI hT σ).1 hx)).elim
   | tryOk hJ hJ' hd hP hg =>
-    rename_i st nt _ _ r o
+    rename_i st nt sb _ _ r o
     obtain ⟨hz, hs⟩ := hg rfl
-    have h₁ := hok st nt ((holdsC_closedAt_iff hI hT _).2 hJ')
-    have h₂ := holdsC_modalK _ _ _ φ (holdsC_binders_all rets (σ.havoc st nt) _ r h₁)
-    have ha : (call.wk (Thin.ofExt (Ext.append Γ ρ))).addr.evalT
-        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = call.addr.evalT σ :=
-      ExtCall.addr_wk_append call (σ.havoc st nt) r
-    have hc : (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode.evalT
-        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = .ok true := by
-      rw [ExtCall.hasCode_evalT, ha]; simp only [hz, decide_false, Bool.not_false]
-    have hn : (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf.evalT
-        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = .ok true := by
-      rw [ExtCall.notSelf_evalT, ha]
-      show Except.ok (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = _
+    have hn : call.notSelf.evalT σ = .ok true := by
+      rw [ExtCall.notSelf_evalT]
       simp only [hs, decide_false, Bool.not_false]
-    have h₃ := h₂ _ (ExecP.require_true hc (ExecP.require_true hn hP))
-    rw [COut.thenF_map_cat, COut.thenF_map_cat] at h₃
-    rw [show (Ext.append Γ ρ).trans ok.ext = (Ext.append Γ ρ).trans
-      (Prog.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
-        (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext from
-      Subsingleton.elim _ _]
-    exact COut.thenF_drop _ h₃
+    have hguard : holdsC I pay σ (Fml.isBool call.notSelf.lower true) :=
+      (holdsC_iff_holds _ rfl σ).mpr (holds_isBool_lower call.notSelf σ hn)
+    have h₁ := hok hguard st nt sb ((holdsC_closedAt_iff hI hT _).2 hJ')
+    have h₂ := holdsC_modalK _ _ _ φ (holdsC_binders_all rets (σ.havoc st nt sb) _ r h₁)
+    exact COut.thenF_drop _ (h₂ o hP)
+
   | tryError hsf hP =>
     have herr := herr (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl))
     rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
@@ -857,8 +856,8 @@ theorem holdsC_sendDet {m : Modality} (hp : pay = false) (pv : Idx Γ (.val .boo
   refine holdsC_cons fun o₁ he => ?_
   rw [ExecS.detIn_inv he (by show (pay || false) = false; rw [hp]; rfl)]
   change COut.thenF _ _ _ _ (COut.ofRes (TRun.send pv (.simple sadr) (.simple se) σ))
-  rcases TRun.send_cases pv (.simple sadr) (.simple se) σ with ⟨e, ht, _⟩ | ⟨o₂, ht, hs | hs⟩
-  · exact nomatch ht
+  rcases TRun.send_cases pv (.simple sadr) (.simple se) σ with ⟨e, hs⟩ | ⟨o₂, ht, hs⟩ | hs
+  · exact nomatch hs
   · rw [hs]
     have hL := (Upd.lands_of_applyP (transfer_booking sadr se ht)).choose_spec
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
@@ -1386,12 +1385,12 @@ theorem holdsC_anonHavoc {Γ : Ctx} {σ τ : State C Γ} {xs : List ((t : LTy) �
   cases hv with
   | false =>
     have hk := hg.keeps (by simp only [frameMut]; decide)
-    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2]; rfl
+    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2, hg.selfBalance (by simp only [frameMut]; decide)]; rfl
     rw [hτ]
     exact h b
   | true =>
     rw [hb]
-    exact h b τ.storage τ.net
+    exact h b τ.storage τ.net τ.selfBalance
 
 /-- **Induction over a loop's callback runs**, under the box: `P` holds at
 the first head and at every head an iteration from a head in `P` goes on
@@ -1704,14 +1703,14 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
 
 /-- **A derivation from the empty context proves validity with callbacks**
 (the invariant first-order, `Invariant.fo`). -/
-theorem ProvesC.valid {I : Invariant C} {φ : Fml C []}
+theorem ProvesC.fmlValid {I : Invariant C} {φ : Fml C []}
     (d : ProvesC I.fml pay [] .nil φ) : ValidC I φ pay :=
   ProvesC.sound_of I.fo I.noTransfer d
 
 /-- The same, for a transfer semantics (`ValidT`). -/
 theorem ProvesC.validT {ts : TransferSem C} {φ : Fml C []}
     (d : ProvesC ts.inv.fml ts.pay [] .nil φ) : ValidT ts φ :=
-  ProvesC.valid d
+  ProvesC.fmlValid d
 
 /-! ## The invariant assumed, opened at its scope
 
@@ -1877,7 +1876,7 @@ theorem Hyps.wrap_openInv {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       Upd.afterT_imp f fun σ' x => h σ' x
   | havoc H ih =>
     intro φ ψ h
-    exact ih (φ := .havoc φ) (ψ := .havoc ψ) fun τ f st nt => h _ (f st nt)
+    exact ih (φ := .havoc φ) (ψ := .havoc ψ) fun τ f st nt sb => h _ (f st nt sb)
   | all H x p ih =>
     intro φ ψ h
     exact ih (φ := .all x p φ) (ψ := .all x p ψ) fun τ f v => h _ (f v)
@@ -1902,7 +1901,16 @@ theorem Proves.openInv {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ 
     (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ :=
   .closeHolds (fun σ => H.wrap_openInv (fun _ h => h) σ (Proves.sound h σ)) hm
 
+/-- A derivation of the translation proves the direct correctness statement
+under the given callback invariant and transfer policy. -/
+theorem ProvesC.valid {I : Invariant C} {φ : Spec C []} {pay : Bool}
+    (d : ProvesC I.fml pay [] .nil φ.toFml) : Spec.ValidC I φ pay :=
+  (Spec.validC_iff I φ pay).mpr (ProvesC.fmlValid d)
+
 /-- info: 'Solidity.ProvesC.valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms ProvesC.valid
+
+/-- info: 'Solidity.ProvesC.fmlValid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ProvesC.fmlValid
 
 end Solidity

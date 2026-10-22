@@ -107,6 +107,7 @@ theorem ExecS.frameM_aux : {Γ Γ' : Ctx} → {σ : State C Γ} → {s : Stmt C 
   | _, _, _, _, _, .trySelfViolated .., _, _, _, _, ho => by cases ho
   | _, _, _, _, _, .transferResume .., hw, hwi, _, _, _
   | _, _, _, _, _, .sendFailed .., hw, hwi, _, _, _
+  | _, _, _, _, _, .sendRefused .., hw, hwi, _, _, _
   | _, _, _, _, _, .sendResume .., hw, hwi, _, _, _
   | _, _, _, _, _, .loopExit .., hw, hwi, _, _, _
   | _, _, _, _, _, .loopIter .., hw, hwi, _, _, _

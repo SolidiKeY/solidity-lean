@@ -8,7 +8,7 @@ import Solidity.Tools.Inspect
 # solkey's `taclets` suite, on storage
 
 The storage programs of `keyext.solidity.examples/taclets` (each docstring
-names its `.key` file), as theorems of the calculus: `⊨ dl!{ … }` by
+names its `.key` file), as theorems of the calculus: `⊨ᶠ dl!{ … }` by
 `sol_symex` and `sol_close`.  The statement forms themselves, with the
 derivations for them, are `StorageSteps.lean`; this file is the suite's
 programs, deduplicated: one example per program the forms there do not already
@@ -35,42 +35,42 @@ open scoped Scoped
 
 /-- `age = 34; uint result = age;` — a root is written with `store`
 (`storage-root-read-write.key`). -/
-theorem rootWriteRead : ⊨ dl!{ [ age = 34; uint result = age; ] result == 34 } := by
+theorem rootWriteRead : ⊨ᶠ dl!{ [ age = 34; uint result = age; ] result == 34 } := by
   sol_symex
   sol_close
 
 /-- `age = 1; age = 2; uint result = age;` — the last write wins
 (`storage-root-multiple-writes.key`). -/
 theorem rootMultipleWrites :
-    ⊨ dl!{ [ age = 1; age = 2; uint result = age; ] result == 2 } := by
+    ⊨ᶠ dl!{ [ age = 1; age = 2; uint result = age; ] result == 2 } := by
   sol_symex
   sol_close
 
 /-- `alice.age = 17; total = alice.age; uint result = total;` — a root written
 from a field read: the source is captured first (`storage-field-global-age.key`). -/
 theorem rootFromField :
-    ⊨ dl!{ [ alice.age = 17; total = alice.age; uint result = total; ] result == 17 } := by
+    ⊨ᶠ dl!{ [ alice.age = 17; total = alice.age; uint result = total; ] result == 17 } := by
   sol_symex
   sol_close
 
 /-- `age = 34; balance = age; uint result = balance;` — a root from a root
 (`storage-root-copy-source.key`). -/
 theorem rootFromRoot :
-    ⊨ dl!{ [ age = 34; balance = age; uint result = balance; ] result == 34 } := by
+    ⊨ᶠ dl!{ [ age = 34; balance = age; uint result = balance; ] result == 34 } := by
   sol_symex
   sol_close
 
 /-- `alice.age = 1; bob.age = 2;` — two roots do not interfere
 (`storage-field-disjoint-roots.key`). -/
 theorem disjointRoots :
-    ⊨ dl!{ [ alice.age = 1; bob.age = 2; ] alice.age == 1 && bob.age == 2 } := by
+    ⊨ᶠ dl!{ [ alice.age = 1; bob.age = 2; ] alice.age == 1 && bob.age == 2 } := by
   sol_symex
   sol_close
 
 /-- `alice.account.balance = 1; alice.account.token.value = 2;` — nor do two
 members of one struct (`storage-field-disjoint-fields.key`). -/
 theorem disjointFields :
-    ⊨ dl!{ [ alice.account.balance = 1; alice.account.token.value = 2; ]
+    ⊨ᶠ dl!{ [ alice.account.balance = 1; alice.account.token.value = 2; ]
            alice.account.balance == 1 && alice.account.token.value == 2 } := by
   sol_symex
   sol_close
@@ -78,13 +78,13 @@ theorem disjointFields :
 /-- `bob.age = 7; alice = bob; uint result = alice.age;` — a root copy is deep
 (`storage-root-copy-struct.key`) … -/
 theorem rootCopyStruct :
-    ⊨ dl!{ [ bob.age = 7; alice = bob; uint result = alice.age; ] result == 7 } := by
+    ⊨ᶠ dl!{ [ bob.age = 7; alice = bob; uint result = alice.age; ] result == 7 } := by
   sol_symex
   sol_close
 
 /-- … and by value: writing the source afterwards leaves the copy as it was. -/
 theorem rootCopyByValue :
-    ⊨ dl!{ [ bob.age = 7; alice = bob; bob.age = 9; uint result = alice.age; ]
+    ⊨ᶠ dl!{ [ bob.age = 7; alice = bob; bob.age = 9; uint result = alice.age; ]
            result == 7 } := by
   sol_symex
   sol_close
@@ -93,7 +93,7 @@ theorem rootCopyByValue :
 alice.account = acc; uint result = alice.account.balance;` — a member copied
 from an alias (`storage-field-copy-struct.key`). -/
 theorem fieldCopyStruct :
-    ⊨ dl!{ [ bob.account.balance = 11; Account storage acc = bob.account;
+    ⊨ᶠ dl!{ [ bob.account.balance = 11; Account storage acc = bob.account;
              alice.account = acc; uint result = alice.account.balance; ] result == 11 } := by
   sol_symex
   sol_close
@@ -104,7 +104,7 @@ theorem fieldCopyStruct :
 root rebind (`storageLocalRootRebind`), read through
 (`storage-alias-rebind-alias.key`). -/
 theorem aliasRebind :
-    ⊨ dl!{ [ Person storage p = alice; bob.age = 20; p = bob; uint result = p.age; ]
+    ⊨ᶠ dl!{ [ Person storage p = alice; bob.age = 20; p = bob; uint result = p.age; ]
            result == 20 } := by
   sol_symex
   sol_close
@@ -113,7 +113,7 @@ theorem aliasRebind :
 uint result = alice.age;` — rebinding leaves the original untouched
 (`storage-alias-rebind-original.key`). -/
 theorem aliasRebindOriginal :
-    ⊨ dl!{ [ uint before = alice.age; Person storage p = alice; bob.age = 20; p = bob;
+    ⊨ᶠ dl!{ [ uint before = alice.age; Person storage p = alice; bob.age = 20; p = bob;
              uint result = alice.age; ] result == before } := by
   sol_symex
   sol_close
@@ -122,7 +122,7 @@ theorem aliasRebindOriginal :
 p.account.token.value = 3;` — writes through two aliases, read through the root
 (`storage-alias-write-balance.key`, `storage-alias-write-token.key`). -/
 theorem aliasWrites :
-    ⊨ dl!{ [ Person storage p = alice; Account storage acc = p.account; acc.balance = 100;
+    ⊨ᶠ dl!{ [ Person storage p = alice; Account storage acc = p.account; acc.balance = 100;
              p.account.token.value = 3;
              uint b = alice.account.balance; uint v = alice.account.token.value; ]
            b == 100 && v == 3 } := by
@@ -132,7 +132,7 @@ theorem aliasWrites :
 /-- `Account storage acc = alice.account; bob.account.balance = 42;
 acc = bob.account; uint result = acc.balance;` (`storage-field-read-bind-local.key`). -/
 theorem aliasBindMember :
-    ⊨ dl!{ [ Account storage acc = alice.account; bob.account.balance = 42;
+    ⊨ᶠ dl!{ [ Account storage acc = alice.account; bob.account.balance = 42;
              acc = bob.account; uint result = acc.balance; ] result == 42 } := by
   sol_symex
   sol_close
@@ -141,7 +141,7 @@ theorem aliasBindMember :
 bound to no path, `{p := unset}` (`storageLocalDeclSkip`,
 `storage-local-decl-skip.key`, where KeY binds nothing). -/
 theorem localDeclSkip :
-    ⊨ dl!{ [ Person storage p; age = 7; uint result = age; ] result == 7 } := by
+    ⊨ᶠ dl!{ [ Person storage p; age = 7; uint result = age; ] result == 7 } := by
   sol_symex
   sol_close
 
@@ -201,14 +201,14 @@ so the run is printed. -/
 /-- `values[3] = 5; values[3] = 8; uint result = values[3];`
 (`storage-index-multiple-writes.key`). -/
 theorem arrayMultipleWrites :
-    ⊨ dl!{ [ values[3] = 5; values[3] = 8; uint result = values[3]; ] result == 8 } := by
+    ⊨ᶠ dl!{ [ values[3] = 5; values[3] = 8; uint result = values[3]; ] result == 8 } := by
   sol_symex
   sol_close
 
 /-- `matrix[2][3] = 99; uint result = matrix[2][3];`
 (`storage-matrix-write-read.key`, `storage-index-decomposition.key`). -/
 theorem matrixWriteRead :
-    ⊨ dl!{ [ matrix[2][3] = 99; uint result = matrix[2][3]; ] result == 99 } := by
+    ⊨ᶠ dl!{ [ matrix[2][3] = 99; uint result = matrix[2][3]; ] result == 99 } := by
   sol_symex
   sol_close
 
@@ -218,7 +218,7 @@ theorem arrayOutOfBounds : (runEx arrayOutOfBoundsCore).halt? = some .revert := 
 
 /-- `balances[1] = 42; uint result = balances[1];` (`storage-index-root-mapping.key`). -/
 theorem mappingWriteRead :
-    ⊨ dl!{ [ balances[1] = 42; uint result = balances[1]; ] result == 42 } := by
+    ⊨ᶠ dl!{ [ balances[1] = 42; uint result = balances[1]; ] result == 42 } := by
   sol_symex
   sol_close
 
@@ -227,7 +227,7 @@ theorem mappingWriteRead :
 /-- `matrix.push(); matrix[0].push(100); matrix[0][0] = 7;` — a pushed row
 extended and written (`storage-index-decompose-after-push.key`). -/
 theorem decomposeAfterPush :
-    ⊨ dl!{ [ matrix.push(); matrix[0].push(100); matrix[0][0] = 7;
+    ⊨ᶠ dl!{ [ matrix.push(); matrix[0].push(100); matrix[0][0] = 7;
              uint result = matrix[0][0]; ] result == 7 } := by
   sol_symex
   sol_close
@@ -338,32 +338,32 @@ info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 
 /-- `alice.age = 30; alice.age -= 5;` (`storage-field-sub-assign.key`). -/
 theorem fieldOpAssign :
-    ⊨ dl!{ [ alice.age = 30; alice.age -= 5; uint result = alice.age; ] result == 25 } := by
+    ⊨ᶠ dl!{ [ alice.age = 30; alice.age -= 5; uint result = alice.age; ] result == 25 } := by
   sol_symex
   sol_close
 
 /-- `age = 6; age *= 3;` (`storage-root-mul-assign.key`). -/
-theorem rootMulAssign : ⊨ dl!{ [ age = 6; age *= 3; uint result = age; ] result == 18 } := by
+theorem rootMulAssign : ⊨ᶠ dl!{ [ age = 6; age *= 3; uint result = age; ] result == 18 } := by
   sol_symex
   sol_close
 
 /-- `age = 10; age /= 0;` — a zero divisor reverts, so nothing after it holds or
 fails: the box proves `false`. -/
-theorem divByZero : ⊨ dl!{ [ age = 10; age /= 0; ] false } := by
+theorem divByZero : ⊨ᶠ dl!{ [ age = 10; age /= 0; ] false } := by
   sol_symex
   sol_close
 
 /-- `alice.age = 30; ++alice.age;` (`storageFieldIncrement`,
 `storage-field-preincrement.key`). -/
 theorem fieldIncrement :
-    ⊨ dl!{ [ alice.age = 30; ++alice.age; uint result = alice.age; ] result == 31 } := by
+    ⊨ᶠ dl!{ [ alice.age = 30; ++alice.age; uint result = alice.age; ] result == 31 } := by
   sol_symex
   sol_close
 
 /-- `alice.account.balance = 30; alice.account.balance += 4;` — through the
 alias Step 2 binds (`storage-field-deep-add-assign.key`). -/
 theorem deepOpAssignRead :
-    ⊨ dl!{ [ alice.account.balance = 30; alice.account.balance += 4;
+    ⊨ᶠ dl!{ [ alice.account.balance = 30; alice.account.balance += 4;
              uint result = alice.account.balance; ] result == 34 } := by
   sol_symex
   sol_close
@@ -371,7 +371,7 @@ theorem deepOpAssignRead :
 /-- `alice.account.balance = 100; ++alice.account.balance;`
 (`storage-deep-field-preincrement.key`). -/
 theorem deepIncrementRead :
-    ⊨ dl!{ [ alice.account.balance = 100; ++alice.account.balance;
+    ⊨ᶠ dl!{ [ alice.account.balance = 100; ++alice.account.balance;
              uint result = alice.account.balance; ] result == 101 } := by
   sol_symex
   sol_close
@@ -380,39 +380,39 @@ theorem deepIncrementRead :
 
 /-- `age = 10; if (age < 20) { result = 1; } else { result = 2; }` -/
 theorem ifOnStorage :
-    ⊨ dl!{ [ age = 10; if (age < 20) { result = 1; } else { result = 2; }; ] result == 1 } := by
+    ⊨ᶠ dl!{ [ age = 10; if (age < 20) { result = 1; } else { result = 2; }; ] result == 1 } := by
   sol_symex
   sol_close
 
 /-- `age = 10; assert(age == 10); result = 1;` — a holding `assert` goes on. -/
-theorem assertHolds : ⊨ dl!{ [ age = 10; assert(age == 10); result = 1; ] result == 1 } := by
+theorem assertHolds : ⊨ᶠ dl!{ [ age = 10; assert(age == 10); result = 1; ] result == 1 } := by
   sol_symex
   sol_close
 
 /-- `assert(false); result = 1;` — a failing `assert` panics: unlike a
 `require`, the box does not hold … -/
-theorem assertFails : ¬ (⊨ dl!{ [ assert(false); result = 1; ] true }) :=
+theorem assertFails : ¬ (⊨ᶠ dl!{ [ assert(false); result = 1; ] true }) :=
   fun h => Modality.afterRunTR_not_panic
     (h (State.init _) ⟨0, by decide⟩)
     (by decide +kernel)
 
 /-- … and the diamond of nothing. -/
-theorem assertFailsDiamond : ¬ (⊨ dl!{ ⟨ assert(false); result = 1; ⟩ result == 1 }) :=
+theorem assertFailsDiamond : ¬ (⊨ᶠ dl!{ ⟨ assert(false); result = 1; ⟩ result == 1 }) :=
   fun h => Modality.afterRunTR_diamond_fail
     (h (State.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-- `age = 10; require(age == 10); result = 1;` -/
-theorem requireHolds : ⊨ dl!{ [ age = 10; require(age == 10); result = 1; ] result == 1 } := by
+theorem requireHolds : ⊨ᶠ dl!{ [ age = 10; require(age == 10); result = 1; ] result == 1 } := by
   sol_symex
   sol_close
 
 /-- `require(false); result = 1;` — the box `c → φ` … -/
-theorem requireFails : ⊨ dl!{ [ require(false); result = 1; ] false } := by
+theorem requireFails : ⊨ᶠ dl!{ [ require(false); result = 1; ] false } := by
   sol_symex
   sol_close
 
 /-- … the diamond `c ∧ φ` (solkey `docs/require-assert.md`). -/
-theorem requireFailsDiamond : ¬ (⊨ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
+theorem requireFailsDiamond : ¬ (⊨ᶠ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
   fun h => Modality.afterRunTR_diamond_fail
     (h (State.init _) ⟨0, by decide⟩) (by decide +kernel)
 
@@ -435,14 +435,14 @@ open scoped Scoped
 /-- `fixedValues[2] = 1; uint result = fixedValues[2];`
 (`TestSuite.testFixedArrayIndexInBounds`). -/
 theorem fixedWriteRead :
-    ⊨ dl!{ [ fixedValues[2] = 1; uint result = fixedValues[2]; ] result == 1 } := by
+    ⊨ᶠ dl!{ [ fixedValues[2] = 1; uint result = fixedValues[2]; ] result == 1 } := by
   sol_symex
   sol_close
 
 /-- `triple.items[1] = 7; uint result = triple.items[1];` — an element of a
 fixed-size member. -/
 theorem fixedMemberWriteRead :
-    ⊨ dl!{ [ triple.items[1] = 7; uint result = triple.items[1]; ] result == 7 } := by
+    ⊨ᶠ dl!{ [ triple.items[1] = 7; uint result = triple.items[1]; ] result == 7 } := by
   sol_symex
   sol_close
 
@@ -450,7 +450,7 @@ theorem fixedMemberWriteRead :
 (`testFixedArrayLength`, `testStructFixedMemberLength`,
 `testFixedStructArrayLength`). -/
 theorem fixedLengths :
-    ⊨ dl!{ [ uint n = fixedValues.length; uint m = triple.items.length;
+    ⊨ᶠ dl!{ [ uint n = fixedValues.length; uint m = triple.items.length;
              uint t = fixedTokens.length; ] (n == 3 && m == 3 && t == 2) } := by
   sol_symex
   sol_close
@@ -458,7 +458,7 @@ theorem fixedLengths :
 /-- `rows[0].length` with `rows : uint[3][]`: `rows[0]` is evaluated (bound to
 a fresh alias, so an index past `rows`'s end reverts), and the length is `3`
 (`testFixedElementOfDynamicArrayLength`). -/
-theorem fixedElementLength : ⊨ dl!{ [ uint k = rows[0].length; ] k == 3 } := by
+theorem fixedElementLength : ⊨ᶠ dl!{ [ uint k = rows[0].length; ] k == 3 } := by
   sol_symex
   sol_close
 

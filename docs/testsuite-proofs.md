@@ -61,15 +61,15 @@ benchmarks, `Elab.async false`, each command or tactic wrapped in an
 | `sol[TestSuite]{…}`, 5 statements | one `evalExpr` + quote | 20 ms | 0.49k |
 | `sol[TestSuite]{…}`, 10 statements | one `evalExpr` + quote | 24 ms | 0.71k |
 | `dl!{…}` over Counter's `inc()` | | 12 ms | 0.29k |
-| Mapping `set_frame`, `⊨`: `sol_symex` | `symex_valid 200` | 10 ms | 0.26k |
+| Mapping `set_frame`, `⊨ᶠ`: `sol_symex` | `symex_valid 200` | 10 ms | 0.26k |
 | ⤷ `inL` check | `decide +kernel` | 18 ms | 0.25k |
 | ⤷ `sol_reduce` | | 3 ms | 0.13k |
 | ⤷ the leaf by `LFml.syn` | `decide +kernel` | 58 ms | 0.86k |
 | ⤷ whole theorem | | 133 ms | 2.2k |
 | Mapping `set_frame`, `⊢`: `sol_derive` + leaves | 76 + 20 ms | 143 ms | 3.1k |
-| Counter `spec!{dec}`, `⊨`: `sol_symex; sol_decide` | 12 + 93 ms | 152 ms | 2.4k |
+| Counter `spec!{dec}`, `⊨ᶠ`: `sol_symex; sol_decide` | 12 + 93 ms | 152 ms | 2.4k |
 | Counter `spec!{dec}`, `⊢`: `sol_derive` + leaves | 63 + 24 ms | 139 ms | 2.9k |
-| Counter `c == count → [inc();] count == c + 1`, `⊨`: `sol_symex; sol_decide` | `LFml.syn` says no (36 ms), `sol_decide_cons` closes | 691 ms | 19.0k |
+| Counter `c == count → [inc();] count == c + 1`, `⊨ᶠ`: `sol_symex; sol_decide` | `LFml.syn` says no (36 ms), `sol_decide_cons` closes | 691 ms | 19.0k |
 | ⤷ the same with `sol_close` | | 939 ms | 27.8k |
 | ⤷ `⊢`: `sol_derive` + leaves | 48 + 623 ms | 735 ms | 19.7k |
 
@@ -91,7 +91,7 @@ What they say:
 - **`sol[C]{…}` costs 20–25 ms per program**, so 418 programs cost about
   10 s. Avoiding the per-program `evalExpr` is worth doing but is not the
   bottleneck.
-- **`⊢` by `sol_derive` costs the same as `⊨` by `sol_symex`** on these
+- **`⊢` by `sol_derive` costs the same as `⊨ᶠ` by `sol_symex`** on these
   obligations. Where `LFml.syn` closes the leaf, a whole obligation is about
   140 ms; where it falls back to `sol_decide_cons`, about 700 ms, nearly all
   in the fallback.
@@ -390,7 +390,7 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   reverts.  `compile_correct`'s second case is "both revert", the
   interpreter's halt a revert or a panic; `Theorems.lean`'s `(P, σ) ↯` says
   the same.
-- **Regression** (`Examples/Tactics/Revert.lean`): `¬ ⊨ [ assert(false); ] true`
+- **Regression** (`Examples/Tactics/Revert.lean`): `¬ ⊨ᶠ [ assert(false); ] true`
   and so `¬ ⊢` (`assertFalse_box_not_valid`, `assertFalse_box_not_derivable`),
   while `⊢ [ require(false); ] true` (`requireFalse_box`).  The examples that
   relied on the old reading now state the precondition the box needs
@@ -828,7 +828,7 @@ Of the 117 pending, 111 use memory (M6).  The other 6, and why:
 
 | Function | Why it stays pending |
 |---|---|
-| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of the length.  Valid in the model: a push at a full array is out of gas (`Semantics/Run.lean`, `push`), which the diamond accepts, so after one that returns the length is at least `1` and the `- 1` does not underflow.  Not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed (W9.8 review, `docs/intrinsic.md`). |
+| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of the length.  Fml.Valid in the model: a push at a full array is out of gas (`Semantics/Run.lean`, `push`), which the diamond accepts, so after one that returns the length is at least `1` and the `- 1` does not underflow.  Not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed (W9.8 review, `docs/intrinsic.md`). |
 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` (diamonds) | an alias bound through an index (`Token storage r = tokens[0];`) used after a `pop` made it dangle: the fragment drops such an alias at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach. |
 
 **Cost.**  `Derived7.lean` (40 theorems) takes 58 s, `Derived8.lean` (23)

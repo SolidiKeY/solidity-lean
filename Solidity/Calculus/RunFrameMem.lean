@@ -179,7 +179,7 @@ transaction, and, unless `μ` is `nonpayable`, the storage and the ledger. -/
 structure TGFrameM (μ : Mutability) {Γ Δ : Ctx} (σ : State C Γ) (τ : State C Δ)
     (e : σ.H <+: τ.H) : Prop where
   keeps : Heap.Keeps e σ.heap τ.heap
-  selfBalance : τ.selfBalance = σ.selfBalance
+  selfBalance : μ ≠ .nonpayable → τ.selfBalance = σ.selfBalance
   tx : τ.tx = σ.tx
   keepsSt : μ ≠ .nonpayable → τ.storage = σ.storage ∧ τ.net = σ.net
 
@@ -190,7 +190,7 @@ variable {μ : Mutability} {Γ Δ Ε : Ctx}
 theorem trans {σ : State C Γ} {τ : State C Δ} {υ : State C Ε} {e₁ : σ.H <+: τ.H}
     {e₂ : τ.H <+: υ.H} (h₁ : TGFrameM μ σ τ e₁) (h₂ : TGFrameM μ τ υ e₂) (e : σ.H <+: υ.H) :
     TGFrameM μ σ υ e :=
-  ⟨Heap.Keeps.trans h₁.keeps h₂.keeps, h₂.selfBalance.trans h₁.selfBalance, h₂.tx.trans h₁.tx,
+  ⟨Heap.Keeps.trans h₁.keeps h₂.keeps, (fun hμ => (h₂.selfBalance hμ).trans (h₁.selfBalance hμ)), h₂.tx.trans h₁.tx,
     fun hμ => ⟨(h₂.keepsSt hμ).1.trans (h₁.keepsSt hμ).1,
       (h₂.keepsSt hμ).2.trans (h₁.keepsSt hμ).2⟩⟩
 
@@ -217,7 +217,7 @@ theorem env (σ : State C Γ) (env : TEnv C σ.H Δ) (e : σ.H <+: σ.H) :
 /-- A grown heap that keeps every object, adopted. -/
 theorem adopt {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α)
     (hk : Heap.Keeps g.ext σ.heap g.heap) : TGFrameM μ σ (σ.adopt g).1 g.ext :=
-  ⟨hk, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+  ⟨hk, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
 end TGFrameM
 
@@ -263,7 +263,7 @@ theorem CallRet.enterT_frameM {μ : Mutability} {Γ' rs ps : Ctx} (ret : CallRet
   cases ret with
   | none | val | rets | storage => exact TGFrameM.ofFrame (CallRet.enterT_frame _ rfl σ) _
   | mem R r hd hm =>
-    exact ⟨State.keeps_allocDefaultG σ R hm, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+    exact ⟨State.keeps_allocDefaultG σ R hm, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
 /-- What a call leaves its caller's locals: the result where it lands, the
 rest as they were, weakened along the heap the call grew. -/

@@ -49,7 +49,7 @@ theorem prefix_scope_keeps_fresh_alias :
   have hp : ∃ o, ExecP keep (State.init CallbackContract) (allocatingPaymentAt []).code o ∧
       heapLength o = some 1 := by
     refine ⟨_, ExecP.cons (ExecS.transferResume (J := keep) (σ := State.init CallbackContract)
-      (st := changed) (nt := []) (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl))
+      (st := changed) (nt := []) (sb := ⟨0, by decide⟩) (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl))
       rfl rfl trivial trivial) (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
     decide +kernel
   obtain ⟨o, he, hheap⟩ := hp

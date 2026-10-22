@@ -174,8 +174,8 @@ theorem at_lift {Γ Δ : Ctx} (J : StateInv C) (h : Thin Γ Δ) (σ : State C Γ
     (d : TEnv C σ.H Δ) : J.at (σ.lift h d) ↔ J.at σ := Iff.rfl
 
 theorem lift_havoc {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Γ)
-    (d : TEnv C σ.H Δ) (st : Storage C) (nt : Ledger) :
-    (σ.lift h d).havoc st nt = (σ.havoc st nt).lift h d := rfl
+    (d : TEnv C σ.H Δ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.lift h d).havoc st nt sb = (σ.havoc st nt sb).lift h d := rfl
 
 def WkS (J : StateInv C) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
   ∀ {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Γ) (d : TEnv C σ.H Δ)
@@ -257,14 +257,14 @@ theorem transfer_wk {Γ : Ctx} (J : StateInv C) (r amt : Val C Γ .uint) :
       rw [TRun.transfer_wk, hp]
       rfl
     exact ⟨_, .transferViolated hpay hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
-  | @transferResume _ _ _ _ a st nt hpay hp hj hk =>
+  | @transferResume _ _ _ _ a st nt sb hpay hp hj hk =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    refine ⟨_, ExecS.transferResume (J := J) (st := st) (nt := nt) hpay hl ?_ ?_, ?_⟩
+    refine ⟨_, ExecS.transferResume (J := J) (st := st) (nt := nt) (sb := sb) hpay hl ?_ ?_, ?_⟩
     · exact (at_lift J h a.st _).mpr hj
-    · exact (at_lift J h (a.st.havoc st nt) _).mpr hk
-    · exact CWkRel.lift_ok h d ⟨a.st.havoc st nt, a.ext⟩
+    · exact (at_lift J h (a.st.havoc st nt sb) _).mpr hk
+    · exact CWkRel.lift_ok h d ⟨a.st.havoc st nt sb, a.ext⟩
 
 theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
     (r amt : Val C Γ .uint) (full : Bool) : WkS J (.send pv r amt full) := by
@@ -273,8 +273,15 @@ theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
   | det hf => exact det_wk J _ h σ d hf
   | sendHalt hpay hp =>
     refine ⟨_, ExecS.sendHalt (J := J) hpay ?_, rfl⟩
-    rw [TRun.transfer_wk, hp]
+    rw [TRun.send_wk, hp]
     rfl
+  | sendRefused hpay hp =>
+    have hl := TRun.send_wk h σ d pv r amt
+    rw [hp] at hl
+    refine ⟨_, ExecS.sendRefused (J := J) hpay ?_, ?_⟩
+    · simpa only [liftedT, Except.map, Out.lift, State.lift_setLocal, TEnv.wk_self] using hl
+    · simpa only [Out.lift, TEnv.wk_self, State.lift_setLocal] using
+        CWkRel.lift_ok h d (⟨σ.setLocal pv false, List.prefix_refl _⟩ : Out C σ.H Γ)
   | @sendFailed _ _ _ _ _ _ a hpay hp =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
@@ -287,15 +294,15 @@ theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
       rw [TRun.transfer_wk, hp]
       rfl
     exact ⟨_, .sendViolated hpay hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
-  | @sendResume _ _ _ _ _ _ a st nt hpay hp hj hk =>
+  | @sendResume _ _ _ _ _ _ a st nt sb hpay hp hj hk =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    refine ⟨_, ExecS.sendResume (J := J) (pv := pv.wk h) (st := st) (nt := nt) hpay hl ?_ ?_, ?_⟩
+    refine ⟨_, ExecS.sendResume (J := J) (pv := pv.wk h) (st := st) (nt := nt) (sb := sb) hpay hl ?_ ?_, ?_⟩
     · exact (at_lift J h a.st _).mpr hj
-    · exact (at_lift J h (a.st.havoc st nt) _).mpr hk
+    · exact (at_lift J h (a.st.havoc st nt sb) _).mpr hk
     · simpa only [Out.lift, State.lift_setLocal, lift_havoc] using
-        CWkRel.lift_ok h d (⟨(a.st.havoc st nt).setLocal pv true, a.ext⟩ : Out C σ.H Γ)
+        CWkRel.lift_ok h d (⟨(a.st.havoc st nt sb).setLocal pv true, a.ext⟩ : Out C σ.H Γ)
 
 theorem ite_wk {Γ Γ₁ Γ₂ : Ctx} (J : StateInv C) (c : Val C Γ .bool)
     (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) (ht : WkP J thn) (hels : WkP J els) :
@@ -475,13 +482,13 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
   | tryDecode hd => exact ⟨_, .tryDecode hd, rfl⟩
   | tryViolated hj => exact ⟨_, .tryViolated (fun hk => hj ((at_lift J h σ d).mp hk)), trivial⟩
   | tryOk hj hk hd hp hg =>
-    rename_i st nt vs rest r u
+    rename_i st nt sb vs rest r u
     obtain ⟨u', hu, hr⟩ := hok (Thin.keepAll ρ h)
-      ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) (TEnv.append ρ r d) hp
+      ((σ.havoc st nt sb).withEnv (TEnv.append ρ r σ.env)) (TEnv.append ρ r d) hp
     simp only [State.lift, State.withEnv, State.havoc] at hu
     rw [TEnv.put_keepAll h ρ r r σ.env d] at hu
-    refine ⟨_, ExecS.tryOk (J := J) (st := st) (nt := nt) (vs := vs) (rest := rest)
-      ((at_lift J h σ d).mpr hj) ((at_lift J h (σ.havoc st nt) d).mpr hk) hd hu
+    refine ⟨_, ExecS.tryOk (J := J) (st := st) (nt := nt) (sb := sb) (vs := vs) (rest := rest)
+      ((at_lift J h σ d).mpr hj) ((at_lift J h (σ.havoc st nt sb) d).mpr hk) hd hu
       (by rw [ha]; exact hg), ?_⟩
     simpa only [TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h ρ).trans (Prog.wk_over ok (Thin.keepAll ρ h))) hr)

@@ -70,7 +70,7 @@ holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account), and
 `Evm/Interpreter.lean` reads the run's `net(5) = -30` and `net(this) = 0` off
 it (`payOwner_interpreter`).
 
-From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at
+From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, balances agreeing on the contract's funds, at
 any address `self < 2^256`, which `address(this)` reads and `ADDRESS`
 pushes):
 
@@ -197,7 +197,7 @@ Out, and why:
 | storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length; the machine has no loops. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
-| `address(this).balance` | The interpreter's is the funds the transaction found, which a `transfer` leaves (it books `net` only); `SELFBALANCE` reads the account a `CALL` debits. The two part at the first payment. |
+| `address(this).balance` | Transfers debit the typed balance and the machine account together; `Sim.funds` records their agreement. Direct compilation of the balance read remains outside the fragment. |
 | mappings keyed by `bool`/`int` | `ReprAt` relates a mapping keyed by `uint` only (`ReprAt.map` claims its entries only when the key type is `uint`): a `bool` key, which the typed run hashes as `0`/`1`, and an `int` key's two's complement are not related yet. |
 
 The run evaluates an `op=`'s right-hand side before its target; the

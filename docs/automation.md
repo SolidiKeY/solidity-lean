@@ -313,7 +313,7 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
     (hb : φ.exactBounded = true) : (dependentReduction? φ).isSome = true
 
 theorem auto_complete (φ : Fml C []) (h : φ.inExact = true) (hb : φ.exactBounded = true) :
-    ∃ r, dependentReduction? φ = some r ∧ (Valid φ ↔ r.arithmetic.guarded.decide = true)
+    ∃ r, dependentReduction? φ = some r ∧ (Fml.Valid φ ↔ r.arithmetic.guarded.decide = true)
 
 theorem auto_countermodel (φ : Fml C []) (h : φ.inExact = true) (hb : φ.exactBounded = true) :
     ∃ r, dependentReduction? φ = some r ∧

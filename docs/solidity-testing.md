@@ -35,17 +35,15 @@ argument, including with named arguments and tuple returns. Independent rows
 belong to contracts and libraries; top-level free functions have no independent
 test row. Recursion and unsupported helper signatures remain import gaps.
 
-**What `proved` states.** A plain (box or diamond) obligation is proved as
-`⊢ N.f.problem`, whose reading `Valid` has every external callee keep the
-contract's state (solkey's `noCallback`). Where the function reaches a call
-whose callee may write the state, a `try` of a callee not declared `view` or
-`pure` or a low-level `call` (`SolcFun.writingCall`), and the obligation
-hands control to it (`Fml.callsBack false`), the runner states
-`ValidT .noCallback N.f.problem` instead, the callee changing the state as it
-may, and proves it by `sol_prove`'s walk of `ProvesC` (`docs/options.md`,
-O7). A specification row (`cspec`) is unchanged. The TestSuite's derived
-theorems (`Solidity/TestSuite/Derived*.lean`) stay `⊢ N.f.problem`: solkey's
-reading, as solkey proves them.
+**What `proved` states.** The runner reads the actual obligation, including
+`cspec` rows. Whenever `Fml.callsBack false` holds it proves
+`ValidT .noCallback` by the callback calculus. Otherwise plain rows retain
+`⊢ N.f.problem`, and specified rows retain internal formula validity.
+Bare high-level external calls are included. View/pure calls also receive
+the conservative callback reading until static-call restrictions occur in
+the operational call type (`docs/options.md`, O7). The TestSuite's hand
+written derived theorems remain internal `⊢` statements under their stated
+reading. See [correctness.md](correctness.md) for public `Spec` correctness.
 
 | Result | Meaning |
 |---|---|

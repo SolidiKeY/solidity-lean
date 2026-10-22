@@ -932,11 +932,11 @@ def freshT (C : Contract) (balance : Nat) (hb : balance < W) (self : Fin W) :
 `0`, nothing moved, whatever the world's balances and the contract's
 address. -/
 theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
-    (self : Fin W) :
+    (self : Fin W) (hbalance : balance = bal self) :
     Sim C 1 0 (Frag.init []) (freshT C balance hb self) (Machine.init bal self) :=
   ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
     fun _ _ => by simp only [netAt, Machine.init, Int.sub_self]; rfl,
-    rfl, by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl⟩⟩
+    rfl, by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl⟩, by exact congrArg Int.ofNat hbalance, fun _ _ _ _ _ _ => rfl⟩
 
 /-- **The EVM agrees with the typed run's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
@@ -949,7 +949,7 @@ Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 theorem). -/
 theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
     (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
-    (self : Fin W) :
+    (self : Fin W) (hbalance : balance = bal self) :
     (∃ o m', Solidity.Prog.run (freshT C balance hb self) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
@@ -961,7 +961,7 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
       run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
       ∃ o, Solidity.Prog.run (freshT C balance hb self) P = .ok o) := by
-  rcases compile_correct hP (Sim.init C balance hb bal self) (by omega) with
+  rcases compile_correct hP (Sim.init C balance hb bal self hbalance) (by omega) with
     ⟨o, m', h1, h2, _, hm⟩ | h | ⟨hp, h1, o, _, h2, _⟩
   · refine .inl ⟨o, m', h1, h2, fun r s v hp hf => ?_⟩
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩

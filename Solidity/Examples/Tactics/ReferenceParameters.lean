@@ -91,15 +91,15 @@ private def receiver := sol{
 theorem receiver_run : (Prog.run (State.init Calls) receiver).toOption.isSome = true := by
   decide +kernel
 
-theorem mapping_proved : ⊨ dl!{ [ credit(counts, 4); ] counts[4] == 1 } := by
+theorem mapping_proved : ⊨ᶠ dl!{ [ credit(counts, 4); ] counts[4] == 1 } := by
   sol_symex
   sol_close
 
-theorem memory_spec : ⊨ spec!{first} := by
+theorem memory_spec : ⊨ᶠ spec!{first} := by
   sol_symex
   sol_close
 
-theorem memory_input_length : ⊨ spec!{lengthNonnegative} := by
+theorem memory_input_length : ⊨ᶠ spec!{lengthNonnegative} := by
   sol_symex
   sol_close
 

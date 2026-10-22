@@ -26,7 +26,7 @@ with the invariant `balance + paidOut == deposited`.  Two withdrawals:
   with `transferWithCallbackBox`;
 * **interaction first** — `uint amt = balance; to.transfer(amt); balance = 0;
   paidOut += amt;` — pays before booking.  Without callbacks it keeps the
-  invariant (`⊨`, the strategy proves it); with callbacks it does not: a
+  invariant (`⊨ᶠ`, the strategy proves it); with callbacks it does not: a
   re-entrant withdrawal pays `amt` out a second time before the first is
   booked, and the booking then counts it twice.  The counterexample is a run
   with callbacks, built step by step.
@@ -37,7 +37,7 @@ the callee refuses, and the send returns `false` with nothing booked
 
 The withdrawals read scoped (`open scoped Solidity.Scoped`): the
 calculus with callbacks is `Calculus/Callback.lean`'s `ProvesC`, sound
-against `ValidC` for a first-order invariant (`ProvesC.valid`,
+against `ValidC` for a first-order invariant (`ProvesC.fmlValid`,
 `Calculus/CallbackSound.lean`); a rule takes its taclet as a `Rule`
 (`.key`), `localValueDeclInitDrop` is a hidden binder's rule
 (`ProvesC.bind`), and "resume after callback" closes by the invariant
@@ -74,7 +74,7 @@ theorem withdrawSafe :
     ValidC vaultInv dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } := by
-  apply ProvesC.valid
+  apply ProvesC.fmlValid
   apply ProvesC.allIntro
   apply ProvesC.intro
   apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
@@ -93,7 +93,7 @@ theorem withdrawSafe :
 /-- What is safe with callbacks is safe without: the deterministic run is one
 of the runs with callbacks. -/
 theorem withdrawSafe_valid :
-    ⊨ dl!{ balance + paidOut == deposited →
+    ⊨ᶠ dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } :=
   fun σ v => holds_of_holdsC_imp (withdrawSafe σ v) rfl rfl
@@ -109,7 +109,7 @@ def withdrawUnsafe : Fml Vault [] := dl!{ balance + paidOut == deposited →
 set_option maxHeartbeats 2000000 in
 /-- Without callbacks the interaction-first withdrawal keeps the invariant:
 `balance` moves to `paidOut`. -/
-theorem withdrawUnsafe_valid : ⊨ dl!{ balance + paidOut == deposited →
+theorem withdrawUnsafe_valid : ⊨ᶠ dl!{ balance + paidOut == deposited →
     [ uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt; ]
       balance + paidOut == deposited } := by
   sol_symex
@@ -146,7 +146,7 @@ nothing ("send failed", `ok` false). -/
 theorem callToKeepsInv :
     ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
       [ (bool ok, ) = to.call{value: 5}(""); sent = ok; ] balance + paidOut == deposited } := by
-  apply ProvesC.valid
+  apply ProvesC.fmlValid
   apply ProvesC.allIntro
   apply ProvesC.intro
   apply ProvesC.update (.key .valueDeclSkip) rfl
@@ -169,7 +169,7 @@ theorem callToKeepsInv :
 
 /-- What holds with callbacks holds without. -/
 theorem callToKeepsInv_valid :
-    ⊨ dl[SendVault]{ balance + paidOut == deposited →
+    ⊨ᶠ dl[SendVault]{ balance + paidOut == deposited →
       [ (bool ok, ) = to.call{value: 5}(""); sent = ok; ] balance + paidOut == deposited } :=
   fun σ v => holds_of_holdsC_imp (callToKeepsInv σ v) rfl rfl
 
@@ -185,7 +185,7 @@ theorem callIfFunded :
     ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
       [ if (balance > 0) { (bool ok, ) = to.call{value: 5}(""); sent = ok; }; ]
         balance + paidOut == deposited } := by
-  apply ProvesC.valid
+  apply ProvesC.fmlValid
   apply ProvesC.allIntro
   apply ProvesC.intro
   apply ProvesC.capture (.key .ifElseUnfold) .ite
@@ -254,7 +254,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   -- the run: `amt = 5`; pay `5`; the callee withdraws again; `balance = 0`; `paidOut += 5`
   have H := h before (u 7) ?inv _
     (.cons (execOfRun rfl rfl)
-      (.cons (ExecS.transferResume (st := vault 0 5 5) (nt := []) rfl rfl ?exit ?resume)
+      (.cons (ExecS.transferResume (st := vault 0 5 5) (nt := []) (sb := ⟨0, rfl⟩) rfl rfl ?exit ?resume)
         (.cons (execOfRun rfl rfl)
           (.cons (execOfRun rfl rfl) .nil))))
   case inv =>
@@ -274,7 +274,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
 `full`), so its callee may call back even under `transferSemantics:noCallback`,
 which only makes `transfer` and `send` gas-limited (solkey's bug 5, which
 reads the value call as a `send`, `docs/options.md`).  Read as every callee
-keeping the state (`⊨`), the interaction-first withdrawal by a value call
+keeping the state (`⊨ᶠ`), the interaction-first withdrawal by a value call
 keeps the invariant; under `noCallback` it does not. -/
 
 /-- The interaction-first withdrawal, paying by a value call. -/
@@ -284,7 +284,7 @@ def withdrawCall : Fml Vault [] := dl!{ balance + paidOut == deposited →
 
 set_option maxHeartbeats 2000000 in
 /-- Every callee keeping the state, the value call is a send. -/
-theorem withdrawCall_valid : ⊨ dl!{ balance + paidOut == deposited →
+theorem withdrawCall_valid : ⊨ᶠ dl!{ balance + paidOut == deposited →
     [ uint amt = balance; (bool ok, ) = to.call{value: amt}(""); balance = 0; paidOut += amt; ]
       balance + paidOut == deposited } := by
   sol_symex
@@ -298,7 +298,7 @@ theorem withdrawCall_noCallback : ¬ ValidT .noCallback withdrawCall := by
   have H := h before (u 7) ?inv _
     (.cons (execOfRun rfl rfl)
       (.cons (execOfRun rfl rfl)
-        (.cons (ExecS.sendResume (st := vault 0 5 5) (nt := []) rfl rfl ?exit ?resume)
+        (.cons (ExecS.sendResume (st := vault 0 5 5) (nt := []) (sb := ⟨0, rfl⟩) rfl rfl ?exit ?resume)
           (.cons (execOfRun rfl rfl)
             (.cons (execOfRun rfl rfl) .nil)))))
   case inv =>
@@ -314,8 +314,7 @@ theorem withdrawCall_noCallback : ¬ ValidT .noCallback withdrawCall := by
 
 /--
 info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
-  dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝
-    { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+  dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝ { pay(sadr,se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 
@@ -323,8 +322,7 @@ info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ
 info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
   {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
-    "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
-      "send failed": { pv := false } ⟨[ ]⟩ }
+    "send succeeded": { pay(sadr,se) ‖ pv := true } ⟨[ ]⟩ ; "send failed": { pv := false } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @CallbackTaclet.sendWithCallbackBox
 

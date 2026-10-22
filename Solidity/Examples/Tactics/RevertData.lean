@@ -104,21 +104,21 @@ info: @LeanTaclet.catchDataBox : ∀ {C : Contract} {k : Nat} {Γ ρ ps Γf Γ�
 
 /-- **The callee's reason reaches `catch Error(string memory r)`**:
 `require(false, "boom")` in `boom()`, and `r`'s bytes are `"boom"`. -/
-theorem boomReason : ⊨ dl!{ [ try this.boom() { } catch Error(string memory r) {
+theorem boomReason : ⊨ᶠ dl!{ [ try this.boom() { } catch Error(string memory r) {
     assert(r.length == 4); assert(r[0] == 98); assert(r[1] == 111); assert(r[2] == 111);
     assert(r[3] == 109); } catch { }; ] true } := by
   sol_symex
   sol_decide
 
 /-- `revert("big")` in a branch of the callee: its reason, when it reverts. -/
-theorem checkReason : ⊨ dl!{ [ try this.check(5) { } catch Error(string memory r) {
+theorem checkReason : ⊨ᶠ dl!{ [ try this.check(5) { } catch Error(string memory r) {
     assert(r.length == 3); assert(r[0] == 98); } catch { }; ] true } := by
   sol_symex
   sol_decide
 
 /-- Two reasons in the callee: the clause holds for each (`"a"` or
 `"bc"`), the over-approximation the rule reads off the body. -/
-theorem twoReasons : ⊨ dl!{ [ try this.two(false) { } catch Error(string memory r) {
+theorem twoReasons : ⊨ᶠ dl!{ [ try this.two(false) { } catch Error(string memory r) {
     assert(r.length == 1 || r.length == 2); } catch { }; ] true } := by
   sol_symex
   sol_decide
@@ -126,7 +126,7 @@ theorem twoReasons : ⊨ dl!{ [ try this.two(false) { } catch Error(string memor
 /-- `catch (bytes memory d)`: the raw data.  `plain` reverts with none
 (`require(x > 3)` carries no reason), so `d` is empty.  (`Error("boom")`'s
 100 bytes, written out byte by byte, are past the closer's bounds.) -/
-theorem plainData : ⊨ dl!{ [ try this.plain(1) { } catch (bytes memory d) {
+theorem plainData : ⊨ᶠ dl!{ [ try this.plain(1) { } catch (bytes memory d) {
     assert(d.length == 0); }; ] true } := by
   sol_symex
   sol_decide
@@ -167,7 +167,7 @@ local instance : InContract := ⟨Custom⟩
 
 /-- **A custom error's data reaches `catch (bytes memory d)`**: its selector
 and its argument. -/
-theorem customData : ⊨ dl!{ [ try this.failE() { } catch (bytes memory d) {
+theorem customData : ⊨ᶠ dl!{ [ try this.failE() { } catch (bytes memory d) {
     assert(d.length == 0 || d.length == 36 && d[1] == 47 && d[3] == 103 && d[35] == 7);
     }; ] true } := by
   sol_symex
@@ -176,7 +176,7 @@ theorem customData : ⊨ dl!{ [ try this.failE() { } catch (bytes memory d) {
 /-- A callee that reverts with a custom error of a symbolic argument and
 with a reason: the custom datum cannot decode as `Error`
 (`RevPart.notError`), so `catch Error(string memory r)` binds the reason. -/
-theorem mixedReason : ⊨ dl!{ ∀ uint x; [ try this.mixed(x) { } catch Error(string memory r) {
+theorem mixedReason : ⊨ᶠ dl!{ ∀ uint x; [ try this.mixed(x) { } catch Error(string memory r) {
     assert(r.length == 5); assert(r[0] == 115); } catch { }; ] true } := by
   sol_symex
   sol_decide
@@ -188,7 +188,7 @@ bytes (`Pat.fml`, printed `∀ fresh bytes d; (d.length = 36 ∧ read(memory,
 d[0]) = 0 ∧ …) → …`).  The closer reads the fresh object semantically
 (`sol_close`, `CloseS.holds_allocAll`); its bytes read in the clause too
 cost it past its heartbeats, so the clause here reads the length. -/
-theorem symbolicCustom : ⊨ dl!{ ∀ uint y; [ try this.failIf(y) { } catch (bytes memory d) {
+theorem symbolicCustom : ⊨ᶠ dl!{ ∀ uint y; [ try this.failIf(y) { } catch (bytes memory d) {
     assert(d.length == 0 || d.length == 36); }; ] true } := by
   sol_prove (steps := 2048)
   all_goals (sol_leaf; sol_close)
@@ -204,7 +204,7 @@ clause is proved for every reason, its length a `uint` the closer reads as
 any other. -/
 
 /-- **Another contract's reason**, its length read. -/
-theorem externalReason : ⊨ dl!{ ∀ uint a; [ try address(a).boom() { } catch Error(string memory r) {
+theorem externalReason : ⊨ᶠ dl!{ ∀ uint a; [ try address(a).boom() { } catch Error(string memory r) {
     if (r.length > 3) { assert(r.length >= 4); } } catch { }; ] true } := by
   sol_prove (steps := 256)
   · sol_leaf
@@ -247,19 +247,19 @@ private def σ₇ : State Pan [] := { State.init Pan with tx := { selfAddress :=
 /-- **The code a failed `assert` panics with** (`trySelfStep`'s `Panic`
 goal): the callee's data lists `Panic(0x01)` only, so the clause proves
 `c == 1`. -/
-theorem assertCode : ⊨ dl!{ [ try this.failAssert(5) { } catch Panic(uint c) {
+theorem assertCode : ⊨ᶠ dl!{ [ try this.failAssert(5) { } catch Panic(uint c) {
     assert(c == 1); } catch { }; ] true } := by
   sol_symex
   sol_close
 
 /-- The same with an overflow in `checked { … }`: `Panic(0x11)`. -/
-theorem overflowCode : ⊨ dl!{ ∀ uint y; [ try this.overflow(y) { } catch Panic(uint c) {
+theorem overflowCode : ⊨ᶠ dl!{ ∀ uint y; [ try this.overflow(y) { } catch Panic(uint c) {
     assert(c == 17); } catch { }; ] true } := by
   sol_symex
   sol_close
 
 /-- The raw data: `Panic`'s selector (`0x4e487b71`), then the code's word. -/
-theorem panicSelector : ⊨ dl!{ [ try this.failAssert(5) { } catch (bytes memory d) {
+theorem panicSelector : ⊨ᶠ dl!{ [ try this.failAssert(5) { } catch (bytes memory d) {
     assert(d.length == 0 || d[0] == 78 && d[3] == 113 && d[35] == 1); }; ] true } := by
   sol_symex
   sol_decide

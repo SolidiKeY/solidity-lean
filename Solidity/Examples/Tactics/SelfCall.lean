@@ -72,7 +72,7 @@ info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ 
 /-- **The callee's write is seen on success** (solc's `try_2.sol`, with
 `this` for the harness's address): the success block reads `ix == 42`, the
 catch-all the caller's `ix == 0`. -/
-theorem setIxSeen : ⊨ dl!{ [ ix = 0;
+theorem setIxSeen : ⊨ᶠ dl!{ [ ix = 0;
     try this.setIx() { int r = ix; assert(r == 42); } catch { int r = ix; assert(r == 0); }; ]
       true } := by
   sol_symex
@@ -80,7 +80,7 @@ theorem setIxSeen : ⊨ dl!{ [ ix = 0;
 
 /-- **The callee's return value is bound** (solc's `simple_notuple.sol`):
 `gOne(true)` returns `13` to the success block. -/
-theorem gOneReturns : ⊨ dl!{ [
+theorem gOneReturns : ⊨ᶠ dl!{ [
     try this.gOne(true) returns (uint a) { assert(a == 13); } catch { }; ] true } := by
   sol_symex
   sol_close
@@ -93,7 +93,7 @@ assumes `¬⟨ require(this == address(this)); gOne(true) → a; ⟩ true`
 def gOneExactF : Fml SelfCaller [] := dl!{ [ uint r = 0;
     try this.gOne(true) returns (uint a) { r = a; } catch { r = 9; }; ] r == 13 }
 
-theorem gOneExact : ⊨ gOneExactF := by
+theorem gOneExact : ⊨ᶠ gOneExactF := by
   sol_prove
 
 /-- The same with callbacks (`ValidT .noCallback`, `ProvesC.trySelf`). -/
@@ -102,13 +102,13 @@ theorem gOneExactT : ValidT .noCallback gOneExactF := by
 
 /-- A reverting callee runs the catch-all, its writes undone: `gOne(false)`
 reverts at its `require`. -/
-theorem gOneReverts : ⊨ dl!{ [ uint r = 0;
+theorem gOneReverts : ⊨ᶠ dl!{ [ uint r = 0;
     try this.gOne(false) returns (uint a) { r = a; } catch { r = 9; }; ] r == 9 } := by
   sol_symex
   sol_close
 
 /-- A getter of the contract returns its storage (solc's `try_nested_1.sol`). -/
-theorem getIxReturns : ⊨ dl!{ [ ix = 5; int y = 0;
+theorem getIxReturns : ⊨ᶠ dl!{ [ ix = 5; int y = 0;
     try this.getIx() returns (int v) { y = v; } catch { y = 5; }; ] y == ix } := by
   sol_symex
   sol_close
@@ -135,7 +135,7 @@ theorem keeps_panics : (Prog.run at7 keepsP).halt? = some .panic := by
 def keepsF : Fml SelfCaller [] := .modal .box keepsP .nil .tt
 
 /-- So the claim the oracle reading proves is not valid. -/
-theorem keeps_invalid : ¬ Valid keepsF := by
+theorem keeps_invalid : ¬ Fml.Valid keepsF := by
   intro h
   have h7 := (holds_modal_iff at7 keepsP .nil .tt).1 (h at7)
   have hr : Prog.runSt at7 keepsP = .error .panic := by
@@ -153,7 +153,7 @@ theorem keeps_invalid : ¬ Valid keepsF := by
 A call to address `0` reverts in the caller: `r.f()` outside a `try` is
 `try r.f() { } catch { revert(); }`, so whatever follows is unreachable. -/
 
-theorem noCodeAtZero : ⊨ dl!{ [ try I(0).setIx() { } catch { revert(); }; assert(false); ]
+theorem noCodeAtZero : ⊨ᶠ dl!{ [ try I(0).setIx() { } catch { revert(); }; assert(false); ]
     true } := by
   sol_symex
   sol_close
@@ -182,7 +182,7 @@ local instance : InContract := ⟨Receiver⟩
 def receiveRunsF : Fml Receiver [] := dl!{ [ fy = 0;
     (bool ok, ) = payable(this).call{value: 0}(""); uint r = fy; assert(ok && r == 1); ] true }
 
-theorem receiveRuns : ⊨ receiveRunsF := by
+theorem receiveRuns : ⊨ᶠ receiveRunsF := by
   sol_prove
 
 /-- With callbacks: the value call is a `try` of the contract's own
@@ -202,7 +202,7 @@ def recv7 : State Receiver [] :=
 theorem keepsR_panics : (Prog.run recv7 keepsRP).halt? = some .panic := by
   decide +kernel
 
-theorem keepsStorage_invalid : ¬ Valid (.modal .box keepsRP .nil .tt : Fml Receiver []) := by
+theorem keepsStorage_invalid : ¬ Fml.Valid (.modal .box keepsRP .nil .tt : Fml Receiver []) := by
   intro h
   have h7 := (holds_modal_iff recv7 keepsRP .nil .tt).1 (h recv7)
   have hr : Prog.runSt recv7 keepsRP = .error .panic := by

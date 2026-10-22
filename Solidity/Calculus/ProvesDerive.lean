@@ -6,8 +6,8 @@ import Solidity.Calculus.AllLeft
 
 Under `open scoped Solidity.Scoped` an obligation is stated `⊢ φ`, the
 scoped sequent `Proves C .all [] .nil φ` (`Calculus/Surface.lean`),
-so the strategy has to build a derivation.  A goal `Valid φ` (`⊨ φ`) goes the
-same way: `Proves.valid`, then this walk (decision 89 extended), so its
+so the strategy has to build a derivation.  A goal `Fml.Valid φ` (`⊨ᶠ φ`) goes the
+same way: `Proves.fmlValid`, then this walk (decision 89 extended), so its
 leaves are scoped sequents too.
 
 `Seq.run` walks the sequent as `Proves` has its rules: `intro`,
@@ -23,12 +23,12 @@ A leaf that closer does not read (outside its fragment: the classes
 `docs/intrinsic.md`'s "W9.3 `walk` record" lists), or reads and does not
 close, stays the walk's own sequent `H ⊢ φ` (`Seq.SLeaf`, `Seq.leafS`; M6c
 6c, decision 89), a goal of the scoped calculus: `sol_leaf` leaves it as
-`⊨ ψ` (`Proves.closeValid`) for a closer, the scoped `sol_close` among
+`⊨ᶠ ψ` (`Proves.closeValid`) for a closer, the scoped `sol_close` among
 them.  Since W9.4 there is no erased fallback, in the walk or after it
 (`Proves.close_leaf`, `core_leaf_close` are gone).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
 it as one evaluation (`Seq.residue R H φ = some ls`), and the tactic
-leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Valid` does.
+leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Fml.Valid` does.
 
 The walk is generic in what a leaf is (`α`), so the compiled run that
 quotes the leaves for the tactic (`Seq.leafQuoteS`) and the kernel's
@@ -222,7 +222,7 @@ def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Optio
 
 A leaf the closer does not close stays the walk's own sequent `H ⊢ φ`
 (`SLeaf`, decision 89), a goal of the scoped calculus, which `sol_leaf`
-leaves as `⊨ ψ` for a closer. -/
+leaves as `⊨ᶠ ψ` for a closer. -/
 
 /-- A leaf the walk leaves: a sequent of the outer scope `[]`. -/
 abbrev SLeaf (C : Contract) := (Γ : Ctx) × Hyps C [] Γ × Fml C Γ
@@ -778,7 +778,7 @@ end Seq
 /-- **A leaf closed over the typed reading**: `Proves.closeHolds`, the
 sequent wrapped (`Hyps.wrap`) and valid. -/
 theorem Proves.closeValid {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ}
-    (h : Valid (H.wrap φ)) (hm : (H.wrap φ).modalFree = true) : Proves C R [] H φ :=
+    (h : Fml.Valid (H.wrap φ)) (hm : (H.wrap φ).modalFree = true) : Proves C R [] H φ :=
   .closeHolds h hm
 
 namespace Seq
@@ -844,7 +844,7 @@ def allLeftLits (H φ : Expr) : MetaM (Option Expr) := do
   return some (← mkListLit (mkConst ``InstLit) ls.toList)
 
 /-- `sol_leaf` on the main goal, a leaf `H ⊢ φ` of the outer scope:
-`Proves.closeValid`, the goal left `⊨ ψ` with `ψ` the wrapped sequent
+`Proves.closeValid`, the goal left `⊨ᶠ ψ` with `ψ` the wrapped sequent
 computed and quoted (`Symex.normValid`); no modality left
 (`Fml.modalFree`, checked by the kernel).  Where a premise of `H` is a `∀`,
 each such premise is instantiated first (`allLeft`, `Hyps.instAll_valid`)
@@ -871,14 +871,14 @@ def leafValid : TacticM Unit := withMainContext do
       mkEqRefl (mkConst ``Bool.true)
     else try Decide.trueLemma mf
       catch _ => throwError "sol_leaf: a modality is left in the leaf"
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Valid) C ψ) (← g.getTag)
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Fml.Valid) C ψ) (← g.getTag)
   g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, g', hm])
   match ← allLeftLits H φ with
   | none => replaceMainGoal [← Symex.normValid g'.mvarId!]
   | some ts =>
     let H' := mkAppN (mkConst ``Hyps.instAll) #[C, nilCtx, ts, Γ, H]
     let g'' ← mkFreshExprSyntheticOpaqueMVar
-      (mkApp2 (mkConst ``Valid) C (mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H', φ])) (← g.getTag)
+      (mkApp2 (mkConst ``Fml.Valid) C (mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H', φ])) (← g.getTag)
     g'.mvarId!.assign (mkAppN (mkConst ``Hyps.instAll_valid) #[C, ts, Γ, H, φ, g''])
     replaceMainGoal [← Symex.normValid g''.mvarId!]
 
@@ -908,10 +908,10 @@ def evalSolProveSeq : Tactic := fun stx => withMainContext do
     setGoals (leaves ++ rest)
 
 open Lean Elab Tactic Meta in
-/-- `sol_prove` on a scoped goal `Valid φ` (`⊨ φ`): `Proves.valid` at the
+/-- `sol_prove` on a scoped goal `Fml.Valid φ` (`⊨ᶠ φ`): `Proves.fmlValid` at the
 rule set `.all`, then the walk on `⊢ φ` (`Seq.prove`), one goal `leafᵢ` per
 leaf the closer leaves, each the walk's own sequent `H ⊢ ψ` (decision 89
-extended to the `⊨` route). -/
+extended to the `⊨ᶠ` route). -/
 @[tactic Solidity.tacticSol_prove]
 def evalSolProveValid : Tactic := fun stx => withMainContext do
   let `(tactic| sol_prove $[(steps := $n:num)]?) := stx | throwUnsupportedSyntax
@@ -921,7 +921,7 @@ def evalSolProveValid : Tactic := fun stx => withMainContext do
   Symex.reporting g do
     let R := mkConst ``RuleSet.all
     let g' ← mkFreshExprSyntheticOpaqueMVar (ProofTree.provesE C φ) (← g.getTag)
-    g.assign (mkAppN (mkConst ``Proves.valid) #[C, R, φ, g'])
+    g.assign (mkAppN (mkConst ``Proves.fmlValid) #[C, R, φ, g'])
     let leaves ← Seq.prove g'.mvarId! C R (ctxE []) (mkApp2 (mkConst ``Hyps.nil) C (ctxE [])) φ
       (n.map (·.getNat))
     setGoals (leaves ++ rest)

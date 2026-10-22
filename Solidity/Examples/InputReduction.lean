@@ -73,10 +73,10 @@ def setterReduction : InputReduction setterClaim :=
 #guard_msgs in #eval setterReduction.verify.isLeft
 
 /-- `put(x)` writes exactly `x`, for every typed call and initial state. -/
-theorem setter_valid : Valid setterClaim := setterReduction.valid_of_decide (by decide +kernel)
+theorem setter_valid : Fml.Valid setterClaim := setterReduction.valid_of_decide (by decide +kernel)
 
 /-- The exact decision tactic proves the original generated specification. -/
-theorem setter_exact : Valid setterClaim := by sol_exact
+theorem setter_exact : Fml.Valid setterClaim := by sol_exact
 
 def badClaim : Fml Bank [] := cspec[Bank]{bad}
 def badReduction : InputReduction badClaim :=
@@ -90,7 +90,7 @@ def badReduction : InputReduction badClaim :=
       (cm.atoms.get .uint 0).val + 1 < 2 ^ 256))
 
 /-- The original `bad(x)` specification fails at the all-zero input. -/
-theorem bad_invalid : ¬ Valid badClaim := badReduction.not_valid_of_codes [] (by decide +kernel)
+theorem bad_invalid : ¬ Fml.Valid badClaim := badReduction.not_valid_of_codes [] (by decide +kernel)
 
 def badExact : Lean.Elab.Term.TermElabM String := do
   match ← Tools.exactVerify (Lean.mkConst ``badClaim) with

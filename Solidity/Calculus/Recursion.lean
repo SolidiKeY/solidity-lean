@@ -55,7 +55,7 @@ def Fml.allCtx : (ps : Ctx) → List Var → Fml C ps → Fml C []
   | t :: ps, ns, φ => Fml.allCtx ps ns.tail (.bind .box (ns.headD (.user "p")) t φ)
 
 theorem holds_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
-    Valid (Fml.allCtx ps ns φ) → ∀ σ : State C ps, holds σ φ
+    Fml.Valid (Fml.allCtx ps ns φ) → ∀ σ : State C ps, holds σ φ
   | [], _, _, h, σ => h σ
   | .val p :: ps, ns, φ, h, σ =>
     holds_allCtx ps ns.tail (φ := .all (ns.headD (.user "p")) p φ) h (σ.withEnv σ.env.2) σ.env.1
@@ -79,7 +79,7 @@ theorem holds_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
 (`Fml.allCtx`, named by `ns`, innermost first). -/
 theorem FunContract.ofValidCtx {Γ Γ' Γf : Ctx} (ns : List Var) {ret : CallRet Γ rs Γ'}
     {body : Prog C (rs ++ ps) Γf} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
-    (h : Valid (Fml.allCtx ps ns (FunContract.obligation ret body req ens m))) :
+    (h : Fml.Valid (Fml.allCtx ps ns (FunContract.obligation ret body req ens m))) :
     FunContract ret body req ens m :=
   FunContract.ofValid (holds_allCtx ps ns h)
 
@@ -188,17 +188,17 @@ theorem useRecContract {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {d : Nat}
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C (rs ++ (Olds ++ ps))} (hc : RecContract μ (body ()) req ens m)
-    («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
+    («pre» : Fml.Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Fml.Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
     (hn : ret.nVals = rs.length) :
-    Valid (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)) := fun σ =>
+    Fml.Valid (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)) := fun σ =>
   H.wrap_mono (φ := .modal m (.cons (.call f args ret (body ())) ω) κ φ)
     (ψ := .modal m (.cons (.callRec f d args ret body) ω) κ φ) (fun _ h => h) σ
     (useContractC_of_valid (f := f) (hc.1 ret) «pre» «post» hc.2.1 (hn ▸ hc.2.2) σ)
 
 /-- A conjunction behind a context, from each conjunct behind it. -/
-theorem valid_wrap_and {H : Hyps C [] Γ} {φ ψ : Fml C Γ} (h₁ : Valid (H.wrap φ))
-    (h₂ : Valid (H.wrap ψ)) : Valid (H.wrap (.and φ ψ)) :=
+theorem valid_wrap_and {H : Hyps C [] Γ} {φ ψ : Fml C Γ} (h₁ : Fml.Valid (H.wrap φ))
+    (h₂ : Fml.Valid (H.wrap ψ)) : Fml.Valid (H.wrap (.and φ ψ)) :=
   fun σ => H.wrap_and (χ := .and φ ψ) (fun _ a b => ⟨a, b⟩) σ (h₁ σ) (h₂ σ)
 
 end Rule
@@ -278,7 +278,7 @@ end SpecContract
 
 /-! ## Tactics
 
-`sol_symex_rec` runs the strategy (`sol_step`) on each goal `⊨ φ`, a
+`sol_symex_rec` runs the strategy (`sol_step`) on each goal `⊨ᶠ φ`, a
 conjunction behind the context split in two goals (`valid_wrap_and`), and
 stops where the first statement of the box at the head of a goal is a
 recursive call (`Stmt.callRec`), or where no modality is left.
@@ -298,10 +298,10 @@ partial def hasModal (φ : Expr) : MetaM Bool := do
       if ← hasModal a then return true
   return false
 
-/-- The context and formula of a goal `⊨ φ`: `φ` peeled (`Contract.peel`). -/
+/-- The context and formula of a goal `⊨ᶠ φ`: `φ` peeled (`Contract.peel`). -/
 def goalParts (g : MVarId) : MetaM (Option (Expr × Expr × Expr)) := do
   let ty ← whnfR (← instantiateMVars (← g.getType))
-  let_expr Valid C φ := ty | return none
+  let_expr Fml.Valid C φ := ty | return none
   let nil := ctxE []
   let mut (H, Γ, χ) ← Contract.peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil (← whnfD φ)
   -- a definition under the context (`FunContract.obligation`) unfolded, and peeled
@@ -351,7 +351,7 @@ partial def loop (g : MVarId) (fuel : Nat) : TacticM (List MVarId) := g.withCont
     let (_, k) ← splitPrefix (← whnfD ty.appArg!)
     let mut out := []
     for (g', ψ) in gs.zip [a[2]!, a[3]!] do
-      let g'' ← g'.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C (k ψ))
+      let g'' ← g'.replaceTargetDefEq (mkApp2 (mkConst ``Fml.Valid) C (k ψ))
       out := out ++ (← loop g'' fuel)
     return out
   if ← headRecCall χ then return [g]
@@ -379,7 +379,7 @@ open Lean Elab Tactic Meta in
 the contract `h` (`useRecContract`), the goals "pre" and "post" left. -/
 elab "rec_contract " h:term : tactic => withMainContext do
   let g ← getMainGoal
-  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract: expected a goal `⊨ φ`"
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract: expected a goal `⊨ᶠ φ`"
   unless ← Recursion.headRecCall χ do
     throwError "rec_contract: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
@@ -393,7 +393,7 @@ contract, `RecContract.unroll`), "pre" and "post" left. -/
 elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : tactic =>
   withMainContext do
   let g ← getMainGoal
-  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_by: expected a goal `⊨ φ`"
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_by: expected a goal `⊨ᶠ φ`"
   unless ← Recursion.headRecCall χ do
     throwError "rec_contract_by: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
@@ -412,7 +412,7 @@ elab "rec_contract_mem_by " μ:term:max ppSpace req:term:max ppSpace ens:term:ma
   withMainContext do
   let g ← getMainGoal
   let some (_, H, χ) ← Recursion.goalParts g
-    | throwError "rec_contract_mem_by: expected a goal `⊨ φ`"
+    | throwError "rec_contract_mem_by: expected a goal `⊨ᶠ φ`"
   unless ← Recursion.headRecCall χ do
     throwError "rec_contract_mem_by: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
@@ -426,7 +426,7 @@ open Lean Elab Tactic Meta in
 of the goal's box by the contract `h : RecContractM μ (t ()) req ens`. -/
 elab "rec_contract_mem " h:term : tactic => withMainContext do
   let g ← getMainGoal
-  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_mem: expected `⊨ φ`"
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_mem: expected `⊨ᶠ φ`"
   unless ← Recursion.headRecCall χ do
     throwError "rec_contract_mem: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
@@ -435,7 +435,7 @@ elab "rec_contract_mem " h:term : tactic => withMainContext do
 open Lean Elab Tactic Meta in
 /-- `rec_head`: fails unless the head of the goal's box is a recursive call. -/
 elab "rec_head" : tactic => withMainContext do
-  let some (_, _, χ) ← Recursion.goalParts (← getMainGoal) | throwError "rec_head: not `⊨ φ`"
+  let some (_, _, χ) ← Recursion.goalParts (← getMainGoal) | throwError "rec_head: not `⊨ᶠ φ`"
   unless ← Recursion.headRecCall χ do throwError "rec_head: no recursive call at the head"
 
 /-- `rec_step ih`: an induction step's obligation, its recursive calls by the
@@ -730,7 +730,7 @@ end
 end Recursion
 
 open Lean Elab Tactic Meta in
-/-- `rec_auto`: a goal `⊨ φ` whose recursive calls are proved by their
+/-- `rec_auto`: a goal `⊨ᶠ φ` whose recursive calls are proved by their
 contracts (`docs/kernel-port.md`, "Recursion"): the strategy up to each
 recursive call (`sol_symex_rec`), the closer everywhere else.  A call is
 proved by a hypothesis about its body (in an induction step, the frame

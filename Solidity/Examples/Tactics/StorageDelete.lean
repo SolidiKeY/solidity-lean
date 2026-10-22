@@ -33,7 +33,7 @@ A read *below* a deleted struct reads the default of a member of a value
 typed run from `State.exampleStore` (`Tools/Run.lean`), printed by `#eval`
 (`Prog.localAfterT`).
 
-The walks start with `apply Proves.valid`, which turns `⊨ φ` into the judgement
+The walks start with `apply Proves.fmlValid`, which turns `⊨ᶠ φ` into the judgement
 `⊢ φ`; each `apply` names one taclet (`StorageSteps.lean`).
 -/
 
@@ -51,8 +51,8 @@ open scoped Scoped
 once. -/
 
 /-- `delete alice.account;` -/
-theorem deleteField : ⊨ dl!{ [ delete alice.account; ] true } := by
-  apply Proves.valid
+theorem deleteField : ⊨ᶠ dl!{ [ delete alice.account; ] true } := by
+  apply Proves.fmlValid
   apply update .storageFieldDelete
   apply empty
   sol_leaf
@@ -65,8 +65,8 @@ theorem deleteField : ⊨ dl!{ [ delete alice.account; ] true } := by
 applies to `sp1.token`. -/
 
 /-- `delete alice.account.token;` -/
-theorem deleteDeepField : ⊨ dl!{ [ delete alice.account.token; ] true } := by
-  apply Proves.valid
+theorem deleteDeepField : ⊨ᶠ dl!{ [ delete alice.account.token; ] true } := by
+  apply Proves.fmlValid
   apply unfold .storageFieldDelete_unfold_leftFst
   -- dl{ ⟹ [ Account storage sp1 = alice.account; delete sp1.token; ] true }
   apply unfold .storageLocalDeclInitDrop
@@ -79,8 +79,8 @@ theorem deleteDeepField : ⊨ dl!{ [ delete alice.account.token; ] true } := by
 /-! ## Example 17: `delete people[i];` — an entry -/
 
 /-- `delete people[i];` -/
-theorem deleteIndex : ⊨ dl!{ [ delete people[i]; ] true } := by
-  apply Proves.valid
+theorem deleteIndex : ⊨ᶠ dl!{ [ delete people[i]; ] true } := by
+  apply Proves.fmlValid
   apply update .storageIndexArrayDelete
   apply empty
   sol_leaf
@@ -88,8 +88,8 @@ theorem deleteIndex : ⊨ dl!{ [ delete people[i]; ] true } := by
 
 /-- `delete people[i + 1];` — a non-simple index is captured first
 (`storageIndexDeleteNonSimpleIndexCapture`). -/
-theorem deleteNonSimpleIndex : ⊨ dl!{ [ delete people[i + 1]; ] true } := by
-  apply Proves.valid
+theorem deleteNonSimpleIndex : ⊨ᶠ dl!{ [ delete people[i + 1]; ] true } := by
+  apply Proves.fmlValid
   apply unfold .storageIndexDeleteNonSimpleIndexCapture
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
@@ -103,8 +103,8 @@ theorem deleteNonSimpleIndex : ⊨ dl!{ [ delete people[i + 1]; ] true } := by
 /-- `age = 10; delete age; uint result = age;` — a root reset reads `0`
 (`storageRootDelete`, `storage-root-delete.key`). -/
 theorem deleteThenRead :
-    ⊨ dl!{ [ age = 10; delete age; uint result = age; ] result == 0 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ age = 10; delete age; uint result = age; ] result == 0 } := by
+  apply Proves.fmlValid
   apply update .storageRootWriteStore
   apply update .storageRootDelete
   apply unfold .localValueDeclInitDrop
@@ -116,21 +116,21 @@ theorem deleteThenRead :
 /-- `alice.age = 30; delete alice.age; uint result = alice.age;`
 (`storage-field-delete.key`). -/
 theorem deleteFieldThenRead :
-    ⊨ dl!{ [ alice.age = 30; delete alice.age; uint result = alice.age; ] result == 0 } := by
+    ⊨ᶠ dl!{ [ alice.age = 30; delete alice.age; uint result = alice.age; ] result == 0 } := by
   sol_symex
   sol_close
 
 /-- `values[1] = 7; delete values[1]; uint result = values[1];` — an array entry
 (`storage-index-delete.key`). -/
 theorem deleteIndexThenRead :
-    ⊨ dl!{ [ values[1] = 7; delete values[1]; uint result = values[1]; ] result == 0 } := by
+    ⊨ᶠ dl!{ [ values[1] = 7; delete values[1]; uint result = values[1]; ] result == 0 } := by
   sol_symex
   sol_close
 
 /-- `flags[3] = true; delete flags[3]; bool result = flags[3];` — a `bool`
 resets to `false` (`storage-index-delete-mapping-bool.key`). -/
 theorem deleteBoolThenRead :
-    ⊨ dl!{ [ flags[3] = true; delete flags[3]; bool result = flags[3]; ] result == false } := by
+    ⊨ᶠ dl!{ [ flags[3] = true; delete flags[3]; bool result = flags[3]; ] result == false } := by
   sol_symex
   sol_close
 
@@ -138,9 +138,9 @@ theorem deleteBoolThenRead :
 uint a = alice.age;` — `alice.age` parts ways with `alice.account` (at `age`
 against `account`), so it keeps `30`. -/
 theorem deleteThenReadBeside :
-    ⊨ dl!{ [ alice.account.balance = 7; alice.age = 30; delete alice.account;
+    ⊨ᶠ dl!{ [ alice.account.balance = 7; alice.age = 30; delete alice.account;
              uint a = alice.age; ] a == 30 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .storageFieldWrite_unfold_leftFst
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
@@ -160,7 +160,7 @@ a well-typed storage, where `total` holds the `uint` it is declared as.
 Over today's untyped storage it was refuted (a `bool` there resets to
 `false`); `wt(storage)` describes the typed states. -/
 theorem deleteRootUnknown :
-    ⊨ dl!{ wt(storage) → [ delete total; ] total == 0 } := by
+    ⊨ᶠ dl!{ wt(storage) → [ delete total; ] total == 0 } := by
   sol_prove
 
 /-! ### Below a deleted struct, from the initial store

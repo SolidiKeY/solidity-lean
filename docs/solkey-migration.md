@@ -860,9 +860,9 @@ directories against their source comments and Lean's execution semantics:
 
 | Cases | Finding |
 |---|---|
-| OZMath `tryDiv`, `tryMod`; constructor `baseConstructorArgumentsSelfMul`; four modifier examples | Valid arithmetic or lowering improvements over the upstream proof strategy. |
-| Five unsigned/environment bound examples; two truncating-cast examples | Valid consequences of Lean's bounded values and casts. |
-| Seven checked-overflow/underflow boxes in `Unprovable.sol` | Valid boxes because checked execution halts before `assert(false)`, as the upstream source explicitly describes for the EVM. |
+| OZMath `tryDiv`, `tryMod`; constructor `baseConstructorArgumentsSelfMul`; four modifier examples | Fml.Valid arithmetic or lowering improvements over the upstream proof strategy. |
+| Five unsigned/environment bound examples; two truncating-cast examples | Fml.Valid consequences of Lean's bounded values and casts. |
+| Seven checked-overflow/underflow boxes in `Unprovable.sol` | Fml.Valid boxes because checked execution halts before `assert(false)`, as the upstream source explicitly describes for the EVM. |
 | Payment examples `trySuccessKeepsStorageUnsound`, `callKeepsStorageUnsound`, `tryArgumentSideEffect` | Depend on the ordinary no-callback model. They are not unconditional Solidity guarantees and remain required callback-compatibility gaps. |
 | `SolcTypesOpen.ternaryLiteralOverflow` | A genuine frontend type-fidelity bug: solc's `uint8` conditional width was lost, allowing an incorrect returning diamond. |
 

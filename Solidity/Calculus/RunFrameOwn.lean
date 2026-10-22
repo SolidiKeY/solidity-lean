@@ -640,7 +640,7 @@ is `nonpayable`, the storage and the ledger. -/
 structure TGFrameW (μ : Mutability) (b : Nat) {Γ Δ : Ctx} (σ : State C Γ) (τ : State C Δ)
     (e : σ.H <+: τ.H) : Prop where
   keeps : Heap.KeepsBelow b e σ.heap τ.heap
-  selfBalance : τ.selfBalance = σ.selfBalance
+  selfBalance : μ ≠ .nonpayable → τ.selfBalance = σ.selfBalance
   tx : τ.tx = σ.tx
   keepsSt : μ ≠ .nonpayable → τ.storage = σ.storage ∧ τ.net = σ.net
 
@@ -651,7 +651,7 @@ variable {μ : Mutability} {b : Nat} {Γ Δ Ε : Ctx}
 theorem trans {σ : State C Γ} {τ : State C Δ} {υ : State C Ε} {e₁ : σ.H <+: τ.H}
     {e₂ : τ.H <+: υ.H} (h₁ : TGFrameW μ b σ τ e₁) (h₂ : TGFrameW μ b τ υ e₂) (e : σ.H <+: υ.H) :
     TGFrameW μ b σ υ e :=
-  ⟨Heap.KeepsBelow.trans h₁.keeps h₂.keeps, h₂.selfBalance.trans h₁.selfBalance,
+  ⟨Heap.KeepsBelow.trans h₁.keeps h₂.keeps, fun hn => (h₂.selfBalance hn).trans (h₁.selfBalance hn),
     h₂.tx.trans h₁.tx, fun hμ => ⟨(h₂.keepsSt hμ).1.trans (h₁.keepsSt hμ).1,
       (h₂.keepsSt hμ).2.trans (h₁.keepsSt hμ).2⟩⟩
 
@@ -950,7 +950,7 @@ theorem Stmt.run_frameW : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.withinW �
     cases h
     obtain ⟨hk, hh'⟩ := Heap.writeAddr_own σ.heap hh a (MLoc.addrT_own σ he hh l ha) mv
       (MSrc.mvalT_own σ he hh r hmv) (TRes.ofOpt_ok hw')
-    exact ⟨⟨hk, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩,
+    exact ⟨⟨hk, fun _ => rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩,
       TLocAgreeM.ofAgree rfl (TLocAgree.refl _), he, hh'⟩
   | _, _, .ite c thn els, hw, d, b, σ, o, h, hb, he, hh => by
     have hw' : (c.readsIn μ && Prog.withinW μ thn && Prog.withinW μ els) = true := hw

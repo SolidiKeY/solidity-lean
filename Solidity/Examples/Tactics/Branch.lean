@@ -115,11 +115,12 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
 `true = false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
 
 /--
-trace: ⊢ ⊨ dl{ (true = true → [ age = 1; } ] find(storage, age) = 1) ∧ (true = false → [ age = 2; } ] find(storage, age) = 1) }
+trace: ⊢ ⊨ᶠ
+    dl{ (true = true → [ age = 1; } ] find(storage, age) = 1) ∧ (true = false → [ age = 2; } ] find(storage, age) = 1) }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/
-theorem ifTrue : ⊨ dl!{ [ if (true) { age = 1; } else { age = 2; }; ] age == 1 } := by
+theorem ifTrue : ⊨ᶠ dl!{ [ if (true) { age = 1; } else { age = 2; }; ] age == 1 } := by
   sol_step
   trace_state
   sol_symex
@@ -127,7 +128,7 @@ theorem ifTrue : ⊨ dl!{ [ if (true) { age = 1; } else { age = 2; }; ] age == 1
 
 /-- `if (false) { x = 2; } else { x = 1; }`, under the diamond: the `then`
 goal is the vacuous one. -/
-theorem ifFalse : ⊨ dl!{ ⟨ if (false) { x = 2; } else { x = 1; }; ⟩ x == 1 } := by
+theorem ifFalse : ⊨ᶠ dl!{ ⟨ if (false) { x = 2; } else { x = 1; }; ⟩ x == 1 } := by
   sol_symex
   sol_close
 
@@ -137,11 +138,11 @@ theorem ifFalse : ⊨ dl!{ ⟨ if (false) { x = 2; } else { x = 1; }; ⟩ x == 1
 the old table swapped the branches (`ifElseNegated`). -/
 
 /--
-trace: ⊢ ⊨ dl{ [ bool se1 = !true; if (se1) {age = 2;} else {age = 1;}; ] ¬find(storage, age) = 0 }
+trace: ⊢ ⊨ᶠ dl{ [ bool se1 = !true; if (se1) {age = 2;} else {age = 1;}; ] ¬find(storage, age) = 0 }
 -/
 #guard_msgs in
 /-- `if (!true) { age = 2; } else { age = 1; }` leaves `age != 0`. -/
-theorem ifNegated : ⊨ dl!{ [ if (!true) { age = 2; } else { age = 1; }; ] age != 0 } := by
+theorem ifNegated : ⊨ᶠ dl!{ [ if (!true) { age = 2; } else { age = 1; }; ] age != 0 } := by
   sol_step
   trace_state
   sol_symex
@@ -158,7 +159,7 @@ sequent rule it could not name; here the split is a rule like the others. -/
 /-- `if (alice.age == 4) { total = 1; } else { total = 2; } uint y = total;`
 ends with `y != 0`. -/
 theorem branchOnStorage :
-    ⊨ dl!{ [ if (alice.age == 4) { total = 1; } else { total = 2; }; uint y = total; ] y != 0 } := by
+    ⊨ᶠ dl!{ [ if (alice.age == 4) { total = 1; } else { total = 2; }; uint y = total; ] y != 0 } := by
   sol_symex
   sol_close
 
@@ -175,7 +176,7 @@ is for a value. -/
 /-- `Person storage p = c ? alice : bob; p.age = 7;` writes the person the
 condition picks. -/
 theorem ternaryOfReferences :
-    ⊨ dl!{ [ bool c = true; Person storage p = c ? alice : bob; p.age = 7;
+    ⊨ᶠ dl!{ [ bool c = true; Person storage p = c ? alice : bob; p.age = 7;
              uint r = alice.age; ] r == 7 } := by
   sol_symex
   sol_close
@@ -183,7 +184,7 @@ theorem ternaryOfReferences :
 /-- `Person memory m = c ? mx : my;` — in memory the pick is by identity:
 a write through `m` is a write to `my`. -/
 theorem ternaryOfMemoryReferences :
-    ⊨ dl!{ [ bool c = false; Person memory mx = alice; Person memory my = bob;
+    ⊨ᶠ dl!{ [ bool c = false; Person memory mx = alice; Person memory my = bob;
              Person memory m = c ? mx : my; m.age = 9; uint r = my.age; ] r == 9 } := by
   sol_symex
   sol_close
@@ -258,7 +259,7 @@ theorem branchDiamond :
 /-- Without the precondition the diamond holds too: `a` and `b` are bound
 (the parameters' `∀`), so the condition is never stuck.  Today's reading
 refuted it, in a state that binds no `a`. -/
-example : ⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 } := by
+example : ⊨ᶠ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 } := by
   sol_prove
 
 end Solidity.Examples.Tactics.Branch

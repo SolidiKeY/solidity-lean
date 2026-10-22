@@ -276,7 +276,7 @@ private def loopφ : Fml SE [] :=
 
 -- `sendNoCallbackBox`: labelled goals (`Premise.cases`).
 /--
-info: dl{ { net := if(_ = this) then net else store(net, at(_), net(_) - 3) ‖ _ := true } ⟨[ ]⟩ ; { _ := false } ⟨[ ]⟩ }
+info: dl{ { pay(_,3) ‖ _ := true } ⟨[ ]⟩ ; { _ := false } ⟨[ ]⟩ }
 -/
 #guard_msgs in
 run_meta headPremise (mkConst ``StandardExample) sendSimpleφ
@@ -287,7 +287,7 @@ info: ∀ bool ok; [ uint se1 = owner; ok = se1 .send(3); ] true
 #guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 1
 
 /--
-info: ∀ bool ok; { se1 := find(storage, owner) } ({ net := if(se1 = this) then net else store(net, at(se1), net(se1) - 3) ‖ ok := true } true ∧ { ok := false } true)
+info: ∀ bool ok; { se1 := find(storage, owner) } ({ pay(se1,3) ‖ ok := true } true ∧ { ok := false } true)
 -/
 #guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 4
 

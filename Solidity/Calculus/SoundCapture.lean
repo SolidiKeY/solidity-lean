@@ -651,7 +651,12 @@ theorem TRun.transfer_pushT (r' a' : Val C (t :: Γ) .uint) (r a : Val C Γ .uin
     (hr : r'.evalT (σ.push w) = r.evalT σ) (ha : a'.evalT (σ.push w) = a.evalT σ) :
     TRun.transfer r' a' (σ.push w) = pushedT σ w (TRun.transfer r a σ) := by
   simp only [TRun.transfer, hr, ha, liftedT_bind]
-  lift_fin
+  congr 1
+  funext addr
+  congr 1
+  funext amt
+  change (if σ.canPay addr amt then _ else _) = _
+  split <;> first | rfl | lift_fin
 
 theorem TRun.send_pushT (pv : Idx Γ (.val .bool)) (r' a' : Val C (t :: Γ) .uint)
     (r a : Val C Γ .uint) (hr : r'.evalT (σ.push w) = r.evalT σ)

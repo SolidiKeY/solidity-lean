@@ -8,7 +8,7 @@ What `H ⊢ φ` proves holds, its context in front, in every typed state of the
 outer scope (`Proves.sound_of`, `holds`, `Calculus/Logic.lean`), given
 that every rule the strategy fires is sound there (`Stmt.Sound`, the arms'
 part, `Premise.Sound` per premise, proved in `Calculus/Sound.lean`:
-`Stmt.sound`, `Proves.sound`, `Proves.valid`).  This module is the
+`Stmt.sound`, `Proves.sound`, `Proves.fmlValid`).  This module is the
 structural part, which does not depend on any arm: the context is monotone
 and keeps a conjunction (`Hyps.wrap_and`), as every entry is an
 implication, an update or a universal; `closeTrue` holds behind a context
@@ -59,8 +59,8 @@ scoped macro "hyps_wrap_and" : tactic => `(tactic| (
       Upd.afterT_and f g fun σ' x y => h σ' x y
   | havoc H ih =>
     intro φ ψ χ h
-    exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt =>
-      h _ (f st nt) (g st nt)
+    exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt sb =>
+      h _ (f st nt sb) (g st nt sb)
   | all H x p ih =>
     intro φ ψ χ h
     exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v => h _ (f v) (g v)
@@ -130,7 +130,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       refine Upd.afterT_intro (fun he => ?_) fun _ σ' _ => h σ'
       rw [Upd.popsOnly_globT τ U hb'.1] at he
       cases he
-  | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
+  | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ _ => h _
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ => h _
   | bind H m x t ih =>
     intro φ hb h

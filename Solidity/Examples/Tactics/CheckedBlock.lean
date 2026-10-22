@@ -30,12 +30,12 @@ open scoped Scoped
 /-! ## 1 · The underflow -/
 
 /-- Outside the block, `0 - 1` reverts, and the box holds of `false`. -/
-theorem underflowBox : ⊨ dl!{ [ uint x = 0; x -= 1; ] false } := by
+theorem underflowBox : ⊨ᶠ dl!{ [ uint x = 0; x -= 1; ] false } := by
   sol_symex
   sol_close
 
 /-- Inside it, the run fails the `assert` first: the box does not hold. -/
-theorem underflowChecked : ¬ (⊨ dl!{ [ checked { uint x = 0; x -= 1; }; ] false }) :=
+theorem underflowChecked : ¬ (⊨ᶠ dl!{ [ checked { uint x = 0; x -= 1; }; ] false }) :=
   fun h => Modality.afterRunTR_not_panic (h (State.init _)) (by decide +kernel)
 
 /-! What the block writes: `1 <= x` before `x -= 1`. -/
@@ -49,24 +49,24 @@ info: dl{ [ uint x = 0; assert(1 <= x); x -= 1; ] false } : Fml StandardExample 
 /-! ## 2 · Proofs inside the block -/
 
 /-- In range, the guard holds: `5 - 1`. -/
-theorem inRange : ⊨ dl!{ [ uint x = 5; checked { x -= 1; }; ] x == 4 } := by
+theorem inRange : ⊨ᶠ dl!{ [ uint x = 5; checked { x -= 1; }; ] x == 4 } := by
   sol_symex
   sol_close
 
 /-- A bound on the inputs discharges the guard of `a + 1`. -/
-theorem bounded : ⊨ dl!{ ∀ uint a; a <= 100 → [ uint y; checked { y = a + 1; }; ] y <= 101 } := by
+theorem bounded : ⊨ᶠ dl!{ ∀ uint a; a <= 100 → [ uint y; checked { y = a + 1; }; ] y <= 101 } := by
   sol_symex
   sol_close
 
 /-- Without one, `a + 1` may overflow: the box fails at `a = 2^256 - 1`. -/
-theorem unbounded : ¬ (⊨ dl!{ ∀ uint a; [ checked { uint y = a + 1; }; ] true }) :=
+theorem unbounded : ¬ (⊨ᶠ dl!{ ∀ uint a; [ checked { uint y = a + 1; }; ] true }) :=
   fun h => Modality.afterRunTR_not_panic (h (State.init _) ⟨((2 ^ 256 - 1 : Nat) : Int), by decide⟩)
     (by decide +kernel)
 
 /-! ## 3 · Evaluation order -/
 
 /-- `z > 0 && z - 1 >= 0`: `z - 1` is guarded only where it is evaluated. -/
-theorem shortCircuit : ⊨ dl!{ [ uint z = 0; bool b; checked { b = z > 0 && z - 1 >= 0; }; ] b == false } := by
+theorem shortCircuit : ⊨ᶠ dl!{ [ uint z = 0; bool b; checked { b = z > 0 && z - 1 >= 0; }; ] b == false } := by
   sol_symex
   sol_close
 
@@ -93,13 +93,13 @@ info: dl{
 #guard_msgs in
 #check (dl!{ ∀ uint y; [ checked { uint z = 0; uint w = 1 / z + (y + 1); }; ] false } : Fml StandardExample [])
 
-theorem haltsFirst : ⊨ dl!{ ∀ uint y; [ checked { uint z = 0; uint w = 1 / z + (y + 1); }; ] false } := by
+theorem haltsFirst : ⊨ᶠ dl!{ ∀ uint y; [ checked { uint z = 0; uint w = 1 / z + (y + 1); }; ] false } := by
   sol_symex
   sol_close
 
 /-- A narrow type's check is an `assert` inside the block: `250 + 10` at
 `uint8` fails it. -/
-theorem narrow : ¬ (⊨ dl!{ [ checked { uint8 x = 250; x += 10; }; ] false }) :=
+theorem narrow : ¬ (⊨ᶠ dl!{ [ checked { uint8 x = 250; x += 10; }; ] false }) :=
   fun h => Modality.afterRunTR_not_panic (h (State.init _)) (by decide +kernel)
 
 /-! ## 4 · `ignoringOverflow { … }`: an overflow assumed away
@@ -122,18 +122,18 @@ info: dl{ ⟨ uint x = 0; if (1 <= x) {} else {assume(false);}; x -= 1; ⟩ fals
 #check (dl!{ ⟨ ignoringOverflow { uint x = 0; x -= 1; }; ⟩ false } : Fml StandardExample [])
 
 /-- The underflow is assumed away: even `false` holds after it. -/
-theorem underflowIgnored : ⊨ dl!{ ⟨ ignoringOverflow { uint x = 0; x -= 1; }; ⟩ false } := by
+theorem underflowIgnored : ⊨ᶠ dl!{ ⟨ ignoringOverflow { uint x = 0; x -= 1; }; ⟩ false } := by
   sol_symex
   sol_close
 
 /-- Termination with `y > a`, for every `a` but the one where `a + 1`
 overflows. -/
-theorem endsIgnoring : ⊨ dl!{ ∀ uint a; ⟨ uint y; ignoringOverflow { y = a + 1; }; ⟩ y > a } := by
+theorem endsIgnoring : ⊨ᶠ dl!{ ∀ uint a; ⟨ uint y; ignoringOverflow { y = a + 1; }; ⟩ y > a } := by
   sol_symex
   sol_close
 
 /-- Without the block it is false: at `a = 2^256 - 1` the run reverts. -/
-theorem endsPlain : ¬ (⊨ dl!{ ∀ uint a; ⟨ uint y; y = a + 1; ⟩ y > a }) :=
+theorem endsPlain : ¬ (⊨ᶠ dl!{ ∀ uint a; ⟨ uint y; y = a + 1; ⟩ y > a }) :=
   fun h => Modality.afterRunTR_diamond_fail (h (State.init _) ⟨((2 ^ 256 - 1 : Nat) : Int), by decide⟩)
     (by decide +kernel)
 

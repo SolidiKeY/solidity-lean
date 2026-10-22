@@ -175,7 +175,7 @@ theorem underAndRight (left : Fml C Γ) {a b : Fml C Γ} (h : Fml.Leads a b) :
     Fml.Leads (.and left a) (.and left b) := fun σ hp => ⟨hp.1, h σ hp.2⟩
 
 theorem underHavoc {a b : Fml C Γ} (h : Fml.Leads a b) :
-    Fml.Leads (.havoc a) (.havoc b) := fun σ hp st nt => h (σ.havoc st nt) (hp st nt)
+    Fml.Leads (.havoc a) (.havoc b) := fun σ hp st nt sb => h (σ.havoc st nt sb) (hp st nt sb)
 
 theorem underAnon (xs : List ((t : LTy) × Idx Γ t))
     {a b : Fml C Γ} (h : Fml.Leads a b) :

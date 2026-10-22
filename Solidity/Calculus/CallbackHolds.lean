@@ -22,7 +22,7 @@ Proved: with no payment in a formula the two readings agree
 (`holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`, from
 `Prog.exec_run` and `Frames.exec_run`).  `ProvesC`'s soundness against
 `ValidC` (`Calculus/Callback.lean`) is `Calculus/CallbackSound.lean`'s
-`ProvesC.valid`.
+`ProvesC.fmlValid`.
 -/
 
 namespace Solidity
@@ -58,7 +58,7 @@ def holdsC (I : Fml C []) (pay : Bool) : {Γ : Ctx} → State C Γ → Fml C Γ 
   | _, σ, .upd m U φ => U.afterT m σ (holdsC I pay · φ)
   | _, σ, .modal m P κ φ =>
     ∀ o, ExecP (I.stateInv pay) σ P o → o.thenF (I.stateInv pay) κ m (holdsC I pay · φ)
-  | _, σ, .havoc φ => ∀ st nt, holdsC I pay (σ.havoc st nt) φ
+  | _, σ, .havoc φ => ∀ st nt sb, holdsC I pay (σ.havoc st nt sb) φ
   | _, σ, .all _ p φ => ∀ v : p.Denote, holdsC I pay (σ.push (t := .val p) v) φ
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holdsC I pay (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holdsC I pay (σ.anon xs b) φ
@@ -140,7 +140,7 @@ theorem Invariant.noCallsBack (I : Invariant C) {pay : Bool} : I.fml.callsBack p
 in particular. -/
 def Invariant.top : Invariant C := ⟨.tt, rfl⟩
 
-/-- Valid with callbacks: true in every typed state, a `transfer` and a
+/-- Fml.Valid with callbacks: true in every typed state, a `transfer` and a
 `send` calling back too unless `pay` is unset. -/
 def ValidC (I : Invariant C) (φ : Fml C []) (pay : Bool := true) : Prop :=
   ∀ σ : State C [], holdsC I.fml pay σ φ
@@ -168,7 +168,7 @@ the semantics' invariant, a payment calling back under `withCallback`. -/
 def holdsT (ts : TransferSem C) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
   holdsC ts.inv.fml ts.pay σ φ
 
-/-- Valid under a transfer semantics. -/
+/-- Fml.Valid under a transfer semantics. -/
 def ValidT (ts : TransferSem C) (φ : Fml C []) : Prop := ∀ σ : State C [], holdsT ts σ φ
 
 theorem validT_noCallback {I : Invariant C} {φ : Fml C []} :
@@ -260,7 +260,7 @@ theorem holdsC_iff_holds {I : Fml C []} {pay : Bool} : {Γ : Ctx} → (φ : Fml 
     rw [e]
     exact after_frames_iff h.1.1 h.1.2 m _
   | _, .havoc φ, h, σ =>
-    forall_congr' fun _ => forall_congr' fun _ => holdsC_iff_holds φ h _
+    forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ => holdsC_iff_holds φ h _
   | _, .all _ _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
   | _, .bind m _ t φ, h, σ => by
     have e : (fun v : t.TDenote C σ.H => holdsC I pay (σ.push v) φ) =
@@ -315,24 +315,24 @@ theorem holds_of_holdsC_imp {I : Fml C []} {pay : Bool} {Γ Γ₁ Γ₀ : Ctx} {
     (hφ : φ.callsBack pay = false) : holds σ (.imp a (.modal m P κ φ)) :=
   fun h => holds_of_holdsC_modal (H ((holdsC_iff_holds a ha σ).2 h)) hφ
 
-/-- **Valid with callbacks is valid without**, for `pre → [ P ] post`. -/
+/-- **Fml.Valid with callbacks is valid without**, for `pre → [ P ] post`. -/
 theorem valid_of_validC {I : Invariant C} {pay : Bool} {Γ₁ Γ₀ : Ctx} {a : Fml C []}
     {m : Modality} {P : Prog C [] Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
     (H : ValidC I (.imp a (.modal m P κ φ)) pay)
     (ha : a.callsBack pay = false) (hφ : φ.callsBack pay = false) :
-    Valid (.imp a (.modal m P κ φ)) :=
+    Fml.Valid (.imp a (.modal m P κ φ)) :=
   fun σ => holds_of_holdsC_imp (H σ) ha hφ
 
 /-- **With nothing calling back, valid with callbacks is valid**: under
 `transferSemantics:noCallback`, a formula with no `try` and no value call
 reads as `holds`. -/
 theorem validC_false_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
-    ValidC I φ false ↔ Valid φ :=
+    ValidC I φ false ↔ Fml.Valid φ :=
   forall_congr' fun σ => holdsC_iff_holds φ h σ
 
 /-- The same, for the transfer semantics. -/
 theorem validT_noCallback_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
-    ValidT (.noCallback I) φ ↔ Valid φ :=
+    ValidT (.noCallback I) φ ↔ Fml.Valid φ :=
   validC_false_iff h
 
 end Solidity

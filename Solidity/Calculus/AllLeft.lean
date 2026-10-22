@@ -205,7 +205,7 @@ theorem Hyps.instAll_mono {Γ₀ : Ctx} (ts : List InstLit) : {Γ : Ctx} → (H 
     Hyps.instAll_mono ts H (φ := .upd m U φ) (ψ := .upd m U ψ)
       (fun _ hτ => Upd.afterT_imp hτ h) σ hσ
   | _, .havoc H, φ, ψ, h, σ, hσ =>
-    Hyps.instAll_mono ts H (φ := .havoc φ) (ψ := .havoc ψ) (fun _ hτ st nt => h _ (hτ st nt)) σ hσ
+    Hyps.instAll_mono ts H (φ := .havoc φ) (ψ := .havoc ψ) (fun _ hτ st nt sb => h _ (hτ st nt sb)) σ hσ
   | _, .all H x p, φ, ψ, h, σ, hσ =>
     Hyps.instAll_mono ts H (φ := .all x p φ) (ψ := .all x p ψ) (fun _ hτ v => h _ (hτ v)) σ hσ
   | _, .bind H m x t, φ, ψ, h, σ, hσ =>
@@ -222,7 +222,7 @@ theorem Hyps.instAll_mono {Γ₀ : Ctx} (ts : List InstLit) : {Γ : Ctx} → (H 
 /-- **`allLeft` at a leaf**: the sequent with its `∀` premises instantiated
 is valid only where the sequent is. -/
 theorem Hyps.instAll_valid (ts : List InstLit) {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ}
-    (h : Valid ((H.instAll ts).wrap φ)) : Valid (H.wrap φ) :=
+    (h : Fml.Valid ((H.instAll ts).wrap φ)) : Fml.Valid (H.wrap φ) :=
   fun σ => H.instAll_mono ts (fun _ h => h) σ (h σ)
 
 end Solidity

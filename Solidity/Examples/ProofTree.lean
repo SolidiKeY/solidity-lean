@@ -218,7 +218,7 @@ replayed walk touches only them. -/
 
 /--
 info: Try this:
-  apply Proves.valid
+  apply Proves.fmlValid
     apply cases .sendNoCallbackBox <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
@@ -228,7 +228,7 @@ info: Try this:
       sol_close
 -/
 #guard_msgs in
-example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+example : ⊨ᶠ dl!{ [ ok = to.send(5); ] true } := by
   sol_derive?
 
 /-! The box walk replayed beside another open goal, which it leaves alone,
@@ -236,9 +236,9 @@ in the scoped calculus's own constructors: the parameter's `∀` is
 `allRight`, the hidden binder of `ok`, which the program assigns without
 declaring, `bindIntro`. -/
 
-example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
+example : (⊨ᶠ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   refine ⟨?_, ?_⟩
-  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.fmlValid (R := RuleSet.all) ?_
   refine Proves.allRight ?_
   refine Proves.bindIntro ?_
   apply Proves.cases (Taclet.step_eq .sendNoCallbackBox) rfl <;>
@@ -270,7 +270,7 @@ closed: 0 open goal(s), 6 node(s), 3 branch(es)
 
 /--
 info: Try this:
-  apply Proves.valid
+  apply Proves.fmlValid
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
     apply cases .sendNoCallbackDiamond <;>
@@ -284,7 +284,7 @@ info: Try this:
       sol_close
 -/
 #guard_msgs in
-example : ⊨ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
+example : ⊨ᶠ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
   sol_derive?
 
 /-! The same two by the reflective driver (`Derive.residue`, its
@@ -301,6 +301,8 @@ example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
 /--
 info: Try this:
   sol_prove (steps := 128)
+    sol_leaf
+    sol_close
 -/
 #guard_msgs in
 example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
@@ -386,7 +388,7 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
 
 /--
 info: Try this:
-  apply Proves.valid
+  apply Proves.fmlValid
     apply update .storageFieldWriteSave
     apply unfold .transfer_unfold_rightSndArgument
     apply unfold .localValueDeclInitDrop
@@ -398,11 +400,11 @@ info: Try this:
     sol_close
 -/
 #guard_msgs in
-/-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;`: on `⊨ φ` the
-walk starts with `apply Proves.valid`; the payment, once its amount is
+/-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;`: on `⊨ᶠ φ` the
+walk starts with `apply Proves.fmlValid`; the payment, once its amount is
 captured, is one update (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
-    ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
+    ⊨ᶠ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   sol_derive?
 
 /-! ## `sol_prove?`: the walk in one evaluation
@@ -985,10 +987,10 @@ info: Try this:
       (id (Eq.refl true))
 -/
 #guard_msgs in
-example : Valid (dl!{ true } : Fml StandardExample []) := by sol_exact?
+example : Fml.Valid (dl!{ true } : Fml StandardExample []) := by sol_exact?
 
 /-- Replay the offered certificate without tactic search. -/
-example : Valid (dl!{ true } : Fml StandardExample []) := by
+example : Fml.Valid (dl!{ true } : Fml StandardExample []) := by
   exact
     Decide.InputReduction.valid_of_decide
       ((DeclarationReduction.certified Fml.tt DeclarationFacts.valid_true).input?.get

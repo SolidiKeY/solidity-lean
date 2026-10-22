@@ -12,7 +12,7 @@ are the last two, the run outside both blocks the first).
 
 Lean states a calculus option in the theorem, not in a setting: the reading is an
 argument of the validity the theorem proves (`ValidT ts φ`, `ValidC I φ pay`,
-the notations `⊨[I]`, `⊨ₙ[I]`, `⊨ₜ[m]` of `Theorems.lean`), so a proof under one option
+the notations `⊨ᶠ[I]`, `⊨ᶠₙ[I]`, `⊨ᶠₜ[m]` of `Theorems.lean`), so a proof under one option
 can never be read as one under another.
 
 | Milestone | What | Status |
@@ -43,12 +43,12 @@ forks where `Stmt.forksIn pay` says, a `transfer` or a `send` only when
 `Stmt.run` otherwise (`ExecS.det`). `holdsC I pay` reads the modalities over
 those runs (`Calculus/CallbackHolds.lean`), and `holdsT ts` is `holdsC` at the
 semantics' invariant and flag. `ValidT .noCallback φ` is therefore no longer
-`Valid φ`: it is when `φ` has no `try` and no value call
+`Fml.Valid φ`: it is when `φ` has no `try` and no value call
 (`validT_noCallback_iff`, `Fml.callsBack`).  A recursive call's
 `callsBack` is its body's, every frame of the unrolling: proved off one
 frame (`sol_no_callback`, `Prog.callsBack_recUnroll`), never evaluated.
 
-`Valid` (`holds`, the deterministic run) keeps its meaning: every callee
+`Fml.Valid` (`holds`, the deterministic run) keeps its meaning: every callee
 keeps the contract's state. It is solkey's `noCallback` reading, bug 5
 included, and what `Proves` is sound for; `Examples/Tactics/TryCatch.lean`
 (`selfCall_valid`, `selfCall_noCallback`) and
@@ -57,7 +57,7 @@ included, and what `Proves` is sound for; `Examples/Tactics/TryCatch.lean`
 `noCallback` with a typed run.
 
 **The calculus.** `ProvesC I pay` (`Calculus/Callback.lean`) is sound for
-`ValidC I φ pay` (`ProvesC.valid`, `ProvesC.validT`): its ordinary rules fire
+`ValidC I φ pay` (`ProvesC.fmlValid`, `ProvesC.validT`): its ordinary rules fire
 on a statement that does not fork under `pay`, so a gas-limited payment uses
 `transferNoCallbackBox`/`sendNoCallbackBox` there, and `plain` hands a goal
 with nothing calling back to `Proves`. Its sequent prints as
@@ -314,14 +314,14 @@ nothing tells what a recycled slot of the starting storage holds, and
 `tokens.push(); assert(tokens[tokens.length - 1].value == 0);` is refuted at
 that storage (`pushRead_solc_refuted`, `Examples/Tactics/TailMode.lean`).
 Whether to assume the tails clean is an option: `TailMode.solc` assumes
-nothing (the reading of `Valid`), `TailMode.clean` assumes every shadow an
+nothing (the reading of `Fml.Valid`), `TailMode.clean` assumes every shadow an
 ordinary default (`Storage.CleanTail`, `Typing/CleanTail.lean`: a word at
 its default, a dynamic array of length `0` whose shadow is one too, a
 mapping anything, since no clearing reaches a mapping's entries).
 
-**The reading.** `ValidTail .solc φ` is `Valid φ`; `ValidTail .clean φ` is
-`Valid (cleanTail(storage) = true → φ)` (`Calculus/TailMode.lean`), a
-formula, so `Proves.valid` proves it unchanged and the premise enters the
+**The reading.** `ValidTail .solc φ` is `Fml.Valid φ`; `ValidTail .clean φ` is
+`Fml.Valid (cleanTail(storage) = true → φ)` (`Calculus/TailMode.lean`), a
+formula, so `Proves.fmlValid` proves it unchanged and the premise enters the
 sequent by `impRight`. `cleanTail(s)` is a symbol (`Op1.cleanTail`, Lean
 only): the interpreter's test, a fold the kernel evaluates
 (`Storage.cleanTailB`, `Semantics/StorageWt.lean`, deciding
@@ -358,7 +358,7 @@ expose nothing has clean tails in every storage it reaches from its
 deployment (`ReachableBy.cleanTail`), so what `.clean` proves holds there
 (`ValidTail.holds_reachable`, `pushRead_reachable` in
 `Examples/Tactics/TailMode.lean`).  The reading is the deterministic run's
-(`Valid`): under the callback reading a callee's own run is not checked.
+(`Fml.Valid`): under the callback reading a callee's own run is not checked.
 
 **The runner.** `scripts/test-solidity.mjs` states a contract's plain
 obligations (neither a specification nor one that calls back, O7) under
@@ -391,8 +391,8 @@ leaves, prove the recycled slot's default (`pushRead_clean`,
 
 | Option | `ValidTail` | The starting storage | Proved of a recycled slot |
 |---|---|---|---|
-| `solc` | `Valid φ` | any typed storage | what the program wrote there, nothing of the start |
-| `clean` | `Valid (cleanTail(storage) = true → φ)` | its shadows ordinary defaults | the default, unless the program wrote it |
+| `solc` | `Fml.Valid φ` | any typed storage | what the program wrote there, nothing of the start |
+| `clean` | `Fml.Valid (cleanTail(storage) = true → φ)` | its shadows ordinary defaults | the default, unless the program wrote it |
 
 **Not done.** `next(b)` (the alias of an empty `push`, `p[p.length]`)
 reaches the closer as the index `obsL(q)` and is handled so; a `nextIn`
@@ -404,18 +404,15 @@ premise.
 ## O7. The test runner reads callbacks
 
 **Decision.** `scripts/test-solidity.mjs` reports `proved` for a
-kernel-checked statement, and `⊢ N.f.problem` states `Valid`, bug 5
+kernel-checked statement, and `⊢ N.f.problem` states `Fml.Valid`, bug 5
 included: `tests/solc/open`'s `trySuccessKeepsStorageUnsound` and
 `callKeepsStorageUnsound` were proved, and fail on the EVM, where the callee
 is the contract itself. So `testObligation` (`Frontend/Testing.lean`) states
-a plain obligation as `ValidT .noCallback N.f.problem` where both hold:
-
-* the function, a modifier it applies or a function it inlines holds a
-  `try` of a callee not declared `view` or `pure`, or a low-level
-  `call`/`delegatecall` (`SolcFun.writingCall`, read off solc's AST;
-  `ImportRow.writingCall`);
-* the obligation calls back (`Fml.callsBack false`, reduced by `whnf`; a
-  value that does not reduce counts as calling back).
+the actual obligation, plain or specified, as callback validity whenever
+`Fml.callsBack false` is true (a value that does not reduce counts as true).
+`SolcFun.writingCall` records bare high-level external calls as well as
+`try` and low-level calls, but metadata cannot override the obligation's
+operational semantics.
 
 It is proved by `sol_prove` (O3), the goal read at the obligation's value
 and the declaration stated at `N.f.problem`; one with a recursive call by
@@ -423,17 +420,14 @@ and the declaration stated at `N.f.problem`; one with a recursive call by
 (`sol_no_callback`), a recursive storage or memory return by its contract
 over the callback runs (`ProvesC.recContract`, `ProvesC.recContractM`,
 `docs/kernel-port.md` "Recursion"). Elsewhere it stays
-`⊢ N.f.problem`: with nothing calling back `Valid` is the reading
+`⊢ N.f.problem`: with nothing calling back `Fml.Valid` is the reading
 (`validT_noCallback_iff`).
 
-**Why the callee's mutability.** solc calls a `view` or `pure` function by
-`STATICCALL`, under which any state write reverts, so a `try` of one leaves
-the caller's storage and balance as they were: `Valid`'s reading is the
-EVM's there (`tryArgumentSideEffect`, `try id(postinc())`, stays proved).
-The model does not record the mutability (`ExtCall`, O1 "Not done": 5D),
-so this step is argued, not a theorem; and `Valid`'s oracle still answers
-two equal calls alike, which a `view` callee reading the caller's state
-between writes need not.
+**Callee mutability.** The operational `ExtCall` does not yet record static
+call restrictions (O1, 5D). Consequently even a `view` or `pure` external
+call receives the conservative callback reading. Some previously proved
+static-call rows may remain pending until that restriction is represented
+and proved; metadata alone does not justify plain validity.
 
 **Where it lives.** In the runner alone: `N.f.problem` is still one table
 of formulas (`solc_scoped_problems`), the reading the statement's type. The

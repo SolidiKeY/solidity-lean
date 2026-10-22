@@ -5,15 +5,15 @@ import Solidity.Tools.Verify
 
 Each verdict of `Tools/Verify.lean` once: a specification proved (with the
 theorem as a `Try this:` suggestion), one refuted with a certified
-counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
+counterexample (the kernel checked `¬ ⊨ᶠ spec[C]{f}`), one refuted by its
 `assignable` frame, one whose mapping-layout premise is proved structurally
 rather than by finite evaluation, one refuted by a failed `assert`, and one given up on: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula,
 and on a contract with a struct, both arrays and a mapping.
 
 Both read the scoped calculus (`open scoped Solidity.Scoped`,
-`docs/intrinsic.md`): `#verify` states `⊨ spec[C]{f}` of the scoped
-obligation (`Valid`), and a certificate is the kernel's `¬ ⊨` of that
+`docs/intrinsic.md`): `#verify` states `⊨ᶠ spec[C]{f}` of the scoped
+obligation (`Fml.Valid`), and a certificate is the kernel's `¬ ⊨ᶠ` of that
 statement; `#counterexample` evaluates scoped formulas over the typed state
 and the typed run with fuel (`Fml.eval3`, `Tools/Counterexample.lean`).
 -/
@@ -51,12 +51,12 @@ def Counter : Contract := contract!{
 info: ✓ inc
 ---
 info: Try this:
-  theorem inc_spec : ⊨ spec[Counter]{inc} := by sol_spec
+  theorem inc_spec : ⊨ᶠ spec[Counter]{inc} := by sol_spec
 -/
 #guard_msgs in #verify Counter.inc
 
-/-- The suggestion, pasted: the scoped obligation (`Valid`). -/
-theorem inc_spec : ⊨ spec[Counter]{inc} := by sol_spec
+/-- The suggestion, pasted: the scoped obligation (`Fml.Valid`). -/
+theorem inc_spec : ⊨ᶠ spec[Counter]{inc} := by sol_spec
 
 /--
 info: ✗ incTwice (certified):
@@ -192,7 +192,7 @@ reader. Compilation errors are reported, never silently dropped. -/
 def declarationRanges : Fml Declarations [] :=
   declaration_facts[Declarations]
 
-theorem declarationRanges_valid : ⊨ declarationRanges := by sol_decl_facts
+theorem declarationRanges_valid : ⊨ᶠ declarationRanges := by sol_decl_facts
 
 section
 local instance : InContract := ⟨Declarations⟩
@@ -200,13 +200,13 @@ local instance : InContract := ⟨Declarations⟩
 /-- A declaration supplies a range, not a particular stored value. -/
 example : True := by
   fail_if_success
-    have : ⊨ dl!{ ∀ uint k; people[k].age == 0 } := by sol_decl_facts
+    have : ⊨ᶠ dl!{ ∀ uint k; people[k].age == 0 } := by sol_decl_facts
   trivial
 
 /-- An array's index can fail even though its element type is a uint. -/
 example : True := by
   fail_if_success
-    have : ⊨ dl!{ 0 <= xs[0] ∧ xs[0] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 } := by
+    have : ⊨ᶠ dl!{ 0 <= xs[0] ∧ xs[0] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 } := by
       sol_decl_facts
   trivial
 

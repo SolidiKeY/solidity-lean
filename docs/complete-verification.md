@@ -548,7 +548,7 @@ boundaries, and checked unsigned no-wrap. Both intermediate-overflow and
 intermediate-underflow cancellation are tested: the final affine expression
 can equal the input while an earlier operation still failed. An equality of
 two identical failed closed expressions has an explicit kernel-checked
-original counterstate and a `¬ Valid` theorem. Generated quantified mapping
+original counterstate and a `¬ Fml.Valid` theorem. Generated quantified mapping
 facts and the retained user requirement also pass through the checked helper;
 a false quantified user premise is rejected.
 

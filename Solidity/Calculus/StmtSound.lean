@@ -9,7 +9,7 @@ import Solidity.Calculus.SoundCatch
 The arms (`Stmt.stepSound_arms`, `Calculus/SoundStep.lean`) and the
 blocks' (`Stmt.sound_call`, `Stmt.sound_tryCall`, `Stmt.sound_loop`),
 assembled: `Stmt.sound`, every rule sound in every typed state, with no
-hypothesis.  The sequent's soundness (`Proves.sound`, `Proves.valid`) is
+hypothesis.  The sequent's soundness (`Proves.sound`, `Proves.fmlValid`) is
 `Calculus/Sound.lean`'s, which adds the sequent's own rules.
 
 Decisions 15 and 16 took two conditions away (a push at the bound is

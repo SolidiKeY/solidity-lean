@@ -724,7 +724,7 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
 /-- **Completeness on the fragment**: the decision returns a certificate,
 and the formula is valid exactly when the arithmetic decision says so. -/
 theorem auto_complete (φ : Fml C []) (h : φ.inExact = true) (hb : φ.exactBounded = true) :
-    ∃ r, dependentReduction? φ = some r ∧ (Valid φ ↔ r.arithmetic.guarded.decide = true) := by
+    ∃ r, dependentReduction? φ = some r ∧ (Fml.Valid φ ↔ r.arithmetic.guarded.decide = true) := by
   obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp (dependentReduction?_isSome φ h hb)
   exact ⟨r, hr, r.valid_iff.trans (r.arithmetic.valid_iff.trans (AFml.decide_iff _).symm)⟩
 

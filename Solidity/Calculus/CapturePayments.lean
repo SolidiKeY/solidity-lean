@@ -1,4 +1,4 @@
-import Solidity.Calculus.SoundKit
+import Solidity.Calculus.SoundCapture
 import Solidity.Semantics.CallbackCapture
 
 /-!
@@ -30,15 +30,17 @@ abbrev pushOut {H : HTy} (v : PrimTy.uint.Denote) (x : Out C H Γ) : Out C H (.v
 runs with callbacks as the other does, the local kept. -/
 theorem transfer_push {J : StateInv C} (hp : J.pay = true) {r a : Val C Γ .uint}
     {r' a' : Val C (.val .uint :: Γ) .uint} {σ : State C Γ} {v : PrimTy.uint.Denote}
-    (h : TRun.transfer r' a' (σ.push (t := .val .uint) v) =
-      (TRun.transfer r a σ).map (pushOut v))
+    (hr : r'.evalT (σ.push (t := .val .uint) v) = r.evalT σ)
+    (ha : a'.evalT (σ.push (t := .val .uint) v) = a.evalT σ)
     {o : COut C σ.H Γ} (he : ExecS J σ (.transfer r a) o) :
     ExecS J (σ.push (t := .val .uint) v) (.transfer r' a') (o.map (pushOut v)) := by
+  have h := TRun.transfer_pushT σ (t := .val .uint) v r' a' r a hr ha
+  change TRun.transfer r' a' (σ.push v) = (TRun.transfer r a σ).map (pushOut v) at h
   cases he with
   | det hf => exact absurd (hp.symm.trans hf) (by decide)
   | transferHalt hpay ht => exact .transferHalt hpay (by rw [h, ht]; rfl)
   | transferViolated hpay ht hj => exact .transferViolated hpay (by rw [h, ht]; rfl) hj
-  | @transferResume _ _ _ _ o₁ _ _ hpay ht hj hk =>
+  | @transferResume _ _ _ _ o₁ _ _ sb hpay ht hj hk =>
     exact ExecS.transferResume (σ := σ.push (t := .val .uint) v) (o₁ := pushOut v o₁) hpay
       (by rw [h, ht]; rfl) hj hk
 
@@ -46,16 +48,21 @@ theorem transfer_push {J : StateInv C} (hp : J.pay = true) {r a : Val C Γ .uint
 theorem send_push {J : StateInv C} {full : Bool} (hp : (J.pay || full) = true)
     {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
     {r' a' : Val C (.val .uint :: Γ) .uint} {σ : State C Γ} {v : PrimTy.uint.Denote}
-    (h : TRun.transfer r' a' (σ.push (t := .val .uint) v) =
-      (TRun.transfer r a σ).map (pushOut v))
+    (hr : r'.evalT (σ.push (t := .val .uint) v) = r.evalT σ)
+    (ha : a'.evalT (σ.push (t := .val .uint) v) = a.evalT σ)
     {o : COut C σ.H Γ} (he : ExecS J σ (.send pv r a full) o) :
     ExecS J (σ.push (t := .val .uint) v) (.send pv.there r' a' full) (o.map (pushOut v)) := by
+  have h := TRun.transfer_pushT σ (t := .val .uint) v r' a' r a hr ha
+  change TRun.transfer r' a' (σ.push v) = (TRun.transfer r a σ).map (pushOut v) at h
+  have hs := TRun.send_pushT σ (t := .val .uint) v pv r' a' r a hr ha
+  change TRun.send pv.there r' a' (σ.push v) = (TRun.send pv r a σ).map (pushOut v) at hs
   cases he with
   | det hf => exact absurd (hp.symm.trans hf) (by decide)
-  | sendHalt hpay ht => exact .sendHalt hpay (by rw [h, ht]; rfl)
+  | sendHalt hpay ht => exact .sendHalt hpay (by rw [hs, ht]; rfl)
+  | sendRefused hpay ht => exact .sendRefused hpay (by rw [hs, ht]; rfl)
   | sendFailed hpay ht => exact .sendFailed hpay (by rw [h, ht]; rfl)
   | sendViolated hpay ht hj => exact .sendViolated hpay (by rw [h, ht]; rfl) hj
-  | @sendResume _ _ _ _ _ _ o₁ _ _ hpay ht hj hk =>
+  | @sendResume _ _ _ _ _ _ o₁ _ _ sb hpay ht hj hk =>
     exact ExecS.sendResume (σ := σ.push (t := .val .uint) v) (o₁ := pushOut v o₁) hpay
       (by rw [h, ht]; rfl) hj hk
 
@@ -96,7 +103,7 @@ theorem Stmt.CapturesAs.transferAmt {m : Modality} {sadr : Simple C Γ .uint}
       (.cons (.declLocal .uint x (some a))
         (.cons (.transfer (.simple sadr.up) (.simple (.local .here))) .nil)) (.push .refl) := by
   intro J hJ σ o he
-  refine .inr (capture_of (fun err hv => ?_) (fun v hv => transfer_push (hJ.trans hp) ?_ he))
+  refine .inr (capture_of (fun err hv => ?_) (fun v hv => transfer_push (hJ.trans hp) ?_ ?_ he))
   · have ht : TRun.transfer (.simple sadr) a σ = .error err := by
       simp only [TRun.transfer, Val.evalT, hv]; rfl
     cases he with
@@ -104,7 +111,8 @@ theorem Stmt.CapturesAs.transferAmt {m : Modality} {sadr : Simple C Γ .uint}
     | transferHalt _ ht' => rw [ht] at ht'; cases ht'; rfl
     | transferViolated _ ht' => rw [ht] at ht'; cases ht'
     | transferResume _ ht' => rw [ht] at ht'; cases ht'
-  · simp only [TRun.transfer, Val.evalT, Simple.evalT_up, hv]; rfl
+  · simp only [Val.evalT, Simple.evalT_up]
+  · exact hv.symm
 
 /-- **`transfer_unfold_leftFstReceiver` with callbacks**: `nse.transfer(a)`
 runs as `uint se = nse; se.transfer(a)`. -/
@@ -114,7 +122,7 @@ theorem Stmt.CapturesAs.transferRecv {m : Modality} {r a : Val C Γ .uint} {x : 
       (.cons (.declLocal .uint x (some r))
         (.cons (.transfer (.simple (.local .here)) a.up) .nil)) (.push .refl) := by
   intro J hJ σ o he
-  refine .inr (capture_of (fun err hv => ?_) (fun v hv => transfer_push (hJ.trans hp) ?_ he))
+  refine .inr (capture_of (fun err hv => ?_) (fun v hv => transfer_push (hJ.trans hp) ?_ ?_ he))
   · have ht : TRun.transfer r a σ = .error err := by
       simp only [TRun.transfer, hv]; rfl
     cases he with
@@ -122,8 +130,8 @@ theorem Stmt.CapturesAs.transferRecv {m : Modality} {r a : Val C Γ .uint} {x : 
     | transferHalt _ ht' => rw [ht] at ht'; cases ht'; rfl
     | transferViolated _ ht' => rw [ht] at ht'; cases ht'
     | transferResume _ ht' => rw [ht] at ht'; cases ht'
-  · simp only [TRun.transfer, Val.evalT_up, hv]
-    cases Val.evalT σ a <;> rfl
+  · exact hv.symm
+  · simp only [Val.evalT_up]
 
 /-- **`send_unfold_rightSndArgument` with callbacks.** -/
 theorem Stmt.CapturesAs.sendAmt {m : Modality} {pv : Idx Γ (.val .bool)} {full : Bool}
@@ -134,16 +142,20 @@ theorem Stmt.CapturesAs.sendAmt {m : Modality} {pv : Idx Γ (.val .bool)} {full 
       (.push .refl) := by
   intro J hJ σ o he
   have hp' : (J.pay || full) = true := by rw [hJ]; exact hp
-  refine .inr (capture_of (fun err hv => ?_) (fun v hv => send_push hp' ?_ he))
+  refine .inr (capture_of (fun err hv => ?_) (fun v hv => send_push hp' ?_ ?_ he))
   · have ht : TRun.transfer (.simple sadr) a σ = .error err := by
       simp only [TRun.transfer, Val.evalT, hv]; rfl
+    have hs : TRun.send pv (.simple sadr) a σ = .error err := by
+      simp only [TRun.send, Val.evalT, hv]; rfl
     cases he with
     | det hf => exact absurd (hp'.symm.trans hf) (by decide)
-    | sendHalt _ ht' => rw [ht] at ht'; cases ht'; rfl
+    | sendHalt _ ht' => rw [hs] at ht'; cases ht'; rfl
+    | sendRefused _ hs' => rw [hs] at hs'; cases hs'
     | sendFailed _ ht' => rw [ht] at ht'; cases ht'
     | sendViolated _ ht' => rw [ht] at ht'; cases ht'
     | sendResume _ ht' => rw [ht] at ht'; cases ht'
-  · simp only [TRun.transfer, Val.evalT, Simple.evalT_up, hv]; rfl
+  · simp only [Val.evalT, Simple.evalT_up]
+  · exact hv.symm
 
 /-- **`send_unfold_leftFstReceiver` with callbacks.** -/
 theorem Stmt.CapturesAs.sendRecv {m : Modality} {pv : Idx Γ (.val .bool)} {full : Bool}
@@ -153,16 +165,19 @@ theorem Stmt.CapturesAs.sendRecv {m : Modality} {pv : Idx Γ (.val .bool)} {full
         (.cons (.send pv.there (.simple (.local .here)) a.up full) .nil)) (.push .refl) := by
   intro J hJ σ o he
   have hp' : (J.pay || full) = true := by rw [hJ]; exact hp
-  refine .inr (capture_of (fun err hv => ?_) (fun v hv => send_push hp' ?_ he))
+  refine .inr (capture_of (fun err hv => ?_) (fun v hv => send_push hp' ?_ ?_ he))
   · have ht : TRun.transfer r a σ = .error err := by
       simp only [TRun.transfer, hv]; rfl
+    have hs : TRun.send pv r a σ = .error err := by
+      simp only [TRun.send, hv]; rfl
     cases he with
     | det hf => exact absurd (hp'.symm.trans hf) (by decide)
-    | sendHalt _ ht' => rw [ht] at ht'; cases ht'; rfl
+    | sendHalt _ ht' => rw [hs] at ht'; cases ht'; rfl
+    | sendRefused _ hs' => rw [hs] at hs'; cases hs'
     | sendFailed _ ht' => rw [ht] at ht'; cases ht'
     | sendViolated _ ht' => rw [ht] at ht'; cases ht'
     | sendResume _ ht' => rw [ht] at ht'; cases ht'
-  · simp only [TRun.transfer, Val.evalT_up, hv]
-    cases Val.evalT σ a <;> rfl
+  · exact hv.symm
+  · simp only [Val.evalT_up]
 
 end Solidity

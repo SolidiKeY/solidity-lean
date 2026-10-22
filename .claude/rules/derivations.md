@@ -72,7 +72,7 @@ Two directories, by proof style:
   (`docs/latex.md`). Disabling grouping alone does not split `CaptureAll`.
   The checked relation is `Fml.Leads`; the final leaf still needs a proof,
   and other native rules retain their own granularity.
-- `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
+- `Examples/Tactics/` — formulas `⊨ᶠ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
 
 The notation's own tests (`ChainNotation`, `ChainRewrites`, `ExampleNames`,
@@ -86,7 +86,7 @@ one of two ways:
 
 - **by the strategy**: `sol_symex` fires the one rule each statement has,
   `sol_close` finishes the first-order goal in an arbitrary state;
-- **by a walk**, for a worked example: `apply Proves.valid`, then
+- **by a walk**, for a worked example: `apply Proves.fmlValid`, then
   one `apply` per taclet (`unfold r`, `update r`, `split r`, `Proves.check r`,
   `done r`, `empty`, `intro`; `Calculus/WalkSyntax.lean`), and
   `sol_leaf; sol_close` at each leaf. Each rule the walk takes is named
@@ -102,7 +102,7 @@ something, extend the notation (`Calculus/SurfaceNotation.lean`, its scoped
 reading `Calculus/Notation.lean`); if a goal prints with a `‹…›` escape,
 extend the printer (`Calculus/RuleSyntax.lean`, `Calculus/Delab.lean`).
 
-**Valid means every typed state** (`Valid`, `Calculus/Logic.lean`): a typed
+**Fml.Valid means every typed state** (`Fml.Valid`, `Calculus/Logic.lean`): a typed
 storage has every member, so a write under the diamond along a path through
 no array slot returns and its leaf closes (`⟨ alice.age = 1; ⟩ true`,
 pinned in `Examples/ProofTree.lean`). A write at an index, or through the

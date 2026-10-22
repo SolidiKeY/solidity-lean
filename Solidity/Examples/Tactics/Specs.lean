@@ -61,10 +61,10 @@ local instance : InContract := ⟨ERC20⟩
 
 open scoped Scoped
 /-- `approve(spender, amount)`: `ensures \result && allowance[msg.sender][spender] == amount`. -/
-theorem erc_approve : ⊨ spec!{ approve } := by sol_spec
+theorem erc_approve : ⊨ᶠ spec!{ approve } := by sol_spec
 set_option maxHeartbeats 1000000 in
 /-- `_mint(to, amount)`: the balance and the supply both up by `amount`. -/
-theorem erc_mint : ⊨ spec!{ _mint } := by sol_spec
+theorem erc_mint : ⊨ᶠ spec!{ _mint } := by sol_spec
 end
 
 def Tally : Contract := contract!{
@@ -111,12 +111,12 @@ info: dl{
 #guard_msgs in #check spec!{ pay }
 
 /-- `inc()`: `assignable count`, so `total` and every `seen[k]` are kept. -/
-theorem tally_inc : ⊨ spec!{ inc } := by sol_spec
+theorem tally_inc : ⊨ᶠ spec!{ inc } := by sol_spec
 /-- `mark()`: `assignable seen[msg.sender]`, so every other key is kept. -/
-theorem tally_mark : ⊨ spec!{ mark } := by sol_spec
+theorem tally_mark : ⊨ᶠ spec!{ mark } := by sol_spec
 /-- `pay()`, `payable`: the sender's ledger entry up by `msg.value`, the
 storage untouched. -/
-theorem tally_pay : ⊨ spec!{ pay } := by sol_spec
+theorem tally_pay : ⊨ᶠ spec!{ pay } := by sol_spec
 end
 
 /-! ## Returns by name
@@ -154,9 +154,9 @@ info: dl{
 #guard_msgs in #check spec!{ order }
 
 /-- `inc(x)`: its named return `r` is `result`. -/
-theorem ordered_inc : ⊨ spec!{ inc } := by sol_spec
+theorem ordered_inc : ⊨ᶠ spec!{ inc } := by sol_spec
 /-- `order(x, y)`: `lo <= hi` of the two returns. -/
-theorem ordered_order : ⊨ spec!{ order } := by sol_spec
+theorem ordered_order : ⊨ᶠ spec!{ order } := by sol_spec
 end
 
 /-! The `this` adapter must preserve the existing name-resolution priority,
@@ -234,11 +234,11 @@ local instance : InContract := ⟨LedgerNegation⟩
 open scoped Scoped
 
 /-- `ledger()`: negation is unbounded integer subtraction from zero. -/
-theorem ledger_negation : ⊨ spec!{ ledger } := by sol_spec
+theorem ledger_negation : ⊨ᶠ spec!{ ledger } := by sol_spec
 /-- `unsigned(value)`: the unsigned negand widens beside the ledger integer. -/
-theorem unsigned_negation : ⊨ spec!{ unsigned } := by sol_spec
+theorem unsigned_negation : ⊨ᶠ spec!{ unsigned } := by sol_spec
 /-- `reversed(value)`: the ledger context also reaches the left operand. -/
-theorem reversed_negation : ⊨ spec!{ reversed } := by sol_spec
+theorem reversed_negation : ⊨ᶠ spec!{ reversed } := by sol_spec
 end
 
 end Solidity.Examples.Tactics.Specs

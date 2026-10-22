@@ -25,7 +25,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I; noCallback] φ }` | printing only: the same where a `transfer` and a `send` do not call back (`ProvesC I false`) |
 | `tm{ find(save(s, p, v), q) }` | a scoped term `Tm`, every name a Lean variable (where `Calculus/TermLib.lean` is imported) |
-| `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
+| `⊨ᶠ φ` | `Fml.Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
 | `σ ⊧ φ` | `holds σ φ`, likewise |
 
 At a state variable a write is `save(storage, gsp, se)` and a read
@@ -133,8 +133,8 @@ syntax:30 dl_term:30 " && " dl_term:31 : dl_term
 syntax:25 dl_term:25 " || " dl_term:26 : dl_term
 /-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
 syntax:max "at" noWs "(" dl_term ")" : dl_term
-/-- `if(r = this) then net else …`: KeY's `\if … \then … \else`, the form of a
-payment's booking (`UpdElem.pay`), and read only there. -/
+/-- Historical conditional-payment text is recognized for a migration
+diagnostic; a payment is written `pay(r, a)`. -/
 syntax:max "if" noWs "(" dl_term " = " dl_term ")" " then " dl_term " else " dl_term : dl_term
 syntax:max "(" dl_term ")" : dl_term
 /-- `(a == b)`: a comparison as a `bool` term. Parenthesised, since a bare `==`
@@ -145,9 +145,10 @@ syntax:max "‹" term "›" : dl_term
 /-- One elementary update `x := t`.  The funds and the ledger are written
 `selfBalance := selfBalance - a` and `net := store(net, at(r), net(r) - a)`
 (`+` as well), their arithmetic KeY's `int`; a payment
-`net := if(r = this) then net else store(net, at(r), net(r) - a)`. -/
+`pay(r, a)`, which also debits the balance. -/
 declare_syntax_cat dl_upd_elem (behavior := both)
 syntax dl_term " := " dl_term : dl_upd_elem
+syntax (priority := high) "pay" "(" dl_term "," dl_term ")" : dl_upd_elem
 /-- `x := a <= b`, `x := a < b` (and `>`, `>=`): a comparison captured.  A comparison has
 no term spelling of its own (`a <= b` standing alone is a formula), so the
 element carries it. -/
@@ -363,13 +364,13 @@ syntax (name := dlJudgement) "dl[" term "]{ " "⟨" "[ " sol_stmt "; " "]" "⟩"
 @[inherit_doc dlJudgement] syntax "dl[" term "]{ " "[ " sol_stmt "; " "]" " ⇝ " dl_premise " }" : term
 @[inherit_doc dlJudgement] syntax "dl[" term "]{ " "⟨ " sol_stmt "; " "⟩" " ⇝ " dl_premise " }" : term
 syntax "dl{ " dl_premise " }" : term
-/-- `⊨ φ` for a formula given as a Lean term. -/
-syntax:25 (name := validSyntax) "⊨ " term:26 : term
+/-- `⊨ᶠ φ` for a formula given as a Lean term. -/
+syntax:25 (name := validSyntax) "⊨ᶠ " term:26 : term
 /-- `σ ⊧ φ`: the formula `φ` holds in the state `σ`. -/
 syntax:50 (name := holdsSyntax) term:51 " ⊧ " term:51 : term
 
 open Lean Elab Term Meta in
-/-- `⊨ φ` is `Valid φ` and `σ ⊧ φ` is `holds σ φ` for a scoped formula
+/-- `⊨ᶠ φ` is `Fml.Valid φ` and `σ ⊧ φ` is `holds σ φ` for a scoped formula
 (`Fml`, `Calculus/Logic.lean`). -/
 def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Expr := do
   let φ ← elabTerm φ none
@@ -377,8 +378,8 @@ def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Ex
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
   match σ?, ty.getAppFn.constName?, ty.getAppArgs with
-  | none, some `Solidity.Fml, #[_, _] => mkAppM `Solidity.Valid #[φ]
-  | none, _, _ => throwError "⊨ reads a scoped formula (`Fml C []`), not{indentExpr φ}"
+  | none, some `Solidity.Fml, #[_, _] => mkAppM `Solidity.Fml.Valid #[φ]
+  | none, _, _ => throwError "⊨ᶠ reads a scoped formula (`Fml C []`), not{indentExpr φ}"
   | some σ, some `Solidity.Fml, #[C, Γ] =>
     let σ ← elabTermEnsuringType σ (mkApp2 (mkConst `Solidity.State) C Γ)
     return mkApp4 (mkConst `Solidity.holds) C Γ σ φ
@@ -386,7 +387,7 @@ def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Ex
 
 open Lean Elab Term in
 elab_rules : term
-  | `(⊨ $φ:term) => elabValidHolds none φ
+  | `(⊨ᶠ $φ:term) => elabValidHolds none φ
   | `($σ:term ⊧ $φ:term) => elabValidHolds (some σ) φ
 
 /-! ## Side conditions
@@ -1691,6 +1692,8 @@ def tmSort : TSyntax `dl_term → TPos
 /-- One elementary update of a global: `selfBalance`, `net`, `storage` or
 `memory` (`schemaUpdCore` reads a local's itself, as `UpdElem.local`). -/
 def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
+  | `(dl_upd_elem| pay($r:dl_term, $a:dl_term)) => do
+    `(UpdElem.pay $(← schemaTerm Γ .val r) $(← schemaTerm Γ .val a))
   | `(dl_upd_elem| $l:dl_term := $r:dl_term) => do
     let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
     let n := x.getId.toString
@@ -1726,9 +1729,8 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
           unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
           unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
             Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
-          `(UpdElem.pay $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val v))
-        | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)`, `… + a`, or \
-            `if(r = this) then net else store(net, at(r), net(r) - a)`"
+          Macro.throwErrorAt r "use `pay(receiver, amount)`: a payment updates both ledger and balance"
+        | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)` or `… + a`; use `pay(r, a)` for payments"
     if n == "storage" then return ← `(UpdElem.storage $(← schemaTerm Γ .storage r))
     if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
     Macro.throwErrorAt x "an elementary update of a global assigns `selfBalance`, `net`, \
@@ -1982,6 +1984,8 @@ def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
   let mut Γ' := Γ
   for e in U.raw[1].getSepArgs do
     match (⟨e⟩ : TSyntax `dl_upd_elem) with
+    | `(dl_upd_elem| pay($_:dl_term, $_:dl_term)) =>
+      acc ← `($(Lean.mkCIdent `Solidity.Upd.snoc) $acc $(← schemaUpdElem Γ ⟨e⟩))
     | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
       let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
       let n := x.getId.toString
@@ -2766,7 +2770,7 @@ def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do
 /-! ### The delaborators
 
 Each stands aside (`failure`, and Lean prints the term its own way) when all
-it would print is one `‹…›`, and `⊨`, `⊧` when it is a name: `⊨ φ`. -/
+it would print is one `‹…›`, and `⊨ᶠ`, `⊧` when it is a name: `⊨ᶠ φ`. -/
 
 /-- Printed as `‹…›` as a whole. -/
 def isEscape (s : Syntax) : Bool := s[0].isToken "‹"

@@ -33,8 +33,8 @@ Where the scoped calculus takes a step today's names otherwise:
   with no statement: a rule that leaves none goes on into the rest or past
   the frames (Gate G0, condition 6), so after a last statement it does
   nothing, and before a statement it is refused (`core_skip`); so is
-  `apply allIntro` on a parameter `Proves.valid` already bound;
-* `apply Proves.valid` binds the formula's parameters (`∀`, `cdl!`) with
+  `apply allIntro` on a parameter `Proves.fmlValid` already bound;
+* `apply Proves.fmlValid` binds the formula's parameters (`∀`, `cdl!`) with
   `allRight` at once, as today's walk leaves them free (`core_params`); an
   explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
   `apply allRight`;
@@ -120,7 +120,7 @@ def evalCoreParams : Tactic := fun _ => do
 strategy already took its step, after the silent steps: `empty` where no
 modality is left at the head (a rule that leaves no statement went past the
 frames), `allIntro` where the context holds the parameters only and no `∀`
-is left (`Proves.valid` and `core_silent` bound them).  It fails anywhere
+is left (`Proves.fmlValid` and `core_silent` bound them).  It fails anywhere
 else, so the line is checked: `apply empty` before a statement is refused. -/
 syntax (name := coreSkip) "core_skip " ident : tactic
 
@@ -273,9 +273,9 @@ scoped macro_rules
     `(tactic| first
       | (core_silent; apply Solidity.Proves.allIntro) <;> core_silent
       | core_skip allIntro)
-  | `(tactic| apply Proves.valid) =>
+  | `(tactic| apply Proves.fmlValid) =>
     `(tactic| first
-      | (refine Solidity.Proves.valid (R := RuleSet.all) ?_; core_params))
+      | (refine Solidity.Proves.fmlValid (R := RuleSet.all) ?_; core_params))
 
 end Scoped
 

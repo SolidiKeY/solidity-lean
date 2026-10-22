@@ -617,13 +617,7 @@ def updElemS (ns ms : List Expr) (e : Expr) : MetaM (Option (TSyntax `dl_upd_ele
   | some ``UpdElem.pay =>
     let r ← ppTermS ns args[3]!
     let a ← ppTermS ns args[4]!
-    if ← keyOn then
-      return some (← `(dl_upd_elem|
-        net := if($r = $(mkIdent `self):ident) then $(mkIdent `net):ident
-          else storeSt(net, at($r), selectSt(net, at($r)) - $a)))
-    return some (← `(dl_upd_elem|
-      net := if($r = $(mkIdent `this):ident) then $(mkIdent `net):ident
-        else store(net, at($r), net($r) - $a)))
+    return some (← `(dl_upd_elem| pay($r, $a)))
   | some ``UpdElem.netMt =>
     let r ← ppTermS ns args[3]!
     let a ← ppTermS ns args[4]!

@@ -1344,8 +1344,10 @@ theorem ckeeps_transfer {g : Bool} (r a : Val C Γ .uint) : CKeeps g (TRun.trans
   unfold TRun.transfer at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
-  cases h
-  exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
+  split at h
+  · cases h
+    exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
+  · cases h
 
 theorem ckeeps_send {g : Bool} (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     CKeeps g (TRun.send pv r a) := by
@@ -1354,11 +1356,7 @@ theorem ckeeps_send {g : Bool} (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint)
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   cases h
-  unfold sendT
-  split
-  · exact ⟨CTInv.setLocal (σ := σ.pay _ _) hσ pv trivial, fun _ => Storage.Grows.refl _⟩
-  · exact ⟨hσ.setLocal pv trivial, fun _ => Storage.Grows.refl _⟩
-  · exact ⟨hσ.setLocal pv trivial, fun _ => Storage.Grows.refl _⟩
+  exact ⟨hσ.setLocal pv trivial, fun _ => Storage.Grows.refl _⟩
 
 theorem MRhs.evalT_ct {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} :
     (r : MRhs C Γ R) → {g : Grew C Γ σ.H (HRef · R)} → r.evalT σ = .ok g →

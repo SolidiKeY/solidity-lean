@@ -101,7 +101,7 @@ theorem ExactReduction.elim_holds_iff {φ : Fml C []} (r : ExactReduction φ) (�
 
 /-- A countermodel of an exact reduced leaf refutes the original formula. -/
 theorem ExactReduction.refutes {φ : Fml C []} (r : ExactReduction φ) (σ : State C [])
-    (h : ¬ r.leaf.elim.holds σ AEnv.dflt) : ¬ Valid φ :=
+    (h : ¬ r.leaf.elim.holds σ AEnv.dflt) : ¬ Fml.Valid φ :=
   fun hv => h ((r.elim_holds_iff σ).2 (hv σ))
 
 /-- Produce an exact certificate only after both reductions and their

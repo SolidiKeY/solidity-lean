@@ -26,9 +26,9 @@ section Frame
 
 variable {J : StateInv C} {μ : Mutability}
 
-theorem TGFrame.havoc {Γ : Ctx} (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    TGFrame .nonpayable σ (σ.havoc st nt) :=
-  ⟨rfl, HEq.rfl, rfl, rfl, fun h => absurd rfl h⟩
+theorem TGFrame.havoc {Γ : Ctx} (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    TGFrame .nonpayable σ (σ.havoc st nt sb) :=
+  ⟨rfl, HEq.rfl, (fun h => absurd rfl h), rfl, fun h => absurd rfl h⟩
 
 mutual
 
@@ -48,8 +48,9 @@ theorem ExecS.frame : {Γ Γ' : Ctx} → {σ : State C Γ} → {s : Stmt C Γ Γ
     subst hμ
     cases ho
     obtain ⟨hg, ha⟩ := Stmt.run_frame (Stmt.transfer r a) hw d ht
-    exact ⟨hg.trans (TGFrame.havoc _ _ _), ha⟩
-  | _, _, σ, _, _, .sendFailed (pv := pv) _ _, _, d, o', ho => by
+    exact ⟨hg.trans (TGFrame.havoc _ _ _ _), ha⟩
+  | _, _, σ, _, _, .sendFailed (pv := pv) _ _, _, d, o', ho
+  | _, _, σ, _, _, .sendRefused (pv := pv) _ _, _, d, o', ho => by
     cases ho
     exact ⟨TGFrame.setLocal σ pv _, TLocAgree.set pv _ _⟩
   | _, _, σ, _, _, .sendResume (pv := pv) (r := r) (a := a) _ ht _ _, hw, d, o', ho => by
@@ -57,7 +58,7 @@ theorem ExecS.frame : {Γ Γ' : Ctx} → {σ : State C Γ} → {s : Stmt C Γ Γ
     subst hμ
     cases ho
     obtain ⟨hg, ha⟩ := Stmt.run_frame (μ := .nonpayable) (Stmt.transfer r a) hw d ht
-    refine ⟨(hg.trans (TGFrame.havoc _ _ _)).trans (TGFrame.setLocal _ pv _), ?_⟩
+    refine ⟨(hg.trans (TGFrame.havoc _ _ _ _)).trans (TGFrame.setLocal _ pv _), ?_⟩
     exact (ha.mono (W' := pv.outer d) fun _ h => by cases h).trans (TLocAgree.set pv _ _)
   | _, _, _, _, _, .iteThen (thn := thn) (o := o₁) _ hp, hw, d, o', ho => by
     have hw' : (_ && Prog.within μ thn && _) = true := hw
@@ -140,12 +141,12 @@ theorem ExecS.frame : {Γ Γ' : Ctx} → {σ : State C Γ} → {s : Stmt C Γ Γ
   | _, _, _, _, _, .tryViolated .., _, _, _, ho | _, _, _, _, _, .trySelfHalt .., _, _, _, ho
   | _, _, _, _, _, .trySelfViolated .., _, _, _, ho => by cases ho
   -- a `try` (`Stmt.within`: it pays): each clause from the state it starts in
-  | Γ, _, σ, _, _, .tryOk (ρ := ρ) (ok := ok) (st := st) (nt := nt) (r := r) (o := o₁) _ _ _ hp _,
+  | Γ, _, σ, _, _, .tryOk (ρ := ρ) (ok := ok) (st := st) (nt := nt) (sb := sb) (r := r) (o := o₁) _ _ _ hp _,
       hw, d, o', ho => by
     have hw' : ((μ == .nonpayable) && _ && _ && Prog.within μ ok && _ && _ && _) = true := hw
     simp only [Bool.and_eq_true] at hw'
-    have hh : TGFrame μ σ (σ.havoc st nt) := by
-      rw [nonpayable_of_within' hw'.1.1.1.1.1.1]; exact TGFrame.havoc σ st nt
+    have hh : TGFrame μ σ (σ.havoc st nt sb) := by
+      rw [nonpayable_of_within' hw'.1.1.1.1.1.1]; exact TGFrame.havoc σ st nt sb
     have ih := ExecP.frame hp hw'.1.1.1.2 (d + (Ext.append Γ ρ).depth)
     cases o₁ with
     | ok x =>

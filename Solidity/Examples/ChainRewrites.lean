@@ -34,7 +34,7 @@ line too (W9.4).
   for any modality `m` and postcondition `φ`, down to its last line, and on to
   the write alone (`headlineWrite`), the captures dropped;
 * §2 — on to the value under the box: `simplifyUpdate`, `applyStorageBox`,
-  `findOnSave`, and `⊨`;
+  `findOnSave`, and `⊨ᶠ`;
 * §3 — `alice.age = 42; uint x = alice.age;` read back two ways: the law in
   the update's right-hand side, and the update applied
   first, then the law (`SelectOnSaveConsr.ageWriteReadKeY`'s order, which goes
@@ -180,7 +180,7 @@ theorem headlineValueChain :
 
 /-- `alice.account.balance = 10;` reads back `10`: the chain is a proof, its last scoped line
 valid: it binds three hidden locals over `10 = 10` (`Fml.Via.valid`). -/
-theorem headlineValue : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance = 10 } :=
+theorem headlineValue : ⊨ᶠ dl!{ [ alice.account.balance = 10; ] alice.account.balance = 10 } :=
   Fml.Via.valid headlineValueChain fun _ => rfl
 
 /-! ## 3 · A law in an update's right-hand side
@@ -200,7 +200,7 @@ Then the headline's write read back (`Theory.deepFieldWriteValue`'s
 program): the write sits amid captures, and the spine merges inside out. -/
 
 /-- `alice.age = 42; uint x = alice.age;` reads back `42`: the law in the update. -/
-theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 } :=
+theorem ageWriteReadValue : ⊨ᶠ dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 } :=
   Fml.Via.valid (show dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 }
     ~*> dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
     ~[sequentialToParallel]~>
@@ -212,7 +212,7 @@ theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x =
 
 /-- `alice.age = 42; uint x = alice.age;` reads back `42`, in
 `ageWriteReadKeY`'s order: merge, apply, then the law. -/
-theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 } :=
+theorem ageWriteReadKeYValue : ⊨ᶠ dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 } :=
   Fml.Via.valid (show dl!{ [ alice.age = 42; uint x = alice.age; ] x = 42 }
     ~*> dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
     ~[sequentialToParallel]~>
@@ -240,7 +240,7 @@ def ageReadMembers :
 `10`: five updates merged inside out, the read over the write first
 (`withSt`), then the captures; the law in the update; the update applied. -/
 theorem readBackValue :
-    ⊨ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x = 10 } :=
+    ⊨ᶠ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x = 10 } :=
   Fml.Via.valid (show dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x = 10 }
     ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
             { sp2 := alice.account } { x := find(storage, sp2.balance) } x = 10 }

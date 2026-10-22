@@ -46,37 +46,37 @@ local instance : InContract := ⟨OwnStructsExample⟩
 open scoped Scoped
 
 /-- Nested members. -/
-theorem nested : ⊨ dl!{ [ line.start.x = 1; line.stop.y = 2; ] line.start.x + line.stop.y == 3 } := by
+theorem nested : ⊨ᶠ dl!{ [ line.start.x = 1; line.stop.y = 2; ] line.start.x + line.stop.y == 3 } := by
   sol_symex
   sol_close
 
 /-- A mapping member, and `delete` of its struct. -/
 theorem mappingMember :
-    ⊨ dl!{ [ accounts[7].allowance[3] = 9; accounts[7].balance = 5; ]
+    ⊨ᶠ dl!{ [ accounts[7].allowance[3] = 9; accounts[7].balance = 5; ]
       accounts[7].balance == 5 && accounts[7].allowance[3] == 9 } := by
   sol_symex
   sol_close
 
 theorem deleteMappingMember :
-    ⊨ dl!{ [ accounts[7].balance = 5; delete accounts[7]; ] accounts[7].balance == 0 } := by
+    ⊨ᶠ dl!{ [ accounts[7].balance = 5; delete accounts[7]; ] accounts[7].balance == 0 } := by
   sol_symex
   sol_close
 
 /-- An array of structs. -/
 theorem arrayOfStructs :
-    ⊨ dl!{ lines.length == 1 → [ lines[0].width = 3; lines[0].stop.x = 4; ]
+    ⊨ᶠ dl!{ lines.length == 1 → [ lines[0].width = 3; lines[0].stop.x = 4; ]
       lines[0].width == 3 && lines[0].stop.x == 4 } := by
   sol_symex
   sol_close
 
 /-- A struct literal, copied into storage. -/
 theorem literal :
-    ⊨ dl!{ [ Point memory p = Point(4, 5); line.start = p; ] line.start.y == 5 } := by
+    ⊨ᶠ dl!{ [ Point memory p = Point(4, 5); line.start = p; ] line.start.y == 5 } := by
   sol_symex
   sol_close
 
 /-- A named struct literal of the contract's `Pair`, not the table's. -/
-theorem namedLiteral : ⊨ dl!{ [ pair = Pair({b: true, a: 2}); ] pair.b == true && pair.a == 2 } := by
+theorem namedLiteral : ⊨ᶠ dl!{ [ pair = Pair({b: true, a: 2}); ] pair.b == true && pair.a == 2 } := by
   sol_symex
   sol_close
 

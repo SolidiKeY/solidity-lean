@@ -120,16 +120,16 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
             (σ.withEnv a)))
           ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext).trans hg e₀)
       have hX := holds_snapOld ((holds_declsThen hpost).2 a hA)
-      have hX' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+      have hX' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
           (Fml.callResultM R r ens ω κ φ m) := by
         cases μ with
-        | nonpayable => exact hX o.st.storage o.st.net
+        | nonpayable => exact hX o.st.storage o.st.net o.st.selfBalance
         | pure =>
           obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
-          rw [h1, h2]; exact hX
+          rw [h1, h2, hfr.selfBalance (by decide)]; exact hX
         | view =>
           obtain ⟨h1, h2⟩ := hfr.keepsSt (by decide)
-          rw [h1, h2]; exact hX
+          rw [h1, h2, hfr.selfBalance (by decide)]; exact hX
       have hY := hX' ⟨e₀, o.st.heap, ()⟩ hfr.keeps (TEnv.drop body.ext o.st.env).1
       -- the parameters as the callee was entered with them, weakened
       have hps : (TEnv.drop body.ext o.st.env : TEnv C o.st.H (.mem R :: ps)).2 =
@@ -138,11 +138,11 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
           (σ.withEnv a)).st.env) hag hw]
         exact TEnv.wk_trans _ _ ps a
       have hst : State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
-          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net).adopt
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance).adopt
             (⟨e₀, o.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R) (TEnv.drop body.ext o.st.env).1) =
           State.withOlds [.mem R] (σ.withEnv a).net (σ.withEnv a).storage
             (State.drop body.ext o.st) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl hfr.tx.symm
         show ((TEnv.drop body.ext o.st.env).1, TEnv.thin (Thin.atop (Olds ++ ps) Γ)
           (TEnv.wk e₀ (Olds ++ (ps ++ Γ))
             (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) =
@@ -157,11 +157,11 @@ theorem holds_callMemM {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : R
       rw [holds_modal_iff] at hM
       dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
       have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net).adopt
+          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance).adopt
             (⟨e₀, o.st.heap, ()⟩ : Grown σ.H fun _ => Unit)).1.push (t := .mem R) (TEnv.drop body.ext o.st.env).1) =
           o.st.withEnv (CallRet.leaveT (TEnv.wk e₀ Γ σ.env) (CallRet.mem R r hd hm)
             (TEnv.take [.mem R] (TEnv.drop body.ext o.st.env))) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hfr.selfBalance.symm hfr.tx.symm
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl hfr.tx.symm
         show ((TEnv.drop body.ext o.st.env).1, TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
           (TEnv.wk e₀ (Olds ++ (ps ++ Γ))
             (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) =
@@ -227,10 +227,10 @@ theorem useRecContractM {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {d : Nat
     {hm : (Ty.ref R).mapFree = true} {body : Unit → Prog C ([.mem R] ++ ps) ([.mem R] ++ ps)}
     {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C ([.mem R] ++ (Olds ++ ps))} (hc : RecContractM μ (body ()) req ens m)
-    («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
+    («pre» : Fml.Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Fml.Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
     (hpm : Ctx.memFree ps = true := by rfl) :
-    Valid (H.wrap (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
+    Fml.Valid (H.wrap (.modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
   H.wrap_and (φ := Fml.callPre args req m) (ψ := Fml.callPostM μ args R r ens ω κ φ m)
     (χ := .modal m (.cons (.callRec f d args (.mem R r hd hm) body) ω) κ φ)
     (fun _ h₁ h₂ => (holds_callMemM (f := f) (hd := hd) (hm := hm) (hc.1 _) hc.2.1 hc.2.2 hpm h₁ h₂ :
@@ -245,11 +245,11 @@ theorem useContractM_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {�
     {ω : Prog C (.mem R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C ([.mem R] ++ (Olds ++ ps))}
     (hc : FunContract (CallRet.mem (Γ := Γ) R r hd hm) body req ens m)
-    («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
+    («pre» : Fml.Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Fml.Valid (H.wrap (Fml.callPostM μ args R r ens ω κ φ m)))
     (hμ : Prog.withinW μ body = true := by rfl) (hw : writesRets 1 body = true := by rfl)
     (hpm : Ctx.memFree ps = true := by rfl) :
-    Valid (H.wrap (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
+    Fml.Valid (H.wrap (.modal m (.cons (.call f args (.mem R r hd hm) body) ω) κ φ)) := fun σ =>
   H.wrap_and (fun _ h₁ h₂ => holds_callMemM hc hμ hw hpm h₁ h₂) σ («pre» σ) («post» σ)
 
 end Rec

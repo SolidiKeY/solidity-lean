@@ -39,7 +39,7 @@ theorem copies_run : (Prog.run (State.init Shapes) copies).toOption.isSome = tru
   decide +kernel
 
 /-- A shorter fixed copy clears the entire typed target tail in every state. -/
-theorem tail_proved : ⊨ dl!{ wt(storage) → [ big = small; ] big[3] == 0 } := by
+theorem tail_proved : ⊨ᶠ dl!{ wt(storage) → [ big = small; ] big[3] == 0 } := by
   sol_prove (steps := 128)
 
 example : (NSTerm.save (C := Shapes) NSTerm.storage (NPTerm.root "big")

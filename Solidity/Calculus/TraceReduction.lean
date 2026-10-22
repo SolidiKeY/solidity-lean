@@ -36,7 +36,7 @@ namespace TraceReduction
 /-- No source counterexample is lost: the original validity question is
 exactly validity over replay values satisfying their finite alias gate. -/
 theorem valid_iff {φ : Fml C []} (r : TraceReduction φ) :
-    Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (values : ReadValues),
+    Fml.Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (values : ReadValues),
       (Query.replay values 0 (r.sentence.query g AEnv.dflt args)).2.Consistent →
       (Query.replay values 0 (r.sentence.query g AEnv.dflt args)).1 = true := by
   constructor

@@ -49,7 +49,7 @@ open scoped Scoped
 
 /-- `y = addOne(x);` by `addOne`'s contract, a `pure` callee: nothing but
 the result is forgotten. -/
-theorem callAddOne : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
+theorem callAddOne : ⊨ᶠ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
   core_contract .pure cdlIn![uint se1]{ se1 <= 100 }
     cdlIn![uint se1, old, oldNet, uint se2]{ se2 == se1 + 1 }
   case hc =>
@@ -64,7 +64,7 @@ theorem callAddOne : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
 
 /-- `y = getTotal();` by its contract, a `view` callee: `total` is still
 `7` after the call, so `ensures` gives `y`. -/
-theorem callGetTotal : ⊨ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := by
+theorem callGetTotal : ⊨ᶠ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := by
   core_contract .view cdlIn![]{ total == 7 } cdlIn![old, oldNet, uint se1]{ se1 == total }
   case hc =>
     sol_symex
@@ -78,7 +78,7 @@ theorem callGetTotal : ⊨ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := b
 
 /-- `deposit(4);` by its contract, a `nonpayable` callee: storage is
 forgotten (`{havoc}`), and `ensures` is all that is known of it. -/
-theorem callDeposit : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
+theorem callDeposit : ⊨ᶠ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
   core_contract .nonpayable cdlIn![uint se1]{ total == 3 ∧ se1 == 4 }
     cdlIn![uint se1, old, oldNet]{ total == 7 }
   case hc =>
@@ -94,7 +94,7 @@ theorem callDeposit : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
 /-- `deposit(4);` by a contract that reads `\old`: `total` grows by `v`
 over the storage the call was entered with (`find(old, total)`), which the
 snapshot `{old := storage}` of "post" keeps past `{havoc}`. -/
-theorem callDepositOld : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
+theorem callDepositOld : ⊨ᶠ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
   core_contract .nonpayable cdlIn![uint se1]{ total <= 100 ∧ se1 <= 100 }
     cdlIn![uint se1, old, oldNet]{ find(storage, total) = find(old, total) + se1 }
   case hc =>
@@ -110,7 +110,7 @@ theorem callDepositOld : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } :=
 /-- A call that leaves two results (`CallRet.rets`) for the tuple's
 targets: "post" binds both (`∀ T r₁ r₂`), the frame dropped from under
 them.  The targets are declared first, a step each. -/
-theorem callPair : ⊨ dl!{ x <= 10 → [ (uint a, uint b) = pair(x); ] b == a + 1 } := by
+theorem callPair : ⊨ᶠ dl!{ x <= 10 → [ (uint a, uint b) = pair(x); ] b == a + 1 } := by
   sol_step
   sol_step
   core_contract .pure cdlIn![uint se1]{ se1 <= 100 }
@@ -128,7 +128,7 @@ theorem callPair : ⊨ dl!{ x <= 10 → [ (uint a, uint b) = pair(x); ] b == a +
 /-- A memory return: "post" declares the fresh object the callee is
 entered with (`[ Person memory r; ]`), which a `pure` callee leaves as it
 is; storage is untouched. -/
-theorem callFresh : ⊨ dl!{ total == 3 → [ Person memory m = fresh(); ] total == 3 } := by
+theorem callFresh : ⊨ᶠ dl!{ total == 3 → [ Person memory m = fresh(); ] total == 3 } := by
   core_contract .pure cdlIn![]{ true } cdlIn![old, oldNet, Person memory se1]{ true }
   case hc =>
     sol_symex
@@ -141,7 +141,7 @@ theorem callFresh : ⊨ dl!{ total == 3 → [ Person memory m = fresh(); ] total
     sol_close
 
 /-- `callAddOne`, its two goals derived one rule at a time (`⊢`). -/
-theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
+theorem callAddOneWalk : ⊨ᶠ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
   core_contract_walk .pure cdlIn![uint se1]{ se1 <= 100 }
     cdlIn![uint se1, old, oldNet, uint se2]{ se2 == se1 + 1 }
   case hc =>

@@ -28,7 +28,7 @@ versions.  It names files by the paths they had at each step, which is why
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
 | Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; a `dl!{}` with a modality reads scoped, one without reads as `NFml` (`Surface.Fml` went at W8) |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 160 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
-| Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.valid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
+| Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.fmlValid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
 | Tools | on `Fml C` | `sol_symex`, `sol_prove`, `sol_derive?`, chains, `#chain`, the proof tree, `#wp`, `#step`, specs, contracts, callbacks on `Fml C Γ`; the same text through `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) |
 | Names (W5) | `Solidity.Core.X`, `Calculus/Core/*`, `TState`, `trun` | `Solidity.X`, `Calculus/*`, `State`, `run`; the old side's clashing names under `Surface`, `NFml`, `Semantics` (decision 62) |
 | Closer (W6) | a leaf erased to `NFml`, closed over the untyped state | in part on `Fml C Γ`: `sol_decide` reduces a scoped leaf by position (`Calculus/DecideScoped.lean`), `sol_close` reads parameters at their types, `sol_prove`'s leaves on `⊢` are scoped sequents with `rw` (`Calculus/SeqRewrite.lean`), the chains rewrite while the program is open (`Calculus/RewriteScoped.lean`), the update rules and merges have scoped ports (`UpdRuleScoped`, `StatePartsScoped`; W7: `sol_upd`, `sol_merge` and the chains' links while the program is open use them); below that `NFml` stays the decision procedure's IR (decisions 83, 88, 91, 93) |
@@ -59,9 +59,9 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **done with IR** (W6–W7, merged 2026-10-11; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (update rules, merges, `⊢`/`⊨` leaves, the chains' rewrites while the program is open); W7: atoms by position and the closer on the scoped reduction, the `⊨` route on the walk, the scoped update rules given their consumers.  `NFml`, `Fml.erase` and `Semantics/Erased.lean` stay as decision 7's IR, every reader listed ("M6c", W7 merge); `NFml` and `Fml.erase` deleted at W9.5a ("W9.5a `delete` record") |
+| M6c | **done with IR** (W6–W7, merged 2026-10-11; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (update rules, merges, `⊢`/`⊨ᶠ` leaves, the chains' rewrites while the program is open); W7: atoms by position and the closer on the scoped reduction, the `⊨ᶠ` route on the walk, the scoped update rules given their consumers.  `NFml`, `Fml.erase` and `Semantics/Erased.lean` stay as decision 7's IR, every reader listed ("M6c", W7 merge); `NFml` and `Fml.erase` deleted at W9.5a ("W9.5a `delete` record") |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
-| W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
+| W0 | done | the four M6 lanes merged; `Proves.fmlValid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
 | W2 | done 2026-10-08 | soundness over the typed run (`sound`), the strategy (`symex`), chains (`chains`), the tree (`tree`) |
 | W2.5 | done 2026-10-08 | typed soundness of the arms and blocks (`tsoundA`, `tsoundB`); decisions 12–17' implemented (CORE 1, CORE A, CORE B) |
@@ -69,7 +69,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W4 | done 2026-10-09 | prep (`theorems`, `contracts`, `moves`), then `sem-del` (the untyped run), `calc-del` (the untyped calculus), `modal` (the modality off `Update.lean`'s formulas), `reader-dry`; W4b: `run40` (decisions 40, 50), `rules36` (36, 53), `printers` (item 14) |
 | W5 | done 2026-10-09 | the rename (`scripts/w5-rename.sh`, since deleted), its pins, review fixes, the reader ported |
 | W6 | done 2026-10-09 | lanes `w6-canon` (decision 75 implemented, 77 recorded false), `w6-step` (76: `Stmt.step` total), `w6-closer` (M6c 6a, 6b, and 6c's lanes `w6c-upd`, `w6c-rw`, `w6c-chain`); merged in that order into `intrinsic`; the final gates ("Gates") |
-| W7 `w7-route` | done 2026-10-11 | the `⊨` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (proposals 95–98) |
+| W7 `w7-route` | done 2026-10-11 | the `⊨ᶠ` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (proposals 95–98) |
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
@@ -122,7 +122,7 @@ The confirmed findings of the final review, applied:
   `Fml.bindsB_eq_bindsBM`, `Upd.freshK_eq_freshM`, `Fml.plainB_eq_plainM`,
   `Fml.posB_eq_posM`).
 - *soundness premise*: `symex_sound`, `symex_valid`, `Fml.step_valid`,
-  `Valid.of_proves`, `Valid.of_residue` take no `Stmt.Sound C`
+  `Fml.Valid.of_proves`, `Fml.Valid.of_residue` take no `Stmt.Sound C`
   (`Stmt.sound` inside; `Symex.soundName` deleted).
 - *canonicity*: `canonInv.ekeeps` asks a leaf for canonical storage only;
   the memory writes are storage frames (`memWriteField_storage` …
@@ -467,13 +467,13 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     for any parameter list (`Calculus/Deploy.lean`: for every typed value
     of the parameters, `State.deploy` with them bound, via
     `holds_closeN`); `_typed` is its case of none.
-24. *Proposed (W3c `tactics`), the lead's call:* `ProvesC.valid` asks the
+24. *Proposed (W3c `tactics`), the lead's call:* `ProvesC.fmlValid` asks the
     invariant first-order (`Fml.FO`, KeY's `CInv` of the storage and the
     ledger): "the invariant holds" is then a fact of the erasure, which the
     callee's havocked state and the updates read; today's asks it closed.
     *M7 review:* `Invariant` carries it (`fo := by rfl`, as master's carried
     `closed`), `noTransfer` is a lemma of it (`Fml.hasTransfer_of_FO`), and
-    `ProvesC.valid`/`Main.callback_soundness` take no hypothesis.
+    `ProvesC.fmlValid`/`Main.callback_soundness` take no hypothesis.
 25. *Proposed (W3c `tactics`), the lead's call:* `Core.Proves.closeHolds`,
     today's semantic `Proves.close` over the typed reading (modal-free), is
     a rule of the scoped sequent beside the erasure's `close`; the steps
@@ -564,7 +564,7 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     stay until the `modal` lane: they are the reading of today's
     `Fml.modal` (`Update.lean`'s `holds`, `holds_frame`) and of the program
     rules of today's `Proves`, which decision 34 keeps past `calc-del`
-    (`Logic`'s `Proves.valid` through `RuleSoundness`, `SoundLoop`, …).
+    (`Logic`'s `Proves.fmlValid` through `RuleSoundness`, `SoundLoop`, …).
     `sem-del` before `modal` cannot delete them without deleting those
     rules; the `modal` lane deletes them with `.modal`.  `Halt.stuck`
     becomes the term model's `undef` then, when no run produces it.  See
@@ -773,7 +773,7 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     `ExtCall`, `LoopAnn`, `Tm`, `MAddr`, `UpdElem`, `Upd`, the holes `Hole`,
     `MHole`, `VHole`, `Premise`, the obligations `Problem.*` and
     `specObligation`, `primName`, `cmpParts?`); the closer's is `NFml`'s
-    (`NFml.holds`, `holds_conj`, `Valid`, `Proves`, `Post`, `Link`, the
+    (`NFml.holds`, `holds_conj`, `Fml.Valid`, `Proves`, `Post`, `Link`, the
     rewrite chains' `Chain.*`, `Derive.*`, `instSoundRelLeads`); the untyped
     semantics' is `Semantics`' (the lemma namespaces `State.*`, `SVal.*`,
     `MVal.*`, `MObj.*`, `Value.*`, `Res.*`, and `SE`, `Tight`,
@@ -785,7 +785,7 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     renamed: W5's `TState` → `State` takes the plain name.
 64. *Proposed (W5 preparation), the lead's call:* the switch
     `Solidity.Core.Surface` (`open scoped`, the scoped reading of `dl!{}`,
-    `⊨`, the walks' `apply`) is `Solidity.Core.Scoped`: W5 would merge it
+    `⊨ᶠ`, the walks' `apply`) is `Solidity.Core.Scoped`: W5 would merge it
     into the old side's `Surface`, and every `def Surface.X …` (which opens
     its prefix) would read its formulas scoped.
 65. *Proposed (W5 preparation), the lead's call:* the old modules W5's
@@ -991,7 +991,7 @@ the closer port.
     before.
     *Implemented (W7 lane `w7-closer`):* an atom is `Atom` (`DecideLang`):
     `pos k`, the local at the position `k` of a scoped leaf's context
-    counted along its binders, or `name x`, an erased leaf's local (the `⊨`
+    counted along its binders, or `name x`, an erased leaf's local (the `⊨ᶠ`
     route and `sol_prove`'s leaves, until `NFml` goes).  The scoped
     reduction reads no name: every binder's local is held under its
     position's key (`slotVar k`), a quantifier's local is the atom `pos k`,
@@ -1067,14 +1067,14 @@ the closer port.
     soundness is the commutation with the erased reduction, exactly
     (`Fml.toLS_eq`: the scoped reduction and fragment are the erasure's,
     for every leaf `Fml.posB` takes), then `NFml.valid_iff_reduce` and
-    `Valid.of_erase` (`Valid.of_reduceS`), not a re-proof of
+    `Fml.Valid.of_erase` (`Fml.Valid.of_reduceS`), not a re-proof of
     `NFml.toL_holds` and the elimination over the typed state: those
     read the scoped terms' symbols on the erasure anyway
     (`Calculus/Logic.lean`), so the 9k lines of term lemmas would restate
     the untyped interpreter by position for no new theorem.  `NFml` stays
     `Decide.lean`'s IR for its proofs (decision 7's documented IR), not for
     the computation: no erasure is computed or checked by the kernel.
-    `Valid.of_reduce` (the erasure computed and quoted) is deleted.
+    `Fml.Valid.of_reduce` (the erasure computed and quoted) is deleted.
     The kernel-evaluated functions keep G0's conditions 1 and 2 (review
     fix): `Fml.toLS`, `Fml.inLS`, `Fml.peelS`, `Upd.view`, `Upd.replayS`,
     `Thin.sel`, `Tm.toLS`, `Tm.inLS` and `Idx.toNatR` are written by the
@@ -1092,7 +1092,7 @@ the closer port.
     (`Calculus/DecideTyped.lean`) follows the leaf's binders, updates and
     connectives as `holds` reads them, over the typed state, at a polarity
     (the fragment `Fml.inLS pos` takes updates, hidden binders and
-    modalities only in positive positions), and `Valid.of_reduceS` puts it
+    modalities only in positive positions), and `Fml.Valid.of_reduceS` puts it
     together with the elimination (`LFml.elim_holds`); `Fml.toLS_eq` (the
     formula's commutation with the erased reduction) and its lemmas are
     deleted.  A term still reads its symbols on the erasure (`Tm.toLS_eq`
@@ -1189,10 +1189,10 @@ the closer port.
     erasure (a leaf of `sol_derive`), so `Benchmark/Mapping`'s
     `remove_spec`, which wrote it after `sol_prove`, now writes today's
     `refine NFml.Proves.close ?_` (one line; the leaf it closes is the
-    same).  The `⊨` route (`Derive.lean`'s `sol_prove` on `Valid φ`) keeps
+    same).  The `⊨ᶠ` route (`Derive.lean`'s `sol_prove` on `Fml.Valid φ`) keeps
     today's leaves: it has no sequent, its leaf is the erasure of the
     strategy's whole output, and moving it to `⊢`'s walk changes the leaves
-    of the `⊨` examples (`Constructors`, `LoopsImport`, `Purchase`, …).
+    of the `⊨ᶠ` examples (`Constructors`, `LoopsImport`, `Purchase`, …).
 90. *Proposed (M6c 6c), the lead's call:* the scoped `Proves` has today's
     `Proves.rewrite` as a rule: a Theory equation (`TermTaclet.sound`, or a
     law's `Term.Theq`) in every equation of the sequent, the context's
@@ -1219,7 +1219,7 @@ the closer port.
     stay, as the decision procedure's IR (decision 7's documented IR), not
     as a failed gate (their gate passed): every rule of `NFml.Proves` has
     its scoped twin, and `NFml.Proves` is what a scoped leaf erases to,
-    the leaves of the `⊨` route, and the sequents written over today's
+    the leaves of the `⊨ᶠ` route, and the sequents written over today's
     terms (`Examples/Tactics/TermTaclets.lean`, `Calculus/CloseTests.lean`);
     `Derive.residue`/`synClose` are the closer on the erasure.
     `TheoryRewrite.lean` is a symbol library (`theoryRewrite` reads a closed
@@ -1272,17 +1272,17 @@ the closer port.
 **Lead, 2026-10-09 (5):** proposals 78–94 are approved. M6c continues (W7):
 the closer's atoms by position and `Closer` on scoped formulas, the scoped
 update rules and merges given their consumers, the open-program links
-scoped, decision 49's four examples restored, the `⊨` route on the `⊢`
+scoped, decision 49's four examples restored, the `⊨ᶠ` route on the `⊢`
 walk; then `NFml`, `Fml.erase` and `Semantics/Erased.lean` go wherever
 nothing reads them, and what stays is recorded as decision 7's IR.
 
 95. *Proposed (W7 `w7-route`), the lead's call:*
-    `sol_prove` on `⊨ φ` is `Proves.valid` at `.all` and then the `⊢`
+    `sol_prove` on `⊨ᶠ φ` is `Proves.fmlValid` at `.all` and then the `⊢`
     walk (`evalSolProveValid`, `Calculus/ProvesDerive.lean`), decision 89
     extended: its leaves are the walk's sequents `H ⊢ ψ`, closed as a `⊢`
     leaf is (`refine NFml.Proves.close_dropWt ?_`, read as
     `core_leaf_close_wt` there).  The erased route (`Derive.proves`,
-    `Derive.residueOf`, `Valid.of_proves`, `Valid.of_residue`) is deleted.
+    `Derive.residueOf`, `Fml.Valid.of_proves`, `Fml.Valid.of_residue`) is deleted.
     Pins moved, each re-derived: `Examples/Tactics/LoopsImport`'s three
     invariant obligations leave one sequent per branch where the erased
     residue left one formula, so their leaf script runs under `all_goals`;
@@ -1293,7 +1293,7 @@ nothing reads them, and what stays is recorded as decision 7's IR.
     `sol_derive?` writes); the residue pins of `Examples/Tactics/Dangling`
     and `Examples/ProofTree` (`rounds2`/`4`/`6`, `pushes22`, `writes4`/`6`,
     `deletes10`) read the walk's leaves (`Seq.residue`, `Seq.leafErase`)
-    where they read the erased residue, and print the same.  The `⊨`
+    where they read the erased residue, and print the same.  The `⊨ᶠ`
     route's step bound moved from `Derive.fuel` (5000) to the walk's
     `Seq.fuel` (`NFml.Derive.budget`); `Derive.fuel` now bounds only
     `sol_derive`'s walk.
@@ -1338,11 +1338,11 @@ nothing reads them, and what stays is recorded as decision 7's IR.
 100. *Proposed (W7, `w7-closer`), the lead's call:* the closer
     on a scoped reduction runs with no layout (`LFml.closeS`), and "its
     layout (`LayoutOk`) from the typed state" (decision 81) is withdrawn:
-    `Valid φ` reads every typed state, and a typed storage is not
+    `Fml.Valid φ` reads every typed state, and a typed storage is not
     canonical (`SVal.map`'s default is any value of its type, its entries
     may repeat a key), so the typed state does not give `LayoutOk`;
     decision 75 ties canonicity to the *reachable* typed states, which
-    `Valid` does not restrict to.  A leaf with a `wt(storage)` premise
+    `Fml.Valid` does not restrict to.  A leaf with a `wt(storage)` premise
     could give the layout as `NFmlDerive` does on the erasure (`topWt`,
     `LayoutOk` from `holds σ (.defined wt)`); not done, since the scoped
     `sol_decide`'s leaves (`Examples/Tactics/Decide`) have none, and the
@@ -1442,10 +1442,10 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   the untyped interpreter's.  `Closer` moved to 6b (decision 81) and is
   not ported.
 - **6b** (`Decide.lean`): `Calculus/DecideScoped.lean`, the reduction by
-  position (`Fml.reduceS`, `Fml.inLS`, `Valid.of_reduceS`), sound through
+  position (`Fml.reduceS`, `Fml.inLS`, `Fml.Valid.of_reduceS`), sound through
   its commutation with the erased one (`Fml.toLS_eq`), so `Decide.lean`'s
   proofs stay on `NFml` (decision 83; 84–85, two fragment pins;
-  superseded by W7 `w7-closer`: `Fml.toLS_eq` is gone, `Valid.of_reduceS`
+  superseded by W7 `w7-closer`: `Fml.toLS_eq` is gone, `Fml.Valid.of_reduceS`
   is proved over the typed state, `Fml.toLSM_sound`).  The
   kernel-evaluated functions are recursors with `match` twins (G0's
   conditions 1 and 2).
@@ -1464,7 +1464,7 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   (`Calculus/RewriteScoped.lean`, `Examples/ChainRewrites` §3⁗), so a step
   and a rewrite are links of one chain again; past the program the chains
   stay on `NFml` (`Fml.ViaE`; decisions 92–94).
-- **W7 `w7-route`** (2026-10-11, proposals 95–98): the `⊨` route runs
+- **W7 `w7-route`** (2026-10-11, proposals 95–98): the `⊨ᶠ` route runs
   the `⊢` walk, its leaves scoped sequents (`evalSolProveValid`; the
   erased route deleted, four pin files re-derived, decision 95); "only an
   `assert` panics" over the typed run (`Semantics/NoPanic.lean`,
@@ -1493,14 +1493,14 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   `Examples/Benchmark/Syntax` 1.46 s (1.04) and `Solkey/TestSuite` 11.18
   (1.03), so the machine ran 3–4% slower than at W6; the Derived files'
   path (`sol_prove` on `⊢`) is unchanged by the lane (`evalSolProveValid`
-  answers only a `Valid` goal).  Dropped: two runs killed when another
+  answers only a `Fml.Valid` goal).  Dropped: two runs killed when another
   session took the cgroup past 32 GiB (`Derived6`, `Derived10`), and two
   control runs under another lane's build (load 4.9–20).  Every row
   within 1.2×: passed.
 - **W7 `w7-rewrites`** (2026-10-09 to 2026-10-11; `UpdRuleScoped`,
   `StatePartsScoped`, `RewriteScoped` given their consumers): `sol_upd` and
-  `sol_merge` rewrite the scoped leaf (`Valid.of_updAtSD`,
-  `Valid.of_simpUpdsS`; `Closers.lean`), merging past hidden binders
+  `sol_merge` rewrite the scoped leaf (`Fml.Valid.of_updAtSD`,
+  `Fml.Valid.of_simpUpdsS`; `Closers.lean`), merging past hidden binders
   (`Fml.mergeB`); `simplifyUpdate` drops shadowed writes (`Upd.shadow`,
   `Upd.redecl`, `Upd.simpS`; decision 87's first half, under either
   modality); while the program is open the chain links are scoped for
@@ -1550,7 +1550,7 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   (`Atom.pos`, decision 78 implemented), the closer on the scoped
   reduction (`LFml.closeS`, decision 81 implemented with no layout), the
   scoped reduction sound over the typed state (`Calculus/DecideTyped.lean`,
-  `Fml.toLSM_sound`, `Valid.of_reduceS`; decision 83's rest; 84 in part
+  `Fml.toLSM_sound`, `Fml.Valid.of_reduceS`; decision 83's rest; 84 in part
   superseded), the G0 forms kept (recursors with `match` twins and links);
   proposals 99 and 100.  No pin's output moved (the fragment pins
   take the polarity, `Fml.inLS true`; `key{}`'s examples spell
@@ -1720,7 +1720,7 @@ namespace, an `NFml*` module it imports, `Fml.erase`, or the erased state
   `Calculus/TreeData.lean`, `Calculus/ProofTree.lean`,
   `Calculus/DelabErase.lean` (printing an erased line).
 - *notation and quoting of formulas with no modality*:
-  `Calculus/RuleSyntax.lean` (`dl{}`, `⊨`), `Calculus/SurfaceNotation.lean`,
+  `Calculus/RuleSyntax.lean` (`dl{}`, `⊨ᶠ`), `Calculus/SurfaceNotation.lean`,
   `Calculus/SurfaceSpec.lean`, `Calculus/RuleKit.lean`,
   `Calculus/Sequents.lean`, `Calculus/Surface.lean`, `Calculus/Print.lean`,
   `Calculus/Quote.lean`, `Tools/Common.lean`, `Tools/Counterexample.lean`,
@@ -2223,7 +2223,7 @@ erasure.  Once that printer lands, the pins switch to `Fml StandardExample []`.
 | `fun m φ => dl![m]{ ⟨[ x = 1; ]⟩ φ }` | `φ : NFml StandardExample` → `Post StandardExample [.val .uint]` | a scoped hole is a `Post C Γ` |
 | `∀ φ, dl!{ ⟨ x = 1; ⟩ φ } = …` (`trace_state`) | `φ✝ : Post …`, `‹↑φ✝›` | same |
 | `dl!{ ⟨ x = 1; ⟩ ture }` error | `(φ : Post C)` → `(φ : Post C Γ)` | the scoped reader's message |
-| `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the new module sees the scoped `State` too |
+| `fun φ => (⊨ᶠ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the new module sees the scoped `State` too |
 | `dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }` | type suffix only | scoped reading, hidden binder |
 | `Examples/Tactics/Surface.lean`: `dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }` outside the flip | type suffix only (`Fml StandardExample []`); the scoped pin below it keeps `∀ uint a;` | a modality reads scoped without the flip, hidden binder |
 
@@ -2909,7 +2909,7 @@ removed pins.
 | W8.2 `obligations` | `Examples/Tactics/Spec`'s `Surface.Problem.ctor` erasure guard | a `Problem.text` pin of the deployment's obligation | `Surface.Problem` removed |
 | W8.2 `reader-tools` | `Examples/Tactics/DlNotation.lean` (from `SurfaceNotation`): four pins, `Examples/Tactics/Surface.lean`: one | type suffix `: Surface.Fml X` → `: Fml X []` | a modality reads scoped |
 | W8.2 `reader-tools` | `fun m φ => dl![m]{ … }`, the `trace_state` pin, the `ture` error | `NFml` → `Post StandardExample [.val .uint]`, `(φ : Post C)` → `(φ : Post C Γ)` | a scoped hole is a `Post C Γ` |
-| W8.2 `reader-tools` | `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the module sees the scoped `State` |
+| W8.2 `reader-tools` | `fun φ => (⊨ᶠ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the module sees the scoped `State` |
 | W8.3 (all lanes) | string pins `Surface.Prog.toStr (sol{…}) = "…"` (16 in `Benchmark/Syntax`, `ExampleNames`; more in `Checked`, `Operators`, `Chains/Memory`, `Calls`, …) | `Prog.toStr [] (sol{…})`, same strings | `Surface.Prog` removed |
 | W8.3 | `Surface.Prog.inlined` pins (`Benchmark/{Syntax,Purchase}`, `Loops`, `CallOperands`) | `Prog.inlinedStr`/`inlinedShow`, same strings | proposal 116 |
 | W8.3 | the run pins (`StorageSuite`, `StorageDelete`, `Memory`, `LedgerDelete`, `Values`, `CrossDomain`, `Tools`) | `Prog.runT`/`Prog.localAfterT`, same values | the scoped run tools |
@@ -3179,8 +3179,8 @@ The confirmed findings of the final review, applied.
   `Solkey/Constructors.lean`, `scripts/solkey-port.mjs`,
   `docs/testsuite-proofs.md`'s parameters paragraph, the module map); the
   dated records keep the name of their date.
-- **`sol_symex`/`sol_step` on a goal that is not `⊨ φ`** now fail with
-  "expected a goal `⊨ φ`" and the goal, not "Unexpected syntax".  The
+- **`sol_symex`/`sol_step` on a goal that is not `⊨ᶠ φ`** now fail with
+  "expected a goal `⊨ᶠ φ`" and the goal, not "Unexpected syntax".  The
   `negativeKey` pin (`Examples/Tactics/Decide.lean`) pins only the
   elaboration refusal (`#check dl!{ … }`).
 - **The memory conditional** (`T memory m = c ? a : b;`): the documentation
@@ -3342,7 +3342,7 @@ Branch `w9-terms`, additive: nothing on the IR moved, no pin changed.
 
 ### W9.0 spike record (2026-10-11, not committed)
 
-**The leaf closer on the scoped leaf** (`Proves.closeHolds` + `Valid.of_reduceS`
+**The leaf closer on the scoped leaf** (`Proves.closeHolds` + `Fml.Valid.of_reduceS`
 + `LFml.closeS`, walked by `Seq.run`), timed against the erased route
 (`Fml.closeErase` + `NFml.Derive`):
 
@@ -3355,7 +3355,7 @@ The compiled walk costs the same on both routes.  **Go for W9.3**, once
 these leaf classes are closed scoped:
 1. *The layout* (26 leaves in `Derived7`, 27 in `Derived12`).  `LFml.closeS`
    reads `[]` (`Calculus/DecideComplete.lean`).  Proposal 100: the layout
-   comes from the scoped `wt(storage)` premise, and `Valid.of_reduceS` needs
+   comes from the scoped `wt(storage)` premise, and `Fml.Valid.of_reduceS` needs
    a `LayoutOk` premise for it.
 2. *A parallel update of two elements that is not an allocation pair*
    (23 and 9 leaves; `{x := x+1 ‖ se := x}`).  The fragment refuses it
@@ -3571,9 +3571,9 @@ are unchanged.
 - **Proposal 100.**  `Fml.layoutS` (the roots of a premise `wt(storage)`
   under the leaf's parameters' quantifiers) and `Fml.dropWtS` (the premise
   set aside), both by the recursor with `match` twins (`layoutSM`,
-  `dropWtSM`) and links.  `Valid.of_reduceSL` (`DecideComplete`, beside
-  `Valid.of_reduceS`): `∀ σ, LayoutOk (layoutS φ) σ → (dropWtS φ).reduceS`
-  holds gives `Valid φ`, through `holds_of_dropWtSM` and
+  `dropWtSM`) and links.  `Fml.Valid.of_reduceSL` (`DecideComplete`, beside
+  `Fml.Valid.of_reduceS`): `∀ σ, LayoutOk (layoutS φ) σ → (dropWtS φ).reduceS`
+  holds gives `Fml.Valid φ`, through `holds_of_dropWtSM` and
   `layoutOk_of_wtS`.  `LFml.closeS L φ` takes the layout (`closeS_valid`,
   `closeS_valid_nil`); `sol_decide_close` accepts both goal shapes, and
   `sol_reduce` the one with the layout.  `sol_decide` on a scoped leaf
@@ -3588,7 +3588,7 @@ are unchanged.
   `RelU.par`.  Pinned: `postIncrementParallel`.
 - **Decision 80's parts on a scoped goal** (`Calculus/Closers.lean`,
   `Decide.onReduced`): `sol_reduce`, `sol_reads`, `sol_decide_cons`,
-  `sol_decide_heuristic`, `sol_decide_unconstrained` on `Valid ψ` reduce by
+  `sol_decide_heuristic`, `sol_decide_unconstrained` on `Fml.Valid ψ` reduce by
   position (`reduceScoped`) and then take their step on the reduction:
   `sol_decide_cons` is the constraints with the parameters typed
   (`sol_decide_typed`; `typedCons` factored out), `sol_reads` its first
@@ -3599,7 +3599,7 @@ are unchanged.
   `DecideRel`, `DecideTyped`, `DecideComplete`, `Closers`,
   `Examples/Tactics/Decide`); `lean_build` of the default targets;
   `check-orphans`, `check-doc-paths`; `sorry` count unchanged (20, all in
-  prose or strings); axioms of `Valid.of_reduceS`, `Valid.of_reduceSL`:
+  prose or strings); axioms of `Fml.Valid.of_reduceS`, `Fml.Valid.of_reduceSL`:
   `propext`, `Classical.choice`, `Quot.sound`.  No pin moved; no leaf that
   failed before closes in an existing pin (the two new capabilities are
   pinned by the two new theorems).
@@ -3625,7 +3625,7 @@ erased closer is the fallback for a leaf the scoped one does not read.
   modality is left or the fragment does not read it, else whether it closes
   (`Seq.checkCore`: `Fml.dropWtS` in the fragment, `Fml.toLS` within
   `closeSize`, `LFml.closeS` of `Fml.reduceS` with `Fml.layoutS`);
-  `Seq.leafCheckS_sound` is `Proves.closeHolds` of `Valid.of_reduceSL` and
+  `Seq.leafCheckS_sound` is `Proves.closeHolds` of `Fml.Valid.of_reduceSL` and
   `LFml.closeS_valid`.  A leaf not read as it is is read prepared
   (`Fml.prepS`, `holds_of_prepS`).  The kernel-evaluated functions
   (`checkCore`, `Fml.prepS`, `Tm.stablePathS`, `Hyps.groundInS`,
@@ -3640,7 +3640,7 @@ erased closer is the fallback for a leaf the scoped one does not read.
   are gone.  `Seq.leafQuoteS` marks as before; `Seq.scanLeaves` counts
   writes on the scoped context (`Hyps.storageWrites`).
 - **The spike's classes.**
-  1. *Layout* and 2. *two parallel elements*: W9.2 (`Valid.of_reduceSL`,
+  1. *Layout* and 2. *two parallel elements*: W9.2 (`Fml.Valid.of_reduceSL`,
      `ElemS.parOk`).
   3. *Push alias*: `Upd.pushSplit` (the scoped `pushAlias?`: `{storage :=
      extend(storage, a) ‖ x := next(a)}` as the push, then `x :=
@@ -3649,7 +3649,7 @@ erased closer is the fallback for a leaf the scoped one does not read.
      state between the two updates is the one the parallel update ends in
      with the alias reset).  10 TestSuite leaves.
   4. *`wt(storage)` under the parameters' `∀`*: W9.2's `Fml.dropWtS`; on a
-     leaf a tactic closes, `sol_leaf_wt` (`Valid.of_dropWtS`).
+     leaf a tactic closes, `sol_leaf_wt` (`Fml.Valid.of_dropWtS`).
   5. *The ground test*: `Hyps.groundS`, which agrees with the erased test
      on all 437 TestSuite statements (the walk's leaf counts equal).
   6. *`pick`/`Fml.stripN`* (decision 27): not ported.  The scoped leaf keeps
@@ -3685,7 +3685,7 @@ erased closer is the fallback for a leaf the scoped one does not read.
   - a loop's frame (`anon`, `havoc`): `Examples/Tactics/LoopsImport.lean`
     (`sol_leaf; sol_close`);
   - a modality left in the leaf: neither closer reads it, the walk fails.
-- **`sol_leaf`** (`Seq.leafValid`): a leaf `H ⊢ φ` as `⊨ ψ`, `ψ` the wrapped
+- **`sol_leaf`** (`Seq.leafValid`): a leaf `H ⊢ φ` as `⊨ᶠ ψ`, `ψ` the wrapped
   sequent quoted (`Proves.closeValid`, `Symex.normValid`), `Fml.modalFree`
   checked by the kernel; `sol_leaf_wt` sets `wt(storage)` aside.
   `Derive.leafTacs` tries on a scoped leaf `sol_leaf` then `sol_decide`
@@ -3750,7 +3750,7 @@ erased closer is the fallback for a leaf the scoped one does not read.
   together); `check-orphans`, `check-doc-paths`; `sorry` count
   unchanged (20 lines, prose and strings); axioms of `Proves.of_residue`,
   `Seq.leafCheckS_sound`, `holds_push_alias`, `Proves.closeValid`,
-  `Valid.of_dropWtS`: `propext`, `Classical.choice`, `Quot.sound`.
+  `Fml.Valid.of_dropWtS`: `propext`, `Classical.choice`, `Quot.sound`.
 - **Left.**  The erased fallback (`Seq.leafRes`, `Proves.close`,
   `close_leaf`, the erased lines of `Derive.leafTacs`) until W9.5; the
   fallback classes above need an erasing closer (`sol_close`,
@@ -3796,7 +3796,7 @@ scoped leaf without the erasure; no pin moved.
 - **Dispatch.**  `sol_close_eval`, `_facts`, `_reads`, `_reads_all` and the
   new `sol_close_mt_eval` are elaborators in `NFmlClose` that step aside on a
   scoped goal (`Close.scopedGoal`: the goal or its context names
-  `Solidity.State`, `EState`, `Valid` or `CloseS.holdsE`) for
+  `Solidity.State`, `EState`, `Fml.Valid` or `CloseS.holdsE`) for
   `CloseScoped`'s; `sol_close`, `sol_close_mt`, `sol_spec_prep` and
   `Benchmark/Coin`'s hand-written steps are unchanged text.
   `Derive.evalSolCloseUnwrapCore` (the erasure) and `SolSpec`'s erasing
@@ -3804,7 +3804,7 @@ scoped leaf without the erasure; no pin moved.
 - **Erased callers that remain**: `refine close ?_` (`Proves.close`, an
   `NFml.Valid` goal) and the leaf searches on it (`NFml.Derive.searchLeaf`,
   `Walk.closeLeaf`, `sol_prove?`); `Calculus/Closers.lean`'s second
-  elaborators (`sol_close_eval` on a bare `Valid ψ`, `sol_decide_*`,
+  elaborators (`sol_close_eval` on a bare `Fml.Valid ψ`, `sol_decide_*`,
   `sol_reduce`, `sol_reads`, `sol_apply_upd`, `sol_fold_terms`: the
   `decide` lane's file, not edited here); `Decide`'s own `close_rw` passes.
 - **Pins.**  None moved: every `fail_if_success sol_close` still fails
@@ -3847,7 +3847,7 @@ tree close a leaf by `sol_leaf` and the scoped closers.
   `6aca012a` (`close` over `decide` and `walk`): no integration commit.
   `TestSuite/Derived7` and `Examples/Tactics/LoopsImport` are clean.  The
   walk's fallback classes are already closed scoped there: after
-  `sol_leaf` the goal is the scoped `⊨ ψ`, so `sol_close` and
+  `sol_leaf` the goal is the scoped `⊨ᶠ ψ`, so `sol_close` and
   `sol_close_mt` are the `close` lane's (`sol_close_unwrap` to
   `CloseS.holdsE`; `Calculus/Closers.lean`'s erasing elaborator steps
   aside once the state is introduced): the alias index after a storage
@@ -3881,7 +3881,7 @@ tree close a leaf by `sol_leaf` and the scoped closers.
   Solidity.Scoped` its parameters are hidden binders, inside `∀`.
   `SurfaceNotation`'s `elabDl`/`elabFml` (the closer's reading) stay only
   for `Calculus/Chains.lean`'s `elabDlN` (the `chains` lane's).
-- **`⊨`/`⊧`** (`Calculus/RuleSyntax.lean`, `elabValidHolds`): `Valid` and
+- **`⊨ᶠ`/`⊧`** (`Calculus/RuleSyntax.lean`, `elabValidHolds`): `Fml.Valid` and
   `holds` of a scoped formula, the closer's of any other (the `chains`
   lane's `NFml.Via` lines, which `Calculus/RewriteChains.lean` writes
   without importing `Logic`); `Theorems.lean`'s scoped copies are gone;
@@ -3907,7 +3907,7 @@ tree close a leaf by `sol_leaf` and the scoped closers.
   `sol_leaf`'s elaborator).  `Proves.close` stays for `Calculus/ChainKit.lean`'s
   last line past the program and `Calculus/CloseTests.lean`'s erased
   section; `refine close ?_` (`Calculus/WalkSyntax.lean`) is documented
-  as that fallback.  `sol_close_eval` on a bare scoped `Valid ψ` is
+  as that fallback.  `sol_close_eval` on a bare scoped `Fml.Valid ψ` is
   `sol_close_unwrap; intro σ; sol_close_eval` (`Calculus/Closers.lean`);
   `sol_apply_upd` and `sol_fold_terms` still erase (no scoped reading).
   `NFml.Derive.closeSize`/`elimSize` are `Decide.closeSize`/`elimSize`'s
@@ -3932,7 +3932,7 @@ tree close a leaf by `sol_leaf` and the scoped closers.
     StandardExample` → `Fml StandardExample []` (the parallel update, `∨`/`↔`,
     `∃`, `defined`/`≐`, `!=`/`<`, `Token[3]`, `newArr`); `dl{ a = 1 }` now
     of a closed scoped tree (a hidden binder over `.pvV .here`); the
-    `⊨`/`⊧` pin `fun φ => (⊨ φ) ∧ ∀ (σ : State StandardExample []), σ ⊧ φ :
+    `⊨ᶠ`/`⊧` pin `fun φ => (⊨ᶠ φ) ∧ ∀ (σ : State StandardExample []), σ ⊧ φ :
     Fml StandardExample [] → Prop`.  Examples (not pins) rewritten: the two
     equation trees and the push tree as scoped trees, the Lean-formula
     holes at `Fml` types, and `{ p := unset } true` needs `where Person
@@ -3973,7 +3973,7 @@ tree close a leaf by `sol_leaf` and the scoped closers.
   the program (`elabDlN`, the `chains` lane).  `RuleSyntax`'s `schemaFml`
   (`dl_schema{}`, `dl{ φ }`, the `NFmlSeq` sequents) and the `NFml`
   delaborators: `Calculus/{Hyp,NFmlLogic,NFmlUpdateRules}.lean`, W9.5's.
-  `⊨`/`⊧`'s and `valid%`'s `NFml` branch: the `chains` lane's `NFml.Via`.
+  `⊨ᶠ`/`⊧`'s and `valid%`'s `NFml` branch: the `chains` lane's `NFml.Via`.
   `Calculus/NFmlQuote.lean`: `Calculus/Quote.lean` imports it (the
   `ToExpr` of `PrimVal`), `NFmlDerive`, `TheoryRewrite`.  `Proves.close`:
   `ChainKit`'s bridge and `CloseTests`.  `Derive.eraseLeaf`:
@@ -4059,8 +4059,8 @@ about an untyped formula: every closer, chain, walk and printer reads
 **Deleted modules**: `Calculus/{NFmlLogic, NFmlDerive, NFmlUpdateRules,
 NFmlQuote, HoldsErase, CloseErase, Closable, CloseHavoc, Rewrite,
 TheoryRewrite, ChainRewrites, ChainBranches, Literals, StateParts,
-TermRules, TermTaclets}`, and the old `Calculus/Close` (`Valid.of_erase`).
-**Deleted names**: `NFml` but its stub (`holds`, `Valid`, `Post`,
+TermRules, TermTaclets}`, and the old `Calculus/Close` (`Fml.Valid.of_erase`).
+**Deleted names**: `NFml` but its stub (`holds`, `Fml.Valid`, `Post`,
 `NFml.Proves`, `NFml.Chain.*`, `NFml.toL`/`inL`/`valid_iff_reduce`, the
 erased lowering in `Decide`), `Fml.erase`, `Proves.close` (with its
 `SolkeyProves` case), `Hyp` and its rules, `Atom.name` (proposal 99: an
@@ -4089,8 +4089,8 @@ with no modality is read by name into the same key (`elabKeyQ`), so it
 need not declare a memory local it no longer writes.  `Fml.LeadsK φ L` is
 `∃ B, Fml.Leads φ B ∧ B.eraseNames = L.eraseNames` (`L` read where it
 stands, the binders' names aside: `Fml.eraseNames`, `holds_eraseNames`),
-and `Fml.LeadsK.valid h hL : Valid φ` from `Valid L` (the coordinator's
-point: `ChainNotation`'s `composed` now proves `Valid` by it).  A law's
+and `Fml.LeadsK.valid h hL : Fml.Valid φ` from `Fml.Valid L` (the coordinator's
+point: `ChainNotation`'s `composed` now proves `Fml.Valid` by it).  A law's
 instances are found on the scoped line (`lawInstances`, `spinePositions`
 for the `…In` laws), its side conditions closed by `rfl`/`decide` or a
 `Tm.KindFreeAt` hypothesis (`Tm.KindFreeAt.ofNil`).  The line's closed
@@ -4139,7 +4139,7 @@ green.  `.lake/build/bin/solkeycheck`: OK (326 taclets at the local
 `check-doc-paths`: no missing path.  `sorry` lines 19, as at
 `887f4d1a`.  `#print axioms` of `FmlRw.lawUpdS`, `Fml.LeadsK.valid`,
 `holds_eraseNames`, `LawCov.covered`, `Upd.rwBy_apply(_rev, _eq)`,
-`holds_upd_rwG`, `Proves.sound`, `Valid.of_reduceS`,
+`holds_upd_rwG`, `Proves.sound`, `Fml.Valid.of_reduceS`,
 `LFml.syn_valid_alls`: `propext`, `Classical.choice`, `Quot.sound`.
 `check-testsuite.sh` refuses the local `../solkey` (`4150e0a8`, stale, as
 before).  `rg "\bNFml\b"` outside the records: the stub and the reader
@@ -4169,7 +4169,7 @@ The confirmed findings of the W9.5a review, fixed:
   so; they are not deleted because the user keeps the reader untouched.
 - **`docs/module-map.md`**: the Closers, CloseTests and DecideLang rows no
   longer describe an erased leaf (`sol_fold_terms`, `Derive.eraseLeaf`,
-  `Valid.of_erase`, the erased fallback, an erased atom's name); dangling
+  `Fml.Valid.of_erase`, the erased fallback, an erased atom's name); dangling
   names fixed or dropped (`Idx.nameR_eq`, `lawResolveQ`, `pairL`/`pairMem`
   → `pairLS`/`pairMemS`/`allocPairS?`, `Config.erased`, `Stmt.complete`,
   `Proves.close_leaf`, `State.glob` → `EState.glob`); `Update.lean` holds
@@ -4232,7 +4232,7 @@ cannot be applied element by element to a typed state.  Two carriers:
 | W9.6.0 | spike (scratch) ‖ `notation` | **spike**: the typed `Tm.eval` (`rfl` against today's); U2's `Lands` for every `UpdElem` with `decl`/`pop`/`drop`, `Lands ↔ σ'.erase = τ`, `holds_upd_graft` and `Premise.sound_update` for the allocation pair; `sol_close` on `Derived7`'s leaves and `SelectOnSaveConsr` read through U1 and U2 against `holdsE`.  Chooses U1 or U2.  **notation (W9.6N)**: `tm{}`, `st!{}`/`pt!{}`, a chain's by-name key and the spec front end parse to `Tm C Γ`/`Upd` directly; `delabTmS` prints a scoped term without `tmSurface`; the twin check goes; `Surface.*`, `Tm.erase`, `Delab.tr`, `NFml` stay as the reader's frozen shim, read by nothing in the prover | notation pins |
 | W9.6.1 | `logic` ‖ `inv` | `Logic.lean`'s readers on the typed state with the chosen carrier (old ones kept as `rfl` twins), `holdsC`, `Deploy`; `RunInv.HoldsT` over `State` in `Typing/TypedRunInv.lean`, `TKeeps` per statement against `TRun` (replaces `EKeeps`, `canonInv.ekeeps`, `SRuns.of_agrees`, `Faithfulness`' `RunWT`) | all rebuild, no pin |
 | W9.6.2 | `sound` ‖ `laws` | `Premise.sound_update` and `SoundArms`' equations against `TRun.*`, then `SoundCalls`/`Local`/`Loops`, `CallbackSound`, `ProvesSound`; the update laws (`Graft`, `UpdRuleScoped`, `RewritePast`, `TermLaws`, `UpdateRules`, `RewriteScoped`, `SeqRewrite`, `StatePartsScoped`, `LeafDerive`, …) | `Chains/*`, `ChainRewrites*`, Derived |
-| W9.6.3 | `decide` ‖ `close` | `RelB`/`RelU`, `peelS`, `redState`, `Valid.of_reduceSL` on the typed state; `CloseScoped` without `EState` (U2) or on the pair (U1); `Close`, `CloseTests`, `Closers`, `State.lift?` | `Tactics/Decide`, Derived, `Solkey/TestSuite`, `ProofTree` |
+| W9.6.3 | `decide` ‖ `close` | `RelB`/`RelU`, `peelS`, `redState`, `Fml.Valid.of_reduceSL` on the typed state; `CloseScoped` without `EState` (U2) or on the pair (U1); `Close`, `CloseTests`, `Closers`, `State.lift?` | `Tactics/Decide`, Derived, `Solkey/TestSuite`, `ProofTree` |
 | W9.6.4 | master | delete Erased's evaluators and `EState` (and `Env` under U2), the twins, `StepErase` (its `State`/`TEnv` erase lemmas move to `State.lean`), the old `RunInv.Holds`/`EKeeps`; docs | all |
 
 **Fallback**: if U2 fails the gate, U1 (the evaluators, `EState`,
@@ -4445,7 +4445,7 @@ read it there (`aliasPath`/`memRef` stay, as the term readers).
   `MRhs.eval`; `Val.eval_erase_ok`/`_error` (`SoundLoops`) are
   `Val.lower_eval_ok`/`_error`; `Simple.eval_lower`/`denote_lower`
   (`Logic.lean`) are deleted for `Simple.lower_evalT`/`denote_lowerT`.  No
-  `*_sound`, `Stmt.sound`, `Proves.valid` statement changed; their axioms
+  `*_sound`, `Stmt.sound`, `Proves.fmlValid` statement changed; their axioms
   are `propext`, `Classical.choice`, `Quot.sound`.
 - **Deleted, unused**: `MPath.mval_noPanic` (`SoundStore`),
   `MSrc.mval_noPanic` (`SoundMem`), `Res.map_bind'`,
@@ -4529,7 +4529,7 @@ added, all of them moved; 19 Lean files):
 (`SolkeyTestSuite` added to `defaultTargets` for the build, not
 committed), clean; `check-orphans` (310 reachable), `check-doc-paths`;
 `sorry` count unchanged (19 occurrences, prose and strings); `#print axioms
-Proves.valid`: `propext`, `Classical.choice`, `Quot.sound`.
+Proves.fmlValid`: `propext`, `Classical.choice`, `Quot.sound`.
 `check-testsuite.sh` refuses the local `../solkey` (`4150e0a8`, stale, as
 before).
 
@@ -4961,7 +4961,7 @@ read; they go at W9.7.3.
 (added to `defaultTargets` for the build, not committed), clean; every pin
 built unchanged (`Examples/ProofTree.lean`, `CloseTests`, `Verify`'s
 `#verify` outputs); `check-orphans` (310 reachable), `check-doc-paths`;
-`sorry` count unchanged; `#print axioms Valid.of_reduceS`: `propext`,
+`sorry` count unchanged; `#print axioms Fml.Valid.of_reduceS`: `propext`,
 `Classical.choice`, `Quot.sound`.
 
 **Gates** (each file copied under `Solidity/Scratch/`, a fresh worker, `/proc`
@@ -5101,7 +5101,7 @@ typed state into.
 **Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
 (added to `defaultTargets` for the build, not committed), clean (312 jobs);
 the touched modules have no warning; `sorry` count 19; `#print axioms
-Proves.valid`: `propext`, `Classical.choice`, `Quot.sound`;
+Proves.fmlValid`: `propext`, `Classical.choice`, `Quot.sound`;
 `check-orphans` (309 reachable), `check-doc-paths`.
 
 **Gates** (each file copied under `Solidity/Scratch/` of both trees, a fresh
@@ -5894,10 +5894,10 @@ conditions read by `holds_eqD`; `evalBinop_cmp_true` gone.
 (the laws), so `Premise.Sound`, `Stmt.Sound`, `holds_exit` moved to
 `Calculus/PremiseSound.lean` (below `Proves`; `SoundKit` imports it), and
 `Stmt.stepSound`/`sound`/`runs` to `Calculus/StmtSound.lean`;
-`Calculus/Sound.lean` keeps `Proves.sound`/`Proves.valid` above
+`Calculus/Sound.lean` keeps `Proves.sound`/`Proves.fmlValid` above
 `StmtSound` and `ProvesSound`.  **`Stmt.sound` elaborates**, axioms
 `propext`, `Classical.choice`, `Quot.sound` (its `#guard_msgs` pin).
-**`Proves.valid` does not yet**: it waits on the laws.
+**`Proves.fmlValid` does not yet**: it waits on the laws.
 
 **Erasure kept, with readers**: `TDenote.erase`, `Storage.erase`,
 `Heap.erase`, `State.globE` (the Theory's abstraction `SVal.absT`/`Storage.absT`,
@@ -5928,7 +5928,7 @@ every module but the ones below elaborates (among them `Theory/Bridge/Denote`,
 - `Calculus/CloseLemmas.lean:80` — the untyped readers (`Srt.Ev`,
   `State.findStorage` on a typed state); blocks `Close`, `Deploy`.
 - `Calculus/NamedTerm.lean:60`, `Calculus/Quote.lean:52` — lane `front`'s.
-For `Proves.valid`: `Graft`'s `Upd.seqPar`/`holds_upd_seqPar`/`holds_liftBinds`
+For `Proves.fmlValid`: `Graft`'s `Upd.seqPar`/`holds_upd_seqPar`/`holds_liftBinds`
 (the substitution lemma `Tm.eval_substH` over `Upd.Lands`), `SeqRewrite`'s
 `Fml.rwEqC`/`Fml.rwEqC_holds`/`Upd.rwC`/`holds_upd_rwC`, `TermLib`'s
 `Tm.Theq`; then `ProvesSound` (its `merge`/`updRw`/`rewrite` cases) and
@@ -5998,10 +5998,10 @@ read by `close_rw` and `sol_decide`'s language over `Semantics.State`.
 ### W9.8.3c laws record (2026-10-12, branch `w98-laws`)
 
 The laws over the typed terms, in dependency order, up to the closer
-lane's modules.  **`Proves.valid` elaborates**, axioms `propext`,
+lane's modules.  **`Proves.fmlValid` elaborates**, axioms `propext`,
 `Classical.choice`, `Quot.sound` (its `#guard_msgs` pin in
 `Calculus/Sound.lean`; mid-lane commit `d0ba6f84`); so does
-`ProvesC.valid` (`Calculus/CallbackSound.lean`'s pin).
+`ProvesC.fmlValid` (`Calculus/CallbackSound.lean`'s pin).
 
 **`Calculus/StateFacts.lean`.**  The facts about the untyped symbols went
 with them: `Op2.opaque`, `Srt.DEquiv`, `OpN.denote_congr`, `State.Keeps`,
@@ -6289,7 +6289,7 @@ local was a `uint`, `net` an `int`); the `ProofTree` and `Dangling` changes
 above.
 
 **Checked** in `w98-dec`: every module above elaborates, no warning;
-`sorry` count 19; `#print axioms Valid.of_reduceS`: `propext`,
+`sorry` count 19; `#print axioms Fml.Valid.of_reduceS`: `propext`,
 `Classical.choice`, `Quot.sound`.  `Closers` and `Deploy` import the chain
 lane's `Problem`/`Spec` and do not build here: Deploy skipped.  In a
 throwaway merge with `w98-chain` (clean): `Closers` builds;
@@ -6487,7 +6487,7 @@ likewise, 0.1 s under its gate.
 - `Tools/Counterexample`'s candidates (`State.ofSem?`, `Storage.decode`):
   a search over untyped states, each lifted to a typed one before it counts.
 
-**Checked**: `sorry` count 19; `#print axioms Proves.valid` three
+**Checked**: `sorry` count 19; `#print axioms Proves.fmlValid` three
 (`propext`, `Classical.choice`, `Quot.sound`; `Sound.lean`'s pin);
 `check-orphans` (the only orphans are git-ignored `Scratch` modules);
 `check-doc-paths`; `solkeycheck` zero (323 taclets) and `check-testsuite`
@@ -6527,7 +6527,7 @@ run is not, which `Premise.sound_update_typed` discharges by `exh_free`
 (the lowered terms are push-free, `Upd.exh_of_pushFree`) except at the
 push arms (`pushSlot_exh`, `extend_exh`, `pushSome_exh`, `pushBind_exh`).
 `CloseS.holds_upd` gains the exhausted disjunct; the counterexample
-evaluator reads `m = .box || U.exh σ`.  `#print axioms Proves.valid`:
+evaluator reads `m = .box || U.exh σ`.  `#print axioms Proves.fmlValid`:
 `propext`, `Classical.choice`, `Quot.sound`.
 
 **The decision procedure** (`DecideScoped`, `DecideRel`, `DecideTyped`).
@@ -6704,7 +6704,7 @@ definition): the thirty-three listed lemmas deleted.  Kept:
 
 **Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
 (added to `defaultTargets` for the build, not committed), clean (320
-jobs); `Report.lean`'s pin 435 derived; `Proves.valid`'s axioms
+jobs); `Report.lean`'s pin 435 derived; `Proves.fmlValid`'s axioms
 `propext`, `Classical.choice`, `Quot.sound` (`Sound.lean`'s pin); `sorry`
 19; `check-orphans` (orphans only the git-ignored `Scratch` modules),
 `check-doc-paths`, `check-testsuite --solkey` at `1b4341a303` (438 = 435
@@ -6874,7 +6874,7 @@ remnant is the `w10-remnant` lane's).
 edited here), which reads the old `Option`-free `.eq`; it needs
 `a.denote σ = some x`, `b.denote σ = some y` and `Option.some.injEq`.
 `Derived1`–`14` check on the branch; `Report.lean` was not rebuilt.
-`sorry` lines 19 (as master); `#print axioms Proves.valid`: `propext`,
+`sorry` lines 19 (as master); `#print axioms Proves.fmlValid`: `propext`,
 `Classical.choice`, `Quot.sound`; `check-orphans` (313 reachable, 0
 orphaned), `check-doc-paths`; `check-testsuite` against solkey
 `1b4341a303`: 438 = 435 derived + 1 pending + 1 divergent + 1 excluded,
@@ -6939,7 +6939,7 @@ memory island is gone.
   symbolically (`Calculus/Decide.lean`, its soundness
   `Calculus/DecideEval.lean`, `LTm.elim_eval`).  A scoped leaf is pushed in
   by position (`Fml.toLS`, `Calculus/DecideScoped.lean`) and is sound over
-  the typed state (`Valid.of_toLS`, `Calculus/DecideTyped.lean`).
+  the typed state (`Fml.Valid.of_toLS`, `Calculus/DecideTyped.lean`).
   `DecideRel` and `DecideErase` are deleted.
 - **W10.4.4.**  The closer is typed (`Calculus/Closer.lean`): a value is in
   range by its type and the storage in its declared shape, so no layout
@@ -6992,7 +6992,7 @@ pins on `LMem` terms gone; `copyFrame`, `mappingEveryKey` now close).
 `Tools/Counterexample.lean` 426–428 (the `w10-remnant` lane's file, not
 edited: it reads `Theory.StValue.Equiv`, now deleted; fixed at the
 merge, `7b7c3bb1`, and `eb267464`).  `sorry` lines 20
-(as master); `#print axioms Proves.valid` and `Seq.checkCore_valid`:
+(as master); `#print axioms Proves.fmlValid` and `Seq.checkCore_valid`:
 `propext`, `Classical.choice`, `Quot.sound`; `check-orphans` clean but for
 scratch; `check-doc-paths` clean but for `AGENTS.md`'s two citations of
 deleted modules.
@@ -7038,7 +7038,7 @@ the deleted `PrimTy.admits` (dead, gone) and one line of
   `checkCore_valid` into `Calculus/DecideComplete.lean`; `Seq.fitsCore`
   the two bounds alone) and says so past them.  `sol_decide_finish`, a
   stub that always failed after an unbounded reduction, is gone;
-  `Valid.of_close` too.  `sol_reduce?` is pinned
+  `Fml.Valid.of_close` too.  `sol_reduce?` is pinned
   (`Examples/Tactics/Decide.lean`).
 - **Names that were not solkey's**: the memory laws carried names no
   `.key` file has at `1b4341a303`.  Now, a taclet's `\then` by its name and
@@ -7701,7 +7701,7 @@ The untyped core is deleted: there is no untyped state.  Nothing under
   `TestSuite/Problems.lean`, `Corpus/Imported.lean` and
   `TestSuite/Derived5.lean` clean; `TestSuite/Report.lean` not checked
   (building its fourteen `Derived` imports at once passed 27 GB and was
-  stopped); `#print axioms` of `Proves.valid`, `Seq.checkCore_valid`,
+  stopped); `#print axioms` of `Proves.fmlValid`, `Seq.checkCore_valid`,
   `compiler_correct`, `wt_iff_reachable`, `initStorage_wt`, `holds_wt`:
   `propext`, `Classical.choice`, `Quot.sound` (appended to `Theorems.lean`
   with its imports, then removed); no `sorry` (0, as on master), no

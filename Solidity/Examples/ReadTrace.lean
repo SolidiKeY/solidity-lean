@@ -33,7 +33,7 @@ def counterstate : { σ : State Bank [] // ¬ holds σ claim } :=
 #eval ((three.read counterstate.val.storage).val, (four.read counterstate.val.storage).val)
 
 /-- A trace chosen by occurrence refutes the original nested-read formula. -/
-theorem invalid : ¬ Valid claim := fun h => counterstate.property (h counterstate.val)
+theorem invalid : ¬ Fml.Valid claim := fun h => counterstate.property (h counterstate.val)
 
 def finiteValues : List CallValue := List.ofFn fun i : Fin reduction.sentence.readBound =>
   .uint (values i .uint)
@@ -61,7 +61,7 @@ def followCounterstate : { σ : State Follower [] // ¬ holds σ followClaim } :
 
 /-- Actual program normalization and declaration certificates retain the
 original universally quantified function claim in the refutation. -/
-theorem follow_invalid : ¬ Valid followClaim :=
+theorem follow_invalid : ¬ Fml.Valid followClaim :=
   fun h => followCounterstate.property (h followCounterstate.val)
 
 example : followCounterstate.val.storage.find

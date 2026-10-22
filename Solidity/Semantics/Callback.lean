@@ -507,20 +507,27 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- KeY's "resume after callback": control leaves with `J` kept and comes
   back to any state the callee may leave in which `J` holds. -/
   | transferResume {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {o₁ : Out C σ.H Γ}
-      {st : Storage C} {nt : Ledger} :
-      J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
-        ExecS J σ (.transfer r a) (.ok ⟨o₁.st.havoc st nt, o₁.ext⟩)
+      {st : Storage C} {nt : Ledger} {sb : PrimTy.uint.Denote} :
+      J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt sb) →
+        ExecS J σ (.transfer r a) (.ok ⟨o₁.st.havoc st nt sb, o₁.ext⟩)
   /-- A send that halts, where its transfer would; it calls back under
   `J.pay` or forwarding all the gas (`full`, a value call). -/
   | sendHalt {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {full : Bool} {e : THalt} :
-      (J.pay || full) = true → TRun.transfer r a σ = .error e →
+      (J.pay || full) = true → TRun.send pv r a σ = .error e →
         ExecS J σ (.send pv r a full) (.halt e)
   /-- KeY's "send failed": the callee reverts, nothing is booked and `pv`
   is `false`, whatever the transaction's oracle says. -/
   | sendFailed {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {full : Bool} {o₁ : Out C σ.H Γ} :
       (J.pay || full) = true → TRun.transfer r a σ = .ok o₁ →
+        ExecS J σ (.send pv r a full) (.ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩)
+  /-- A fundedness or oracle refusal returns `false`, without booking a
+  payment or entering a callback. Operand evaluation errors still halt. -/
+  | sendRefused {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
+      {full : Bool} :
+      (J.pay || full) = true →
+      TRun.send pv r a σ = .ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩ →
         ExecS J σ (.send pv r a full) (.ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩)
   /-- KeY's "invariant on exit", the payment booked. -/
   | sendViolated {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
@@ -530,10 +537,10 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- KeY's "send succeeded": the payment booked, `J` kept, any state the
   callee may leave in which `J` holds, `pv` then `true`. -/
   | sendResume {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {full : Bool} {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} :
+      {full : Bool} {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} {sb : PrimTy.uint.Denote} :
       (J.pay || full) = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st →
-        J.at (o₁.st.havoc st nt) → ExecS J σ (.send pv r a full)
-          (.ok ⟨(o₁.st.havoc st nt).setLocal pv (true : Bool), o₁.ext⟩)
+        J.at (o₁.st.havoc st nt sb) → ExecS J σ (.send pv r a full)
+          (.ok ⟨(o₁.st.havoc st nt sb).setLocal pv (true : Bool), o₁.ext⟩)
   | iteHalt {Γ Γ₁ Γ₂ : Ctx} {σ : State C Γ} {c : Val C Γ .bool} {thn : Prog C Γ Γ₁}
       {els : Prog C Γ Γ₂} {e : THalt} :
       c.evalT σ = .error e → ExecS J σ (.ite c thn els) (.halt e)
@@ -624,10 +631,10 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   | tryOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
-      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {st : Storage C} {nt : Ledger}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {st : Storage C} {nt : Ledger} {sb : PrimTy.uint.Denote}
       {vs rest : List Word} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
-      J.at σ → J.at (σ.havoc st nt) → rets.decodeT vs = .ok (r, rest) →
-        ExecP J ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) ok o →
+      J.at σ → J.at (σ.havoc st nt sb) → rets.decodeT vs = .ok (r, rest) →
+        ExecP J ((σ.havoc st nt sb).withEnv (TEnv.append ρ r σ.env)) ok o →
         (self = true → (call.addr.evalT σ).1 ≠ 0 ∧
           (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1) →
           ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
@@ -821,25 +828,31 @@ variable {Γ : Ctx}
 otherwise ends in the booking with `pv` true, or with nothing booked and `pv`
 false (`sendT`, as the transaction's oracle says). -/
 theorem TRun.send_cases (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (σ : State C Γ) :
-    (∃ e, TRun.transfer r a σ = .error e ∧ TRun.send pv r a σ = .error e) ∨
-    ∃ o₁ : Out C σ.H Γ, TRun.transfer r a σ = .ok o₁ ∧
-      (TRun.send pv r a σ = .ok ⟨o₁.st.setLocal pv (true : Bool), o₁.ext⟩ ∨
-        TRun.send pv r a σ = .ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩) := by
-  simp only [TRun.transfer, TRun.send, bind, Except.bind]
-  cases r.evalT σ with
-  | error e => exact .inl ⟨e, rfl, rfl⟩
+    (∃ e, TRun.send pv r a σ = .error e) ∨
+    (∃ o₁ : Out C σ.H Γ, TRun.transfer r a σ = .ok o₁ ∧
+      TRun.send pv r a σ = .ok ⟨o₁.st.setLocal pv (true : Bool), o₁.ext⟩) ∨
+    TRun.send pv r a σ = .ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩ := by
+  cases hr : r.evalT σ with
+  | error e => exact .inl ⟨e, by simp only [TRun.send, hr, bind, Except.bind]⟩
   | ok addr =>
-    cases a.evalT σ with
-    | error e => exact .inl ⟨e, rfl, rfl⟩
+    cases ha : a.evalT σ with
+    | error e => exact .inl ⟨e, by simp only [TRun.send, hr, ha, bind, Except.bind]⟩
     | ok amt =>
-      refine .inr ⟨_, rfl, ?_⟩
-      simp only [pure, Except.pure, sendT]
-      rcases lookupBy (sendKey addr amt) σ.tx.ext with _ | (_ | _ | _ | _)
-      · exact .inl rfl
-      · exact .inl rfl
-      · exact .inr rfl
-      · exact .inr rfl
-      · exact .inr rfl
+      cases hp : σ.canPay addr amt with
+      | false =>
+        right; right
+        simp only [TRun.send, hr, ha, bind, Except.bind, pure, Except.pure]
+        unfold sendT
+        rw [hp]
+        rfl
+      | true =>
+        right; left
+        refine ⟨⟨σ.pay addr amt.1, List.prefix_refl _⟩, ?_, ?_⟩
+        · simp only [TRun.transfer, hr, ha, hp, bind, Except.bind, if_true, pure, Except.pure]
+        · simp only [TRun.send, hr, ha, bind, Except.bind, pure, Except.pure]
+          unfold sendT
+          rw [hp]
+          rfl
 
 /-- `if` by its condition. -/
 theorem TRun.ite_eval {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁) (thn : TStep C Γ Γ₁)
@@ -892,20 +905,20 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       | error e => exact .inl (.transferHalt hp h)
       | ok o₁ =>
         by_cases hI : J.at o₁.st
-        · exact .inl (ExecS.transferResume (st := o₁.st.storage) (nt := o₁.st.net) hp h hI hI)
+        · exact .inl (ExecS.transferResume (st := o₁.st.storage) (nt := o₁.st.net) (sb := o₁.st.selfBalance) hp h hI hI)
         · exact .inr (.transferViolated hp h hI)
   | _, _, .send pv r a full, σ => by
     cases hp : (J.pay || full) with
     | false => exact .inl (.det hp)
     | true =>
       show ExecS J σ _ (.ofRes (TRun.send pv r a σ)) ∨ _
-      rcases TRun.send_cases pv r a σ with ⟨e, ht, hs⟩ | ⟨o₁, ht, hs | hs⟩
-      · rw [hs]; exact .inl (.sendHalt hp ht)
+      rcases TRun.send_cases pv r a σ with ⟨e, hs⟩ | ⟨o₁, ht, hs⟩ | hs
+      · rw [hs]; exact .inl (.sendHalt hp hs)
       · rw [hs]
         by_cases hI : J.at o₁.st
-        · exact .inl (ExecS.sendResume (st := o₁.st.storage) (nt := o₁.st.net) hp ht hI hI)
+        · exact .inl (ExecS.sendResume (st := o₁.st.storage) (nt := o₁.st.net) (sb := o₁.st.selfBalance) hp ht hI hI)
         · exact .inr (.sendViolated hp ht hI)
-      · rw [hs]; exact .inl (.sendFailed hp ht)
+      · rw [hs]; exact .inl (.sendRefused hp hs)
   | _, _, .ite c thn els, σ => by
     show ExecS J σ _ (.ofRes (TRun.ite c thn.ext thn.runR els.ext els.runR σ)) ∨ _
     rw [TRun.ite_eval]
@@ -1121,8 +1134,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
         by_cases hI : J.at σ
         · rw [← COut.map_ofRes]
           rcases Prog.exec_run J ok (σ.withEnv (TEnv.append _ r σ.env)) with h | h
-          · exact .inl (ExecS.tryOk (st := σ.storage) (nt := σ.net) hI hI hd h hg)
-          · exact .inr (ExecS.tryOk (st := σ.storage) (nt := σ.net) (o := .violated) hI hI hd h hg)
+          · exact .inl (ExecS.tryOk (st := σ.storage) (nt := σ.net) (sb := σ.selfBalance) hI hI hd h hg)
+          · exact .inr (ExecS.tryOk (st := σ.storage) (nt := σ.net) (sb := σ.selfBalance) (o := .violated) hI hI hd h hg)
         · exact .inr (.tryViolated hI)
     · exact hErr fun h => (hg h).2
     · exact hPnc (fun h => (hg h).2) v

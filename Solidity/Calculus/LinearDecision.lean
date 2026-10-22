@@ -85,7 +85,7 @@ def AFml.holds (x : Nat → Nat) : AFml → Prop
   | .and φ ψ => φ.holds x ∧ ψ.holds x
   | .imp φ ψ => φ.holds x → ψ.holds x
 
-/-- Valid: true at every choice of the variables. -/
+/-- Fml.Valid: true at every choice of the variables. -/
 def AFml.Valid (φ : AFml) : Prop := ∀ x, φ.holds x
 
 /-- How many variables the formula reads: its longest form. -/

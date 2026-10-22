@@ -15,7 +15,7 @@ and it is what the rules say: `memoryRootRebind` binds `mv₁ := mv₂`,
 `memoryFieldReadAliasRoot` binds `mv₁ := read(memory, mv₂.fr)` — the identity
 the member holds — and only `memoryFieldWrite` writes the heap.
 
-Every example is a theorem `⊨ dl!{ … }`, proved by the strategy (`sol_symex;
+Every example is a theorem `⊨ᶠ dl!{ … }`, proved by the strategy (`sol_symex;
 sol_close`) or, for a worked example, by a walk naming each
 taclet (`StorageSteps.lean`'s docstring says how to read one).  A memory local
 has no root to fall back on, so every program declares its objects: either
@@ -56,8 +56,8 @@ open scoped Scoped
 the identity and the heap that holds it (`memoryReferenceDeclFreshAlloc`),
 and a write to it reads back. -/
 theorem memoryDeclFreshAlloc :
-    ⊨ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
@@ -71,9 +71,9 @@ initialiser drops (`memoryLocalDeclInitDrop`) and the alias binds the same
 identity (`memoryRootRebind`), with no heap write, so a write through the alias
 is seen through `carol`. -/
 theorem memoryDeclAlias :
-    ⊨ dl!{ [ Person memory carol; Person memory carolAlias = carol; carolAlias.age = 3;
+    ⊨ᶠ dl!{ [ Person memory carol; Person memory carolAlias = carol; carolAlias.age = 3;
              uint x = carol.age; ] x == 3 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryRootRebind
@@ -89,9 +89,9 @@ the receiver `carol.account` is bound to a memory local first, and each
 binding is a `read` of an identity (`memoryFieldReadAliasRoot`), still with
 no heap write. -/
 theorem memoryDeclDeepAlias :
-    ⊨ dl!{ [ Person memory carol = alice; Token memory t = carol.account.token; t.value = 9;
+    ⊨ᶠ dl!{ [ Person memory carol = alice; Token memory t = carol.account.token; t.value = 9;
              uint x = carol.account.token.value; ] x == 9 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
@@ -116,7 +116,7 @@ theorem memoryDeclDeepAlias :
 
 /-- `carol.age = amount;` — both parts simple: one write (`memoryFieldWrite`). -/
 theorem memoryFieldWrite :
-    ⊨ dl!{ [ Person memory carol; carol.age = amount; uint x = carol.age; ] x == amount } := by
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = amount; uint x = carol.age; ] x == amount } := by
   sol_symex
   sol_close
 
@@ -126,9 +126,9 @@ theorem memoryFieldWrite :
 through (`memoryFieldWrite`), a `write` at an identity where storage has
 a `save` at a path. -/
 theorem memoryDeepFieldWrite :
-    ⊨ dl!{ [ Person memory carol; carol.account.balance = 10; uint x = carol.account.balance; ]
+    ⊨ᶠ dl!{ [ Person memory carol; carol.account.balance = 10; uint x = carol.account.balance; ]
            x == 10 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
@@ -146,8 +146,8 @@ theorem memoryDeepFieldWrite :
 /-- `carol.age = a + b;` — a computed value is captured before the write
 (`memoryFieldWriteUnfoldSource`), as a storage field write captures it. -/
 theorem memoryFieldWriteCapturedRhs :
-    ⊨ dl!{ [ Person memory carol; carol.age = a + b; uint x = carol.age; ] x == a + b } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ Person memory carol; carol.age = a + b; uint x = carol.age; ] x == a + b } := by
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryFieldWriteUnfoldSource
   apply unfold .localValueDeclInitDrop
@@ -166,9 +166,9 @@ aliasing example.  The alias binds the identity `carol.account` holds,
 so the write through it is a write to that object, and the path reads it
 back. -/
 theorem memoryAliasWrite :
-    ⊨ dl!{ [ Person memory carol; Account memory carolAcc = carol.account;
+    ⊨ᶠ dl!{ [ Person memory carol; Account memory carolAcc = carol.account;
              carolAcc.balance = 100; uint x = carol.account.balance; ] x == 100 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot  -- { carolAcc := read(memory, carol.account) }
@@ -186,7 +186,7 @@ theorem memoryAliasWrite :
 identity (`memoryFieldWriteCopy`), so the two names share one object: a write
 through `carol.account` is seen through `acc`. -/
 theorem memoryFieldReferenceAssign :
-    ⊨ dl!{ [ Person memory carol = alice; Account memory acc = bob.account; carol.account = acc;
+    ⊨ᶠ dl!{ [ Person memory carol = alice; Account memory acc = bob.account; carol.account = acc;
              carol.account.balance = 60; uint x = acc.balance; ] x == 60 } := by
   sol_symex
   sol_close
@@ -195,8 +195,8 @@ theorem memoryFieldReferenceAssign :
 identity is what is written: no alias is introduced for it
 (`memoryFieldWriteCopy` takes any memory path). -/
 theorem memoryFieldCopy :
-    ⊨ dl!{ [ Person memory carol; Person memory david; carol.account = david.account; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ Person memory carol; Person memory david; carol.account = david.account; ] true } := by
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWriteCopy
@@ -207,9 +207,9 @@ theorem memoryFieldCopy :
 /-- `carol = david;` — a root assignment rebinds (`memoryRootRebind`); the heap
 is untouched, and `carol` now names `david`'s object. -/
 theorem memoryRootAssign :
-    ⊨ dl!{ [ Person memory carol; Person memory david; david.age = 40; carol = david;
+    ⊨ᶠ dl!{ [ Person memory carol; Person memory david; david.age = 40; carol = david;
              carol.age = 41; uint x = david.age; ] x == 41 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWrite
@@ -225,10 +225,10 @@ theorem memoryRootAssign :
 local is rebound to the identity the read yields (`memoryFieldReadAliasRoot`),
 and a write through it is a write to `d`'s account. -/
 theorem memoryRootRebind :
-    ⊨ dl!{ [ Person memory carol = alice; Account memory carolAcc = carol.account;
+    ⊨ᶠ dl!{ [ Person memory carol = alice; Account memory carolAcc = carol.account;
              Person memory d = bob; carolAcc = d.account; carolAcc.balance = 4;
              uint x = d.account.balance; ] x == 4 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
@@ -256,8 +256,8 @@ out of bounds halts the update, which the box accepts. -/
 /-- `uint[] memory v;` — a fresh array is one allocation, as a struct is
 (`memoryReferenceDeclFreshAlloc`); it is empty, so every access to it
 reverts. -/
-theorem memoryArrayAlloc : ⊨ dl!{ [ uint[] memory v; ] true } := by
-  apply Proves.valid
+theorem memoryArrayAlloc : ⊨ᶠ dl!{ [ uint[] memory v; ] true } := by
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply empty
   sol_leaf
@@ -266,8 +266,8 @@ theorem memoryArrayAlloc : ⊨ dl!{ [ uint[] memory v; ] true } := by
 /-- `v[i] = 100; x = v[i];` — the write and the read, both simple
 (`memoryIndexWriteArray`, `memoryIndexReadArrayValue`), on a copy of `values`. -/
 theorem memoryArrayWriteRead :
-    ⊨ dl!{ [ uint[] memory v = values; v[i] = 100; uint x = v[i]; ] x == 100 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ uint[] memory v = values; v[i] = 100; uint x = v[i]; ] x == 100 } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryIndexWriteArray
@@ -281,9 +281,9 @@ theorem memoryArrayWriteRead :
 `carol.account.values[i] = 42;`): the receiver `b.tokens[i]` is bound to a
 memory local, which binds `b.tokens` first. -/
 theorem memoryNestedArrayWrite :
-    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; b.tokens[i].value = 42;
+    ⊨ᶠ dl[TestSuite]{ [ TokenBucket memory b = bucket; b.tokens[i].value = 42;
                        uint x = b.tokens[i].value; ] x == 42 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryFieldWrite_unfold_leftFst
@@ -310,9 +310,9 @@ set_option maxHeartbeats 300000 in
 identity is stored (`memoryIndexWriteCopy`), so the slot and `t` alias (the
 printed `carolTokens[i] = david.account.token;`). -/
 theorem memoryArrayWriteRefSource :
-    ⊨ dl[TestSuite]{ [ Token[] memory ts = tokens; Token memory t = tok; ts[i] = t;
+    ⊨ᶠ dl[TestSuite]{ [ Token[] memory ts = tokens; Token memory t = tok; ts[i] = t;
                        t.value = 7; uint x = ts[i].value; ] x == 7 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
@@ -333,10 +333,10 @@ set_option maxHeartbeats 400000 in
 identity is written into the member (the printed
 `carol.account.token = davidTokens[i];`). -/
 theorem memoryFieldWriteFromArrayElem :
-    ⊨ dl[TestSuite]{ [ Person memory carol = alice; Token[] memory ts = tokens;
+    ⊨ᶠ dl[TestSuite]{ [ Person memory carol = alice; Token[] memory ts = tokens;
                        carol.account.token = ts[i]; ts[i].value = 5;
                        uint x = carol.account.token.value; ] x == 5 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
@@ -365,9 +365,9 @@ theorem memoryFieldWriteFromArrayElem :
 nested path: two identity bindings and no heap write (the printed
 `Token memory tok = carol.account.tokens[i];`). -/
 theorem memoryDeclFromNestedArrayElem :
-    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; Token memory t = b.tokens[i];
+    ⊨ᶠ dl[TestSuite]{ [ TokenBucket memory b = bucket; Token memory t = b.tokens[i];
                        t.value = 3; uint x = b.tokens[i].value; ] x == 3 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
@@ -442,9 +442,9 @@ delete carol; oldAge = carolAlias.age; newAge = carol.age;` — the alias keeps
 the old object (`memoryRootDeleteFreshRebind`).  The printed program, its
 `oldAge`, `newAge` undeclared; its chain is `Chains.MemoryDelete.RootDelete.chain`. -/
 theorem memoryRootDelete :
-    ⊨ dl!{ [ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol;
+    ⊨ᶠ dl!{ [ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol;
              oldAge = carolAlias.age; newAge = carol.age; ] true } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryRootRebind
@@ -459,9 +459,9 @@ theorem memoryRootDelete :
 /-- `delete carol.age;` — a primitive member is reset to its default
 (`memoryFieldDeletePrimitive`), which reads back. -/
 theorem memoryFieldDeletePrim :
-    ⊨ dl!{ [ Person memory carol = alice; carol.age = 33; delete carol.age;
+    ⊨ᶠ dl!{ [ Person memory carol = alice; carol.age = 33; delete carol.age;
              uint x = carol.age; ] x == 0 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryFieldWrite
@@ -478,10 +478,10 @@ newBal = carol.account.balance;` — a member of reference type gets a fresh
 default object (`memoryFieldDeleteReference`); `carolAcc` keeps the old one.
 The printed program; its chain is `Chains.MemoryDelete.FieldDeleteRef.chain`. -/
 theorem memoryFieldDeleteRef :
-    ⊨ dl!{ [ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
+    ⊨ᶠ dl!{ [ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
              delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance; ]
            true } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply update .memoryReferenceDeclFreshAlloc
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
@@ -500,9 +500,9 @@ theorem memoryFieldDeleteRef :
 is reset (`memoryIndexDeletePrimitive`); out of bounds the write reverts,
 which the box accepts. -/
 theorem memoryIndexDeletePrim :
-    ⊨ dl!{ [ uint[] memory carolValues = values; carolValues[i] = 5; delete carolValues[i];
+    ⊨ᶠ dl!{ [ uint[] memory carolValues = values; carolValues[i] = 5; delete carolValues[i];
              uint x = carolValues[i]; ] x == 0 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryIndexWriteArray
@@ -516,8 +516,8 @@ theorem memoryIndexDeletePrim :
 /-- `delete carolTokens[i];` (box) — an element of an array of structs gets
 a fresh default object (`memoryIndexDeleteReference`). -/
 theorem memoryIndexDeleteRef :
-    ⊨ dl[TestSuite]{ [ Token[] memory carolTokens = tokens; delete carolTokens[i]; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl[TestSuite]{ [ Token[] memory carolTokens = tokens; delete carolTokens[i]; ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply update .memoryIndexDeleteReference
@@ -529,8 +529,8 @@ theorem memoryIndexDeleteRef :
 having the tokens) — the receiver is bound first
 (`memoryIndexDelete_unfold_leftFst`). -/
 theorem memoryNestedIndexDelete :
-    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; delete b.tokens[i]; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl[TestSuite]{ [ TokenBucket memory b = bucket; delete b.tokens[i]; ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryIndexDelete_unfold_leftFst
@@ -544,8 +544,8 @@ theorem memoryNestedIndexDelete :
 /-- `delete carolValues[i + 1];` — a complex index is captured first
 (`memoryIndexDeleteNonSimpleIndexCapture`). -/
 theorem memoryIndexDeleteCapture :
-    ⊨ dl!{ [ uint[] memory carolValues = values; delete carolValues[i + 1]; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ uint[] memory carolValues = values; delete carolValues[i + 1]; ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryIndexDeleteNonSimpleIndexCapture
@@ -591,8 +591,8 @@ KeY's member reads at `length`). -/
 /-- `uint[] memory xs = new uint[](n); uint len = xs.length;` —
 `memoryArrayFreshAlloc`, then `memoryLengthRead`. -/
 theorem memoryNewArray :
-    ⊨ dl!{ [ uint[] memory xs = new uint[](n); uint len = xs.length; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ uint[] memory xs = new uint[](n); uint len = xs.length; ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryArrayFreshAlloc
   apply unfold .localValueDeclInitDrop
@@ -604,8 +604,8 @@ theorem memoryNewArray :
 /-- `xs[0] = new uint[](3);` — a fresh array written into a memory element is
 bound to a fresh memory local first (`newArrayCapture`). -/
 theorem memoryNewArrayCapture :
-    ⊨ dl!{ [ uint[][] memory xs = new uint[][](1); xs[0] = new uint[](3); ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ uint[][] memory xs = new uint[][](1); xs[0] = new uint[](3); ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryArrayFreshAlloc
   apply unfold .newArrayCapture
@@ -619,8 +619,8 @@ theorem memoryNewArrayCapture :
 /-- `basketA.items = new uint[](2);` — into storage, through a fresh memory
 local (`newArrayCapture`), then copied back (`memoryToStorageFieldCopyRoot`). -/
 theorem storageNewArrayCapture :
-    ⊨ dl[TestSuite]{ [ basketA.items = new uint[](2); uint len = basketA.items.length; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl[TestSuite]{ [ basketA.items = new uint[](2); uint len = basketA.items.length; ] true } := by
+  apply Proves.fmlValid
   apply unfold .newArrayCapture
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryArrayFreshAlloc
@@ -637,8 +637,8 @@ theorem storageNewArrayCapture :
 /-- `TokenBucket memory b = bucket; uint len = b.tokens.length;` — the
 receiver bound first (`memoryLengthRead_unfold_rightFst`). -/
 theorem memoryNestedLength :
-    ⊨ dl[TestSuite]{ [ TokenBucket memory b = bucket; uint len = b.tokens.length; ] true } := by
-  apply Proves.valid
+    ⊨ᶠ dl[TestSuite]{ [ TokenBucket memory b = bucket; uint len = b.tokens.length; ] true } := by
+  apply Proves.fmlValid
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .localValueDeclInitDrop
@@ -685,7 +685,7 @@ fixed, `MObj.array`); it is indexed by the same rules as a `uint[]`
 
 /-- `uint[3] memory x; x[1] = 5; uint y = x[1];` (`TestSuite.testMemoryFixedArrayLength`). -/
 theorem memoryFixedWriteRead :
-    ⊨ dl[TestSuite]{ [ uint[3] memory x; x[1] = 5; uint y = x[1]; ] y == 5 } := by
+    ⊨ᶠ dl[TestSuite]{ [ uint[3] memory x; x[1] = 5; uint y = x[1]; ] y == 5 } := by
   sol_symex
   sol_close
 

@@ -214,7 +214,7 @@ def dotIdent (n : Lean.Name) : Lean.Term :=
 def short (n : Lean.Name) : MetaM Ident := return mkIdent (← unresolveNameGlobal n)
 
 /-- The constant `n` as `Proves.n` when the scope reads it so, as a walk's
-`apply Proves.valid` is written; else as the scope spells it. -/
+`apply Proves.fmlValid` is written; else as the scope spells it. -/
 def qualified (n : Lean.Name) : MetaM Ident := do
   let q := Lean.Name.mkSimple n.getPrefix.getString! ++ Lean.Name.mkSimple n.getString!
   if (← resolveGlobalName q).any (·.1 == n) then return mkIdent q

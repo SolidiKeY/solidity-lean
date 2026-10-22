@@ -9,7 +9,7 @@ import Solidity.Tools.Inspect
 
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
 callback (`transferNoCallbackBox`, solkey's `netHeader.key`), and does
-nothing else (`TRun.transfer`): `to`'s entry down by `v`, unless
+also debits the live balance (`TRun.transfer`): `to`'s entry down by `v`, unless
 `to` is the contract itself (`this`, `address(this)`), which books nothing.
 The rule and its single-statement walk are `Payment.lean`'s.
 
@@ -39,14 +39,14 @@ open scoped Scoped
 before a transfer reads the same after it.  The amount is captured first
 (`transfer_unfold_rightSndArgument`), then booked (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
-    ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
+  apply Proves.fmlValid
   apply update .storageFieldWriteSave
   apply unfold .transfer_unfold_rightSndArgument
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply update .transferNoCallbackBox
-  -- { net := if(to = this) then net else store(net, at(to), net(to) - se1) }
+  -- { pay(to, se1) }
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
@@ -57,8 +57,8 @@ theorem transferFrameStorage :
 captured (`transfer_unfold_leftFstReceiver`), and the transfer leaves it, and
 every other root, as it was. -/
 theorem transferFrameRoot :
-    ⊨ dl!{ [ uint z = total; owner.transfer(5); ] total == z } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ uint z = total; owner.transfer(5); ] total == z } := by
+  apply Proves.fmlValid
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
   apply unfold .transfer_unfold_leftFstReceiver
@@ -72,21 +72,21 @@ theorem transferFrameRoot :
 /-- `uint z = balances[k]; to.transfer(5); uint y = balances[k];` — a mapping
 entry, read before and after. -/
 theorem transferFrameMapping :
-    ⊨ dl!{ [ uint z = balances[k]; to.transfer(5); uint y = balances[k]; ] y == z } := by
+    ⊨ᶠ dl!{ [ uint z = balances[k]; to.transfer(5); uint y = balances[k]; ] y == z } := by
   sol_symex
   sol_close
 
 /-- `uint y = 7; to.transfer(5); to.transfer(2);` — the locals are untouched
 by two transfers. -/
 theorem transferFrameLocal :
-    ⊨ dl!{ [ uint y = 7; to.transfer(5); to.transfer(2); ] y == 7 } := by
+    ⊨ᶠ dl!{ [ uint y = 7; to.transfer(5); to.transfer(2); ] y == 7 } := by
   sol_symex
   sol_close
 
 /-- `Person memory m = alice; m.age = 4; to.transfer(1); uint y = m.age;` — and
 so is memory. -/
 theorem transferFrameMemory :
-    ⊨ dl!{ [ Person memory m = alice; m.age = 4; to.transfer(1); uint y = m.age; ] y == 4 } := by
+    ⊨ᶠ dl!{ [ Person memory m = alice; m.age = 4; to.transfer(1); uint y = m.age; ] y == 4 } := by
   sol_symex
   sol_close
 
@@ -100,33 +100,33 @@ the contract's own entry is never moved (`netTransferThis`). -/
 /-- `net(to) = 7 → [ to.transfer(5); ] net(to) = 2`: the booking, at every
 state where `to` is not the contract (`net-transfer-simple.key`). -/
 theorem netTransfer :
-    ⊨ dl!{ to != this → net(to) = 7 → [ to.transfer(5); ] net(to) = 2 } := by
+    ⊨ᶠ dl!{ to != this → net(to) = 7 → [ to.transfer(5); ] net(to) = 2 } := by
   sol_symex
   sol_close
 
 /-- …and the contract's own entry is as it was. -/
 theorem netTransferThis :
-    ⊨ dl!{ to != this → net(this) = 1 → [ to.transfer(5); ] net(this) = 1 } := by
+    ⊨ᶠ dl!{ to != this → net(this) = 1 → [ to.transfer(5); ] net(this) = 1 } := by
   sol_symex
   sol_close
 
 /-- **A payment to the contract itself books nothing**: `net(this)` is as it
 was. -/
 theorem netSelfTransfer :
-    ⊨ dl!{ net(this) = 7 → [ address(this).transfer(5); ] net(this) = 7 } := by
+    ⊨ᶠ dl!{ net(this) = 7 → [ address(this).transfer(5); ] net(this) = 7 } := by
   sol_symex
   sol_close
 
 /-- `owner.transfer(5);` — a storage receiver, captured first
 (`net-transfer-capture-receiver.key`). -/
 theorem netTransferStorageReceiver :
-    ⊨ dl!{ owner != this → net(owner) = 7 → [ owner.transfer(5); ] net(owner) = 2 } := by
+    ⊨ᶠ dl!{ owner != this → net(owner) = 7 → [ owner.transfer(5); ] net(owner) = 2 } := by
   sol_symex
   sol_close
 
 /-- `to.transfer(x + 2);` — a captured amount (`net-transfer-capture-argument.key`). -/
 theorem netTransferCapturedAmount :
-    ⊨ dl!{ x = 3 → to != this → net(to) = 7 → [ to.transfer(x + 2); ] net(to) = 2 } := by
+    ⊨ᶠ dl!{ x = 3 → to != this → net(to) = 7 → [ to.transfer(x + 2); ] net(to) = 2 } := by
   sol_symex
   sol_close
 
@@ -134,19 +134,19 @@ theorem netTransferCapturedAmount :
 `RawFml.kintParams`): the entry `e - 5` for every integer `e`, negative or
 past `2^256`, as solkey reads it. -/
 theorem netTransferAny :
-    ⊨ dl!{ to != this → net(to) = e → [ to.transfer(5); ] net(to) = e - 5 } := by
+    ⊨ᶠ dl!{ to != this → net(to) = e → [ to.transfer(5); ] net(to) = e - 5 } := by
   sol_symex
   sol_close
 
 /-- The ledger is unbounded below: a debit of an empty entry is negative. -/
 theorem netTransferBelowZero :
-    ⊨ dl!{ to != this → net(to) = 0 → [ to.transfer(5); ] net(to) < 0 } := by
+    ⊨ᶠ dl!{ to != this → net(to) = 0 → [ to.transfer(5); ] net(to) < 0 } := by
   sol_symex
   sol_close
 
 /-- Two transfers to one address accumulate. -/
 theorem netTransfersAccumulate :
-    ⊨ dl!{ to != this → net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by
+    ⊨ᶠ dl!{ to != this → net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by
   sol_symex
   sol_close
 
@@ -164,7 +164,7 @@ private def sendNineCore := (sol{ uint to = 9; bool ok = to.send(5); } : Prog St
 
 /-- The initial store, typed. -/
 private abbrev start : State StandardExample [] :=
-  State.ofStorage Storage.standardExample
+  { State.ofStorage Storage.standardExample with selfBalance := ⟨10, rfl⟩ }
 
 /-- The ledger at `a` (the typed state's `net`, read by `lookupBy`) after `P` runs from `σ`; `none` on a
 halt. -/
@@ -189,12 +189,33 @@ theorem netThis : netAfter start payNineCore 0 = some 0 := by decide +kernel
 /-- A payment to the contract itself books nothing. -/
 theorem netSelfRun : netAfter start paySelfCore 0 = some 0 := by decide +kernel
 
-/-- The funds are not the transfer's: `address(this).balance` reads `3`
-after a payment of `5` from `3`. -/
-theorem transferLeavesFunds :
-    ((Prog.run { start with selfBalance := ⟨3, rfl⟩ } payNineCore).toOption.map
-      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, o.st.selfBalance.1)) = some (-5, 3) := by
+/-- A successful payment debits both the ledger entry and the balance. -/
+theorem transferDebitsFunds :
+    ((Prog.run start payNineCore).toOption.map
+      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0,
+        o.st.selfBalance.1)) = some (-5, 5) := by
   decide +kernel
+
+/-- Insufficient funds revert for transfer and return false for send. -/
+example : (Prog.run { start with selfBalance := ⟨3, rfl⟩ } payNineCore).halt? =
+    some .revert := by decide +kernel
+example : ((Prog.run { start with selfBalance := ⟨3, rfl⟩ } sendNineCore).toOption.map
+    fun o => (o.st.env.1, o.st.selfBalance.1, o.st.net)) =
+      some (false, 3, []) := by decide +kernel
+
+/-- A self-transfer keeps the balance and requires sufficient funds. -/
+example : ((Prog.run start paySelfCore).toOption.map (·.st.selfBalance.1)) =
+    some 10 := by decide +kernel
+example : (Prog.run { start with selfBalance := ⟨3, rfl⟩ } paySelfCore).halt? =
+    some .revert := by decide +kernel
+
+/-- An explicit oracle refusal also leaves send's balance and ledger unchanged. -/
+private def refusing : State StandardExample [] :=
+  { start with tx := { ext := [(sendKey ⟨9, rfl⟩ ⟨5, rfl⟩, .other [])] } }
+example : (Prog.run refusing payNineCore).halt? = some .revert := by decide +kernel
+example : ((Prog.run refusing sendNineCore).toOption.map
+    fun o => (o.st.env.1, o.st.selfBalance.1, o.st.net)) =
+      some (false, 10, []) := by decide +kernel
 
 /-! ## 4 · `msg.value`, `msg.sender`
 
@@ -210,7 +231,7 @@ def PiggyMsg : Contract := contract!{
 /-- `[ readMsg(); ] paidValue == msg.value && paidBy == msg.sender`
 (`net-msg-value.key`). -/
 theorem netMsgValue :
-    ⊨ dl[PiggyMsg]{ [ readMsg(); ] paidValue == msg.value && paidBy == msg.sender } := by
+    ⊨ᶠ dl[PiggyMsg]{ [ readMsg(); ] paidValue == msg.value && paidBy == msg.sender } := by
   sol_symex
   sol_close
 
@@ -232,7 +253,7 @@ def PiggySend : Contract := contract!{
 /-- `net-send-simple.key`: after `sendTo(to)` from an empty ledger, `to`'s
 entry is `-5` or still `0`, and an untouched address's is `0`. -/
 theorem netSendSimple :
-    ⊨ dl[PiggySend]{ to != this → to != other → net(to) = 0 → net(other) = 0 →
+    ⊨ᶠ dl[PiggySend]{ to != this → to != other → net(to) = 0 → net(other) = 0 →
       [ sendTo(to); ] ((net(to) + 5 = 0 ∨ net(to) = 0) ∧ net(other) = 0) } := by
   sol_symex
   sol_close
@@ -240,14 +261,14 @@ theorem netSendSimple :
 /-- A send that went through booked the payment: `ok` true, `to`'s entry
 down by `5`. -/
 theorem netSendOk :
-    ⊨ dl!{ to != this → net(to) = 7 → [ ok = to.send(5); ] (ok == true → net(to) = 2) } := by
+    ⊨ᶠ dl!{ to != this → net(to) = 7 → [ ok = to.send(5); ] (ok == true → net(to) = 2) } := by
   sol_symex
   sol_close
 
 /-- A ledger read crosses a storage write: `total = 1;` leaves `net` as it
 was (`CloseS.wp_box_write`). -/
 theorem netTransferThenStore :
-    ⊨ dl!{ to != this → net(to) = 7 → [ to.transfer(5); total = 1; ] net(to) = 2 } := by
+    ⊨ᶠ dl!{ to != this → net(to) = 7 → [ to.transfer(5); total = 1; ] net(to) = 2 } := by
   sol_symex
   sol_close
 
@@ -257,7 +278,7 @@ theorem netSendRun : netAfter start sendNineCore 9 = some (-5) := by decide +ker
 /-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
 theorem netSendRefusedRun :
     ((Prog.run { start with tx := { ext := [(sendKey ⟨9, rfl⟩ ⟨5, rfl⟩, .error [])] } } sendNineCore).toOption.map
-      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, (TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
+      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, (o.st.env.1 : PrimTy.bool.Denote))) =
       some (0, false) := by
   decide +kernel
 

@@ -157,7 +157,7 @@ storage and the ledger. -/
 structure TGFrame (μ : Mutability) {Γ Δ : Ctx} (σ : State C Γ) (τ : State C Δ) : Prop where
   H : τ.H = σ.H
   heap : HEq τ.heap σ.heap
-  selfBalance : τ.selfBalance = σ.selfBalance
+  selfBalance : μ ≠ .nonpayable → τ.selfBalance = σ.selfBalance
   tx : τ.tx = σ.tx
   keeps : μ ≠ .nonpayable → τ.storage = σ.storage ∧ τ.net = σ.net
 
@@ -165,11 +165,11 @@ namespace TGFrame
 
 variable {μ : Mutability} {Γ Δ Ε : Ctx}
 
-theorem refl (σ : State C Γ) : TGFrame μ σ σ := ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+theorem refl (σ : State C Γ) : TGFrame μ σ σ := ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
 theorem trans {σ : State C Γ} {τ : State C Δ} {υ : State C Ε} (h₁ : TGFrame μ σ τ)
     (h₂ : TGFrame μ τ υ) : TGFrame μ σ υ :=
-  ⟨h₂.H.trans h₁.H, h₂.heap.trans h₁.heap, h₂.selfBalance.trans h₁.selfBalance,
+  ⟨h₂.H.trans h₁.H, h₂.heap.trans h₁.heap, (fun hμ => (h₂.selfBalance hμ).trans (h₁.selfBalance hμ)),
     h₂.tx.trans h₁.tx, fun hμ => ⟨(h₂.keeps hμ).1.trans (h₁.keeps hμ).1,
       (h₂.keeps hμ).2.trans (h₁.keeps hμ).2⟩⟩
 
@@ -180,17 +180,17 @@ theorem env (σ : State C Γ) (e : TEnv C σ.H Δ) : TGFrame μ σ (σ.withEnv e
   (refl σ).withEnv e
 
 theorem setLocal (σ : State C Γ) {t : LTy} (i : Idx Γ t) (v : t.TDenote C σ.H) :
-    TGFrame μ σ (σ.setLocal i v) := ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+    TGFrame μ σ (σ.setLocal i v) := ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
 theorem push (σ : State C Γ) {t : LTy} (v : t.TDenote C σ.H) : TGFrame μ σ (σ.push v) :=
-  ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+  ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
 
 theorem withStorage (σ : State C Γ) (st : Storage C) :
     TGFrame .nonpayable σ (σ.withStorage st) :=
-  ⟨rfl, HEq.rfl, rfl, rfl, fun h => absurd rfl h⟩
+  ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun h => absurd rfl h⟩
 
 theorem pay (σ : State C Γ) (a : PrimTy.uint.Denote) (m : Int) : TGFrame .nonpayable σ (σ.pay a m) :=
-  ⟨rfl, HEq.rfl, rfl, rfl, fun h => absurd rfl h⟩
+  ⟨rfl, HEq.rfl, (fun h => absurd rfl h), rfl, fun h => absurd rfl h⟩
 
 end TGFrame
 
@@ -316,7 +316,7 @@ nothing allocated. -/
 theorem CallRet.enterT_frame {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (hm : ret.noMem = true)
     (σ : State C ps) : TGFrame μ σ (ret.enterT σ).st := by
   cases ret with
-  | none | val | rets | storage => exact ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+  | none | val | rets | storage => exact ⟨rfl, HEq.rfl, (fun _ => rfl), rfl, fun _ => ⟨rfl, rfl⟩⟩
   | mem => exact absurd hm Bool.false_ne_true
 
 
@@ -423,21 +423,20 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     simp only [TRun.transfer] at h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
-    cases h
+    split at h <;> cases h
     exact ⟨TGFrame.pay σ _ _, TLocAgree.refl _⟩
   | _, _, .send pv r a _, hw, d, σ, o, h => by
     have hμ := nonpayable_of_within' hw
     subst hμ
     change TRun.send pv r a σ = .ok o at h
     simp only [TRun.send] at h
-    obtain ⟨_, _, h⟩ := tbind_ok_inv h
-    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨addr, _, h⟩ := tbind_ok_inv h
+    obtain ⟨amt, _, h⟩ := tbind_ok_inv h
     cases h
-    unfold sendT
-    rcases Semantics.lookupBy (sendKey _ _) σ.tx.ext with _ | (_ | _ | _ | _) <;>
-      first
-      | exact ⟨(TGFrame.pay σ _ _).trans (TGFrame.setLocal _ pv _), TLocAgree.set pv _ _⟩
-      | exact ⟨TGFrame.setLocal σ pv _, TLocAgree.set pv _ _⟩
+    change TGFrame .nonpayable σ (sendT σ pv addr amt).st ∧
+      TLocAgree d (pv.outer d) σ.env (sendT σ pv addr amt).st.env
+    exact ⟨⟨rfl, HEq.rfl, (fun h => absurd rfl h), rfl, fun h => absurd rfl h⟩,
+      TLocAgree.set pv (σ.canPay addr amt) σ.env⟩
   | _, _, .delete l, hw, d, σ, o, h => by
     have hμ := nonpayable_of_within' hw
     subst hμ
@@ -693,10 +692,10 @@ def State.anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
 
 /-- The state after a callback: storage and ledger replaced by what the
 callee left (KeY's `{storage := storageSk ‖ net := netSk}`, fresh skolem
-constants), the locals, memory and funds kept: the funds are not a
-transfer's to change. -/
-def State.havoc (σ : State C Γ) (st : Storage C) (nt : Ledger) : State C Γ :=
-  { σ with storage := st, net := nt }
+constants), the locals and memory kept. The balance may also be replaced. -/
+def State.havoc (σ : State C Γ) (st : Storage C) (nt : Ledger)
+    (balance : PrimTy.uint.Denote := σ.selfBalance) : State C Γ :=
+  { σ with storage := st, net := nt, selfBalance := balance }
 
 theorem State.havoc_self (σ : State C Γ) : σ.havoc σ.storage σ.net = σ := rfl
 
@@ -748,11 +747,11 @@ theorem State.eq_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ 
     {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
     (hg : TGFrame μ σ τ) (ha : TLocAgree 0 W σ.env τ.env) :
-    ∃ b, τ = (σ.anon xs b).havoc τ.storage τ.net := by
+    ∃ b, τ = (σ.anon xs b).havoc τ.storage τ.net τ.selfBalance := by
   obtain ⟨st, H, hp, env, net, sb, tx⟩ := τ
   obtain ⟨hH, hhp, hsb, htx, -⟩ := hg
   dsimp only at hH hhp hsb htx
-  subst hH hsb htx
+  subst hH htx
   cases hhp
   let b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H := fun x => TEnv.get x.2 env
   refine ⟨b, ?_⟩
@@ -772,7 +771,7 @@ theorem Prog.run_frame_anon {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t :
     (h : Prog.run σ P = .ok o) :
     TGFrame (frameMut hv) σ (o.st.drop P.ext) ∧
       ∃ b, o.st.drop P.ext = (σ.anon xs b).havoc (o.st.drop P.ext).storage
-        (o.st.drop P.ext).net := by
+        (o.st.drop P.ext).net (o.st.drop P.ext).selfBalance := by
   obtain ⟨hw, hxs⟩ := Prog.frame_some hf
   obtain ⟨hg, ha⟩ := Prog.run_frame P hw 0 h
   have hg' : TGFrame (frameMut hv) σ (o.st.drop P.ext) := hg.withEnv _

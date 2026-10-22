@@ -494,18 +494,21 @@ ones it was entered with). -/
 theorem holds_callPost {μ : Mutability} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
     {ens : Fml C (rs ++ (Olds ++ ps))} {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {σ : State C Γ} (h : holds σ (Fml.callPost μ args ret ens ω κ φ m)) (a : TEnv C σ.H ps)
-    (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger)
-    (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net) :
-    holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt)
+    (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote)
+    (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net)
+    (hb : μ ≠ .nonpayable → sb = σ.selfBalance) :
+    holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt sb)
       (Fml.callResult ret ens ω κ φ m) := by
   have hX := holds_snapOld ((holds_declsThen h).2 a ha)
   cases μ with
-  | nonpayable => exact hX st nt
+  | nonpayable => exact hX st nt sb
   | pure =>
     obtain ⟨rfl, rfl⟩ := hk (by decide)
+    obtain rfl := hb (by decide)
     exact hX
   | view =>
     obtain ⟨rfl, rfl⟩ := hk (by decide)
+    obtain rfl := hb (by decide)
     exact hX
 
 /-- A call by its contract, up to what it leaves: the arguments read, the
@@ -524,7 +527,7 @@ theorem holds_call_of {μ : Mutability} {f : Name} {args : Args C Γ ps}
       TGFrame μ (ret.enterT (σ.withEnv a)).st o.st →
       TLocAgree 0 (Prog.writesAt 0 body) (ret.enterT (σ.withEnv a)).st.env
         (TEnv.drop body.ext o.st.env) →
-      holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+      holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net o.st.selfBalance)
         (Fml.callResult ret ens ω κ φ m) →
       m.afterRunTR (fun x => holds x φ)
         ((Prog.runSt (o.st.withEnv (ret.leaveT
@@ -551,9 +554,12 @@ theorem holds_call_of {μ : Mutability} {f : Name} {args : Args C Γ ps}
     | ok o =>
       rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
       obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      refine k a hA o hct.1 hg hag (holds_callPost hpost a hA o.st.storage o.st.net fun hn => ?_)
-      have hk := hg.keeps hn
-      cases ret <;> exact hk
+      refine k a hA o hct.1 hg hag (holds_callPost hpost a hA o.st.storage o.st.net
+        o.st.selfBalance (fun hn => ?_) (fun hn => ?_))
+      · have hk := hg.keeps hn
+        cases ret <;> exact hk
+      · have hb := hg.selfBalance hn
+        cases ret <;> exact hb
 
 /-- A call by its contract, no result. -/
 theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
@@ -574,13 +580,13 @@ theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
   -- the parameters keep the arguments' values
   have hps : TEnv.drop body.ext env = a :=
     TLocAgree.drop_eq (ρ := []) hag hw
-  have hens' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net)
+  have hens' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb)
       (ens.wkD (Thin.atop (Olds ++ ps) Γ)) := by
     apply holds_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds []
         σ.net σ.storage = State.thin (Thin.atop (Olds ++ ps) Γ)
-          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show TEnv.olds σ.net σ.storage (TEnv.drop body.ext env) =
         TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env))
       rw [TEnv.thin_atop_append, hps]
@@ -590,11 +596,11 @@ theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
   dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
   rw [TEnv.wk_self]
   have hT : State.drop (Ext.append Γ (Olds ++ ps))
-      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) =
+      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb) =
       (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
         (CallRet.leaveT σ.env (CallRet.none (Γ := Γ))
           (TEnv.take [] (TEnv.drop body.ext env))) :=
-    State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+    State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl rfl
       htx.symm
   simp only [Prog.runSt_nil, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
   exact hM
@@ -618,15 +624,15 @@ theorem holds_callVal {μ : Mutability} {f : Name} {args : Args C Γ ps} {p : Pr
   -- the parameters keep the arguments' values
   have hps : (TEnv.drop body.ext env).2 = a :=
     TLocAgree.drop_eq (ρ := [.val p]) (e := (PrimTy.dflt p, a)) hag hw
-  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push
       (t := .val p) (TEnv.drop body.ext env).1)
       (ens.wkD (Thin.atop (.val p :: (Olds ++ ps)) Γ)) := by
     apply holds_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.val p]
         σ.net σ.storage = State.thin (Thin.atop (.val p :: (Olds ++ ps)) Γ)
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
             (TEnv.drop body.ext env).1) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
         ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
           (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
@@ -639,34 +645,34 @@ theorem holds_callVal {μ : Mutability} {f : Name} {args : Args C Γ ps} {p : Pr
   cases res with
   | none =>
     have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
           (TEnv.drop body.ext env).1) =
         (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
           (CallRet.leaveT σ.env (CallRet.val p r Option.none)
             (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) :=
-      State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+      State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl rfl
         htx.symm
     simp only [CallRet.resultC, Prog.runSt_nil, Except.bind, Frames.runSt_pop,
       Frames.runSt_seq, hT] at hM
     exact hM
   | some j =>
     have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
           (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
             (TEnv.drop body.ext env).1) =
         (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
           (CallRet.leaveT σ.env (CallRet.val p r (some j))
             (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
       show TEnv.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
         (TEnv.set (j.under (.val p :: (Olds ++ ps))) _ _) = _
       rw [TEnv.drop_set_under]
       show TEnv.set j _ (TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = _
       rw [TEnv.drop_append]
       rfl
-    have hs : Prog.runSt (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+    have hs : Prog.runSt (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push
         (t := .val p) (TEnv.drop body.ext env).1) (CallRet.resultC (Olds ++ ps) (some j)) =
-        .ok ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+        .ok ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .val p)
           (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
             (TEnv.drop body.ext env).1) := rfl
     simp only [hs, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
@@ -693,17 +699,17 @@ theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : 
   have hX' := holds_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
     (.modal m .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
       (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
-  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
       (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-        ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env))
+        ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env))
       (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))) := by
     apply holds_wkD
     have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds rs
         σ.net σ.storage = State.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
             (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) := by
-      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
       show TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
           (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env))) =
         TEnv.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
@@ -719,13 +725,13 @@ theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : 
   dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
   rw [TEnv.wk_self]
   have hT : State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
         (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) =
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) =
       (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
         (CallRet.leaveT σ.env (CallRet.rets bs)
           (TEnv.take rs (TEnv.drop body.ext env))) := by
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     show TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
         (TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
           TEnv.append rs _ σ.env
@@ -761,10 +767,10 @@ theorem holds_callMem {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : Re
   have hst : State.withOlds [.mem R] σ.net σ.storage (State.drop body.ext
       (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf)) =
       State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
-        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
+        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).allocDefaultG R hm).st.push
           (t := .mem R)
-          (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) := by
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+          (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).allocDefaultG R hm).val)) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
     show TEnv.append [.mem R] (TEnv.take [.mem R] (TEnv.drop body.ext env))
       (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps [.mem R]) (TEnv.drop body.ext env))) = _
     rw [hE]
@@ -778,14 +784,14 @@ theorem holds_callMem {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : Re
   rw [holds_modal_iff] at hM
   dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
   have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
+      ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).allocDefaultG R hm).st.push
         (t := .mem R)
-        (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) =
+        (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).allocDefaultG R hm).val)) =
       (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf).withEnv
         (CallRet.leaveT (TEnv.wk (((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext.trans
           ext) Γ σ.env) (CallRet.mem R r hd hm)
           (TEnv.take [.mem R] (TEnv.drop body.ext env))) := by
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     show _ = ((TEnv.drop body.ext env).1, _)
     rw [hE]
     show (some _, TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
@@ -819,14 +825,14 @@ theorem holds_callStorage {μ : Mutability} {f : Name} {args : Args C Γ ps}
     TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
   have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
       σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
-        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .alias R)
           (TEnv.drop body.ext env).1) := by
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx
     change ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
       ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
         (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
     rw [TEnv.thin_atop_append, hps]
-  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push
       (t := .alias R) (TEnv.drop body.ext env).1)
       (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) :=
     holds_wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ) ens _ (hst ▸ hens)
@@ -835,12 +841,12 @@ theorem holds_callStorage {μ : Mutability} {f : Name} {args : Args C Γ ps}
   dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
   rw [TEnv.wk_self]
   have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).push (t := .alias R)
         (TEnv.drop body.ext env).1) =
       (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
         (CallRet.leaveT σ.env (CallRet.storage R r)
           (TEnv.take [.alias R] (TEnv.drop body.ext env))) := by
-    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     change ((TEnv.drop body.ext env).1,
       TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
         (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
@@ -888,7 +894,7 @@ def Fml.allArgs : {ps : Ctx} → Args C Γ ps → Fml C ps → Fml C []
   termination_by structural _ args => args
 
 theorem holds_allArgs : {ps : Ctx} → (args : Args C Γ ps) → {φ : Fml C ps} →
-    Valid (Fml.allArgs args φ) → ∀ σ : State C ps, holds σ φ
+    Fml.Valid (Fml.allArgs args φ) → ∀ σ : State C ps, holds σ φ
   | _, .nil, _, h, σ => h σ
   | _, .snoc as p x _, φ, h, σ =>
     holds_allArgs as (φ := .all x p φ) h (σ.withEnv σ.env.2) σ.env.1
@@ -901,7 +907,7 @@ theorem holds_allArgs : {ps : Ctx} → (args : Args C Γ ps) → {φ : Fml C ps}
 (`Fml.allArgs`), as `sol_symex; sol_close` prove it. -/
 theorem FunContract.ofValid' {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
     {body : Prog C (rs ++ ps) Γf} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
-    (h : Valid (Fml.allArgs args (FunContract.obligation ret body req ens m))) :
+    (h : Fml.Valid (Fml.allArgs args (FunContract.obligation ret body req ens m))) :
     FunContract ret body req ens m :=
   FunContract.ofValid (holds_allArgs args h)
 
@@ -910,10 +916,10 @@ theorem useContractC_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name}
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C (rs ++ (Olds ++ ps))} (hc : FunContract ret body req ens m)
-    («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
+    («pre» : Fml.Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Fml.Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
     (hμ : Prog.within μ body = true := by rfl) (hw : writesRets ret.nVals body = true := by rfl) :
-    Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
+    Fml.Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
   fun σ => H.wrap_and (fun _ h₁ h₂ => holds_callContract hc hμ hw h₁ h₂) σ («pre» σ) («post» σ)
 
 /-- **`useContract`** with its goals proved valid, the contract by its
@@ -923,11 +929,11 @@ theorem useContract_of_valid {H : Hyps C [] Γ} {μ : Mutability} {f : Name}
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C (rs ++ (Olds ++ ps))}
-    (hc : Valid (Fml.allArgs args (FunContract.obligation ret body req ens m)))
-    («pre» : Valid (H.wrap (Fml.callPre args req m)))
-    («post» : Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
+    (hc : Fml.Valid (Fml.allArgs args (FunContract.obligation ret body req ens m)))
+    («pre» : Fml.Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Fml.Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
     (hμ : Prog.within μ body = true := by rfl) (hw : writesRets ret.nVals body = true := by rfl) :
-    Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
+    Fml.Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
   useContractC_of_valid (FunContract.ofValid' hc) «pre» «post» hμ hw
 
 /-- **`useContract`**: a call proved by its callee's contract, KeY's
@@ -937,11 +943,11 @@ theorem useContract {R : RuleSet} {H : Hyps C [] Γ} {μ : Mutability} {f : Name
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
     {ens : Fml C (rs ++ (Olds ++ ps))}
-    (hc : Valid (Fml.allArgs args (FunContract.obligation ret body req ens m)))
+    (hc : Fml.Valid (Fml.allArgs args (FunContract.obligation ret body req ens m)))
     («pre» : Proves C R [] H (Fml.callPre args req m))
     («post» : Proves C R [] H (Fml.callPost μ args ret ens ω κ φ m))
     (hμ : Prog.within μ body = true := by rfl) (hw : writesRets ret.nVals body = true := by rfl) :
-    Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
+    Fml.Valid (H.wrap (.modal m (.cons (.call f args ret body) ω) κ φ)) :=
   useContractC_of_valid (FunContract.ofValid' hc) «pre».sound «post».sound hμ hw
 
 end RuleSeq
@@ -1069,13 +1075,13 @@ partial def peel (C H Γ φ : Expr) : MetaM (Expr × Expr × Expr) := do
     peel C (mkAppN (mkConst ``Hyps.grow) #[C, nil, Γ, H]) Γ a[2]!
   else return (H, Γ, φ)
 
-/-- `core_contract` on `⊨ φ`: the call at the head of `φ`'s first box,
+/-- `core_contract` on `⊨ᶠ φ`: the call at the head of `φ`'s first box,
 behind its context, proved by `rule` (`useContract_of_valid`,
 `useContract`), the goals `hc`, `pre` and `post` left. -/
 def run (rule : Lean.Name) (μ req ens : Syntax) : TacticM Unit := withMainContext do
   let g ← getMainGoal
   let ty ← whnfR (← instantiateMVars (← g.getType))
-  let_expr Valid C φ := ty | throwError "core_contract: expected a goal `⊨ φ`, scoped"
+  let_expr Fml.Valid C φ := ty | throwError "core_contract: expected a goal `⊨ᶠ φ`, scoped"
   let nil := ctxE []
   let (H, _, χ) ← peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil φ
   unless χ.isAppOf ``Fml.modal do
@@ -1097,7 +1103,7 @@ end Contract
 
 /-- `core_contract μ req ens`: a call by its callee's contract
 (`useContract_of_valid`), its goals `hc` (the contract's obligation,
-`FunContract.ofValid'`), `pre` and `post` left as `⊨`. -/
+`FunContract.ofValid'`), `pre` and `post` left as `⊨ᶠ`. -/
 syntax "core_contract " term:max ppSpace term:max ppSpace term:max : tactic
 
 /-- `core_contract_walk μ req ens`: the same, its goals `pre` and `post`

@@ -44,7 +44,7 @@ over every combination of arguments first, then random states
 run).  A witness found is shrunk before it is shown
 (Shrinking, below).
 
-A witness is **certified** when the kernel checks `¬ ⊨ φ` of the scoped
+A witness is **certified** when the kernel checks `¬ ⊨ᶠ φ` of the scoped
 formula from it: `Fml.not_valid_of_eval3Peel` applied to
 `Fml.eval3Peel dom vals σ₀ φ = .ff`, `φ` with its leading parameters bound
 to the witness's arguments `vals` (`Fml.peel`), which the kernel decides by
@@ -359,8 +359,8 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
       refine ⟨nofun, fun _ hall => ?_⟩
       rcases h with h | h
       · exact (Fml.eval3C_sound dom φ σ).2 h
-          (by simpa only [State.havoc_self] using hall σ.storage σ.net)
-      · exact (Fml.eval3C_sound dom φ _).2 h (hall _ _)
+          (by simpa only [State.havoc_self] using hall σ.storage σ.net σ.selfBalance)
+      · exact (Fml.eval3C_sound dom φ _).2 h (hall _ _ σ.selfBalance)
     · exact ⟨nofun, nofun⟩
   | _, .all _ p φ, σ => by
     simp only [Fml.eval3C, holds]
@@ -766,9 +766,9 @@ def Fml.eval3Peel (dom : TDom) (vals : List (Var × Semantics.CallValue)) {Γ : 
   | ⟨_, σ', ψ⟩ => ψ.eval3 dom σ'
 
 /-- **A certificate**: a typed state where `φ`, its leading parameters bound
-to `vals`, evaluates to `ff` refutes `⊨ φ`. -/
+to `vals`, evaluates to `ff` refutes `⊨ᶠ φ`. -/
 theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Semantics.CallValue)) (σ : State C [])
-    {φ : Fml C []} (h : Fml.eval3Peel dom vals σ φ = .ff) : ¬ Valid φ := by
+    {φ : Fml C []} (h : Fml.eval3Peel dom vals σ φ = .ff) : ¬ Fml.Valid φ := by
   intro hv
   have key := Fml.not_holds_of_peelC vals σ φ
   rw [← Fml.peel_eq] at key
@@ -782,7 +782,7 @@ formula. This permits structural proofs of quantified declaration premises
 alongside the finite evaluator's proof of a false consequent. -/
 theorem Fml.not_valid_of_peel (vals : List (Var × Semantics.CallValue)) (σ : State C [])
     {φ : Fml C []}
-    (h : ¬ holds (Fml.peel vals σ φ).2.1 (Fml.peel vals σ φ).2.2) : ¬ Valid φ := by
+    (h : ¬ holds (Fml.peel vals σ φ).2.1 (Fml.peel vals σ φ).2.2) : ¬ Fml.Valid φ := by
   intro hv
   have key := Fml.not_holds_of_peelC vals σ φ
   rw [← Fml.peel_eq] at key
@@ -1090,7 +1090,7 @@ def Cand.quote (cE : Expr) (c : Cand C) : Expr :=
     #[u c.tx.msgSender, u c.tx.selfAddress, u c.tx.msgValue, u c.tx.timestamp, toExpr c.tx.ext]
   mkAppN (mkConst ``Cand.mk) #[cE, c.st.fold quoteFold, toExpr c.args, txE, toExpr c.net, u c.bal]
 
-/-- **The certificate**: the kernel checks `¬ ⊨ φ` of the scoped `φ` as
+/-- **The certificate**: the kernel checks `¬ ⊨ᶠ φ` of the scoped `φ` as
 `Fml.not_valid_of_eval3Peel` at the typed state of the candidate `c`
 (`Cand.tstate`, quoted by `Cand.quote`), its leading parameters bound to
 the witness's arguments `vals` (`Fml.peel`, as the search read it),
@@ -1106,7 +1106,7 @@ def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Semantics
   let ev ← mkAppM ``Fml.eval3Peel #[domE, valsE, σE, φE]
   let eq ← mkEq ev (mkConst ``Tri.ff)
   let h ← mkDecideProof eq
-  let type := mkNot (← mkAppM ``Valid #[φE])
+  let type := mkNot (← mkAppM ``Fml.Valid #[φE])
   let value ← mkAppM ``Fml.not_valid_of_eval3Peel #[valsE, σE, h]
   let decl := Declaration.thmDecl {
     name := `_counterexample_certificate, levelParams := [], type, value }
@@ -1162,7 +1162,7 @@ def certifyDeclarations (cE φE : Expr) (lits : List Int)
   let result ← tryCatchRuntimeEx (withCurrHeartbeats do
     let domE := mkApp (mkConst ``poolDom) (toExpr lits)
     let σE := mkApp2 (mkConst ``Cand.tstate) cE (c.quote cE)
-    let type := mkNot (← mkAppM ``Solidity.Valid #[φE])
+    let type := mkNot (← mkAppM ``Solidity.Fml.Valid #[φE])
     let goal ← mkFreshExprMVar type
     let peel ← mkAppM ``Fml.not_valid_of_peel #[toExpr vals, σE]
     let [failure] ← goal.mvarId!.apply peel | return false

@@ -602,7 +602,7 @@ theorem Stmt.run_dataS (raw : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .pop b, _, _, σ => (b.resolveT_dataS σ).bind fun _ => (TRes.DataS.ofOpt _).bind
       fun _ => TRes.DataS.ok _
   | _, _, .transfer r a, _, _, σ => (r.evalT_dataS σ).bind fun _ => (a.evalT_dataS σ).bind
-      fun _ => TRes.DataS.ok _
+      fun _ => by split; exact TRes.DataS.ok _; exact TRes.DataS.revert
   | _, _, .send _ r a _, _, _, σ => (r.evalT_dataS σ).bind fun _ => (a.evalT_dataS σ).bind
       fun _ => TRes.DataS.ok _
   | _, _, .declMem R _ init _ _, _, _, σ => by

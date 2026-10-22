@@ -919,15 +919,24 @@ test("revert data: a self-call's reason reaches catch Error, raw data catch (tes
 });
 
 test("an obligation whose callee may write the state is read with callbacks", () => {
-  // docs/options.md O7: `ValidT .noCallback` where a `try` of a callee not
-  // declared view/pure or a low-level call is reached, `⊢` elsewhere
+  // O7 follows the actual formula, including static calls until their
+  // restrictions occur in the operational call type.
   const report = runSolidityTests(["tests/solc/CallbackReading.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   assert.equal(status.localKept, "proved");
-  assert.equal(status.staticKept, "proved");
+  assert.equal(status.staticKept, "pending");
   assert.equal(status.storageLost, "pending");
   assert.equal(status.valueCallLost, "pending");
+});
+
+test("bare external calls and specified rows use callback validity", () => {
+  const report = runSolidityTests(["tests/solc/AuditCallbacks.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.bare, "pending");
+  assert.equal(status.specified, "pending");
+  assert.equal(status.specifiedTrue, "proved");
 });
 
 test("callbacks: value calls through a function and loops of them, by their invariant", () => {

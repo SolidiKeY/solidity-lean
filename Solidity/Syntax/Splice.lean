@@ -262,7 +262,7 @@ example : (sol{ uint x = 1157920892373161954235709850086879078532699846656405640
      (.cons (.declLocal .int (.user "y") (some (.simple (.lit 57896044618658097711785492504343953926634992332820282019728792003956564819967 rfl)))) .nil) := rfl
 
 -- One whose result is out of range is refused.
-/-- error: Solidity elaboration failed: the literal 115792089237316195423570985008687907853269984665640564039457584007913129639936 is out of the range of uint -/
+/-- error: Solidity elaboration failed: the literal 115792089237316195423570985008687907853269984665640564039457584007913129639937 is out of the range of uint -/
 #guard_msgs in #check sol{ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639936 + 1; }
 
 /-- `delete` in memory, and a fresh array written to a location. -/

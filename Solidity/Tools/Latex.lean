@@ -6,7 +6,7 @@ import Solidity.Tools.LatexTerm
 LeanTeX's `#latex` composes ordinary mathematics with the scoped calculus.
 `Solidity.Latex.exprLatex` returns a math fragment in `MetaM`; `declLatex`
 exports a declaration's statement (hypotheses retained; parameters implicit
-by default).  A scoped formula, `Valid`, a sequent (`Proves`) and a chain
+by default).  A scoped formula, `Fml.Valid`, a sequent (`Proves`) and a chain
 (`Fml.Via`, `Fml.StepBy`, …) are read from their `Expr` by
 `Tools/LatexTerm.lean`; a chain or a derivation (`derivationLatex`) is an
 `aligned` environment, one line a row, a long line broken onto `\qquad` rows.
@@ -361,12 +361,12 @@ inductive Out where
   | line (d : Doc)
   | rows (rs : Array String)
 
-/-- A scoped formula, `Valid`, a sequent or a chain; `none` for anything else. -/
+/-- A scoped formula, `Fml.Valid`, a sequent or a chain; `none` for anything else. -/
 def calculusOut? (e : Expr) : RM (Option Out) := do
   let e ← instantiateMVars e
   let ty ← whnfR (← inferType e)
   if ty.isAppOf ``Fml then return some (.line (← fml [] e))
-  if e.isAppOfArity ``Valid 2 then
+  if e.isAppOfArity ``Fml.Valid 2 then
     return some (.line (.cat #[.tx "\\models " 2, ← fml [] e.appArg!]))
   if e.isAppOfArity ``Proves 6 then
     let (hs, ns) ← hypsDoc (e.getArg! 4)
@@ -414,7 +414,7 @@ def derivationLatex (φ : Expr) (steps : Array Step) (o : Options := {}) : MetaM
   latex_pp app.Solidity.Fml.Steps, latex_pp app.Solidity.Fml.StepBy,
   latex_pp app.Solidity.Fml.RwBy, latex_pp app.Solidity.Fml.MergeBy,
   latex_pp app.Solidity.Fml.Via, latex_pp app.Solidity.Fml.LeadsK,
-  latex_pp app.Solidity.Fml.Leads, latex_pp app.Solidity.Valid, latex_pp app.Solidity.Proves]
+  latex_pp app.Solidity.Fml.Leads, latex_pp app.Solidity.Fml.Valid, latex_pp app.Solidity.Proves]
 def ppCalculus : LatexPrinter := fun e => do
   return LatexData.atomString (← calculusLatex e)
 

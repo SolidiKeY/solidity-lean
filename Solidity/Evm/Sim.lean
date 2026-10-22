@@ -219,6 +219,13 @@ structure SimL (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C
       ∃ sv, σ.storage.findLive r = some sv
   /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this)`. -/
   env : EnvSim σ.tx m
+  /-- The contract's spendable balance agrees with the machine. -/
+  funds : σ.selfBalance.1 = m.bal m.self
+  /-- Both readings accept the same external payment. -/
+  oracle : ∀ (addr amt : PrimTy.uint.Denote) (x y : Fin W),
+    addr.1 = x.1 → amt.1 = y.1 →
+    (match Semantics.lookupBy (sendKey addr amt) σ.tx.ext with
+      | none | some (.ok _) => true | some _ => false) = m.accepts x y
 
 variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State C []} {ρ : Look C Γ}
 
@@ -227,7 +234,7 @@ namespace SimL
 /-- `SimL` does not look at the stack. -/
 theorem stack {m : Machine} (h : SimL C L b F σ ρ m) (st : List Word) :
     SimL C L b F σ ρ { m with stack := st } :=
-  ⟨h.store, h.vals, h.aliases, h.net, h.netSelf, h.bound, h.fragile, h.env⟩
+  ⟨h.store, h.vals, h.aliases, h.net, h.netSelf, h.bound, h.fragile, h.env, h.funds, h.oracle⟩
 
 theorem push {m : Machine} (h : SimL C L b F σ ρ m) (w : Word) : SimL C L b F σ ρ (m.push w) :=
   h.stack _
@@ -235,14 +242,15 @@ theorem push {m : Machine} (h : SimL C L b F σ ρ m) (w : Word) : SimL C L b F 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
 theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Fin W → Nat)
     (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a : Int) - bl a)
-    (hself : netAt (σ.pay x y).net m.self = 0) :
+    (hself : netAt (σ.pay x y).net m.self = 0)
+    (hb : (σ.pay x y).selfBalance.1 = bl m.self) :
     SimL C L b F (σ.pay x y) ρ { m with bal := bl, bal₀ := bl₀ } :=
-  ⟨h.store, h.vals, h.aliases, hn, hself, h.bound, h.fragile, h.env⟩
+  ⟨h.store, h.vals, h.aliases, hn, hself, h.bound, h.fragile, h.env, hb, h.oracle⟩
 
 /-- Under a looser bound on the arrays. -/
 theorem mono {m : Machine} {L' : Nat} (h : SimL C L b F σ ρ m) (hL : L ≤ L') (hL' : L' ≤ Lmax) :
     SimL C L' b F σ ρ m :=
-  ⟨h.store.mono hL, h.vals, h.aliases, h.net, h.netSelf, hL', h.fragile, h.env⟩
+  ⟨h.store.mono hL, h.vals, h.aliases, h.net, h.netSelf, hL', h.fragile, h.env, h.funds, h.oracle⟩
 
 /-- A storage write that lowers no array's length. -/
 theorem store' {m : Machine} (h : SimL C L b F σ ρ m) {st' : WordStore}
@@ -252,7 +260,7 @@ theorem store' {m : Machine} (h : SimL C L b F σ ρ m) {st' : WordStore}
   ⟨hs, h.vals, h.aliases, h.net, h.netSelf, h.bound, fun i hi => by
     obtain ⟨r, s, h1, h2, h3, h4⟩ := h.fragile i hi
     exact ⟨r, s, h1, h2, h3, live_mono h.store hs hlen h3 h4⟩,
-    h.env⟩
+    h.env, h.funds, h.oracle⟩
 
 /-- Forgetting what the fragment knew: every alias it still reads, it read
 before, as the same kind.  The branches met (`Frag.meet`), the fragile
@@ -261,7 +269,7 @@ theorem flags {m : Machine} {G : Frag Γ} (h : SimL C L b F σ ρ m)
     (hG : ∀ {R : RefTy} (i : Idx Γ (.alias R)) (g : Fl), G.get i = g → g ≠ .dead → F.get i = g) :
     SimL C L b G σ ρ m :=
   ⟨h.store, h.vals, fun i hi => h.aliases i (hG i _ hi (by decide)), h.net, h.netSelf, h.bound,
-    fun i hi => h.fragile i (hG i _ hi (by decide)), h.env⟩
+    fun i hi => h.fragile i (hG i _ hi (by decide)), h.env, h.funds, h.oracle⟩
 
 theorem meet {m : Machine} (G : Frag Γ) (h : SimL C L b F σ ρ m) :
     SimL C L b (F.meet G) σ ρ m :=
@@ -273,13 +281,13 @@ theorem storeDrop {m : Machine} (h : SimL C L b F σ ρ m) {st' : WordStore}
     {stor : Solidity.Storage C} (hs : ReprStore C L st' stor) :
     SimL C L b F.dropFragile { σ with storage := stor } ρ { m with store := st' } := by
   refine ⟨hs, h.vals, fun i hi => h.aliases i (Frag.get_dropFragile F i hi (by decide)).1,
-    h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+    h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   exact absurd rfl (Frag.get_dropFragile F i hi (by decide)).2
 
 /-- A scope's end: its locals popped, the enclosing ones where they were. -/
 theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look C Δ} {m : Machine} (hΓ : Ext Γ Δ)
     (h : SimL C L b G σ ρ' m) : SimL C L b (G.restrict Γ) σ (ρ'.drop hΓ) m := by
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · rw [← lvl_ext b hΓ]; exact h.vals (i.ext hΓ)
   · rw [Frag.get_restrict hΓ] at hi; rw [← lvl_ext b hΓ]; exact h.aliases (i.ext hΓ) hi
   · rw [Frag.get_restrict hΓ] at hi; rw [← lvl_ext b hΓ]; exact h.fragile (i.ext hΓ) hi
@@ -290,7 +298,7 @@ theorem congrMem {m : Machine} {mem : Nat → Word} (h : SimL C L b F σ ρ m)
     SimL C L b F σ ρ { m with mem := mem } := by
   have e : ∀ {t : LTy} (i : Idx Γ t), ({ m with mem := mem } : Machine).memAt (lvl b i) =
       m.memAt (lvl b i) := fun i => hm _ (le_lvl b i) (lvl_lt b i)
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · rw [e]; exact h.vals i
   · rw [e]; exact h.aliases i hi
   · rw [e]; exact h.fragile i hi
@@ -298,7 +306,7 @@ theorem congrMem {m : Machine} {mem : Nat → Word} (h : SimL C L b F σ ρ m)
 /-- `SimL` reads the locals pointwise. -/
 theorem congrLook {ρ' : Look C Γ} {m : Machine} (h : SimL C L b F σ ρ m)
     (hρ : ∀ {t : LTy} (i : Idx Γ t), ρ' i = ρ i) : SimL C L b F σ ρ' m := by
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · rw [hρ]; exact h.vals i
   · rw [hρ]; exact h.aliases i hi
   · rw [hρ]; exact h.fragile i hi
@@ -314,7 +322,7 @@ theorem consVal {m : Machine} (h : SimL C L b F σ ρ m) {p : PrimTy} {v : p.Den
       ({ m with mem := upd m.mem (cell (b + Γ.length)) w } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · cases i with
     | here => rw [lvl_here, memAt_upd, if_pos rfl]; exact hv
     | there j => rw [lvl_there, e]; exact h.vals j
@@ -333,7 +341,7 @@ theorem consAlias {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy}
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · cases i with
     | there j => rw [lvl_there, e]; exact h.vals j
   · cases i with
@@ -354,7 +362,7 @@ theorem consFragile {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy}
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · cases i with
     | there j => rw [lvl_there, e]; exact h.vals j
   · cases i with
@@ -368,7 +376,7 @@ theorem consFragile {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy}
 (`unset`), its cell left. -/
 theorem consDead {m : Machine} (h : SimL C L b F σ ρ m) (R : RefTy) (v : Seen C (.alias R)) :
     SimL C L b (F.push (.alias R) .dead) σ (ρ.cons (u := .alias R) v) m := by
-  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env, h.funds, h.oracle⟩
   · cases i with
     | there j => rw [lvl_there]; exact h.vals j
   · cases i with
@@ -388,7 +396,7 @@ theorem setVal {m : Machine} (h : SimL C L b F σ ρ m) {p : PrimTy} (i : Idx Γ
       ({ m with mem := upd m.mem (cellOf b i) w } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then w else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
-  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
+  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env, h.funds, h.oracle⟩
   · rw [e]
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
@@ -410,7 +418,7 @@ theorem setAlias {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy} (i : Idx �
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then .slot s else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
-  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
+  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env, h.funds, h.oracle⟩
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
     rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.vals j
   · rw [Frag.get_set] at hj
@@ -442,7 +450,7 @@ theorem setFragile {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy} (i : Idx
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then .slot s else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
-  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
+  refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env, h.funds, h.oracle⟩
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
     rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.vals j
   · rw [Frag.get_set] at hj
@@ -472,7 +480,7 @@ theorem enter {m : Machine} {Δ : Ctx} (b' : Nat) (h : SimL C L b F σ ρ m) (ρ
     (hv : ∀ {p : PrimTy} (i : Idx Δ (.val p)), ReprV p (ρ' i) (m.memAt (lvl b' i)))
     (hal : ∀ {R : RefTy}, Idx Δ (.alias R) → False) :
     SimL C L b' (Frag.init Δ) σ ρ' m :=
-  ⟨h.store, hv, fun i _ => (hal i).elim, h.net, h.netSelf, h.bound, fun i _ => (hal i).elim, h.env⟩
+  ⟨h.store, hv, fun i _ => (hal i).elim, h.net, h.netSelf, h.bound, fun i _ => (hal i).elim, h.env, h.funds, h.oracle⟩
 
 /-- **Back from a call**: the machine and state the callee left (`h'`), the
 caller's locals where they were (the callee stored above them,
@@ -487,7 +495,7 @@ theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
   have e : ∀ {t : LTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
     fun i => hmem _ (lvl_lt b i)
   refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
-    h'.env⟩
+    h'.env, h'.funds, h'.oracle⟩
   · rw [e]; exact h.vals i
   · rw [e]; exact h.aliases i hi
   · obtain ⟨r, s, h1, h2, h3, h4⟩ := h.fragile i hi
@@ -503,7 +511,7 @@ theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
   have e : ∀ {t : LTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
     fun i => hmem _ (lvl_lt b i)
   refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
-    h'.env⟩
+    h'.env, h'.funds, h'.oracle⟩
   · rw [e]; exact h.vals i
   · rw [e]; exact h.aliases i (Frag.get_dropFragile F i hi (by decide)).1
   · exact absurd rfl (Frag.get_dropFragile F i hi (by decide)).2
@@ -955,12 +963,21 @@ theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf
 
 theorem env (h : Sim C L b F σ m) : EnvSim σ.tx m := SimL.env h
 
+theorem funds (h : Sim C L b F σ m) : σ.selfBalance.1 = m.bal m.self := SimL.funds h
+
+theorem oracle (h : Sim C L b F σ m) (addr amt : PrimTy.uint.Denote) (x y : Fin W)
+    (hx : addr.1 = x.1) (hy : amt.1 = y.1) :
+    (match Semantics.lookupBy (sendKey addr amt) σ.tx.ext with
+      | none | some (.ok _) => true | some _ => false) = m.accepts x y :=
+  SimL.oracle h addr amt x y hx hy
+
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
 theorem book (h : Sim C L b F σ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Fin W → Nat)
     (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a : Int) - bl a)
-    (hself : netAt (σ.pay x y).net m.self = 0) :
+    (hself : netAt (σ.pay x y).net m.self = 0)
+    (hb : (σ.pay x y).selfBalance.1 = bl m.self) :
     Sim C L b F (σ.pay x y) { m with bal := bl, bal₀ := bl₀ } :=
-  SimL.book h x y bl bl₀ hn hself
+  SimL.book h x y bl bl₀ hn hself hb
 
 /-- Under a looser bound on the arrays. -/
 theorem mono {L' : Nat} (h : Sim C L b F σ m) (hL : L ≤ L') (hL' : L' ≤ Lmax) :

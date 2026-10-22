@@ -954,7 +954,7 @@ theorem UpdElem.globT_withSM {Δ : Ctx} (σ₀ : State C Γ) (st : Storage C)
       | none => rfl
       | some w =>
         simp only [Option.bind_some, Option.map_some]
-        split <;> rfl
+        rfl
   | .netMt r a, _, _ => by
     rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
     simp only [UpdElem.globTM]

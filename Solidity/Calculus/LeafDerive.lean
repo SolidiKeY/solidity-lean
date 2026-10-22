@@ -14,7 +14,7 @@ tier (`LFml.boundsOk`; `Seq.checkCore`,
 eliminated under the premises (`LFml.elimF`, `Calculus/ElimFacts.lean`),
 memory read as solkey reads it and the reduction closed by the closer
 (`LFml.decideMem`, `Calculus/MemRead.lean`, `Calculus/Closer.lean`).
-Soundness is `Valid.of_toLS` and `LFml.decideMem_valid`, then
+Soundness is `Fml.Valid.of_toLS` and `LFml.decideMem_valid`, then
 `Proves.closeHolds`.  A
 leaf outside the fragment is not read (`none`); the walk leaves it, a goal
 of the scoped calculus.
@@ -510,7 +510,7 @@ def refuteCore (ψ : Fml C []) : Bool :=
       else l.refuteForm.decideMem
   | none => false
 
-theorem refuteCore_valid {ψ : Fml C []} (h : refuteCore ψ = true) : Valid ψ := by
+theorem refuteCore_valid {ψ : Fml C []} (h : refuteCore ψ = true) : Fml.Valid ψ := by
   unfold refuteCore at h
   split at h
   case h_2 => cases h
@@ -519,11 +519,11 @@ theorem refuteCore_valid {ψ : Fml C []} (h : refuteCore ψ = true) : Valid ψ :
   have hc := h.2
   cases hct : ψ.assumesCT
   · rw [hct, cond_false] at hc
-    exact Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
+    exact Fml.Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
   · rw [hct, cond_true, Bool.or_eq_true] at hc
     rcases hc with hc | hc
     case inr =>
-      exact Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
+      exact Fml.Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
     intro τ
     by_cases hg : TSto.CleanTails τ.storage.obs
     · exact (Fml.toLS_sound ψ true hl τ AEnv.dflt (Agrees.init τ AEnv.dflt)

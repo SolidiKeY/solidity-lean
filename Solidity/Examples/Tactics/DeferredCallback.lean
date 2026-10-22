@@ -43,7 +43,7 @@ theorem callback_reads_resumed_storage :
   refine ⟨finishPush payment .here
     (.ok ⟨(before.pay ⟨9, rfl⟩ 0).havoc changed [], List.prefix_refl _⟩),
     pushBlock_of_prefix (J := keep) payment .here ?_, ?_⟩
-  · exact .cons (.transferResume (J := keep) (σ := before) (st := changed) (nt := [])
+  · exact .cons (.transferResume (J := keep) (σ := before) (st := changed) (nt := []) (sb := before.selfBalance)
       (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial) .nil
   · decide +kernel
 
@@ -60,11 +60,15 @@ def afterCapture : State CallbackContract [.alias (.array .uint), .alias (.array
   before.push (some (SRef.ofRoot "values" rfl))
 
 /-- The `to.transfer(0);` prefix resumes with the changed typed storage. -/
-private theorem resume_prefix (σ : State CallbackContract Γ) :
+private theorem resume_prefix (σ : State CallbackContract Γ)
+    (hpay : σ.canPay ⟨9, rfl⟩ ⟨0, rfl⟩ = true) :
     ExecP keep σ (paymentAt Γ).code
       (.ok ⟨(σ.pay ⟨9, rfl⟩ 0).havoc changed [], List.prefix_refl _⟩) :=
-  .cons (.transferResume (J := keep) (σ := σ) (st := changed) (nt := [])
-    (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial) .nil
+  .cons (.transferResume (J := keep) (σ := σ) (o₁ := ⟨σ.pay ⟨9, rfl⟩ 0, List.prefix_refl _⟩)
+    (st := changed) (nt := []) (sb := (σ.pay ⟨9, rfl⟩ 0).selfBalance)
+    (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl
+      (by change (if σ.canPay ⟨9, rfl⟩ ⟨0, rfl⟩ then _ else _) = _; rw [hpay]; rfl)
+      trivial trivial) .nil
 
 /-- Explicit `sp = valuesRef(); to.transfer(0); sp.push(calls);` observes resumed storage. -/
 theorem complete_capture_reads_resumed_storage :
@@ -72,7 +76,7 @@ theorem complete_capture_reads_resumed_storage :
       (callProgram "valuesRef" .nil (.user "r") getterBody (paymentAt [])) o ∧
         observed (o.map (Out.drop (.push (.push .refl)))) = some 9 := by
   have hb := pushBlock_of_prefix (J := keep)
-    (((paymentAt []).wk (.drop .refl)).wk (.drop .refl)) .here (resume_prefix afterCapture)
+    (((paymentAt []).wk (.drop .refl)).wk (.drop .refl)) .here (resume_prefix afterCapture (by decide +kernel))
   have hp := ExecP.cons (s := .declStorage (.array .uint) (.user "sp")
     (some (.path (.alias .here)))) (σ := before) (ExecS.det rfl) (singleton_iff.mpr hb)
   have hc : ExecS keep (State.init CallbackContract)
@@ -122,7 +126,7 @@ theorem callback_allocation_survives_scope :
     ∃ o, ExecS keep before (pushBlock (allocatingPaymentAt _) .here) o ∧
       observed o = some 9 ∧ heapLength o = some 1 := by
   refine ⟨_, pushBlock_of_prefix (J := keep) (allocatingPaymentAt _) .here
-    (ExecP.cons (ExecS.transferResume (J := keep) (σ := before) (st := changed) (nt := [])
+    (ExecP.cons (ExecS.transferResume (J := keep) (σ := before) (st := changed) (nt := []) (sb := before.selfBalance)
       (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial)
       (ExecP.cons (ExecS.det rfl) ExecP.nil)), ?_⟩
   decide +kernel

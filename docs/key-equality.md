@@ -1,10 +1,13 @@
 # One equation, KeY's `=`
 
-The formulas have one equation, `a = b` (`Fml.eq`), KeY's `=`: it compares
+Internal formulas have one equation, `a = b` (`Fml.eq`), KeY's `=`: it compares
 what the sides denote in the Theory (`Tm.denote`), total as KeY's terms
 are.  There is no definedness test.  This records the change that removed
 `defined(t)` and `Fml.eqD` (`defined(a) ∧ defined(b) ∧ a ≐ b`), and what
 replaced each use.
+
+Public `Spec` equations instead require successful evaluation of both
+operands; see [correctness.md](correctness.md).
 
 ## What a formula says
 

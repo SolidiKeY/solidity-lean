@@ -9,7 +9,7 @@ import Solidity.Calculus.SolkeyProves
 # The scoped strategy tools
 
 The tactics of `Calculus/Symex.lean` and `Calculus/Derive.lean`
-on scoped goals `Valid φ` (`cdl!{ … }`): `sol_symex` then `sol_close`,
+on scoped goals `Fml.Valid φ` (`cdl!{ … }`): `sol_symex` then `sol_close`,
 `sol_prove` as one kernel evaluation, and `sol_derive?`'s walk, one
 `refine` per rule cited by its taclet, each leaf closed (`sol_leaf` and
 the scoped `sol_close`), pinned and replayed; `sol_prove` and
@@ -22,19 +22,19 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-example : Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
+example : Fml.Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
   sol_prove
 
-example : Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
+example : Fml.Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
   sol_symex
   sol_close
 
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_prove
 
 /--
 info: Try this:
-  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.fmlValid (R := RuleSet.all) ?_
     refine Proves.allRight ?_
     apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
     apply Proves.update (Taclet.step_eq .binopAssignment)
@@ -54,12 +54,12 @@ info: Try this:
       exact Proves.closeTrue rfl
 -/
 #guard_msgs in
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
-  refine Proves.valid (R := RuleSet.all) ?_
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+  refine Proves.fmlValid (R := RuleSet.all) ?_
   refine Proves.allRight ?_
   apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
   apply Proves.update (Taclet.step_eq .binopAssignment)
@@ -78,7 +78,7 @@ example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } el
     refine Proves.updIntro ?_
     exact Proves.closeTrue rfl
 
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_derive
 
 /-! A leaf with a formula left closes on its scoped form: `sol_leaf`, then
@@ -86,7 +86,7 @@ the scoped `sol_close`. -/
 
 /--
 info: Try this:
-  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.fmlValid (R := RuleSet.all) ?_
     refine Proves.allRight ?_
     apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
     apply Proves.update (Taclet.step_eq .binopAssignment)
@@ -108,12 +108,12 @@ info: Try this:
       sol_close
 -/
 #guard_msgs in
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
-  refine Proves.valid (R := RuleSet.all) ?_
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+  refine Proves.fmlValid (R := RuleSet.all) ?_
   refine Proves.allRight ?_
   apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
   apply Proves.update (Taclet.step_eq .binopAssignment)
@@ -135,7 +135,7 @@ example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } el
     sol_close
 
 /-- `sol_derive` leaves the leaves, as today's does. -/
-example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Fml.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive
   all_goals
     sol_leaf
@@ -207,7 +207,7 @@ open scoped Scoped
 
 /--
 info: Try this:
-  apply Proves.valid
+  apply Proves.fmlValid
     apply allRight
     apply unfold .localValueDeclInitDrop
     apply update .binopAssignment
@@ -225,12 +225,12 @@ info: Try this:
       sol_close
 -/
 #guard_msgs in
-example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : ⊨ᶠ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
-  apply Proves.valid
+example : ⊨ᶠ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+  apply Proves.fmlValid
   apply allRight
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
@@ -287,7 +287,7 @@ example : ⊢ dl!{ a == 1 → [ uint x = a; require(x == 1); ] x == 1 } := by
 
 /--
 info: Try this:
-  apply Proves.valid
+  apply Proves.fmlValid
     apply cases .sendNoCallbackBox <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
@@ -297,12 +297,12 @@ info: Try this:
       sol_close
 -/
 #guard_msgs in
-example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+example : ⊨ᶠ dl!{ [ ok = to.send(5); ] true } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
-  apply Proves.valid
+example : ⊨ᶠ dl!{ [ ok = to.send(5); ] true } := by
+  apply Proves.fmlValid
   apply cases .sendNoCallbackBox <;>
       (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
         and_true]) <;>

@@ -86,7 +86,7 @@ structure Countermodel {φ : Fml C []} (r : InputReduction φ) where
 theorem Countermodel.refutes {φ : Fml C []} {r : InputReduction φ} (cm : r.Countermodel) :
     ¬ holds cm.state φ := fun h => cm.falseInstance ((r.meaning cm.state).2 h cm.atoms)
 
-theorem valid_iff {φ : Fml C []} (r : InputReduction φ) : Valid φ ↔ r.arithmetic.Valid := by
+theorem valid_iff {φ : Fml C []} (r : InputReduction φ) : Fml.Valid φ ↔ r.arithmetic.Valid := by
   constructor
   · intro h vs
     let model : State C [] × AEnv := Inputs.realize r.environment r.parameters r.refs vs
@@ -99,7 +99,7 @@ theorem valid_iff {φ : Fml C []} (r : InputReduction φ) : Valid φ ↔ r.arith
 
 /-- A positive arithmetic computation proves the original source claim. -/
 theorem valid_of_decide {φ : Fml C []} (r : InputReduction φ)
-    (h : r.arithmetic.guarded.decide = true) : Valid φ :=
+    (h : r.arithmetic.guarded.decide = true) : Fml.Valid φ :=
   r.valid_iff.mpr (r.arithmetic.valid_iff.mpr ((AFml.decide_iff _).mp h))
 
 def countermodelOf {φ : Fml C []} (r : InputReduction φ)
@@ -127,10 +127,10 @@ def countermodelOfCodes {φ : Fml C []} (r : InputReduction φ) (xs : List Nat)
 
 /-- A finite checked assignment refutes the original source formula. -/
 theorem not_valid_of_codes {φ : Fml C []} (r : InputReduction φ) (xs : List Nat)
-    (h : r.arithmetic.guarded.check (fun k => xs[k]?.getD 0) = false) : ¬ Valid φ :=
+    (h : r.arithmetic.guarded.check (fun k => xs[k]?.getD 0) = false) : ¬ Fml.Valid φ :=
   fun hv => (r.countermodelOfCodes xs h).refutes (hv (r.countermodelOfCodes xs h).state)
 
-def verify {φ : Fml C []} (r : InputReduction φ) : Sum (PLift (Valid φ)) r.Countermodel :=
+def verify {φ : Fml C []} (r : InputReduction φ) : Sum (PLift (Fml.Valid φ)) r.Countermodel :=
   match r.arithmetic.verify with
   | .inl h => .inl ⟨fun σ => (r.meaning σ).1 (fun _ => h.down _)⟩
   | .inr cm => .inr (r.countermodelOf cm)

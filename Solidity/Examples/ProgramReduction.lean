@@ -194,7 +194,7 @@ def badWriteCountermodel : badWriteReduction.Countermodel :=
   badWriteReduction.countermodelOfCheck () (by decide +kernel)
 
 /-- Writing 17 does not establish the original postcondition `balances[3] == 19`. -/
-theorem badWrite_invalid : ¬ Valid badWrite :=
+theorem badWrite_invalid : ¬ Fml.Valid badWrite :=
   fun h => badWriteCountermodel.refutes (h badWriteCountermodel.state)
 
 example : (ProgramNormalization.ofFormula? 0 writeClaim).isNone = true := by decide +kernel

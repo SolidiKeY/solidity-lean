@@ -39,7 +39,7 @@ theorem ageBox : cdl!{ [ alice.age = 3; ] true }
     ~> cdl![.box]{ { storage := save(storage, alice.age, 3) } true } := by
   sol_chain
 
-example : Valid cdl!{ [ alice.age = 3; ] true } :=
+example : Fml.Valid cdl!{ [ alice.age = 3; ] true } :=
   ageBox.valid fun _ => Upd.afterT_intro (fun _ => trivial) fun _ _ _ => trivial
 
 theorem balance : cdl!{ ⟨ alice.account.balance = 10; ⟩ true }

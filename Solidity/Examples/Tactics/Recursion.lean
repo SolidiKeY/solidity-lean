@@ -113,7 +113,7 @@ below's, `Stmt.rebind`), within `view`, so it has a contract
 (`FunContract.forall_storage`), proved by induction over the frames: the
 call does not panic, from any `n`.  (An `ensures` that reads the returned
 alias, `r.length`, is `pickLen`'s.) -/
-theorem pickNoPanic : ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true } := by
+theorem pickNoPanic : ⊨ᶠ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] true } := by
   rec_contract_by .view cdlIn![uint n]{ true } cdlIn![uint n, old, oldNet, uint[] storage r]{ true }
   case hc =>
     apply RecContract.unroll
@@ -135,7 +135,7 @@ s.length; … l == …`, the length is the interpreter's, which the Theory's
 `ensures` does not give: an alias the contract leaves may hold a path that is
 no array.) -/
 theorem pickLen :
-    ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
+    ⊨ᶠ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
   rec_contract_by .view cdlIn![uint n]{ true }
     cdlIn![uint n, old, oldNet, uint[] storage r]{ r.length == values.length }
   case hc =>
@@ -183,7 +183,7 @@ local instance : InContract := ⟨Build⟩
 of length `3`, and no frame fails its `assert`; the contract by induction
 over the frames (`RecContractM.unroll`), the frame's own call by the
 hypothesis (`rec_contract_mem`). -/
-theorem buildLen : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
+theorem buildLen : ⊨ᶠ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
   rec_contract_mem_by .view cdlIn![uint n]{ true }
     cdlIn![uint n, old, oldNet, uint[] memory r]{ r.length == n }
   case hc =>
@@ -237,11 +237,11 @@ local instance : InContract := ⟨RefSpec⟩
 
 /-- `pick`'s source contract, the returned alias's length. -/
 theorem pickAuto :
-    ⊨ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
+    ⊨ᶠ dl!{ ∀ uint m; [ uint[] storage s = pick(m); ] s.length == values.length } := by
   rec_auto
 
 /-- `build`'s source contract, the returned array's length. -/
-theorem buildAuto : ⊨ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
+theorem buildAuto : ⊨ᶠ dl!{ [ uint[] memory q = build(3); ] q.length == 3 } := by
   rec_auto
 
 end RefSpec
@@ -253,7 +253,7 @@ of `countdown();`, its contract `true`/`true` (every frame ends without a
 panic, or does not end).  In the step the frame's own call is proved by the
 hypothesis, `a = a - 1` is checked (`a > 0` there), and the `else` branch
 asserts `a == 0` where `a > 0` is false. -/
-theorem countdownNoPanic : ⊨ dl!{ [ countdown(); ] true } := by
+theorem countdownNoPanic : ⊨ᶠ dl!{ [ countdown(); ] true } := by
   rec_contract_by .nonpayable cdlIn![]{ true } cdlIn![old, oldNet]{ true }
   case hc =>
     apply RecContract.unroll
@@ -274,7 +274,7 @@ theorem countdownNoPanic : ⊨ dl!{ [ countdown(); ] true } := by
 /-- **A recursive sum**: `add(x, y)` is `x + y`, its contract
 `x <= 1000 && y <= 1000` / `r == x + y`; the step reads the frame below's
 result `r'` as `x + (y - 1)` (the hypothesis), so `r' + 1` is `x + y`. -/
-theorem addSum : ⊨ dl!{ x <= 1000 → y <= 1000 → [ z = add(x, y); ] z == x + y } := by
+theorem addSum : ⊨ᶠ dl!{ x <= 1000 → y <= 1000 → [ z = add(x, y); ] z == x + y } := by
   rec_contract_by .pure cdlIn![uint a, uint b]{ a <= 1000 && b <= 1000 }
     cdlIn![uint a, uint b, old, oldNet, uint r]{ r == a + b }
   case hc =>
@@ -296,14 +296,14 @@ theorem addSum : ⊨ dl!{ x <= 1000 → y <= 1000 → [ z = add(x, y); ] z == x 
 /-- **The countdown, automatically** (`rec_auto`, what the solc import's
 runner does): the box's own contract, `true`/`true`, at `nonpayable`, by
 induction over the frames; the same proof as `countdownNoPanic`. -/
-theorem countdownAuto : ⊨ dl!{ [ countdown(); ] true } := by rec_auto
+theorem countdownAuto : ⊨ᶠ dl!{ [ countdown(); ] true } := by rec_auto
 
 /-- **The countdown ends**, from any `a`, the diamond: below `recDepth`
 frames its run ends normally, above them it is exhausted (the EVM's stack
 overflows), which the diamond accepts; the contract under the diamond is
 proved by induction over the frames as the box's (`docs/kernel-port.md`,
 "Recursion"). -/
-theorem countdownEnds : ⊨ dl!{ ⟨ countdown(); ⟩ true } := by rec_auto
+theorem countdownEnds : ⊨ᶠ dl!{ ⟨ countdown(); ⟩ true } := by rec_auto
 
 /-! ## By the source's contracts
 
@@ -313,22 +313,22 @@ theorem countdownEnds : ⊨ dl!{ ⟨ countdown(); ⟩ true } := by rec_auto
 frame below by the induction's hypothesis. -/
 
 /-- `sum(3, 4)` is `7`: the call by `sum`'s contract. -/
-theorem sumSeven : ⊨ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by rec_auto
+theorem sumSeven : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by rec_auto
 
 /-- `sum`'s own obligation (`spec!{sum}`): its call by its contract. -/
-theorem sumSpec : ⊨ spec!{sum} := by rec_auto
+theorem sumSpec : ⊨ᶠ spec!{sum} := by rec_auto
 
 /-- **Mutual recursion**: `even`'s contract by induction over its frames,
 in whose step `odd`'s by induction over its own, in whose step the call of
 `even` is the outer hypothesis's. -/
-theorem evenFour : ⊨ dl!{ [ bool z = even(4); ] z == true } := by rec_auto
+theorem evenFour : ⊨ᶠ dl!{ [ bool z = even(4); ] z == true } := by rec_auto
 
 /-- **Several returns**: a recursive call returns to a tuple's targets. -/
-theorem divmodSeven : ⊨ dl!{ [ uint q; uint r; (q, r) = divmod(7, 2); ] r < 2 && q <= 7 } := by
+theorem divmodSeven : ⊨ᶠ dl!{ [ uint q; uint r; (q, r) = divmod(7, 2); ] r < 2 && q <= 7 } := by
   rec_auto
 
 /-- The strategy stops at a recursive call: `sol_symex` says so. -/
-example : ⊨ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
+example : ⊨ᶠ dl!{ [ uint z = sum(3, 4); ] z == 7 } := by
   fail_if_success sol_symex
   rec_auto
 
@@ -488,7 +488,7 @@ local instance : InContract := ⟨MakeAge⟩
 with `Prog.withinW`, `Stmt.run_frameW`): the write `p.age = 7` lands in the
 frame's own allocation, so the caller's objects are kept and the returned
 object read off the contract. -/
-theorem mkAge : ⊨ dl!{ [ Person memory q = mk(2); uint z = q.age; ] z == 7 } := by
+theorem mkAge : ⊨ᶠ dl!{ [ Person memory q = mk(2); uint z = q.age; ] z == 7 } := by
   rec_auto
 
 end MakeAge
@@ -540,10 +540,10 @@ section Triangular
 local instance : InContract := ⟨Triangular⟩
 
 /-- `tri`'s contract, by induction over the frames. -/
-theorem triSpec : ⊨ spec!{tri} := by rec_auto
+theorem triSpec : ⊨ᶠ spec!{tri} := by rec_auto
 
 /-- Its caller: `tri(3)` is `6`. -/
-theorem triThree : ⊨ dl!{ [ uint z = tri(3); ] z == 6 } := by rec_auto
+theorem triThree : ⊨ᶠ dl!{ [ uint z = tri(3); ] z == 6 } := by rec_auto
 
 end Triangular
 

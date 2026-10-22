@@ -38,7 +38,7 @@ def Bank : Contract := contract!{
 }
 
 /-- Generated quantified mapping ranges are retained in the proved claim. -/
-theorem mapping_valid : Valid (cspec[Bank]{put}) := by sol_exact
+theorem mapping_valid : Fml.Valid (cspec[Bank]{put}) := by sol_exact
 
 def mappingClaim : Fml Bank [] := cspec[Bank]{put}
 
@@ -54,23 +54,23 @@ def exactPositive : Lean.Elab.Term.TermElabM Bool := do
 info: ✓ put
 ---
 info: Try this:
-  theorem put_spec : ⊨ spec[Bank]{put} := by sol_exact
+  theorem put_spec : ⊨ᶠ spec[Bank]{put} := by sol_exact
 -/
 #guard_msgs in #verify Bank.put
 
 /-- Replay the theorem offered by the public verifier. -/
-theorem put_spec : ⊨ spec[Bank]{put} := by sol_exact
+theorem put_spec : ⊨ᶠ spec[Bank]{put} := by sol_exact
 
 /--
 info: ✓ putParam
 ---
 info: Try this:
-  theorem putParam_spec : ⊨ spec[Bank]{putParam} := by sol_exact
+  theorem putParam_spec : ⊨ᶠ spec[Bank]{putParam} := by sol_exact
 -/
 #guard_msgs in #verify Bank.putParam
 
 /-- Generated mapping facts are certified under real hidden parameters. -/
-theorem putParam_spec : ⊨ spec[Bank]{putParam} := by sol_exact
+theorem putParam_spec : ⊨ᶠ spec[Bank]{putParam} := by sol_exact
 
 def minimalNegative : Lean.Elab.Term.TermElabM Bool := do
   let φ ← Lean.Elab.Term.elabTerm (← `(cspec[Bank]{ $(Lean.mkIdent (.mkSimple "bad")) })) none

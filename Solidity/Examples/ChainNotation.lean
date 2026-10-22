@@ -170,7 +170,7 @@ write is valid, at the postcondition the statement is written for: past the prog
 rewrites the scoped line (`Fml.Via.valid`), its last line closed by `sol_decide`.  The chain keeps its
 captures, which `sol_decide` does not drop: `simplifyUpdate` drops them first. -/
 
-theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
+theorem headline_valid : ⊨ᶠ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
   refine Fml.Via.valid (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
       ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
@@ -619,8 +619,8 @@ theorem composed :
   ((readSeg ..).leads.via (resolveSeg ..)).leadsK
 
 /-- What `composed` proves: the first line is valid where the line written is. -/
-example (h : Valid dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }) :
-    Valid dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ } :=
+example (h : Fml.Valid dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }) :
+    Fml.Valid dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ } :=
   (composed m φ).valid h
 
 #guard_msgs in

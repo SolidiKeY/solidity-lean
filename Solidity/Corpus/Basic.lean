@@ -14,17 +14,17 @@ and states it as `Diamond (State.init C) P`: the program elaborated scoped
 over its typed run (`holds`, `Semantics/Run.lean`) from the typed
 state the contract starts in, every root at its default.
 
-Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
+Why not a validity `⊨ᶠ`, which is what `sol_symex` and `sol_close` prove:
 
-* `⊨ ⟨ P ⟩ true` quantifies over every state, including those whose storage
+* `⊨ᶠ ⟨ P ⟩ true` quantifies over every state, including those whose storage
   is not one the contract can be in; solkey's obligation asks `wt(storage)`
   for that, and its diamond over every such storage is not decided here.
-* `⊨ [ P ] true` says that no `assert` of `P` fails, from any state: a
+* `⊨ᶠ [ P ] true` says that no `assert` of `P` fails, from any state: a
   failed `assert` panics, which the box does not accept, while a failed
   `require` reverts, which it does (solkey's `assertSimple`).  So it is a
   different obligation: it does not say that the body runs to its end,
   which the diamond asks.
-* `⊨ pre → ⟨ P ⟩ true` with `pre` describing the store would be the faithful
+* `⊨ᶠ pre → ⟨ P ⟩ true` with `pre` describing the store would be the faithful
   validity, but the closer does not close a storage write under the
   diamond, so it would prove nothing more than this form while failing on
   almost every obligation.
@@ -73,7 +73,7 @@ normally. -/
 def outcome {Γ' : Ctx} (σ : State C []) (P : Prog C [] Γ') : String :=
   match P.run σ with
   | .ok _ => "ok"
-  | .error .revert => "revert"
+  | .error .revert | .error (.revertWith _) => "revert"
   | .error .panic => "panic"
   | .error .diverge => "diverge"
   | .error .exhausted => "exhausted"

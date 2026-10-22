@@ -773,10 +773,7 @@ def elemDoc (ns ms : List Expr) (e : Expr) : RM Doc := do
       return asg lhs (store net (.bin sel op 1 (← tm ns args[5]!)))
     | ``UpdElem.pay =>
       let a ← tm ns args[4]!
-      let self : Doc := if mac then .tx "\\code{self}" 4 else .kw "this"
-      return asg lhs (.cat #[.kw "if", .tx "\\;(" 2, r, .tx " = " 3, self, .tx ")\\;" 2, .brk,
-        .kw "then", .tx "\\;" 1, net, .tx "\\;" 1, .brk, .kw "else", .tx "\\;" 1,
-        store net (.bin sel "-" 1 a)])
+      return .app (.kw "pay") #[r, a]
     | _ => return asg lhs (store (.tx (← symOf ``Op0.mtSt) 4) (← tm ns args[4]!))
   | _ => unknownTm e
 

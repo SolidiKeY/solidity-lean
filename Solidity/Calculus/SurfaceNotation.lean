@@ -150,7 +150,7 @@ inductive RawUpdElem where
   | selfBalance (op : IntOp) (a : RawTerm)
   /-- `net := store(net, at(r), net(r) ± a)` -/
   | net (r : RawTerm) (op : IntOp) (a : RawTerm)
-  /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)`, a payment. -/
+  /-- `pay(r, a)`: joint ledger and balance bookkeeping. -/
   | pay (r a : RawTerm)
   /-- `net := store(mtSt, at(r), a)`, a deployment's ledger. -/
   | netMt (r a : RawTerm)
@@ -295,6 +295,8 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
   -- the elements, read off the `sepBy1` node: `‖` does not splice in a pattern
   let elems ← U.raw[1].getSepArgs.mapM fun e => do
     match (⟨e⟩ : TSyntax `dl_upd_elem) with
+    | `(dl_upd_elem| pay($r:dl_term, $a:dl_term)) => do
+      `(RawUpdElem.pay $(← expandTerm r) $(← expandTerm a))
     | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
       let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
       let [n] := nameParts x.getId | Macro.throwErrorAt l "an update assigns a variable"
@@ -323,7 +325,7 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
           unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
           unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
             Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
-          return ← `(RawUpdElem.pay $(← expandTerm a) $(← expandTerm v))
+          Macro.throwErrorAt r "use `pay(receiver, amount)`: a payment updates both ledger and balance"
         | _ => pure ()
       `(RawUpdElem.assign $(quote n) $(← expandTerm r))
     | `(dl_upd_elem| $l:dl_term := $a:dl_term <= $b:dl_term) => assignCmp l ``BinOp.le a b

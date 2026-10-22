@@ -31,7 +31,7 @@ def Bank : Contract := contract!{
 def followClaim : Fml Bank [] := cspec[Bank]{follow}
 def reduced : Solidity.Decide.DependentReduction followClaim := declaration_dependent_reduce[followClaim]
 def countermodel : reduced.Countermodel := reduced.countermodelOfCodes [] (by decide +kernel)
-theorem follow_invalid : ¬ Valid followClaim := fun h => countermodel.refutes (h countermodel.state)
+theorem follow_invalid : ¬ Fml.Valid followClaim := fun h => countermodel.refutes (h countermodel.state)
 
 def exactNegative : Lean.Elab.Term.TermElabM Bool := do
   match ← exactVerify (Lean.mkConst ``followClaim) with
@@ -43,7 +43,7 @@ def exactNegative : Lean.Elab.Term.TermElabM Bool := do
 /-- info: true -/
 #guard_msgs in #eval exactNegative
 
-theorem same_valid : Valid (cspec[Bank]{same}) := by sol_exact
+theorem same_valid : Fml.Valid (cspec[Bank]{same}) := by sol_exact
 
 /--
 info: ✗ follow (certified):
@@ -69,7 +69,7 @@ info: ✗ mixed (certified):
 info: ✓ same
 ---
 info: Try this:
-  theorem same_spec : ⊨ spec[Bank]{same} := by sol_exact
+  theorem same_spec : ⊨ᶠ spec[Bank]{same} := by sol_exact
 -/
 #guard_msgs in #verify Bank.same
 

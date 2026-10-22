@@ -19,8 +19,8 @@ hidden binder printing as nothing (`dl!` outside the scope):
   `Fml C []`, with or without a modality;
 * `spec!{f}`, `spec[C]{f}` are `cspec…`'s, `problem!{constructor}` is
   `cproblem…`'s (`Calculus/Spec.lean`);
-* `⊨ φ` is `Valid φ` (`Calculus/RuleSyntax.lean`, either side); under the
-  scope `valid% φ`, which reads the closer's `Valid` of a formula that is
+* `⊨ᶠ φ` is `Fml.Valid φ` (`Calculus/RuleSyntax.lean`, either side); under the
+  scope `valid% φ`, which reads the closer's `Fml.Valid` of a formula that is
   no `Fml` (a chain's line past the program, `Calculus/RewriteChains.lean`);
   `⊢ φ` is the scoped sequent with nothing assumed,
   `Proves C .all [] .nil φ`;
@@ -52,7 +52,7 @@ def surfaceOn : TermElabM Bool := do
   let some stx ← liftMacroM (expandMacro? (← `(core_surface%))) | return false
   return stx.isIdent && stx.getId.eraseMacroScopes == `true
 
-/-- `valid% φ`: `Valid φ` of a scoped formula. -/
+/-- `valid% φ`: `Fml.Valid φ` of a scoped formula. -/
 syntax (name := validDispatch) "valid% " term:max : term
 
 @[term_elab validDispatch]
@@ -62,12 +62,12 @@ def elabValidDispatch : TermElab := fun stx _ => do
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
   unless ty.isAppOfArity ``Fml 2 do throwError "valid%: not a scoped formula{indentExpr φ}"
-  mkAppM ``Valid #[φ]
+  mkAppM ``Fml.Valid #[φ]
 
-/-- `Valid φ` prints as `⊨ φ`. -/
-@[app_unexpander Valid]
+/-- `Fml.Valid φ` prints as `⊨ᶠ φ`. -/
+@[app_unexpander Fml.Valid]
 def unexpandValid : PrettyPrinter.Unexpander
-  | `($_ $φ) => `(⊨ $φ)
+  | `($_ $φ) => `(⊨ᶠ $φ)
   | _ => throw ()
 
 /-- `holds σ φ` prints as `σ ⊧ φ`. -/
@@ -97,7 +97,7 @@ scoped macro_rules
   | `(problem[ $c:term ]{ constructor }) => `(cproblem[$c]{ constructor })
 
 scoped macro_rules
-  | `(⊨ $φ:term) => `(valid% $φ)
+  | `(⊨ᶠ $φ:term) => `(valid% $φ)
 
 /-- `⊢ φ`: the scoped sequent with nothing assumed. -/
 scoped notation:25 "⊢ " φ:26 => Proves _ RuleSet.all [] Hyps.nil φ

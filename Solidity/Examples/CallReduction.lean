@@ -131,7 +131,7 @@ def wrongResultCountermodel : wrongResultReduction.Countermodel :=
   wrongResultReduction.countermodelOfCheck (⟨17, by decide +kernel⟩, ()) (by decide +kernel)
 
 /-- Calling `echo(17)` returns 17, so the original claim demanding 19 is invalid. -/
-theorem wrongResult_invalid : ¬ Valid wrongResult :=
+theorem wrongResult_invalid : ¬ Fml.Valid wrongResult :=
   fun h => wrongResultCountermodel.refutes (h wrongResultCountermodel.state)
 
 example : (ProgramNormalization.ofFormula? 2048 (cspec[Calls]{put})).isSome = true := by

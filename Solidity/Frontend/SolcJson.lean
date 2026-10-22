@@ -1664,6 +1664,9 @@ def writingCall (f : Json) : Bool :=
       !(((J.opt n "externalCall").bind (J.opt · "expression")).any fun e =>
         let ws := (J.tyStr e).splitOn " "
         ws.contains "pure" || ws.contains "view")) ||
+    (J.kind n == "FunctionCall" && (J.opt n "expression").any fun e =>
+      isExternalMember e &&
+        !((J.tyStr e).splitOn " ").any (fun w => w == "pure" || w == "view")) ||
     (J.kind n == "MemberAccess" &&
       ["call", "delegatecall"].contains ((J.str? n "memberName").getD ""))
 

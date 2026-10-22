@@ -6,7 +6,7 @@ import Solidity.Calculus.TermAgree
 /-!
 # The reduction on a scoped leaf
 
-`sol_decide` on a scoped leaf `Valid φ` (`φ : Fml C []`) pushes its updates
+`sol_decide` on a scoped leaf `Fml.Valid φ` (`φ : Fml C []`) pushes its updates
 into the formula (`Fml.toLS`, mini-solkey's `Fml.applyUpds`): a term of
 the reduction is the scoped term with its locals, `storage` and `memory`
 replaced by what the updates bound them to, read in the state the leaf
@@ -344,7 +344,9 @@ def _root_.Solidity.UpdElem.toLS {Δ : Ctx} (ρ₀ : SymS C Γ) (e : UpdElem C �
     (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next⟩, seqL m' .tt))
     (fun _ _ => none)
     (fun r _ a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
-    (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
+    -- Payments change the balance, which the old no-op encoding omitted.
+    -- Leave them to semantic closing until this fragment represents that change.
+    (fun _ _ => none)
     (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
     (fun a => (a.toL ρ₀).map fun a' => (⟨ρ.loc, ρ.stor, ρ.mem, a', ρ.next⟩, seqL a' .tt))
 

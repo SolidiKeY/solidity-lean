@@ -23,7 +23,7 @@ rule at a time with `apply` — the way PLFA builds a typing derivation
   `revertDiamond` to `false`; `Revert.lean`);
 * `empty` — `⟨⟩ φ` (or `[] φ`) is `φ`;
 * `sol_leaf` — leave the calculus once no modality is left: what is left is
-  `⊨ Γ → φ`, scoped, for `sol_close` (`Proves.closeValid`, which checks
+  `⊨ᶠ Γ → φ`, scoped, for `sol_close` (`Proves.closeValid`, which checks
   that no modality is left).
 
 `sol_derive` runs the strategy as such a derivation: the rule `Stmt.step`
@@ -35,7 +35,7 @@ solkey names the rule; hover it to see its taclet.  Unification matches its
 `apply` the goal is the next line of the derivation, printed as the sequent
 `dl{ Γ ⟹ φ }` (`Calculus/Notation.lean`).  A rule that does not match, or whose
 side conditions do not hold (`nsp` where the part is simple, …), is refused
-by `apply`.  `Proves.valid` turns a derivation into a proof of `⊨ φ`; it is the
+by `apply`.  `Proves.fmlValid` turns a derivation into a proof of `⊨ᶠ φ`; it is the
 only place soundness is used.
 -/
 
@@ -114,6 +114,6 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
     sol_close
 
 /-- A derivation is a proof of validity. -/
-example : ⊨ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := guardedCopy.valid
+example : ⊨ᶠ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := guardedCopy.fmlValid
 
 end Solidity.Examples.Tactics.ApplySteps

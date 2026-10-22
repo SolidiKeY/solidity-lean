@@ -229,15 +229,15 @@ section Scoped
 open scoped Scoped
 
 /-- `x = 2; x += 3;` reads the first assignment and leaves five. -/
-example : ⊨ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x = 5 } := by
+example : ⊨ᶠ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x = 5 } := by
   sol_close
 
 /-- In a parallel update both assignments read the old nine, leaving twelve. -/
-example : ⊨ dl!{ { x := 9 } { x := 2 ‖ x := x + 3 } x = 12 } := by
+example : ⊨ᶠ dl!{ { x := 9 } { x := 2 ‖ x := x + 3 } x = 12 } := by
   sol_close
 
 /-- Sequential assignment must not accidentally use the parallel result. -/
-example : ⊨ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x != 12 } := by
+example : ⊨ᶠ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x != 12 } := by
   sol_close
 
 /-! ## A formula prints as it reads

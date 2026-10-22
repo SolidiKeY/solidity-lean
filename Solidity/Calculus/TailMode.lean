@@ -13,11 +13,11 @@ what a recycled slot holds.
 
 The option says whether the starting storage is assumed to have clean
 tails, every shadow an ordinary default (`Storage.CleanTail`,
-`Typing/CleanTail.lean`): `.solc` assumes nothing, the reading of `Valid`;
+`Typing/CleanTail.lean`): `.solc` assumes nothing, the reading of `Fml.Valid`;
 `.clean` assumes it, as the premise `cleanTail(storage) = true`
 (`Fml.cleanTail`, the symbol `Op1.cleanTail`).  As every option here it is
 an argument of the validity proved (`ValidTail m φ`), and the premise is a
-formula, so `Proves.valid` proves `.clean` unchanged: `impRight` puts it in
+formula, so `Proves.fmlValid` proves `.clean` unchanged: `impRight` puts it in
 the antecedent, where the closer reads it (`Calculus/DecideCleanTail.lean`).
 
 It is an assumption on the starting storage, not a property every program
@@ -64,16 +64,16 @@ inductive TailMode where
   | clean
   deriving DecidableEq, Repr
 
-/-- **Valid under a tail mode**: `.solc` is `Valid`; `.clean` is `Valid` of
+/-- **Fml.Valid under a tail mode**: `.solc` is `Fml.Valid`; `.clean` is `Fml.Valid` of
 the formula under the premise `cleanTail(storage) = true`. -/
 def ValidTail : TailMode → Fml C [] → Prop
-  | .solc, φ => Valid φ
-  | .clean, φ => Valid (.imp (Fml.cleanTail C) φ)
+  | .solc, φ => Fml.Valid φ
+  | .clean, φ => Fml.Valid (.imp (Fml.cleanTail C) φ)
 
-theorem validTail_solc {φ : Fml C []} : ValidTail .solc φ ↔ Valid φ := Iff.rfl
+theorem validTail_solc {φ : Fml C []} : ValidTail .solc φ ↔ Fml.Valid φ := Iff.rfl
 
 theorem validTail_clean {φ : Fml C []} :
-    ValidTail .clean φ ↔ Valid (.imp (Fml.cleanTail C) φ) := Iff.rfl
+    ValidTail .clean φ ↔ Fml.Valid (.imp (Fml.cleanTail C) φ) := Iff.rfl
 
 /-- What `.clean` proves holds in every state whose storage has clean
 tails. -/

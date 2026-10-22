@@ -214,7 +214,7 @@ derivations; a chain proved as a theorem keeps its links as written.
 ## Commands and API
 
 * `#latex t` (LeanTeX), `#latex_expr (opts) t`, `#latex_file "path" (opts) t`:
-  a formula, `Valid φ`, a sequent `⊢ φ`, a chain, or ordinary mathematics.
+  a formula, `Fml.Valid φ`, a sequent `⊢ φ`, a chain, or ordinary mathematics.
 * `#latex_decl (opts) n`, `#latex_decl_file "path" (opts) n`: a declaration's
   statement, hypotheses kept as implications, parameters implicit.
 * `#latex_derivation (opts) t` and `_file "path"`: the derivation `#chain`

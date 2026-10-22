@@ -242,6 +242,14 @@ def GlobT.withNet {H : HTy} (g : GlobT C H) (nt : Ledger) : GlobT C H :=
 def GlobT.withBalance {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) : GlobT C H :=
   ⟨{ g.1 with selfBalance := b }, g.2⟩
 
+/-- The balance and ledger of the hypothetical successful payment branch.
+The operational run separately checks funds and acceptance. -/
+def GlobT.paid {H : HTy} {Δ : Ctx} (g : GlobT C H) (σ : State C Δ)
+    (addr amt : PrimTy.uint.Denote) : GlobT C H :=
+  (g.withNet (if addr.1 = σ.tx.selfAddress.1 then g.1.net
+    else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net)).withBalance
+      (σ.pay addr amt.1).selfBalance
+
 /-- `globT` by `match`, its compiled form. -/
 def UpdElem.globTM {Δ : Ctx} (σ₀ : State C Γ) :
     UpdElem C Γ Δ → GlobT C σ₀.H → Option (GlobT C σ₀.H)
@@ -255,8 +263,7 @@ def UpdElem.globTM {Δ : Ctx} (σ₀ : State C Γ) :
   | .net r op a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
     some (g.withNet (setBy addr (op.apply ((lookupBy addr g.1.net).getD 0) amt.1) g.1.net))
   | .pay r a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-    some (g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-      else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net))
+    some (g.paid σ₀ addr amt)
   | .netMt r a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
     some (g.withNet [(addr, amt.1)])
   | .setBalance a, g => (a.eval σ₀).bind fun amt => some (g.withBalance amt)
@@ -277,8 +284,7 @@ def UpdElem.globT {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ) (g : Glo
     (fun r op a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
       some (g.withNet (setBy addr (op.apply ((lookupBy addr g.1.net).getD 0) amt.1) g.1.net)))
     (fun r a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-      some (g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-        else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net)))
+      some (g.paid σ₀ addr amt))
     (fun r a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
       some (g.withNet [(addr, amt.1)]))
     (fun a => (a.eval σ₀).bind fun amt => some (g.withBalance amt))
@@ -626,7 +632,8 @@ def UpdElem.okB {Δ : Ctx} (σ₀ : State C Γ) : UpdElem C Γ Δ → Bool
   | .memory m => (m.eval σ₀).isSome
   | .selfBalance op a => ((a.eval σ₀).bind fun amt =>
       PrimTy.uint.ofInt? (op.apply σ₀.selfBalance.1 amt.1)).isSome
-  | .net r _ a | .pay r a | .netMt r a => (r.eval σ₀).isSome && (a.eval σ₀).isSome
+  | .net r _ a | .netMt r a => (r.eval σ₀).isSome && (a.eval σ₀).isSome
+  | .pay r a => (r.eval σ₀).isSome && (a.eval σ₀).isSome
   | .setBalance a => (a.eval σ₀).isSome
 
 theorem UpdElem.globT_isSome {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
@@ -644,8 +651,12 @@ theorem UpdElem.globT_isSome {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ �
     simp only [UpdElem.globTM, UpdElem.okB]; cases r.eval σ₀ <;> rfl
   | storage x | memory x | setBalance x =>
     simp only [UpdElem.globTM, UpdElem.okB]; cases x.eval σ₀ <;> rfl
-  | net r _ a | pay r a | netMt r a =>
+  | net r _ a | netMt r a =>
     simp only [UpdElem.globTM, UpdElem.okB]; cases r.eval σ₀ <;> cases a.eval σ₀ <;> rfl
+  | pay r a =>
+    simp only [UpdElem.globTM, UpdElem.okB]
+    cases r.eval σ₀ <;> cases a.eval σ₀ <;>
+      rfl
 
 /-- An element out of gas does not return. -/
 theorem Rhs.eval_of_exhB (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) (h : r.exhB σ₀ = true) :
@@ -672,7 +683,7 @@ theorem UpdElem.okB_of_exhB {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ
     simp only [UpdElem.exhB, Bool.or_eq_true, Bool.and_eq_true] at h
     rcases h with ⟨h, -⟩ | ⟨h, -⟩ <;>
       simp only [UpdElem.okB, Tm.eval_of_exhB σ₀ _ h, Option.isSome_none, Bool.false_and,
-        Bool.and_false]
+        Bool.and_false] <;> cases r.eval σ₀ <;> rfl
 
 /-- An element of the update is out of gas. -/
 def Upd.exhAny (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Bool

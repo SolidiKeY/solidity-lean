@@ -58,7 +58,7 @@ theorem ctor : ⊢ dl!{ [ constructor(); ] owner == msg.sender } := by
 /-- A deployment, from the empty storage: it returns, the deployer the
 owner. -/
 theorem deployOwner :
-    ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+    ⊨ᶠ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
         selfBalance := msg.value }
       ⟨ constructor(); ⟩ owner == msg.sender } := by
   sol_symex
@@ -68,6 +68,7 @@ theorem deployOwner :
 theorem withdrawOwner :
     ⊢ dl!{ [ uint o = owner; withdraw(x); ] msg.sender == o && owner == o } := by
   sol_prove
+  all_goals (sol_leaf; sol_close)
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`, the old entry `40`:
 the owner's entry is `10` after `withdraw(30)`, and anyone else's call
@@ -99,18 +100,15 @@ noncomputable def deployed : Option (State EtherWallet []) :=
     fun σ => { σ with selfBalance := ⟨100, rfl⟩ }
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
-less, and the funds as the transaction found them. -/
+less, and the balance is debited by the same amount. -/
 theorem withdrawRunNet :
     (deployed.bind fun σ => (Prog.run σ withdrawCore).toOption.map
-      fun o => ((Semantics.lookupBy (⟨7, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 100) := by
+      fun o => ((Semantics.lookupBy (⟨7, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 70) := by
   decide +kernel
 
-/-- More than the funds: the ledger books it all the same.  That the contract
-can pay is not the ledger's to check; on the EVM the payment is refused and
-the call reverts (`Evm.compile_correct`). -/
+/-- More than the funds: the transfer reverts. -/
 theorem withdrawRunOverdrawn :
-    (deployed.bind fun σ => (Prog.run σ overdrawCore).toOption.map
-      fun o => (Semantics.lookupBy (⟨7, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0) = some (-130) := by
+    (deployed.map fun σ => (Prog.run σ overdrawCore).halt?) = some (some .revert) := by
   decide +kernel
 
 /-- Anyone but the owner: `withdraw` reverts. -/

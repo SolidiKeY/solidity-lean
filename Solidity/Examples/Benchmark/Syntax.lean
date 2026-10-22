@@ -53,7 +53,7 @@ local instance : InContract := ⟨Elaborates⟩
 
 /-- `2 ether` is `2 * 10^18`, `3 days` is `3 * 86400`, `1 gwei` is `10^9`. -/
 example : Prog.toStr [] (sol{ total = 2 ether + 3 days; total = 1 gwei; }) =
-    "total = 2000000000000000000 + 259200; total = 1000000000;" := rfl
+    "total = 2000000000000259200; total = 1000000000;" := rfl
 
 /-- `payable(e)` and `address(e)` are `e`. -/
 example : Prog.toStr [] (sol{ owner = payable(address(total)); owner = address(0); }) =

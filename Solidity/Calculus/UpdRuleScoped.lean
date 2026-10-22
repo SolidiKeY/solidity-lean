@@ -1147,7 +1147,7 @@ theorem Fml.rwAtSM_sound {top : UpdRw C} (htop : top.Sound) :
     exact Modality.afterRunTR_imp (p := (holds · φ')) hψ fun τ => Fml.rwAtSM_sound htop φ h' τ
   | _, .havoc φ, ψ, h, σ, hψ => by
     obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun st nt => Fml.rwAtSM_sound htop φ h' _ (hψ st nt)
+    exact fun st nt sb => Fml.rwAtSM_sound htop φ h' _ (hψ st nt sb)
   | _, .all _ _ φ, ψ, h, σ, hψ => by
     obtain ⟨φ', h', rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun v => Fml.rwAtSM_sound htop φ h' _ (hψ v)
@@ -1300,7 +1300,7 @@ theorem Fml.simpUpdsSM_holds : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ, holds 
   | _, .imp _ ψ, σ, h => fun ha => Fml.simpUpdsSM_holds ψ σ (h ha)
   | _, .modal _ _ _ φ, _, h =>
     Modality.afterRunTR_imp (p := (holds · φ.simpUpdsSM)) h fun τ => Fml.simpUpdsSM_holds φ τ
-  | _, .havoc φ, _, h => fun st nt => Fml.simpUpdsSM_holds φ _ (h st nt)
+  | _, .havoc φ, _, h => fun st nt sb => Fml.simpUpdsSM_holds φ _ (h st nt sb)
   | _, .all _ _ φ, _, h => fun v => Fml.simpUpdsSM_holds φ _ (h v)
   | _, .bind _ _ _ φ, _, h => fun v => Fml.simpUpdsSM_holds φ _ (h v)
   | _, .anon _ φ, _, h => fun b => Fml.simpUpdsSM_holds φ _ (h b)
@@ -1317,20 +1317,20 @@ theorem Fml.simpUpdsS_holds {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ)
   Fml.simpUpdsSM_holds φ σ (Fml.simpUpdsS_eq_simpUpdsSM φ ▸ h)
 
 /-- A scoped formula is valid where its simplification is. -/
-theorem Valid.of_simpUpdsS {φ : Fml C []} (h : Valid φ.simpUpdsS) : Valid φ :=
+theorem Fml.Valid.of_simpUpdsS {φ : Fml C []} (h : Fml.Valid φ.simpUpdsS) : Fml.Valid φ :=
   fun σ => Fml.simpUpdsS_holds φ σ (h σ)
 
 /-- A scoped formula is valid where a rule's rewrite of it is. -/
-theorem Valid.of_updAtS {r : UpdRuleNameS} {φ ψ : Fml C []} (hr : φ.updAtS r = some ψ)
-    (h : Valid ψ) : Valid φ :=
+theorem Fml.Valid.of_updAtS {r : UpdRuleNameS} {φ ψ : Fml C []} (hr : φ.updAtS r = some ψ)
+    (h : Fml.Valid ψ) : Fml.Valid φ :=
   fun σ => Fml.updAtS_sound φ hr σ (h σ)
 
 /-- A scoped formula is valid where a rule's rewrite of it is, or, where
 the rule fits nowhere, itself (`sol_upd r`). -/
-theorem Valid.of_updAtSD (r : UpdRuleNameS) {φ : Fml C []} (h : Valid ((φ.updAtS r).getD φ)) :
-    Valid φ := by
+theorem Fml.Valid.of_updAtSD (r : UpdRuleNameS) {φ : Fml C []} (h : Fml.Valid ((φ.updAtS r).getD φ)) :
+    Fml.Valid φ := by
   cases hr : φ.updAtS r with
   | none => rw [hr] at h; exact h
-  | some ψ => rw [hr] at h; exact Valid.of_updAtS hr h
+  | some ψ => rw [hr] at h; exact Fml.Valid.of_updAtS hr h
 
 end Solidity

@@ -123,7 +123,7 @@ open ReadRealization Semantics
 /-- The source formula keeps its meaning through declaration removal and
 both stages of exact read reduction. -/
 theorem valid_iff {φ : Fml C []} (r : DeclarationReadReduction φ) :
-    Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (rd : (q : Ref C) → q.Value),
+    Fml.Valid φ ↔ ∀ (g : State C []) (args : List CallValue) (rd : (q : Ref C) → q.Value),
       (r.reads.sentence.query g Decide.AEnv.dflt args).run rd = true := by
   rw [← r.reads.valid_iff]
   exact forall_congr' (fun σ => (r.declaration.correct σ).symm)

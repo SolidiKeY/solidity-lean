@@ -7,8 +7,8 @@ import Solidity.Calculus.TermAgree
 /-!
 # `sol_close` on a scoped leaf
 
-`sol_symex` on a scoped goal (`⊨ dl!{ … }` under `open scoped Solidity.Scoped`)
-leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
+`sol_symex` on a scoped goal (`⊨ᶠ dl!{ … }` under `open scoped Solidity.Scoped`)
+leaves leaves `Fml.Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 `sol_close_mt` and `sol_spec_close` close them here, on the scoped formula,
 by the elaborators below, which read it with `close_rw_s`
 (`Calculus/Close.lean` declares the syntax and the simp sets).
@@ -64,8 +64,8 @@ section StateAPI
 
 variable {Γ : Ctx}
 
-theorem locV_havoc (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    (σ.havoc st nt).locV = σ.locV := rfl
+theorem locV_havoc (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.havoc st nt sb).locV = σ.locV := rfl
 
 /-! The global part a field at a time: the leaf reads fields, never the
 global part whole, so no rewrite changes a type that depends on it. -/
@@ -75,14 +75,14 @@ theorem glob_net (σ : State C Γ) : σ.glob.net = σ.net := rfl
 theorem glob_selfBalance (σ : State C Γ) : σ.glob.selfBalance = σ.selfBalance := rfl
 theorem glob_tx (σ : State C Γ) : σ.glob.tx = σ.tx := rfl
 theorem glob_envVal (σ : State C Γ) (k : EnvKey) : σ.glob.envVal k = σ.envVal k := rfl
-theorem havoc_storage (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    (σ.havoc st nt).storage = st := rfl
-theorem havoc_net (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    (σ.havoc st nt).net = nt := rfl
-theorem havoc_selfBalance (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    (σ.havoc st nt).selfBalance = σ.selfBalance := rfl
-theorem havoc_tx (σ : State C Γ) (st : Storage C) (nt : Ledger) :
-    (σ.havoc st nt).tx = σ.tx := rfl
+theorem havoc_storage (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.havoc st nt sb).storage = st := rfl
+theorem havoc_net (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.havoc st nt sb).net = nt := rfl
+theorem havoc_selfBalance (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.havoc st nt sb).selfBalance = sb := rfl
+theorem havoc_tx (σ : State C Γ) (st : Storage C) (nt : Ledger) (sb : PrimTy.uint.Denote) :
+    (σ.havoc st nt sb).tx = σ.tx := rfl
 theorem push_storage {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).storage = σ.storage := rfl
 /-- A memory array's length read through a pushed local is the state's: the
@@ -363,13 +363,8 @@ theorem glob_netE (r : Tm C Γ (.val .uint)) (op : IntOp) (a : Tm C Γ (.val .ui
   | some _ => show Option.bind _ _ = _; cases a.eval σ₀ <;> rfl
 theorem glob_payE (r a : Tm C Γ (.val .uint)) (g : GlobT C σ₀.H) :
     (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g =
-      (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt =>
-        g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-          else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net) := by
-  show (r.eval σ₀).bind _ = _
-  cases r.eval σ₀ with
-  | none => rfl
-  | some _ => show Option.bind _ _ = _; cases a.eval σ₀ <;> rfl
+      (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
+        some (g.paid σ₀ addr amt) := rfl
 theorem glob_netMtE (r a : Tm C Γ (.val .uint)) (g : GlobT C σ₀.H) :
     (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g =
       (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt => g.withNet [(addr, amt.1)] := by
@@ -722,7 +717,7 @@ section Leaf
 variable {Γ : Ctx}
 
 /-- A scoped leaf is valid where it holds in every typed state. -/
-theorem valid_of_holds {φ : Fml C []} (h : ∀ σ : State C [], holds σ φ) : Valid φ := h
+theorem valid_of_holds {φ : Fml C []} (h : ∀ σ : State C [], holds σ φ) : Fml.Valid φ := h
 
 theorem holds_tt (σ : State C Γ) : holds σ (.tt : Fml C Γ) ↔ True := Iff.rfl
 theorem holds_not (σ : State C Γ) (φ : Fml C Γ) : holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
@@ -864,7 +859,7 @@ theorem exh_pushFree {Δ : Ctx} {σ : State C Γ} {U : Upd C Γ Δ} (h : U.pushF
   Upd.exh_of_pushFree h
 
 theorem holds_havoc (σ : State C Γ) (φ : Fml C Γ) :
-    holds σ (.havoc φ) ↔ ∀ (st : Storage C) nt, holds (σ.havoc st nt) φ := Iff.rfl
+    holds σ (.havoc φ) ↔ ∀ (st : Storage C) nt sb, holds (σ.havoc st nt sb) φ := Iff.rfl
 theorem holds_all (σ : State C Γ) (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
     holds σ (.all x p φ) ↔ ∀ v : p.Denote, holds (σ.push (t := .val p) v) φ := Iff.rfl
 /-! A hidden binder at each type, its domain written out (no `LTy.TDenote`
@@ -1050,6 +1045,7 @@ attribute [close_rw_s]
   CloseS.elem_net CloseS.elem_pay CloseS.elem_netMt CloseS.elem_setBalance
   CloseS.glob_storageE CloseS.glob_memoryE CloseS.glob_selfBalanceE
   CloseS.glob_netE CloseS.glob_payE CloseS.glob_netMtE CloseS.glob_setBalanceE
+  GlobT.paid
   CloseS.withStorage_storage CloseS.withStorage_net CloseS.withStorage_selfBalance
   CloseS.withStorage_tx CloseS.withMem_storage CloseS.withMem_net CloseS.withMem_selfBalance
   CloseS.withMem_tx CloseS.withNet_storage CloseS.withNet_net CloseS.withNet_selfBalance
@@ -1180,19 +1176,19 @@ private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
   | some ``Fml.tt, _ | some ``Fml.wellFormed, _ | some ``Fml.modal, _ => return φ
   | _, _ => mkAppM ``Fml.evalEqs #[toExpr goal, φ]
 
-/-- `sol_close_unwrap` on a scoped leaf `Valid ψ`: its equations read by the
-interpreter (`Valid.of_evalEqs`, `Calculus/EvalEqs.lean`, computed by
+/-- `sol_close_unwrap` on a scoped leaf `Fml.Valid ψ`: its equations read by the
+interpreter (`Fml.Valid.of_evalEqs`, `Calculus/EvalEqs.lean`, computed by
 `evalEqsE`), then `holds` in every typed state (`CloseS.valid_of_holds`). -/
 @[tactic Solidity.tacticSol_close_unwrap]
 def evalSolCloseUnwrapS : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
-  unless ty.isAppOf ``Solidity.Valid do throwUnsupportedSyntax
+  unless ty.isAppOf ``Solidity.Fml.Valid do throwUnsupportedSyntax
   let tag ← g.getTag
   -- the pass where every equation's Booleans reduce, else the leaf as it is
   let g₂ ← try
       let φ' ← evalEqsE true ty.appArg!
-      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Valid.of_evalEqs) | failure
+      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Fml.Valid.of_evalEqs) | failure
       let ty₁ ← instantiateMVars (← g₁.getType)
       g₁.replaceTargetDefEq (mkApp ty₁.appFn! φ')
     catch _ => pure g
@@ -1201,17 +1197,17 @@ def evalSolCloseUnwrapS : Tactic := fun _ => withMainContext do
   replaceMainGoal gs
 
 /-- `sol_close_unwrap_th`: `sol_close_unwrap` with no equation strengthened
-(`Valid.of_evalEqsTh`): one that reads a storage alias stays a Theory
+(`Fml.Valid.of_evalEqsTh`): one that reads a storage alias stays a Theory
 equation, for `sol_close_denote`. -/
 @[tactic Solidity.tacticSol_close_unwrap_th]
 def evalSolCloseUnwrapThS : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
-  unless ty.isAppOf ``Solidity.Valid do throwUnsupportedSyntax
+  unless ty.isAppOf ``Solidity.Fml.Valid do throwUnsupportedSyntax
   let tag ← g.getTag
   let g₂ ← try
       let φ' ← evalEqsE false ty.appArg!
-      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Valid.of_evalEqsTh) | failure
+      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Fml.Valid.of_evalEqsTh) | failure
       let ty₁ ← instantiateMVars (← g₁.getType)
       g₁.replaceTargetDefEq (mkApp ty₁.appFn! φ')
     catch _ => pure g
@@ -1289,7 +1285,7 @@ def aliasDenoteLeft : TacticM Bool := withMainContext do
 @[tactic Solidity.tacticSol_close_alias_guard]
 def evalSolCloseAliasGuard : Tactic := fun _ => withMainContext do
   let ty ← instantiateMVars (← getMainTarget)
-  unless ty.isAppOf ``Solidity.Valid do throwError "sol_close_alias_guard: not a scoped leaf"
+  unless ty.isAppOf ``Solidity.Fml.Valid do throwError "sol_close_alias_guard: not a scoped leaf"
   let hasPvP (e : Expr) : Bool := (e.find? (·.isConstOf ``Tm.pvP)).isSome
   let hit := ty.find? fun x => x.isAppOfArity ``Fml.eq 5 && hasPvP x
   unless hit.isSome do throwError "sol_close_alias_guard: no equation reads a storage alias"

@@ -371,68 +371,32 @@ the bind.
 
 ## `transfer`
 
-On the EVM a value transfer fails, and with `transfer` reverts, when the
-sending contract's balance does not cover the amount or the recipient
-refuses it (its code reverts, or runs out of the 2300 gas). `TRun.transfer`
-does neither check: a negative amount reverts (since 2026-10-07; it was
-`.stuck`): it is unrepresentable in the unsigned value field, so never
-negative on the EVM, and in the typed run it is unrepresentable too
-(`TRun.transfer` takes a `Val C Γ .uint`, `msg.value` is a `TTx` field of
-type `uint`); the revert survived only in the untyped `transferAt` (gone at
-W10.5.1); otherwise the payment is booked at the
-recipient's end of the ledger, `net(addr) := net(addr) - amt`, unless the
-recipient is the contract itself (`State.pay`; `this` is `address(this)`,
-`TTx.selfAddress`), which books nothing, as solkey's
-`\if(sadr = self) \then(net)` does; and nothing else. `State.selfBalance`
-(`address(this).balance`) is the funds the transaction found, which a
-`transfer` leaves; solkey's box rule books the debit unconditionally too
-(`333cc7b353`), and the diamond has no rule here. The interpreter thus
-assumes the world pays, and the compiler theorem says what that costs: in
-code that pays, the machine may revert where the interpreter succeeds
-(`Evm.compile_correct`'s third outcome), so what the interpreter proves
-under the box holds of every run the machine completes (`Evm.compile_box`),
-and there `net(a)` is what `a`'s account lost (`Evm.compile_net`), at every
-address but the contract's own, whose entry stays `0`: without the `if` in
-`State.pay`, a payment to itself would move that entry and the simulation
-(`Evm.Sim.netSelf`) would fail.
+`TRun.transfer` evaluates its captured operands, checks `State.canPay`
+(available balance and the `sendKey` response in `TTx.ext`), and reverts on
+refusal. A successful payment to another address debits `selfBalance` and
+`net(addr)` by the amount; a self-payment moves neither and still requires
+sufficient funds. No table entry or an `ok` response accepts the payment;
+other responses refuse it.
 
-The callback semantics (`Semantics/Callback.lean`) is a relation over this
-one: after the debit `State.havoc` replaces storage, ledger and balance, so
-the callee may move funds into or out of the contract.
+`Evm.Sim` relates the spendable balance and the payment response to the
+machine, so typed and compiled transfers agree on both success and refusal.
+`Sim.init` requires the supplied typed balance to equal `bal self`.
+The symbolic box update records a hypothetical successful payment; a
+refused runtime transfer satisfies the box by reverting.
+
+The callback reading may then replace storage, ledger and balance, subject
+to the stated invariant. These semantics do not model the stipend's gas.
 
 ## `send`
 
-On the EVM `a.send(v)` is a value call with the 2300-gas stipend that returns
-`false` instead of reverting when it fails (funds that do not cover `v`, a
-recipient whose code reverts or runs out of gas). Treating it as a transfer
-that always succeeds would prove `ok == true` after it, which is false on the
-EVM. So the outcome is the transaction's, as a `try`'s is: `TRun.send` looks the
-call up in `TTx.ext` at `sendKey a v` (the address, empty calldata, the
-amount as the one word). No entry, or `ok`, is a recipient that takes the
-payment (an address with no code does): the payment is booked as `transfer`
-books it (`State.pay`) and `ok` is `true`. Any other entry is a refusal: nothing
-is booked and `ok` is `false`. A negative amount reverts, as for `transfer`.
+`TRun.send` uses the same funds and oracle checks. Success debits the balance
+and ledger and returns true; refusal returns false with both unchanged.
+A send is outside the compiled fragment. The calculus proves a branch for
+each outcome, independently of the oracle.
 
-The calculus reads none of the oracle: `sendNoCallbackBox` and
-`sendNoCallbackDiamond` have a goal for each outcome, so a proof holds
-whatever the table says, and the diamond's rule is sound (unlike a diamond
-over `transfer`, a refusal is an outcome of the run, not a revert of the
-machine). Two consequences of the table being fixed per transaction:
-
-- two sends of one amount to one address read one entry, so a run where the
-  first is taken and the second refused is not one `Stmt.run` makes. That
-  costs completeness only: each send's rule still has both goals;
-- the funds are not checked, as for `transfer`: a send refused for want of
-  funds is one of the oracle's refusals, and a taken one is booked whatever
-  `State.selfBalance` holds (which it does not debit).
-
-A send is outside the compiled fragment (`Evm.inFrag` refuses it).
-`(bool ok, ) = a.call{value: v}("")`, which solkey lowers to
-`bool ok = a.send(v);` (its `SolJSONParser.isValueCall`), is a send with all
-the gas here (`Stmt.send`'s `full`), written so in `sol{}`. Under solc that
-call forwards all the gas, so the callee may re-enter: `ValidT .noCallback`
-lets it (`docs/options.md`), `holds` ignores it, as solkey's `noCallback`
-does.
+`(bool ok, ) = a.call{value: v}("")` carries all the gas (`Stmt.send`'s
+`full` flag), so its callee may re-enter even under `ValidT .noCallback`.
+The plain `holds` reading ignores callbacks, as solkey's `noCallback` does.
 
 ## Calls
 
@@ -586,9 +550,6 @@ stronger obligation, not an additional assumption available to its proofs.
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer`, `send`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.
-- **`transfer` assumes the world pays.** It never reverts for funds or a
-  refusing recipient; the EVM may, which `Evm.compile_correct` states as the
-  machine reverting alone (`docs/compiler-verification.md`).
 - **`push` over a recycled slot.** `arr.push(v)` of a struct or array value
   lays it on fresh slots (`SVal.strip`), not over the recycled slot it lands
   on, so what a reference wrote into that slot's own arrays past their ends is

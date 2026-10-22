@@ -98,7 +98,7 @@ theorem conditional (_h : 1 = 1) : 2 = 2 := by rfl
 #latex_expr (macros := true) dl!{ ∀ uint x; ⟨ x = 0; ⟩ x == 0 }
 /-- info: \models [\texttt{alice.age = 0;}]\mathit{true} -/
 #guard_msgs in
-#latex (Valid dl!{ [ alice.age = 0; ] true })
+#latex (Fml.Valid dl!{ [ alice.age = 0; ] true })
 /-- info: \Longrightarrow [\texttt{alice.age = 0;}]\mathit{true} -/
 #guard_msgs in
 #latex (⊢ dl!{ [ alice.age = 0; ] true })
@@ -318,14 +318,14 @@ run_elab do
 /-- info: \forall \_n : \mathbb{N},\ \models \hyperlink{def:find}{\mathit{find}_{\mathsf{int}}}(\mathit{storage}, \mathit{alice}.\mathit{age}) = 42 -/
 #guard_msgs in
 #latex_expr (width := 300) (definitions := [(find, "def:find")])
-  (∀ _n : Nat, Valid dl!{ find(storage, alice.age) = 42 })
+  (∀ _n : Nat, Fml.Valid dl!{ find(storage, alice.age) = 42 })
 
 section
 #latex_definition_targets [(find, "def:find")]
 /-- info: \forall \_n : \mathbb{N},\ \models \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{alice}.\mathit{age}) = 42 -/
 #guard_msgs in
 #latex_expr (width := 300) (definitions := [])
-  (∀ _n : Nat, Valid dl!{ find(storage, alice.age) = 42 })
+  (∀ _n : Nat, Fml.Valid dl!{ find(storage, alice.age) = 42 })
 end
 
 end Solidity.Examples.Tactics.Latex

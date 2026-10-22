@@ -57,36 +57,36 @@ local instance : InContract := ⟨Ops⟩
 /-! ## 1 · Function values -/
 
 /-- A function value in a local: `h(2)` dispatches to `triple`. -/
-theorem local_ : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = triple; uint y = h(2); ⟩
+theorem local_ : ⊨ᶠ dl!{ ⟨ function (uint) pure returns (uint) h = triple; uint y = h(2); ⟩
     y == 6 } := by
   sol_symex
   sol_close
 
 /-- A function value as an argument. -/
-theorem apply_ : ⊨ dl!{ ⟨ uint y = apply(double, 3); ⟩ y == 6 } := by
+theorem apply_ : ⊨ᶠ dl!{ ⟨ uint y = apply(double, 3); ⟩ y == 6 } := by
   sol_symex
   sol_close
 
 /-- Two, composed: `triple(double(1))`. -/
-theorem compose_ : ⊨ dl!{ ⟨ uint y = compose(double, triple, 1); ⟩ y == 6 } := by
+theorem compose_ : ⊨ᶠ dl!{ ⟨ uint y = compose(double, triple, 1); ⟩ y == 6 } := by
   sol_symex
   sol_close
 
 /-- A function value returned. -/
-theorem choose_ : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = choose(false); uint y = h(4); ⟩
+theorem choose_ : ⊨ᶠ dl!{ ⟨ function (uint) pure returns (uint) h = choose(false); uint y = h(4); ⟩
     y == 12 } := by
   sol_symex
   sol_close
 
 /-- A function value stored, chosen by a flag, then called from storage. -/
-theorem stored : ⊨ dl!{ ⟨ setOp(true); uint y = runOp(5); ⟩ y == 10 } := by
+theorem stored : ⊨ᶠ dl!{ ⟨ setOp(true); uint y = runOp(5); ⟩ y == 10 } := by
   sol_symex
   sol_close
 
 /-- A struct member of a function type is its tag, a `uint` with its
 marker (the struct spells its type, `Semantics.StructEnc`): called through
 a local of the type. -/
-theorem member : ⊨ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uint) g = hold.f;
+theorem member : ⊨ᶠ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uint) g = hold.f;
     uint y = g(3); ⟩ y == 9 } := by
   sol_symex
   sol_close
@@ -94,23 +94,23 @@ theorem member : ⊨ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uin
 /-- A call through a value that is not a name (`callValueName`): the
 callee is captured into a fresh local of its type first, then called as a
 name is.  A struct member, `hold.f(3)`: -/
-theorem memberCall : ⊨ dl!{ ⟨ hold.f = triple; uint y = hold.f(3); ⟩ y == 9 } := by
+theorem memberCall : ⊨ᶠ dl!{ ⟨ hold.f = triple; uint y = hold.f(3); ⟩ y == 9 } := by
   sol_symex
   sol_close
 
 /-- An array element, `fs[0](4)`. -/
-theorem elementCall : ⊨ dl!{ ⟨ fs.push(triple); fs[0] = double; uint y = fs[0](4); ⟩
+theorem elementCall : ⊨ᶠ dl!{ ⟨ fs.push(triple); fs[0] = double; uint y = fs[0](4); ⟩
     y == 8 } := by
   sol_symex
   sol_decide
 
 /-- A call's value, `choose(true)(4)`, and a call statement through a member. -/
-theorem callCall : ⊨ dl!{ ⟨ uint y = choose(true)(4); hold.f = double; hold.f(1); ⟩ y == 8 } := by
+theorem callCall : ⊨ᶠ dl!{ ⟨ uint y = choose(true)(4); hold.f = double; hold.f(1); ⟩ y == 8 } := by
   sol_symex
   sol_close
 
 /-- At a symbolic argument: only the branch of the value's tag is reached. -/
-theorem symbolic : ⊨ dl!{ x < 100 → ⟨ function (uint) pure returns (uint) h = triple;
+theorem symbolic : ⊨ᶠ dl!{ x < 100 → ⟨ function (uint) pure returns (uint) h = triple;
     assert(h(x) == 3 * x); ⟩ true } := by
   sol_symex
   sol_close
@@ -118,17 +118,17 @@ theorem symbolic : ⊨ dl!{ x < 100 → ⟨ function (uint) pure returns (uint) 
 /-! ## 2 · The default value, `delete`, `==` -/
 
 /-- An unassigned value panics when called: the run reverts. -/
-theorem unassigned : ⊨ dl!{ [ function (uint) pure returns (uint) h; uint y = h(1); ] false } := by
+theorem unassigned : ⊨ᶠ dl!{ [ function (uint) pure returns (uint) h; uint y = h(1); ] false } := by
   sol_symex
   sol_close
 
 /-- `delete` unassigns: the stored value is `0` again, and a call panics. -/
-theorem deleted : ⊨ dl!{ [ op = double; delete op; uint y = op(1); ] false } := by
+theorem deleted : ⊨ᶠ dl!{ [ op = double; delete op; uint y = op(1); ] false } := by
   sol_symex
   sol_close
 
 /-- `==` compares the functions: a function equals itself, not another. -/
-theorem equality : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = double; bool a = h == double;
+theorem equality : ⊨ᶠ dl!{ ⟨ function (uint) pure returns (uint) h = double; bool a = h == double;
     bool b = h == triple; ⟩ a == true && b == false } := by
   sol_symex
   sol_close
@@ -194,7 +194,7 @@ example : Prog.toStr [] (sol[Ext]{ function (uint) external returns (uint) h = t
 
 /-- `h.address` of `this.double` is the contract's address: the closer reads
 `(address(this) * 2^32 + s) / 2^32` back (`Facts.cancelDiv`, Lean only). -/
-theorem addressOfValue : ⊨ dl[Ext]{ [ function (uint) external returns (uint) h = this.double;
+theorem addressOfValue : ⊨ᶠ dl[Ext]{ [ function (uint) external returns (uint) h = this.double;
     uint a = h.address; uint t = address(this); ] a == t } := by
   sol_symex
   sol_decide

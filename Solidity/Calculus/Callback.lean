@@ -33,7 +33,7 @@ printed), so it needs no weakening.
 
 `ProvesC` is sound against `ValidC` (the callback reading over `State`,
 `Calculus/CallbackHolds.lean`) for a first-order invariant:
-`ProvesC.valid`, `Calculus/CallbackSound.lean`.
+`ProvesC.fmlValid`, `Calculus/CallbackSound.lean`.
 -/
 
 namespace Solidity
@@ -401,9 +401,9 @@ not. -/
       (self : ProvesC I pay Γ₀ H
         (b₀.bs.all (.modalK .box b₀.P
           (.pop .block ((Ext.append Γ b₀.ρ).trans b₀.P.ext) (.seq ω κ)) φ)))
-      (ok : ProvesC I pay Γ₀ (H.havoc.pre (Fml.closedAt I))
-        (b₁.bs.all (.modalK .box b₁.P
-          (.pop .block ((Ext.append Γ b₁.ρ).trans b₁.P.ext) (.seq ω κ)) φ)))
+      (ok : ProvesC I pay Γ₀ ((H.pre (Fml.isBool call.notSelf.lower true)).havoc.pre (Fml.closedAt I))
+        (rets.all (.modalK .box body
+          (.pop .block ((Ext.append Γ ρ).trans body.ext) (.seq ω κ)) φ)))
       (caught : ∀ b ∈ bs, ProvesC I pay Γ₀ H
         (Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
           (b.bs.all

@@ -57,7 +57,7 @@ assert(i == n); -/
 
 /-- solkey's `invariantCountsToBound`, its `box` obligation: the loop's
 invariant proves the `assert` after it. -/
-theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem := by
+theorem invariantCountsToBound : ⊨ᶠ Solc.Loops.invariantCountsToBound.problem := by
   sol_prove
   all_goals
     sol_leaf
@@ -65,7 +65,7 @@ theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem :
 
 /-- `invariantBreak`: the invariant holds at the head the `break` leaves
 from too. -/
-theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
+theorem invariantBreak : ⊨ᶠ Solc.Loops.invariantBreak.problem := by
   sol_prove
   all_goals
     sol_leaf
@@ -73,17 +73,17 @@ theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
 
 /-- `whileCountsUp`, under the diamond, unwound three times (`unwind 3`, a
 clause only Lean reads). -/
-theorem whileCountsUp : ⊨ Solc.Loops.whileCountsUp.problem := by
+theorem whileCountsUp : ⊨ᶠ Solc.Loops.whileCountsUp.problem := by
   sol_prove
 
 /-- `doWhileRunsBodyFirst`, under the diamond: the body runs once, though the
 condition is false from the start (`unwind 1`, the one iteration). -/
-theorem doWhileRunsBodyFirst : ⊨ Solc.Loops.doWhileRunsBodyFirst.problem := by
+theorem doWhileRunsBodyFirst : ⊨ᶠ Solc.Loops.doWhileRunsBodyFirst.problem := by
   sol_prove
 
 /-- `invariantTwoLines`: the invariant read over its two `///` lines, as
 solkey's `KeyNatspec` joins them. -/
-theorem invariantTwoLines : ⊨ Solc.Loops.invariantTwoLines.problem := by
+theorem invariantTwoLines : ⊨ᶠ Solc.Loops.invariantTwoLines.problem := by
   sol_prove
   all_goals
     sol_leaf

@@ -15,9 +15,9 @@ paths:
 (`Stmt.run`, `Semantics/Run.lean`), in every typed state, at any fresh index,
 with no hypothesis. A taclet is sound because its premise is the one
 `Stmt.step` builds (`Taclet.toStep`, `Calculus/Taclet.lean`): there is no
-proof per taclet. `Proves.sound`/`Proves.valid` and `symex_sound` lift it to
+proof per taclet. `Proves.sound`/`Proves.fmlValid` and `symex_sound` lift it to
 derivations; a leaf the closer proves is sound on its scoped form
-(`Valid.of_reduceS`, `Calculus/DecideTyped.lean`). `#print axioms` on
+(`Fml.Valid.of_reduceS`, `Calculus/DecideTyped.lean`). `#print axioms` on
 them shows only `propext`, `Classical.choice`, `Quot.sound`. Keep it that
 way: no `sorry`, no new hypothesis.
 

@@ -159,10 +159,21 @@ def envVal (σ : State C Γ) : EnvKey → PrimTy.uint.Denote
   | .selfBalance => σ.selfBalance
   | .selfAddress => σ.tx.selfAddress
 
-/-- `amt` paid to `addr` on the ledger (`State.pay`): nothing booked for the
-contract itself. -/
+/-- Whether an evaluated payment is funded and accepted by the callee.
+A self-payment still needs funding, but leaves the balance unchanged. -/
+def canPay (σ : State C Γ) (addr amt : PrimTy.uint.Denote) : Bool :=
+  decide (amt.1 ≤ σ.selfBalance.1) &&
+    match lookupBy (sendKey addr amt) σ.tx.ext with
+    | none | some (.ok _) => true
+    | some _ => false
+
+/-- A successful payment debits the balance and records the ledger change.
+Callers check `canPay` before applying it. -/
 def pay (σ : State C Γ) (addr : PrimTy.uint.Denote) (amt : Int) : State C Γ :=
-  { σ with net := if addr.1 = σ.tx.selfAddress.1 then σ.net
+  { σ with
+    selfBalance := if addr.1 = σ.tx.selfAddress.1 then σ.selfBalance
+      else uintOfNat (σ.selfBalance.1 - amt).toNat
+    net := if addr.1 = σ.tx.selfAddress.1 then σ.net
       else setBy addr ((lookupBy addr σ.net).getD 0 - amt) σ.net }
 
 /-- A state with no locals and no memory, over a storage. -/
@@ -429,9 +440,12 @@ def OpLoc.bumpT (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p 
 /-- `pv = a.send(v);` with both evaluated (`sendT`): a payment refused books
 nothing and sets `pv` to `false`. -/
 def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.Denote) : Out C σ.H Γ :=
-  match lookupBy (sendKey addr amt) σ.tx.ext with
-  | none | some (.ok _) => ⟨(σ.pay addr amt.1).setLocal pv (true : Bool), List.prefix_refl _⟩
-  | some _ => ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩
+  let accepted := σ.canPay addr amt
+  let paid := σ.pay addr amt.1
+  let τ : State C Γ := { σ with
+    net := if accepted then paid.net else σ.net
+    selfBalance := if accepted then paid.selfBalance else σ.selfBalance }
+  ⟨τ.setLocal pv accepted, List.prefix_refl _⟩
 
 /-- The call as it is made: its bounded receiver and arguments at their Solidity types. -/
 def ExtCall.keyT (σ : State C Γ) (c : ExtCall C Γ) : ExtKey :=
@@ -701,7 +715,8 @@ def pop {E : Ty} (b : SPath C Γ (.array E)) : TStep C Γ Γ := fun σ => do
 def transfer (r a : Val C Γ .uint) : TStep C Γ Γ := fun σ => do
   let addr ← r.evalT σ
   let amt ← a.evalT σ
-  pure ⟨σ.pay addr amt.1, List.prefix_refl _⟩
+  if σ.canPay addr amt then pure ⟨σ.pay addr amt.1, List.prefix_refl _⟩
+  else throw .revert
 
 def send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) : TStep C Γ Γ := fun σ => do
   let addr ← r.evalT σ

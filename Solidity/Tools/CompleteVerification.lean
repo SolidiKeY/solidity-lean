@@ -119,13 +119,13 @@ private def verifyReduction (φ r : Expr) (arithmeticName validName checkName re
     let hDecision := mkExpectedPropHint (← mkEqRefl (mkConst ``Bool.true))
       (← mkEq decision (mkConst ``Bool.true))
     let proof ← mkAppM validName #[r, hDecision]
-    return .proved (← checkCertificate (← mkAppM ``Solidity.Valid #[φ]) proof)
+    return .proved (← checkCertificate (← mkAppM ``Solidity.Fml.Valid #[φ]) proof)
   | some xs =>
     let check ← mkAppM checkName #[r, toExpr xs]
     let h := mkExpectedPropHint (← mkEqRefl (mkConst ``Bool.false))
       (← mkEq check (mkConst ``Bool.false))
     let proof ← mkAppM refuteName #[r, toExpr xs, h]
-    let checked ← checkCertificate (mkNot (← mkAppM ``Solidity.Valid #[φ])) proof
+    let checked ← checkCertificate (mkNot (← mkAppM ``Solidity.Fml.Valid #[φ])) proof
     return if dependent then .refutedDependent checked r xs else .refuted checked r xs
 
 /-- Keep the existing static-input route first; dependent reads use the
@@ -173,7 +173,7 @@ private def renderRefutation (n : Lean.Name) (C : Contract) (f : String)
   let h := mkExpectedPropHint (← mkEqRefl (mkConst ``Bool.false))
     (← mkEq check (mkConst ``Bool.false))
   let proof ← mkAppM refuteName #[r, toExpr xs, h]
-  let _ ← checkCertificate (mkNot (← mkAppM ``Solidity.Valid #[φ])) proof
+  let _ ← checkCertificate (mkNot (← mkAppM ``Solidity.Fml.Valid #[φ])) proof
   let report ← mkAppM reportName #[r, toExpr xs, h]
   let candidate ← mkAppM candidateName #[r, toExpr xs, h]
   let minimal ← unsafe evalExpr (List String) (← inferType report) report
@@ -197,7 +197,7 @@ private def exactTactic (ref : Syntax) (suggest : Bool) : Tactic.TacticM Unit :=
   Tactic.withMainContext do
     let goal ← Tactic.getMainGoal
     let ty ← goal.getType
-    unless ty.isAppOfArity ``Solidity.Valid 2 do
+    unless ty.isAppOfArity ``Solidity.Fml.Valid 2 do
       throwError "sol_exact: expected validity of a closed scoped formula"
     match ← exactVerify ty.appArg! with
     | .proved proof =>

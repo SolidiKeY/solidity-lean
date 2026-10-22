@@ -1,6 +1,6 @@
 # Repairing a broken rule
 
-Use this workflow for a failing Solidity example or a new rule. `|=` (`⊨`)
+Use this workflow for a failing Solidity example or a new rule. `|=` (`⊨ᶠ`)
 is semantic validity over the typed run; `|-` (`⊢`) is derivability in the
 calculus. Establish the execution meaning first, prototype a lazy rule,
 reject bad candidates cheaply, then finish the proof that `|-` implies `|=`.
@@ -53,7 +53,7 @@ candidate rule sound.
    through `Stmt.stepSound_arms` (or the blocks' soundness) to `Stmt.sound`.
    For a read/update law, prove its semantic equation in `Theory/` and use
    that theorem in the rewrite/closer. Reuse the global lifting to
-   `Proves.sound`/`Proves.valid`; do not re-prove it for each rule. Follow
+   `Proves.sound`/`Proves.fmlValid`; do not re-prove it for each rule. Follow
    `.claude/rules/rule-table.md` for registration and correspondence checks.
    No `sorry`, new axiom or weakened theorem to accept a prototype. Preserve
    the regression examples and measured costs, then run the review pass.

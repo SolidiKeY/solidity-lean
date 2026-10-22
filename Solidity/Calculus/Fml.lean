@@ -102,7 +102,7 @@ inductive UpdElem (C : Contract) (Γ Δ : Ctx) where
   | selfBalance (op : IntOp) (a : Tm C Γ (.val .uint))
   /-- `net := store(net, at(r), net(r) ± a)` -/
   | net (r : Tm C Γ (.val .uint)) (op : IntOp) (a : Tm C Γ (.val .uint))
-  /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)` -/
+  /-- `pay(r, a)` -/
   | pay (r a : Tm C Γ (.val .uint))
   /-- `net := store(mtSt, at(r), a)` -/
   | netMt (r a : Tm C Γ (.val .uint))

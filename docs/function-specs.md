@@ -101,7 +101,7 @@ R ∧ L ∧ M ∧ I ∧ requires →
   value, where solkey's `int` parameters need no such fact.
 - `L`: the layout premises of the state the clauses read (`layoutFmls`):
   each word has its declared type, at every key of a mapping (not inside an
-  array). `⊨` ranges over storages the contract never has, where `balances`
+  array). `⊨ᶠ` ranges over storages the contract never has, where `balances`
   may be no mapping or hold a `bool`; solkey's reads are total and typed and
   need none (`docs/solkey-feedback.md`). What only the body reads needs no
   premise, since the program reverts where a read is undefined.
@@ -136,7 +136,7 @@ declaration/input compilation and complete arithmetic decision, then falls
 back to `sol_spec_try` and on leftover goals searches for a counterexample
 (`refuteSpec`, `Tools/Counterexample.lean`). Verdicts: proved (offered as a
 `Try this:` theorem), refuted (certified when the kernel checked
-`¬ ⊨ spec[C]{f}`, else tested by the interpreter), or given up on. `#verify C`
+`¬ ⊨ᶠ spec[C]{f}`, else tested by the interpreter), or given up on. `#verify C`
 runs every function with an obligation. Pinned in `Examples/Verify.lean`.
 
 Generated scalar/struct/mapping bounds can now be certified directly
@@ -217,7 +217,7 @@ obligations, not `spec!`.
 - **The corpus's 23 `concretized` rows** (TestSuite 14, SolcExpressions 4,
   SolcControlFlow 5) fix parameters to constants, since solkey proves them
   for all. 17 fit `sol_decide`'s fragment as symbolic diamond goals
-  `⊨ D ∧ R ∧ pre → ⟨ body ⟩ true`, with `pre` the dropped bounds, `R` the
+  `⊨ᶠ D ∧ R ∧ pre → ⟨ body ⟩ true`, with `pre` the dropped bounds, `R` the
   ranges, and `D` the definedness of each storage word the body reads or
   writes (a write succeeds exactly where a read of the path does,
   `save_ok_iff_find_ok`), proved by `sol_symex; sol_decide`. The other 6

@@ -125,7 +125,7 @@ the program reverts. -/
 
 /-- Without the precondition the diamond is not valid: where `a` is `0` and
 `b` is `1` the `require` reverts. -/
-example : ¬ (⊨ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
+example : ¬ (⊨ᶠ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
   fun h => Modality.afterRunTR_diamond_fail
     (h (State.init _) ⟨0, by decide⟩ ⟨1, by decide⟩
       ⟨0, by decide⟩) (by decide +kernel)
@@ -181,7 +181,7 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
 
 /-- Without the precondition the box is not valid: where `a != b` the
 assertion fails, and a panic satisfies no box formula. -/
-example : ¬ (⊨ dl!{ [ assert(a == b); x = a; ] x == b }) :=
+example : ¬ (⊨ᶠ dl!{ [ assert(a == b); x = a; ] x == b }) :=
   fun h => Modality.afterRunTR_not_panic
     (h (State.init _) ⟨0, by decide⟩ ⟨1, by decide⟩ ⟨0, by decide⟩)
     (by decide +kernel)
@@ -190,13 +190,13 @@ example : ¬ (⊨ dl!{ [ assert(a == b); x = a; ] x == b }) :=
 is neither valid nor derivable, `[ require(false); ] true` is both. -/
 
 /-- A failed `assert` is no box formula's: `[ assert(false); ] true` is not valid. -/
-theorem assertFalse_box_not_valid : ¬ (⊨ dl!{ [ assert(false); ] true }) :=
+theorem assertFalse_box_not_valid : ¬ (⊨ᶠ dl!{ [ assert(false); ] true }) :=
   fun h => Modality.afterRunTR_not_panic (h (State.init _))
     (by decide +kernel)
 
-/-- ... and so not derivable (`Proves.valid`). -/
+/-- ... and so not derivable (`Proves.fmlValid`). -/
 theorem assertFalse_box_not_derivable : ¬ (⊢ dl!{ [ assert(false); ] true }) :=
-  fun h => assertFalse_box_not_valid h.valid
+  fun h => assertFalse_box_not_valid h.fmlValid
 
 /-- A failed `require` is: `[ require(false); ] true` is derived. -/
 theorem requireFalse_box : ⊢ dl!{ [ require(false); ] true } := by
@@ -211,7 +211,7 @@ theorem requireFalse_box : ⊢ dl!{ [ require(false); ] true } := by
     sol_close
 
 /-- `a == b → ⟨ assert(a == b); x = a; ⟩ x == b`. -/
-theorem assertDiamond : ⊨ dl!{ a == b → ⟨ assert(a == b); x = a; ⟩ x == b } := by
+theorem assertDiamond : ⊨ᶠ dl!{ a == b → ⟨ assert(a == b); x = a; ⟩ x == b } := by
   sol_symex
   sol_close
 
@@ -232,7 +232,7 @@ theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
   sol_close
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
-example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+example : ¬ (⊨ᶠ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
   (h (State.init _)) (by decide +kernel)
 
 /-- Only the rule for the goal's modality fires. -/

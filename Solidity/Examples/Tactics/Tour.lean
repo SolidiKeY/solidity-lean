@@ -18,7 +18,7 @@ compiler).
    mapping of structs reads back.
 4. What elaboration rejects.
 
-A proof by hand starts with `apply Proves.valid`, which turns `⊨ φ` into the
+A proof by hand starts with `apply Proves.fmlValid`, which turns `⊨ᶠ φ` into the
 judgement `⊢ φ` (`Calculus/Proves.lean`); each `apply` then checks that its rule
 matches the first statement and replaces the goal by the rule's premise.  A
 read whose receiver is not simple is unfolded by `storageFieldRead_unfold_rightFst`,
@@ -39,8 +39,8 @@ open scoped Scoped
 /-- `alice.account.balance = 10; uint x = alice.account.balance;`, one taclet at
 a time. -/
 theorem runningExample_byHand :
-    ⊨ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x == 10 } := by
-  apply Proves.valid
+    ⊨ᶠ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x == 10 } := by
+  apply Proves.fmlValid
   -- Step 2: the receiver `alice.account` is not simple; capture source, then receiver
   apply unfold .storageFieldWrite_unfold_leftFst
   apply unfold .localValueDeclInitDrop
@@ -63,7 +63,7 @@ theorem runningExample_byHand :
 
 /-- The same, with the strategy choosing the rules. -/
 theorem runningExample :
-    ⊨ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x == 10 } := by
+    ⊨ᶠ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x == 10 } := by
   sol_symex
   sol_close
 
@@ -72,9 +72,9 @@ theorem runningExample :
 /-- `Account storage p = alice.account; p.balance = 7; uint x = alice.account.balance;`
 — the alias is a path, so the write through it is a write to `alice`. -/
 theorem aliasing :
-    ⊨ dl!{ [ Account storage p = alice.account; p.balance = 7;
+    ⊨ᶠ dl!{ [ Account storage p = alice.account; p.balance = 7;
              uint x = alice.account.balance; ] x == 7 } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot  -- { p := alice.account }
   apply update .storageFieldWriteSave
@@ -94,9 +94,9 @@ set_option maxHeartbeats 1000000 in
 /-- `uint z = balances[b]; balances[a] += 5; uint y = balances[b];` — another
 mapping key is untouched, given that the keys differ. -/
 theorem mappingFrame :
-    ⊨ dl!{ a != b → [ uint z = balances[b]; balances[a] += 5; uint y = balances[b]; ]
+    ⊨ᶠ dl!{ a != b → [ uint z = balances[b]; balances[a] += 5; uint y = balances[b]; ]
              y == z } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply intro
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadMappingFind
@@ -111,9 +111,9 @@ theorem mappingFrame :
 mapping of structs, written through a receiver two selectors deep, from a
 root read; the source is read first. -/
 theorem nested :
-    ⊨ dl!{ [ folks[k].account.balance = total; uint y = folks[k].account.balance; ]
+    ⊨ᶠ dl!{ [ folks[k].account.balance = total; uint y = folks[k].account.balance; ]
            y == total } := by
-  apply Proves.valid
+  apply Proves.fmlValid
   apply unfold .storageFieldWrite_unfold_leftFst
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect

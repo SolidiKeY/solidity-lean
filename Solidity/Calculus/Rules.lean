@@ -660,7 +660,7 @@ inductive Taclet (C : Contract) (k : Nat) :
   else changes.  The box only: the diamond has no rule (`LeanTaclet.transferDiamond`). -/
   | transferNoCallbackBox :
       dl{ [ sadr.transfer(se); ] ⇝
-          { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
+          { pay(sadr, se) } ⟨[ ]⟩ }
   -- Send -----------------------------------------------------------------
   | send_unfold_leftFstReceiver :
       dl{ ⟨[ pv = nadr.send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se.send(e); ]⟩ }
@@ -672,7 +672,7 @@ inductive Taclet (C : Contract) (k : Nat) :
   | sendNoCallbackBox :
       dl{ [ pv = sadr.send(se); ] ⇝
           "send succeeded":
-            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            { pay(sadr, se) ‖ pv := true }
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
   /-- The same under the diamond, and the amount owed non-negative: a send
@@ -681,7 +681,7 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨ pv = sadr.send(se); ⟩ ⇝
           "non-negative amount": 0 <= se
         ; "send succeeded":
-            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            { pay(sadr, se) ‖ pv := true }
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
   -- Memory ---------------------------------------------------------------

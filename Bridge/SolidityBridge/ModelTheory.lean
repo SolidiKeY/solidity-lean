@@ -358,7 +358,7 @@ theorem glob_eq (σ : State C []) : σ.glob = σ := rfl
 /-- **A first-order formula is valid exactly when its sentence is in the
 Theory.** -/
 theorem valid_iff_mem {φ : Fml C []} {ψ : (lang C).Sentence} (h : φ.toBF = some ψ) :
-    Valid φ ↔ ψ ∈ SolTheory C :=
+    Fml.Valid φ ↔ ψ ∈ SolTheory C :=
   ⟨fun hv g => (holds_iff_realize g h).1 (hv g), fun hm σ => (holds_iff_realize σ h).2 (hm σ)⟩
 
 /-- **What the calculus proves is in the Theory**: soundness, read in
@@ -366,7 +366,7 @@ Mathlib's model theory. -/
 theorem _root_.Solidity.Proves.mem_solTheory {R : RuleSet} {φ : Fml C []}
     {ψ : (lang C).Sentence} (d : Proves C R [] .nil φ) (h : φ.toBF = some ψ) :
     ψ ∈ SolTheory C :=
-  (valid_iff_mem h).1 d.valid
+  (valid_iff_mem h).1 d.fmlValid
 
 /-- A first-order formula the calculus proves is a semantic consequence of
 any theory the states model. -/

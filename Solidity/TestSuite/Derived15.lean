@@ -106,7 +106,18 @@ theorem Solkey.TestSuite.invariantOverStorageWrites.proved : ⊢ Solkey.TestSuit
     sol_close
   case leaf2 =>
     sol_leaf
-    sol_close
+    -- The exit leaf needs only the invariant and the negated loop guard.
+    -- Skip storage-frame saturation over the dependent states of the prefix.
+    sol_close_unwrap
+    intro σ
+    sol_close_eval
+    simp only [CloseS.landedAll_def]
+    intros
+    sol_close_reads_all
+    rename_i hinv heq hstop hlanded
+    replace heq := Classical.not_not.mp heq
+    specialize hinv heq
+    omega
 
 theorem Solkey.TestSuite.constantInlined.proved : ⊢ Solkey.TestSuite.constantInlined.problem := by
   sol_prove

@@ -5,7 +5,7 @@ import Solidity.Calculus.TacticSyntax
 /-!
 # Symbolic execution on scoped formulas
 
-`sol_step` and `sol_symex` (`Calculus/TacticSyntax.lean`) on a goal `Valid φ`: the
+`sol_step` and `sol_symex` (`Calculus/TacticSyntax.lean`) on a goal `Fml.Valid φ`: the
 strategy (`Fml.step`, `symex`, `Calculus/Step.lean`) fires
 the rule of the first statement until no modality is left.  Every step is
 sound (`Fml.stepR_sound`), from the soundness of each rule
@@ -71,7 +71,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
   | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound k m P κ φ h σ hχ
   | havoc φ ih =>
     step_under Fml.havoc
-    exact fun st nt => ih hφ _ (hχ st nt)
+    exact fun st nt sb => ih hφ _ (hχ st nt sb)
   | all x p φ ih =>
     step_under (Fml.all x p)
     exact fun v => ih hφ _ (hχ v)
@@ -99,11 +99,11 @@ theorem symex_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, holds
     · exact h
 
 /-- To prove `φ` valid, prove what `symex n` leaves of it valid. -/
-theorem symex_valid (n : Nat) {φ : Fml C []} (h : Valid (symex n φ)) : Valid φ :=
+theorem symex_valid (n : Nat) {φ : Fml C []} (h : Fml.Valid (symex n φ)) : Fml.Valid φ :=
   fun σ => symex_sound n φ σ (h σ)
 
 /-- To prove `φ` valid, prove what one step leaves of it valid. -/
-theorem Fml.step_valid {φ : Fml C []} (h : Valid (φ.step.getD φ)) : Valid φ := by
+theorem Fml.step_valid {φ : Fml C []} (h : Fml.Valid (φ.step.getD φ)) : Fml.Valid φ := by
   intro σ
   cases hs : φ.step with
   | none => simpa only [hs, Option.getD_none] using h σ
@@ -235,7 +235,7 @@ theorem Fml.stepRS_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
   | havoc φ ih =>
     intro χ h σ hχ
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map Fml.havoc = some χ from h)
-    exact fun st nt => ih hφ _ (hχ st nt)
+    exact fun st nt sb => ih hφ _ (hχ st nt sb)
   | all x p φ ih =>
     intro χ h σ hχ
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.all x p) = some χ from h)
@@ -270,12 +270,12 @@ theorem symexS_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, hold
     · exact h
 
 /-- To prove `φ` valid, prove what `symexS n` leaves of it valid. -/
-theorem symexS_valid (n : Nat) {φ : Fml C []} (h : Valid (symexS n φ)) : Valid φ :=
+theorem symexS_valid (n : Nat) {φ : Fml C []} (h : Fml.Valid (symexS n φ)) : Fml.Valid φ :=
   fun σ => symexS_sound n φ σ (h σ)
 
 /-- To prove `φ` valid, prove what one step of the stopping strategy leaves
 of it valid. -/
-theorem Fml.stepS_valid {φ : Fml C []} (h : Valid (φ.stepS.getD φ)) : Valid φ := by
+theorem Fml.stepS_valid {φ : Fml C []} (h : Fml.Valid (φ.stepS.getD φ)) : Fml.Valid φ := by
   intro σ
   cases hs : φ.stepS with
   | none => simpa only [hs, Option.getD_none] using h σ
@@ -290,10 +290,10 @@ namespace Symex
 
 open Lean Elab Tactic Meta
 
-/-- The goal `Valid φ`, its contract and formula; `none` on any other goal. -/
+/-- The goal `Fml.Valid φ`, its contract and formula; `none` on any other goal. -/
 def validGoal? (g : MVarId) : MetaM (Option (Expr × Expr)) := do
   let ty ← instantiateMVars (← g.getType)
-  let_expr Valid C φ := ty | return none
+  let_expr Fml.Valid C φ := ty | return none
   return some (C, ← instantiateMVars φ)
 
 /-- The element `i` of a list literal. -/
@@ -379,14 +379,14 @@ def placeholders (xs : Array Expr) : MetaM (Option (Array Expr × Array (Expr ×
   unless back.any (·.1.isConst) do return none
   return some (args, back)
 
-/-- Compute the formula of a goal `Valid φ` (`Solidity.normValid` for
+/-- Compute the formula of a goal `Fml.Valid φ` (`Solidity.normValid` for
 scoped formulas): the compiled strategy's result quoted back
 (`Fml.quote`); the kernel re-checks it.  A formula with a variable
 or of an anonymous contract falls back to `Meta.reduce`.  With `src`, the
 formula the step started from, its explicit `∀`s stay marked
 (`restoreMarks`). -/
 def normValid (g : MVarId) (src : Option Expr := none) : TacticM MVarId := do
-  let some (C, φ) ← validGoal? g | throwError "expected a goal `Valid φ`"
+  let some (C, φ) ← validGoal? g | throwError "expected a goal `Fml.Valid φ`"
   let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
     | some n, false =>
       unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
@@ -407,9 +407,9 @@ def normValid (g : MVarId) (src : Option Expr := none) : TacticM MVarId := do
   let φ' := match src with
     | some src => restoreMarks src φ'
     | none => φ'
-  g.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C φ')
+  g.replaceTargetDefEq (mkApp2 (mkConst ``Fml.Valid) C φ')
 
-/-- Apply `lem`, a lemma `Valid ψ → Valid φ`, to the goal `g`, and compute
+/-- Apply `lem`, a lemma `Fml.Valid ψ → Fml.Valid φ`, to the goal `g`, and compute
 `ψ`; with `unchanged`, a goal left as it was is an error. -/
 def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option MessageData := none) :
     TacticM MVarId := do
@@ -449,13 +449,13 @@ def reporting (g : MVarId) (k : TacticM Unit) : TacticM Unit := do
 end Symex
 
 open Lean Elab Tactic Meta in
-/-- `sol_step` on a scoped goal `Valid φ`: fire the rule of the first
+/-- `sol_step` on a scoped goal `Fml.Valid φ`: fire the rule of the first
 statement. -/
 @[tactic Solidity.tacticSol_step]
 def evalSolStepCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g
-    | throwError m!"sol_step: expected a goal `⊨ φ`{indentExpr (← g.getType)}"
+    | throwError m!"sol_step: expected a goal `⊨ᶠ φ`{indentExpr (← g.getType)}"
   let lem := mkApp (mkConst ``Fml.stepS_valid) C
   Symex.reporting g do
     let g' ← Symex.applyValid "sol_step" g lem (some m!"no modality left, or a recursive call \
@@ -463,7 +463,7 @@ def evalSolStepCore : Tactic := fun _ => withMainContext do
     replaceMainGoal [g']
 
 open Lean Elab Tactic Meta in
-/-- `sol_symex` on a scoped goal `Valid φ`: run the strategy until no
+/-- `sol_symex` on a scoped goal `Fml.Valid φ`: run the strategy until no
 modality is left. -/
 @[tactic Solidity.tacticSol_symex]
 def evalSolSymexCore : Tactic := fun _ => withMainContext do

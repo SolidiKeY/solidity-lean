@@ -36,21 +36,21 @@ example : (dl!{ cleanTail(storage) = true } : Fml Tokens []) = Fml.cleanTail Tok
 
 /-- **The recycled slot reads the default**, the starting tails clean. -/
 theorem pushRead_clean : ValidTail .clean pushRead := by
-  show ⊨ dl!{ cleanTail(storage) = true →
+  show ⊨ᶠ dl!{ cleanTail(storage) = true →
     [ tokens.push(); assert(tokens[tokens.length - 1].value == 0); ] true }
   sol_prove
 
 /-- The same as a postcondition: `sol_symex; sol_decide`. -/
 theorem pushRead_clean_box :
     ValidTail .clean dl!{ [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } := by
-  show ⊨ dl!{ cleanTail(storage) = true → [ tokens.push(); ] tokens[tokens.length - 1].value == 0 }
+  show ⊨ᶠ dl!{ cleanTail(storage) = true → [ tokens.push(); ] tokens[tokens.length - 1].value == 0 }
   sol_symex
   sol_decide
 
 /-- Through the alias `push()` returns, the slot at the old length. -/
 theorem pushAlias_clean :
     ValidTail .clean dl!{ [ Token storage r = tokens.push(); ] r.value == 0 } := by
-  show ⊨ dl!{ cleanTail(storage) = true → [ Token storage r = tokens.push(); ] r.value == 0 }
+  show ⊨ᶠ dl!{ cleanTail(storage) = true → [ Token storage r = tokens.push(); ] r.value == 0 }
   sol_symex
   sol_decide
 
@@ -62,7 +62,7 @@ theorem pushRead_init : holds (State.init Tokens) pushRead := pushRead_clean.hol
 /-- error: sol_decide: the closer does not close the leaf -/
 #guard_msgs in
 /-- Without the premise the closer reads the recycled slot as it is. -/
-example : ⊨ dl!{ [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } := by
+example : ⊨ᶠ dl!{ [ tokens.push(); ] tokens[tokens.length - 1].value == 0 } := by
   sol_symex
   sol_decide
 
@@ -83,7 +83,7 @@ written, under either option. -/
 recycles. -/
 theorem recycledWrite_solc : ValidTail .solc dl!{ [ Token storage r = tokens.push(); tokens.pop();
     r.value = 7; tokens.push(); assert(tokens[tokens.length - 1].value == 7); ] true } := by
-  show ⊨ dl!{ [ Token storage r = tokens.push(); tokens.pop();
+  show ⊨ᶠ dl!{ [ Token storage r = tokens.push(); tokens.pop();
     r.value = 7; tokens.push(); assert(tokens[tokens.length - 1].value == 7); ] true }
   sol_prove
 

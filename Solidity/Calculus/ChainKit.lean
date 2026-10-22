@@ -438,7 +438,7 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
     exact Upd.afterT_imp hψ fun σ' a => Fml.stepFocusR_sound φ h₁ σ' a
   | _, .havoc φ, f, ψ, h, σ, hψ => by
     obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some Fml.havoc h
-    exact fun st nt => Fml.stepFocusR_sound φ h₁ _ (hψ st nt)
+    exact fun st nt sb => Fml.stepFocusR_sound φ h₁ _ (hψ st nt sb)
   | _, .all x p φ, f, ψ, h, σ, hψ => by
     obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.all x p) h
     exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
@@ -496,17 +496,17 @@ theorem Fml.Via.leads : {φ : Fml C Γ} → {ws : List (Link C × Fml C Γ)} →
 
 /-- A chain whose last line is valid has a valid first line. -/
 theorem Fml.Via.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} (v : Fml.Via φ ws)
-    (h : Valid (Fml.Via.last φ ws)) : Valid φ :=
+    (h : Fml.Valid (Fml.Via.last φ ws)) : Fml.Valid φ :=
   fun σ => v.leads σ (h σ)
 
-theorem Fml.Steps.valid {φ ψ : Fml C []} (c : Fml.Steps φ ψ) (h : Valid ψ) : Valid φ :=
+theorem Fml.Steps.valid {φ ψ : Fml C []} (c : Fml.Steps φ ψ) (h : Fml.Valid ψ) : Fml.Valid φ :=
   fun σ => c.sound σ (h σ)
 
-theorem Fml.OneStep.valid {φ ψ : Fml C []} (s : Fml.OneStep φ ψ) (h : Valid ψ) : Valid φ :=
+theorem Fml.OneStep.valid {φ ψ : Fml C []} (s : Fml.OneStep φ ψ) (h : Fml.Valid ψ) : Fml.Valid φ :=
   fun σ => s.sound σ (h σ)
 
-theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r φ ψ) (h : Valid ψ) :
-    Valid φ :=
+theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r φ ψ) (h : Fml.Valid ψ) :
+    Fml.Valid φ :=
   fun σ => s.sound σ (h σ)
 
 /-! ## Composing: `~~>`, segments, `calc`
@@ -524,7 +524,7 @@ theorem Fml.Leads.via {ψ : Fml C Γ} {ws : List (Link C × Fml C Γ)} (h : Fml.
     (v : Fml.Via ψ ws) : Fml.Leads φ (Fml.Via.last ψ ws) :=
   h.comp v.leads
 
-theorem Fml.Leads.valid {φ ψ : Fml C []} (h : Fml.Leads φ ψ) (hψ : Valid ψ) : Valid φ :=
+theorem Fml.Leads.valid {φ ψ : Fml C []} (h : Fml.Leads φ ψ) (hψ : Fml.Valid ψ) : Fml.Valid φ :=
   fun σ => h σ (hψ σ)
 
 /-! ### Binder names
@@ -622,7 +622,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
     show U.eraseNames.afterT m σ (holds · φ.eraseNames) ↔ U.afterT m σ (holds · φ)
     unfold Upd.afterT Upd.Lands
     simp only [Upd.globT_eraseNames, Upd.held_eraseNames, holds_eraseNames, Upd.exh_eraseNames]
-  | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .anon _ φ | _, σ, .allocAll _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
@@ -648,7 +648,7 @@ theorem Fml.Via.leadsK {φ L : Fml C []} {ws : List (Link C × Fml C [])}
 
 /-- **`~~>` past the program is a proof**: `φ` is valid where the line
 written is. -/
-theorem Fml.LeadsK.valid {φ L : Fml C []} (h : Fml.LeadsK φ L) (hL : Valid L) : Valid φ := by
+theorem Fml.LeadsK.valid {φ L : Fml C []} (h : Fml.LeadsK φ L) (hL : Fml.Valid L) : Fml.Valid φ := by
   obtain ⟨B, hl, he⟩ := h
   refine hl.valid fun σ => (holds_eraseNames σ B).1 ?_
   rw [he]

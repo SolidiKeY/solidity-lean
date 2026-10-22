@@ -295,6 +295,7 @@ error: Solidity elaboration failed: constructor is marked `skip`: it has no obli
 theorem abort_spec :
     ⊢ dl!{ msgSender == seller ∧ state == State.Created → [ abort(); ] state == State.Inactive } := by
   sol_prove
+  all_goals (sol_leaf; sol_close)
 
 /-- `abort()` by anyone but the seller reverts (`revert OnlySeller();`): no
 run of it ends. -/
@@ -315,6 +316,7 @@ theorem confirmReceived_spec :
     ⊢ dl!{ msgSender == buyer ∧ state == State.Locked →
            [ confirmReceived(); ] state == State.Release } := by
   sol_prove
+  all_goals (sol_leaf; sol_close)
 
 /-- `refundSeller()`: `requires msg.sender == seller && state ==
 State.Release`, `ensures state == State.Inactive`. -/
@@ -322,5 +324,6 @@ theorem refundSeller_spec :
     ⊢ dl!{ msgSender == seller ∧ state == State.Release →
            [ refundSeller(); ] state == State.Inactive } := by
   sol_prove
+  all_goals (sol_leaf; sol_close)
 
 end Solidity.Examples.Benchmark.Purchase

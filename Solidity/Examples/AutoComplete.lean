@@ -56,15 +56,15 @@ def flagWriteReduction : DependentReduction flagWrite :=
     (dependentReduction?_isSome flagWrite flagWrite_inExact flagWrite_bounded)
 
 /-- `auto_complete`, applied: the verdict is exact. -/
-theorem flagWrite_iff : Valid flagWrite ↔ flagWriteReduction.arithmetic.guarded.decide = true := by
+theorem flagWrite_iff : Fml.Valid flagWrite ↔ flagWriteReduction.arithmetic.guarded.decide = true := by
   obtain ⟨r, hr, h⟩ := auto_complete flagWrite flagWrite_inExact flagWrite_bounded
   obtain rfl : r = flagWriteReduction := Option.some.inj (hr.symm.trans (Option.some_get _).symm)
   exact h
 
-theorem flagWrite_valid : Valid flagWrite := flagWrite_iff.mpr (by decide +kernel)
+theorem flagWrite_valid : Fml.Valid flagWrite := flagWrite_iff.mpr (by decide +kernel)
 
 /-- The public tactic, which runs the same decision, proves it too. -/
-example : Valid flagWrite := by sol_exact
+example : Fml.Valid flagWrite := by sol_exact
 
 theorem flagBad_inExact : flagBad.inExact = true := by decide +kernel
 theorem flagBad_bounded : flagBad.exactBounded = true := by decide +kernel
@@ -78,7 +78,7 @@ theorem flagBad_decide : flagBadReduction.arithmetic.guarded.decide = false := b
 def flagBadCountermodel : flagBadReduction.Countermodel :=
   flagBadReduction.countermodelOfDecide flagBad_decide
 
-theorem flagBad_invalid : ¬ Valid flagBad :=
+theorem flagBad_invalid : ¬ Fml.Valid flagBad :=
   fun h => flagBadCountermodel.refutes (h flagBadCountermodel.state)
 
 -- The countermodel's `k` and `j`: different keys.
@@ -124,7 +124,7 @@ def symBadReduction : DependentReduction symBad :=
 
 /-- The refutation, at finite codes in that order: `j = 1`, the starting
 value `0` read at `j`, `k = 0`. -/
-theorem symBad_invalid : ¬ Valid symBad :=
+theorem symBad_invalid : ¬ Fml.Valid symBad :=
   symBadReduction.not_valid_of_codes [1, 0, 0] (by decide +kernel)
 
 end Solidity.Examples.AutoComplete
