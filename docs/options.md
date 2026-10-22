@@ -421,7 +421,9 @@ a plain obligation as `ValidT .noCallback N.f.problem` where both hold:
 It is proved by `sol_prove` (O3), the goal read at the obligation's value
 and the declaration stated at `N.f.problem`; one with a recursive call by
 `rec_auto_c`, whether it calls back read off one frame of each unrolling
-(`sol_no_callback`). Elsewhere it stays
+(`sol_no_callback`), a recursive storage or memory return by its contract
+over the callback runs (`ProvesC.recContract`, `ProvesC.recContractM`,
+`docs/kernel-port.md` "Recursion"). Elsewhere it stays
 `⊢ N.f.problem`: with nothing calling back `Valid` is the reading
 (`validT_noCallback_iff`).
 
