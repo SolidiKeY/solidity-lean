@@ -13,7 +13,7 @@ import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
   /^Solidity\.(KeySort|Eqns|AST|Scope|SpecSyntax|Hashes|Keccak|RevertBytes|Syntax|Semantics|Signature|Update)$/,
-  /^Solidity\.Syntax\.(Scoped|Checked|Inlined|PushSource|Join)$/,
+  /^Solidity\.Syntax\.(Raw|Grammar|Contract|Scoped|Checked|Inlined|PushSource|Join)$/,
   /^Solidity\.(Semantics|Typing|Theory)\./,
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Hyp|Correct|FirstOrder)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
