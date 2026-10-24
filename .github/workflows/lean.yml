@@ -25,6 +25,10 @@ jobs:
         run: |
           node --test scripts/check-trust.test.mjs
           bash scripts/check-trust.sh
+      # The core (`docs/parallelism.md`) imports no module of the elaborator,
+      # the printers or the tactic front ends, even transitively.
+      - name: Check layering
+        run: node scripts/check-layers.mjs
 
       # Elaboration is the test suite: there is no separate test driver, and
       # the default library is the whole formalization.

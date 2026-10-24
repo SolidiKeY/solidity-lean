@@ -19,6 +19,8 @@ cd "$repo_root"
 # pick the wrong version, so they come after elan.
 export PATH="$HOME/.elan/bin:$repo_root/scripts/lean-vscode/bin:$PATH"
 
+# The core reaches no elaborator module (`docs/parallelism.md`): no Lean.
+node scripts/check-layers.mjs
 lake build
 # solkey's TestSuite through the solc import: not a default target, and the
 # import reports a function that stops elaborating as a row, so only its
