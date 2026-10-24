@@ -1297,33 +1297,157 @@ theorem Tm.extendsIn_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C �
     | _ => intro h; cases h
   exact key q h rfl
 
-/-- **Each scoped term taclet is sound**: its two terms have one Theory value
-in every state (`TermTaclet.sound`). -/
-theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t' → Tm.Theq t t'
-  | @findOnSave _ _ s _ p q v hp hq => fun σ => by
+/-- `findOnSave`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnSave_sound {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))}
+    {v : P.Denote} (_hp : p.hasSeg = true) (hq : p.sameSegs q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.val (Tms.Term.lit v))) q)
+      (Tms.Term.lit v) := fun σ => by
     show some (((s.denote σ).copyTo (p.denote σ) (TVal.ofWord v)).word (q.denote σ)) = some v
     rw [← Tm.sameSegs_denote σ hq, Obs.copyTo_word_same]
     rfl
-  | @findOnSaveFrame _ _ s _ _ p q v h => fun σ => by
+
+/-- `findOnSaveFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnSaveFrame_sound {s : Tm C Γ .st} {T : Ty} {P : PrimTy}
+    {p : Tm C Γ (.path T)} {q : Tm C Γ (.path (.prim P))} {v : Tm C Γ (.sv T)}
+    (h : p.diverges q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.save s p v) q) (Tms.Term.find s q) := fun σ => by
     show some (((s.denote σ).copyTo (p.denote σ) (v.denote σ)).word (q.denote σ)) =
       some ((s.denote σ).word (q.denote σ))
     rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
-  | @findMemberCons _ _ s _ p r sn hr p' h => fun σ => by
+
+/-- `findMemberCons`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findMemberCons_sound {s : Tm C Γ .st} {P : PrimTy} {p : Tm C Γ (.path (.prim P))}
+    {r sn : Name} {hr : C.rootType r = some (.ref (.struct sn))} {p' : Tm C Γ (.spath sn (.prim P))}
+    (h : p.shift? = some ⟨r, sn, hr, p'⟩) :
+    Tm.Theq (Tms.Term.find s p) (.app2 .findIn (Tms.STerm.select s r hr) p') := fun σ => by
     show some ((s.denote σ).word (p.denote σ)) = some (((s.denote σ).select hr).word (p'.denote σ))
     rw [Tm.shift?_denote σ p h]
     rfl
-  | @findMemberConsIn _ _ sn s _ p f sn' hf p' h => fun σ => by
+
+/-- `findMemberConsIn`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findMemberConsIn_sound {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
+    {p : Tm C Γ (.spath sn (.prim P))} {f sn' : Name}
+    {hf : C.fieldType sn f = some (.ref (.struct sn'))} {p' : Tm C Γ (.spath sn' (.prim P))}
+    (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩) :
+    Tm.Theq (.app2 .findIn s p) (.app2 .findIn (.app1 (.selectIn hf) s) p') := fun σ => by
     have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf (p'.denote σ) :=
       Tm.shiftIn?_ok σ p _ h
     show some ((s.denote σ).word (p.denote σ)) =
       some ((Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf).word (p'.denote σ))
     rw [hd]
     rfl
-  | @findOnSaveIn _ _ sn s _ p q v hq => fun σ => by
+
+/-- `findOnSaveIn`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnSaveIn_sound {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
+    {p q : Tm C Γ (.spath sn (.prim P))} {v : P.Denote} (hq : p.beqR q = true) :
+    Tm.Theq (.app2 .findIn (.app3 .saveIn s p (Tms.SValT.val (Tms.Term.lit v))) q)
+      (Tms.Term.lit v) := fun σ => by
     obtain rfl := Tm.eq_of_beqR hq
     show some (((s.denote σ).copyTo (p.denote σ) (TVal.ofWord v)).word (p.denote σ)) = some v
     rw [Obs.copyTo_word_same]
     rfl
+
+/-- `findOnDelAt`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnDelAt_sound {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))}
+    {w : P.Denote} (_hw : TermTaclet (Tms.Term.find s p) (Tms.Term.lit w)) (_hp : p.hasSeg = true)
+    (hq : p.sameSegs q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.dflt P) := fun σ => by
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [← Tm.sameSegs_denote σ hq, Obs.delAt_word_same]
+
+/-- `findOnDelAtValue`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnDelAtValue_sound {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
+    {P : PrimTy} {q : Tm C Γ (.path (.prim P))} (hp : p.hasSeg = true) (hq : p.sameSegs q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.delAt s p) q)
+      (Tms.Term.delValue (Tms.Term.find s q)) := fun σ => by
+    obtain ⟨rfl, hh⟩ := Tm.sameSegs_heq σ hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
+      (some ((s.denote σ).word (q.denote σ))).map fun _ => PrimTy.dflt _
+    rw [← eq_of_heq hh, Obs.delAt_word_same]
+    rfl
+
+/-- `findOnDelAtBelow`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnDelAtBelow_sound {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
+    {P : PrimTy} {q : Tm C Γ (.path (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
+    (_hw : s.findLit? q = some w) (_hp : p.hasSeg = true) (hq : q.extends p = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.dflt P) := fun σ => by
+    obtain ⟨r, -, hqr⟩ := Tm.extends_denote σ q hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [hqr, Obs.delAt_word_below]
+    exact congrArg some (hk σ r)
+
+/-- `findOnDelAtBelowIn`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnDelAtBelowIn_sound {sn : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+    {p : Tm C Γ (.spath sn T)} {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote}
+    (hk : s.KindFreeAt p) (_hw : s.findLitIn? q = some w) (hq : q.extendsIn p = true) :
+    Tm.Theq (.app2 .findIn (.app2 .delAtIn s p) q) (Tms.Term.dflt P) := fun σ => by
+    obtain ⟨r, -, hqr⟩ := Tm.extendsIn_denote σ q hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [hqr, Obs.delAt_word_below]
+    exact congrArg some (hk σ r)
+
+/-- `findOnDelAtFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnDelAtFrame_sound {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
+    {P : PrimTy} {q : Tm C Γ (.path (.prim P))} (h : p.diverges q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.find s q) := fun σ => by
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.delAt, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
+
+/-- `findOnPushFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnPushFrame_sound {s : Tm C Γ .st} {E : Ty}
+    {p : Tm C Γ (.path (.ref (.array E)))} {v : Tm C Γ (.sv E)} {P : PrimTy}
+    {q : Tm C Γ (.path (.prim P))} (h : p.diverges q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.push s p v) q) (Tms.Term.find s q) := fun σ => by
+    show some (((s.denote σ).push (p.denote σ) (TVal.strip (v.denote σ))).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.push, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
+
+/-- `findOnPopFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.findOnPopFrame_sound {s : Tm C Γ .st} {E : Ty}
+    {p : Tm C Γ (.path (.ref (.array E)))} {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
+    (h : p.diverges q = true) :
+    Tm.Theq (Tms.Term.find (Tms.STerm.pop s p) q) (Tms.Term.find s q) := fun σ => by
+    show some (((s.denote σ).pop false (p.denote σ)).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.pop, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
+
+/-- `lenOnSaveFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.lenOnSaveFrame_sound {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)}
+    {v : Tm C Γ (.sv T)} {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))}
+    (h : q.divergesLen p = true) :
+    Tm.Theq (Tms.Term.len (Tms.STerm.save s q v) p) (Tms.Term.len s p) := fun σ => by
+    show lenW (((s.denote σ).copyTo (q.denote σ) (v.denote σ)).len (p.denote σ)) =
+      lenW ((s.denote σ).len (p.denote σ))
+    rw [Obs.copyTo, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
+
+/-- `lenOnDelAtFrame`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.lenOnDelAtFrame_sound {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)} {E : Ty}
+    {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true) :
+    Tm.Theq (Tms.Term.len (Tms.STerm.delAt s q) p) (Tms.Term.len s p) := fun σ => by
+    show lenW (((s.denote σ).delAt (q.denote σ)).len (p.denote σ)) =
+      lenW ((s.denote σ).len (p.denote σ))
+    rw [Obs.delAt, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
+
+/-- `lenOnSaveFixedCopy`'s case of `TermTaclet.sound`. -/
+theorem TermTaclet.lenOnSaveFixedCopy_sound {s : Tm C Γ .st} {E : Ty} {n : Nat}
+    {c : FixedCopy E n (.array E)} {q p : Tm C Γ (.path (.ref (.array E)))}
+    {v : Tm C Γ (.sv (.ref (.fixed E n)))} {w : PrimTy.uint.Denote} (hw : lenW n = some w)
+    (hq : q.sameSegs p = true) :
+    Tm.Theq (Tms.Term.len (Tms.STerm.save s q (.app1 (.fixedCopy c) v)) p)
+      (Tms.Term.lit w) := fun σ => by
+    show lenW (((s.denote σ).copyTo (q.denote σ) (c.observe (v.denote σ))).len (p.denote σ)) =
+      some w
+    rw [← Tm.sameSegs_denote σ hq, Obs.copyTo_len_same, FixedCopy.observe_len, hw]
+
+/-- **Each scoped term taclet is sound**: its two terms have one Theory value
+in every state (`TermTaclet.sound`). -/
+theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t' → Tm.Theq t t'
+  | findOnSave hp hq => TermTaclet.findOnSave_sound hp hq
+  | findOnSaveFrame h => TermTaclet.findOnSaveFrame_sound h
+  | findMemberCons h => TermTaclet.findMemberCons_sound h
+  | findMemberConsIn h => TermTaclet.findMemberConsIn_sound h
+  | findOnSaveIn hq => TermTaclet.findOnSaveIn_sound hq
   | @selectOnSaveMember _ _ s _ p v r sn hr p' _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMember_denote h) .hole q
   | @selectOnSaveFrame _ _ s _ p v r sn r' sn' hr hr' p' _ q h hne =>
@@ -1348,50 +1472,17 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
     Tm.findIn_fill_theq (Tm.selectOnDelAtMemberAt_denote h) K q
   | @selectOnDelAtFrameAt _ _ sn sn' sn'' f f' s _ p hf hf' p' _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrameAt_denote h hne) K q
-  | @findOnDelAt _ _ s P p q w hw hp hq => fun σ => by
-    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
-    rw [← Tm.sameSegs_denote σ hq, Obs.delAt_word_same]
-  | @findOnDelAtValue _ _ s _ p _ q hp hq => fun σ => by
-    obtain ⟨rfl, hh⟩ := Tm.sameSegs_heq σ hq
-    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
-      (some ((s.denote σ).word (q.denote σ))).map fun _ => PrimTy.dflt _
-    rw [← eq_of_heq hh, Obs.delAt_word_same]
-    rfl
+  | findOnDelAt hw hp hq => TermTaclet.findOnDelAt_sound hw hp hq
+  | findOnDelAtValue hp hq => TermTaclet.findOnDelAtValue_sound hp hq
   | @delValueLit _ _ P w => fun σ => rfl
-  | @findOnDelAtBelow _ _ s _ p P q w hk hw hp hq => fun σ => by
-    obtain ⟨r, -, hqr⟩ := Tm.extends_denote σ q hq
-    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
-    rw [hqr, Obs.delAt_word_below]
-    exact congrArg some (hk σ r)
-  | @findOnDelAtBelowIn _ _ sn s _ p P q w hk hw hq => fun σ => by
-    obtain ⟨r, -, hqr⟩ := Tm.extendsIn_denote σ q hq
-    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
-    rw [hqr, Obs.delAt_word_below]
-    exact congrArg some (hk σ r)
-  | @findOnDelAtFrame _ _ s _ p _ q h => fun σ => by
-    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
-      some ((s.denote σ).word (q.denote σ))
-    rw [Obs.delAt, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
-  | @findOnPushFrame _ _ s _ p v _ q h => fun σ => by
-    show some (((s.denote σ).push (p.denote σ) (TVal.strip (v.denote σ))).word (q.denote σ)) =
-      some ((s.denote σ).word (q.denote σ))
-    rw [Obs.push, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
-  | @findOnPopFrame _ _ s _ p _ q h => fun σ => by
-    show some (((s.denote σ).pop false (p.denote σ)).word (q.denote σ)) =
-      some ((s.denote σ).word (q.denote σ))
-    rw [Obs.pop, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
-  | @lenOnSaveFrame _ _ s _ q v _ p h => fun σ => by
-    show lenW (((s.denote σ).copyTo (q.denote σ) (v.denote σ)).len (p.denote σ)) =
-      lenW ((s.denote σ).len (p.denote σ))
-    rw [Obs.copyTo, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
-  | @lenOnDelAtFrame _ _ s _ q _ p h => fun σ => by
-    show lenW (((s.denote σ).delAt (q.denote σ)).len (p.denote σ)) =
-      lenW ((s.denote σ).len (p.denote σ))
-    rw [Obs.delAt, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
-  | @lenOnSaveFixedCopy _ _ s _ _ c q p v w hw hq => fun σ => by
-    show lenW (((s.denote σ).copyTo (q.denote σ) (c.observe (v.denote σ))).len (p.denote σ)) =
-      some w
-    rw [← Tm.sameSegs_denote σ hq, Obs.copyTo_len_same, FixedCopy.observe_len, hw]
+  | findOnDelAtBelow hk hw hp hq => TermTaclet.findOnDelAtBelow_sound hk hw hp hq
+  | findOnDelAtBelowIn hk hw hq => TermTaclet.findOnDelAtBelowIn_sound hk hw hq
+  | findOnDelAtFrame h => TermTaclet.findOnDelAtFrame_sound h
+  | findOnPushFrame h => TermTaclet.findOnPushFrame_sound h
+  | findOnPopFrame h => TermTaclet.findOnPopFrame_sound h
+  | lenOnSaveFrame h => TermTaclet.lenOnSaveFrame_sound h
+  | lenOnDelAtFrame h => TermTaclet.lenOnDelAtFrame_sound h
+  | lenOnSaveFixedCopy hw hq => TermTaclet.lenOnSaveFixedCopy_sound hw hq
   | .theory h => h
   | .symm r => r.sound.symm
 
