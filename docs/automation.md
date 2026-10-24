@@ -510,7 +510,11 @@ TestSuite build's log).  It failed on one pending obligation until the symbolic 
 
 **Symbolic counterexamples (2026-10-25).**  `invariantClosedFormSum` is
 refuted by `sol_refute` alone (`TestSuite/Refuted.lean`), from a storage
-whose `values` has `2^255` elements; none pending.  Three pieces, all
+whose `values` has `2^255` elements; none pending.  The witness is reachable
+in the model, where `wt` bounds a length only by `2^256`; to my knowledge
+solc's storage `push` panics (0x41) far below that, at `2^64` elements, so
+code solc compiles never builds it.  The refutation is a gap between the
+model and solkey's reading, not a bug in solkey's obligation.  Three pieces, all
 checked by the kernel, nothing trusted:
 
 * *Long arrays* (`Tools/LazyStorage.lean`): `SVec.rep v n`, `n` copies of
@@ -541,8 +545,9 @@ checked by the kernel, nothing trusted:
   dynamic-array root whose element default is well-formed at `2^255` and
   `2^256 - 1` elements (`longCands`), the formula's parameters at their
   defaults, and ask the kernel for `¬ ⊨ᶠ φ` of a formula
-  `wt(storage) → ψ` directly (`certifyLong`, each attempt under its own
-  heartbeats): no compiled evaluator can hold such a storage.  The
+  `wt(storage) → ψ` directly (`certifyLong`; the kernel check is bounded
+  by its own heartbeats, the elaboration that builds it only by the
+  declaration's): no compiled evaluator can hold such a storage.  The
   certificate for `invariantClosedFormSum` checks in about 0.1 s; the
   tactic's 4 s are the ordinary search before it.
 
