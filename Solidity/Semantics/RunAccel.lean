@@ -5,18 +5,19 @@ import Solidity.Semantics.RunFrame
 # Loops run in closed form
 
 `Prog.runF` (`Semantics/RunFuel.lean`) gives up on a loop after `n`
-iterations.  A counter loop's outcome after any number of them has a closed
+iterations.  A counting loop's outcome after any number of them has a closed
 form: here a loop whose body only adds literals to `uint` locals
-(`x = x + d;`, each local once, `Prog.bumps?`) and whose condition compares
-one local against a term the body leaves alone (`i < e`, `i <= e`, `e > i`,
-`e >= i`, `Val.guard?`, `Val.rigid`) is run in O(1): the iteration where the
-condition first fails, or the first one an addition overflows in (a revert),
-whichever comes first (`TRun.accel?`).  `TRun.accel?_sound` proves it is the
-typed run's outcome (`TRun.loop`); `Prog.runA` is `Prog.runF` with every
-loop of that shape so accelerated, approximating the typed run as it does
-(`Prog.runA_approx`).  Counterexamples evaluate it in the kernel
-(`Tools/Counterexample.lean`): a loop bounded by an array of `2^255`
-elements reverts on its first overflow without its `2^255` iterations.
+(`x = x + d;`, `x += d;`, `x++;`, `++x;`, each local once, `Prog.bumps?`)
+and whose condition compares one local against a term the body leaves alone
+(`i < e`, `i <= e`, `e > i`, `e >= i`: `Val.guard?`, `Val.rigid?`) is run in
+O(1): to the iteration where the condition first fails, or to the first one
+an addition overflows in (a revert), whichever comes first (`TRun.accel?`).
+`TRun.accel?_sound` proves it is the typed run's outcome (`TRun.loop`);
+`Prog.runA` is `Prog.runF` with every loop of that shape so accelerated,
+approximating the typed run as it does (`Prog.runA_approx`).
+Counterexamples evaluate it in the kernel (`Tools/Counterexample.lean`): a
+loop bounded by an array of `2^255` elements reverts on its first overflow
+without its `2^255` iterations.
 
 The recognizers are `match`-based (a deviation from Gate G0's condition 1,
 cheap on the loop bodies they see); the run itself is the recursor
