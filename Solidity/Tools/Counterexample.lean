@@ -17,7 +17,8 @@ over `2^256` values, an update over the typed states it lands on, `{havoc}` over
 (`Upd.applyV`), the programs under a
 modality are run by the typed run with fuel (`Prog.runF`,
 `Semantics/RunFuel.lean`: a loop entered at most `loopFuel`
-iterations, `unknown` past them), a quantifier and a hidden binder are
+iterations, `unknown` past them), a loop that only counts in closed form
+(`Prog.runA`, `Semantics/RunAccel.lean`), a quantifier and a hidden binder are
 tried on a finite domain (`ff` as soon as one instance is), an update is
 read in the one typed state its end lifts to (`State.lift?`: the heap
 empty, the storage and the transaction its own), and the connectives are
@@ -57,9 +58,10 @@ When a quantified declaration premise cannot evaluate to `tt`, the fallback
 (`Calculus/DeclarationFacts.lean`) and evaluates the remaining premises and
 the body. Every premise of the original obligation is proved; unsupported
 premises can still leave the witness only **tested**. What the kernel runs is written by the recursor
-(`Fml.eval3`, `Fml.peel`, `Prog.runF`; Gate G0 conditions 1 and 2), each
+(`Fml.eval3`, `Fml.peel`, `Prog.runA`; Gate G0 conditions 1 and 2), each
 with a compiled `match` twin the search runs (`Fml.eval3C`, `Fml.peelC`,
-`Prog.runFC`) and a theorem that they agree.
+`Prog.runAC`) and a theorem that they agree.  A witness may need an array
+no search can build (Long arrays, below): the kernel alone certifies it.
 -/
 
 namespace Solidity.Tools

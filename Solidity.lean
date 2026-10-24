@@ -487,3 +487,4 @@ import Solidity.Examples.Tactics.Inheritance
 import Solidity.Examples.Tactics.Lifetime
 
 import Solidity.Examples.Tactics.Rigid
+import Solidity.Examples.Tactics.SymbolicCounterexample
