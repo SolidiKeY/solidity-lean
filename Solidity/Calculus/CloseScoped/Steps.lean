@@ -18,6 +18,40 @@ variable {C : Contract}
 
 open Lean Elab Tactic Meta
 
+/-- **A checked result read as itself** (`CloseS.wp_ite_uintOf`,
+`CloseS.wp_ite_intOf`) where its integer reads a variable, before the rest
+is read: the rest at `⟨n, _⟩`, not at `uintOf n`, whose integer copies `n`
+three times.  An integer that reads no variable value (`1 << 255`, a
+local's value read off the state) is left to `Modality.wp_ite`, which
+decides its check or reads it as before. -/
+simproc ↓ [close_rw_s] CloseS.wpChecked (@Modality.wp _ _ (@ite _ _ _ (Except.ok _) _) _) :=
+    fun e => do
+  let_expr Modality.wp _ m x P := e | return .continue
+  let_expr ite _ _ inst t y := x | return .continue
+  let_expr Except.ok _ _ v := t | return .continue
+  let lem ← match v.getAppFn.constName? with
+    | some ``CloseS.uintOf => pure ``CloseS.wp_ite_uintOf
+    | some ``CloseS.intOf => pure ``CloseS.wp_ite_intOf
+    | _ => return .continue
+  let n := v.appArg!
+  -- a value that reads a variable value (a parameter, an earlier result),
+  -- not the state's locals, whose reads are read off the state first
+  let fs := (collectFVars {} n).fvarIds
+  let mut isVar := false
+  for f in fs do
+    let ty ← instantiateMVars (← f.getType)
+    if ty.isConstOf ``Int || ty.isAppOf ``PrimTy.Denote || ty.isAppOf ``Subtype then
+      isVar := true
+  unless isVar do return .continue
+  try
+    let pf := mkAppN (mkConst lem) #[m, n, inst, y, P]
+    let some (lhs, rhs) := (← inferType pf).iff? | return .continue
+    unless ← isDefEq lhs e do return .continue
+    return .visit { expr := rhs, proof? := some (mkApp3 (mkConst ``propext) lhs rhs pf) }
+  catch _ => return .continue
+
+
+
 /-- A Boolean of the formula's terms, evaluated (`Tm.agreeB`, `Tm.totB`,
 `Tm.pushFree`); one that does not reduce to a literal (a term with a free
 variable) fails, and `sol_close_unwrap` then leaves the leaf as it is. -/

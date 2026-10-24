@@ -780,6 +780,37 @@ of a sequence of updates over fresh locals, not one term over the frame —
 a new update shape and a new soundness argument in place of
 `Prog.sym_sound` — and is not done.
 
+**Worktree consolidation (2026-10-24).** All three other worktrees' commits
+were already ancestors of master. The `share` worktree's source matched the
+integration at `3b03ac58`, except for a checked-result optimization and an
+unfinished sharing prototype. The optimization is now in
+`Calculus/CloseScoped/Leaf.lean` (`CloseS.wp_ite_uintOf`,
+`CloseS.wp_ite_intOf`) and `Calculus/CloseScoped/Steps.lean`
+(`CloseS.wpChecked`): under a successful range check, the continuation reads
+`⟨n, proof⟩` directly instead of unfolding `uintOf n` or `intOf n` again.
+Both the success and failure branches remain in the proved equivalence.
+The scratch measurement above at `k = 3` took 2438 ms before and 1157 ms
+after for `sol_leaf; sol_close`; `k = 4` still exceeded a 45-second limit.
+This improves the existing term summary without implementing shared calls.
+
+The read-only finder and skeptic agreed to port that optimization and keep
+the unfinished `LeafShare` prototype out of the library: it has a one-step
+soundness proof but no bounded sharing pass, tactic integration or tests.
+Its source and three scratch benchmarks are preserved on the local branch
+`codex/archive-share-20261024` (`3f0aca1e`). Regression examples in
+`Examples/Tactics/CallSummary.lean` cover eight checked products, symbolic
+signed arithmetic, signed and unsigned overflow, and constant positive and
+negative inputs; the five-node tree and headline axiom sets are pinned.
+
+The frozen TestSuite metadata check passes. Existing checkout checks remain
+separate failures: strict automation has one pending obligation
+(`invariantClosedFormSum`), the trust inventory has 13 drift findings, the
+orphan check sees 33 scratch modules, and the documentation path check has
+13 missing external/vendor references. This consolidation does not change
+those inventories or obligation statuses.
+All three other worktrees were removed after their archived source was
+rechecked byte for byte; only the master worktree remains.
+
 ## Review (2026-10-20)
 
 A read-only review pass (finder and skeptic per area) confirmed six

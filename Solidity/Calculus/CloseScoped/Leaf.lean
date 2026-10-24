@@ -576,6 +576,74 @@ theorem eq_uintOf' (n : Int) (a : PrimTy.uint.Denote) :
 theorem eq_intOf' (n : Int) (a : PrimTy.int.Denote) :
     a = intOf n ↔ a.val = if -intBound ≤ n ∧ n < intBound then n else 0 :=
   ⟨fun e => e ▸ intOf_val' n, fun e => Subtype.ext (e.trans (intOf_val' n).symm)⟩
+/-! A checked result handed to the rest of the run (`Modality.wp_ite` at
+`if c then .ok (uintOf n) else y`, `c` its range check) as `⟨n, _⟩`, the
+check's two halves the premises of its proof: the rest reads `n` itself.
+Through `uintOf n` it would read `if c then n else 0` (`uintOf_val'`), three
+copies of `n`, and a value computed from the previous one (`a * 3 * 3 * …`,
+a callee's summary, `docs/automation.md` M6) would nest them: the evaluated
+leaf a tree of about `7^d` nodes over a DAG of a few hundred, `458 · 10⁶`
+at eight products, which whatever walks it unshared (instance search on its
+premises, `Expr` equality) pays for without allocating, so without a
+heartbeat: at sixteen products `sol_close_eval` ran for minutes under
+`maxHeartbeats 50000`. -/
+
+theorem inRange_uint_of {n : Int} (h₀ : 0 ≤ n)
+    (h₁ : n < 115792089237316195423570985008687907853269984665640564039457584007913129639936) :
+    PrimTy.uint.inRange n = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]; exact ⟨h₀, h₁⟩
+
+theorem inRange_int_of {n : Int}
+    (h₀ : -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n)
+    (h₁ : n < 57896044618658097711785492504343953926634992332820282019728792003956564819968) :
+    PrimTy.int.inRange n = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]; exact ⟨h₀, h₁⟩
+
+/-- **A checked result read as itself**: where `y = x * 3` returns, the
+rest is asked of `⟨x * 3, _⟩`, not of `uintOf (x * 3)`. -/
+theorem wp_ite_uintOf {m : Modality} {n : Int}
+    [Decidable (0 ≤ n ∧ n < 115792089237316195423570985008687907853269984665640564039457584007913129639936)]
+    {y : TRes PrimTy.uint.Denote} {P : PrimTy.uint.Denote → Prop} :
+    m.wp (if 0 ≤ n ∧ n < 115792089237316195423570985008687907853269984665640564039457584007913129639936
+      then .ok (uintOf n) else y) P ↔
+      (∀ (h₀ : 0 ≤ n)
+        (h₁ : n < 115792089237316195423570985008687907853269984665640564039457584007913129639936),
+        P ⟨n, inRange_uint_of h₀ h₁⟩) ∧
+      (¬(0 ≤ n ∧ n < 115792089237316195423570985008687907853269984665640564039457584007913129639936) →
+        m.wp y P) := by
+  by_cases h : 0 ≤ n ∧ n < 115792089237316195423570985008687907853269984665640564039457584007913129639936
+  · have hv : uintOf n = ⟨n, inRange_uint_of h.1 h.2⟩ := Subtype.ext (uintOf_val h)
+    rw [if_pos h]
+    show P (uintOf n) ↔ _
+    rw [hv]
+    exact ⟨fun hP => ⟨fun _ _ => hP, fun hn => absurd h hn⟩, fun hP => hP.1 h.1 h.2⟩
+  · rw [if_neg h]
+    exact ⟨fun hy => ⟨fun h₀ h₁ => absurd ⟨h₀, h₁⟩ h, fun _ => hy⟩, fun h' => h'.2 h⟩
+
+/-- `wp_ite_uintOf` at `int`. -/
+theorem wp_ite_intOf {m : Modality} {n : Int}
+    [Decidable (-57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n ∧
+      n < 57896044618658097711785492504343953926634992332820282019728792003956564819968)]
+    {y : TRes PrimTy.int.Denote} {P : PrimTy.int.Denote → Prop} :
+    m.wp (if -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n ∧
+        n < 57896044618658097711785492504343953926634992332820282019728792003956564819968
+      then .ok (intOf n) else y) P ↔
+      (∀ (h₀ : -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n)
+        (h₁ : n < 57896044618658097711785492504343953926634992332820282019728792003956564819968),
+        P ⟨n, inRange_int_of h₀ h₁⟩) ∧
+      (¬(-57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n ∧
+          n < 57896044618658097711785492504343953926634992332820282019728792003956564819968) →
+        m.wp y P) := by
+  by_cases h : -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ n ∧
+      n < 57896044618658097711785492504343953926634992332820282019728792003956564819968
+  · have hv : intOf n = ⟨n, inRange_int_of h.1 h.2⟩ := Subtype.ext (intOf_val h)
+    rw [if_pos h]
+    show P (intOf n) ↔ _
+    rw [hv]
+    exact ⟨fun hP => ⟨fun _ _ => hP, fun hn => absurd h hn⟩, fun hP => hP.1 h.1 h.2⟩
+  · rw [if_neg h]
+    exact ⟨fun hy => ⟨fun h₀ h₁ => absurd ⟨h₀, h₁⟩ h, fun _ => hy⟩, fun h' => h'.2 h⟩
+
 theorem root_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
     (SRef.ofRoot r h).root = r := rfl
 /-- A key of a mapping at a root: always a slot (`inBounds` at `map`), so

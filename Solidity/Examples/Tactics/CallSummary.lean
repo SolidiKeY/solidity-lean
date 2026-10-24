@@ -251,3 +251,84 @@ closed: 0 open goal(s), 27 node(s), 2 branch(es)
 #proof_tree dl!{ [ bool y = lazy1(a); ] y == y }
 
 end Solidity.Examples.Tactics.CallSummary.Reads
+
+namespace Solidity.Examples.Tactics.CallSummary.CheckedResult
+
+/-- Multiplication summaries retain every checked intermediate result. -/
+def Tripling : Contract := contract!{
+  function f0(uint x) returns (uint r) { r = x * 3; }
+  function f1(uint x) returns (uint r) { r = f0(f0(x)); }
+  function f2(uint x) returns (uint r) { r = f1(f1(x)); }
+  function f3(uint x) returns (uint r) { r = f2(f2(x)); }
+  function s0(int x) returns (int r) { r = x * 3; }
+  function s1(int x) returns (int r) { r = s0(s0(x)); }
+}
+
+local instance : InContract := ⟨Tripling⟩
+open scoped Solidity.Scoped
+
+/-- Eight checked products: `f3(a)` returns at least `a` below 1000. -/
+theorem triplingThree : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
+  apply Proves.fmlValid
+  apply allIntro
+  apply impRight
+  apply update .valueDeclSkip
+  apply update .internalCallSummary
+  sol_leaf
+  sol_close
+
+/--
+info: 0: allRight
+1: impRight
+2: valueDeclSkip
+3: internalCallSummary
+4: Closed goal
+closed: 0 open goal(s), 5 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a }
+
+/-- Signed checked products grow a nonnegative symbolic input. -/
+theorem signedTripling : ⊨ᶠ dl!{ ∀ int a; a >= 0 ∧ a < 1000 →
+    ⟨ int y = s1(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- An overflowing unsigned summary cannot return normally. -/
+theorem unsignedOverflow : ⊨ᶠ dl!{
+    a > 57896044618658097711785492504343953926634992332820282019728792003956564819968 →
+    [ uint y = f1(a); ] false } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- An overflowing signed summary cannot return normally. -/
+theorem signedOverflow : ⊨ᶠ dl!{ ∀ int a;
+    a > 28948022309329048855892746252171976963317496166410141009864396001978282409984 →
+    [ int y = s1(a); ] false } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- A constant summary still evaluates without symbolic range premises. -/
+theorem constantTripling : ⊨ᶠ dl!{ ⟨ uint y = f1(2); ⟩ y == 18 } := by
+  sol_prove (steps := 128)
+
+/-- Signed summaries also return the expected negative result. -/
+theorem signedNegative : ⊨ᶠ dl!{ ⟨ int y = s1(-2); ⟩ y + 18 == 0 } := by
+  sol_prove (steps := 128)
+
+/-- info: 'Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingThree' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms triplingThree
+
+/-- info: 'Solidity.Examples.Tactics.CallSummary.CheckedResult.signedTripling' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms signedTripling
+
+end Solidity.Examples.Tactics.CallSummary.CheckedResult
