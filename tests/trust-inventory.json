@@ -5,77 +5,77 @@
     "code": "g.admit"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "unsafe def evalQuoted (\u03b1) (ty e : Expr) : MetaM \u03b1 :="
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "let r \u2190 unsafe evalQuoted (List LineQ \u00d7 Expr) ty"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "unsafe evalQuoted (List (Nat \u00d7 Nat \u00d7 Expr \u00d7 Expr)) ty"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "pure (\u2190 unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "let skels \u2190 unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "unsafe evalQuoted (List Ctx) (mkApp (mkConst ``List [0]) (mkConst ``Ctx)) scopesE"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
     "code": "unsafe evalQuoted (List (Option (Expr \u00d7 Expr))) ty"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Proofs.lean",
     "kind": "unsafe",
     "code": "let rs \u2190 unsafe evalQuoted (List (Except String Lean.Expr)) ty e"
   },
   {
-    "file": "Solidity/Calculus/Chains.lean",
+    "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "kernel-option",
     "code": "withOptions (debug.skipKernelTC.set \u00b7 true) (evalExpr \u03b1 ty e)"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Facts.lean",
     "kind": "override",
     "code": "@[implemented_by Facts.returnsM]"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Bytes.lean",
     "kind": "override",
     "code": "@[implemented_by Facts.nfM]"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Leaf.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.strictM]"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Leaf.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.mentionsM]"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Leaf.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.pickM]"
   },
   {
-    "file": "Solidity/Calculus/Closer.lean",
+    "file": "Solidity/Calculus/Closer/Leaf.lean",
     "kind": "override",
     "code": "@[implemented_by LFml.closeM]"
   },
@@ -340,47 +340,47 @@
     "code": "@[implemented_by LFml.dropPremM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Spine.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.onSpineAnyM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Spine.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.boundedInM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Spine.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.freshPathM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.memResM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.seqMemM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LFml.memResM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.hasStRdM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LFml.hasStRdM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Pass.lean",
     "kind": "override",
     "code": "@[implemented_by LFml.nfEM]"
   },
@@ -465,7 +465,7 @@
     "code": "g.admit"
   },
   {
-    "file": "Solidity/Calculus/RewritePast.lean",
+    "file": "Solidity/Calculus/RewritePast/Merge.lean",
     "kind": "override",
     "code": "@[implemented_by Tm.spineHasM]"
   },
@@ -510,17 +510,17 @@
     "code": "private unsafe def evalNamesImpl (e : Expr) : MetaM (List Lean.Name) :="
   },
   {
-    "file": "Solidity/Calculus/RuleSyntax.lean",
+    "file": "Solidity/Calculus/RuleSyntax/Print.lean",
     "kind": "unsafe",
     "code": "try return some (\u2190 unsafe evalExpr Nat (mkConst ``Nat) e) catch _ => return none"
   },
   {
-    "file": "Solidity/Calculus/RuleSyntax.lean",
+    "file": "Solidity/Calculus/RuleSyntax/Print.lean",
     "kind": "unsafe",
     "code": "try return some (\u2190 unsafe evalExpr Int (mkConst ``Int) e) catch _ => return none"
   },
   {
-    "file": "Solidity/Calculus/RuleSyntax.lean",
+    "file": "Solidity/Calculus/RuleSyntax/Print.lean",
     "kind": "unsafe",
     "code": "unsafe evalExpr String (mkConst ``String)"
   },
@@ -715,142 +715,142 @@
     "code": "@[implemented_by Prog.runFC]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.foldM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by SFields.foldM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by SList.foldM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by SVec.foldM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by SMap.foldM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by toListM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by toListM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by setM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by toListM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by getM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by setM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by Semantics.Segs.labelsM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by segmentsM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Values.lean",
     "kind": "override",
     "code": "@[implemented_by appendM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.findM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.findLiveM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.saveM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.defaultOfM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SFields.defaultOfM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SList.defaultOfM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVec.defaultOfM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.stripM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SFields.stripM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SList.stripM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVec.stripM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVal.overlayM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SFields.overlayM]"
   },
   {
-    "file": "Solidity/Semantics/Storage.lean",
+    "file": "Solidity/Semantics/Storage/Ops.lean",
     "kind": "override",
     "code": "@[implemented_by SVec.overlayOnM]"
   },
@@ -880,17 +880,17 @@
     "code": "@[implemented_by Op3.evalM]"
   },
   {
-    "file": "Solidity/Syntax/Elab.lean",
+    "file": "Solidity/Syntax/Elab/Context.lean",
     "kind": "override",
     "code": "@[implemented_by RecThunk.getImpl]"
   },
   {
-    "file": "Solidity/Syntax/Elab.lean",
+    "file": "Solidity/Syntax/Elab/Context.lean",
     "kind": "opaque",
     "code": "opaque RecThunk.get (C : Contract) (F : Ctx) (r : RecThunk) : Unit \u2192 Prog C F F"
   },
   {
-    "file": "Solidity/Syntax/Elab.lean",
+    "file": "Solidity/Syntax/Elab/Context.lean",
     "kind": "unsafe",
     "code": "private unsafe def RecThunk.getImpl (C : Contract) (F : Ctx) (r : RecThunk) :"
   },
@@ -1010,7 +1010,7 @@
     "code": "@[implemented_by rigidM]"
   },
   {
-    "file": "Solidity/Calculus/MemRead.lean",
+    "file": "Solidity/Calculus/MemRead/Spine.lean",
     "kind": "override",
     "code": "@[implemented_by LTm.stripWM]"
   },
