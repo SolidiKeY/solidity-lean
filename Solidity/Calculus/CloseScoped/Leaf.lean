@@ -1232,7 +1232,7 @@ attribute [close_rw_s]
   Subtype.mk.injEq Prod.mk.injEq cond_true cond_false
   forall_eq' forall_eq exists_eq_left' exists_eq_left exists_eq' exists_eq forall_exists_index
   and_imp
-  true_and and_true and_self implies_true forall_const ne_eq not_false_eq_true not_true_eq_false
+  true_and and_true and_self implies_true Close.forall_const_type ne_eq not_false_eq_true not_true_eq_false
   true_or or_true or_false false_or not_and not_exists Classical.not_not true_implies
   false_implies decide_eq_true_eq decide_eq_false_iff_not
   Bool.and_true Bool.and_false Bool.true_and Bool.false_and Bool.or_true Bool.or_false

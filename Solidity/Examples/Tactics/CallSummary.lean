@@ -254,12 +254,15 @@ end Solidity.Examples.Tactics.CallSummary.Reads
 
 namespace Solidity.Examples.Tactics.CallSummary.CheckedResult
 
-/-- Multiplication summaries retain every checked intermediate result. -/
+/-- Multiplication summaries retain every checked intermediate result:
+`fₖ`'s is `x * 3 * … * 3`, `2^k` checked products, one per call site. -/
 def Tripling : Contract := contract!{
   function f0(uint x) returns (uint r) { r = x * 3; }
   function f1(uint x) returns (uint r) { r = f0(f0(x)); }
   function f2(uint x) returns (uint r) { r = f1(f1(x)); }
   function f3(uint x) returns (uint r) { r = f2(f2(x)); }
+  function f4(uint x) returns (uint r) { r = f3(f3(x)); }
+  function f5(uint x) returns (uint r) { r = f4(f4(x)); }
   function s0(int x) returns (int r) { r = x * 3; }
   function s1(int x) returns (int r) { r = s0(s0(x)); }
 }
@@ -287,6 +290,100 @@ closed: 0 open goal(s), 5 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a }
+
+/-! ### The family, `k = 1 … 5`, one call site at a time
+
+The leaf is `{ y := a * 3 * … * 3 } y >= a`, `2^k` products.  From four
+on (`CloseJ.shareMin`), `sol_close` reads it one call site at a time
+(`holds_upd_share`, `Calculus/LeafShare.lean`): `{ sh0 := a * 3 }
+{ sh1 := sh0 * 3 } … { y := sh₂ₖ₋₂ * 3 ‖ pop }`, each update evaluated with
+the rest held opaque and each check refuted in a context of its own
+(`CloseJ.peel`); the heartbeats are `docs/automation.md`'s M6 table. -/
+
+theorem triplingOne : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f1(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingTwo : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f2(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingThreeAuto : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingFour : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingFive : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f5(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- Under the box an overflow reverts, so no precondition is needed. -/
+theorem triplingFourBox : ⊨ᶠ dl!{ [ uint y = f4(a); ] y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- A false leaf (at `a = 0` the product is `0`) fails at about the cost of
+a true one: a summary of more than `CloseJ.shareWholeMax` products is not
+evaluated whole after the steps fail.  (The hypothesis only closes the
+example once the closer has failed.) -/
+example (h : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 }) :
+    ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 } := by
+  fail_if_success
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
+  exact h
+
+/-- The same formula, refuted (`a = 0`). -/
+theorem triplingFourOff : ¬ (⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 }) := by
+  sol_refute
+
+/-- Thirty-two products overflow past `10^62`: the steps fail, within the
+declaration's heartbeats. -/
+example (h : ⊨ᶠ dl!{ a < 100000000000000000000000000000000000000000000000000000000000000 →
+    ⟨ uint y = f5(a); ⟩ y >= a }) :
+    ⊨ᶠ dl!{ a < 100000000000000000000000000000000000000000000000000000000000000 →
+      ⟨ uint y = f5(a); ⟩ y >= a } := by
+  fail_if_success
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
+  exact h
+
+/-- The leaf of sixteen products evaluated whole (`sol_close`'s last
+alternative, which `CloseJ.shareWholeMax` now skips at this size): it
+finishes within the default heartbeats.  It ran past 45 s inside `simp`
+before `Close.forall_const_type`, in instance searches the heartbeats do
+not count (`docs/automation.md`, M6). -/
+theorem triplingFourWhole : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a } := by
+  apply Proves.fmlValid
+  apply allIntro
+  apply impRight
+  apply update .valueDeclSkip
+  apply update .internalCallSummary
+  sol_leaf
+  sol_close_unwrap
+  intro σ
+  sol_close_eval
+  all_goals sol_close_saturate
+  all_goals (try sol_close_landed)
+  all_goals try (intros; sol_close_reads_all)
+  all_goals try (subst_vars; sol_close_reads_all)
+  all_goals (try intros)
+  all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+    Close.forall_const_type] at *)
+  all_goals (try sol_close_witness)
+  all_goals (repeat' (first | intro _ | apply And.intro))
+  all_goals sol_close_finish
 
 /-- Signed checked products grow a nonnegative symbolic input. -/
 theorem signedTripling : ⊨ᶠ dl!{ ∀ int a; a >= 0 ∧ a < 1000 →
@@ -330,5 +427,11 @@ theorem signedNegative : ⊨ᶠ dl!{ ⟨ int y = s1(-2); ⟩ y + 18 == 0 } := by
  Quot.sound]
 -/
 #guard_msgs in #print axioms signedTripling
+
+/-- info: 'Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms triplingFive
 
 end Solidity.Examples.Tactics.CallSummary.CheckedResult
