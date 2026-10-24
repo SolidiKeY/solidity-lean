@@ -115,6 +115,11 @@ formulas and their updates in `Calculus/Fml.lean`,
 the taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
 imports acyclic and local. Add new modules to `Solidity.lean`:
 `node scripts/check-orphans.mjs` fails on a module nothing imports.
+The core (syntax, semantics, typing, Theory, rules and their soundness)
+imports no elaborator, printer or tactic front end, not even transitively:
+`node scripts/check-layers.mjs` fails otherwise, and
+`node scripts/import-fanout.mjs` shows what an edit rebuilds.
+`docs/parallelism.md` has the core's list and the rule for new modules.
 
 Before editing one of these families, read its conventions file. Claude Code
 loads them automatically when you open a matching file; other agents should

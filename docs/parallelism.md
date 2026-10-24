@@ -109,3 +109,69 @@ snapshot (`--solkey tests/migration/solkey/keyext.solidity.examples`), and
 fails against a newer sibling `../solkey` only because `TestSuite.sol`
 moved.  Every milestone below is held to the same output: no new failure,
 the same counts.
+
+## P1. The core apart from the elaborator
+
+### The core
+
+112 modules, `CORE` in `scripts/check-layers.mjs`:
+
+- `KeySort`, `Eqns`, `AST`, `Scope`, `SpecSyntax`, `Hashes`, `Keccak`,
+  `RevertBytes`, `Syntax`, `Signature`, `Update`;
+- `Syntax.{Scoped,Checked,Inlined,PushSource,Join}`;
+- `Semantics` and `Semantics/**` (29), `Typing/**` (12), `Theory/**` (6);
+- the rules: `Calculus.{Fml,Rules,RuleSyntax,RuleKit,KeyTaclets,Step,Arms,
+  Blocks,Taclet,Proves,Logic,Hyp,Correct,FirstOrder}`;
+- their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
+  UpdRuleScoped,UpdateRules,TermLib.Rules}`;
+- what those import: `Calculus.{TermEval,TermEq,TermWk,Lower,LowerRun,Shift,
+  WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
+  CallSummary}`.
+
+The list is closed under imports: no core module imports a module outside
+it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
+`Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.
+
+**A new module** that only states or proves (no `sol{}`, `dl!{}`, `#wp`,
+`#guard_msgs` of a printer) belongs in the core if what it imports is: add
+it to `CORE` when its name is not matched already.  Examples written in the
+surface syntax go above, in `Examples/`.
+
+### The cuts
+
+| Path | Cut |
+|---|---|
+| `Semantics.State → Syntax.Quote` | import dropped (unused) |
+| `Semantics → Syntax.Splice` | replaced by `Syntax.Checked`; the nine modules above the core that wrote programs through it import `Syntax.Splice` themselves |
+| `Semantics.DeferredSource → Syntax.Elab` | import dropped (unused) |
+| `Calculus.TermLib → Calculus.PrintTerm` | split: the rules and their soundness are `Calculus/TermLib/Rules.lean` (core), the printers and pins stay in `TermLib.lean`, which imports it |
+| `Calculus.Blocks → Prog.join` (in `Syntax/Elab.lean`) | `Prog.join` moved, same name, to `Syntax/Join.lean` |
+| `Semantics.Run`'s `sol[C]{…}` examples (`guardLowCore` …) | moved to `Examples/ScopedRuns.lean` |
+| `Syntax.Quote → Syntax.Elab` | narrowed to `Syntax.Scoped`, all `Quote` uses; `Syntax.Splice` imports `Syntax.Elab` itself |
+
+No notation had to move: the core's `dl{}`/`tm{}` macros already sat below
+the elaborator.  Nothing was restated, so there is no `rfl` to show.
+
+### Fan-out, before and after
+
+| Module | P0 | P1 |
+|---|---|---|
+| `Syntax.Elab` | 501 | 294 |
+| `Syntax.Quote` | 500 | 308 |
+| `Syntax.Splice` | 499 | 228 |
+| `Syntax.Scoped` | 505 | 508 |
+| `Syntax` | 508 | 511 |
+| `Semantics.Run` | 459 | 461 |
+| `Signature` | 440 | 441 |
+| `Calculus.Fml` | 423 | 424 |
+| `Calculus.RuleSyntax` | 304 | 305 |
+| `Calculus.Rules` | 277 | 278 |
+| `Calculus.Close` | 255 | 255 |
+| `Calculus.Decide` | 202 | 202 |
+| `Frontend.SolcJson` | 55 | 55 |
+
+The low modules gain the three new ones (532 modules).  The longest import
+chain falls from 53 to 50 modules: `Elab → Quote → Splice` is no longer on
+the way to the calculus.  `Decide`, `Closer`, `MemRead` and `TermLaws` no
+longer reach `Elab`; what does is the tactics, the printers, the examples,
+the TestSuite and the frontends.
