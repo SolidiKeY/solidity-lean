@@ -90,7 +90,10 @@ declared rules cover it or have disjoint applicability.
    `SoundMem`, `SoundLocal`, `SoundControl`, `SoundCapture`; `SoundCalls`,
    `SoundLoops` for the blocks), dispatched by `SoundStep.lean` into
    `Stmt.sound` (`.claude/rules/soundness.md`). There is no proof per
-   taclet: `toStep` makes it `Stmt.sound`'s.
+   taclet: `toStep` makes it `Stmt.sound`'s.  A new rule's arm goes in a
+   file of its own, `Calculus/Sound/<KeYName>.lean` (the template is in
+   `.claude/rules/soundness.md`; the six places a rule is registered are in
+   `docs/parallelism.md`).
 4. Its row in `RuleShapes.tacletOrigins` (the solkey taclets it transcribes)
    and in `PrintedRules.printedOrigins`. `#check_constructor_table` fails the
    build on a missing or extra row; `taclets_partitioned` and

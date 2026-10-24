@@ -1,6 +1,7 @@
 ---
 paths:
   - "Solidity/Calculus/Sound*.lean"
+  - "Solidity/Calculus/Sound/*.lean"
   - "Solidity/Calculus/ProvesSound.lean"
   - "Solidity/Calculus/Logic.lean"
   - "Solidity/Calculus/Symex.lean"
@@ -63,6 +64,45 @@ substitutes for the general proof below.
   push at the bound is `exhausted`, which both modalities accept.
 - Develop an arm as a standalone lemma in a scratch module importing
   `Calculus/SoundKit.lean`; the arms' files elaborate in tens of seconds.
+
+## A new rule: one file in `Calculus/Sound/`
+
+The existing arms stay where they are (`SoundArms` … `SoundLoops`).  A rule
+added from now on proves its arm in a file of its own,
+`Calculus/Sound/<KeYName>.lean` (`Calculus/Sound/README.md`), so that it
+elaborates alone and in parallel with the others:
+
+```lean
+import Solidity.Calculus.SoundKit   -- or the arms' file it builds on
+
+/-!
+# `<keyName>` is sound
+
+What the premise asks of the statement's typed run, in a sentence.
+-/
+
+namespace Solidity
+open Solidity (Modality)
+variable {C : Contract} {m : Modality} {Γ : Ctx} {σ : State C Γ}
+
+/-- **`<keyName>`'s premise is what the statement's typed run does.** -/
+theorem <arm>Step_sound (k : Nat) … (q : Premise C Γ Γ')
+    (hs : <arm>Step k … = q) : Premise.Runs m (.<ctor> …) q σ := by
+  …
+
+/-- info: 'Solidity.<arm>Step_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms <arm>Step_sound
+
+end Solidity
+```
+
+Then register it: `Calculus/SoundStep.lean` imports the file and its
+`Stmt.stepSound_arms` case calls the theorem (a block's arm:
+`Calculus/StmtSound.lean`'s `Stmt.stepSound`, through `SoundCalls`/
+`SoundLoops`); and `docs/lean-key-rule-map.md` gets the rule's row, naming
+the file.  The `cases s` there is exhaustive, so a rule without its lemma
+fails the build.  `docs/parallelism.md` ("Adding a rule: the six places")
+lists every place a new rule is registered.
 
 ## When a case is false
 
