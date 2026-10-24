@@ -415,6 +415,19 @@ terminating with a proof or a counterexample; CI fails on anything else.
   a formula's parameters are read universally.  Validity of
   `∀ x̄. p(x̄) ≠ 0` over the integers is undecidable (Matiyasevich), so no
   terminating closer is complete on that fragment, quantifiers or not.
+  **Decided (2026-10-25, option c):** on a goal with a product of two
+  non-literal KeY `int` terms the closer may answer *unknown*; it must be
+  complete (a proof or a certified counterexample) on every other goal.
+  **Extended (2026-10-25, option c′):** the same for a product of two
+  non-literal terms of a 256-bit type (`uint`, `int`): bounded, so
+  decidable, but only bit by bit, and a kernel-checked certificate for a
+  256-bit multiplier is out of reach without `Lean.ofReduceBool` (an axiom).
+* **Decided (2026-10-25, option d):** a quantified formula over array or
+  mapping contents is decided completely inside the array property fragment
+  (Bradley, Manna and Sipma: universal index quantifiers, linear index
+  guards, array reads only at the quantified indices); outside it the
+  closer may answer *unknown*.  Over 2^256-long storages the general case
+  is decidable only by enumerating storages, which the theorem forbids.
 * A counterexample is a concrete typed state, certified by kernel
   evaluation.  One that needs a storage array of `2^255` elements cannot be
   built: `invariantClosedFormSum` is false in the model (`s + 2` overflows
