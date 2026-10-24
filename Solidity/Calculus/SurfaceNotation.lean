@@ -2,6 +2,7 @@ import Solidity.Calculus.Hyp
 import Solidity.Syntax.Quote
 import Solidity.Calculus.Lower
 import Solidity.Calculus.NamedTerm
+import Solidity.Syntax.Elab.Values
 
 /-!
 # Reading concrete formulas: `dl[C]{ φ }`
