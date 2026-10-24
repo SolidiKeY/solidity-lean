@@ -529,7 +529,8 @@ def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
         (PrimTy.ofInt? .uint)
     | .int => (intPool lits ++ sender :: argInts).eraseDups.filterMap (PrimTy.ofInt? .int)
   let g : TGen :=
-    { prim := fun p => pickD (PrimTy.dflt p) (poolDom lits p)
+    { shadow := 2
+      prim := fun p => pickD (PrimTy.dflt p) (poolDom lits p)
       key := fun K => match keys K with
         | [] => none
         | k :: _ => some (pickD k (keys K)) }
@@ -1029,7 +1030,7 @@ def Witness.lines (C : Contract) (w : Witness C) : List String :=
     | none => []
     | some (.error h) => [s!"after: {fmtHalt h}"]
     | some (.ok st) => ["after: " ++ fmtStorageLine C st]
-  [", ".intercalate (args ++ fmtTx σ), "before: " ++ fmtStorageLine C σ.storage] ++
+  [", ".intercalate (args ++ fmtTx σ), "before: " ++ fmtStorageLine C σ.storage true] ++
     after
 
 /-! ## Certificates -/
@@ -1288,7 +1289,9 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     let cE := ty.appFn!.appArg!
     unless (← whnfR cE).isConst do throwError "#counterexample: not a named contract: {cE}"
     let C ← unsafe evalExpr Contract (Lean.mkConst ``Contract) cE
-    let φ ← unsafe evalExpr (Fml C []) ty φE
+    -- an obligation declared without code (`solc_scoped_problems … decl`)
+    -- is evaluated by its value, as `sol_prove` reads it
+    let φ ← unsafe evalExpr (Fml C []) ty (← Solidity.Symex.evaluable φE)
     let s := searchFml C φ
     let some w := s.witness
       | logInfo m!"no counterexample found in {s.tried} candidates"
@@ -1298,5 +1301,55 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
       else pure false
     logReport m!"counterexample ({if certified then "certified" else "tested"}):"
       ((w.lines C).map toMessageData)
+
+/-! ## `sol_refute`
+
+A goal `¬ ⊢ φ` or `¬ ⊨ᶠ φ`, `φ` closed, by a counterexample: the search of
+`#counterexample` (`searchFml`), its witness certified as there
+(`Fml.not_valid_of_eval3Peel`, the kernel evaluating the formula at the
+witness), and `¬ ⊢ φ` by the soundness of `⊢` read backwards
+(`Proves.not_of_not_valid`).  The obligations of an import that are false
+in the model are refuted so (`N.f.refuted`, `#solkey_obligations`). -/
+
+/-- A sequent with no context that is not valid is not derivable. -/
+theorem _root_.Solidity.Proves.not_of_not_valid {R : RuleSet} {φ : Fml C []}
+    (h : ¬ Fml.Valid φ) : ¬ Proves C R [] .nil φ :=
+  fun d => h d.fmlValid
+
+/-- `sol_refute`: `¬ ⊢ φ` or `¬ ⊨ᶠ φ` by a certified counterexample.  Fails
+when the search finds none. -/
+syntax (name := solRefute) "sol_refute" : tactic
+
+open Lean Elab Tactic Meta in
+@[tactic solRefute]
+def evalSolRefute : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  let some body := ty.consumeMData.not? | throwError "sol_refute: the goal is not a negation"
+  let (cE, φE, wrap) ← match body.consumeMData.getAppFnArgs with
+    | (``Proves, #[cE, R, Γ₀, _, H, φE]) =>
+      unless (← whnfR Γ₀).isAppOf ``List.nil && (← whnfR H).isAppOf ``Hyps.nil do
+        throwError "sol_refute: a sequent with hypotheses"
+      pure (cE, φE, fun nv => mkAppN (mkConst ``Proves.not_of_not_valid) #[cE, R, φE, nv])
+    | (``Fml.Valid, #[cE, φE]) => pure (cE, φE, id)
+    | _ => throwError "sol_refute: not `¬ ⊢ φ` or `¬ ⊨ᶠ φ`"
+  if φE.hasFVar || φE.hasMVar then throwError "sol_refute: the formula is not closed"
+  unless (← whnfR cE).isConst do throwError "sol_refute: not a named contract: {cE}"
+  let C ← unsafe evalExpr Contract (mkConst ``Contract) cE
+  let φ ← unsafe evalExpr (Fml C []) (← inferType φE) (← Solidity.Symex.evaluable φE)
+  let s := searchFml C φ
+  let some w := s.witness
+    | throwError "sol_refute: no counterexample found in {s.tried} candidates"
+  let c := w.cand
+  -- the kernel is asked only what the evaluator already answered
+  unless Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff do
+    throwError "sol_refute: the counterexample found is not certified"
+  let domE := mkApp (mkConst ``poolDom) (toExpr c.argInts)
+  let σE := mkApp2 (mkConst ``Cand.tstate) cE (c.quote cE)
+  let valsE := toExpr c.vals
+  let ev ← mkAppM ``Fml.eval3Peel #[domE, valsE, σE, φE]
+  let h ← mkDecideProof (← mkEq ev (mkConst ``Tri.ff))
+  g.assign (wrap (mkAppN (mkConst ``Fml.not_valid_of_eval3Peel) #[cE, domE, valsE, σE, φE, h]))
+  replaceMainGoal []
 
 end Solidity.Tools

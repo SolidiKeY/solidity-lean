@@ -248,10 +248,20 @@ theorem LTm.literalRead_eval (g : State C []) (ν : AEnv) {p : PrimTy}
     · rfl
   · rfl
 
+theorem foldMem2_eval (g : State C []) (ν : AEnv) {a b s : Srt}
+    (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    (foldMem2 o x y).eval g ν = (LTm.app2 o x y).eval g ν := by
+  dsimp only [foldMem2]
+  split
+  · split
+    · exact Op2.memRes_eval o x y
+    · rfl
+  · rfl
+
 theorem foldRead2_eval (g : State C []) (ν : AEnv) {a b s : Srt}
     (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     (foldRead2 o x y).eval g ν = (LTm.app2 o x y).eval g ν := by
-  cases o <;> simp only [foldRead2, LTm.literalRead_eval, fold2_eval]
+  cases o <;> simp only [foldRead2, LTm.literalRead_eval, fold2_eval, foldMem2_eval]
 
 theorem Op3.eval_atIn (g : State C []) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
     (x : Option (Storage C)) (y : Option (SRef C (.ref R))) (z : Option k.Denote) :
@@ -696,7 +706,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     have hd := Tm.toL_drel hA m m' hm'
     refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal⟩, rfl⟩
-    · rw [seqL_tt_drel hd]
+    · rw [seqMemL_tt_eval, seqL_tt_drel hd]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (m.eval τ : Option (Grown _ _)) <;> rfl
     · intro q hq

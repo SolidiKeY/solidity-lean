@@ -17,28 +17,35 @@ semantics but in what the calculus and its closers prove automatically,
 each with the reason recorded in its section:
 
 - **Calculus.** A computed or rethrown revert reason (`revert(string.concat(…))`,
-  `catch (bytes memory d) { revert(d); }`) is bound as any byte string: no
+  `catch (bytes memory d) { assembly { revert(add(d, 32), mload(d)) } }`)
+  is bound as any byte string: no
   formula reads the data a run halts with, which would need a third
   modality over revert outcomes, with no solkey taclet to follow ("Revert
   data").  A diamond over a loop whose body calls back is unsound by
   design (`holdsC_diamond_loop`, `docs/options.md` O3).
-- **Closer and search cost.** The four `SolcLoopsOpen` functions
-  (`docs/loops.md`); an array's length after an element write under
+- **Closer and search cost.** Two `SolcLoopsOpen` functions remain open;
+  `binomialFaithfulRowsSmall` proves within the default budget
+  ([assurance.md](assurance.md), M13) and `binomialRowsNine` in chunks
+  (`sol_prove (chunk := 128)`; `docs/loops.md`). Other limits include
+  an array's length after an element write under
   `{grow}`; a fresh object's bytes under `allocAll` read by `sol_decide`;
-  quantifier instances at loop counters; reassembling a full address's 20
-  bytes; loops without an invariant (ABI arrays, `T[]` decoding), which no
-  strategy proves without one.
-- **Known defect.** `sol_close` names `CloseS.landedAll_def` before it is
-  declared, so that one `simp only` step never fires (`docs/kernel-port.md`);
-  fixing it changes `sol_close` everywhere, so it is left for a measured
-  change of its own.
+  remaining quantified memory-read patterns at loop counters; reassembling a
+  full address's 20 bytes; and symbolic unbounded loops whose required
+  invariants are not inferred (ABI arrays and `T[]` decoding).
+- **Repaired closer defect.** `sol_close_landed` now expands after
+  `CloseS.landedAll_def` is declared, and primitive capture realizability
+  closes strict result specifications. Focused unsigned, signed and Boolean
+  regressions pass; whole-library validation is still due
+  ([assurance.md](assurance.md)).
 
 ## Out of scope: the EVM inside Solidity
 
 The model is Solidity's semantics, not the machine's. These are left out on
 purpose, and a program using them is refused:
 
-- inline assembly (`assembly { … }`, Yul), `address.code`, `extcodesize`,
+- inline assembly other than a canonical whole-byte-buffer rethrow
+  (`assembly { revert(add(data, 32), mload(data)) }`, M14 below),
+  `address.code`, `extcodesize`,
   `gasleft()`, gas stipends beyond `transfer`/`send`'s `noCallback`
   reading, `selfdestruct`, `create2` salts;
 - raw calldata and returndata (`msg.data`, `msg.sig`, low-level
@@ -92,9 +99,9 @@ contract's invariant.
 | a loop by its invariant and a call returning a value or a reference, while something calls back (`ValidT`) | calculus | closed (`docs/options.md` O3): a call forks where its body does (`Stmt.forksIn`), and one whose callee calls back is inlined under callbacks whatever it returns (`ProvesC.callVal`, `callStorage`, `callMem`); a loop by its invariant under the box (`ProvesC.invBox`, the body's frame read over its callback runs, `ExecP.frame`); `tests/solc/CallbackCalls.sol`.  Not open but refused: a diamond over a loop whose body calls back never holds, the loop's callback runs including a divergence (`ExecS.loopDiverge`, `holdsC_diamond_loop`), whatever its bound, invariant or variant |
 | a loop body containing a `try` (no frame: `whileClose`) | calculus | closed: a `try` is within `nonpayable` when its clauses and a self-call's callee are, writing what its clauses write of the caller's locals (`Stmt.within`, `Stmt.writesAt`; `Stmt.run_frame`, `ExecS.frame` with the callee's havoc under callbacks), so the invariant rules apply, with or without callbacks (`tests/solc/CallbackCalls.sol`, `loopOfTries`); a `catch` that binds the data allocates and stays without a frame |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
-| closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`) | closer limit, not a semantic gap | closed (lane `open-closer`): `sol_close`'s last alternative adds solkey's `multiply_2_inEq0` of the literal bounds of the atoms of a leaf's products (`sol_close_nonlin`, `Calculus/CloseNonlin.lean`), only where a product of two non-literal integers is left; `tests/solc/Recursion.sol`'s `sum` and `sumThree`, `Examples/Tactics/Recursion.lean` (`triSpec`) |
-| closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | closed for a local of the premise's scope (lane `open-abi2`): `allLeftHide` offers the literals and the locals the leaf indexes with (`InstLit.loc`, a position counted from the outermost, `Calculus/AllLeft.lean`), a conjunction of premises split around its `∀`s (`Fml.instRest`); `NarrowNested.abiElementAtParameter` (`xs[i]` at a parameter `i`).  Open: a loop counter, a local pushed after the premise, is not a term of the premise's scope; an invariant states its element's range instead |
-| the four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner now states (the contract exposes nothing, `reading: clean`), but its 43 unrolled pushes run past the search's heartbeats; the others are closer cost (exposed recycled slots, unshared memory terms); `docs/loops.md`, "Open loops lane" (remeasured in lane `open-closer`: 55 s, 57 s, 58 s, 38 s, all four still timeouts) |
+| closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`) | closer limit, not a semantic gap | The bounded fallback now includes symbolic linear comparisons, sign-guarded `multiply_inEq0`, and factor/difference squares as well as `multiply_2_inEq0` from literal bounds (`Calculus/CloseNonlin.lean`). `Examples/Tactics/Nonlinear.lean` covers symbolic/coefficient/strict orders, cross-product inequalities and checked source multiplication; the triangular recursion contract remains a regression. This is incomplete instance-based arithmetic, not a general nonlinear decision procedure or an extension of `#verify`'s exact fragment. |
+| closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | The scoped `allLeftHide` pre-pass handles literals and locals already in the premise's scope (`InstLit.loc`, `Calculus/AllLeft.lean`). A bounded closer fallback now opens later binders and applies universal proofs at numeric locals and typed projections (`Calculus/CloseAll.lean`), including an anonymised invariant-loop counter (`Examples/Tactics/AllLeftLater.lean`). It retains Theory equations so premises and conclusions read alike. Arbitrary ABI memory-array loops still need further memory-read/length normalization and suitable invariants; this is not complete quantified-array automation. |
+| the original four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | `binomialFaithfulRowsSmall` now proves through the actual runner and its pinned-solc regression, after demanded memory-read folding (M13). `binomialRowsNine` proves in `Examples/Tactics/OpenLoops.lean` with identities named by their allocations (`copyRes`) and its walk checked in chunks (`sol_prove (chunk := 128)`), and through the runner, which checks a walk past 1024 steps in chunks (with `--timeout-ms` past the default 300 s). Two remain open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner states, but its 43 unrolled pushes exceed the search budget; and `multiArrayFillByPushLoops` needs exposed recycled-slot handling. See `docs/loops.md` and `docs/assurance.md`. |
 | a quotient `x / k` of a parameter left open (constructors and functions alike) | closer | closed: `sol_close`'s arithmetic reads a quotient of a nonnegative dividend as `div` (`Int.tdiv_eq_ediv_of_nonneg`, solkey's `sdiv_axiom`; `Calculus/Close.lean`, `tests/solc/CtorDivision.sol`) |
 | narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  A tuple of references stays refused whatever its types (`elabTuple`) |
 | a struct the struct table does not list (a contract's own, or the table's name with other members) | semantics, solc import | closed: a contract's own struct is the table's struct whose name spells its members ("Struct table" below; `contract!{ struct S { … } }`, `Examples/Tactics/OwnStructs.lean`, `tests/solc/OwnStructs.sol`); a struct recursive through an array stays refused, a library's struct its caller cannot see stays a row |
@@ -736,12 +743,13 @@ the data has `Error`'s selector and decodes, `r` the decoded string;
   modalities read no data: a box accepts every revert, a diamond none.
   `ExtResult.error` and `.other` carry the reason and the data an external
   callee returns.
-- *Where data is computed.*  Neither modality reads a top-level revert's
-  data, so the elaborator emits `Stmt.revertData` only where a `try` can
-  read it: in the callee a self-call `try` runs (`trySelfBody`, the
-  elaborator's `selfFrame`), and its calls.  Elsewhere `require(c, "m")`,
+- *Where literal/custom-error data is computed.* Neither modality reads a
+  top-level revert's data, so literal/custom-error lowering emits
+  `Stmt.revertData` in the callee a self-call `try` runs (`trySelfBody`, the
+  elaborator's `selfFrame`), and its calls. Elsewhere `require(c, "m")`,
   `revert("m")`, `revert E(a)` stay `require(c)`/`revert()` as before, so
-  no other proof changes shape.
+  no other proof changes shape. M14 computed-memory operands below retain
+  their bytes at top level too.
 - *Dispatch.*  A self-call whose callee reverts goes to `catch Error` when
   its data decodes as `Error(string)`, to `catch Panic` when it decodes as
   `Panic(uint256)` (the code bound), to the catch-all otherwise (empty data
@@ -771,7 +779,13 @@ the data has `Error`'s selector and decodes, `r` the decoded string;
   `0x11`, read as an assertion, `docs/options.md` O2); division by zero
   (`0x12`), an enum out of range (`0x21`), an index out of range (`0x32`),
   a too-large allocation (`0x41`) and an unset function value (`0x51`)
-  revert in the model (the solkey reading).  A self-call's `Panic` clause
+  revert in the model (the solkey reading).  In a self-call's callee, where
+  a `catch` reads the data, every statement is preceded by the checks it
+  meets with their codes (`Prog.withPanics`, `Syntax/Checked.lean`): an
+  overflow `0x11` (outside `checked { … }` too), a division or modulo by
+  zero `0x12`, an empty `pop()` `0x31`, an index past a length `0x32`; the
+  allocation's `0x41`, the enum's `0x21` and the function value's `0x51`
+  are not.  A self-call's `Panic` clause
   binds the table's code, `1` without one, as before; its rule's goal is
   behind the codes its callee's data carries (`Prog.panicCodes`,
   `docs/options.md` O8, "The `Panic` goal per code").
@@ -782,8 +796,8 @@ quoters gain an arm, as `assumeFalse` did), one `THalt` constructor (every
 case split over a halt: few, most proofs are generic in the halt), the
 self-call `try` dispatch in `TRun.tryCall` and its soundness
 (`Premise.sound_trySelfBox`, `holdsC_trySelfCb`).  No proof over an
-existing program changes shape: data is computed only in self-call
-callees.
+existing literal/custom-error program changes shape: that lowering computes
+data only in self-call callees. M14 extends computed-memory data separately.
 
 **Status.** (updated as slices land)
 - Slice 1, the run and the calculus: landed.  `THalt.revertWith`,
@@ -898,39 +912,31 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   (2026-10-21): `lean_build` of the default targets; `node --test
   --test-name-pattern="revert|self|solc/open"` passes (4 tests).
 
+**Computed memory data (M14).** `RevPart.mem` now reads a typed memory
+local at the point of revert. `.reason` ABI-encodes its bytes as
+`Error(string)`; `.raw` copies them unchanged. The copied values survive
+callee heap rollback. `revert(reason)` and `require(c, reason)` accept computed
+reasons; require evaluates its condition and reason in argument order even
+when the condition is true. Raw rethrow uses Solidity's actual spelling,
+`assembly { revert(add(data, 32), mload(data)) }`. The importer accepts only
+that whole-buffer form over a bytes/string object, with matching declaration
+references; other assembly and word-array buffers remain unsupported.
+`Semantics/RevertMemory.lean` proves the current-heap and unset-local laws.
+`Examples/Tactics/ComputedRevert.lean` proves computed, aliased and empty
+execution outcomes; nested raw catching and outer Error decoding also have
+executable guards from pinned solc source. These guards are not proof axioms.
+
 **Left open, with the reason.**
-- A reason that is not a literal (`revert(string.concat("x", s))`, a
-  rethrown `catch (bytes memory d) { revert(d); }` in a self-call's
-  callee).  Re-examined in lane `open-memret`, not implemented; what it
-  takes, layer by layer:
-  1. *Syntax.* `sol{}` refuses a reason that is not a literal ("a string
-     literal", `Syntax.lean`'s `solRequireMsg`), and `RevPart` (`Syntax/Scoped.lean`) has
-     literal bytes, a selector and a word only.  A `RevPart.mem (x : Idx Γ
-     (.mem .bytes))` — the bytes of a memory local at the revert — is one
-     constructor of `Stmt`'s data, so every fold over `Stmt` gains an arm
-     (`Stmt.within*`, `writesAt`, the printers, `Stmt.run`'s halt).
-  2. *Run.* The halted run would carry those bytes, read off the callee's
-     heap as it halts; the heap itself is discarded, so the data must be
-     copied out as values (`THalt.revertWith` carries bytes already).
-  3. *Calculus.* The `try`'s rule (`catchDataBox`, `Calculus/Blocks.lean`)
-     enumerates the callee's data statically (`Stmt.revertDatas`, a `Pat`
-     per `revert`); a computed datum has no pattern, so the clause would
-     bind it as any bytes (`Fml.allocAll`), the any-bytes goal of today.
-     To prove facts about it the caller's goal needs a term for what the
-     callee halts with, and no formula reads a halt's data: `[·]` and `⟨·⟩`
-     read normal outcomes only.  The reading needed is a third modality,
-     `[s]ʳ(d. φ)`: every run of `s` that reverts does so with data `d`
-     such that `φ`, `φ` read in the state the callee reverts in (its
-     memory, so `d`'s bytes are `string.concat("x", s)`'s); the `try`'s
-     rule then splits the callee into `[body] success` and
-     `[body]ʳ(d. clause)`.  This is a new `Fml` constructor with a rule for
-     every statement (solkey has no taclet to transcribe: KeY's Solidity
-     calculus reads no revert data) and a soundness case for each; the
-     `{grow}` reading of this lane (`Fml.grow`) carries the heap the
-     callee leaves, but a revert leaves none.
-  The cost is the obstacle: `Fml.grow` added one constructor and about
-  forty fold arms (`Derived15`'s near-limit replay re-checked under it); a
-  revert modality is that plus a rule per statement, so it is its own lane.
+- The calculus still enumerates static payload patterns. A memory operand
+  has no static pattern (`RevPart.pat?` returns `none`), so `catchDataBox`
+  conservatively binds arbitrary bytes through `Fml.allocAll`. Runtime
+  precision does not supply an exact symbolic relationship between the
+  callee's computed data and the catch local. Such a relationship needs a
+  proved reading of revert outcomes. A separate revert modality was considered
+  in lane `open-memret`; it would add formula-fold cases and a rule per
+  statement, affecting checking costs throughout the calculus. M14 adds no
+  such modality. Literal errors outside a self-call frame still use the
+  existing empty-data lowering; exact error classes are not complete.
 - A fresh object's bytes read in the clause cost `sol_close` past its
   heartbeats when the premises read bytes too (`symbolicCustom` reads the
   length); `sol_decide` does not read `allocAll` (it would need an atom of
@@ -964,10 +970,13 @@ through `catch (bytes memory d)`), `Examples/Tactics/RevertData.lean`
   `require(a != address(this) || c == 1);`), sound over `Prog.run_dataS`
   and with callbacks (`holdsC_trySelfCb`, a callee that pays nobody), so
   `catch Panic(uint c)` proves `c == 1` (`RevertData.lean`'s `assertCode`,
-  `overflowCode`); `docs/options.md` O8.  The other
-  codes (`0x12` division, `0x21` enum, `0x32` index, `0x41` allocation,
-  `0x51` function value) and an overflow outside `checked { … }` are reverts
-  in the model, with no data (the solkey reading).
+  `overflowCode`); `docs/options.md` O8.  In such a callee a division by
+  zero (`0x12`), an empty `pop()` (`0x31`), an index past a length
+  (`0x32`) and an overflow outside `checked { … }` (`0x11`) now revert
+  with their `Panic` data too (`Prog.withPanics`; `RevertData.lean`'s
+  `divideCode`, `indexCode`, `plainOverflowCode`).  Elsewhere, and the
+  enum (`0x21`), allocation (`0x41`) and function-value (`0x51`) codes
+  everywhere, they are reverts with no data (the solkey reading).
 - A raw datum always includes the empty one (an evaluator's revert), so a
   `catch (bytes memory d)` goal holds for `d` empty too.
 - The callback reading (`ValidT`): `catchData` forks when its callee or
@@ -1010,8 +1019,8 @@ of bounded integers by solkey's `multiply_2_inEq0` (`sol_close_nonlin`,
 back and reassembled (`hornerU?`, `Facts.arithOk` on `uint` shifts,
 remainders and products, `Facts.modSmall`; "Hashing and the ABI"); a
 locally built byte string's hash evaluated under `⟨⟩` (`keccakAt`).  Left
-open with their numbers: a fresh object's bytes ("Revert data"), the four
-`SolcLoopsOpen` functions (`docs/loops.md`).  `TestSuite/Derived15`'s
+open with their numbers: a fresh object's bytes ("Revert data"), two of the
+four `SolcLoopsOpen` functions (`docs/loops.md`).  `TestSuite/Derived15`'s
 `invariantVariantSkipsBreakIteration` replay: 200045 heartbeats (in units
 of `maxHeartbeats`) before and after, its 205000 override unchanged.
 

@@ -118,7 +118,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               .$(mkIdent `tryCallSelfBox):ident)
             let app ← `(tactic| apply $(← ProofTree.short ``ProvesC.tryCall)
               .$(mkIdent `tryCallWithCallbackBox):ident)
-            pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
+            -- a `catch` of the raw data: a goal per datum (`flatten`)
+            pure #[#[← ProofTree.takeApart selfApp (flatten := true)], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
           -- a loop at its unwinding bound, under the box (`loopExit`)
           -- a loop by its invariant, under the box (`whileInvariantBox`)
@@ -169,7 +170,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   return (if noPlain then #[] else #[#[plain]]) ++ rest
 
 /-- A `Proves` leaf closed as `sol_prove` closes one: `sol_leaf` and
-`sol_close` (`sol_spec_close` for a specification's), the invariant opened
+`sol_decide`, else `sol_close` (`sol_spec_close` for a specification's), as
+`sol_prove?` tries them (`Derive.leafTacs`), the invariant opened
 first where it is assumed: where the invariant is `true` (`inv` unset),
 opening it changes nothing, and a failed try costs a closer's run. -/
 def closeLeaf (g : MVarId) (inv : Bool) : TacticM (Option (Array String)) := do
@@ -178,15 +180,18 @@ def closeLeaf (g : MVarId) (inv : Bool) : TacticM (Option (Array String)) := do
   let close ← `(tactic| sol_close)
   let spec ← `(tactic| sol_spec_close)
   let tries : Array (Array (TSyntax `tactic)) :=
-    #[#[leaf, close], #[← `(tactic| exact $(← ProofTree.short ``Proves.assumeInv))]] ++
+    #[#[leaf, ← `(tactic| sol_decide)], #[leaf, close],
+      #[← `(tactic| exact $(← ProofTree.short ``Proves.assumeInv))]] ++
     (if inv then #[#[openT, leaf, close]] else #[]) ++
     -- a specification's leaf (`spec[C]{f}`): `sol_spec_close`
     #[#[leaf, spec]] ++
     (if inv then #[#[openT, leaf, spec]] else #[])
   for tacs in tries do
     let s ← saveState
+    -- a failed try leaves no error behind (`withoutRecover`)
     let ok ← tryCatchRuntimeEx
-      (withCurrHeartbeats do return (← ProofTree.runOn g tacs).isEmpty) fun _ => pure false
+      (withCurrHeartbeats do return (← withoutRecover (ProofTree.runOn g tacs)).isEmpty)
+      fun _ => pure false
     if ok then return some (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
     s.restore
   return none
@@ -195,7 +200,7 @@ def closeLeaf (g : MVarId) (inv : Bool) : TacticM (Option (Array String)) := do
 `Walk.walk` writes them. -/
 partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId)
     (close : Bool) (inv : Bool := true) : TacticM (Array String) := do
-  if ← stopped leaves then leaves.modify (·.push g); return #["sorry"]
+  if ← stopped leaves then leaves.modify (·.push g); return #[r"sorry"]
   let n ← fuel.get
   if n == 0 then throwError "sol_derive: more than {Derive.fuel} steps"
   fuel.set (n - 1)
@@ -210,7 +215,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     -- the walk's
     let some lines ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (Walk.walk fuel' ls g false))
         fun _ => do s.restore; pure none
-      | leaves.modify (·.push g); return #["sorry"]
+      | leaves.modify (·.push g); return #[r"sorry"]
     fuel.set (← fuel'.get)
     -- each `sorry` (`· sorry` under a bullet) is the next leaf `Proves`'
     -- walk left: closed here where the invariant assumed closes it, its
@@ -220,7 +225,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     for line in lines do
       let t := line.trimLeft
       let bullet := t.startsWith "· "
-      if (if bullet then (t.drop 2).trimLeft else t) == "sorry" then
+      if (if bullet then (t.drop 2).trimLeft else t) == r"sorry" then
         match rest with
         | l :: rs =>
           rest := rs
@@ -262,12 +267,13 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   let moves ← tryCatchRuntimeEx (withCurrHeartbeats (movesAt g)) fun _ => pure #[]
   for tacs in moves do
     let s ← saveState
-    let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g tacs))
+    let r ← tryCatchRuntimeEx
+      (some <$> withCurrHeartbeats (Walk.withStepDepth (ProofTree.runOn g tacs)))
       fun _ => do s.restore; pure none
     if let some gs := r then
       step := some (tacs, gs)
       break
-  let some (tacs, gs) := step | leaves.modify (·.push g); return #["sorry"]
+  let some (tacs, gs) := step | leaves.modify (·.push g); return #[r"sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   match gs with
   | [g'] => return head ++ (← walk fuel leaves g' close inv)

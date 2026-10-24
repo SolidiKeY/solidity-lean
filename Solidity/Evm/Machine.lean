@@ -34,12 +34,14 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   they are the same term, so keccak never collides: the assumption solc makes,
   written into the type.  Adding to a slot adds to its offset, unbounded.
 * **Jumps are relative and forward**: `JUMP n`/`JUMPI n` skip the next `n`
-  instructions.  The fragment has no loops (`inFrag` refuses one), so no
-  backward jump is needed, and
-  `exec` is structural: it carries the number of instructions still to skip.
-  Absolute targets with `JUMPDEST` are an assembler's business.  The one loop
-  solc emits for the fragment, `checked_exp_helper`'s, runs at most `255`
-  times and is unrolled (`expLoop`, `Evm/Layout.lean`).
+  instructions, and a loop is one structured instruction, `LOOP cond body`
+  (`Instr.loop`), where solc writes a `JUMPDEST` and a `JUMP` back.  So
+  `exec` is structural: it carries the number of instructions still to skip,
+  and a loop's turns are those of `loopRun`, a fault where no number of them
+  ends it (the run's `diverge`).  Absolute targets with `JUMPDEST` are an
+  assembler's business.  The one loop solc emits inside an operator,
+  `checked_exp_helper`'s, runs at most `255` times and is unrolled
+  (`expLoop`, `Evm/Layout.lean`).
 * `KECCAK256` takes its inputs from the stack (real code first `MSTORE`s them),
   in two forms: `keccakMap` for a mapping entry, `keccakArr` for array data.
 * **Locals live in memory**, one cell per local, addressed by the local's
@@ -195,6 +197,10 @@ inductive Instr where
   | sstore
   | mload (l : Nat)
   | mstore (l : Nat)
+  /-- Stack-addressed memory operations; the fixed-cell forms above are
+  shorthands used by the existing local-variable compiler. -/
+  | mloadAt
+  | mstoreAt
   | jump (n : Nat)
   | jumpi (n : Nat)
   | call
@@ -208,7 +214,12 @@ inductive Instr where
   | caller | callvalue | timestamp | selfbalance
   /-- `ADDRESS` (`address(this)`). -/
   | address
-  deriving DecidableEq, Repr, Inhabited
+  /-- A loop, `while (cond) { body }`: the condition's code leaves a word
+  on the stack, the body runs while it is not `0`.  An assembler writes it
+  as a `JUMPDEST` at the condition and a `JUMP` back from the body's end
+  (`docs/compiler-verification.md`, "Loops"). -/
+  | loop (cond body : List Instr)
+  deriving Repr, Inhabited
 
 instance : ToString Instr where
   toString
@@ -224,6 +235,8 @@ instance : ToString Instr where
     | .sstore => "SSTORE"
     | .mload l => s!"MLOAD %{l}"
     | .mstore l => s!"MSTORE %{l}"
+    | .mloadAt => "MLOAD"
+    | .mstoreAt => "MSTORE"
     | .jump n => s!"JUMP +{n}"
     | .jumpi n => s!"JUMPI +{n}"
     | .call => "CALL"
@@ -232,6 +245,7 @@ instance : ToString Instr where
     | .caller => "CALLER" | .callvalue => "CALLVALUE" | .timestamp => "TIMESTAMP"
     | .selfbalance => "SELFBALANCE"
     | .address => "ADDRESS"
+    | .loop c b => s!"LOOP [{c.length} | {b.length}]"
 
 /-- `f` with `x` sent to `v`. -/
 def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : β) : α → β :=
@@ -339,12 +353,23 @@ def pay (bal : Fin W → Nat) (s a : Fin W) (v : Nat) : Fin W → Nat :=
 def Machine.push (m : Machine) (w : Word) : Machine := { m with stack := w :: m.stack }
 
 /-- A run's outcome: a machine and the number of instructions still to skip
-(a pending jump), a `REVERT`, or a fault (stack underflow, a word of the wrong
-kind) — which compiled code of the fragment never reaches. -/
+(a pending jump), a `REVERT`, or a fault: a stack underflow or a word of the
+wrong kind, which compiled code of the fragment never reaches, or a loop that
+never ends (`loopRun`). -/
 inductive Out where
   | ok (m : Machine) (skip : Nat)
   | revert
   | fault
+
+/-- Whether an outcome is a revert: decidable, so the kernel can check a
+run's revert (`Out.eq_revert`) where unfolding `exec` in the elaborator is
+slow. -/
+def Out.isRevert : Out → Bool
+  | .revert => true
+  | _ => false
+
+theorem Out.eq_revert {o : Out} (h : o.isRevert = true) : o = .revert := by
+  cases o <;> first | rfl | (simp only [Out.isRevert, Bool.false_eq_true] at h)
 
 def Out.bind : Out → (Machine → Nat → Out) → Out
   | .ok m k, f => f m k
@@ -364,8 +389,88 @@ theorem Out.bind_assoc (o : Out) (f g : Machine → Nat → Out) :
     (o.bind f).bind g = o.bind (fun m k => (f m k).bind g) := by
   cases o <;> rfl
 
+instance : Inhabited Out := ⟨.fault⟩
+
+/-! ## Loops
+
+A loop's turn runs the condition's code; a `0` on top leaves the loop, the
+word popped, anything else runs the body.  Either piece ending with a jump
+still pending, or the condition leaving no word, is a fault, which compiled
+code never reaches.  The loop is its turns until one ends it: the first
+`n` for which `loopIterN` ends gives its outcome (`loopRun_of_iterN`), and a
+loop no number of turns ends is a fault too: the machine has no outcome
+(`Stmt.run`'s `diverge`, `TLoop.run`). -/
+
+/-- One turn of a loop whose condition and body run as `rc` and `rb`. -/
+def loopTurn (rc rb : Machine → Out) (m : Machine) : Machine ⊕ Out :=
+  match rc m with
+  | .ok m₁ 0 => match m₁.stack with
+    | .val w :: st =>
+      if w.1 = 0 then .inr (.ok { m₁ with stack := st } 0) else
+        match rb { m₁ with stack := st } with
+        | .ok m₂ 0 => .inl m₂
+        | .ok _ (_ + 1) => .inr .fault
+        | r => .inr r
+    | _ => .inr .fault
+  | .ok _ (_ + 1) => .inr .fault
+  | r => .inr r
+
+/-- `n` turns of a loop: still running, or ended. -/
+def loopIterN (rc rb : Machine → Out) : Nat → Machine → Machine ⊕ Out
+  | 0, m => .inl m
+  | n + 1, m => match loopTurn rc rb m with
+    | .inl m' => loopIterN rc rb n m'
+    | .inr r => .inr r
+
+/-- `loopRun`'s compiled twin. -/
+partial def loopImpl (rc rb : Machine → Out) (m : Machine) : Out :=
+  match loopTurn rc rb m with
+  | .inl m' => loopImpl rc rb m'
+  | .inr r => r
+
+open Classical in
+/-- **A loop's outcome**: what the turns end with, a fault where no number
+of turns ends it. -/
+@[implemented_by loopImpl]
+noncomputable def loopRun (rc rb : Machine → Out) (m : Machine) : Out :=
+  if h : ∃ r n, loopIterN rc rb n m = .inr r then Classical.choose h else .fault
+
+theorem loopIterN_done_le {rc rb : Machine → Out} {n k : Nat} {m : Machine} {r : Out}
+    (hnk : n ≤ k) (h : loopIterN rc rb n m = .inr r) : loopIterN rc rb k m = .inr r := by
+  induction n generalizing m k with
+  | zero => simp only [loopIterN, reduceCtorEq] at h
+  | succ n ih =>
+    obtain ⟨k, rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
+    simp only [loopIterN] at h ⊢
+    split at h
+    · exact ih (by omega) h
+    · exact h
+
+/-- **A loop ended after `n` turns ends so.** -/
+theorem loopRun_of_iterN {rc rb : Machine → Out} {n : Nat} {m : Machine} {r : Out}
+    (h : loopIterN rc rb n m = .inr r) : loopRun rc rb m = r := by
+  have hex : ∃ r n, loopIterN rc rb n m = .inr r := ⟨r, n, h⟩
+  simp only [loopRun, hex, dif_pos]
+  obtain ⟨n', hn'⟩ := Classical.choose_spec hex
+  have h1 := loopIterN_done_le (Nat.le_max_left n n') h
+  have h2 := loopIterN_done_le (Nat.le_max_right n n') hn'
+  rw [h1] at h2
+  exact (Sum.inr.inj h2).symm
+
+/-- **A loop no number of turns ends faults.** -/
+theorem loopRun_of_forall {rc rb : Machine → Out} {m : Machine}
+    (h : ∀ n, ∃ m', loopIterN rc rb n m = .inl m') : loopRun rc rb m = .fault := by
+  have hex : ¬ ∃ r n, loopIterN rc rb n m = .inr r := by
+    rintro ⟨r, n, hn⟩
+    obtain ⟨m', hm'⟩ := h n
+    rw [hm'] at hn
+    cases hn
+  simp only [loopRun, hex, dif_neg, not_false_eq_true]
+
 /-- One step with the stack's top replaced: `ok` with nothing to skip. -/
 @[inline] def Machine.next (m : Machine) (st : List Word) : Out := .ok { m with stack := st } 0
+
+mutual
 
 /-- One instruction. -/
 def Instr.step : Instr → Machine → Out
@@ -454,6 +559,12 @@ def Instr.step : Instr → Machine → Out
   | .mstore x, m => match m.stack with
     | w :: st => .ok { m with stack := st, mem := upd m.mem x w } 0
     | [] => .fault
+  | .mloadAt, m => match m.stack with
+    | .val x :: st => m.next (m.mem x.1 :: st)
+    | _ => .fault
+  | .mstoreAt, m => match m.stack with
+    | .val x :: w :: st => .ok { m with stack := st, mem := upd m.mem x.1 w } 0
+    | _ => .fault
   | .jump n, m => .ok m n
   | .jumpi n, m => match m.stack with
     | .val c :: st => .ok { m with stack := st } (if c.1 = 0 then 0 else n)
@@ -486,12 +597,15 @@ def Instr.step : Instr → Machine → Out
   | .timestamp, m => m.next (.val m.timestamp :: m.stack)
   | .selfbalance, m => m.next (.val (wmod (m.bal m.self)) :: m.stack)
   | .address, m => m.next (.val m.self :: m.stack)
+  | .loop c b, m => loopRun (fun m => exec c 0 m) (fun m => exec b 0 m) m
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/
 def exec : List Instr → Nat → Machine → Out
   | [], k, m => .ok m k
   | _ :: c, k + 1, m => exec c k m
   | i :: c, 0, m => (i.step m).bind (fun m' k' => exec c k' m')
+
+end
 
 /-- Run code from its first instruction. -/
 def run (c : List Instr) (m : Machine) : Out := exec c 0 m

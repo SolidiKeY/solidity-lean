@@ -128,13 +128,13 @@ info: Try this:
       (try and_intros)
     case fml =>
       sol_leaf
-      sol_close
+      sol_decide
     case upd =>
       sol_leaf
       sol_close
     case upd =>
       sol_leaf
-      sol_close
+      sol_decide
 -/
 #guard_msgs in
 example : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
@@ -376,7 +376,7 @@ info: Try this:
         exact Proves.closeTrue rfl
       case els =>
         sol_leaf
-        sol_close
+        sol_decide
 -/
 #guard_msgs in
 example : ValidT .noCallback dl[Payer]{ [ uint y = payOne(to, 1); assert(y == 2); ] true } := by
@@ -408,7 +408,7 @@ info: Try this:
     apply ProvesC.invBox rfl
     · refine ProvesC.plain ?_ rfl
       sol_leaf
-      sol_close
+      sol_decide
     · apply ProvesC.updIntro
       apply ProvesC.update (.key .valueDeclSkip) rfl
       apply ProvesC.send .sendWithCallbackBox

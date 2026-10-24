@@ -186,11 +186,12 @@ def Stmt.shrinks {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
     Prog.shrinks body || match op with | .pop => true | .push .. => false
   | .callReceiverPush _ _ _ body code _ => Prog.shrinks body || Prog.shrinks code
   | .callRec .. => true
+  | .loop _ _ body => Prog.shrinks body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .transfer .. | .send ..
   | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData .. | .loop ..
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData ..
   | .pushOpAssign .. | .pushIncDec .. => false
 def Prog.shrinks {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
   | .nil => false
@@ -221,6 +222,52 @@ def declStorageIn {Γ : Ctx} (F : Frag Γ) (R : RefTy) :
   | none => some (F.push (.alias R) .dead)
   | some (.path q) => (bindFl F q).map (F.push (.alias R))
   | some (.push ..) => none
+
+mutual
+/-- How many `push` statements a statement has: each runs at
+most once, since the fragment has no loop. -/
+def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
+  | .push .. | .pushOpAssign .. | .pushIncDec .. => 1
+  | .ite _ t e => Prog.pushes t + Prog.pushes e
+  | .block body => Prog.pushes body
+  | .call _ _ _ body => Prog.pushes body
+  | .callReceiver _ _ _ body op =>
+    Prog.pushes body + match op with | .push .. => 1 | .pop => 0
+  | .callReceiverPush _ _ _ body code _ => Prog.pushes body + Prog.pushes code + 1
+  | .callRec .. => 0
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
+  | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData .. => 0
+  -- a loop of the fragment pushes nothing (`inFrag`): its turns are unbounded
+  | .loop .. => 0
+def Prog.pushes {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Nat
+  | .nil => 0
+  | .cons s P => Stmt.pushes s + Prog.pushes P
+end
+
+mutual
+/-- Whether a statement pays: a `transfer` or a `send`, or one
+in a branch, a block or a called body. -/
+def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
+  | .transfer .. | .send .. => true
+  | .ite _ t e => Prog.pays t || Prog.pays e
+  | .block body => Prog.pays body
+  | .call _ _ _ body => Prog.pays body
+  | .callReceiver _ _ _ body _ => Prog.pays body
+  | .callReceiverPush _ _ _ body code _ => Prog.pays body || Prog.pays code
+  | .callRec .. => true
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData ..
+  | .pushOpAssign .. | .pushIncDec .. => false
+  | .loop _ _ body => Prog.pays body
+def Prog.pays {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
+  | .nil => false
+  | .cons s P => Stmt.pays s || Prog.pays P
+end
 
 mutual
 /-- A statement of the fragment, and what is known after it. -/
@@ -255,9 +302,17 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
       | some _ => CallRetIn (F.after (Prog.shrinks body)) ret
       | none => none
     else none
+  -- a loop whose body pushes, pays, shrinks nothing and leaves what is known
+  -- of the locals as it found it: every turn starts from the same fragment
+  | .loop _ c body =>
+    if valIn F c && Prog.pushes body == 0 && !Prog.pays body && !Prog.shrinks body then
+      match inFragP F body with
+      | some G => if (G.restrict Γ).fl = F.fl then some F else none
+      | none => none
+    else none
   | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
   | .assignMem .. | .deleteMem ..
-  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
+  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .pushOpAssign .. | .pushIncDec ..
   | .callReceiver .. => none
   | .callReceiverPush .. => none
   -- recursion is outside the compiled fragment
@@ -414,9 +469,11 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
     argsCode b args ++ retEnterCode b ps ret ++ compileProg (b + Γ.length) body ++
       retLeaveCode b ps ret
   | .block body => compileProg b body
+  -- the condition's word, the body while it is not `0` (`Instr.loop`)
+  | .loop _ c body => [.loop (compileVal b c) (compileProg b body)]
   | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
   | .assignMem .. | .deleteMem ..
-  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
+  | .assignNew .. | .tryCall .. | .revertData _ | .catchData .. | .pushOpAssign .. | .pushIncDec ..
   | .callReceiver .. => []
   | .callReceiverPush .. => []
   | .callRec .. => []
@@ -426,47 +483,5 @@ def compileProg (b : Nat) {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → List Instr
   | .cons s P => compileStmt b s ++ compileProg b P
 end
 
-mutual
-/-- How many `push` statements a statement has: each runs at
-most once, since the fragment has no loop. -/
-def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
-  | .push .. | .pushOpAssign .. | .pushIncDec .. => 1
-  | .ite _ t e => Prog.pushes t + Prog.pushes e
-  | .block body => Prog.pushes body
-  | .call _ _ _ body => Prog.pushes body
-  | .callReceiver _ _ _ body op =>
-    Prog.pushes body + match op with | .push .. => 1 | .pop => 0
-  | .callReceiverPush _ _ _ body code _ => Prog.pushes body + Prog.pushes code + 1
-  | .callRec .. => 0
-  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
-  | .declMem ..
-  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData .. | .loop .. => 0
-def Prog.pushes {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Nat
-  | .nil => 0
-  | .cons s P => Stmt.pushes s + Prog.pushes P
-end
-
-mutual
-/-- Whether a statement pays: a `transfer` or a `send`, or one
-in a branch, a block or a called body. -/
-def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
-  | .transfer .. | .send .. => true
-  | .ite _ t e => Prog.pays t || Prog.pays e
-  | .block body => Prog.pays body
-  | .call _ _ _ body => Prog.pays body
-  | .callReceiver _ _ _ body _ => Prog.pays body
-  | .callReceiverPush _ _ _ body code _ => Prog.pays body || Prog.pays code
-  | .callRec .. => true
-  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
-  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .revertData _ | .catchData .. | .loop ..
-  | .pushOpAssign .. | .pushIncDec .. => false
-def Prog.pays {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
-  | .nil => false
-  | .cons s P => Stmt.pays s || Prog.pays P
-end
 
 end Solidity.Evm

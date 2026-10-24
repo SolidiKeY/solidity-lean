@@ -259,13 +259,15 @@ other seven:
 - `memoryIndexWriteStorageRefRhsCapture`,
   `memoryIndexWriteStorageStructCopy` and
   `memoryIndexWriteStorageRefImpureIndex`: memory reads through a storage
-  copy below its root (the memory closer reads one level); the last one's
-  search runs away.
+  copy below its root.  Derived since by `sol_prove`
+  (`TestSuite/Derived21.lean`): the memory closer reads a copy's objects
+  below its root (`copyObjN`, `copyPathRd?`, `Theory/Typed/MemMirror.lean`)
+  and takes a read's guards out of its address (`LTm.hoistA`).
 - `invariantClosedFormSum`: a diamond leaf whose length witnesses (`∃ a,
   len = some a`) the closer does not pick.
-- `invariantQuantifiedOverPrefix`: imports and runs; its preservation leaf
-  needs the old `∀` instantiated through the write's frame (`values[q]`
-  diverging from `values[i]`), which the closer does not do.
+- `invariantQuantifiedOverPrefix`: derived (`TestSuite/Derived20.lean`) since
+  the closer splits a read at a symbolic index on the write
+  (`sol_close_save_cases`, solkey's `selectOnSaveCons`, `docs/automation.md`).
 
 **Review pass (2026-10-17).** A read-only finder and skeptic over
 `3dc319e9^..7c2dad3d` confirmed three defects, now fixed:

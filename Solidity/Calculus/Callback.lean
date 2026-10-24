@@ -383,7 +383,7 @@ not. -/
   reads its own.  The invariant where control leaves ("invariant on exit");
   the receiver the contract: the callee inlined, which may itself call back,
   then the success block ("self call succeeded"); the receiver another
-  contract: the success block from any state the callee may leave in which
+  contract, not at address `0`: the success block from any state the callee may leave in which
   the invariant holds, for every value of the return data ("call
   succeeded"); each `catch` block from the caller's state, where the call
   does not end normally as a self-call (`ExtCall.selfFails`).  At address
@@ -401,7 +401,8 @@ not. -/
       (self : ProvesC I pay Γ₀ H
         (b₀.bs.all (.modalK .box b₀.P
           (.pop .block ((Ext.append Γ b₀.ρ).trans b₀.P.ext) (.seq ω κ)) φ)))
-      (ok : ProvesC I pay Γ₀ ((H.pre (Fml.isBool call.notSelf.lower true)).havoc.pre (Fml.closedAt I))
+      (ok : ProvesC I pay Γ₀ (((H.pre (Fml.isBool call.hasCode.lower true)).pre
+          (Fml.isBool call.notSelf.lower true)).havoc.pre (Fml.closedAt I))
         (rets.all (.modalK .box body
           (.pop .block ((Ext.append Γ ρ).trans body.ext) (.seq ω κ)) φ)))
       (caught : ∀ b ∈ bs, ProvesC I pay Γ₀ H

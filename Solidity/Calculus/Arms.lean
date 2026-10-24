@@ -112,6 +112,144 @@ def Premise.captureMV {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
     (s : Stmt C (.mem R :: Γ) (.mem R :: Γ)) : Premise C Γ Γ :=
   .unfold (.cons (.declMem R x (some (.alias b)) rfl b.mapFree) (.cons s .nil)) (.push .refl)
 
+/-! ### The join of an `if` (`ifElseJoin`, Lean only)
+
+A branch of an `if` that is empty or one assignment of a value local
+(`v = e;`) runs as the update `{v := e}`: it neither panics nor hands
+control to anyone.  An `if` on a simple condition whose branches are both so,
+one of them empty and the other an accumulation (`Upd.ifJoin?`), is then one
+update, its right-hand side a conditional term (KeY's join, its `ifThenElse`
+merge), and the rest of the program is run once, not once per branch
+(`docs/automation.md`, M6).  `Upd.ifJoin` joins any two such branches; the
+gate keeps the others split, their cases cheaper for the closers than the
+conditional term. -/
+
+/-- What a branch of a joinable `if` does: nothing (`none`), or one value
+local assigned (`some ⟨p, v, e⟩`, `v = e;`). -/
+abbrev JoinArm (C : Contract) (Γ : Ctx) : Type :=
+  Option ((p : PrimTy) × Idx Γ (.val p) × Val C Γ p)
+
+/-- `v = e;`, the assignment of a value local, if the statement is one. -/
+def Stmt.localAssign? {Γ' : Ctx} (s : Stmt C Γ Γ') :
+    Option ((p : PrimTy) × Idx Γ (.val p) × Val C Γ p) :=
+  Stmt.casesOn (motive_1 := fun Γ _ _ => Option ((p : PrimTy) × Idx Γ (.val p) × Val C Γ p)) s
+    (assign := fun _ _ => none) (rebind := fun _ _ => none)
+    (assignLocal := fun i r => some ⟨_, i, r⟩)
+    (declLocal := fun _ _ _ => none) (declStorage := fun _ _ _ => none)
+    (opAssign := fun _ _ _ _ _ => none) (incDec := fun _ _ _ => none)
+    (assignIncDec := fun _ _ _ _ _ => none) (assignLocalPush := fun _ _ => none)
+    (push := fun _ _ _ => none) (pop := fun _ => none) (transfer := fun _ _ => none)
+    (send := fun _ _ _ _ => none) (declMem := fun _ _ _ _ _ => none)
+    (rebindMem := fun _ _ => none) (assignFromMem := fun _ _ => none)
+    (assignMem := fun _ _ => none) (delete := fun _ => none) (deleteMem := fun _ _ => none)
+    (assignNew := fun _ _ _ => none) (ite := fun _ _ _ => none) (require := fun _ => none)
+    (assert := fun _ => none) (revert := none) (assumeFalse := none)
+    (call := fun _ _ _ _ => none) (tryCall := fun _ _ _ _ _ _ _ _ _ _ => none)
+    (loop := fun _ _ _ => none) (block := fun _ => none)
+    (pushOpAssign := fun _ _ _ _ _ => none) (pushIncDec := fun _ _ _ => none)
+    (callReceiver := fun _ _ _ _ _ => none) (callReceiverPush := fun _ _ _ _ _ _ => none)
+    (callRec := fun _ _ _ _ _ => none) (revertData := fun _ => none)
+    (catchData := fun _ _ _ _ _ _ _ _ => none)
+
+/-- The program is empty. -/
+def Prog.isNil {Γ Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Bool :=
+  Prog.casesOn (motive_2 := fun _ _ _ => Bool) P true (fun _ _ => false)
+
+/-- **A branch of a joinable `if`**: empty, or one assignment of a value
+local; `none` when it does anything else. -/
+def Prog.joinArm? {Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (JoinArm C Γ) :=
+  Prog.casesOn (motive_2 := fun Γ _ _ => Option (JoinArm C Γ)) P (some none)
+    (fun s ω => s.localAssign?.bind fun a => if Prog.isNil ω then some (some a) else none)
+
+/-- Whether the term reads the local at position `n`. -/
+def Tm.readsPos (n : Nat) : {s : Srt} → Tm C Γ s → Bool
+  | _, .pvV i => i.toNat == n
+  | _, .netOf _ a => a.readsPos n
+  | _, .app1 _ x => x.readsPos n
+  | _, .app2 _ x y => x.readsPos n || y.readsPos n
+  | _, .app3 _ x y z => x.readsPos n || y.readsPos n || z.readsPos n
+  | _, _ => false
+
+/-- A branch an `if` is joined by: nothing, or an accumulation, a value
+local set from its own value (`x = x + 1;`), which a split would copy the
+rest of the program for, once per case of every `if` before it. -/
+def JoinArm.accumulates : JoinArm C Γ → Bool
+  | none => true
+  | some ⟨_, i, r⟩ => r.lower.readsPos i.toNat
+
+/-- `v := c ? t : v`: the `then` branch assigns `v`, the `else` branch does
+not. -/
+abbrev UpdElem.joinThen (c : Tm C Γ (.val .bool)) {p : PrimTy} (i : Idx Γ (.val p))
+    (t : Tm C Γ (.val p)) : UpdElem C Γ Γ :=
+  .local i (.val (.app3 .ite c t (.pvV i)))
+
+/-- `v := c ? v : t`: the `else` branch assigns `v`, the `then` branch does
+not. -/
+abbrev UpdElem.joinElse (c : Tm C Γ (.val .bool)) {p : PrimTy} (i : Idx Γ (.val p))
+    (t : Tm C Γ (.val p)) : UpdElem C Γ Γ :=
+  .local i (.val (.app3 .ite c (.pvV i) t))
+
+/-- **The joined update** of `if (c) thn else els;`, from what the branches
+assign: a local both assign is set to `c ? e₁ : e₂`, one the `then` branch
+alone assigns to `c ? e : v`, one the `else` branch alone to `c ? v : e`.
+The elements are parallel: every right-hand side is read where the `if`
+starts, and only the side its condition picks is evaluated. -/
+def Upd.ifJoin (c : Tm C Γ (.val .bool)) : JoinArm C Γ → JoinArm C Γ → Upd C Γ Γ
+  | none, none => .nil
+  | some ⟨_, i, a⟩, none => Upd.nil.snoc (UpdElem.joinThen c i a.lower)
+  | none, some ⟨_, j, b⟩ => Upd.nil.snoc (UpdElem.joinElse c j b.lower)
+  | some ⟨p, i, a⟩, some ⟨q, j, b⟩ =>
+    if h : p = q then
+      if (h ▸ i : Idx Γ (.val q)) = j then
+        Upd.nil.snoc (.local j (.val (.app3 .ite c (Tm.castV h a.lower) b.lower)))
+      else (Upd.nil.snoc (UpdElem.joinThen c i a.lower)).snoc (UpdElem.joinElse c j b.lower)
+    else (Upd.nil.snoc (UpdElem.joinThen c i a.lower)).snoc (UpdElem.joinElse c j b.lower)
+
+/-- **When an `if` is joined** (`ifElseJoin`), whatever its condition: both
+branches joinable (`Prog.joinArm?`), one of them empty and the other empty
+or an accumulation (`JoinArm.accumulates`): the `if (c) { x = x + 1; }`
+whose split would copy the rest of the program.  An `if` that assigns in
+both branches (`if (c) { x = 2; } else { x = 1; }`, a conditional value's
+`ternaryToIf`) or sets a flag (`if (c) { brk = true; }`, a lowered `break`)
+still splits: its join is sound as well (`Upd.ifJoin`), but the closers read
+its two cases more cheaply than the conditional term
+(`docs/automation.md`, M6). -/
+def Upd.ifJoin? {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) : Option (Upd C Γ Γ) :=
+  match thn.joinArm?, els.joinArm? with
+  | some a, some b =>
+    if (thn.isNil || els.isNil) && a.accumulates && b.accumulates then some (Upd.ifJoin c a b)
+    else none
+  | _, _ => none
+
+/-- The shape of a joinable `if` (`Upd.ifJoin?`), whatever its values: both
+branches empty or one assignment of a value local, one of them empty. -/
+def Prog.joinShape {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) : Bool :=
+  (thn.isNil || els.isNil) && thn.joinArm?.isSome && els.joinArm?.isSome
+
+/-- A joined `if` has the shape. -/
+theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : Prog C Γ Γ₁}
+    {els : Prog C Γ Γ₂} {u : Upd C Γ Γ} (h : Upd.ifJoin? c thn els = some u) :
+    Prog.joinShape thn els = true := by
+  unfold Upd.ifJoin? at h
+  unfold Prog.joinShape
+  split at h
+  next a b ha hb =>
+    split at h
+    next hg =>
+      rw [ha, hb]
+      simp only [Bool.and_eq_true] at hg
+      simp only [hg.1.1, Option.isSome_some, Bool.and_self]
+    next => cases h
+  next => cases h
+
+/-- An `if` without the shape splits. -/
+theorem Upd.ifJoin?_none_of_shape {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) {thn : Prog C Γ Γ₁}
+    {els : Prog C Γ Γ₂} (h : Prog.joinShape thn els = false) : Upd.ifJoin? c thn els = none := by
+  cases hj : Upd.ifJoin? c thn els with
+  | none => rfl
+  | some u => rw [Upd.ifJoin?_shape hj] at h; cases h
+
 end Builders
 
 /-! ## Where a read or a value lands
@@ -738,13 +876,17 @@ def assignNewStep {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (h : R
 
 /-! ### Control flow -/
 
-/-- `if (c) …`: split on a simple condition (`ifElseSplit`), capture any
-other (`ifElseUnfold`), the branches read with the capture on top: weakened
-by `Prog.wk up`, which the kernel runs on every captured condition. -/
+/-- `if (c) …`: on a simple condition, one update when both branches are
+joinable (`ifElseJoin`, Lean only: `Upd.ifJoin?`), two goals otherwise
+(`ifElseSplit`); any other condition captured (`ifElseUnfold`), the
+branches read with the capture on top: weakened by `Prog.wk up`, which the
+kernel runs on every captured condition. -/
 def iteStep {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
     Premise C Γ Γ :=
   match c with
-  | .simple s => .split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els
+  | .simple s => match Upd.ifJoin? s.lower thn els with
+    | some U => .update U
+    | none => .split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els
   | c => .capture .bool (fse k) c
       (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2)
 

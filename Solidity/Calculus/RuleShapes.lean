@@ -607,7 +607,10 @@ is a recursive call read as the call of its body's next frame
 (`Stmt.callRec`), where solkey inlines without end. `hashAssignment` reads
 the hashing builtins, which solkey does not have. `revertDataBox`, `revertDataDiamond`,
 `catchDataBox` and `catchDataDiamond` read revert data, which solkey does not
-keep (`docs/semantic-gaps.md`, "Revert data"). The list is checked against the
+keep (`docs/semantic-gaps.md`, "Revert data"). `ifElseJoin` is KeY's join
+after a conditional, which solkey does not run: it splits. `internalCallSummary` is KeY's
+contract-based method call with a derived contract, which solkey does not
+run: it inlines. The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
@@ -620,7 +623,7 @@ def leanTaclets : List Lean.Name :=
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave,
     ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond, ``LeanTaclet.recursiveCallUnfold,
     ``LeanTaclet.revertDataBox, ``LeanTaclet.revertDataDiamond, ``LeanTaclet.catchDataBox,
-    ``LeanTaclet.catchDataDiamond]
+    ``LeanTaclet.catchDataDiamond, ``LeanTaclet.ifElseJoin, ``LeanTaclet.internalCallSummary]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

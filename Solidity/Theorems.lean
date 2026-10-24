@@ -2,6 +2,7 @@ import Solidity.Calculus.Sound
 import Solidity.Calculus.Symex
 import Solidity.Calculus.CallbackSound
 import Solidity.Evm.Correct
+import Solidity.Evm.Compiler
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.TailMode
 
@@ -260,18 +261,22 @@ open Evm Evm in
 state, the typed run and the compiled code both end, in states the machine
 still represents, or both revert (a panic, a failed `assert`, is solc's
 revert with `Panic(0x01)` data), or the world refuses a payment the program
-makes and the machine alone reverts.  `L` bounds every array's length, which
-solc caps at `2^64`.  There is no fourth case: on the fragment the typed run
-neither diverges nor is exhausted, and the typed run halts in no other way. -/
+makes and the machine alone reverts, or a loop no number of turns ends: the
+typed run diverges and the machine has no outcome (a fault), or stopped at
+a refused payment before it.  `L` bounds every array's length, which solc
+caps at `2^64`.  On the fragment the typed run is never exhausted, and it
+halts in no other way. -/
 theorem compiler_correct {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : State C Γ}
     {mc : Machine} {L b : Nat}
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :
     (∃ o mc', (P, σ) ⇓ o ∧ (⟦P⟧b, mc) ⇓ₘ mc' ∧ o.st ≈[C, L + Prog.pushes P, b, F'] mc') ∨
       ((Prog.run σ P = .error .revert ∨
           (Prog.asserts P = true ∧ Prog.run σ P = .error .panic)) ∧ (⟦P⟧b, mc) ↯ₘ) ∨
-      (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ ∧ ∃ o, (P, σ) ⇓ o) :=
+      (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ ∧ ∃ o, (P, σ) ⇓ o) ∨
+      (Prog.run σ P = .error .diverge ∧
+        (run (⟦P⟧b) mc = .fault ∨ (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ))) :=
   (compile_correct hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩)
-    (Or.imp id fun ⟨hp, h, o, _, h', _⟩ => ⟨hp, h, o, h'⟩)
+    (Or.imp id (Or.imp (fun ⟨hp, h, o, _, h', _⟩ => ⟨hp, h, o, h'⟩) id))
 
 open Evm Evm in
 /-- **The box reaches the EVM**: where the compiled code succeeds, the typed
@@ -285,6 +290,15 @@ theorem compiler_net {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Sta
       (∀ a : Fin W, a ≠ mc'.self → netAt o.st.net a.1 = (mc'.bal₀ a : Int) - mc'.bal a) ∧
       netAt o.st.net mc'.self = 0 :=
   compile_net hP hm hL hrun
+
+/-- The checked entry covers the core fragment and the certified memory
+fragment. Its agreement retains heap objects and pointer locals on the memory
+path, with the layout and final frame capacity stated in the input. -/
+theorem compiler_checked {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame : Nat}
+    (compiled : Evm.Compiler.Compilation b F P) {base : Nat → Fin Evm.W}
+    {σ : State C Γ} {mc : Evm.Machine}
+    (h : compiled.Input L frame base σ mc) : compiled.Agrees L frame base σ mc :=
+  compiled.correct h
 
 /-! ## Their axioms: Lean's three at most -/
 
@@ -338,6 +352,9 @@ theorem compiler_net {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Sta
 
 /-- info: 'Solidity.Main.compiler_net' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms compiler_net
+
+/-- info: 'Solidity.Main.compiler_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms compiler_checked
 
 end Main
 end Solidity

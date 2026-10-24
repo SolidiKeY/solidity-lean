@@ -18,7 +18,8 @@
  * `#solkey_obligations` (derived, pending, and what the import made of the
  * rest) and the import's own summary (why one has no program).  The
  * statuses are `derived` (the theorem `Solkey.TestSuite.f.proved` exists),
- * `pending`, `divergent` (pending and false in the model, `DIVERGENT`),
+ * `refuted` (false in the model, with a theorem `N.f.refuted`), `pending`,
+ * `divergent` (pending and false in the model, `DIVERGENT`),
  * `excluded` and `skip`.  `Corpus/TestSuite.lean` states each derived
  * obligation with no parameters at the initial storage, as a corollary.
  * The script fails when the pins disagree with the source or each other.
@@ -203,7 +204,7 @@ const DIVERGENT = {};
 const PENDING = {};
 
 /** The statuses of an imported row, in report order. */
-const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "unsupported", "skip"];
+const IMPORTED_STATUSES = ["derived", "refuted", "pending", "divergent", "excluded", "unsupported", "skip"];
 
 /**
  * Functions that cannot be expressed, with the reason, where the reason is
@@ -1109,17 +1110,21 @@ function readImported() {
     `#eval IO.println (Solidity.Frontend.ImportRow.summary ${IMPORTED.ns}.report)`);
   for (const m of summary.matchAll(/^(\w+) (\w+): (.*)$/gm)) why.set(m[2], m[3]);
   const proved = new Map();
+  const refuted = new Map();
   const dir = join(ROOT, "Solidity/TestSuite");
   for (const f of readdirSync(dir).filter((f) => f.endsWith(".lean")).sort()) {
     if (["Problems.lean", "Report.lean", "Suggestions.lean"].includes(f)) continue;
     const src = readFileSync(join(dir, f), "utf8");
-    for (const m of src.matchAll(/^theorem Solkey\.TestSuite\.(\S+)\.proved\b/gm)) {
+    for (const m of src.matchAll(/^(?:theorem|sol_auto_theorem) Solkey\.TestSuite\.(\S+)\.proved\b/gm)) {
       proved.set(m[1].replace(/^«(.*)»$/, "$1"), `Solidity/TestSuite/${f}`);
+    }
+    for (const m of src.matchAll(/^theorem Solkey\.TestSuite\.(\S+)\.refuted\b/gm)) {
+      refuted.set(m[1].replace(/^«(.*)»$/, "$1"), `Solidity/TestSuite/${f}`);
     }
   }
   return {
     total: Number(counts[1]), derived: Number(counts[2]), pendingCount: Number(counts[3]),
-    otherCount: Number(counts[4]), other, pending, why, proved,
+    otherCount: Number(counts[4]), other, pending, why, proved, refuted,
   };
 }
 
@@ -1156,6 +1161,10 @@ function importedRows({ functions, internalCount: internal }, lean) {
     } else if (status === "excluded" || status === "unsupported") {
       if (!lean.why.has(fn.name)) throw new Error(`${fn.name}: ${status}, but the import's pin gives no reason`);
       row = [status, lean.why.get(fn.name)];
+    } else if (status === "refuted") {
+      const module = lean.refuted.get(fn.name);
+      if (!module) throw new Error(`${fn.name}: refuted by Report.lean's pin, but no theorem`);
+      row = ["refuted", `\`${IMPORTED.ns}.${fn.name}.refuted\` (\`${module}\`)`];
     } else if (status !== undefined) {
       throw new Error(`Report.lean lists \`${status} ${fn.name}\`: fix it in Lean first`);
     } else if (lean.pending.has(fn.name)) {
@@ -1186,7 +1195,7 @@ function importedRows({ functions, internalCount: internal }, lean) {
 
 /** `Corpus/TestSuite.lean`: each derived obligation with no parameters, at the initial storage. */
 function importedModule(corollaries, rows, internal, commit) {
-  const scopedCount = rows.filter((r) => ["derived", "pending", "divergent"].includes(r[3])).length;
+  const scopedCount = rows.filter((r) => ["derived", "refuted", "pending", "divergent"].includes(r[3])).length;
   // Final-corollary checks needed depth 513 for 501 entries and 514 for 502.
   // Retain that observed margin above the table length, with the ordinary default as
   // a floor; this does not change any heartbeat/search budget.
@@ -1384,6 +1393,8 @@ function parityDoc(allRows, internal, commit) {
     "- **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no",
     "  axiom but Lean's three; with no parameters, also stated at the initial",
     "  storage in `Solidity/Corpus/TestSuite.lean`;",
+    "- **refuted**: stated, and false in the model: a certified counterexample",
+    "  refutes it (`sol_refute`), a theorem `¬ (⊢ problem)`;",
     "- **pending**: stated, not derived yet;",
     "- **divergent**: stated, and false in the model, for the reason below;",
     "- **excluded**: no program: the model cannot hold its contract;",

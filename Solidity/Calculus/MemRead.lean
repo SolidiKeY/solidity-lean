@@ -2,6 +2,7 @@ import Solidity.Calculus.Closer
 import Solidity.Calculus.ElimFacts
 import Solidity.Calculus.DecideEval
 import Solidity.Calculus.TermLaws
+import Solidity.Theory.Typed.MemMirror
 
 /-!
 # Reading memory as solkey reads it
@@ -29,6 +30,17 @@ node down (`LTm.memRes`), comparing addresses without running anything:
 * **readFromCopyToStorage**: a member of a copy of storage reads the
   storage there, its read eliminated as the storage reads are
   (`LTm.elim`).
+* **readFromCopyToStorageIdentity**, and **readFromCopyToStorage** below
+  the root (KeY's `idC(idp, fxs)`): an identity member of a copy's object,
+  read at the copy, stays that read and holds the storage member
+  (`copyObjN`); a word of such an object, or an element of a copied
+  storage array (Lean only), reads the storage copied (`copyPathRd?`), and
+  the object is fresh over the memory the copy grows (`LTm.copyFresh?`).
+  Sound by `Theory/Typed/MemMirror.lean`.
+
+A read whose address's object is guarded (`if (c) then o else err`, `d;
+o`: a read walked before it) is read with the guards out (`LTm.hoistA`,
+`wrapG`), each guard once; the addresses a write compares are read so too.
 
 Each rewrite is an equation of reads (`LTm.memRes_eval`): it keeps what
 the term reads in every state, a halting term halting.
@@ -41,6 +53,67 @@ namespace Decide
 open Semantics (lookupBy structDef)
 
 variable {C : Contract}
+
+/-! ## What an allocation mints, by the heap typing
+
+A copy into memory grows the heap typing by what it allocates alone: the
+objects' contents are the value's, their identities past the typing it
+starts from.  So two heaps of one typing mint the same identities. -/
+
+mutual
+/-- **A copy grows a heap typing the same over any heap of it.** -/
+theorem _root_.Solidity.SVal.copyStToM_H' : {T : Ty} → (v : SVal T) → (h : T.mapFree = true) →
+    {H₁ H₂ : HTy} → (hp₁ : Heap H₁) → (hp₂ : Heap H₂) → H₁ = H₂ →
+    (v.copyStToM hp₁ h).H' = (v.copyStToM hp₂ h).H'
+  | _, .prim _, _, _, _, hp₁, hp₂, e => by
+    rw [SVal.copyStToM_prim, SVal.copyStToM_prim]; exact e
+  | _, .struct fs, _, _, _, hp₁, hp₂, e => by
+    rw [SVal.copyStToM_struct, SVal.copyStToM_struct]
+    exact congrArg (· ++ [_]) (SFields.copyStToM_H' fs _ hp₁ hp₂ e)
+  | _, .array v _ _, _, _, _, hp₁, hp₂, e => by
+    rw [SVal.copyStToM_array, SVal.copyStToM_array]
+    exact congrArg (· ++ [_]) (SVec.copyStToM_H' v _ hp₁ hp₂ e)
+  | _, .fixed v, _, _, _, hp₁, hp₂, e => by
+    rw [SVal.copyStToM_fixed, SVal.copyStToM_fixed]
+    exact congrArg (· ++ [_]) (SVec.copyStToM_H' v _ hp₁ hp₂ e)
+  | _, .map _ _, h, _, _, _, _, _ => by simp only [Ty.mapFree, Bool.false_eq_true] at h
+
+theorem _root_.Solidity.SFields.copyStToM_H' : {fs : List (Name × Ty)} → (x : SFields fs) →
+    (h : ∀ fT ∈ fs, fT.2.mapFree = true) → {H₁ H₂ : HTy} → (hp₁ : Heap H₁) → (hp₂ : Heap H₂) →
+    H₁ = H₂ → (x.copyStToM hp₁ h).H' = (x.copyStToM hp₂ h).H'
+  | _, .nil, _, _, _, hp₁, hp₂, e => by
+    rw [SFields.copyStToM_nil, SFields.copyStToM_nil]; exact e
+  | _, .cons v rest, _, _, _, hp₁, hp₂, e => by
+    rw [SFields.copyStToM_cons, SFields.copyStToM_cons]
+    exact SFields.copyStToM_H' rest _ _ _ (SVal.copyStToM_H' v _ hp₁ hp₂ e)
+
+theorem _root_.Solidity.SVec.copyStToM_H' : {E : Ty} → {n : Nat} → (l : SVec E n) →
+    (h : E.mapFree = true) → {H₁ H₂ : HTy} → (hp₁ : Heap H₁) → (hp₂ : Heap H₂) → H₁ = H₂ →
+    (l.copyStToM hp₁ h).H' = (l.copyStToM hp₂ h).H'
+  | _, _, .nil, _, _, _, hp₁, hp₂, e => by
+    rw [SVec.copyStToM_nil, SVec.copyStToM_nil]; exact e
+  | _, _, .cons v rest, h, _, _, hp₁, hp₂, e => by
+    rw [SVec.copyStToM_cons, SVec.copyStToM_cons]
+    exact SVec.copyStToM_H' rest h _ _ (SVal.copyStToM_H' v h hp₁ hp₂ e)
+end
+
+/-- **A copy of a reference mints the same root over any heap of a
+typing**: the root is the identity past what its members allocate. -/
+theorem _root_.Solidity.SVal.copyStToM_id_eq {R : RefTy} (v : SVal (.ref R))
+    (h : (Ty.ref R).mapFree = true) {H₁ H₂ : HTy} (hp₁ : Heap H₁) (hp₂ : Heap H₂)
+    (e : H₁ = H₂) :
+    ((v.copyStToM hp₁ h).val : HRef _ R).id = ((v.copyStToM hp₂ h).val : HRef _ R).id := by
+  cases v with
+  | struct fs =>
+    rw [SVal.copyStToM_struct, SVal.copyStToM_struct]
+    exact congrArg List.length (SFields.copyStToM_H' fs _ hp₁ hp₂ e)
+  | array v sh hn =>
+    rw [SVal.copyStToM_array, SVal.copyStToM_array]
+    exact congrArg List.length (SVec.copyStToM_H' v _ hp₁ hp₂ e)
+  | fixed v =>
+    rw [SVal.copyStToM_fixed, SVal.copyStToM_fixed]
+    exact congrArg List.length (SVec.copyStToM_H' v _ hp₁ hp₂ e)
+  | map => simp only [Ty.mapFree, Bool.false_eq_true] at h
 
 /-! ## The spine of a memory term -/
 
@@ -93,6 +166,57 @@ theorem LTm.onSpineAny_eq_onSpineAnyM {k : Srt} (w : LTm C k) {u : Srt} (t : LTm
 
 /-- `w` is `t` or on its spine. -/
 def LTm.onSpine {k : Srt} (t w : LTm C k) : Bool := t.beqR w || w.onSpineAny t
+
+/-- `LTm.stripW` at a binary symbol: a copy's memory stripped. -/
+def _root_.Solidity.Op2.stripStep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
+    (ihx : LTm C a) : LTm C s :=
+  match o, ihx with
+  | .copySt h, ihx => .app2 (.copySt h) ihx y
+  | o, _ => .app2 o x y
+
+/-- `LTm.stripW` at a ternary symbol: a write dropped. -/
+def _root_.Solidity.Op3.stripStep {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b)
+    (z : LTm C c) (ihx : LTm C a) : LTm C s :=
+  match o, ihx with
+  | .write, ihx => ihx
+  | o, _ => .app3 o x y z
+
+/-- `LTm.stripW`'s compiled twin. -/
+def LTm.stripWM : {s : Srt} → LTm C s → LTm C s
+  | _, .app2 o x y => o.stripStep x y x.stripWM
+  | _, .app3 o x y z => o.stripStep x y z x.stripWM
+  | _, t => t
+
+/-- **A memory without its writes**: the copies on its spine down to the
+first node that is neither a write nor a copy (an `addM` is kept with what
+is below it), which leave the heap typing a write keeps
+(`LTm.stripW_eval`), so an identity minted over it is the one minted over
+the memory.  Generic in the sort, the identity off the spine; by the
+recursor. -/
+@[implemented_by LTm.stripWM]
+def LTm.stripW {s : Srt} (t : LTm C s) : LTm C s :=
+  @LTm.rec C (fun s _ => LTm C s)
+    (@fun _ k => .var k) (@fun _ o => .app0 o)
+    (@fun _ _ o x _ => .app1 o x)
+    (@fun _ _ _ o x y ihx _ => o.stripStep x y ihx)
+    (@fun _ _ _ _ o x y z ihx _ _ => o.stripStep x y z ihx)
+    (@fun _ _ _ it q i _ _ => .index it q i)
+    (@fun _ q _ => .obsW q) (@fun _ q _ => .obsL q) (@fun _ q _ => .obsH q)
+    (@fun _ _ d a _ _ => .seq d a)
+    (@fun _ a b _ _ => .orElse a b)
+    (@fun _ _ a b t e _ _ _ _ => .kite a b t e)
+    (@fun _ => .err) s t
+
+theorem LTm.stripW_eq_stripWM {s : Srt} (t : LTm C s) : t.stripW = t.stripWM := by
+  induction t with
+  | app2 o x y ihx => simp only [LTm.stripWM, ← ihx]; rfl
+  | app3 o x y z ihx => simp only [LTm.stripWM, ← ihx]; rfl
+  | _ => rfl
+
+/-- **`w` is on `t`'s spine, up to writes**: on it, or, where `w` has no
+write, on the allocations of `t`'s spine (`LTm.stripW`). -/
+def LTm.onSpineS {k : Srt} (t w : LTm C k) : Bool :=
+  t.onSpine w || (w.stripW.beqR w && t.stripW.onSpine w)
 
 /-- At the memory sort: a memory whose heap typing extends `μ`'s. -/
 def Srt.GrowsL {H : HTy} (μ : Grown H (fun _ => Unit)) : (u : Srt) → Option (u.Den C H) → Prop
@@ -166,6 +290,93 @@ theorem LTm.onSpine_grows {t w : LTm C .mem} (h : t.onSpine w = true)
     exact List.prefix_refl _
   · exact LTm.onSpineAny_grows hw t h μ' ht
 
+/-- At the memory sort: where the first returns, the second returns at
+its heap typing. -/
+def Srt.SameHL {H : HTy} : (u : Srt) → Option (u.Den C H) → Option (u.Den C H) → Prop
+  | .mem, x, y => ∀ μ : Grown H (fun _ => Unit), x = some μ →
+      ∃ μ' : Grown H (fun _ => Unit), y = some μ' ∧ μ'.H' = μ.H'
+  | _, _, _ => True
+
+theorem Srt.SameHL.refl {H : HTy} : (u : Srt) → (x : Option (u.Den C H)) → Srt.SameHL u x x
+  | .mem, _ => fun μ h => ⟨μ, h, rfl⟩
+  | .val _, _ | .path _, _ | .st, _ | .sv _, _ | .ident _, _ | .addr _, _ | .mv _, _
+  | .sts _, _ | .spath _ _, _ | .kint, _ => trivial
+
+theorem LTm.stripW_sameH {u : Srt} (t : LTm C u) :
+    Srt.SameHL (C := C) u (t.eval g ν) (t.stripW.eval g ν) := by
+  induction t with
+  | app2 o x y ihx _ihy =>
+    cases o
+    case copySt =>
+      rename_i hT
+      intro μ hμ
+      rw [LTm.eval_app2, Op2.eval_eq_evalM] at hμ
+      simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_eq_some_iff,
+        Option.some.injEq] at hμ
+      obtain ⟨μ₀, hμ₀, v, hv, rfl⟩ := hμ
+      obtain ⟨μ₁, h₁, e₁⟩ := ihx μ₀ hμ₀
+      refine ⟨μ₁.then (v.copyStToM μ₁.heap hT), ?_, ?_⟩
+      · show (LTm.app2 (.copySt hT) x.stripW y).eval g ν = _
+        rw [LTm.eval_app2, Op2.eval_eq_evalM]
+        simp only [Op2.evalM, h₁, hv, Option.bind_eq_bind, Option.bind_some]
+      · exact SVal.copyStToM_H' v hT μ₁.heap μ₀.heap e₁
+    all_goals exact Srt.SameHL.refl _ _
+  | app3 o x y z ihx _ _ =>
+    cases o
+    case write =>
+      intro μ hμ
+      rw [LTm.eval_app3, Op3.eval_eq_evalM] at hμ
+      simp only [Op3.evalM, Grown.writeT, Option.bind_eq_bind, Option.bind_eq_some_iff,
+        Option.some.injEq] at hμ
+      obtain ⟨μ₀, hμ₀, ad, -, w', -, ra, -, mv, -, hp, -, rfl⟩ := hμ
+      obtain ⟨μ₁, h₁, e₁⟩ := ihx μ₀ hμ₀
+      exact ⟨μ₁, h₁, e₁⟩
+    all_goals exact Srt.SameHL.refl _ _
+  | _ => exact Srt.SameHL.refl _ _
+
+/-- **A memory that returns, without its writes, returns at its heap
+typing**: a write keeps the typing (`Grown.writeT`), and a copy grows a
+typing by what it allocates alone (`SVal.copyStToM_H'`). -/
+theorem LTm.stripW_eval {M : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
+    (h : M.eval g ν = some μ) :
+    ∃ μ' : Grown g.H (fun _ => Unit), M.stripW.eval g ν = some μ' ∧ μ'.H' = μ.H' :=
+  LTm.stripW_sameH M μ h
+
+/-- **An identity's memory read as a spine node's**: the node's memory, or
+it without its writes (`LTm.stripW`), returns where the node's does, at its
+heap typing. -/
+theorem LTm.base_eval {m' m : LTm C .mem} (h : (m'.beqR m || m'.beqR m.stripW) = true)
+    {μ : Grown g.H (fun _ => Unit)} (hm : m.eval g ν = some μ) :
+    ∃ μ' : Grown g.H (fun _ => Unit), m'.eval g ν = some μ' ∧ μ'.H' = μ.H' := by
+  rcases Bool.or_eq_true_iff.1 h with h | h
+  · obtain rfl := LTm.eq_of_beqR h
+    exact ⟨μ, hm, rfl⟩
+  · obtain rfl := LTm.eq_of_beqR h
+    exact LTm.stripW_eval hm
+
+theorem LTm.copy_stripW_eval {m : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
+    (hm : m.eval g ν = some μ) {R : RefTy} (h : (Ty.ref R).mapFree = true)
+    (S : LTm C (.sv (.ref R))) :
+    (LTm.app2 (.copy h) m.stripW S).eval g ν = (LTm.app2 (.copy h) m S).eval g ν := by
+  obtain ⟨μ', h', e⟩ := LTm.stripW_eval hm
+  rw [LTm.eval_app2, LTm.eval_app2, Op2.eval_eq_evalM, hm, h']
+  simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_some]
+  cases (S.eval g ν : Option (SVal (.ref R))) with
+  | none => rfl
+  | some v =>
+    simp only [Option.bind_some]
+    exact congrArg some (SVal.copyStToM_id_eq v h μ'.heap μ.heap e)
+
+theorem LTm.onSpineS_grows {t w : LTm C .mem} (h : t.onSpineS w = true)
+    {μ μ' : Grown g.H (fun _ => Unit)} (ht : t.eval g ν = some μ') (hw : w.eval g ν = some μ) :
+    μ.H' <+: μ'.H' := by
+  rcases Bool.or_eq_true_iff.mp h with h | h
+  · exact LTm.onSpine_grows h ht hw
+  · obtain ⟨μ₁, h₁, e₁⟩ := LTm.stripW_eval ht
+    have := LTm.onSpine_grows (Bool.and_eq_true_iff.1 h).2 h₁ hw
+    rw [e₁] at this
+    exact this
+
 end Spine
 
 /-! ## Older objects -/
@@ -189,7 +400,7 @@ def Op1.boundStep (M : LTm C .mem) {a s : Srt} : Op1 C a s → LTm C a → Bool 
 
 /-- One step of `LTm.boundedIn` at a binary symbol. -/
 def Op2.boundStep (M : LTm C .mem) {a b s : Srt} : Op2 C a b s → LTm C a → LTm C b → Bool → Bool
-  | .copy h, m₀, v, _ => M.onSpine (.app2 (.copySt h) m₀ v)
+  | .copy h, m₀, v, _ => M.onSpineS (.app2 (.copySt h) m₀ v)
   | .iread, X, _, _ => M.onSpine X
   | .mat _, _, _, ih => ih
   | _, _, _, _ => false
@@ -263,7 +474,7 @@ theorem LTm.boundedIn_eval {M : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
           some (μ₀.then (v.copyStToM μ₀.heap hR)) := by
         rw [LTm.eval_app2, Op2.eval_eq_evalM]
         simp only [Op2.evalM, hμ₀, hv, Option.bind_eq_bind, Option.bind_some]
-      exact Nat.lt_of_lt_of_le (HRef.id_lt _) (LTm.onSpine_grows h hM hA).length_le
+      exact Nat.lt_of_lt_of_le (HRef.id_lt _) (LTm.onSpineS_grows h hM hA).length_le
     | iread =>
       intro id hid
       simp only [LTm.boundedIn, Op2.boundStep] at h
@@ -574,13 +785,744 @@ theorem LTm.freshOver?_eval {R : RefTy} {t : LTm C (.ident R)} {m : LTm C .mem}
     | _ => simp only [LTm.identView, reduceCtorEq] at ht'
   · cases h
 
+end Views
+
+section Guards
+
+variable {g : State C []} {ν : AEnv}
+
+/-- **A guard around a term**: `if (a == b) then · else err`, or `d; ·`
+(`guardL`, `seqMemL`). -/
+inductive GFrame (C : Contract) where
+  | kite {p : PrimTy} (a b : LTm C (.val p))
+  | seq {s : Srt} (d : LTm C s)
+
+/-- The guard holds: its two words are equal, its term returns. -/
+def GFrame.Holds (g : State C []) (ν : AEnv) : GFrame C → Prop
+  | .kite (p := p) a b => ∃ x, (a.eval g ν : Option p.Denote) = some x ∧
+      (b.eval g ν : Option p.Denote) = some x
+  | .seq d => (d.eval g ν).isSome = true
+
+/-- The guard around `t`. -/
+def GFrame.wrap {s : Srt} : GFrame C → LTm C s → LTm C s
+  | .kite a b, t => .kite a b t .err
+  | .seq d, t => .seq d t
+
+open Classical in
+theorem GFrame.wrap_eval (f : GFrame C) {s : Srt} (t : LTm C s) :
+    (f.wrap t).eval g ν = if f.Holds g ν then t.eval g ν else none := by
+  cases f with
+  | kite a b =>
+    rename_i p
+    show (LTm.kite a b t .err).eval g ν = _
+    rw [LTm.eval_kite]
+    by_cases hh : GFrame.Holds g ν (.kite a b)
+    · obtain ⟨x, hx, hy⟩ := hh
+      have hh : GFrame.Holds g ν (.kite a b) := ⟨x, hx, hy⟩
+      rw [if_pos hh, hx, hy]
+      simp only [Option.bind_some, if_true]
+    · rw [if_neg hh]
+      cases ha : (a.eval g ν : Option p.Denote) with
+      | none => rfl
+      | some x =>
+        cases hb : (b.eval g ν : Option p.Denote) with
+        | none => rfl
+        | some y =>
+          have hxy : x ≠ y := fun e => hh ⟨x, ha, e ▸ hb⟩
+          simp only [Option.bind_some, hxy, if_false]
+          rfl
+  | seq d =>
+    show (LTm.seq d t).eval g ν = _
+    rw [LTm.eval_seq]
+    by_cases hh : GFrame.Holds g ν (.seq d)
+    · rw [if_pos hh]
+      obtain ⟨w, hw⟩ := Option.isSome_iff_exists.1 hh
+      rw [hw]; rfl
+    · rw [if_neg hh]
+      cases hd : d.eval g ν with
+      | none => rfl
+      | some w => exact absurd (show (d.eval g ν).isSome = true by rw [hd]; rfl) hh
+
+/-- Two guards of the same terms. -/
+def GFrame.beq : GFrame C → GFrame C → Bool
+  | .kite a b, .kite a' b' => a.beqR a' && b.beqR b'
+  | .seq d, .seq d' => d.beqR d'
+  | _, _ => false
+
+theorem GFrame.eq_of_beq {f f' : GFrame C} (h : f.beq f' = true) : f = f' := by
+  cases f with
+  | kite a b =>
+    cases f' with
+    | kite a' b' =>
+      simp only [GFrame.beq, Bool.and_eq_true] at h
+      obtain ⟨ha, hb⟩ := h
+      obtain ⟨hp, ha'⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR ha)
+      cases hp
+      cases eq_of_heq ha'
+      cases LTm.eq_of_beqR hb
+      rfl
+    | seq _ => simp only [GFrame.beq, Bool.false_eq_true] at h
+  | seq d =>
+    cases f' with
+    | kite _ _ => simp only [GFrame.beq, Bool.false_eq_true] at h
+    | seq d' =>
+      simp only [GFrame.beq] at h
+      obtain ⟨hs, hd⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR h)
+      cases hs
+      cases eq_of_heq hd
+      rfl
+
+/-- `LTm.peel`'s compiled twin. -/
+def LTm.peelM : {s : Srt} → LTm C s → List (GFrame C) × LTm C s
+  | _, .kite a b t e =>
+    if e.isErr then (.kite a b :: t.peelM.1, t.peelM.2) else ([], .kite a b t e)
+  | _, .seq d a => (.seq d :: a.peelM.1, a.peelM.2)
+  | _, t => ([], t)
+
+/-- **The guards around a term**, outermost first, and the term inside
+them.  By the recursor. -/
+@[implemented_by LTm.peelM]
+def LTm.peel {s : Srt} (t : LTm C s) : List (GFrame C) × LTm C s :=
+  @LTm.rec C (fun s _ => List (GFrame C) × LTm C s)
+    (@fun _ k => ([], .var k)) (@fun _ o => ([], .app0 o))
+    (@fun _ _ o x _ => ([], .app1 o x))
+    (@fun _ _ _ o x y _ _ => ([], .app2 o x y))
+    (@fun _ _ _ _ o x y z _ _ _ => ([], .app3 o x y z))
+    (@fun _ _ _ it q i _ _ => ([], .index it q i))
+    (@fun _ q _ => ([], .obsW q)) (@fun _ q _ => ([], .obsL q)) (@fun _ q _ => ([], .obsH q))
+    (@fun _ _ d _ _ iha => (.seq d :: iha.1, iha.2))
+    (@fun _ a b _ _ => ([], .orElse a b))
+    (@fun _ _ a b t e _ _ iht _ =>
+      if e.isErr then (.kite a b :: iht.1, iht.2) else ([], .kite a b t e))
+    (@fun _ => ([], .err)) s t
+
+theorem LTm.peel_eq_peelM {s : Srt} (t : LTm C s) : t.peel = t.peelM := by
+  induction t with
+  | kite a b t e _ _ iht _ =>
+    show (if e.isErr then (.kite a b :: t.peel.1, t.peel.2) else ([], .kite a b t e)) = _
+    rw [iht]; rfl
+  | seq d a _ iha =>
+    show (GFrame.seq d :: a.peel.1, a.peel.2) = _
+    rw [iha]; rfl
+  | _ => rfl
+
+/-- The guards `fs` around `t`, each one. -/
+def wrapP {s : Srt} (fs : List (GFrame C)) (t : LTm C s) : LTm C s :=
+  fs.foldr (fun f a => f.wrap a) t
+
+open Classical in
+theorem wrapP_eval {s : Srt} (fs : List (GFrame C)) (t : LTm C s) :
+    (wrapP fs t).eval g ν = if ∀ f ∈ fs, f.Holds g ν then t.eval g ν else none := by
+  induction fs with
+  | nil => simp only [wrapP, List.foldr_nil, List.not_mem_nil, false_implies, implies_true,
+      if_true]
+  | cons f fs ih =>
+    show (f.wrap (wrapP fs t)).eval g ν = _
+    rw [GFrame.wrap_eval, ih]
+    simp only [List.mem_cons, forall_eq_or_imp]
+    by_cases hf : f.Holds g ν
+    · simp only [hf, true_and, if_true]
+    · simp only [hf, false_and, if_false]
+
+/-- A term is its guards around what they guard. -/
+theorem LTm.peel_eval {s : Srt} (t : LTm C s) :
+    (wrapP t.peel.1 t.peel.2).eval g ν = t.eval g ν := by
+  induction t with
+  | kite a b t e _ _ iht _ =>
+    show (wrapP (if e.isErr then (.kite a b :: t.peel.1, t.peel.2) else ([], .kite a b t e)).1
+      (if e.isErr then (.kite a b :: t.peel.1, t.peel.2) else ([], .kite a b t e)).2).eval g ν = _
+    cases he : e.isErr
+    · rfl
+    · simp only [if_true]
+      show (LTm.kite a b (wrapP t.peel.1 t.peel.2) .err).eval g ν = _
+      rw [LTm.eval_kite, LTm.eval_kite, iht, LTm.eval_of_isErr (g := g) ν he]
+      rfl
+  | seq d a _ iha =>
+    show (LTm.seq d (wrapP a.peel.1 a.peel.2)).eval g ν = _
+    rw [LTm.eval_seq, LTm.eval_seq, iha]
+  | _ => rfl
+
+/-- A guard a term has at its top fails only where the term halts. -/
+theorem LTm.eval_none_of_peel {s : Srt} {t : LTm C s} {f : GFrame C} (hf : f ∈ t.peel.1)
+    (h : ¬ f.Holds g ν) : t.eval g ν = none := by
+  classical
+  rw [← LTm.peel_eval, wrapP_eval, if_neg (fun hall => h (hall f hf))]
+
+/-- **The guards `fs` around `t`**, a guard `t` already has at its top left
+out (`GFrame.beq`): `if (c) then (if (c) then t else err) else err` is the
+inner one. -/
+def wrapG {s : Srt} (fs : List (GFrame C)) (t : LTm C s) : LTm C s :=
+  fs.foldr (fun f a => if a.peel.1.any f.beq then a else f.wrap a) t
+
+open Classical in
+theorem wrapG_eval {s : Srt} (fs : List (GFrame C)) (t : LTm C s) :
+    (wrapG fs t).eval g ν = if ∀ f ∈ fs, f.Holds g ν then t.eval g ν else none := by
+  induction fs with
+  | nil => simp only [wrapG, List.foldr_nil, List.not_mem_nil, false_implies, implies_true,
+      if_true]
+  | cons f fs ih =>
+    show (if (wrapG fs t).peel.1.any f.beq then wrapG fs t else f.wrap (wrapG fs t)).eval g ν = _
+    simp only [List.mem_cons, forall_eq_or_imp]
+    split
+    · rename_i hany
+      obtain ⟨f', hf', hb⟩ := List.any_eq_true.1 hany
+      cases GFrame.eq_of_beq hb
+      by_cases hf : f.Holds g ν
+      · rw [ih]; simp only [hf, true_and]
+      · rw [LTm.eval_none_of_peel hf' hf]; simp only [hf, false_and, if_false]
+    · rw [GFrame.wrap_eval, ih]
+      by_cases hf : f.Holds g ν
+      · simp only [hf, true_and, if_true]
+      · simp only [hf, false_and, if_false]
+
+/-- A term is its guards around what they guard, each guard once. -/
+theorem LTm.peel_evalG {s : Srt} (t : LTm C s) :
+    (wrapG t.peel.1 t.peel.2).eval g ν = t.eval g ν := by
+  classical
+  rw [wrapG_eval]
+  exact (wrapP_eval _ _).symm.trans (LTm.peel_eval t)
+
+/-- **A guard goes out through a context that halts where its argument
+does** (`F`): `F(if (c) then t else err)` is `if (c) then F(t) else err`. -/
+theorem wrapG_out {s s' : Srt} (F : LTm C s → LTm C s')
+    (hF : ∀ t₁ t₂ : LTm C s, t₁.eval g ν = t₂.eval g ν → (F t₁).eval g ν = (F t₂).eval g ν)
+    (hF0 : (F .err).eval g ν = none) (fs : List (GFrame C)) (t : LTm C s) :
+    (F (wrapG fs t)).eval g ν = (wrapG fs (F t)).eval g ν := by
+  classical
+  rw [wrapG_eval]
+  split
+  · rename_i h
+    exact hF _ _ (by rw [wrapG_eval, if_pos h])
+  · rename_i h
+    rw [← hF0]
+    exact hF _ _ (by rw [wrapG_eval, if_neg h]; rfl)
+
+theorem wrapG_congr {s : Srt} (fs : List (GFrame C)) {t₁ t₂ : LTm C s}
+    (h : t₁.eval g ν = t₂.eval g ν) : (wrapG fs t₁).eval g ν = (wrapG fs t₂).eval g ν := by
+  classical
+  rw [wrapG_eval, wrapG_eval, h]
+
+theorem wrapG_some {s : Srt} {fs : List (GFrame C)} {t : LTm C s} {x : s.Den C g.H}
+    (h : (wrapG fs t).eval g ν = some x) : t.eval g ν = some x := by
+  classical
+  rw [wrapG_eval] at h
+  split at h
+  · exact h
+  · cases h
+
+/-- At a unary symbol: a member's object, its guards out. -/
+def _root_.Solidity.Op1.hoistA {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
+    List (GFrame C) × LTm C s :=
+  match o, x with
+  | .mfield h, x => (x.peel.1, .app1 (.mfield h) x.peel.2)
+  | o, x => ([], .app1 o x)
+
+/-- At a binary symbol: an element's array, its guards out. -/
+def _root_.Solidity.Op2.hoistA {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    List (GFrame C) × LTm C s :=
+  match o, x, y with
+  | .mat ak, x, y => (x.peel.1, .app2 (.mat ak) x.peel.2 y)
+  | o, x, y => ([], .app2 o x y)
+
+/-- **An address with its object's guards out**: `(if (c) then o else err).f`
+is `if (c) then o.f else err`. -/
+def LTm.hoistA {s : Srt} (b : LTm C s) : List (GFrame C) × LTm C s :=
+  match b with
+  | .app1 o x => o.hoistA x
+  | .app2 o x y => o.hoistA x y
+  | b => ([], b)
+
+theorem LTm.hoistA_eval {s : Srt} (b : LTm C s) :
+    (wrapG b.hoistA.1 b.hoistA.2).eval g ν = b.eval g ν := by
+  cases b with
+  | app1 o x =>
+    cases o
+    case mfield h =>
+      show (wrapG x.peel.1 (.app1 (.mfield h) x.peel.2)).eval g ν = _
+      rw [← wrapG_out (fun t => LTm.app1 (.mfield h) t)
+        (fun t₁ t₂ e => by simp only [LTm.eval_app1, e]) rfl]
+      simp only [LTm.eval_app1, LTm.peel_evalG]
+    all_goals rfl
+  | app2 o x y =>
+    cases o
+    case mat ak =>
+      show (wrapG x.peel.1 (.app2 (.mat ak) x.peel.2 y)).eval g ν = _
+      rw [← wrapG_out (fun t => LTm.app2 (.mat ak) t y)
+        (fun t₁ t₂ e => by simp only [LTm.eval_app2, e]) rfl]
+      simp only [LTm.eval_app2, LTm.peel_evalG]
+    all_goals rfl
+  | _ => rfl
+
+theorem LTm.hoistA_some {s : Srt} {b : LTm C s} {x : s.Den C g.H} (h : b.eval g ν = some x) :
+    b.hoistA.2.eval g ν = some x :=
+  wrapG_some (by rw [LTm.hoistA_eval]; exact h)
+
+/-- **A symbol that reads its right argument, the argument's guards out**
+(a read of memory at an address, a length at an array). -/
+theorem LTm.app2_wrapG {a b s : Srt} (o : Op2 C a b s) (ho : o.strictR = true) (x : LTm C a)
+    (fs : List (GFrame C)) (y : LTm C b) :
+    (LTm.app2 o x (wrapG fs y)).eval g ν = (wrapG fs (.app2 o x y)).eval g ν :=
+  wrapG_out (fun t => LTm.app2 o x t) (fun t₁ t₂ e => by simp only [LTm.eval_app2, e])
+    (by rw [LTm.eval_app2]; exact Op2.eval_none_right g o ho _) fs y
+
+theorem LTm.app2_hoistA {a b s : Srt} (o : Op2 C a b s) (ho : o.strictR = true) (x : LTm C a)
+    (y : LTm C b) :
+    (LTm.app2 o x y).eval g ν = (wrapG y.hoistA.1 (.app2 o x y.hoistA.2)).eval g ν := by
+  rw [← LTm.app2_wrapG o ho, LTm.eval_app2, LTm.eval_app2, LTm.hoistA_eval]
+
+theorem LTm.app2_peel {a b s : Srt} (o : Op2 C a b s) (ho : o.strictR = true) (x : LTm C a)
+    (y : LTm C b) :
+    (LTm.app2 o x y).eval g ν = (wrapG y.peel.1 (.app2 o x y.peel.2)).eval g ν := by
+  rw [← LTm.app2_wrapG o ho, LTm.eval_app2, LTm.eval_app2, LTm.peel_evalG]
+
+end Guards
+
+section CopyObj
+
+variable {g : State C []} {ν : AEnv}
+
+/-- How deep a read walks down a memory, and a returning check down a term. -/
+def memFuel : Nat := 256
+
+/-- At a binary symbol: `sfind(st, q)` taken to `sfind(st, q.f)`. -/
+def _root_.Solidity.Op2.sfindFieldStep {s f : Name} {T : Ty} (hf : C.fieldType s f = some T)
+    {a b : Srt} (o : Op2 C a b (.sv (.ref (.struct s)))) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.sv T)) :=
+  match o, x, y with
+  | .sfind, st, q => some (.app2 .sfind st (.app1 (.field hf) q))
+  | _, _, _ => none
+
+/-- `sfind(st, q)` taken to `sfind(st, q.f)`. -/
+def LTm.sfindField {s f : Name} {T : Ty} (S : LTm C (.sv (.ref (.struct s))))
+    (hf : C.fieldType s f = some T) : Option (LTm C (.sv T)) :=
+  match S with
+  | .app2 o x y => o.sfindFieldStep hf x y
+  | _ => none
+
+theorem LTm.sfindField_eval {s f : Name} {T : Ty} {S : LTm C (.sv (.ref (.struct s)))}
+    {hf : C.fieldType s f = some T} {S' : LTm C (.sv T)} (h : S.sfindField hf = some S')
+    {v : SVal (.ref (.struct s))} (hv : (S.eval g ν : Option (SVal _)) = some v) :
+    (S'.eval g ν : Option (SVal T)) = some ((SVal.view v : SFields _).get hf) := by
+  cases S with
+  | app2 o x y =>
+    cases o <;> simp only [LTm.sfindField, Op2.sfindFieldStep, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rw [LTm.eval_app2] at hv ⊢
+    rw [LTm.eval_app1]
+    cases hx : (x.eval g ν : Option (Storage C)) with
+    | none => rw [hx, Op2.eval_none_left] at hv; cases hv
+    | some st =>
+      cases hy : (y.eval g ν : Option (SRef C _)) with
+      | none => rw [hx, hy, Op2.eval_none_right g _ rfl] at hv; cases hv
+      | some r =>
+        rw [hx, hy] at hv
+        change st.find r = some v at hv
+        change st.find (r.field hf) = _
+        rw [SRef.field, Storage.find_append, hv]
+        cases v with
+        | struct fs => rfl
+  | _ => simp only [LTm.sfindField, reduceCtorEq] at h
+
+/-- At a binary symbol: `sfind(st, q)` taken to the word `find(st, q.f)`. -/
+def _root_.Solidity.Op2.findFieldStep {s f : Name} {P : PrimTy} (hf : C.fieldType s f = some (.prim P))
+    {a b : Srt} (o : Op2 C a b (.sv (.ref (.struct s)))) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.val P)) :=
+  match o, x, y with
+  | .sfind, st, q => some (.app2 .find st (.app1 (.field hf) q))
+  | _, _, _ => none
+
+/-- `sfind(st, q)` taken to the word `find(st, q.f)`. -/
+def LTm.findField {s f : Name} {P : PrimTy} (S : LTm C (.sv (.ref (.struct s))))
+    (hf : C.fieldType s f = some (.prim P)) : Option (LTm C (.val P)) :=
+  match S with
+  | .app2 o x y => o.findFieldStep hf x y
+  | _ => none
+
+theorem LTm.findField_eval {s f : Name} {P : PrimTy} {S : LTm C (.sv (.ref (.struct s)))}
+    {hf : C.fieldType s f = some (.prim P)} {y : LTm C (.val P)} (h : S.findField hf = some y)
+    {v : SVal (.ref (.struct s))} (hv : (S.eval g ν : Option (SVal _)) = some v) :
+    (y.eval g ν : Option P.Denote) = some ((SVal.view v : SFields _).get hf).view := by
+  cases S with
+  | app2 o x z =>
+    cases o <;> simp only [LTm.findField, Op2.findFieldStep, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rw [LTm.eval_app2] at hv ⊢
+    rw [LTm.eval_app1]
+    cases hx : (x.eval g ν : Option (Storage C)) with
+    | none => rw [hx, Op2.eval_none_left] at hv; cases hv
+    | some st =>
+      cases hz : (z.eval g ν : Option (SRef C _)) with
+      | none => rw [hx, hz, Op2.eval_none_right g _ rfl] at hv; cases hv
+      | some r =>
+        rw [hx, hz] at hv
+        change st.find r = some v at hv
+        change (st.find (r.field hf)).bind (fun w => some w.view) = _
+        rw [SRef.field, Storage.find_append, hv]
+        cases v with
+        | struct fs => rfl
+  | _ => simp only [LTm.findField, reduceCtorEq] at h
+
+/-- At a binary symbol: `sfind(st, q)` of an array taken to the word at
+`i`, within the stored length. -/
+def _root_.Solidity.Op2.findIndexStep {P : PrimTy} (i : LTm C (.val .uint))
+    {a b : Srt} (o : Op2 C a b (.sv (.ref (.array (.prim P))))) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.val P)) :=
+  match o, x, y with
+  | .sfind, st, q =>
+    some (.app3 .ite (.app2 (.binop .lt rfl) i (.app2 .len st q))
+      (.app2 .find st (.index (.arr .dyn) q i)) .err)
+  | _, _, _ => none
+
+/-- `sfind(st, q)` of an array taken to `if (i < len(st, q)) then
+find(st, q[i]) else err`. -/
+def LTm.findIndex {P : PrimTy} (S : LTm C (.sv (.ref (.array (.prim P)))))
+    (i : LTm C (.val .uint)) : Option (LTm C (.val P)) :=
+  match S with
+  | .app2 o x y => o.findIndexStep i x y
+  | _ => none
+
+theorem LTm.findIndex_eval {P : PrimTy} {S : LTm C (.sv (.ref (.array (.prim P))))}
+    {i : LTm C (.val .uint)} {y : LTm C (.val P)} (h : S.findIndex i = some y)
+    {n : Nat} {e : SVec (.prim P) n} {sh : SList (.prim P)} {hn : n < 2 ^ 256}
+    (hv : (S.eval g ν : Option (SVal _)) = some (.array e sh hn)) :
+    (y.eval g ν : Option P.Denote) =
+      (i.eval g ν : Option PrimTy.uint.Denote).bind fun k =>
+        (e.toList[k.1.toNat]?).map fun x => x.view := by
+  cases S with
+  | app2 o x z =>
+    cases o <;> simp only [LTm.findIndex, Op2.findIndexStep, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rw [LTm.eval_app2] at hv
+    cases hx : (x.eval g ν : Option (Storage C)) with
+    | none => rw [hx, Op2.eval_none_left] at hv; cases hv
+    | some st =>
+      cases hz : (z.eval g ν : Option (SRef C _)) with
+      | none => rw [hx, hz, Op2.eval_none_right g _ rfl] at hv; cases hv
+      | some r =>
+        rw [hx, hz] at hv
+        change st.find r = some (.array e sh hn) at hv
+        cases hi : (i.eval g ν : Option PrimTy.uint.Denote) with
+        | none =>
+          simp only [LTm.eval_app3, LTm.eval_app2, hi]
+          rw [Op2.eval_none_left]
+          rfl
+        | some k =>
+          simp only [LTm.eval_app3, LTm.eval_app2, LTm.eval_index, hi, hx, hz]
+          have hlen : Op2.eval g Op2.len (some st) (some r) = some (lenU n hn) := by
+            show (st.len r) = _
+            unfold Storage.len; rw [hv]; rfl
+          have hf : Op2.eval g Op2.find (some st) (some (SRef.index r (IndexTy.arr ArrTy.dyn) k)) =
+              ((e.toList ++ sh.toList)[k.1.toNat]?).map fun x => x.view := by
+            rw [show SRef.index r (IndexTy.arr ArrTy.dyn) k = r.append (.at k .nil) by rw [SRef.index, Path.index_dyn]]
+            change (st.find (r.append (.at k .nil))).bind (fun w => some w.view) = _
+            rw [Storage.find_append, hv, Option.bind_some]
+            try rw [SVal.find_eq_findM]
+            simp only [SVal.findM]
+            cases (e.toList ++ sh.toList)[k.1.toNat]? <;> rfl
+          simp only [Option.bind_some]
+          rw [hlen, hf]
+          change (bif decide (k.1 < (n : Int)) then _ else none) = _
+          have hk := k.2
+          simp only [PrimTy.inRange, decide_eq_true_eq] at hk
+          by_cases hkn : k.1.toNat < n
+          · have hlt : k.1 < (n : Int) := by omega
+            have hl : k.1.toNat < e.toList.length := by rw [SVec.length_toList]; exact hkn
+            simp only [hlt, decide_true, cond_true, List.getElem?_append_left hl]
+          · have hlt : ¬ k.1 < (n : Int) := by omega
+            have hl : e.toList.length ≤ k.1.toNat := by rw [SVec.length_toList]; omega
+            simp only [hlt, decide_false, cond_false, List.getElem?_eq_none hl, Option.map_none]
+  | _ => simp only [LTm.findIndex, reduceCtorEq] at h
+
+/-- `copyObjN`'s step at an identity member: `o.f`, `o` holding
+`sfind(st, q)`, holds `sfind(st, q.f)`. -/
+def _root_.Solidity.Op1.objField
+    (ih : {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))))
+    {a : Srt} {R : RefTy} (o : Op1 C a (.addr (.ref R))) (x : LTm C a) :
+    Option (LTm C (.sv (.ref R))) :=
+  match o, x with
+  | .mfield hf, x => (ih x).bind fun S₁ => S₁.sfindField hf
+
+/-- `copyObjN`'s step at a binary symbol: the copy's root, or an identity
+member read at the copy. -/
+def _root_.Solidity.Op2.objStep (X m : LTm C .mem) {U : Ty} (S : LTm C (.sv U))
+    (ih : {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))))
+    {a b : Srt} {R : RefTy} (o : Op2 C a b (.ident R)) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.sv (.ref R))) :=
+  match o, x, y with
+  | .copy _, m', S' => if (m'.beqR m || m'.beqR m.stripW) && S'.beqR S then some S' else none
+  | .iread, X', b =>
+    if X'.beqR X then
+      match b with
+      | .app1 o' x' => o'.objField ih x'
+      | _ => none
+    else none
+
+/-- **What an object of a copy of storage holds, read at the copy**
+`X = copySt(m, S)` (`readFromCopyToStorageIdentity`, KeY's
+`idC(idp, fxs)`): the root holds `S`; an identity member read at `X` of an
+object holding `sfind(st, q)` holds `sfind(st, q.f)`.  By the recursor on
+the depth. -/
+def copyObjN (X m : LTm C .mem) {U : Ty} (S : LTm C (.sv U)) (n : Nat) :
+    {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))) :=
+  Nat.rec (motive := fun _ => {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))))
+    (fun _ => none)
+    (fun _ ih {_} o =>
+      match o with
+      | .app2 op x y => op.objStep X m S ih x y
+      | _ => none) n
+
+/-- The copy `copySt(m, S)` read: `m` grown by the copy of `S`. -/
+theorem LTm.copySt_eval {m : LTm C .mem} {U : Ty} {hU : U.mapFree = true} {S : LTm C (.sv U)}
+    {μ : Grown g.H (fun _ => Unit)} (hm : m.eval g ν = some μ) {v : SVal U}
+    (hS : (S.eval g ν : Option (SVal U)) = some v) :
+    (LTm.app2 (.copySt hU) m S).eval g ν = some (μ.then (v.copyStToM μ.heap hU)) := by
+  rw [LTm.eval_app2, hm, hS]; rfl
+
+theorem copyObjN_eval {m : LTm C .mem} {U : Ty} {hU : U.mapFree = true} {S : LTm C (.sv U)}
+    {μ : Grown g.H (fun _ => Unit)} (hm : m.eval g ν = some μ) {v : SVal U}
+    (hS : (S.eval g ν : Option (SVal U)) = some v) (n : Nat) :
+    ∀ {R : RefTy} (o : LTm C (.ident R)) (S' : LTm C (.sv (.ref R))),
+      copyObjN (.app2 (.copySt hU) m S) m S n o = some S' →
+      ∃ (r : HRef (v.copyStToM μ.heap hU).H' R) (v' : SVal (.ref R)),
+        (o.eval g ν : Option Nat) = some r.id ∧ (S'.eval g ν : Option (SVal (.ref R))) = some v' ∧
+        v'.Mirrors (v.copyStToM μ.heap hU).heap μ.H'.length r := by
+  induction n with
+  | zero => intro R o S' h; cases h
+  | succ n ih =>
+    intro R o S' h
+    cases o with
+    | app2 op x y =>
+      cases op
+      case copy hR =>
+        change (if (x.beqR m || x.beqR m.stripW) && y.beqR S then some y else none) = some S' at h
+        split at h
+        case isFalse => cases h
+        case isTrue hc =>
+          cases h
+          simp only [Bool.and_eq_true, Bool.or_eq_true] at hc
+          obtain ⟨hx, hy⟩ := hc
+          obtain ⟨hUU, hyS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hy)
+          cases hUU
+          cases eq_of_heq hyS
+          have hxm : (LTm.app2 (.copy hR) x S').eval g ν = (LTm.app2 (.copy hR) m S').eval g ν := by
+            rcases hx with hx | hx
+            · rw [LTm.eq_of_beqR hx]
+            · rw [LTm.eq_of_beqR hx]; exact LTm.copy_stripW_eval hm hR S'
+          refine ⟨(v.copyStToM μ.heap hU).val, v, ?_, hS, SVal.mirrors_copyStToM μ.heap v hU⟩
+          rw [hxm, LTm.eval_app2, hm, hS]; rfl
+      case iread =>
+        change (if x.beqR (LTm.app2 (.copySt hU) m S) then
+          (match y with
+            | .app1 o' x' => o'.objField (copyObjN (.app2 (.copySt hU) m S) m S n) x'
+            | _ => none) else none) = some S' at h
+        split at h
+        case isFalse => cases h
+        case isTrue hx =>
+          cases LTm.eq_of_beqR hx
+          cases y with
+          | app1 o' x' =>
+            cases o'
+            case mfield s f hf =>
+              change ((copyObjN (.app2 (.copySt hU) m S) m S n x').bind
+                fun S₁ => S₁.sfindField hf) = some S' at h
+              obtain ⟨S₁, h₁, h₂⟩ := Option.bind_eq_some_iff.1 h
+              obtain ⟨r₁, v₁, hx', hS₁, hM⟩ := ih x' S₁ h₁
+              cases v₁ with
+              | struct fs =>
+                simp only [SVal.Mirrors] at hM
+                refine ⟨(v.copyStToM μ.heap hU).heap.field r₁ hf, fs.get hf, ?_,
+                  LTm.sfindField_eval h₂ hS₁, SFields.Mirrors.get fs _ hM.2 hf⟩
+                simp only [LTm.iread_evalT, LTm.copySt_eval hm hS, Option.bind_some, LTm.eval_app1,
+                  hx', Op1.eval_eq_evalM, Op1.evalM, Option.map_some, MAddrT.resolve_eq_resolveM,
+                  MAddrT.resolveM]
+                change ((((HRef.ofId? (SVal.copyStToM μ.heap v hU).H' (.struct s) r₁.id).map
+                  (fun x => MAddr.field x hf)).bind
+                    fun rb => (SVal.copyStToM μ.heap v hU).heap.readAddr rb).bind
+                      fun r => some (r : HRef _ R).id) = _
+                rw [HRef.ofId?_self (r := r₁)]
+                rfl
+          | _ => cases h
+    | _ => cases h
+
+/-- `copyPathRd?` at a member: the word the member of the object holds. -/
+def _root_.Solidity.Op1.copyFieldRd
+    (obj : {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))))
+    {a : Srt} {P : PrimTy} (o : Op1 C a (.addr (.prim P))) (x : LTm C a) :
+    Option (LTm C (.val P)) :=
+  match o, x with
+  | .mfield (f := f) hf, x => if f != "length" then (obj x).bind fun S₁ => S₁.findField hf else none
+
+/-- `copyPathRd?` at an element: the word the array holds there, within its
+length. -/
+def _root_.Solidity.Op2.copyElemRd
+    (obj : {R : RefTy} → LTm C (.ident R) → Option (LTm C (.sv (.ref R))))
+    {a b : Srt} {P : PrimTy} (o : Op2 C a b (.addr (.prim P))) (x : LTm C a) (y : LTm C b) :
+    Option (LTm C (.val P)) :=
+  match o, x, y with
+  | .mat .dyn, x, i => (obj x).bind fun S₁ => S₁.findIndex i
+  | _, _, _ => none
+
+/-- **A word of an object of a copy of storage, read at the copy**
+(`readFromCopyToStorage` at `idC(idp, fxs)`, any `fxs`; an element Lean
+only): what the storage it copied holds there (`copyObjN`). -/
+def copyPathRd? (X m : LTm C .mem) {U : Ty} (S : LTm C (.sv U)) {P : PrimTy}
+    (b : LTm C (.addr (.prim P))) : Option (LTm C (.val P)) :=
+  match b with
+  | .app1 o x => o.copyFieldRd (copyObjN X m S memFuel) x
+  | .app2 o x y => o.copyElemRd (copyObjN X m S memFuel) x y
+  | _ => none
+
+theorem copyPathRd?_eval {m : LTm C .mem} {U : Ty} {hU : U.mapFree = true} {S : LTm C (.sv U)}
+    {P : PrimTy} {b : LTm C (.addr (.prim P))} {y : LTm C (.val P)}
+    (h : copyPathRd? (.app2 (.copySt hU) m S) m S b = some y) :
+    ((LTm.app2 .read (.app2 (.copySt hU) m S) b).eval g ν : Option P.Denote) =
+      (LTm.seq (.app2 (.copySt hU) m S) y).eval g ν := by
+  cases hm : (m.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+  | none =>
+    rw [LTm.eval_app2_none _ _ _ (LTm.eval_app2_none _ _ _ hm), LTm.eval_seq,
+      LTm.eval_app2_none _ _ _ hm]; rfl
+  | some μ =>
+  cases hS : (S.eval g ν : Option (SVal U)) with
+  | none =>
+    have hX : (LTm.app2 (.copySt hU) m S).eval g ν = none := by
+      rw [LTm.eval_app2, hm, hS, Op2.eval_none_right g _ rfl]
+    rw [LTm.eval_app2_none _ _ _ hX, LTm.eval_seq, hX]; rfl
+  | some v =>
+  rw [LTm.eval_seq, LTm.copySt_eval hm hS, Option.bind_some, LTm.read_evalT,
+    LTm.copySt_eval hm hS, Option.bind_some]
+  cases b with
+  | app1 o x =>
+    cases o
+    case mfield s f hf =>
+      change (if f != "length" then (copyObjN _ m S memFuel x).bind fun S₁ => S₁.findField hf
+        else none) = some y at h
+      split at h
+      case isFalse => cases h
+      case isTrue =>
+        obtain ⟨S₁, h₁, h₂⟩ := Option.bind_eq_some_iff.1 h
+        obtain ⟨r, v₁, hx, hS₁, hM⟩ := copyObjN_eval hm hS memFuel x S₁ h₁
+        cases v₁ with
+        | struct fs =>
+          simp only [SVal.Mirrors] at hM
+          rw [LTm.findField_eval h₂ hS₁, LTm.eval_app1, hx]
+          change ((((HRef.ofId? (SVal.copyStToM μ.heap v hU).H' (.struct s) r.id).map
+            (fun x => MAddr.field x hf)).bind
+              fun rb => (SVal.copyStToM μ.heap v hU).heap.readAddr rb)) = _
+          rw [HRef.ofId?_self (r := r)]
+          change some (MFields.get _ ((v.copyStToM μ.heap hU).heap.get r) hf) = _
+          rw [SVal.Mirrors.prim _ _ (SFields.Mirrors.get fs _ hM.2 hf)]
+          rfl
+  | app2 o x i =>
+    cases o
+    case mat ak =>
+      cases ak
+      case dyn =>
+        change ((copyObjN _ m S memFuel x).bind fun S₁ => S₁.findIndex i) = some y at h
+        obtain ⟨S₁, h₁, h₂⟩ := Option.bind_eq_some_iff.1 h
+        obtain ⟨r, v₁, hx, hS₁, hM⟩ := copyObjN_eval hm hS memFuel x S₁ h₁
+        cases v₁ with
+        | array e sh hn =>
+          simp only [SVal.Mirrors] at hM
+          rw [LTm.findIndex_eval h₂ hS₁, LTm.eval_app2, hx]
+          cases hi : (i.eval g ν : Option PrimTy.uint.Denote) with
+          | none => rfl
+          | some k =>
+            change ((((HRef.ofId? (SVal.copyStToM μ.heap v hU).H' (.array (.prim P)) r.id).map
+              (fun x => MAddr.index x .dyn k)).bind
+                fun rb => (SVal.copyStToM μ.heap v hU).heap.readAddr rb)) = _
+            rw [HRef.ofId?_self (r := r)]
+            change (MObj.elems .dyn ((v.copyStToM μ.heap hU).heap.get r))[k.1.toNat]? = _
+            rcases SVec.Mirrors.getElem e _ hM.2 k.1.toNat with ⟨h1, h2⟩ | ⟨x₀, w, h1, h2, h3⟩
+            · rw [h2, Option.bind_some, h1]; rfl
+            · rw [h2, Option.bind_some, h1, SVal.Mirrors.prim _ _ h3]; rfl
+      all_goals cases h
+    all_goals cases h
+  | _ => cases h
+
+/-- `LTm.copyFresh?` at a binary symbol. -/
+def _root_.Solidity.Op2.copyFreshStep {a b : Srt} {R : RefTy} (o : Op2 C a b (.ident R))
+    (x : LTm C a) (y : LTm C b) (t : LTm C (.ident R)) : Option (LTm C .mem) :=
+  match o, x, y with
+  | .iread, X, _ =>
+    match X.memView with
+    | .copySt m _ S => if (copyObjN X m S memFuel t).isSome then some m else none
+    | _ => none
+  | _, _, _ => none
+
+/-- **An object a copy made, read at the copy**, is fresh over the memory
+the copy grows (`Grown.alloc_fresh`, as the copy's root). -/
+def LTm.copyFresh? {R : RefTy} (t : LTm C (.ident R)) : Option (LTm C .mem) :=
+  match t with
+  | .app2 o x y => o.copyFreshStep x y t
+  | _ => none
+
+theorem LTm.copyFresh?_eval {R : RefTy} {t : LTm C (.ident R)} {m : LTm C .mem}
+    (h : t.copyFresh? = some m) {id : Nat} (ht : (t.eval g ν : Option Nat) = some id) :
+    ∃ μ : Grown g.H (fun _ => Unit), m.eval g ν = some μ ∧ μ.H'.length ≤ id := by
+  cases t with
+  | app2 o X b =>
+    cases o
+    case iread =>
+      change (match X.memView with
+        | .copySt m _ S => if (copyObjN X m S memFuel (.app2 .iread X b)).isSome then some m
+          else none
+        | _ => none) = some _ at h
+      split at h
+      case h_1 m' U hU S hX =>
+        obtain rfl := LTm.memView_copySt hX
+        split at h
+        case isFalse => cases h
+        case isTrue hc =>
+          cases h
+          obtain ⟨S', hS'⟩ := Option.isSome_iff_exists.1 hc
+          cases hm : (m.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+          | none =>
+            rw [LTm.eval_app2_none _ _ _ (LTm.eval_app2_none _ _ _ hm)] at ht; cases ht
+          | some μ =>
+            cases hS : (S.eval g ν : Option (SVal U)) with
+            | none =>
+              have hX : (LTm.app2 (.copySt hU) m S).eval g ν = none := by
+                rw [LTm.eval_app2, hm, hS, Op2.eval_none_right g _ rfl]
+              rw [LTm.eval_app2_none _ _ _ hX] at ht; cases ht
+            | some v =>
+              obtain ⟨r, v', hr, -, hM⟩ := copyObjN_eval hm hS memFuel _ S' hS'
+              rw [hr] at ht
+              cases ht
+              exact ⟨μ, rfl, SVal.Mirrors.id_ge v' r hM⟩
+      all_goals cases h
+    all_goals cases h
+  | _ => cases h
+
+/-- **The memory an identity is fresh over**: an allocation's, a copy's,
+an object's of a copy (`LTm.copyFresh?`). -/
+def LTm.freshOverC? {R : RefTy} (t : LTm C (.ident R)) : Option (LTm C .mem) :=
+  match t.freshOver? with
+  | some m => some m
+  | none => t.copyFresh?
+
+theorem LTm.freshOverC?_eval {R : RefTy} {t : LTm C (.ident R)} {m : LTm C .mem}
+    (h : t.freshOverC? = some m) {id : Nat} (ht : (t.eval g ν : Option Nat) = some id) :
+    ∃ μ : Grown g.H (fun _ => Unit), m.eval g ν = some μ ∧ μ.H'.length ≤ id := by
+  unfold LTm.freshOverC? at h
+  split at h
+  · rename_i m' hm
+    cases h
+    exact LTm.freshOver?_eval hm ht
+  · exact LTm.copyFresh?_eval h ht
+
+end CopyObj
+
+section Views
+
+variable {g : State C []} {ν : AEnv}
+
 /-- **Two identities that differ** (`Grown.alloc_fresh`, the freshness behind `newFromAdd`): one fresh over a
-memory the other is older than. -/
+memory the other is older than (`LTm.freshOverC?`). -/
 def LTm.identApart? {R R' : RefTy} (t : LTm C (.ident R)) (t' : LTm C (.ident R')) : Bool :=
-  (match t'.freshOver? with
+  (match t'.freshOverC? with
     | some m => t.boundedIn m
     | none => false) ||
-  (match t.freshOver? with
+  (match t.freshOverC? with
     | some m => t'.boundedIn m
     | none => false)
 
@@ -591,13 +1533,13 @@ theorem LTm.identApart?_ne {R R' : RefTy} {t : LTm C (.ident R)} {t' : LTm C (.i
   rcases Bool.or_eq_true_iff.1 h with h | h
   · split at h
     · rename_i m hm
-      obtain ⟨μ, hμ, hle⟩ := LTm.freshOver?_eval hm ht'
+      obtain ⟨μ, hμ, hle⟩ := LTm.freshOverC?_eval hm ht'
       have : id < μ.H'.length := LTm.boundedIn_eval hμ t h id ht
       omega
     · cases h
   · split at h
     · rename_i m hm
-      obtain ⟨μ, hμ, hle⟩ := LTm.freshOver?_eval hm ht
+      obtain ⟨μ, hμ, hle⟩ := LTm.freshOverC?_eval hm ht
       have : id' < μ.H'.length := LTm.boundedIn_eval hμ t' h id' ht'
       omega
     · cases h
@@ -626,9 +1568,10 @@ def LTm.addrShape? {u : Srt} : LTm C u → Option (AddrShapeL C)
 
 /-- **Two address terms that never meet** (`readOnWriteFrame`'s side
 condition, decided on the terms): two members, a member and an element, or
-two elements of one identity at two literal indices. -/
+two elements of one identity at two literal indices; each address with its
+object's guards out (`LTm.hoistA`). -/
 def LTm.apart? {T U : Ty} (a : LTm C (.addr T)) (b : LTm C (.addr U)) : Bool :=
-  match a.addrShape?, b.addrShape? with
+  match a.hoistA.2.addrShape?, b.hoistA.2.addrShape? with
   | some (.field f o), some (.field g o') => f != g || LTm.identApart? o.2 o'.2
   | some (.field _ _), some (.index _ _) => true
   | some (.index _ _), some (.field _ _) => true
@@ -677,6 +1620,8 @@ theorem LTm.apart?_resolve {T U : Ty} {a : LTm C (.addr T)} {b : LTm C (.addr U)
     (h : a.apart? b = true) {ad : MAddrT T} {bd : MAddrT U}
     (ha : (a.eval g ν : Option (MAddrT T)) = some ad)
     (hb : (b.eval g ν : Option (MAddrT U)) = some bd) : ad.Apart bd := by
+  have ha := LTm.hoistA_some ha
+  have hb := LTm.hoistA_some hb
   unfold LTm.apart? at h
   split at h
   · rename_i f o f' o' hfa hfb
@@ -792,6 +1737,37 @@ theorem LTm.iread_write_same {R : RefTy} (m : LTm C .mem) (a : LTm C (.addr (.re
   | some μ' =>
     obtain ⟨μ, ad, w, hm, ha, hv, hw⟩ := LTm.write_some hW
     rw [Option.bind_some, ha, Option.bind_some, (Grown.writeT_facts hw).1]
+    have hx : (t.eval g ν : Option Nat) = some w := hv
+    rw [Option.bind_some, hx]
+
+/-- **readOnWrite** at the address written, its object's guards out
+(`LTm.hoistA`): where the write returns, the guards hold. -/
+theorem LTm.read_write_hoist {P : PrimTy} (m : LTm C .mem) (a : LTm C (.addr (.prim P)))
+    (x : LTm C (.val P)) :
+    ((LTm.app2 .read (.app3 .write m a (.app1 .mval x)) a.hoistA.2).eval g ν : Option P.Denote) =
+      (LTm.seq (.app3 .write m a (.app1 .mval x)) x).eval g ν := by
+  rw [LTm.read_eval_readId, LTm.eval_seq]
+  cases hW : ((LTm.app3 .write m a (.app1 .mval x)).eval g ν :
+      Option (Grown g.H (fun _ => Unit))) with
+  | none => rfl
+  | some μ' =>
+    obtain ⟨μ, ad, w, hm, ha, hv, hw⟩ := LTm.write_some hW
+    rw [Option.bind_some, LTm.hoistA_some ha, Option.bind_some, (Grown.writeT_facts hw).1]
+    have hx : (x.eval g ν : Option P.Denote) = some w := hv
+    rw [Option.bind_some, hx]
+
+/-- **readOnWrite** of an identity, its object's guards out. -/
+theorem LTm.iread_write_hoist {R : RefTy} (m : LTm C .mem) (a : LTm C (.addr (.ref R)))
+    (t : LTm C (.ident R)) :
+    ((LTm.app2 .iread (.app3 .write m a (.app1 .ref t)) a.hoistA.2).eval g ν : Option Nat) =
+      (LTm.seq (.app3 .write m a (.app1 .ref t)) t).eval g ν := by
+  rw [LTm.iread_eval_readId, LTm.eval_seq]
+  cases hW : ((LTm.app3 .write m a (.app1 .ref t)).eval g ν :
+      Option (Grown g.H (fun _ => Unit))) with
+  | none => rfl
+  | some μ' =>
+    obtain ⟨μ, ad, w, hm, ha, hv, hw⟩ := LTm.write_some hW
+    rw [Option.bind_some, LTm.hoistA_some ha, Option.bind_some, (Grown.writeT_facts hw).1]
     have hx : (t.eval g ν : Option Nat) = some w := hv
     rw [Option.bind_some, hx]
 
@@ -967,6 +1943,89 @@ def LTm.sfindV? {u : Srt} (S : LTm C u) : Option (SFindV C) :=
   | .app2 o x y => o.sfindV x y
   | _ => none
 
+/-- An identity minted over `m` without its writes, minted over `m` itself
+(`LTm.stripW`): how a copy's root reads at the node that copies it. -/
+def _root_.Solidity.Op2.unstripId (m : LTm C .mem) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a)
+    (y : LTm C b) : LTm C s :=
+  match o, x with
+  | .copy h, x => if x.beqR m.stripW then .app2 (.copy h) m y else .app2 (.copy h) x y
+  | o, x => .app2 o x y
+
+/-- `Op2.unstripId` on a term. -/
+def LTm.unstripId {s : Srt} (t : LTm C s) (m : LTm C .mem) : LTm C s :=
+  match t with
+  | .app2 o x y => o.unstripId m x y
+  | t => t
+
+/-- An address with its object's identity read at `m` (`LTm.unstripId`). -/
+def _root_.Solidity.Op1.unstripA (m : LTm C .mem) {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
+    LTm C s :=
+  match o with
+  | .mfield h => .app1 (.mfield h) (x.unstripId m)
+  | o => .app1 o x
+
+/-- At a binary symbol. -/
+def _root_.Solidity.Op2.unstripA (m : LTm C .mem) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a)
+    (y : LTm C b) : LTm C s :=
+  match o with
+  | .mat ak => .app2 (.mat ak) (x.unstripId m) y
+  | o => .app2 o x y
+
+/-- **An address read at the copy that minted its object**: its identity
+over `m` in place of `m` without its writes, so that the copy's laws
+(`copyFieldRd?`, `copyNewArrayRd?`) see the root they copy. -/
+def LTm.unstripAddr {s : Srt} (b : LTm C s) (m : LTm C .mem) : LTm C s :=
+  match b with
+  | .app1 o x => o.unstripA m x
+  | .app2 o x y => o.unstripA m x y
+  | b => b
+
+theorem LTm.unstripId_eval {m : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
+    (hm : m.eval g ν = some μ) {s : Srt} (t : LTm C s) :
+    (t.unstripId m).eval g ν = t.eval g ν := by
+  cases t with
+  | app2 o x y =>
+    cases o
+    case copy =>
+      show (if x.beqR m.stripW then _ else _ : LTm C _).eval g ν = _
+      split
+      · rename_i hx
+        obtain rfl := LTm.eq_of_beqR hx
+        exact (LTm.copy_stripW_eval hm _ y).symm
+      · rfl
+    all_goals rfl
+  | _ => rfl
+
+theorem LTm.unstripAddr_eval {m : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
+    (hm : m.eval g ν = some μ) {s : Srt} (b : LTm C s) :
+    (b.unstripAddr m).eval g ν = b.eval g ν := by
+  cases b with
+  | app1 o x =>
+    cases o
+    case mfield =>
+      show (LTm.app1 _ (x.unstripId m)).eval g ν = _
+      rw [LTm.eval_app1, LTm.eval_app1, LTm.unstripId_eval hm]
+    all_goals rfl
+  | app2 o x y =>
+    cases o
+    case mat =>
+      show (LTm.app2 _ (x.unstripId m) y).eval g ν = _
+      rw [LTm.eval_app2, LTm.eval_app2, LTm.unstripId_eval hm]
+    all_goals rfl
+  | _ => rfl
+
+/-- A read at the node `copySt(m, S)`, its address read there
+(`LTm.unstripAddr`). -/
+theorem LTm.read_unstrip {P : PrimTy} {U : Ty} (m : LTm C .mem) (hU : U.mapFree = true)
+    (S : LTm C (.sv U)) (b : LTm C (.addr (.prim P))) :
+    (LTm.app2 .read (.app2 (.copySt hU) m S) (b.unstripAddr m)).eval g ν =
+      (LTm.app2 .read (.app2 (.copySt hU) m S) b).eval g ν := by
+  cases hm : (m.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+  | none =>
+    rw [LTm.eval_app2_none _ _ _ (LTm.eval_app2_none _ _ _ hm),
+      LTm.eval_app2_none _ _ _ (LTm.eval_app2_none _ _ _ hm)]
+  | some μ => simp only [LTm.eval_app2, LTm.unstripAddr_eval hm]
+
 /-- **A member of a copy of storage, read** (`readFromCopyToStorage`): the
 word at the member of the copy's root, as the storage it copied holds it
 there. -/
@@ -1135,7 +2194,7 @@ def lenAtN (n : Nat) : {E : Ty} → LTm C .mem → LTm C (.ident (.array E)) →
         else
           match t.identView with
           | .copy m' _ S' =>
-            if m'.beqR m && S'.beqR S then
+            if (m'.beqR m || m'.beqR m.stripW) && S'.beqR S then
               match S'.newArrLen? with
               | some x => x
               | none =>
@@ -1166,7 +2225,7 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
         else
           match t.identView with
           | .copy m' _ S' =>
-            if m'.beqR m && S'.beqR S then
+            if (m'.beqR m || m'.beqR m.stripW) && S'.beqR S then
               match S'.newArrLen? with
               | some x => x
               | none =>
@@ -1242,7 +2301,7 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
             · rename_i x hx
               simp only [Bool.and_eq_true] at hc
               obtain ⟨hmm, hSS⟩ := hc
-              cases LTm.sigma_eq_of_beqR hmm
+              obtain ⟨μ₁, h₁, e₁⟩ := LTm.base_eval hmm hm
               obtain ⟨hUU, hS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hSS)
               cases hUU
               cases eq_of_heq hS
@@ -1260,12 +2319,13 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
                   rw [LTm.eval_app1, Op1.eval_eq_evalM] at hv'
                   simp only [Op1.evalM, Option.map_eq_some_iff] at hv'
                   obtain ⟨k, hk, rfl⟩ := hv'
-                  rw [hk, LTm.mlen_evalT, hX, Option.bind_some, LTm.eval_app2, hm, hv,
+                  rw [hk, LTm.mlen_evalT, hX, Option.bind_some, LTm.eval_app2, h₁, hv,
                     Op2.eval_eq_evalM]
                   show some k = Option.map
                     (fun r => (SVal.copyStToM μ₀.heap (newArrT (RefTy.array E) k _) hU).heap.lenU r)
                     (HRef.ofId? (SVal.copyStToM μ₀.heap (newArrT (RefTy.array E) k _) hU).H' _
-                      (SVal.copyStToM μ₀.heap (newArrT (RefTy.array E) k _) hU).val.id)
+                      (SVal.copyStToM μ₁.heap (newArrT (RefTy.array E) k _) hU).val.id)
+                  rw [SVal.copyStToM_id_eq _ hU μ₁.heap μ₀.heap e₁]
                   rw [HRef.ofId?_self (r := ((SVal.copyStToM μ₀.heap (newArrT (RefTy.array E) k _)
                     hU).val : HRef _ _)), Option.map_some]
                   refine congrArg some (Subtype.ext ?_)
@@ -1282,7 +2342,7 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
               · rename_i x _ hx
                 simp only [Bool.and_eq_true] at hc
                 obtain ⟨hmm, hSS⟩ := hc
-                cases LTm.sigma_eq_of_beqR hmm
+                obtain ⟨μ₁, h₁, e₁⟩ := LTm.base_eval hmm hm
                 obtain ⟨hUU, hS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hSS)
                 cases hUU
                 cases eq_of_heq hS
@@ -1304,12 +2364,13 @@ theorem lenAtN_eval (n : Nat) : ∀ {E : Ty} (X : LTm C .mem) (t : LTm C (.ident
                     have hlen : ((LTm.app2 Op2.len st q).eval g ν : Option PrimTy.uint.Denote) =
                         Storage.len s₀ r₀ := by
                       rw [LTm.eval_app2, Op2.eval_eq_evalM, hs₀, hr₀]; rfl
-                    rw [hlen, LTm.mlen_evalT, hX, Option.bind_some, LTm.eval_app2, hm, hv,
+                    rw [hlen, LTm.mlen_evalT, hX, Option.bind_some, LTm.eval_app2, h₁, hv,
                       Op2.eval_eq_evalM]
                     show (Storage.len s₀ r₀ : Option PrimTy.uint.Denote) = Option.map
                       (fun r => (SVal.copyStToM μ₀.heap v hU).heap.lenU r)
                       (HRef.ofId? (SVal.copyStToM μ₀.heap v hU).H' _
-                        (SVal.copyStToM μ₀.heap v hU).val.id)
+                        (SVal.copyStToM μ₁.heap v hU).val.id)
+                    rw [SVal.copyStToM_id_eq v hU μ₁.heap μ₀.heap e₁]
                     rw [HRef.ofId?_self (r := ((SVal.copyStToM μ₀.heap v hU).val : HRef _ _)),
                       Option.map_some]
                     unfold Storage.len
@@ -1370,6 +2431,16 @@ theorem LTm.onSpine_eval {M W : LTm C .mem} (h : M.onSpine W = true)
   obtain ⟨ω, hω⟩ := Option.ne_none_iff_exists'.1 hW
   exact ⟨ω, hω, LTm.onSpine_grows h hM hω⟩
 
+
+/-- `LTm.onSpine_eval` up to writes. -/
+theorem LTm.onSpineS_eval {M W : LTm C .mem} (h : M.onSpineS W = true)
+    {μ : Grown g.H (fun _ => Unit)} (hM : M.eval g ν = some μ) :
+    ∃ ω, W.eval g ν = some ω ∧ ω.H' <+: μ.H' := by
+  rcases Bool.or_eq_true_iff.mp h with h | h
+  · exact LTm.onSpine_eval h hM
+  · obtain ⟨μ₁, h₁, e₁⟩ := LTm.stripW_eval hM
+    obtain ⟨ω, hω, hext⟩ := LTm.onSpine_eval (Bool.and_eq_true_iff.1 h).2 h₁
+    exact ⟨ω, hω, e₁ ▸ hext⟩
 /-- A question of returning, about a memory: whether it returns; whether an
 identity is an object of its type in it; whether an address resolves and
 reads there. -/
@@ -1405,6 +2476,65 @@ theorem LTm.retsC_true {s : Srt} (t : LTm C s) :
   cases t.eval g ν with
   | none => exact ⟨fun h => (nomatch h), fun h => (nomatch h)⟩
   | some _ => exact ⟨fun _ => rfl, fun _ => rfl⟩
+
+/-- The word a guard comes to: `c` of `if (c) then · else err`, `d`
+returning of `d; ·`. -/
+def GFrame.cond? : GFrame C → Option (LTm C (.val .bool))
+  | .kite (p := .bool) c b => if b.isTT then some c else none
+  | .kite _ _ => none
+  | .seq d => some d.retsC
+
+theorem GFrame.cond?_iff {f : GFrame C} {c : LTm C (.val .bool)} (h : f.cond? = some c) :
+    f.Holds g ν ↔ (c.eval g ν : Option Bool) = some true := by
+  cases f with
+  | kite a b =>
+    rename_i p
+    cases p with
+    | bool =>
+      simp only [GFrame.cond?] at h
+      split at h
+      · rename_i hb
+        cases h
+        have hb' := LTm.isTT_eval (g := g) (ν := ν) hb
+        constructor
+        · rintro ⟨x, hx, hy⟩
+          rw [hb'] at hy
+          cases hy
+          exact hx
+        · intro hc
+          exact ⟨true, hc, hb'⟩
+      · cases h
+    | uint | int => simp only [GFrame.cond?, reduceCtorEq] at h
+  | seq d =>
+    simp only [GFrame.cond?, Option.some.injEq] at h
+    subst h
+    rw [← AllT.single, LTm.retsC_true]
+    rfl
+
+/-- The words the guards `fs` come to. -/
+def framesCond? (fs : List (GFrame C)) : Option (List (LTm C (.val .bool))) :=
+  fs.mapM GFrame.cond?
+
+theorem framesCond?_iff : (fs : List (GFrame C)) → {cs : List (LTm C (.val .bool))} →
+    framesCond? fs = some cs → ((∀ f ∈ fs, f.Holds g ν) ↔ AllT g ν cs)
+  | [], cs, h => by
+    simp only [framesCond?, List.mapM_nil, pure, Option.some.injEq] at h
+    subst h
+    exact ⟨fun _ => AllT.nil, fun _ f hf => nomatch hf⟩
+  | f :: fs, cs, h => by
+    simp only [framesCond?, List.mapM_cons, bind, pure, Option.bind_eq_some_iff,
+      Option.some.injEq] at h
+    obtain ⟨c, hc, cs', hcs', rfl⟩ := h
+    have H := framesCond?_iff fs hcs'
+    rw [show c :: cs' = [c] ++ cs' from rfl, AllT.append, AllT.single, ← GFrame.cond?_iff hc, ← H]
+    simp only [List.mem_cons, forall_eq_or_imp]
+
+open Classical in
+/-- A guarded term returns where its guards hold and what they guard returns. -/
+theorem LTm.eval_peel {s : Srt} (t : LTm C s) :
+    t.eval g ν = if ∀ f ∈ t.peel.1, f.Holds g ν then t.peel.2.eval g ν else none := by
+  classical
+  rw [← LTm.peel_eval, wrapP_eval]
 
 /-- **What a question's words say**: a memory returns exactly where they
 are `true`; where the memory returns, an identity is an object of its type
@@ -1487,9 +2617,6 @@ theorem svConds_iff {U : Ty} (S : LTm C (.sv U)) :
       rw [LTm.eval_app1, hw]; rfl
     · exact (LTm.retsC_true _).symm
   | _ => exact (LTm.retsC_true _).symm
-
-/-- How deep a read walks down a memory, and a returning check down a term. -/
-def memFuel : Nat := 64
 
 /-- **An index within an array's bounds** (`memoryIndexInBounds`), in a
 memory that returns: below its length walked down the memory (`lenAtN`),
@@ -1574,11 +2701,13 @@ def memCondStep (ih : MemQ C → Option (List (LTm C (.val .bool)))) :
       (ih (.mem m)).map fun c => c ++ svConds S
     | .other => if M.retsS then some [] else none
   | .ident t M =>
-    match t.identView with
-    | .alloc m R h => if M.onSpine (.app1 (.addM R h) m) then some [] else none
-    | .copy m h S => if M.onSpine (.app2 (.copySt h) m S) then some [] else none
-    | .iread X b => if M.onSpine X then ih (.addr b X) else none
-    | .other => none
+    if t.peel.1.isEmpty then
+      match t.identView with
+      | .alloc m R h => if M.onSpine (.app1 (.addM R h) m) then some [] else none
+      | .copy m h S => if M.onSpineS (.app2 (.copySt h) m S) then some [] else none
+      | .iread X b => if M.onSpine X then ih (.addr b X) else none
+      | .other => none
+    else (framesCond? t.peel.1).bind fun c₀ => (ih (.ident t.peel.2 M)).map fun c => c₀ ++ c
   | .addr a M =>
     match a.fieldObj? with
     | some ⟨_, t⟩ => ih (.ident t M)
@@ -1701,6 +2830,22 @@ theorem memCondN_sound (n : Nat) :
     | ident t M =>
       intro μ hμ
       simp only [memCondN, memCondStep] at h
+      by_cases hpe : t.peel.1.isEmpty = true
+      case neg =>
+        rw [if_neg hpe] at h
+        obtain ⟨c₀, h₀, h⟩ := Option.bind_eq_some_iff.1 h
+        obtain ⟨c₁, h₁, rfl⟩ := Option.map_eq_some_iff.1 h
+        have HF := framesCond?_iff (g := g) (ν := ν) _ h₀
+        have HI := ih _ _ h₁ μ hμ
+        classical
+        rw [AllT.append, LTm.eval_peel t]
+        refine ⟨fun ⟨a₀, a₁⟩ => ?_, fun ht => ?_⟩
+        · rw [if_pos (HF.2 a₀)]; exact HI.1 a₁
+        · split at ht
+          · rename_i hf
+            exact ⟨HF.1 hf, HI.2 ht⟩
+          · cases ht
+      rw [if_pos hpe] at h
       split at h
       · rename_i m R' hR ht
         split at h
@@ -1735,7 +2880,7 @@ theorem memCondN_sound (n : Nat) :
             obtain ⟨rfl, hU', hS⟩ := ht
             subst hU'
             cases hS
-            obtain ⟨ω, hω, hext⟩ := LTm.onSpine_eval hsp hμ
+            obtain ⟨ω, hω, hext⟩ := LTm.onSpineS_eval hsp hμ
             rw [LTm.eval_app2, Op2.eval_eq_evalM] at hω
             simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_eq_some_iff,
               Option.some.injEq] at hω
@@ -1946,14 +3091,42 @@ def guardQ {s : Srt} (d : LTm C s) : Option (List (LTm C (.val .bool))) :=
   | some M => memCondN memFuel (.mem M)
   | none =>
     match s, d with
-    | .ident _, d => d.identMem?.bind fun M => (memCondN memFuel (.mem M)).bind fun c₁ =>
-        (memCondN memFuel (.ident d M)).map fun c₂ => c₁ ++ c₂
+    | .ident _, d =>
+      if d.peel.1.isEmpty then
+        d.identMem?.bind fun M => (memCondN memFuel (.mem M)).bind fun c₁ =>
+          (memCondN memFuel (.ident d M)).map fun c₂ => c₁ ++ c₂
+      else
+        (framesCond? d.peel.1).bind fun c₀ =>
+          (d.peel.2.identMem?.bind fun M => (memCondN memFuel (.mem M)).bind fun c₁ =>
+            (memCondN memFuel (.ident d.peel.2 M)).map fun c₂ => c₁ ++ c₂).map fun c => c₀ ++ c
     | .sv _, d =>
       match d.copyMemV? with
       | some ⟨_, M, t⟩ => (memCondN memFuel (.mem M)).bind fun c₁ =>
           (memCondN memFuel (.ident t M)).map fun c₂ => c₁ ++ c₂
       | none => some (svConds d)
     | _, _ => none
+
+/-- `guardQ` at an identity with no guard of its own. -/
+theorem guardQ_ident {R : RefTy} (d' : LTm C (.ident R)) {cs : List (LTm C (.val .bool))}
+    (h : (d'.identMem?.bind fun M => (memCondN memFuel (.mem M)).bind fun c₁ =>
+        (memCondN memFuel (.ident d' M)).map fun c₂ => c₁ ++ c₂) = some cs) :
+    (d'.eval g ν : Option Nat).isSome = true ↔ AllT g ν cs := by
+  obtain ⟨M, hM, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨c₁, h₁, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨c₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
+  have HM := memCondN_sound (g := g) (ν := ν) memFuel (.mem M) c₁ h₁
+  have HI := memCondN_sound (g := g) (ν := ν) memFuel (.ident d' M) c₂ h₂
+  rw [AllT.append]
+  constructor
+  · intro hd
+    have hMs := LTm.identMem?_rets hM hd
+    obtain ⟨μ, hμ⟩ := Option.isSome_iff_exists.1 hMs
+    exact ⟨HM.1 hMs, (HI μ hμ).2 hd⟩
+  · rintro ⟨a₁, a₂⟩
+    obtain ⟨μ, hμ⟩ := Option.isSome_iff_exists.1 (HM.2 a₁)
+    obtain ⟨id, hid, -⟩ := (HI μ hμ).1 a₂
+    show (d'.eval g ν : Option Nat).isSome = true
+    rw [hid]; rfl
 
 theorem guardQ_sound {s : Srt} {d : LTm C s} {cs : List (LTm C (.val .bool))}
     (h : guardQ d = some cs) : (d.eval g ν).isSome = true ↔ AllT g ν cs := by
@@ -1964,22 +3137,21 @@ theorem guardQ_sound {s : Srt} {d : LTm C s} {cs : List (LTm C (.val .bool))}
     exact memCondN_sound memFuel (.mem M) cs h
   · split at h
     · rename_i R d' _
-      obtain ⟨M, hM, h⟩ := Option.bind_eq_some_iff.1 h
-      obtain ⟨c₁, h₁, h⟩ := Option.bind_eq_some_iff.1 h
-      obtain ⟨c₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
-      have HM := memCondN_sound (g := g) (ν := ν) memFuel (.mem M) c₁ h₁
-      have HI := memCondN_sound (g := g) (ν := ν) memFuel (.ident d' M) c₂ h₂
-      rw [AllT.append]
-      constructor
-      · intro hd
-        have hMs := LTm.identMem?_rets hM hd
-        obtain ⟨μ, hμ⟩ := Option.isSome_iff_exists.1 hMs
-        exact ⟨HM.1 hMs, (HI μ hμ).2 hd⟩
-      · rintro ⟨a₁, a₂⟩
-        obtain ⟨μ, hμ⟩ := Option.isSome_iff_exists.1 (HM.2 a₁)
-        obtain ⟨id, hid, -⟩ := (HI μ hμ).1 a₂
-        show (d'.eval g ν : Option Nat).isSome = true
-        rw [hid]; rfl
+      split at h
+      · exact guardQ_ident d' h
+      · obtain ⟨c₀, h₀, h⟩ := Option.bind_eq_some_iff.1 h
+        obtain ⟨c, hc, rfl⟩ := Option.map_eq_some_iff.1 h
+        have HF := framesCond?_iff (g := g) (ν := ν) _ h₀
+        have HI := guardQ_ident (g := g) (ν := ν) d'.peel.2 hc
+        classical
+        rw [AllT.append, ← HI, LTm.eval_peel d']
+        constructor
+        · intro hd
+          split at hd
+          · rename_i hf; exact ⟨HF.1 hf, hd⟩
+          · cases hd
+        · rintro ⟨a₀, a₁⟩
+          rw [if_pos (HF.2 a₀)]; exact a₁
     · rename_i U d' _
       split at h
       · rename_i R M t hcm
@@ -2020,9 +3192,11 @@ theorem LTm.isTrueC_eval {c : LTm C (.val .bool)} (h : c.isTrueC = true) :
   · cases h
 
 /-- `a`, guarded by the words `cs`: `if (c) then … else err`, a word the
-closer folds to `true` dropped. -/
+closer folds to `true` dropped, and a guard `a` already has at its top
+(`LTm.peel`). -/
 def guardL (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) : LTm C s :=
-  cs.foldr (fun c a => if c.isTrueC then a else .kite c .tt a .err) a
+  cs.foldr (fun c a => if c.isTrueC then a
+    else if a.peel.1.any (GFrame.kite c .tt).beq then a else .kite c .tt a .err) a
 
 open Classical in
 theorem guardL_eval (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) :
@@ -2032,7 +3206,9 @@ theorem guardL_eval (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) :
   | cons c cs ih =>
     have hc : AllT g ν (c :: cs) ↔ (c.eval g ν : Option Bool) = some true ∧ AllT g ν cs := by
       rw [show c :: cs = [c] ++ cs from rfl, AllT.append, AllT.single]
-    show (if c.isTrueC then guardL cs a else .kite c .tt (guardL cs a) .err).eval g ν = _
+    show (if c.isTrueC then guardL cs a
+      else if (guardL cs a).peel.1.any (GFrame.kite c .tt).beq then guardL cs a
+      else .kite c .tt (guardL cs a) .err).eval g ν = _
     split
     · rename_i htc
       have h1 := LTm.isTrueC_eval (g := g) (ν := ν) htc
@@ -2040,6 +3216,22 @@ theorem guardL_eval (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) :
       by_cases h2 : AllT g ν cs
       · rw [if_pos h2, if_pos (hc.2 ⟨h1, h2⟩)]
       · rw [if_neg h2, if_neg (fun h => h2 (hc.1 h).2)]
+    split
+    · rename_i hany
+      obtain ⟨f', hf', hb⟩ := List.any_eq_true.1 hany
+      cases GFrame.eq_of_beq hb
+      by_cases h1 : (c.eval g ν : Option Bool) = some true
+      · rw [ih]
+        by_cases h2 : AllT g ν cs
+        · rw [if_pos h2, if_pos (hc.2 ⟨h1, h2⟩)]
+        · rw [if_neg h2, if_neg (fun h => h2 (hc.1 h).2)]
+      · have hn : ¬ (GFrame.kite c .tt).Holds g ν := by
+          rintro ⟨x, hx, hy⟩
+          have ht : ((LTm.tt : LTm C (.val .bool)).eval g ν : Option Bool) = some true := rfl
+          rw [ht] at hy
+          cases hy
+          exact h1 hx
+        rw [LTm.eval_none_of_peel hf' hn, if_neg (fun h => h1 (hc.1 h).1)]
     rw [LTm.eval_kite, ih]
     by_cases h1 : (c.eval g ν : Option Bool) = some true
     · rw [h1]
@@ -2235,7 +3427,7 @@ def memReadN (n : Nat) : {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P))
     (fun _ ih {P} X b =>
       match X.memView with
       | .write m a v =>
-        if a.beqR b then
+        if a.hoistA.2.beqR b then
           match v.mvArg? with
           | some ⟨_, x⟩ =>
             match x.castTo? with
@@ -2252,12 +3444,15 @@ def memReadN (n : Nat) : {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P))
       | .copySt m _ S =>
         if b.boundedIn m then seqMemL S (ih m b)
         else
-          match copyFieldRd? m S b with
+          match copyFieldRd? m S (b.unstripAddr m) with
           | some y => seqMemL X y
           | none =>
-            match copyNewArrayRd? m S b with
+            match copyNewArrayRd? m S (b.unstripAddr m) with
             | some y => seqMemL X y
-            | none => .app2 .read X b
+            | none =>
+              match copyPathRd? X m S b with
+              | some y => seqMemL X y
+              | none => .app2 .read X b
       | .other => .app2 .read X b) n
 
 /-- **A read of an identity, walked down its memory.** -/
@@ -2267,7 +3462,7 @@ def memIReadN (n : Nat) : {R : RefTy} → LTm C .mem → LTm C (.addr (.ref R)) 
     (fun _ ih {R} X b =>
       match X.memView with
       | .write m a v =>
-        if a.beqR b then
+        if a.hoistA.2.beqR b then
           match v.mvArg? with
           | some ⟨_, x⟩ =>
             match x.castTo? with
@@ -2290,7 +3485,7 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
     intro P X b
     show (match X.memView with
       | .write m a v =>
-        if a.beqR b then
+        if a.hoistA.2.beqR b then
           match v.mvArg? with
           | some ⟨_, x⟩ =>
             match x.castTo? with
@@ -2307,12 +3502,15 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
       | .copySt m _ S =>
         if b.boundedIn m then seqMemL S (memReadN n m b)
         else
-          match copyFieldRd? m S b with
+          match copyFieldRd? m S (b.unstripAddr m) with
           | some y => seqMemL X y
           | none =>
-            match copyNewArrayRd? m S b with
+            match copyNewArrayRd? m S (b.unstripAddr m) with
             | some y => seqMemL X y
-            | none => .app2 .read X b
+            | none =>
+              match copyPathRd? X m S b with
+              | some y => seqMemL X y
+              | none => .app2 .read X b
       | .other => .app2 .read X b : LTm C (.val P)).eval g ν = _
     split
     · rename_i m T a v hX
@@ -2330,7 +3528,7 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
               cases o <;> simp only [LTm.mvArg?, Op1.mvArg, reduceCtorEq, Option.some.injEq] at hv
               obtain ⟨-, h⟩ := Sigma.mk.inj hv
               cases h
-              rw [seqMemL_eval]; exact (LTm.read_write_same m _ x').symm
+              rw [seqMemL_eval]; exact (LTm.read_write_hoist m _ x').symm
             | _ => simp only [LTm.mvArg?, reduceCtorEq] at hv
           · rfl
         · rfl
@@ -2354,13 +3552,17 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
         rw [seqMemL_eval, LTm.read_copySt_old m hU S b hb, LTm.eval_seq, LTm.eval_seq, ih]
       · split
         · rename_i y hy
-          rw [seqMemL_eval]
+          rw [seqMemL_eval, ← LTm.read_unstrip]
           exact (copyFieldRd?_eval hy).symm
         · split
           · rename_i y hy
-            rw [seqMemL_eval]
+            rw [seqMemL_eval, ← LTm.read_unstrip]
             exact (copyNewArrayRd?_eval g ν hy).symm
-          · rfl
+          · split
+            · rename_i y hy
+              rw [seqMemL_eval]
+              exact (copyPathRd?_eval hy).symm
+            · rfl
     · rfl
 
 theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (.addr (.ref R))),
@@ -2371,7 +3573,7 @@ theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (
     intro R X b
     show (match X.memView with
       | .write m a v =>
-        if a.beqR b then
+        if a.hoistA.2.beqR b then
           match v.mvArg? with
           | some ⟨_, x⟩ =>
             match x.castTo? with
@@ -2401,7 +3603,7 @@ theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (
               cases o <;> simp only [LTm.mvArg?, Op1.mvArg, reduceCtorEq, Option.some.injEq] at hv
               obtain ⟨-, h⟩ := Sigma.mk.inj hv
               cases h
-              rw [seqMemL_eval]; exact (LTm.iread_write_same m _ x').symm
+              rw [seqMemL_eval]; exact (LTm.iread_write_hoist m _ x').symm
             | _ => simp only [LTm.mvArg?, reduceCtorEq] at hv
           · rfl
         · rfl
@@ -2669,28 +3871,74 @@ section Pass
 
 variable {g : State C []} {ν : AEnv}
 
+/-- **An identity minted over a memory, minted over its allocations**
+(`LTm.stripW`, Lean only: solkey names it by a Skolem `freshIdp`): where
+every word the memory's writes land on folds to `true` (`guardQ`,
+`LTm.isTrueC`), the root of a copy over the memory is the root over it
+without its writes, which no longer carries the writes before it; else the
+identity is kept as it is, so that the copy's laws still see it. -/
+def copyRes {R : RefTy} (h : (Ty.ref R).mapFree = true) (X : LTm C .mem)
+    (S : LTm C (.sv (.ref R))) : LTm C (.ident R) :=
+  let X' := X.stripW
+  if X'.beqR X then .app2 (.copy h) X S
+  else match guardQ X with
+    | some cs => if cs.all LTm.isTrueC then .app2 (.copy h) X' S else .app2 (.copy h) X S
+    | none => .app2 (.copy h) X S
+
+theorem copyRes_eval {R : RefTy} (h : (Ty.ref R).mapFree = true) (X : LTm C .mem)
+    (S : LTm C (.sv (.ref R))) :
+    (copyRes h X S).eval g ν = (LTm.app2 (.copy h) X S).eval g ν := by
+  unfold copyRes
+  dsimp only
+  split
+  · rfl
+  split
+  · rename_i cs hq
+    split
+    · rename_i hall
+      have hc : AllT g ν cs := fun c hc =>
+        LTm.isTrueC_eval (List.all_eq_true.1 hall c hc)
+      obtain ⟨μ, hX⟩ := Option.isSome_iff_exists.1 ((guardQ_sound hq).2 hc)
+      exact LTm.copy_stripW_eval hX h S
+    · rfl
+  · rfl
+
+theorem seqMemL_tt_eval {s : Srt} (d : LTm C s) :
+    ((seqMemL d .tt).eval g ν : Option Bool) = (seqL d .tt).eval g ν := by
+  rw [seqMemL_eval, LTm.eval_seq, seqL_eval]
+
 /-- A binary symbol, its reads of memory walked. -/
 def _root_.Solidity.Op2.memRes {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     LTm C s :=
   match o, x, y with
-  | .read, X, b => memReadN memFuel X b
-  | .iread, X, b => memIReadN memFuel X b
-  | .mlen, X, t => seqMemL X (lenAtN memFuel X t)
+  | .read, X, b => wrapG b.hoistA.1 (memReadN memFuel X b.hoistA.2)
+  | .iread, X, b => wrapG b.hoistA.1 (memIReadN memFuel X b.hoistA.2)
+  | .mlen, X, t => wrapG t.peel.1 (seqMemL X (lenAtN memFuel X t.peel.2))
   | .hash k, X, t => keccakRes k X t
+  | .copy h, X, S => copyRes h X S
   | o, x, y => .app2 o x y
 
 theorem Op2.memRes_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     (o.memRes x y).eval g ν = (LTm.app2 o x y).eval g ν := by
   cases o
-  case read => simp only [Op2.memRes]; exact memReadN_eval _ x y
-  case iread => simp only [Op2.memRes]; exact memIReadN_eval _ x y
+  case read =>
+    simp only [Op2.memRes]
+    rw [LTm.app2_hoistA .read rfl x y]
+    exact wrapG_congr _ (memReadN_eval _ x _)
+  case iread =>
+    simp only [Op2.memRes]
+    rw [LTm.app2_hoistA .iread rfl x y]
+    exact wrapG_congr _ (memIReadN_eval _ x _)
   case mlen =>
     simp only [Op2.memRes]
+    rw [LTm.app2_peel .mlen rfl x y]
+    refine wrapG_congr _ ?_
     rw [seqMemL_eval, LTm.eval_seq]
     cases hx : (x.eval g ν : Option (Grown g.H (fun _ => Unit))) with
     | none => rw [LTm.eval_app2_none _ _ _ hx]; rfl
-    | some μ => exact lenAtN_eval memFuel x y μ hx
+    | some μ => exact lenAtN_eval memFuel x _ μ hx
   case hash k => simp only [Op2.memRes]; exact keccakRes_eval k x y
+  case copy h => simp only [Op2.memRes]; exact copyRes_eval h x y
   all_goals simp only [Op2.memRes]
 
 /-- `LTm.memRes`'s compiled twin. -/
@@ -2956,19 +4204,34 @@ theorem LFml.hasStRd_eq_hasStRdM (φ : LFml C) : φ.hasStRd = φ.hasStRdM := by
   | not φ ih | all k p φ ih => simp only [LFml.hasStRdM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.hasStRdM, ← ihφ, ← ihψ]; rfl
 
+/-- The storage reads a walk of memory exposed (a member of a copy of
+storage, a guard of a copy's source) eliminated once more (`LFml.elim`),
+and memory walked again. -/
+def LFml.memElim (φ : LFml C) : LFml C :=
+  if φ.hasStRd then φ.elim.memRes else φ
+
+theorem LFml.memElim_valid {φ : LFml C} (h : φ.memElim.Valid) : φ.Valid := by
+  unfold LFml.memElim at h
+  split at h
+  · exact fun g ν => (LFml.elim_holds g φ ν).1 (LFml.memRes_valid h g ν)
+  · exact h
+
 /-- **The closer with memory read**: every read of memory walked
-(`LFml.memRes`), the storage reads that walk exposed (a member of a copy
-of storage) eliminated once more (`LFml.elim`), walked again, then
-`LFml.close`. -/
-def LFml.closeMem (φ : LFml C) : Bool :=
-  if φ.memRes.hasStRd then φ.memRes.elim.memRes.close else φ.memRes.close
+(`LFml.memRes`), the storage reads that walk exposed eliminated and the
+memory walked again (`LFml.memElim`), then `LFml.close`; where that does
+not close, once more, for the reads the second walk exposed (the guards
+of a copy's source on a word read below the copy's root). -/
+def LFml.closeMem (φ : LFml C) : Bool := closeTwice φ.memRes.memElim
+where
+  /-- `ψ` closed, or closed after one more elimination. -/
+  closeTwice (ψ : LFml C) : Bool := ψ.close || (ψ.hasStRd && ψ.memElim.close)
 
 theorem LFml.closeMem_valid {φ : LFml C} (h : φ.closeMem = true) : φ.Valid := by
-  unfold LFml.closeMem at h
-  split at h
-  · exact LFml.memRes_valid fun g ν =>
-      (LFml.elim_holds g φ.memRes ν).1 (LFml.memRes_valid (LFml.close_valid h) g ν)
-  · exact LFml.memRes_valid (LFml.close_valid h)
+  unfold LFml.closeMem LFml.closeMem.closeTwice at h
+  rcases Bool.or_eq_true_iff.1 h with h | h
+  · exact LFml.memRes_valid (LFml.memElim_valid (LFml.close_valid h))
+  · exact LFml.memRes_valid (LFml.memElim_valid (LFml.memElim_valid
+      (LFml.close_valid (Bool.and_eq_true_iff.1 h).2)))
 
 /-! ## Before the elimination -/
 

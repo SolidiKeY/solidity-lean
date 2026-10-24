@@ -464,10 +464,11 @@ info: Try this:
 example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
-/-! A split whose condition is ground under its updates keeps only the
-branch it takes (`Hyps.groundS`, `Seq.refuteS`): the `revert()` branches are closed by
-`Proves.closeFalse`, not run (two steps fewer in each).  The second reads `y` through twelve updates
-`y := y * y`, each position listed once (`Upd.groundStepS`), not `2¹²` times. -/
+/-! A small ground condition is refuted by bounded rigid substitution
+(`Hyps.groundS`, `Seq.refuteLanded`), so the first example keeps its taken
+branch. The second's twelve `y := y * y` updates exceed the projection's
+syntax cap and keep both branches; its box proof still closes. The ground
+test itself lists each position once (`Upd.groundStepS`). -/
 
 /--
 info: Try this:
@@ -998,5 +999,62 @@ example : Fml.Valid (dl!{ true } : Fml StandardExample []) := by
       (id (Eq.refl true))
 
 end ExactDecision
+
+/-- info: Try this:
+  (expose_names; have allLeft := h i hi; clear h) -/
+#guard_msgs in
+example (P : Int → Prop) (h : ∀ n, 0 ≤ n → P n) (i : Int) (hi : 0 ≤ i) : P i := by
+  sol_close_all?
+  assumption
+
+-- The suggestion itself is replayed without searching for instances or guards.
+example (P : Int → Prop) (h : ∀ n, 0 ≤ n → P n) (i : Int) (hi : 0 ≤ i) : P i := by
+  (expose_names; have allLeft := h i hi; clear h)
+  assumption
+
+/-- info: Try this:
+  (expose_names; have allLeft := h i h_1; clear h) -/
+#guard_msgs in
+example (P : Int → Prop) (h : ∀ n, 0 ≤ n → P n) : ∀ i : Int, 0 ≤ i → P i := by
+  intros
+  sol_close_all?
+  assumption
+
+example (P : Int → Prop) (h : ∀ n, 0 ≤ n → P n) : ∀ i : Int, 0 ≤ i → P i := by
+  intros
+  (expose_names; have allLeft := h i h_1; clear h)
+  assumption
+
+/-- info: Try this:
+  (expose_names; have nonlin := Close.square_nonneg x) -/
+#guard_msgs in
+example (x : Int) : 0 ≤ x*x := by
+  sol_close_nonlin?
+  assumption
+
+example (x : Int) : 0 ≤ x*x := by
+  (expose_names; have nonlin := Solidity.Close.square_nonneg x)
+  assumption
+
+namespace Rigid
+open scoped Solidity.Scoped
+
+/--
+info: Try this:
+  sol_prove (steps := 128)
+-/
+#guard_msgs in
+example : ⊢ dl!{
+    ⟨ uint[] memory xs = new uint[](2); uint i = 0;
+      while (i < 8) { xs[0] = i; i++; }; ⟩ i == 8 } := by
+  sol_prove?
+
+-- Replay retains the measured bound and does not search over stages.
+example : ⊢ dl!{
+    ⟨ uint[] memory xs = new uint[](2); uint i = 0;
+      while (i < 8) { xs[0] = i; i++; }; ⟩ i == 8 } := by
+  sol_prove (steps := 128)
+
+end Rigid
 
 end Solidity.Examples.ProofTree

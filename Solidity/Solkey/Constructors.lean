@@ -37,7 +37,7 @@ solc_import "../../tests/solc/EtherWallet.ast.json" hash 0x381a46a368c7fa67 as S
 solc_import "../../tests/solc/CtorGap.ast.json" hash 0xc422f333726d501d as Solkey.CtorGap
 
 /--
-warning: solc_import: the initializers are left out: an initializer calls `cap`, which is left out: the statement `InlineAssembly`
+warning: solc_import: the initializers are left out: an initializer calls `cap`, which is left out: assembly other than revert(add(data, 32), mload(data))
 -/
 #guard_msgs in
 solc_import "../../tests/solc/InitGap.ast.json" hash 0x1fb55aa0ceab10b9 as Solkey.InitGap
@@ -128,7 +128,7 @@ are left out, with a warning at the import. -/
 
 /--
 info: 2 functions (2 diamond, 0 box, 0 skip): 1 elaborated, 0 skipped, 0 excluded, 1 unsupported
-unsupported constructor: CtorGap.sol:16: the statement `InlineAssembly`
+unsupported constructor: CtorGap.sol:16: assembly other than revert(add(data, 32), mload(data))
 -/
 #guard_msgs in
 #eval IO.println (Solidity.Frontend.ImportRow.summary Solkey.CtorGap.report)

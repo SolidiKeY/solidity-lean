@@ -51,13 +51,16 @@ def budget : Nat := 20000
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
 lines: `sol_leaf` (the sequent as `⊨ᶠ ψ`, `Calculus/ProvesDerive.lean`), then
 `sol_decide` on the scoped leaf, then
-`sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`).  A leaf past
+`sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`), and last
+`sol_close` on the leaf with its `∀` premises kept (`sol_leaf_keep`).  A leaf past
 the closer's bounds (`small = false`) gets no step that reduces it, only
 `sol_close` and `sol_spec_close`, whose `simp`, `omega` and `grind` heed
 heartbeats. -/
 def leafTacs (small : Bool := true) : Array (Array String) :=
   (if small then #[#["sol_leaf", "sol_decide"]] else #[]) ++
-    #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"]]
+    #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"],
+      -- last: the `∀` premises kept for a goal that opens its own `∀`
+      #["sol_leaf_keep", "sol_close"]]
 
 /-- The first of `leafTacs` that closes the leaf `l`, with the raw
 heartbeats it used; `none` when none does.  Each try runs with its own
@@ -127,7 +130,7 @@ def proveSearch (g : MVarId) (prove : MVarId → MetaM (List MVarId))
       hb := hb + h
     | none =>
       open_ := open_ ++ [l]
-      found := found ++ [(name, #["sorry"])]
+      found := found ++ [(name, #[r"sorry"])]
       if stopAtOpen then break
   return { found, open_, heartbeats := hb, steps }
 
@@ -179,6 +182,18 @@ short line fails, the explicit `refine` stands in. -/
 namespace Walk
 
 open Lean Elab Tactic Meta
+
+/-- The recursion depth a step of the walk runs with: unifying a rule with
+a sequent over a memory history unfolds the memory reads (`memFuel`,
+`Calculus/MemRead.lean`) past the default 512 (`reasonBytes` of
+`tests/solc/RevertData.sol` needs over 512, 1024 suffices). -/
+def stepRecDepth : Nat := 4096
+
+/-- `x` at `stepRecDepth`, the context's bound and the option alike. -/
+def withStepDepth {α : Type} (x : TacticM α) : TacticM α :=
+  let set (c : Core.Context) : Core.Context :=
+    { c with maxRecDepth := stepRecDepth, options := maxRecDepth.set c.options stepRecDepth }
+  withTheReader Core.Context set x
 
 /-- The explicit arguments of the constructor `c` after the rule `d`, but
 those a default proves (`hR`). -/
@@ -381,7 +396,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   for (tacs, note) in ← movesAt g short do
     let s ← saveState
     -- each try with its own heartbeats, a timeout a failed try
-    let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g tacs))
+    let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (withStepDepth (ProofTree.runOn g tacs)))
       fun _ => do s.restore; pure none
     if let some gs := r then
       step := some (tacs, note, gs)
@@ -389,7 +404,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   let some (tacs, note, gs) := step
     | if close then
         if let some lines ← closeLeaf g then return lines
-      leaves.modify (·.push g); return #["sorry"]
+      leaves.modify (·.push g); return #[r"sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   let head := match note with
     | some n => head.modify (head.size - 1) (· ++ s!" -- {n}")

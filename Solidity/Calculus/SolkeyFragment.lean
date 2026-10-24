@@ -12,7 +12,8 @@ solkey does not have.  A statement is **in solkey's fragment** under a
 modality (`Stmt.inSolkey m`) when no `LeanTaclet` is needed to run it
 there: every call's arguments are simple, in its branches, blocks and the
 bodies it inlines too; no program operand, including a path index, contains
-a native modular builtin; under the diamond it pays no one; and it has no
+a native modular builtin; no `if` has the shape of a joined one
+(`Prog.joinShape`, `ifElseJoin`); under the diamond it pays no one; and it has no
 `try` and no annotated loop. This is a conservative program-rule fragment:
 it does not restrict symbols inside arbitrary formula atoms or updates. The table now
 also contains restricted upstream loop rules. On the fragment the strategy
@@ -63,10 +64,12 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignMem := fun l r => l.keyValue && r.keyValue)
     (delete := fun l => l.keyValue)
     (deleteMem := fun p _ => p.keyValue) (assignNew := fun l _ _ => l.keyValue)
-    (ite := fun c thn els => c.keyValue && Prog.inSolkey m thn && Prog.inSolkey m els)
+    (ite := fun c thn els => c.keyValue && Prog.inSolkey m thn && Prog.inSolkey m els &&
+      !Prog.joinShape thn els)
     (require := fun c => c.keyValue) (assert := fun c => c.keyValue) (revert := true)
     (assumeFalse := false)
-    (call := fun _ args _ body => (Args.capture args).isNone && args.keyValues && Prog.inSolkey m body)
+    (call := fun _ args ret body => ((Args.capture args).isNone && !(CallRet.sumOK args ret body)) &&
+      args.keyValues && Prog.inSolkey m body)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
     (loop := fun a c body => match a with | .auto => c.keyValue && Prog.inSolkey m body | _ => false)
     (block := fun body => Prog.inSolkey m body)
@@ -97,8 +100,12 @@ theorem LeanTaclet.not_inSolkey {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
     {p : Premise C Γ Γ'} (d : LeanTaclet C k m s p) : s.inSolkey m = false := by
   cases d with
   | functionCallArgCapture hcap =>
-    show ((Args.capture _).isNone && _ && _) = false
+    show ((Args.capture _).isNone && _ && _ && _) = false
     rw [hcap]; rfl
+  | internalCallSummary _ _ hs =>
+    show ((Args.capture _).isNone && !(CallRet.sumOK _ _ _) && _ && _) = false
+    rw [← CallRet.summary?_isSome, hs]
+    simp only [Option.isSome_some, Bool.not_true, Bool.and_false, Bool.false_and]
   | pushCompoundUnfoldReceiver h =>
     simp only [Stmt.inSolkey, h, Bool.false_and]
   | pushIncrementUnfoldReceiver h =>
@@ -112,6 +119,10 @@ theorem LeanTaclet.not_inSolkey {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
   | pushMemorySourceCapture _ hnmp =>
     simp only [Stmt.inSolkey, Option.elim, Src.keyPushSource, hnmp, Bool.false_and,
       Bool.and_false]
+  | @ifElseJoin _ _ thn _ els _ se _ hj =>
+    have h : (!Prog.joinShape thn els) = false := by
+      rw [Upd.ifJoin?_shape hj]; rfl
+    simp only [Stmt.inSolkey, h, Bool.and_false]
   | _ => rfl
 
 /-- **On the fragment, the rule the strategy fires is solkey's.** -/
@@ -194,6 +205,14 @@ theorem Stmt.keyStep_of_inSolkey {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ
       rw [show r.keyPushSource = true from (Bool.and_eq_true _ _ ▸ hv).1]
       rfl
   | assumeFalse | callRec | revertData | catchData => exact absurd h Bool.false_ne_true
+  | ite c thn els =>
+    have hj : (!Prog.joinShape thn els) = true := (Bool.and_eq_true _ _ ▸ h).2
+    cases c with
+    | simple se =>
+      show (Upd.ifJoin? se.lower thn els).isNone = true
+      rw [Upd.ifJoin?_none_of_shape se.lower (by simpa only [Bool.not_eq_true'] using hj)]
+      rfl
+    | _ => rfl
   | _ => rfl
 
 /-! ## Solkey's rules keep the fragment -/
@@ -289,6 +308,64 @@ theorem Args.capture_wk_isNone {Γ Δ : Ctx} (h : Thin Γ Δ) {ps : Ctx} (args :
     show (Args.capture (.snocMemory (as.wk h) R x (e.wk h))).isNone = _
     rw [Args.capture_snocMemory_isNone, Args.capture_snocMemory_isNone, ih]
 
+/-- A branch of two statements or more is not joinable:
+`{ v = nse; v = v && true; }`. -/
+theorem Prog.joinArm?_cons_cons {Γ Γ₁ Γ₂ Γ₃ : Ctx} (s : Stmt C Γ Γ₁) (t : Stmt C Γ₁ Γ₂)
+    (ω : Prog C Γ₂ Γ₃) : (Prog.cons s (.cons t ω)).joinArm? = none := by
+  show s.localAssign?.bind (fun a => if Prog.isNil (.cons t ω) then some (some a) else none) = none
+  cases s.localAssign? <;> rfl
+
+/-- Weakening keeps a branch joinable, or not: `{ x = x + 1; }` is one
+assignment wherever it is read. -/
+theorem Prog.joinArm?_wk_isSome {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
+    ((P.wk h).2.2.joinArm?).isSome = P.joinArm?.isSome := by
+  cases P with
+  | nil => rfl
+  | cons s ω =>
+    cases s <;> try rfl
+    cases ω <;> rfl
+
+/-- Weakening keeps a branch empty, or not. -/
+theorem Prog.isNil_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
+    (P.wk h).2.2.isNil = P.isNil := by
+  cases P <;> rfl
+
+/-- A branch with a statement is not empty. -/
+theorem Prog.isNil_cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (ω : Prog C Γ₁ Γ₂) :
+    (Prog.cons s ω).isNil = false := rfl
+
+theorem Prog.joinShape_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) :
+    Prog.joinShape (thn.wk h).2.2 (els.wk h).2.2 = Prog.joinShape thn els := by
+  unfold Prog.joinShape
+  rw [Prog.isNil_wk, Prog.isNil_wk, Prog.joinArm?_wk_isSome, Prog.joinArm?_wk_isSome]
+
+/-- Weakening keeps the arguments simple values. -/
+theorem Args.simpleVals_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {ps : Ctx} (args : Args C Γ ps) :
+    (args.wk h).simpleVals = args.simpleVals := by
+  induction args with
+  | nil => rfl
+  | snoc as p x e ih =>
+    show ((match e.wk h with | .simple _ => true | _ => false) && (as.wk h).simpleVals) =
+      ((match e with | .simple _ => true | _ => false) && as.simpleVals)
+    rw [ih]; cases e <;> rfl
+  | snocStorage => rfl
+  | snocMemory => rfl
+
+/-- Weakening keeps a call's summary, which reads its callee alone. -/
+theorem CallRet.sumOK_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {ps rs Γ' Γf : Ctx} (args : Args C Γ ps)
+    (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) :
+    CallRet.sumOK (args.wk h) (ret.wk h).2.2 body = CallRet.sumOK args ret body := by
+  cases ret with
+  | val p r res =>
+    show ((res.map (·.wk h)).isSome && _ && _ && (args.wk h).simpleVals) =
+      (res.isSome && _ && _ && args.simpleVals)
+    rw [Option.isSome_map, Args.simpleVals_wk]
+  | none => rfl
+  | rets _ => rfl
+  | mem _ _ _ _ => rfl
+  | storage _ _ => rfl
+
 mutual
 
 /-- Weakening keeps a statement in the fragment. -/
@@ -296,12 +373,14 @@ theorem Stmt.inSolkey_wk (m : Modality) {Γ Δ : Ctx} (h : Thin Γ Δ) :
     {Γ' : Ctx} → (s : Stmt C Γ Γ') → (s.wk h).2.2.inSolkey m = s.inSolkey m
   | _, .ite c thn els => by
     show ((c.wk h).keyValue && Prog.inSolkey m (thn.wk h).2.2 &&
-      Prog.inSolkey m (els.wk h).2.2) = _
-    rw [Val.keyValue_wk, Prog.inSolkey_wk m h thn, Prog.inSolkey_wk m h els]; rfl
+      Prog.inSolkey m (els.wk h).2.2 && !Prog.joinShape (thn.wk h).2.2 (els.wk h).2.2) = _
+    rw [Val.keyValue_wk, Prog.inSolkey_wk m h thn, Prog.inSolkey_wk m h els,
+      Prog.joinShape_wk]; rfl
   | _, .call f args ret body => by
     simp only [Stmt.wk]
-    show ((Args.capture (args.wk h)).isNone && (args.wk h).keyValues && Prog.inSolkey m body) = _
-    rw [Args.capture_wk_isNone, Args.keyValues_wk]; rfl
+    show (((Args.capture (args.wk h)).isNone && !(CallRet.sumOK (args.wk h) (ret.wk h).2.2 body)) &&
+      (args.wk h).keyValues && Prog.inSolkey m body) = _
+    rw [Args.capture_wk_isNone, Args.keyValues_wk, CallRet.sumOK_wk]; rfl
   | _, .callReceiver _ args _ body op => by
     cases op with
     | pop => simp only [Stmt.wk, Stmt.inSolkey, ReceiverOp.wk, Args.capture_wk_isNone, Args.keyValues_wk]
@@ -455,7 +534,7 @@ theorem callReceiverStep_inSolkey (m : Modality) (k : Nat) {Γ ps Γf : Ctx} {E 
     (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E)
     (h : (Stmt.callReceiver f args r body op).inSolkey m = true) :
     (callReceiverStep k f args r body op).inSolkey m = true := by
-  change (((Args.capture args).isNone && args.keyValues && Prog.inSolkey m body) &&
+  change ((((Args.capture args).isNone && true) && args.keyValues && Prog.inSolkey m body) &&
     (true && ((((op.wk (.drop .refl)).wk (.drop .refl)).toStmt (.alias .here)).inSolkey m && true)))
       = true
   cases op with
@@ -480,7 +559,7 @@ theorem ReceiverValue.step_inSolkey (m : Modality) (k : Nat) {Γ ps Γf : Ctx} {
     let q := p.2.2.wk (.drop (t := .alias (.array E)) .refl)
     let push : Prog C q.1 q.1 := .cons (.push (.alias (Idx.here.ext q.2.2.ext))
       (some ((value.wk p.2.1).wk q.2.1)) rfl) .nil
-    change (((Args.capture args).isNone && args.keyValues && body.inSolkey m) &&
+    change ((((Args.capture args).isNone && true) && args.keyValues && body.inSolkey m) &&
       (true && ((q.2.2.join push).inSolkey m && true))) = true
     rw [Prog.inSolkey_join, Prog.inSolkey_wk, Prog.inSolkey_wk]
     have hs : push.inSolkey m =
@@ -503,7 +582,9 @@ theorem loopUnwindStep_inSolkey (m : Modality) (u : LoopUnwind) {Γ Γ₁ : Ctx}
     have hc : c.keyValue = true := (Bool.and_eq_true _ _ ▸ h).1
     have hb : body.inSolkey m = true := (Bool.and_eq_true _ _ ▸ h).2
     simp only [loopUnwindStep, Premise.inSolkey, Prog.inSolkey, Stmt.inSolkey,
-      LoopUnwind.after, hc, hb, Bool.and_self]
+      LoopUnwind.after, hc, hb, Bool.and_self, Prog.joinShape, Prog.joinArm?_cons_cons,
+      Option.isSome_none, Bool.false_and, Bool.and_false, Bool.not_false, Prog.isNil_cons,
+      Bool.false_or]
 
 namespace FragmentProof
 open Lean Meta Elab Tactic
@@ -534,8 +615,10 @@ elab "#check_fragment_rules" : command => do
           evalTactic (← `(tactic| (intros; rename_i h; exact Premise.expandCall_inSolkey _ _ _ _ _ (Bool.and_eq_true _ _ ▸ (Bool.and_eq_true _ _ ▸ h).1).2 (Bool.and_eq_true _ _ ▸ h).2)))
         | "whileUnwind" =>
           evalTactic (← `(tactic| (intros; rename_i h; exact loopUnwindStep_inSolkey _ _ _ _ h)))
+        | "ifElseSplit" =>
+          evalTactic (← `(tactic| (intros; rename_i h; simp only [Stmt.inSolkey, Val.keyValue, Bool.true_and, Bool.and_eq_true] at h; simp only [Premise.inSolkey, Fml.inSolkey, Bool.true_and, h.1.1, h.1.2, Bool.and_self])))
         | "ifElseUnfold" =>
-          evalTactic (← `(tactic| (intro C k m Γ c Γ₁ thn Γ₂ els _ h; change (c.keyValue && ((true && Prog.inSolkey m thn.up && Prog.inSolkey m els.up) && true)) = true; rw [Prog.inSolkey_wk, Prog.inSolkey_wk]; simpa only [Stmt.inSolkey, Bool.true_and, Bool.and_true, Bool.and_assoc] using h)))
+          evalTactic (← `(tactic| (intro C k m Γ c Γ₁ thn Γ₂ els _ h; change (c.keyValue && ((true && Prog.inSolkey m thn.up && Prog.inSolkey m els.up && !Prog.joinShape thn.up els.up) && true)) = true; rw [Prog.inSolkey_wk, Prog.inSolkey_wk, Prog.joinShape_wk]; simpa only [Stmt.inSolkey, Bool.true_and, Bool.and_true, Bool.and_assoc] using h)))
         | _ =>
           evalTactic (← `(tactic| (intros; rename_i h; (try core_cases_hole) <;>
             (try fragment_wrapper_cases) <;> first
@@ -554,7 +637,9 @@ elab "#check_fragment_rules" : command => do
         Src.keyValue, MSrc.keyValue, ARhs.keyValue, MRhs.keyValue, NewLhs.keyValue,
         OpLoc.keyValue, Src.isMemory, Src.keyPushSource, SPath.isSimple_wk, MPath.isSimple_wk,
         Bool.and_eq_true, Bool.not_eq_true, Bool.true_and, Bool.and_true, Bool.false_and,
-        Bool.and_false, Bool.false_eq_true, Bool.true_eq_false, Option.elim])
+        Bool.and_false, Bool.false_eq_true, Bool.true_eq_false, Option.elim,
+        Prog.joinShape, Prog.joinArm?_cons_cons, Option.isSome_none, Bool.not_false,
+        Prog.isNil_cons, Bool.false_or])
     | exact absurd h Bool.false_ne_true
     | (cases ‹NewLhs _ _ _› <;> simp_all only [NewLhs.fill, NewLhs.keyValue,
         Loc.up_eq, MLoc.up_eq, Loc.keyValue_wk, MLoc.keyValue_wk,

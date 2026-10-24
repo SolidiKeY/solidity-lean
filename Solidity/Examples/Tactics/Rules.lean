@@ -37,6 +37,9 @@ private def writePeople : Stmt SE [.val .uint] [.val .uint] :=
     "age" rfl) (.val (.simple (.lit 3 rfl)))
 /-- `if (b) {} else {}` -/
 private def iteB : Stmt SE [.val .bool] [.val .bool] := .ite (.simple (.local .here)) .nil .nil
+/-- `if (b) { revert(); } else {}` -/
+private def iteRevert : Stmt SE [.val .bool] [.val .bool] :=
+  .ite (.simple (.local .here)) (.cons .revert .nil) .nil
 /-- `if (x < 3) {} else {}` -/
 private def iteLt : Stmt SE [.val .uint] [.val .uint] :=
   .ite (.binop .lt rfl rfl (.simple (.local .here)) (.simple (.lit 3 rfl))) .nil .nil
@@ -53,8 +56,10 @@ private def iteLt : Stmt SE [.val .uint] [.val .uint] :=
 #guard_msgs in #rule_of .box writeAge
 /-- info: Solidity.Taclet.storageFieldWrite_unfold_leftFst -/
 #guard_msgs in #rule_of .box writePeople
-/-- info: Solidity.Taclet.ifElseSplit -/
+/-- info: Solidity.LeanTaclet.ifElseJoin -/
 #guard_msgs in #rule_of .box iteB
+/-- info: Solidity.Taclet.ifElseSplit -/
+#guard_msgs in #rule_of .box iteRevert
 /-- info: Solidity.Taclet.ifElseUnfold -/
 #guard_msgs in #rule_of .box iteLt
 /-- info: Solidity.Taclet.revertBox -/

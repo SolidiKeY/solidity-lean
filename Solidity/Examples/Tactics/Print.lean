@@ -40,8 +40,8 @@ info: @Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {
 #guard_msgs in #check @Taclet.storageFieldDelete_unfold_leftFst
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
-  {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1}
+  {m : Modality} {se : Simple C Γ PrimTy.bool},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
 -/
@@ -330,15 +330,15 @@ info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Hyps SE [] [LTy.val PrimTy.uint] → Pro
 -- A goal of a walk prints as the line it is.
 /--
 trace: case h.thn
-⊢ dl{ ∀ bool b, b = true ⟹ true }
+⊢ dl{ ∀ bool b, b = true ⟹ [ revert(); } ] true }
 -/
 #guard_msgs in
 example : Proves SE .all [] .nil (.all (.user "b") .bool
-    (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) := by
+    (.modal .box (.cons (.ite (.simple (.local .here)) (.cons .revert .nil) .nil) .nil) .nil .tt)) := by
   apply Proves.allIntro
   apply Proves.split rfl
   · trace_state
-    exact .updIntro (.closeTrue rfl)
+    exact .done rfl (.closeTrue rfl)
   · exact .updIntro (.closeTrue rfl)
 
 end Solidity.Examples.Tactics.Print

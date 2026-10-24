@@ -19,7 +19,7 @@
 #   --solkey    the checkout TestSuite was imported from (default:
 #               $SOLKEY_EXAMPLES, else ../solkey/keyext.solidity.examples)
 #   --complete  also fail while a function is pending: the goal is
-#               testSuiteFunctions = derived + excluded + divergent.
+#               testSuiteFunctions = derived + refuted + excluded + divergent.
 # Exit 0 = clean, 1 = a finding.
 set -euo pipefail
 
@@ -122,7 +122,7 @@ const tsvRows = (path) => readFileSync(path, "utf8").split("\n")
   .map((l) => l.split("\t")).filter((r) => r[1] === "TestSuite");
 const rows = tsvRows("tests/solkey/expected.tsv");
 const by = (st) => new Set(rows.filter((r) => st.includes(r[3])).map((r) => r[2]));
-const stated = by(["derived", "pending", "divergent", "excluded", "unsupported"]);
+const stated = by(["derived", "refuted", "pending", "divergent", "excluded", "unsupported"]);
 const skip = by(["skip"]);
 const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
 if (!same(stated, provable)) {
@@ -136,12 +136,12 @@ if (JSON.stringify(fresh) !== JSON.stringify(rows)) {
   fail("the TestSuite rows are not what scripts/solkey-port.mjs writes (re-run it)");
 }
 const n = (st) => by([st]).size;
-const closed = n("derived") + n("excluded") + n("divergent");
-console.log(`parity: ${provable.size} testSuiteFunctions = ${n("derived")} derived + ` +
+const closed = n("derived") + n("refuted") + n("excluded") + n("divergent");
+console.log(`parity: ${provable.size} testSuiteFunctions = ${n("derived")} derived + ${n("refuted")} refuted + ` +
   `${n("pending")} pending + ${n("divergent")} divergent + ${n("excluded")} excluded` +
   `${n("unsupported") ? ` + ${n("unsupported")} unsupported` : ""}; ${skip.size} skip`);
 if (complete === "1" && closed !== provable.size) {
-  fail(`${provable.size - closed} of ${provable.size} not derived, excluded or divergent`);
+  fail(`${provable.size - closed} of ${provable.size} not derived, refuted, excluded or divergent`);
 }
 process.exit(ok ? 0 : 1);
 EOF

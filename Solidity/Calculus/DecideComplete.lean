@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideCleanTail
+import Solidity.Calculus.CondLift
 import Solidity.Calculus.Symex
 
 /-!
@@ -8,7 +9,9 @@ import Solidity.Calculus.Symex
 `sol_symex`): its updates pushed in by position (`Fml.toLS`,
 `Calculus/DecideScoped.lean`), the reads of writes eliminated under the
 premises (`LFml.elimF`), memory read and the result closed by the closer
-(`LFml.decideMem`), within the closer's bounds (`Seq.checkCore`:
+(`LFml.decideMem`; where it does not close, the leaf's conditional terms
+lifted into case splits first, `LFml.decideLift`: a joined `if`'s
+`{x := c ? e₁ : e₂}`), within the closer's bounds (`Seq.checkCore`:
 `Seq.closeSize`, `Seq.stackSize`, or `concreteSize` and `concreteDepth`
 where every storage history is concrete, `LFml.boundsOk`), all of it
 evaluated once by the kernel
@@ -18,6 +21,54 @@ is past the bounds, it fails; `sol_reduce?` shows the reduction
 -/
 
 namespace Solidity
+
+namespace Decide
+
+variable {C : Contract}
+
+/-- The nesting depth to which `LFml.decideLift` lifts a leaf's
+conditionals. -/
+def liftFuel : Nat := 64
+
+/-- `1` at `ite`. -/
+def Op3.iteOne {a b c s : Srt} : Op3 C a b c s → Nat
+  | .ite => 1
+  | _ => 0
+
+/-- The conditional terms of a term, counted as a tree. -/
+def LTm.iteCount : {s : Srt} → LTm C s → Nat
+  | _, .app1 _ a | _, .obsW a | _, .obsL a | _, .obsH a => a.iteCount
+  | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.iteCount + b.iteCount
+  | _, .app3 o a b c => a.iteCount + b.iteCount + c.iteCount + Op3.iteOne o
+  | _, .kite a b t e => a.iteCount + b.iteCount + t.iteCount + e.iteCount + 1
+  | _, _ => 0
+
+/-- The conditional terms of a formula's equations. -/
+def LFml.iteCount : LFml C → Nat
+  | .tt => 0
+  | .eq a b => a.iteCount + b.iteCount
+  | .not φ | .all _ _ φ => φ.iteCount
+  | .and φ ψ | .imp φ ψ => φ.iteCount + ψ.iteCount
+
+/-- The most conditional terms `LFml.decideLift` lifts: each splits the
+formula in three. -/
+def liftConds : Nat := 6
+
+/-- **The closer, conditionals lifted where it does not close**: `decideMem`
+on the leaf, else, where it has at most `liftConds` conditional terms, on
+the leaf with them lifted into case splits (`LFml.liftCond`, exact):
+`{x := c ? x + 1 : x} (x <= 1)` is then `(c → x + 1 <= 1) ∧ (¬c → x <= 1)`,
+each case linear.  A leaf with more is left to `sol_close` (`sol_close_join`). -/
+def LFml.decideLift (φ : LFml C) : Bool :=
+  φ.decideMem || (decide (φ.iteCount ≤ liftConds) && (φ.liftCond liftFuel).decideMem)
+
+theorem LFml.decideLift_valid {φ : LFml C} (h : φ.decideLift = true) : φ.Valid := by
+  unfold LFml.decideLift at h
+  rcases Bool.or_eq_true _ _ ▸ h with h | h
+  · exact LFml.decideMem_valid h
+  · exact (LFml.liftCond_valid liftFuel φ).1 (LFml.decideMem_valid (Bool.and_eq_true _ _ ▸ h).2)
+
+end Decide
 
 namespace Seq
 
@@ -49,7 +100,7 @@ or `concreteSize` and `concreteDepth` where its histories are concrete
 leaf the plain closer closes. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    l.boundsOk && bif ψ.assumesCT then l.decideMemCT || l.decideMem else l.decideMem
+    l.boundsOk && bif ψ.assumesCT then l.decideMemCT || l.decideLift else l.decideLift
 
 /-- What `checkCore` closes is valid: `Fml.Valid.of_toLS` and
 `LFml.decideMem_valid`; under the premise `cleanTail(storage) = true`,
@@ -60,10 +111,10 @@ theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Fml.Val
   obtain ⟨l, hl, -, hc⟩ := h
   cases hct : ψ.assumesCT
   · rw [hct, cond_false] at hc
-    exact Fml.Valid.of_toLS hl (LFml.decideMem_valid hc)
+    exact Fml.Valid.of_toLS hl (LFml.decideLift_valid hc)
   · rw [hct, cond_true, Bool.or_eq_true] at hc
     rcases hc with hc | hc
-    case inr => exact Fml.Valid.of_toLS hl (LFml.decideMem_valid hc)
+    case inr => exact Fml.Valid.of_toLS hl (LFml.decideLift_valid hc)
     intro τ
     by_cases hg : TSto.CleanTails τ.storage.obs
     · exact (Fml.toLS_sound ψ true hl τ AEnv.dflt (Agrees.init τ AEnv.dflt)

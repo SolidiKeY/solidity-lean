@@ -2,6 +2,7 @@ import Solidity.Calculus.Decide
 import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.TermEq
 import Solidity.Calculus.TermAgree
+import Solidity.Calculus.MemRead
 
 /-!
 # The reduction on a scoped leaf
@@ -168,12 +169,26 @@ def LTm.literalRead {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
     if r.litV?.isSome then r else t
   else t
 
-/-- Resolve demanded primitive storage observations before later writes duplicate them.
-The storage itself remains a lazy term; all other symbols retain literal folding. -/
+/-- Apply the existing memory taclets before a later write duplicates a demanded
+read. The input has an explicit node bound; the retained result cannot be larger. -/
+def foldMem2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
+  let original := LTm.app2 o x y
+  match original.fits normalizationSize with
+  | some remaining =>
+    let reduced := o.memRes x y
+    if (reduced.fits (normalizationSize - remaining)).isSome then reduced else original
+  | none => original
+
+/-- Resolve demanded storage and memory observations before later writes
+duplicate them. The stores themselves remain lazy terms. -/
 def foldRead2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
   match o with
   | .find => (LTm.app2 .find x y).literalRead
   | .len => (LTm.app2 .len x y).literalRead
+  | .read => foldMem2 .read x y
+  | .mlen => foldMem2 .mlen x y
+  | .iread => foldMem2 .iread x y
+  | .copy h => foldMem2 (.copy h) x y
   | o => fold2 o x y
 
 /-- A storage worth reading at a formation: within `concreteSize` nodes,
@@ -238,8 +253,8 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (fun op {_} h x y => some (fold2 (.binop op h) x y))
     (fun {_} x y => some (foldRead2 .find x y))
     (fun {_} x y => some (foldRead2 .len x y))
-    (fun {_} x y => some (.app2 .read x y))
-    (fun {_} x y => some (.app2 .mlen x y))
+    (fun {_} x y => some (foldRead2 .read x y))
+    (fun {_} x y => some (foldRead2 .mlen x y))
     (fun {_} {_} {_} it x y => some (foldAt it ρ.stor x y))
     (fun {_} x y => some (.app2 .nextIn x y))
     (fun {_} x y => some (.app2 .delAt x y))
@@ -249,8 +264,8 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (fun {_} x y => some (.app2 .extend x y))
     (fun {_} x y => some (.app2 .sfind x y))
     (fun {_} x y => some (.app2 .copyMem x y))
-    (fun {_} x y => some (.app2 .iread x y))
-    (fun {_} h x y => some (.app2 (.copy h) x y))
+    (fun {_} x y => some (foldRead2 .iread x y))
+    (fun {_} h x y => some (foldRead2 (.copy h) x y))
     (fun {_} {_} a x y => some (.app2 (.mat a) x y))
     (fun {_} h x y => some (.app2 (.copySt h) x y))
     (fun {_} {_} x y => some (.app2 .findIn x y))
@@ -341,7 +356,7 @@ def _root_.Solidity.UpdElem.toLS {Δ : Ctx} (ρ₀ : SymS C Γ) (e : UpdElem C �
     (fun {_} i r => (r.toL ρ₀).map fun b =>
       (⟨ρ.loc.set i (some b.1), ρ.stor, ρ.mem, ρ.bal, ρ.next⟩, b.2))
     (fun s => (s.toL ρ₀).map fun s' => (⟨ρ.loc, s', ρ.mem, ρ.bal, ρ.next⟩, seqL s' .tt))
-    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next⟩, seqL m' .tt))
+    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next⟩, seqMemL m' .tt))
     (fun _ _ => none)
     (fun r _ a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
     -- Payments change the balance, which the old no-op encoding omitted.

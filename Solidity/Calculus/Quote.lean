@@ -349,6 +349,7 @@ partial def qStmtH (hs : List Name) (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr
       | .bytes bs => ctor ``RevPart.bytes Γ #[toExpr bs]
       | .sel sig => ctor ``RevPart.sel Γ #[toExpr sig]
       | @RevPart.word _ _ p v => do ctor ``RevPart.word Γ #[toExpr p, ← qVal Γ p v]
+      | .mem kind src => do ctor ``RevPart.mem Γ #[CatchKind.quote kind, ← qIdx Γ (.mem bytesR) src]
     sctor ``Stmt.revertData #[Γe, parts.foldr
       (fun x acc => mkApp3 (mkConst ``List.cons [levelZero]) ty x acc)
       (mkApp (mkConst ``List.nil [levelZero]) ty)]

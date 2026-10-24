@@ -356,43 +356,37 @@ private def boundsSnippet : String :=
 private def rootCopyAnnOnly : List TacletReadAnn :=
   tacletReadAnns.filter (·.keyName == "storageRootWriteCopySource")
 
-example :
+#guard
     conforms rootCopyAnnOnly (parseKeyFile currentRootCopySnippet)
-      = [] := by
-  native_decide
+      = []
 
 -- The pre-fix taclet text (hard-coded `find<[int]>`) drifts from the
 -- current table row — the checker catches the `12e72a1b4b` bug class.
-example :
+#guard
     conforms rootCopyAnnOnly (parseKeyFile preFixRootCopySnippet)
-      ≠ [] := by
-  native_decide
+      ≠ []
 
 -- The commented-out `find<[Struct]>` is invisible: the parsed reads of
 -- the pre-fix snippet are exactly one int-sorted storage value read.
-example :
+#guard
     ((parseKeyFile preFixRootCopySnippet).map (·.reads)) =
-      [[⟨"find", "int", "storage,sp"⟩]] := by
-  native_decide
+      [[⟨"find", "int", "storage,sp"⟩]]
 
-example :
+#guard
     conforms
       (tacletReadAnns.filter (·.keyName == "storageRootReadSelect"))
-      (parseKeyFile readSelectSnippet) = [] := by
-  native_decide
+      (parseKeyFile readSelectSnippet) = []
 
 -- A `.. size` read classifies as a length site (one per bounds branch).
-example :
+#guard
     conforms
       (tacletReadAnns.filter
         (·.keyName == "storageIndexReadArrayBindLocalRoot"))
-      (parseKeyFile boundsSnippet) = [] := by
-  native_decide
+      (parseKeyFile boundsSnippet) = []
 
 -- A read-bearing taclet with no table row is reported.
-example :
-    conforms [] (parseKeyFile boundsSnippet) ≠ [] := by
-  native_decide
+#guard
+    conforms [] (parseKeyFile boundsSnippet) ≠ []
 
 end KeyTacletParser
 end Solidity

@@ -11,6 +11,7 @@ the others link to it.
 | [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, the design decisions, what is still open. |
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, and its update and theory symbols, to Lean names. |
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
+| [assurance.md](assurance.md) | Trust source inventory, headline axiom gate, non-vacuity witnesses and the remaining assurance/automation work. |
 | [correctness.md](correctness.md) | Direct `Spec` correctness, strict equations, proved calculus bridges, callbacks and October audit repairs. |
 | [lifetime.md](lifetime.md) | Constructor-rooted transaction traces, whole-contract safety, possible reachability, invariant induction, payment/rollback and observation limits. |
 | [bridge.md](bridge.md) | Optional Mathlib/CSLib and external EVM word adapters, correctness theorems, build command and exact scope. |
@@ -18,7 +19,6 @@ the others link to it.
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [complete-verification.md](complete-verification.md) | Declaration certificates, exact reductions, automatic dependent-read compilation, guarded aliases, original-source countermodels and the complete `#verify` fragment. |
-| [automation.md](automation.md) | Automation milestones; M4: the fragment on which the automatic decision is total and complete, what is proved stage by stage, and what is not yet characterized syntactically. |
 | [solkey-migration.md](solkey-migration.md) | Pinned upstream inputs, migration tooling, evidence and remaining parity work. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files and directories: CLI, JavaScript and Lean APIs, results and limits. |
 | [testsuite-proofs.md](testsuite-proofs.md) | Proving solkey's TestSuite by `⊢`: the decisions, the milestones, the measured costs. |
@@ -28,5 +28,5 @@ the others link to it.
 | [intrinsic.md](intrinsic.md) | The intrinsic refactor (branch `intrinsic`): what changed, what stays extrinsic on purpose, the decisions, gates, the removal of the surface syntax (W8, decision 11), and what is left of M6c. |
 | [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics the model leaves open or out of scope, and the chain facts an obligation assumes: the work list. |
 | [options.md](options.md) | Calculus options, callbacks, overflow, clean tails, and legacy/via-IR expression evaluation order. |
-| [automation.md](automation.md) | Towards a deciding closer: the leaves of a type, the expansions of a delete, a copy, a push and a pop (Theory, interpreter, chain links), the size of what a rule emits; M0–M5. |
+| [automation.md](automation.md) | Towards a deciding closer: the leaves of a type, the expansions (Theory, interpreter, chain links), M4's complete fragment, the size of what a rule emits; M0–M5; M6 the automation gate and what blocks the full theorem. |
 | [loops.md](loops.md) | `while`/`for`/`do … while`/`break`/`continue`: the decisions and the stages; L1–L4 (syntax, semantics, typing, unwinding, the invariant rules) built; L5–L7 planned. |

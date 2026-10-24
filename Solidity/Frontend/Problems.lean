@@ -294,10 +294,11 @@ def elabSolkeyScan : CommandElab := fun stx => do
 open Tactic in
 /-- `Derive.proveSearch` (`stopAtOpen`) on a scoped goal `⊢ N.f.problem`:
 `sol_prove` (the scoped walk, `Calculus/ProvesDerive.lean`), then
-`Derive.searchLeaf` on each leaf it leaves (`Seq.goalFits`). -/
-def scopedSearch (g : MVarId) : TacticM Derive.Search := do
+`Derive.searchLeaf` on each leaf it leaves (`Seq.goalFits`); a walk of more
+than `oneCheck` steps is an error. -/
+def scopedSearch (g : MVarId) (oneCheck : Nat := Seq.fuel) : TacticM Derive.Search := do
   let_expr Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
-  Derive.proveSearch g (fun g => Seq.prove g C R Γ H φ) (stopAtOpen := true)
+  Derive.proveSearch g (fun g => Seq.prove g C R Γ H φ (oneCheck := oneCheck)) (stopAtOpen := true)
     (fits := Seq.goalFits)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
@@ -381,7 +382,9 @@ theorem `N.f.proved` whose type is `⊢ N.f.problem`, the scoped
 `Proves N .all [] .nil N.f.problem` (`provesScoped`), compared as an
 expression, and whose proof uses no axiom but Lean's three (`standardAxioms`): a theorem of another statement,
 or of a sequent with hypotheses, is "mismatched"; one that uses `sorry` or
-`native_decide` is "unsound".  The axioms are collected once for all the
+`native_decide` is "unsound".  One false in the model is "refuted" by a
+theorem `N.f.refuted : ¬ (⊢ N.f.problem)` (a certified counterexample,
+`sol_refute`), under the same axioms.  The axioms are collected once for all the
 theorems, and per theorem only when that union is not standard. -/
 @[command_elab solkeyObligations]
 def elabSolkeyObligations : CommandElab := fun stx => do
@@ -391,6 +394,7 @@ def elabSolkeyObligations : CommandElab := fun stx => do
   let C := mkConst N
   let mut matched : Array (String × Lean.Name) := #[]
   let mut pending : Array String := #[]
+  let mut refutedM : Array (String × Lean.Name) := #[]
   let mut other : Array String := #[]
   for r in rows do
     if r.status == .elaborated then
@@ -404,7 +408,15 @@ def elabSolkeyObligations : CommandElab := fun stx => do
         if provesScoped C (mkConst (f ++ `problem)) t.type then matched := matched.push (r.name, f ++ `proved)
         else other := other.push s!"mismatched {r.name}"
       | some _ => other := other.push s!"mismatched {r.name}"
-      | none => pending := pending.push r.name
+      | none =>
+        match env.find? (f ++ `refuted) with
+        | some (.thmInfo t) =>
+          let φ := mkConst (f ++ `problem)
+          if t.type.consumeMData.not?.any (provesScoped C φ) then
+            refutedM := refutedM.push (r.name, f ++ `refuted)
+          else other := other.push s!"mismatched {r.name}"
+        | some _ => other := other.push s!"mismatched {r.name}"
+        | none => pending := pending.push r.name
     else other := other.push s!"{r.status.toStr} {r.name}"
   let std (n : Lean.Name) : Bool := standardAxioms.contains n
   let union := (((matched.forM fun (p : String × Lean.Name) => CollectAxioms.collect p.2).run env).run {}).2.axioms
@@ -414,6 +426,9 @@ def elabSolkeyObligations : CommandElab := fun stx => do
     -- out of the `||`, and each theorem's traversal then runs whatever the union
     if union.all std then derived := derived.push name
     else if (← collectAxioms t).all std then derived := derived.push name
+    else other := other.push s!"unsound {name}"
+  for (name, t) in refutedM do
+    if (← collectAxioms t).all std then other := other.push s!"refuted {name}"
     else other := other.push s!"unsound {name}"
   let mut lines : Array String := #[]
   for x in pending, i in [0:pending.size] do

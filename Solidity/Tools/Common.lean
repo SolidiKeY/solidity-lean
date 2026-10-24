@@ -52,6 +52,10 @@ structure TGen where
   key : (p : PrimTy) → Option (Gen p.Denote)
   entries : Nat := 4
   length : Nat := 3
+  /-- The bound on an array's shadow (its slots past the live end), drawn
+  below it where `wt` admits one: elements of a reference type with a
+  well-formed default (`Storage.wtB`'s array test). -/
+  shadow : Nat := 0
 
 /-- Exactly `n` values, each drawn by `f`, the first first. -/
 def TGen.vec {E : Ty} (f : Gen (SVal E)) : (n : Nat) → Gen (SVec E n)
@@ -67,6 +71,13 @@ def TGen.fields (f : (T : Ty) → Gen (SVal T)) :
   | (_, T) :: fs => do
     let v ← f T
     pure (.cons v (← TGen.fields f fs))
+
+/-- Exactly `n` values, each drawn by `f`, as a shadow. -/
+def TGen.slist {E : Ty} (f : Gen (SVal E)) : (n : Nat) → Gen (SList E)
+  | 0 => pure .nil
+  | n + 1 => do
+    let v ← f
+    pure (.cons v (← TGen.slist f n))
 
 /-- A mapping's entries, in the order written. -/
 def TGen.smap {K : PrimTy} {V : Ty} : List (K.Denote × SVal V) → SMap K V
@@ -84,8 +95,8 @@ def _root_.Solidity.SVal.arrayOf {E : Ty} {n : Nat} (es : SVec E n) (sh : SList 
 /-- **A canonical storage value of type `T`**, at most `k` levels deep (the
 default below): every struct member in order, a mapping's keys drawn by
 `g.key` (a key drawn twice is drawn once, its value only the first time)
-over the type's default, an array of fewer than `g.length` elements and no
-shadow. -/
+over the type's default, an array of fewer than `g.length` elements and a
+shadow of at most `g.shadow` (none by default). -/
 def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
   | 0, T => pure (SVal.dflt T)
   | _ + 1, .prim p => do pure (.prim (← g.prim p))
@@ -100,7 +111,12 @@ def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
   | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
   | k + 1, .ref (.array E) => do
     let n ← randBelow g.length
-    pure (SVal.arrayOf (← TGen.vec (g.sval k E) n) .nil)
+    let es ← TGen.vec (g.sval k E) n
+    -- no draw where no shadow is admitted, so a generator without one
+    -- draws what it always drew
+    let m ← if 0 < g.shadow && !E.isPrimitive && E.defaultOkS then randBelow (g.shadow + 1)
+      else pure 0
+    pure (SVal.arrayOf es (← TGen.slist (g.sval k E) m))
   | k + 1, .ref (.fixed E n) => do pure (.fixed (← TGen.vec (g.sval k E) n))
 
 /-- A storage: every root of the contract, drawn at its type, in order. -/

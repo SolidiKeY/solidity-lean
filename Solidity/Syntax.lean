@@ -225,6 +225,12 @@ inductive RawStmt where
   /-- `require(c, "m");`: `require(c);`, but where a `try` reads the data
   (as `revertMsg`) `if (c) { } else { revert("m"); }`. -/
   | requireMsg (c : RawExpr) (msg : String)
+  /-- `revert(s)` with a computed string reason. -/
+  | revertReason (msg : RawExpr)
+  /-- `require(c, s)`: both operands evaluated before the condition is tested. -/
+  | requireReason (c msg : RawExpr)
+  /-- The canonical memory-byte rethrow assembly block. -/
+  | revertRaw (data : RawExpr)
   /-- `revert E(a, b);`: a revert with the custom error `E`'s data (its
   selector, then `abi.encode(a, b)`) where a `try` reads it, `revert();`
   elsewhere, as `revertMsg`. -/
@@ -537,7 +543,7 @@ def hashKeyRows : List (String × Nat) := [("{}#hash", 1)]
 def dynBytesRows : List (String × Nat) := [("[]", 8), ("[]#bytes", 1)]
 
 /-- The rows of `bytes` or `string` (`dynBytesTy`): a `string` marked so
-too, which only a signature reads (`string`, not `bytes`). -/
+too, retained by signatures and computed revert reasons. -/
 def dynBytesRowsOf (s : String) : List (String × Nat) :=
   if s == "string" then dynBytesRows ++ [("#string", 1)] else dynBytesRows
 
@@ -995,7 +1001,8 @@ syntax (name := solAssumeFalse) &"assume" "(" &"false" ")" : sol_stmt
 syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
 /-- `require(c, "msg");`: `require(c);`, the reason kept where a `try` reads
 it (`RawStmt.requireMsg`). -/
-syntax (name := solRequireMsg) &"require" "(" sol_expr ", " str ")" : sol_stmt
+syntax (name := solRequireMsg) (priority := high) &"require" "(" sol_expr ", " str ")" : sol_stmt
+syntax (name := solRequireReason) &"require" "(" sol_expr ", " sol_expr ")" : sol_stmt
 /-- `require(c, Err(a));`: `RawStmt.requireErr`. -/
 syntax (name := solRequireErr) &"require" "(" sol_expr ", " ident "(" sol_expr,* ")" ")" : sol_stmt
 /-- `revert Err(a);`: `RawStmt.revertErr`; `revert();` where no `try` reads
@@ -1003,7 +1010,10 @@ the data, since a revert undoes whatever evaluating `a` did. -/
 syntax (name := solRevertErr) &"revert" ident "(" sol_expr,* ")" : sol_stmt
 /-- `revert("msg");`: `revert();`, the reason kept where a `try` reads it
 (`RawStmt.revertMsg`). -/
-syntax (name := solRevertMsg) &"revert" "(" str ")" : sol_stmt
+syntax (name := solRevertMsg) (priority := high) &"revert" "(" str ")" : sol_stmt
+syntax (name := solRevertReason) &"revert" "(" sol_expr ")" : sol_stmt
+syntax (name := solRevertRaw) &"assembly" "{" &"revert" "(" &"add" "(" ident "," num ")" ","
+  &"mload" "(" ident ")" ")" "}" : sol_stmt
 /-- `_;`: where a modifier's body runs the function's (`contract!{ … }`). -/
 syntax (name := solHole) "_" : sol_stmt
 /-- `(a, , b) = e;`: a tuple assignment, a component left out discarded
@@ -1422,6 +1432,8 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireMsg =>
     let some m := s.raw[4].isStrLit? | Macro.throwErrorAt s.raw[4] "a string literal"
     `(RawStmt.requireMsg $(← expandExpr ⟨s.raw[2]⟩) $(quote m))
+  | ``solRequireReason =>
+    `(RawStmt.requireReason $(← expandExpr ⟨s.raw[2]⟩) $(← expandExpr ⟨s.raw[4]⟩))
   | ``solRequireErr =>
     `(RawStmt.requireErr $(← expandExpr ⟨s.raw[2]⟩) $(quote s.raw[4].getId.toString)
       [$(← exprs s.raw[6]),*])
@@ -1429,6 +1441,11 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevertMsg =>
     let some m := s.raw[2].isStrLit? | Macro.throwErrorAt s.raw[2] "a string literal"
     `(RawStmt.revertMsg $(quote m))
+  | ``solRevertReason => `(RawStmt.revertReason $(← expandExpr ⟨s.raw[2]⟩))
+  | ``solRevertRaw => do
+    unless s.raw[8].isNatLit? == some 32 && s.raw[6].getId == s.raw[13].getId do
+      Macro.throwErrorAt s "raw rethrow expects revert(add(data, 32), mload(data))"
+    `(RawStmt.revertRaw (RawExpr.name $(quote s.raw[6].getId.toString)))
   | ``solHole => `(RawStmt.hole)
   | ``solBreak => `(RawStmt.brk)
   | ``solContinue => `(RawStmt.cont)

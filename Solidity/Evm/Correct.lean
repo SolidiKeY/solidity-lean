@@ -48,6 +48,18 @@ theorem Keeps.weaken {sh' : Bool} {m m' : Machine} (h : Keeps C b sh m m')
   ⟨h.mem, fun h' => h.len (by
     cases sh <;> simp_all only [Bool.false_eq_true, Bool.true_eq_false, implies_true])⟩
 
+/-- A fault in the first piece of code faults the whole: a loop that never
+ends, then the rest. -/
+theorem run_append_fault {c₁ c₂ : List Instr} {m : Machine} (h : run c₁ m = .fault) :
+    run (c₁ ++ c₂) m = .fault := by
+  simp only [run] at h ⊢; rw [exec_append, h]; rfl
+
+/-- The machine's side of a divergence, carried past more code. -/
+theorem divOut_append {pays : Bool} {c₁ c₂ : List Instr} {m : Machine}
+    (h : run c₁ m = .fault ∨ (pays = true ∧ run c₁ m = .revert)) :
+    run (c₁ ++ c₂) m = .fault ∨ (pays = true ∧ run (c₁ ++ c₂) m = .revert) :=
+  h.imp run_append_fault fun ⟨hp, hr⟩ => ⟨hp, run_append_revert hr⟩
+
 /-- A scope's end in the state: its locals popped. -/
 theorem Sim.dropState {Γ Δ : Ctx} {G : Frag Δ} {τ : State C Δ} (h : Ext Γ Δ)
     (hm : Sim C L b G τ m) :
@@ -60,11 +72,12 @@ theorem StmtOut.drop {Γ Δ : Ctx} {G : Frag Δ} (h : Ext Γ Δ) {H : HTy}
     StmtOut C L b (G.restrict Γ) sh pays asserts
       (res.map fun o => (⟨o.st.drop h, o.ext⟩ : Solidity.Out C H Γ)) out m := by
   rcases hs with ⟨o, m', h1, h2, h3, h4, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
-      ⟨hp, h1, o, m', h2, h4, h5⟩
+      ⟨hp, h1, o, m', h2, h4, h5⟩ | ⟨h1, h2⟩
   · exact .inl ⟨⟨o.st.drop h, o.ext⟩, m', by rw [h1]; rfl, h2, h3, h4, Sim.dropState h h5⟩
   · exact .inr ⟨by rw [h1]; rfl, h2⟩
   · exact .panic ha ⟨by rw [h1]; rfl, h2⟩
   · exact .refused hp ⟨h1, ⟨o.st.drop h, o.ext⟩, m', by rw [h2]; rfl, h4, Sim.dropState h h5⟩
+  · exact .diverge ⟨by rw [h1]; rfl, h2⟩
 
 /-- An outcome under weaker flags: fewer aliases known, a statement that
 may shrink, pay or assert more. -/
@@ -74,11 +87,13 @@ theorem StmtOut.weaken {G G' : Frag Γ'} {sh' pays' asserts' : Bool} {H : HTy}
     (hs : sh = true → sh' = true) (hp : pays = true → pays' = true)
     (ha : asserts = true → asserts' = true) (h : StmtOut C L b G sh pays asserts res out m) :
     StmtOut C L b G' sh' pays' asserts' res out m := by
-  rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | h | ⟨ha', h⟩ | ⟨hp', h1, o, m', h2, h4, h5⟩
+  rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | h | ⟨ha', h⟩ | ⟨hp', h1, o, m', h2, h4, h5⟩ |
+      ⟨h1, h2⟩
   · exact .inl ⟨o, m', h1, h2, h3, h4.weaken hs, h5.flags hG⟩
   · exact .inr h
   · exact .panic (ha ha') h
   · exact .refused (hp hp') ⟨h1, o, m', h2, h4.weaken hs, h5.flags hG⟩
+  · exact .diverge ⟨h1, h2.imp id fun ⟨hp', ho⟩ => ⟨hp hp', ho⟩⟩
 
 /-- An outcome whose states are carried along a map that keeps what `Sim`
 reads of them. -/
@@ -89,11 +104,12 @@ theorem StmtOut.map {H : HTy} {Γ'' : Ctx} {F'' : Frag Γ''} {res : TRes (Solidi
     (h : StmtOut C L b G sh pays asserts res out m) :
     StmtOut C L b F'' sh pays asserts (res.map f) out m := by
   rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
-      ⟨hp, h1, o, m', h2, h4, h5⟩
+      ⟨hp, h1, o, m', h2, h4, h5⟩ | ⟨h1, h2⟩
   · exact .inl ⟨f o, m', by rw [h1]; rfl, h2, h3, h4, hf o h5⟩
   · exact .inr ⟨by rw [h1]; rfl, h2⟩
   · exact .panic ha ⟨by rw [h1]; rfl, h2⟩
   · exact .refused hp ⟨h1, f o, m', by rw [h2]; rfl, h4, hf o h5⟩
+  · exact .diverge ⟨by rw [h1]; rfl, h2⟩
 
 end Outcomes
 
@@ -142,7 +158,7 @@ theorem ite_sim {Γ₁ Γ₂ : Ctx} (c : Solidity.Val C Γ .bool)
         (by simp_all only [Bool.true_or, implies_true])
         (by simp_all only [Bool.true_or, implies_true])
       rcases iht with ⟨τ', m', hτ', hrun', hst', hk', hm'⟩ | ⟨hτ', hrun'⟩ | ⟨ha, hτ', hrun'⟩ |
-          ⟨hp, hrun', τ', m', hτ', hk', hm'⟩
+          ⟨hp, hrun', τ', m', hτ', hk', hm'⟩ | ⟨hτ', hrun'⟩
       · refine .inl ⟨τ', m', hτ', ?_, hst', hk', hm'⟩
         change run _ m = _
         rw [run_append_skip (k := 0) hrun']
@@ -150,6 +166,7 @@ theorem ite_sim {Γ₁ Γ₂ : Ctx} (c : Solidity.Val C Γ .bool)
       · exact .inr ⟨hτ', run_append_revert hrun'⟩
       · exact .panic ha ⟨hτ', run_append_revert hrun'⟩
       · exact .refused hp ⟨run_append_revert hrun', τ', m', hτ', hk', hm'⟩
+      · exact .diverge ⟨hτ', divOut_append hrun'⟩
   · exact .inr ⟨by simp only [Solidity.TRun.ite, hvc, bind, Except.bind],
       run_append_revert hrunc⟩
 
@@ -163,6 +180,165 @@ theorem block_sim {Γ₁ : Ctx} (body : Solidity.Prog C Γ Γ₁) {G : Frag Γ�
   ih.drop body.ext
 
 end Scopes
+
+/-! ## Loops
+
+A loop of the fragment (`inFrag`) has a body that pushes, pays and shrinks
+nothing and leaves the fragment as it found it, so every turn starts from a
+state `Sim` relates at the same fragment.  The typed run's turns
+(`TLoop.iterN`) and the machine's (`loopIterN`) go on together, or end
+alike (`TurnRel`); a loop no number of turns ends diverges in the run and
+faults on the machine (`loopRun_of_forall`). -/
+
+section Loops
+
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State C Γ}
+
+/-- A turn's outcomes related: both go on, both end in related states, or
+both halt (a panic only in code that asserts). -/
+inductive TurnRel (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (asserts : Bool)
+    (m₀ : Machine) {H : HTy} :
+    Solidity.Out C H Γ ⊕ TRes (Solidity.Out C H Γ) → Machine ⊕ Out → Prop where
+  | more {o : Solidity.Out C H Γ} {m : Machine} (hm : Sim C L b F o.st m)
+      (hs : m.stack = m₀.stack) (hk : Keeps C b false m₀ m) : TurnRel C L b F asserts m₀ (.inl o) (.inl m)
+  | done {o : Solidity.Out C H Γ} {m : Machine} (hm : Sim C L b F o.st m)
+      (hs : m.stack = m₀.stack) (hk : Keeps C b false m₀ m) :
+      TurnRel C L b F asserts m₀ (.inr (.ok o)) (.inr (.ok m 0))
+  | revert : TurnRel C L b F asserts m₀ (.inr (.error .revert)) (.inr .revert)
+  | panic (ha : asserts = true) : TurnRel C L b F asserts m₀ (.inr (.error .panic)) (.inr .revert)
+  | diverge : TurnRel C L b F asserts m₀ (.inr (.error .diverge)) (.inr .fault)
+
+/-- A machine with a word pushed, then its stack put back, is the machine. -/
+theorem Machine.push_stack (m : Machine) (w : Word) : { m.push w with stack := m.stack } = m := rfl
+
+/-- **One turn** of a loop of the fragment: the condition, then, where it
+holds, the body (`ih`). -/
+theorem loop_turn {Γ₁ : Ctx} (c : Solidity.Val C Γ .bool) (body : Solidity.Prog C Γ Γ₁)
+    {G : Frag Γ₁} (hwc : valIn F c = true) (hG : G.restrict Γ = F)
+    (ih : ∀ {τ : State C Γ} {m : Machine}, Sim C L b F τ m →
+      StmtOut C L b G false false (Prog.asserts body) (Solidity.Prog.run τ body)
+        (run (compileProg b body) m) m)
+    {m₀ : Machine} {o : Solidity.Out C σ.H Γ} {m : Machine} (hm : Sim C L b F o.st m)
+    (hs : m.stack = m₀.stack) (hk : Keeps C b false m₀ m) :
+    TurnRel C L b F (Prog.asserts body) m₀
+      (TLoop.step (fun o : Solidity.Out C σ.H Γ => (Solidity.Prog.run o.st body).map
+          fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+        (fun o => c.evalT o.st) o)
+      (loopTurn (fun m => exec (compileVal b c) 0 m) (fun m => exec (compileProg b body) 0 m) m) := by
+  rcases val_sim c hm hwc with ⟨v, w, hv, hrw, hrc⟩ | ⟨hv, hrc⟩
+  · obtain rfl := hrw.bool_inv
+    have hrc' : exec (compileVal b c) 0 m = .ok (m.push (.val (bword v))) 0 := hrc
+    unfold loopTurn TLoop.step
+    dsimp only
+    rw [hv, hrc']
+    cases v
+    · exact .done hm hs hk
+    · show TurnRel C L b F _ m₀ _
+        (match exec (compileProg b body) 0 m with
+          | .ok m₂ 0 => .inl m₂
+          | .ok _ (_ + 1) => .inr .fault
+          | r => .inr r)
+      rcases ih hm with ⟨o', m', ho', hr', hst, hk', hsim⟩ | ⟨ho', hr'⟩ | ⟨ha, ho', hr'⟩ |
+          ⟨hp, -⟩ | ⟨ho', hr'⟩
+      · have hr'' : exec (compileProg b body) 0 m = .ok m' 0 := hr'
+        simp only [ho', Except.map, hr'']
+        refine .more ?_ (hst.trans hs) (hk.trans hk')
+        have := Sim.dropState body.ext hsim
+        rw [hG] at this
+        exact this
+      · have hr'' : exec (compileProg b body) 0 m = .revert := hr'
+        simp only [ho', Except.map, hr'']
+        exact .revert
+      · have hr'' : exec (compileProg b body) 0 m = .revert := hr'
+        simp only [ho', Except.map, hr'']
+        exact .panic ha
+      · cases hp
+      · rcases hr' with hr' | ⟨hp, -⟩
+        · have hr'' : exec (compileProg b body) 0 m = .fault := hr'
+          simp only [ho', Except.map, hr'']
+          exact .diverge
+        · cases hp
+  · have hrc' : exec (compileVal b c) 0 m = .revert := hrc
+    unfold loopTurn TLoop.step
+    dsimp only
+    rw [hv, hrc']
+    exact .revert
+
+/-- **`n` turns** of a loop of the fragment, related. -/
+theorem loop_iterN {Γ₁ : Ctx} (c : Solidity.Val C Γ .bool) (body : Solidity.Prog C Γ Γ₁)
+    {G : Frag Γ₁} (hwc : valIn F c = true) (hG : G.restrict Γ = F)
+    (ih : ∀ {τ : State C Γ} {m : Machine}, Sim C L b F τ m →
+      StmtOut C L b G false false (Prog.asserts body) (Solidity.Prog.run τ body)
+        (run (compileProg b body) m) m)
+    {m₀ : Machine} : ∀ (n : Nat) {o : Solidity.Out C σ.H Γ} {m : Machine},
+    Sim C L b F o.st m → m.stack = m₀.stack → Keeps C b false m₀ m →
+    TurnRel C L b F (Prog.asserts body) m₀
+      (TLoop.iterN (fun o : Solidity.Out C σ.H Γ => (Solidity.Prog.run o.st body).map
+          fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+        (fun o => c.evalT o.st) n o)
+      (loopIterN (fun m => exec (compileVal b c) 0 m) (fun m => exec (compileProg b body) 0 m) n m)
+  | 0, _, _, hm, hs, hk => .more hm hs hk
+  | n + 1, _, _, hm, hs, hk => by
+    have ht := loop_turn c body hwc hG ih (m₀ := m₀) hm hs hk
+    simp only [TLoop.iterN, loopIterN]
+    revert ht
+    generalize TLoop.step _ _ _ = A
+    generalize loopTurn _ _ _ = B
+    intro ht
+    cases ht with
+    | more hm' hs' hk' => exact loop_iterN c body hwc hG ih n hm' hs' hk'
+    | done hm' hs' hk' => exact .done hm' hs' hk'
+    | revert => exact .revert
+    | panic ha => exact .panic ha
+    | diverge => exact .diverge
+
+/-- **A loop's code does what the loop does.** -/
+theorem loop_sim {Γ₁ : Ctx} (a : Solidity.LoopAnn C Γ) (c : Solidity.Val C Γ .bool)
+    (body : Solidity.Prog C Γ Γ₁) {G : Frag Γ₁} {m : Machine} (hm : Sim C L b F σ m)
+    (hwc : valIn F c = true) (hG : G.restrict Γ = F)
+    (ih : ∀ {τ : State C Γ} {m : Machine}, Sim C L b F τ m →
+      StmtOut C L b G false false (Prog.asserts body) (Solidity.Prog.run τ body)
+        (run (compileProg b body) m) m) :
+    StmtOut C L b F false false (Prog.asserts body) (Solidity.Stmt.run σ (.loop a c body))
+      (run (compileStmt b (.loop a c body)) m) m := by
+  have hcode : run (compileStmt b (.loop a c body)) m =
+      loopRun (fun m => exec (compileVal b c) 0 m) (fun m => exec (compileProg b body) 0 m) m := by
+    show (Instr.step (.loop _ _) m).bind (fun m' k' => exec [] k' m') = _
+    simp only [Instr.step]
+    cases loopRun _ _ m <;> rfl
+  rw [hcode, Solidity.Stmt.run_loop]
+  by_cases hex : ∃ r n, TLoop.iterN (fun o : Solidity.Out C σ.H Γ => (Solidity.Prog.run o.st body).map
+      fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+      (fun o => c.evalT o.st) n ⟨σ, List.prefix_refl _⟩ = .inr r
+  · obtain ⟨r, n, hn⟩ := hex
+    have hrel := loop_iterN c body hwc hG ih (m₀ := m) n (o := ⟨σ, List.prefix_refl _⟩) hm rfl
+      (Keeps.refl m)
+    rw [hn] at hrel
+    rw [TLoop.run_of_iterN hn]
+    generalize hB : loopIterN _ _ n m = B at hrel
+    cases hrel with
+    | done hm' hs' hk' => exact .inl ⟨_, _, rfl, loopRun_of_iterN hB, hs', hk', hm'⟩
+    | revert => exact .inr ⟨rfl, loopRun_of_iterN hB⟩
+    | panic ha => exact .panic ha ⟨rfl, loopRun_of_iterN hB⟩
+    | diverge => exact .diverge ⟨rfl, .inl (loopRun_of_iterN hB)⟩
+  · have hrun : TLoop.run (fun o : Solidity.Out C σ.H Γ => (Solidity.Prog.run o.st body).map
+        fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+        (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩ = .error .diverge := by
+      simp only [TLoop.run, hex, dif_neg, not_false_eq_true]
+    rw [hrun]
+    refine .diverge ⟨rfl, .inl (loopRun_of_forall fun n => ?_)⟩
+    have hrel := loop_iterN c body hwc hG ih (m₀ := m) n (o := ⟨σ, List.prefix_refl _⟩) hm rfl
+      (Keeps.refl m)
+    generalize hA : TLoop.iterN _ _ n _ = A at hrel
+    generalize hB : loopIterN _ _ n m = B at hrel
+    cases hrel with
+    | more => exact ⟨_, rfl⟩
+    | done => exact (hex ⟨_, n, hA⟩).elim
+    | revert => exact (hex ⟨_, n, hA⟩).elim
+    | panic => exact (hex ⟨_, n, hA⟩).elim
+    | diverge => exact (hex ⟨_, n, hA⟩).elim
+
+end Loops
 
 /-! ## Calls -/
 
@@ -318,7 +494,7 @@ theorem callNone_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps)
     have h₁ : ∀ l, l < b + Γ.length →
         ({ m with mem := mem₁ } : Machine).memAt l = m.memAt l := fun l hl => hmem₁ l hl
     rcases hout with ⟨υ, m₃, hυ, hrun₃, hst₃, hk₃, hm₃⟩ | ⟨hυ, hrun₃⟩ | ⟨hasr, hυ, hrun₃⟩ |
-        ⟨hp, hrun₃, υ, m₃, hυ, hk₃, hm₃⟩
+        ⟨hp, hrun₃, υ, m₃, hυ, hk₃, hm₃⟩ | ⟨hυ, hrun₃⟩
     · obtain ⟨hs, hk⟩ := Sim.back hL hm h₁ rfl hk₃ hm₃
       exact .inl ⟨_, m₃, by rw [hυ]; rfl, hrun₃, hst₃, hk,
         hs.congrLook fun i => Look.ofTEnv_wk υ.ext σ.env i⟩
@@ -327,6 +503,7 @@ theorem callNone_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps)
     · obtain ⟨hs, hk⟩ := Sim.back hL hm h₁ rfl hk₃ hm₃
       exact .refused hp ⟨hrun₃, _, m₃, by rw [hυ]; rfl, hk,
         hs.congrLook fun i => Look.ofTEnv_wk υ.ext σ.env i⟩
+    · exact .diverge ⟨by rw [hυ]; rfl, hrun₃⟩
   · refine .inr ⟨?_, run_append_revert hrun₁⟩
     show Solidity.TRun.call args .none body.ext body.runR σ = _
     simp only [Solidity.TRun.call, ha, bind, Except.bind]
@@ -396,7 +573,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
         refine ⟨_, rfl, rfl, (hk.trans (Keeps.upd (sh := false) (le_lvl b y) _)).weaken
           (by simp only [Bool.or_false, imp_self]), hs''⟩
     rcases hout with ⟨υ, m₃, hυ, hrun₃, hst₃, hk₃, hm₃⟩ | ⟨hυ, hrun₃⟩ | ⟨hasr, hυ, hrun₃⟩ |
-        ⟨hp, hrun₃, υ, m₃, hυ, hk₃, hm₃⟩
+        ⟨hp, hrun₃, υ, m₃, hυ, hk₃, hm₃⟩ | ⟨hυ, hrun₃⟩
     · obtain ⟨m₄, hrun₄, hst₄, hk, hs⟩ := leave hk₃ hm₃
       exact .inl ⟨_, m₄, by rw [hυ]; rfl, by rw [run_append_ok hrun₃, hrun₄],
         hst₄.trans hst₃, hk, hs⟩
@@ -404,6 +581,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
     · exact .panic hasr ⟨by rw [hυ]; rfl, run_append_revert hrun₃⟩
     · obtain ⟨m₄, -, -, hk, hs⟩ := leave hk₃ hm₃
       exact .refused hp ⟨run_append_revert hrun₃, _, m₄, by rw [hυ]; rfl, hk, hs⟩
+    · exact .diverge ⟨by rw [hυ]; rfl, divOut_append hrun₃⟩
   · refine .inr ⟨?_, run_append_revert hrun₁⟩
     show Solidity.TRun.call args (.val p r res) body.ext body.runR σ = _
     simp only [Solidity.TRun.call, ha, bind, Except.bind]
@@ -608,6 +786,57 @@ theorem block_frag {Γ₁ : Ctx} {body : Solidity.Prog C Γ Γ₁} {F' : Frag Γ
   obtain ⟨G, hG, rfl⟩ := hw
   exact ⟨G, hG, rfl⟩
 
+/-- What `inFrag` admits of a loop: its condition, and a body that pushes,
+pays and shrinks nothing and leaves the fragment as it found it. -/
+theorem loop_frag {Γ₁ : Ctx} {a : Solidity.LoopAnn C Γ} {c : Solidity.Val C Γ .bool}
+    {body : Solidity.Prog C Γ Γ₁} {F' : Frag Γ} (hw : inFrag F (.loop a c body) = some F') :
+    valIn F c = true ∧ Prog.pushes body = 0 ∧ Prog.pays body = false ∧
+      Prog.shrinks body = false ∧ ∃ G, inFragP F body = some G ∧ G.restrict Γ = F ∧ F' = F := by
+  simp only [inFrag] at hw
+  split at hw
+  · rename_i hc
+    simp only [Bool.and_eq_true, beq_iff_eq, Bool.not_eq_eq_eq_not, Bool.not_true] at hc
+    obtain ⟨⟨⟨hwc, hpush⟩, hpay⟩, hshr⟩ := hc
+    split at hw
+    · rename_i G hb
+      split at hw
+      · rename_i hfl
+        cases hw
+        refine ⟨hwc, hpush, hpay, hshr, G, hb, ?_, rfl⟩
+        cases hG : G.restrict Γ
+        rw [hG] at hfl
+        cases F
+        simp only at hfl
+        rw [hfl]
+      · cases hw
+    · cases hw
+  · cases hw
+
+/-- A loop of the fragment, its body's code doing what the body does (`ihP`). -/
+theorem loop_family {Γ₁ : Ctx} (a : Solidity.LoopAnn C Γ) (c : Solidity.Val C Γ .bool)
+    (body : Solidity.Prog C Γ Γ₁) {F' : Frag Γ} (hm : Sim C L b F σ m)
+    (hw : inFrag F (.loop a c body) = some F')
+    (hL : L + Stmt.pushes (Solidity.Stmt.loop a c body) ≤ Lmax)
+    (ihP : ∀ {G : Frag Γ₁}, inFragP F body = some G → L + Prog.pushes body ≤ Lmax →
+      ∀ {τ : State C Γ} {m' : Machine}, Sim C L b F τ m' →
+        StmtOut C (L + Prog.pushes body) b G (Prog.shrinks body) (Prog.pays body)
+          (Prog.asserts body) (Solidity.Prog.run τ body) (run (compileProg b body) m') m') :
+    StmtOut C (L + Stmt.pushes (Solidity.Stmt.loop a c body)) b F'
+      (Stmt.shrinks (Solidity.Stmt.loop a c body)) (Stmt.pays (Solidity.Stmt.loop a c body))
+      (Stmt.asserts (Solidity.Stmt.loop a c body)) (Solidity.Stmt.run σ (.loop a c body))
+      (run (compileStmt b (.loop a c body)) m) m := by
+  obtain ⟨hwc, hpush, hpay, hshr, G, hb, hG, rfl⟩ := loop_frag hw
+  have hLb : L + Prog.pushes body ≤ Lmax := by rw [hpush]; exact hL
+  have h := loop_sim a c body hm hwc hG fun {τ} {m'} hm' => by
+    have h' := ihP hb hLb hm'
+    rw [hpush, hpay, hshr, Nat.add_zero] at h'
+    exact h'
+  have e₁ : Stmt.shrinks (Solidity.Stmt.loop a c body) = false := hshr
+  have e₂ : Stmt.pays (Solidity.Stmt.loop a c body) = false := hpay
+  have e₃ : Stmt.pushes (Solidity.Stmt.loop a c body) = 0 := rfl
+  rw [e₁, e₂, e₃, Nat.add_zero]
+  exact h
+
 /-- What `inFrag` admits of a call. -/
 theorem call_frag {Γ' ps rs Γf : Ctx} {f : Name} {args : Solidity.Args C Γ ps}
     {ret : Solidity.CallRet Γ rs Γ'} {body : Solidity.Prog C (rs ++ ps) Γf}
@@ -683,28 +912,33 @@ theorem seq_sim {Γ₁ Γ₂ : Ctx} (s : Solidity.Stmt C Γ Γ₁) (P : Solidity
       (Solidity.Prog.run σ (.cons s P)) (run (compileProg b (.cons s P)) m) m := by
   simp only [compileProg]
   rcases hs with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hk₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩ | ⟨ha₁, hτ₁, hrun₁⟩ |
-      ⟨hp₁, hrun₁, τ₁, m₁, hτ₁, hk₁, hm₁⟩
+      ⟨hp₁, hrun₁, τ₁, m₁, hτ₁, hk₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩
   · rw [run_append_ok hrun₁, Solidity.Prog.run_cons_ok hτ₁]
     rcases hP hm₁ with ⟨τ₂, m₂, hτ₂, hrun₂, hst₂, hk₂, hm₂⟩ | ⟨hτ₂, hrun₂⟩ | ⟨ha₂, hτ₂, hrun₂⟩ |
-        ⟨hp₂, hrun₂, τ₂, m₂, hτ₂, hk₂, hm₂⟩
+        ⟨hp₂, hrun₂, τ₂, m₂, hτ₂, hk₂, hm₂⟩ | ⟨hτ₂, hrun₂⟩
     · exact .inl ⟨_, m₂, by rw [hτ₂]; rfl, hrun₂, hst₂.trans hst₁, hk₁.trans hk₂, hm₂⟩
     · exact .inr ⟨by rw [hτ₂]; rfl, hrun₂⟩
     · exact .panic (by simp only [ha₂, Bool.or_true]) ⟨by rw [hτ₂]; rfl, hrun₂⟩
     · exact .refused (by simp only [hp₂, Bool.or_true])
         ⟨hrun₂, _, m₂, by rw [hτ₂]; rfl, hk₁.trans hk₂, hm₂⟩
+    · exact .diverge ⟨by rw [hτ₂]; rfl,
+        hrun₂.imp id fun ⟨hp, hr⟩ => ⟨by simp only [hp, Bool.or_true], hr⟩⟩
   · exact .inr ⟨Prog.run_cons_error hτ₁, run_append_revert hrun₁⟩
   · exact .panic (by simp only [ha₁, Bool.true_or])
       ⟨Prog.run_cons_error hτ₁, run_append_revert hrun₁⟩
   · -- the machine stopped at a refused payment; the typed run goes on
     rw [run_append_revert hrun₁, Solidity.Prog.run_cons_ok hτ₁]
     rcases hP hm₁ with ⟨τ₂, m₂, hτ₂, -, -, hk₂, hm₂⟩ | ⟨hτ₂, -⟩ | ⟨ha₂, hτ₂, -⟩ |
-        ⟨-, -, τ₂, m₂, hτ₂, hk₂, hm₂⟩
+        ⟨-, -, τ₂, m₂, hτ₂, hk₂, hm₂⟩ | ⟨hτ₂, -⟩
     · exact .refused (by simp only [hp₁, Bool.true_or])
         ⟨rfl, _, m₂, by rw [hτ₂]; rfl, hk₁.trans hk₂, hm₂⟩
     · exact .inr ⟨by rw [hτ₂]; rfl, rfl⟩
     · exact .panic (by simp only [ha₂, Bool.or_true]) ⟨by rw [hτ₂]; rfl, rfl⟩
     · exact .refused (by simp only [hp₁, Bool.true_or])
         ⟨rfl, _, m₂, by rw [hτ₂]; rfl, hk₁.trans hk₂, hm₂⟩
+    · exact .diverge ⟨by rw [hτ₂]; rfl, .inr ⟨by simp only [hp₁, Bool.true_or], rfl⟩⟩
+  · exact .diverge ⟨Prog.run_cons_error hτ₁,
+      (divOut_append hrun₁).imp id fun ⟨hp, hr⟩ => ⟨by simp only [hp, Bool.true_or], hr⟩⟩
 
 /-- A `try` is outside the fragment (stated apart, so that `stmt_sim`'s arm
 does not unfold `inFrag` through a `try`'s seven blocks). -/
@@ -718,7 +952,7 @@ theorem inFrag_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (F : Frag
 /-- The statements outside the fragment that `stmt_sim` rules out at once. -/
 def Stmt.evmOutside {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .send .. | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem ..
-  | .assignNew .. | .loop .. | .assignLocalPush .. | .pushOpAssign .. | .pushIncDec ..
+  | .assignNew .. | .assignLocalPush .. | .pushOpAssign .. | .pushIncDec ..
   | .callReceiver .. | .callReceiverPush .. | .callRec .. | .revertData .. | .catchData .. => true
   | _ => false
 
@@ -791,7 +1025,8 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
   | _, _, .deleteMem a0 a1 => stmt_sim_outside (.deleteMem a0 a1) rfl
   | _, _, .assignNew a0 a1 a2 => stmt_sim_outside (.assignNew a0 a1 a2) rfl
   | _, _, .tryCall .. => fun _ hw _ => by rw [inFrag_tryCall] at hw; cases hw
-  | _, _, .loop a0 a1 a2 => stmt_sim_outside (.loop a0 a1 a2) rfl
+  | _, _, .loop a c body => fun hm hw hL =>
+    loop_family a c body hm hw hL @fun _ hb hLb _ _ hm' => prog_sim body hm' hb hLb
   | _, _, .assignLocalPush a0 a1 => stmt_sim_outside (.assignLocalPush a0 a1) rfl
   | _, _, .pushOpAssign a0 a1 a2 a3 a4 => stmt_sim_outside (.pushOpAssign a0 a1 a2 a3 a4) rfl
   | _, _, .pushIncDec a0 a1 a2 => stmt_sim_outside (.pushIncDec a0 a1 a2) rfl
@@ -840,8 +1075,10 @@ code agree: both succeed — the machine's stack as it was, its storage,
 locals and balances representing the final state and ledger — or both
 revert (a panic, a failed `assert`, is solc's revert with `Panic(0x01)`
 data, and only code with an `assert` panics), or, in code that pays, the
-world refuses a payment and the machine alone reverts.  There is no fourth
-case: on the fragment the typed run neither diverges nor is exhausted.
+world refuses a payment and the machine alone reverts, or a loop no number
+of turns ends: the typed run diverges, and the machine has no outcome (a
+fault) or stopped before at a refused payment.  The typed run is never
+exhausted on the fragment.
 
 Example: from a state where `total = 3`,
 ```solidity
@@ -858,17 +1095,21 @@ theorem compile_correct {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F'
       run (compileProg b P) m = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ o m',
       Solidity.Prog.run σ P = .ok o ∧
-      Sim C (L + Prog.pushes P) b F' o.st m') := by
+      Sim C (L + Prog.pushes P) b F' o.st m') ∨
+    (Solidity.Prog.run σ P = .error .diverge ∧ (run (compileProg b P) m = .fault ∨
+      (Prog.pays P = true ∧ run (compileProg b P) m = .revert))) := by
   rcases prog_sim P hm hP hL with ⟨o, m', h1, h2, h3, -, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
-      ⟨hp, h1, o, m', h2, -, h5⟩
+      ⟨hp, h1, o, m', h2, -, h5⟩ | h
   · exact .inl ⟨o, m', h1, h2, h3, h5⟩
   · exact .inr (.inl ⟨.inl h1, h2⟩)
   · exact .inr (.inl ⟨.inr ⟨ha, h1⟩, h2⟩)
-  · exact .inr (.inr ⟨hp, h1, o, m', h2, h5⟩)
+  · exact .inr (.inr (.inl ⟨hp, h1, o, m', h2, h5⟩))
+  · exact .inr (.inr (.inr h))
 
 /-- **Code that pays no one agrees exactly**: with no `transfer`, nothing can
-be refused, and the machine reverts where the typed run does; with no
-`assert` either, the typed run's revert is a plain one.
+be refused, and the machine reverts where the typed run does, and faults
+where it diverges; with no `assert` either, the typed run's revert is a
+plain one.
 
 Example: `total += 1;` at `2^256 - 1` reverts in both. -/
 theorem compile_exact {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
@@ -878,10 +1119,13 @@ theorem compile_exact {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
       m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m') ∨
     ((Solidity.Prog.run σ P = .error .revert ∨
         (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
-      run (compileProg b P) m = .revert) := by
-  rcases compile_correct hP hm hL with h | h | ⟨hp, _⟩
+      run (compileProg b P) m = .revert) ∨
+    (Solidity.Prog.run σ P = .error .diverge ∧ run (compileProg b P) m = .fault) := by
+  rcases compile_correct hP hm hL with h | h | ⟨hp, _⟩ | ⟨h1, h2 | ⟨hp, _⟩⟩
   · exact .inl h
-  · exact .inr h
+  · exact .inr (.inl h)
+  · rw [hpay] at hp; cases hp
+  · exact .inr (.inr ⟨h1, h2⟩)
   · rw [hpay] at hp; cases hp
 
 /-- **What the machine does, the typed run did**: the box reading of
@@ -895,8 +1139,11 @@ theorem compile_box {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F 
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
       Sim C (L + Prog.pushes P) b F' o.st m' := by
-  rcases compile_correct hP hm hL with ⟨o, m'', h1, h2, _, h4⟩ | ⟨_, h2⟩ | ⟨_, h2, _⟩
+  rcases compile_correct hP hm hL with ⟨o, m'', h1, h2, _, h4⟩ | ⟨_, h2⟩ | ⟨_, h2, _⟩ |
+      ⟨_, h2 | ⟨_, h2⟩⟩
   · rw [hrun] at h2; cases h2; exact ⟨o, h1, h4⟩
+  · rw [hrun] at h2; cases h2
+  · rw [hrun] at h2; cases h2
   · rw [hrun] at h2; cases h2
   · rw [hrun] at h2; cases h2
 
@@ -960,9 +1207,12 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
           Solidity.Prog.run (freshT C balance hb self) P = .error .panic)) ∧
       run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
-      ∃ o, Solidity.Prog.run (freshT C balance hb self) P = .ok o) := by
+      ∃ o, Solidity.Prog.run (freshT C balance hb self) P = .ok o) ∨
+    (Solidity.Prog.run (freshT C balance hb self) P = .error .diverge ∧
+      (run (compileProg 0 P) (Machine.init bal self) = .fault ∨ (Prog.pays P = true ∧
+        run (compileProg 0 P) (Machine.init bal self) = .revert))) := by
   rcases compile_correct hP (Sim.init C balance hb bal self hbalance) (by omega) with
-    ⟨o, m', h1, h2, _, hm⟩ | h | ⟨hp, h1, o, _, h2, _⟩
+    ⟨o, m', h1, h2, _, hm⟩ | h | ⟨hp, h1, o, _, h2, _⟩ | h
   · refine .inl ⟨o, m', h1, h2, fun r s v hp hf => ?_⟩
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
     · rw [hf] at hsv; cases hsv
@@ -974,7 +1224,8 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
         rfl
     · rw [hf] at hsv; cases hsv
   · exact .inr (.inl h)
-  · exact .inr (.inr ⟨hp, h1, o, h2⟩)
+  · exact .inr (.inr (.inl ⟨hp, h1, o, h2⟩))
+  · exact .inr (.inr (.inr h))
 
 end Headline
 

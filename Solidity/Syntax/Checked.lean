@@ -381,4 +381,214 @@ abbrev Prog.checkOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.with
 /-- `ignoringOverflow { … }`'s program. -/
 abbrev Prog.ignoreOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .ignoring false
 
+/-! ## `Panic` codes in a self-call's callee
+
+In the callee a self-call `try` runs, where a `catch` reads the data, solc's
+checks fail with `Panic(uint256)`'s data and their code, as `assert` does
+there (`0x01`): an overflow of a checked operation `0x11` (inside or outside
+`checked { … }`), a division or a modulo by zero `0x12` (`addmod`/`mulmod`
+by zero too), `pop()` of an empty array `0x31`, an index past an array's
+length `0x32`.  The run reverts with no data at each of them (the solkey
+reading, `docs/semantic-gaps.md`, "Revert data"); so, in such a callee
+alone, each statement is preceded by one check per failure it may meet, in
+the order it is evaluated, which reverts with its code's data
+(`Prog.withPanics`): the run fails at the same place, with solc's data.  A
+nested self-call's callee is checked where its own `try` is built. -/
+
+namespace Checked
+
+/-- `(code, g)`: the check of a code, where `g` reads `false`. -/
+abbrev PGuards (C : Contract) (Γ : Ctx) := List (Nat × Val C Γ .bool)
+
+/-- A guard of `code`, where there is one. -/
+def pg (code : Nat) : Option (Val C Γ .bool) → PGuards C Γ
+  | none => []
+  | some g => [(code, g)]
+
+/-- The checks under `c`: each read as `true` where `c` does not hold. -/
+def pgUnder (c : Val C Γ .bool) (gs : PGuards C Γ) : PGuards C Γ :=
+  gs.map fun (k, g) => (k, orB (notB c) g)
+
+/-- The divisor `b` of `/` and `%` at a number type: not zero (`0x12`). -/
+def divPG : (op : BinOp) → (p : PrimTy) → Val C Γ p → PGuards C Γ
+  | .div, .uint, b | .mod, .uint, b => [(0x12, cmpU .neB rfl rfl b (litU 0 (by decide)))]
+  | .div, .int, b | .mod, .int, b => [(0x12, cmpI .neB rfl rfl b (litI 0 (by decide)))]
+  | _, _, _ => []
+
+/-- An index into a storage array: below its length (`0x32`). -/
+def idxPG {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (b : SPath C Γ (.ref R))
+    (i : Val C Γ k) : PGuards C Γ :=
+  match R, k, it, b, i with
+  | _, _, .map, _, _ => []
+  | _, _, .arr .dyn, b, i => [(0x32, cmpU .lt rfl rfl i (.len b rfl))]
+  | _, _, .arr (.fixed (n := n)), _, i =>
+    if h : PrimTy.uint.inRange (n : Int) = true then [(0x32, cmpU .lt rfl rfl i (litU n h))]
+    else []
+
+/-- An index into a memory array: below its length (`0x32`). -/
+def mIdxPG {R : RefTy} {E : Ty} (a : ArrTy R E) (b : MPath C Γ (.ref R)) (i : Val C Γ .uint) :
+    PGuards C Γ :=
+  match R, a, b with
+  | _, .dyn, b => [(0x32, cmpU .lt rfl rfl i (.mlen b rfl))]
+  | _, .fixed (n := n), _ =>
+    if h : PrimTy.uint.inRange (n : Int) = true then [(0x32, cmpU .lt rfl rfl i (litU n h))]
+    else []
+
+end Checked
+
+open Checked
+
+mutual
+
+/-- The checks a value meets, in the order it is evaluated: as `Val.guard`,
+each with its code, and a divisor and an index besides. -/
+def Val.panics {Γ : Ctx} : {p : PrimTy} → Val C Γ p → PGuards C Γ
+  | _, .simple _ => []
+  | _, .read l => l.panics
+  | _, .binop (p := .bool) .and _ _ a b => a.panics ++ pgUnder a b.panics
+  | _, .binop (p := .bool) .or _ _ a b => a.panics ++ pgUnder (notB a) b.panics
+  | _, .binop op _ _ a b =>
+    let pb := b.panics
+    let pa := if !pb.isEmpty && a.mayHalt then a.panics ++ [(0x11, touch _ a)] else a.panics
+    pa ++ pb ++ divPG op _ b ++ (if op.isArith then pg 0x11 (range op _ a b) else [])
+  | _, .unop op _ _ a => a.panics ++ (if op = .neg then pg 0x11 (negRange _ a) else [])
+  | _, .ternary c a b => c.panics ++ pgUnder c a.panics ++ pgUnder (notB c) b.panics
+  | _, .readMem l => l.panics
+  | _, .len b _ => b.panics
+  | _, .mlen b _ => b.panics
+  | _, .modular _ a b k =>
+    a.panics ++ b.panics ++ k.panics ++ [(0x12, cmpU .neB rfl rfl k (litU 0 (by decide)))]
+  | _, .hash _ b _ => b.panics
+
+def SPath.panics {Γ : Ctx} : {T : Ty} → SPath C Γ T → PGuards C Γ
+  | _, .alias _ => []
+  | _, .loc l => l.panics
+
+def Loc.panics {Γ : Ctx} : {T : Ty} → Loc C Γ T → PGuards C Γ
+  | _, .root .. => []
+  | _, .field b _ _ => b.panics
+  | _, .index it b i => b.panics ++ i.panics ++ idxPG it b i
+
+def MPath.panics {Γ : Ctx} : {T : Ty} → MPath C Γ T → PGuards C Γ
+  | _, .var .. => []
+  | _, .loc l => l.panics
+
+def MLoc.panics {Γ : Ctx} : {T : Ty} → MLoc C Γ T → PGuards C Γ
+  | _, .field b _ _ => b.panics
+  | _, .index a b i => b.panics ++ i.panics ++ mIdxPG a b i
+
+end
+
+def Src.panics {Γ : Ctx} {T : Ty} : Src C Γ T → PGuards C Γ
+  | .val v => v.panics
+  | .copy p _ | .fixedCopy p _ _ => p.panics
+  | .copyMem p => p.panics
+
+def ARhs.panics {Γ : Ctx} {R : RefTy} : ARhs C Γ R → PGuards C Γ
+  | .path p => p.panics
+  | .push b _ => b.panics
+
+def MRhs.panics {Γ : Ctx} {R : RefTy} : MRhs C Γ R → PGuards C Γ
+  | .alias p => p.panics
+  | .copy p _ => p.panics
+  | .newArr .. => []
+
+def MSrc.panics {Γ : Ctx} {T : Ty} : MSrc C Γ T → PGuards C Γ
+  | .val v => v.panics
+  | .ref p => p.panics
+
+def NewLhs.panics {Γ : Ctx} {R : RefTy} : NewLhs C Γ R → PGuards C Γ
+  | .store l => l.panics
+  | .mem l => l.panics
+
+def Args.panics {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → PGuards C Γ
+  | _, .nil => []
+  | _, .snoc as _ _ e => as.panics ++ e.panics
+  | _, .snocStorage as _ _ e => as.panics ++ e.panics
+  | _, .snocMemory as _ _ e => as.panics ++ e.panics
+
+def OpLoc.panics {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → PGuards C Γ
+  | .local _ | .root .. => []
+  | .field b _ _ | .mfield b _ _ => b.panics
+  | .index it b i => b.panics ++ idxPG it b (.simple i)
+  | .mindex a b i => b.panics ++ mIdxPG a b (.simple i)
+
+/-- The checks a statement meets before it runs (`Stmt.guard`'s, with
+codes, and the divisor of `/=` and `%=`, an empty `pop()`). -/
+def Stmt.panics {Γ Γ' : Ctx} : Stmt C Γ Γ' → PGuards C Γ
+  | .assign l r => r.panics ++ l.panics
+  | .rebind _ r => r.panics
+  | .assignLocal _ r => r.panics
+  | .declLocal _ _ init => (init.map Val.panics).getD []
+  | .declStorage _ _ init => (init.map ARhs.panics).getD []
+  | .opAssign op _ _ l r =>
+    r.panics ++ l.panics ++ divPG op _ r ++ pg 0x11 (range op _ l.val r)
+  | .incDec op _ l => l.panics ++ pg 0x11 (bumpRange op _ l.val)
+  | .assignIncDec _ op _ l _ => l.panics ++ pg 0x11 (bumpRange op _ l.val)
+  | .assignLocalPush _ b => b.panics
+  | .push b v _ => b.panics ++ (v.map Src.panics).getD []
+  | .pop b => b.panics ++ [(0x31, cmpU .gt rfl rfl (.len b rfl) (litU 0 (by decide)))]
+  | .transfer r a => r.panics ++ a.panics
+  | .send _ r a _ => r.panics ++ a.panics
+  | .declMem _ _ init _ _ => (init.map MRhs.panics).getD []
+  | .rebindMem _ r => r.panics
+  | .assignFromMem l p => p.panics ++ l.panics
+  | .assignMem l r => r.panics ++ l.panics
+  | .delete l => l.panics
+  | .deleteMem p _ => p.panics
+  | .assignNew l _ _ => l.panics
+  | .ite c _ _ => c.panics
+  | .require c | .assert c => c.panics
+  | .revert | .assumeFalse => []
+  | .call _ args _ _ => args.panics
+  | .tryCall .. => []
+  | .loop _ c _ => c.panics
+  | .block _ => []
+  | .pushOpAssign op _ _ b r =>
+    r.panics ++ b.panics ++ divPG op _ r ++ pg 0x11 (range op _ (zero _) r)
+  | .pushIncDec (p := p) op _ b => b.panics ++ pg 0x11 (bumpRange op p (zero p))
+  | .callReceiver _ args _ _ _ => args.panics
+  | .callReceiverPush _ args _ _ _ _ => args.panics
+  | .callRec _ _ args _ _ => args.panics
+  | .revertData d => d.foldl (fun g p => match p with | .word v => g ++ v.panics | _ => g) []
+  | .catchData .. => []
+
+/-- The check of `code`: `if (g) {} else { revert Panic(code); }`. -/
+def panicStmt {Γ : Ctx} (code : Nat) (g : Val C Γ .bool) : Stmt C Γ Γ :=
+  .ite g .nil (.cons (.revertData [.bytes (Semantics.encodePanic code)]) .nil)
+
+/-- `P`, then the checks. -/
+def Prog.snocPanics {Γ Γ₁ : Ctx} (P : Prog C Γ Γ₁) (gs : PGuards C Γ₁) : Prog C Γ Γ₁ :=
+  gs.foldl (fun P (k, g) => P.snocS (panicStmt k g)) P
+
+mutual
+
+/-- A statement with the programs it holds checked (`Stmt.withOF`'s
+places); a nested self-call's callee is left as its `try` built it. -/
+def Stmt.withPanics {Γ Γ' : Ctx} : Stmt C Γ Γ' → Stmt C Γ Γ'
+  | .ite c thn els => .ite c thn.withPanics els.withPanics
+  | .call f args ret body => .call f args ret body.withPanics
+  | .tryCall call rets ok err code pnc other sargs sbody self =>
+    .tryCall call rets ok.withPanics err.withPanics code pnc.withPanics other.withPanics
+      sargs sbody self
+  | .loop a c body =>
+    .loop a c (body.withPanics.snocPanics (c.wk (Thin.ofExt body.ext)).panics)
+  | .block body => .block body.withPanics
+  | .callReceiver f args r body op => .callReceiver f args r body.withPanics op
+  | .callReceiverPush f args r body code value =>
+    .callReceiverPush f args r body.withPanics (code.withPanics.snocPanics value.panics) value
+  | .callRec f d args ret body => .callRec f d args ret fun u => (body u).withPanics
+  | .catchData c rets sargs sbody self kind x body =>
+    .catchData c rets sargs sbody self kind x body.withPanics
+  | s => s
+
+/-- **A self-call's callee, its failures given solc's `Panic` data**: each
+statement preceded by its checks (`Stmt.panics`, `panicStmt`). -/
+def Prog.withPanics {Γ Γ' : Ctx} : Prog C Γ Γ' → Prog C Γ Γ'
+  | .nil => .nil
+  | .cons s P =>
+    s.panics.foldr (fun (k, g) Q => .cons (panicStmt k g) Q) (.cons s.withPanics P.withPanics)
+
+end
+
 end Solidity

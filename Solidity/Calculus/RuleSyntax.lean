@@ -68,7 +68,7 @@ hypothesis):
 | `l` | the target of `⊕=` and `++` | `OpLoc C Γ p` | |
 | `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C Γ Γ'`; `Prog C Γ Γ'` | |
 | `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
-| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
+| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`); no summary (`CallRet.summary?`, `internalCallSummary`) |
 | `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C Γ`, …; `Prog C Γ Γ'` | |
 | `cond`; `body`; `n` | a loop's condition (KeY's `s#cond`); its body, a block, or spliced in place inside one (`{ body; … }`); the bound of `/// @custom:key unwind n` | `Val C Γ .bool`; `Prog C Γ Γ'`; `Nat` | |
 
@@ -140,6 +140,10 @@ syntax:max "(" dl_term ")" : dl_term
 /-- `(a == b)`: a comparison as a `bool` term. Parenthesised, since a bare `==`
 after `:=` is the update `x := a == b`. -/
 syntax:max "(" dl_term " == " dl_term ")" : dl_term
+/-- `(c ? a : b)`: a conditional value, `a` where `c` holds and `b` where it
+fails (KeY's `\if (c) \then (a) \else (b)`), what a joined `if` sets a local
+to (`ifElseJoin`). -/
+syntax:max "(" dl_term " ? " dl_term " : " dl_term ")" : dl_term
 syntax:max "‹" term "›" : dl_term
 
 /-- One elementary update `x := t`.  The funds and the ledger are written
@@ -1547,6 +1551,10 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.or PrimTy.bool $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| ( $a:dl_term == $b:dl_term )) => do
     `(Term.binop BinOp.eqB _ $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | stx@`(dl_term| ( $c:dl_term ? $a:dl_term : $b:dl_term )) => do
+    unless pos matches .val do tposError stx "a conditional value" pos
+    `($(Lean.mkCIdent `Solidity.Tm.app3) $(Lean.mkCIdent `Solidity.Op3.ite)
+      $(← schemaTerm Γ .val c) $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| ( $t:dl_term )) => schemaTerm Γ pos t
   | `(dl_term| ‹ $t:term ›) => pure t
   | stx@`(dl_term| $f:ident($args,*)) => do
@@ -1859,8 +1867,12 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     let n := x.getId.toString
     unless isCallStem n do return out
     let b ← if stemOf n == "fbs" then `(true) else `(false)
-    return out.push (mkIdent `hexp, ← `($(mkIdent `Solidity.Args.firstNonSimple) $(schemaIdent "args") = none))
+    let out' := out.push (mkIdent `hexp, ← `($(mkIdent `Solidity.Args.firstNonSimple) $(schemaIdent "args") = none))
       |>.push (mkIdent `hrets, ← `($(mkIdent `Solidity.CallRet.isRets) $(schemaIdent "ret") = $b))
+    -- `ic`: no summary (`internalCallSummary` runs one)
+    if stemOf n == "fbs" then return out'
+    return out'.push (mkIdent `hsum, ← `($(mkIdent `Solidity.CallRet.summary?) $(schemaIdent "args")
+      $(schemaIdent "ret") $(schemaIdent "body") = none))
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) =>
     match lhsHead [] l with
     | some (.other h) =>

@@ -818,6 +818,48 @@ theorem landedAll_const {Δ : Ctx} (g : State C []) (ℓ : LocsV C Δ) (P : Prop
     LandedAll g ℓ (fun _ => P) ↔ (Nonempty (Landed g ℓ) → P) :=
   ⟨fun h ⟨x⟩ => h x, fun h x => h ⟨x⟩⟩
 
+/-- The actual state witnesses its own global/local observations. -/
+theorem landed_nonempty (σ : State C Δ) : Nonempty (Landed σ.glob σ.locV) :=
+  ⟨⟨σ, rfl, rfl⟩⟩
+
+/-- Capturing a primitive value cannot make representable locals unrealizable. -/
+theorem landed_nonempty_push_val {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ}
+    {p : PrimTy} (v : p.Denote) (h : Nonempty (Landed g ℓ)) :
+    Nonempty (Landed g (ℓ.push (t := .val p) v)) := by
+  obtain ⟨x⟩ := h
+  refine ⟨⟨x.val.push v, x.glob_eq, ?_⟩⟩
+  rw [State.locV_push, x.locV_eq]
+  rfl
+
+/-- A primitive capture is realizable exactly when the preceding locals are. -/
+theorem landed_nonempty_push_val_iff {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ}
+    {p : PrimTy} (v : p.Denote) :
+    Nonempty (Landed g (ℓ.push (t := .val p) v)) ↔ Nonempty (Landed g ℓ) := by
+  constructor
+  · rintro ⟨x⟩
+    refine ⟨⟨x.val.drop (.push .refl), x.glob_eq, ?_⟩⟩
+    rw [State.locV_drop, x.locV_eq]
+    rfl
+  · exact landed_nonempty_push_val v
+
+/-- Specialize the primitive type so the simplifier can recover its dependent value. -/
+theorem landed_nonempty_push_uint {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ}
+    (v : PrimTy.uint.Denote) :
+    Nonempty (Landed g (ℓ.push (t := .val .uint) v)) ↔ Nonempty (Landed g ℓ) :=
+  landed_nonempty_push_val_iff v
+
+/-- Specialize the primitive type so the simplifier can recover its dependent value. -/
+theorem landed_nonempty_push_int {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ}
+    (v : PrimTy.int.Denote) :
+    Nonempty (Landed g (ℓ.push (t := .val .int) v)) ↔ Nonempty (Landed g ℓ) :=
+  landed_nonempty_push_val_iff v
+
+/-- Specialize the primitive type so the simplifier can recover its dependent value. -/
+theorem landed_nonempty_push_bool {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ}
+    (v : PrimTy.bool.Denote) :
+    Nonempty (Landed g (ℓ.push (t := .val .bool) v)) ↔ Nonempty (Landed g ℓ) :=
+  landed_nonempty_push_val_iff v
+
 /-- What follows an update, read in every typed state it lands on: a
 constant, so that `simp` reads it only once the update's result is known
 (`landedRest_def`), not first with the result abstract. -/
@@ -923,6 +965,35 @@ theorem denote_pvP {R : RefTy} (σ : State C Γ) (i : Idx Γ (.alias R)) :
   rw [e]
   simp only [Tm.denote]
   cases (TEnv.get i σ.env : Option (SRef C (.ref R))) <;> rfl
+theorem denote_at {R : RefTy} {k : PrimTy} {V : Ty} (σ : State C Γ) (it : IndexTy R k V)
+    (x : Tm C Γ (.path (.ref R))) (y : Tm C Γ (.val k)) :
+    (Tm.app2 (.at it) x y).denote σ =
+      ObsLoc.app (x.denote σ) (Path.index it ((y.denote σ).getD (PrimTy.dflt _))) := rfl
+
+/-- **`selectOnSaveCons`** at a word, both branches (`\if (a1 = a2)`): a word
+read after a write of a word is the word written where the read goes through
+the write, the old read elsewhere (`Obs.findOnSave`, `Obs.findOnSaveFrame`).
+What `sol_close_save_cases` splits a read at a symbolic index by. -/
+theorem copyTo_word_ite {L : Ty → Type} [ObsLoc L] (o : Obs L) {P : PrimTy}
+    (p q : L (.prim P)) (v : TVal (.prim P)) :
+    (o.copyTo p v).word q = if (ObsLoc.strip? p q).isSome then v.word .nil else o.word q := by
+  unfold Obs.copyTo Obs.save
+  dsimp only
+  split
+  · rename_i r hr
+    cases r
+    simp only [hr, Option.isSome_some, if_true, TVal.overlay_prim]
+  · rename_i hr
+    simp only [hr, Option.isSome_none, Bool.false_eq_true, if_false]
+/-- A read's location below a state variable, as the reference it reads. -/
+theorem app_ref {U W : Ty} (r : SRef C U) (q : Path U W) :
+    ObsLoc.app (SLoc.ref r) q = SLoc.ref (r.append q) := rfl
+/-- The write's location and the read's, compared from their common root
+(`SRef.strip?_append_append`). -/
+theorem strip?_ref_append {U V W : Ty} (r : SRef C U) (p : Path U V) (q : Path U W) :
+    ObsLoc.strip? (SLoc.ref (r.append p)) (SLoc.ref (r.append q)) = Path.strip? p q :=
+  SRef.strip?_append_append r p q
+theorem obs_word_prim_nil {P : PrimTy} (v : P.Denote) : (SVal.prim v).obs.word .nil = v := rfl
 
 /-- `τ` is `σ` over a grown heap that keeps `σ`'s objects (`Fml.grow`). -/
 def _root_.Solidity.State.GrowOf (σ τ : State C Γ) : Prop :=
@@ -975,6 +1046,38 @@ theorem alloc_readT_index {p : PrimTy} (σ : State C Γ) (o : MObj σ.H (.array 
   cases (o : {l : List (MVal σ.H (.prim p)) // l.length < 2 ^ 256}).1[k.1.toNat]? <;> rfl
 theorem push_readId {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {T : Ty} (a : MAddrT T) :
     (σ.push v).glob.memT.readId a = σ.glob.memT.readId a := rfl
+
+/-- Local updates preserve memory observations, including an anonymised loop counter. -/
+theorem setLocal_lenId {t : LTy} (σ : State C Γ) (i : Idx Γ t)
+    (v : t.TDenote C σ.H) (E : Ty) (id : Nat) :
+    (σ.setLocal i v).glob.memT.lenId E id = σ.glob.memT.lenId E id := rfl
+theorem setLocal_lenU {t : LTy} (σ : State C Γ) (i : Idx Γ t)
+    (v : t.TDenote C σ.H) {E : Ty} (r : HRef σ.H (.array E)) :
+    (σ.setLocal i v).glob.memT.heap.lenU r = σ.glob.memT.heap.lenU r := rfl
+theorem setLocal_readT {t : LTy} (σ : State C Γ) (i : Idx Γ t)
+    (v : t.TDenote C σ.H) {T : Ty} (a : MAddrT T) :
+    (σ.setLocal i v).glob.memT.readT a = σ.glob.memT.readT a := rfl
+theorem setLocal_readId {t : LTy} (σ : State C Γ) (i : Idx Γ t)
+    (v : t.TDenote C σ.H) {T : Ty} (a : MAddrT T) :
+    (σ.setLocal i v).glob.memT.readId a = σ.glob.memT.readId a := rfl
+
+/-- A captured typed value is the witness once its integer observation is known. -/
+theorem exists_val_eq {α : Type} {p : α → Prop} (w : Subtype p) (P : Subtype p → Prop) :
+    (∃ a : Subtype p, w.val = a.val ∧ P a) ↔ P w :=
+  ⟨fun ⟨_a, h, hP⟩ => (congrArg P (Subtype.ext h)).mpr hP,
+    fun hP => ⟨w, rfl, hP⟩⟩
+
+/-- Erase a rebuilt index's proof before first-order matching. -/
+theorem index_uint_eta {R : RefTy} {E : Ty} (a : ArrTy R E) (id : Nat)
+    (i : PrimTy.uint.Denote) (h : PrimTy.uint.inRange i.val = true) :
+    (MAddrT.index id a ⟨i.val, h⟩ : MAddrT E) = MAddrT.index id a i := rfl
+
+/-- Equal integer observations identify typed array indices. The reconstructed
+index used by a universal instance may carry a different range proof. -/
+theorem index_uint_congr {R : RefTy} {E : Ty} (a : ArrTy R E) (id : Nat)
+    (i j : PrimTy.uint.Denote) (h : i.val = j.val) :
+    (MAddrT.index id a i : MAddrT E) = MAddrT.index id a j :=
+  congrArg (fun k => MAddrT.index id a k) (Subtype.ext h)
 /-- An element of the fresh array of words, as the closer reads it: its
 list's. -/
 theorem alloc_readId_index {p : PrimTy} (σ : State C Γ) (o : MObj σ.H (.array (.prim p)))
@@ -1025,16 +1128,21 @@ attribute [close_rw_s]
   CloseS.glob_storage CloseS.glob_net CloseS.glob_selfBalance CloseS.glob_tx CloseS.glob_envVal
   CloseS.havoc_storage CloseS.havoc_net CloseS.havoc_selfBalance CloseS.havoc_tx
   CloseS.push_storage CloseS.push_net CloseS.push_selfBalance CloseS.push_tx CloseS.push_lenU
+  CloseS.index_uint_eta
+  CloseS.push_lenId CloseS.push_readT CloseS.push_readId
+  CloseS.setLocal_lenId CloseS.setLocal_lenU CloseS.setLocal_readT CloseS.setLocal_readId
   CloseS.setLocal_storage CloseS.setLocal_net CloseS.setLocal_selfBalance CloseS.setLocal_tx
   CloseS.envVal_msgSender CloseS.envVal_msgValue CloseS.envVal_timestamp
   CloseS.envVal_selfBalance CloseS.envVal_selfAddress
   CloseS.Landed.storage_eq CloseS.Landed.net_eq CloseS.Landed.selfBalance_eq CloseS.Landed.tx_eq
   CloseS.Landed.hashId_eq CloseS.push_hashId CloseS.setLocal_hashId
   CloseS.withStorage_hashId CloseS.withNet_hashId CloseS.withBalance_hashId
-  CloseS.Landed.locV_eq
+  CloseS.Landed.locV_eq CloseS.Landed.glob_eq
   CloseS.set_push_here CloseS.set_push_there CloseS.drop_refl' CloseS.drop_push' CloseS.thin_refl'
   CloseS.thin_keep' CloseS.thin_drop'
   CloseS.landedAll_const CloseS.landedRest_def
+  CloseS.landed_nonempty CloseS.landed_nonempty_push_uint
+  CloseS.landed_nonempty_push_int CloseS.landed_nonempty_push_bool
   State.anon_nil State.anon_cons
   CloseS.vden_val CloseS.vden_alias CloseS.vden_mem CloseS.vden_old CloseS.vden_oldNet
   CloseS.vden_kint
@@ -1121,6 +1229,7 @@ private def evalBoolE (e : Expr) : MetaM Bool := do
 /-- A local, a literal or a value of the transaction, read off the syntax, as
 the atom (`Fml.Atom`) whose term it is. -/
 private def atomE? (e : Expr) : MetaM (Option Expr) := do
+  unless e.isAppOfArity ``Tm.pvV 4 || e.isAppOfArity ``Tm.app0 4 do return none
   let (C, Γ) := (e.getArg! 0, e.getArg! 1)
   if e.isAppOfArity ``Tm.pvV 4 then
     return some (← mkAppOptM ``Fml.Atom.loc #[C, Γ, e.getArg! 2, e.appArg!])
@@ -1233,19 +1342,22 @@ def allocInGoal : TacticM Bool := do
 def allocLemmas : TacticM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
   #[``CloseS.holds_allocAll, ``CloseS.alloc_storage, ``CloseS.alloc_net,
     ``CloseS.alloc_selfBalance, ``CloseS.alloc_tx, ``CloseS.locV_alloc, ``CloseS.alloc_snd_id,
-    ``CloseS.push_lenId, ``CloseS.alloc_lenId, ``CloseS.push_readT, ``CloseS.alloc_readT_index,
-    ``CloseS.push_readId, ``CloseS.alloc_readId_index, ``CloseS.holds_grow].mapM fun n =>
+    ``CloseS.alloc_lenId, ``CloseS.alloc_readT_index,
+    ``CloseS.alloc_readId_index, ``CloseS.holds_grow].mapM fun n =>
       `(Lean.Parser.Tactic.simpLemma| $(mkIdent n):ident)
 
 /-- The extra lemmas where the goal reads a fresh object, none elsewhere. -/
 def allocExtra : TacticM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) := do
   if ← allocInGoal then allocLemmas else pure #[]
 
+/-- The steps as `sol_close_facts` and `sol_close_reads` allow: a leaf of
+nested landed states (`CloseS.LandedAll`) repeats its captures' terms in each
+(`externalValue` of `tests/solc/FunctionTypes.sol` passes the default 100000). -/
 @[tactic Solidity.tacticSol_close_eval, tactic Solidity.tacticSol_close_mt_eval]
 def evalSolCloseEvalS : Tactic := onScoped do
   let ex ← allocExtra
-  if ex.isEmpty then `(tactic| simp only [close_rw_s])
-  else `(tactic| simp only [close_rw_s, $ex,*])
+  if ex.isEmpty then `(tactic| simp (config := { maxSteps := 400000 }) only [close_rw_s])
+  else `(tactic| simp (config := { maxSteps := 400000 }) only [close_rw_s, $ex,*])
 
 @[tactic Solidity.tacticSol_close_facts]
 def evalSolCloseFactsS : Tactic := onScoped do
@@ -1291,10 +1403,170 @@ def evalSolCloseAliasGuard : Tactic := fun _ => withMainContext do
   unless hit.isSome do throwError "sol_close_alias_guard: no equation reads a storage alias"
 
 macro_rules
+  | `(tactic| sol_close_landed) => `(tactic| simp only [CloseS.landedAll_def])
+
+/-- Select the quantified-premise fallback without charging ordinary leaves. -/
+elab "sol_close_all_guard" : tactic => withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  let rec hasAll (e : Expr) : Bool :=
+    e.isAppOf ``Fml.all || (e.isAppOfArity ``Fml.and 4 &&
+      (hasAll (e.getArg! 2) || hasAll (e.getArg! 3)))
+  unless (ty.find? fun e => e.isAppOfArity ``Fml.imp 4 && hasAll (e.getArg! 2)).isSome do
+    throwError "sol_close_quantified: no quantified premise"
+
+/-- Open at most 128 logical constructors, reusing a captured value only
+when the goal's equality identifies it. Each checked step has its own budget. -/
+elab "sol_close_captures" : tactic => do
+  let mut todo ← getGoals
+  let mut leaves : List MVarId := []
+  for _ in [0:128] do
+    let g :: rest := todo | break
+    setGoals [g]
+    let saved ← saveState
+    let ok ← tryCatchRuntimeEx (Budget.within 1000 do
+        let step? ← g.withContext do
+          let ty ← whnfR (← g.getType)
+          if ty.isForall then return some (← `(tactic| intro _))
+          if ty.isAppOf ``And then return some (← `(tactic| apply And.intro))
+          if ty.isAppOf ``Exists then
+            return some (← `(tactic| apply (CloseS.exists_val_eq _ _).2))
+          return none
+        let some step := step? | return false
+        Term.withoutErrToSorry <| withoutRecover <| evalTactic step
+        return true) (fun _ => pure false)
+    if ok then todo := (← getUnsolvedGoals) ++ rest
+    else
+      saved.restore
+      leaves := leaves ++ [g]
+      todo := rest
+  setGoals (leaves ++ todo)
+
+/-- `sol_close_save_cases`'s first step: the Theory reads of the goal and of
+the premises that read one (a `∀` premise's instances) unfolded alike to
+`st.obs.word (.ref r)`; then the storage each landed on after a write
+`st.write r v = some st'` read as the write's (`Storage.obs_write`), for at
+most 8 writes the goal reads, and a read the leaf knows, `st.find r = some w`,
+noted as the Theory's (`Storage.obs_word_ref_some`), at most 16.  Fails where
+there is neither. -/
+elab "sol_close_save_write" : tactic => withMainContext do
+  -- cheap guard first: a write or a read of storage known, at most 256 premises
+  let mut known := false
+  let mut seen := 0
+  for d in ← getLCtx do
+    if seen == 256 then break
+    seen := seen + 1
+    if d.isImplementationDetail then continue
+    let_expr Eq _ lhs rhs := (← instantiateMVars d.type) | continue
+    if rhs.isAppOfArity ``Option.some 2 &&
+        (lhs.isAppOf ``Storage.write || lhs.isAppOfArity ``Storage.find 4) then
+      known := true
+      break
+  unless known do throwError "sol_close_save_cases: no write and no read of storage known"
+  let mut hs : Array FVarId := #[]
+  for d in ← getLCtx do
+    if hs.size == 64 then break
+    if d.isImplementationDetail then continue
+    if ((← instantiateMVars d.type).find? (·.isAppOf ``Tm.denote)).isSome then
+      hs := hs.push d.fvarId
+  let (fs, g) ← (← getMainGoal).revert hs
+  replaceMainGoal [g]
+  evalTactic (← `(tactic| simp (config := { maxSteps := 100000 }) only [CloseS.denote_find,
+      CloseS.denote_storage, CloseS.denote_root, CloseS.denote_at, CloseS.denote_pvV,
+      Option.getD_some, Option.bind_some, CloseS.push_storage, CloseS.setLocal_storage,
+      CloseS.havoc_storage, CloseS.Landed.storage_eq, CloseS.glob_storage,
+      CloseS.withStorage_storage, CloseS.globG_val, State.locV_push, CloseS.push_here,
+      CloseS.vden_val, Option.some.injEq, Path.index_dyn, Path.index_fixed, Path.index_map,
+      CloseS.app_ref]))
+  let (_, g) ← (← getMainGoal).introNP fs.size
+  let mut g := g
+  let mut writes := 0
+  let mut reads := 0
+  for d in ← g.withContext getLCtx do
+    if d.isImplementationDetail then continue
+    let_expr Eq _ lhs rhs := (← instantiateMVars d.type) | continue
+    unless rhs.isAppOfArity ``Option.some 2 do continue
+    if lhs.isAppOf ``Storage.write && writes < 8 then
+      let target ← instantiateMVars (← g.getType)
+      unless (target.find? fun e => e.isAppOfArity ``Storage.obs 2 &&
+        e.appArg! == rhs.appArg!).isSome do continue
+      let r ← g.withContext do g.rewrite target (← mkAppM ``Storage.obs_write #[d.toExpr])
+      g ← g.replaceTargetEq r.eNew r.eqProof
+      writes := writes + 1
+    else if lhs.isAppOfArity ``Storage.find 4 && reads < 16 then
+      let some pf ← g.withContext (observing? (mkAppM ``Storage.obs_word_ref_some #[d.toExpr]))
+        | continue
+      let (_, g') ← g.note `read pf
+      g := g'
+      reads := reads + 1
+  if writes + reads == 0 then
+    throwError "sol_close_save_cases: no write and no read of storage known"
+  replaceMainGoal [g]
+
+/-- **`selectOnSaveCons`** at a symbolic index, solkey's `\if (a1 = a2)`: a
+word read after a word written (`sol_close_save_write`) is split on whether
+the read goes through the write (`CloseS.copyTo_word_ite`, the paths
+compared from their root, `CloseS.strip?_ref_append`): the written word where
+the indices agree, the old storage's read, as the premises' instances and
+the reads known read it, where they differ.  Each branch is closed as the
+leaf's are; with 20000 heartbeats of its own, past which, or where a branch
+stays open, it fails with the goal as it was. -/
+elab "sol_close_save_cases" : tactic => do
+  let saved ← saveState
+  let ok ← tryCatchRuntimeEx (Budget.within 20000 do
+      Term.withoutErrToSorry <| withoutRecover <| evalTactic (← `(tactic| (
+        sol_close_save_write
+        try simp only [CloseS.copyTo_word_ite, CloseS.strip?_ref_append, Path.strip?,
+          CloseS.obs_word_prim_nil]
+        repeat' split
+        all_goals try simp only [Option.isSome_some, Option.isSome_none, if_true, if_false,
+          Bool.false_eq_true, CloseS.uint_eq_mk, CloseS.int_eq_mk] at *
+        all_goals first | decide | omega | grind [CloseS.index_uint_congr])))
+      return (← getUnsolvedGoals).isEmpty) (fun _ => pure false)
+  unless ok do
+    saved.restore
+    throwError "sol_close_save_cases: the goal stays open"
+
+macro "sol_close_quantified_core" : tactic => `(tactic| (
+    sol_close_all_guard
+    sol_close_unwrap_th
+    intro σ
+    sol_close_eval
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals try sol_close_landed
+    all_goals try (intros; sol_close_reads_all)
+    all_goals try (subst_vars; sol_close_reads_all)
+    all_goals try intros
+    all_goals try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *
+    all_goals try sol_close_witness
+    all_goals (repeat' (first | intro _ | apply And.intro))
+    all_goals try sol_close_enrich
+    all_goals try sol_close_all
+    all_goals try sol_close_enrich
+    all_goals try sol_close_reads_all
+    sol_close_captures
+    all_goals first
+      | omega | assumption | rfl | grind [CloseS.index_uint_congr]
+      -- a read past a write at a symbolic index (`selectOnSaveCons`)
+      | sol_close_save_cases))
+
+elab_rules : tactic
+  | `(tactic| sol_close_quantified) => do
+    let saved ← saveState
+    -- bounded by the declaration's heartbeats, as it always was: its option
+    -- of 20000 never bound it (`checkMaxHeartbeats` reads the context's
+    -- limit), and the ABI scans of `Examples/Tactics/ArrayScans.lean` use
+    -- most of a declaration's
+    let ok ← tryCatchRuntimeEx (do
+        Term.withoutErrToSorry <| withoutRecover <| evalTactic (← `(tactic| sol_close_quantified_core))
+        return (← getUnsolvedGoals).isEmpty) (fun _ => pure false)
+    unless ok do
+      saved.restore
+      throwError "sol_close_quantified: the quantified fallback left the original goal open"
+
+macro_rules
   | `(tactic| sol_close_witness) => `(tactic| (
-    -- the landed states opened here: `sol_close`'s own `CloseS.landedAll_def`
-    -- is quoted in `Calculus/Close.lean`, before the name exists, and reads nothing
-    (try simp only [CloseS.landedAll_def])
+    (try sol_close_landed)
     intros
     refine ⟨⟨_, by decide⟩, rfl, ?_⟩
     try dsimp only))
@@ -1312,6 +1584,521 @@ macro_rules
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
     all_goals sol_close_denote))
+
+/-! ### A joined `if`'s values (`sol_close_join`) -/
+
+/-- A value read as a fresh `a` and its defining fact: where `X` returns,
+`∃ a, X = some a ∧ P a` holds when `P` holds of whatever it returns. -/
+theorem CloseS.exists_some_of {α : Type} {X : Option α} {P : α → Prop} (ht : X.isSome = true)
+    (h : ∀ a, X = some a → P a) : ∃ a, X = some a ∧ P a := by
+  cases hX : X with
+  | none => rw [hX] at ht; cases ht
+  | some a => exact ⟨a, rfl, h a hX⟩
+
+/-- A conditional's value, as an implication per case: what `omega` reads
+with one case split each. -/
+theorem CloseS.ite_eq_some_iff {α : Type} {p : Prop} [Decidable p] {x y : Option α} {z : α} :
+    (if p then x else y) = some z ↔ (p → x = some z) ∧ (¬p → y = some z) := by
+  by_cases h : p <;> simp only [h, if_true, if_false, true_implies, false_implies, and_true,
+    true_and, not_true_eq_false, not_false_eq_true]
+
+/-- A checked result: its check a fact, its value the result's. -/
+theorem CloseS.ite_some_none_eq {α : Type} {p : Prop} [Decidable p] {y z : α} :
+    (if p then some y else none) = some z ↔ p ∧ y = z := by
+  by_cases h : p <;> simp only [h, if_true, if_false, Option.some.injEq, true_and, reduceCtorEq,
+    false_and]
+
+/-- A value under its own check: the check holds, so the value is the
+checked one. -/
+theorem CloseS.and_eq_ite_self {α : Type} {p : Prop} [Decidable p] {z a b : α} :
+    (p ∧ z = if p then a else b) ↔ (p ∧ z = a) := by
+  by_cases h : p <;> simp only [h, if_true, if_false, true_and, false_and]
+
+/-- A conditional's value, as the disjunction of its cases. -/
+theorem CloseS.ite_eq_iff' {α : Type} {p : Prop} [Decidable p] {x y : α} {z : α} :
+    (if p then x else y) = z ↔ (p ∧ x = z) ∨ (¬p ∧ y = z) := by
+  by_cases h : p <;> simp only [h, if_true, if_false, true_and, false_and, or_false,
+    false_or, not_true_eq_false, not_false_eq_true]
+
+/-- A value set to a conditional, as the disjunction of its cases. -/
+theorem CloseS.eq_ite_iff' {α : Type} {p : Prop} [Decidable p] {x y : α} {z : α} :
+    z = (if p then x else y) ↔ (p ∧ z = x) ∨ (¬p ∧ z = y) := by
+  by_cases h : p <;> simp only [h, if_true, if_false, true_and, false_and, or_false,
+    false_or, not_true_eq_false, not_false_eq_true]
+
+theorem CloseS.uintOf_eq' (n : Int) (a : PrimTy.uint.Denote) :
+    CloseS.uintOf n = a ↔ a.val = if 0 ≤ n ∧ n < uintBound then n else 0 :=
+  eq_comm.trans (CloseS.eq_uintOf' n a)
+
+theorem CloseS.intOf_eq' (n : Int) (a : PrimTy.int.Denote) :
+    CloseS.intOf n = a ↔ a.val = if -intBound ≤ n ∧ n < intBound then n else 0 :=
+  eq_comm.trans (CloseS.eq_intOf' n a)
+
+/-- The words' bounds as literals, which `omega` reads. -/
+theorem CloseS.uintBound_eq :
+    uintBound = 115792089237316195423570985008687907853269984665640564039457584007913129639936 :=
+  rfl
+
+theorem CloseS.intBound_eq :
+    intBound = 57896044618658097711785492504343953926634992332820282019728792003956564819968 :=
+  rfl
+
+/-- Whether `e` reads a conditional value (`cond`), or a conditional whose
+condition the evaluation has decided away but a checked value's `ite`
+remains (`if c then some v else none`, a joined `x + 1` once `brk` is known). -/
+def readsCond (e : Expr) : Bool :=
+  (e.find? fun x => x.isAppOfArity ``cond 4 || x.isAppOfArity ``ite 5).isSome
+
+/-- Fails unless the goal reads a conditional value. -/
+elab "sol_close_has_cond" : tactic => do
+  unless readsCond (← instantiateMVars (← getMainTarget)) do
+    throwError "sol_close_has_cond: no conditional value"
+
+/-- The landed states and their witnesses cleared from the context, the
+arithmetic left for `omega`. -/
+elab "sol_close_clear_landed" : tactic => withMainContext do
+  let mut g ← getMainGoal
+  for d in (← getLCtx).decls.toArray.reverse do
+    let some d := d | continue
+    if d.isImplementationDetail then continue
+    let t ← instantiateMVars d.type
+    if t.isAppOf ``CloseS.Landed || t.isAppOf ``Nonempty || t.isAppOf ``State then
+      g ← g.tryClear d.fvarId
+  replaceMainGoal [g]
+
+/-- A defining fact `h : X = some a` as `omega` reads it: an implication
+per condition, a checked value its check and its integer. -/
+syntax "sol_close_join_fact " ident : tactic
+
+macro_rules
+  | `(tactic| sol_close_join_fact $h:ident) => `(tactic| (
+    (try simp only [Bool.cond_eq_ite, decide_eq_true_eq, decide_eq_false_iff_not,
+      Bool.not_eq_true] at $h:ident)
+    (try simp only [CloseS.ite_some_none_eq, CloseS.ite_eq_some_iff, Option.some.injEq,
+      reduceCtorEq, imp_false, Classical.not_not] at $h:ident)
+    (try simp only [CloseS.uintOf_eq', CloseS.intOf_eq'] at $h:ident)
+    (try simp only [CloseS.uint_eq_iff, CloseS.int_eq_iff, CloseS.uintBound_eq,
+      CloseS.intBound_eq] at $h:ident)
+    (try simp only [CloseS.and_eq_ite_self, CloseS.eq_ite_iff', and_self, true_and, and_true,
+      ite_true, ite_false, if_true, if_false] at $h:ident)
+    -- the literal checks decided, a case's own check assumed in it
+    (try simp (config := { contextual := true }) only [Int.reduceLT, Int.reduceLE, and_true,
+      true_and, and_self, or_false, false_or, not_true_eq_false, false_and, and_false,
+      not_false_eq_true, true_implies, implies_true, Classical.not_not] at $h:ident)))
+
+/-- The condition of the first `if` of `e` that tests a Boolean (`b = true`,
+a `bif` rewritten) and reads no bound variable. -/
+def boolCondOf? (e : Expr) : Option Expr :=
+  (e.find? fun x => x.isAppOfArity ``ite 5 && (x.getArg! 1).isAppOfArity ``Eq 3 &&
+    ((x.getArg! 1).getArg! 0).isConstOf ``Bool && !(x.getArg! 1).hasLooseBVars &&
+    !((x.getArg! 1).getArg! 1).isConstOf ``Bool.true &&
+    !((x.getArg! 1).getArg! 1).isConstOf ``Bool.false).map (·.getArg! 1)
+
+/-- The most cases `sol_close_join` splits a leaf into (`splitBoolConds`):
+each split adds one, so `n` conditions cost at most this many, not `2^n`. -/
+def joinMaxCases : Nat := 64
+
+/-- The goals split on the Boolean conditions they still read, into at most
+`joinMaxCases` cases in all; past them it fails. -/
+def splitBoolConds : TacticM Unit := do
+  let mut todo := ← getGoals
+  let mut out : Array MVarId := #[]
+  let mut count := todo.length
+  for _ in [0:4 * joinMaxCases + 4] do
+    let g :: rest := todo | break
+    todo := rest
+    match boolCondOf? (← instantiateMVars (← g.getType)) with
+    | none => out := out.push g
+    | some c =>
+      setGoals [g]
+      g.withContext do
+        let cs ← Term.exprToSyntax c
+        evalTactic (← `(tactic| by_cases hc : $cs))
+        evalTactic (← `(tactic| all_goals (
+          (try simp only [hc, ite_true, ite_false, if_true, if_false, Bool.false_eq_true,
+            ↓reduceIte])
+          (try simp only [decide_eq_true_eq, Bool.not_eq_true, decide_eq_false_iff_not] at hc))))
+      let gs ← getGoals
+      count := count + gs.length - 1
+      if count > joinMaxCases then
+        throwError "sol_close_join: past {joinMaxCases} cases"
+      todo := gs ++ todo
+  unless todo.isEmpty do throwError "sol_close_join: past {joinMaxCases} cases"
+  setGoals out.toList
+
+/-- `sol_close_join`'s last cases: each Boolean condition the goal still
+reads split, into at most `joinMaxCases` cases. -/
+elab "sol_close_cond_cases" : tactic => do
+  evalTactic (← `(tactic| all_goals (try simp only [Bool.cond_eq_ite])))
+  splitBoolConds
+
+macro_rules
+  | `(tactic| sol_close_join) => `(tactic| (
+    sol_close_has_cond
+    repeat' (first
+      | intro _
+      | apply And.intro
+      | (refine CloseS.exists_some_of ?_ (fun _ hX => ?_)
+         rotate_left
+         sol_close_join_fact hX
+         rotate_left
+         -- the value returns: a case per condition, the halting one refuted
+         focus
+           (try simp only [Bool.cond_eq_ite])
+           repeat' split
+           all_goals first | rfl | (exfalso; sol_close_clear_landed; grind)))
+    all_goals sol_close_clear_landed
+    -- what is still conditional: a case per condition
+    all_goals (try sol_close_cond_cases)
+    all_goals (repeat' intro _)
+    all_goals first | trivial | omega | (simp_all; done) | grind))
+
+/-! ### A joined leaf one update at a time (`sol_close_join_steps`) -/
+
+/-- A conditional value returns where each case's does. -/
+theorem CloseS.isSome_cond {α : Type} {c : Bool} {x y : Option α}
+    (h₁ : c = true → x.isSome = true) (h₂ : c = false → y.isSome = true) :
+    (bif c then x else y).isSome = true := by
+  cases c
+  · exact h₂ rfl
+  · exact h₁ rfl
+
+/-- A checked value returns where its check holds. -/
+theorem CloseS.isSome_ite {α : Type} {p : Prop} [Decidable p] {x y : Option α}
+    (h₁ : p → x.isSome = true) (h₂ : ¬p → y.isSome = true) :
+    (if p then x else y).isSome = true := by
+  by_cases hp : p
+  · rw [if_pos hp]; exact h₁ hp
+  · rw [if_neg hp]; exact h₂ hp
+
+/-- The box over a value: whatever it returns, read as a fresh value and
+its defining fact. -/
+theorem CloseS.wp_box_optRes {α : Type} {X : Option α} {P : α → Prop} :
+    Modality.box.wp (Close.optRes X) P ↔ ∀ a, X = some a → P a := by
+  rw [Modality.wp_box]
+  cases X with
+  | none => exact ⟨fun _ a h => (nomatch h), fun _ a h => (nomatch h)⟩
+  | some b => exact ⟨fun h a e => h a (by cases e; rfl), fun h a e => h a (by cases e; rfl)⟩
+
+namespace CloseJ
+
+/-- The leaves with at least this many joined updates (`countJoins`) take
+`sol_close_join_steps` first; those with fewer, and those it does not
+close, go on to `sol_close`'s join alternative.  Two: the join alternative
+evaluates the leaf whole, which costs about `n³` (`n = 5` near 170 k
+heartbeats, past its budget), the steps about `5 k` a join. -/
+def stepsMin : Nat := 2
+
+/-- The updates of `e` whose values are conditional (`Op3.ite`: a joined
+`if`'s), counted up to `stepsMin`. -/
+partial def countJoins (e : Expr) (acc : Nat) (cap : Nat := stepsMin) : Nat :=
+  if acc ≥ cap then acc
+  else if e.isAppOfArity ``Fml.upd 6 then
+    let acc := if ((e.getArg! 4).find? (·.isConstOf ``Op3.ite)).isSome then acc + 1 else acc
+    countJoins (e.getArg! 5) acc cap
+  else match e with
+    | .app f x => countJoins x (countJoins f acc cap) cap
+    | .mdata _ b => countJoins b acc cap
+    | _ => acc
+
+/-- The most joined updates a leaf may have for `sol_close` to evaluate it
+whole (its join alternative, `sol_close_quantified`, its last
+alternative) where `sol_close_join_steps` did not close it: whole, each
+update's rest is visited again under every rewrite above it, past the
+default heartbeats from six (`docs/automation.md`, M6), and a timeout
+there is not caught.  Past it, `sol_close` fails where the steps do. -/
+def wholeMax : Nat := 5
+
+/-- `tac` on `g` alone; the goals it leaves. -/
+def runOn (g : MVarId) (tac : TSyntax `tactic) : TacticM (List MVarId) := do
+  let saved ← getGoals
+  setGoals [g]
+  try
+    evalTactic tac
+    getGoals
+  finally
+    setGoals saved
+
+/-- `omega` on `p` in the local context cut down to `keep` and what they
+and `p` mention, so that a call costs the same at every step of the leaf. -/
+def omegaIn (keep : Array FVarId) (p : Expr) : TacticM (Option Expr) := do
+  let lctx ← getLCtx
+  let mut need : FVarIdSet := {}
+  let mut todo : Array FVarId := keep ++ (collectFVars {} (← instantiateMVars p)).fvarIds
+  while !todo.isEmpty do
+    let f := todo.back!
+    todo := todo.pop
+    if need.contains f then continue
+    need := need.insert f
+    let some d := lctx.find? f | continue
+    todo := todo ++ (collectFVars {} (← instantiateMVars d.type)).fvarIds
+    if let some v := d.value? then
+      todo := todo ++ (collectFVars {} (← instantiateMVars v)).fvarIds
+  let lctx' := lctx.foldl (init := lctx) fun l d =>
+    if need.contains d.fvarId then l else l.erase d.fvarId
+  let insts := (← getLocalInstances).filter fun i => need.contains i.fvar.fvarId!
+  let m ← mkFreshExprMVarAt lctx' insts p
+  try
+    let [] ← runOn m.mvarId! (← `(tactic| omega)) | return none
+    return some (← instantiateMVars m)
+  catch _ => return none
+
+/-- What is known of a fresh value `a`: `L ≤ a.val ≤ H`, and that fact. -/
+abbrev Bounds := Std.HashMap FVarId (Int × Int × FVarId)
+
+/-- `lo ≤ a.val ∧ a.val ≤ hi`. -/
+def intervalP (a lo hi : Expr) : MetaM Expr := do
+  let av ← mkAppM ``Subtype.val #[a]
+  mkAppM ``And #[← mkAppM ``LE.le #[lo, av], ← mkAppM ``LE.le #[av, hi]]
+
+/-- `h : p`, proved by `e`, in front of `g`. -/
+def assertH (g : MVarId) (n : Lean.Name) (p e : Expr) : MetaM (FVarId × MVarId) := do
+  (← g.assert n p e).intro1P
+
+/-- `t` as a base and an integer offset (`b + k`, `b - k`, a literal `k`,
+else `t + 0`). -/
+def affine (t : Expr) : Option Expr × Int :=
+  let lit? (e : Expr) : Option Int := do
+    if e.isAppOfArity ``OfNat.ofNat 3 then
+      return ((← (e.getArg! 1).rawNatLit?) : Int)
+    if e.isAppOfArity ``Neg.neg 3 && (e.getArg! 2).isAppOfArity ``OfNat.ofNat 3 then
+      return -((← ((e.getArg! 2).getArg! 1).rawNatLit?) : Int)
+    none
+  if let some k := lit? t then (none, k)
+  else if t.isAppOfArity ``HAdd.hAdd 6 then
+    match lit? (t.getArg! 5) with
+    | some k => (some (t.getArg! 4), k)
+    | none => (some t, 0)
+  else if t.isAppOfArity ``HSub.hSub 6 then
+    match lit? (t.getArg! 5) with
+    | some k => (some (t.getArg! 4), -k)
+    | none => (some t, 0)
+  else (some t, 0)
+
+/-- The integer equations of `e`. -/
+partial def intEqs (e : Expr) (acc : Array Expr) : Array Expr :=
+  let acc := if e.isAppOfArity ``Eq 3 && (e.getArg! 0).isConstOf ``Int then acc.push e else acc
+  match e with
+  | .app f x => intEqs x (intEqs f acc)
+  | .lam _ t b _ | .forallE _ t b _ => intEqs b (intEqs t acc)
+  | .letE _ t v b _ => intEqs b (intEqs v (intEqs t acc))
+  | .mdata _ b => intEqs b acc
+  | _ => acc
+
+/-- The values `a.val` is equated to in `e`, none of which reads `a`. -/
+def valuesOf (a : Expr) (e : Expr) : Array Expr := Id.run do
+  let isA (x : Expr) := x.isAppOfArity ``Subtype.val 3 && x.appArg! == a
+  let mut out := #[]
+  for x in intEqs e #[] do
+    if isA (x.getArg! 1) && !(x.getArg! 2).containsFVar a.fvarId! then
+      out := out.push (x.getArg! 2)
+    else if isA (x.getArg! 2) && !(x.getArg! 1).containsFVar a.fvarId! then
+      out := out.push (x.getArg! 1)
+  return out
+
+/-- From a defining fact `hX : X = some a`, the interval its cases give
+when they are offsets of one base (KeY's join with the conditional's bounds
+in the antecedent): relative to the base (`hint`) and, where the base's own
+is known, absolute (`hintA`, recorded in `bounds`).  Each by `omega` from
+the fact alone.  `none` where reading the fact closed the goal. -/
+def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
+    TacticM (Option (MVarId × Bounds)) := g.withContext do
+  let ty ← instantiateMVars (← hX.getType)
+  unless ty.isAppOfArity ``Eq 3 do return some (g, bounds)
+  let rhs := ty.getArg! 2
+  unless rhs.isAppOfArity ``Option.some 2 && rhs.appArg!.isFVar do return some (g, bounds)
+  let a := rhs.appArg!
+  -- a copy of the fact, read as `omega` reads it
+  let (_, g₂) ← assertH g `hjoin ty (mkFVar hX)
+  let gs ← runOn g₂ (← `(tactic| sol_close_join_fact $(mkIdent `hjoin)))
+  let [g₃] := gs | if gs.isEmpty then return none else throwError "sol_close_join_steps: a fact split"
+  g₃.withContext do
+    let some hkD := (← getLCtx).findFromUserName? `hjoin | return some (g₃, bounds)
+    let hk := hkD.fvarId
+    let done (g : MVarId) (b : Bounds) : MetaM (Option (MVarId × Bounds)) := do
+      return some (← g.tryClear hk, b)
+    let vs := valuesOf a (← instantiateMVars hkD.type)
+    if vs.isEmpty then return ← done g₃ bounds
+    let ps := vs.map affine
+    let base := ps[0]!.1
+    for q in ps do
+      match q.1, base with
+      | none, none => pure ()
+      | some x, some y => unless ← withReducible (isDefEq x y) do return ← done g₃ bounds
+      | _, _ => return ← done g₃ bounds
+    let (iLo, iHi) := Id.run do
+      let mut lo := 0
+      let mut hi := 0
+      for i in [0:ps.size] do
+        if ps[i]!.2 < ps[lo]!.2 then lo := i
+        if ps[i]!.2 > ps[hi]!.2 then hi := i
+      return (lo, hi)
+    let (cLo, cHi) := (ps[iLo]!.2, ps[iHi]!.2)
+    let p ← intervalP a vs[iLo]! vs[iHi]!
+    let some e ← omegaIn #[hk] p | return ← done g₃ bounds
+    match base with
+    | none =>
+      let (h, g₄) ← assertH g₃ `hintA p e
+      done g₄ (bounds.insert a.fvarId! (cLo, cHi, h))
+    | some b =>
+      let (h, g₄) ← assertH g₃ `hint p e
+      let some (L, H, hb) := (if b.isAppOfArity ``Subtype.val 3 && b.appArg!.isFVar then
+          bounds.get? b.appArg!.fvarId! else none) | done g₄ bounds
+      g₄.withContext do
+        let pA ← intervalP a (toExpr (L + cLo)) (toExpr (H + cHi))
+        let some eA ← omegaIn #[h, hb] pA | done g₄ bounds
+        let (hA, g₅) ← assertH g₄ `hintA pA eA
+        done g₅ (bounds.insert a.fvarId! (L + cLo, H + cHi, hA))
+
+/-- A value that must return (`X.isSome = true`): a case per condition
+(`CloseS.isSome_cond`, `CloseS.isSome_ite`), a halting case refuted by
+`omega` from its conditions and the absolute intervals of the values they
+read. -/
+partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]) :
+    TacticM Bool := g.withContext do
+  let t ← instantiateMVars (← g.getType)
+  unless t.isAppOfArity ``Eq 3 && (t.getArg! 1).isAppOfArity ``Option.isSome 2 do return false
+  let X ← whnfR (t.getArg! 1).appArg!
+  let cases (lem : Lean.Name) : TacticM Bool := do
+    let gs ← try g.apply (← mkConstWithFreshMVarLevels lem) catch _ => return false
+    for g' in gs do
+      let (h, g'') ← g'.intro1P
+      unless ← closeSide g'' bounds (hyps.push h) do return false
+    return true
+  if X.isAppOfArity ``cond 4 then return ← cases ``CloseS.isSome_cond
+  if X.isAppOfArity ``ite 5 then return ← cases ``CloseS.isSome_ite
+  if X.isAppOfArity ``Option.some 2 then return (← observing? g.refl).isSome
+  if X.isAppOfArity ``Option.none 1 then
+    let mut keep := hyps
+    for h in hyps do
+      for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
+        if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
+    let some e ← omegaIn keep (mkConst ``False) | return false
+    g.assign (← mkFalseElim t e)
+    return true
+  return false
+
+/-- What one step of evaluation leaves in front, opened: binders, premises,
+landed states (`CloseS.LandedAll`), and a value as a fresh `a` and its
+defining fact `X = some a`: under the box whatever it returns
+(`CloseS.wp_box_optRes`), under the diamond with a goal that it returns
+(`CloseS.exists_some_of`).
+The goals left, the main one last, and the facts. -/
+partial def introFront (g : MVarId) : MetaM (List MVarId × List FVarId) := g.withContext do
+  let t ← whnfR (← instantiateMVars (← g.getType))
+  if t.isForall || t.isAppOfArity ``CloseS.LandedAll 5 then
+    let (_, g') ← g.intro1
+    return ← introFront g'
+  if t.isAppOfArity ``Modality.wp 4 && (t.getArg! 1).isConstOf ``Modality.box &&
+      (t.getArg! 2).isAppOfArity ``Close.optRes 2 then
+    let [g₁] ← g.apply (← mkAppM ``Iff.mpr #[← mkAppOptM ``CloseS.wp_box_optRes
+        #[none, (t.getArg! 2).appArg!, t.getArg! 3]])
+      | throwError "sol_close_join_steps: the box's value"
+    let (fs, g₂) ← g₁.introN 2
+    let (rest, hs) ← introFront g₂
+    return (rest, fs[1]! :: hs)
+  if t.isAppOfArity ``Exists 2 then
+    match ← g.apply (← mkConstWithFreshMVarLevels ``CloseS.exists_some_of) with
+    | [gS, gH] =>
+      let (fs, gH') ← gH.introN 2
+      let (rest, hs) ← introFront gH'
+      return (gS :: rest, fs[1]! :: hs)
+    | gs => throwError "sol_close_join_steps: {gs.length} goals from an existential"
+  return ([g], [])
+
+/-- The facts `introFront` named, each with its interval; the side goals,
+each closed or failing.  `none` where the main goal closed. -/
+def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) :
+    TacticM (Option (MVarId × Bounds)) := do
+  let some gMain := gs.getLast? | throwError "sol_close_join_steps: no goal"
+  for gS in gs.dropLast do
+    unless ← closeSide gS bounds do
+      throwError "sol_close_join_steps: a value is not shown to return"
+  let mut gM := gMain
+  let mut bounds := bounds
+  for h in hs do
+    let some (g', b') ← addInterval gM h bounds | return none
+    (gM, bounds) := (g', b')
+  return some (gM, bounds)
+
+/-- The leaf's binders and updates one at a time, the rest of the formula
+held opaque (a fresh `ψ` and `rest = ψ`), so that each step evaluates one
+update with `close_rw_s` and every value is named once.  Stops at the
+first formula that is not a binder or an update; `none` where the goal
+closed on the way. -/
+partial def peel (g : MVarId) (bounds : Bounds) : TacticM (Option (MVarId × Bounds)) :=
+    g.withContext do
+  let t ← instantiateMVars (← g.getType)
+  unless t.isAppOfArity ``Solidity.holds 4 do return some (g, bounds)
+  let φ ← whnfR t.appArg!
+  let rest? : Option Expr :=
+    if φ.isAppOfArity ``Fml.upd 6 || φ.isAppOfArity ``Fml.bind 6 then some (φ.getArg! 5)
+    else if φ.isAppOfArity ``Fml.all 5 then some (φ.getArg! 4)
+    else none
+  let some rest := rest? | return some (g, bounds)
+  -- `∀ ψ, rest = ψ → holds σ (head ψ)`, built in place (no `kabstract`)
+  let ty ← withLocalDeclD `ψ (← inferType rest) fun ψ => do
+    withLocalDeclD `hψ (← mkEq rest ψ) fun h => do
+      mkForallFVars #[ψ, h] (mkApp t.appFn! (mkAppN φ.getAppFn (φ.getAppArgs.pop.push ψ)))
+  let g' ← mkFreshExprSyntheticOpaqueMVar ty (← g.getTag)
+  g.assign (mkApp2 g' rest (← mkEqRefl rest))
+  let (fs, g₁) ← g'.mvarId!.introNP 2
+  let (ψ, hψ) := (fs[0]!, fs[1]!)
+  let gs ← runOn g₁ (← `(tactic| simp (config := { maxSteps := 400000 }) only [close_rw_s]))
+  let [g₂] := gs | if gs.isEmpty then return none else
+    throwError "sol_close_join_steps: a step split the goal"
+  let (gs, hs) ← introFront g₂
+  let some (gM, bounds) ← settle gs hs bounds | return none
+  -- the rest back, by its equation
+  let gM ← gM.withContext do
+    let tgt ← whnfR (← instantiateMVars (← gM.getType))
+    unless tgt.isAppOfArity ``Solidity.holds 4 && tgt.appArg! == mkFVar ψ do
+      throwError "sol_close_join_steps: a step left {tgt}"
+    gM.replaceTargetEq (mkApp tgt.appFn! rest)
+      (← mkCongrArg tgt.appFn! (← mkEqSymm (mkFVar hψ)))
+  peel gM bounds
+
+/-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
+read as the updates were, then `omega` on the intervals, the defining facts'
+cases only if it fails (`sol_close_finish`, within 20000 heartbeats of its
+own: a false leaf fails in about the cost of a true one).  Fails where a
+goal is left. -/
+def closeSteps : TacticM Unit := do
+  evalTactic (← `(tactic| (sol_close_unwrap; intro σ)))
+  let some (g, bounds) ← peel (← getMainGoal) {} | setGoals []; return
+  let gs ← runOn g (← `(tactic| sol_close_eval))
+  let mut rest : Array MVarId := #[]
+  for g in gs do
+    let (gs', hs) ← introFront g
+    if let some (g', _) ← settle gs' hs bounds then rest := rest.push g'
+  setGoals rest.toList
+  evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_finish))
+  unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
+
+/-- `sol_close_join_steps`'s budget, in thousands of heartbeats, within the
+declaration's own. -/
+def budget : Nat := 100000
+
+end CloseJ
+
+@[tactic Solidity.tacticSol_close_few_joins]
+def evalSolCloseFewJoins : Tactic := fun _ => withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  if CloseJ.countJoins ty 0 (CloseJ.wholeMax + 1) > CloseJ.wholeMax then
+    throwError "sol_close_few_joins: more than {CloseJ.wholeMax} joined updates"
+
+@[tactic Solidity.tacticSol_close_join_steps]
+def evalSolCloseJoinSteps : Tactic := fun _ => withMainContext do
+  let ty ← instantiateMVars (← getMainTarget)
+  unless ty.isAppOf ``Solidity.Fml.Valid && CloseJ.countJoins ty 0 ≥ CloseJ.stepsMin do
+    throwError "sol_close_join_steps: fewer than {CloseJ.stepsMin} joined updates"
+  let saved ← saveState
+  let ok ← tryCatchRuntimeEx (Budget.within CloseJ.budget do
+      Term.withoutErrToSorry <| withoutRecover CloseJ.closeSteps
+      pure true) (fun _ => pure false)
+  unless ok do
+    saved.restore
+    throwError "sol_close_join_steps: the leaf did not close"
 
 @[tactic Solidity.tacticSol_close_denote]
 def evalSolCloseDenote : Tactic := fun _ => withMainContext do
@@ -1422,12 +2209,12 @@ def evalSolCloseEnrichS : Tactic := fun _ => focus <| withMainContext do
   unless ← Close.scopedGoal do throwUnsupportedSyntax
   let g ← addRangeFacts (← getMainGoal)
   replaceMainGoal [g]
-  evalTactic (← `(tactic| simp_all only [CloseS.uintRange, CloseS.intRange,
+  evalTactic (← `(tactic| try simp_all only [CloseS.uintRange, CloseS.intRange,
     true_implies, not_true_eq_false, false_implies]))
   let some g := (← getUnsolvedGoals).head? | return
   let g ← exposeWitnesses g
   replaceMainGoal [g]
-  evalTactic (← `(tactic| simp_all only [Option.some.injEq, exists_eq_left', exists_eq',
+  evalTactic (← `(tactic| try simp_all only [Option.some.injEq, exists_eq_left', exists_eq',
     forall_eq', Classical.not_not]))
   let some g := (← getUnsolvedGoals).head? | return
   let g ← addRangeFacts g

@@ -12,6 +12,19 @@ Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
 "One rule per statement" and "Conditions" are the decisions this plan
 extends).
 
+## Later counter instances
+
+Quantified premises can now be instantiated at counters introduced after the
+premise was stated. `Calculus/CloseAll.lean` applies the universal proof only
+after the closer opens the leaf's binders; anonymised counters are typed
+value projections. The search proves range/guard arguments and is bounded by
+declaration, expression, candidate, application, binder and heartbeat limits.
+`Examples/Tactics/AllLeftLater.lean` proves an actual invariant loop that reads
+`balances[i]` from an earlier quantified premise. The loop still supplies its
+invariant. General ABI memory-array scans remain open where their reads and
+lengths do not yet normalize together; this does not resolve the four large
+open loop ports below.
+
 ## What solkey has
 
 solkey has loops since `ed7849d5b6` ("added loops", after the pinned
@@ -373,8 +386,16 @@ at every fuel"; and a new bound on a loop's pushes, since
 `L + pushesP P ≤ 2^64` no longer holds (the interpreter's `push` would revert
 at `2^64` as solc does, or the bound becomes a run-time invariant of `Sim`).
 That is comparable to rewriting the compiler's correctness proof (about 2,300 lines).
-**Decision:** `inFrag` (`Evm/Compile.lean`) refuses a loop, as it refuses
-memory, and `docs/compiler-verification.md` lists it. Loops also unblock its
+**Decision** (until 2026-10-23): `inFrag` (`Evm/Compile.lean`) refused a
+loop.  **Built** (2026-10-23, L7 without absolute jumps): a loop is one
+structured instruction, `LOOP cond body` (`Instr.loop`), so `exec` stays
+structural and the skip-count lemmas stand; its turns are `loopRun`'s,
+classical as `TLoop.run`'s, a fault where no number of them ends it (the
+fourth outcome, `StmtOut.diverge`); the simulation is by induction on the
+turns (`loop_sim`, `Evm/Correct.lean`).  The fragment takes a loop whose body
+pushes, pays and shrinks nothing and keeps the fragment's flags
+(`docs/compiler-verification.md`); lowering `LOOP` to `JUMPDEST`/`JUMP` is
+an assembler's step, as absolute targets already are. Loops also unblock its
 gaps "storage copies of a dynamic array" and "`push()` of a struct", so the
 EVM stage is worth doing once, for all.
 
@@ -393,7 +414,7 @@ and their soundness onto `Calculus/SoundLoops.lean`.
 | **L4 Invariant rule** (built) | `Calculus/Fml.lean` (`Fml.anon`), `Update.lean` (`State.anon`), `Calculus/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic`, `Termination`, `CloseScoped` (`CloseS.holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
-| **L7 EVM** | `Evm/{Machine,Compile,Correct}.lean`, as above. | High: the largest stage. |
+| **L7 EVM** (built, 2026-10-23) | `Evm/{Machine,Compile,Sim,Stmt,Correct}.lean`: `Instr.loop`, `loopRun`, `StmtOut.diverge`, `loop_sim`; loops that push, pay or shrink stay out. | Done with a structured loop instruction rather than absolute jumps. |
 
 L1 to L4 make loops provable. L5 is what Ballot and BlindAuction need once
 their other blockers (`bytes32`, events, `keccak256`) are gone. L3 and L4
@@ -638,3 +659,131 @@ the unknown lengths of recycled slots its guards read (its search now
 stops after the 512-step stage, in 38 s, where `a97fba7f` stopped after the
 1024-step one in 112 s; still a timeout).  What is left stays the list
 above.
+
+## ABI memory scans (assurance M7)
+
+`Examples/Tactics/ArrayScans.lean` checks signed and unsigned array element
+ranges from actual solc-imported ABI premises after the loop introduces its
+counter. The supplied `i <= xs.length` invariant suffices for the box scans;
+the diamond checks both signed bounds and supplies `xs.length - i` as its variant.
+The closer preserves memory observations across local captures and counter
+updates, instantiates the earlier premise, then reuses its typed read witness.
+These are supplied-invariant proofs, not inferred invariants or a resolution
+of the four open loops above. The combined signed diamond uses
+`sol_symex; sol_close` to avoid the walk's repeated expansion of separate
+leaves; its `sol_prove` version still exceeds the declaration budget.
+
+## Demanded memory observations (assurance M13)
+
+`foldMem2` applies the existing memory read/length/identity taclets as the
+scoped reducer forms each observation. Input size is bounded, and the result
+is retained only when it does not increase the tree's node count. Equality
+of the full optional result is proved in `DecideTyped.lean`, so an invalid
+address or a failed write cannot become an unguarded successful read.
+
+This resolves the original `binomialFaithfulRowsSmall` timeout: the actual
+runner proves it in about seven seconds, and `Examples/Tactics/OpenLoops.lean`
+checks the same pinned-solc source with `sol_prove` under the ordinary
+declaration budget. No invariant annotation was added to that source.
+
+The other three remain open under the same 200000-heartbeat runner budget:
+`binomialRowsNine` times out after its 1024-step stage (about 58 seconds),
+`multiArrayFillByPushLoops` after its 512-step stage (about 37 seconds), and
+`pushNoArgs2dLoop` at kernel reduction (about 59 seconds). The push-loop
+measurement uses the runner's clean-tail premise; the earlier `.solc`
+counterexample remains relevant outside that reading. This is one repaired
+timeout, not general loop invariant inference.
+
+### Rigid local conditions (M19)
+
+`Seq.refuteLanded` reads a literal-local guard back through its local updates,
+using `Fml.substU` from `applyOnRigidFormula`. It avoids expanding unrelated
+memory histories just to decide a loop counter. The live sibling remains a
+proof obligation: `Hyps.rigid_lift` transports the condition through the
+original context, including failure and exhaustion of its diamond updates.
+A refuted guard alone cannot prove that the prefix succeeds.
+
+The projection checks a 512-node cap on its condition and update before
+each substitution, and checks the final condition too. Thus repeated
+`x := x + x` assignments refuse before an exponential tree can accumulate.
+Ground conditions outside the projection or closer bounds keep both branches;
+non-ground guards retain the existing contextual refutation. Ignoring unused
+premises can lose pruning when those premises contradict each other. The
+regressions pin that conservative choice, memory writes in an eight-iteration
+diamond loop, and a failing prefix that remains invalid.
+
+On the original nine-row source an isolated compiled walk reached two leaves
+at 2048 steps in about five seconds, versus the previous timeout after the
+1024-step stage. This is a walk measurement, not a theorem: the public proof
+construction then exceeded the session's 16 GiB RAM limit, including when run
+alone. The original obligation stayed open until the next section.
+
+### Identities by their allocations, and the walk in chunks (2026-10-23)
+
+`binomialRowsNine` is proved (`Examples/Tactics/OpenLoops.lean`) by two
+changes, and so is it by the solc runner (below).
+
+**The leaf.** The reduction named a copy's root `copy(M, S)`, `M` the whole
+memory before it. A row's writes address the row's root, and the next row's
+root carries the memory those writes built, so the leaf grew with each row
+by a factor of its writes: about 12 000 nodes at three rows, 76 000 at four,
+86 million at five. An identity depends on the heap typing alone
+(`SVal.copyStToM_H'`, `SVal.copyStToM_id_eq`), which a write keeps, so a
+copy's root is now formed over the memory without its writes (`LTm.stripW`,
+which keeps the copies and stops at the newest `addM`; `copyRes`,
+`Op2.memRes`'s `.copy` arm, applied at formation by `foldRead2`) where every
+word its writes land on folds to `true` (`guardQ`); else the root is kept
+as it was, so that the copy's laws still read it. A memory's own landing guard is read the same way
+(`UpdElem.toLS`, `seqMemL_tt_eval`), and so are a copy's laws: the spine test
+(`LTm.onSpineS`), the length (`lenAtN`, `LTm.base_eval`) and the reads of a
+fresh copy (`LTm.unstripAddr`, `LTm.read_unstrip`). `memFuel` is 256. The
+five- and six-row binomials then close inside the walk; every rewrite is an
+equation of reads, as before (`copyRes_eval`, `LTm.stripW_eval`).
+
+**The walk.** About two thousand steps over a context of some 360 updates:
+one kernel check of the whole walk (`sol_prove`) passed 14 GiB.
+`sol_prove (chunk := n)` (`Calculus/ProveChunked.lean`) checks it `n` steps
+at a time (`Seq.cutK`, `runK` whose spent step budget leaves the sequent as
+a leaf; `Proves.of_cutWithin`), each chunk's kernel check and each leaf's
+`sol_leaf; sol_close` under a heartbeat budget of its own (the compiled walk
+that proposes a chunk heeds none, as `sol_prove`'s does not). On the nine
+rows:
+
+| chunk | kernel | compile and evaluate | final leaf | total | memory |
+|---:|---:|---:|---:|---:|---|
+| 32 | 240 s | 91 s | 50 s | 390 s | below 6 GiB |
+| 128 | 146 s | 19 s | 75 s | 242 s | below 6 GiB |
+| 512 | 90 s for the first three chunks | | | | past 14 GiB, stopped |
+
+The theorem uses 128. What is left is the kernel's evaluation of the walk
+itself, linear in the context at each step.
+
+**The runner** (`Frontend/Testing.lean`) checks a plain walk of more than
+`oneCheckSteps` (1024) steps in chunks of `chunkSteps` (128): `Seq.prove`
+refuses such a walk before its kernel check (`oneCheck`, `longWalkNote`),
+and `Seq.proveChunked` walks it, each leaf searched as `sol_prove?` searches
+it (`Derive.searchLeaf`, the chunked walk's `close`).  `node
+scripts/test-solidity.mjs --function binomialRowsNine --timeout-ms 1800000
+tests/solc/OpenLoops.sol` reports it proved in 4 min 34 s (one core); the
+default 300 s per contract is too short for it.
+
+`pushNoArgs2dLoop` under clean tails: in chunks its walk now passes (one
+kernel check of it was 465k heartbeats), and leaves its three asserts, each
+over 45 stacked saves of one length slot (`pointer.length := pointer.length +
+1`). `sol_close` times out on each: the reads of that slot stay symbolic at
+formation, since its starting length is known only through the premises
+(`array2d.length == 0`, clean tails), which formation-time folding does not
+read, and the stack is past `concreteDepth`. `multiArrayFillByPushLoops`
+remains open for the reason above.
+
+Review (read-only finder, then the findings checked against the code): no
+unsoundness, the compiled twins agree (`LTm.stripW_eq_stripWM`). Fixed from
+it: a copy's root wrapped in an unfolded guard hid it from the copy's laws
+(now kept unwrapped unless every guard folds); a chunk that made no step was
+walked again up to `chunkFuel` times (now left, with a note); a goal that is
+neither `⊢ φ` nor `⊨ᶠ φ` was left silently (now an error); a stopped leaf's
+note now carries the closer's own error; and the docs claimed more than the
+code for `LTm.stripW` (it stops at an `addM`) and for the heartbeat budget
+(the compiled walk heeds none). Not changed: `memFuel` 256 and the guard
+read at every memory update cost more evaluation per update; the full build
+(below) measures it.

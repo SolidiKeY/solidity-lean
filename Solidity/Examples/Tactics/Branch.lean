@@ -62,8 +62,8 @@ info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : C
 #guard_msgs in #check @Taclet.ifElseUnfold
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
-  {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1}
+  {m : Modality} {se : Simple C Γ PrimTy.bool},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
 -/

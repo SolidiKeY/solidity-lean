@@ -17,6 +17,9 @@ import Solidity.TestSuite.Derived16
 import Solidity.TestSuite.Derived17
 import Solidity.TestSuite.Derived18
 import Solidity.TestSuite.Derived19
+import Solidity.TestSuite.Derived20
+import Solidity.TestSuite.Derived21
+import Solidity.TestSuite.Refuted
 
 /-!
 # What is derived of solkey's `TestSuite`
@@ -35,13 +38,15 @@ the earlier send, internal-call, return and tuple derivations.
 dangle, read again after a copy) and `storagePushReadBack` (the slot at
 `(len + 1) - 1` after a push) are derived since W10.4, in `Derived13.lean`
 and `Derived7.lean`.  Since solkey `d85018517f` an empty push saves only the
-length and exposes the slot as it is: the five obligations that read an
+length and exposes the slot as it is: the seven obligations that read an
 appended reference slot as its default (solkey's `SYMBOLIC_TAIL_OPENS`)
-are pending, as they stay open in solkey.
+are false in the model (a dirty slot past an array's end, which `wt`
+admits), and are refuted with the `unprovable*` ones
+(`Solidity/TestSuite/Refuted.lean`, listed "refuted").
 -/
 
 /--
-info: 617 functions: 546 derived, 17 pending, 54 other
+info: 617 functions: 552 derived, 1 pending, 64 other
 internal valuesRef
 internal valuesRefWithEffect
 internal matrixRefWithEffect
@@ -96,10 +101,18 @@ internal nestedReturningContinuation
 internal loopContinuationBody
 internal whileContinuationBody
 internal doWhileContinuationBody
+refuted storagePushReturnPrimitiveBindComplexReceiver
+refuted storageArrayMethodReferencesComplexReceiver
+refuted storageArrayMethodReferencesComposedCallReceiver
+refuted unprovableStorageShortCircuitMutation
+refuted unprovableInvariantBreakPostcondition
+refuted unprovableInvariantForContinueUpdate
+refuted testFixedShapeEmptyPushFixedElementReadsZero
+refuted testEmptyPushFixedArrayReturnReadsZero
+refuted testEmptyPushDynamicArrayReturnReadsZero
+refuted testEmptyPushStructReturnReadsZero
 pending:
-storagePushReturnPrimitiveBindComplexReceiver storageArrayMethodReferencesComplexReceiver storageArrayMethodReferencesComposedCallReceiver unprovableStorageShortCircuitMutation memoryIndexWriteStorageRefRhsCapture memoryIndexWriteStorageStructCopy
-memoryIndexWriteStorageRefImpureIndex bitAndSymbolic invariantClosedFormSum invariantForBreakSkipsUpdate unprovableInvariantBreakPostcondition unprovableInvariantForContinueUpdate
-invariantQuantifiedOverPrefix testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero
+invariantClosedFormSum
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

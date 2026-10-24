@@ -1,4 +1,5 @@
 import Solidity.Calculus.Arms
+import Solidity.Calculus.CallSummary
 import Solidity.Semantics.NoPanic
 
 /-!
@@ -8,7 +9,9 @@ master's arms for calls, `try` and loops (`Calculus/Completeness.lean` at
 `ad728b16`) over the scoped syntax (`docs/intrinsic.md`, M6a), and the loop
 frame they need (master's `Prog.loopFrame`, at `ad728b16`).
 
-* **A call** (`internalCallExpand`, `functionBodyExpand`) is inlined as
+* **A call** whose callee calls and has a summary (`internalCallSummary`,
+  `Calculus/CallSummary.lean`) is one update, `{ y := R(args) }`.  Any
+  other (`internalCallExpand`, `functionBodyExpand`) is inlined as
   KeY's `expand_function_body` writes it: the parameters declared with the
   arguments, the return variables declared, the body, the result assigned.
   The body is closed over its frame `rs ++ ps`, so it is read under the
@@ -96,9 +99,10 @@ def Binders.declsThen {Δ : Ctx} : {ρ : Ctx} → Binders ρ → Prog C (ρ ++ �
   termination_by structural _ bs => bs
 
 /-- A call (`callStep`): its leftmost argument that is not simple captured
-(`functionCallArgCapture`), or, with every argument simple, its body
-inlined (`internalCallExpand`; `functionBodyExpand` for one that returns to
-targets). -/
+(`functionCallArgCapture`), or, with every argument simple, one update where
+the callee calls and has a summary (`internalCallSummary`,
+`CallRet.summary?`), its body inlined otherwise (`internalCallExpand`;
+`functionBodyExpand` for one that returns to targets). -/
 def callStep (k : Nat) {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
     (body : Prog C (rs ++ ps) Γf) : Premise C Γ Γ' :=
   CallRet.casesOn (motive := fun rs Γ' _ => Prog C (rs ++ ps) Γf → Premise C Γ Γ') ret
@@ -108,13 +112,15 @@ def callStep (k : Nat) {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (r
           (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) (Ext.append Γ ps))
     (fun p r res body => match args.capture with
       | some ⟨p', v, as'⟩ => .capture p' (fse k) v (.call f as' (.val p r (res.map .there)) body)
-      | none =>
-        let result : Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ)) := match res with
-          | none => .nil
-          | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
-        .unfold (args.declsThen (.cons (.declLocal p r none)
-          (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) result)))
-          (.push (Ext.append Γ ps)))
+      | none => match CallRet.summary? args (.val p r res) body with
+        | some U => .update U
+        | none =>
+          let result : Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ)) := match res with
+            | none => .nil
+            | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
+          .unfold (args.declsThen (.cons (.declLocal p r none)
+            (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) result)))
+            (.push (Ext.append Γ ps)))
     (fun {rs} bs body => match args.capture with
       | some ⟨p', v, as'⟩ => .inline
           (.cons (.declLocal p' (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
@@ -278,6 +284,7 @@ def RevPart.pat? {Γ : Ctx} : List (RevPart C Γ) → Option Pat
   | .bytes bs :: d => (RevPart.pat? d).map (bs.map some ++ ·)
   | .word _ :: d => (RevPart.pat? d).map (List.replicate 32 none ++ ·)
   | .sel _ :: _ => none
+  | .mem _ _ :: _ => none
 
 /-- Data whose first part is literal bytes that do not begin with `Error`'s
 selector (a custom error's): it cannot reach a `catch Error(string memory

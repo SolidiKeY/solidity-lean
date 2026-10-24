@@ -473,8 +473,9 @@ change of `TTx`.
 
 **Termination.** The callee is a function declared before the caller (the
 elaborator's `funs`, as for an internal call), whose parameter types are the
-arguments' and whose return types are the `try`'s binders; any other callee
-is the oracle's.  So the body is a subterm of the statement and `Stmt.run`
+arguments' and whose return types are the `try`'s binders, or whose returns
+a `try` that binds none ignores (`try this.id(x) { … }`: the callee called
+as a statement, `Stmt.selfCall?`); any other callee is the oracle's.  So the body is a subterm of the statement and `Stmt.run`
 stays structural, with no fuel.  A self-call of a later function, or of
 itself, is not run (reported as left).
 
@@ -566,7 +567,8 @@ address other than `0` and the contract's (`tryOk`'s last premise).
 callbacks, as `ProvesC.tryCall` reads `tryCallNoCallbackBox`: the invariant
 where control leaves ("invariant on exit"); `tryCallSelfBox`'s self goal,
 the callee inlined, whose own `try`s and payments may call back; the other
-receiver's goal after `{havoc}` with the invariant assumed; each `catch`
+receiver's goal, at an address other than `0` and the contract's (both
+premises, as `tryOk` has them), after `{havoc}` with the invariant assumed; each `catch`
 goal from the caller's state.  `sol_prove`'s walk tries it before
 `tryCallWithCallbackBox` (`Calculus/CallbackDerive.lean`), so the runner's
 `ValidT .noCallback` reading (O7) proves a self-call `try` whose callee

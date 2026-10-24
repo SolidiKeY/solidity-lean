@@ -578,35 +578,158 @@ abbrev Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C Γ)
 
 /-! ## A frame's cells -/
 
-/-- One instruction other than a store to `x` leaves `x`'s cell. -/
-theorem step_mem {i : Instr} {m m' : Machine} {k : Nat} {x : Nat} (hi : i ≠ .mstore x)
-    (h : i.step m = .ok m' k) : m'.mem x = m.mem x := by
-  cases i <;> simp only [Instr.step, Machine.next] at h <;>
-    (try split at h) <;> (try split at h) <;> (try split at h) <;>
-    (try simp only [Out.ok.injEq, reduceCtorEq] at h) <;>
-    (try obtain ⟨rfl, -⟩ := h) <;> try rfl
-  exact upd_other _ _ fun e => hi (e ▸ rfl)
+mutual
+/-- Whether an instruction may store to the cell `x`: `MSTORE x`, a store at
+an address on the stack (any cell), or a loop whose condition or body may. -/
+def _root_.Solidity.Evm.Instr.storesCell (x : Nat) : Instr → Bool
+  | .mstore y => y == x
+  | .mstoreAt => true
+  | .loop c b => codeStoresCell x c || codeStoresCell x b
+  | _ => false
+/-- Whether code may store to the cell `x`. -/
+def codeStoresCell (x : Nat) : List Instr → Bool
+  | [] => false
+  | i :: c => i.storesCell x || codeStoresCell x c
+end
+
+theorem codeStoresCell_append (x : Nat) (c₁ c₂ : List Instr) :
+    codeStoresCell x (c₁ ++ c₂) = (codeStoresCell x c₁ || codeStoresCell x c₂) := by
+  induction c₁ with
+  | nil => simp only [List.nil_append, codeStoresCell, Bool.false_or]
+  | cons i c ih => simp only [List.cons_append, codeStoresCell, ih, Bool.or_assoc]
+
+/-- What a turn that keeps `x`'s cell leaves: the cell, on another turn or
+at the end. -/
+def TurnMem (x : Nat) (m : Machine) : Machine ⊕ Out → Prop
+  | .inl m₂ => m₂.mem x = m.mem x
+  | .inr (.ok m' _) => m'.mem x = m.mem x
+  | .inr _ => True
+
+/-- A turn whose condition and body keep `x`'s cell keeps it. -/
+theorem loopTurn_mem {rc rb : Machine → Out} {x : Nat}
+    (hc : ∀ {m m' : Machine}, rc m = .ok m' 0 → m'.mem x = m.mem x)
+    (hb : ∀ {m m' : Machine}, rb m = .ok m' 0 → m'.mem x = m.mem x) (m : Machine) :
+    TurnMem x m (loopTurn rc rb m) := by
+  unfold loopTurn
+  split
+  next m₁ hrc =>
+    have e₁ : m₁.mem x = m.mem x := hc hrc
+    split
+    next w st hs =>
+      split
+      next => exact e₁
+      next =>
+        split
+        next m₂ hrb =>
+          show m₂.mem x = m.mem x
+          rw [hb hrb]
+          exact e₁
+        next => trivial
+        next _ h₁ h₂ =>
+          generalize rb { m₁ with stack := st } = R at h₁ h₂ ⊢
+          cases R with
+          | ok m' k =>
+            cases k with
+            | zero => exact (h₁ m' rfl).elim
+            | succ k => exact (h₂ m' k rfl).elim
+          | revert => trivial
+          | fault => trivial
+    next => trivial
+  next => trivial
+  next _ h₁ h₂ =>
+    generalize rc m = R at h₁ h₂ ⊢
+    cases R with
+    | ok m' k =>
+      cases k with
+      | zero => exact (h₁ m' rfl).elim
+      | succ k => exact (h₂ m' k rfl).elim
+    | revert => trivial
+    | fault => trivial
+
+/-- A loop whose condition and body keep `x`'s cell keeps it. -/
+theorem loopRun_mem {rc rb : Machine → Out} {x : Nat}
+    (hc : ∀ {m m' : Machine}, rc m = .ok m' 0 → m'.mem x = m.mem x)
+    (hb : ∀ {m m' : Machine}, rb m = .ok m' 0 → m'.mem x = m.mem x)
+    {m m' : Machine} {k : Nat} (h : loopRun rc rb m = .ok m' k) : m'.mem x = m.mem x := by
+  obtain ⟨r, n, hn⟩ : ∃ r n, loopIterN rc rb n m = .inr r := by
+    refine Classical.byContradiction fun hex => ?_
+    have : loopRun rc rb m = .fault := by
+      simp only [loopRun, hex, dif_neg, not_false_eq_true]
+    rw [this] at h
+    cases h
+  rw [loopRun_of_iterN hn] at h
+  subst h
+  induction n generalizing m with
+  | zero => simp only [loopIterN, reduceCtorEq] at hn
+  | succ n ih =>
+    have ht := loopTurn_mem hc hb m
+    simp only [loopIterN] at hn
+    split at hn
+    · rename_i m₂ he
+      rw [he] at ht
+      rw [ih hn]
+      exact ht
+    · rename_i r he
+      rw [he] at ht
+      cases hn
+      exact ht
+
+mutual
+/-- One instruction that does not store to `x` leaves `x`'s cell. -/
+theorem step_mem {x : Nat} : ∀ {i : Instr} {m m' : Machine} {k : Nat},
+    i.storesCell x = false → i.step m = .ok m' k → m'.mem x = m.mem x
+  | .loop c b, _, _, _, hi, h => by
+    simp only [Instr.storesCell, Bool.or_eq_false_iff] at hi
+    exact loopRun_mem (fun hr => exec_mem hi.1 hr) (fun hr => exec_mem hi.2 hr) h
+  | .mstoreAt, _, _, _, hi, _ => by simp only [Instr.storesCell, Bool.true_eq_false] at hi
+  | .mstore y, m, m', k, hi, h => by
+    simp only [Instr.storesCell, beq_eq_false_iff_ne] at hi
+    simp only [Instr.step, Machine.next] at h
+    split at h
+    · simp only [Out.ok.injEq] at h
+      obtain ⟨rfl, -⟩ := h
+      exact upd_other _ _ (Ne.symm hi)
+    · cases h
+  | .push _, _, _, _, _, h | .pop, _, _, _, _, h | .dup _, _, _, _, _, h | .swap _, _, _, _, _, h
+  | .add, _, _, _, _, h | .sub, _, _, _, _, h | .mul, _, _, _, _, h | .div, _, _, _, _, h
+  | .mod, _, _, _, _, h | .lt, _, _, _, _, h | .gt, _, _, _, _, h | .eq, _, _, _, _, h
+  | .iszero, _, _, _, _, h | .or, _, _, _, _, h | .and, _, _, _, _, h | .slt, _, _, _, _, h
+  | .sgt, _, _, _, _, h | .sdiv, _, _, _, _, h | .smod, _, _, _, _, h
+  | .keccakMap, _, _, _, _, h | .keccakArr, _, _, _, _, h | .sload, _, _, _, _, h
+  | .sstore, _, _, _, _, h | .mload _, _, _, _, _, h | .mloadAt, _, _, _, _, h
+  | .jump _, _, _, _, _, h | .jumpi _, _, _, _, _, h | .call, _, _, _, _, h
+  | .revert, _, _, _, _, h | .xor, _, _, _, _, h | .not, _, _, _, _, h | .shl, _, _, _, _, h
+  | .shr, _, _, _, _, h | .exp, _, _, _, _, h | .caller, _, _, _, _, h
+  | .callvalue, _, _, _, _, h | .timestamp, _, _, _, _, h | .selfbalance, _, _, _, _, h
+  | .address, _, _, _, _, h => by
+    simp only [Instr.step, Machine.next] at h <;>
+      (try split at h) <;> (try split at h) <;> (try split at h) <;>
+      (try simp only [Out.ok.injEq, reduceCtorEq] at h) <;>
+      (try obtain ⟨rfl, -⟩ := h) <;> rfl
 
 /-- Code with no store to `x` leaves `x`'s cell. -/
 theorem exec_mem {x : Nat} : ∀ {c : List Instr} {k k' : Nat} {m m' : Machine},
-    Instr.mstore x ∉ c → exec c k m = .ok m' k' → m'.mem x = m.mem x
+    codeStoresCell x c = false → exec c k m = .ok m' k' → m'.mem x = m.mem x
   | [], _, _, _, _, _, h => by simp only [exec_nil, Out.ok.injEq] at h; rw [h.1]
-  | i :: c, k + 1, _, _, _, hx, h => exec_mem (fun hc => hx (List.mem_cons_of_mem _ hc)) h
+  | i :: c, k + 1, _, _, _, hx, h => by
+    simp only [codeStoresCell, Bool.or_eq_false_iff] at hx
+    exact exec_mem hx.2 h
   | i :: c, 0, _, m, _, hx, h => by
+    simp only [codeStoresCell, Bool.or_eq_false_iff] at hx
     rw [exec_cons_zero] at h
     cases hs : i.step m with
     | ok m₁ k₁ =>
       rw [hs, Out.ok_bind] at h
-      rw [exec_mem (fun hc => hx (List.mem_cons_of_mem _ hc)) h,
-        step_mem (fun he => hx (he ▸ List.mem_cons_self ..)) hs]
+      rw [exec_mem hx.2 h, step_mem hx.1 hs]
     | revert => rw [hs] at h; cases h
     | fault => rw [hs] at h; cases h
+end
 
 /-! ### Which cells the compiled code stores to -/
 
 /-- Whether an instruction stores to a memory cell. -/
 def _root_.Solidity.Evm.Instr.isStore : Instr → Bool
-  | .mstore _ => true
+  | .mstore _ | .mstoreAt | .loop .. => true
   | _ => false
 
 /-- Code that stores to no cell: an expression's, the guards'. -/
@@ -619,6 +742,12 @@ theorem NoStore.not_mem {c : List Instr} (h : NoStore c) (x : Nat) : Instr.mstor
   intro hx
   have := List.all_eq_true.1 h _ hx
   simp only [Instr.isStore, Bool.not_true, Bool.false_eq_true] at this
+
+/-- Store-free code contains no dynamic-address store either. -/
+theorem NoStore.not_dynamic {c : List Instr} (h : NoStore c) : Instr.mstoreAt ∉ c := by
+  intro hx
+  have hh := List.all_eq_true.1 h _ hx
+  simp only [Instr.isStore, Bool.not_true, Bool.false_eq_true] at hh
 
 set_option hygiene false in
 /-- One piece of code that stores nowhere: a hypothesis, a guard, or a
@@ -738,12 +867,28 @@ theorem noStore_compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} →
   | _, .hash .. => rfl
 end
 
+/-- Store-free code stores to no cell. -/
+theorem NoStore.noCellStore {c : List Instr} (h : NoStore c) (x : Nat) :
+    codeStoresCell x c = false := by
+  induction c with
+  | nil => rfl
+  | cons i c ih =>
+    have h' : (!i.isStore && c.all (fun i => !i.isStore)) = true := h
+    rw [Bool.and_eq_true] at h'
+    have hi : i.isStore = false := by simpa only [Bool.not_eq_eq_eq_not, Bool.not_true] using h'.1
+    show (i.storesCell x || codeStoresCell x c) = false
+    rw [ih h'.2, Bool.or_false]
+    cases i <;> simp only [Instr.isStore, Bool.true_eq_false] at hi <;> rfl
+
 /-- Code that stores to no level below `n`. -/
-def StoresFrom (n : Nat) (c : List Instr) : Prop := ∀ l, l < n → Instr.mstore (cell l) ∉ c
+def StoresFrom (n : Nat) (c : List Instr) : Prop :=
+  ∀ l, l < n → codeStoresCell (cell l) c = false
+
+theorem storesFrom_nil (n : Nat) : StoresFrom n [] := fun _ _ => rfl
 
 theorem storesFrom_append {n : Nat} {c₁ c₂ : List Instr} :
     StoresFrom n (c₁ ++ c₂) ↔ StoresFrom n c₁ ∧ StoresFrom n c₂ := by
-  simp only [StoresFrom, List.mem_append, not_or]
+  simp only [StoresFrom, codeStoresCell_append, Bool.or_eq_false_iff]
   exact ⟨fun h => ⟨fun l hl => (h l hl).1, fun l hl => (h l hl).2⟩,
     fun h l hl => ⟨h.1 l hl, h.2 l hl⟩⟩
 
@@ -751,12 +896,20 @@ theorem StoresFrom.mono {n n' : Nat} {c : List Instr} (h : StoresFrom n c) (hn :
     StoresFrom n' c := fun l hl => h l (Nat.lt_of_lt_of_le hl hn)
 
 theorem NoStore.storesFrom {c : List Instr} (h : NoStore c) (n : Nat) : StoresFrom n c :=
-  fun l _ => h.not_mem (cell l)
+  fun l _ => h.noCellStore (cell l)
 
 theorem storesFrom_store {n l : Nat} (h : n ≤ l) : StoresFrom n [.mstore (cell l)] := by
-  intro l' hl' hm
-  simp only [List.mem_singleton, Instr.mstore.injEq] at hm
-  have := cell_inj hm; omega
+  intro l' hl'
+  simp only [codeStoresCell, Instr.storesCell, Bool.or_false, beq_eq_false_iff_ne]
+  intro he
+  have := cell_inj he
+  omega
+
+/-- A loop whose condition and body store to no level below `n`. -/
+theorem storesFrom_loop {n : Nat} {c b : List Instr} (hc : StoresFrom n c) (hb : StoresFrom n b) :
+    StoresFrom n [.loop c b] := by
+  intro l hl
+  simp only [codeStoresCell, Instr.storesCell, hc l hl, hb l hl, Bool.or_false]
 
 /-- A run of such code keeps every cell below `n`. -/
 theorem StoresFrom.exec {n : Nat} {c : List Instr} (h : StoresFrom n c) {k k' : Nat}
@@ -775,11 +928,11 @@ local macro "stores_from" : tactic =>
 
 theorem storesFrom_argsCode (b : Nat) {Γ : Ctx} : {ps : Ctx} →
     (args : Solidity.Args C Γ ps) → StoresFrom (b + Γ.length) (argsCode b args)
-  | _, .nil => fun _ _ h => nomatch h
+  | _, .nil => storesFrom_nil _
   | _, .snoc as _ _ e => by
     have := storesFrom_argsCode b as; have := noStore_compileVal b e
     simp only [argsCode]; stores_from
-  | _, .snocStorage .. | _, .snocMemory .. => fun _ _ h => nomatch h
+  | _, .snocStorage .. | _, .snocMemory .. => storesFrom_nil _
 
 theorem storesFrom_retEnterCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
     (ret : Solidity.CallRet Γ rs Γ') :
@@ -788,7 +941,7 @@ theorem storesFrom_retEnterCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
   | val =>
     show StoresFrom _ ([.push w[0]] ++ [.mstore _])
     stores_from
-  | _ => exact fun _ _ h => nomatch h
+  | _ => exact storesFrom_nil _
 
 theorem storesFrom_retLeaveCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
     (ret : Solidity.CallRet Γ rs Γ') : StoresFrom b (retLeaveCode b ps ret) := by
@@ -798,8 +951,8 @@ theorem storesFrom_retLeaveCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
     | some y =>
       show StoresFrom _ ([.mload _] ++ [.mstore _])
       stores_from
-    | none => exact fun _ _ h => nomatch h
-  | _ => exact fun _ _ h => nomatch h
+    | none => exact storesFrom_nil _
+  | _ => exact storesFrom_nil _
 
 theorem noStore_pushCode (b : Nat) {Γ : Ctx} {E : Ty} (v : Option (Solidity.Src C Γ E))
     (q : Solidity.SPath C Γ (.array E)) : NoStore (pushCode b v q) := by
@@ -818,7 +971,7 @@ theorem storesFrom_opLocCode (b n : Nat) {Γ : Ctx} {p : PrimTy} (l : Solidity.O
     (onLocal : Nat → List Instr) (onLoc : Solidity.Loc C Γ (.prim p) → List Instr)
     (h₁ : ∀ {t : LTy} (i : Idx Γ t), StoresFrom n (onLocal (cellOf b i)))
     (h₂ : ∀ l, StoresFrom n (onLoc l)) : StoresFrom n (opLocCode b l onLocal onLoc) := by
-  cases l <;> simp only [opLocCode] <;> first | exact h₁ _ | exact h₂ _ | exact fun _ _ h => nomatch h
+  cases l <;> simp only [opLocCode] <;> first | exact h₁ _ | exact h₂ _ | exact storesFrom_nil _
 
 mutual
 /-- Code compiled at base `b` stores to no level below `b`. -/
@@ -830,11 +983,11 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .assign l (.copy q _) => by
     have := noStore_compileSPath b q; have := noStore_compileLoc b l
     simp only [compileStmt, assignCode]; stores_from
-  | .assign _ (.copyMem _) | .assign _ (.fixedCopy ..) => fun _ _ h => nomatch h
+  | .assign _ (.copyMem _) | .assign _ (.fixedCopy ..) => storesFrom_nil _
   | .rebind i (.path q) => by
     have := noStore_compileSPath b q
     simp only [compileStmt]; stores_from
-  | .rebind _ (.push ..) => fun _ _ h => nomatch h
+  | .rebind _ (.push ..) => storesFrom_nil _
   | .assignLocal i r => by
     have := noStore_compileVal b r
     simp only [compileStmt]; stores_from
@@ -844,11 +997,11 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .declLocal _ _ (some e) => by
     have := noStore_compileVal b e
     simp only [compileStmt]; stores_from
-  | .declStorage _ _ none => fun _ _ h => nomatch h
+  | .declStorage _ _ none => storesFrom_nil _
   | .declStorage _ _ (some (.path q)) => by
     have := noStore_compileSPath b q
     simp only [compileStmt]; stores_from
-  | .declStorage _ _ (some (.push ..)) => fun _ _ h => nomatch h
+  | .declStorage _ _ (some (.push ..)) => storesFrom_nil _
   | @Solidity.Stmt.opAssign _ _ p op _ _ l r => by
     have := noStore_compileVal b r; have := noStore_binTail p op
     simp only [compileStmt]
@@ -880,16 +1033,16 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .transfer r a => by
     have := noStore_compileVal b r; have := noStore_compileVal b a
     simp only [compileStmt, assertTop]; stores_from
-  | .send .. => fun _ _ h => nomatch h
-  | .declMem .. => fun _ _ h => nomatch h
-  | .rebindMem .. => fun _ _ h => nomatch h
-  | .assignFromMem .. => fun _ _ h => nomatch h
-  | .assignMem .. => fun _ _ h => nomatch h
+  | .send .. => storesFrom_nil _
+  | .declMem .. => storesFrom_nil _
+  | .rebindMem .. => storesFrom_nil _
+  | .assignFromMem .. => storesFrom_nil _
+  | .assignMem .. => storesFrom_nil _
   | @Solidity.Stmt.delete _ _ T l => by
     have := noStore_compileLoc b l
     simp only [compileStmt]; stores_from
-  | .deleteMem .. => fun _ _ h => nomatch h
-  | .assignNew .. => fun _ _ h => nomatch h
+  | .deleteMem .. => storesFrom_nil _
+  | .assignNew .. => storesFrom_nil _
   | .ite c t e => by
     have := noStore_compileVal b c
     have := storesFrom_compileProg b t; have := storesFrom_compileProg b e
@@ -908,21 +1061,22 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
     have := (storesFrom_compileProg (b + Γ.length) body).mono (Nat.le_add_right b Γ.length)
     have := storesFrom_retLeaveCode b ps ret
     simp only [compileStmt]; stores_from
-  | .tryCall .. => fun _ _ h => nomatch h
-  | .loop .. => fun _ _ h => nomatch h
-  | .assignLocalPush .. => fun _ _ h => nomatch h
-  | .pushOpAssign .. => fun _ _ h => nomatch h
-  | .pushIncDec .. => fun _ _ h => nomatch h
-  | .callReceiver .. => fun _ _ h => nomatch h
-  | .callReceiverPush .. => fun _ _ h => nomatch h
-  | .callRec .. => fun _ _ h => nomatch h
-  | .revertData .. => fun _ _ h => nomatch h
-  | .catchData .. => fun _ _ h => nomatch h
+  | .tryCall .. => storesFrom_nil _
+  | .loop _ c body => storesFrom_loop ((noStore_compileVal b c).storesFrom b)
+    (storesFrom_compileProg b body)
+  | .assignLocalPush .. => storesFrom_nil _
+  | .pushOpAssign .. => storesFrom_nil _
+  | .pushIncDec .. => storesFrom_nil _
+  | .callReceiver .. => storesFrom_nil _
+  | .callReceiverPush .. => storesFrom_nil _
+  | .callRec .. => storesFrom_nil _
+  | .revertData .. => storesFrom_nil _
+  | .catchData .. => storesFrom_nil _
   | .block body => by simp only [compileStmt]; exact storesFrom_compileProg b body
 /-- A block's code at base `b` stores to no level below `b`. -/
 theorem storesFrom_compileProg (b : Nat) {Γ Γ' : Ctx} :
     (P : Solidity.Prog C Γ Γ') → StoresFrom b (compileProg b P)
-  | .nil => fun _ _ h => nomatch h
+  | .nil => storesFrom_nil _
   | .cons s P => by
     have := storesFrom_compileStmt b s; have := storesFrom_compileProg b P
     simp only [compileProg]; stores_from

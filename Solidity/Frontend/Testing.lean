@@ -3,6 +3,7 @@ import Solidity.Calculus.SolSpec
 import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RecursionCallback
+import Solidity.Calculus.ProveChunked
 
 /-!
 # Testing imported Solidity files
@@ -22,7 +23,9 @@ by the contract `true`/`true` proved by induction over its frames
 (`docs/kernel-port.md`, "Recursion"): the search does no induction.  Whether
 it calls back is read off one frame of each unrolling (`sol_no_callback`);
 where it does, it is stated as `ValidT .noCallback N.f.problem` and proved
-by `rec_auto_c` (`Calculus/RecursionCallback.lean`).
+by `rec_auto_c` (`Calculus/RecursionCallback.lean`).  A plain walk longer
+than `oneCheckSteps` is checked in chunks (`Seq.proveChunked`), each leaf
+searched as `sol_prove?` searches it (`Derive.searchLeaf`).
 -/
 
 namespace Solidity.Frontend
@@ -44,12 +47,13 @@ private def elabClosed (t : Term) : TermElabM Expr := do
   instantiateMVars e
 
 /-- Whether the obligation `p` may hand control to a callee that calls back
-under `transferSemantics:noCallback` (`Fml.callsBack false`), read off its
-value; `true` where it does not reduce. -/
+under `transferSemantics:noCallback` (`Fml.callsBack false`), run as compiled
+code on its value (`Symex.evaluable`: a `whnf` of it may pass `maxRecDepth`);
+`true` where it does not run. -/
 private def callsBackE (N : Lean.Name) (φ : Expr) : TermElabM Bool := do
+  let φ ← Symex.evaluable φ
   let e ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false $(← Term.exprToSyntax φ)))
-  let v ← withTransparency .all <| whnf e
-  return !v.isConstOf ``Bool.false
+  tryCatchRuntimeEx (unsafe evalExpr Bool (mkConst ``Bool) e) fun _ => pure true
 
 /-- Whether the obligation `p`, which has a recursive call, provably hands
 control to no callee under `transferSemantics:noCallback`: `sol_no_callback`
@@ -98,6 +102,15 @@ def contractTailMode (N : Lean.Name) (rows : List ImportRow) : CommandElabM Tail
       unless ok do return .solc
     return .clean
 
+/-- The longest walk a test checks in one kernel check; a longer one is
+checked `chunkSteps` steps at a time (`sol_prove (chunk := n)`,
+`Calculus/ProveChunked.lean`), as one check of it may pass the memory a
+session has (`docs/loops.md`). -/
+def oneCheckSteps : Nat := 1024
+
+/-- The steps of a chunk of a walk past `oneCheckSteps`. -/
+def chunkSteps : Nat := 128
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -115,9 +128,15 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       -- a specification's obligation, scoped
       let spec? ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
-          let φ ← Term.elabTerm stx none
-          Term.synthesizeSyntheticMVarsNoPostponing
-          pure (some (← instantiateMVars φ))
+          -- a specification that does not elaborate is an error, not a
+          -- `sorry`; logged too, as the import reports it
+          let φ ← try
+              let φ ← Term.withoutErrToSorry <| Term.elabTerm stx none
+              Term.synthesizeSyntheticMVarsNoPostponing
+              instantiateMVars φ
+            catch e => logException e; throw e
+          if φ.hasSorry then throwError "the specification does not elaborate"
+          pure (some φ)
         else pure none
       -- a recursive call: `rec_auto`, each call by its callee's contract
       -- (its `requires`/`ensures`, else `true`/`true`) proved by induction
@@ -210,10 +229,21 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
           Tactic.run g.mvarId! (Tactic.evalTactic tac)
         else do
           let out ← IO.mkRef (none : Option Derive.Search)
+          let long ← IO.mkRef false
           let _ ← Tactic.run g.mvarId! do
-            out.set (some (← scopedSearch g.mvarId!))
-          let some s ← out.get | throwError "search did not run"
-          pure s.open_
+            -- a walk past one kernel check: in chunks, each leaf searched
+            try out.set (some (← scopedSearch g.mvarId! (oneCheck := oneCheckSteps)))
+            catch e =>
+              unless (← e.toMessageData.toString).startsWith Seq.longWalkNote do throw e
+              long.set true
+          if ← long.get then
+            Tactic.run g.mvarId! do
+              let left ← Seq.proveChunked g.mvarId! chunkSteps fun l => do
+                pure (if (← Derive.searchLeaf l Seq.goalFits).isSome then [] else [l])
+              Tactic.setGoals left
+          else
+            let some s ← out.get | throwError "search did not run"
+            pure s.open_
       unless goals.isEmpty do return ("pending", "open proof goals", mode)
       let proof ← instantiateMVars g
       if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)

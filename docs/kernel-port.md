@@ -112,7 +112,11 @@ and the run, and moved the calculus onto both.
   `refusedStructs`): that such an array
   stays empty is unproved, so `reachable_iff` asks `Ty.okDeep` of every root
   (`Typing/Constructibility.lean`).
-- **The EVM fragment**: memory, copies of dynamic arrays, `push()` of a struct,
+- **The EVM fragment**: broader memory operations beyond the
+  checked primitive-array/struct-field path (reads/writes, lengths, typed local alias/value
+  operations, primitive-array and primitive-member struct construction/rebinding with explicit capacity,
+  checked expressions, guards and primitive storage writes are
+  proved), copies of dynamic arrays, `push()` of a struct,
   fragile aliases after `pop`/`delete`, mappings keyed by `bool`/`int`
   (`docs/compiler-verification.md`).
 
@@ -304,12 +308,12 @@ length, which the Theory's `ensures` does not give (an alias the contract
 leaves may hold a path that is no array).  A leaf that reads
 `xs.length + 1` of an array returned under `{grow}` makes the kernel
 recurse too deep in `sol_close`'s proof (`buildLen` asserts
-`s.length == n - 1` instead).  `sol_close` (`Calculus/Close.lean`) quotes
-`CloseS.landedAll_def` before the name is declared, so its own
-`simp only [CloseS.landedAll_def]` step resolves nothing (hygiene) and the
-landed states are opened by later steps only; the steps whose names live
-in `Calculus/CloseScoped.lean` are `macro_rules` there
-(`sol_close_alias`, `sol_close_witness`).  A contract assumes no invariant
+`s.length == n - 1` instead). The landed-state macro hygiene defect is
+repaired: `sol_close_landed` is declared in `Calculus/Close.lean` and expanded
+in `Calculus/CloseScoped.lean`, after `CloseS.landedAll_def` exists. Primitive
+capture existence is also simplified by proved realizability equivalences;
+strict Spec result equations now close in `Examples/Tactics/Nonvacuity.lean`.
+See [assurance.md](assurance.md). A contract assumes no invariant
 of the contract (`invariant`), so a clause that needs one past a
 recursive call stays open.  `Stmt.within` of a body with two recursive calls
 of itself is exponential in compiled code (`rec_auto` proves it by `simp`,

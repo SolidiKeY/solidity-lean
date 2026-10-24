@@ -66,7 +66,9 @@ call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body, closed over a frame of its own — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
-obligation's).  **Callbacks** are
+obligation's).  A call whose callee calls and only computes values is one
+update by the callee's summary instead (`internalCallSummary`,
+`Calculus/CallSummary.lean`, `docs/automation.md` M6).  **Callbacks** are
 a second reading of the modalities (`Semantics/Callback.lean`, `holdsC` of
 `Calculus/CallbackHolds.lean`, the `CallbackTaclet`s and `ProvesC` of
 `Calculus/Callback.lean`), not a change to `Stmt.run`; which statements call
@@ -163,7 +165,9 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 
 - **by the strategy**: `sol_symex; sol_close` (`sol_decide` for reads of
   writes; `sol_spec` for a `spec!{f}` obligation); `sol_prove` on a goal
-  read with callbacks (`ValidT`, `ValidC`; `docs/options.md`). `#wp φ` prints what
+  read with callbacks (`ValidT`, `ValidC`; `docs/options.md`);
+  `sol_prove (chunk := n)` where the walk is too long for one kernel check
+  (`Calculus/ProveChunked.lean`). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
 - **by a walk**: `apply Proves.fmlValid`, then one `apply` per rule — `intro`
   (solkey's `impRight`), `update r`, `unfold r`, `split r` (KeY's two
@@ -267,6 +271,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 | `./scripts/check-testsuite.sh` | the TestSuite rows against `Report.lean`'s pin and solkey's functions; no Lean |
+| `node scripts/check-automatic.mjs --strict` | the automation gate: every TestSuite obligation by `sol_prove` (and its replay) or `sol_refute`, none pending; no Lean |
 
 `solkeycheck` is at zero against frozen solkey `473da8944c` in
 `tests/migration/solkey` (377 taclets, 131 read-bearing annotations,

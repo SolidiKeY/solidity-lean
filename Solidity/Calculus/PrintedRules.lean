@@ -506,7 +506,9 @@ def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.revertDataBox, .leanOnly .calculus),
   (``LeanTaclet.revertDataDiamond, .leanOnly .calculus),
   (``LeanTaclet.catchDataBox, .leanOnly .calculus),
-  (``LeanTaclet.catchDataDiamond, .leanOnly .calculus) ]
+  (``LeanTaclet.catchDataDiamond, .leanOnly .calculus),
+  (``LeanTaclet.ifElseJoin, .leanOnly .calculus),
+  (``LeanTaclet.internalCallSummary, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
@@ -565,7 +567,7 @@ def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 60 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 23 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 25 := by decide +kernel
 
 end PrintedRules
 end Solidity

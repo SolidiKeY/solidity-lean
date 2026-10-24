@@ -531,6 +531,46 @@ theorem Stmt.catchData.ruleExists {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C �
   · exact ⟨_, rfl, .lean .catchDataDiamond⟩
   · exact ⟨_, rfl, .lean .catchDataBox⟩
 
+/-- A call: an argument captured (`functionCallArgCapture`), else its
+summary's update where it has one (`internalCallSummary`), else its body
+inlined (`functionBodyExpand`, `internalCallExpand`); by hand, since the
+summary is decided by a computed test the search does not split.  For
+example `y = addTwo(x);`. -/
+theorem Stmt.call.ruleExists {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (k : Nat) (m : Modality) :
+    ∃ p, (Stmt.call f args ret body).step k m = p ∧ Rule C k m (.call f args ret body) p := by
+  cases hc : args.capture with
+  | some q =>
+    obtain ⟨p, v, as'⟩ := q
+    exact ⟨_, LeanTaclet.functionCallArgCapture.toStep hc, .lean (.functionCallArgCapture hc)⟩
+  | none =>
+    have h1 : args.firstNonSimple = none := by
+      simp only [Args.firstNonSimple, hc, Option.map_none]
+    cases hs : CallRet.summary? args ret body with
+    | some u =>
+      have hr : ret.isRets = false := by
+        cases ret <;> first | rfl | exact Option.noConfusion hs
+      exact ⟨_, LeanTaclet.internalCallSummary.toStep h1 hs, .lean (.internalCallSummary h1 hr hs)⟩
+    | none =>
+      cases hr : ret.isRets with
+      | true => exact ⟨_, Taclet.functionBodyExpand.toStep h1 hr, .key (.functionBodyExpand h1 hr)⟩
+      | false =>
+        exact ⟨_, Taclet.internalCallExpand.toStep h1 hr hs, .key (.internalCallExpand h1 hr hs)⟩
+
+/-- An `if`: joined when its branches are (`ifElseJoin`), else split on a
+simple condition (`ifElseSplit`), else its condition captured
+(`ifElseUnfold`); by hand, since the join is decided by a computed test the
+search does not split. -/
+theorem Stmt.ite.ruleExists {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) (k : Nat) (m : Modality) :
+    ∃ p, (Stmt.ite c thn els).step k m = p ∧ Rule C k m (.ite c thn els) p := by
+  cases c with
+  | simple se =>
+    cases hj : Upd.ifJoin? se.lower thn els with
+    | some u => exact ⟨_, LeanTaclet.ifElseJoin.toStep hj, .lean (.ifElseJoin hj)⟩
+    | none => exact ⟨_, Taclet.ifElseSplit.toStep hj, .key (.ifElseSplit hj)⟩
+  | _ => exact ⟨_, rfl, .key .ifElseUnfold⟩
+
 #replay_ruleExists
   assign "storageRootWriteStore 3*storageRootWriteValueRhsCapture ternaryToIf 8*ternaryCaptureCond 5*storageRootWriteValueRhsCapture 2*storageRootWriteCopySource storageFieldRead_unfold_rightFst storageFieldReadStoreRoot storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingStoreRoot storageIndexReadArrayStoreRoot 9*storageIndexRead_unfold_rightSndIndex lean.storageFixedCopySave lean.storageMemorySourceSave 4*storageFieldWrite_unfold_leftFst ternaryToIf 8*ternaryCaptureCond 5*storageFieldWrite_unfold_leftFst storageFieldWriteSave 3*fieldWriteValueRhsCapture ternaryToIf 8*ternaryCaptureCond 5*fieldWriteValueRhsCapture storageFieldWriteStorageRef_unfold_leftFst 2*storageFieldWriteCopySource storageFieldRead_unfold_rightFst storageFieldRead_unfold_rightSndResult storageIndexRead_unfold_rightFst storageIndexRead_unfold_rightSndResult 9*storageIndexRead_unfold_rightSndIndex lean.storageFixedCopySave lean.storageMemorySourceSave 4*storageIndexWriteCaptureAllComplexRecv ternaryToIf 8*ternaryCaptureCond 5*storageIndexWriteCaptureAllComplexRecv /IndexTy storageIndexWriteMappingSave storageIndexWriteArraySave 3*indexWriteValueRhsCapture ternaryToIf 8*ternaryCaptureCond 5*indexWriteValueRhsCapture 4*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 9*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 8*ternaryCaptureCond 5*storageIndexWriteCaptureAllNonSimpleIndex storageIndexWriteStorageRefCaptureAllComplexRecv /IndexTy storageIndexWriteMappingCopySource storageIndexWriteArrayCopySource /IndexTy storageIndexWriteMappingCopySource storageIndexWriteArrayCopySource ?storageFieldRead_unfold_rightFst /SPath storageFieldRead_unfold_rightFst /Loc 4*storageFieldRead_unfold_rightFst ?storageFieldRead_unfold_rightSndResult /SPath storageFieldRead_unfold_rightSndResult /Loc 4*storageFieldRead_unfold_rightSndResult ?storageIndexRead_unfold_rightFst /SPath storageIndexRead_unfold_rightFst /Loc 4*storageIndexRead_unfold_rightFst ?storageIndexRead_unfold_rightSndResult /SPath storageIndexRead_unfold_rightSndResult /Loc 4*storageIndexRead_unfold_rightSndResult ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex 9*storageIndexWriteStorageRefCaptureAllNonSimpleIndex lean.storageFixedCopySave lean.storageMemorySourceSave"
   rebind "2*storageLocalRootRebind storageFieldRead_unfold_rightFst storageFieldReadBindLocalRoot storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingBindLocalRoot ?storageIndexReadArrayBindLocalRoot storageIndexReadArrayBindLocalRoot storageIndexReadArrayBindLocalRootMappingElement 9*storageIndexRead_unfold_rightSndIndex storageLocalRootPush_unfold_leftFstReceiver storageLocalRootPushBind storageLocalRootPushBindMappingElement"
@@ -552,12 +592,10 @@ theorem Stmt.catchData.ruleExists {Γ ρ ps Γf Γ₁ : Ctx} (call : ExtCall C �
   delete "storageRootDelete storageFieldDelete_unfold_leftFst storageFieldDelete storageIndexDelete_unfold_leftFst /IndexTy storageIndexDelete storageIndexArrayDelete 9*storageIndexDeleteNonSimpleIndexCapture"
   deleteMem "memoryRootDeleteFreshRebind memoryFieldDeletePrimitive memoryFieldDeleteReference memoryFieldDelete_unfold_leftFst memoryIndexDeletePrimitive memoryIndexDeleteReference 9*memoryIndexDeleteNonSimpleIndexCapture memoryIndexDelete_unfold_leftFst"
   assignNew "newArrayCapture"
-  ite "ifElseSplit 8*ifElseUnfold"
   require "requireSimple 8*requireConditionCapture"
   assert "assertSimple 8*assertConditionCapture"
   revert "revertDiamond revertBox"
   assumeFalse "lean.assumeFalse"
-  call "internalCallExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture functionBodyExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture"
   tryCall "lean.tryCallDiamond tryCallNoCallbackBox lean.tryCallSelfDiamond lean.tryCallSelfBox"
   loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond lean.whileNoVariantDiamond whileInvariantBox whileUnwind"
   block "blockEmpty"

@@ -923,11 +923,27 @@ theorem popStep_saveLike {E : Ty} (b : SPath C Γ (.array E)) (hb : b.MemFree = 
   · exact Premise.saveLike_captureSP _ hb
       (by simp only [Stmt.Frag, SPath.MemFree, Bool.true_and]; exact he)
 
+/-- A joined update (`{x := c ? x + 1 : x}`) writes only locals. -/
+theorem Upd.ifJoin_saveLike (c : Tm C Γ (.val .bool)) (a b : JoinArm C Γ) :
+    (Upd.ifJoin c a b).SaveLike := by
+  rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩ <;> simp only [Upd.ifJoin]
+  all_goals (repeat' split) <;> simp only [Upd.SaveLike, UpdElem.SaveLike, and_self]
+
 theorem iteStep_saveLike {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (hc : c.MemFree = true) (ht : thn.Frag = true) (he : els.Frag = true) :
     (iteStep k c thn els).SaveLike := by
   cases c with
-  | simple s => exact ⟨ht, he⟩
+  | simple s =>
+    cases ha : thn.joinArm? with
+    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact ⟨ht, he⟩
+    | some a =>
+      cases hb : els.joinArm? with
+      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact ⟨ht, he⟩
+      | some b =>
+        simp only [iteStep, Upd.ifJoin?, ha, hb]
+        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
+        · simp only [Bool.false_eq_true, if_false]; exact ⟨ht, he⟩
+        · simp only [if_true]; exact Upd.ifJoin_saveLike _ a b
   | _ =>
     exact Premise.saveLike_capture _ hc
       (by simp only [Stmt.Frag, Val.MemFree, Prog.frag_up thn ht, Prog.frag_up els he,

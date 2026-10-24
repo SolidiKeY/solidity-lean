@@ -12,7 +12,8 @@ with` sets it (`fmtTx`), a typed run's halt (`fmtHalt`).  They are for
 people, not for the kernel: nothing is proved about them.
 
 A mapping prints its entries and then its default, `{7: 5, _: 0}`; an array
-its live elements, not the `shadow` a `pop` leaves behind.
+its live elements, not the `shadow` a `pop` leaves behind, except in a
+counterexample (`fmtFoldShadow`), where an exposed slot can be the point.
 -/
 
 namespace Solidity.Tools
@@ -53,6 +54,17 @@ def fmtFold : Fold where
   mnil := []
   mcons k _ _ v r := s!"{PrimTy.fmt k}: {v}" :: r
 
+/-- `fmtFold` with each array's shadow after its live elements, `[1, 2 |
+past the end: 7]`: what a counterexample shows, where a slot past the end
+that a push exposes can be what refutes. -/
+def fmtFoldShadow : Fold :=
+  { fmtFold with
+    L _ := List String
+    array _ _ _ w sh := "[" ++ ", ".intercalate w ++
+      (if sh.isEmpty then "" else " | past the end: " ++ ", ".intercalate sh) ++ "]"
+    lnil := []
+    lcons _ _ v r := v :: r }
+
 /-- A storage value as Solidity writes it. -/
 def _root_.Solidity.SVal.fmt {T : Ty} (v : SVal T) : String := v.fold fmtFold
 
@@ -64,9 +76,12 @@ def fmtStorage (C : Contract) (st : Storage C) : List String :=
 def fmtRoot {C : Contract} (st : Storage C) (r : Name) : Option String :=
   lookupBy r (SFields.fold fmtFold st)
 
-/-- The storage on one line: `count = 1; total = 0`. -/
-def fmtStorageLine (C : Contract) (st : Storage C) : String :=
-  "; ".intercalate (fmtStorage C st)
+/-- The storage on one line: `count = 1; total = 0`; with `shadow`, each
+array's slots past its end too (`fmtFoldShadow`). -/
+def fmtStorageLine (C : Contract) (st : Storage C) (shadow : Bool := false) : String :=
+  if shadow then
+    "; ".intercalate ((SFields.fold fmtFoldShadow st).map fun (r, v) => s!"{r} = {v}")
+  else "; ".intercalate (fmtStorage C st)
 
 /-- A typed state printed by `#eval`: its storage on one line. -/
 instance {C : Contract} {Γ : Ctx} : Repr (State C Γ) :=

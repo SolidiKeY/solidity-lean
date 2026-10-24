@@ -106,17 +106,22 @@ inductive StmtOut (C : Contract) (L b : Nat) {Γ' : Ctx} (F' : Frag Γ') (sh pay
   | panic (ha : asserts = true) (h : res = .error .panic ∧ out = .revert)
   | refused (hp : pays = true) (h : out = .revert ∧ ∃ o m', res = .ok o ∧ Keeps C b sh m m' ∧
       Sim C L b F' o.st m')
+  /-- A loop no number of turns ends: the run diverges, and the machine has
+  no outcome (`loopRun`'s fault), or, in code that pays, it reverted at a
+  refused payment before the loop. -/
+  | diverge (h : res = .error .diverge ∧ (out = .fault ∨ (pays = true ∧ out = .revert)))
 
 /-- `StmtOut` under a looser bound on the arrays. -/
 theorem StmtOut.mono {L b : Nat} {Γ' : Ctx} {F' : Frag Γ'} {sh pays asserts : Bool} {H : HTy}
     {res : TRes (Solidity.Out C H Γ')} {out : Out} {m : Machine} {L' : Nat}
     (h : StmtOut C L b F' sh pays asserts res out m) (hL : L ≤ L') (hL' : L' ≤ Lmax) :
     StmtOut C L' b F' sh pays asserts res out m := by
-  rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | h | ⟨ha, h⟩ | ⟨hp, h1, o, m', h2, h4, h5⟩
+  rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | h | ⟨ha, h⟩ | ⟨hp, h1, o, m', h2, h4, h5⟩ | h
   · exact .inl ⟨o, m', h1, h2, h3, h4, h5.mono hL hL'⟩
   · exact .inr h
   · exact .panic ha h
   · exact .refused hp ⟨h1, o, m', h2, h4, h5.mono hL hL'⟩
+  · exact .diverge h
 
 /-! ## The state's locals, changed -/
 

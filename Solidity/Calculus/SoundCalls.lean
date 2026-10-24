@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundArms
+import Solidity.Calculus.SoundSummary
 import Solidity.Calculus.DataIn
 import Solidity.Calculus.SoundCapture
 import Solidity.Calculus.SoundStore
@@ -667,7 +668,8 @@ theorem Premise.sound_callCaptureStorage {ps Γf : Ctx} (k : Nat) (f : Name)
     (fun _ _ _ _ => rfl) fun _ _ => rfl)
 
 /-- **The rule of a call is sound** over the typed state: its leftmost
-argument that is not simple captured, or its body inlined. -/
+argument that is not simple captured, its summary's update
+(`Premise.sound_callSummary`), or its body inlined. -/
 theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
     (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (σ : State C Γ)
     (pr : Premise C Γ Γ') (hp : Stmt.step k m (.call f args ret body) = pr) :
@@ -693,10 +695,16 @@ theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name
       rw [hc] at hp; cases hp
       exact Premise.sound_callCaptureVal k f args q r res body hc σ
     | none =>
-      rw [hc] at hp; cases hp
-      cases res with
-      | none => exact Premise.sound_callVal f args q r none body σ
-      | some j => exact Premise.sound_callVal f args q r (some j) body σ
+      rw [hc] at hp
+      cases hs : CallRet.summary? args (.val q r res) body with
+      | some U =>
+        rw [hs] at hp; cases hp
+        exact Premise.sound_callSummary f args q r res body hs σ
+      | none =>
+        rw [hs] at hp; cases hp
+        cases res with
+        | none => exact Premise.sound_callVal f args q r none body σ
+        | some j => exact Premise.sound_callVal f args q r (some j) body σ
   | rets bs =>
     dsimp only at hp
     cases hc : args.capture with

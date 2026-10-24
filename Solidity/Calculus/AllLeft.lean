@@ -23,7 +23,10 @@ literals and the locals the leaf indexes an array or a mapping with (`at`,
 `atIn`, `mat`), at most `Seq.allLeftBudget` of them
 (`Calculus/ProvesDerive.lean`).  A local pushed below the premise (a loop
 counter after the premise was stated) is no local of its scope and is not
-offered.  A conjunction of premises is split where one conjunct has an
+offered by this pre-pass. `Calculus/CloseAll.lean` supplies a separate bounded
+fallback after opening the leaf's binders: the later numeric local or typed
+projection is then in scope for an ordinary application of the universal proof.
+A conjunction of premises is split where one conjunct has an
 instance (`Fml.instRest`).  The premise is hidden because the
 closers cannot use it: `sol_close`'s `grind` fails on a goal that keeps a
 `∀` over a bounded index beside its instance, and `sol_decide` does not

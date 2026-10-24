@@ -2,6 +2,7 @@ import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.CloseLemmas
 import Solidity.Calculus.CloseNonlin
+import Solidity.Calculus.CloseAll
 
 /-!
 # Closing the first-order goal: `sol_close`
@@ -127,6 +128,216 @@ open Lean Elab Tactic in
 elab_rules : tactic
   | `(tactic| sol_close_unwrap) => pure ()
 
+/-- Open landed-state binders after the scoped closer has simplified their reads.
+The implementation is registered in `CloseScoped`, where the lemma exists. -/
+syntax "sol_close_landed" : tactic
+
+/-- Instantiate quantified premises after opening the leaf's later binders.
+The implementation is registered by `CloseScoped`. -/
+syntax "sol_close_quantified" : tactic
+
+/-- `sol_skip_after n tac`: `tac` with `n` thousand heartbeats of its own;
+past them, or where it fails, nothing is done.  A saturation that grows
+past its budget is skipped: what it would add is often not needed. -/
+syntax "sol_skip_after " num tacticSeq : tactic
+
+open Lean Elab Tactic in
+elab_rules : tactic
+  | `(tactic| sol_skip_after $n $tac) => do
+    let saved ← saveState
+    -- never past what the declaration's own limit has left (`Budget.within`)
+    let ok ← tryCatchRuntimeEx (Budget.within n.getNat do
+        Term.withoutErrToSorry <| withoutRecover <| evalTactic tac
+        pure true) (fun _ => pure false)
+    unless ok do saved.restore
+
+/-- `sol_within n tac`: `tac` with `n` thousand heartbeats of its own,
+never past what the declaration's limit has left (`Budget.within`); past
+them, or where `tac` fails, it fails with the goal as it was, so a `first`
+goes on to its next alternative. -/
+syntax "sol_within " num tacticSeq : tactic
+
+open Lean Elab Tactic in
+elab_rules : tactic
+  | `(tactic| sol_within $n $tac) => do
+    let r ← Budget.bounded n.getNat
+      (Term.withoutErrToSorry <| withoutRecover <| evalTactic tac)
+    if r.isNone then throwError "sol_within: failed, or past {n.getNat}000 heartbeats"
+
+/-- An `Option` read a leaf asks of as `∃ a, t = some a ∧ φ a` (a length, a
+lookup), in the goal or a premise: each such `t` generalized over both and
+split, its `none` contradicting the premise that reads it, its `some a`
+taking each `∃` to its `φ a` (`exists_eq_left'`): a premise's witness is then
+the goal's.  At most 8 reads; fails where there is none. -/
+syntax "sol_close_some_cases" : tactic
+
+namespace Close
+
+open Lean Meta in
+/-- The `t` of each `∃ a, t = some a ∧ _` in `e`, at most `64` of them, over
+at most `20000` nodes (a leaf's terms are shared, not walked twice per
+occurrence). -/
+partial def someReads (e : Expr) : StateM (Array Expr × Nat) Unit := do
+  let (acc, n) ← get
+  if n == 0 || acc.size ≥ 64 then return
+  set (acc, n - 1)
+  if e.isAppOfArity ``Exists 2 then
+    if let .lam _ _ b _ := e.appArg! then
+      if b.isAppOfArity ``And 2 then
+        let eq := b.appFn!.appArg!
+        if eq.isAppOfArity ``Eq 3 && (eq.getArg! 2).isAppOfArity ``Option.some 2 &&
+            (eq.getArg! 2).appArg! == .bvar 0 && !(eq.getArg! 1).hasLooseBVars then
+          let t := eq.getArg! 1
+          modify fun (acc, n) => (if acc.contains t then acc else acc.push t, n)
+  match e with
+  | .app f a => someReads f; someReads a
+  | .lam _ t b _ | .forallE _ t b _ => someReads t; someReads b
+  | .letE _ t v b _ => someReads t; someReads v; someReads b
+  | .mdata _ b | .proj _ _ b => someReads b
+  | _ => pure ()
+
+end Close
+
+open Lean Elab Tactic Meta in
+elab_rules : tactic
+  | `(tactic| sol_close_some_cases) => do
+    let g ← getMainGoal
+    let ts ← g.withContext do
+      let mut st : Array Expr × Nat := (#[], 20000)
+      st := ((Close.someReads (← instantiateMVars (← g.getType))).run st).2
+      for d in ← getLCtx do
+        unless d.isImplementationDetail do
+          st := ((Close.someReads (← instantiateMVars d.type)).run st).2
+      pure st.1
+    if ts.isEmpty then throwError "sol_close_some_cases: no read `∃ a, t = some a ∧ _`"
+    let mut goals := [g]
+    for t in ts.toList.take 8 do
+      let mut next := []
+      for g in goals do
+        let gs ← g.withContext do
+          -- the premises that read `t`, reverted, so that it is generalized in them too
+          let mut hs : Array FVarId := #[]
+          for d in ← getLCtx do
+            if !d.isImplementationDetail && ((← instantiateMVars d.type).find? (· == t)).isSome then
+              hs := hs.push d.fvarId
+          -- with what depends on them: `revert` says how many went back
+          let (rs, g₁) ← g.revert hs
+          let ty ← instantiateMVars (← g₁.getType)
+          unless (ty.find? (· == t)).isSome do return [(← g₁.introNP rs.size).2]
+          let (fs, g₂) ← g₁.generalize #[{ expr := t, xName? := `L }]
+          let some L := fs[0]? | return [g]
+          let cs ← g₂.cases L
+          cs.toList.mapM fun c => do
+            let (_, c') ← c.mvarId.introNP rs.size
+            pure c'
+        next := next ++ gs
+      goals := next
+    setGoals goals
+    evalTactic (← `(tactic| all_goals (try simp only [Option.some.injEq, exists_eq_left',
+      reduceCtorEq, false_and, and_false, exists_false, false_implies, implies_true,
+      true_and, and_true] at *)))
+
+/-- `sol_close`'s write facts and reads (`sol_close_facts`,
+`sol_close_reads`).  On a leaf past a `{havoc}` (`State.havoc`: a loop's
+exit or preservation under its invariant), where the frame of the prefix's
+writes saturates over the havocked states, each is skipped past a budget of
+its own (`sol_skip_after`): what the leaf needs is then the invariant and
+the guard.  Elsewhere they run as they always have. -/
+syntax "sol_close_saturate" : tactic
+
+open Lean Elab Tactic in
+elab_rules : tactic
+  | `(tactic| sol_close_saturate) => do
+    let havoc ← withMainContext do
+      let t ← instantiateMVars (← getMainTarget)
+      pure (t.find? (·.isConstOf `Solidity.State.havoc)).isSome
+    if havoc then
+      evalTactic (← `(tactic| sol_skip_after 10000 sol_close_facts))
+      evalTactic (← `(tactic| all_goals sol_skip_after 10000 sol_close_reads))
+    else
+      evalTactic (← `(tactic| try sol_close_facts))
+      evalTactic (← `(tactic| all_goals try sol_close_reads))
+
+open Lean Elab Tactic Meta in
+/-- Fails unless the leaf has a joined update: an update (`Fml.upd`) whose
+value is conditional (`Op3.ite`, `Upd.ifJoin`, a joined `if`'s), not a
+conditional of the post alone (a specification's ternary).  The guard of
+`sol_close`'s join alternative, so a leaf with none is not evaluated twice. -/
+elab "sol_close_has_ite" : tactic => withMainContext do
+  let joined (x : Expr) : Bool :=
+    x.isAppOfArity `Solidity.Fml.upd 6 &&
+      ((x.getArg! 4).find? fun y =>
+        y.isConstOf `Solidity.Op3.ite || y.isConstOf `Solidity.Upd.ifJoin).isSome
+  let hit (e : Expr) : Bool := (e.find? joined).isSome
+  if hit (← instantiateMVars (← getMainTarget)) then return
+  for d in ← getLCtx do
+    if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return
+  throwError "sol_close_has_ite: no joined update"
+
+/-- A leaf whose updates' values are conditional (`bif c then a else b`, what
+a joined `if`'s `{x := c ? e₁ : e₂}` reads, `ifElseJoin`), each value
+`∃ a, X = some a ∧ P a` read as a fresh `a` and its defining fact `X = some a`
+(KeY's join with the conditional in the antecedent): `X` returns (by cases on
+its conditions, `omega` refuting the case that halts), and `P a` follows
+from the facts, which `omega` reads as disjunctions.  Fails unless the goal
+reads a conditional value. -/
+syntax "sol_close_join" : tactic
+
+/-- A leaf of many joined values (`CloseJ.stepsMin` conditional terms or
+more), read one binder and one update at a time, the rest of the formula
+held opaque, each value named once with its defining fact and the interval
+its cases give; `omega` reads the intervals, and only where they do not
+suffice the defining facts (`sol_close_finish`).  Within a budget of its
+own (`CloseJ.budget`); fails, leaving the leaf as it was, where it does not
+close it. -/
+syntax "sol_close_join_steps" : tactic
+
+/-- Fails on a leaf of more than `CloseJ.wholeMax` joined updates: the guard
+of `sol_close`'s alternatives that evaluate a leaf whole, which on such a
+leaf run past the heartbeats rather than fail. -/
+syntax "sol_close_few_joins" : tactic
+
+/-- `sol_close`'s last pass, on goals with no state left: the arithmetic
+(`omega`, `grind`), with the witnesses' ranges, an `Option` read split once,
+and products. -/
+macro "sol_close_finish" : tactic => `(tactic|
+  -- `Int.tmod_lt_of_pos`, `Int.lt_tmod_of_pos`: solkey's `smod_lessPositiveDenom`,
+  -- `smod_NumPos` and `smod_NumNeg`, a remainder within a positive divisor;
+  -- `Int.tmod_nonneg`, `Close.tmod_nonpos`: `smod_geZero`, its sign the
+  -- dividend's; `Int.mul_tmod_left`: `smodMultiple`;
+  -- `Close.uintBitwise_and_self`: its `binaryAndIdentity`, at an `int256`;
+  -- `Int.tdiv_eq_ediv_of_nonneg`: solkey's `sdiv_axiom`, a quotient of a
+  -- nonnegative dividend is `div` (`div_axiom`: grind's own)
+  all_goals first
+    | omega
+    | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
+        Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+        Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self]
+    | (sol_close_enrich
+       all_goals (repeat' (first | intro _ | apply And.intro))
+       all_goals first
+         | omega
+         | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
+             Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+             Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
+    -- an `Option` read whose witness a premise gives and the goal asks
+    -- again (`∃ a, len = some a ∧ _`), split once for both
+    | (sol_close_some_cases
+       all_goals (repeat' (first | intro _ | apply And.intro))
+       -- the witnesses' ranges (`sol_close_enrich`)
+       all_goals (try sol_close_enrich)
+       all_goals (repeat' (first | intro _ | apply And.intro))
+       all_goals first
+         | omega
+         | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
+             Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+             Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
+    -- Last, where a product remains: bounded literal/symbolic bound
+    -- products, sign-guarded monotonicity and factor/difference squares.
+    | (sol_close_nonlin
+       grind [Int.tmod_lt_of_pos, Int.lt_tmod_of_pos, Int.tmod_nonneg, Close.tmod_nonpos,
+         Int.tdiv_eq_ediv_of_nonneg]))
+
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
 (`Calculus/Close.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
 steps of the same names).  Run `sol_symex` first; with no goal left it does
@@ -136,13 +347,39 @@ macro "sol_close" : tactic => `(tactic|
   -- a leaf whose equations read a storage alias (an `ensures` of a returned
   -- alias): read in the Theory, the alias at the path it holds; else as below
   | sol_close_alias
-  |(sol_close_unwrap
+  -- a leaf of many joined values: one update at a time, each value named
+  -- once with its interval (`sol_close_join_steps`)
+  | sol_close_join_steps
+  -- a leaf whose values a joined `if` left conditional: each a fresh value
+  -- and its facts (`sol_close_join`), within a budget of its own (its case
+  -- splits bounded too, `joinMaxCases`), so past it the alternatives
+  -- below are still tried
+  |(sol_close_has_ite
+    sol_close_few_joins
+    sol_within 160000 (
+    sol_close_unwrap
     intro σ
     sol_close_eval
-    all_goals try sol_close_facts
-    all_goals try sol_close_reads
+    all_goals sol_close_saturate
+    all_goals (try sol_close_landed)
+    all_goals try (intros; sol_close_reads_all)
+    all_goals try (subst_vars; sol_close_reads_all)
+    all_goals (try intros)
+    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    all_goals (try sol_close_witness)
+    all_goals (repeat' (first | intro _ | apply And.intro))
+    -- a goal the evaluation left no conditional value in: as below
+    all_goals first | sol_close_join | sol_close_finish))
+  -- past `CloseJ.wholeMax` joined updates, none of the whole evaluations
+  |(sol_close_few_joins
+    sol_close_quantified)
+  |(sol_close_few_joins
+    sol_close_unwrap
+    intro σ
+    sol_close_eval
+    all_goals sol_close_saturate
     -- the states an update lands on (`CloseS.LandedAll`), opened to binders
-    all_goals (try simp only [CloseS.landedAll_def])
+    all_goals (try sol_close_landed)
     all_goals try (intros; sol_close_reads_all)
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
@@ -154,31 +391,7 @@ macro "sol_close" : tactic => `(tactic|
     -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
     -- state: every premise introduced, every conjunct its own goal
     all_goals (repeat' (first | intro _ | apply And.intro))
-    -- `Int.tmod_lt_of_pos`, `Int.lt_tmod_of_pos`: solkey's `smod_lessPositiveDenom`,
-    -- `smod_NumPos` and `smod_NumNeg`, a remainder within a positive divisor;
-    -- `Int.tmod_nonneg`, `Close.tmod_nonpos`: `smod_geZero`, its sign the
-    -- dividend's; `Int.mul_tmod_left`: `smodMultiple`;
-    -- `Close.uintBitwise_and_self`: its `binaryAndIdentity`, at an `int256`;
-    -- `Int.tdiv_eq_ediv_of_nonneg`: solkey's `sdiv_axiom`, a quotient of a
-    -- nonnegative dividend is `div` (`div_axiom`: grind's own)
-    all_goals first
-      | omega
-      | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
-          Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-          Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self]
-      | (sol_close_enrich
-         all_goals (repeat' (first | intro _ | apply And.intro))
-         all_goals first
-           | omega
-           | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
-               Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
-      -- last, where nothing above closed and a product of two non-literal
-      -- integers is left: solkey's `multiply_2_inEq0` of their atoms' bounds
-      -- (`Calculus/CloseNonlin.lean`)
-      | (sol_close_nonlin
-         grind [Int.tmod_lt_of_pos, Int.lt_tmod_of_pos, Int.tmod_nonneg, Close.tmod_nonpos,
-           Int.tdiv_eq_ediv_of_nonneg])))
+    all_goals sol_close_finish))
 
 /-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
 evaluators unfolded over a deployment's storage. -/
@@ -200,7 +413,7 @@ macro "sol_close_mt" : tactic => `(tactic|
     sol_close_mt_eval
     all_goals try sol_close_facts
     all_goals try sol_close_reads
-    all_goals (try simp only [CloseS.landedAll_def])
+    all_goals (try sol_close_landed)
     all_goals try (intros; sol_close_reads_all)
     all_goals (try intros)
     all_goals (repeat' (first | intro _ | apply And.intro))

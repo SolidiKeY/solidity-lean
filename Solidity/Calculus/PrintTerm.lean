@@ -241,6 +241,8 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTermS ns a))
     if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTermS ns a))
     escapeS e
+  | .sym ``Op3.ite _ #[c, a, b] =>
+    `(dl_term| ($(← ppTermS ns c) ? $(← ppTermS ns a) : $(← ppTermS ns b)))
   | .sym ``Op2.find _ #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
   | .sym ``Op3.modular #[op] #[a, b, k] =>
     match_expr (← whnf op) with

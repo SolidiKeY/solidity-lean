@@ -31,7 +31,10 @@ hence `16`.
 `Calculus/Blocks.lean`), each by cases on the arm's own shape, under the
 builders' lemmas (`Premise.Bounded.update1`, …); a premise that emits no
 update and no formula (a capture, an unfold, a call inlined, a `try`'s
-branches) is bounded by anything (`Premise.Bounded.of_nil`).
+branches) is bounded by anything (`Premise.Bounded.of_nil`).  A call's
+summary (`internalCallSummary`) is one element whose term has the nodes of
+the summary, which its gate bounds by the callee's body
+(`CallRet.summary?_bounded`, `Tm.sumGate`).
 -/
 
 namespace Solidity
@@ -41,19 +44,6 @@ open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
 variable {C : Contract}
 
 /-! ## Sizes of terms, updates and formulas -/
-
-/-- The nodes of a term. -/
-def Tm.size {Γ : Ctx} : {s : Srt} → Tm C Γ s → Nat
-  | _, .pvV _ => 1
-  | _, .pvP _ => 1
-  | _, .pvS _ => 1
-  | _, .pvI _ => 1
-  | _, .netOf _ a => 1 + a.size
-  | _, .app0 _ => 1
-  | _, .app1 _ x => 1 + x.size
-  | _, .app2 _ x y => 1 + x.size + y.size
-  | _, .app3 _ x y z => 1 + x.size + y.size + z.size
-  | _, .pvZ _ => 1
 
 /-- The nodes of what a local is set to. -/
 def Rhs.size {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Nat
@@ -109,156 +99,6 @@ def Fml.tmSize : {Γ : Ctx} → Fml C Γ → Nat
   | _, .bind _ _ _ φ => 1 + φ.tmSize
   | _, .anon _ φ | _, .allocAll _ _ φ | _, .grow φ => 1 + φ.tmSize
 
-/-! ## Sizes of statements -/
-
-section Syntax
-
-variable {Γ : Ctx}
-
-/-- A simple value is one node. -/
-def Simple.size {p : PrimTy} (_ : Simple C Γ p) : Nat := 1
-
-mutual
-
-def SPath.size : {T : Ty} → SPath C Γ T → Nat
-  | _, .alias _ => 1
-  | _, .loc l => 1 + l.size
-
-def Loc.size : {T : Ty} → Loc C Γ T → Nat
-  | _, .root _ _ => 1
-  | _, .field b _ _ => 1 + b.size
-  | _, .index _ b i => 1 + b.size + i.size
-
-def MPath.size : {T : Ty} → MPath C Γ T → Nat
-  | _, .var _ _ => 1
-  | _, .loc l => 1 + l.size
-
-def MLoc.size : {T : Ty} → MLoc C Γ T → Nat
-  | _, .field b _ _ => 1 + b.size
-  | _, .index _ b i => 1 + b.size + i.size
-
-def Val.size : {p : PrimTy} → Val C Γ p → Nat
-  | _, .simple s => 1 + s.size
-  | _, .read l => 1 + l.size
-  | _, .binop _ _ _ a b => 1 + a.size + b.size
-  | _, .unop _ _ _ a => 1 + a.size
-  | _, .ternary c a b => 1 + c.size + a.size + b.size
-  | _, .readMem l => 1 + l.size
-  | _, .len b _ => 1 + b.size
-  | _, .mlen b _ => 1 + b.size
-  | _, .modular _ a b k => 1 + a.size + b.size + k.size
-  | _, .hash _ b _ => 1 + b.size
-
-end
-
-def Src.size {T : Ty} : Src C Γ T → Nat
-  | .val v => 1 + v.size
-  | .copy p _ => 1 + p.size
-  | .fixedCopy p _ _ => 1 + p.size
-  | .copyMem p => 1 + p.size
-
-def MSrc.size {T : Ty} : MSrc C Γ T → Nat
-  | .val v => 1 + v.size
-  | .ref p => 1 + p.size
-
-def ARhs.size {R : RefTy} : ARhs C Γ R → Nat
-  | .path p => 1 + p.size
-  | .push b _ => 1 + b.size
-
-def MRhs.size {R : RefTy} : MRhs C Γ R → Nat
-  | .alias p => 1 + p.size
-  | .copy p _ => 1 + p.size
-  | .newArr n _ => 1 + n.size
-
-def NewLhs.size {R : RefTy} : NewLhs C Γ R → Nat
-  | .store l => 1 + l.size
-  | .mem l => 1 + l.size
-
-/-- A compound target, as the location it denotes (`OpLoc.set`). -/
-def OpLoc.size {p : PrimTy} : OpLoc C Γ p → Nat
-  | .local _ => 1
-  | .root _ _ => 1
-  | .field b _ _ => 1 + b.size
-  | .index _ b _ => 3 + b.size
-  | .mfield b _ _ => 1 + b.size
-  | .mindex _ b _ => 3 + b.size
-
-def Args.size : {ps : Ctx} → Args C Γ ps → Nat
-  | _, .nil => 0
-  | _, .snoc as _ _ e => as.size + 1 + e.size
-  | _, .snocStorage as _ _ e => as.size + 1 + e.size
-  | _, .snocMemory as _ _ e => as.size + 1 + e.size
-
-def ExtCall.size (e : ExtCall C Γ) : Nat := 1 + e.addr.size + e.args.length
-
-def ReceiverOp.size {E : Ty} : ReceiverOp C Γ E → Nat
-  | .push none _ => 1
-  | .push (some v) _ => 1 + v.size
-  | .pop => 1
-
-end Syntax
-
-def LoopQ.size : {Γ : Ctx} → LoopQ C Γ → Nat
-  | _, .val a => 1 + a.size
-  | _, .imp a c => 1 + a.size + c.size
-  | _, .all _ _ b => 1 + b.size
-
-def LoopAnn.size {Γ : Ctx} : LoopAnn C Γ → Nat
-  | .unwind _ => 1
-  | .auto => 1
-  | .inv I dec _ qs => 1 + I.size + (match dec with | some d => d.size | none => 0) +
-      (qs.map LoopQ.size).sum
-
-mutual
-
-/-- The nodes of a statement: its own, its expressions', its blocks'. -/
-def Stmt.size : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
-  | _, _, .assign l r => 1 + l.size + r.size
-  | _, _, .rebind _ r => 1 + r.size
-  | _, _, .assignLocal _ r => 1 + r.size
-  | _, _, .declLocal _ _ init => 1 + (match init with | some e => e.size | none => 0)
-  | _, _, .declStorage _ _ init => 1 + (match init with | some r => r.size | none => 0)
-  | _, _, .opAssign _ _ _ l r => 1 + l.size + r.size
-  | _, _, .incDec _ _ l => 1 + l.size
-  | _, _, .assignIncDec _ _ _ l _ => 1 + l.size
-  | _, _, .assignLocalPush _ b => 1 + b.size
-  | _, _, .push b v _ => 1 + b.size + (match v with | some e => e.size | none => 0)
-  | _, _, .pop b => 1 + b.size
-  | _, _, .transfer r a => 1 + r.size + a.size
-  | _, _, .send _ r a _ => 1 + r.size + a.size
-  | _, _, .declMem _ _ init _ _ => 1 + (match init with | some r => r.size | none => 0)
-  | _, _, .rebindMem _ r => 1 + r.size
-  | _, _, .assignFromMem l p => 1 + l.size + p.size
-  | _, _, .assignMem l r => 1 + l.size + r.size
-  | _, _, .delete l => 1 + l.size
-  | _, _, .deleteMem p _ => 1 + p.size
-  | _, _, .assignNew l n _ => 1 + l.size + n.size
-  | _, _, .ite c thn els => 1 + c.size + thn.size + els.size
-  | _, _, .require c => 1 + c.size
-  | _, _, .assert c => 1 + c.size
-  | _, _, .revert => 1
-  | _, _, .assumeFalse => 1
-  | _, _, .call _ args _ body => 1 + args.size + body.size
-  | _, _, .tryCall call _ ok err _ pnc other sargs sbody _ =>
-    1 + call.size + ok.size + err.size + pnc.size + other.size + sargs.size + sbody.size
-  | _, _, .loop a c body => 1 + a.size + c.size + body.size
-  | _, _, .block body => 1 + body.size
-  | _, _, .revertData _ => 1
-  | _, _, .catchData call _ sargs sbody _ _ _ body =>
-    1 + call.size + sargs.size + sbody.size + body.size
-  | _, _, .pushOpAssign _ _ _ b r => 1 + b.size + r.size
-  | _, _, .pushIncDec _ _ b => 1 + b.size
-  | _, _, .callReceiver _ args _ body op => 1 + args.size + body.size + op.size
-  | _, _, .callReceiverPush _ args _ body code value =>
-    1 + args.size + body.size + code.size + value.size
-  -- the body is read when the call is unfolded
-  | _, _, .callRec _ _ args _ _ => 1 + args.size
-
-def Prog.size : {Γ Γ' : Ctx} → Prog C Γ Γ' → Nat
-  | _, _, .nil => 0
-  | _, _, .cons s P => s.size + P.size
-
-end
 
 /-! ## Lowering, by the nodes -/
 
@@ -1285,12 +1125,68 @@ theorem deleteMemStep_bounded {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = t
 
 /-! ### Control flow -/
 
+/-- What a joinable branch assigns is a part of it: `{ x = x + 1; }`
+assigns `x + 1`, of fewer nodes than the branch. -/
+theorem Prog.joinArm?_size {Γ₁ : Ctx} (P : Prog C Γ Γ₁) {p : PrimTy} {i : Idx Γ (.val p)}
+    {r : Val C Γ p} (h : P.joinArm? = some (some ⟨p, i, r⟩)) : r.size + 1 ≤ P.size := by
+  cases P with
+  | nil => cases h
+  | cons s ω =>
+    cases s <;> try cases h
+    rename_i i' r'
+    cases ω with
+    | nil =>
+      cases h
+      simp only [Prog.size, Stmt.size]; omega
+    | cons _ _ => cases h
+
+/-- The joined update of two branches has at most two elements, each at
+most three nodes a node of the branches, and the condition's. -/
+theorem Upd.ifJoin_bounded (se : Simple C Γ .bool) {Γ₁ Γ₂ : Ctx} {thn : Prog C Γ Γ₁}
+    {els : Prog C Γ Γ₂} {a b : JoinArm C Γ} (ha : thn.joinArm? = some a)
+    (hb : els.joinArm? = some b) :
+    (Upd.ifJoin se.lower a b).length ≤ 2 ∧
+      (Upd.ifJoin se.lower a b).tmSize ≤ 3 * (thn.size + els.size) + 8 := by
+  rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩
+  · simp only [Upd.ifJoin, Upd.length, Upd.tmSize]; omega
+  · have := Prog.joinArm?_size els hb
+    have := Val.lower_size rb
+    simp only [Upd.ifJoin, Upd.length, Upd.tmSize, UpdElem.size, Rhs.size, Tm.size,
+      Simple.lower_size]; omega
+  · have := Prog.joinArm?_size thn ha
+    have := Val.lower_size ra
+    simp only [Upd.ifJoin, Upd.length, Upd.tmSize, UpdElem.size, Rhs.size, Tm.size,
+      Simple.lower_size]; omega
+  · have := Prog.joinArm?_size thn ha
+    have := Prog.joinArm?_size els hb
+    have := Val.lower_size ra
+    have := Val.lower_size rb
+    simp only [Upd.ifJoin]
+    repeat' split
+    all_goals simp only [Upd.length, Upd.tmSize, UpdElem.size, Rhs.size, Tm.size,
+      Simple.lower_size, Tm.size_castV]
+    all_goals omega
+
 theorem iteStep_bounded {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
-    (els : Prog C Γ Γ₂) : (iteStep k c thn els).Bounded 3 := by
+    (els : Prog C Γ Γ₂) : (iteStep k c thn els).Bounded (3 * (thn.size + els.size) + 8) := by
   cases c with
   | simple s =>
-    apply Premise.Bounded.split <;>
-      simp only [Fml.tmSize, Tm.size, Simple.lower_size] <;> omega
+    have hsplit : (Premise.split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false)
+        thn els).Bounded (3 * (thn.size + els.size) + 8) := by
+      apply Premise.Bounded.split <;>
+        simp only [Fml.tmSize, Tm.size, Simple.lower_size] <;> omega
+    cases ha : thn.joinArm? with
+    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact hsplit
+    | some a =>
+      cases hb : els.joinArm? with
+      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
+      | some b =>
+        simp only [iteStep, Upd.ifJoin?, ha, hb]
+        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
+        · simp only [Bool.false_eq_true, if_false]; exact hsplit
+        · simp only [if_true]
+          obtain ⟨hl, hs⟩ := Upd.ifJoin_bounded s ha hb
+          exact Premise.Bounded.update hl hs
   | _ => bnil
 
 theorem requireStep_bounded (c : Val C Γ .bool) : (requireStep k c).Bounded 3 := by
@@ -1396,10 +1292,119 @@ theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Va
 
 /-! ### Calls, `try`, receivers -/
 
+/-- A term read through a frame of one-node terms keeps its nodes. -/
+theorem Tm.size_substE {Γ₀ Δ : Ctx} {E : SEnv C Γ₀ Δ}
+    (hE : ∀ {p : PrimTy} (i : Idx Δ (.val p)), (E.get i).1.size = 1) :
+    {s : Srt} → (t : Tm C Δ s) → {t' : Tm C Γ₀ s} → t.substE E = some t' → t'.size = t.size
+  | _, .pvV i, _, h => by cases h; exact hE i
+  | _, .app0 _, _, h => by cases h; rfl
+  | _, .app1 o x, t', h => by
+    have h' : (x.substE E).map (Tm.app1 o) = some t' := h
+    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h'
+    simp only [Tm.size, Tm.size_substE hE x hx]
+  | _, .app2 o x y, t', h => by
+    have h' : (x.substE E).bind (fun x' => (y.substE E).map fun y' => Tm.app2 o x' y') =
+      some t' := h
+    obtain ⟨x', hx, h₁⟩ := Option.bind_eq_some_iff.1 h'
+    obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 h₁
+    simp only [Tm.size, Tm.size_substE hE x hx, Tm.size_substE hE y hy]
+  | _, .app3 o x y z, t', h => by
+    have h' : (x.substE E).bind (fun x' => (y.substE E).bind fun y' =>
+      (z.substE E).map fun z' => Tm.app3 o x' y' z') = some t' := h
+    obtain ⟨x', hx, h₁⟩ := Option.bind_eq_some_iff.1 h'
+    obtain ⟨y', hy, h₂⟩ := Option.bind_eq_some_iff.1 h₁
+    obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 h₂
+    simp only [Tm.size, Tm.size_substE hE x hx, Tm.size_substE hE y hy, Tm.size_substE hE z hz]
+  | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf _ _, _, h
+  | _, .pvZ _, _, h => nomatch h
+
+theorem Simple.lower_size_one {p : PrimTy} (s : Simple C Γ p) : s.lower.size = 1 := by
+  cases s with
+  | env k hp => simp only [Simple.lower, Tm.size_castV]; rfl
+  | _ => rfl
+
+/-- The arguments of a call read at the call: one node each. -/
+theorem Args.sym_id_size : {ps : Ctx} → (args : Args C Γ ps) → {θ : SEnv C Γ ps} →
+    Args.sym (SEnv.id Γ) args = some θ →
+    ∀ {p : PrimTy} (i : Idx ps (.val p)), (θ.get i).1.size = 1
+  | _, .nil, _, _ => fun i => nomatch i
+  | _, .snoc as p x e, θ, h => by
+    cases e with
+    | simple s =>
+      have h' : (s.lower.substE (SEnv.id Γ)).bind
+          (fun t => (Args.sym (SEnv.id Γ) as).map fun θ => ((t, false), θ)) = some θ := h
+      obtain ⟨t, ht, h₁⟩ := Option.bind_eq_some_iff.1 h'
+      obtain ⟨θ', hθ', rfl⟩ := Option.map_eq_some_iff.1 h₁
+      intro i
+      cases i with
+      | here =>
+        show t.size = 1
+        rw [Tm.size_substE (fun j => by rw [SEnv.id, SEnv.get_idAt]; rfl) s.lower ht,
+          Simple.lower_size_one]
+      | there i => exact Args.sym_id_size as hθ' i
+    | _ => exact nomatch h
+  | _, .snocStorage .., _, h | _, .snocMemory .., _, h => nomatch h
+
+/-- **A summary's update is no larger than the callee's body bounds**: one
+element, its term the summary's own nodes (`Tm.sumGate`). -/
+theorem CallRet.summary?_bounded {ps rs Γ' Γf : Ctx} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf} {U : Upd C Γ Γ'}
+    (h : CallRet.summary? args ret body = some U) :
+    U.length ≤ 2 ∧ U.tmSize ≤ 16 * body.size + 16 := by
+  cases ret with
+  | val p r res =>
+    cases res with
+    | none => exact nomatch h
+    | some j =>
+      have h' : (if body.hasCall then
+          (CallRet.sumOf body.ext (body.sym _ (SEnv.id _))).bind fun R =>
+            if Tm.sumGate body R then
+              (Args.sym (SEnv.id Γ) args).bind fun θ =>
+                (Tm.substE (Γ₀ := Γ) (Δ := .val p :: ps)
+                  ((Tm.app0 (.lit (PrimTy.dflt p)), false), θ) R).map fun t =>
+                    Upd.nil.snoc (.local j (.val t))
+            else Option.none
+          else Option.none) = some U := h
+      split at h'
+      · obtain ⟨R, _, h₁⟩ := Option.bind_eq_some_iff.1 h'
+        split at h₁
+        · rename_i hgate
+          obtain ⟨θ, hθ, h₂⟩ := Option.bind_eq_some_iff.1 h₁
+          obtain ⟨t, ht, rfl⟩ := Option.map_eq_some_iff.1 h₂
+          have hR : R.size < 16 * body.size + 16 := by
+            simp only [Tm.sumGate, Bool.and_eq_true, decide_eq_true_eq] at hgate; exact hgate.2
+          have hts : t.size = R.size := by
+            refine Tm.size_substE (E := (show SEnv C Γ (.val p :: ps) from
+              ((Tm.app0 (.lit (PrimTy.dflt p)), false), θ))) ?_ R ht
+            intro q i
+            cases i with
+            | here => rfl
+            | there i => exact Args.sym_id_size args hθ i
+          refine ⟨by simp only [Upd.length]; omega, ?_⟩
+          simp only [Upd.tmSize, UpdElem.size, Rhs.size, hts]
+          omega
+        · cases h₁
+      · cases h'
+  | none => exact nomatch h
+  | rets _ => exact nomatch h
+  | mem _ _ _ _ => exact nomatch h
+  | storage _ _ => exact nomatch h
+
 theorem callStep_bounded {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (n : Nat) :
+    (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (n : Nat)
+    (hn : 16 * body.size + 16 ≤ n) :
     (callStep k f args ret body).Bounded n := by
-  cases ret <;> (simp only [callStep]; split <;> bnil)
+  cases ret with
+  | val p r res =>
+    simp only [callStep]
+    split
+    · bnil
+    · split
+      · rename_i U hU
+        obtain ⟨hl, hs⟩ := CallRet.summary?_bounded hU
+        exact Premise.Bounded.update hl (by omega)
+      · bnil
+  | _ => simp only [callStep]; split <;> bnil
 
 theorem tryStep_bounded (m : Modality) {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (rets : Binders ρ)
     (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
@@ -1456,7 +1461,8 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
     exact (assignIncStep_bounded i op hp l).mono (by simp only [Stmt.size]; omega)
   | assignLocalPush i b =>
     exact (assignLocalPushStep_bounded k i b).mono (by simp only [Stmt.size]; omega)
-  | push b v hd => exact (pushStep_bounded k b v hd).mono (by simp only [Stmt.size]; omega)
+  | push b v hd =>
+    exact (pushStep_bounded k b v hd).mono (by cases v <;> simp only [Stmt.size] <;> omega)
   | pop b => exact (popStep_bounded k b).mono (by simp only [Stmt.size]; omega)
   | transfer r a => exact (transferStep_bounded k m r a).mono (by omega)
   | send pv r a full => exact (sendStep_bounded k m pv full r a).mono (by omega)
@@ -1474,12 +1480,13 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
   | delete l => exact (deleteStep_bounded k l).mono (by simp only [Stmt.size]; omega)
   | deleteMem p hd => exact (deleteMemStep_bounded k p hd).mono (by simp only [Stmt.size]; omega)
   | assignNew l n h => bnil
-  | ite c thn els => exact (iteStep_bounded k c thn els).mono (by omega)
+  | ite c thn els => exact (iteStep_bounded k c thn els).mono (by simp only [Stmt.size]; omega)
   | require c => exact (requireStep_bounded k c).mono (by omega)
   | assert c => exact (assertStep_bounded k c).mono (by omega)
   | revert => cases m <;> bnil
   | assumeFalse => bnil
-  | call f args ret body => exact callStep_bounded k f args ret body _
+  | call f args ret body =>
+    exact callStep_bounded k f args ret body _ (by simp only [Stmt.size]; omega)
   | tryCall call rets ok err code pnc other sargs sbody self =>
     exact tryStepS_bounded m call rets ok err code pnc other sargs sbody self _
   | loop a c body =>

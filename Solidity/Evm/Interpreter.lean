@@ -36,7 +36,7 @@ theorem setAge_interpreter :
     ∃ o, Solidity.Prog.run (freshState StandardExample) setAge = .ok o ∧
       ∀ v, o.st.storage.findLive aliceAge = some (.prim v) → v.1 = 10 := by
   rcases compile_storage (Option.some_get setAge_frag).symm (by decide +kernel) 0 W_pos (fresh).bal
-      ⟨0, W_pos⟩ rfl with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
+      ⟨0, W_pos⟩ rfl with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩ | ⟨-, hd⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
     have hp : PathSlot StandardExample false aliceAge (.root 13) := PathAt.field PathAt.nil
     have hs := h3 _ _ v hp hv
@@ -50,6 +50,11 @@ theorem setAge_interpreter :
     rw [show run (compileProg 0 setAge) fresh = _ from h2] at this
     cases this
   · exact absurd hp (by decide +kernel)
+  · rcases hd with h2 | ⟨-, h2⟩ <;>
+    · have := Solidity.Evm.Examples.setAge_run
+      unfold slotAfter codeOf at this
+      rw [show run (compileProg 0 setAge) fresh = _ from h2] at this
+      cases this
 
 theorem overflow_frag : (inFragP (Frag.init []) overflow).isSome = true := by
   decide +kernel
@@ -61,13 +66,17 @@ theorem overflow_interpreter :
     Solidity.Prog.run (freshState StandardExample) overflow = .error .revert := by
   rcases compile_exact (Option.some_get overflow_frag).symm
       (Sim.init StandardExample 0 W_pos (fresh).bal ⟨0, W_pos⟩ rfl) (by decide +kernel) (by decide +kernel) with
-    ⟨_, _, _, h, _⟩ | ⟨h | ⟨ha, _⟩, _⟩
+    ⟨_, _, _, h, _⟩ | ⟨h | ⟨ha, _⟩, _⟩ | ⟨-, h⟩
   · have := reverted_eq Solidity.Evm.Examples.overflow_run
     unfold codeOf at this
     rw [show run (compileProg 0 overflow) fresh = _ from h] at this
     cases this
   · exact h
   · exact absurd ha (by decide +kernel)
+  · have := reverted_eq Solidity.Evm.Examples.overflow_run
+    unfold codeOf at this
+    rw [show run (compileProg 0 overflow) fresh = _ from h] at this
+    cases this
 
 theorem payOwner_frag : (inFragP (Frag.init []) payOwner).isSome = true := by
   decide +kernel
@@ -109,7 +118,7 @@ theorem callTwice_interpreter :
       ∀ v, o.st.storage.findLive (Solidity.SRef.ofRoot "total" rfl) = some (.prim v) →
         v.1 = 5 := by
   rcases compile_storage (Option.some_get callTwice_frag).symm (by decide +kernel) 0 W_pos
-      (fresh).bal ⟨0, W_pos⟩ rfl with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
+      (fresh).bal ⟨0, W_pos⟩ rfl with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩ | ⟨-, hd⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
     have hp : PathSlot CallsExample false (Solidity.SRef.ofRoot (C := CallsExample) "total"
         (T := .prim .uint) rfl) (.root 0) := PathSlot.root rfl
@@ -125,5 +134,10 @@ theorem callTwice_interpreter :
     rw [show run (compileProg 0 callTwice) fresh = _ from h2] at this
     cases this
   · exact absurd hp (by decide +kernel)
+  · rcases hd with h2 | ⟨-, h2⟩ <;>
+    · have := Solidity.Evm.Examples.callTwice_run
+      unfold slotAfter codeOf at this
+      rw [show run (compileProg 0 callTwice) fresh = _ from h2] at this
+      cases this
 
 end Solidity.Evm.Examples

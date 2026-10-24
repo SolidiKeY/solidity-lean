@@ -246,6 +246,9 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
       for x in xs do
         let t := (← whnfR (← instantiateMVars (← inferType x))).unAutoParam
         if let some (_, a, b) := t.eq? then
+          -- a call's summary by the kernel (`summary_cond`), within its bound
+          let a ← if a.isAppOf ``CallRet.summary? then
+              pure ((← kernelSummary? a).getD a) else pure a
           unless ← isDefEq a b do return none
       discard <| defaultLocalTys xs
       let p ← instantiateMVars p
@@ -254,8 +257,14 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
     match r with
     | some (c, p) =>
       -- the premise is the step's (`Rule.toStep`)
-      let step ← whnfD (← mkAppM ``Solidity.Stmt.step #[k, m, s])
-      unless ← isDefEq step p do
+      let stepE ← mkAppM ``Solidity.Stmt.step #[k, m, s]
+      -- a call's step runs its callee's summary: by the kernel, within
+      -- the bound of `summary_cond` (`fewNodes`)
+      let ok ← if s.isAppOf ``Stmt.call && !p.hasMVar && !stepE.hasMVar &&
+          fewNodes stepE summaryNodes && fewNodes p summaryNodes then
+          pure (Kernel.isDefEqGuarded (← getEnv) (← getLCtx) stepE p)
+        else isDefEq (← whnfD stepE) p
+      unless ok do
         throwError "ruleOf?: `{c}` does not leave `Stmt.step`'s premise"
       return some (c, p)
     | none => st.restore

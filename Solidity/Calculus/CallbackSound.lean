@@ -736,7 +736,7 @@ theorem holdsC_tryPanicG {κc Γ₃ Γ₂ Γ₀ : Ctx} (call : ExtCall C Γ) (co
 /-- **`tryCallSelfBox` is sound with callbacks** (Lean, `docs/options.md`
 O8): the invariant where control leaves; the receiver the contract, the
 callee's body inlined (its runs with callbacks) then the success block; the
-receiver another, the success block from any state the callee leaves in
+receiver another, not at address `0`, the success block from any state the callee leaves in
 which the invariant holds; each clause's block where the call reverted. -/
 theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     {ρ κc Γok Γe Γ₃ Γ₄ ps Γf : Ctx}
@@ -751,9 +751,10 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
         (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
           (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok).ext)
         (.seq ω κ)) φ)))
-    (hok : holdsC I pay σ (.imp (Fml.isBool call.notSelf.lower true)
+    (hok : holdsC I pay σ (.imp (Fml.isBool call.hasCode.lower true)
+      (.imp (Fml.isBool call.notSelf.lower true)
       (.havoc (.imp (Fml.closedAt I) (rets.all (Fml.modalK .box ok
-      (.pop .block ((Ext.append Γ ρ).trans ok.ext) (.seq ω κ)) φ))))))
+      (.pop .block ((Ext.append Γ ρ).trans ok.ext) (.seq ω κ)) φ)))))))
     (herr : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
       (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ))))
     (hpnc : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (code.binders.all
@@ -775,9 +776,13 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     have hn : call.notSelf.evalT σ = .ok true := by
       rw [ExtCall.notSelf_evalT]
       simp only [hs, decide_false, Bool.not_false]
+    have hc0 : call.hasCode.evalT σ = .ok true := by
+      rw [ExtCall.hasCode_evalT]; simp only [hz, decide_false, Bool.not_false]
+    have hcode : holdsC I pay σ (Fml.isBool call.hasCode.lower true) :=
+      (holdsC_iff_holds _ rfl σ).mpr (holds_isBool_lower call.hasCode σ hc0)
     have hguard : holdsC I pay σ (Fml.isBool call.notSelf.lower true) :=
       (holdsC_iff_holds _ rfl σ).mpr (holds_isBool_lower call.notSelf σ hn)
-    have h₁ := hok hguard st nt sb ((holdsC_closedAt_iff hI hT _).2 hJ')
+    have h₁ := hok hcode hguard st nt sb ((holdsC_closedAt_iff hI hT _).2 hJ')
     have h₂ := holdsC_modalK _ _ _ φ (holdsC_binders_all rets (σ.havoc st nt sb) _ r h₁)
     exact COut.thenF_drop _ (h₂ o hP)
 

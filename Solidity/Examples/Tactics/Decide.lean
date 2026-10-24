@@ -462,6 +462,23 @@ theorem memoryNewLarge :
   sol_symex
   sol_decide
 
+/-- Each RHS reads its previous write twice. Forming reads early keeps the
+diamond's allocation and bounds obligations from growing as a binary tree. -/
+theorem memoryRepeatedDoubling :
+    ⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](1); xs[0] = 1;
+      xs[0] = xs[0] + xs[0]; xs[0] = xs[0] + xs[0];
+      xs[0] = xs[0] + xs[0]; xs[0] = xs[0] + xs[0];
+      xs[0] = xs[0] + xs[0]; xs[0] = xs[0] + xs[0];
+      xs[0] = xs[0] + xs[0]; xs[0] = xs[0] + xs[0]; ⟩ xs[0] == 256 } := by
+  sol_prove
+
+/-- Reading an empty array still cannot supply a successful diamond witness. -/
+example : True := by
+  fail_if_success
+    have : ⊨ᶠ dl!{ ⟨ uint[] memory xs = new uint[](0); uint y = xs[0]; ⟩ true } := by
+      sol_prove
+  trivial
+
 /-- `delete carol.account;` writes a fresh default `Account` into the member
 (`memoryFieldDeleteReference`): its balance reads `0` again. -/
 theorem memoryDeleteRefFresh :
@@ -539,6 +556,30 @@ private def wide : Nat → LTm StandardExample (.val .uint)
 -- for a concrete history), and is rejected before early elimination.
 #guard ((wide 17).fits concreteSize).isNone
 #guard LTm.beqR (wide 17).literalRead (wide 17)
+
+private def unknownAddress : LTm StandardExample (.addr (.prim .uint)) :=
+  .app2 (.mat .dyn) (.app1 (.alloc (.array (.prim .uint)) rfl) (.app0 .memory)) (.lit ⟨0, rfl⟩)
+
+private def guardedWrite : LTm StandardExample .mem :=
+  .app3 .write (.app0 .memory) unknownAddress (.app1 .mval (.lit ⟨7, rfl⟩))
+
+-- The original heap/address may not admit the write: the read cannot become
+-- an unguarded literal merely because the addresses are syntactically equal.
+#guard (foldMem2 .read guardedWrite unknownAddress).litV?.isNone
+
+/-- The root was never allocated in this heap: the retained guard really fails. -/
+example : (foldMem2 .read guardedWrite unknownAddress).eval (State.init StandardExample) AEnv.dflt = none := by
+  decide +kernel
+
+private def wideMemory : LTm StandardExample .mem :=
+  .app3 .write (.app0 .memory) unknownAddress (.app1 .mval (wide 17))
+
+/-- Oversized memory input is retained before invoking the read taclets. -/
+example : foldMem2 .read wideMemory unknownAddress = .app2 .read wideMemory unknownAddress := rfl
+
+/-- Reading an arbitrary initial heap retains its symbolic value. -/
+example : foldMem2 .read (.app0 .memory) unknownAddress =
+    .app2 .read (.app0 .memory) unknownAddress := rfl
 
 private def SignedReads : Contract := contract!{ int[] values; }
 private def signedFalse : Fml SignedReads [] := dl[SignedReads]{ [

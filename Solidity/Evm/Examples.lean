@@ -360,6 +360,32 @@ theorem rejected :
       Solidity.Prog StandardExample [] _) := by
   decide +kernel
 
+/-! ## Loops
+
+A loop is one `LOOP cond body` instruction (`Instr.loop`), whose turns are
+`loopRun`'s: classical, as the typed run's (`TLoop.run`), so the kernel does
+not evaluate it and `#eval` runs its compiled twin (`loopImpl`). -/
+
+/-- A counting loop is in the fragment: its body pushes, pays and shrinks
+nothing, and declares nothing that outlives a turn. -/
+theorem loop_compiles :
+    compiles (sol{ total = 0; age = 0; while (age < 3) { total = total + 2; age = age + 1; } } :
+      Solidity.Prog StandardExample [] _) := by
+  decide +kernel
+
+/-- info: (some 6, some 3) -/
+#guard_msgs in #eval
+  let P : Solidity.Prog StandardExample [] _ :=
+    sol{ total = 0; age = 0; while (age < 3) { total = total + 2; age = age + 1; } }
+  (slotAfter P (.root 0), slotAfter P (.root 1))
+
+/-- A loop whose body pushes is out: its pushes are unbounded, past the
+`2^64` bound `Sim` carries. -/
+theorem loop_push_rejected :
+    rejects (sol{ while (age < 3) { values.push(1); age = age + 1; } } :
+      Solidity.Prog StandardExample [] _) := by
+  decide +kernel
+
 /-! ## Calls -/
 
 /-- `y` lives at level `0`, `addTwo`'s parameter and return variable at `1`

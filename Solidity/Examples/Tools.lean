@@ -147,7 +147,7 @@ info: symbolic execution leaves:
   { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
     { x := read(memory, carol.age) } x = find(storage, alice.age) }
 update-free:
-    (copy(memory, select(storage, alice)), copySt(memory, select(storage, alice)); true) = (copy(memory, select(storage, alice)), copySt(memory, select(storage, alice)); true) → ∀ uint x; (read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age); true) = (read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age); true) → read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age) = find(storage, alice.age)
+    (copy(memory, select(storage, alice)); if(true = true) then true else err) = (copy(memory, select(storage, alice)); if(true = true) then true else err) → ∀ uint x; ((if(true = true) then find(storage, alice.age) else err); true) = ((if(true = true) then find(storage, alice.age) else err); true) → (if(true = true) then find(storage, alice.age) else err) = find(storage, alice.age)
 -/
 #guard_msgs in #wp dl!{ [ Person memory carol = alice; uint x = carol.age; ] x == alice.age }
 
@@ -160,7 +160,7 @@ info: symbolic execution leaves:
         { memory := write(memory, xs[i], 7) }
           { storage := save(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
 update-free:
-    ∀ uint i; ∀ uint n; (copy(memory, newArr(n)), copySt(memory, newArr(n)); true) = (copy(memory, newArr(n)), copySt(memory, newArr(n)); true) → (write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7); true) = (write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7); true) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) = (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then true else err); if(if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false) else has(storage, values[i])) then (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false = true) then read(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))[i]) else 0) else if(i < find(storage, values.length)) then 0 else find(storage, values[i])) else err) = 7
+    ∀ uint i; ∀ uint n; (copy(memory, newArr(n)); true) = (copy(memory, newArr(n)); true) → (if(i < n = true) then true else err) = (if(i < n = true) then true else err) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) = (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then true else err); if(if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false) else has(storage, values[i])) then (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false = true) then read(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))[i]) else 0) else if(i < find(storage, values.length)) then 0 else find(storage, values[i])) else err) = 7
 -/
 #guard_msgs in
 #wp dl!{ [ uint[] memory xs = new uint[](n); xs[i] = 7; values = xs; ] values[i] == 7 }
@@ -246,6 +246,20 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet functionCallArgCapture
 
+/-! `ifElseJoin`'s update is what `Upd.ifJoin?` computes of the branches,
+the side condition the printer hides (`{ u }`): `{ x := (se ? x + 1 : x) }`
+for `if (se) { x = x + 1; }` (`Examples/Tactics/Join.lean`). -/
+
+/--
+info: Solidity.LeanTaclet.ifElseJoin : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx}
+  {elseStm : Prog C Γ x_1} {m : Modality} {se : Simple C Γ PrimTy.bool} {u : Upd C Γ Γ},
+  dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ { u } ⟨[ ]⟩ }
+solkey: none (a rule solkey does not have)
+printed: none (theory only Lean has)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
+-/
+#guard_msgs in #taclet ifElseJoin
+
 /--
 info: solkey: ifTrue (concrete_solidity)
 no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
@@ -257,7 +271,7 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /--
 info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 23 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 25 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/

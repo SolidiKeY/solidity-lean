@@ -402,6 +402,384 @@ nodes, never a type.  Every rule writes at most two elements an update
 (`Stmt.step_tmSize_le`), one lemma per arm.  The terms inside a program a
 rule emits (a premise's continuation) are not bounded by it.
 
+## M6 · The automation gate (2026-10-24)
+
+The goal set on 2026-10-24: every program the elaborator accepts (loops
+closed by their invariants) and every specification is decided without
+enumerating inputs, symbolic execution polynomial in the text, the closer
+terminating with a proof or a counterexample; CI fails on anything else.
+
+**What blocks the theorem as stated** (reported, not worked around):
+
+* KeY's `int` (`Srt.kint`) is unbounded and `BinOp.zArith` admits `*`;
+  a formula's parameters are read universally.  Validity of
+  `∀ x̄. p(x̄) ≠ 0` over the integers is undecidable (Matiyasevich), so no
+  terminating closer is complete on that fragment, quantifiers or not.
+* A counterexample is a concrete typed state, certified by kernel
+  evaluation.  One that needs a storage array of `2^255` elements cannot be
+  built: `invariantClosedFormSum` is false in the model (`s + 2` overflows
+  at `i = 2^255 − 1` when `values.length ≥ 2^255`, its invariant leaf shows
+  it), yet nothing refutes it.  A complete closer needs symbolic
+  counterexamples here.
+* Not impossible, but false today: `split` duplicates the continuation
+  (`n` sequential `if`s give `2^n` leaves), a call carries its callee's
+  body (nested calls grow exponentially; a callee that computes values runs
+  by its summary, below), and literal-bounded loops are
+  unrolled (`docs/loops.md`).
+
+**The gate**, `node scripts/check-automatic.mjs --strict` (CI, after the
+TestSuite build): every TestSuite obligation is derived by `sol_prove`, its
+step budget and the leaf replay `sol_prove?` writes, or `sol_auto_theorem`,
+or refuted by `sol_refute` (in `TestSuite/Refuted.lean`, from `¬ ⊨ᶠ φ`:
+false in the model, not merely underivable), and none is pending; its counts
+must be the `Report.lean` pin's; and no TestSuite module the build compiled
+took past its budget (`--build-log`, 300 s each by default; CI tees the
+TestSuite build's log).  It fails today, on the one pending obligation.  Built this round:
+
+* `sol_refute` (`Tools/Counterexample.lean`): `¬ (⊢ φ)` or `¬ ⊨ᶠ φ` from a
+  certified counterexample, through `Proves.not_of_not_valid` (soundness
+  read backwards).  `#solkey_obligations` counts `N.f.refuted`
+  (`TestSuite/Refuted.lean`, ten).  The search now draws array shadows
+  where `wt` admits them (`TGen.shadow`: elements of a reference type),
+  which refutes the seven obligations that read an appended slot as its
+  default (solkey's `SYMBOLIC_TAIL_OPENS`); a witness prints them
+  (`fmtFoldShadow`, `[… | past the end: …]`).
+* `sol_auto_theorem n : φ` (`Calculus/Closers.lean`): the walk and each leaf
+  with heartbeats of their own, the declaration added after.  A tactic
+  cannot do this: whatever runs after it is checked against the
+  declaration's count since its start.  `bitAndSymbolic` and
+  `invariantForBreakSkipsUpdate` and `invariantQuantifiedOverPrefix`
+  (`TestSuite/Derived20.lean`).
+* `sol_close`: the write facts and reads are skipped past 10 M heartbeats
+  on a leaf past a `{havoc}` (`sol_close_saturate`, `sol_skip_after`; a
+  budget is `Core.Context.maxHeartbeats`, not the option), so an
+  invariant's exit leaf closes by the invariant and the guard
+  (`invariantOverStorageWrites`, no hand proof left); a last fallback
+  splits an `Option` read a premise and the goal both ask of
+  (`sol_close_some_cases`).
+
+* The closer's bounded steps are bounded now.  Every budget was set as an
+  option (`withOptions … maxHeartbeats`), which `checkMaxHeartbeats` never
+  reads (it reads `Core.Context.maxHeartbeats`); `sol_close_all`'s guards
+  and instance search, `sol_close_captures` and `sol_close_nonlin` now set
+  the context's limit.  `sol_close_quantified`'s nominal 20000 is gone: it is
+  bounded by the declaration's heartbeats, which is all it ever was, and the
+  ABI scans of `Examples/Tactics/ArrayScans.lean` need most of them.
+  Each step's limit is also capped at what the enclosing limit has left
+  (`Budget.within`, `Calculus/Budget.lean`; `sol_skip_after`,
+  `sol_within`, `sol_close_join_steps`, the `sol_close_all`,
+  `sol_close_captures`, `sol_close_save_cases` and `sol_close_nonlin`
+  steps): a fresh count alone let a step started at 150 k of 200 k spend
+  another 100 k, and the declaration's next check then threw a timeout
+  nobody catches.
+* `sol_leaf_keep` (`Seq.leafValid (keepAll := true)`): the leaf without the
+  `allLeftHide` pre-pass, which instantiates a `∀` premise at the terms in
+  its scope and hides it, losing the instance a goal's own `∀` opens later;
+  the last of `Derive.leafTacs`.
+
+* `sol_close_quantified`'s last alternative, `sol_close_save_cases`
+  (`Calculus/CloseScoped.lean`): solkey's `selectOnSaveCons` at a symbolic
+  index.  The Theory reads of the goal and of the `∀` premise's instances
+  are unfolded alike, a written storage is read as the write
+  (`Storage.obs_write`), a read the leaf knows as the Theory's
+  (`Storage.obs_word_ref_some`), and the read is split on whether it goes
+  through the write (`CloseS.copyTo_word_ite`): the word written, else the
+  old storage's read, which an instance gives.  `sol_close_all` also
+  instantiates at the goal's own numeric locals past its cap of eight.
+  `invariantQuantifiedOverPrefix` closes so.
+
+* The memory closer reads a copy of storage below its root (`copyObjN`,
+  `copyPathRd?`, solkey's `readFromCopyToStorage` and
+  `readFromCopyToStorageIdentity` `\then`; `Theory/Typed/MemMirror.lean`)
+  and takes a read's guards out of its address (`LTm.hoistA`): the three
+  `memoryIndexWrite*` obligations (`TestSuite/Derived21.lean`, `sol_prove`).
+
+Pending (one): `invariantClosedFormSum` (above).
+
+**The exponential, measured** (`#proof_tree`, `StandardExample`, the
+program `uint x = 0;` then `n` statements `if (vᵢ == 1) { x = x + 1; };`,
+post `x <= n`):
+
+| n | nodes | branches |
+|---|---|---|
+| 1 | 10 | 2 |
+| 2 | 23 | 4 |
+| 3 | 48 | 8 |
+| 4 | 97 | 16 |
+| 5 | timeout (200000 heartbeats) | |
+
+`ifElseSplit` copies the continuation into both goals, so `n` conditionals
+in sequence give `2^n` leaves and about `6·2^n` nodes.  What the polynomial
+bound needs, each a change to the calculus (every derivation's walk and
+`Examples/ProofTree.lean`'s pins move):
+
+1. **A join after a conditional** (done, 2026-10-24, for accumulations;
+   below): run both branches to the end of the `if` as updates, then go on
+   once under the merged update `{x := c ? x₁ : x₂}` (KeY's join rules,
+   `ifThenElse` in the update), with each branch's failures (revert, panic)
+   kept as its own goal; a branch that halts the function needs no join.
+   The rest of the program is then executed once, and the formula grows by
+   one conditional per joined local.
+2. **Calls by summary** (done, 2026-10-24, for callees that compute values;
+   below): a callee's body inlined at every call makes nested calls
+   exponential in the text; the summary is the callee run once as an
+   update of its return variable, applied at each call.
+3. **Loops by their invariants only**: a loop with literal bounds is
+   unrolled today (`docs/loops.md`); under the theorem it needs an invariant.
+
+**The join** (`LeanTaclet.ifElseJoin`, `Calculus/Rules.lean`; its arm
+`iteStep` and `Upd.ifJoin?`, `Calculus/Arms.lean`; its soundness
+`sound_iteJoin`, `Calculus/SoundControl.lean`).  An `if` on a simple
+condition whose branches are each empty or one assignment of a value local
+(`Prog.joinArm?`) runs as one parallel update, a local the `then` branch
+sets to `e` set to `c ? e : v`, one the `else` branch sets to `c ? v : e`,
+one both set to `c ? e₁ : e₂` (`Upd.ifJoin`).  Such a branch reads its
+value lazily (`Tm.app3 .ite`, only the side `c` picks is evaluated), never
+panics, never diverges and calls nobody, so the update fails exactly where
+the branch `c` picks reverts (`ifJoin_agrees`), which is
+`Premise.sound_update`'s condition.  Which rule an `if` gets is decided by
+the statement alone: `ifElseSplit` carries the converse side condition
+(`Upd.ifJoin? … = none`), `Stmt.ite.ruleExists` covers both.
+
+The gate (`Upd.ifJoin?`): one branch empty, the other empty or an
+accumulation, a local set from its own value (`JoinArm.accumulates`:
+`x = x + 1;`).  Joining every joinable `if` was tried first and broke the
+leaves of `if (c) { x = 2; } else { x = 1; }` (`CloseTests`'
+`whichWriteWins`), of conditional values (`ternaryToIf`: `Bytes`,
+`SignedCasts`, tuple returns) and of lowered `break`/`continue` flags
+inside invariant loops (`Loops`' `breakKeepsBound`, `LoopsImport`'s
+`invariantBreak`): their two cases are cheaper for the closers than the
+conditional term, so they split as before.  An accumulation's split copies
+the rest of the program once per case of every `if` before it, which is
+what the join removes.  The solkey fragment (`Stmt.inSolkey`) leaves out
+every `if` of the joined shape (`Prog.joinShape`).
+
+**The leaf.**  The kernel closer lifts the conditionals into case splits
+(`LFml.decideLift`, `Calculus/DecideComplete.lean`) when there are at most
+`liftConds` of them (each lift splits three ways, and the update terms,
+substituted, double with each join).  Past that, `sol_close` reads each
+joined value as a fresh value and its defining fact (KeY's join with the
+conditional in the antecedent, `sol_close_join`,
+`Calculus/CloseScoped.lean`): `X = some a` as an implication per condition
+and a checked value as its check and its integer, `omega` reading the facts;
+a leaf whose conditionals the evaluation has already decided (a lowered
+`break`'s `if (!brk) { i = i + 1; }`, `brk` known) reads the checked value
+left (`if c then some v else none`) the same way, or goes on to
+`sol_close`'s arithmetic (`sol_close_finish`) without being evaluated
+again.  The TestSuite's `invariantVariantSkipsBreakIteration` replay
+(`TestSuite/Derived15.lean`) has four leaves where it had six.
+The same family, joined (`Examples/Tactics/Join.lean` pins `n = 1, 2, 5`
+and proves `n = 1…12`), before `sol_close_join_steps`:
+
+| n | nodes | branches | leaf closed by |
+|---|---|---|---|
+| 1 | 8 | 1 | `sol_prove` (kernel, lifted) |
+| 2–5 | 5n + 3 | 1 | `sol_leaf; sol_close` |
+| 6 | 33 | 1 | past 200000 heartbeats (≈ 11 s: evaluation 6 s, `omega` 2 s) |
+| 7 | 38 | 1 | past 200000 heartbeats (≈ 22 s: evaluation 10 s, `omega` 8 s) |
+| 8 | 43 | 1 | past 200000 heartbeats |
+
+The walk is linear (`5n + 3` nodes, one leaf); the leaf was not.
+`sol_close`'s evaluation is one `simp` over the whole leaf, and grew about
+cubically (eval alone 10 k, 49 k, 152 k, 372 k heartbeats at `n = 2, 4, 6,
+8`): each update's rest is entered under a fresh binder, so `simp`'s cache
+misses the terms below it, and they are visited again for each rewrite
+above (`CloseS.landedAll_const` tried 210, 1235, 3648, 8025 times).
+`omega` then split each joined value's two cases (`2^n`).
+
+**One update at a time** (`sol_close_join_steps`, `CloseJ` in
+`Calculus/CloseScoped.lean`; 2026-10-24).  The leaf `σ ⊧ {U₁} … {Uₙ} φ` is
+read one binder or update at a time, the rest held opaque: the goal
+becomes `∀ ψ, rest = ψ → σ ⊧ {U₁} ψ` (built directly, no `kabstract`),
+`close_rw_s` evaluates `U₁` alone, what it leaves in front is opened
+(binders, premises, landed states; a value as a fresh `a` and its defining
+fact `X = some a`: under the box whatever it returns, `CloseS.wp_box_optRes`,
+under the diamond with a goal that it returns, `CloseS.exists_some_of`), and
+`rest` comes back by its equation (`replaceTargetEq`).  Every value is
+named once, and the leaf's terms stay the size of one update.  Then, for
+each defining fact (KeY's join, the conditional in the antecedent):
+
+* its cases read as `omega` reads them (`sol_close_join_fact`, on a copy);
+  where every case's value is one base plus a literal offset, the interval
+  `base + lo ≤ a ≤ base + hi` (`hint`), and with the base's own absolute
+  interval, `L + lo ≤ a ≤ H + hi` (`hintA`) — each by `omega` in a local
+  context cut down to the facts it needs (`CloseJ.omegaIn`), so a call
+  costs the same at every step;
+* a value that must return (`X.isSome`, the diamond) is split on its
+  conditions by `CloseS.isSome_cond` and `CloseS.isSome_ite`, a halting
+  case refuted by `omega` from its conditions and the absolute intervals of
+  the values they read.
+
+The post is evaluated the same way, then `omega` on the linear facts; only
+if that fails, `sol_close_finish` (the defining facts' cases), within 20000
+heartbeats of its own, so a false leaf fails at about the cost of a true
+one (`x <= 5` after six joins: 42 k).  Nothing is trusted: each step is a
+tactic whose proof the kernel checks, and the three new lemmas
+(`CloseS.isSome_cond`, `CloseS.isSome_ite`, `CloseS.wp_box_optRes`) are
+proved.  The same leaves under the box, and with offsets other than one
+(`x = x + 2` on every other `if`, `n = 7`: 28 k), close the same way.  `sol_close` tries it first on a leaf of at least
+`CloseJ.stepsMin` (two) joined updates (`CloseJ.countJoins`), within a
+budget of its own (`CloseJ.budget`), restoring the leaf where it does not
+close it.  Then the join alternative, on a leaf with at least one joined
+update (an update whose value is conditional, not a specification's
+ternary in the post: `sol_close_has_ite`), within 160 k heartbeats of its
+own (`sol_within`) and at most `joinMaxCases` (64) cases split in all
+(`splitBoolConds`; it bounded the depth before, `2^n` cases).  A leaf of
+more than `CloseJ.wholeMax` (five) joined updates is never evaluated whole
+(`sol_close_few_joins` guards the join alternative, `sol_close_quantified`
+and the last alternative): those run past the heartbeats there rather than
+fail, so `sol_close` fails where the steps do, a false leaf of six joins
+at 43 k (`Examples/Tactics/Join.lean`, `fail_if_success`).
+
+Measured (heartbeats in thousands, one declaration each, default
+`maxHeartbeats`; walk `sol_prove`, leaf `sol_leaf; sol_close`):
+
+| n | walk | leaf | path | leaf by `sol_close_join_steps` |
+|---|---|---|---|---|
+| 1 | 3.3 (0.26 s) | — | kernel | — |
+| 2 | 2.4 (0.18 s) | 8.1 (0.33 s) | steps | 7.5 (0.29 s) |
+| 3 | 3.1 (0.24 s) | 11.3 (0.42 s) | steps | 11.0 (0.42 s) |
+| 4 | 4.0 (0.31 s) | 15.1 (0.60 s) | steps | 14.9 (0.55 s) |
+| 5 | 5.1 (0.41 s) | 19.2 (0.71 s) | steps | 18.9 (0.70 s) |
+| 6 | 6.4 (0.53 s) | 23.5 (0.85 s) | steps | 23.3 |
+| 7 | 8.2 (0.65 s) | 27.9 (1.0 s) | steps | 27.9 |
+| 8 | 10.8 (0.81 s) | 32.8 (1.2 s) | steps | 32.8 |
+| 9 | 14.8 (1.1 s) | 38.0 (1.4 s) | steps | 38.0 |
+| 10 | 29.9 (2.4 s) | 43.6 (1.6 s) | steps | 43.6 |
+| 11 | 42.4 (3.5 s) | 49.5 (1.8 s) | steps | 49.5 |
+| 12 | 43.6 (3.5 s) | 55.9 (2.0 s) | steps | 55.9 |
+
+(`n = 14`: leaf 69.7.)  The leaf by steps grows by about 5 k a join, a
+little more each time (the locals' stack every update reads grows with
+the parameters): quadratic with a small coefficient.  The walk levels off
+near 44 k from `n = 11` (`sol_prove`'s bounded attempts at the leaf).  The
+leaf column for `n = 2…5` was the join alternative's until the review of
+2026-10-24 (21.0, 45.9, 88.9 and 162.5 k: `n = 5` used 162 k of the 200 k,
+past the alternative's budget of its own), with `CloseJ.stepsMin` six; it
+is the steps' since (`stepsMin` two).
+
+What stays open: a leaf whose formula is not a chain of binders and
+updates over its post (a premise `pre → {U} φ`, a conjunction) is peeled
+only up to it, the rest evaluated whole; a joined value whose cases are not
+offsets of one base (`c ? y : z`) gets no interval, and its cases are split
+by `sol_close_finish` as before.
+
+**Calls by summary** (`LeanTaclet.internalCallSummary`, `Calculus/Rules.lean`;
+the summary `CallRet.summary?`, `Calculus/CallSummary.lean`; its soundness
+`Premise.sound_callSummary`, `Calculus/SoundSummary.lean`; 2026-10-24).  A
+call statement carries its callee's body, so the family `f₀(x) = x + 1`,
+`fₖ(x) = fₖ₋₁(fₖ₋₁(x))` inlines `2^k` bodies at `y = fₖ(a);`.  Measured
+before (`#proof_tree`, `a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, inlining):
+
+| k | nodes | time | leaf |
+|---|---|---|---|
+| 1 | 25 | 1.6 s | closed |
+| 2 | 53 | 9.4 s | open (the closer gave up on `{se1 := a} … {y := se2}`) |
+| 3 | 109 | 2.5 s | open |
+| 4 | 221 | 6.4 s | open |
+| 5, 6 | `7·2^(k+1) − 3` (445, 893), not run | | |
+
+The rule: a call `y = f(args);` of one value assigned to a value local,
+its arguments simple, whose callee calls (`Prog.hasCall`; a body that does
+not runs once per call either way) and has a summary, is the update
+`{ y := R(args) }`.  The summary `R` is the callee's body run symbolically
+once, in its own frame (`Prog.sym`, `Stmt.sym`, by the recursors): every
+value local holds a term over the frame's locals; `T v = e;`, `v = e;`,
+blocks and calls of the same kind are run (a call in the body read through
+its own callee's summary at its arguments, `CallRet.sym`), anything else
+(`if`, `require`, a loop, a write to the state, an external call, a
+storage or memory local) has no summary and the call is inlined as before
+(`internalCallExpand`, whose side condition is `CallRet.summary? … = none`,
+so a call still has one rule, `Stmt.call.ruleExists`).  Literal offsets are
+folded as the terms are built (`Tm.norm`, `Op2.mk2`: `(u + c₁) + c₂ ⇝
+u + (c₁ + c₂)` at `uint`, KeY's `polySimp` adding literal summands), so
+`fₖ`'s summary is `x + 2^k`, not `2^k` nested additions.
+
+*Failure.*  A term that may revert (an overflow, a failed read) is owed by
+the local that holds it (its pending flag, `SEnv`) until a term that reads
+it wherever it is read (`Tm.strictReads`: not under `?:`, `&&`, `||`) takes
+it over; a pending local is never overwritten or popped, and at the end of
+the body only the return variable may owe.  So the update fails exactly
+where the call reverts: `Prog.sym_sound` (from a frame that agrees with the
+typed one, the run ends in one that agrees, or reverts where an owed term
+does not return; what is owed after is owed before), `CallRet.sumOf_sound`,
+`CallRet.summary_agrees`.  A body that drops a value it may revert on
+(`uint t = x + 1;` never read) has no summary.  The gate (`Tm.sumGate`)
+also asks that the summary read no local but a value local (`Tm.valOnly`:
+value locals and the nullary symbols, literals and the state's roots
+`storage`, `env` (`msg.sender`, …) and `memory`, so a callee reading
+storage or the sender has one; no reference local), push nothing and be
+smaller than `16 * body.size + 16`, so `Stmt.step_tmSize_le` still holds
+(`CallRet.summary?_bounded`).  The tools compute the summary by the kernel
+(`summary_cond`, `kernelNF`, `Calculus/Rules.lean`; `ruleOf?`): the
+elaborator's reduction re-runs a nested callee's summary once per call
+path.  `Kernel.whnf` runs outside the heartbeats, so `summary_cond` (and
+`ruleOf?`) hands the kernel only a side condition of at most
+`summaryNodes` (200 000) distinct subterms (`fewNodes`), its own and the
+converse `= none` alike, and reads back at most as many terms, each once
+(`kernelNF` memoised); past that the condition is left to `side_cond`'s
+other alternatives, which are bounded.  The solkey fragment leaves out a call with a summary
+(`CallRet.sumOK`), so `⊢ₖ` still fires solkey's taclets only.
+
+After (`Examples/Tactics/CallSummary.lean` pins `k = 1, 6` and proves
+`k = 1 … 6`; time of `#proof_tree` and of `sol_prove?`, one declaration
+each):
+
+| k | nodes | `#proof_tree` | `sol_prove?` | leaf |
+|---|---|---|---|---|
+| 1 | 5 | 0.33 s | 0.38 s | `{ y := a + 2 } y >= a`, closed |
+| 2 | 5 | 0.36 s | 0.39 s | `a + 4` |
+| 3 | 5 | 0.50 s | 0.43 s | `a + 8` |
+| 4 | 5 | 0.77 s | 0.48 s | `a + 16` |
+| 5 | 5 | 1.34 s | 0.59 s | `a + 32` |
+| 6 | 5 | 2.43 s | 0.80 s | `a + 64` |
+
+The walk is constant (one node a call) and the leaf one update of one
+addition.  What still grows is the summary's computation: a call statement
+carries its callee's inlined bodies (the elaborator inlines, `Stmt.call`),
+a tree of `2^k` copies of `f₀`'s, which the kernel's evaluation of
+`Prog.sym` walks; the times above grow by about `1.8` a level from it.
+Making that polynomial too needs the bodies named once per function (a
+call carrying its callee by name and a table of summaries proved once per
+function), a change to the syntax, not to the calculus.
+
+**What a summary does not share** (review, 2026-10-24).  A summary is one
+term over the callee's frame, and a call in the body substitutes its
+callee's term at its arguments: only literal offsets are folded
+(`Tm.norm`), so the summary stays small only where the callee's term
+does.  In the family `f₀(x) = x * 3`, `fₖ(x) = fₖ₋₁(fₖ₋₁(x))`, `fₖ`'s
+summary is `x * 3 * … * 3`, `2^k` checked multiplications, and
+`Tm.sumGate` passes it (it is measured against the inlined body, itself
+`2^k` bodies).  Measured (`a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, a
+scratch module, heartbeats in thousands, one declaration each; walk: the
+four rules to the leaf, leaf: `sol_leaf; sol_close`):
+
+| k | walk | leaf |
+|---|---|---|
+| 1 | 1.3 (0.08 s) | 10.4 (0.50 s) |
+| 2 | 1.7 (0.11 s) | 19.8 (0.82 s) |
+| 3 | 2.7 (0.18 s) | 79.4 (3.0 s) |
+| 4 | 4.7 (0.34 s) | `sol_close_eval` alone not done after 6 min, at `maxHeartbeats 50000` |
+| 5 | 8.7 (0.69 s) | not run |
+| 6 | 17.0 (1.4 s) | not run |
+
+The walk is five nodes for every `k`, and grows with the inlined bodies
+the kernel's evaluation of the summary walks (about 2 a level).  The leaf
+is `{ y := a * 3 * … * 3 }` with `2^k` multiplications, and its
+evaluation reads each one's wrap (`uintOf`, `if 0 ≤ v ∧ v < 2^256 then v
+else 0`) with its operand three times, so the evaluated leaf, as a tree, has
+up to `3^(2^k)` nodes (`k = 3`: 228 000 characters printed); at `k = 4`
+it runs in a part of the evaluation that does not check heartbeats.  So the
+summaries are polynomial only for callees whose terms `Tm.norm` keeps the
+size of one body (literal offsets); the doubling family above is one.
+Sharing would make the leaf linear in the call sites whatever the callee:
+each call's result a fresh value with its defining fact
+(`{ t₁ := x * 3 } { t₂ := t₁ * 3 } …`, KeY's contract applied once per
+call) rather than its callee's term substituted.  That is a summary made
+of a sequence of updates over fresh locals, not one term over the frame —
+a new update shape and a new soundness argument in place of
+`Prog.sym_sound` — and is not done.
+
 ## Review (2026-10-20)
 
 A read-only review pass (finder and skeptic per area) confirmed six

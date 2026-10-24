@@ -407,6 +407,8 @@ theorem revertData_noPanic (d : List (RevPart C Γ)) (σ : State C Γ) :
       | bytes => exact TRes.NoPanic.ok _
       | sel => exact TRes.NoPanic.ok _
       | word v => exact (v.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
+      | mem kind src =>
+        exact ((MPath.var src rfl).mvalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
   refine (hm d).bind fun bs => ?_
   cases h : bs.flatten <;> exact fun h' => nomatch h'
 

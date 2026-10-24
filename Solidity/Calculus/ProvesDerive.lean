@@ -1,4 +1,4 @@
-import Solidity.Calculus.LeafDerive
+import Solidity.Calculus.Rigid
 import Solidity.Calculus.AllLeft
 
 /-!
@@ -40,8 +40,7 @@ A leaf behind updates of either modality is read: an update's reading asks
 only of the typed states it may end in.
 
 A split whose branch the bounded scoped closer refutes keeps only the other branch,
-the refuted one closed by `Proves.closeFalse` (`refuteS`, on the premises the
-condition reaches, `Calculus/LeafDerive.lean`): `returnEarly`
+the refuted one closed by `Proves.closeFalse` (`refuteLanded`, retaining the shared prefix through the live branch, `Calculus/LeafDerive.lean`): `returnEarly`
 runs one path of its callee, not 27.  The scoped closer keeps the
 parameters bound, its reduction reading each at its type.  An explicit
 `∀ uint x;` is marked on a leaf left (decision 28): the tactic counts the
@@ -96,7 +95,7 @@ def freshK {Γ : Ctx} (k : Nat) (φ : Fml C Γ) : Nat := max (max k φ.maxIdx) C
 /-- The goals of a rule's premise, as the `Proves` rule of its kind has
 them; `r` walks a goal, given the largest index of its context (`k` that of
 `H`).  A split's branch whose context `x` refutes is closed by `closeFalse`
-and not walked (`refuteS`). -/
+and not walked (`refuteLanded`). -/
 def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat))
     (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (k : Nat)
     (m : Modality) (ω : Prog C Γ' Γ₁)
@@ -183,7 +182,7 @@ def modal (R : RuleSet) (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ �
 /-- The walk of the sequent `H ⊢ φ`, `k` the largest index `H` binds
 (`Hyps.maxIdxH`): the leaves `leaf` leaves, or `none` when a step has no
 rule, a leaf does not close, or `n` or `b` runs out; `rf` says which of a
-split's branches is refuted (`refuteS`). -/
+split's branches is refuted (`refuteLanded`). -/
 def runK (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
     (rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) :
     Nat → {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat)
@@ -327,7 +326,7 @@ def fuel : Nat := Derive.budget
 leaf closes.  A split's branch is refuted as its leaf is read. -/
 def residueWithin (steps : Nat) (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ)
     (φ : Fml C Γ) : Option (List (SLeaf C)) :=
-  (run R leafS refuteS steps H φ steps).map (·.1)
+  (run R leafS refuteLanded steps H φ steps).map (·.1)
 
 def residue (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (SLeaf C)) :=
   residueWithin fuel R H φ
@@ -353,7 +352,7 @@ rule. -/
 def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
   let leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List (SLeaf C)) :=
     fun H φ => if walk then some [⟨_, H, φ⟩] else leafS H φ
-  (run .all leaf refuteS fuel .nil φ fuel).map fun (ls, _) =>
+  (run .all leaf refuteLanded fuel .nil φ fuel).map fun (ls, _) =>
     (ls.length, ls.foldl (fun m l => max m l.2.1.storageWrites) 0)
 
 /-- `residue`, the leaves quoted (`leafQuoteS`), `np` the sequent's
@@ -361,7 +360,7 @@ parameters (their marks, `Quote.qHyps`). -/
 def residueQuoteWithin (steps : Nat) (R : RuleSet) (c : Lean.Expr) (np : Option Nat)
     {Γ : Ctx} (H : Hyps C [] Γ)
     (φ : Fml C Γ) : Option (List Lean.Expr) :=
-  (run R (leafQuoteS c np) refuteS steps H φ steps).map (·.1)
+  (run R (leafQuoteS c np) refuteLanded steps H φ steps).map (·.1)
 
 /-- The closer's bounds on a leaf, which `sol_prove?` asks before it
 reduces it: the scoped closer's (`leafFitsOn`) on a leaf it reads; a leaf it
@@ -449,7 +448,8 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
     (hr : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', r H H.maxIdxH φ b = some (ls, b') →
       (∀ l ∈ ls, P l) → Proves C R [] H φ)
     {x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
-    (hx : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), x H c = true → Proves C R [] (H.pre c) .ff)
+    (hx : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), x H c = true →
+      ∀ {a φ : Fml C Γ}, Proves C R [] (H.pre a) φ → Proves C R [] (H.pre c) .ff)
     {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (m : Modality) (s : Stmt C Γ Γ') (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₂) (φ : Fml C Γ₂) (p : Premise C Γ Γ')
     (d : s.stepIn R (H.fresh (.modal m (.cons s ω) κ φ)) m = some p) {b : Nat} {ls : List α}
@@ -468,9 +468,9 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
         exact .guardedUpdates (hR := hR) hd this.1 this.2
       · simp only [premise, h1, h2, cond_false, cond_true] at h
         exact .guardedUpdates (hR := hR) hd (hr _ _ _ _ _ h hl)
-          (.closeFalse (hx H (.not c) h2))
+          (.closeFalse (hx H (.not c) h2 (hr _ _ _ _ _ h hl)))
     · simp only [premise, h1, cond_true] at h
-      exact .guardedUpdates (hR := hR) hd (.closeFalse (hx H c h1)) (hr _ _ _ _ _ h hl)
+      exact .guardedUpdates (hR := hR) hd (.closeFalse (hx H c h1 (hr _ _ _ _ _ h hl))) (hr _ _ _ _ _ h hl)
   | unfold P e => exact .unfold (hR := hR) hd (hr _ _ _ _ _ h hl)
   | bind x t P => exact .bind (hR := hR) hd (hr _ _ _ _ _ h hl)
   | split bk c c' P Q =>
@@ -480,9 +480,9 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
         have := both_sound h hl (hr _ _) (hr _ _)
         exact .split (hR := hR) hd this.1 this.2
       · simp only [premise, h1, h2, cond_false, cond_true] at h
-        exact .split (hR := hR) hd (hr _ _ _ _ _ h hl) (.closeFalse (hx H c' h2))
+        exact .split (hR := hR) hd (hr _ _ _ _ _ h hl) (.closeFalse (hx H c' h2 (hr _ _ _ _ _ h hl)))
     · simp only [premise, h1, cond_true] at h
-      exact .split (hR := hR) hd (.closeFalse (hx H c h1)) (hr _ _ _ _ _ h hl)
+      exact .split (hR := hR) hd (.closeFalse (hx H c h1 (hr _ _ _ _ _ h hl))) (hr _ _ _ _ _ h hl)
   | check c =>
     have := both_sound h hl (hr _ _) (hr _ _)
     exact .check (hR := hR) hd this.1 this.2
@@ -526,7 +526,8 @@ theorem leaf_sound {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ} {b : Nat} {ls :
   exact hleaf H φ _ h' hl
 
 variable {rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
-  (hrf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), rf H c = true → Proves C R [] (H.pre c) .ff)
+  (hrf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), rf H c = true →
+    ∀ {a φ : Fml C Γ}, Proves C R [] (H.pre a) φ → Proves C R [] (H.pre c) .ff)
 include hrf in
 /-- **The walk is a derivation**, its index the context's largest. -/
 theorem runK_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (b : Nat)
@@ -642,7 +643,7 @@ theorem Proves.of_residueWithin (steps : Nat) {R : RuleSet} {Γ : Ctx} {H : Hyps
   cases he
   exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
     Seq.leafS_sound
-    (fun H c h => Seq.refuteS_sound H c h)
+    (fun {_} H c h {_ _} live => Seq.refuteLanded_sound H c h live)
     _ H φ _ _ _ hr hl
 
 /-- `Proves.of_residueWithin` at the walk's full fuel. -/
@@ -685,9 +686,14 @@ partial def paramCount (H φ : Expr) : MetaM (Option Nat) := do
     else unless e.isAppOfArity ``Hyps.bind 7 do return some n
   return (← Symex.paramCount φ).map (n + ·)
 
+/-- How `prove`'s error over a walk longer than its `oneCheck` begins. -/
+def longWalkNote : String := "sol_prove: a walk of more than"
+
 /-- `sol_prove` on the goal `g`, `Proves C R [] H φ`: the goals it
-leaves, one per leaf the closer leaves, each the walk's own sequent. -/
-def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none) : MetaM (List MVarId) := do
+leaves, one per leaf the closer leaves, each the walk's own sequent; a walk
+of more than `oneCheck` steps is an error (`longWalkNote`). -/
+def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none)
+    (oneCheck : Nat := fuel) : MetaM (List MVarId) := do
   if let some steps := steps? then
     unless 0 < steps && steps ≤ fuel do
       throwError "sol_prove: steps must be between 1 and {fuel}"
@@ -734,6 +740,9 @@ def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none) : Meta
   let some (steps, leaves) := chosen
     | throwError "sol_prove: the walk does not reach the end of the sequent: a step with no \
         rule, or more than {steps?.getD fuel} steps"
+  if oneCheck < steps then
+    throwError "{longWalkNote} {oneCheck} steps, past one kernel check; \
+      `sol_prove (chunk := n)` checks it in chunks"
   if leaves.isEmpty then
     let h ← try lemmaFor steps nil
       catch e => throwError "sol_prove: the kernel rejects the walk:{indentD e.toMessageData}"
@@ -849,7 +858,7 @@ computed and quoted (`Symex.normValid`); no modality left
 (`Fml.modalFree`, checked by the kernel).  Where a premise of `H` is a `∀`,
 each such premise is instantiated first (`allLeft`, `Hyps.instAll_valid`)
 at the literals the leaf indexes with (`allLeftLits`). -/
-def leafValid : TacticM Unit := withMainContext do
+def leafValid (keepAll : Bool := false) : TacticM Unit := withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
   let_expr Proves C R Γ₀ Γ H φ := ty | throwError "sol_leaf: not a scoped sequent"
@@ -873,7 +882,7 @@ def leafValid : TacticM Unit := withMainContext do
       catch _ => throwError "sol_leaf: a modality is left in the leaf"
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Fml.Valid) C ψ) (← g.getTag)
   g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, g', hm])
-  match ← allLeftLits H φ with
+  match ← if keepAll then pure none else allLeftLits H φ with
   | none => replaceMainGoal [← Symex.normValid g'.mvarId!]
   | some ts =>
     let H' := mkAppN (mkConst ``Hyps.instAll) #[C, nilCtx, ts, Γ, H]
@@ -889,6 +898,7 @@ leaf by it): `Seq.leafValid`. -/
 elab_rules : tactic
   | `(tactic| sol_leaf) => Seq.leafValid
   | `(tactic| sol_leaf_wt) => Seq.leafValid
+  | `(tactic| sol_leaf_keep) => Seq.leafValid (keepAll := true)
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove` on a scoped sequent `H ⊢ φ` (`Proves C R [] H φ`,

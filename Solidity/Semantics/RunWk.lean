@@ -1285,6 +1285,11 @@ theorem RevPart.evalT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (τ : State C Γ) (d : T
   | .bytes _ => rfl
   | .sel _ => rfl
   | .word v => by simp only [RevPart.wk, RevPart.evalT, Val.evalT_wk]
+  | .mem kind src => by
+    simp only [RevPart.wk, RevPart.evalT]
+    rw [show (MPath.var (src.wk h) rfl).mvalT (τ.lift h d) =
+      (MPath.var src rfl).mvalT τ from MPath.mvalT_wk h τ d (.var src rfl)]
+    rfl
 
 theorem TRun.catchBytes_wk {Γ Δ ρ ps Γf : Ctx} (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ)
     (c : ExtCall C Γ) (rets : Binders ρ) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)

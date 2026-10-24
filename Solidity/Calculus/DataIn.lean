@@ -385,6 +385,7 @@ theorem RevPart.mapM_litData (σ : State C Γ) : (d : List (RevPart C Γ)) → {
     rfl
   | .sel _ :: _, _, h => nomatch h
   | .word _ :: _, _, h => nomatch h
+  | .mem _ _ :: _, _, h => nomatch h
 
 theorem revertData_dataS (d : List (RevPart C Γ)) {bs : List UInt8}
     (hd : RevPart.litData d = some bs) (σ : State C Γ) : (revertData d σ).DataS K ([bs], []) := by
@@ -435,6 +436,7 @@ theorem RevPart.mapM_pat (σ : State C Γ) : (d : List (RevPart C Γ)) → {p : 
         rw [List.flatten_cons]
         exact (Pat.matches_word _).append (RevPart.mapM_pat σ d hd ps' hr)
   | .sel _ :: _, _, h, _, _ => nomatch h
+  | .mem _ _ :: _, _, h, _, _ => nomatch h
 /-- An evaluated part carries no data: only a value's evaluation can fail,
 and it only reverts. -/
 theorem RevPart.mapM_revertOnly (σ : State C Γ) (l : List (RevPart C Γ)) :
@@ -448,6 +450,8 @@ theorem RevPart.mapM_revertOnly (σ : State C Γ) (l : List (RevPart C Γ)) :
     | bytes => exact TRes.RevertOnly.ok _
     | sel => exact TRes.RevertOnly.ok _
     | word v => exact (Val.evalT_revertOnly σ v).bind fun _ => TRes.RevertOnly.ok _
+    | mem kind src =>
+      exact (MPath.mvalT_revertOnly σ (.var src rfl)).bind fun _ => TRes.RevertOnly.ok _
 
 /-- A datum that cannot decode as `Error` (`RevPart.notError`) is none a
 `catch Error(string memory r)` keeps. -/

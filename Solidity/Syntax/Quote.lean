@@ -246,6 +246,9 @@ def RevPart.quote : RevPart C Γ → Lean.Expr
   | .bytes bs => mkAppN (mkConst ``RevPart.bytes) #[c, Γe, toExpr bs]
   | .sel sig => mkAppN (mkConst ``RevPart.sel) #[c, Γe, toExpr sig]
   | @RevPart.word _ _ p v => mkAppN (mkConst ``RevPart.word) #[c, Γe, toExpr p, Val.quote c Γe v]
+  | .mem kind src => mkAppN (mkConst ``RevPart.mem) #[c, Γe,
+      (match kind with | .raw => mkConst ``CatchKind.raw | .reason => mkConst ``CatchKind.reason),
+      Idx.quote Γe src]
 
 def CatchKind.quote : CatchKind → Lean.Expr
   | .reason => mkConst ``CatchKind.reason

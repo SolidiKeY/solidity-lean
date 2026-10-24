@@ -132,12 +132,213 @@ theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C 
   · show (TRun.ite c _ _ _ _ σ).map _ = _
     simp only [TRun.ite, hh]; rfl
 
+/-- What a joinable branch runs as. -/
+def JoinArm.runSt : JoinArm C Γ → TRes (State C Γ)
+  | none => .ok σ
+  | some ⟨_, i, r⟩ => (r.evalT σ).map fun x => σ.setLocal i x
+
+/-- A joinable branch runs as what it assigns: `{ x = x + 1; }` as
+`x = x + 1;`, `{ }` as nothing, its scope's end popping nothing. -/
+theorem Prog.joinArm?_runSt {Γ₁ : Ctx} (P : Prog C Γ Γ₁) {a : JoinArm C Γ}
+    (h : P.joinArm? = some a) : (Prog.runSt σ P).map (State.drop P.ext) = a.runSt σ := by
+  cases P with
+  | nil =>
+    cases h
+    rfl
+  | cons s ω =>
+    cases s <;> try cases h
+    rename_i i r
+    cases ω with
+    | nil =>
+      cases h
+      rw [Prog.runSt_single, Stmt.runSt_assignLocal]
+      show _ = (r.evalT σ).map _
+      cases r.evalT σ <;> rfl
+    | cons _ _ => exact nomatch h
+
+
+/-- A local set to the value it has (`x := x`) leaves the locals as they are. -/
+theorem LocsV.set_getV {t : LTy} (i : Idx Γ t) : σ.locV.set i (σ.getV i) = σ.locV := by
+  funext u j
+  by_cases h : i.toNat = j.toNat
+  · obtain rfl := Idx.ty_eq_of_toNat h
+    obtain rfl := Idx.toNat_inj i j h
+    exact LocsV.set_same _ _ _
+  · exact LocsV.set_ne _ i j h _
+
+/-- `v := t` sets `v` to what `t` reads. -/
+theorem Rhs.eval_val {p : PrimTy} (t : Tm C Γ (.val p)) : Rhs.eval σ (.val t) = t.eval σ := rfl
+
+/-- `c ? t : e` read where `c` is `bv`: `true ? 1 : x` is `1`. -/
+theorem Tm.eval_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (t e : Tm C Γ (.val p)) {bv : Bool}
+    (hc : c.eval σ = some bv) :
+    (Tm.app3 .ite c t e).eval σ = cond bv (t.eval σ) (e.eval σ) := by
+  show (c.eval σ).bind (fun cv => cond cv (t.eval σ) (e.eval σ)) = _
+  rw [hc]; rfl
+
+/-- One branch's assignment (`x = x + 1;`) against an update that sets its
+local to the value's term (`{x := x + 1}`). -/
+theorem joinArm_agrees_one {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p)
+    {X : Option (State C [] × LocsV C Γ)}
+    (hX : X = (r.lower.eval σ).map fun v => (σ.glob, σ.locV.set i v)) :
+    TRes.AgreesO (fun τ : State C Γ => (τ.glob, τ.locV))
+      (JoinArm.runSt σ (some ⟨p, i, r⟩)) X := by
+  subst hX
+  refine TRes.AgreesO.map (Val.lower_evalT σ r) fun x => ?_
+  show (σ.glob, σ.locV.set i x) = ((σ.setLocal i x).glob, (σ.setLocal i x).locV)
+  rw [State.locV_setLocal]
+  rfl
+
+/-- An empty branch (`{ }`) against an update that changes nothing. -/
+theorem joinArm_agrees_none {X : Option (State C [] × LocsV C Γ)}
+    (hX : X = some (σ.glob, σ.locV)) :
+    TRes.AgreesO (fun τ : State C Γ => (τ.glob, τ.locV)) (JoinArm.runSt σ none) X := hX
+
+/-- Two branches assigning different locals, `if (c) { x = 1; } else { y = 2; }`
+against `{x := c ? 1 : x ‖ y := c ? y : 2}`. -/
+theorem ifJoin_agrees_two (c : Tm C Γ (.val .bool)) {bv : Bool} (hc : c.eval σ = some bv)
+    {p q : PrimTy} (i : Idx Γ (.val p)) (ra : Val C Γ p) (j : Idx Γ (.val q)) (rb : Val C Γ q)
+    (hij : i.toNat ≠ j.toNat) :
+    TRes.AgreesO (fun τ : State C Γ => (τ.glob, τ.locV))
+      (if bv then JoinArm.runSt σ (some ⟨p, i, ra⟩) else JoinArm.runSt σ (some ⟨q, j, rb⟩))
+      (((Upd.nil.snoc (UpdElem.joinThen c i ra.lower)).snoc
+        (UpdElem.joinElse c j rb.lower)).applyP σ) := by
+  rw [applyP_snoc]
+  have h1 : Upd.applyV σ (Upd.nil.snoc (UpdElem.joinThen c i ra.lower)) =
+      ((Tm.app3 .ite c ra.lower (.pvV i)).eval σ).map fun v => (σ.globG, σ.locV.set i v) := by
+    rw [Upd.applyV_eq_applyVM]
+    show (some (σ.globG, σ.locV)).bind (fun p => UpdElem.applyV σ _ p.1 p.2) = _
+    rw [Option.bind_some, UpdElem.applyV_local]
+    rfl
+  rw [h1, Tm.eval_ite σ _ _ _ hc]
+  cases bv
+  · show TRes.AgreesO _ _ ((some (σ.globG, σ.locV.set i (σ.getV i))).bind _)
+    rw [LocsV.set_getV, Option.bind_some, UpdElem.applyV_local]
+    refine joinArm_agrees_one σ j rb ?_
+    rw [Rhs.eval_val, Tm.eval_ite σ _ _ _ hc]
+    cases rb.lower.eval σ <;> rfl
+  · refine joinArm_agrees_one σ i ra ?_
+    show Option.bind (Option.map _ (ra.lower.eval σ)) _ = _
+    cases ra.lower.eval σ with
+    | none => rfl
+    | some v =>
+      rw [Option.map_some, Option.bind_some, UpdElem.applyV_local, Rhs.eval_val,
+        Tm.eval_ite σ _ _ _ hc]
+      show some (σ.glob, (σ.locV.set i v).set j (σ.getV j)) = some (σ.glob, σ.locV.set i v)
+      have e : σ.locV.set i v = (σ.setLocal i v).locV := (State.locV_setLocal σ i v).symm
+      rw [e, ← State.getV_setLocal_ne σ i j hij v, LocsV.set_getV]
+
+/-- **The joined update computes what the branch the condition picks runs
+as**: `if (c) { x = x + 1; }` as `{x := c ? x + 1 : x}`. -/
+theorem ifJoin_agrees (c : Tm C Γ (.val .bool)) {bv : Bool} (hc : c.eval σ = some bv)
+    (a b : JoinArm C Γ) :
+    TRes.AgreesO (fun τ : State C Γ => (τ.glob, τ.locV))
+      (if bv then a.runSt σ else b.runSt σ) ((Upd.ifJoin c a b).applyP σ) := by
+  rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩
+  · cases bv <;> exact joinArm_agrees_none σ rfl
+  · simp only [Upd.ifJoin]
+    rw [applyP_local1]
+    cases bv
+    · refine joinArm_agrees_one σ j rb ?_
+      show Option.map _ ((Tm.app3 .ite c (.pvV j) rb.lower).eval σ) = _
+      rw [Tm.eval_ite σ _ _ _ hc]; rfl
+    · refine joinArm_agrees_none σ ?_
+      show Option.map _ ((Tm.app3 .ite c (.pvV j) rb.lower).eval σ) = _
+      rw [Tm.eval_ite σ _ _ _ hc]
+      show some (σ.glob, σ.locV.set j (σ.getV j)) = _
+      rw [LocsV.set_getV]
+  · simp only [Upd.ifJoin]
+    rw [applyP_local1]
+    cases bv
+    · refine joinArm_agrees_none σ ?_
+      show Option.map _ ((Tm.app3 .ite c ra.lower (.pvV i)).eval σ) = _
+      rw [Tm.eval_ite σ _ _ _ hc]
+      show some (σ.glob, σ.locV.set i (σ.getV i)) = _
+      rw [LocsV.set_getV]
+    · refine joinArm_agrees_one σ i ra ?_
+      show Option.map _ ((Tm.app3 .ite c ra.lower (.pvV i)).eval σ) = _
+      rw [Tm.eval_ite σ _ _ _ hc]; rfl
+  · simp only [Upd.ifJoin]
+    by_cases hpq : p = q
+    · subst hpq
+      rw [dif_pos rfl]
+      by_cases hij : i = j
+      · subst hij
+        rw [if_pos rfl, applyP_local1]
+        cases bv
+        · refine joinArm_agrees_one σ _ rb ?_
+          show Option.map _ ((Tm.app3 .ite c ra.lower rb.lower).eval σ) = _
+          rw [Tm.eval_ite σ _ _ _ hc]; rfl
+        · refine joinArm_agrees_one σ _ ra ?_
+          show Option.map _ ((Tm.app3 .ite c ra.lower rb.lower).eval σ) = _
+          rw [Tm.eval_ite σ _ _ _ hc]; rfl
+      · rw [if_neg hij]
+        exact ifJoin_agrees_two σ c hc i ra j rb (fun h => hij (Idx.toNat_inj _ _ h))
+    · rw [dif_neg hpq]
+      exact ifJoin_agrees_two σ c hc i ra j rb fun h => hpq (LTy.val.inj (Idx.ty_eq_of_toNat h))
+
+/-- A joinable branch (`{ x = x + 1; }`) never diverges. -/
+theorem JoinArm.runSt_noDiv (a : JoinArm C Γ) : (a.runSt σ).NoDiv := by
+  rcases a with _ | ⟨p, i, r⟩
+  · exact TRes.NoDiv.ok _
+  · exact ((Val.evalT_ends σ r).map _).1
+
+/-- A joined update (`{x := c ? x + 1 : x}`) pushes nothing: it is never out
+of gas. -/
+theorem Upd.ifJoin_pushFree (c : Tm C Γ (.val .bool)) (hc : c.pushFree = true)
+    (a b : JoinArm C Γ) : (Upd.ifJoin c a b).pushFree = true := by
+  rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩ <;> simp only [Upd.ifJoin]
+  all_goals (repeat' split) <;> simp only [Upd.pushFree, UpdElem.pushFree, Rhs.pushFree,
+    Tm.pushFree, Op3.pushFree, hc, Val.lower_pushFree, Tm.castV_pushFree, Bool.and_self]
+
+/-- **`ifElseJoin`**: an `if` whose branches are joinable runs as the joined
+update; `if (se) { x = x + 1; }` as `{x := se ? x + 1 : x}`. -/
+theorem sound_iteJoin (se : Simple C Γ .bool) {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) {U : Upd C Γ Γ} (h : Upd.ifJoin? se.lower thn els = some U) :
+    Premise.Runs m (.ite (.simple se) thn els) (.update U) σ := by
+  unfold Upd.ifJoin? at h
+  split at h
+  next a b ha hb =>
+    split at h
+    case isFalse => cases h
+    cases h
+    have hr : Stmt.runSt σ (.ite (.simple se) thn els) =
+        if boolT (se.evalT σ) then a.runSt σ else b.runSt σ := by
+      rw [Stmt.runSt_ite_simple, Prog.joinArm?_runSt σ thn ha, Prog.joinArm?_runSt σ els hb]
+    have hag := ifJoin_agrees σ se.lower (Simple.lower_evalT σ se) a b
+    have hnd : (if boolT (se.evalT σ) then a.runSt σ else b.runSt σ).NoDiv := by
+      split
+      · exact JoinArm.runSt_noDiv σ a
+      · exact JoinArm.runSt_noDiv σ b
+    apply Premise.sound_update σ
+    · intro τ hτ
+      rw [hr] at hτ
+      rw [hτ] at hag
+      exact hag
+    · intro e he
+      rw [hr] at he
+      rw [he] at hag hnd
+      cases e with
+      | revert =>
+        refine ⟨nofun, fun _ _ => ⟨?_, Upd.exh_of_pushFree
+          (Upd.ifJoin_pushFree _ (Simple.lower_pushFree se) a b)⟩⟩
+        have hag' : (Upd.ifJoin se.lower a b).applyP σ = none := hag
+        exact Option.map_eq_none_iff.1 hag'
+      | panic => exact hag.elim
+      | revertWith _ => exact hag.elim
+      | diverge => exact absurd rfl hnd
+      | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
+  next => cases h
+
 /-- **An `if`** (`iteStep`). -/
 theorem iteStep_sound (k : Nat) {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (q : Premise C Γ Γ) (hs : iteStep k c thn els = q) :
     Premise.Runs m (.ite c thn els) q σ := by
   cases c with
   | simple se =>
+    simp only [iteStep] at hs
+    split at hs
+    next U hj => cases hs; exact sound_iteJoin σ se thn els hj
     cases hs
     refine Premise.sound_split σ (fun h => ?_) (fun h => ?_) ?_ (fun h J o he => ?_)
       (fun h J o he => ?_)

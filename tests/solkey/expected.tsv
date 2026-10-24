@@ -18,15 +18,15 @@ taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	derived	box; for all x,
 taclets	TestSuite	storagePushValueCopySource	derived	box	`Solkey.TestSuite.storagePushValueCopySource.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushMemoryCopySource	derived	box	`Solkey.TestSuite.storagePushMemoryCopySource.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	storagePushMemoryStructCopySource	derived	box	`Solkey.TestSuite.storagePushMemoryStructCopySource.proved` (`Solidity/TestSuite/Derived15.lean`)
-taclets	TestSuite	storagePushReturnPrimitiveBindComplexReceiver	pending	diamond	not derived yet
+taclets	TestSuite	storagePushReturnPrimitiveBindComplexReceiver	refuted	diamond	`Solkey.TestSuite.storagePushReturnPrimitiveBindComplexReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	storagePushCompoundTarget	derived	diamond	`Solkey.TestSuite.storagePushCompoundTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
 taclets	TestSuite	storagePushDivModTarget	derived	diamond	`Solkey.TestSuite.storagePushDivModTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
 taclets	TestSuite	storagePushIncrementTarget	derived	diamond	`Solkey.TestSuite.storagePushIncrementTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
 taclets	TestSuite	storagePushCompoundSigned	derived	diamond	`Solkey.TestSuite.storagePushCompoundSigned.proved` (`Solidity/TestSuite/Derived16.lean`)
 taclets	TestSuite	storagePushPopCallReceiver	derived	diamond	`Solkey.TestSuite.storagePushPopCallReceiver.proved` (`Solidity/TestSuite/Derived16.lean`)
 taclets	TestSuite	storageArrayMethodReferences	derived	diamond	`Solkey.TestSuite.storageArrayMethodReferences.proved` (`Solidity/TestSuite/Derived19.lean`)
-taclets	TestSuite	storageArrayMethodReferencesComplexReceiver	pending	diamond	not derived yet
-taclets	TestSuite	storageArrayMethodReferencesComposedCallReceiver	pending	diamond	not derived yet
+taclets	TestSuite	storageArrayMethodReferencesComplexReceiver	refuted	diamond	`Solkey.TestSuite.storageArrayMethodReferencesComplexReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`)
+taclets	TestSuite	storageArrayMethodReferencesComposedCallReceiver	refuted	diamond	`Solkey.TestSuite.storageArrayMethodReferencesComposedCallReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	storageArrayMethodReferencesCallReceiver	derived	diamond	`Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	storagePopReferenceOutOfBounds	derived	box	`Solkey.TestSuite.storagePopReferenceOutOfBounds.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	storagePopReferenceCallOutOfBounds	derived	box	`Solkey.TestSuite.storagePopReferenceCallOutOfBounds.proved` (`Solidity/TestSuite/Derived19.lean`)
@@ -63,7 +63,7 @@ taclets	TestSuite	storageAssignmentValueIndexOnce	derived	diamond	`Solkey.TestSu
 taclets	TestSuite	storageAssignmentValueRhsBeforeIndex	derived	diamond	`Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	logicalAndStorageAssignmentSkipsIndex	derived	diamond	`Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	logicalOrStorageAssignmentSkipsIndex	derived	diamond	`Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.proved` (`Solidity/TestSuite/Derived19.lean`)
-taclets	TestSuite	unprovableStorageShortCircuitMutation	pending	diamond	not derived yet
+taclets	TestSuite	unprovableStorageShortCircuitMutation	refuted	diamond	`Solkey.TestSuite.unprovableStorageShortCircuitMutation.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	logicalNotSimple	derived	diamond	`Solkey.TestSuite.logicalNotSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
 taclets	TestSuite	logicalOrSimple	derived	diamond	`Solkey.TestSuite.logicalOrSimple.proved` (`Solidity/TestSuite/Derived1.lean`)
 taclets	TestSuite	logicalOrShortCircuitRhs	derived	diamond	`Solkey.TestSuite.logicalOrShortCircuitRhs.proved` (`Solidity/TestSuite/Derived1.lean`)
@@ -353,9 +353,9 @@ taclets	TestSuite	mulAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.mul
 taclets	TestSuite	divAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.divAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	modAssignValueRhsCapture	derived	diamond	`Solkey.TestSuite.modAssignValueRhsCapture.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	indexWriteValueRhsCapture	derived	diamond	`Solkey.TestSuite.indexWriteValueRhsCapture.proved` (`Solidity/TestSuite/Derived10.lean`)
-taclets	TestSuite	memoryIndexWriteStorageRefRhsCapture	pending	diamond	not derived yet
-taclets	TestSuite	memoryIndexWriteStorageStructCopy	pending	diamond	not derived yet
-taclets	TestSuite	memoryIndexWriteStorageRefImpureIndex	pending	diamond	not derived yet
+taclets	TestSuite	memoryIndexWriteStorageRefRhsCapture	derived	diamond	`Solkey.TestSuite.memoryIndexWriteStorageRefRhsCapture.proved` (`Solidity/TestSuite/Derived21.lean`)
+taclets	TestSuite	memoryIndexWriteStorageStructCopy	derived	diamond	`Solkey.TestSuite.memoryIndexWriteStorageStructCopy.proved` (`Solidity/TestSuite/Derived21.lean`)
+taclets	TestSuite	memoryIndexWriteStorageRefImpureIndex	derived	diamond	`Solkey.TestSuite.memoryIndexWriteStorageRefImpureIndex.proved` (`Solidity/TestSuite/Derived21.lean`)
 taclets	TestSuite	memoryIndexWriteStorageRefOutOfBoundsReverts	derived	box	`Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	memoryIndexWriteStorageRefSourceOutOfBoundsReverts	derived	box	`Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	memoryIndexWriteMemRefRhsCapture	derived	diamond	`Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.proved` (`Solidity/TestSuite/Derived10.lean`)
@@ -449,7 +449,7 @@ taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.t
 taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	bitAndOneValues	derived	diamond	`Solkey.TestSuite.bitAndOneValues.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	bitAndGeneralValues	derived	diamond	`Solkey.TestSuite.bitAndGeneralValues.proved` (`Solidity/TestSuite/Derived19.lean`)
-taclets	TestSuite	bitAndSymbolic	pending	diamond; for all x	not derived yet
+taclets	TestSuite	bitAndSymbolic	derived	diamond; for all x	`Solkey.TestSuite.bitAndSymbolic.proved` (`Solidity/TestSuite/Derived20.lean`)
 taclets	TestSuite	bitAndOperandEvaluation	derived	diamond	`Solkey.TestSuite.bitAndOperandEvaluation.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	conditionalCallee	derived	diamond; for all choose	`Solkey.TestSuite.conditionalCallee.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	conditionalCalleeEffects	derived	diamond	`Solkey.TestSuite.conditionalCalleeEffects.proved` (`Solidity/TestSuite/Derived19.lean`)
@@ -498,12 +498,12 @@ taclets	TestSuite	invariantForCountsArrayLength	derived	diamond	`Solkey.TestSuit
 taclets	TestSuite	invariantClosedFormSum	pending	diamond	not derived yet
 taclets	TestSuite	invariantBreakLeavesInvariantRange	derived	box; for all n	`Solkey.TestSuite.invariantBreakLeavesInvariantRange.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	invariantForContinueRunsUpdate	derived	box; for all n	`Solkey.TestSuite.invariantForContinueRunsUpdate.proved` (`Solidity/TestSuite/Derived19.lean`)
-taclets	TestSuite	invariantForBreakSkipsUpdate	pending	box; for all n	not derived yet
-taclets	TestSuite	unprovableInvariantBreakPostcondition	pending	box; for all n	not derived yet
-taclets	TestSuite	unprovableInvariantForContinueUpdate	pending	box; for all n	not derived yet
+taclets	TestSuite	invariantForBreakSkipsUpdate	derived	box; for all n	`Solkey.TestSuite.invariantForBreakSkipsUpdate.proved` (`Solidity/TestSuite/Derived20.lean`)
+taclets	TestSuite	unprovableInvariantBreakPostcondition	refuted	box; for all n	`Solkey.TestSuite.unprovableInvariantBreakPostcondition.refuted` (`Solidity/TestSuite/Refuted.lean`)
+taclets	TestSuite	unprovableInvariantForContinueUpdate	refuted	box; for all n	`Solkey.TestSuite.unprovableInvariantForContinueUpdate.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	invariantVariantSkipsBreakIteration	derived	diamond; for all n	`Solkey.TestSuite.invariantVariantSkipsBreakIteration.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	invariantOverStorageWrites	derived	box; for all n	`Solkey.TestSuite.invariantOverStorageWrites.proved` (`Solidity/TestSuite/Derived15.lean`)
-taclets	TestSuite	invariantQuantifiedOverPrefix	pending	box	not derived yet
+taclets	TestSuite	invariantQuantifiedOverPrefix	derived	box	`Solkey.TestSuite.invariantQuantifiedOverPrefix.proved` (`Solidity/TestSuite/Derived20.lean`)
 taclets	TestSuite	constantInlined	derived	diamond	`Solkey.TestSuite.constantInlined.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	contractQualifiedConstantAndEnum	derived	diamond	`Solkey.TestSuite.contractQualifiedConstantAndEnum.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	fileLevelConstantEnumAndFunction	derived	diamond	`Solkey.TestSuite.fileLevelConstantEnumAndFunction.proved` (`Solidity/TestSuite/Derived15.lean`)
@@ -548,10 +548,10 @@ taclets	TestSuite	testFixedShapePopPushResetsFixedElement	derived	diamond	`Solke
 taclets	TestSuite	testFixedShapeDeleteFixedElementKeepsLength	derived	diamond	`Solkey.TestSuite.testFixedShapeDeleteFixedElementKeepsLength.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	testFixedShapeDeleteDynamicThenPushFixedElement	derived	diamond	`Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	testFixedShapeFixedElementStorageAlias	derived	diamond	`Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.proved` (`Solidity/TestSuite/Derived15.lean`)
-taclets	TestSuite	testFixedShapeEmptyPushFixedElementReadsZero	pending	diamond	not derived yet
-taclets	TestSuite	testEmptyPushFixedArrayReturnReadsZero	pending	diamond	not derived yet
-taclets	TestSuite	testEmptyPushDynamicArrayReturnReadsZero	pending	diamond	not derived yet
-taclets	TestSuite	testEmptyPushStructReturnReadsZero	pending	diamond	not derived yet
+taclets	TestSuite	testFixedShapeEmptyPushFixedElementReadsZero	refuted	diamond	`Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`)
+taclets	TestSuite	testEmptyPushFixedArrayReturnReadsZero	refuted	diamond	`Solkey.TestSuite.testEmptyPushFixedArrayReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`)
+taclets	TestSuite	testEmptyPushDynamicArrayReturnReadsZero	refuted	diamond	`Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`)
+taclets	TestSuite	testEmptyPushStructReturnReadsZero	refuted	diamond	`Solkey.TestSuite.testEmptyPushStructReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	arithmeticAssignmentValues	derived	diamond	`Solkey.TestSuite.arithmeticAssignmentValues.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	arithmeticDiscardKeepsSideEffects	derived	diamond	`Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	arithmeticDiscardKeepsZeroDivisorRevert	derived	box	`Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.proved` (`Solidity/TestSuite/Derived19.lean`)

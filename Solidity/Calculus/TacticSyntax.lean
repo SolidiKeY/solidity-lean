@@ -54,6 +54,11 @@ syntax (name := tacticSol_prove) "sol_prove" ("(" &"steps" ":=" num ")")? : tact
 closes it; suggests the replay. -/
 syntax (name := tacticSol_prove?) "sol_prove?" : tactic
 
+/-- `sol_auto`: `sol_prove`, then each leaf it leaves closed by `sol_prove?`'s
+leaf search, each try with heartbeats of its own; an error names the first
+leaf no try closes. -/
+syntax (name := tacticSol_auto) "sol_auto" ("(" &"steps" ":=" num ")")? : tactic
+
 namespace ProofTree
 
 /-- `sol_derive?`: build the proof tree of the goal and suggest it as the walk

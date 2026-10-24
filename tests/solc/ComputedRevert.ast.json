@@ -1,0 +1,297 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "33396a320d7dea974578d839dfc34ed4d7b825cf1b5abf681cbcc445508e38d6",
+  "solkeyCommit": "unknown",
+  "source": "tests/solc/ComputedRevert.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".0"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "canonicalName": "ComputedRevert",
+    "contractKind": "contract",
+    "id": 157,
+    "name": "ComputedRevert",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 3,
+      "mutability": "mutable",
+      "name": "result",
+      "nodeType": "VariableDeclaration",
+      "src": "91:11:0",
+      "line": 5,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"declarations":[{"constant":false,"id":7,"mutability":"mutable","name":"lead","nodeType":"VariableDeclaration","src":"146:18:0","line":8,"stateVariable":false,"storageLocation":"memory","typeDescriptions":{"typeString":"string"},"typeName":{"name":"string","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"string"}},"visibility":"internal"}],"initialValue":{"kind":"string","nodeType":"Literal","typeDescriptions":{"typeString":"literal_string \"boom\""},"value":"boom"},"nodeType":"VariableDeclarationStatement","src":"146:27:0","line":8},
+        {"declarations":[{"constant":false,"id":11,"mutability":"mutable","name":"reason","nodeType":"VariableDeclaration","src":"183:20:0","line":9,"stateVariable":false,"storageLocation":"memory","typeDescriptions":{"typeString":"string"},"typeName":{"name":"string","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"string"}},"visibility":"internal"}],"initialValue":{"arguments":[{"name":"lead","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"string memory"}},{"kind":"string","nodeType":"Literal","typeDescriptions":{"typeString":"literal_string \"!\""},"value":"!"}],"expression":{"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(string storage pointer)"},"typeName":{"name":"string","nodeType":"ElementaryTypeName"}},"memberName":"concat","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function () pure returns (string memory)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"string memory"}},"nodeType":"VariableDeclarationStatement","src":"183:47:0","line":9},
+        {"expression":{"arguments":[{"name":"reason","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"string memory"}}],"expression":{"name":"revert","nodeType":"Identifier","referencedDeclaration":-19,"typeDescriptions":{"typeString":"function (string memory) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"240:14:0","line":10}
+       ]
+      },
+      "id": 24,
+      "kind": "function",
+      "name": "computed",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "109:152:0",
+      "line": 7,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"clauses":[{"block":{"nodeType":"Block","statements":[]},"errorName":"","nodeType":"TryCatchClause","src":"322:3:0","line":14},{"block":{"nodeType":"Block","statements":[{"AST":{"nativeSrc":"383:38:0","nodeType":"YulBlock","statements":[{"expression":{"arguments":[{"arguments":[{"name":"data","nativeSrc":"396:4:0","nodeType":"YulIdentifier"},{"kind":"number","nativeSrc":"402:2:0","nodeType":"YulLiteral","type":"","value":"32"}],"functionName":{"name":"add","nativeSrc":"392:3:0","nodeType":"YulIdentifier"},"nativeSrc":"392:13:0","nodeType":"YulFunctionCall"},{"arguments":[{"name":"data","nativeSrc":"413:4:0","nodeType":"YulIdentifier"}],"functionName":{"name":"mload","nativeSrc":"407:5:0","nodeType":"YulIdentifier"},"nativeSrc":"407:11:0","nodeType":"YulFunctionCall"}],"functionName":{"name":"revert","nativeSrc":"385:6:0","nodeType":"YulIdentifier"},"nativeSrc":"385:34:0","nodeType":"YulFunctionCall"},"nativeSrc":"385:34:0","nodeType":"YulExpressionStatement","src":"385:34:0","line":16}]},"evmVersion":"osaka","externalReferences":[{"declaration":33,"isOffset":false,"isSlot":false,"valueSize":1},{"declaration":33,"isOffset":false,"isSlot":false,"valueSize":1}],"nodeType":"InlineAssembly","src":"374:47:0","line":16}]},"errorName":"","nodeType":"TryCatchClause","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":33,"mutability":"mutable","name":"data","nodeType":"VariableDeclaration","src":"341:17:0","line":15,"stateVariable":false,"storageLocation":"memory","typeDescriptions":{"typeString":"bytes"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"bytes"}},"visibility":"internal"}]},"src":"334:97:0","line":15}],"externalCall":{"arguments":[],"expression":{"expression":{"name":"this","nodeType":"Identifier","referencedDeclaration":-28,"typeDescriptions":{"typeString":"contract ComputedRevert"}},"memberName":"computed","nodeType":"MemberAccess","referencedDeclaration":24,"typeDescriptions":{"typeString":"function () external"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"TryStatement","src":"302:129:0","line":14}
+       ]
+      },
+      "id": 40,
+      "kind": "function",
+      "name": "bounce",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "267:170:0",
+      "line": 13,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"clauses":[{"block":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"result","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 99"},"value":"99"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"499:11:0","line":21}]},"errorName":"","nodeType":"TryCatchClause","src":"497:16:0","line":21},{"block":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"result","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"expression":{"arguments":[{"name":"reason","nodeType":"Identifier","referencedDeclaration":53,"typeDescriptions":{"typeString":"string memory"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(bytes storage pointer)"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"bytes memory"}},"memberName":"length","nodeType":"MemberAccess","typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"570:29:0","line":23},{"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"613:19:0","line":24},{"expression":{"arguments":[{"leftExpression":{"baseExpression":{"arguments":[{"name":"reason","nodeType":"Identifier","referencedDeclaration":53,"typeDescriptions":{"typeString":"string memory"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(bytes storage pointer)"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"bytes memory"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"bytes1"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"arguments":[{"arguments":[{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 33"},"value":"33"}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(uint8)"},"typeName":{"name":"uint8","nodeType":"ElementaryTypeName"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint8"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(bytes1)"},"typeName":{"name":"bytes1","nodeType":"ElementaryTypeName"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"bytes1"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"646:45:0","line":25}]},"errorName":"Error","nodeType":"TryCatchClause","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":53,"mutability":"mutable","name":"reason","nodeType":"VariableDeclaration","src":"534:20:0","line":22,"stateVariable":false,"storageLocation":"memory","typeDescriptions":{"typeString":"string"},"typeName":{"name":"string","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"string"}},"visibility":"internal"}]},"src":"522:180:0","line":22},{"block":{"nodeType":"Block","statements":[{"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","typeDescriptions":{"typeString":"bool"},"value":"false"}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"719:13:0","line":27}]},"errorName":"","nodeType":"TryCatchClause","src":"711:24:0","line":27}],"externalCall":{"arguments":[],"expression":{"expression":{"name":"this","nodeType":"Identifier","referencedDeclaration":-28,"typeDescriptions":{"typeString":"contract ComputedRevert"}},"memberName":"bounce","nodeType":"MemberAccess","referencedDeclaration":40,"typeDescriptions":{"typeString":"function () external"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"TryStatement","src":"479:256:0","line":21}
+       ]
+      },
+      "id": 96,
+      "kind": "function",
+      "name": "observe",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "443:298:0",
+      "line": 20,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"812:8:0","line":31},
+        {"expression":{"kind":"string","nodeType":"Literal","typeDescriptions":{"typeString":"literal_string \"made\""},"value":"made"},"nodeType":"Return","src":"830:13:0","line":32}
+       ]
+      },
+      "id": 107,
+      "kind": "function",
+      "name": "makeReason",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 99,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "787:13:0",
+         "line": 30,
+         "stateVariable": false,
+         "storageLocation": "memory",
+         "typeDescriptions": {
+          "typeString": "string"
+         },
+         "typeName": {
+          "name": "string",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "string"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "747:103:0",
+      "line": 30,
+      "stateMutability": "nonpayable",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","typeDescriptions":{"typeString":"bool"},"value":"true"},{"arguments":[],"expression":{"name":"makeReason","nodeType":"Identifier","referencedDeclaration":107,"typeDescriptions":{"typeString":"function () returns (string memory)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"string memory"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool,string memory) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"890:27:0","line":36},
+        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"927:19:0","line":37}
+       ]
+      },
+      "id": 123,
+      "kind": "function",
+      "name": "eager",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "856:97:0",
+      "line": 35,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","typeDescriptions":{"typeString":"bool"},"value":"false"},{"arguments":[{"kind":"string","nodeType":"Literal","typeDescriptions":{"typeString":"literal_string \"b\""},"value":"b"},{"kind":"string","nodeType":"Literal","typeDescriptions":{"typeString":"literal_string \"!\""},"value":"!"}],"expression":{"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(string storage pointer)"},"typeName":{"name":"string","nodeType":"ElementaryTypeName"}},"memberName":"concat","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function () pure returns (string memory)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"string memory"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool,string memory) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1005:39:0","line":41}
+       ]
+      },
+      "id": 137,
+      "kind": "function",
+      "name": "failedConcat",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "959:92:0",
+      "line": 40,
+      "stateMutability": "pure",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[],"expression":{"name":"revert","nodeType":"Identifier","referencedDeclaration":-19,"typeDescriptions":{"typeString":"function () pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1128:8:0","line":45}
+       ]
+      },
+      "id": 146,
+      "kind": "function",
+      "name": "reasonFails",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 140,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "1103:13:0",
+         "line": 44,
+         "stateVariable": false,
+         "storageLocation": "memory",
+         "typeDescriptions": {
+          "typeString": "string"
+         },
+         "typeName": {
+          "name": "string",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "string"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "1057:86:0",
+      "line": 44,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"kind":"bool","nodeType":"Literal","typeDescriptions":{"typeString":"bool"},"value":"true"},{"arguments":[],"expression":{"name":"reasonFails","nodeType":"Identifier","referencedDeclaration":146,"typeDescriptions":{"typeString":"function () pure returns (string memory)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"string memory"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool,string memory) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1195:28:0","line":49}
+       ]
+      },
+      "id": 156,
+      "kind": "function",
+      "name": "eagerFailure",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "1149:81:0",
+      "line": 48,
+      "stateMutability": "pure",
+      "visibility": "public"
+     }
+    ],
+    "src": "61:1171:0",
+    "line": 4
+   }
+  ]
+ }
+}

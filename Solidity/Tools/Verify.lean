@@ -80,7 +80,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let res ← tryCatchRuntimeEx (withCurrHeartbeats run) fun e => do pure (.error (← errText e))
   match res with
   | .ok [] =>
-    if (← instantiateMVars goal).hasSorry then return .gaveUp [] "the proof contains `sorry`"
+    if (← instantiateMVars goal).hasSorry then return .gaveUp [] r"the proof contains `sorry`"
     return .proved
   | _ =>
     let gs := match res with

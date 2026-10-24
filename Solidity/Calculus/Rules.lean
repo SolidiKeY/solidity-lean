@@ -262,10 +262,84 @@ def VHole.isTarget {p : PrimTy} : VHole C Γ p → Bool
   | .mem l => l.isTarget
   | _ => true
 
+section SummaryCond
+
+open Lean Meta Elab Tactic
+
+/-- The most distinct subterms a summary side condition may have for
+`summary_cond` to hand it to the kernel, and the most terms `kernelNF`
+reads back.  `Kernel.whnf` runs outside the heartbeats, so a larger one is
+left to `side_cond`'s other alternatives, which are bounded. -/
+def summaryNodes : Nat := 200000
+
+/-- Whether `e` has at most `n` distinct subterms (counted once however
+often they are shared). -/
+partial def fewNodes (e : Expr) (n : Nat) : Bool :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr) Bool := do
+    if (← get).contains e then return true
+    modify (·.insert e)
+    if (← get).size > n then return false
+    match e with
+    | .app f a => return (← go f) && (← go a)
+    | .lam _ t b _ | .forallE _ t b _ => return (← go t) && (← go b)
+    | .letE _ t v b _ => return (← go t) && (← go v) && (← go b)
+    | .mdata _ b | .proj _ _ b => go b
+    | _ => return true
+  (go e).run' {}
+
+/-- A closed term's value by the kernel: its weak head normal form, and a
+constructor's arguments that are not proofs the same way, each distinct
+term once (`memo`), at most `summaryNodes` of them.  A call's summary runs
+through every inlined body below it; the kernel shares what the
+elaborator's reduction would compute once per call path. -/
+partial def kernelNF (e : Expr) : StateRefT (Std.HashMap Expr Expr) MetaM Expr := do
+  let e ← instantiateMVars e
+  if e.hasMVar then return e
+  if let some r := (← get)[e]? then return r
+  if (← get).size ≥ summaryNodes then throwError "summary_cond: past {summaryNodes} terms"
+  let r ← match Kernel.whnf (← getEnv) (← getLCtx) e with
+    | .error _ => pure e
+    | .ok r =>
+      let .const n _ := r.getAppFn | pure r
+      if !(← getEnv).isConstructor n then pure r
+      else
+        let args ← r.getAppArgs.mapM fun a => do
+          if ← isProof a then pure a else kernelNF a
+        pure (mkAppN r.getAppFn args)
+  modify (·.insert e r)
+  return r
+
+/-- A summary side condition's left side by the kernel (`kernelNF`), within
+`summaryNodes` distinct terms in and out; `none` past them. -/
+def kernelSummary? (a : Expr) : MetaM (Option Expr) := do
+  unless fewNodes a summaryNodes do return none
+  try some <$> (kernelNF a).run' {} catch _ => return none
+
+/-- **A call's summary side condition** (`CallRet.summary? args ret body = u`)
+decided by the kernel: the summary computed (`kernelNF`), `u` read off it,
+and the equation proved by `rfl`, which the kernel checks again.  Only on a
+condition of at most `summaryNodes` distinct subterms (`fewNodes`), since
+the kernel's evaluation cannot be interrupted. -/
+elab "summary_cond" : tactic => do
+  let g ← getMainGoal
+  g.withContext do
+    let ty ← instantiateMVars (← g.getType)
+    let some (_, a, b) := ty.consumeMData.eq? | throwError "summary_cond: not an equation"
+    unless a.isAppOf ``CallRet.summary? do throwError "summary_cond: not a summary"
+    let some a' ← kernelSummary? a
+      | throwError "summary_cond: past {summaryNodes} distinct terms"
+    unless ← isDefEq b a' do throwError "summary_cond: the summary is not the one asked"
+    g.assign (← mkExpectedTypeHint (← mkEqRefl a') ty)
+    replaceMainGoal []
+
+end SummaryCond
+
 /-- `side_cond`, the side conditions' `autoParam`: the predicates above
-compute (`Taclet.lean`'s `coreSidePreds` names them for the tools). -/
+compute (`Taclet.lean`'s `coreSidePreds` names them for the tools); a call's
+summary by the kernel (`summary_cond`). -/
 macro_rules
   | `(tactic| side_cond) => `(tactic| first
+      | summary_cond
       | rfl
       | assumption
       | (simp_all [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
@@ -780,8 +854,10 @@ inductive Taclet (C : Contract) (k : Nat) :
   | ifElseUnfold :
       dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
   /-- Two goals: the `then` branch where `se` is `true`, the `else` branch where
-  it is `false` (solkey's `\add(se = TRUE ==>)`). -/
-  | ifElseSplit :
+  it is `false` (solkey's `\add(se = TRUE ==>)`), unless the branches are
+  joinable (`LeanTaclet.ifElseJoin`). -/
+  | ifElseSplit {se : Simple C Γ .bool}
+      (hj : Upd.ifJoin? se.lower thenStm elseStm = none := by side_cond) :
       dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
           "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
   | requireConditionCapture :
@@ -885,6 +961,15 @@ inductive Taclet (C : Contract) (k : Nat) :
 inductive LeanTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
 
+  /-- KeY's join after a conditional (its merge rule, the `ifThenElse`
+  merge): an `if` on a simple condition with one branch empty and the other
+  empty or an accumulation of a value local (`v = e;`, `e` reading `v`) is
+  one update, `u`, its right-hand side a conditional term,
+  `{ v := se ? e : v }` (`Upd.ifJoin?`), and the rest of the program runs
+  once.  solkey splits (`ifElseSplit`). -/
+  | ifElseJoin {se : Simple C Γ .bool} {u : Upd C Γ Γ}
+      (hj : Upd.ifJoin? se.lower thenStm elseStm = some u := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ ‹u› ⟨[ ]⟩ }
   /-- Native wide addition followed by reduction; the frozen upstream has no rule. -/
   | addmodAssignment :
       dl[LeanTaclet C k]{ ⟨[ v = addmod(e₁, e₂, e₃); ]⟩ ⇝
@@ -1060,6 +1145,20 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
       {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Val C Γ p}
       {as' : Args C (.val p :: Γ) ps} (hcap : Args.capture args = some ⟨p, v, as'⟩ := by side_cond) :
       LeanTaclet C k m (.call f args ret body) (Premise.argCapture k f p v as' ret body)
+  /-- KeY's contract-based method call with the contract derived, not
+  written: a call of one value assigned to a value local, its arguments
+  simple, whose callee calls and has a summary `R` (its body run
+  symbolically once, in its own frame, `CallRet.summary?`), is the update
+  `u = { y := R(args) }`: `⟨[ y = f(args); ]⟩ ⇝ { y := R(args) } ⟨[ ]⟩`.
+  The update fails exactly where the call reverts, so nested calls are run
+  once per function, not once per call path.  solkey inlines
+  (`internalCallExpand`). -/
+  | internalCallSummary {Γ : Ctx} {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
+      {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {u : Upd C Γ Γ'}
+      (hexp : args.firstNonSimple = none := by side_cond)
+      (hrets : CallRet.isRets ret = false := by side_cond)
+      (hs : CallRet.summary? args ret body = some u := by side_cond) :
+      LeanTaclet C k m (.call f args ret body) (.update u)
 
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')

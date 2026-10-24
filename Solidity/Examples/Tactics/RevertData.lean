@@ -225,22 +225,42 @@ namespace Panics
 
 def Pan : Contract := contract!{
   uint last;
+  uint[] arr;
   function failAssert(uint x) { assert(x < 3); }
   function overflow(uint x) { checked { last = x + 1; } }
+  function divide(uint x) { last = 10 / x; }
+  function index(uint i) { last = arr[i]; }
+  function plain(uint x) { last = x + 1; }
 }
 
 local instance : InContract := ⟨Pan⟩
 
 private def σ₇ : State Pan [] := { State.init Pan with tx := { selfAddress := ⟨7, rfl⟩ } }
 
-/-- info: Except.ok "last = 1" -/
+/-- info: Except.ok "last = 1; arr = []" -/
 #guard_msgs in
 #eval (Prog.runT σ₇ (sol[Pan]{ try this.failAssert(5) { last = 1; } catch Panic(uint c) {
     last = c; } catch { last = 9; } })).map fun τ => Tools.fmtStorageLine Pan τ.storage
 
-/-- info: Except.ok "last = 17" -/
+/-- info: Except.ok "last = 17; arr = []" -/
 #guard_msgs in
 #eval (Prog.runT σ₇ (sol[Pan]{ try this.overflow(115792089237316195423570985008687907853269984665640564039457584007913129639935) {
+    last = 1; } catch Panic(uint c) { last = c; } catch { last = 9; } })).map
+  fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- info: Except.ok "last = 18; arr = []" -/
+#guard_msgs in
+#eval (Prog.runT σ₇ (sol[Pan]{ try this.divide(0) { last = 1; } catch Panic(uint c) {
+    last = c; } catch { last = 9; } })).map fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- info: Except.ok "last = 50; arr = []" -/
+#guard_msgs in
+#eval (Prog.runT σ₇ (sol[Pan]{ try this.index(0) { last = 1; } catch Panic(uint c) {
+    last = c; } catch { last = 9; } })).map fun τ => Tools.fmtStorageLine Pan τ.storage
+
+/-- info: Except.ok "last = 17; arr = []" -/
+#guard_msgs in
+#eval (Prog.runT σ₇ (sol[Pan]{ try this.plain(115792089237316195423570985008687907853269984665640564039457584007913129639935) {
     last = 1; } catch Panic(uint c) { last = c; } catch { last = 9; } })).map
   fun τ => Tools.fmtStorageLine Pan τ.storage
 
@@ -254,6 +274,24 @@ theorem assertCode : ⊨ᶠ dl!{ [ try this.failAssert(5) { } catch Panic(uint c
 
 /-- The same with an overflow in `checked { … }`: `Panic(0x11)`. -/
 theorem overflowCode : ⊨ᶠ dl!{ ∀ uint y; [ try this.overflow(y) { } catch Panic(uint c) {
+    assert(c == 17); } catch { }; ] true } := by
+  sol_symex
+  sol_close
+
+/-- A division by zero: `Panic(0x12)` (`Prog.withPanics`). -/
+theorem divideCode : ⊨ᶠ dl!{ ∀ uint y; [ try this.divide(y) { } catch Panic(uint c) {
+    assert(c == 18); } catch { }; ] true } := by
+  sol_symex
+  sol_close
+
+/-- An index past a storage array's length: `Panic(0x32)`. -/
+theorem indexCode : ⊨ᶠ dl!{ ∀ uint y; [ try this.index(y) { } catch Panic(uint c) {
+    assert(c == 50); } catch { }; ] true } := by
+  sol_symex
+  sol_close
+
+/-- An overflow outside `checked { … }`: `Panic(0x11)` too, as solc. -/
+theorem plainOverflowCode : ⊨ᶠ dl!{ ∀ uint y; [ try this.plain(y) { } catch Panic(uint c) {
     assert(c == 17); } catch { }; ] true } := by
   sol_symex
   sol_close

@@ -269,7 +269,7 @@ def leanKeywords : List String :=
    "match", "end", "open", "import", "structure", "class", "instance", "theorem", "def",
    "example", "abbrev", "namespace", "section", "variable", "universe", "local", "macro",
    "syntax", "deriving", "mutual", "partial", "private", "protected", "noncomputable",
-   "unsafe", "calc", "suffices", "obtain", "nomatch", "nofun", "forall", "exists", "Type",
+   r"unsafe", "calc", "suffices", "obtain", "nomatch", "nofun", "forall", "exists", "Type",
    "to", "count", "listing",
    "Sort", "Prop", "if", "else", "for", "unless", "return", "try", "catch", "finally",
    "break", "continue", "mut", "rec", "fun", "λ", "delete", "new", "true", "false"]
@@ -1265,6 +1265,34 @@ def withSpecScope {α : Type} (action : PM α) : PM α := do
   modify fun st => { st with specLocals := names }
   pure result
 
+private def yulArgs? (name : String) (j : Json) : Option (List Json) := do
+  guard (J.kind j == "YulFunctionCall")
+  let f ← J.opt j "functionName"
+  guard (J.kind f == "YulIdentifier" && J.str? f "name" == some name)
+  (J.arr? j "arguments").map Array.toList
+
+/-- Only the canonical byte-buffer rethrow; no other assembly is erased. -/
+private def memoryRethrow? (j : Json) : Option String := do
+  let ast ← J.opt j "AST"
+  guard (J.kind ast == "YulBlock")
+  let [stmt] ← (J.arr? ast "statements").map Array.toList | none
+  guard (J.kind stmt == "YulExpressionStatement")
+  let [ptr, len] ← yulArgs? "revert" (← J.opt stmt "expression") | none
+  let [data, offset] ← yulArgs? "add" ptr | none
+  let [same] ← yulArgs? "mload" len | none
+  guard (J.kind data == "YulIdentifier" && J.kind same == "YulIdentifier")
+  let name ← J.str? data "name"
+  guard (J.str? same "name" == some name)
+  guard (J.kind offset == "YulLiteral" && J.str? offset "kind" == some "number")
+  guard (((J.str? offset "value").bind parseRational).bind Q.int? == some 32)
+  let [left, right] ← (J.arr? j "externalReferences").map Array.toList | none
+  let declaration (r : Json) : Option Int := do
+    guard (J.opt r "isOffset" == some (.bool false) && J.opt r "isSlot" == some (.bool false))
+    guard ((r.getObjValAs? Nat "valueSize").toOption == some 1)
+    (r.getObjValAs? Int "declaration").toOption
+  guard ((declaration left).isSome && declaration left == declaration right)
+  pure name
+
 mutual
 
 /-- A statement as `sol` text, after the storage locals it reads pushed
@@ -1424,6 +1452,12 @@ partial def stmt1 (j : Json) : PM (List String) := do
     pure [s!"{← loopSpec j}for ({init}; {c}; {upd}) {← block (← PM.lift (J.get j "body"))}"]
   | "Break" => pure ["break"]
   | "Continue" => pure ["continue"]
+  | "InlineAssembly" =>
+    let some source := memoryRethrow? j |
+      unsupported "assembly other than revert(add(data, 32), mload(data))"
+    let some name := lookupBy source (← get).specLocals |
+      unsupported "raw rethrow of a value outside the local scope"
+    pure [s!"assembly \{ revert(add({name}, 32), mload({name})) }"]
   -- `revert E(a, b);`: the custom error by its name, declared as a member
   -- (`errorMembers`)
   | "RevertStatement" =>

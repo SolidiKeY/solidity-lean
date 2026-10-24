@@ -77,7 +77,9 @@ variable {C : Contract}
 (`transferDiamond`, `tryCallDiamond`), a `try` of the contract's own function
 (`tryCallSelfBox`), an exhausted loop bound (`loopExit`),
 `assume(false)` (`assumeFalse`), a recursive call (`recursiveCallUnfold`), revert
-data (`revertDataBox`, `catchDataBox`) and
+data (`revertDataBox`, `catchDataBox`), an `if` on a simple condition whose
+branches are joinable (`ifElseJoin`), a call with a summary
+(`internalCallSummary`) and
 unsupported invariant shapes have Lean's
 rules only (`LeanTaclet.keyStep`).
 Automatic and positive-bound loops use `whileUnwind`; framed invariants use
@@ -93,8 +95,12 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
     (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
-    (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
-    (revert := true) (assumeFalse := false) (call := fun _ args _ _ => (Args.capture args).isNone)
+    (ite := fun c thn els => match c with
+      | .simple s => (Upd.ifJoin? s.lower thn els).isNone
+      | _ => true)
+    (require := fun _ => true) (assert := fun _ => true)
+    (revert := true) (assumeFalse := false)
+    (call := fun _ args ret body => (Args.capture args).isNone && !(CallRet.sumOK args ret body))
     (tryCall := fun _ _ _ _ _ _ _ _ _ self => m == .box && !self)
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
@@ -157,7 +163,7 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
     {p : Premise C Γ Γ'} (d : LeanTaclet C k m s p) : s.keyStep m = false := by
   cases d with
   | functionCallArgCapture hcap =>
-    show (Args.capture _).isNone = false
+    show ((Args.capture _).isNone && _) = false
     rw [hcap]; rfl
   | pushCompoundUnfoldReceiver h => exact h
   | pushIncrementUnfoldReceiver h => exact h
@@ -172,6 +178,10 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
     simp only [Stmt.keyStep, Option.elim, Src.keyPushSource, hnmp, hsp,
       Bool.not_true, Bool.false_or]
   | whileClose hf => simp only [Stmt.keyStep, hf, Option.isSome_none, Bool.false_and]
+  | ifElseJoin hj => simp only [Stmt.keyStep, hj, Option.isNone_some]
+  | internalCallSummary _ _ hs =>
+    show ((Args.capture _).isNone && !(CallRet.sumOK _ _ _)) = false
+    rw [← CallRet.summary?_isSome, hs]; simp only [Option.isSome_some, Bool.not_true, Bool.and_false]
   | whileNoVariantDiamond _ hd =>
     cases ‹Option (Val C Γ .uint)› <;> cases ‹List (LoopQ C Γ)› <;>
       simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, List.isEmpty, Bool.false_eq_true,
@@ -532,18 +542,24 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
 
 /-! ## A derivation
 
-`[ if (b) { } else { } ] true`, `b` a `bool` local: `ifElseSplit`, then in
-each goal the block's end (an update that pops nothing, taken into the
-context) and `closeTrue`. -/
+`[ if (b) { } else { } ] true`, `b` a `bool` local: its branches are
+joinable, so `ifElseJoin`: the empty update, then `closeTrue`; and
+`[ if (b) { revert(); } else { } ] true`, whose `then` branch is not:
+`ifElseSplit`, then in each goal the block's end (an update that pops
+nothing, taken into the context), `revertBox` and `closeTrue`. -/
 
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
-  .split (Taclet.step_eq .ifElseSplit) (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+  .update rfl (.closeTrue rfl)
 
-/-- The diamond twin: a scope end pops, so `closeTrue` still fires in the two
-branches, and there is no third goal. -/
+example : Proves StandardExample .all [.val .bool] .nil
+    (.modal .box (.cons (.ite (.simple (.local .here)) (.cons .revert .nil) .nil) .nil) .nil .tt) :=
+  .split (Taclet.step_eq .ifElseSplit) (.done rfl (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+
+/-- The diamond twin of the join: the empty update pops nothing, so
+`closeTrue` still fires. -/
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
-  .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+  .update rfl (.closeTrue rfl)
 
 end Solidity

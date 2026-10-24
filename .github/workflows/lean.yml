@@ -18,6 +18,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit source trust boundaries
+        run: |
+          node --test scripts/check-trust.test.mjs
+          bash scripts/check-trust.sh
 
       # Elaboration is the test suite: there is no separate test driver, and
       # the default library is the whole formalization.
@@ -40,6 +47,19 @@ jobs:
           axiom-audit: "true"
           axiom-audit-root: "Solidity"
           axiom-audit-allow: "propext,Classical.choice,Quot.sound"
+      - name: Audit headline theorem dependencies
+        run: lake env lean --tstack=131072 TrustAudit.lean
+      # The automation gate: every TestSuite obligation is derived by the
+      # automatic prover (`sol_prove` and the replay `sol_prove?` writes) or
+      # refuted by `sol_refute`, and none is pending
+      # (`scripts/check-automatic.mjs`).  It reads `Report.lean`'s pin, which
+      # the TestSuite build checks.
+      - name: Build the TestSuite
+        run: |
+          set -o pipefail
+          lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
+      - name: Automation gate
+        run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log
 
   bridge:
     runs-on: ubuntu-latest

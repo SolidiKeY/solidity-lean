@@ -1092,11 +1092,61 @@ theorem popStep_elimOk {E : Ty} (b : SPath C Γ (.array E)) (hb : b.MemFree = tr
     · exact ⟨trivial, .app2 rfl (.app0 rfl) hb'⟩
   · trivial
 
+/-- What a joinable branch of the fragment assigns is free of memory:
+`{ x = x + 1; }`. -/
+theorem Prog.joinArm?_memFree {Γ₁ : Ctx} (P : Prog C Γ Γ₁) {p : PrimTy} {i : Idx Γ (.val p)}
+    {r : Val C Γ p} (h : P.joinArm? = some (some ⟨p, i, r⟩)) (hf : P.Frag = true) :
+    r.MemFree = true := by
+  cases P with
+  | nil => cases h
+  | cons s ω =>
+    cases s <;> try cases h
+    cases ω with
+    | nil =>
+      cases h
+      simpa only [Prog.Frag, Stmt.Frag, Bool.and_true] using hf
+    | cons _ _ => cases h
+
+/-- A joined update (`{x := c ? x + 1 : x}`) of memory-free values has a
+reading. -/
+theorem Upd.ifJoin_elimOk {c : Tm C Γ (.val .bool)} (hc : c.ElimOk) (a b : JoinArm C Γ)
+    (ha : ∀ p i r, a = some ⟨p, i, r⟩ → r.MemFree = true)
+    (hb : ∀ p i r, b = some ⟨p, i, r⟩ → r.MemFree = true) : (Upd.ifJoin c a b).ElimOk := by
+  rcases a with _ | ⟨p, i, ra⟩ <;> rcases b with _ | ⟨q, j, rb⟩
+  · trivial
+  · exact ⟨trivial, .app3 rfl hc (.pvV j) (Val.lower_elimOk rb (hb _ _ _ rfl))⟩
+  · exact ⟨trivial, .app3 rfl hc (Val.lower_elimOk ra (ha _ _ _ rfl)) (.pvV i)⟩
+  · have hra := Val.lower_elimOk ra (ha _ _ _ rfl)
+    have hrb := Val.lower_elimOk rb (hb _ _ _ rfl)
+    simp only [Upd.ifJoin]
+    split
+    · rename_i hpq
+      split
+      · exact ⟨trivial, .app3 rfl hc (.castV hpq hra) hrb⟩
+      · exact ⟨⟨trivial, .app3 rfl hc hra (.pvV i)⟩, .app3 rfl hc (.pvV j) hrb⟩
+    · exact ⟨⟨trivial, .app3 rfl hc hra (.pvV i)⟩, .app3 rfl hc (.pvV j) hrb⟩
+
 theorem iteStep_elimOk {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
-    (els : Prog C Γ Γ₂) : (iteStep k c thn els).ElimOk := by
+    (els : Prog C Γ Γ₂) (ht : thn.Frag = true) (he : els.Frag = true) :
+    (iteStep k c thn els).ElimOk := by
   cases c with
   | simple s =>
-    exact ⟨Fml.isBool_frag (Simple.lower_elimOk s) _, Fml.isBool_frag (Simple.lower_elimOk s) _⟩
+    have hsplit : (Premise.split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false)
+        thn els).ElimOk :=
+      ⟨Fml.isBool_frag (Simple.lower_elimOk s) _, Fml.isBool_frag (Simple.lower_elimOk s) _⟩
+    cases ha : thn.joinArm? with
+    | none => simp only [iteStep, Upd.ifJoin?, ha]; exact hsplit
+    | some a =>
+      cases hb : els.joinArm? with
+      | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
+      | some b =>
+        simp only [iteStep, Upd.ifJoin?, ha, hb]
+        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
+        · simp only [Bool.false_eq_true, if_false]; exact hsplit
+        · simp only [if_true]
+          refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
+          · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
+          · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
   | _ => trivial
 
 theorem requireStep_elimOk (c : Val C Γ .bool) : (requireStep k c).ElimOk := by
@@ -1142,7 +1192,9 @@ theorem Stmt.step_elimOk {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (h : s.Frag = true) 
   | delete l =>
     simp only [Stmt.Frag, Bool.and_eq_true] at h
     exact deleteStep_elimOk k l h.2
-  | ite c thn els => exact iteStep_elimOk k c thn els
+  | ite c thn els =>
+    simp only [Stmt.Frag, Bool.and_eq_true] at h
+    exact iteStep_elimOk k c thn els h.1.2 h.2
   | require c => exact requireStep_elimOk k c
   | assert c => exact assertStep_elimOk k c
   | revert => cases m <;> trivial

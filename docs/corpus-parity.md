@@ -19,6 +19,8 @@ an internal helper has no obligation, so the table's
 - **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no
   axiom but Lean's three; with no parameters, also stated at the initial
   storage in `Solidity/Corpus/TestSuite.lean`;
+- **refuted**: stated, and false in the model: a certified counterexample
+  refutes it (`sol_refute`), a theorem `¬ (⊢ problem)`;
 - **pending**: stated, not derived yet;
 - **divergent**: stated, and false in the model, for the reason below;
 - **excluded**: no program: the model cannot hold its contract;
@@ -27,8 +29,9 @@ an internal helper has no obligation, so the table's
 
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
-| derived | 422 | 124 | 0 | 546 |
-| pending | 13 | 4 | 0 | 17 |
+| derived | 426 | 126 | 0 | 552 |
+| refuted | 8 | 2 | 0 | 10 |
+| pending | 1 | 0 | 0 | 1 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
 | **all** | **436** | **128** | **2** | **566** |
@@ -37,9 +40,19 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | not derived yet | 17 | `storagePushReturnPrimitiveBindComplexReceiver`, `storageArrayMethodReferencesComplexReceiver`, `storageArrayMethodReferencesComposedCallReceiver`, … |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
+| refuted | `Solkey.TestSuite.storagePushReturnPrimitiveBindComplexReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `storagePushReturnPrimitiveBindComplexReceiver` |
+| refuted | `Solkey.TestSuite.storageArrayMethodReferencesComplexReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `storageArrayMethodReferencesComplexReceiver` |
+| refuted | `Solkey.TestSuite.storageArrayMethodReferencesComposedCallReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `storageArrayMethodReferencesComposedCallReceiver` |
+| refuted | `Solkey.TestSuite.unprovableStorageShortCircuitMutation.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableStorageShortCircuitMutation` |
 | excluded | struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
+| pending | not derived yet | 1 | `invariantClosedFormSum` |
+| refuted | `Solkey.TestSuite.unprovableInvariantBreakPostcondition.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableInvariantBreakPostcondition` |
+| refuted | `Solkey.TestSuite.unprovableInvariantForContinueUpdate.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableInvariantForContinueUpdate` |
+| refuted | `Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `testFixedShapeEmptyPushFixedElementReadsZero` |
+| refuted | `Solkey.TestSuite.testEmptyPushFixedArrayReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `testEmptyPushFixedArrayReturnReadsZero` |
+| refuted | `Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `testEmptyPushDynamicArrayReturnReadsZero` |
+| refuted | `Solkey.TestSuite.testEmptyPushStructReturnReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `testEmptyPushStructReturnReadsZero` |
 
 ## The other suites
 

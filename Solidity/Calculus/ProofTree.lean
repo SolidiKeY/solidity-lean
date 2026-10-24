@@ -72,6 +72,10 @@ tree closes its leaves by it. -/
 syntax "sol_leaf" : tactic
 /-- `sol_leaf`, kept for the replays that name it. -/
 syntax "sol_leaf_wt" : tactic
+/-- `sol_leaf` without the `allLeftHide` pre-pass (`Calculus/AllLeft.lean`):
+every `∀` premise kept as stated, for a closer that instantiates it at a
+term the goal opens later (`sol_close_all`, `Calculus/CloseAll.lean`). -/
+syntax "sol_leaf_keep" : tactic
 
 namespace ProofTree
 
@@ -126,10 +130,11 @@ def forallMemLemmas : MetaM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
 
 /-- The lemmas that flatten a list of goals a function built, as
 `catchDataBox`'s (`catchDataStep`: a goal per datum, mapped over appended
-lists). -/
+lists, a `Panic` datum where the callee asserts, `Prog.asserts`). -/
 def flattenLemmas : MetaM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
   #[``List.map_append, ``List.map_cons, ``List.map_nil, ``List.cons_append,
-    ``List.nil_append, ``List.append_nil].mapM fun n => do
+    ``List.nil_append, ``List.append_nil, ``Prog.asserts, ``Stmt.asserts, ``Bool.false_or,
+    ``Bool.or_false, ``ite_false, ``ite_true, ``Bool.false_eq_true].mapM fun n => do
       `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
 
 /-- The line `app` of a rule of labelled goals (`∀ f ∈ fs, …`), its goals

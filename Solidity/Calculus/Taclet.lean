@@ -296,6 +296,21 @@ section Hand
 
 variable {k : Nat} {m : Modality} {Γ : Ctx}
 
+/-- `ifElseSplit`: the branches are not joinable. -/
+theorem Taclet.ifElseSplit.toStep {Γ₁ Γ₂ : Ctx} {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂}
+    {se : Simple C Γ .bool} (hj : Upd.ifJoin? se.lower thn els = none) :
+    Stmt.step k m (.ite (.simple se) thn els) =
+      .split .block (Fml.isBool se.lower true) (Fml.isBool se.lower false) thn els := by
+  dsimp only [Stmt.step]
+  simp only [iteStep, hj]
+
+/-- `ifElseJoin`: the branches are joinable, the `if` is their joined update. -/
+theorem LeanTaclet.ifElseJoin.toStep {Γ₁ Γ₂ : Ctx} {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂}
+    {se : Simple C Γ .bool} {u : Upd C Γ Γ} (hj : Upd.ifJoin? se.lower thn els = some u) :
+    Stmt.step k m (.ite (.simple se) thn els) = .update u := by
+  dsimp only [Stmt.step]
+  simp only [iteStep, hj]
+
 theorem Taclet.storageIndexRead_unfold_rightSndIndex.toStep {x : Ty} {lhs : SHole C Γ x}
     {R : RefTy} {kp : PrimTy} {it : IndexTy R kp x} {sp : SPath C Γ (Ty.ref R)} {nse : Val C Γ kp}
     (h1 : sp.isSimple = true) (h2 : nse.isSimple = false) (h3 : lhs.isTarget = true) :
@@ -521,25 +536,37 @@ theorem Taclet.storagePopSaveMappingElement.toStep {E : Ty} {marr : SPath C Γ E
   simp only [popStep, h1, h2]
   rfl
 
-/-- A call whose arguments are all simple is inlined, whatever it returns. -/
+/-- A call whose arguments are all simple and that has no summary is
+inlined, whatever it returns. -/
 theorem Premise.expandCall_step {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
-    (h1 : args.firstNonSimple = none) :
+    (h1 : args.firstNonSimple = none) (hs : CallRet.summary? args ret body = none) :
     Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body := by
   simp only [Args.firstNonSimple, Option.map_eq_none_iff] at h1
-  cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, h1]) <;> rfl
+  cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, h1]) <;> try rfl
+  all_goals (rw [hs]; rfl)
 
 theorem Taclet.functionBodyExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
-    (h1 : args.firstNonSimple = none) (_ : ret.isRets = true) :
+    (h1 : args.firstNonSimple = none) (h2 : ret.isRets = true) :
     Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body :=
-  Premise.expandCall_step h1
+  Premise.expandCall_step h1 (by cases ret <;> first | rfl | exact absurd h2 Bool.false_ne_true)
 
 theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
-    (h1 : args.firstNonSimple = none) (_ : ret.isRets = false) :
+    (h1 : args.firstNonSimple = none) (_ : ret.isRets = false)
+    (hs : CallRet.summary? args ret body = none) :
     Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body :=
-  Premise.expandCall_step h1
+  Premise.expandCall_step h1 hs
+
+/-- `internalCallSummary`: the call is its summary's update. -/
+theorem LeanTaclet.internalCallSummary.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps}
+    {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
+    {u : Upd C Γ Γ'} (h1 : args.firstNonSimple = none) (hs : CallRet.summary? args ret body = some u) :
+    Stmt.step k m (Stmt.call f args ret body) = .update u := by
+  simp only [Args.firstNonSimple, Option.map_eq_none_iff] at h1
+  cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, h1])
+  all_goals first | exact Option.noConfusion hs | (rw [hs])
 
 theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
@@ -758,7 +785,6 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   memoryToStorageIndexCaptureAllComplexRecv "2."
   memoryToStorageIndexCaptureAllNonSimpleIndex "62."
   ifElseUnfold "30."
-  ifElseSplit "."
   requireConditionCapture "30."
   requireSimple "."
   assertConditionCapture "30."

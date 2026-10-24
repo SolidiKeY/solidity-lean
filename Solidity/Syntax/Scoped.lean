@@ -269,6 +269,15 @@ def LoopUnwind.after {C : Contract} {Γ : Ctx} : LoopUnwind → LoopAnn C Γ
 
 /-! ## Revert data -/
 
+/-- What a catch binds, or how a memory operand is returned as revert data. -/
+inductive CatchKind where
+  | reason
+  | raw
+  deriving Repr, DecidableEq, Inhabited
+
+/-- A memory byte string is an array of words holding individual bytes. -/
+abbrev bytesR : RefTy := .array (.prim .uint)
+
 /-- A part of the data `Stmt.revertData` reverts with
 (`docs/semantic-gaps.md`, "Revert data"): literal bytes (an `Error(string)`
 encoding of a literal reason), a custom error's selector (`customSelector`,
@@ -277,18 +286,8 @@ inductive RevPart (C : Contract) (Γ : Ctx) where
   | bytes (bs : List UInt8)
   | sel (sig : String)
   | word {p : PrimTy} (v : Val C Γ p)
-
-/-- What a `catch` clause binds of the data (`Stmt.catchData`): the reason
-`catch Error(string memory r)` decodes, or the raw data of `catch (bytes
-memory d)`. -/
-inductive CatchKind where
-  | reason
-  | raw
-  deriving Repr, DecidableEq, Inhabited
-
-/-- A memory `bytes`/`string`: `bytes1[]`, an array of `uint`s holding a byte
-each (`docs/semantic-gaps.md`, "Bytes and strings"). -/
-abbrev bytesR : RefTy := .array (.prim .uint)
+  /-- Copy the local's bytes from the heap at the revert: raw, or ABI Error(string). -/
+  | mem (kind : CatchKind) (src : Idx Γ (.mem bytesR))
 
 /-! ## Statements -/
 
@@ -766,6 +765,8 @@ def RevPart.toStr {Γ : Ctx} (ns : List Var) : RevPart C Γ → String
   | .bytes bs => hexStr bs
   | .sel sig => s!"selector(\"{sig}\")"
   | .word v => s!"abi.encode({v.toStr ns true})"
+  | .mem .raw src => s!"bytes({src.name ns})"
+  | .mem .reason src => s!"Error({src.name ns})"
 
 mutual
 
@@ -1016,6 +1017,7 @@ def RevPart.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : RevPart C Γ → RevPart C Δ
   | .bytes bs => .bytes bs
   | .sel sig => .sel sig
   | .word v => .word (v.wk h)
+  | .mem kind src => .mem kind (src.wk h)
 
 mutual
 

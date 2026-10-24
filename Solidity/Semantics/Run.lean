@@ -937,6 +937,10 @@ def _root_.Solidity.RevPart.evalT (σ : State C Γ) : RevPart C Γ → TRes (Lis
   | .word v => do
     let x ← v.evalT σ
     pure (Semantics.wordBytes (PrimTy.toWord x).1.toNat)
+  | .mem kind src => do
+    let r ← (MPath.var src rfl).mvalT σ
+    let bs : List UInt8 := (σ.heap.get r).1.map (fun v => UInt8.ofNat v.val.toNat)
+    pure (match kind with | .raw => bs | .reason => Semantics.encodeError bs)
 
 /-- `revert(d)`: the parts in order, then a revert with their bytes. -/
 def revertData (d : List (RevPart C Γ)) : TStep C Γ Γ := fun σ => do

@@ -237,7 +237,7 @@ def tacLines (t : TSyntax `tactic) : MetaM (Array String) := do
 goals have no distinct names), and `sorry` for an open leaf. -/
 partial def Tree.script (t : Tree) : MetaM (Array String) := do
   match t.act with
-  | .opened => return #["sorry"]
+  | .opened => return #[r"sorry"]
   | .closed tacs => return (← tacs.mapM tacLines).flatten
   | .rule _ tacs _ =>
     let head := (← tacs.mapM tacLines).flatten

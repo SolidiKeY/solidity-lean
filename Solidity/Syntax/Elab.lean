@@ -510,6 +510,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .ite b _ _ | .requireMsg b _ => [b]
   | .revertErr _ as => as
   | .requireErr c _ as => c :: as
+  | .revertReason m | .revertRaw m => [m]
+  | .requireReason c m => [c, m]
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
@@ -565,6 +567,9 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .revert => pure .revert
   | .revertMsg m => pure (.revertMsg m)
   | .requireMsg b m => return .requireMsg (← f b) m
+  | .revertReason m => return .revertReason (← f m)
+  | .requireReason c m => return .requireReason (← f c) (← f m)
+  | .revertRaw d => return .revertRaw (← f d)
   | .revertErr e as => return .revertErr e (← as.mapM f)
   | .requireErr c e as => return .requireErr (← f c) e (← as.mapM f)
   | .assumeFalse => pure .assumeFalse
@@ -2016,6 +2021,20 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     | none => []
   | e => placeShape C Γ e
 
+/-- A computed Error reason retains its source string type before byte casts
+and ABI lowering erase it. Raw assembly buffers need no string marker. -/
+def stringReason? (Γ : ECtx) : RawExpr → Bool
+  | .ternary _ a b => stringReason? Γ a && stringReason? Γ b
+  | .call "string" [a] =>
+    match a.bytesLit? with
+    | none => true
+    | some bs => (String.fromUTF8? ⟨bs.toArray.map UInt8.ofNat⟩).isSome
+  | .call "string.concat" as => as.attach.all fun ⟨a, _ha⟩ => stringReason? Γ a
+  | e =>
+    match e.bytesLit? with
+    | some bs => (String.fromUTF8? ⟨bs.toArray.map UInt8.ofNat⟩).isSome
+    | none => (exprShape C Γ e).contains ("#string", 1)
+
 /-- The narrow positions of `ws`, below a place written `·` (`·[]` 8 bits wide). -/
 def shapeStr (ws : List (String × Nat)) : String :=
   if ws.isEmpty then "none" else ", ".intercalate (ws.map fun (k, n) => s!"·{k} {n} bits wide")
@@ -2712,7 +2731,8 @@ def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
   let sf := (← read).selfFrame
   pure [.of Γ (match (← read).overflow with
     | some o => o.guardStmt c sf
-    | none => .require c)]
+    -- in a self-call's callee, solc's `Panic(0x11)` data (`Prog.withPanics`)
+    | none => if sf then panicStmt 0x11 c else .require c)]
 
 /-- The slot `b.push()` appended: `b[b.length - 1]`. -/
 def pushedSlot (b : RawExpr) : RawExpr :=
@@ -3349,10 +3369,17 @@ def Simple.toRaw {Γ : Ctx} {p : PrimTy} (ns : List Var) : Simple C Γ p → Raw
   | .env k _ => .env k
 
 /-- The parts of an inlined call with return variables `ρ`: its arguments
-and its body. -/
+and its body.  A `try` that binds none (`ρ = []`) of a callee that returns
+values runs it as a call statement: its return variable declared at the
+head of its body (`.val`), or its returns declared there already (`.none`). -/
 def Stmt.selfCall? {Γ Γ' : Ctx} (ρ : Ctx) : Stmt C Γ Γ' →
     Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ ps × Prog C (ρ ++ ps) Γf)
   | .call (rs := rs) _ as (.rets _) b => if h : rs = ρ then some ⟨_, _, as, h ▸ b⟩ else none
+  | .call _ as (.val p r _) b =>
+    if h : ([] : Ctx) = ρ then
+      some ⟨_, _, as, h ▸ (Prog.cons (Stmt.declLocal p r none) b : Prog C ([] ++ _) _)⟩
+    else none
+  | .call _ as .none b => if h : ([] : Ctx) = ρ then some ⟨_, _, as, h ▸ b⟩ else none
   | _ => none
 
 /-! ### `abi.*`, `string.concat`, `bytes.concat`
@@ -4962,6 +4989,18 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   let hoistArgs := @ElabRec.hoistArgs C rc
   let hoistCallArgs := @ElabRec.hoistCallArgs C rc
   match s0 with
+  | .revertReason m => do
+    let (P, m) ← hoist m
+    pure (P, .revertReason m)
+  | .revertRaw m => do
+    let (P, m) ← hoist m
+    pure (P, .revertRaw m)
+  | .requireReason c m => do
+    let (P, args) ← hoistArgs [c, m]
+    let [c, m] := args | throw "internal: require reason changed arity"
+    let x := toString (← freshCapture "mv")
+    let Q ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
+    pure (P ++ Q, .requireReason c (.name x))
   | .pushOpAssign op b r => do
     let (P, r) ← hoist r
     let (Pc, r) ← if b.hasIncDec then captureExpr C r else pure ([], r)
@@ -5085,9 +5124,20 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   let s : RawStmt := match s with
     | .revertErr .. => if self then s else .revert
     | .requireErr c e as =>
-      if self then .ite c (if as.all RawExpr.isPure then [] else [.eval as]) [.revertErr e as]
+      if (lookupBy e C.errors).isNone then .requireReason c (.call e as)
+      else if self then .ite c (if as.all RawExpr.isPure then [] else [.eval as]) [.revertErr e as]
       else RawStmt.requireWith c as
     | s => s
+  match s with
+  | .revertReason m | .requireReason _ m => do
+    let Γ ← ctx
+    -- Validate nested string conversions before bytesPure erases them too.
+    let invalid := m.any fun e => match e with
+      | .call "string" [_] | .call "string.concat" _ => !stringReason? C Γ e
+      | _ => false
+    unless stringReason? C Γ m && !invalid do
+      throw "a revert reason is a string; convert bytes with string(data)"
+  | _ => pure ()
   -- a call statement through a value that is not a name, `s.f(x);`
   -- (`callValueName`); `push`, `pop` and `transfer` are the receivers' own
   let s := match s with
@@ -5204,11 +5254,17 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
     | _ => pure false
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
   -- a push's receiver, as a `.push` member's base
-  let es : List (RawExpr × Bool) := match s with
-    | .call (.name f) as => [(RawExpr.call f as, whole)]
-    | .pushOpAssign _ b r => [(b, true), (r, whole)]
-    | .pushIncDec _ b => [(b, true)]
-    | s => s.exprs.map (·, whole)
+  let es : List (RawExpr × Bool) ← match s with
+    | .call (.name f) as => pure [(RawExpr.call f as, whole)]
+    | .pushOpAssign _ b r => pure [(b, true), (r, whole)]
+    | .pushIncDec _ b => pure [(b, true)]
+    | .revertReason m | .revertRaw m => do
+      ElabM.lift (shapeCheck C Γ dynBytesRows m)
+      pure [(m, true)]
+    | .requireReason c m => do
+      ElabM.lift (shapeCheck C Γ dynBytesRows m)
+      pure [(c, false), (m, true)]
+    | s => pure (s.exprs.map (·, whole))
   unless s matches .delete _ do
     for (e, base) in es do
       let w := if base then narrowWholeAt? C Γ e else narrowWholeUse? C Γ e
@@ -5245,6 +5301,14 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
   let elabBranch := @ElabRec.elabBranch C rc
   let elabScope := @ElabRec.elabScope C rc
   let elabTuple := @ElabRec.elabTuple C rc
+  let memoryRevert (kind : CatchKind) (m : RawExpr) : ElabM (SProg C) := do
+    ElabM.lift (shapeCheck C (← ctx) dynBytesRows m)
+    let (P, x) ← rc.abiMemBytes m
+    let Γ ← nctx
+    let p ← ElabM.lift (checkMPath C Γ (.ref bytesR) (.name x))
+    match p with
+    | .var src _ => pure (P ++ [.of Γ (.revertData [.mem kind src])])
+    | .loc _ => throw "internal: revert data was not captured in a memory local"
   match s0 with
   | .pushOpAssign op b r => do
     let ⟨Γ, t⟩ ← synthM C b
@@ -5558,6 +5622,9 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
     if (← read).selfFrame then
       pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
     else pure [.of (← nctx) .revert]
+  | .revertReason m => memoryRevert .reason m
+  | .revertRaw d => memoryRevert .raw d
+  | .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])
   | .requireMsg c m => do
     if (← read).selfFrame then elabStmt1 (.ite c [] [.revertMsg m])
     else elabStmt1 (.require c)
@@ -6085,7 +6152,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
 call with targets (`elabCallRet`), its environment the frame's
 (`RawStmt.selfFrame`), when `g` is a function declared before this one whose
 parameters take the arguments' types and whose return variables are the
-`try`'s `ρ`; `none` otherwise (another contract's function, or one this
+`try`'s `ρ`, or a `try` that binds none (`try this.g(x) { … }`); `none` otherwise (another contract's function, or one this
 function may not call: the restriction that keeps the run structural). -/
 partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
@@ -6093,12 +6160,16 @@ partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx))
   unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
   unless d.rets.all (fun (_, T) => T matches .prim _) do return none
   let raw := args.map fun a => Simple.toRaw C Γ.names a.2
+  -- a `try` that binds none: the callee called as a statement (`selfCall?`)
+  let targets := !ρ.isEmpty || d.rets.isEmpty
   let r ← tryCatch (do
-      let (P, _, _) ← elabCallRet g raw none (targets := true) (selfFrame := true)
+      let (P, _, _) ← elabCallRet g raw none (targets := targets) (selfFrame := true)
       pure (some P)) fun _ => pure none
   let some [st] := r | pure none
   if h : st.Γ.ctx = Γ.ctx then
-    pure (Stmt.selfCall? C ρ (h ▸ st.s))
+    -- its failures with solc's `Panic` data, which the `catch` reads
+    pure ((Stmt.selfCall? C ρ (h ▸ st.s)).map fun ⟨ps, Γf, sargs, sbody⟩ =>
+      ⟨ps, Γf, sargs, sbody.withPanics⟩)
   else pure none
 
 /-- **The body a value call runs when its receiver is the contract itself**
