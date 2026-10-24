@@ -495,7 +495,7 @@ taclets	TestSuite	forWritesStorageArray	derived	box	`Solkey.TestSuite.forWritesS
 taclets	TestSuite	returnLeavesNestedLoops	derived	diamond	`Solkey.TestSuite.returnLeavesNestedLoops.proved` (`Solidity/TestSuite/Derived17.lean`)
 taclets	TestSuite	invariantCountsToBound	derived	box; for all n	`Solkey.TestSuite.invariantCountsToBound.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	invariantForCountsArrayLength	derived	diamond	`Solkey.TestSuite.invariantForCountsArrayLength.proved` (`Solidity/TestSuite/Derived17.lean`)
-taclets	TestSuite	invariantClosedFormSum	pending	diamond	not derived yet
+taclets	TestSuite	invariantClosedFormSum	refuted	diamond	`Solkey.TestSuite.invariantClosedFormSum.refuted` (`Solidity/TestSuite/Refuted.lean`)
 taclets	TestSuite	invariantBreakLeavesInvariantRange	derived	box; for all n	`Solkey.TestSuite.invariantBreakLeavesInvariantRange.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	invariantForContinueRunsUpdate	derived	box; for all n	`Solkey.TestSuite.invariantForContinueRunsUpdate.proved` (`Solidity/TestSuite/Derived19.lean`)
 taclets	TestSuite	invariantForBreakSkipsUpdate	derived	box; for all n	`Solkey.TestSuite.invariantForBreakSkipsUpdate.proved` (`Solidity/TestSuite/Derived20.lean`)

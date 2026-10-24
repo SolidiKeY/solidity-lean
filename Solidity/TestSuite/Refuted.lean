@@ -8,7 +8,9 @@ counterexample (`sol_refute`, `Tools/Counterexample.lean`):
 appended reference slot as its default (solkey's `SYMBOLIC_TAIL_OPENS`)
 are false from a storage whose array keeps a dirty slot past its end (a
 shadow `wt(storage)` admits, `Storage.wtB`), which an empty push exposes
-(`docs/solkey-migration.md`, "Push semantics"). -/
+(`docs/solkey-migration.md`, "Push semantics").  `invariantClosedFormSum`
+is false only past every storage the search builds: its witness is an array
+of `2^255` elements (`docs/automation.md`, M6). -/
 
 open Solidity
 open scoped Scoped
@@ -41,4 +43,11 @@ theorem Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.refuted : ¬ (
   sol_refute
 
 theorem Solkey.TestSuite.testEmptyPushStructReturnReadsZero.refuted : ¬ (⊢ Solkey.TestSuite.testEmptyPushStructReturnReadsZero.problem) := by
+  sol_refute
+
+/-- False from a storage whose `values` has `2^255` elements: the loop's
+`s + 2` overflows at `i = 2^255 - 1`, a revert the diamond refuses.  The
+witness is a long array (`SVec.rep`, `Tools/LazyStorage.lean`) and the loop
+runs in closed form (`Prog.runA`, `Semantics/RunAccel.lean`). -/
+theorem Solkey.TestSuite.invariantClosedFormSum.refuted : ¬ (⊢ Solkey.TestSuite.invariantClosedFormSum.problem) := by
   sol_refute

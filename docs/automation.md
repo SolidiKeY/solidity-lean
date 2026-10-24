@@ -429,11 +429,12 @@ terminating with a proof or a counterexample; CI fails on anything else.
   closer may answer *unknown*.  Over 2^256-long storages the general case
   is decidable only by enumerating storages, which the theorem forbids.
 * A counterexample is a concrete typed state, certified by kernel
-  evaluation.  One that needs a storage array of `2^255` elements cannot be
-  built: `invariantClosedFormSum` is false in the model (`s + 2` overflows
-  at `i = 2^255 − 1` when `values.length ≥ 2^255`, its invariant leaf shows
-  it), yet nothing refutes it.  A complete closer needs symbolic
-  counterexamples here.
+  evaluation.  One that needs a storage array of `2^255` elements could not
+  be built: `invariantClosedFormSum` is false in the model (`s + 2`
+  overflows at `i = 2^255 − 1` when `values.length ≥ 2^255`, its invariant
+  leaf shows it).  It is refuted now by symbolic counterexamples (below);
+  a witness outside their shapes (a long array read element by element, a
+  loop that does more than count) is still out of reach.
 * Not impossible, but false today: `split` duplicates the continuation
   (`n` sequential `if`s give `2^n` leaves), a call carries its callee's
   body (nested calls grow exponentially; a callee that computes values runs
@@ -447,7 +448,7 @@ or refuted by `sol_refute` (in `TestSuite/Refuted.lean`, from `¬ ⊨ᶠ φ`:
 false in the model, not merely underivable), and none is pending; its counts
 must be the `Report.lean` pin's; and no TestSuite module the build compiled
 took past its budget (`--build-log`, 300 s each by default; CI tees the
-TestSuite build's log).  It fails today, on the one pending obligation.  Built this round:
+TestSuite build's log).  It failed on one pending obligation until the symbolic counterexamples (below).  Built this round:
 
 * `sol_refute` (`Tools/Counterexample.lean`): `¬ (⊢ φ)` or `¬ ⊨ᶠ φ` from a
   certified counterexample, through `Proves.not_of_not_valid` (soundness
@@ -507,7 +508,50 @@ TestSuite build's log).  It fails today, on the one pending obligation.  Built t
   and takes a read's guards out of its address (`LTm.hoistA`): the three
   `memoryIndexWrite*` obligations (`TestSuite/Derived21.lean`, `sol_prove`).
 
-Pending (one): `invariantClosedFormSum` (above).
+**Symbolic counterexamples (2026-10-25).**  `invariantClosedFormSum` is
+refuted by `sol_refute` alone (`TestSuite/Refuted.lean`), from a storage
+whose `values` has `2^255` elements; none pending.  Three pieces, all
+checked by the kernel, nothing trusted:
+
+* *Long arrays* (`Tools/LazyStorage.lean`): `SVec.rep v n`, `n` copies of
+  `v` as the function that makes them; the kernel unfolds it only as far
+  as a reader goes, and `Storage.len` reads the vector's index.  The
+  premise `wt(storage)` visits every element, so it is proved, not
+  evaluated (`holds_wt_of`: the long root by `SVal.allB_arrayOf_rep`, whose
+  element test is `SVec.allB_rep` by induction and whose node tests read
+  only the length; every other root by evaluation).
+* *Counting loops in closed form* (`Semantics/RunAccel.lean`): a body that
+  only adds literals to `uint` locals (`x = x + d`, `x += d`, `x++`, `++x`,
+  each local once: `Prog.bumps?`) under a condition `x < e`, `x <= e`,
+  `e > x` or `e >= x` with `e` a term the body leaves alone (literals, the
+  transaction, other locals, a root's value or length, operators over them:
+  `Val.rigid?`).  `TRun.accel?` computes the iteration `K` where the
+  condition fails (`guardBound`) and the last `T` every counter survives
+  (`ovfBound`): the loop ends at `K` (each local at its value plus `K`
+  steps, `State.bumpK`) if `K ≤ T`, and reverts at `T` otherwise.
+  `TRun.accel?_sound` proves it is `TRun.loop`'s outcome, by
+  `TLoop.run_of_steps` (a loop along a closed form `f k`); the recognizers
+  carry their proofs (`Prog.BumpsAt`, `Guard.Spec`, `Val.Rigid`), so no
+  `match` needs a splitter.  `Prog.runA` is `Prog.runF` with such loops
+  accelerated (`TRun.loopA`, `Prog.runA_approx`), and the evaluator runs it
+  (`Prog.runFramesF`): a loop bounded by an argument at `2^256 - 1` that
+  only counts is now answered, not `unknown`.
+* *The search* (`Tools/Counterexample.lean`, "Long arrays"): when the
+  ordinary candidates fail, `sol_refute` and `#counterexample` propose each
+  dynamic-array root whose element default is well-formed at `2^255` and
+  `2^256 - 1` elements (`longCands`), the formula's parameters at their
+  defaults, and ask the kernel for `¬ ⊨ᶠ φ` of a formula
+  `wt(storage) → ψ` directly (`certifyLong`, each attempt under its own
+  heartbeats): no compiled evaluator can hold such a storage.  The
+  certificate for `invariantClosedFormSum` checks in about 0.1 s; the
+  tactic's 4 s are the ordinary search before it.
+
+`Examples/Tactics/SymbolicCounterexample.lean` pins both closed forms
+(an overflow, a loop that ends at `2^255`), `Prog.runF` giving up where
+`Prog.runA` answers, and a true property of the same loop not refuted.
+Soundness is the usual chain: `Prog.runA_approx` against the typed run,
+`Fml.eval3_sound`, `Fml.not_valid_of_peel`, `Proves.not_of_not_valid`;
+`#print axioms` of the refutation shows Lean's three.
 
 **The exponential, measured** (`#proof_tree`, `StandardExample`, the
 program `uint x = 0;` then `n` statements `if (vᵢ == 1) { x = x + 1; };`,
