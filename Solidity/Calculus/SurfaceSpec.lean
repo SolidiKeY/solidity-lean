@@ -1,6 +1,7 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.RefInputs
+import Solidity.Syntax.Elab
 
 /-!
 # Specifications, compiled to dynamic logic
