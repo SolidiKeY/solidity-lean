@@ -7,6 +7,7 @@ the others link to it.
 |---|---|
 | [latex.md](latex.md) | LeanTeX paper notation, symbol-definition links, checked traces and the Lean LaTeX/JSON export API. |
 | [module-map.md](module-map.md) | One row per module: where things live. |
+| [parallelism.md](parallelism.md) | The core apart from the elaborator, large files split by topic, one soundness file per rule: the layering check, the fan-out tool and the measured costs. |
 | [rule-repair.md](rule-repair.md) | Semantics-first rule repair, lazy reads, rejection gates, proof budgets and soundness integration. |
 | [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, the design decisions, what is still open. |
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, and its update and theory symbols, to Lean names. |
