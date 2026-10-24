@@ -10,11 +10,16 @@ KeY; this file is the work list.
 
 ## Status (2026-10-22)
 
-Every row of the language's semantics below is closed: the run models it,
-the elaborator and the solc import accept it, and `tests/solc/` pins a
-proof of solc's behaviour for it.  What is left is not a gap in the
-semantics but in what the calculus and its closers prove automatically,
-each with the reason recorded in its section:
+The broader, version-pinned [language audit](solidity-scope.md) and
+[feature inventory](solidity-feature-inventory.md) distinguish modeled features,
+conditional abstractions, implementation work and deliberate exclusions.
+The historical status below covers its listed work items, not all upstream
+Solidity syntax or every frontend shape.
+
+The rows marked closed below have implementations and focused fixtures in
+`tests/solc/`. Their remaining calculus and closer limits are recorded in
+their sections; the broader inventory also lists frontend and semantic work
+outside those historical rows:
 
 - **Calculus.** A computed or rethrown revert reason (`revert(string.concat(…))`,
   `catch (bytes memory d) { assembly { revert(add(d, 32), mload(d)) } }`)

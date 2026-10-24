@@ -5,6 +5,8 @@ the others link to it.
 
 | Document | Holds |
 |---|---|
+| [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
+| [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
 | [latex.md](latex.md) | LeanTeX paper notation, symbol-definition links, checked traces and the Lean LaTeX/JSON export API. |
 | [module-map.md](module-map.md) | One row per module: where things live. |
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, large files split by topic, one soundness file per rule: the layering check, the fan-out tool and the measured costs. |
