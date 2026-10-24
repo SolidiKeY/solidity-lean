@@ -7,6 +7,7 @@ import SolidityBridge.Fresh
 import SolidityBridge.ProofTheory
 import SolidityBridge.Arith
 import SolidityBridge.WeakestPre
+import SolidityBridge.WeakestPreLaws
 import SolidityBridge.ExternalEvm
 import SolidityBridge.Adversary
 import SolidityBridge.Checks

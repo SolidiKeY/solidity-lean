@@ -61,3 +61,221 @@ modules are allowed; the unfiltered check reports 25 scratch modules. The
 existing prose-path check reports 13 unrelated missing upstream/vendor
 references; none was introduced by this milestone. CI was configured locally
 but has not been run on GitHub in this task.
+
+## Bridge-theorems milestones (2026-10-24)
+
+### B0: build and dependency pins
+
+Work starts on `bridge-theorems` from `origin/master` at
+`82e75b10b180e72103be3a9e5884d1f44431a9b8`. This base already contains the
+separate Bridge package, its pinned manifest, and the opt-in
+`./run-lean.sh --bridge` gate. The default run is unchanged.
+
+The reported CSLib URL failure does not reproduce on this base:
+`https://github.com/leanprover/cslib` cloned and checked out
+`e1fea784d55eae30275c205291f12a1b4868eed3` successfully. There is no local
+`Bridge/build.log` in the fresh checkout. The current URL and revision are
+therefore retained rather than repinning a working dependency. CSLib,
+Mathlib `v4.24.0` (commit `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`), Bridge,
+and the core all pin `leanprover/lean4:v4.24.0`; no toolchain change is needed.
+The external EVM vendor checksums and the bridge shell syntax checks pass.
+
+The required `cd Bridge && lake exe cache get` was attempted before the
+build, including a retry in the resumed environment. The proxy still denies
+`lakecache.blob.core.windows.net` with `CONNECT tunnel failed, response 403`,
+even though that hostname appears in the saved environment configuration.
+No public cache files were downloaded. The failed retry was stopped and
+`cd Bridge && lake build` then passed from source (1,528 jobs), including
+the imported regression module and its pinned axiom audits. Cache access is
+an optimization, not a logical prerequisite for this build.
+
+The core's default `lake build` passes under the same Lean 4.24.0 toolchain
+(453 jobs). Vendor checksums and shell syntax checks pass. Independent
+read-only finder and skeptic reviews confirm the installed dependencies
+match the pins and that the existing script is opt-in. Retaining these
+working pins is preferable to changing them solely to reproduce a stale
+URL report.
+
+B0 is complete. No configuration or manifest edit was needed: this base
+already contains the working dependency pins and opt-in runner. B0 changes
+only this validation record. The earlier October 22 results above describe
+the baseline and do not establish the requested all-width/operator coverage.
+
+### B1: arithmetic, widths, and exact failure policies
+
+`Bridge/SolidityBridge/Arith.lean` imports the family files below and preserves
+the original public theorem names. The numeric bridges cover every admitted
+integer operator and every legal Solidity width (8, 16, …, 256). Most width
+lemmas are stronger: unsigned `n ≤ 256`, signed `0 < n ≤ 256`.
+`unsignedN`/`signedN` embed **every** `BitVec n` value into the actual core
+primitive type; no overflow or operation-success assumption excludes inputs.
+
+The unqualified requested milestone is **not all green**: universal panic
+behavior and word-valued signed shift counts have the counterexamples in
+“Discrepancies”. The true equations and those findings are both retained.
+
+| Files under `Bridge/SolidityBridge/Arith/` | Proved behavior |
+|---|---|
+| `Bridge/SolidityBridge/Arith/Basic.lean`, `Bridge/SolidityBridge/Arith/Checked.lean` | Actual 256-bit range checks and checked unsigned/signed `+ - *`, signed negation, and unsigned power. Acceptance is exactly equality of the mathematical integer with its decoded BitVec word. |
+| `Bridge/SolidityBridge/Arith/Wrapping.lean`, `Bridge/SolidityBridge/Arith/SignedWrapping.lean`, `Bridge/SolidityBridge/Arith/NarrowWrapping.lean` | Unsigned wrapping `+ - * **`; signed wrapping `+ - * **` and negation, including width 256. All-width equations evaluate actual typed primitive/cast/cut compositions. `cutUInt`/`cutInt` are the terms checked from `lowBits`/`signedAt`. Any operand error is preserved. Signed power has an unsigned exponent; exponents retain their full value. Primitive unsigned wrapping operations also agree with ZMod. |
+| `Bridge/SolidityBridge/Arith/Division.lean`, `Bridge/SolidityBridge/Arith/NarrowDivision.lean`, `Bridge/SolidityBridge/Arith/SignedDivision.lean` | Unsigned division/remainder and signed truncation-toward-zero division/remainder at every width, with zero failures explicit. The signed remainder reference is `srem`. Checked signed division includes its width predicate; wrapping division proves the narrow quotient/cast and full-width conditional-denominator/modular-sign strategies, including minimum signed value divided by `-1`. |
+| `Bridge/SolidityBridge/Arith/Comparison.lean` | All six signed/unsigned comparisons and equality tests on arbitrary words at every width. |
+| `Bridge/SolidityBridge/Arith/Bitwise.lean`, `Bridge/SolidityBridge/Arith/NarrowBitwise.lean` | Signed/unsigned AND, OR, XOR at every width; unsigned complement, including the narrow source's `maxN -% x` lowering. Signed proofs use sign extension and establish the returned integer, not merely its low-bit projection. |
+| `Bridge/SolidityBridge/Arith/Shifts.lean`, `Bridge/SolidityBridge/Arith/NarrowShifts.lean` | Unsigned left/right shifts at every width and unsigned count, preserving the full count independently of base width. Left shift evaluates the actual width-cut term. Signed arithmetic right shift agrees with `sshiftRight count.toNat` at every width; the stronger word-count claim is refuted below. |
+| `Bridge/SolidityBridge/Arith/Casts.lean`, `Bridge/SolidityBridge/Arith/Widths.lean` | Actual word conversions; all target-width unsigned truncation and signed interpretation; signed-to-unsigned, signed-to-signed, and unsigned-to-signed templates; same-sign widening for arbitrary valid source-width words. `lowBits_from_correct`/`signedAt_from_correct` connect the real source checker to evaluation of arbitrary typed operands, preserving their failures. |
+| `Bridge/SolidityBridge/Arith/NarrowChecked.lean`, `Bridge/SolidityBridge/Arith/OverflowGuards.lean`, `Bridge/SolidityBridge/Arith/CheckedExecution.lean` | Actual `inTyCond` checker equations and assert/require runners; actual full-width `Checked.rangeU`/`rangeI`/`negRange` guards, including multiplication's protected intermediates. The explicit checking-mode pipeline (core value preguard, primitive, width predicate) panics exactly when `+ - *` or signed negation/division changes the bounded result; zero division reverts. Power's separate equation retains primitive revert before the destination guard. |
+| `Bridge/SolidityBridge/Arith/Modular.lean` | Actual `addmod`/`mulmod` against ZMod, with wide intermediates and explicit zero-modulus failure, for every core unsigned operand/modulus, hence every valid narrow operand too. |
+| `Bridge/SolidityBridge/Arith/Signature.lean` | Actual `Op1`/`Op2` signature evaluators call the same primitive operators. Signature `Op1.toInt` widens uint to unbounded KeY `kint`; it is distinguished from signed word cast `UnOp.toInt`. |
+| `Bridge/SolidityBridge/Arith/Lowering.lean` | Exact source equations for wrapping rewrites, signed division's two strategies, unsigned complement/left shift, negative-literal addition/subtraction, and literal power bases. `castCapture_factor` retains the real checker/fresh capture continuation and their errors; `castCapture_typed` selects identity or conversion. `narrowCheck_guard` identifies the emitted statement, including default require, explicit checking, self-call panic data, and ignoring mode; `narrowCheck_full` proves the full-width no-op. |
+
+`PrimTy` contains uint256/int256/bool; narrow widths are metadata carried by
+`intTyOf` and the cast/cut/guard lowerings. `intTyOf_head` demonstrates any
+width on an ordinary local. Division and comparisons use genuine width-sized
+words, not arbitrary 256-bit states with an assumed width label. Counts and
+exponents are never truncated to the base width.
+
+`*_checked_all_widths` in `Bridge/SolidityBridge/Arith/NarrowChecked.lean` composes primitive evaluation
+**then** a width check. Primitive `none` becomes revert through `TRes.ofOpt`;
+the width-check failure is separate. These equations alone do not describe
+explicit `checked` blocks. `*_explicit_checked_all_widths` in
+`Bridge/SolidityBridge/Arith/CheckedExecution.lean` adds the actual value preguard first. Its numeric
+operands are arbitrary core values embedded as pure typed terms.
+`guardedValue_assert_then` connects that prefix to the actual `Stmt.assert`
+runner followed by evaluation in its returned state. The
+checker/template and source-action equations provide separate compositional
+links; this is not a universal correctness theorem for the whole frontend.
+In particular signed division's raw source branch and numeric primitive
+pipeline are both proved, without claiming one combined theorem for
+checking/evaluating that entire raw template.
+
+`narrowWrap_uint`/`narrowWrap_int` describe nonliteral operands; separate
+negative-literal and literal-power equations cover those signed
+optimizations. Their fit hypotheses are actual source admission checks,
+not assumptions that an operation's result fits. `negative_literal_add` and
+`negative_literal_sub` prove the optimizations retain the same mathematical
+operation. `castCapture_factor` also retains literal fit failures. A
+whole-frontend theorem covering every expression, capture, and side effect
+is outside these operator bridges.
+
+Signed left shift, signed complement, and checked signed power are rejected
+by the primitive admission table. No evaluator is fabricated for those
+combinations. The extra homogeneous signed right-shift count is discussed
+below.
+
+Read-only finder/skeptic review confirmed nonvacuous width embeddings and
+numeric coverage. It identified the need to separate primitive postchecks
+from explicit preguards and expose literal source branches; both are now
+represented in the proofs and these claims. No heartbeat limit was raised.
+Some arithmetic/source modules increase recursion depth for the existing
+256-bit representations. Final validation and independent statement/doc
+review are recorded below.
+
+### B2: lattice laws and the two wp readings
+
+`Bridge/SolidityBridge/WeakestPreLaws.lean` is imported by the package root.
+It uses Mathlib's `Set` predicate lattice (`Monotone`, `⊓`, `⊤`, and order
+homomorphisms) on the actual core predicates. There are no termination,
+success, panic-freedom, or postcondition-consistency assumptions in the
+monotonicity, binary-conjunction, or sequencing laws.
+
+- For the actual modality transformer `Bridge.wp`, `wp_mono`/`wpOrderHom`
+  were already present; `wp_inf` and `wp_comp` add binary conjunction and
+  sequencing for arbitrary result-valued functions with the exact
+  `Modality.afterRunTR` halt policy.
+- `stepWp` observes states returned by a core `TStep`. `stepWp_mono` and
+  `stepWp_inf` lift the lattice laws; `stepWp_seq` proves composition for
+  the real `TRun.seq`, including its heap-extension evidence;
+  `stepWp_prog_cons` specializes it to the real program constructor.
+- `valid_modal_iff_wp_top` identifies `Fml.Valid` of a framed modality with
+  the top precondition; `proves_modal_wp_top` uses `Proves.fmlValid`.
+  `proves_spec_box_wp_top` separately uses `Proves.valid` at its actual
+  `Spec.box`/`Spec.toFml` types.
+- The closer's helper `Modality.wp` in `Solidity/Calculus/CloseLemmas.lean`
+  is a different reading: it treats every error as `onHalt`. `rawWp`
+  embeds exactly that helper into the same lattice. `rawWp_mono`,
+  `rawWpOrderHom`, `rawWp_inf`, `rawWp_box_top`, and `rawWp_comp` prove its
+  four requested laws, with top preservation stated for box.
+- `wp_eq_rawWp` proves the precise relation between the readings for
+  arbitrary runs: actual wp is `(raw wp OR exhaustion) AND not panic`.
+  The helper's top law therefore cannot establish top preservation for
+  the actual box.
+
+The requested **unconditional top-preservation law for the actual box is
+false**, so B2 is not fully green as requested. `wp_box_top_iff` classifies
+the exact obstruction, without replacing the original statement by a
+restricted one. `assert_false_box_not_valid` and a minimal Lean `example`
+refute `[assert(false)] true`; another `example` refutes top preservation
+on the inhabited `Unit` state type. No postcondition or impossible input
+hypothesis makes those counterexamples disappear.
+
+B3 is not started: its explicit B0–B2-green prerequisite is not met.
+Optional B4 is not attempted. The existing compiler and loop adapters
+remain the baseline results described above.
+
+### Discrepancies
+
+1. **Checked power overflow need not panic.** In
+   `Bridge/SolidityBridge/Arith/Power.lean`, `checked_pow_reverts` proves that
+   `checked { uint x = 2; uint y = 256; uint z = x ** y; }` reverts.
+   `checked_narrow_pow_reverts` proves the same for a `uint8` base/result.
+   Each has a minimal Lean `example` proving the run is not panic.
+   `checked_narrow_pow_panics` checks the boundary: replacing the exponent
+   by `8` at `uint8` does panic. The larger power fails the 256-bit
+   evaluator before its narrow guard. `Syntax/Checked.lean` explicitly
+   excludes full-width power from its checked guards. These are findings,
+   not corrected semantics or weakened agreement statements.
+2. **Negative signed shift counts differ from word-valued BitVec shifts.**
+   In `Bridge/SolidityBridge/Arith/Shifts.lean`, the accepted primitive `int(1) >> int(-1)`
+   returns `1`, because the core applies `Int.toNat` to the negative count.
+   BitVec's `sshiftRight'` reads the count's word as `2^256-1` and returns
+   `0`. The file contains a minimal inequality `example`. Solidity does
+   not admit a signed count; the primitive's admission/type representation
+   permits this extra case. This is not a claim that a valid Solidity
+   program with an unsigned count misexecutes.
+
+3. **Actual box does not preserve top.** `assert(false)` panics; the
+   actual box rejects panic even when its postcondition is true. This
+   agrees with the core's documented partial-correctness policy. The
+   simpler closer wp helper does preserve top under box, but differs on
+   both panic and exhaustion. The B2 file checks both readings explicitly.
+
+### Core changes wanted
+
+- Decide whether explicit `checked` mode must panic on every arithmetic
+  overflow. If so, power needs a guard before primitive evaluation,
+  including before an overflowing narrow intermediate; merely checking the
+  destination afterward cannot repair the demonstrated case.
+- Represent the shift count independently from the left operand's type:
+  reject signed counts while admitting the unsigned count of a signed
+  arithmetic right shift. The current homogeneous `BinOp.evalT` signature
+  and `BinOp.accepts` cannot express that distinction.
+
+- Preserve or explicitly reconsider the deliberate panic-rejecting box
+  policy before requesting its unconditional top-preservation law. The
+  bridge does not propose silently changing that policy to force a lattice
+  theorem. The closer helper and actual modality should continue to be
+  distinguished in any public wp API.
+
+No core file or root dependency manifest was changed. The discrepancies
+are findings; no numeric statement was weakened to conceal them.
+
+### Final bridge-theorems validation
+
+`./run-lean.sh --bridge` passes under Lean 4.24.0: the core default targets,
+the separate TestSuite target, the Bridge build (1,547 jobs), vendor hashes,
+and the frozen SolKey check (377 taclets, 131 read-bearing annotations).
+All 179 printed Bridge axiom audits, including 162 arithmetic audits,
+contain only `propext`, `Classical.choice`, and `Quot.sound`. Arithmetic
+source checks find no `sorry`, new axiom/opaque declaration, unrestricted
+simp, untyped `have`, or heartbeat-limit change. New arithmetic modules
+build without warnings. Whitespace and changed-path scope checks pass;
+the root still has zero dependency declarations and no core source diff.
+
+Independent read-only finder/skeptic passes confirm the arithmetic operand
+domains, multiplication guard protection, source-link boundaries, and the
+wp/validity statements. The final separate reviewer found no actionable theorem/doc mismatch or
+vacuous hypothesis and confirmed real numeric coverage of every legal width
+and admitted operator family. It confirmed the stated frontend boundaries
+and that the refuted laws keep B3 gated. The prose-path script still reports
+13 pre-existing missing upstream/vendor references; no reference in this
+updated document is missing. No unrelated path or core file was changed.
