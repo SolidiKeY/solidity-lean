@@ -1,4 +1,5 @@
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.Join
 import Solidity.Syntax.Checked
 import Solidity.Keccak
 import Solidity.RevertBytes
@@ -1311,11 +1312,6 @@ def SStmt.withOF (o : OFMode) (sf : Bool) (s : SStmt C) : SProg C :=
   match s.s.guard with
   | none => [⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
   | some g => [.of s.Γ (o.guardStmt g sf), ⟨s.Γ, s.Γ', s.s.withOF o sf⟩]
-
-/-- `P` then `Q`. -/
-def Prog.join {Γ Δ Ε : Ctx} : Prog C Γ Δ → Prog C Δ Ε → Prog C Γ Ε
-  | .nil, Q => Q
-  | .cons s P, Q => .cons s (Prog.join P Q)
 
 /-- `a` then `b`, which must start where `a` leaves (an internal error
 otherwise). -/

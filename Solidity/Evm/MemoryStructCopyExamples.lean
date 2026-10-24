@@ -1,4 +1,5 @@
 import Solidity.Evm.Compiler
+import Solidity.Syntax.Splice
 
 /-!
 Ordinary Solidity storage-to-memory copies retain populated primitive values

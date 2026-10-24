@@ -1,5 +1,6 @@
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Inlined
+import Solidity.Syntax.Elab
 
 /-!
 # Elaborating a block, as a term

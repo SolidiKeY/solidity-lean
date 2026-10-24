@@ -1,6 +1,7 @@
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
+import Solidity.Syntax.Splice
 
 /-!
 # Reading concrete formulas into scoped ones: `cdl!{ φ }`

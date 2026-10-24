@@ -1,4 +1,5 @@
 import Solidity.Evm.Compile
+import Solidity.Syntax.Splice
 
 /-!
 # The scoped compiler at work

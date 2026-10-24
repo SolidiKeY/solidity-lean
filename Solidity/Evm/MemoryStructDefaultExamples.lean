@@ -1,4 +1,5 @@
 import Solidity.Evm.Compiler
+import Solidity.Syntax.Splice
 
 /-!
 Ordinary Solidity struct literals use the default-allocation compiler clause

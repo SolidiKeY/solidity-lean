@@ -1,5 +1,5 @@
 import Lean.Util.ShareCommon
-import Solidity.Syntax.Elab
+import Solidity.Syntax.Scoped
 
 /-!
 # Quoting the scoped syntax

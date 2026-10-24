@@ -1,4 +1,3 @@
-import Solidity.Syntax.Quote
 import Solidity.Semantics.Heap
 
 /-!

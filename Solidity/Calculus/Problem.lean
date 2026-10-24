@@ -3,6 +3,7 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Logic
+import Solidity.Syntax.Splice
 
 /-!
 # Obligations, as solkey states them

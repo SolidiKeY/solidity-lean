@@ -1,3 +1,4 @@
+import Solidity.Examples.ScopedRuns
 import Solidity.Semantics.Callback
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds

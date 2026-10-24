@@ -1,6 +1,7 @@
 import Solidity.Calculus.Arms
 import Solidity.Calculus.CallSummary
 import Solidity.Semantics.NoPanic
+import Solidity.Syntax.Join
 
 /-!
 # The rules of the statements that hold blocks

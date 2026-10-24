@@ -1,6 +1,5 @@
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
-import Solidity.Syntax.Elab
 
 /-!
 # Deferred operand evaluation

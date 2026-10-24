@@ -1,5 +1,6 @@
 import Solidity.Calculus.CleanTailBoundary
 import Solidity.Typing.Constructibility
+import Solidity.Syntax.Splice
 
 namespace Solidity.Examples.Tactics.CleanTail
 

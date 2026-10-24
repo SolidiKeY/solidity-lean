@@ -10,6 +10,7 @@ import Solidity.Syntax.Checked
 import Solidity.Syntax.CheckedExact
 import Solidity.Syntax.PushSource
 import Solidity.Syntax.Inlined
+import Solidity.Syntax.Join
 import Solidity.Syntax.Elab
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Splice
@@ -186,6 +187,7 @@ import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.TermLib
+import Solidity.Examples.ScopedRuns
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays
 import Solidity.Examples.Chains.StorageDelete

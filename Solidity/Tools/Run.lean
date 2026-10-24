@@ -1,4 +1,5 @@
 import Solidity.Tools.Common
+import Solidity.Syntax.Splice
 import Solidity.Semantics.Run
 import Solidity.Semantics.Deploy
 

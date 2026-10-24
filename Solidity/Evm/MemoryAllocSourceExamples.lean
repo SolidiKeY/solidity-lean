@@ -1,5 +1,6 @@
 import Solidity.Evm.MemoryAllocSource
 import Solidity.Evm.Compiler
+import Solidity.Syntax.Splice
 
 /-! Public allocation from a concrete typed state: local lengths, distinct
 primitive arrays, allocating rebinding and retained old aliases/objects. -/

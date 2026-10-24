@@ -2,6 +2,7 @@ import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.DelabLean
 import Solidity.Tools.Common
+import Solidity.Syntax.Splice
 
 /-!
 # `#taclet`: a rule of the calculus
