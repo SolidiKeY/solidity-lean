@@ -101,11 +101,91 @@ already contains the working dependency pins and opt-in runner. B0 changes
 only this validation record. The earlier October 22 results above describe
 the baseline and do not establish the requested all-width/operator coverage.
 
+### B1: primitive arithmetic and refuted universal claims
+
+The package builds with the new imported `Bridge/SolidityBridge/Arith/`
+family modules. The existing `Arith.lean` is now an import facade; its old
+public theorem names are preserved in `Bridge/SolidityBridge/Arith/Basic.lean`.
+
+The requested **all-width/all-operator milestone is not green**. In
+particular its unqualified overflow/panic requirement has counterexamples
+below. The positive results have this exact scope:
+
+| File | New checked results | Quantification |
+|---|---|---|
+| `Bridge/SolidityBridge/Arith/Basic.lean` | The core range check fails exactly when conversion to an unsigned/signed BitVec changes the mathematical integer; core operands constructed from arbitrary library words. | All integers and all 256-bit words. |
+| `Bridge/SolidityBridge/Arith/Checked.lean` | Actual `BinOp.evalT` for checked unsigned/signed `+ - *`, signed unary `-`, and unsigned `**`: returns the unbounded result exactly when it equals the corresponding BitVec result, otherwise `none`. | Every core operand; no no-overflow hypothesis. |
+| `Bridge/SolidityBridge/Arith/Wrapping.lean` | Adds actual unsigned wrapping subtraction and power agreement with BitVec, and wrapping power with ZMod; baseline covers wrapping addition/multiplication with both libraries and subtraction with ZMod. | Every core unsigned operand and exponent. The helper identities `ofInt_sub`/`ofInt_pow` hold at every natural width; those identities alone are not source-elaboration correctness. |
+| `Bridge/SolidityBridge/Arith/Division.lean` | Actual unsigned division/remainder, signed `sdiv`/`srem`; zero divisors return `none`, signed division overflow returns `none` exactly when the integer quotient differs from the word. | All 256-bit words/core operands, including minimum signed value divided by `-1`. |
+| `Bridge/SolidityBridge/Arith/Comparison.lean` | All six comparisons, both unsigned and signed, against BitVec comparisons/equality. | All pairs of 256-bit words. |
+| `Bridge/SolidityBridge/Arith/Bitwise.lean` | Actual unsigned AND, OR, XOR against BitVec. | All core unsigned operands. |
+| `Bridge/SolidityBridge/Arith/Casts.lean` | Actual unsigned-to-signed and signed-to-unsigned conversions against BitVec word interpretation. | All 256-bit words/core signed operands. |
+| `Bridge/SolidityBridge/Arith/Modular.lean` | Both actual `ModOp.evalT` builtins `addmod`/`mulmod`, retaining wide intermediates, against ZMod; zero modulus fails. | Every core unsigned operand and modulus. |
+| `Bridge/SolidityBridge/Arith/Power.lean`, `Bridge/SolidityBridge/Arith/Shifts.lean` | Kernel-checked counterexamples described below. | Concrete inhabited inputs and actual source runs. |
+
+These evaluator equations return `Option`; they do not relabel `none` as
+panic. `TRes.ofOpt` in `Semantics/Run.lean` turns it into revert. The source
+counterexamples separately test the actual `Prog.run`, including explicit
+`checked` mode. No theorem assumes an impossible range or successful
+execution to hide an overflow case.
+
+Remaining requested coverage is explicit: generic signed bitwise operations,
+unsigned complement, general unsigned/signed shifts, signed wrapping source
+lowerings (including width 256), all narrow-width source operator lowerings,
+and casts between distinct widths. The primitive type
+`PrimTy` has no width parameter: only `uint256`, `int256`, and `bool`.
+The lowerings to audit are `intTyOf`, `checkedNarrow?`, `narrowWrapNode`,
+`narrowCapture`, `narrowCheck`, `lowBits`, `signedAt`, and `castCapture` in
+`Solidity/Syntax/Elab.lean`; a detached arithmetic model or a projection
+into `BitVec w` would not establish their correctness. Signed left shift,
+signed complement, and checked signed power are rejected by the primitive
+admission table; no agreement theorem is claimed for them.
+
+Read-only finder/skeptic review confirmed the listed positive statements are
+nonvacuous and the counterexamples read the actual evaluators/runs. The
+skeptic identified missing explicit mention of signed wrapping at width 256;
+the coverage list above includes it. This is a findings checkpoint, not a
+claim that B1 satisfies the requested completion criterion.
+
+Validation: `cd Bridge && lake build` passes (1,533 jobs), including the
+imported new family files, source counterexamples and existing checks.
+Every new family file ends with `#print axioms` for its headline results;
+the outputs contain only `propext`, `Classical.choice`, and `Quot.sound`.
+No heartbeat limit was raised. Four files use `maxRecDepth 2048` to check
+the existing 256-bit bound representations and concrete source reductions.
+
 ### Discrepancies
 
-No new semantic discrepancy has been investigated for this milestone yet.
+1. **Checked power overflow need not panic.** In
+   `Bridge/SolidityBridge/Arith/Power.lean`, `checked_pow_reverts` proves that
+   `checked { uint x = 2; uint y = 256; uint z = x ** y; }` reverts.
+   `checked_narrow_pow_reverts` proves the same for a `uint8` base/result.
+   Each has a minimal Lean `example` proving the run is not panic.
+   `checked_narrow_pow_panics` checks the boundary: replacing the exponent
+   by `8` at `uint8` does panic. The larger power fails the 256-bit
+   evaluator before its narrow guard. `Syntax/Checked.lean` explicitly
+   excludes full-width power from its checked guards. These are findings,
+   not corrected semantics or weakened agreement statements.
+2. **Negative signed shift counts differ from word-valued BitVec shifts.**
+   In `Bridge/SolidityBridge/Arith/Shifts.lean`, the accepted primitive `int(1) >> int(-1)`
+   returns `1`, because the core applies `Int.toNat` to the negative count.
+   BitVec's `sshiftRight'` reads the count's word as `2^256-1` and returns
+   `0`. The file contains a minimal inequality `example`. Solidity does
+   not admit a signed count; the primitive's admission/type representation
+   permits this extra case. This is not a claim that a valid Solidity
+   program with an unsigned count misexecutes.
 
 ### Core changes wanted
 
-None identified during B0. The core files and its dependency-free manifest
-remain unchanged.
+- Decide whether explicit `checked` mode must panic on every arithmetic
+  overflow. If so, power needs a guard before primitive evaluation,
+  including before an overflowing narrow intermediate; merely checking the
+  destination afterward cannot repair the demonstrated case.
+- Represent the shift count independently from the left operand's type:
+  reject signed counts while admitting the unsigned count of a signed
+  arithmetic right shift. The current homogeneous `BinOp.evalT` signature
+  and `BinOp.accepts` cannot express that distinction.
+
+No core file or root dependency manifest was changed. Missing all-width
+proofs above remain Bridge proof work, not an assertion that changing the
+core is logically necessary to prove every true correspondence.
