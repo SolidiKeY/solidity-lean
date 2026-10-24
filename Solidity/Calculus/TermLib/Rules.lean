@@ -1450,31 +1450,31 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
   | findOnSaveIn hq => TermTaclet.findOnSaveIn_sound hq
   | @selectOnSaveMember _ _ s _ p v r sn hr p' _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMember_denote h) .hole q
-  | @selectOnSaveFrame _ _ s _ p v r sn r' sn' hr hr' p' _ q h hne =>
+  | @selectOnSaveFrame _ _ s _ p v r sn _ _ hr _ _ _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnSaveFrame_denote h hne) .hole q
   | @selectOnDelAtMember _ _ s _ p r sn hr p' _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtMember_denote h) .hole q
-  | @selectOnDelAtFrame _ _ s _ p r sn r' sn' hr hr' p' _ q h hne =>
+  | @selectOnDelAtFrame _ _ s _ p r sn _ _ hr _ _ _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrame_denote h hne) .hole q
   | @selectOnSaveMemberIn _ _ s _ p v r sn hr p' _ K _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMember_denote h) K q
-  | @selectOnSaveFrameIn _ _ s _ p v r sn r' sn' hr hr' p' _ K _ q h hne =>
+  | @selectOnSaveFrameIn _ _ s _ p v r sn _ _ hr _ _ _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnSaveFrame_denote h hne) K q
   | @selectOnDelAtMemberIn _ _ s _ p r sn hr p' _ K _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtMember_denote h) K q
-  | @selectOnDelAtFrameIn _ _ s _ p r sn r' sn' hr hr' p' _ K _ q h hne =>
+  | @selectOnDelAtFrameIn _ _ s _ p r sn _ _ hr _ _ _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrame_denote h hne) K q
   | @selectOnSaveMemberAt _ _ sn sn' f s _ p v hf p' _ K _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMemberAt_denote h) K q
-  | @selectOnSaveFrameAt _ _ sn sn' sn'' f f' s _ p v hf hf' p' _ K _ q h hne =>
+  | @selectOnSaveFrameAt _ _ sn sn' _ f _ s _ p v hf _ _ _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnSaveFrameAt_denote h hne) K q
   | @selectOnDelAtMemberAt _ _ sn sn' f s _ p hf p' _ K _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtMemberAt_denote h) K q
-  | @selectOnDelAtFrameAt _ _ sn sn' sn'' f f' s _ p hf hf' p' _ K _ q h hne =>
+  | @selectOnDelAtFrameAt _ _ sn sn' _ f _ s _ p hf _ _ _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrameAt_denote h hne) K q
   | findOnDelAt hw hp hq => TermTaclet.findOnDelAt_sound hw hp hq
   | findOnDelAtValue hp hq => TermTaclet.findOnDelAtValue_sound hp hq
-  | @delValueLit _ _ P w => fun σ => rfl
+  | @delValueLit _ _ P w => fun _ => rfl
   | findOnDelAtBelow hk hw hp hq => TermTaclet.findOnDelAtBelow_sound hk hw hp hq
   | findOnDelAtBelowIn hk hw hq => TermTaclet.findOnDelAtBelowIn_sound hk hw hq
   | findOnDelAtFrame h => TermTaclet.findOnDelAtFrame_sound h
