@@ -277,3 +277,45 @@ largest of any piece):
 
 Downstream files, before → after: `Calculus/ElimWriteFree` 1.1 → 1.1, `Calculus/Hyp` 0.4 → 0.4, `Calculus/RewriteLaws` 0.5 → 0.5, `Calculus/CloseFrame` 0.6 → 0.6, `Calculus/ChainGen` 1.6 → 1.6, `Calculus/CallbackDerive` 1.5 → 1.5, `Syntax/Scoped` 3.5 → 3.5, `Semantics/Heap` 0.8 → 0.7, `Signature` 1.2 → 1.2, `Frontend/Import` 1.8 → 1.8.  Again no piece and no downstream
 file is slower.
+
+## P3. Theorems: one lemma per rule
+
+Statement-rule soundness was already split by rule: one lemma per arm in
+`Calculus/SoundArms.lean` … `SoundLoops.lean`, dispatched by
+`Calculus/SoundStep.lean` (`Stmt.stepSound_arms`) and
+`Calculus/StmtSound.lean` (`Stmt.stepSound`, the blocks), each one `cases s`.
+That structure stays, and no existing lemma moved.  A rule added from now on
+proves its arm in `Calculus/Sound/<KeYName>.lean`, one file per rule
+(`Calculus/Sound/README.md`; the template is in `.claude/rules/soundness.md`),
+so that it elaborates alone and in parallel with the others.
+
+**Term taclets** (`TermTaclet.sound`, `Calculus/TermLib/Rules.lean`): of its
+30 cases, 15 were proved inline by tactic blocks inside the one `match`.
+Each is now a named lemma beside it, `TermTaclet.<rule>_sound`, stating the
+constructor's own binders and terms, the proof moved as it was; the case
+applies it.  The other 15 were one term already: twelve
+`Tm.findIn_fill_theq` of the rule's `…_denote`, `delValueLit` by `rfl`,
+`theory` its hypothesis, `symm` the recursion.
+**Update rules** (`UpdRuleS.sound`, `Calculus/UpdRuleScoped.lean`): each of
+its 7 cases already applies one lemma (`holds_upd_seqPar`, …); unchanged.
+
+### Adding a rule: the six places
+
+1. **The constructor**: `Taclet` in `Calculus/Rules.lean`, written in
+   `dl{ … }` (`.claude/rules/rule-table.md`, step 1).
+2. **Its `Stmt.step` arm**: `Calculus/Arms.lean` or `Calculus/Blocks.lean`,
+   dispatched by `Calculus/Step.lean`, with `Taclet.<rule>.toStep`
+   (`Calculus/Taclet.lean`) and, where the arm is new, `Stmt.<c>.ruleExists`
+   (`Calculus/RuleExists.lean`).
+3. **Its soundness file**: `Calculus/Sound/<KeYName>.lean`.
+4. **The assembly line**: an import and a case in `Stmt.stepSound_arms`
+   (`Calculus/SoundStep.lean`), or in `Stmt.stepSound`
+   (`Calculus/StmtSound.lean`) for a block.  The `cases s` is exhaustive:
+   a statement whose arm has no lemma fails the build.
+5. **The rule map row**: `docs/lean-key-rule-map.md`, the solkey taclets it
+   transcribes and the file of its soundness.
+6. **The printed tables**: `RuleShapes.tacletOrigins`
+   (`Calculus/RuleShapes.lean`) and `PrintedRules.printedOrigins`
+   (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
+   missing row.  A taclet that reads storage or memory also gets its row in
+   `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
