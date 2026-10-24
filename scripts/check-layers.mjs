@@ -17,6 +17,7 @@ const CORE = [
   /^Solidity\.(Semantics|Typing|Theory)\./,
   /^Solidity\.Calculus\.(Fml|Rules|RuleSyntax|RuleKit|KeyTaclets|Step|Arms|Blocks|Taclet|Proves|Logic|Hyp|Correct|FirstOrder)$/,
   /^Solidity\.Calculus\.(Sound.*|StmtSound|ProvesSound|PremiseSound|UpdRuleScoped|UpdateRules|TermLib\.Rules)$/,
+  /^Solidity\.Calculus\.RuleSyntax\./,
   /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary)$/,
 ];
 const ELABORATOR = [
