@@ -1,5 +1,6 @@
 -- The root of the `Solidity` library: every module of the default build.
 import Solidity.KeySort
+import Solidity.Language.Features
 import Solidity.Eqns
 import Solidity.AST
 import Solidity.SpecSyntax

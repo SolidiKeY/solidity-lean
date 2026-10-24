@@ -30,6 +30,9 @@ jobs:
       - name: Check layering
         run: node scripts/check-layers.mjs
 
+      - name: Check pinned Solidity feature inventory
+        run: python3 scripts/solidity-feature-audit.py --check
+
       # Elaboration is the test suite: there is no separate test driver, and
       # the default library is the whole formalization.
       #
