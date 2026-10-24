@@ -9,20 +9,26 @@ A call's summary (`internalCallSummary`, `Calculus/CallSummary.lean`) is
 one update whose term substitutes each callee's term at its call: in the
 family `f₀(x) = x * 3`, `fₖ(x) = fₖ₋₁(fₖ₋₁(x))`, `{ y := a * 3 * … * 3 }`
 with `2^k` products, one per call site.  The term is linear in the call
-sites; reading it whole is not: the closer's evaluation enters the rest of
-each product under a binder before the value is known, and the steps of
-`sol_close` read an update at once (`docs/automation.md`, M6).
+sites; reading it whole is not: the closer's evaluation reads the whole
+update at once, each product's range check nested in the one before it
+(`docs/automation.md`, M6).
 
 Here the term is read one value at a time, each a fresh local with its
 defining fact, KeY's contract applied once per call site: `{ y := C[s] }`
-is `{ z := s } { y := C[z] }`, `s` the innermost strict redex of the term
-(`Tm.redex?`: a symbol applied to locals and nullary symbols, reached
+is `{ z := s } { y := C[z] ‖ pop }`, `s` the innermost strict redex of the
+term (`Tm.redex?`: a symbol applied to locals and nullary symbols, reached
 through operands that are always read, `Op2.strictB`), `z` popped after.
 Where `s` does not return, neither does `C[s]`, so the two fail alike
 (`holds_upd_share`); where it does, `C[z]` reads what `C[s]` read.  So
-`{ y := a * 3 * 3 }` is `{ t₁ := a * 3 } { y := t₁ * 3 }`, and a leaf of
-`n` call sites is `n` updates of one product each, which the steps read in
-turn (`CloseJ.peel`, `Calculus/CloseScoped.lean`).
+`{ y := a * 3 * 3 }` is `{ z := a * 3 } { y := z * 3 ‖ pop }`, and a leaf
+of `n` call sites is `n` updates of one product each, which `sol_close`'s
+steps read in turn (`CloseJ.shareStep`, `CloseJ.peel`,
+`Calculus/CloseScoped/Steps.lean`).  Lean only: solkey applies a contract
+at a call, it has no summaries to split.
+
+Nothing here is trusted by the closer: each split is an `apply` of
+`holds_upd_share`, its redex equation `rfl` and its `pushFree` conditions
+`rfl`, which the kernel checks.
 -/
 
 namespace Solidity
@@ -33,6 +39,8 @@ variable {C : Contract}
 
 /-! ## Strict operands -/
 
+/-- A strict operator never short-circuits: `x * y` reads `y` whatever `x`
+is (`&&` and `||` are the lazy ones). -/
 theorem BinOp.shortT_of_lazyB {op : BinOp} (h : op.lazyB = false) {p : PrimTy} (a : p.Denote) :
     op.shortT a = none := by
   cases op <;> first | (cases p <;> rfl) | (simp only [BinOp.lazyB, Bool.true_eq_false] at h)
@@ -93,17 +101,16 @@ def Tm.redex? : {s : Srt} → Tm C Γ s →
     else none
   | _, _ => none
 
-/-- A state with a local pushed, thinned past it, is the state. -/
-theorem State.thin_push_drop {t : LTy} (σ : State C Γ) (u : t.TDenote C σ.H) :
-    (σ.push u).thin (.drop .refl) = σ := by
-  cases σ; rfl
-
+/-- A term weakened past a pushed local reads as before: `x * 3` under a
+fresh `uint z` is `x * 3`. -/
 theorem Tm.eval_wk_push {t : LTy} (σ : State C Γ) (u : t.TDenote C σ.H) {s : Srt}
     (x : Tm C Γ s) : (x.wk (.drop .refl)).eval (σ.push u) = x.eval σ := by
   rw [Tm.eval_wk]
   cases σ
   rfl
 
+/-- **The term as its own redex** (`Tm.self?`): `x * 3` read from a local
+holding its value. -/
 theorem Tm.self?_spec {s : Srt} {t : Tm C Γ s} {q : PrimTy} {r : Tm C Γ (.val q)}
     {t' : Tm C (.val q :: Γ) s} (h : t.self? = some ⟨q, r, t'⟩) (σ : State C Γ) :
     (r.eval σ = none → t.eval σ = none) ∧
@@ -255,5 +262,8 @@ theorem holds_upd_share {Γ' : Ctx} {m : Modality} {p q : PrimTy} (z : Var)
         rfl
 
 end Share
+
+/-- info: 'Solidity.holds_upd_share' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms holds_upd_share
 
 end Solidity

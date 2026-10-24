@@ -772,13 +772,12 @@ up to `3^(2^k)` nodes (`k = 3`: 228 000 characters printed); at `k = 4`
 it runs in a part of the evaluation that does not check heartbeats.  So the
 summaries are polynomial only for callees whose terms `Tm.norm` keeps the
 size of one body (literal offsets); the doubling family above is one.
-Sharing would make the leaf linear in the call sites whatever the callee:
+Sharing makes the leaf linear in the call sites whatever the callee:
 each call's result a fresh value with its defining fact
 (`{ t₁ := x * 3 } { t₂ := t₁ * 3 } …`, KeY's contract applied once per
-call) rather than its callee's term substituted.  That is a summary made
-of a sequence of updates over fresh locals, not one term over the frame —
-a new update shape and a new soundness argument in place of
-`Prog.sym_sound` — and is not done.
+call) rather than its callee's term substituted.  It is done at the leaf,
+not in the rule (below, "Call sites shared"); the `k = 4` row's runaway was
+an instance search, not the size of the term.
 
 **Worktree consolidation (2026-10-24).** All three other worktrees' commits
 were already ancestors of master. The `share` worktree's source matched the
@@ -810,6 +809,84 @@ orphan check sees 33 scratch modules, and the documentation path check has
 those inventories or obligation statuses.
 All three other worktrees were removed after their archived source was
 rechecked byte for byte; only the master worktree remains.
+
+**Call sites shared (2026-10-25).**  The summary stays one term over the
+frame (`CallRet.summary?`, the walk and its pins unchanged); `sol_close`
+reads it one call site at a time.  `CloseJ.shareStep`
+(`Calculus/CloseScoped/Steps.lean`) rewrites the leaf's
+`{ y := C[s] ‖ pop } φ` to `{ shₖ := s } { y := C[shₖ] ‖ pop } φ`, `s` the
+term's innermost strict redex (`Tm.redex?`, `Calculus/LeafShare.lean`: a
+binary symbol on locals and literals, reached through operands that are
+always read), until the term is one operation: `{ y := a * 3 * 3 * 3 }`
+becomes `{ sh0 := a * 3 } { sh1 := sh0 * 3 } { y := sh1 * 3 ‖ pop }`, a
+fresh local and its defining update per call site.  Soundness is
+`holds_upd_share`: where `s` does not return neither does `C[s]`
+(`Op2.eval_none_of_strictB`, the operator strict), so the two updates fail
+alike, and where it returns `u`, `C[z]` at `z = u` reads what `C[s]` read
+(`Tm.redex?_spec`); its axioms are `propext`, `Classical.choice`,
+`Quot.sound`.  Each step is an `apply` of it, its redex equation and its
+`pushFree` conditions by `rfl` (the redex computed by `Kernel.whnf`
+through `Tm`'s constructors only, `CloseJ.tmNF`), which the kernel checks
+again.
+
+`CloseJ.peel` then reads the shared leaf as it reads a joined one, one
+binder, premise (`Fml.imp`, new: the leaf's precondition, kept for every
+later `omega`) or update at a time with the rest held opaque.  A checked
+product evaluates to its two cases (`CloseS.wpChecked`:
+`(0 ≤ v ∧ v < 2^256 → k ⟨v, _⟩) ∧ (¬ … → False)`); the failing case is a
+side goal, closed by `omega` in a context cut to its premises, the leaf's
+premises and the known intervals (`CloseJ.closeArith`, under the diamond:
+the precondition `a < 1000` shows `a * 3^i` fits).  `sol_close` tries it
+first on a leaf with a summary's update of at least `CloseJ.shareMin` (4)
+operations, within `CloseJ.budget`; a leaf whose summary has more than
+`CloseJ.shareWholeMax` (8) is never evaluated whole after it
+(`sol_close_few_joins`), so a false leaf fails at about the cost of a true
+one (`y >= a + 1` at `k = 4`: 47 k; an overflow past `10^62` at `k = 5`:
+76 k).
+
+**The runaway** (`k = 4`, past 45 s in `sol_close_eval`).  Bisected on
+`simp`'s `maxSteps` under a watchdog: 5000 steps 12 k heartbeats, 0.5 s;
+7000 steps 18 k, 2.6 s; 8000 steps 21 k, 14 s: the time grew while the
+heartbeats did not.  `set_option profiler true` put it in
+`typeclass inference of Nonempty` (0.18 s, 1.25 s, 8.7 s, each nesting
+level about seven times the one before), and
+`trace.Meta.Tactic.simp.discharge` named the lemma: `forall_const`
+(`[Nonempty α] (α → b) ↔ b`) of `close_rw_s`, tried at every premise of
+the nested range checks, `Nonempty (Nonempty (Landed …))` and
+`Nonempty (v * 3 * … * 3 < 2^256)`, which no instance gives and whose
+failed search the heartbeats do not count.  At a proposition the lemma
+never applies (a premise is not an instance); `Close.forall_const_type`
+and `Close.exists_const_type` (`Calculus/CloseLemmas.lean`) take a type's
+binder only, and replace `forall_const` in `close_rw_s` and
+`exists_const`/`forall_const` in `sol_close`'s, `sol_spec`'s and
+`sol_close_quantified`'s cleanup.  The whole evaluation at `k = 4` is then
+1.0 s and 27 k heartbeats (`triplingFourWhole` pins the whole path within
+the default), and the whole `sol_close` 24 k, 107 k, 803 k at `k = 3, 4, 5`
+(the `k = 3` leaf was 79 k before): bounded, but not polynomial, so the
+shared steps are what the family takes.
+
+Measured (`Examples/Tactics/CallSummary.lean`'s `triplingOne` …
+`triplingFive`, `a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, heartbeats in
+thousands, one declaration each; walk: `sol_prove (steps := 128)`, leaf:
+`sol_leaf; sol_close`):
+
+| k | call sites | walk | leaf | path |
+|---|---|---|---|---|
+| 1 | 2 | 2 (0.18 s) | 5 (0.18 s) | whole |
+| 2 | 4 | 2 (0.22 s) | 6 (0.28 s) | shared |
+| 3 | 8 | 4 (0.31 s) | 12 (0.56 s) | shared |
+| 4 | 16 | 7 (0.52 s) | 28 (1.3 s) | shared |
+| 5 | 32 | 12 (0.88 s) | 79 (3.6 s) | shared |
+
+The leaf is `2^k` updates of one product each, linear in the call sites.
+What the closer spends on it grows by about `n^1.5` in the `n` call sites
+(per step, `peel` at `n = 32`: the share 0.4–0.7 k, the step's `simp`
+0.8–1.3 k, the check's `omega` 0.1–1.5 k): each step's `simp` walks the
+locals' stack, one deeper per call site, and each check reads the product
+`a * 3 * … * 3` it is about.  Naming each checked value afresh (a variable
+and its equation, rather than the product substituted) would make the
+checks constant; the stack would still grow.  The walk grows with the
+inlined bodies the kernel's evaluation of the summary walks (above).
 
 ## Review (2026-10-20)
 

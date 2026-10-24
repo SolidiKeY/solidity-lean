@@ -428,4 +428,10 @@ theorem signedNegative : ⊨ᶠ dl!{ ⟨ int y = s1(-2); ⟩ y + 18 == 0 } := by
 -/
 #guard_msgs in #print axioms signedTripling
 
+/-- info: 'Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms triplingFive
+
 end Solidity.Examples.Tactics.CallSummary.CheckedResult
