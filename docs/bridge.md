@@ -61,3 +61,51 @@ modules are allowed; the unfiltered check reports 25 scratch modules. The
 existing prose-path check reports 13 unrelated missing upstream/vendor
 references; none was introduced by this milestone. CI was configured locally
 but has not been run on GitHub in this task.
+
+## Bridge-theorems milestones (2026-10-24)
+
+### B0: build and dependency pins
+
+Work starts on `bridge-theorems` from `origin/master` at
+`82e75b10b180e72103be3a9e5884d1f44431a9b8`. This base already contains the
+separate Bridge package, its pinned manifest, and the opt-in
+`./run-lean.sh --bridge` gate. The default run is unchanged.
+
+The reported CSLib URL failure does not reproduce on this base:
+`https://github.com/leanprover/cslib` cloned and checked out
+`e1fea784d55eae30275c205291f12a1b4868eed3` successfully. There is no local
+`Bridge/build.log` in the fresh checkout. The current URL and revision are
+therefore retained rather than repinning a working dependency. CSLib,
+Mathlib `v4.24.0` (commit `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`), Bridge,
+and the core all pin `leanprover/lean4:v4.24.0`; no toolchain change is needed.
+The external EVM vendor checksums and the bridge shell syntax checks pass.
+
+The required `cd Bridge && lake exe cache get` was attempted before the
+build, including a retry in the resumed environment. The proxy still denies
+`lakecache.blob.core.windows.net` with `CONNECT tunnel failed, response 403`,
+even though that hostname appears in the saved environment configuration.
+No public cache files were downloaded. The failed retry was stopped and
+`cd Bridge && lake build` then passed from source (1,528 jobs), including
+the imported regression module and its pinned axiom audits. Cache access is
+an optimization, not a logical prerequisite for this build.
+
+The core's default `lake build` passes under the same Lean 4.24.0 toolchain
+(453 jobs). Vendor checksums and shell syntax checks pass. Independent
+read-only finder and skeptic reviews confirm the installed dependencies
+match the pins and that the existing script is opt-in. Retaining these
+working pins is preferable to changing them solely to reproduce a stale
+URL report.
+
+B0 is complete. No configuration or manifest edit was needed: this base
+already contains the working dependency pins and opt-in runner. B0 changes
+only this validation record. The earlier October 22 results above describe
+the baseline and do not establish the requested all-width/operator coverage.
+
+### Discrepancies
+
+No new semantic discrepancy has been investigated for this milestone yet.
+
+### Core changes wanted
+
+None identified during B0. The core files and its dependency-free manifest
+remain unchanged.
