@@ -317,12 +317,12 @@ const VALUE_TYPES = { uint: "uint", uint256: "uint", int: "int", int256: "int",
 // ─────────────────────────── the Lean side ─────────────────────────────
 
 /**
- * The state variables of each ported `Contract`, read off `Syntax.lean`, as a
+ * The state variables of each ported `Contract`, read off `Syntax/Contract.lean`, as a
  * set; its `functions` are the names of the functions it declares
  * (`function f(…) … { … }`), which a ported body may call.
  */
 function leanContracts() {
-  const src = readFileSync(join(ROOT, "Solidity/Syntax.lean"), "utf8");
+  const src = readFileSync(join(ROOT, "Solidity/Syntax/Contract.lean"), "utf8");
   const out = {};
   for (const m of src.matchAll(/def (\w+) : Contract := contract!\{/g)) {
     const start = m.index + m[0].length;
@@ -1453,7 +1453,7 @@ async function main() {
     const sol = parseContract(readFileSync(join(SOLKEY, file), "utf8"));
     const { functions, stateVars } = sol;
     const leanVars = lean[contract];
-    if (!leanVars) throw new Error(`no contract ${contract} in Syntax.lean`);
+    if (!leanVars) throw new Error(`no contract ${contract} in Syntax/Contract.lean`);
     const renames = RENAMES[contract] || {};
     const unportedVars = new Map(
       [...stateVars].filter(([n]) => !leanVars.has(Object.hasOwn(renames, n) ? renames[n] : n)),
