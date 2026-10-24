@@ -983,28 +983,35 @@ def shareStep (g : MVarId) (k : Nat) : MetaM (Option MVarId) := g.withContext do
     else main := some g'
   return main
 
-/-- The binary operations of a term (`Tm.app2`), counted up to `cap`. -/
-partial def tmOps (e : Expr) (acc cap : Nat) : Nat :=
-  if acc ≥ cap then acc
-  else
-    let acc := if e.isAppOfArity ``Tm.app2 8 then acc + 1 else acc
+/-- The binary operations of a term (`Tm.app2`), each distinct subterm
+counted once, up to `cap`. -/
+partial def tmOps (e : Expr) (cap : Nat) : Nat :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr × Nat) Unit := do
+    let (seen, n) ← get
+    if n ≥ cap || seen.contains e then return
+    set (seen.insert e, if e.isAppOfArity ``Tm.app2 8 then n + 1 else n)
     match e with
-    | .app f x => tmOps x (tmOps f acc cap) cap
-    | .mdata _ b => tmOps b acc cap
-    | _ => acc
+    | .app f x => go f; go x
+    | .mdata _ b => go b
+    | _ => pure ()
+  ((go e).run ({}, 0)).2.2
 
 /-- The most binary operations of a summary's update in `e`
-(`shareable?`), counted up to `cap`. -/
+(`shareable?`, `tmOps`), up to `cap`; each distinct subterm visited once. -/
 partial def countShare (e : Expr) (cap : Nat) : Nat :=
-  if e.isAppOfArity ``Fml.upd 6 then
-    let n := match shareable? (e.getArg! 4) with
-      | some (_, t, _) => tmOps t 0 cap
-      | none => 0
-    max n (countShare (e.getArg! 5) cap)
-  else match e with
-    | .app f x => max (countShare f cap) (countShare x cap)
-    | .mdata _ b => countShare b cap
-    | _ => 0
+  let rec go (e : Expr) : StateM (Std.HashSet Expr × Nat) Unit := do
+    let (seen, best) ← get
+    if best ≥ cap || seen.contains e then return
+    set (seen.insert e, best)
+    if e.isAppOfArity ``Fml.upd 6 then
+      if let some (_, t, _) := shareable? (e.getArg! 4) then
+        let n := tmOps t cap
+        modify fun (s, b) => (s, max b n)
+    match e with
+    | .app f x => go f; go x
+    | .mdata _ b => go b
+    | _ => pure ()
+  ((go e).run ({}, 0)).2.2
 
 /-- The leaves whose summary's update has at least this many operations
 take `sol_close_join_steps` first, one call site at a time (`shareStep`). -/
@@ -1015,6 +1022,8 @@ evaluate the leaf whole where `sol_close_join_steps` did not close it:
 whole, `x * 3 * … * 3` costs 24 k heartbeats at eight products, 107 k at
 sixteen, 803 k at thirty-two (`docs/automation.md`, M6). -/
 def shareWholeMax : Nat := 8
+
+mutual
 
 /-- The leaf's binders, premises and updates one at a time, the rest of
 the formula held opaque (a fresh `ψ` and `rest = ψ`), so that each step
@@ -1040,6 +1049,18 @@ partial def peel (g : MVarId) (bounds : Bounds) (prems : Array FVarId) (k : Nat)
     else if φ.isAppOfArity ``Fml.imp 4 then some (φ.getArg! 3)
     else none
   let some rest := rest? | return some (g, bounds, prems)
+  -- a premise is read as far as it goes: where the steps past it fail, the
+  -- leaf is left at it, as before premises were read (`closeSteps` then
+  -- evaluates it whole)
+  if φ.isAppOfArity ``Fml.imp 4 then
+    let saved ← saveState
+    try return ← peelHead g t φ rest bounds prems k
+    catch _ => saved.restore; return some (g, bounds, prems)
+  peelHead g t φ rest bounds prems k
+
+/-- `peel`'s step at a head `φ` of rest `rest`, then `peel` on. -/
+partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : Array FVarId)
+    (k : Nat) : TacticM (Option (MVarId × Bounds × Array FVarId)) := g.withContext do
   -- `∀ ψ, rest = ψ → holds σ (head ψ)`, built in place (no `kabstract`)
   let ty ← withLocalDeclD `ψ (← inferType rest) fun ψ => do
     withLocalDeclD `hψ (← mkEq rest ψ) fun h => do
@@ -1062,6 +1083,8 @@ partial def peel (g : MVarId) (bounds : Bounds) (prems : Array FVarId) (k : Nat)
     gM.replaceTargetEq (mkApp tgt.appFn! rest)
       (← mkCongrArg tgt.appFn! (← mkEqSymm (mkFVar hψ)))
   peel gM bounds prems k
+
+end
 
 /-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
 read as the updates were, then `omega` on the intervals, the defining facts'
