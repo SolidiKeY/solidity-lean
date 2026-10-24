@@ -319,3 +319,28 @@ its 7 cases already applies one lemma (`holds_upd_seqPar`, …); unchanged.
    (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
    missing row.  A taclet that reads storage or memory also gets its row in
    `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
+
+## P4. Closer clauses as units: stopped at step 1
+
+The task gates P4 on why `LFml.close` is one `Bool`, and stops it if that
+shape was chosen for speed.  It was:
+
+- the closer is the reflective half of `sol_prove` (`docs/testsuite-proofs.md`,
+  M1 and M4, `3fc9bb4c`): one kernel evaluation runs the strategy and the
+  closer per obligation, a leaf costing 50–60 ms and under 1k heartbeats in
+  one `decide`, against ~600 ms and 18k heartbeats per leaf for the
+  `sol_decide_cons` fallback.  A KeY taclet is a clause of that function,
+  not a proof step, so that it costs the kernel one evaluation, not a proof;
+- the functions the kernel evaluates keep Gate G0's forms
+  (`docs/intrinsic.md`, M0; `docs/kernel-port.md`): recursors and
+  `casesOn`, with a `match` twin for compiled code, because a `match` on a
+  context-indexed family costs the kernel a context comparison per cast
+  (11–13× on symex).
+
+Clauses as records folded over a list would change what the kernel unfolds
+on every leaf (structure projections and the fold, on top of each clause),
+the cost that design avoided, so the prototype was not written.  Nothing of
+P4 is on master.  Doing it is a decision for the owner of the closer, with
+the measurements of P4's step 3 (`Calculus/CloseTests.lean`,
+`Examples/Tactics/Decide.lean`, two `TestSuite/Derived*` modules, the whole
+`SolkeyTestSuite`) as the gate.
