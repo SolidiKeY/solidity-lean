@@ -1,5 +1,5 @@
 import Solidity.Calculus.Lower
-import Solidity.Syntax.Elab
+import Solidity.Syntax.Elab.Context
 
 /-!
 # Terms read by name, resolved where they stand
