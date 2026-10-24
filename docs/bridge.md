@@ -170,6 +170,48 @@ Some arithmetic/source modules increase recursion depth for the existing
 256-bit representations. Final validation and independent statement/doc
 review are recorded below.
 
+### B2: lattice laws and the two wp readings
+
+`Bridge/SolidityBridge/WeakestPreLaws.lean` is imported by the package root.
+It uses Mathlib's `Set` predicate lattice (`Monotone`, `⊓`, `⊤`, and order
+homomorphisms) on the actual core predicates. There are no termination,
+success, panic-freedom, or postcondition-consistency assumptions in the
+monotonicity, binary-conjunction, or sequencing laws.
+
+- For the actual modality transformer `Bridge.wp`, `wp_mono`/`wpOrderHom`
+  were already present; `wp_inf` and `wp_comp` add binary conjunction and
+  sequencing for arbitrary result-valued functions with the exact
+  `Modality.afterRunTR` halt policy.
+- `stepWp` observes states returned by a core `TStep`. `stepWp_mono` and
+  `stepWp_inf` lift the lattice laws; `stepWp_seq` proves composition for
+  the real `TRun.seq`, including its heap-extension evidence;
+  `stepWp_prog_cons` specializes it to the real program constructor.
+- `valid_modal_iff_wp_top` identifies `Fml.Valid` of a framed modality with
+  the top precondition; `proves_modal_wp_top` uses `Proves.fmlValid`.
+  `proves_spec_box_wp_top` separately uses `Proves.valid` at its actual
+  `Spec.box`/`Spec.toFml` types.
+- The closer's helper `Modality.wp` in `Solidity/Calculus/CloseLemmas.lean`
+  is a different reading: it treats every error as `onHalt`. `rawWp`
+  embeds exactly that helper into the same lattice. `rawWp_mono`,
+  `rawWpOrderHom`, `rawWp_inf`, `rawWp_box_top`, and `rawWp_comp` prove its
+  four requested laws, with top preservation stated for box.
+- `wp_eq_rawWp` proves the precise relation between the readings for
+  arbitrary runs: actual wp is `(raw wp OR exhaustion) AND not panic`.
+  The helper's top law therefore cannot establish top preservation for
+  the actual box.
+
+The requested **unconditional top-preservation law for the actual box is
+false**, so B2 is not fully green as requested. `wp_box_top_iff` classifies
+the exact obstruction, without replacing the original statement by a
+restricted one. `assert_false_box_not_valid` and a minimal Lean `example`
+refute `[assert(false)] true`; another `example` refutes top preservation
+on the inhabited `Unit` state type. No postcondition or impossible input
+hypothesis makes those counterexamples disappear.
+
+B3 is not started: its explicit B0–B2-green prerequisite is not met.
+Optional B4 is not attempted. The existing compiler and loop adapters
+remain the baseline results described above.
+
 ### Discrepancies
 
 1. **Checked power overflow need not panic.** In
@@ -191,6 +233,12 @@ review are recorded below.
    permits this extra case. This is not a claim that a valid Solidity
    program with an unsigned count misexecutes.
 
+3. **Actual box does not preserve top.** `assert(false)` panics; the
+   actual box rejects panic even when its postcondition is true. This
+   agrees with the core's documented partial-correctness policy. The
+   simpler closer wp helper does preserve top under box, but differs on
+   both panic and exhaustion. The B2 file checks both readings explicitly.
+
 ### Core changes wanted
 
 - Decide whether explicit `checked` mode must panic on every arithmetic
@@ -202,16 +250,32 @@ review are recorded below.
   arithmetic right shift. The current homogeneous `BinOp.evalT` signature
   and `BinOp.accepts` cannot express that distinction.
 
+- Preserve or explicitly reconsider the deliberate panic-rejecting box
+  policy before requesting its unconditional top-preservation law. The
+  bridge does not propose silently changing that policy to force a lattice
+  theorem. The closer helper and actual modality should continue to be
+  distinguished in any public wp API.
+
 No core file or root dependency manifest was changed. The discrepancies
 are findings; no numeric statement was weakened to conceal them.
 
-### B1 validation
+### Final bridge-theorems validation
 
-The arithmetic library and full opt-in run pass under Lean 4.24.0. All 162
-printed arithmetic axiom audits contain only `propext`, `Classical.choice`,
-and `Quot.sound`. Source checks find no `sorry`, new axiom/opaque declaration,
-unrestricted simp, untyped `have`, or heartbeat-limit change. New arithmetic
-modules build without warnings. Independent read-only finder/skeptic review
-confirmed the operand domains, guard protection, and documented source-link
-boundaries. The final separate reviewer also confirmed genuine all-width
-numeric coverage with no impossible result-fit hypotheses.
+`./run-lean.sh --bridge` passes under Lean 4.24.0: the core default targets,
+the separate TestSuite target, the Bridge build (1,547 jobs), vendor hashes,
+and the frozen SolKey check (377 taclets, 131 read-bearing annotations).
+All 179 printed Bridge axiom audits, including 162 arithmetic audits,
+contain only `propext`, `Classical.choice`, and `Quot.sound`. Arithmetic
+source checks find no `sorry`, new axiom/opaque declaration, unrestricted
+simp, untyped `have`, or heartbeat-limit change. New arithmetic modules
+build without warnings. Whitespace and changed-path scope checks pass;
+the root still has zero dependency declarations and no core source diff.
+
+Independent read-only finder/skeptic passes confirm the arithmetic operand
+domains, multiplication guard protection, source-link boundaries, and the
+wp/validity statements. The final separate reviewer found no actionable theorem/doc mismatch or
+vacuous hypothesis and confirmed real numeric coverage of every legal width
+and admitted operator family. It confirmed the stated frontend boundaries
+and that the refuted laws keep B3 gated. The prose-path script still reports
+13 pre-existing missing upstream/vendor references; no reference in this
+updated document is missing. No unrelated path or core file was changed.
