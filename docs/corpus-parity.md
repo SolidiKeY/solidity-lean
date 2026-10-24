@@ -30,8 +30,7 @@ an internal helper has no obligation, so the table's
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
 | derived | 426 | 126 | 0 | 552 |
-| refuted | 8 | 2 | 0 | 10 |
-| pending | 1 | 0 | 0 | 1 |
+| refuted | 9 | 2 | 0 | 11 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
 | **all** | **436** | **128** | **2** | **566** |
@@ -46,7 +45,7 @@ Not derived, by reason:
 | refuted | `Solkey.TestSuite.storageArrayMethodReferencesComposedCallReceiver.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `storageArrayMethodReferencesComposedCallReceiver` |
 | refuted | `Solkey.TestSuite.unprovableStorageShortCircuitMutation.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableStorageShortCircuitMutation` |
 | excluded | struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
-| pending | not derived yet | 1 | `invariantClosedFormSum` |
+| refuted | `Solkey.TestSuite.invariantClosedFormSum.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `invariantClosedFormSum` |
 | refuted | `Solkey.TestSuite.unprovableInvariantBreakPostcondition.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableInvariantBreakPostcondition` |
 | refuted | `Solkey.TestSuite.unprovableInvariantForContinueUpdate.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `unprovableInvariantForContinueUpdate` |
 | refuted | `Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.refuted` (`Solidity/TestSuite/Refuted.lean`) | 1 | `testFixedShapeEmptyPushFixedElementReadsZero` |

@@ -42,11 +42,13 @@ length and exposes the slot as it is: the seven obligations that read an
 appended reference slot as its default (solkey's `SYMBOLIC_TAIL_OPENS`)
 are false in the model (a dirty slot past an array's end, which `wt`
 admits), and are refuted with the `unprovable*` ones
-(`Solidity/TestSuite/Refuted.lean`, listed "refuted").
+(`Solidity/TestSuite/Refuted.lean`, listed "refuted"), and so is
+`invariantClosedFormSum`, from an array of `2^255` elements
+(`docs/automation.md`, M6).
 -/
 
 /--
-info: 617 functions: 552 derived, 1 pending, 64 other
+info: 617 functions: 552 derived, 0 pending, 65 other
 internal valuesRef
 internal valuesRefWithEffect
 internal matrixRefWithEffect
@@ -105,6 +107,7 @@ refuted storagePushReturnPrimitiveBindComplexReceiver
 refuted storageArrayMethodReferencesComplexReceiver
 refuted storageArrayMethodReferencesComposedCallReceiver
 refuted unprovableStorageShortCircuitMutation
+refuted invariantClosedFormSum
 refuted unprovableInvariantBreakPostcondition
 refuted unprovableInvariantForContinueUpdate
 refuted testFixedShapeEmptyPushFixedElementReadsZero
@@ -112,7 +115,6 @@ refuted testEmptyPushFixedArrayReturnReadsZero
 refuted testEmptyPushDynamicArrayReturnReadsZero
 refuted testEmptyPushStructReturnReadsZero
 pending:
-invariantClosedFormSum
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite
