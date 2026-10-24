@@ -365,7 +365,8 @@ macro "sol_close" : tactic => `(tactic|
     all_goals try (intros; sol_close_reads_all)
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
-    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+      Close.forall_const_type] at *)
     all_goals (try sol_close_witness)
     all_goals (repeat' (first | intro _ | apply And.intro))
     -- a goal the evaluation left no conditional value in: as below
@@ -384,7 +385,8 @@ macro "sol_close" : tactic => `(tactic|
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
     -- a bounds check returns `()`: nothing is left to choose
-    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+      Close.forall_const_type] at *)
     -- a value read back (`∃ a, t = a.val ∧ φ a`): the witness is `t`, its
     -- bounds of a literal by `decide`
     all_goals (try sol_close_witness)

@@ -76,6 +76,18 @@ namespace Close
 
 /-! ## Values, operators, ledgers -/
 
+/-- `forall_const` at a binder of a type, never of a proposition: `simp`
+asks an instance `Nonempty α` of every binder it tries the lemma at, and at a
+premise `p → q` that is `Nonempty p`, which no instance gives.  Under a
+checked product's nested range checks (`x * 3 * … * 3 < 2^256 → …`) each such
+search took about seven times the one before it, `8.7 s` at sixteen products,
+in time the heartbeats do not count (`docs/automation.md`, M6). -/
+theorem forall_const_type {α : Type u} [Nonempty α] {b : Prop} : (α → b) ↔ b :=
+  forall_const α
+/-- `exists_const` at a binder of a type, as `forall_const_type`: a
+proposition's is `exists_prop`'s. -/
+theorem exists_const_type {α : Type u} [Nonempty α] {b : Prop} : (∃ _ : α, b) ↔ b :=
+  exists_const α
 /-- A bounds check returns nothing to name: `∀ u : Unit, …` is the one case. -/
 theorem forall_unit {P : PUnit.{1} → Prop} : (∀ u, P u) ↔ P PUnit.unit :=
   ⟨fun h => h _, fun h u => by cases u; exact h⟩
