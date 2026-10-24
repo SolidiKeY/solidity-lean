@@ -2,6 +2,8 @@ import Solidity.Calculus.SolSpec
 import Solidity.Calculus.Surface
 import Solidity.Calculus.SoundLoops
 import Solidity.Semantics.RunFuel
+import Solidity.Semantics.RunAccel
+import Solidity.Tools.LazyStorage
 import Solidity.Tools.Common
 import Solidity.Calculus.DeclarationFacts
 
@@ -214,16 +216,17 @@ def Tri.afterT {α : Type} (m : Modality) (k : α → Tri) : TRes α → Tri
     | .box => .tt
     | .diamond => .ff
 
-/-- The program, then its frames, run with fuel (`Prog.runFrames`). -/
+/-- The program, then its frames, run with fuel (`Prog.runFrames`), counting
+loops in closed form (`Prog.runA`, `Semantics/RunAccel.lean`). -/
 def Prog.runFramesF {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : State C Γ) (P : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) : TRes (State C Γ₀) := do
-  let o ← Prog.runF n P σ
-  let o' ← Frames.runF n o.st κ
+  let o ← Prog.runA n P σ
+  let o' ← Frames.runA n o.st κ
   pure o'.st
 
 theorem Prog.runFramesF_approx {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : State C Γ) (P : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) : TRes.Approx (Prog.runFramesF n σ P κ) (Prog.runFrames σ P κ) :=
-  (Prog.runF_approx n P σ).bind fun o => (Frames.runF_approx n o.st κ).bind fun _ => .refl _
+  (Prog.runA_approx n P σ).bind fun o => (Frames.runA_approx n o.st κ).bind fun _ => .refl _
 
 /-- **`holds`, evaluated**, compiled: `dom p` is the finite domain a
 quantifier over `p` is tried on.  The twin of `Fml.eval3` (`Fml.eval3_eq`). -/
@@ -1084,12 +1087,16 @@ def quoteFold : Fold where
   mnil {K U} := mkApp2 (mkConst ``SMap.nil) (toExpr K) (toExpr U)
   mcons {K U} k _ _ v r := mkApp5 (mkConst ``SMap.cons) (toExpr K) (toExpr U) (quotePrim K k) v r
 
-/-- A candidate as a closed term of `Cand C`, `cE` naming `C`. -/
-def Cand.quote (cE : Expr) (c : Cand C) : Expr :=
+/-- A candidate as a closed term of `Cand C`, `cE` naming `C`, its storage
+the term `stE`. -/
+def Cand.quoteWith (cE stE : Expr) (c : Cand C) : Expr :=
   let u (n : PrimTy.uint.Denote) : Expr := quotePrim .uint n
   let txE := mkAppN (mkConst ``TTx.mk)
     #[u c.tx.msgSender, u c.tx.selfAddress, u c.tx.msgValue, u c.tx.timestamp, toExpr c.tx.ext]
-  mkAppN (mkConst ``Cand.mk) #[cE, c.st.fold quoteFold, toExpr c.args, txE, toExpr c.net, u c.bal]
+  mkAppN (mkConst ``Cand.mk) #[cE, stE, toExpr c.args, txE, toExpr c.net, u c.bal]
+
+/-- A candidate as a closed term of `Cand C`, `cE` naming `C`. -/
+def Cand.quote (cE : Expr) (c : Cand C) : Expr := c.quoteWith cE (c.st.fold quoteFold)
 
 /-- **The certificate**: the kernel checks `¬ ⊨ᶠ φ` of the scoped `φ` as
 `Fml.not_valid_of_eval3Peel` at the typed state of the candidate `c`
@@ -1184,6 +1191,159 @@ def certifyDeclarations (cE φE : Expr) (lits : List Int)
       pure false
   saved.restore
   pure result
+
+/-! ### Long arrays
+
+A counterexample may need a dynamic array longer than any storage the
+search can build: `2^255` elements, at which a counting loop bounded by
+the length overflows (`Semantics/RunAccel.lean`).  Its storage is quoted
+with that root `N` copies of its element type's default (`SVec.rep`,
+`Tools/LazyStorage.lean`), which the kernel never unfolds: the run reads
+the length, and the loop runs in closed form (`Prog.runA`).  The premise
+`wt(storage)` is not evaluated, which would visit every element, but proved
+(`holds_wt_of`): the long root by `SVal.allB_arrayOf_rep`, every other
+root by evaluation.  No compiled evaluator can hold such a storage, so the
+search proposes these candidates to the kernel directly, each under a
+heartbeat budget of its own, after the ordinary candidates fail. -/
+
+/-- A long-array candidate: the `k`-th root `root`, a dynamic array of
+`E`s, `n` long. -/
+structure LongCand where
+  root : String
+  k : Nat
+  E : Ty
+  n : Nat
+
+/-- The lengths tried: where a `uint` counter stepped once per element
+overflows when it steps by two (`2^255`), and the longest array
+(`2^256 - 1`). -/
+def longLengths : List Nat := [2 ^ 255, 2 ^ 256 - 1]
+
+/-- The long-array candidates of `C`: each root that is a dynamic array
+whose element default is well-formed (`Ty.defaultOkS`, which `wt` asks of a
+non-empty array), at each of `longLengths`. -/
+def longCands (C : Contract) : List LongCand :=
+  (C.vars.zipIdx.filterMap fun ((r, T), k) => match T with
+    | .ref (.array E) => if E.defaultOkS then some (r, k, E) else none
+    | _ => none).flatMap fun (r, k, E) => longLengths.map fun n => { root := r, k, E, n }
+
+/-- A length as it is printed. -/
+def fmtLength (n : Nat) : String :=
+  if n = 2 ^ 255 then "2^255" else if n = 2 ^ 256 - 1 then "2^256 - 1" else toString n
+
+/-- `n` copies of `E`'s default as a quoted array (`SVal.arrayOf` over
+`SVec.rep`, no slot past its end). -/
+def lazyArray (E : Ty) (n : Nat) : Expr :=
+  let vE := (SVal.dflt E).fold quoteFold
+  mkAppN (mkConst ``SVal.arrayOf) #[toExpr E, toExpr n,
+    mkAppN (mkConst ``SVec.rep) #[toExpr E, vE, toExpr n], mkApp (mkConst ``SList.nil) (toExpr E)]
+
+/-- The quoted members `e` with the `k`-th replaced by `v`. -/
+def replaceMember : Expr → Nat → Expr → Option Expr
+  | e, k, v =>
+    if e.isAppOfArity ``SFields.cons 5 then
+      let args := e.getAppArgs
+      match k with
+      | 0 => some (mkAppN (mkConst ``SFields.cons) (args.set! 3 v))
+      | k + 1 => (replaceMember args[4]! k v).map fun r =>
+        mkAppN (mkConst ``SFields.cons) (args.set! 4 r)
+    else none
+
+/-- Whether a quoted value holds a long array. -/
+def hasRep (e : Expr) : Bool := (e.find? (·.isConstOf ``SVec.rep)).isSome
+
+/-- `lhs = true` by evaluation, left to the kernel. -/
+def rflTrue (lhs : Expr) : MetaM Expr := do
+  mkExpectedTypeHint (← mkEqRefl (mkConst ``Bool.true)) (← mkEq lhs (mkConst ``Bool.true))
+
+/-- A proof of `SFields.allB B e = true` for quoted members `e`: the long
+array by `SVal.allB_arrayOf_rep`, the rest by evaluation. -/
+partial def proveMembersAllB (B e : Expr) : MetaM Expr := do
+  let fs := (← whnfR (← inferType e)).appArg!
+  if !hasRep e then return ← rflTrue (mkAppN (mkConst ``SFields.allB) #[B, fs, e])
+  unless e.isAppOfArity ``SFields.cons 5 do throwError "counterexample: unexpected storage"
+  let args := e.getAppArgs
+  let (f, T, fs', v, r) := (args[0]!, args[1]!, args[2]!, args[3]!, args[4]!)
+  let pv ← if hasRep v then do
+      unless v.isAppOfArity ``SVal.arrayOf 4 do throwError "counterexample: unexpected array"
+      let a := v.getAppArgs
+      let lem := mkAppN (mkConst ``SVal.allB_arrayOf_rep) #[B, a[0]!, a[2]!.getAppArgs[1]!, a[1]!]
+      let ty ← inferType lem
+      let hn ← mkDecideProof ty.bindingDomain!
+      let hv ← mkExpectedTypeHint (← mkEqRefl (mkConst ``Bool.true)) ty.bindingBody!.bindingDomain!
+      let ha ← mkExpectedTypeHint (← mkEqRefl (mkConst ``Bool.true))
+        ty.bindingBody!.bindingBody!.bindingDomain!
+      pure (mkAppN lem #[hn, hv, ha])
+    else rflTrue (mkAppN (mkConst ``SVal.allB) #[B, T, v])
+  let pr ← proveMembersAllB B r
+  pure (mkAppN (mkConst ``SFields.allB_cons_true) #[B, f, T, fs', v, r, pv, pr])
+
+/-- The leading parameters of `φ` at their defaults: what a long-array
+candidate binds them to. -/
+def dfltVals (φ : Fml C []) : List (Var × Semantics.CallValue) :=
+  (Fml.params φ).map fun (x, p) => (x, match p with
+    | .bool => .bool false
+    | .uint => .uint (PrimTy.dflt .uint)
+    | .int => .int (PrimTy.dflt .int))
+
+/-- **The certificate of a long-array candidate**: `¬ ⊨ᶠ φ` for `φ`, its
+leading parameters bound to `vals`, of the shape `wt(storage) → ψ`, from the
+candidate's typed state: the premise by `holds_wt_of`, `ψ` evaluated to
+`ff` (`Fml.not_holds_imp_of_eval3`).  `none` when the formula is not of
+that shape or the kernel does not check it within `heartbeats`. -/
+def certifyLong (cE φE : Expr) (vals : List (Var × Semantics.CallValue)) (lc : LongCand)
+    (heartbeats : Nat := 100000) : MetaM (Option Expr) := do
+  let C ← unsafe evalExpr Contract (mkConst ``Contract) cE
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (withCurrHeartbeats <| withTheReader Core.Context
+      (fun ctx => { ctx with maxRecDepth := max ctx.maxRecDepth 100000 }) do
+    let some stE := replaceMember ((Storage.init C).fold quoteFold) lc.k (lazyArray lc.E lc.n)
+      | return none
+    let c0 : Cand C := { st := Storage.init C, args := [] }
+    let σE := mkApp2 (mkConst ``Cand.tstate) cE (c0.quoteWith cE stE)
+    let domE := mkApp (mkConst ``poolDom) (toExpr ([] : List Int))
+    let type := mkNot (← mkAppM ``Fml.Valid #[φE])
+    let goal ← mkFreshExprMVar type
+    let peel ← mkAppM ``Fml.not_valid_of_peel #[toExpr vals, σE]
+    let [failure] ← goal.mvarId!.apply peel | return none
+    let rule := mkApp2 (mkConst ``Fml.not_holds_imp_of_eval3) cE domE
+    let [pre, body] ← failure.apply rule | return none
+    let preTy ← instantiateMVars (← pre.getType)
+    let_expr holds _ Γ σ' φpre := preTy | return none
+    unless ← isDefEq φpre (mkAppN (mkConst ``Fml.wt) #[cE, Γ]) do return none
+    let h1 ← proveMembersAllB (mkConst ``canonHB) stE
+    let h2 ← proveMembersAllB (mkConst ``tightHB) stE
+    pre.assign (mkAppN (mkConst ``holds_wt_of) #[cE, Γ, σ', h1, h2])
+    body.assign (← mkDecideProof (← body.getType))
+    let value ← instantiateMVars goal
+    if value.hasSorry || value.hasMVar then return none
+    let decl := Declaration.thmDecl {
+      name := `_counterexample_long_certificate, levelParams := [], type, value }
+    let opts := maxHeartbeats.set (← getOptions) heartbeats
+    match Kernel.Environment.addDecl (← getEnv).toKernelEnv opts decl with
+    | .ok _ => return some value
+    | .error _ => return none) fun _ => pure none
+  saved.restore
+  pure result
+
+/-- The first long-array candidate the kernel certifies, with its proof of
+`¬ ⊨ᶠ φ`. -/
+def refuteLong (C : Contract) (cE φE : Expr) (φ : Fml C []) :
+    MetaM (Option (LongCand × Expr)) := do
+  for lc in longCands C do
+    if let some pf ← certifyLong cE φE (dfltVals φ) lc then return some (lc, pf)
+  return none
+
+/-- A long-array witness, one fact per line. -/
+def LongCand.lines (C : Contract) (vals : List (Var × Semantics.CallValue)) (lc : LongCand) :
+    List String :=
+  let args := vals.map fun (x, v) => match x with
+    | .user n => s!"{n} = {CallValue.fmt v}"
+    | .fresh b k => s!"{b}{k} = {CallValue.fmt v}"
+  let σ := ({ st := Storage.init C, args := [] } : Cand C).tstate C
+  [", ".intercalate (args ++ fmtTx σ),
+   s!"before: {lc.root}.length = {fmtLength lc.n}, each element its default; " ++
+     "every other root its default"]
 
 /-- A refutation: the witness, printed (`Witness.lines`), whether the
 kernel certified it, and the conjuncts it fails. -/
@@ -1293,8 +1453,10 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     -- is evaluated by its value, as `sol_prove` reads it
     let φ ← unsafe evalExpr (Fml C []) ty (← Solidity.Symex.evaluable φE)
     let s := searchFml C φ
-    let some w := s.witness
-      | logInfo m!"no counterexample found in {s.tried} candidates"
+    let some w := s.witness | do
+      let some (lc, _) ← refuteLong C cE φE φ
+        | logInfo m!"no counterexample found in {s.tried} candidates"
+      logReport m!"counterexample (certified):" ((lc.lines C (dfltVals φ)).map toMessageData)
     let c := w.cand
     let certified ← if Fml.eval3Peel (poolDom c.argInts) c.vals
         (c.tstate C) φ = .ff then certifyRefl cE φE c.argInts c.vals c
@@ -1338,8 +1500,12 @@ def evalSolRefute : Tactic := fun _ => withMainContext do
   let C ← unsafe evalExpr Contract (mkConst ``Contract) cE
   let φ ← unsafe evalExpr (Fml C []) (← inferType φE) (← Solidity.Symex.evaluable φE)
   let s := searchFml C φ
-  let some w := s.witness
-    | throwError "sol_refute: no counterexample found in {s.tried} candidates"
+  let some w := s.witness | do
+    -- no candidate the search can build: a long array, certified by the kernel alone
+    let some (_, pf) ← refuteLong C cE φE φ
+      | throwError "sol_refute: no counterexample found in {s.tried} candidates"
+    g.assign (wrap pf)
+    replaceMainGoal []
   let c := w.cand
   -- the kernel is asked only what the evaluator already answered
   unless Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff do
