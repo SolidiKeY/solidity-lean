@@ -8091,3 +8091,49 @@ each through a one-import scratch module (not committed).
   simulation's symbolic address space, which the representation relation
   reads, not a value the run computes; its memory cells are indexed by the
   locals' levels.
+
+## W12 plan: checks that should be types (2026-10-24, not started)
+
+Several theorems take as a hypothesis a fact that a type could carry. The
+ones that recur most, in the order to do them:
+
+1. **The contract proves its own well-formedness.** `Contract`
+   (`Syntax.lean`) is a plain record, so a contract whose storage
+   mentions a broken struct (an unknown name, a repeated member name)
+   can be written, and `wt_iff_reachable` (`Calculus/Problem.lean`)
+   needs `C.vars.all (·.2.okDeep)` and `nodupKeysB C.vars` as
+   hypotheses. For such a contract nothing says whether `wt(storage)`
+   is stronger than reachability (`Typing/Tight.lean`). Add proof fields
+   to `Contract`, `vars_ok` and `vars_nodup`, each defaulting to
+   `by decide`. `contract!{…}` and the solc frontend already reject such
+   contracts. `Contract.ofStruct` needs a lemma that `structDef s` is
+   `okDeep` and has distinct members. After this, `wt` is reachability
+   for every `C`. Cheap, but it rebuilds everything above `Syntax.lean`.
+2. **Roots and fields as positions.** `Loc.root (r : Name)
+   (h : C.rootType r = some T)` (`Syntax/Scoped.lean`) and the matching
+   field lookups (`C.fieldType s f = some T`, `lookupBy f … = some T`;
+   about 80 hypotheses) become `Idx C.vars T` and `Idx fs T`, as
+   locals already are. A position is unique, so `nodupKeysB` goes away.
+   The printers recover the name from the position, so what a reader
+   sees is unchanged. Needs (1) first.
+3. **Structs carry their members.** `.ref (.struct s)` names a struct of
+   a global table (`structDef`, `StructEnc`). Hence `okDeep`, `structOk`,
+   `mapFree`, `encFieldsOk`, the lists `defaultOkStructs` and
+   `mapFreeStructs`, and the `tyRank T < k` bounds. A struct type whose
+   members are part of it (an inductive type, so it cannot contain
+   itself) makes an unknown name, an empty struct and a recursive
+   struct impossible to write; a repeated member name still needs a
+   proof field. This is a W9-sized change: `Ty` is under everything,
+   and solkey's sorts and the rule map name structs. **It may slow
+   checking**: types become larger terms for the kernel to compare.
+4. **Operators indexed by their type.** `op.accepts p = true` and
+   `op.hasCompoundA = true` (about 90 hypotheses, e.g. `binopT`, `evalT`)
+   become `BinOp p q`. Small gain, since they are usually closed by
+   `rfl`. Low priority.
+5. **`SVal.Fits` by type.** Bounding storage keys and array lengths by
+   their types would remove `Fits`, the third hypothesis of
+   `wt_iff_reachable`. Other `< 2 ^ 256` bounds stay: W11 kept EVM
+   identities and slot offsets `Nat` on purpose.
+
+`Heap H` and `Thin`/`Ext` are already intrinsic: they are typed values
+and context embeddings, not checks.
