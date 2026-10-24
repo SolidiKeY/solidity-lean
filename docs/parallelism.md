@@ -230,7 +230,7 @@ Not split:
   `RuleSyntax` is narrowed.
 - *The layer check names core modules exactly*: the pieces of a core file
   (`Syntax`, `Semantics/Storage`, `Theory/Typed/Obs`, `RuleSyntax`) are added
-  to `CORE`, 124 modules now.
+  to `CORE`, 123 modules now.
 
 **Narrowing.**  `Calculus.NamedTerm` imports `Syntax.Elab.Context` and
 `Calculus.SurfaceNotation` `Syntax.Elab.Values` (it reads `synth`):
