@@ -878,7 +878,10 @@ thousands, one declaration each; walk: `sol_prove (steps := 128)`, leaf:
 | 4 | 16 | 7 (0.52 s) | 28 (1.3 s) | shared |
 | 5 | 32 | 12 (0.88 s) | 79 (3.6 s) | shared |
 
-The leaf is `2^k` updates of one product each, linear in the call sites.
+(`k = 6`, 64 call sites: the walk 23 k; the steps run past their budget,
+`CloseJ.budget`, and `sol_close` fails, at `sol_close_few_joins`, without
+evaluating the leaf whole.)  The leaf is `2^k` updates of one product each,
+linear in the call sites.
 What the closer spends on it grows by about `n^1.5` in the `n` call sites
 (per step, `peel` at `n = 32`: the share 0.4–0.7 k, the step's `simp`
 0.8–1.3 k, the check's `omega` 0.1–1.5 k): each step's `simp` walks the
