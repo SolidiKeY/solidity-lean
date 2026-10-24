@@ -7,7 +7,7 @@ import Solidity.Calculus.Closers
 # Term taclets on a sequent
 
 `rw [findOnSave]` on a sequent applies the term taclet
-`TermTaclet.findOnSave` (`Calculus/TermLib.lean`) by `Proves.rewrite`:
+`TermTaclet.findOnSave` (`Calculus/TermLib/Rules.lean`) by `Proves.rewrite`:
 its paths are found in the sequent and its side conditions closed on them.
 `sol_rw [Obs.findOnDelAt, …]` builds a rule from the typed Theory's own
 laws instead (`Theory/Typed/Obs.lean`, `Calculus/RewriteSyntax.lean`).

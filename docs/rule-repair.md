@@ -51,7 +51,7 @@ candidate rule sound.
 6. **Integrate the surviving candidate and finish soundness.** For a program
    arm, prove the local run/update agreement or simulation and connect it
    through `Stmt.stepSound_arms` (or the blocks' soundness) to `Stmt.sound`;
-   a new rule's arm lemma is a file of its own, `Calculus/Sound/<KeYName>.lean`
+   a new arm's lemma is a file of its own, `Calculus/Sound/<Arm>.lean`
    (`.claude/rules/soundness.md` has the template).
    For a read/update law, prove its semantic equation in `Theory/` and use
    that theorem in the rewrite/closer. Reuse the global lifting to

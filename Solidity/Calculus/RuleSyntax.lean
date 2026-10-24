@@ -25,7 +25,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I; noCallback] φ }` | printing only: the same where a `transfer` and a `send` do not call back (`ProvesC I false`) |
-| `tm{ find(save(s, p, v), q) }` | a scoped term `Tm`, every name a Lean variable (where `Calculus/TermLib.lean` is imported) |
+| `tm{ find(save(s, p, v), q) }` | a scoped term `Tm`, every name a Lean variable (where `Calculus/TermLib/Rules.lean` is imported) |
 | `⊨ᶠ φ` | `Fml.Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
 | `σ ⊧ φ` | `holds σ φ`, likewise |
 

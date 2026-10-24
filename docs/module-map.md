@@ -41,7 +41,7 @@ no definedness test: what may revert is evaluated by the program, and
 `wt(storage)` is a predicate (`Fml.wellFormed`).  `Theory/Typed/Obs.lean` proves once that the
 interpreter's reads and writes are the Theory's (`Storage.obs_write`, …), and
 `Theory/Bridge/Denote.lean` lifts it to the symbols (`OpN.denote_eval`).  A
-derivation rewrites terms by named term taclets (`Calculus/TermLib.lean`,
+derivation rewrites terms by named term taclets (`Calculus/TermLib/Rules.lean`,
 `Proves.rewrite`), each sound by its Theory law (`TermTaclet.sound`).  `sol_decide`
 reads the same Theory symbolically (`Calculus/Decide.lean`), and memory by
 the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
@@ -121,7 +121,7 @@ Its root is `Bridge/SolidityBridge.lean`; it never enters the core import graph.
 
 | Module | What it defines |
 |---|---|
-| `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, whose formulas are written scoped, `fmlC`; update schemas `{u ‖ {u}u2}`; terms written by their symbols' KeY names and turned into the scoped `Tms` symbols by `coreNames`), the syntax of `tm{ … }` (read and printed by `Calculus/TermLib.lean`), `⊨ᶠ`/`⊧` (`Fml.Valid`/`holds` of a scoped formula: `elabValidHolds`), and the printers' builders for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms); no untyped term or printer since W9.7.1  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
+| `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, whose formulas are written scoped, `fmlC`; update schemas `{u ‖ {u}u2}`; terms written by their symbols' KeY names and turned into the scoped `Tms` symbols by `coreNames`), the syntax of `tm{ … }` (read by `Calculus/TermLib/Rules.lean`, printed by `Calculus/TermLib.lean`), `⊨ᶠ`/`⊧` (`Fml.Valid`/`holds` of a scoped formula: `elabValidHolds`), and the printers' builders for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms); no untyped term or printer since W9.7.1  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
 | `Calculus/RuleSyntax/Grammar.lean` | The grammar of `dl{ … }`/`tm{ … }`, the side conditions' syntax, the first schema macros. |
 | `Calculus/RuleSyntax/Schemas.lean` | The schema macros, continued: terms and scoped taclets; `Schema`, the side conditions' elaborator. |
 | `Calculus/RuleSyntax/Print.lean` | The delaborators that print the notation back. |

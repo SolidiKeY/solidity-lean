@@ -461,7 +461,7 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
 
 /-- The modality of the formula under an update: an update is judged as the
 goal it came from.  `⟨[ ]⟩` is `either`: the taclet's `m` in `dl{ … }`, the
-formula's modality in `dl![m]{ … }` (`Notation.lean`). -/
+formula's modality in `dl![m]{ … }` (`Calculus/Notation.lean`). -/
 partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Option Lean.Term)
   | `(dl_fml| ⟨ $[$_:sol_stmt;]* ⟩ $_:dl_fml) | `(dl_fml| ⟨ $_:sol_block ⟩ $_:dl_fml) =>
     some <$> `(Modality.diamond)

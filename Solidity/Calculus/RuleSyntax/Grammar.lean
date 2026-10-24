@@ -328,7 +328,7 @@ printers leave them out: the taclet still reads as its one line. -/
 
 /-- Prove a taclet's side condition: by computation on a statement written
 out, or from the facts a dispatcher branch has in scope (its rules are in
-`Rules.lean`, after the conditions). -/
+`Calculus/Rules.lean`, after the conditions). -/
 syntax "side_cond" : tactic
 
 -- `Solidity.sideCond`: `side_cond`, as an `autoParam` stores a tactic.

@@ -56,7 +56,8 @@ The core reached `Syntax.Elab` only through convenience imports, four in all:
 - `Semantics → Syntax.Splice → Syntax.Quote → Syntax.Elab` (`Semantics.lean`,
   the call data and ABI observations, needs only `AST`), and through it
   `Calculus.Rules → RuleSyntax → Update → Theory.Segs → Semantics`;
-- `Semantics.DeferredSource → Syntax.Elab`, unused;
+- `Semantics.DeferredSource → Syntax.Elab`, redundant (its `P.join`, then in
+  `Syntax/Elab.lean`, came through `RunWk` too);
 - `Calculus.TermLib → Calculus.PrintTerm`, the term taclets' printers.
 
 **Critical path**: the longest import chain is 53 modules
@@ -114,14 +115,19 @@ the same counts.
 
 ### The core
 
-112 modules, `CORE` in `scripts/check-layers.mjs`:
+112 modules at P1, 123 since P2 split some of them (`CORE` in
+`scripts/check-layers.mjs`):
 
 - `KeySort`, `Eqns`, `AST`, `Scope`, `SpecSyntax`, `Hashes`, `Keccak`,
   `RevertBytes`, `Syntax`, `Signature`, `Update`;
-- `Syntax.{Scoped,Checked,Inlined,PushSource,Join}`;
-- `Semantics` and `Semantics/**` (29), `Typing/**` (12), `Theory/**` (6);
+- `Syntax.{Scoped,Checked,Inlined,PushSource,Join}`, and since P2 `Syntax`'s
+  pieces `Syntax.{Raw,Grammar,Contract}`;
+- `Semantics` and `Semantics/**` (29 at P1, 31 with `Semantics/Storage`'s
+  pieces), `Typing/**` (12), `Theory/**` (6 at P1, 9 with
+  `Theory/Typed/Obs`'s);
 - the rules: `Calculus.{Fml,Rules,RuleSyntax,RuleKit,KeyTaclets,Step,Arms,
-  Blocks,Taclet,Proves,Logic,Hyp,Correct,FirstOrder}`;
+  Blocks,Taclet,Proves,Logic,Hyp,Correct,FirstOrder}` and `RuleSyntax`'s
+  pieces;
 - their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
 - what those import: `Calculus.{TermEval,TermEq,TermWk,Lower,LowerRun,Shift,
@@ -142,8 +148,8 @@ surface syntax go above, in `Examples/`.
 | Path | Cut |
 |---|---|
 | `Semantics.State → Syntax.Quote` | import dropped (unused) |
-| `Semantics → Syntax.Splice` | replaced by `Syntax.Checked`; the nine modules above the core that wrote programs through it import `Syntax.Splice` themselves |
-| `Semantics.DeferredSource → Syntax.Elab` | import dropped (unused) |
+| `Semantics → Syntax.Splice` | replaced by `Syntax.Checked`, not `AST`, so that its importers keep reading `Scoped`/`Checked`/`RevertBytes` through it; the nine modules above the core that wrote programs through it import `Syntax.Splice` themselves |
+| `Semantics.DeferredSource → Syntax.Elab` | dropped (redundant); it imports `Syntax.Join`, where its `P.join` now is |
 | `Calculus.TermLib → Calculus.PrintTerm` | split: the rules and their soundness are `Calculus/TermLib/Rules.lean` (core), the printers and pins stay in `TermLib.lean`, which imports it |
 | `Calculus.Blocks → Prog.join` (in `Syntax/Elab.lean`) | `Prog.join` moved, same name, to `Syntax/Join.lean` |
 | `Semantics.Run`'s `sol[C]{…}` examples (`guardLowCore` …) | moved to `Examples/ScopedRuns.lean` |
@@ -173,7 +179,10 @@ the elaborator.  Nothing was restated, so there is no `rfl` to show.
 The low modules gain the three new ones (532 modules).  The longest import
 chain falls from 53 to 50 modules: `Elab → Quote → Splice` is no longer on
 the way to the calculus.  `Decide`, `Closer`, `MemRead` and `TermLaws` no
-longer reach `Elab`; what does is the tactics, the printers, the examples,
+longer reach `Syntax.Elab` (they still reach `Calculus.PrintTerm` through
+`TermLaws → TermLib`, and `Calculus.Quote` through `DecideLang`; narrowing
+`TermLaws`' import to `TermLib.Rules` is a candidate, to be checked against
+the printers' pins); what does is the tactics, the printers, the examples,
 the TestSuite and the frontends.
 
 ## P2. Large files split by topic
@@ -184,12 +193,13 @@ importing the one before; the file itself is the umbrella that imports them
 all, keeping its docstring (the whole's rationale) and naming its pieces.
 The cutting is mechanical: a piece restates the file's
 `namespace`s, `open`s and file-level `variable`s, and a section cut in two is
-closed and reopened with its `variable`s.  Nothing else moved, and no
+closed and reopened with its `variable`s; `Syntax/Elab/Stmt.lean` restates
+the `local instance` its `partial` block needs.  Nothing else moved, and no
 declaration changed name.
 
 | File | Lines | Pieces |
 |---|---|---|
-| `Syntax/Elab` | 6389 | `Context` 1381, `Values` 1466, `Lower` 1390, `Arms` 1525, `Stmt` 699 |
+| `Syntax/Elab` | 6385 | `Context` 1381, `Values` 1466, `Lower` 1390, `Arms` 1525, `Stmt` 699 |
 | `Calculus/Closer` | 3959 | `Facts` 938, `Normal` 621, `Bytes` 1136, `Leaf` 1304 |
 | `Calculus/MemRead` | 4292 | `Spine` 1049, `Laws` 1085, `Ok` 1169, `Pass` 1021 |
 | `Calculus/DecideEval` | 2911 | `Readers` 1123, `Storages` 894, `Memory` 929 |
@@ -228,17 +238,17 @@ Not split:
   drops register no instance, macro or delaborator the importer's output
   reads; `RuleSyntax/Print` holds the delaborators, so no importer of
   `RuleSyntax` is narrowed.
-- *The layer check names core modules exactly*: the pieces of a core file
-  (`Syntax`, `Semantics/Storage`, `Theory/Typed/Obs`, `RuleSyntax`) are added
-  to `CORE`, 123 modules now.
+- *The layer check names core modules exactly*: the pieces of `Syntax` and
+  `RuleSyntax` are added to `CORE` (those of `Semantics/Storage` and
+  `Theory/Typed/Obs` were matched already), 123 modules now.
 
 **Narrowing.**  `Calculus.NamedTerm` imports `Syntax.Elab.Context` and
 `Calculus.SurfaceNotation` `Syntax.Elab.Values` (it reads `synth`):
-an edit to `Elab.Lower`, `Arms` or `Stmt` rebuilds 281–283 modules where
-`Syntax.Elab` rebuilt 294.  The gain is small because `Calculus.SurfaceSpec`,
+an edit to `Elab.Lower`, `Arms` or `Stmt` rebuilds 286–288 modules (at
+`e3aefd5a`) where the whole `Syntax.Elab` rebuilt 294 at P1.  The gain is small because `Calculus.SurfaceSpec`,
 low in the graph, uses the whole elaborator.  For the other files every
 importer reaches the last piece anyway (the fan-outs of a file's first and
-last pieces differ by at most two modules), so the gain of the splits is the
+last pieces differ only by the pieces themselves), so the gain of the splits is the
 memory of a worker and the size of what an edit re-checks, not fan-out.
 
 **Speed** (`lake env lean --tstack=131072`, serially, faster of two runs;
@@ -280,12 +290,13 @@ file is slower.
 
 ## P3. Theorems: one lemma per rule
 
-Statement-rule soundness was already split by rule: one lemma per arm in
+Statement-rule soundness was already split by statement: one lemma per
+`Stmt.step` arm in
 `Calculus/SoundArms.lean` … `SoundLoops.lean`, dispatched by
 `Calculus/SoundStep.lean` (`Stmt.stepSound_arms`) and
 `Calculus/StmtSound.lean` (`Stmt.stepSound`, the blocks), each one `cases s`.
 That structure stays, and no existing lemma moved.  A rule added from now on
-proves its arm in `Calculus/Sound/<KeYName>.lean`, one file per rule
+proves its arm in `Calculus/Sound/<Arm>.lean`, one file per new arm
 (`Calculus/Sound/README.md`; the template is in `.claude/rules/soundness.md`),
 so that it elaborates alone and in parallel with the others.
 
@@ -296,18 +307,23 @@ constructor's own binders and terms, the proof moved as it was; the case
 applies it.  The other 15 were one term already: twelve
 `Tm.findIn_fill_theq` of the rule's `…_denote`, `delValueLit` by `rfl`,
 `theory` its hypothesis, `symm` the recursion.
-**Update rules** (`UpdRuleS.sound`, `Calculus/UpdRuleScoped.lean`): each of
-its 7 cases already applies one lemma (`holds_upd_seqPar`, …); unchanged.
+**Update rules** (`UpdRuleS.sound`, `Calculus/UpdRuleScoped.lean`): six of
+its seven cases apply one lemma (`holds_upd_seqPar`, …; `applySkip` one
+direction of `holds_upd_nil`), `trans` composes by recursion; unchanged.
 
 ### Adding a rule: the six places
 
+0. **Start** from `docs/rule-repair.md`: the gates before integration.
 1. **The constructor**: `Taclet` in `Calculus/Rules.lean`, written in
-   `dl{ … }` (`.claude/rules/rule-table.md`, step 1).
+   `dl{ … }` (`.claude/rules/rule-table.md`, step 1), its labels kept equal
+   to `Taclet.branchLabels` (`Calculus/RuleKit.lean`).
 2. **Its `Stmt.step` arm**: `Calculus/Arms.lean` or `Calculus/Blocks.lean`,
    dispatched by `Calculus/Step.lean`, with `Taclet.<rule>.toStep`
    (`Calculus/Taclet.lean`) and, where the arm is new, `Stmt.<c>.ruleExists`
    (`Calculus/RuleExists.lean`).
-3. **Its soundness file**: `Calculus/Sound/<KeYName>.lean`.
+3. **Its soundness**: a new arm's file `Calculus/Sound/<Arm>.lean`; a taclet
+   added to an existing statement extends that statement's `…Step_sound`
+   where it is (`Calculus/SoundControl.lean` …).
 4. **The assembly line**: an import and a case in `Stmt.stepSound_arms`
    (`Calculus/SoundStep.lean`), or in `Stmt.stepSound`
    (`Calculus/StmtSound.lean`) for a block.  The `cases s` is exhaustive:
@@ -319,6 +335,12 @@ its 7 cases already applies one lemma (`holds_upd_seqPar`, …); unchanged.
    (`Calculus/PrintedRules.lean`); `#check_constructor_table` fails on a
    missing row.  A taclet that reads storage or memory also gets its row in
    `SortCheck/Annotations.lean`, checked by `lake exe solkeycheck`.
+   `taclets_partitioned`/`printed_rules_partitioned` and the claimed and
+   unclaimed counts move with the rows.
+
+A new statement form is a larger change than a rule: the syntax, the run,
+the typing, the EVM, the quoters and printers (`Syntax/Quote.lean`,
+`Calculus/Quote.lean`, `Calculus/PrintStmt.lean`) and `Stmt.isBlockArm`.
 
 ## P4. Closer clauses as units: stopped at step 1
 
@@ -344,3 +366,39 @@ P4 is on master.  Doing it is a decision for the owner of the closer, with
 the measurements of P4's step 3 (`Calculus/CloseTests.lean`,
 `Examples/Tactics/Decide.lean`, two `TestSuite/Derived*` modules, the whole
 `SolkeyTestSuite`) as the gate.
+
+## Review (2026-10-24)
+
+One finder and one skeptic per milestone, neither calling the Lean server.
+The finders checked that no moved line changed (all 14 splits rebuilt from
+their pieces line for line; the 15 `TermTaclet` lemmas' binders, terms and
+proofs against the constructors and the old arms), that no core module
+reaches the elaborator, and that the docs match the tree.  What was
+confirmed and fixed:
+
+- **Bug (P2)**: `tests/trust-inventory.json`, which CI checks
+  (`scripts/check-trust.sh`), still named the split files: 114 new
+  findings.  Its 60 entries name their pieces now; the check is back to the
+  13 findings it had before.
+- **Linter (P3)**: with its tactic blocks out, `TermTaclet.sound`'s arms
+  were linted for the first time: 25 unused pattern variables of the frame
+  arms and `delValueLit`, now `_`.
+- **Imports**: `Semantics.DeferredSource` imports `Syntax.Join`, where the
+  `P.join` it uses is; it reached it only through `RunWk`.
+- **Docs**: citations of `Calculus/TermLib.lean` for what moved to
+  `Calculus/TermLib/Rules.lean`; bare file names in the `RuleSyntax` pieces
+  and `rule-table.md` made full paths; the core list, the line count of
+  `Syntax/Elab`, the fan-outs after narrowing; the convention files' path
+  globs (`Calculus/RuleSyntax/*.lean`, `Semantics/**/*.lean`); the
+  soundness template (σ explicit as in the arms' files, per arm not per
+  taclet, a block registered in `StmtSound.lean` beside `SoundCatch`, the
+  axiom pin pasted from `#print axioms`); "the six places" completed
+  (`docs/rule-repair.md` first, `Taclet.branchLabels`, the partition
+  counts, what a new statement form adds); `UpdRuleS.sound` described
+  exactly; AGENTS.md's checks table lists `check-layers.mjs`.
+
+Refuted: an unused `hp` in `findOnDelAtValue_sound` (the build reports none
+there).  Left as is: narrowing `TermLaws`' `TermLib` import to
+`TermLib.Rules` (`TermLib.lean` holds delaborators that downstream pins may
+read), and `scripts/solkey-port.mjs` naming `Syntax.lean` in text it writes
+into generated files (changing it would change them).

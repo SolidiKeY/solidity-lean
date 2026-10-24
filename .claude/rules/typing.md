@@ -2,6 +2,7 @@
 paths:
   - "Solidity/Typing/*.lean"
   - "Solidity/Semantics/*.lean"
+  - "Solidity/Semantics/**/*.lean"
 ---
 
 # Typing and the interpreter

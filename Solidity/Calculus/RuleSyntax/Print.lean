@@ -317,7 +317,7 @@ def primName? (p : Lean.Expr) : MetaM (Option String) := do
   | _ => return none
 
 /-- A formula that is a Lean variable, or the coercion of one (`↑φ` for
-`φ : Post C`, `Chains.lean`): its name, which reads back as `‹φ›` does.  Not
+`φ : Post C`, `Calculus/Chains.lean`): its name, which reads back as `‹φ›` does.  Not
 an inaccessible one (`φ✝`): its bare name would read back as another variable,
 so it stays `‹φ✝›`. -/
 def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do

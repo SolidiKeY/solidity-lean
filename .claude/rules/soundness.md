@@ -69,27 +69,30 @@ substitutes for the general proof below.
 
 The existing arms stay where they are (`SoundArms` … `SoundLoops`).  A rule
 added from now on proves its arm in a file of its own,
-`Calculus/Sound/<KeYName>.lean` (`Calculus/Sound/README.md`), so that it
-elaborates alone and in parallel with the others:
+`Calculus/Sound/<Arm>.lean` (`Calculus/Sound/README.md`), so that it
+elaborates alone and in parallel with the others.  Soundness is per
+`Stmt.step` arm, not per taclet: a taclet added to an existing statement
+extends that statement's `…Step_sound` where it is.
 
 ```lean
 import Solidity.Calculus.SoundKit   -- or the arms' file it builds on
 
 /-!
-# `<keyName>` is sound
+# `<Arm>`'s rules are sound
 
 What the premise asks of the statement's typed run, in a sentence.
 -/
 
 namespace Solidity
 open Solidity (Modality)
-variable {C : Contract} {m : Modality} {Γ : Ctx} {σ : State C Γ}
+variable {C : Contract} {m : Modality} {Γ Γ' : Ctx} (σ : State C Γ)
 
-/-- **`<keyName>`'s premise is what the statement's typed run does.** -/
+/-- **`<arm>Step`'s premise is what the statement's typed run does.** -/
 theorem <arm>Step_sound (k : Nat) … (q : Premise C Γ Γ')
     (hs : <arm>Step k … = q) : Premise.Runs m (.<ctor> …) q σ := by
   …
 
+-- paste what `#print axioms` prints: a subset of these three
 /-- info: 'Solidity.<arm>Step_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms <arm>Step_sound
 
@@ -97,12 +100,13 @@ end Solidity
 ```
 
 Then register it: `Calculus/SoundStep.lean` imports the file and its
-`Stmt.stepSound_arms` case calls the theorem (a block's arm:
-`Calculus/StmtSound.lean`'s `Stmt.stepSound`, through `SoundCalls`/
-`SoundLoops`); and `docs/lean-key-rule-map.md` gets the rule's row, naming
+`Stmt.stepSound_arms` case calls the theorem (`exact <arm>Step_sound σ k …
+p hp`); a block's file is imported by `Calculus/StmtSound.lean`, beside
+`SoundCalls`, `SoundLoops` and `SoundCatch`, and its `Stmt.stepSound` case
+calls it; and `docs/lean-key-rule-map.md` gets the rule's row, naming
 the file.  The `cases s` there is exhaustive, so a rule without its lemma
 fails the build.  `docs/parallelism.md` ("Adding a rule: the six places")
-lists every place a new rule is registered.
+lists the places a new rule is registered.
 
 ## When a case is false
 

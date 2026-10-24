@@ -2,6 +2,7 @@
 paths:
   - "Solidity/Calculus/Rules.lean"
   - "Solidity/Calculus/RuleSyntax.lean"
+  - "Solidity/Calculus/RuleSyntax/*.lean"
   - "Solidity/Calculus/Arms.lean"
   - "Solidity/Calculus/Blocks.lean"
   - "Solidity/Calculus/Step.lean"
@@ -25,7 +26,7 @@ variables are bound implicitly and their kind is read off their name
 are the rule's side conditions (`RuleSyntax.sideConds`: `nsp` is not simple,
 `sp` is, a value written to storage is not a conditional, …), hidden
 `autoParam` hypotheses. Which rule fires is `Stmt.step` (`Calculus/Step.lean`,
-its arms in `Arms.lean` and `Blocks.lean`), a total function over the scoped
+its arms in `Calculus/Arms.lean` and `Calculus/Blocks.lean`), a total function over the scoped
 syntax, and every constructor's premise is the one it builds:
 `Taclet.toStep` (alias `step_eq`, `Calculus/Taclet.lean`). The converse is
 `Stmt.rule_exists` (`Calculus/RuleExists.lean`); `ruleOf?`
@@ -88,10 +89,10 @@ declared rules cover it or have disjoint applicability.
 3. Its arm's soundness, `Stmt.StepSound` of the arm (`…_sound` in
    `Calculus/SoundArms.lean` for an update premise, `SoundStore`,
    `SoundMem`, `SoundLocal`, `SoundControl`, `SoundCapture`; `SoundCalls`,
-   `SoundLoops` for the blocks), dispatched by `SoundStep.lean` into
+   `SoundLoops`, `SoundCatch` for the blocks), dispatched by `SoundStep.lean` into
    `Stmt.sound` (`.claude/rules/soundness.md`). There is no proof per
    taclet: `toStep` makes it `Stmt.sound`'s.  A new rule's arm goes in a
-   file of its own, `Calculus/Sound/<KeYName>.lean` (the template is in
+   file of its own, `Calculus/Sound/<Arm>.lean` (the template is in
    `.claude/rules/soundness.md`; the six places a rule is registered are in
    `docs/parallelism.md`).
 4. Its row in `RuleShapes.tacletOrigins` (the solkey taclets it transcribes)

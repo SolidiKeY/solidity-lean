@@ -33,7 +33,7 @@ update is applied to the equation and dropped in one step (`Proves.applyOnRigidB
 `sol_apply_upd`); it writes the storage too, which it may because `x = 42`
 reads no storage.  The one storage step, the read of the
 write, is the term taclet `findOnSave` on scoped terms
-(`TermTaclet.findOnSave`, `Calculus/TermLib.lean`), applied by
+(`TermTaclet.findOnSave`, `Calculus/TermLib/Rules.lean`), applied by
 `Proves.rewrite`; its soundness is the Theory's `Obs.findOnSave`
 (`TermTaclet.sound`).  `42 = 42` closes by `Proves.eqRefl`.
 

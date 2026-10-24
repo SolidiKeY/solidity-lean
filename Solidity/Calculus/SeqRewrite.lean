@@ -5,7 +5,7 @@ import Solidity.Calculus.TermEq
 # A Theory equation in a scoped sequent, read on its scoped terms
 
 A rewrite of a scoped sequent by a term taclet (`TermTaclet`,
-`Calculus/TermLib.lean`) or a Theory equation (`Tm.Theq`): `q = (t, t')`, two
+`Calculus/TermLib/Rules.lean`) or a Theory equation (`Tm.Theq`): `q = (t, t')`, two
 closed value terms at the empty scope.  A term of the sequent is `t` where it
 has no local and reads `t` at the empty scope (`Tm.closedAs`: `Tm.toNil?`,
 compared by `Tm.beqR`); it becomes `t'` read at its scope (`Tm.ofNil`).  A
