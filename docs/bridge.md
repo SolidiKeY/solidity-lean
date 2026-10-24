@@ -101,58 +101,74 @@ already contains the working dependency pins and opt-in runner. B0 changes
 only this validation record. The earlier October 22 results above describe
 the baseline and do not establish the requested all-width/operator coverage.
 
-### B1: primitive arithmetic and refuted universal claims
+### B1: arithmetic, widths, and exact failure policies
 
-The package builds with the new imported `Bridge/SolidityBridge/Arith/`
-family modules. The existing `Arith.lean` is now an import facade; its old
-public theorem names are preserved in `Bridge/SolidityBridge/Arith/Basic.lean`.
+`Bridge/SolidityBridge/Arith.lean` imports the family files below and preserves
+the original public theorem names. The numeric bridges cover every admitted
+integer operator and every legal Solidity width (8, 16, …, 256). Most width
+lemmas are stronger: unsigned `n ≤ 256`, signed `0 < n ≤ 256`.
+`unsignedN`/`signedN` embed **every** `BitVec n` value into the actual core
+primitive type; no overflow or operation-success assumption excludes inputs.
 
-The requested **all-width/all-operator milestone is not green**. In
-particular its unqualified overflow/panic requirement has counterexamples
-below. The positive results have this exact scope:
+The unqualified requested milestone is **not all green**: universal panic
+behavior and word-valued signed shift counts have the counterexamples in
+“Discrepancies”. The true equations and those findings are both retained.
 
-| File | New checked results | Quantification |
-|---|---|---|
-| `Bridge/SolidityBridge/Arith/Basic.lean` | The core range check fails exactly when conversion to an unsigned/signed BitVec changes the mathematical integer; core operands constructed from arbitrary library words. | All integers and all 256-bit words. |
-| `Bridge/SolidityBridge/Arith/Checked.lean` | Actual `BinOp.evalT` for checked unsigned/signed `+ - *`, signed unary `-`, and unsigned `**`: returns the unbounded result exactly when it equals the corresponding BitVec result, otherwise `none`. | Every core operand; no no-overflow hypothesis. |
-| `Bridge/SolidityBridge/Arith/Wrapping.lean` | Adds actual unsigned wrapping subtraction and power agreement with BitVec, and wrapping power with ZMod; baseline covers wrapping addition/multiplication with both libraries and subtraction with ZMod. | Every core unsigned operand and exponent. The helper identities `ofInt_sub`/`ofInt_pow` hold at every natural width; those identities alone are not source-elaboration correctness. |
-| `Bridge/SolidityBridge/Arith/Division.lean` | Actual unsigned division/remainder, signed `sdiv`/`srem`; zero divisors return `none`, signed division overflow returns `none` exactly when the integer quotient differs from the word. | All 256-bit words/core operands, including minimum signed value divided by `-1`. |
-| `Bridge/SolidityBridge/Arith/Comparison.lean` | All six comparisons, both unsigned and signed, against BitVec comparisons/equality. | All pairs of 256-bit words. |
-| `Bridge/SolidityBridge/Arith/Bitwise.lean` | Actual unsigned AND, OR, XOR against BitVec. | All core unsigned operands. |
-| `Bridge/SolidityBridge/Arith/Casts.lean` | Actual unsigned-to-signed and signed-to-unsigned conversions against BitVec word interpretation. | All 256-bit words/core signed operands. |
-| `Bridge/SolidityBridge/Arith/Modular.lean` | Both actual `ModOp.evalT` builtins `addmod`/`mulmod`, retaining wide intermediates, against ZMod; zero modulus fails. | Every core unsigned operand and modulus. |
-| `Bridge/SolidityBridge/Arith/Power.lean`, `Bridge/SolidityBridge/Arith/Shifts.lean` | Kernel-checked counterexamples described below. | Concrete inhabited inputs and actual source runs. |
+| Files under `Bridge/SolidityBridge/Arith/` | Proved behavior |
+|---|---|
+| `Bridge/SolidityBridge/Arith/Basic.lean`, `Bridge/SolidityBridge/Arith/Checked.lean` | Actual 256-bit range checks and checked unsigned/signed `+ - *`, signed negation, and unsigned power. Acceptance is exactly equality of the mathematical integer with its decoded BitVec word. |
+| `Bridge/SolidityBridge/Arith/Wrapping.lean`, `Bridge/SolidityBridge/Arith/SignedWrapping.lean`, `Bridge/SolidityBridge/Arith/NarrowWrapping.lean` | Unsigned wrapping `+ - * **`; signed wrapping `+ - * **` and negation, including width 256. All-width equations evaluate actual typed primitive/cast/cut compositions. `cutUInt`/`cutInt` are the terms checked from `lowBits`/`signedAt`. Any operand error is preserved. Signed power has an unsigned exponent; exponents retain their full value. Primitive unsigned wrapping operations also agree with ZMod. |
+| `Bridge/SolidityBridge/Arith/Division.lean`, `Bridge/SolidityBridge/Arith/NarrowDivision.lean`, `Bridge/SolidityBridge/Arith/SignedDivision.lean` | Unsigned division/remainder and signed truncation-toward-zero division/remainder at every width, with zero failures explicit. The signed remainder reference is `srem`. Checked signed division includes its width predicate; wrapping division proves the narrow quotient/cast and full-width conditional-denominator/modular-sign strategies, including minimum signed value divided by `-1`. |
+| `Bridge/SolidityBridge/Arith/Comparison.lean` | All six signed/unsigned comparisons and equality tests on arbitrary words at every width. |
+| `Bridge/SolidityBridge/Arith/Bitwise.lean`, `Bridge/SolidityBridge/Arith/NarrowBitwise.lean` | Signed/unsigned AND, OR, XOR at every width; unsigned complement, including the narrow source's `maxN -% x` lowering. Signed proofs use sign extension and establish the returned integer, not merely its low-bit projection. |
+| `Bridge/SolidityBridge/Arith/Shifts.lean`, `Bridge/SolidityBridge/Arith/NarrowShifts.lean` | Unsigned left/right shifts at every width and unsigned count, preserving the full count independently of base width. Left shift evaluates the actual width-cut term. Signed arithmetic right shift agrees with `sshiftRight count.toNat` at every width; the stronger word-count claim is refuted below. |
+| `Bridge/SolidityBridge/Arith/Casts.lean`, `Bridge/SolidityBridge/Arith/Widths.lean` | Actual word conversions; all target-width unsigned truncation and signed interpretation; signed-to-unsigned, signed-to-signed, and unsigned-to-signed templates; same-sign widening for arbitrary valid source-width words. `lowBits_from_correct`/`signedAt_from_correct` connect the real source checker to evaluation of arbitrary typed operands, preserving their failures. |
+| `Bridge/SolidityBridge/Arith/NarrowChecked.lean`, `Bridge/SolidityBridge/Arith/OverflowGuards.lean`, `Bridge/SolidityBridge/Arith/CheckedExecution.lean` | Actual `inTyCond` checker equations and assert/require runners; actual full-width `Checked.rangeU`/`rangeI`/`negRange` guards, including multiplication's protected intermediates. The explicit checking-mode pipeline (core value preguard, primitive, width predicate) panics exactly when `+ - *` or signed negation/division changes the bounded result; zero division reverts. Power's separate equation retains primitive revert before the destination guard. |
+| `Bridge/SolidityBridge/Arith/Modular.lean` | Actual `addmod`/`mulmod` against ZMod, with wide intermediates and explicit zero-modulus failure, for every core unsigned operand/modulus, hence every valid narrow operand too. |
+| `Bridge/SolidityBridge/Arith/Signature.lean` | Actual `Op1`/`Op2` signature evaluators call the same primitive operators. Signature `Op1.toInt` widens uint to unbounded KeY `kint`; it is distinguished from signed word cast `UnOp.toInt`. |
+| `Bridge/SolidityBridge/Arith/Lowering.lean` | Exact source equations for wrapping rewrites, signed division's two strategies, unsigned complement/left shift, negative-literal addition/subtraction, and literal power bases. `castCapture_factor` retains the real checker/fresh capture continuation and their errors; `castCapture_typed` selects identity or conversion. `narrowCheck_guard` identifies the emitted statement, including default require, explicit checking, self-call panic data, and ignoring mode; `narrowCheck_full` proves the full-width no-op. |
 
-These evaluator equations return `Option`; they do not relabel `none` as
-panic. `TRes.ofOpt` in `Semantics/Run.lean` turns it into revert. The source
-counterexamples separately test the actual `Prog.run`, including explicit
-`checked` mode. No theorem assumes an impossible range or successful
-execution to hide an overflow case.
+`PrimTy` contains uint256/int256/bool; narrow widths are metadata carried by
+`intTyOf` and the cast/cut/guard lowerings. `intTyOf_head` demonstrates any
+width on an ordinary local. Division and comparisons use genuine width-sized
+words, not arbitrary 256-bit states with an assumed width label. Counts and
+exponents are never truncated to the base width.
 
-Remaining requested coverage is explicit: generic signed bitwise operations,
-unsigned complement, general unsigned/signed shifts, signed wrapping source
-lowerings (including width 256), all narrow-width source operator lowerings,
-and casts between distinct widths. The primitive type
-`PrimTy` has no width parameter: only `uint256`, `int256`, and `bool`.
-The lowerings to audit are `intTyOf`, `checkedNarrow?`, `narrowWrapNode`,
-`narrowCapture`, `narrowCheck`, `lowBits`, `signedAt`, and `castCapture` in
-`Solidity/Syntax/Elab.lean`; a detached arithmetic model or a projection
-into `BitVec w` would not establish their correctness. Signed left shift,
-signed complement, and checked signed power are rejected by the primitive
-admission table; no agreement theorem is claimed for them.
+`*_checked_all_widths` in `Bridge/SolidityBridge/Arith/NarrowChecked.lean` composes primitive evaluation
+**then** a width check. Primitive `none` becomes revert through `TRes.ofOpt`;
+the width-check failure is separate. These equations alone do not describe
+explicit `checked` blocks. `*_explicit_checked_all_widths` in
+`Bridge/SolidityBridge/Arith/CheckedExecution.lean` adds the actual value preguard first. Its numeric
+operands are arbitrary core values embedded as pure typed terms.
+`guardedValue_assert_then` connects that prefix to the actual `Stmt.assert`
+runner followed by evaluation in its returned state. The
+checker/template and source-action equations provide separate compositional
+links; this is not a universal correctness theorem for the whole frontend.
+In particular signed division's raw source branch and numeric primitive
+pipeline are both proved, without claiming one combined theorem for
+checking/evaluating that entire raw template.
 
-Read-only finder/skeptic review confirmed the listed positive statements are
-nonvacuous and the counterexamples read the actual evaluators/runs. The
-skeptic identified missing explicit mention of signed wrapping at width 256;
-the coverage list above includes it. This is a findings checkpoint, not a
-claim that B1 satisfies the requested completion criterion.
+`narrowWrap_uint`/`narrowWrap_int` describe nonliteral operands; separate
+negative-literal and literal-power equations cover those signed
+optimizations. Their fit hypotheses are actual source admission checks,
+not assumptions that an operation's result fits. `negative_literal_add` and
+`negative_literal_sub` prove the optimizations retain the same mathematical
+operation. `castCapture_factor` also retains literal fit failures. A
+whole-frontend theorem covering every expression, capture, and side effect
+is outside these operator bridges.
 
-Validation: `cd Bridge && lake build` passes (1,533 jobs), including the
-imported new family files, source counterexamples and existing checks.
-Every new family file ends with `#print axioms` for its headline results;
-the outputs contain only `propext`, `Classical.choice`, and `Quot.sound`.
-No heartbeat limit was raised. Four files use `maxRecDepth 2048` to check
-the existing 256-bit bound representations and concrete source reductions.
+Signed left shift, signed complement, and checked signed power are rejected
+by the primitive admission table. No evaluator is fabricated for those
+combinations. The extra homogeneous signed right-shift count is discussed
+below.
+
+Read-only finder/skeptic review confirmed nonvacuous width embeddings and
+numeric coverage. It identified the need to separate primitive postchecks
+from explicit preguards and expose literal source branches; both are now
+represented in the proofs and these claims. No heartbeat limit was raised.
+Some arithmetic/source modules increase recursion depth for the existing
+256-bit representations. Final validation and independent statement/doc
+review are recorded below.
 
 ### Discrepancies
 
@@ -186,6 +202,16 @@ the existing 256-bit bound representations and concrete source reductions.
   arithmetic right shift. The current homogeneous `BinOp.evalT` signature
   and `BinOp.accepts` cannot express that distinction.
 
-No core file or root dependency manifest was changed. Missing all-width
-proofs above remain Bridge proof work, not an assertion that changing the
-core is logically necessary to prove every true correspondence.
+No core file or root dependency manifest was changed. The discrepancies
+are findings; no numeric statement was weakened to conceal them.
+
+### B1 validation
+
+The arithmetic library and full opt-in run pass under Lean 4.24.0. All 162
+printed arithmetic axiom audits contain only `propext`, `Classical.choice`,
+and `Quot.sound`. Source checks find no `sorry`, new axiom/opaque declaration,
+unrestricted simp, untyped `have`, or heartbeat-limit change. New arithmetic
+modules build without warnings. Independent read-only finder/skeptic review
+confirmed the operand domains, guard protection, and documented source-link
+boundaries. The final separate reviewer also confirmed genuine all-width
+numeric coverage with no impossible result-fit hypotheses.

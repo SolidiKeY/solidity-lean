@@ -167,9 +167,36 @@ theorem unsigned_encode (x : BitVec 256) : BitVec.ofInt 256 (unsigned x).val = x
 theorem signed_encode (x : BitVec 256) : BitVec.ofInt 256 (signed x).val = x := by
   exact BitVec.ofInt_toInt
 
+/-- Every uint width, embedded into the actual primitive type without changing its value. -/
+def unsignedN {n : Nat} (hn : n ≤ 256) (x : BitVec n) : PrimTy.uint.Denote :=
+  ⟨x.toNat, by
+    simp only [PrimTy.inRange, decide_eq_true_eq]
+    have hp : (2 : Nat) ^ n ≤ 2 ^ 256 := Nat.pow_le_pow_right (by decide) hn
+    exact ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr (x.isLt.trans_le hp)⟩⟩
+
+/-- Every int width, embedded with its signed value into the actual primitive type. -/
+def signedN {n : Nat} (hn : n ≤ 256) (x : BitVec n) : PrimTy.int.Denote :=
+  ⟨x.toInt, by
+    simp only [PrimTy.inRange, decide_eq_true_eq, Nat.cast_pow, Nat.cast_ofNat]
+    have hp : (2 : Int) ^ (n - 1) ≤ 2 ^ 255 := by
+      have hp' : (2 : Nat) ^ (n - 1) ≤ 2 ^ 255 :=
+        Nat.pow_le_pow_right (by decide) (show n - 1 ≤ 255 by omega)
+      exact_mod_cast hp'
+    exact ⟨(neg_le_neg hp).trans (BitVec.le_toInt x), BitVec.toInt_lt.trans_le hp⟩⟩
+
+theorem unsignedN_word {n : Nat} (hn : n ≤ 256) (x : BitVec n) :
+    BitVec.ofInt 256 (unsignedN hn x).val = x.setWidth 256 := by
+  exact BitVec.ofNat_toNat 256 x
+
+theorem signedN_word {n : Nat} (hn : n ≤ 256) (x : BitVec n) :
+    BitVec.ofInt 256 (signedN hn x).val = x.signExtend 256 := rfl
+
 end Solidity.Bridge.Arith
 
 #print axioms Solidity.Bridge.Arith.uint_check_bitvec
 #print axioms Solidity.Bridge.Arith.int_check_bitvec
 #print axioms Solidity.Bridge.Arith.unsigned_encode
 #print axioms Solidity.Bridge.Arith.signed_encode
+
+#print axioms Solidity.Bridge.Arith.unsignedN_word
+#print axioms Solidity.Bridge.Arith.signedN_word
