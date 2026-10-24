@@ -934,10 +934,29 @@ def shareable? (U : Expr) : Option (Expr × Expr × Option Expr) :=
     (core (U.getArg! 4)).map fun (j, t) => (j, t, some (U.getArg! 5))
   else (core U).map fun (j, t) => (j, t, none)
 
+/-- The distinct subterms of `e`, counted up to `cap`. -/
+partial def termNodes (e : Expr) (cap : Nat) : Nat :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr) Unit := do
+    if (← get).size ≥ cap || (← get).contains e then return
+    modify (·.insert e)
+    match e with
+    | .app f x => go f; go x
+    | .lam _ t b _ | .forallE _ t b _ => go t; go b
+    | .mdata _ b | .proj _ _ b => go b
+    | _ => pure ()
+  ((go e).run {}).2.size
+
+/-- The most distinct subterms a summary's term may have for `redexOf?`
+to hand it to the kernel. -/
+def shareNodes : Nat := 20000
+
 /-- `t`'s innermost strict redex (`Tm.redex?`, by the kernel, `tmNF`): the
 redex, the term reading it from a fresh local, and the equation, which
 `rfl` proves; `none` where `t` is its own redex or has none. -/
 def redexOf? (t : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
+  -- `Kernel.whnf` runs outside the heartbeats: a term of at most
+  -- `shareNodes` distinct subterms only (`termNodes`)
+  unless termNodes t shareNodes < shareNodes do return none
   let red ← mkAppM ``Tm.redex? #[t]
   let nf ← (tmNF red).run' {}
   unless nf.isAppOfArity ``Option.some 2 do return none
