@@ -402,3 +402,25 @@ there).  Left as is: narrowing `TermLaws`' `TermLib` import to
 `TermLib.Rules` (`TermLib.lean` holds delaborators that downstream pins may
 read), and `scripts/solkey-port.mjs` naming `Syntax.lean` in text it writes
 into generated files (changing it would change them).
+
+## Before and after
+
+Master `3b03ac58` (P0) against `acf6e54a` (after the review), measured as in
+P0 (a cold clone, an empty private Lake cache, 12 threads).
+
+| | P0 | After |
+|---|---|---|
+| `Syntax.Elab`'s fan-out | 501 | 285 (a piece: 286–307) |
+| Longest import chain | 53 modules | 65 modules (the pieces chain) |
+| Weighted critical path | 504 s | 508 s (`OpenLoops` 290 → 300 s of it) |
+| Cold `lake build` | 662.7 s | 645.7 s |
+| `SolkeyTestSuite`'s 23 modules built in both runs, summed | 561.4 s | 531.7 s |
+| Peak RSS, `Calculus/Closer` | 3.17 GB | 2.02 GB (largest piece) |
+| Peak RSS, `Calculus/MemRead` | 2.87 GB | 2.12 GB |
+| Peak RSS, `Calculus/TermLaws` | 2.60 GB | 2.06 GB |
+| Peak RSS, `Syntax/Elab` | 1.75 GB | 1.37 GB |
+
+The cold `lake build SolkeyTestSuite` could not be timed whole at 12
+threads: three `TestSuite/Derived*` modules were killed by the session's
+32 GiB cap (exit 137); the gate's runs at 4 threads pass.  The row above
+sums the modules both cold runs built.
