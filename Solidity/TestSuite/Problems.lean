@@ -51,4 +51,4 @@ well-formed (`initStorage_wt`: the empty program reaches it, and its words
 are defaults). -/
 theorem Solkey.TestSuite.initState_wt :
     holds (State.init Solkey.TestSuite) (Fml.wt Solkey.TestSuite) :=
-  initStorage_wt (by decide +kernel)
+  initStorage_wt

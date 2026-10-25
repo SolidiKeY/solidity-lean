@@ -1099,14 +1099,20 @@ theorem mapFree_structDef (s : Name) (hs : structMapFree s = true) :
       · rw [hs] at h'; cases h'
       · exact Semantics.all_mem h'
 
+/-- Every struct definition has well-formed members, including the empty
+definition returned for an unknown or rejected name. -/
+theorem structDef_okDeep (s : Name) :
+    (Semantics.structDef s).all (fun nt => nt.2.okDeep) = true := by
+  refine structDef_rec (P := fun _ fs => fs.all (fun nt => nt.2.okDeep) = true) s (by decide) ?_
+  rcases Semantics.structDefEnc_ok s with h | h
+  · rw [h]; rfl
+  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
+    exact h.1.2
+
 /-- The members of a struct are well-formed all the way down. -/
 theorem struct_okDeep {s : Name} (_h : structOk s = true) :
-    ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true := by
-  refine structDef_rec (P := fun _ fs => ∀ nt ∈ fs, nt.2.okDeep = true) s (by decide) ?_
-  rcases Semantics.structDefEnc_ok s with h | h
-  · rw [h]; intro _ hm; cases hm
-  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
-    exact Semantics.all_mem h.1.2
+    ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true :=
+  Semantics.all_mem (structDef_okDeep s)
 
 /-- A member of a struct that holds no mapping holds none: what a memory
 path's type inherits from its receiver's (`MPath.memOk`). -/

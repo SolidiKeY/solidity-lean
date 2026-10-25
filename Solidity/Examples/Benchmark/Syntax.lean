@@ -257,7 +257,11 @@ def BadInit : Contract := contract!{ uint8 small = 300; }
 /-- error: Solidity elaboration failed: 300 does not fit uint8 -/
 #guard_msgs in #check sol[BadInit]{ constructor(); }
 
-/-- error: unknown type uint7: the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8 -/
+/--
+error: unknown type uint7: the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8
+---
+error: could not synthesize default value for field 'vars_ok' of 'Solidity.Contract' using tactics
+-/
 #guard_msgs (error, drop info) in #check contract!{ uint7 small; }
 
 end Solidity.Examples.Benchmark.Syntax

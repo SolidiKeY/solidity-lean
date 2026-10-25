@@ -11,8 +11,9 @@ The typed syntax is what well-typedness was: a statement no rule can run
 cannot be written, so no theorem of the calculus carries a typing hypothesis.
 The typed state is what a well-typed state was: its storage holds the
 contract's roots at their types, its heap objects at the types its typing
-lists.  What is left here is about what the types do not say, read on the
-typed state only.
+lists. The contract carries `vars_ok` and `vars_nodup`: root types are
+`okDeep` and root names distinct. What is left here is about what the types
+do not say, read on the typed state only.
 
 Each run invariant is a hereditary predicate on typed values
 (`Typing/Values.lean`: `SVal.All P` for node conditions `P : Hered`):
@@ -28,7 +29,7 @@ operation needs a field of `HeredRun` (or a lemma from its fields).
 
 `Typing/Constructibility.lean` is the converse: canonical and tight is
 exactly reachable for a storage whose keys and slots fit (`reachable_iff`,
-for `Ty.okDeep` roots, under `SVal.Fits`; implied under `FixedFits`,
+under `SVal.Fits`; implied under `FixedFits`,
 `reachable_fits`, so `reachable_iff_fits` has no premise on the storage;
 decisions 77 and 97 of `docs/intrinsic.md`), by a builder that reaches past
 an array's end through aliases `slot d` (`Build.fill`, `fill_ok`).
