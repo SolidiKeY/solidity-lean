@@ -1,7 +1,7 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
-import Solidity.Calculus.HashComplete
+import Solidity.Calculus.HashKinds
 
 /-!
 # The closer's decision, stated (M7)
@@ -316,58 +316,6 @@ theorem decideHash_refutes {φ : Fml C []} {σ : State C []} (h : decideHash φ 
   rcases decideHash_cases h with h | h | h <;> exact decideHashK_refutes h
 
 /-! ### Completeness on leaves with hashes -/
-
-/-- The root a term names. -/
-def _root_.Solidity.Tm.rootName? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option Name
-  | .app0 (.root r _) => some r
-  | _ => none
-
-/-- The roots a term indexes by a word local of `V`. -/
-def _root_.Solidity.Tm.vRoots (V : List Nat) {Γ : Ctx} : {s : Srt} → Tm C Γ s → List Name
-  | _, .netOf _ a => a.vRoots V
-  | _, .app1 _ x => x.vRoots V
-  | _, .app2 o x y =>
-    (if o.isAtR && y.isVVar V then x.rootName?.toList else []) ++ x.vRoots V ++ y.vRoots V
-  | _, .app3 _ x y z => x.vRoots V ++ y.vRoots V ++ z.vRoots V
-  | _, _ => []
-
-def _root_.Solidity.Rhs.vRoots (V : List Nat) {Γ : Ctx} {t : LTy} : Rhs C Γ t → List Name
-  | .val a => a.vRoots V
-  | _ => []
-
-def _root_.Solidity.UpdElem.vRoots (V : List Nat) {Γ Δ : Ctx} : UpdElem C Γ Δ → List Name
-  | .local _ r => r.vRoots V
-  | .storage s => s.vRoots V
-  | _ => []
-
-def _root_.Solidity.Upd.vRoots (V : List Nat) {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List Name
-  | _, .snoc U e => U.vRoots V ++ e.vRoots V
-  | _, .decl U _ r => U.vRoots V ++ r.vRoots V
-  | _, _ => []
-
-/-- The roots a formula indexes by a word local of `V`: the keyed roots. -/
-def _root_.Solidity.Fml.vRoots (V : List Nat) : {Γ : Ctx} → Fml C Γ → List Name
-  | _, .eq a b => a.vRoots V ++ b.vRoots V
-  | _, .wellFormed s => s.vRoots V
-  | _, .not φ | _, .all _ _ φ => Fml.vRoots V φ
-  | _, .and φ ψ | _, .imp φ ψ => Fml.vRoots V φ ++ Fml.vRoots V ψ
-  | _, .upd _ U φ => U.vRoots V ++ Fml.vRoots V φ
-  | _, _ => []
-
-/-- The levels of the prefix's fresh strings. -/
-def _root_.Solidity.Fml.allocLevels : {Γ : Ctx} → Fml C Γ → List Nat
-  | _, .all _ _ φ => Fml.allocLevels φ
-  | Γ, .allocAll _ _ φ => Γ.length :: Fml.allocLevels φ
-  | _, _ => []
-
-/-- The keyed roots map words to words, checked. -/
-def kTypedB (C : Contract) (K : List Name) : Bool :=
-  K.all fun r => decide (C.rootType r = some (.ref (.mapping .uint (.prim .uint))))
-
-theorem kTyped_of {K : List Name} (h : kTypedB C K = true) : KTyped C K := by
-  intro r hr
-  simp only [kTypedB, List.all_eq_true, decide_eq_true_eq] at h
-  exact h r hr
 
 /-- **The covered leaves with hashes of kind `k`**: the swapped leaf and each
 instance at classes of its strings covered (`Fml.Covered`), at most
