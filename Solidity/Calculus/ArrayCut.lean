@@ -1025,11 +1025,6 @@ theorem foldl_max_le (f : Nat → Nat) {M : Nat} : ∀ (l : List Nat) (m : Nat),
   | k :: l, _, hm, hf => foldl_max_le f l _ (Nat.max_le.mpr ⟨hm, hf k List.mem_cons_self⟩)
       fun j hj => hf j (List.mem_cons_of_mem _ hj)
 
-theorem uint_toNat_lt (v : PrimTy.uint.Denote) : v.1.toNat < 2 ^ 256 := by
-  have h := v.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  omega
-
 section RealObs
 
 variable (ν : AEnv) (N : Nat) (rs : List (ARead C)) (st : Storage C)
