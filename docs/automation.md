@@ -1112,9 +1112,14 @@ It contains everything except what the user allowed to answer *unknown*:
   assumption; on a leaf without a hash it is `Fml.Valid` (`Fml.validH_iff`).
   A hash term is in the fragment only where the premise settles it: as an
   operand of `==`/`!=` against a hash of its kind, or as a key of a mapping
-  at a root all of whose keys are hashes of that kind.  Elsewhere its verdict may turn
+  at a root all of whose keys are hashes of that kind, the hash of a memory
+  local.  Elsewhere its verdict may turn
   on a preimage, which the user allowed to answer unknown. `ecrecover` (an
-  `opaque` function) is outside everywhere.
+  `opaque` function) is outside everywhere.  So is a hash under a hidden
+  memory binder or an anonymising update: they range over an unset
+  reference, whose hash reads nothing, and a key of nothing reads the
+  default key `0`, so the verdict turns on whether a string hashes to `0`
+  (`namesBound`, step 7's review, below).
 
 The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
@@ -1128,16 +1133,20 @@ fragment the user named, never a superset:
 * an update or a program under a quantifier counts as reading at its
   variable;
 * an index guard may not negate a comparison of bound variables;
-* a hash stored by an update, a hash key of a nested mapping and a hash
-  under any other operator are outside, even where the premise would
-  settle them.
+* a hash stored by an update, a hash key of a nested mapping or of
+  anything but a memory local, a hash under a hidden memory binder or an
+  anonymising update, and a hash under any other operator are outside,
+  even where the premise would settle them.
 
 Three properties of the reading are worth knowing.
 * The per-scope premise depends on where the binders stand:
   `pre → ∀ k. ψ` and `∀ k. pre → ψ` take different premises, so
   `LFml.prenex` is exact for `holds` but not for `Fml.holdsH`.
-  `decideGoal` answers only on leaves without a hash, where the two
-  readings agree (`Fml.holdsH_iff`).
+  `decideGoal` prenexes only leaves without a hash, where the two
+  readings agree (`Fml.holdsH_iff`), and the swapped readings of leaves
+  with hashes (feature 10), which have none; a leaf with hashes it takes
+  has its quantifiers in front (`Fml.swPrefix`), where the premise is the
+  body's.
 * A hash of an identity that names no object reads `none` and returns
   `0`; an object hashing to `0` would count as colliding with it.
 * A program's hashes are not read by the premise.  The fragment holds no
@@ -1154,6 +1163,12 @@ Three properties of the reading are worth knowing.
 | `decideLeaf_proved_iff` | on `Fml.Covered`, `proved` exactly when valid |
 | `decideGoal_sound`, `decideGoal_refutes` | the same under the hash premise |
 | `decideGoal_complete` | `φ.Covered = true → φ.hasHash = false → decideGoal φ ≠ .unknown` |
+| `decideGoal_complete_hash` | `φ.hashCovered = true → decideGoal φ ≠ .unknown` |
+| `Fml.swPrefix_validH` | a valid swapped leaf is valid under the leaf's premise |
+| `Fml.swInst_refutes` | a refutation of an instance at the family's strings refutes the leaf under its premise |
+| `Fml.swPrefix_complete` | on the fragment, a swapped leaf that is not valid has an instance at some classes that is not |
+| `Fml.swPrefix_exact` | on the fragment, `Fml.ValidH φ ↔ Fml.Valid φ'` |
+| `famOK_keccak`, `famOK_sha256`, `famOK_ripemd160` | four one-word strings with distinct, nonzero hashes, by the kernel |
 | `Fml.holdsH_iff`, `Fml.validH_iff` | without a hash the premise is empty |
 | `LFml.prenex_holds` | prenexing is exact |
 | `CheckedScalar.scale_correct` | checked multiplication by a literal is encoded exactly |
@@ -1167,7 +1182,10 @@ Three properties of the reading are worth knowing.
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
 
-`#print axioms` of each of the six `decide*` theorems is pinned in
+`#print axioms` of each of the six `decide*` theorems, of
+`decideGoal_complete_hash` and of the hash reduction's four
+(`Fml.swPrefix_validH`, `Fml.swInst_refutes`, `Fml.swPrefix_complete`,
+`Fml.swPrefix_exact`) is pinned in
 `Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
 `Calculus/QuantTotality.lean`, of the preparations' in
@@ -1337,10 +1355,49 @@ its own pipeline):
    `store(net, …)`) stays outside: the leaf builder refuses a read past a
    write (`SymS.netOk`).
 
+10. **Hashes under the premise** (plan step 7, `decideHash`,
+    `Calculus/HashSwap.lean` … `Calculus/HashComplete.lean`).  A leaf whose
+    memory locals are fresh byte strings (`∀ fresh s.`, `Fml.allocAll` at
+    `uint[]`, any bytes) read only by hashes of one kind (not `ecrecover`):
+    * **the swap** (`Fml.swPrefix`): each string read as the word its hash
+      returns, its binder a `∀ uint`, each hash node the local
+      (`Tm.sw`), on a body of equations, `wt`, the connectives and
+      one-element updates (a storage write, a value local declared or
+      set, no push).  A state of the leaf and one of the swapped leaf with
+      one storage, ledger and transaction, any heaps, each string's word
+      its hash, read every term alike (`SwRel`, `Tm.sw_eval`,
+      `Tm.sw_denote`, `Fml.sw_holds`), so a valid swapped leaf is valid
+      whatever the hash (`Fml.swPrefix_validH`): `decideLeaf` decides it;
+    * **the refutation** (`Fml.swInst`): the swapped leaf with each word
+      fixed (`∀ v. v == c → …`) to the hash of a family's one-word string,
+      one per class of equal strings (`rgs`, the restricted growth
+      strings: one instance for one string, two for two, 15 for four).
+      The first instance `decideLeaf` refutes gives a state; the leaf's
+      strings allocated there with the family's bytes hash to exactly the
+      fixed words, and a heap of the family's strings meets every premise,
+      their hashes being distinct and nonzero (`famOK`, by the kernel for
+      four strings of each kind), so it refutes the leaf under its premise
+      (`Fml.swInst_refutes`);
+    * **exactness** (`Fml.swPrefix_exact`, `Fml.swPrefix_complete`): the
+      swapped leaf reads its words only as they compare, against each
+      other and as keys of the roots they key (`Fml.rl`: the storage read
+      at a path, written by a one-element update, no `wt`, keyed roots
+      `mapping(uint => uint)`), so a state refuting it is relabeled into
+      one refuting the instance at its classes (`classesOf`): each fixed
+      word sent to its class's free word, each keyed root's entry at a
+      fixed key moved from the free one (`RelRL`, `relabel_state`,
+      `Fml.rl_holds`).  So `Fml.ValidH φ ↔ Fml.Valid φ'` on the fragment.
+    `Fml.hashCovered` is the fragment: a hash, and for some kind the
+    swapped leaf and every instance in `Fml.Covered`, at most four
+    strings (`famBound`), the swapped leaf in `Fml.rl` over the roots its
+    words key (`Fml.vRoots`), each `mapping(uint => uint)` (`kTypedB`), the
+    prefix's string levels the words' (`Fml.prefixOK`).
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
-and eight and nine (no atom of `Srt.kint`, no ledger read).
+and eight and nine (no atom of `Srt.kint`, no ledger read); ten was
+answered `unknown` (`decideGoal` read no hash).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1368,6 +1425,21 @@ feature 9: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
 (`netSame`), a ledger entry against a storage read and past a write,
 proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
 `net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
+For feature 10, `Examples/DecisionHashes.lean` pins, over `Names` of
+`Examples/Tactics/Hashing.lean` §3
+(`mapping(string => uint) ids`, keyed by `keccak256`): `namesSet`, the leaf
+`∀ s t. keccak256(s) != keccak256(t) → ids[s] == 0 → {ids[t] := 1}
+ids[s] == 0` (`[ ids[t] = 1; ]` past the program; `s ≠ t` as their hashes,
+the only way a leaf with no memory read states that two strings read
+different bytes), proved; without `s ≠ t` (`namesSetBad`) refuted by two
+strings with the same bytes; `keccak256(s) == keccak256(t) → ids[s] ==
+ids[t]` (`namesEq`) proved and `keccak256(s) == keccak256(t)`
+(`namesEqBad`) refuted by two strings with different bytes; `namesSet_covered`
+and `namesEqBad_covered` kernel-checked (about 4 s each),
+`namesSet_answers` by `decideGoal_complete_hash`.  `namesTwoKinds`
+(`sha256(s) == sha256(t) → keccak256(s) == keccak256(t)`, valid only under
+the premise) is in the named fragment and `unknown`; `namesBound` (the
+strings as hidden binders) is outside it and `unknown`.
 
 ### Running time (the walks)
 
@@ -1488,7 +1560,21 @@ of about two thousand nodes, about a millisecond a state).  The
     Theory reads a default past the length, the interpreter halts), the
     path guards refuse `.at`, and the read queries and realization carry
     no index or length evidence;
-  * every hash.
+  * hashes outside `Fml.hashCovered` (feature 10): two kinds of hash of
+    one string (`namesTwoKinds`: one word per string cannot be both its
+    hashes; it needs the relabeling of one kind's words into the other's),
+    a hash stored in a local (`{se := keccak256(memory, s)}`, the form
+    symbolic execution leaves, and a key read through that local), a hash
+    of memory the leaf writes or of a string not fresh (a program's
+    `bytes memory b = "ab"`, a parameter), more than four strings, a keyed
+    root that is not `mapping(uint => uint)` or is read or written other
+    than at a key (`sfind`, `delete`, `wt`), a quantifier in the body, and
+    a leaf with a modality.  Of these `Fml.inTarget` takes two kinds of
+    hash of one string, hashes of memory the leaf writes in equations,
+    more than four strings (a refutation needing a fifth class answers
+    `unknown`), keyed roots of other types and quantifiers in the body; it
+    takes no stored hash, no hash of a hidden binder's string, and a hash
+    key only of a memory local in the starting memory.
 
 ### The plan for the rest
 
@@ -1535,7 +1621,12 @@ in this order:
    (`LTm.Elimable`).  Each is a stage of its own to make exact first.
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
-   as its input's word list.
+   as its input's word list.  Done (2026-10-25) for fresh strings read only
+   by hashes of one kind (feature 10): no stage reads memory, so the
+   inputs are free, and their equality is the hashes' (the swap); the
+   bounded `∀` over words is needed only once memory reads are, at step 6.
+   Left: two kinds per string, stored hashes, hashes of written memory,
+   strings not fresh, more than four strings.
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
    the size bounds by fuel computed from the formula.
@@ -1568,6 +1659,21 @@ the floor does not preserve it (two keys between consecutive index values
 share their floor); `Tm.apfG` now refuses it (`strictSorted`, outside).
 A hash key reached through an alias or `atIn` is outside the fragment (its
 position is not admitted), so the key-kind check need not see it.
+
+**Step 7 (2026-10-25)** found `Fml.inTarget` a superset of the named
+fragment at hash keys: a hidden memory binder (`Fml.bind`) or an
+anonymising update ranges over an unset reference, whose hash reads
+nothing, and a key of nothing reads the default key `0`; so
+`ids[keccak256(s)]` with `s` unset reads `ids[0]`, and a verdict turns on
+whether another string hashes to `0`, a preimage question
+(`namesBound`).  The same holds of a hash of a memory a failing write
+leaves (`write(memory, a, v)` at an address past a string's end returns
+nothing).  `Fml.inTarget` now admits no hash under either binder, and a
+hash key only of a memory local in the starting memory
+(`Tm.hashOfLocal`).  Fresh strings (`Fml.allocAll`) are always set.  The
+review found no other source of an undefined hash key: an update setting
+a memory local to nothing does not land, and an equation of two hashes
+compares their readings as options, reading no default.
 
 ## M8 · Polynomial size (2026-10-25)
 
