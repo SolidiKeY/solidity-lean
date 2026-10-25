@@ -12,7 +12,9 @@ also over a storage read); a universal quantifier in the consequent of
 an implication (a postcondition's `\forall`), moved to the prefix; unary
 `-` and `~`, compiled as affine codes; and the operators cut into fresh
 atoms (`Calculus/QuotientCut.lean`): `int(·)`, `uint(·)`, `/`, `%`, `>>`,
-`<<` and a low mask `& (2^k - 1)` by a literal, `+%`, `-%`.  Each has a
+`<<` and a low mask `& (2^k - 1)` by a literal, `+%`, `-%`; and, written
+through those, `&`, `|`, `^`, `*%` with any literal, `**` by `0` or `1`,
+`/` and `%` at `int`.  Each has a
 proved and a refuted verdict pinned and a kernel-checked covered leaf.  The
 verdicts are the compiled ones: the kernel's arithmetic decision over
 256-bit codes is too deep for the language server (as in
