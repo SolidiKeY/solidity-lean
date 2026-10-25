@@ -660,11 +660,16 @@ def MxMap.ixs {Γ Δ : Ctx} (θ : MxMap C Γ Δ) (es : List (Tm C Γ (.val .uint
       | none => none
     else none
 
-/-- `⊥` at `q`: a term that halts (`1 / 0` decides it). -/
-def mxHalt {Γ : Ctx} (q : PrimTy) : Tm C Γ (.val q) :=
-  .app3 .ite (.app2 (.binop .eqB rfl) (.app2 (.binop .div rfl) (.app0 (.lit (uintOfNat 1)))
-    (.app0 (.lit (uintOfNat 0)))) (.app0 (.lit (uintOfNat 0))))
-    (.app0 (.lit (PrimTy.dflt q))) (.app0 (.lit (PrimTy.dflt q)))
+/-- `1 / 0` at `uint`. -/
+def mxDiv0 {Γ : Ctx} : Tm C Γ (.val .uint) :=
+  .app2 (.binop .div rfl) (.app0 (.lit (uintOfNat 1))) (.app0 (.lit (uintOfNat 0)))
+
+/-- `⊥` at `q`: a term that halts (`1 / 0`). -/
+def mxHalt {Γ : Ctx} : (q : PrimTy) → Tm C Γ (.val q)
+  | .uint => mxDiv0
+  | .int => .app2 (.binop .div rfl) (.app0 (.lit (p := .int) ⟨1, by decide⟩))
+      (.app0 (.lit (p := .int) ⟨0, by decide⟩))
+  | .bool => .app2 (.binop .eqB rfl) mxDiv0 (.app0 (.lit (uintOfNat 0)))
 
 /-- The bound of an index: the length's word, a fixed array's length. -/
 def mxBound {Δ : Ctx} (n : Idx Δ (.val .uint)) {R : RefTy} {q : PrimTy} :
@@ -768,7 +773,7 @@ theorem _root_.Solidity.MObj.elems_wk_prim {H H' : HTy} (e : H <+: H') {R : RefT
 
 /-- An element read by identity: the object's element, `none` past its
 length. -/
-theorem readAt_eval (g : State C []) {R : RefTy} {q : PrimTy} (a : ArrTy R (.prim q))
+theorem mxReadAt_eval (g : State C []) {R : RefTy} {q : PrimTy} (a : ArrTy R (.prim q))
     (r : HRef g.H R) (k : PrimTy.uint.Denote) :
     (Op2.eval g (.read (p := q)) (some g.memT) (some (MAddrT.index r.id a k)) : Option q.Denote) =
       (MObj.elems a (g.heap.get r))[k.1.toNat]? := by
@@ -779,7 +784,7 @@ theorem readAt_eval (g : State C []) {R : RefTy} {q : PrimTy} (a : ArrTy R (.pri
   rfl
 
 /-- A dynamic array's length by identity. -/
-theorem mlenAt_eval (g : State C []) {E : Ty} (r : HRef g.H (.array E)) :
+theorem mxMlenAt_eval (g : State C []) {E : Ty} (r : HRef g.H (.array E)) :
     (Op2.eval g (.mlen (E := E)) (some g.memT) (some r.id) : Option PrimTy.uint.Denote) =
       some (g.heap.lenU r) := by
   rw [Op2.eval_eq_evalM]
@@ -795,11 +800,11 @@ theorem _root_.Solidity.State.alloc_glob_get (τ : State C Γ') {R R' : RefTy} (
   rw [HRef.ofId?_wk (List.prefix_append τ.H [R]) R' hid, HRef.ofId?_self]
   rfl
 
-theorem gAgree_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj τ.H R) :
+theorem mxGAgree_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj τ.H R) :
     GAgree τ.glob (τ.alloc o).1.glob := ⟨rfl, rfl, rfl, rfl⟩
 
 /-- An allocation keeps an older array's length. -/
-theorem lenU_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj τ.H R) {E : Ty}
+theorem mxLenU_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj τ.H R) {E : Ty}
     (r : HRef τ.H (.array E)) :
     (τ.alloc o).1.heap.lenU (r.wk (List.prefix_append τ.H [R])) = τ.heap.lenU r := by
   apply Subtype.ext
@@ -829,13 +834,13 @@ theorem MxOrig.eval_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj �
     cases TEnv.get i τ.env with
     | none => rw [Op2.eval_eq_evalM, Op2.eval_eq_evalM]; rfl
     | some r =>
-      rw [Option.map_some, mlenAt_eval τ.glob r]
+      rw [Option.map_some, mxMlenAt_eval τ.glob r]
       rw [show r.id = (r.wk (List.prefix_append τ.H [R])).id from rfl]
-      rw [mlenAt_eval (τ.alloc o).1.glob (r.wk (List.prefix_append τ.H [R]))]
-      exact congrArg some (lenU_alloc τ o r)
+      rw [mxMlenAt_eval (τ.alloc o).1.glob (r.wk (List.prefix_append τ.H [R]))]
+      exact congrArg some (mxLenU_alloc τ o r)
   | elem i a e he =>
     have hE : (e.eval (τ.alloc o).1 : Option PrimTy.uint.Denote) = e.eval τ :=
-      Tm.ixOk_eval (gAgree_alloc τ o) (fun j => State.getV_alloc τ o j) e he
+      Tm.ixOk_eval (mxGAgree_alloc τ o) (fun j => State.getV_alloc τ o j) e he
     show Op2.eval (τ.alloc o).1.glob .read (some (τ.alloc o).1.glob.memT)
         (Op2.eval (τ.alloc o).1.glob (.mat a) ((τ.alloc o).1.getV i) (e.eval (τ.alloc o).1)) =
       Op2.eval τ.glob .read (some τ.glob.memT) (Op2.eval τ.glob (.mat a) (τ.getV i) (e.eval τ))
@@ -853,8 +858,8 @@ theorem MxOrig.eval_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj �
           rw [Op2.eval_eq_evalM]; rfl
         have h2 : Op2.eval τ.glob (.mat a) (some r.id) (some k) = some (MAddrT.index r.id a k) := by
           rw [Op2.eval_eq_evalM]; rfl
-        rw [Option.map_some, h1, h2, readAt_eval τ.glob a r k,
-          readAt_eval (τ.alloc o).1.glob a (r.wk (List.prefix_append τ.H [R])) k]
+        rw [Option.map_some, h1, h2, mxReadAt_eval τ.glob a r k,
+          mxReadAt_eval (τ.alloc o).1.glob a (r.wk (List.prefix_append τ.H [R])) k]
         show (MObj.elems a ((τ.heap.alloc o).1.get (r.wk _)))[k.1.toNat]? = _
         rw [Heap.keeps_alloc τ.heap o r, MObj.elems_wk_prim]
         rfl
@@ -863,14 +868,21 @@ theorem MxOrig.eval_alloc {Γ' : Ctx} (τ : State C Γ') {R : RefTy} (o : MObj �
 
 theorem mxHalt_eval {Δ' : Ctx} (σ : State C Δ') (q : PrimTy) :
     ((mxHalt q : Tm C Δ' (.val q)).eval σ : Option q.Denote) = none := by
-  show Op3.eval σ.glob .ite (Op2.eval σ.glob (.binop .eqB rfl)
-    (Op2.eval σ.glob (.binop .div rfl) (some (uintOfNat 1)) (some (uintOfNat 0))) (some (uintOfNat 0)))
-    (some (PrimTy.dflt q)) (some (PrimTy.dflt q)) = none
-  rw [Op3.eval_eq_evalM, Op2.eval_eq_evalM, Op2.eval_eq_evalM]
-  rfl
+  cases q with
+  | uint =>
+    show Op2.eval σ.glob (.binop .div rfl) (some (uintOfNat 1)) (some (uintOfNat 0)) = none
+    rw [Op2.eval_eq_evalM]; rfl
+  | int =>
+    rfl
+  | bool =>
+    show Op2.eval σ.glob (.binop .eqB rfl)
+      (Op2.eval σ.glob (.binop .div rfl) (some (uintOfNat 1)) (some (uintOfNat 0)))
+      (some (uintOfNat 0)) = none
+    rw [Op2.eval_eq_evalM, Op2.eval_eq_evalM]; rfl
 
 theorem mxHalt_denote {Δ' : Ctx} (σ : State C Δ') (q : PrimTy) :
-    ((mxHalt q : Tm C Δ' (.val q)).denote σ : Option q.Denote) = none := rfl
+    ((mxHalt q : Tm C Δ' (.val q)).denote σ : Option q.Denote) = none := by
+  cases q <;> rfl
 
 theorem mxReadT_eval {Δ' : Ctx} (σ : State C Δ') (q : PrimTy) (e bnd : Tm C Δ' (.val .uint))
     (w : Idx Δ' (.val q)) :
@@ -918,16 +930,16 @@ def mxBndV {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) : ArrTy R (.prim q)
   | .dyn => n
   | @ArrTy.fixed _ N => uintOfNat N
 
-theorem uint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := by
+theorem mxUint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := by
   have h := x.2
   simp only [PrimTy.inRange, decide_eq_true_eq] at h
   exact h.1
 
-theorem lenU_toNat (n : PrimTy.uint.Denote) (h : n.1.toNat < 2 ^ 256) : lenU n.1.toNat h = n :=
-  Subtype.ext (by show ((n.1.toNat : Nat) : Int) = n.1; exact Int.toNat_of_nonneg (uint_nonneg n))
+theorem mxLenU_toNat (n : PrimTy.uint.Denote) (h : n.1.toNat < 2 ^ 256) : lenU n.1.toNat h = n :=
+  Subtype.ext (by show ((n.1.toNat : Nat) : Int) = n.1; exact Int.toNat_of_nonneg (mxUint_nonneg n))
 
 /-- The new object's element, read at an index read before it. -/
-theorem readNew_eval {Γ : Ctx} (τ : State C Γ) {R : RefTy} {q : PrimTy} (o : MObj τ.H R)
+theorem mxReadNew_eval {Γ : Ctx} (τ : State C Γ) {R : RefTy} {q : PrimTy} (o : MObj τ.H R)
     (a : ArrTy R (.prim q)) (e : Tm C Γ (.val .uint)) (he : e.ixOk = true)
     (he' : (e.wk (.drop .refl) : Tm C (.mem R :: Γ) _).ixOk = true) :
     ((MxOrig.elem .here a (e.wk (.drop .refl)) he').tm.eval (τ.allocPush o) : Option q.Denote) =
@@ -939,7 +951,7 @@ theorem readNew_eval {Γ : Ctx} (τ : State C Γ) {R : RefTy} {q : PrimTy} (o : 
       congrArg (fun (X : State C Γ) => (show Option PrimTy.uint.Denote from e.eval X))
         (mxThin_drop_push (τ.alloc o).1 _)
     rw [e1]
-    exact Tm.ixOk_eval (gAgree_alloc τ o) (fun j => State.getV_alloc τ o j) e he
+    exact Tm.ixOk_eval (mxGAgree_alloc τ o) (fun j => State.getV_alloc τ o j) e he
   show Op2.eval (τ.alloc o).1.glob .read (some (τ.alloc o).1.glob.memT)
       (Op2.eval (τ.alloc o).1.glob (.mat a) (some (τ.alloc o).2.id) ((e.wk (.drop .refl)).eval (τ.allocPush o))) = _
   rw [hE]
@@ -949,18 +961,18 @@ theorem readNew_eval {Γ : Ctx} (τ : State C Γ) {R : RefTy} {q : PrimTy} (o : 
     have h1 : Op2.eval (τ.alloc o).1.glob (.mat a) (some (τ.alloc o).2.id) (some k) =
         some (MAddrT.index (τ.alloc o).2.id a k) := by
       rw [Op2.eval_eq_evalM]; rfl
-    rw [h1, readAt_eval (τ.alloc o).1.glob a (τ.alloc o).2 k]
+    rw [h1, mxReadAt_eval (τ.alloc o).1.glob a (τ.alloc o).2 k]
     show (MObj.elems a ((τ.heap.alloc o).1.get (τ.heap.alloc o).2))[k.1.toNat]? = _
     rw [Heap.get_alloc, MObj.elems_wk_prim]
     rfl
 
 /-- The new array's length. -/
-theorem lenNew_eval {Γ : Ctx} (τ : State C Γ) {q : PrimTy} (o : MObj τ.H (.array (.prim q))) :
+theorem mxLenNew_eval {Γ : Ctx} (τ : State C Γ) {q : PrimTy} (o : MObj τ.H (.array (.prim q))) :
     ((MxOrig.len (Γ := .mem (.array (.prim q)) :: Γ) .here).tm.eval (τ.allocPush o) :
       Option PrimTy.uint.Denote) =
       some (lenU (MObj.elems .dyn o).length (by rw [MObj.elems_dyn]; exact o.2)) := by
   show Op2.eval (τ.alloc o).1.glob .mlen (some (τ.alloc o).1.glob.memT) (some (τ.alloc o).2.id) = _
-  rw [mlenAt_eval (τ.alloc o).1.glob (τ.alloc o).2]
+  rw [mxMlenAt_eval (τ.alloc o).1.glob (τ.alloc o).2]
   congr 1
   apply Subtype.ext
   show (((τ.heap.alloc o).1.len (τ.heap.alloc o).2 .dyn : Nat) : Int) = _
@@ -972,7 +984,7 @@ section AllocRel
 
 variable {Γ Δ : Ctx} {θ : MxMap C Γ Δ} {τ : State C Γ} {ρ : State C Δ} {R : RefTy} {q : PrimTy}
 
-theorem getV_mxN (ps : List (MxIx θ)) (ρ : State C Δ) (n : PrimTy.uint.Denote)
+theorem mxGetV_N (ps : List (MxIx θ)) (ρ : State C Δ) (n : PrimTy.uint.Denote)
     (ws : Fin ps.length → q.Denote) :
     (mxPush q ps.length (ρ.push (t := .val .uint) n) ws).getV (mxN θ (q := q) ps) = n := by
   rw [← State.getV_thin, thin_mxPush, mxThin_refl]
@@ -985,7 +997,7 @@ theorem mxBound_eval (ps : List (MxIx θ)) (a : ArrTy R (.prim q)) (ρ : State C
     ((mxBound (mxN θ (q := q) ps) a).denote (mxPush q ps.length (ρ.push (t := .val .uint) n) ws) :
       Option PrimTy.uint.Denote) = some (mxBndV n a) := by
   cases a with
-  | dyn => exact ⟨congrArg some (getV_mxN ps ρ n ws), congrArg some (getV_mxN ps ρ n ws)⟩
+  | dyn => exact ⟨congrArg some (mxGetV_N ps ρ n ws), congrArg some (mxGetV_N ps ρ n ws)⟩
   | fixed => exact ⟨rfl, rfl⟩
 
 theorem mxE_eval (hr : MxRel θ τ ρ) (ps : List (MxIx θ)) (n : PrimTy.uint.Denote)
@@ -1046,15 +1058,15 @@ theorem MxRel.alloc (hr : MxRel θ τ ρ) (a : ArrTy R (.prim q)) (ps : List (Mx
         | dyn =>
           simp only [mxLenEnts, List.mem_singleton] at hm
           subst hm
-          have hn := getV_mxN ps ρ n ws
-          have hL := lenNew_eval τ o
+          have hn := mxGetV_N ps ρ n ws
+          have hL := mxLenNew_eval τ o
           have hlen' : lenU (MObj.elems .dyn o).length
               (by rw [MObj.elems_dyn]; exact o.2) = n := by
             have : (MObj.elems .dyn o).length = n.1.toNat := hlen
             apply Subtype.ext
             show (((MObj.elems .dyn o).length : Nat) : Int) = n.1
             rw [this]
-            exact Int.toNat_of_nonneg (uint_nonneg n)
+            exact Int.toNat_of_nonneg (mxUint_nonneg n)
           refine ⟨?_, ?_⟩
           · show some _ = (MxOrig.len (Γ := .mem (.array (.prim q)) :: Γ) .here).tm.eval (τ.allocPush o)
             rw [hL, hlen']; exact congrArg some hn
@@ -1063,7 +1075,7 @@ theorem MxRel.alloc (hr : MxRel θ τ ρ) (a : ArrTy R (.prim q)) (ps : List (Mx
         | fixed => simp only [mxLenEnts, List.not_mem_nil] at hm
     · obtain ⟨j, -, rfl⟩ := List.mem_map.1 hm
       dsimp only
-      have hR := readNew_eval τ o a (ps.get j).e (ps.get j).he (Tm.ixOk_wk _ _ (ps.get j).he)
+      have hR := mxReadNew_eval τ o a (ps.get j).e (ps.get j).he (Tm.ixOk_wk _ _ (ps.get j).he)
       have hE := mxE_eval hr ps n ws j
       have hB := mxBound_eval ps a ρ n ws
       have hw : (mxPush q ps.length (ρ.push (t := .val .uint) n) ws).getV (mxAtom q ps.length j) =
@@ -1081,8 +1093,8 @@ theorem MxRel.alloc (hr : MxRel θ τ ρ) (a : ArrTy R (.prim q)) (ps : List (Mx
             symm
             apply List.getElem?_eq_none
             rw [hlen]
-            have h0 := uint_nonneg k
-            have h1 := uint_nonneg (mxBndV n a)
+            have h0 := mxUint_nonneg k
+            have h1 := mxUint_nonneg (mxBndV n a)
             omega
       refine ⟨?_, ?_⟩
       · rw [mxReadT_eval, hE.1, hB.1, hw]
@@ -1110,12 +1122,12 @@ theorem _root_.Solidity.RefTy.mxArr?_ok : (R : RefTy) → {x : (q : PrimTy) × A
   | .array (.ref _), _, h | .fixed (.ref _) _, _, h | .struct _, _, h | .mapping _ _, _, h => by
     simp only [RefTy.mxArr?, reduceCtorEq] at h
 
-theorem uintOfNat_toNat (k : PrimTy.uint.Denote) : uintOfNat k.1.toNat = k := by
+theorem mxUintOfNat_toNat (k : PrimTy.uint.Denote) : uintOfNat k.1.toNat = k := by
   have h := k.2
   simp only [PrimTy.inRange, decide_eq_true_eq] at h
   have hl : k.1.toNat < 2 ^ 256 := by omega
   rw [uintOfNat_eq_lenU hl]
-  exact lenU_toNat k hl
+  exact mxLenU_toNat k hl
 
 theorem mxBndV_lt {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (a : ArrTy R (.prim q)) :
     (mxBndV n a).1.toNat < 2 ^ 256 := by
@@ -1131,14 +1143,14 @@ def mxMk {H : HTy} {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (L : List q
   | @ArrTy.fixed _ N, hok, hL => (⟨L, by rw [hL]; show (uintOfNat N).1.toNat = N; rw [uintOfNat_val hok]; rfl⟩ :
       {l : List (MVal H (.prim q)) // l.length = N})
 
-theorem elems_mxMk {H : HTy} {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (L : List q.Denote)
+theorem mxElems_mk {H : HTy} {R : RefTy} {q : PrimTy} (n : PrimTy.uint.Denote) (L : List q.Denote)
     (a : ArrTy R (.prim q)) (hok : mxArrOk a) (hL : L.length = (mxBndV n a).1.toNat) :
     MObj.elems a (mxMk (H := H) n L a hok hL) = L := by
   cases a with
   | dyn => rw [MObj.elems_dyn]; rfl
   | fixed => rw [MObj.elems_fixed]; rfl
 
-theorem mem_finRange' {n : Nat} (j : Fin n) : j ∈ List.finRange n :=
+theorem mxMem_finRange {n : Nat} (j : Fin n) : j ∈ List.finRange n :=
   List.mem_iff_getElem.2 ⟨j.val, by simp, by simp⟩
 
 section Realize
@@ -1160,11 +1172,11 @@ theorem mxPick_spec (τ : State C Γ) (ps : List (MxIx θ)) (ws : Fin ps.length 
     (hc : MxConsistent τ ps ws) (j : Fin ps.length) (k : PrimTy.uint.Denote)
     (hk : (ps.get j).e.eval τ = some k) : mxPick τ ps ws k.1.toNat = ws j := by
   unfold mxPick
-  have hk0 := uint_nonneg k
+  have hk0 := mxUint_nonneg k
   have hex : ((List.finRange ps.length).find? (fun j => decide (((ps.get j).e.eval τ).map (·.1) =
       some ((k.1.toNat : Nat) : Int)))).isSome := by
     rw [List.find?_isSome]
-    refine ⟨j, mem_finRange' j, ?_⟩
+    refine ⟨j, mxMem_finRange j, ?_⟩
     simp only [hk, Option.map_some, Int.toNat_of_nonneg hk0, decide_true]
   obtain ⟨j₀, hj₀⟩ := Option.isSome_iff_exists.1 hex
   rw [hj₀]
@@ -1188,16 +1200,16 @@ def mxRealize (τ : State C Γ) {R : RefTy} (a : ArrTy R (.prim q)) (hok : mxArr
 theorem mxRealize_len (τ : State C Γ) {R : RefTy} (a : ArrTy R (.prim q)) (hok : mxArrOk a)
     (ps : List (MxIx θ)) (n : PrimTy.uint.Denote) (ws : Fin ps.length → q.Denote) :
     (MObj.elems a (mxRealize τ a hok ps n ws)).length = (mxBndV n a).1.toNat := by
-  rw [mxRealize, elems_mxMk, List.length_ofFn]
+  rw [mxRealize, mxElems_mk, List.length_ofFn]
 
 theorem mxRealize_ag (τ : State C Γ) {R : RefTy} (a : ArrTy R (.prim q)) (hok : mxArrOk a)
     (ps : List (MxIx θ)) (n : PrimTy.uint.Denote) (ws : Fin ps.length → q.Denote)
     (hc : MxConsistent τ ps ws) (j : Fin ps.length) (k : PrimTy.uint.Denote)
     (hk : (ps.get j).e.eval τ = some k) (hlt : k.1 < (mxBndV n a).1) :
     (MObj.elems a (mxRealize τ a hok ps n ws))[k.1.toNat]? = some (ws j) := by
-  rw [mxRealize, elems_mxMk, List.getElem?_ofFn]
-  have hk0 := uint_nonneg k
-  have hb := uint_nonneg (mxBndV n a)
+  rw [mxRealize, mxElems_mk, List.getElem?_ofFn]
+  have hk0 := mxUint_nonneg k
+  have hb := mxUint_nonneg (mxBndV n a)
   have hi : k.1.toNat < (mxBndV n a).1.toNat := by omega
   simp only [hi, dite_true]
   exact congrArg some (mxPick_spec τ ps ws hc j k hk)
@@ -1219,7 +1231,7 @@ theorem mxFill_ag (τ : State C Γ) {R : RefTy} (a : ArrTy R (.prim q)) (ps : Li
     (j : Fin ps.length) (k : PrimTy.uint.Denote) (hk : (ps.get j).e.eval τ = some k)
     (hlt : k.1 < (mxBndV n a).1) :
     (MObj.elems a o)[k.1.toNat]? = some (mxFill τ a ps o j) := by
-  have hk0 := uint_nonneg k
+  have hk0 := mxUint_nonneg k
   have hi : k.1.toNat < (MObj.elems a o).length := by rw [hlen]; omega
   simp only [mxFill, hk, List.getElem?_eq_getElem hi, Option.getD_some]
 
@@ -1274,11 +1286,11 @@ theorem holds_mxCons (hr : MxRel θ τ ρ) (ps : List (MxIx θ)) (n : PrimTy.uin
   · intro h j l hjl
     rcases Nat.lt_trichotomy j.val l.val with hlt | heq | hgt
     · refine (one j l).1 (h _ ?_) hjl
-      refine List.mem_flatMap.2 ⟨j, mem_finRange' j, List.mem_filterMap.2 ⟨l, mem_finRange' l, ?_⟩⟩
+      refine List.mem_flatMap.2 ⟨j, mxMem_finRange j, List.mem_filterMap.2 ⟨l, mxMem_finRange l, ?_⟩⟩
       simp only [hlt, if_true]
     · rw [Fin.ext heq]
     · refine ((one l j).1 (h _ ?_) hjl.symm).symm
-      refine List.mem_flatMap.2 ⟨l, mem_finRange' l, List.mem_filterMap.2 ⟨j, mem_finRange' j, ?_⟩⟩
+      refine List.mem_flatMap.2 ⟨l, mxMem_finRange l, List.mem_filterMap.2 ⟨j, mxMem_finRange j, ?_⟩⟩
       simp only [hgt, if_true]
   · intro hc f hf
     obtain ⟨j, -, hf⟩ := List.mem_flatMap.1 hf

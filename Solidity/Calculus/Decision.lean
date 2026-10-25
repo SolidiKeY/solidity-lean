@@ -3,6 +3,7 @@ import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.HashKinds
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.MemSwap
 
 /-!
 # The closer's decision, stated (M7)
@@ -111,7 +112,7 @@ inductive LeafVerdict (C : Contract) where
   /-- Neither: allowed only outside the fragment. -/
   | unknown
 
-/-- **The decision**: the automatic pipeline (`dependentReduction?`), its
+/-- **The pipelines**: the automatic pipeline (`dependentReduction?`), its
 arithmetic decided by the verified procedure (`AFml.decide_iff`), a `false`
 answer turned into a typed countermodel (`DependentReduction.verify`); on a
 leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
@@ -119,7 +120,7 @@ the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
 on a leaf both refuse, the pipeline with storage array reads
 (`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
 (`ledgerReduction?`, `LedgerReduction.verify`). -/
-def decideLeaf (φ : Fml C []) : LeafVerdict C :=
+def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
     match r.verify with
@@ -146,8 +147,8 @@ def decideLeaf (φ : Fml C []) : LeafVerdict C :=
         | none => .unknown
 
 /-- **Soundness.** -/
-theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
-  unfold decideLeaf at h
+theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.Valid φ := by
+  unfold decideLeafA at h
   split at h
   · split at h
     · rename_i hv _
@@ -171,9 +172,9 @@ theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Val
         · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
-theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA φ = .refuted σ) :
     ¬ holds σ φ := by
-  unfold decideLeaf at h
+  unfold decideLeafA at h
   split at h
   · split at h
     · cases h
@@ -200,21 +201,17 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
             exact cm.refutes
         · cases h
 
-theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
-    ¬ Fml.Valid φ :=
-  fun hv => decideLeaf_refutes h (hv σ)
-
-/-- **The fragment proved complete**: M4's, on the eliminated leaf, and the
+/-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
 quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
 reads (`Fml.ledgerCovered`, M7 step 3), and the one with storage array reads
 (`Fml.arrayCovered`, M7 step 6). -/
-def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
+def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
   φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered
 
-/-- **Completeness on `Fml.Covered`.** -/
-theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
-  simp only [Fml.Covered, Bool.or_eq_true, Bool.and_eq_true] at h
-  unfold decideLeaf
+/-- **Completeness on `Fml.CoveredA`.** -/
+theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLeafA φ ≠ .unknown := by
+  simp only [Fml.CoveredA, Bool.or_eq_true, Bool.and_eq_true] at h
+  unfold decideLeafA
   cases hd : dependentReduction? φ with
   | some r =>
     dsimp only
@@ -245,6 +242,107 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
         · rw [hq]
           dsimp only
           split <;> exact fun h => nomatch h
+
+
+/-! ### Fresh memory arrays (M7, plan step 6)
+
+A leaf the pipelines above refuse and that binds fresh arrays of
+primitives (`Fml.allocAll`) is read with its reads of them cut into atoms
+(`Fml.mxTop`, `Calculus/MemSwap.lean`), exactly at every state
+(`Fml.mxTop_holds`), and the cut leaf decided by `decideLeafA`. -/
+
+/-- The formula binds a fresh memory object. -/
+def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
+  | .allocAll .. => true
+  | .not φ => φ.hasAllocAll
+  | .and φ ψ | .imp φ ψ => φ.hasAllocAll || ψ.hasAllocAll
+  | .all _ _ φ => φ.hasAllocAll
+  | _ => false
+
+/-- The leaf's fresh arrays cut, the cut leaf decided. -/
+def decideMem (φ : Fml C []) : LeafVerdict C :=
+  if φ.hasAllocAll then
+    match φ.mxTop with
+    | some ψ => decideLeafA ψ
+    | none => .unknown
+  else .unknown
+
+theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid φ := by
+  unfold decideMem at h
+  split at h
+  · split at h
+    · rename_i ψ hψ
+      exact (Fml.mxTop_valid hψ).2 (decideLeafA_sound h)
+    · cases h
+  · cases h
+
+theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
+    ¬ holds σ φ := by
+  unfold decideMem at h
+  split at h
+  · split at h
+    · rename_i ψ hψ
+      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 hφ)
+    · cases h
+  · cases h
+
+/-- **The decision**: `decideLeafA`, then on a leaf it answers `unknown` on,
+the one with its fresh arrays cut (`decideMem`). -/
+def decideLeaf (φ : Fml C []) : LeafVerdict C :=
+  match decideLeafA φ with
+  | .unknown => decideMem φ
+  | v => v
+
+/-- **Soundness.** -/
+theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
+  unfold decideLeaf at h
+  split at h
+  · exact decideMem_sound h
+  · exact decideLeafA_sound h
+
+/-- **Refutations are certified**: the state returned refutes the leaf. -/
+theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+    ¬ holds σ φ := by
+  unfold decideLeaf at h
+  split at h
+  · exact decideMem_refutes h
+  · exact decideLeafA_refutes h
+
+theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+    ¬ Fml.Valid φ :=
+  fun hv => decideLeaf_refutes h (hv σ)
+
+/-- **The fragment with fresh arrays**: the leaf binds one, its cut is
+defined and in `Fml.CoveredA`. -/
+def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
+  φ.hasAllocAll && match φ.mxTop with
+    | some ψ => ψ.CoveredA
+    | none => false
+
+/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with fresh
+arrays whose cut is in it (`Fml.memCovered`, M7 step 6). -/
+def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool := φ.CoveredA || φ.memCovered
+
+theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
+  unfold Fml.memCovered at h
+  simp only [Bool.and_eq_true] at h
+  obtain ⟨ha, h⟩ := h
+  unfold decideMem
+  rw [if_pos ha]
+  split at h
+  · exact decideLeafA_complete h
+  · cases h
+
+/-- **Completeness on `Fml.Covered`.** -/
+theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
+  unfold decideLeaf
+  split
+  · rename_i hv
+    simp only [Fml.Covered, Bool.or_eq_true] at h
+    rcases h with h | h
+    · exact absurd hv (decideLeafA_complete h)
+    · exact decideMem_complete h
+  · assumption
 
 /-- On the fragment the verdict is exact. -/
 theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :
