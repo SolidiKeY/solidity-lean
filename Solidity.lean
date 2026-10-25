@@ -502,6 +502,7 @@ import Solidity.Examples.Tactics.EvaluationOrder
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.ArrayShapeCopy
 import Solidity.Examples.Tactics.Inheritance
+import Solidity.Examples.Tactics.DeclarationMetadata
 import Solidity.Examples.Tactics.Lifetime
 
 import Solidity.Examples.Tactics.Rigid

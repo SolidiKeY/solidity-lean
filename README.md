@@ -9,6 +9,27 @@ compiler to an EVM-style machine (`docs/compiler-verification.md`), and
 worked examples. The design follows mini-solkey, a small readable copy of
 the calculus; `docs/kernel-port.md` says what came from where.
 
+## Examples online
+
+**<https://solidikey.github.io/solidity-lean/>** — the worked examples as
+Lean shows them: Solidity contracts and their proofs, with the goal and the
+messages at every line, recorded from Lean's language server when the site
+was built. Pick a project (the Solidity calculus, or Velvet) and an example
+at the top; a link names the file and line. `docs/site.md` says how the site
+is built and how to add an example.
+
+The Velvet examples state Solidity contracts as Velvet methods, proved by
+`loom_solve`:
+
+- [Solidity patterns](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet.lean) — a counting loop, the largest
+  balance, ERC20's `transfer`
+- [A bank](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Bank.lean) — `deposit` without overflow and
+  `withdraw`, other accounts untouched
+- [An ERC20 token](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Token.lean) — `mint` with
+  `totalSupply`, `transferFrom` with allowances
+- [Loops over storage arrays](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Loops.lean) — the
+  total balance, a holder's index, the winning proposal
+
 ## Build
 
 ```sh
@@ -40,6 +61,17 @@ MCP configuration), then check `/mcp` for
 `lean_lsp`. `.mcp.json` provides the equivalent configuration for clients that
 use that format. The launcher creates `.venv` on first use and installs the
 version pinned in `scripts/lean-mcp-requirements.txt`.
+
+## Optional bridge: Mathlib, Loom and Velvet
+
+`Bridge/` is a separate Lake package that connects the core to Mathlib,
+CSLib, an external EVM, [Loom](https://github.com/verse-lab/loom)'s VC
+generator and [Velvet](https://github.com/verse-lab/velvet), the Dafny-style
+verifier built on Loom (`docs/bridge.md`). The core does not depend on it.
+
+```sh
+cd Bridge && lake exe cache get && lake build   # or ../scripts/check-bridge.sh
+```
 
 See `docs/module-map.md` for the module map, `docs/README.md` for the rest of
 the documents, and `AGENTS.md` for the working conventions.

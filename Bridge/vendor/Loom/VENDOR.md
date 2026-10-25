@@ -5,8 +5,14 @@ commit `78928abc9054b31d0bea85985496490baae95244` (2026-02-21).
 Lean `leanprover/lean4:v4.24.0`, Mathlib `v4.24.0`
 (`f897ebcf72cd16f89ab4577d0c826cd14afaafc7`), exactly as Bridge.
 
-The fifteen Lean files are the complete transitive Loom import closure of
-`Loom.MonadAlgebras.WP.Tactic`. There is no toolchain backport. Paths and
+Fifteen of the Lean files are the complete transitive Loom import closure of
+`Loom.MonadAlgebras.WP.Tactic`, which the Solidity adapter uses. The other
+seven complete the closure of Velvet (`../CaseStudies/VENDOR.md`):
+`Meta`, `SMT`, `TacticAsync`, `MonadAlgebras/NonDetT/{Basic,Extract,Findable}`
+and `MonadAlgebras/WP/Options`. Velvet comes from the earlier commit
+`2c7dbe71`; between it and the selected commit, the Loom sources differ
+only by one added elaborator in `WP/Gen.lean` (`with_custom_name`), so
+Velvet reads the same Loom. There is no toolchain backport. Paths and
 declaration names are retained. `SHA256SUMS` pins all files and the license;
 check it from `Bridge/` with `sha256sum --check vendor/Loom/SHA256SUMS`.
 
@@ -24,14 +30,18 @@ agree. No type, body, or proof changes; all other source bytes are upstream.
 
 For package configuration, Bridge declares the `Loom` library over
 these vendored files. The upstream Lake file is not used, so its solver
-download target and lean-auto dependency are omitted. No imported source
-uses lean-auto, Velvet, SMT, or Loom's separate tactic solver. The small
-Plausible generator instance remains because `WP.Basic` imports it;
-Plausible is already a dependency of Mathlib.
+download target (z3 and cvc5 binaries) is omitted. The adapter's closure
+uses neither lean-auto nor SMT. `SMT.lean` imports lean-auto, so Bridge
+requires it at the revision upstream's manifest records,
+`36d85bf6372f1a35fb5487325d1ef965b33c6296` (upstream's Lake file requests
+`f62266d7cef8d70a7354f13ba925114642c2445b`; the manifest is what upstream
+builds). Without the solver binaries, `loom_solve` works with its default
+solver, `grind`; `set_option loom.solver "cvc5"` (or `"z3"`) needs that
+binary on the path. The small Plausible generator instance remains because
+`WP.Basic` imports it; Plausible is already a dependency of Mathlib.
 
-Upstream's Lake file requests lean-auto `f62266d7cef8d70a7354f13ba925114642c2445b`,
-whereas its manifest records `36d85bf6372f1a35fb5487325d1ef965b33c6296`.
-Neither is needed or selected by this source closure.
+`TacticAsync.lean`'s `loom_solve_async` admits the goals it solves (upstream
+says so in its warning); nothing here uses it.
 
 The older tags `loom-paper` and `v4.23.0` use Lean/Mathlib 4.20.0 and 4.23.0.
 Commit `210c05668fb2f16b649d83e8846c8168b211d7ce` upgraded to 4.24.0;

@@ -1,13 +1,15 @@
 name = "solidity-bridge"
 version = "0.1.0"
-defaultTargets = ["SolidityBridge"]
+defaultTargets = ["SolidityBridge", "Velvet", "VelvetExamples", "SolidityVelvet"]
 # As the core's: its outputs are hard links into Lake's artifact cache, read
 # only, and only a workspace with the cache on replaces them when it rebuilds.
 enableArtifactCache = true
 
 # The core (`..`) has no dependencies and keeps none (`../AGENTS.md`): this
 # package is where Mathlib and CSLib meet it. Both are pinned to the core's
-# toolchain, v4.24.0; CSLib e1fea78 is its last commit on v4.24.0.
+# toolchain, v4.24.0; CSLib e1fea78 is its last commit on v4.24.0. lean-auto
+# is the revision Loom's manifest records, needed only by `Loom.SMT`, which
+# Velvet's `loom_solve` imports (`vendor/CaseStudies/VENDOR.md`).
 
 [[require]]
 name = "solidity-lean"
@@ -22,6 +24,11 @@ rev = "v4.24.0"
 name = "cslib"
 git = "https://github.com/leanprover/cslib"
 rev = "e1fea784d55eae30275c205291f12a1b4868eed3"
+
+[[require]]
+name = "auto"
+git = "https://github.com/leanprover-community/lean-auto"
+rev = "36d85bf6372f1a35fb5487325d1ef965b33c6296"
 
 [[lean_lib]]
 name = "SolidityBridge"
@@ -50,10 +57,41 @@ name = "Conform"
 srcDir = "vendor"
 globs = ["Conform.Wheels"]
 
-# Loom's Lean 4.24 WP/VC-generator closure, without solver targets.
-# Provenance and checksums: vendor/Loom/VENDOR.md.
+# Loom's Lean 4.24 WP/VC-generator closure, and the modules Velvet adds to
+# it, without solver targets. Provenance and checksums: vendor/Loom/VENDOR.md.
 [[lean_lib]]
 name = "Loom"
 srcDir = "vendor"
 globs = ["Loom.+"]
 weakLeanArgs = ["--tstack=131072"]
+
+# Velvet, the Dafny-style verifier built on Loom, at the last Loom commit that
+# carried it (2c7dbe7, Lean 4.24): the library and four of its examples, under
+# their upstream module names. Provenance and checksums:
+# vendor/CaseStudies/VENDOR.md.
+[[lean_lib]]
+name = "Velvet"
+srcDir = "vendor"
+globs = [
+  "CaseStudies.Extension",
+  "CaseStudies.Macro",
+  "CaseStudies.Tactic",
+  "CaseStudies.TestingUtil",
+  "CaseStudies.Theory",
+  "CaseStudies.Velvet.Std",
+  "CaseStudies.Velvet.Syntax",
+  "CaseStudies.Velvet.VelvetTheory",
+]
+
+[[lean_lib]]
+name = "VelvetExamples"
+srcDir = "vendor"
+globs = ["CaseStudies.Velvet.VelvetExamples.+"]
+
+# Velvet programs for Solidity contracts: the patterns the core verifies, a
+# bank, a token and loops over storage arrays (`SolidityVelvet/`); they import
+# Velvet only, so its keywords (`method`, `ensures`, `invariant`) stay out of
+# `SolidityBridge` (`../docs/bridge.md`, "Velvet").
+[[lean_lib]]
+name = "SolidityVelvet"
+globs = ["SolidityVelvet", "SolidityVelvet.+"]

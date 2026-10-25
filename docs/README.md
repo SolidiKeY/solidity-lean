@@ -17,7 +17,8 @@ the others link to it.
 | [assurance.md](assurance.md) | Trust source inventory, headline axiom gate, non-vacuity witnesses and the remaining assurance/automation work. |
 | [correctness.md](correctness.md) | Direct `Spec` correctness, strict equations, proved calculus bridges, callbacks and October audit repairs. |
 | [lifetime.md](lifetime.md) | Constructor-rooted transaction traces, whole-contract safety, possible reachability, invariant induction, payment/rollback and observation limits. |
-| [bridge.md](bridge.md) | Optional Mathlib/CSLib and external EVM word adapters, correctness theorems, build command and exact scope. |
+| [bridge.md](bridge.md) | Optional Mathlib/CSLib and external EVM word adapters, Loom and Velvet, correctness theorems, build command and exact scope. |
+| [site.md](site.md) | The examples site on GitHub Pages: how it is recorded from Lean's language server, built, deployed, and how to add an example. |
 | [key-equality.md](key-equality.md) | One equation, KeY's `=`: no definedness test, `wt(s)` a predicate, conditions read by the program, how the closers read an equation. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |

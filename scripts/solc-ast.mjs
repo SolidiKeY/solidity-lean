@@ -158,9 +158,36 @@ const DECLS = new Set([
   "EnumDefinition", "EnumValue", "UserDefinedValueTypeDefinition",
   "ModifierDefinition",
 ]);
+// Selectors are declaration metadata, needed only when the source observes
+// them. Retain precisely those identities and fields, preserving older
+// fixtures that never use metadata. Interface IDs use the interface's own
+// declarations, not its inherited interface functions.
+const selectorDeclarations = new Set();
+const declarations = new Map();
+function walkAst(node, visit) {
+  if (Array.isArray(node)) { for (const child of node) walkAst(child, visit); }
+  else if (node && typeof node === 'object') {
+    visit(node);
+    for (const child of Object.values(node)) walkAst(child, visit);
+  }
+}
+walkAst(ast, node => { if (node.id !== undefined) declarations.set(node.id, node); });
+walkAst(ast, node => {
+  if (node.nodeType !== 'MemberAccess') return;
+  if (node.memberName === 'selector' && node.expression?.referencedDeclaration !== undefined)
+    selectorDeclarations.add(node.expression.referencedDeclaration);
+  if (node.memberName === 'interfaceId') {
+    const declaration = declarations.get(node.expression?.arguments?.[0]?.referencedDeclaration);
+    for (const member of declaration?.nodes ?? [])
+      if (member.nodeType === 'FunctionDefinition' && member.kind === 'function' &&
+          ['public', 'external'].includes(member.visibility))
+        selectorDeclarations.add(member.id);
+  }
+});
+const isDeclaration = n => DECLS.has(n.nodeType) || selectorDeclarations.has(n.id);
 // The nodes `src` and `line` are kept on.
 const located = (n, parentKey) =>
-  DECLS.has(n.nodeType) || parentKey === "statements" || n.nodeType === "TryCatchClause";
+  isDeclaration(n) || parentKey === "statements" || n.nodeType === "TryCatchClause";
 
 // The `@custom:key` clauses of the `///` lines directly above the loop
 // starting at byte `b` (solkey's `SolJSONParser.loopSpec`, `KeyNatspec.of`).
@@ -208,9 +235,10 @@ function trim(n, parentKey) {
     // when they are UTF-8 at all); a number's is noise.
     const hexBytes = k === "hexValue" && n.nodeType === "Literal" &&
       (n.kind === "hexString" || typeof n.value !== "string");
-    if (NOISE.has(k) && !hexBytes && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
+    const selector = k === 'functionSelector' && selectorDeclarations.has(n.id);
+    if (NOISE.has(k) && !hexBytes && !selector && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
-    if (k === "id" && !DECLS.has(n.nodeType)) continue;
+    if (k === "id" && !isDeclaration(n)) continue;
     if (k === "src") {
       if (located(n, parentKey)) {
         out.src = v;
@@ -252,7 +280,7 @@ const fixture = {
 // Indented down to the statements, each statement on one line: small, and a
 // diff names the statements that changed.
 const isStatement = (n) => n && typeof n === "object" && !Array.isArray(n) &&
-  n.line !== undefined && !DECLS.has(n.nodeType);
+  n.line !== undefined && !isDeclaration(n);
 function serialize(v, indent) {
   if (isStatement(v) || v === null || typeof v !== "object") return JSON.stringify(v);
   const pad = " ".repeat(indent + 1);
