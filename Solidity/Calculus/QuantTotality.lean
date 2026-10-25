@@ -305,7 +305,7 @@ theorem quantReduction?_isSome (φ : Fml C []) (h : φ.quantCovered = true) :
     have hW := layoutOf_W M (abstracted u.body).2
     obtain ⟨D, hD⟩ := Option.isSome_iff_exists.mp (QDefs.compile_isSome
       (layoutOf M (abstracted u.body).2).pos (layoutOf M (abstracted u.body).2).P
-      ((layoutOf M _).pos_inj hW (layoutOf_extras M _)) (abstracted u.body).2
+      ((layoutOf M _).pos_inj hW) (abstracted u.body).2
       (layoutOf M _).top ((layoutOf M _).pos_lt hW) (fun e he =>
         ⟨hq e (by rw [← hub]; exact he),
           fun q hq' => layoutOf_P M _ q (List.mem_flatMap.2 ⟨e, he, List.mem_cons_of_mem _ (List.mem_append_left _ hq')⟩),

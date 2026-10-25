@@ -123,7 +123,7 @@ theorem pos_lt (L : QLayout) (hW : L.es.length + L.ps.length ≤ L.W) (q : Param
       simp only [h1, h2, ↓reduceIte]; omega
     · simp only [h1, h2, ↓reduceIte]; omega
 
-theorem pos_inj (L : QLayout) (hW : L.es.length + L.ps.length ≤ L.W) (hd : ∀ q ∈ L.extras, q ∉ L.ps) :
+theorem pos_inj (L : QLayout) (hW : L.es.length + L.ps.length ≤ L.W) :
     ∀ q ∈ L.P, ∀ q' ∈ L.P, L.pos q = L.pos q' → q = q' := by
   intro q hq q' hq' h
   unfold pos at h
@@ -564,7 +564,7 @@ def quantReduction? (φ : Fml C []) : Option (QuantReduction φ) := do
     else
       let M ← flattenedArithmetic? 2048 (abstracted sentence.body).1
       let L := layoutOf M (abstracted sentence.body).2
-      let D ← QDefs.compile L.pos L.P (L.pos_inj (layoutOf_W M _) (layoutOf_extras M _))
+      let D ← QDefs.compile L.pos L.P (L.pos_inj (layoutOf_W M _))
         (abstracted sentence.body).2 L.top (L.pos_lt (layoutOf_W M _))
       return ⟨d, r, sentence, hc, M, D⟩
   else none

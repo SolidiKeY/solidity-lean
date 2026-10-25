@@ -639,7 +639,7 @@ end
 
 theorem depthL_le : ∀ {ss : List QFml} {d : Nat}, (∀ s ∈ ss, s.depth ≤ d) → depthL ss ≤ d
   | [], _, _ => Nat.zero_le _
-  | s :: ss, d, h => Nat.max_le.2 ⟨h s List.mem_cons_self, depthL_le fun t ht => h t (List.mem_cons_of_mem _ ht)⟩
+  | s :: _, _, h => Nat.max_le.2 ⟨h s List.mem_cons_self, depthL_le fun t ht => h t (List.mem_cons_of_mem _ ht)⟩
 
 mutual
 /-- The formulas a formula leads to nest no deeper. -/
@@ -1161,7 +1161,6 @@ theorem sumOn_halve_lt : ∀ (L : List Nat) (x : Nat → Nat), 0 < sumOn L x →
     simp only [sumOn, halve] at *
     by_cases h0 : x a = 0
     · have := sumOn_halve_lt L x (by omega)
-      simp only [halve] at this
       omega
     · omega
 

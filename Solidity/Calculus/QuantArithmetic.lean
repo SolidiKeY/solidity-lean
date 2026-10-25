@@ -389,7 +389,7 @@ def LFml.abstractQ : LFml C → Nat → LFml C × List (Nat × LFml C)
 theorem LFml.abstractQ_holds (g : State C []) (ν : AEnv) : ∀ (φ : LFml C) (n : Nat),
     (∀ e ∈ (φ.abstractQ n).2, (ν.get .bool e.1 = true ↔ e.2.holds g ν)) →
     ((φ.abstractQ n).1.holds g ν ↔ φ.holds g ν)
-  | .all k p φ, n, h => h _ List.mem_cons_self
+  | .all .., _, h => h _ List.mem_cons_self
   | .not φ, n, h => not_congr (LFml.abstractQ_holds g ν φ n h)
   | .and φ ψ, n, h => and_congr (LFml.abstractQ_holds g ν φ n fun e he => h e (List.mem_append_left _ he))
       (LFml.abstractQ_holds g ν ψ _ fun e he => h e (List.mem_append_right _ he))
