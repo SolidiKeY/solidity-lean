@@ -15,8 +15,10 @@ Presburger quantifier over value locals:
    conditionals;
 2. each quantified subformula `Qⱼ` outside binders replaced by a fresh
    Boolean atom `bⱼ` (`LFml.abstractQ`); the rest is the quantifier-free
-   leaf `dependentReduction?` decides, flattened and compiled as there
-   (`FlattenedArithmetic`);
+   leaf `dependentReduction?` decides, cut (`LFml.cutAll`), flattened and
+   compiled as there (`FlattenedArithmetic`); the cut keeps every atom
+   (`LFml.atomBound_le_cutAll`), so the flattening's fresh atoms leave
+   the `bⱼ` and the parameters of the `Qⱼ` alone;
 3. each `Qⱼ` compiled to `QFml` (`QArith.compile`), at the positions of
    the main layout, with positions of their own for its other variables;
 4. one quantified sentence: the domain, `bⱼ ↔ Qⱼ` for every `j`, then the
@@ -200,6 +202,123 @@ def compile (pos : Parameter → Nat) (P : List Parameter)
         simp only [List.mem_cons, forall_eq_or_imp]⟩
 
 end QDefs
+
+/-! ## The cut keeps every atom -/
+
+theorem cut1_atomBound {a s : Srt} (o : Op1 C a s) (prev : List (LFml C)) (A : CutTm C a) :
+    A.term.atomBound ≤ (cut1 o prev A).term.atomBound := by
+  cases o with
+  | @unop op p h => cases op <;> cases p <;> first | exact Nat.le_refl _ | exact Nat.le_max_left _ _
+  | _ => exact Nat.le_refl _
+
+theorem maskCut_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (k : Nat) (ds : List (LFml C))
+    (m : Nat) : a.atomBound ≤ (maskCut prev a k ds m).term.atomBound := by
+  unfold maskCut
+  split
+  · exact Nat.le_max_left _ _
+  · exact Nat.le_refl _
+
+theorem LTm.maskOf?_atomBound {t : LTm C (.val .uint)} {k : Nat} (h : t.maskOf? = some k) :
+    t.atomBound = 0 := by
+  unfold LTm.maskOf? at h
+  split at h
+  · rfl
+  · cases h
+
+/-- The cut node `X` keeps the atoms of its cut operands `A`, `B`. -/
+def CutKeeps {a b s : Srt} (A : CutTm C a) (B : CutTm C b) (X : CutTm C s) : Prop :=
+  max A.term.atomBound B.term.atomBound ≤ X.term.atomBound
+
+theorem cut2_atomBound {a b s : Srt} (o : Op2 C a b s) (prev : List (LFml C)) (A : CutTm C a)
+    (B : CutTm C b) : CutKeeps A B (cut2 o prev A B) := by
+  cases o with
+  | @binop op p h =>
+    cases op <;> cases p <;> first | exact Nat.le_refl _ | skip
+    case band.uint =>
+      dsimp only [cut2, cutBand]
+      split
+      · rename_i k hk
+        have h0 := LTm.maskOf?_atomBound hk
+        have h1 := maskCut_atomBound prev A.term k (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]
+        omega
+      · split
+        · rename_i k hk
+          have h0 := LTm.maskOf?_atomBound hk
+          have h1 := maskCut_atomBound prev B.term k (A.defs ++ B.defs) B.next
+          simp only [CutKeeps, h0]
+          omega
+        · exact Nat.le_refl _
+    all_goals dsimp only [cut2, cutShl]
+    all_goals (repeat' split)
+    all_goals first | exact Nat.le_refl _ |
+      (simp only [CutKeeps, CutTm.atom, CutTm.rem, CutTm.shl, LTm.remOf, LTm.atomBound, *]; omega)
+  | _ => exact Nat.le_refl _
+
+/-- **The cut keeps every atom of a term.** -/
+theorem LTm.atomBound_le_cut : ∀ {s : Srt} (t : LTm C s) (prev : List (LFml C)) (n : Nat),
+    t.atomBound ≤ (t.cut prev n).term.atomBound
+  | _, .var _, _, _ | _, .app0 _, _, _ | _, .err, _, _ => Nat.le_refl _
+  | _, .app1 o a, prev, n => Nat.le_trans (LTm.atomBound_le_cut a prev n) (cut1_atomBound o prev _)
+  | _, .app2 o a b, prev, n => by
+    have h1 := LTm.atomBound_le_cut a prev n
+    have h2 := LTm.atomBound_le_cut b (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    have h3 : CutKeeps _ _ _ :=
+      cut2_atomBound o prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)
+    unfold CutKeeps at h3
+    show max a.atomBound b.atomBound ≤
+      (cut2 o prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)).term.atomBound
+    omega
+  | _, .app3 o a b c, prev, n => by
+    have h1 := LTm.atomBound_le_cut a prev n
+    have h2 := LTm.atomBound_le_cut b (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    have h3 := LTm.atomBound_le_cut c (prev ++ (a.cut prev n).defs ++
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next
+    simp only [LTm.cut, LTm.atomBound]
+    omega
+  | _, .index _ a b, prev, n | _, .seq a b, prev, n | _, .orElse a b, prev, n => by
+    have h1 := LTm.atomBound_le_cut a prev n
+    have h2 := LTm.atomBound_le_cut b (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    simp only [LTm.cut, LTm.atomBound]
+    omega
+  | _, .obsW a, prev, n | _, .obsL a, prev, n | _, .obsH a, prev, n => LTm.atomBound_le_cut a prev n
+  | _, .kite a b t e, prev, n => by
+    have h1 := LTm.atomBound_le_cut a prev n
+    have h2 := LTm.atomBound_le_cut b (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    have h3 := LTm.atomBound_le_cut t (prev ++ (a.cut prev n).defs ++
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next
+    have h4 := LTm.atomBound_le_cut e (prev ++ (a.cut prev n).defs ++
+      (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs ++
+      (t.cut (prev ++ (a.cut prev n).defs ++ (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
+        (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next).defs)
+      (t.cut (prev ++ (a.cut prev n).defs ++ (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
+        (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next).next
+    simp only [LTm.cut, LTm.atomBound]
+    omega
+
+/-- **The cut keeps every atom of a formula.** -/
+theorem LFml.atomBound_le_cut : ∀ (φ : LFml C) (prev : List (LFml C)) (n : Nat),
+    φ.atomBound ≤ (φ.cut prev n).formula.atomBound
+  | .tt, _, _ | .all _ _ _, _, _ => Nat.le_refl _
+  | .eq a b, prev, n => by
+    have h1 := LTm.atomBound_le_cut a prev n
+    have h2 := LTm.atomBound_le_cut b (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    simp only [LFml.cut, LFml.atomBound]
+    omega
+  | .not φ, prev, n => LFml.atomBound_le_cut φ prev n
+  | .and φ ψ, prev, n | .imp φ ψ, prev, n => by
+    have h1 := LFml.atomBound_le_cut φ prev n
+    have h2 := LFml.atomBound_le_cut ψ (prev ++ (φ.cut prev n).defs) (φ.cut prev n).next
+    simp only [LFml.cut, LFml.atomBound]
+    omega
+
+theorem LFml.atomBound_le_cutAll (φ : LFml C) : φ.atomBound ≤ φ.cutAll.atomBound := by
+  unfold LFml.cutAll
+  split
+  · exact LFml.atomBound_le_cut φ [] _
+  · exact Nat.le_trans (LFml.atomBound_le_cut φ [] _) (Nat.le_max_right _ _)
 
 /-! ## The reduction -/
 
@@ -405,12 +524,20 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
       (LFml.liftCond_holds g _ _ ν')
   have hhat : (abstracted r.sentence.body).1.holds g ν1 ↔ L0.holds g ν1 :=
     LFml.abstractQ_holds g ν1 L0 n fun e he => (hkey e he).trans (hQ1 e he).symm
+  -- the cut's fresh atoms, defined past every atom of the abstracted body
+  let B := (abstracted r.sentence.body).1
+  have hF := LFml.cut_good_top B
+  obtain ⟨μ, hμ, hd⟩ := hF.defs.extend g ν1
+  have hcut : B.cutAll.holds g μ → B.holds g ν1 := fun h =>
+    (LFml.holds_agree_below g B hμ).mpr
+      ((hF.holds g μ (fun _ h => nomatch h) hd).mp ((LFml.cutAll_holds_iff B g μ).mp h hd))
   let fl := r.main.flattening
-  let ν2 := fl.layout.fill g ν1
-  have hfill : fl.flat.formula.holds g ν2 ↔ (abstracted r.sentence.body).1.holds g ν1 := fl.fill_iff g ν1
+  let ν2 := fl.layout.fill g μ
+  have hfill : fl.flat.formula.holds g ν2 ↔ B.cutAll.holds g μ := fl.fill_iff g μ
   have hcons : (ReadOccurrence.constraints fl.flat.reads).holds g ν2 :=
-    (fl.layout.constraints_iff g ν2).2 (fl.layout.entries_consistent g ν2 (fl.layout.fill_interpreted g ν1))
-  have hagree2 : ν1.AgreesBelow (abstracted r.sentence.body).1.atomBound ν2 := fl.layout.fill_agrees g ν1
+    (fl.layout.constraints_iff g ν2).2 (fl.layout.entries_consistent g ν2 (fl.layout.fill_interpreted g μ))
+  have hagree2 : ν1.AgreesBelow B.atomBound ν2 :=
+    hμ.trans ((fl.layout.fill_agrees g μ).mono (LFml.atomBound_le_cutAll B))
   have hQ2 : ∀ e ∈ r.Qs, (e.2.holds g ν2 ↔ e.2.holds g ν1) := fun e he =>
     LFml.holds_agree g e.2 fun q hq => (hagree2 q.prim q.index (Nat.lt_of_lt_of_le
       (Nat.lt_of_lt_of_le (hQparams e he q hq) (hkge e he))
@@ -463,7 +590,7 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
   have hA' : r.A.holds obs := (AFml.holds_agree _ _ _ fun i hi =>
     hlow i (Nat.lt_of_lt_of_le hi r.A.width)).1 hA
   have hflat := (r.main.encoding.correct g ν2).1 hA' hcons
-  exact hL0.1 (hhat.1 (hfill.1 hflat))
+  exact hL0.1 (hhat.1 (hcut (hfill.1 hflat)))
 
 /-- **A valid sentence makes the leaf valid.** -/
 theorem valid_of_sentence (h : r.sentenceF.Valid) : Fml.Valid φ := fun g =>
@@ -538,7 +665,7 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : {σ : State
     exact hdefs e he
   let L0 := r.sentence.body.liftCond condLiftFuel
   have hL0 : ¬ L0.holds st.1 ν := fun h =>
-    st.2 ((LFml.abstractQ_holds st.1 ν L0 L0.atomBound hkey).2 h)
+    st.2 (LFml.holds_cutAll _ st.1 ν ((LFml.abstractQ_holds st.1 ν L0 L0.atomBound hkey).2 h))
   have hB : ¬ r.sentence.body.holds st.1 ν := fun h => hL0 ((LFml.liftCond_holds st.1 _ _ ν).2 h)
   have hinst := r.sentence.instantiate st.1 AEnv.dflt ν ((LFml.prenex_holds _ _ _).mpr
     ((LFml.condSimp_holds _ _ _).mpr ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hφ))))

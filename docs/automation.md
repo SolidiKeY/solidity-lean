@@ -1191,13 +1191,20 @@ features, each with its completeness proved through every stage
      reachability with the other bits `0`.  A bound is an atom
      `x < bound p` (`2^256` at a word) whose derivatives halve it: no
      value is enumerated.
+   The abstracted body goes through M4's cut (`LFml.cutAll`, feature 5)
+   like any leaf, so its main arithmetic may hold the cut operators.
    Validity of the sentence is validity of the leaf (`bⱼ` set to `Qⱼ`'s
-   truth); a false assignment is realized as in M4, the flattening's
-   countermodel keeping each `bⱼ` equal to `Qⱼ` there, since `Qⱼ` reads no
-   storage.  `Fml.quantCovered` (`Calculus/QuantTotality.lean`) is the
+   truth, the cut's fresh atoms by `Defs.Good.extend`); a false assignment
+   is realized as in M4, the flattening's countermodel keeping each `bⱼ`
+   equal to `Qⱼ` there, since `Qⱼ` reads no storage, and refuting the
+   uncut body by `LFml.holds_cutAll`.  The cut keeps every atom of the
+   body (`LFml.atomBound_le_cutAll`), so the flattening's read atoms, past
+   the cut's bound, leave the `bⱼ` and the `Qⱼ`'s parameters alone.
+   `Fml.quantCovered` (`Calculus/QuantTotality.lean`) is the
    fragment, on the eliminated leaf: a prefix binding the body's free
    parameters, the lift within budget, the abstracted body in
-   `LFml.Src false` within M4's bounds, each `Qⱼ` in `LFml.qfrag`
+   `LFml.Src false` (the cut operators allowed), its cut within M4's
+   bounds, each `Qⱼ` in `LFml.qfrag`
    (connectives, `∀`, equations of the checked compiler's `LTm.Num`/
    `LTm.BoolV` terms over value locals and literals, recognized with their
    evidence by `LTm.num?`, `LTm.bool?`).  It asks no quantifier to be

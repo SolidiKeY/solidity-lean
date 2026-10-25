@@ -8,7 +8,7 @@ import Solidity.Calculus.AutoComplete
 the eliminated leaf (`leafOf?`) has a universal prefix binding its free
 parameters; its lifted body, quantified subformulas abstracted, is in the
 quantifier-free fragment of `Fml.Covered` (`LFml.Src false`, the size
-bounds); and each abstracted subformula is a Presburger formula
+bounds on its cut, `LFml.cutAll`); and each abstracted subformula is a Presburger formula
 (`LFml.qfrag`): `¬`, `∧`, `→`, `∀` over equations of the checked
 compiler's scalar or Boolean terms over value locals and literals
 (`LTm.Num`, `LTm.BoolV`: `+`, `-`, products by a literal, comparisons,
@@ -262,14 +262,14 @@ theorem QDefs.compile_isSome (pos : Parameter → Nat) (P : List Parameter)
 (shorter than 1024) binding the body's free parameters; the body lifted
 within `liftBudget` (checked first: an unbounded lift is exponential), its
 quantified subformulas abstracted, in
-`LFml.Src false` within the size bounds; each abstracted subformula
+`LFml.Src false`, its cut within the size bounds; each abstracted subformula
 Presburger (`LFml.qfrag`). -/
 def LFml.quantCovered (ψ : LFml C) : Bool :=
   decide (ψ.allDepth < 1024) && ψ.stripAll.2.freeParams.all (fun q => decide (q ∈ ψ.stripAll.1)) &&
     (ψ.stripAll.2.liftCondB condLiftFuel liftBudget).isSome &&
     ((abstracted ψ.stripAll.2).1.src? false).isSome &&
-    decide ((abstracted ψ.stripAll.2).1.nodes ≤ 511) &&
-    decide ((abstracted ψ.stripAll.2).1.words * (abstracted ψ.stripAll.2).1.words ≤ 2048) &&
+    decide ((abstracted ψ.stripAll.2).1.cutAll.nodes ≤ 511) &&
+    decide ((abstracted ψ.stripAll.2).1.cutAll.words * (abstracted ψ.stripAll.2).1.cutAll.words ≤ 2048) &&
     (abstracted ψ.stripAll.2).2.all (·.2.qfrag)
 
 /-- **The fragment of the quantified decision**, on the eliminated leaf. -/
