@@ -434,11 +434,12 @@ terminating with a proof or a counterexample; CI fails on anything else.
   `c % x` with a symbolic divisor belong to the division class; `{havoc}`,
   `{anon}`, `allocAll`, `grow` and storage-typed `bind` in a negative
   position over formulas that read storage fall under (d).
-* **Hashes (2026-10-25, e3, being refined):** the user chose to assume
-  collision-freeness.  A global assumption would be false (keccak maps
-  unbounded byte strings to 256 bits) and the theorem vacuous; the proposal
-  is a premise per goal on its own hash terms, with *unknown* for verdicts
-  that depend on an `ecrecover` value (an `opaque` function) or a preimage.
+* **Decided (2026-10-25, option e3′):** hashes are collision-free on each
+  goal's own hash terms, a premise of that goal (its distinct hash inputs
+  give distinct outputs), not a global assumption, which would be false
+  (keccak maps unbounded byte strings to 256 bits) and make the theorem
+  vacuous; the closer may answer *unknown* on a verdict that depends on an
+  `ecrecover` value (an `opaque` function) or on a hash preimage.
 * A counterexample is a concrete typed state, certified by kernel
   evaluation.  One that needs a storage array of `2^255` elements could not
   be built: `invariantClosedFormSum` is false in the model (`s + 2`
