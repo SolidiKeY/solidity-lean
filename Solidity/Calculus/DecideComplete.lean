@@ -137,7 +137,7 @@ variable {C : Contract}
 
 /-- The reduction quoted at the contract `c`, and printed. -/
 def LFml.quoteOpt (c : Expr) : Option (LFml C) → Option (Expr × String)
-  | some ψ => some ((ψ.quote).run c, ψ.pp)
+  | some ψ => some ((ψ.quote).go c, ψ.pp)
   | none => none
 
 /-- The reduction of the closed leaf `φ` of the contract `C` (a constant),

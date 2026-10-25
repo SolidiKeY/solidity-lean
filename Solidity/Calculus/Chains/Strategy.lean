@@ -54,7 +54,7 @@ def Fml.stepFocusAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Focus C × F
 def Focus.quoteRaw (c : Lean.Expr) : Focus C → Lean.Expr
   | @Focus.stmt _ k m Γ Γ' s =>
     Lean.mkAppN (Lean.mkConst ``Focus.stmt) #[c, Lean.toExpr k, Lean.toExpr m, Quote.qCtxRaw Γ,
-      Quote.qCtxRaw Γ', (Quote.qStmt Γ Γ' s).run c]
+      Quote.qCtxRaw Γ', (Quote.qStmt Γ Γ' s).go c]
   | .empty => Lean.mkApp (Lean.mkConst ``Focus.empty) c
 
 /-- A line of a derivation as compiled code leaves it: the line and the
@@ -222,7 +222,7 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
     match φ.stepFocusAt k with
     | some (f, ψ) =>
       let pair := Lean.ShareCommon.shareCommon
-        (Lean.mkApp2 (Lean.mkConst ``Prod.mk [0, 0]) (f.quoteRaw c) ((Quote.qFml Γ ψ).run c))
+        (Lean.mkApp2 (Lean.mkConst ``Prod.mk [0, 0]) (f.quoteRaw c) ((Quote.qFml Γ ψ).go c))
       ⟨pair, k, ψ.lineKeyQ Γ.blankNames⟩ :: Fml.chainLines c n ψ
     | none => []
 
@@ -237,13 +237,13 @@ key (`Fml.lineKey`, quoted). -/
 def Fml.mergeCandsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     List (Nat × Nat × Lean.Expr × Lean.Expr) :=
   (List.range 8).flatMap fun k => (List.range 8).reverse.filterMap fun n =>
-    (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.lineKeyQ Γ.blankNames)
+    (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).go c, ψ.lineKeyQ Γ.blankNames)
 
 /-- Each rewrite of `fs` on `φ` (`Calculus/RewriteScoped.lean`), quoted: the
 line it leaves and that line's key (`Fml.lineKey`, quoted), or `none`. -/
 def Fml.rwResultsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ)
     (fs : List (Fml C Γ → Option (Fml C Γ))) : List (Option (Lean.Expr × Lean.Expr)) :=
-  fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).run c, ψ.lineKeyQ Γ.blankNames)
+  fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).go c, ψ.lineKeyQ Γ.blankNames)
 
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Delab`'s `core_item`). -/

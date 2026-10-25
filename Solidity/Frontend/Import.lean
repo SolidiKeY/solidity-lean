@@ -533,7 +533,7 @@ def elabSolcImport : CommandElab := fun stx => do
     let lower := !f.rets.isEmpty || raw.any RawStmt.hasReturn
     let rets := (retNames f).map (·.1)
     let lowered : ECtx → Except String (List RawStmt × (ECtx × Nat)) := fun Γ => do
-      let (raw, st) ← ((lowerBodyLoops rets rets.length raw).run { funs := C.funs }).run
+      let (raw, st) ← (lowerBodyLoops rets rets.length raw).runFrom { funs := C.funs }
         (Γ, RawStmt.maxIdxs raw + 1)
       pure ((← if lower then lowerReturns rets raw else pure raw), st)
     -- its `calldata` parameters read only (`calldataCheck`)
