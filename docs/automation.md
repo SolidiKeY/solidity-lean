@@ -1144,14 +1144,20 @@ Three properties of the reading are worth knowing.
 | `Fml.holdsH_iff`, `Fml.validH_iff` | without a hash the premise is empty |
 | `LFml.prenex_holds` | prenexing is exact |
 | `CheckedScalar.scale_correct` | checked multiplication by a literal is encoded exactly |
+| `QFml.decide_iff` | `F.decide = true ↔ F.Valid`: quantified linear arithmetic decided |
+| `QuantReduction.valid_of_sentence`, `QuantReduction.verify` | a valid sentence makes the leaf valid; a false assignment gives a refuting state |
+| `quantReduction?_isSome` | `φ.quantCovered = true → (quantReduction? φ).isSome` |
 
 `#print axioms` of each of the six `decide*` theorems is pinned in
-`Calculus/Decision.lean`: `propext`, `Classical.choice`, `Quot.sound`.
+`Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
+`Calculus/PresburgerDecision.lean`, of the quantified reduction's in
+`Calculus/QuantTotality.lean`: `propext`, `Classical.choice`, `Quot.sound`.
 Everything is `sorry`-free.
 
 `Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by two
 features, each with its completeness proved through every stage
-(recognizer, lifting, flattening, compilers):
+(recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
+(feature 3, its own pipeline):
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1161,16 +1167,53 @@ features, each with its completeness proved through every stage
 2. **Universal quantifiers in a consequent**: `pre → ∀ k. post` (a
    postcondition's `\forall`) becomes `∀ k. pre → post` when `pre` reads
    no `k` (`LFml.prenex`), ahead of the prefix.
+3. **Presburger quantifiers** (step 4): a quantifier left in the body past
+   the prefix (in an antecedent, under a negation, alternating), whose
+   body reads no storage and no transaction field.  `decideLeaf` falls
+   back to `quantReduction?` (`Calculus/QuantReduction.lean`) where
+   `dependentReduction?` refuses:
+   * the body lifted (within `liftBudget`), each quantified subformula
+     `Qⱼ` outside binders replaced by a fresh Boolean atom `bⱼ`
+     (`LFml.abstractQ`), the rest flattened and compiled as in M4;
+   * each `Qⱼ` compiled to `QFml` (`QArith.compile`,
+     `Calculus/QuantArithmetic.lean`): its equations by the shared checked
+     compiler with no transaction field, read-free (`readFreeFormula?`),
+     placed at their parameters' positions, a binder at its variable's
+     position under the variable's range;
+   * one sentence: the domain, `bⱼ ↔ Qⱼ` for each `j`, then the main
+     arithmetic, decided by `QFml.decide_iff` and `QFml.verify`
+     (`Calculus/PresburgerDecision.lean`).  The derivative of
+     `∃ xᵢ. ⋁ S` reads both bits of `xᵢ` (the projection of the bit
+     automaton): its states are lists over the body's universe, finite and
+     never computed (it only bounds `reach`); the zero test of an `∃` is a
+     reachability with the other bits `0`.  A bound is an atom
+     `x < bound p` (`2^256` at a word) whose derivatives halve it: no
+     value is enumerated.
+   Validity of the sentence is validity of the leaf (`bⱼ` set to `Qⱼ`'s
+   truth); a false assignment is realized as in M4, the flattening's
+   countermodel keeping each `bⱼ` equal to `Qⱼ` there, since `Qⱼ` reads no
+   storage.  `Fml.quantCovered` (`Calculus/QuantTotality.lean`) is the
+   fragment, on the eliminated leaf: a prefix binding the body's free
+   parameters, the lift within budget, the abstracted body in
+   `LFml.Src false` within M4's bounds, each `Qⱼ` in `LFml.qfrag`
+   (connectives, `∀`, equations of the checked compiler's `LTm.Num`/
+   `LTm.BoolV` terms over value locals and literals, recognized with their
+   evidence by `LTm.num?`, `LTm.bool?`).  It asks no quantifier to be
+   left: a quantifier-free leaf M4 refuses may pass here.
 
-Both were refused before (`dependentReduction?` returned `none`: the
+All three were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
-its false variant (refuted).  The coverage of `double` and `nested` is
-kernel-checked (`decide +kernel`); the other rows and the verdicts are the
-compiled ones (`#eval` pins), since the kernel's arithmetic decision over
-256-bit codes is too deep for the language server.
+its false variant (refuted); and for feature 3, an `∃` in a hypothesis
+(`evenHyp`, proved; `evenHypBad`, refuted), a `∀` in one (`leastHyp`), an
+alternation `∀∃` (`above`, proved; `below`, refuted) and an `∃` hypothesis
+beside a storage write (`evenWrite`, proved; `oddWrite`, refuted).  The
+coverage of `double`, `nested` and `evenHyp` is kernel-checked
+(`decide +kernel`); the other rows and the verdicts are the compiled ones
+(`#eval` pins), since the kernel's arithmetic decision over 256-bit codes
+is too deep for the language server.
 
 ### What is not proved
 
@@ -1183,10 +1226,16 @@ compiled ones (`#eval` pins), since the kernel's arithmetic decision over
   `Tm.agreeB`/`Tm.toL`, elimination's invariant.
 * The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
   which come from the stages' fuel.
+* A time bound for the quantified decision: `QFml.verify` has no node
+  budget.  Each state has `2^n` successors (`n` the free variables), an
+  `∃` state's zero test is a reachability of its own, not memoized, and
+  an `∃` state's list keeps its order (two orders, two states).  The pins
+  take well under a second; a large leaf may not.  `quantReduction?`
+  also re-runs the front `dependentReduction?` refused.
 * On the fragment, `decideGoal` still answers *unknown* on:
-  * negative-position quantifiers, including those in the array property
-    fragment (`Examples/Decision.lean`, `apf`);
-  * quantifier alternation;
+  * a quantifier past the prefix whose body reads storage or a transaction
+    field, even at no bound variable (`Examples/Decision.lean`,
+    `evenRead`), the array property fragment among them (`apf`);
   * KeY `int` (no atom of `Srt.kint` in `LTm`);
   * literal division, modulo, shifts and bitwise operators, and wrapping
     arithmetic;
@@ -1208,11 +1257,12 @@ in this order:
    returns constraints beside the code.
 3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
    difference of two natural codes in `AFml`.
-4. **Quantifiers in the arithmetic**: `AFml` with `∃`, decided by
-   projection in the binary-derivative automaton (the universe of reachable
-   formulas becomes one of subsets, still finite), or a verified Cooper
-   elimination; then negative-position Presburger quantifiers and
-   alternation.
+4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
+   by projection in the binary-derivative automaton (`QFml.decide_iff`),
+   and negative-position Presburger quantifiers and alternation over value
+   locals (feature 3).  Left: a quantifier body reading storage at no
+   bound variable (a read hoisted to a fresh atom with its defining
+   equation, as the flattener does outside binders).
 5. **The array property fragment**: instantiate a negative `∀` block at the
    index set (the goal's index terms and the guards' bounds, Bradley–Manna–
    Sipma), then decide the instance by the quantifier-free pipeline.

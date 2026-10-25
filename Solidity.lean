@@ -385,6 +385,7 @@ import Solidity.Calculus.DeclarationReduction
 import Solidity.Examples.DeclarationReduction
 import Solidity.Calculus.LinearDecision
 import Solidity.Calculus.LinearCountermodel
+import Solidity.Calculus.PresburgerDecision
 import Solidity.Calculus.LinearSyntax
 import Solidity.Examples.LinearDecision
 import Solidity.Calculus.ScalarCode
@@ -437,6 +438,9 @@ import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.LiftTotality
 import Solidity.Calculus.Prenex
 import Solidity.Calculus.AutoComplete
+import Solidity.Calculus.QuantArithmetic
+import Solidity.Calculus.QuantReduction
+import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening

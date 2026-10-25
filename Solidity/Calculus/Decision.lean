@@ -1,4 +1,5 @@
 import Solidity.Calculus.AutoComplete
+import Solidity.Calculus.QuantTotality
 
 /-!
 # The closer's decision, stated (M7)
@@ -40,7 +41,9 @@ rounds extend.
 What is proved: `decideLeaf` is sound (`decideLeaf_sound`), its refutations
 are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`decideLeaf_complete`), the fragment M4 proves total
-(`dependentReduction?_isSome`) as extended since; `decideGoal` likewise
+(`dependentReduction?_isSome`) as extended since, or the leaves every
+quantifier of which past the prefix is Presburger (`Fml.quantCovered`,
+`quantReduction?_isSome`, decided by `QFml.decide_iff`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)
@@ -77,23 +80,36 @@ inductive LeafVerdict (C : Contract) where
 
 /-- **The decision**: the automatic pipeline (`dependentReduction?`), its
 arithmetic decided by the verified procedure (`AFml.decide_iff`), a `false`
-answer turned into a typed countermodel (`DependentReduction.verify`). -/
+answer turned into a typed countermodel (`DependentReduction.verify`); on a
+leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
+the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
-  | none => .unknown
   | some r =>
     match r.verify with
     | .inl _ => .proved
     | .inr cm => .refuted cm.state
+  | none =>
+    match quantReduction? φ with
+    | some q =>
+      match q.verify with
+      | .inl _ => .proved
+      | .inr cm => .refuted cm.1
+    | none => .unknown
 
 /-- **Soundness.** -/
 theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
   unfold decideLeaf at h
   split at h
-  · cases h
   · split at h
     · rename_i hv _
       exact hv.down
+    · cases h
+  · split at h
+    · split at h
+      · rename_i hv _
+        exact hv.down
+      · cases h
     · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
@@ -101,28 +117,46 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
     ¬ holds σ φ := by
   unfold decideLeaf at h
   split at h
-  · cases h
   · split at h
     · cases h
     · rename_i cm _
       cases h
       exact cm.refutes
+  · split at h
+    · split at h
+      · cases h
+      · rename_i cm _
+        cases h
+        exact cm.2
+    · cases h
 
 theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
     ¬ Fml.Valid φ :=
   fun hv => decideLeaf_refutes h (hv σ)
 
-/-- **The fragment proved complete**: M4's, on the eliminated leaf. -/
-def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool := φ.inExact && φ.exactBounded
+/-- **The fragment proved complete**: M4's, on the eliminated leaf, and the
+quantified one (`Fml.quantCovered`, M7 step 4). -/
+def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
+  φ.inExact && φ.exactBounded || φ.quantCovered
 
 /-- **Completeness on `Fml.Covered`.** -/
 theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
-  simp only [Fml.Covered, Bool.and_eq_true] at h
-  obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp (dependentReduction?_isSome φ h.1 h.2)
+  simp only [Fml.Covered, Bool.or_eq_true, Bool.and_eq_true] at h
   unfold decideLeaf
-  rw [hr]
-  dsimp only
-  split <;> exact fun h => nomatch h
+  cases hd : dependentReduction? φ with
+  | some r =>
+    dsimp only
+    split <;> exact fun h => nomatch h
+  | none =>
+    rcases h with h | h
+    · have := dependentReduction?_isSome φ h.1 h.2
+      rw [hd] at this
+      cases this
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (quantReduction?_isSome φ h)
+      dsimp only
+      rw [hq]
+      dsimp only
+      split <;> exact fun h => nomatch h
 
 /-- On the fragment the verdict is exact. -/
 theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :
