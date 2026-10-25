@@ -1,6 +1,7 @@
 import SolidityBridge.Arith
 import SolidityBridge.WeakestPre
 import SolidityBridge.LoomRules
+import SolidityBridge.LoomExamples
 import SolidityBridge.ExternalEvm
 import SolidityBridge.Adversary
 import SolidityBridge.Loop

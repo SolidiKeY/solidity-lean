@@ -61,15 +61,42 @@ the WP correspondence. It does not inspect statements or premises.
 These are **sufficient preconditions**, in the `Leads` direction. The
 strategy's last line is not asserted to be weakest.
 
-At this milestone the strategy post is restricted to `holds · ψ` for
+The strategy post is restricted to `holds · ψ` for
 `ψ : Fml C Γ₀`. A `Post C Γ₀` additionally carries the no-fresh-name and
 inactive evidence used to step around an opaque post. Loom's actual
 `WPGen.get` must accept every Lean predicate, so the fixed-post generator
 uses Loom's own `WPGen.spec_triple`: its VC is the last line together with
 entailment from the fixed deep post to the requested continuation. At the
 same deep post, `generator_get` proves the VC is exactly the last line.
-General direct generation for arbitrary Lean posts requires the separately
-approved `Fml.pred` change; it has not been made at this milestone.
+`Bridge/SolidityBridge/LoomVCGen.lean` supplies `runWithPost` and one
+`@[loomSpec]` generator for all programs. The annotation exposes the deep
+post and VC budget to Loom's specification lookup; its execution is
+definitionally `Prog.runFrames`. `runWithPost_wp` also identifies its WP
+with the existing bridge WP. The budget bounds symbolic execution only:
+exhausting it leaves a modal obligation, without changing program execution.
+Loom's `mwp` combines this generator with its own bind, pure and conditional
+generators. `runWithPostGenerator_get` exposes the core strategy leaf and
+the explicit continuation entailment.
+
+Direct automatic generation against an uninterpreted Lean parameter
+`Q : State C Γ₀ → Prop`, without a deep post or an entailment proof, is
+outside this interface. Existing taclets transform `Fml`, which cannot
+contain that parameter. Users instead choose an existing deep `ψ` and
+prove `∀ τ, holds τ ψ → Q τ` when composing the Solidity step. Ordinary
+Lean continuations may use arbitrary predicates; this obligation records
+exactly what the fixed Solidity specification supplies. The core formula
+language is retained without an opaque predicate constructor.
+
+`Bridge/SolidityBridge/LoomExamples.lean` is imported by both the bridge root
+and its regression module. Its proofs exercise the real VCG, rather than
+calling the bridge soundness theorem directly:
+
+| Example | Checked behavior |
+|---|---|
+| `straight_via_loom` | `mwp` selects the registered Solidity generator; `sol_decide` closes its core strategy leaf. A `#wp` output pin and `straight_vc_is_wp_leaf` identify that leaf exactly. |
+| `mixed_via_loom` | An ordinary Lean bind, a Solidity `seven()` call, and a Lean conditional compose through Loom's bind/pure/if generators. The deep post `x = 7` supplies the fact needed to prove the Lean result is `8`. `mixed_returns` also checks actual successful execution at the initial state, excluding a vacuous box specification. |
+| `panic_rejected`, `revert_accepted` | The actual `assert(false)` is rejected with a true deep post; the actual revert is accepted even with a false deep post. |
+| `invariant_via_loom` | The counting loop uses its core invariant taclet, pinned by `#step` as `whileInvariantBox`. Its generated quantified leaf is normalized and closed by `sol_close`; no Loom loop rule is applied to Solidity code. This is box partial correctness, not a termination claim. |
 
 The read-only finder/skeptic review confirmed that execution and rule
 soundness are reused, that all five halt cases agree with `afterRunTR`,
@@ -78,9 +105,12 @@ are stated accurately. The confirmed wording fix describes the existing
 core loop taclets generally, rather than implying only box invariants
 are supported. The skeptic also verified that the two vendor patches
 only make existing instance names explicit; no types or proof bodies change.
+The completion review also checked the generic Loom registration, the
+successful mixed-program witness, and the deep-post-to-Lean entailment;
+the finder and skeptic identified no remaining code issues.
 
-Per-file Lean MCP diagnostics pass for both adapter modules and all fifteen
-vendored modules. Six imported `#guard_msgs` axiom audits allow only
+The original six adapter audits are retained; the front end and examples
+add ten more imported `#guard_msgs` axiom audits. All sixteen allow only
 `propext`, `Classical.choice`, and `Quot.sound`. Building the existing WP
 laws exposed a missing `Solidity.Syntax.Splice` import for their `sol[...]`
 regression; the bridge import is corrected without changing those laws.
@@ -102,19 +132,16 @@ Integration with master `c7e634f5` accounts for its new `CallMemo` layer in
 capture and guard proofs quantify that cache and unfold the existing
 transformers; no elaborator implementation is copied or changed.
 
-Final validation for phases 0–2: `./scripts/check-bridge.sh` passes
-(1,624 jobs), including both vendor hash manifests and the imported axiom
-pins; the final log contains no errors. Per-file Lean MCP diagnostics also
-pass for the root, `Checks`, both adapters, and all repaired bridge files.
+Final validation of the deep-post interface: `./scripts/check-bridge.sh`
+passes (1,723 jobs), including both vendor hash manifests, the sixteen Loom
+axiom pins, and the printed leaf/rule regressions; the final log contains
+no errors. Per-file Lean MCP diagnostics also pass for every edited Lean
+file, including the root and `Checks` imports.
 The core source, root dependency manifest, both toolchains, and `AGENTS.md`
-are unchanged, so the phase-3-only core checks were not run.
+are unchanged, so the core-only checks were not run.
 
-Phase 3 remains gated on explicit user approval. Adding `Fml.pred` gives
-every recursion over `Fml` another case; the import-fanout tool reports
-453 dependent modules above `Calculus.Fml`, with bridge consumers also
-needing rebuilding. `git log -S` searches for predicate/atom/pure
-constructors and a typed-state predicate field found no earlier removal
-of a comparable constructor for speed in the inspected formula histories.
+The completed interface intentionally retains this deep-post restriction.
+No extension of the core `Fml` datatype is part of the integration.
 
 ## October 22 milestone
 

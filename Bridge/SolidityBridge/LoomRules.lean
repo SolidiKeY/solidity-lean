@@ -9,8 +9,8 @@ Postconditions in this module are deep formulas, read as `holds · ψ`.
 There is one translation and one soundness theorem for all statements;
 there are no Loom-specific statement or loop rules.
 
-Loom's `WPGen.get` takes every Lean predicate. Before a predicate constructor
-is added to the core formula language, a generator therefore uses Loom's
+Loom's `WPGen.get` takes every Lean predicate. With the existing deep formula
+language, a generator therefore uses Loom's
 `spec_triple`: the strategy's last line together with entailment from its
 fixed deep post to the requested continuation. At that same deep post,
 this entailment is reflexive and `get` is exactly the last line's reading.

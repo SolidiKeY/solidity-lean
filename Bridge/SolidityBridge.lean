@@ -9,6 +9,8 @@ import SolidityBridge.Arith
 import SolidityBridge.WeakestPre
 import SolidityBridge.WeakestPreLaws
 import SolidityBridge.LoomRules
+import SolidityBridge.LoomVCGen
+import SolidityBridge.LoomExamples
 import SolidityBridge.ExternalEvm
 import SolidityBridge.Adversary
 import SolidityBridge.Checks
