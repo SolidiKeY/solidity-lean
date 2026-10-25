@@ -101,6 +101,28 @@ instance [Repr κ] [Repr α] : Repr (Mapping κ α) where
 
 end Mapping
 
+/-! ## Reverts
+
+A revert is Loom's `assume`. Velvet derives the VC generator's rule for
+`pickSuchThat` and not for `assume`; it is derived here as Velvet does
+(`CaseStudies/Theory.lean`), from Loom's `wp_assume`. -/
+
+section AssumeWP
+variable {m l} [Monad m] [LawfulMonad m] [CompleteBooleanAlgebra l] [MAlgOrdered m l]
+variable {as : Prop} [Decidable as]
+
+section
+open PartialCorrectness DemonicChoice
+#derive_wp for (MonadNonDet.assume as : NonDetT m PUnit)
+end
+
+section
+open TotalCorrectness DemonicChoice
+#derive_wp for (MonadNonDet.assume as : NonDetT m PUnit)
+end
+
+end AssumeWP
+
 /-! ## The grammar -/
 
 declare_syntax_cat solTy
