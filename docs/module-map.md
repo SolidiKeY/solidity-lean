@@ -75,6 +75,8 @@ See `docs/bridge.md` for scope and commands.
 |---|---|
 | `Bridge/SolidityBridge/Loom.lean` | Loom's exception algebra with the actual modal halt policy, equality to `afterRunTR` and the existing bridge WP, and bind inherited from `wp_comp`. |
 | `Bridge/SolidityBridge/LoomRules.lean` | One translation and soundness theorem for all taclets, plus Loom generators from `Fml.Leads`, `Fml.Steps`, and the existing bounded strategy, with fixed deep posts. |
+| `Bridge/SolidityBridge/LoomVCGen.lean` | Deep-post annotations for the actual core run, one generic Loom specification registration, and the strategy-leaf/continuation-entailment VC equation. |
+| `Bridge/SolidityBridge/LoomExamples.lean` | Loom VC generation for straight-line Solidity, a Solidity function inside a Lean bind/if program, halt-policy boundaries, and the existing invariant loop rule. |
 | `Bridge/vendor/Loom/MonadAlgebras/WP/Tactic.lean` | The upstream Loom VC-generator import closure, with two explicit instance names for editor checks; provenance and checksums in `Bridge/vendor/Loom/VENDOR.md`. |
 
 | Module | What it defines |
