@@ -305,39 +305,118 @@ theorem PrimTy.uint_ofInt?_add_assoc (a c₁ c₂ : Int) (ha : 0 ≤ a) (h1 : 0 
     simp only [PrimTy.inRange, decide_eq_true_eq] at hy ⊢
     omega
 
+theorem Tm.mulParts?_spec {p : PrimTy} (x : Tm C Γ (.val p)) {u : Tm C Γ (.val p)} {c : Int}
+    (h : x.mulParts? = some (u, c)) :
+    ∃ (h' : BinOp.mul.accepts p = true) (w : Tm C Γ (.val p)), w.litInt? = some c ∧
+      x = .app2 (.binop .mul h') u w := by
+  cases x with
+  | app2 o u' w =>
+    cases o with
+    | binop op h'' =>
+      cases op with
+      | mul =>
+        have h1 : w.litInt?.map (fun c => (u', c)) = some (u, c) := h
+        obtain ⟨c', hc, he⟩ := Option.map_eq_some_iff.1 h1
+        cases he
+        exact ⟨h'', w, hc, rfl⟩
+      | _ => exact nomatch h
+    | _ => exact nomatch h
+  | _ => exact nomatch h
+
+theorem PrimTy.uint_ofInt?_mul_assoc (a c₁ c₂ : Int) (ha : 0 ≤ a) (h1 : 0 ≤ c₁) (h2 : c₂ ≠ 0)
+    (h2' : 0 ≤ c₂) :
+    PrimTy.uint.ofInt? (a * (c₁ * c₂)) =
+      (PrimTy.uint.ofInt? (a * c₁)).bind fun b => PrimTy.uint.ofInt? (b.1 * c₂) := by
+  simp only [PrimTy.ofInt?]
+  by_cases hx : PrimTy.uint.inRange (a * c₁) = true
+  · rw [dif_pos hx, Option.bind_some]
+    show _ = (if h : PrimTy.uint.inRange (a * c₁ * c₂) = true then _ else _)
+    rw [Int.mul_assoc]
+  · rw [dif_neg hx, Option.bind_none, dif_neg]
+    intro hy
+    apply hx
+    have hac : 0 ≤ a * c₁ := Int.mul_nonneg ha h1
+    have hle : a * c₁ ≤ a * c₁ * c₂ := by
+      have h3 : 0 ≤ a * c₁ * (c₂ - 1) := Int.mul_nonneg hac (by omega)
+      rw [Int.mul_sub, Int.mul_one] at h3
+      omega
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hy ⊢
+    rw [← Int.mul_assoc] at hy
+    omega
+
+theorem Op2.mk2_add_eval (σ : State C Γ) (h : BinOp.add.accepts .uint = true)
+    (x y : Tm C Γ (.val .uint)) :
+    ((Op2.binop .add h : Op2 C _ _ _).mk2 x y).eval σ = (Tm.app2 (.binop .add h) x y).eval σ := by
+  simp only [Op2.mk2]
+  cases hy : y.litInt? with
+  | none => rfl
+  | some c₂ =>
+    cases hx : x.addParts? with
+    | none => rfl
+    | some q =>
+      obtain ⟨u, c₁⟩ := q
+      dsimp only
+      split
+      · rename_i hr
+        obtain ⟨h', w, hw, rfl⟩ := Tm.addParts?_spec x hx
+        obtain ⟨hc₁, hw'⟩ := Tm.litInt?_eval σ w hw
+        obtain ⟨hc₂, hy'⟩ := Tm.litInt?_eval σ y hy
+        show (u.eval σ).bind (fun a => binopT .add h a (some ⟨c₁ + c₂, hr⟩)) =
+          (((u.eval σ).bind fun a => binopT .add h' a (w.eval σ))).bind
+            (fun b => binopT .add h b (y.eval σ))
+        rw [hy', hw']
+        cases u.eval σ with
+        | none => rfl
+        | some a =>
+          show PrimTy.uint.ofInt? (a.1 + (c₁ + c₂)) =
+            (PrimTy.uint.ofInt? (a.1 + c₁)).bind fun b => PrimTy.uint.ofInt? (b.1 + c₂)
+          have ha := a.2
+          simp only [PrimTy.inRange, decide_eq_true_eq] at ha hc₁ hc₂
+          exact PrimTy.uint_ofInt?_add_assoc a.1 c₁ c₂ ha.1 hc₁.1 hc₂.1
+      · rfl
+
+theorem Op2.mk2_mul_eval (σ : State C Γ) (h : BinOp.mul.accepts .uint = true)
+    (x y : Tm C Γ (.val .uint)) :
+    ((Op2.binop .mul h : Op2 C _ _ _).mk2 x y).eval σ = (Tm.app2 (.binop .mul h) x y).eval σ := by
+  simp only [Op2.mk2]
+  cases hy : y.litInt? with
+  | none => rfl
+  | some c₂ =>
+    cases hx : x.mulParts? with
+    | none => rfl
+    | some q =>
+      obtain ⟨u, c₁⟩ := q
+      dsimp only
+      split
+      · rename_i hr
+        split
+        · rfl
+        · rename_i hz
+          obtain ⟨h', w, hw, rfl⟩ := Tm.mulParts?_spec x hx
+          obtain ⟨hc₁, hw'⟩ := Tm.litInt?_eval σ w hw
+          obtain ⟨hc₂, hy'⟩ := Tm.litInt?_eval σ y hy
+          show (u.eval σ).bind (fun a => binopT .mul h a (some ⟨c₁ * c₂, hr⟩)) =
+            (((u.eval σ).bind fun a => binopT .mul h' a (w.eval σ))).bind
+              (fun b => binopT .mul h b (y.eval σ))
+          rw [hy', hw']
+          cases u.eval σ with
+          | none => rfl
+          | some a =>
+            show PrimTy.uint.ofInt? (a.1 * (c₁ * c₂)) =
+              (PrimTy.uint.ofInt? (a.1 * c₁)).bind fun b => PrimTy.uint.ofInt? (b.1 * c₂)
+            have ha := a.2
+            simp only [PrimTy.inRange, decide_eq_true_eq] at ha hc₁ hc₂
+            exact PrimTy.uint_ofInt?_mul_assoc a.1 c₁ c₂ ha.1 hc₁.1 hz hc₂.1
+      · rfl
+
 theorem Op2.mk2_eval (σ : State C Γ) {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a)
     (y : Tm C Γ b) : (o.mk2 x y).eval σ = (Tm.app2 o x y).eval σ := by
   cases o with
   | binop op h =>
     rename_i p
     cases op <;> cases p <;> try rfl
-    simp only [Op2.mk2]
-    cases hy : y.litInt? with
-    | none => rfl
-    | some c₂ =>
-      cases hx : x.addParts? with
-      | none => rfl
-      | some q =>
-        obtain ⟨u, c₁⟩ := q
-        dsimp only
-        split
-        · rename_i hr
-          obtain ⟨h', w, hw, rfl⟩ := Tm.addParts?_spec x hx
-          obtain ⟨hc₁, hw'⟩ := Tm.litInt?_eval σ w hw
-          obtain ⟨hc₂, hy'⟩ := Tm.litInt?_eval σ y hy
-          show (u.eval σ).bind (fun a => binopT .add h a (some ⟨c₁ + c₂, hr⟩)) =
-            (((u.eval σ).bind fun a => binopT .add h' a (w.eval σ))).bind
-              (fun b => binopT .add h b (y.eval σ))
-          rw [hy', hw']
-          cases u.eval σ with
-          | none => rfl
-          | some a =>
-            show PrimTy.uint.ofInt? (a.1 + (c₁ + c₂)) =
-              (PrimTy.uint.ofInt? (a.1 + c₁)).bind fun b => PrimTy.uint.ofInt? (b.1 + c₂)
-            have ha := a.2
-            simp only [PrimTy.inRange, decide_eq_true_eq] at ha hc₁ hc₂
-            exact PrimTy.uint_ofInt?_add_assoc a.1 c₁ c₂ ha.1 hc₁.1 hc₂.1
-        · rfl
+    · exact Op2.mk2_add_eval σ h x y
+    · exact Op2.mk2_mul_eval σ h x y
   | _ => rfl
 
 /-- Folding offsets keeps a term's reading. -/

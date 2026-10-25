@@ -175,7 +175,7 @@ def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml
   let xs := ps.map fun (n, p) => (p, Var.ofName n)
   let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
   let Γ : ECtx := ps.reverse.map fun (n, p) => (n, LocalTy.val p)
-  let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
+  let P ← (elabStmtsP C call).runFrom' { funs := C.funs } (Γ, 1)
   let ⟨_, P⟩ ← SProg.chain (paramsN xs).names (paramsN xs).ctx P
   pure (Problem.ctorFml m xs P)
 

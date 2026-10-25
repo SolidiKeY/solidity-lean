@@ -980,7 +980,7 @@ def elabFmlAtC (ns : List (String × LTy)) (φ : RawFml) :
     | .alias R => some (x, LocalTy.alias R)
     | _ => none
   let taken := (ns.map fun (x, _) => (Var.ofName x).idx).filter (· > 0)
-  ((elabFmlC C taken false φ (ctxOfLocals ns)).run { funs := C.funs }).run' (scope, 1)
+  (elabFmlC C taken false φ (ctxOfLocals ns)).runFrom' { funs := C.funs } (scope, 1)
 
 end Notation
 

@@ -527,8 +527,54 @@ def abiEncodeWith (rc : ElabRec C) (std strs : Bool) (args : List RawExpr) (mark
     hpos := hpos + 32 * k.headWords
   pure (P ++ (← elabStmtsP S), .name r)
 
-/-- `elabCallRet`, outside its `mutual` block (`elabRec`). -/
-def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+/-- Every local of the callee ends with its call: no return variable is
+left in the caller (a reference return's, `CallRet.mem`/`storage`). -/
+def FunDecl.endsWithCall (d : FunDecl) : Bool :=
+  !d.retMem && !d.retStorage && d.rets.all fun (_, T) => match T with | .prim _ => true | _ => false
+
+/-- A callee's body as its frame runs it: its locals renamed (`ρ`), its loops
+and `return`s lowered, its modifiers around it, a constructor's initializers
+first, a self-call's environment, a block's locals renamed apart. -/
+def calleeBody (d : FunDecl) (ρ : List (String × String)) (ctor selfFrame : Bool) (Γf : ECtx) :
+    ElabM (List RawStmt) := do
+  let body ← renameStmts ρ d.body
+  let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
+  let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
+  let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
+  -- a constructor's initializers: after its parameters are bound, before its
+  -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
+  let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
+  -- an external call of the contract to itself: its frame's environment
+  let selfValue := (← read).selfValue
+  let body := if selfFrame then body.map (RawStmt.selfFrame selfValue) else body
+  -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
+  ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
+
+/-- The body of a callee inlined at its call, elaborated in its frame `Γf`
+from the caller's `Γ`, its locals numbered from `k₀`.  A `shared` callee's
+(`CallMemo`) is elaborated at its first call only: a later call, numbered
+from the same `k₀`, reads it back (`CallMemo.body?`), the same body. -/
+def inlinedBody (rc : ElabRec C) (f : String) (d : FunDecl) (ρ : List (String × String))
+    (shared ctor selfFrame : Bool) (scope : List (Name × FunDecl)) (k₀ : Nat) (Γ Γf : ECtx) :
+    ElabM (SProg C) := do
+  let key := calleeKey f selfFrame (← read)
+  if shared then
+    if let some (P, kEnd) ← CallMemo.body? C key k₀ then
+      modify fun (Γc, _) => (Γc, kEnd)
+      return P
+  let body ← calleeBody C d ρ ctor selfFrame Γf
+  let k₁ := (← get).2
+  modify fun (_, k) => (Γf, k)
+  let P ← withReader (fun sc =>
+      { sc with funs := scope, top := false, selfFrame := selfFrame, unchecked := false,
+                inlined := (k₀, k₁) :: sc.inlined })
+    (@ElabRec.elabStmtsP C rc body)
+  modify fun (_, k) => (Γ, k)
+  if shared then CallMemo.setBody C key k₀ P (← get).2
+  pure P
+
+/-- `elabCallRet`'s elaboration of the call, from the numbering it is entered at. -/
+def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
     (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
@@ -687,48 +733,31 @@ def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
     recBody := some (rf.depth, fun F _ =>
       if rf.below.frame == F then pure (rf.below.get C F)
       else throw s!"internal: {f}'s recursive frame has another context")
-  else
-    let body ← renameStmts ρ d.body
-    let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
-    let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
-    let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
-    -- a constructor's initializers: after its parameters are bound, before its
-    -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
-    let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
-    -- an external call of the contract to itself: its frame's environment
-    let selfValue := (← read).selfValue
-    let body := if selfFrame then body.map (RawStmt.selfFrame selfValue) else body
-    -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
-    let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
+  else if recursive then
+    let body ← calleeBody C d ρ ctor selfFrame Γf
     let k₁ := (← get).2
-    if recursive then
-      recBody := some (recDepth, fun F ns => do
-        let sc ← read
-        let frame (n : Nat) (bt : Unit → Prog C F F) : Except String (Prog C F F × Nat) := do
-          let rf : RecFrame :=
-            { name := f, params := pnames, rets := rnames, depth := n, below := ⟨C, F, bt⟩ }
-          let sc' : ElabScope :=
-            { sc with funs := scope, top := false, selfFrame := selfFrame, unchecked := false,
-                      inlined := (k₀, k₁) :: sc.inlined, recs := rf :: sc.recs }
-          let (Q, (_, kEnd)) ← ((elabStmtsP body).run sc').run (Γf, k₁)
-          let ⟨_, b⟩ ← SProg.chain ns F Q
-          pure (.cons (.block b) .nil, kEnd)
-        -- elaborated once here, for its errors and the names it takes
-        let (_, kEnd) ← ElabM.lift (frame (recDepth - 1) fun _ => Prog.recBase)
-        modify fun (Γc, _) => (Γc, kEnd)
-        pure fun _ => recUnroll Prog.recBase
-          (fun n bt => match frame n bt with
-            | .ok (Q, _) => Q
-            -- unreachable (a frame elaborates as the one checked above);
-            -- were it reached, a panic, which no modality accepts
-            | .error _ => .cons (.assert (.simple (.bool false))) .nil) recDepth)
-    else
-      modify fun (_, k) => (Γf, k)
-      P ← withReader (fun sc =>
+    recBody := some (recDepth, fun F ns => do
+      let sc ← read
+      let frame (n : Nat) (bt : Unit → Prog C F F) : Except String (Prog C F F × Nat) := do
+        let rf : RecFrame :=
+          { name := f, params := pnames, rets := rnames, depth := n, below := ⟨C, F, bt⟩ }
+        let sc' : ElabScope :=
           { sc with funs := scope, top := false, selfFrame := selfFrame, unchecked := false,
-                    inlined := (k₀, k₁) :: sc.inlined })
-        (elabStmtsP body)
-      modify fun (_, k) => (Γ, k)
+                    inlined := (k₀, k₁) :: sc.inlined, recs := rf :: sc.recs }
+        let (Q, (_, kEnd)) ← (elabStmtsP body).runFrom sc' (Γf, k₁)
+        let ⟨_, b⟩ ← SProg.chain ns F Q
+        pure (.cons (.block b) .nil, kEnd)
+      -- elaborated once here, for its errors and the names it takes
+      let (_, kEnd) ← ElabM.lift (frame (recDepth - 1) fun _ => Prog.recBase)
+      modify fun (Γc, _) => (Γc, kEnd)
+      pure fun _ => recUnroll Prog.recBase
+        (fun n bt => match frame n bt with
+          | .ok (Q, _) => Q
+          -- unreachable (a frame elaborates as the one checked above);
+          -- were it reached, a panic, which no modality accepts
+          | .error _ => .cons (.assert (.simple (.bool false))) .nil) recDepth)
+  else
+    P ← inlinedBody C rc f d ρ (!ctor && !targets && d.endsWithCall) ctor selfFrame scope k₀ Γ Γf
   -- the call's context: the caller's, with `res` pushed when the statement
   -- before the call declares it
   let ⟨ps, as⟩ := targs
@@ -785,7 +814,24 @@ def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
         pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
+  -- after a repeated callee, the caller's numbering goes on from where it was
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
+
+/-- `elabCallRet`, outside its `mutual` block (`elabRec`).  A callee all of
+whose locals end with the call (not recursive, not the constructor, no
+return variable left in the caller) has its locals numbered from where its
+first call's were (`CallMemo`), so that its body is one term at every call. -/
+def elabCallRetWith (rc : ElabRec C) (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
+    (selfFrame : Bool := false) :
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
+  let sc ← read
+  let shared := !ctor && !targets && sc.recs.all (·.name != f) && !isRecursiveC C f &&
+    ((sc.funs.find? (·.1 == f)).map (·.2.endsWithCall)).getD false
+  let entry ← CallMemo.enter shared f (selfFrame || sc.selfFrame)
+  let r ← elabCallRetCore C rc f args res resW targets ctor resNew selfFrame
+  CallMemo.leave entry
+  pure r
 
 /-- `hoistStmt`, outside its `mutual` block (`elabRec`). -/
 def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := fun s0 =>

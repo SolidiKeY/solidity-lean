@@ -1,4 +1,5 @@
 import Lean.Util.ShareCommon
+import Std.Data.HashMap
 import Solidity.Syntax.Scoped
 
 /-!
@@ -256,130 +257,175 @@ def CatchKind.quote : CatchKind → Lean.Expr
 
 end Parts
 
+/-! ## Calls' bodies, quoted once
+
+A callee's body is one object at every call of it (`CallMemo`,
+`Syntax/Elab/Values.lean`), and is quoted once (`Prog.quoteBody`,
+`Calculus/Quote.lean`'s `qStmtH`): a quoted call body is kept by the body
+object and the terms of its contexts.  The logical reading quotes it again
+(`QMemo.find` is `none`), which gives the same `Expr`. -/
+
+/-- The calls' bodies quoted so far, by the body's address: the body (kept,
+so that its address is not reused), the recursive frames' names and the
+term of its contexts, and its `Expr`. -/
+structure QMemo where
+  bodies : Std.HashMap USize (Array (NonScalar × List Name × Lean.Expr × Lean.Expr)) := {}
+
+/-- `find`, compiled. -/
+unsafe def QMemo.findImpl {m : Type → Type} [Monad m] [MonadStateOf QMemo m] {α : Type}
+    (body : α) (hs : List Name) (k : Lean.Expr) : m (Option Lean.Expr) := do
+  let some es := (← getThe QMemo).bodies[ptrAddrUnsafe body]? | pure none
+  pure <| es.findSome? fun (b, hs', k', e) =>
+    if ptrAddrUnsafe b == ptrAddrUnsafe body && hs' == hs && k' == k then some e else none
+
+/-- **A body quoted before**, under the frames `hs` and the contexts' term
+`k`: its `Expr`, read back where the compiled code runs; logically `none`,
+quote it again. -/
+@[implemented_by QMemo.findImpl]
+def QMemo.find {m : Type → Type} [Monad m] [MonadStateOf QMemo m] {α : Type}
+    (_body : α) (_hs : List Name) (_k : Lean.Expr) : m (Option Lean.Expr) :=
+  pure none
+
+/-- `add`, compiled. -/
+unsafe def QMemo.addImpl {m : Type → Type} [Monad m] [MonadStateOf QMemo m] {α : Type}
+    (body : α) (hs : List Name) (k e : Lean.Expr) : m Unit :=
+  let entry : NonScalar × List Name × Lean.Expr × Lean.Expr := (unsafeCast body, hs, k, e)
+  modifyThe QMemo fun q =>
+    { q with bodies := q.bodies.alter (ptrAddrUnsafe body) (fun es => some ((es.getD #[]).push entry)) }
+
+/-- Record a body's `Expr` (`find`); logically nothing. -/
+@[implemented_by QMemo.addImpl]
+def QMemo.add {m : Type → Type} [Monad m] [MonadStateOf QMemo m] {α : Type}
+    (_body : α) (_hs : List Name) (_k _e : Lean.Expr) : m Unit :=
+  pure ()
+
+/-- The quoter of programs: the bodies quoted so far. -/
+abbrev QuoteM := StateM QMemo
+
 mutual
 
 /-- A statement read in `Γ` (its term `Γe`) leaving `Γ'` (its term `Γ'e`). -/
-def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' → Lean.Expr
-  | _, _, Γe, _, @Stmt.assign _ _ T l r =>
-    mkAppN (mkConst ``Stmt.assign) #[c, Γe, toExpr T, Loc.quote c Γe l, Src.quote c Γe r]
-  | _, _, Γe, _, @Stmt.rebind _ _ R i r =>
-    mkAppN (mkConst ``Stmt.rebind) #[c, Γe, toExpr R, Idx.quote Γe i, ARhs.quote c Γe r]
-  | _, _, Γe, _, @Stmt.assignLocal _ _ p i r =>
-    mkAppN (mkConst ``Stmt.assignLocal) #[c, Γe, toExpr p, Idx.quote Γe i, Val.quote c Γe r]
-  | _, _, Γe, _, .declLocal p x init =>
-    mkAppN (mkConst ``Stmt.declLocal) #[c, Γe, toExpr p, toExpr x,
+partial def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' →
+    QuoteM Lean.Expr
+  | _, _, Γe, _, @Stmt.assign _ _ T l r => do
+    pure <| mkAppN (mkConst ``Stmt.assign) #[c, Γe, toExpr T, Loc.quote c Γe l, Src.quote c Γe r]
+  | _, _, Γe, _, @Stmt.rebind _ _ R i r => do
+    pure <| mkAppN (mkConst ``Stmt.rebind) #[c, Γe, toExpr R, Idx.quote Γe i, ARhs.quote c Γe r]
+  | _, _, Γe, _, @Stmt.assignLocal _ _ p i r => do
+    pure <| mkAppN (mkConst ``Stmt.assignLocal) #[c, Γe, toExpr p, Idx.quote Γe i, Val.quote c Γe r]
+  | _, _, Γe, _, .declLocal p x init => do
+    pure <| mkAppN (mkConst ``Stmt.declLocal) #[c, Γe, toExpr p, toExpr x,
       optE (mkAppN (mkConst ``Val) #[c, Γe, toExpr p]) (init.map (Val.quote c Γe))]
-  | _, _, Γe, _, .declStorage R x init =>
-    mkAppN (mkConst ``Stmt.declStorage) #[c, Γe, toExpr R, toExpr x,
+  | _, _, Γe, _, .declStorage R x init => do
+    pure <| mkAppN (mkConst ``Stmt.declStorage) #[c, Γe, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``ARhs) #[c, Γe, toExpr R]) (init.map (ARhs.quote c Γe))]
-  | _, _, Γe, _, @Stmt.opAssign _ _ p op _ _ l r =>
-    mkAppN (mkConst ``Stmt.opAssign) #[c, Γe, toExpr p, toExpr op, rflTrue, rflTrue,
+  | _, _, Γe, _, @Stmt.opAssign _ _ p op _ _ l r => do
+    pure <| mkAppN (mkConst ``Stmt.opAssign) #[c, Γe, toExpr p, toExpr op, rflTrue, rflTrue,
       OpLoc.quote c Γe l, Val.quote c Γe r]
-  | _, _, Γe, _, @Stmt.incDec _ _ p op _ l =>
-    mkAppN (mkConst ``Stmt.incDec) #[c, Γe, toExpr p, toExpr op, rflTrue, OpLoc.quote c Γe l]
-  | _, _, Γe, _, @Stmt.pushOpAssign _ _ p op _ _ b r =>
-    mkAppN (mkConst ``Stmt.pushOpAssign) #[c, Γe, toExpr p, toExpr op, rflTrue, rflTrue,
+  | _, _, Γe, _, @Stmt.incDec _ _ p op _ l => do
+    pure <| mkAppN (mkConst ``Stmt.incDec) #[c, Γe, toExpr p, toExpr op, rflTrue, OpLoc.quote c Γe l]
+  | _, _, Γe, _, @Stmt.pushOpAssign _ _ p op _ _ b r => do
+    pure <| mkAppN (mkConst ``Stmt.pushOpAssign) #[c, Γe, toExpr p, toExpr op, rflTrue, rflTrue,
       SPath.quote c Γe b, Val.quote c Γe r]
-  | _, _, Γe, _, @Stmt.pushIncDec _ _ p op _ b =>
-    mkAppN (mkConst ``Stmt.pushIncDec) #[c, Γe, toExpr p, toExpr op, rflTrue,
+  | _, _, Γe, _, @Stmt.pushIncDec _ _ p op _ b => do
+    pure <| mkAppN (mkConst ``Stmt.pushIncDec) #[c, Γe, toExpr p, toExpr op, rflTrue,
       SPath.quote c Γe b]
-  | _, _, Γe, _, @Stmt.assignIncDec _ _ p i op _ l _ =>
-    mkAppN (mkConst ``Stmt.assignIncDec) #[c, Γe, toExpr p, Idx.quote Γe i, toExpr op, rflTrue,
+  | _, _, Γe, _, @Stmt.assignIncDec _ _ p i op _ l _ => do
+    pure <| mkAppN (mkConst ``Stmt.assignIncDec) #[c, Γe, toExpr p, Idx.quote Γe i, toExpr op, rflTrue,
       OpLoc.quote c Γe l, rflTrue]
-  | _, _, Γe, _, @Stmt.assignLocalPush _ _ p i b =>
-    mkAppN (mkConst ``Stmt.assignLocalPush) #[c, Γe, toExpr p, Idx.quote Γe i,
+  | _, _, Γe, _, @Stmt.assignLocalPush _ _ p i b => do
+    pure <| mkAppN (mkConst ``Stmt.assignLocalPush) #[c, Γe, toExpr p, Idx.quote Γe i,
       SPath.quote c Γe b]
-  | _, _, Γe, _, @Stmt.push _ _ E' b v _ =>
-    mkAppN (mkConst ``Stmt.push) #[c, Γe, toExpr E', SPath.quote c Γe b,
+  | _, _, Γe, _, @Stmt.push _ _ E' b v _ => do
+    pure <| mkAppN (mkConst ``Stmt.push) #[c, Γe, toExpr E', SPath.quote c Γe b,
       optE (mkAppN (mkConst ``Src) #[c, Γe, toExpr E']) (v.map (Src.quote c Γe)), rflTrue]
-  | _, _, Γe, _, @Stmt.pop _ _ E' b => mkAppN (mkConst ``Stmt.pop) #[c, Γe, toExpr E', SPath.quote c Γe b]
-  | _, _, Γe, _, @Stmt.callReceiver _ _ ps Γf E' f args r body op =>
+  | _, _, Γe, _, @Stmt.pop _ _ E' b => pure <| mkAppN (mkConst ``Stmt.pop) #[c, Γe, toExpr E', SPath.quote c Γe b]
+  | _, _, Γe, _, @Stmt.callReceiver _ _ ps Γf E' f args r body op => do
     let (ase, pse) := Args.quote c Γe args
     let Γfe := ctxOnto pse [.alias (.array E')]
-    mkAppN (mkConst ``Stmt.callReceiver) #[c, Γe, pse,
+    pure <| mkAppN (mkConst ``Stmt.callReceiver) #[c, Γe, pse,
       ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, toExpr E', toExpr f,
-      ase, toExpr r, Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
+      ase, toExpr r, (← Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body),
       ReceiverOp.quote c Γe op]
-  | Γ, _, Γe, _, @Stmt.callReceiverPush _ _ ps Γf Γv E' f args r body code value =>
+  | Γ, _, Γe, _, @Stmt.callReceiverPush _ _ ps Γf Γv E' f args r body code value => do
     let (ase, pse) := Args.quote c Γe args
     let Γfe := ctxOnto pse [.alias (.array E')]
     let Γve := ctxFrom Γ Γe Γv
-    mkAppN (mkConst ``Stmt.callReceiverPush) #[c, Γe, pse,
+    pure <| mkAppN (mkConst ``Stmt.callReceiverPush) #[c, Γe, pse,
       ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, Γve, toExpr E', toExpr f,
-      ase, toExpr r, Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
-      Prog.quote hs Γe Γve code, Src.quote c Γve value]
-  | _, _, Γe, _, .transfer r a =>
-    mkAppN (mkConst ``Stmt.transfer) #[c, Γe, Val.quote c Γe r, Val.quote c Γe a]
-  | _, _, Γe, _, .send pv r a g =>
-    mkAppN (mkConst ``Stmt.send) #[c, Γe, Idx.quote Γe pv, Val.quote c Γe r, Val.quote c Γe a,
+      ase, toExpr r, (← Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body),
+      (← Prog.quote hs Γe Γve code), Src.quote c Γve value]
+  | _, _, Γe, _, .transfer r a => do
+    pure <| mkAppN (mkConst ``Stmt.transfer) #[c, Γe, Val.quote c Γe r, Val.quote c Γe a]
+  | _, _, Γe, _, .send pv r a g => do
+    pure <| mkAppN (mkConst ``Stmt.send) #[c, Γe, Idx.quote Γe pv, Val.quote c Γe r, Val.quote c Γe a,
       toExpr g]
-  | _, _, Γe, _, .declMem R x init _ _ =>
-    mkAppN (mkConst ``Stmt.declMem) #[c, Γe, toExpr R, toExpr x,
+  | _, _, Γe, _, .declMem R x init _ _ => do
+    pure <| mkAppN (mkConst ``Stmt.declMem) #[c, Γe, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``MRhs) #[c, Γe, toExpr R]) (init.map (MRhs.quote c Γe)),
       rflTrue, rflTrue]
-  | _, _, Γe, _, @Stmt.rebindMem _ _ R i r =>
-    mkAppN (mkConst ``Stmt.rebindMem) #[c, Γe, toExpr R, Idx.quote Γe i, MRhs.quote c Γe r]
-  | _, _, Γe, _, @Stmt.assignFromMem _ _ R l p =>
-    mkAppN (mkConst ``Stmt.assignFromMem) #[c, Γe, toExpr R, Loc.quote c Γe l, MPath.quote c Γe p]
-  | _, _, Γe, _, @Stmt.assignMem _ _ T l r =>
-    mkAppN (mkConst ``Stmt.assignMem) #[c, Γe, toExpr T, MLoc.quote c Γe l, MSrc.quote c Γe r]
-  | _, _, Γe, _, @Stmt.delete _ _ T l => mkAppN (mkConst ``Stmt.delete) #[c, Γe, toExpr T, Loc.quote c Γe l]
-  | _, _, Γe, _, @Stmt.deleteMem _ _ T p _ =>
-    mkAppN (mkConst ``Stmt.deleteMem) #[c, Γe, toExpr T, MPath.quote c Γe p, rflTrue]
-  | _, _, Γe, _, @Stmt.assignNew _ _ R l n _ =>
-    mkAppN (mkConst ``Stmt.assignNew) #[c, Γe, toExpr R, NewLhs.quote c Γe l,
+  | _, _, Γe, _, @Stmt.rebindMem _ _ R i r => do
+    pure <| mkAppN (mkConst ``Stmt.rebindMem) #[c, Γe, toExpr R, Idx.quote Γe i, MRhs.quote c Γe r]
+  | _, _, Γe, _, @Stmt.assignFromMem _ _ R l p => do
+    pure <| mkAppN (mkConst ``Stmt.assignFromMem) #[c, Γe, toExpr R, Loc.quote c Γe l, MPath.quote c Γe p]
+  | _, _, Γe, _, @Stmt.assignMem _ _ T l r => do
+    pure <| mkAppN (mkConst ``Stmt.assignMem) #[c, Γe, toExpr T, MLoc.quote c Γe l, MSrc.quote c Γe r]
+  | _, _, Γe, _, @Stmt.delete _ _ T l => pure <| mkAppN (mkConst ``Stmt.delete) #[c, Γe, toExpr T, Loc.quote c Γe l]
+  | _, _, Γe, _, @Stmt.deleteMem _ _ T p _ => do
+    pure <| mkAppN (mkConst ``Stmt.deleteMem) #[c, Γe, toExpr T, MPath.quote c Γe p, rflTrue]
+  | _, _, Γe, _, @Stmt.assignNew _ _ R l n _ => do
+    pure <| mkAppN (mkConst ``Stmt.assignNew) #[c, Γe, toExpr R, NewLhs.quote c Γe l,
       Simple.quote c Γe n, rflTrue]
-  | Γ, _, Γe, _, @Stmt.ite _ _ Γ₁ Γ₂ cv thn els =>
+  | Γ, _, Γe, _, @Stmt.ite _ _ Γ₁ Γ₂ cv thn els => do
     let Γ₁e := ctxFrom Γ Γe Γ₁
     let Γ₂e := ctxFrom Γ Γe Γ₂
-    mkAppN (mkConst ``Stmt.ite) #[c, Γe, Γ₁e, Γ₂e, Val.quote c Γe cv,
-      Prog.quote hs Γe Γ₁e thn, Prog.quote hs Γe Γ₂e els]
-  | _, _, Γe, _, .require cv => mkAppN (mkConst ``Stmt.require) #[c, Γe, Val.quote c Γe cv]
-  | _, _, Γe, _, .assert cv => mkAppN (mkConst ``Stmt.assert) #[c, Γe, Val.quote c Γe cv]
-  | _, _, Γe, _, .revert => mkAppN (mkConst ``Stmt.revert) #[c, Γe]
-  | _, _, Γe, _, .assumeFalse => mkAppN (mkConst ``Stmt.assumeFalse) #[c, Γe]
-  | _, _, Γe, _, .revertData d =>
-    mkAppN (mkConst ``Stmt.revertData) #[c, Γe,
+    pure <| mkAppN (mkConst ``Stmt.ite) #[c, Γe, Γ₁e, Γ₂e, Val.quote c Γe cv,
+      (← Prog.quote hs Γe Γ₁e thn), (← Prog.quote hs Γe Γ₂e els)]
+  | _, _, Γe, _, .require cv => pure <| mkAppN (mkConst ``Stmt.require) #[c, Γe, Val.quote c Γe cv]
+  | _, _, Γe, _, .assert cv => pure <| mkAppN (mkConst ``Stmt.assert) #[c, Γe, Val.quote c Γe cv]
+  | _, _, Γe, _, .revert => pure <| mkAppN (mkConst ``Stmt.revert) #[c, Γe]
+  | _, _, Γe, _, .assumeFalse => pure <| mkAppN (mkConst ``Stmt.assumeFalse) #[c, Γe]
+  | _, _, Γe, _, .revertData d => do
+    pure <| mkAppN (mkConst ``Stmt.revertData) #[c, Γe,
       let ty := mkAppN (mkConst ``RevPart) #[c, Γe]
       (d.map (RevPart.quote c Γe)).foldr (fun x acc => mkAppN (mkConst ``List.cons [0]) #[ty, x, acc])
         (mkAppN (mkConst ``List.nil [0]) #[ty])]
-  | Γ, _, Γe, _, @Stmt.catchData _ _ ρ ps Γf Γ₁ call rets sargs sbody self kind x body =>
+  | Γ, _, Γe, _, @Stmt.catchData _ _ ρ ps Γf Γ₁ call rets sargs sbody self kind x body => do
     let (ase, pse) := Args.quote c Γe sargs
     let fre := ctxOnto pse ρ
     let Γfe := ctxFrom (ρ ++ ps) fre Γf
     let bΓe := ctxOnto Γe [.mem bytesR]
     let Γ₁e := ctxFrom (.mem bytesR :: Γ) bΓe Γ₁
-    mkAppN (mkConst ``Stmt.catchData) #[c, Γe, ctxE ρ, pse, Γfe, Γ₁e,
-      ExtCall.quote c Γe call, Binders.quote rets, ase, Prog.quote hs fre Γfe sbody, toExpr self,
-      CatchKind.quote kind, toExpr x, Prog.quote hs bΓe Γ₁e body]
-  | _, _, Γe, Γ'e, @Stmt.call _ _ _ ps rs Γf f args ret body =>
+    pure <| mkAppN (mkConst ``Stmt.catchData) #[c, Γe, ctxE ρ, pse, Γfe, Γ₁e,
+      ExtCall.quote c Γe call, Binders.quote rets, ase, (← Prog.quote hs fre Γfe sbody), toExpr self,
+      CatchKind.quote kind, toExpr x, (← Prog.quote hs bΓe Γ₁e body)]
+  | _, _, Γe, Γ'e, @Stmt.call _ _ _ ps rs Γf f args ret body => do
     let (ase, pse) := Args.quote c Γe args
     let fre := ctxOnto pse rs
     let Γfe := ctxFrom (rs ++ ps) fre Γf
-    mkAppN (mkConst ``Stmt.call) #[c, Γe, Γ'e, pse, ctxE rs, Γfe, toExpr f, ase,
-      CallRet.quote Γe ret, Prog.quote hs fre Γfe body]
-  | _, _, Γe, Γ'e, @Stmt.callRec _ _ _ ps rs f d args ret body =>
+    pure <| mkAppN (mkConst ``Stmt.call) #[c, Γe, Γ'e, pse, ctxE rs, Γfe, toExpr f, ase,
+      CallRet.quote Γe ret, ← Prog.quoteBody hs fre Γfe body]
+  | _, _, Γe, Γ'e, @Stmt.callRec _ _ _ ps rs f d args ret body => do
     let (ase, pse) := Args.quote c Γe args
     let fre := ctxOnto pse rs
     let head := #[c, Γe, Γ'e, pse, ctxE rs, toExpr f]
-    match hs.idxOf? f with
     -- a call of a function whose unrolling is being quoted: its frame below
-    | some j => mkAppN (mkConst ``Stmt.callRec)
+    if let some j := hs.idxOf? f then
+      return mkAppN (mkConst ``Stmt.callRec)
         (head ++ #[.bvar (3 * j + 1), ase, CallRet.quote Γe ret, .bvar (3 * j)])
     -- a recursive call: `fun _ => recUnroll Prog.recBase (fun n bt => body) d`,
     -- its body's own recursive calls the frame below, `bt`, `n` frames left
-    | none =>
-      let progTy := mkAppN (mkConst ``Prog) #[c, fre, fre]
-      let thunkTy := Lean.mkForall `u .default (mkConst ``Unit) progTy
-      let inner := Prog.quote (f :: hs) fre fre (body ())
-      let stepE := Lean.mkLambda `n .default (mkConst ``Nat)
-        (Lean.mkLambda `bt .default thunkTy inner)
-      let unroll := mkAppN (mkConst ``recUnroll) #[progTy,
-        mkAppN (mkConst ``Prog.recBase) #[c, fre], stepE, Lean.mkRawNatLit d]
-      mkAppN (mkConst ``Stmt.callRec) (head ++ #[Lean.mkRawNatLit d, ase, CallRet.quote Γe ret,
-        Lean.mkLambda `u .default (mkConst ``Unit) unroll])
+    let progTy := mkAppN (mkConst ``Prog) #[c, fre, fre]
+    let thunkTy := Lean.mkForall `u .default (mkConst ``Unit) progTy
+    let inner ← Prog.quote (f :: hs) fre fre (body ())
+    let stepE := Lean.mkLambda `n .default (mkConst ``Nat)
+      (Lean.mkLambda `bt .default thunkTy inner)
+    let unroll := mkAppN (mkConst ``recUnroll) #[progTy,
+      mkAppN (mkConst ``Prog.recBase) #[c, fre], stepE, Lean.mkRawNatLit d]
+    pure <| mkAppN (mkConst ``Stmt.callRec) (head ++ #[Lean.mkRawNatLit d, ase, CallRet.quote Γe ret,
+      Lean.mkLambda `u .default (mkConst ``Unit) unroll])
   | Γ, _, Γe, _, @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf call rets ok err code pnc other
-      sargs sbody self =>
+      sargs sbody self => do
     let oke := ctxOnto Γe ρ
     let pne := ctxOnto Γe κ
     let Γ₁e := ctxFrom (ρ ++ Γ) oke Γ₁
@@ -389,24 +435,36 @@ def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr →
     let (ase, pse) := Args.quote c Γe sargs
     let fre := ctxOnto pse ρ
     let Γfe := ctxFrom (ρ ++ ps) fre Γf
-    mkAppN (mkConst ``Stmt.tryCall) #[c, Γe, ctxE ρ, ctxE κ, Γ₁e, Γ₂e, Γ₃e, Γ₄e, pse, Γfe,
-      ExtCall.quote c Γe call, Binders.quote rets, Prog.quote hs oke Γ₁e ok, Prog.quote hs Γe Γ₂e err,
-      CodeBinder.quote code, Prog.quote hs pne Γ₃e pnc, Prog.quote hs Γe Γ₄e other, ase,
-      Prog.quote hs fre Γfe sbody, toExpr self]
-  | Γ, _, Γe, _, @Stmt.loop _ _ Γ₁ a cv body =>
+    pure <| mkAppN (mkConst ``Stmt.tryCall) #[c, Γe, ctxE ρ, ctxE κ, Γ₁e, Γ₂e, Γ₃e, Γ₄e, pse, Γfe,
+      ExtCall.quote c Γe call, Binders.quote rets, (← Prog.quote hs oke Γ₁e ok), (← Prog.quote hs Γe Γ₂e err),
+      CodeBinder.quote code, (← Prog.quote hs pne Γ₃e pnc), (← Prog.quote hs Γe Γ₄e other), ase,
+      (← Prog.quote hs fre Γfe sbody), toExpr self]
+  | Γ, _, Γe, _, @Stmt.loop _ _ Γ₁ a cv body => do
     let Γ₁e := ctxFrom Γ Γe Γ₁
-    mkAppN (mkConst ``Stmt.loop) #[c, Γe, Γ₁e, LoopAnn.quote c Γe a, Val.quote c Γe cv,
-      Prog.quote hs Γe Γ₁e body]
-  | Γ, _, Γe, _, @Stmt.block _ _ Γ₁ body =>
+    pure <| mkAppN (mkConst ``Stmt.loop) #[c, Γe, Γ₁e, LoopAnn.quote c Γe a, Val.quote c Γe cv,
+      (← Prog.quote hs Γe Γ₁e body)]
+  | Γ, _, Γe, _, @Stmt.block _ _ Γ₁ body => do
     let Γ₁e := ctxFrom Γ Γe Γ₁
-    mkAppN (mkConst ``Stmt.block) #[c, Γe, Γ₁e, Prog.quote hs Γe Γ₁e body]
+    pure <| mkAppN (mkConst ``Stmt.block) #[c, Γe, Γ₁e, (← Prog.quote hs Γe Γ₁e body)]
 
 /-- A block read in `Γ` (its term `Γe`) leaving `Γ'` (its term `Γ'e`). -/
-def Prog.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Prog C Γ Γ' → Lean.Expr
-  | _, _, Γe, _, .nil => mkAppN (mkConst ``Prog.nil) #[c, Γe]
-  | Γ, _, Γe, Γ₂e, @Prog.cons _ _ Γ₁ _ s P =>
+partial def Prog.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Prog C Γ Γ' →
+    QuoteM Lean.Expr
+  | _, _, Γe, _, .nil => pure <| mkAppN (mkConst ``Prog.nil) #[c, Γe]
+  | Γ, _, Γe, Γ₂e, @Prog.cons _ _ Γ₁ _ s P => do
     let Γ₁e := ctxFrom Γ Γe Γ₁
-    mkAppN (mkConst ``Prog.cons) #[c, Γe, Γ₁e, Γ₂e, Stmt.quote hs Γe Γ₁e s, Prog.quote hs Γ₁e Γ₂e P]
+    pure <| mkAppN (mkConst ``Prog.cons) #[c, Γe, Γ₁e, Γ₂e, (← Stmt.quote hs Γe Γ₁e s), (← Prog.quote hs Γ₁e Γ₂e P)]
+
+/-- A call's body, quoted once (`QMemo`). -/
+partial def Prog.quoteBody (hs : List Name) {Γ Γ' : Ctx} (Γe Γ'e : Lean.Expr) (P : Prog C Γ Γ') :
+    QuoteM Lean.Expr := do
+  let k := Lean.mkApp2 c Γe Γ'e
+  match ← QMemo.find P hs k with
+  | some e => pure e
+  | none =>
+    let e ← Prog.quote hs Γe Γ'e P
+    QMemo.add P hs k e
+    pure e
 
 end
 
@@ -415,7 +473,7 @@ the terms of its contexts: the value, `Γ` and `Γ'`. -/
 def Prog.quoteShared {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Lean.Expr × Lean.Expr × Lean.Expr :=
   let Γe := ctxE Γ
   let Γ'e := ctxFrom Γ Γe Γ'
-  Lean.ShareCommon.shareCommon (Prog.quote c [] Γe Γ'e P, Γe, Γ'e)
+  Lean.ShareCommon.shareCommon ((Prog.quote c [] Γe Γ'e P).run' {}, Γe, Γ'e)
 
 /-- The type `Prog C Γ Γ'` of a quoted block, from the terms of its contexts. -/
 def Prog.quoteType (Γe Γ'e : Lean.Expr) : Lean.Expr := mkAppN (mkConst ``Prog) #[c, Γe, Γ'e]

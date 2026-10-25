@@ -813,9 +813,8 @@ addition.  What still grows is the summary's computation: a call statement
 carries its callee's inlined bodies (the elaborator inlines, `Stmt.call`),
 a tree of `2^k` copies of `f₀`'s, which the kernel's evaluation of
 `Prog.sym` walks; the times above grow by about `1.8` a level from it.
-Making that polynomial too needs the bodies named once per function (a
-call carrying its callee by name and a table of summaries proved once per
-function), a change to the syntax, not to the calculus.
+That is gone since "One body a function" (below): every call of a
+callee holds the same body term, which the kernel's caches walk once.
 
 **What a summary does not share** (review, 2026-10-24).  A summary is one
 term over the callee's frame, and a call in the body substitutes its
@@ -964,6 +963,86 @@ locals' stack, one deeper per call site, and each check reads the product
 and its equation, rather than the product substituted) would make the
 checks constant; the stack would still grow.  The walk grows with the
 inlined bodies the kernel's evaluation of the summary walks (above).
+
+**One body a function (2026-10-25).**  A call statement still carries its
+callee's body (`Stmt.call`, the run, the rules and their soundness are
+unchanged), but the body is now the same term at every call of the callee,
+so the program is a DAG the size of the source, and the kernel, whose
+caches are keyed by the term, evaluates a callee's summary once however
+many call paths reach it.  Three changes, none in the calculus:
+
+* *The names.*  A body differed between calls only by the fresh names of
+  its locals (`se5` at one call, `se9` at the next), so its copies were
+  distinct terms.  A callee all of whose locals end with the call (not
+  recursive, not the constructor, no return variable left in the caller:
+  `FunDecl.endsWithCall`, a call not in a tuple assignment) now numbers its
+  locals from where its first call's were (`CallMemo.enter`,
+  `Syntax/Elab/Values.lean`), and the caller's numbering goes on after the
+  call where it was (`CallMemo.leave`).  Two such calls never have their
+  locals live at once (the frame is popped after the call,
+  `Premise.unfold`), so the names stay unique on every state; a printed
+  inlining repeats them (`addOne`'s `se3`, `se4` twice in
+  `Syntax/Splice.lean`'s pin).  The key (`calleeKey`) is what else the
+  elaboration reads: the callee, a self-call's frame, the overflow mode,
+  `msg.value`'s reading.
+* *The elaborator* reads a repeated callee's body back instead of
+  elaborating it again (`CallMemo.body?`, `inlinedBody`,
+  `Syntax/Elab/Arms.lean`): logically `none` (elaborate again, which gives
+  the same body), compiled the body its first call stored
+  (`implemented_by`, the contract checked by address).  And
+  `reachableBy` (`Syntax/Elab/Context.lean`) visits each function once a
+  round: it explored `fₖ₋₁` twice, `fₖ₋₂` four times, at every call, the
+  elaborator's last exponential.
+* *The quoters* quote a call's body once per object and contexts
+  (`QMemo`, `Prog.quoteBody` in `Syntax/Quote.lean`, `qStmtH` in
+  `Calculus/Quote.lean`, logically quoting it again); `Prog.quote` and
+  `Stmt.quote` are monadic (`QuoteM`) and `partial`, as `Calculus/Quote.lean`'s
+  were, and `QM` carries the memo (`QM.go`).
+
+Literal factors are folded as literal summands are (`Op2.mk2`,
+`(u * c₁) * c₂ ⇝ u * (c₁ * c₂)` at `uint` where the product is a `uint`
+and `c₂ ≠ 0`, KeY's `polySimp`; `Op2.mk2_mul_eval`,
+`PrimTy.uint_ofInt?_mul_assoc`: `u * c₁` overflows only where the folded
+product does), so the tripling family's summary is one product,
+`x * 3^(2^k)`.  A summary whose operations do not fold
+(`f₀(x) = x * 3 + 1`, `Examples/Tactics/CallSummary.lean`'s `Affine`) is
+still `2^(k+1)` operations, read one call site at a time as above.
+
+*Speed* (the review's question: none of this undoes an earlier speed
+change; `git log` shows none on the elaborator's naming or the quoters).
+The elaborator and the quoters do strictly less work on a repeated
+callee and the same on any other; the extra monad layer (`StateT CallMemo`,
+`StateM QMemo`) costs nothing measurable in the elaboration of the
+examples.  `elabCallRetWith` is split (`elabCallRetCore`, `calleeBody`,
+`inlinedBody`): one more bind in the old body ran it past the default
+heartbeats while its own definition was elaborated.
+
+Measured (`a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, a scratch module, one
+declaration each; *DAG*: distinct subterms of the `dl!` formula's term;
+*walk*: `sol_prove (steps := 128)`; *leaf*: `sol_leaf; sol_close`;
+*kernel*: the declaration's type checking):
+
+| family | k | DAG before → after | walk before → after | leaf before → after | kernel before → after |
+|---|---|---|---|---|---|
+| `x * 3` | 1 | 422 → 408 | 0.18 → 0.16 s | 0.21 → 0.15 s | 0.16 → 0.14 s |
+| | 2 | 623 → 495 | 0.24 → 0.17 s | 0.30 → 0.14 s | 0.21 → 0.15 s |
+| | 3 | 1 024 → 582 | 0.32 → 0.19 s | 0.60 → 0.14 s | 0.30 → 0.17 s |
+| | 4 | 1 825 → 669 | 0.52 → 0.19 s | 1.4 → 0.14 s | 0.49 → 0.18 s |
+| | 5 | 3 426 → 756 | 0.94 → 0.21 s | 3.8 → 0.14 s | 0.88 → 0.19 s |
+| | 6 | 6 627 → 843 | 1.7 → 0.22 s | fails (budget) → 0.14 s | 1.6 → 0.20 s |
+| | 7 | 13 028 → 930 | 3.4 → 0.24 s | fails (budget) → 0.14 s | 3.1 → 0.21 s |
+| `x + 1` | 1 | | 0.17 → 0.17 s | 0.14 → 0.14 s | 0.16 → 0.15 s |
+| | 4 | | 0.31 → 0.21 s | 0.14 → 0.14 s | 0.28 → 0.19 s |
+| | 7 | | 1.5 → 0.24 s | 0.14 → 0.14 s | 1.2 → 0.22 s |
+
+The `sol[…]{ uint y = fₖ(a); }` program of the `x + 1` family: distinct
+subterms 267, 554, 1 686, 6 202, 48 320 before and 255, 330, 404, 478, 589
+after at `k = 1, 3, 5, 7, 10` (its tree, 2 471 … 1 568 175 nodes, is the
+same); the elaboration of `fₖ` at `k = 8, 9, 10`, compiled code: 33, 59,
+112 ms before, 6.6, 7.3, 7.8 ms after; quoting: 61, 119, 229 ms before,
+8.9, 9.7, 10.6 ms after.  Every column grows linearly in `k` after,
+the DAG by 87 subterms a level.  `Examples/Tactics/CallSummary.lean` proves
+both families to `k = 7` by `sol_prove` and the leaf replay.
 
 ## Review (2026-10-20)
 

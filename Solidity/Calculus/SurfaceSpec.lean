@@ -591,7 +591,7 @@ def specPieces (f : String) :
   let call : List RawStmt := if ctor then [.call (.name f) args] else
     rets.map (fun (_, v, p) => RawStmt.decl (.named (p.toStr)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
-  let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
+  let P ← (elabStmtsP C call).runFrom' { funs := C.funs } (Γ, 1)
   -- the snapshots `\old` reads, taken where something reads them
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
