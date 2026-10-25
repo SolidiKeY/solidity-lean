@@ -171,7 +171,12 @@ its arguments; `uint` is `Nat`, a `mapping` a `Mapping` (unwritten keys read
 zero, `@[grind =]` on its read-over-write), and Solidity's reverts (a
 `require`, overflow and underflow, an index past the length, a division by
 zero) are Loom `assume`s, so an `ensures` speaks of the calls that do not
-revert. The contracts are three Solidity programs of the core (the counting
+revert. `Bridge/SolidityVelvet/TestSuite.lean` is solkey's `TestSuite.sol` read
+this way: 83 of its functions, under their names, in one contract, each
+stating with `assert` what holds after the feature it tests, all proved by
+`prove_contract TestSuite by loom_solve`; those that need structs, aliases,
+memory, calls, `break`/`continue` or effects inside expressions are left
+out. The other contracts are three Solidity programs of the core (the counting
 loop of `LoomExamples`, a scan for the largest balance, ERC20's `transfer`),
 a bank (`Bridge/SolidityVelvet/Bank.lean`), an ERC20 token's `mint`,
 `transfer`, `approve` and `transferFrom` (`Bridge/SolidityVelvet/Token.lean`)

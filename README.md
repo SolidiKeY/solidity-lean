@@ -22,6 +22,11 @@ The Velvet examples are Solidity contracts, each on one page with its
 specification (`contract C { … }`, `Bridge/SolidityVelvet/Contract.lean`),
 every function proved by Velvet's `loom_solve`:
 
+- [The test suite](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/TestSuite.lean) — one
+  contract of 83 of solkey's `TestSuite.sol` functions, feature by feature
+  (arithmetic and its reverts, logic, `if`, `require`/`assert`, storage
+  roots, mappings, arrays, `push`/`pop`, `delete`, loops), all proved by
+  `prove_contract TestSuite by loom_solve`
 - [Solidity patterns](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet.lean) — a counting loop, the largest
   balance, ERC20's `transfer`
 - [A bank](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Bank.lean) — `deposit`, `withdraw` and

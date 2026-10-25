@@ -81,6 +81,7 @@ See `docs/bridge.md` for scope and commands.
 | `Bridge/vendor/CaseStudies/Velvet/Std.lean` | Velvet's front end (`method`, `prove_correct`, `loom_solve`), vendored verbatim from Loom's last Velvet commit with four of its examples; provenance and checksums in `Bridge/vendor/CaseStudies/VENDOR.md`. |
 | `Bridge/SolidityVelvet/Contract.lean` | `contract C { … }`: a Solidity contract (storage, functions, `ensures`, loop `invariant`s) read as one Velvet method per function; `Mapping`, Solidity's reverts as `assume`s. |
 | `Bridge/SolidityVelvet.lean` | Three of the core's Solidity programs as a contract (a counting loop, a largest-balance scan, ERC20's `transfer`), proved by `loom_solve` and pinned by `#eval`; not related to `Stmt.run`. |
+| `Bridge/SolidityVelvet/TestSuite.lean` | solkey's `TestSuite.sol` in Velvet: 83 of its functions, under their names, in one contract, each `assert` proved (`prove_contract`). |
 | `Bridge/SolidityVelvet/Bank.lean` | A bank contract: `deposit` (reverting past `2^256 - 1`), `withdraw`, `balance`. |
 | `Bridge/SolidityVelvet/Token.lean` | An ERC20 token contract: `mint`, `transfer`, `approve`, `transferFrom` over mappings. |
 | `Bridge/SolidityVelvet/Loops.lean` | A contract's loops over storage arrays: the total balance, a holder's index, the winning proposal. |

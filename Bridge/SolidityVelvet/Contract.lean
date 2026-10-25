@@ -37,12 +37,17 @@ The reading:
   under Velvet's partial correctness a reverting run has no outcome, so an
   `ensures` is about the calls that do not revert, as solc-verify reads it.
 - **Specs.** `ensures e` after the signature, `invariant e` after a loop's
-  header, over Solidity expressions with `old(e)`, `forall (T x) e` and
-  `a ==> b`; any other call `f(a, b)` is the Lean function `f a b`.
+  header and `assert(e)` in the body (a proof obligation, as KeY reads it),
+  over Solidity expressions with `old(e)`, `forall (T x) e` and `a ==> b`;
+  any other call `f(a, b)` is the Lean function `f a b`.
 
-Statements are Solidity's: local declarations, `=`, `+=`, `-=`, `*=`,
-`x++`, `a.push(v)`, `require`, `if`/`else`, `while`, `for` and `return`
-last. A decrement is `x -= 1` (`--` opens a Lean comment).
+Statements are Solidity's: local declarations, `=`, the compound
+assignments, `x++` and `++x`, `delete`, `a.push(v)`, `a.push()`, `a.pop()`,
+`require`, `assert`, `if`/`else`, `while`, `for` and `return` last;
+expressions add the ternary `c ? a : b`. Two spellings are the core's
+(`sol{ … }`), since `--` opens a Lean comment: a decrement is `x−−` (two
+U+2212), and a comment is Lean's `--`, not `//`. `prove_contract C by
+loom_solve` proves every function of `C` (`Bridge/SolidityVelvet/TestSuite.lean`).
 -/
 
 open Lean Elab Command Term
@@ -162,11 +167,14 @@ syntax:35 solExpr:35 " && " solExpr:36 : solExpr
 syntax:30 solExpr:30 " || " solExpr:31 : solExpr
 syntax:25 solExpr:26 " ==> " solExpr:25 : solExpr
 syntax:20 "forall" "(" solTy ident ")" solExpr:20 : solExpr
+syntax:20 solExpr:21 " ? " solExpr:21 " : " solExpr:20 : solExpr
 
 syntax "invariant " solExpr : solInv
 syntax "ensures " solExpr : solSpec
 
 syntax solExpr "++" : solStep
+syntax "++" solExpr : solStep
+syntax solExpr "−−" : solStep
 syntax solExpr " += " solExpr : solStep
 syntax solExpr " = " solExpr : solStep
 
@@ -176,7 +184,14 @@ syntax solExpr " = " solExpr ";" : solStmt
 syntax solExpr " += " solExpr ";" : solStmt
 syntax solExpr " -= " solExpr ";" : solStmt
 syntax solExpr " *= " solExpr ";" : solStmt
+syntax solExpr " /= " solExpr ";" : solStmt
+syntax solExpr " %= " solExpr ";" : solStmt
 syntax solExpr "++" ";" : solStmt
+syntax "++" solExpr ";" : solStmt
+syntax solExpr "−−" ";" : solStmt
+syntax "−−" solExpr ";" : solStmt
+syntax "delete " solExpr ";" : solStmt
+syntax "assert" "(" solExpr ")" ";" : solStmt
 syntax solExpr ";" : solStmt
 syntax "require" "(" solExpr ")" ";" : solStmt
 syntax "if " "(" solExpr ")" solStmt (" else " solStmt)? : solStmt
@@ -197,6 +212,10 @@ syntax "function " ident "(" solParam,* ")" solMod*
 /-- `contract C { storage and functions }`: one Velvet `method` `C.f` for
 each function `f`, proved by `prove_correct C.f by loom_solve`. -/
 syntax "contract " ident "{" solMember* "}" : command
+
+/-- `prove_contract C by tac`: `prove_correct C.f by tac` for every function
+`f` of `C`, in the order of the source. -/
+syntax "prove_contract " ident " by " tacticSeq : command
 
 /-! ## The reading -/
 
@@ -352,6 +371,11 @@ partial def trExpr (c : Ctx) (e : TSyntax `solExpr) : TrM Term := do
     let ta ← trExpr c a
     let tb ← guarded (trExpr c b) fun g => `($ta → $g)
     `($ta → $tb)
+  | `(solExpr| $a ? $b : $d) => do
+    let ta ← trExpr c a
+    let tb ← guardedBy ta (trExpr c b) fun g => `($ta → $g)
+    let td ← guarded (trExpr c d) fun g => `(¬ $ta → $g)
+    `(if $ta then $tb else $td)
   | `(solExpr| forall ($t $x) $b) => do
     let ty ← SolTy.ofSyntax t
     let tb ← trExpr (c.push x.getId ty) b
@@ -368,9 +392,9 @@ partial def arith (t : Term) : TrM Term := do
 end
 
 /-- A specification: an expression whose guards are dropped (`a[i]` reads
-`a[i]!`). -/
-def trSpec (c : Ctx) (e : TSyntax `solExpr) : CommandElabM Term :=
-  Prod.fst <$> (trExpr c e).run #[]
+`a[i]!`), stated at `Prop`, so that a `bool` reads as `b = true`. -/
+def trSpec (c : Ctx) (e : TSyntax `solExpr) : CommandElabM Term := do
+  `(($(← Prod.fst <$> (trExpr c e).run #[]) : Prop))
 
 abbrev Item := TSyntax ``Lean.Parser.Term.doSeqItem
 
@@ -434,14 +458,35 @@ partial def trStmt (c : Ctx) (s : TSyntax `solStmt) : CommandElabM (Ctx × Array
   | `(solStmt| $l:solExpr += $r:solExpr ;) => return (c, ← trAssign c l (← `(solExpr| $l + $(← operand r))))
   | `(solStmt| $l:solExpr -= $r:solExpr ;) => return (c, ← trAssign c l (← `(solExpr| $l - $(← operand r))))
   | `(solStmt| $l:solExpr *= $r:solExpr ;) => return (c, ← trAssign c l (← `(solExpr| $l * $(← operand r))))
-  | `(solStmt| $l:solExpr ++ ;) => return (c, ← trAssign c l (← `(solExpr| $l + 1)))
+  | `(solStmt| $l:solExpr /= $r:solExpr ;) => return (c, ← trAssign c l (← `(solExpr| $l / $(← operand r))))
+  | `(solStmt| $l:solExpr %= $r:solExpr ;) => return (c, ← trAssign c l (← `(solExpr| $l % $(← operand r))))
+  | `(solStmt| $l:solExpr ++ ;) | `(solStmt| ++ $l:solExpr ;) =>
+    return (c, ← trAssign c l (← `(solExpr| $l + 1)))
+  | `(solStmt| $l:solExpr −− ;) | `(solStmt| −− $l:solExpr ;) =>
+    return (c, ← trAssign c l (← `(solExpr| $l - 1)))
+  | `(solStmt| delete $l:solExpr ;) => do
+    let some t := tyOf c l | throwErrorAt l "cannot delete this expression: its type is unknown"
+    let (items, gs) ← (assign c l (← t.zero)).run #[]
+    return (c, (← assumes gs) ++ items)
+  | `(solStmt| assert($e);) => do
+    let (t, gs) ← trCode c e
+    let t ← `(($t : Prop))
+    return (c, gs.push (← `(Lean.Parser.Term.doSeqItem| assertGadget (with_name_prefix `assert $t))))
   | `(solStmt| $f:ident($args,*) ;) => do
-    let .str p "push" := f.getId | throwErrorAt f "unsupported call statement"
-    let #[a] := args.getElems | throwErrorAt s "`push` takes one argument"
-    let some (.array _) := c.lookup p | throwErrorAt f "`push` on a non-array"
-    let (v, gs) ← trCode c a
+    let .str p m := f.getId | throwErrorAt f "unsupported call statement"
+    let some (.array el) := c.lookup p | throwErrorAt f "unsupported call statement: `{p}` is not an array"
     let x := mkIdent p
-    return (c, gs.push (← `(Lean.Parser.Term.doSeqItem| $x:ident := Array.push $x $v)))
+    match m, args.getElems with
+    | "push", #[a] =>
+      let (v, gs) ← trCode c a
+      return (c, gs.push (← `(Lean.Parser.Term.doSeqItem| $x:ident := Array.push $x $v)))
+    | "push", #[] =>
+      return (c, #[← `(Lean.Parser.Term.doSeqItem| $x:ident := Array.push $x $(← el.zero))])
+    | "pop", #[] =>
+      -- `pop` on an empty array reverts.
+      let g ← `(0 < Array.size $x)
+      return (c, (← assumes #[g]).push (← `(Lean.Parser.Term.doSeqItem| $x:ident := Array.pop $x)))
+    | _, _ => throwErrorAt s "unsupported call statement: only `push(v)`, `push()` and `pop()`"
   | `(solStmt| require($e);) => do
     let (t, gs) ← trCode c e
     return (c, gs ++ (← assumes #[t]))
@@ -461,7 +506,8 @@ partial def trStmt (c : Ctx) (s : TSyntax `solStmt) : CommandElabM (Ctx × Array
   | `(solStmt| for ($init:solStmt $e:solExpr; $step:solStep) $invs:solInv* $body:solStmt) => do
     let (c', ii) ← trStmt c init
     let si ← match step with
-      | `(solStep| $l:solExpr ++) => trAssign c' l (← `(solExpr| $l + 1))
+      | `(solStep| $l:solExpr ++) | `(solStep| ++ $l:solExpr) => trAssign c' l (← `(solExpr| $l + 1))
+      | `(solStep| $l:solExpr −−) => trAssign c' l (← `(solExpr| $l - 1))
       | `(solStep| $l:solExpr += $r:solExpr) => trAssign c' l (← `(solExpr| $l + $(← operand r)))
       | `(solStep| $l:solExpr = $r:solExpr) => trAssign c' l r
       | _ => throwErrorAt step "unsupported loop step"
@@ -517,13 +563,17 @@ partial def written (s : TSyntax `solStmt) : Array Name :=
   match s with
   | `(solStmt| { $ss* }) => ss.flatMap written
   | `(solStmt| $l:solExpr = $_:solExpr ;) | `(solStmt| $l:solExpr += $_:solExpr ;) | `(solStmt| $l:solExpr -= $_:solExpr ;)
-  | `(solStmt| $l:solExpr *= $_:solExpr ;) | `(solStmt| $l:solExpr ++ ;) => lhsRoot l
+  | `(solStmt| $l:solExpr *= $_:solExpr ;) | `(solStmt| $l:solExpr /= $_:solExpr ;)
+  | `(solStmt| $l:solExpr %= $_:solExpr ;) | `(solStmt| $l:solExpr ++ ;)
+  | `(solStmt| ++ $l:solExpr ;) | `(solStmt| $l:solExpr −− ;) | `(solStmt| −− $l:solExpr ;)
+  | `(solStmt| delete $l:solExpr ;) => lhsRoot l
   | `(solStmt| $f:ident($_,*) ;) => #[f.getId.getRoot]
   | `(solStmt| if ($_) $thn:solStmt $[else $els:solStmt]?) => written thn ++ (els.map written).getD #[]
   | `(solStmt| while ($_) $_:solInv* $body:solStmt) => written body
   | `(solStmt| for ($init:solStmt $_:solExpr; $step:solStep) $_:solInv* $body:solStmt) =>
     written init ++ written body ++ (match step with
-      | `(solStep| $l:solExpr ++) | `(solStep| $l:solExpr += $_:solExpr) | `(solStep| $l:solExpr = $_:solExpr) => lhsRoot l
+      | `(solStep| $l:solExpr ++) | `(solStep| ++ $l:solExpr) | `(solStep| $l:solExpr −−)
+      | `(solStep| $l:solExpr += $_:solExpr) | `(solStep| $l:solExpr = $_:solExpr) => lhsRoot l
       | _ => #[])
   | _ => #[]
 
@@ -592,6 +642,14 @@ def trFunction (cname : Name) (storage : List (Name × SolTy)) (f : Ident)
   `(command| method $name $binders* return ($(mkIdent retName) : $retLean) $[ensures $specTerms]*
       do $items*)
 
+/-- Each contract's functions, in the order of the source, for `prove_contract`. -/
+initialize contractFunctions :
+    SimpleScopedEnvExtension (Name × Name) (Std.HashMap Name (Array Name)) ←
+  registerSimpleScopedEnvExtension {
+    initial := {}
+    addEntry := fun s (c, f) => s.insert c ((s.getD c #[]).push f)
+  }
+
 elab_rules : command
   | `(command| contract $c:ident { $members* }) => do
     let mut storage : List (Name × SolTy) := []
@@ -601,6 +659,14 @@ elab_rules : command
       | `(solMember| function $f:ident ($ps,*) $mods:solMod* $[returns ($r)]? $specs:solSpec* { $body* }) =>
         let cmd ← withRef m <| trFunction c.getId storage f ps.getElems mods r specs body
         withRef m <| elabCommand cmd
+        contractFunctions.add (c.getId, c.getId ++ f.getId)
       | _ => throwErrorAt m "unsupported contract member"
+
+elab_rules : command
+  | `(command| prove_contract $c:ident by $tac) => do
+    let some fs := (contractFunctions.getState (← getEnv))[c.getId]?
+      | throwErrorAt c "no contract {c} has been read"
+    for f in fs do
+      elabCommand (← `(command| prove_correct $(mkIdent f):ident by $tac))
 
 end SolidityVelvet
