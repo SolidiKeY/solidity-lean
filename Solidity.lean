@@ -468,6 +468,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
+import Solidity.Examples.DecisionMemory
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify

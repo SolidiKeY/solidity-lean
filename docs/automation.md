@@ -1133,8 +1133,9 @@ It is the goal of the rounds to come, not true today:
 kernel, `*_inTarget`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
 over an inner mapping, `allow[3][k]`), `namesTwoKinds` (two kinds of
-hash of one string) and `arrayRead`, `fixedRead` (storage-array reads,
-feature 10), the last four since 2026-10-25.
+hash of one string), `arrayRead`, `fixedRead` (storage-array reads,
+feature 10) and `gapMemory` (a fresh memory array's element, feature 13),
+the last five since 2026-10-25.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, never a superset:
@@ -1197,6 +1198,8 @@ Three properties of the reading are worth knowing.
 | `LFml.orLift_holds`, `LFml.gx_holds`, `LFml.hasFold_holds` | fallbacks lifted, guards extracted, slot tests a length check settles folded: exact |
 | `LFml.aCut_valid_iff`, `LFml.aCut_refutes` | the array cut is exact; a refutation of the cut leaf refutes the leaf in the state its arrays are rebuilt in |
 | `arrayReduction?_isSome` | `φ.arrayCovered = true → (arrayReduction? φ).isSome` |
+| `Fml.mx_holds`, `Fml.mxTop_holds` | the fresh memory arrays' cut is exact at every state (`Calculus/MemSwap.lean`) |
+| `decideMem_sound`, `decideMem_refutes`, `decideMem_complete` | the memory lane: a proof of the cut leaf proves the leaf, a state refuting it refutes the leaf, it answers on `Fml.memCovered` |
 
 `#print axioms` of each of the six `decide*` theorems, of
 `decideGoal_complete_hash` and of the hash reduction's four
@@ -1206,14 +1209,18 @@ Three properties of the reading are worth knowing.
 `Fml.tk_refutes`, `Fml.tk_complete`) in `Calculus/HashKinds.lean`, of `QFml.decide_iff` and `QFml.verify` in
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
 `Calculus/QuantTotality.lean`, of the preparations' in
-`Calculus/QuantHoist.lean` and `Calculus/ArrayProperty.lean`: `propext`,
+`Calculus/QuantHoist.lean` and `Calculus/ArrayProperty.lean`, of
+`Fml.mxTop_holds` in `Calculus/MemSwap.lean`: `propext`,
 `Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
-`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by
-features 1, 2, 4, 5 and 8, each with its completeness proved through every
-stage (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
-(features 3, 6 and 7, its own pipeline), or `Fml.ledgerCovered` (feature 9,
-its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
+`Fml.Covered` is `Fml.CoveredA || Fml.memCovered`.  `Fml.CoveredA`, the
+pipelines' fragment (`decideLeafA`), is `Fml.inExact && Fml.exactBounded`
+(M4), extended by features 1, 2, 4, 5 and 8, each with its completeness
+proved through every stage (recognizer, lifting, flattening, compilers), or
+`Fml.quantCovered` (features 3, 6 and 7, its own pipeline), or
+`Fml.ledgerCovered` (feature 9, its own pipeline), or `Fml.arrayCovered`
+(feature 10, its own pipeline); `Fml.memCovered` is feature 13's, a leaf
+with fresh memory arrays whose cut is in `Fml.CoveredA`:
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1504,13 +1511,49 @@ its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
     swapped body over the new binders in `Fml.rl` of their levels and the
     roots they key, each `mapping(uint => uint)` (`Fml.tkRL`).
 
+13. **Fresh memory arrays** (2026-10-25, plan step 6, `decideMem`,
+    `Calculus/MemSwap.lean`).  `decideLeaf` is `decideLeafA` (the
+    pipelines above), then, where that answers `unknown` and the leaf binds
+    fresh memory objects (`Fml.allocAll`: a `catch` clause's data, a memory
+    parameter), `decideMem`: the leaf with its reads of fresh arrays of
+    primitives (`T[]`, `T[n]` with `n < 2^256`, any contents) cut into
+    atoms (`Fml.mxTop`), decided by `decideLeafA`.
+    * **the cut** (`Fml.mx`, `Tm.mx`): each binder `∀ fresh x : T[]`
+      becomes `∀ uint n` (the length; a word nothing reads for `T[n]`),
+      then one `∀ w` per read `x[e]` the leaf makes (`Fml.mxIdx`, repeats
+      dropped), under what actual arrays make of them (`mxCons`, Ackermann's
+      reduction: `eᵢ == eⱼ → wᵢ == wⱼ`); `len(x)` becomes `n`, the read
+      `e < n ? w : ⊥` (`n` the literal length of a `T[n]`, `⊥` the halt
+      `1 / 0`: a read past the length reverts).  The binder's atoms stand
+      right after it, so it may stand anywhere among `∀`s and connectives,
+      at either polarity; an index must name no local bound after the array
+      and read as it denotes (`Tm.ixOk`: value locals, literals, the
+      transaction's fields, operators).
+    * **exact at every state** (`Fml.mx_holds`, `Fml.mxTop_holds`):
+      `MxRel` relates a state of the leaf to one of the cut leaf: global
+      parts alike but for the heap, value locals alike, each read the cut
+      has abstracted (`MxOrig`: a length, an element at an index) read by
+      the term that stands for it (`MxMap.tbl`); terms read and denote alike
+      over it (`Tm.mx_eval`, `Tm.mx_denote`), an allocation keeping every
+      older read (`MxOrig.eval_alloc`).  At a binder, a fresh object's reads
+      give words that meet the premise (`mxFill`), and words that meet it
+      give an object of length `n` holding at each index the word of the
+      first read there (`mxRealize`), so `∀ fresh x. φ` holds exactly where
+      `∀ n w. cons → φ'` does (`MxRel.alloc`).  A proof of the cut leaf
+      proves the leaf; a state refuting it refutes the leaf, as it is (the
+      binders range over every object).
+    `Fml.memCovered` is the fragment: the leaf binds a fresh object, its cut
+    is defined and in `Fml.CoveredA` (`decideMem_complete`).
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
 and eight and nine (no atom of `Srt.kint`, no ledger read), and ten
 (`sourceReduction?` refused a formula's `a[i]` after an update, and no
 stage read an array path); eleven was answered `unknown` (`decideGoal`
-read no hash), and twelve too (the swap reads one kind).
+read no hash), and twelve too (the swap reads one kind), and thirteen
+(`ExactAt` has no case for `allocAll`, `LTm.Elimable` refuses the memory
+sorts).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1581,6 +1624,17 @@ For the inner mappings of feature 7: `rowApf` (`allow[3][k]`) and `rowVar`
 (a parameter row) proved, `rowBad` (another row) and `rowOut` (a key past
 the guard) refuted; `rowApf_covered`, `rowBad_covered` kernel-checked,
 `rowApf_answers`, `rowApf_iff`.
+For feature 13, `Examples/DecisionMemory.lean` pins: `gapMemory`
+(`len(s) > 0 → s[0] == 0`, once a counterexample) refuted; a read at a parameter index read twice
+(`memSame`) and Ackermann's premise (`memAck`, `i == j → s[i] == 5 →
+s[j] == 5`) proved, without `i == j` (`memAckBad`) refuted; two fresh
+arrays apart (`memApart`) and their lengths (`memLenEq`) refuted; a read
+below the length (`memInRange`) proved, past it (`memPast`, at length `0`)
+refuted, and two reads that halt alike equal in the Theory (`memHalts`)
+proved; a `uint[3]` read below its length (`memFixed`) proved, past it
+(`memFixedPast`) refuted; a `bool[]` (`memBools`) proved.
+`gapMemory_covered`, `memAck_covered` and `memAck_inTarget` are
+kernel-checked, `gapMemory_answers` and `memAck_iff` apply the theorems.
 
 ### Running time (the walks)
 
@@ -1694,11 +1748,10 @@ of about two thousand nodes, about a millisecond a state).  The
     (`gapPartialGuard`, `k < x - 1`: the index set takes total operands);
     a positive quantifier the prefix does not reach, reading at its
     variable (`gapPositiveForall`, `∀ k` inside a conjunction);
-  * **memory, the ledger and KeY `int` without quantifiers** (the plain
+  * **the ledger and KeY `int` without quantifiers** (the plain
     storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
-    decided by feature 10): a memory read (`gapMemory`:
-    `LTm.Elimable` refuses the memory sorts, no stage realizes a heap); a
-    binder of KeY's `int` (`gapKIntBinder`: `LFml` has no unbounded binder);
+    decided by feature 10, and the fresh memory array's, `gapMemory`, by
+    feature 13): a binder of KeY's `int` (`gapKIntBinder`: `LFml` has no unbounded binder);
     a ledger read past a payment (`gapLedgerWrite`: the leaf builder
     refuses a read past a write, `SymS.netOk`); more reads than
     `Fml.exactBounded` admits (`gapManyReads`, fifty: 511 lifted nodes,
@@ -1783,8 +1836,16 @@ in this order:
    the path guards, read queries and `Calculus/ReadRealization.lean`, the
    array reads cut to atoms before those stages, with the arrays rebuilt
    from the atoms (`Calculus/ArrayCut.lean`).  Left: arrays below fields
-   and keys, of structs and arrays, blocks over arrays; memory, refused
-   at elimination (`LTm.Elimable`), with no stage that realizes a heap.
+   and keys, of structs and arrays, blocks over arrays.  Memory done
+   (2026-10-25, feature 13) for fresh arrays of primitives read at indices
+   named before them, the reads cut to atoms at the binder (Ackermann),
+   exact at every state; refused at elimination still (`LTm.Elimable`), the
+   cut runs on the source formula, ahead of the pipelines, so no stage
+   realizes a heap: the refuting state is the cut leaf's.  Left: memory
+   writes and allocations in a leaf's updates (`{memory := write(…)}`,
+   `addM`, copies from storage: the cut takes no update), struct members
+   and nested arrays of a fresh object, an index bound after its array
+   (`allocAll s. ∀ i. … s[i]`), an index that reads memory or storage.
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.  Done (2026-10-25) for fresh strings read only
