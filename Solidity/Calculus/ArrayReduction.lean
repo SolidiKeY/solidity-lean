@@ -115,7 +115,7 @@ def arrayReduction? (φ : Fml C []) : Option (ArrayReduction φ) := do
   let b ← arrayBody? r.leaf.elim.condSimp.prenex
   -- The lift's size first, within `liftBudget` nodes.
   if (b.cut.gx.liftCondB condLiftFuel liftBudget).isNone then none
-  return ⟨d, r, b, ← flattenedArithmetic? 2048 b.leaf⟩
+  return ⟨d, r, b, ← flattenedArithmetic? (readBudget b.leaf.cutAll) b.leaf⟩
 
 namespace ArrayReduction
 
@@ -193,13 +193,14 @@ end ArrayReduction
 /-- **The eliminated leaf's fragment with array reads**: the array stages
 succeed, and their leaf is in `LFml.Src true` (the elimination's
 conditionals allowed), of lifting weight below `condLiftFuel`, lifted within
-the budget and within M4's bounds. -/
+the budget and within M4's node bound (the reads' budget is the leaf's own,
+`readBudget`). -/
 def LFml.arrayCovered (ψ : LFml C) : Bool :=
   match arrayBody? ψ with
   | some b =>
     (b.cut.gx.src? true).isSome && decide (b.cut.gx.condMax < condLiftFuel) &&
       (b.cut.gx.liftCondB condLiftFuel liftBudget).isSome &&
-      decide (b.leaf.cutAll.nodes ≤ 511) && decide (b.leaf.cutAll.words * b.leaf.cutAll.words ≤ 2048)
+      decide (b.leaf.cutAll.nodes ≤ 511)
   | none => false
 
 /-- **The fragment of the decision with array reads.** -/
@@ -225,10 +226,10 @@ theorem arrayReduction?_isSome (φ : Fml C []) (h : φ.arrayCovered = true) :
     | some b =>
       rw [hb] at h
       simp only [Bool.and_eq_true, decide_eq_true_eq] at h
-      obtain ⟨⟨⟨⟨hsrc, hm⟩, hcap⟩, hn⟩, hw⟩ := h
+      obtain ⟨⟨⟨hsrc, hm⟩, hcap⟩, hn⟩ := h
       obtain ⟨⟨hs⟩, -⟩ := Option.isSome_iff_exists.mp hsrc
       have hlift := LFml.liftCond_src condLiftFuel hs hm
-      obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp (flattenedArithmetic?_isSome b.leaf hlift hn hw)
+      obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp (flattenedArithmetic?_isSome b.leaf hlift hn)
       have hnone : (b.cut.gx.liftCondB condLiftFuel liftBudget).isNone = false := by
         cases hX : b.cut.gx.liftCondB condLiftFuel liftBudget with
         | none => rw [hX] at hcap; cases hcap

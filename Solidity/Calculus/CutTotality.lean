@@ -59,6 +59,119 @@ theorem maskCut_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {k m : Na
       quotAtom_src hds (LFml.defn_src rfl ha (.defDiv rfl rfl _ hpos _ ha))⟩
   · exact ⟨ha, hds⟩
 
+theorem two_ne_zero_val : (uintTwo).val ≠ 0 := by decide
+
+/-- `x & c` bit by bit stays in the fragment. -/
+theorem bandGo_src {prev : List (LFml C)} : ∀ (f : Nat) (a : LTm C (.val .uint)) (c : Nat)
+    (ds : List (LFml C)) (m : Nat), a.SrcL false false l .num → (∀ d ∈ ds, d.SrcL false false l) →
+    (bandGo prev f a c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (bandGo prev f a c ds m).defs, d.SrcL false false l
+  | 0, _, _, _, _, _, hds => ⟨.lit _, hds⟩
+  | f + 1, a, c, ds, m, ha, hds => by
+    have hQ := quotAtom_src (prev := prev) (m := m) hds
+      (LFml.defn_src rfl ha (.defDiv rfl rfl uintTwo two_ne_zero_val _ ha))
+    unfold bandGo
+    split
+    · exact ⟨.sub rfl ha (.mulR rfl _ (.var _)), hQ⟩
+    · obtain ⟨h1, h2⟩ := bandGo_src (prev := prev) f (.var (quotAtom prev ds a (a.divLit uintTwo) m).1)
+        (c / 2) _ _ (.var _) hQ
+      dsimp only
+      split
+      · exact ⟨.mulL rfl _ h1, h2⟩
+      · exact ⟨.add rfl (.sub rfl ha (.mulR rfl _ (.var _))) (.mulL rfl _ h1), h2⟩
+
+theorem bandLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {c m : Nat}
+    (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (bandLit prev a c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (bandLit prev a c ds m).defs, d.SrcL false false l := by
+  unfold bandLit
+  split
+  · exact ⟨.seq ha (.lit _), hds⟩
+  · obtain ⟨h1, h2⟩ := bandGo_src (prev := prev) c a c ds m ha hds
+    exact ⟨.seq ha h1, h2⟩
+
+theorem borLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {v : PrimTy.uint.Denote} {m : Nat}
+    (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (borLit prev a v ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (borLit prev a v ds m).defs, d.SrcL false false l := by
+  unfold borLit
+  split
+  · exact ⟨ha, hds⟩
+  · obtain ⟨h1, h2⟩ := bandGo_src (prev := prev) v.val.toNat a v.val.toNat ds m ha hds
+    exact ⟨.add rfl (.sub rfl ha h1) (.lit _), h2⟩
+
+theorem bxorLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {v : PrimTy.uint.Denote} {m : Nat}
+    (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (bxorLit prev a v ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (bxorLit prev a v ds m).defs, d.SrcL false false l := by
+  unfold bxorLit
+  split
+  · exact ⟨ha, hds⟩
+  · obtain ⟨h1, h2⟩ := bandGo_src (prev := prev) v.val.toNat a v.val.toNat ds m ha hds
+    exact ⟨.add rfl (.sub rfl ha h1) (.sub rfl (.lit _) h1), h2⟩
+
+theorem mulWGo_src {prev : List (LFml C)} {a : LTm C (.val .uint)} (ha : a.SrcL false false l .num) :
+    ∀ (f c : Nat) (ds : List (LFml C)) (m : Nat), (∀ d ∈ ds, d.SrcL false false l) →
+    (mulWGo prev a f c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (mulWGo prev a f c ds m).defs, d.SrcL false false l
+  | 0, _, _, _, hds => ⟨ha, hds⟩
+  | f + 1, c, ds, m, hds => by
+    unfold mulWGo
+    split
+    · exact ⟨ha, hds⟩
+    · obtain ⟨h1, h2⟩ := mulWGo_src ha f (c / 2) ds m hds
+      have hD := quotAtom_src (prev := prev) (m := (mulWGo prev a f (c / 2) ds m).next) h2
+        (LFml.defn_src rfl ha (.defAddW rfl rfl _ h1 h1))
+      dsimp only
+      split
+      · exact ⟨.seq ha (.var _), hD⟩
+      · exact ⟨.seq ha (.var _), quotAtom_src hD
+          (LFml.defn_src rfl ha (.defAddW rfl rfl _ (.seq ha (.var _)) ha))⟩
+
+theorem mulWLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {c m : Nat}
+    (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (mulWLit prev a c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (mulWLit prev a c ds m).defs, d.SrcL false false l := by
+  unfold mulWLit
+  split
+  · exact ⟨.seq ha (.lit _), hds⟩
+  · exact mulWGo_src ha c c ds m hds
+
+theorem lit?_none {p : PrimTy} {t : LTm C (.val p)} {v : p.Denote} (h : t.lit? = none)
+    (ht : t = .app0 (.lit v)) : False := by
+  subst ht; cases h
+
+/-- **A commutative operator with a literal operand**, both cut. -/
+theorem cut2_comm_src {op : BinOp} (h : op.accepts .uint = true) (hop : litCutL op .uint = true)
+    {prev : List (LFml C)} {A B : CutTm C (.val .uint)} (hA : A.term.SrcL false false l .num)
+    (hB : B.term.SrcL false false l .num) (hds : ∀ d ∈ A.defs ++ B.defs, d.SrcL false false l)
+    (hlit : (∃ v, A.term = .app0 (.lit v)) ∨ (∃ v, B.term = .app0 (.lit v))) :
+    (cut2 (.binop op h) prev A B).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut2 (.binop op h) prev A B).defs, d.SrcL false false l := by
+  cases op <;> simp only [litCutL, Bool.false_eq_true] at hop
+  all_goals
+    dsimp only [cut2]
+    first
+    | (unfold cutBand
+       split
+       · exact maskCut_src hA hds
+       · split
+         · exact maskCut_src hB hds
+         · split
+           · exact bandLit_src hA hds
+           · exact bandLit_src hB hds
+           · rename_i hb ha
+             rcases hlit with ⟨v, hv⟩ | ⟨v, hv⟩
+             · exact (lit?_none ha hv).elim
+             · exact (lit?_none hb hv).elim)
+    | (split
+       · first | exact mulWLit_src hA hds | exact borLit_src hA hds | exact bxorLit_src hA hds
+       · first | exact mulWLit_src hB hds | exact borLit_src hB hds | exact bxorLit_src hB hds
+       · rename_i hb ha
+         rcases hlit with ⟨v, hv⟩ | ⟨v, hv⟩
+         · exact (lit?_none ha hv).elim
+         · exact (lit?_none hb hv).elim)
+
 /-- **The cut of a source term is in the fragment without cut operators**, and so
 is every definition it makes. -/
 theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false true l k → ∀ prev n,
@@ -225,6 +338,52 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     | none =>
       rw [cutBand_left (A := ⟨.app0 (.lit v), [], n⟩) hbk hmk]
       exact maskCut_src h3 (defs_append (fun _ h => nomatch h) h4)
+  | @litR _ p op h a v hv _ ih =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := ih prev n
+    show (cut2 (.binop op h) prev (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut2 (.binop op h) prev (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).defs, d.SrcL false false l
+    have h2' := defs_append h2 (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h)
+    cases op <;> cases p <;> simp only [litCutR, Bool.false_eq_true, Bool.or_eq_true, beq_iff_eq] at hv
+    case band.uint | bor.uint | bxor.uint | mulW.uint =>
+      exact cut2_comm_src h rfl h1 (.lit v) h2' (.inr ⟨v, rfl⟩)
+    case pow.uint | powW.uint =>
+      dsimp only [cut2]
+      unfold powLit
+      split
+      · exact ⟨.seq h1 (.lit _), h2'⟩
+      · split
+        · exact ⟨h1, h2'⟩
+        · omega
+    case div.uint | mod.uint =>
+      dsimp only [cut2]
+      rw [if_pos hv]
+      exact ⟨.seq h1 .err, h2'⟩
+    case div.int =>
+      dsimp only [cut2]
+      split
+      · exact ⟨.seq h1 .err, h2'⟩
+      · split
+        · exact ⟨.neg rfl h1, h2'⟩
+        · rename_i hv0 _
+          exact ⟨.seq h1 (.var _), quotAtom_src h2' (LFml.defn_src rfl h1 (.defDivI rfl h v hv0 _ h1))⟩
+    case mod.int =>
+      dsimp only [cut2]
+      split
+      · exact ⟨.seq h1 .err, h2'⟩
+      · split
+        · exact ⟨.seq h1 (.lit _), h2'⟩
+        · rename_i hv0 _
+          exact ⟨.sub rfl h1 (.mulR rfl v (.var _)),
+            quotAtom_src h2' (LFml.defn_src rfl h1 (.defDivI rfl rfl v hv0 _ h1))⟩
+  | @litL _ p op h v hv b _ ih =>
+    intro prev n
+    obtain ⟨h3, h4⟩ := ih (prev ++ []) n
+    show (cut2 (.binop op h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut2 (.binop op h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).defs, d.SrcL false false l
+    cases p <;> simp only [litCutL] at hv <;>
+      try (cases op <;> simp only [litCutL, Bool.false_eq_true] at hv)
+    all_goals exact cut2_comm_src h rfl (.lit v) h3 (defs_append (fun _ h => nomatch h) h4) (.inl ⟨v, rfl⟩)
   | @addW _ h a b _ _ iha ihb =>
     intro prev n
     obtain ⟨h1, h2⟩ := iha prev n
@@ -376,6 +535,7 @@ theorem LFml.cut_src : ∀ {φ : LFml C}, φ.SrcL false true l → ∀ prev n,
     obtain ⟨h3, h4⟩ := ihψ (prev ++ (φ.cut prev n).defs) (φ.cut prev n).next
     exact ⟨.imp h1 h3, defs_append h2 h4⟩
   | defDiv hw => cases hw
+  | defDivI hw => cases hw
   | defShr hw => cases hw
   | defAddW hw => cases hw
   | defSubW hw => cases hw
@@ -401,12 +561,14 @@ theorem LFml.cutAll_src {φ : LFml C} (h : φ.SrcL false true l) : φ.cutAll.Src
   · exact .imp (LFml.conj_src h2) h1
 
 /-- **The leaf decision never refuses its fragment** (`flattenedArithmetic?`):
-a source leaf whose cut has at most 511 nodes and 45 storage reads. -/
+a source leaf whose cut has at most 511 nodes, its reads within the budget
+computed from it (`readBudget`). -/
 theorem flattenedArithmetic?_isSome (φ : LFml C) (h : φ.Src false true)
-    (hn : φ.cutAll.nodes ≤ 511) (hw : φ.cutAll.words * φ.cutAll.words ≤ 2048) :
-    (flattenedArithmetic? 2048 φ).isSome = true := by
+    (hn : φ.cutAll.nodes ≤ 511) :
+    (flattenedArithmetic? (readBudget φ.cutAll) φ).isSome = true := by
   obtain ⟨src, hsrc⟩ := h.readFormula
-  obtain ⟨r, hr, hsq, hE⟩ := readFlatten?_arith φ.cutAll (LFml.cutAll_src h) hn hw
+  obtain ⟨r, hr, hsq, hE⟩ := readFlatten?_arith φ.cutAll (LFml.cutAll_src h) hn
+    (le_readBudget _) (words_le_readBudget _)
   obtain ⟨E, hE'⟩ := Option.isSome_iff_exists.mp hE
   simp only [flattenedArithmetic?, hsrc, hr, Option.bind_eq_bind, Option.bind_some, hsq, if_true, hE']
   rfl

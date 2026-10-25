@@ -291,7 +291,10 @@ On terms (`LTm.Src c k`, `Calculus/FlattenTotality.lean`), by kind:
   `*` with a literal factor on either side (checked, M7), unary `-` and `~`
   (M7), `seq` guards, `err`, and storage reads `obsW` of a path; with the
   flag `w = true` (before the cut, M7) also `int(·)`, `uint(·)`, `/`, `%`,
-  `>>`, `<<` by a literal, `&` by a low mask, `+%`, `-%`;
+  `>>`, `<<` by a literal, `&` by a low mask, `+%`, `-%`, and (`litR`,
+  `litL`, M7 feature 14) `&`, `|`, `^`, `*%` with a literal on either side,
+  `**`, `**%` by `0` or `1`, `/` and `%` at `int` by any literal and at
+  `uint` by `0`;
 * Booleans (`bool`): a scalar at `bool`, `!`, `&&`, `||`, `==`/`!=` on
   Booleans or numbers, `<`/`>`/`<=`/`>=`, `seq` guards;
 * paths (`path`): a root, fields, mapping keys whose keys are scalars;
@@ -307,12 +310,12 @@ complete (`LTm.src?_complete`, `LFml.src?_complete`).
 update pushing, elimination and folding) exists and, as `LFml.inExact`
 checks, has a universal prefix shorter than 1024 binding every atom of a
 body in `LFml.Src true` whose lifting weight is below `condLiftFuel`.
-`Fml.exactBounded φ` bounds the lifted body: at most 511 nodes and at most
-45 storage reads (`words² ≤ 2048`).  The bounds come from the stages' fuel:
-the flattener's 2048-node budget, the compilers' 1024-deep fuel (a
-flattened term has at most twice its source's nodes), the 2048 alias-pair
-budget.  They are unavoidable in this form: elimination and lifting can be
-exponential.
+`Fml.exactBounded φ` bounds the lifted body: at most 511 nodes.  The bound
+comes from the compilers' 1024-deep fuel (a flattened term has at most
+twice its source's nodes).  The reads had a bound too, 45 (`words² ≤ 2048`,
+the alias-pair budget), until M7 (2026-10-25) computed the flattener's
+budget from the leaf (`readBudget`, at least 2048 and the leaf's reads
+squared).
 
 ### (d) Totality and completeness
 
@@ -1138,7 +1141,9 @@ hash of one string), `arrayRead`, `fixedRead` (storage-array reads,
 feature 10) and `gapMemory` (a fresh memory array's element, feature 13),
 the last five since 2026-10-25; `gapFiveStrings` (now `fiveStrings`) and
 `gapHashUnderForall` (now `namesUnderForall`) since the hash round of
-2026-10-25 (`Examples/DecisionHashes.lean`).
+2026-10-25 (`Examples/DecisionHashes.lean`); `gapIntDiv`, `gapIntMod`,
+`gapOr`, `gapXor`, `gapAnd`, `gapPow`, `gapMulW` (literal operators,
+feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, with one known exception (below, `gapHashNegForall`):
@@ -1230,12 +1235,13 @@ Three properties of the reading are worth knowing.
 
 `Fml.Covered` is `Fml.CoveredA || Fml.memCovered`.  `Fml.CoveredA`, the
 pipelines' fragment (`decideLeafA`), is `Fml.inExact && Fml.exactBounded`
-(M4), extended by features 1, 2, 4, 5 and 8, each with its completeness
-proved through every stage (recognizer, lifting, flattening, compilers), or
-`Fml.quantCovered` (features 3, 6 and 7, its own pipeline), or
-`Fml.ledgerCovered` (feature 9, its own pipeline), or `Fml.arrayCovered`
-(feature 10, its own pipeline); `Fml.memCovered` is feature 13's, a leaf
-with fresh memory arrays whose cut is in `Fml.CoveredA`:
+(M4), extended by features 1, 2, 4, 5, 8, 14 and 15, each with its
+completeness proved through every stage (recognizer, lifting, flattening,
+compilers), or `Fml.quantCovered` (features 3, 6 and 7, its own pipeline),
+or `Fml.ledgerCovered` (feature 9, its own pipeline), or
+`Fml.arrayCovered` (feature 10, its own pipeline); `Fml.memCovered` is
+feature 13's, a leaf with fresh memory arrays whose cut is in
+`Fml.CoveredA`:
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1583,6 +1589,43 @@ with fresh memory arrays whose cut is in `Fml.CoveredA`:
     `Fml.memCovered` is the fragment: the leaf binds a fresh object, its cut
     is defined and in `Fml.CoveredA` (`decideMem_complete`).
 
+14. **Operators with a literal operand, through the others** (2026-10-25,
+    `Calculus/QuotientCut.lean`, `Calculus/BitArith.lean`).  `cut2` writes
+    each through the operators already cut, so no new definition reaches
+    the compilers but one (`defDivI`):
+    * `x & c` at `uint` for any literal `c` (`bandGo`): bit by bit from the
+      lowest, the atom `q` of `x / 2` (`defDiv`), the low bit `x - 2q`, the
+      rest `2 · (q & ⌊c/2⌋)`, down to `c`'s top bit (the fuel is `c`
+      itself, so the kernel never unfolds a fixed 256 on a symbolic
+      literal); `BitArith.and_split`.  Low masks keep `maskCut`;
+    * `x | c` as `(x - (x & c)) + c`, `x ^ c` as `(x - (x & c)) + (c - (x & c))`
+      (`borLit`, `bxorLit`; `BitArith.and_or_eq`, `xor_and_eq`), checked
+      sums that never overflow;
+    * `x *% c` by doubling (`mulWGo`): `x *% c` from `x *% ⌊c/2⌋`, a wrapped
+      sum with itself (`defAddW`) and, for an odd `c`, with `x`
+      (`BitArith.mulMod_double`, `mulMod_succ`); about `2·log₂ c` atoms;
+    * `x ** 0`, `x **% 0` as `1` after `x`; `x ** 1`, `x **% 1` as `x` (`powLit`);
+    * `x / c`, `x % c` at `int`: `c = 0` fails (`x` then `err`, as at
+      `uint` now), `c = -1` is `-x` and `0` after `x`, any other `c` the atom
+      of the truncated quotient, defined by its sign cases
+      (`StorageEncoding.defDivI`, `tdivRel`: `x - c·q` between `0` and
+      `|c| - 1` on `x`'s side of zero, `BitArith.tdiv_iff`), and `x % c` as
+      `x - q·c`;
+    * the literal on either side of `&`, `|`, `^`, `*%` (`LTm.SrcL.litR`,
+      `litL`, gated by `litCutR`/`litCutL`; recognized by `LTm.litSrc?`).
+    `CutTm.Good` of each (`bandGo_spec`, `mulWGo_spec`, `bandLit_spec`,
+    `borLit_spec`, `bxorLit_spec`, `mulWLit_spec`, `powLit_spec`,
+    `int_rem_eval`), their source fragment (`bandGo_src` … `cut2_comm_src`,
+    `LTm.cut_src`), lifting, the ledger fragment, flattening and the
+    compiler (`LFml.Arith.defDivI`) carry the completeness through.
+15. **Reads without a fixed bound** (2026-10-25): the flattener's budget is
+    the leaf's own (`readBudget φ = max 2048 (words²)`, in
+    `dependentReduction?`, `quantReduction?`, `ledgerReduction?` and
+    `arrayReduction?`); `readFlatten?_arith` and `readFlatten?_arithZ`
+    take any budget past 2048 that covers the reads' pairs, so
+    `Fml.exactBounded`, `LFml.ledgerBounded`, `LFml.quantCovered` and
+    `Fml.arrayCovered` bound the nodes only.
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -1591,7 +1634,8 @@ and eight and nine (no atom of `Srt.kint`, no ledger read), and ten
 stage read an array path); eleven was answered `unknown` (`decideGoal`
 read no hash), and twelve too (the swap reads one kind), and thirteen
 (`ExactAt` has no case for `allocAll`, `LTm.Elimable` refuses the memory
-sorts).
+sorts); fourteen was refused by the cut, which wrote no `|`, `^`, `*%`,
+other masks or `int` quotients, and fifteen by the fixed 45 reads.
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1687,6 +1731,16 @@ proved; a `uint[3]` read below its length (`memFixed`) proved, past it
 (`memFixedPast`) refuted; a `bool[]` (`memBools`) proved.
 `gapMemory_covered`, `memAck_covered` and `memAck_inTarget` are
 kernel-checked, `gapMemory_answers` and `memAck_iff` apply the theorems.
+For feature 14: the former counterexamples `gapIntDiv` (`x ≥ 0 → (x / 3) · 3 ≤ x`
+at `int`), `gapIntMod`, `gapOr` (`x | 1 ≥ x`), `gapXor`, `gapAnd` (`x & 6 ≤ 6`),
+`gapPow` (`x ** 1 == x`) and `gapMulW` (`x *% 3 ≥ 0`) proved; `intDivBad`,
+`intModBad`, `orBad`, `xorBad`, `andBad` (`6 & x < 6`, the literal on the
+left), `powBad` (`x ** 0 == x`) and `mulWBad` (`3 *% x ≥ x`) refuted; the
+coverage of each of the seven, `andBad` and `mulWBad` kernel-checked
+(`gapIntDiv_covered` …, under a second each), `gapOr_answers`,
+`gapMulW_iff`.  For feature 15: `gapManyReads` (fifty reads) covered by the
+kernel and answering (`gapManyReads_answers`, by `decideGoal_complete`);
+its verdict is not computed (below, "Running time").
 
 ### Running time (the walks)
 
@@ -1750,6 +1804,16 @@ of about two thousand nodes, about a millisecond a state).  The
 `Examples/Decision.lean` build went from about fifteen minutes to 192 s,
 146 of them `sortedLe`.
 
+The literal operators of feature 14 cost little: each of their fourteen
+pins answers in under a second (`x & 6` is two atoms of halving, `x *% 3`
+two wrapped sums); the file now builds in about 275 s.  Reads are another
+matter: the `AFml` walk recurses once a bit read, so its depth is about
+256 times the variables, and a leaf of fourteen reads at distinct keys
+(fifteen variables, about 3,800 levels) overflows the interpreter's stack
+where ten do not.  `gapManyReads` (fifty reads) is covered and answers by
+the theorem, but its verdict is not computed; a walk with an explicit
+stack would lift this.
+
 ### What is not proved
 
 * `DecisionTheorem` itself; it is false today (above).
@@ -1759,8 +1823,11 @@ of about two thousand nodes, about a millisecond a state).  The
   eliminated leaf, `Fml.inTarget` on the source, and M4's "what blocks the
   rest" stands: normalization's budget, update pushing's
   `Tm.agreeB`/`Tm.toL`, elimination's invariant.
-* The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
-  which come from the stages' fuel.
+* The node bound of `Fml.exactBounded` (511 lifted nodes), which comes from
+  the compilers' fuel (1024 deep, `CheckedValue.ofTermIn?`, and the
+  `depth ≤ 1023` fields of `LFml.Arith`); the reads' bound is gone
+  (feature 15).  No pinned leaf of the target exceeds it; lifting it means
+  computing those fuels from the term as the reads' budget now is.
 * A time bound for either decision.  `decideLeaf_complete` says it
   answers, not when.  The walks' fuel is not proved to suffice (above,
   "Running time"); the graphs stay exponential in the worst case: an
@@ -1818,19 +1885,35 @@ of about two thousand nodes, about a millisecond a state).  The
     a struct with reference members needs objects for them);
   * **the ledger and KeY `int` without quantifiers** (the plain
     storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
-    decided by feature 10, and the fresh memory array's, `gapMemory`, by
-    feature 13): a binder of KeY's `int` (`gapKIntBinder`: `LFml` has no unbounded binder);
-    a ledger read past a payment (`gapLedgerWrite`: the leaf builder
-    refuses a read past a write, `SymS.netOk`); more reads than
-    `Fml.exactBounded` admits (`gapManyReads`, fifty: 511 lifted nodes,
-    45 reads, the stages' fuel);
-  * **operators with a literal operand** not carried through the stages:
-    `/` and `%` at `int` (`gapIntDiv`, `gapIntMod`), `|` and `^` with a
-    literal (`gapOr`, `gapXor`), `&` with a literal that is not a low mask
-    (`gapAnd`), `**` by a literal (`gapPow`, `x ** 1`; `**%` alike) and
-    `*%` by one (`gapMulW`): each needs an encoding with a coefficient of
-    `2^256` or a disjunction per bit (the cut and its proofs extend to
-    them as to `<<`);
+    decided by feature 10, the fresh memory array's, `gapMemory`, by
+    feature 13, and fifty reads, `gapManyReads`, by feature 15): a
+    binder of KeY's `int` (`gapKIntBinder`, `∀ int z. z + 1 > z`): an atom
+    position holds a `bool`, `uint` or `int` (`AEnv`), `LTm.var` and the
+    binder `LFml.all k p` are sorted by `PrimTy`, so the leaf has no
+    position of sort `Srt.kint` to bind.  It needs one (a field of `AEnv`
+    and a `kint` variable of `LTm`, or an `allZ` binder of `LFml`, with
+    every recursion over them extended, some forty modules), the prefix
+    taking it as a parameter compiled as two unbounded natural codes (as
+    the ledger entries are, `Inputs.AgreeZ`), and, past the prefix, an
+    unbounded binder of `QFml` (no range atom; Presburger over ℤ as two
+    naturals); a ledger read past a payment (`gapLedgerWrite`,
+    `{pay(x, 1)} net(x) ≥ 0`): `UpdElem.toLS` refuses `pay` outright (its
+    balance change is not encoded) and a `net`/`netMt` write sets
+    `SymS.netOk := false`, after which `Op1.toL` refuses `net`.  It needs
+    the symbolic state to keep the ledger writes (address, operation,
+    amount) and the balance `pay` leaves (`GlobT.paid`: the recipient's
+    entry less the amount unless it is the contract, the balance
+    `σ.pay`), a read `net(a)` past them as nested conditionals on the
+    addresses at sort `Srt.kint` (`kite a r (net(a) - v) (net(a))`, which
+    the source fragment, `LTm.condSplit` and the lift take only at value
+    sorts today), and the builder's agreement (`DecideTyped`, `AgreesV`'s
+    `net` field) restated from the starting ledger to it with the writes
+    applied;
+  * **operators with a literal operand still outside**: `&`, `|`, `^` at
+    `int` (`gapIntAnd`; two's complement, `toInt(toUint(x) & c')` would
+    carry it) and `addmod` with a literal modulus (`gapAddmod`; its sum may
+    pass `2^256`), both in the target since the waivers name two symbolic
+    operands only;
   * **hashes outside `Fml.hashCovered`** (features 11 and 12):
     * three kinds of hash of one string (`gapThreeKinds`).  `Fml.tk` reads
       one second kind's words.  Applied twice it is sound (`Fml.tk_validH`
@@ -1893,7 +1976,9 @@ in this order:
    returns constraints beside the code.  Done for `/`, `%`, `>>`, `<<`,
    low masks, `+%`, `-%` (above), the constraints a stage of their own
    ahead of the compiler (`LFml.cutAll`), the compiler encoding each
-   definition; not done: `*%`, `|`, `^`, other masks, `int` `/` and `%`.
+   definition.  Done too (2026-10-25, feature 14): `*%`, `|`, `^`, any
+   mask, `**` at `0` and `1`, `int` `/` and `%`, written through the others.
+   Not done: `&`, `|`, `^` at `int`, `addmod` with a literal modulus.
 3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
    difference of two natural codes in `AFml`.  Done (2026-10-25) for the
    linear operations, `toInt` and the comparisons (feature 8), and for
@@ -1959,7 +2044,9 @@ in this order:
    stored hashes, strings not fresh.
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
-   the size bounds by fuel computed from the formula.
+   the size bounds by fuel computed from the formula.  Done for the reads
+   (feature 15, `readBudget`); the 511-node bound (the compilers' fuel) is
+   left.
 
 **Review (2026-10-25).** A read-only review found nine issues, fixed here.
 * Guards: `!=` written another way, and arithmetic on the bound variables,

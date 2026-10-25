@@ -74,7 +74,7 @@ def ledgerReduction? (φ : Fml C []) : Option (LedgerReduction φ) := do
       if hn : sentence.body.netReads.length ≤ 2 ^ 256 then
         let qs ← readExprs? sentence.body.netReads
         return ⟨d, r, sentence, bodyRead, hc, hok, hn, qs.1, qs.2,
-          ← flattenedArithmeticZ? 2048 sentence.body.ledgerCut⟩
+          ← flattenedArithmeticZ? (readBudget sentence.body.ledgerCut.cutAll) sentence.body.ledgerCut⟩
       else none
     else none
   else none
@@ -130,12 +130,12 @@ def LFml.inLedger (ψ : LFml C) : Bool :=
     decide (ψ.stripAll.2.condMax < condLiftFuel) &&
     ψ.stripAll.2.parameters.all (fun q => decide (q ∈ ψ.stripAll.1))
 
-/-- The size bounds, on the lifted body and on its ledger cut then cut. -/
+/-- The size bounds, on the lifted body and on its ledger cut then cut (the
+reads' budget is the leaf's own, `readBudget`). -/
 def LFml.ledgerBounded (ψ : LFml C) : Bool :=
   let body := (ψ.liftCond condLiftFuel).stripAll.2
   decide (body.nodes ≤ 511) && decide (body.netReads.length ≤ 2 ^ 256) &&
-    decide (body.ledgerCut.cutAll.nodes ≤ 511) &&
-    decide (body.ledgerCut.cutAll.words * body.ledgerCut.cutAll.words ≤ 2048)
+    decide (body.ledgerCut.cutAll.nodes ≤ 511)
 
 /-- **The fragment of the decision with ledger reads.** -/
 def _root_.Solidity.Fml.ledgerCovered (φ : Fml C []) : Bool :=
@@ -175,7 +175,7 @@ theorem ledgerReduction?_isSome (φ : Fml C []) (h : φ.ledgerCovered = true) :
       rw [e2]
       exact hc0 q (LFml.liftCond_params _ _ q hq')
     simp only [LFml.ledgerBounded, Bool.and_eq_true, decide_eq_true_eq] at hb
-    obtain ⟨⟨⟨hn, hlen⟩, hcn⟩, hw⟩ := hb
+    obtain ⟨⟨hn, hlen⟩, hcn⟩ := hb
     obtain ⟨u, hu, hup, hub⟩ := UniversalPrefix.ofFormula?_strip _ 1024 hdepth
     have hs : u.body.SrcL false true .pre := hub ▸ hlift
     have hc : ∀ p ∈ u.body.parameters, p ∈ u.parameters := by
@@ -187,7 +187,7 @@ theorem ledgerReduction?_isSome (φ : Fml C []) (h : φ.ledgerCovered = true) :
     obtain ⟨qs, hqs⟩ := Option.isSome_iff_exists.mp
       (readExprs?_isSome (rs := u.body.netReads) fun a ha => (hreads a ha).readExpr)
     obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp
-      (flattenedArithmeticZ?_isSome u.body.ledgerCut hcut (hub ▸ hcn) (hub ▸ hw))
+      (flattenedArithmeticZ?_isSome u.body.ledgerCut hcut (hub ▸ hcn))
     have hcap := LFml.liftCondB_isSome _ hdepth hn
     have hnone : (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone = false := by
       cases hX : r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget with

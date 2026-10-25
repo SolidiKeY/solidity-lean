@@ -384,6 +384,13 @@ inductive LTm.SrcL (c : Bool) (w : Bool) (l : LedgerMode) : SrcKind → {s : Srt
       LTm.SrcL c w l .num a → LTm.SrcL c w l .num b → LTm.SrcL c w l .num (.app2 (.binop .addW h) a b)
   | subW (hw : w = true) (h : BinOp.subW.accepts .uint = true) {a b : LTm C (.val .uint)} :
       LTm.SrcL c w l .num a → LTm.SrcL c w l .num b → LTm.SrcL c w l .num (.app2 (.binop .subW h) a b)
+  /-- The operators the cut writes through the others, with a literal operand. -/
+  | litR (hw : w = true) {p : PrimTy} (op : BinOp) (h : op.accepts p = true) {a : LTm C (.val p)}
+      (v : p.Denote) (hv : litCutR op p v = true) :
+      LTm.SrcL c w l .num a → LTm.SrcL c w l .num (.app2 (.binop op h) a (.app0 (.lit v)))
+  | litL (hw : w = true) {p : PrimTy} (op : BinOp) (h : op.accepts p = true) (v : p.Denote)
+      (hv : litCutL op p = true) {b : LTm C (.val p)} :
+      LTm.SrcL c w l .num b → LTm.SrcL c w l .num (.app2 (.binop op h) (.app0 (.lit v)) b)
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.SrcL c w l .num d → LTm.SrcL c w l .num a → LTm.SrcL c w l .num (.seq d a)
   | err {p : PrimTy} : LTm.SrcL c w l .num (LTm.err (C := C) (s := .val p))
@@ -460,15 +467,6 @@ def FlatOK (l : LedgerMode) : SrcKind → (s : Srt) → LTm C s → Prop
   | .znum, .kint, t => t.ZNum (fun _ => True) (fun _ => True) (fun _ => l = .post)
   | _, _, _ => False
 
-/-- The storage reads of a term. -/
-def LTm.words : {s : Srt} → LTm C s → Nat
-  | _, .var _ | _, .app0 _ | _, .err => 0
-  | _, .obsW a => a.words + 1
-  | _, .app1 _ a | _, .obsL a | _, .obsH a => a.words
-  | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.words + b.words
-  | _, .app3 _ a b c => a.words + b.words + c.words
-  | _, .kite a b t e => a.words + b.words + t.words + e.words
-
 /-- An occurrence whose guard and path keys the compilers accept. -/
 def OccOK (r : ReadOccurrence C) : Prop :=
   r.guard.test.Num (fun _ => True) (fun _ => True) ∧ r.guard.test.depth ≤ 1022 ∧
@@ -503,7 +501,7 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | kite hc => cases hc
   | ite hc => cases hc
   | toInt hw | toUint hw | divL hw | modL hw | shrL hw | shlL hw | addW hw | subW hw | bandR hw
-    | bandL hw => cases hw
+    | bandL hw | litR hw | litL hw => cases hw
   | @var p k =>
     intro d r start hd hr hb hs
     obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
@@ -1370,6 +1368,9 @@ inductive LFml.SrcL (c : Bool) (w : Bool) (l : LedgerMode) : LFml C → Prop
   | defDiv (hw : w = false) (h : BinOp.div.accepts .uint = true) (v : PrimTy.uint.Denote)
       (hv : v.val ≠ 0) (k : Nat) {a : LTm C (.val .uint)} : a.SrcL c w l .num →
       LFml.SrcL c w l (.eq (.app2 (.binop .div h) a (.app0 (.lit v))) (.var k))
+  | defDivI (hw : w = false) (h : BinOp.div.accepts .int = true) (v : PrimTy.int.Denote)
+      (hv : v.val ≠ 0) (k : Nat) {a : LTm C (.val .int)} : a.SrcL c w l .num →
+      LFml.SrcL c w l (.eq (.app2 (.binop .div h) a (.app0 (.lit v))) (.var k))
   | defShr (hw : w = false) {p : PrimTy} (h : BinOp.shr.accepts p = true) (v : p.Denote) (k : Nat)
       {a : LTm C (.val p)} : a.SrcL c w l .num →
       LFml.SrcL c w l (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k))
@@ -1396,12 +1397,6 @@ def LFml.depth : LFml C → Nat
   | .eq a b => max a.depth b.depth + 1
   | .not φ | .all _ _ φ => φ.depth + 1
   | .and φ ψ | .imp φ ψ => max φ.depth ψ.depth + 1
-
-def LFml.words : LFml C → Nat
-  | .tt => 0
-  | .eq a b => a.words + b.words
-  | .not φ | .all _ _ φ => φ.words
-  | .and φ ψ | .imp φ ψ => φ.words + ψ.words
 
 theorem LFml.depth_le_nodes (φ : LFml C) : φ.depth ≤ φ.nodes := by
   induction φ with
@@ -1628,6 +1623,25 @@ theorem flattenFormulaFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
     have hda := LTm.depth_le_nodes a.term
     refine ⟨_, flattenFormulaFuel?_eqVar _ k d r start _ ha (by omega) (by simp only [LTm.nodes]; omega),
       LFml.Arith.defDiv h v hv k aok trivial (by omega), ?_, ?_, ?_⟩
+    · show ((a.reads ++ []) ++ []).length = _
+      simp only [List.append_nil, LFml.words, LTm.words, alen, Nat.add_zero]
+    · show Laid ((a.reads ++ []) ++ []) start
+      simpa only [List.append_nil] using alaid
+    · intro o ho
+      change o ∈ ((a.reads ++ []) ++ []) at ho
+      simp only [List.append_nil] at ho
+      exact aocc o ho
+  | @defDivI hw h v hv k x hx =>
+    intro d r start hd hr hb hs
+    simp only [LFml.depth, LFml.nodes, LFml.atomBound, LTm.depth, LTm.nodes, LTm.atomBound] at hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by omega⟩
+    obtain ⟨a, ha, aok, alen, alaid, an, aocc⟩ := flattenFuel?_binLit .div h hpre hx v d r start
+      (by simp only [LTm.depth]; omega) (by simp only [LTm.nodes]; omega) (by omega)
+      (by simp only [LTm.nodes]; omega)
+    have hda := LTm.depth_le_nodes a.term
+    refine ⟨_, flattenFormulaFuel?_eqVar _ k d r start _ ha (by omega) (by simp only [LTm.nodes]; omega),
+      LFml.Arith.defDivI h v hv k aok trivial (by omega), ?_, ?_, ?_⟩
     · show ((a.reads ++ []) ++ []).length = _
       simp only [List.append_nil, LFml.words, LTm.words, alen, Nat.add_zero]
     · show Laid ((a.reads ++ []) ++ []) start
@@ -2124,6 +2138,8 @@ theorem LFml.Arith.readFree {ps : Parameter → Prop} {es : EnvKey → Prop} {L 
       rw [ha0, hb0]
   | @defDiv h c hc k a ha _ _ =>
     exact ReadFreeOf.eq (ReadFreeOf.binop _ h (LTm.Num.readFree ha) (.lit c)) (.var k)
+  | @defDivI h c hc k a ha _ _ =>
+    exact ReadFreeOf.eq (ReadFreeOf.binop _ h (LTm.Num.readFree ha) (.lit c)) (.var k)
   | @defShr p h v k a ha _ _ =>
     exact ReadFreeOf.eq (ReadFreeOf.binop _ h (LTm.Num.readFree ha) (.lit v)) (.var k)
   | @defAddW h k a b ha hb _ _ _ | @defSubW h k a b ha hb _ _ _ =>
@@ -2214,6 +2230,21 @@ theorem LTm.SrcL.readExpr {w : Bool} {l : LedgerMode} : ∀ {k : SrcKind} {s : S
           some (ReadExpr.binop _ h x' y')) = _
       rw [he, show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by
         first | rfl | (cases ‹PrimTy› <;> rfl)]
+      rfl⟩
+  | @litR _ p op h x v _ _ ih =>
+    obtain ⟨e, he⟩ := ih
+    exact ⟨ReadExpr.binop _ h e (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? x) fun x' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun y' =>
+          some (ReadExpr.binop _ h x' y')) = _
+      rw [he, show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl]
+      rfl⟩
+  | @litL _ p op h v _ y _ ih =>
+    obtain ⟨e, he⟩ := ih
+    exact ⟨ReadExpr.binop _ h (.lit v) e, by
+      change (Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun x' =>
+        Option.bind (ReadExpr.ofTerm? y) fun y' => some (ReadExpr.binop _ h x' y')) = _
+      rw [he, show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl]
       rfl⟩
   | @bandR _ h x v _ _ ih =>
     obtain ⟨e, he⟩ := ih
@@ -2393,7 +2424,7 @@ theorem LFml.SrcL.readFormula {w : Bool} {l : LedgerMode} : ∀ {φ : LFml C}, �
       change (Option.bind (ReadFormula.ofFormula? φ) fun x => Option.bind (ReadFormula.ofFormula? ψ)
         fun y => some (ReadFormula.imp x y)) = _
       rw [ha, hb]; rfl⟩
-  | @defDiv _ h v _ k x hx | @defShr _ _ h v k x hx =>
+  | @defDiv _ h v _ k x hx | @defDivI _ h v _ k x hx | @defShr _ _ h v k x hx =>
     obtain ⟨e, he⟩ := hx.readExpr
     exact ⟨.eq (ReadExpr.binop _ h e (.lit v)) (.var k), by
       change (Option.bind (Option.bind (ReadExpr.ofTerm? x) fun x' =>
@@ -2621,6 +2652,13 @@ theorem LFml.Arith.restrict {P : Parameter → Prop} {E : EnvKey → Prop} {L : 
       (fun e he => hE e (by
         simp only [Inputs.formulaKeys, Inputs.termKeys, List.mem_append]; exact Or.inl (Or.inl he))))
       (hP _ (by simp only [LFml.parameters, LTm.parameters, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false, Parameter.mk.injEq, and_true]; exact Or.inr rfl)) hd
+  | defDivI h c hc k ha _ hd =>
+    intro hP hE
+    exact .defDivI h c hc k (ha.restrict (fun q hq => hP q (by
+        simp only [LFml.parameters, LTm.parameters, List.mem_append]; exact Or.inl (Or.inl hq)))
+      (fun e he => hE e (by
+        simp only [Inputs.formulaKeys, Inputs.termKeys, List.mem_append]; exact Or.inl (Or.inl he))))
+      (hP _ (by simp only [LFml.parameters, LTm.parameters, List.mem_append, List.mem_cons, List.mem_nil_iff, or_false, Parameter.mk.injEq, and_true]; exact Or.inr rfl)) hd
   | defShr h v k ha _ hd =>
     intro hP hE
     exact .defShr h v k (ha.restrict (fun q hq => hP q (by
@@ -2670,33 +2708,33 @@ theorem LFml.Arith.restrict {P : Parameter → Prop} {E : EnvKey → Prop} {L : 
 /-- **Flattening and compiling never refuse their fragment**: a cut leaf
 (`LFml.Src false false`, the defining equations of its atoms included) with at
 most 511 nodes and 45 storage reads. -/
-theorem readFlatten?_arith (φ : LFml C) (h : φ.Src false false) (hn : φ.nodes ≤ 511)
-    (hw : φ.words * φ.words ≤ 2048) :
-    ∃ r, readFlatten? 2048 φ = some r ∧ r.flat.reads.length * r.flat.reads.length ≤ 2048 ∧
+theorem readFlatten?_arith (φ : LFml C) (h : φ.Src false false) (hn : φ.nodes ≤ 511) {B : Nat}
+    (hB : 2048 ≤ B) (hw : φ.words * φ.words ≤ B) :
+    ∃ r, readFlatten? B φ = some r ∧ r.flat.reads.length * r.flat.reads.length ≤ B ∧
       (leafArithmetic? r.formula).isSome = true := by
   have hd := LFml.depth_le_nodes φ
   obtain ⟨a, ha, aok, alen, alaid, aocc⟩ :=
-    flattenFormulaFuel?_Src (l := .none) (by decide) h 2048 2048 φ.atomBound (by omega) (by omega)
+    flattenFormulaFuel?_Src (l := .none) (by decide) h B B φ.atomBound (by omega) (by omega)
       (Nat.le_refl _) hn
   replace aok := aok.ledger_mono (L' := fun _ => False) (fun _ h => nomatch h)
   obtain ⟨src, hsrc⟩ := h.readFormula
-  have hwl : φ.words ≤ 2048 := Nat.le_trans (Nat.le_mul_self _) hw
-  obtain ⟨L, hL⟩ := Option.isSome_iff_exists.mp (occurrenceLayout?_isSome 2048 alaid (by omega))
+  have hwl : φ.words ≤ B := Nat.le_trans (Nat.le_mul_self _) hw
+  obtain ⟨L, hL⟩ := Option.isSome_iff_exists.mp (occurrenceLayout?_isSome B alaid (by omega))
   obtain ⟨rf, hrf, hrf0⟩ := aok.readFree
-  have hflat : flattenFormula? 2048 φ = some a := by
-    show Option.map Prod.fst (flattenFormulaFuel? 2048 2048 φ φ.atomBound) = _
+  have hflat : flattenFormula? B φ = some a := by
+    show Option.map Prod.fst (flattenFormulaFuel? B B φ φ.atomBound) = _
     rw [ha]
     rfl
   have hRF : readFreeFormula? a.formula = some ⟨rf, hrf0⟩ := by
     simp only [readFreeFormula?, hrf, Option.bind_eq_bind, Option.bind_some, hrf0, dif_pos]
     rfl
-  have hR : readFlatten? 2048 φ = some ⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ := by
+  have hR : readFlatten? B φ = some ⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ := by
     simp only [readFlatten?, hflat, hsrc, hL, hRF, Option.bind_eq_bind, Option.bind_some]
     rfl
   have harith : (ReadFlattening.formula (⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ :
       ReadFlattening φ φ.atomBound)).Arith (fun _ => True) (fun _ => True) :=
     .imp (ReadOccurrence.constraints_arith aocc) aok
-  have hsq : a.reads.length * a.reads.length ≤ 2048 := by rw [alen]; exact hw
+  have hsq : a.reads.length * a.reads.length ≤ B := by rw [alen]; exact hw
   exact ⟨_, hR, hsq, leafArithmetic?_isSome _ (harith.restrict
     (fun q hq => (List.mem_eraseDups' _ q).mpr hq)
     (fun e he => ((Inputs.unique_spec _).2 e).mpr he))⟩
