@@ -1246,6 +1246,86 @@ of one dimension).  A hash key reached through an alias or `atIn` is
 outside the fragment (its position is not admitted), so the key-kind check
 need not see it.
 
+## M8 · Polynomial size (2026-10-25)
+
+The theorem of M6, measured where it is not yet true: symbolic execution
+takes a number of steps, and produces formulas, of size polynomial in the
+program and specification text.  `Examples/Tactics/PolySize.lean` pins
+three families for small `k` by `#proof_size` (a command of that file:
+`#proof_tree`'s nodes and branches, its open goals, and its largest leaf,
+the leaf's sequent as `sol_leaf` reads it, `⊨ᶠ ψ`, in term nodes,
+`Fml.tmSize`, M5):
+
+* **F1, sequential `if`s that both assign**:
+  `⟨ uint x = 0; if (a == 1) { x = x + 1; } else { x = 0; }; …; ⟩ x <= k`,
+  the `i`-th `else` setting `x = i - 1`, each `if` reading the `x` the one
+  before wrote;
+* **F2, literal-bounded loops by their invariants**: `k` loops
+  `/// @custom:key invariant i <= 10 && s == 10 * (j - 1) + i`
+  `for (uint i = 0; i < 10; i++) { s = s + 1; }` in sequence, then
+  `s == 10 * k`, under the box;
+* **F3, both**: one such loop whose body is `k` sequential `if`s,
+  `if (cⱼ == 1) { s = s + 1; } else { s = 0; }`, its invariant
+  `i <= 10 && s <= k * i`, then `s <= 10 * k`.
+
+Three steps follow it: **A1** joins every `if` whose branches only assign
+locals, **A2** proves literal-bounded loops by their invariants only,
+**A3** bounds the recursion depth the counterexample certificates need.
+
+### Baseline (master `c7e634f`)
+
+Measured on the cloud container (4 cores, 15 GB, one Lean process), a
+scratch module per family, `#proof_size` with the time it took to build the
+tree, leaves closed by `sol_leaf; sol_close` as `#proof_tree` closes them;
+`maxHeartbeats 2000000` a command so the larger `k` finish (the pins use
+the default):
+
+| k | F1 nodes | branches | leaf | time | F2 nodes | branches | leaf | time | F3 nodes | branches | leaf | time |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 11 | 2 | 27 | 0.9 s | 10 | 3 | 49 | 2.1 s | 18 | 4 | 66 | 6.8 s |
+| 2 | 26 | 4 | 45 | 2.1 s | 17 | 5 | 78 | 8.2 s | 35 | 6 | 84 | 42.6 s |
+| 3 | 55 | 8 | 63 | 5.3 s | 24 | 7 | 105 | 20.2 s | past 2 M heartbeats | | | |
+| 4 | 112 | 16 | 81 | 14.4 s | 31 | 9 | 132 | 42.7 s | past 2 M | | | |
+| 5 | 225 | 32 | 99 | 35.7 s | 38 | 11 | 159 | 81.4 s | past 2 M | | | |
+| 6 | 450 | 64 | 117 | 89.3 s | 45 | 13 | 186 | 145.5 s | past 2 M | | | |
+
+What it shows:
+
+* **F1 is exponential in the walk**: `ifElseSplit` copies the rest of the
+  program into both goals, `2^k` branches and `7 · 2^k + k − 4` nodes; each
+  leaf is linear (`18k + 9` term nodes).  Under the default heartbeats the
+  tree is built up to `k = 4` (`k = 5` runs past 200 000).  The join
+  (`ifElseJoin`) does not fire: its gate (`Upd.ifJoin?`) takes only an
+  `if` with one branch empty and the other an accumulation (A1 below).
+* **F2's walk is linear** (`7k + 3` nodes, `2k + 1` branches, a leaf
+  about 27 term nodes larger a loop): an annotated loop is closed by its invariant rule
+  (`whileInvariantBox`), whatever its bound (`docs/loops.md`, decision 3),
+  so the bound's value never enters the walk.  The time is not linear
+  (about cubic in `k`: the ratio of successive times falls to `1.8` at
+  `k = 6`, where `(6/5)^3` is `1.73`): the leaves past the `j`-th loop read `j` anonymised
+  frames, and the closer's cost per leaf grows with them.  Under the
+  default heartbeats `k = 3` leaves one goal open (the whole command shares
+  one budget); with 2 M every leaf closes.
+* **F3 is exponential inside the loop**: the body's `k` `if`s split as F1's
+  do, `2^k` preservation goals, each closed past the invariant's `{anon}`;
+  `k = 3` is past 2 M heartbeats.
+* An unannotated literal-bounded loop is unwound (`.auto`,
+  `whileUnwind`), so its walk grows with the bound's value, not with the
+  text; none of the three families has one (A2 below).
+
+### A0 review (2026-10-25)
+
+A read-only finder and skeptic (neither ran Lean) over the baseline.
+Confirmed and fixed: the cubic check compared `t₆/t₅` with `(7/6)^3`
+instead of `(6/5)^3`; the families' Solidity lacked `*`; PolySize's
+docstring wrote the `else` value as `x = i - 1`, a local of that name; the
+A-milestone tags were undefined; `#proof_size` answered `0` for a leaf
+`sol_leaf` did not take apart, which now fails instead.  F1's nodes are
+stated exactly (`7 · 2^k + k − 4`).  Left as minor: the command is global
+(`Solidity.lean` imports the example), the pins add about 25 s to the
+default build, and the leaf mvar is made outside the leaf's context (the
+tree's sequents are closed, so it reads the same).
+
 ## Review (2026-10-20)
 
 A read-only review pass (finder and skeptic per area) confirmed six

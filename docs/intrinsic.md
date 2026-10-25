@@ -8246,3 +8246,22 @@ modules with no path to the elaborator, and no pending automation obligation.
 The feature inventory is current. The 23 trust-inventory findings and 13
 missing documentation paths match an unmodified `f6041962` export; this
 integration adds no finding.
+
+During validation, master advanced to `ec47ae47` with the polynomial-size
+example and its documentation. This merged cleanly. The finder and skeptic
+also reviewed that integration: the example uses `StandardExample`, has no
+contract construction or migrated theorem call, and measures formula nodes
+rather than the contract's proof fields. They found no integration issue.
+The updated gates report 583 reachable modules and 24 trust-inventory
+findings; those same 24 findings occur on unmodified `ec47ae47`.
+
+Final integration validation passed with a private Lake cache and two Lean
+threads: default build 565 jobs, TestSuite 240, optional bridge 1723, corpus
+248, and frozen SolKey conformance (377 taclets, all 131 read-bearing
+annotations covered). The automation gate has 552 derived, 11 refuted and
+no pending obligation. The public axiom audit passed for 468 headline
+theorems; the changed certificate, tightness and reachability theorems use
+only the standard axiom set or a subset. The 13 missing documentation
+paths also match the unmodified upstream tree. An initial shared-cache run
+crashed in unchanged dependencies; the private-cache build and final
+cached confirmation completed without compiler errors.

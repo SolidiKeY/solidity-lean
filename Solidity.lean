@@ -220,6 +220,7 @@ import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
 import Solidity.Examples.Tactics.Join
+import Solidity.Examples.Tactics.PolySize
 import Solidity.Examples.Tactics.CallSummary
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
