@@ -507,26 +507,23 @@ def gapThreeKinds : Fml Names [] :=
 against. -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
-/-- Five strings, refuted only by five classes: past `famBound`. -/
-def gapFiveStrings : Fml Names [] :=
-  let h (i : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str)) :
-      Tm Names [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.val .uint) :=
-    .app2 (.hash .keccak) (.app0 .memory) (.pvI i)
-  let i0 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .here
-  let i1 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there .here
-  let i2 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there (.there .here)
-  let i3 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
-    .there (.there (.there .here))
-  let i4 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
-    .there (.there (.there (.there .here)))
-  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str
-    (.allocAll (.user "d") Str (.allocAll (.user "e") Str
-      (Fml.orL [.eq (h i0) (h i1), .eq (h i0) (h i2), .eq (h i0) (h i3), .eq (h i0) (h i4),
-        .eq (h i1) (h i2), .eq (h i1) (h i3), .eq (h i1) (h i4), .eq (h i2) (h i3), .eq (h i2) (h i4),
-        .eq (h i3) (h i4)])))))
-/-- A quantifier in the body, past a connective. -/
-def gapHashUnderForall : Fml Names [] := strings (.imp (.eq hS hT) (.all (.user "x") .uint
-  (.imp (.eq (Tm.pvV .here) (.app0 (.lit (uintOfNat 0)))) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT)))))
+/-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
+keccak256(t)`.  The verdict turns on the strings' bytes past the write,
+which no stage reads (memory, plan step 6). -/
+def gapWrittenMemory : Fml Names [] :=
+  strings (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1))))) (.eq hS hT))
+/-- A hash under a negative value quantifier whose nodes the top premise
+does not read: `∀ s t. (∀ x. keccak256(s) != keccak256(t)) → !(∀ y.
+keccak256(s) == keccak256(t))`.  Valid as `holds` reads it, and false
+under the premise exactly at two strings with different bytes and one
+hash, where both inner premises fail: the only refutation is a
+collision, which cannot be exhibited.  Not decidable without narrowing
+`Fml.inTarget` (`docs/automation.md`, M7). -/
+def gapHashNegForall : Fml Names [] :=
+  let hs : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hS
+  let ht : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hT
+  strings (.imp (.all (.user "x") .uint (.not (.eq hs ht))) (.not (.all (.user "y") .uint (.eq hs ht))))
 
 end GapHashes
 
@@ -554,8 +551,8 @@ theorem gapPow_inTarget : gapPow.inTarget {} = true := by decide +kernel
 theorem gapMulW_inTarget : gapMulW.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
-theorem gapFiveStrings_inTarget : gapFiveStrings.inTarget {} = true := by decide +kernel
-theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := by decide +kernel
+theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
+theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by decide +kernel
 
 /-- info: true -/
 #guard_msgs in
@@ -565,6 +562,6 @@ theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := b
 
 /-- info: ["unknown", "unknown", "unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapFiveStrings, verdict gapHashUnderForall]
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapWrittenMemory, verdict gapHashNegForall]
 
 end Solidity.Examples.Decision
