@@ -1323,8 +1323,8 @@ its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
    the sort.
 9. **Reads of the starting ledger** (plan step 3, `net(a)`, an address a
    scalar of the fragment).  `decideLeaf` falls back to
-   `ledgerReduction?` (`Calculus/LedgerReduction.lean`) where the other
-   two refuse.  The lifted body's reads are cut (`LFml.ledgerCut`,
+   `ledgerReduction?` (`Calculus/LedgerReduction.lean`) where the
+   others refuse (the array pipeline runs before it).  The lifted body's reads are cut (`LFml.ledgerCut`,
    `Calculus/LedgerCut.lean`): the `j`-th read `net(aⱼ)` becomes
    `seq aⱼ (net(j))`, and `aᵢ == aⱼ → net(i) == net(j)` for each pair is
    put in the antecedent.  The cut is exact in a universal reading
@@ -1347,8 +1347,10 @@ its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
 
 10. **Storage arrays at symbolic indices** (plan step 6, arrays of
    primitives at roots, dynamic and fixed).  `decideLeaf` falls back to
-   `arrayReduction?` (`Calculus/ArrayReduction.lean`) where the other
-   three refuse.  Stage by stage:
+   `arrayReduction?` (`Calculus/ArrayReduction.lean`) where
+   `dependentReduction?` and `quantReduction?` refuse, ahead of the
+   ledger's pipeline (on an array leaf that one recurses deeply enough to
+   overflow the stack of a command-line `lean`).  Stage by stage:
    * *update pushing*: an equation over a formula's `a[i]` (the Theory
      reads every slot, the default past them; the interpreter halts past
      the live length) was read one way at each polarity.  `Tm.toLT`

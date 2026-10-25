@@ -93,9 +93,9 @@ arithmetic decided by the verified procedure (`AFml.decide_iff`), a `false`
 answer turned into a typed countermodel (`DependentReduction.verify`); on a
 leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
 the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
-on a leaf both refuse, the pipeline with ledger reads (`ledgerReduction?`,
-`LedgerReduction.verify`); then the one with storage array reads
-(`arrayReduction?`, `ArrayReduction.verify`). -/
+on a leaf both refuse, the pipeline with storage array reads
+(`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
+(`ledgerReduction?`, `LedgerReduction.verify`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -109,13 +109,13 @@ def decideLeaf (φ : Fml C []) : LeafVerdict C :=
       | .inl _ => .proved
       | .inr cm => .refuted cm.1
     | none =>
-      match ledgerReduction? φ with
+      match arrayReduction? φ with
       | some q =>
         match q.verify with
         | .inl _ => .proved
         | .inr cm => .refuted cm.state
       | none =>
-        match arrayReduction? φ with
+        match ledgerReduction? φ with
         | some q =>
           match q.verify with
           | .inl _ => .proved
@@ -186,7 +186,7 @@ quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
 reads (`Fml.ledgerCovered`, M7 step 3), and the one with storage array reads
 (`Fml.arrayCovered`, M7 step 6). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
-  φ.inExact && φ.exactBounded || φ.quantCovered || φ.ledgerCovered || φ.arrayCovered
+  φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered
 
 /-- **Completeness on `Fml.Covered`.** -/
 theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
@@ -206,14 +206,14 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
       rw [hq]
       dsimp only
       split <;> exact fun h => nomatch h
-    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayReduction?_isSome φ h)
       dsimp only
       split
       · split <;> exact fun h => nomatch h
       · rw [hq]
         dsimp only
         split <;> exact fun h => nomatch h
-    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayReduction?_isSome φ h)
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
       dsimp only
       split
       · split <;> exact fun h => nomatch h
