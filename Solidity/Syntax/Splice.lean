@@ -30,26 +30,27 @@ past every fresh variable the block writes. -/
 def elabProgS (ss : List RawStmt) : Except String (Blk C []) := do
   let k := RawStmt.maxIdxs ss + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] ss
-  let P ← ((elabStmtsP C ss).run { funs := C.funs }).run' ([], k)
+  let P ← (elabStmtsP C ss).runFrom' { funs := C.funs } ([], k)
   SProg.chain [] [] P
 
 /-- The statements `ss`, the `i`th first, from the state `st`, each appended
 to `acc`, the block so far, which leaves the context named `ns`. -/
 def elabProgAtS.goWt {Γ₀ : Ctx} (i : Nat) (ss : List RawStmt) (st : ECtx × Nat)
-    (ns : List Var) (acc : Blk C Γ₀) (mutableFreshNames : List String := []) :
+    (ns : List Var) (acc : Blk C Γ₀) (mutableFreshNames : List String := [])
+    (memo : CallMemo := {}) :
     Except (Nat × String) (Blk C Γ₀) :=
   match ss with
   | [] => pure acc
   | s :: ss =>
-    match ((elabStmtP C s).run { funs := C.funs, mutableFreshNames }).run st with
+    match (((elabStmtP C s).run { funs := C.funs, mutableFreshNames }).run st).run memo with
     | .error e => .error (i, e)
-    | .ok (P, st) =>
+    | .ok ((P, st), memo) =>
       match SProg.chain ns acc.1 P with
       | .error e => .error (i, e)
       | .ok b =>
         match Blk.append acc b with
         | .error e => .error (i, e)
-        | .ok acc' => elabProgAtS.goWt (i + 1) ss st (b.2.outNames ns) acc' mutableFreshNames
+        | .ok acc' => elabProgAtS.goWt (i + 1) ss st (b.2.outNames ns) acc' mutableFreshNames memo
 
 /-- `elabProgS`, from the state `st`, an error naming the statement of the
 block it arose in (its position, from `i`): the same block, statement by
@@ -276,10 +277,11 @@ example : Prog.toStr [] (sol[CallsExample]{ uint y = addTwo(3); credit(y, 2); bu
     "uint y; y = addTwo(3); credit(y, 2); bump();" := rfl
 
 /-! What the calls run: `addTwo` calls `addOne` twice, `larger` returns from
-both branches of its last `if`. -/
+both branches of its last `if`.  `addOne`'s body is the same at both calls,
+its locals `se3`, `se4` too: the first call's end with it (`CallMemo`). -/
 
 /--
-info: uint y; uint se1 = 3; uint se2; uint se3 = se1; uint se4; se4 = se3 + 1; se2 = se4; uint se5 = se2; uint se6; se6 = se5 + 1; se2 = se6; y = se2; uint z; uint se7 = y; uint se8 = 7; uint se9; if (se7 > se8) { se9 = se7; } else { se9 = se8; } z = se9;
+info: uint y; uint se1 = 3; uint se2; uint se3 = se1; uint se4; se4 = se3 + 1; se2 = se4; uint se3 = se2; uint se4; se4 = se3 + 1; se2 = se4; y = se2; uint z; uint se5 = y; uint se6 = 7; uint se7; if (se5 > se6) { se7 = se5; } else { se7 = se6; } z = se7;
 -/
 #guard_msgs in
 #eval IO.println (Prog.inlinedStr [] (sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); }))

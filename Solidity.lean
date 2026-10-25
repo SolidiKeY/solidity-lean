@@ -1,5 +1,6 @@
 -- The root of the `Solidity` library: every module of the default build.
 import Solidity.KeySort
+import Solidity.Language.Features
 import Solidity.Eqns
 import Solidity.AST
 import Solidity.SpecSyntax
@@ -39,6 +40,7 @@ import Solidity.Semantics.CallbackCapture
 import Solidity.Semantics.DeferredCorrespondence
 import Solidity.Semantics.NativeDeferredCallback
 import Solidity.Semantics.RunFuel
+import Solidity.Semantics.RunAccel
 import Solidity.Semantics.RevertMemory
 import Solidity.Update
 import Solidity.Signature
@@ -367,6 +369,7 @@ import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.Taclet
 import Solidity.Tools.DiffTest
+import Solidity.Tools.LazyStorage
 import Solidity.Tools.Counterexample
 import Solidity.Calculus.DeclarationFacts
 import Solidity.Calculus.ReadRealization
@@ -430,11 +433,14 @@ import Solidity.Calculus.DependentReduction
 import Solidity.Calculus.LeafTotality
 import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.LiftTotality
+import Solidity.Calculus.Prenex
 import Solidity.Calculus.AutoComplete
+import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.AutoComplete
+import Solidity.Examples.Decision
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify
@@ -485,3 +491,4 @@ import Solidity.Examples.Tactics.Inheritance
 import Solidity.Examples.Tactics.Lifetime
 
 import Solidity.Examples.Tactics.Rigid
+import Solidity.Examples.Tactics.SymbolicCounterexample

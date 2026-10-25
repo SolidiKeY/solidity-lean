@@ -1,4 +1,5 @@
 import Solidity.Calculus.CloseScoped.Leaf
+import Solidity.Calculus.LeafShare
 
 /-!
 # Closing a scoped leaf: the steps
@@ -372,7 +373,8 @@ macro "sol_close_quantified_core" : tactic => `(tactic| (
     all_goals try (intros; sol_close_reads_all)
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals try intros
-    all_goals try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *
+    all_goals try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+      Close.forall_const_type] at *
     all_goals try sol_close_witness
     all_goals (repeat' (first | intro _ | apply And.intro))
     all_goals try sol_close_enrich
@@ -814,40 +816,70 @@ partial def closeSide (g : MVarId) (bounds : Bounds) (hyps : Array FVarId := #[]
   return false
 
 /-- What one step of evaluation leaves in front, opened: binders, premises,
-landed states (`CloseS.LandedAll`), and a value as a fresh `a` and its
-defining fact `X = some a`: under the box whatever it returns
-(`CloseS.wp_box_optRes`), under the diamond with a goal that it returns
-(`CloseS.exists_some_of`).
-The goals left, the main one last, and the facts. -/
-partial def introFront (g : MVarId) : MetaM (List MVarId × List FVarId) := g.withContext do
+landed states (`CloseS.LandedAll`), a checked value's two cases
+(`(c → k) ∧ (¬c → False)`, `CloseS.wpChecked`: the second a side goal), and
+a value as a fresh `a` and its defining fact `X = some a`: under the box
+whatever it returns (`CloseS.wp_box_optRes`), under the diamond with a goal
+that it returns (`CloseS.exists_some_of`).
+The goals left, the main one last; the defining facts; the premises
+introduced (not a landed state's `Nonempty`), which every later `omega`
+reads (`closeArith`, `closeSide`). -/
+partial def introFront (g : MVarId) : MetaM (List MVarId × List FVarId × List FVarId) :=
+    g.withContext do
   let t ← whnfR (← instantiateMVars (← g.getType))
+  if t.isAppOfArity ``And 2 then
+    let [g₁, g₂] ← g.apply (mkConst ``And.intro) | throwError "sol_close_join_steps: a conjunction"
+    let (rest, hs, ps) ← introFront g₁
+    return (g₂ :: rest, hs, ps)
   if t.isForall || t.isAppOfArity ``CloseS.LandedAll 5 then
-    let (_, g') ← g.intro1
-    return ← introFront g'
+    let isPrem ← if t.isForall then isProp t.bindingDomain! else pure false
+    let (f, g') ← g.intro1
+    let keep ← if isPrem then g'.withContext do
+        pure !(← instantiateMVars (← f.getType)).isAppOf ``Nonempty
+      else pure false
+    let (rest, hs, ps) ← introFront g'
+    return (rest, hs, if keep then f :: ps else ps)
   if t.isAppOfArity ``Modality.wp 4 && (t.getArg! 1).isConstOf ``Modality.box &&
       (t.getArg! 2).isAppOfArity ``Close.optRes 2 then
     let [g₁] ← g.apply (← mkAppM ``Iff.mpr #[← mkAppOptM ``CloseS.wp_box_optRes
         #[none, (t.getArg! 2).appArg!, t.getArg! 3]])
       | throwError "sol_close_join_steps: the box's value"
     let (fs, g₂) ← g₁.introN 2
-    let (rest, hs) ← introFront g₂
-    return (rest, fs[1]! :: hs)
+    let (rest, hs, ps) ← introFront g₂
+    return (rest, fs[1]! :: hs, ps)
   if t.isAppOfArity ``Exists 2 then
     match ← g.apply (← mkConstWithFreshMVarLevels ``CloseS.exists_some_of) with
     | [gS, gH] =>
       let (fs, gH') ← gH.introN 2
-      let (rest, hs) ← introFront gH'
-      return (gS :: rest, fs[1]! :: hs)
+      let (rest, hs, ps) ← introFront gH'
+      return (gS :: rest, fs[1]! :: hs, ps)
     | gs => throwError "sol_close_join_steps: {gs.length} goals from an existential"
-  return ([g], [])
+  return ([g], [], [])
+
+/-- A side goal of arithmetic (a checked value that must return: its
+failing case `¬c → False`): its premises introduced, then `omega` in the
+context cut to them, the leaf's premises and the intervals of the values
+they read (`omegaIn`). -/
+def closeArith (g : MVarId) (bounds : Bounds) (prems : Array FVarId) : TacticM Bool := do
+  if ← g.isAssigned then return false
+  let (hs, g) ← g.intros
+  g.withContext do
+    let mut keep := prems ++ hs
+    for h in hs do
+      for f in (collectFVars {} (← instantiateMVars (← h.getType))).fvarIds do
+        if let some (_, _, hb) := bounds.get? f then keep := keep.push hb
+    let some e ← omegaIn keep (← g.getType) | return false
+    g.assign e
+    return true
 
 /-- The facts `introFront` named, each with its interval; the side goals,
-each closed or failing.  `none` where the main goal closed. -/
-def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) :
+each closed (`closeSide`, `closeArith`) or failing.  `none` where the main
+goal closed. -/
+def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) (prems : Array FVarId) :
     TacticM (Option (MVarId × Bounds)) := do
   let some gMain := gs.getLast? | throwError "sol_close_join_steps: no goal"
   for gS in gs.dropLast do
-    unless ← closeSide gS bounds do
+    unless (← closeSide gS bounds prems) || (← closeArith gS bounds prems) do
       throwError "sol_close_join_steps: a value is not shown to return"
   let mut gM := gMain
   let mut bounds := bounds
@@ -856,21 +888,198 @@ def settle (gs : List MVarId) (hs : List FVarId) (bounds : Bounds) :
     (gM, bounds) := (g', b')
   return some (gM, bounds)
 
-/-- The leaf's binders and updates one at a time, the rest of the formula
-held opaque (a fresh `ψ` and `rest = ψ`), so that each step evaluates one
-update with `close_rw_s` and every value is named once.  Stops at the
-first formula that is not a binder or an update; `none` where the goal
-closed on the way. -/
-partial def peel (g : MVarId) (bounds : Bounds) : TacticM (Option (MVarId × Bounds)) :=
-    g.withContext do
+/-! #### A call site at a time (`Calculus/LeafShare.lean`) -/
+
+/-- The inductives whose constructors `tmNF` reads through. -/
+def nfTypes : List Lean.Name :=
+  [``Option, ``Sigma, ``Prod, ``Solidity.Tm, ``Solidity.Idx, ``Solidity.PrimTy]
+
+/-- A closed term's value by the kernel, through the constructors of
+`nfTypes` only (`kernelNF`'s, narrowed): a term's operators and literals are
+left as written, so the closer's lemmas still read them (`PrimTy.uint.ofLit`,
+not its integer).  Each distinct term once. -/
+partial def tmNF (e : Expr) : StateRefT (Std.HashMap Expr Expr) MetaM Expr := do
+  if let some r := (← get)[e]? then return r
+  let r ← do
+    match Kernel.whnf (← getEnv) (← getLCtx) e with
+    | .error _ => pure e
+    | .ok r =>
+      match r.getAppFn with
+      | .const n _ =>
+        match (← getEnv).find? n with
+        | some (.ctorInfo ci) =>
+          if nfTypes.contains ci.induct then
+            let args ← r.getAppArgs.mapM fun a => do
+              if ← isProof a then pure a else tmNF a
+            pure (mkAppN r.getAppFn args)
+          else pure e
+        | _ => pure e
+      | _ => pure e
+  modify (·.insert e r)
+  return r
+
+/-- An update a call's summary emits, `{ y := t }` (`CallRet.summary?`),
+possibly popped (`{ y := t ‖ pop }`, what a share leaves): `y`'s position,
+`t`, the pop. -/
+def shareable? (U : Expr) : Option (Expr × Expr × Option Expr) :=
+  let core (V : Expr) : Option (Expr × Expr) := do
+    guard (V.isAppOfArity ``Upd.snoc 5)
+    guard ((V.getArg! 3).isAppOfArity ``Upd.nil 2)
+    let el := V.getArg! 4
+    guard (el.isAppOfArity ``UpdElem.local 6)
+    let rhs := el.getArg! 5
+    guard (rhs.isAppOfArity ``Rhs.val 4)
+    return (el.getArg! 4, rhs.getArg! 3)
+  if U.isAppOfArity ``Upd.pop 6 then
+    (core (U.getArg! 4)).map fun (j, t) => (j, t, some (U.getArg! 5))
+  else (core U).map fun (j, t) => (j, t, none)
+
+/-- The distinct subterms of `e`, counted up to `cap`. -/
+partial def termNodes (e : Expr) (cap : Nat) : Nat :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr) Unit := do
+    if (← get).size ≥ cap || (← get).contains e then return
+    modify (·.insert e)
+    match e with
+    | .app f x => go f; go x
+    | .lam _ t b _ | .forallE _ t b _ => go t; go b
+    | .mdata _ b | .proj _ _ b => go b
+    | _ => pure ()
+  ((go e).run {}).2.size
+
+/-- The most distinct subterms a summary's term may have for `redexOf?`
+to hand it to the kernel. -/
+def shareNodes : Nat := 20000
+
+/-- `t`'s innermost strict redex (`Tm.redex?`, by the kernel, `tmNF`): the
+redex, the term reading it from a fresh local, and the equation, which
+`rfl` proves; `none` where `t` is its own redex or has none. -/
+def redexOf? (t : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
+  -- `Kernel.whnf` runs outside the heartbeats: a term of at most
+  -- `shareNodes` distinct subterms only (`termNodes`)
+  unless termNodes t shareNodes < shareNodes do return none
+  let red ← mkAppM ``Tm.redex? #[t]
+  let nf ← (tmNF red).run' {}
+  unless nf.isAppOfArity ``Option.some 2 do return none
+  let sg := nf.appArg!
+  unless sg.isAppOfArity ``Sigma.mk 4 do return none
+  let pr := sg.getArg! 3
+  unless pr.isAppOfArity ``Prod.mk 4 do return none
+  let t' := pr.getArg! 3
+  if t'.isAppOfArity ``Tm.pvV 4 && (t'.getArg! 3).isAppOf ``Idx.here then return none
+  return some (pr.getArg! 2, t', ← mkEq red nf)
+
+/-- **One call site shared** (`holds_upd_share`, KeY's contract applied
+once per call): `holds σ ({ y := C[s] ‖ pop } φ)` from
+`holds σ ({ z := s } { y := C[z] ‖ pop } φ)`, `s` the innermost strict redex
+of the summary's term, `z` the fresh `sh·k`; an unpopped update is popped
+by nothing first (`holds_upd_pop_refl`).  `none` where the head is no
+summary's update or its term is one operation. -/
+def shareStep (g : MVarId) (k : Nat) : MetaM (Option MVarId) := g.withContext do
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOfArity ``Solidity.holds 4 do return none
+  let φ ← whnfR ty.appArg!
+  unless φ.isAppOfArity ``Fml.upd 6 do return none
+  let some (j, t, h?) := shareable? (φ.getArg! 4) | return none
+  let some (r, t', eqT) ← redexOf? t | return none
+  let g ← g.replaceTargetDefEq (mkApp ty.appFn! φ)
+  let (g, h) ← match h? with
+    | some h => pure (g, h)
+    | none =>
+      let [g'] ← g.apply (← mkConstWithFreshMVarLevels ``holds_upd_pop_refl) | return none
+      g'.withContext do
+        let ty ← instantiateMVars (← g'.getType)
+        pure (g', ((← whnfR ty.appArg!).getArg! 4).appArg!)
+  let ht ← mkExpectedTypeHint (← mkEqRefl eqT.appArg!) eqT
+  let lem ← mkConstWithFreshMVarLevels ``holds_upd_share
+  let (args, _, _) ← forallMetaTelescope (← inferType lem)
+  let vals := #[toExpr (Var.fresh "sh" k), j, h, t, r, t', ht]
+  for i in [0:vals.size] do
+    unless ← isDefEq args[i + 6]! vals[i]! do return none
+  let gs ← g.apply (← instantiateMVars (mkAppN lem (args.extract 0 13)))
+  let mut main := none
+  for g' in gs do
+    if (← instantiateMVars (← g'.getType)).isAppOfArity ``Eq 3 then g'.refl
+    else main := some g'
+  return main
+
+/-- The binary operations of a term (`Tm.app2`), each distinct subterm
+counted once, up to `cap`. -/
+partial def tmOps (e : Expr) (cap : Nat) : Nat :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr × Nat) Unit := do
+    let (seen, n) ← get
+    if n ≥ cap || seen.contains e then return
+    set (seen.insert e, if e.isAppOfArity ``Tm.app2 8 then n + 1 else n)
+    match e with
+    | .app f x => go f; go x
+    | .mdata _ b => go b
+    | _ => pure ()
+  ((go e).run ({}, 0)).2.2
+
+/-- The most binary operations of a summary's update in `e`
+(`shareable?`, `tmOps`), up to `cap`; each distinct subterm visited once. -/
+partial def countShare (e : Expr) (cap : Nat) : Nat :=
+  let rec go (e : Expr) : StateM (Std.HashSet Expr × Nat) Unit := do
+    let (seen, best) ← get
+    if best ≥ cap || seen.contains e then return
+    set (seen.insert e, best)
+    if e.isAppOfArity ``Fml.upd 6 then
+      if let some (_, t, _) := shareable? (e.getArg! 4) then
+        let n := tmOps t cap
+        modify fun (s, b) => (s, max b n)
+    match e with
+    | .app f x => go f; go x
+    | .mdata _ b => go b
+    | _ => pure ()
+  ((go e).run ({}, 0)).2.2
+
+/-- The leaves whose summary's update has at least this many operations
+take `sol_close_join_steps` first, one call site at a time (`shareStep`). -/
+def shareMin : Nat := 4
+
+/-- The most operations a summary's update may have for `sol_close` to
+evaluate the leaf whole where `sol_close_join_steps` did not close it:
+whole, `x * 3 * … * 3` costs 24 k heartbeats at eight products, 107 k at
+sixteen, 803 k at thirty-two (`docs/automation.md`, M6). -/
+def shareWholeMax : Nat := 8
+
+mutual
+
+/-- The leaf's binders, premises and updates one at a time, the rest of
+the formula held opaque (a fresh `ψ` and `rest = ψ`), so that each step
+evaluates one update with `close_rw_s` and every value is named once; a
+summary's update first split into its call sites (`shareStep`).  Stops at
+the first formula that is not a binder, a premise or an update; `none`
+where the goal closed on the way. -/
+partial def peel (g : MVarId) (bounds : Bounds) (prems : Array FVarId) (k : Nat) :
+    TacticM (Option (MVarId × Bounds × Array FVarId)) := do
+  let mut g := g
+  let mut k := k
+  repeat
+    match ← shareStep g k with
+    | some g' => g := g'; k := k + 1
+    | none => break
+  g.withContext do
   let t ← instantiateMVars (← g.getType)
-  unless t.isAppOfArity ``Solidity.holds 4 do return some (g, bounds)
+  unless t.isAppOfArity ``Solidity.holds 4 do return some (g, bounds, prems)
   let φ ← whnfR t.appArg!
   let rest? : Option Expr :=
     if φ.isAppOfArity ``Fml.upd 6 || φ.isAppOfArity ``Fml.bind 6 then some (φ.getArg! 5)
     else if φ.isAppOfArity ``Fml.all 5 then some (φ.getArg! 4)
+    else if φ.isAppOfArity ``Fml.imp 4 then some (φ.getArg! 3)
     else none
-  let some rest := rest? | return some (g, bounds)
+  let some rest := rest? | return some (g, bounds, prems)
+  -- a premise is read as far as it goes: where the steps past it fail, the
+  -- leaf is left at it, as before premises were read (`closeSteps` then
+  -- evaluates it whole)
+  if φ.isAppOfArity ``Fml.imp 4 then
+    let saved ← saveState
+    try return ← peelHead g t φ rest bounds prems k
+    catch _ => saved.restore; return some (g, bounds, prems)
+  peelHead g t φ rest bounds prems k
+
+/-- `peel`'s step at a head `φ` of rest `rest`, then `peel` on. -/
+partial def peelHead (g : MVarId) (t φ rest : Expr) (bounds : Bounds) (prems : Array FVarId)
+    (k : Nat) : TacticM (Option (MVarId × Bounds × Array FVarId)) := g.withContext do
   -- `∀ ψ, rest = ψ → holds σ (head ψ)`, built in place (no `kabstract`)
   let ty ← withLocalDeclD `ψ (← inferType rest) fun ψ => do
     withLocalDeclD `hψ (← mkEq rest ψ) fun h => do
@@ -882,8 +1091,9 @@ partial def peel (g : MVarId) (bounds : Bounds) : TacticM (Option (MVarId × Bou
   let gs ← runOn g₁ (← `(tactic| simp (config := { maxSteps := 400000 }) only [close_rw_s]))
   let [g₂] := gs | if gs.isEmpty then return none else
     throwError "sol_close_join_steps: a step split the goal"
-  let (gs, hs) ← introFront g₂
-  let some (gM, bounds) ← settle gs hs bounds | return none
+  let (gs, hs, ps) ← introFront g₂
+  let prems := prems ++ ps.toArray
+  let some (gM, bounds) ← settle gs hs bounds prems | return none
   -- the rest back, by its equation
   let gM ← gM.withContext do
     let tgt ← whnfR (← instantiateMVars (← gM.getType))
@@ -891,7 +1101,9 @@ partial def peel (g : MVarId) (bounds : Bounds) : TacticM (Option (MVarId × Bou
       throwError "sol_close_join_steps: a step left {tgt}"
     gM.replaceTargetEq (mkApp tgt.appFn! rest)
       (← mkCongrArg tgt.appFn! (← mkEqSymm (mkFVar hψ)))
-  peel gM bounds
+  peel gM bounds prems k
+
+end
 
 /-- The leaf (`Fml.Valid ψ`) closed one update at a time (`peel`), the post
 read as the updates were, then `omega` on the intervals, the defining facts'
@@ -900,12 +1112,12 @@ own: a false leaf fails in about the cost of a true one).  Fails where a
 goal is left. -/
 def closeSteps : TacticM Unit := do
   evalTactic (← `(tactic| (sol_close_unwrap; intro σ)))
-  let some (g, bounds) ← peel (← getMainGoal) {} | setGoals []; return
+  let some (g, bounds, prems) ← peel (← getMainGoal) {} #[] 0 | setGoals []; return
   let gs ← runOn g (← `(tactic| sol_close_eval))
   let mut rest : Array MVarId := #[]
   for g in gs do
-    let (gs', hs) ← introFront g
-    if let some (g', _) ← settle gs' hs bounds then rest := rest.push g'
+    let (gs', hs, ps) ← introFront g
+    if let some (g', _) ← settle gs' hs bounds (prems ++ ps.toArray) then rest := rest.push g'
   setGoals rest.toList
   evalTactic (← `(tactic| all_goals first | omega | sol_skip_after 20000 sol_close_finish))
   unless (← getGoals).isEmpty do throwError "sol_close_join_steps: goals left"
@@ -921,12 +1133,16 @@ def evalSolCloseFewJoins : Tactic := fun _ => withMainContext do
   let ty ← instantiateMVars (← getMainTarget)
   if CloseJ.countJoins ty 0 (CloseJ.wholeMax + 1) > CloseJ.wholeMax then
     throwError "sol_close_few_joins: more than {CloseJ.wholeMax} joined updates"
+  if CloseJ.countShare ty (CloseJ.shareWholeMax + 1) > CloseJ.shareWholeMax then
+    throwError "sol_close_few_joins: a summary of more than {CloseJ.shareWholeMax} operations"
 
 @[tactic Solidity.tacticSol_close_join_steps]
 def evalSolCloseJoinSteps : Tactic := fun _ => withMainContext do
   let ty ← instantiateMVars (← getMainTarget)
-  unless ty.isAppOf ``Solidity.Fml.Valid && CloseJ.countJoins ty 0 ≥ CloseJ.stepsMin do
-    throwError "sol_close_join_steps: fewer than {CloseJ.stepsMin} joined updates"
+  unless ty.isAppOf ``Solidity.Fml.Valid && (CloseJ.countJoins ty 0 ≥ CloseJ.stepsMin ||
+      CloseJ.countShare ty CloseJ.shareMin ≥ CloseJ.shareMin) do
+    throwError "sol_close_join_steps: fewer than {CloseJ.stepsMin} joined updates, \
+      and no summary of {CloseJ.shareMin} operations"
   let saved ← saveState
   let ok ← tryCatchRuntimeEx (Budget.within CloseJ.budget do
       Term.withoutErrToSorry <| withoutRecover CloseJ.closeSteps

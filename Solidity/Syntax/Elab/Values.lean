@@ -448,12 +448,96 @@ structure ElabScope where
   first: a call of one is the frame below (`elabCallRet`). -/
   recs : List RecFrame := []
 
+/-- Where each callee's body was first elaborated: the first index its
+names took, by the callee and what its elaboration reads besides
+(`calleeKey`).  A later call of it elaborates it again from that index, so
+that its body is the same term at every call (`elabCallRet`), and a nested
+callee's body is one term however many paths reach it (`docs/automation.md`,
+M6, "One body a function"). -/
+structure CallMemo where
+  /-- The first index each callee's names took, by its key. -/
+  starts : List (String × Nat) := []
+  /-- The bodies elaborated, by their key and first index: a contract and a
+  block of it with the index after it, erased (`CallMemo.setBody`). -/
+  bodies : List ((String × Nat) × NonScalar) := []
+
 /-- Elaboration threads the locals in scope, newest first, and the index of
-the next variable a capture declares, and reads its scope (`ElabScope`). -/
-abbrev ElabM := ReaderT ElabScope (StateT (ECtx × Nat) (Except String))
+the next variable a capture declares, and reads its scope (`ElabScope`);
+below them, the callees elaborated so far (`CallMemo`). -/
+abbrev ElabM := ReaderT ElabScope (StateT (ECtx × Nat) (StateT CallMemo (Except String)))
+
+instance : Inhabited CallMemo := ⟨{}⟩
 
 /-- A checking step, in the elaborator. -/
-def ElabM.lift {α : Type} (x : Except String α) : ElabM α := fun _ => StateT.lift x
+def ElabM.lift {α : Type} (x : Except String α) : ElabM α := fun _ => StateT.lift (StateT.lift x)
+
+/-- What a callee's elaboration reads besides its declaration: its name,
+whether it runs in a self-call's frame, the overflow mode and what
+`msg.value` reads there (`CallMemo`). -/
+def calleeKey (f : String) (selfFrame : Bool) (sc : ElabScope) : String :=
+  s!"{f}|{selfFrame}|{reprStr sc.overflow}|{reprStr sc.selfValue}"
+
+/-- Entering a callee of key `key`: where its first call's locals were
+numbered, and the index the caller is at.  For a callee that is `shared`, the
+numbering goes back to its first call's, or, at its first call, is recorded. -/
+def CallMemo.enter (shared : Bool) (f : String) (selfFrame : Bool) : ElabM (Option Nat × Nat) := do
+  let kEntry := (← get).2
+  if !shared then return (none, kEntry)
+  let key := calleeKey f selfFrame (← read)
+  match lookupBy key (← getThe CallMemo).starts with
+  | some k =>
+    modify fun (Γc, _) => (Γc, k)
+    pure (some k, kEntry)
+  | none =>
+    modifyThe CallMemo fun m => { m with starts := (key, kEntry) :: m.starts }
+    pure (none, kEntry)
+
+/-- `body?`, compiled: the body `setBody` recorded under the key, if it is a
+block of the same contract (the same object). -/
+unsafe def CallMemo.bodyImpl? (C : Contract) (key : String) (k₀ : Nat) :
+    ElabM (Option (SProg C × Nat)) := do
+  match lookupBy (key, k₀) (← getThe CallMemo).bodies with
+  | some x =>
+    let e : (C' : Contract) × (SProg C' × Nat) := unsafeCast x
+    if ptrAddrUnsafe e.1 == ptrAddrUnsafe C then pure (some (unsafeCast e.2)) else pure none
+  | none => pure none
+
+/-- **A shared callee's body, read back**: the body its first call elaborated
+from `k₀` (`CallMemo`), and the index after it.  It is the body this call
+elaborates (the elaboration reads nothing else, `calleeKey`), so the logical
+reading is `none`, elaborate it again; the compiled one reads it back, so
+that elaboration is linear in the functions, not in the calls. -/
+@[implemented_by CallMemo.bodyImpl?]
+def CallMemo.body? (C : Contract) (_key : String) (_k₀ : Nat) : ElabM (Option (SProg C × Nat)) :=
+  pure none
+
+/-- `setBody`, compiled: the block and its contract, erased. -/
+unsafe def CallMemo.setBodyImpl (C : Contract) (key : String) (k₀ : Nat) (P : SProg C)
+    (kEnd : Nat) : ElabM Unit :=
+  let e : (C' : Contract) × (SProg C' × Nat) := ⟨C, (P, kEnd)⟩
+  modifyThe CallMemo fun m => { m with bodies := ((key, k₀), unsafeCast e) :: m.bodies }
+
+/-- Record a shared callee's body (`body?`); logically nothing. -/
+@[implemented_by CallMemo.setBodyImpl]
+def CallMemo.setBody (C : Contract) (_key : String) (_k₀ : Nat) (_P : SProg C) (_kEnd : Nat) :
+    ElabM Unit :=
+  pure ()
+
+/-- Leaving a callee entered at `kEntry`: after a repeated one, the caller's
+numbering goes on from where it was. -/
+def CallMemo.leave (entry : Option Nat × Nat) : ElabM Unit :=
+  if entry.1.isSome then modify fun (Γc, k) => (Γc, max k entry.2) else pure ()
+
+/-- Run an elaboration from the scope `sc` and the state `st`, with no
+callee elaborated yet. -/
+def ElabM.runFrom {α : Type} (x : ElabM α) (sc : ElabScope) (st : ECtx × Nat) :
+    Except String (α × (ECtx × Nat)) :=
+  ((x.run sc).run st).run' {}
+
+/-- `runFrom`, the state dropped. -/
+def ElabM.runFrom' {α : Type} (x : ElabM α) (sc : ElabScope) (st : ECtx × Nat) :
+    Except String α :=
+  (x.runFrom sc st).map (·.1)
 
 /-- A fresh variable for a capture, `ie1`, `sp2`: numbered past every
 variable the program itself writes. -/

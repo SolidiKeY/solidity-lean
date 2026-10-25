@@ -264,7 +264,9 @@ other seven:
   below its root (`copyObjN`, `copyPathRd?`, `Theory/Typed/MemMirror.lean`)
   and takes a read's guards out of its address (`LTm.hoistA`).
 - `invariantClosedFormSum`: a diamond leaf whose length witnesses (`∃ a,
-  len = some a`) the closer does not pick.
+  len = some a`) the closer does not pick.  Refuted since (2026-10-25,
+  `TestSuite/Refuted.lean`): false in the model from an array of `2^255`
+  elements (`docs/automation.md`, M6, "Symbolic counterexamples").
 - `invariantQuantifiedOverPrefix`: derived (`TestSuite/Derived20.lean`) since
   the closer splits a read at a symbolic index on the write
   (`sol_close_save_cases`, solkey's `selectOnSaveCons`, `docs/automation.md`).

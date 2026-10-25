@@ -66,7 +66,9 @@ call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body, closed over a frame of its own — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
-obligation's).  A call whose callee calls and only computes values is one
+obligation's).  Every call of a callee holds the same body term, its locals
+named as at its first call (`CallMemo`, `docs/automation.md` M6), so nested
+calls stay the size of the source.  A call whose callee calls and only computes values is one
 update by the callee's summary instead (`internalCallSummary`,
 `Calculus/CallSummary.lean`, `docs/automation.md` M6).  **Callbacks** are
 a second reading of the modalities (`Semantics/Callback.lean`, `holdsC` of

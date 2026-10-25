@@ -137,8 +137,10 @@ info: counterexample (certified):
 #guard_msgs in #counterexample dl!{ [ count = a; ] count == a }
 
 /-! A loop runs at most `loopFuel` iterations in the search (`Prog.runF`,
-the typed run with fuel): bounded by `a`, which the pools draw at
-`2^256 - 1`, its run is `unknown` past them, not endless.  A loop that ends within them is
+the typed run with fuel), unless it only counts: then it runs in closed
+form (`Prog.runA`, `Semantics/RunAccel.lean`).  Bounded by `a`, which the
+pools draw at `2^256 - 1`, the first loop counts to `a` in one step, and
+the property holds.  A loop that ends within the fuel is
 run, and its counterexample certified; `i` is the program's local, not a
 parameter, so the witness binds nothing. -/
 

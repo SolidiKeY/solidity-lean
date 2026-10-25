@@ -11,6 +11,111 @@ Both packages must use the same `lean-toolchain`. The bridge's manifest pins
 its dependencies; the external EVM modules have an upstream commit and
 verified checksums in `Bridge/vendor/EvmYul/VENDOR.md`.
 
+## Loom
+
+The adapter uses upstream Loom commit
+`78928abc9054b31d0bea85985496490baae95244`, which already pins Lean and
+Mathlib 4.24.0. The WP/VC-generator import closure is vendored
+under `Bridge/vendor/Loom` (provenance, exclusions, and file hashes in its
+`VENDOR.md`). Two CCPO instances receive explicit upstream names so editor
+checks agree with the build under the vendored path; no proof body changes.
+It needs no toolchain backport, lean-auto, Velvet, or SMT backend.
+The bridge gate verifies those hashes. The root dependency manifest and
+the `Solidity/` import graph remain independent of Loom.
+
+`Bridge/SolidityBridge/Loom.lean` selects Loom's `MAlgExcept` algebra for
+`ExceptT THalt Id`, definitionally the actual `TRes`. A Solidity program is
+the Kleisli arrow `fun σ => Prog.runFrames σ P κ`; the contexts may change,
+and the runner itself retains the heap-extension evidence until projecting
+the returned state. No `StateT` or alternative interpreter is introduced.
+`loomWp_iff_afterRunTR` proves Loom's WP equals the core reading, and
+`loomWp_eq_wp` identifies the resulting transformer with the existing
+bridge WP. `loomWp_bind` is derived from `wp_comp`, without another
+operational proof.
+
+| Halt | Box accepts | Diamond accepts |
+|---|---|---|
+| `revert` | yes | no |
+| `revertWith data` | yes | no |
+| `diverge` | yes | no |
+| `exhausted` | yes | yes |
+| `panic` | no | no |
+
+`Modality.onTHalt` alone accepts panic for box; the separate panic exclusion
+in `afterRunTR` is part of the selected handler. Loom's base `MAlgOrdered`
+does not demand preservation of top or arbitrary infima, so it fits this
+policy. There is deliberately no `NoFailure` instance for either modality:
+`wp_top` is unavailable (box of top is precisely panic freedom). The
+existing nonempty intersection and binary meet laws remain applicable;
+empty intersection preservation and unconditional box/diamond duality
+are not claimed. Loom's CCPO-based loop rules and partial/total algebra
+instances are not supplied for this adapter; Solidity loops use the
+existing core loop taclets (including `whileInvariantBox`) and their
+existing soundness proofs.
+
+`Bridge/SolidityBridge/LoomRules.lean` defines `Premise.toLoom` once and
+proves `Premise.toLoom_sound` once from `Stmt.sound`, `holds_modal`, and
+the WP correspondence. It does not inspect statements or premises.
+`generator` packages `Fml.Leads`; `stepsGenerator` uses `Fml.Steps.sound`;
+`symexGenerator` uses the existing bounded strategy and its certificate.
+These are **sufficient preconditions**, in the `Leads` direction. The
+strategy's last line is not asserted to be weakest.
+
+At this milestone the strategy post is restricted to `holds · ψ` for
+`ψ : Fml C Γ₀`. A `Post C Γ₀` additionally carries the no-fresh-name and
+inactive evidence used to step around an opaque post. Loom's actual
+`WPGen.get` must accept every Lean predicate, so the fixed-post generator
+uses Loom's own `WPGen.spec_triple`: its VC is the last line together with
+entailment from the fixed deep post to the requested continuation. At the
+same deep post, `generator_get` proves the VC is exactly the last line.
+General direct generation for arbitrary Lean posts requires the separately
+approved `Fml.pred` change; it has not been made at this milestone.
+
+The read-only finder/skeptic review confirmed that execution and rule
+soundness are reused, that all five halt cases agree with `afterRunTR`,
+and that the generator's fixed-post restriction and sufficient direction
+are stated accurately. The confirmed wording fix describes the existing
+core loop taclets generally, rather than implying only box invariants
+are supported. The skeptic also verified that the two vendor patches
+only make existing instance names explicit; no types or proof bodies change.
+
+Per-file Lean MCP diagnostics pass for both adapter modules and all fifteen
+vendored modules. Six imported `#guard_msgs` axiom audits allow only
+`propext`, `Classical.choice`, and `Quot.sound`. Building the existing WP
+laws exposed a missing `Solidity.Syntax.Splice` import for their `sol[...]`
+regression; the bridge import is corrected without changing those laws.
+`Bridge/SolidityBridge/Arith/Power.lean` needed the same notation-import fix
+for its existing `sol{...}` regressions; no arithmetic statement changes.
+The full bridge gate also exposed a missing divergence alternative in
+`Bridge/SolidityBridge/Evm.lean`'s existing `compile_trace_complete` proof.
+The added case contradicts its successful-run hypothesis; its statement
+and compiler correspondence are unchanged.
+`Bridge/SolidityBridge/Arith/Lowering.lean`'s `narrowCheck_guard` equation
+also omitted the current core's self-frame panic-data branch when overflow
+mode is unset. Its right-hand side now includes `panicStmt 17` in that
+case, as the existing source does; no hypothesis or execution definition
+changes.
+
+Integration with master `c7e634f5` accounts for its new `CallMemo` layer in
+`ElabM`: `ctx_run`, `nctx_run`, and the two narrow-check equations return
+`pure` in the cache state monad, preserving any incoming cache. The cast
+capture and guard proofs quantify that cache and unfold the existing
+transformers; no elaborator implementation is copied or changed.
+
+Final validation for phases 0–2: `./scripts/check-bridge.sh` passes
+(1,624 jobs), including both vendor hash manifests and the imported axiom
+pins; the final log contains no errors. Per-file Lean MCP diagnostics also
+pass for the root, `Checks`, both adapters, and all repaired bridge files.
+The core source, root dependency manifest, both toolchains, and `AGENTS.md`
+are unchanged, so the phase-3-only core checks were not run.
+
+Phase 3 remains gated on explicit user approval. Adding `Fml.pred` gives
+every recursion over `Fml` another case; the import-fanout tool reports
+453 dependent modules above `Calculus.Fml`, with bridge consumers also
+needing rebuilding. `git log -S` searches for predicate/atom/pure
+constructors and a typed-state predicate field found no earlier removal
+of a comparable constructor for speed in the inspected formula histories.
+
 ## October 22 milestone
 
 Implements the concrete correctness directions discussed with Claude on

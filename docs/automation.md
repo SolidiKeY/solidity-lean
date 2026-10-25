@@ -213,6 +213,7 @@ ProgramNormalization.ofFormula? 2048      exact program normalization
 sourceReduction?                          updates pushed in (ExactAt, toLS)
 LTm.elim / LFml.elim                      reads of writes eliminated
 LFml.condSimp                             trivial conditionals folded      (new)
+LFml.prenex                               consequent quantifiers in front  (M7)
 LFml.liftCond condLiftFuel                conditionals lifted to cases     (new)
 UniversalPrefix.ofFormula? 1024           the ∀ prefix
 flattenedArithmetic? 2048                 reads to fresh atoms, alias constraints,
@@ -283,7 +284,8 @@ in-range evidence.  Dynamic arrays are out, as planned.
 On terms (`LTm.Src c k`, `Calculus/FlattenTotality.lean`), by kind:
 
 * scalars (`num`): atoms, literals, transaction fields, `+`/`-` (checked),
-  `seq` guards, `err`, and storage reads `obsW` of a path;
+  `*` with a literal factor on either side (checked, M7), `seq` guards,
+  `err`, and storage reads `obsW` of a path;
 * Booleans (`bool`): a scalar at `bool`, `!`, `&&`, `||`, `==`/`!=` on
   Booleans or numbers, `<`/`>`/`<=`/`>=`, `seq` guards;
 * paths (`path`): a root, fields, mapping keys whose keys are scalars;
@@ -415,12 +417,38 @@ terminating with a proof or a counterexample; CI fails on anything else.
   a formula's parameters are read universally.  Validity of
   `∀ x̄. p(x̄) ≠ 0` over the integers is undecidable (Matiyasevich), so no
   terminating closer is complete on that fragment, quantifiers or not.
+  **Decided (2026-10-25, option c):** on a goal with a product of two
+  non-literal KeY `int` terms the closer may answer *unknown*; it must be
+  complete (a proof or a certified counterexample) on every other goal.
+  **Extended (2026-10-25, option c′):** the same for a product of two
+  non-literal terms of a 256-bit type (`uint`, `int`): bounded, so
+  decidable, but only bit by bit, and a kernel-checked certificate for a
+  256-bit multiplier is out of reach without `Lean.ofReduceBool` (an axiom).
+* **Decided (2026-10-25, option d):** a quantified formula over array or
+  mapping contents is decided completely inside the array property fragment
+  (Bradley, Manna and Sipma: universal index quantifiers, linear index
+  guards, array reads only at the quantified indices); outside it the
+  closer may answer *unknown*.  Over 2^256-long storages the general case
+  is decidable only by enumerating storages, which the theorem forbids.
+* **Decided (2026-10-25):** division, modulo, `**`, shifts and bitwise
+  operators with two symbolic operands may answer *unknown*, as products
+  do; `x ** e` with a literal `e ≥ 2` is a product (c′); `c / x` and
+  `c % x` with a symbolic divisor belong to the division class; `{havoc}`,
+  `{anon}`, `allocAll`, `grow` and storage-typed `bind` in a negative
+  position over formulas that read storage fall under (d).
+* **Decided (2026-10-25, option e3′):** hashes are collision-free on each
+  goal's own hash terms, a premise of that goal (its distinct hash inputs
+  give distinct outputs), not a global assumption, which would be false
+  (keccak maps unbounded byte strings to 256 bits) and make the theorem
+  vacuous; the closer may answer *unknown* on a verdict that depends on an
+  `ecrecover` value (an `opaque` function) or on a hash preimage.
 * A counterexample is a concrete typed state, certified by kernel
-  evaluation.  One that needs a storage array of `2^255` elements cannot be
-  built: `invariantClosedFormSum` is false in the model (`s + 2` overflows
-  at `i = 2^255 − 1` when `values.length ≥ 2^255`, its invariant leaf shows
-  it), yet nothing refutes it.  A complete closer needs symbolic
-  counterexamples here.
+  evaluation.  One that needs a storage array of `2^255` elements could not
+  be built: `invariantClosedFormSum` is false in the model (`s + 2`
+  overflows at `i = 2^255 − 1` when `values.length ≥ 2^255`, its invariant
+  leaf shows it).  It is refuted now by symbolic counterexamples (below);
+  a witness outside their shapes (a long array read element by element, a
+  loop that does more than count) is still out of reach.
 * Not impossible, but false today: `split` duplicates the continuation
   (`n` sequential `if`s give `2^n` leaves), a call carries its callee's
   body (nested calls grow exponentially; a callee that computes values runs
@@ -434,7 +462,7 @@ or refuted by `sol_refute` (in `TestSuite/Refuted.lean`, from `¬ ⊨ᶠ φ`:
 false in the model, not merely underivable), and none is pending; its counts
 must be the `Report.lean` pin's; and no TestSuite module the build compiled
 took past its budget (`--build-log`, 300 s each by default; CI tees the
-TestSuite build's log).  It fails today, on the one pending obligation.  Built this round:
+TestSuite build's log).  It failed on one pending obligation until the symbolic counterexamples (below).  Built this round:
 
 * `sol_refute` (`Tools/Counterexample.lean`): `¬ (⊢ φ)` or `¬ ⊨ᶠ φ` from a
   certified counterexample, through `Proves.not_of_not_valid` (soundness
@@ -494,7 +522,55 @@ TestSuite build's log).  It fails today, on the one pending obligation.  Built t
   and takes a read's guards out of its address (`LTm.hoistA`): the three
   `memoryIndexWrite*` obligations (`TestSuite/Derived21.lean`, `sol_prove`).
 
-Pending (one): `invariantClosedFormSum` (above).
+**Symbolic counterexamples (2026-10-25).**  `invariantClosedFormSum` is
+refuted by `sol_refute` alone (`TestSuite/Refuted.lean`), from a storage
+whose `values` has `2^255` elements; none pending.  The witness is reachable
+in the model, where `wt` bounds a length only by `2^256`; to my knowledge
+solc's storage `push` panics (0x41) far below that, at `2^64` elements, so
+code solc compiles never builds it.  The refutation is a gap between the
+model and solkey's reading, not a bug in solkey's obligation.  Three pieces, all
+checked by the kernel, nothing trusted:
+
+* *Long arrays* (`Tools/LazyStorage.lean`): `SVec.rep v n`, `n` copies of
+  `v` as the function that makes them; the kernel unfolds it only as far
+  as a reader goes, and `Storage.len` reads the vector's index.  The
+  premise `wt(storage)` visits every element, so it is proved, not
+  evaluated (`holds_wt_of`: the long root by `SVal.allB_arrayOf_rep`, whose
+  element test is `SVec.allB_rep` by induction and whose node tests read
+  only the length; every other root by evaluation).
+* *Counting loops in closed form* (`Semantics/RunAccel.lean`): a body that
+  only adds literals to `uint` locals (`x = x + d`, `x += d`, `x++`, `++x`,
+  each local once: `Prog.bumps?`) under a condition `x < e`, `x <= e`,
+  `e > x` or `e >= x` with `e` a term the body leaves alone (literals, the
+  transaction, other locals, a root's value or length, operators over them:
+  `Val.rigid?`).  `TRun.accel?` computes the iteration `K` where the
+  condition fails (`guardBound`) and the last `T` every counter survives
+  (`ovfBound`): the loop ends at `K` (each local at its value plus `K`
+  steps, `State.bumpK`) if `K ≤ T`, and reverts at `T` otherwise.
+  `TRun.accel?_sound` proves it is `TRun.loop`'s outcome, by
+  `TLoop.run_of_steps` (a loop along a closed form `f k`); the recognizers
+  carry their proofs (`Prog.BumpsAt`, `Guard.Spec`, `Val.Rigid`), so no
+  `match` needs a splitter.  `Prog.runA` is `Prog.runF` with such loops
+  accelerated (`TRun.loopA`, `Prog.runA_approx`), and the evaluator runs it
+  (`Prog.runFramesF`): a loop bounded by an argument at `2^256 - 1` that
+  only counts is now answered, not `unknown`.
+* *The search* (`Tools/Counterexample.lean`, "Long arrays"): when the
+  ordinary candidates fail, `sol_refute` and `#counterexample` propose each
+  dynamic-array root whose element default is well-formed at `2^255` and
+  `2^256 - 1` elements (`longCands`), the formula's parameters at their
+  defaults, and ask the kernel for `¬ ⊨ᶠ φ` of a formula
+  `wt(storage) → ψ` directly (`certifyLong`; the kernel check is bounded
+  by its own heartbeats, the elaboration that builds it only by the
+  declaration's): no compiled evaluator can hold such a storage.  The
+  certificate for `invariantClosedFormSum` checks in about 0.1 s; the
+  tactic's 4 s are the ordinary search before it.
+
+`Examples/Tactics/SymbolicCounterexample.lean` pins both closed forms
+(an overflow, a loop that ends at `2^255`), `Prog.runF` giving up where
+`Prog.runA` answers, and a true property of the same loop not refuted.
+Soundness is the usual chain: `Prog.runA_approx` against the typed run,
+`Fml.eval3_sound`, `Fml.not_valid_of_peel`, `Proves.not_of_not_valid`;
+`#print axioms` of the refutation shows Lean's three.
 
 **The exponential, measured** (`#proof_tree`, `StandardExample`, the
 program `uint x = 0;` then `n` statements `if (vᵢ == 1) { x = x + 1; };`,
@@ -739,9 +815,8 @@ addition.  What still grows is the summary's computation: a call statement
 carries its callee's inlined bodies (the elaborator inlines, `Stmt.call`),
 a tree of `2^k` copies of `f₀`'s, which the kernel's evaluation of
 `Prog.sym` walks; the times above grow by about `1.8` a level from it.
-Making that polynomial too needs the bodies named once per function (a
-call carrying its callee by name and a table of summaries proved once per
-function), a change to the syntax, not to the calculus.
+That is gone since "One body a function" (below): every call of a
+callee holds the same body term, which the kernel's caches walk once.
 
 **What a summary does not share** (review, 2026-10-24).  A summary is one
 term over the callee's frame, and a call in the body substitutes its
@@ -772,13 +847,12 @@ up to `3^(2^k)` nodes (`k = 3`: 228 000 characters printed); at `k = 4`
 it runs in a part of the evaluation that does not check heartbeats.  So the
 summaries are polynomial only for callees whose terms `Tm.norm` keeps the
 size of one body (literal offsets); the doubling family above is one.
-Sharing would make the leaf linear in the call sites whatever the callee:
+Sharing makes the leaf linear in the call sites whatever the callee:
 each call's result a fresh value with its defining fact
 (`{ t₁ := x * 3 } { t₂ := t₁ * 3 } …`, KeY's contract applied once per
-call) rather than its callee's term substituted.  That is a summary made
-of a sequence of updates over fresh locals, not one term over the frame —
-a new update shape and a new soundness argument in place of
-`Prog.sym_sound` — and is not done.
+call) rather than its callee's term substituted.  It is done at the leaf,
+not in the rule (below, "Call sites shared"); the `k = 4` row's runaway was
+an instance search, not the size of the term.
 
 **Worktree consolidation (2026-10-24).** All three other worktrees' commits
 were already ancestors of master. The `share` worktree's source matched the
@@ -810,6 +884,367 @@ orphan check sees 33 scratch modules, and the documentation path check has
 those inventories or obligation statuses.
 All three other worktrees were removed after their archived source was
 rechecked byte for byte; only the master worktree remains.
+
+**Call sites shared (2026-10-25).**  The summary stays one term over the
+frame (`CallRet.summary?`, the walk and its pins unchanged); `sol_close`
+reads it one call site at a time.  `CloseJ.shareStep`
+(`Calculus/CloseScoped/Steps.lean`) rewrites the leaf's
+`{ y := C[s] ‖ pop } φ` to `{ shₖ := s } { y := C[shₖ] ‖ pop } φ`, `s` the
+term's innermost strict redex (`Tm.redex?`, `Calculus/LeafShare.lean`: a
+binary symbol on locals and literals, reached through operands that are
+always read), until the term is one operation: `{ y := a * 3 * 3 * 3 }`
+becomes `{ sh0 := a * 3 } { sh1 := sh0 * 3 } { y := sh1 * 3 ‖ pop }`, a
+fresh local and its defining update per call site.  Soundness is
+`holds_upd_share`: where `s` does not return neither does `C[s]`
+(`Op2.eval_none_of_strictB`, the operator strict), so the two updates fail
+alike, and where it returns `u`, `C[z]` at `z = u` reads what `C[s]` read
+(`Tm.redex?_spec`); its axioms are `propext`, `Classical.choice`,
+`Quot.sound`.  Each step is an `apply` of it, its redex equation and its
+`pushFree` conditions by `rfl` (the redex computed by `Kernel.whnf`
+through `Tm`'s constructors only, `CloseJ.tmNF`), which the kernel checks
+again.
+
+`CloseJ.peel` then reads the shared leaf as it reads a joined one, one
+binder, premise (`Fml.imp`, new: the leaf's precondition, kept for every
+later `omega`) or update at a time with the rest held opaque.  A checked
+product evaluates to its two cases (`CloseS.wpChecked`:
+`(0 ≤ v ∧ v < 2^256 → k ⟨v, _⟩) ∧ (¬ … → False)`); the failing case is a
+side goal, closed by `omega` in a context cut to its premises, the leaf's
+premises and the known intervals (`CloseJ.closeArith`, under the diamond:
+the precondition `a < 1000` shows `a * 3^i` fits).  `sol_close` tries it
+first on a leaf with a summary's update of at least `CloseJ.shareMin` (4)
+operations, within `CloseJ.budget`; a leaf whose summary has more than
+`CloseJ.shareWholeMax` (8) is never evaluated whole after it
+(`sol_close_few_joins`), so a false leaf fails at about the cost of a true
+one (`y >= a + 1` at `k = 4`: 47 k; an overflow past `10^62` at `k = 5`:
+76 k).
+
+**The runaway** (`k = 4`, past 45 s in `sol_close_eval`).  Bisected on
+`simp`'s `maxSteps` under a watchdog: 5000 steps 12 k heartbeats, 0.5 s;
+7000 steps 18 k, 2.6 s; 8000 steps 21 k, 14 s: the time grew while the
+heartbeats did not.  `set_option profiler true` put it in
+`typeclass inference of Nonempty` (0.18 s, 1.25 s, 8.7 s, each nesting
+level about seven times the one before), and
+`trace.Meta.Tactic.simp.discharge` named the lemma: `forall_const`
+(`[Nonempty α] (α → b) ↔ b`) of `close_rw_s`, tried at every premise of
+the nested range checks, `Nonempty (Nonempty (Landed …))` and
+`Nonempty (v * 3 * … * 3 < 2^256)`, which no instance gives and whose
+failed search the heartbeats do not count.  At a proposition the lemma
+never applies (a premise is not an instance); `Close.forall_const_type`
+and `Close.exists_const_type` (`Calculus/CloseLemmas.lean`) take a type's
+binder only, and replace `forall_const` in `close_rw_s` and
+`exists_const`/`forall_const` in `sol_close`'s, `sol_spec`'s and
+`sol_close_quantified`'s cleanup.  The whole evaluation at `k = 4` is then
+1.0 s and 27 k heartbeats (`triplingFourWhole` pins the whole path within
+the default), and the whole `sol_close` 24 k, 107 k, 803 k at `k = 3, 4, 5`
+(the `k = 3` leaf was 79 k before): bounded, but not polynomial, so the
+shared steps are what the family takes.
+
+Measured (`Examples/Tactics/CallSummary.lean`'s `triplingOne` …
+`triplingFive`, `a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, heartbeats in
+thousands, one declaration each; walk: `sol_prove (steps := 128)`, leaf:
+`sol_leaf; sol_close`):
+
+| k | call sites | walk | leaf | path |
+|---|---|---|---|---|
+| 1 | 2 | 2 (0.18 s) | 5 (0.18 s) | whole |
+| 2 | 4 | 2 (0.22 s) | 6 (0.28 s) | shared |
+| 3 | 8 | 4 (0.31 s) | 12 (0.56 s) | shared |
+| 4 | 16 | 7 (0.52 s) | 28 (1.3 s) | shared |
+| 5 | 32 | 12 (0.88 s) | 79 (3.6 s) | shared |
+
+(`k = 6`, 64 call sites: the walk 23 k; the steps run past their budget,
+`CloseJ.budget`, and `sol_close` fails, at `sol_close_few_joins`, without
+evaluating the leaf whole.)  The leaf is `2^k` updates of one product each,
+linear in the call sites.
+What the closer spends on it grows by about `n^1.5` in the `n` call sites
+(per step, `peel` at `n = 32`: the share 0.4–0.7 k, the step's `simp`
+0.8–1.3 k, the check's `omega` 0.1–1.5 k): each step's `simp` walks the
+locals' stack, one deeper per call site, and each check reads the product
+`a * 3 * … * 3` it is about.  Naming each checked value afresh (a variable
+and its equation, rather than the product substituted) would make the
+checks constant; the stack would still grow.  The walk grows with the
+inlined bodies the kernel's evaluation of the summary walks (above).
+
+**One body a function (2026-10-25).**  A call statement still carries its
+callee's body (`Stmt.call`, the run, the rules and their soundness are
+unchanged), but the body is now the same term at every call of the callee,
+so the program is a DAG the size of the source, and the kernel, whose
+caches are keyed by the term, evaluates a callee's summary once however
+many call paths reach it.  Three changes, none in the calculus:
+
+* *The names.*  A body differed between calls only by the fresh names of
+  its locals (`se5` at one call, `se9` at the next), so its copies were
+  distinct terms.  A callee all of whose locals end with the call (not
+  recursive, not the constructor, no return variable left in the caller:
+  `FunDecl.endsWithCall`, a call not in a tuple assignment) now numbers its
+  locals from where its first call's were (`CallMemo.enter`,
+  `Syntax/Elab/Values.lean`), and the caller's numbering goes on after the
+  call where it was (`CallMemo.leave`).  Two such calls never have their
+  locals live at once (the frame is popped after the call,
+  `Premise.unfold`), so the names stay unique on every state; a printed
+  inlining repeats them (`addOne`'s `se3`, `se4` twice in
+  `Syntax/Splice.lean`'s pin).  The key (`calleeKey`) is what else the
+  elaboration reads: the callee, a self-call's frame, the overflow mode,
+  `msg.value`'s reading.
+* *The elaborator* reads a repeated callee's body back instead of
+  elaborating it again (`CallMemo.body?`, `inlinedBody`,
+  `Syntax/Elab/Arms.lean`): logically `none` (elaborate again, which gives
+  the same body), compiled the body its first call stored
+  (`implemented_by`, the contract checked by address).  And
+  `reachableBy` (`Syntax/Elab/Context.lean`) visits each function once a
+  round: it explored `fₖ₋₁` twice, `fₖ₋₂` four times, at every call, the
+  elaborator's last exponential.
+* *The quoters* quote a call's body once per object and contexts
+  (`QMemo`, `Prog.quoteBody` in `Syntax/Quote.lean`, `qStmtH` in
+  `Calculus/Quote.lean`, logically quoting it again); `Prog.quote` and
+  `Stmt.quote` are monadic (`QuoteM`) and `partial`, as `Calculus/Quote.lean`'s
+  were, and `QM` carries the memo (`QM.go`).
+
+Literal factors are folded as literal summands are (`Op2.mk2`,
+`(u * c₁) * c₂ ⇝ u * (c₁ * c₂)` at `uint` where the product is a `uint`
+and `c₂ ≠ 0`, KeY's `polySimp`; `Op2.mk2_mul_eval`,
+`PrimTy.uint_ofInt?_mul_assoc`: `u * c₁` overflows only where the folded
+product does), so the tripling family's summary is one product,
+`x * 3^(2^k)`.  A summary whose operations do not fold
+(`f₀(x) = x * 3 + 1`, `Examples/Tactics/CallSummary.lean`'s `Affine`) is
+still `2^(k+1)` operations, read one call site at a time as above.
+
+*Speed* (the review's question: none of this undoes an earlier speed
+change; `git log` shows none on the elaborator's naming or the quoters).
+The elaborator and the quoters do strictly less work on a repeated
+callee and the same on any other; the extra monad layer (`StateT CallMemo`,
+`StateM QMemo`) costs nothing measurable in the elaboration of the
+examples.  `elabCallRetWith` is split (`elabCallRetCore`, `calleeBody`,
+`inlinedBody`): one more bind in the old body ran it past the default
+heartbeats while its own definition was elaborated.
+
+Measured (`a < 1000 → ⟨ uint y = fₖ(a); ⟩ y >= a`, a scratch module, one
+declaration each; *DAG*: distinct subterms of the `dl!` formula's term;
+*walk*: `sol_prove (steps := 128)`; *leaf*: `sol_leaf; sol_close`;
+*kernel*: the declaration's type checking):
+
+| family | k | DAG before → after | walk before → after | leaf before → after | kernel before → after |
+|---|---|---|---|---|---|
+| `x * 3` | 1 | 422 → 408 | 0.18 → 0.16 s | 0.21 → 0.15 s | 0.16 → 0.14 s |
+| | 2 | 623 → 495 | 0.24 → 0.17 s | 0.30 → 0.14 s | 0.21 → 0.15 s |
+| | 3 | 1 024 → 582 | 0.32 → 0.19 s | 0.60 → 0.14 s | 0.30 → 0.17 s |
+| | 4 | 1 825 → 669 | 0.52 → 0.19 s | 1.4 → 0.14 s | 0.49 → 0.18 s |
+| | 5 | 3 426 → 756 | 0.94 → 0.21 s | 3.8 → 0.14 s | 0.88 → 0.19 s |
+| | 6 | 6 627 → 843 | 1.7 → 0.22 s | fails (budget) → 0.14 s | 1.6 → 0.20 s |
+| | 7 | 13 028 → 930 | 3.4 → 0.24 s | fails (budget) → 0.14 s | 3.1 → 0.21 s |
+| `x + 1` | 1 | | 0.17 → 0.17 s | 0.14 → 0.14 s | 0.16 → 0.15 s |
+| | 4 | | 0.31 → 0.21 s | 0.14 → 0.14 s | 0.28 → 0.19 s |
+| | 7 | | 1.5 → 0.24 s | 0.14 → 0.14 s | 1.2 → 0.22 s |
+
+The `sol[…]{ uint y = fₖ(a); }` program of the `x + 1` family: distinct
+subterms 267, 554, 1 686, 6 202, 48 320 before and 255, 330, 404, 478, 589
+after at `k = 1, 3, 5, 7, 10` (its tree, 2 471 … 1 568 175 nodes, is the
+same); the elaboration of `fₖ` at `k = 8, 9, 10`, compiled code: 33, 59,
+112 ms before, 6.6, 7.3, 7.8 ms after; quoting: 61, 119, 229 ms before,
+8.9, 9.7, 10.6 ms after.  Every column grows linearly in `k` after,
+the DAG by 87 subterms a level.  `Examples/Tactics/CallSummary.lean` proves
+both families to `k = 7` by `sol_prove` and the leaf replay.
+
+## M7 · The theorem (`Calculus/Decision.lean`, `Calculus/Prenex.lean`)
+
+The closer's theorem, stated in Lean, with what is proved of it.
+
+### The statement
+
+```lean
+inductive LeafVerdict (C : Contract) | proved | refuted (σ : State C []) | unknown
+
+def decideGoal (φ : Fml C []) : LeafVerdict C   -- total, computable
+
+theorem decideGoal_sound    : decideGoal φ = .proved → Fml.ValidH φ
+theorem decideGoal_refutes  : decideGoal φ = .refuted σ → ¬ Fml.holdsH σ φ
+
+def DecisionTheorem (w : Waivers := {}) : Prop :=
+  ∀ (C : Contract) (φ : Fml C []), φ.inTarget w = true → decideGoal φ ≠ .unknown
+```
+
+`Fml.inTarget w` is the fragment the user named, on a program-free leaf.
+It contains everything except what the user allowed to answer *unknown*:
+
+* (c, c′) a product of two non-literal terms (KeY `int`, `uint`, `int`).
+  `x ** e` at a literal `e ≥ 2` and `mulmod` of two symbolic factors count
+  as products.
+* `/`, `%`, `**`, `<<`, `>>`, `&`, `|`, `^` with two symbolic operands.
+  A symbolic divisor (`c / x`, `c % x`, the modulus of `addmod`/`mulmod`),
+  a symbolic exponent and a symbolic shift amount count as two.  Each class
+  is a field of `Waivers`, and the user waived all four (2026-10-25).
+* (d) a quantified formula over array or mapping contents outside the
+  array property fragment.  Polarity is tracked: a positive-position `∀`
+  is an `∃` of the negation, so it needs no check.  A negative-position
+  `∀` block whose body reads at its variables must be the
+  Bradley–Manna–Sipma shape (`Fml.apfBlock`): a quantifier-free body made of
+  `guard → value` parts and their conjunctions; guards `&&`/`||` of
+  comparisons (`<`, `<=`, `==`, never `!=`) of index terms, a bound
+  variable or a term mentioning none; values reading the bound variables
+  only as indices, never in a nested index (`a[a[i]]`), and writing
+  nothing at them.  A Presburger quantifier, one whose body reads
+  nothing at its variable, is in the fragment at any polarity, but past a
+  negative-position one only further Presburger quantifiers are.  Negative
+  `havoc`/`anon`/`allocAll`/`grow` and storage binders over a body that
+  reads contents fall under d.
+* (e3′) hashes.  Each goal is read under its own collision-freeness
+  premise.  `Fml.HashFree σ φ` says that the hash terms of `φ` outside its
+  binders, evaluated at `σ` or past its updates, whose outputs agree read
+  the same bytes (each word modulo 256, as `HashKind.apply` reads them).
+  `ecrecover` is excluded: it is `0` on every invalid signature.
+  `Fml.holdsH` is `holds` with the premise taken at every scope, each
+  binder's body under its instance's premise.  So each premise is about
+  finitely many evaluations and fails only at an actual collision among
+  them.  `Fml.ValidH` is validity so read.  It is no axiom and no global
+  assumption; on a leaf without a hash it is `Fml.Valid` (`Fml.validH_iff`).
+  A hash term is in the fragment only where the premise settles it: as an
+  operand of `==`/`!=` against a hash of its kind, or as a key of a mapping
+  at a root all of whose keys are hashes of that kind.  Elsewhere its verdict may turn
+  on a preimage, which the user allowed to answer unknown. `ecrecover` (an
+  `opaque` function) is outside everywhere.
+
+The statement is about one computable function. "Some decider is
+complete" would be vacuous: `Classical.choice` gives a noncomputable one.
+It is the goal of the rounds to come, not true today:
+`Examples/Decision.lean` pins `apf`, in the fragment
+(`apf_inTarget`, kernel-checked) and answered *unknown*.
+
+`Fml.inTarget` is a conservative syntactic reading, a subset of the
+fragment the user named, never a superset:
+* an update or a program under a quantifier counts as reading at its
+  variable;
+* an index guard may not negate a comparison of bound variables;
+* a hash stored by an update, a hash key of a nested mapping and a hash
+  under any other operator are outside, even where the premise would
+  settle them.
+
+Three properties of the reading are worth knowing.
+* The per-scope premise depends on where the binders stand:
+  `pre → ∀ k. ψ` and `∀ k. pre → ψ` take different premises, so
+  `LFml.prenex` is exact for `holds` but not for `Fml.holdsH`.
+  `decideGoal` answers only on leaves without a hash, where the two
+  readings agree (`Fml.holdsH_iff`).
+* A hash of an identity that names no object reads `none` and returns
+  `0`; an object hashing to `0` would count as colliding with it.
+* A program's hashes are not read by the premise.  The fragment holds no
+  program, and on a formula with one, `decideGoal` answers by `Fml.Valid`,
+  the stronger reading.
+
+### What is proved
+
+| Theorem | Statement |
+|---|---|
+| `decideLeaf_sound` | `decideLeaf φ = .proved → Fml.Valid φ` |
+| `decideLeaf_refutes` | `decideLeaf φ = .refuted σ → ¬ holds σ φ` (the state certifies it) |
+| `decideLeaf_complete` | `φ.Covered = true → decideLeaf φ ≠ .unknown` |
+| `decideLeaf_proved_iff` | on `Fml.Covered`, `proved` exactly when valid |
+| `decideGoal_sound`, `decideGoal_refutes` | the same under the hash premise |
+| `decideGoal_complete` | `φ.Covered = true → φ.hasHash = false → decideGoal φ ≠ .unknown` |
+| `Fml.holdsH_iff`, `Fml.validH_iff` | without a hash the premise is empty |
+| `LFml.prenex_holds` | prenexing is exact |
+| `CheckedScalar.scale_correct` | checked multiplication by a literal is encoded exactly |
+
+`#print axioms` of each of the six `decide*` theorems is pinned in
+`Calculus/Decision.lean`: `propext`, `Classical.choice`, `Quot.sound`.
+Everything is `sorry`-free.
+
+`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by two
+features, each with its completeness proved through every stage
+(recognizer, lifting, flattening, compilers):
+
+1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
+   `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
+   `CheckedScalar.scale`, the code `c · (a - offset) + offset` under the
+   range guard).  The decision over it is still `AFml.decide_iff`, the
+   verified binary-derivative procedure, not `omega`.
+2. **Universal quantifiers in a consequent**: `pre → ∀ k. post` (a
+   postcondition's `\forall`) becomes `∀ k. pre → post` when `pre` reads
+   no `k` (`LFml.prenex`), ahead of the prefix.
+
+Both were refused before (`dependentReduction?` returned `none`: the
+compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
+`Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
+read, a doubling that overflows under the diamond (refuted), nested
+consequent quantifiers, a postcondition `∀ j` past a write (proved), and
+its false variant (refuted).  The coverage of `double` and `nested` is
+kernel-checked (`decide +kernel`); the other rows and the verdicts are the
+compiled ones (`#eval` pins), since the kernel's arithmetic decision over
+256-bit codes is too deep for the language server.
+
+### What is not proved
+
+* `DecisionTheorem` itself; it is false today (above).
+* `Fml.Covered ⊆ Fml.inTarget` on program-free leaves.  It holds of
+  neither direction in general: `Fml.Covered` also takes formulas with
+  programs, which `Fml.inTarget` excludes.  `Fml.Covered` is read on the
+  eliminated leaf, `Fml.inTarget` on the source, and M4's "what blocks the
+  rest" stands: normalization's budget, update pushing's
+  `Tm.agreeB`/`Tm.toL`, elimination's invariant.
+* The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
+  which come from the stages' fuel.
+* On the fragment, `decideGoal` still answers *unknown* on:
+  * negative-position quantifiers, including those in the array property
+    fragment (`Examples/Decision.lean`, `apf`);
+  * quantifier alternation;
+  * KeY `int` (no atom of `Srt.kint` in `LTm`);
+  * literal division, modulo, shifts and bitwise operators, and wrapping
+    arithmetic;
+  * unary `-`, `~` and the conversions;
+  * memory reads and writes;
+  * fixed and dynamic array indices (M4 (b));
+  * every hash.
+
+### The plan for the rest
+
+One feature a round, each with its completeness proof through the stages,
+in this order:
+
+1. **Unary `-` and the conversions** (`toInt`, `toUint` at a literal
+   range), like the literal product (`CheckedScalar` codes).
+2. **Literal division, modulo, shifts, masks, wrapping `+%`/`-%`/`*%`**: a
+   fresh atom per quotient with its defining constraints in the antecedent
+   (`q·c ≤ x < q·c + c`), exact in a universal reading. The compiler then
+   returns constraints beside the code.
+3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
+   difference of two natural codes in `AFml`.
+4. **Quantifiers in the arithmetic**: `AFml` with `∃`, decided by
+   projection in the binary-derivative automaton (the universe of reachable
+   formulas becomes one of subsets, still finite), or a verified Cooper
+   elimination; then negative-position Presburger quantifiers and
+   alternation.
+5. **The array property fragment**: instantiate a negative `∀` block at the
+   index set (the goal's index terms and the guards' bounds, Bradley–Manna–
+   Sipma), then decide the instance by the quantifier-free pipeline.
+   Completeness is their theorem: the instance is equisatisfiable.
+6. **Memory, array indices**: realization cases for memory and in-range
+   evidence for array indices (`Calculus/ReadRealization.lean`).
+7. **Hashes under the premise**: a hash–hash equation as its inputs'
+   equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
+   as its input's word list.
+8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
+   normalization and update pushing syntactically (M4's list), then lift
+   the size bounds by fuel computed from the formula.
+
+**Review (2026-10-25).** A read-only review found nine issues, fixed here.
+* Guards: `!=` written another way, and arithmetic on the bound variables,
+  passed.  Guards are now comparisons of index terms.
+* Hash keys of two kinds at one root passed.  Keys now record their kind.
+* The premise compared words where the hash reads bytes.
+* `ecrecover` was inside the premise.
+* The premise ranged over every value of every binder, so a leaf with a
+  binder over byte strings held vacuously by pigeonhole.  It is now taken
+  per scope.
+* `wt`/`cleanTail` were not counted as reads.
+* The docs overclaimed the inclusion `Fml.Covered ⊆ Fml.inTarget` (it
+  fails on programs), the truth of `DecisionTheorem` (it is the goal, not
+  true today) and the kernel-checked coverage.
+
+One concern remains unconfirmed: nested mappings `m[i][j]` at two bound
+indices are admitted (Bradley–Manna–Sipma state their result for arrays
+of one dimension).  A hash key reached through an alias or `atIn` is
+outside the fragment (its position is not admitted), so the key-kind check
+need not see it.
 
 ## Review (2026-10-20)
 

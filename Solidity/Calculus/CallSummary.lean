@@ -262,8 +262,22 @@ def Tm.addParts? {s : Srt} : Tm C Γ s → Option (Tm C Γ s × Int)
   | .app2 o u w => o.addParts u w
   | _ => none
 
-/-- **A binary symbol applied, offsets folded**: `(u + c₁) + c₂` at `uint` is
-`u + (c₁ + c₂)` where the sum is a `uint`; any other application as it is. -/
+/-- `u * c`, `c` a `uint` literal: `u` and `c`. -/
+def _root_.Solidity.Op2.mulParts : {a b s : Srt} → Op2 C a b s → Tm C Γ a → Tm C Γ b →
+    Option (Tm C Γ s × Int)
+  | _, _, _, .binop .mul _, u, w => w.litInt?.map fun c => (u, c)
+  | _, _, _, _, _, _ => none
+
+/-- A term `u * c`, `c` a `uint` literal: `u` and `c`. -/
+def Tm.mulParts? {s : Srt} : Tm C Γ s → Option (Tm C Γ s × Int)
+  | .app2 o u w => o.mulParts u w
+  | _ => none
+
+/-- **A binary symbol applied, literals folded**: `(u + c₁) + c₂` at `uint` is
+`u + (c₁ + c₂)` where the sum is a `uint`, and `(u * c₁) * c₂` is
+`u * (c₁ * c₂)` where the product is a `uint` and `c₂` is not `0` (KeY's
+`polySimp`, a monomial's literal factors multiplied: both overflow where the
+other does); any other application as it is. -/
 def _root_.Solidity.Op2.mk2 : {a b s : Srt} → Op2 C a b s → Tm C Γ a → Tm C Γ b → Tm C Γ s
   | _, _, _, .binop .add (p := .uint) h, x, y =>
     match y.litInt?, x.addParts? with
@@ -272,6 +286,14 @@ def _root_.Solidity.Op2.mk2 : {a b s : Srt} → Op2 C a b s → Tm C Γ a → Tm
         .app2 (.binop .add h) u (.app0 (.lit (p := .uint) ⟨c₁ + c₂, hr⟩))
       else .app2 (.binop .add h) x y
     | _, _ => .app2 (.binop .add h) x y
+  | _, _, _, .binop .mul (p := .uint) h, x, y =>
+    match y.litInt?, x.mulParts? with
+    | some c₂, some (u, c₁) =>
+      if hr : PrimTy.uint.inRange (c₁ * c₂) = true then
+        if c₂ = 0 then .app2 (.binop .mul h) x y
+        else .app2 (.binop .mul h) u (.app0 (.lit (p := .uint) ⟨c₁ * c₂, hr⟩))
+      else .app2 (.binop .mul h) x y
+    | _, _ => .app2 (.binop .mul h) x y
   | _, _, _, o, x, y => .app2 o x y
 
 /-- `norm` by `match`, its compiled form. -/
@@ -282,9 +304,10 @@ def Tm.normM : {s : Srt} → Tm C Γ s → Tm C Γ s
   | _, .app3 o x y z => .app3 o x.normM y.normM z.normM
   | _, t => t
 
-/-- **A term's offsets folded**: `(u + c₁) + c₂` at `uint` is `u + (c₁ + c₂)`
-wherever both are literals and the sum is a `uint` (`Op2.mk2`), as KeY's
-`polySimp` adds literal summands. -/
+/-- **A term's literals folded**: `(u + c₁) + c₂` at `uint` is `u + (c₁ + c₂)`
+wherever both are literals and the sum is a `uint`, and `(u * c₁) * c₂` is
+`u * (c₁ * c₂)` likewise (`Op2.mk2`), as KeY's `polySimp` adds literal
+summands and multiplies literal factors. -/
 @[implemented_by Tm.normM]
 def Tm.norm {s : Srt} (t : Tm C Γ s) : Tm C Γ s :=
   @Tm.rec C Γ (fun s _ => Tm C Γ s)

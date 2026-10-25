@@ -591,7 +591,7 @@ def specPieces (f : String) :
   let call : List RawStmt := if ctor then [.call (.name f) args] else
     rets.map (fun (_, v, p) => RawStmt.decl (.named (p.toStr)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
-  let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
+  let P ← (elabStmtsP C call).runFrom' { funs := C.funs } (Γ, 1)
   -- the snapshots `\old` reads, taken where something reads them
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
@@ -656,7 +656,8 @@ macro "sol_spec_prep" : tactic => `(tactic|
    all_goals try (intros; sol_close_reads_all)
    all_goals try (subst_vars; sol_close_reads_all)
    all_goals (try intros)
-   all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+   all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+      Close.forall_const_type] at *)
    -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
    -- state: every premise introduced, every conjunct its own goal
    all_goals (repeat' (first | intro _ | apply And.intro))))

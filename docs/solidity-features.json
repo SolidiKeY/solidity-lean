@@ -1,0 +1,3624 @@
+{
+  "schemaVersion": 1,
+  "auditedOn": "2026-10-25",
+  "upstream": {
+    "repository": "argotorg/solidity",
+    "tag": "v0.8.38",
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "sources": [
+      {
+        "path": "Changelog.md",
+        "sha256": "2a60ffa2db2cc66d51874b4b677bcf5e71e7bffb96883ed7ae9afc8db183c097",
+        "gitBlobSha": "3ef0184c33411b66b1bae4bdd3351643c03aabb5"
+      },
+      {
+        "path": "docs/abi-spec.rst",
+        "sha256": "bda1c34bf57f3c63e426486e688bf24feda1c8fe439209df1cb4dec8c884eb79",
+        "gitBlobSha": "91da5127c5aa554c29b3f03f0d059ed831df4a9c"
+      },
+      {
+        "path": "docs/contracts/function-modifiers.rst",
+        "sha256": "1439dc3da396d6346e62cf21b6b3c37a277455a6d51f76651305ad6adb3bfd36",
+        "gitBlobSha": "2fd0357db054250cfdb33fdbb17ba5b9bc217f5e"
+      },
+      {
+        "path": "docs/contracts/transient-storage.rst",
+        "sha256": "83bec146073ac67e87aa16ec754b132d4a1d07caf0e2ed2b8504729a2bc6c68f",
+        "gitBlobSha": "b2d0be292204e77d06b7b9d26a4ab0b5d0ada010"
+      },
+      {
+        "path": "docs/control-structures.rst",
+        "sha256": "4f1954c3a09ddcebdf16221578c5b036f479b8a07608b0b931fa34137182ad6b",
+        "gitBlobSha": "a185b5bbf77c4837415e316b298599c984de4dff"
+      },
+      {
+        "path": "docs/grammar/SolidityLexer.g4",
+        "sha256": "b6eb8ffcb358b8a854b22ed0e3df6ced8c42760a3da4f77899ba9c65a6dd7132",
+        "gitBlobSha": "aec17db0670d028f8cd95ce5620fbefbe2767586"
+      },
+      {
+        "path": "docs/grammar/SolidityParser.g4",
+        "sha256": "663afb0d91d482a886a6879c801ba6b6f83f34e250d3e8d9406b1ab198272b6a",
+        "gitBlobSha": "5ad422913e9871333f380ad6a87134725add7c22"
+      },
+      {
+        "path": "docs/types/operators.rst",
+        "sha256": "a0cca6af201fb1b0b80ea1c732399e9287c7de4899ea7dd8643cd78e4e24b712",
+        "gitBlobSha": "1d71352d6019a9e2aa018b59c1696e81dceee874"
+      },
+      {
+        "path": "docs/types/reference-types.rst",
+        "sha256": "3de7d00234c1b199f36ae93b2da88a6c99084384199cf4d46ba80c4f2298bce8",
+        "gitBlobSha": "b2db9406a6a6b89d81f75b6894420160656e6edb"
+      },
+      {
+        "path": "docs/types/value-types.rst",
+        "sha256": "714def57cf5e3bd205bdf89623ddde41519d4324bb72bb3465ea79852841998b",
+        "gitBlobSha": "8b8e26835a180a74dbb39f618ea19c2b12b1178b"
+      },
+      {
+        "path": "docs/units-and-global-variables.rst",
+        "sha256": "fee48da08e14a3893fb84ea73b2764e85cece91939e030f61d3196b2d3ed1526",
+        "gitBlobSha": "dd0a9a98058f88dc96790a03d942b3b527dac976"
+      },
+      {
+        "path": "liblangutil/Token.h",
+        "sha256": "9cd4b25d34af461e8396bbf45806aadbf4810d552e91cd0e60fdb7b1e419e8fd",
+        "gitBlobSha": "7ad34a6b077bf8b6a9fe9ba1d9aa88668469db91"
+      },
+      {
+        "path": "libsolidity/analysis/GlobalContext.cpp",
+        "sha256": "ce2889f813e0bb58fdb76f10598853301f005126d992ce7102ba2ebccb2b68ed",
+        "gitBlobSha": "8bc50a88da65cbd123084fd58b6a23ed7484ab7f"
+      },
+      {
+        "path": "libsolidity/analysis/SyntaxChecker.cpp",
+        "sha256": "b50d89ed20ca894e57e96287e6b053352a32a186bc56ad9c77569324ed1c4d46",
+        "gitBlobSha": "4f79966756fd5866f7a5d7ddecb57a2a3c531838"
+      },
+      {
+        "path": "libsolidity/analysis/TypeChecker.cpp",
+        "sha256": "20d4db6a5c37df65d4c6e23af2f541e79a0c35552ce73a5838f5a7de5ab3eb63",
+        "gitBlobSha": "5a5fe50d07f0bf2acdaf8bb6c59c4e943e1cd6b8"
+      },
+      {
+        "path": "libsolidity/ast/AST.h",
+        "sha256": "c29794c65ced791c0b5b5bbab655edee005432b74370acded6911b819a7f83c9",
+        "gitBlobSha": "9e5901fc338303ae52eaaed31df42448037f0236"
+      },
+      {
+        "path": "libsolidity/ast/Types.cpp",
+        "sha256": "12dc5df7741a2b9b97d5e2eb1dcafa2e83025b6f0faf92d08fc00b5235cd1277",
+        "gitBlobSha": "50fa0508baf49d78ae9d1a36cbffac8eca0c13b0"
+      },
+      {
+        "path": "libsolidity/ast/Types.h",
+        "sha256": "11e7b27488c8160dcbe3e950de56dc0cfe08f6b770cb4ddb027a561228d59f7c",
+        "gitBlobSha": "cddedc0f8c8ff922f0e08e41e24074e2e151cd1a"
+      },
+      {
+        "path": "libsolidity/parsing/Parser.cpp",
+        "sha256": "74097a44bc00df4c71fa2b6f20cd1eeeeaf86a7ebb5811ad066e8ad30b35ca21",
+        "gitBlobSha": "476af01b7e2a10506caf4e65eef20f5edda66fcb"
+      }
+    ]
+  },
+  "features": [
+    {
+      "id": "identifiers",
+      "category": "lexical",
+      "syntax": "identifiers; contextual from/error/revert/global/transient/layout/at",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve declaration identity, lexical scope, shadowing and qualified names; builtin spelling alone is insufficient.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 428
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "comments",
+      "category": "lexical",
+      "syntax": "// and /* */; NatSpec /// and /** */",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Ignore ordinary comments after lexing; preserve source spans and requested specification annotations; NatSpec is not executable Solidity.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/AST.h",
+          "line": 443
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "numericLiterals",
+      "category": "lexical",
+      "syntax": "decimal, hexadecimal, underscores, scientific notation, fractional literals",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Fold exact arbitrary-precision rationals before contextual integer typing; reject invalid denominators and out-of-range conversions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 240
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "booleanLiterals",
+      "category": "lexical",
+      "syntax": "true; false",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Produce Boolean values, without numeric implicit coercion.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 434
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "stringLiterals",
+      "category": "lexical",
+      "syntax": "single/double quotes, escapes, adjacent strings",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Decode bytes and escapes; concatenate adjacent literals; enforce Solidity literal conversions rather than host string semantics.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 438
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "unicodeLiterals",
+      "category": "lexical",
+      "syntax": "unicode\"...\"",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Validate UTF-8 at compile time and retain the resulting bytes.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 446
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "hexLiterals",
+      "category": "lexical",
+      "syntax": "hex\"...\"; adjacent hex strings",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Decode exact byte sequences, including empty values and separators allowed upstream.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 442
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "addressLiterals",
+      "category": "lexical",
+      "syntax": "0x followed by address-sized hexadecimal digits",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Enforce address-literal length/checksum and 160-bit bounds; distinguish numeric literals and addresses.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 3954
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "etherUnits",
+      "category": "lexical",
+      "syntax": "wei; gwei; ether",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Multiply literals by exact powers of ten before range checking; denominations do not create a runtime currency type.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 67
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "timeUnits",
+      "category": "lexical",
+      "syntax": "seconds; minutes; hours; days; weeks",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Fold literal unit factors; do not infer real-world clock guarantees or calendar arithmetic.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 67
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "pragmaVersion",
+      "category": "lexical",
+      "syntax": "pragma solidity version constraints",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Check the selected compiler/version range before importing a validated AST; record the compiler version.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 29
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "pragmaAbicoder",
+      "category": "lexical",
+      "syntax": "pragma abicoder v1/v2; experimental ABIEncoderV2",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Record ABI-coder selection and its validation restrictions; do not silently apply v2 to a v1 compilation.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 29
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "pragmaOther",
+      "category": "lexical",
+      "syntax": "other pragmas and experimental feature gates",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Delegate acceptance to pinned solc and reject unknown enabled language modes; compiler settings are part of provenance.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 29
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "sourceUnits",
+      "category": "declarations",
+      "syntax": "source files and top-level declarations",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve file-level namespaces and all reachable declaration identities across the compilation unit.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 12
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "imports",
+      "category": "declarations",
+      "syntax": "import path; as; named aliases; wildcard namespace",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Resolve imports/remappings in solc; preserve qualified references and declaration IDs in the importer.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 34
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "contracts",
+      "category": "declarations",
+      "syntax": "contract C; abstract contract C",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Distinguish deployable and abstract contracts, initialization and declared member visibility.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 16
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "interfaces",
+      "category": "declarations",
+      "syntax": "interface I is J",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve external signatures, inherited interface members and the absence of implementation bodies.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 67
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "libraries",
+      "category": "declarations",
+      "syntax": "library L",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Inline resolvable pure/internal library calls; externally linked library execution additionally requires an explicit world/storage-context abstraction.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 74
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "inheritance",
+      "category": "declarations",
+      "syntax": "is A(args), B; diamond inheritance",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Follow solc C3 linearization, virtual dispatch and base initialization order; do not flatten solely by source name.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 84
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "overrideDeclarations",
+      "category": "declarations",
+      "syntax": "virtual; override; override(A,B)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Validate overrides in solc and retain distinct base bodies and the selected implementation.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 159
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "functions",
+      "category": "declarations",
+      "syntax": "function f(...) returns (...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve parameter/return order, named return defaults, overload resolution, implicit return and visibility.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 19
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "freeFunctions",
+      "category": "declarations",
+      "syntax": "file-level function definitions",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Resolve free and imported functions by declaration identity; model them without an implicit contract receiver.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 12
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "constructors",
+      "category": "declarations",
+      "syntax": "constructor(...) payable modifiers {...}",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Run state initializers and base constructors exactly once in compiler order; handle payments and rollback.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 93
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "modifiers",
+      "category": "declarations",
+      "syntax": "modifier m(...); m(args); inherited modifiers",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate arguments and nest pre/body/post execution in source application order, including return/revert interactions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 95
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "modifierPlaceholder",
+      "category": "declarations",
+      "syntax": "_; one or repeated syntactic placeholders; conditionally reached placeholders",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Invoke the modified continuation at each executed placeholder, preserving nesting and returns. A concrete modifier body must contain a placeholder, and a placeholder cannot be inside unchecked; a conditional placeholder can skip the body dynamically. Abstract modifier declarations have no body.",
+      "upstream": [
+        {
+          "path": "libsolidity/parsing/Parser.cpp",
+          "line": 1423
+        },
+        {
+          "path": "libsolidity/analysis/SyntaxChecker.cpp",
+          "line": 212
+        },
+        {
+          "path": "libsolidity/analysis/SyntaxChecker.cpp",
+          "line": 402
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "receiveFunction",
+      "category": "declarations",
+      "syntax": "receive() external payable",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Run the receive body for the modeled empty-data payment entry; preserve payable checks and callback behavior.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 97
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "fallbackFunction",
+      "category": "declarations",
+      "syntax": "fallback(); fallback(bytes calldata) returns(bytes memory)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model the no-argument body only under explicit entry assumptions; the byte-oriented overload also uses excluded raw call data/return data.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 96
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "visibility",
+      "category": "declarations",
+      "syntax": "public; external; internal; private",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Enforce permitted calls/access and distinguish external entry from internal dispatch; public does not imply every call is external.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 125
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "stateMutability",
+      "category": "declarations",
+      "syntax": "pure; view; payable; default nonpayable",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Enforce static restrictions and payment entry guards; view alone does not prove other contracts preserve this contract's state.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 153
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "stateVariables",
+      "category": "declarations",
+      "syntax": "state T x; initializer",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Give each logical root its declared type/default and execute initializers with correct visibility and declaration ordering.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 101
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "constants",
+      "category": "declarations",
+      "syntax": "constant state and file variables",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate supported constants by declaration identity; preserve contextual width and reject unsupported constant expressions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 20
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "immutables",
+      "category": "declarations",
+      "syntax": "immutable state variable",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Enforce constructor initialization/read rules and retain the value across transactions; representing it as a logical root must not allow later writes.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 101
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "publicGetters",
+      "category": "declarations",
+      "syntax": "synthesized getters; public override variable",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Generate exact getter signatures and omit struct array/mapping members as solc does; validate interface overrides.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 2865
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "structDeclarations",
+      "category": "declarations",
+      "syntax": "struct S { T f; ... }",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve member identity/order, recursive legality and storage/memory compatibility; recursive shapes remain an implementation task.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 251
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "enumDeclarations",
+      "category": "declarations",
+      "syntax": "enum E { A, B, ... }",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve distinct enum identity, ordinals, min/max and runtime conversion checks.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "valueTypeDeclarations",
+      "category": "declarations",
+      "syntax": "type T is V",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Keep source nominal identity for type checking; lower only after preserving underlying signedness/width and wrap/unwrap rules.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 263
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "errorDeclarations",
+      "category": "declarations",
+      "syntax": "error E(T a, ...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve signature, selector and argument evaluation/encoding for custom errors, including qualified declarations.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 317
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "eventDeclarations",
+      "category": "declarations",
+      "syntax": "event E(... indexed ...) anonymous",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve declaration and indexed/anonymous metadata; argument evaluation belongs to the model, log observation is separately excluded.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 304
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "usingFor",
+      "category": "declarations",
+      "syntax": "using L for T/*; using {f} for T; global",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Resolve extension calls by solc identity and bind the receiver once; global applicability is lexical/type-specific.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 346
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean"
+      ]
+    },
+    {
+      "id": "operatorAliases",
+      "category": "declarations",
+      "syntax": "using {f as op} for T global; op in &, ~, |, ^, +, /, %, *, -, ==, >, >=, <, <=, !=",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Lower all 15 permitted operator aliases to their resolved pure free functions; distinguish unary and binary signatures.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 325
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "boolType",
+      "category": "types",
+      "syntax": "bool",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Keep Boolean typing distinct from integers and ABI words.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 359
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "integerTypes",
+      "category": "types",
+      "syntax": "uint/int; uint8..uint256; int8..int256 in steps of 8",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Track width and signedness at every nested type position and intermediate operation; aliases mean 256 bits.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 82
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "addressTypes",
+      "category": "types",
+      "syntax": "address; address payable; contract/interface references",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Use bounded 160-bit identities and validate payable conversion rules before erasure to the logical address representation.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 359
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "fixedBytesTypes",
+      "category": "types",
+      "syntax": "bytes1..bytes32",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Track byte length, indexing, padding, alignment, bitwise operations and explicit conversions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 41
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "dynamicBytesType",
+      "category": "types",
+      "syntax": "bytes",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Treat as byte array with Solidity storage/memory/calldata restrictions and exact copying behavior.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 359
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "stringType",
+      "category": "types",
+      "syntax": "string",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model byte content and explicit conversions; string has no direct indexing or length member.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 359
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "dynamicArrays",
+      "category": "types",
+      "syntax": "T[]; nested dynamic arrays",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Track runtime lengths, bounds, reference element types and source-dependent assignment/copy behavior.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 358
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "fixedArrays",
+      "category": "types",
+      "syntax": "T[n]; nested fixed arrays",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate constant lengths and retain lengths in types; preserve element bounds and ABI restrictions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 358
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "mappings",
+      "category": "types",
+      "syntax": "mapping(K [keyName] => V [valueName])",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model allowed key types, default values, nested mappings and named getter components without pretending the map is enumerable.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 547
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "structTypes",
+      "category": "types",
+      "syntax": "qualified user-defined struct types",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Retain declaration identity and recursive graph restrictions; independently validate storage and memory uses.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 251
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "enumTypes",
+      "category": "types",
+      "syntax": "qualified enum types",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve enum membership ranges in conversions and ABI entry values.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "valueTypes",
+      "category": "types",
+      "syntax": "user-defined value types",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Erase wrappers only after solc nominal checks and operator resolution, retaining exact primitive shape.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 263
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "internalFunctionTypes",
+      "category": "types",
+      "syntax": "function(...) internal [pure/view] returns(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model declaration identities/dispatch tables and uninitialized-function failure, not machine jump addresses.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 358
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "externalFunctionTypes",
+      "category": "types",
+      "syntax": "function(...) external [payable/view/pure] returns(...)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Represent target address plus typed function identity/selector and an explicit external-call relation; no raw code pointers.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 358
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "tupleTypes",
+      "category": "types",
+      "syntax": "tuple values; holes; multiple returns",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve simultaneous assignment and evaluation/capture order; tuples are not independently declarable Solidity variable types.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 419
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "storageLocation",
+      "category": "types",
+      "syntax": "storage locals/parameters/returns",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Represent typed logical paths; distinguish binding a reference, copying an aggregate and mutating its target.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 374
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "memoryLocation",
+      "category": "types",
+      "syntax": "memory locals/parameters/returns",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve heap object identity, aliasing, allocation and copy boundaries across calls.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 374
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "calldataLocation",
+      "category": "types",
+      "syntax": "typed calldata parameters, locals, slices and returns",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model immutable typed views and bounds; typed calldata does not require exposing msg.data or physical ABI offsets.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 374
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean"
+      ]
+    },
+    {
+      "id": "recursiveTypes",
+      "category": "types",
+      "syntax": "recursive structs through mappings/arrays",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Use a guarded/graph representation where Solidity permits recursion; do not treat a finite-tree implementation limit as an EVM exclusion.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/AST.h",
+          "line": 781
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "names",
+      "category": "expressions",
+      "syntax": "identifiers; qualified members; this; super",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Resolve declarations, distinguish locals/state/type members and retain selected base implementations.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 115
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "parentheses",
+      "category": "expressions",
+      "syntax": "(e)",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Preserve grouping without introducing a tuple or changing evaluation.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 419
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "tupleExpressions",
+      "category": "expressions",
+      "syntax": "(a,b); (a,,b); return tuples",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Capture all components once and commit assignments in Solidity order, preserving empty targets.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 419
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "inlineArrays",
+      "category": "expressions",
+      "syntax": "[a,b,...]",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Infer the fixed array's common element type using Solidity's first-element/context rules and allocate a memory array.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 423
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "memberAccess",
+      "category": "expressions",
+      "syntax": "e.f",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Distinguish fields, builtins, type members and extension methods using resolved types/declarations.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 386
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "indexAccess",
+      "category": "expressions",
+      "syntax": "e[i]",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Check bounds for arrays/bytes; use key-type conversion for mappings; capture side effects once.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 384
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "rangeAccess",
+      "category": "expressions",
+      "syntax": "a[start:end]; omitted endpoints",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model legal calldata views with zero-based derived lengths, endpoint checks and shared immutable content.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 385
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "unaryArithmetic",
+      "category": "expressions",
+      "syntax": "-x; ~x; !x",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Respect width/signedness, Boolean negation and checked minimum-integer negation; no unary numeric plus exists.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 391
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "increments",
+      "category": "expressions",
+      "syntax": "++x; x++; --x; x--",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve lvalue evaluation once, old/new result and overflow mode; Lean spelling of decrement differs only at its parser boundary.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 392
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "deleteExpression",
+      "category": "expressions",
+      "syntax": "delete x",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Reset the target according to its type; mappings inside aggregates retain inaccessible historical entries where Solidity does.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 391
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "arithmetic",
+      "category": "expressions",
+      "syntax": "+ - * / % **",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Apply Solidity typing/overflow and signed division/remainder; exponentiation is right associative and division by zero always fails.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 393
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "bitwise",
+      "category": "expressions",
+      "syntax": "& ^ |",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Operate over finite-width representations and preserve bytesN versus integer typing.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 397
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "shifts",
+      "category": "expressions",
+      "syntax": "<<; >>",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve left operand type; signed right shift sign-extends; shifts do not gain checked-arithmetic overflow guards.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 396
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "comparisons",
+      "category": "expressions",
+      "syntax": "< <= > >= == !=",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Admit only comparisons supported by Solidity types; do not invent structural equality on arrays/structs.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 400
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "shortCircuit",
+      "category": "expressions",
+      "syntax": "a && b; a || b",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate the second operand only when required and preserve failures/side effects in the first.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 402
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "conditional",
+      "category": "expressions",
+      "syntax": "c ? a : b",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate only one arm and preserve the conditional's inferred/mobile type, including reference-valued arms.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 404
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "assignment",
+      "category": "expressions",
+      "syntax": "x = e; nested assignment expressions",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve lvalue/rvalue scheduling and reference-versus-copy semantics; the assigned value is also an expression result where legal.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 405
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "compoundAssignment",
+      "category": "expressions",
+      "syntax": "+= -= *= /= %= &= ^= |= <<= >>=",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Capture the target once, read the old value at the proper point and use its declared arithmetic width.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 418
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "explicitConversions",
+      "category": "expressions",
+      "syntax": "T(e); payable(e); bytes/string/array casts",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve Solidity legality, truncation, sign extension, bytesN alignment and enum checks; casts differ from checked arithmetic.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 389
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "implicitConversions",
+      "category": "expressions",
+      "syntax": "contextual literal/type conversions",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Use solc's resolved type, preserving widths before enclosing operations rather than only at assignment.",
+      "upstream": [
+        {
+          "path": "docs/types/value-types.rst",
+          "line": 481
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "structConstruction",
+      "category": "expressions",
+      "syntax": "S(args); S({f: e,...})",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate arguments in the selected compiler order, use field declaration order and allocate correct memory objects.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 111
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "namedArguments",
+      "category": "expressions",
+      "syntax": "f({b: e2,a: e1})",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Bind by formal name while preserving actual compiler evaluation order; do not assume textual object order.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 106
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "newMemory",
+      "category": "expressions",
+      "syntax": "new T[](n); new bytes(n)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Allocate fresh defaulted memory, check feasible lengths and preserve allocation failure as a distinct concern from mathematical unboundedness.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 406
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "functionCalls",
+      "category": "expressions",
+      "syntax": "f(args); member calls; function-valued expressions",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate callee/receiver and every argument exactly once before entering a fresh call frame.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 387
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "callOptions",
+      "category": "expressions",
+      "syntax": "f{value:v,gas:g}(...); new C{salt:s,value:v}(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Split options by semantic demand: value is modeled, gas is excluded, salt is excluded; a generic options node is not automatically admissible.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 387
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "metaTypeExpression",
+      "category": "expressions",
+      "syntax": "type(T)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Resolve only integer, enum or contract/interface metatypes accepted upstream; classify each accessed member separately.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 390
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean"
+      ]
+    },
+    {
+      "id": "blocks",
+      "category": "statements",
+      "syntax": "{...}; nested scopes",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Allocate locals with Solidity lifetime, default initialization and shadowing; discard bindings when leaving the scope.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 456
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "uncheckedBlock",
+      "category": "statements",
+      "syntax": "unchecked {...}",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Wrap only applicable arithmetic in lexical scope; retain division/index checks and do not propagate unchecked into called functions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 459
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "variableDeclarations",
+      "category": "statements",
+      "syntax": "T x; T x=e; tuple declarations with holes",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve declaration identity, defaults, data location, inference constraints and initializer capture order.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 544
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "expressionStatements",
+      "category": "statements",
+      "syntax": "e;",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Execute all effects and failures even when the resulting value is discarded.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 545
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "ifStatement",
+      "category": "statements",
+      "syntax": "if(c) s; if(c) s else t",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Evaluate a Boolean condition once and execute exactly one branch.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 482
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "whileStatement",
+      "category": "statements",
+      "syntax": "while(c) s",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Reevaluate condition and distinguish termination, revert, break, continue and divergence.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 487
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "forStatement",
+      "category": "statements",
+      "syntax": "for(init;condition;post) s",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Handle omitted clauses, initializer scope and continue-through-post behavior.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 486
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "doWhileStatement",
+      "category": "statements",
+      "syntax": "do s while(c);",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Execute body before condition and route continue to the condition.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 488
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "breakStatement",
+      "category": "statements",
+      "syntax": "break;",
+      "scope": "model",
+      "current": "present",
+      "requirement": "Exit only the innermost loop without evaluating its next condition/post.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 496
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "continueStatement",
+      "category": "statements",
+      "syntax": "continue;",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Continue the innermost loop with the correct post/condition destination.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 492
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "returnStatement",
+      "category": "statements",
+      "syntax": "return; return e; return(a,b)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Capture return values/references and run enclosing modifier continuations with correct frame isolation.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 506
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "tryStatement",
+      "category": "statements",
+      "syntax": "try externalCall/new C returns(...) {...} catch...",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Separate callee failure from caller argument/return-decoding failures; typed contract creation needs the world abstraction.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 500
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "catchClauses",
+      "category": "statements",
+      "syntax": "catch Error(string); Panic(uint); (bytes); catch {...}",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Dispatch by valid revert bytes, handle malformed payloads and preserve caller/callee rollback boundaries.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 504
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "revertStatement",
+      "category": "statements",
+      "syntax": "revert E(args); revert(); revert(reason)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate payload arguments and roll back the correct frame; retain exact bytes where supported and document proof-logic precision limits.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 514
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "emitStatement",
+      "category": "statements",
+      "syntax": "emit E(args)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate every argument for effects/reverts before erasing the unobserved log; erasure is valid only for properties that do not observe logs.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 510
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "canonicalRethrow",
+      "category": "statements",
+      "syntax": "assembly { revert(add(data,32),mload(data)) }",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Recognize only the verified whole-buffer pattern with matching resolved declarations; lower to raw rethrow, never admit general Yul by this exception.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 520
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean"
+      ]
+    },
+    {
+      "id": "assertBuiltin",
+      "category": "builtins",
+      "syntax": "assert(bool)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "False raises Panic(0x01); distinguish failure from assumptions and from ordinary require failure.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 85
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "requireBuiltin",
+      "category": "builtins",
+      "syntax": "require(bool); require(bool,string); require(bool,E(...))",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate all arguments even if the condition succeeds; retain Error/custom-error encoding and rollback.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 95
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "revertBuiltin",
+      "category": "builtins",
+      "syntax": "revert(); revert(string)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve computed reasons and evaluation failures; do not replace revert by a proof assumption.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 98
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "addmodBuiltin",
+      "category": "builtins",
+      "syntax": "addmod(x,y,k)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Compute with arbitrary-precision intermediate addition; reject a constant zero modulus and fail with Panic(0x12) for a dynamic zero modulus. Raw EVM opcode zero behavior is not Solidity builtin behavior.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 84
+        },
+        {
+          "path": "docs/units-and-global-variables.rst",
+          "line": 204
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "mulmodBuiltin",
+      "category": "builtins",
+      "syntax": "mulmod(x,y,k)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Compute with arbitrary-precision intermediate multiplication; reject a constant zero modulus and fail with Panic(0x12) for a dynamic zero modulus. Raw EVM opcode zero behavior is not Solidity builtin behavior.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 93
+        },
+        {
+          "path": "docs/units-and-global-variables.rst",
+          "line": 207
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "keccakBuiltin",
+      "category": "builtins",
+      "syntax": "keccak256(bytes)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Use the existing Keccak semantics/explicit abstraction over bytes; injectivity and collision resistance are not unconditional equations.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 91
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "sha256Builtin",
+      "category": "builtins",
+      "syntax": "sha256(bytes)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Use an explicit deterministic cryptographic interpretation; opaque axioms must not claim collision freedom.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 102
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "ripemd160Builtin",
+      "category": "builtins",
+      "syntax": "ripemd160(bytes)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Preserve the 20-byte result and explicit interpretation independently of precompile gas.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 100
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "ecrecoverBuiltin",
+      "category": "builtins",
+      "syntax": "ecrecover(hash,v,r,s)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Specify accepted inputs, zero-on-failure and recovery relation; never infer signer authorization without premises.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 88
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "erc7201Builtin",
+      "category": "builtins",
+      "syntax": "erc7201(string memory id) returns(uint)",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Evaluate the ERC-7201 namespace formula for runtime strings and constant-foldable inputs: hash the string bytes, subtract one modulo 2^256, hash the encoded word, and clear the low eight bits. Producing a namespace integer does not expose physical storage.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 89
+        },
+        {
+          "path": "docs/units-and-global-variables.rst",
+          "line": 250
+        },
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 2405
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "wrapUnwrap",
+      "category": "builtins",
+      "syntax": "T.wrap(x); T.unwrap(x)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve the exact underlying value and perform nominal checks before erasure; these are not arithmetic casts.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3930
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "bytesConcat",
+      "category": "builtins",
+      "syntax": "bytes.concat(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Concatenate exact bytes/bytesN in argument order with fresh result memory.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3930
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "stringConcat",
+      "category": "builtins",
+      "syntax": "string.concat(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Concatenate byte content, preserving argument evaluation and fresh allocation.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3930
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "msgSender",
+      "category": "environment",
+      "syntax": "msg.sender",
+      "scope": "abstract",
+      "current": "present",
+      "requirement": "Supply a bounded caller identity per call frame; external self-calls change sender.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4199
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean"
+      ]
+    },
+    {
+      "id": "msgValue",
+      "category": "environment",
+      "syntax": "msg.value",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Supply per-frame payment with payable entry/ledger assumptions; callback/self-call frames may change the value.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4201
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean"
+      ]
+    },
+    {
+      "id": "thisAddress",
+      "category": "environment",
+      "syntax": "this; address(this)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Supply a bounded deployment identity and distinguish the contract value from its external call dispatch.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 146
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean"
+      ]
+    },
+    {
+      "id": "addressBalance",
+      "category": "environment",
+      "syntax": "address(a).balance; address(this).balance",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Read an explicit ledger and state required balance/supply/world assumptions; arbitrary-address balances are not proved from chain execution.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 554
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean"
+      ]
+    },
+    {
+      "id": "blockTimestamp",
+      "category": "environment",
+      "syntax": "block.timestamp",
+      "scope": "abstract",
+      "current": "present",
+      "requirement": "Read the environment timestamp; monotonicity, accuracy and miner constraints require explicit premises.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4186
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean"
+      ]
+    },
+    {
+      "id": "blockCoinbase",
+      "category": "environment",
+      "syntax": "block.coinbase",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; coinbase requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4185
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockDifficulty",
+      "category": "environment",
+      "syntax": "block.difficulty",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; difficulty requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4188
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockPrevrandao",
+      "category": "environment",
+      "syntax": "block.prevrandao",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; prevrandao requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4189
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockNumber",
+      "category": "environment",
+      "syntax": "block.number",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; number requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4190
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockGaslimit",
+      "category": "environment",
+      "syntax": "block.gaslimit",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; gaslimit requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4191
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockChainid",
+      "category": "environment",
+      "syntax": "block.chainid",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; chainid requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4192
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockBasefee",
+      "category": "environment",
+      "syntax": "block.basefee",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; basefee requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4193
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockBlobbasefee",
+      "category": "environment",
+      "syntax": "block.blobbasefee",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; blobbasefee requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4194
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockSlotnum",
+      "category": "environment",
+      "syntax": "block.slotnum",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile supplies only block.timestamp; slotnum requires an additional chain input and premises (feasible in another profile), not an invented constant. Fork gating remains solc's responsibility.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4195
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "txOrigin",
+      "category": "environment",
+      "syntax": "tx.origin",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Transaction-origin identity is not carried by the current call environment; it must not be replaced by msg.sender.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4207
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "txGasprice",
+      "category": "environment",
+      "syntax": "tx.gasprice",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Transaction pricing lies outside the chosen functional environment and gas abstraction.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4208
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blockhashBuiltin",
+      "category": "environment",
+      "syntax": "blockhash(n)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Requires chain history, fork rules and the bounded block-hash window absent from this profile.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 87
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "blobhashBuiltin",
+      "category": "environment",
+      "syntax": "blobhash(i)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Requires transaction blob metadata and fork rules absent from this profile.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 119
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "internalCalls",
+      "category": "calls",
+      "syntax": "f(args); base-qualified and super calls",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Use resolved implementation identity and fresh frames; preserve return/default/reference values and modifier continuations.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "recursiveCalls",
+      "category": "calls",
+      "syntax": "direct/mutual recursion",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Model recursion/frame exhaustion explicitly; the existing bounded call implementation is not unbounded mathematical recursion.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "externalTypedCalls",
+      "category": "calls",
+      "syntax": "c.f(args); interface calls",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Use typed inputs/outcomes, payment/rollback and a documented external-call relation; arbitrary external code is not proved by the local interpreter.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1260
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "externalSelfCalls",
+      "category": "calls",
+      "syntax": "this.f(args)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Run a distinct external frame with sender=this, value, return ABI validation and local-state rollback behavior.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1260
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "extensionCalls",
+      "category": "calls",
+      "syntax": "x.f(args) via using for",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Bind receiver once and lower to the resolved function; external library calls require their own world/storage abstraction.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "functionValues",
+      "category": "calls",
+      "syntax": "taking, storing, comparing and invoking function values",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve Solidity identity rules, compatible signatures and failure for unset internal function values; avoid code-address equality assumptions.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1260
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "valueOption",
+      "category": "calls",
+      "syntax": "{value: amount}",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate amount and update ledger on success with rollback on failure, respecting payable and self-call semantics.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 83
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "sendTransfer",
+      "category": "calls",
+      "syntax": "address payable .send(v); .transfer(v)",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Model success/failure, transfer's revert behavior and payment effects; callback exclusion is an explicit selected assumption, not a timeless gas theorem.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 564
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "emptyDataValueCall",
+      "category": "calls",
+      "syntax": "(bool ok,) = a.call{value:v}(\"\")",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Admit only the recognized empty-payload payment form, discard unread return bytes and allow callbacks under the chosen call semantics.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 557
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "newContract",
+      "category": "calls",
+      "syntax": "new C(args) without salt",
+      "scope": "abstract",
+      "current": "missing",
+      "requirement": "Requires fresh address/world allocation, constructor execution, payment, rollback and callable instance identity; feasible source-level extension without bytecode.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1266
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "creationTry",
+      "category": "calls",
+      "syntax": "try new C(args) returns(C c)",
+      "scope": "abstract",
+      "current": "missing",
+      "requirement": "Use contract-world creation outcomes and catch only creation-frame failures; caller-side evaluation errors still propagate.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1266
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "callbackSemantics",
+      "category": "calls",
+      "syntax": "reentrancy during modeled external calls",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Select and record ordinary versus callback modality; state frame guarantees and callback invariants explicitly.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics.lean"
+      ]
+    },
+    {
+      "id": "externalLibraryCalls",
+      "category": "calls",
+      "syntax": "linked library public/external calls",
+      "scope": "abstract",
+      "current": "missing",
+      "requirement": "Execute typed library bodies in caller storage context with explicit library identity/static restrictions; internal library lowering alone is insufficient.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1261
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "abiEncode",
+      "category": "abi",
+      "syntax": "abi.encode(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Implement canonical head/tail, offsets, padding and recursive value shapes; current supported shape is narrower than all Solidity ABI types.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4212
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "abiEncodePacked",
+      "category": "abi",
+      "syntax": "abi.encodePacked(...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve packed widths and array restrictions; ambiguity/collisions of packed encodings are real and must not be erased.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4222
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "abiEncodeWithSelector",
+      "category": "abi",
+      "syntax": "abi.encodeWithSelector(bytes4,...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Prefix a selector to canonical encoding; selector bytes are data, independent of raw CALL support. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4232
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab/Lower.lean",
+        "Solidity/Syntax/Elab/Arms.lean"
+      ]
+    },
+    {
+      "id": "abiEncodeWithSignature",
+      "category": "abi",
+      "syntax": "abi.encodeWithSignature(string,...)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Derive bytes4(keccak256(signature)) then canonical encoding; do not assert hashes are injective. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4252
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab/Lower.lean",
+        "Solidity/Syntax/Elab/Arms.lean"
+      ]
+    },
+    {
+      "id": "abiEncodeCall",
+      "category": "abi",
+      "syntax": "abi.encodeCall(f,(args))",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Check exact function/tuple compatibility, derive selector and encode typed arguments. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4242
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab/Lower.lean",
+        "Solidity/Syntax/Elab/Arms.lean"
+      ]
+    },
+    {
+      "id": "abiDecode",
+      "category": "abi",
+      "syntax": "abi.decode(bytes,(T,...))",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Validate offsets, lengths, alignment, ranges and truncation for supported nested types; reject malformed inputs and explicitly gate unsupported shapes.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4262
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab.lean"
+      ]
+    },
+    {
+      "id": "typeBounds",
+      "category": "metadata",
+      "syntax": "type(integer/enum).min/max",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Produce exact source-type bounds, including enum cardinality and signed minimum.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4305
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean"
+      ]
+    },
+    {
+      "id": "typeName",
+      "category": "metadata",
+      "syntax": "type(C).name",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Return compiler-resolved contract name bytes as a compile-time value.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4293
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "interfaceId",
+      "category": "metadata",
+      "syntax": "type(I).interfaceId",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Compute the XOR of the interface's own external function selectors according to Solidity rules; inherited functions are excluded.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4297
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "functionSelector",
+      "category": "metadata",
+      "syntax": "f.selector; C.f.selector",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve canonical signature and four-byte selector without exposing code addresses or asserting uniqueness. Existing lowering handles modeled external function values; all declaration contexts still need validation.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3399
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab/Values.lean"
+      ]
+    },
+    {
+      "id": "functionAddress",
+      "category": "metadata",
+      "syntax": "externalFunction.address",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Project the bounded receiver identity from an external function value. Existing lowering handles modeled external function values; all declaration contexts still need validation.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3399
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Elab/Values.lean"
+      ]
+    },
+    {
+      "id": "errorEventSelector",
+      "category": "metadata",
+      "syntax": "E.selector for errors/events where accepted",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Compute bytes4 for error signatures and bytes32 for non-anonymous event signatures, respecting solc declaration resolution; anonymous events have no selector member.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 3399
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "arrayLength",
+      "category": "storage",
+      "syntax": "arrays/bytes/bytesN .length",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Return exact length with correct static/dynamic location restrictions; string requires an explicit bytes conversion.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 1925
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "arrayPush",
+      "category": "storage",
+      "syntax": "storage dynamic array/bytes .push(v)",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate receiver and source in compiler order, grow length, initialize/copy the new element and preserve aliases.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 1925
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "arrayPushReference",
+      "category": "storage",
+      "syntax": "storage dynamic array .push()",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Append a default value and return a storage lvalue/reference; nested member effects must occur in compiler order.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 1925
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "arrayPop",
+      "category": "storage",
+      "syntax": "storage dynamic array/bytes .pop()",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Fail on empty, shorten length and clear the element according to Solidity mapping-tail rules.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 1925
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "storageCopy",
+      "category": "storage",
+      "syntax": "storage assignment of arrays/structs",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Deep-copy value content with destination cleanup and correct overlapping/alias behavior; mapping members are not naively copied.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 64
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "memoryAliasing",
+      "category": "storage",
+      "syntax": "memory-to-memory and internal memory parameters",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Share object identity where Solidity aliases; external ABI boundaries copy and storage-to-memory creates fresh objects.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 64
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "storageAliasing",
+      "category": "storage",
+      "syntax": "storage local/parameter/return paths",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Rebinding a reference differs from writing its target; represent nested fields and indices without physical slot numbers.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 64
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "deleteMappingTails",
+      "category": "storage",
+      "syntax": "delete aggregates and later reusing dynamic slots",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve mapping entries where Solidity does, and record clean-tail assumptions/selected semantics rather than hiding them.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 98
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "danglingReferences",
+      "category": "storage",
+      "syntax": "references invalidated by pop/delete/resize",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Preserve the chosen Solidity/compiler semantics or reject affected programs explicitly; safe-path assumptions need premises.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 496
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Ops.lean"
+      ]
+    },
+    {
+      "id": "transientState",
+      "category": "storage",
+      "syntax": "T transient x",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Add a separate logical transaction-local store, shared across reentrant frames, rolled back on frame failure and reset at transaction end; no gas model is needed.",
+      "upstream": [
+        {
+          "path": "libsolidity/parsing/Parser.cpp",
+          "line": 895
+        },
+        {
+          "path": "docs/contracts/transient-storage.rst",
+          "line": 6
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "checkedArithmetic",
+      "category": "semantics",
+      "syntax": "Solidity 0.8 default checked arithmetic",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Guard every operation at its intermediate width, signedness and overflow mode, including values used only by conditions.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 519
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "uncheckedArithmetic",
+      "category": "semantics",
+      "syntax": "modular unchecked operations",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Wrap at each operation's width; zero division and invalid indexing still fail and called functions retain their own lexical mode.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 519
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "evaluationOrder",
+      "category": "semantics",
+      "syntax": "legacy/via-IR scheduling and optimizer settings",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Record the selected compiler pipeline; do not impose a single source-order guarantee where Solidity leaves order unspecified.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 323
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "exactConstants",
+      "category": "semantics",
+      "syntax": "rational/constant-expression evaluation",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Evaluate exact rationals and contextual/mobile literal types before runtime integer operations.",
+      "upstream": [
+        {
+          "path": "docs/types/value-types.rst",
+          "line": 481
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "defaultInitialization",
+      "category": "semantics",
+      "syntax": "zero/default locals, fields and returns",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Default according to complete type and location; unset storage references and function values have special restrictions/failure behavior.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 425
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "referenceCopyRules",
+      "category": "semantics",
+      "syntax": "storage/memory/calldata assignment matrix",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Define every allowed location pair, reference binding versus deep copy, and nested element compatibility explicitly.",
+      "upstream": [
+        {
+          "path": "docs/types/reference-types.rst",
+          "line": 64
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "panicCodes",
+      "category": "semantics",
+      "syntax": "Panic 0x00/01/11/12/21/22/31/32/41/51",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Retain applicable Solidity panic codes and payloads; some current paths lose data, and malformed storage encoding 0x22 is tied to excluded low-level corruption.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 612
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "revertPayloads",
+      "category": "semantics",
+      "syntax": "Error(string), custom errors, Panic, raw bytes",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Distinguish runtime byte precision from what the current proof modalities can observe; do not advertise exact computed-data proofs where unavailable.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 589
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "rollback",
+      "category": "semantics",
+      "syntax": "require/revert/panic/call failure",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Roll back storage, transient state, ledger and outputs at the failing frame boundary while keeping caller state where Solidity does.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 589
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "abiEntryValidation",
+      "category": "semantics",
+      "syntax": "external parameters and return decoding",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "State caller assumptions and enforce ABI range/shape validation; malformed return decoding is a caller failure, not a caught callee revert.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        },
+        {
+          "path": "docs/abi-spec.rst",
+          "line": 24
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "constructorLifetime",
+      "category": "semantics",
+      "syntax": "deployment and transaction traces",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "State which claims range over arbitrary typed states versus constructor-reachable traces and deployed instances.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 216
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "nonpayableEntry",
+      "category": "semantics",
+      "syntax": "nonpayable function/constructor call",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Refuse nonzero msg.value at external entry without incorrectly restricting internal calls of the same declaration.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "staticCallRestriction",
+      "category": "semantics",
+      "syntax": "view/static external execution",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Model forbidden writes/payments in a static context, including transitive calls; source view checking alone does not capture arbitrary external behavior.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "termination",
+      "category": "semantics",
+      "syntax": "loops/recursion, divergence, resource bounds",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Keep semantic divergence separate from evaluator fuel and real EVM gas; total-correctness claims must state their termination premises.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 2
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "worldAssumptions",
+      "category": "semantics",
+      "syntax": "balances, code existence and external responses",
+      "scope": "abstract",
+      "current": "partial",
+      "requirement": "Carry chain premises and call/callback interpretation in the theorem; do not derive them from the single-contract store.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "typeValidation",
+      "category": "semantics",
+      "syntax": "solc validation, nominal types, overloads and mutability",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Import only validated ASTs from the pinned compiler/settings; the catalog is not a replacement type checker.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "docs/solc-alignment.md"
+      ]
+    },
+    {
+      "id": "featureDetection",
+      "category": "semantics",
+      "syntax": "transitive declaration-aware feature extraction",
+      "scope": "model",
+      "current": "missing",
+      "requirement": "Collect features from initializers, modifiers, inherited bodies, callees, payloads, specifications and call options; reject unknown AST nodes instead of default admission.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 65
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "inlineAssembly",
+      "category": "excluded",
+      "syntax": "arbitrary assembly / Yul including memory-safe flags",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityParser.g4",
+          "line": 520
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "gasleft",
+      "category": "excluded",
+      "syntax": "gasleft()",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Requires dynamic gas accounting, memory expansion, refunds and call forwarding absent from functional semantics.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 90
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "gasOption",
+      "category": "excluded",
+      "syntax": "{gas:g}; exact forwarded gas/stipend",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "An exact gas budget can change success, failure and reentrancy; it cannot be silently discarded.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 83
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "rawCalldata",
+      "category": "excluded",
+      "syntax": "msg.data; msg.sig; fallback(bytes) input",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "This profile starts with typed arguments and lacks raw transaction payload/selector dispatch; typed calldata views remain in scope.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4202
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "rawReturndata",
+      "category": "excluded",
+      "syntax": "arbitrary raw low-level return bytes; fallback raw output",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Exact arbitrary external return bytes and machine return-buffer behavior are outside typed external-call outcomes; caught revert bytes are separate.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 557
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "lowLevelCall",
+      "category": "excluded",
+      "syntax": "address.call(arbitraryBytes)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Arbitrary selector dispatch and byte-oriented external world effects exceed the recognized empty-data payment form.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 557
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "delegatecall",
+      "category": "excluded",
+      "syntax": "address.delegatecall(bytes)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Arbitrary foreign code executes against caller storage and context; requires a code/world semantics beyond typed library abstractions.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 559
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "lowLevelStaticcall",
+      "category": "excluded",
+      "syntax": "address.staticcall(bytes)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Arbitrary byte-oriented dispatch/static-context return bytes require a richer external world than typed view calls.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 560
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "selfdestruct",
+      "category": "excluded",
+      "syntax": "selfdestruct(payableAddress)",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Balance transfer, account deletion and creation-in-transaction exceptions depend on fork-specific world semantics.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/GlobalContext.cpp",
+          "line": 101
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "create2Salt",
+      "category": "excluded",
+      "syntax": "new C{salt:s}(...); deterministic deployment address",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Address derivation requires init-code hashing and account/world collision rules absent from this profile.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 257
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "addressCode",
+      "category": "excluded",
+      "syntax": "address.code; extcodesize",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Observes deployed bytecode/code size, including construction/deletion states, absent from the source interpreter.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 555
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "addressCodehash",
+      "category": "excluded",
+      "syntax": "address.codehash; extcodehash",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Observes account existence and deployed bytecode hashing, absent from the source interpreter.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 556
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "creationCode",
+      "category": "excluded",
+      "syntax": "type(C).creationCode",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Exact compiled init-code bytes depend on code generation, linking and compiler settings.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4291
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "runtimeCode",
+      "category": "excluded",
+      "syntax": "type(C).runtimeCode",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Exact deployed code bytes depend on compilation and immutable/library substitution.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 4292
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "storageLayout",
+      "category": "excluded",
+      "syntax": "layout at expr; physical slots/packing/offsets",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/AST.h",
+          "line": 635
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "memoryLayout",
+      "category": "excluded",
+      "syntax": "raw memory addresses; mload/mstore; free-memory pointer",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Typed heap objects have no exposed machine byte addresses, expansion cost or scratch/free-memory regions.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 304
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "transientLayout",
+      "category": "excluded",
+      "syntax": "physical transient slots; tload/tstore through assembly",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Logical transaction-local values can be modeled separately; physical transient slot access is a machine observation.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 787
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "eventLog",
+      "category": "excluded",
+      "syntax": "log contents/topics/order/gas; indexed/anonymous observation",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "The selected observation model erases logs after evaluating arguments; properties about emitted logs require a new observable trace.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.h",
+          "line": 1276
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "machineResources",
+      "category": "excluded",
+      "syntax": "gas exhaustion/refunds, stack limits, exact allocation limits",
+      "scope": "exclude",
+      "current": "notApplicable",
+      "requirement": "Mathematical execution/fuel bounds are not real gas or stack accounting; exact resource-sensitive outcomes need an EVM semantics.",
+      "upstream": [
+        {
+          "path": "docs/control-structures.rst",
+          "line": 61
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "fixedPoint",
+      "category": "upstream",
+      "syntax": "fixed/ufixed; fixedMxN/ufixedMxN",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Grammar/type placeholders exist but fixed-point code generation is upstream incomplete; do not claim complete Solidity runtime support.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 814
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "removedAliases",
+      "category": "upstream",
+      "syntax": "now; sha3; suicide; throw; msg.gas; block.blockhash; callcode; legacy f.gas()/value()",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Retained parser/AST/type entries receive upstream removal errors; report compiler invalidity before model scope diagnostics.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 3879
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "unsignedRightShift",
+      "category": "upstream",
+      "syntax": ">>>; >>>=",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Lexer/ANTLR retain these tokens but Solidity's type system rejects the unsigned-right-shift operator.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/Types.cpp",
+          "line": 575
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "removedUnits",
+      "category": "upstream",
+      "syntax": "years; historical finney/szabo",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "years is rejected by the type checker; removed historical units are not admitted by the modern compiler.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/TypeChecker.cpp",
+          "line": 3985
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "reservedKeywords",
+      "category": "upstream",
+      "syntax": "after alias apply auto byte case copyof default define final implements in inline let macro match mutable null of partial promise reference relocatable sealed sizeof static supports switch typedef typeof var",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Reserved lexer words are not executable language features; preserve compiler diagnostics and do not reinterpret them as identifiers.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 6
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "invalidLexemes",
+      "category": "upstream",
+      "syntax": "octal-like literals; number glued to identifier; bare ->",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Scanned tokens without a Solidity parser production remain invalid source; recognizing a token does not admit a language construct.",
+      "upstream": [
+        {
+          "path": "docs/grammar/SolidityLexer.g4",
+          "line": 232
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "removedGenericSolidity",
+      "category": "upstream",
+      "syntax": "pragma experimental solidity; Generic Solidity prototype",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "The experimental Generic Solidity language was removed in 0.8.37; it is not part of the pinned mainstream Solidity surface.",
+      "upstream": [
+        {
+          "path": "Changelog.md",
+          "line": 46
+        }
+      ],
+      "localEvidence": []
+    },
+    {
+      "id": "invalidModifierBody",
+      "category": "upstream",
+      "syntax": "concrete modifier body without _; placeholder inside unchecked",
+      "scope": "upstream",
+      "current": "notApplicable",
+      "requirement": "Pinned solc rejects concrete modifiers without any placeholder and placeholders nested inside unchecked blocks; an abstract modifier declaration without a body is legal.",
+      "upstream": [
+        {
+          "path": "libsolidity/analysis/SyntaxChecker.cpp",
+          "line": 212
+        },
+        {
+          "path": "libsolidity/analysis/SyntaxChecker.cpp",
+          "line": 402
+        }
+      ],
+      "localEvidence": []
+    }
+  ]
+}

@@ -1,0 +1,3609 @@
+{
+  "schemaVersion": 1,
+  "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "interpretation": "Coverage index only: shared tokens and composite syntax can map to multiple semantic subfeatures; mappings do not determine admission.",
+  "symbols": {
+    "parserRules": {
+      "assemblyFlags": [
+        "canonicalRethrow",
+        "inlineAssembly"
+      ],
+      "assemblyStatement": [
+        "canonicalRethrow",
+        "inlineAssembly"
+      ],
+      "assignOp": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "block": [
+        "blocks"
+      ],
+      "booleanLiteral": [
+        "booleanLiterals"
+      ],
+      "breakStatement": [
+        "breakStatement"
+      ],
+      "callArgumentList": [
+        "functionCalls",
+        "namedArguments"
+      ],
+      "catchClause": [
+        "catchClauses"
+      ],
+      "constantVariableDeclaration": [
+        "constants"
+      ],
+      "constructorDefinition": [
+        "constructors"
+      ],
+      "continueStatement": [
+        "continueStatement"
+      ],
+      "contractBodyElement": [
+        "contracts"
+      ],
+      "contractDefinition": [
+        "contracts",
+        "inheritance",
+        "storageLayout"
+      ],
+      "dataLocation": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "doWhileStatement": [
+        "doWhileStatement"
+      ],
+      "elementaryTypeName": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "emitStatement": [
+        "emitStatement"
+      ],
+      "enumDefinition": [
+        "enumDeclarations"
+      ],
+      "errorDefinition": [
+        "errorDeclarations"
+      ],
+      "errorParameter": [
+        "errorDeclarations"
+      ],
+      "eventDefinition": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "eventParameter": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "expression": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "expressionStatement": [
+        "expressionStatements"
+      ],
+      "fallbackFunctionDefinition": [
+        "fallbackFunction",
+        "rawCalldata",
+        "rawReturndata"
+      ],
+      "forStatement": [
+        "forStatement"
+      ],
+      "functionDefinition": [
+        "freeFunctions",
+        "functions"
+      ],
+      "functionTypeName": [
+        "externalFunctionTypes",
+        "internalFunctionTypes"
+      ],
+      "hexStringLiteral": [
+        "hexLiterals"
+      ],
+      "identifier": [
+        "identifiers",
+        "names"
+      ],
+      "identifierPath": [
+        "identifiers",
+        "names"
+      ],
+      "ifStatement": [
+        "ifStatement"
+      ],
+      "importAliases": [
+        "imports"
+      ],
+      "importDirective": [
+        "imports"
+      ],
+      "inheritanceSpecifier": [
+        "constructors",
+        "inheritance"
+      ],
+      "inheritanceSpecifierList": [
+        "constructors",
+        "inheritance"
+      ],
+      "inlineArrayExpression": [
+        "inlineArrays"
+      ],
+      "interfaceDefinition": [
+        "inheritance",
+        "interfaces"
+      ],
+      "libraryDefinition": [
+        "libraries"
+      ],
+      "literal": [
+        "booleanLiterals",
+        "hexLiterals",
+        "numericLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "literalWithSubDenomination": [
+        "etherUnits",
+        "removedUnits",
+        "timeUnits"
+      ],
+      "mappingKeyType": [
+        "mappings"
+      ],
+      "mappingType": [
+        "mappings"
+      ],
+      "modifierDefinition": [
+        "invalidModifierBody",
+        "modifierPlaceholder",
+        "modifiers"
+      ],
+      "modifierInvocation": [
+        "modifierPlaceholder",
+        "modifiers"
+      ],
+      "namedArgument": [
+        "functionCalls",
+        "namedArguments"
+      ],
+      "numberLiteral": [
+        "addressLiterals",
+        "numericLiterals"
+      ],
+      "overrideSpecifier": [
+        "overrideDeclarations"
+      ],
+      "parameterDeclaration": [
+        "calldataLocation",
+        "functions",
+        "memoryLocation",
+        "storageLocation",
+        "tupleTypes"
+      ],
+      "parameterList": [
+        "calldataLocation",
+        "functions",
+        "memoryLocation",
+        "storageLocation",
+        "tupleTypes"
+      ],
+      "path": [
+        "imports"
+      ],
+      "pragmaDirective": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "receiveFunctionDefinition": [
+        "receiveFunction"
+      ],
+      "returnStatement": [
+        "returnStatement"
+      ],
+      "revertStatement": [
+        "revertStatement"
+      ],
+      "simpleStatement": [
+        "blocks",
+        "expressionStatements",
+        "variableDeclarations"
+      ],
+      "sourceUnit": [
+        "sourceUnits"
+      ],
+      "stateMutability": [
+        "stateMutability"
+      ],
+      "stateVariableDeclaration": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState"
+      ],
+      "statement": [
+        "blocks",
+        "expressionStatements",
+        "variableDeclarations"
+      ],
+      "stringLiteral": [
+        "stringLiterals"
+      ],
+      "structDefinition": [
+        "structDeclarations"
+      ],
+      "structMember": [
+        "structDeclarations"
+      ],
+      "symbolAliases": [
+        "imports"
+      ],
+      "tryStatement": [
+        "creationTry",
+        "tryStatement"
+      ],
+      "tupleExpression": [
+        "tupleExpressions"
+      ],
+      "typeName": [
+        "addressTypes",
+        "dynamicArrays",
+        "dynamicBytesType",
+        "enumTypes",
+        "externalFunctionTypes",
+        "fixedArrays",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "internalFunctionTypes",
+        "mappings",
+        "stringType",
+        "structTypes",
+        "valueTypes"
+      ],
+      "uncheckedBlock": [
+        "uncheckedBlock"
+      ],
+      "unicodeStringLiteral": [
+        "unicodeLiterals"
+      ],
+      "userDefinableOperator": [
+        "operatorAliases"
+      ],
+      "userDefinedValueTypeDefinition": [
+        "valueTypeDeclarations"
+      ],
+      "usingAliases": [
+        "operatorAliases",
+        "usingFor"
+      ],
+      "usingDirective": [
+        "operatorAliases",
+        "usingFor"
+      ],
+      "variableDeclaration": [
+        "variableDeclarations"
+      ],
+      "variableDeclarationList": [
+        "tupleExpressions",
+        "variableDeclarations"
+      ],
+      "variableDeclarationStatement": [
+        "tupleExpressions",
+        "variableDeclarations"
+      ],
+      "variableDeclarationTuple": [
+        "tupleExpressions",
+        "variableDeclarations"
+      ],
+      "visibility": [
+        "visibility"
+      ],
+      "whileStatement": [
+        "whileStatement"
+      ],
+      "yulAssignment": [
+        "inlineAssembly"
+      ],
+      "yulBlock": [
+        "inlineAssembly"
+      ],
+      "yulBoolean": [
+        "inlineAssembly"
+      ],
+      "yulExpression": [
+        "inlineAssembly"
+      ],
+      "yulForStatement": [
+        "inlineAssembly"
+      ],
+      "yulFunctionCall": [
+        "inlineAssembly"
+      ],
+      "yulFunctionDefinition": [
+        "inlineAssembly"
+      ],
+      "yulIfStatement": [
+        "inlineAssembly"
+      ],
+      "yulLiteral": [
+        "inlineAssembly"
+      ],
+      "yulPath": [
+        "inlineAssembly"
+      ],
+      "yulStatement": [
+        "inlineAssembly"
+      ],
+      "yulSwitchCase": [
+        "inlineAssembly"
+      ],
+      "yulSwitchStatement": [
+        "inlineAssembly"
+      ],
+      "yulVariableDeclaration": [
+        "inlineAssembly"
+      ]
+    },
+    "expressionAlternatives": {
+      "AddSubOperation": [
+        "arithmetic"
+      ],
+      "AndOperation": [
+        "shortCircuit"
+      ],
+      "Assignment": [
+        "assignment",
+        "compoundAssignment"
+      ],
+      "BitAndOperation": [
+        "bitwise"
+      ],
+      "BitOrOperation": [
+        "bitwise"
+      ],
+      "BitXorOperation": [
+        "bitwise"
+      ],
+      "Conditional": [
+        "conditional"
+      ],
+      "EqualityComparison": [
+        "comparisons"
+      ],
+      "ExpOperation": [
+        "arithmetic"
+      ],
+      "FunctionCall": [
+        "functionCalls"
+      ],
+      "FunctionCallOptions": [
+        "callOptions",
+        "create2Salt",
+        "gasOption",
+        "valueOption"
+      ],
+      "IndexAccess": [
+        "indexAccess"
+      ],
+      "IndexRangeAccess": [
+        "rangeAccess"
+      ],
+      "InlineArray": [
+        "inlineArrays"
+      ],
+      "MemberAccess": [
+        "memberAccess"
+      ],
+      "MetaType": [
+        "metaTypeExpression"
+      ],
+      "MulDivModOperation": [
+        "arithmetic"
+      ],
+      "NewExpr": [
+        "create2Salt",
+        "newContract",
+        "newMemory"
+      ],
+      "OrOperation": [
+        "shortCircuit"
+      ],
+      "OrderComparison": [
+        "comparisons"
+      ],
+      "PayableConversion": [
+        "explicitConversions"
+      ],
+      "PrimaryExpression": [
+        "booleanLiterals",
+        "hexLiterals",
+        "names",
+        "numericLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "ShiftOperation": [
+        "shifts",
+        "unsignedRightShift"
+      ],
+      "Tuple": [
+        "parentheses",
+        "tupleExpressions"
+      ],
+      "UnaryPrefixOperation": [
+        "deleteExpression",
+        "increments",
+        "unaryArithmetic"
+      ],
+      "UnarySuffixOperation": [
+        "increments"
+      ]
+    },
+    "lexerRules": {
+      "Abstract": [
+        "contracts",
+        "inheritance",
+        "storageLayout"
+      ],
+      "Add": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Address": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "boolType",
+        "conditional",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "integerTypes",
+        "shortCircuit",
+        "stringType"
+      ],
+      "And": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Anonymous": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "As": [
+        "imports",
+        "operatorAliases",
+        "usingFor"
+      ],
+      "Assembly": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockCOMMENT": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockComma": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockLINE_COMMENT": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockLParen": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockRParen": [
+        "inlineAssembly"
+      ],
+      "AssemblyBlockWS": [
+        "inlineAssembly"
+      ],
+      "AssemblyDialect": [
+        "inlineAssembly"
+      ],
+      "AssemblyFlagString": [
+        "inlineAssembly"
+      ],
+      "AssemblyLBrace": [
+        "inlineAssembly"
+      ],
+      "Assign": [
+        "assignment",
+        "compoundAssignment",
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "tupleExpressions",
+        "unsignedRightShift",
+        "variableDeclarations"
+      ],
+      "AssignAdd": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitAnd": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitOr": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitXor": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignDiv": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignMod": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignMul": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignSar": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "AssignShl": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "AssignShr": [
+        "unsignedRightShift"
+      ],
+      "AssignSub": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "At": [
+        "contracts",
+        "identifiers",
+        "inheritance",
+        "names",
+        "storageLayout"
+      ],
+      "BitAnd": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitNot": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitOr": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitXor": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Bool": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "Break": [
+        "breakStatement"
+      ],
+      "Bytes": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "COMMENT": [
+        "comments"
+      ],
+      "Calldata": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "Catch": [
+        "catchClauses"
+      ],
+      "Colon": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "namedArguments",
+        "shortCircuit"
+      ],
+      "Comma": [
+        "arithmetic",
+        "assignment",
+        "calldataLocation",
+        "conditional",
+        "constructors",
+        "enumDeclarations",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "functionCalls",
+        "functions",
+        "imports",
+        "inheritance",
+        "inlineArrays",
+        "memoryLocation",
+        "namedArguments",
+        "operatorAliases",
+        "overrideDeclarations",
+        "shortCircuit",
+        "storageLocation",
+        "tupleExpressions",
+        "tupleTypes",
+        "usingFor",
+        "variableDeclarations"
+      ],
+      "Conditional": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Constant": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState"
+      ],
+      "Constructor": [
+        "constructors"
+      ],
+      "Continue": [
+        "continueStatement"
+      ],
+      "Contract": [
+        "contracts",
+        "inheritance",
+        "storageLayout"
+      ],
+      "Dec": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "DecimalDigits": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "DecimalNumber": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "DecimalNumberFollowedByIdentifier": [
+        "invalidLexemes"
+      ],
+      "Delete": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Div": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Do": [
+        "doWhileStatement"
+      ],
+      "DoubleArrow": [
+        "mappings"
+      ],
+      "DoubleQuote": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "DoubleQuotedPrintable": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "DoubleQuotedStringCharacter": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "DoubleQuotedUnicodeStringCharacter": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "Else": [
+        "ifStatement"
+      ],
+      "Emit": [
+        "emitStatement"
+      ],
+      "EmptyStringLiteral": [
+        "stringLiterals"
+      ],
+      "Enum": [
+        "enumDeclarations"
+      ],
+      "Equal": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Error": [
+        "errorDeclarations",
+        "identifiers",
+        "names"
+      ],
+      "EscapeSequence": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "EvenHexDigits": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "Event": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "Exp": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "External": [
+        "fallbackFunction",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "visibility"
+      ],
+      "Fallback": [
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "rawCalldata",
+        "rawReturndata"
+      ],
+      "False": [
+        "booleanLiterals"
+      ],
+      "Fixed": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "FixedBytes": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "For": [
+        "forStatement",
+        "operatorAliases",
+        "usingFor"
+      ],
+      "From": [
+        "identifiers",
+        "imports",
+        "names"
+      ],
+      "Function": [
+        "externalFunctionTypes",
+        "freeFunctions",
+        "functions",
+        "internalFunctionTypes"
+      ],
+      "Global": [
+        "identifiers",
+        "names",
+        "operatorAliases",
+        "usingFor"
+      ],
+      "GreaterThan": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "GreaterThanOrEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Hex": [
+        "hexLiterals",
+        "unicodeLiterals"
+      ],
+      "HexCharacter": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "HexDigits": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "HexNumber": [
+        "hexLiterals",
+        "numericLiterals"
+      ],
+      "HexString": [
+        "hexLiterals"
+      ],
+      "Identifier": [
+        "identifiers"
+      ],
+      "IdentifierPart": [
+        "identifiers"
+      ],
+      "IdentifierStart": [
+        "identifiers"
+      ],
+      "If": [
+        "ifStatement"
+      ],
+      "Immutable": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState"
+      ],
+      "Import": [
+        "imports"
+      ],
+      "Inc": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Indexed": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "Interface": [
+        "inheritance",
+        "interfaces"
+      ],
+      "Internal": [
+        "constants",
+        "constructors",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Is": [
+        "constructors",
+        "inheritance",
+        "valueTypeDeclarations"
+      ],
+      "LBrace": [
+        "arithmetic",
+        "assignment",
+        "blocks",
+        "conditional",
+        "contracts",
+        "enumDeclarations",
+        "functionCalls",
+        "imports",
+        "inheritance",
+        "interfaces",
+        "libraries",
+        "namedArguments",
+        "operatorAliases",
+        "shortCircuit",
+        "storageLayout",
+        "structDeclarations",
+        "usingFor"
+      ],
+      "LBrack": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "dynamicArrays",
+        "dynamicBytesType",
+        "enumTypes",
+        "externalFunctionTypes",
+        "fixedArrays",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "inlineArrays",
+        "integerTypes",
+        "internalFunctionTypes",
+        "mappings",
+        "shortCircuit",
+        "stringType",
+        "structTypes",
+        "valueTypes"
+      ],
+      "LINE_COMMENT": [
+        "comments"
+      ],
+      "LParen": [
+        "arithmetic",
+        "assignment",
+        "catchClauses",
+        "conditional",
+        "constructors",
+        "creationTry",
+        "doWhileStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functionCalls",
+        "functions",
+        "ifStatement",
+        "internalFunctionTypes",
+        "mappings",
+        "modifierPlaceholder",
+        "modifiers",
+        "namedArguments",
+        "overrideDeclarations",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "shortCircuit",
+        "tryStatement",
+        "tupleExpressions",
+        "variableDeclarations",
+        "whileStatement"
+      ],
+      "Layout": [
+        "contracts",
+        "identifiers",
+        "inheritance",
+        "names",
+        "storageLayout"
+      ],
+      "LessThan": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "LessThanOrEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Library": [
+        "libraries"
+      ],
+      "Mapping": [
+        "mappings"
+      ],
+      "Memory": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "Mod": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Modifier": [
+        "modifierPlaceholder",
+        "modifiers"
+      ],
+      "Mul": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "imports",
+        "operatorAliases",
+        "shortCircuit",
+        "usingFor"
+      ],
+      "New": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "NonEmptyStringLiteral": [
+        "imports",
+        "stringLiterals"
+      ],
+      "Not": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "NotEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "OctalNumber": [
+        "invalidLexemes"
+      ],
+      "Or": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Override": [
+        "overrideDeclarations"
+      ],
+      "Payable": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "boolType",
+        "conditional",
+        "constructors",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "integerTypes",
+        "receiveFunction",
+        "shortCircuit",
+        "stateMutability",
+        "stringType"
+      ],
+      "Period": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "identifiers",
+        "names",
+        "shortCircuit"
+      ],
+      "Pragma": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "PragmaCOMMENT": [
+        "comments"
+      ],
+      "PragmaLINE_COMMENT": [
+        "comments"
+      ],
+      "PragmaSemicolon": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "PragmaToken": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "PragmaWS": [
+        "comments"
+      ],
+      "Private": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Public": [
+        "constants",
+        "constructors",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Pure": [
+        "stateMutability"
+      ],
+      "RBrace": [
+        "arithmetic",
+        "assignment",
+        "blocks",
+        "conditional",
+        "contracts",
+        "enumDeclarations",
+        "functionCalls",
+        "imports",
+        "inheritance",
+        "interfaces",
+        "libraries",
+        "namedArguments",
+        "operatorAliases",
+        "shortCircuit",
+        "storageLayout",
+        "structDeclarations",
+        "usingFor"
+      ],
+      "RBrack": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "dynamicArrays",
+        "dynamicBytesType",
+        "enumTypes",
+        "externalFunctionTypes",
+        "fixedArrays",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "inlineArrays",
+        "integerTypes",
+        "internalFunctionTypes",
+        "mappings",
+        "shortCircuit",
+        "stringType",
+        "structTypes",
+        "valueTypes"
+      ],
+      "RParen": [
+        "arithmetic",
+        "assignment",
+        "catchClauses",
+        "conditional",
+        "constructors",
+        "creationTry",
+        "doWhileStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functionCalls",
+        "functions",
+        "ifStatement",
+        "internalFunctionTypes",
+        "mappings",
+        "modifierPlaceholder",
+        "modifiers",
+        "namedArguments",
+        "overrideDeclarations",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "shortCircuit",
+        "tryStatement",
+        "tupleExpressions",
+        "variableDeclarations",
+        "whileStatement"
+      ],
+      "Receive": [
+        "freeFunctions",
+        "functions",
+        "receiveFunction"
+      ],
+      "ReservedKeywords": [
+        "reservedKeywords"
+      ],
+      "Return": [
+        "returnStatement"
+      ],
+      "Returns": [
+        "creationTry",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "internalFunctionTypes",
+        "rawCalldata",
+        "rawReturndata",
+        "tryStatement"
+      ],
+      "Revert": [
+        "identifiers",
+        "names",
+        "revertStatement"
+      ],
+      "RightArrow": [
+        "invalidLexemes"
+      ],
+      "Sar": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "Semicolon": [
+        "breakStatement",
+        "constants",
+        "continueStatement",
+        "doWhileStatement",
+        "emitStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "expressionStatements",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functions",
+        "immutables",
+        "imports",
+        "modifierPlaceholder",
+        "modifiers",
+        "operatorAliases",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "returnStatement",
+        "revertStatement",
+        "stateVariables",
+        "structDeclarations",
+        "transientState",
+        "tupleExpressions",
+        "usingFor",
+        "valueTypeDeclarations",
+        "variableDeclarations"
+      ],
+      "Shl": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "Shr": [
+        "unsignedRightShift"
+      ],
+      "SignedIntegerType": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "SingleQuote": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "SingleQuotedPrintable": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "SingleQuotedStringCharacter": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "SingleQuotedUnicodeStringCharacter": [
+        "hexLiterals",
+        "stringLiterals",
+        "unicodeLiterals"
+      ],
+      "Storage": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "String": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "Struct": [
+        "structDeclarations"
+      ],
+      "Sub": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "SubDenomination": [
+        "etherUnits",
+        "removedUnits",
+        "timeUnits"
+      ],
+      "Transient": [
+        "constants",
+        "identifiers",
+        "immutables",
+        "names",
+        "stateVariables",
+        "transientState"
+      ],
+      "True": [
+        "booleanLiterals"
+      ],
+      "Try": [
+        "creationTry",
+        "tryStatement"
+      ],
+      "Type": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit",
+        "valueTypeDeclarations"
+      ],
+      "Ufixed": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "Unchecked": [
+        "uncheckedBlock"
+      ],
+      "Unicode": [
+        "hexLiterals",
+        "unicodeLiterals"
+      ],
+      "UnicodeStringLiteral": [
+        "unicodeLiterals"
+      ],
+      "UnsignedIntegerType": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "Using": [
+        "operatorAliases",
+        "usingFor"
+      ],
+      "View": [
+        "stateMutability"
+      ],
+      "Virtual": [
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "modifierPlaceholder",
+        "modifiers",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction"
+      ],
+      "WS": [
+        "comments"
+      ],
+      "While": [
+        "doWhileStatement",
+        "whileStatement"
+      ],
+      "YulArrow": [
+        "inlineAssembly"
+      ],
+      "YulAssign": [
+        "inlineAssembly"
+      ],
+      "YulBreak": [
+        "inlineAssembly"
+      ],
+      "YulCOMMENT": [
+        "inlineAssembly"
+      ],
+      "YulCase": [
+        "inlineAssembly"
+      ],
+      "YulComma": [
+        "inlineAssembly"
+      ],
+      "YulContinue": [
+        "inlineAssembly"
+      ],
+      "YulDecimalNumber": [
+        "inlineAssembly"
+      ],
+      "YulDefault": [
+        "inlineAssembly"
+      ],
+      "YulEVMBuiltin": [
+        "inlineAssembly"
+      ],
+      "YulFalse": [
+        "inlineAssembly"
+      ],
+      "YulFor": [
+        "inlineAssembly"
+      ],
+      "YulFunction": [
+        "inlineAssembly"
+      ],
+      "YulHex": [
+        "inlineAssembly"
+      ],
+      "YulHexNumber": [
+        "inlineAssembly"
+      ],
+      "YulHexStringLiteral": [
+        "inlineAssembly"
+      ],
+      "YulIdentifier": [
+        "inlineAssembly"
+      ],
+      "YulIdentifierPart": [
+        "inlineAssembly"
+      ],
+      "YulIdentifierStart": [
+        "inlineAssembly"
+      ],
+      "YulIf": [
+        "inlineAssembly"
+      ],
+      "YulLBrace": [
+        "inlineAssembly"
+      ],
+      "YulLINE_COMMENT": [
+        "inlineAssembly"
+      ],
+      "YulLParen": [
+        "inlineAssembly"
+      ],
+      "YulLeave": [
+        "inlineAssembly"
+      ],
+      "YulLet": [
+        "inlineAssembly"
+      ],
+      "YulPeriod": [
+        "inlineAssembly"
+      ],
+      "YulRBrace": [
+        "inlineAssembly"
+      ],
+      "YulRParen": [
+        "inlineAssembly"
+      ],
+      "YulStringLiteral": [
+        "inlineAssembly"
+      ],
+      "YulSwitch": [
+        "inlineAssembly"
+      ],
+      "YulTrue": [
+        "inlineAssembly"
+      ],
+      "YulWS": [
+        "inlineAssembly"
+      ]
+    },
+    "astClasses": {
+      "ASTNode": [
+        "sourceUnits"
+      ],
+      "ArrayTypeName": [
+        "dynamicArrays",
+        "fixedArrays"
+      ],
+      "Assignment": [
+        "assignment",
+        "compoundAssignment"
+      ],
+      "BinaryOperation": [
+        "arithmetic",
+        "bitwise",
+        "comparisons",
+        "operatorAliases",
+        "shifts",
+        "shortCircuit"
+      ],
+      "Block": [
+        "blocks",
+        "uncheckedBlock"
+      ],
+      "Break": [
+        "breakStatement"
+      ],
+      "BreakableStatement": [
+        "expressionStatements"
+      ],
+      "CallableDeclaration": [
+        "functions"
+      ],
+      "Conditional": [
+        "conditional"
+      ],
+      "Continue": [
+        "continueStatement"
+      ],
+      "ContractDefinition": [
+        "contracts",
+        "interfaces",
+        "libraries"
+      ],
+      "Declaration": [
+        "sourceUnits"
+      ],
+      "Documented": [
+        "sourceUnits"
+      ],
+      "ElementaryTypeName": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "ElementaryTypeNameExpression": [
+        "explicitConversions"
+      ],
+      "EmitStatement": [
+        "emitStatement"
+      ],
+      "EnumDefinition": [
+        "enumDeclarations"
+      ],
+      "EnumValue": [
+        "enumDeclarations"
+      ],
+      "ErrorDefinition": [
+        "errorDeclarations"
+      ],
+      "EventDefinition": [
+        "eventDeclarations"
+      ],
+      "Expression": [
+        "functionCalls"
+      ],
+      "ExpressionStatement": [
+        "expressionStatements"
+      ],
+      "ForStatement": [
+        "forStatement"
+      ],
+      "FunctionCall": [
+        "explicitConversions",
+        "functionCalls",
+        "structConstruction"
+      ],
+      "FunctionCallOptions": [
+        "callOptions",
+        "create2Salt",
+        "gasOption",
+        "valueOption"
+      ],
+      "FunctionDefinition": [
+        "functions"
+      ],
+      "FunctionTypeName": [
+        "externalFunctionTypes",
+        "internalFunctionTypes"
+      ],
+      "Identifier": [
+        "names"
+      ],
+      "IdentifierPath": [
+        "names"
+      ],
+      "IfStatement": [
+        "ifStatement"
+      ],
+      "ImplementationOptional": [
+        "sourceUnits"
+      ],
+      "ImportDirective": [
+        "imports"
+      ],
+      "IndexAccess": [
+        "indexAccess"
+      ],
+      "IndexRangeAccess": [
+        "rangeAccess"
+      ],
+      "InheritanceSpecifier": [
+        "inheritance"
+      ],
+      "InlineAssembly": [
+        "canonicalRethrow",
+        "inlineAssembly"
+      ],
+      "Literal": [
+        "addressLiterals",
+        "booleanLiterals",
+        "etherUnits",
+        "hexLiterals",
+        "numericLiterals",
+        "removedUnits",
+        "stringLiterals",
+        "timeUnits",
+        "unicodeLiterals"
+      ],
+      "MagicVariableDeclaration": [
+        "featureDetection"
+      ],
+      "Mapping": [
+        "mappings"
+      ],
+      "MemberAccess": [
+        "memberAccess"
+      ],
+      "ModifierDefinition": [
+        "invalidModifierBody",
+        "modifiers"
+      ],
+      "ModifierInvocation": [
+        "modifiers"
+      ],
+      "NewExpression": [
+        "newContract",
+        "newMemory"
+      ],
+      "OverrideSpecifier": [
+        "overrideDeclarations"
+      ],
+      "ParameterList": [
+        "functions"
+      ],
+      "PlaceholderStatement": [
+        "invalidModifierBody",
+        "modifierPlaceholder"
+      ],
+      "PragmaDirective": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "PrimaryExpression": [
+        "functionCalls"
+      ],
+      "Return": [
+        "returnStatement"
+      ],
+      "RevertStatement": [
+        "revertStatement"
+      ],
+      "Scopable": [
+        "sourceUnits"
+      ],
+      "ScopeOpener": [
+        "sourceUnits"
+      ],
+      "SourceUnit": [
+        "sourceUnits"
+      ],
+      "Statement": [
+        "expressionStatements"
+      ],
+      "StorageLayoutSpecifier": [
+        "storageLayout"
+      ],
+      "StructDefinition": [
+        "structDeclarations"
+      ],
+      "StructurallyDocumented": [
+        "sourceUnits"
+      ],
+      "StructuredDocumentation": [
+        "comments"
+      ],
+      "Throw": [
+        "removedAliases"
+      ],
+      "TryCatchClause": [
+        "catchClauses"
+      ],
+      "TryStatement": [
+        "creationTry",
+        "tryStatement"
+      ],
+      "TupleExpression": [
+        "inlineArrays",
+        "parentheses",
+        "tupleExpressions"
+      ],
+      "TypeName": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "UnaryOperation": [
+        "deleteExpression",
+        "increments",
+        "unaryArithmetic"
+      ],
+      "UserDefinedTypeName": [
+        "addressTypes",
+        "enumTypes",
+        "structTypes",
+        "valueTypes"
+      ],
+      "UserDefinedValueTypeDefinition": [
+        "valueTypeDeclarations"
+      ],
+      "UsingForDirective": [
+        "operatorAliases",
+        "usingFor"
+      ],
+      "VariableDeclaration": [
+        "constants",
+        "immutables",
+        "publicGetters",
+        "stateVariables",
+        "transientState",
+        "variableDeclarations"
+      ],
+      "VariableDeclarationStatement": [
+        "variableDeclarations"
+      ],
+      "VariableScope": [
+        "sourceUnits"
+      ],
+      "WhileStatement": [
+        "doWhileStatement",
+        "whileStatement"
+      ]
+    },
+    "functionKinds": {
+      "ABIDecode": [
+        "abiDecode"
+      ],
+      "ABIEncode": [
+        "abiEncode"
+      ],
+      "ABIEncodeCall": [
+        "abiEncodeCall"
+      ],
+      "ABIEncodePacked": [
+        "abiEncodePacked"
+      ],
+      "ABIEncodeWithSelector": [
+        "abiEncodeWithSelector"
+      ],
+      "ABIEncodeWithSignature": [
+        "abiEncodeWithSignature"
+      ],
+      "AddMod": [
+        "addmodBuiltin"
+      ],
+      "ArrayPop": [
+        "arrayPop"
+      ],
+      "ArrayPush": [
+        "arrayPush",
+        "arrayPushReference"
+      ],
+      "Assert": [
+        "assertBuiltin"
+      ],
+      "BareCall": [
+        "emptyDataValueCall",
+        "lowLevelCall"
+      ],
+      "BareCallCode": [
+        "removedAliases"
+      ],
+      "BareDelegateCall": [
+        "delegatecall"
+      ],
+      "BareStaticCall": [
+        "lowLevelStaticcall"
+      ],
+      "BlobHash": [
+        "blobhashBuiltin"
+      ],
+      "BlockHash": [
+        "blockhashBuiltin"
+      ],
+      "BytesConcat": [
+        "bytesConcat"
+      ],
+      "Creation": [
+        "create2Salt",
+        "creationTry",
+        "newContract"
+      ],
+      "Declaration": [
+        "functionSelector",
+        "functionValues"
+      ],
+      "DelegateCall": [
+        "externalLibraryCalls"
+      ],
+      "ECRecover": [
+        "ecrecoverBuiltin"
+      ],
+      "ERC7201": [
+        "erc7201Builtin"
+      ],
+      "Error": [
+        "errorDeclarations",
+        "requireBuiltin",
+        "revertStatement"
+      ],
+      "Event": [
+        "emitStatement",
+        "eventLog"
+      ],
+      "External": [
+        "externalTypedCalls"
+      ],
+      "GasLeft": [
+        "gasleft"
+      ],
+      "Internal": [
+        "internalCalls",
+        "recursiveCalls"
+      ],
+      "KECCAK256": [
+        "keccakBuiltin"
+      ],
+      "MetaType": [
+        "metaTypeExpression"
+      ],
+      "MulMod": [
+        "mulmodBuiltin"
+      ],
+      "ObjectCreation": [
+        "newMemory"
+      ],
+      "RIPEMD160": [
+        "ripemd160Builtin"
+      ],
+      "Require": [
+        "requireBuiltin"
+      ],
+      "Revert": [
+        "revertBuiltin",
+        "revertStatement"
+      ],
+      "SHA256": [
+        "sha256Builtin"
+      ],
+      "Selfdestruct": [
+        "selfdestruct"
+      ],
+      "Send": [
+        "sendTransfer"
+      ],
+      "SetGas": [
+        "gasOption",
+        "removedAliases"
+      ],
+      "SetValue": [
+        "removedAliases",
+        "valueOption"
+      ],
+      "StringConcat": [
+        "stringConcat"
+      ],
+      "Transfer": [
+        "sendTransfer"
+      ],
+      "Unwrap": [
+        "wrapUnwrap"
+      ],
+      "Wrap": [
+        "wrapUnwrap"
+      ]
+    },
+    "globalNames": {
+      "abi": [
+        "abiDecode",
+        "abiEncode",
+        "abiEncodeCall",
+        "abiEncodePacked",
+        "abiEncodeWithSelector",
+        "abiEncodeWithSignature"
+      ],
+      "addmod": [
+        "addmodBuiltin"
+      ],
+      "assert": [
+        "assertBuiltin"
+      ],
+      "blobhash": [
+        "blobhashBuiltin"
+      ],
+      "block": [
+        "blockBasefee",
+        "blockBlobbasefee",
+        "blockChainid",
+        "blockCoinbase",
+        "blockDifficulty",
+        "blockGaslimit",
+        "blockNumber",
+        "blockPrevrandao",
+        "blockSlotnum",
+        "blockTimestamp"
+      ],
+      "blockhash": [
+        "blockhashBuiltin"
+      ],
+      "ecrecover": [
+        "ecrecoverBuiltin"
+      ],
+      "erc7201": [
+        "erc7201Builtin"
+      ],
+      "gasleft": [
+        "gasleft"
+      ],
+      "keccak256": [
+        "keccakBuiltin"
+      ],
+      "msg": [
+        "msgSender",
+        "msgValue",
+        "rawCalldata"
+      ],
+      "mulmod": [
+        "mulmodBuiltin"
+      ],
+      "now": [
+        "removedAliases"
+      ],
+      "require": [
+        "requireBuiltin"
+      ],
+      "revert": [
+        "revertBuiltin"
+      ],
+      "ripemd160": [
+        "ripemd160Builtin"
+      ],
+      "selfdestruct": [
+        "selfdestruct"
+      ],
+      "sha256": [
+        "sha256Builtin"
+      ],
+      "sha3": [
+        "removedAliases"
+      ],
+      "suicide": [
+        "removedAliases"
+      ],
+      "super": [
+        "inheritance",
+        "internalCalls"
+      ],
+      "this": [
+        "externalSelfCalls",
+        "thisAddress"
+      ],
+      "tx": [
+        "txGasprice",
+        "txOrigin"
+      ],
+      "type": [
+        "metaTypeExpression"
+      ]
+    },
+    "yulBuiltins": {
+      "add": [
+        "inlineAssembly"
+      ],
+      "addmod": [
+        "inlineAssembly"
+      ],
+      "address": [
+        "inlineAssembly"
+      ],
+      "and": [
+        "inlineAssembly"
+      ],
+      "balance": [
+        "inlineAssembly"
+      ],
+      "basefee": [
+        "inlineAssembly"
+      ],
+      "blobbasefee": [
+        "inlineAssembly"
+      ],
+      "blobhash": [
+        "inlineAssembly"
+      ],
+      "blockhash": [
+        "inlineAssembly"
+      ],
+      "byte": [
+        "inlineAssembly"
+      ],
+      "call": [
+        "inlineAssembly"
+      ],
+      "callcode": [
+        "inlineAssembly"
+      ],
+      "calldatacopy": [
+        "inlineAssembly"
+      ],
+      "calldataload": [
+        "inlineAssembly"
+      ],
+      "calldatasize": [
+        "inlineAssembly"
+      ],
+      "caller": [
+        "inlineAssembly"
+      ],
+      "callvalue": [
+        "inlineAssembly"
+      ],
+      "chainid": [
+        "inlineAssembly"
+      ],
+      "clz": [
+        "inlineAssembly"
+      ],
+      "coinbase": [
+        "inlineAssembly"
+      ],
+      "create": [
+        "inlineAssembly"
+      ],
+      "create2": [
+        "inlineAssembly"
+      ],
+      "delegatecall": [
+        "inlineAssembly"
+      ],
+      "difficulty": [
+        "inlineAssembly"
+      ],
+      "div": [
+        "inlineAssembly"
+      ],
+      "eq": [
+        "inlineAssembly"
+      ],
+      "exp": [
+        "inlineAssembly"
+      ],
+      "extcodecopy": [
+        "inlineAssembly"
+      ],
+      "extcodehash": [
+        "inlineAssembly"
+      ],
+      "extcodesize": [
+        "inlineAssembly"
+      ],
+      "gas": [
+        "inlineAssembly"
+      ],
+      "gaslimit": [
+        "inlineAssembly"
+      ],
+      "gasprice": [
+        "inlineAssembly"
+      ],
+      "gt": [
+        "inlineAssembly"
+      ],
+      "invalid": [
+        "inlineAssembly"
+      ],
+      "iszero": [
+        "inlineAssembly"
+      ],
+      "keccak256": [
+        "inlineAssembly"
+      ],
+      "log0": [
+        "inlineAssembly"
+      ],
+      "log1": [
+        "inlineAssembly"
+      ],
+      "log2": [
+        "inlineAssembly"
+      ],
+      "log3": [
+        "inlineAssembly"
+      ],
+      "log4": [
+        "inlineAssembly"
+      ],
+      "lt": [
+        "inlineAssembly"
+      ],
+      "mcopy": [
+        "inlineAssembly"
+      ],
+      "mload": [
+        "inlineAssembly"
+      ],
+      "mod": [
+        "inlineAssembly"
+      ],
+      "msize": [
+        "inlineAssembly"
+      ],
+      "mstore": [
+        "inlineAssembly"
+      ],
+      "mstore8": [
+        "inlineAssembly"
+      ],
+      "mul": [
+        "inlineAssembly"
+      ],
+      "mulmod": [
+        "inlineAssembly"
+      ],
+      "not": [
+        "inlineAssembly"
+      ],
+      "number": [
+        "inlineAssembly"
+      ],
+      "or": [
+        "inlineAssembly"
+      ],
+      "origin": [
+        "inlineAssembly"
+      ],
+      "pop": [
+        "inlineAssembly"
+      ],
+      "prevrandao": [
+        "inlineAssembly"
+      ],
+      "return": [
+        "inlineAssembly"
+      ],
+      "returndatacopy": [
+        "inlineAssembly"
+      ],
+      "returndatasize": [
+        "inlineAssembly"
+      ],
+      "revert": [
+        "inlineAssembly"
+      ],
+      "sar": [
+        "inlineAssembly"
+      ],
+      "sdiv": [
+        "inlineAssembly"
+      ],
+      "selfbalance": [
+        "inlineAssembly"
+      ],
+      "selfdestruct": [
+        "inlineAssembly"
+      ],
+      "sgt": [
+        "inlineAssembly"
+      ],
+      "shl": [
+        "inlineAssembly"
+      ],
+      "shr": [
+        "inlineAssembly"
+      ],
+      "signextend": [
+        "inlineAssembly"
+      ],
+      "sload": [
+        "inlineAssembly"
+      ],
+      "slotnum": [
+        "inlineAssembly"
+      ],
+      "slt": [
+        "inlineAssembly"
+      ],
+      "smod": [
+        "inlineAssembly"
+      ],
+      "sstore": [
+        "inlineAssembly"
+      ],
+      "staticcall": [
+        "inlineAssembly"
+      ],
+      "stop": [
+        "inlineAssembly"
+      ],
+      "sub": [
+        "inlineAssembly"
+      ],
+      "timestamp": [
+        "inlineAssembly"
+      ],
+      "tload": [
+        "inlineAssembly"
+      ],
+      "tstore": [
+        "inlineAssembly"
+      ],
+      "xor": [
+        "inlineAssembly"
+      ]
+    },
+    "compilerTokens": {
+      "Abstract": [
+        "contracts",
+        "inheritance",
+        "storageLayout"
+      ],
+      "Add": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Address": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "boolType",
+        "conditional",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "integerTypes",
+        "shortCircuit",
+        "stringType"
+      ],
+      "After": [
+        "reservedKeywords"
+      ],
+      "Alias": [
+        "reservedKeywords"
+      ],
+      "And": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Anonymous": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "Apply": [
+        "reservedKeywords"
+      ],
+      "As": [
+        "imports",
+        "operatorAliases",
+        "usingFor"
+      ],
+      "Assembly": [
+        "inlineAssembly"
+      ],
+      "AssemblyAssign": [
+        "inlineAssembly"
+      ],
+      "Assign": [
+        "assignment",
+        "compoundAssignment",
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "tupleExpressions",
+        "unsignedRightShift",
+        "variableDeclarations"
+      ],
+      "AssignAdd": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitAnd": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitOr": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignBitXor": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignDiv": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignMod": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignMul": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "AssignSar": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "AssignShl": [
+        "compoundAssignment",
+        "shifts"
+      ],
+      "AssignShr": [
+        "unsignedRightShift"
+      ],
+      "AssignSub": [
+        "assignment",
+        "compoundAssignment",
+        "unsignedRightShift"
+      ],
+      "Auto": [
+        "reservedKeywords"
+      ],
+      "BitAnd": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitNot": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitOr": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "BitXor": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Bool": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "Break": [
+        "breakStatement"
+      ],
+      "Byte": [
+        "reservedKeywords"
+      ],
+      "Bytes": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "BytesM": [
+        "fixedBytesTypes"
+      ],
+      "CallData": [
+        "calldataLocation"
+      ],
+      "Case": [
+        "reservedKeywords"
+      ],
+      "Catch": [
+        "catchClauses"
+      ],
+      "Colon": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "namedArguments",
+        "shortCircuit"
+      ],
+      "Comma": [
+        "arithmetic",
+        "assignment",
+        "calldataLocation",
+        "conditional",
+        "constructors",
+        "enumDeclarations",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "functionCalls",
+        "functions",
+        "imports",
+        "inheritance",
+        "inlineArrays",
+        "memoryLocation",
+        "namedArguments",
+        "operatorAliases",
+        "overrideDeclarations",
+        "shortCircuit",
+        "storageLocation",
+        "tupleExpressions",
+        "tupleTypes",
+        "usingFor",
+        "variableDeclarations"
+      ],
+      "CommentLiteral": [
+        "comments"
+      ],
+      "Conditional": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Constant": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState"
+      ],
+      "Constructor": [
+        "constructors"
+      ],
+      "Continue": [
+        "continueStatement"
+      ],
+      "Contract": [
+        "contracts",
+        "inheritance",
+        "storageLayout"
+      ],
+      "CopyOf": [
+        "reservedKeywords"
+      ],
+      "Dec": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Default": [
+        "reservedKeywords"
+      ],
+      "Define": [
+        "reservedKeywords"
+      ],
+      "Delete": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Div": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Do": [
+        "doWhileStatement"
+      ],
+      "DoubleArrow": [
+        "mappings"
+      ],
+      "EOS": [
+        "sourceUnits"
+      ],
+      "Else": [
+        "ifStatement"
+      ],
+      "Emit": [
+        "emitStatement"
+      ],
+      "Enum": [
+        "enumDeclarations"
+      ],
+      "Equal": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Event": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "Exp": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "External": [
+        "fallbackFunction",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "visibility"
+      ],
+      "Fallback": [
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "rawCalldata",
+        "rawReturndata"
+      ],
+      "FalseLiteral": [
+        "booleanLiterals"
+      ],
+      "Final": [
+        "reservedKeywords"
+      ],
+      "Fixed": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "FixedMxN": [
+        "fixedPoint"
+      ],
+      "For": [
+        "forStatement",
+        "operatorAliases",
+        "usingFor"
+      ],
+      "Function": [
+        "externalFunctionTypes",
+        "freeFunctions",
+        "functions",
+        "internalFunctionTypes"
+      ],
+      "GreaterThan": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "GreaterThanOrEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Hex": [
+        "hexLiterals",
+        "unicodeLiterals"
+      ],
+      "HexStringLiteral": [
+        "hexLiterals"
+      ],
+      "Identifier": [
+        "identifiers"
+      ],
+      "If": [
+        "ifStatement"
+      ],
+      "Illegal": [
+        "invalidLexemes"
+      ],
+      "Immutable": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState"
+      ],
+      "Implements": [
+        "reservedKeywords"
+      ],
+      "Import": [
+        "imports"
+      ],
+      "In": [
+        "reservedKeywords"
+      ],
+      "Inc": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Indexed": [
+        "eventDeclarations",
+        "eventLog"
+      ],
+      "Inline": [
+        "reservedKeywords"
+      ],
+      "Int": [
+        "integerTypes"
+      ],
+      "IntM": [
+        "integerTypes"
+      ],
+      "Interface": [
+        "inheritance",
+        "interfaces"
+      ],
+      "Internal": [
+        "constants",
+        "constructors",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Is": [
+        "constructors",
+        "inheritance",
+        "valueTypeDeclarations"
+      ],
+      "LBrace": [
+        "arithmetic",
+        "assignment",
+        "blocks",
+        "conditional",
+        "contracts",
+        "enumDeclarations",
+        "functionCalls",
+        "imports",
+        "inheritance",
+        "interfaces",
+        "libraries",
+        "namedArguments",
+        "operatorAliases",
+        "shortCircuit",
+        "storageLayout",
+        "structDeclarations",
+        "usingFor"
+      ],
+      "LBrack": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "dynamicArrays",
+        "dynamicBytesType",
+        "enumTypes",
+        "externalFunctionTypes",
+        "fixedArrays",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "inlineArrays",
+        "integerTypes",
+        "internalFunctionTypes",
+        "mappings",
+        "shortCircuit",
+        "stringType",
+        "structTypes",
+        "valueTypes"
+      ],
+      "LParen": [
+        "arithmetic",
+        "assignment",
+        "catchClauses",
+        "conditional",
+        "constructors",
+        "creationTry",
+        "doWhileStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functionCalls",
+        "functions",
+        "ifStatement",
+        "internalFunctionTypes",
+        "mappings",
+        "modifierPlaceholder",
+        "modifiers",
+        "namedArguments",
+        "overrideDeclarations",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "shortCircuit",
+        "tryStatement",
+        "tupleExpressions",
+        "variableDeclarations",
+        "whileStatement"
+      ],
+      "Leave": [
+        "inlineAssembly"
+      ],
+      "LessThan": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "LessThanOrEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Let": [
+        "reservedKeywords"
+      ],
+      "Library": [
+        "libraries"
+      ],
+      "Macro": [
+        "reservedKeywords"
+      ],
+      "Mapping": [
+        "mappings"
+      ],
+      "Match": [
+        "reservedKeywords"
+      ],
+      "Memory": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "Mod": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "Modifier": [
+        "modifierPlaceholder",
+        "modifiers"
+      ],
+      "Mul": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "imports",
+        "operatorAliases",
+        "shortCircuit",
+        "usingFor"
+      ],
+      "Mutable": [
+        "reservedKeywords"
+      ],
+      "New": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Not": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "NotEqual": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "NullLiteral": [
+        "reservedKeywords"
+      ],
+      "Number": [
+        "addressLiterals",
+        "numericLiterals"
+      ],
+      "Of": [
+        "reservedKeywords"
+      ],
+      "Or": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit"
+      ],
+      "Override": [
+        "overrideDeclarations"
+      ],
+      "Partial": [
+        "reservedKeywords"
+      ],
+      "Payable": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "boolType",
+        "conditional",
+        "constructors",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "integerTypes",
+        "receiveFunction",
+        "shortCircuit",
+        "stateMutability",
+        "stringType"
+      ],
+      "Period": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "identifiers",
+        "names",
+        "shortCircuit"
+      ],
+      "Pragma": [
+        "pragmaAbicoder",
+        "pragmaOther",
+        "pragmaVersion"
+      ],
+      "Private": [
+        "constants",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Promise": [
+        "reservedKeywords"
+      ],
+      "Public": [
+        "constants",
+        "constructors",
+        "immutables",
+        "stateVariables",
+        "transientState",
+        "visibility"
+      ],
+      "Pure": [
+        "stateMutability"
+      ],
+      "RBrace": [
+        "arithmetic",
+        "assignment",
+        "blocks",
+        "conditional",
+        "contracts",
+        "enumDeclarations",
+        "functionCalls",
+        "imports",
+        "inheritance",
+        "interfaces",
+        "libraries",
+        "namedArguments",
+        "operatorAliases",
+        "shortCircuit",
+        "storageLayout",
+        "structDeclarations",
+        "usingFor"
+      ],
+      "RBrack": [
+        "addressTypes",
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "dynamicArrays",
+        "dynamicBytesType",
+        "enumTypes",
+        "externalFunctionTypes",
+        "fixedArrays",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "functionCalls",
+        "inlineArrays",
+        "integerTypes",
+        "internalFunctionTypes",
+        "mappings",
+        "shortCircuit",
+        "stringType",
+        "structTypes",
+        "valueTypes"
+      ],
+      "RParen": [
+        "arithmetic",
+        "assignment",
+        "catchClauses",
+        "conditional",
+        "constructors",
+        "creationTry",
+        "doWhileStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functionCalls",
+        "functions",
+        "ifStatement",
+        "internalFunctionTypes",
+        "mappings",
+        "modifierPlaceholder",
+        "modifiers",
+        "namedArguments",
+        "overrideDeclarations",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "shortCircuit",
+        "tryStatement",
+        "tupleExpressions",
+        "variableDeclarations",
+        "whileStatement"
+      ],
+      "Receive": [
+        "freeFunctions",
+        "functions",
+        "receiveFunction"
+      ],
+      "Reference": [
+        "reservedKeywords"
+      ],
+      "Relocatable": [
+        "reservedKeywords"
+      ],
+      "Return": [
+        "returnStatement"
+      ],
+      "Returns": [
+        "creationTry",
+        "externalFunctionTypes",
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "internalFunctionTypes",
+        "rawCalldata",
+        "rawReturndata",
+        "tryStatement"
+      ],
+      "RightArrow": [
+        "invalidLexemes"
+      ],
+      "SAR": [
+        "shifts"
+      ],
+      "SHL": [
+        "shifts"
+      ],
+      "SHR": [
+        "unsignedRightShift"
+      ],
+      "Sealed": [
+        "reservedKeywords"
+      ],
+      "Semicolon": [
+        "breakStatement",
+        "constants",
+        "continueStatement",
+        "doWhileStatement",
+        "emitStatement",
+        "errorDeclarations",
+        "eventDeclarations",
+        "eventLog",
+        "expressionStatements",
+        "fallbackFunction",
+        "forStatement",
+        "freeFunctions",
+        "functions",
+        "immutables",
+        "imports",
+        "modifierPlaceholder",
+        "modifiers",
+        "operatorAliases",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction",
+        "returnStatement",
+        "revertStatement",
+        "stateVariables",
+        "structDeclarations",
+        "transientState",
+        "tupleExpressions",
+        "usingFor",
+        "valueTypeDeclarations",
+        "variableDeclarations"
+      ],
+      "Sizeof": [
+        "reservedKeywords"
+      ],
+      "Static": [
+        "reservedKeywords"
+      ],
+      "Storage": [
+        "calldataLocation",
+        "memoryLocation",
+        "storageLocation"
+      ],
+      "String": [
+        "addressTypes",
+        "boolType",
+        "dynamicBytesType",
+        "fixedBytesTypes",
+        "fixedPoint",
+        "integerTypes",
+        "stringType"
+      ],
+      "StringLiteral": [
+        "stringLiterals"
+      ],
+      "Struct": [
+        "structDeclarations"
+      ],
+      "Sub": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "operatorAliases",
+        "shortCircuit"
+      ],
+      "SubDay": [
+        "timeUnits"
+      ],
+      "SubEther": [
+        "etherUnits"
+      ],
+      "SubGwei": [
+        "etherUnits"
+      ],
+      "SubHour": [
+        "timeUnits"
+      ],
+      "SubMinute": [
+        "timeUnits"
+      ],
+      "SubSecond": [
+        "timeUnits"
+      ],
+      "SubWeek": [
+        "timeUnits"
+      ],
+      "SubWei": [
+        "etherUnits"
+      ],
+      "SubYear": [
+        "removedUnits"
+      ],
+      "Supports": [
+        "reservedKeywords"
+      ],
+      "Switch": [
+        "reservedKeywords"
+      ],
+      "Throw": [
+        "removedAliases"
+      ],
+      "TrueLiteral": [
+        "booleanLiterals"
+      ],
+      "Try": [
+        "creationTry",
+        "tryStatement"
+      ],
+      "Type": [
+        "arithmetic",
+        "assignment",
+        "conditional",
+        "functionCalls",
+        "shortCircuit",
+        "valueTypeDeclarations"
+      ],
+      "TypeOf": [
+        "reservedKeywords"
+      ],
+      "Typedef": [
+        "reservedKeywords"
+      ],
+      "TypesEnd": [
+        "sourceUnits"
+      ],
+      "UFixed": [
+        "fixedPoint"
+      ],
+      "UFixedMxN": [
+        "fixedPoint"
+      ],
+      "UInt": [
+        "integerTypes"
+      ],
+      "UIntM": [
+        "integerTypes"
+      ],
+      "Unchecked": [
+        "uncheckedBlock"
+      ],
+      "Unicode": [
+        "hexLiterals",
+        "unicodeLiterals"
+      ],
+      "UnicodeStringLiteral": [
+        "unicodeLiterals"
+      ],
+      "Using": [
+        "operatorAliases",
+        "usingFor"
+      ],
+      "Var": [
+        "reservedKeywords"
+      ],
+      "View": [
+        "stateMutability"
+      ],
+      "Virtual": [
+        "fallbackFunction",
+        "freeFunctions",
+        "functions",
+        "modifierPlaceholder",
+        "modifiers",
+        "rawCalldata",
+        "rawReturndata",
+        "receiveFunction"
+      ],
+      "While": [
+        "doWhileStatement",
+        "whileStatement"
+      ],
+      "Whitespace": [
+        "comments"
+      ]
+    },
+    "typeCategories": {
+      "Address": [
+        "addressTypes"
+      ],
+      "Array": [
+        "dynamicArrays",
+        "dynamicBytesType",
+        "fixedArrays",
+        "stringType"
+      ],
+      "ArraySlice": [
+        "calldataLocation",
+        "rangeAccess"
+      ],
+      "Bool": [
+        "boolType"
+      ],
+      "Contract": [
+        "addressTypes"
+      ],
+      "Enum": [
+        "enumTypes"
+      ],
+      "FixedBytes": [
+        "fixedBytesTypes"
+      ],
+      "FixedPoint": [
+        "fixedPoint"
+      ],
+      "Function": [
+        "externalFunctionTypes",
+        "functionCalls",
+        "internalFunctionTypes"
+      ],
+      "InaccessibleDynamic": [
+        "abiEntryValidation",
+        "publicGetters"
+      ],
+      "Integer": [
+        "integerTypes"
+      ],
+      "Magic": [
+        "featureDetection"
+      ],
+      "Mapping": [
+        "mappings"
+      ],
+      "Modifier": [
+        "modifiers"
+      ],
+      "Module": [
+        "imports"
+      ],
+      "RationalNumber": [
+        "exactConstants",
+        "numericLiterals"
+      ],
+      "StringLiteral": [
+        "stringLiterals"
+      ],
+      "Struct": [
+        "structTypes"
+      ],
+      "Tuple": [
+        "tupleTypes"
+      ],
+      "TypeType": [
+        "explicitConversions",
+        "metaTypeExpression"
+      ],
+      "UserDefinedValueType": [
+        "valueTypes"
+      ]
+    },
+    "magicMembers": {
+      "ABI.decode": [
+        "abiDecode"
+      ],
+      "ABI.encode": [
+        "abiEncode"
+      ],
+      "ABI.encodeCall": [
+        "abiEncodeCall"
+      ],
+      "ABI.encodePacked": [
+        "abiEncodePacked"
+      ],
+      "ABI.encodeWithSelector": [
+        "abiEncodeWithSelector"
+      ],
+      "ABI.encodeWithSignature": [
+        "abiEncodeWithSignature"
+      ],
+      "Block.basefee": [
+        "blockBasefee"
+      ],
+      "Block.blobbasefee": [
+        "blockBlobbasefee"
+      ],
+      "Block.blockhash": [
+        "removedAliases"
+      ],
+      "Block.chainid": [
+        "blockChainid"
+      ],
+      "Block.coinbase": [
+        "blockCoinbase"
+      ],
+      "Block.difficulty": [
+        "blockDifficulty"
+      ],
+      "Block.gaslimit": [
+        "blockGaslimit"
+      ],
+      "Block.number": [
+        "blockNumber"
+      ],
+      "Block.prevrandao": [
+        "blockPrevrandao"
+      ],
+      "Block.slotnum": [
+        "blockSlotnum"
+      ],
+      "Block.timestamp": [
+        "blockTimestamp"
+      ],
+      "Message.data": [
+        "rawCalldata"
+      ],
+      "Message.gas": [
+        "removedAliases"
+      ],
+      "Message.sender": [
+        "msgSender"
+      ],
+      "Message.sig": [
+        "rawCalldata"
+      ],
+      "Message.value": [
+        "msgValue"
+      ],
+      "MetaType.creationCode": [
+        "creationCode"
+      ],
+      "MetaType.interfaceId": [
+        "interfaceId"
+      ],
+      "MetaType.max": [
+        "typeBounds"
+      ],
+      "MetaType.min": [
+        "typeBounds"
+      ],
+      "MetaType.name": [
+        "typeName"
+      ],
+      "MetaType.runtimeCode": [
+        "runtimeCode"
+      ],
+      "Transaction.gasprice": [
+        "txGasprice"
+      ],
+      "Transaction.origin": [
+        "txOrigin"
+      ]
+    },
+    "AddressTypeMembers": {
+      "balance": [
+        "addressBalance"
+      ],
+      "call": [
+        "emptyDataValueCall",
+        "lowLevelCall"
+      ],
+      "callcode": [
+        "removedAliases"
+      ],
+      "code": [
+        "addressCode"
+      ],
+      "codehash": [
+        "addressCodehash"
+      ],
+      "delegatecall": [
+        "delegatecall"
+      ],
+      "send": [
+        "sendTransfer"
+      ],
+      "staticcall": [
+        "lowLevelStaticcall"
+      ],
+      "transfer": [
+        "sendTransfer"
+      ]
+    },
+    "FixedBytesTypeMembers": {
+      "length": [
+        "arrayLength"
+      ]
+    },
+    "ArrayTypeMembers": {
+      "length": [
+        "arrayLength"
+      ],
+      "pop": [
+        "arrayPop"
+      ],
+      "push": [
+        "arrayPush",
+        "arrayPushReference"
+      ]
+    },
+    "FunctionTypeMembers": {
+      "address": [
+        "functionAddress"
+      ],
+      "gas": [
+        "removedAliases"
+      ],
+      "selector": [
+        "errorEventSelector",
+        "functionSelector"
+      ],
+      "value": [
+        "removedAliases"
+      ]
+    },
+    "TypeTypeMembers": {
+      "concat": [
+        "bytesConcat",
+        "stringConcat"
+      ],
+      "unwrap": [
+        "wrapUnwrap"
+      ],
+      "wrap": [
+        "wrapUnwrap"
+      ]
+    },
+    "nativeMemberOwners": {
+      "AddressType": [
+        "addressBalance",
+        "addressCode",
+        "addressCodehash",
+        "lowLevelCall",
+        "delegatecall",
+        "lowLevelStaticcall",
+        "sendTransfer"
+      ],
+      "FixedBytesType": [
+        "arrayLength"
+      ],
+      "ArrayType": [
+        "arrayLength",
+        "arrayPush",
+        "arrayPushReference",
+        "arrayPop"
+      ],
+      "ContractType": [
+        "externalTypedCalls",
+        "publicGetters",
+        "visibility"
+      ],
+      "StructType": [
+        "structTypes",
+        "memberAccess",
+        "referenceCopyRules"
+      ],
+      "FunctionType": [
+        "functionSelector",
+        "functionAddress",
+        "errorEventSelector",
+        "removedAliases"
+      ],
+      "TypeType": [
+        "wrapUnwrap",
+        "bytesConcat",
+        "stringConcat",
+        "inheritance",
+        "names"
+      ],
+      "ModuleType": [
+        "imports",
+        "sourceUnits",
+        "names"
+      ],
+      "MagicType": [
+        "featureDetection",
+        "metaTypeExpression",
+        "msgSender",
+        "msgValue",
+        "blockTimestamp"
+      ]
+    }
+  }
+}

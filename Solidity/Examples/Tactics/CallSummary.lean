@@ -33,6 +33,7 @@ def Doubling : Contract := contract!{
   function f4(uint x) returns (uint r) { r = f3(f3(x)); }
   function f5(uint x) returns (uint r) { r = f4(f4(x)); }
   function f6(uint x) returns (uint r) { r = f5(f5(x)); }
+  function f7(uint x) returns (uint r) { r = f6(f6(x)); }
   function g(uint x) returns (uint r) { uint t = x + 1; r = f0(x); }
 }
 
@@ -116,7 +117,7 @@ theorem doublingTwoWalk : ⊨ᶠ dl!{ a < 1000 → [ uint y = f2(a); ] y == a + 
   sol_leaf
   sol_close
 
-/-! ## The family, `k = 1 … 6`
+/-! ## The family, `k = 1 … 7`
 
 `sol_prove` and the leaf replay `sol_prove?` writes; the walk is five nodes
 for every `k`, the leaf `{ y := a + 2^k } y >= a`. -/
@@ -147,6 +148,11 @@ theorem doublingFive : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f5(a); ⟩ y >= a }
   sol_close
 
 theorem doublingSix : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f6(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem doublingSeven : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f7(a); ⟩ y >= a } := by
   sol_prove (steps := 128)
   sol_leaf
   sol_close
@@ -254,12 +260,19 @@ end Solidity.Examples.Tactics.CallSummary.Reads
 
 namespace Solidity.Examples.Tactics.CallSummary.CheckedResult
 
-/-- Multiplication summaries retain every checked intermediate result. -/
+/-- The family of the M6 table with products: `fₖ` multiplies by `3^(2^k)`,
+by two calls of `fₖ₋₁`.  Its summary folds the literal factors
+(`Op2.mk2`, `(u * c₁) * c₂ ⇝ u * (c₁ * c₂)`, which overflows where the
+other does): `fₖ`'s is `x * 3^(2^k)`, one checked product. -/
 def Tripling : Contract := contract!{
   function f0(uint x) returns (uint r) { r = x * 3; }
   function f1(uint x) returns (uint r) { r = f0(f0(x)); }
   function f2(uint x) returns (uint r) { r = f1(f1(x)); }
   function f3(uint x) returns (uint r) { r = f2(f2(x)); }
+  function f4(uint x) returns (uint r) { r = f3(f3(x)); }
+  function f5(uint x) returns (uint r) { r = f4(f4(x)); }
+  function f6(uint x) returns (uint r) { r = f5(f5(x)); }
+  function f7(uint x) returns (uint r) { r = f6(f6(x)); }
   function s0(int x) returns (int r) { r = x * 3; }
   function s1(int x) returns (int r) { r = s0(s0(x)); }
 }
@@ -267,7 +280,7 @@ def Tripling : Contract := contract!{
 local instance : InContract := ⟨Tripling⟩
 open scoped Solidity.Scoped
 
-/-- Eight checked products: `f3(a)` returns at least `a` below 1000. -/
+/-- `f3(a) = a * 6561` returns at least `a` below 1000. -/
 theorem triplingThree : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
   apply Proves.fmlValid
   apply allIntro
@@ -287,6 +300,110 @@ closed: 0 open goal(s), 5 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a }
+
+/-! ### The family, `k = 1 … 7`
+
+The leaf is `{ y := a * 3^(2^k) } y >= a`, one product (`3^128` at `k =
+7`, below `2^256 / 1000`); the walk is five nodes, and the program a term
+the size of the source: every call of `fₖ₋₁` holds its one body
+(`CallMemo`, `docs/automation.md`, M6). -/
+
+theorem triplingOne : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f1(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingTwo : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f2(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingThreeAuto : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingFour : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingFive : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f5(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingSix : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f6(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem triplingSeven : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f7(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- The summary is exact: `f₇` multiplies by `3^128`. -/
+theorem triplingSevenExact : ⊨ᶠ dl!{
+    ⟨ uint y = f7(1); ⟩ y == 11790184577738583171520872861412518665678211592275841109096961 } := by
+  sol_prove (steps := 128)
+
+/-- Under the box an overflow reverts, so no precondition is needed. -/
+theorem triplingFourBox : ⊨ᶠ dl!{ [ uint y = f4(a); ] y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- A false leaf (at `a = 0` the product is `0`): the closer fails.  (The
+hypothesis only closes the example once the closer has failed.) -/
+example (h : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 }) :
+    ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 } := by
+  fail_if_success
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
+  exact h
+
+/-- The same formula, refuted (`a = 0`). -/
+theorem triplingFourOff : ¬ (⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a + 1 }) := by
+  sol_refute
+
+/-- `a * 3^32` overflows past `10^62`: the closer fails, within the
+declaration's heartbeats. -/
+example (h : ⊨ᶠ dl!{ a < 100000000000000000000000000000000000000000000000000000000000000 →
+    ⟨ uint y = f5(a); ⟩ y >= a }) :
+    ⊨ᶠ dl!{ a < 100000000000000000000000000000000000000000000000000000000000000 →
+      ⟨ uint y = f5(a); ⟩ y >= a } := by
+  fail_if_success
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
+  exact h
+
+/-- The leaf evaluated whole (`sol_close`'s last alternative), its
+summary `a * 3^16` (sixteen products before the literal factors were
+folded: it ran past 45 s inside `simp` before `Close.forall_const_type`,
+`docs/automation.md`, M6; `Affine.affineThreeWhole` keeps that shape). -/
+theorem triplingFourWhole : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f4(a); ⟩ y >= a } := by
+  apply Proves.fmlValid
+  apply allIntro
+  apply impRight
+  apply update .valueDeclSkip
+  apply update .internalCallSummary
+  sol_leaf
+  sol_close_unwrap
+  intro σ
+  sol_close_eval
+  all_goals sol_close_saturate
+  all_goals (try sol_close_landed)
+  all_goals try (intros; sol_close_reads_all)
+  all_goals try (subst_vars; sol_close_reads_all)
+  all_goals (try intros)
+  all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+    Close.forall_const_type] at *)
+  all_goals (try sol_close_witness)
+  all_goals (repeat' (first | intro _ | apply And.intro))
+  all_goals sol_close_finish
 
 /-- Signed checked products grow a nonnegative symbolic input. -/
 theorem signedTripling : ⊨ᶠ dl!{ ∀ int a; a >= 0 ∧ a < 1000 →
@@ -331,4 +448,96 @@ theorem signedNegative : ⊨ᶠ dl!{ ⟨ int y = s1(-2); ⟩ y + 18 == 0 } := by
 -/
 #guard_msgs in #print axioms signedTripling
 
+/-- info: 'Solidity.Examples.Tactics.CallSummary.CheckedResult.triplingFive' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms triplingFive
+
 end Solidity.Examples.Tactics.CallSummary.CheckedResult
+
+/-! ## Summaries the literals do not fold: one call site at a time
+
+`fₖ(x) = fₖ₋₁(fₖ₋₁(x))` over `f₀(x) = x * 3 + 1`: no literal factor or
+summand meets another (`(u * 3 + 1) * 3`), so `fₖ`'s summary has `2^(k+1)`
+operations.  From four on (`CloseJ.shareMin`), `sol_close` reads the leaf one
+call site at a time (`holds_upd_share`, `Calculus/LeafShare.lean`):
+`{ sh0 := a * 3 } { sh1 := sh0 + 1 } … { y := … ‖ pop }`, each update
+evaluated with the rest held opaque and each check refuted in a context of
+its own (`CloseJ.peel`). -/
+
+namespace Solidity.Examples.Tactics.CallSummary.Affine
+
+def Affine : Contract := contract!{
+  function f0(uint x) returns (uint r) { r = x * 3 + 1; }
+  function f1(uint x) returns (uint r) { r = f0(f0(x)); }
+  function f2(uint x) returns (uint r) { r = f1(f1(x)); }
+  function f3(uint x) returns (uint r) { r = f2(f2(x)); }
+}
+
+local instance : InContract := ⟨Affine⟩
+open scoped Solidity.Scoped
+
+theorem affineTwo : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f2(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+theorem affineThree : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close
+
+/-- Sixteen operations evaluated whole (`sol_close`'s last alternative,
+which `CloseJ.shareWholeMax` skips at this size): within the default
+heartbeats (`docs/automation.md`, M6, "The runaway"). -/
+theorem affineThreeWhole : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >= a } := by
+  apply Proves.fmlValid
+  apply allIntro
+  apply impRight
+  apply update .valueDeclSkip
+  apply update .internalCallSummary
+  sol_leaf
+  sol_close_unwrap
+  intro σ
+  sol_close_eval
+  all_goals sol_close_saturate
+  all_goals (try sol_close_landed)
+  all_goals try (intros; sol_close_reads_all)
+  all_goals try (subst_vars; sol_close_reads_all)
+  all_goals (try intros)
+  all_goals (try simp only [Close.exists_unit, Close.forall_unit, Close.exists_const_type,
+    Close.forall_const_type] at *)
+  all_goals (try sol_close_witness)
+  all_goals (repeat' (first | intro _ | apply And.intro))
+  all_goals sol_close_finish
+
+end Solidity.Examples.Tactics.CallSummary.Affine
+
+/-! A callee's locals numbered past a fresh name the formula writes: the retry
+of `elabModalProg` (`Calculus/Notation.lean`) rolls back the callees' first
+numbering (`CallMemo`) with the counter, so the shared callee's `a` and `r`
+take `se3` and `se4`, not the formula's `se2`. -/
+namespace Solidity.Examples.Tactics.CallSummary.Retry
+
+def Incr : Contract := contract!{
+  function h(uint a) returns (uint r) { r = a + 1; }
+}
+local instance : InContract := ⟨Incr⟩
+open scoped Solidity.Scoped
+
+/--
+info: node: 5
+sequent:
+  dl{ { se2 := 5 }, { y := defVal(T) }, { se3 := 1 } ⟹ ⟨ uint se4; se4 = se3 + 1; y = se4; ⟩ y = 2 }
+rule: valueDeclSkip
+state: inner
+branch: -
+parent: 4
+children: [6]
+tactics: apply Proves.update (Taclet.toStep .valueDeclSkip)
+-/
+#guard_msgs in
+#proof_node 5 dl!{ { se2 := 5 } ⟨ uint y = h(1); ⟩ y == 2 }
+
+end Solidity.Examples.Tactics.CallSummary.Retry

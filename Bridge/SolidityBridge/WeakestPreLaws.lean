@@ -1,7 +1,7 @@
 import SolidityBridge.WeakestPre
 import Solidity.Calculus.Sound
 import Solidity.Calculus.CloseLemmas
-import Solidity.Syntax.Elab
+import Solidity.Syntax.Splice
 
 /-!
 The actual box reading rejects panic. The closer's `Modality.wp` is a
