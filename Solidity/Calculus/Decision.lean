@@ -41,7 +41,9 @@ rounds extend.
 What is proved: `decideLeaf` is sound (`decideLeaf_sound`), its refutations
 are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`decideLeaf_complete`), the fragment M4 proves total
-(`dependentReduction?_isSome`) as extended since; `decideGoal` likewise
+(`dependentReduction?_isSome`) as extended since, or the leaves with
+Presburger quantifiers past their prefix (`Fml.quantCovered`,
+`quantReduction?_isSome`, decided by `QFml.decide_iff`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)

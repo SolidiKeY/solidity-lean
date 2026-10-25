@@ -312,4 +312,13 @@ theorem quantReduction?_isSome (φ : Fml C []) (h : φ.quantCovered = true) :
       Bool.false_eq_true, if_false, hM, hD]
     rfl
 
+/-- info: 'Solidity.Decide.quantReduction?_isSome' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms quantReduction?_isSome
+
+/-- info: 'Solidity.Decide.QuantReduction.valid_of_sentence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantReduction.valid_of_sentence
+
+/-- info: 'Solidity.Decide.QuantReduction.verify' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantReduction.verify
+
 end Solidity.Decide

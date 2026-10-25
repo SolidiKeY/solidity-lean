@@ -1262,4 +1262,10 @@ def verify (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.h
 
 end QFml
 
+/-- info: 'Solidity.Linear.QFml.decide_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QFml.decide_iff
+
+/-- info: 'Solidity.Linear.QFml.verify' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QFml.verify
+
 end Solidity.Linear
