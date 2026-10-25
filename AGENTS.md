@@ -231,6 +231,16 @@ meaning, prototype a lazy rule, reject bad candidates with concrete cases
 and bounded proofs, then prove local soundness and integrate it. Check
 coverage, overlap and termination separately. Keep detailed guidance there.
 
+**QuickCheck while debugging:** `cd Bridge && lake exe rulecheck` runs
+Plausible on typed states, comparing emitted updates with statement execution.
+Use `lake exe rulecheck --seed 42 --samples 1000` for another reproducible
+run; failures print the rule, type, shrunk operands and seed. Add cases or
+observations in `Bridge/SolidityBridge/PropertyChecks.lean` when repairing a
+rule. Unsupported premise shapes must fail or be reported explicitly, never
+count as passing samples. This initial corpus covers numeric local update
+rules, not every taclet; testing complements the required soundness proof.
+Keep Plausible in the optional Bridge package, not the dependency-free core.
+
 ## Writing or fixing a tactic
 
 1. **Search once, replay cheaply.** A tactic that searches (`sol_chain`,

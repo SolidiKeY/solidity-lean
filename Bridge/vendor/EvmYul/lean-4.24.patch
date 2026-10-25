@@ -13,3 +13,15 @@
      result := result.insert key (← self.getObjValAs? β k)
    pure result
  
+
+--- a/EvmYul/EVM/Semantics.lean
++++ b/EvmYul/EVM/Semantics.lean
+@@ -745,7 +745,7 @@
+   let σ'₁ :=
+     match σ.find? r with
+       | none =>
+-        if v != ⟨0⟩ then
++        if v != (⟨0⟩ : UInt256) then
+           σ.insert r { (default : Account .EVM) with balance := v}
+         else
+           σ

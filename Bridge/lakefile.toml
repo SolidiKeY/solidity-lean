@@ -27,6 +27,10 @@ rev = "e1fea784d55eae30275c205291f12a1b4868eed3"
 name = "SolidityBridge"
 weakLeanArgs = ["--tstack=131072"]
 
+[[lean_exe]]
+name = "rulecheck"
+root = "RuleCheck"
+
 # CSLib's proof theory (inference systems, logical equivalence, natural
 # deduction), backported from its Lean 4.30 release (`vendor/CslibBackport/VENDOR.md`).
 [[lean_lib]]
