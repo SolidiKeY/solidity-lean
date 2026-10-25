@@ -394,8 +394,8 @@ theorem _root_.Solidity.Upd.xk1?_afterT {k₂ : HashKind} {Γ Γ' : Ctx} {θ : X
           show (Upd.decl .nil x (.val t')).afterT m (τ.lift θ.thin d) P' ↔
             (Upd.decl .nil x (.val t)).afterT m τ P
           rw [Upd.afterT_decl1 m _ x t' (by simp only [Upd.pushFree, Rhs.pushFree, hpf.2,
-            Bool.and_self, Bool.true_and]), Upd.afterT_decl1 m τ x t (by simp only [Upd.pushFree,
-            Rhs.pushFree, hpf.1, Bool.and_self, Bool.true_and]), Tm.xk_eval h t ht]
+            Bool.and_self]), Upd.afterT_decl1 m τ x t (by simp only [Upd.pushFree,
+            Rhs.pushFree, hpf.1, Bool.and_self]), Tm.xk_eval h t ht]
           cases t.eval τ with
           | none => exact Iff.rfl
           | some v => exact hP (τ.push (t := .val _) v) (v, d) (h.push (t := .val _) v)
@@ -514,7 +514,7 @@ under its premise, `ψ` says at every value of the binders. -/
 theorem holdsS_allN {Γ : Ctx} (x : Var) : (m : Nat) → (ψ : Fml C (List.replicate m (.val .uint) ++ Γ)) →
     (τ : State C Γ) → Fml.holdsS τ (Fml.allN x m ψ) → ∀ es : Fin m → PrimTy.uint.Denote,
       ψ.HashFree (τ.withEnv (envOf m es τ.env)) → Fml.holdsS (τ.withEnv (envOf m es τ.env)) ψ
-  | 0, ψ, τ, h, _, _ => h
+  | 0, _, _, h, _, _ => h
   | m + 1, ψ, τ, h, es, hf =>
     holdsS_allN x m (.all x .uint ψ) τ h (fun i => es i.succ) (hashFree_all _ _ _ _) (es 0) hf
 
@@ -1025,7 +1025,7 @@ theorem _root_.Solidity.Grown.hashId_of_input {H : HTy} (m : Grown H (fun _ => U
     | none => rw [h1, h2] at h; cases h
     | some r' =>
       rw [h1, h2] at h
-      simp only [Option.map_some, Option.some.injEq, List.map_map] at h
+      simp only [Option.map_some, Option.some.injEq] at h
       simp only [Option.map_some, Option.getD_some, Heap.hash]
       exact HashKind.apply_congr k h
 
@@ -1697,9 +1697,7 @@ theorem holds_allNsw (x : Var) : (m : Nat) → (ψ : Fml C (Ctx.sw (List.replica
     · intro h es
       exact h (fun i => es i.succ) (es 0)
     · intro h es' v
-      have := h (finCons v es')
-      simp only [finCons_zero, finCons_succ] at this
-      exact this
+      exact h (finCons v es')
 
 theorem holds_allN (x : Var) : (m : Nat) → (ψ : Fml C (List.replicate m (.val .uint) ++ Γ)) →
     (τ : State C Γ) → (holds τ (Fml.allN x m ψ) ↔
@@ -1711,9 +1709,7 @@ theorem holds_allN (x : Var) : (m : Nat) → (ψ : Fml C (List.replicate m (.val
     · intro h es
       exact h (fun i => es i.succ) (es 0)
     · intro h es' v
-      have := h (finCons v es')
-      simp only [finCons_zero, finCons_succ] at this
-      exact this
+      exact h (finCons v es')
 
 /-- **The new binders' values pushed alike** in a state and its swapped reading. -/
 theorem SwRel.envOf {k : HashKind} {τ : State C Γ} {τ' : State C (Ctx.sw Γ)} (h : SwRel k τ τ') :
@@ -1777,7 +1773,7 @@ theorem _root_.Solidity.Fml.tk_hashFree {k₁ k₂ : HashKind} {fix : Bool} {Γ 
 /-- **What the body says under its premise in a heap of the family, the
 instance with the second kind's words fixed says.** -/
 theorem _root_.Solidity.Fml.tkBody_inst_holds {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
-    (hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (ψ : Fml C Γ) {φF : Fml C Γ}
+    (_hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (ψ : Fml C Γ) {φF : Fml C Γ}
     (e : ψ.tkBody k₁ k₂ true = some φF) {cs : List Nat} {inst : Fml C (Ctx.sw Γ)}
     (ei : φF.swInst k₁ cs = some inst) (τ : State C Γ) (τ' : State C (Ctx.sw Γ)) (h : SwRel k₁ τ τ')
     (hF : FamHeap famBound τ.glob) (hstr : ∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome)
@@ -2169,7 +2165,7 @@ theorem _root_.Solidity.Fml.tkBody_fix_complete {k₁ k₂ : HashKind} (hk₁ : 
     omega
   obtain ⟨st, hrel⟩ := relabel_stateΓ (kTyped_of hK) ρ Cs hinj _ hV τ
   have hrel' := hrel.envOfSw L.length (fun d hd => by
-      simp only [extraLevels, Ctx.sw, List.length_map, List.contains_iff_mem, List.mem_map, List.mem_range]
+      simp only [extraLevels, List.contains_iff_mem, List.mem_map, List.mem_range]
       exact ⟨d, hd, rfl⟩)
     es'' es (fun d => ⟨List.mem_map_of_mem (mem_finRange' d), hρ d⟩)
   have hF := (holds_allNsw _ _ _ _).1 (H st) es''
@@ -2271,5 +2267,14 @@ theorem _root_.Solidity.Fml.tk_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠
     omega
   exact Fml.tk_fix_complete hk₁ hk₂ φ e₂ hF hi₂ hiF hb hrl₂ σ (fun i => nomatch i)
     (fun st => hv (σ.withStorage st))
+
+/-- info: 'Solidity.Fml.tk_validH' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.tk_validH
+
+/-- info: 'Solidity.Fml.tk_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.tk_refutes
+
+/-- info: 'Solidity.Fml.tk_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.tk_complete
 
 end Solidity.Decide
