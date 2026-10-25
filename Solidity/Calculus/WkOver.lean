@@ -9,8 +9,8 @@ apart from the runs so that the typed ones
 need neither M3 run.  `Thin.Over e h e' h'` says that `e'` pops on `Δ` what
 `e` pops on `Γ`, the thinning kept over it, which a weakened statement does
 (`Stmt.wk_over`, `Prog.wk_over`); `Prog.frame_some` reads a loop body's
-frame (`Prog.frame`, `Calculus/Blocks.lean`) as its mutability and
-the locals it may write.
+frame (`Prog.frame`, `Calculus/Blocks.lean`) as its mutability, its modifies
+set and the locals it may write.
 -/
 
 namespace Solidity
@@ -70,14 +70,14 @@ section Frame
 
 variable {Γ : Ctx}
 
-/-- The mutability a loop frame's flag stands for. -/
-def frameMut (hv : Bool) : Mutability := if hv then .nonpayable else .view
-
-/-- **A body with a frame** is within its mutability, and its frame lists
-every local of the loop's context it may write. -/
+/-- **A body with a frame** is within no mutability, its frame writing no
+storage, or within `nonpayable`, its frame its modifies set
+(`Prog.storeAt`); and its frame lists every local of the loop's context it
+may write. -/
 theorem Prog.frame_some {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy) × Idx Γ t)}
-    {hv : Bool} (h : P.frame = some (xs, hv)) :
-    Prog.within (frameMut hv) P = true ∧
+    {hv : Option (List Name)} (h : P.frame = some (xs, hv)) :
+    (Prog.within .view P = true ∧ hv = some [] ∨
+        Prog.within .nonpayable P = true ∧ hv = Prog.storeAt P) ∧
       ∀ t (i : Idx Γ t), (t, i.toNat) ∈ Prog.writesAt 0 P → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs := by
   unfold Prog.frame at h
   have hxs : ∀ ys : List ((t : LTy) × Idx Γ t),
@@ -88,11 +88,18 @@ theorem Prog.frame_some {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy
     exact ⟨(t, i.toNat), hm, by simp only [Ctx.idx?_toNat, Option.map_some]⟩
   split at h
   · cases h
-    exact ⟨by assumption, hxs _ rfl⟩
+    exact ⟨.inl ⟨by assumption, rfl⟩, hxs _ rfl⟩
   · split at h
     · cases h
-      exact ⟨by assumption, hxs _ rfl⟩
+      exact ⟨.inr ⟨by assumption, rfl⟩, hxs _ rfl⟩
     · cases h
+
+/-- A body with a frame is within a mutability. -/
+theorem Prog.frame_within {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Option (List Name)} (h : P.frame = some (xs, hv)) : ∃ μ, Prog.within μ P = true := by
+  rcases (Prog.frame_some h).1 with ⟨hw, -⟩ | ⟨hw, -⟩
+  · exact ⟨_, hw⟩
+  · exact ⟨_, hw⟩
 
 end Frame
 

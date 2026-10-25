@@ -569,7 +569,7 @@ theorem LeanTaclet.internalCallSummary.toStep {f : Name} {ps : Ctx} {args : Args
   all_goals first | exact Option.noConfusion hs | (rw [hs])
 
 theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
-    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {dec : Option (Val C Γ .uint)}
     {cond inv : Val C Γ .bool} {brk : Bool} {qs : List (LoopQ C Γ)}
     (hf : body.frame = some (xs, hv)) :
     Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) =
@@ -582,7 +582,7 @@ theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
   simp only [loopStep, hf]
 
 theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
-    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
     {brk : Bool} {qs : List (LoopQ C Γ)} (hf : body.frame = some (xs, hv)) (hq : qs = []) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec) brk qs) cond body) =
       Premise.inv (invFml inv qs) none xs hv

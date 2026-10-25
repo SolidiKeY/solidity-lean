@@ -127,6 +127,9 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .zbin op _, _, _, da, db => do some (op.evalZ (← da) (← db))
   | .zcmp op _, _, _, da, db => do some (op.cmpZ (← da) (← db))
   | .hash k, x, y, _, _ => Op2.eval g (.hash k) x y
+  | .anon L, x, y, _, _ => match x, y with
+    | some a, some b => (Storage.anon L a b).obs
+    | _, _ => (Storage.init C).obs
 
 /-- A ternary symbol in the Theory, its arguments' denotations given. -/
 def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.TDen C → s.TDen C

@@ -1409,6 +1409,8 @@ def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C
     (fun op h _ _ ex ey =>
       (.app2 (.zcmp op h) (ex : LTm C .kint) (ey : LTm C .kint) : LTm C (.val .bool)))
     (fun {_} k x y _ _ => (.app2 (.hash k) x y : LTm C (.val .uint)))
+    -- a loop frame's anonymised storage: opaque to the decision procedure
+    (fun L x y _ _ => SFun.ofOrig (.app2 (.anon L) x y))
 
 /-- A ternary symbol, eliminated. -/
 def _root_.Solidity.Op3.elim {a b c s : Srt} (o : Op3 C a b c s) : LTm C a → LTm C b → LTm C c → ElimM C a →

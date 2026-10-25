@@ -29,7 +29,10 @@ frame they need (master's `Prog.loopFrame`, at `ad728b16`).
   `whileInvariantDiamond`).  The invariant rule's frame anonymises the
   locals of the loop's context the body writes; the body's own locals are
   popped every iteration, so, unlike master's `Prog.loopFrame`, it does not
-  list them (the frame differs from master's, not the rule).
+  list them (the frame differs from master's, not the rule).  Of the
+  storage it anonymises the roots of the body's modifies set
+  (`Stmt.storeAt`, KeY's `assignable`), or all of it and the ledger where
+  the body may write any root, pay or call out.
 -/
 
 namespace Solidity
@@ -677,14 +680,106 @@ def Prog.writesAt (d : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List (LTy × 
 
 end
 
+/-! ### Modifies sets
+
+What a statement may write of the storage, at the granularity of the roots
+(KeY's `assignable`, Dafny's `modifies`): `some L`, the roots `L` names and
+nothing else of the global part, or `none`, anything (a write through an
+alias, which may name any root; memory; a push or a pop; a payment; a call
+out, whose callee may call back).  The frame theorem reads it
+(`Stmt.run_keeps`, `Semantics/RunFrame.lean`): a run ends in a storage
+`Storage.Framed L` by the one it started in, the ledger and the balance as
+they were. -/
+
+/-- Two modifies sets joined, each root once. -/
+def Locs.union : Option (List Name) → Option (List Name) → Option (List Name)
+  | some a, some b => some (a ++ b.filter fun r => !a.contains r)
+  | _, _ => none
+
+mutual
+
+/-- The state variable a storage path starts at; `none` through an alias,
+which may be bound to any root. -/
+def SPath.root? : {T : Ty} → SPath C Γ T → Option Name
+  | _, .alias _ => none
+  | _, .loc l => l.root?
+
+def Loc.root? : {T : Ty} → Loc C Γ T → Option Name
+  | _, .root r _ => some r
+  | _, .field b _ _ => b.root?
+  | _, .index _ b _ => b.root?
+
+end
+
+/-- What a write at `l` may change: its root. -/
+def Loc.storeAt {T : Ty} (l : Loc C Γ T) : Option (List Name) := l.root?.map ([·])
+
+/-- What `x ⊕= e` or `x++` may change of the storage: nothing at a local,
+its root in storage, anything in memory. -/
+def OpLoc.storeAt {p : PrimTy} : OpLoc C Γ p → Option (List Name)
+  | .local _ => some []
+  | .root r _ => some [r]
+  | .field b _ _ => b.root?.map ([·])
+  | .index _ b _ => b.root?.map ([·])
+  | .mfield .. | .mindex .. => none
+
+/-- What binding a storage alias may change: nothing for a path, the
+array for a push. -/
+def ARhs.storeAt {R : RefTy} : ARhs C Γ R → Option (List Name)
+  | .path _ => some []
+  | .push .. => none
+
+mutual
+
+/-- **The roots a statement may write**: its modifies set (`some L`), or
+`none` where it may change more of the global part. -/
+def Stmt.storeAt : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Option (List Name)
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Option (List Name)) s
+    (assign := fun l _ => l.storeAt) (rebind := fun _ r => r.storeAt)
+    (assignLocal := fun _ _ => some []) (declLocal := fun _ _ _ => some [])
+    (declStorage := fun _ _ init => match init with
+      | none => some []
+      | some r => r.storeAt)
+    (opAssign := fun _ _ _ l _ => l.storeAt) (incDec := fun _ _ l => l.storeAt)
+    (assignIncDec := fun _ _ _ l _ => l.storeAt)
+    (assignLocalPush := fun _ _ => none)
+    (pushOpAssign := fun _ _ _ _ _ => none) (pushIncDec := fun _ _ _ => none)
+    (push := fun _ _ _ => none) (pop := fun _ => none)
+    (transfer := fun _ _ => none) (send := fun _ _ _ _ => none)
+    (declMem := fun _ _ _ _ _ => none) (rebindMem := fun _ _ => none)
+    (assignFromMem := fun _ _ => none) (assignMem := fun _ _ => none)
+    (delete := fun l => l.storeAt) (deleteMem := fun _ _ => none)
+    (assignNew := fun _ _ _ => none)
+    (ite := fun _ thn els => Locs.union (Prog.storeAt thn) (Prog.storeAt els))
+    (require := fun _ => some []) (assert := fun _ => some []) (revert := some [])
+    (assumeFalse := some [])
+    (call := fun _ _ ret body => if ret.noMem then Prog.storeAt body else none)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => none)
+    (loop := fun _ _ body => Prog.storeAt body) (block := fun body => Prog.storeAt body)
+    (callReceiver := fun _ _ _ _ _ => none)
+    (callReceiverPush := fun _ _ _ _ _ _ => none)
+    (callRec := fun _ _ _ ret body => if ret.noMem then Prog.storeAt (body ()) else none)
+    (revertData := fun _ => some [])
+    (catchData := fun _ _ _ _ _ _ _ _ => none)
+  termination_by structural _ _ s => s
+
+def Prog.storeAt : {Γ Γ' : Ctx} → Prog C Γ Γ' → Option (List Name)
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Option (List Name)) P (some [])
+      (fun s P => Locs.union (Stmt.storeAt s) (Prog.storeAt P))
+  termination_by structural _ _ P => P
+
+end
+
 /-- **The frame of a loop body** (master's `Prog.loopFrame`, at
-`ad728b16`): the
-locals of the loop's context it writes, and whether it writes the storage
-and the ledger too; `none` when it does more. -/
-def Prog.frame {Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (List ((t : LTy) × Idx Γ t) × Bool) :=
+`ad728b16`): the locals of the loop's context it writes, and what it writes
+of the storage: the roots of its modifies set (`some L`, `some []` when it
+writes none), or the storage and the ledger (`none`); no frame when it
+does more. -/
+def Prog.frame {Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
+    Option (List ((t : LTy) × Idx Γ t) × Option (List Name)) :=
   let xs := (Prog.writesAt 0 P).filterMap fun (t, n) => (Γ.idx? n t).map (⟨t, ·⟩)
-  if Prog.within .view P then some (xs, false)
-  else if Prog.within .nonpayable P then some (xs, true)
+  if Prog.within .view P then some (xs, some [])
+  else if Prog.within .nonpayable P then some (xs, Prog.storeAt P)
   else none
 
 end Frame

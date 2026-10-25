@@ -88,6 +88,13 @@ def _root_.Solidity.Hyps.maxIdxH {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ 
       (fun H => Hyps.maxIdxH H)
   termination_by structural _ H => H
 
+/-- The largest index of a loop body's anonymising update joined to a
+context whose largest index is `k` (`Hyps.anonHavoc`'s `Hyps.maxIdxH`, by
+`rfl` on each shape of `hv`). -/
+def anonHavocIdx (k : Nat) : Option (List Name) → Nat
+  | none | some [] => k
+  | some (r :: L) => max (max k anonStorage.idx) (Upd.anonSt (C := C) (Γ := []) (r :: L)).maxIdx
+
 /-- The fresh index of a step on `φ` behind a context whose largest index
 is `k` (`Hyps.fresh` when `k` is `Hyps.maxIdxH`, `Hyps.fresh_eq_freshK`). -/
 def freshK {Γ : Ctx} (k : Nat) (φ : Fml C Γ) : Nat := max (max k φ.maxIdx) C.rootMaxIdx + 1
@@ -124,11 +131,11 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Op
         (each (fun U => r (H.upd m U) (max k U.maxIdx) (.modalK m ω κ φ)) us) b))
     (fun I B xs hv U c c' hu hb P post ω => both (r H k (I.invHyp B))
       (both (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c)
-            (max (max (max k (I.invHyp B).maxIdx) U.maxIdx) c.maxIdx)
+            (max (max (max (anonHavocIdx (C := C) k hv) (I.invHyp B).maxIdx) U.maxIdx) c.maxIdx)
           (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil)
             (Fml.invPost m hu ω κ φ post B))))
         (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c')
-            (max (max (max k (I.invHyp B).maxIdx) U.maxIdx) c'.maxIdx)
+            (max (max (max (anonHavocIdx (C := C) k hv) (I.invHyp B).maxIdx) U.maxIdx) c'.maxIdx)
           (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))) b)
     (fun P e ω => r H k (.modal m P (.drop e (.seq ω κ)) φ) b)
     (fun c U V ω =>
@@ -501,7 +508,7 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → 
       exact .cases (hR := hR) hd hb this.1 this.2
     · simp only [premise, hb, cond_true, reduceCtorEq] at h
   | inv I B xs hv U c c' hu hb P post =>
-    cases hv <;>
+    rcases hv with _ | _ | ⟨_, _⟩ <;>
     · have := both_sound h hl (hr _ _)
         (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
       exact .inv (hR := hR) hd this.1 this.2.1 this.2.2

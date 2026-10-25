@@ -524,20 +524,112 @@ variable {I : Fml C []} {J : StateInv C}
 /-- **A state in a loop body's frame is one its anonymised premise covers**,
 with callbacks (`holds_anonHavoc`). -/
 theorem holdsC_anonHavoc {Γ : Ctx} {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
-    {hv : Bool} {W : List (LTy × Nat)}
+    {hv : Option (List Name)} {μ : Mutability} {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
-    (hg : TGFrame (frameMut hv) σ τ) (ha : TLocAgree 0 W σ.env τ.env) {ψ : Fml C Γ}
-    (h : holdsC I pay σ (Fml.anonHavoc xs hv ψ)) : holdsC I pay τ ψ := by
+    (hg : TGFrame μ σ τ) (ha : TLocAgree 0 W σ.env τ.env) (hk : FrameKeeps hv σ τ)
+    {ψ : Fml C Γ} (h : holdsC I pay σ (Fml.anonHavoc xs hv ψ)) : holdsC I pay τ ψ := by
   obtain ⟨b, hb⟩ := State.eq_anonHavoc hxs hg ha
-  cases hv with
-  | false =>
-    have hk := hg.keeps (by simp only [frameMut]; decide)
-    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2, hg.selfBalance (by simp only [frameMut]; decide)]; rfl
-    rw [hτ]
-    exact h b
-  | true =>
+  match hv, hk, h with
+  | none, _, h =>
     rw [hb]
     exact h b τ.storage τ.net τ.selfBalance
+  | some [], hk, h =>
+    have hst : τ.storage = σ.storage := hk.1.symm
+    have hτ : τ = σ.anon xs b := by rw [hb, hst, hk.2.1, hk.2.2]; rfl
+    rw [hτ]
+    exact h b
+  | some (r :: L), hk, h =>
+    have h₁ := Modality.forallB_all (h b) τ.storage
+    have hτ : τ = (σ.anon xs b).withStorage (Storage.anon (r :: L) (σ.anon xs b).storage τ.storage) := by
+      have hs : Storage.anon (r :: L) (σ.anon xs b).storage τ.storage = τ.storage := hk.1
+      rw [hs, hb, hk.2.1, hk.2.2]
+      rfl
+    rw [hτ]
+    exact Upd.afterT.of_lands h₁ (Upd.lands_anonSt (r :: L) (σ.anon xs b) τ.storage)
+
+mutual
+
+/-- **A statement with a modifies set calls nobody back**: a payment, a
+`try` and a call out have none (`Stmt.storeAt`). -/
+theorem Stmt.callsBack_of_storeAt (pay : Bool) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    {L : List Name} → s.storeAt = some L → Stmt.callsBack pay s = false
+  | _, _, .ite _ thn els, _, h => by
+    have h' : Locs.union (Prog.storeAt thn) (Prog.storeAt els) = some _ := h
+    show (Prog.callsBack pay thn || Prog.callsBack pay els) = false
+    cases h₁ : Prog.storeAt thn with
+    | none => rw [h₁] at h'; cases h'
+    | some L₁ =>
+      cases h₂ : Prog.storeAt els with
+      | none => rw [h₁, h₂] at h'; cases h'
+      | some L₂ =>
+        rw [Prog.callsBack_of_storeAt pay thn h₁, Prog.callsBack_of_storeAt pay els h₂]
+        rfl
+  | _, _, .call _ _ ret body, _, h => by
+    have h' : (if ret.noMem then Prog.storeAt body else none) = some _ := h
+    show Prog.callsBack pay body = false
+    split at h'
+    · exact Prog.callsBack_of_storeAt pay body h'
+    · cases h'
+  | _, _, .callRec _ _ _ ret body, _, h => by
+    have h' : (if ret.noMem then Prog.storeAt (body ()) else none) = some _ := h
+    show Prog.callsBack pay (body ()) = false
+    split at h'
+    · exact Prog.callsBack_of_storeAt pay (body ()) h'
+    · cases h'
+  | _, _, .loop _ _ body, _, h => Prog.callsBack_of_storeAt pay body h
+  | _, _, .block body, _, h => Prog.callsBack_of_storeAt pay body h
+  | _, _, .transfer .., _, h | _, _, .send .., _, h | _, _, .tryCall .., _, h
+  | _, _, .callReceiver .., _, h | _, _, .callReceiverPush .., _, h
+  | _, _, .catchData .., _, h => by cases h
+  | _, _, .assign .., _, _ | _, _, .rebind .., _, _ | _, _, .assignLocal .., _, _
+  | _, _, .declLocal .., _, _ | _, _, .declStorage .., _, _ | _, _, .opAssign .., _, _
+  | _, _, .incDec .., _, _ | _, _, .assignIncDec .., _, _ | _, _, .assignLocalPush .., _, _
+  | _, _, .pushOpAssign .., _, _ | _, _, .pushIncDec .., _, _ | _, _, .push .., _, _
+  | _, _, .pop .., _, _ | _, _, .declMem .., _, _ | _, _, .rebindMem .., _, _
+  | _, _, .assignFromMem .., _, _ | _, _, .assignMem .., _, _ | _, _, .delete .., _, _
+  | _, _, .deleteMem .., _, _ | _, _, .assignNew .., _, _ | _, _, .require .., _, _
+  | _, _, .assert .., _, _ | _, _, .revert, _, _ | _, _, .assumeFalse, _, _
+  | _, _, .revertData .., _, _ => rfl
+
+theorem Prog.callsBack_of_storeAt (pay : Bool) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    {L : List Name} → Prog.storeAt P = some L → Prog.callsBack pay P = false
+  | _, _, .nil, _, _ => rfl
+  | _, _, .cons s P, _, h => by
+    have h' : Locs.union (Stmt.storeAt s) (Prog.storeAt P) = some _ := h
+    rw [Prog.callsBack_cons]
+    cases h₁ : Stmt.storeAt s with
+    | none => rw [h₁] at h'; cases h'
+    | some L₁ =>
+      cases h₂ : Prog.storeAt P with
+      | none => rw [h₁, h₂] at h'; cases h'
+      | some L₂ =>
+        rw [Stmt.callsBack_of_storeAt pay s h₁, Prog.callsBack_of_storeAt pay P h₂]
+        rfl
+
+end
+
+/-- **What a loop body with a frame leaves of the global part, with
+callbacks** (`Prog.frame_keeps`): a body within no mutability calls nobody
+back and keeps the storage (`ExecP.frame`); one with a modifies set calls
+nobody back either (`Prog.callsBack_of_storeAt`), so its callback run is
+its run (`ExecP.eq_run`). -/
+theorem ExecP.frame_keeps {Γ Γb : Ctx} {body : Prog C Γ Γb} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Option (List Name)} (hf : body.frame = some (xs, hv)) {τ : State C Γ}
+    {υ : Out C τ.H Γb} (hp : ExecP J τ body (.ok υ)) : FrameKeeps hv τ (υ.st.drop body.ext) := by
+  rcases (Prog.frame_some hf).1 with ⟨hw, -⟩ | ⟨-, rfl⟩
+  · exact FrameKeeps.ofView ((ExecP.frame hp hw 0 υ rfl).1.withEnv _)
+  · cases hs : Prog.storeAt body with
+    | none => trivial
+    | some L =>
+      have hr := ExecP.eq_run hp (Prog.callsBack_of_storeAt J.pay body hs)
+      have hr' : Prog.run τ body = .ok υ := by
+        revert hr
+        cases Prog.run τ body with
+        | error _ => exact fun h => nomatch h
+        | ok _ => intro h; cases h; rfl
+      have := (Prog.run_keeps body hr').withEnv (TEnv.drop body.ext υ.st.env)
+      rw [hs] at this
+      exact this
 
 /-- **Induction over a loop's callback runs**, under the box: `P` holds at
 the first head and at every head an iteration from a head in `P` goes on
@@ -610,7 +702,7 @@ body that broke goes on to the rest. -/
 theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Option (Val C Γ .uint)}
     {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool} {body : Prog C Γ Γb}
     {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} {xs : List ((t : LTy) × Idx Γ t)}
-    {hv : Bool} {k : Nat} (hf : body.frame = some (xs, hv)) {σ : State C Γ}
+    {hv : Option (List Name)} {k : Nat} (hf : body.frame = some (xs, hv)) {σ : State C Γ}
     (hI : holdsC I pay σ ((invFml Iv qs).invHyp (loopBreak brk c)))
     (hX : holdsC I pay σ (Fml.anonHavoc xs hv (.imp ((invFml Iv qs).invHyp (loopBreak brk c))
       (.upd .box (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
@@ -620,21 +712,22 @@ theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Op
           (.imp (.isBool (.pvV (p := .bool) .here) false)
             (.upd .box (Upd.nil.pop (.push .refl)) (Fml.modalK .box ω κ φ)))))))) :
     holdsC I pay σ (.modal .box (.cons (.loop (.inv Iv dec brk qs) c body) ω) κ φ) := by
-  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  obtain ⟨μ, hwμ⟩ := Prog.frame_within hf
+  have hxs := (Prog.frame_some hf).2
   have hB := breakTest_loopBreak brk c
   -- the premise at a head the frame allows, the condition read
-  have hY : ∀ τ : State C Γ, TGFrame (frameMut hv) σ τ →
+  have hY : ∀ τ : State C Γ, TGFrame μ σ τ → FrameKeeps hv σ τ →
       TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env →
       holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c)) → ∀ v : Bool, c.evalT τ = .ok v →
       (v = true → holdsC I pay τ (Fml.modalK .box body (.pop .block body.ext .nil)
           (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)))) ∧
       (v = false → holdsC I pay τ (Fml.modalK .box ω κ φ)) := by
-    intro τ hg hag hIτ v hc
+    intro τ hg hk hag hIτ v hc
     have hcl : (Rhs.val (p := .bool) c.lower).eval τ =
         some (LTy.VDen.ofT (H := τ.H) (.val .bool) v) := by
       show c.lower.eval τ = _
       exact Val.lower_eval_ok c τ hc
-    obtain ⟨hT, hF⟩ := (holdsC_anonHavoc hxs hg hag hX hIτ).of_lands
+    obtain ⟨hT, hF⟩ := (holdsC_anonHavoc hxs hg hag hk hX hIτ).of_lands
       (Upd.lands_decl (Upd.lands_nil τ) (fse k) hcl)
     refine ⟨fun hv => ?_, fun hv => ?_⟩
     · subst hv
@@ -643,17 +736,17 @@ theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Op
       exact Upd.afterT.of_lands (hF ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
   refine holdsC_cons fun o₁ he => ?_
   have hL := ExecS.loop_box (J := I.stateInv pay)
-    (P := fun τ => (TGFrame (frameMut hv) σ τ ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
+    (P := fun τ => (TGFrame μ σ τ ∧ FrameKeeps hv σ τ ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
         holdsC I pay τ ((invFml Iv qs).invHyp (loopBreak brk c))) ∨
       (c.evalT τ = .ok false ∧ holdsC I pay τ (Fml.modalK .box ω κ φ)))
-    (Q := fun τ => holdsC I pay τ (Fml.modalK .box ω κ φ)) (.inl ⟨TGFrame.refl σ, TLocAgree.refl _, hI⟩)
+    (Q := fun τ => holdsC I pay τ (Fml.modalK .box ω κ φ)) (.inl ⟨TGFrame.refl σ, FrameKeeps.refl _ σ, TLocAgree.refl _, hI⟩)
     (fun τ hτ hc => by
-      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨_, hR⟩
-      · exact (hY τ hg hag hIτ false hc).2 rfl
+      rcases hτ with ⟨hg, hk, hag, hIτ⟩ | ⟨_, hR⟩
+      · exact (hY τ hg hk hag hIτ false hc).2 rfl
       · exact hR)
     (fun τ hτ hc o hp => by
-      rcases hτ with ⟨hg, hag, hIτ⟩ | ⟨hc', _⟩
-      · have hA := holdsC_modalK τ body _ _ ((hY τ hg hag hIτ true hc).1 rfl) o hp
+      rcases hτ with ⟨hg, hk, hag, hIτ⟩ | ⟨hc', _⟩
+      · have hA := holdsC_modalK τ body _ _ ((hY τ hg hk hag hIτ true hc).1 rfl) o hp
         have hA' := COut.thenF_nil _ (COut.thenF_drop _ hA)
         cases o with
         | halt e => exact hA'
@@ -662,14 +755,15 @@ theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Op
           have hpost : holdsC I pay (υ.st.drop body.ext)
               (Fml.invPost .box .refl ω κ φ (invFml Iv qs) (loopBreak brk c)) := hA'
           obtain ⟨hg', ha'⟩ := ExecP.frame hp hwμ 0 υ rfl
-          have hfr : TGFrame (frameMut hv) σ (υ.st.drop body.ext) := hg.trans (hg'.withEnv _)
+          have hfr : TGFrame μ σ (υ.st.drop body.ext) := hg.trans (hg'.withEnv _)
+          have hkr : FrameKeeps hv σ (υ.st.drop body.ext) := hk.trans (ExecP.frame_keeps hf hp)
           have hag' : TLocAgree 0 (Prog.writesAt 0 body) σ.env (υ.st.drop body.ext).env :=
             hag.trans ha'
           show _ ∨ _
           cases hBr : loopBreak brk c with
           | none =>
             rw [hBr] at hpost
-            exact .inl ⟨hfr, hag', hpost⟩
+            exact .inl ⟨hfr, hkr, hag', hpost⟩
           | some Bf =>
             rw [hBr] at hpost
             obtain ⟨x, rfl, hx⟩ := hB _ hBr
@@ -682,7 +776,7 @@ theorem holdsC_invBox {Γ Γb Γ₁ Γ₀ : Ctx} {Iv : Val C Γ .bool} {dec : Op
                     rw [he] at hl; cases hl)
                   fun _ σ' hL => (Upd.Lands.eq (Upd.lands_pop_nil _ _) hL) ▸ hbk))
                 (Upd.lands_pop_nil _ _)
-            · refine .inl ⟨hfr, hag', ?_⟩
+            · refine .inl ⟨hfr, hkr, hag', ?_⟩
               exact ⟨hpost.1 (fun hb' => hbk (Upd.afterT.of_lands hb' (Upd.lands_pop_nil _ _))),
                 hbk⟩
       · rw [hc'] at hc; cases hc)

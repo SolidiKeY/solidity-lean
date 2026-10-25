@@ -251,6 +251,11 @@ inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
   `m` (`Heap.hash`); total, `0` at an identity that names no object of its
   type (which no program reads).  Lean only: solkey has no hash. -/
   | hash {R : RefTy} (k : HashKind) : Op2 C .mem (.ident R) (.val .uint)
+  /-- `anon(s, L, s')`: the roots `L` names from `s'`, the others from `s`
+  (KeY's `anon(heap, locset, anonHeap)`, `Storage.anon`): the storage a loop
+  body's frame leaves (`Fml.anonHavoc`).  `L` is a set of roots, written
+  out in the symbol as KeY writes a location set. -/
+  | anon (L : List Name) : Op2 C .st .st .st
 
 /-- Ternary symbols. -/
 inductive Op3 (C : Contract) : Srt → Srt → Srt → Srt → Type where
@@ -441,6 +446,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | @Op2.hash _ R k, x, y => do
     let m ← x
     some (m.hashId k R (← y))
+  | .anon L, x, y => do some (Storage.anon L (← x) (← y))
 
 /-- A binary symbol on the typed global part. -/
 @[implemented_by Op2.evalM]
@@ -485,6 +491,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun {R} k x y => do
       let m ← x
       some (m.hashId k R (← y)))
+    (fun L x y => do some (Storage.anon L (← x) (← y)))
 
 theorem Op2.eval_eq_evalM (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     o.eval g = o.evalM g := by

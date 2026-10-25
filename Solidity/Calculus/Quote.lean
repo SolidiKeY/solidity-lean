@@ -482,6 +482,7 @@ def qOp2 : {a b s : Srt} → Op2 C a b s → QM Expr
   | _, _, _, @Op2.mlen _ E => do return mkApp2 (mkConst ``Op2.mlen) (← contract) (toExpr E)
   | _, _, _, @Op2.hash _ R k => do
     return mkApp3 (mkConst ``Op2.hash) (← contract) (toExpr R) (toExpr k)
+  | _, _, _, .anon L => do return mkApp2 (mkConst ``Op2.anon) (← contract) (toExpr L)
   | _, _, _, @Op2.at _ R k V it => do
     return mkAppN (mkConst ``Op2.at) #[← contract, toExpr R, toExpr k, toExpr V, IndexTy.quote it]
   | _, _, _, @Op2.nextIn _ E => do return mkApp2 (mkConst ``Op2.nextIn) (← contract) (toExpr E)

@@ -446,11 +446,6 @@ section Paths
 
 variable {Γ : Ctx}
 
-theorem TRes.ofOpt_ok {α : Type} {o : Option α} {a : α} (h : TRes.ofOpt o = .ok a) : o = some a := by
-  cases o with
-  | none => cases h
-  | some x => cases h; rfl
-
 mutual
 /-- **A memory path of an own state reads an own slot.** -/
 theorem MPath.mvalT_own {b : Nat} (σ : State C Γ) (he : TEnv.Own b σ.env)

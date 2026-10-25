@@ -95,7 +95,7 @@ inductive Op2Code where
   | copyMem (R : RefTy) | iread (R : RefTy) | copy (R : RefTy) | mat (R : RefTy) (E : Ty)
   | copySt (T : Ty) | findIn (s : Name) (p : PrimTy) | delAtIn (s : Name) (T : Ty)
   | sfindIn (s : Name) (T : Ty) | zbin (op : BinOp) | zcmp (op : BinOp)
-  | hash (k : HashKind) (R : RefTy)
+  | hash (k : HashKind) (R : RefTy) | anon (L : List Name)
   deriving DecidableEq
 
 /-- A ternary symbol's constructor and types, its proofs dropped. -/
@@ -153,6 +153,7 @@ def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code
   | .zbin op _ => .zbin op
   | .zcmp op _ => .zcmp op
   | @Op2.hash _ R k => .hash k R
+  | .anon L => .anon L
 
 /-- A ternary symbol's code. -/
 def Op3.code {a b c s : Srt} : Op3 C a b c s → Op3Code
