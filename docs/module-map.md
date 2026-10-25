@@ -51,6 +51,26 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 The separate dependency-bearing package is indexed in [bridge.md](bridge.md).
 Its root is `Bridge/SolidityBridge.lean`; it never enters the core import graph.
 
+Optional independent checks: `Bridge/SolidityBridge/CompilerSimulation.lean`
+(CSLib program-boundary bisimulation), `Bridge/SolidityBridge/ExternalEvm/Environment.lean`
+(EvmYul account/transaction observations), `Bridge/SolidityBridge/LoopFixpoint.lean`
+(least-fixed-point and well-founded loop rules), `Bridge/SolidityBridge/AdversaryPolicy.lean`
+(fixed-callee reachable-return correspondence), and
+`Bridge/SolidityBridge/PropertyChecks.lean` (Plausible local-rule debugger,
+run by `Bridge/RuleCheck.lean`). Further reference checks live in
+`Bridge/SolidityBridge/ExternalEvm/WordOps.lean` (comparisons, shifts, unary words),
+`Bridge/SolidityBridge/ExternalEvm/SignedOps.lean` (signed comparisons/division/remainder),
+`Bridge/SolidityBridge/ExternalEvm/Power.lean` (upstream exponentiation by squaring),
+`Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` (actual EVM opcode dispatcher),
+`Bridge/SolidityBridge/ExternalEvm/StackOps.lean` (legal DUP/SWAP), and
+`Bridge/SolidityBridge/ExternalEvm/Obstructions.lean` (checked macro/slot mismatches).
+`Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean` gives relative compactness,
+upward/downward Löwenheim–Skolem and elementary-submodel preservation.
+`Bridge/SolidityBridge/CallbackTrace.lean` relates operational callees to observable
+traces and strong/weak bisimulation; `Bridge/SolidityBridge/CallbackModalTrace.lean`
+gives CSLib trace/bisimulation invariance for every framed callback modality.
+See `docs/bridge.md` for scope and commands.
+
 | Module | What it defines |
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |

@@ -279,3 +279,209 @@ and admitted operator family. It confirmed the stated frontend boundaries
 and that the refuted laws keep B3 gated. The prose-path script still reports
 13 pre-existing missing upstream/vendor references; no reference in this
 updated document is missing. No unrelated path or core file was changed.
+
+## Independent checks and debugging (2026-10-25)
+
+This follow-up leaves arithmetic and weakest-precondition work (items 1
+and 4) to their separate implementation. It extends the other existing
+bridges rather than duplicating the core's rule-soundness proofs.
+
+- `Bridge/SolidityBridge/ExternalEvm/Environment.lean` relates SELFBALANCE
+  to EvmYul's actual account-map lookup and its `stateOp` transformer,
+  including absent accounts. ADDRESS, CALLER, CALLVALUE and TIMESTAMP
+  agree on shared observations as well. `referenceMachine_agrees` gives a
+  representing machine for every upstream state, so the relation does not
+  assume zero balances or equal caller/executing addresses. Each opcode
+  theorem also preserves that shared-state relation after execution. This extends
+  the eight existing binary-word comparisons; it does not establish every
+  instruction, gas, byte memory, account-changing CALL or bytecode dispatch.
+- `Bridge/SolidityBridge/CompilerSimulation.lean` supplies CSLib
+  `IsBisimulation`, `Simulation` and `TraceEq` for successful program
+  boundaries. Each target transition contains an actual instruction trace
+  in `Evm.lts`; labels retain the typed source program. Traces compose over
+  any number of admitted, payment-free programs, including inlined calls.
+  Fragment admission and local-space bounds remain explicit. Instruction
+  labels are grouped into those boundary transitions; failure and divergence
+  are outside this successful-execution LTS. The existing trace-completeness
+  proof now handles the core theorem's divergence alternative explicitly.
+- `Bridge/SolidityBridge/LoopFixpoint.lean` identifies `OrderHom.lfp` of
+  the one-iteration outcome transformer with Mathlib's `PFun.fix` outcomes.
+  Well-founded induction gives total correctness with decreases required
+  only on invariant states. The postcondition chooses whether terminal
+  errors are acceptable. This argument invokes no core loop rule.
+- `Bridge/SolidityBridge/AdversaryPolicy.lean` proves that each fixed
+  operational callee has exactly the completed outcomes of its reachable
+  return policy. Internal callee labels are retained when lifting traces.
+  This strengthens the existing theorem quantifying over all callees;
+  returns must still preserve the assumed invariant, and infinite callee
+  runs are not completed outcomes.
+- `FO.finite_storage_support` in `Bridge/SolidityBridge/ModelTheory.lean`
+  applies compactness to the contract theory together with supplied
+  first-order storage facts. It extracts a finite subset of the supplied
+  facts while leaving the contract theory available in full. This is
+  semantic entailment, without a calculus-completeness claim.
+
+### Plausible for rule debugging
+
+Run `cd Bridge && lake exe rulecheck`, or supply `--seed 42 --samples 1000`.
+`Bridge/SolidityBridge/PropertyChecks.lean` uses Plausible (Lean's QuickCheck)
+to test 36 named signed/unsigned local-rule cases: five binary assignments,
+five compound assignments, and all four increment/decrement forms both
+alone and with assignment. Each case receives 200 samples by default.
+The generator mixes zero, one, word maximum, signed minimum and maximum
+with uniformly sampled full-width words; shrinking reduces failing operands.
+
+The checker independently executes the emitted update and the typed
+statement, compares both locals, and distinguishes ordinary revert from
+panic and fuel exhaustion. Unsupported premise shapes fail the corpus
+check rather than counting as successes. The general observation API also
+receives the global state for future storage/heap/ledger/balance tests.
+This initial corpus does not claim coverage of every taclet or random
+storage layouts. A deliberate missing-assignment mutation must be rejected
+by the same Plausible path, checking that the harness can find a bad rule.
+No test result is installed as a theorem or proof axiom.
+
+The bridge root runs the fixed-seed corpus during a fresh build. The
+`rulecheck` executable runs it again on every invocation, including when
+build artifacts are cached. Zero samples and malformed options fail.
+`AGENTS.md` and the rule-repair guide point to this workflow. All tooling
+and dependencies remain in the optional Bridge package.
+
+### Validation and review
+
+The six new/extended proof-and-test module targets and `rulecheck` build
+independently under Lean 4.24.0. The default seed passes 36 × 200 samples;
+seed 42 passes 36 × 1,000. Both runs reject the deliberate bad assignment.
+The executable rejects zero samples, malformed numbers, unknown flags and
+missing option values with exit status 2. The eight new pinned axiom audits
+permit only `propext`, `Classical.choice` and `Quot.sound`.
+
+The full Bridge root was also attempted. It remains blocked in the
+untouched item-1/item-4 files: source-notation parse errors in
+`Bridge/SolidityBridge/Arith/Power.lean` and
+`Bridge/SolidityBridge/WeakestPreLaws.lean`, and a failed reflexivity proof
+in `Bridge/SolidityBridge/Arith/Lowering.lean`. Those files are reserved for
+the separate arithmetic/WP work and were not changed here. The independent
+targets above do not import them. Vendor checksums, whitespace, core import
+layering and module reachability pass; the prose-path check retains its
+13 previously recorded missing references.
+
+Independent read-only finder/skeptic reviews found two debugger issues:
+the observation API initially exposed only locals, and build-time failures
+initially omitted their seed. Both are fixed. The reviews confirmed the
+documented program-boundary, environment-opcode and completed-callee scope;
+neither reviewer invoked Lean or edited files.
+
+### Model theory and callback trace follow-up (2026-10-25)
+
+`Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean` adds:
+
+- `FO.solTheory_compact`: `SolTheory C ∪ facts` is satisfiable exactly when
+  every finite subset of `facts` is satisfiable together with the whole theory.
+- `FO.solTheory_models_of_card`: a model at every infinite cardinal at least
+  the language cardinal. The proof supplies the concrete state's infinite
+  logical-integer carrier, rather than assuming an infinite model exists.
+- `FO.solTheory_elementary_submodel`: downward Löwenheim–Skolem with explicit
+  language, parameter-set and ambient-model cardinal bounds, retaining the
+  parameters and every contract axiom.
+- `FO.holds_iff_submodel_realize`: an elementary submodel of a concrete state
+  preserves each translated closed first-order leaf, including leaves that
+  are not valid in every state.
+
+The cardinality results concern abstract first-order models. They assert
+neither that these models are concrete Solidity states nor that the entire
+Solidity signature is countable.
+
+`Bridge/SolidityBridge/CallbackTrace.lean` labels completed outcomes with the
+full returned state. `holdsC_iff_weakObservable_traces` identifies the transfer
+callback modality with safety on every callee's observable traces. CSLib
+saturation treats internal computation as silent:
+`weakTraceEq_callSafe` and `weakBisim_callSafe` preserve every postcondition,
+even when callees perform different amounts of internal work.
+`holdsC_iff_weakTraceEquivalent_callee` permits replacing the universal callee
+by an implementation with the same weak traces. Strong trace/bisimulation
+versions are provided too; those count internal transitions.
+
+`Bridge/SolidityBridge/CallbackModalTrace.lean` supplies `holdsC_iff_traceSafe`,
+`traceEq_holdsC` and `bisim_holdsC` for every program, frame stack and modality.
+Its LTS reuses `ExecP` and `ExecF`: it is an adapter establishing CSLib
+invariance, rather than an independent implementation of callback execution.
+The separate operational callee correspondence concerns one transfer boundary.
+Both results cover finite completed outcomes under invariant-preserving
+returns; even diamond safety does not assert termination of an arbitrary callee.
+
+Read-only finder/skeptic review confirmed these distinctions and the need for
+weak rather than strong equivalence when internal-step counts differ. Neither
+reviewer invoked Lean or edited files.
+
+### Expanded independent EVM audit (2026-10-25)
+
+The vendor now contains the 53-module import closure of the pinned upstream
+primitive and full EVM dispatchers. Its Lean 4.24 compatibility patch adds one
+`UInt256` type annotation to the upstream EVM semantics, alongside the existing
+JSON compatibility patch. Original and patched checksums are retained.
+
+`Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` connects the core's actual
+instruction steps to `EvmYul.EVM.step` on all numeric represented stacks for
+18 binary and two unary word operators, the five account/transaction
+observations, numeric PUSH and POP. The binary/unary/POP correspondences
+include stack underflow. `Bridge/SolidityBridge/ExternalEvm/StackOps.lean`
+compares legal DUP1–DUP16 and SWAP1–SWAP16 with explicit stack-depth premises.
+Signed division/remainder and exponentiation are proved against the upstream
+implementations, including exponentiation by squaring, zero divisors, and
+signed-minimum division by minus one.
+
+These are projected opcode proofs. The shared relation observes the numeric
+stack and account/transaction fields, balances modulo `2^256`, and 160-bit
+account addresses. It does not equate memory, storage, PC, code, exact
+unbounded balances or gas. The dispatcher is supplied its opcode/immediate
+with positive evaluator fuel and zero charged gas; instruction fetching and
+the gas/stack-limit/static-mode checks in the upstream `X` driver are not
+verified by these theorems.
+
+The full requested instruction correspondence is **not complete**. The
+remaining constructors and their required representation work are explicit:
+
+| Core instructions | Remaining obligation |
+|---|---|
+| `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
+| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
+| `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
+| `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
+| `revert` | Return-data operands and the driver's halting relation. |
+
+Symbolic-slot PUSH/ADD and DUP/SWAP depths outside 1–16 are also outside the
+numeric correspondence. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
+proves concrete disagreements for same-stack CALL/REVERT/JUMP/JUMPI and fixed
+memory opcodes, non-wrapping symbolic offsets, and impossibility of a globally
+injective encoding of all symbolic slots into finite EVM words. These results
+rule out an unrestricted one-opcode identity theorem; they do not rule out
+verified macro lowerings under explicit representation assumptions.
+
+Read-only finder/skeptic review confirmed the arithmetic equations and required the
+modular-balance, 160-bit-address and driver limitations above. A proof-checking
+performance issue in signed operations was resolved by normalizing finite
+multiplication by minus one before projecting to naturals, avoiding kernel
+expansion of a huge numeral. No heartbeat limit or proof axiom was added.
+
+Final follow-up validation: the independent targets build successfully
+(1,428 jobs), including the new model-theory/callback modules, dispatcher,
+stack proofs, obstruction proofs, previous loop/compiler/callee extensions,
+and `rulecheck`. Seventeen additional pinned headline audits admit only
+`propext`, `Classical.choice` and `Quot.sound`. Plausible again passes 36 ×
+1,000 samples at seed 42; its default fixed-seed 36 × 200 corpus also passes.
+Upstream and build vendor checksums, patch dry-run, whitespace, core layering,
+and reachability of all 48 Bridge modules pass. A fresh full-root build
+still fails only in the reserved arithmetic/WP files recorded above; the
+prose-path check retains the same 13 unrelated missing references.
+
+To check the new work independently of those reserved files, run from `Bridge/`:
+
+```sh
+lake build SolidityBridge.ModelTheory.LowenheimSkolem \
+  SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
+  SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
+  SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
+  SolidityBridge.AdversaryPolicy rulecheck
+lake exe rulecheck --seed 42 --samples 1000
+```
