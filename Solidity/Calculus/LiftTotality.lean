@@ -187,6 +187,10 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k 
     exact SplitOK.un (fun q' => LTm.obsW q') (fun _ h' => .word h') (fun _ => rfl) ih rfl rfl
   | @field sn f T h q _ ih =>
     exact SplitOK.un (fun q' => LTm.app1 (.field h) q') (fun _ h' => .field h h') (fun _ => rfl) ih rfl rfl
+  | @neg h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .neg h) a') (fun _ h' => .neg h h') (fun _ => rfl) ih rfl rfl
+  | @bnot h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .bnot h) a') (fun _ h' => .bnot h h') (fun _ => rfl) ih rfl rfl
   | @not a _ ih =>
     exact SplitOK.un (fun a' => LTm.app1 (.unop .not rfl) a') (fun _ h' => .not h') (fun _ => rfl) ih rfl rfl
   | @ofNum t _ ih =>
@@ -311,6 +315,12 @@ theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k
   | @not a _ ih =>
     intro hn
     exact .not (ih (Option.map_eq_none_iff.mp hn))
+  | @neg h a _ ih =>
+    intro hn
+    exact .neg h (ih (Option.map_eq_none_iff.mp hn))
+  | @bnot h a _ ih =>
+    intro hn
+    exact .bnot h (ih (Option.map_eq_none_iff.mp hn))
   | ofNum _ ih => intro hn; exact .ofNum (ih hn)
   | kite => intro hn; cases hn
   | ite => intro hn; cases hn

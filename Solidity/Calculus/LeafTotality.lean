@@ -106,6 +106,10 @@ theorem CheckedScalar.W.scale {n : Nat} {p : PrimTy} (c : Int) {a : CheckedScala
     (CheckedScalar.scale c a).W n :=
   CheckedScalar.W.guard ha.2 (CheckedScalar.W.ofInt p (((ha.1.offset _).scale c).offset _))
 
+theorem CheckedScalar.W.compl {n : Nat} {a : CheckedScalar .uint} (ha : a.W n) :
+    (CheckedScalar.compl a).W n :=
+  CheckedScalar.W.guard ha.2 (CheckedScalar.W.ofInt .uint ((Affine.W.literal _ _).sub ha.1))
+
 theorem CheckedScalar.W.eq {n : Nat} {p : PrimTy} {a b : CheckedScalar p} (ha : a.W n)
     (hb : b.W n) : (a.eq b).width ≤ n :=
   AFml.width_and ha.2 (AFml.width_and hb.2 (Affine.width_eq ha.1 hb.1))
@@ -178,6 +182,10 @@ inductive LTm.Num (ps : Parameter → Prop) (es : EnvKey → Prop) : {p : PrimTy
       LTm.Num ps es b → LTm.Num ps es (.app2 (.binop .mul h) (.app0 (.lit v)) b)
   | mulR {p : PrimTy} (h : BinOp.mul.accepts p = true) {a : LTm C (.val p)} (v : p.Denote) :
       LTm.Num ps es a → LTm.Num ps es (.app2 (.binop .mul h) a (.app0 (.lit v)))
+  | neg (h : UnOp.neg.accepts .int = true) {a : LTm C (.val .int)} :
+      LTm.Num ps es a → LTm.Num ps es (.app1 (.unop .neg h) a)
+  | bnot (h : UnOp.bnot.accepts .uint = true) {a : LTm C (.val .uint)} :
+      LTm.Num ps es a → LTm.Num ps es (.app1 (.unop .bnot h) a)
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.Num ps es d → LTm.Num ps es a → LTm.Num ps es (.seq d a)
   | err {p : PrimTy} : LTm.Num ps es (LTm.err (C := C) (s := .val p))
@@ -317,6 +325,28 @@ theorem CheckedValue.ofTermFuel?_good (ps : List Parameter) (es : List EnvKey) :
       refine ⟨CheckedValue.sub hp va vb, by simp only [CheckedValue.ofTermFuel?, hs, hva, hvb]; rfl, ?_⟩
       intro rs hr
       exact CheckedScalar.W.arith true (ga rs (fun r hm => hr r (List.mem_append_left _ hm))) (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))
+  | @neg hp a _ iha =>
+    intro n hn
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn
+    obtain ⟨va, hva, ga⟩ := iha n (by omega)
+    cases hs : StaticValue.ofTerm? (LTm.app1 (C := C) (.unop .neg hp) a) with
+    | some w => exact ⟨_, by simp only [CheckedValue.ofTermFuel?, hs], CheckedValue.good_ofStatic w⟩
+    | none =>
+      refine ⟨CheckedValue.neg hp va, by simp only [CheckedValue.ofTermFuel?, hs, hva]; rfl, ?_⟩
+      intro rs hr
+      exact CheckedScalar.W.scale _ (ga rs hr)
+  | @bnot hp a _ iha =>
+    intro n hn
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn
+    obtain ⟨va, hva, ga⟩ := iha n (by omega)
+    cases hs : StaticValue.ofTerm? (LTm.app1 (C := C) (.unop .bnot hp) a) with
+    | some w => exact ⟨_, by simp only [CheckedValue.ofTermFuel?, hs], CheckedValue.good_ofStatic w⟩
+    | none =>
+      refine ⟨CheckedValue.bnot hp va, by simp only [CheckedValue.ofTermFuel?, hs, hva]; rfl, ?_⟩
+      intro rs hr
+      exact CheckedScalar.W.compl (ga rs hr)
   | @mulL p hp v b _ ihb =>
     intro n hn
     obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
@@ -433,6 +463,7 @@ theorem LTm.Num.toBoolV {ps : Parameter → Prop} {es : EnvKey → Prop} :
     have hb : p = .bool := by simpa only [BinOp.ret, BinOp.isArith, if_true] using h
     subst hb
     cases hp
+  | neg _ _ _ | bnot _ _ _ => intro h; exact absurd h (by decide)
   | @mulL p hp v b _ _ | @mulR p hp b v _ _ =>
     intro h
     have hb : p = .bool := by simpa only [BinOp.ret, BinOp.isArith, if_true] using h

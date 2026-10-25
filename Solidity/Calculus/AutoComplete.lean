@@ -89,9 +89,11 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
     | .num, _ => (q.src? c .path).map fun ⟨h⟩ => ⟨.word h⟩
     | .bool, .bool => (q.src? c .path).map fun ⟨h⟩ => ⟨.ofNum (.word h)⟩
     | _, _ => none
-  | c, k, _, .app1 (.unop op (p := p) _) a =>
+  | c, k, _, .app1 (.unop op (p := p) hop) a =>
     match k, op, p with
     | .bool, .not, .bool => (a.src? c .bool).map fun ⟨h⟩ => ⟨.not h⟩
+    | .num, .neg, .int => (a.src? c .num).map fun ⟨h⟩ => ⟨.neg hop h⟩
+    | .num, .bnot, .uint => (a.src? c .num).map fun ⟨h⟩ => ⟨.bnot hop h⟩
     | _, _, _ => none
   | c, k, _, .app1 (.field h) q =>
     match k with
@@ -338,6 +340,12 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
     show ((LTm.src? false .bool a).map _).isSome = true
+    rw [hx]
+    rfl
+  | @neg h a _ ih | @bnot h a _ ih =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show ((LTm.src? false .num a).map _).isSome = true
     rw [hx]
     rfl
   | @and a b _ _ iha ihb =>

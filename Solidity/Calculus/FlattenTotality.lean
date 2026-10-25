@@ -58,6 +58,9 @@ theorem LTm.Num.readFree {ps : Parameter → Prop} {es : EnvKey → Prop} :
   | var k _ => exact ⟨.var k, rfl, rfl⟩
   | @lit p v => exact ⟨.lit v, by cases p <;> rfl, rfl⟩
   | env e _ => exact ⟨.env e, rfl, rfl⟩
+  | @neg hp a _ iha | @bnot hp a _ iha =>
+    obtain ⟨ea, hea, ha0⟩ := iha
+    exact ⟨.unop _ hp ea, by change (ReadExpr.ofTerm? a).map (ReadExpr.unop _ hp) = _; rw [hea]; rfl, ha0⟩
   | @add p hp a b _ _ iha ihb =>
     obtain ⟨ea, hea, ha0⟩ := iha
     obtain ⟨eb, heb, hb0⟩ := ihb
@@ -343,6 +346,10 @@ inductive LTm.Src (c : Bool) : SrcKind → {s : Srt} → LTm C s → Prop
       LTm.Src c .num b → LTm.Src c .num (.app2 (.binop .mul h) (.app0 (.lit v)) b)
   | mulR {p : PrimTy} (h : BinOp.mul.accepts p = true) {a : LTm C (.val p)} (v : p.Denote) :
       LTm.Src c .num a → LTm.Src c .num (.app2 (.binop .mul h) a (.app0 (.lit v)))
+  | neg (h : UnOp.neg.accepts .int = true) {a : LTm C (.val .int)} :
+      LTm.Src c .num a → LTm.Src c .num (.app1 (.unop .neg h) a)
+  | bnot (h : UnOp.bnot.accepts .uint = true) {a : LTm C (.val .uint)} :
+      LTm.Src c .num a → LTm.Src c .num (.app1 (.unop .bnot h) a)
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.Src c .num d → LTm.Src c .num a → LTm.Src c .num (.seq d a)
   | err {p : PrimTy} : LTm.Src c .num (LTm.err (C := C) (s := .val p))
@@ -507,6 +514,34 @@ theorem flattenFuel?_Src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fals
     · show Option.bind (flattenFuel? (C := C) d r x start) _ = _
       rw [ha]
       show some (Flattened.app1 (Op1.unop UnOp.not (p := .bool) rfl) a, r - x.nodes) = _
+      simp only [LTm.nodes, Option.some.injEq, Prod.mk.injEq, true_and]
+      omega
+    · show a.term.nodes + 1 ≤ 2 * (x.nodes + 1)
+      omega
+  | @neg h x _ ih =>
+    intro d r start hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by simp only [LTm.nodes] at hr; omega⟩
+    simp only [LTm.depth, LTm.nodes, LTm.atomBound] at hd hr hb hs
+    obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ := ih d r start (by omega) (by omega) hb (by omega)
+    refine ⟨Flattened.app1 (Op1.unop UnOp.neg h) a, ?_, LTm.Num.neg h aok, alen, alaid, aab, ?_, aocc⟩
+    · show Option.bind (flattenFuel? (C := C) d r x start) _ = _
+      rw [ha]
+      show some (Flattened.app1 (Op1.unop UnOp.neg h) a, r - x.nodes) = _
+      simp only [LTm.nodes, Option.some.injEq, Prod.mk.injEq, true_and]
+      omega
+    · show a.term.nodes + 1 ≤ 2 * (x.nodes + 1)
+      omega
+  | @bnot h x _ ih =>
+    intro d r start hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by simp only [LTm.nodes] at hr; omega⟩
+    simp only [LTm.depth, LTm.nodes, LTm.atomBound] at hd hr hb hs
+    obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ := ih d r start (by omega) (by omega) hb (by omega)
+    refine ⟨Flattened.app1 (Op1.unop UnOp.bnot h) a, ?_, LTm.Num.bnot h aok, alen, alaid, aab, ?_, aocc⟩
+    · show Option.bind (flattenFuel? (C := C) d r x start) _ = _
+      rw [ha]
+      show some (Flattened.app1 (Op1.unop UnOp.bnot h) a, r - x.nodes) = _
       simp only [LTm.nodes, Option.some.injEq, Prod.mk.injEq, true_and]
       omega
     · show a.term.nodes + 1 ≤ 2 * (x.nodes + 1)
@@ -1513,6 +1548,9 @@ theorem LTm.Src.readExpr : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fals
   | @not x _ ih =>
     obtain ⟨e, he⟩ := ih
     exact ⟨.unop .not (p := .bool) rfl e, by change (ReadExpr.ofTerm? x).map (ReadExpr.unop .not rfl) = _; rw [he]; rfl⟩
+  | @neg h x _ ih | @bnot h x _ ih =>
+    obtain ⟨e, he⟩ := ih
+    exact ⟨.unop _ h e, by change (ReadExpr.ofTerm? x).map (ReadExpr.unop _ h) = _; rw [he]; rfl⟩
   | @add p h x y _ _ iha ihb =>
     obtain ⟨ea, hea⟩ := iha
     obtain ⟨eb, heb⟩ := ihb
@@ -1681,6 +1719,8 @@ theorem LTm.Num.restrict {P : Parameter → Prop} {E : EnvKey → Prop} :
   | lit v => intro _ _; exact .lit v
   | env e _ => intro _ hE; exact .env e (hE e List.mem_cons_self)
   | err => intro _ _; exact .err
+  | neg h _ ih => intro hP hE; exact .neg h (ih hP hE)
+  | bnot h _ ih => intro hP hE; exact .bnot h (ih hP hE)
   | @add p h a b _ _ iha ihb =>
     intro hP hE
     exact .add h (iha (fun q hq => hP q (by simp only [LTm.parameters, List.mem_append]; exact Or.inl hq))

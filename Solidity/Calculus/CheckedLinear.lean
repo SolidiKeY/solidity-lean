@@ -163,6 +163,29 @@ def litMul {p : PrimTy} (hp : BinOp.mul.accepts p = true) {a b : LTm C (.val p)}
     | bool => cases hp
     | uint | int => exact ih⟩
 
+/-- Checked negation on `int`: `-1 · a`, out of range at `-2^255`. -/
+def neg (hp : UnOp.neg.accepts .int = true) {a : LTm C (.val .int)}
+    (ha : CheckedValue (ps := ps) (es := es) a) :
+    CheckedValue (ps := ps) (es := es) (.app1 (.unop .neg hp) a) :=
+  ⟨ha.refs, fun rs => .scale (-1) (ha.lower rs), by
+    intro rs hr g ν
+    have ih := CheckedScalar.scale_correct (p := .int) rfl (-1) (ha.lower rs)
+      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+    rw [LTm.eval_app1, Close.Op1.eval_unop]
+    simp only [integer, Int.neg_one_mul] at ih
+    exact ih⟩
+
+/-- The complement on `uint`: `2^256 - 1 - a`, always in range. -/
+def bnot (hp : UnOp.bnot.accepts .uint = true) {a : LTm C (.val .uint)}
+    (ha : CheckedValue (ps := ps) (es := es) a) :
+    CheckedValue (ps := ps) (es := es) (.app1 (.unop .bnot hp) a) :=
+  ⟨ha.refs, fun rs => .compl (ha.lower rs), by
+    intro rs hr g ν
+    have ih := CheckedScalar.compl_correct (ha.lower rs)
+      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+    rw [LTm.eval_app1, Close.Op1.eval_unop]
+    exact ih⟩
+
 /-- A primitive guard must return before the value does. This is the
 definedness sequencing emitted by read-occurrence flattening. -/
 def seq {q p : PrimTy} {d : LTm C (.val q)} {t : LTm C (.val p)}
@@ -199,6 +222,8 @@ def ofTermFuel? (ps : List Parameter) : Nat → {p : PrimTy} → (t : LTm C (.va
           match b.lit? with
           | some ⟨v, hv⟩ => do return litMul h v hv (← ofTermFuel? ps fuel a)
           | none => none
+      | .app1 (.unop .neg (p := .int) h) a => do return neg h (← ofTermFuel? ps fuel a)
+      | .app1 (.unop .bnot (p := .uint) h) a => do return bnot h (← ofTermFuel? ps fuel a)
       | .seq (s' := .val _) d a => do return seq (← ofTermFuel? ps fuel d) (← ofTermFuel? ps fuel a)
       | .err => some failed
       | _ => none
