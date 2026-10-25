@@ -1130,7 +1130,8 @@ complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
 *unknown* (`gapColumn` … `gapHashUnderForall`, each in the fragment by the
-kernel, `*_inTarget`), listed under "What is not proved" below.  The
+kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
+(`gapMemWrite` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
 over an inner mapping, `allow[3][k]`), `namesTwoKinds` (two kinds of
 hash of one string), `arrayRead`, `fixedRead` (storage-array reads,
@@ -1748,6 +1749,16 @@ of about two thousand nodes, about a millisecond a state).  The
     (`gapPartialGuard`, `k < x - 1`: the index set takes total operands);
     a positive quantifier the prefix does not reach, reading at its
     variable (`gapPositiveForall`, `∀ k` inside a conjunction);
+  * **memory outside feature 13** (`Examples/DecisionMemory.lean`): a
+    write in a leaf's update (`gapMemWrite`, `{memory := write(memory,
+    s[0], 5)}`: the cut takes no update; it needs the reads past the write
+    as `e == e' ? v : w` and the fresh objects apart in `MxRel`); an index
+    bound after its array (`gapMemInner`, `∀ fresh s. … ∀ i. … s[i]`: the
+    reads' atoms stand at the binder, and the object cannot be chosen
+    before `i`); a hidden memory binder (`gapMemParam`: it ranges over the
+    objects already in the heap, which may alias, and over none); a fresh
+    struct's member (`gapMemStruct`: the cut takes arrays of primitives;
+    a struct with reference members needs objects for them);
   * **the ledger and KeY `int` without quantifiers** (the plain
     storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
     decided by feature 10, and the fresh memory array's, `gapMemory`, by
@@ -1845,7 +1856,11 @@ in this order:
    writes and allocations in a leaf's updates (`{memory := write(…)}`,
    `addM`, copies from storage: the cut takes no update), struct members
    and nested arrays of a fresh object, an index bound after its array
-   (`allocAll s. ∀ i. … s[i]`), an index that reads memory or storage.
+   (`allocAll s. ∀ i. … s[i]`), hidden memory binders, an index that reads
+   memory or storage (in the fragment: `gapMemWrite`, `gapMemInner`,
+   `gapMemParam`, `gapMemStruct`).  Programs with memory statements are
+   refused earlier still: `ProgramNormalization` takes value statements
+   only (`ExactStatement.ofStatement?`).
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.  Done (2026-10-25) for fresh strings read only

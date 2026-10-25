@@ -124,4 +124,39 @@ theorem memAck_iff : decideLeaf memAck = .proved ↔ Fml.Valid memAck :=
 /-- info: 'Solidity.Examples.Decision.memAck_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms memAck_iff
 
+
+/-! ### Counterexamples to `DecisionTheorem` left with memory
+
+Each in `Fml.inTarget` (by the kernel) and answered `unknown`
+(`docs/automation.md`, M7, "What is not proved"): a write in a leaf's update
+(the cut takes no update), an index bound after its array (the reads' atoms
+stand at the binder), a hidden memory binder (it ranges over the objects
+already there, and over none), a fresh struct's member (the cut takes
+arrays of primitives). -/
+
+def gapMemWrite : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (isT (gtB (mlenG .here) (litU 0)))
+    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (litU 0))
+        (.app1 .mval (litU 5)))))
+      (.eq (mrdG .dyn .here (litU 0)) (litU 5))))
+def gapMemInner : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (isT (gtB (mlenG .here) (litU 0)))
+    (.all (.user "i") .uint (.imp (isT (gtB (mlenG (.there .here)) (.pvV .here)))
+      (.eq (mrdG .dyn (.there .here) (.pvV .here)) (litU 0)))))
+def gapMemParam : Fml Gaps [] := .bind .box (.user "s") (.mem UA)
+  (.imp (isT (gtB (mlenG .here) (litU 0))) (.eq (mrdG .dyn .here (litU 0)) (litU 0)))
+def gapMemStruct : Fml StandardExample [] := .allocAll (.user "p") (.struct "Person")
+  (.eq (.app2 .read (.app0 .memory)
+      (.app1 (.mfield (s := "Person") (f := "age") (T := .prim .uint) (by decide)) (.pvI .here)))
+    (.app0 (.lit (uintOfNat 0))))
+
+theorem gapMemWrite_inTarget : gapMemWrite.inTarget {} = true := by decide +kernel
+theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kernel
+theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
+theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
+
+/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+#guard_msgs in
+#eval [verdict gapMemWrite, verdict gapMemInner, verdict gapMemParam, verdict gapMemStruct]
+
 end Solidity.Examples.Decision
