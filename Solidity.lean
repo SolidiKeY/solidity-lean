@@ -434,6 +434,7 @@ import Solidity.Calculus.LeafTotality
 import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.LiftTotality
 import Solidity.Calculus.AutoComplete
+import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
