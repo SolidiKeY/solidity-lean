@@ -9,4 +9,5 @@ if ! cmp -s "$repo_root/lean-toolchain" "$repo_root/Bridge/lean-toolchain"; then
 fi
 cd "$repo_root/Bridge"
 sha256sum --check vendor/EvmYul/SHA256SUMS
+sha256sum --check vendor/Loom/SHA256SUMS
 exec lake build

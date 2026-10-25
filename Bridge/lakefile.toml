@@ -45,3 +45,11 @@ globs = ["EvmYul.+"]
 name = "Conform"
 srcDir = "vendor"
 globs = ["Conform.Wheels"]
+
+# Loom's Lean 4.24 WP/VC-generator closure, without solver targets.
+# Provenance and checksums: vendor/Loom/VENDOR.md.
+[[lean_lib]]
+name = "Loom"
+srcDir = "vendor"
+globs = ["Loom.+"]
+weakLeanArgs = ["--tstack=131072"]
