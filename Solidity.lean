@@ -449,6 +449,9 @@ import Solidity.Calculus.LedgerCut
 import Solidity.Calculus.LedgerArithmetic
 import Solidity.Calculus.LedgerTotality
 import Solidity.Calculus.LedgerReduction
+import Solidity.Calculus.HashPremise
+import Solidity.Calculus.HashSwap
+import Solidity.Calculus.HashReduction
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
