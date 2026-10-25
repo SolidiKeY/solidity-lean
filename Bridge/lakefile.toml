@@ -88,8 +88,10 @@ name = "VelvetExamples"
 srcDir = "vendor"
 globs = ["CaseStudies.Velvet.VelvetExamples.+"]
 
-# Velvet programs for the Solidity patterns the core verifies; they import
+# Velvet programs for Solidity contracts: the patterns the core verifies, a
+# bank, a token and loops over storage arrays (`SolidityVelvet/`); they import
 # Velvet only, so its keywords (`method`, `ensures`, `invariant`) stay out of
 # `SolidityBridge` (`../docs/bridge.md`, "Velvet").
 [[lean_lib]]
 name = "SolidityVelvet"
+globs = ["SolidityVelvet", "SolidityVelvet.+"]

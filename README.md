@@ -18,6 +18,18 @@ was built. Pick a project (the Solidity calculus, or Velvet) and an example
 at the top; a link names the file and line. `docs/site.md` says how the site
 is built and how to add an example.
 
+The Velvet examples state Solidity contracts as Velvet methods, proved by
+`loom_solve`:
+
+- [Solidity patterns](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet.lean) — a counting loop, the largest
+  balance, ERC20's `transfer`
+- [A bank](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Bank.lean) — `deposit` without overflow and
+  `withdraw`, other accounts untouched
+- [An ERC20 token](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Token.lean) — `mint` with
+  `totalSupply`, `transferFrom` with allowances
+- [Loops over storage arrays](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Loops.lean) — the
+  total balance, a holder's index, the winning proposal
+
 ## Build
 
 ```sh

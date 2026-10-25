@@ -42,6 +42,9 @@
       "description": "Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
       "examples": [
         { "group": "Solidity patterns", "file": "SolidityVelvet.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Bank.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Token.lean" },
+        { "group": "Solidity patterns", "file": "SolidityVelvet/Loops.lean" },
         { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/MaxElem.lean" },
         { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/IsSorted.lean" },
         { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/SumOfDigits.lean" },

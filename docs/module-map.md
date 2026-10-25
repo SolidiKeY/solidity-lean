@@ -80,6 +80,9 @@ See `docs/bridge.md` for scope and commands.
 | `Bridge/vendor/Loom/MonadAlgebras/WP/Tactic.lean` | The upstream Loom VC-generator import closure, with two explicit instance names for editor checks; provenance and checksums in `Bridge/vendor/Loom/VENDOR.md`. |
 | `Bridge/vendor/CaseStudies/Velvet/Std.lean` | Velvet's front end (`method`, `prove_correct`, `loom_solve`), vendored verbatim from Loom's last Velvet commit with four of its examples; provenance and checksums in `Bridge/vendor/CaseStudies/VENDOR.md`. |
 | `Bridge/SolidityVelvet.lean` | Three of the core's Solidity programs as Velvet methods (a counting loop, a largest-balance scan, ERC20's `transfer`), proved by `loom_solve` and pinned by `#eval`; not related to `Stmt.run`. |
+| `Bridge/SolidityVelvet/Bank.lean` | A bank's `deposit` (bounded by `2^256`) and `withdraw` as Velvet methods. |
+| `Bridge/SolidityVelvet/Token.lean` | An ERC20 token's `mint` (with `totalSupply`) and `transferFrom` (with allowances) as Velvet methods. |
+| `Bridge/SolidityVelvet/Loops.lean` | Loops over storage arrays in Velvet: the total balance, a holder's index, the winning proposal. |
 
 | Module | What it defines |
 |---|---|

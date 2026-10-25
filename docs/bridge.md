@@ -164,7 +164,10 @@ upstream's examples) and `SolidityVelvet` (`Bridge/SolidityVelvet.lean`).
 The last states three Solidity programs of the core as Velvet methods,
 proved by `loom_solve` and run by `#eval`: the counting loop of
 `LoomExamples`, a scan for the largest balance and ERC20's `transfer` over
-a ledger. They are Lean programs and are not related to `Stmt.run`; the
+a ledger. Its modules add a bank (`Bridge/SolidityVelvet/Bank.lean`), a
+token's `mint` and `transferFrom` (`Bridge/SolidityVelvet/Token.lean`) and
+loops over storage arrays with their invariants
+(`Bridge/SolidityVelvet/Loops.lean`). They are Lean programs and are not related to `Stmt.run`; the
 theorems about Solidity's own semantics are the Loom adapter's above.
 `SolidityVelvet` imports Velvet alone and nothing imports it, so Velvet's
 keywords (`method`, `require`, `ensures`, `invariant`) and its global
