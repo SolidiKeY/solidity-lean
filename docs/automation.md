@@ -213,6 +213,7 @@ ProgramNormalization.ofFormula? 2048      exact program normalization
 sourceReduction?                          updates pushed in (ExactAt, toLS)
 LTm.elim / LFml.elim                      reads of writes eliminated
 LFml.condSimp                             trivial conditionals folded      (new)
+LFml.prenex                               consequent quantifiers in front  (M7)
 LFml.liftCond condLiftFuel                conditionals lifted to cases     (new)
 UniversalPrefix.ofFormula? 1024           the ∀ prefix
 flattenedArithmetic? 2048                 reads to fresh atoms, alias constraints,
@@ -283,7 +284,8 @@ in-range evidence.  Dynamic arrays are out, as planned.
 On terms (`LTm.Src c k`, `Calculus/FlattenTotality.lean`), by kind:
 
 * scalars (`num`): atoms, literals, transaction fields, `+`/`-` (checked),
-  `seq` guards, `err`, and storage reads `obsW` of a path;
+  `*` with a literal factor on either side (checked, M7), `seq` guards,
+  `err`, and storage reads `obsW` of a path;
 * Booleans (`bool`): a scalar at `bool`, `!`, `&&`, `||`, `==`/`!=` on
   Booleans or numbers, `<`/`>`/`<=`/`>=`, `seq` guards;
 * paths (`path`): a root, fields, mapping keys whose keys are scalars;
@@ -952,6 +954,167 @@ locals' stack, one deeper per call site, and each check reads the product
 and its equation, rather than the product substituted) would make the
 checks constant; the stack would still grow.  The walk grows with the
 inlined bodies the kernel's evaluation of the summary walks (above).
+
+## M7 · The theorem (`Calculus/Decision.lean`, `Calculus/Prenex.lean`)
+
+The closer's theorem, stated in Lean, with what is proved of it.
+
+### The statement
+
+```lean
+inductive LeafVerdict (C : Contract) | proved | refuted (σ : State C []) | unknown
+
+def decideGoal (φ : Fml C []) : LeafVerdict C   -- total, computable
+
+theorem decideGoal_sound    : decideGoal φ = .proved → Fml.ValidH φ
+theorem decideGoal_refutes  : decideGoal φ = .refuted σ → ¬ Fml.holdsH σ φ
+
+def DecisionTheorem (w : Waivers := {}) : Prop :=
+  ∀ (C : Contract) (φ : Fml C []), φ.inTarget w = true → decideGoal φ ≠ .unknown
+```
+
+`Fml.inTarget w` is the fragment the user named, on a program-free leaf.
+It contains everything except what the user allowed to answer *unknown*:
+
+* (c, c′) a product of two non-literal terms (KeY `int`, `uint`, `int`).
+  `x ** e` at a literal `e ≥ 2` and `mulmod` of two symbolic factors count
+  as products.
+* `/`, `%`, `**`, `<<`, `>>`, `&`, `|`, `^` with two symbolic operands.
+  A symbolic divisor (`c / x`, `c % x`, the modulus of `addmod`/`mulmod`),
+  a symbolic exponent and a symbolic shift amount count as two.  Each class
+  is a field of `Waivers`, and the user waived all four (2026-10-25).
+* (d) a quantified formula over array or mapping contents outside the
+  array property fragment.  Polarity is tracked: a positive-position `∀`
+  is an `∃` of the negation, so it needs no check.  A negative-position
+  `∀` block whose body reads at its variables must be the
+  Bradley–Manna–Sipma shape (`Fml.apfBlock`): a quantifier-free body made of
+  `guard → value` parts and their conjunctions; guards linear and positive
+  in the bound variables, reading nothing at them; values reading the bound
+  variables only as indices, never in a nested index (`a[a[i]]`), and
+  writing nothing at them.  A Presburger quantifier, one whose body reads
+  nothing at its variable, is in the fragment at any polarity, but past a
+  negative-position one only further Presburger quantifiers are.  Negative
+  `havoc`/`anon`/`allocAll`/`grow` and storage binders over a body that
+  reads contents fall under d.
+* (e3′) hashes.  Each goal is read under its own collision-freeness
+  premise: `Fml.HashFree σ φ` says that the hash terms of `φ` (in each
+  state `φ`'s reading reaches from `σ`) whose outputs agree read one input.
+  `Fml.holdsH` instantiates the leaf's leading binders, its parameters,
+  before the premise is taken, so the premise is about one instance.
+  `Fml.ValidH` is validity so read.  It is no axiom and no global
+  assumption; on a leaf without a hash it is `Fml.Valid` (`Fml.validH_iff`).
+  A hash term is in the fragment only where the premise settles it: as an
+  operand of `==`/`!=` against a hash of its kind, or as a key of a mapping
+  at a root all of whose keys are hashes.  Elsewhere its verdict may turn
+  on a preimage, which the user allowed to answer unknown. `ecrecover` (an
+  `opaque` function) is outside everywhere.
+
+The statement is about one computable function. "Some decider is
+complete" would be vacuous: `Classical.choice` gives a noncomputable one.
+
+`Fml.inTarget` is a conservative syntactic reading, a subset of the
+fragment the user named, never a superset:
+* an update or a program under a quantifier counts as reading at its
+  variable;
+* an index guard may not negate a comparison of bound variables;
+* a hash stored by an update, a hash key of a nested mapping and a hash
+  under any other operator are outside, even where the premise would
+  settle them;
+* a hash under a binder past the leading prefix contributes every input
+  that binder reaches, so for a binder over unbounded byte strings the
+  premise is false for the real Keccak and the goal holds vacuously.
+
+### What is proved
+
+| Theorem | Statement |
+|---|---|
+| `decideLeaf_sound` | `decideLeaf φ = .proved → Fml.Valid φ` |
+| `decideLeaf_refutes` | `decideLeaf φ = .refuted σ → ¬ holds σ φ` (the state certifies it) |
+| `decideLeaf_complete` | `φ.Covered = true → decideLeaf φ ≠ .unknown` |
+| `decideLeaf_proved_iff` | on `Fml.Covered`, `proved` exactly when valid |
+| `decideGoal_sound`, `decideGoal_refutes` | the same under the hash premise |
+| `decideGoal_complete` | `φ.Covered = true → φ.hasHash = false → decideGoal φ ≠ .unknown` |
+| `Fml.holdsH_iff`, `Fml.validH_iff` | without a hash the premise is empty |
+| `LFml.prenex_holds` | prenexing is exact |
+| `CheckedScalar.scale_correct` | checked multiplication by a literal is encoded exactly |
+
+`#print axioms` of each of the six `decide*` theorems is pinned in
+`Calculus/Decision.lean`: `propext`, `Classical.choice`, `Quot.sound`.
+Everything is `sorry`-free.
+
+`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by two
+features, each with its completeness proved through every stage
+(recognizer, lifting, flattening, compilers):
+
+1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
+   `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
+   `CheckedScalar.scale`, the code `c · (a - offset) + offset` under the
+   range guard).  The decision over it is still `AFml.decide_iff`, the
+   verified binary-derivative procedure, not `omega`.
+2. **Universal quantifiers in a consequent**: `pre → ∀ k. post` (a
+   postcondition's `\forall`) becomes `∀ k. pre → post` when `pre` reads
+   no `k` (`LFml.prenex`), ahead of the prefix.
+
+Both were refused before (`dependentReduction?` returned `none`: the
+compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
+`Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
+read, a doubling that overflows under the diamond (refuted), nested
+consequent quantifiers, a postcondition `∀ j` past a write (proved), and
+its false variant (refuted).  Coverage there is kernel-checked
+(`decide +kernel`); the verdicts are the compiled ones, since the kernel's
+arithmetic decision over 256-bit codes is too deep for the language
+server.
+
+### What is not proved
+
+* `DecisionTheorem` itself, and `Fml.Covered ⊆ Fml.inTarget`:
+  `Fml.Covered` is read on the eliminated leaf, `Fml.inTarget` on the
+  source, and M4's "what blocks the rest" (normalization's budget, update
+  pushing's `Tm.agreeB`/`Tm.toL`, elimination's invariant) stands.
+* The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
+  which come from the stages' fuel.
+* On the fragment, `decideGoal` still answers *unknown* on:
+  * negative-position quantifiers, including those in the array property
+    fragment (`Examples/Decision.lean`, `apf`);
+  * quantifier alternation;
+  * KeY `int` (no atom of `Srt.kint` in `LTm`);
+  * literal division, modulo, shifts and bitwise operators, and wrapping
+    arithmetic;
+  * unary `-`, `~` and the conversions;
+  * memory reads and writes;
+  * fixed and dynamic array indices (M4 (b));
+  * every hash.
+
+### The plan for the rest
+
+One feature a round, each with its completeness proof through the stages,
+in this order:
+
+1. **Unary `-` and the conversions** (`toInt`, `toUint` at a literal
+   range), like the literal product (`CheckedScalar` codes).
+2. **Literal division, modulo, shifts, masks, wrapping `+%`/`-%`/`*%`**: a
+   fresh atom per quotient with its defining constraints in the antecedent
+   (`q·c ≤ x < q·c + c`), exact in a universal reading. The compiler then
+   returns constraints beside the code.
+3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
+   difference of two natural codes in `AFml`.
+4. **Quantifiers in the arithmetic**: `AFml` with `∃`, decided by
+   projection in the binary-derivative automaton (the universe of reachable
+   formulas becomes one of subsets, still finite), or a verified Cooper
+   elimination; then negative-position Presburger quantifiers and
+   alternation.
+5. **The array property fragment**: instantiate a negative `∀` block at the
+   index set (the goal's index terms and the guards' bounds, Bradley–Manna–
+   Sipma), then decide the instance by the quantifier-free pipeline.
+   Completeness is their theorem: the instance is equisatisfiable.
+6. **Memory, array indices**: realization cases for memory and in-range
+   evidence for array indices (`Calculus/ReadRealization.lean`).
+7. **Hashes under the premise**: a hash–hash equation as its inputs'
+   equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
+   as its input's word list.
+8. **`Fml.Covered ⊆ Fml.inTarget`**: characterize normalization and update
+   pushing syntactically (M4's list), then lift the size bounds by fuel
+   computed from the formula.
 
 ## Review (2026-10-20)
 
