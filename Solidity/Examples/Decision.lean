@@ -28,8 +28,8 @@ hoisted out, `hoistPrep`).
 negative-position quantifier over a mapping is in it only when it is in
 the array property fragment (a conservative reading).  `decideLeaf` decides such a block over a
 mapping at a root (M7, step 5: `apf`, instantiated at the index set,
-`apfPrep`); a block over an inner mapping (`rowApf`) is still answered
-`unknown`, so `DecisionTheorem` is not yet true.  Two bound indices on one
+`apfPrep`), and a block over an inner mapping whose bound index is the
+last (`rowApf`).  Two bound indices on one
 path (`gridApf`) and a strict comparison of two bound variables
 (`strictSorted`) are outside the named fragment (`docs/automation.md`, M7).
 -/
@@ -193,8 +193,13 @@ section
 
 local instance : InContract := ⟨Allow⟩
 
-/-- In the named fragment, not yet decided: a block over an inner mapping. -/
+/-- A block over an inner mapping, its bound index the last (`apfPrep`,
+`MShape`): decided, and false variants (another row, a key past the guard);
+the row a parameter. -/
 def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][5] == 0 }
+def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
+def rowOut : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][12] == 0 }
+def rowVar : Fml Allow [] := dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[x][k] == 0) → allow[x][5] == 0 }
 /-- Outside the named fragment: two bound indices on one path, and a
 strict comparison of two bound variables. -/
 def gridApf : Fml Allow [] := dl!{ (∀ uint i; ∀ uint j; allow[i][j] == 0) → allow[1][2] == 0 }
@@ -354,12 +359,26 @@ theorem apf_answers : decideGoal apf ≠ .unknown := decideGoal_complete apf_cov
 theorem apfBad_iff : decideLeaf apfBad = .proved ↔ Fml.Valid apfBad :=
   decideLeaf_proved_iff apfBad_covered
 
-/-- `DecisionTheorem` is not yet true: `rowApf` is in the fragment, and
-answered `unknown`. -/
+/-! A block over an inner mapping (`allow[3][k]`): the floor construction
+under every outer key (`MShape.rebuild`). -/
+
 theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 
-/-- info: "unknown" -/
-#guard_msgs in #eval verdict rowApf
+/-- info: ["proved", "refuted", "refuted", "proved"] -/
+#guard_msgs in #eval [rowApf, rowBad, rowOut, rowVar].map verdict
+
+/-- info: [true, true, true, true] -/
+#guard_msgs in #eval [rowApf, rowBad, rowOut, rowVar].map Fml.Covered
+
+theorem rowApf_covered : rowApf.Covered = true := by decide +kernel
+theorem rowBad_covered : rowBad.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied to a block over an inner mapping. -/
+theorem rowApf_answers : decideGoal rowApf ≠ .unknown := decideGoal_complete rowApf_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the verdict is exact. -/
+theorem rowApf_iff : decideLeaf rowApf = .proved ↔ Fml.Valid rowApf :=
+  decideLeaf_proved_iff rowApf_covered
 
 /-- info: [false, false, true, true] -/
 #guard_msgs in #eval [gridApf, strictSorted, sortedLe, columnApf].map (Fml.inTarget {})

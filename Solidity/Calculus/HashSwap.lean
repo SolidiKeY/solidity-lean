@@ -134,10 +134,12 @@ theorem _root_.Solidity.Op2.eval_trO {a b s : Srt} (o : Op2 C a b s) (ha : a.isM
   | _ => rfl
 
 theorem _root_.Solidity.Op2.denote_agree {a b s : Srt} (o : Op2 C a b s) (ha : a.isMem = false) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
-    (x' : Option (a.Den C g'.H)) (y' : Option (b.Den C g'.H)) (da : a.TDen C) (db : b.TDen C) :
+    (x' : Option (a.Den C g'.H)) (y' : Option (b.Den C g'.H)) (hx : x' = Srt.trO a x)
+    (hy : y' = Srt.trO b y) (da : a.TDen C) (db : b.TDen C) :
     o.denote g' x' y' da db = o.denote g x y da db := by
   cases o with
   | read | mlen | copyMem | iread | copy | copySt | hash => cases ha
+  | anon => subst hx hy; simp only [Op2.denote]; split <;> rfl
   | _ => rfl
 
 theorem _root_.Solidity.Op3.eval_trO {a b c s : Srt} (o : Op3 C a b c s) (ha : a.isMem = false) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
@@ -370,7 +372,7 @@ theorem _root_.Solidity.Tm.sw_denote (h : SwRel k τ τ') : {s : Srt} → (t : T
         show o.denote τ'.glob (x'.eval τ') (y'.eval τ') (x'.denote τ') (y'.denote τ') =
           o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
         rw [Tm.sw_denote h x hx, Tm.sw_denote h y hy]
-        exact Op2.denote_agree o hm.1.1 _ _ _ _ _ _
+        exact Op2.denote_agree o hm.1.1 _ _ _ _ (Tm.sw_eval h x hx) (Tm.sw_eval h y hy) _ _
   | s, .app3 (a := a) (b := b) (c := c) o x y z, _, e => by
     simp only [Tm.sw] at e
     split at e
