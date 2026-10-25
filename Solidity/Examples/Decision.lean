@@ -394,8 +394,10 @@ def writeRead : Fml Arrays [] := dl!{ ∀ uint i; [ xs[i] = 5; ] xs[i] == 5 }
 /-- A fixed array: a write below its length read back, and one past it. -/
 def rowWrite : Fml Arrays [] := dl!{ ∀ uint i; i < 4 → [ row[i] = 5; ] row[i] == 5 }
 def rowPast : Fml Arrays [] := dl!{ ∀ uint i; ⟨ row[i] = 5; ⟩ true }
-/-- Past the live length the Theory reads the slots there: not the default. -/
-def shadowRead : Fml Arrays [] := dl!{ ∀ uint i; xs[i] == 0 }
+/-- Past the live length the Theory reads the slots there, not the default;
+past a fixed array's length, the default. -/
+def shadowRead : Fml Arrays [] := dl!{ ∀ uint i; i >= xs.length → xs[i] == 0 }
+def rowPastRead : Fml Arrays [] := dl!{ ∀ uint i; i >= 4 → row[i] == 0 }
 /-- An array read stored in a mapping. -/
 def owedRead : Fml Arrays [] :=
   dl!{ ∀ uint i; i < xs.length → [ owed[i] = xs[i]; ] owed[i] == xs[i] }
@@ -424,6 +426,8 @@ end
 #guard_msgs in #eval verdict rowPast
 /-- info: "refuted" -/
 #guard_msgs in #eval verdict shadowRead
+/-- info: "proved" -/
+#guard_msgs in #eval verdict rowPastRead
 /-- info: "proved" -/
 #guard_msgs in #eval verdict owedRead
 

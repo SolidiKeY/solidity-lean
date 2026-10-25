@@ -48,7 +48,9 @@ quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 `QFml.decide_iff`): reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`), negative array-property blocks over mappings at
-roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
+roots instantiated at the index set (`apfPrep_valid_iff`); or the leaves
+that read the starting ledger (`Fml.ledgerCovered`) or storage arrays at
+symbolic indices (`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)

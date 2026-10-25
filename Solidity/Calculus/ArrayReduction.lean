@@ -20,7 +20,7 @@ of writes eliminated, the universal prefix stripped, then
 
 Each stage is exact in a universal reading, so the verdict is exact
 (`ArrayReduction.valid_iff`); a false assignment is realized as in M4, then
-its arrays rebuilt from the atoms (`ARead.realize`), which refutes the leaf
+its arrays rebuilt from the atoms (`arrRealize`), which refutes the leaf
 (`LFml.aCut_refutes`).  `Fml.arrayCovered` is the fragment, on the
 eliminated leaf; `arrayReduction?_isSome` proves the pipeline never refuses
 it.
@@ -78,7 +78,7 @@ theorem valid_iff {ψ : LFml C} (b : ArrayBody ψ) :
 arrays are rebuilt in. -/
 theorem refutesCut {ψ : LFml C} (b : ArrayBody ψ) (g : State C []) (ν : AEnv)
     (hK : ¬ b.cut.holds g ν) :
-    ¬ ψ.holds (realize ν (b.pre.body.hasFold.orLift orFuel).atomBound b.reads g) AEnv.dflt := by
+    ¬ ψ.holds (arrRealize ν (b.pre.body.hasFold.orLift orFuel).atomBound b.reads g) AEnv.dflt := by
   intro hψ
   exact LFml.aCut_refutes b.hcut g ν hK
     ((LFml.orLift_holds _ orFuel _ ν).mpr ((LFml.hasFold_holds _ _ ν).mpr (b.holds_body _ ν hψ)))
@@ -86,7 +86,7 @@ theorem refutesCut {ψ : LFml C} (b : ArrayBody ψ) (g : State C []) (ν : AEnv)
 /-- **A refutation of the arithmetic's leaf refutes the leaf**. -/
 theorem refutes {ψ : LFml C} (b : ArrayBody ψ) (g : State C []) (ν : AEnv)
     (h : ¬ b.leaf.holds g ν) :
-    ¬ ψ.holds (realize ν (b.pre.body.hasFold.orLift orFuel).atomBound b.reads g) AEnv.dflt :=
+    ¬ ψ.holds (arrRealize ν (b.pre.body.hasFold.orLift orFuel).atomBound b.reads g) AEnv.dflt :=
   b.refutesCut g ν fun hk => h ((LFml.liftCond_holds g _ _ ν).mpr ((LFml.gx_holds g _ ν).mpr hk))
 
 end ArrayBody
@@ -140,7 +140,7 @@ structure Countermodel {φ : Fml C []} (r : ArrayReduction φ) where
 def countermodelOf {φ : Fml C []} (r : ArrayReduction φ)
     (cm : {vs // ¬ r.flat.encoding.arithmetic.holds vs}) : r.Countermodel := by
   let actual := r.flat.countermodelOf cm
-  refine ⟨realize actual.atoms (r.body.pre.body.hasFold.orLift orFuel).atomBound r.body.reads actual.state,
+  refine ⟨arrRealize actual.atoms (r.body.pre.body.hasFold.orLift orFuel).atomBound r.body.reads actual.state,
     fun hv => r.body.refutes actual.state actual.atoms actual.refutes ?_⟩
   exact (LFml.prenex_holds _ _ _).mpr ((LFml.condSimp_holds _ _ _).mpr
     ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv)))
@@ -236,5 +236,11 @@ theorem arrayReduction?_isSome (φ : Fml C []) (h : φ.arrayCovered = true) :
       simp only [arrayReduction?, hd, hr, hb, Option.bind_eq_bind, Option.bind_some, hnone,
         Bool.false_eq_true, if_false, hF]
       rfl
+
+/-- info: 'Solidity.Decide.arrayReduction?_isSome' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms arrayReduction?_isSome
+
+/-- info: 'Solidity.Decide.ArrayReduction.valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ArrayReduction.valid_iff
 
 end Solidity.Decide

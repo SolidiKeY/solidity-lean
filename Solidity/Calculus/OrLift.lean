@@ -269,14 +269,14 @@ each guard once, not once per side and per copy.  Exact
 
 /-- A term read as its guards, then a value: where `G` holds the term
 reads `v`'s value, elsewhere it halts. -/
-structure Guarded {p : PrimTy} (t : LTm C (.val p)) where
+structure GuardSplit {p : PrimTy} (t : LTm C (.val p)) where
   G : LFml C
   v : LTm C (.val p)
   sound : ∀ (g : State C []) (ν : AEnv), (G.holds g ν → t.eval g ν = v.eval g ν) ∧
     (¬ G.holds g ν → (t.eval g ν : Option p.Denote) = none)
 
 /-- No guard taken out. -/
-def Guarded.self {p : PrimTy} (t : LTm C (.val p)) : Guarded t :=
+def GuardSplit.self {p : PrimTy} (t : LTm C (.val p)) : GuardSplit t :=
   ⟨.tt, t, fun _ _ => ⟨fun _ => rfl, fun h => absurd trivial h⟩⟩
 
 /-- `v` returns. -/
@@ -291,11 +291,11 @@ theorem retsBase_holds (g : State C []) (ν : AEnv) {p : PrimTy} (v : LTm C (.va
   · exact LFml.holds_rets g ν v
 
 /-- The term returns: its guards hold and its value returns. -/
-def Guarded.retsF {p : PrimTy} {t : LTm C (.val p)} (r : Guarded t) : LFml C :=
+def GuardSplit.retsF {p : PrimTy} {t : LTm C (.val p)} (r : GuardSplit t) : LFml C :=
   .and r.G (retsBase r.v)
 
-theorem Guarded.retsF_holds (g : State C []) (ν : AEnv) {p : PrimTy} {t : LTm C (.val p)}
-    (r : Guarded t) : r.retsF.holds g ν ↔ ∃ x, (t.eval g ν : Option p.Denote) = some x := by
+theorem GuardSplit.retsF_holds (g : State C []) (ν : AEnv) {p : PrimTy} {t : LTm C (.val p)}
+    (r : GuardSplit t) : r.retsF.holds g ν ↔ ∃ x, (t.eval g ν : Option p.Denote) = some x := by
   show r.G.holds g ν ∧ (retsBase r.v).holds g ν ↔ _
   rw [retsBase_holds]
   by_cases hG : r.G.holds g ν
@@ -304,8 +304,8 @@ theorem Guarded.retsF_holds (g : State C []) (ν : AEnv) {p : PrimTy} {t : LTm C
     exact ⟨fun h => absurd h.1 hG, fun ⟨_, h⟩ => nomatch h⟩
 
 /-- `seq d a`: `d`'s guards and its value returning, then `a`'s guards. -/
-def seqGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), Guarded t) {p : PrimTy} {s' : Srt}
-    (d : LTm C s') (a : LTm C (.val p)) : Guarded (.seq d a) :=
+def seqGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), GuardSplit t) {p : PrimTy} {s' : Srt}
+    (d : LTm C s') (a : LTm C (.val p)) : GuardSplit (.seq d a) :=
   match s', d with
   | .val _, d =>
     let gd := rec d
@@ -329,8 +329,8 @@ def seqGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), Guarded t) {p : PrimT
   | _, d => .self _
 
 /-- `if c then x else err`: `c` true, then `x`'s guards. -/
-def iteErrGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), Guarded t) {p : PrimTy}
-    (c : LTm C (.val .bool)) (x z : LTm C (.val p)) : Guarded (.app3 .ite c x z) :=
+def iteErrGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), GuardSplit t) {p : PrimTy}
+    (c : LTm C (.val .bool)) (x z : LTm C (.val p)) : GuardSplit (.app3 .ite c x z) :=
   match z with
   | .err =>
     let gx := rec x
@@ -358,15 +358,15 @@ def iteErrGuard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), Guarded t) {p : Pr
   | z => .self _
 
 /-- A ternary node: `if c then x else err` taken apart, any other kept. -/
-def app3Guard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), Guarded t) {p : PrimTy} {a b c : Srt}
+def app3Guard (rec : ∀ {q : PrimTy} (t : LTm C (.val q)), GuardSplit t) {p : PrimTy} {a b c : Srt}
     (o : Op3 C a b c (.val p)) (x : LTm C a) (y : LTm C b) (z : LTm C c) :
-    Guarded (.app3 o x y z) :=
+    GuardSplit (.app3 o x y z) :=
   match a, b, c, o, x, y, z with
   | _, _, _, .ite, x, y, z => iteErrGuard rec x y z
   | _, _, _, _, _, _, _ => .self _
 
 /-- **A term's guards taken out**, to the nesting depth `fuel`. -/
-def LTm.guarded : Nat → {p : PrimTy} → (t : LTm C (.val p)) → Guarded t
+def LTm.guarded : Nat → {p : PrimTy} → (t : LTm C (.val p)) → GuardSplit t
   | 0, _, t => .self t
   | n + 1, _, t =>
     match t with
@@ -416,5 +416,11 @@ def LFml.gx : LFml C → LFml C := LFml.mapEq LFml.gxEq
 
 theorem LFml.gx_holds (g : State C []) (φ : LFml C) (ν : AEnv) : φ.gx.holds g ν ↔ φ.holds g ν :=
   LFml.mapEq_holds g _ (fun ν _ a b => LFml.gxEq_holds g ν a b) φ ν
+
+/-- info: 'Solidity.Decide.LFml.orLift_holds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.orLift_holds
+
+/-- info: 'Solidity.Decide.LFml.gx_holds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.gx_holds
 
 end Solidity.Decide

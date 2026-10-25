@@ -270,14 +270,18 @@ a guard equation is over a conditional's operands, so each step lowers the
 weight (`LTm.Src.split`, `LTm.Src.split_weight`).  Lifting adds no atom
 (`LFml.liftCond_params`).
 
-### (b) Fixed arrays at literal indices: not done
+### (b) Fixed arrays at literal indices: not done here
 
-Not cheap: the path guards refuse `.atF` (`TSegs.guardFuel?`), `ReadExpr`
-has no fixed-array index, and the realization layer that turns an
+Not in M4's pipeline: the path guards refuse `.atF` (`TSegs.guardFuel?`),
+`ReadExpr` has no fixed-array index, and the realization layer that turns an
 alias-consistent assignment into an actual storage
 (`Calculus/ReadRealization.lean`, `Ref.Declared`) covers root, field and
-mapping-key paths only.  Each needs a case; the realization one needs
-in-range evidence.  Dynamic arrays are out, as planned.
+mapping-key paths only.  M7 step 6 (feature 10 below) answers on leaves
+that read arrays of primitives at roots, fixed and dynamic, at symbolic
+indices (on `Fml.arrayCovered`, within its fuels and M4's bounds), by a
+pipeline of its own
+(`arrayReduction?`) that cuts them to atoms before these stages run, so
+they stay as they are.
 
 ### (c) The fragment
 
@@ -1166,6 +1170,10 @@ Three properties of the reading are worth knowing.
 | `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma) |
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
+| `Tm.toLT_sound` | an array element read in the Theory pushed in exactly (`Calculus/TheoryRead.lean`) |
+| `LFml.orLift_holds`, `LFml.gx_holds`, `LFml.hasFold_holds` | fallbacks lifted, guards extracted, slot tests a length check settles folded: exact |
+| `LFml.aCut_valid_iff`, `LFml.aCut_refutes` | the array cut is exact; a refutation of the cut leaf refutes the leaf in the state its arrays are rebuilt in |
+| `arrayReduction?_isSome` | `φ.arrayCovered = true → (arrayReduction? φ).isSome` |
 
 `#print axioms` of each of the six `decide*` theorems is pinned in
 `Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
@@ -1178,7 +1186,7 @@ Three properties of the reading are worth knowing.
 features 1, 2, 4, 5 and 8, each with its completeness proved through every
 stage (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
 (features 3, 6 and 7, its own pipeline), or `Fml.ledgerCovered` (feature 9,
-its own pipeline):
+its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1337,10 +1345,59 @@ its own pipeline):
    `store(net, …)`) stays outside: the leaf builder refuses a read past a
    write (`SymS.netOk`).
 
+10. **Storage arrays at symbolic indices** (plan step 6, arrays of
+   primitives at roots, dynamic and fixed).  `decideLeaf` falls back to
+   `arrayReduction?` (`Calculus/ArrayReduction.lean`) where the other
+   three refuse.  Stage by stage:
+   * *update pushing*: an equation over a formula's `a[i]` (the Theory
+     reads every slot, the default past them; the interpreter halts past
+     the live length) was read one way at each polarity.  `Tm.toLT`
+     pushes it in exactly, as `orElse(find(S, a[i]), 0)` over the storage
+     `S` the updates left (`Tm.toLT_sound`); `ExactAt.ofFormula?` takes
+     an equation so where `directional?` refuses (`ExactAt.eqT?`).
+   * *the eliminated leaf*: a slot test `has(a[i])` that a length check
+     `i < a.length` of the same index guards is replaced by `true`
+     (`LFml.hasFold`, `Calculus/ArrayFold.lean`), then the fallbacks are
+     lifted out of equations (`LFml.orLift`, `Calculus/OrLift.lean`).
+   * *the cut* (`Calculus/ArrayCut.lean`): the path guards, the read
+     queries and the realization layer are not extended.  Instead every
+     read of an array root (`obsW(a[i])`, `obsH(a[i])`, `obsL(a)`) becomes
+     atoms before them: the index (the index itself where it is an atom)
+     and the value, `seq i v`; the antecedent says what actual arrays make
+     of them (`ARead.cons`: reads at equal indices one word, lengths of a
+     root one, a slot there below the length and below a slot there, the
+     default past a slot not there, exactly the slots below `n` in a fixed
+     array of length `n`).  Exact in a universal reading
+     (`LFml.aCut_valid_iff`): the actual observations satisfy the
+     antecedent (`cons_fill`, `describes_fill`), and atoms that satisfy it
+     rebuild a storage (`arrRealize`: each array root the array whose live
+     length is the length atom and whose slots hold what the reads give
+     them, up to the last slot the atoms need) in which the leaf reads
+     what the cut leaf reads (`describes_realize`, `frames_realize`).  An
+     index that reads an array root, and any other read of one, refuse
+     the cut.
+   * *the rest*: guards extracted (`LFml.gx`: an equation of guarded terms
+     as its guards' conjunction and the values' equation), conditionals
+     lifted, flattened and decided as in M4.  A false assignment is shrunk
+     code by code while the arithmetic stays false at it
+     (`ArrayReduction.shrinkCodes`, checked again by `AFml.check`), then
+     realized as in M4 and its arrays rebuilt from the atoms, built
+     eagerly.  The shrinking is a heuristic: the arithmetic is free to pick
+     a length near `2^256`, and where the shrinking cannot bring it down
+     (or a fixed array is long) the refuting state exists but cannot be
+     built in practice.
+   `Fml.arrayCovered` is the fragment, on the eliminated leaf: the array
+   stages succeed, their leaf in `LFml.Src true` within the lifting fuel,
+   budget and M4's bounds; `arrayReduction?_isSome` proves the pipeline
+   never refuses it, through `LFml.liftCond_src` and
+   `flattenedArithmetic?_isSome`.
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
-and eight and nine (no atom of `Srt.kint`, no ledger read).
+and eight and nine (no atom of `Srt.kint`, no ledger read), and ten
+(`sourceReduction?` refused a formula's `a[i]` after an update, and no
+stage read an array path).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1368,6 +1425,19 @@ feature 9: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
 (`netSame`), a ledger entry against a storage read and past a write,
 proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
 `net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
+For feature 10: an in-range read with its element read again in the
+postcondition (`inRange`, proved; `inRangeBad`, refuted), a read past the
+length under the diamond (`pastEnd`, refuted) and below it
+(`inRangeReturns`, proved), a write then a read at equal indices
+(`writeSame`), at different ones keeping the old word (`writeKeep`) and the
+written word read back (`writeRead`), proved; at any indices
+(`writeOther`), refuted; a fixed array written below its length
+(`rowWrite`, proved) and past it (`rowPast`, refuted), read past it (the
+default, `rowPastRead`, proved); the slots past the live length, which
+the Theory reads as they are (`shadowRead`, refuted); an element stored
+in a mapping (`owedRead`, proved).  `pastEnd_covered`, `writeSame_covered` and
+`inRange_covered` are kernel-checked; `pastEnd_answers`,
+`writeSame_answers` and `inRange_iff` apply the theorems.
 
 ### What is not proved
 
@@ -1426,11 +1496,16 @@ proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
     them as to `<<`);
   * memory reads and writes: `LTm.Elimable` refuses the memory sorts, and
     no stage realizes a heap;
-  * fixed and dynamic array indices (M4 (b)): a checked read `a[i]` is
-    not pushed exactly through updates (`Tm.agreeB` is false on it: the
-    Theory reads a default past the length, the interpreter halts), the
-    path guards refuse `.at`, and the read queries and realization carry
-    no index or length evidence;
+  * array reads outside feature 10: arrays below a field or a mapping
+    key, of structs or of arrays (`a[i][j]`), an index that reads an
+    array (`a[a[0]]`), a read of the whole array (`delete a`, a copy), a
+    leaf with more than `orBudget` fallbacks (Theory reads after writes);
+    blocks over arrays (the array property fragment over arrays needs the
+    lengths in the index set);
+  * a time bound with arrays: each read is up to two variables of the
+    arithmetic, whose search grows with their number; a counterassignment
+    the shrinking leaves with a length near `2^256` is out of reach to
+    realize in practice;
   * every hash.
 
 ### The plan for the rest
@@ -1470,12 +1545,14 @@ in this order:
    base at `-2^255`), arrays (lengths: M4 (b)), memory, the ledger;
    blocks inside other quantifiers (an index set per instance of the outer
    variables).
-6. **Memory, array indices**: realization cases for memory and in-range
-   evidence for array indices (`Calculus/ReadRealization.lean`).  Not
-   started: an array leaf is refused before realization, at update
-   pushing (`Tm.agreeB`, the halting read past the length) and at the path
-   guards (`TSegs.guardFuel?` refuses `.at`); memory at elimination
-   (`LTm.Elimable`).  Each is a stage of its own to make exact first.
+6. **Memory, array indices**: array indices done (2026-10-25, feature 10)
+   for arrays of primitives at roots: update pushing made exact for the
+   Theory's reads (`Tm.toLT`), and instead of in-range evidence through
+   the path guards, read queries and `Calculus/ReadRealization.lean`, the
+   array reads cut to atoms before those stages, with the arrays rebuilt
+   from the atoms (`Calculus/ArrayCut.lean`).  Left: arrays below fields
+   and keys, of structs and arrays, blocks over arrays; memory, refused
+   at elimination (`LTm.Elimable`), with no stage that realizes a heap.
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.

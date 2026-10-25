@@ -147,7 +147,8 @@ theorem settles_sound (g : State C []) (ν : AEnv) {s' : Srt} {d : LTm C s'} {T 
     · cases h
   · cases h
 
-/-- Every slot test the guard `d` settles replaced by `true`. -/
+/-- The slot tests the guard `d` settles replaced by `true`, outside paths and
+observations (a test there is kept). -/
 def LTm.foldUnder {s' : Srt} (d : LTm C s') : {s : Srt} → LTm C s → LTm C s
   | _, .var k => .var k
   | _, .app0 o => .app0 o
@@ -240,5 +241,8 @@ theorem LFml.hasFold_holds (g : State C []) (φ : LFml C) (ν : AEnv) :
   apply LFml.mapEq_holds g _ _ φ ν
   intro ν p a b
   simp only [LFml.holds, LTm.eval_hasFold, LTm.eval_reassoc]
+
+/-- info: 'Solidity.Decide.LFml.hasFold_holds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.hasFold_holds
 
 end Solidity.Decide

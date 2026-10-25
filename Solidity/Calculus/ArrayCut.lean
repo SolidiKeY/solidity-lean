@@ -21,8 +21,8 @@ array makes of them (`ARead.cons`):
 * a fixed array of length `n` has exactly the slots below `n`.
 
 The cut is exact in a universal reading (`LFml.aCut_valid_iff`): the
-actual observations satisfy the antecedent (`ARead.fill`), and from atoms
-that satisfy it an actual storage is rebuilt (`ARead.realize`): each
+actual observations satisfy the antecedent (`arrFill`), and from atoms
+that satisfy it an actual storage is rebuilt (`arrRealize`): each
 array root replaced by the array whose live length is the length atom,
 whose slots run up to the last index that the atoms say is there or holds
 a word other than the default, each slot holding the word its reads give
@@ -356,7 +356,7 @@ abbrev State.withStorage (g : State C []) (st : Storage C) : State C [] := { g w
 /-- **The read `j` described**: its index atom is its index where that
 returns, and its value atom what the storage `st` shows there (or the
 length). -/
-def ARead.Describes (r : ARead C) (g : State C []) (st : Storage C) (ν : AEnv) (N j : Nat) : Prop :=
+def ARead.ArrDescribes (r : ARead C) (g : State C []) (st : Storage C) (ν : AEnv) (N j : Nat) : Prop :=
   match r.kind with
   | .word => ∀ k, (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k →
       ν.u (r.xPos N j) = k ∧ ν.get r.e (N + 2 * j + 1) = st.obs.word (.ref (r.loc k))
@@ -365,12 +365,12 @@ def ARead.Describes (r : ARead C) (g : State C []) (st : Storage C) (ν : AEnv) 
   | .len => lenDesc r.root r.h r.ar st (ν.u (N + 2 * j + 1))
 
 /-- Every read described. -/
-def Describes (g : State C []) (st : Storage C) (ν : AEnv) (N : Nat) (rs : List (ARead C)) : Prop :=
-  ∀ j (r : ARead C), rs[j]? = some r → r.Describes g st ν N j
+def ArrDescribes (g : State C []) (st : Storage C) (ν : AEnv) (N : Nat) (rs : List (ARead C)) : Prop :=
+  ∀ j (r : ARead C), rs[j]? = some r → r.ArrDescribes g st ν N j
 
 /-- With the storage `st`, every term that reads no array root reads as in
 `g`. -/
-def Frames (g : State C []) (st : Storage C) (ν : AEnv) : Prop :=
+def ArrFrames (g : State C []) (st : Storage C) (ν : AEnv) : Prop :=
   ∀ {s : Srt} (t : LTm C s), t.aFree = true → t.eval (g.withStorage st) ν = t.eval g ν
 
 theorem ArrTy.subsingleton {R : RefTy} {E : Ty} (a b : ArrTy R E) : a = b := by
@@ -468,7 +468,7 @@ section Eval
 variable {g : State C []} {st : Storage C} {ν : AEnv} {N : Nat} {rs : List (ARead C)}
 
 /-- A word read cut to its atoms reads what the storage shows. -/
-theorem aCut_obsW (hD : Describes g st ν N rs) (hF : Frames g st ν) {p : PrimTy}
+theorem aCut_obsW (hD : ArrDescribes g st ν N rs) (hF : ArrFrames g st ν) {p : PrimTy}
     (q : LTm C (.path (.prim p))) (ep : ElemPath q) (hi : ep.i.aFree = true) (j : Nat) (r : ARead C)
     (hr : rs[j]? = some r) (hroot : r.root = ep.root) (hk : r.kind = .word) (hidx : r.idx = ep.i) :
     ((LTm.seq ep.i (.var (N + 2 * j + 1)) : LTm C (.val p)).eval g ν : Option p.Denote) =
@@ -484,7 +484,7 @@ theorem aCut_obsW (hD : Describes g st ν N rs) (hF : Frames g st ν) {p : PrimT
   obtain rfl : e' = p := ArrTy.elem_eq ar' ar
   obtain rfl : ar' = ar := ArrTy.subsingleton _ _
   have hiF := hF i' hi
-  simp only [ARead.Describes] at hd
+  simp only [ARead.ArrDescribes] at hd
   show ((i'.eval g ν : Option PrimTy.uint.Denote).bind fun _ => some (ν.get e' (N + 2 * j + 1))) = _
   rw [LTm.eval_obsW, LTm.eval_index, LTm.eval_app0, hiF]
   cases hk : (i'.eval g ν : Option PrimTy.uint.Denote) with
@@ -495,7 +495,7 @@ theorem aCut_obsW (hD : Describes g st ν N rs) (hF : Frames g st ν) {p : PrimT
     exact congrArg some hv
 
 /-- A slot test cut to its atoms reads what the storage shows. -/
-theorem aCut_obsH (hD : Describes g st ν N rs) (hF : Frames g st ν) {T : Ty}
+theorem aCut_obsH (hD : ArrDescribes g st ν N rs) (hF : ArrFrames g st ν) {T : Ty}
     (q : LTm C (.path T)) (ep : ElemPath q) (hi : ep.i.aFree = true) (j : Nat) (r : ARead C)
     (hr : rs[j]? = some r) (hroot : r.root = ep.root) (hk : r.kind = .has) (hidx : r.idx = ep.i) :
     ((LTm.seq ep.i (.var (N + 2 * j + 1)) : LTm C (.val .bool)).eval g ν : Option Bool) =
@@ -511,7 +511,7 @@ theorem aCut_obsH (hD : Describes g st ν N rs) (hF : Frames g st ν) {T : Ty}
   obtain rfl : e' = e := ArrTy.elem_eq ar' ar
   obtain rfl : ar' = ar := ArrTy.subsingleton _ _
   have hiF := hF i' hi
-  simp only [ARead.Describes] at hd
+  simp only [ARead.ArrDescribes] at hd
   show ((i'.eval g ν : Option PrimTy.uint.Denote).bind fun _ => some (ν.b (N + 2 * j + 1))) = _
   rw [LTm.eval_obsH, LTm.eval_index, LTm.eval_app0, hiF]
   cases hk : (i'.eval g ν : Option PrimTy.uint.Denote) with
@@ -522,7 +522,7 @@ theorem aCut_obsH (hD : Describes g st ν N rs) (hF : Frames g st ν) {T : Ty}
     exact congrArg some hv
 
 /-- A length cut to its atom reads what the storage shows. -/
-theorem aCut_obsL (hD : Describes g st ν N rs) {E : Ty}
+theorem aCut_obsL (hD : ArrDescribes g st ν N rs) {E : Ty}
     (q : LTm C (.path (.ref (.array E)))) (rp : RootPath q) (j : Nat) (r : ARead C)
     (hr : rs[j]? = some r) (hroot : r.root = rp.root) (hk : r.kind = .len) :
     ((LTm.var (N + 2 * j + 1) : LTm C (.val .uint)).eval g ν : Option PrimTy.uint.Denote) =
@@ -536,7 +536,7 @@ theorem aCut_obsL (hD : Describes g st ν N rs) {E : Ty}
   obtain rfl : R' = .array (.prim e) := by
     have := h'.symm.trans h; simp only [Option.some.injEq, Ty.ref.injEq] at this; exact this
   cases ar'
-  simp only [ARead.Describes, lenDesc] at hd
+  simp only [ARead.ArrDescribes, lenDesc] at hd
   rw [LTm.eval_obsL, LTm.eval_app0]
   exact congrArg some hd
 
@@ -556,7 +556,7 @@ theorem Op3.eval_aFree {a b c s : Srt} (o : Op3 C a b c s) (h : o.aFree = true)
 
 /-- **A cut term reads in `g`, at atoms that describe its reads in `st`,
 what the term reads with the storage `st`.** -/
-theorem LTm.aCut_eval (hD : Describes g st ν N rs) (hF : Frames g st ν) :
+theorem LTm.aCut_eval (hD : ArrDescribes g st ν N rs) (hF : ArrFrames g st ν) :
     ∀ {s : Srt} (t : LTm C s) (rs₀ : List (ARead C)) {t' : LTm C s} {rs₁ : List (ARead C)},
       t.aCut? N rs₀ = some (t', rs₁) → rs₁ <+: rs → t'.eval g ν = t.eval (g.withStorage st) ν := by
   intro s t
@@ -717,7 +717,7 @@ theorem LFml.aCutF?_prefix {N : Nat} : ∀ (φ : LFml C) (rs₀ : List (ARead C)
 /-- **The cut formula holds** in `g`, at atoms that describe its reads in
 `st`, where the formula holds with the storage `st`. -/
 theorem LFml.aCutF_holds {g : State C []} {st : Storage C} {ν : AEnv} {N : Nat}
-    {rs : List (ARead C)} (hD : Describes g st ν N rs) (hF : Frames g st ν) :
+    {rs : List (ARead C)} (hD : ArrDescribes g st ν N rs) (hF : ArrFrames g st ν) :
     ∀ (φ : LFml C) (rs₀ : List (ARead C)) {φ' : LFml C} {rs₁ : List (ARead C)},
       φ.aCutF? N rs₀ = some (φ', rs₁) → rs₁ <+: rs →
         (φ'.holds g ν ↔ φ.holds (g.withStorage st) ν)
@@ -788,59 +788,59 @@ section Realize
 variable (ν : AEnv) (N : Nat) (rs : List (ARead C))
 
 /-- The index atom of the `j`-th read, as a number. -/
-def idxV (j : Nat) : Nat :=
+def arrIdxV (j : Nat) : Nat :=
   match rs[j]? with
   | some r => (ν.u (r.xPos N j)).1.toNat
   | none => 0
 
 /-- The `j`-th read reads the root `a` and observes `k`. -/
-def isRd (a : Name) (k : AKind) (j : Nat) : Bool :=
+def arrIsRd (a : Name) (k : AKind) (j : Nat) : Bool :=
   match rs[j]? with
   | some r => r.root == a && r.kind == k
   | none => false
 
 /-- The live length the atoms give the root `a`: its first length read's. -/
-def lenOf (a : Name) : Nat :=
-  match (List.range rs.length).find? (isRd rs a .len) with
+def arrLenOf (a : Name) : Nat :=
+  match (List.range rs.length).find? (arrIsRd rs a .len) with
   | some j => (ν.u (N + 2 * j + 1)).1.toNat
   | none => 0
 
 /-- The word the atoms give the slot `t` of the root `a`: its first word
 read's there. -/
-def wordAt (a : Name) (e : PrimTy) (t : Nat) : e.Denote :=
-  match (List.range rs.length).find? (fun j => isRd rs a .word j && idxV ν N rs j == t) with
+def arrWordAt (a : Name) (e : PrimTy) (t : Nat) : e.Denote :=
+  match (List.range rs.length).find? (fun j => arrIsRd rs a .word j && arrIdxV ν N rs j == t) with
   | some j => ν.get e (N + 2 * j + 1)
   | none => PrimTy.dflt e
 
 /-- The slots the `j`-th read asks to be there. -/
-def bump (a : Name) (e : PrimTy) (j : Nat) : Nat :=
-  if (isRd rs a .has j && ν.b (N + 2 * j + 1)) ||
-      (isRd rs a .word j && !decide (ν.get e (N + 2 * j + 1) = PrimTy.dflt e)) then
-    idxV ν N rs j + 1
+def arrBump (a : Name) (e : PrimTy) (j : Nat) : Nat :=
+  if (arrIsRd rs a .has j && ν.b (N + 2 * j + 1)) ||
+      (arrIsRd rs a .word j && !decide (ν.get e (N + 2 * j + 1) = PrimTy.dflt e)) then
+    arrIdxV ν N rs j + 1
   else 0
 
 /-- The slots of the rebuilt root `a`: past the live length, past every
 slot the atoms say is there or hold a word other than the default. -/
-def slotsOf (a : Name) (e : PrimTy) : Nat :=
-  (List.range rs.length).foldl (fun m j => max m (bump ν N rs a e j)) (lenOf ν N rs a)
+def arrSlotsOf (a : Name) (e : PrimTy) : Nat :=
+  (List.range rs.length).foldl (fun m j => max m (arrBump ν N rs a e j)) (arrLenOf ν N rs a)
 
 /-- The array of the root `a`, rebuilt from the atoms. -/
 def arrVal (a : Name) : (T : Ty) → SVal T → SVal T
   | .ref (.array (.prim e)), v =>
-    if hL : lenOf ν N rs a < 2 ^ 256 then
-      .array (vecOf (fun t => .prim (wordAt ν N rs a e t)) (lenOf ν N rs a))
-        (SList.ofList ((List.range (slotsOf ν N rs a e - lenOf ν N rs a)).map
-          fun t => .prim (wordAt ν N rs a e (lenOf ν N rs a + t)))) hL
+    if hL : arrLenOf ν N rs a < 2 ^ 256 then
+      .array (vecOf (fun t => .prim (arrWordAt ν N rs a e t)) (arrLenOf ν N rs a))
+        (SList.ofList ((List.range (arrSlotsOf ν N rs a e - arrLenOf ν N rs a)).map
+          fun t => .prim (arrWordAt ν N rs a e (arrLenOf ν N rs a + t)))) hL
     else v
-  | .ref (.fixed (.prim e) n), _ => .fixed (vecOf (fun t => .prim (wordAt ν N rs a e t)) n)
+  | .ref (.fixed (.prim e) n), _ => .fixed (vecOf (fun t => .prim (arrWordAt ν N rs a e t)) n)
   | _, v => v
 
 /-- **The storage rebuilt from the atoms**: every array root replaced. -/
-def realizeSt (st : Storage C) : Storage C :=
+def arrRealizeSt (st : Storage C) : Storage C :=
   SFields.mapF (fun a T v => if C.isArrRoot a then arrVal ν N rs a T v else v) st
 
 /-- The state rebuilt from the atoms. -/
-def realize (g : State C []) : State C [] := g.withStorage (realizeSt ν N rs g.storage)
+def arrRealize (g : State C []) : State C [] := g.withStorage (arrRealizeSt ν N rs g.storage)
 
 end Realize
 
@@ -848,9 +848,9 @@ section Frame
 
 variable (ν : AEnv) (N : Nat) (rs : List (ARead C))
 
-theorem realizeSt_get_ne (st : Storage C) {a : Name} {T : Ty} (h : C.rootType a = some T)
-    (ha : C.isArrRoot a = false) : (realizeSt ν N rs st).get h = st.get h := by
-  unfold realizeSt
+theorem arrRealizeSt_get_ne (st : Storage C) {a : Name} {T : Ty} (h : C.rootType a = some T)
+    (ha : C.isArrRoot a = false) : (arrRealizeSt ν N rs st).get h = st.get h := by
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
   simp only [ha, Bool.false_eq_true, if_false]
 
@@ -939,7 +939,7 @@ theorem LTm.aFree_roots (g : State C []) (ν : AEnv) :
     | _ => trivial
 
 /-- **The rebuilt storage frames every term that reads no array root.** -/
-theorem frames_realize (g : State C []) : Frames g (realizeSt ν N rs g.storage) ν := by
+theorem frames_realize (g : State C []) : ArrFrames g (arrRealizeSt ν N rs g.storage) ν := by
   intro s t
   induction t with
   | var | err => intro _; rfl
@@ -978,7 +978,7 @@ theorem frames_realize (g : State C []) : Frames g (realizeSt ν N rs g.storage)
       simp only [Option.bind_some]
       congr 1
       simp only [Storage.obs_word_ref]
-      exact congrArg (fun v => v.obs.word r.path) (realizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
+      exact congrArg (fun v => v.obs.word r.path) (arrRealizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
   | obsL q ih =>
     intro h; simp only [LTm.aFree] at h
     rw [LTm.eval_obsL, LTm.eval_obsL, ih h]
@@ -989,7 +989,7 @@ theorem frames_realize (g : State C []) : Frames g (realizeSt ν N rs g.storage)
       simp only [Option.bind_some]
       congr 2
       simp only [Storage.obs_len_ref]
-      exact congrArg (fun v => v.obs.len r.path) (realizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
+      exact congrArg (fun v => v.obs.len r.path) (arrRealizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
   | obsH q ih =>
     intro h; simp only [LTm.aFree] at h
     rw [LTm.eval_obsH, LTm.eval_obsH, ih h]
@@ -1000,7 +1000,7 @@ theorem frames_realize (g : State C []) : Frames g (realizeSt ν N rs g.storage)
       simp only [Option.bind_some]
       congr 1
       simp only [Storage.obs_has_ref]
-      exact congrArg (fun v => v.obs.has r.path) (realizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
+      exact congrArg (fun v => v.obs.has r.path) (arrRealizeSt_get_ne ν N rs g.storage r.hroot (hr r hq))
 
 end Frame
 
@@ -1034,13 +1034,13 @@ section RealObs
 
 variable (ν : AEnv) (N : Nat) (rs : List (ARead C)) (st : Storage C)
 
-theorem lenOf_lt (a : Name) : lenOf ν N rs a < 2 ^ 256 := by
-  unfold lenOf
+theorem arrLenOf_lt (a : Name) : arrLenOf ν N rs a < 2 ^ 256 := by
+  unfold arrLenOf
   split
   · exact uint_toNat_lt _
   · exact Nat.two_pow_pos 256
 
-theorem lenOf_le_slotsOf (a : Name) (e : PrimTy) : lenOf ν N rs a ≤ slotsOf ν N rs a e :=
+theorem arrLenOf_le_slotsOf (a : Name) (e : PrimTy) : arrLenOf ν N rs a ≤ arrSlotsOf ν N rs a e :=
   foldl_max_ge_init _ _ _
 
 theorem slots_toList {E : Ty} (f : Nat → SVal E) {L S : Nat} (h : L ≤ S) :
@@ -1054,74 +1054,74 @@ theorem getElem?_range_map {α : Type} (f : Nat → α) (S k : Nat) :
   by_cases hk : k < S <;> simp [hk]
 
 /-- The rebuilt dynamic array: a word at an index. -/
-theorem realize_dyn_word {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
+theorem arrRealize_dyn_word {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
     (ha : C.isArrRoot a = true) (k : PrimTy.uint.Denote) :
-    (realizeSt ν N rs st).obs.word (.ref ((SRef.ofRoot a h).index (.arr .dyn) k)) =
-      if k.1.toNat < slotsOf ν N rs a e then wordAt ν N rs a e k.1.toNat else PrimTy.dflt e := by
+    (arrRealizeSt ν N rs st).obs.word (.ref ((SRef.ofRoot a h).index (.arr .dyn) k)) =
+      if k.1.toNat < arrSlotsOf ν N rs a e then arrWordAt ν N rs a e k.1.toNat else PrimTy.dflt e := by
   rw [Storage.obs_word_ref]
   rw [show ((SRef.ofRoot a h).index (.arr .dyn) k).path = .at k .nil by
     simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_dyn, Path.append_nil]]
-  show ((realizeSt ν N rs st).get h).obs.word (.at k .nil) = _
-  unfold realizeSt
+  show ((arrRealizeSt ν N rs st).get h).obs.word (.at k .nil) = _
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
-  simp only [ha, if_true, arrVal, dif_pos (lenOf_lt ν N rs a), SVal.obs_word, SVal.findM,
-    vecOf_toList, SList.toList_ofList, slots_toList _ (lenOf_le_slotsOf ν N rs a e),
+  simp only [ha, if_true, arrVal, dif_pos (arrLenOf_lt ν N rs a), SVal.obs_word, SVal.findM,
+    vecOf_toList, SList.toList_ofList, slots_toList _ (arrLenOf_le_slotsOf ν N rs a e),
     getElem?_range_map]
-  by_cases hk : k.1.toNat < slotsOf ν N rs a e <;> simp only [hk, if_true, if_false] <;> rfl
+  by_cases hk : k.1.toNat < arrSlotsOf ν N rs a e <;> simp only [hk, if_true, if_false] <;> rfl
 
 /-- The rebuilt dynamic array: whether a slot is there. -/
-theorem realize_dyn_has {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
+theorem arrRealize_dyn_has {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
     (ha : C.isArrRoot a = true) (k : PrimTy.uint.Denote) :
-    (realizeSt ν N rs st).obs.has (.ref ((SRef.ofRoot a h).index (.arr .dyn) k)) =
-      decide (k.1.toNat < slotsOf ν N rs a e) := by
+    (arrRealizeSt ν N rs st).obs.has (.ref ((SRef.ofRoot a h).index (.arr .dyn) k)) =
+      decide (k.1.toNat < arrSlotsOf ν N rs a e) := by
   rw [Storage.obs_has_ref]
   rw [show ((SRef.ofRoot a h).index (.arr .dyn) k).path = .at k .nil by
     simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_dyn, Path.append_nil]]
-  show ((realizeSt ν N rs st).get h).obs.has (.at k .nil) = _
-  unfold realizeSt
+  show ((arrRealizeSt ν N rs st).get h).obs.has (.at k .nil) = _
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
-  simp only [ha, if_true, arrVal, dif_pos (lenOf_lt ν N rs a), SVal.obs_has, SVal.findM,
-    vecOf_toList, SList.toList_ofList, slots_toList _ (lenOf_le_slotsOf ν N rs a e),
+  simp only [ha, if_true, arrVal, dif_pos (arrLenOf_lt ν N rs a), SVal.obs_has, SVal.findM,
+    vecOf_toList, SList.toList_ofList, slots_toList _ (arrLenOf_le_slotsOf ν N rs a e),
     getElem?_range_map]
   split <;> simp_all
 
 /-- The rebuilt dynamic array: its live length. -/
-theorem realize_dyn_len {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
+theorem arrRealize_dyn_len {a : Name} {e : PrimTy} (h : C.rootType a = some (.ref (.array (.prim e))))
     (ha : C.isArrRoot a = true) :
-    (realizeSt ν N rs st).obs.len (.ref (SRef.ofRoot a h)) = lenOf ν N rs a := by
+    (arrRealizeSt ν N rs st).obs.len (.ref (SRef.ofRoot a h)) = arrLenOf ν N rs a := by
   rw [Storage.obs_len_ref]
-  show ((realizeSt ν N rs st).get h).obs.len .nil = _
-  unfold realizeSt
+  show ((arrRealizeSt ν N rs st).get h).obs.len .nil = _
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
-  simp only [ha, if_true, arrVal, dif_pos (lenOf_lt ν N rs a), SVal.obs_len, SVal.findM]
+  simp only [ha, if_true, arrVal, dif_pos (arrLenOf_lt ν N rs a), SVal.obs_len, SVal.findM]
   rfl
 
 /-- The rebuilt fixed array: a word at an index. -/
-theorem realize_fixed_word {a : Name} {e : PrimTy} {n : Nat}
+theorem arrRealize_fixed_word {a : Name} {e : PrimTy} {n : Nat}
     (h : C.rootType a = some (.ref (.fixed (.prim e) n))) (ha : C.isArrRoot a = true)
     (k : PrimTy.uint.Denote) :
-    (realizeSt ν N rs st).obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) =
-      if k.1.toNat < n then wordAt ν N rs a e k.1.toNat else PrimTy.dflt e := by
+    (arrRealizeSt ν N rs st).obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) =
+      if k.1.toNat < n then arrWordAt ν N rs a e k.1.toNat else PrimTy.dflt e := by
   rw [Storage.obs_word_ref]
   rw [show ((SRef.ofRoot a h).index (.arr .fixed) k).path = .atF k .nil by
     simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_fixed, Path.append_nil]]
-  show ((realizeSt ν N rs st).get h).obs.word (.atF k .nil) = _
-  unfold realizeSt
+  show ((arrRealizeSt ν N rs st).get h).obs.word (.atF k .nil) = _
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
   simp only [ha, if_true, arrVal, SVal.obs_word, SVal.findM, vecOf_toList, getElem?_range_map]
   by_cases hk : k.1.toNat < n <;> simp only [hk, if_true, if_false] <;> rfl
 
 /-- The rebuilt fixed array: whether a slot is there. -/
-theorem realize_fixed_has {a : Name} {e : PrimTy} {n : Nat}
+theorem arrRealize_fixed_has {a : Name} {e : PrimTy} {n : Nat}
     (h : C.rootType a = some (.ref (.fixed (.prim e) n))) (ha : C.isArrRoot a = true)
     (k : PrimTy.uint.Denote) :
-    (realizeSt ν N rs st).obs.has (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) =
+    (arrRealizeSt ν N rs st).obs.has (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) =
       decide (k.1.toNat < n) := by
   rw [Storage.obs_has_ref]
   rw [show ((SRef.ofRoot a h).index (.arr .fixed) k).path = .atF k .nil by
     simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_fixed, Path.append_nil]]
-  show ((realizeSt ν N rs st).get h).obs.has (.atF k .nil) = _
-  unfold realizeSt
+  show ((arrRealizeSt ν N rs st).get h).obs.has (.atF k .nil) = _
+  unfold arrRealizeSt
   rw [SFields.get_mapF]
   simp only [ha, if_true, arrVal, SVal.obs_has, SVal.findM, vecOf_toList, getElem?_range_map]
   split <;> simp_all
@@ -1273,16 +1273,16 @@ section Realized
 
 variable {g : State C []} {ν : AEnv} {N : Nat} {rs : List (ARead C)}
 
-theorem idxV_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
-    idxV ν N rs j = (ν.u (r.xPos N j)).1.toNat := by
-  simp only [idxV, hr]
+theorem arrIdxV_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
+    arrIdxV ν N rs j = (ν.u (r.xPos N j)).1.toNat := by
+  simp only [arrIdxV, hr]
 
-theorem isRd_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) : isRd rs r.root r.kind j = true := by
-  simp only [isRd, hr, beq_self_eq_true, Bool.and_self]
+theorem arrIsRd_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) : arrIsRd rs r.root r.kind j = true := by
+  simp only [arrIsRd, hr, beq_self_eq_true, Bool.and_self]
 
-theorem isRd_some {a : Name} {k : AKind} {j : Nat} (h : isRd rs a k j = true) :
+theorem arrIsRd_some {a : Name} {k : AKind} {j : Nat} (h : arrIsRd rs a k j = true) :
     ∃ r, rs[j]? = some r ∧ r.root = a ∧ r.kind = k := by
-  unfold isRd at h
+  unfold arrIsRd at h
   split at h
   · rename_i r hr
     simp only [Bool.and_eq_true, beq_iff_eq] at h
@@ -1304,29 +1304,29 @@ theorem ARead.e_eq_of_root (r s : ARead C) (h : r.root = s.root) : r.e = s.e := 
     have := hR'.symm.trans hR; simp only [Option.some.injEq, Ty.ref.injEq] at this; exact this
   exact ArrTy.elem_eq ar ar'
 
-theorem bump_le_slots (a : Name) (e : PrimTy) {j : Nat} (hj : j < rs.length) :
-    bump ν N rs a e j ≤ slotsOf ν N rs a e :=
+theorem arrBump_le_slots (a : Name) (e : PrimTy) {j : Nat} (hj : j < rs.length) :
+    arrBump ν N rs a e j ≤ arrSlotsOf ν N rs a e :=
   foldl_max_ge _ _ _ (List.mem_range.mpr hj)
 
 /-- The slot of a word read holds its value atom. -/
-theorem wordAt_eq (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
-    (hk : r.kind = .word) : wordAt ν N rs r.root r.e (idxV ν N rs j) = ν.get r.e (N + 2 * j + 1) := by
-  unfold wordAt
+theorem arrWordAt_eq (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
+    (hk : r.kind = .word) : arrWordAt ν N rs r.root r.e (arrIdxV ν N rs j) = ν.get r.e (N + 2 * j + 1) := by
+  unfold arrWordAt
   have hj : j < rs.length := (List.getElem?_eq_some_iff.mp hr).1
   cases hf : (List.range rs.length).find?
-      (fun j' => isRd rs r.root .word j' && idxV ν N rs j' == idxV ν N rs j) with
+      (fun j' => arrIsRd rs r.root .word j' && arrIdxV ν N rs j' == arrIdxV ν N rs j) with
   | none =>
     have := List.find?_range_eq_none.mp hf j hj
-    rw [← hk, isRd_of hr] at this
+    rw [← hk, arrIsRd_of hr] at this
     simp only [beq_self_eq_true, Bool.and_self, Bool.not_true, Bool.false_eq_true] at this
   | some j₀ =>
     obtain ⟨hp, hj₀, -⟩ := List.find?_range_eq_some.mp hf
     simp only [Bool.and_eq_true, beq_iff_eq] at hp
-    obtain ⟨r₀, hr₀, hroot₀, hk₀⟩ := isRd_some hp.1
+    obtain ⟨r₀, hr₀, hroot₀, hk₀⟩ := arrIsRd_some hp.1
     by_cases e : j₀ = j
     · subst e; rfl
     · have h2 := hp.2
-      rw [idxV_of hr₀, idxV_of hr] at h2
+      rw [arrIdxV_of hr₀, arrIdxV_of hr] at h2
       have hw := pair_ww hC e hr₀ hr (hroot₀.trans rfl) hk₀ hk (uint_ext_toNat h2)
       rw [ARead.e_eq_of_root r₀ r hroot₀] at hw
       exact hw
@@ -1334,27 +1334,27 @@ theorem wordAt_eq (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (h
 /-- A word read past the slots reads the default. -/
 theorem word_past (a : Name) (e : PrimTy) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
     (hroot : r.root = a) (hk : r.kind = .word)
-    (hS : ¬ idxV ν N rs j < slotsOf ν N rs a e) : ν.get e (N + 2 * j + 1) = PrimTy.dflt e := by
+    (hS : ¬ arrIdxV ν N rs j < arrSlotsOf ν N rs a e) : ν.get e (N + 2 * j + 1) = PrimTy.dflt e := by
   have hj : j < rs.length := (List.getElem?_eq_some_iff.mp hr).1
   refine Classical.byContradiction fun hne => hS ?_
-  have hb := bump_le_slots (ν := ν) (N := N) a e hj
-  have hrd : isRd rs a .word j = true := by rw [← hroot, ← hk]; exact isRd_of hr
-  simp only [bump, hrd, hne, decide_false, Bool.not_false, Bool.and_true, Bool.or_true,
+  have hb := arrBump_le_slots (ν := ν) (N := N) a e hj
+  have hrd : arrIsRd rs a .word j = true := by rw [← hroot, ← hk]; exact arrIsRd_of hr
+  simp only [arrBump, hrd, hne, decide_false, Bool.not_false, Bool.and_true, Bool.or_true,
     if_true] at hb
   omega
 
 /-- A slot read that says no slot is there reads past every slot. -/
 theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C}
     (hr : rs[j]? = some r) (hk : r.kind = .has) (hb : ν.b (N + 2 * j + 1) = false) :
-    slotsOf ν N rs r.root r.e ≤ idxV ν N rs j := by
+    arrSlotsOf ν N rs r.root r.e ≤ arrIdxV ν N rs j := by
   have hj0 := uint_nonneg (ν.u (r.xPos N j))
-  rw [idxV_of hr]
+  rw [arrIdxV_of hr]
   apply foldl_max_le
-  · unfold lenOf
+  · unfold arrLenOf
     split
     · rename_i j₁ hf
       obtain ⟨hp, -, -⟩ := List.find?_range_eq_some.mp hf
-      obtain ⟨r₁, hr₁, hroot₁, hk₁⟩ := isRd_some hp
+      obtain ⟨r₁, hr₁, hroot₁, hk₁⟩ := arrIsRd_some hp
       have hne : j ≠ j₁ := fun e => by subst e; rw [hr] at hr₁; cases hr₁; rw [hk] at hk₁; cases hk₁
       refine Classical.byContradiction fun hlt => ?_
       have h1 := uint_nonneg (ν.u (N + 2 * j₁ + 1))
@@ -1363,21 +1363,21 @@ theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead
     · exact Nat.zero_le _
   · intro m hm
     have hm' : m < rs.length := List.mem_range.mp hm
-    unfold bump
+    unfold arrBump
     split
     · rename_i hcond
       simp only [Bool.or_eq_true, Bool.and_eq_true, Bool.not_eq_true', decide_eq_false_iff_not] at hcond
       rcases hcond with ⟨hrd, hbm⟩ | ⟨hrd, hne⟩
-      · obtain ⟨rm, hrm, hrootm, hkm⟩ := isRd_some hrd
+      · obtain ⟨rm, hrm, hrootm, hkm⟩ := arrIsRd_some hrd
         have hmj : m ≠ j := fun e => by subst e; rw [hb] at hbm; cases hbm
-        rw [idxV_of hrm]
+        rw [arrIdxV_of hrm]
         refine Classical.byContradiction fun hlt => ?_
         have h1 := uint_nonneg (ν.u (rm.xPos N m))
         have := pair_hh hC hmj hrm hr hrootm hkm hk hbm (by omega)
         rw [hb] at this; cases this
-      · obtain ⟨rm, hrm, hrootm, hkm⟩ := isRd_some hrd
+      · obtain ⟨rm, hrm, hrootm, hkm⟩ := arrIsRd_some hrd
         have hjm : j ≠ m := fun e => by subst e; rw [hr] at hrm; cases hrm; rw [hk] at hkm; cases hkm
-        rw [idxV_of hrm]
+        rw [arrIdxV_of hrm]
         refine Classical.byContradiction fun hlt => ?_
         have h1 := uint_nonneg (ν.u (rm.xPos N m))
         have := pair_hw hC hjm hr hrm hrootm.symm hk hkm hb (by omega)
@@ -1402,7 +1402,7 @@ theorem fixed_lt_bound {a : Name} {e : PrimTy} {n : Nat}
 
 /-- **Atoms that satisfy the antecedent describe the rebuilt storage.** -/
 theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
-    Describes g (realizeSt ν N rs g.storage) ν N rs := by
+    ArrDescribes g (arrRealizeSt ν N rs g.storage) ν N rs := by
   intro j r hr
   have hj : j < rs.length := (List.getElem?_eq_some_iff.mp hr).1
   obtain ⟨a, R, h, harr, e, ar, kind, idx⟩ := r
@@ -1410,48 +1410,48 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
   | dyn =>
     cases kind with
     | word =>
-      simp only [ARead.Describes]
+      simp only [ARead.ArrDescribes]
       intro k hk
       have hx := self_idx hC hr (Or.inl rfl) hk
       refine ⟨hx, ?_⟩
-      show _ = (realizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
-      rw [realize_dyn_word ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
+      show _ = (arrRealizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
+      rw [arrRealize_dyn_word ν N rs g.storage h harr k]
+      have hk' : k.1.toNat = arrIdxV ν N rs j := by rw [arrIdxV_of hr, hx]
       rw [hk']
       split
-      · exact (wordAt_eq hC hr rfl).symm
+      · exact (arrWordAt_eq hC hr rfl).symm
       · rename_i hS
         exact word_past a e hr rfl rfl hS
     | has =>
-      simp only [ARead.Describes]
+      simp only [ARead.ArrDescribes]
       intro k hk
       have hx := self_idx hC hr (Or.inr rfl) hk
       refine ⟨hx, ?_⟩
-      show _ = (realizeSt ν N rs g.storage).obs.has (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
-      rw [realize_dyn_has ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
+      show _ = (arrRealizeSt ν N rs g.storage).obs.has (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
+      rw [arrRealize_dyn_has ν N rs g.storage h harr k]
+      have hk' : k.1.toNat = arrIdxV ν N rs j := by rw [arrIdxV_of hr, hx]
       rw [hk']
       cases hb : ν.b (N + 2 * j + 1) with
       | false =>
         have := has_false_slots hC hr rfl hb
         exact (decide_eq_false (Nat.not_lt.mpr this)).symm
       | true =>
-        have hbump := bump_le_slots (ν := ν) (N := N) (rs := rs) a e hj
-        have hrd : isRd rs a .has j = true := isRd_of hr
-        simp only [bump, hrd, hb, Bool.and_self, Bool.true_or, if_true] at hbump
+        have hbump := arrBump_le_slots (ν := ν) (N := N) (rs := rs) a e hj
+        have hrd : arrIsRd rs a .has j = true := arrIsRd_of hr
+        simp only [arrBump, hrd, hb, Bool.and_self, Bool.true_or, if_true] at hbump
         exact (decide_eq_true (by omega)).symm
     | len =>
-      simp only [ARead.Describes, lenDesc]
-      rw [realize_dyn_len ν N rs g.storage h harr]
-      unfold lenOf
-      cases hf : (List.range rs.length).find? (isRd rs a .len) with
+      simp only [ARead.ArrDescribes, lenDesc]
+      rw [arrRealize_dyn_len ν N rs g.storage h harr]
+      unfold arrLenOf
+      cases hf : (List.range rs.length).find? (arrIsRd rs a .len) with
       | none =>
         have := List.find?_range_eq_none.mp hf j hj
-        rw [show a = (⟨a, _, h, harr, e, .dyn, .len, idx⟩ : ARead C).root from rfl, isRd_of hr] at this
+        rw [show a = (⟨a, _, h, harr, e, .dyn, .len, idx⟩ : ARead C).root from rfl, arrIsRd_of hr] at this
         cases this
       | some j₁ =>
         obtain ⟨hp, -, -⟩ := List.find?_range_eq_some.mp hf
-        obtain ⟨r₁, hr₁, hroot₁, hk₁⟩ := isRd_some hp
+        obtain ⟨r₁, hr₁, hroot₁, hk₁⟩ := arrIsRd_some hp
         dsimp only
         rw [uintOfNat_toNatA]
         by_cases e₁ : j₁ = j
@@ -1462,31 +1462,31 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
     have hs := cons_self hC hr
     cases kind with
     | word =>
-      simp only [ARead.Describes]
+      simp only [ARead.ArrDescribes]
       intro k hk
       have hx := self_idx hC hr (Or.inl rfl) hk
       refine ⟨hx, ?_⟩
-      show _ = (realizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k))
-      rw [realize_fixed_word ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
+      show _ = (arrRealizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k))
+      rw [arrRealize_fixed_word ν N rs g.storage h harr k]
+      have hk' : k.1.toNat = arrIdxV ν N rs j := by rw [arrIdxV_of hr, hx]
       rw [hk']
       split
-      · exact (wordAt_eq hC hr rfl).symm
+      · exact (arrWordAt_eq hC hr rfl).symm
       · rename_i hS
         simp only [ARead.self, ArrTy.fixedLen?, List.mem_append, List.mem_cons, List.not_mem_nil,
           or_false, forall_eq_or_imp, forall_eq] at hs
         refine (holds_eqDflt _).mp (hs.2 ((holds_isF _).mpr ?_))
         rw [eval_ltLit, uintOfNat_val hn]
         have h0 := uint_nonneg (ν.u (ARead.xPos N j ⟨a, _, h, harr, e, .fixed, .word, idx⟩))
-        rw [idxV_of hr] at hS
+        rw [arrIdxV_of hr] at hS
         exact congrArg some (decide_eq_false (by omega))
     | has =>
-      simp only [ARead.Describes]
+      simp only [ARead.ArrDescribes]
       intro k hk
       have hx := self_idx hC hr (Or.inr rfl) hk
       refine ⟨hx, ?_⟩
-      show _ = (realizeSt ν N rs g.storage).obs.has (.ref ((SRef.ofRoot a h).index (.arr .fixed) k))
-      rw [realize_fixed_has ν N rs g.storage h harr k]
+      show _ = (arrRealizeSt ν N rs g.storage).obs.has (.ref ((SRef.ofRoot a h).index (.arr .fixed) k))
+      rw [arrRealize_fixed_has ν N rs g.storage h harr k]
       simp only [ARead.self, ArrTy.fixedLen?, List.mem_append, List.mem_cons, List.not_mem_nil,
         or_false, forall_eq_or_imp, forall_eq] at hs
       have h2 := hs.2
@@ -1496,7 +1496,7 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
       have e1 : ν.b (N + 2 * j + 1) = x := Option.some.inj hx1
       rw [e1, ← Option.some.inj hx2]
       exact decide_eq_decide.mpr (by omega)
-    | len => simp only [ARead.Describes, lenDesc]
+    | len => simp only [ARead.ArrDescribes, lenDesc]
 
 end Realized
 
@@ -1504,14 +1504,14 @@ end Realized
 
 /-- The live length of a read's root, as a word (a fixed array's reads have
 no length read: the default). -/
-def lenVal {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
+def arrLenVal {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
     (ar : ArrTy R (.prim e)) (st : Storage C) : PrimTy.uint.Denote :=
   match R, h, ar with
   | _, h, .dyn => uintOfNat (st.obs.len (.ref (SRef.ofRoot a h)))
   | _, _, .fixed => PrimTy.dflt .uint
 
 theorem lenDesc_lenVal {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
-    (ar : ArrTy R (.prim e)) (st : Storage C) : lenDesc a h ar st (lenVal a h ar st) := by
+    (ar : ArrTy R (.prim e)) (st : Storage C) : lenDesc a h ar st (arrLenVal a h ar st) := by
   cases ar <;> trivial
 
 theorem dyn_shape_val {e : PrimTy} (v : SVal (.ref (.array (.prim e)))) :
@@ -1557,17 +1557,17 @@ theorem arr_shape {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (
     (ar : ArrTy R (.prim e)) (st : Storage C) :
     ∃ B : Nat, (∀ k, st.obs.has (.ref ((SRef.ofRoot a h).index (.arr ar) k)) = decide (k.1.toNat < B)) ∧
       (∀ k, ¬ k.1.toNat < B → st.obs.word (.ref ((SRef.ofRoot a h).index (.arr ar) k)) = PrimTy.dflt e) ∧
-      (lenVal a h ar st).1.toNat ≤ B := by
+      (arrLenVal a h ar st).1.toNat ≤ B := by
   cases ar with
   | dyn =>
     have hp : ∀ k : PrimTy.uint.Denote, ((SRef.ofRoot a h).index (.arr .dyn) k).path = .at k .nil :=
       fun k => by simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_dyn, Path.append_nil]
-    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, lenVal, Storage.obs_len_ref]
+    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, arrLenVal, Storage.obs_len_ref]
     exact dyn_shape_val (st.get h)
   | @fixed _ n =>
     have hp : ∀ k : PrimTy.uint.Denote, ((SRef.ofRoot a h).index (.arr .fixed) k).path = .atF k .nil :=
       fun k => by simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_fixed, Path.append_nil]
-    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, lenVal]
+    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, arrLenVal]
     obtain ⟨h1, h2⟩ := fixed_shape_val (st.get h)
     exact ⟨n, h1, h2, Nat.zero_le _⟩
 
@@ -1692,57 +1692,57 @@ section Fill
 variable (g : State C []) (ν : AEnv) (N : Nat) (rs : List (ARead C))
 
 /-- A read's index as the start state reads it, `0` where it halts. -/
-noncomputable def idxVal (r : ARead C) : PrimTy.uint.Denote :=
+noncomputable def arrIdxVal (r : ARead C) : PrimTy.uint.Denote :=
   (r.idx.eval g ν : Option PrimTy.uint.Denote).getD (PrimTy.dflt .uint)
 
 /-- A read's value atom, at the type `p`, set to what it observes. -/
-noncomputable def valAt (r : ARead C) (p : PrimTy) (d : p.Denote) : p.Denote :=
+noncomputable def arrValAt (r : ARead C) (p : PrimTy) (d : p.Denote) : p.Denote :=
   match r.kind with
-  | .word => if hp : r.e = p then hp ▸ g.storage.obs.word (.ref (r.loc (idxVal g ν r))) else d
-  | .has => if hp : PrimTy.bool = p then hp ▸ g.storage.obs.has (.ref (r.loc (idxVal g ν r))) else d
-  | .len => if hp : PrimTy.uint = p then hp ▸ lenVal r.root r.h r.ar g.storage else d
+  | .word => if hp : r.e = p then hp ▸ g.storage.obs.word (.ref (r.loc (arrIdxVal g ν r))) else d
+  | .has => if hp : PrimTy.bool = p then hp ▸ g.storage.obs.has (.ref (r.loc (arrIdxVal g ν r))) else d
+  | .len => if hp : PrimTy.uint = p then hp ▸ arrLenVal r.root r.h r.ar g.storage else d
 
 /-- The atom at `k`, of the type `p`: below `N` as `ν` has it, a read's
 atoms as the start state reads it. -/
-noncomputable def fillAt (p : PrimTy) (k : Nat) : p.Denote :=
+noncomputable def arrFillAt (p : PrimTy) (k : Nat) : p.Denote :=
   if k < N then ν.get p k else
     match rs[(k - N) / 2]? with
     | none => ν.get p k
     | some r =>
-      if (k - N) % 2 = 0 then (if hp : PrimTy.uint = p then hp ▸ idxVal g ν r else ν.get p k)
-      else valAt g ν r p (ν.get p k)
+      if (k - N) % 2 = 0 then (if hp : PrimTy.uint = p then hp ▸ arrIdxVal g ν r else ν.get p k)
+      else arrValAt g ν r p (ν.get p k)
 
 /-- **The atoms set to the actual observations.** -/
-noncomputable def fill : AEnv := ⟨fillAt g ν N rs .bool, fillAt g ν N rs .uint, fillAt g ν N rs .int⟩
+noncomputable def arrFill : AEnv := ⟨arrFillAt g ν N rs .bool, arrFillAt g ν N rs .uint, arrFillAt g ν N rs .int⟩
 
-theorem fill_get (p : PrimTy) (k : Nat) : (fill g ν N rs).get p k = fillAt g ν N rs p k := by
+theorem arrFill_get (p : PrimTy) (k : Nat) : (arrFill g ν N rs).get p k = arrFillAt g ν N rs p k := by
   cases p <;> rfl
 
-theorem fill_below : (fill g ν N rs).AgreesBelow N ν := by
+theorem arrFill_below : (arrFill g ν N rs).AgreesBelow N ν := by
   intro p k hk
-  rw [fill_get, fillAt, if_pos hk]
+  rw [arrFill_get, arrFillAt, if_pos hk]
 
-theorem fill_idx {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
-    (fill g ν N rs).u (N + 2 * j) = idxVal g ν r := by
-  show fillAt g ν N rs .uint (N + 2 * j) = _
+theorem arrFill_idx {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
+    (arrFill g ν N rs).u (N + 2 * j) = arrIdxVal g ν r := by
+  show arrFillAt g ν N rs .uint (N + 2 * j) = _
   have h1 : (N + 2 * j - N) / 2 = j := by omega
   have h2 : (N + 2 * j - N) % 2 = 0 := by omega
-  simp only [fillAt, show ¬ N + 2 * j < N by omega, if_false, h1, hr, h2, if_true, dite_true]
+  simp only [arrFillAt, show ¬ N + 2 * j < N by omega, if_false, h1, hr, h2, if_true, dite_true]
 
-theorem fill_val {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (p : PrimTy) :
-    (fill g ν N rs).get p (N + 2 * j + 1) = valAt g ν r p (ν.get p (N + 2 * j + 1)) := by
-  rw [fill_get]
+theorem arrFill_val {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (p : PrimTy) :
+    (arrFill g ν N rs).get p (N + 2 * j + 1) = arrValAt g ν r p (ν.get p (N + 2 * j + 1)) := by
+  rw [arrFill_get]
   have h1 : (N + 2 * j + 1 - N) / 2 = j := by omega
   have h2 : ¬ (N + 2 * j + 1 - N) % 2 = 0 := by omega
-  simp only [fillAt, show ¬ N + 2 * j + 1 < N by omega, if_false, h1, hr, h2]
+  simp only [arrFillAt, show ¬ N + 2 * j + 1 < N by omega, if_false, h1, hr, h2]
 
 variable {g ν N rs}
 
-theorem fill_xPos (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
-    (hr : rs[j]? = some r) : (fill g ν N rs).u (r.xPos N j) = idxVal g ν r := by
+theorem arrFill_xPos (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+    (hr : rs[j]? = some r) : (arrFill g ν N rs).u (r.xPos N j) = arrIdxVal g ν r := by
   unfold ARead.xPos
   cases hv : r.idx.varIdx? with
-  | none => exact fill_idx g ν N rs hr
+  | none => exact arrFill_idx g ν N rs hr
   | some k =>
     have he := LTm.eq_of_varIdx? hv
     have hk : k < N := by
@@ -1750,43 +1750,43 @@ theorem fill_xPos (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
       rw [he] at this
       simp only [LTm.atomBound] at this
       omega
-    show fillAt g ν N rs .uint k = _
-    rw [fillAt, if_pos hk, idxVal, he]
+    show arrFillAt g ν N rs .uint k = _
+    rw [arrFillAt, if_pos hk, arrIdxVal, he]
     rfl
 
 theorem idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {r : ARead C} (hr : r ∈ rs) :
-    (r.idx.eval g (fill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
-  LTm.eval_agree_below g r.idx ((fill_below g ν N rs).mono (hb r hr))
+    (r.idx.eval g (arrFill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
+  LTm.eval_agree_below g r.idx ((arrFill_below g ν N rs).mono (hb r hr))
 
-theorem idxVal_of {r : ARead C} {k : PrimTy.uint.Denote}
-    (h : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k) : idxVal g ν r = k := by
-  rw [idxVal, h]; rfl
+theorem arrIdxVal_of {r : ARead C} {k : PrimTy.uint.Denote}
+    (h : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k) : arrIdxVal g ν r = k := by
+  rw [arrIdxVal, h]; rfl
 
 /-- **The actual observations describe the reads.** -/
 theorem describes_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
-    Describes g g.storage (fill g ν N rs) N rs := by
+    ArrDescribes g g.storage (arrFill g ν N rs) N rs := by
   intro j r hr
   have hmem : r ∈ rs := List.mem_of_getElem? hr
-  have hi : (r.idx.eval g (fill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
+  have hi : (r.idx.eval g (arrFill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
     idx_fill hb hmem
-  unfold ARead.Describes
+  unfold ARead.ArrDescribes
   cases hk : r.kind with
   | word =>
     intro k hk'
     rw [hi] at hk'
-    refine ⟨by rw [fill_xPos hb hr, idxVal_of hk'], ?_⟩
-    rw [fill_val g ν N rs hr, valAt, hk]
-    simp only [idxVal_of hk', dite_true]
+    refine ⟨by rw [arrFill_xPos hb hr, arrIdxVal_of hk'], ?_⟩
+    rw [arrFill_val g ν N rs hr, arrValAt, hk]
+    simp only [arrIdxVal_of hk', dite_true]
   | has =>
     intro k hk'
     rw [hi] at hk'
-    refine ⟨by rw [fill_xPos hb hr, idxVal_of hk'], ?_⟩
-    show (fill g ν N rs).get .bool (N + 2 * j + 1) = _
-    rw [fill_val g ν N rs hr, valAt, hk]
-    simp only [idxVal_of hk', dite_true]
+    refine ⟨by rw [arrFill_xPos hb hr, arrIdxVal_of hk'], ?_⟩
+    show (arrFill g ν N rs).get .bool (N + 2 * j + 1) = _
+    rw [arrFill_val g ν N rs hr, arrValAt, hk]
+    simp only [arrIdxVal_of hk', dite_true]
   | len =>
-    show lenDesc r.root r.h r.ar g.storage ((fill g ν N rs).get .uint (N + 2 * j + 1))
-    rw [fill_val g ν N rs hr, valAt, hk]
+    show lenDesc r.root r.h r.ar g.storage ((arrFill g ν N rs).get .uint (N + 2 * j + 1))
+    rw [arrFill_val g ν N rs hr, arrValAt, hk]
     simp only [dite_true]
     exact lenDesc_lenVal _ _ _ _
 
@@ -1802,7 +1802,7 @@ theorem fixed_obs {a : Name} {e : PrimTy} {n : Nat} (h : C.rootType a = some (.r
 
 theorem self_idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
     (hr : rs[j]? = some r) :
-    (LFml.imp (.eq r.idx r.idx) (.eq r.idx (r.xTm N j))).holds g (fill g ν N rs) := by
+    (LFml.imp (.eq r.idx r.idx) (.eq r.idx (r.xTm N j))).holds g (arrFill g ν N rs) := by
   intro h
   rw [LFml.holds_rets] at h
   obtain ⟨k, hk⟩ := h
@@ -1810,12 +1810,12 @@ theorem self_idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : 
     (idx_fill hb (List.mem_of_getElem? hr)).symm.trans hk
   rw [LFml.holds_eq_iff]
   refine ⟨k, hk, ?_⟩
-  show some ((fill g ν N rs).u (r.xPos N j)) = some k
-  rw [fill_xPos hb hr, idxVal_of hk']
+  show some ((arrFill g ν N rs).u (r.xPos N j)) = some k
+  rw [arrFill_xPos hb hr, arrIdxVal_of hk']
 
 /-- What one read makes of itself holds of the actual observations. -/
 theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
-    (hr : rs[j]? = some r) : ∀ d ∈ r.self N j, d.holds g (fill g ν N rs) := by
+    (hr : rs[j]? = some r) : ∀ d ∈ r.self N j, d.holds g (arrFill g ν N rs) := by
   have hi := self_idx_fill (g := g) (ν := ν) hb hr
   intro d hd
   obtain ⟨a, R, h, harr, e, ar, kind, idx⟩ := r
@@ -1832,17 +1832,17 @@ theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
       · exact hi
       · intro hF
         rw [holds_isF] at hF
-        rw [holds_eqDflt, fill_val g ν N rs hr]
-        simp only [valAt, dite_true]
+        rw [holds_eqDflt, arrFill_val g ν N rs hr]
+        simp only [arrValAt, dite_true]
         have hn := fixed_lt_bound h harr
-        have hx := fill_xPos (g := g) (ν := ν) hb hr
+        have hx := arrFill_xPos (g := g) (ν := ν) hb hr
         have e1 : ((LTm.ltU (ARead.xTm N j ⟨a, _, h, harr, e, .fixed, .word, idx⟩)
             (.app0 (.lit (uintOfNat n))) : LTm C (.val .bool)).eval g
-            (fill g ν N rs) : Option Bool) = some (decide ((idxVal g ν
+            (arrFill g ν N rs) : Option Bool) = some (decide ((arrIdxVal g ν
               ⟨a, _, h, harr, e, .fixed, .word, idx⟩).1 < n)) := by
           rw [eval_ltLit, hx, uintOfNat_val hn]
         rw [e1] at hF
-        have h0 := uint_nonneg (idxVal g ν ⟨a, _, h, harr, e, .fixed, .word, idx⟩)
+        have h0 := uint_nonneg (arrIdxVal g ν ⟨a, _, h, harr, e, .fixed, .word, idx⟩)
         exact (fixed_obs h g.storage).2 _ (fun hlt => by
           simp only [Option.some.injEq, decide_eq_false_iff_not] at hF; omega)
   | has =>
@@ -1855,41 +1855,41 @@ theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
       rcases hd with rfl | rfl
       · exact hi
       · have hn := fixed_lt_bound h harr
-        have hx := fill_xPos (g := g) (ν := ν) hb hr
+        have hx := arrFill_xPos (g := g) (ν := ν) hb hr
         rw [LFml.holds_eq_iff, eval_ltLit, hx, uintOfNat_val hn]
         refine ⟨_, ?_, rfl⟩
-        show some ((fill g ν N rs).get .bool (N + 2 * j + 1)) = _
-        rw [fill_val g ν N rs hr]
-        simp only [valAt, dite_true]
+        show some ((arrFill g ν N rs).get .bool (N + 2 * j + 1)) = _
+        rw [arrFill_val g ν N rs hr]
+        simp only [arrValAt, dite_true]
         rw [(fixed_obs h g.storage).1]
-        have h0 := uint_nonneg (idxVal g ν ⟨a, _, h, harr, e, .fixed, .has, idx⟩)
+        have h0 := uint_nonneg (arrIdxVal g ν ⟨a, _, h, harr, e, .fixed, .has, idx⟩)
         exact congrArg some (decide_eq_decide.mpr (by omega))
 
-theorem fill_x (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+theorem arrFill_x (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
     (hr : rs[j]? = some r) :
-    ((r.xTm N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
-      some (idxVal g ν r) := by
-  rw [LTm.eval_var]; exact congrArg some (fill_xPos hb hr)
+    ((r.xTm N j : LTm C (.val .uint)).eval g (arrFill g ν N rs) : Option PrimTy.uint.Denote) =
+      some (arrIdxVal g ν r) := by
+  rw [LTm.eval_var]; exact congrArg some (arrFill_xPos hb hr)
 
-theorem fill_word {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .word) :
-    ((vAt r.e N j : LTm C (.val r.e)).eval g (fill g ν N rs) : Option r.e.Denote) =
-      some (g.storage.obs.word (.ref (r.loc (idxVal g ν r)))) := by
-  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+theorem arrFill_word {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .word) :
+    ((vAt r.e N j : LTm C (.val r.e)).eval g (arrFill g ν N rs) : Option r.e.Denote) =
+      some (g.storage.obs.word (.ref (r.loc (arrIdxVal g ν r)))) := by
+  rw [LTm.eval_var, arrFill_val g ν N rs hr, arrValAt, hk]; simp only [dite_true]
 
-theorem fill_has {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .has) :
-    ((vAt .bool N j : LTm C (.val .bool)).eval g (fill g ν N rs) : Option Bool) =
-      some (g.storage.obs.has (.ref (r.loc (idxVal g ν r)))) := by
-  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+theorem arrFill_has {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .has) :
+    ((vAt .bool N j : LTm C (.val .bool)).eval g (arrFill g ν N rs) : Option Bool) =
+      some (g.storage.obs.has (.ref (r.loc (arrIdxVal g ν r)))) := by
+  rw [LTm.eval_var, arrFill_val g ν N rs hr, arrValAt, hk]; simp only [dite_true]
 
-theorem fill_len {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .len) :
-    ((vAt .uint N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
-      some (lenVal r.root r.h r.ar g.storage) := by
-  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+theorem arrFill_len {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .len) :
+    ((vAt .uint N j : LTm C (.val .uint)).eval g (arrFill g ν N rs) : Option PrimTy.uint.Denote) =
+      some (arrLenVal r.root r.h r.ar g.storage) := by
+  rw [LTm.eval_var, arrFill_val g ν N rs hr, arrValAt, hk]; simp only [dite_true]
 
 /-- What two reads make of each other holds of the actual observations. -/
 theorem pair_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j k : Nat} {r s : ARead C}
     (hr : rs[j]? = some r) (hs : rs[k]? = some s) :
-    ∀ d ∈ r.pair N j k s, d.holds g (fill g ν N rs) := by
+    ∀ d ∈ r.pair N j k s, d.holds g (arrFill g ν N rs) := by
   intro d hd
   unfold ARead.pair at hd
   split at hd
@@ -1906,14 +1906,14 @@ theorem pair_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j k : Nat} {r s : 
     have har : ar = ar' := ArrTy.subsingleton _ _
     subst har
     obtain ⟨B, hB1, hB2, hB3⟩ := arr_shape a h ar g.storage
-    have xj := fill_x (g := g) (ν := ν) (N := N) hb hr
-    have xk := fill_x (g := g) (ν := ν) (N := N) hb hs
-    have nj := uint_nonneg (idxVal g ν ⟨a, R, h, harr, e, ar, kr, ir⟩)
-    have nk := uint_nonneg (idxVal g ν ⟨a, R, h', harr', e, ar, ks, is⟩)
+    have xj := arrFill_x (g := g) (ν := ν) (N := N) hb hr
+    have xk := arrFill_x (g := g) (ν := ν) (N := N) hb hs
+    have nj := uint_nonneg (arrIdxVal g ν ⟨a, R, h, harr, e, ar, kr, ir⟩)
+    have nk := uint_nonneg (arrIdxVal g ν ⟨a, R, h', harr', e, ar, ks, is⟩)
     cases kr <;> cases ks <;> simp only [List.mem_singleton, List.not_mem_nil] at hd <;> subst hd
     · -- word, word
-      have wj := fill_word (g := g) (ν := ν) (N := N) hr rfl
-      have wk := fill_word (g := g) (ν := ν) (N := N) hs rfl
+      have wj := arrFill_word (g := g) (ν := ν) (N := N) hr rfl
+      have wk := arrFill_word (g := g) (ν := ν) (N := N) hs rfl
       intro hx
       rw [LFml.holds_eq_iff, xj, xk] at hx
       obtain ⟨x, h1, h2⟩ := hx
@@ -1925,46 +1925,46 @@ theorem pair_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j k : Nat} {r s : 
       rw [e1]
     · -- has, word
       intro h1 h2
-      rw [holds_isF, fill_has hr rfl, hB1] at h1
+      rw [holds_isF, arrFill_has hr rfl, hB1] at h1
       rw [holds_isT, eval_leU] at h2
-      rw [fill_xPos hb hr, fill_xPos hb hs] at h2
+      rw [arrFill_xPos hb hr, arrFill_xPos hb hs] at h2
       simp only [Option.some.injEq, decide_eq_false_iff_not, decide_eq_true_eq] at h1 h2
       rw [LFml.holds_eq_iff]
-      refine ⟨_, fill_word hs rfl, ?_⟩
+      refine ⟨_, arrFill_word hs rfl, ?_⟩
       dsimp only at h1 h2 ⊢
       rw [hB2 _ (by omega)]
       rfl
     · -- has, has
       intro h1 h2
-      rw [holds_isT, fill_has hr rfl, hB1] at h1
+      rw [holds_isT, arrFill_has hr rfl, hB1] at h1
       rw [holds_isT, eval_leU] at h2
-      rw [fill_xPos hb hs, fill_xPos hb hr] at h2
-      rw [holds_isT, fill_has hs rfl, hB1]
+      rw [arrFill_xPos hb hs, arrFill_xPos hb hr] at h2
+      rw [holds_isT, arrFill_has hs rfl, hB1]
       simp only [Option.some.injEq, decide_eq_true_eq] at h1 h2 ⊢
       omega
     · -- has, len
       intro h1
       rw [holds_isT] at h1
       have e1 : ((LTm.ltU (ARead.xTm N j ⟨a, R, h, harr, e, ar, .has, ir⟩) (vAt .uint N k) :
-          LTm C (.val .bool)).eval g (fill g ν N rs) :
-          Option Bool) = some (decide ((idxVal g ν ⟨a, R, h, harr, e, ar, .has, ir⟩).1 <
-            (lenVal a h' ar g.storage).1)) := by
-        rw [eval_ltU, fill_xPos hb hr]
-        rw [show (fill g ν N rs).u (N + 2 * k + 1) = lenVal a h' ar g.storage from
-          Option.some.inj (fill_len hs rfl)]
+          LTm C (.val .bool)).eval g (arrFill g ν N rs) :
+          Option Bool) = some (decide ((arrIdxVal g ν ⟨a, R, h, harr, e, ar, .has, ir⟩).1 <
+            (arrLenVal a h' ar g.storage).1)) := by
+        rw [eval_ltU, arrFill_xPos hb hr]
+        rw [show (arrFill g ν N rs).u (N + 2 * k + 1) = arrLenVal a h' ar g.storage from
+          Option.some.inj (arrFill_len hs rfl)]
       rw [e1] at h1
-      rw [holds_isT, fill_has hr rfl, hB1]
+      rw [holds_isT, arrFill_has hr rfl, hB1]
       simp only [Option.some.injEq, decide_eq_true_eq] at h1 ⊢
-      have := uint_nonneg (lenVal a h' ar g.storage)
+      have := uint_nonneg (arrLenVal a h' ar g.storage)
       omega
     · -- len, len
-      rw [eqVal, LFml.holds_eq_iff, fill_len hr rfl, fill_len hs rfl]
+      rw [eqVal, LFml.holds_eq_iff, arrFill_len hr rfl, arrFill_len hs rfl]
       exact ⟨_, rfl, rfl⟩
   · cases hd
 
 /-- **The actual observations satisfy the antecedent.** -/
 theorem cons_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
-    (ARead.cons N rs).holds g (fill g ν N rs) := by
+    (ARead.cons N rs).holds g (arrFill g ν N rs) := by
   rw [ARead.cons, LFml.holds_conj]
   intro d hd
   obtain ⟨j, -, hd⟩ := List.mem_flatMap.mp hd
@@ -1996,10 +1996,10 @@ theorem LFml.aCut_valid_iff {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
   have hb := LFml.aCutF?_bound φ [] hc hN (fun _ h => nomatch h)
   constructor
   · intro hK g ν
-    have hf := hK g (fill g ν N rs')
+    have hf := hK g (arrFill g ν N rs')
     have hφ' := hf (cons_fill hb)
     have := (LFml.aCutF_holds (describes_fill hb) (fun _ _ => rfl) φ [] hc (List.prefix_refl _)).mp hφ'
-    exact (LFml.holds_agree_below g φ ((fill_below g ν N rs').mono hN)).mp this
+    exact (LFml.holds_agree_below g φ ((arrFill_below g ν N rs').mono hN)).mp this
   · intro hφ g ν hC
     exact (LFml.aCutF_holds (describes_realize hC) (frames_realize ν N rs' g) φ [] hc
       (List.prefix_refl _)).mpr (hφ _ ν)
@@ -2008,7 +2008,7 @@ theorem LFml.aCut_valid_iff {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
 from its atoms. -/
 theorem LFml.aCut_refutes {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
     (h : φ.aCut? N = some (K, rs)) (g : State C []) (ν : AEnv) (hK : ¬ K.holds g ν) :
-    ¬ φ.holds (realize ν N rs g) ν := by
+    ¬ φ.holds (arrRealize ν N rs g) ν := by
   simp only [LFml.aCut?, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
   obtain ⟨φ', rs', hc, rfl, rfl⟩ := h
   intro hφ
@@ -2016,5 +2016,11 @@ theorem LFml.aCut_refutes {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
   intro hC
   exact (LFml.aCutF_holds (describes_realize hC) (frames_realize ν N rs' g) φ [] hc
     (List.prefix_refl _)).mpr hφ
+
+/-- info: 'Solidity.Decide.LFml.aCut_valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.aCut_valid_iff
+
+/-- info: 'Solidity.Decide.LFml.aCut_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.aCut_refutes
 
 end Solidity.Decide

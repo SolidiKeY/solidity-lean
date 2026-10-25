@@ -194,4 +194,7 @@ theorem _root_.Solidity.Tm.toLT_sound (hA : Agrees g₀ ν ρ τ) {s : Srt} (t :
 
 end Sound
 
+/-- info: 'Solidity.Tm.toLT_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Tm.toLT_sound
+
 end Solidity.Decide
