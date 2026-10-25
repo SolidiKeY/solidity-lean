@@ -223,6 +223,19 @@ def rgsFrom : Nat → Nat → List (List Nat)
 /-- The classes of `n` strings. -/
 def rgs (n : Nat) : List (List Nat) := rgsFrom n 0
 
+theorem rgsFrom_bound : (n m : Nat) → ∀ cs ∈ rgsFrom n m, ∀ j ∈ cs, j < m + n
+  | 0, _, cs, hcs, j, hj => by
+    simp only [rgsFrom, List.mem_singleton] at hcs
+    subst hcs
+    exact absurd hj List.not_mem_nil
+  | n + 1, m, cs, hcs, j, hj => by
+    simp only [rgsFrom, List.mem_flatMap, List.mem_range, List.mem_map] at hcs
+    obtain ⟨c, hc, cs', hcs', rfl⟩ := hcs
+    rcases List.mem_cons.1 hj with rfl | hj
+    · omega
+    · have := rgsFrom_bound n (max m (c + 1)) cs' hcs' j hj
+      omega
+
 /-- A word of the swapped leaf. -/
 abbrev HWord := PrimTy.uint.Denote
 
@@ -571,6 +584,23 @@ theorem _root_.Solidity.Fml.swPrefix_complete {k : HashKind} (hk : k ≠ .ecreco
   obtain ⟨σ'', hrel⟩ := relabel_state hK ρ Cs hinj V σ'
   refine ⟨cs, hcs, φc, by rw [Fml.swInst_eq]; exact ec, fun hv => hnvv ?_⟩
   exact Fml.swInstV_transfer hK k φ vs Cs ev ec hwp hrl hpre σ'' σ' hrel (hv σ'')
+
+/-- **The reduction is exact under the premise**: on the fragment, the leaf
+is valid under its own hash premise exactly where its swapped reading is
+valid. -/
+theorem _root_.Solidity.Fml.swPrefix_exact {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C []}
+    {φ' : Fml C []} (e : φ.swPrefix k = some φ') {V : List Nat} {K : List Name}
+    (hK : KTyped C K) (hrl : φ.swRL k V K = true) (hpre : φ.prefixOK V = true)
+    (hn : φ.allocCount ≤ famBound) : Fml.ValidH φ ↔ Fml.Valid φ' := by
+  refine ⟨fun hv => Classical.byContradiction fun hnv => ?_, Fml.swPrefix_validH e⟩
+  obtain ⟨cs, hcs, φf, hf, hnf⟩ := Fml.swPrefix_complete hk e hK hrl hpre hn hnv
+  have : ∃ σ, ¬ holds σ φf := Classical.byContradiction fun hc =>
+    hnf fun σ => Classical.byContradiction fun hσ => hc ⟨σ, hσ⟩
+  obtain ⟨σ, hσ⟩ := this
+  have hb : ∀ j ∈ cs, j < famBound := fun j hj => by
+    have := rgsFrom_bound φ.allocCount 0 cs hcs j hj
+    omega
+  exact Fml.swInst_refutes (famOK_bound k hk) hf hb hσ (hv σ.noHeap)
 
 end Complete
 

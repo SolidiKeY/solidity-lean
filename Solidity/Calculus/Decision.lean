@@ -370,19 +370,6 @@ def _root_.Solidity.Fml.coveredK (k : HashKind) (φ : Fml C []) : Bool :=
 def _root_.Solidity.Fml.hashCovered (φ : Fml C []) : Bool :=
   φ.hasHash && (φ.coveredK .keccak || φ.coveredK .sha256 || φ.coveredK .ripemd160)
 
-theorem rgsFrom_bound : (n m : Nat) → ∀ cs ∈ rgsFrom n m, ∀ j ∈ cs, j < m + n
-  | 0, _, cs, hcs, j, hj => by
-    simp only [rgsFrom, List.mem_singleton] at hcs
-    subst hcs
-    exact absurd hj List.not_mem_nil
-  | n + 1, m, cs, hcs, j, hj => by
-    simp only [rgsFrom, List.mem_flatMap, List.mem_range, List.mem_map] at hcs
-    obtain ⟨c, hc, cs', hcs', rfl⟩ := hcs
-    rcases List.mem_cons.1 hj with rfl | hj
-    · omega
-    · have := rgsFrom_bound n (max m (c + 1)) cs' hcs' j hj
-      omega
-
 theorem findSome?_ne_none {α β : Type} {f : α → Option β} {a : α} :
     {l : List α} → a ∈ l → f a ≠ none → l.findSome? f ≠ none
   | [], h, _ => absurd h List.not_mem_nil
@@ -594,6 +581,17 @@ def _root_.Solidity.Tm.hashable? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option Has
     | k => k
   | _ => none
 
+/-- A memory local. -/
+def _root_.Solidity.Tm.isPvI {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .pvI _ => true
+  | _ => false
+
+/-- A hash of a memory local: a key it reads is a hash's, not the default a
+key with no value reads. -/
+def _root_.Solidity.Tm.hashOfLocal {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .app2 o _ y => o.isHash && y.isPvI
+  | _ => false
+
 /-- Two hash terms of one kind: their equation is their inputs' under the
 goal's premise. -/
 def _root_.Solidity.Tm.hashPair {Γ : Ctx} {s s' : Srt} (x : Tm C Γ s) (y : Tm C Γ s') : Bool :=
@@ -611,7 +609,7 @@ def _root_.Solidity.Tm.inTarget {Γ : Ctx} (w : Waivers) (hashOK : Bool) : {s : 
   | _, .app1 _ x => x.inTarget w false
   | _, .app2 o x y =>
     let eqH := o.isEqNe && x.hashPair y
-    let keyH := o.isMapAt && x.rootNameD?.isSome && y.hashable?.isSome
+    let keyH := o.isMapAt && x.rootNameD?.isSome && y.hashable?.isSome && y.hashOfLocal
     x.inTarget w eqH && y.inTarget w (eqH || keyH) &&
       (if o.isHash then hashOK else o.admits w x.isLitV y.isLitV y.litValue?)
   | _, .app3 o x y z => x.inTarget w false && y.inTarget w false && z.inTarget w false &&
@@ -851,8 +849,12 @@ def _root_.Solidity.Fml.target (w : Waivers) : {Γ : Ctx} → Bool → Bool → 
       else if n then false
       else if pol then φ.target w pol n
       else φ.apfBlock w [Γ.length]
+    | .mem _ =>
+      !φ.hasHash && if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
     | _ => if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
-  | _, pol, n, .havoc φ | _, pol, n, .anon _ φ | _, pol, n, .grow φ | _, pol, n, .allocAll _ _ φ =>
+  | _, pol, n, .anon _ φ =>
+    !φ.hasHash && if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
+  | _, pol, n, .havoc φ | _, pol, n, .grow φ | _, pol, n, .allocAll _ _ φ =>
     if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
 
 /-! ### Hashes as mapping keys
@@ -935,5 +937,20 @@ def DecisionTheorem (w : Waivers := {}) : Prop :=
 
 /-- info: 'Solidity.Decide.decideGoal_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideGoal_complete
+
+/-- info: 'Solidity.Decide.decideGoal_complete_hash' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_complete_hash
+
+/-- info: 'Solidity.Fml.swPrefix_validH' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_validH
+
+/-- info: 'Solidity.Fml.swInst_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swInst_refutes
+
+/-- info: 'Solidity.Fml.swPrefix_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_complete
+
+/-- info: 'Solidity.Fml.swPrefix_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_exact
 
 end Solidity.Decide
