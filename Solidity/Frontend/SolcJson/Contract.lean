@@ -143,8 +143,8 @@ def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
   if cs.any (·.kind == "box") then return .box
   return .diamond
 
-/-- Every declaration of a function that must be renamed: one named like a
-state variable or a Lean keyword gets `_` until it is fresh. -/
+/-- Every local declaration that needs a model name: unnamed parameters and
+returns get a fresh identity-based name; state/keyword clashes get `_`. -/
 def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   let decls := (J.nodes f).filter fun n =>
     J.kind n == "VariableDeclaration" &&
@@ -160,12 +160,12 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   (decls.foldl (fun (acc : List String × List (Int × String)) d =>
     let (taken, out) := acc
     match J.str? d "name", J.id? d with
-    | some n, some i => if n != "" && (stateVars.contains n || leanKeywords.contains n) then
+    | some n, some i => if n == "" || stateVars.contains n || leanKeywords.contains n then
       let rec fresh (k : Nat) (x : String) : String :=
         match k with
         | 0 => x
         | k + 1 => if taken.contains x then fresh k (x ++ "_") else x
-      let name := fresh (taken.length + 1) (n ++ "_")
+      let name := fresh (taken.length + 1) (if n.isEmpty then s!"solcArg{i}" else n ++ "_")
       (name :: taken, out ++ [(i, name)])
       else acc
     | _, _ => acc) (taken, [])).2
@@ -348,6 +348,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
     | _ => []
+  let declarations := (J.nodes ast).filter fun node => (J.id? node).isSome
   let some c := units.find? fun u =>
       J.kind u == "ContractDefinition" && J.str? u "name" == some name
     | throw s!"no contract `{name}` in the AST"
@@ -612,7 +613,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let (specConstants, scopeConstBlocked) :=
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
-    { names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
+    { declarations, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
@@ -793,7 +794,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let inits : Except Gap (List String) := kept.mapM fun (n, t, v) => do
     let some e := J.opt v "value" | pure s!"{t} {n};"
     match (expr e).run' { initSt with superNames := superNamesOf v } with

@@ -500,6 +500,9 @@ declaration's id), the statements to put before the current one (a pushed
 element's storage local), a counter for their names, and whether the
 current position may hoist a push. -/
 structure PState where
+  /-- Validated solc declarations, retained by identity for source metadata.
+  This is importer input, not a second representation of typed model terms. -/
+  declarations : List Json := []
   names : List (Int × String) := []
   /-- Original function-version names, for an explicit `Base.f()` call. -/
   staticNames : List (Int × String) := []
@@ -683,6 +686,65 @@ def defaultLiteral (t : String) : Json :=
   else Json.mkObj [("nodeType", "Literal"), ("kind", "number"), ("value", "0")]
 
 def unsupported {α : Type} (msg : String) : PM α := throw (.unsupported msg)
+
+/-- A compiler-provided selector has exactly its ABI width; malformed or
+trimmed metadata fails closed instead of acquiring a default selector. -/
+def declarationSelector (d : Json) (key : String) (bytes : Nat) : Except Gap Nat := do
+  let text ← J.str d key
+  unless text.length == 2 * bytes do
+    throw (.unsupported s!"malformed {key} on declaration #{(J.id? d).getD 0}")
+  text.toList.foldlM (fun n c => do
+    let digit ← if c.isDigit then pure (c.toNat - '0'.toNat)
+      else if 'a' ≤ c && c ≤ 'f' then pure (c.toNat - 'a'.toNat + 10)
+      else if 'A' ≤ c && c ≤ 'F' then pure (c.toNat - 'A'.toNat + 10)
+      else throw (.unsupported s!"non-hexadecimal {key}")
+    pure (n * 16 + digit)) 0
+
+/-- Declaration metadata is resolved by solc identity, never a short name.
+Only a static declaration or `this.f` can fold a function selector here:
+an arbitrary receiver expression must retain its evaluation effects. -/
+def declarationMetadata (declarations : List Json) (e : Json) (member : String) :
+    Except Gap (Option String) := do
+  let find (id : Int) : Option Json := declarations.find? (J.id? · == some id)
+  if J.kind e == "FunctionCall" && ["name", "interfaceId"].contains member then
+    let some head := J.opt e "expression" | return none
+    if J.kind head != "Identifier" || J.ref? head != some (-27) then return none
+    let some args := J.arr? e "arguments" | return none
+    if args.size != 1 then return none
+    let some arg := args[0]? | return none
+    let some d := (J.ref? arg).bind find | return none
+    if J.kind d != "ContractDefinition" then return none
+    if member == "name" then return some (← J.str d "name").quote
+    unless J.str? d "contractKind" == some "interface" do
+      throw (.unsupported "interfaceId metadata requires an interface declaration")
+    -- Inherited declarations are deliberately absent from this list. An
+    -- interface's own override is present and contributes its selector once.
+    let own := (J.arrD d "nodes").toList.filter fun f =>
+      J.kind f == "FunctionDefinition" &&
+        J.str? f "kind" == some "function" &&
+        [some "public", some "external"].contains (J.str? f "visibility")
+    let value ← own.foldlM (fun value f => do
+      pure (value ^^^ (← declarationSelector f "functionSelector" 4))) 0
+    return some s!"bytes4({value})"
+  if member != "selector" then return none
+  let some d := (J.ref? e).bind find | return none
+  match J.kind d with
+  | "ErrorDefinition" =>
+    return some s!"bytes4({← declarationSelector d "errorSelector" 4})"
+  | "EventDefinition" =>
+    if (d.getObjValAs? Bool "anonymous").toOption == some true then
+      throw (.unsupported "an anonymous event has no selector")
+    return some s!"bytes32({← declarationSelector d "eventSelector" 32})"
+  | "FunctionDefinition" | "VariableDeclaration" =>
+    let static := (J.ref? e).isSome &&
+      (J.kind e == "Identifier" || J.kind e == "IdentifierPath" ||
+        (J.kind e == "MemberAccess" && ((J.opt e "expression").any fun receiver =>
+          ((J.ref? receiver).bind find).any (J.kind · == "ContractDefinition") ||
+          (J.kind receiver == "Identifier" && J.ref? receiver == some (-28)))))
+    if static && (J.str? d "functionSelector").isSome then
+      return some s!"bytes4({← declarationSelector d "functionSelector" 4})"
+    return none
+  | _ => return none
 
 /-- `e ? 1 : 0`, solc's encoding of a `bool` key, folded on a literal. -/
 def boolKey (j : Json) (e : String) : String :=
@@ -925,6 +987,25 @@ partial def expr (j : Json) : PM String := do
   | "MemberAccess" =>
     let e ← PM.lift (J.get j "expression")
     let m ← PM.lift (J.str j "memberName")
+    if let some value ← PM.lift (declarationMetadata (← get).declarations e m) then
+      return value
+    -- `fnPure` folds a known function's selector. Capture a dynamic
+    -- receiver first, so its calls, checks and indexing still execute once.
+    if m == "selector" && J.kind e == "MemberAccess" then
+      let declarations := (← get).declarations
+      if let some d := (J.ref? e).bind fun id =>
+          declarations.find? (J.id? · == some id) then
+        if J.kind d == "FunctionDefinition" && (J.str? d "functionSelector").isSome then
+          let receiver ← PM.lift (J.get e "expression")
+          let value ← expr receiver
+          let st ← get
+          let taken := st.names.map (·.2)
+          let mut name := s!"solcMetadataReceiver{st.fresh + 1}"
+          for _ in [:taken.length + 1] do
+            if !taken.contains name then break
+            name := name ++ "_"
+          set { st with fresh := st.fresh + 1, pre := st.pre.push s!"address {name} = address({value})" }
+          return s!"bytes4({← PM.lift (declarationSelector d "functionSelector" 4)})"
     if let some bound := typeBound? (← get).enumBounds e m then
       let t := if (J.tyStr j).startsWith "enum " then "uint" else elemTy (J.tyStr j) false
       return s!"{t}({bound})"
