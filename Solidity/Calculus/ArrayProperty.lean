@@ -1882,6 +1882,25 @@ theorem mem_apfValues {us : List (IdxKey C)} {g : State C []} {ν : AEnv} {s : I
     s ∈ apfValues us g ν ↔ ∃ e ∈ us, ∃ v : PrimTy.uint.Denote, (e.1.eval g ν : Option _) = some v ∧ v.1 = s := by
   simp only [apfValues, List.mem_filterMap, Option.map_eq_some_iff, IdxKey.value_eq]
 
+/-- **The index set without repeated terms**: a term written twice is one
+instance, not two (`LTm.beqR`, structural). -/
+def dedupKeys : List (IdxKey C) → List (IdxKey C)
+  | [] => []
+  | e :: l => e :: (dedupKeys l).filter fun e' => !(e'.1.beqR e.1)
+
+theorem dedupKeys_mem : ∀ {l : List (IdxKey C)} {e : IdxKey C}, e ∈ l → ∃ e' ∈ dedupKeys l, e'.1 = e.1
+  | e₀ :: l, e, h => by
+    rcases List.mem_cons.1 h with rfl | h
+    · exact ⟨e, List.mem_cons_self, rfl⟩
+    · obtain ⟨e', he', hee⟩ := dedupKeys_mem h
+      by_cases hb : e'.1.beqR e₀.1 = true
+      · rw [LTm.beqR_eq_beqM] at hb
+        have := LTm.eq_of_beqM _ _ hb
+        exact ⟨e₀, List.mem_cons_self, by
+          rw [← hee]; exact (eq_of_heq (Sigma.ext_iff.1 this).2).symm⟩
+      · exact ⟨e', List.mem_cons_of_mem _ (List.mem_filter.2 ⟨he', by simp only [hb, Bool.not_false]⟩),
+          hee⟩
+
 /-- The shape of a type, if it has one. -/
 def MShape.of? : (T : Ty) → Option ((p : PrimTy) × MShape T p)
   | .ref (.mapping .uint (.prim p)) => some ⟨p, .last p⟩
@@ -1905,7 +1924,7 @@ def apfPrep (B : LFml C) : Prep B :=
     match ApfFml.ofFormula? Rs B with
     | none => Prep.id B
     | some h =>
-      let us := IdxKey.zero :: (h.topGd B.binders true ++ (h.topLo B.binders true).map IdxKey.succ)
+      let us := dedupKeys (IdxKey.zero :: (h.topGd B.binders true ++ (h.topLo B.binders true).map IdxKey.succ))
       if hc : h.topB B.binders true = true ∧
           us.all (fun e => e.1.parameters.all fun q => decide (q ∉ B.binders)) = true then
         { body := B.apfInst Rs (us.map (·.1)) true
@@ -1940,8 +1959,9 @@ def apfPrep (B : LFml C) : Prep B :=
                   loS := fun x hx v hv hb => by
                     obtain ⟨w, hw, hw1⟩ := LTm.eval_succU g ν x hv hb
                     obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
-                    exact mem_apfValues.2 ⟨e.succ, List.mem_cons_of_mem _
-                      (List.mem_append_right _ (List.mem_map.2 ⟨e, he, rfl⟩)), w, hw, hw1⟩
+                    obtain ⟨e', he', hee⟩ := dedupKeys_mem (List.mem_cons_of_mem IdxKey.zero
+                      (List.mem_append_right _ (List.mem_map.2 ⟨e, he, rfl⟩)))
+                    exact mem_apfValues.2 ⟨e', he', w, by rw [hee]; exact hw, hw1⟩
                   loT := fun x hx v hv => by
                     obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
                     exact mem_apfValues.2 ⟨e, he, v, hv, rfl⟩
@@ -1950,7 +1970,10 @@ def apfPrep (B : LFml C) : Prep B :=
                   hν := fun _ _ => rfl }
               have htop := ApfFml.topB_sound (Gd := fun x => x ∈ us.map (·.1))
                 (Lo := fun x => x ∈ lo.map (·.1)) true h hc.1
-                (fun e he => List.mem_map.2 ⟨e, List.mem_cons_of_mem _ (List.mem_append_left _ he), rfl⟩)
+                (fun e he => by
+                  obtain ⟨e', he', hee⟩ := dedupKeys_mem (List.mem_cons_of_mem IdxKey.zero
+                    (List.mem_append_left _ he))
+                  exact List.mem_map.2 ⟨e', he', hee⟩)
                 (fun e he => List.mem_map.2 ⟨e, he, rfl⟩)
               exact fun hB => hneg ((ApfFml.apfInst_refute (us.map (·.1)) hus hcover h0 hset true h htop).1
                 rfl hB)⟩ }
