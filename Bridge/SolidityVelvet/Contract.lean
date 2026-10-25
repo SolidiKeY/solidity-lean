@@ -109,16 +109,16 @@ A revert is Loom's `assume`. Velvet derives the VC generator's rule for
 
 section AssumeWP
 variable {m l} [Monad m] [LawfulMonad m] [CompleteBooleanAlgebra l] [MAlgOrdered m l]
-variable {as : Prop} [Decidable as]
+variable {p : Prop} [Decidable p]
 
 section
 open PartialCorrectness DemonicChoice
-#derive_wp for (MonadNonDet.assume as : NonDetT m PUnit)
+#derive_wp for (MonadNonDet.assume p : NonDetT m PUnit)
 end
 
 section
 open TotalCorrectness DemonicChoice
-#derive_wp for (MonadNonDet.assume as : NonDetT m PUnit)
+#derive_wp for (MonadNonDet.assume p : NonDetT m PUnit)
 end
 
 end AssumeWP
