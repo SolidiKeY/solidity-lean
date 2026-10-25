@@ -266,11 +266,12 @@ quantified subformulas abstracted, in
 Presburger (`LFml.qfrag`). -/
 def LFml.quantCovered (ψ : LFml C) : Bool :=
   decide (ψ.allDepth < 1024) && ψ.stripAll.2.freeParams.all (fun q => decide (q ∈ ψ.stripAll.1)) &&
-    (ψ.stripAll.2.liftCondB condLiftFuel liftBudget).isSome &&
-    ((abstracted ψ.stripAll.2).1.src? false).isSome &&
-    decide ((abstracted ψ.stripAll.2).1.cutAll.nodes ≤ 511) &&
-    decide ((abstracted ψ.stripAll.2).1.cutAll.words * (abstracted ψ.stripAll.2).1.cutAll.words ≤ 2048) &&
-    (abstracted ψ.stripAll.2).2.all (·.2.qfrag)
+    ((bodyPrep ψ.stripAll.2).body.liftCondB condLiftFuel liftBudget).isSome &&
+    ((abstracted (bodyPrep ψ.stripAll.2).body).1.src? false).isSome &&
+    decide ((abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.nodes ≤ 511) &&
+    decide ((abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.words *
+      (abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.words ≤ 2048) &&
+    (abstracted (bodyPrep ψ.stripAll.2).body).2.all (·.2.qfrag)
 
 /-- **The fragment of the quantified decision**, on the eliminated leaf. -/
 def _root_.Solidity.Fml.quantCovered (φ : Fml C []) : Bool :=
@@ -294,18 +295,19 @@ theorem quantReduction?_isSome (φ : Fml C []) (h : φ.quantCovered = true) :
     obtain ⟨u, hu, hup, hub⟩ := UniversalPrefix.ofFormula?_strip _ 1024 hdepth
     have hc : ∀ q ∈ u.body.freeParams, q ∈ u.parameters := by
       rw [hub, hup]; exact hcov
-    have hcap : (u.body.liftCondB condLiftFuel liftBudget).isSome = true := by rw [hub]; exact hnodes
-    have hnone : (u.body.liftCondB condLiftFuel liftBudget).isNone = false := by
-      cases hX : u.body.liftCondB condLiftFuel liftBudget with
+    have hcap : ((bodyPrep u.body).body.liftCondB condLiftFuel liftBudget).isSome = true := by
+      rw [hub]; exact hnodes
+    have hnone : ((bodyPrep u.body).body.liftCondB condLiftFuel liftBudget).isNone = false := by
+      cases hX : (bodyPrep u.body).body.liftCondB condLiftFuel liftBudget with
       | none => rw [hX] at hcap; cases hcap
       | some _ => rfl
     obtain ⟨⟨hs⟩, -⟩ := Option.isSome_iff_exists.mp hsrc
     obtain ⟨M, hM⟩ := Option.isSome_iff_exists.mp
-      (flattenedArithmetic?_isSome (abstracted u.body).1 (hub ▸ hs) (hub ▸ hn) (hub ▸ hw))
-    have hW := layoutOf_W M (abstracted u.body).2
+      (flattenedArithmetic?_isSome (abstracted (bodyPrep u.body).body).1 (hub ▸ hs) (hub ▸ hn) (hub ▸ hw))
+    have hW := layoutOf_W M (abstracted (bodyPrep u.body).body).2
     obtain ⟨D, hD⟩ := Option.isSome_iff_exists.mp (QDefs.compile_isSome
-      (layoutOf M (abstracted u.body).2).pos (layoutOf M (abstracted u.body).2).P
-      ((layoutOf M _).pos_inj hW) (abstracted u.body).2
+      (layoutOf M (abstracted (bodyPrep u.body).body).2).pos (layoutOf M (abstracted (bodyPrep u.body).body).2).P
+      ((layoutOf M _).pos_inj hW) (abstracted (bodyPrep u.body).body).2
       (layoutOf M _).top ((layoutOf M _).pos_lt hW) (fun e he =>
         ⟨hq e (by rw [← hub]; exact he),
           fun q hq' => layoutOf_P M _ q (List.mem_flatMap.2 ⟨e, he, List.mem_cons_of_mem _ (List.mem_append_left _ hq')⟩),

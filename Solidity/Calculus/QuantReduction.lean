@@ -1,4 +1,4 @@
-import Solidity.Calculus.QuantArithmetic
+import Solidity.Calculus.QuantHoist
 import Solidity.Calculus.DependentReduction
 
 /-!
@@ -391,6 +391,10 @@ theorem QFml.holds_atom_range (F : AFml) (W : Nat) (hw : F.width ≤ W) (x : Nat
   rw [List.getD_eq_getElem?_getD, List.getElem?_range (Nat.lt_of_lt_of_le hi hw)]
   rfl
 
+/-- **The body's preparations**: reads at no bound variable hoisted out of
+the quantifiers (`hoistPrep`). -/
+def bodyPrep (B : LFml C) : Prep B := hoistPrep B
+
 /-- **A leaf whose remaining quantifiers are Presburger quantifiers**,
 reduced to one quantified linear sentence. -/
 structure QuantReduction (φ : Fml C []) where
@@ -398,17 +402,18 @@ structure QuantReduction (φ : Fml C []) where
   source : SourceReduction normalization.formula
   sentence : UniversalPrefix source.leaf.elim.condSimp.prenex
   covered : ∀ q ∈ sentence.body.freeParams, q ∈ sentence.parameters
-  main : FlattenedArithmetic (abstracted sentence.body).1
-  defs : QDefs (abstracted sentence.body).2 (layoutOf main (abstracted sentence.body).2).pos
-    (layoutOf main (abstracted sentence.body).2).top
+  prep : Prep sentence.body
+  main : FlattenedArithmetic (abstracted prep.body).1
+  defs : QDefs (abstracted prep.body).2 (layoutOf main (abstracted prep.body).2).pos
+    (layoutOf main (abstracted prep.body).2).top
 
 namespace QuantReduction
 
 variable {φ : Fml C []} (r : QuantReduction φ)
 
 /-- The main layout and the abstracted subformulas. -/
-abbrev L : QLayout := layoutOf r.main (abstracted r.sentence.body).2
-abbrev Qs : List (Nat × LFml C) := (abstracted r.sentence.body).2
+abbrev L : QLayout := layoutOf r.main (abstracted r.prep.body).2
+abbrev Qs : List (Nat × LFml C) := (abstracted r.prep.body).2
 abbrev A : TypedFormula (Inputs.types r.main.encoding.environment r.main.encoding.parameters
     r.main.encoding.refs) := r.main.encoding.arithmetic
 
@@ -492,8 +497,8 @@ theorem assignmentOf_top (L : QLayout) (main : Nat → Nat) (ν : AEnv) (i : Nat
 
 /-- **A valid sentence makes the body valid.** -/
 theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
-    r.sentence.body.holds g ν' := by
-  let L0 := r.sentence.body.liftCond condLiftFuel
+    r.prep.body.holds g ν' := by
+  let L0 := r.prep.body.liftCond condLiftFuel
   let n := L0.atomBound
   have hQs : r.Qs = (L0.abstractQ n).2 := rfl
   obtain ⟨hkge, hknd⟩ := keys_spec L0 n
@@ -519,13 +524,13 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
       have : e' = e := nodup_map_inj hknd he' he hk
       exact this ▸ hh
     · exact fun hh => ⟨e, he, rfl, hh⟩
-  have hL0 : L0.holds g ν1 ↔ r.sentence.body.holds g ν' :=
+  have hL0 : L0.holds g ν1 ↔ r.prep.body.holds g ν' :=
     (LFml.holds_agree g L0 fun q hq => hagree1 q (LFml.index_lt_atomBound L0 q hq)).trans
       (LFml.liftCond_holds g _ _ ν')
-  have hhat : (abstracted r.sentence.body).1.holds g ν1 ↔ L0.holds g ν1 :=
+  have hhat : (abstracted r.prep.body).1.holds g ν1 ↔ L0.holds g ν1 :=
     LFml.abstractQ_holds g ν1 L0 n fun e he => (hkey e he).trans (hQ1 e he).symm
   -- the cut's fresh atoms, defined past every atom of the abstracted body
-  let B := (abstracted r.sentence.body).1
+  let B := (abstracted r.prep.body).1
   have hF := LFml.cut_good_top B
   obtain ⟨μ, hμ, hd⟩ := hF.defs.extend g ν1
   have hcut : B.cutAll.holds g μ → B.holds g ν1 := fun h =>
@@ -595,7 +600,8 @@ theorem body_of_sentence (h : r.sentenceF.Valid) (g : State C []) (ν' : AEnv) :
 /-- **A valid sentence makes the leaf valid.** -/
 theorem valid_of_sentence (h : r.sentenceF.Valid) : Fml.Valid φ := fun g =>
   (r.normalization.correct g).mp ((r.source.elim_holds_iff g).mp ((LFml.condSimp_holds g _ _).mp
-    ((LFml.prenex_holds g _ _).mp (r.sentence.close g AEnv.dflt (r.body_of_sentence h g)))))
+    ((LFml.prenex_holds g _ _).mp (r.sentence.close g AEnv.dflt
+    (fun ν => r.prep.sound (r.body_of_sentence h) g ν)))))
 
 /-- The value of an extra parameter, read from `x`. -/
 def extraValue (L : QLayout) (x : Nat → Nat) (q : Parameter) : q.Value :=
@@ -630,7 +636,6 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : {σ : State
     Classical.byContradiction fun h => hflat fun hh => (h hh).elim
   have hf : ¬ r.main.flattening.flat.formula.holds gM ν := fun h => hflat fun _ => h
   let st := r.main.flattening.countermodel gM ν ((r.main.flattening.layout.constraints_iff gM ν).1 hc) hf
-  refine ⟨st.1, fun hφ => ?_⟩
   have hW : r.L.es.length + r.L.ps.length ≤ r.L.W := layoutOf_W r.main r.Qs
   have hrep : ∀ q ∈ freeQ r.Qs, x (r.L.pos q) = q.code ν := by
     intro q hqf
@@ -663,13 +668,15 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : {σ : State
   have hkey : ∀ e ∈ r.Qs, (ν.get .bool e.1 = true ↔ e.2.holds st.1 ν) := fun e he => by
     rw [← code_bool, ← hrep _ (List.mem_flatMap.2 ⟨e, he, List.mem_cons_self⟩)]
     exact hdefs e he
-  let L0 := r.sentence.body.liftCond condLiftFuel
+  let L0 := r.prep.body.liftCond condLiftFuel
   have hL0 : ¬ L0.holds st.1 ν := fun h =>
     st.2 (LFml.holds_cutAll _ st.1 ν ((LFml.abstractQ_holds st.1 ν L0 L0.atomBound hkey).2 h))
-  have hB : ¬ r.sentence.body.holds st.1 ν := fun h => hL0 ((LFml.liftCond_holds st.1 _ _ ν).2 h)
-  have hinst := r.sentence.instantiate st.1 AEnv.dflt ν ((LFml.prenex_holds _ _ _).mpr
+  have hB : ¬ r.prep.body.holds st.1 ν := fun h => hL0 ((LFml.liftCond_holds st.1 _ _ ν).2 h)
+  let st' := r.prep.refute st.1 ν hB
+  refine ⟨st'.1, fun hφ => ?_⟩
+  have hinst := r.sentence.instantiate st'.1 AEnv.dflt ν ((LFml.prenex_holds _ _ _).mpr
     ((LFml.condSimp_holds _ _ _).mpr ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hφ))))
-  refine hB ((LFml.holds_agree_free st.1 _ fun q hq => ?_).1 hinst)
+  refine st'.2 ((LFml.holds_agree_free st'.1 _ fun q hq => ?_).1 hinst)
   rw [Parameters.read_assign, if_pos (r.covered q hq)]
 
 /-- **Proof or refutation**, from one traversal of the sentence's
@@ -687,13 +694,14 @@ def quantReduction? (φ : Fml C []) : Option (QuantReduction φ) := do
   let r ← sourceReduction? d.formula
   let sentence ← UniversalPrefix.ofFormula? 1024 r.leaf.elim.condSimp.prenex
   if hc : ∀ q ∈ sentence.body.freeParams, q ∈ sentence.parameters then
-    if (sentence.body.liftCondB condLiftFuel liftBudget).isNone then none
+    let P := bodyPrep sentence.body
+    if (P.body.liftCondB condLiftFuel liftBudget).isNone then none
     else
-      let M ← flattenedArithmetic? 2048 (abstracted sentence.body).1
-      let L := layoutOf M (abstracted sentence.body).2
+      let M ← flattenedArithmetic? 2048 (abstracted P.body).1
+      let L := layoutOf M (abstracted P.body).2
       let D ← QDefs.compile L.pos L.P (L.pos_inj (layoutOf_W M _))
-        (abstracted sentence.body).2 L.top (L.pos_lt (layoutOf_W M _))
-      return ⟨d, r, sentence, hc, M, D⟩
+        (abstracted P.body).2 L.top (L.pos_lt (layoutOf_W M _))
+      return ⟨d, r, sentence, hc, P, M, D⟩
   else none
 
 end Solidity.Decide
