@@ -60,6 +60,59 @@ def LTm.lit? {p : PrimTy} : (t : LTm C (.val p)) → Option {v : p.Denote // t =
   | .app0 (.lit v) => some ⟨v, rfl⟩
   | _ => none
 
+/-! ## Values at their ranges -/
+
+theorem uint_val_nonneg (v : PrimTy.uint.Denote) : 0 ≤ v.val := by
+  have h := v.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h.1
+
+theorem uint_val_lt (v : PrimTy.uint.Denote) : v.val < ((2 ^ 256 : Nat) : Int) := by
+  have h := v.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h.2
+
+theorem ofInt?_isSome' {p : PrimTy} (hp : p.isNumeric = true) {n : Int} (h : p.inRange n = true) :
+    (p.ofInt? n).isSome = true := by
+  cases p with
+  | bool => cases hp
+  | uint | int => simp only [PrimTy.ofInt?, dif_pos h, Option.isSome_some]
+
+theorem uint_inRange {n : Int} (h0 : 0 ≤ n) (h1 : n < ((2 ^ 256 : Nat) : Int)) :
+    PrimTy.uint.inRange n = true := decide_eq_true ⟨h0, h1⟩
+
+theorem int_inRange {n : Int} (h0 : -((2 ^ 255 : Nat) : Int) ≤ n) (h1 : n < ((2 ^ 255 : Nat) : Int)) :
+    PrimTy.int.inRange n = true := decide_eq_true ⟨h0, h1⟩
+
+theorem uintBound_eq : ((2 ^ 256 : Nat) : Int) =
+    115792089237316195423570985008687907853269984665640564039457584007913129639936 := by decide
+
+theorem intBound_eq : ((2 ^ 255 : Nat) : Int) =
+    57896044618658097711785492504343953926634992332820282019728792003956564819968 := by decide
+
+theorem int_val_bounds (v : PrimTy.int.Denote) :
+    -((2 ^ 255 : Nat) : Int) ≤ v.val ∧ v.val < ((2 ^ 255 : Nat) : Int) := by
+  have h := v.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h
+
+theorem LTm.eval_binop_of {op : BinOp} {p : PrimTy} (h : op.accepts p = true)
+    (hs : ∀ x : p.Denote, op.shortT x = none) (a b : LTm C (.val p)) (σ : State C []) (ν : AEnv) :
+    (LTm.app2 (.binop op h) a b).eval σ ν = (a.eval σ ν).bind fun x => (b.eval σ ν).bind (op.evalT h x) := by
+  rw [LTm.eval_app2, Close.Op2.eval_binop]
+  cases a.eval σ ν with
+  | none => rfl
+  | some x => simp only [Option.bind_some, binopT, hs]
+
+/-- Every cut binary operator but `&&`/`||` evaluates both operands. -/
+theorem shortT_none {op : BinOp} (hop : op ≠ .and ∧ op ≠ .or) {p : PrimTy} (x : p.Denote) :
+    op.shortT x = none := by
+  cases op <;> cases p <;> first | rfl | exact absurd rfl hop.1 | exact absurd rfl hop.2
+
+theorem uint_ofInt?_eq {n : Int} (h0 : 0 ≤ n) (h1 : n < ((2 ^ 256 : Nat) : Int)) :
+    PrimTy.uint.ofInt? n = some ⟨n, uint_inRange h0 h1⟩ := by
+  simp only [PrimTy.ofInt?, dif_pos (uint_inRange h0 h1)]
+
 namespace CheckedValue
 
 def parameter {p : PrimTy} (k : Nat) (h : Parameter.mk p k ∈ ps) :
@@ -476,9 +529,403 @@ def imp {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) φ) (b : Sto
     imp_congr (a.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
       (b.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)⟩
 
-def equality? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
+def equalityPlain? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
   | .bool, a, b => do return boolEq (← BooleanValue.ofTermIn? ps a) (← BooleanValue.ofTermIn? ps b)
   | .uint, a, b | .int, a, b => do return eq (← CheckedValue.ofTermIn? ps a) (← CheckedValue.ofTermIn? ps b)
+
+/-! ### The defining equations of cut atoms
+
+`Calculus/QuotientCut.lean` replaces an operator that is not affine in its
+operand's code by a fresh atom `k` and defines it by `e == k`, `e` the
+operator's node.  Each such equation is encoded exactly by a relation
+between the operands' codes and `k`'s, linear because the divisor, the shift
+and the wrap are literals: `d·q ≤ x < d·q + d` for a quotient,
+`y = x₁ + x₂` or `y + 2^256 = x₁ + x₂` for a wrapped sum, `y = x + 2^255` or
+`y + 2^255 = x` for a conversion. -/
+
+/-- The parameter `k`'s code, as `CheckedValue.parameter` lays it out. -/
+theorem param_code {r : PrimTy} (k : Nat) (hk : Parameter.mk r k ∈ ps) (rs : List (Ref C))
+    (g : State C []) (ν : AEnv) :
+    (Affine.variable (es.length + Parameters.index ⟨r, k⟩ ps)).eval (Inputs.observe es ps rs g ν).codes =
+      ((encode r (ν.get r k)).val : Int) :=
+  ((CheckedValue.parameter (C := C) (ps := ps) (es := es) k hk).correct rs (fun _ h => nomatch h) g ν).2
+
+/-- A unary node `e` of `a` defining the atom `k`, by the relation `rel`
+between their codes. -/
+def rel1 {p r : PrimTy} {a : LTm C (.val p)} {e : LTm C (.val r)} (k : Nat)
+    (hk : Parameter.mk r k ∈ ps) (f : p.Denote → Option r.Denote)
+    (he : ∀ g ν, e.eval g ν = (a.eval g ν).bind f) (rel : Affine → Affine → AFml)
+    (hrel : ∀ (x : Nat → Nat) (v : p.Denote) (w : r.Denote) (A B : Affine),
+      A.eval x = ((encode p v).val : Int) → B.eval x = ((encode r w).val : Int) →
+        ((rel A B).holds x ↔ f v = some w))
+    (ha : CheckedValue (ps := ps) (es := es) a) : StorageEncoding (ps := ps) (es := es) (.eq e (.var k)) :=
+  ⟨ha.refs, fun rs => .and (ha.lower rs).defined
+      (rel (ha.lower rs).code (.variable (es.length + Parameters.index ⟨r, k⟩ ps))), by
+    intro rs hr g ν
+    have ih := ha.correct rs hr g ν
+    have hq := param_code (C := C) (es := es) k hk rs g ν
+    simp only [LFml.holds, he, LTm.eval_var]
+    cases hv : a.eval g ν with
+    | none =>
+      rw [hv] at ih
+      simp only [AFml.holds, Option.bind_none]
+      exact ⟨(fun h => (ih h.1).elim), (fun h => h.elim)⟩
+    | some v =>
+      rw [hv] at ih
+      simp only [AFml.holds, Option.bind_some, ih.1, true_and, hrel _ v (ν.get r k) _ _ ih.2 hq]
+      cases f v with
+      | none => exact ⟨(fun h => nomatch h), (fun h => h.elim)⟩
+      | some w => exact ⟨(fun h => Option.some.inj h), (fun h => congrArg some h)⟩⟩
+
+/-- A binary node `e` of `a` and `b` defining the atom `k`. -/
+def rel2 {p r : PrimTy} {a b : LTm C (.val p)} {e : LTm C (.val r)} (k : Nat)
+    (hk : Parameter.mk r k ∈ ps) (f : p.Denote → p.Denote → Option r.Denote)
+    (he : ∀ g ν, e.eval g ν = (a.eval g ν).bind fun x => (b.eval g ν).bind (f x))
+    (rel : Affine → Affine → Affine → AFml)
+    (hrel : ∀ (x : Nat → Nat) (v u : p.Denote) (w : r.Denote) (A B Y : Affine),
+      A.eval x = ((encode p v).val : Int) → B.eval x = ((encode p u).val : Int) →
+        Y.eval x = ((encode r w).val : Int) → ((rel A B Y).holds x ↔ f v u = some w))
+    (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
+    StorageEncoding (ps := ps) (es := es) (.eq e (.var k)) :=
+  ⟨ha.refs ++ hb.refs, fun rs => .and (ha.lower rs).defined (.and (hb.lower rs).defined
+      (rel (ha.lower rs).code (hb.lower rs).code (.variable (es.length + Parameters.index ⟨r, k⟩ ps)))), by
+    intro rs hr g ν
+    have iha := ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν
+    have ihb := hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν
+    have hq := param_code (C := C) (es := es) k hk rs g ν
+    simp only [LFml.holds, he, LTm.eval_var]
+    cases hv : a.eval g ν with
+    | none =>
+      rw [hv] at iha
+      simp only [AFml.holds, Option.bind_none]
+      exact ⟨(fun h => (iha h.1).elim), (fun h => h.elim)⟩
+    | some v =>
+      rw [hv] at iha
+      cases hu : b.eval g ν with
+      | none =>
+        rw [hu] at ihb
+        simp only [AFml.holds, Option.bind_none, Option.bind_some]
+        exact ⟨(fun h => (ihb h.2.1).elim), (fun h => h.elim)⟩
+      | some u =>
+        rw [hu] at ihb
+        simp only [AFml.holds, Option.bind_some, iha.1, ihb.1, true_and,
+          hrel _ v u (ν.get r k) _ _ _ iha.2 ihb.2 hq]
+        cases f v u with
+        | none => exact ⟨(fun h => nomatch h), (fun h => h.elim)⟩
+        | some w => exact ⟨(fun h => Option.some.inj h), (fun h => congrArg some h)⟩⟩
+
+end StorageEncoding
+
+/-- `d · (y - off) ≤ x - off ≤ d · (y - off) + d - 1`: `y` is `x` divided by
+`d`, rounding down, on codes offset by `off`. -/
+def floorRel (off d M : Int) (A B : Affine) : AFml :=
+  .and (.and (((B.offset (-off)).scale d).le (A.offset (-off)))
+    ((A.offset (-off)).le (((B.offset (-off)).scale d).offset (d - 1))))
+    ((B.offset (-off)).le (.literal (M / d)))
+
+theorem floorRel_holds (off d M : Int) (A B : Affine) (x : Nat → Nat) :
+    (floorRel off d M A B).holds x ↔
+      (d * (B.eval x - off) ≤ A.eval x - off ∧ A.eval x - off ≤ d * (B.eval x - off) + (d - 1)) ∧
+        B.eval x - off ≤ M / d := by
+  simp only [floorRel, AFml.holds, Affine.holds_le, Affine.eval_offset, Affine.eval_scale,
+    Affine.eval_literal, ← Int.sub_eq_add_neg]
+
+/-- `y = x₁ + x₂` or `y + 2^256 = x₁ + x₂`, and for a difference `y = x₁ - x₂`
+or `y = x₁ - x₂ + 2^256`. -/
+def wrapRel (sub : Bool) (A B Y : Affine) : AFml :=
+  if sub then .imp (.not (Y.eq (A.sub B))) (Y.eq ((A.sub B).offset ((2 ^ 256 : Nat) : Int)))
+  else .imp (.not (Y.eq (A.add B))) ((Y.offset ((2 ^ 256 : Nat) : Int)).eq (A.add B))
+
+/-- `y = x + 2^255` or `y + 2^255 = x`: a conversion between the codes of
+`uint` and `int`. -/
+def convRel (A Y : Affine) : AFml :=
+  .imp (.not (Y.eq (A.offset ((2 ^ 255 : Nat) : Int)))) ((Y.offset ((2 ^ 255 : Nat) : Int)).eq A)
+
+theorem convRel_holds (A Y : Affine) (x : Nat → Nat) :
+    (convRel A Y).holds x ↔ Y.eval x = A.eval x + ((2 ^ 255 : Nat) : Int) ∨
+      Y.eval x + ((2 ^ 255 : Nat) : Int) = A.eval x := by
+  simp only [convRel, AFml.holds, Affine.holds_eq, Affine.eval_offset]
+  omega
+
+theorem PrimTy.ofInt?_eq_some_iff {p : PrimTy} (hp : p.isNumeric = true) (n : Int) (w : p.Denote) :
+    p.ofInt? n = some w ↔ integer p w = n := by
+  cases p with
+  | bool => cases hp
+  | uint | int =>
+    simp only [PrimTy.ofInt?, integer]
+    split
+    · exact ⟨(fun h => by cases h; rfl), (fun h => by subst h; rfl)⟩
+    · rename_i hn
+      exact ⟨(fun h => nomatch h), (fun h => absurd (h ▸ w.property) hn)⟩
+
+theorem encode_uint (v : PrimTy.uint.Denote) : ((encode .uint v).val : Int) = v.val := by
+  rw [encode_integer]; simp only [integer, offset, Int.add_zero]
+
+theorem encode_int (v : PrimTy.int.Denote) :
+    ((encode .int v).val : Int) = v.val + ((2 ^ 255 : Nat) : Int) := by
+  rw [encode_integer]; rfl
+
+theorem eq_ediv_iff {d : Int} (hd : 0 < d) (v w : Int) :
+    w = v / d ↔ d * w ≤ v ∧ v ≤ d * w + (d - 1) := by
+  constructor
+  · rintro rfl
+    have h1 := Int.ediv_mul_le v (Int.ne_of_gt hd)
+    have h2 := Int.lt_ediv_add_one_mul_self v hd
+    rw [Int.add_mul, Int.one_mul] at h2
+    rw [Int.mul_comm]
+    omega
+  · rintro ⟨h1, h2⟩
+    have hle : w ≤ v / d := (Int.le_ediv_iff_mul_le hd).mpr (by rw [Int.mul_comm]; exact h1)
+    have hlt : v / d < w + 1 := (Int.ediv_lt_iff_lt_mul hd).mpr (by rw [Int.add_mul, Int.one_mul, Int.mul_comm]; omega)
+    omega
+
+/-- A quotient below the largest value `M` its dividend may take: the bound
+the relation states, so that the decision need not discover it. -/
+theorem eq_ediv_iff_bounded {d : Int} (hd : 0 < d) (v w M : Int) (hv : v ≤ M) :
+    w = v / d ↔ (d * w ≤ v ∧ v ≤ d * w + (d - 1)) ∧ w ≤ M / d := by
+  rw [eq_ediv_iff hd]
+  constructor
+  · rintro ⟨h1, h2⟩
+    exact ⟨⟨h1, h2⟩, (Int.le_ediv_iff_mul_le hd).mpr (by rw [Int.mul_comm]; omega)⟩
+  · rintro ⟨h, -⟩
+    exact h
+
+/-- The largest value of a type. -/
+def maxInt : PrimTy → Int
+  | .uint => ((2 ^ 256 : Nat) : Int) - 1
+  | .int => ((2 ^ 255 : Nat) : Int) - 1
+  | .bool => 1
+
+namespace StorageEncoding
+
+/-- `a / c == k` at `uint`, `c ≠ 0`. -/
+def defDiv (h : BinOp.div.accepts .uint = true) {a : LTm C (.val .uint)} (c : PrimTy.uint.Denote)
+    (hc : c.val ≠ 0) (k : Nat) (hk : Parameter.mk .uint k ∈ ps)
+    (ha : CheckedValue (ps := ps) (es := es) a) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k)) :=
+  rel1 k hk (fun x => BinOp.evalT .div h x c)
+    (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)]; rfl)
+    (floorRel 0 c.val (maxInt .uint)) (by
+      intro x v w A B hA hB
+      change PrimTy.uint.Denote at w
+      change B.eval x = ((encode .uint w).val : Int) at hB
+      rw [floorRel_holds, hA, hB, encode_uint, encode_uint]
+      show _ ↔ (if c.val = 0 then none else some (Int.tdiv v.val c.val)).bind PrimTy.uint.ofInt? = some w
+      rw [if_neg hc, Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl,
+        Int.tdiv_eq_ediv_of_nonneg (uint_val_nonneg v)]
+      have hc0 : 0 < c.val := by have := uint_val_nonneg c; omega
+      have := eq_ediv_iff_bounded hc0 v.val w.val (maxInt .uint)
+        (by have := uint_val_lt v; simp only [maxInt]; omega)
+      simp only [integer, Int.sub_zero]
+      omega) ha
+
+/-- The divisor of `a >> v`: `2^v`, every shift past the word one of `2^256`. -/
+def shrDiv {p : PrimTy} (v : p.Denote) : Int :=
+  2 ^ (if integer p v < 256 then (integer p v).toNat else 256)
+
+/-- `a >> v == k`, at `uint` (logical) and `int` (arithmetic). -/
+def defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) {a : LTm C (.val p)} (v : p.Denote)
+    (k : Nat) (hk : Parameter.mk p k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k)) :=
+  rel1 k hk (fun x => BinOp.evalT .shr h x v)
+    (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)]; rfl)
+    (floorRel (offset p) (shrDiv v) (maxInt p)) (by
+      intro x u w A B hA hB
+      have hM := uintBound_eq
+      have hp : (2 : Int) ^ 256 = ((2 ^ 256 : Nat) : Int) := by rw [Int.natCast_pow]; rfl
+      rw [floorRel_holds, hA]
+      cases p with
+      | bool => cases h
+      | uint =>
+        change PrimTy.uint.Denote at w
+        change B.eval x = ((encode .uint w).val : Int) at hB
+        rw [hB, encode_uint, encode_uint]
+        have hu0 := uint_val_nonneg u
+        have hu1 := uint_val_lt u
+        have hw0 := uint_val_nonneg w
+        have hw1 := uint_val_lt w
+        show _ ↔ (some (if v.val < 256 then u.val / 2 ^ v.val.toNat
+          else if u.val < 0 then -1 else 0)).bind PrimTy.uint.ofInt? = some w
+        rw [Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl]
+        simp only [shrDiv, integer, offset, Int.sub_zero]
+        by_cases hk : v.val < 256
+        · simp only [hk, if_true]
+          exact (eq_ediv_iff_bounded (Int.pow_pos (by decide)) _ _ _
+            (by simp only [maxInt]; omega)).symm
+        · simp only [hk, if_false, if_neg (show ¬ u.val < 0 by omega), hp, maxInt]
+          rw [hM] at *
+          omega
+      | int =>
+        change PrimTy.int.Denote at w
+        change B.eval x = ((encode .int w).val : Int) at hB
+        rw [hB, encode_int, encode_int]
+        have hu := int_val_bounds u
+        have hw := int_val_bounds w
+        have hB' := intBound_eq
+        show _ ↔ (some (if v.val < 256 then u.val / 2 ^ v.val.toNat
+          else if u.val < 0 then -1 else 0)).bind PrimTy.int.ofInt? = some w
+        rw [Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl]
+        simp only [shrDiv, integer, offset, Int.add_sub_cancel]
+        by_cases hk : v.val < 256
+        · simp only [hk, if_true]
+          exact (eq_ediv_iff_bounded (Int.pow_pos (by decide)) _ _ _
+            (by simp only [maxInt]; omega)).symm
+        · simp only [hk, if_false, hp, maxInt]
+          rw [hM, hB'] at *
+          split <;> omega) ha
+
+/-- `a +% b == k` at `uint`. -/
+def defAddW (h : BinOp.addW.accepts .uint = true) {a b : LTm C (.val .uint)} (k : Nat)
+    (hk : Parameter.mk .uint k ∈ ps)
+    (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .addW h) a b) (.var k)) :=
+  rel2 k hk (fun x y => BinOp.evalT .addW h x y)
+    (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)])
+    (wrapRel false) (by
+      intro x v u w A B Y hA hB hY
+      change PrimTy.uint.Denote at w
+      change Y.eval x = ((encode .uint w).val : Int) at hY
+      have hM := uintBound_eq
+      have hv0 := uint_val_nonneg v
+      have hv1 := uint_val_lt v
+      have hu0 := uint_val_nonneg u
+      have hu1 := uint_val_lt u
+      have hw0 := uint_val_nonneg w
+      have hw1 := uint_val_lt w
+      simp only [wrapRel, Bool.false_eq_true, if_false, AFml.holds, Affine.holds_eq,
+        Affine.eval_offset, Affine.eval_add, hA, hB, hY, encode_uint]
+      show _ ↔ (some ((v.val + u.val) % Semantics.uintBound)).bind PrimTy.uint.ofInt? = some w
+      rw [Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl]
+      simp only [integer, Semantics.uintBound]
+      rw [hM] at *
+      omega) ha hb
+
+/-- `a -% b == k` at `uint`. -/
+def defSubW (h : BinOp.subW.accepts .uint = true) {a b : LTm C (.val .uint)} (k : Nat)
+    (hk : Parameter.mk .uint k ∈ ps)
+    (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .subW h) a b) (.var k)) :=
+  rel2 k hk (fun x y => BinOp.evalT .subW h x y)
+    (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)])
+    (wrapRel true) (by
+      intro x v u w A B Y hA hB hY
+      change PrimTy.uint.Denote at w
+      change Y.eval x = ((encode .uint w).val : Int) at hY
+      have hM := uintBound_eq
+      have hv0 := uint_val_nonneg v
+      have hv1 := uint_val_lt v
+      have hu0 := uint_val_nonneg u
+      have hu1 := uint_val_lt u
+      have hw0 := uint_val_nonneg w
+      have hw1 := uint_val_lt w
+      simp only [wrapRel, if_true, AFml.holds, Affine.holds_eq, Affine.eval_offset,
+        Affine.eval_sub, hA, hB, hY, encode_uint]
+      show _ ↔ (some ((v.val - u.val) % Semantics.uintBound)).bind PrimTy.uint.ofInt? = some w
+      rw [Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl]
+      simp only [integer, Semantics.uintBound]
+      rw [hM] at *
+      omega) ha hb
+
+/-- `int(a) == k`. -/
+def defToInt (h : UnOp.toInt.accepts .uint = true) {a : LTm C (.val .uint)} (k : Nat)
+    (hk : Parameter.mk .int k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop .toInt h) a) (.var k)) :=
+  rel1 k hk (fun x => UnOp.evalT .toInt h x)
+    (fun g ν => by rw [LTm.eval_app1, Close.Op1.eval_unop]) convRel (by
+      intro x v w A B hA hB
+      change PrimTy.int.Denote at w
+      change B.eval x = ((encode .int w).val : Int) at hB
+      rw [convRel_holds, hA, hB, encode_uint, encode_int]
+      have hM := uintBound_eq
+      have hB' := intBound_eq
+      have hv0 := uint_val_nonneg v
+      have hv1 := uint_val_lt v
+      have hw := int_val_bounds w
+      show _ ↔ PrimTy.int.ofInt? (if v.val < Semantics.intBound then v.val
+        else v.val - Semantics.uintBound) = some w
+      rw [PrimTy.ofInt?_eq_some_iff rfl]
+      simp only [integer, Semantics.uintBound, Semantics.intBound]
+      rw [hM, hB'] at *
+      split <;> omega) ha
+
+/-- `uint(a) == k`. -/
+def defToUint (h : UnOp.toUint.accepts .int = true) {a : LTm C (.val .int)} (k : Nat)
+    (hk : Parameter.mk .uint k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
+    StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop .toUint h) a) (.var k)) :=
+  rel1 k hk (fun x => UnOp.evalT .toUint h x)
+    (fun g ν => by rw [LTm.eval_app1, Close.Op1.eval_unop]) (fun A Y => convRel Y A) (by
+      intro x v w A B hA hB
+      change PrimTy.uint.Denote at w
+      change B.eval x = ((encode .uint w).val : Int) at hB
+      rw [convRel_holds, hA, hB, encode_int, encode_uint]
+      have hM := uintBound_eq
+      have hB' := intBound_eq
+      have hv := int_val_bounds v
+      have hw0 := uint_val_nonneg w
+      have hw1 := uint_val_lt w
+      show _ ↔ PrimTy.uint.ofInt? (v.val % Semantics.uintBound) = some w
+      rw [PrimTy.ofInt?_eq_some_iff rfl]
+      simp only [integer, Semantics.uintBound]
+      rw [hM, hB'] at *
+      omega) ha
+
+/-- The defining equation `op x y == k` of a cut atom, by the operator. -/
+def specialBin? (op : BinOp) {q : PrimTy} (h : op.accepts q = true) (x y : LTm C (.val q)) (k : Nat)
+    (hk : Parameter.mk (op.ret q) k ∈ ps) :
+    Option (StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop op h) x y) (.var k))) :=
+  match op, h, hk with
+  | .div, h, hk =>
+    match q, h, y, hk with
+    | .uint, h, .app0 (.lit c), hk =>
+      if hc : c.val = 0 then none else (CheckedValue.ofTermIn? ps x).map (defDiv h c hc k hk)
+    | _, _, _, _ => none
+  | .shr, h, hk =>
+    match y with
+    | .app0 (.lit v) => (CheckedValue.ofTermIn? ps x).map (defShr h v k hk)
+    | _ => none
+  | .addW, h, hk =>
+    match q, h, x, y, hk with
+    | .uint, h, x, y, hk => do
+      return defAddW h k hk (← CheckedValue.ofTermIn? ps x) (← CheckedValue.ofTermIn? ps y)
+    | _, _, _, _, _ => none
+  | .subW, h, hk =>
+    match q, h, x, y, hk with
+    | .uint, h, x, y, hk => do
+      return defSubW h k hk (← CheckedValue.ofTermIn? ps x) (← CheckedValue.ofTermIn? ps y)
+    | _, _, _, _, _ => none
+  | _, _, _ => none
+
+/-- The defining equation `op x == k` of a cut atom, by the operator. -/
+def specialUn? (op : UnOp) {q : PrimTy} (h : op.accepts q = true) (x : LTm C (.val q)) (k : Nat)
+    (hk : Parameter.mk (op.ret q) k ∈ ps) :
+    Option (StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop op h) x) (.var k))) :=
+  match op, h, hk with
+  | .toInt, h, hk =>
+    match q, h, x, hk with
+    | .uint, h, x, hk => (CheckedValue.ofTermIn? ps x).map (defToInt h k hk)
+    | _, _, _, _ => none
+  | .toUint, h, hk =>
+    match q, h, x, hk with
+    | .int, h, x, hk => (CheckedValue.ofTermIn? ps x).map (defToUint h k hk)
+    | _, _, _, _ => none
+  | _, _, _ => none
+
+/-- The defining equation `e == k` of a cut atom, recognized by `e`'s operator. -/
+def specialVar? : {p : PrimTy} → (a : LTm C (.val p)) → (k : Nat) → Parameter.mk p k ∈ ps →
+    Option (StorageEncoding (ps := ps) (es := es) (.eq a (.var k)))
+  | _, .app2 (.binop op h) x y, k, hk => specialBin? op h x y k hk
+  | _, .app1 (.unop op h) x, k, hk => specialUn? op h x k hk
+  | _, _, _, _ => none
+
+def special? {p : PrimTy} (a : LTm C (.val p)) : (b : LTm C (.val p)) →
+    Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
+  | .var k => if hk : Parameter.mk p k ∈ ps then specialVar? a k hk else none
+  | _ => none
+
+def equality? {p : PrimTy} (a b : LTm C (.val p)) : Option (StorageEncoding (ps := ps) (es := es) (.eq a b)) :=
+  match special? a b with
+  | some e => some e
+  | none => equalityPlain? a b
 
 def ofFormula? : (φ : LFml C) → Option (StorageEncoding (ps := ps) (es := es) φ)
   | .tt => some tt

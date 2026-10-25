@@ -172,7 +172,7 @@ theorem body_valid_iff {φ : Fml C []} (r : DependentReduction φ) :
     Fml.Valid φ ↔ r.sentence.body.Valid := by
   constructor
   · intro h g ν
-    exact (r.body.flattening.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
+    exact (r.body.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
       (r.sentence.instantiate g AEnv.dflt ν ((LFml.liftCond_holds g _ _ _).mpr
         ((LFml.prenex_holds g _ _).mpr ((LFml.condSimp_holds g _ _).mpr
           ((r.source.elim_holds_iff g).mpr ((r.normalization.correct g).mpr (h g)))))))
@@ -197,7 +197,7 @@ def countermodelOf {φ : Fml C []} (r : DependentReduction φ)
     (cm : {vs // ¬ r.arithmetic.holds vs}) : r.Countermodel := by
   let actual := r.body.countermodelOf cm
   refine ⟨actual.state, actual.atoms, fun hv => actual.refutes ?_⟩
-  exact (r.body.flattening.source.holds_assign _ r.sentence.parameters r.covered AEnv.dflt _).mp
+  exact (r.body.source.holds_assign _ r.sentence.parameters r.covered AEnv.dflt _).mp
     (r.sentence.instantiate _ AEnv.dflt actual.atoms ((LFml.liftCond_holds _ _ _ _).mpr
       ((LFml.prenex_holds _ _ _).mpr ((LFml.condSimp_holds _ _ _).mpr
         ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv))))))

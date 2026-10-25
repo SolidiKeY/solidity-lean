@@ -671,6 +671,95 @@ inductive LFml.Arith (ps : Parameter → Prop) (es : EnvKey → Prop) : LFml C �
   | not {φ : LFml C} : LFml.Arith ps es φ → LFml.Arith ps es (.not φ)
   | and {φ ψ : LFml C} : LFml.Arith ps es φ → LFml.Arith ps es ψ → LFml.Arith ps es (.and φ ψ)
   | imp {φ ψ : LFml C} : LFml.Arith ps es φ → LFml.Arith ps es ψ → LFml.Arith ps es (.imp φ ψ)
+  /-- The defining equations of cut atoms (`Calculus/QuotientCut.lean`). -/
+  | defDiv (h : BinOp.div.accepts .uint = true) (c : PrimTy.uint.Denote) (hc : c.val ≠ 0) (k : Nat)
+      {a : LTm C (.val .uint)} : a.Num ps es → ps ⟨.uint, k⟩ → a.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k))
+  | defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) (v : p.Denote) (k : Nat)
+      {a : LTm C (.val p)} : a.Num ps es → ps ⟨p, k⟩ → a.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k))
+  | defAddW (h : BinOp.addW.accepts .uint = true) (k : Nat) {a b : LTm C (.val .uint)} :
+      a.Num ps es → b.Num ps es → ps ⟨.uint, k⟩ → a.depth ≤ 1023 → b.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app2 (.binop .addW h) a b) (.var k))
+  | defSubW (h : BinOp.subW.accepts .uint = true) (k : Nat) {a b : LTm C (.val .uint)} :
+      a.Num ps es → b.Num ps es → ps ⟨.uint, k⟩ → a.depth ≤ 1023 → b.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app2 (.binop .subW h) a b) (.var k))
+  | defToInt (h : UnOp.toInt.accepts .uint = true) (k : Nat) {a : LTm C (.val .uint)} :
+      a.Num ps es → ps ⟨.int, k⟩ → a.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app1 (.unop .toInt h) a) (.var k))
+  | defToUint (h : UnOp.toUint.accepts .int = true) (k : Nat) {a : LTm C (.val .int)} :
+      a.Num ps es → ps ⟨.uint, k⟩ → a.depth ≤ 1023 →
+      LFml.Arith ps es (.eq (.app1 (.unop .toUint h) a) (.var k))
+
+theorem StorageEncoding.specialVar?_num {ps : List Parameter} {es : List EnvKey}
+    {P : Parameter → Prop} {E : EnvKey → Prop} :
+    ∀ {p : PrimTy} {a : LTm C (.val p)}, a.Num P E → ∀ k (hk : Parameter.mk p k ∈ ps),
+      StorageEncoding.specialVar? (ps := ps) (es := es) a k hk = none := by
+  intro p a ha
+  cases ha <;> intro k hk <;> rfl
+
+theorem StorageEncoding.specialVar?_bool {ps : List Parameter} {es : List EnvKey}
+    {P : Parameter → Prop} {E : EnvKey → Prop} :
+    ∀ {a : LTm C (.val .bool)}, a.BoolV P E → ∀ k (hk : Parameter.mk .bool k ∈ ps),
+      StorageEncoding.specialVar? (ps := ps) (es := es) a k hk = none := by
+  intro a ha
+  cases ha <;> intro k hk <;> rfl
+
+theorem StorageEncoding.special?_none {ps : List Parameter} {es : List EnvKey} {p : PrimTy}
+    {a : LTm C (.val p)} (ha : ∀ k (hk : Parameter.mk p k ∈ ps),
+      StorageEncoding.specialVar? (ps := ps) (es := es) a k hk = none) (b : LTm C (.val p)) :
+    StorageEncoding.special? (ps := ps) (es := es) a b = none := by
+  unfold StorageEncoding.special?
+  split
+  · split
+    · exact ha _ _
+    · rfl
+  · rfl
+
+theorem StorageEncoding.equality?_plain {ps : List Parameter} {es : List EnvKey} {p : PrimTy}
+    {a : LTm C (.val p)} (ha : ∀ k (hk : Parameter.mk p k ∈ ps),
+      StorageEncoding.specialVar? (ps := ps) (es := es) a k hk = none) (b : LTm C (.val p)) :
+    StorageEncoding.equality? (ps := ps) (es := es) a b =
+      StorageEncoding.equalityPlain? (ps := ps) (es := es) a b := by
+  unfold StorageEncoding.equality?
+  rw [StorageEncoding.special?_none ha b]
+
+theorem StorageEncoding.equality?_var {ps : List Parameter} {es : List EnvKey} {p : PrimTy}
+    (a : LTm C (.val p)) (k : Nat) (hk : Parameter.mk p k ∈ ps)
+    (e : StorageEncoding (ps := ps) (es := es) (.eq a (.var k)))
+    (he : StorageEncoding.specialVar? (ps := ps) (es := es) a k hk = some e) :
+    StorageEncoding.equality? (ps := ps) (es := es) a (.var k) = some e := by
+  have hs : StorageEncoding.special? (ps := ps) (es := es) a (.var k) =
+      StorageEncoding.specialVar? (ps := ps) (es := es) a k hk := by
+    show (if hk' : Parameter.mk p k ∈ ps then _ else none) = _
+    rw [dif_pos hk]
+  unfold StorageEncoding.equality?
+  rw [hs, he]
+
+theorem Affine.W.var_index {ps : List Parameter} {es : List EnvKey} {rs : List (Ref C)} {r : PrimTy}
+    {k : Nat} (hk : Parameter.mk r k ∈ ps) :
+    (Affine.variable (es.length + Parameters.index ⟨r, k⟩ ps)).W (es.length + (ps.length + rs.length)) := by
+  apply Affine.W.variable
+  have := Parameters.index_lt hk
+  omega
+
+theorem floorRel_width {n : Nat} {A B : Affine} (hA : A.W n) (hB : B.W n) (off d M : Int) :
+    (floorRel off d M A B).width ≤ n :=
+  AFml.width_and (AFml.width_and (Affine.width_le ((hB.offset _).scale _) (hA.offset _))
+    (Affine.width_le (hA.offset _) (((hB.offset _).scale _).offset _)))
+    (Affine.width_le (hB.offset _) (Affine.W.literal _ _))
+
+theorem wrapRel_width {n : Nat} {A B Y : Affine} (hA : A.W n) (hB : B.W n) (hY : Y.W n) (sub : Bool) :
+    (wrapRel sub A B Y).width ≤ n := by
+  cases sub
+  · exact AFml.width_imp (AFml.width_not (Affine.width_eq hY (hA.add hB)))
+      (Affine.width_eq (hY.offset _) (hA.add hB))
+  · exact AFml.width_imp (AFml.width_not (Affine.width_eq hY (hA.sub hB)))
+      (Affine.width_eq hY ((hA.sub hB).offset _))
+
+theorem convRel_width {n : Nat} {A Y : Affine} (hA : A.W n) (hY : Y.W n) :
+    (convRel A Y).width ≤ n :=
+  AFml.width_imp (AFml.width_not (Affine.width_eq hY (hA.offset _))) (Affine.width_eq (hY.offset _) hA)
 
 theorem StorageEncoding.ofFormula?_good {ps : List Parameter} {es : List EnvKey} :
     ∀ {φ : LFml C}, φ.Arith (· ∈ ps) (· ∈ es) → ∃ v, StorageEncoding.ofFormula? (C := C) (ps := ps) (es := es) φ = some v ∧ v.Good := by
@@ -681,6 +770,8 @@ theorem StorageEncoding.ofFormula?_good {ps : List Parameter} {es : List EnvKey}
     obtain ⟨va, hva, ga⟩ := BooleanValue.ofTermIn?_good (es := es) ha hda
     obtain ⟨vb, hvb, gb⟩ := BooleanValue.ofTermIn?_good (es := es) hb hdb
     refine ⟨StorageEncoding.boolEq va vb, ?_, fun rs hr => (CheckedBool.W.eq (ga rs (fun r hm => hr r (List.mem_append_left _ hm))) (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))).1⟩
+    show StorageEncoding.equality? a b = _
+    rw [StorageEncoding.equality?_plain (StorageEncoding.specialVar?_bool ha) b]
     change (Option.bind (BooleanValue.ofTermIn? (C := C) (es := es) ps a) fun x => Option.bind (BooleanValue.ofTermIn? (C := C) (es := es) ps b) fun y => some (StorageEncoding.boolEq x y)) = _
     rw [hva, hvb]
     rfl
@@ -691,6 +782,8 @@ theorem StorageEncoding.ofFormula?_good {ps : List Parameter} {es : List EnvKey}
     | bool => cases hp
     | uint | int =>
       refine ⟨StorageEncoding.eq va vb, ?_, fun rs hr => CheckedScalar.W.eq (ga rs (fun r hm => hr r (List.mem_append_left _ hm))) (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))⟩
+      show StorageEncoding.equality? a b = _
+      rw [StorageEncoding.equality?_plain (StorageEncoding.specialVar?_num ha) b]
       change (Option.bind (CheckedValue.ofTermIn? (C := C) (es := es) ps a) fun x => Option.bind (CheckedValue.ofTermIn? (C := C) (es := es) ps b) fun y => some (StorageEncoding.eq x y)) = _
       rw [hva, hvb]
       rfl
@@ -713,6 +806,64 @@ theorem StorageEncoding.ofFormula?_good {ps : List Parameter} {es : List EnvKey}
     refine ⟨StorageEncoding.imp v w, ?_, fun rs hr => AFml.width_imp (gv rs (fun r hm => hr r (List.mem_append_left _ hm))) (gw rs (fun r hm => hr r (List.mem_append_right _ hm)))⟩
     change (Option.bind (StorageEncoding.ofFormula? (C := C) (ps := ps) (es := es) φ) fun x => Option.bind (StorageEncoding.ofFormula? (C := C) (ps := ps) (es := es) ψ) fun y => some (StorageEncoding.imp x y)) = _
     rw [hv, hw]
+    rfl
+
+  | @defDiv h c hc k a ha hk hd =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hd
+    refine ⟨StorageEncoding.defDiv h c hc k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => AFml.width_and (ga rs hr).2 (floorRel_width (ga rs hr).1 (Affine.W.var_index hk) _ _ _)⟩
+    show (if hc' : c.val = 0 then none else _) = _
+    rw [dif_neg hc, hva]
+    rfl
+  | @defShr p h v k a ha hk hd =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hd
+    refine ⟨StorageEncoding.defShr h v k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => AFml.width_and (ga rs hr).2 (floorRel_width (ga rs hr).1 (Affine.W.var_index hk) _ _ _)⟩
+    cases p with
+    | bool => cases h
+    | uint | int =>
+      show (CheckedValue.ofTermIn? ps a).map _ = _
+      rw [hva]
+      rfl
+  | @defAddW h k a b ha hb hk hda hdb =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hda
+    obtain ⟨vb, hvb, gb⟩ := CheckedValue.ofTermIn?_good (es := es) hb hdb
+    refine ⟨StorageEncoding.defAddW h k hk va vb, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => ?_⟩
+    · show (Option.bind (CheckedValue.ofTermIn? ps a) fun x =>
+        Option.bind (CheckedValue.ofTermIn? ps b) fun y => some _) = _
+      rw [hva, hvb]
+      rfl
+    · have ha' := ga rs (fun r hm => hr r (List.mem_append_left _ hm))
+      have hb' := gb rs (fun r hm => hr r (List.mem_append_right _ hm))
+      exact AFml.width_and ha'.2 (AFml.width_and hb'.2
+        (wrapRel_width ha'.1 hb'.1 (Affine.W.var_index hk) false))
+  | @defSubW h k a b ha hb hk hda hdb =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hda
+    obtain ⟨vb, hvb, gb⟩ := CheckedValue.ofTermIn?_good (es := es) hb hdb
+    refine ⟨StorageEncoding.defSubW h k hk va vb, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => ?_⟩
+    · show (Option.bind (CheckedValue.ofTermIn? ps a) fun x =>
+        Option.bind (CheckedValue.ofTermIn? ps b) fun y => some _) = _
+      rw [hva, hvb]
+      rfl
+    · have ha' := ga rs (fun r hm => hr r (List.mem_append_left _ hm))
+      have hb' := gb rs (fun r hm => hr r (List.mem_append_right _ hm))
+      exact AFml.width_and ha'.2 (AFml.width_and hb'.2
+        (wrapRel_width ha'.1 hb'.1 (Affine.W.var_index hk) true))
+  | @defToInt h k a ha hk hd =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hd
+    refine ⟨StorageEncoding.defToInt h k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => AFml.width_and (ga rs hr).2 (convRel_width (ga rs hr).1 (Affine.W.var_index hk))⟩
+    show (CheckedValue.ofTermIn? ps a).map _ = _
+    rw [hva]
+    rfl
+  | @defToUint h k a ha hk hd =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hd
+    refine ⟨StorageEncoding.defToUint h k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => AFml.width_and (ga rs hr).2 (convRel_width (Affine.W.var_index hk) (ga rs hr).1)⟩
+    show (CheckedValue.ofTermIn? ps a).map _ = _
+    rw [hva]
     rfl
 
 /-! ## The leaf arithmetic: layouts -/
