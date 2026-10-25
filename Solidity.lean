@@ -442,6 +442,7 @@ import Solidity.Calculus.Prenex
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantArithmetic
 import Solidity.Calculus.QuantHoist
+import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.QuantReduction
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.Decision

@@ -661,8 +661,10 @@ def _root_.Solidity.Tm.readsAny {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
 
 /-- **A value term of the array property fragment**: a bound variable
 occurs only as an index (`a[i]`, `m[k]`, a memory element, a ledger
-entry), never under arithmetic, never in a nested index (`a[a[i]]`), and
-nothing is written at a path that mentions it. -/
+entry), never under arithmetic, never in a nested index (`a[a[i]]`), at
+most once along a path (`m[i][j]` with `i`, `j` both bound is outside:
+Bradley, Manna and Sipma state their result for arrays of one dimension),
+and nothing is written at a path that mentions it. -/
 def _root_.Solidity.Tm.apfV {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV i | _, .pvZ i => !qs.contains i.level
   | _, .netOf _ a => a.isBound qs || !a.mentions qs
@@ -671,12 +673,13 @@ def _root_.Solidity.Tm.apfV {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s
     | .net => x.isBound qs || !x.mentions qs
     | o => if o.isWrite then !x.mentions qs else x.apfV qs
   | _, .app2 o x y =>
-    if o.isIndex then x.apfV qs && (y.isBound qs || !y.mentions qs)
+    if o.isIndex then x.apfV qs && (y.isBound qs || !y.mentions qs) && !(y.isBound qs && x.mentions qs)
     else if o.isWrite then !(x.mentions qs || y.mentions qs)
     else x.apfV qs && y.apfV qs
   | _, .app3 o x y z =>
     match o with
-    | .atIn _ => !x.mentions qs && y.apfV qs && (z.isBound qs || !z.mentions qs)
+    | .atIn _ => !x.mentions qs && y.apfV qs && (z.isBound qs || !z.mentions qs) &&
+        !(z.isBound qs && y.mentions qs)
     | .ite => x.apfV qs && y.apfV qs && z.apfV qs
     | .modular _ => x.apfV qs && y.apfV qs && z.apfV qs
     | _ => !(x.mentions qs || y.mentions qs || z.mentions qs)
@@ -693,6 +696,14 @@ def _root_.Solidity.Op2.isGuardCmp {a b s : Srt} : Op2 C a b s → Bool
   | .zcmp .lt _ | .zcmp .gt _ | .zcmp .le _ | .zcmp .ge _ | .zcmp .eqB _ => true
   | _ => false
 
+/-- A strict comparison: `<`, `>`.  Between two bound variables it is
+outside the fragment (`i < j` is `i + 1 ≤ j`, arithmetic on the bound
+variables, under which Bradley, Manna and Sipma show satisfiability
+undecidable). -/
+def _root_.Solidity.Op2.isStrictCmp {a b s : Srt} : Op2 C a b s → Bool
+  | .binop .lt _ | .binop .gt _ | .zcmp .lt _ | .zcmp .gt _ => true
+  | _ => false
+
 def _root_.Solidity.Op2.isAndOr {a b s : Srt} : Op2 C a b s → Bool
   | .binop .and _ | .binop .or _ => true
   | _ => false
@@ -702,7 +713,8 @@ term mentioning no bound variable. -/
 def _root_.Solidity.Tm.apfG {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s → Bool
   | _, .app2 o x y =>
     if o.isAndOr then x.apfG qs && y.apfG qs
-    else if o.isGuardCmp then x.indexTerm qs && y.indexTerm qs
+    else if o.isGuardCmp then
+      x.indexTerm qs && y.indexTerm qs && !(o.isStrictCmp && x.isBound qs && y.isBound qs)
     else !(x.mentions qs || y.mentions qs)
   | _, t => !t.mentions qs
 

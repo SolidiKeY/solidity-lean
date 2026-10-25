@@ -1,4 +1,4 @@
-import Solidity.Calculus.QuantHoist
+import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.DependentReduction
 
 /-!
@@ -391,9 +391,10 @@ theorem QFml.holds_atom_range (F : AFml) (W : Nat) (hw : F.width ≤ W) (x : Nat
   rw [List.getD_eq_getElem?_getD, List.getElem?_range (Nat.lt_of_lt_of_le hi hw)]
   rfl
 
-/-- **The body's preparations**: reads at no bound variable hoisted out of
-the quantifiers (`hoistPrep`). -/
-def bodyPrep (B : LFml C) : Prep B := hoistPrep B
+/-- **The body's preparations**: the negative array-property blocks
+instantiated at the index set (`apfPrep`), then the reads at no bound
+variable hoisted out of the remaining quantifiers (`hoistPrep`). -/
+def bodyPrep (B : LFml C) : Prep B := (apfPrep B).trans (hoistPrep _)
 
 /-- **A leaf whose remaining quantifiers are Presburger quantifiers**,
 reduced to one quantified linear sentence. -/
@@ -607,6 +608,31 @@ theorem valid_of_sentence (h : r.sentenceF.Valid) : Fml.Valid φ := fun g =>
 def extraValue (L : QLayout) (x : Nat → Nat) (q : Parameter) : q.Value :=
   (decode? q.prim (x (L.pos q))).getD (PrimTy.dflt q.prim)
 
+/-- **A state where the prepared body fails refutes the leaf**: the
+preparation's state, the prefix instantiated at the same atoms. -/
+def countermodelOfBody (st : State C []) (ν : AEnv) (hB : ¬ r.prep.body.holds st ν) :
+    {σ : State C [] // ¬ holds σ φ} :=
+  let st' := r.prep.refute st ν hB
+  ⟨st'.1, fun hφ => by
+    have hinst := r.sentence.instantiate st'.1 AEnv.dflt ν ((LFml.prenex_holds _ _ _).mpr
+      ((LFml.condSimp_holds _ _ _).mpr ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hφ))))
+    refine st'.2 ((LFml.holds_agree_free st'.1 _ fun q hq => ?_).1 hinst)
+    rw [Parameters.read_assign, if_pos (r.covered q hq)]⟩
+
+/-- With no quantifier left, the abstracted body is the lifted body. -/
+theorem abstracted_iff (hq : r.Qs.isEmpty = true) (g : State C []) (ν : AEnv) :
+    (abstracted r.prep.body).1.holds g ν ↔ r.prep.body.holds g ν :=
+  (LFml.abstractQ_holds g ν _ _ fun e he => by
+      rw [List.isEmpty_iff] at hq
+      exact absurd (show e ∈ r.Qs from he) (by rw [hq]; exact List.not_mem_nil)).trans
+    (LFml.liftCond_holds g _ _ ν)
+
+/-- With no quantifier left, the main arithmetic's validity is the leaf's. -/
+theorem valid_of_main (hq : r.Qs.isEmpty = true) (h : (abstracted r.prep.body).1.Valid) : Fml.Valid φ :=
+  fun g => (r.normalization.correct g).mp ((r.source.elim_holds_iff g).mp ((LFml.condSimp_holds g _ _).mp
+    ((LFml.prenex_holds g _ _).mp (r.sentence.close g AEnv.dflt
+      (fun ν => r.prep.sound (fun g' ν' => (r.abstracted_iff hq g' ν').1 (h g' ν')) g ν)))))
+
 /-- **A false assignment gives a refuting state**: the main layout's
 values realized, the extras read from the assignment, the flattening's
 countermodel; its definitions make each atom agree with its subformula. -/
@@ -672,19 +698,21 @@ def countermodelOf (x : Nat → Nat) (hx : ¬ r.sentenceF.holds x) : {σ : State
   have hL0 : ¬ L0.holds st.1 ν := fun h =>
     st.2 (LFml.holds_cutAll _ st.1 ν ((LFml.abstractQ_holds st.1 ν L0 L0.atomBound hkey).2 h))
   have hB : ¬ r.prep.body.holds st.1 ν := fun h => hL0 ((LFml.liftCond_holds st.1 _ _ ν).2 h)
-  let st' := r.prep.refute st.1 ν hB
-  refine ⟨st'.1, fun hφ => ?_⟩
-  have hinst := r.sentence.instantiate st'.1 AEnv.dflt ν ((LFml.prenex_holds _ _ _).mpr
-    ((LFml.condSimp_holds _ _ _).mpr ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hφ))))
-  refine st'.2 ((LFml.holds_agree_free st'.1 _ fun q hq => ?_).1 hinst)
-  rw [Parameters.read_assign, if_pos (r.covered q hq)]
+  exact r.countermodelOfBody st.1 ν hB
 
 /-- **Proof or refutation**, from one traversal of the sentence's
-automaton. -/
+automaton; with no quantifier left (every block instantiated), of the
+main arithmetic's (`AFml.decide_iff`, as `dependentReduction?`). -/
 def verify : Sum (PLift (Fml.Valid φ)) {σ : State C [] // ¬ holds σ φ} :=
-  match r.sentenceF.verify with
-  | .inl h => .inl ⟨r.valid_of_sentence h.down⟩
-  | .inr cm => .inr (r.countermodelOf cm.1 cm.2)
+  if hq : r.Qs.isEmpty = true then
+    match r.main.verify with
+    | .inl h => .inl ⟨r.valid_of_main hq h.down⟩
+    | .inr cm => .inr (r.countermodelOfBody cm.state cm.atoms fun hb =>
+        cm.refutes ((r.abstracted_iff hq cm.state cm.atoms).2 hb))
+  else
+    match r.sentenceF.verify with
+    | .inl h => .inl ⟨r.valid_of_sentence h.down⟩
+    | .inr cm => .inr (r.countermodelOf cm.1 cm.2)
 
 end QuantReduction
 
