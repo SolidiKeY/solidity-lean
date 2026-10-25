@@ -29,7 +29,7 @@ def LTm.conds : {s : Srt} → LTm C s → Nat
   | _, .app3 o a b c => a.conds + b.conds + c.conds + o.iteN
   | _, .kite a b t e => a.conds + b.conds + t.conds + e.conds + 1
 
-theorem LTm.Src.sort_bool {c : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src c k →
+theorem LTm.Src.sort_bool {c w : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src c w k →
     k = .bool → s = .val .bool := by
   intro k s t h
   induction h with
@@ -41,8 +41,8 @@ theorem LTm.Src.sort_bool {c : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}
 
 /-- The operands a guard tests. -/
 def CondGuard.Src : CondGuard C → Prop
-  | .kite x y => x.Src true .num ∧ y.Src true .num
-  | .ite d => d.Src true .bool
+  | .kite x y => x.Src true true .num ∧ y.Src true true .num
+  | .ite d => d.Src true true .bool
 
 /-- The conditionals of a guard's operands. -/
 def CondGuard.conds : CondGuard C → Nat
@@ -52,7 +52,7 @@ def CondGuard.conds : CondGuard C → Nat
 /-- A split of a fragment term: its parts in the fragment, each with fewer
 conditionals. -/
 def SplitOK {s : Srt} (k : SrcKind) (t : LTm C s) (r : CondSplit C s) : Prop :=
-  r.thn.Src true k ∧ r.els.Src true k ∧ r.bad.Src true k ∧ r.guard.Src ∧
+  r.thn.Src true true k ∧ r.els.Src true true k ∧ r.bad.Src true true k ∧ r.guard.Src ∧
     r.thn.conds < t.conds ∧ r.els.conds < t.conds ∧ r.bad.conds < t.conds ∧
     r.guard.conds + 1 ≤ t.conds
 
@@ -84,9 +84,9 @@ theorem CondSplit.first_none {s a b : Srt} {ix : Option (CondSplit C a)}
 /-- A binary node: its split is one operand's, under the node. -/
 theorem SplitOK.bin {s a b : Srt} {k ka kb : SrcKind} {x : LTm C a} {y : LTm C b}
     (mk : LTm C a → LTm C b → LTm C s)
-    (hmk : ∀ x' y', x'.Src true ka → y'.Src true kb → (mk x' y').Src true k)
+    (hmk : ∀ x' y', x'.Src true true ka → y'.Src true true kb → (mk x' y').Src true true k)
     (hc : ∀ x' y', (mk x' y').conds = x'.conds + y'.conds)
-    (hx : x.Src true ka) (hy : y.Src true kb)
+    (hx : x.Src true true ka) (hy : y.Src true true kb)
     (ihx : ∀ r, x.condSplit = some r → SplitOK ka x r)
     (ihy : ∀ r, y.condSplit = some r → SplitOK kb y r)
     {t : LTm C s} (ht : t.condSplit = CondSplit.first x.condSplit y.condSplit (mk · y) (mk x ·))
@@ -104,7 +104,7 @@ theorem SplitOK.bin {s a b : Srt} {k ka kb : SrcKind} {x : LTm C a} {y : LTm C b
 
 /-- A unary node: its split is its operand's, under the node. -/
 theorem SplitOK.un {s a : Srt} {k ka : SrcKind} {x : LTm C a} (mk : LTm C a → LTm C s)
-    (hmk : ∀ x', x'.Src true ka → (mk x').Src true k) (hc : ∀ x', (mk x').conds = x'.conds)
+    (hmk : ∀ x', x'.Src true true ka → (mk x').Src true true k) (hc : ∀ x', (mk x').conds = x'.conds)
     (ihx : ∀ r, x.condSplit = some r → SplitOK ka x r)
     {t : LTm C s} (ht : t.condSplit = x.condSplit.map (·.map mk)) (htc : t.conds = x.conds) :
     ∀ r, t.condSplit = some r → SplitOK k t r := by
@@ -120,13 +120,61 @@ theorem SplitOK.un {s a : Srt} {k ka : SrcKind} {x : LTm C a} (mk : LTm C a → 
       simp only [CondSplit.map, hc, htc] <;> omega
 
 /-- **A fragment term splits into fragment parts with fewer conditionals.** -/
-theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k →
+theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true true k →
     ∀ r, t.condSplit = some r → SplitOK k t r := by
   intro k s t h
   induction h with
   | var | lit | env | err | root => intro r hr; cases hr
   | @add p h a b hx hy ihx ihy =>
     exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .add h) x' y') (fun _ _ hx' hy' => .add h hx' hy') (fun _ _ => rfl)
+      hx hy ihx ihy rfl rfl
+  | @toInt hw h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .toInt h) a') (fun _ h' => .toInt hw h h') (fun _ => rfl) ih rfl rfl
+  | @toUint hw h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .toUint h) a') (fun _ h' => .toUint hw h h') (fun _ => rfl) ih rfl rfl
+  | @divL hw h a v hv _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .div h) a' (.app0 (.lit v))) (fun _ h' => .divL hw h v hv h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .div h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .div h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @modL hw h a v hv _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .mod h) a' (.app0 (.lit v))) (fun _ h' => .modL hw h v hv h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .mod h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .mod h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @shrL hw p h a v _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .shr h) a' (.app0 (.lit v))) (fun _ h' => .shrL hw h v h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .shr h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .shr h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @shlL hw h a v _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .shl h) a' (.app0 (.lit v))) (fun _ h' => .shlL hw h v h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .shl h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .shl h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @bandR hw h a v hv _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .band h) a' (.app0 (.lit v))) (fun _ h' => .bandR hw h v hv h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .band h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .band h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @bandL hw h v hv b _ ih =>
+    exact SplitOK.un (fun b' => LTm.app2 (.binop .band h) (.app0 (.lit v)) b') (fun _ h' => .bandL hw h v hv h')
+      (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
+  | @addW hw h a b hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .addW h) x' y') (fun _ _ hx' hy' => .addW hw h hx' hy') (fun _ _ => rfl)
+      hx hy ihx ihy rfl rfl
+  | @subW hw h a b hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .subW h) x' y') (fun _ _ hx' hy' => .subW hw h hx' hy') (fun _ _ => rfl)
       hx hy ihx ihy rfl rfl
   | @mulL p h v b _ ih =>
     exact SplitOK.un (fun b' => LTm.app2 (.binop .mul h) (.app0 (.lit v)) b') (fun _ h' => .mulL h v h')
@@ -187,6 +235,10 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k 
     exact SplitOK.un (fun q' => LTm.obsW q') (fun _ h' => .word h') (fun _ => rfl) ih rfl rfl
   | @field sn f T h q _ ih =>
     exact SplitOK.un (fun q' => LTm.app1 (.field h) q') (fun _ h' => .field h h') (fun _ => rfl) ih rfl rfl
+  | @neg h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .neg h) a') (fun _ h' => .neg h h') (fun _ => rfl) ih rfl rfl
+  | @bnot h a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 (.unop .bnot h) a') (fun _ h' => .bnot h h') (fun _ => rfl) ih rfl rfl
   | @not a _ ih =>
     exact SplitOK.un (fun a' => LTm.app1 (.unop .not rfl) a') (fun _ h' => .not h') (fun _ => rfl) ih rfl rfl
   | @ofNum t _ ih =>
@@ -196,7 +248,7 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k 
   | @kite hc p q k hk x y t e hx hy ht he _ _ _ _ =>
     intro r hr
     cases hr
-    have hbad : (LTm.err (C := C) (s := .val q)).Src true k := by
+    have hbad : (LTm.err (C := C) (s := .val q)).Src true true k := by
       cases k with
       | num => exact .err
       | bool =>
@@ -208,7 +260,7 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k 
   | @ite hc p k hk d t e hd ht he _ _ _ =>
     intro r hr
     cases hr
-    have hbad : (LTm.err (C := C) (s := .val p)).Src true k := by
+    have hbad : (LTm.err (C := C) (s := .val p)).Src true true k := by
       cases k with
       | num => exact .err
       | bool =>
@@ -221,8 +273,8 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k 
 
 /-- **A fragment term without a conditional is in the fragment without
 them.** -/
-theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k →
-    t.condSplit = none → t.Src false k := by
+theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true true k →
+    t.condSplit = none → t.Src false true k := by
   intro k s t h
   induction h with
   | var i => intro _; exact .var i
@@ -234,6 +286,48 @@ theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k
     intro hn
     have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .add h) x' _) (fy := fun y' => LTm.app2 (.binop .add h) _ y') hn
     exact .add h (ihx h2.1) (ihy h2.2)
+  | @toInt hw h a _ ih =>
+    intro hn
+    exact .toInt hw h (ih (Option.map_eq_none_iff.mp hn))
+  | @toUint hw h a _ ih =>
+    intro hn
+    exact .toUint hw h (ih (Option.map_eq_none_iff.mp hn))
+  | @divL hw h a v hv _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .div h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .div h) a y') hn
+    exact .divL hw h v hv (ih h2.1)
+  | @modL hw h a v hv _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .mod h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .mod h) a y') hn
+    exact .modL hw h v hv (ih h2.1)
+  | @shrL hw p h a v _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .shr h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .shr h) a y') hn
+    exact .shrL hw h v (ih h2.1)
+  | @shlL hw h a v _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .shl h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .shl h) a y') hn
+    exact .shlL hw h v (ih h2.1)
+  | @bandR hw h a v hv _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .band h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .band h) a y') hn
+    exact .bandR hw h v hv (ih h2.1)
+  | @bandL hw h v hv b _ ih =>
+    intro hn
+    exact .bandL hw h v hv (ih (Option.map_eq_none_iff.mp hn))
+  | @addW hw h a b _ _ ihx ihy =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .addW h) x' _) (fy := fun y' => LTm.app2 (.binop .addW h) _ y') hn
+    exact .addW hw h (ihx h2.1) (ihy h2.2)
+  | @subW hw h a b _ _ ihx ihy =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .subW h) x' _) (fy := fun y' => LTm.app2 (.binop .subW h) _ y') hn
+    exact .subW hw h (ihx h2.1) (ihy h2.2)
   | @mulL p h v b _ ih =>
     intro hn
     exact .mulL h v (ih (Option.map_eq_none_iff.mp hn))
@@ -311,6 +405,12 @@ theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true k
   | @not a _ ih =>
     intro hn
     exact .not (ih (Option.map_eq_none_iff.mp hn))
+  | @neg h a _ ih =>
+    intro hn
+    exact .neg h (ih (Option.map_eq_none_iff.mp hn))
+  | @bnot h a _ ih =>
+    intro hn
+    exact .bnot h (ih (Option.map_eq_none_iff.mp hn))
   | ofNum _ ih => intro hn; exact .ofNum (ih hn)
   | kite => intro hn; cases hn
   | ite => intro hn; cases hn
@@ -324,29 +424,29 @@ def LFml.condMax : LFml C → Nat
   | .not φ | .all _ _ φ => φ.condMax
   | .and φ ψ | .imp φ ψ => max φ.condMax ψ.condMax
 
-theorem LFml.Src.ofNums {c : Bool} {p : PrimTy} {x y : LTm C (.val p)} (hx : x.Src c .num)
-    (hy : y.Src c .num) : (LFml.eq x y).Src c := by
+theorem LFml.Src.ofNums {c w : Bool} {p : PrimTy} {x y : LTm C (.val p)} (hx : x.Src c w .num)
+    (hy : y.Src c w .num) : (LFml.eq x y).Src c w := by
   cases p with
   | bool => exact .eqB (.ofNum hx) (.ofNum hy)
   | uint => exact .eqN rfl hx hy
   | int => exact .eqN rfl hx hy
 
-theorem CondGuard.split_src {G : CondGuard C} {P Q R : LFml C} (hG : G.Src) (hP : P.Src true)
-    (hQ : Q.Src true) (hR : R.Src true) : (G.split P Q R).Src true := by
+theorem CondGuard.split_src {G : CondGuard C} {P Q R : LFml C} (hG : G.Src) (hP : P.Src true true)
+    (hQ : Q.Src true true) (hR : R.Src true true) : (G.split P Q R).Src true true := by
   cases G with
   | kite x y =>
     obtain ⟨hx, hy⟩ := hG
-    have hxy : (LFml.eq x y).Src true := LFml.Src.ofNums hx hy
-    have hD : (LFml.and (.eq x x) (.eq y y)).Src true :=
+    have hxy : (LFml.eq x y).Src true true := LFml.Src.ofNums hx hy
+    have hD : (LFml.and (.eq x x) (.eq y y)).Src true true :=
       .and (LFml.Src.ofNums hx hx) (LFml.Src.ofNums hy hy)
     simp only [CondGuard.split]
     split
     · exact .and (.imp hxy hP) (.imp (.not hxy) hQ)
     · exact .and (.imp (.and hD hxy) hP) (.and (.imp (.and hD (.not hxy)) hQ) (.imp (.not hD) hR))
   | ite d =>
-    have hd : d.Src true .bool := hG
-    have ht : (LFml.eq d (.app0 (.lit true))).Src true := .eqB hd (.ofNum (.lit (p := .bool) true))
-    have hf : (LFml.eq d (.app0 (.lit false))).Src true := .eqB hd (.ofNum (.lit (p := .bool) false))
+    have hd : d.Src true true .bool := hG
+    have ht : (LFml.eq d (.app0 (.lit true))).Src true true := .eqB hd (.ofNum (.lit (p := .bool) true))
+    have hf : (LFml.eq d (.app0 (.lit false))).Src true true := .eqB hd (.ofNum (.lit (p := .bool) false))
     simp only [CondGuard.split]
     split
     · exact .and (.imp ht hP) (.imp hf hQ)
@@ -387,18 +487,19 @@ theorem LTm.Src.split_weight {k : SrcKind} {s : Srt} {t : LTm C s} {r : CondSpli
 
 /-- **Lifting removes every conditional** of the fragment, given fuel above
 its weight. -/
-theorem LFml.liftCond_src : ∀ (n : Nat) {φ : LFml C}, φ.Src true → φ.condMax < n →
-    (φ.liftCond n).Src false := by
+theorem LFml.liftCond_src : ∀ (n : Nat) {φ : LFml C}, φ.Src true true → φ.condMax < n →
+    (φ.liftCond n).Src false true := by
   intro n
   induction n with
   | zero => intro φ _ h; omega
   | succ n ih =>
     intro φ hφ hm
-    show (φ.mapEq (LFml.liftEq (LFml.liftCond n))).Src false
+    show (φ.mapEq (LFml.liftEq (LFml.liftCond n))).Src false true
     induction hφ with
     | tt => exact .tt
+    | defDiv hw | defShr hw | defAddW hw | defSubW hw | defToInt hw | defToUint hw => cases hw
     | @eqB a b ha hb =>
-      show (LFml.liftEq (LFml.liftCond n) a b).Src false
+      show (LFml.liftEq (LFml.liftCond n) a b).Src false true
       unfold LFml.liftEq
       cases hsa : a.condSplit with
       | some r =>
@@ -419,7 +520,7 @@ theorem LFml.liftCond_src : ∀ (n : Nat) {φ : LFml C}, φ.Src true → φ.cond
           exact Nat.lt_of_lt_of_le (Nat.lt_of_le_of_lt h1 h2) (by omega)
         | none => exact .eqB (ha.noCond hsa) (hb.noCond hsb)
     | @eqN p hp a b ha hb =>
-      show (LFml.liftEq (LFml.liftCond n) a b).Src false
+      show (LFml.liftEq (LFml.liftCond n) a b).Src false true
       unfold LFml.liftEq
       cases hsa : a.condSplit with
       | some r =>

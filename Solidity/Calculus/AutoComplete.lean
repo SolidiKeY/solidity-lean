@@ -1,4 +1,5 @@
 import Solidity.Calculus.LiftTotality
+import Solidity.Calculus.CutTotality
 
 /-!
 # Completeness of the automatic decision on a stated fragment
@@ -38,24 +39,24 @@ variable {C : Contract}
 
 /-- A product with a literal factor, recognized with its evidence from the
 factors' (`sa`, `sb`). -/
-def LTm.mulSrc? {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (a b : LTm C (.val p))
-    (sa : Option (PLift (a.Src c .num))) (sb : Option (PLift (b.Src c .num))) :
-    Option (PLift ((LTm.app2 (.binop .mul h) a b).Src c .num)) :=
+def LTm.mulSrc? {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (a b : LTm C (.val p))
+    (sa : Option (PLift (a.Src c w .num))) (sb : Option (PLift (b.Src c w .num))) :
+    Option (PLift ((LTm.app2 (.binop .mul h) a b).Src c w .num)) :=
   match a.lit?, b.lit? with
   | some ⟨v, hv⟩, _ => sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .mulL h v hb⟩
   | none, some ⟨v, hv⟩ => sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .mulR h v ha⟩
   | none, none => none
 
-theorem LTm.mulSrc?_left {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote)
-    (b : LTm C (.val p)) (sa : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c .num)))
-    (sb : Option (PLift (b.Src c .num))) (hb : sb.isSome = true) :
+theorem LTm.mulSrc?_left {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote)
+    (b : LTm C (.val p)) (sa : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c w .num)))
+    (sb : Option (PLift (b.Src c w .num))) (hb : sb.isSome = true) :
     (LTm.mulSrc? h (.app0 (.lit v)) b sa sb).isSome = true := by
   obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
   rfl
 
-theorem LTm.mulSrc?_right {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true)
-    (a : LTm C (.val p)) (v : p.Denote) (sa : Option (PLift (a.Src c .num)))
-    (sb : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c .num))) (ha : sa.isSome = true)
+theorem LTm.mulSrc?_right {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true)
+    (a : LTm C (.val p)) (v : p.Denote) (sa : Option (PLift (a.Src c w .num)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c w .num))) (ha : sa.isSome = true)
     (hb : sb.isSome = true) :
     (LTm.mulSrc? h a (.app0 (.lit v)) sa sb).isSome = true := by
   obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
@@ -65,8 +66,37 @@ theorem LTm.mulSrc?_right {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = tru
   | some r => obtain ⟨w, hw⟩ := r; rfl
   | none => rfl
 
+/-- A literal low mask on the left of `&`. -/
+def LTm.bandLSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
+    (sb : Option (PLift (b.Src c true .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+  match a.lit? with
+  | some ⟨v, hv⟩ =>
+    if hm : (lowMask? v).isSome = true then sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .bandL rfl h v hm hb⟩
+    else none
+  | none => none
+
+/-- A literal low mask on either side of `&`, recognized with its evidence. -/
+def LTm.bandSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
+    (sa : Option (PLift (a.Src c true .num))) (sb : Option (PLift (b.Src c true .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+  match b.lit? with
+  | some ⟨v, hv⟩ =>
+    if hm : (lowMask? v).isSome = true then sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .bandR rfl h v hm ha⟩
+    else LTm.bandLSrc? h a b sb
+  | none => LTm.bandLSrc? h a b sb
+
+theorem LTm.bandLSrc?_isSome {c : Bool} (h : BinOp.band.accepts .uint = true) (v : PrimTy.uint.Denote)
+    (hm : (lowMask? v).isSome = true) (b : LTm C (.val .uint)) (sb : Option (PLift (b.Src c true .num)))
+    (hb : sb.isSome = true) : (LTm.bandLSrc? h (.app0 (.lit v)) b sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.bandLSrc?
+  dsimp only [LTm.lit?]
+  rw [dif_pos hm]
+  rfl
+
 /-- The source fragment, recognized with its evidence. -/
-def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → Option (PLift (t.Src c k))
+def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → Option (PLift (t.Src c true k))
   | _, k, _, .var (p := p) i =>
     match k, p with
     | .num, _ => some ⟨.var i⟩
@@ -89,9 +119,13 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
     | .num, _ => (q.src? c .path).map fun ⟨h⟩ => ⟨.word h⟩
     | .bool, .bool => (q.src? c .path).map fun ⟨h⟩ => ⟨.ofNum (.word h)⟩
     | _, _ => none
-  | c, k, _, .app1 (.unop op (p := p) _) a =>
+  | c, k, _, .app1 (.unop op (p := p) hop) a =>
     match k, op, p with
     | .bool, .not, .bool => (a.src? c .bool).map fun ⟨h⟩ => ⟨.not h⟩
+    | .num, .neg, .int => (a.src? c .num).map fun ⟨h⟩ => ⟨.neg hop h⟩
+    | .num, .bnot, .uint => (a.src? c .num).map fun ⟨h⟩ => ⟨.bnot hop h⟩
+    | .num, .toInt, .uint => (a.src? c .num).map fun ⟨h⟩ => ⟨.toInt rfl hop h⟩
+    | .num, .toUint, .int => (a.src? c .num).map fun ⟨h⟩ => ⟨.toUint rfl hop h⟩
     | _, _, _ => none
   | c, k, _, .app1 (.field h) q =>
     match k with
@@ -112,6 +146,33 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
       let ⟨hb⟩ ← b.src? c .num
       return ⟨.sub h ha hb⟩
     | .num, .mul, _ => LTm.mulSrc? h a b (a.src? c .num) (b.src? c .num)
+    | .num, .div, .uint =>
+      match b with
+      | .app0 (.lit v) =>
+        if hv : v.val = 0 then none else (a.src? c .num).map fun ⟨ha⟩ => ⟨.divL rfl h v hv ha⟩
+      | _ => none
+    | .num, .mod, .uint =>
+      match b with
+      | .app0 (.lit v) =>
+        if hv : v.val = 0 then none else (a.src? c .num).map fun ⟨ha⟩ => ⟨.modL rfl h v hv ha⟩
+      | _ => none
+    | .num, .shr, _ =>
+      match b with
+      | .app0 (.lit v) => (a.src? c .num).map fun ⟨ha⟩ => ⟨.shrL rfl h v ha⟩
+      | _ => none
+    | .num, .shl, .uint =>
+      match b with
+      | .app0 (.lit v) => (a.src? c .num).map fun ⟨ha⟩ => ⟨.shlL rfl h v ha⟩
+      | _ => none
+    | .num, .band, .uint => LTm.bandSrc? h a b (a.src? c .num) (b.src? c .num)
+    | .num, .addW, .uint => do
+      let ⟨ha⟩ ← a.src? c .num
+      let ⟨hb⟩ ← b.src? c .num
+      return ⟨.addW rfl h ha hb⟩
+    | .num, .subW, .uint => do
+      let ⟨ha⟩ ← a.src? c .num
+      let ⟨hb⟩ ← b.src? c .num
+      return ⟨.subW rfl h ha hb⟩
     | .bool, .and, .bool => do
       let ⟨ha⟩ ← a.src? c .bool
       let ⟨hb⟩ ← b.src? c .bool
@@ -211,7 +272,7 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
   | _, _, _, _ => none
 
 /-- The source leaf, recognized with its evidence. -/
-def LFml.src? (c : Bool) : (φ : LFml C) → Option (PLift (φ.Src c))
+def LFml.src? (c : Bool) : (φ : LFml C) → Option (PLift (φ.Src c true))
   | .tt => some ⟨.tt⟩
   | @LFml.eq _ .bool a b => do
     let ⟨ha⟩ ← a.src? c .bool
@@ -238,7 +299,7 @@ def LFml.src? (c : Bool) : (φ : LFml C) → Option (PLift (φ.Src c))
 
 /-- **The recognizer is complete**: it accepts every term of the fragment,
 and a scalar at `bool` as a Boolean. -/
-theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false k →
+theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false true k →
     (t.src? false k).isSome = true ∧
       (k = .num → (hs : s = .val .bool) → ((hs ▸ t : LTm C (.val .bool)).src? false .bool).isSome = true) := by
   intro k s t h
@@ -339,6 +400,64 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
     show ((LTm.src? false .bool a).map _).isSome = true
     rw [hx]
+    rfl
+  | @neg h a _ ih | @bnot h a _ ih | @toInt _ h a _ ih | @toUint _ h a _ ih =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show ((LTm.src? false .num a).map _).isSome = true
+    rw [hx]
+    rfl
+  | @divL _ h a v hv _ ih | @modL _ h a v hv _ ih =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show (if hv' : v.val = 0 then none else (LTm.src? false .num a).map _).isSome = true
+    rw [dif_neg hv, hx]
+    rfl
+  | @shlL _ h a v _ ih =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show ((LTm.src? false .num a).map _).isSome = true
+    rw [hx]
+    rfl
+  | @shrL _ p h a v _ ih =>
+    refine ⟨?_, ?_⟩
+    · obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+      show ((LTm.src? false .num a).map _).isSome = true
+      rw [hx]
+      rfl
+    · intro _ hs
+      have hb : p = .bool := by
+        have := congrArg (fun | Srt.val q => q | _ => PrimTy.bool) hs
+        simpa only [BinOp.ret, BinOp.isArith, if_true] using this
+      subst hb
+      cases h
+  | @bandR _ h a v hm _ iha =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    show (LTm.bandSrc? h a (.app0 (.lit v)) (LTm.src? false .num a) _).isSome = true
+    unfold LTm.bandSrc?
+    dsimp only [LTm.lit?]
+    rw [dif_pos hm, hxa]
+    rfl
+  | @bandL _ h v hm b _ ihb =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    show (LTm.bandSrc? h (.app0 (.lit v)) b _ (LTm.src? false .num b)).isSome = true
+    unfold LTm.bandSrc?
+    split
+    · rename_i w hw _
+      split
+      · show (Option.map _ (some _)).isSome = true
+        rfl
+      · exact LTm.bandLSrc?_isSome h v hm b _ ihb.1
+    · exact LTm.bandLSrc?_isSome h v hm b _ ihb.1
+  | @addW _ h a b _ _ iha ihb | @subW _ h a b _ _ iha ihb =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    rw [hxb]
     rfl
   | @and a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
@@ -476,10 +595,11 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
   | kite hc => cases hc
   | ite hc => cases hc
 
-theorem LFml.src?_complete : ∀ {φ : LFml C}, φ.Src false → (φ.src? false).isSome = true := by
+theorem LFml.src?_complete : ∀ {φ : LFml C}, φ.Src false true → (φ.src? false).isSome = true := by
   intro φ h
   induction h with
   | tt => rfl
+  | defDiv hw | defShr hw | defAddW hw | defSubW hw | defToInt hw | defToUint hw => cases hw
   | @eqB a b ha hb =>
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete ha).1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete hb).1
@@ -620,11 +740,13 @@ def LFml.inExact (ψ : LFml C) : Bool :=
     decide (ψ.stripAll.2.condMax < condLiftFuel) &&
     ψ.stripAll.2.parameters.all (fun q => decide (q ∈ ψ.stripAll.1))
 
-/-- The size bounds, on the lifted body: at most 511 nodes and 45 storage
+/-- The size bounds, on the lifted body and on its cut (`LFml.cutAll`, the
+body itself where no operator is cut): at most 511 nodes and 45 storage
 reads. -/
 def LFml.exactBounded (ψ : LFml C) : Bool :=
   let body := (ψ.liftCond condLiftFuel).stripAll.2
-  decide (body.nodes ≤ 511) && decide (body.words * body.words ≤ 2048)
+  decide (body.nodes ≤ 511) && decide (body.cutAll.nodes ≤ 511) &&
+    decide (body.cutAll.words * body.cutAll.words ≤ 2048)
 
 /-- **The fragment of the automatic decision**: the formula normalizes and
 pushes its updates exactly, and its eliminated leaf is in `LFml.inExact`. -/
@@ -748,15 +870,15 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
     simp only [LFml.liftedExact, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h'
     obtain ⟨⟨hdepth, hsrc⟩, hcov⟩ := h'
     simp only [LFml.exactBounded, Bool.and_eq_true, decide_eq_true_eq] at hb
-    obtain ⟨hn, hw⟩ := hb
+    obtain ⟨⟨hn, hcn⟩, hw⟩ := hb
     obtain ⟨u, hu, hup, hub⟩ := UniversalPrefix.ofFormula?_strip _ 1024 hdepth
     obtain ⟨⟨hs⟩, -⟩ := Option.isSome_iff_exists.mp hsrc
-    have hs' : u.body.Src false := hub ▸ hs
+    have hs' : u.body.Src false true := hub ▸ hs
     have hc : ∀ p ∈ u.body.parameters, p ∈ u.parameters := by
       rw [hub, hup]
       exact hcov
     obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp
-      (flattenedArithmetic?_isSome u.body hs' (hub ▸ hn) (hub ▸ hw))
+      (flattenedArithmetic?_isSome u.body hs' (hub ▸ hcn) (hub ▸ hw))
     have hcap := LFml.liftCondB_isSome _ hdepth hn
     have hnone : (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone = false := by
       cases hX : r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget with

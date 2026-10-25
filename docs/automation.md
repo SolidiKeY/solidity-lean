@@ -284,8 +284,10 @@ in-range evidence.  Dynamic arrays are out, as planned.
 On terms (`LTm.Src c k`, `Calculus/FlattenTotality.lean`), by kind:
 
 * scalars (`num`): atoms, literals, transaction fields, `+`/`-` (checked),
-  `*` with a literal factor on either side (checked, M7), `seq` guards,
-  `err`, and storage reads `obsW` of a path;
+  `*` with a literal factor on either side (checked, M7), unary `-` and `~`
+  (M7), `seq` guards, `err`, and storage reads `obsW` of a path; with the
+  flag `w = true` (before the cut, M7) also `int(·)`, `uint(·)`, `/`, `%`,
+  `>>`, `<<` by a literal, `&` by a low mask, `+%`, `-%`;
 * Booleans (`bool`): a scalar at `bool`, `!`, `&&`, `||`, `==`/`!=` on
   Booleans or numbers, `<`/`>`/`<=`/`>=`, `seq` guards;
 * paths (`path`): a root, fields, mapping keys whose keys are scalars;
@@ -1154,7 +1156,7 @@ Three properties of the reading are worth knowing.
 `Calculus/QuantTotality.lean`: `propext`, `Classical.choice`, `Quot.sound`.
 Everything is `sorry`-free.
 
-`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by two
+`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by four
 features, each with its completeness proved through every stage
 (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
 (feature 3, its own pipeline):
@@ -1201,7 +1203,39 @@ features, each with its completeness proved through every stage
    evidence by `LTm.num?`, `LTm.bool?`).  It asks no quantifier to be
    left: a quantifier-free leaf M4 refuses may pass here.
 
-All three were refused before (`dependentReduction?` returned `none`: the
+4. **Unary `-` (`int`) and `~` (`uint`)**, affine codes like the literal
+   product (`LTm.Src.neg`, `bnot`; `LTm.Num.neg`, `bnot`;
+   `CheckedValue.neg` as `CheckedScalar.scale (-1)`, `CheckedValue.bnot` as
+   `CheckedScalar.compl`, the code `2^256 - 1 - a`).
+5. **Operators cut into fresh atoms** (`Calculus/QuotientCut.lean`, plan
+   steps 1 and 2): the conversions `int(·)`/`uint(·)`; `/` and `%` by a
+   nonzero literal and `&` by a low mask `2^k - 1` on either side (`uint`);
+   `>>` by a literal (`uint` and `int`); `<<` by a literal (`uint`); the
+   wrapping `+%`, `-%` (`uint`).  `LFml.cutAll`, the first stage of
+   `flattenedArithmetic?`, replaces each such node `e` by a fresh atom `q`,
+   sequenced after the operands it needs (`seq g q`), and puts `q`'s
+   definition `g == g → e == q` in the antecedent; `%`, `&` and `<<` are
+   written through the atom of a quotient (`a - q·c`, `(a - q·2^(256-k))·2^k`).
+   A node written twice gets one atom (`quotAtom`, by term identity).  The
+   cut is exact in a universal reading (`LFml.cutAll_valid_iff`), and a
+   countermodel of the cut leaf refutes the leaf at the same point
+   (`LFml.holds_cutAll`); the fresh atoms' values come from
+   `Defs.Good.extend`.  The compiler encodes each definition exactly as a
+   linear relation between codes (`StorageEncoding.special?`): a quotient
+   `d·q ≤ x ≤ d·q + d - 1` with the bound `q ≤ M/d` stated, a wrapped sum
+   `y = x₁ + x₂ ∨ y + 2^256 = x₁ + x₂`, a difference
+   `y = x₁ - x₂ ∨ y = x₁ - x₂ + 2^256`, a conversion `y = x + 2^255 ∨ y + 2^255 = x`
+   (`defDiv`, `defShr`, `defAddW`, `defSubW`, `defToInt`, `defToUint`).  On
+   the source fragment the new term constructors are gated by a flag
+   (`LTm.Src c w`, `w = true` before the cut) and the defining equations
+   are `LFml.Src` constructors after it (`w = false`); `LTm.cut_src`,
+   `LFml.cutAll_src` (`Calculus/CutTotality.lean`) map one to the other, so
+   flattening and compilation keep their totality proofs
+   (`readFlatten?_arith`, `flattenedArithmetic?_isSome`).
+   `Fml.exactBounded` bounds the cut body (`body.cutAll`, the body itself
+   where nothing is cut) as well as the lifted one.
+
+All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
@@ -1214,6 +1248,11 @@ coverage of `double`, `nested` and `evenHyp` is kernel-checked
 (`decide +kernel`); the other rows and the verdicts are the compiled ones
 (`#eval` pins), since the kernel's arithmetic decision over 256-bit codes
 is too deep for the language server.
+For the fourth and fifth it pins a proved
+and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
+`>>` on `uint` and `int`, `<<` at 0 and past 256, `& 7`, `7 &`, `+%`,
+`-%`), and kernel-checks one covered leaf per operator (`neg_covered` …
+`subW_covered`).
 
 ### What is not proved
 
@@ -1232,14 +1271,25 @@ is too deep for the language server.
   an `∃` state's list keeps its order (two orders, two states).  The pins
   take well under a second; a large leaf may not.  `quantReduction?`
   also re-runs the front `dependentReduction?` refused.
+* Any bound on the decision's running time.  `decideLeaf_complete` says it
+  answers, not when: `AFml.decide`'s search is a breadth-first walk over
+  the reachable formulas with list membership, and a relation whose
+  coefficients are large keeps many constants apart.  A quotient by `d`
+  costs about `d` states a bit read; `<<` by `0 < k < 256` relates `x`
+  to `y` through `2^256`, so `shlOk` (`x << 4`) is pinned covered
+  (`shl_covered`) but its verdict is out of reach in practice, and the
+  masks and divisors pinned are small (`& 7`, `% 8`, `/ 3`, `>> 4`).
 * On the fragment, `decideGoal` still answers *unknown* on:
   * a quantifier past the prefix whose body reads storage or a transaction
     field, even at no bound variable (`Examples/Decision.lean`,
     `evenRead`), the array property fragment among them (`apf`);
   * KeY `int` (no atom of `Srt.kint` in `LTm`);
-  * literal division, modulo, shifts and bitwise operators, and wrapping
-    arithmetic;
-  * unary `-`, `~` and the conversions;
+  * division and modulo at `int`, `<<` at `int`, `|` and `^` with a
+    literal, `&` with a literal that is not a low mask `2^k - 1`, `**` and
+    `**%` with a literal exponent, and `*%` by a literal: each needs an
+    encoding with a coefficient of `2^256` or a disjunction per bit, and
+    none was carried through the stages (the cut and its proofs extend to
+    them as to `<<`);
   * memory reads and writes;
   * fixed and dynamic array indices (M4 (b));
   * every hash.
@@ -1250,11 +1300,15 @@ One feature a round, each with its completeness proof through the stages,
 in this order:
 
 1. **Unary `-` and the conversions** (`toInt`, `toUint` at a literal
-   range), like the literal product (`CheckedScalar` codes).
+   range), like the literal product (`CheckedScalar` codes).  Done
+   (2026-10-25): `-` and `~` as codes, the conversions as cut atoms (above).
 2. **Literal division, modulo, shifts, masks, wrapping `+%`/`-%`/`*%`**: a
    fresh atom per quotient with its defining constraints in the antecedent
    (`q·c ≤ x < q·c + c`), exact in a universal reading. The compiler then
-   returns constraints beside the code.
+   returns constraints beside the code.  Done for `/`, `%`, `>>`, `<<`,
+   low masks, `+%`, `-%` (above), the constraints a stage of their own
+   ahead of the compiler (`LFml.cutAll`), the compiler encoding each
+   definition; not done: `*%`, `|`, `^`, other masks, `int` `/` and `%`.
 3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
    difference of two natural codes in `AFml`.
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided

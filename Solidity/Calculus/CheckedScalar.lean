@@ -181,6 +181,26 @@ theorem scale_correct' {p : PrimTy} (hp : p.isNumeric = true) (c : Int) (a : Che
   simp only [Int.mul_comm c] at h
   exact h
 
+/-- Result code of `~a` on `uint`: the integer `2^256 - 1 - a`. -/
+def complCode (a : Affine) : Affine := (Affine.literal (((2 ^ 256 : Nat) : Int) - 1)).sub a
+
+/-- `~a` on `uint`: the operand must return; the result is always in range,
+and its range guard says so. -/
+def compl (a : CheckedScalar .uint) : CheckedScalar .uint :=
+  (ofInt .uint (complCode a.code)).guard a.defined
+
+theorem compl_correct (a : CheckedScalar .uint) (x : Nat → Nat) (va : Option PrimTy.uint.Denote)
+    (ha : a.Correct x va) :
+    (compl a).Correct x (va.bind fun v => PrimTy.uint.ofInt? (((2 ^ 256 : Nat) : Int) - 1 - v.val)) := by
+  cases va with
+  | none => exact fun hg => ha hg.1
+  | some v =>
+    apply guard_correct a.defined _ x _ _ ha.1
+    apply ofInt_correct .uint rfl
+    simp only [complCode, Affine.eval_sub, Affine.eval_literal, ha.2, encode_integer]
+    simp only [integer, offset]
+    omega
+
 /-- Defined equality includes both guards. Two failed expressions are not
 equal, even when their unchecked affine values happen to coincide. -/
 def eq {p : PrimTy} (a b : CheckedScalar p) : AFml :=
