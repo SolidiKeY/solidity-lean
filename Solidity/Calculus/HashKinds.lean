@@ -837,6 +837,49 @@ def _root_.Solidity.Fml.topLevels (k : HashKind) : {Γ : Ctx} → Fml C Γ → L
   | _, .upd _ U _ => U.hLevels k
   | _, _ => []
 
+/-- A hash node reads a memory local in the starting memory. -/
+def _root_.Solidity.Op2.memNode {Γ : Ctx} {a b s : Srt} : Op2 C a b s → Tm C Γ a → Tm C Γ b → Bool
+  | .hash _, .app0 .memory, .pvI _ => true
+  | .hash _, _, _ => false
+  | _, _, _ => true
+
+/-- Every hash node of the term reads a memory local in the starting memory. -/
+def _root_.Solidity.Tm.memNodes {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
+  | _, .netOf _ a | _, .app1 _ a => a.memNodes
+  | _, .app2 o x y => o.memNode x y && x.memNodes && y.memNodes
+  | _, .app3 _ x y z => x.memNodes && y.memNodes && z.memNodes
+  | _, _ => true
+
+/-- A one-element update (a storage write, a value local declared) whose
+hash nodes read memory locals. -/
+def _root_.Solidity.Upd.memNodes1 {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .snoc U e =>
+    match U with
+    | .nil =>
+      match e with
+      | .storage s => s.memNodes
+      | _ => false
+    | .snoc .. | .decl .. | .pop .. | .drop .. => false
+  | _, .decl U _ r =>
+    match U with
+    | .nil =>
+      match r with
+      | .val t => t.memNodes
+      | _ => false
+    | .snoc .. | .decl .. | .pop .. | .drop .. => false
+  | _, .nil | _, .pop .. | _, .drop .. => false
+
+/-- **Every hash node of the body reads a memory local**: equations, `wt`,
+the connectives and one-element updates. -/
+def _root_.Solidity.Fml.memNodes : {Γ : Ctx} → Fml C Γ → Bool
+  | _, .tt => true
+  | _, .eq a b => a.memNodes && b.memNodes
+  | _, .wellFormed s => s.memNodes
+  | _, .not φ => φ.memNodes
+  | _, .and φ ψ | _, .imp φ ψ => φ.memNodes && ψ.memNodes
+  | _, .upd _ U φ => U.memNodes1 && φ.memNodes
+  | _, _ => false
+
 /-- **The body with the second kind's words**: the strings `k₂` hashes
 (`L`), each hashed by both kinds where the premise reads it; `m` new
 binders, the link of the two kinds (`linkE`; and, for an instance,
@@ -845,7 +888,7 @@ word. -/
 def _root_.Solidity.Fml.tkBody (k₁ k₂ : HashKind) (fix : Bool) {Γ : Ctx} (ψ : Fml C Γ) :
     Option (Fml C Γ) :=
   let L := (ψ.hLevels k₂).eraseDups
-  if L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (ψ.topLevels k₁).contains l &&
+  if ψ.memNodes && L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (ψ.topLevels k₁).contains l &&
       (ψ.topLevels k₂).contains l) then
     (ψ.xk k₂ (XMap.extras L Γ)).map fun ψ₂ =>
       Fml.allN (.user "e") L.length
@@ -1293,7 +1336,7 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
     obtain ⟨ψ₂, hψ₂, rfl⟩ := Option.map_eq_some_iff.1 e
     have hcov' : ∀ l ∈ L, (Idx.memAtLevel? Γ l).isSome ∧ l ∈ ψ.topLevels k₁ ∧ l ∈ ψ.topLevels k₂ :=
       fun l hl => by
-        have := List.all_eq_true.1 hcov l hl
+        have := List.all_eq_true.1 (Bool.and_eq_true _ _ ▸ hcov).2 l hl
         simp only [Bool.and_eq_true, List.contains_iff_mem] at this
         exact ⟨this.1.1, this.1.2, this.2⟩
     -- the strings `L` names are hashed by both kinds where the premise reads them
@@ -1430,5 +1473,354 @@ theorem _root_.Solidity.Fml.tk_validH {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .
     (hk₂ : k₂ ≠ .ecrecover) {φ φ₂ : Fml C []} (e : φ.tk k₁ k₂ false = some φ₂) (hv : Fml.ValidH φ₂) :
     Fml.ValidH φ :=
   fun σ hf => Fml.tk_sound hk₁ hk₂ φ e σ (fun i => nomatch i) (hv σ) hf
+
+/-! ## Refutations -/
+
+section MemNodes
+
+variable {Γ : Ctx}
+
+theorem _root_.Solidity.Tm.memNodes_hashIn (σ : State C Γ) {k : HashKind} {inp : Option (List Nat)}
+    {out : PrimTy.uint.Denote} : {s : Srt} → (t : Tm C Γ s) → t.memNodes = true → t.HashIn σ k inp out →
+      ∃ R id, inp = σ.glob.memT.hashInput R id ∧ out = σ.glob.memT.hashId k R id
+  | _, .netOf _ a, hm, h | _, .app1 _ a, hm, h => Tm.memNodes_hashIn σ a hm h
+  | _, .app2 o x y, hm, h => by
+    simp only [Tm.memNodes, Bool.and_eq_true] at hm
+    rcases h with h | h | h
+    · cases o with
+      | hash k' =>
+        cases x with
+        | app0 o' =>
+          cases o' with
+          | memory =>
+            cases y with
+            | pvI i =>
+              obtain ⟨rfl, id, -, h1, h2⟩ := hnode_hashIn σ k' i (.inl h)
+              exact ⟨_, id, h1, h2⟩
+            | _ => exact absurd hm.1.1 Bool.false_ne_true
+          | _ => exact absurd hm.1.1 Bool.false_ne_true
+        | _ => exact absurd hm.1.1 Bool.false_ne_true
+      | _ => exact h.elim
+    · exact Tm.memNodes_hashIn σ x hm.1.2 h
+    · exact Tm.memNodes_hashIn σ y hm.2 h
+  | _, .app3 _ x y z, hm, h => by
+    simp only [Tm.memNodes, Bool.and_eq_true] at hm
+    rcases h with h | h | h
+    · exact Tm.memNodes_hashIn σ x hm.1.1 h
+    · exact Tm.memNodes_hashIn σ y hm.1.2 h
+    · exact Tm.memNodes_hashIn σ z hm.2 h
+  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .app0 _, _, h
+  | _, .pvZ _, _, h => h.elim
+
+end MemNodes
+
+/-- **The hash nodes of a body read memory locals**, past its updates too:
+of the memory it starts in. -/
+theorem _root_.Solidity.Fml.memNodes_hashIn {k : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
+    φ.memNodes = true → ∀ (σ : State C Γ) {inp : Option (List Nat)} {out : PrimTy.uint.Denote},
+      Fml.HashIn k inp out σ φ → ∃ R id, inp = σ.glob.memT.hashInput R id ∧ out = σ.glob.memT.hashId k R id := by
+  induction φ with
+  | tt => intro _ _ _ _ h; exact h.elim
+  | eq a b =>
+    intro hm σ _ _ h
+    simp only [Fml.memNodes, Bool.and_eq_true] at hm
+    rcases h with h | h
+    · exact Tm.memNodes_hashIn σ a hm.1 h
+    · exact Tm.memNodes_hashIn σ b hm.2 h
+  | wellFormed s => intro hm σ _ _ h; exact Tm.memNodes_hashIn σ s hm h
+  | not φ ih => intro hm σ _ _ h; exact ih hm σ h
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ =>
+    intro hm σ _ _ h
+    simp only [Fml.memNodes, Bool.and_eq_true] at hm
+    rcases h with h | h
+    · exact ihφ hm.1 σ h
+    · exact ihψ hm.2 σ h
+  | upd m U φ ih =>
+    intro hm σ _ _ h
+    simp only [Fml.memNodes, Bool.and_eq_true] at hm
+    obtain ⟨hU, hφ⟩ := hm
+    cases U with
+    | snoc U₀ e₀ =>
+      cases U₀ with
+      | nil =>
+        cases e₀ with
+        | storage s =>
+          rcases h with (h | h) | ⟨g, σ', hg, hL, h⟩
+          · exact h.elim
+          · exact Tm.memNodes_hashIn σ s hU h
+          · have hg' : (s.eval σ).bind (fun st => some (σ.globG.withStorage st)) = some g := hg
+            obtain ⟨st, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+            have hσ : σ'.glob = { σ.glob with storage := st } := hL.2.1
+            obtain ⟨R, id, h1, h2⟩ := ih hφ σ' h
+            refine ⟨R, id, ?_, ?_⟩
+            · rw [h1, hσ]; rfl
+            · rw [h2, hσ]; rfl
+        | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
+      | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
+    | decl U₀ x r =>
+      cases U₀ with
+      | nil =>
+        cases r with
+        | val t =>
+          rcases h with (h | h) | ⟨g, σ', hg, hL, h⟩
+          · exact h.elim
+          · exact Tm.memNodes_hashIn σ t hU h
+          · have hg' : (t.eval σ).bind (fun _ => some σ.globG) = some g := hg
+            obtain ⟨_, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+            have hσ : σ'.glob = σ.glob := hL.2.1
+            obtain ⟨R, id, h1, h2⟩ := ih hφ σ' h
+            exact ⟨R, id, by rw [h1, hσ], by rw [h2, hσ]⟩
+        | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
+      | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
+    | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
+  | modal | havoc | all | bind | anon | allocAll | grow => intro hm; simp only [Fml.memNodes,
+      Bool.false_eq_true] at hm
+
+/-- **A heap of the family's strings meets the premise** of a body whose
+hash nodes read memory locals, of every kind. -/
+theorem _root_.Solidity.Fml.hashFree_memNodes {Γ : Ctx} {φ : Fml C Γ} (hm : φ.memNodes = true)
+    (σ : State C Γ) (hF : FamHeap famBound σ.glob) : φ.HashFree σ := by
+  intro k hk i₁ i₂ out h₁ h₂
+  have hok := famOK_bound k hk
+  obtain ⟨R₁, id₁, rfl, ho₁⟩ := Fml.memNodes_hashIn φ hm σ h₁
+  obtain ⟨R₂, id₂, rfl, ho₂⟩ := Fml.memNodes_hashIn φ hm σ h₂
+  rcases hF.hash k R₁ id₁ with ⟨hi₁, hh₁⟩ | ⟨j₁, hj₁, hi₁, hh₁⟩ <;>
+    rcases hF.hash k R₂ id₂ with ⟨hi₂, hh₂⟩ | ⟨j₂, hj₂, hi₂, hh₂⟩
+  · rw [hi₁, hi₂]
+  · exact absurd (congrArg Subtype.val ((hh₁.symm.trans ho₁.symm).trans (ho₂.trans hh₂))).symm
+      (famOK_ne hok hj₂)
+  · exact absurd (congrArg Subtype.val ((hh₂.symm.trans ho₂.symm).trans (ho₁.trans hh₁))).symm
+      (famOK_ne hok hj₁)
+  · rw [hi₁, hi₂, famOK_inj hok hj₁ hj₂ ((hh₁.symm.trans ho₁.symm).trans (ho₂.trans hh₂))]
+
+/-! ### The new binders, swapped -/
+
+/-- `v`, then `es`. -/
+def finCons {α : Type} {m : Nat} (v : α) (es : Fin m → α) : Fin (m + 1) → α :=
+  fun i => Fin.cases (motive := fun _ => α) v es i
+
+@[simp] theorem finCons_zero {α : Type} {m : Nat} (v : α) (es : Fin m → α) : finCons v es 0 = v :=
+  Fin.cases_zero
+
+@[simp] theorem finCons_succ {α : Type} {m : Nat} (v : α) (es : Fin m → α) (i : Fin m) :
+    finCons v es i.succ = es i := Fin.cases_succ i
+
+section Swapped
+
+variable {Γ : Ctx}
+
+/-- `Fml.allN` in the swapped context. -/
+def _root_.Solidity.Fml.allNsw (x : Var) :
+    (m : Nat) → Fml C (Ctx.sw (List.replicate m (.val .uint) ++ Γ)) → Fml C (Ctx.sw Γ)
+  | 0, ψ => ψ
+  | m + 1, ψ => Fml.allNsw x m (.all x .uint ψ)
+
+/-- `envOf` in the swapped context. -/
+def envOfSw {H : HTy} : (m : Nat) → (Fin m → PrimTy.uint.Denote) → TEnv C H (Ctx.sw Γ) →
+    TEnv C H (Ctx.sw (List.replicate m (.val .uint) ++ Γ))
+  | 0, _, e => e
+  | m + 1, es, e => (es 0, envOfSw m (fun i => es i.succ) e)
+
+theorem _root_.Solidity.Fml.swInst_allN (k : HashKind) (cs : List Nat) (x : Var) :
+    (m : Nat) → (F : Fml C (List.replicate m (.val .uint) ++ Γ)) →
+      (Fml.allN x m F).swInst k cs = (F.swInst k cs).map (Fml.allNsw x m)
+  | 0, F => by simp only [Fml.allN, Fml.allNsw, Option.map_id']
+  | m + 1, F => by
+    show (Fml.allN x m (.all x .uint F)).swInst k cs = _
+    rw [Fml.swInst_allN k cs x m (.all x .uint F)]
+    show ((F.swInst k cs).map (Fml.all x .uint)).map (Fml.allNsw x m) = _
+    rw [Option.map_map]
+    rfl
+
+theorem holds_allNsw (x : Var) : (m : Nat) → (ψ : Fml C (Ctx.sw (List.replicate m (.val .uint) ++ Γ))) →
+    (τ : State C (Ctx.sw Γ)) → (holds τ (Fml.allNsw x m ψ) ↔
+      ∀ es : Fin m → PrimTy.uint.Denote, holds (τ.withEnv (envOfSw m es τ.env)) ψ)
+  | 0, ψ, τ => ⟨fun h _ => h, fun h => h Fin.elim0⟩
+  | m + 1, ψ, τ => by
+    rw [show Fml.allNsw x (m + 1) ψ = Fml.allNsw x m (.all x .uint ψ) from rfl, holds_allNsw x m]
+    constructor
+    · intro h es
+      exact h (fun i => es i.succ) (es 0)
+    · intro h es' v
+      have := h (finCons v es')
+      simp only [finCons_zero, finCons_succ] at this
+      exact this
+
+theorem holds_allN (x : Var) : (m : Nat) → (ψ : Fml C (List.replicate m (.val .uint) ++ Γ)) →
+    (τ : State C Γ) → (holds τ (Fml.allN x m ψ) ↔
+      ∀ es : Fin m → PrimTy.uint.Denote, holds (τ.withEnv (envOf m es τ.env)) ψ)
+  | 0, ψ, τ => ⟨fun h _ => h, fun h => h Fin.elim0⟩
+  | m + 1, ψ, τ => by
+    rw [show Fml.allN x (m + 1) ψ = Fml.allN x m (.all x .uint ψ) from rfl, holds_allN x m]
+    constructor
+    · intro h es
+      exact h (fun i => es i.succ) (es 0)
+    · intro h es' v
+      have := h (finCons v es')
+      simp only [finCons_zero, finCons_succ] at this
+      exact this
+
+/-- **The new binders' values pushed alike** in a state and its swapped reading. -/
+theorem SwRel.envOf {k : HashKind} {τ : State C Γ} {τ' : State C (Ctx.sw Γ)} (h : SwRel k τ τ') :
+    (m : Nat) → (es : Fin m → PrimTy.uint.Denote) →
+      SwRel k (τ.withEnv (envOf m es τ.env)) (τ'.withEnv (envOfSw m es τ'.env))
+  | 0, _ => h
+  | m + 1, es => (SwRel.envOf h m (fun i => es i.succ)).push (p := .uint) (es 0)
+
+end Swapped
+
+theorem holds_orL {Γ : Ctx} (σ : State C Γ) (fs : List (Fml C Γ)) :
+    holds σ (Fml.orL fs) ↔ ∃ f ∈ fs, holds σ f := by
+  show ¬ holds σ (Fml.conjL (fs.map .not)) ↔ _
+  rw [holds_conjL]
+  constructor
+  · intro h
+    exact Classical.byContradiction fun hn => h fun g hg => by
+      obtain ⟨f, hf, rfl⟩ := List.mem_map.1 hg
+      exact fun hf' => hn ⟨f, hf, hf'⟩
+  · rintro ⟨f, hf, hf'⟩ h
+    exact h _ (List.mem_map_of_mem hf) hf'
+
+/-- What a hash of an identity reads and returns in a heap of the family:
+nothing, or one string of the family and its hash of every kind. -/
+theorem FamHeap.hashAll {N : Nat} {g : State C []} (hF : FamHeap N g) (R : RefTy) (id : Nat) :
+    (g.memT.hashInput R id = none ∧ ∀ k, g.memT.hashId k R id = PrimTy.dflt .uint) ∨
+      ∃ j < N, g.memT.hashInput R id = some ((famBytes j).map fun b => b.toNat % 256) ∧
+        ∀ k, g.memT.hashId k R id = famHash k j := by
+  unfold Grown.hashInput Grown.hashId
+  cases hr : HRef.ofId? g.memT.H' R id with
+  | none => exact .inl ⟨rfl, fun _ => rfl⟩
+  | some r =>
+    obtain ⟨j, hj, hw⟩ := hF r
+    refine .inr ⟨j, hj, ?_, fun k => ?_⟩
+    · show some ((MObj.words R (g.heap.get r)).map _) = some _
+      rw [hw]
+    · show k.apply (MObj.words R (g.heap.get r)) = _
+      rw [hw]
+      rfl
+
+theorem _root_.Solidity.Fml.tkBody_memNodes {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} {ψ φ' : Fml C Γ}
+    (e : ψ.tkBody k₁ k₂ fix = some φ') : ψ.memNodes = true := by
+  unfold Fml.tkBody at e
+  cases fix
+  all_goals
+    simp only [Bool.false_eq_true, ↓reduceIte] at e
+    split at e
+    · rename_i hcov
+      exact (Bool.and_eq_true _ _ ▸ hcov).1
+    · cases e
+
+/-- **The leaf meets its premise in a heap of the family**, where it has
+the second kind's words. -/
+theorem _root_.Solidity.Fml.tk_hashFree {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} {φ φ' : Fml C Γ}
+    (e : φ.tk k₁ k₂ fix = some φ') (σ : State C Γ) (hF : FamHeap famBound σ.glob) : φ.HashFree σ := by
+  cases φ with
+  | all | allocAll => intro _ _ _ _ _ h; exact h.elim
+  | modal | havoc | bind | anon | grow => cases e
+  | _ => exact Fml.hashFree_memNodes (Fml.tkBody_memNodes e) σ hF
+
+/-- **What the body says under its premise in a heap of the family, the
+instance with the second kind's words fixed says.** -/
+theorem _root_.Solidity.Fml.tkBody_inst_holds {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
+    (hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (ψ : Fml C Γ) {φF : Fml C Γ}
+    (e : ψ.tkBody k₁ k₂ true = some φF) {cs : List Nat} {inst : Fml C (Ctx.sw Γ)}
+    (ei : φF.swInst k₁ cs = some inst) (τ : State C Γ) (τ' : State C (Ctx.sw Γ)) (h : SwRel k₁ τ τ')
+    (hF : FamHeap famBound τ.glob) (hstr : ∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome)
+    (hs : Fml.holdsS τ ψ) : holds τ' inst := by
+  unfold Fml.tkBody at e
+  simp only [↓reduceIte] at e
+  split at e
+  · rename_i hcov
+    generalize hLd : (Fml.hLevels k₂ ψ).eraseDups = L at hcov e
+    obtain ⟨ψ₂, hψ₂, rfl⟩ := Option.map_eq_some_iff.1 e
+    rw [Fml.swInst_allN] at ei
+    obtain ⟨B', hB', rfl⟩ := Option.map_eq_some_iff.1 ei
+    have hB'' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ L)) (.imp (Fml.conjL (linkE k₁ L)) ψ₂)) = some B' := hB'
+    rw [holds_allNsw]
+    intro es
+    rw [Fml.sw_holds _ hB'' _ _ (h.envOf L.length es)]
+    intro hfix _
+    rw [← lift_dropN] at hfix ⊢
+    have hes : ∀ (d : Fin L.length) {R : RefTy} (i : Idx Γ (.mem R)), i.level = L[d] →
+        ∃ id, τ.getV i = some id ∧ es d = τ.glob.memT.hashId k₂ R id := by
+      intro d R i hl
+      obtain ⟨id, hid⟩ := Option.isSome_iff_exists.1 (hstr i)
+      refine ⟨id, hid, ?_⟩
+      have hsd : strAt (Γ := Γ) L d = some ⟨R, i⟩ := by
+        unfold strAt
+        rw [← hl, Idx.memAtLevel?_self]
+      have hp := (holds_conjL _ _).1 hfix _ (fixE_mem (C := C) (k₁ := k₁) (k₂ := k₂) d hsd)
+      obtain ⟨f, hf, hf'⟩ := (holds_orL _ _).1 hp
+      obtain ⟨j, hj, rfl⟩ := List.mem_map.1 hf
+      obtain ⟨h1, h2⟩ := hf'
+      rw [holds_eq, hnode_wk_denote, hnode_denote τ k₁ i hid] at h1
+      rw [holds_eq, topIdx_denote] at h2
+      have h1' := Option.some.inj h1
+      have h2' := Option.some.inj h2
+      have hjb := List.mem_range.1 hj
+      rcases hF.hashAll R id with ⟨-, hz⟩ | ⟨j', hj', -, hk⟩
+      · rw [hz k₁] at h1'
+        exact absurd (congrArg Subtype.val h1'.symm) (famOK_ne (famOK_bound k₁ hk₁) hjb)
+      · rw [hk k₁] at h1'
+        have := famOK_inj (famOK_bound k₁ hk₁) hj' hjb h1'
+        subst this
+        rw [h2', hk k₂]
+    have hX : XRel k₂ (XMap.extras L Γ) τ (envOf L.length es τ.env) := xrel_extras k₂ L τ es hes
+    exact (Fml.xk_holds ψ hψ₂ τ _ hX).2 ((Fml.holdsS_of_xk ψ hψ₂ τ).1 hs)
+  · cases e
+
+/-- **What the leaf says under its premise, its strings chosen in the
+family, the instance with the second kind's words fixed says.** -/
+theorem _root_.Solidity.Fml.tk_inst_holds {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
+    (hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (φ : Fml C Γ) :
+    ∀ {cs : List Nat} {φF : Fml C Γ} {inst : Fml C (Ctx.sw Γ)}, φ.tk k₁ k₂ true = some φF →
+      φF.swInst k₁ cs = some inst → (∀ j ∈ cs, j < famBound) →
+      ∀ (τ : State C Γ) (τ' : State C (Ctx.sw Γ)), SwRel k₁ τ τ' → FamHeap famBound τ.glob →
+      (∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome) → Fml.holdsS τ φ → holds τ' inst := by
+  induction φ with
+  | all x p φ ih =>
+    intro cs _ _ e ei hcs τ τ' h hF hstr hs
+    obtain ⟨φF, hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    obtain ⟨inst, hi, rfl⟩ := Option.map_eq_some_iff.1 ei
+    exact fun v => ih hφ hi hcs _ _ (h.push v) hF (strOK_push hstr v)
+      (hs v (Fml.tk_hashFree hφ _ hF))
+  | allocAll x R φ ih =>
+    intro cs _ _ e ei hcs τ τ' h hF hstr hs
+    obtain ⟨φF, hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    cases cs with
+    | nil => cases ei
+    | cons j cs =>
+      simp only [Fml.swInst] at ei
+      split at ei
+      · rename_i hR
+        subst hR
+        obtain ⟨inst, hi, rfl⟩ := Option.map_eq_some_iff.1 ei
+        have hj : j < famBound := hcs j (List.mem_cons_self ..)
+        intro w hw
+        have hw' : w = famHash k₁ j := Option.some.inj hw
+        subst hw'
+        let o := famObj τ.H j
+        have hF' : FamHeap famBound (τ.alloc o).1.glob := hF.alloc hj
+        have h' := (h.alloc o).pushMem (τ.alloc o).2
+        rw [State.alloc_hashId_self, famObj_words] at h'
+        exact ih hφ hi (fun i hi => hcs i (List.mem_cons_of_mem _ hi)) _ _ h' hF' (strOK_alloc hstr o)
+          (hs o (Fml.tk_hashFree hφ _ hF'))
+      · cases ei
+  | tt | eq | wellFormed | not | and | imp | upd =>
+    intro cs _ _ e ei _ τ τ' h hF hstr hs
+    exact Fml.tkBody_inst_holds hk₁ hk₂ _ e ei τ τ' h hF hstr hs
+  | modal | havoc | bind | anon | grow => intro _ _ _ e; cases e
+
+/-- **A refutation of the instance with the second kind's words fixed
+refutes the leaf under its premise**: in the state with no memory, the
+leaf's fresh strings allocated with the family's bytes. -/
+theorem _root_.Solidity.Fml.tk_refutes {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    {φ φF : Fml C []} {cs : List Nat} {inst : Fml C []} (e : φ.tk k₁ k₂ true = some φF)
+    (ei : φF.swInst k₁ cs = some inst) (hcs : ∀ j ∈ cs, j < famBound) {σ : State C []}
+    (hr : ¬ holds σ inst) : ¬ Fml.holdsH σ.noHeap φ := by
+  intro hH
+  have hF : FamHeap famBound σ.noHeap.glob := FamHeap.empty famBound _ rfl
+  exact hr (Fml.tk_inst_holds hk₁ hk₂ φ e ei hcs σ.noHeap σ ⟨⟨rfl, rfl, rfl, rfl⟩, fun i => nomatch i⟩
+    hF (fun i => nomatch i) (hH (Fml.tk_hashFree e _ hF)))
 
 end Solidity.Decide
