@@ -76,6 +76,25 @@ theorem LTm.Num.readFree {ps : Parameter → Prop} {es : EnvKey → Prop} :
       rw [hea, heb]; rfl
     · change ea.readBound + eb.readBound = 0
       rw [ha0, hb0]
+  | @mulL p hp v b _ ihb =>
+    obtain ⟨eb, heb, hb0⟩ := ihb
+    refine ⟨.binop .mul hp (.lit v) eb, ?_, ?_⟩
+    · change (Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun x =>
+        Option.bind (ReadExpr.ofTerm? b) fun y => some (ReadExpr.binop .mul hp x y)) = _
+      rw [show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl, heb]
+      rfl
+    · change (ReadExpr.lit (C := C) v).readBound + eb.readBound = 0
+      rw [hb0]; rfl
+  | @mulR p hp a v _ iha =>
+    obtain ⟨ea, hea, ha0⟩ := iha
+    refine ⟨.binop .mul hp ea (.lit v), ?_, ?_⟩
+    · change (Option.bind (ReadExpr.ofTerm? a) fun x =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun y =>
+          some (ReadExpr.binop .mul hp x y)) = _
+      rw [show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl, hea]
+      rfl
+    · change ea.readBound + (ReadExpr.lit (C := C) v).readBound = 0
+      rw [ha0]; rfl
   | @seq q p d a _ _ ihd iha =>
     obtain ⟨ed, hed, hd0⟩ := ihd
     obtain ⟨ea, hea, ha0⟩ := iha
@@ -320,6 +339,10 @@ inductive LTm.Src (c : Bool) : SrcKind → {s : Srt} → LTm C s → Prop
       LTm.Src c .num a → LTm.Src c .num b → LTm.Src c .num (.app2 (.binop .add h) a b)
   | sub {p : PrimTy} (h : BinOp.sub.accepts p = true) {a b : LTm C (.val p)} :
       LTm.Src c .num a → LTm.Src c .num b → LTm.Src c .num (.app2 (.binop .sub h) a b)
+  | mulL {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote) {b : LTm C (.val p)} :
+      LTm.Src c .num b → LTm.Src c .num (.app2 (.binop .mul h) (.app0 (.lit v)) b)
+  | mulR {p : PrimTy} (h : BinOp.mul.accepts p = true) {a : LTm C (.val p)} (v : p.Denote) :
+      LTm.Src c .num a → LTm.Src c .num (.app2 (.binop .mul h) a (.app0 (.lit v)))
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.Src c .num d → LTm.Src c .num a → LTm.Src c .num (.seq d a)
   | err {p : PrimTy} : LTm.Src c .num (LTm.err (C := C) (s := .val p))
@@ -388,6 +411,11 @@ def FlatGood {s : Srt} (k : SrcKind) (t : LTm C s) (start : Nat) (a : Flattened 
   FlatOK k s a.term ∧ a.reads.length = t.words ∧ Laid a.reads start ∧
     a.term.atomBound ≤ a.next ∧ a.term.nodes ≤ 2 * t.nodes ∧ ∀ o ∈ a.reads, OccOK o
 
+
+theorem flattenFuel?_lit {p : PrimTy} (v : p.Denote) (d r start : Nat) :
+    flattenFuel? (C := C) (d + 1) (r + 1) (LTm.app0 (.lit v)) start =
+      some (Flattened.pure (LTm.app0 (.lit v)) start, r) := by
+  cases p <;> rfl
 
 /-- **Flattening never refuses a source term**: under a node budget, with its
 atoms below `start`, it returns a flattened term of the compilers' fragment,
@@ -507,6 +535,67 @@ theorem flattenFuel?_Src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fals
       rw [List.length_append]
       omega
     · show a.term.nodes + b.term.nodes + 1 ≤ 2 * (x.nodes + y.nodes + 1)
+      omega
+  | @mulL p h v y _ ihy =>
+    intro d r start hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by simp only [LTm.nodes] at hr; omega⟩
+    simp only [LTm.depth, LTm.nodes, LTm.atomBound] at hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by omega⟩
+    let a := Flattened.pure (LTm.app0 (C := C) (.lit v)) start
+    obtain ⟨b, hb', bok, blen, blaid, bab, bn, bocc⟩ := ihy (d + 1) r a.next (by omega) (by omega)
+      (by show y.atomBound ≤ start + 0; omega) (by omega)
+    refine ⟨Flattened.app2 (.binop .mul h) a b, ?_, LTm.Num.mulL h v bok, ?_,
+      (Laid.nil start).append blaid, ?_, ?_,
+      fun o ho => (List.mem_append.mp ho).elim (fun h => nomatch h) (bocc o)⟩
+    · show Option.bind (flattenFuel? (C := C) (d + 1) (r + 1) (LTm.app0 (.lit v)) start) _ = _
+      rw [flattenFuel?_lit]
+      show Option.bind (flattenFuel? (C := C) (d + 1) r y a.next) _ = _
+      rw [hb']
+      show some (Flattened.app2 (.binop .mul h) a b, r - y.nodes) = _
+      simp only [LTm.nodes, Option.some.injEq, Prod.mk.injEq, true_and]
+      omega
+    · show ([] ++ b.reads).length = (LTm.app0 (C := C) (.lit v)).words + y.words
+      rw [List.nil_append, blen]
+      simp only [LTm.words, Nat.zero_add]
+    · show max (LTm.app0 (C := C) (.lit v)).atomBound b.term.atomBound ≤ start + ([] ++ b.reads).length
+      simp only [Flattened.next] at bab
+      simp only [List.nil_append, LTm.atomBound]
+      show max 0 b.term.atomBound ≤ start + b.reads.length
+      have h0 : a.reads.length = 0 := rfl
+      omega
+    · show (LTm.app0 (C := C) (.lit v)).nodes + b.term.nodes + 1 ≤ 2 * ((LTm.app0 (C := C) (.lit v)).nodes + y.nodes + 1)
+      simp only [LTm.nodes]
+      omega
+  | @mulR p h x v _ ihx =>
+    intro d r start hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
+    obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by simp only [LTm.nodes] at hr; omega⟩
+    simp only [LTm.depth, LTm.nodes, LTm.atomBound] at hd hr hb hs
+    obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by omega⟩
+    obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ := ihx (d + 1) r start (by omega) (by omega) (by omega) (by omega)
+    obtain ⟨k, hk⟩ : ∃ k, r - x.nodes = k + 1 := ⟨r - x.nodes - 1, by omega⟩
+    let b := Flattened.pure (LTm.app0 (C := C) (.lit v)) a.next
+    refine ⟨Flattened.app2 (.binop .mul h) a b, ?_, LTm.Num.mulR h v aok, ?_,
+      alaid.append (Laid.nil _), ?_, ?_,
+      fun o ho => (List.mem_append.mp ho).elim (aocc o) (fun h => nomatch h)⟩
+    · show Option.bind (flattenFuel? (C := C) (d + 1) r x start) _ = _
+      rw [ha]
+      show Option.bind (flattenFuel? (C := C) (d + 1) (r - x.nodes) (LTm.app0 (.lit v)) a.next) _ = _
+      rw [hk, flattenFuel?_lit]
+      show some (Flattened.app2 (.binop .mul h) a b, k) = _
+      simp only [LTm.nodes, Option.some.injEq, Prod.mk.injEq, true_and]
+      omega
+    · show (a.reads ++ []).length = x.words + (LTm.app0 (C := C) (.lit v)).words
+      rw [List.append_nil, alen]
+      simp only [LTm.words, Nat.add_zero]
+    · show max a.term.atomBound (LTm.app0 (C := C) (.lit v)).atomBound ≤ start + (a.reads ++ []).length
+      simp only [Flattened.next] at aab
+      simp only [List.append_nil, LTm.atomBound]
+      omega
+    · show a.term.nodes + (LTm.app0 (C := C) (.lit v)).nodes + 1 ≤ 2 * (x.nodes + (LTm.app0 (C := C) (.lit v)).nodes + 1)
+      simp only [LTm.nodes]
       omega
   | @sub p h x y _ _ ihx ihy =>
     intro d r start hd hr hb hs
@@ -1431,6 +1520,21 @@ theorem LTm.Src.readExpr : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fals
       change (Option.bind (ReadExpr.ofTerm? x) fun x' => Option.bind (ReadExpr.ofTerm? y) fun y' =>
         some (ReadExpr.binop .add h x' y')) = _
       rw [hea, heb]; rfl⟩
+  | @mulL p h v y _ ihb =>
+    obtain ⟨eb, heb⟩ := ihb
+    exact ⟨ReadExpr.binop .mul h (.lit v) eb, by
+      change (Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun x' =>
+        Option.bind (ReadExpr.ofTerm? y) fun y' => some (ReadExpr.binop .mul h x' y')) = _
+      rw [show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl, heb]
+      rfl⟩
+  | @mulR p h x v _ iha =>
+    obtain ⟨ea, hea⟩ := iha
+    exact ⟨ReadExpr.binop .mul h ea (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? x) fun x' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun y' =>
+          some (ReadExpr.binop .mul h x' y')) = _
+      rw [show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl, hea]
+      rfl⟩
   | @sub p h x y _ _ iha ihb =>
     obtain ⟨ea, hea⟩ := iha
     obtain ⟨eb, heb⟩ := ihb
@@ -1589,6 +1693,14 @@ theorem LTm.Num.restrict {P : Parameter → Prop} {E : EnvKey → Prop} :
       (fun e he => hE e (by simp only [Inputs.termKeys, List.mem_append]; exact Or.inl he)))
       (ihb (fun q hq => hP q (by simp only [LTm.parameters, List.mem_append]; exact Or.inr hq))
       (fun e he => hE e (by simp only [Inputs.termKeys, List.mem_append]; exact Or.inr he)))
+  | @mulL p h v b _ ihb =>
+    intro hP hE
+    exact .mulL h v (ihb (fun q hq => hP q (by simp only [LTm.parameters, List.mem_append]; exact Or.inr hq))
+      (fun e he => hE e (by simp only [Inputs.termKeys, List.mem_append]; exact Or.inr he)))
+  | @mulR p h a v _ iha =>
+    intro hP hE
+    exact .mulR h v (iha (fun q hq => hP q (by simp only [LTm.parameters, List.mem_append]; exact Or.inl hq))
+      (fun e he => hE e (by simp only [Inputs.termKeys, List.mem_append]; exact Or.inl he)))
   | @seq q p a b _ _ iha ihb =>
     intro hP hE
     exact .seq (iha (fun q hq => hP q (by simp only [LTm.parameters, List.mem_append]; exact Or.inl hq))
