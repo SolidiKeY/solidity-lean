@@ -25,6 +25,10 @@ jobs:
         run: |
           node --test scripts/check-trust.test.mjs
           bash scripts/check-trust.sh
+      # The examples site's recorder, against a stand-in language server
+      # (`docs/site.md`; `pages.yml` runs it against Lean's).
+      - name: Test the site exporter
+        run: node --test scripts/site/export.test.mjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
       - name: Check layering

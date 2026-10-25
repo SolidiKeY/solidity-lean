@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>solidity-lean examples</title>
+  <meta name="description" content="Solidity programs and their proofs in Lean 4, with the goals and messages Lean shows for every line.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23334a7d'/%3E%3Cpath d='M16 5l7 11-7 4-7-4zM9 17.5l7 4 7-4-7 9.5z' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" title="solidity-lean examples">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 5l7 11-7 4-7-4zM9 17.5l7 4 7-4-7 9.5z"/></svg>
+      <span>solidity-lean</span>
+    </a>
+    <label class="picker">
+      <span>Project</span>
+      <select id="project" aria-label="Project"></select>
+    </label>
+    <label class="picker picker-example">
+      <span>Example</span>
+      <select id="example" aria-label="Example"></select>
+    </label>
+    <nav class="links">
+      <a id="source-link" target="_blank" rel="noopener">Source</a>
+      <a id="repo-link" target="_blank" rel="noopener">GitHub</a>
+      <button id="about-open" type="button">About</button>
+    </nav>
+  </header>
+
+  <main class="workspace" id="workspace">
+    <section class="editor" aria-label="Lean source">
+      <div class="file-head">
+        <h1 id="title">Loading…</h1>
+        <p id="summary"></p>
+      </div>
+      <div id="code" class="code" tabindex="0" aria-label="Source lines; use the arrow keys to move"></div>
+    </section>
+    <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+    <aside class="infoview" aria-label="Infoview">
+      <div id="info"></div>
+    </aside>
+  </main>
+
+  <dialog id="about">
+    <h2>About these examples</h2>
+    <p>
+      Each page is a file of <a id="about-repo">solidity-lean</a>, a Lean 4
+      model of <a href="https://github.com/SolidiKeY/solkey">solkey</a>'s
+      calculus for Solidity. The infoview shows what Lean's language server
+      answered when the site was built: the messages of the file, and the goal
+      at the end of each line, as the editor would show it with the cursor
+      there.
+    </p>
+    <p>
+      The pages are read-only: GitHub Pages runs no Lean. To edit and re-check
+      an example, clone the repository and open it in an editor with the Lean
+      extension:
+    </p>
+    <pre>git clone https://github.com/SolidiKeY/solidity-lean
+cd solidity-lean
+lake build Solidity
+code Solidity/Examples/Tactics/Tour.lean</pre>
+    <p>
+      The Velvet examples come from the optional <code>Bridge</code> package
+      (<code>cd Bridge &amp;&amp; lake exe cache get &amp;&amp; lake build Velvet</code>).
+    </p>
+    <p id="about-recorded"></p>
+    <form method="dialog"><button type="submit">Close</button></form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

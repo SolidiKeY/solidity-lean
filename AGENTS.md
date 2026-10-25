@@ -112,6 +112,8 @@ earlier change made for speed.
 
 `docs/module-map.md` — one line per module. Read it instead of searching
 when you need to know where something lives.
+`docs/site.md` — the GitHub Pages examples site (`site/`, recorded by
+`scripts/site/export.mjs`); add an example to `site/examples.json`.
 
 Layering: types and names in `AST.lean`, contexts in `Scope.lean`, the grammar
 and raw syntax in `Syntax.lean`, elaborated (`Syntax/Elab.lean`) to the scoped

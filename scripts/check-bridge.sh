@@ -10,4 +10,5 @@ fi
 cd "$repo_root/Bridge"
 sha256sum --check vendor/EvmYul/SHA256SUMS
 sha256sum --check vendor/Loom/SHA256SUMS
+sha256sum --check vendor/CaseStudies/SHA256SUMS
 exec lake build
