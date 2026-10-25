@@ -1091,9 +1091,11 @@ It contains everything except what the user allowed to answer *unknown*:
   Bradley–Manna–Sipma shape (`Fml.apfBlock`): a quantifier-free body made of
   `guard → value` parts and their conjunctions; guards `&&`/`||` of
   comparisons (`<`, `<=`, `==`, never `!=`) of index terms, a bound
-  variable or a term mentioning none; values reading the bound variables
-  only as indices, never in a nested index (`a[a[i]]`), and writing
-  nothing at them.  A Presburger quantifier, one whose body reads
+  variable or a term mentioning none, never a strict comparison of two
+  bound variables (`i < j` is `i + 1 ≤ j`, arithmetic on them); values
+  reading the bound variables only as indices, never in a nested index
+  (`a[a[i]]`), at most one bound index along a path (`m[i][j]` with both
+  bound is outside), and writing nothing at them.  A Presburger quantifier, one whose body reads
   nothing at its variable, is in the fragment at any polarity, but past a
   negative-position one only further Presburger quantifiers are.  Negative
   `havoc`/`anon`/`allocAll`/`grow` and storage binders over a body that
@@ -1117,8 +1119,9 @@ It contains everything except what the user allowed to answer *unknown*:
 The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
-`Examples/Decision.lean` pins `apf`, in the fragment
-(`apf_inTarget`, kernel-checked) and answered *unknown*.
+`Examples/Decision.lean` pins `rowApf` (a block over an inner mapping,
+`allow[3][k]`), in the fragment (`rowApf_inTarget`, kernel-checked) and
+answered *unknown*.  `apf`, the witness until step 5, is decided.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, never a superset:
@@ -1157,17 +1160,22 @@ Three properties of the reading are worth knowing.
 | `QFml.decide_iff` | `F.decide = true ↔ F.Valid`: quantified linear arithmetic decided |
 | `QuantReduction.valid_of_sentence`, `QuantReduction.verify` | a valid sentence makes the leaf valid; a false assignment gives a refuting state |
 | `quantReduction?_isSome` | `φ.quantCovered = true → (quantReduction? φ).isSome` |
+| `Prep.valid_iff` | a preparation's body is valid exactly where the body is |
+| `hoistPrep_valid_iff` | hoisting reads out of quantifiers is exact |
+| `apfPrep_valid_iff` | array property instantiation is exact on its fragment (the body kept outside it) |
+| `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma) |
 
 `#print axioms` of each of the six `decide*` theorems is pinned in
 `Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
-`Calculus/QuantTotality.lean`: `propext`, `Classical.choice`, `Quot.sound`.
-Everything is `sorry`-free.
+`Calculus/QuantTotality.lean`, of the preparations' in
+`Calculus/QuantHoist.lean` and `Calculus/ArrayProperty.lean`: `propext`,
+`Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
-`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by four
-features, each with its completeness proved through every stage
-(recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
-(feature 3, its own pipeline):
+`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by
+features 1, 2, 4 and 5, each with its completeness proved through every
+stage (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
+(features 3, 6 and 7, its own pipeline):
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1179,7 +1187,8 @@ features, each with its completeness proved through every stage
    no `k` (`LFml.prenex`), ahead of the prefix.
 3. **Presburger quantifiers** (step 4): a quantifier left in the body past
    the prefix (in an antecedent, under a negation, alternating), whose
-   body reads no storage and no transaction field.  `decideLeaf` falls
+   body reads no storage and no transaction field once its reads at no
+   bound variable are hoisted out (feature 6).  `decideLeaf` falls
    back to `quantReduction?` (`Calculus/QuantReduction.lean`) where
    `dependentReduction?` refuses:
    * the body lifted (within `liftBudget`), each quantified subformula
@@ -1250,8 +1259,50 @@ features, each with its completeness proved through every stage
    `Fml.exactBounded` bounds the cut body (`body.cutAll`, the body itself
    where nothing is cut) as well as the lifted one.
 
+6. **Reads hoisted out of quantifiers** (`Calculus/QuantHoist.lean`, step
+   4's remainder): inside each quantifier of the body, a read `W(q)` of a
+   total path (roots, fields, keys that are total terms) whose atoms
+   the quantifiers on the way do not bind becomes a fresh atom `r`, and the
+   body becomes `⋀ (W(q) == r) → body'` (`LFml.hoistOut`, `hoistPrep`).
+   Exact (`hoistPrep_valid_iff`): the atoms set to the reads' values
+   (`HDef.fill`) where the prepared body is valid, the same state and atoms
+   where it fails (its definitions hold, so each atom is its read).  Where
+   every read was hoistable the quantified subformulas are then read-free;
+   the definitions are flattened with the rest of the body.  `evenRead` is decided so.
+7. **The array property fragment** (`Calculus/ArrayProperty.lean`, step
+   5): a negative-position block `∀ k₁ … kₙ : uint. φ` outside binders,
+   `φ` quantifier-free and reading a mapping `mapping(uint => p)` at a
+   root at one of its variables, is replaced by its instances at the index
+   set `U` (`LFml.apfInst`, `LFml.inst`): one per tuple of `U`, each
+   guarded by its terms returning (`u == u → φ[ū/k̄]`).  `U` is `0`, the
+   ground keys of those roots anywhere in the body, the guards' ground
+   operands and their successors.  Sound (`LFml.apfInst_sound`): the
+   block implies each instance and stands where the body is antitone in
+   it.  Exact (`ApfFml.apfInst_refute`, Bradley–Manna–Sipma): from a state
+   and atoms where the instantiated body fails, the state whose rebuilt
+   mappings hold at each key `i` what the key `⌊i⌋` held, `⌊i⌋` the
+   largest value of `U` at most `i` (`MRoot.surgery`, `floorIn`; one entry
+   a key below `U`'s largest value, the default past it).  Reads at `U`'s
+   values keep their words, so every term outside the blocks reads as
+   before (`ApfTm.eval_rel`); a guard true at the keys is true at their
+   floors (`GuardP.mono`, `cmp_mono`: a variable against a ground
+   operand, whose successor is in `U` for `t < k`; two variables by `≤`,
+   `≥`, `==`); so each block holds by its instance at the floors
+   (`LFml.block_refute`).  The fragment (`ApfFml.TopOk`, computed by
+   `ApfFml.topB` with soundness `topB_sound`): every read of such a root a
+   key read (`ApfTm.rread`), at a block variable or at a ground key
+   mentioning no binder of the body; guard atoms (`g == true` of `&&`/`||`
+   of comparisons whose ground operands are total, or an equation of
+   operands) only in negative positions of the block body; every other
+   atom read alike.  With no quantifier left after instantiation,
+   `QuantReduction.verify` decides the main arithmetic by `AFml.decide`
+   (`valid_of_main`, `countermodelOfBody`), as `dependentReduction?` does.
+   `bodyPrep` composes the two preparations (`Prep.trans`), and
+   `Fml.quantCovered` reads the prepared body.
+
 All five were refused before (`dependentReduction?` returned `none`: the
-compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
+compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
+and seven (`quantReduction?` compiled no storage read in a quantifier).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1263,6 +1314,9 @@ coverage of `double`, `nested` and `evenHyp` is kernel-checked
 (`decide +kernel`); the other rows and the verdicts are the compiled ones
 (`#eval` pins), since the kernel's arithmetic decision over 256-bit codes
 is too deep for the language server.
+For features 6 and 7: `evenRead` (proved) and `evenReadBad` (refuted);
+`apf`, `apfTwo` (proved), `apfBad`, `apfOut`, `apfTwoBad` (refuted), the
+coverage of `evenRead`, `apf` and `apfBad` kernel-checked.
 For the fourth and fifth it pins a proved
 and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
 `>>` on `uint` and `int`, `<<` at 0 and past 256, `& 7`, `7 &`, `+%`,
@@ -1294,10 +1348,23 @@ and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
   to `y` through `2^256`, so `shlOk` (`x << 4`) is pinned covered
   (`shl_covered`) but its verdict is out of reach in practice, and the
   masks and divisors pinned are small (`& 7`, `% 8`, `/ 3`, `>> 4`).
+* Array property instantiation has no size bound either: a block over `n`
+  variables has `|U|ⁿ` instances, each read an occurrence of its own in
+  the flattening, so a two-variable block (`∀ i j. i <= j → a[i] <= a[j]`
+  against `a[2] <= a[5]`: nine instances, nineteen reads) is covered
+  (`sortedLe_covered`) but its verdict is out of reach in practice;
+  and a refutation's rebuilt mapping lists one entry per key below `U`'s
+  largest value, so a guard bound near `2^256` gives a refutation that
+  exists but cannot be built in practice.
 * On the fragment, `decideGoal` still answers *unknown* on:
-  * a quantifier past the prefix whose body reads storage or a transaction
-    field, even at no bound variable (`Examples/Decision.lean`,
-    `evenRead`), the array property fragment among them (`apf`);
+  * a quantifier past the prefix whose body reads storage at a variable it
+    binds outside the array property shapes `apfPrep` decides, or reads a
+    transaction field: blocks over inner mappings (`m[3][k]`,
+    `Examples/Decision.lean`, `rowApf`), over mappings keyed by `int` or
+    `bool`, over arrays, memory or the ledger; blocks under another
+    quantifier, or in a positive position the prefix does not reach; guards
+    with a partial ground operand (`k < x / y`); a read at a bound variable
+    through another path of the same root;
   * KeY `int` (no atom of `Srt.kint` in `LTm`);
   * division and modulo at `int`, `<<` at `int`, `|` and `^` with a
     literal, `&` with a literal that is not a low mask `2^k - 1`, `**` and
@@ -1329,13 +1396,19 @@ in this order:
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
    by projection in the binary-derivative automaton (`QFml.decide_iff`),
    and negative-position Presburger quantifiers and alternation over value
-   locals (feature 3).  Left: a quantifier body reading storage at no
-   bound variable (a read hoisted to a fresh atom with its defining
-   equation, as the flattener does outside binders).
-5. **The array property fragment**: instantiate a negative `∀` block at the
-   index set (the goal's index terms and the guards' bounds, Bradley–Manna–
-   Sipma), then decide the instance by the quantifier-free pipeline.
-   Completeness is their theorem: the instance is equisatisfiable.
+   locals (feature 3); a quantifier body reading storage at no bound
+   variable, the read hoisted to a fresh atom with its defining equation
+   (feature 6, done 2026-10-25).
+5. **The array property fragment** (done for mappings at roots,
+   2026-10-25, feature 7): a negative `∀` block instantiated at the index
+   set (the goal's index terms and the guards' bounds, Bradley–Manna–
+   Sipma), the instance decided by the quantifier-free pipeline; the
+   instantiation proved exact on the fragment (`apfPrep_valid_iff`).
+   Left: inner mappings (`m[u][k]`: the same floor construction over the
+   inner mapping of every outer key), `int`-keyed mappings (the floor's
+   base at `-2^255`), arrays (lengths: M4 (b)), memory, the ledger;
+   blocks inside other quantifiers (an index set per instance of the outer
+   variables).
 6. **Memory, array indices**: realization cases for memory and in-range
    evidence for array indices (`Calculus/ReadRealization.lean`).
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
@@ -1359,11 +1432,20 @@ in this order:
   fails on programs), the truth of `DecisionTheorem` (it is the goal, not
   true today) and the kernel-checked coverage.
 
-One concern remains unconfirmed: nested mappings `m[i][j]` at two bound
-indices are admitted (Bradley–Manna–Sipma state their result for arrays
-of one dimension).  A hash key reached through an alias or `atIn` is
-outside the fragment (its position is not admitted), so the key-kind check
-need not see it.
+The concern left open, nested mappings `m[i][j]` at two bound indices,
+is settled by narrowing the target (2026-10-25), not by a proof:
+`Tm.apfV` admits at most one bound index along a path, the arrays of one
+dimension Bradley, Manna and Sipma state their result for
+(`Examples/Decision.lean`, `gridApf`, outside), so `DecisionTheorem` says
+less there than it did.
+The floor construction would extend to it (a mapping at `(i, j)` holding
+what `(⌊i⌋, ⌊j⌋)` held), but it is not proved here.  The same round found
+the guards too wide: a strict comparison of two bound variables (`i < j`,
+`i + 1 ≤ j`) is arithmetic on them, outside their fragment as stated, and
+the floor does not preserve it (two keys between consecutive index values
+share their floor); `Tm.apfG` now refuses it (`strictSorted`, outside).
+A hash key reached through an alias or `atIn` is outside the fragment (its
+position is not admitted), so the key-kind check need not see it.
 
 ## M8 · Polynomial size (2026-10-25)
 

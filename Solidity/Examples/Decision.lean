@@ -20,13 +20,18 @@ kernel's, the `#eval` pins the compiled ones.
 
 Presburger quantifiers past the prefix (M7, step 4) are decided by the
 quantified pipeline (`quantReduction?`, `QFml.decide_iff`): an `∃` or a
-`∀` in a hypothesis, an alternation `∀∃`, beside a storage write; a
-quantifier whose body reads storage is still outside (`evenRead`).
+`∀` in a hypothesis, an alternation `∀∃`, beside a storage write, and one
+whose body reads storage at no variable it binds (`evenRead`: the read
+hoisted out, `hoistPrep`).
 
 `Fml.inTarget` is the fragment the user named, on program-free leaves: a
 negative-position quantifier over a mapping is in it exactly when it is in
-the array property fragment, and `decideLeaf` still answers `unknown` on
-it (`docs/automation.md`, M7).
+the array property fragment.  `decideLeaf` decides such a block over a
+mapping at a root (M7, step 5: `apf`, instantiated at the index set,
+`apfPrep`); a block over an inner mapping (`rowApf`) is still answered
+`unknown`, so `DecisionTheorem` is not yet true.  Two bound indices on one
+path (`gridApf`) and a strict comparison of two bound variables
+(`strictSorted`) are outside the named fragment (`docs/automation.md`, M7).
 -/
 
 namespace Solidity.Examples.Decision
@@ -77,8 +82,20 @@ def evenWrite : Fml Bank [] :=
 def oddWrite : Fml Bank [] :=
   dl!{ ∀ uint k; (∃ uint y; y + y + 1 == k) → [ balances[k] = k; ] balances[k] != 1 }
 
-/-- A quantifier whose body reads storage is outside (step 4's remainder). -/
+/-- A quantifier whose body reads storage at no variable it binds: the read
+hoisted out (step 4's remainder), and a false variant. -/
 def evenRead : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 7 }
+def evenReadBad : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 8 }
+
+/-! ### The array property fragment (M7, plan step 5) -/
+
+/-- Instantiated at `0`, `5`, `10`, `11`; false variants, a key past the
+guard, a two-sided guard and its strict variant. -/
+def apfBad : Fml Bank [] := dl!{ (∀ uint k; k < 10 → balances[k] == 0) → balances[5] == 1 }
+def apfOut : Fml Bank [] := dl!{ (∀ uint k; k < 10 → balances[k] == 0) → balances[12] == 0 }
+def apfTwo : Fml Bank [] :=
+  dl!{ (∀ uint k; 3 <= k && k < 10 → balances[k] == 7) → balances[4] + balances[9] == 14 }
+def apfTwoBad : Fml Bank [] := dl!{ (∀ uint k; 3 < k && k < 10 → balances[k] == 7) → balances[3] == 7 }
 
 /-! ### Unary minus, the complement and the conversions (M7, plan step 1) -/
 
@@ -124,6 +141,23 @@ def guardArith : Fml Bank [] := dl!{ (∀ uint k; k + 1 < 10 → balances[k] == 
 
 end
 
+/-- Nested mappings. -/
+def Allow : Contract := contract!{ mapping(uint => mapping(uint => uint)) allow; mapping(uint => uint) balances; }
+
+section
+
+local instance : InContract := ⟨Allow⟩
+
+/-- In the named fragment, not yet decided: a block over an inner mapping. -/
+def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][5] == 0 }
+/-- Outside the named fragment: two bound indices on one path, and a
+strict comparison of two bound variables. -/
+def gridApf : Fml Allow [] := dl!{ (∀ uint i; ∀ uint j; allow[i][j] == 0) → allow[1][2] == 0 }
+def strictSorted : Fml Allow [] :=
+  dl!{ (∀ uint i; ∀ uint j; i < j → balances[i] < balances[j]) → balances[1] < balances[2] }
+
+end
+
 def verdict {C : Contract} (φ : Fml C []) : String :=
   match decideGoal φ with
   | .proved => "proved"
@@ -153,13 +187,16 @@ theorem double_iff : decideLeaf double = .proved ↔ Fml.Valid double :=
 
 -- `decideLeaf` on Presburger quantifiers: each verdict exact
 -- (`QFml.decide_iff`), each refutation a certified state.
-/-- info: ["proved", "refuted", "proved", "proved", "refuted", "proved", "refuted", "unknown"] -/
+/-- info: ["proved", "refuted", "proved", "proved", "refuted", "proved", "refuted", "proved", "refuted"] -/
 #guard_msgs in
-#eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead].map verdict
+#eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead, evenReadBad].map verdict
 
-/-- info: [true, true, true, true, true, true, true, false] -/
+/-- info: [true, true, true, true, true, true, true, true, true] -/
 #guard_msgs in
-#eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead].map Fml.Covered
+#eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead, evenReadBad].map Fml.Covered
+
+/-- A read in a quantifier, hoisted: kernel-checked coverage. -/
+theorem evenRead_covered : evenRead.Covered = true := by decide +kernel
 
 theorem evenHyp_covered : evenHyp.Covered = true := by decide +kernel
 
@@ -204,11 +241,40 @@ theorem div_iff : decideLeaf divOk = .proved ↔ Fml.Valid divOk :=
 /-- A program-free leaf both covered and in the named fragment. -/
 theorem nested_inTarget : nested.inTarget {} = true := by decide +kernel
 
-/-- `DecisionTheorem` is not yet true: `apf` is in the fragment, and
-answered `unknown`. -/
+/-- `apf` is in the named fragment, and decided (below). -/
 theorem apf_inTarget : apf.inTarget {} = true := by decide +kernel
 
-/-- info: ["unknown", "unknown"] -/
+/-- info: ["proved", "unknown"] -/
 #guard_msgs in #eval [apf, notApf].map verdict
+
+/-! Array property blocks (M7, step 5): each verdict exact, each refutation
+a state whose mapping holds, at each key, what the key's floor in the
+index set held (`MRoot.surgery`). -/
+
+/-- info: ["proved", "refuted", "refuted", "proved", "refuted"] -/
+#guard_msgs in #eval [apf, apfBad, apfOut, apfTwo, apfTwoBad].map verdict
+
+/-- info: [true, true, true, true, true] -/
+#guard_msgs in #eval [apf, apfBad, apfOut, apfTwo, apfTwoBad].map Fml.Covered
+
+theorem apf_covered : apf.Covered = true := by decide +kernel
+theorem apfBad_covered : apfBad.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied to an array property block. -/
+theorem apf_answers : decideGoal apf ≠ .unknown := decideGoal_complete apf_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the false variant is not valid. -/
+theorem apfBad_iff : decideLeaf apfBad = .proved ↔ Fml.Valid apfBad :=
+  decideLeaf_proved_iff apfBad_covered
+
+/-- `DecisionTheorem` is not yet true: `rowApf` is in the fragment, and
+answered `unknown`. -/
+theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
+
+/-- info: "unknown" -/
+#guard_msgs in #eval verdict rowApf
+
+/-- info: [false, false] -/
+#guard_msgs in #eval [gridApf, strictSorted].map (Fml.inTarget {})
 
 end Solidity.Examples.Decision

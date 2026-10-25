@@ -35,6 +35,11 @@ structure Prep (B : LFml C) where
   sound : (∀ (g : State C []) (ν : AEnv), body.holds g ν) → ∀ (g : State C []) (ν : AEnv), B.holds g ν
   refute : (g : State C []) → (ν : AEnv) → ¬ body.holds g ν → {g' : State C [] // ¬ B.holds g' ν}
 
+/-- **A preparation is exact**: the prepared body is valid exactly where
+the body is. -/
+theorem Prep.valid_iff {B : LFml C} (P : Prep B) : P.body.Valid ↔ B.Valid :=
+  ⟨P.sound, fun hv g ν => Classical.byContradiction fun hn => (P.refute g ν hn).2 (hv _ ν)⟩
+
 /-- The body itself. -/
 def Prep.id (B : LFml C) : Prep B := ⟨B, fun h => h, fun g _ h => ⟨g, h⟩⟩
 
@@ -446,5 +451,11 @@ def hoistPrep (B : LFml C) : Prep B :=
           rw [LFml.holds_conj] at hc
           exact fun e he => (HDef.holds_fml g ν e).1 (hc _ (List.mem_map.2 ⟨e, he, rfl⟩))
         exact (H.holds g ν hgood).2 hB⟩ }
+
+/-- **Hoisting is exact.** -/
+theorem hoistPrep_valid_iff (B : LFml C) : (hoistPrep B).body.Valid ↔ B.Valid := (hoistPrep B).valid_iff
+
+/-- info: 'Solidity.Decide.hoistPrep_valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms hoistPrep_valid_iff
 
 end Solidity.Decide

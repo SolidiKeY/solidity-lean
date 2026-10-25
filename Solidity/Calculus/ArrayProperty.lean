@@ -1705,4 +1705,18 @@ def apfPrep (B : LFml C) : Prep B :=
       else Prep.id B
   else Prep.id B
 
+/-- **Array property instantiation is exact** (Bradley, Manna, Sipma, for
+the shapes `apfPrep` admits): the instantiated body is valid exactly where
+the body is; outside the fragment the body is kept. -/
+theorem apfPrep_valid_iff (B : LFml C) : (apfPrep B).body.Valid ↔ B.Valid := (apfPrep B).valid_iff
+
+/-- info: 'Solidity.Decide.apfPrep_valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms apfPrep_valid_iff
+
+/-- info: 'Solidity.Decide.LFml.apfInst_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms LFml.apfInst_sound
+
+/-- info: 'Solidity.Decide.ApfFml.apfInst_refute' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms ApfFml.apfInst_refute
+
 end Solidity.Decide

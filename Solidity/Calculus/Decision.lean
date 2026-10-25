@@ -32,8 +32,8 @@ hashes (`Fml.inTarget`); `ecrecover` stands nowhere.
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash).  The statement is the goal of the rounds to come, not true
-today: `Examples/Decision.lean`'s `apf` is in the fragment and answered
-`unknown`.  A statement of the form "some decider is complete" would
+today: `Examples/Decision.lean`'s `rowApf` (a block over an inner mapping)
+is in the fragment and answered `unknown`.  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
 rounds extend.
@@ -42,8 +42,11 @@ What is proved: `decideLeaf` is sound (`decideLeaf_sound`), its refutations
 are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`decideLeaf_complete`), the fragment M4 proves total
 (`dependentReduction?_isSome`) as extended since, or the leaves every
-quantifier of which past the prefix is Presburger (`Fml.quantCovered`,
-`quantReduction?_isSome`, decided by `QFml.decide_iff`); `decideGoal` likewise
+quantifier of which past the prefix is Presburger once the body is
+prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
+`QFml.decide_iff`): reads at no bound variable hoisted out
+(`hoistPrep_valid_iff`), negative array-property blocks over mappings at
+roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)
@@ -54,9 +57,12 @@ Fml.inTarget` is not proved (`Fml.Covered` is read on the eliminated leaf,
 The array-property check is syntactic and conservative: an update or a
 program under a quantifier counts as reading at its variable, the body of a
 negative-position block must be quantifier-free, and an index guard is an
-`&&`/`||` of comparisons (never `!=`) of index terms, a bound variable or a
-term mentioning none; a hash stored by an update, a hash key of a nested
-mapping and an `ecrecover` term are outside.  So
+`&&`/`||` of comparisons (never `!=`, never a strict one of two bound
+variables) of index terms, a bound variable or a term mentioning none; a
+path indexes at most one bound variable (no `m[i][j]` with both bound, as
+Bradley, Manna and Sipma state their result for one dimension); a hash
+stored by an update, a hash key of a nested mapping and an `ecrecover` term
+are outside.  So
 `Fml.inTarget` is a subset of the fragment the user named, never a
 superset.
 -/
