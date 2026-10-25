@@ -15,9 +15,12 @@ on:
 permissions:
   contents: read
 
+# On the default branch a push waits for the build before it rather than
+# cancelling it: the core's build outlasts the gap between pushes, so
+# cancelling would never let it finish. Elsewhere the newer push wins.
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
 
 jobs:
   solidity:
@@ -75,9 +78,11 @@ jobs:
 
   # The viewer with whatever was recorded: a project whose job failed is
   # shown as not recorded rather than holding back the other.
+  # A project whose job failed is published as not recorded; a cancelled run
+  # publishes nothing, so it cannot replace the site with an empty project.
   assemble:
     needs: [solidity, velvet]
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -97,7 +102,7 @@ jobs:
 
   deploy:
     needs: assemble
-    if: always() && needs.assemble.result == 'success' && github.ref_name == github.event.repository.default_branch
+    if: ${{ !cancelled() && needs.assemble.result == 'success' && github.ref_name == github.event.repository.default_branch }}
     runs-on: ubuntu-latest
     permissions:
       pages: write

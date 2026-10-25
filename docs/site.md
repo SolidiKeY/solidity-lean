@@ -34,8 +34,11 @@ by hand (`workflow_dispatch`) on any branch:
 3. **Assemble** the viewer (`site/index.html`, `site/app.js`,
    `site/style.css`, `site/examples.json`) with whatever was recorded. A
    project whose job failed shows as not recorded; the other still deploys.
-4. **Deploy** to Pages, from the default branch only. On another branch the
-   site is uploaded as the run's `github-pages` artifact instead.
+4. **Deploy** to Pages, from the default branch only, and never from a
+   cancelled run. On the default branch a push queues behind the build in
+   progress instead of cancelling it (the core's build is longer than the
+   gap between pushes); on another branch the newer run cancels the older,
+   and the site is uploaded as the run's `github-pages` artifact instead.
 
 The repository's Pages source must be **GitHub Actions** (Settings → Pages →
 Build and deployment → Source), once.
