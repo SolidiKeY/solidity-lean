@@ -45,6 +45,20 @@ theorem quotAtom_src {p r : PrimTy} {prev ds : List (LFml C)} {g : LTm C (.val p
     (hd : (LFml.defn g e m).Src false false) : ∀ d ∈ (quotAtom prev ds g e m).2.1, d.Src false false :=
   fun d h => (quotAtom_mem h).elim (hds d) (fun h => h ▸ hd)
 
+theorem maskCut_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {k m : Nat}
+    (ha : a.Src false false .num) (hds : ∀ d ∈ ds, d.Src false false) :
+    (maskCut prev a k ds m).term.Src false false .num ∧
+      ∀ d ∈ (maskCut prev a k ds m).defs, d.Src false false := by
+  unfold maskCut
+  split
+  · rename_i hk
+    have hpos : (uintPow k hk).val ≠ 0 := by
+      show ((2 ^ k : Nat) : Int) ≠ 0
+      have := Nat.two_pow_pos k; omega
+    exact ⟨.sub rfl ha (.mulR rfl _ (.var _)),
+      quotAtom_src hds (LFml.defn_src rfl ha (.defDiv rfl rfl _ hpos _ ha))⟩
+  · exact ⟨ha, hds⟩
+
 /-- **The cut of a source term is in the fragment without cut operators**, and so
 is every definition it makes. -/
 theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false true k → ∀ prev n,
@@ -152,6 +166,33 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false tru
         exact ⟨.mulR rfl _ (.sub rfl h1 (.mulR rfl _ (.var _))),
           quotAtom_src h2' (LFml.defn_src rfl h1 (.defDiv rfl rfl _ hpos _ h1))⟩
       · exact ⟨.seq h1 (.lit _), h2'⟩
+  | @bandR _ h a v hm _ ih =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := ih prev n
+    obtain ⟨k, hk⟩ := Option.isSome_iff_exists.mp hm
+    show (cut2 (.binop .band h) prev (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).term.Src false false .num ∧
+      ∀ d ∈ (cut2 (.binop .band h) prev (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).defs, d.Src false false
+    have hmk : (LTm.app0 (C := C) (.lit v)).maskOf? = some k := hk
+    show (cutBand prev h (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).term.Src false false .num ∧
+      ∀ d ∈ (cutBand prev h (a.cut prev n) ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).defs, d.Src false false
+    rw [cutBand_right (B := ⟨.app0 (.lit v), [], (a.cut prev n).next⟩) hmk]
+    exact maskCut_src h1 (defs_append h2 (fun _ h => nomatch h))
+  | @bandL _ h v hm b _ ih =>
+    intro prev n
+    obtain ⟨h3, h4⟩ := ih (prev ++ []) n
+    obtain ⟨k, hk⟩ := Option.isSome_iff_exists.mp hm
+    show (cut2 (.binop .band h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).term.Src false false .num ∧
+      ∀ d ∈ (cut2 (.binop .band h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).defs, d.Src false false
+    have hmk : (LTm.app0 (C := C) (.lit v)).maskOf? = some k := hk
+    show (cutBand prev h ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).term.Src false false .num ∧
+      ∀ d ∈ (cutBand prev h ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).defs, d.Src false false
+    cases hbk : (b.cut (prev ++ []) n).term.maskOf? with
+    | some j =>
+      rw [cutBand_right (A := ⟨.app0 (.lit v), [], n⟩) hbk]
+      exact maskCut_src (.lit v) (defs_append (fun _ h => nomatch h) h4)
+    | none =>
+      rw [cutBand_left (A := ⟨.app0 (.lit v), [], n⟩) hbk hmk]
+      exact maskCut_src h3 (defs_append (fun _ h => nomatch h) h4)
   | @addW _ h a b _ _ iha ihb =>
     intro prev n
     obtain ⟨h1, h2⟩ := iha prev n

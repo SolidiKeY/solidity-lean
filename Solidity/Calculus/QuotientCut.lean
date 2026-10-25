@@ -115,6 +115,31 @@ def CutTm.shl (prev : List (LFml C)) (a : LTm C (.val .uint)) (k : Nat) (hk : 25
     (quotAtom prev ds a (a.divLit (uintPow (256 - k) hk)) m).2.1,
     (quotAtom prev ds a (a.divLit (uintPow (256 - k) hk)) m).2.2⟩
 
+/-- The `k` of a low mask `2^k - 1`, `k ≤ 256`. -/
+def lowMask? (v : PrimTy.uint.Denote) : Option Nat :=
+  (List.range 257).find? fun k => decide (((2 ^ k : Nat) : Int) - 1 = v.val)
+
+/-- `a & (2^k - 1)`: `a % 2^k`, through the atom of `a / 2^k`; `a` itself at
+`k = 256`. -/
+def maskCut (prev : List (LFml C)) (a : LTm C (.val .uint)) (k : Nat) (ds : List (LFml C))
+    (m : Nat) : CutTm C (.val .uint) :=
+  if hk : k < 256 then CutTm.rem prev a (uintPow k hk) ds m else ⟨a, ds, m⟩
+
+/-- The `k` of a literal low mask `2^k - 1`. -/
+def LTm.maskOf? : LTm C (.val .uint) → Option Nat
+  | .app0 (.lit v) => lowMask? v
+  | _ => none
+
+/-- `a & b` at `uint`, either side a low mask. -/
+def cutBand (prev : List (LFml C)) (h : BinOp.band.accepts .uint = true) (A B : CutTm C (.val .uint)) :
+    CutTm C (.val .uint) :=
+  match B.term.maskOf? with
+  | some k => maskCut prev A.term k (A.defs ++ B.defs) B.next
+  | none =>
+    match A.term.maskOf? with
+    | some k => maskCut prev B.term k (A.defs ++ B.defs) B.next
+    | none => ⟨.app2 (.binop .band h) A.term B.term, A.defs ++ B.defs, B.next⟩
+
 /-- A unary node, its operand cut; `prev` the definitions made before it. -/
 def cut1 : {a s : Srt} → Op1 C a s → List (LFml C) → CutTm C a → CutTm C s
   | _, _, .unop .toInt (p := .uint) h, prev, A =>
@@ -155,6 +180,7 @@ def cut2 : {a b s : Srt} → Op2 C a b s → List (LFml C) → CutTm C a → Cut
     match B.term with
     | .app0 (.lit v) => cutShl prev A v (A.defs ++ B.defs) B.next
     | _ => ⟨.app2 (.binop .shl h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .band (p := .uint) h, prev, A, B => cutBand prev h A B
   | _, _, _, .binop .addW (p := .uint) h, prev, A, B =>
     CutTm.atom prev (A.defs ++ B.defs) (.seq A.term B.term) (.app2 (.binop .addW h) A.term B.term)
       B.next
@@ -732,11 +758,11 @@ theorem shl_eval (h : BinOp.shl.accepts .uint = true) (x v q : PrimTy.uint.Denot
 
 /-- A binary operator the cut leaves: the node is rebuilt over its cut operands. -/
 theorem cut2_default {op : BinOp} {p : PrimTy} (h : op.accepts p = true)
-    (hop : op ≠ .div ∧ op ≠ .mod ∧ op ≠ .shr ∧ op ≠ .shl ∧ op ≠ .addW ∧ op ≠ .subW)
+    (hop : op ≠ .div ∧ op ≠ .mod ∧ op ≠ .shr ∧ op ≠ .shl ∧ op ≠ .addW ∧ op ≠ .subW ∧ op ≠ .band)
     (prev : List (LFml C)) (A B : CutTm C (.val p)) :
     cut2 (.binop op h) prev A B = ⟨.app2 (.binop op h) A.term B.term, A.defs ++ B.defs, B.next⟩ := by
-  obtain ⟨h1, h2, h3, h4, h5, h6⟩ := hop
-  cases op <;> cases p <;> first | rfl | (exfalso; revert h1 h2 h3 h4 h5 h6; decide)
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hop
+  cases op <;> cases p <;> first | rfl | exact absurd rfl h1 | exact absurd rfl h2 | exact absurd rfl h3 | exact absurd rfl h4 | exact absurd rfl h5 | exact absurd rfl h6 | exact absurd rfl h7
 
 /-- A unary operator the cut leaves. -/
 theorem cut1_default {op : UnOp} {p : PrimTy} (h : op.accepts p = true)
@@ -792,6 +818,114 @@ theorem shl_big (h : BinOp.shl.accepts .uint = true) (x v : PrimTy.uint.Denote) 
     PrimTy.uint.ofInt? = some (PrimTy.dflt .uint)
   rw [if_neg hv, Option.bind_some, uint_ofInt?_eq (Int.le_refl 0) (by decide)]
   rfl
+
+theorem lowMask?_spec {v : PrimTy.uint.Denote} {k : Nat} (h : lowMask? v = some k) :
+    v.val = ((2 ^ k : Nat) : Int) - 1 ∧ k ≤ 256 := by
+  unfold lowMask? at h
+  have h1 := List.find?_some h
+  have h2 := List.mem_of_find?_eq_some h
+  simp only [decide_eq_true_eq] at h1
+  simp only [List.mem_range] at h2
+  exact ⟨h1.symm, by omega⟩
+
+theorem cutBand_right {prev : List (LFml C)} {h : BinOp.band.accepts .uint = true}
+    {A B : CutTm C (.val .uint)} {k : Nat} (hk : B.term.maskOf? = some k) :
+    cutBand prev h A B = maskCut prev A.term k (A.defs ++ B.defs) B.next := by
+  unfold cutBand
+  rw [hk]
+
+theorem cutBand_left {prev : List (LFml C)} {h : BinOp.band.accepts .uint = true}
+    {A B : CutTm C (.val .uint)} {k : Nat} (hb : B.term.maskOf? = none) (hk : A.term.maskOf? = some k) :
+    cutBand prev h A B = maskCut prev B.term k (A.defs ++ B.defs) B.next := by
+  unfold cutBand
+  rw [hb]
+  dsimp only
+  rw [hk]
+
+theorem LTm.maskOf?_spec {t : LTm C (.val .uint)} {k : Nat} (h : t.maskOf? = some k) :
+    ∃ v, t = .app0 (.lit v) ∧ v.val = ((2 ^ k : Nat) : Int) - 1 ∧ k ≤ 256 := by
+  unfold LTm.maskOf? at h
+  split at h
+  · rename_i v
+    exact ⟨v, rfl, lowMask?_spec h⟩
+  · cases h
+
+/-- **A low mask is a remainder**: `x & (2^k - 1) = x % 2^k`. -/
+theorem band_mask (h : BinOp.band.accepts .uint = true) (x v : PrimTy.uint.Denote) (k : Nat)
+    (hv : v.val = ((2 ^ k : Nat) : Int) - 1) :
+    BinOp.evalT .band h x v = PrimTy.uint.ofInt? (x.val % ((2 ^ k : Nat) : Int)) := by
+  have hx0 := uint_val_nonneg x
+  have hpos := Nat.two_pow_pos k
+  show (some (Semantics.uintBitwise (· &&& ·) x.val v.val)).bind PrimTy.uint.ofInt? = _
+  rw [Option.bind_some, hv, ← Int.toNat_of_nonneg hx0,
+    show ((2 ^ k : Nat) : Int) - 1 = ((2 ^ k - 1 : Nat) : Int) by omega,
+    Semantics.uintBitwise_natCast, Nat.and_two_pow_sub_one_eq_mod, Int.natCast_emod]
+
+theorem band_comm (h : BinOp.band.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    BinOp.evalT .band h v x = BinOp.evalT .band h x v := by
+  have hx0 := uint_val_nonneg x
+  have hv0 := uint_val_nonneg v
+  show (some (Semantics.uintBitwise (· &&& ·) v.val x.val)).bind PrimTy.uint.ofInt? =
+    (some (Semantics.uintBitwise (· &&& ·) x.val v.val)).bind PrimTy.uint.ofInt?
+  rw [← Int.toNat_of_nonneg hx0, ← Int.toNat_of_nonneg hv0, Semantics.uintBitwise_natCast,
+    Semantics.uintBitwise_natCast, Nat.and_comm]
+
+theorem mod_pow_eval (x : PrimTy.uint.Denote) (k : Nat) (hk : k < 256) :
+    BinOp.evalT .mod rfl x (uintPow k hk) = PrimTy.uint.ofInt? (x.val % ((2 ^ k : Nat) : Int)) := by
+  have hx0 := uint_val_nonneg x
+  have hpos := Nat.two_pow_pos k
+  show (if ((2 ^ k : Nat) : Int) = 0 then none else some (Int.tmod x.val ((2 ^ k : Nat) : Int))).bind
+    PrimTy.uint.ofInt? = _
+  rw [if_neg (by omega), Option.bind_some, Int.tmod_eq_emod_of_nonneg hx0]
+
+theorem band_full (h : BinOp.band.accepts .uint = true) (x v : PrimTy.uint.Denote)
+    (hv : v.val = ((2 ^ 256 : Nat) : Int) - 1) : BinOp.evalT .band h x v = some x := by
+  rw [band_mask h x v 256 hv, Int.emod_eq_of_lt (uint_val_nonneg x) (uint_val_lt x),
+    uint_ofInt?_eq (uint_val_nonneg x) (uint_val_lt x)]
+  rfl
+
+theorem maskCut_good {n m : Nat} {prev ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a t : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (k : Nat) (hk : k ≤ 256)
+    (heval : ∀ (σ : State C []) ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν ds →
+      t.eval σ ν = (a.eval σ ν).bind fun x => PrimTy.uint.ofInt? (x.val % ((2 ^ k : Nat) : Int))) :
+    CutTm.Good t n prev (maskCut prev a k ds m) := by
+  unfold maskCut
+  split
+  · rename_i hk'
+    refine CutTm.Good.quot hds hprev (fun q => a.remOf q (uintPow k hk')) ha
+      (by show max a.atomBound 0 ≤ m; omega)
+      (fun q j hq hm => by show max a.atomBound (max (q + 1) 0) ≤ j; omega)
+      (fun σ ν hg => by
+        rw [LTm.divLit, isSome_binop_lit rfl ⟨by decide, by decide⟩ a (.app0 (.lit _)) _ rfl
+          (fun x => div_isSome rfl x _ (by
+            show ((2 ^ k : Nat) : Int) ≠ 0
+            have := Nat.two_pow_pos k; omega))]
+        exact hg) ?_
+    intro σ ν q hp hd hdefn
+    rw [heval σ ν hp hd]
+    show (LTm.app2 (.binop .sub rfl) a _).eval σ ν = _
+    rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩)]
+    cases hx : a.eval σ ν with
+    | none => rfl
+    | some xv =>
+      have hq := LFml.defn_eval hdefn hx
+      rw [LTm.divLit, LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩), hx] at hq
+      simp only [Option.bind_some]
+      rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩)]
+      exact (rem_eval rfl xv _ _ (by show ((2 ^ k : Nat) : Int) ≠ 0; have := Nat.two_pow_pos k; omega)
+        hq).trans (mod_pow_eval xv k hk')
+  · rename_i hk'
+    have h256 : k = 256 := by omega
+    subst h256
+    refine ⟨hds, ha, fun σ ν hp hd => ?_⟩
+    rw [heval σ ν hp hd]
+    show a.eval σ ν = _
+    cases a.eval σ ν with
+    | none => rfl
+    | some xv =>
+      rw [Option.bind_some, Int.emod_eq_of_lt (uint_val_nonneg xv) (uint_val_lt xv),
+        uint_ofInt?_eq (uint_val_nonneg xv) (uint_val_lt xv)]
+      rfl
 
 theorem cut1_good {a s : Srt} (o : Op1 C a s) {x : LTm C a} {n : Nat} {prev : List (LFml C)}
     {A : CutTm C a} (hA : CutTm.Good x n prev A) (hprev : Defs.Below n prev) :
@@ -945,6 +1079,28 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
           (isSome_binop_lit h ⟨by decide, by decide⟩ A.term B.term v heq (fun x => shr_isSome h x v))
           hev
       · exact hgen
+    case band.uint =>
+      dsimp only [cut2]
+      unfold cutBand
+      split
+      · rename_i k hk
+        obtain ⟨v, heq, hv, hk256⟩ := LTm.maskOf?_spec hk
+        refine maskCut_good hds hprev' hAb k hk256 (fun σ ν hp hd => ?_)
+        rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩) x y, ← hxe σ ν hp hd,
+          show y.eval σ ν = some v by rw [← hye σ ν hp hd, heq]; rfl]
+        cases A.term.eval σ ν with
+        | none => rfl
+        | some xv => exact band_mask h xv v k hv
+      · split
+        · rename_i k hk
+          obtain ⟨v, heq, hv, hk256⟩ := LTm.maskOf?_spec hk
+          refine maskCut_good hds hprev' hB.bound k hk256 (fun σ ν hp hd => ?_)
+          rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩) x y, ← hye σ ν hp hd,
+            show x.eval σ ν = some v by rw [← hxe σ ν hp hd, heq]; rfl]
+          cases B.term.eval σ ν with
+          | none => rfl
+          | some yv => exact (band_comm h yv v).trans (band_mask h yv v k hv)
+        · exact hgen
     case addW.uint =>
       exact CutTm.Good.atom hds hprev'
         (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)

@@ -366,6 +366,12 @@ inductive LTm.Src (c : Bool) (w : Bool) : SrcKind → {s : Srt} → LTm C s → 
   | shlL (hw : w = true) (h : BinOp.shl.accepts .uint = true) {a : LTm C (.val .uint)}
       (v : PrimTy.uint.Denote) :
       LTm.Src c w .num a → LTm.Src c w .num (.app2 (.binop .shl h) a (.app0 (.lit v)))
+  | bandR (hw : w = true) (h : BinOp.band.accepts .uint = true) {a : LTm C (.val .uint)}
+      (v : PrimTy.uint.Denote) (hv : (lowMask? v).isSome = true) :
+      LTm.Src c w .num a → LTm.Src c w .num (.app2 (.binop .band h) a (.app0 (.lit v)))
+  | bandL (hw : w = true) (h : BinOp.band.accepts .uint = true) (v : PrimTy.uint.Denote)
+      (hv : (lowMask? v).isSome = true) {b : LTm C (.val .uint)} :
+      LTm.Src c w .num b → LTm.Src c w .num (.app2 (.binop .band h) (.app0 (.lit v)) b)
   | addW (hw : w = true) (h : BinOp.addW.accepts .uint = true) {a b : LTm C (.val .uint)} :
       LTm.Src c w .num a → LTm.Src c w .num b → LTm.Src c w .num (.app2 (.binop .addW h) a b)
   | subW (hw : w = true) (h : BinOp.subW.accepts .uint = true) {a b : LTm C (.val .uint)} :
@@ -454,7 +460,8 @@ theorem flattenFuel?_Src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fals
   induction h with
   | kite hc => cases hc
   | ite hc => cases hc
-  | toInt hw | toUint hw | divL hw | modL hw | shrL hw | shlL hw | addW hw | subW hw => cases hw
+  | toInt hw | toUint hw | divL hw | modL hw | shrL hw | shlL hw | addW hw | subW hw | bandR hw
+    | bandL hw => cases hw
   | @var p k =>
     intro d r start hd hr hb hs
     obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
@@ -1844,6 +1851,21 @@ theorem LTm.Src.readExpr {w : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s},
           some (ReadExpr.binop _ h x' y')) = _
       rw [he, show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by
         first | rfl | (cases ‹PrimTy› <;> rfl)]
+      rfl⟩
+  | @bandR _ h x v _ _ ih =>
+    obtain ⟨e, he⟩ := ih
+    exact ⟨ReadExpr.binop _ h e (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? x) fun x' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun y' =>
+          some (ReadExpr.binop _ h x' y')) = _
+      rw [he]
+      rfl⟩
+  | @bandL _ h v _ y _ ih =>
+    obtain ⟨e, he⟩ := ih
+    exact ⟨ReadExpr.binop _ h (.lit v) e, by
+      change (Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun x' =>
+        Option.bind (ReadExpr.ofTerm? y) fun y' => some (ReadExpr.binop _ h x' y')) = _
+      rw [he]
       rfl⟩
   | @addW _ h x y _ _ iha ihb | @subW _ h x y _ _ iha ihb =>
     obtain ⟨ea, hea⟩ := iha

@@ -66,6 +66,35 @@ theorem LTm.mulSrc?_right {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = t
   | some r => obtain ⟨w, hw⟩ := r; rfl
   | none => rfl
 
+/-- A literal low mask on the left of `&`. -/
+def LTm.bandLSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
+    (sb : Option (PLift (b.Src c true .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+  match a.lit? with
+  | some ⟨v, hv⟩ =>
+    if hm : (lowMask? v).isSome = true then sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .bandL rfl h v hm hb⟩
+    else none
+  | none => none
+
+/-- A literal low mask on either side of `&`, recognized with its evidence. -/
+def LTm.bandSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
+    (sa : Option (PLift (a.Src c true .num))) (sb : Option (PLift (b.Src c true .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+  match b.lit? with
+  | some ⟨v, hv⟩ =>
+    if hm : (lowMask? v).isSome = true then sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .bandR rfl h v hm ha⟩
+    else LTm.bandLSrc? h a b sb
+  | none => LTm.bandLSrc? h a b sb
+
+theorem LTm.bandLSrc?_isSome {c : Bool} (h : BinOp.band.accepts .uint = true) (v : PrimTy.uint.Denote)
+    (hm : (lowMask? v).isSome = true) (b : LTm C (.val .uint)) (sb : Option (PLift (b.Src c true .num)))
+    (hb : sb.isSome = true) : (LTm.bandLSrc? h (.app0 (.lit v)) b sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.bandLSrc?
+  dsimp only [LTm.lit?]
+  rw [dif_pos hm]
+  rfl
+
 /-- The source fragment, recognized with its evidence. -/
 def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → Option (PLift (t.Src c true k))
   | _, k, _, .var (p := p) i =>
@@ -135,6 +164,7 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
       match b with
       | .app0 (.lit v) => (a.src? c .num).map fun ⟨ha⟩ => ⟨.shlL rfl h v ha⟩
       | _ => none
+    | .num, .band, .uint => LTm.bandSrc? h a b (a.src? c .num) (b.src? c .num)
     | .num, .addW, .uint => do
       let ⟨ha⟩ ← a.src? c .num
       let ⟨hb⟩ ← b.src? c .num
@@ -401,6 +431,25 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
         simpa only [BinOp.ret, BinOp.isArith, if_true] using this
       subst hb
       cases h
+  | @bandR _ h a v hm _ iha =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    show (LTm.bandSrc? h a (.app0 (.lit v)) (LTm.src? false .num a) _).isSome = true
+    unfold LTm.bandSrc?
+    dsimp only [LTm.lit?]
+    rw [dif_pos hm, hxa]
+    rfl
+  | @bandL _ h v hm b _ ihb =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    show (LTm.bandSrc? h (.app0 (.lit v)) b _ (LTm.src? false .num b)).isSome = true
+    unfold LTm.bandSrc?
+    split
+    · rename_i w hw _
+      split
+      · show (Option.map _ (some _)).isSome = true
+        rfl
+      · exact LTm.bandLSrc?_isSome h v hm b _ ihb.1
+    · exact LTm.bandLSrc?_isSome h v hm b _ ihb.1
   | @addW _ h a b _ _ iha ihb | @subW _ h a b _ _ iha ihb =>
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1

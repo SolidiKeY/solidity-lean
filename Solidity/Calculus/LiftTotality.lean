@@ -160,6 +160,16 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true tr
           (fun y => LTm.app2 (.binop .shl h) a y) = a.condSplit.map _
         cases a.condSplit <;> rfl)
       (Nat.add_zero _)
+  | @bandR hw h a v hv _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop .band h) a' (.app0 (.lit v))) (fun _ h' => .bandR hw h v hv h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop .band h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop .band h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @bandL hw h v hv b _ ih =>
+    exact SplitOK.un (fun b' => LTm.app2 (.binop .band h) (.app0 (.lit v)) b') (fun _ h' => .bandL hw h v hv h')
+      (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
   | @addW hw h a b hx hy ihx ihy =>
     exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .addW h) x' y') (fun _ _ hx' hy' => .addW hw h hx' hy') (fun _ _ => rfl)
       hx hy ihx ihy rfl rfl
@@ -302,6 +312,14 @@ theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true t
     have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .shl h) x' (.app0 (.lit v)))
       (fy := fun y' => LTm.app2 (.binop .shl h) a y') hn
     exact .shlL hw h v (ih h2.1)
+  | @bandR hw h a v hv _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .band h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop .band h) a y') hn
+    exact .bandR hw h v hv (ih h2.1)
+  | @bandL hw h v hv b _ ih =>
+    intro hn
+    exact .bandL hw h v hv (ih (Option.map_eq_none_iff.mp hn))
   | @addW hw h a b _ _ ihx ihy =>
     intro hn
     have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .addW h) x' _) (fy := fun y' => LTm.app2 (.binop .addW h) _ y') hn
