@@ -1540,4 +1540,430 @@ theorem arr_shape {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (
     obtain ⟨h1, h2⟩ := fixed_shape_val (st.get h)
     exact ⟨n, h1, h2, Nat.zero_le _⟩
 
+/-- The cut's reads read only the term's atoms. -/
+theorem LTm.aCut?_bound {N : Nat} : ∀ {s : Srt} (t : LTm C s) (rs₀ : List (ARead C))
+    {t' : LTm C s} {rs₁ : List (ARead C)}, t.aCut? N rs₀ = some (t', rs₁) → t.atomBound ≤ N →
+      (∀ r ∈ rs₀, r.idx.atomBound ≤ N) → ∀ r ∈ rs₁, r.idx.atomBound ≤ N := by
+  intro s t
+  induction t with
+  | var | err =>
+    intro rs₀ t' rs₁ h _ h0; simp only [LTm.aCut?, Option.some.injEq, Prod.mk.injEq] at h
+    rw [← h.2]; exact h0
+  | app0 o =>
+    intro rs₀ t' rs₁ h _ h0; simp only [LTm.aCut?] at h; split at h
+    · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+    · cases h
+  | index it a b _ _ =>
+    intro rs₀ t' rs₁ h _ h0; simp only [LTm.aCut?] at h; split at h
+    · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+    · cases h
+  | app1 o a iha =>
+    intro rs₀ t' rs₁ h hb h0; simp only [LTm.aCut?] at h; split at h
+    · simp only [Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+      obtain ⟨_, _, h1, -, rfl⟩ := h
+      exact iha _ h1 hb h0
+    · cases h
+  | app2 o a b iha ihb =>
+    intro rs₀ t' rs₁ h hb h0; simp only [LTm.aCut?] at h; split at h
+    · simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+      obtain ⟨_, _, h1, _, _, h2, -, rfl⟩ := h
+      simp only [LTm.atomBound, Nat.max_le] at hb
+      exact ihb _ h2 hb.2 (iha _ h1 hb.1 h0)
+    · cases h
+  | app3 o a b c iha ihb ihc =>
+    intro rs₀ t' rs₁ h hb h0; simp only [LTm.aCut?] at h; split at h
+    · simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+      obtain ⟨_, _, h1, _, _, h2, _, _, h3, -, rfl⟩ := h
+      simp only [LTm.atomBound, Nat.max_le] at hb
+      exact ihc _ h3 hb.2.2 (ihb _ h2 hb.2.1 (iha _ h1 hb.1 h0))
+    · cases h
+  | seq a b iha ihb | orElse a b iha ihb =>
+    intro rs₀ t' rs₁ h hb h0
+    simp only [LTm.aCut?, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists,
+      Prod.mk.injEq] at h
+    obtain ⟨_, _, h1, _, _, h2, -, rfl⟩ := h
+    simp only [LTm.atomBound, Nat.max_le] at hb
+    exact ihb _ h2 hb.2 (iha _ h1 hb.1 h0)
+  | kite a b t e iha ihb iht ihe =>
+    intro rs₀ t' rs₁ h hb h0
+    simp only [LTm.aCut?, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists,
+      Prod.mk.injEq] at h
+    obtain ⟨_, _, h1, _, _, h2, _, _, h3, _, _, h4, -, rfl⟩ := h
+    simp only [LTm.atomBound, Nat.max_le] at hb
+    exact ihe _ h4 hb.2.2.2 (iht _ h3 hb.2.2.1 (ihb _ h2 hb.2.1 (iha _ h1 hb.1 h0)))
+  | obsW q _ | obsH q _ =>
+    intro rs₀ t' rs₁ h hb h0; simp only [LTm.aCut?] at h
+    split at h
+    · rename_i ep _
+      split at h
+      · split at h
+        · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+        · simp only [Option.some.injEq, Prod.mk.injEq] at h
+          rw [← h.2]
+          intro r hr
+          rcases List.mem_append.mp hr with hr | hr
+          · exact h0 r hr
+          · rw [List.mem_singleton] at hr
+            subst hr
+            have e := ep.eq
+            simp only [LTm.atomBound] at hb
+            rw [e] at hb
+            simp only [LTm.atomBound, Nat.max_le] at hb
+            exact hb.2
+      · cases h
+    · split at h
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+      · cases h
+  | obsL q _ =>
+    intro rs₀ t' rs₁ h _ h0; simp only [LTm.aCut?] at h
+    split at h
+    · split at h
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h
+        rw [← h.2]
+        intro r hr
+        rcases List.mem_append.mp hr with hr | hr
+        · exact h0 r hr
+        · rw [List.mem_singleton] at hr
+          subst hr
+          exact Nat.zero_le _
+    · split at h
+      · simp only [Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+      · cases h
+
+theorem LFml.aCutF?_bound {N : Nat} : ∀ (φ : LFml C) (rs₀ : List (ARead C)) {φ' : LFml C}
+    {rs₁ : List (ARead C)}, φ.aCutF? N rs₀ = some (φ', rs₁) → φ.atomBound ≤ N →
+      (∀ r ∈ rs₀, r.idx.atomBound ≤ N) → ∀ r ∈ rs₁, r.idx.atomBound ≤ N
+  | .tt, _, _, _, h, _, h0 => by
+    simp only [LFml.aCutF?, Option.some.injEq, Prod.mk.injEq] at h; rw [← h.2]; exact h0
+  | .eq a b, rs₀, _, _, h, hb, h0 => by
+    simp only [LFml.aCutF?, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists,
+      Prod.mk.injEq] at h
+    obtain ⟨_, _, h1, _, _, h2, -, rfl⟩ := h
+    simp only [LFml.atomBound, Nat.max_le] at hb
+    exact LTm.aCut?_bound b _ h2 hb.2 (LTm.aCut?_bound a _ h1 hb.1 h0)
+  | .not φ, rs₀, _, _, h, hb, h0 => by
+    simp only [LFml.aCutF?, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+    obtain ⟨_, _, h1, -, rfl⟩ := h
+    exact LFml.aCutF?_bound φ _ h1 hb h0
+  | .and φ ψ, rs₀, _, _, h, hb, h0 | .imp φ ψ, rs₀, _, _, h, hb, h0 => by
+    simp only [LFml.aCutF?, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.exists,
+      Prod.mk.injEq] at h
+    obtain ⟨_, _, h1, _, _, h2, -, rfl⟩ := h
+    simp only [LFml.atomBound, Nat.max_le] at hb
+    exact LFml.aCutF?_bound ψ _ h2 hb.2 (LFml.aCutF?_bound φ _ h1 hb.1 h0)
+  | .all .., _, _, _, h, _, _ => by cases h
+
+/-! ## The atoms set to the actual observations -/
+
+section Fill
+
+variable (g : State C []) (ν : AEnv) (N : Nat) (rs : List (ARead C))
+
+/-- A read's index as the start state reads it, `0` where it halts. -/
+noncomputable def idxVal (r : ARead C) : PrimTy.uint.Denote :=
+  (r.idx.eval g ν : Option PrimTy.uint.Denote).getD (PrimTy.dflt .uint)
+
+/-- A read's value atom, at the type `p`, set to what it observes. -/
+noncomputable def valAt (r : ARead C) (p : PrimTy) (d : p.Denote) : p.Denote :=
+  match r.kind with
+  | .word => if hp : r.e = p then hp ▸ g.storage.obs.word (.ref (r.loc (idxVal g ν r))) else d
+  | .has => if hp : PrimTy.bool = p then hp ▸ g.storage.obs.has (.ref (r.loc (idxVal g ν r))) else d
+  | .len => if hp : PrimTy.uint = p then hp ▸ lenVal r.root r.h r.ar g.storage else d
+
+/-- The atom at `k`, of the type `p`: below `N` as `ν` has it, a read's
+atoms as the start state reads it. -/
+noncomputable def fillAt (p : PrimTy) (k : Nat) : p.Denote :=
+  if k < N then ν.get p k else
+    match rs[(k - N) / 2]? with
+    | none => ν.get p k
+    | some r =>
+      if (k - N) % 2 = 0 then (if hp : PrimTy.uint = p then hp ▸ idxVal g ν r else ν.get p k)
+      else valAt g ν r p (ν.get p k)
+
+/-- **The atoms set to the actual observations.** -/
+noncomputable def fill : AEnv := ⟨fillAt g ν N rs .bool, fillAt g ν N rs .uint, fillAt g ν N rs .int⟩
+
+theorem fill_get (p : PrimTy) (k : Nat) : (fill g ν N rs).get p k = fillAt g ν N rs p k := by
+  cases p <;> rfl
+
+theorem fill_below : (fill g ν N rs).AgreesBelow N ν := by
+  intro p k hk
+  rw [fill_get, fillAt, if_pos hk]
+
+theorem fill_idx {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
+    (fill g ν N rs).u (N + 2 * j) = idxVal g ν r := by
+  show fillAt g ν N rs .uint (N + 2 * j) = _
+  have h1 : (N + 2 * j - N) / 2 = j := by omega
+  have h2 : (N + 2 * j - N) % 2 = 0 := by omega
+  simp only [fillAt, show ¬ N + 2 * j < N by omega, if_false, h1, hr, h2, if_true, dite_true]
+
+theorem fill_val {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (p : PrimTy) :
+    (fill g ν N rs).get p (N + 2 * j + 1) = valAt g ν r p (ν.get p (N + 2 * j + 1)) := by
+  rw [fill_get]
+  have h1 : (N + 2 * j + 1 - N) / 2 = j := by omega
+  have h2 : ¬ (N + 2 * j + 1 - N) % 2 = 0 := by omega
+  simp only [fillAt, show ¬ N + 2 * j + 1 < N by omega, if_false, h1, hr, h2]
+
+variable {g ν N rs}
+
+theorem idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {r : ARead C} (hr : r ∈ rs) :
+    (r.idx.eval g (fill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
+  LTm.eval_agree_below g r.idx ((fill_below g ν N rs).mono (hb r hr))
+
+theorem idxVal_of {r : ARead C} {k : PrimTy.uint.Denote}
+    (h : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k) : idxVal g ν r = k := by
+  rw [idxVal, h]; rfl
+
+/-- **The actual observations describe the reads.** -/
+theorem describes_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
+    Describes g g.storage (fill g ν N rs) N rs := by
+  intro j r hr
+  have hmem : r ∈ rs := List.mem_of_getElem? hr
+  have hi : (r.idx.eval g (fill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
+    idx_fill hb hmem
+  unfold ARead.Describes
+  cases hk : r.kind with
+  | word =>
+    intro k hk'
+    rw [hi] at hk'
+    refine ⟨by rw [fill_idx g ν N rs hr, idxVal_of hk'], ?_⟩
+    rw [fill_val g ν N rs hr, valAt, hk]
+    simp only [idxVal_of hk', dite_true]
+  | has =>
+    intro k hk'
+    rw [hi] at hk'
+    refine ⟨by rw [fill_idx g ν N rs hr, idxVal_of hk'], ?_⟩
+    show (fill g ν N rs).get .bool (N + 2 * j + 1) = _
+    rw [fill_val g ν N rs hr, valAt, hk]
+    simp only [idxVal_of hk', dite_true]
+  | len =>
+    show lenDesc r.root r.h r.ar g.storage ((fill g ν N rs).get .uint (N + 2 * j + 1))
+    rw [fill_val g ν N rs hr, valAt, hk]
+    simp only [dite_true]
+    exact lenDesc_lenVal _ _ _ _
+
+theorem fixed_obs {a : Name} {e : PrimTy} {n : Nat} (h : C.rootType a = some (.ref (.fixed (.prim e) n)))
+    (st : Storage C) :
+    (∀ k, st.obs.has (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) = decide (k.1.toNat < n)) ∧
+      (∀ k, ¬ k.1.toNat < n → st.obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k)) =
+        PrimTy.dflt e) := by
+  have hp : ∀ k : PrimTy.uint.Denote, ((SRef.ofRoot a h).index (.arr .fixed) k).path = .atF k .nil :=
+    fun k => by simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_fixed, Path.append_nil]
+  simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp]
+  exact fixed_shape_val (st.get h)
+
+theorem self_idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+    (hr : rs[j]? = some r) :
+    (LFml.imp (.eq r.idx r.idx) (.eq r.idx (xAt N j))).holds g (fill g ν N rs) := by
+  intro h
+  rw [LFml.holds_rets] at h
+  obtain ⟨k, hk⟩ := h
+  have hk' : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k :=
+    (idx_fill hb (List.mem_of_getElem? hr)).symm.trans hk
+  rw [LFml.holds_eq_iff]
+  refine ⟨k, hk, ?_⟩
+  show some ((fill g ν N rs).u (N + 2 * j)) = some k
+  rw [fill_idx g ν N rs hr, idxVal_of hk']
+
+/-- What one read makes of itself holds of the actual observations. -/
+theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+    (hr : rs[j]? = some r) : ∀ d ∈ r.self N j, d.holds g (fill g ν N rs) := by
+  have hi := self_idx_fill (g := g) (ν := ν) hb hr
+  intro d hd
+  obtain ⟨a, R, h, harr, e, ar, kind, idx⟩ := r
+  cases kind with
+  | len => cases hd
+  | word =>
+    cases ar with
+    | dyn =>
+      simp only [ARead.self, ArrTy.fixedLen?, List.append_nil, List.mem_singleton] at hd
+      subst hd; exact hi
+    | @fixed _ n =>
+      simp only [ARead.self, ArrTy.fixedLen?, List.mem_append, List.mem_singleton] at hd
+      rcases hd with rfl | rfl
+      · exact hi
+      · intro hF
+        rw [holds_isF] at hF
+        rw [holds_eqDflt, fill_val g ν N rs hr]
+        simp only [valAt, dite_true]
+        have hn := fixed_lt_bound h harr
+        have hx := fill_idx g ν N rs hr
+        have e1 : ((LTm.ltU (xAt N j) (.app0 (.lit (uintOfNat n))) : LTm C (.val .bool)).eval g
+            (fill g ν N rs) : Option Bool) = some (decide ((idxVal g ν
+              ⟨a, _, h, harr, e, .fixed, .word, idx⟩).1 < n)) := by
+          rw [eval_ltLit, hx, uintOfNat_val hn]
+        rw [e1] at hF
+        have h0 := uint_nonneg (idxVal g ν ⟨a, _, h, harr, e, .fixed, .word, idx⟩)
+        exact (fixed_obs h g.storage).2 _ (fun hlt => by
+          simp only [Option.some.injEq, decide_eq_false_iff_not] at hF; omega)
+  | has =>
+    cases ar with
+    | dyn =>
+      simp only [ARead.self, ArrTy.fixedLen?, List.append_nil, List.mem_singleton] at hd
+      subst hd; exact hi
+    | @fixed _ n =>
+      simp only [ARead.self, ArrTy.fixedLen?, List.mem_append, List.mem_singleton] at hd
+      rcases hd with rfl | rfl
+      · exact hi
+      · have hn := fixed_lt_bound h harr
+        have hx := fill_idx g ν N rs hr
+        rw [LFml.holds_eq_iff, eval_ltLit, hx, uintOfNat_val hn]
+        refine ⟨_, ?_, rfl⟩
+        show some ((fill g ν N rs).get .bool (N + 2 * j + 1)) = _
+        rw [fill_val g ν N rs hr]
+        simp only [valAt, dite_true]
+        rw [(fixed_obs h g.storage).1]
+        have h0 := uint_nonneg (idxVal g ν ⟨a, _, h, harr, e, .fixed, .has, idx⟩)
+        exact congrArg some (decide_eq_decide.mpr (by omega))
+
+theorem fill_x {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
+    ((xAt N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
+      some (idxVal g ν r) := by
+  rw [LTm.eval_var]; exact congrArg some (fill_idx g ν N rs hr)
+
+theorem fill_word {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .word) :
+    ((vAt r.e N j : LTm C (.val r.e)).eval g (fill g ν N rs) : Option r.e.Denote) =
+      some (g.storage.obs.word (.ref (r.loc (idxVal g ν r)))) := by
+  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+
+theorem fill_has {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .has) :
+    ((vAt .bool N j : LTm C (.val .bool)).eval g (fill g ν N rs) : Option Bool) =
+      some (g.storage.obs.has (.ref (r.loc (idxVal g ν r)))) := by
+  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+
+theorem fill_len {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .len) :
+    ((vAt .uint N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
+      some (lenVal r.root r.h r.ar g.storage) := by
+  rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
+
+/-- What two reads make of each other holds of the actual observations. -/
+theorem pair_fill {j k : Nat} {r s : ARead C} (hr : rs[j]? = some r) (hs : rs[k]? = some s) :
+    ∀ d ∈ r.pair N j k s, d.holds g (fill g ν N rs) := by
+  intro d hd
+  unfold ARead.pair at hd
+  split at hd
+  · rename_i hroot
+    obtain ⟨a, R, h, harr, e, ar, kr, ir⟩ := r
+    obtain ⟨a', R', h', harr', e', ar', ks, is⟩ := s
+    dsimp only at hroot
+    subst hroot
+    have hR : R = R' := by
+      have := h.symm.trans h'; simp only [Option.some.injEq, Ty.ref.injEq] at this; exact this
+    subst hR
+    have he : e = e' := ArrTy.elem_eq ar ar'
+    subst he
+    have har : ar = ar' := ArrTy.subsingleton _ _
+    subst har
+    obtain ⟨B, hB1, hB2, hB3⟩ := arr_shape a h ar g.storage
+    have xj := fill_x (g := g) (ν := ν) (N := N) hr
+    have xk := fill_x (g := g) (ν := ν) (N := N) hs
+    have nj := uint_nonneg (idxVal g ν ⟨a, R, h, harr, e, ar, kr, ir⟩)
+    have nk := uint_nonneg (idxVal g ν ⟨a, R, h', harr', e, ar, ks, is⟩)
+    cases kr <;> cases ks <;> simp only [List.mem_singleton, List.not_mem_nil] at hd <;> subst hd
+    · -- word, word
+      have wj := fill_word (g := g) (ν := ν) (N := N) hr rfl
+      have wk := fill_word (g := g) (ν := ν) (N := N) hs rfl
+      intro hx
+      rw [LFml.holds_eq_iff, xj, xk] at hx
+      obtain ⟨x, h1, h2⟩ := hx
+      have e1 := (Option.some.inj h1).trans (Option.some.inj h2).symm
+      rw [eqVal, LFml.holds_eq_iff]
+      refine ⟨_, wj, ?_⟩
+      rw [wk]
+      dsimp only at e1 ⊢
+      rw [e1]
+    · -- has, word
+      intro h1 h2
+      rw [holds_isF, fill_has hr rfl, hB1] at h1
+      rw [holds_isT, eval_leU] at h2
+      rw [fill_idx g ν N rs hr, fill_idx g ν N rs hs] at h2
+      simp only [Option.some.injEq, decide_eq_false_iff_not, decide_eq_true_eq] at h1 h2
+      rw [LFml.holds_eq_iff]
+      refine ⟨_, fill_word hs rfl, ?_⟩
+      dsimp only at h1 h2 ⊢
+      rw [hB2 _ (by omega)]
+      rfl
+    · -- has, has
+      intro h1 h2
+      rw [holds_isT, fill_has hr rfl, hB1] at h1
+      rw [holds_isT, eval_leU] at h2
+      rw [fill_idx g ν N rs hs, fill_idx g ν N rs hr] at h2
+      rw [holds_isT, fill_has hs rfl, hB1]
+      simp only [Option.some.injEq, decide_eq_true_eq] at h1 h2 ⊢
+      omega
+    · -- has, len
+      intro h1
+      rw [holds_isT] at h1
+      have e1 : ((LTm.ltU (xAt N j) (vAt .uint N k) : LTm C (.val .bool)).eval g (fill g ν N rs) :
+          Option Bool) = some (decide ((idxVal g ν ⟨a, R, h, harr, e, ar, .has, ir⟩).1 <
+            (lenVal a h' ar g.storage).1)) := by
+        rw [eval_ltU, fill_idx g ν N rs hr]
+        rw [show (fill g ν N rs).u (N + 2 * k + 1) = lenVal a h' ar g.storage from
+          Option.some.inj (fill_len hs rfl)]
+      rw [e1] at h1
+      rw [holds_isT, fill_has hr rfl, hB1]
+      simp only [Option.some.injEq, decide_eq_true_eq] at h1 ⊢
+      have := uint_nonneg (lenVal a h' ar g.storage)
+      omega
+    · -- len, len
+      rw [eqVal, LFml.holds_eq_iff, fill_len hr rfl, fill_len hs rfl]
+      exact ⟨_, rfl, rfl⟩
+  · cases hd
+
+/-- **The actual observations satisfy the antecedent.** -/
+theorem cons_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
+    (ARead.cons N rs).holds g (fill g ν N rs) := by
+  rw [ARead.cons, LFml.holds_conj]
+  intro d hd
+  obtain ⟨j, -, hd⟩ := List.mem_flatMap.mp hd
+  cases hr : rs[j]? with
+  | none => rw [hr] at hd; cases hd
+  | some r =>
+    rw [hr] at hd
+    rcases List.mem_append.mp hd with hd | hd
+    · exact self_fill hb hr d hd
+    · obtain ⟨k, -, hd⟩ := List.mem_flatMap.mp hd
+      cases hs : rs[k]? with
+      | none => rw [hs] at hd; cases hd
+      | some s =>
+        rw [hs] at hd
+        dsimp only at hd
+        split at hd
+        · cases hd
+        · exact pair_fill hr hs d hd
+
+end Fill
+
+/-! ## The cut is exact -/
+
+/-- **The cut is exact in a universal reading.** -/
+theorem LFml.aCut_valid_iff {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
+    (h : φ.aCut? N = some (K, rs)) (hN : φ.atomBound ≤ N) : K.Valid ↔ φ.Valid := by
+  simp only [LFml.aCut?, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+  obtain ⟨φ', rs', hc, rfl, rfl⟩ := h
+  have hb := LFml.aCutF?_bound φ [] hc hN (fun _ h => nomatch h)
+  constructor
+  · intro hK g ν
+    have hf := hK g (fill g ν N rs')
+    have hφ' := hf (cons_fill hb)
+    have := (LFml.aCutF_holds (describes_fill hb) (fun _ _ => rfl) φ [] hc (List.prefix_refl _)).mp hφ'
+    exact (LFml.holds_agree_below g φ ((fill_below g ν N rs').mono hN)).mp this
+  · intro hφ g ν hC
+    exact (LFml.aCutF_holds (describes_realize hC) (frames_realize ν N rs' g) φ [] hc
+      (List.prefix_refl _)).mpr (hφ _ ν)
+
+/-- **A refutation of the cut leaf refutes the leaf**, in the state rebuilt
+from its atoms. -/
+theorem LFml.aCut_refutes {N : Nat} {φ K : LFml C} {rs : List (ARead C)}
+    (h : φ.aCut? N = some (K, rs)) (g : State C []) (ν : AEnv) (hK : ¬ K.holds g ν) :
+    ¬ φ.holds (realize ν N rs g) ν := by
+  simp only [LFml.aCut?, Option.map_eq_some_iff, Prod.exists, Prod.mk.injEq] at h
+  obtain ⟨φ', rs', hc, rfl, rfl⟩ := h
+  intro hφ
+  apply hK
+  intro hC
+  exact (LFml.aCutF_holds (describes_realize hC) (frames_realize ν N rs' g) φ [] hc
+    (List.prefix_refl _)).mpr hφ
+
 end Solidity.Decide
