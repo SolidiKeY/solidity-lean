@@ -22,14 +22,16 @@ variable {C : Contract}
 def ReadDen (C : Contract) : Srt → Type
   | .val p => p.Denote
   | .path T => { r : SRef C T // r.Declared }
+  | .kint => Int
   | _ => Empty
 
 /-- Forget the proof attached to a declared query path. -/
 def ReadDen.erase (g : State C []) : {s : Srt} → ReadDen C s → s.Den C g.H
   | .val _, v => v
   | .path _, r => r.val
+  | .kint, v => v
   | .st, v | .sv _, v | .ident _, v | .addr _, v | .mem, v |
-      .mv _, v | .sts _, v | .spath _ _, v | .kint, v => nomatch v
+      .mv _, v | .sts _, v | .spath _ _, v => nomatch v
 
 theorem ReadDen.erase_val (g : State C []) (p : PrimTy) :
     (ReadDen.erase g (s := .val p)) = id := rfl
@@ -57,6 +59,18 @@ inductive ReadExpr : {s : Srt} → LTm C s → Type where
       (ha : ReadExpr a) (hb : ReadExpr b) (ht : ReadExpr t) (he : ReadExpr e) :
       ReadExpr (.kite a b t e)
   | err {s : Srt} : ReadExpr (LTm.err (C := C) (s := s))
+  /-- A KeY `int` literal. -/
+  | zlit (n : Int) : ReadExpr (.app0 (.zlit n))
+  /-- A `uint` read as a KeY `int`. -/
+  | toInt {t : LTm C (.val .uint)} (ht : ReadExpr t) : ReadExpr (.app1 .toInt t)
+  /-- The ledger's entry at an address, a KeY `int`. -/
+  | net {t : LTm C (.val .uint)} (ht : ReadExpr t) : ReadExpr (.app1 .net t)
+  /-- `a ⊕ b` on KeY's `int`. -/
+  | zbin (op : BinOp) (h : op.zArith = true) {a b : LTm C .kint} (ha : ReadExpr a)
+      (hb : ReadExpr b) : ReadExpr (.app2 (.zbin op h) a b)
+  /-- `a ⊲ b` on KeY's `int`. -/
+  | zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint} (ha : ReadExpr a)
+      (hb : ReadExpr b) : ReadExpr (.app2 (.zcmp op h) a b)
 
 namespace ReadExpr
 
@@ -76,6 +90,22 @@ def ofTerm? : {s : Srt} → (t : LTm C s) → Option (ReadExpr t)
   | _, .orElse a b => do return .orElse (← ofTerm? a) (← ofTerm? b)
   | _, .kite a b t e => do return .kite (← ofTerm? a) (← ofTerm? b) (← ofTerm? t) (← ofTerm? e)
   | _, .err => some .err
+  -- KeY `int` nodes, matched under a variable symbol so that the cases
+  -- above do not discriminate on the sort.
+  | s, .app0 o =>
+    match s, o with
+    | _, .zlit n => some (.zlit n)
+    | _, _ => none
+  | s, .app1 (a := a) o t =>
+    match a, s, o, t with
+    | _, _, .toInt, t => (ofTerm? t).map .toInt
+    | _, _, .net, t => (ofTerm? t).map .net
+    | _, _, _, _ => none
+  | s, .app2 (a := u) (b := v) o a b =>
+    match u, v, s, o, a, b with
+    | _, _, _, .zbin op h, a, b => do return .zbin op h (← ofTerm? a) (← ofTerm? b)
+    | _, _, _, .zcmp op h, a, b => do return .zcmp op h (← ofTerm? a) (← ofTerm? b)
+    | _, _, _, _, _, _ => none
   | _, _ => none
 
 /-- Compute a supported term by recording primitive storage reads. The
@@ -115,6 +145,14 @@ def query (g : State C []) (ν : AEnv) : {s : Srt} → {t : LTm C s} →
       | some x, some y => @ite _ (x = y) (PrimTy.decEqDenote p x y) (ht.query g ν) (he.query g ν)
       | _, _ => .pure none
   | _, _, .err => .pure none
+  | _, _, .zlit n => .pure (some n)
+  | _, _, .toInt ht => (ht.query g ν).bind fun v => .pure (v.map fun n => n.1)
+  | _, _, .net ht => (ht.query g ν).bind fun v =>
+      .pure (v.map fun n => (lookupBy n g.net).getD 0)
+  | _, _, .zbin op _ ha hb => (ha.query g ν).bind fun a => (hb.query g ν).bind fun b =>
+      .pure (a.bind fun x => b.map fun y => op.evalZ x y)
+  | _, _, .zcmp op _ ha hb => (ha.query g ν).bind fun a => (hb.query g ν).bind fun b =>
+      .pure (a.bind fun x => b.map fun y => op.cmpZ x y)
 
 /-- Query evaluation agrees with the original term on every actual typed
 storage, retaining the other components of its starting state. -/
@@ -164,6 +202,14 @@ theorem query_sound (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C s}
       simp only [Option.bind_none, Option.bind_some, Query.run, Option.map_none]
     split <;> assumption
   | err => rfl
+  | zlit n => rfl
+  | toInt ht ih | net ht ih =>
+    simp only [query, Query.runStorage, Query.run_bind, Query.run, LTm.eval_app1, ← ih]
+    cases (ht.query g ν).run (fun r => r.read st) <;> rfl
+  | zbin op h ha hb iha ihb | zcmp op h ha hb iha ihb =>
+    simp only [query, Query.runStorage, Query.run_bind, Query.run, LTm.eval_app2, ← iha, ← ihb]
+    cases (ha.query g ν).run (fun r => r.read st) <;>
+      cases (hb.query g ν).run (fun r => r.read st) <;> rfl
 
 end ReadExpr
 

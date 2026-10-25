@@ -12,7 +12,8 @@ solkey does not have.  A statement is **in solkey's fragment** under a
 modality (`Stmt.inSolkey m`) when no `LeanTaclet` is needed to run it
 there: every call's arguments are simple, in its branches, blocks and the
 bodies it inlines too; no program operand, including a path index, contains
-a native modular builtin; no `if` has the shape of a joined one
+a native modular builtin or a conditional value (`Val.keyValue`: its
+`ternaryToIf` gives a joined `if`); no `if` has the shape of a joined one
 (`Prog.joinShape`, `ifElseJoin`); under the diamond it pays no one; and it has no
 `try` and no annotated loop. This is a conservative program-rule fragment:
 it does not restrict symbols inside arbitrary formula atoms or updates. The table now
@@ -338,7 +339,7 @@ theorem Prog.joinShape_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {Γ₁ Γ₂ : Ctx} (th
     (els : Prog C Γ Γ₂) :
     Prog.joinShape (thn.wk h).2.2 (els.wk h).2.2 = Prog.joinShape thn els := by
   unfold Prog.joinShape
-  rw [Prog.isNil_wk, Prog.isNil_wk, Prog.joinArm?_wk_isSome, Prog.joinArm?_wk_isSome]
+  rw [Prog.joinArm?_wk_isSome, Prog.joinArm?_wk_isSome]
 
 /-- Weakening keeps the arguments simple values. -/
 theorem Args.simpleVals_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {ps : Ctx} (args : Args C Γ ps) :

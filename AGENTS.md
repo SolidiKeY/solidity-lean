@@ -11,6 +11,11 @@ judgement written in the calculus's notation, and a sound proof system.
 `docs/kernel-port.md` says which chapter landed where and what is still to
 port.
 
+**Use dependent types as much as possible.** New code states its invariants
+in its types (indexed families, typed positions, `Fin`, subtypes) rather than
+in side predicates or runtime checks; an untyped representation needs a
+written reason.
+
 **The model is intrinsic** (`docs/intrinsic.md`). A statement is
 `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): its locals are positions `Idx Γ t` in a
 context (`Scope.lean`), so a local read out of scope or at another type cannot
@@ -66,7 +71,9 @@ call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body, closed over a frame of its own — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
-obligation's).  A call whose callee calls and only computes values is one
+obligation's).  Every call of a callee holds the same body term, its locals
+named as at its first call (`CallMemo`, `docs/automation.md` M6), so nested
+calls stay the size of the source.  A call whose callee calls and only computes values is one
 update by the callee's summary instead (`internalCallSummary`,
 `Calculus/CallSummary.lean`, `docs/automation.md` M6).  **Callbacks** are
 a second reading of the modalities (`Semantics/Callback.lean`, `holdsC` of
@@ -228,6 +235,16 @@ Follow [docs/rule-repair.md](docs/rule-repair.md): establish the execution
 meaning, prototype a lazy rule, reject bad candidates with concrete cases
 and bounded proofs, then prove local soundness and integrate it. Check
 coverage, overlap and termination separately. Keep detailed guidance there.
+
+**QuickCheck while debugging:** `cd Bridge && lake exe rulecheck` runs
+Plausible on typed states, comparing emitted updates with statement execution.
+Use `lake exe rulecheck --seed 42 --samples 1000` for another reproducible
+run; failures print the rule, type, shrunk operands and seed. Add cases or
+observations in `Bridge/SolidityBridge/PropertyChecks.lean` when repairing a
+rule. Unsupported premise shapes must fail or be reported explicitly, never
+count as passing samples. This initial corpus covers numeric local update
+rules, not every taclet; testing complements the required soundness proof.
+Keep Plausible in the optional Bridge package, not the dependency-free core.
 
 ## Writing or fixing a tactic
 

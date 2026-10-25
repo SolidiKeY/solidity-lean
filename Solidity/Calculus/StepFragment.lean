@@ -941,9 +941,7 @@ theorem iteStep_saveLike {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C 
       | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact ⟨ht, he⟩
       | some b =>
         simp only [iteStep, Upd.ifJoin?, ha, hb]
-        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
-        · simp only [Bool.false_eq_true, if_false]; exact ⟨ht, he⟩
-        · simp only [if_true]; exact Upd.ifJoin_saveLike _ a b
+        exact Upd.ifJoin_saveLike _ a b
   | _ =>
     exact Premise.saveLike_capture _ hc
       (by simp only [Stmt.Frag, Val.MemFree, Prog.frag_up thn ht, Prog.frag_up els he,

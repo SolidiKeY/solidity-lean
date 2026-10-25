@@ -1,5 +1,6 @@
 import Solidity.Calculus.LeafInputs
 import Solidity.Calculus.CondLift
+import Solidity.Calculus.Prenex
 
 /-!
 # Original-source decisions with dependent mapping reads
@@ -146,7 +147,7 @@ theorem LFml.liftCondB_eq : ∀ (k : Nat) (φ : LFml C) (n : Nat),
 structure DependentReduction (φ : Fml C []) where
   normalization : DeclarationReduction φ
   source : SourceReduction normalization.formula
-  sentence : UniversalPrefix (source.leaf.elim.condSimp.liftCond condLiftFuel)
+  sentence : UniversalPrefix (source.leaf.elim.condSimp.prenex.liftCond condLiftFuel)
   body : FlattenedArithmetic sentence.body
   covered : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters
 
@@ -155,8 +156,8 @@ def dependentReduction? (φ : Fml C []) : Option (DependentReduction φ) := do
   let r ← sourceReduction? d.formula
   -- The lift's size first, within `liftBudget` nodes: past it the flattener
   -- refuses the leaf, and lifting it whole would be exponential.
-  if (r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget).isNone then none
-  let sentence ← UniversalPrefix.ofFormula? 1024 (r.leaf.elim.condSimp.liftCond condLiftFuel)
+  if (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone then none
+  let sentence ← UniversalPrefix.ofFormula? 1024 (r.leaf.elim.condSimp.prenex.liftCond condLiftFuel)
   if hc : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters then
     return ⟨d, r, sentence, ← flattenedArithmetic? 2048 sentence.body, hc⟩
   else none
@@ -171,14 +172,14 @@ theorem body_valid_iff {φ : Fml C []} (r : DependentReduction φ) :
     Fml.Valid φ ↔ r.sentence.body.Valid := by
   constructor
   · intro h g ν
-    exact (r.body.flattening.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
+    exact (r.body.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
       (r.sentence.instantiate g AEnv.dflt ν ((LFml.liftCond_holds g _ _ _).mpr
-        ((LFml.condSimp_holds g _ _).mpr
-          ((r.source.elim_holds_iff g).mpr ((r.normalization.correct g).mpr (h g))))))
+        ((LFml.prenex_holds g _ _).mpr ((LFml.condSimp_holds g _ _).mpr
+          ((r.source.elim_holds_iff g).mpr ((r.normalization.correct g).mpr (h g)))))))
   · intro h g
     exact (r.normalization.correct g).mp ((r.source.elim_holds_iff g).mp
-      ((LFml.condSimp_holds g _ _).mp
-        ((LFml.liftCond_holds g _ _ _).mp (r.sentence.close g AEnv.dflt (h g)))))
+      ((LFml.condSimp_holds g _ _).mp ((LFml.prenex_holds g _ _).mp
+        ((LFml.liftCond_holds g _ _ _).mp (r.sentence.close g AEnv.dflt (h g))))))
 
 theorem valid_iff {φ : Fml C []} (r : DependentReduction φ) : Fml.Valid φ ↔ r.arithmetic.Valid :=
   r.body_valid_iff.trans r.body.valid_iff
@@ -196,10 +197,10 @@ def countermodelOf {φ : Fml C []} (r : DependentReduction φ)
     (cm : {vs // ¬ r.arithmetic.holds vs}) : r.Countermodel := by
   let actual := r.body.countermodelOf cm
   refine ⟨actual.state, actual.atoms, fun hv => actual.refutes ?_⟩
-  exact (r.body.flattening.source.holds_assign _ r.sentence.parameters r.covered AEnv.dflt _).mp
+  exact (r.body.source.holds_assign _ r.sentence.parameters r.covered AEnv.dflt _).mp
     (r.sentence.instantiate _ AEnv.dflt actual.atoms ((LFml.liftCond_holds _ _ _ _).mpr
-      ((LFml.condSimp_holds _ _ _).mpr
-        ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv)))))
+      ((LFml.prenex_holds _ _ _).mpr ((LFml.condSimp_holds _ _ _).mpr
+        ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv))))))
 
 def checkCodes {φ : Fml C []} (r : DependentReduction φ) (xs : List Nat) : Bool :=
   r.arithmetic.guarded.check (fun k => xs[k]?.getD 0)

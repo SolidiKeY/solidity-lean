@@ -175,10 +175,14 @@ def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk
   for s in P do
     let (Γe, k) ← get
     let k₀ := nextFree taken k
+    -- the callees' first numbering too (`CallMemo`): a retry that kept it
+    -- would number a shared callee where the first try did, into `taken`
+    let memo ← getThe CallMemo
     set (Γe, k₀)
     let mut Q ← elabStmtP C s
     let (_, k₁) ← get
     if (List.range' k₀ (k₁ - k₀)).any taken.contains then
+      set (σ := CallMemo) memo
       set (Γe, max k (taken.foldl max 0 + 1))
       Q ← elabStmtP C s
     let b ← ElabM.lift (SProg.chain ns acc.1 Q)
@@ -309,7 +313,7 @@ def elabDlIn (φ : RawFml) (pastAll : Bool) (declared : List String) (taken : Li
   -- a declared name's parameter is not in the program's scope, which may
   -- declare it (as `dl!` reads it free, a `pv`)
   let scope := ps.filter fun (x, _) => !declared.contains x
-  (((elabFmlC C taken (!pastAll) φ Γ).run { funs := C.funs }).run' (scope, 1)).map (⟨Γ, ·⟩)
+  ((elabFmlC C taken (!pastAll) φ Γ).runFrom' { funs := C.funs } (scope, 1)).map (⟨Γ, ·⟩)
 
 /-- **A formula against `C`, scoped**: `elabDl`'s parameters (the names
 read, a declared one included) bound outermost (`Fml.closeN`), each only if
@@ -400,7 +404,7 @@ def elabKeyFml : RawFml → ElabM LineKey
 scope, the line read by `elabKeyFml`. -/
 def elabKeyQ (φ : RawFml) : Except String Lean.Expr :=
   let (params, _, _) := dlParams C φ false
-  ((elabKeyFml C φ).run { funs := C.funs }).run' (params, 1) |>.map LineKey.quote
+  (elabKeyFml C φ).runFrom' { funs := C.funs } (params, 1) |>.map LineKey.quote
 
 end Read
 

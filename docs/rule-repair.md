@@ -29,7 +29,16 @@ candidate rule sound.
    avoid a representation refactor before testing the idea.
 4. **Use cheap rejection gates.** First compare the proposed operation's
    observations with the semantic operation on concrete cases. A disagreement
-   rejects the candidate. Next try the original proof and boundary cases
+   rejects the candidate. For numeric local update rules, run
+   `cd Bridge && lake exe rulecheck --seed 42 --samples 1000` (Plausible,
+   Lean's QuickCheck). Add the candidate to the named cases in
+   `Bridge/SolidityBridge/PropertyChecks.lean`; `checkUpdateWith` also tests
+   a proposed update before installing it in `Stmt.step`. Its observation
+   receives the global state and typed locals: include the locations the
+   rule writes and nearby locations it must preserve. The harness currently
+   supports single-update premises; unsupported shapes are not successes.
+   A failing run prints its seed, rule, type and shrunk operands. Preserve
+   that witness as a deterministic regression. Next try the original proof and boundary cases
    under a fixed node budget and time limit. Inspect the remaining leaf:
    repeated expansion, cycling or term duplication calls for redesign;
    budget exhaustion alone does not refute the rule. Attempt the general

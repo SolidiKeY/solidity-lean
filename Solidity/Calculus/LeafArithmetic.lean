@@ -1,5 +1,6 @@
 import Solidity.Calculus.InputReduction
 import Solidity.Calculus.ActiveReadConstraints
+import Solidity.Calculus.QuotientCut
 
 /-!
 # Automatic arithmetic for flattened dependent-read leaves
@@ -88,21 +89,27 @@ def countermodelOf {φ : LFml C} (r : LeafArithmetic φ)
 
 end LeafArithmetic
 
+/-- A leaf decided by arithmetic: its operators cut out into fresh atoms
+(`LFml.cutAll`, `Calculus/QuotientCut.lean`), its reads flattened, the
+result compiled. -/
 structure FlattenedArithmetic (φ : LFml C) where
-  flattening : ReadFlattening φ φ.atomBound
+  source : ReadFormula φ
+  flattening : ReadFlattening φ.cutAll φ.cutAll.atomBound
   encoding : LeafArithmetic flattening.formula
 
 /-- Check the quadratic alias-pair budget before constructing its formula. -/
 def flattenedArithmetic? (budget : Nat) (φ : LFml C) : Option (FlattenedArithmetic φ) := do
-  let r ← readFlatten? budget φ
+  let src ← ReadFormula.ofFormula? φ
+  let r ← readFlatten? budget φ.cutAll
   if r.flat.reads.length * r.flat.reads.length ≤ budget then
-    return ⟨r, ← leafArithmetic? r.formula⟩
+    return ⟨src, r, ← leafArithmetic? r.formula⟩
   else none
 
 namespace FlattenedArithmetic
 
 theorem valid_iff {φ : LFml C} (r : FlattenedArithmetic φ) : φ.Valid ↔ r.encoding.arithmetic.Valid :=
-  r.flattening.formula_valid_iff.symm.trans r.encoding.valid_iff
+  (LFml.cutAll_valid_iff φ).symm.trans
+    (r.flattening.formula_valid_iff.symm.trans r.encoding.valid_iff)
 
 structure Countermodel {φ : LFml C} (r : FlattenedArithmetic φ) where
   state : State C []
@@ -118,7 +125,7 @@ def countermodelOf {φ : LFml C} (r : FlattenedArithmetic φ)
   have hf := fun h => hn (fun _ => h)
   let actual := r.flattening.countermodel raw.state raw.atoms
     ((r.flattening.layout.constraints_iff _ _).mp hc) hf
-  exact ⟨actual.val, raw.atoms, actual.property⟩
+  exact ⟨actual.val, raw.atoms, fun h => actual.property (LFml.holds_cutAll φ _ _ h)⟩
 
 def verify {φ : LFml C} (r : FlattenedArithmetic φ) : Sum (PLift φ.Valid) r.Countermodel :=
   match r.encoding.arithmetic.verify with

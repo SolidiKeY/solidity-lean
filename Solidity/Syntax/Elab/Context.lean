@@ -1145,9 +1145,10 @@ def reachableBy (callees : FunDecl → List String) (funs : List (Name × FunDec
   let mut seen : List String := []
   let mut todo : List String := ((lookupBy f funs).map callees).getD []
   for _ in [0:funs.length + 1] do
-    let next := todo.filter (fun g => !seen.contains g && (lookupBy g funs).isSome)
+    -- each function once a round: a function called twice is not explored twice
+    let next := (todo.filter (fun g => !seen.contains g && (lookupBy g funs).isSome)).eraseDups
     if next.isEmpty then break
-    seen := seen ++ next.eraseDups
+    seen := seen ++ next
     todo := next.flatMap fun g => ((lookupBy g funs).map callees).getD []
   return seen
 

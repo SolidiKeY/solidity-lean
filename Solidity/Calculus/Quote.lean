@@ -55,8 +55,12 @@ end Quote
 
 open Quote
 
-/-- The quoting monad: the contract's `Expr`. -/
-abbrev QM := ReaderT Expr Id
+/-- The quoting monad: the contract's `Expr`, and the calls' bodies quoted
+(`QMemo`, `Syntax/Quote.lean`). -/
+abbrev QM := ReaderT Expr (StateM QMemo)
+
+/-- Quote from the contract's `Expr` `c`, with no body quoted yet. -/
+def QM.go {α : Type} (x : QM α) (c : Expr) : α := ((x.run c).run' {})
 
 namespace Quote
 
@@ -358,8 +362,16 @@ partial def qStmtH (hs : List Name) (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr
       ← qExtCall Γ call, ← qBinders ρ rets, ← qArgs Γ ps sargs, ← qProgH hs (ρ ++ ps) Γf sbody,
       toExpr self, CatchKind.quote kind, toExpr x, ← qProgH hs (.mem bytesR :: Γ) Γ₁ body]
   | @Stmt.call _ _ _ ps rs Γf f args ret body =>
+    -- a callee's body is one object at every call of it: quoted once (`QMemo`)
+    let k := mkApp (qCtxRaw (rs ++ ps)) (qCtxRaw Γf)
+    let be ← match ← QMemo.find body hs k with
+      | some e => pure e
+      | none => do
+        let e ← qProgH hs (rs ++ ps) Γf body
+        QMemo.add body hs k e
+        pure e
     sctor ``Stmt.call #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, ← qCtx Γf, toExpr f,
-      ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProgH hs (rs ++ ps) Γf body]
+      ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, be]
   | @Stmt.callReceiver _ _ ps Γf E f args r body op =>
     sctor ``Stmt.callReceiver #[Γe, ← qCtx ps, ← qCtx Γf, toExpr E, toExpr f,
       ← qArgs Γ ps args, toExpr r, ← qProgH hs ([.alias (.array E)] ++ ps) Γf body,
@@ -693,23 +705,23 @@ The contract is the `Expr` `c` that names it (`mkConst ``StandardExample`). -/
 
 /-- A scoped formula. -/
 def Fml.quote {C : Contract} (c : Expr) {Γ : Ctx} (φ : Fml C Γ) : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qFml Γ φ).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qFml Γ φ).go c)
 
 /-- A term of sort `s`. -/
 def Tm.quote {C : Contract} (c : Expr) {Γ : Ctx} {s : Srt} (t : Tm C Γ s) : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qTm Γ s t).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qTm Γ s t).go c)
 
 /-- An update. -/
 def Upd.quote {C : Contract} (c : Expr) {Γ Δ : Ctx} (U : Upd C Γ Δ) : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qUpd Γ Δ U).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qUpd Γ Δ U).go c)
 
 /-- The frames after a program. -/
 def Frames.quote {C : Contract} (c : Expr) {Γ Γ₀ : Ctx} (κ : Frames C Γ Γ₀) : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qFrames Γ Γ₀ κ).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qFrames Γ Γ₀ κ).go c)
 
 /-- What a rule leaves (`Stmt.step`'s result). -/
 def Premise.quote {C : Contract} (c : Expr) {Γ Γ' : Ctx} (p : Premise C Γ Γ') : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qPremise Γ Γ' p).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qPremise Γ Γ' p).go c)
 
 /-! A scoped block on its own is quoted by `Syntax/Quote.lean`'s
 `Prog.quoteShared`. -/

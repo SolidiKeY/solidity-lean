@@ -21,10 +21,11 @@ local instance : InContract := ⟨StandardExample⟩
 
 open scoped Scoped
 
-/-- A walk, its goals checked lines; a wrong line fails. -/
-example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] true } := by
+/-- A walk, its goals checked lines; a wrong line fails.  The `else`
+branch writes the storage, so the `if` splits (`ifElseSplit`). -/
+example : ⊢ dl!{ [ if (true) { x = 2; } else { age = 1; }; ] true } := by
   apply Proves.allIntro
-  show sequent!{ ∀ uint x ⟹ [ if (true) { x = 2; } else { x = 1; }; ] true }
+  show sequent!{ ∀ uint x ⟹ [ if (true) { x = 2; } else { age = 1; }; ] true }
   apply Proves.split (Taclet.toStep .ifElseSplit)
   case thn =>
     show sequent!{ ∀ uint x, true = true ⟹ [ x = 2; ] true }
@@ -35,8 +36,8 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] true } := by
     show sequent!{ ∀ uint x, true = true, { x := 2 } ⟹ true }
     exact .updIntro (.closeTrue rfl)
   case els =>
-    apply Proves.update (Taclet.toStep .localValueAssign)
-    show sequent!{ ∀ uint x, true = false, { x := 1 } ⟹ true }
+    apply Proves.update (Taclet.toStep .storageRootWriteStore)
+    show sequent!{ ∀ uint x, true = false, { storage := save(storage, age, 1) } ⟹ true }
     exact .updIntro (.closeTrue rfl)
 
 /-- A capture's fresh name, and a hidden binder that is no entry. -/

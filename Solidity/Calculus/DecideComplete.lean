@@ -58,15 +58,22 @@ def liftConds : Nat := 6
 on the leaf, else, where it has at most `liftConds` conditional terms, on
 the leaf with them lifted into case splits (`LFml.liftCond`, exact):
 `{x := c ? x + 1 : x} (x <= 1)` is then `(c → x + 1 <= 1) ∧ (¬c → x <= 1)`,
-each case linear.  A leaf with more is left to `sol_close` (`sol_close_join`). -/
+each case linear; else on the leaf with them lifted to its top
+(`LFml.liftTop`, exact, KeY's `ifthenelse_split`): `{x := c ? 2 : 1} (x != 0)`
+is `(c → ¬ 2 = 0) ∧ (¬c → ¬ 1 = 0)`, the cases a joined `if`'s split would
+have left.  A leaf with more is left to `sol_close` (`sol_close_join`,
+`sol_close_ite_split`). -/
 def LFml.decideLift (φ : LFml C) : Bool :=
-  φ.decideMem || (decide (φ.iteCount ≤ liftConds) && (φ.liftCond liftFuel).decideMem)
+  φ.decideMem || (decide (φ.iteCount ≤ liftConds) &&
+    ((φ.liftCond liftFuel).decideMem || (φ.liftTop liftFuel).decideMem))
 
 theorem LFml.decideLift_valid {φ : LFml C} (h : φ.decideLift = true) : φ.Valid := by
   unfold LFml.decideLift at h
   rcases Bool.or_eq_true _ _ ▸ h with h | h
   · exact LFml.decideMem_valid h
-  · exact (LFml.liftCond_valid liftFuel φ).1 (LFml.decideMem_valid (Bool.and_eq_true _ _ ▸ h).2)
+  · rcases Bool.or_eq_true _ _ ▸ (Bool.and_eq_true _ _ ▸ h).2 with h | h
+    · exact (LFml.liftCond_valid liftFuel φ).1 (LFml.decideMem_valid h)
+    · exact (LFml.liftTop_valid liftFuel φ).1 (LFml.decideMem_valid h)
 
 end Decide
 
@@ -137,7 +144,7 @@ variable {C : Contract}
 
 /-- The reduction quoted at the contract `c`, and printed. -/
 def LFml.quoteOpt (c : Expr) : Option (LFml C) → Option (Expr × String)
-  | some ψ => some ((ψ.quote).run c, ψ.pp)
+  | some ψ => some ((ψ.quote).go c, ψ.pp)
   | none => none
 
 /-- The reduction of the closed leaf `φ` of the contract `C` (a constant),

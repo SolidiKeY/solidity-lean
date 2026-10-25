@@ -292,6 +292,23 @@ own (`CloseJ.budget`); fails, leaving the leaf as it was, where it does not
 close it. -/
 syntax "sol_close_join_steps" : tactic
 
+/-- A leaf whose joined values (`{x := c ? t : e}`, `ifElseJoin`) are split
+back into their cases, KeY's `ifthenelse_split` on the antecedent
+(`Fml.SplitTo.here`, `Calculus/LeafSplit.lean`): one goal per case, each
+`c = TRUE → {x := t} φ` or `c = FALSE → {x := e} φ`, the leaves the walk's
+`ifElseSplit` would have left.  An accumulation (`{x := c ? x + 1 : x}`) is
+not split: `sol_close_join_steps` reads those one update at a time.  Fails
+on a leaf with none, or with more than `CloseSplit.splitMax`. -/
+syntax "sol_close_ite_split" : tactic
+
+/-- `sol_close_ite_split` on a leaf of at most `CloseSplit.splitFew` joined
+updates. -/
+syntax "sol_close_ite_split_few" : tactic
+
+/-- `sol_close_ite_split` on a leaf of more than `CloseSplit.splitFew` joined
+updates (at most `CloseSplit.splitMax`). -/
+syntax "sol_close_ite_split_many" : tactic
+
 /-- Fails on a leaf of more than `CloseJ.wholeMax` joined updates: the guard
 of `sol_close`'s alternatives that evaluate a leaf whole, which on such a
 leaf run past the heartbeats rather than fail. -/
@@ -342,14 +359,28 @@ macro "sol_close_finish" : tactic => `(tactic|
 (`Calculus/Close.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
 steps of the same names).  Run `sol_symex` first; with no goal left it does
 nothing. -/
-macro "sol_close" : tactic => `(tactic|
+syntax "sol_close" : tactic
+
+macro_rules
+  | `(tactic| sol_close) => `(tactic|
   all_goals first
+  -- a leaf of one or two joined values that are not accumulations: back
+  -- into the cases the walk's split would have left, each closed as such a
+  -- leaf
+  | sol_within 160000 (
+     sol_close_ite_split_few
+     all_goals sol_close)
   -- a leaf whose equations read a storage alias (an `ensures` of a returned
   -- alias): read in the Theory, the alias at the path it holds; else as below
   | sol_close_alias
   -- a leaf of many joined values: one update at a time, each value named
   -- once with its interval (`sol_close_join_steps`)
   | sol_close_join_steps
+  -- more joined values than the first alternative takes, where the steps
+  -- did not close the leaf: split back as above
+  | sol_within 160000 (
+     sol_close_ite_split_many
+     all_goals sol_close)
   -- a leaf whose values a joined `if` left conditional: each a fresh value
   -- and its facts (`sol_close_join`), within a budget of its own (its case
   -- splits bounded too, `joinMaxCases`), so past it the alternatives

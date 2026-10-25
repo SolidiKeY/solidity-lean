@@ -361,6 +361,32 @@ theorem finite_support {ψ : (lang C).Sentence} (h : SolTheory C ⊨ᵇ ψ) :
       (T₀ : (lang C).Theory) ⊆ SolTheory C ∧ (T₀ : (lang C).Theory) ⊨ᵇ ψ :=
   FirstOrder.Language.Theory.models_iff_finset_models.mp h
 
+/-- A first-order consequence of any collection of storage facts needs
+only finitely many of those facts. The contract theory remains available
+in full; compactness is applied to its union with the supplied facts. -/
+theorem finite_storage_support (facts : (lang C).Theory) {ψ : (lang C).Sentence}
+    (h : SolTheory C ∪ facts ⊨ᵇ ψ) :
+    ∃ F : Finset (lang C).Sentence, (F : (lang C).Theory) ⊆ facts ∧
+      SolTheory C ∪ (F : (lang C).Theory) ⊨ᵇ ψ := by
+  classical
+  obtain ⟨T, hT, hmodels⟩ := FirstOrder.Language.Theory.models_iff_finset_models.mp h
+  refine ⟨T.filter (· ∈ facts), ?_, ?_⟩
+  · intro φ hφ
+    exact (Finset.mem_filter.mp hφ).2
+  · rw [FirstOrder.Language.Theory.models_iff_not_satisfiable] at hmodels ⊢
+    intro hs
+    apply hmodels (hs.mono ?_)
+    intro φ hφ
+    rcases hφ with hφ | hnot
+    · left
+      rcases hT hφ with hcore | hfact
+      · exact Or.inl hcore
+      · exact Or.inr (Finset.mem_filter.mpr ⟨hφ, hfact⟩)
+    · exact Or.inr hnot
+
+/-- info: 'Solidity.FO.finite_storage_support' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms finite_storage_support
+
 /-- A sentence realizes in a closed state as its formula holds there. -/
 theorem holds_iff_realize (σ : State C []) {φ : Fml C []} {ψ : (lang C).Sentence}
     (h : φ.toBF = some ψ) : holds σ φ ↔ Carrier C σ.glob ⊨ ψ := by

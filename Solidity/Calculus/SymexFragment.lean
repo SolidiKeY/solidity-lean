@@ -226,9 +226,16 @@ theorem Op0.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {s : Srt} (o : Op0 C s)
 theorem Op1.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a s : Srt} (o : Op1 C a s)
     (ho : o.elimOk = true) {x : LTm C a} (hx : x.Elimable) {l : LTm C s} (h : o.toL ρ x = some l) :
     l.Elimable := by
-  cases o <;> simp only [Op1.elimOk, Bool.false_eq_true] at ho <;>
-    simp only [Op1.toL, Option.some.injEq, reduceCtorEq] at h <;> subst h
-  all_goals first
+  cases o <;> simp only [Op1.elimOk, Bool.false_eq_true] at ho
+  case net =>
+    simp only [Op1.toL] at h
+    split at h
+    · cases h; exact .app1 rfl hx
+    · cases h
+  all_goals
+    simp only [Op1.toL, Option.some.injEq] at h
+    subst h
+    first
     | exact Decide.fold1_unop_elimable _ _ hx
     | exact Decide.foldNext_elimable hρ.2.1 hx
     | exact .app1 rfl hx
@@ -400,7 +407,14 @@ theorem Rhs.ElimOk.toL {ρ : SymS C Γ} (hρ : ρ.Ok) {t : LTy} {r : Rhs C Γ t}
     have hx' := Tm.ElimOk.toL hρ hr hx
     exact ⟨hx', Decide.seqL_elimable hx' Decide.tt_elimable⟩
   | unset => exact hr.elim
-  | saveNet | saveNetMt => simp only [Rhs.toL, reduceCtorEq] at h
+  | saveNet =>
+    simp only [Rhs.toL] at h
+    split at h
+    · simp only [Option.some.injEq] at h
+      subst h
+      exact ⟨.app0 rfl, Decide.tt_elimable⟩
+    · cases h
+  | saveNetMt => simp only [Rhs.toL, reduceCtorEq] at h
 
 theorem UpdElem.ElimOk.toLS {Δ : Ctx} {ρ₀ : SymS C Γ} (hρ₀ : ρ₀.Ok) {e : UpdElem C Γ Δ}
     (he : e.ElimOk) {ρ : SymS C Δ} (hρ : ρ.Ok) {q : SymS C Δ × LTm C (.val .bool)}
@@ -1141,12 +1155,9 @@ theorem iteStep_elimOk {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ
       | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
       | some b =>
         simp only [iteStep, Upd.ifJoin?, ha, hb]
-        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
-        · simp only [Bool.false_eq_true, if_false]; exact hsplit
-        · simp only [if_true]
-          refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
-          · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
-          · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
+        refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
+        · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
+        · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
   | _ => trivial
 
 theorem requireStep_elimOk (c : Val C Γ .bool) : (requireStep k c).ElimOk := by

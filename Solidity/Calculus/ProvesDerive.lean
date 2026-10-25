@@ -297,7 +297,7 @@ end Quote
 
 /-- A context, quoted and hash-consed, the contract named by `c`. -/
 def _root_.Solidity.Hyps.quote (c : Lean.Expr) {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) : Lean.Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qHyps Γ₀ none Γ H).run c)
+  Lean.ShareCommon.shareCommon ((Quote.qHyps Γ₀ none Γ H).go c)
 
 namespace Seq
 
@@ -305,7 +305,7 @@ namespace Seq
 by `c` (`Quote.qHyps` for the marks). -/
 def SLeaf.quote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Lean.Expr :=
-  Lean.ShareCommon.shareCommon <| Id.run <| ReaderT.run (r := c) do
+  Lean.ShareCommon.shareCommon <| QM.go (c := c) do
     let ctxE := Lean.mkConst ``Ctx
     let nilE ← Quote.qCtx []
     let Γe ← Quote.qCtx Γ

@@ -50,6 +50,28 @@ theorem inRange_iff (p : PrimTy) (hp : p.isNumeric = true) (n : Int) :
 
 end ScalarCode
 
+/-- `c · a₀·x₀ + c · a₁·x₁ + …`. -/
+def Lin.scale (c : Int) (as : Lin) : Lin := as.map (c * ·)
+
+theorem Lin.eval_scale (c : Int) (as : Lin) (x : Nat → Nat) :
+    (as.scale c).eval x = c * as.eval x := by
+  induction as generalizing x with
+  | nil => simp only [Lin.scale, List.map_nil, Lin.eval, Int.mul_zero]
+  | cons a as ih =>
+    simp only [Lin.scale, List.map_cons, Lin.eval] at *
+    rw [ih]
+    simp only [Int.mul_add, Int.mul_assoc]
+
+theorem Lin.length_scale (c : Int) (as : Lin) : (as.scale c).length = as.length :=
+  List.length_map _
+
+/-- `c · a`. -/
+def Affine.scale (a : Affine) (c : Int) : Affine := ⟨a.coeff.scale c, c * a.constant⟩
+
+theorem Affine.eval_scale (a : Affine) (c : Int) (x : Nat → Nat) :
+    (a.scale c).eval x = c * a.eval x := by
+  simp only [Affine.scale, Affine.eval, Lin.eval_scale, Int.mul_add]
+
 /-- A partial primitive computation, as a code and its definedness guard. -/
 structure CheckedScalar (p : PrimTy) where
   code : Affine
@@ -131,6 +153,53 @@ theorem arith_correct {p : PrimTy} (hp : p.isNumeric = true) (subtract : Bool)
         simp only [arithCode, Bool.false_eq_true, ↓reduceIte, Affine.eval_add,
           Affine.eval_sub, Affine.eval_offset, ha.2, hb.2, encode_integer]
       all_goals omega
+
+/-- Result code of checked multiplication by the literal `c`: the integer
+`c · (a - offset)`, offset once. -/
+def scaleCode (p : PrimTy) (c : Int) (a : Affine) : Affine :=
+  ((a.offset (-offset p)).scale c).offset (offset p)
+
+/-- `c · a`, checked: the operand and the result in range must return. -/
+def scale {p : PrimTy} (c : Int) (a : CheckedScalar p) : CheckedScalar p :=
+  (ofInt p (scaleCode p c a.code)).guard a.defined
+
+theorem scale_correct {p : PrimTy} (hp : p.isNumeric = true) (c : Int) (a : CheckedScalar p)
+    (x : Nat → Nat) (va : Option p.Denote) (ha : a.Correct x va) :
+    (scale c a).Correct x (va.bind fun v => p.ofInt? (c * integer p v)) := by
+  cases va with
+  | none => exact fun hg => ha hg.1
+  | some v =>
+    apply guard_correct a.defined _ x _ _ ha.1
+    apply ofInt_correct p hp
+    simp only [scaleCode, Affine.eval_offset, Affine.eval_scale, ha.2, encode_integer]
+    rw [Int.add_neg_cancel_right]
+
+theorem scale_correct' {p : PrimTy} (hp : p.isNumeric = true) (c : Int) (a : CheckedScalar p)
+    (x : Nat → Nat) (va : Option p.Denote) (ha : a.Correct x va) :
+    (scale c a).Correct x (va.bind fun v => p.ofInt? (integer p v * c)) := by
+  have h := scale_correct hp c a x va ha
+  simp only [Int.mul_comm c] at h
+  exact h
+
+/-- Result code of `~a` on `uint`: the integer `2^256 - 1 - a`. -/
+def complCode (a : Affine) : Affine := (Affine.literal (((2 ^ 256 : Nat) : Int) - 1)).sub a
+
+/-- `~a` on `uint`: the operand must return; the result is always in range,
+and its range guard says so. -/
+def compl (a : CheckedScalar .uint) : CheckedScalar .uint :=
+  (ofInt .uint (complCode a.code)).guard a.defined
+
+theorem compl_correct (a : CheckedScalar .uint) (x : Nat → Nat) (va : Option PrimTy.uint.Denote)
+    (ha : a.Correct x va) :
+    (compl a).Correct x (va.bind fun v => PrimTy.uint.ofInt? (((2 ^ 256 : Nat) : Int) - 1 - v.val)) := by
+  cases va with
+  | none => exact fun hg => ha hg.1
+  | some v =>
+    apply guard_correct a.defined _ x _ _ ha.1
+    apply ofInt_correct .uint rfl
+    simp only [complCode, Affine.eval_sub, Affine.eval_literal, ha.2, encode_integer]
+    simp only [integer, offset]
+    omega
 
 /-- Defined equality includes both guards. Two failed expressions are not
 equal, even when their unchecked affine values happen to coincide. -/

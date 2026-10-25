@@ -155,12 +155,15 @@ theorem compile_trace_complete (hP : inFragP F P = some F') (hm : Sim C L b F σ
     {o : Solidity.Out C σ.H Γ'} (hrun : Solidity.Prog.run σ P = .ok o) :
     ∃ m' μs, lts.MTr ⟨compileProg b P, 0, m⟩ μs ⟨[], 0, m'⟩ ∧
       m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m' := by
-  rcases compile_exact hP hm hL hpay with ⟨o', m', hsrc, htgt, hstk, hsim⟩ | ⟨hbad, _⟩
+  rcases compile_exact hP hm hL hpay with
+    ⟨o', m', hsrc, htgt, hstk, hsim⟩ | ⟨hbad, _⟩ | ⟨hbad, _⟩
   · have ho : o' = o := Except.ok.inj (hsrc.symm.trans hrun)
     subst o'
     obtain ⟨μs, htr⟩ := exec_eq_ok_iff.mp htgt
     exact ⟨m', μs, htr, hstk, hsim⟩
   · rcases hbad with hr | ⟨_, hr⟩ <;> rw [hrun] at hr <;> cases hr
+  · rw [hrun] at hbad
+    cases hbad
 
 /-- Exact successful termination correspondence, stated using CSLib traces.
 This is a trace theorem for the existing compiler, not a bisimulation with

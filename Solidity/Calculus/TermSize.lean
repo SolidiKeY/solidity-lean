@@ -1182,11 +1182,8 @@ theorem iteStep_bounded {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C �
       | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
       | some b =>
         simp only [iteStep, Upd.ifJoin?, ha, hb]
-        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
-        · simp only [Bool.false_eq_true, if_false]; exact hsplit
-        · simp only [if_true]
-          obtain ⟨hl, hs⟩ := Upd.ifJoin_bounded s ha hb
-          exact Premise.Bounded.update hl hs
+        obtain ⟨hl, hs⟩ := Upd.ifJoin_bounded s ha hb
+        exact Premise.Bounded.update hl hs
   | _ => bnil
 
 theorem requireStep_bounded (c : Val C Γ .bool) : (requireStep k c).Bounded 3 := by
