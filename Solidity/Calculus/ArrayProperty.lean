@@ -8,7 +8,7 @@ A universal block in a negative position whose body reads mappings at its
 variables (`(∀ k. k < 10 → balances[k] == 0) → balances[5] == 0`) is
 decided as Bradley, Manna and Sipma decide it: replaced by its instances
 at the index set `U`, the goal's ground keys of those mappings and the
-guards' ground bounds (each also plus one), and `0`; the instance is
+guards' ground operands with their successors, and `0`; the instance is
 decided by the quantified pipeline.
 
 * **Sound** (`apfInst_sound`): the block implies each instance, and it
@@ -19,7 +19,7 @@ decided by the quantified pipeline.
   `⌊i⌋` held, `⌊i⌋` the largest value of the index set at most `i`
   (`floorIn`).  Reads at the index set keep their values, so everything
   outside the blocks reads as before (`ApfTm.eval_rel`); a guard true at `i`
-  is true at `⌊i⌋` (`GTm.mono`: guards compare a variable with a ground
+  is true at `⌊i⌋` (`GuardP.mono`: guards compare a variable with a ground
   term, or two variables by `≤`, `≥`, `==`, never `<`), so each block
   holds by its instance at `⌊i⌋`.
 

@@ -25,8 +25,8 @@ whose body reads storage at no variable it binds (`evenRead`: the read
 hoisted out, `hoistPrep`).
 
 `Fml.inTarget` is the fragment the user named, on program-free leaves: a
-negative-position quantifier over a mapping is in it exactly when it is in
-the array property fragment.  `decideLeaf` decides such a block over a
+negative-position quantifier over a mapping is in it only when it is in
+the array property fragment (a conservative reading).  `decideLeaf` decides such a block over a
 mapping at a root (M7, step 5: `apf`, instantiated at the index set,
 `apfPrep`); a block over an inner mapping (`rowApf`) is still answered
 `unknown`, so `DecisionTheorem` is not yet true.  Two bound indices on one
@@ -155,6 +155,11 @@ strict comparison of two bound variables. -/
 def gridApf : Fml Allow [] := dl!{ (∀ uint i; ∀ uint j; allow[i][j] == 0) → allow[1][2] == 0 }
 def strictSorted : Fml Allow [] :=
   dl!{ (∀ uint i; ∀ uint j; i < j → balances[i] < balances[j]) → balances[1] < balances[2] }
+/-- Inside: the non-strict comparison of two bound variables, and one bound
+index on a nested path. -/
+def sortedLe : Fml Allow [] :=
+  dl!{ (∀ uint i; ∀ uint j; i <= j → balances[i] <= balances[j]) → balances[2] <= balances[5] }
+def columnApf : Fml Allow [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
 
 end
 
@@ -274,7 +279,11 @@ theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 /-- info: "unknown" -/
 #guard_msgs in #eval verdict rowApf
 
-/-- info: [false, false] -/
-#guard_msgs in #eval [gridApf, strictSorted].map (Fml.inTarget {})
+/-- info: [false, false, true, true] -/
+#guard_msgs in #eval [gridApf, strictSorted, sortedLe, columnApf].map (Fml.inTarget {})
+
+/-- A two-variable block over a root: covered (nine instances), its verdict
+out of reach in practice (`docs/automation.md`, M7). -/
+theorem sortedLe_covered : sortedLe.Covered = true := by decide +kernel
 
 end Solidity.Examples.Decision

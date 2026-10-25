@@ -704,8 +704,8 @@ def _root_.Solidity.Op2.isGuardCmp {a b s : Srt} : Op2 C a b s → Bool
 
 /-- A strict comparison: `<`, `>`.  Between two bound variables it is
 outside the fragment (`i < j` is `i + 1 ≤ j`, arithmetic on the bound
-variables, under which Bradley, Manna and Sipma show satisfiability
-undecidable). -/
+variables, outside Bradley, Manna and Sipma's fragment as they state it;
+`BinOp.isStrict` is the decision's counterpart). -/
 def _root_.Solidity.Op2.isStrictCmp {a b s : Srt} : Op2 C a b s → Bool
   | .binop .lt _ | .binop .gt _ | .zcmp .lt _ | .zcmp .gt _ => true
   | _ => false
