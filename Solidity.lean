@@ -430,6 +430,7 @@ import Solidity.Calculus.OccurrenceLayout
 import Solidity.Calculus.ReadFlattening
 import Solidity.Calculus.ActiveReadConstraints
 import Solidity.Calculus.LeafArithmetic
+import Solidity.Calculus.BitArith
 import Solidity.Calculus.QuotientCut
 import Solidity.Calculus.LeafInputs
 import Solidity.Calculus.CondLift

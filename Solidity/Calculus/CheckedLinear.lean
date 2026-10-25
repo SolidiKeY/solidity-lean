@@ -2,6 +2,7 @@ import Solidity.Calculus.CheckedBool
 import Solidity.Calculus.StaticLinear
 import Solidity.Calculus.ExactUpdates
 import Solidity.Calculus.InputLayout
+import Solidity.Calculus.BitArith
 
 /-!
 # Checked arithmetic compilation of typed inputs
@@ -989,6 +990,30 @@ def defDiv (h : BinOp.div.accepts .uint = true) {a : LTm C (.val .uint)} (c : Pr
       simp only [integer, Int.sub_zero]
       omega) ha
 
+/-- `x - c·q` between `0` and `|c| - 1` on `x`'s side of zero, on the
+codes of `int` (offset by `2^255`): `q` is `x` divided by `c`, truncating. -/
+def tdivRel (c : Int) (A B : Affine) : AFml :=
+  let R := (A.sub (B.scale c)).offset (c * ((2 ^ 255 : Nat) : Int) - ((2 ^ 255 : Nat) : Int))
+  .and (.imp ((Affine.literal ((2 ^ 255 : Nat) : Int)).le A)
+      (.and ((Affine.literal 0).le R) (R.le (.literal ((c.natAbs : Int) - 1)))))
+    (.imp (.not ((Affine.literal ((2 ^ 255 : Nat) : Int)).le A))
+      (.and (R.le (.literal 0)) ((Affine.literal (1 - (c.natAbs : Int))).le R)))
+
+theorem tdivRel_holds (c : Int) (A B : Affine) (x : Nat → Nat) (v w : Int)
+    (hA : A.eval x = v + ((2 ^ 255 : Nat) : Int)) (hB : B.eval x = w + ((2 ^ 255 : Nat) : Int)) :
+    (tdivRel c A B).holds x ↔ BitArith.TdivRel v c w c.natAbs := by
+  simp only [tdivRel, BitArith.TdivRel, AFml.holds, Affine.holds_le, Affine.eval_offset,
+    Affine.eval_sub, Affine.eval_scale, Affine.eval_literal, hA, hB, Int.mul_add]
+  constructor
+  · rintro ⟨h1, h2⟩
+    refine ⟨fun hv => ?_, fun hv => ?_⟩
+    · have := h1 (by omega); omega
+    · have := h2 (by omega); omega
+  · rintro ⟨h1, h2⟩
+    refine ⟨fun hv => ?_, fun hv => ?_⟩
+    · have := h1 (by omega); omega
+    · have := h2 (by omega); omega
+
 /-- The divisor of `a >> v`: `2^v`, every shift past the word one of `2^256`. -/
 def shrDiv {p : PrimTy} (v : p.Denote) : Int :=
   2 ^ (if integer p v < 256 then (integer p v).toNat else 256)
@@ -1043,6 +1068,23 @@ def defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) {a : LTm C (.val p)} (v
         · simp only [hk, if_false, hp, maxInt]
           rw [hM, hB'] at *
           split <;> omega) ha
+
+/-- `a / c == k` at `int`, `c ∉ {0, -1}`: truncation toward zero, by its sign cases. -/
+def defDivI (h : BinOp.div.accepts .int = true) {a : LTm C (.val .int)} (c : PrimTy.int.Denote)
+    (hc : c.val ≠ 0) (k : Nat) (hk : Parameter.mk .int k ∈ ps)
+    (ha : CheckedValue (ps := ps) (es := es) a) :
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k)) :=
+  rel1 k hk (fun x => BinOp.evalT .div h x c)
+    (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)]; rfl)
+    (tdivRel c.val) (by
+      intro x v w A B hA hB
+      change PrimTy.int.Denote at w
+      change B.eval x = ((encode .int w).val : Int) at hB
+      rw [encode_int] at hA hB
+      rw [tdivRel_holds c.val A B x v.val w.val hA hB]
+      show _ ↔ (if c.val = 0 then none else some (Int.tdiv v.val c.val)).bind PrimTy.int.ofInt? = some w
+      rw [if_neg hc, Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl]
+      exact (BitArith.tdiv_iff v.val c.val w.val hc).symm) ha
 
 /-- `a +% b == k` at `uint`. -/
 def defAddW (h : BinOp.addW.accepts .uint = true) {a b : LTm C (.val .uint)} (k : Nat)
@@ -1148,6 +1190,8 @@ def specialBin? (op : BinOp) {q : PrimTy} (h : op.accepts q = true) (x y : LTm C
     match q, h, y, hk with
     | .uint, h, .app0 (.lit c), hk =>
       if hc : c.val = 0 then none else (CheckedValue.ofTermIn? ps x).map (defDiv h c hc k hk)
+    | .int, h, .app0 (.lit c), hk =>
+      if hc : c.val = 0 then none else (CheckedValue.ofTermIn? ps x).map (defDivI h c hc k hk)
     | _, _, _, _ => none
   | .shr, h, hk =>
     match y with

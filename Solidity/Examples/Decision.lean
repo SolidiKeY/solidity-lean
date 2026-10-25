@@ -489,6 +489,22 @@ def gapAnd : Fml Gaps [] := allU (isT (.app2 (.binop .le rfl) (.app2 (.binop .ba
 def gapPow : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 1)) xU)
 def gapMulW : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) xU (litU 3)) (litU 0)))
 
+/-- Still outside `Fml.Covered`: `&` at `int` with a literal (two's
+complement), and `addmod` with a literal modulus. -/
+def gapIntAnd : Fml Gaps [] := allI (isT (.app2 (.binop .le rfl) (.app2 (.binop .band rfl) xI (litI 6)) (litI 6)))
+def gapAddmod : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .addmod) xU xU (litU 7)) (litU 7)))
+
+/-! ### Operators with a literal operand, decided: false variants -/
+
+def intDivBad : Fml Gaps [] := allI (isT (.app2 (.binop .eqB rfl)
+  (.app2 (.binop .mul rfl) (.app2 (.binop .div rfl) xI (litI 3)) (litI 3)) xI))
+def intModBad : Fml Gaps [] := allI (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mod rfl) xI (litI 3)) (litI 0)))
+def orBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bor rfl) xU (litU 1)) xU))
+def xorBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bxor rfl) xU (litU 1)) xU))
+def andBad : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app2 (.binop .band rfl) (litU 6) xU) (litU 6)))
+def powBad : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 0)) xU)
+def mulWBad : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) (litU 3) xU) xU))
+
 end GapTerms
 
 /-! ### Hashes outside `Fml.hashCovered` -/
@@ -552,6 +568,8 @@ theorem gapXor_inTarget : gapXor.inTarget {} = true := by decide +kernel
 theorem gapAnd_inTarget : gapAnd.inTarget {} = true := by decide +kernel
 theorem gapPow_inTarget : gapPow.inTarget {} = true := by decide +kernel
 theorem gapMulW_inTarget : gapMulW.inTarget {} = true := by decide +kernel
+theorem gapIntAnd_inTarget : gapIntAnd.inTarget {} = true := by decide +kernel
+theorem gapAddmod_inTarget : gapAddmod.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
 theorem gapFiveStrings_inTarget : gapFiveStrings.inTarget {} = true := by decide +kernel
@@ -560,8 +578,44 @@ theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := b
 /-- info: true -/
 #guard_msgs in
 #eval ([gapColumn, gapTwoPaths, gapIntKeyed, gapBoolKeyed, gapStructValue, gapArrayBlock, gapLedgerBlock,
-  gapPartialGuard, gapPositiveForall, gapArrayRead, gapFixedRead, gapMemory, gapKIntBinder, gapLedgerWrite,
-  gapManyReads, gapIntDiv, gapIntMod, gapOr, gapXor, gapAnd, gapPow, gapMulW].map verdict).all (· == "unknown")
+  gapPartialGuard, gapPositiveForall, gapArrayRead, gapFixedRead, gapMemory, gapKIntBinder,
+  gapLedgerWrite, gapIntAnd, gapAddmod].map verdict).all (· == "unknown")
+
+/-! Fifty reads (M7, 2026-10-25): the flattener's budget is the leaf's own
+(`readBudget`), no longer a fixed 45 reads. -/
+
+theorem gapManyReads_covered : gapManyReads.Covered = true := by decide +kernel
+
+/-- It answers (`decideGoal_complete`); the answer is not computed here: the
+walk of `AFml.fastVerify` over 51 variables of 256 bits recurses past the
+interpreter's stack (docs/automation.md, M7, "Running time"). -/
+theorem gapManyReads_answers : decideGoal gapManyReads ≠ .unknown :=
+  decideGoal_complete gapManyReads_covered rfl
+
+/-! Operators with a literal operand (M7, 2026-10-25), written by the cut
+through the others (`Calculus/QuotientCut.lean`: `bandGo`, `mulWGo`,
+`litCutR`): each former counterexample proved, a false variant refuted,
+the coverage kernel-checked. -/
+
+/-- info: ["proved", "proved", "proved", "proved", "proved", "proved", "proved"] -/
+#guard_msgs in #eval [gapIntDiv, gapIntMod, gapOr, gapXor, gapAnd, gapPow, gapMulW].map verdict
+
+/-- info: ["refuted", "refuted", "refuted", "refuted", "refuted", "refuted", "refuted"] -/
+#guard_msgs in #eval [intDivBad, intModBad, orBad, xorBad, andBad, powBad, mulWBad].map verdict
+
+theorem gapIntDiv_covered : gapIntDiv.Covered = true := by decide +kernel
+theorem gapIntMod_covered : gapIntMod.Covered = true := by decide +kernel
+theorem gapOr_covered : gapOr.Covered = true := by decide +kernel
+theorem gapXor_covered : gapXor.Covered = true := by decide +kernel
+theorem gapAnd_covered : gapAnd.Covered = true := by decide +kernel
+theorem gapPow_covered : gapPow.Covered = true := by decide +kernel
+theorem gapMulW_covered : gapMulW.Covered = true := by decide +kernel
+theorem andBad_covered : andBad.Covered = true := by decide +kernel
+theorem mulWBad_covered : mulWBad.Covered = true := by decide +kernel
+
+theorem gapOr_answers : decideGoal gapOr ≠ .unknown := decideGoal_complete gapOr_covered rfl
+theorem gapMulW_iff : decideLeaf gapMulW = .proved ↔ Fml.Valid gapMulW :=
+  decideLeaf_proved_iff gapMulW_covered
 
 /-- info: ["unknown", "unknown", "unknown", "unknown"] -/
 #guard_msgs in

@@ -269,8 +269,6 @@ def LFml.quantCovered (ψ : LFml C) : Bool :=
     ((bodyPrep ψ.stripAll.2).body.liftCondB condLiftFuel liftBudget).isSome &&
     ((abstracted (bodyPrep ψ.stripAll.2).body).1.src? false).isSome &&
     decide ((abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.nodes ≤ 511) &&
-    decide ((abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.words *
-      (abstracted (bodyPrep ψ.stripAll.2).body).1.cutAll.words ≤ 2048) &&
     (abstracted (bodyPrep ψ.stripAll.2).body).2.all (·.2.qfrag)
 
 /-- **The fragment of the quantified decision**, on the eliminated leaf. -/
@@ -291,7 +289,7 @@ theorem quantReduction?_isSome (φ : Fml C []) (h : φ.quantCovered = true) :
       Option.some.injEq] at hl
     obtain ⟨d, hd, r, hr, rfl⟩ := hl
     simp only [LFml.quantCovered, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
-    obtain ⟨⟨⟨⟨⟨⟨hdepth, hcov⟩, hnodes⟩, hsrc⟩, hn⟩, hw⟩, hq⟩ := h
+    obtain ⟨⟨⟨⟨⟨hdepth, hcov⟩, hnodes⟩, hsrc⟩, hn⟩, hq⟩ := h
     obtain ⟨u, hu, hup, hub⟩ := UniversalPrefix.ofFormula?_strip _ 1024 hdepth
     have hc : ∀ q ∈ u.body.freeParams, q ∈ u.parameters := by
       rw [hub, hup]; exact hcov
@@ -303,7 +301,7 @@ theorem quantReduction?_isSome (φ : Fml C []) (h : φ.quantCovered = true) :
       | some _ => rfl
     obtain ⟨⟨hs⟩, -⟩ := Option.isSome_iff_exists.mp hsrc
     obtain ⟨M, hM⟩ := Option.isSome_iff_exists.mp
-      (flattenedArithmetic?_isSome (abstracted (bodyPrep u.body).body).1 (hub ▸ hs) (hub ▸ hn) (hub ▸ hw))
+      (flattenedArithmetic?_isSome (abstracted (bodyPrep u.body).body).1 (hub ▸ hs) (hub ▸ hn))
     have hW := layoutOf_W M (abstracted (bodyPrep u.body).body).2
     obtain ⟨D, hD⟩ := Option.isSome_iff_exists.mp (QDefs.compile_isSome
       (layoutOf M (abstracted (bodyPrep u.body).body).2).pos (layoutOf M (abstracted (bodyPrep u.body).body).2).P

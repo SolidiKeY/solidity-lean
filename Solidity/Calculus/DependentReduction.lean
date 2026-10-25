@@ -151,6 +151,30 @@ structure DependentReduction (φ : Fml C []) where
   body : FlattenedArithmetic sentence.body
   covered : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters
 
+/-- The storage reads of a term. -/
+def LTm.words : {s : Srt} → LTm C s → Nat
+  | _, .var _ | _, .app0 _ | _, .err => 0
+  | _, .obsW a => a.words + 1
+  | _, .app1 _ a | _, .obsL a | _, .obsH a => a.words
+  | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.words + b.words
+  | _, .app3 _ a b c => a.words + b.words + c.words
+  | _, .kite a b t e => a.words + b.words + t.words + e.words
+
+/-- The storage reads of a formula. -/
+def LFml.words : LFml C → Nat
+  | .tt => 0
+  | .eq a b => a.words + b.words
+  | .not φ | .all _ _ φ => φ.words
+  | .and φ ψ | .imp φ ψ => φ.words + ψ.words
+
+/-- **The flattener's budget for a cut leaf**: its alias pairs, at least
+2048.  Computed from the leaf, so that no fixed bound refuses its reads. -/
+def readBudget (φ : LFml C) : Nat := max 2048 (φ.words * φ.words)
+
+theorem le_readBudget (φ : LFml C) : 2048 ≤ readBudget φ := Nat.le_max_left _ _
+
+theorem words_le_readBudget (φ : LFml C) : φ.words * φ.words ≤ readBudget φ := Nat.le_max_right _ _
+
 def dependentReduction? (φ : Fml C []) : Option (DependentReduction φ) := do
   let d ← ProgramNormalization.ofFormula? 2048 φ
   let r ← sourceReduction? d.formula
@@ -159,7 +183,7 @@ def dependentReduction? (φ : Fml C []) : Option (DependentReduction φ) := do
   if (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone then none
   let sentence ← UniversalPrefix.ofFormula? 1024 (r.leaf.elim.condSimp.prenex.liftCond condLiftFuel)
   if hc : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters then
-    return ⟨d, r, sentence, ← flattenedArithmetic? 2048 sentence.body, hc⟩
+    return ⟨d, r, sentence, ← flattenedArithmetic? (readBudget sentence.body.cutAll) sentence.body, hc⟩
   else none
 
 namespace DependentReduction

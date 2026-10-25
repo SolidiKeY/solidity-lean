@@ -848,6 +848,9 @@ inductive LFml.Arith (ps : Parameter → Prop) (es : EnvKey → Prop)
   | defDiv (h : BinOp.div.accepts .uint = true) (c : PrimTy.uint.Denote) (hc : c.val ≠ 0) (k : Nat)
       {a : LTm C (.val .uint)} : a.Num ps es → ps ⟨.uint, k⟩ → a.depth ≤ 1023 →
       LFml.Arith ps es L (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k))
+  | defDivI (h : BinOp.div.accepts .int = true) (c : PrimTy.int.Denote) (hc : c.val ≠ 0) (k : Nat)
+      {a : LTm C (.val .int)} : a.Num ps es → ps ⟨.int, k⟩ → a.depth ≤ 1023 →
+      LFml.Arith ps es L (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k))
   | defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) (v : p.Denote) (k : Nat)
       {a : LTm C (.val p)} : a.Num ps es → ps ⟨p, k⟩ → a.depth ≤ 1023 →
       LFml.Arith ps es L (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k))
@@ -922,6 +925,16 @@ theorem floorRel_width {n : Nat} {A B : Affine} (hA : A.W n) (hB : B.W n) (off d
     (Affine.width_le (hA.offset _) (((hB.offset _).scale _).offset _)))
     (Affine.width_le (hB.offset _) (Affine.W.literal _ _))
 
+theorem tdivRel_width {n : Nat} {A B : Affine} (hA : A.W n) (hB : B.W n) (c : Int) :
+    (StorageEncoding.tdivRel c A B).width ≤ n :=
+  AFml.width_and
+    (AFml.width_imp (Affine.width_le (Affine.W.literal _ _) hA)
+      (AFml.width_and (Affine.width_le (Affine.W.literal _ _) ((hA.sub (hB.scale _)).offset _))
+        (Affine.width_le ((hA.sub (hB.scale _)).offset _) (Affine.W.literal _ _))))
+    (AFml.width_imp (AFml.width_not (Affine.width_le (Affine.W.literal _ _) hA))
+      (AFml.width_and (Affine.width_le ((hA.sub (hB.scale _)).offset _) (Affine.W.literal _ _))
+        (Affine.width_le (Affine.W.literal _ _) ((hA.sub (hB.scale _)).offset _))))
+
 theorem wrapRel_width {n : Nat} {A B Y : Affine} (hA : A.W n) (hB : B.W n) (hY : Y.W n) (sub : Bool) :
     (wrapRel sub A B Y).width ≤ n := by
   cases sub
@@ -988,6 +1001,14 @@ theorem StorageEncoding.ofFormulaL?_good {ps : List Parameter} {es : List EnvKey
     replace ga := ga.lift ls
     refine ⟨StorageEncoding.defDiv h c hc k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
       fun rs hr => AFml.width_and (ga rs hr).2 (floorRel_width (ga rs hr).1 ((Affine.W.var_index hk).mono (Nat.le_add_right _ _)) _ _ _)⟩
+    show (if hc' : c.val = 0 then none else _) = _
+    rw [dif_neg hc, hva]
+    rfl
+  | @defDivI h c hc k a ha hk hd =>
+    obtain ⟨va, hva, ga⟩ := CheckedValue.ofTermIn?_good (es := es) ha hd
+    replace ga := ga.lift ls
+    refine ⟨StorageEncoding.defDivI h c hc k hk va, StorageEncoding.equality?_var _ k hk _ ?_,
+      fun rs hr => AFml.width_and (ga rs hr).2 (tdivRel_width (ga rs hr).1 ((Affine.W.var_index hk).mono (Nat.le_add_right _ _)) _)⟩
     show (if hc' : c.val = 0 then none else _) = _
     rw [dif_neg hc, hva]
     rfl
@@ -1162,6 +1183,7 @@ theorem LFml.Arith.ledger_mono {P : Parameter → Prop} {E : EnvKey → Prop}
   | and _ _ ih1 ih2 => exact .and ih1 ih2
   | imp _ _ ih1 ih2 => exact .imp ih1 ih2
   | defDiv h c hc k ha hk hd => exact .defDiv h c hc k ha hk hd
+  | defDivI h c hc k ha hk hd => exact .defDivI h c hc k ha hk hd
   | defShr h v k ha hk hd => exact .defShr h v k ha hk hd
   | defAddW h k ha hb hk hda hdb => exact .defAddW h k ha hb hk hda hdb
   | defSubW h k ha hb hk hda hdb => exact .defSubW h k ha hb hk hda hdb
