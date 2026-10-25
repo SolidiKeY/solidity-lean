@@ -1,7 +1,7 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
-import Solidity.Calculus.HashComplete
+import Solidity.Calculus.HashKinds
 
 /-!
 # The closer's decision, stated (M7)
@@ -44,13 +44,17 @@ strings at a time, from a family whose hashes are distinct
 (`Fml.swInst`, `Fml.swInst_refutes`, `Calculus/HashReduction.lean`), which
 meets the premise; exact on the fragment `Fml.hashCovered`
 (`Fml.swPrefix_exact`, `Calculus/HashComplete.lean`, through the
-relabeling of `Calculus/HashRelabel.lean`).
+relabeling of `Calculus/HashRelabel.lean`).  A string hashed by two kinds
+stands for one word per kind (`decideHash2`, `Calculus/HashKinds.lean`):
+the second kind's words binders of their own, linked to the first's by
+the premise, the result read by the one-kind swap.
 
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
-today: `Examples/Decision.lean`'s `rowApf` (a block over an inner mapping)
-is in the fragment and answered `unknown`.  A statement of the form "some decider is complete" would
+today: `Examples/Decision.lean` pins a leaf of the fragment answered
+`unknown` for each shape left (`gapColumn` … `gapHashUnderForall`,
+`docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
 rounds extend.
@@ -287,87 +291,7 @@ theorem decideHashK_refutes {k : HashKind} {hk : k ≠ .ecrecover} {φ : Fml C [
         exact r.refutes
       · cases h
 
-/-- A leaf with hashes: of each kind in turn. -/
-def decideHash (φ : Fml C []) : LeafVerdict C :=
-  match decideHashK .keccak (by decide) φ with
-  | .unknown =>
-    match decideHashK .sha256 (by decide) φ with
-    | .unknown => decideHashK .ripemd160 (by decide) φ
-    | v => v
-  | v => v
-
-theorem decideHash_cases {φ : Fml C []} {v : LeafVerdict C} (h : decideHash φ = v) :
-    decideHashK .keccak (by decide) φ = v ∨ decideHashK .sha256 (by decide) φ = v ∨
-      decideHashK .ripemd160 (by decide) φ = v := by
-  unfold decideHash at h
-  cases h1 : decideHashK .keccak (by decide) φ with
-  | unknown =>
-    rw [h1] at h
-    cases h2 : decideHashK .sha256 (by decide) φ with
-    | unknown => rw [h2] at h; exact .inr (.inr h)
-    | _ => rw [h2] at h; exact .inr (.inl h)
-  | _ => rw [h1] at h; exact .inl h
-
-theorem decideHash_sound {φ : Fml C []} (h : decideHash φ = .proved) : Fml.ValidH φ := by
-  rcases decideHash_cases h with h | h | h <;> exact decideHashK_sound h
-
-theorem decideHash_refutes {φ : Fml C []} {σ : State C []} (h : decideHash φ = .refuted σ) :
-    ¬ Fml.holdsH σ φ := by
-  rcases decideHash_cases h with h | h | h <;> exact decideHashK_refutes h
-
 /-! ### Completeness on leaves with hashes -/
-
-/-- The root a term names. -/
-def _root_.Solidity.Tm.rootName? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option Name
-  | .app0 (.root r _) => some r
-  | _ => none
-
-/-- The roots a term indexes by a word local of `V`. -/
-def _root_.Solidity.Tm.vRoots (V : List Nat) {Γ : Ctx} : {s : Srt} → Tm C Γ s → List Name
-  | _, .netOf _ a => a.vRoots V
-  | _, .app1 _ x => x.vRoots V
-  | _, .app2 o x y =>
-    (if o.isAtR && y.isVVar V then x.rootName?.toList else []) ++ x.vRoots V ++ y.vRoots V
-  | _, .app3 _ x y z => x.vRoots V ++ y.vRoots V ++ z.vRoots V
-  | _, _ => []
-
-def _root_.Solidity.Rhs.vRoots (V : List Nat) {Γ : Ctx} {t : LTy} : Rhs C Γ t → List Name
-  | .val a => a.vRoots V
-  | _ => []
-
-def _root_.Solidity.UpdElem.vRoots (V : List Nat) {Γ Δ : Ctx} : UpdElem C Γ Δ → List Name
-  | .local _ r => r.vRoots V
-  | .storage s => s.vRoots V
-  | _ => []
-
-def _root_.Solidity.Upd.vRoots (V : List Nat) {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List Name
-  | _, .snoc U e => U.vRoots V ++ e.vRoots V
-  | _, .decl U _ r => U.vRoots V ++ r.vRoots V
-  | _, _ => []
-
-/-- The roots a formula indexes by a word local of `V`: the keyed roots. -/
-def _root_.Solidity.Fml.vRoots (V : List Nat) : {Γ : Ctx} → Fml C Γ → List Name
-  | _, .eq a b => a.vRoots V ++ b.vRoots V
-  | _, .wellFormed s => s.vRoots V
-  | _, .not φ | _, .all _ _ φ => Fml.vRoots V φ
-  | _, .and φ ψ | _, .imp φ ψ => Fml.vRoots V φ ++ Fml.vRoots V ψ
-  | _, .upd _ U φ => U.vRoots V ++ Fml.vRoots V φ
-  | _, _ => []
-
-/-- The levels of the prefix's fresh strings. -/
-def _root_.Solidity.Fml.allocLevels : {Γ : Ctx} → Fml C Γ → List Nat
-  | _, .all _ _ φ => Fml.allocLevels φ
-  | Γ, .allocAll _ _ φ => Γ.length :: Fml.allocLevels φ
-  | _, _ => []
-
-/-- The keyed roots map words to words, checked. -/
-def kTypedB (C : Contract) (K : List Name) : Bool :=
-  K.all fun r => decide (C.rootType r = some (.ref (.mapping .uint (.prim .uint))))
-
-theorem kTyped_of {K : List Name} (h : kTypedB C K = true) : KTyped C K := by
-  intro r hr
-  simp only [kTypedB, List.all_eq_true, decide_eq_true_eq] at h
-  exact h r hr
 
 /-- **The covered leaves with hashes of kind `k`**: the swapped leaf and each
 instance at classes of its strings covered (`Fml.Covered`), at most
@@ -382,10 +306,6 @@ def _root_.Solidity.Fml.coveredK (k : HashKind) (φ : Fml C []) : Bool :=
     φ'.Covered && decide (φ.allocCount ≤ famBound) &&
       (rgs φ.allocCount).all (fun cs => (φ.swInst k cs).any Fml.Covered) &&
       φ.swRL k V K && φ.prefixOK V && kTypedB C K
-
-/-- **The covered leaves with hashes.** -/
-def _root_.Solidity.Fml.hashCovered (φ : Fml C []) : Bool :=
-  φ.hasHash && (φ.coveredK .keccak || φ.coveredK .sha256 || φ.coveredK .ripemd160)
 
 theorem findSome?_ne_none {α β : Type} {f : α → Option β} {a : α} :
     {l : List α} → a ∈ l → f a ≠ none → l.findSome? f ≠ none
@@ -446,24 +366,238 @@ theorem decideHashK_complete {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C 
       | none => exact absurd hs this
       | some r => exact fun h => nomatch h
 
-theorem decideHash_complete {φ : Fml C []}
-    (h : (φ.coveredK .keccak || φ.coveredK .sha256 || φ.coveredK .ripemd160) = true) :
+/-- A refutation of the leaf with two kinds at the classes `cs`: the
+instance with the second kind's words fixed (`Fml.tk`), refuted by
+`decideLeaf`. -/
+def refuteAt2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) (φ : Fml C [])
+    (cs : List Nat) : Option (HashRefutation φ) :=
+  if hcs : ∀ j ∈ cs, j < famBound then
+    match he : φ.tk k₁ k₂ true with
+    | none => none
+    | some φF =>
+      match hi : φF.swInst k₁ cs with
+      | none => none
+      | some inst =>
+        match hd : decideLeaf inst with
+        | .refuted σ => some ⟨σ.noHeap, Fml.tk_refutes hk₁ hk₂ he hi hcs (decideLeaf_refutes hd)⟩
+        | _ => none
+  else none
+
+/-- **A leaf with strings hashed by two kinds** (`k₁`, `k₂`): the second
+kind's words as binders of their own (`Fml.tk`), the result read by the
+one-kind swap; proved by it, or refuted at the first class of strings whose
+instance, the second kind's words fixed, is refuted. -/
+def decideHash2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) (φ : Fml C []) :
+    LeafVerdict C :=
+  match φ.tk k₁ k₂ false with
+  | none => .unknown
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => .unknown
+    | some φ₂' =>
+      match decideLeaf φ₂' with
+      | .proved => .proved
+      | _ =>
+        match (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ) with
+        | some r => .refuted r.state
+        | none => .unknown
+
+theorem decideHash2_sound {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {φ : Fml C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .proved) : Fml.ValidH φ := by
+  unfold decideHash2 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      split at h
+      · rename_i hd
+        exact Fml.tk_validH hk₁ hk₂ e₂ (Fml.swPrefix_validH e' (decideLeaf_sound hd))
+      · split at h <;> cases h
+
+theorem decideHash2_refutes {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {φ : Fml C []} {σ : State C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  unfold decideHash2 at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · split at h
+      · cases h
+      · split at h
+        · rename_i r _
+          cases h
+          exact r.refutes
+        · cases h
+
+/-- One way of deciding a leaf with hashes, with its fragment. -/
+structure HashTry (C : Contract) where
+  run : Fml C [] → LeafVerdict C
+  covers : Fml C [] → Bool
+  sound : ∀ {φ}, run φ = .proved → Fml.ValidH φ
+  refutes : ∀ {φ σ}, run φ = .refuted σ → ¬ Fml.holdsH σ φ
+  complete : ∀ {φ}, covers φ = true → run φ ≠ .unknown
+
+/-- The first answer of a list of decisions. -/
+def firstKnown : List (Fml C [] → LeafVerdict C) → Fml C [] → LeafVerdict C
+  | [], _ => .unknown
+  | t :: ts, φ =>
+    match t φ with
+    | .unknown => firstKnown ts φ
+    | v => v
+
+theorem firstKnown_mem {φ : Fml C []} {v : LeafVerdict C} (hv : v ≠ .unknown) :
+    (ts : List (Fml C [] → LeafVerdict C)) → firstKnown ts φ = v → ∃ t ∈ ts, t φ = v
+  | [], h => absurd h.symm hv
+  | t :: ts, h => by
+    unfold firstKnown at h
+    split at h
+    · obtain ⟨t', ht', e⟩ := firstKnown_mem hv ts h
+      exact ⟨t', List.mem_cons_of_mem _ ht', e⟩
+    · rename_i hne
+      exact ⟨t, List.mem_cons_self, by rw [← h]⟩
+
+theorem firstKnown_ne {φ : Fml C []} :
+    (ts : List (Fml C [] → LeafVerdict C)) → (∃ t ∈ ts, t φ ≠ .unknown) → firstKnown ts φ ≠ .unknown
+  | [], ⟨_, h, _⟩ => nomatch h
+  | t :: ts, ⟨t', ht', hne⟩ => by
+    unfold firstKnown
+    split
+    · rename_i hu
+      rcases List.mem_cons.1 ht' with rfl | ht'
+      · exact absurd hu hne
+      · exact firstKnown_ne ts ⟨t', ht', hne⟩
+    · rename_i v hv
+      exact hv
+
+
+/-- **The covered leaves with hashes of two kinds** (`k₁`, `k₂`): the
+reading with the second kind's words in the one-kind fragment of `k₁`
+(`Fml.coveredK`'s conditions on it), each instance with the second kind's
+words fixed covered, and the second kind's words in the relabeling
+fragment (`Fml.tkRL`). -/
+def _root_.Solidity.Fml.coveredK2 (k₁ k₂ : HashKind) (φ : Fml C []) : Bool :=
+  match φ.tk k₁ k₂ false with
+  | none => false
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => false
+    | some φ₂' =>
+      let V := φ₂.allocLevels
+      let K := φ₂'.vRoots V
+      φ₂'.Covered && decide (φ₂.allocCount ≤ famBound) &&
+        (rgs φ₂.allocCount).all (fun cs => ((φ.tk k₁ k₂ true).bind (·.swInst k₁ cs)).any Fml.Covered) &&
+        φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂
+
+/-- **Completeness for two kinds.** -/
+theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    {φ : Fml C []} (h : φ.coveredK2 k₁ k₂ = true) : decideHash2 k₁ k₂ hk₁ hk₂ φ ≠ .unknown := by
+  unfold Fml.coveredK2 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      simp only [Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
+      obtain ⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩ := h
+      unfold decideHash2
+      rw [e₂]
+      simp only
+      rw [e']
+      simp only
+      cases hd : decideLeaf φ₂' with
+      | proved => exact fun h => nomatch h
+      | unknown => exact absurd hd (decideLeaf_complete hcov)
+      | refuted σ =>
+        simp only
+        have hinst : ∀ cs ∈ rgs φ₂.allocCount, ∃ φF instF, φ.tk k₁ k₂ true = some φF ∧
+            φF.swInst k₁ cs = some instF := by
+          intro cs hcs
+          have := hall cs hcs
+          cases hF : φ.tk k₁ k₂ true with
+          | none => rw [hF] at this; cases this
+          | some φF =>
+            rw [hF] at this
+            cases hi : φF.swInst k₁ cs with
+            | none => simp only [Option.bind_some, hi, Option.any_none, Bool.false_eq_true] at this
+            | some instF => exact ⟨φF, instF, rfl, hi⟩
+        obtain ⟨cs, hcs, φF, instF, hF, hi, hnf⟩ := Fml.tk_complete hk₁ hk₂ e₂ e' (kTyped_of hK) hrl
+          hpre hn hrl₂ hinst (decideLeaf_not_valid hd)
+        have hcovf : instF.Covered = true := by
+          have := hall cs hcs
+          rw [hF, Option.bind_some, hi] at this
+          exact this
+        have href : refuteAt2 k₁ k₂ hk₁ hk₂ φ cs ≠ none := by
+          unfold refuteAt2
+          have hb : ∀ j ∈ cs, j < famBound := fun j hj => by
+            have := rgsFrom_bound φ₂.allocCount 0 cs hcs j hj
+            omega
+          rw [dif_pos hb]
+          split
+          · rename_i he; rw [hF] at he; cases he
+          · rename_i φF' he
+            rw [hF] at he
+            cases he
+            split
+            · rename_i he; rw [hi] at he; cases he
+            · rename_i inst' he
+              rw [hi] at he
+              cases he
+              split
+              · exact fun h => nomatch h
+              · rename_i hne
+                exfalso
+                cases hv : decideLeaf instF with
+                | proved => exact hnf (decideLeaf_sound hv)
+                | unknown => exact decideLeaf_complete hcovf hv
+                | refuted σ => exact hne σ hv
+        have := findSome?_ne_none hcs href
+        cases hs : (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ) with
+        | none => exact absurd hs this
+        | some r => exact fun h => nomatch h
+
+/-- A leaf with hashes of one kind. -/
+def tryK (k : HashKind) (hk : k ≠ .ecrecover) : HashTry C :=
+  ⟨decideHashK k hk, Fml.coveredK k, decideHashK_sound, decideHashK_refutes, decideHashK_complete hk⟩
+
+/-- A leaf with hashes of two kinds. -/
+def tryK2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) : HashTry C :=
+  ⟨decideHash2 k₁ k₂ hk₁ hk₂, Fml.coveredK2 k₁ k₂, decideHash2_sound, decideHash2_refutes,
+    decideHash2_complete hk₁ hk₂⟩
+
+/-- **The ways of deciding a leaf with hashes**: of one kind, each kind in
+turn; of two, each ordered pair. -/
+def hashTries : List (HashTry C) :=
+  [tryK .keccak (by decide), tryK .sha256 (by decide), tryK .ripemd160 (by decide),
+    tryK2 .keccak .sha256 (by decide) (by decide), tryK2 .sha256 .keccak (by decide) (by decide),
+    tryK2 .keccak .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .keccak (by decide) (by decide),
+    tryK2 .sha256 .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .sha256 (by decide) (by decide)]
+
+/-- **A leaf with hashes**: the first way that answers. -/
+def decideHash (φ : Fml C []) : LeafVerdict C := firstKnown (hashTries.map (·.run)) φ
+
+theorem decideHash_sound {φ : Fml C []} (h : decideHash φ = .proved) : Fml.ValidH φ := by
+  obtain ⟨t, ht, e⟩ := firstKnown_mem (φ := φ) (v := .proved) (fun h => nomatch h) _ h
+  obtain ⟨T, -, rfl⟩ := List.mem_map.1 ht
+  exact T.sound e
+
+theorem decideHash_refutes {φ : Fml C []} {σ : State C []} (h : decideHash φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  obtain ⟨t, ht, e⟩ := firstKnown_mem (φ := φ) (v := .refuted σ) (fun h => nomatch h) _ h
+  obtain ⟨T, -, rfl⟩ := List.mem_map.1 ht
+  exact T.refutes e
+
+/-- **The covered leaves with hashes**: of some way of deciding them. -/
+def _root_.Solidity.Fml.hashCovered (φ : Fml C []) : Bool :=
+  φ.hasHash && (hashTries (C := C)).any (·.covers φ)
+
+theorem decideHash_complete {φ : Fml C []} (h : (hashTries (C := C)).any (·.covers φ) = true) :
     decideHash φ ≠ .unknown := by
-  unfold decideHash
-  intro hu
-  cases h1 : decideHashK .keccak (by decide) φ with
-  | unknown =>
-    rw [h1] at hu
-    cases h2 : decideHashK .sha256 (by decide) φ with
-    | unknown =>
-      rw [h2] at hu
-      simp only [Bool.or_eq_true] at h
-      rcases h with (h | h) | h
-      · exact decideHashK_complete (by decide) h h1
-      · exact decideHashK_complete (by decide) h h2
-      · exact decideHashK_complete (by decide) h hu
-    | _ => rw [h2] at hu; cases hu
-  | _ => rw [h1] at hu; cases hu
+  obtain ⟨T, hT, hc⟩ := List.any_eq_true.1 h
+  exact firstKnown_ne _ ⟨T.run, List.mem_map_of_mem hT, T.complete hc⟩
 
 /-! ### The decision, read so -/
 

@@ -133,20 +133,13 @@ theorem _root_.Solidity.Op2.eval_trO {a b s : Srt} (o : Op2 C a b s) (ha : a.isM
   | read | mlen | copyMem | iread | copy | copySt | hash => cases ha
   | _ => rfl
 
-/-- Whether a binary symbol is `anon` (an anonymised storage, a modifies
-set): its Theory reading reads its arguments' values, so the swap refuses
-it. -/
-def _root_.Solidity.Op2.isAnon {a b s : Srt} : Op2 C a b s → Bool
-  | .anon _ => true
-  | _ => false
-
-theorem _root_.Solidity.Op2.denote_agree {a b s : Srt} (o : Op2 C a b s) (ha : a.isMem = false)
-    (hn : o.isAnon = false) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
-    (x' : Option (a.Den C g'.H)) (y' : Option (b.Den C g'.H)) (da : a.TDen C) (db : b.TDen C) :
+theorem _root_.Solidity.Op2.denote_agree {a b s : Srt} (o : Op2 C a b s) (ha : a.isMem = false) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
+    (x' : Option (a.Den C g'.H)) (y' : Option (b.Den C g'.H)) (hx : x' = Srt.trO a x)
+    (hy : y' = Srt.trO b y) (da : a.TDen C) (db : b.TDen C) :
     o.denote g' x' y' da db = o.denote g x y da db := by
   cases o with
   | read | mlen | copyMem | iread | copy | copySt | hash => cases ha
-  | anon => cases hn
+  | anon => subst hx hy; simp only [Op2.denote]; split <;> rfl
   | _ => rfl
 
 theorem _root_.Solidity.Op3.eval_trO {a b c s : Srt} (o : Op3 C a b c s) (ha : a.isMem = false) (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H))
@@ -180,7 +173,7 @@ def _root_.Solidity.Tm.sw (k : HashKind) {Γ : Ctx} : {s : Srt} → Tm C Γ s �
   | s, .app2 (a := a) (b := b) o x y =>
     match o.hashSw? k x y with
     | some t => some t
-    | none => if a.isMem || b.isMem || s.isMem || o.isAnon then none else
+    | none => if a.isMem || b.isMem || s.isMem then none else
         (x.sw k).bind fun x' => (y.sw k).map fun y' => .app2 o x' y'
   | s, .app3 (a := a) (b := b) (c := c) o x y z =>
     if a.isMem || b.isMem || c.isMem || s.isMem then none else
@@ -306,7 +299,7 @@ theorem _root_.Solidity.Tm.sw_eval (h : SwRel k τ τ') : {s : Srt} → (t : Tm 
         obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
         show o.eval τ'.glob (x'.eval τ') (y'.eval τ') = _
         rw [Tm.sw_eval h x hx, Tm.sw_eval h y hy]
-        exact Op2.eval_trO o hm.1.1.1 hm.1.1.2 h.glob _ _
+        exact Op2.eval_trO o hm.1.1 hm.1.2 h.glob _ _
   | s, .app3 (a := a) (b := b) (c := c) o x y z, _, e => by
     simp only [Tm.sw] at e
     split at e
@@ -379,7 +372,7 @@ theorem _root_.Solidity.Tm.sw_denote (h : SwRel k τ τ') : {s : Srt} → (t : T
         show o.denote τ'.glob (x'.eval τ') (y'.eval τ') (x'.denote τ') (y'.denote τ') =
           o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
         rw [Tm.sw_denote h x hx, Tm.sw_denote h y hy]
-        exact Op2.denote_agree o hm.1.1.1 hm.2 _ _ _ _ _ _
+        exact Op2.denote_agree o hm.1.1 _ _ _ _ (Tm.sw_eval h x hx) (Tm.sw_eval h y hy) _ _
   | s, .app3 (a := a) (b := b) (c := c) o x y z, _, e => by
     simp only [Tm.sw] at e
     split at e
