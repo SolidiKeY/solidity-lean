@@ -8212,7 +8212,21 @@ Validation:
 - Strict automation still reports the existing pending
   `invariantClosedFormSum`; the non-strict gate passes. The documentation
   path checker still reports 13 existing missing references. Both findings
-  were compared with an unmodified `HEAD` export and are unchanged.
+  were compared with an unmodified `adcebe2b` export and are unchanged on that base.
 
 The optional bridge's published Mathlib cache was unavailable through the
 proxy, so its existing pinned dependencies were built locally.
+
+### Integration with current master (2026-10-25)
+
+The contract-certificate commit rebased cleanly onto `c7e634f5`, preserving
+25 upstream commits. The integrated source gates report 580 reachable
+modules with no orphan and 124 core modules with no path to the elaborator.
+Upstream has resolved `invariantClosedFormSum`: strict automation now passes
+with 552 derived, 11 refuted and no pending obligation.
+
+The source-trust inventory gate reports 23 mismatches. Running the same
+audit on an unmodified `c7e634f5` export produces the identical set of 23
+findings; this change introduces no additional implementation/recovery
+site. The inventory is left intact rather than silently accepting the
+upstream changes.
