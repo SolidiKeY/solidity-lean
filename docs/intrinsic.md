@@ -8225,6 +8225,14 @@ modules with no orphan and 124 core modules with no path to the elaborator.
 Upstream has resolved `invariantClosedFormSum`: strict automation now passes
 with 552 derived, 11 refuted and no pending obligation.
 
+Upstream also added `CallMemo` beneath the elaborator's local state. The
+bridge's lowering equations now quantify over that memo and state the full
+`Except ((value, localState), memo)` result. Context reads and narrow checks
+preserve the arbitrary input memo; the cast equations retain their complete
+success/error equality. Direct checking of `Arith/Lowering.lean` passes and
+its axiom prints contain only the standard set. The required read-only
+finder and skeptic reviews found no issue or downstream caller to migrate.
+
 The source-trust inventory gate reports 23 mismatches. Running the same
 audit on an unmodified `c7e634f5` export produces the identical set of 23
 findings; this change introduces no additional implementation/recovery
