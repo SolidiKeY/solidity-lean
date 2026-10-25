@@ -604,7 +604,7 @@ elimination and the folding of trivial conditionals, as
 def leafOf? (φ : Fml C []) : Option (LFml C) := do
   let d ← ProgramNormalization.ofFormula? 2048 φ
   let r ← sourceReduction? d.formula
-  return r.leaf.elim.condSimp
+  return r.leaf.elim.condSimp.prenex
 
 /-- A lifted leaf the arithmetic stages accept: a universal prefix (shorter
 than 1024) binding every atom of a body in `LFml.Src false`. -/
@@ -758,8 +758,8 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
     obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp
       (flattenedArithmetic?_isSome u.body hs' (hub ▸ hn) (hub ▸ hw))
     have hcap := LFml.liftCondB_isSome _ hdepth hn
-    have hnone : (r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget).isNone = false := by
-      cases hX : r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget with
+    have hnone : (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone = false := by
+      cases hX : r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget with
       | none => rw [hX] at hcap; cases hcap
       | some _ => rfl
     simp only [dependentReduction?, hd, hr, hu, Option.bind_eq_bind, Option.bind_some, hnone,
