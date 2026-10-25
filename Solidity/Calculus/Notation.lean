@@ -175,10 +175,14 @@ def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk
   for s in P do
     let (Γe, k) ← get
     let k₀ := nextFree taken k
+    -- the callees' first numbering too (`CallMemo`): a retry that kept it
+    -- would number a shared callee where the first try did, into `taken`
+    let memo ← getThe CallMemo
     set (Γe, k₀)
     let mut Q ← elabStmtP C s
     let (_, k₁) ← get
     if (List.range' k₀ (k₁ - k₀)).any taken.contains then
+      set (σ := CallMemo) memo
       set (Γe, max k (taken.foldl max 0 + 1))
       Q ← elabStmtP C s
     let b ← ElabM.lift (SProg.chain ns acc.1 Q)

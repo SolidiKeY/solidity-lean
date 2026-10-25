@@ -513,3 +513,31 @@ theorem affineThreeWhole : ⊨ᶠ dl!{ a < 1000 → ⟨ uint y = f3(a); ⟩ y >=
   all_goals sol_close_finish
 
 end Solidity.Examples.Tactics.CallSummary.Affine
+
+/-! A callee's locals numbered past a fresh name the formula writes: the retry
+of `elabModalProg` (`Calculus/Notation.lean`) rolls back the callees' first
+numbering (`CallMemo`) with the counter, so the shared callee's `a` and `r`
+take `se3` and `se4`, not the formula's `se2`. -/
+namespace Solidity.Examples.Tactics.CallSummary.Retry
+
+def Incr : Contract := contract!{
+  function h(uint a) returns (uint r) { r = a + 1; }
+}
+local instance : InContract := ⟨Incr⟩
+open scoped Solidity.Scoped
+
+/--
+info: node: 5
+sequent:
+  dl{ { se2 := 5 }, { y := defVal(T) }, { se3 := 1 } ⟹ ⟨ uint se4; se4 = se3 + 1; y = se4; ⟩ y = 2 }
+rule: valueDeclSkip
+state: inner
+branch: -
+parent: 4
+children: [6]
+tactics: apply Proves.update (Taclet.toStep .valueDeclSkip)
+-/
+#guard_msgs in
+#proof_node 5 dl!{ { se2 := 5 } ⟨ uint y = h(1); ⟩ y == 2 }
+
+end Solidity.Examples.Tactics.CallSummary.Retry
