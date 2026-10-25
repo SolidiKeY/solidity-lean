@@ -1937,6 +1937,69 @@ stated exactly (`7 · 2^k + k − 4`).  Left as minor: the command is global
 default build, and the leaf mvar is made outside the leaf's context (the
 tree's sequents are closed, so it reads the same).
 
+### What is left (2026-10-25)
+
+To pick up later, in order of what the theorem needs:
+
+1. **A2 · Literal-bounded loops by their invariants only** (not started:
+   it waits for the frames branch, `claude/festive-johnson-nar57p`, the
+   narrowed anonymisation of loop frames, to land on master).  An
+   annotated loop is already closed by its invariant whatever its bound
+   (`docs/loops.md`, decision 3; F2's walk is `7k + 3` nodes).  What is
+   left is the unannotated loop (`.auto`, `whileUnwind`), whose walk grows
+   with the bound's value: report it (a warning naming the loop) rather
+   than unroll it silently, keep unrolling as an opt-in option in
+   `docs/options.md` if the TestSuite needs it and list the obligations
+   that do, then re-measure `Examples/Tactics/PolySize.lean`.
+2. **The cost of a loop's leaves past `{anon}`.**  F2's time is about
+   cubic in the loops in sequence (`145 s` at `k = 6`) although its walk
+   and leaves are linear, and F3 (a loop whose body has `k` joined `if`s)
+   is past 2 M heartbeats from `k = 3`: the closer on an invariant's
+   preservation and exit leaves (`sol_close_saturate`, the anonymised
+   frames) grows with what each leaf reads.  Measure one leaf in a
+   scratch module before changing anything.
+3. **Branches of more than one assignment.**  `Prog.joinArm?` takes one
+   value-local assignment a branch, so `if (c) { x = a; y = x + 1; }`
+   still splits.  Joining it needs the branch's assignments composed
+   without substituting terms into each other (a sequence of updates, or a
+   premise that is an update followed by the rest of the `if`), so that
+   the update stays linear in the branch.
+4. **A conditional term in the surface notation.**  `dl!` has no spelling
+   for `c ? a : b` in an update (`Calculus/Notation.lean`, the `callee`
+   lane's when A1 landed), so a chain cannot write a joined line.  Once it
+   can: restore the paper's programs in
+   `Examples/Chains/StorageCoverage.lean` (the `ifElseUnfold` and
+   `ifElseSplit` rows now give their `else` a second assignment), add an
+   `ifElseJoin` row, and finish `Examples/ChainNotation.lean`'s `ifTrace`
+   past the join.
+5. **The walk's kernel closer on a joined mapping key.**
+   `boolKeyMappingSymbolicKey` (`TestSuite/Derived5.lean`) needs
+   `sol_leaf; sol_close` for `{ ie1 := (b ? 1 : 0) }` read as a key: the
+   lift (`LFml.liftCond`, `LFml.liftTop`) counts more than `liftConds`
+   conditionals once the key's elimination copies them.  A case split on
+   a Boolean atom with the atom substituted (KeY's `ifthenelse_split` and
+   `applyEq` together) would close it in the walk.
+6. **Joined values the steps cannot bound.**  `sol_close_join_steps`
+   reads cases that are one base plus offsets, or that and literals; a
+   value whose cases are two bases (`c ? y : z`) gets no interval, and
+   past `CloseSplit.splitMax` (six) such updates nothing splits them.
+7. **The solkey fragment.**  `⊢ₖ` no longer runs a conditional value
+   assigned to a local nor an `if` whose branches only assign locals
+   (A1).  If solkey-only derivations of those matter, the fragment needs
+   a way to reach `ifElseSplit` on them, which the one-rule-per-statement
+   strategy does not have today.
+8. **Small items from the reviews.**  `CloseJ.affine` does not read
+   `Int.negSucc` literals; the split's congruence lemmas
+   (`Fml.SplitTo.valid`, `andL`, `andR`) carry no Solidity in their
+   docstrings; `#proof_size` is declared globally by an example file
+   (move it to `Tools/ProofTree.lean` with a pin in
+   `Examples/ProofTree.lean`); `certifyLong` reads `Γ` off the formula's
+   type, always `[]`.
+9. **Failures that predate M8.**  `./run-lean.sh` ends with solkeycheck's
+   `localValueDelete` drift (an unannotated read), and
+   `./scripts/check-doc-paths.sh` with 13 vendor and doc paths to files
+   that do not exist.
+
 ## Review (2026-10-20)
 
 A read-only review pass (finder and skeptic per area) confirmed six
