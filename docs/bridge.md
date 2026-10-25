@@ -590,3 +590,12 @@ lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
 ```
+
+Post-integration validation (2026-10-25): after merging `master` at
+`507ac062`, the full Bridge root and `scripts/check-bridge.sh` pass (1,660
+jobs), and the Plausible executable again passes 36,000 samples at seed 42.
+The earlier arithmetic/WP blockers were fixed upstream; this change does
+not modify those reserved files. Core layering and module reachability
+also pass. The separate core trust-inventory gate reports 23 existing
+drift findings from that master revision, reproduced by GitHub CI; this
+feature changes no core source or trust-inventory entries.
