@@ -17,7 +17,85 @@ namespace Solidity.Decide
 
 open Semantics ReadRealization Linear ScalarCode
 
-variable {C : Contract} {ps : List Parameter} {es : List EnvKey}
+variable {C : Contract} {ps : List Parameter} {es : List EnvKey} {ls : List PrimTy.uint.Denote}
+
+/-! ## The codes a compiled formula reads
+
+The typed inputs (`Inputs.observe`) below their width; past it, each ledger
+entry read at a constant address of `ls` (`Calculus/LedgerCut.lean`) the
+difference of two natural codes, unbounded as a KeY `int` is. -/
+
+/-- A ledger's entry, `0` where none (`Op1.net`). -/
+def ledgerAt (l : Ledger) (a : PrimTy.uint.Denote) : Int := (lookupBy a l).getD 0
+
+/-- The number of the typed inputs' codes. -/
+abbrev Inputs.width (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C)) : Nat :=
+  es.length + (ps.length + rs.length)
+
+/-- **The codes `x` read the inputs of `g` and `ν`**: the typed ones below the
+width, and past it the ledger entries at `ls`, each the difference of two
+codes. -/
+def Inputs.AgreeZ (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C))
+    (ls : List PrimTy.uint.Denote) (g : State C []) (ν : AEnv) (x : Nat → Nat) : Prop :=
+  (∀ k, k < Inputs.width es ps rs → x k = (Inputs.observe es ps rs g ν).codes k) ∧
+    ∀ (j : Nat) (c : PrimTy.uint.Denote), ls[j]? = some c →
+      (x (Inputs.width es ps rs + 2 * j) : Int) - x (Inputs.width es ps rs + 2 * j + 1) =
+        ledgerAt g.net c
+
+/-- The typed codes themselves read the inputs, with no ledger entry. -/
+theorem Inputs.AgreeZ.observe (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C))
+    (g : State C []) (ν : AEnv) : Inputs.AgreeZ es ps rs [] g ν (Inputs.observe es ps rs g ν).codes :=
+  ⟨fun _ _ => rfl, fun j c h => by simp only [List.getElem?_nil, reduceCtorEq] at h⟩
+
+theorem Layout.index_lt {r : Ref C} : ∀ {rs : List (Ref C)}, r ∈ rs → Layout.index r rs < rs.length
+  | [], h => nomatch h
+  | q :: rs, h => by
+    unfold Layout.index
+    by_cases he : r = q
+    · simp only [he, if_true, List.length_cons]; omega
+    · simp only [he, if_false, List.length_cons]
+      have := Layout.index_lt ((List.mem_cons.mp h).resolve_left he)
+      omega
+
+theorem Parameters.index_lt {q : Parameter} : ∀ {ps : List Parameter}, q ∈ ps →
+    Parameters.index q ps < ps.length
+  | [], h => nomatch h
+  | x :: ps, h => by
+    unfold Parameters.index
+    by_cases he : q = x
+    · simp only [he, if_true, List.length_cons]; omega
+    · simp only [he, if_false, List.length_cons]
+      have := Parameters.index_lt ((List.mem_cons.mp h).resolve_left he)
+      omega
+
+theorem Inputs.index_lt {e : EnvKey} : ∀ {es : List EnvKey}, e ∈ es → Inputs.index e es < es.length
+  | [], h => nomatch h
+  | x :: es, h => by
+    unfold Inputs.index
+    by_cases he : e = x
+    · simp only [he, if_true, List.length_cons]; omega
+    · simp only [he, if_false, List.length_cons]
+      have := Inputs.index_lt ((List.mem_cons.mp h).resolve_left he)
+      omega
+
+/-- The position of a ledger constant in the layout's ledger. -/
+def ledgerIndex (c : PrimTy.uint.Denote) : List PrimTy.uint.Denote → Nat
+  | [] => 0
+  | d :: ls => if c = d then 0 else ledgerIndex c ls + 1
+
+theorem getElem?_ledgerIndex {c : PrimTy.uint.Denote} :
+    ∀ {ls : List PrimTy.uint.Denote}, c ∈ ls → ls[ledgerIndex c ls]? = some c
+  | [], h => nomatch h
+  | d :: ls, h => by
+    unfold ledgerIndex
+    by_cases he : c = d
+    · subst he; simp only [if_true, List.getElem?_cons_zero]
+    · simp only [he, if_false, List.getElem?_cons_succ]
+      exact getElem?_ledgerIndex ((List.mem_cons.mp h).resolve_left he)
+
+theorem ledgerIndex_lt {c : PrimTy.uint.Denote} {ls : List PrimTy.uint.Denote} (h : c ∈ ls) :
+    ledgerIndex c ls < ls.length :=
+  (List.getElem?_eq_some_iff.1 (getElem?_ledgerIndex h)).1
 
 namespace StaticValue
 
@@ -27,33 +105,38 @@ def codeIn (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C)) :
   | _, _, .read r => .variable (es.length + (ps.length + Layout.index ⟨_, r.ref, r.declared⟩ rs))
 
 theorem codeIn_value (es : List EnvKey) (ps : List Parameter) (rs : List (Ref C)) (g : State C []) (ν : AEnv)
-    {p : PrimTy} {t : LTm C (.val p)} (v : StaticValue t) (h : ∀ r ∈ v.refs, r ∈ rs) :
-    (v.codeIn es ps rs).eval (Inputs.observe es ps rs g ν).codes = ((encode p (v.value g.storage)).val : Int) := by
+    {p : PrimTy} {t : LTm C (.val p)} (v : StaticValue t) (h : ∀ r ∈ v.refs, r ∈ rs)
+    {ls : List PrimTy.uint.Denote} {xc : Nat → Nat} (hxc : Inputs.AgreeZ es ps rs ls g ν xc) :
+    (v.codeIn es ps rs).eval xc = ((encode p (v.value g.storage)).val : Int) := by
   cases v with
   | lit v => exact Affine.eval_literal _ _
   | constant v _ => exact Affine.eval_literal _ _
   | read r =>
-    rw [codeIn, Affine.eval_variable, Inputs.codes_tail, Parameters.codes_storage,
+    have hl := Layout.index_lt (h _ List.mem_cons_self)
+    rw [codeIn, Affine.eval_variable,
+      hxc.1 (es.length + (ps.length + Layout.index ⟨_, r.ref, r.declared⟩ rs))
+        (by simp only [Inputs.width]; omega), Inputs.codes_tail, Parameters.codes_storage,
       Layout.codes_index rs _ g.storage (h _ List.mem_cons_self)]
     rfl
 
 end StaticValue
 
 /-- A term guard states precisely that its actual evaluation returns. -/
-structure DefinedValue {s : Srt} (t : LTm C s) (ps : List Parameter := []) (es : List EnvKey := []) where
+structure DefinedValue {s : Srt} (t : LTm C s) (ps : List Parameter := []) (es : List EnvKey := [])
+    (ls : List PrimTy.uint.Denote := []) where
   refs : List (Ref C)
   lower : List (Ref C) → AFml
-  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
-    ∀ (g : State C []) (ν : AEnv),
-      (lower rs).holds (Inputs.observe es ps rs g ν).codes ↔ (t.eval g ν).isSome = true
+  correctX : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv) (xc : Nat → Nat), Inputs.AgreeZ es ps rs ls g ν xc →
+      ((lower rs).holds xc ↔ (t.eval g ν).isSome = true)
 
 /-- An exact partial-value encoding of an existing typed leaf term. -/
 structure CheckedValue {p : PrimTy} (t : LTm C (.val p)) (ps : List Parameter := []) (es : List EnvKey := []) where
   refs : List (Ref C)
   lower : List (Ref C) → CheckedScalar p
-  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
-    ∀ (g : State C []) (ν : AEnv),
-      (lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν)
+  correctX : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv) {ls : List PrimTy.uint.Denote} (xc : Nat → Nat),
+      Inputs.AgreeZ es ps rs ls g ν xc → (lower rs).Correct xc (t.eval g ν)
 
 /-- The term is a literal: its value. -/
 def LTm.lit? {p : PrimTy} : (t : LTm C (.val p)) → Option {v : p.Denote // t = .app0 (.lit v)}
@@ -118,23 +201,28 @@ namespace CheckedValue
 def parameter {p : PrimTy} (k : Nat) (h : Parameter.mk p k ∈ ps) :
     CheckedValue (ps := ps) (es := es) (LTm.var (C := C) (p := p) k) :=
   ⟨[], fun _ => ⟨.variable (es.length + Parameters.index ⟨p, k⟩ ps), .tt⟩, by
-    intro rs _ g ν
+    intro rs _ g ν ls xc hxc
     refine ⟨trivial, ?_⟩
-    rw [Affine.eval_variable, Inputs.codes_tail, Parameters.codes_parameter ps ⟨p, k⟩ rs g.storage ν h]
+    have hl := Parameters.index_lt h
+    rw [Affine.eval_variable, hxc.1 (es.length + Parameters.index ⟨p, k⟩ ps)
+      (by simp only [Inputs.width]; omega), Inputs.codes_tail,
+      Parameters.codes_parameter ps ⟨p, k⟩ rs g.storage ν h]
     rfl⟩
 
 def environment (e : EnvKey) (h : e ∈ es) :
     CheckedValue (ps := ps) (es := es) (LTm.app0 (C := C) (.env e)) :=
   ⟨[], fun _ => ⟨.variable (Inputs.index e es), .tt⟩, by
-    intro rs _ g ν
+    intro rs _ g ν ls xc hxc
     refine ⟨trivial, ?_⟩
-    rw [Affine.eval_variable, Inputs.codes_env es ps rs g ν e h]⟩
+    have hl := Inputs.index_lt h
+    rw [Affine.eval_variable, hxc.1 (Inputs.index e es) (by simp only [Inputs.width]; omega),
+      Inputs.codes_env es ps rs g ν e h]⟩
 
-def defined {p : PrimTy} {t : LTm C (.val p)} (a : CheckedValue (ps := ps) (es := es) t) : DefinedValue (ps := ps) (es := es) t :=
+def defined {p : PrimTy} {t : LTm C (.val p)} (a : CheckedValue (ps := ps) (es := es) t) : DefinedValue (ps := ps) (es := es) (ls := ls) t :=
   ⟨a.refs, fun rs => (a.lower rs).defined, by
-    intro rs hr g ν
-    have ih : (a.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
-      a.correct rs hr g ν
+    intro rs hr g ν xc hxc
+    have ih : (a.lower rs).Correct xc (t.eval g ν) :=
+      a.correctX rs hr g ν xc hxc
     cases he : t.eval g ν with
     | none =>
       rw [he] at ih
@@ -145,25 +233,25 @@ def defined {p : PrimTy} {t : LTm C (.val p)} (a : CheckedValue (ps := ps) (es :
 
 def ofStatic {p : PrimTy} {t : LTm C (.val p)} (v : StaticValue t) : CheckedValue (ps := ps) (es := es) t :=
   ⟨v.refs, fun rs => ⟨v.codeIn es ps rs, .tt⟩, by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     rw [v.eval_value g ν]
-    exact ⟨trivial, v.codeIn_value es ps rs g ν hr⟩⟩
+    exact ⟨trivial, v.codeIn_value es ps rs g ν hr hxc⟩⟩
 
 def failed {p : PrimTy} : CheckedValue (ps := ps) (es := es) (LTm.err (C := C) (s := .val p)) :=
-  ⟨[], fun _ => ⟨.literal 0, .ff⟩, fun _ _ _ _ => id⟩
+  ⟨[], fun _ => ⟨.literal 0, .ff⟩, by intro _ _ _ _ _ _ _; exact id⟩
 
 def add {p : PrimTy} (hp : BinOp.add.accepts p = true) {a b : LTm C (.val p)}
     (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) : CheckedValue (ps := ps) (es := es) (.app2 (.binop .add hp) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => .arith false (ha.lower rs) (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     have hpa : p.isNumeric = true := hp
     have ih : (CheckedScalar.arith false (ha.lower rs) (hb.lower rs)).Correct
-        (Inputs.observe es ps rs g ν).codes
+        xc
         ((a.eval g ν).bind fun v => (b.eval g ν).bind fun w => p.ofInt? (integer p v + integer p w)) :=
       CheckedScalar.arith_correct hpa false (ha.lower rs) (hb.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (b.eval g ν)
-      (ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)
+      xc (a.eval g ν) (b.eval g ν)
+      (ha.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases p with
     | bool => cases hp
@@ -172,15 +260,15 @@ def add {p : PrimTy} (hp : BinOp.add.accepts p = true) {a b : LTm C (.val p)}
 def sub {p : PrimTy} (hp : BinOp.sub.accepts p = true) {a b : LTm C (.val p)}
     (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) : CheckedValue (ps := ps) (es := es) (.app2 (.binop .sub hp) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => .arith true (ha.lower rs) (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     have hpa : p.isNumeric = true := hp
     have ih : (CheckedScalar.arith true (ha.lower rs) (hb.lower rs)).Correct
-        (Inputs.observe es ps rs g ν).codes
+        xc
         ((a.eval g ν).bind fun v => (b.eval g ν).bind fun w => p.ofInt? (integer p v - integer p w)) :=
       CheckedScalar.arith_correct hpa true (ha.lower rs) (hb.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (b.eval g ν)
-      (ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)
+      xc (a.eval g ν) (b.eval g ν)
+      (ha.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases p with
     | bool => cases hp
@@ -191,11 +279,11 @@ def mulLit {p : PrimTy} (hp : BinOp.mul.accepts p = true) {a b : LTm C (.val p)}
     (ha : a = .app0 (.lit v)) (hb : CheckedValue (ps := ps) (es := es) b) :
     CheckedValue (ps := ps) (es := es) (.app2 (.binop .mul hp) a b) :=
   ⟨hb.refs, fun rs => .scale (integer p v) (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     subst ha
     have hpa : p.isNumeric = true := hp
     have ih := CheckedScalar.scale_correct hpa (integer p v) (hb.lower rs)
-      (Inputs.observe es ps rs g ν).codes (b.eval g ν) (hb.correct rs hr g ν)
+      xc (b.eval g ν) (hb.correctX rs hr g ν xc hxc)
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases p with
     | bool => cases hp
@@ -206,11 +294,11 @@ def litMul {p : PrimTy} (hp : BinOp.mul.accepts p = true) {a b : LTm C (.val p)}
     (hb : b = .app0 (.lit v)) (ha : CheckedValue (ps := ps) (es := es) a) :
     CheckedValue (ps := ps) (es := es) (.app2 (.binop .mul hp) a b) :=
   ⟨ha.refs, fun rs => .scale (integer p v) (ha.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     subst hb
     have hpa : p.isNumeric = true := hp
     have ih := CheckedScalar.scale_correct' hpa (integer p v) (ha.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+      xc (a.eval g ν) (ha.correctX rs hr g ν xc hxc)
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases p with
     | bool => cases hp
@@ -221,9 +309,9 @@ def neg (hp : UnOp.neg.accepts .int = true) {a : LTm C (.val .int)}
     (ha : CheckedValue (ps := ps) (es := es) a) :
     CheckedValue (ps := ps) (es := es) (.app1 (.unop .neg hp) a) :=
   ⟨ha.refs, fun rs => .scale (-1) (ha.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     have ih := CheckedScalar.scale_correct (p := .int) rfl (-1) (ha.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+      xc (a.eval g ν) (ha.correctX rs hr g ν xc hxc)
     rw [LTm.eval_app1, Close.Op1.eval_unop]
     simp only [integer, Int.neg_one_mul] at ih
     exact ih⟩
@@ -233,9 +321,9 @@ def bnot (hp : UnOp.bnot.accepts .uint = true) {a : LTm C (.val .uint)}
     (ha : CheckedValue (ps := ps) (es := es) a) :
     CheckedValue (ps := ps) (es := es) (.app1 (.unop .bnot hp) a) :=
   ⟨ha.refs, fun rs => .compl (ha.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν ls xc hxc
     have ih := CheckedScalar.compl_correct (ha.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+      xc (a.eval g ν) (ha.correctX rs hr g ν xc hxc)
     rw [LTm.eval_app1, Close.Op1.eval_unop]
     exact ih⟩
 
@@ -245,9 +333,9 @@ def seq {q p : PrimTy} {d : LTm C (.val q)} {t : LTm C (.val p)}
     (hd : CheckedValue (ps := ps) (es := es) d)
     (a : CheckedValue (ps := ps) (es := es) t) : CheckedValue (ps := ps) (es := es) (.seq d t) :=
   ⟨hd.refs ++ a.refs, fun rs => (a.lower rs).guard (hd.lower rs).defined, by
-    intro rs hr g ν
-    have ihd := hd.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν
-    have iha := a.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν
+    intro rs hr g ν ls xc hxc
+    have ihd := hd.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc
+    have iha := a.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc
     rw [LTm.eval_seq]
     cases hv : d.eval g ν with
     | none =>
@@ -285,16 +373,23 @@ def ofTermIn? (ps : List Parameter) {p : PrimTy} (t : LTm C (.val p)) : Option (
 
 def ofTerm? {p : PrimTy} (t : LTm C (.val p)) : Option (CheckedValue t) := ofTermIn? [] t
 
+/-- The encoding at the typed codes themselves. -/
+theorem correct {p : PrimTy} {t : LTm C (.val p)} (v : CheckedValue (ps := ps) (es := es) t)
+    (rs : List (Ref C)) (hr : ∀ r ∈ v.refs, r ∈ rs) (g : State C []) (ν : AEnv) :
+    (v.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
+  v.correctX rs hr g ν _ (Inputs.AgreeZ.observe es ps rs g ν)
+
 end CheckedValue
 
 /-- **An exact encoding of a KeY `int` term** (`Srt.kint`): an affine form
 over the codes, unbounded, and its definedness guard. -/
-structure KIntValue (t : LTm C .kint) (ps : List Parameter := []) (es : List EnvKey := []) where
+structure KIntValue (t : LTm C .kint) (ps : List Parameter := []) (es : List EnvKey := [])
+    (ls : List PrimTy.uint.Denote := []) where
   refs : List (Ref C)
   lower : List (Ref C) → CheckedInt
-  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
-    ∀ (g : State C []) (ν : AEnv),
-      (lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν)
+  correctX : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv) (xc : Nat → Nat), Inputs.AgreeZ es ps rs ls g ν xc →
+      (lower rs).Correct xc (t.eval g ν)
 
 /-- The term is a KeY `int` literal: its value. -/
 def LTm.zlit? : (t : LTm C .kint) → Option {n : Int // t = .app0 (.zlit n)}
@@ -303,14 +398,14 @@ def LTm.zlit? : (t : LTm C .kint) → Option {n : Int // t = .app0 (.zlit n)}
 
 namespace KIntValue
 
-def zlit (n : Int) : KIntValue (ps := ps) (es := es) (LTm.app0 (C := C) (.zlit n)) :=
-  ⟨[], fun _ => .lit n, fun _ _ _ _ => CheckedInt.lit_correct n _⟩
+def zlit (n : Int) : KIntValue (ps := ps) (es := es) (ls := ls) (LTm.app0 (C := C) (.zlit n)) :=
+  ⟨[], fun _ => .lit n, fun _ _ _ _ _ _ => CheckedInt.lit_correct n _⟩
 
 /-- `toInt(a)`: a `uint` read as a KeY `int`. -/
 def toInt {a : LTm C (.val .uint)} (ha : CheckedValue (ps := ps) (es := es) a) :
-    KIntValue (ps := ps) (es := es) (.app1 .toInt a) :=
-  ⟨ha.refs, fun rs => .ofUint (ha.lower rs), fun rs hr g ν =>
-    CheckedInt.ofUint_correct _ _ _ (ha.correct rs hr g ν)⟩
+    KIntValue (ps := ps) (es := es) (ls := ls) (.app1 .toInt a) :=
+  ⟨ha.refs, fun rs => .ofUint (ha.lower rs), fun rs hr g ν xc hxc =>
+    CheckedInt.ofUint_correct _ _ _ (ha.correctX rs hr g ν xc hxc)⟩
 
 theorem eval_zbin (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zArith = true)
     (a b : LTm C .kint) :
@@ -322,39 +417,39 @@ theorem eval_zbin (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zArith = tru
 /-- `a + b` (`subtract = false`) or `a - b` on KeY's `int`. -/
 def arith (subtract : Bool) (op : BinOp) (h : op.zArith = true)
     (hop : op = if subtract then .sub else .add) {a b : LTm C .kint}
-    (ha : KIntValue (ps := ps) (es := es) a) (hb : KIntValue (ps := ps) (es := es) b) :
-    KIntValue (ps := ps) (es := es) (.app2 (.zbin op h) a b) :=
+    (ha : KIntValue (ps := ps) (es := es) (ls := ls) a) (hb : KIntValue (ps := ps) (es := es) (ls := ls) b) :
+    KIntValue (ps := ps) (es := es) (ls := ls) (.app2 (.zbin op h) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => .arith subtract (ha.lower rs) (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν xc hxc
     have ih := CheckedInt.arith_correct subtract (ha.lower rs) (hb.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (b.eval g ν)
-      (ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)
+      xc (a.eval g ν) (b.eval g ν)
+      (ha.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)
     rw [eval_zbin]
     subst hop
     cases subtract <;> exact ih⟩
 
 /-- `n · b` on KeY's `int`, `n` a literal. -/
 def mulLit (h : BinOp.mul.zArith = true) {a b : LTm C .kint} (n : Int)
-    (ha : a = .app0 (.zlit n)) (hb : KIntValue (ps := ps) (es := es) b) :
-    KIntValue (ps := ps) (es := es) (.app2 (.zbin .mul h) a b) :=
+    (ha : a = .app0 (.zlit n)) (hb : KIntValue (ps := ps) (es := es) (ls := ls) b) :
+    KIntValue (ps := ps) (es := es) (ls := ls) (.app2 (.zbin .mul h) a b) :=
   ⟨hb.refs, fun rs => .scale n (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν xc hxc
     subst ha
     have ih := CheckedInt.scale_correct n (hb.lower rs)
-      (Inputs.observe es ps rs g ν).codes (b.eval g ν) (hb.correct rs hr g ν)
+      xc (b.eval g ν) (hb.correctX rs hr g ν xc hxc)
     rw [eval_zbin]
     exact ih⟩
 
 /-- `a · n` on KeY's `int`, `n` a literal. -/
 def litMul (h : BinOp.mul.zArith = true) {a b : LTm C .kint} (n : Int)
-    (hb : b = .app0 (.zlit n)) (ha : KIntValue (ps := ps) (es := es) a) :
-    KIntValue (ps := ps) (es := es) (.app2 (.zbin .mul h) a b) :=
+    (hb : b = .app0 (.zlit n)) (ha : KIntValue (ps := ps) (es := es) (ls := ls) a) :
+    KIntValue (ps := ps) (es := es) (ls := ls) (.app2 (.zbin .mul h) a b) :=
   ⟨ha.refs, fun rs => .scale n (ha.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν xc hxc
     subst hb
     have ih := CheckedInt.scale_correct n (ha.lower rs)
-      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+      xc (a.eval g ν) (ha.correctX rs hr g ν xc hxc)
     rw [eval_zbin]
     cases ha' : (a.eval g ν : Option Int) with
     | none => rw [ha'] at ih; exact ih
@@ -364,12 +459,47 @@ def litMul (h : BinOp.mul.zArith = true) {a b : LTm C .kint} (n : Int)
       rw [Int.mul_comm]
       exact ih⟩
 
+/-- A ledger read at a constant `c` of the layout's ledger: two codes past
+the typed ones, their difference the entry. -/
+def netLit (c : PrimTy.uint.Denote) (hc : c ∈ ls) :
+    KIntValue (ps := ps) (es := es) (ls := ls) (.app1 .net (.app0 (C := C) (.lit c))) :=
+  ⟨[], fun rs => ⟨(Affine.variable (Inputs.width es ps rs + 2 * ledgerIndex c ls)).sub
+      (.variable (Inputs.width es ps rs + 2 * ledgerIndex c ls + 1)), .tt⟩, by
+    intro rs _ g ν xc hxc
+    refine ⟨trivial, ?_⟩
+    rw [Affine.eval_sub, Affine.eval_variable, Affine.eval_variable,
+      hxc.2 (ledgerIndex c ls) c (getElem?_ledgerIndex hc)]
+    rfl⟩
+
+/-- `d`, then `a`: a scalar guard before a KeY `int`, as the ledger cut
+writes a read's address before the read (`Calculus/LedgerCut.lean`). -/
+def seq {q : PrimTy} {d : LTm C (.val q)} {a : LTm C .kint}
+    (hd : CheckedValue (ps := ps) (es := es) d) (ha : KIntValue (ps := ps) (es := es) (ls := ls) a) :
+    KIntValue (ps := ps) (es := es) (ls := ls) (.seq d a) :=
+  ⟨hd.refs ++ ha.refs, fun rs => ⟨(ha.lower rs).code, .and (hd.lower rs).defined (ha.lower rs).defined⟩, by
+    intro rs hr g ν xc hxc
+    have ihd := hd.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc
+    have iha := ha.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc
+    rw [LTm.eval_seq]
+    cases hv : d.eval g ν with
+    | none =>
+      rw [hv] at ihd
+      exact fun h => ihd h.1
+    | some v =>
+      rw [hv] at ihd
+      cases hw : (a.eval g ν : Option Int) with
+      | none => rw [hw] at iha; exact fun h => iha h.2
+      | some w => rw [hw] at iha; exact ⟨⟨ihd.1, iha.1⟩, iha.2⟩⟩
+
 /-- Recognition is bounded by term depth; a product of two non-literals is
 refused (decision c). -/
 def ofTermFuel? (ps : List Parameter) : Nat → (t : LTm C .kint) →
-    Option (KIntValue (ps := ps) (es := es) t)
+    Option (KIntValue (ps := ps) (es := es) (ls := ls) t)
   | 0, _ => none
   | _ + 1, .app0 (.zlit n) => some (zlit n)
+  | _ + 1, .app1 .net (.app0 (.lit c)) => if hc : c ∈ ls then some (netLit c hc) else none
+  | fuel + 1, .seq (s' := .val _) d a => do
+    return seq (← CheckedValue.ofTermIn? ps d) (← ofTermFuel? ps fuel a)
   | _ + 1, .app1 .toInt a => (CheckedValue.ofTermIn? ps a).map toInt
   | fuel + 1, .app2 (.zbin .add h) a b => do
     return arith false .add h rfl (← ofTermFuel? ps fuel a) (← ofTermFuel? ps fuel b)
@@ -384,27 +514,33 @@ def ofTermFuel? (ps : List Parameter) : Nat → (t : LTm C .kint) →
       | none => none
   | _ + 1, _ => none
 
-def ofTermIn? (ps : List Parameter) (t : LTm C .kint) : Option (KIntValue (ps := ps) (es := es) t) :=
+def ofTermIn? (ps : List Parameter) (t : LTm C .kint) : Option (KIntValue (ps := ps) (es := es) (ls := ls) t) :=
   ofTermFuel? ps 1024 t
+
+theorem correct {t : LTm C .kint} (v : KIntValue (ps := ps) (es := es) t)
+    (rs : List (Ref C)) (hr : ∀ r ∈ v.refs, r ∈ rs) (g : State C []) (ν : AEnv) :
+    (v.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
+  v.correctX rs hr g ν _ (Inputs.AgreeZ.observe es ps rs g ν)
 
 end KIntValue
 
 /-- Source Boolean values use success predicates, retaining the distinction
 between false and failed evaluation. -/
-structure BooleanValue (t : LTm C (.val .bool)) (ps : List Parameter := []) (es : List EnvKey := []) where
+structure BooleanValue (t : LTm C (.val .bool)) (ps : List Parameter := []) (es : List EnvKey := [])
+    (ls : List PrimTy.uint.Denote := []) where
   refs : List (Ref C)
   lower : List (Ref C) → CheckedBool
-  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
-    ∀ (g : State C []) (ν : AEnv),
-      (lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν)
+  correctX : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv) (xc : Nat → Nat), Inputs.AgreeZ es ps rs ls g ν xc →
+      (lower rs).Correct xc (t.eval g ν)
 
 namespace BooleanValue
 
-def defined {t : LTm C (.val .bool)} (a : BooleanValue (ps := ps) (es := es) t) : DefinedValue (ps := ps) (es := es) t :=
+def defined {t : LTm C (.val .bool)} (a : BooleanValue (ps := ps) (es := es) (ls := ls) t) : DefinedValue (ps := ps) (es := es) (ls := ls) t :=
   ⟨a.refs, fun rs => CheckedBool.disj (a.lower rs).yes (a.lower rs).no, by
-    intro rs hr g ν
-    have ih : (a.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
-      a.correct rs hr g ν
+    intro rs hr g ν xc hxc
+    have ih : (a.lower rs).Correct xc (t.eval g ν) :=
+      a.correctX rs hr g ν xc hxc
     simp only [CheckedBool.disj_holds, ih.1, ih.2]
     cases t.eval g ν with
     | none => simp only [reduceCtorEq, false_or, Option.isSome_none, Bool.false_eq_true, iff_self]
@@ -412,30 +548,30 @@ def defined {t : LTm C (.val .bool)} (a : BooleanValue (ps := ps) (es := es) t) 
         Option.isSome_some, iff_self]⟩
 
 def seq {s : Srt} {d : LTm C s} {t : LTm C (.val .bool)}
-    (hd : DefinedValue (ps := ps) (es := es) d) (a : BooleanValue (ps := ps) (es := es) t) : BooleanValue (ps := ps) (es := es) (.seq d t) :=
+    (hd : DefinedValue (ps := ps) (es := es) (ls := ls) d) (a : BooleanValue (ps := ps) (es := es) (ls := ls) t) : BooleanValue (ps := ps) (es := es) (ls := ls) (.seq d t) :=
   ⟨hd.refs ++ a.refs, fun rs =>
     ⟨.and (hd.lower rs) (a.lower rs).yes, .and (hd.lower rs) (a.lower rs).no⟩, by
-    intro rs hr g ν
-    have ihd : (hd.lower rs).holds (Inputs.observe es ps rs g ν).codes ↔ (d.eval g ν).isSome = true :=
-      hd.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν
-    have iha : (a.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
-      a.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν
+    intro rs hr g ν xc hxc
+    have ihd : (hd.lower rs).holds xc ↔ (d.eval g ν).isSome = true :=
+      hd.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc
+    have iha : (a.lower rs).Correct xc (t.eval g ν) :=
+      a.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc
     simp only [CheckedBool.Correct, AFml.holds, ihd, iha.1, iha.2, LTm.eval_seq]
     cases d.eval g ν with
     | none => simp only [Option.bind_none, Option.isSome_none, Bool.false_eq_true,
         false_and, reduceCtorEq, iff_self, and_self]
     | some _ => simp only [Option.bind_some, Option.isSome_some, true_and, iff_self, and_self]⟩
 
-def ofScalar {t : LTm C (.val .bool)} (v : CheckedValue (ps := ps) (es := es) t) : BooleanValue (ps := ps) (es := es) t :=
-  ⟨v.refs, fun rs => .ofScalar (v.lower rs), fun rs hr g ν =>
-    CheckedBool.ofScalar_correct _ _ _ (v.correct rs hr g ν)⟩
+def ofScalar {t : LTm C (.val .bool)} (v : CheckedValue (ps := ps) (es := es) t) : BooleanValue (ps := ps) (es := es) (ls := ls) t :=
+  ⟨v.refs, fun rs => .ofScalar (v.lower rs), fun rs hr g ν xc hxc =>
+    CheckedBool.ofScalar_correct _ _ _ (v.correctX rs hr g ν xc hxc)⟩
 
-def not {t : LTm C (.val .bool)} (v : BooleanValue (ps := ps) (es := es) t) :
-    BooleanValue (ps := ps) (es := es) (.app1 (.unop .not rfl) t) :=
+def not {t : LTm C (.val .bool)} (v : BooleanValue (ps := ps) (es := es) (ls := ls) t) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app1 (.unop .not rfl) t) :=
   ⟨v.refs, fun rs => (v.lower rs).not, by
-    intro rs hr g ν
-    have ih : ((v.lower rs).not).Correct (Inputs.observe es ps rs g ν).codes
-        ((t.eval g ν).map (! ·)) := CheckedBool.not_correct _ _ _ (v.correct rs hr g ν)
+    intro rs hr g ν xc hxc
+    have ih : ((v.lower rs).not).Correct xc
+        ((t.eval g ν).map (! ·)) := CheckedBool.not_correct _ _ _ (v.correctX rs hr g ν xc hxc)
     rw [LTm.eval_app1, Close.Op1.eval_unop]
     cases he : t.eval g ν <;> rw [he] at ih <;> exact ih⟩
 
@@ -466,13 +602,13 @@ theorem eval_comparison (op : BinOp) (hc : op.zCmp = true) {p : PrimTy}
 
 def comparison {p : PrimTy} (op : BinOp) (hc : op.zCmp = true) (h : op.accepts p = true)
     (hr : op.ret p = .bool) {a b : LTm C (.val p)} (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (hr ▸ LTm.app2 (.binop op h) a b) :=
+    BooleanValue (ps := ps) (es := es) (ls := ls) (hr ▸ LTm.app2 (.binop op h) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => .comparison op (ha.lower rs) (hb.lower rs), by
-    intro rs hs g ν
+    intro rs hs g ν xc hxc
     rw [eval_comparison op hc h hr a b g ν]
     exact CheckedBool.comparison_correct _ _ _ _ _ _
-      (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)⟩
+      (ha.correctX rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν xc hxc)⟩
 
 theorem eval_zcmp (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zCmp = true)
     (a b : LTm C .kint) :
@@ -483,28 +619,28 @@ theorem eval_zcmp (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zCmp = true)
 
 /-- `a ⊲ b` on KeY's `int`. -/
 def zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint}
-    (ha : KIntValue (ps := ps) (es := es) a) (hb : KIntValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (.app2 (.zcmp op h) a b) :=
+    (ha : KIntValue (ps := ps) (es := es) (ls := ls) a) (hb : KIntValue (ps := ps) (es := es) (ls := ls) b) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app2 (.zcmp op h) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => CheckedInt.comparison op (ha.lower rs) (hb.lower rs), by
-    intro rs hs g ν
+    intro rs hs g ν xc hxc
     rw [eval_zcmp]
     exact CheckedInt.comparison_correct _ _ _ _ _ _
-      (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)⟩
+      (ha.correctX rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν xc hxc)⟩
 
 def binary (f : CheckedBool → CheckedBool → CheckedBool) (result : Option Bool → Option Bool → Option Bool)
     (sound : ∀ a b x va vb, a.Correct x va → b.Correct x vb → (f a b).Correct x (result va vb))
-    {a b t : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b)
-    (he : ∀ g ν, t.eval g ν = result (a.eval g ν) (b.eval g ν)) : BooleanValue (ps := ps) (es := es) t :=
+    {a b t : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b)
+    (he : ∀ g ν, t.eval g ν = result (a.eval g ν) (b.eval g ν)) : BooleanValue (ps := ps) (es := es) (ls := ls) t :=
   ⟨ha.refs ++ hb.refs, fun rs => f (ha.lower rs) (hb.lower rs), by
-    intro rs hs g ν
+    intro rs hs g ν xc hxc
     rw [he g ν]
     exact sound _ _ _ _ _
-      (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)⟩
+      (ha.correctX rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν xc hxc)⟩
 
-def and {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (.app2 (.binop .and rfl) a b) :=
+def and {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app2 (.binop .and rfl) a b) :=
   binary CheckedBool.and CheckedBool.andResult CheckedBool.and_correct ha hb (by
     intro g ν
     rw [LTm.eval_app2, Close.Op2.eval_binop]
@@ -515,8 +651,8 @@ def and {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (
       | none => cases v <;> rfl
       | some w => cases v <;> cases w <;> rfl)
 
-def or {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (.app2 (.binop .or rfl) a b) :=
+def or {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app2 (.binop .or rfl) a b) :=
   binary CheckedBool.or CheckedBool.orResult CheckedBool.or_correct ha hb (by
     intro g ν
     rw [LTm.eval_app2, Close.Op2.eval_binop]
@@ -527,38 +663,38 @@ def or {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (h
       | none => cases v <;> rfl
       | some w => cases v <;> cases w <;> rfl)
 
-def eq {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (.app2 (.binop .eqB rfl) a b) :=
+def eq {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app2 (.binop .eqB rfl) a b) :=
   binary CheckedBool.eq (fun va vb => va.bind fun v => vb.map fun w => decide (v = w))
     CheckedBool.eq_correct ha hb (by
       intro g ν
       rw [LTm.eval_app2, Close.Op2.eval_binop]
       cases a.eval g ν <;> cases b.eval g ν <;> rfl)
 
-def ne {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b) :
-    BooleanValue (ps := ps) (es := es) (.app2 (.binop .neB rfl) a b) :=
+def ne {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b) :
+    BooleanValue (ps := ps) (es := es) (ls := ls) (.app2 (.binop .neB rfl) a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => ((ha.lower rs).eq (hb.lower rs)).not, by
-    intro rs hs g ν
-    have heq : ((ha.lower rs).eq (hb.lower rs)).Correct (Inputs.observe es ps rs g ν).codes
+    intro rs hs g ν xc hxc
+    have heq : ((ha.lower rs).eq (hb.lower rs)).Correct xc
         ((a.eval g ν).bind fun v => (b.eval g ν).map fun w => decide (v = w)) :=
       CheckedBool.eq_correct _ _ _ _ _
-        (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
-        (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)
-    have hn : (((ha.lower rs).eq (hb.lower rs)).not).Correct (Inputs.observe es ps rs g ν).codes
+        (ha.correctX rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν xc hxc)
+        (hb.correctX rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν xc hxc)
+    have hn : (((ha.lower rs).eq (hb.lower rs)).not).Correct xc
         (((a.eval g ν).bind fun v => (b.eval g ν).map fun w => decide (v = w)).map (! ·)) :=
       CheckedBool.not_correct _ _ _ heq
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases hv : a.eval g ν <;> cases hw : b.eval g ν <;> rw [hv, hw] at hn <;> exact hn⟩
 
 def Result (ps : List Parameter) : {s : Srt} → LTm C s → Type
-  | .val .bool, t => BooleanValue (ps := ps) (es := es) t
+  | .val .bool, t => BooleanValue (ps := ps) (es := es) (ls := ls) t
   | _, _ => Empty
 
-def scalar? : {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
+def scalar? : {s : Srt} → (t : LTm C s) → Option (Result (es := es) (ls := ls) ps t)
   | .val .bool, t => (CheckedValue.ofTermIn? ps t).map ofScalar
   | _, _ => none
 
-def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
+def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → Option (Result (es := es) (ls := ls) ps t)
   | 0, _, _ => none
   | fuel + 1, s, .seq (s' := s') d a =>
     match s with
@@ -594,64 +730,70 @@ def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → 
     return zcmp op h (← KIntValue.ofTermIn? ps a) (← KIntValue.ofTermIn? ps b)
   | _ + 1, _, t => scalar? t
 
-def ofTermIn? (ps : List Parameter) (t : LTm C (.val .bool)) : Option (BooleanValue (ps := ps) (es := es) t) := ofTermFuel? ps 1024 t
+def ofTermIn? (ps : List Parameter) (t : LTm C (.val .bool)) : Option (BooleanValue (ps := ps) (es := es) (ls := ls) t) := ofTermFuel? ps 1024 t
 
 def ofTerm? (t : LTm C (.val .bool)) : Option (BooleanValue t) := ofTermIn? [] t
+
+theorem correct {t : LTm C (.val .bool)} (v : BooleanValue (ps := ps) (es := es) t)
+    (rs : List (Ref C)) (hr : ∀ r ∈ v.refs, r ∈ rs) (g : State C []) (ν : AEnv) :
+    (v.lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν) :=
+  v.correctX rs hr g ν _ (Inputs.AgreeZ.observe es ps rs g ν)
 
 end BooleanValue
 
 /-- A compositional arithmetic encoding of the existing leaf formula. -/
-structure StorageEncoding (φ : LFml C) (ps : List Parameter := []) (es : List EnvKey := []) where
+structure StorageEncoding (φ : LFml C) (ps : List Parameter := []) (es : List EnvKey := [])
+    (ls : List PrimTy.uint.Denote := []) where
   refs : List (Ref C)
   lower : List (Ref C) → AFml
-  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
-    ∀ (g : State C []) (ν : AEnv),
-      (lower rs).holds (Inputs.observe es ps rs g ν).codes ↔ φ.holds g ν
+  correctX : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv) (xc : Nat → Nat), Inputs.AgreeZ es ps rs ls g ν xc →
+      ((lower rs).holds xc ↔ φ.holds g ν)
 
 namespace StorageEncoding
 
-def tt : StorageEncoding (ps := ps) (es := es) (LFml.tt (C := C)) := ⟨[], fun _ => .tt, fun _ _ _ _ => Iff.rfl⟩
+def tt : StorageEncoding (ps := ps) (es := es) (ls := ls) (LFml.tt (C := C)) := ⟨[], fun _ => .tt, fun _ _ _ _ _ _ => Iff.rfl⟩
 
 def eq {p : PrimTy} {a b : LTm C (.val p)} (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
-    StorageEncoding (ps := ps) (es := es) (.eq a b) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => (ha.lower rs).eq (hb.lower rs), by
-    intro rs hr g ν
+    intro rs hr g ν xc hxc
     rw [CheckedScalar.eq_correct _ _ _ (a.eval g ν) (b.eval g ν)
-      (ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)]
+      (ha.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (hb.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)]
     simp only [LFml.holds]
     cases a.eval g ν <;> cases b.eval g ν <;>
       simp only [ReadFormula.equal, Bool.false_eq_true, decide_eq_true_eq]⟩
 
-def boolEq {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (hb : BooleanValue (ps := ps) (es := es) b) :
-    StorageEncoding (ps := ps) (es := es) (.eq a b) :=
+def boolEq {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) (ls := ls) a) (hb : BooleanValue (ps := ps) (es := es) (ls := ls) b) :
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a b) :=
   ⟨ha.refs ++ hb.refs, fun rs => ((ha.lower rs).eq (hb.lower rs)).yes, by
-    intro rs hs g ν
-    have hq : ((ha.lower rs).eq (hb.lower rs)).Correct (Inputs.observe es ps rs g ν).codes
+    intro rs hs g ν xc hxc
+    have hq : ((ha.lower rs).eq (hb.lower rs)).Correct xc
         ((a.eval g ν).bind fun v => (b.eval g ν).map fun w => decide (v = w)) :=
       CheckedBool.eq_correct _ _ _ _ _
-        (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
-        (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)
+        (ha.correctX rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν xc hxc)
+        (hb.correctX rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν xc hxc)
     apply hq.1.trans
     simp only [LFml.holds]
     cases a.eval g ν <;> cases b.eval g ν <;>
       simp only [Option.bind_none, Option.bind_some, Option.map_none, Option.map_some,
         Option.some.injEq, decide_eq_true_eq, reduceCtorEq]⟩
 
-def not {φ : LFml C} (a : StorageEncoding (ps := ps) (es := es) φ) : StorageEncoding (ps := ps) (es := es) (.not φ) :=
-  ⟨a.refs, fun rs => .not (a.lower rs), fun rs hr g ν => not_congr (a.correct rs hr g ν)⟩
+def not {φ : LFml C} (a : StorageEncoding (ps := ps) (es := es) (ls := ls) φ) : StorageEncoding (ps := ps) (es := es) (ls := ls) (.not φ) :=
+  ⟨a.refs, fun rs => .not (a.lower rs), fun rs hr g ν xc hxc => not_congr (a.correctX rs hr g ν xc hxc)⟩
 
-def and {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) φ) (b : StorageEncoding (ps := ps) (es := es) ψ) : StorageEncoding (ps := ps) (es := es) (.and φ ψ) :=
-  ⟨a.refs ++ b.refs, fun rs => .and (a.lower rs) (b.lower rs), fun rs hr g ν =>
-    and_congr (a.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (b.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)⟩
+def and {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) (ls := ls) φ) (b : StorageEncoding (ps := ps) (es := es) (ls := ls) ψ) : StorageEncoding (ps := ps) (es := es) (ls := ls) (.and φ ψ) :=
+  ⟨a.refs ++ b.refs, fun rs => .and (a.lower rs) (b.lower rs), fun rs hr g ν xc hxc =>
+    and_congr (a.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (b.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)⟩
 
-def imp {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) φ) (b : StorageEncoding (ps := ps) (es := es) ψ) : StorageEncoding (ps := ps) (es := es) (.imp φ ψ) :=
-  ⟨a.refs ++ b.refs, fun rs => .imp (a.lower rs) (b.lower rs), fun rs hr g ν =>
-    imp_congr (a.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
-      (b.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)⟩
+def imp {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) (ls := ls) φ) (b : StorageEncoding (ps := ps) (es := es) (ls := ls) ψ) : StorageEncoding (ps := ps) (es := es) (ls := ls) (.imp φ ψ) :=
+  ⟨a.refs ++ b.refs, fun rs => .imp (a.lower rs) (b.lower rs), fun rs hr g ν xc hxc =>
+    imp_congr (a.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc)
+      (b.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc)⟩
 
-def equalityPlain? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
+def equalityPlain? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a b))
   | .bool, a, b => do return boolEq (← BooleanValue.ofTermIn? ps a) (← BooleanValue.ofTermIn? ps b)
   | .uint, a, b | .int, a, b => do return eq (← CheckedValue.ofTermIn? ps a) (← CheckedValue.ofTermIn? ps b)
 
@@ -667,10 +809,10 @@ and the wrap are literals: `d·q ≤ x < d·q + d` for a quotient,
 
 /-- The parameter `k`'s code, as `CheckedValue.parameter` lays it out. -/
 theorem param_code {r : PrimTy} (k : Nat) (hk : Parameter.mk r k ∈ ps) (rs : List (Ref C))
-    (g : State C []) (ν : AEnv) :
-    (Affine.variable (es.length + Parameters.index ⟨r, k⟩ ps)).eval (Inputs.observe es ps rs g ν).codes =
+    (g : State C []) (ν : AEnv) {xc : Nat → Nat} (hxc : Inputs.AgreeZ es ps rs ls g ν xc) :
+    (Affine.variable (es.length + Parameters.index ⟨r, k⟩ ps)).eval xc =
       ((encode r (ν.get r k)).val : Int) :=
-  ((CheckedValue.parameter (C := C) (ps := ps) (es := es) k hk).correct rs (fun _ h => nomatch h) g ν).2
+  ((CheckedValue.parameter (C := C) (ps := ps) (es := es) k hk).correctX rs (fun _ h => nomatch h) g ν xc hxc).2
 
 /-- A unary node `e` of `a` defining the atom `k`, by the relation `rel`
 between their codes. -/
@@ -680,12 +822,12 @@ def rel1 {p r : PrimTy} {a : LTm C (.val p)} {e : LTm C (.val r)} (k : Nat)
     (hrel : ∀ (x : Nat → Nat) (v : p.Denote) (w : r.Denote) (A B : Affine),
       A.eval x = ((encode p v).val : Int) → B.eval x = ((encode r w).val : Int) →
         ((rel A B).holds x ↔ f v = some w))
-    (ha : CheckedValue (ps := ps) (es := es) a) : StorageEncoding (ps := ps) (es := es) (.eq e (.var k)) :=
+    (ha : CheckedValue (ps := ps) (es := es) a) : StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq e (.var k)) :=
   ⟨ha.refs, fun rs => .and (ha.lower rs).defined
       (rel (ha.lower rs).code (.variable (es.length + Parameters.index ⟨r, k⟩ ps))), by
-    intro rs hr g ν
-    have ih := ha.correct rs hr g ν
-    have hq := param_code (C := C) (es := es) k hk rs g ν
+    intro rs hr g ν xc hxc
+    have ih := ha.correctX rs hr g ν xc hxc
+    have hq := param_code (C := C) (es := es) k hk rs g ν hxc
     simp only [LFml.holds, he, LTm.eval_var]
     cases hv : a.eval g ν with
     | none =>
@@ -708,13 +850,13 @@ def rel2 {p r : PrimTy} {a b : LTm C (.val p)} {e : LTm C (.val r)} (k : Nat)
       A.eval x = ((encode p v).val : Int) → B.eval x = ((encode p u).val : Int) →
         Y.eval x = ((encode r w).val : Int) → ((rel A B Y).holds x ↔ f v u = some w))
     (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
-    StorageEncoding (ps := ps) (es := es) (.eq e (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq e (.var k)) :=
   ⟨ha.refs ++ hb.refs, fun rs => .and (ha.lower rs).defined (.and (hb.lower rs).defined
       (rel (ha.lower rs).code (hb.lower rs).code (.variable (es.length + Parameters.index ⟨r, k⟩ ps)))), by
-    intro rs hr g ν
-    have iha := ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν
-    have ihb := hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν
-    have hq := param_code (C := C) (es := es) k hk rs g ν
+    intro rs hr g ν xc hxc
+    have iha := ha.correctX rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν xc hxc
+    have ihb := hb.correctX rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν xc hxc
+    have hq := param_code (C := C) (es := es) k hk rs g ν hxc
     simp only [LFml.holds, he, LTm.eval_var]
     cases hv : a.eval g ν with
     | none =>
@@ -737,6 +879,12 @@ def rel2 {p r : PrimTy} {a b : LTm C (.val p)} {e : LTm C (.val r)} (k : Nat)
         | some w => exact ⟨(fun h => Option.some.inj h), (fun h => congrArg some h)⟩⟩
 
 end StorageEncoding
+
+/-- The encoding at the typed codes themselves, with no ledger entry. -/
+theorem StorageEncoding.correct {φ : LFml C} (v : StorageEncoding (ps := ps) (es := es) φ)
+    (rs : List (Ref C)) (hr : ∀ r ∈ v.refs, r ∈ rs) (g : State C []) (ν : AEnv) :
+    (v.lower rs).holds (Inputs.observe es ps rs g ν).codes ↔ φ.holds g ν :=
+  v.correctX rs hr g ν _ (Inputs.AgreeZ.observe es ps rs g ν)
 
 /-- `d · (y - off) ≤ x - off ≤ d · (y - off) + d - 1`: `y` is `x` divided by
 `d`, rounding down, on codes offset by `off`. -/
@@ -824,7 +972,7 @@ namespace StorageEncoding
 def defDiv (h : BinOp.div.accepts .uint = true) {a : LTm C (.val .uint)} (c : PrimTy.uint.Denote)
     (hc : c.val ≠ 0) (k : Nat) (hk : Parameter.mk .uint k ∈ ps)
     (ha : CheckedValue (ps := ps) (es := es) a) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop .div h) a (.app0 (.lit c))) (.var k)) :=
   rel1 k hk (fun x => BinOp.evalT .div h x c)
     (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)]; rfl)
     (floorRel 0 c.val (maxInt .uint)) (by
@@ -848,7 +996,7 @@ def shrDiv {p : PrimTy} (v : p.Denote) : Int :=
 /-- `a >> v == k`, at `uint` (logical) and `int` (arithmetic). -/
 def defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) {a : LTm C (.val p)} (v : p.Denote)
     (k : Nat) (hk : Parameter.mk p k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop .shr h) a (.app0 (.lit v))) (.var k)) :=
   rel1 k hk (fun x => BinOp.evalT .shr h x v)
     (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)]; rfl)
     (floorRel (offset p) (shrDiv v) (maxInt p)) (by
@@ -900,7 +1048,7 @@ def defShr {p : PrimTy} (h : BinOp.shr.accepts p = true) {a : LTm C (.val p)} (v
 def defAddW (h : BinOp.addW.accepts .uint = true) {a b : LTm C (.val .uint)} (k : Nat)
     (hk : Parameter.mk .uint k ∈ ps)
     (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .addW h) a b) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop .addW h) a b) (.var k)) :=
   rel2 k hk (fun x y => BinOp.evalT .addW h x y)
     (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)])
     (wrapRel false) (by
@@ -926,7 +1074,7 @@ def defAddW (h : BinOp.addW.accepts .uint = true) {a b : LTm C (.val .uint)} (k 
 def defSubW (h : BinOp.subW.accepts .uint = true) {a b : LTm C (.val .uint)} (k : Nat)
     (hk : Parameter.mk .uint k ∈ ps)
     (ha : CheckedValue (ps := ps) (es := es) a) (hb : CheckedValue (ps := ps) (es := es) b) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop .subW h) a b) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop .subW h) a b) (.var k)) :=
   rel2 k hk (fun x y => BinOp.evalT .subW h x y)
     (fun g ν => by rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩)])
     (wrapRel true) (by
@@ -951,7 +1099,7 @@ def defSubW (h : BinOp.subW.accepts .uint = true) {a b : LTm C (.val .uint)} (k 
 /-- `int(a) == k`. -/
 def defToInt (h : UnOp.toInt.accepts .uint = true) {a : LTm C (.val .uint)} (k : Nat)
     (hk : Parameter.mk .int k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop .toInt h) a) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app1 (.unop .toInt h) a) (.var k)) :=
   rel1 k hk (fun x => UnOp.evalT .toInt h x)
     (fun g ν => by rw [LTm.eval_app1, Close.Op1.eval_unop]) convRel (by
       intro x v w A B hA hB
@@ -973,7 +1121,7 @@ def defToInt (h : UnOp.toInt.accepts .uint = true) {a : LTm C (.val .uint)} (k :
 /-- `uint(a) == k`. -/
 def defToUint (h : UnOp.toUint.accepts .int = true) {a : LTm C (.val .int)} (k : Nat)
     (hk : Parameter.mk .uint k ∈ ps) (ha : CheckedValue (ps := ps) (es := es) a) :
-    StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop .toUint h) a) (.var k)) :=
+    StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app1 (.unop .toUint h) a) (.var k)) :=
   rel1 k hk (fun x => UnOp.evalT .toUint h x)
     (fun g ν => by rw [LTm.eval_app1, Close.Op1.eval_unop]) (fun A Y => convRel Y A) (by
       intro x v w A B hA hB
@@ -994,7 +1142,7 @@ def defToUint (h : UnOp.toUint.accepts .int = true) {a : LTm C (.val .int)} (k :
 /-- The defining equation `op x y == k` of a cut atom, by the operator. -/
 def specialBin? (op : BinOp) {q : PrimTy} (h : op.accepts q = true) (x y : LTm C (.val q)) (k : Nat)
     (hk : Parameter.mk (op.ret q) k ∈ ps) :
-    Option (StorageEncoding (ps := ps) (es := es) (.eq (.app2 (.binop op h) x y) (.var k))) :=
+    Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app2 (.binop op h) x y) (.var k))) :=
   match op, h, hk with
   | .div, h, hk =>
     match q, h, y, hk with
@@ -1020,7 +1168,7 @@ def specialBin? (op : BinOp) {q : PrimTy} (h : op.accepts q = true) (x y : LTm C
 /-- The defining equation `op x == k` of a cut atom, by the operator. -/
 def specialUn? (op : UnOp) {q : PrimTy} (h : op.accepts q = true) (x : LTm C (.val q)) (k : Nat)
     (hk : Parameter.mk (op.ret q) k ∈ ps) :
-    Option (StorageEncoding (ps := ps) (es := es) (.eq (.app1 (.unop op h) x) (.var k))) :=
+    Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq (.app1 (.unop op h) x) (.var k))) :=
   match op, h, hk with
   | .toInt, h, hk =>
     match q, h, x, hk with
@@ -1034,28 +1182,33 @@ def specialUn? (op : UnOp) {q : PrimTy} (h : op.accepts q = true) (x : LTm C (.v
 
 /-- The defining equation `e == k` of a cut atom, recognized by `e`'s operator. -/
 def specialVar? : {p : PrimTy} → (a : LTm C (.val p)) → (k : Nat) → Parameter.mk p k ∈ ps →
-    Option (StorageEncoding (ps := ps) (es := es) (.eq a (.var k)))
+    Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a (.var k)))
   | _, .app2 (.binop op h) x y, k, hk => specialBin? op h x y k hk
   | _, .app1 (.unop op h) x, k, hk => specialUn? op h x k hk
   | _, _, _, _ => none
 
 def special? {p : PrimTy} (a : LTm C (.val p)) : (b : LTm C (.val p)) →
-    Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
+    Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a b))
   | .var k => if hk : Parameter.mk p k ∈ ps then specialVar? a k hk else none
   | _ => none
 
-def equality? {p : PrimTy} (a b : LTm C (.val p)) : Option (StorageEncoding (ps := ps) (es := es) (.eq a b)) :=
+def equality? {p : PrimTy} (a b : LTm C (.val p)) : Option (StorageEncoding (ps := ps) (es := es) (ls := ls) (.eq a b)) :=
   match special? a b with
   | some e => some e
   | none => equalityPlain? a b
 
-def ofFormula? : (φ : LFml C) → Option (StorageEncoding (ps := ps) (es := es) φ)
+def ofFormulaL? : (φ : LFml C) → Option (StorageEncoding (ps := ps) (es := es) (ls := ls) φ)
   | .tt => some tt
   | .eq a b => equality? a b
-  | .not φ => (ofFormula? φ).map not
-  | .and φ ψ => do return and (← ofFormula? φ) (← ofFormula? ψ)
-  | .imp φ ψ => do return imp (← ofFormula? φ) (← ofFormula? ψ)
+  | .not φ => (ofFormulaL? φ).map not
+  | .and φ ψ => do return and (← ofFormulaL? φ) (← ofFormulaL? ψ)
+  | .imp φ ψ => do return imp (← ofFormulaL? φ) (← ofFormulaL? ψ)
   | .all .. => none
+
+/-- **The compiler of a leaf**, its ledger layout `ls` (none by default). -/
+def ofFormula? (φ : LFml C) (ls : List PrimTy.uint.Denote := []) :
+    Option (StorageEncoding (ps := ps) (es := es) (ls := ls) φ) :=
+  ofFormulaL? φ
 
 end StorageEncoding
 

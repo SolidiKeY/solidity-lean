@@ -1157,6 +1157,8 @@ Three properties of the reading are worth knowing.
 | `QFml.decide_iff` | `F.decide = true ↔ F.Valid`: quantified linear arithmetic decided |
 | `QuantReduction.valid_of_sentence`, `QuantReduction.verify` | a valid sentence makes the leaf valid; a false assignment gives a refuting state |
 | `quantReduction?_isSome` | `φ.quantCovered = true → (quantReduction? φ).isSome` |
+| `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
+| `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
 
 `#print axioms` of each of the six `decide*` theorems is pinned in
 `Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
@@ -1164,10 +1166,11 @@ Three properties of the reading are worth knowing.
 `Calculus/QuantTotality.lean`: `propext`, `Classical.choice`, `Quot.sound`.
 Everything is `sorry`-free.
 
-`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by four
+`Fml.Covered` is `Fml.inExact && Fml.exactBounded` (M4), extended by six
 features, each with its completeness proved through every stage
 (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
-(feature 3, its own pipeline):
+(feature 3, its own pipeline), or `Fml.ledgerCovered` (feature 7, its own
+pipeline):
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1249,6 +1252,40 @@ features, each with its completeness proved through every stage
    (`readFlatten?_arith`, `flattenedArithmetic?_isSome`).
    `Fml.exactBounded` bounds the cut body (`body.cutAll`, the body itself
    where nothing is cut) as well as the lifted one.
+6. **KeY `int`** (plan step 3, `Srt.kint`): a literal, a `uint` widened
+   (`toInt`), `+`, `-`, a product by a literal on either side, and the
+   comparisons (`LTm.Src.zlit` … `zcmp`; `LTm.ZNum`, `LTm.BoolV.zcmp`).
+   An unbounded value has no range: `KIntValue` compiles it to an affine
+   form over the typed codes, the difference of two of them where it
+   comes from words, and a comparison to an `AFml` relation between the
+   forms' positive and negative parts (`BooleanValue.zcmp`).  Nothing
+   overflows, so no guard is added.  The flattener and the read queries
+   take the new nodes (`flattenKInt?`, `ReadExpr.zbin`, `ReadExpr.zcmp`)
+   under a variable symbol, so that the existing cases do not split on
+   the sort.
+7. **Reads of the starting ledger** (plan step 3, `net(a)`, an address a
+   scalar of the fragment).  `decideLeaf` falls back to
+   `ledgerReduction?` (`Calculus/LedgerReduction.lean`) where the other
+   two refuse.  The lifted body's reads are cut (`LFml.ledgerCut`,
+   `Calculus/LedgerCut.lean`): the `j`-th read `net(aⱼ)` becomes
+   `seq aⱼ (net(j))`, and `aᵢ == aⱼ → net(i) == net(j)` for each pair is
+   put in the antecedent.  The cut is exact in a universal reading
+   (`LFml.ledgerCut_valid_iff`; it needs each address to read no ledger,
+   `LFml.netOK`, and fewer than `2^256` reads).  The cut body goes through
+   M4's cut and flattening, and the compiler takes each entry `net(j)` as
+   the difference of two unbounded natural codes past the typed inputs
+   (`Inputs.AgreeZ`, `LeafArithmeticZ`).  A false assignment realizes the
+   entries as a ledger at the constants (`ledgerOfCodes`), and the
+   refuting state's ledger is that one pulled back to the addresses'
+   values (`LFml.ledgerPull`), which the reads' queries compute
+   (`ReadExpr.query`), so the verdict stays computable.
+   `Fml.ledgerCovered` is `Fml.inExact` with ledger reads
+   (`LFml.srcL? .pre`) and the bounds of `Fml.exactBounded` on the ledger
+   cut; `LFml.ledgerCut_src` (`Calculus/LedgerTotality.lean`) maps the
+   fragment with reads at addresses to the one with reads at constants.
+   A read under the symbolic execution's own ledger writes (`pay`,
+   `store(net, …)`) stays outside: the leaf builder refuses a read past a
+   write (`SymS.netOk`).
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
@@ -1268,6 +1305,14 @@ and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
 `>>` on `uint` and `int`, `<<` at 0 and past 256, `& 7`, `7 &`, `+%`,
 `-%`), and kernel-checks one covered leaf per operator (`neg_covered` …
 `subW_covered`).
+For the sixth it pins `toInt(x) + 1 > toInt(x)`, a difference that may
+be negative, a sum past `2^256`, products by literals, a transaction field
+and a storage read past a write, proved and refuted (`kintOk` …
+`kintRead`), `kint_covered` and `kintScale_covered` kernel-checked.  For
+the seventh: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
+(`netSame`), a ledger entry against a storage read and past a write,
+proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
+`net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
 
 ### What is not proved
 
@@ -1286,6 +1331,10 @@ and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
   an `∃` state's list keeps its order (two orders, two states).  The pins
   take well under a second; a large leaf may not.  `quantReduction?`
   also re-runs the front `dependentReduction?` refused.
+* A time bound with ledger reads: each read is two codes and each pair of
+  reads a consistency premise, so `netSwap` (four reads) is pinned
+  covered but its verdict is out of reach in practice.  Reads at the
+  same address are not merged.
 * Any bound on the decision's running time.  `decideLeaf_complete` says it
   answers, not when: `AFml.decide`'s search is a breadth-first walk over
   the reachable formulas with list membership, and a relation whose
@@ -1298,15 +1347,22 @@ and a refuted verdict per operator (`-`, `~`, `int`, `uint`, `/`, `%`,
   * a quantifier past the prefix whose body reads storage or a transaction
     field, even at no bound variable (`Examples/Decision.lean`,
     `evenRead`), the array property fragment among them (`apf`);
-  * KeY `int` (no atom of `Srt.kint` in `LTm`);
+  * a KeY `int` binder (`∀ int k` of KeY's sort: `LFml` has no
+    unbounded binder), `/`, `%` and products of KeY `int`s, and a read of
+    the ledger past a ledger write (`pay`, `store(net, …)`);
   * division and modulo at `int`, `<<` at `int`, `|` and `^` with a
     literal, `&` with a literal that is not a low mask `2^k - 1`, `**` and
     `**%` with a literal exponent, and `*%` by a literal: each needs an
     encoding with a coefficient of `2^256` or a disjunction per bit, and
     none was carried through the stages (the cut and its proofs extend to
     them as to `<<`);
-  * memory reads and writes;
-  * fixed and dynamic array indices (M4 (b));
+  * memory reads and writes: `LTm.Elimable` refuses the memory sorts, and
+    no stage realizes a heap;
+  * fixed and dynamic array indices (M4 (b)): a checked read `a[i]` is
+    not pushed exactly through updates (`Tm.agreeB` is false on it: the
+    Theory reads a default past the length, the interpreter halts), the
+    path guards refuse `.at`, and the read queries and realization carry
+    no index or length evidence;
   * every hash.
 
 ### The plan for the rest
@@ -1325,7 +1381,11 @@ in this order:
    ahead of the compiler (`LFml.cutAll`), the compiler encoding each
    definition; not done: `*%`, `|`, `^`, other masks, `int` `/` and `%`.
 3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
-   difference of two natural codes in `AFml`.
+   difference of two natural codes in `AFml`.  Done (2026-10-25) for the
+   linear operations, `toInt` and the comparisons (feature 6), and for
+   reads of the starting ledger as atoms (feature 7).  Left: a binder of
+   KeY's `int`, which needs an unbounded binder in `LFml` and its
+   prefix, and ledger reads past ledger writes.
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
    by projection in the binary-derivative automaton (`QFml.decide_iff`),
    and negative-position Presburger quantifiers and alternation over value
@@ -1337,7 +1397,11 @@ in this order:
    Sipma), then decide the instance by the quantifier-free pipeline.
    Completeness is their theorem: the instance is equisatisfiable.
 6. **Memory, array indices**: realization cases for memory and in-range
-   evidence for array indices (`Calculus/ReadRealization.lean`).
+   evidence for array indices (`Calculus/ReadRealization.lean`).  Not
+   started: an array leaf is refused before realization, at update
+   pushing (`Tm.agreeB`, the halting read past the length) and at the path
+   guards (`TSegs.guardFuel?` refuses `.at`); memory at elimination
+   (`LTm.Elimable`).  Each is a stage of its own to make exact first.
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.

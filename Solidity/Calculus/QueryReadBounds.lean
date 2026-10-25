@@ -18,7 +18,7 @@ variable {C : Contract}
 
 def ReadExpr.readBound : {s : Srt} → {t : LTm C s} → ReadExpr t → Nat
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root _ _ | _, _, .err | _, _, .zlit _ => 0
-  | _, _, .field _ q | _, _, .unop _ _ q | _, _, .toInt q => q.readBound
+  | _, _, .field _ q | _, _, .unop _ _ q | _, _, .toInt q | _, _, .net q => q.readBound
   | _, _, .index q k | _, _, .binop _ _ q k | _, _, .seq q k | _, _, .orElse q k
   | _, _, .zbin _ _ q k | _, _, .zcmp _ _ q k =>
     q.readBound + k.readBound
@@ -30,7 +30,7 @@ theorem ReadExpr.query_within (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C 
     (h : ReadExpr t) : (h.query g ν).Within h.readBound := by
   induction h with
   | var _ | lit _ | env _ | root _ _ | err | zlit _ => exact Query.within_pure _ 0
-  | field _ _ ih | unop _ _ _ ih | toInt _ ih =>
+  | field _ _ ih | unop _ _ _ ih | toInt _ ih | net _ ih =>
     exact Query.within_bind _ _ ih (fun _ => Query.within_pure _ 0)
   | index _ _ ihq ihk | binop _ _ _ _ ihq ihk | zbin _ _ _ _ ihq ihk | zcmp _ _ _ _ ihq ihk =>
     exact Query.within_bind _ _ ihq (fun _ => Query.within_bind _ _ ihk

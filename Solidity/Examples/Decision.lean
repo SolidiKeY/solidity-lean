@@ -138,6 +138,30 @@ def kintValue : Fml Bank [] := dl!{ toInt(msg.value) + toInt(msg.value) >= toInt
 def kintRead : Fml Bank [] :=
   dl!{ ∀ uint k; [ balances[k] = 7; ] toInt(balances[k]) - 7 = 0 }
 
+/-! ### Ledger reads (M7, plan step 3)
+
+`net(a)` reads the ledger of the starting state, a KeY `int` per address:
+each read is cut to a read at a fresh constant, consistent with the others
+at equal addresses (`LFml.ledgerCut`), its entry two natural codes of the
+arithmetic (`LeafArithmeticZ`). -/
+
+def netOk : Fml Bank [] := dl!{ ∀ uint a; net(a) = 7 → net(a) + 1 = 8 }
+/-- Reads at equal addresses read equal entries. -/
+def netSame : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; a == b → net(a) = net(b) }
+/-- An entry may be negative. -/
+def netNeg : Fml Bank [] := dl!{ ∀ uint a; net(a) >= 0 }
+def netOther : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) = 7 → net(b) = 7 }
+/-- A ledger entry against a storage read. -/
+def netStore : Fml Bank [] := dl!{ ∀ uint a; net(a) = toInt(balances[a]) → net(a) >= 0 }
+/-- Past a write to storage. -/
+def netWrite : Fml Bank [] :=
+  dl!{ ∀ uint a; [ balances[a] = 3; ] net(a) - toInt(balances[a]) < net(a) }
+def netDistinct : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) < net(b) → a != b }
+/-- Four reads: in the fragment (`netSwap_covered`), its verdict past the
+decision's reach in practice, each read two codes and each pair of reads
+a consistency premise (`docs/automation.md`, M7). -/
+def netSwap : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) + net(b) = net(b) + net(a) }
+
 /-- Guards outside the fragment: a disequality, arithmetic on the index. -/
 def guardNe : Fml Bank [] := dl!{ (∀ uint k; k != 3 → balances[k] == 0) → balances[5] == 0 }
 def guardArith : Fml Bank [] := dl!{ (∀ uint k; k + 1 < 10 → balances[k] == 0) → balances[5] == 0 }
@@ -228,6 +252,20 @@ theorem kintScale_covered : kintScale.Covered = true := by decide +kernel
 /-- `decideLeaf_proved_iff`, applied to a KeY `int` leaf. -/
 theorem kint_iff : decideLeaf kintOk = .proved ↔ Fml.Valid kintOk :=
   decideLeaf_proved_iff kint_covered
+
+/-- info: ["proved", "proved", "refuted", "refuted", "proved", "proved", "proved"] -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].map verdict
+
+/-- info: true -/
+#guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].all Fml.Covered
+
+theorem net_covered : netOk.Covered = true := by decide +kernel
+theorem netSame_covered : netSame.Covered = true := by decide +kernel
+theorem netSwap_covered : netSwap.Covered = true := by decide +kernel
+
+/-- `decideLeaf_proved_iff`, applied to a leaf that reads the ledger. -/
+theorem net_iff : decideLeaf netOk = .proved ↔ Fml.Valid netOk :=
+  decideLeaf_proved_iff net_covered
 
 /-- `decideLeaf_proved_iff`, applied to a cut leaf. -/
 theorem div_iff : decideLeaf divOk = .proved ↔ Fml.Valid divOk :=

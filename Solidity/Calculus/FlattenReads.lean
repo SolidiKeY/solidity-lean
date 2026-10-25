@@ -180,6 +180,9 @@ def flattenKInt? (rec : Nat → {s : Srt} → (t : LTm C s) → (start : Nat) �
   | remaining, _, .app1 .toInt q, start => do
     let (a, remaining) ← rec remaining q start
     return (.app1 .toInt a, remaining)
+  | remaining, _, .app1 .net q, start => do
+    let (a, remaining) ← rec remaining q start
+    return (.app1 .net a, remaining)
   | remaining, _, .app2 (.zbin op h) t w, start => do
     let (a, remaining) ← rec remaining t start
     let (b, remaining) ← rec remaining w a.next
@@ -240,6 +243,16 @@ theorem flattenFuel?_zbin (d r : Nat) (op : BinOp) (h : op.zArith = true) (t w :
     (start : Nat) :
     flattenFuel? (d + 1) (r + 1) (.app2 (.zbin op h) t w) start =
       flattenKInt? (flattenFuel? d) r (.app2 (.zbin op h) t w) start := rfl
+
+/-- `flattenFuel?` at a ledger read: `flattenKInt?`. -/
+theorem flattenFuel?_net (d r : Nat) (q : LTm C (.val .uint)) (start : Nat) :
+    flattenFuel? (d + 1) (r + 1) (.app1 .net q) start =
+      flattenKInt? (flattenFuel? d) r (.app1 .net q) start := rfl
+
+theorem flattenKInt?_net (rec : Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
+      Option (Flattened t start × Nat)) (r : Nat) (q : LTm C (.val .uint)) (start : Nat) :
+    flattenKInt? rec r (.app1 .net q) start =
+      (rec r q start).bind fun p => some (Flattened.app1 .net p.1, p.2) := rfl
 
 theorem flattenKInt?_zbin (rec : Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
       Option (Flattened t start × Nat)) (r : Nat) (op : BinOp) (h : op.zArith = true)

@@ -63,6 +63,8 @@ inductive ReadExpr : {s : Srt} → LTm C s → Type where
   | zlit (n : Int) : ReadExpr (.app0 (.zlit n))
   /-- A `uint` read as a KeY `int`. -/
   | toInt {t : LTm C (.val .uint)} (ht : ReadExpr t) : ReadExpr (.app1 .toInt t)
+  /-- The ledger's entry at an address, a KeY `int`. -/
+  | net {t : LTm C (.val .uint)} (ht : ReadExpr t) : ReadExpr (.app1 .net t)
   /-- `a ⊕ b` on KeY's `int`. -/
   | zbin (op : BinOp) (h : op.zArith = true) {a b : LTm C .kint} (ha : ReadExpr a)
       (hb : ReadExpr b) : ReadExpr (.app2 (.zbin op h) a b)
@@ -97,6 +99,7 @@ def ofTerm? : {s : Srt} → (t : LTm C s) → Option (ReadExpr t)
   | s, .app1 (a := a) o t =>
     match a, s, o, t with
     | _, _, .toInt, t => (ofTerm? t).map .toInt
+    | _, _, .net, t => (ofTerm? t).map .net
     | _, _, _, _ => none
   | s, .app2 (a := u) (b := v) o a b =>
     match u, v, s, o, a, b with
@@ -144,6 +147,8 @@ def query (g : State C []) (ν : AEnv) : {s : Srt} → {t : LTm C s} →
   | _, _, .err => .pure none
   | _, _, .zlit n => .pure (some n)
   | _, _, .toInt ht => (ht.query g ν).bind fun v => .pure (v.map fun n => n.1)
+  | _, _, .net ht => (ht.query g ν).bind fun v =>
+      .pure (v.map fun n => (lookupBy n g.net).getD 0)
   | _, _, .zbin op _ ha hb => (ha.query g ν).bind fun a => (hb.query g ν).bind fun b =>
       .pure (a.bind fun x => b.map fun y => op.evalZ x y)
   | _, _, .zcmp op _ ha hb => (ha.query g ν).bind fun a => (hb.query g ν).bind fun b =>
@@ -198,7 +203,7 @@ theorem query_sound (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C s}
     split <;> assumption
   | err => rfl
   | zlit n => rfl
-  | toInt ht ih =>
+  | toInt ht ih | net ht ih =>
     simp only [query, Query.runStorage, Query.run_bind, Query.run, LTm.eval_app1, ← ih]
     cases (ht.query g ν).run (fun r => r.read st) <;> rfl
   | zbin op h ha hb iha ihb | zcmp op h ha hb iha ihb =>
