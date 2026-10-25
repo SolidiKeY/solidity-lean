@@ -224,6 +224,15 @@ partial def SolTy.toTerm : SolTy → CommandElabM Term
   | .array t => do `(Array $(← t.toTerm))
   | .mapping k v => do `(Mapping $(← k.toTerm) $(← v.toTerm))
 
+/-- A variable's initial value, Solidity's zero, written out so that the
+VCs read `0` rather than `default`. -/
+def SolTy.zero (t : SolTy) : CommandElabM Term := do
+  match t with
+  | .uint | .address => `(0)
+  | .bool => `(false)
+  | .array _ => `((#[] : $(← t.toTerm)))
+  | .mapping _ _ => `((default : $(← t.toTerm)))
+
 /-- What an expression is read in: the variables' types, the storage the
 function writes, and whether the reading is inside `old(…)`. -/
 structure Ctx where
@@ -418,7 +427,7 @@ partial def trStmt (c : Ctx) (s : TSyntax `solStmt) : CommandElabM (Ctx × Array
     let lt ← ty.toTerm
     let (v, gs) ← match e with
       | some e => trCode c e
-      | none => do pure (← `((default : $lt)), #[])
+      | none => do pure (← ty.zero, #[])
     let item ← `(Lean.Parser.Term.doSeqItem| let mut $(mkIdent x.getId):ident : $lt := $v)
     return (c.push x.getId ty, gs.push item)
   | `(solStmt| $l:solExpr = $r:solExpr ;) => return (c, ← trAssign c l r)
@@ -570,7 +579,7 @@ def trFunction (cname : Name) (storage : List (Name × SolTy)) (f : Ident)
   if let some t := retTy then
     if ret?.any (fun r => match r with | `(solParam| $_:solTy $_:ident) => true | _ => false) then
       prelude := prelude.push (← `(Lean.Parser.Term.doSeqItem|
-        let mut $(mkIdent retName):ident : $(← t.toTerm) := default))
+        let mut $(mkIdent retName):ident : $(← t.toTerm) := $(← t.zero)))
   let (_, items) ← trStmts c body
   let endsInReturn := match body.back? with
     | some s => match s with | `(solStmt| return $[$_:solExpr]? ;) => true | _ => false
