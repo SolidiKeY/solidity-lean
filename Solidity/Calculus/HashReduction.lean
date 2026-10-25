@@ -190,7 +190,7 @@ theorem _root_.Solidity.Tm.sw_hashIn {k k' : HashKind} {Γ : Ctx} (σ : State C 
         obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
         obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
         rcases h with h | h | h
-        · cases o <;> first | exact h.elim | exact absurd hm.1.1 (by decide)
+        · cases o <;> first | exact h.elim | exact absurd hm.1.1.1 (by decide)
         · exact Tm.sw_hashIn σ x hx h
         · exact Tm.sw_hashIn σ y hy h
   | s, .app3 (a := a) (b := b) (c := c) o x y z, _, e, h => by
