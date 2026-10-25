@@ -1439,7 +1439,9 @@ default, `rowPastRead`, proved); the slots past the live length, which
 the Theory reads as they are (`shadowRead`, refuted); an element stored
 in a mapping (`owedRead`, proved).  `pastEnd_covered`, `writeSame_covered` and
 `inRange_covered` are kernel-checked; `pastEnd_answers`,
-`writeSame_answers` and `inRange_iff` apply the theorems.
+`writeSame_answers` and `inRange_iff` apply the theorems.  The array verdicts are
+evaluated one after another (`set_option Elab.async false`): evaluated
+in parallel they overflow a command-line `lean`'s stack.
 
 ### What is not proved
 

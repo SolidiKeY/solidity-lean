@@ -369,6 +369,10 @@ array reads to atoms with what actual arrays make of them
 (`LTm.hasFold`).  A refutation's arrays are rebuilt from the atoms, the
 counterassignment first shrunk. -/
 
+-- The verdicts below run one after another: run in parallel, their
+-- evaluations together overflow a command-line `lean`'s stack.
+set_option Elab.async false
+
 def Arrays : Contract := contract!{ uint[] xs; uint[4] row; mapping(uint => uint) owed; }
 
 section
