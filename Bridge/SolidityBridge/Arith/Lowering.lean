@@ -161,7 +161,8 @@ theorem narrowCheck_guard (C : Contract) (scope : ElabScope) (st : ECtx × Nat)
     (hc : Solidity.check C st.1.toNCtx .bool (inTyCond p n e) = .ok v) :
     narrowCheck C p n e scope st = .ok
       ([.of st.1.toNCtx (match scope.overflow with
-        | some o => o.guardStmt v scope.selfFrame | none => .require v)], st) := by
+        | some o => o.guardStmt v scope.selfFrame
+        | none => if scope.selfFrame then panicStmt 0x11 v else .require v)], st) := by
   delta narrowCheck
   rw [if_neg (not_le.mpr hn)]
   simp only [bind, ReaderT.bind, StateT.bind, nctx_run, Except.bind, pure, ReaderT.pure, StateT.pure, Except.pure]

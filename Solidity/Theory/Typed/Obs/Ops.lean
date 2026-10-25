@@ -18,7 +18,8 @@ open Semantics (structDef lookupBy setBy)
 `select(s, r)` reads as a storage (`Storage (Contract.ofStruct s)`), and
 where a path under it is rooted (`SRef (Contract.ofStruct s) T`), so the
 storage's operations read it unchanged. -/
-def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
+def Contract.ofStruct (s : Name) : Contract :=
+  { vars := structDef s, vars_ok := structDef_okDeep s, vars_nodup := structDef_nodup s }
 
 /-- A path under `select(s, r)` as a path from the root `r`: its member
 first. -/

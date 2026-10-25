@@ -190,6 +190,7 @@ import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.TermLib
 import Solidity.Examples.ScopedRuns
+import Solidity.Examples.ContractTypes
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays
 import Solidity.Examples.Chains.StorageDelete
