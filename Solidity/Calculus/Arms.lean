@@ -116,13 +116,13 @@ def Premise.captureMV {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
 
 A branch of an `if` that is empty or one assignment of a value local
 (`v = e;`) runs as the update `{v := e}`: it neither panics nor hands
-control to anyone.  An `if` on a simple condition whose branches are both so,
-one of them empty and the other an accumulation (`Upd.ifJoin?`), is then one
-update, its right-hand side a conditional term (KeY's join, its `ifThenElse`
-merge), and the rest of the program is run once, not once per branch
-(`docs/automation.md`, M6).  `Upd.ifJoin` joins any two such branches; the
-gate keeps the others split, their cases cheaper for the closers than the
-conditional term. -/
+control to anyone.  An `if` on a simple condition whose branches are both so
+(`Upd.ifJoin?`) is then one update, its right-hand side a conditional term
+(KeY's join, its `ifThenElse` merge), and the rest of the program is run
+once, not once per branch (`docs/automation.md`, M6 and M8).  The closer
+splits a joined value back into its two cases at the leaf where that is
+cheaper (`sol_close_ite_split`, KeY's `ifthenelse_split`), so a leaf costs
+what the walk's split cost. -/
 
 /-- What a branch of a joinable `if` does: nothing (`none`), or one value
 local assigned (`some ⟨p, v, e⟩`, `v = e;`). -/
@@ -161,22 +161,6 @@ def Prog.joinArm? {Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (JoinArm C Γ) :=
   Prog.casesOn (motive_2 := fun Γ _ _ => Option (JoinArm C Γ)) P (some none)
     (fun s ω => s.localAssign?.bind fun a => if Prog.isNil ω then some (some a) else none)
 
-/-- Whether the term reads the local at position `n`. -/
-def Tm.readsPos (n : Nat) : {s : Srt} → Tm C Γ s → Bool
-  | _, .pvV i => i.toNat == n
-  | _, .netOf _ a => a.readsPos n
-  | _, .app1 _ x => x.readsPos n
-  | _, .app2 _ x y => x.readsPos n || y.readsPos n
-  | _, .app3 _ x y z => x.readsPos n || y.readsPos n || z.readsPos n
-  | _, _ => false
-
-/-- A branch an `if` is joined by: nothing, or an accumulation, a value
-local set from its own value (`x = x + 1;`), which a split would copy the
-rest of the program for, once per case of every `if` before it. -/
-def JoinArm.accumulates : JoinArm C Γ → Bool
-  | none => true
-  | some ⟨_, i, r⟩ => r.lower.readsPos i.toNat
-
 /-- `v := c ? t : v`: the `then` branch assigns `v`, the `else` branch does
 not. -/
 abbrev UpdElem.joinThen (c : Tm C Γ (.val .bool)) {p : PrimTy} (i : Idx Γ (.val p))
@@ -206,26 +190,19 @@ def Upd.ifJoin (c : Tm C Γ (.val .bool)) : JoinArm C Γ → JoinArm C Γ → Up
     else (Upd.nil.snoc (UpdElem.joinThen c i a.lower)).snoc (UpdElem.joinElse c j b.lower)
 
 /-- **When an `if` is joined** (`ifElseJoin`), whatever its condition: both
-branches joinable (`Prog.joinArm?`), one of them empty and the other empty
-or an accumulation (`JoinArm.accumulates`): the `if (c) { x = x + 1; }`
-whose split would copy the rest of the program.  An `if` that assigns in
-both branches (`if (c) { x = 2; } else { x = 1; }`, a conditional value's
-`ternaryToIf`) or sets a flag (`if (c) { brk = true; }`, a lowered `break`)
-still splits: its join is sound as well (`Upd.ifJoin`), but the closers read
-its two cases more cheaply than the conditional term
-(`docs/automation.md`, M6). -/
+branches joinable (`Prog.joinArm?`), each empty or one assignment of a value
+local: `if (c) { x = x + 1; }`, `if (c) { x = 2; } else { x = 1; }`, a
+lowered `break`'s `if (c) { brk = true; }`. -/
 def Upd.ifJoin? {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) : Option (Upd C Γ Γ) :=
   match thn.joinArm?, els.joinArm? with
-  | some a, some b =>
-    if (thn.isNil || els.isNil) && a.accumulates && b.accumulates then some (Upd.ifJoin c a b)
-    else none
+  | some a, some b => some (Upd.ifJoin c a b)
   | _, _ => none
 
 /-- The shape of a joinable `if` (`Upd.ifJoin?`), whatever its values: both
-branches empty or one assignment of a value local, one of them empty. -/
+branches empty or one assignment of a value local. -/
 def Prog.joinShape {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) : Bool :=
-  (thn.isNil || els.isNil) && thn.joinArm?.isSome && els.joinArm?.isSome
+  thn.joinArm?.isSome && els.joinArm?.isSome
 
 /-- A joined `if` has the shape. -/
 theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : Prog C Γ Γ₁}
@@ -235,12 +212,8 @@ theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : 
   unfold Prog.joinShape
   split at h
   next a b ha hb =>
-    split at h
-    next hg =>
-      rw [ha, hb]
-      simp only [Bool.and_eq_true] at hg
-      simp only [hg.1.1, Option.isSome_some, Bool.and_self]
-    next => cases h
+    rw [ha, hb]
+    rfl
   next => cases h
 
 /-- An `if` without the shape splits. -/

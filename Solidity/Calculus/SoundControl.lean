@@ -299,8 +299,6 @@ theorem sound_iteJoin (se : Simple C Γ .bool) {Γ₁ Γ₂ : Ctx} (thn : Prog C
   unfold Upd.ifJoin? at h
   split at h
   next a b ha hb =>
-    split at h
-    case isFalse => cases h
     cases h
     have hr : Stmt.runSt σ (.ite (.simple se) thn els) =
         if boolT (se.evalT σ) then a.runSt σ else b.runSt σ := by

@@ -1,5 +1,6 @@
 import Solidity.Calculus.CloseScoped.Leaf
 import Solidity.Calculus.LeafShare
+import Solidity.Calculus.LeafSplit
 
 /-!
 # Closing a scoped leaf: the steps
@@ -736,7 +737,9 @@ def valuesOf (a : Expr) (e : Expr) : Array Expr := Id.run do
 /-- From a defining fact `hX : X = some a`, the interval its cases give
 when they are offsets of one base (KeY's join with the conditional's bounds
 in the antecedent): relative to the base (`hint`) and, where the base's own
-is known, absolute (`hintA`, recorded in `bounds`).  Each by `omega` from
+is known, absolute (`hintA`, recorded in `bounds`); when they are offsets of
+one base and literals (`c ? x + 1 : 0`), absolute only, where the base's is
+known.  Each by `omega` from
 the fact alone.  `none` where reading the fact closed the goal. -/
 def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     TacticM (Option (MVarId × Bounds)) := g.withContext do
@@ -757,6 +760,25 @@ def addInterval (g : MVarId) (hX : FVarId) (bounds : Bounds) :
     let vs := valuesOf a (← instantiateMVars hkD.type)
     if vs.isEmpty then return ← done g₃ bounds
     let ps := vs.map affine
+    -- one base with literal offsets and literals (`c ? x + 1 : 0`): the
+    -- absolute interval from the base's, by `omega` from the fact and it
+    let lits := ps.filter (·.1.isNone)
+    let based := ps.filter (·.1.isSome)
+    if !lits.isEmpty && !based.isEmpty then
+      let some b := based[0]!.1 | return ← done g₃ bounds
+      for q in based do
+        let some x := q.1 | return ← done g₃ bounds
+        unless ← withReducible (isDefEq x b) do return ← done g₃ bounds
+      let some (L, H, hb) := (if b.isAppOfArity ``Subtype.val 3 && b.appArg!.isFVar then
+          bounds.get? b.appArg!.fvarId! else none) | return ← done g₃ bounds
+      let offs := based.map (·.2)
+      let ls := lits.map (·.2)
+      let lo := min (L + offs.foldl min offs[0]!) (ls.foldl min ls[0]!)
+      let hi := max (H + offs.foldl max offs[0]!) (ls.foldl max ls[0]!)
+      let pA ← intervalP a (toExpr lo) (toExpr hi)
+      let some eA ← omegaIn #[hk, hb] pA | return ← done g₃ bounds
+      let (hA, g₄) ← assertH g₃ `hintA pA eA
+      return ← done g₄ (bounds.insert a.fvarId! (lo, hi, hA))
     let base := ps[0]!.1
     for q in ps do
       match q.1, base with
@@ -1127,6 +1149,187 @@ declaration's own. -/
 def budget : Nat := 100000
 
 end CloseJ
+
+/-! ### A joined value split back (`sol_close_ite_split`) -/
+
+namespace CloseSplit
+
+/-- The condition of a joined value `x := c ? t : e` the split reads: `c` a
+`bool` local's position (`Tm.pvV`), and the element not an accumulation
+(`x := c ? t : x`, `t` reading `x`, the shape `Upd.ifJoin?` joined first),
+which `sol_close_join_steps` reads one update at a time. -/
+def splitCond? (el : Expr) : MetaM (Option Expr) := do
+  let el ← whnfR el
+  unless el.isAppOfArity ``UpdElem.local 6 do return none
+  let i := el.getArg! 4
+  let rhs ← whnfR (el.getArg! 5)
+  unless rhs.isAppOfArity ``Rhs.val 4 do return none
+  let tm ← whnfR (rhs.getArg! 3)
+  unless tm.isAppOfArity ``Tm.app3 10 && (tm.getArg! 6).isAppOf ``Op3.ite do return none
+  let c ← whnfR (tm.getArg! 7)
+  unless c.isAppOfArity ``Tm.pvV 4 do return none
+  let (t, e) := (tm.getArg! 8, tm.getArg! 9)
+  let isSelf (x : Expr) : Bool := x.isAppOfArity ``Tm.pvV 4 && x.appArg! == i
+  let reads (x : Expr) : Bool := (x.find? isSelf).isSome
+  if (isSelf e && reads t) || (isSelf t && reads e) then return none
+  return some c.appArg!
+
+/-- `U` with its constructors exposed (a joined update is `Upd.ifJoin c a b`
+until reduced), up to the elements. -/
+partial def normUpd (U : Expr) : MetaM Expr := do
+  let U ← whnfD U
+  if U.isAppOfArity ``Upd.snoc 5 then
+    return mkAppN U.getAppFn (U.getAppArgs.set! 3 (← normUpd (U.getArg! 3)))
+  if U.isAppOfArity ``Upd.decl 7 then
+    return mkAppN U.getAppFn (U.getAppArgs.set! 4 (← normUpd (U.getArg! 4)))
+  if U.isAppOfArity ``Upd.pop 6 || U.isAppOfArity ``Upd.drop 6 then
+    return mkAppN U.getAppFn (U.getAppArgs.set! 4 (← normUpd (U.getArg! 4)))
+  return U
+
+/-- The first condition of `U`'s joined values the split reads. -/
+partial def updCond? (U : Expr) : MetaM (Option Expr) := do
+  if U.isAppOfArity ``Upd.snoc 5 then
+    if let some k ← updCond? (U.getArg! 3) then return some k
+    return ← splitCond? (U.getArg! 4)
+  if U.isAppOfArity ``Upd.decl 7 || U.isAppOfArity ``Upd.pop 6 ||
+      U.isAppOfArity ``Upd.drop 6 then
+    return ← updCond? (U.getArg! 4)
+  return none
+
+/-- `Upd.IteCase k.toNat b U U'` and `U'`, for `U` normalized (`normUpd`). -/
+partial def iteCase (k : Expr) (b : Bool) (U : Expr) : MetaM (Expr × Expr) := do
+  let j ← mkAppM ``Idx.toNat #[k]
+  let bE := toExpr b
+  if U.isAppOfArity ``Upd.snoc 5 then
+    let (h, U') ← iteCase k b (U.getArg! 3)
+    let el := U.getArg! 4
+    if let some k' ← splitCond? el then
+      if k' == k then
+        let el ← whnfR el
+        let tm ← whnfR ((← whnfR (el.getArg! 5)).getArg! 3)
+        let (t, e) := (tm.getArg! 8, tm.getArg! 9)
+        let pf ← mkAppM ``Upd.IteCase.ite #[el.getArg! 4, k, t, e, ← mkEqRefl j, h]
+        -- the case's value as written, not `cond b t e`
+        let U'' ← mkAppM ``Upd.snoc
+          #[U', ← mkAppM ``UpdElem.local #[el.getArg! 4, ← mkAppM ``Rhs.val #[if b then t else e]]]
+        let ty ← inferType pf
+        return (← mkExpectedTypeHint pf (mkApp ty.appFn! U''), U'')
+    let pf ← mkAppM ``Upd.IteCase.snoc #[el, h]
+    return (pf, (← inferType pf).appArg!)
+  if U.isAppOfArity ``Upd.decl 7 then
+    let (h, _) ← iteCase k b (U.getArg! 4)
+    let pf ← mkAppM ``Upd.IteCase.decl #[U.getArg! 5, U.getArg! 6, h]
+    return (pf, (← inferType pf).appArg!)
+  if U.isAppOfArity ``Upd.pop 6 then
+    let (h, _) ← iteCase k b (U.getArg! 4)
+    let pf ← mkAppM ``Upd.IteCase.pop #[U.getArg! 5, h]
+    return (pf, (← inferType pf).appArg!)
+  if U.isAppOfArity ``Upd.drop 6 then
+    let (h, _) ← iteCase k b (U.getArg! 4)
+    let pf ← mkAppM ``Upd.IteCase.drop #[U.getArg! 5, h]
+    return (pf, (← inferType pf).appArg!)
+  let pf ← mkAppOptM ``Upd.IteCase.nil #[U.getArg! 0, U.getArg! 1, j, bE]
+  return (pf, (← inferType pf).appArg!)
+
+/-- `b = true` by evaluation. -/
+def trueBy (b : Expr) : MetaM (Option Expr) := do
+  unless (← whnfD b).isConstOf ``Bool.true do return none
+  return some (← mkExpectedTypeHint (← mkEqRefl (mkConst ``Bool.true)) (← mkEq b (mkConst ``Bool.true)))
+
+/-- One split of `φ` at its first joined update the split reads, through
+binders, updates, premises, conjunctions, `{havoc}` and `{anon}`: the proof
+of `Fml.SplitTo φ ψ₁ ψ₂`. -/
+partial def splitE (φ : Expr) : MetaM (Option Expr) := do
+  let φ ← whnfR φ
+  let some n := φ.getAppFn.constName? | return none
+  let under (lem : Lean.Name) (pre : Array Expr) (body : Expr) : MetaM (Option Expr) := do
+    let some h ← splitE body | return none
+    return some (← mkAppM lem (pre.push h))
+  match n, φ.getAppNumArgs with
+  | ``Fml.upd, 6 =>
+    let (m, U, body) := (φ.getArg! 3, φ.getArg! 4, φ.getArg! 5)
+    let Un ← normUpd U
+    if let some k ← updCond? Un then
+      let (h₁, U₁) ← iteCase k true Un
+      let (h₂, U₂) ← iteCase k false Un
+      let some hU ← trueBy (← mkAppM ``Upd.pushFree #[Un]) | return none
+      let some hU₁ ← trueBy (← mkAppM ``Upd.pushFree #[U₁]) | return none
+      let some hU₂ ← trueBy (← mkAppM ``Upd.pushFree #[U₂]) | return none
+      return some (← mkAppM ``Fml.SplitTo.here #[m, body, k, h₁, h₂, hU, hU₁, hU₂])
+    under ``Fml.SplitTo.upd #[m, U] body
+  | ``Fml.all, 5 => under ``Fml.SplitTo.all #[φ.getArg! 2, φ.getArg! 3] (φ.getArg! 4)
+  | ``Fml.bind, 6 => under ``Fml.SplitTo.bind #[φ.getArg! 2, φ.getArg! 3, φ.getArg! 4] (φ.getArg! 5)
+  | ``Fml.imp, 4 => under ``Fml.SplitTo.imp #[φ.getArg! 2] (φ.getArg! 3)
+  | ``Fml.and, 4 =>
+    if let some h ← splitE (φ.getArg! 2) then
+      return some (← mkAppM ``Fml.SplitTo.andL #[φ.getArg! 3, h])
+    under ``Fml.SplitTo.andR #[φ.getArg! 2] (φ.getArg! 3)
+  | ``Fml.havoc, 3 => under ``Fml.SplitTo.havoc #[] (φ.getArg! 2)
+  | ``Fml.anon, 4 => under ``Fml.SplitTo.anon #[φ.getArg! 2] (φ.getArg! 3)
+  | _, _ => return none
+
+/-- The joined updates the split reads along `φ`'s prefix (`splitE`'s
+path, both sides of a conjunction), counted up to `cap`. -/
+partial def count (φ : Expr) (cap : Nat) (acc : Nat := 0) : MetaM Nat := do
+  if acc ≥ cap then return acc
+  let φ ← whnfR φ
+  let some n := φ.getAppFn.constName? | return acc
+  match n, φ.getAppNumArgs with
+  | ``Fml.upd, 6 =>
+    let acc := if (← updCond? (← normUpd (φ.getArg! 4))).isSome then acc + 1 else acc
+    count (φ.getArg! 5) cap acc
+  | ``Fml.all, 5 => count (φ.getArg! 4) cap acc
+  | ``Fml.bind, 6 => count (φ.getArg! 5) cap acc
+  | ``Fml.imp, 4 | ``Fml.anon, 4 => count (φ.getArg! 3) cap acc
+  | ``Fml.and, 4 => count (φ.getArg! 3) cap (← count (φ.getArg! 2) cap acc)
+  | ``Fml.havoc, 3 => count (φ.getArg! 2) cap acc
+  | _, _ => return acc
+
+/-- The most joined updates a leaf may have for the split, counted as
+updates (`count`), each split on one condition: `2^splitMax` cases at most,
+what the walk's `ifElseSplit` made of the same `if`s (`docs/automation.md`,
+M8). -/
+def splitMax : Nat := 6
+
+/-- The most joined updates a leaf may have for the split to come first in
+`sol_close`; from one more, `sol_close_join_steps` (one update at a time,
+linear in them) is tried first and the split after it. -/
+def splitFew : Nat := 2
+
+/-- Split `g` (`Fml.Valid φ`) at every joined update the split reads. -/
+partial def splitAll (g : MVarId) : MetaM (List MVarId) := g.withContext do
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOfArity ``Fml.Valid 2 do return [g]
+  let some h ← splitE ty.appArg! | return [g]
+  let gs ← g.apply (← mkAppM ``Fml.SplitTo.valid #[h])
+  return (← gs.mapM splitAll).flatten
+
+end CloseSplit
+
+/-- `sol_close_ite_split` where the leaf has at least `least` and at most
+`most` joined updates the split reads. -/
+def CloseSplit.run (least most : Nat) : TacticM Unit := withMainContext do
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOfArity ``Fml.Valid 2 do throwError "sol_close_ite_split: not a scoped leaf"
+  let n ← CloseSplit.count ty.appArg! (most + 1)
+  if n < max least 1 then throwError "sol_close_ite_split: fewer than {max least 1} joined updates"
+  if n > most then throwError "sol_close_ite_split: more than {most} joined updates"
+  -- a split that takes nothing apart (an update with a push) fails, so that
+  -- `sol_close` does not enter this alternative again on the same goal
+  let gs ← CloseSplit.splitAll g
+  if gs == [g] then throwError "sol_close_ite_split: no joined update splits"
+  replaceMainGoal gs
+
+@[tactic Solidity.tacticSol_close_ite_split]
+def evalSolCloseIteSplit : Tactic := fun _ => CloseSplit.run 1 CloseSplit.splitMax
+
+@[tactic Solidity.tacticSol_close_ite_split_few]
+def evalSolCloseIteSplitFew : Tactic := fun _ => CloseSplit.run 1 CloseSplit.splitFew
+
+@[tactic Solidity.tacticSol_close_ite_split_many]
+def evalSolCloseIteSplitMany : Tactic := fun _ =>
+  CloseSplit.run (CloseSplit.splitFew + 1) CloseSplit.splitMax
 
 @[tactic Solidity.tacticSol_close_few_joins]
 def evalSolCloseFewJoins : Tactic := fun _ => withMainContext do

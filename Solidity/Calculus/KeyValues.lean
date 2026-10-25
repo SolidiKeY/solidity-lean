@@ -6,7 +6,11 @@ import Solidity.Syntax.PushSource
 
 Native modular builtins are Lean-only. This recursive check also inspects
 array indices and reference paths: unfolding a containing expression must
-not expose a native assignment in a SolKey-only derivation.
+not expose a native assignment in a SolKey-only derivation.  So is a
+conditional value: `ternaryToIf` lowers `v = se ? a : b;` to
+`if (se) { v = a; } else { v = b; }`, which the strategy joins
+(`ifElseJoin`, Lean only), and a conditional anywhere in a value reaches a
+local through the captures (`T se = c ? a : b;`).
 -/
 
 namespace Solidity
@@ -36,7 +40,7 @@ def Val.keyValue {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .read l | .readMem l => l.keyValue
   | .binop _ _ _ a b => a.keyValue && b.keyValue
   | .unop _ _ _ a => a.keyValue
-  | .ternary c a b => c.keyValue && a.keyValue && b.keyValue
+  | .ternary .. => false
   | .len b _ | .mlen b _ => b.keyValue
   | .modular .. | .hash .. => false
 
@@ -112,16 +116,13 @@ theorem MLoc.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} :
 
 theorem Val.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} :
     (e : Val C Γ p) → (e.wk h).keyValue = e.keyValue
-  | .simple _ | .modular .. | .hash .. => rfl
+  | .simple _ | .modular .. | .hash .. | .ternary .. => rfl
   | .read l => Loc.keyValue_wk h l
   | .readMem l => MLoc.keyValue_wk h l
   | .binop _ _ _ a b => by
     show ((a.wk h).keyValue && (b.wk h).keyValue) = _
     rw [Val.keyValue_wk h a, Val.keyValue_wk h b]; rfl
   | .unop _ _ _ a => Val.keyValue_wk h a
-  | .ternary c a b => by
-    show ((c.wk h).keyValue && (a.wk h).keyValue && (b.wk h).keyValue) = _
-    rw [Val.keyValue_wk h c, Val.keyValue_wk h a, Val.keyValue_wk h b]; rfl
   | .len b _ => SPath.keyValue_wk h b
   | .mlen b _ => MPath.keyValue_wk h b
 

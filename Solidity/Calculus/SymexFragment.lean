@@ -1141,12 +1141,9 @@ theorem iteStep_elimOk {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ
       | none => simp only [iteStep, Upd.ifJoin?, ha, hb]; exact hsplit
       | some b =>
         simp only [iteStep, Upd.ifJoin?, ha, hb]
-        cases hn : ((thn.isNil || els.isNil) && a.accumulates && b.accumulates)
-        · simp only [Bool.false_eq_true, if_false]; exact hsplit
-        · simp only [if_true]
-          refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
-          · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
-          · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
+        refine Upd.ifJoin_elimOk (Simple.lower_elimOk s) a b ?_ ?_
+        · intro p i r e; subst e; exact Prog.joinArm?_memFree thn ha ht
+        · intro p i r e; subst e; exact Prog.joinArm?_memFree els hb he
   | _ => trivial
 
 theorem requireStep_elimOk (c : Val C Γ .bool) : (requireStep k c).ElimOk := by

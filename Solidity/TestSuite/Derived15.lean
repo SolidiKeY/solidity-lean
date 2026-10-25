@@ -82,9 +82,6 @@ theorem Solkey.TestSuite.invariantVariantSkipsBreakIteration.proved : ⊢ Solkey
   case leaf3 =>
     sol_leaf
     sol_close
-  case leaf4 =>
-    sol_leaf
-    sol_close
 
 theorem Solkey.TestSuite.invariantOverStorageWrites.proved : ⊢ Solkey.TestSuite.invariantOverStorageWrites.problem := by
   sol_prove

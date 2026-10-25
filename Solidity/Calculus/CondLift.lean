@@ -694,4 +694,185 @@ theorem LFml.liftCond_holds (g : State C []) :
 theorem LFml.liftCond_valid (n : Nat) (φ : LFml C) : (φ.liftCond n).Valid ↔ φ.Valid :=
   forall_congr' fun g => forall_congr' fun ν => LFml.liftCond_holds g n φ ν
 
+/-! ## Lifting to the top (`ifthenelse_split`)
+
+`liftCond` lifts a conditional where its equation stands, so under a
+negation or a premise the cases stay inside it:
+`¬ ((c ? 2 : 1) = 0)` is `¬ ((c → 2 = 0) ∧ (¬c → 1 = 0))`, which the closer
+reads less well than the two cases.  `liftTop` lifts the first conditional
+out of the whole formula, as KeY's `ifthenelse_split` splits the sequent:
+`(c → ¬ 2 = 0) ∧ (¬c → ¬ 1 = 0)`.  It stops at a binder (the guard may
+read its variable), and lifts below the leading binders only. -/
+
+/-- **The first conditional of a formula outside its binders**, the
+equation it sits in read at each of the guard's outcomes: the guard and the
+formula with that equation replaced by its three cases. -/
+def LFml.findCond : LFml C → Option (CondGuard C × LFml C × LFml C × LFml C)
+  | .tt => none
+  | .eq a b =>
+    match a.condSplit with
+    | some r => some (r.guard, .eq r.thn b, .eq r.els b, .eq r.bad b)
+    | none =>
+      match b.condSplit with
+      | some r => some (r.guard, .eq a r.thn, .eq a r.els, .eq a r.bad)
+      | none => none
+  | .not φ => φ.findCond.map fun (G, P, Q, R) => (G, .not P, .not Q, .not R)
+  | .and φ ψ =>
+    match φ.findCond with
+    | some (G, P, Q, R) => some (G, .and P ψ, .and Q ψ, .and R ψ)
+    | none => ψ.findCond.map fun (G, P, Q, R) => (G, .and φ P, .and φ Q, .and φ R)
+  | .imp φ ψ =>
+    match φ.findCond with
+    | some (G, P, Q, R) => some (G, .imp P ψ, .imp Q ψ, .imp R ψ)
+    | none => ψ.findCond.map fun (G, P, Q, R) => (G, .imp φ P, .imp φ Q, .imp φ R)
+  | .all .. => none
+
+/-- A formula read at each of a guard's outcomes. -/
+abbrev CondGuard.Sel (g : State C []) (ν : AEnv) (G : CondGuard C) (P Q R : LFml C) : Prop :=
+  match G.case g ν with
+  | some true => P.holds g ν
+  | some false => Q.holds g ν
+  | none => R.holds g ν
+
+/-- **The first conditional's cases are the formula's**:
+`¬ ((c ? 2 : 1) = 0)` holds where `¬ 2 = 0` does if `c`, `¬ 1 = 0` if not. -/
+theorem LFml.findCond_holds (g : State C []) (ν : AEnv) :
+    ∀ (φ : LFml C) {G : CondGuard C} {P Q R : LFml C}, φ.findCond = some (G, P, Q, R) →
+      (φ.holds g ν ↔ G.Sel g ν P Q R)
+  | .tt, _, _, _, _, h => by cases h
+  | .eq a b, G, P, Q, R, h => by
+    unfold LFml.findCond at h
+    cases ha : a.condSplit with
+    | some r =>
+      rw [ha] at h
+      cases h
+      rw [LFml.holds_eq_split g ν a b r (LTm.condSplit_eval g ν a r ha), CondGuard.split_holds]
+    | none =>
+      rw [ha] at h
+      cases hb : b.condSplit with
+      | some r =>
+        rw [hb] at h
+        cases h
+        rw [LFml.holds_eq_split' g ν a b r (LTm.condSplit_eval g ν b r hb), CondGuard.split_holds]
+      | none => rw [hb] at h; cases h
+  | .not φ, G, P, Q, R, h => by
+    unfold LFml.findCond at h
+    cases hφ : φ.findCond with
+    | none => rw [hφ] at h; cases h
+    | some t =>
+      obtain ⟨G', P', Q', R'⟩ := t
+      rw [hφ] at h
+      cases h
+      have ih := LFml.findCond_holds g ν φ hφ
+      show ¬ φ.holds g ν ↔ _
+      rw [ih]
+      unfold CondGuard.Sel
+      cases G.case g ν with
+      | none => exact Iff.rfl
+      | some v => cases v <;> exact Iff.rfl
+  | .and φ ψ, G, P, Q, R, h => by
+    unfold LFml.findCond at h
+    cases hφ : φ.findCond with
+    | some t =>
+      obtain ⟨G', P', Q', R'⟩ := t
+      rw [hφ] at h
+      cases h
+      have ih := LFml.findCond_holds g ν φ hφ
+      show φ.holds g ν ∧ ψ.holds g ν ↔ _
+      rw [ih]
+      unfold CondGuard.Sel
+      cases G.case g ν with
+      | none => exact Iff.rfl
+      | some v => cases v <;> exact Iff.rfl
+    | none =>
+      rw [hφ] at h
+      cases hψ : ψ.findCond with
+      | none => rw [hψ] at h; cases h
+      | some t =>
+        obtain ⟨G', P', Q', R'⟩ := t
+        rw [hψ] at h
+        cases h
+        have ih := LFml.findCond_holds g ν ψ hψ
+        show φ.holds g ν ∧ ψ.holds g ν ↔ _
+        rw [ih]
+        unfold CondGuard.Sel
+        cases G.case g ν with
+        | none => exact Iff.rfl
+        | some v => cases v <;> exact Iff.rfl
+  | .imp φ ψ, G, P, Q, R, h => by
+    unfold LFml.findCond at h
+    cases hφ : φ.findCond with
+    | some t =>
+      obtain ⟨G', P', Q', R'⟩ := t
+      rw [hφ] at h
+      cases h
+      have ih := LFml.findCond_holds g ν φ hφ
+      show (φ.holds g ν → ψ.holds g ν) ↔ _
+      rw [ih]
+      unfold CondGuard.Sel
+      cases G.case g ν with
+      | none => exact Iff.rfl
+      | some v => cases v <;> exact Iff.rfl
+    | none =>
+      rw [hφ] at h
+      cases hψ : ψ.findCond with
+      | none => rw [hψ] at h; cases h
+      | some t =>
+        obtain ⟨G', P', Q', R'⟩ := t
+        rw [hψ] at h
+        cases h
+        have ih := LFml.findCond_holds g ν ψ hψ
+        show (φ.holds g ν → ψ.holds g ν) ↔ _
+        rw [ih]
+        unfold CondGuard.Sel
+        cases G.case g ν with
+        | none => exact Iff.rfl
+        | some v => cases v <;> exact Iff.rfl
+  | .all .., _, _, _, _, h => by cases h
+
+/-- **Conditionals lifted to the top of the formula**, each first
+conditional out of the whole formula below the binders, to the depth
+`fuel`. -/
+def LFml.liftTop : Nat → LFml C → LFml C
+  | 0, φ => φ
+  | n + 1, .all k p φ => .all k p (LFml.liftTop n φ)
+  | n + 1, φ =>
+    match φ.findCond with
+    | some (G, P, Q, R) => G.split (LFml.liftTop n P) (LFml.liftTop n Q) (LFml.liftTop n R)
+    | none => φ
+
+/-- **Lifting to the top is exact.** -/
+theorem LFml.liftTop_holds (g : State C []) :
+    ∀ (n : Nat) (φ : LFml C) (ν : AEnv), (φ.liftTop n).holds g ν ↔ φ.holds g ν
+  | 0, _, _ => Iff.rfl
+  | n + 1, φ, ν => by
+    have key : ∀ ψ : LFml C, (∀ k p χ, ψ ≠ .all k p χ) →
+        (ψ.liftTop (n + 1) = match ψ.findCond with
+          | some (G, P, Q, R) => G.split (LFml.liftTop n P) (LFml.liftTop n Q) (LFml.liftTop n R)
+          | none => ψ) := by
+      intro ψ hψ
+      cases ψ with
+      | all k p χ => exact absurd rfl (hψ k p χ)
+      | _ => rfl
+    cases φ with
+    | all k p χ =>
+      show (∀ v : p.Denote, (χ.liftTop n).holds g (ν.set p k v)) ↔
+        ∀ v : p.Denote, χ.holds g (ν.set p k v)
+      exact forall_congr' fun v => LFml.liftTop_holds g n χ _
+    | _ =>
+      rw [key _ (fun _ _ _ h => by cases h)]
+      split
+      next G P Q R hf =>
+        rw [CondGuard.split_holds, LFml.findCond_holds g ν _ hf]
+        unfold CondGuard.Sel
+        cases G.case g ν with
+        | none => exact LFml.liftTop_holds g n R ν
+        | some v => cases v <;> exact LFml.liftTop_holds g n _ ν
+      next => exact Iff.rfl
+
+/-- Lifting to the top keeps validity: `{x := c ? 2 : 1} (x != 0)` is valid
+where its two cases are. -/
+theorem LFml.liftTop_valid (n : Nat) (φ : LFml C) : (φ.liftTop n).Valid ↔ φ.Valid :=
+  forall_congr' fun g => forall_congr' fun ν => LFml.liftTop_holds g n φ ν
+
 end Solidity.Decide

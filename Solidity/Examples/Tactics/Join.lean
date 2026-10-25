@@ -182,7 +182,9 @@ example : ⊨ᶠ dl!{ ⟨ uint x = 0; if (a == 1) { x = x + 1; }; if (b == 1) { 
     sol_leaf
     sol_close
 
-/-- An `if` with both branches assigning still splits (`ifElseSplit`). -/
+/-- An `if` with both branches assigning is joined too,
+`{x := se1 ? 2 : 1}`; the closer splits the value back into its two cases
+at the leaf (`sol_close_ite_split`, KeY's `ifthenelse_split`). -/
 example : ⊨ᶠ dl!{ [ if (a == 1) { x = 2; } else { x = 1; }; ] x != 0 } := by
   sol_prove
 

@@ -93,7 +93,10 @@ closed: 0 open goal(s), 2 node(s), 1 branch(es)
 /-! ## A node, and the tree as data
 
 `#proof_node n φ` is solkey's `node` request; `#proof_tree_json φ` its `tree`
-request, the rows `[serial, parent, name, branchLabel, state]`. -/
+request, the rows `[serial, parent, name, branchLabel, state]`.  The `else`
+branch reverts, so the `if` splits (`ifElseSplit`) and its goals carry
+their labels; branches that only assign locals are joined (`ifElseJoin`,
+below). -/
 
 /--
 info: node: 2
@@ -107,29 +110,29 @@ children: [3]
 tactics: apply Proves.update (Taclet.toStep .localValueAssign); apply Proves.updIntro
 -/
 #guard_msgs in
-#proof_node 2 dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+#proof_node 2 dl!{ [ if (true) { x = 2; } else { revert(); }; ] x != 0 }
 
 /--
 info: {"stats": {"nodes": 6, "branches": 2},
  "sequents":
- ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
-  "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
+ ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {revert();}; ] ¬x = 0 }",
+  "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {revert();}; ] ¬x = 0 }",
   "dl{ ∀ uint x, true = true ⟹ [ x = 2; } ] ¬x = 0 }",
   "dl{ ∀ uint x, true = true, { x := 2 } ⟹ ¬x = 0 }",
-  "dl{ ∀ uint x, true = false ⟹ [ x = 1; } ] ¬x = 0 }",
-  "dl{ ∀ uint x, true = false, { x := 1 } ⟹ ¬x = 0 }"],
+  "dl{ ∀ uint x, true = false ⟹ [ revert(); } ] ¬x = 0 }",
+  "dl{ ∀ uint x, true = false ⟹ true }"],
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "allRight", null, "inner"],
   [1, 0, "ifElseSplit", null, "inner"],
   [2, 1, "localValueAssign", "if true true", "inner"],
   [3, 2, "Closed goal", null, "closed"],
-  [4, 1, "localValueAssign", "if true false", "inner"],
+  [4, 1, "revertBox", "if true false", "inner"],
   [5, 4, "Closed goal", null, "closed"]],
  "closed": true}
 -/
 #guard_msgs in
-#proof_tree_json dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+#proof_tree_json dl!{ [ if (true) { x = 2; } else { revert(); }; ] x != 0 }
 
 /-! The labels are the ones the rules write (`"if s#se true": …`, dropped by
 the macro), `Taclet.branchLabels`; this reads `Calculus/Rules.lean` and fails
@@ -166,12 +169,12 @@ info: 0: allRight
     6: localValueAssign
     7: Closed goal
   [if se1 false]
-    8: localValueAssign
+    8: revertBox
     9: Closed goal
 closed: 0 open goal(s), 10 node(s), 2 branch(es)
 -/
 #guard_msgs in
-#proof_tree dl!{ [ if (a == 1) { x = 2; } else { x = 1; }; ] true }
+#proof_tree dl!{ [ if (a == 1) { x = 2; } else { revert(); }; ] true }
 
 /-! A `try` has a goal for each way the call may end, labelled as
 `tryCallNoCallbackBox` labels them. -/
@@ -331,15 +334,9 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  apply splitBox .ifElseSplit
-    case thn =>
-      apply update .localValueAssign
-      sol_leaf
-      sol_close
-    case els =>
-      apply update .localValueAssign
-      sol_leaf
-      sol_close
+  apply update .ifElseJoin
+    sol_leaf
+    sol_close
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
@@ -348,15 +345,9 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 /-- The suggestion replayed: today's walk text, which the scope's macros
 read (`Calculus/WalkSyntax.lean`). -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
-  apply splitBox .ifElseSplit
-  case thn =>
-    apply update .localValueAssign
-    sol_leaf
-    sol_close
-  case els =>
-    apply update .localValueAssign
-    sol_leaf
-    sol_close
+  apply update .ifElseJoin
+  sol_leaf
+  sol_close
 
 /-! ## `sol_derive?`: the walk
 
