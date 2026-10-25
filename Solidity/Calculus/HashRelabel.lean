@@ -64,14 +64,14 @@ def _root_.Solidity.Tm.isVVar (V : List Nat) {Γ : Ctx} : {s : Srt} → Tm C Γ 
   | _, _ => false
 
 /-- An index into a root. -/
-def _root_.Solidity.Op2.isAt {a b s : Srt} : Op2 C a b s → Bool
+def _root_.Solidity.Op2.isAtR {a b s : Srt} : Op2 C a b s → Bool
   | .at _ => true
   | _ => false
 
 /-- **A key of a keyed root**: `r[v]`, `r` a root of `K`, `v` a word local
 at a level of `V`. -/
 def _root_.Solidity.Tm.kKey (V : List Nat) (K : List Name) {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
-  | _, .app2 o x y => o.isAt && x.isKRoot K && y.isVVar V
+  | _, .app2 o x y => o.isAtR && x.isKRoot K && y.isVVar V
   | _, _ => false
 
 /-- **The fragment's terms**: no word local of `V` but in a key of `K`, the
@@ -122,7 +122,7 @@ theorem _root_.Solidity.Tm.kKey_view {V : List Nat} {K : List Name} (hK : KTyped
           | arr a => cases a
         | _ => simp only [Tm.isKRoot, Bool.false_eq_true] at hx
       | _ => simp only [Tm.isKRoot, Bool.false_eq_true] at hx
-    | _ => simp only [Op2.isAt, Bool.false_eq_true] at ho
+    | _ => simp only [Op2.isAtR, Bool.false_eq_true] at ho
   | _ => simp only [Tm.kKey, Bool.false_eq_true] at h
 
 /-! ## States relabeled -/
@@ -137,22 +137,23 @@ theorem GAgree0.envVal {g g' : State C []} (h : GAgree0 g g') (k : EnvKey) :
     g'.envVal k = g.envVal k := by
   cases k <;> simp only [State.envVal, h.tx, h.bal]
 
-/-- **A state relabeled** (`τ''`, its words fixed) **and the state it came
-from** (`τ'`, its words free): each key `x` of a root of `K` read at
-`ρ x`, every other root alike, each word local of `V` sent by `ρ` to its
-free word and the only fixed word sent there, every other local alike. -/
-structure RelRL (ρ : PrimTy.uint.Denote → PrimTy.uint.Denote) (V : List Nat) (K : List Name)
-    {Γ : Ctx} (τ'' τ' : State C Γ) : Prop where
+/-- **A state relabeled** (`τ''`, its words fixed, among `Cs`) **and the
+state it came from** (`τ'`, its words free): each fixed key `x` of a root of
+`K` read at `ρ x`, every other root alike, each word local of `V` a fixed
+word sent by `ρ` to its free word, every other local alike; `ρ` one to one
+on the fixed words. -/
+structure RelRL (ρ : PrimTy.uint.Denote → PrimTy.uint.Denote) (Cs : List PrimTy.uint.Denote)
+    (V : List Nat) (K : List Name) {Γ : Ctx} (τ'' τ' : State C Γ) : Prop where
   glob : GAgree0 τ'.glob τ''.glob
-  stK : ∀ r ∈ K, ∀ (hr : C.rootType r = some (.ref (.mapping .uint (.prim .uint))))
-    (x : PrimTy.uint.Denote),
-    τ''.storage.find ⟨r, hr, .key x .nil⟩ = τ'.storage.find ⟨r, hr, .key (ρ x) .nil⟩
+  stK : ∀ r ∈ K, ∀ (hr : C.rootType r = some (.ref (.mapping .uint (.prim .uint)))),
+    ∀ x ∈ Cs, τ''.storage.find ⟨r, hr, .key x .nil⟩ = τ'.storage.find ⟨r, hr, .key (ρ x) .nil⟩
   stO : ∀ (r : Name) {T : Ty} (hr : C.rootType r = some T), r ∉ K →
     τ''.storage.get hr = τ'.storage.get hr
   locT : ∀ {t : LTy} (i : Idx Γ t), V.contains i.level = true → t = .val .uint
   locV : ∀ (i : Idx Γ (.val .uint)), V.contains i.level = true →
-    ρ (τ''.getV i) = τ'.getV i ∧ ∀ x, ρ x = τ'.getV i → x = τ''.getV i
+    ρ (τ''.getV i) = τ'.getV i ∧ τ''.getV i ∈ Cs
   locO : ∀ {t : LTy} (i : Idx Γ t), V.contains i.level = false → τ''.getV i = τ'.getV i
+  inj : ∀ x ∈ Cs, ∀ y ∈ Cs, ρ x = ρ y → x = y
 
 section Ops
 
@@ -312,15 +313,16 @@ end Writes
 
 section Terms
 
-variable {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote} {V : List Nat} {K : List Name} {Γ : Ctx}
+variable {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote} {Cs : List PrimTy.uint.Denote}
+  {V : List Nat} {K : List Name} {Γ : Ctx}
   {τ'' τ' : State C Γ}
 
-theorem RelRL.find_notK (h : RelRL ρ V K τ'' τ') {U : Ty} (p : SRef C U) (hp : p.root ∉ K) :
+theorem RelRL.find_notK (h : RelRL ρ Cs V K τ'' τ') {U : Ty} (p : SRef C U) (hp : p.root ∉ K) :
     τ''.storage.find p = τ'.storage.find p := by
   show (τ''.storage.get p.hroot).find p.path = (τ'.storage.get p.hroot).find p.path
   rw [h.stO p.root p.hroot hp]
 
-theorem RelRL.word_notK (h : RelRL ρ V K τ'' τ') {P : PrimTy} (d : SLoc C (.prim P))
+theorem RelRL.word_notK (h : RelRL ρ Cs V K τ'' τ') {P : PrimTy} (d : SLoc C (.prim P))
     (hd : ∀ p, d = SLoc.ref p → p.root ∉ K) : τ''.storage.obs.word d = τ'.storage.obs.word d := by
   cases d with
   | ref p =>
@@ -329,7 +331,7 @@ theorem RelRL.word_notK (h : RelRL ρ V K τ'' τ') {P : PrimTy} (d : SLoc C (.p
   | dangling => rfl
 
 /-- **A term of the fragment reads alike in a relabeled state.** -/
-theorem _root_.Solidity.Tm.rl_reads (hK : KTyped C K) (h : RelRL ρ V K τ'' τ') {s : Srt}
+theorem _root_.Solidity.Tm.rl_reads (hK : KTyped C K) (h : RelRL ρ Cs V K τ'' τ') {s : Srt}
     (t : Tm C Γ s)
     (ht : t.rl V K = true) :
     t.eval τ'' = Srt.trO s (t.eval τ') ∧ t.denote τ'' = t.denote τ' ∧
@@ -404,7 +406,7 @@ theorem _root_.Solidity.Tm.rl_reads (hK : KTyped C K) (h : RelRL ρ V K τ'' τ'
         · obtain ⟨rfl, r, hr, i, rfl, hrK, hi⟩ := Tm.kKey_view hK y hy
           rw [find_eval, find_eval, keyPath_eval, keyPath_eval]
           simp only [Option.bind_some]
-          have e := h.stK r (List.contains_iff_mem.1 hrK) hr (TEnv.get i τ''.env)
+          have e := h.stK r (List.contains_iff_mem.1 hrK) hr (TEnv.get i τ''.env) (h.locV i hi).2
           rw [e, show ρ (TEnv.get i τ''.env) = TEnv.get i τ'.env from (h.locV i hi).1]
           rfl
         · obtain ⟨hy1, -, hy3⟩ := ihy hy
@@ -419,7 +421,7 @@ theorem _root_.Solidity.Tm.rl_reads (hK : KTyped C K) (h : RelRL ρ V K τ'' τ'
         rcases hy with hy | hy
         · obtain ⟨rfl, r, hr, i, rfl, hrK, hi⟩ := Tm.kKey_view hK y hy
           rw [keyPath_denote, keyPath_denote, obs_word_key, obs_word_key]
-          have e := h.stK r (List.contains_iff_mem.1 hrK) hr (TEnv.get i τ''.env)
+          have e := h.stK r (List.contains_iff_mem.1 hrK) hr (TEnv.get i τ''.env) (h.locV i hi).2
           rw [e, show ρ (TEnv.get i τ''.env) = TEnv.get i τ'.env from (h.locV i hi).1]
         · obtain ⟨-, hy2, hy3⟩ := ihy hy
           rw [hy2, h.word_notK _ hy3.2]
@@ -566,7 +568,8 @@ def _root_.Solidity.Fml.rl (V : List Nat) (K : List Name) : {Γ : Ctx} → Fml C
 
 section Formulas
 
-variable {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote} {V : List Nat} {K : List Name}
+variable {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote} {Cs : List PrimTy.uint.Denote}
+  {V : List Nat} {K : List Name}
 
 theorem _root_.Solidity.Idx.level_here {Γ : Ctx} {t : LTy} :
     (Idx.here : Idx (t :: Γ) t).level = Γ.length := by
@@ -587,13 +590,13 @@ theorem _root_.Solidity.Tm.isVVar_view {Γ : Ctx} {p : PrimTy} {t : Tm C Γ (.va
 
 variable {Γ : Ctx} {τ'' τ' : State C Γ}
 
-theorem RelRL.push (h : RelRL ρ V K τ'' τ') (hV : ∀ l ∈ V, l < Γ.length) {p : PrimTy}
-    (v : p.Denote) : RelRL ρ V K (τ''.push (t := .val p) v) (τ'.push (t := .val p) v) := by
+theorem RelRL.push (h : RelRL ρ Cs V K τ'' τ') (hV : ∀ l ∈ V, l < Γ.length) {p : PrimTy}
+    (v : p.Denote) : RelRL ρ Cs V K (τ''.push (t := .val p) v) (τ'.push (t := .val p) v) := by
   have hn : V.contains Γ.length = false := by
     cases hc : V.contains Γ.length
     · rfl
     · exact absurd (hV _ (List.contains_iff_mem.1 hc)) (Nat.lt_irrefl _)
-  refine ⟨h.glob, h.stK, h.stO, fun {t} i hi => ?_, fun i hi => ?_, fun {t} i hi => ?_⟩
+  refine ⟨h.glob, h.stK, h.stO, fun {t} i hi => ?_, fun i hi => ?_, fun {t} i hi => ?_, h.inj⟩
   · cases i with
     | here => rw [Idx.level_here, hn] at hi; cases hi
     | there j => rw [Idx.level_there] at hi; exact h.locT j hi
@@ -604,10 +607,11 @@ theorem RelRL.push (h : RelRL ρ V K τ'' τ') (hV : ∀ l ∈ V, l < Γ.length)
     | here => rfl
     | there j => rw [Idx.level_there] at hi; exact h.locO j hi
 
-theorem RelRL.setLocal (h : RelRL ρ V K τ'' τ') {p : PrimTy} (i : Idx Γ (.val p))
+theorem RelRL.setLocal (h : RelRL ρ Cs V K τ'' τ') {p : PrimTy} (i : Idx Γ (.val p))
     (hi : V.contains i.level = false) (v : p.Denote) :
-    RelRL ρ V K (τ''.setLocal i v) (τ'.setLocal i v) := by
-  refine ⟨h.glob, h.stK, h.stO, fun {t} j hj => h.locT j hj, fun j hj => ?_, fun {t} j hj => ?_⟩
+    RelRL ρ Cs V K (τ''.setLocal i v) (τ'.setLocal i v) := by
+  refine ⟨h.glob, h.stK, h.stO, fun {t} j hj => h.locT j hj, fun j hj => ?_, fun {t} j hj => ?_,
+    h.inj⟩
   · have hij : i.toNat ≠ j.toNat := by
       intro e
       have ht := Idx.ty_eq_of_toNat e
@@ -638,32 +642,33 @@ theorem save_eval (σ : State C Γ) {P : PrimTy} (y : Tm C Γ (.path (.prim P)))
     | some v => rfl
 
 /-- A write at a key of a keyed root, relabeled. -/
-theorem RelRL.writeKey (h : RelRL ρ V K τ'' τ') (r : Name) (hrK : r ∈ K)
+theorem RelRL.writeKey (h : RelRL ρ Cs V K τ'' τ') (r : Name) (hrK : r ∈ K)
     (hr : C.rootType r = some (.ref (.mapping .uint (.prim .uint)))) (i : Idx Γ (.val .uint))
     (hi : V.contains i.level = true) (w : PrimTy.uint.Denote) :
     ∃ st₁ st₂, τ''.storage.write ⟨r, hr, .key (TEnv.get i τ''.env) .nil⟩ (.prim w) = some st₁ ∧
       τ'.storage.write ⟨r, hr, .key (TEnv.get i τ'.env) .nil⟩ (.prim w) = some st₂ ∧
-      RelRL ρ V K (τ''.withStorage st₁) (τ'.withStorage st₂) := by
+      RelRL ρ Cs V K (τ''.withStorage st₁) (τ'.withStorage st₂) := by
   obtain ⟨st₁, h₁, hf₁, hg₁⟩ := Storage.write_key τ''.storage r hr (TEnv.get i τ''.env) w
   obtain ⟨st₂, h₂, hf₂, hg₂⟩ := Storage.write_key τ'.storage r hr (TEnv.get i τ'.env) w
-  refine ⟨st₁, st₂, h₁, h₂, ⟨⟨h.glob.net, h.glob.bal, h.glob.tx⟩, ?_, ?_, h.locT, h.locV, h.locO⟩⟩
-  · intro r' hr'K hr' x
+  refine ⟨st₁, st₂, h₁, h₂, ⟨⟨h.glob.net, h.glob.bal, h.glob.tx⟩, ?_, ?_, h.locT, h.locV, h.locO,
+    h.inj⟩⟩
+  · intro r' hr'K hr' x hx
     by_cases e : r' = r
     · subst e
       show st₁.find _ = st₂.find _
       rw [hf₁, hf₂]
       have hv := h.locV i hi
-      have hx : (x = TEnv.get i τ''.env) ↔ (ρ x = TEnv.get i τ'.env) := by
+      have hx' : (x = TEnv.get i τ''.env) ↔ (ρ x = TEnv.get i τ'.env) := by
         constructor
         · intro e; rw [e]; exact hv.1
-        · exact hv.2 x
+        · intro e; exact h.inj x hx _ hv.2 (e.trans hv.1.symm)
       by_cases ex : x = TEnv.get i τ''.env
-      · rw [if_pos ex, if_pos (hx.1 ex)]
-      · rw [if_neg ex, if_neg (fun e => ex (hx.2 e))]
-        exact h.stK r' hr'K hr' x
+      · rw [if_pos ex, if_pos (hx'.1 ex)]
+      · rw [if_neg ex, if_neg (fun e => ex (hx'.2 e))]
+        exact h.stK r' hr'K hr' x hx
     · show (st₁.get hr').find _ = (st₂.get hr').find _
       rw [hg₁ r' hr' (Ne.symm e), hg₂ r' hr' (Ne.symm e)]
-      exact h.stK r' hr'K hr' x
+      exact h.stK r' hr'K hr' x hx
   · intro r₂ T h₂' hn
     have hne : r ≠ r₂ := fun e => hn (e ▸ hrK)
     show st₁.get h₂' = st₂.get h₂'
@@ -671,11 +676,11 @@ theorem RelRL.writeKey (h : RelRL ρ V K τ'' τ') (r : Name) (hrK : r ∈ K)
     exact h.stO r₂ h₂' hn
 
 /-- A write off the keyed roots, relabeled. -/
-theorem RelRL.writeOff (h : RelRL ρ V K τ'' τ') {U : Ty} (p : SRef C U) (hp : p.root ∉ K)
+theorem RelRL.writeOff (h : RelRL ρ Cs V K τ'' τ') {U : Ty} (p : SRef C U) (hp : p.root ∉ K)
     (v : SVal U) :
     (τ''.storage.write p v).isSome = (τ'.storage.write p v).isSome ∧
       ∀ st₁ st₂, τ''.storage.write p v = some st₁ → τ'.storage.write p v = some st₂ →
-        RelRL ρ V K (τ''.withStorage st₁) (τ'.withStorage st₂) := by
+        RelRL ρ Cs V K (τ''.withStorage st₁) (τ'.withStorage st₂) := by
   rw [Storage.write_eq, Storage.write_eq, h.stO p.root p.hroot hp]
   refine ⟨by cases writeF (τ'.storage.get p.hroot) p.path v <;> rfl, fun st₁ st₂ e₁ e₂ => ?_⟩
   cases hw : writeF (τ'.storage.get p.hroot) p.path v with
@@ -684,12 +689,12 @@ theorem RelRL.writeOff (h : RelRL ρ V K τ'' τ') {U : Ty} (p : SRef C U) (hp :
     rw [hw] at e₁ e₂
     cases e₁
     cases e₂
-    refine ⟨⟨h.glob.net, h.glob.bal, h.glob.tx⟩, ?_, ?_, h.locT, h.locV, h.locO⟩
-    · intro r' hr'K hr' x
+    refine ⟨⟨h.glob.net, h.glob.bal, h.glob.tx⟩, ?_, ?_, h.locT, h.locV, h.locO, h.inj⟩
+    · intro r' hr'K hr' x hx
       have hne : p.root ≠ r' := fun e => hp (e ▸ hr'K)
       show ((τ''.storage.set p.hroot fv).get hr').find _ = ((τ'.storage.set p.hroot fv).get hr').find _
       rw [SFields.get_set_ne _ _ _ hne, SFields.get_set_ne _ _ _ hne]
-      exact h.stK r' hr'K hr' x
+      exact h.stK r' hr'K hr' x hx
     · intro r₂ T h₂' hn
       show (τ''.storage.set p.hroot fv).get h₂' = (τ'.storage.set p.hroot fv).get h₂'
       by_cases e : p.root = r₂
@@ -725,9 +730,9 @@ theorem _root_.Solidity.Tm.rlSave_view {V : List Nat} {K : List Name} {Γ : Ctx}
   | _ => simp only [Tm.rlSave, Bool.false_eq_true] at h
 
 /-- **A formula of the fragment holds alike in a relabeled state.** -/
-theorem _root_.Solidity.Fml.rl_holds {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote} {V : List Nat}
-    {K : List Name} (hK : KTyped C K) {Γ : Ctx} (φ : Fml C Γ) (hφ : φ.rl V K = true) :
-    ∀ (τ'' τ' : State C Γ), (∀ l ∈ V, l < Γ.length) → RelRL ρ V K τ'' τ' →
+theorem _root_.Solidity.Fml.rl_holds {ρ : PrimTy.uint.Denote → PrimTy.uint.Denote}
+    {Cs : List PrimTy.uint.Denote} {V : List Nat} {K : List Name} (hK : KTyped C K) {Γ : Ctx} (φ : Fml C Γ) (hφ : φ.rl V K = true) :
+    ∀ (τ'' τ' : State C Γ), (∀ l ∈ V, l < Γ.length) → RelRL ρ Cs V K τ'' τ' →
       (holds τ'' φ ↔ holds τ' φ) := by
   induction φ with
   | tt => intro _ _ _ _; exact Iff.rfl
@@ -751,7 +756,7 @@ theorem _root_.Solidity.Fml.rl_holds {ρ : PrimTy.uint.Denote → PrimTy.uint.De
       · intro e
         rw [← ei, ← ej, Option.some.inj e]
       · intro e
-        exact congrArg some (hvj.2 _ (ei.trans (Option.some.inj e)))
+        exact congrArg some (h.inj _ hvi.2 _ hvj.2 ((ei.trans (Option.some.inj e)).trans ej.symm))
   | wellFormed => intro _ _ _ _; simp only [Fml.rl, Bool.false_eq_true] at hφ
   | not φ ih =>
     intro τ'' τ' hV h
