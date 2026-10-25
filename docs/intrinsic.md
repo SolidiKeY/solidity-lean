@@ -8220,13 +8220,25 @@ proxy, so its existing pinned dependencies were built locally.
 ### Integration with current master (2026-10-25)
 
 The contract-certificate commit rebased cleanly onto `c7e634f5`, preserving
-25 upstream commits. The integrated source gates report 580 reachable
+25 upstream commits, and then merged `ec47ae47` as master advanced. The
+integrated source gates report 583 reachable
 modules with no orphan and 124 core modules with no path to the elaborator.
 Upstream has resolved `invariantClosedFormSum`: strict automation now passes
 with 552 derived, 11 refuted and no pending obligation.
 
-The source-trust inventory gate reports 23 mismatches. Running the same
-audit on an unmodified `c7e634f5` export produces the identical set of 23
+Upstream also added `CallMemo` beneath the elaborator's local state. The
+bridge's lowering equations retain that state transformer, whose result at
+an arbitrary memo is `Except ((value, localState), memo)`. Context reads and
+narrow checks preserve the input memo; the cast equations retain their
+complete success/error equality. Direct checking of the explicit-memo
+repair passed with only standard axioms. The same bridge repairs landed
+independently on master; integration retains the upstream versions, with no
+remaining bridge diff. The required read-only finder and skeptic reviews
+confirmed the equivalent memo equations, preserved divergence case, and
+intact certificate implementation, tests, imports and documentation.
+
+The source-trust inventory gate reports 24 mismatches. Running the same
+audit on an unmodified `ec47ae47` export produces the identical set of 24
 findings; this change introduces no additional implementation/recovery
 site. The inventory is left intact rather than silently accepting the
 upstream changes.
