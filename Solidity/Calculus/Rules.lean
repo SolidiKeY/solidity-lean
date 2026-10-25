@@ -962,11 +962,11 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
 
   /-- KeY's join after a conditional (its merge rule, the `ifThenElse`
-  merge): an `if` on a simple condition with one branch empty and the other
-  empty or an accumulation of a value local (`v = e;`, `e` reading `v`) is
-  one update, `u`, its right-hand side a conditional term,
-  `{ v := se ? e : v }` (`Upd.ifJoin?`), and the rest of the program runs
-  once.  solkey splits (`ifElseSplit`). -/
+  merge): an `if` on a simple condition whose branches are each empty or
+  one assignment of a value local (`v = e;`) is one update, `u`, its
+  right-hand sides conditional terms, `{ v := se ? e₁ : e₂ }`
+  (`Upd.ifJoin?`), and the rest of the program runs once.  solkey splits
+  (`ifElseSplit`). -/
   | ifElseJoin {se : Simple C Γ .bool} {u : Upd C Γ Γ}
       (hj : Upd.ifJoin? se.lower thenStm elseStm = some u := by side_cond) :
       dl[LeanTaclet C k]{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝ ‹u› ⟨[ ]⟩ }

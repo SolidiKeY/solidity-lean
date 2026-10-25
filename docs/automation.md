@@ -452,7 +452,8 @@ terminating with a proof or a counterexample; CI fails on anything else.
   a witness outside their shapes (a long array read element by element, a
   loop that does more than count) is still out of reach.
 * Not impossible, but false today: `split` duplicates the continuation
-  (`n` sequential `if`s give `2^n` leaves), a call carries its callee's
+  (`n` sequential `if`s give `2^n` leaves; since M8's A1 only for an `if`
+  whose branches do more than assign one local), a call carries its callee's
   body (nested calls grow exponentially; a callee that computes values runs
   by its summary, below), and literal-bounded loops are
   unrolled (`docs/loops.md`).
@@ -561,7 +562,8 @@ checked by the kernel, nothing trusted:
   dynamic-array root whose element default is well-formed at `2^255` and
   `2^256 - 1` elements (`longCands`), the formula's parameters at their
   defaults, and ask the kernel for `¬ ⊨ᶠ φ` of a formula
-  `wt(storage) → ψ` directly (`certifyLong`; the kernel check is bounded
+  `wt(storage) → ψ` directly (`certifyLong`, at the default `maxRecDepth`
+  since M8's A3; the kernel check is bounded
   by its own heartbeats, the elaboration that builds it only by the
   declaration's): no compiled evaluator can hold such a storage.  The
   certificate for `invariantClosedFormSum` checks in about 0.1 s; the
@@ -592,6 +594,7 @@ bound needs, each a change to the calculus (every derivation's walk and
 `Examples/ProofTree.lean`'s pins move):
 
 1. **A join after a conditional** (done, 2026-10-24, for accumulations;
+   2026-10-25 for every `if` whose branches only assign a local, M8's A1;
    below): run both branches to the end of the `if` as updates, then go on
    once under the merged update `{x := c ? x₁ : x₂}` (KeY's join rules,
    `ifThenElse` in the update), with each branch's failures (revert, panic)
@@ -619,18 +622,23 @@ the branch `c` picks reverts (`ifJoin_agrees`), which is
 the statement alone: `ifElseSplit` carries the converse side condition
 (`Upd.ifJoin? … = none`), `Stmt.ite.ruleExists` covers both.
 
-The gate (`Upd.ifJoin?`): one branch empty, the other empty or an
-accumulation, a local set from its own value (`JoinArm.accumulates`:
-`x = x + 1;`).  Joining every joinable `if` was tried first and broke the
+The gate (`Upd.ifJoin?`) was, until M8's A1 (below): one branch empty,
+the other empty or an accumulation, a local set from its own value
+(`JoinArm.accumulates`: `x = x + 1;`); it is now every `if` whose branches
+are each empty or one assignment of a value local, the closer splitting the
+value back at the leaf.  Joining every joinable `if` was tried first and broke the
 leaves of `if (c) { x = 2; } else { x = 1; }` (`CloseTests`'
 `whichWriteWins`), of conditional values (`ternaryToIf`: `Bytes`,
 `SignedCasts`, tuple returns) and of lowered `break`/`continue` flags
 inside invariant loops (`Loops`' `breakKeepsBound`, `LoopsImport`'s
 `invariantBreak`): their two cases are cheaper for the closers than the
-conditional term, so they split as before.  An accumulation's split copies
+conditional term, so they split as before.  A1 keeps the join and gives
+the closer those two cases back at the leaf instead (`sol_close_ite_split`,
+M8).  An accumulation's split copies
 the rest of the program once per case of every `if` before it, which is
 what the join removes.  The solkey fragment (`Stmt.inSolkey`) leaves out
-every `if` of the joined shape (`Prog.joinShape`).
+every `if` of the joined shape (`Prog.joinShape`), and since A1 every
+conditional value (`Val.keyValue`), whose `ternaryToIf` gives such an `if`.
 
 **The leaf.**  The kernel closer lifts the conditionals into case splits
 (`LFml.decideLift`, `Calculus/DecideComplete.lean`) when there are at most
@@ -1423,6 +1431,188 @@ What it shows:
 * An unannotated literal-bounded loop is unwound (`.auto`,
   `whileUnwind`), so its walk grows with the bound's value, not with the
   text; none of the three families has one (A2 below).
+
+### A1 · Joins for every `if` whose branches only assign locals
+
+**The gate** (`Upd.ifJoin?`, `Calculus/Arms.lean`): an `if` on a simple
+condition is joined (`LeanTaclet.ifElseJoin`) when each branch is empty or
+one assignment of a value local (`Prog.joinArm?`), whichever local and
+whatever value; `if (c) { x = 2; } else { x = 1; }` is
+`{ x := c ? 2 : 1 }`, `if (c) { s0 = 1; } else { s1 = 1; }` the two
+elements `{ s0 := c ? 1 : s0 ‖ s1 := c ? s1 : 1 }`.  The arm and its
+soundness are unchanged (`Upd.ifJoin`, `sound_iteJoin` held for every
+joinable pair already); `JoinArm.accumulates` and `Tm.readsPos` are gone.
+A branch of two statements, or one that writes the state, calls, reverts
+or declares, still splits.
+
+**The closer side.**  Where the earlier attempt broke (above, "The join"),
+the closer now gets the two cases back at the leaf:
+
+* `sol_close_ite_split` (`CloseSplit`, `Calculus/CloseScoped/Steps.lean`;
+  the lemmas in `Calculus/LeafSplit.lean`): KeY's `ifthenelse_split` on a
+  joined value whose condition is a `bool` local and which is not an
+  accumulation, `{x := c ? t : e} φ` from `c = TRUE → {x := t} φ` and
+  `c = FALSE → {x := e} φ` (`Fml.SplitTo.here`), through the binders,
+  updates, premises and conjunctions in front of it; every value of the
+  update at that condition takes its side at once (`Upd.IteCase`).  The
+  cases are the leaves `ifElseSplit` left, so they cost what they cost.
+  `sol_close` takes it first on a leaf of one or two such updates
+  (`CloseSplit.splitFew`); from three, after `sol_close_join_steps`, at
+  most `CloseSplit.splitMax` (six); each within `sol_within 160000`.
+* `sol_close_join_steps` reads a value whose cases are one base with
+  offsets and literals (`c ? x + 1 : 0`): the absolute interval from the
+  base's (`CloseJ.addInterval`), so F1's leaf is one update at a time.
+* The walk's kernel closer (`LFml.decideLift`,
+  `Calculus/DecideComplete.lean`), after `liftCond`, lifts the first
+  conditional to the formula's top (`LFml.liftTop`, `LFml.findCond`,
+  `Calculus/CondLift.lean`, exact by `LFml.liftTop_holds`): `x != 0` after
+  `{x := c ? 2 : 1}` is `(c → ¬ 2 = 0) ∧ (¬c → ¬ 1 = 0)`, where the
+  equation's own lift left `¬ ((c → …) ∧ (¬c → …))`, which it did not
+  close.  Without it `sol_prove` left a leaf on
+  `[ if (a == 1) { x = 2; } else { x = 1; }; ] x != 0` (`Join.lean`), which
+  it closed when the `if` split.
+
+**The solkey fragment** (`⊢ₖ`, `Stmt.inSolkey`) loses every `if` of the
+wider shape and every conditional value (`Val.keyValue` is `false` on
+`.ternary`): `ternaryToIf` lowers `v = c ? a : b;` to an `if` the strategy
+joins, and a conditional anywhere in a value reaches a local through the
+captures.  On those `⊢ₖ` stops where `⊢` goes on; as with the
+accumulations' join and the summaries, the fragment is what solkey's
+taclets alone run, now smaller.
+
+**Pins that moved, each because the walk shrank** (the program unchanged
+unless said):
+
+* `Examples/Tactics/PolySize.lean`: F1 `8`, `13`, `18` nodes and one
+  branch (`5k + 3`) where it was `11`, `26`, `55` and `2^k`; F3 `14` nodes
+  and three branches where it was `18` and four.
+* `Examples/Tactics/ProofTree.lean` (the `cdl!` trees): `ifElseJoin` in
+  place of `ifElseSplit` and its two goals, the `#proof_node` of the leaf
+  at serial 2.
+* `Examples/ProofTree.lean`: the label pins (`#proof_node 2`,
+  `#proof_tree_json`, the `a == 1` tree) are about `ifElseSplit`'s labels,
+  so their `else` branch now reverts (the program changed, to keep the
+  split); `sol_derive?`'s suggestion is `apply update .ifElseJoin`.
+* `Examples/Tactics/Branch.lean`: `branchLocals` and `branchDiamond` walk
+  `ifElseJoin` (one goal, its trace pinned).
+* `Examples/Tactics/Sequents.lean`: the split walk's `else` branch writes
+  the storage (the program changed, to keep its checked lines).
+* `Examples/ChainNotation.lean`: section 5's `else` writes the storage and
+  the nested example's inner `else` too (to keep the split), the nested
+  derivation pin follows; `ifTrace` ends before the join, whose line the
+  surface notation cannot write (below).
+* `Examples/Chains/StorageCoverage.lean`: the rows `ifElseUnfold` and
+  `ifElseSplit` give their `else` a second assignment, `s0 = 0;`, so they
+  split as the paper's table prints them; the paper's own programs
+  (`if (ok) { s0 = 1; } else { s1 = 1; }`) now join.
+* `Calculus/CloseTests.lean`: the walk on `if (a == b) { x = 2; } else
+  { x = 1; }` takes `ifElseJoin`; a split example writes the storage; the
+  split itself is pinned (`sol_close_ite_split`, its two cases).
+* `TestSuite/Derived5.lean`, `boolKeyMappingSymbolicKey`: one leaf
+  (`{ ie1 := b ? 1 : 0 }` read as a mapping key) that the walk's kernel
+  closer does not close, by `sol_leaf; sol_close`, where the split's two
+  goals each closed in the walk.  `TestSuite/Derived15.lean`,
+  `invariantVariantSkipsBreakIteration`: three leaves where it had four
+  (`case leaf4` dropped).  The gate's counts are unchanged: 491 automatic,
+  61 with a step budget, 0 manual, 11 refuted, 0 pending.
+
+**After A1** (the same scratch modules, `maxHeartbeats 2000000` a command):
+
+| k | F1 nodes | branches | leaf | time | F2 time | F3 nodes | branches | leaf | time |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | 8 | 1 | 25 | 0.6 s | 2.0 s | 14 | 3 | 64 | 6.6 s |
+| 2 | 13 | 1 | 41 | 1.3 s | 8.8 s | 19 | 3 | 80 | 41.5 s |
+| 3 | 18 | 1 | 57 | 1.4 s | 20.2 s | past 2 M heartbeats | | | |
+| 4 | 23 | 1 | 73 | 1.7 s | 44.0 s | past 2 M | | | |
+| 5 | 28 | 1 | 89 | 2.3 s | 85.1 s | past 2 M | | | |
+| 6 | 33 | 1 | 105 | 2.9 s | 148.4 s | past 2 M | | | |
+| 7 | 38 | 1 | 121 | 3.3 s | | | | | |
+| 8 | 43 | 1 | 137 | 4.0 s | | | | | |
+
+F2's walk and leaves are as before (no `if`).  F1 is linear in the walk
+(`5k + 3` nodes) and the leaf (`16k + 9` term nodes), and about linear in
+time; with the split alone in front of the steps it was `0.56`, `1.4`,
+`3.5`, `8.5`, `21.9`, `53.2` s at `k = 1 … 6` (the leaf's `2^k` cases).
+F3's walk is linear (three branches whatever `k`); its body's preservation
+leaf, past `{anon}`, costs what the split cases cost before: open.
+
+**Speed.**  `git log` shows no earlier change on the gate made for speed;
+the gate was narrowed for the closers (above), which A1 addresses.  The
+TestSuite modules took 1023 s after against 1045 s before (`Derived5`
+10 → 15 s, its leaf by `sol_close`; `Derived17` 181 → 171 s; no other
+module moved by more than 5 s); the library's examples are not slower as a
+whole (`Examples/Tactics/OpenLoops.lean`, the slowest, 624 s before, 600 s
+after).  May slow checking: `sol_close` on a leaf with joined values now
+tries the split first, and the walk's kernel closer evaluates `liftTop` on
+a leaf `liftCond` did not close.
+
+**What is left.**  A branch of more than one local assignment still splits
+(a join needs the branch's assignments composed, `x = a; y = x + 1;`);
+the surface notation (`dl!`, `Calculus/Notation.lean`, the `callee` lane's)
+cannot write a conditional term, so a chain cannot show a joined line;
+F3's invariant leaves.
+
+### A1 review (2026-10-25)
+
+A read-only finder and skeptic (neither ran Lean).  Confirmed and fixed:
+`sol_close_ite_split` could succeed without taking anything apart (an
+update `count` counts but whose `pushFree` fails), and `sol_close` would
+then enter it again on the same goal until the recursion depth, which
+`first` does not catch: it now fails there; the split alternatives ran
+with no budget of their own, so a split case that ran out of heartbeats
+ended `sol_close` instead of falling through: each is now within
+`sol_within 160000`; nothing pinned that the split fires: `CloseTests`
+pins its two cases.  Minor, reworded: `splitMax` counts updates, not
+conditions; `liftTop` lifts below the leading binders only; the solkey
+fragment's banner names conditional values.  Rejected by the skeptic: an
+unreduced leaf (`sol_leaf` quotes it), the `decideLift` example (its
+guard is a total local, two cases), and the kernel's cost on failing
+leaves (the compiled closer finds them first).  Left as minor: the
+`affine` reader misses `Int.negSucc` literals (the interval step then
+records nothing), and the docstrings of the split's congruence lemmas
+carry no Solidity.
+
+### A3 · The recursion depth of two kernel checks
+
+* `certifyLong` (`Tools/Counterexample.lean`) raised `maxRecDepth` to
+  100 000, which can crash a worker: the elaborator's `apply` of
+  `Fml.not_holds_imp_of_eval3` unified `holds σ' (pre → body)` with the
+  peeled obligation, unfolding the whole formula, and on the TestSuite's
+  `invariantClosedFormSum` passed the default depth (512) at that step
+  (a scratch copy without the override failed there for every long-array
+  candidate).  The certificate is now built with its arguments written:
+  the peeled state and formula read by the kernel (`kernelWhnf?`, a
+  `Kernel.whnf`, which reads no `maxRecDepth`: it is bounded by the stack,
+  and by no heartbeats, a weak-head reduction down the parameters'
+  binders), the premise checked to be
+  `wt(storage)` on that small term, and the rest, `¬ holds (peel …)`
+  against the term built, left to the kernel's check of the declaration,
+  as before.  No override is left; `invariantClosedFormSum` is refuted as
+  before (`TestSuite/Refuted.lean`, 10 s before, 9.5 s after), and so are
+  `Examples/Tactics/SymbolicCounterexample.lean`'s.
+* `Evm/Examples.lean`'s `pow_run` set `maxRecDepth 100000` for one
+  `decide +kernel` on a conjunction of four runs; each conjunct is decided
+  on its own now (`refine ⟨?_, ?_, ?_, ?_⟩ <;> decide +kernel`) at the
+  default depth, the statement unchanged (31 s before, 30 s after).
+
+Neither needed the chunking `Calculus/ProveChunked.lean` does for walks:
+the depth was the elaborator's on one term, not a long derivation.  The only
+`maxRecDepth` settings left under `Solidity/` are `ProveChunked`'s and
+`Derive`'s per-step contexts and the generated `Corpus/TestSuite.lean`'s
+575.
+
+### A3 review (2026-10-25)
+
+A read-only finder and skeptic (neither ran Lean).  No correctness
+finding: the explicit arguments match the declarations, the peeled
+`Sigma.mk`/`Prod.mk`/`Fml.imp` are built literally by `Fml.peel`'s minor
+premises, and a shape test that stopped matching would fail
+`TestSuite/Refuted.lean` and `SymbolicCounterexample.lean`, which call
+`sol_refute` on long arrays.  Confirmed and fixed (wording):
+`Kernel.whnf` reads no `maxRecDepth` but is bounded by the stack, not by
+heartbeats; `pow_run`'s depth was the elaborator's, not the unifier's;
+this section's place and a bullet's indent.  Minor, left: `certifyLong`
+reads `Γ` off the formula's type, always `[]`.
 
 ### A0 review (2026-10-25)
 

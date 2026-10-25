@@ -19,6 +19,9 @@ theorem Solkey.TestSuite.boolIsTrueOrFalse.proved : ⊢ Solkey.TestSuite.boolIsT
 
 theorem Solkey.TestSuite.boolKeyMappingSymbolicKey.proved : ⊢ Solkey.TestSuite.boolKeyMappingSymbolicKey.problem := by
   sol_prove
+  case leaf1 =>
+    sol_leaf
+    sol_close
 
 theorem Solkey.TestSuite.numberLiteralForms.proved : ⊢ Solkey.TestSuite.numberLiteralForms.problem := by
   sol_prove

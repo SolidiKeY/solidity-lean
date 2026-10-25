@@ -212,18 +212,19 @@ example (m : Modality) (φ : Post StandardExample []) :
 `ifElseSplit` makes the two goals one formula, `(c → …) ∧ (c' → …)`
 (`Calculus/Fml.lean`'s `Premise.fml`), each branch's program ending at
 its block's `}` (`core_item`).  The chain runs the `then` branch, then the
-`else` branch. -/
+`else` branch.  (The `else` branch writes the storage: branches that only
+assign locals are joined, `ifElseJoin`, `ifTrace` below.) -/
 
-example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ balances[a] == x }
+example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; total = 1; }; ⟩ balances[a] == x }
     ~> dl!{ { storage := save(storage, balances[a], 1) }
-            ⟨ if (true) { x = 2; } else { x = 1; }; ⟩ balances[a] == x }
+            ⟨ if (true) { x = 2; } else { x = 1; total = 1; }; ⟩ balances[a] == x }
     ~[ifElseSplit]~>
         dl!{ { storage := save(storage, balances[a], 1) }
             ((true = true → ⟨ x = 2; } ⟩ balances[a] == x) ∧
-              (true = false → ⟨ x = 1; } ⟩ balances[a] == x)) }
+              (true = false → ⟨ x = 1; total = 1; } ⟩ balances[a] == x)) }
     ~*> dl!{ { storage := save(storage, balances[a], 1) }
             ((true = true → { x := 2 } balances[a] == x) ∧
-              (true = false → { x := 1 } balances[a] == x)) } := by
+              (true = false → { x := 1 } { storage := save(storage, total, 1) } balances[a] == x)) } := by
   sol_chain
 
 /-! ## 6 · The evidence is unique
@@ -434,13 +435,13 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ ⟨[ uint8 x = 250; x
           ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) } := by
   sol_chain
 
-/-- The `ifElseSplit` trace: both goals to their end, under `m`. -/
+/-- The trace up to an `if` whose branches only assign locals, under `m`.
+The next step joins it (`ifElseJoin`): one update, `{ y := (se1 ? 1 : 2) }`,
+which `#derivation` prints and a chain's line cannot yet write (the surface
+notation has no conditional term, `docs/automation.md`, M8). -/
 theorem ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{ ⟨[ bool se1 = flags[a]; if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
-    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 = true → ⟨[ y = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ y = 2; } ]⟩ φ)) }
-    ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → { y := 2 } φ)) } := by
+    ~*> dl![m]{ { se1 := find(storage, flags[a]) } ⟨[ if (se1) { y = 1; } else { y = 2; }; ]⟩ φ } := by
   sol_chain
 
 /-- A revert in the `else` branch: the lines stop at it, the `then` goal done. -/
@@ -484,35 +485,47 @@ example : ∃ ψ, Nonempty (dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 
 -- `⟨[ x = 1; } ]⟩ φ`, active whatever `φ` is.
 /--
 info:
-  dl{ ∀ uint x; ⟨[ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ]⟩ φ }
-  ~[ifElseSplit]~>
-  dl{ ∀ uint x; (true = true → ⟨[ if (true) {x = 2;} else {x = 1;}; } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; } ]⟩ φ) }
+  dl{ ∀ uint x; ⟨[ if (true) {if (true) {x = 2;} else {x = 1;total = 1;};} else {x = 1;}; ]⟩ φ }
   ~[ifElseSplit]~>
   dl{
     ∀ uint x;
-      (true = true → (true = true → ⟨[ x = 2; } } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+      (true = true → ⟨[ if (true) {x = 2;} else {x = 1;total = 1;}; } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[ifElseSplit]~>
+  dl{
+    ∀ uint x;
+      (true = true → (true = true → ⟨[ x = 2; } } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; total = 1; } } ]⟩ φ)) ∧
         (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → ⟨[ x = 1; total = 1; } } ]⟩ φ)) ∧
         (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧ (true = false → ⟨[ x = 1; } ]⟩ φ) }
+      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } ⟨[ total = 1; } } ]⟩ φ)) ∧
+        (true = false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[storageRootWriteStore]~>
+  dl{
+    ∀ uint x;
+      (true = true →
+            (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } { storage := save(storage, total, 1) } φ)) ∧
+        (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧ (true = false → { x := 1 } φ) }
+      (true = true →
+            (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } { storage := save(storage, total, 1) } φ)) ∧
+        (true = false → { x := 1 } φ) }
 -/
 #guard_msgs in
 variable (φ : Post StandardExample [.val .uint]) in
-#derivation dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+#derivation dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; total = 1; } } else { x = 1; }; ]⟩ φ }
 
 example (φ : Post StandardExample [.val .uint]) :
-    dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
-    ~*> dl![m]{ (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧
+    dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; total = 1; } } else { x = 1; }; ]⟩ φ }
+    ~*> dl![m]{ (true = true → (true = true → { x := 2 } φ) ∧
+            (true = false → { x := 1 } { storage := save(storage, total, 1) } φ)) ∧
           (true = false → { x := 1 } φ) } := by
   sol_chain
 

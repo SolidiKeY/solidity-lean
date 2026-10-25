@@ -89,8 +89,38 @@ example : ⊢ dl!{ [ x = 1; ] x == 1 } := by
   sol_leaf
   sol_close
 
-/-- Each goal of a split (the scoped split has KeY's two). -/
+/-- A joined `if`'s one goal (`ifElseJoin`), its value split back into the
+two cases at the leaf (`sol_close_ite_split`). -/
 example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x == 2 } := by
+  apply intro
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply update .ifElseJoin
+  apply empty
+  sol_leaf
+  sol_close
+
+/--
+trace: case h₁
+⊢ ⊨ᶠ dl{ ∀ uint x; ∀ uint b; ∀ uint a; { se1 := a == b } (se1 = true → { x := 2 } ¬x = 0) }
+
+case h₂
+⊢ ⊨ᶠ dl{ ∀ uint x; ∀ uint b; ∀ uint a; { se1 := a == b } (se1 = false → { x := 1 } ¬x = 0) }
+-/
+#guard_msgs in
+/-- The split itself (`sol_close_ite_split`, KeY's `ifthenelse_split`): the
+joined `{x := se1 ? 2 : 1}` back into the two cases `ifElseSplit` would have
+left, each closed as such a leaf. -/
+example : ⊨ᶠ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x != 0 } := by
+  sol_symex
+  sol_close_ite_split
+  trace_state
+  all_goals sol_close
+
+/-- Each goal of a split (the scoped split has KeY's two): a branch that
+writes the storage is not joined. -/
+example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { age = 1; x = 1; }; ⟩ x == 2 } := by
   apply intro
   apply unfold .ifElseUnfold
   apply unfold .localValueDeclInitDrop
@@ -102,6 +132,7 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
     sol_leaf
     sol_close
   case els =>
+    apply update .storageRootWriteStore
     apply update .localValueAssign
     apply empty
     sol_leaf

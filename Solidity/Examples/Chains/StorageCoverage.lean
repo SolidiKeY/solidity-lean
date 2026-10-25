@@ -684,89 +684,95 @@ theorem revertBox : dl!{ [ revert(); ] φ } ~[revertBox]~> dl![.box]{ true } := 
 /-! ### `if`
 
 `if (true)`, `if (false)` and `if (!ok)` have no rule of their own here: a literal is a
-simple condition (`ifElseSplit`) and `!ok` is captured (`ifElseUnfold`). -/
+simple condition (`ifElseSplit`) and `!ok` is captured (`ifElseUnfold`).  The paper's rows assign one
+local a branch (`if (ok) { s0 = 1; } else { s1 = 1; }`), which the strategy now joins (`ifElseJoin`,
+`docs/automation.md`, M8) into an update a chain's line cannot yet write; here the `else` branch
+assigns a second local, so the `if` splits as the paper prints it. -/
 
-/-- `if (alice.age > ageVal) { s0 = 1; } else { s1 = 1; }` with `ageVal` 30, from a storage where `alice.age`
-is 42: the condition captured (the row's rule), split on, the comparison folded to `true` (`greater_literals`),
-the `then` branch kept (`applyOnPV`, `concrete`). -/
+/-- `if (alice.age > ageVal) { s0 = 1; } else { s1 = 1; s0 = 0; }` with `ageVal` 30, from a storage where
+`alice.age` is 42: the condition captured (the row's rule), split on, the comparison folded to `true`
+(`greater_literals`), the `then` branch kept (`applyOnRigid`, `concrete`). -/
 theorem ifElseUnfold (φ : Post Coverage [.val .uint, .val .uint, .val .uint]) :
     dl![m]{
-      { storage := save(storage, alice.age, 42) ‖ ageVal := 30 } ⟨[ if (alice.age > ageVal) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+      { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
+              ⟨[ if (alice.age > ageVal) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          ⟨[ bool se1 = alice.age > ageVal; if (se1) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+                ⟨[ bool se1 = alice.age > ageVal; if (se1) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[localValueDeclInitDrop]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          ⟨[ se1 = alice.age > ageVal; if (se1) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+                ⟨[ se1 = alice.age > ageVal; if (se1) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[binopUnfoldLeft]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          ⟨[ uint se2 = alice.age; se1 = se2 > ageVal; if (se1) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+                ⟨[ uint se2 = alice.age; se1 = se2 > ageVal; if (se1) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          { se2 := find(storage, alice.age) } ⟨[ se1 = se2 > ageVal; if (se1) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+                { se2 := find(storage, alice.age) } ⟨[ se1 = se2 > ageVal; if (se1) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[binopAssignment]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          { se2 := find(storage, alice.age) } { se1 := se2 > ageVal } ⟨[ if (se1) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+                { se2 := find(storage, alice.age) }
+                  { se1 := se2 > ageVal } ⟨[ if (se1) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[ifElseSplit]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          { se2 := find(storage, alice.age) }
-            { se1 := se2 > ageVal }
-              ((se1 = true → ⟨[ s0 = 1; } ]⟩ φ) ∧
-                  (se1 = false → ⟨[ s1 = 1; } ]⟩ φ)) }
+                { se2 := find(storage, alice.age) }
+                  { se1 := se2 > ageVal } ((se1 = true → ⟨[ s0 = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ s1 = 1; s0 = 0; } ]⟩ φ)) }
     ~*> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          { se2 := find(storage, alice.age) }
-            { se1 := se2 > ageVal }
-              ((se1 = true → { s0 := 1 } φ) ∧
-                  (se1 = false → ⟨[ s1 = 1; } ]⟩ φ)) }
-    ~*> dl![m]{
-        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
-          { se2 := find(storage, alice.age) }
-            { se1 := se2 > ageVal }
-              ((se1 = true → { s0 := 1 } φ) ∧
-                  (se1 = false → { s1 := 1 } φ)) }
+                { se2 := find(storage, alice.age) }
+                  { se1 := se2 > ageVal } ((se1 = true → { s0 := 1 } φ) ∧ (se1 = false → { s1 := 1 } { s0 := 0 } φ)) }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := find(save(storage, alice.age, 42), alice.age) ‖
-            se1 := find(save(storage, alice.age, 42), alice.age) > 30 }
-          ((se1 = true → { s0 := 1 } φ) ∧
-              (se1 = false → { s1 := 1 } φ)) }
+        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖
+                  se2 := find(save(storage, alice.age, 42), alice.age) ‖
+                  se1 := find(save(storage, alice.age, 42), alice.age) > 30 }
+                ((se1 = true → { s0 := 1 } φ) ∧ (se1 = false → { s1 := 1 } { s0 := 0 } φ)) }
+    ~[sequentialToParallel]~> dl![m]{
+        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖
+                  se2 := find(save(storage, alice.age, 42), alice.age) ‖
+                  se1 := find(save(storage, alice.age, 42), alice.age) > 30 }
+                ((se1 = true → { s0 := 1 } φ) ∧ (se1 = false → { s1 := 1 ‖ s0 := 0 } φ)) }
     ~[findOnSave]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := 42 > 30 }
-          ((se1 = true → { s0 := 1 } φ) ∧
-              (se1 = false → { s1 := 1 } φ)) }
+                ((se1 = true → { s0 := 1 } φ) ∧ (se1 = false → { s1 := 1 ‖ s0 := 0 } φ)) }
     ~[greater_literals]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
-          ((se1 = true → { s0 := 1 } φ) ∧
-              (se1 = false → { s1 := 1 } φ)) }
-    ~[applyOnPV]~> dl![m]{
-        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
-          ((true = true → { s0 := 1 } φ) ∧
-              (true = false → { s1 := 1 } φ)) }
-    ~[concrete]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true } { s0 := 1 } φ }
-    ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s0 := 1 } φ } := by
+                ((se1 = true → { s0 := 1 } φ) ∧ (se1 = false → { s1 := 1 ‖ s0 := 0 } φ)) }
+    ~[applyOnRigid]~> dl![m]{
+        (true = true →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true } { s0 := 1 } φ) ∧
+                (true = false →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
+                      { s1 := 1 ‖ s0 := 0 } φ) }
+    ~[sequentialToParallel]~> dl![m]{
+        (true = true →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s0 := 1 } φ) ∧
+                (true = false →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
+                      { s1 := 1 ‖ s0 := 0 } φ) }
+    ~[sequentialToParallel]~> dl![m]{
+        (true = true →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s0 := 1 } φ) ∧
+                (true = false →
+                    { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s1 := 1 ‖ s0 := 0 }
+                      φ) }
+    ~[concrete]~> dl![m]{
+        { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s0 := 1 } φ } := by
   sol_chain
 #last_line ifElseUnfold
 
-/-- `if (ok) { s0 = 1; } else { s1 = 1; }` with `ok` `true`: both branches run, the condition read
+/-- `if (ok) { s0 = 1; } else { s1 = 1; s0 = 0; }` with `ok` `true`: both branches run, the condition read
 (`applyOnRigid`), and the `then` branch kept (`concrete`). -/
 theorem ifElseSplit (φ : Post Coverage [.val .bool, .val .uint, .val .uint]) :
-    dl![m]{ { ok := true } ⟨[ if (ok) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
+    dl![m]{ { ok := true } ⟨[ if (ok) {s0 = 1;} else {s1 = 1;s0 = 0;}; ]⟩ φ }
     ~[ifElseSplit]~> dl![m]{
-        { ok := true }
-          ((ok = true → ⟨[ s0 = 1; } ]⟩ φ) ∧
-              (ok = false → ⟨[ s1 = 1; } ]⟩ φ)) }
-    ~*> dl![m]{
-        { ok := true }
-          ((ok = true → { s0 := 1 } φ) ∧ (ok = false → ⟨[ s1 = 1; } ]⟩ φ)) }
-    ~*> dl![m]{
-        { ok := true }
-          ((ok = true → { s0 := 1 } φ) ∧ (ok = false → { s1 := 1 } φ)) }
+        { ok := true } ((ok = true → ⟨[ s0 = 1; } ]⟩ φ) ∧ (ok = false → ⟨[ s1 = 1; s0 = 0; } ]⟩ φ)) }
+    ~*> dl![m]{ { ok := true } ((ok = true → { s0 := 1 } φ) ∧ (ok = false → { s1 := 1 } { s0 := 0 } φ)) }
+    ~[sequentialToParallel]~> dl![m]{ { ok := true } ((ok = true → { s0 := 1 } φ) ∧ (ok = false → { s1 := 1 ‖ s0 := 0 } φ)) }
     ~[applyOnRigid]~> dl![m]{
-        (true = true → { ok := true } { s0 := 1 } φ) ∧
-          (true = false → { ok := true } { s1 := 1 } φ) }
+        (true = true → { ok := true } { s0 := 1 } φ) ∧ (true = false → { ok := true } { s1 := 1 ‖ s0 := 0 } φ) }
     ~[sequentialToParallel]~> dl![m]{
-        (true = true → { ok := true ‖ s0 := 1 } φ) ∧
-          (true = false → { ok := true } { s1 := 1 } φ) }
+        (true = true → { ok := true ‖ s0 := 1 } φ) ∧ (true = false → { ok := true } { s1 := 1 ‖ s0 := 0 } φ) }
+    ~[sequentialToParallel]~> dl![m]{
+        (true = true → { ok := true ‖ s0 := 1 } φ) ∧ (true = false → { ok := true ‖ s1 := 1 ‖ s0 := 0 } φ) }
     ~[concrete]~> dl![m]{ { ok := true ‖ s0 := 1 } φ } := by
   sol_chain
 #last_line ifElseSplit

@@ -73,18 +73,17 @@ info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {thenStm :
 
 `if (a == b) { x = 2; } else { x = 1; }` leaves `x` nonzero either way.  The
 condition is captured into `se1`, the capture's declaration dropped, and its
-value bound by `binopAssignment`; then the split.  The two goals are pinned
-(the parameters `a`, `b`, `x` bound by `∀`, taken by `allRight` first, as
-the walk does before its first rule):
-the condition is added *after* the updates of the context, since it is read in
-the state the `if` runs in. -/
+value bound by `binopAssignment`.  Both branches only assign a local, so the
+`if` is not split but joined (`ifElseJoin`, `docs/automation.md`, M8): one
+goal, `x` set to `se1 ? 2 : 1`, read in the state the `if` runs in; the
+closer splits it back into the two cases at the leaf
+(`sol_close_ite_split`).  The goal is pinned (the parameters `a`, `b`, `x`
+bound by `∀`, taken by `allRight` first, as the walk does before its first
+rule).  A branch that does anything else splits (`ifTrue` below). -/
 
 /--
-trace: case thn
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = true ⟹ [ x = 2; } ] ¬x = 0 }
-
-case els
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = false ⟹ [ x = 1; } ] ¬x = 0 }
+trace: case h.h.h.h
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, { x := (se1 ? 2 : 1) } ⟹ ¬x = 0 }
 -/
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/
@@ -94,20 +93,11 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   -- dl{ { se1 := a == b } ⟹ [ if (se1) { x = 2; } else { x = 1; }; ] ¬x = 0 }
-  apply split .ifElseSplit
+  apply update .ifElseJoin
   trace_state
-  case thn =>
-    -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = 2; ] ¬x = 0 }
-    apply update .localValueAssign
-    apply empty
-    sol_leaf
-    sol_close
-  case els =>
-    -- dl{ { se1 := a == b }, se1 = false ⟹ [ x = 1; ] ¬x = 0 }
-    apply update .localValueAssign
-    apply empty
-    sol_leaf
-    sol_close
+  apply empty
+  sol_leaf
+  sol_close
 
 /-! ## A literal condition
 
@@ -232,8 +222,9 @@ example : Prog StandardExample [] [.val .bool] := sol{ bool c = true;
 
 /-! ## Under the diamond: the condition decides
 
-With the precondition `a == b` the `else` goal has both `a = b` and
-`se1 = false` in its context, a contradiction. -/
+With the precondition `a == b` the joined `x := se1 ? 2 : 1` is `2`: split
+back at the leaf, the `else` case has both `a = b` and `se1 = false` in its
+context, a contradiction. -/
 
 /-- `a == b → ⟨ if (a == b) { x = 2; } else { x = 1; } ⟩ x == 2`. -/
 theorem branchDiamond :
@@ -242,19 +233,10 @@ theorem branchDiamond :
   apply unfold .ifElseUnfold
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  apply split .ifElseSplit
-  case thn =>
-    apply update .localValueAssign
-    apply empty
-    sol_leaf
-    sol_close
-  case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 = false ⟹
-    --     ⟨ x = 1; } ⟩ x = 2 }
-    apply update .localValueAssign
-    apply empty
-    sol_leaf
-    sol_close
+  apply update .ifElseJoin
+  apply empty
+  sol_leaf
+  sol_close
 
 /-- Without the precondition the diamond holds too: `a` and `b` are bound
 (the parameters' `∀`), so the condition is never stuck.  Today's reading

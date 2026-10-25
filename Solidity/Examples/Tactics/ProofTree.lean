@@ -32,14 +32,9 @@ info: 0: allRight
 2: ifElseUnfold
 3: localValueDeclInitDrop
 4: boolEqualityAssignment
-5: ifElseSplit
-  [if se1 true]
-    6: localValueAssign
-    7: Closed goal
-  [if se1 false]
-    8: localValueAssign
-    9: Closed goal
-closed: 0 open goal(s), 10 node(s), 2 branch(es)
+5: ifElseJoin
+6: Closed goal
+closed: 0 open goal(s), 7 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree cdl!{ [ if (a == 1) { x = 2; } else { x = 1; }; ] true }
@@ -57,14 +52,9 @@ info: 0: allRight
 3: ifElseUnfold
 4: localValueDeclInitDrop
 5: lessEqualAssignment
-6: ifElseSplit
-  [if se1 true]
-    7: localValueAssign
-    8: Closed goal
-  [if se1 false]
-    9: localValueAssign
-    10: Closed goal
-closed: 0 open goal(s), 11 node(s), 2 branch(es)
+6: ifElseJoin
+7: Closed goal
+closed: 0 open goal(s), 8 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree cdl!{ [ if (a <= b) { x = 1; } else { x = 2; }; ] true }
@@ -92,12 +82,12 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 info: node: 1
 sequent:
   dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }
-rule: ifElseSplit
+rule: ifElseJoin
 state: inner
 branch: -
 parent: 0
-children: [2, 4]
-tactics: apply Proves.split (Taclet.toStep .ifElseSplit)
+children: [2]
+tactics: apply Proves.update (LeanTaclet.toStep .ifElseJoin)
 -/
 #guard_msgs in
 #proof_node 1 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
@@ -157,22 +147,16 @@ closed: 0 open goal(s), 6 node(s), 3 branch(es)
 #proof_tree cdl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true }
 
 /--
-info: {"stats": {"nodes": 6, "branches": 2},
+info: {"stats": {"nodes": 3, "branches": 1},
  "sequents":
  ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {x = 1;}; ] true }",
   "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] true }",
-  "dl{ ∀ uint x, true = true ⟹ [ x = 2; } ] true }",
-  "dl{ ∀ uint x, true = true, { x := 2 } ⟹ true }",
-  "dl{ ∀ uint x, true = false ⟹ [ x = 1; } ] true }",
-  "dl{ ∀ uint x, true = false, { x := 1 } ⟹ true }"],
+  "dl{ ∀ uint x, { x := (true ? 2 : 1) } ⟹ true }"],
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "allRight", null, "inner"],
-  [1, 0, "ifElseSplit", null, "inner"],
-  [2, 1, "localValueAssign", "if true true", "inner"],
-  [3, 2, "Closed goal", null, "closed"],
-  [4, 1, "localValueAssign", "if true false", "inner"],
-  [5, 4, "Closed goal", null, "closed"]],
+  [1, 0, "ifElseJoin", null, "inner"],
+  [2, 1, "Closed goal", null, "closed"]],
  "closed": true}
 -/
 #guard_msgs in
@@ -183,31 +167,26 @@ scoped `sol_close`. -/
 
 /--
 info: 0: allRight
-1: ifElseSplit
-  [if true true]
-    2: localValueAssign
-    3: Closed goal
-  [if true false]
-    4: localValueAssign
-    5: Closed goal
-closed: 0 open goal(s), 6 node(s), 2 branch(es)
+1: ifElseJoin
+2: Closed goal
+closed: 0 open goal(s), 3 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /--
-info: node: 3
+info: node: 2
 sequent:
-  dl{ ∀ uint x, true = true, { x := 2 } ⟹ ¬x = 0 }
+  dl{ ∀ uint x, { x := (true ? 2 : 1) } ⟹ ¬x = 0 }
 rule: Closed goal
 state: closed
 branch: -
-parent: 2
+parent: 1
 children: []
 tactics: sol_leaf; sol_close
 -/
 #guard_msgs in
-#proof_node 3 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+#proof_node 2 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /-! `#step` names the rule as the tree does: KeY's taclet at the operator. -/
 

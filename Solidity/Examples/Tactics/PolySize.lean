@@ -63,19 +63,21 @@ def elabProofSize : CommandElab := fun stx => liftTermElabM do
 
 /-! ## Sequential `if`s, both branches assigning
 
-`ifElseSplit` copies the rest of the program into both goals: `2^k`
-branches, `7 · 2^k + k − 4` nodes. -/
+Each `if` is joined (`ifElseJoin`): the rest of the program runs once,
+`5k + 3` nodes and one branch, where `ifElseSplit` made `2^k` branches and
+`7 · 2^k + k − 4` nodes; the leaf splits the joined values back
+(`sol_close_ite_split`). -/
 
-/-- info: 11 node(s), 2 branch(es), 0 open, largest leaf 27 term node(s) -/
+/-- info: 8 node(s), 1 branch(es), 0 open, largest leaf 25 term node(s) -/
 #guard_msgs in
 #proof_size dl!{ ⟨ uint x = 0; if (a == 1) { x = x + 1; } else { x = 0; }; ⟩ x <= 1 }
 
-/-- info: 26 node(s), 4 branch(es), 0 open, largest leaf 45 term node(s) -/
+/-- info: 13 node(s), 1 branch(es), 0 open, largest leaf 41 term node(s) -/
 #guard_msgs in
 #proof_size dl!{ ⟨ uint x = 0; if (a == 1) { x = x + 1; } else { x = 0; };
   if (b == 1) { x = x + 1; } else { x = 1; }; ⟩ x <= 2 }
 
-/-- info: 55 node(s), 8 branch(es), 0 open, largest leaf 63 term node(s) -/
+/-- info: 18 node(s), 1 branch(es), 0 open, largest leaf 57 term node(s) -/
 #guard_msgs in
 #proof_size dl!{ ⟨ uint x = 0; if (a == 1) { x = x + 1; } else { x = 0; };
   if (b == 1) { x = x + 1; } else { x = 1; }; if (c == 1) { x = x + 1; } else { x = 2; }; ⟩ x <= 3 }
@@ -101,7 +103,7 @@ constant number of nodes. -/
 
 /-! ## Both: a loop whose body is sequential `if`s -/
 
-/-- info: 18 node(s), 4 branch(es), 0 open, largest leaf 66 term node(s) -/
+/-- info: 14 node(s), 3 branch(es), 0 open, largest leaf 64 term node(s) -/
 #guard_msgs in
 #proof_size dl!{ [ uint s = 0;
   /// @custom:key invariant i <= 10 && s <= 1 * i
