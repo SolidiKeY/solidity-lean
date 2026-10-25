@@ -89,7 +89,8 @@ example : (ReadExpr.ofTerm? (LTm.obsL (C := Bank) (E := .prim .uint) (.err))).is
 example : (ReadExpr.ofTerm? (LTm.app0 (C := Bank) .memory)).isNone = true := by
   decide +kernel
 
-example : (ReadExpr.ofTerm? (LTm.app1 (C := Bank) .net (.app0 (.lit (PrimTy.dflt .uint))))).isNone = true := by
+/-- A ledger read is a query too: it reads the ledger, not the storage. -/
+example : (ReadExpr.ofTerm? (LTm.app1 (C := Bank) .net (.app0 (.lit (PrimTy.dflt .uint))))).isSome = true := by
   decide +kernel
 
 section Nested

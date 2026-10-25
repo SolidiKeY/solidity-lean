@@ -33,30 +33,30 @@ namespace Solidity.Decide
 
 open Semantics ReadRealization Linear ScalarCode
 
-variable {C : Contract}
+variable {C : Contract} {l : LedgerMode}
 
 /-! ## Recognizing the source fragment -/
 
 /-- A product with a literal factor, recognized with its evidence from the
 factors' (`sa`, `sb`). -/
 def LTm.mulSrc? {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (a b : LTm C (.val p))
-    (sa : Option (PLift (a.Src c w .num))) (sb : Option (PLift (b.Src c w .num))) :
-    Option (PLift ((LTm.app2 (.binop .mul h) a b).Src c w .num)) :=
+    (sa : Option (PLift (a.SrcL c w l .num))) (sb : Option (PLift (b.SrcL c w l .num))) :
+    Option (PLift ((LTm.app2 (.binop .mul h) a b).SrcL c w l .num)) :=
   match a.lit?, b.lit? with
   | some ⟨v, hv⟩, _ => sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .mulL h v hb⟩
   | none, some ⟨v, hv⟩ => sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .mulR h v ha⟩
   | none, none => none
 
 theorem LTm.mulSrc?_left {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote)
-    (b : LTm C (.val p)) (sa : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c w .num)))
-    (sb : Option (PLift (b.Src c w .num))) (hb : sb.isSome = true) :
+    (b : LTm C (.val p)) (sa : Option (PLift ((LTm.app0 (C := C) (.lit v)).SrcL c w l .num)))
+    (sb : Option (PLift (b.SrcL c w l .num))) (hb : sb.isSome = true) :
     (LTm.mulSrc? h (.app0 (.lit v)) b sa sb).isSome = true := by
   obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
   rfl
 
 theorem LTm.mulSrc?_right {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true)
-    (a : LTm C (.val p)) (v : p.Denote) (sa : Option (PLift (a.Src c w .num)))
-    (sb : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c w .num))) (ha : sa.isSome = true)
+    (a : LTm C (.val p)) (v : p.Denote) (sa : Option (PLift (a.SrcL c w l .num)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.lit v)).SrcL c w l .num))) (ha : sa.isSome = true)
     (hb : sb.isSome = true) :
     (LTm.mulSrc? h a (.app0 (.lit v)) sa sb).isSome = true := by
   obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
@@ -66,10 +66,38 @@ theorem LTm.mulSrc?_right {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = t
   | some r => obtain ⟨w, hw⟩ := r; rfl
   | none => rfl
 
+/-- A KeY `int` product with a literal factor, recognized with its evidence. -/
+def LTm.zmulSrc? {c w : Bool} (h : BinOp.mul.zArith = true) (a b : LTm C .kint)
+    (sa : Option (PLift (a.SrcL c w l .znum))) (sb : Option (PLift (b.SrcL c w l .znum))) :
+    Option (PLift ((LTm.app2 (.zbin .mul h) a b).SrcL c w l .znum)) :=
+  match a.zlit?, b.zlit? with
+  | some ⟨n, hn⟩, _ => sb.map fun ⟨hb⟩ => ⟨by subst hn; exact .zmulL h n hb⟩
+  | none, some ⟨n, hn⟩ => sa.map fun ⟨ha⟩ => ⟨by subst hn; exact .zmulR h n ha⟩
+  | none, none => none
+
+theorem LTm.zmulSrc?_left {c w : Bool} (h : BinOp.mul.zArith = true) (n : Int) (b : LTm C .kint)
+    (sa : Option (PLift ((LTm.app0 (C := C) (.zlit n)).SrcL c w l .znum)))
+    (sb : Option (PLift (b.SrcL c w l .znum))) (hb : sb.isSome = true) :
+    (LTm.zmulSrc? h (.app0 (.zlit n)) b sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
+  rfl
+
+theorem LTm.zmulSrc?_right {c w : Bool} (h : BinOp.mul.zArith = true) (a : LTm C .kint) (n : Int)
+    (sa : Option (PLift (a.SrcL c w l .znum)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.zlit n)).SrcL c w l .znum))) (ha : sa.isSome = true)
+    (hb : sb.isSome = true) :
+    (LTm.zmulSrc? h a (.app0 (.zlit n)) sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
+  obtain ⟨y, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.zmulSrc?
+  cases hl : a.zlit? with
+  | some r => obtain ⟨w, hw⟩ := r; rfl
+  | none => rfl
+
 /-- A literal low mask on the left of `&`. -/
 def LTm.bandLSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
-    (sb : Option (PLift (b.Src c true .num))) :
-    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+    (sb : Option (PLift (b.SrcL c true l .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).SrcL c true l .num)) :=
   match a.lit? with
   | some ⟨v, hv⟩ =>
     if hm : (lowMask? v).isSome = true then sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .bandL rfl h v hm hb⟩
@@ -78,8 +106,8 @@ def LTm.bandLSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C 
 
 /-- A literal low mask on either side of `&`, recognized with its evidence. -/
 def LTm.bandSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
-    (sa : Option (PLift (a.Src c true .num))) (sb : Option (PLift (b.Src c true .num))) :
-    Option (PLift ((LTm.app2 (.binop .band h) a b).Src c true .num)) :=
+    (sa : Option (PLift (a.SrcL c true l .num))) (sb : Option (PLift (b.SrcL c true l .num))) :
+    Option (PLift ((LTm.app2 (.binop .band h) a b).SrcL c true l .num)) :=
   match b.lit? with
   | some ⟨v, hv⟩ =>
     if hm : (lowMask? v).isSome = true then sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .bandR rfl h v hm ha⟩
@@ -87,7 +115,7 @@ def LTm.bandSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (
   | none => LTm.bandLSrc? h a b sb
 
 theorem LTm.bandLSrc?_isSome {c : Bool} (h : BinOp.band.accepts .uint = true) (v : PrimTy.uint.Denote)
-    (hm : (lowMask? v).isSome = true) (b : LTm C (.val .uint)) (sb : Option (PLift (b.Src c true .num)))
+    (hm : (lowMask? v).isSome = true) (b : LTm C (.val .uint)) (sb : Option (PLift (b.SrcL c true l .num)))
     (hb : sb.isSome = true) : (LTm.bandLSrc? h (.app0 (.lit v)) b sb).isSome = true := by
   obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
   unfold LTm.bandLSrc?
@@ -96,7 +124,8 @@ theorem LTm.bandLSrc?_isSome {c : Bool} (h : BinOp.band.accepts .uint = true) (v
   rfl
 
 /-- The source fragment, recognized with its evidence. -/
-def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → Option (PLift (t.Src c true k))
+def LTm.srcL? (l : LedgerMode) : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) →
+    Option (PLift (t.SrcL c true l k))
   | _, k, _, .var (p := p) i =>
     match k, p with
     | .num, _ => some ⟨.var i⟩
@@ -108,6 +137,7 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
     | .bool, .lit (p := .bool) v => some ⟨.ofNum (.lit v)⟩
     | .num, .env e => some ⟨.env e⟩
     | .path, .root r h => some ⟨.root r h⟩
+    | .znum, .zlit n => some ⟨.zlit n⟩
     | _, _ => none
   | _, k, s, .err =>
     match k, s with
@@ -116,194 +146,233 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
     | _, _ => none
   | c, k, _, .obsW (p := p) q =>
     match k, p with
-    | .num, _ => (q.src? c .path).map fun ⟨h⟩ => ⟨.word h⟩
-    | .bool, .bool => (q.src? c .path).map fun ⟨h⟩ => ⟨.ofNum (.word h)⟩
+    | .num, _ => (q.srcL? l c .path).map fun ⟨h⟩ => ⟨.word h⟩
+    | .bool, .bool => (q.srcL? l c .path).map fun ⟨h⟩ => ⟨.ofNum (.word h)⟩
     | _, _ => none
   | c, k, _, .app1 (.unop op (p := p) hop) a =>
     match k, op, p with
-    | .bool, .not, .bool => (a.src? c .bool).map fun ⟨h⟩ => ⟨.not h⟩
-    | .num, .neg, .int => (a.src? c .num).map fun ⟨h⟩ => ⟨.neg hop h⟩
-    | .num, .bnot, .uint => (a.src? c .num).map fun ⟨h⟩ => ⟨.bnot hop h⟩
-    | .num, .toInt, .uint => (a.src? c .num).map fun ⟨h⟩ => ⟨.toInt rfl hop h⟩
-    | .num, .toUint, .int => (a.src? c .num).map fun ⟨h⟩ => ⟨.toUint rfl hop h⟩
+    | .bool, .not, .bool => (a.srcL? l c .bool).map fun ⟨h⟩ => ⟨.not h⟩
+    | .num, .neg, .int => (a.srcL? l c .num).map fun ⟨h⟩ => ⟨.neg hop h⟩
+    | .num, .bnot, .uint => (a.srcL? l c .num).map fun ⟨h⟩ => ⟨.bnot hop h⟩
+    | .num, .toInt, .uint => (a.srcL? l c .num).map fun ⟨h⟩ => ⟨.toInt rfl hop h⟩
+    | .num, .toUint, .int => (a.srcL? l c .num).map fun ⟨h⟩ => ⟨.toUint rfl hop h⟩
     | _, _, _ => none
   | c, k, _, .app1 (.field h) q =>
     match k with
-    | .path => (q.src? c .path).map fun ⟨hq⟩ => ⟨.field h hq⟩
+    | .path => (q.srcL? l c .path).map fun ⟨hq⟩ => ⟨.field h hq⟩
     | _ => none
   | c, .path, _, .index .map q i => do
-    let ⟨hq⟩ ← q.src? c .path
-    let ⟨hk⟩ ← i.src? c .num
+    let ⟨hq⟩ ← q.srcL? l c .path
+    let ⟨hk⟩ ← i.srcL? l c .num
     return ⟨.key hq hk⟩
   | c, k, _, .app2 (.binop op (p := p) h) a b =>
     match k, op, p with
     | .num, .add, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.add h ha hb⟩
     | .num, .sub, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.sub h ha hb⟩
-    | .num, .mul, _ => LTm.mulSrc? h a b (a.src? c .num) (b.src? c .num)
+    | .num, .mul, _ => LTm.mulSrc? h a b (a.srcL? l c .num) (b.srcL? l c .num)
     | .num, .div, .uint =>
       match b with
       | .app0 (.lit v) =>
-        if hv : v.val = 0 then none else (a.src? c .num).map fun ⟨ha⟩ => ⟨.divL rfl h v hv ha⟩
+        if hv : v.val = 0 then none else (a.srcL? l c .num).map fun ⟨ha⟩ => ⟨.divL rfl h v hv ha⟩
       | _ => none
     | .num, .mod, .uint =>
       match b with
       | .app0 (.lit v) =>
-        if hv : v.val = 0 then none else (a.src? c .num).map fun ⟨ha⟩ => ⟨.modL rfl h v hv ha⟩
+        if hv : v.val = 0 then none else (a.srcL? l c .num).map fun ⟨ha⟩ => ⟨.modL rfl h v hv ha⟩
       | _ => none
     | .num, .shr, _ =>
       match b with
-      | .app0 (.lit v) => (a.src? c .num).map fun ⟨ha⟩ => ⟨.shrL rfl h v ha⟩
+      | .app0 (.lit v) => (a.srcL? l c .num).map fun ⟨ha⟩ => ⟨.shrL rfl h v ha⟩
       | _ => none
     | .num, .shl, .uint =>
       match b with
-      | .app0 (.lit v) => (a.src? c .num).map fun ⟨ha⟩ => ⟨.shlL rfl h v ha⟩
+      | .app0 (.lit v) => (a.srcL? l c .num).map fun ⟨ha⟩ => ⟨.shlL rfl h v ha⟩
       | _ => none
-    | .num, .band, .uint => LTm.bandSrc? h a b (a.src? c .num) (b.src? c .num)
+    | .num, .band, .uint => LTm.bandSrc? h a b (a.srcL? l c .num) (b.srcL? l c .num)
     | .num, .addW, .uint => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.addW rfl h ha hb⟩
     | .num, .subW, .uint => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.subW rfl h ha hb⟩
     | .bool, .and, .bool => do
-      let ⟨ha⟩ ← a.src? c .bool
-      let ⟨hb⟩ ← b.src? c .bool
+      let ⟨ha⟩ ← a.srcL? l c .bool
+      let ⟨hb⟩ ← b.srcL? l c .bool
       return ⟨.and ha hb⟩
     | .bool, .or, .bool => do
-      let ⟨ha⟩ ← a.src? c .bool
-      let ⟨hb⟩ ← b.src? c .bool
+      let ⟨ha⟩ ← a.srcL? l c .bool
+      let ⟨hb⟩ ← b.srcL? l c .bool
       return ⟨.or ha hb⟩
     | .bool, .eqB, .bool => do
-      let ⟨ha⟩ ← a.src? c .bool
-      let ⟨hb⟩ ← b.src? c .bool
+      let ⟨ha⟩ ← a.srcL? l c .bool
+      let ⟨hb⟩ ← b.srcL? l c .bool
       return ⟨.eqB ha hb⟩
     | .bool, .neB, .bool => do
-      let ⟨ha⟩ ← a.src? c .bool
-      let ⟨hb⟩ ← b.src? c .bool
+      let ⟨ha⟩ ← a.srcL? l c .bool
+      let ⟨hb⟩ ← b.srcL? l c .bool
       return ⟨.neB ha hb⟩
     | .bool, .eqB, .uint => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.eqN rfl ha hb⟩
     | .bool, .eqB, .int => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.eqN rfl ha hb⟩
     | .bool, .neB, .uint => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.neN rfl ha hb⟩
     | .bool, .neB, .int => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.neN rfl ha hb⟩
     | .bool, .lt, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.lt h ha hb⟩
     | .bool, .gt, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.gt h ha hb⟩
     | .bool, .le, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.le h ha hb⟩
     | .bool, .ge, _ => do
-      let ⟨ha⟩ ← a.src? c .num
-      let ⟨hb⟩ ← b.src? c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
       return ⟨.ge h ha hb⟩
     | _, _, _ => none
   | c, k, s, .seq (s' := s') d a =>
     match k, s', s with
     | .num, .val _, .val _ => do
-      let ⟨hd⟩ ← d.src? c .num
-      let ⟨ha⟩ ← a.src? c .num
+      let ⟨hd⟩ ← d.srcL? l c .num
+      let ⟨ha⟩ ← a.srcL? l c .num
       return ⟨.seq hd ha⟩
     | .bool, .val .bool, .val .bool => do
-      let ⟨hd⟩ ← d.src? c .bool
-      let ⟨ha⟩ ← a.src? c .bool
+      let ⟨hd⟩ ← d.srcL? l c .bool
+      let ⟨ha⟩ ← a.srcL? l c .bool
       return ⟨.seqB hd ha⟩
     | .bool, .val .uint, .val .bool => do
-      let ⟨hd⟩ ← d.src? c .num
-      let ⟨ha⟩ ← a.src? c .bool
+      let ⟨hd⟩ ← d.srcL? l c .num
+      let ⟨ha⟩ ← a.srcL? l c .bool
       return ⟨.seqN rfl hd ha⟩
     | .bool, .val .int, .val .bool => do
-      let ⟨hd⟩ ← d.src? c .num
-      let ⟨ha⟩ ← a.src? c .bool
+      let ⟨hd⟩ ← d.srcL? l c .num
+      let ⟨ha⟩ ← a.srcL? l c .bool
       return ⟨.seqN rfl hd ha⟩
     | _, _, _ => none
   | c, k, _, .kite (s := .val _) x y t e =>
     match c, k with
     | true, .num => do
-      let ⟨hx⟩ ← x.src? true .num
-      let ⟨hy⟩ ← y.src? true .num
-      let ⟨ht⟩ ← t.src? true .num
-      let ⟨he⟩ ← e.src? true .num
+      let ⟨hx⟩ ← x.srcL? l true .num
+      let ⟨hy⟩ ← y.srcL? l true .num
+      let ⟨ht⟩ ← t.srcL? l true .num
+      let ⟨he⟩ ← e.srcL? l true .num
       return ⟨.kite (k := .num) rfl (fun h => nomatch h) hx hy ht he⟩
     | true, .bool => do
-      let ⟨hx⟩ ← x.src? true .num
-      let ⟨hy⟩ ← y.src? true .num
-      let ⟨ht⟩ ← t.src? true .bool
-      let ⟨he⟩ ← e.src? true .bool
+      let ⟨hx⟩ ← x.srcL? l true .num
+      let ⟨hy⟩ ← y.srcL? l true .num
+      let ⟨ht⟩ ← t.srcL? l true .bool
+      let ⟨he⟩ ← e.srcL? l true .bool
       return ⟨.kite (k := .bool) rfl (fun h => nomatch h) hx hy ht he⟩
     | _, _ => none
   | c, k, _, .app3 .ite d t e =>
     match c, k with
     | true, .num => do
-      let ⟨hd⟩ ← d.src? true .bool
-      let ⟨ht⟩ ← t.src? true .num
-      let ⟨he⟩ ← e.src? true .num
+      let ⟨hd⟩ ← d.srcL? l true .bool
+      let ⟨ht⟩ ← t.srcL? l true .num
+      let ⟨he⟩ ← e.srcL? l true .num
       return ⟨.ite (k := .num) rfl (fun h => nomatch h) hd ht he⟩
     | true, .bool => do
-      let ⟨hd⟩ ← d.src? true .bool
-      let ⟨ht⟩ ← t.src? true .bool
-      let ⟨he⟩ ← e.src? true .bool
+      let ⟨hd⟩ ← d.srcL? l true .bool
+      let ⟨ht⟩ ← t.srcL? l true .bool
+      let ⟨he⟩ ← e.srcL? l true .bool
       return ⟨.ite (k := .bool) rfl (fun h => nomatch h) hd ht he⟩
     | _, _ => none
+  -- KeY `int` nodes, under a variable symbol so that the cases above do not
+  -- discriminate on the sort.
+  | c, k, s, .app1 (a := u) o x =>
+    match u, s, o, x, k with
+    | _, _, .toInt, x, .znum => (x.srcL? l c .num).map fun ⟨h⟩ => ⟨.zint h⟩
+    | _, _, .net, x, .znum =>
+      if hl : l = .pre then (x.srcL? l c .num).map fun ⟨h⟩ => ⟨.znet hl h⟩ else none
+    | _, _, _, _, _ => none
+  | c, k, s, .app2 (a := u) (b := v) o x y =>
+    match u, v, s, o, x, y, k with
+    | _, _, _, .zbin .add h, x, y, .znum => do
+      let ⟨ha⟩ ← x.srcL? l c .znum
+      let ⟨hb⟩ ← y.srcL? l c .znum
+      return ⟨.zadd h ha hb⟩
+    | _, _, _, .zbin .sub h, x, y, .znum => do
+      let ⟨ha⟩ ← x.srcL? l c .znum
+      let ⟨hb⟩ ← y.srcL? l c .znum
+      return ⟨.zsub h ha hb⟩
+    | _, _, _, .zbin .mul h, x, y, .znum => LTm.zmulSrc? h x y (x.srcL? l c .znum) (y.srcL? l c .znum)
+    | _, _, _, .zcmp op h, x, y, .bool => do
+      let ⟨ha⟩ ← x.srcL? l c .znum
+      let ⟨hb⟩ ← y.srcL? l c .znum
+      return ⟨.zcmp op h ha hb⟩
+    | _, _, _, _, _, _, _ => none
   | _, _, _, _ => none
 
+/-- The recognizer of the fragment without ledger reads. -/
+abbrev LTm.src? (c : Bool) (k : SrcKind) {s : Srt} (t : LTm C s) : Option (PLift (t.Src c true k)) :=
+  t.srcL? .none c k
+
 /-- The source leaf, recognized with its evidence. -/
-def LFml.src? (c : Bool) : (φ : LFml C) → Option (PLift (φ.Src c true))
+def LFml.srcL? (l : LedgerMode) (c : Bool) : (φ : LFml C) → Option (PLift (φ.SrcL c true l))
   | .tt => some ⟨.tt⟩
   | @LFml.eq _ .bool a b => do
-    let ⟨ha⟩ ← a.src? c .bool
-    let ⟨hb⟩ ← b.src? c .bool
+    let ⟨ha⟩ ← a.srcL? l c .bool
+    let ⟨hb⟩ ← b.srcL? l c .bool
     return ⟨.eqB ha hb⟩
   | @LFml.eq _ .uint a b => do
-    let ⟨ha⟩ ← a.src? c .num
-    let ⟨hb⟩ ← b.src? c .num
+    let ⟨ha⟩ ← a.srcL? l c .num
+    let ⟨hb⟩ ← b.srcL? l c .num
     return ⟨.eqN rfl ha hb⟩
   | @LFml.eq _ .int a b => do
-    let ⟨ha⟩ ← a.src? c .num
-    let ⟨hb⟩ ← b.src? c .num
+    let ⟨ha⟩ ← a.srcL? l c .num
+    let ⟨hb⟩ ← b.srcL? l c .num
     return ⟨.eqN rfl ha hb⟩
-  | .not φ => (φ.src? c).map fun ⟨h⟩ => ⟨.not h⟩
+  | .not φ => (φ.srcL? l c).map fun ⟨h⟩ => ⟨.not h⟩
   | .and φ ψ => do
-    let ⟨h1⟩ ← φ.src? c
-    let ⟨h2⟩ ← ψ.src? c
+    let ⟨h1⟩ ← φ.srcL? l c
+    let ⟨h2⟩ ← ψ.srcL? l c
     return ⟨.and h1 h2⟩
   | .imp φ ψ => do
-    let ⟨h1⟩ ← φ.src? c
-    let ⟨h2⟩ ← ψ.src? c
+    let ⟨h1⟩ ← φ.srcL? l c
+    let ⟨h2⟩ ← ψ.srcL? l c
     return ⟨.imp h1 h2⟩
   | .all .. => none
 
+/-- The source leaf without ledger reads, recognized. -/
+abbrev LFml.src? (c : Bool) (φ : LFml C) : Option (PLift (φ.Src c true)) := φ.srcL? .none c
+
 /-- **The recognizer is complete**: it accepts every term of the fragment,
 and a scalar at `bool` as a Boolean. -/
-theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false true k →
-    (t.src? false k).isSome = true ∧
-      (k = .num → (hs : s = .val .bool) → ((hs ▸ t : LTm C (.val .bool)).src? false .bool).isSome = true) := by
+theorem LTm.srcL?_complete (hpost : l ≠ .post) : ∀ {k : SrcKind} {s : Srt} {t : LTm C s},
+    t.SrcL false true l k →
+    (t.srcL? l false k).isSome = true ∧
+      (k = .num → (hs : s = .val .bool) → ((hs ▸ t : LTm C (.val .bool)).srcL? l false .bool).isSome = true) := by
   intro k s t h
   induction h with
+  | znetLit hl | zseq hl => exact absurd hl hpost
+  | @znet hl a _ ih =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show (if hl' : l = .pre then ((LTm.srcL? l false .num a).map _) else none).isSome = true
+    rw [dif_pos hl, hx]
+    rfl
   | var i => exact ⟨rfl, fun _ hs => by cases hs; rfl⟩
   | @lit p v => exact ⟨by cases p <;> rfl, fun _ hs => by cases hs; rfl⟩
   | env e => exact ⟨rfl, fun _ hs => by cases hs⟩
@@ -312,9 +381,9 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
       obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
       rw [hxb]
       rfl
     · intro _ hs
@@ -327,9 +396,9 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
       obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
       rw [hxb]
       rfl
     · intro _ hs
@@ -358,9 +427,9 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp ihd.1
       obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp iha.1
-      show (Option.bind (LTm.src? false .num d) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num d) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxb]
       rfl
     · intro _ hs
@@ -369,60 +438,96 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
       | bool =>
         obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (ihd.2 rfl rfl)
         obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (iha.2 rfl rfl)
-        show (Option.bind (LTm.src? false .bool d) _).isSome = true
+        show (Option.bind (LTm.srcL? l false .bool d) _).isSome = true
         rw [hxa]
-        show (Option.bind (LTm.src? false .bool a) _).isSome = true
+        show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
         rw [hxb]
         rfl
       | uint | int =>
         obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp ihd.1
         obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (iha.2 rfl rfl)
-        show (Option.bind (LTm.src? false .num d) _).isSome = true
+        show (Option.bind (LTm.srcL? l false .num d) _).isSome = true
         rw [hxa]
-        show (Option.bind (LTm.src? false .bool a) _).isSome = true
+        show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
         rw [hxb]
         rfl
   | @word p q _ ih =>
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-      show ((LTm.src? false .path q).map _).isSome = true
+      show ((LTm.srcL? l false .path q).map _).isSome = true
       rw [hx]
       rfl
     · intro _ hs
       cases hs
       obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-      show ((LTm.src? false .path q).map _).isSome = true
+      show ((LTm.srcL? l false .path q).map _).isSome = true
       rw [hx]
       rfl
   | ofNum _ ih => exact ⟨ih.2 rfl rfl, fun hk => by cases hk⟩
+  | zlit n => exact ⟨rfl, fun hk => by cases hk⟩
+  | @zint a _ ih =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show ((LTm.srcL? l false .num a).map _).isSome = true
+    rw [hx]
+    rfl
+  | @zadd h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.srcL? l false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.srcL? l false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zsub h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.srcL? l false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.srcL? l false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zcmp op h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.srcL? l false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.srcL? l false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zmulL h n b _ ihb => exact ⟨LTm.zmulSrc?_left h n b _ _ ihb.1, fun hk => by cases hk⟩
+  | @zmulR h a n _ iha => exact ⟨LTm.zmulSrc?_right h a n _ _ iha.1 rfl, fun hk => by cases hk⟩
   | @not a _ ih =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-    show ((LTm.src? false .bool a).map _).isSome = true
+    show ((LTm.srcL? l false .bool a).map _).isSome = true
     rw [hx]
     rfl
   | @neg h a _ ih | @bnot h a _ ih | @toInt _ h a _ ih | @toUint _ h a _ ih =>
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-    show ((LTm.src? false .num a).map _).isSome = true
+    show ((LTm.srcL? l false .num a).map _).isSome = true
     rw [hx]
     rfl
   | @divL _ h a v hv _ ih | @modL _ h a v hv _ ih =>
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-    show (if hv' : v.val = 0 then none else (LTm.src? false .num a).map _).isSome = true
+    show (if hv' : v.val = 0 then none else (LTm.srcL? l false .num a).map _).isSome = true
     rw [dif_neg hv, hx]
     rfl
   | @shlL _ h a v _ ih =>
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-    show ((LTm.src? false .num a).map _).isSome = true
+    show ((LTm.srcL? l false .num a).map _).isSome = true
     rw [hx]
     rfl
   | @shrL _ p h a v _ ih =>
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-      show ((LTm.src? false .num a).map _).isSome = true
+      show ((LTm.srcL? l false .num a).map _).isSome = true
       rw [hx]
       rfl
     · intro _ hs
@@ -434,14 +539,14 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
   | @bandR _ h a v hm _ iha =>
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
-    show (LTm.bandSrc? h a (.app0 (.lit v)) (LTm.src? false .num a) _).isSome = true
+    show (LTm.bandSrc? h a (.app0 (.lit v)) (LTm.srcL? l false .num a) _).isSome = true
     unfold LTm.bandSrc?
     dsimp only [LTm.lit?]
     rw [dif_pos hm, hxa]
     rfl
   | @bandL _ h v hm b _ ihb =>
     refine ⟨?_, fun _ hs => by cases hs⟩
-    show (LTm.bandSrc? h (.app0 (.lit v)) b _ (LTm.src? false .num b)).isSome = true
+    show (LTm.bandSrc? h (.app0 (.lit v)) b _ (LTm.srcL? l false .num b)).isSome = true
     unfold LTm.bandSrc?
     split
     · rename_i w hw _
@@ -454,45 +559,45 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     refine ⟨?_, fun _ hs => by cases hs⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | @and a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @or a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @eqB a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @neB a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @eqN p hp a b _ _ iha ihb =>
@@ -502,9 +607,9 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     cases p with
     | bool => cases hp
     | uint | int =>
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
       rw [hxb]
       rfl
   | @neN p hp a b _ _ iha ihb =>
@@ -514,54 +619,54 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     cases p with
     | bool => cases hp
     | uint | int =>
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
       rw [hxb]
       rfl
   | @lt p h a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | @gt p h a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | @le p h a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | @ge p h a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .num a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | @seqB a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @seqN q hq a b _ _ iha ihb =>
@@ -571,68 +676,77 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
     cases q with
     | bool => cases hq
     | uint | int =>
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .bool b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
       rw [hxb]
       rfl
   | root r h => exact ⟨rfl, fun hk => by cases hk⟩
   | @field sn f T h q _ ih =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
-    show ((LTm.src? false .path q).map _).isSome = true
+    show ((LTm.srcL? l false .path q).map _).isSome = true
     rw [hx]
     rfl
   | @key K V a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
-    show (Option.bind (LTm.src? false .path a) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .path a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .num b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
     rw [hxb]
     rfl
   | kite hc => cases hc
   | ite hc => cases hc
 
-theorem LFml.src?_complete : ∀ {φ : LFml C}, φ.Src false true → (φ.src? false).isSome = true := by
+theorem LFml.srcL?_complete (hpost : l ≠ .post) : ∀ {φ : LFml C}, φ.SrcL false true l →
+    (φ.srcL? l false).isSome = true := by
   intro φ h
   induction h with
   | tt => rfl
   | defDiv hw | defShr hw | defAddW hw | defSubW hw | defToInt hw | defToUint hw => cases hw
   | @eqB a b ha hb =>
-    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete ha).1
-    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete hb).1
-    show (Option.bind (LTm.src? false .bool a) _).isSome = true
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (LTm.srcL?_complete hpost ha).1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (LTm.srcL?_complete hpost hb).1
+    show (Option.bind (LTm.srcL? l false .bool a) _).isSome = true
     rw [hxa]
-    show (Option.bind (LTm.src? false .bool b) _).isSome = true
+    show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
   | @eqN p hp a b ha hb =>
-    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete ha).1
-    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (LTm.src?_complete hb).1
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp (LTm.srcL?_complete hpost ha).1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp (LTm.srcL?_complete hpost hb).1
     cases p with
     | bool => cases hp
     | uint | int =>
-      show (Option.bind (LTm.src? false .num a) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
       rw [hxa]
-      show (Option.bind (LTm.src? false .num b) _).isSome = true
+      show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
       rw [hxb]
       rfl
   | @not φ _ ih =>
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih
-    show ((LFml.src? false φ).map _).isSome = true
+    show ((LFml.srcL? l false φ).map _).isSome = true
     rw [hx]
     rfl
   | @and φ ψ _ _ ih1 ih2 | @imp φ ψ _ _ ih1 ih2 =>
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp ih1
     obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ih2
-    show (Option.bind (LFml.src? false φ) _).isSome = true
+    show (Option.bind (LFml.srcL? l false φ) _).isSome = true
     rw [hxa]
-    show (Option.bind (LFml.src? false ψ) _).isSome = true
+    show (Option.bind (LFml.srcL? l false ψ) _).isSome = true
     rw [hxb]
     rfl
 
+
+theorem LTm.src?_complete {k : SrcKind} {s : Srt} {t : LTm C s} (h : t.Src false true k) :
+    (t.src? false k).isSome = true ∧
+      (k = .num → (hs : s = .val .bool) → ((hs ▸ t : LTm C (.val .bool)).src? false .bool).isSome = true) :=
+  LTm.srcL?_complete (by decide) h
+
+theorem LFml.src?_complete {φ : LFml C} (h : φ.Src false true) : (φ.src? false).isSome = true :=
+  LFml.srcL?_complete (by decide) h
 
 /-! ## The universal prefix -/
 
