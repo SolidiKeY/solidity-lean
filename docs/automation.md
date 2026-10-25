@@ -560,7 +560,8 @@ checked by the kernel, nothing trusted:
   dynamic-array root whose element default is well-formed at `2^255` and
   `2^256 - 1` elements (`longCands`), the formula's parameters at their
   defaults, and ask the kernel for `¬ ⊨ᶠ φ` of a formula
-  `wt(storage) → ψ` directly (`certifyLong`; the kernel check is bounded
+  `wt(storage) → ψ` directly (`certifyLong`, at the default `maxRecDepth`
+  since M8's A3; the kernel check is bounded
   by its own heartbeats, the elaboration that builds it only by the
   declaration's): no compiled evaluator can hold such a storage.  The
   certificate for `invariantClosedFormSum` checks in about 0.1 s; the
@@ -1509,6 +1510,48 @@ leaves (the compiled closer finds them first).  Left as minor: the
 `affine` reader misses `Int.negSucc` literals (the interval step then
 records nothing), and the docstrings of the split's congruence lemmas
 carry no Solidity.
+
+### A3 · The recursion depth of two kernel checks
+
+* `certifyLong` (`Tools/Counterexample.lean`) raised `maxRecDepth` to
+  100 000, which can crash a worker: the elaborator's `apply` of
+  `Fml.not_holds_imp_of_eval3` unified `holds σ' (pre → body)` with the
+  peeled obligation, unfolding the whole formula, and on the TestSuite's
+  `invariantClosedFormSum` passed the default depth (512) at that step
+  (a scratch copy without the override failed there for every long-array
+  candidate).  The certificate is now built with its arguments written:
+  the peeled state and formula read by the kernel (`kernelWhnf?`, a
+  `Kernel.whnf`, which reads no `maxRecDepth`: it is bounded by the stack,
+  and by no heartbeats, a weak-head reduction down the parameters'
+  binders), the premise checked to be
+  `wt(storage)` on that small term, and the rest, `¬ holds (peel …)`
+  against the term built, left to the kernel's check of the declaration,
+  as before.  No override is left; `invariantClosedFormSum` is refuted as
+  before (`TestSuite/Refuted.lean`, 10 s before, 9.5 s after), and so are
+  `Examples/Tactics/SymbolicCounterexample.lean`'s.
+* `Evm/Examples.lean`'s `pow_run` set `maxRecDepth 100000` for one
+  `decide +kernel` on a conjunction of four runs; each conjunct is decided
+  on its own now (`refine ⟨?_, ?_, ?_, ?_⟩ <;> decide +kernel`) at the
+  default depth, the statement unchanged (31 s before, 30 s after).
+
+Neither needed the chunking `Calculus/ProveChunked.lean` does for walks:
+the depth was the elaborator's on one term, not a long derivation.  The only
+`maxRecDepth` settings left under `Solidity/` are `ProveChunked`'s and
+`Derive`'s per-step contexts and the generated `Corpus/TestSuite.lean`'s
+575.
+
+### A3 review (2026-10-25)
+
+A read-only finder and skeptic (neither ran Lean).  No correctness
+finding: the explicit arguments match the declarations, the peeled
+`Sigma.mk`/`Prod.mk`/`Fml.imp` are built literally by `Fml.peel`'s minor
+premises, and a shape test that stopped matching would fail
+`TestSuite/Refuted.lean` and `SymbolicCounterexample.lean`, which call
+`sol_refute` on long arrays.  Confirmed and fixed (wording):
+`Kernel.whnf` reads no `maxRecDepth` but is bounded by the stack, not by
+heartbeats; `pow_run`'s depth was the elaborator's, not the unifier's;
+this section's place and a bullet's indent.  Minor, left: `certifyLong`
+reads `Γ` off the formula's type, always `[]`.
 
 ### A0 review (2026-10-25)
 

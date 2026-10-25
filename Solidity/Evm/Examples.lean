@@ -327,13 +327,14 @@ theorem pushLimit_run :
       = true := by
   decide +kernel
 
-set_option maxRecDepth 100000 in
+-- one `decide +kernel` a conjunct: deciding the conjunction whole needs more
+-- than the default `maxRecDepth`
 theorem pow_run :
     slotAfter sol{ total = 3 ** 5; } (.root 0) = some 243 ∧
     slotAfter sol{ total = 0 ** 0; } (.root 0) = some 1 ∧
     slotAfter sol{ total = 2 ** 255; } (.root 0) = some (2 ^ 255) ∧
     reverts sol{ total = 2 ** 256; } = true := by
-  decide +kernel
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> decide +kernel
 
 theorem pow_wt : compiles (sol{ total = 3 ** 5; } : Solidity.Prog StandardExample [] _) := by
   decide +kernel

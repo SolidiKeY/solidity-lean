@@ -1288,36 +1288,54 @@ def dfltVals (φ : Fml C []) : List (Var × Semantics.CallValue) :=
     | .uint => .uint (PrimTy.dflt .uint)
     | .int => .int (PrimTy.dflt .int))
 
+/-- The weak head normal form of `e` by the kernel, which reads no
+`maxRecDepth` (the elaborator's unifier unfolding a peeled formula passes
+it): bounded by the stack, and by no heartbeats, so only for a reduction
+as short as one down a formula's leading binders; `none` where it fails. -/
+def kernelWhnf? (e : Expr) : MetaM (Option Expr) := do
+  match Kernel.whnf (← getEnv) (← getLCtx) e with
+  | .ok r => return some r
+  | .error _ => return none
+
 /-- **The certificate of a long-array candidate**: `¬ ⊨ᶠ φ` for `φ`, its
 leading parameters bound to `vals`, of the shape `wt(storage) → ψ`, from the
 candidate's typed state: the premise by `holds_wt_of`, `ψ` evaluated to
-`ff` (`Fml.not_holds_imp_of_eval3`).  `none` when the formula is not of
-that shape or the kernel does not check it within `heartbeats`. -/
+`ff` (`Fml.not_holds_imp_of_eval3`).  The peeled formula is read by the
+kernel (`kernelWhnf?`) and the proof built with its arguments written, so
+nothing is unified at the formula's depth: the default `maxRecDepth`
+suffices.  `none` when the formula is not of that shape or the kernel does
+not check it within `heartbeats`. -/
 def certifyLong (cE φE : Expr) (vals : List (Var × Semantics.CallValue)) (lc : LongCand)
     (heartbeats : Nat := 100000) : MetaM (Option Expr) := do
   let C ← unsafe evalExpr Contract (mkConst ``Contract) cE
   let saved ← saveState
-  let result ← tryCatchRuntimeEx (withCurrHeartbeats <| withTheReader Core.Context
-      (fun ctx => { ctx with maxRecDepth := max ctx.maxRecDepth 100000 }) do
+  let result ← tryCatchRuntimeEx (withCurrHeartbeats do
     let some stE := replaceMember ((Storage.init C).fold quoteFold) lc.k (lazyArray lc.E lc.n)
       | return none
     let c0 : Cand C := { st := Storage.init C, args := [] }
     let σE := mkApp2 (mkConst ``Cand.tstate) cE (c0.quoteWith cE stE)
     let domE := mkApp (mkConst ``poolDom) (toExpr ([] : List Int))
     let type := mkNot (← mkAppM ``Fml.Valid #[φE])
-    let goal ← mkFreshExprMVar type
-    let peel ← mkAppM ``Fml.not_valid_of_peel #[toExpr vals, σE]
-    let [failure] ← goal.mvarId!.apply peel | return none
-    let rule := mkApp2 (mkConst ``Fml.not_holds_imp_of_eval3) cE domE
-    let [pre, body] ← failure.apply rule | return none
-    let preTy ← instantiateMVars (← pre.getType)
-    let_expr holds _ Γ σ' φpre := preTy | return none
-    unless ← isDefEq φpre (mkAppN (mkConst ``Fml.wt) #[cE, Γ]) do return none
+    let ΓE := (← whnfR (← inferType φE)).appArg!
+    let valsE := toExpr vals
+    -- the peeled state and formula, `⟨Δ, σ', pre → body⟩`, by the kernel
+    let some pk ← kernelWhnf? (mkAppN (mkConst ``Fml.peel) #[cE, valsE, ΓE, σE, φE]) | return none
+    unless pk.isAppOfArity ``Sigma.mk 4 do return none
+    let Δ := pk.getArg! 2
+    let some pr ← kernelWhnf? (pk.getArg! 3) | return none
+    unless pr.isAppOfArity ``Prod.mk 4 do return none
+    let σ' := pr.getArg! 2
+    let some ψ ← kernelWhnf? (pr.getArg! 3) | return none
+    unless ψ.isAppOfArity ``Fml.imp 4 do return none
+    let (pre, body) := (ψ.getArg! 2, ψ.getArg! 3)
+    unless ← isDefEq pre (mkAppN (mkConst ``Fml.wt) #[cE, Δ]) do return none
     let h1 ← proveMembersAllB (mkConst ``canonHB) stE
     let h2 ← proveMembersAllB (mkConst ``tightHB) stE
-    pre.assign (mkAppN (mkConst ``holds_wt_of) #[cE, Γ, σ', h1, h2])
-    body.assign (← mkDecideProof (← body.getType))
-    let value ← instantiateMVars goal
+    let hp := mkAppN (mkConst ``holds_wt_of) #[cE, Δ, σ', h1, h2]
+    let ev := mkAppN (mkConst ``Fml.eval3) #[cE, domE, Δ, σ', body]
+    let hb ← mkDecideProof (← mkEq ev (mkConst ``Tri.ff))
+    let h := mkAppN (mkConst ``Fml.not_holds_imp_of_eval3) #[cE, domE, Δ, σ', pre, body, hp, hb]
+    let value := mkAppN (mkConst ``Fml.not_valid_of_peel) #[cE, valsE, σE, φE, h]
     if value.hasSorry || value.hasMVar then return none
     let decl := Declaration.thmDecl {
       name := `_counterexample_long_certificate, levelParams := [], type, value }
