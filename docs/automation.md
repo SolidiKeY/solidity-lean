@@ -1425,7 +1425,8 @@ feature 9: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
 (`netSame`), a ledger entry against a storage read and past a write,
 proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
 `net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
-For feature 10, over `Names` of `Examples/Tactics/Hashing.lean` §3
+For feature 10, `Examples/DecisionHashes.lean` pins, over `Names` of
+`Examples/Tactics/Hashing.lean` §3
 (`mapping(string => uint) ids`, keyed by `keccak256`): `namesSet`, the leaf
 `∀ s t. keccak256(s) != keccak256(t) → ids[s] == 0 → {ids[t] := 1}
 ids[s] == 0` (`[ ids[t] = 1; ]` past the program; `s ≠ t` as their hashes,
