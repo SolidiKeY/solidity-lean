@@ -201,6 +201,12 @@ def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → 
 def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
 def rowOut : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][12] == 0 }
 def rowVar : Fml Allow [] := dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[x][k] == 0) → allow[x][5] == 0 }
+/-- A key the solver places past `2^200`: refuted by a rebuilt mapping of a
+dozen entries, the keys between the guard's bound and the key read at the
+key (`lastIn`, `lastBound`), not `2^200` entries. -/
+def rowFar : Fml Allow [] :=
+  dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[3][k] == 0) →
+    x > 1606938044258990275541962092341162602522202993782792835301376 → allow[3][x] == 0 }
 /-- Outside the named fragment: two bound indices on one path, and a
 strict comparison of two bound variables. -/
 def gridApf : Fml Allow [] := dl!{ (∀ uint i; ∀ uint j; allow[i][j] == 0) → allow[1][2] == 0 }
@@ -373,6 +379,26 @@ theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 
 theorem rowApf_covered : rowApf.Covered = true := by decide +kernel
 theorem rowBad_covered : rowBad.Covered = true := by decide +kernel
+
+/-- The entries of `allow`'s rows in a state: the outer keys', each row's. -/
+def allowRows (σ : State Allow []) : List Nat :=
+  match σ.storage.get (f := "allow") (T := .ref (.mapping .uint (.ref (.mapping .uint (.prim .uint))))) rfl with
+  | .map m d => (m.toList.map fun e => match e.2 with | .map m' _ => m'.toList.length) ++
+      [match d with | .map m' _ => m'.toList.length]
+
+/-- info: ("refuted", true, true) -/
+#guard_msgs in #eval (verdict rowFar, rowFar.Covered, rowFar.inTarget {})
+
+/-! The refutation's `allow`: the row it reads (`3`) and the default row,
+twelve entries each (keys `0` to `11`: the guard's bound and its successor;
+past them the default, the far key's word), where the floor construction
+listed `2^200` keys. -/
+
+/-- info: some [12, 12] -/
+#guard_msgs in #eval match decideGoal rowFar with | .refuted σ => some (allowRows σ) | _ => none
+
+/-- The far key's leaf, by the kernel. -/
+theorem rowFar_covered : rowFar.Covered = true := by decide +kernel
 
 /-- `decideGoal_complete`, applied to a block over an inner mapping. -/
 theorem rowApf_answers : decideGoal rowApf ≠ .unknown := decideGoal_complete rowApf_covered rfl
