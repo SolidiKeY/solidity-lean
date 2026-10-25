@@ -455,7 +455,10 @@ partial def trLoop (c : Ctx) (e : TSyntax `solExpr) (invs : Array (TSyntax `solI
   let (_, bi) ← trStmt c body
   let bi := bi ++ step ++ gs
   let bi ← if bi.isEmpty then pure #[← pureUnit] else pure bi
-  let loop ← `(Lean.Parser.Term.doSeqItem| while $t $[invariant $invs]* do $bi*)
+  -- Velvet's clause ends at a line break (`linebreak`), so the quotation has one.
+  let invs ← invs.mapM fun i => `(invariantClause| invariant $i
+    )
+  let loop ← `(Lean.Parser.Term.doSeqItem| while $t $invs:invariantClause* do $bi*)
   return (c, gs.push loop)
 
 partial def trStmts (c : Ctx) (ss : Array (TSyntax `solStmt)) : CommandElabM (Ctx × Array Item) := do
