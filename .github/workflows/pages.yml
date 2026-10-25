@@ -28,10 +28,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      # The core and solkey's test suite (`SolkeyTestSuite`), whose import,
+      # report and proofs are examples too.
       - name: Build
         uses: leanprover/lean-action@v1
         with:
-          build-args: "Solidity"
+          build-args: "Solidity SolkeyTestSuite"
           use-mathlib-cache: "false"
           test: "false"
           lint: "false"

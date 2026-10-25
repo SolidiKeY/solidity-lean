@@ -31,6 +31,22 @@ every function proved by Velvet's `loom_solve`:
 - [Loops over storage arrays](https://solidikey.github.io/solidity-lean/#project=Velvet&file=SolidityVelvet/Loops.lean) — the
   total balance, a holder's index, the winning proposal
 
+solkey's test suite is here too: its
+[`TestSuite.sol`](tests/migration/solkey/keyext.solidity.examples/TestSuite.sol)
+(617 functions, from solkey
+[`473da8944c`](https://github.com/SolidiKeY/solkey/blob/473da8944ca7329e6b76819863591407db26e7ec/keyext.solidity.examples/TestSuite.sol)),
+imported from solc's AST, with an obligation per public function and a
+theorem per obligation (`lake build SolkeyTestSuite`):
+
+- [The import](https://solidikey.github.io/solidity-lean/#project=Solidity&file=Solidity/Solkey/TestSuite.lean) — what
+  was elaborated, skipped and excluded, and why
+- [The report](https://solidikey.github.io/solidity-lean/#project=Solidity&file=Solidity/TestSuite/Report.lean) — every
+  function derived, refuted or not an obligation (552 derived of 617)
+- [Derived obligations](https://solidikey.github.io/solidity-lean/#project=Solidity&file=Solidity/TestSuite/Derived1.lean) — the
+  first of the proofs, each by `sol_prove`
+- [Refuted obligations](https://solidikey.github.io/solidity-lean/#project=Solidity&file=Solidity/TestSuite/Refuted.lean) — the
+  false ones, each with a certified counterexample (`sol_refute`)
+
 ## Build
 
 ```sh

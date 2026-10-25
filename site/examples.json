@@ -32,7 +32,11 @@
         { "group": "Proofs", "file": "Solidity/Examples/Chains/Arithmetic.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Chains/Payment.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/ProofTree.lean" },
-        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" }
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/Solkey/TestSuite.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Report.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Derived1.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Refuted.lean", "title": "solkey's TestSuite, refuted" }
       ]
     },
     {

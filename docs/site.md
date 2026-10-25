@@ -18,7 +18,8 @@ it in an editor (the page's About box has the commands).
 `.github/workflows/pages.yml` runs on every push to the default branch, and
 by hand (`workflow_dispatch`) on any branch:
 
-1. **Build** the project's libraries: `lake build Solidity` in the root, or
+1. **Build** the project's libraries: `lake build Solidity SolkeyTestSuite`
+   in the root (the core and solkey's test suite), or
    `lake build Velvet VelvetExamples SolidityVelvet` in `Bridge/` (Mathlib
    from its cache). The two projects are separate jobs.
 2. **Record** with `node scripts/site/export.mjs --project <id> --out _site`.
@@ -46,8 +47,8 @@ stand-in language server, without Lean; `lean.yml` runs it.
 
 Add a row to `site/examples.json` under its project: the `file` relative to
 the project's `root`, and a `group` for the picker. The file must be built by
-the project's step 1 (for the core, imported from `Solidity.lean`, as every
-example already is). The title and summary come from the file's module
+the project's step 1 (for the core, imported from `Solidity.lean` or
+`SolkeyTestSuite.lean`). The title and summary come from the file's module
 docstring; give `title` in the row for a file without one. A long file costs
 its elaboration time again in the site's build, plus one or two goal requests
 per line.
