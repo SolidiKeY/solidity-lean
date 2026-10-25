@@ -29,11 +29,25 @@ hash terms are free of collisions (`Fml.HashFree`, `Fml.holdsH`,
 per scope, each binder's instance under its own.  In the fragment a hash
 term stands where that premise settles it: against a hash of its kind
 (`==`, `!=`), or as the key of a mapping at a root whose keys are all
-hashes (`Fml.inTarget`); `ecrecover` stands nowhere.
+hashes (`Fml.inTarget`); `ecrecover` stands nowhere, and neither does a
+hash under a hidden memory binder or an anonymising update (an unset
+reference hashes to nothing, a key of nothing reads the default key `0`:
+a preimage question) or a hash key of anything but a memory local.
+
+A leaf with hashes (`decideHash`, plan step 7) is decided where its memory
+locals are fresh byte strings read only by hashes of one kind: read with
+each string the word its hash returns (`Fml.swPrefix`,
+`Calculus/HashSwap.lean`), valid whatever the hash
+(`Fml.swPrefix_validH`); refuted by choosing the strings, a class of equal
+strings at a time, from a family whose hashes are distinct
+(`Fml.swInst`, `Fml.swInst_refutes`, `Calculus/HashReduction.lean`), which
+meets the premise; exact on the fragment `Fml.hashCovered`
+(`Fml.swPrefix_exact`, `Calculus/HashComplete.lean`, through the
+relabeling of `Calculus/HashRelabel.lean`).
 
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
-without a hash).  The statement is the goal of the rounds to come, not true
+without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean`'s `rowApf` (a block over an inner mapping)
 is in the fragment and answered `unknown`.  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
@@ -50,7 +64,8 @@ prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 (`hoistPrep_valid_iff`), negative array-property blocks over mappings at
 roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
-`decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
+`decideGoal_complete` on covered leaves without a hash,
+`decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)
 excludes; on program-free leaves the inclusion `Fml.Covered ⊆
 Fml.inTarget` is not proved (`Fml.Covered` is read on the eliminated leaf,
@@ -63,8 +78,9 @@ negative-position block must be quantifier-free, and an index guard is an
 variables) of index terms, a bound variable or a term mentioning none; a
 path indexes at most one bound variable (no `m[i][j]` with both bound, as
 Bradley, Manna and Sipma state their result for one dimension); a hash
-stored by an update, a hash key of a nested mapping and an `ecrecover` term
-are outside.  So
+stored by an update, a hash key of a nested mapping or of anything but a
+memory local, a hash under a hidden memory binder or an anonymising update,
+and an `ecrecover` term are outside.  So
 `Fml.inTarget` is a subset of the fragment the user named, never a
 superset.
 -/
