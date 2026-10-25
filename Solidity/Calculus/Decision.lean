@@ -369,18 +369,15 @@ theorem decideHashK_complete {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C 
 /-- A refutation of the leaf with two kinds at the classes `cs`: the
 instance with the second kind's words fixed (`Fml.tk`), refuted by
 `decideLeaf`. -/
-def refuteAt2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) (φ : Fml C [])
-    (cs : List Nat) : Option (HashRefutation φ) :=
+def refuteAt2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) (φ φF : Fml C [])
+    (he : φ.tk k₁ k₂ true = some φF) (cs : List Nat) : Option (HashRefutation φ) :=
   if hcs : ∀ j ∈ cs, j < famBound then
-    match he : φ.tk k₁ k₂ true with
+    match hi : φF.swInst k₁ cs with
     | none => none
-    | some φF =>
-      match hi : φF.swInst k₁ cs with
-      | none => none
-      | some inst =>
-        match hd : decideLeaf inst with
-        | .refuted σ => some ⟨σ.noHeap, Fml.tk_refutes hk₁ hk₂ he hi hcs (decideLeaf_refutes hd)⟩
-        | _ => none
+    | some inst =>
+      match hd : decideLeaf inst with
+      | .refuted σ => some ⟨σ.noHeap, Fml.tk_refutes hk₁ hk₂ he hi hcs (decideLeaf_refutes hd)⟩
+      | _ => none
   else none
 
 /-- **A leaf with strings hashed by two kinds** (`k₁`, `k₂`): the second
@@ -398,9 +395,12 @@ def decideHash2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k�
       match decideLeaf φ₂' with
       | .proved => .proved
       | _ =>
-        match (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ) with
-        | some r => .refuted r.state
+        match he : φ.tk k₁ k₂ true with
         | none => .unknown
+        | some φF =>
+          match (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ φF he) with
+          | some r => .refuted r.state
+          | none => .unknown
 
 theorem decideHash2_sound {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
     {φ : Fml C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .proved) : Fml.ValidH φ := by
@@ -414,7 +414,9 @@ theorem decideHash2_sound {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {
       split at h
       · rename_i hd
         exact Fml.tk_validH hk₁ hk₂ e₂ (Fml.swPrefix_validH e' (decideLeaf_sound hd))
-      · split at h <;> cases h
+      · split at h
+        · cases h
+        · split at h <;> cases h
 
 theorem decideHash2_refutes {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
     {φ : Fml C []} {σ : State C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .refuted σ) :
@@ -427,10 +429,12 @@ theorem decideHash2_refutes {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover}
     · split at h
       · cases h
       · split at h
-        · rename_i r _
-          cases h
-          exact r.refutes
         · cases h
+        · split at h
+          · rename_i r _
+            cases h
+            exact r.refutes
+          · cases h
 
 /-- One way of deciding a leaf with hashes, with its fragment. -/
 structure HashTry (C : Contract) where
@@ -485,11 +489,14 @@ def _root_.Solidity.Fml.coveredK2 (k₁ k₂ : HashKind) (φ : Fml C []) : Bool 
     match φ₂.swPrefix k₁ with
     | none => false
     | some φ₂' =>
-      let V := φ₂.allocLevels
-      let K := φ₂'.vRoots V
-      φ₂'.Covered && decide (φ₂.allocCount ≤ famBound) &&
-        (rgs φ₂.allocCount).all (fun cs => ((φ.tk k₁ k₂ true).bind (·.swInst k₁ cs)).any Fml.Covered) &&
-        φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂
+      match φ.tk k₁ k₂ true with
+      | none => false
+      | some φF =>
+        let V := φ₂.allocLevels
+        let K := φ₂'.vRoots V
+        φ₂'.Covered && decide (φ₂.allocCount ≤ famBound) &&
+          (rgs φ₂.allocCount).all (fun cs => (φF.swInst k₁ cs).any Fml.Covered) &&
+          φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂
 
 /-- **Completeness for two kinds.** -/
 theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
@@ -501,46 +508,42 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
     split at h
     · cases h
     · rename_i φ₂' e'
-      simp only [Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
-      obtain ⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩ := h
-      unfold decideHash2
-      rw [e₂]
-      simp only
-      rw [e']
-      simp only
-      cases hd : decideLeaf φ₂' with
-      | proved => exact fun h => nomatch h
-      | unknown => exact absurd hd (decideLeaf_complete hcov)
-      | refuted σ =>
+      split at h
+      · cases h
+      · rename_i φF hF
+        simp only [Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
+        obtain ⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩ := h
+        unfold decideHash2
+        rw [e₂]
         simp only
-        have hinst : ∀ cs ∈ rgs φ₂.allocCount, ∃ φF instF, φ.tk k₁ k₂ true = some φF ∧
-            φF.swInst k₁ cs = some instF := by
-          intro cs hcs
-          have := hall cs hcs
-          cases hF : φ.tk k₁ k₂ true with
-          | none => rw [hF] at this; cases this
-          | some φF =>
-            rw [hF] at this
+        rw [e']
+        simp only
+        cases hd : decideLeaf φ₂' with
+        | proved => exact fun h => nomatch h
+        | unknown => exact absurd hd (decideLeaf_complete hcov)
+        | refuted σ =>
+          simp only
+          have hinst : ∀ cs ∈ rgs φ₂.allocCount, ∃ φF instF, φ.tk k₁ k₂ true = some φF ∧
+              φF.swInst k₁ cs = some instF := by
+            intro cs hcs
+            have := hall cs hcs
             cases hi : φF.swInst k₁ cs with
-            | none => simp only [Option.bind_some, hi, Option.any_none, Bool.false_eq_true] at this
-            | some instF => exact ⟨φF, instF, rfl, hi⟩
-        obtain ⟨cs, hcs, φF, instF, hF, hi, hnf⟩ := Fml.tk_complete hk₁ hk₂ e₂ e' (kTyped_of hK) hrl
-          hpre hn hrl₂ hinst (decideLeaf_not_valid hd)
-        have hcovf : instF.Covered = true := by
-          have := hall cs hcs
-          rw [hF, Option.bind_some, hi] at this
-          exact this
-        have href : refuteAt2 k₁ k₂ hk₁ hk₂ φ cs ≠ none := by
-          unfold refuteAt2
-          have hb : ∀ j ∈ cs, j < famBound := fun j hj => by
-            have := rgsFrom_bound φ₂.allocCount 0 cs hcs j hj
-            omega
-          rw [dif_pos hb]
-          split
-          · rename_i he; rw [hF] at he; cases he
-          · rename_i φF' he
-            rw [hF] at he
-            cases he
+            | none => rw [hi] at this; cases this
+            | some instF => exact ⟨φF, instF, hF, hi⟩
+          obtain ⟨cs, hcs, φF', instF, hF', hi, hnf⟩ := Fml.tk_complete hk₁ hk₂ e₂ e' (kTyped_of hK) hrl
+            hpre hn hrl₂ hinst (decideLeaf_not_valid hd)
+          rw [hF] at hF'
+          cases hF'
+          have hcovf : instF.Covered = true := by
+            have := hall cs hcs
+            rw [hi] at this
+            exact this
+          have href : refuteAt2 k₁ k₂ hk₁ hk₂ φ φF hF cs ≠ none := by
+            unfold refuteAt2
+            have hb : ∀ j ∈ cs, j < famBound := fun j hj => by
+              have := rgsFrom_bound φ₂.allocCount 0 cs hcs j hj
+              omega
+            rw [dif_pos hb]
             split
             · rename_i he; rw [hi] at he; cases he
             · rename_i inst' he
@@ -554,10 +557,15 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
                 | proved => exact hnf (decideLeaf_sound hv)
                 | unknown => exact decideLeaf_complete hcovf hv
                 | refuted σ => exact hne σ hv
-        have := findSome?_ne_none hcs href
-        cases hs : (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ) with
-        | none => exact absurd hs this
-        | some r => exact fun h => nomatch h
+          have := findSome?_ne_none hcs href
+          split
+          · rename_i he; rw [hF] at he; cases he
+          · rename_i φF'' he
+            rw [hF] at he
+            cases he
+            cases hs : (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ φ φF hF) with
+            | none => exact absurd hs this
+            | some r => simp only [hs]; exact fun h => nomatch h
 
 /-- A leaf with hashes of one kind. -/
 def tryK (k : HashKind) (hk : k ≠ .ecrecover) : HashTry C :=

@@ -93,14 +93,38 @@ thinning into the new context, and each string's word of the second kind. -/
 structure XMap (Γ Γ' : Ctx) where
   thin : Thin Γ Γ'
   ext : ∀ {R : RefTy}, Idx Γ (.mem R) → Option (Idx Γ' (.val .uint))
+  /-- The extra words are new binders: no local of `Γ` lands on one. -/
+  off : ∀ {R : RefTy} (i : Idx Γ (.mem R)) (j : Idx Γ' (.val .uint)), ext i = some j →
+    ∀ {t : LTy} (k : Idx Γ t), (k.wk thin).toNat ≠ j.toNat
+
+/-- The extra words past a declared local. -/
+def XMap.keepExt {Γ Γ' : Ctx} (θ : XMap Γ Γ') (t : LTy) :
+    ∀ {R : RefTy}, Idx (t :: Γ) (.mem R) → Option (Idx (t :: Γ') (.val .uint)) :=
+  fun {R} i => Idx.casesOn (motive := fun Δ u _ => Δ = t :: Γ → u = .mem R →
+      Option (Idx (t :: Γ') (.val .uint))) i
+    (fun _ _ => none) (fun {_} {_} {_} j hΔ hu => by
+      cases hΔ; cases hu; exact (θ.ext j).map .there) rfl rfl
+
+theorem XMap.keepExt_off {Γ Γ' : Ctx} (θ : XMap Γ Γ') (t : LTy) {R : RefTy} (i : Idx (t :: Γ) (.mem R))
+    (j : Idx (t :: Γ') (.val .uint)) (hj : θ.keepExt t i = some j) {u : LTy} (k : Idx (t :: Γ) u) :
+    (k.wk (.keep θ.thin)).toNat ≠ j.toNat := by
+  cases i with
+  | here => cases hj
+  | there i₀ =>
+    have hj' : (θ.ext i₀).map .there = some j := hj
+    obtain ⟨j₀, hj₀, rfl⟩ := Option.map_eq_some_iff.1 hj'
+    cases k with
+    | here => show 0 ≠ j₀.toNat + 1; omega
+    | there k₀ =>
+      have := θ.off i₀ j₀ hj₀ k₀
+      show (k₀.wk θ.thin).toNat + 1 ≠ j₀.toNat + 1
+      omega
 
 /-- Past a declared local. -/
 def XMap.keep {Γ Γ' : Ctx} (θ : XMap Γ Γ') (t : LTy) : XMap (t :: Γ) (t :: Γ') where
   thin := .keep θ.thin
-  ext := fun {R} i => Idx.casesOn (motive := fun Δ u _ => Δ = t :: Γ → u = .mem R →
-      Option (Idx (t :: Γ') (.val .uint))) i
-    (fun _ _ => none) (fun {_} {_} {_} j hΔ hu => by
-      cases hΔ; cases hu; exact (θ.ext j).map .there) rfl rfl
+  ext := θ.keepExt t
+  off := θ.keepExt_off t
 
 theorem XMap.keep_ext_there {Γ Γ' : Ctx} (θ : XMap Γ Γ') (t : LTy) {R : RefTy} (j : Idx Γ (.mem R)) :
     (θ.keep t).ext (.there j) = (θ.ext j).map .there := rfl
@@ -138,6 +162,20 @@ def XRel (k₂ : HashKind) {Γ Γ' : Ctx} (θ : XMap Γ Γ') (τ : State C Γ) (
     ∃ id, (TEnv.get i τ.env).map (·.id) = some id ∧
       TEnv.get j (τ.lift θ.thin d).env = τ.glob.memT.hashId k₂ R id
 
+/-- **`XRel` where the premise reads**: each string's extra word its hash
+of kind `k₂` wherever that hash, as an input and an output, is one of `Q`'s
+(the hashes the body evaluates, past the updates that land). -/
+def XRelQ (k₂ : HashKind) {Γ Γ' : Ctx} (θ : XMap Γ Γ') (τ : State C Γ) (d : TEnv C τ.H Γ')
+    (Q : Option (List Nat) → PrimTy.uint.Denote → Prop) : Prop :=
+  ∀ {R : RefTy} (i : Idx Γ (.mem R)) (j : Idx Γ' (.val .uint)), θ.ext i = some j →
+    ∃ id, (TEnv.get i τ.env).map (·.id) = some id ∧
+      (Q (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId k₂ R id) →
+        TEnv.get j (τ.lift θ.thin d).env = τ.glob.memT.hashId k₂ R id)
+
+theorem XRel.toQ {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'} {τ : State C Γ} {d : TEnv C τ.H Γ'}
+    (h : XRel k₂ θ τ d) (Q : Option (List Nat) → PrimTy.uint.Denote → Prop) : XRelQ k₂ θ τ d Q :=
+  fun i j hj => (h i j hj).imp fun _ hh => ⟨hh.1, fun _ => hh.2⟩
+
 section Read
 
 variable {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'} {τ : State C Γ} {d : TEnv C τ.H Γ'}
@@ -153,8 +191,10 @@ theorem hashNode_eval {Δ : Ctx} (σ : State C Δ) (k : HashKind) {R : RefTy} (i
   rw [hv, Op2.eval_eq_evalM]
   rfl
 
-theorem _root_.Solidity.Op2.xHash?_reads (h : XRel k₂ θ τ d) {a b s : Srt} (o : Op2 C a b s)
-    (x : Tm C Γ a) (y : Tm C Γ b) {t' : Tm C Γ' s} (ht : o.xHash? k₂ θ x y = some (some t')) :
+theorem _root_.Solidity.Op2.xHash?_reads {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
+    (h : XRelQ k₂ θ τ d Q) {a b s : Srt} (o : Op2 C a b s)
+    (x : Tm C Γ a) (y : Tm C Γ b) {t' : Tm C Γ' s} (ht : o.xHash? k₂ θ x y = some (some t'))
+    (hQ : ∀ inp out, (Tm.app2 o x y).HashIn τ k₂ inp out → Q inp out) :
     t'.eval (τ.lift θ.thin d) = (Tm.app2 o x y).eval τ ∧
       t'.denote (τ.lift θ.thin d) = (Tm.app2 o x y).denote τ := by
   unfold Op2.xHash? at ht
@@ -166,6 +206,11 @@ theorem _root_.Solidity.Op2.xHash?_reads (h : XRel k₂ θ τ d) {a b s : Srt} (
       obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
       obtain ⟨id, hid, hw⟩ := h i j hj
       have he := hashNode_eval τ k' i hid
+      have hw := hw (hQ _ _ (.inl (by
+        show Op2.HashIn (H := τ.H) k' _ _ (Op2.hash (R := R) k') (some τ.glob.memT)
+          ((TEnv.get i τ.env).map (·.id))
+        rw [hid]
+        exact ⟨rfl, rfl, rfl⟩)))
       refine ⟨?_, ?_⟩
       · rw [he]
         show some (TEnv.get j (τ.lift θ.thin d).env) = _
@@ -176,68 +221,77 @@ theorem _root_.Solidity.Op2.xHash?_reads (h : XRel k₂ θ τ d) {a b s : Srt} (
     · simp only [hk, if_false, reduceCtorEq] at ht
   · cases ht
 
-/-- **A term read past new binders reads as the term.** -/
-theorem _root_.Solidity.Tm.xk_eval (h : XRel k₂ θ τ d) : {s : Srt} → (t : Tm C Γ s) →
-    {t' : Tm C Γ' s} → t.xk k₂ θ = some t' → t'.eval (τ.lift θ.thin d) = t.eval τ
-  | _, .pvV i, _, e => by
+/-- **A term read past new binders reads as the term**, where `Q` holds of
+the term's hashes of kind `k₂`. -/
+theorem _root_.Solidity.Tm.xk_eval {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
+    (h : XRelQ k₂ θ τ d Q) : {s : Srt} → (t : Tm C Γ s) →
+    {t' : Tm C Γ' s} → t.xk k₂ θ = some t' → (∀ inp out, t.HashIn τ k₂ inp out → Q inp out) →
+      t'.eval (τ.lift θ.thin d) = t.eval τ
+  | _, .pvV i, _, e, _ => by
     cases e
     show some (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env) = some (TEnv.get i τ.env)
     rw [State.get_lift]
-  | _, .pvP i, _, e => by
+  | _, .pvP i, _, e, _ => by
     cases e
     show TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env = TEnv.get i τ.env
     rw [State.get_lift]
-  | _, .pvS i, _, e => by
+  | _, .pvS i, _, e, _ => by
     cases e
     show some (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env) = some (TEnv.get i τ.env)
     rw [State.get_lift]
-  | _, .pvI i, _, e => by
+  | _, .pvI i, _, e, _ => by
     cases e
     show (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env).map (·.id) = (TEnv.get i τ.env).map (·.id)
     rw [State.get_lift]
     rfl
-  | _, .netOf i a, _, e => by
+  | _, .netOf i a, _, e, hQ => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 e
     show (a'.eval (τ.lift θ.thin d)).bind (Tm.netOfT (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env)) =
       (a.eval τ).bind (Tm.netOfT (TEnv.get i τ.env))
-    rw [Tm.xk_eval h a ha, State.get_lift]
-  | _, .app0 o, _, e => by cases e; rfl
-  | _, .app1 o x, _, e => by
+    rw [Tm.xk_eval h a ha hQ, State.get_lift]
+  | _, .app0 o, _, e, _ => by cases e; rfl
+  | _, .app1 o x, _, e, hQ => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
     show o.eval τ.glob (x'.eval (τ.lift θ.thin d)) = o.eval τ.glob (x.eval τ)
-    rw [Tm.xk_eval h x hx]
-  | _, .app2 o x y, _, e => by
+    rw [Tm.xk_eval h x hx hQ]
+  | _, .app2 o x y, _, e, hQ => by
     simp only [Tm.xk] at e
     split at e
     · rename_i r hr
       cases r with
       | none => cases e
-      | some t₀ => cases e; exact (o.xHash?_reads h x y hr).1
+      | some t₀ => cases e; exact (o.xHash?_reads h x y hr hQ).1
     · obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
       obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
       show o.eval τ.glob (x'.eval (τ.lift θ.thin d)) (y'.eval (τ.lift θ.thin d)) =
         o.eval τ.glob (x.eval τ) (y.eval τ)
-      rw [Tm.xk_eval h x hx, Tm.xk_eval h y hy]
-  | _, .app3 o x y z, _, e => by
+      rw [Tm.xk_eval h x hx fun _ _ hi => hQ _ _ (.inr (.inl hi)),
+        Tm.xk_eval h y hy fun _ _ hi => hQ _ _ (.inr (.inr hi))]
+  | _, .app3 o x y z, _, e, hQ => by
     obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
     show o.eval τ.glob (x'.eval (τ.lift θ.thin d)) (y'.eval (τ.lift θ.thin d))
       (z'.eval (τ.lift θ.thin d)) = o.eval τ.glob (x.eval τ) (y.eval τ) (z.eval τ)
-    rw [Tm.xk_eval h x hx, Tm.xk_eval h y hy, Tm.xk_eval h z hz]
-  | _, .pvZ i, _, e => by
+    rw [Tm.xk_eval h x hx fun _ _ hi => hQ _ _ (.inl hi),
+      Tm.xk_eval h y hy fun _ _ hi => hQ _ _ (.inr (.inl hi)),
+      Tm.xk_eval h z hz fun _ _ hi => hQ _ _ (.inr (.inr hi))]
+  | _, .pvZ i, _, e, _ => by
     cases e
     show some (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env) = some (TEnv.get i τ.env)
     rw [State.get_lift]
 
-/-- **A term read past new binders denotes as the term.** -/
-theorem _root_.Solidity.Tm.xk_denote (h : XRel k₂ θ τ d) : {s : Srt} → (t : Tm C Γ s) →
-    {t' : Tm C Γ' s} → t.xk k₂ θ = some t' → t'.denote (τ.lift θ.thin d) = t.denote τ
-  | _, .pvV i, _, e => by
+/-- **A term read past new binders denotes as the term**, where `Q` holds
+of the term's hashes of kind `k₂`. -/
+theorem _root_.Solidity.Tm.xk_denote {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
+    (h : XRelQ k₂ θ τ d Q) : {s : Srt} → (t : Tm C Γ s) →
+    {t' : Tm C Γ' s} → t.xk k₂ θ = some t' → (∀ inp out, t.HashIn τ k₂ inp out → Q inp out) →
+      t'.denote (τ.lift θ.thin d) = t.denote τ
+  | _, .pvV i, _, e, _ => by
     cases e
     show some (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env) = some (TEnv.get i τ.env)
     rw [State.get_lift]
-  | _, .pvP i, _, e => by
+  | _, .pvP i, _, e, _ => by
     cases e
     have e := State.get_lift θ.thin τ d i
     simp only [Tm.denote]
@@ -247,41 +301,46 @@ theorem _root_.Solidity.Tm.xk_denote (h : XRel k₂ θ τ d) : {s : Srt} → (t 
     intro e
     subst e
     cases a <;> rfl
-  | _, .pvS i, _, e => by
+  | _, .pvS i, _, e, _ => by
     cases e
     show Storage.obs _ = Storage.obs _
     rw [State.get_lift]
-  | _, .pvI i, _, e => by cases e; rfl
-  | _, .netOf i a, _, e => by
+  | _, .pvI i, _, e, _ => by cases e; rfl
+  | _, .netOf i a, _, e, hQ => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 e
     show (a'.denote (τ.lift θ.thin d)).map _ = (a.denote τ).map _
-    rw [Tm.xk_denote h a ha, State.get_lift]
-  | _, .app0 o, _, e => by cases e; rfl
-  | _, .app1 o x, _, e => by
+    rw [Tm.xk_denote h a ha hQ, State.get_lift]
+  | _, .app0 o, _, e, _ => by cases e; rfl
+  | _, .app1 o x, _, e, hQ => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
     show o.denote τ.glob (x'.denote (τ.lift θ.thin d)) = o.denote τ.glob (x.denote τ)
-    rw [Tm.xk_denote h x hx]
-  | _, .app2 o x y, _, e => by
+    rw [Tm.xk_denote h x hx hQ]
+  | _, .app2 o x y, _, e, hQ => by
     simp only [Tm.xk] at e
     split at e
     · rename_i r hr
       cases r with
       | none => cases e
-      | some t₀ => cases e; exact (o.xHash?_reads h x y hr).2
+      | some t₀ => cases e; exact (o.xHash?_reads h x y hr hQ).2
     · obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
       obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
+      have hQx : ∀ inp out, x.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr (.inl hi))
+      have hQy : ∀ inp out, y.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr (.inr hi))
       show o.denote τ.glob (x'.eval (τ.lift θ.thin d)) (y'.eval (τ.lift θ.thin d))
         (x'.denote (τ.lift θ.thin d)) (y'.denote (τ.lift θ.thin d)) =
         o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
-      rw [Tm.xk_denote h x hx, Tm.xk_denote h y hy, Tm.xk_eval h x hx, Tm.xk_eval h y hy]
-  | _, .app3 o x y z, _, e => by
+      rw [Tm.xk_denote h x hx hQx, Tm.xk_denote h y hy hQy, Tm.xk_eval h x hx hQx,
+        Tm.xk_eval h y hy hQy]
+  | _, .app3 o x y z, _, e, hQ => by
     obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
     show o.denote (x'.denote (τ.lift θ.thin d)) (y'.denote (τ.lift θ.thin d))
       (z'.denote (τ.lift θ.thin d)) = o.denote (x.denote τ) (y.denote τ) (z.denote τ)
-    rw [Tm.xk_denote h x hx, Tm.xk_denote h y hy, Tm.xk_denote h z hz]
-  | _, .pvZ i, _, e => by
+    rw [Tm.xk_denote h x hx fun _ _ hi => hQ _ _ (.inl hi),
+      Tm.xk_denote h y hy fun _ _ hi => hQ _ _ (.inr (.inl hi)),
+      Tm.xk_denote h z hz fun _ _ hi => hQ _ _ (.inr (.inr hi))]
+  | _, .pvZ i, _, e, _ => by
     cases e
     show some (TEnv.get (i.wk θ.thin) (τ.lift θ.thin d).env) = some (TEnv.get i τ.env)
     rw [State.get_lift]
@@ -290,8 +349,15 @@ end Read
 
 /-! ## Formulas read past new binders -/
 
+/-- A value local's right-hand side read past new binders. -/
+def _root_.Solidity.Rhs.xkV (k₂ : HashKind) {Γ Γ' : Ctx} (θ : XMap Γ Γ') {t : LTy} :
+    Rhs C Γ t → Option (Rhs C Γ' t)
+  | .val a => (a.xk k₂ θ).map .val
+  | _ => none
+
 /-- A one-element update with no push read past new binders: a storage
-write, a value local declared (its continuation past the declared local). -/
+write, a value local set, a value local declared (its continuation past
+the declared local). -/
 def _root_.Solidity.Upd.xk1? (k₂ : HashKind) {Γ Γ' : Ctx} (θ : XMap Γ Γ') :
     {Δ : Ctx} → Upd C Γ Δ → Option ((Δ' : Ctx) × Upd C Γ' Δ' × XMap Δ Δ')
   | _, .snoc U e =>
@@ -300,6 +366,8 @@ def _root_.Solidity.Upd.xk1? (k₂ : HashKind) {Γ Γ' : Ctx} (θ : XMap Γ Γ')
       match e with
       | .storage s => (s.xk k₂ θ).bind fun s' =>
         if s.pushFree && s'.pushFree then some ⟨Γ', .snoc .nil (.storage s'), θ⟩ else none
+      | .local i r => (r.xkV k₂ θ).bind fun r' =>
+        if r.pushFree && r'.pushFree then some ⟨Γ', .snoc .nil (.local (i.wk θ.thin) r'), θ⟩ else none
       | _ => none
     | .snoc .. | .decl .. | .pop .. | .drop .. => none
   | _, .decl U x r =>
@@ -328,17 +396,17 @@ def _root_.Solidity.Fml.xk (k₂ : HashKind) : {Γ Γ' : Ctx} → XMap Γ Γ' �
 
 section Preserve
 
-variable {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'}
+variable {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'} {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
 
-theorem XRel.withStorage {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRel k₂ θ τ d) (st : Storage C) :
-    XRel k₂ θ (τ.withStorage st) d := fun i j hj => h i j hj
+theorem XRelQ.withStorage {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRelQ k₂ θ τ d Q) (st : Storage C) :
+    XRelQ k₂ θ (τ.withStorage st) d Q := fun i j hj => h i j hj
 
 theorem lift_push (h : Thin Γ Γ') (τ : State C Γ) (d : TEnv C τ.H Γ') {t : LTy} (v : t.TDenote C τ.H)
     (v' : t.TDenote C τ.H) :
     (τ.push v).lift (.keep h) (v', d) = (τ.lift h d).push v := rfl
 
-theorem XRel.push {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRel k₂ θ τ d) {t : LTy}
-    (v : t.TDenote C τ.H) : XRel k₂ (θ.keep t) (τ.push v) (v, d) := by
+theorem XRelQ.push {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRelQ k₂ θ τ d Q) {t : LTy}
+    (v : t.TDenote C τ.H) : XRelQ k₂ (θ.keep t) (τ.push v) (v, d) Q := by
   intro R i j hj
   cases i with
   | here => cases hj
@@ -347,14 +415,30 @@ theorem XRel.push {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRel k₂ θ τ d
     obtain ⟨j₀, hj₀, rfl⟩ := Option.map_eq_some_iff.1 hj
     exact h i j₀ hj₀
 
+theorem XRelQ.setLocal {τ : State C Γ} {d : TEnv C τ.H Γ'} (h : XRelQ k₂ θ τ d Q) {p : PrimTy}
+    (i : Idx Γ (.val p)) (v : p.Denote) : XRelQ k₂ θ (τ.setLocal (t := .val p) i v) d Q := by
+  intro R i' j hj
+  obtain ⟨id, hid, hw⟩ := h i' j hj
+  refine ⟨id, ?_, fun hq => ?_⟩
+  · show (TEnv.get i' (TEnv.set i v τ.env)).map (·.id) = some id
+    rw [TEnv.get_set_ne i i' v τ.env fun e => nomatch Idx.ty_eq_of_toNat e]
+    exact hid
+  · rw [← State.lift_setLocal]
+    show TEnv.get j (TEnv.set (i.wk θ.thin) v (τ.lift θ.thin d).env) = _
+    rw [TEnv.get_set_ne _ _ _ _ (θ.off i' j hj i)]
+    exact hw hq
+
 end Preserve
 
-/-- **A one-element update read past new binders lands as the update.** -/
+/-- **A one-element update read past new binders lands as the update**,
+its continuation read where it lands (`hP`). -/
 theorem _root_.Solidity.Upd.xk1?_afterT {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'} {Δ : Ctx}
+    {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
     (U : Upd C Γ Δ) {r : (Δ' : Ctx) × Upd C Γ' Δ' × XMap Δ Δ'} (hU : U.xk1? k₂ θ = some r)
-    (m : Modality) (τ : State C Γ) (d : TEnv C τ.H Γ') (h : XRel k₂ θ τ d)
+    (m : Modality) (τ : State C Γ) (d : TEnv C τ.H Γ') (h : XRelQ k₂ θ τ d Q)
+    (hQ : ∀ inp out, U.HashIn τ k₂ inp out → Q inp out)
     (P : State C Δ → Prop) (P' : State C r.1 → Prop)
-    (hP : ∀ (σ : State C Δ) (d' : TEnv C σ.H r.1), XRel k₂ r.2.2 σ d' →
+    (hP : ∀ (σ : State C Δ) (d' : TEnv C σ.H r.1), (∃ g, U.Lands τ g σ) → XRelQ k₂ r.2.2 σ d' Q →
       (P' (σ.lift r.2.2.thin d') ↔ P σ)) :
     r.2.1.afterT m (τ.lift θ.thin d) P' ↔ U.afterT m τ P := by
   cases U with
@@ -369,15 +453,47 @@ theorem _root_.Solidity.Upd.xk1?_afterT {k₂ : HashKind} {Γ Γ' : Ctx} {θ : X
         · rename_i hpf
           simp only [Bool.and_eq_true] at hpf
           cases e
+          have hQs : ∀ inp out, s.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
           show (Upd.snoc .nil (.storage s')).afterT m (τ.lift θ.thin d) P' ↔
             (Upd.snoc .nil (.storage s)).afterT m τ P
           rw [Upd.afterT_storage1 m _ s' (by simp only [Upd.pushFree, UpdElem.pushFree, hpf.2,
             Bool.and_self]), Upd.afterT_storage1 m τ s (by simp only [Upd.pushFree, UpdElem.pushFree,
-            hpf.1, Bool.and_self]), Tm.xk_eval h s hs]
-          cases s.eval τ with
+            hpf.1, Bool.and_self]), Tm.xk_eval h s hs hQs]
+          cases hse : s.eval τ with
           | none => exact Iff.rfl
-          | some st => exact hP (τ.withStorage st) d (h.withStorage st)
+          | some st =>
+            have hg₀ : (Upd.snoc .nil (.storage s) : Upd C Γ Γ).globT τ =
+                (s.eval τ).bind fun st => some (τ.globG.withStorage st) := rfl
+            have hL₀ : (Upd.snoc .nil (.storage s) : Upd C Γ Γ).Lands τ (τ.globG.withStorage st)
+                (τ.withStorage st) := ⟨by rw [hg₀, hse]; rfl, rfl, fun _ => rfl⟩
+            exact hP (τ.withStorage st) d ⟨_, hL₀⟩ (h.withStorage st)
         · cases e
+      | «local» i r₀ =>
+        cases r₀ with
+        | val t =>
+          simp only [Upd.xk1?, Rhs.xkV] at hU
+          obtain ⟨r', hr', e⟩ := Option.bind_eq_some_iff.1 hU
+          obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hr'
+          split at e
+          · rename_i hpf
+            simp only [Bool.and_eq_true, Rhs.pushFree] at hpf
+            cases e
+            have hQt : ∀ inp out, t.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
+            show (Upd.snoc .nil (.local (i.wk θ.thin) (.val t'))).afterT m (τ.lift θ.thin d) P' ↔
+              (Upd.snoc .nil (.local i (.val t))).afterT m τ P
+            rw [Upd.afterT_local1 m _ (i.wk θ.thin) t' (by simp only [Upd.pushFree, UpdElem.pushFree,
+              Rhs.pushFree, hpf.2, Bool.and_self]), Upd.afterT_local1 m τ i t (by simp only [Upd.pushFree,
+              UpdElem.pushFree, Rhs.pushFree, hpf.1, Bool.and_self]), Tm.xk_eval h t ht hQt]
+            cases hte : t.eval τ with
+            | none => exact Iff.rfl
+            | some v =>
+              have hL₀ := Upd.lands_snoc_local (Upd.lands_nil τ) i (r := .val t) (v := (v : _)) hte
+              show P' ((State.lift θ.thin τ d).setLocal (t := .val _) (Idx.wk θ.thin i) v) ↔
+                P (τ.setLocal i v)
+              rw [State.lift_setLocal]
+              exact hP (τ.setLocal i v) d ⟨_, hL₀⟩ (h.setLocal i v)
+          · cases e
+        | _ => simp only [Upd.xk1?, Rhs.xkV, Option.bind_none, reduceCtorEq] at hU
       | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
     | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
   | decl U₀ x r₀ =>
@@ -391,55 +507,72 @@ theorem _root_.Solidity.Upd.xk1?_afterT {k₂ : HashKind} {Γ Γ' : Ctx} {θ : X
         · rename_i hpf
           simp only [Bool.and_eq_true] at hpf
           cases e
+          have hQt : ∀ inp out, t.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
           show (Upd.decl .nil x (.val t')).afterT m (τ.lift θ.thin d) P' ↔
             (Upd.decl .nil x (.val t)).afterT m τ P
           rw [Upd.afterT_decl1 m _ x t' (by simp only [Upd.pushFree, Rhs.pushFree, hpf.2,
             Bool.and_self]), Upd.afterT_decl1 m τ x t (by simp only [Upd.pushFree,
-            Rhs.pushFree, hpf.1, Bool.and_self]), Tm.xk_eval h t ht]
-          cases t.eval τ with
+            Rhs.pushFree, hpf.1, Bool.and_self]), Tm.xk_eval h t ht hQt]
+          cases hte : t.eval τ with
           | none => exact Iff.rfl
-          | some v => exact hP (τ.push (t := .val _) v) (v, d) (h.push (t := .val _) v)
+          | some v =>
+            have hL₀ := Upd.lands_decl (Upd.lands_nil τ) x (r := .val t) (v := (v : _)) hte
+            exact hP (τ.push (t := .val _) v) (v, d) ⟨_, hL₀⟩ (h.push (t := .val _) v)
         · cases e
       | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
     | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
   | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
 
-/-- **A body read past new binders holds as the body.** -/
-theorem _root_.Solidity.Fml.xk_holds {k₂ : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
+/-- **A body read past new binders holds as the body**, where `Q` holds of
+the body's hashes of kind `k₂`. -/
+theorem _root_.Solidity.Fml.xk_holdsQ {k₂ : HashKind} {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
+    {Γ : Ctx} (φ : Fml C Γ) :
     ∀ {Γ' : Ctx} {θ : XMap Γ Γ'} {φ' : Fml C Γ'}, φ.xk k₂ θ = some φ' →
-      ∀ (τ : State C Γ) (d : TEnv C τ.H Γ'), XRel k₂ θ τ d →
+      ∀ (τ : State C Γ) (d : TEnv C τ.H Γ'), XRelQ k₂ θ τ d Q →
+      (∀ inp out, Fml.HashIn k₂ inp out τ φ → Q inp out) →
       (holds (τ.lift θ.thin d) φ' ↔ holds τ φ) := by
   induction φ with
-  | tt => intro _ _ _ e _ _ _; cases e; exact Iff.rfl
+  | tt => intro _ _ _ e _ _ _ _; cases e; exact Iff.rfl
   | eq a b =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨b', hb, rfl⟩ := Option.map_eq_some_iff.1 e
-    rw [holds_eq, holds_eq, Tm.xk_denote h a ha, Tm.xk_denote h b hb]
+    rw [holds_eq, holds_eq, Tm.xk_denote h a ha fun _ _ hi => hQ _ _ (.inl hi),
+      Tm.xk_denote h b hb fun _ _ hi => hQ _ _ (.inr hi)]
   | wellFormed s =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 e
-    rw [holds_wellFormed, holds_wellFormed, Tm.xk_eval h s hs]
+    rw [holds_wellFormed, holds_wellFormed, Tm.xk_eval h s hs hQ]
   | not φ ih =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact not_congr (ih hφ τ d h)
+    exact not_congr (ih hφ τ d h hQ)
   | and φ ψ ihφ ihψ =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact and_congr (ihφ hφ τ d h) (ihψ hψ τ d h)
+    exact and_congr (ihφ hφ τ d h fun _ _ hi => hQ _ _ (.inl hi))
+      (ihψ hψ τ d h fun _ _ hi => hQ _ _ (.inr hi))
   | imp φ ψ ihφ ihψ =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact imp_congr (ihφ hφ τ d h) (ihψ hψ τ d h)
+    exact imp_congr (ihφ hφ τ d h fun _ _ hi => hQ _ _ (.inl hi))
+      (ihψ hψ τ d h fun _ _ hi => hQ _ _ (.inr hi))
   | upd m U φ ih =>
-    intro _ _ _ e τ d h
+    intro _ _ _ e τ d h hQ
     obtain ⟨r, hU, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact U.xk1?_afterT hU m τ d h _ _ fun σ d' h' => ih hφ σ d' h'
+    exact U.xk1?_afterT hU m τ d h (fun _ _ hi => hQ _ _ (.inl hi)) _ _ fun σ d' ⟨g, hL⟩ h' =>
+      ih hφ σ d' h' fun _ _ hi => hQ _ _ (.inr ⟨g, σ, hL.1, hL, hi⟩)
   | modal | havoc | all | bind | anon | allocAll | grow => intro _ _ _ e; cases e
+
+/-- **A body read past new binders holds as the body.** -/
+theorem _root_.Solidity.Fml.xk_holds {k₂ : HashKind} {Γ : Ctx} (φ : Fml C Γ)
+    {Γ' : Ctx} {θ : XMap Γ Γ'} {φ' : Fml C Γ'} (e : φ.xk k₂ θ = some φ')
+    (τ : State C Γ) (d : TEnv C τ.H Γ') (h : XRel k₂ θ τ d) :
+    holds (τ.lift θ.thin d) φ' ↔ holds τ φ :=
+  Fml.xk_holdsQ (Q := fun _ _ => True) φ e τ d (fun i j hj => XRel.toQ h (fun _ _ => True) i j hj) fun _ _ _ => trivial
 
 /-- On a formula `Fml.xk` takes the premise is read nowhere: it has no binder. -/
 theorem _root_.Solidity.Fml.holdsS_of_xk {k₂ : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
@@ -610,31 +743,57 @@ theorem posIn_of_mem : (l : List Nat) → (x : Nat) → x ∈ l → ∃ d, posIn
 
 /-- **The extra words of the strings at the levels `L`**: past `L.length`
 new binders, the string at level `L[d]` read at the `d`-th. -/
+theorem toNat_wk_dropN {Γ : Ctx} {t : LTy} (k : Idx Γ t) : (m : Nat) →
+    (k.wk (Thin.dropN (Γ := Γ) m)).toNat = k.toNat + m
+  | 0 => by rw [Thin.dropN, Idx.wk_refl]; rfl
+  | m + 1 => by
+    show (k.wk (Thin.dropN m)).toNat + 1 = _
+    rw [toNat_wk_dropN k m]
+    omega
+
+theorem toNat_topIdx {Γ : Ctx} : (m : Nat) → (d : Fin m) → (topIdx (Γ := Γ) m d).toNat = d.val
+  | _ + 1, ⟨0, _⟩ => rfl
+  | m + 1, ⟨d + 1, h⟩ => by
+    show (topIdx m ⟨d, Nat.lt_of_succ_lt_succ h⟩).toNat + 1 = d + 1
+    rw [toNat_topIdx m]
+
 def XMap.extras (L : List Nat) (Γ : Ctx) : XMap Γ (List.replicate L.length (.val .uint) ++ Γ) where
   thin := Thin.dropN L.length
   ext := fun i => (posIn L i.level).bind fun d =>
     if h : d < L.length then some (topIdx L.length ⟨d, h⟩) else none
+  off := by
+    intro R i j hj t k
+    obtain ⟨d, -, hj⟩ := Option.bind_eq_some_iff.1 hj
+    split at hj
+    · rename_i hd
+      cases hj
+      rw [toNat_wk_dropN, toNat_topIdx]
+      show k.toNat + L.length ≠ d
+      omega
+    · cases hj
 
 /-! ## The premise past new binders -/
 
 section HashIn
 
 variable {k₂ : HashKind} {Γ Γ' : Ctx} {θ : XMap Γ Γ'} {τ : State C Γ} {d : TEnv C τ.H Γ'}
+  {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
 
 /-- **A hash term read past new binders is one of the term's.** -/
-theorem _root_.Solidity.Tm.xk_hashIn (h : XRel k₂ θ τ d) {k : HashKind} {inp : Option (List Nat)}
+theorem _root_.Solidity.Tm.xk_hashIn (h : XRelQ k₂ θ τ d Q) {k : HashKind} {inp : Option (List Nat)}
     {out : PrimTy.uint.Denote} : {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → t.xk k₂ θ = some t' →
+      (∀ inp out, t.HashIn τ k₂ inp out → Q inp out) →
       t'.HashIn (τ.lift θ.thin d) k inp out → t.HashIn τ k inp out
-  | _, .pvV _, _, e, hi | _, .pvP _, _, e, hi | _, .pvS _, _, e, hi | _, .pvI _, _, e, hi
-  | _, .pvZ _, _, e, hi => by cases e; exact hi.elim
-  | _, .app0 _, _, e, hi => by cases e; exact hi.elim
-  | _, .netOf i a, _, e, hi => by
+  | _, .pvV _, _, e, _, hi | _, .pvP _, _, e, _, hi | _, .pvS _, _, e, _, hi | _, .pvI _, _, e, _, hi
+  | _, .pvZ _, _, e, _, hi => by cases e; exact hi.elim
+  | _, .app0 _, _, e, _, hi => by cases e; exact hi.elim
+  | _, .netOf i a, _, e, hQ, hi => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact Tm.xk_hashIn h a ha hi
-  | _, .app1 o x, _, e, hi => by
+    exact Tm.xk_hashIn h a ha hQ hi
+  | _, .app1 o x, _, e, hQ, hi => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact Tm.xk_hashIn h x hx hi
-  | _, .app2 o x y, _, e, hi => by
+    exact Tm.xk_hashIn h x hx hQ hi
+  | _, .app2 o x y, _, e, hQ, hi => by
     simp only [Tm.xk] at e
     split at e
     · rename_i r hr
@@ -652,34 +811,37 @@ theorem _root_.Solidity.Tm.xk_hashIn (h : XRel k₂ θ τ d) {k : HashKind} {inp
         · cases hr
     · obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
       obtain ⟨y', hy, rfl⟩ := Option.map_eq_some_iff.1 e
+      have hQx : ∀ inp out, x.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr (.inl hi))
+      have hQy : ∀ inp out, y.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr (.inr hi))
       rcases hi with hi | hi | hi
       · refine .inl ?_
-        have ex := Tm.xk_eval h x hx
-        have ey := Tm.xk_eval h y hy
+        have ex := Tm.xk_eval h x hx hQx
+        have ey := Tm.xk_eval h y hy hQy
         revert hi
         show Op2.HashIn (H := τ.H) k inp out o (x'.eval (τ.lift θ.thin d)) (y'.eval (τ.lift θ.thin d)) →
           Op2.HashIn (H := τ.H) k inp out o (x.eval τ) (y.eval τ)
         rw [ex, ey]
         exact id
-      · exact .inr (.inl (Tm.xk_hashIn h x hx hi))
-      · exact .inr (.inr (Tm.xk_hashIn h y hy hi))
-  | _, .app3 o x y z, _, e, hi => by
+      · exact .inr (.inl (Tm.xk_hashIn h x hx hQx hi))
+      · exact .inr (.inr (Tm.xk_hashIn h y hy hQy hi))
+  | _, .app3 o x y z, _, e, hQ, hi => by
     obtain ⟨x', hx, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨y', hy, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨z', hz, rfl⟩ := Option.map_eq_some_iff.1 e
     rcases hi with hi | hi | hi
-    · exact .inl (Tm.xk_hashIn h x hx hi)
-    · exact .inr (.inl (Tm.xk_hashIn h y hy hi))
-    · exact .inr (.inr (Tm.xk_hashIn h z hz hi))
+    · exact .inl (Tm.xk_hashIn h x hx (fun _ _ hi => hQ _ _ (.inl hi)) hi)
+    · exact .inr (.inl (Tm.xk_hashIn h y hy (fun _ _ hi => hQ _ _ (.inr (.inl hi))) hi))
+    · exact .inr (.inr (Tm.xk_hashIn h z hz (fun _ _ hi => hQ _ _ (.inr (.inr hi))) hi))
 
 /-- **A one-element update read past new binders lands where the update
 does**, lifted, and its terms' hashes are the update's. -/
 theorem _root_.Solidity.Upd.xk1?_lands {Δ : Ctx} (U : Upd C Γ Δ)
-    {r : (Δ' : Ctx) × Upd C Γ' Δ' × XMap Δ Δ'} (hU : U.xk1? k₂ θ = some r) (h : XRel k₂ θ τ d) :
+    {r : (Δ' : Ctx) × Upd C Γ' Δ' × XMap Δ Δ'} (hU : U.xk1? k₂ θ = some r) (h : XRelQ k₂ θ τ d Q)
+    (hQ : ∀ inp out, U.HashIn τ k₂ inp out → Q inp out) :
     (∀ {k inp out}, r.2.1.HashIn (τ.lift θ.thin d) k inp out → U.HashIn τ k inp out) ∧
     ∀ (g : GlobT C (τ.lift θ.thin d).H) (σ₂ : State C r.1), r.2.1.Lands (τ.lift θ.thin d) g σ₂ →
       ∃ (g₀ : GlobT C τ.H) (σ' : State C Δ) (d' : TEnv C σ'.H r.1), U.Lands τ g₀ σ' ∧
-        σ₂ = σ'.lift r.2.2.thin d' ∧ XRel k₂ r.2.2 σ' d' := by
+        σ₂ = σ'.lift r.2.2.thin d' ∧ XRelQ k₂ r.2.2 σ' d' Q := by
   cases U with
   | snoc U₀ e₀ =>
     cases U₀ with
@@ -688,15 +850,16 @@ theorem _root_.Solidity.Upd.xk1?_lands {Δ : Ctx} (U : Upd C Γ Δ)
       | storage s =>
         simp only [Upd.xk1?] at hU
         obtain ⟨s', hs, e⟩ := Option.bind_eq_some_iff.1 hU
+        have hQs : ∀ inp out, s.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
         split at e
         · cases e
           refine ⟨fun hi => ?_, fun g σ₂ hL => ?_⟩
           · rcases hi with hi | hi
             · exact hi.elim
-            · exact .inr (Tm.xk_hashIn h s hs hi)
+            · exact .inr (Tm.xk_hashIn h s hs hQs hi)
           · have hg : (Upd.snoc .nil (.storage s') : Upd C Γ' Γ').globT (τ.lift θ.thin d) =
                 (s'.eval (τ.lift θ.thin d)).bind fun st => some ((τ.lift θ.thin d).globG.withStorage st) := rfl
-            rw [Tm.xk_eval h s hs] at hg
+            rw [Tm.xk_eval h s hs hQs] at hg
             cases hse : s.eval τ with
             | none => rw [hse] at hg; exact absurd (hL.1.symm.trans hg) (by simp only [Option.bind_none,
                 reduceCtorEq, not_false_eq_true])
@@ -710,6 +873,36 @@ theorem _root_.Solidity.Upd.xk1?_lands {Δ : Ctx} (U : Upd C Γ Δ)
                 ⟨by rw [hg, hse]; rfl, rfl, fun _ => rfl⟩
               exact ⟨τ.globG.withStorage st, τ.withStorage st, d, hL₀, Upd.Lands.eq hL hL₂, h.withStorage st⟩
         · cases e
+      | «local» i r₀ =>
+        cases r₀ with
+        | val t =>
+          simp only [Upd.xk1?, Rhs.xkV] at hU
+          obtain ⟨r', hr', e⟩ := Option.bind_eq_some_iff.1 hU
+          obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hr'
+          have hQt : ∀ inp out, t.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
+          split at e
+          · cases e
+            refine ⟨fun hi => ?_, fun g σ₂ hL => ?_⟩
+            · rcases hi with hi | hi
+              · exact hi.elim
+              · exact .inr (Tm.xk_hashIn h t ht hQt hi)
+            · cases hte : t.eval τ with
+              | none =>
+                have hg : (Upd.snoc .nil (.local (i.wk θ.thin) (.val t')) : Upd C Γ' Γ').globT
+                    (τ.lift θ.thin d) = (t'.eval (τ.lift θ.thin d)).bind fun _ => some (τ.lift θ.thin d).globG :=
+                  rfl
+                rw [Tm.xk_eval h t ht hQt, hte] at hg
+                exact absurd (hL.1.symm.trans hg) (by simp only [Option.bind_none, reduceCtorEq,
+                  not_false_eq_true])
+              | some v =>
+                have hL₀ := Upd.lands_snoc_local (Upd.lands_nil τ) i (r := .val t) (v := (v : _)) hte
+                have hte' : (t'.eval (τ.lift θ.thin d)) = some v := by rw [Tm.xk_eval h t ht hQt, hte]
+                have hL₂ := Upd.lands_snoc_local (Upd.lands_nil (τ.lift θ.thin d)) (i.wk θ.thin)
+                  (r := .val t') (v := (v : _)) hte'
+                rw [State.lift_setLocal] at hL₂
+                exact ⟨τ.globG, τ.setLocal i v, d, hL₀, Upd.Lands.eq hL hL₂, h.setLocal i v⟩
+          · cases e
+        | _ => simp only [Upd.xk1?, Rhs.xkV, Option.bind_none, reduceCtorEq] at hU
       | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
     | _ => simp only [Upd.xk1?, reduceCtorEq] at hU
   | decl U₀ x r₀ =>
@@ -719,22 +912,23 @@ theorem _root_.Solidity.Upd.xk1?_lands {Δ : Ctx} (U : Upd C Γ Δ)
       | val t =>
         simp only [Upd.xk1?] at hU
         obtain ⟨t', ht, e⟩ := Option.bind_eq_some_iff.1 hU
+        have hQt : ∀ inp out, t.HashIn τ k₂ inp out → Q inp out := fun _ _ hi => hQ _ _ (.inr hi)
         split at e
         · cases e
           refine ⟨fun hi => ?_, fun g σ₂ hL => ?_⟩
           · rcases hi with hi | hi
             · exact hi.elim
-            · exact .inr (Tm.xk_hashIn h t ht hi)
+            · exact .inr (Tm.xk_hashIn h t ht hQt hi)
           · cases hte : t.eval τ with
             | none =>
               have hg : (Upd.decl .nil x (.val t') : Upd C Γ' (_ :: Γ')).globT (τ.lift θ.thin d) =
                   (t'.eval (τ.lift θ.thin d)).bind fun _ => some (τ.lift θ.thin d).globG := rfl
-              rw [Tm.xk_eval h t ht, hte] at hg
+              rw [Tm.xk_eval h t ht hQt, hte] at hg
               exact absurd (hL.1.symm.trans hg) (by simp only [Option.bind_none, reduceCtorEq,
                 not_false_eq_true])
             | some v =>
               have hL₀ := Upd.lands_decl (Upd.lands_nil τ) x (r := .val t) (v := (v : _)) hte
-              have hte' : (t'.eval (τ.lift θ.thin d)) = some v := by rw [Tm.xk_eval h t ht, hte]
+              have hte' : (t'.eval (τ.lift θ.thin d)) = some v := by rw [Tm.xk_eval h t ht hQt, hte]
               have hL₂ := Upd.lands_decl (Upd.lands_nil (τ.lift θ.thin d)) x (r := .val t')
                 (v := (v : _)) hte'
               exact ⟨τ.globG, τ.push (t := .val _) v, (v, d), hL₀, Upd.Lands.eq hL hL₂, h.push (t := .val _) v⟩
@@ -745,44 +939,48 @@ theorem _root_.Solidity.Upd.xk1?_lands {Δ : Ctx} (U : Upd C Γ Δ)
 
 end HashIn
 
-/-- **A hash term of a body read past new binders is one of the body's.** -/
-theorem _root_.Solidity.Fml.xk_hashIn {k₂ : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
+/-- **A hash term of a body read past new binders is one of the body's**,
+where `Q` holds of the body's hashes of kind `k₂`. -/
+theorem _root_.Solidity.Fml.xk_hashIn {k₂ : HashKind} {Q : Option (List Nat) → PrimTy.uint.Denote → Prop}
+    {Γ : Ctx} (φ : Fml C Γ) :
     ∀ {Γ' : Ctx} {θ : XMap Γ Γ'} {φ' : Fml C Γ'}, φ.xk k₂ θ = some φ' →
-      ∀ (τ : State C Γ) (d : TEnv C τ.H Γ'), XRel k₂ θ τ d → ∀ {k inp out},
+      ∀ (τ : State C Γ) (d : TEnv C τ.H Γ'), XRelQ k₂ θ τ d Q →
+      (∀ inp out, Fml.HashIn k₂ inp out τ φ → Q inp out) → ∀ {k inp out},
         Fml.HashIn k inp out (τ.lift θ.thin d) φ' → Fml.HashIn k inp out τ φ := by
   induction φ with
-  | tt => intro _ _ _ e _ _ _ _ _ _ hi; cases e; exact hi.elim
+  | tt => intro _ _ _ e _ _ _ _ _ _ _ hi; cases e; exact hi.elim
   | eq a b =>
-    intro _ _ _ e τ d h _ _ _ hi
+    intro _ _ _ e τ d h hQ _ _ _ hi
     obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨b', hb, rfl⟩ := Option.map_eq_some_iff.1 e
     rcases hi with hi | hi
-    · exact .inl (Tm.xk_hashIn h a ha hi)
-    · exact .inr (Tm.xk_hashIn h b hb hi)
+    · exact .inl (Tm.xk_hashIn h a ha (fun _ _ hi => hQ _ _ (.inl hi)) hi)
+    · exact .inr (Tm.xk_hashIn h b hb (fun _ _ hi => hQ _ _ (.inr hi)) hi)
   | wellFormed s =>
-    intro _ _ _ e τ d h _ _ _ hi
+    intro _ _ _ e τ d h hQ _ _ _ hi
     obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact Tm.xk_hashIn h s hs hi
+    exact Tm.xk_hashIn h s hs hQ hi
   | not φ ih =>
-    intro _ _ _ e τ d h _ _ _ hi
+    intro _ _ _ e τ d h hQ _ _ _ hi
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact ih hφ τ d h hi
+    exact ih hφ τ d h hQ hi
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ =>
-    intro _ _ _ e τ d h _ _ _ hi
+    intro _ _ _ e τ d h hQ _ _ _ hi
     obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
     rcases hi with hi | hi
-    · exact .inl (ihφ hφ τ d h hi)
-    · exact .inr (ihψ hψ τ d h hi)
+    · exact .inl (ihφ hφ τ d h (fun _ _ hi => hQ _ _ (.inl hi)) hi)
+    · exact .inr (ihψ hψ τ d h (fun _ _ hi => hQ _ _ (.inr hi)) hi)
   | upd m U φ ih =>
-    intro _ _ _ e τ d h _ _ _ hi
+    intro _ _ _ e τ d h hQ _ _ _ hi
     obtain ⟨r, hU, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    obtain ⟨hUi, hUl⟩ := U.xk1?_lands hU h
+    obtain ⟨hUi, hUl⟩ := U.xk1?_lands hU h fun _ _ hi => hQ _ _ (.inl hi)
     rcases hi with hi | ⟨g, σ₂, -, hL, hi⟩
     · exact .inl (hUi hi)
     · obtain ⟨g₀, σ', d', hL₀, rfl, h'⟩ := hUl g σ₂ hL
-      exact .inr ⟨g₀, σ', hL₀.1, hL₀, ih hφ σ' d' h' hi⟩
+      exact .inr ⟨g₀, σ', hL₀.1, hL₀, ih hφ σ' d' h'
+        (fun _ _ hi' => hQ _ _ (.inr ⟨g₀, σ', hL₀.1, hL₀, hi'⟩)) hi⟩
   | modal | havoc | all | bind | anon | allocAll | grow => intro _ _ _ e; cases e
 
 /-! ## The leaf with the second kind's words -/
@@ -905,14 +1103,18 @@ def _root_.Solidity.Tm.memNodes {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
   | _, .app3 _ x y z => x.memNodes && y.memNodes && z.memNodes
   | _, _ => true
 
-/-- A one-element update (a storage write, a value local declared) whose
-hash nodes read memory locals. -/
+/-- A one-element update (a storage write, a value local set or declared)
+whose hash nodes read memory locals. -/
 def _root_.Solidity.Upd.memNodes1 {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .snoc U e =>
     match U with
     | .nil =>
       match e with
       | .storage s => s.memNodes
+      | .local _ r =>
+        match r with
+        | .val t => t.memNodes
+        | _ => false
       | _ => false
     | .snoc .. | .decl .. | .pop .. | .drop .. => false
   | _, .decl U _ r =>
@@ -936,15 +1138,17 @@ def _root_.Solidity.Fml.memNodes : {Γ : Ctx} → Fml C Γ → Bool
   | _, _ => false
 
 /-- **The body with the second kind's words**: the strings `k₂` hashes
-(`L`), each hashed by both kinds where the premise reads it; `m` new
-binders, the link of the two kinds (`linkE`; and, for an instance,
-`fixE`) assumed, the body read past them with each node of kind `k₂` its
-word. -/
+(`L`, at least one; anywhere, past the updates too: the premise reads a
+hash in an update's continuation where the update lands), each hashed by
+`k₁` where the premise always reads it (outside every continuation,
+`Fml.topLevels`); `m` new binders, the link of the two kinds (`linkE`;
+and, for an instance, `fixE`) assumed, the body read past them with each
+node of kind `k₂` its word. -/
 def _root_.Solidity.Fml.tkBody (k₁ k₂ : HashKind) (fix : Bool) {Γ : Ctx} (ψ : Fml C Γ) :
     Option (Fml C Γ) :=
   let L := (ψ.hLevels k₂).eraseDups
-  if ψ.memNodes && L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (ψ.topLevels k₁).contains l &&
-      (ψ.topLevels k₂).contains l) then
+  if ψ.memNodes && !L.isEmpty && decide (L.length * (L.length + 1) < 2 ^ 256) &&
+      L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (ψ.topLevels k₁).contains l) then
     (ψ.xk k₂ (XMap.extras L Γ)).map fun ψ₂ =>
       Fml.allN (.user "e") L.length
         (.imp (Fml.conjL (if fix then fixE k₁ k₂ L else [])) (.imp (Fml.conjL (linkE k₁ L)) ψ₂))
@@ -1280,7 +1484,8 @@ theorem xrel_extras (k₂ : HashKind) (L : List Nat) (τ : State C Γ) (es : Fin
 
 /-- Past no extra words, every map holds. -/
 theorem xrel_extras_nil (k₂ : HashKind) {L : List Nat} (hL : L.length = 0) (τ : State C Γ)
-    (d : TEnv C τ.H (List.replicate L.length (.val .uint) ++ Γ)) : XRel k₂ (XMap.extras L Γ) τ d := by
+    (d : TEnv C τ.H (List.replicate L.length (.val .uint) ++ Γ))
+    (Q : Option (List Nat) → PrimTy.uint.Denote → Prop) : XRelQ k₂ (XMap.extras L Γ) τ d Q := by
   intro R i j hj
   simp only [XMap.extras] at hj
   obtain ⟨n, -, hj⟩ := Option.bind_eq_some_iff.1 hj
@@ -1377,8 +1582,141 @@ theorem topIdx_denote (τ : State C Γ) (m : Nat) (es : Fin m → PrimTy.uint.De
 
 end Lifted
 
+/-! ## Words for the strings the premise does not read -/
+
+/-- A list of `n` naturals misses one of `0 … n`. -/
+theorem exists_le_not_mem_aux : (n : Nat) → (l : List Nat) → (∀ x < n, x ∈ l) → n ≤ l.length
+  | 0, _, _ => Nat.zero_le _
+  | n + 1, l, h => by
+    have hn : n ∈ l := h n (Nat.lt_succ_self n)
+    have h' : ∀ x < n, x ∈ l.erase n := fun x hx =>
+      (List.mem_erase_of_ne (Nat.ne_of_lt hx)).2 (h x (Nat.lt_succ_of_lt hx))
+    have := exists_le_not_mem_aux n (l.erase n) h'
+    rw [List.length_erase_of_mem hn] at this
+    have hpos : 0 < l.length := List.length_pos_of_mem hn
+    omega
+
+theorem exists_le_not_mem (l : List Nat) : ∃ x, x ≤ l.length ∧ x ∉ l := by
+  apply Classical.byContradiction
+  intro h
+  have h' : ∀ x < l.length + 1, x ∈ l := fun x hx =>
+    Classical.byContradiction fun hm => h ⟨x, Nat.le_of_lt_succ hx, hm⟩
+  have := exists_le_not_mem_aux (l.length + 1) l h'
+  omega
+
+/-- Among `k, k + n, …, k + n·|S|` one misses `S`. -/
+theorem exists_fresh_class (S : List Nat) (n k : Nat) (hn : 0 < n) :
+    ∃ t, t ≤ S.length ∧ k + n * t ∉ S := by
+  obtain ⟨t, ht, hm⟩ := exists_le_not_mem (S.map fun s => (s - k) / n)
+  rw [List.length_map] at ht
+  refine ⟨t, ht, fun hs => hm ?_⟩
+  refine List.mem_map.2 ⟨_, hs, ?_⟩
+  rw [Nat.add_sub_cancel_left, Nat.mul_div_cancel_left _ hn]
+
+/-- **Words for the strings not read, linked**: given the first kind's
+words `w` and the second kind's `r`, which agree on the strings `Q` reads,
+some words `e` are `r` on those strings and compare exactly as `w` does. -/
+theorem linkChoice {n : Nat} (hn : n * (n + 1) < 2 ^ 256) (w r : Fin n → PrimTy.uint.Denote)
+    (Q : Fin n → Prop) (hQ : ∀ a b, Q a → Q b → (w a = w b ↔ r a = r b)) :
+    ∃ e : Fin n → PrimTy.uint.Denote, (∀ a, Q a → e a = r a) ∧ ∀ a b, (w a = w b ↔ e a = e b) := by
+  classical
+  -- the class of `a`: the first string with its word
+  let rep : Fin n → Fin n := fun a => ((List.finRange n).find? fun b => decide (w b = w a)).getD a
+  have hrep_w : ∀ a, w (rep a) = w a := by
+    intro a
+    show w (((List.finRange n).find? fun b => decide (w b = w a)).getD a) = w a
+    cases hf : (List.finRange n).find? (fun b => decide (w b = w a)) with
+    | none => rfl
+    | some b => simpa only [Option.getD_some, decide_eq_true_eq] using List.find?_some hf
+  have hrep_eq : ∀ a c, w a = w c → rep a = rep c := by
+    intro a c h
+    show ((List.finRange n).find? fun b => decide (w b = w a)).getD a =
+      ((List.finRange n).find? fun b => decide (w b = w c)).getD c
+    have hs : ∀ x, (List.finRange n).find? (fun b => decide (w b = w x)) ≠ none := by
+      intro x hx
+      have := List.find?_eq_none.1 hx x (mem_finRange' x)
+      simp only [decide_true, not_true_eq_false] at this
+    rw [h]
+    cases hf : (List.finRange n).find? (fun b => decide (w b = w c)) with
+    | none => exact absurd hf (hs c)
+    | some b => rfl
+  -- fresh words, one per class, missing every `r`
+  let S : List Nat := (List.finRange n).map fun b => (r b).1.toNat
+  have hpos : ∀ a : Fin n, 0 < n := fun a => Nat.lt_of_le_of_lt (Nat.zero_le _) a.2
+  let t : Fin n → Nat := fun a => Classical.choose (exists_fresh_class S n a.val (hpos a))
+  have ht : ∀ a, t a ≤ S.length ∧ a.val + n * t a ∉ S := fun a =>
+    Classical.choose_spec (exists_fresh_class S n a.val (hpos a))
+  have hS : S.length = n := by simp only [S, List.length_map, List.length_finRange]
+  have hlt : ∀ a : Fin n, a.val + n * t a < 2 ^ 256 := by
+    intro a
+    have h1 := (ht a).1
+    rw [hS] at h1
+    have : n * t a ≤ n * n := Nat.mul_le_mul_left n h1
+    have : n * (n + 1) = n * n + n := by rw [Nat.mul_succ]
+    omega
+  let fresh : Fin n → PrimTy.uint.Denote := fun a => uintOfNat (a.val + n * t a)
+  have fresh_val : ∀ a, (fresh a).1 = ((a.val + n * t a : Nat) : Int) := fun a => uintOfNat_val (hlt a)
+  have fresh_inj : ∀ a c, fresh a = fresh c → a = c := by
+    intro a c h
+    have h1 := congrArg Subtype.val h
+    rw [fresh_val, fresh_val] at h1
+    have h2 : a.val + n * t a = c.val + n * t c := by exact_mod_cast h1
+    have h3 := congrArg (· % n) h2
+    simp only [Nat.add_mul_mod_self_left, Nat.mod_eq_of_lt a.2, Nat.mod_eq_of_lt c.2] at h3
+    exact Fin.ext h3
+  have fresh_ne : ∀ a b, fresh a ≠ r b := by
+    intro a b h
+    apply (ht a).2
+    refine List.mem_map.2 ⟨b, mem_finRange' b, ?_⟩
+    rw [← h, fresh_val]
+    rfl
+  -- the witness read by `Q` in `a`'s class
+  let qrep : Fin n → Option (Fin n) := fun a => (List.finRange n).find? fun b => decide (Q b ∧ w b = w a)
+  have hq_some : ∀ a b, qrep a = some b → Q b ∧ w b = w a := fun a b h => by
+    simpa only [decide_eq_true_eq] using List.find?_some h
+  have hq_none : ∀ a, qrep a = none → ∀ b, Q b → w b ≠ w a := fun a h b hb hw => by
+    have := List.find?_eq_none.1 h b (mem_finRange' b)
+    simp only [decide_eq_true_eq, not_and] at this
+    exact this hb hw
+  let e : Fin n → PrimTy.uint.Denote := fun a =>
+    match qrep a with
+    | some b => r b
+    | none => fresh (rep a)
+  refine ⟨e, fun a ha => ?_, fun a c => ?_⟩
+  · show (match qrep a with | some b => r b | none => fresh (rep a)) = r a
+    cases hqa : qrep a with
+    | none => exact absurd rfl (hq_none a hqa a ha)
+    | some b =>
+      obtain ⟨hb, hw⟩ := hq_some a b hqa
+      exact (hQ b a hb ha).1 hw
+  · show w a = w c ↔ (match qrep a with | some b => r b | none => fresh (rep a)) =
+      (match qrep c with | some b => r b | none => fresh (rep c))
+    cases hqa : qrep a with
+    | some b =>
+      obtain ⟨hb, hwb⟩ := hq_some a b hqa
+      cases hqc : qrep c with
+      | some b' =>
+        obtain ⟨hb', hwb'⟩ := hq_some c b' hqc
+        rw [← hwb, ← hwb']
+        exact hQ b b' hb hb'
+      | none =>
+        refine ⟨fun h => absurd (hwb.trans h) (hq_none c hqc b hb), fun h => ?_⟩
+        exact absurd h.symm (fresh_ne _ _)
+    | none =>
+      cases hqc : qrep c with
+      | some b' =>
+        obtain ⟨hb', hwb'⟩ := hq_some c b' hqc
+        refine ⟨fun h => absurd (hwb'.trans h.symm) (hq_none a hqa b' hb'), fun h => ?_⟩
+        exact absurd h (fresh_ne _ _)
+      | none =>
+        refine ⟨fun h => by show fresh (rep a) = fresh (rep c); rw [hrep_eq a c h], fun h => ?_⟩
+        have := fresh_inj _ _ h
+        rw [← hrep_w a, ← hrep_w c, this]
+
 /-- **The body with the second kind's words is sound**: where its reading
-under the premise holds, the body holds under the body's premise. -/
+under the premise holds, the body holds under the body's premise.  The
+extra words are the strings' hashes of the second kind where the premise
+reads them (`linkChoice`), and else words that keep the link. -/
 theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
     (hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (ψ : Fml C Γ) {φ₂ : Fml C Γ} (e : ψ.tkBody k₁ k₂ false = some φ₂)
     (τ : State C Γ) (hstr : ∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome)
@@ -1389,22 +1727,13 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
   · rename_i hcov
     generalize hLd : (Fml.hLevels k₂ ψ).eraseDups = L at hcov e
     obtain ⟨ψ₂, hψ₂, rfl⟩ := Option.map_eq_some_iff.1 e
-    have hcov' : ∀ l ∈ L, (Idx.memAtLevel? Γ l).isSome ∧ l ∈ ψ.topLevels k₁ ∧ l ∈ ψ.topLevels k₂ :=
-      fun l hl => by
-        have := List.all_eq_true.1 (Bool.and_eq_true _ _ ▸ hcov).2 l hl
-        simp only [Bool.and_eq_true, List.contains_iff_mem] at this
-        exact ⟨this.1.1, this.1.2, this.2⟩
-    -- the strings `L` names are hashed by both kinds where the premise reads them
-    have hnodeIn : ∀ {R : RefTy} (i : Idx Γ (.mem R)) (kk : HashKind), i.level ∈ L →
-        (kk = k₁ ∨ kk = k₂) → ∀ id, τ.getV i = some id →
-          Fml.HashIn kk (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId kk R id) τ ψ := by
-      intro R i kk hl hkk id hv
-      have hc := hcov' _ hl
-      have htop : i.level ∈ ψ.topLevels kk := by
-        rcases hkk with rfl | rfl
-        · exact hc.2.1
-        · exact hc.2.2
-      obtain ⟨R', i', hl', hin⟩ := Fml.topLevels_hashIn τ kk ψ htop
+    simp only [Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true, List.contains_iff_mem] at hcov
+    obtain ⟨⟨_, hbound⟩, hcov'⟩ := hcov
+    -- the strings `L` names are hashed by the first kind where the premise always reads them
+    have hnodeIn : ∀ {R : RefTy} (i : Idx Γ (.mem R)), i.level ∈ L → ∀ id, τ.getV i = some id →
+          Fml.HashIn k₁ (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId k₁ R id) τ ψ := by
+      intro R i hl id hv
+      obtain ⟨R', i', hl', hin⟩ := Fml.topLevels_hashIn τ k₁ ψ (hcov' _ hl).2
       have he := mem_level_eq hl'
       cases he
       exact hin id hv
@@ -1412,9 +1741,68 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
         i.level ∈ L := fun a R i ha => by
       rw [Idx.memAtLevel?_level ha]
       exact List.getElem_mem _
+    have hstrAt : ∀ d : Fin L.length, ∃ (R : RefTy) (i : Idx Γ (.mem R)) (id : Nat),
+        i.level = L[d] ∧ τ.getV i = some id := by
+      intro d
+      obtain ⟨⟨R, i⟩, hi⟩ := Option.isSome_iff_exists.1 (hcov' _ (List.getElem_mem d.2)).1
+      obtain ⟨id, hid⟩ := Option.isSome_iff_exists.1 (hstr i)
+      exact ⟨R, i, id, Idx.memAtLevel?_level hi, hid⟩
+    -- the strings whose hash of the second kind the premise reads
+    let Qd : Fin L.length → Prop := fun d => ∀ (R : RefTy) (i : Idx Γ (.mem R)) (id : Nat),
+      i.level = L[d] → τ.getV i = some id →
+        Fml.HashIn k₂ (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId k₂ R id) τ ψ
+    have hQd : ∀ a b, Qd a → Qd b → (esOf k₁ L τ a = esOf k₁ L τ b ↔ esOf k₂ L τ a = esOf k₂ L τ b) := by
+      intro a b ha hb
+      obtain ⟨R₁, i, idi, hli, hvi⟩ := hstrAt a
+      obtain ⟨R₂, j, idj, hlj, hvj⟩ := hstrAt b
+      obtain ⟨_, hvi₁, he₁a⟩ := esOf_spec k₁ L τ hstr a i hli
+      obtain ⟨_, hvj₁, he₁b⟩ := esOf_spec k₁ L τ hstr b j hlj
+      obtain ⟨_, hvi₂, he₂a⟩ := esOf_spec k₂ L τ hstr a i hli
+      obtain ⟨_, hvj₂, he₂b⟩ := esOf_spec k₂ L τ hstr b j hlj
+      rw [hvi] at hvi₁ hvi₂; cases hvi₁; cases hvi₂
+      rw [hvj] at hvj₁ hvj₂; cases hvj₁; cases hvj₂
+      rw [he₁a, he₁b, he₂a, he₂b]
+      have hla : i.level ∈ L := by rw [hli]; exact List.getElem_mem _
+      have hlb : j.level ∈ L := by rw [hlj]; exact List.getElem_mem _
+      constructor
+      · intro hw
+        have h2 := hnodeIn j hlb idj hvj
+        rw [← hw] at h2
+        exact Grown.hashId_of_input _ k₂ (hf k₁ hk₁ _ _ _ (hnodeIn i hla idi hvi) h2)
+      · intro hw
+        have h2 := hb R₂ j idj hlj hvj
+        rw [← hw] at h2
+        exact Grown.hashId_of_input _ k₁ (hf k₂ hk₂ _ _ _ (ha R₁ i idi hli hvi) h2)
+    obtain ⟨es, hes₁, hes₂⟩ := linkChoice hbound (esOf k₁ L τ) (esOf k₂ L τ) Qd hQd
+    let Q : Option (List Nat) → PrimTy.uint.Denote → Prop := fun inp out => Fml.HashIn k₂ inp out τ ψ
+    -- the extra words are the second kind's hashes where the premise reads them
+    have hX : XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es τ.env) Q := by
+      intro R i j hj
+      simp only [XMap.extras] at hj
+      obtain ⟨d, hd, hj⟩ := Option.bind_eq_some_iff.1 hj
+      obtain ⟨hlt, hL⟩ := posIn_spec L _ d hd
+      rw [dif_pos hlt] at hj
+      cases hj
+      obtain ⟨id, hv⟩ := Option.isSome_iff_exists.1 (hstr i)
+      refine ⟨id, hv, fun hq => ?_⟩
+      show TEnv.get (topIdx L.length ⟨d, hlt⟩) (TEnv.put (Thin.dropN L.length) τ.env
+        (envOf L.length es τ.env)) = _
+      rw [put_dropN, get_topIdx]
+      have hQ' : Qd ⟨d, hlt⟩ := by
+        intro R' i' id' hl' hv'
+        have he := mem_level_eq (hl'.trans hL)
+        cases he
+        rw [hv] at hv'
+        cases hv'
+        exact hq
+      rw [hes₁ _ hQ']
+      obtain ⟨_, hv₂, he₂⟩ := esOf_spec k₂ L τ hstr ⟨d, hlt⟩ i hL.symm
+      rw [hv] at hv₂
+      cases hv₂
+      exact he₂
     -- a hash term of the body read past the binders is one of the body's
     have hBin : ∀ (es' : Fin L.length → PrimTy.uint.Denote),
-        XRel k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) → ∀ {k inp out},
+        XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) Q → ∀ {k inp out},
           Fml.HashIn k inp out (τ.withEnv (envOf L.length es' τ.env))
             (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) ψ₂)) → Fml.HashIn k inp out τ ψ := by
       intro es' hX' k inp out hi
@@ -1426,58 +1814,50 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
         rcases hi with ((h | h) | (h | h)) | ((h | h) | (h | h))
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ i h
-          exact hnodeIn i _ (strL a ha) (.inl rfl) id hv
+          exact hnodeIn i (strL a ha) id hv
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ j h
-          exact hnodeIn j _ (strL b hb) (.inl rfl) id hv
+          exact hnodeIn j (strL b hb) id hv
         · exact h.elim
         · exact h.elim
         · exact h.elim
         · exact h.elim
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ i h
-          exact hnodeIn i _ (strL a ha) (.inl rfl) id hv
+          exact hnodeIn i (strL a ha) id hv
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ j h
-          exact hnodeIn j _ (strL b hb) (.inl rfl) id hv
-      · exact Fml.xk_hashIn _ hψ₂ τ _ hX' hi
+          exact hnodeIn j (strL b hb) id hv
+      · exact Fml.xk_hashIn _ hψ₂ τ _ hX' (fun _ _ hi => hi) hi
     have hfreeB : ∀ (es' : Fin L.length → PrimTy.uint.Denote),
-        XRel k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) →
+        XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) Q →
           Fml.HashFree (τ.withEnv (envOf L.length es' τ.env))
             (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) ψ₂)) :=
       fun es' hX' k hk i₁ i₂ out h₁ h₂ => hf k hk i₁ i₂ out (hBin es' hX' h₁) (hBin es' hX' h₂)
-    have hX : XRel k₂ (XMap.extras L Γ) τ (envOf L.length (esOf k₂ L τ) τ.env) :=
-      xrel_extras k₂ L τ _ (esOf_spec k₂ L τ hstr)
-    have hHf := hashFree_allN (.user "e") L.length _ τ fun es' hm => hfreeB es' (xrel_extras_nil k₂ hm τ _)
-    have hS := holdsS_allN (.user "e") L.length _ τ (H hHf) (esOf k₂ L τ) (hfreeB _ hX)
+    have hHf := hashFree_allN (.user "e") L.length _ τ fun es' hm =>
+      hfreeB es' (xrel_extras_nil k₂ hm τ _ Q)
+    have hS := holdsS_allN (.user "e") L.length _ τ (H hHf) es (hfreeB _ hX)
     obtain ⟨ψ', hψ'⟩ : ∃ ψ', ψ.xk k₂ (XMap.extras L Γ) = some ψ' := ⟨ψ₂, hψ₂⟩
     rw [Fml.holdsS_of_xk ψ hψ' τ]
-    -- the link holds where the extra words are the strings' hashes
-    have hlink : holds (τ.lift (Thin.dropN L.length) (envOf L.length (esOf k₂ L τ) τ.env))
+    -- the link holds at the chosen words
+    have hlink : holds (τ.lift (Thin.dropN L.length) (envOf L.length es τ.env))
         (Fml.conjL (linkE k₁ L)) := by
       refine (holds_conjL _ _).2 fun f hf' => ?_
       obtain ⟨a, b, -, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE hf'
       obtain ⟨idi, hvi⟩ := Option.isSome_iff_exists.1 (hstr i)
       obtain ⟨idj, hvj⟩ := Option.isSome_iff_exists.1 (hstr j)
-      obtain ⟨idi', hvi', hei⟩ := esOf_spec k₂ L τ hstr a i (Idx.memAtLevel?_level ha)
-      obtain ⟨idj', hvj', hej⟩ := esOf_spec k₂ L τ hstr b j (Idx.memAtLevel?_level hb)
+      obtain ⟨idi', hvi', hei⟩ := esOf_spec k₁ L τ hstr a i (Idx.memAtLevel?_level ha)
+      obtain ⟨idj', hvj', hej⟩ := esOf_spec k₁ L τ hstr b j (Idx.memAtLevel?_level hb)
       rw [hvi] at hvi'; cases hvi'
       rw [hvj] at hvj'; cases hvj'
-      have step : ∀ kk kk', (kk = k₁ ∨ kk = k₂) → kk ≠ .ecrecover →
-          τ.glob.memT.hashId kk R₁ idi = τ.glob.memT.hashId kk R₂ idj →
-            τ.glob.memT.hashId kk' R₁ idi = τ.glob.memT.hashId kk' R₂ idj := by
-        intro kk kk' hkk hne he
-        have h2 := hnodeIn j kk (strL b hb) hkk idj hvj
-        rw [← he] at h2
-        exact Grown.hashId_of_input _ kk' (hf kk hne _ _ _ (hnodeIn i kk (strL a ha) hkk idi hvi) h2)
       show (holds _ (.eq _ _) → holds _ (.eq _ _)) ∧ (holds _ (.eq _ _) → holds _ (.eq _ _))
       rw [holds_eq, holds_eq, hnode_wk_denote, hnode_wk_denote, hnode_denote τ k₁ i hvi,
-        hnode_denote τ k₁ j hvj, topIdx_denote, topIdx_denote, hei, hej, Option.some.injEq,
+        hnode_denote τ k₁ j hvj, topIdx_denote, topIdx_denote, ← hei, ← hej, Option.some.injEq,
         Option.some.injEq]
-      exact ⟨step k₁ k₂ (.inl rfl) hk₁, step k₂ k₁ (.inr rfl) hk₂⟩
+      exact ⟨(hes₂ a b).1, (hes₂ a b).2⟩
     rw [← lift_dropN] at hS
     have h3 := hS trivial ((Fml.holdsS_pure _ (Fml.pure_conjL_linkE k₁ L) _).2 hlink)
-    exact (Fml.xk_holds ψ hψ₂ τ _ hX).1 ((Fml.holdsS_img_xk ψ hψ₂ _).1 h3)
+    exact (Fml.xk_holdsQ ψ hψ₂ τ _ hX fun _ _ hi => hi).1 ((Fml.holdsS_img_xk ψ hψ₂ _).1 h3)
   · cases e
 
 theorem hashFree_allocAll {Γ : Ctx} (σ : State C Γ) (x : Var) (R : RefTy) (φ : Fml C (.mem R :: Γ)) :
@@ -1610,6 +1990,18 @@ theorem _root_.Solidity.Fml.memNodes_hashIn {k : HashKind} {Γ : Ctx} (φ : Fml 
             refine ⟨R, id, ?_, ?_⟩
             · rw [h1, hσ]; rfl
             · rw [h2, hσ]; rfl
+        | «local» i r =>
+          cases r with
+          | val t =>
+            rcases h with (h | h) | ⟨g, σ', hg, hL, h⟩
+            · exact h.elim
+            · exact Tm.memNodes_hashIn σ t hU h
+            · have hg' : (t.eval σ).bind (fun _ => some σ.globG) = some g := hg
+              obtain ⟨_, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+              have hσ : σ'.glob = σ.glob := hL.2.1
+              obtain ⟨R, id, h1, h2⟩ := ih hφ σ' h
+              exact ⟨R, id, by rw [h1, hσ], by rw [h2, hσ]⟩
+          | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
         | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
       | _ => simp only [Upd.memNodes1, Bool.false_eq_true] at hU
     | decl U₀ x r =>
@@ -1758,7 +2150,8 @@ theorem _root_.Solidity.Fml.tkBody_memNodes {k₁ k₂ : HashKind} {fix : Bool} 
     simp only [Bool.false_eq_true, ↓reduceIte] at e
     split at e
     · rename_i hcov
-      exact (Bool.and_eq_true _ _ ▸ hcov).1
+      simp only [Bool.and_eq_true] at hcov
+      exact hcov.1.1.1
     · cases e
 
 /-- **The leaf meets its premise in a heap of the family**, where it has
@@ -1999,9 +2392,10 @@ theorem _root_.Solidity.Fml.tkBody_eq {k₁ k₂ : HashKind} {fix : Bool} {Γ : 
     · rename_i hcov
       obtain ⟨ψ₂, hψ₂, rfl⟩ := Option.map_eq_some_iff.1 e
       refine ⟨fun l hl => ?_, ψ₂, hψ₂, rfl⟩
-      have := List.all_eq_true.1 (Bool.and_eq_true _ _ ▸ hcov).2 l hl
+      simp only [Bool.and_eq_true] at hcov
+      have := List.all_eq_true.1 hcov.2 l hl
       simp only [Bool.and_eq_true] at this
-      exact this.1.1
+      exact this.1
     · cases e
 
 section Words
