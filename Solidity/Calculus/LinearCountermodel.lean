@@ -141,17 +141,26 @@ def searchCountermodel (F : AFml) (h : F.search = false) :
     Bool.noConfusion ((F.falseNode_spec h).symm.trans
       ((holds_zero (fun _ => 0) node.formula (fun _ _ => rfl)).1 ((node.correct _).1 hv)))⟩
 
-/-- Every negative arithmetic decision produces a counterassignment.
+/-- Every negative arithmetic decision produces a counterassignment: the
+walk's (`AFml.fastVerify`), or where its fuel runs out the traced search's.
 Reconstruction terminates by the same proved finite graph bound as the
 decision; it has no guessed assignment-size bound or small-value pool. -/
 def countermodel (F : AFml) (h : F.decide = false) :
     { x : Nat → Nat // ¬ F.holds x } :=
-  let cm := F.simp.searchCountermodel h
-  ⟨cm.val, fun hv => cm.property ((holds_simp cm.val F).2 hv)⟩
+  match hf : F.fastVerify with
+  | some (.inr cm) => cm
+  | some (.inl v) => absurd ((decide_iff F).2 v.down) (by rw [h]; exact Bool.false_ne_true)
+  | none =>
+    let cm := F.simp.searchCountermodel (by unfold AFml.decide at h; rw [hf] at h; exact h)
+    ⟨cm.val, fun hv => cm.property ((holds_simp cm.val F).2 hv)⟩
 
-/-- Proof or counterassignment from one traced graph traversal, with no
-unsupported or exhausted branch inside the stated arithmetic language. -/
+/-- Proof or counterassignment from the walk (`AFml.fastVerify`); where its
+fuel runs out, from one traced graph traversal, with no unsupported or
+exhausted branch inside the stated arithmetic language. -/
 def verify (F : AFml) : Sum (PLift F.Valid) { x : Nat → Nat // ¬ F.holds x } :=
+  match F.fastVerify with
+  | some r => r
+  | none =>
   let states := F.simp.nodes
   match h : states.find? (fun node => !node.formula.atZero) with
   | some node => .inr ⟨node.embed (fun _ => 0), by
@@ -162,15 +171,16 @@ def verify (F : AFml) : Sum (PLift F.Valid) { x : Nat → Nat // ¬ F.holds x } 
         ((node.correct _).1 ((holds_simp _ F).2 hv))
       exact Bool.noConfusion (hn.symm.trans ht)⟩
   | none => .inl ⟨by
-      apply (decide_iff F).1
-      show F.simp.search = true
-      rw [search_nodes]
-      apply List.all_eq_true.2
-      intro node hn
-      have hx := List.find?_eq_none.1 h node hn
-      cases he : node.formula.atZero with
-      | true => rfl
-      | false => exact (hx (by rw [he]; rfl)).elim⟩
+      have hs : F.simp.search = true := by
+        rw [search_nodes]
+        apply List.all_eq_true.2
+        intro node hn
+        have hx := List.find?_eq_none.1 h node hn
+        cases he : node.formula.atZero with
+        | true => rfl
+        | false => exact (hx (by rw [he]; rfl)).elim
+      rw [search_iff] at hs
+      exact fun x => (holds_simp x F).1 (hs x)⟩
 
 /-- Independent direct evaluation at a reconstructed assignment. -/
 def check (F : AFml) (x : Nat → Nat) : Bool :=

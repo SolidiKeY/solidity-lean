@@ -82,7 +82,7 @@ theorem flagBad_invalid : ¬ Fml.Valid flagBad :=
   fun h => flagBadCountermodel.refutes (h flagBadCountermodel.state)
 
 -- The countermodel's `k` and `j`: different keys.
-/-- info: (true, false) -/
+/-- info: (false, true) -/
 #guard_msgs in
 #eval (flagBadCountermodel.atoms.get .bool 0, flagBadCountermodel.atoms.get .bool 1)
 

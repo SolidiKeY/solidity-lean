@@ -1369,6 +1369,68 @@ feature 9: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
 proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
 `net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
 
+### Running time (the walks)
+
+Both decisions walk their derivative graphs depth first (`walk`,
+`Calculus/VisitedSet.lean`), the states seen kept in an `HSet`: a search
+tree on a hash, its buckets compared exactly, so membership is a walk down
+the tree and a comparison, not a pass over every state found.  A walk
+stops at the first state false at zero; its reconstruction is the
+counterassignment, and the rest of the graph is not built.
+
+* `AFml` (`AFml.fastVerify`, `Calculus/LinearDecision.lean`): a step reads
+  one variable's bit (`AFml.pstep`: `xⱼ = b + 2·yⱼ`), two successors where
+  `AFml.deriv` had `2^n`.  The atoms it touches are worked out by sign and
+  halved where every coefficient became even, so a round of every
+  variable halves each form back.  The formula is put in normal form first
+  (`AFml.norm`: `true`/`false` absorbed by the connectives, an atom its
+  sign settles worked out, an atom divided by its coefficients' divisor),
+  and a hypothesis a bit falsifies (`q ≤ 15` once a fifth bit of `q` is
+  `1`) closes its branch at once.  A closed walk proves the formula by
+  `AFml.valid_of_rounds`: induction on the sum of the variables, a round
+  halving all of them (`AFml.round`).
+* `QFml` (`QFml.fastVerify`, `Calculus/PresburgerDecision.lean`): the same
+  walk over `QFml.deriv`, whose `∃` lists are sorted by hash before
+  repeats are dropped (`canon`): two orders of one list are one state.  The
+  zero test of an `∃` is a walk of its own (`exTest`) that stops at the
+  first state true at zero; the states of its closed walks are remembered
+  as reaching none (`NGood`) and cut from later tests, and each `∃`'s
+  answer is memoized (`atZeroC`, `ZGood`).  The caches thread through the
+  walk (`walkC`), which is the plain walk on them (`walkC_eq`).
+
+The walks' fuel (`2^64` steps) is not proved to suffice: the normalized
+states' universe is not computed.  Where it runs out, `AFml.decide` and
+`AFml.verify` fall back to the breadth-first search whose bound is proved
+(`AFml.search_iff`), `QFml.decide` and `QFml.verify` to `QFml.search`;
+`decide_iff` holds either way.  A refutation's witness is now the walk's:
+six pinned countermodel values moved (`Examples/AutoComplete.lean`,
+`QueryArithmetic.lean`, `AliasConstraints.lean`, `ProgramReduction.lean`,
+`ReadFlattening.lean`), no verdict.
+
+`verdict` of the pins of `Examples/Decision.lean`, in the language
+server's interpreter (as a build runs the `#eval` pins), before
+(`3f5f3f4b`) and after (2026-10-25), in seconds:
+
+| Leaf | Before | After | | Leaf | Before | After |
+|---|---|---|---|---|---|---|
+| `shrOk` (`>> 4`) | 299 | 1.9 | | `netOther` | 111 | 0.002 |
+| `maskBad` (`& 7`) | 78 | 0.08 | | `netDistinct` | 40 | 1.0 |
+| `modBad` (`% 8`) | 77 | 0.08 | | `netSame` | 13 | 0.5 |
+| `modOk` (`% 8`) | 45 | 1.0 | | `apfTwo` | 12 | 0.4 |
+| `maskOk` (`& 7`) | 44 | 1.0 | | `apfTwoBad` | 6.5 | 0.01 |
+| `divBad` (`/ 3`) | 17 | 0.001 | | `above` (`∀∃`) | 27 | 0.8 |
+| `divOk` (`/ 3`) | 11 | 0.4 | | `leastHyp` | 21 | 0.5 |
+| `doubleBalance` | 25 | 0.5 | | `evenReadBad` | 6.5 | 3.2 |
+| `nested` | 7.3 | 0.03 | | the 59 pinned, in all | 877 | 16 |
+| `shlOk` (`<< 4`) | > 900 | 1.2 | | `netSwap` (four ledger reads) | not finished | 21 |
+| `sortedLe` (two-variable block) | crashed the server | 146 | | | | |
+
+`shlOk`, `netSwap` and `sortedLe` are pinned now (`proved`).  The walk's
+states: `shrOk` 27,784, `netSwap` 187,347, `sortedLe` 121,586 (a formula
+of about two thousand nodes, about a millisecond a state).  The
+`Examples/Decision.lean` build went from about fifteen minutes to 192 s,
+146 of them `sortedLe`.
+
 ### What is not proved
 
 * `DecisionTheorem` itself; it is false today (above).
@@ -1380,32 +1442,27 @@ proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
   `Tm.agreeB`/`Tm.toL`, elimination's invariant.
 * The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
   which come from the stages' fuel.
-* A time bound for the quantified decision: `QFml.verify` has no node
-  budget.  Each state has `2^n` successors (`n` the free variables), an
-  `∃` state's zero test is a reachability of its own, not memoized, and
-  an `∃` state's list keeps its order (two orders, two states).  The pins
-  take well under a second; a large leaf may not.  `quantReduction?`
-  also re-runs the front `dependentReduction?` refused.
-* A time bound with ledger reads: each read is two codes and each pair of
-  reads a consistency premise, so `netSwap` (four reads) is pinned
-  covered but its verdict is out of reach in practice.  Reads at the
-  same address are not merged.
-* Any bound on the decision's running time.  `decideLeaf_complete` says it
-  answers, not when: `AFml.decide`'s search is a breadth-first walk over
-  the reachable formulas with list membership, and a relation whose
-  coefficients are large keeps many constants apart.  A quotient by `d`
-  costs about `d` states a bit read; `<<` by `0 < k < 256` relates `x`
-  to `y` through `2^256`, so `shlOk` (`x << 4`) is pinned covered
-  (`shl_covered`) but its verdict is out of reach in practice, and the
-  masks and divisors pinned are small (`& 7`, `% 8`, `/ 3`, `>> 4`).
+* A time bound for either decision.  `decideLeaf_complete` says it
+  answers, not when.  The walks' fuel is not proved to suffice (above,
+  "Running time"); the graphs stay exponential in the worst case: an
+  `AFml` state is a formula and the variable read next, a bound `x < 2^256`
+  costs 256 rounds of every variable, and a relation whose coefficients
+  are large keeps many constants apart (a quotient by `d`, about `d`
+  constants a bit read).  A `QFml` state still has `2^n` successors (`n`
+  the free variables): `QFml.deriv` reads every free variable's bit at
+  once.  `quantReduction?` also re-runs the front `dependentReduction?`
+  refused.
+* Ledger reads: each read is two codes and each pair of reads a
+  consistency premise; reads at the same address are not merged.
+  `netSwap` (four reads, ten variables) takes the longest of the pins.
 * Array property instantiation has no size bound either: a block over `n`
   variables has `|U|ⁿ` instances, each read an occurrence of its own in
-  the flattening, so a two-variable block (`∀ i j. i <= j → a[i] <= a[j]`
-  against `a[2] <= a[5]`: nine instances, nineteen reads) is covered
-  (`sortedLe_covered`) but its verdict is out of reach in practice;
-  and a refutation's rebuilt mapping lists one entry per key below `U`'s
-  largest value, so a guard bound near `2^256` gives a refutation that
-  exists but cannot be built in practice.
+  the flattening (`sortedLe`, `∀ i j. i <= j → a[i] <= a[j]` against
+  `a[2] <= a[5]`: nine instances, nineteen reads, a formula of about two
+  thousand nodes, decided in about two minutes); and a refutation's
+  rebuilt mapping lists one entry per key below `U`'s largest value, so a
+  guard bound near `2^256` gives a refutation that exists but cannot be
+  built in practice.
 * On the fragment, `decideGoal` still answers *unknown* on:
   * a quantifier past the prefix whose body reads storage at a variable it
     binds outside the array property shapes `apfPrep` decides, or reads a
