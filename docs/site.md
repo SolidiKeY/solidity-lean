@@ -18,8 +18,9 @@ it in an editor (the page's About box has the commands).
 `.github/workflows/pages.yml` runs on every push to the default branch, and
 by hand (`workflow_dispatch`) on any branch:
 
-1. **Build** the project's libraries: `lake build Solidity SolkeyTestSuite`
-   in the root (the core and solkey's test suite), or
+1. **Build** the project's libraries: `lake build Solidity`, then
+   `lake build SolkeyTestSuite` (solkey's test suite, allowed to fail: its
+   pages then show Lean's errors and the rest still records) in the root, or
    `lake build Velvet VelvetExamples SolidityVelvet` in `Bridge/` (Mathlib
    from its cache). The two projects are separate jobs.
 2. **Record** with `node scripts/site/export.mjs --project <id> --out _site`.
