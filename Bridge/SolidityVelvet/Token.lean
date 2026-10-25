@@ -1,81 +1,84 @@
-import CaseStudies.Velvet.Std
-import CaseStudies.TestingUtil
+import SolidityVelvet.Contract
 
 /-!
 # An ERC20 token in Velvet
 
-`mint` and `transferFrom` of an ERC20 token:
+The token's storage and its `mint`, `transfer`, `approve` and
+`transferFrom`, as Solidity
+(`Bridge/SolidityVelvet/Contract.lean`).
+`allowance[owner][spender]` is what `spender` may still move from `owner`.
+A subtraction past zero reverts, and so does an addition past `2^256 - 1`:
+the `ensures` are about the calls that do not revert, and none needs a
+`require` to rule an underflow out.
 
-```solidity
-function mint(address to, uint amount) public {
-  totalSupply += amount;
-  balanceOf[to] += amount;
-}
-function transferFrom(address from, address to, uint amount) public {
-  allowance[from][msg.sender] -= amount;
-  balanceOf[from] -= amount;
-  balanceOf[to] += amount;
-}
-```
-
-Accounts are indices into the ledger (`to` is a Lean keyword, so the
-parameters are `src` and `dst`). `allowance` is the row of
-`msg.sender`, the spender: `allowance[from]` is what it may still move from
-`from`. A `mut` parameter is a storage variable the method writes, and
-`totalSupplyOld` its value on entry. The requires are the calls that do not
-revert, and amounts are unbounded `Nat`s (`Bank.lean` bounds one).
+`transfer` and `transferFrom` keep the sum of the two balances they touch,
+also when an account pays itself; their other postconditions say what
+moves when the two accounts differ.
 -/
 
 set_option loom.semantics.termination "partial"
 set_option loom.semantics.choice "demonic"
 
-section SolidityVelvetToken
+contract Token {
+  uint totalSupply;
+  mapping(address => uint) balanceOf;
+  mapping(address => mapping(address => uint)) allowance;
 
--- `totalSupply += amount; balanceOf[to] += amount;`
-method mint (mut balances : Array Nat) (mut totalSupply : Nat) (dst : Nat) (amount : Nat)
-    return (u : Unit)
-  require dst < balances.size
-  ensures totalSupply = totalSupplyOld + amount
-  ensures balances.size = balancesOld.size
-  ensures balances[dst]! = balancesOld[dst]! + amount
-  ensures ∀ j, j ≠ dst → balances[j]! = balancesOld[j]!
-  do
-    totalSupply := totalSupply + amount
-    balances[dst] += amount
-    return
+  function mint(address dst, uint amount) public
+    ensures totalSupply == old(totalSupply) + amount
+    ensures balanceOf[dst] == old(balanceOf[dst]) + amount
+    ensures forall (address a) a != dst ==> balanceOf[a] == old(balanceOf[a])
+  {
+    totalSupply += amount;
+    balanceOf[dst] += amount;
+  }
 
-prove_correct mint by
+  function transfer(address dst, uint amount) public
+    ensures balanceOf[msg.sender] + balanceOf[dst]
+      == old(balanceOf[msg.sender]) + old(balanceOf[dst])
+    ensures msg.sender != dst ==> balanceOf[msg.sender] + amount == old(balanceOf[msg.sender])
+    ensures msg.sender != dst ==> balanceOf[dst] == old(balanceOf[dst]) + amount
+  {
+    balanceOf[msg.sender] -= amount;
+    balanceOf[dst] += amount;
+  }
+
+  function approve(address spender, uint amount) public
+    ensures allowance[msg.sender][spender] == amount
+    ensures forall (address a) a != msg.sender ==> allowance[a] == old(allowance[a])
+  {
+    allowance[msg.sender][spender] = amount;
+  }
+
+  function transferFrom(address src, address dst, uint amount) public
+    ensures allowance[src][msg.sender] + amount == old(allowance[src][msg.sender])
+    ensures balanceOf[src] + balanceOf[dst] == old(balanceOf[src]) + old(balanceOf[dst])
+    ensures src != dst ==> balanceOf[src] + amount == old(balanceOf[src])
+    ensures src != dst ==> balanceOf[dst] == old(balanceOf[dst]) + amount
+    ensures forall (address a) a != src && a != dst ==> balanceOf[a] == old(balanceOf[a])
+  {
+    allowance[src][msg.sender] -= amount;
+    balanceOf[src] -= amount;
+    balanceOf[dst] += amount;
+  }
+}
+
+prove_correct Token.mint by
   loom_solve
 
-/-- info: DivM.res ((), #[0, 5], 15) -/
-#guard_msgs in
-#eval (mint #[0, 0] 10 1 5).run
-
--- The spender's allowance and the owner's balance go down, the recipient's up.
-method transferFrom (mut balances : Array Nat) (mut allowance : Array Nat)
-    (src : Nat) (dst : Nat) (amount : Nat) return (u : Unit)
-  require src < balances.size
-  require dst < balances.size
-  require src < allowance.size
-  require src ≠ dst
-  require amount ≤ allowance[src]!
-  require amount ≤ balances[src]!
-  ensures allowance[src]! + amount = allowanceOld[src]!
-  ensures balances[src]! + amount = balancesOld[src]!
-  ensures balances[dst]! = balancesOld[dst]! + amount
-  ensures ∀ j, j ≠ src → j ≠ dst → balances[j]! = balancesOld[j]!
-  ensures balances[src]! + balances[dst]! = balancesOld[src]! + balancesOld[dst]!
-  do
-    allowance[src] := allowance[src]! - amount
-    balances[src] := balances[src]! - amount
-    balances[dst] += amount
-    return
-
-prove_correct transferFrom by
+prove_correct Token.transfer by
   loom_solve
 
-/-- info: DivM.res ((), #[6, 4, 0], #[1, 0, 0]) -/
-#guard_msgs in
-#eval (transferFrom #[10, 0, 0] #[5, 0, 0] 0 1 4).run
+prove_correct Token.approve by
+  loom_solve
 
-end SolidityVelvetToken
+prove_correct Token.transferFrom by
+  loom_solve
+
+/-- info: DivM.res ((), 15, Mapping.ofList [(1, 5)]) -/
+#guard_msgs in
+#eval (Token.mint 10 default 1 5).run
+
+/-- info: DivM.res ((), Mapping.ofList [(1, 4), (0, 6)]) -/
+#guard_msgs in
+#eval (Token.transfer (Mapping.ofList [(0, 10)]) 0 1 4).run

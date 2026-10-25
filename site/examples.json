@@ -39,7 +39,7 @@
       "id": "Velvet",
       "title": "Velvet",
       "root": "Bridge",
-      "description": "Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
+      "description": "Solidity contracts verified by Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
       "examples": [
         { "group": "Solidity patterns", "file": "SolidityVelvet.lean" },
         { "group": "Solidity patterns", "file": "SolidityVelvet/Bank.lean" },

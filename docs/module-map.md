@@ -79,10 +79,11 @@ See `docs/bridge.md` for scope and commands.
 | `Bridge/SolidityBridge/LoomExamples.lean` | Loom VC generation for straight-line Solidity, a Solidity function inside a Lean bind/if program, halt-policy boundaries, and the existing invariant loop rule. |
 | `Bridge/vendor/Loom/MonadAlgebras/WP/Tactic.lean` | The upstream Loom VC-generator import closure, with two explicit instance names for editor checks; provenance and checksums in `Bridge/vendor/Loom/VENDOR.md`. |
 | `Bridge/vendor/CaseStudies/Velvet/Std.lean` | Velvet's front end (`method`, `prove_correct`, `loom_solve`), vendored verbatim from Loom's last Velvet commit with four of its examples; provenance and checksums in `Bridge/vendor/CaseStudies/VENDOR.md`. |
-| `Bridge/SolidityVelvet.lean` | Three of the core's Solidity programs as Velvet methods (a counting loop, a largest-balance scan, ERC20's `transfer`), proved by `loom_solve` and pinned by `#eval`; not related to `Stmt.run`. |
-| `Bridge/SolidityVelvet/Bank.lean` | A bank's `deposit` (bounded by `2^256`) and `withdraw` as Velvet methods. |
-| `Bridge/SolidityVelvet/Token.lean` | An ERC20 token's `mint` (with `totalSupply`) and `transferFrom` (with allowances) as Velvet methods. |
-| `Bridge/SolidityVelvet/Loops.lean` | Loops over storage arrays in Velvet: the total balance, a holder's index, the winning proposal. |
+| `Bridge/SolidityVelvet/Contract.lean` | `contract C { … }`: a Solidity contract (storage, functions, `ensures`, loop `invariant`s) read as one Velvet method per function; `Mapping`, Solidity's reverts as `assume`s. |
+| `Bridge/SolidityVelvet.lean` | Three of the core's Solidity programs as a contract (a counting loop, a largest-balance scan, ERC20's `transfer`), proved by `loom_solve` and pinned by `#eval`; not related to `Stmt.run`. |
+| `Bridge/SolidityVelvet/Bank.lean` | A bank contract: `deposit` (reverting past `2^256 - 1`), `withdraw`, `balance`. |
+| `Bridge/SolidityVelvet/Token.lean` | An ERC20 token contract: `mint`, `transfer`, `approve`, `transferFrom` over mappings. |
+| `Bridge/SolidityVelvet/Loops.lean` | A contract's loops over storage arrays: the total balance, a holder's index, the winning proposal. |
 
 | Module | What it defines |
 |---|---|
