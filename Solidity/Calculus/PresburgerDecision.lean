@@ -252,14 +252,99 @@ end
 
 /-! ### Derivatives -/
 
+/-- `true`. -/
+abbrev tru : QFml := .atom .tt []
+/-- `false`. -/
+abbrev fls : QFml := .atom .ff []
+
+/-- An atom, `true` or `false` when its formula is. -/
+def mkAtom (φ : AFml) (m : List Nat) : QFml :=
+  match φ with
+  | .tt => tru
+  | .ff => fls
+  | φ => .atom φ m
+
+/-- `¬φ`, worked out on `true` and `false`. -/
+def mkNot : QFml → QFml
+  | .atom .tt _ => fls
+  | .atom .ff _ => tru
+  | s => .not s
+
+/-- `φ ∧ ψ`, worked out when either is `false` or both are `true`. -/
+def mkAnd (s t : QFml) : QFml :=
+  match s, t with
+  | .atom .ff _, _ => fls
+  | _, .atom .ff _ => fls
+  | .atom .tt _, .atom .tt _ => tru
+  | s, t => .and s t
+
+/-- `∃ xᵢ. ⋁ S`, `false` members dropped, worked out when one is `true` or
+none is left. -/
+def mkEx (i : Nat) (l : List QFml) : QFml :=
+  if tru ∈ l then tru
+  else if (l.filter (· != fls)).isEmpty then fls
+  else .ex i (l.filter (· != fls))
+
+theorem holds_mkAtom (φ : AFml) (m : List Nat) (x : Nat → Nat) :
+    (mkAtom φ m).holds x ↔ (QFml.atom φ m).holds x := by
+  unfold mkAtom; split <;> simp only [holds, AFml.holds]
+
+theorem holds_mkNot (s : QFml) (x : Nat → Nat) : (mkNot s).holds x ↔ ¬ s.holds x := by
+  unfold mkNot; split <;> simp only [holds, AFml.holds, not_true_eq_false, not_false_eq_true]
+
+theorem holds_mkAnd (s t : QFml) (x : Nat → Nat) : (mkAnd s t).holds x ↔ s.holds x ∧ t.holds x := by
+  unfold mkAnd; split <;> simp_all only [holds, AFml.holds, false_and, and_false, and_self]
+
+theorem holds_mkEx (i : Nat) (l : List QFml) (x : Nat → Nat) :
+    (mkEx i l).holds x ↔ (QFml.ex i l).holds x := by
+  have hf : ∀ y, holdsL (l.filter (· != fls)) y ↔ holdsL l y := by
+    intro y
+    simp only [holdsL_iff, List.mem_filter, bne_iff_ne, ne_eq]
+    constructor
+    · rintro ⟨s, ⟨hs, -⟩, h⟩; exact ⟨s, hs, h⟩
+    · rintro ⟨s, hs, h⟩
+      refine ⟨s, ⟨hs, fun e => ?_⟩, h⟩
+      subst e; exact h
+  unfold mkEx
+  split
+  · next ht =>
+    simp only [holds, AFml.holds, true_iff]
+    exact ⟨0, (holdsL_iff _ l).2 ⟨tru, ht, trivial⟩⟩
+  · split
+    · next he =>
+      simp only [holds, AFml.holds, false_iff, not_exists]
+      intro n hn
+      rw [← hf] at hn
+      rw [List.isEmpty_iff.1 he] at hn
+      exact hn
+    · simp only [holds, hf]
+
+theorem mkAtom_cases (φ : AFml) (m : List Nat) :
+    mkAtom φ m = tru ∨ mkAtom φ m = fls ∨ mkAtom φ m = .atom φ m := by
+  unfold mkAtom; split <;> simp only [true_or, or_true]
+
+theorem mkNot_cases (s : QFml) : mkNot s = tru ∨ mkNot s = fls ∨ mkNot s = .not s := by
+  unfold mkNot; split <;> simp only [true_or, or_true]
+
+theorem mkAnd_cases (s t : QFml) : mkAnd s t = tru ∨ mkAnd s t = fls ∨ mkAnd s t = .and s t := by
+  unfold mkAnd; split <;> simp only [true_or, or_true]
+
+theorem mkEx_cases (i : Nat) (l : List QFml) :
+    mkEx i l = tru ∨ mkEx i l = fls ∨ mkEx i l = .ex i (l.filter (· != fls)) := by
+  unfold mkEx; split
+  · exact .inl rfl
+  · split
+    · exact .inr (.inl rfl)
+    · exact .inr (.inr rfl)
+
 mutual
 /-- **What is left of a formula once the low bits `B` are read**: each atom
 its `AFml.deriv` at its variables' bits; under `∃ xᵢ` both bits of `xᵢ`. -/
 def deriv (B : Nat → Bool) : QFml → QFml
-  | .atom φ m => .atom (φ.deriv (localBits B m φ.width)) m
-  | .not s => .not (s.deriv B)
-  | .and s t => .and (s.deriv B) (t.deriv B)
-  | .ex i ss => .ex i (uniq (derivL (setBit B i false) ss ++ derivL (setBit B i true) ss))
+  | .atom φ m => mkAtom (φ.deriv (localBits B m φ.width)) m
+  | .not s => mkNot (s.deriv B)
+  | .and s t => mkAnd (s.deriv B) (t.deriv B)
+  | .ex i ss => mkEx i (uniq (derivL (setBit B i false) ss ++ derivL (setBit B i true) ss))
 /-- The derivatives of a list. -/
 def derivL (B : Nat → Bool) : List QFml → List QFml
   | [] => []
@@ -274,13 +359,15 @@ mutual
 /-- **Reading the low bits keeps the meaning.** -/
 theorem holds_deriv : ∀ (s : QFml) (x : Nat → Nat), s.holds x ↔ (s.deriv (bitsAt x)).holds (halve x)
   | .atom φ m, x => by
-    simp only [holds, deriv]
+    simp only [deriv, holds_mkAtom, holds]
     rw [AFml.holds_deriv φ.width (fun j => x (m.getD j 0)) φ (Nat.le_refl _), lowBits_eq_map]
     rfl
-  | .not s, x => by simp only [holds, deriv]; exact not_congr (holds_deriv s x)
-  | .and s t, x => by simp only [holds, deriv]; exact and_congr (holds_deriv s x) (holds_deriv t x)
+  | .not s, x => by simp only [holds, deriv, holds_mkNot]; exact not_congr (holds_deriv s x)
+  | .and s t, x => by
+    simp only [holds, deriv, holds_mkAnd]; exact and_congr (holds_deriv s x) (holds_deriv t x)
   | .ex i ss, x => by
-    simp only [holds, deriv, holdsL_uniq, holdsL_append]
+    simp only [deriv, holds_mkEx]
+    simp only [holds, holdsL_uniq, holdsL_append]
     constructor
     · rintro ⟨n, hn⟩
       rw [holdsL_deriv ss, bitsAt_updAt, halve_updAt] at hn
@@ -364,13 +451,14 @@ theorem of_mem_lists {α : Type} {L : List α} : ∀ {k : Nat} {l : List α}, l 
       · exact of_mem_lists hl' a ha
 
 mutual
-/-- **Every formula reading bits can lead to**: an atom's `AFml.univ`;
-for `∃ xᵢ`, every list over the universe of its body. -/
+/-- **Every formula reading bits can lead to**: `true`, `false`, and one of
+the same shape: an atom's `AFml.universe`; for `∃ xᵢ`, every list over the
+universe of its body. -/
 def univ : QFml → List QFml
-  | .atom φ m => φ.universe.map (.atom · m)
-  | .not s => s.univ.map .not
-  | .and s t => s.univ.flatMap fun a => t.univ.map (.and a)
-  | .ex i ss => (lists (univL ss).length (univL ss)).map (.ex i)
+  | .atom φ m => tru :: fls :: φ.universe.map (.atom · m)
+  | .not s => tru :: fls :: s.univ.map .not
+  | .and s t => tru :: fls :: s.univ.flatMap fun a => t.univ.map (.and a)
+  | .ex i ss => tru :: fls :: (lists (univL ss).length (univL ss)).map (.ex i)
 /-- The universes of a list, joined. -/
 def univL : List QFml → List QFml
   | [] => []
@@ -382,13 +470,32 @@ theorem mem_univL {G : QFml} : ∀ {ss : List QFml}, G ∈ univL ss ↔ ∃ s �
   | s :: ss => by
     simp only [univL, List.mem_append, mem_univL, List.mem_cons, exists_eq_or_imp]
 
+theorem mem_consts {G : QFml} {l : List QFml} (h : G = tru ∨ G = fls ∨ G ∈ l) : G ∈ tru :: fls :: l := by
+  rcases h with rfl | rfl | h
+  · exact List.mem_cons_self
+  · exact List.mem_cons_of_mem _ List.mem_cons_self
+  · exact List.mem_cons_of_mem _ (List.mem_cons_of_mem _ h)
+
+theorem tru_mem_univ (F : QFml) : tru ∈ F.univ := by cases F <;> exact mem_consts (.inl rfl)
+theorem fls_mem_univ (F : QFml) : fls ∈ F.univ := by cases F <;> exact mem_consts (.inr (.inl rfl))
+
+/-- A member of a universe: `true`, `false`, or of the formula's shape. -/
+theorem mem_univ_cases {G : QFml} {l : List QFml} (h : G ∈ tru :: fls :: l) : G = tru ∨ G = fls ∨ G ∈ l := by
+  rcases List.mem_cons.1 h with h | h
+  · exact .inl h
+  · rcases List.mem_cons.1 h with h | h
+    · exact .inr (.inl h)
+    · exact .inr (.inr h)
+
 mutual
 /-- A formula is among the formulas it leads to. -/
 theorem self_mem_univ : ∀ F : QFml, F ∈ F.univ
-  | .atom φ m => List.mem_map.2 ⟨φ, AFml.self_mem_universe φ, rfl⟩
-  | .not s => List.mem_map.2 ⟨s, self_mem_univ s, rfl⟩
-  | .and s t => List.mem_flatMap.2 ⟨s, self_mem_univ s, List.mem_map.2 ⟨t, self_mem_univ t, rfl⟩⟩
-  | .ex i ss => List.mem_map.2 ⟨ss, mem_lists _ _ (self_mem_univL ss) (length_le_univL ss), rfl⟩
+  | .atom φ m => mem_consts (.inr (.inr (List.mem_map.2 ⟨φ, AFml.self_mem_universe φ, rfl⟩)))
+  | .not s => mem_consts (.inr (.inr (List.mem_map.2 ⟨s, self_mem_univ s, rfl⟩)))
+  | .and s t => mem_consts (.inr (.inr
+      (List.mem_flatMap.2 ⟨s, self_mem_univ s, List.mem_map.2 ⟨t, self_mem_univ t, rfl⟩⟩)))
+  | .ex i ss => mem_consts (.inr (.inr
+      (List.mem_map.2 ⟨ss, mem_lists _ _ (self_mem_univL ss) (length_le_univL ss), rfl⟩)))
 theorem self_mem_univL : ∀ (ss : List QFml), ∀ s ∈ ss, s ∈ univL ss
   | [], _, h => nomatch h
   | s :: ss, t, h => by
@@ -404,38 +511,62 @@ theorem length_le_univL : ∀ (ss : List QFml), ss.length ≤ (univL ss).length
     omega
 end
 
+theorem deriv_tru (B : Nat → Bool) : tru.deriv B = tru := rfl
+theorem deriv_fls (B : Nat → Bool) : fls.deriv B = fls := rfl
+
 mutual
 /-- **Reading bits stays among the formulas.** -/
 theorem deriv_mem_univ (B : Nat → Bool) : ∀ (F G : QFml), G ∈ F.univ → G.deriv B ∈ F.univ
   | .atom φ m, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
     obtain ⟨ψ, hψ, rfl⟩ := List.mem_map.1 h
-    exact List.mem_map.2 ⟨_, AFml.deriv_mem_universe _ φ ψ hψ, rfl⟩
+    rcases mkAtom_cases (ψ.deriv (localBits B m ψ.width)) m with e | e | e <;>
+      simp only [deriv, e]
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
+    · exact mem_consts (.inr (.inr (List.mem_map.2 ⟨_, AFml.deriv_mem_universe _ φ ψ hψ, rfl⟩)))
   | .not s, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
     obtain ⟨G', hG', rfl⟩ := List.mem_map.1 h
-    exact List.mem_map.2 ⟨_, deriv_mem_univ B s G' hG', rfl⟩
+    rcases mkNot_cases (G'.deriv B) with e | e | e <;> simp only [deriv, e]
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
+    · exact mem_consts (.inr (.inr (List.mem_map.2 ⟨_, deriv_mem_univ B s G' hG', rfl⟩)))
   | .and s t, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
     obtain ⟨a, ha, h'⟩ := List.mem_flatMap.1 h
     obtain ⟨b, hb, rfl⟩ := List.mem_map.1 h'
-    exact List.mem_flatMap.2 ⟨_, deriv_mem_univ B s a ha,
-      List.mem_map.2 ⟨_, deriv_mem_univ B t b hb, rfl⟩⟩
+    rcases mkAnd_cases (a.deriv B) (b.deriv B) with e | e | e <;> simp only [deriv, e]
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
+    · exact mem_consts (.inr (.inr (List.mem_flatMap.2 ⟨_, deriv_mem_univ B s a ha,
+        List.mem_map.2 ⟨_, deriv_mem_univ B t b hb, rfl⟩⟩)))
   | .ex i ss, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
     obtain ⟨l, hl, rfl⟩ := List.mem_map.1 h
     have hsub := of_mem_lists hl
-    refine List.mem_map.2 ⟨_, mem_lists _ _ ?_ ?_, rfl⟩
-    · have : ∀ a ∈ derivL (setBit B i false) l ++ derivL (setBit B i true) l, a ∈ univL ss := by
-        intro a ha
-        rw [derivL_eq_map, derivL_eq_map] at ha
-        rcases List.mem_append.1 ha with ha | ha <;>
-        · obtain ⟨g, hg, rfl⟩ := List.mem_map.1 ha
-          exact deriv_mem_univL _ ss g (hsub g hg)
-      exact fun a ha => this a ((mem_uniq a _).1 ha)
-    · apply length_le_of_nodup _ (nodup_uniq _)
+    have hin : ∀ a ∈ uniq (derivL (setBit B i false) l ++ derivL (setBit B i true) l), a ∈ univL ss := by
       intro a ha
       have ha := (mem_uniq a _).1 ha
       rw [derivL_eq_map, derivL_eq_map] at ha
       rcases List.mem_append.1 ha with ha | ha <;>
       · obtain ⟨g, hg, rfl⟩ := List.mem_map.1 ha
         exact deriv_mem_univL _ ss g (hsub g hg)
+    rcases mkEx_cases i (uniq (derivL (setBit B i false) l ++ derivL (setBit B i true) l)) with e | e | e <;>
+      simp only [deriv, e]
+    · exact tru_mem_univ _
+    · exact fls_mem_univ _
+    · refine mem_consts (.inr (.inr (List.mem_map.2 ⟨_, mem_lists _ _ ?_ ?_, rfl⟩)))
+      · exact fun a ha => hin a (List.mem_filter.1 ha).1
+      · exact length_le_of_nodup _ ((nodup_uniq _).filter _) fun a ha => hin a (List.mem_filter.1 ha).1
 theorem deriv_mem_univL (B : Nat → Bool) : ∀ (ss : List QFml) (G : QFml), G ∈ univL ss →
     G.deriv B ∈ univL ss
   | [], _, h => nomatch h
@@ -445,24 +576,39 @@ theorem deriv_mem_univL (B : Nat → Bool) : ∀ (ss : List QFml) (G : QFml), G 
     · exact List.mem_append_right _ (deriv_mem_univL B ss G h)
 end
 
+theorem free_tru : tru.free = [] := rfl
+theorem free_fls : fls.free = [] := rfl
+
 mutual
 /-- The formulas a formula leads to read no other variables. -/
 theorem free_of_mem_univ : ∀ (F G : QFml), G ∈ F.univ → ∀ j ∈ G.free, j ∈ F.free
   | .atom φ m, G, h, j, hj => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · nomatch hj
+    · nomatch hj
     obtain ⟨ψ, hψ, rfl⟩ := List.mem_map.1 h
     have hw := AFml.width_of_mem_universe φ ψ hψ
     obtain ⟨k, hk, rfl⟩ := List.mem_map.1 hj
     exact List.mem_map.2 ⟨k, List.mem_range.2 (Nat.lt_of_lt_of_le (List.mem_range.1 hk) hw), rfl⟩
   | .not s, G, h, j, hj => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · nomatch hj
+    · nomatch hj
     obtain ⟨G', hG', rfl⟩ := List.mem_map.1 h
     exact free_of_mem_univ s G' hG' j hj
   | .and s t, G, h, j, hj => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · nomatch hj
+    · nomatch hj
     obtain ⟨a, ha, h'⟩ := List.mem_flatMap.1 h
     obtain ⟨b, hb, rfl⟩ := List.mem_map.1 h'
     rcases List.mem_append.1 hj with hj | hj
     · exact List.mem_append_left _ (free_of_mem_univ s a ha j hj)
     · exact List.mem_append_right _ (free_of_mem_univ t b hb j hj)
   | .ex i ss, G, h, j, hj => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · nomatch hj
+    · nomatch hj
     obtain ⟨l, hl, rfl⟩ := List.mem_map.1 h
     obtain ⟨hj, hji⟩ := List.mem_filter.1 hj
     obtain ⟨g, hg, hjg⟩ := mem_freeL.1 hj
@@ -499,17 +645,29 @@ mutual
 /-- The formulas a formula leads to nest no deeper. -/
 theorem depth_of_mem_univ : ∀ (F G : QFml), G ∈ F.univ → G.depth ≤ F.depth
   | .atom φ m, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact Nat.zero_le _
+    · exact Nat.zero_le _
     obtain ⟨ψ, -, rfl⟩ := List.mem_map.1 h; exact Nat.le_refl _
   | .not s, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact Nat.zero_le _
+    · exact Nat.zero_le _
     obtain ⟨G', hG', rfl⟩ := List.mem_map.1 h
     exact depth_of_mem_univ s G' hG'
   | .and s t, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact Nat.zero_le _
+    · exact Nat.zero_le _
     obtain ⟨a, ha, h'⟩ := List.mem_flatMap.1 h
     obtain ⟨b, hb, rfl⟩ := List.mem_map.1 h'
     have := depth_of_mem_univ s a ha
     have := depth_of_mem_univ t b hb
     simp only [depth]; omega
   | .ex i ss, G, h => by
+    rcases mem_univ_cases h with rfl | rfl | h
+    · exact Nat.zero_le _
+    · exact Nat.zero_le _
     obtain ⟨l, hl, rfl⟩ := List.mem_map.1 h
     simp only [depth, Nat.add_le_add_iff_right]
     exact depthL_le fun g hg => depth_of_mem_univL ss g (of_mem_lists hl g hg)
@@ -767,6 +925,12 @@ theorem zeroReach_spec (i : Nat) (ss : List QFml) (Inv : QFml → Prop)
   have := h.2.2 a ha b hb
   rwa [List.map_id] at this
 
+theorem depth_le_depthL {s : QFml} : ∀ {ss : List QFml}, s ∈ ss → s.depth ≤ depthL ss
+  | _ :: _, h => by
+    rcases List.mem_cons.1 h with rfl | h
+    · exact Nat.le_max_left _ _
+    · exact Nat.le_trans (depth_le_depthL h) (Nat.le_max_right _ _)
+
 theorem lex_lt {a a' b b' : Nat} (h1 : a ≤ a') (h2 : b < b') :
     Prod.Lex (· < ·) (· < ·) (a, b) (a', b') := by
   rcases Nat.lt_or_eq_of_le h1 with h | rfl
@@ -779,12 +943,14 @@ def atZero : QFml → Bool
   | .atom φ _ => φ.atZero
   | .not s => !s.atZero
   | .and s t => s.atZero && t.atZero
-  | .ex i ss => (zeroReach i ss).attach.any fun t => t.1.atZero
+  | .ex i ss => (ss.attach.any fun t => t.1.atZero) || (zeroReach i ss).attach.any fun t => t.1.atZero
 termination_by s => (s.depth, sizeOf s)
 decreasing_by
   · exact lex_lt (Nat.le_refl _) (by simp only [not.sizeOf_spec]; omega)
   · exact lex_lt (Nat.le_max_left _ _) (by simp only [and.sizeOf_spec]; omega)
   · exact lex_lt (Nat.le_max_right _ _) (by simp only [and.sizeOf_spec]; omega)
+  · rename_i i ss
+    exact .left _ _ (Nat.lt_succ_of_le (depth_le_depthL t.2))
   · rename_i i ss
     exact .left _ _ (Nat.lt_succ_of_le (depth_of_mem_univL ss t.1 ((zeroReach_spec i ss (fun _ => True)
       (fun _ _ _ _ => trivial) (fun _ _ => trivial)).2.1 t.1 t.2).2))
@@ -819,7 +985,7 @@ theorem holds_zero : ∀ (s : QFml) (x : Nat → Nat), (∀ j ∈ s.free, x j = 
   | .ex i ss, x, h => by
     have IH : ∀ t ∈ zeroReach i ss, (t.holds (fun _ => 0) ↔ t.atZero = true) :=
       fun t ht => holds_zero t (fun _ => 0) (fun _ _ => rfl)
-    rw [atZero, any_attach_iff]
+    rw [atZero, Bool.or_eq_true, any_attach_iff, any_attach_iff]
     have hx : ∀ n, holdsL ss (updAt x i n) ↔ holdsL ss (updAt (fun _ => 0) i n) := fun n =>
       holdsL_congr ss _ _ fun j hj => by
         simp only [updAt]
@@ -847,6 +1013,7 @@ theorem holds_zero : ∀ (s : QFml) (x : Nat → Nat), (∀ j ∈ s.free, x j = 
       · exact ha _ (key true hn)
     have hI : ∀ a ∈ ss, Inv a := fun a ha n hn => ⟨n, (holdsL_iff _ ss).2 ⟨a, ha, hn⟩⟩
     obtain ⟨hseen, hR, hclosed⟩ := zeroReach_spec i ss Inv hInv hI
+    rw [or_iff_right_of_imp fun ⟨s, hs, hz⟩ => ⟨s, hseen s hs, hz⟩]
     constructor
     · rintro ⟨n, hn⟩
       obtain ⟨s, hs, hsn⟩ := (holdsL_iff _ ss).1 hn
@@ -1036,16 +1203,44 @@ theorem search_iff (root : QFml) : root.search = true ↔ root.Valid := by
     exact List.all_eq_true.2 fun n _ =>
       (holds_zero n.state (fun _ => 0) fun _ _ => rfl).1 ((n.correct _).2 (hv _))
 
-/-- **Decide** a quantified formula. -/
-def decide (root : QFml) : Bool := root.search
+mutual
+/-- Every atom simplified (`AFml.simp`). -/
+def simp : QFml → QFml
+  | .atom φ m => mkAtom φ.simp m
+  | .not s => mkNot s.simp
+  | .and s t => mkAnd s.simp t.simp
+  | .ex i ss => mkEx i (simpL ss)
+/-- Every formula of a list simplified. -/
+def simpL : List QFml → List QFml
+  | [] => []
+  | s :: ss => s.simp :: simpL ss
+end
+
+mutual
+/-- **Simplifying keeps the meaning.** -/
+theorem holds_simp : ∀ (s : QFml) (x : Nat → Nat), s.simp.holds x ↔ s.holds x
+  | .atom φ m, x => (holds_mkAtom _ m x).trans (AFml.holds_simp _ φ)
+  | .not s, x => by simp only [simp, holds_mkNot, holds]; exact not_congr (holds_simp s x)
+  | .and s t, x => by
+    simp only [simp, holds_mkAnd, holds]; exact and_congr (holds_simp s x) (holds_simp t x)
+  | .ex i ss, x => by
+    simp only [simp, holds_mkEx, holds]; exact exists_congr fun n => holdsL_simp ss _
+theorem holdsL_simp : ∀ (ss : List QFml) (x : Nat → Nat), holdsL (simpL ss) x ↔ holdsL ss x
+  | [], _ => Iff.rfl
+  | s :: ss, x => by simp only [simpL, holdsL]; exact or_congr (holds_simp s x) (holdsL_simp ss x)
+end
+
+/-- **Decide** a quantified formula: simplify its atoms, then search. -/
+def decide (root : QFml) : Bool := root.simp.search
 
 /-- **`decide` decides validity**: `true` exactly for the valid formulas. -/
-theorem decide_iff (root : QFml) : root.decide = true ↔ root.Valid := search_iff root
+theorem decide_iff (root : QFml) : root.decide = true ↔ root.Valid :=
+  (search_iff root.simp).trans (forall_congr' fun x => holds_simp root x)
 
 /-- **Proof or counterassignment** from one traversal: a reachable state
 false at zero is false at `0`, so the formula is false at its
 reconstruction. -/
-def verify (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x } :=
+def verifyCore (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x } :=
   match h : (nodes root).find? (fun n => !n.state.atZero) with
   | some n => .inr ⟨n.back (fun _ => 0), fun hv => by
       have hn : n.state.atZero = false := by simpa only [Bool.not_eq_true'] using List.find?_some h
@@ -1056,6 +1251,14 @@ def verify (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.h
       cases he : n.state.atZero with
       | true => rfl
       | false => exact (hx (by rw [he]; rfl)).elim)⟩
+
+
+/-- **Proof or counterassignment**, from one traversal of the simplified
+formula's states. -/
+def verify (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x } :=
+  match verifyCore root.simp with
+  | .inl h => .inl ⟨fun x => (holds_simp root x).1 (h.down x)⟩
+  | .inr cm => .inr ⟨cm.1, fun h => cm.2 ((holds_simp root cm.1).2 h)⟩
 
 end QFml
 
