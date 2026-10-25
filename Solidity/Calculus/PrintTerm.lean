@@ -385,6 +385,14 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
     let some r ← nameOf? r | escapeS e
     if ← keyOn then return ← `(dl_term| selectSt($(← ppSTermS ns s), $(nameIdent r):ident))
     `(dl_term| select($(← ppSTermS ns s), $(nameIdent r):ident))
+  | .sym ``Op2.anon #[L] #[s, s'] =>
+    let some rs ← listElems? L | escapeS e
+    let mut roots : Array (TSyntax `dl_term) := #[]
+    for r in rs do
+      let some r ← nameOf? r | return ← escapeS e
+      roots := roots.push (← `(dl_term| $(nameIdent r):ident))
+    let args := #[← ppSTermS ns s] ++ roots ++ #[← ppSTermS ns s']
+    `(dl_term| anon($args,*))
   | _ => escapeS e
 
 /-- What a storage `save` writes, read at `ns`. -/

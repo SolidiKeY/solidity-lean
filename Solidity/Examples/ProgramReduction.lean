@@ -109,7 +109,7 @@ def assertionClaim : Fml Bank [] := dl!{ [ assert(balances[3] > 17); ] true }
 def assertionReduction : ParameterReduction assertionClaim :=
   (programReduction? assertionClaim).get (by decide +kernel)
 
-/-- info: some 8 -/
+/-- info: some 0 -/
 #guard_msgs in
 #eval match assertionReduction.verify with
   | .inl _ => none

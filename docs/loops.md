@@ -309,14 +309,74 @@ so under the diamond `dec` must be defined wherever the invariant holds.
 **The anonymising update `{anon(body)}`** is `Fml.anonHavoc`
 (`Calculus/Fml.lean`), solkey's `#loopAnon`: `{anon(xs)}`, where `xs` is the body's
 frame, `Prog.frame` (`Calculus/Blocks.lean`: the locals of the
-loop's context the body writes, the lowering's flags included), and
-`{havoc}` inside it when the body writes storage or pays
-(`Prog.within .nonpayable`, storage and ledger together). A body outside
-`nonpayable` (memory, a push or a pop, an alias, an external call) has no
-frame, and its loop closes to `false` (`whileClose`). The frame lemma is
-`State.eq_anonHavoc` (`Semantics/RunFrame.lean`);
-`holds_anonHavoc` (`Calculus/SoundLoops.lean`) turns it into the
-premise at every loop head.
+loop's context the body writes, the lowering's flags included), and, for
+the storage, what the body's modifies set says (see "Modifies sets"
+below): nothing, the roots it may write
+(`{storage := anon(storage, L, s')}` for every storage `s'`), or, where
+it may write any root, pay or call out, `{havoc}` (storage and ledger
+together). A body outside `nonpayable` (memory, a push or a pop, an alias,
+an external call) has no frame, and its loop closes to `false`
+(`whileClose`). The frame lemmas are `State.eq_anonHavoc` (the locals)
+and `Prog.frame_keeps` (the storage, the ledger, the balance;
+`Semantics/RunFrame.lean`); `holds_anonHavoc` (`Calculus/SoundLoops.lean`)
+turns them into the premise at every loop head.
+
+**Modifies sets** (built 2026-10-25).  KeY frames a loop by its
+`assignable` clause and anonymises only the locations it lists; Dafny has
+`modifies`.  Here the set is computed, at the granularity of the roots:
+`Stmt.storeAt` (`Calculus/Blocks.lean`) is `some L`, the state variables a
+statement may write (a write's root, `Loc.root?`), or `none` where it may
+write any root (a write through an alias, which may be bound to any root),
+memory, an array's length, the ledger (a payment) or call out (a `try`, a
+value call: the callee may call back).  Three pieces:
+
+1. **The location set** is `Storage.anon L old new`
+   (`Semantics/Storage/Anon.lean`), KeY's `anon(heap, locset, anonHeap)`:
+   `old` with the roots `L` names taken from `new`, and the symbol
+   `anon(s, r₁, …, rₙ, s')` (`Op2.anon`) that writes it in a formula.
+   `Storage.Framed L σ τ` (`anon L σ τ = τ`) says that `τ` differs from
+   `σ` only there; it is reflexive, transitive and monotone in `L`, and a
+   `save` at a reference is framed by any set naming its root
+   (`Storage.Framed.save`).  The laws are folds of `SFields.set` and `get`
+   by name, so they hold for any member list, a repeated name included.
+2. **The frame theorem** is `Stmt.run_keeps`/`Prog.run_keeps`
+   (`Semantics/RunFrame.lean`): a run that ends normally ends in a storage
+   framed by the statement's modifies set, the ledger and the balance as
+   they were (`FrameKeeps`), whatever its mutability.  The lazy
+   read-over-write rules are its one-step case: a write at `q` changes
+   nothing outside `q`'s root.
+3. **The narrower anonymisation**: `Prog.frame`'s second component is
+   `Prog.storeAt body` for a `nonpayable` body (`some []` for a `view`
+   one), and `Fml.anonHavoc` reads it.  Its soundness is
+   `holds_anonHavoc` (and `holdsC_anonHavoc` with callbacks: a body with a
+   modifies set calls nobody back, `Prog.callsBack_of_storeAt`, so its
+   callback run is its run).  `sol_close` reads a root through the symbol
+   (`Storage.find_anon`, KeY's `selectOfAnon`).
+
+So an invariant no longer restates facts about storage the body never
+touches (`untouchedRoot`, `Examples/Tactics/Loops.lean`).  What is not
+here yet: a finer granularity than the root (a field, a mapping entry, an
+array slot: KeY's `(o, f)` pairs; a write at `b[i]` anonymises all of
+`b`); a modifies set through an alias (an alias bound before the loop to a
+known root could name it); memory (a body that writes memory still has no
+frame: `Prog.within` refuses it); and a callee summary with a modifies
+clause, which would let a call that writes storage be one update instead
+of inlined (`internalCallSummary` covers callees that compute values
+only).  Separation logic is not needed for any of these: disjointness can
+be stated in the location sets themselves (dynamic frames), which is the
+first step if aliasing of memory references becomes the bottleneck.
+
+*Review (2026-10-25).*  A read-only pass found no soundness gap (every
+statement whose modifies set is `some L` checked against its run; every
+statement that calls back has `none`).  Fixed after it: the anonymising
+binder and update are produced under the box under both modalities, as
+`{havoc}` is, so a diamond loop's context stays one `closeTrue` reads
+(`Hyps.boxOnly`); `Locs.union` names each root once; `#latex_program`
+prints the roots (`symDoc`'s `Op2.anon` arm); the `dl!` reader refuses a
+root that is not a state variable; `docs/options.md` and `ProvesC.invBox`'s
+docstring no longer describe the frame as a flag.  Left as it is: the
+binder's printed name `anonStorage` is the same in nested loops (it is a
+hidden binder; the update names it positionally).
 
 **The flags are typed by the invariant.** An anonymised `brk`, `ret` or
 `first` may hold anything, but the condition reads it; `lowerLoops`

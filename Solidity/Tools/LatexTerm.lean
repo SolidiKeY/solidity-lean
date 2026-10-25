@@ -315,6 +315,7 @@ def symbols : Array Sym := #[
   ⟨``Op2.zbin, "", "", none⟩, ⟨``Op2.zcmp, "", "", none⟩,
   -- Lean only: solkey has no hash
   ⟨``Op2.hash, "\\mathit{hash}", "\\mathit{hash}", none⟩,
+  ⟨``Op2.anon, "\\mathit{anon}", "\\mathit{anon}", none⟩,
   -- Op3
   ⟨``Op3.ite, "", "", none⟩,
   ⟨``Op3.save, "\\mathit{save}", "\\save", none⟩,
@@ -710,6 +711,13 @@ partial def symDoc (ns : List Expr) (e : Expr) (k : Lean.Name) (oargs xs : Array
       return (.cat #[.tx "\\fmlIf{" 3, .whole c, .tx "}{" 6, .whole a, .tx "}{" 6, .whole b, .tx "}"], 0)
     return (.cat #[.kw "if", .tx "\\;" 1, c, .tx "\\;" 1, .brk, .kw "then", .tx "\\;" 1, a,
       .tx "\\;" 1, .brk, .kw "else", .tx "\\;" 1, b], 0)
+  | ``Op2.anon =>
+    let some rs ← listElems? oargs[0]! | atom (← unknownTm e)
+    let mut roots : Array Doc := #[]
+    for r in rs do
+      let some r ← nameOf? r | return ← atom (← unknownTm e)
+      roots := roots.push (.ident r)
+    atom (.app (← fn) (#[← x 0] ++ roots ++ #[← x 1]))
   | ``Op3.modular =>
     let n := match (← whnf oargs[0]!).constName? with
       | some ``ModOp.mulmod => "mulmod"

@@ -82,7 +82,7 @@ finite replay and the actual counterstore's query refutation. -/
 def counterstore : { st : Storage Bank // nested.runStorage st = false } :=
   query_countermodel[arithmetic]
 
-/-- info: (3, 3) -/
+/-- info: (0, 0) -/
 #guard_msgs in #eval ((three.read counterstore.val).val,
   ((balance (three.read counterstore.val)).read counterstore.val).val)
 
@@ -208,7 +208,7 @@ def mixedArithmetic : mixed.Arithmetic where
 def mixedCounterstore : { st : Storage Bank // mixed.runStorage st = false } :=
   query_countermodel[mixedArithmetic]
 
-/-- info: (true, -2, 3, 3) -/
+/-- info: (true, -2, 7, 3) -/
 #guard_msgs in #eval (paused.read mixedCounterstore.val, (debt.read mixedCounterstore.val).val,
   (three.read mixedCounterstore.val).val,
   ((balance (three.read mixedCounterstore.val)).read mixedCounterstore.val).val)

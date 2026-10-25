@@ -41,6 +41,11 @@ theorem tbind_ok_inv {α β : Type} {x : TRes α} {f : α → TRes β} {b : β} 
   | error e => exact nomatch h
   | ok a => exact ⟨a, rfl, h⟩
 
+theorem TRes.ofOpt_ok {α : Type} {x : Option α} {a : α} (h : TRes.ofOpt x = .ok a) : x = some a := by
+  cases x with
+  | none => cases h
+  | some b => cases h; rfl
+
 theorem tmap_ok_inv {α β : Type} {f : α → β} {x : TRes α} {b : β} (h : x.map f = .ok b) :
     ∃ a, x = .ok a ∧ f a = b := by
   cases x with
@@ -679,6 +684,463 @@ end
 
 end Progs
 
+/-! ## The modifies set: what a run leaves of the storage
+
+The frame theorem of the roots (`docs/loops.md`, "Modifies sets"): a run of
+`s` ends in a storage framed by `s.storeAt` (`Storage.Framed`), every root
+outside it as it was, and the ledger and the balance kept, whatever `s`'s
+mutability.  A write at a reference is the one-step case
+(`Storage.Framed.save`): it changes only the root it starts at. -/
+
+section Keeps
+
+/-- What a modifies set says of the global part: nothing (`none`), or the
+storage framed by its roots, the ledger and the balance kept (`some L`). -/
+def FrameKeeps {Γ Δ : Ctx} : Option (List Name) → State C Γ → State C Δ → Prop
+  | none, _, _ => True
+  | some L, σ, τ => Storage.Framed L σ.storage τ.storage ∧ τ.net = σ.net ∧
+      τ.selfBalance = σ.selfBalance
+
+namespace FrameKeeps
+
+variable {Γ Δ Ε : Ctx}
+
+theorem refl (hv : Option (List Name)) (σ : State C Γ) : FrameKeeps hv σ σ := by
+  cases hv with
+  | none => trivial
+  | some L => exact ⟨Storage.Framed.refl L σ.storage, rfl, rfl⟩
+
+theorem trans {hv : Option (List Name)} {σ : State C Γ} {τ : State C Δ} {υ : State C Ε}
+    (h₁ : FrameKeeps hv σ τ) (h₂ : FrameKeeps hv τ υ) : FrameKeeps hv σ υ := by
+  cases hv with
+  | none => trivial
+  | some L => exact ⟨h₁.1.trans h₂.1, h₂.2.1.trans h₁.2.1, h₂.2.2.trans h₁.2.2⟩
+
+/-- A set joined on the right frames what its left part does. -/
+theorem unionL {a b : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (h : FrameKeeps a σ τ) : FrameKeeps (Locs.union a b) σ τ := by
+  cases a with
+  | none => cases b <;> trivial
+  | some L =>
+    cases b with
+    | none => trivial
+    | some M => exact ⟨h.1.right, h.2⟩
+
+theorem unionR {a b : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (h : FrameKeeps b σ τ) : FrameKeeps (Locs.union a b) σ τ := by
+  cases a with
+  | none => trivial
+  | some L =>
+    cases b with
+    | none => trivial
+    | some M =>
+      refine ⟨h.1.mono fun r hr => ?_, h.2⟩
+      by_cases hL : r ∈ L
+      · exact List.mem_append_left _ hL
+      · exact List.mem_append_right _ (List.mem_filter.2 ⟨hr, by simpa using hL⟩)
+
+/-- The locals do not count. -/
+theorem withEnv {hv : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (h : FrameKeeps hv σ τ) (e : TEnv C τ.H Ε) : FrameKeeps hv σ (τ.withEnv e) := by
+  cases hv with
+  | none => trivial
+  | some L => exact h
+
+theorem env {hv : Option (List Name)} (σ : State C Γ) (e : TEnv C σ.H Δ) :
+    FrameKeeps hv σ (σ.withEnv e) := (refl hv σ).withEnv e
+
+theorem envL {hv : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (e : TEnv C σ.H Ε) (h : FrameKeeps hv (σ.withEnv e) τ) : FrameKeeps hv σ τ := by
+  cases hv with
+  | none => trivial
+  | some L => exact h
+
+/-- A global part a frame of no mutability keeps: framed by every set. -/
+theorem ofView {hv : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (h : TGFrame .view σ τ) : FrameKeeps hv σ τ := by
+  cases hv with
+  | none => trivial
+  | some L =>
+    have hk := h.keeps (by decide)
+    refine ⟨?_, hk.2, h.selfBalance (by decide)⟩
+    show Storage.anon L σ.storage τ.storage = τ.storage
+    rw [hk.1]
+    exact Storage.Framed.refl L σ.storage
+
+/-- A run that leaves the storage, the ledger and the balance. -/
+theorem same {hv : Option (List Name)} {σ : State C Γ} {τ : State C Δ}
+    (hs : τ.storage = σ.storage) (hn : τ.net = σ.net) (hb : τ.selfBalance = σ.selfBalance) :
+    FrameKeeps hv σ τ := by
+  cases hv with
+  | none => trivial
+  | some L =>
+    refine ⟨?_, hn, hb⟩
+    show Storage.anon L σ.storage τ.storage = τ.storage
+    rw [hs]
+    exact Storage.Framed.refl L σ.storage
+
+/-- A storage written at a reference whose root the set names. -/
+theorem withStorage {L : List Name} (σ : State C Γ) {st : Storage C}
+    (h : Storage.Framed L σ.storage st) : FrameKeeps (some L) σ (σ.withStorage st) :=
+  ⟨h, rfl, rfl⟩
+
+end FrameKeeps
+
+/-! ### The root a path starts at -/
+
+mutual
+
+theorem SPath.resolveT_root {Γ : Ctx} {σ : State C Γ} : {T : Ty} → (b : SPath C Γ T) →
+    {r : SRef C T} → b.resolveT σ = .ok r → ∀ n, b.root? = some n → r.root = n
+  | _, .alias _, _, _, _, hn => by cases hn
+  | _, .loc l, _, h, n, hn => Loc.resolveT_root l h n hn
+
+theorem Loc.resolveT_root {Γ : Ctx} {σ : State C Γ} : {T : Ty} → (l : Loc C Γ T) →
+    {r : SRef C T} → l.resolveT σ = .ok r → ∀ n, l.root? = some n → r.root = n
+  | _, .root _ _, _, h, _, hn => by cases h; cases hn; rfl
+  | _, .field b _ _, _, h, n, hn => by
+    simp only [Loc.resolveT] at h
+    obtain ⟨r', hr', h⟩ := tbind_ok_inv h
+    cases h
+    exact SPath.resolveT_root b hr' n hn
+  | _, .index _ b _, _, h, n, hn => by
+    simp only [Loc.resolveT] at h
+    obtain ⟨r', hr', h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact SPath.resolveT_root b hr' n hn
+
+end
+
+/-- A write at `l` lands in the root its modifies set names. -/
+theorem Loc.resolveT_storeAt {Γ : Ctx} {σ : State C Γ} {T : Ty} {l : Loc C Γ T}
+    {r : SRef C T} (h : l.resolveT σ = .ok r) {L : List Name} (hL : l.storeAt = some L) :
+    r.root ∈ L := by
+  unfold Loc.storeAt at hL
+  cases hn : l.root? with
+  | none => rw [hn] at hL; cases hL
+  | some n =>
+    rw [hn] at hL
+    cases hL
+    rw [Loc.resolveT_root l h n hn]
+    exact List.mem_singleton_self n
+
+theorem SPath.resolveT_storeAt {Γ : Ctx} {σ : State C Γ} {T : Ty} {b : SPath C Γ T}
+    {r : SRef C T} (h : b.resolveT σ = .ok r) {L : List Name} (hL : b.root?.map ([·]) = some L) :
+    r.root ∈ L := by
+  cases hn : b.root? with
+  | none => rw [hn] at hL; cases hL
+  | some n =>
+    rw [hn] at hL
+    cases hL
+    rw [SPath.resolveT_root b h n hn]
+    exact List.mem_singleton_self n
+
+theorem opStoreT_keeps {Γ : Ctx} {σ : State C Γ} (op : BinOp) {p : PrimTy}
+    {r : SRef C (.prim p)} {v : p.Denote} {o : Out C σ.H Γ} {L : List Name} (hr : r.root ∈ L)
+    (h : opStoreT σ op r v = .ok o) : FrameKeeps (some L) σ o.st := by
+  unfold opStoreT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hs, h⟩ := tbind_ok_inv h
+  cases h
+  exact FrameKeeps.withStorage σ (Storage.Framed.save hr (TRes.ofOpt_ok hs))
+
+theorem bumpStoreT_keeps {Γ : Ctx} {σ : State C Γ} (op : IncDec) {p : PrimTy}
+    {r : SRef C (.prim p)} {o : Out C σ.H Γ} {w : p.Denote} {L : List Name} (hr : r.root ∈ L)
+    (h : bumpStoreT σ op r = .ok (o, w)) : FrameKeeps (some L) σ o.st := by
+  unfold bumpStoreT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hs, h⟩ := tbind_ok_inv h
+  cases h
+  exact FrameKeeps.withStorage σ (Storage.Framed.save hr (TRes.ofOpt_ok hs))
+
+theorem OpLoc.storeT_keeps {Γ : Ctx} {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p)
+    {σ : State C Γ} {v : p.Denote} {o : Out C σ.H Γ} (h : l.storeT σ op v = .ok o) :
+    FrameKeeps l.storeAt σ o.st := by
+  cases l with
+  | «local» i =>
+    simp only [OpLoc.storeT] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨Storage.Framed.refl _ _, rfl, rfl⟩
+  | root r _ => exact opStoreT_keeps op (List.mem_singleton_self r) h
+  | field b f hf =>
+    simp only [OpLoc.storeT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    simp only [Loc.resolveT] at hr
+    obtain ⟨r', hr', hr⟩ := tbind_ok_inv hr
+    cases hr
+    cases hL : b.root?.map ([·]) with
+    | none => show FrameKeeps (b.root?.map ([·])) σ o.st; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps (b.root?.map ([·])) σ o.st
+      rw [hL]
+      exact opStoreT_keeps op (SPath.resolveT_storeAt hr' hL) h
+  | index it b i =>
+    simp only [OpLoc.storeT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    simp only [Loc.resolveT] at hr
+    obtain ⟨r', hr', hr⟩ := tbind_ok_inv hr
+    obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+    obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+    cases hr
+    cases hL : b.root?.map ([·]) with
+    | none => show FrameKeeps (b.root?.map ([·])) σ o.st; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps (b.root?.map ([·])) σ o.st
+      rw [hL]
+      exact opStoreT_keeps op (SPath.resolveT_storeAt hr' hL) h
+  | mfield => trivial
+  | mindex => trivial
+
+theorem OpLoc.bumpT_keeps {Γ : Ctx} {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p)
+    {σ : State C Γ} {o : Out C σ.H Γ} {w : p.Denote} (h : l.bumpT σ op = .ok (o, w)) :
+    FrameKeeps l.storeAt σ o.st := by
+  cases l with
+  | «local» i =>
+    simp only [OpLoc.bumpT] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨Storage.Framed.refl _ _, rfl, rfl⟩
+  | root r _ => exact bumpStoreT_keeps op (List.mem_singleton_self r) h
+  | field b f hf =>
+    simp only [OpLoc.bumpT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    simp only [Loc.resolveT] at hr
+    obtain ⟨r', hr', hr⟩ := tbind_ok_inv hr
+    cases hr
+    cases hL : b.root?.map ([·]) with
+    | none => show FrameKeeps (b.root?.map ([·])) σ o.st; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps (b.root?.map ([·])) σ o.st
+      rw [hL]
+      exact bumpStoreT_keeps op (SPath.resolveT_storeAt hr' hL) h
+  | index it b i =>
+    simp only [OpLoc.bumpT] at h
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    simp only [Loc.resolveT] at hr
+    obtain ⟨r', hr', hr⟩ := tbind_ok_inv hr
+    obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+    obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+    cases hr
+    cases hL : b.root?.map ([·]) with
+    | none => show FrameKeeps (b.root?.map ([·])) σ o.st; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps (b.root?.map ([·])) σ o.st
+      rw [hL]
+      exact bumpStoreT_keeps op (SPath.resolveT_storeAt hr' hL) h
+  | mfield => trivial
+  | mindex => trivial
+
+/-- A call's frame entered, with no memory return: the caller's global part. -/
+theorem CallRet.enterT_keeps {Γ Γ' rs ps : Ctx} {hv : Option (List Name)} (ret : CallRet Γ rs Γ')
+    (hm : ret.noMem = true) (σ : State C ps) : FrameKeeps hv σ (ret.enterT σ).st :=
+  FrameKeeps.ofView (CallRet.enterT_frame ret hm σ)
+
+mutual
+
+/-- **The frame theorem**: a statement's run ends in a storage framed by
+its modifies set, the ledger and the balance as they were. -/
+theorem Stmt.run_keeps : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → {σ : State C Γ} →
+    {o : Out C σ.H Γ'} → s.run σ = .ok o → FrameKeeps s.storeAt σ o.st
+  | _, _, .assign l r, σ, o, h => by
+    change TRun.assign l r σ = .ok o at h
+    simp only [TRun.assign] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+    cases h
+    cases hL : l.storeAt with
+    | none => show FrameKeeps l.storeAt σ _; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps l.storeAt σ _
+      rw [hL]
+      exact FrameKeeps.withStorage σ
+        (Storage.Framed.write (Loc.resolveT_storeAt href hL) (TRes.ofOpt_ok hst))
+  | _, _, .delete l, σ, o, h => by
+    change TRun.delete l σ = .ok o at h
+    simp only [TRun.delete] at h
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+    cases h
+    cases hL : l.storeAt with
+    | none => show FrameKeeps l.storeAt σ _; rw [hL]; trivial
+    | some L =>
+      show FrameKeeps l.storeAt σ _
+      rw [hL]
+      exact FrameKeeps.withStorage σ
+        (Storage.Framed.delete (Loc.resolveT_storeAt href hL) (TRes.ofOpt_ok hst))
+  | _, _, .assignLocal i r, σ, o, h => by
+    change TRun.assignLocal i r σ = .ok o at h
+    simp only [TRun.assignLocal] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact FrameKeeps.same rfl rfl rfl
+  | _, _, .declLocal p _ init, σ, o, h => by
+    change TRun.declLocal p init σ = .ok o at h
+    cases init with
+    | none => cases h; exact FrameKeeps.same rfl rfl rfl
+    | some e =>
+      simp only [TRun.declLocal] at h
+      obtain ⟨_, _, h⟩ := tbind_ok_inv h
+      cases h
+      exact FrameKeeps.same rfl rfl rfl
+  | _, _, .opAssign op _ _ l r, σ, o, h => by
+    change TRun.opAssign op l r σ = .ok o at h
+    simp only [TRun.opAssign] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    exact OpLoc.storeT_keeps op l h
+  | _, _, .incDec op _ l, σ, o, h => by
+    change TRun.incDec op l σ = .ok o at h
+    simp only [TRun.incDec] at h
+    obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
+    cases h
+    exact OpLoc.bumpT_keeps op l hb
+  | _, _, .assignIncDec i op _ l _, σ, o, h => by
+    change TRun.assignIncDec i op l σ = .ok o at h
+    simp only [TRun.assignIncDec] at h
+    obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
+    cases h
+    exact (OpLoc.bumpT_keeps op l hb).trans (FrameKeeps.same rfl rfl rfl)
+  | _, _, .rebind i r, σ, o, h => by
+    cases r with
+    | push => trivial
+    | path p =>
+      change TRun.rebind i (.path p) σ = .ok o at h
+      simp only [TRun.rebind, ARhs.evalT] at h
+      obtain ⟨⟨st, ref⟩, hr, h⟩ := tbind_ok_inv h
+      obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+      cases hr
+      cases h
+      exact FrameKeeps.same rfl rfl rfl
+  | _, _, .declStorage R _ init, σ, o, h => by
+    change TRun.declStorage R init σ = .ok o at h
+    cases init with
+    | none => cases h; exact FrameKeeps.same rfl rfl rfl
+    | some r =>
+      cases r with
+      | push => trivial
+      | path p =>
+        simp only [TRun.declStorage, ARhs.evalT] at h
+        obtain ⟨⟨st, ref⟩, hr, h⟩ := tbind_ok_inv h
+        obtain ⟨_, _, hr⟩ := tbind_ok_inv hr
+        cases hr
+        cases h
+        exact FrameKeeps.same rfl rfl rfl
+  | _, _, .ite c thn els, σ, o, h => by
+    change TRun.ite c thn.ext thn.runR els.ext els.runR σ = .ok o at h
+    simp only [TRun.ite] at h
+    obtain ⟨v, _, h⟩ := tbind_ok_inv h
+    split at h
+    · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+      exact ((Prog.run_keeps thn h').withEnv _).unionL
+    · obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+      exact ((Prog.run_keeps els h').withEnv _).unionR
+  | _, _, .require c, σ, o, h => by
+    change TRun.require c σ = .ok o at h
+    simp only [TRun.require] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    split at h
+    · cases h; exact FrameKeeps.same rfl rfl rfl
+    · cases h
+  | _, _, .assert c, σ, o, h => by
+    change TRun.assert c σ = .ok o at h
+    simp only [TRun.assert] at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    split at h
+    · cases h; exact FrameKeeps.same rfl rfl rfl
+    · cases h
+  | _, _, .revert, _, _, h | _, _, .assumeFalse, _, _, h => by cases h
+  | _, _, .call _ args ret body, σ, o, h => by
+    show FrameKeeps (if ret.noMem then Prog.storeAt body else none) σ o.st
+    split
+    · rename_i hm
+      change TRun.call args ret body.ext body.runR σ = .ok o at h
+      rw [TRun.call_eq] at h
+      obtain ⟨a, _, h⟩ := tbind_ok_inv h
+      unfold TRun.callFrom at h
+      obtain ⟨o', hb, h⟩ := tbind_ok_inv h
+      cases h
+      exact (FrameKeeps.envL a ((CallRet.enterT_keeps ret hm _).trans
+        (Prog.run_keeps body hb))).withEnv _
+    · trivial
+  | _, _, .callRec _ _ args ret body, σ, o, h => by
+    show FrameKeeps (if ret.noMem then Prog.storeAt (body ()) else none) σ o.st
+    split
+    · rename_i hm
+      change TRun.call args ret (body ()).ext (body ()).runR σ = .ok o at h
+      rw [TRun.call_eq] at h
+      obtain ⟨a, _, h⟩ := tbind_ok_inv h
+      unfold TRun.callFrom at h
+      obtain ⟨o', hb, h⟩ := tbind_ok_inv h
+      cases h
+      exact (FrameKeeps.envL a ((CallRet.enterT_keeps ret hm _).trans
+        (Prog.run_keeps (body ()) hb))).withEnv _
+    · trivial
+  | _, _, .loop _ c body, σ, o, h => by
+    change TLoop.run (fun o : Out C σ.H _ => (body.runR o.st).map
+        fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩) (fun o => c.evalT o.st)
+        ⟨σ, List.prefix_refl _⟩ = .ok o at h
+    refine TLoop.run_induct
+      (P := fun a : Out C σ.H _ => FrameKeeps (Prog.storeAt body) σ a.st)
+      (Q := fun r => ∀ o, r = .ok o → FrameKeeps (Prog.storeAt body) σ o.st)
+      (FrameKeeps.same rfl rfl rfl) (fun a ha => ?_) (fun _ h => by cases h) o h
+    unfold TLoop.step
+    dsimp only
+    cases c.evalT a.st with
+    | error => dsimp only; intro _ h; cases h
+    | ok v =>
+      cases v with
+      | false => dsimp only; intro _ h; cases h; exact ha
+      | true =>
+        dsimp only
+        cases hb : (body.runR a.st).map
+            (fun o' => (⟨o'.st.drop body.ext, a.ext.trans o'.ext⟩ : Out C σ.H _)) with
+        | error => dsimp only; intro _ h; cases h
+        | ok a' =>
+          dsimp only
+          obtain ⟨o', hb', rfl⟩ := tmap_ok_inv hb
+          exact ha.trans ((Prog.run_keeps body hb').withEnv _)
+  | _, _, .block body, σ, o, h => by
+    change (body.runR σ).map (fun o => ⟨o.st.drop body.ext, o.ext⟩) = .ok o at h
+    obtain ⟨o', h', rfl⟩ := tmap_ok_inv h
+    exact (Prog.run_keeps body h').withEnv _
+  | _, _, .revertData ps, σ, o, h => by
+    change TRun.revertData ps σ = .ok o at h
+    unfold TRun.revertData at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+  | _, _, .assignLocalPush .., _, _, _
+  | _, _, .pushOpAssign .., _, _, _ | _, _, .pushIncDec .., _, _, _
+  | _, _, .push .., _, _, _ | _, _, .pop _, _, _, _
+  | _, _, .transfer .., _, _, _ | _, _, .send .., _, _, _
+  | _, _, .declMem .., _, _, _ | _, _, .rebindMem .., _, _, _
+  | _, _, .assignFromMem .., _, _, _ | _, _, .assignMem .., _, _, _
+  | _, _, .deleteMem .., _, _, _ | _, _, .assignNew .., _, _, _
+  | _, _, .tryCall .., _, _, _ | _, _, .callReceiver .., _, _, _
+  | _, _, .callReceiverPush .., _, _, _ | _, _, .catchData .., _, _, _ => trivial
+
+/-- **The frame theorem**, for a program. -/
+theorem Prog.run_keeps : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {σ : State C Γ} →
+    {o : Out C σ.H Γ'} → Prog.run σ P = .ok o → FrameKeeps (Prog.storeAt P) σ o.st
+  | _, _, .nil, σ, _, h => by cases h; exact FrameKeeps.same rfl rfl rfl
+  | _, _, .cons s P, σ, o, h => by
+    change TRun.seq s.runR P.runR σ = .ok o at h
+    unfold TRun.seq at h
+    split at h
+    · rename_i o₁ hs
+      obtain ⟨o₂, h₂, rfl⟩ := tmap_ok_inv h
+      exact ((Stmt.run_keeps s hs).unionL (b := Prog.storeAt P)).trans
+        (FrameKeeps.unionR (Prog.run_keeps P h₂))
+    · cases h
+
+end
+
+end Keeps
+
 /-! ## The loop frame, anonymised -/
 
 section Anon
@@ -763,19 +1225,16 @@ theorem State.eq_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ 
         fun hw => hm (hxs t i (by rwa [Nat.sub_zero] at hw)))).symm
   simp only [State.havoc, State.anon, State.withEnv, henv]
 
-/-- A loop body with a frame runs within its mutability, and its frame lists
-every local of the loop's context it may write (`Prog.frame_some`), so its
-outcome is one `{anon(xs)}`/`{havoc}` covers. -/
-theorem Prog.run_frame_anon {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy) × Idx Γ t)}
-    {hv : Bool} (hf : P.frame = some (xs, hv)) {σ : State C Γ} {o : Out C σ.H Γ₁}
-    (h : Prog.run σ P = .ok o) :
-    TGFrame (frameMut hv) σ (o.st.drop P.ext) ∧
-      ∃ b, o.st.drop P.ext = (σ.anon xs b).havoc (o.st.drop P.ext).storage
-        (o.st.drop P.ext).net (o.st.drop P.ext).selfBalance := by
-  obtain ⟨hw, hxs⟩ := Prog.frame_some hf
-  obtain ⟨hg, ha⟩ := Prog.run_frame P hw 0 h
-  have hg' : TGFrame (frameMut hv) σ (o.st.drop P.ext) := hg.withEnv _
-  exact ⟨hg', State.eq_anonHavoc hxs hg' ha⟩
+/-- **What a loop body with a frame leaves of the global part**: what its
+frame's `hv` says (`FrameKeeps`): nothing of the storage, the ledger and the
+balance when it is within no mutability, else its modifies set's frame
+(`Prog.run_keeps`). -/
+theorem Prog.frame_keeps {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Option (List Name)} (hf : P.frame = some (xs, hv)) {σ : State C Γ}
+    {o : Out C σ.H Γ₁} (h : Prog.run σ P = .ok o) : FrameKeeps hv σ (o.st.drop P.ext) := by
+  rcases (Prog.frame_some hf).1 with ⟨hw, -⟩ | ⟨-, rfl⟩
+  · exact FrameKeeps.ofView ((Prog.run_frame P hw 0 h).1.withEnv _)
+  · exact (Prog.run_keeps P h).withEnv _
 
 end Anon
 

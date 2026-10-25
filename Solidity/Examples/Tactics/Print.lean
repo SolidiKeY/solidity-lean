@@ -301,7 +301,7 @@ info: dl{
 run_meta headPremise (mkConst ``StandardExample) loopφ
 
 /--
-info: ∀ uint i; i <= 3 ∧ { anon(i) } { havoc } (i <= 3 → { se1 := i < 3 } ((se1 = true → [ i = i + 1; total = i; } ] i <= 3) ∧ (se1 = false → true)))
+info: ∀ uint i; i <= 3 ∧ { anon(i) } { storage := anon(storage, total, anonStorage) } (i <= 3 → { se1 := i < 3 } ((se1 = true → [ i = i + 1; total = i; } ] i <= 3) ∧ (se1 = false → true)))
 -/
 #guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) loopφ 1
 

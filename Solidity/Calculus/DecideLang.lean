@@ -481,6 +481,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | .read => s!"read({x.ppWith nm}, {y.ppWith nm})"
     | .mlen => s!"size({x.ppWith nm}, {y.ppWith nm})"
     | .hash k => s!"{k.toStr}({x.ppWith nm}, {y.ppWith nm})"
+    | .anon L => s!"anon({x.ppWith nm}, {", ".intercalate L}, {y.ppWith nm})"
     | .copyMem => s!"copyMem({x.ppWith nm}, {y.ppWith nm})"
     | .iread => s!"read({x.ppWith nm}, {y.ppWith nm})"
     | .copy _ => s!"copy({x.ppWith nm}, {y.ppWith nm})"

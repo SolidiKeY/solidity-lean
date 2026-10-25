@@ -1,4 +1,5 @@
 import Lean
+import Solidity.Calculus.VisitedSet
 
 /-!
 # Complete decision of linear equations and inequalities over naturals
@@ -872,18 +873,652 @@ theorem AFml.search_iff (F : AFml) : F.search = true ↔ F.Valid := by
     rw [hS] at this
     exact absurd this (by simp only [Option.isSome_none, Bool.false_eq_true, not_false_eq_true])
 
-/-- **Decide** a formula: simplify it, then search. -/
-def AFml.decide (F : AFml) : Bool := F.simp.search
+/-! ## Normal forms
+
+What the search walks is simplified at every state, not only at the start
+(`AFml.norm`): `true` and `false` absorbed by the connectives (`tt ∧ φ` is
+`φ`, `φ → ff` is `¬φ`, `¬¬φ` is `φ`); an atom whose sign settles it worked
+out (`a·x ≤ c` with every coefficient at most `0` and `c ≥ 0` is `true`;
+with every coefficient at least `0` and `c < 0` it is `false`, and so is
+such an equation); an atom divided by the greatest common divisor of its
+coefficients (`16·x - 2^256·q ≤ c` is `x - 2^252·q ≤ ⌊c/16⌋`, an equation
+whose constant it does not divide is `false`).  Each step keeps the
+meaning (`AFml.holds_norm`) and reads no more variables
+(`AFml.width_norm`).  A hypothesis that a bit read makes false
+(`x ≤ 15` once a fifth bit of `x` is `1`) so closes its branch at once. -/
+
+/-- The greatest common divisor of the coefficients (`0` for the zero form). -/
+def Lin.gcdAll : Lin → Nat
+  | [] => 0
+  | a :: as => Nat.gcd a.natAbs (Lin.gcdAll as)
+
+/-- Every coefficient divided by `g`. -/
+def Lin.divBy (g : Int) (as : Lin) : Lin := as.map (· / g)
+
+theorem Lin.gcdAll_dvd : ∀ (as : Lin), ∀ a ∈ as, ((Lin.gcdAll as : Nat) : Int) ∣ a
+  | [], _, h => nomatch h
+  | b :: as, a, h => by
+    rcases List.mem_cons.1 h with rfl | h
+    · exact Int.dvd_natAbs.1 (Int.natCast_dvd_natCast.2 (Nat.gcd_dvd_left _ _))
+    · exact Int.dvd_trans (Int.natCast_dvd_natCast.2 (Nat.gcd_dvd_right _ _)) (Lin.gcdAll_dvd as a h)
+
+theorem Lin.eval_divBy (g : Int) : ∀ (as : Lin), (∀ a ∈ as, g ∣ a) → ∀ x,
+    as.eval x = g * (as.divBy g).eval x
+  | [], _, _ => by simp only [eval, divBy, List.map_nil, Int.mul_zero]
+  | a :: as, h, x => by
+    have ih := Lin.eval_divBy g as (fun b hb => h b (.tail _ hb)) (shift x)
+    have ha : g * (a / g) = a := Int.mul_ediv_cancel' (h a (.head _))
+    simp only [divBy, List.map_cons] at ih ⊢
+    simp only [eval, ih, Int.mul_add, ← Int.mul_assoc, ha]
+
+theorem Lin.length_divBy (g : Int) (as : Lin) : (as.divBy g).length = as.length := List.length_map _
+
+theorem Lin.eval_nonneg : ∀ (as : Lin), (∀ a ∈ as, 0 ≤ a) → ∀ x, 0 ≤ as.eval x
+  | [], _, _ => Int.le_refl 0
+  | a :: as, h, x => by
+    have := Lin.eval_nonneg as (fun b hb => h b (.tail _ hb)) (shift x)
+    have ha := h a (.head _)
+    simp only [eval]
+    have : 0 ≤ a * (x 0 : Int) := Int.mul_nonneg ha (Int.natCast_nonneg _)
+    omega
+
+theorem Lin.eval_nonpos : ∀ (as : Lin), (∀ a ∈ as, a ≤ 0) → ∀ x, as.eval x ≤ 0
+  | [], _, _ => Int.le_refl 0
+  | a :: as, h, x => by
+    have := Lin.eval_nonpos as (fun b hb => h b (.tail _ hb)) (shift x)
+    have ha := h a (.head _)
+    simp only [eval]
+    have : a * (x 0 : Int) ≤ 0 := Int.mul_nonpos_of_nonpos_of_nonneg ha (Int.natCast_nonneg _)
+    omega
+
+theorem Lin.length_trim_le : ∀ (as : Lin), as.trim.length ≤ as.length
+  | [] => Nat.le_refl _
+  | a :: as => by
+    have := Lin.length_trim_le as
+    simp only [Lin.trim]
+    split <;> simp only [List.length_nil, List.length_cons] <;> omega
+
+/-- Every coefficient a multiple of `g`. -/
+def Lin.allDvd (g : Int) (a : Lin) : Bool := a.all (· % g = 0)
+
+theorem Lin.dvd_of_allDvd {g : Int} {a : Lin} (h : a.allDvd g = true) : ∀ b ∈ a, g ∣ b := by
+  intro b hb
+  simp only [Lin.allDvd, List.all_eq_true, decide_eq_true_eq] at h
+  exact Int.dvd_of_emod_eq_zero (h b hb)
+
+/-- `a·x = c`, worked out by sign, divided by `g` where `g` divides every
+coefficient (`false` where it does not divide `c`). -/
+def AFml.atomEqBy (g : Int) (a : Lin) (c : Int) : AFml :=
+  if (a.all (0 ≤ ·) && c < 0) || (a.all (· ≤ 0) && 0 < c) then .ff
+  else if 1 < g && a.allDvd g then (if c % g = 0 then .eq (a.divBy g) (c / g) else .ff)
+  else .eq a c
+
+/-- `a·x ≤ c`, worked out by sign, divided by `g` where `g` divides every
+coefficient. -/
+def AFml.atomLeBy (g : Int) (a : Lin) (c : Int) : AFml :=
+  if a.all (· ≤ 0) && 0 ≤ c then .tt
+  else if a.all (0 ≤ ·) && c < 0 then .ff
+  else if 1 < g && a.allDvd g then .le (a.divBy g) (c / g)
+  else .le a c
+
+/-- `a·x = c` on a trimmed form: the zero form worked out, the rest divided
+by the coefficients' divisor. -/
+def AFml.atomEq (a : Lin) (c : Int) : AFml :=
+  if a = [] then (if c = 0 then .tt else .ff) else AFml.atomEqBy a.gcdAll a c
+
+/-- `a·x ≤ c` on a trimmed form. -/
+def AFml.atomLe (a : Lin) (c : Int) : AFml :=
+  if a = [] then (if 0 ≤ c then .tt else .ff) else AFml.atomLeBy a.gcdAll a c
+
+theorem AFml.holds_atomEqBy (x : Nat → Nat) (g : Int) (a : Lin) (c : Int) :
+    (AFml.atomEqBy g a c).holds x ↔ a.eval x = c := by
+  unfold AFml.atomEqBy
+  split
+  · next h =>
+    simp only [holds, false_iff]
+    simp only [Bool.or_eq_true, Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq] at h
+    rcases h with ⟨h, hc⟩ | ⟨h, hc⟩
+    · have := Lin.eval_nonneg a h x; omega
+    · have := Lin.eval_nonpos a h x; omega
+  · split
+    · next hg =>
+      simp only [Bool.and_eq_true, decide_eq_true_eq] at hg
+      have hd := Lin.eval_divBy g a (Lin.dvd_of_allDvd hg.2) x
+      split
+      · next hc =>
+        simp only [holds]
+        rw [hd]
+        have hc' : g * (c / g) = c := Int.mul_ediv_cancel' (Int.dvd_of_emod_eq_zero hc)
+        constructor
+        · intro h; rw [h, hc']
+        · intro h
+          rw [← hc'] at h
+          exact Int.eq_of_mul_eq_mul_left (by omega) h
+      · next hc =>
+        simp only [holds, false_iff]
+        intro h
+        rw [hd] at h
+        exact hc (Int.emod_eq_zero_of_dvd ⟨_, h.symm⟩)
+    · rfl
+
+theorem AFml.holds_atomLeBy (x : Nat → Nat) (g : Int) (a : Lin) (c : Int) :
+    (AFml.atomLeBy g a c).holds x ↔ a.eval x ≤ c := by
+  unfold AFml.atomLeBy
+  split
+  · next h =>
+    simp only [holds, true_iff]
+    simp only [Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq] at h
+    have := Lin.eval_nonpos a h.1 x; omega
+  · split
+    · next h =>
+      simp only [holds, false_iff]
+      simp only [Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq] at h
+      have := Lin.eval_nonneg a h.1 x; omega
+    · split
+      · next hg =>
+        simp only [Bool.and_eq_true, decide_eq_true_eq] at hg
+        have hd := Lin.eval_divBy g a (Lin.dvd_of_allDvd hg.2) x
+        simp only [holds]
+        rw [hd, Int.le_ediv_iff_mul_le (by omega), Int.mul_comm]
+      · rfl
+
+theorem AFml.holds_atomEq (x : Nat → Nat) (a : Lin) (c : Int) :
+    (AFml.atomEq a c).holds x ↔ a.eval x = c := by
+  unfold AFml.atomEq
+  split
+  · next he => subst he; split <;> simp only [holds, Lin.eval] <;> grind
+  · exact holds_atomEqBy x _ a c
+
+theorem AFml.holds_atomLe (x : Nat → Nat) (a : Lin) (c : Int) :
+    (AFml.atomLe a c).holds x ↔ a.eval x ≤ c := by
+  unfold AFml.atomLe
+  split
+  · next he => subst he; split <;> simp only [holds, Lin.eval] <;> grind
+  · exact holds_atomLeBy x _ a c
+
+theorem AFml.width_atomEqBy (g : Int) (a : Lin) (c : Int) : (AFml.atomEqBy g a c).width ≤ a.length := by
+  unfold AFml.atomEqBy
+  split
+  · simp only [width, Nat.zero_le]
+  · split
+    · split <;> simp only [width, Lin.length_divBy, Nat.le_refl, Nat.zero_le]
+    · simp only [width, Nat.le_refl]
+
+theorem AFml.width_atomLeBy (g : Int) (a : Lin) (c : Int) : (AFml.atomLeBy g a c).width ≤ a.length := by
+  unfold AFml.atomLeBy
+  split
+  · simp only [width, Nat.zero_le]
+  · split
+    · simp only [width, Nat.zero_le]
+    · split
+      · simp only [width, Lin.length_divBy, Nat.le_refl]
+      · simp only [width, Nat.le_refl]
+
+theorem AFml.width_atomEq (a : Lin) (c : Int) : (AFml.atomEq a c).width ≤ a.length := by
+  unfold AFml.atomEq
+  split
+  · split <;> simp only [width, Nat.zero_le]
+  · exact width_atomEqBy _ a c
+
+theorem AFml.width_atomLe (a : Lin) (c : Int) : (AFml.atomLe a c).width ≤ a.length := by
+  unfold AFml.atomLe
+  split
+  · split <;> simp only [width, Nat.zero_le]
+  · exact width_atomLeBy _ a c
+
+/-- `¬φ`, with `¬¬φ` worked out too. -/
+def AFml.nNot : AFml → AFml
+  | .tt => .ff
+  | .ff => .tt
+  | .not φ => φ
+  | φ => .not φ
+
+/-- `φ ∧ ψ`, `true` absorbed. -/
+def AFml.nAnd (φ ψ : AFml) : AFml :=
+  match φ, ψ with
+  | .ff, _ => .ff
+  | _, .ff => .ff
+  | .tt, ψ => ψ
+  | φ, .tt => φ
+  | φ, ψ => .and φ ψ
+
+/-- `φ → ψ`, `true` and `false` absorbed. -/
+def AFml.nImp (φ ψ : AFml) : AFml :=
+  match φ, ψ with
+  | .ff, _ => .tt
+  | _, .tt => .tt
+  | .tt, ψ => ψ
+  | φ, .ff => φ.nNot
+  | φ, ψ => .imp φ ψ
+
+theorem AFml.holds_nNot (x : Nat → Nat) (φ : AFml) : (φ.nNot).holds x ↔ ¬ φ.holds x := by
+  unfold AFml.nNot; split <;> simp only [holds, not_true_eq_false, not_false_eq_true, Classical.not_not]
+
+theorem AFml.holds_nAnd (x : Nat → Nat) (φ ψ : AFml) : (φ.nAnd ψ).holds x ↔ φ.holds x ∧ ψ.holds x := by
+  unfold AFml.nAnd; split <;> simp only [holds, false_and, and_false, true_and, and_true]
+
+theorem AFml.holds_nImp (x : Nat → Nat) (φ ψ : AFml) : (φ.nImp ψ).holds x ↔ (φ.holds x → ψ.holds x) := by
+  unfold AFml.nImp; split <;> simp only [holds, holds_nNot, false_implies, implies_true, true_implies, imp_false]
+
+theorem AFml.width_nNot (φ : AFml) : φ.nNot.width ≤ φ.width := by
+  unfold AFml.nNot; split <;> simp only [width, Nat.le_refl]
+
+theorem AFml.width_nAnd (φ ψ : AFml) : (φ.nAnd ψ).width ≤ max φ.width ψ.width := by
+  unfold AFml.nAnd; split <;> simp only [width] <;> omega
+
+theorem AFml.width_nImp (φ ψ : AFml) : (φ.nImp ψ).width ≤ max φ.width ψ.width := by
+  unfold AFml.nImp; split
+  all_goals first
+    | (simp only [width]; omega)
+    | exact Nat.le_trans (width_nNot _) (Nat.le_max_left _ _)
+
+/-- **The normal form**: every atom and connective worked out. -/
+def AFml.norm : AFml → AFml
+  | .eq a c => AFml.atomEq a.trim c
+  | .le a c => AFml.atomLe a.trim c
+  | .not φ => φ.norm.nNot
+  | .and φ ψ => φ.norm.nAnd ψ.norm
+  | .imp φ ψ => φ.norm.nImp ψ.norm
+  | φ => φ
+
+theorem AFml.holds_norm (x : Nat → Nat) : (φ : AFml) → (φ.norm.holds x ↔ φ.holds x)
+  | .tt | .ff => Iff.rfl
+  | .eq a c => by rw [norm, holds_atomEq, Lin.eval_trim]; rfl
+  | .le a c => by rw [norm, holds_atomLe, Lin.eval_trim]; rfl
+  | .not φ => by rw [norm, holds_nNot, AFml.holds_norm x φ]; rfl
+  | .and φ ψ => by rw [norm, holds_nAnd, AFml.holds_norm x φ, AFml.holds_norm x ψ]; rfl
+  | .imp φ ψ => by rw [norm, holds_nImp, AFml.holds_norm x φ, AFml.holds_norm x ψ]; rfl
+
+theorem AFml.width_norm : (φ : AFml) → φ.norm.width ≤ φ.width
+  | .tt | .ff => Nat.le_refl _
+  | .eq a c => Nat.le_trans (width_atomEq _ _) (Lin.length_trim_le a)
+  | .le a c => Nat.le_trans (width_atomLe _ _) (Lin.length_trim_le a)
+  | .not φ => Nat.le_trans (width_nNot _) (AFml.width_norm φ)
+  | .and φ ψ => by
+    have := width_nAnd φ.norm ψ.norm
+    have := AFml.width_norm φ; have := AFml.width_norm ψ
+    simp only [norm, width] at *; omega
+  | .imp φ ψ => by
+    have := width_nImp φ.norm ψ.norm
+    have := AFml.width_norm φ; have := AFml.width_norm ψ
+    simp only [norm, width] at *; omega
+
+/-! ## One variable at a time
+
+`AFml.deriv` reads the low bit of every variable at once: `2^n` successors
+a state, past reach at ten variables.  The walk reads one variable's bit at
+a time instead (`AFml.pderiv`): `xⱼ = b + 2·yⱼ` substituted, so `a·x = c`
+becomes `a'·x = c - aⱼ·b`, `a'` the form with `aⱼ` doubled.  Two
+successors a state; after a round of every variable each form is doubled,
+and the normal form's divisor (`AFml.norm`) halves it back.  A state is a
+formula and the variable read next (`AFml.Reached`). -/
+
+/-- `x` with the variable `j` set to `n`. -/
+def setAt (x : Nat → Nat) (j n : Nat) : Nat → Nat := fun i => if i = j then n else x i
+
+/-- The coefficient of the variable `j`. -/
+def Lin.coef : Nat → Lin → Int
+  | _, [] => 0
+  | 0, a :: _ => a
+  | j + 1, _ :: as => Lin.coef j as
+
+/-- The coefficient of the variable `j` doubled. -/
+def Lin.dbl : Nat → Lin → Lin
+  | _, [] => []
+  | 0, a :: as => (2 * a) :: as
+  | j + 1, a :: as => a :: Lin.dbl j as
+
+theorem Lin.length_dbl : ∀ (j : Nat) (as : Lin), (Lin.dbl j as).length = as.length
+  | 0, [] | _ + 1, [] => rfl
+  | 0, _ :: _ => rfl
+  | j + 1, _ :: as => by simp only [dbl, List.length_cons, Lin.length_dbl j as]
+
+theorem shift_setAt (x : Nat → Nat) (j n : Nat) : shift (setAt x (j + 1) n) = setAt (shift x) j n := by
+  funext i; simp only [shift, setAt, Nat.add_right_cancel_iff]
+
+theorem shift_setAt_zero (x : Nat → Nat) (n : Nat) : shift (setAt x 0 n) = shift x := by
+  funext i; simp only [shift, setAt, Nat.add_one_ne_zero, ↓reduceIte]
+
+/-- **A form splits at one bit**: `xⱼ` is its low bit plus twice its half. -/
+theorem Lin.eval_dbl : ∀ (j : Nat) (as : Lin) (x : Nat → Nat),
+    as.eval x = Lin.coef j as * ((x j % 2 : Nat) : Int) + (Lin.dbl j as).eval (setAt x j (x j / 2))
+  | 0, [], _ | _ + 1, [], _ => by simp only [eval, coef, dbl, Int.zero_mul, Int.add_zero]
+  | 0, a :: as, x => by
+    simp only [eval, coef, dbl, shift_setAt_zero]
+    have hx : ((x 0 : Nat) : Int) = 2 * ((x 0 / 2 : Nat) : Int) + ((x 0 % 2 : Nat) : Int) := by omega
+    have h0 : setAt x 0 (x 0 / 2) 0 = x 0 / 2 := by simp only [setAt, ↓reduceIte]
+    rw [h0, hx]
+    grind
+  | j + 1, a :: as, x => by
+    simp only [eval, coef, dbl, shift_setAt]
+    have h0 : setAt x (j + 1) (x (j + 1) / 2) 0 = x 0 := by
+      simp only [setAt, Nat.right_eq_add, Nat.add_one_ne_zero, ↓reduceIte]
+    rw [h0, Lin.eval_dbl j as (shift x)]
+    simp only [shift]
+    omega
+
+/-- What is left of a formula once the low bit `b` of the variable `j` is
+read. -/
+def AFml.pderiv (j : Nat) (b : Bool) : AFml → AFml
+  | .eq a c => .eq (Lin.dbl j a) (c - if b then Lin.coef j a else 0)
+  | .le a c => .le (Lin.dbl j a) (c - if b then Lin.coef j a else 0)
+  | .not φ => .not (φ.pderiv j b)
+  | .and φ ψ => .and (φ.pderiv j b) (ψ.pderiv j b)
+  | .imp φ ψ => .imp (φ.pderiv j b) (ψ.pderiv j b)
+  | φ => φ
+
+theorem AFml.width_pderiv (j : Nat) (b : Bool) : (φ : AFml) → (φ.pderiv j b).width = φ.width
+  | .tt | .ff => rfl
+  | .eq a c | .le a c => by simp only [pderiv, width, Lin.length_dbl]
+  | .not φ => by simp only [pderiv, width, AFml.width_pderiv j b φ]
+  | .and φ ψ | .imp φ ψ => by simp only [pderiv, width, AFml.width_pderiv j b φ, AFml.width_pderiv j b ψ]
+
+/-- **Reading one bit keeps the meaning**: `φ` holds where `xⱼ` is
+`b + 2·yⱼ` exactly when what is left of it at `b` holds at `y`. -/
+theorem AFml.holds_pderiv (j : Nat) (b : Bool) (y : Nat → Nat) :
+    (φ : AFml) → (φ.holds (setAt y j ((if b then 1 else 0) + 2 * y j)) ↔ (φ.pderiv j b).holds y)
+  | .tt | .ff => Iff.rfl
+  | .eq a c => by
+    have hs : setAt (setAt y j ((if b then 1 else 0) + 2 * y j)) j
+        ((setAt y j ((if b then 1 else 0) + 2 * y j)) j / 2) = y := by
+      funext i; simp only [setAt]; split <;> (try subst i) <;> (cases b <;> simp only [↓reduceIte, Bool.false_eq_true]) <;> omega
+    have hm : (setAt y j ((if b then 1 else 0) + 2 * y j)) j % 2 = if b then 1 else 0 := by
+      simp only [setAt, ↓reduceIte]; cases b <;> simp only [↓reduceIte, Bool.false_eq_true] <;> omega
+    simp only [holds, pderiv]
+    rw [Lin.eval_dbl j a, hs, hm]
+    cases b <;> simp only [↓reduceIte, Bool.false_eq_true] <;> omega
+  | .le a c => by
+    have hs : setAt (setAt y j ((if b then 1 else 0) + 2 * y j)) j
+        ((setAt y j ((if b then 1 else 0) + 2 * y j)) j / 2) = y := by
+      funext i; simp only [setAt]; split <;> (try subst i) <;> (cases b <;> simp only [↓reduceIte, Bool.false_eq_true]) <;> omega
+    have hm : (setAt y j ((if b then 1 else 0) + 2 * y j)) j % 2 = if b then 1 else 0 := by
+      simp only [setAt, ↓reduceIte]; cases b <;> simp only [↓reduceIte, Bool.false_eq_true] <;> omega
+    simp only [holds, pderiv]
+    rw [Lin.eval_dbl j a, hs, hm]
+    cases b <;> simp only [↓reduceIte, Bool.false_eq_true] <;> omega
+  | .not φ => by simp only [holds, pderiv, AFml.holds_pderiv j b y φ]
+  | .and φ ψ => by simp only [holds, pderiv, AFml.holds_pderiv j b y φ, AFml.holds_pderiv j b y ψ]
+  | .imp φ ψ => by simp only [holds, pderiv, AFml.holds_pderiv j b y φ, AFml.holds_pderiv j b y ψ]
+
+theorem Lin.dbl_of_coef_zero : ∀ (j : Nat) (as : Lin), Lin.coef j as = 0 → Lin.dbl j as = as
+  | 0, [], _ | _ + 1, [], _ => rfl
+  | 0, a :: as, h => by simp only [coef] at h; simp only [dbl, h, Int.mul_zero]
+  | j + 1, a :: as, h => by simp only [coef] at h; simp only [dbl, Lin.dbl_of_coef_zero j as h]
+
+/-- **One step of the walk**: `AFml.pderiv` with the atoms that read the
+variable worked out (`AFml.atomEqBy 2`: halved where every coefficient
+became even), the others kept, and the connectives worked out. -/
+def AFml.pstep (j : Nat) (b : Bool) : AFml → AFml
+  | .eq a c =>
+    if Lin.coef j a = 0 then .eq a c
+    else AFml.atomEqBy 2 (Lin.dbl j a) (c - if b then Lin.coef j a else 0)
+  | .le a c =>
+    if Lin.coef j a = 0 then .le a c
+    else AFml.atomLeBy 2 (Lin.dbl j a) (c - if b then Lin.coef j a else 0)
+  | .not φ => (φ.pstep j b).nNot
+  | .and φ ψ => (φ.pstep j b).nAnd (ψ.pstep j b)
+  | .imp φ ψ => (φ.pstep j b).nImp (ψ.pstep j b)
+  | φ => φ
+
+theorem AFml.holds_pstep (j : Nat) (b : Bool) (y : Nat → Nat) :
+    (φ : AFml) → ((φ.pstep j b).holds y ↔ (φ.pderiv j b).holds y)
+  | .tt | .ff => Iff.rfl
+  | .eq a c => by
+    simp only [pstep, pderiv]
+    split
+    · next h => simp only [holds, Lin.dbl_of_coef_zero j a h, h, ite_self, Int.sub_zero]
+    · rw [holds_atomEqBy]; rfl
+  | .le a c => by
+    simp only [pstep, pderiv]
+    split
+    · next h => simp only [holds, Lin.dbl_of_coef_zero j a h, h, ite_self, Int.sub_zero]
+    · rw [holds_atomLeBy]; rfl
+  | .not φ => by simp only [pstep, pderiv, holds_nNot, holds, AFml.holds_pstep j b y φ]
+  | .and φ ψ => by
+    simp only [pstep, pderiv, holds_nAnd, holds, AFml.holds_pstep j b y φ, AFml.holds_pstep j b y ψ]
+  | .imp φ ψ => by
+    simp only [pstep, pderiv, holds_nImp, holds, AFml.holds_pstep j b y φ, AFml.holds_pstep j b y ψ]
+
+theorem AFml.width_pstep (j : Nat) (b : Bool) : (φ : AFml) → (φ.pstep j b).width ≤ φ.width
+  | .tt | .ff => Nat.le_refl _
+  | .eq a c => by
+    simp only [pstep]; split
+    · exact Nat.le_refl _
+    · exact Nat.le_trans (width_atomEqBy _ _ _) (by rw [Lin.length_dbl]; exact Nat.le_refl _)
+  | .le a c => by
+    simp only [pstep]; split
+    · exact Nat.le_refl _
+    · exact Nat.le_trans (width_atomLeBy _ _ _) (by rw [Lin.length_dbl]; exact Nat.le_refl _)
+  | .not φ => Nat.le_trans (width_nNot _) (AFml.width_pstep j b φ)
+  | .and φ ψ => by
+    have := width_nAnd (φ.pstep j b) (ψ.pstep j b)
+    have := AFml.width_pstep j b φ; have := AFml.width_pstep j b ψ
+    simp only [pstep, width] at *; omega
+  | .imp φ ψ => by
+    have := width_nImp (φ.pstep j b) (ψ.pstep j b)
+    have := AFml.width_pstep j b φ; have := AFml.width_pstep j b ψ
+    simp only [pstep, width] at *; omega
+
+/-- The variables of a round: at least one, so that a formula reading none
+still steps. -/
+def AFml.roundLen (F : AFml) : Nat := max F.width 1
+
+/-- The variable read after `j` in a round of `m`. -/
+def nextVar (m j : Nat) : Nat := if j + 1 < m then j + 1 else 0
+
+theorem sumTo_congr : ∀ (n : Nat) (x y : Nat → Nat), (∀ i < n, x i = y i) → sumTo n x = sumTo n y
+  | 0, _, _, _ => rfl
+  | n + 1, x, y, h => by
+    simp only [sumTo]
+    rw [h 0 (Nat.zero_lt_succ n), sumTo_congr n (shift x) (shift y)
+      (fun i hi => h (i + 1) (Nat.add_lt_add_right hi 1))]
+
+/-- The variables from `k` to `m` halved. -/
+def halveFrom (m k : Nat) (x : Nat → Nat) : Nat → Nat := fun i => if k ≤ i ∧ i < m then x i / 2 else x i
+
+/-- **A round**: from a state at the variable `k`, the bits of `x` read to
+the end of the round reach a state at the first variable, about `x` with
+the variables from `k` on halved. -/
+theorem AFml.round (m : Nat) (S : AFml × Nat → Prop)
+    (hc : ∀ G j, S (G, j) → j < m → ∀ b, S (G.pstep j b, nextVar m j)) :
+    ∀ d k G, k + d = m → k < m → S (G, k) → ∀ x, ∃ G', S (G', 0) ∧ (G.holds x ↔ G'.holds (halveFrom m k x))
+  | 0, k, _, h, hk, _, _ => by omega
+  | d + 1, k, G, h, hk, hS, x => by
+    have hstep : G.holds x ↔ (G.pstep k (x k % 2 == 1)).holds (setAt x k (x k / 2)) := by
+      rw [holds_pstep, ← holds_pderiv]
+      have : setAt (setAt x k (x k / 2)) k ((if (x k % 2 == 1) then 1 else 0) + 2 * setAt x k (x k / 2) k) = x := by
+        funext i
+        simp only [setAt]
+        split
+        · subst i
+          rcases Nat.mod_two_eq_zero_or_one (x k) with h0 | h0 <;> simp only [h0] <;> simp <;> omega
+        · rfl
+      rw [this]
+    have hS' := hc G k hS hk (x k % 2 == 1)
+    unfold nextVar at hS'
+    split at hS'
+    · next hlt =>
+      obtain ⟨G', h1, h2⟩ := AFml.round m S hc d (k + 1) _ (by omega) hlt hS' (setAt x k (x k / 2))
+      refine ⟨G', h1, hstep.trans (h2.trans ?_)⟩
+      have : halveFrom m (k + 1) (setAt x k (x k / 2)) = halveFrom m k x := by
+        funext i; simp only [halveFrom, setAt]
+        by_cases hi : i = k
+        · subst hi; simp only [Nat.le_refl, hk, and_self, ↓reduceIte, Nat.not_succ_le_self, false_and]
+        · simp only [hi, ↓reduceIte]
+          by_cases h' : k + 1 ≤ i ∧ i < m
+          · rw [if_pos h', if_pos ⟨by omega, h'.2⟩]
+          · rw [if_neg h', if_neg (by omega)]
+      rw [this]
+    · next hlt =>
+      refine ⟨_, hS', hstep.trans ?_⟩
+      have : setAt x k (x k / 2) = halveFrom m k x := by
+        funext i; simp only [halveFrom, setAt]
+        by_cases hi : i = k
+        · subst hi; simp only [Nat.le_refl, hk, and_self, ↓reduceIte]
+        · simp only [hi, ↓reduceIte]
+          rw [if_neg (by omega)]
+      rw [this]
+
+/-- **A set closed under reading one bit at a time, all of whose formulas
+hold at zero, holds everywhere** (at its states at the first variable): by
+induction on the sum of the variables, a round halving them all. -/
+theorem AFml.valid_of_rounds (m : Nat) (hm : 0 < m) (S : AFml × Nat → Prop)
+    (hw : ∀ G j, S (G, j) → G.width ≤ m) (hz : ∀ G j, S (G, j) → G.atZero = true)
+    (hc : ∀ G j, S (G, j) → j < m → ∀ b, S (G.pstep j b, nextVar m j)) :
+    ∀ G, S (G, 0) → G.Valid := by
+  suffices ∀ s x, sumTo m x = s → ∀ G, S (G, 0) → G.holds x from fun G hG x => this _ x rfl G hG
+  intro s
+  induction s using Nat.strongRecOn with
+  | _ s ih =>
+    intro x hs G hG
+    by_cases h0 : s = 0
+    · subst h0
+      exact (AFml.holds_zero x G fun i hi => sumTo_eq_zero m x hs i (by have := hw G 0 hG; omega)).2
+        (hz G 0 hG)
+    · obtain ⟨G', h1, h2⟩ := AFml.round m S hc m 0 G (by omega) hm hG x
+      refine h2.2 (ih _ ?_ _ rfl G' h1)
+      rw [← hs, sumTo_congr m (halveFrom m 0 x) (halve x)
+        (fun i hi => by simp only [halveFrom, Nat.zero_le, hi, and_self, ↓reduceIte, halve])]
+      exact sumTo_halve_lt m x (by omega)
+
+/-! ## The walk
+
+A depth-first walk (`walk`, `Calculus/VisitedSet.lean`) over the
+normalized one-bit derivatives, the states seen in an `HSet` keyed by
+`AFml.hashN`.  Each state carries how to put its bits back
+(`AFml.Reached`, as `AFml.Node` of `Calculus/LinearCountermodel.lean`), so
+the first state false at zero is a counterassignment at once, without
+walking the rest.  If the walk closes, every state it saw holds at zero and
+the set is closed under reading bits (`walk_closed`), so the formula is
+valid (`AFml.valid_of_rounds`).  Its fuel is not proved to suffice (the
+normalized states' universe is not computed); where it runs out, the
+decision is the breadth-first `AFml.search`, whose bound is proved. -/
+
+/-- Mix a hash with a number, modulo the prime `2^31 - 1`: every product
+stays a machine word. -/
+def hmix (h x : Nat) : Nat := (h * 1000003 + x % 2147483647) % 2147483647
+
+/-- An integer as a natural, injectively. -/
+def intCode : Int → Nat
+  | .ofNat n => 2 * n
+  | .negSucc n => 2 * n + 1
+
+/-- A formula's hash: its shape, the forms' lengths and the constants.  The
+coefficients are left out: the walk's states differ in their constants, and
+reading every coefficient of every state would cost more than the rare
+comparison of two states that differ only there. -/
+def AFml.hashN : AFml → Nat
+  | .tt => 1
+  | .ff => 2
+  | .eq a c => hmix (hmix 3 a.length) (intCode c)
+  | .le a c => hmix (hmix 5 a.length) (intCode c)
+  | .not φ => hmix 7 φ.hashN
+  | .and φ ψ => hmix (hmix 11 φ.hashN) ψ.hashN
+  | .imp φ ψ => hmix (hmix 13 φ.hashN) ψ.hashN
+
+/-- A state of the walk, the variable it reads next, and its assignment
+reconstruction (the proofs erased). -/
+structure AFml.Reached (root : AFml) where
+  formula : AFml
+  idx : Nat
+  embed : (Nat → Nat) → Nat → Nat
+  width : formula.width ≤ root.width
+  idxLt : idx < root.roundLen
+  correct : ∀ x, root.holds (embed x) ↔ formula.holds x
+
+namespace AFml.Reached
+
+variable {root : AFml}
+
+/-- The formula itself, at the first variable. -/
+def initial (root : AFml) : Reached root :=
+  ⟨root, 0, id, Nat.le_refl _, Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_max_right _ _),
+    fun _ => Iff.rfl⟩
+
+/-- Its state. -/
+def st (r : Reached root) : AFml × Nat := (r.formula, r.idx)
+
+/-- Reading the bit `b` of the next variable, normalized. -/
+def child (r : Reached root) (b : Bool) : Reached root where
+  formula := r.formula.pstep r.idx b
+  idx := nextVar root.roundLen r.idx
+  embed := fun y => r.embed (setAt y r.idx ((if b then 1 else 0) + 2 * y r.idx))
+  width := Nat.le_trans (width_pstep _ _ _) r.width
+  idxLt := by
+    unfold nextVar; split
+    · assumption
+    · exact Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_max_right _ _)
+  correct := fun y => (r.correct _).trans ((holds_pderiv _ _ y _).trans (holds_pstep _ _ y _).symm)
+
+/-- Both bits. -/
+def kids (r : Reached root) : List (Reached root) := [r.child false, r.child true]
+
+end AFml.Reached
+
+/-- A state's hash. -/
+def AFml.stateHash (s : AFml × Nat) : Nat := hmix s.1.hashN s.2
+
+/-- The walk from `F`. -/
+def AFml.walkFrom (F : AFml) : Walk (AFml × Nat) (AFml.Reached F) :=
+  walk AFml.Reached.st AFml.stateHash AFml.Reached.kids (fun r => r.formula.atZero) (2 ^ 64)
+    (HSet.leaf.insert (AFml.stateHash (Reached.initial F).st) (Reached.initial F).st)
+    [Reached.initial F]
+
+/-- A closed walk proves its formula. -/
+theorem AFml.walkFrom_closed {F : AFml} {V : HSet (AFml × Nat)} (h : F.walkFrom = .closed V) :
+    F.Valid := by
+  obtain ⟨hk, hall⟩ := walk_closed _ _ _ _ _ _ _ V h (walkInv_initial _ _ _ _ _)
+  refine AFml.valid_of_rounds F.roundLen (Nat.lt_of_lt_of_le Nat.zero_lt_one (Nat.le_max_right _ _))
+    V.Mem ?_ ?_ ?_ F (hk _ (HSet.mem_insert.2 (.inl rfl)))
+  · intro G j hG
+    obtain ⟨n, hn, -, -⟩ := hall _ hG
+    simp only [Reached.st, Prod.mk.injEq] at hn
+    rw [← hn.1]
+    exact Nat.le_trans n.width (Nat.le_max_left _ _)
+  · intro G j hG
+    obtain ⟨n, hn, hz, -⟩ := hall _ hG
+    simp only [Reached.st, Prod.mk.injEq] at hn
+    rw [← hn.1]; exact hz
+  · intro G j hG _ b
+    obtain ⟨n, hn, -, hs⟩ := hall _ hG
+    simp only [Reached.st, Prod.mk.injEq] at hn
+    obtain ⟨rfl, rfl⟩ := hn
+    have := hs (n.child b) (by cases b <;> simp only [Reached.kids, List.mem_cons, true_or, or_true])
+    exact this
+
+/-- **Proof or counterassignment by the walk**, `none` where its fuel runs
+out.  The walk is of the normal form. -/
+def AFml.fastVerify (F : AFml) : Option (Sum (PLift F.Valid) { x : Nat → Nat // ¬ F.holds x }) :=
+  match h : F.norm.walkFrom with
+  | .closed _ => some (.inl ⟨fun x => (holds_norm x F).1 (AFml.walkFrom_closed h x)⟩)
+  | .refuted r => some (.inr ⟨r.embed (fun _ => 0), fun hv => by
+      have hz := walk_refuted _ _ _ _ _ _ _ _ h
+      have := (holds_zero (fun _ => 0) r.formula (fun _ _ => rfl)).1
+        ((r.correct _).1 ((holds_norm _ F).2 hv))
+      rw [hz] at this; exact Bool.noConfusion this⟩)
+  | .out => none
+
+/-- **Decide** a formula: the walk, or where its fuel runs out the search. -/
+def AFml.decide (F : AFml) : Bool :=
+  match F.fastVerify with
+  | some (.inl _) => true
+  | some (.inr _) => false
+  | none => F.simp.search
 
 /-- **`decide` decides validity**: it says `true` exactly for the valid
-formulas.  The simplified formula is valid exactly when the formula is
-(`AFml.holds_simp`), and the search decides it (`AFml.search_iff`).
+formulas.  The walk's answers are certified (`AFml.fastVerify`); the
+search's, the simplified formula valid exactly when the formula is
+(`AFml.holds_simp`), are `AFml.search_iff`.
 
 Example: `balances[a] + balances[a] ≠ 2·balances[b] + 1` (an even number is
 never odd) is decided `true`, and `balances[a] ≠ 2·balances[b]` is decided
 `false`. -/
 theorem AFml.decide_iff (F : AFml) : F.decide = true ↔ F.Valid := by
-  rw [AFml.decide, AFml.search_iff]
-  exact forall_congr' fun x => AFml.holds_simp x F
+  unfold AFml.decide
+  split
+  · next v _ => exact ⟨fun _ => v.down, fun _ => rfl⟩
+  · next cm _ => exact ⟨fun h => (nomatch h), fun hv => absurd (hv cm.1) cm.2⟩
+  · rw [AFml.search_iff]
+    exact forall_congr' fun x => AFml.holds_simp x F
 
 end Solidity.Linear

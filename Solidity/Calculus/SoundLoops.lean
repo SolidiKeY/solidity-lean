@@ -192,24 +192,34 @@ section Inv
 variable {Γ Γ₁ : Ctx}
 
 /-- **A state in a loop body's frame is one its anonymised premise covers**
-(`holds_anonHavoc`, over the typed state): `{anon(xs)}` (`{havoc}` when
-`hv`) of the loop's first state reaches every state that agrees with it but
-where the body may write. -/
-theorem holds_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
-    {W : List (LTy × Nat)}
+(`holds_anonHavoc`, over the typed state): `{anon(xs)}` and, for the
+storage, what `hv` says (`Fml.anonHavoc`) of the loop's first state reach
+every state that agrees with it but where the body may write: its locals
+`xs` (`TLocAgree`), and the roots of its modifies set (`FrameKeeps`), or
+the storage and the ledger (`{havoc}`). -/
+theorem holds_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)}
+    {hv : Option (List Name)} {μ : Mutability} {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
-    (hg : TGFrame (frameMut hv) σ τ) (ha : TLocAgree 0 W σ.env τ.env) {ψ : Fml C Γ}
-    (h : holds σ (Fml.anonHavoc xs hv ψ)) : holds τ ψ := by
+    (hg : TGFrame μ σ τ) (ha : TLocAgree 0 W σ.env τ.env) (hk : FrameKeeps hv σ τ)
+    {ψ : Fml C Γ} (h : holds σ (Fml.anonHavoc xs hv ψ)) : holds τ ψ := by
   obtain ⟨b, hb⟩ := State.eq_anonHavoc hxs hg ha
-  cases hv with
-  | false =>
-    have hk := hg.keeps (by simp only [frameMut]; decide)
-    have hτ : τ = σ.anon xs b := by rw [hb, hk.1, hk.2, hg.selfBalance (by simp only [frameMut]; decide)]; rfl
-    rw [hτ]
-    exact h b
-  | true =>
+  match hv, hk, h with
+  | none, _, h =>
     rw [hb]
     exact h b τ.storage τ.net τ.selfBalance
+  | some [], hk, h =>
+    have hst : τ.storage = σ.storage := hk.1.symm
+    have hτ : τ = σ.anon xs b := by rw [hb, hst, hk.2.1, hk.2.2]; rfl
+    rw [hτ]
+    exact h b
+  | some (r :: L), hk, h =>
+    have h₁ := Modality.forallB_all (h b) τ.storage
+    have hτ : τ = (σ.anon xs b).withStorage (Storage.anon (r :: L) (σ.anon xs b).storage τ.storage) := by
+      have hs : Storage.anon (r :: L) (σ.anon xs b).storage τ.storage = τ.storage := hk.1
+      rw [hs, hb, hk.2.1, hk.2.2]
+      rfl
+    rw [hτ]
+    exact Upd.afterT.of_lands h₁ (Upd.lands_anonSt (r :: L) (σ.anon xs b) τ.storage)
 
 /-- The loop's run from `σ`, read through its states, then the rest. -/
 abbrev loopThen {Γ₂ Γ₀ : Ctx} (σ : State C Γ) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀)
@@ -251,7 +261,7 @@ and the loop has not broken, or one where the condition is `false` and the
 rest holds (a body that broke). -/
 theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁)
-    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} (hf : body.frame = some (xs, hv))
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} (hf : body.frame = some (xs, hv))
     (σ : State C Γ) {B : Option (Fml C Γ)} (hB : BreakTest c B) :
     Premise.Runs .box (.loop a c body)
       (.inv J B xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
@@ -259,7 +269,8 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
         .refl (.push .refl) body J) σ := by
   intro _ _ ω κ φ hp
   obtain ⟨hI0, hA⟩ := hp
-  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  obtain ⟨μ, hwμ⟩ := Prog.frame_within hf
+  have hxs := (Prog.frame_some hf).2
   rw [holds_modal_iff, runSt_cons_frames]
   show Modality.afterRunTR .box _ (loopThen σ ω κ (TLoop.run
     (fun o : Out C σ.H Γ => (Prog.run o.st body).map
@@ -267,19 +278,20 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
     (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩))
   refine TLoop.run_induct
     (P := fun a : Out C σ.H Γ =>
-      (TGFrame (frameMut hv) σ a.st ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧
+      (TGFrame μ σ a.st ∧ FrameKeeps hv σ a.st ∧
+        TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧
         holds a.st (J.invHyp B)) ∨
       (c.evalT a.st = .ok false ∧
         Modality.afterRunTR .box (holds · φ) (loopThen σ ω κ (.ok a))))
     (Q := fun r => Modality.afterRunTR .box (holds · φ) (loopThen σ ω κ r))
-    (.inl ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩) (fun a ha => ?_) ⟨trivial, nofun⟩
-  rcases ha with ⟨hg, hag, hI⟩ | ⟨hc, hR⟩
+    (.inl ⟨TGFrame.refl σ, FrameKeeps.refl _ σ, TLocAgree.refl _, hI0⟩) (fun a ha => ?_) ⟨trivial, nofun⟩
+  rcases ha with ⟨hg, hk, hag, hI⟩ | ⟨hc, hR⟩
   rotate_left
   · unfold TLoop.step
     dsimp only
     rw [hc]
     exact hR
-  have hY := holds_anonHavoc hxs hg hag hA hI
+  have hY := holds_anonHavoc hxs hg hag hk hA hI
   unfold TLoop.step
   dsimp only
   cases hc : c.evalT a.st with
@@ -313,7 +325,8 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
         rw [hb] at h'
         obtain ⟨hg', ha'⟩ := Prog.run_frame body hwμ 0 hb
         cases B with
-        | none => exact .inl ⟨hg.trans (hg'.withEnv _), hag.trans ha', h'.1⟩
+        | none => exact .inl ⟨hg.trans (hg'.withEnv _), hk.trans (Prog.frame_keeps hf hb),
+            hag.trans ha', h'.1⟩
         | some Bf =>
           obtain ⟨x, rfl, hx⟩ := hB _ rfl
           have hpost := h'.1
@@ -322,13 +335,13 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
             have hr := (holds_upd_popNil .box .refl _ _).1
               (hpost.2 ((holds_upd_popNil .box .refl _ _).2 hbk))
             exact (holds_modal_iff _ ω κ φ).1 (holds_modalK _ ω κ φ hr)
-          · exact .inl ⟨hg.trans (hg'.withEnv _), hag.trans ha',
+          · exact .inl ⟨hg.trans (hg'.withEnv _), hk.trans (Prog.frame_keeps hf hb), hag.trans ha',
               hpost.1 (fun hb' => hbk ((holds_upd_popNil .box .refl _ _).1 hb')), hbk⟩
 
 /-- **`whileInvariantBox` is sound** over the typed state. -/
 theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
     (dec : Option (Val C Γ .uint)) (brk : Bool) (qs : List (LoopQ C Γ)) (body : Prog C Γ Γ₁)
-    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} (hf : body.frame = some (xs, hv))
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} (hf : body.frame = some (xs, hv))
     (σ : State C Γ) :
     Premise.Runs .box (.loop (.inv I dec brk qs) c body)
       (.inv (invFml I qs) (loopBreak brk c) xs hv
@@ -402,7 +415,7 @@ theorem TLoop.run_variant_or {α : Type} {body : α → TRes α} {c : α → TRe
 /-- **`whileInvariantDiamond` is sound** over the typed state: the variant
 bounds the iterations left. -/
 theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
-    (brk : Bool) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
+    (brk : Bool) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
     (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
     (hp : loopStep k .diamond (.inv I (some d) brk []) c body = p) :
     Premise.Runs .diamond (.loop (.inv I (some d) brk []) c body) p σ := by
@@ -412,7 +425,8 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   cases hp
   intro _ _ ω κ φ hp
   obtain ⟨hI0, hA⟩ := hp
-  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  obtain ⟨μ, hwμ⟩ := Prog.frame_within hf
+  have hxs := (Prog.frame_some hf).2
   rw [holds_modal_iff, runSt_cons_frames]
   show Modality.afterRunTR .diamond _ (loopThen σ ω κ (TLoop.run
     (fun o : Out C σ.H Γ => (Prog.run o.st body).map
@@ -432,12 +446,12 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     · rw [hrun]
       exact ⟨rfl, nofun⟩
   refine TLoop.run_variant_or (X := fun e => e = .exhausted)
-    (H := fun a : Out C σ.H Γ => TGFrame (frameMut hv) σ a.st ∧
+    (H := fun a : Out C σ.H Γ => TGFrame μ σ a.st ∧ FrameKeeps hv σ a.st ∧
       TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ holds a.st (Fml.isBool I.lower true))
     (D := fun a : Out C σ.H Γ => (d.evalT a.st).map (·.1)) ?_
-    ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩
-  rintro a ⟨hg, hag, hI⟩
-  have hY := holds_anonHavoc hxs hg hag hA hI
+    ⟨TGFrame.refl σ, FrameKeeps.refl _ σ, TLocAgree.refl _, hI0⟩
+  rintro a ⟨hg, hk, hag, hI⟩
+  have hY := holds_anonHavoc hxs hg hag hk hA hI
   have hglob : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
       (.val (p := .bool) c.lower)).globT a.st =
       ((d.lower.eval a.st).bind fun _ => some a.st.globG).bind fun g =>
@@ -494,9 +508,10 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
         show I.lower.denote τ₀ = _
         rw [← Val.lower_denote_up (t := .val .uint) I τ₀ dv]
         exact h₁
-      have hgτ : TGFrame (frameMut hv) σ τ₀ := hg.trans (hg'.withEnv _)
+      have hgτ : TGFrame μ σ τ₀ := hg.trans (hg'.withEnv _)
+      have hkτ : FrameKeeps hv σ τ₀ := hk.trans (Prog.frame_keeps hf hb)
       have hagτ : TLocAgree 0 (Prog.writesAt 0 body) σ.env τ₀.env := hag.trans ha'
-      refine .inr ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hgτ, hagτ, hIτ⟩, fun hc₁ => ?_⟩
+      refine .inr ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hgτ, hkτ, hagτ, hIτ⟩, fun hc₁ => ?_⟩
       change c.evalT τ₀ = _ at hc₁
       have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
         rw [Val.evalT_up]; exact hc₁
@@ -510,7 +525,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       cases hdx : d.evalT τ₀ with
       | error e =>
         -- the next head reads the variant, which halts there: no landing
-        have hY' := holds_anonHavoc hxs hgτ hagτ hA hIτ
+        have hY' := holds_anonHavoc hxs hgτ hagτ hkτ hA hIτ
         have hglob' : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
             (.val (p := .bool) c.lower)).globT τ₀ =
             ((d.lower.eval τ₀).bind fun _ => some τ₀.globG).bind fun g =>

@@ -122,8 +122,9 @@ def shrOk : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x >> 4; ] y <= x }
 /-- `>>` on `int` rounds toward `-∞`. -/
 def shrInt : Fml Bank [] := dl!{ ∀ int x; x < 0 → [ int y = x >> 1; ] y < 0 }
 def shrIntBad : Fml Bank [] := dl!{ ∀ int x; [ int y = x >> 1; ] y < x }
-/-- A left shift by `4`: in the fragment (`shl_covered`), its verdict past the
-decision's reach in practice (`docs/automation.md`, M7). -/
+/-- A left shift by `4`: in the fragment (`shl_covered`), `x` related to `y`
+through `2^256`; decided by the walk (`AFml.fastVerify`, `docs/automation.md`,
+M7). -/
 def shlOk : Fml Bank [] := dl!{ ∀ uint x; x < 16 → [ uint y = x << 4; uint z = x * 16; ] y == z }
 def shlZero : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x << 0; ] y == x }
 def shlFar : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x << 300; ] y == x }
@@ -174,9 +175,9 @@ def netStore : Fml Bank [] := dl!{ ∀ uint a; net(a) = toInt(balances[a]) → n
 def netWrite : Fml Bank [] :=
   dl!{ ∀ uint a; [ balances[a] = 3; ] net(a) - toInt(balances[a]) < net(a) }
 def netDistinct : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) < net(b) → a != b }
-/-- Four reads: in the fragment (`netSwap_covered`), its verdict past the
-decision's reach in practice, each read two codes and each pair of reads
-a consistency premise (`docs/automation.md`, M7). -/
+/-- Four reads: in the fragment (`netSwap_covered`), each read two codes and
+each pair of reads a consistency premise; decided by the walk, the slowest
+pin here (`docs/automation.md`, M7). -/
 def netSwap : Fml Bank [] := dl!{ ∀ uint a; ∀ uint b; net(a) + net(b) = net(b) + net(a) }
 
 /-- Guards outside the fragment: a disequality, arithmetic on the index. -/
@@ -261,6 +262,10 @@ theorem evenHyp_answers : decideLeaf evenHyp ≠ .unknown := decideLeaf_complete
 /-- info: ["proved", "refuted", "proved", "refuted", "proved", "refuted", "proved", "refuted"] -/
 #guard_msgs in #eval [shlZero, shlFar, maskOk, maskBad, addWOk, addWBad, subWOk, subWBad].map verdict
 
+-- `x << 4` against `x * 16`: decided by the walk (M7, the running time).
+/-- info: "proved" -/
+#guard_msgs in #eval verdict shlOk
+
 /-- info: true -/
 #guard_msgs in #eval [negOk, negBad, bnotOk, bnotBad, toIntOk, toIntBad, toUintOk, toUintBad, divOk,
   divBad, modOk, modBad, shrOk, shrInt, shrIntBad, shlOk, shlZero, shlFar, maskOk, maskBad, addWOk,
@@ -300,6 +305,10 @@ theorem kint_iff : decideLeaf kintOk = .proved ↔ Fml.Valid kintOk :=
 
 /-- info: true -/
 #guard_msgs in #eval [netOk, netSame, netNeg, netOther, netStore, netWrite, netDistinct].all Fml.Covered
+
+-- Four ledger reads: decided by the walk (M7, the running time).
+/-- info: "proved" -/
+#guard_msgs in #eval verdict netSwap
 
 theorem net_covered : netOk.Covered = true := by decide +kernel
 theorem netSame_covered : netSame.Covered = true := by decide +kernel
@@ -355,8 +364,11 @@ theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 /-- info: [false, false, true, true] -/
 #guard_msgs in #eval [gridApf, strictSorted, sortedLe, columnApf].map (Fml.inTarget {})
 
-/-- A two-variable block over a root: covered (nine instances), its verdict
-out of reach in practice (`docs/automation.md`, M7). -/
+/-- A two-variable block over a root: covered (nine instances, nineteen
+reads), decided by the walk (`docs/automation.md`, M7). -/
 theorem sortedLe_covered : sortedLe.Covered = true := by decide +kernel
+
+/-- info: "proved" -/
+#guard_msgs in #eval verdict sortedLe
 
 end Solidity.Examples.Decision

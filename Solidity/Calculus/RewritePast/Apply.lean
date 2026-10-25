@@ -93,6 +93,10 @@ theorem Op2.denote_congrP {a b s : Srt} (o : Op2 C a b s) (hr : g₀.SameRest g�
     intro he
     subst he
     cases u <;> rfl
+  | anon _ =>
+    rw [Srt.sameO_st] at hx hy
+    subst hx hy
+    cases x <;> cases y <;> rfl
   | _ => rfl
 
 variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {σ₁ : State C Δ} {g : GlobT C σ₀.H}
