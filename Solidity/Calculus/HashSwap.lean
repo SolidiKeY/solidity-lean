@@ -52,6 +52,10 @@ theorem _root_.Solidity.Idx.toNat_sw : {Γ : Ctx} → {t : LTy} → (i : Idx Γ 
   | _, _, .here => rfl
   | _, _, .there i => congrArg (· + 1) (Idx.toNat_sw i)
 
+/-- The level of a position: `0` for the outermost local, stable under
+binders further in. -/
+def _root_.Solidity.Idx.level {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat := Γ.length - 1 - i.toNat
+
 /-! ## Sorts that read no heap -/
 
 /-- The memory sort: the only one whose values are typed by the heap. -/

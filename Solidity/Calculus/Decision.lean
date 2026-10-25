@@ -363,9 +363,6 @@ structure Waivers where
   /-- `&`, `|`, `^`: two symbolic operands. -/
   bitwise : Bool := true
 
-/-- The level of a position: `0` for the outermost local, stable under
-binders further in. -/
-def _root_.Solidity.Idx.level {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat := Γ.length - 1 - i.toNat
 
 /-- A literal's integer. -/
 def _root_.Solidity.Op0.litValue? {s : Srt} : Op0 C s → Option Int
