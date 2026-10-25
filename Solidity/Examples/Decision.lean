@@ -58,14 +58,18 @@ def notApf : Fml Bank [] := dl!{ (∀ uint k; balances[k] == k) → balances[5] 
 end
 
 def verdict {C : Contract} (φ : Fml C []) : String :=
-  match decideLeaf φ with
+  match decideGoal φ with
   | .proved => "proved"
   | .refuted _ => "refuted"
   | .unknown => "unknown"
 
-theorem nested_covered : nested.Covered = true := by decide +kernel
-
 theorem double_covered : double.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied: no hash, so no premise. -/
+theorem double_answers : decideGoal double ≠ .unknown :=
+  decideGoal_complete double_covered rfl
+
+theorem nested_covered : nested.Covered = true := by decide +kernel
 
 /-- `decideLeaf_proved_iff`, applied: the verdict is exact. -/
 theorem double_iff : decideLeaf double = .proved ↔ Fml.Valid double :=

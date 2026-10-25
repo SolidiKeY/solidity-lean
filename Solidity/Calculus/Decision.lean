@@ -17,28 +17,39 @@ it (`docs/automation.md`, M6, decisions c, c′, d and their extensions):
 * a quantified formula over array or mapping contents outside the array
   property fragment (Bradley, Manna and Sipma), negative-position
   `havoc`/`anon`/`allocAll`/`grow` and storage binders among them;
-* hashes: not settled (`HashReading`, a parameter: `excluded` puts every
-  hash term outside the fragment; `perGoal` reads the goal under a premise
-  of its own, which the user has yet to fix).
+* a verdict that turns on an `ecrecover` value (an `opaque` function) or
+  on a hash preimage (e3′, 2026-10-25).
+
+Hashes are read as e3′ has it: each goal under the premise that its own
+hash terms are free of collisions (`Fml.HashFree`, `Fml.holdsH`,
+`Fml.ValidH`), no axiom and no global assumption.  In the fragment a hash
+term stands where that premise settles it: against a hash of its kind
+(`==`, `!=`), or as the key of a mapping at a root whose keys are all
+hashes (`Fml.inTarget`); `ecrecover` stands nowhere.
 
 The fragment is `Fml.inTarget`, the open statement `DecisionTheorem`, both
-about the one decision function `decideLeaf`.  A statement of the form "some
-decider is complete" would be vacuous: a classical function deciding
-validity by `Classical.choice` exists, so the statement is about this
-computable function, which later rounds extend.
+about the one decision function `decideGoal` (`decideLeaf` on a leaf
+without a hash).  A statement of the form "some decider is complete" would
+be vacuous: a classical function deciding validity by `Classical.choice`
+exists, so the statement is about this computable function, which later
+rounds extend.
 
 What is proved: `decideLeaf` is sound (`decideLeaf_sound`), its refutations
 are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`decideLeaf_complete`), the fragment M4 proves total
-(`dependentReduction?_isSome`) as extended since.  `Fml.Covered ⊆
+(`dependentReduction?_isSome`) as extended since; `decideGoal` likewise
+under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
+`decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered ⊆
 Fml.inTarget` is not proved: `Fml.Covered` is read on the eliminated leaf,
 `Fml.inTarget` on the source.
 
 The array-property check is syntactic and conservative: an update or a
 program under a quantifier counts as reading at its variable, the body of a
 negative-position block must be quantifier-free, and an index guard may not
-negate a comparison of bound variables.  So `Fml.inTarget` is a subset of
-the fragment the user named, never a superset.
+negate a comparison of bound variables; a hash stored by an update, a
+hash key of a nested mapping and an `ecrecover` term are outside.  So
+`Fml.inTarget` is a subset of the fragment the user named, never a
+superset.
 -/
 
 namespace Solidity.Decide
@@ -116,27 +127,283 @@ theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :
   | refuted σ => exact absurd hv (decideLeaf_not_valid hd)
   | unknown => exact absurd hd (decideLeaf_complete h)
 
+/-! ## The goal under its own hash premise (e3′)
+
+A hash is the real function of its bytes (`Heap.hash`), so a leaf may turn
+on a collision no one can exhibit.  The user's reading (2026-10-25, e3′):
+each goal is read under the premise that *its own* hash terms are free of
+collisions, distinct inputs giving distinct outputs.  The premise is part
+of the goal's reading, not an axiom and not a global assumption.
+
+`Fml.HashIn k inp out σ φ`: some hash term of `φ`, of kind `k`, evaluated
+in a state `φ`'s reading reaches from `σ` (past its updates, at some value
+of each binder), reads `inp` and returns `out`.  `Fml.holdsH` instantiates
+the leaf's leading universal binders first (its parameters), so the
+premise is about one instance's hash terms; a hash under a further binder
+contributes every input that binder reaches. -/
+
+/-- The bytes a hash of the object `id` reads: `none` where `id` names no
+object of type `R` (the hash is then `0`). -/
+def _root_.Solidity.Grown.hashInput {H : HTy} (m : Grown H (fun _ => Unit)) (R : RefTy) (id : Nat) :
+    Option (List Int) :=
+  (HRef.ofId? m.H' R id).map fun r => MObj.words R (m.heap.get r)
+
+/-- A hash node, evaluated: kind `k`, input `inp`, output `out`. -/
+def _root_.Solidity.Op2.HashIn {H : HTy} (k : HashKind) (inp : Option (List Int))
+    (out : PrimTy.uint.Denote) {a b s : Srt} :
+    Op2 C a b s → Option (a.Den C H) → Option (b.Den C H) → Prop
+  | @Op2.hash _ R k', some m, some id => k' = k ∧ inp = m.hashInput R id ∧ out = m.hashId k' R id
+  | _, _, _ => False
+
+def _root_.Solidity.Tm.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+    (out : PrimTy.uint.Denote) : {s : Srt} → Tm C Γ s → Prop
+  | _, .netOf _ a | _, .app1 _ a => a.HashIn σ k inp out
+  | _, .app2 o x y => o.HashIn (H := σ.H) k inp out (x.eval σ) (y.eval σ) ∨ x.HashIn σ k inp out ∨
+      y.HashIn σ k inp out
+  | _, .app3 _ x y z => x.HashIn σ k inp out ∨ y.HashIn σ k inp out ∨ z.HashIn σ k inp out
+  | _, _ => False
+
+def _root_.Solidity.Rhs.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+    (out : PrimTy.uint.Denote) {t : LTy} : Rhs C Γ t → Prop
+  | .val a | .zint a => a.HashIn σ k inp out
+  | .path q => q.HashIn σ k inp out
+  | .mref i => i.HashIn σ k inp out
+  | .store s => s.HashIn σ k inp out
+  | .unset | .saveNet | .saveNetMt => False
+
+def _root_.Solidity.UpdElem.HashIn {Γ Δ : Ctx} (σ : State C Γ) (k : HashKind)
+    (inp : Option (List Int)) (out : PrimTy.uint.Denote) : UpdElem C Γ Δ → Prop
+  | .local _ r => r.HashIn σ k inp out
+  | .storage s => s.HashIn σ k inp out
+  | .memory m => m.HashIn σ k inp out
+  | .selfBalance _ a | .setBalance a => a.HashIn σ k inp out
+  | .net r _ a | .pay r a | .netMt r a => r.HashIn σ k inp out ∨ a.HashIn σ k inp out
+
+def _root_.Solidity.Upd.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+    (out : PrimTy.uint.Denote) : {Δ : Ctx} → Upd C Γ Δ → Prop
+  | _, .nil => False
+  | _, .snoc U e => U.HashIn σ k inp out ∨ e.HashIn σ k inp out
+  | _, .decl U _ r => U.HashIn σ k inp out ∨ r.HashIn σ k inp out
+  | _, .pop U _ | _, .drop U _ => U.HashIn σ k inp out
+
+def _root_.Solidity.Fml.HashIn (k : HashKind) (inp : Option (List Int)) (out : PrimTy.uint.Denote) :
+    {Γ : Ctx} → State C Γ → Fml C Γ → Prop
+  | _, _, .tt => False
+  | _, σ, .eq a b => a.HashIn σ k inp out ∨ b.HashIn σ k inp out
+  | _, σ, .wellFormed s => s.HashIn σ k inp out
+  | _, σ, .not φ => Fml.HashIn k inp out σ φ
+  | _, σ, .and φ ψ | _, σ, .imp φ ψ => Fml.HashIn k inp out σ φ ∨ Fml.HashIn k inp out σ ψ
+  | _, σ, .upd _ U φ => U.HashIn σ k inp out ∨
+      ∃ g σ', U.globT σ = some g ∧ U.Lands σ g σ' ∧ Fml.HashIn k inp out σ' φ
+  | _, _, .modal .. => False
+  | _, σ, .havoc φ => ∃ st nt sb, Fml.HashIn k inp out (σ.havoc st nt sb) φ
+  | _, σ, .all _ p φ => ∃ v : p.Denote, Fml.HashIn k inp out (σ.push (t := .val p) v) φ
+  | _, σ, .bind _ _ t φ => ∃ v : t.TDenote C σ.H, Fml.HashIn k inp out (σ.push v) φ
+  | _, σ, .anon xs φ => ∃ b, Fml.HashIn k inp out (σ.anon xs b) φ
+  | _, σ, .allocAll _ R φ => ∃ o : MObj σ.H R,
+      Fml.HashIn k inp out ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
+  | _, σ, .grow φ => ∃ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap ∧
+      Fml.HashIn k inp out (σ.adopt g).1 φ
+
+/-- **The goal's hash premise**: its hash terms of one kind returning one
+output read one input. -/
+def _root_.Solidity.Fml.HashFree {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
+  ∀ k i₁ i₂ out, Fml.HashIn k i₁ out σ φ → Fml.HashIn k i₂ out σ φ → i₁ = i₂
+
+/-- **A leaf holds under its own hash premise**, past its leading binders. -/
+def _root_.Solidity.Fml.holdsH : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
+  | _, σ, .all _ p φ => ∀ v : p.Denote, Fml.holdsH (σ.push (t := .val p) v) φ
+  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => Fml.holdsH (σ.push v) φ
+  | _, σ, φ => φ.HashFree σ → holds σ φ
+
+/-- **Validity as the theorem reads it.** -/
+def _root_.Solidity.Fml.ValidH (φ : Fml C []) : Prop := ∀ σ : State C [], Fml.holdsH σ φ
+
+/-! ### A leaf without a hash: the premise is empty -/
+
+def _root_.Solidity.Op2.isHash {a b s : Srt} : Op2 C a b s → Bool
+  | .hash _ => true
+  | _ => false
+
+def _root_.Solidity.Tm.hasHash {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
+  | _, .netOf _ a | _, .app1 _ a => a.hasHash
+  | _, .app2 o x y => o.isHash || x.hasHash || y.hasHash
+  | _, .app3 _ x y z => x.hasHash || y.hasHash || z.hasHash
+  | _, _ => false
+
+def _root_.Solidity.Rhs.hasHash {Γ : Ctx} {t : LTy} : Rhs C Γ t → Bool
+  | .val a | .zint a => a.hasHash
+  | .path q => q.hasHash
+  | .mref i => i.hasHash
+  | .store s => s.hasHash
+  | .unset | .saveNet | .saveNetMt => false
+
+def _root_.Solidity.UpdElem.hasHash {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool
+  | .local _ r => r.hasHash
+  | .storage s | .memory s => s.hasHash
+  | .selfBalance _ a | .setBalance a => a.hasHash
+  | .net r _ a | .pay r a | .netMt r a => r.hasHash || a.hasHash
+
+def _root_.Solidity.Upd.hasHash {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .nil => false
+  | _, .snoc U e => U.hasHash || e.hasHash
+  | _, .decl U _ r => U.hasHash || r.hasHash
+  | _, .pop U _ | _, .drop U _ => U.hasHash
+
+/-- The leaf mentions a hash (a program's are not read: `Fml.HashIn` reads
+none either). -/
+def _root_.Solidity.Fml.hasHash : {Γ : Ctx} → Fml C Γ → Bool
+  | _, .tt | _, .modal .. => false
+  | _, .eq a b => a.hasHash || b.hasHash
+  | _, .wellFormed s => s.hasHash
+  | _, .not φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ
+  | _, .grow φ => φ.hasHash
+  | _, .and φ ψ | _, .imp φ ψ => φ.hasHash || ψ.hasHash
+  | _, .upd _ U φ => U.hasHash || φ.hasHash
+
+theorem _root_.Solidity.Op2.isHash_of_HashIn {H : HTy} {k : HashKind} {inp : Option (List Int)}
+    {out : PrimTy.uint.Denote} {a b s : Srt} (o : Op2 C a b s) (x : Option (a.Den C H))
+    (y : Option (b.Den C H)) (h : o.HashIn k inp out x y) : o.isHash = true := by
+  cases o <;> first | rfl | exact h.elim
+
+theorem _root_.Solidity.Tm.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
+    {inp : Option (List Int)} {out : PrimTy.uint.Denote} {s : Srt} (t : Tm C Γ s)
+    (h : t.HashIn σ k inp out) : t.hasHash = true := by
+  induction t with
+  | netOf _ a ih | app1 _ a ih => exact ih h
+  | app2 o x y ihx ihy =>
+    simp only [Tm.hasHash, Bool.or_eq_true]
+    rcases h with h | h | h
+    · exact .inl (.inl (o.isHash_of_HashIn _ _ h))
+    · exact .inl (.inr (ihx h))
+    · exact .inr (ihy h)
+  | app3 _ x y z ihx ihy ihz =>
+    simp only [Tm.hasHash, Bool.or_eq_true]
+    rcases h with h | h | h
+    · exact .inl (.inl (ihx h))
+    · exact .inl (.inr (ihy h))
+    · exact .inr (ihz h)
+  | _ => exact h.elim
+
+theorem _root_.Solidity.Rhs.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
+    {inp : Option (List Int)} {out : PrimTy.uint.Denote} {t : LTy} (r : Rhs C Γ t)
+    (h : r.HashIn σ k inp out) : r.hasHash = true := by
+  cases r <;> first | exact h.elim | exact Tm.hasHash_of_HashIn σ _ h
+
+theorem _root_.Solidity.UpdElem.hasHash_of_HashIn {Γ Δ : Ctx} (σ : State C Γ) {k : HashKind}
+    {inp : Option (List Int)} {out : PrimTy.uint.Denote} (e : UpdElem C Γ Δ)
+    (h : e.HashIn σ k inp out) : e.hasHash = true := by
+  cases e with
+  | «local» _ r => exact Rhs.hasHash_of_HashIn σ r h
+  | storage s | memory s | selfBalance _ s | setBalance s => exact Tm.hasHash_of_HashIn σ s h
+  | net r _ a | pay r a | netMt r a =>
+    simp only [UpdElem.hasHash, Bool.or_eq_true]
+    rcases h with h | h
+    · exact .inl (Tm.hasHash_of_HashIn σ r h)
+    · exact .inr (Tm.hasHash_of_HashIn σ a h)
+
+theorem _root_.Solidity.Upd.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
+    {inp : Option (List Int)} {out : PrimTy.uint.Denote} :
+    ∀ {Δ : Ctx} (U : Upd C Γ Δ), U.HashIn σ k inp out → U.hasHash = true
+  | _, .nil, h => h.elim
+  | _, .snoc U e, h => by
+    simp only [Upd.hasHash, Bool.or_eq_true]
+    rcases h with h | h
+    · exact .inl (Upd.hasHash_of_HashIn σ U h)
+    · exact .inr (UpdElem.hasHash_of_HashIn σ e h)
+  | _, .decl U _ r, h => by
+    simp only [Upd.hasHash, Bool.or_eq_true]
+    rcases h with h | h
+    · exact .inl (Upd.hasHash_of_HashIn σ U h)
+    · exact .inr (Rhs.hasHash_of_HashIn σ r h)
+  | _, .pop U _, h | _, .drop U _, h => Upd.hasHash_of_HashIn σ U h
+
+theorem _root_.Solidity.Fml.hasHash_of_HashIn {k : HashKind} {inp : Option (List Int)}
+    {out : PrimTy.uint.Denote} : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
+      Fml.HashIn k inp out σ φ → φ.hasHash = true
+  | _, _, .tt, h | _, _, .modal .., h => h.elim
+  | _, σ, .eq a b, h => by
+    simp only [Fml.hasHash, Bool.or_eq_true]
+    rcases h with h | h
+    · exact .inl (Tm.hasHash_of_HashIn σ a h)
+    · exact .inr (Tm.hasHash_of_HashIn σ b h)
+  | _, σ, .wellFormed s, h => Tm.hasHash_of_HashIn σ s h
+  | _, σ, .not φ, h => Fml.hasHash_of_HashIn σ φ h
+  | _, σ, .and φ ψ, h | _, σ, .imp φ ψ, h => by
+    simp only [Fml.hasHash, Bool.or_eq_true]
+    rcases h with h | h
+    · exact .inl (Fml.hasHash_of_HashIn σ φ h)
+    · exact .inr (Fml.hasHash_of_HashIn σ ψ h)
+  | _, σ, .upd _ U φ, h => by
+    simp only [Fml.hasHash, Bool.or_eq_true]
+    rcases h with h | ⟨_, σ', _, _, h⟩
+    · exact .inl (Upd.hasHash_of_HashIn σ U h)
+    · exact .inr (Fml.hasHash_of_HashIn σ' φ h)
+  | _, _, .havoc φ, h => by rcases h with ⟨_, _, _, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+  | _, _, .all _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+  | _, _, .bind _ _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+  | _, _, .anon _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+  | _, _, .allocAll _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+  | _, _, .grow φ, h => by rcases h with ⟨_, _, h⟩; exact Fml.hasHash_of_HashIn _ φ h
+
+theorem _root_.Solidity.Fml.hashFree_of_hasHash {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ)
+    (h : φ.hasHash = false) : φ.HashFree σ :=
+  fun _ _ _ _ h₁ _ => absurd (Fml.hasHash_of_HashIn σ φ h₁) (by rw [h]; decide)
+
+/-- **Without a hash the premise is empty**: the reading is `holds`. -/
+theorem _root_.Solidity.Fml.holdsH_iff : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
+    φ.hasHash = false → (Fml.holdsH σ φ ↔ holds σ φ)
+  | _, _, .all _ _ φ, h => forall_congr' fun _ => Fml.holdsH_iff _ φ h
+  | _, _, .bind _ _ _ φ, h => forall_congr' fun _ => Fml.holdsH_iff _ φ h
+  | _, σ, .tt, h | _, σ, .eq _ _, h | _, σ, .wellFormed _, h | _, σ, .not _, h | _, σ, .and _ _, h
+  | _, σ, .imp _ _, h | _, σ, .upd .., h | _, σ, .modal .., h | _, σ, .havoc _, h
+  | _, σ, .anon _ _, h | _, σ, .allocAll .., h | _, σ, .grow _, h =>
+    ⟨fun hh => hh (Fml.hashFree_of_hasHash σ _ h), fun hh _ => hh⟩
+
+theorem _root_.Solidity.Fml.validH_iff {φ : Fml C []} (h : φ.hasHash = false) :
+    Fml.ValidH φ ↔ Fml.Valid φ :=
+  forall_congr' fun σ => Fml.holdsH_iff σ φ h
+
+/-! ### The decision, read so -/
+
+/-- **The decision the theorem is about**: `decideLeaf` on a leaf without
+a hash; `unknown` on one with a hash, which no stage reads yet. -/
+def decideGoal (φ : Fml C []) : LeafVerdict C :=
+  if φ.hasHash then .unknown else decideLeaf φ
+
+theorem decideGoal_eq {φ : Fml C []} {v : LeafVerdict C} (h : decideGoal φ = v) (hv : v ≠ .unknown) :
+    φ.hasHash = false ∧ decideLeaf φ = v := by
+  unfold decideGoal at h
+  cases hh : φ.hasHash
+  · rw [hh] at h
+    exact ⟨rfl, h⟩
+  · rw [hh] at h
+    exact absurd h.symm hv
+
+/-- **Soundness**, under the goal's premise. -/
+theorem decideGoal_sound {φ : Fml C []} (h : decideGoal φ = .proved) : Fml.ValidH φ := by
+  obtain ⟨hh, hd⟩ := decideGoal_eq h (fun h => nomatch h)
+  exact (Fml.validH_iff hh).mpr (decideLeaf_sound hd)
+
+/-- **Refutations are certified**: the state's instance meets the premise
+and refutes the leaf. -/
+theorem decideGoal_refutes {φ : Fml C []} {σ : State C []} (h : decideGoal φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  obtain ⟨hh, hd⟩ := decideGoal_eq h (fun h => nomatch h)
+  exact fun hv => decideLeaf_refutes hd ((Fml.holdsH_iff σ φ hh).mp hv)
+
+/-- **Completeness on the covered leaves without a hash.** -/
+theorem decideGoal_complete {φ : Fml C []} (h : φ.Covered = true) (hh : φ.hasHash = false) :
+    decideGoal φ ≠ .unknown := by
+  unfold decideGoal
+  rw [hh]
+  exact decideLeaf_complete h
+
 /-! ## The fragment the user named -/
-
-/-- How a hash is read: unsettled (`docs/automation.md`, M7).  `admits k`:
-a hash term of kind `k` is in the fragment; `goal φ`: the formula the
-decision is asked for `φ`. -/
-structure HashReading where
-  admits : HashKind → Bool
-  goal : {C : Contract} → Fml C [] → Fml C []
-
-/-- Every hash term outside the fragment, the goal itself. -/
-def HashReading.excluded : HashReading := ⟨fun _ => false, fun φ => φ⟩
-
-/-- The per-goal reading (e3′, proposed, not decided): the goal under a
-premise that its own distinct hash inputs hash apart, `premise φ` (to be
-fixed with the user); `ecrecover` stays outside. -/
-def HashReading.perGoal (premise : {C : Contract} → Fml C [] → Fml C []) : HashReading :=
-  ⟨fun k => k != .ecrecover, fun φ => .imp (premise φ) φ⟩
 
 /-- **The classes the closer may leave `unknown` with two symbolic
 operands** (`true`: waived; the user's answer of 2026-10-25 waives all
-four), and the hash reading. -/
+four). -/
 structure Waivers where
   /-- `/`, `%`, a modulus of `addmod`/`mulmod`: a symbolic divisor. -/
   division : Bool := true
@@ -146,7 +413,6 @@ structure Waivers where
   shift : Bool := true
   /-- `&`, `|`, `^`: two symbolic operands. -/
   bitwise : Bool := true
-  hashes : HashReading := .excluded
 
 /-- The level of a position: `0` for the outermost local, stable under
 binders further in. -/
@@ -185,7 +451,7 @@ def _root_.Solidity.Op2.admits (w : Waivers) {a b s : Srt} (o : Op2 C a b s) (xl
   match o with
   | .binop op _ => op.admits w xl yl y?
   | .zbin op _ => op != .mul || xl || yl
-  | .hash k => w.hashes.admits k
+  | .hash _ => false
   | _ => true
 
 def _root_.Solidity.Op3.admits (w : Waivers) {a b c s : Srt} (o : Op3 C a b c s) (xl yl zl : Bool) :
@@ -195,28 +461,75 @@ def _root_.Solidity.Op3.admits (w : Waivers) {a b c s : Srt} (o : Op3 C a b c s)
   | .modular .addmod => zl || !w.division
   | _ => true
 
-/-- **A term of the fragment**: every operator admitted. -/
-def _root_.Solidity.Tm.inTarget {Γ : Ctx} (w : Waivers) : {s : Srt} → Tm C Γ s → Bool
-  | _, .netOf _ a => a.inTarget w
-  | _, .app1 _ x => x.inTarget w
-  | _, .app2 o x y => x.inTarget w && y.inTarget w && o.admits w x.isLitV y.isLitV y.litValue?
-  | _, .app3 o x y z => x.inTarget w && y.inTarget w && z.inTarget w &&
+def _root_.Solidity.Op2.hashKind? {a b s : Srt} : Op2 C a b s → Option HashKind
+  | .hash k => some k
+  | _ => none
+
+/-- `==`, `!=`. -/
+def _root_.Solidity.Op2.isEqNe {a b s : Srt} : Op2 C a b s → Bool
+  | .binop .eqB _ | .binop .neB _ => true
+  | _ => false
+
+/-- A mapping's key: `m[k]`. -/
+def _root_.Solidity.Op2.isMapAt {a b s : Srt} : Op2 C a b s → Bool
+  | .at .map => true
+  | _ => false
+
+def _root_.Solidity.Op0.rootNameD? {s : Srt} : Op0 C s → Option Name
+  | .root r _ => some r
+  | _ => none
+
+/-- A root of the storage. -/
+def _root_.Solidity.Tm.rootNameD? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option Name
+  | .app0 o => o.rootNameD?
+  | _ => none
+
+/-- A hash term whose verdicts the goal's premise settles: of a kind other
+than `ecrecover`, whose value is `opaque`. -/
+def _root_.Solidity.Tm.hashable? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option HashKind
+  | .app2 o _ _ =>
+    match o.hashKind? with
+    | some .ecrecover => none
+    | k => k
+  | _ => none
+
+/-- Two hash terms of one kind: their equation is their inputs' under the
+goal's premise. -/
+def _root_.Solidity.Tm.hashPair {Γ : Ctx} {s s' : Srt} (x : Tm C Γ s) (y : Tm C Γ s') : Bool :=
+  match x.hashable?, y.hashable? with
+  | some k, some k' => k == k'
+  | _, _ => false
+
+/-- **A term of the fragment**: every operator admitted.  A hash term is
+admitted only where the goal's premise settles it (`hashOK`): an operand
+of `==`/`!=` against a hash of its kind, or a key of a mapping at a root
+(whose other keys must then be hashes too, `Fml.inTarget`).  Anywhere
+else its verdicts may turn on a preimage, and the closer may leave them. -/
+def _root_.Solidity.Tm.inTarget {Γ : Ctx} (w : Waivers) (hashOK : Bool) : {s : Srt} → Tm C Γ s → Bool
+  | _, .netOf _ a => a.inTarget w false
+  | _, .app1 _ x => x.inTarget w false
+  | _, .app2 o x y =>
+    let eqH := o.isEqNe && x.hashPair y
+    let keyH := o.isMapAt && x.rootNameD?.isSome && y.hashable?.isSome
+    x.inTarget w eqH && y.inTarget w (eqH || keyH) &&
+      (if o.isHash then hashOK else o.admits w x.isLitV y.isLitV y.litValue?)
+  | _, .app3 o x y z => x.inTarget w false && y.inTarget w false && z.inTarget w false &&
       o.admits w x.isLitV y.isLitV z.isLitV
   | _, _ => true
 
 def _root_.Solidity.Rhs.inTarget {Γ : Ctx} (w : Waivers) {t : LTy} : Rhs C Γ t → Bool
-  | .val a | .zint a => a.inTarget w
-  | .path q => q.inTarget w
-  | .mref i => i.inTarget w
-  | .store s => s.inTarget w
+  | .val a | .zint a => a.inTarget w false
+  | .path q => q.inTarget w false
+  | .mref i => i.inTarget w false
+  | .store s => s.inTarget w false
   | .unset | .saveNet | .saveNetMt => true
 
 def _root_.Solidity.UpdElem.inTarget {Γ Δ : Ctx} (w : Waivers) : UpdElem C Γ Δ → Bool
   | .local _ r => r.inTarget w
-  | .storage s => s.inTarget w
-  | .memory m => m.inTarget w
-  | .selfBalance _ a | .setBalance a => a.inTarget w
-  | .net r _ a | .pay r a | .netMt r a => r.inTarget w && a.inTarget w
+  | .storage s => s.inTarget w false
+  | .memory m => m.inTarget w false
+  | .selfBalance _ a | .setBalance a => a.inTarget w false
+  | .net r _ a | .pay r a | .netMt r a => r.inTarget w false && a.inTarget w false
 
 def _root_.Solidity.Upd.inTarget {Γ : Ctx} (w : Waivers) : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .nil => true
@@ -383,8 +696,8 @@ def _root_.Solidity.Fml.readsAny : {Γ : Ctx} → Fml C Γ → Bool
 /-- The quantifier-free formulas whose terms are in the fragment. -/
 def _root_.Solidity.Fml.qfTarget {Γ : Ctx} (w : Waivers) : Fml C Γ → Bool
   | .tt => true
-  | .eq a b => a.inTarget w && b.inTarget w
-  | .wellFormed s => s.inTarget w
+  | .eq a b => a.inTarget w (a.hashPair b) && b.inTarget w (a.hashPair b)
+  | .wellFormed s => s.inTarget w false
   | .not φ => φ.qfTarget w
   | .and φ ψ | .imp φ ψ => φ.qfTarget w && ψ.qfTarget w
   | _ => false
@@ -401,8 +714,8 @@ past which only Presburger quantifiers, reading nothing at their variable,
 keep the negation in `∃*∀*`). -/
 def _root_.Solidity.Fml.target (w : Waivers) : {Γ : Ctx} → Bool → Bool → Fml C Γ → Bool
   | _, _, _, .tt => true
-  | _, _, _, .eq a b => a.inTarget w && b.inTarget w
-  | _, _, _, .wellFormed s => s.inTarget w
+  | _, _, _, .eq a b => a.inTarget w (a.hashPair b) && b.inTarget w (a.hashPair b)
+  | _, _, _, .wellFormed s => s.inTarget w false
   | _, pol, n, .not φ => φ.target w (!pol) n
   | _, pol, n, .and φ ψ => φ.target w pol n && ψ.target w pol n
   | _, pol, n, .imp φ ψ => φ.target w (!pol) n && ψ.target w pol n
@@ -424,14 +737,68 @@ def _root_.Solidity.Fml.target (w : Waivers) : {Γ : Ctx} → Bool → Bool → 
   | _, pol, n, .havoc φ | _, pol, n, .anon _ φ | _, pol, n, .grow φ | _, pol, n, .allocAll _ _ φ =>
     if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
 
+/-! ### Hashes as mapping keys
+
+A mapping keyed by hashes (`mapping(string => V)`) compares its keys: two
+hash keys compare as their inputs under the premise, a hash key and any
+other key as a preimage question.  So a root with a hash key must have hash
+keys only. -/
+
+/-- The keys at the mappings at roots: the root and whether the key is a
+hash the premise settles. -/
+def _root_.Solidity.Tm.mapKeys {Γ : Ctx} : {s : Srt} → Tm C Γ s → List (Name × Bool)
+  | _, .netOf _ a | _, .app1 _ a => a.mapKeys
+  | _, .app2 o x y =>
+    (if o.isMapAt then (match x.rootNameD? with
+      | some r => [(r, y.hashable?.isSome)]
+      | none => [])
+    else []) ++ x.mapKeys ++ y.mapKeys
+  | _, .app3 _ x y z => x.mapKeys ++ y.mapKeys ++ z.mapKeys
+  | _, _ => []
+
+def _root_.Solidity.Rhs.mapKeys {Γ : Ctx} {t : LTy} : Rhs C Γ t → List (Name × Bool)
+  | .val a | .zint a => a.mapKeys
+  | .path q => q.mapKeys
+  | .mref i => i.mapKeys
+  | .store s => s.mapKeys
+  | .unset | .saveNet | .saveNetMt => []
+
+def _root_.Solidity.UpdElem.mapKeys {Γ Δ : Ctx} : UpdElem C Γ Δ → List (Name × Bool)
+  | .local _ r => r.mapKeys
+  | .storage s | .memory s => s.mapKeys
+  | .selfBalance _ a | .setBalance a => a.mapKeys
+  | .net r _ a | .pay r a | .netMt r a => r.mapKeys ++ a.mapKeys
+
+def _root_.Solidity.Upd.mapKeys {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List (Name × Bool)
+  | _, .nil => []
+  | _, .snoc U e => U.mapKeys ++ e.mapKeys
+  | _, .decl U _ r => U.mapKeys ++ r.mapKeys
+  | _, .pop U _ | _, .drop U _ => U.mapKeys
+
+def _root_.Solidity.Fml.mapKeys : {Γ : Ctx} → Fml C Γ → List (Name × Bool)
+  | _, .tt | _, .modal .. => []
+  | _, .eq a b => a.mapKeys ++ b.mapKeys
+  | _, .wellFormed s => s.mapKeys
+  | _, .not φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ
+  | _, .grow φ => φ.mapKeys
+  | _, .and φ ψ | _, .imp φ ψ => φ.mapKeys ++ ψ.mapKeys
+  | _, .upd _ U φ => U.mapKeys ++ φ.mapKeys
+
+/-- A root with a hash key has hash keys only. -/
+def keysAgree (ks : List (Name × Bool)) : Bool :=
+  ks.all fun (r, h) => h || !(ks.any fun (r', h') => r' == r && h')
+
 /-- **The fragment the user named**, on a scoped leaf: no program, every
 operator admitted (`Waivers`), every quantifier over contents in the array
-property fragment. -/
-def _root_.Solidity.Fml.inTarget (w : Waivers) (φ : Fml C []) : Bool := φ.target w true false
+property fragment, every hash where the goal's premise settles it. -/
+def _root_.Solidity.Fml.inTarget (w : Waivers) (φ : Fml C []) : Bool :=
+  φ.target w true false && keysAgree φ.mapKeys
 
-/-- **The open theorem**: on the fragment, `decideLeaf` answers. -/
+/-- **The open theorem**: on the fragment, `decideGoal` answers; its
+verdicts are read under the goal's hash premise (`decideGoal_sound`,
+`decideGoal_refutes`). -/
 def DecisionTheorem (w : Waivers := {}) : Prop :=
-  ∀ (C : Contract) (φ : Fml C []), φ.inTarget w = true → decideLeaf (w.hashes.goal φ) ≠ .unknown
+  ∀ (C : Contract) (φ : Fml C []), φ.inTarget w = true → decideGoal φ ≠ .unknown
 
 /-- info: 'Solidity.Decide.decideLeaf_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideLeaf_sound
@@ -441,5 +808,14 @@ def DecisionTheorem (w : Waivers := {}) : Prop :=
 
 /-- info: 'Solidity.Decide.decideLeaf_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideLeaf_complete
+
+/-- info: 'Solidity.Decide.decideGoal_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_sound
+
+/-- info: 'Solidity.Decide.decideGoal_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_refutes
+
+/-- info: 'Solidity.Decide.decideGoal_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_complete
 
 end Solidity.Decide
