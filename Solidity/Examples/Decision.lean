@@ -1,5 +1,6 @@
 import Solidity.Calculus.Decision
 import Solidity.Examples.ReadRealization
+import Solidity.Examples.DecisionHashes
 
 /-!
 # The closer's decision (M7): the features added to its fragment
@@ -389,5 +390,181 @@ theorem sortedLe_covered : sortedLe.Covered = true := by decide +kernel
 
 /-- info: "proved" -/
 #guard_msgs in #eval verdict sortedLe
+
+/-! ## Counterexamples to `DecisionTheorem`
+
+`DecisionTheorem` is not yet true.  One leaf per shape of `Fml.inTarget`
+that `decideGoal` still answers `unknown` on: each in the fragment, by the
+kernel, and answered `unknown` (the compiled verdicts below).  The list is
+`docs/automation.md`'s (M7, "What is not proved"). -/
+
+/-- The roots the shapes read. -/
+def Gaps : Contract := contract!{
+  struct Acc { uint v; bool live; }
+  mapping(uint => mapping(uint => uint)) allow;
+  mapping(uint => uint) balances;
+  mapping(int => uint) ibal;
+  mapping(bool => uint) flags;
+  mapping(uint => Acc) accs;
+  uint[] arr;
+  uint[3] fixedArr;
+}
+
+section Gaps
+
+local instance : InContract := ⟨Gaps⟩
+
+/-! ### Quantifiers over contents outside `apfPrep`'s shapes -/
+
+/-- A block whose bound index is not the last of its path (`m[i][3]`). -/
+def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
+/-- A root read at a bound index at two depths. -/
+def gapTwoPaths : Fml Gaps [] :=
+  dl!{ (∀ uint k; k < 10 → allow[3][k] == 0 && allow[k][3] == 0) → allow[3][5] == 0 }
+/-- A block over a mapping keyed by `int`, and by `bool`. -/
+def gapIntKeyed : Fml Gaps [] := dl!{ (∀ int k; k < 10 → ibal[k] == 0) → ibal[5] == 0 }
+def gapBoolKeyed : Fml Gaps [] := dl!{ (∀ bool b; flags[b] == 0) → flags[true] == 0 }
+/-- A block reading a struct's member past the bound index. -/
+def gapStructValue : Fml Gaps [] := dl!{ (∀ uint k; k < 10 → accs[k].v == 0) → accs[5].v == 0 }
+/-- A block over an array. -/
+def gapArrayBlock : Fml Gaps [] :=
+  dl!{ (∀ uint i; i < 3 → arr[i] == 0) → arr.length > 5 → arr[1] == 0 }
+/-- A block over the ledger. -/
+def gapLedgerBlock : Fml Gaps [] := dl!{ (∀ uint a; net(a) >= 0) → net(5) >= 0 }
+/-- A guard with a partial ground operand (`x - 1` reverts at `0`). -/
+def gapPartialGuard : Fml Gaps [] :=
+  dl!{ ∀ uint x; (∀ uint k; k < x - 1 → balances[k] == 0) → x > 3 → balances[1] == 0 }
+/-- A positive quantifier the prefix does not reach, reading at its variable. -/
+def gapPositiveForall : Fml Gaps [] :=
+  dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == balances[k])) }
+
+/-! ### Arrays, memory, the ledger and KeY's `int` without quantifiers -/
+
+/-- A dynamic array's element at a checked index (M4 (b)), and a fixed
+array's at a literal one. -/
+def gapArrayRead : Fml Gaps [] := dl!{ ∀ uint i; i < arr.length → arr[i] == arr[i] }
+def gapFixedRead : Fml Gaps [] := dl!{ fixedArr[1] == fixedArr[1] }
+
+end Gaps
+
+section GapTerms
+
+/-- Leaves written with the constructors: `dl!` has no notation for them. -/
+def litU {Γ : Ctx} (n : Nat) : Tm Gaps Γ (.val .uint) := .app0 (.lit (uintOfNat n))
+def litI {Γ : Ctx} (n : Int) (h : PrimTy.int.inRange n = true := by decide) : Tm Gaps Γ (.val .int) :=
+  .app0 (.lit (p := .int) ⟨n, h⟩)
+def isT {Γ : Ctx} (b : Tm Gaps Γ (.val .bool)) : Fml Gaps Γ := .eq b (.app0 (.lit (p := .bool) true))
+def xU : Tm Gaps [.val .uint] (.val .uint) := .pvV .here
+def xI : Tm Gaps [.val .int] (.val .int) := .pvV .here
+def allU (φ : Fml Gaps [.val .uint]) : Fml Gaps [] := .all (.user "x") .uint φ
+def allI (φ : Fml Gaps [.val .int]) : Fml Gaps [] := .all (.user "x") .int φ
+
+/-- A memory read: `∀ fresh s. len(s) > 0 → s[0] == 0`. -/
+def gapMemory : Fml Gaps [] := .allocAll (.user "s") (.array (.prim .uint))
+  (.imp (isT (.app2 (.binop .gt rfl) (.app2 .mlen (.app0 .memory) (.pvI .here)) (litU 0)))
+    (.eq (.app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (litU 0))) (litU 0)))
+/-- A binder of KeY's unbounded `int`: `∀ int z. z + 1 > z`. -/
+def gapKIntBinder : Fml Gaps [] := .bind .box (.user "z") .kint
+  (isT (.app2 (.zcmp .gt rfl) (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit 1))) (.pvZ .here)))
+/-- The ledger read past a payment: `{pay(x, 1)} net(x) >= 0`. -/
+def gapLedgerWrite : Fml Gaps [] := allU (.upd .box (.snoc .nil (.pay xU (litU 1)))
+  (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0)))))
+/-- Fifty storage reads: past `Fml.exactBounded`'s bounds. -/
+def gapManyReads : Fml Gaps [] :=
+  let bal (n : Nat) : Tm Gaps [.val .uint] (.val .uint) :=
+    .app2 .find (.app0 .storage) (.app2 (.at .map) (.app0 (.root "balances" rfl)) (litU n))
+  allU (.imp (Fml.conjL ((List.range 50).map fun n => .eq (bal n) xU)) (.eq (bal 0) (bal 49)))
+
+/-! ### Operators with a literal operand, not carried through the stages -/
+
+/-- `/`, `%` at `int` by a literal. -/
+def gapIntDiv : Fml Gaps [] := allI (.imp (isT (.app2 (.binop .ge rfl) xI (litI 0)))
+  (isT (.app2 (.binop .le rfl) (.app2 (.binop .mul rfl) (.app2 (.binop .div rfl) xI (litI 3)) (litI 3)) xI)))
+def gapIntMod : Fml Gaps [] := allI (isT (.app2 (.binop .lt rfl) (.app2 (.binop .mod rfl) xI (litI 3)) (litI 3)))
+/-- `|`, `^` with a literal, `&` with one that is not a low mask. -/
+def gapOr : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .bor rfl) xU (litU 1)) xU))
+def gapXor : Fml Gaps [] := allU (isT (.app2 (.binop .neB rfl) (.app2 (.binop .bxor rfl) xU (litU 1)) xU))
+def gapAnd : Fml Gaps [] := allU (isT (.app2 (.binop .le rfl) (.app2 (.binop .band rfl) xU (litU 6)) (litU 6)))
+/-- `**` by a literal (`x ** 1`), `*%` by a literal. -/
+def gapPow : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 1)) xU)
+def gapMulW : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) xU (litU 3)) (litU 0)))
+
+end GapTerms
+
+/-! ### Hashes outside `Fml.hashCovered` -/
+
+section GapHashes
+
+open Solidity.Examples.DecisionHashes
+open Solidity.Examples.Tactics.Hashing (Names)
+
+/-- Three kinds of hash of one string. -/
+def gapThreeKinds : Fml Names [] :=
+  strings (.imp (.eq hS hT) (.imp (.eq shaS shaT)
+    (.eq (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here)))
+      (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)))))
+/-- Two kinds, no string hashed by both: no kind to read the other's words
+against. -/
+def gapMixedKinds : Fml Names2 [] :=
+  strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
+/-- Five strings, refuted only by five classes: past `famBound`. -/
+def gapFiveStrings : Fml Names [] :=
+  let h (i : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str)) :
+      Tm Names [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.val .uint) :=
+    .app2 (.hash .keccak) (.app0 .memory) (.pvI i)
+  let i0 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .here
+  let i1 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there .here
+  let i2 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there (.there .here)
+  let i3 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
+    .there (.there (.there .here))
+  let i4 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
+    .there (.there (.there (.there .here)))
+  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str
+    (.allocAll (.user "d") Str (.allocAll (.user "e") Str
+      (Fml.orL [.eq (h i0) (h i1), .eq (h i0) (h i2), .eq (h i0) (h i3), .eq (h i0) (h i4),
+        .eq (h i1) (h i2), .eq (h i1) (h i3), .eq (h i1) (h i4), .eq (h i2) (h i3), .eq (h i2) (h i4),
+        .eq (h i3) (h i4)])))))
+/-- A quantifier in the body, past a connective. -/
+def gapHashUnderForall : Fml Names [] := strings (.imp (.eq hS hT) (.all (.user "x") .uint
+  (.imp (.eq (Tm.pvV .here) (.app0 (.lit (uintOfNat 0)))) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT)))))
+
+end GapHashes
+
+theorem gapColumn_inTarget : gapColumn.inTarget {} = true := by decide +kernel
+theorem gapTwoPaths_inTarget : gapTwoPaths.inTarget {} = true := by decide +kernel
+theorem gapIntKeyed_inTarget : gapIntKeyed.inTarget {} = true := by decide +kernel
+theorem gapBoolKeyed_inTarget : gapBoolKeyed.inTarget {} = true := by decide +kernel
+theorem gapStructValue_inTarget : gapStructValue.inTarget {} = true := by decide +kernel
+theorem gapArrayBlock_inTarget : gapArrayBlock.inTarget {} = true := by decide +kernel
+theorem gapLedgerBlock_inTarget : gapLedgerBlock.inTarget {} = true := by decide +kernel
+theorem gapPartialGuard_inTarget : gapPartialGuard.inTarget {} = true := by decide +kernel
+theorem gapPositiveForall_inTarget : gapPositiveForall.inTarget {} = true := by decide +kernel
+theorem gapArrayRead_inTarget : gapArrayRead.inTarget {} = true := by decide +kernel
+theorem gapFixedRead_inTarget : gapFixedRead.inTarget {} = true := by decide +kernel
+theorem gapMemory_inTarget : gapMemory.inTarget {} = true := by decide +kernel
+theorem gapKIntBinder_inTarget : gapKIntBinder.inTarget {} = true := by decide +kernel
+theorem gapLedgerWrite_inTarget : gapLedgerWrite.inTarget {} = true := by decide +kernel
+theorem gapManyReads_inTarget : gapManyReads.inTarget {} = true := by decide +kernel
+theorem gapIntDiv_inTarget : gapIntDiv.inTarget {} = true := by decide +kernel
+theorem gapIntMod_inTarget : gapIntMod.inTarget {} = true := by decide +kernel
+theorem gapOr_inTarget : gapOr.inTarget {} = true := by decide +kernel
+theorem gapXor_inTarget : gapXor.inTarget {} = true := by decide +kernel
+theorem gapAnd_inTarget : gapAnd.inTarget {} = true := by decide +kernel
+theorem gapPow_inTarget : gapPow.inTarget {} = true := by decide +kernel
+theorem gapMulW_inTarget : gapMulW.inTarget {} = true := by decide +kernel
+theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
+theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
+theorem gapFiveStrings_inTarget : gapFiveStrings.inTarget {} = true := by decide +kernel
+theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := by decide +kernel
+
+/-- info: true -/
+#guard_msgs in
+#eval ([gapColumn, gapTwoPaths, gapIntKeyed, gapBoolKeyed, gapStructValue, gapArrayBlock, gapLedgerBlock,
+  gapPartialGuard, gapPositiveForall, gapArrayRead, gapFixedRead, gapMemory, gapKIntBinder, gapLedgerWrite,
+  gapManyReads, gapIntDiv, gapIntMod, gapOr, gapXor, gapAnd, gapPow, gapMulW].map verdict).all (· == "unknown")
+
+/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+#guard_msgs in
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapFiveStrings, verdict gapHashUnderForall]
 
 end Solidity.Examples.Decision
