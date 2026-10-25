@@ -8092,23 +8092,22 @@ each through a one-import scratch module (not committed).
   reads, not a value the run computes; its memory cells are indexed by the
   locals' levels.
 
-## W12 plan: checks that should be types (2026-10-24, not started)
+## W12: checks that should be types (plan 2026-10-24, contract certificates 2026-10-25)
 
 Several theorems take as a hypothesis a fact that a type could carry. The
 ones that recur most, in the order to do them:
 
-1. **The contract proves its own well-formedness.** `Contract`
-   (`Syntax.lean`) is a plain record, so a contract whose storage
-   mentions a broken struct (an unknown name, a repeated member name)
-   can be written, and `wt_iff_reachable` (`Calculus/Problem.lean`)
-   needs `C.vars.all (·.2.okDeep)` and `nodupKeysB C.vars` as
-   hypotheses. For such a contract nothing says whether `wt(storage)`
-   is stronger than reachability (`Typing/Tight.lean`). Add proof fields
-   to `Contract`, `vars_ok` and `vars_nodup`, each defaulting to
-   `by decide`. `contract!{…}` and the solc frontend already reject such
-   contracts. `Contract.ofStruct` needs a lemma that `structDef s` is
-   `okDeep` and has distinct members. After this, `wt` is reachability
-   for every `C`. Cheap, but it rebuilds everything above `Syntax.lean`.
+1. **The contract certifies its storage declaration (done).** `Contract`
+   (`Syntax/Raw.lean`) carries `vars_ok` and `vars_nodup`, defaulted to
+   `by decide`. Raw records, record updates and `contract!{…}` must prove
+   the same conditions: every root's type is `okDeep`, and root names are
+   distinct. Theorems no longer ask clients for those facts:
+   `Prog.run_tight`, `reachable_tight`, the constructibility APIs and
+   `wt_iff_reachable` read the contract's certificates instead. `wt` is
+   reachability for every `C` whose storage fits. `Contract.ofStruct`
+   uses `structDef_okDeep` and the existing `structDef_nodup`, so symbolic
+   struct names require no computation. The proof fields are erased at
+   runtime. This rebuilds everything above the raw syntax.
 2. **Roots and fields as positions.** `Loc.root (r : Name)
    (h : C.rootType r = some T)` (`Syntax/Scoped.lean`) and the matching
    field lookups (`C.fieldType s f = some T`, `lookupBy f … = some T`;
@@ -8137,3 +8136,113 @@ ones that recur most, in the order to do them:
 
 `Heap H` and `Thin`/`Ext` are already intrinsic: they are typed values
 and context embeddings, not checks.
+
+### W12 contract certificates record (2026-10-25)
+
+The source survey covered first-party declarations and imports across the
+syntax, semantics, Theory, calculus, typing, EVM, tools, frontends, examples,
+TestSuite and optional bridge, together with the repository scripts. The
+existing context, heap, path, call-value and ABI representations are already
+indexed. This milestone implements item 1; items 2–5 remain follow-up work.
+History inspection found the existing W12 plan and no earlier performance
+change that these contract certificates reverse. The warning before editing
+was the rebuild of the entire graph above the raw syntax.
+
+`Contract.root_okDeep` projects the declaration's evidence at a successful
+root lookup. `SRef.okDeep` carries it down a typed path. `DeepOk` and
+`deepOk_of_all` are removed; tightness preservation and reachable shape need
+no separate contract validity hypothesis. The builder and reachability
+characterisations use `C.vars_nodup`, and initial storage well-formedness is
+available for arbitrary `C` without a client-supplied proof. The imported
+TestSuite's satisfiable premise uses that generic theorem directly.
+
+The validity certificate has exactly the existing `Ty.okDeep` meaning.
+It excludes ordinary unknown struct names, including under arrays and
+mappings, but `structOk` still admits encoded names by the `isEnc` marker.
+A malformed encoded name can therefore denote the rejected, empty struct
+definition. Full validation of struct names and members belongs to item 3;
+this milestone does not strengthen that predicate. `Fits` and `FixedFits`
+remain explicit where needed: `huge_reachable_not_fits` still witnesses why
+they cannot simply be dropped.
+
+`Examples/ContractTypes.lean` checks rejected raw declarations, duplicate
+names at equal and unequal types, unknown nested types, invalid root updates
+and duplicate roots in `contract!`. Positive checks cover the empty default,
+nested encoded structs, valid root and metadata updates, symbolic `ofStruct`
+and the generic reachability/well-formedness APIs. A record update that changes
+`vars` must explicitly replace `vars_ok` and `vars_nodup`; Lean inherits the
+old proofs otherwise. Metadata-only updates retain the original certificates.
+
+The required read-only finder review found no confirmed defect; its positive
+root-update regression was added, and its observation about encoded-name
+validation is recorded above. The read-only skeptic confirmed no defect and
+reviewed the updated record-update tests after the compiler exposed proof
+inheritance. Both reviewers also checked the updated `uint7` diagnostic pin:
+the original unknown-type error now has a second diagnostic when recovery
+cannot synthesize `vars_ok`.
+
+The cold optional bridge build exposed existing stale interfaces at `HEAD`.
+`Bridge/SolidityBridge/Evm.lean` now eliminates the divergence alternative of
+`compile_exact` when the source run succeeds. The power examples and weakest
+precondition laws import `Syntax/Splice.lean`, which provides their program
+notation. `Bridge/SolidityBridge/Arith/Lowering.lean`'s `narrowCheck_guard`
+now states the existing self-frame `panicStmt 0x11` branch when there is no
+overflow override, rather than incorrectly stating an unconditional
+`require`. These repairs change no core execution behavior. The finder and
+skeptic reviewed each against the unchanged core and found no further issue.
+
+Validation:
+
+- Focused contract and imported-premise targets: 201 jobs passed, including
+  `Examples/ContractTypes.lean` and `TestSuite/Problems.lean`.
+- Full default build: 556 jobs passed; `SolkeyTestSuite`: 237 jobs passed;
+  `SolidityCorpus`: 245 jobs passed; `scripts/check-bridge.sh`: 1607 jobs passed.
+  Under this environment's 16 GiB cap, simultaneous large files approached
+  the limit and one TestSuite process was killed. The affected files passed
+  on separate or serial retries; no proof budgets were increased.
+- Solkey conformance against the bundled migration snapshot: 377 taclets,
+  131 read-bearing annotations, no mismatch. `scripts/check-testsuite.sh`
+  also passed against that snapshot's examples.
+- Headline axiom checks for the new certificates, tightness, reachability,
+  initial well-formedness and repaired bridge facts use only the standard
+  `propext`, `Classical.choice`, `Quot.sound` set (or a subset). No new
+  `sorry`, axiom declaration or core dependency was added.
+- Orphan and layer gates passed: 574 reachable modules, no orphan; 123 core
+  modules, none reaching the elaborator.
+- Strict automation still reports the existing pending
+  `invariantClosedFormSum`; the non-strict gate passes. The documentation
+  path checker still reports 13 existing missing references. Both findings
+  were compared with an unmodified `adcebe2b` export and are unchanged on that base.
+
+The optional bridge's published Mathlib cache was unavailable through the
+proxy, so its existing pinned dependencies were built locally.
+
+### Integration with current master (2026-10-25)
+
+The contract-certificate commit rebased cleanly onto `c7e634f5`, preserving
+25 upstream commits. The integrated source gates report 580 reachable
+modules with no orphan and 124 core modules with no path to the elaborator.
+Upstream has resolved `invariantClosedFormSum`: strict automation now passes
+with 552 derived, 11 refuted and no pending obligation.
+
+The source-trust inventory gate reports 23 mismatches. Running the same
+audit on an unmodified `c7e634f5` export produces the identical set of 23
+findings; this change introduces no additional implementation/recovery
+site. The inventory is left intact rather than silently accepting the
+upstream changes.
+
+### Merge review against `f6041962` (2026-10-25)
+
+The read-only finder and skeptic reviewed the contract certificates,
+the removed theorem hypotheses, constructor clients and the optional bridge.
+Neither found a defect. The bounds hypotheses (`Fits` and `FixedFits`) remain
+explicit. Both confirmed that the bridge's `narrowCheck_guard` and
+`compile_trace_complete` repairs already exist on current master. Their
+merge conflicts retain master's versions, including the newer elaborator
+memo interface.
+
+The integrated source gates pass: 582 reachable modules, no orphan, 124 core
+modules with no path to the elaborator, and no pending automation obligation.
+The feature inventory is current. The 23 trust-inventory findings and 13
+missing documentation paths match an unmodified `f6041962` export; this
+integration adds no finding.

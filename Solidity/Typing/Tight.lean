@@ -18,12 +18,11 @@ The converse needs three more facts, which every run keeps and
   it (`IndexTy.map` takes a word key; a `bool` one is hashed as `0`/`1`).
 
 A fixed-size array has nothing past its end by its type.  `Prog.run_tight`
-is the preservation theorem, for a contract whose types have well-formed
-defaults all the way down (`Ty.okDeep`, `DeepOk`): the typed run keeps
+is the preservation theorem: every contract carries well-formed storage
+types (`Contract.vars_ok`), and the typed run keeps
 `heredInv C tightH` (`Typing/HeredRun.lean`, `tightH_run`).  Under
 `Ty.okDeep` the first clause is vacuous, so a copy out of memory is tight
-(`SVal.Plain`).  Whether that clause is also necessary for a contract with
-a root `defaultOkS` refuses is not proved here.
+(`SVal.Plain`).
 
 `SVal.Fits` (`fitsH`) is what the builder of
 `Typing/Constructibility.lean` needs to write a value with literals: every
@@ -75,13 +74,10 @@ theorem SVal.dflt_tight (T : Ty) : (SVal.dflt T).Tight :=
     (fun _ => ⟨fun _ => ⟨rfl, rfl⟩, fun _ w hw => by rw [SList.toList_nil] at hw; exact nomatch hw⟩)
     (fun _ _ => trivial) (fun _ _ => trivial) T
 
-/-- `T`'s default and those of every type in it are well-formed: every root
-of the contract `Ty.okDeep`. -/
-def DeepOk (C : Contract) : Prop := ∀ r T, C.rootType r = some T → T.okDeep = true
-
-/-- Every type a reference of a `DeepOk` contract reaches is `okDeep`. -/
-theorem DeepOk.ref (hd : DeepOk C) {U : Ty} (r : SRef C U) : U.okDeep = true :=
-  Path.okDeep r.path (hd r.root r.ty r.hroot)
+/-- A storage reference reaches a type with well-formed defaults all the
+way down, as guaranteed by its contract. -/
+theorem SRef.okDeep {U : Ty} (r : SRef C U) : U.okDeep = true :=
+  Path.okDeep r.path (C.root_okDeep r.hroot)
 
 /-- An array with nothing past its end, of elements with a well-formed
 default, is a tight node. -/
@@ -162,19 +158,17 @@ theorem Storage.init_tight : (Storage.init C).Tight :=
 a program writes. -/
 abbrev tightInv (C : Contract) : RunInv C := heredInv C tightH
 
-/-- **Tightness**: for a contract whose types have well-formed defaults all
-the way down, a block run from a state whose storage is tight, its aliases
+/-- **Tightness**: a block run from a state whose storage is tight, its aliases
 bound along keys a program writes, ends, if in a state, in one whose storage
 is tight. -/
-theorem Prog.run_tight (hd : DeepOk C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ}
+theorem Prog.run_tight {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ}
     {o : Out C σ.H Γ'} (hσ : (tightInv C).HoldsT σ) (h : P.run σ = .ok o) :
     o.st.storage.Tight :=
-  Prog.run_all tightH_run hd.ref P hσ h
+  Prog.run_all tightH_run SRef.okDeep P hσ h
 
-/-- **Reachable ⇒ tight**, for a contract whose types have well-formed
-defaults all the way down. -/
-theorem reachable_tight (hd : DeepOk C) {st : Storage C} (h : Reachable C st) : st.Tight :=
-  Reachable.all tightH_run hd.ref Storage.init_tight h
+/-- **Reachable ⇒ tight**, for every contract. -/
+theorem reachable_tight {st : Storage C} (h : Reachable C st) : st.Tight :=
+  Reachable.all tightH_run SRef.okDeep Storage.init_tight h
 
 /-! ## Values the builder writes -/
 

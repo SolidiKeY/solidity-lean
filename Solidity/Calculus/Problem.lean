@@ -86,37 +86,34 @@ theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
   exact ⟨fun ⟨_, h, hw⟩ => by cases h; exact hw, fun h => ⟨_, rfl, h⟩⟩
 
 /-- A reachable storage passes the shape test. -/
-theorem shape_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
+theorem shape_of_reachable {st : Storage C}
     (h : Reachable C st) : st.shapeB = true :=
-  (Storage.shapeB_iff st).2 (reachable_shape hdeep h)
+  (Storage.shapeB_iff st).2 (reachable_shape h)
 
-/-- **The shape is reachability**: for a contract whose types have
-well-formed defaults all the way down, a storage whose keys and slots are in
+/-- **The shape is reachability**: a storage whose keys and slots are in
 range (`SVal.Fits`) passes the shape test exactly when a program reaches it
 from the contract's initial state. -/
-theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C} (hf : st.Fits) :
+theorem shape_iff_reachable {st : Storage C} (hf : st.Fits) :
     st.shapeB = true ↔ Reachable C st := by
-  rw [Storage.shapeB_iff, reachable_iff hnd hdeep hf]
+  rw [Storage.shapeB_iff, reachable_iff hf]
 
 /-- **`wt` is reachability**: a storage whose keys and slots are in range is
 well-formed exactly when a program reaches it.  Its words and keys are in
 range by their types. -/
-theorem wt_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C} (hf : st.Fits) :
+theorem wt_iff_reachable {st : Storage C} (hf : st.Fits) :
     st.wtB = true ↔ Reachable C st := by
-  rw [Storage.wtB, shape_iff_reachable hnd hdeep hf]
+  rw [Storage.wtB, shape_iff_reachable hf]
 
 /-- A reachable storage is well-formed. -/
-theorem wt_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
+theorem wt_of_reachable {st : Storage C}
     (h : Reachable C st) : st.wtB = true := by
-  rw [Storage.wtB, shape_of_reachable hdeep h]
+  rw [Storage.wtB, shape_of_reachable h]
 
 /-- The contract's initial storage is well-formed (the empty program reaches
 it), so the premise is satisfiable. -/
-theorem initStorage_wt (hdeep : C.vars.all (·.2.okDeep) = true) :
+theorem initStorage_wt :
     holds (State.init C) (Fml.wt C) :=
-  holds_wt.2 (wt_of_reachable hdeep
+  holds_wt.2 (wt_of_reachable
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩)
 
 /-! ## The obligations

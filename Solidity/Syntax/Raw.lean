@@ -335,6 +335,8 @@ structure EvalOrder where
 /-- Solidity's IR code generator evaluates ordinary expressions in source order. -/
 def EvalOrder.viaIR : EvalOrder := ⟨true, true⟩
 
+/-- A contract carries the validity of its storage declaration. The proof
+fields are erased when programs run; literals discharge them by computation. -/
 structure Contract where
   vars : List (Name × Ty)
   funs : List (Name × FunDecl) := []
@@ -367,7 +369,13 @@ structure Contract where
   errors : List (Name × FunDecl) := []
   /-- The elaborator's operand schedule, retained by every use of this contract. -/
   evalOrder : EvalOrder := {}
-  deriving Repr, Inhabited
+  /-- Every storage type has well-formed defaults all the way down. -/
+  vars_ok : vars.all (fun nt => nt.2.okDeep) = true := by decide
+  /-- A storage name identifies exactly one declared root. -/
+  vars_nodup : nodupKeysB vars = true := by decide
+  deriving Repr
+
+instance : Inhabited Contract := ⟨{ vars := [] }⟩
 
 namespace Contract
 
@@ -385,6 +393,11 @@ def structFields (C : Contract) (s : Name) : List (Name × Ty) :=
 
 /-- The declared type of the storage root `r`. -/
 def rootType (C : Contract) (r : Name) : Option Ty := lookupBy r C.vars
+
+/-- A declared root inherits its type's validity from the contract. -/
+theorem root_okDeep (C : Contract) {r : Name} {T : Ty}
+    (h : C.rootType r = some T) : T.okDeep = true :=
+  all_mem C.vars_ok (r, T) (lookupBy_eq_some_mem h)
 
 /-- The declared type of member `f` of struct `s`, from `structDef`.  The
 parameter is there so terms read `C.fieldType`. -/
