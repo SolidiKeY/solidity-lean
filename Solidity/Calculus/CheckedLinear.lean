@@ -287,6 +287,108 @@ def ofTerm? {p : PrimTy} (t : LTm C (.val p)) : Option (CheckedValue t) := ofTer
 
 end CheckedValue
 
+/-- **An exact encoding of a KeY `int` term** (`Srt.kint`): an affine form
+over the codes, unbounded, and its definedness guard. -/
+structure KIntValue (t : LTm C .kint) (ps : List Parameter := []) (es : List EnvKey := []) where
+  refs : List (Ref C)
+  lower : List (Ref C) → CheckedInt
+  correct : ∀ (rs : List (Ref C)), (∀ r ∈ refs, r ∈ rs) →
+    ∀ (g : State C []) (ν : AEnv),
+      (lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν)
+
+/-- The term is a KeY `int` literal: its value. -/
+def LTm.zlit? : (t : LTm C .kint) → Option {n : Int // t = .app0 (.zlit n)}
+  | .app0 (.zlit n) => some ⟨n, rfl⟩
+  | _ => none
+
+namespace KIntValue
+
+def zlit (n : Int) : KIntValue (ps := ps) (es := es) (LTm.app0 (C := C) (.zlit n)) :=
+  ⟨[], fun _ => .lit n, fun _ _ _ _ => CheckedInt.lit_correct n _⟩
+
+/-- `toInt(a)`: a `uint` read as a KeY `int`. -/
+def toInt {a : LTm C (.val .uint)} (ha : CheckedValue (ps := ps) (es := es) a) :
+    KIntValue (ps := ps) (es := es) (.app1 .toInt a) :=
+  ⟨ha.refs, fun rs => .ofUint (ha.lower rs), fun rs hr g ν =>
+    CheckedInt.ofUint_correct _ _ _ (ha.correct rs hr g ν)⟩
+
+theorem eval_zbin (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zArith = true)
+    (a b : LTm C .kint) :
+    ((LTm.app2 (.zbin op h) a b).eval g ν : Option Int) =
+      ((a.eval g ν : Option Int).bind fun v => (b.eval g ν : Option Int).map fun w => op.evalZ v w) := by
+  rw [LTm.eval_app2]
+  cases (a.eval g ν : Option Int) <;> cases (b.eval g ν : Option Int) <;> rfl
+
+/-- `a + b` (`subtract = false`) or `a - b` on KeY's `int`. -/
+def arith (subtract : Bool) (op : BinOp) (h : op.zArith = true)
+    (hop : op = if subtract then .sub else .add) {a b : LTm C .kint}
+    (ha : KIntValue (ps := ps) (es := es) a) (hb : KIntValue (ps := ps) (es := es) b) :
+    KIntValue (ps := ps) (es := es) (.app2 (.zbin op h) a b) :=
+  ⟨ha.refs ++ hb.refs, fun rs => .arith subtract (ha.lower rs) (hb.lower rs), by
+    intro rs hr g ν
+    have ih := CheckedInt.arith_correct subtract (ha.lower rs) (hb.lower rs)
+      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (b.eval g ν)
+      (ha.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
+      (hb.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)
+    rw [eval_zbin]
+    subst hop
+    cases subtract <;> exact ih⟩
+
+/-- `n · b` on KeY's `int`, `n` a literal. -/
+def mulLit (h : BinOp.mul.zArith = true) {a b : LTm C .kint} (n : Int)
+    (ha : a = .app0 (.zlit n)) (hb : KIntValue (ps := ps) (es := es) b) :
+    KIntValue (ps := ps) (es := es) (.app2 (.zbin .mul h) a b) :=
+  ⟨hb.refs, fun rs => .scale n (hb.lower rs), by
+    intro rs hr g ν
+    subst ha
+    have ih := CheckedInt.scale_correct n (hb.lower rs)
+      (Inputs.observe es ps rs g ν).codes (b.eval g ν) (hb.correct rs hr g ν)
+    rw [eval_zbin]
+    exact ih⟩
+
+/-- `a · n` on KeY's `int`, `n` a literal. -/
+def litMul (h : BinOp.mul.zArith = true) {a b : LTm C .kint} (n : Int)
+    (hb : b = .app0 (.zlit n)) (ha : KIntValue (ps := ps) (es := es) a) :
+    KIntValue (ps := ps) (es := es) (.app2 (.zbin .mul h) a b) :=
+  ⟨ha.refs, fun rs => .scale n (ha.lower rs), by
+    intro rs hr g ν
+    subst hb
+    have ih := CheckedInt.scale_correct n (ha.lower rs)
+      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+    rw [eval_zbin]
+    cases ha' : (a.eval g ν : Option Int) with
+    | none => rw [ha'] at ih; exact ih
+    | some v =>
+      rw [ha'] at ih
+      show (CheckedInt.scale n (ha.lower rs)).Correct _ (some (v * n))
+      rw [Int.mul_comm]
+      exact ih⟩
+
+/-- Recognition is bounded by term depth; a product of two non-literals is
+refused (decision c). -/
+def ofTermFuel? (ps : List Parameter) : Nat → (t : LTm C .kint) →
+    Option (KIntValue (ps := ps) (es := es) t)
+  | 0, _ => none
+  | _ + 1, .app0 (.zlit n) => some (zlit n)
+  | _ + 1, .app1 .toInt a => (CheckedValue.ofTermIn? ps a).map toInt
+  | fuel + 1, .app2 (.zbin .add h) a b => do
+    return arith false .add h rfl (← ofTermFuel? ps fuel a) (← ofTermFuel? ps fuel b)
+  | fuel + 1, .app2 (.zbin .sub h) a b => do
+    return arith true .sub h rfl (← ofTermFuel? ps fuel a) (← ofTermFuel? ps fuel b)
+  | fuel + 1, .app2 (.zbin .mul h) a b =>
+    match a.zlit? with
+    | some ⟨n, hn⟩ => do return mulLit h n hn (← ofTermFuel? ps fuel b)
+    | none =>
+      match b.zlit? with
+      | some ⟨n, hn⟩ => do return litMul h n hn (← ofTermFuel? ps fuel a)
+      | none => none
+  | _ + 1, _ => none
+
+def ofTermIn? (ps : List Parameter) (t : LTm C .kint) : Option (KIntValue (ps := ps) (es := es) t) :=
+  ofTermFuel? ps 1024 t
+
+end KIntValue
+
 /-- Source Boolean values use success predicates, retaining the distinction
 between false and failed evaluation. -/
 structure BooleanValue (t : LTm C (.val .bool)) (ps : List Parameter := []) (es : List EnvKey := []) where
@@ -369,6 +471,24 @@ def comparison {p : PrimTy} (op : BinOp) (hc : op.zCmp = true) (h : op.accepts p
     intro rs hs g ν
     rw [eval_comparison op hc h hr a b g ν]
     exact CheckedBool.comparison_correct _ _ _ _ _ _
+      (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
+      (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)⟩
+
+theorem eval_zcmp (g : State C []) (ν : AEnv) (op : BinOp) (h : op.zCmp = true)
+    (a b : LTm C .kint) :
+    ((LTm.app2 (.zcmp op h) a b).eval g ν : Option Bool) =
+      ((a.eval g ν : Option Int).bind fun v => (b.eval g ν : Option Int).map fun w => op.cmpZ v w) := by
+  rw [LTm.eval_app2]
+  cases (a.eval g ν : Option Int) <;> cases (b.eval g ν : Option Int) <;> rfl
+
+/-- `a ⊲ b` on KeY's `int`. -/
+def zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint}
+    (ha : KIntValue (ps := ps) (es := es) a) (hb : KIntValue (ps := ps) (es := es) b) :
+    BooleanValue (ps := ps) (es := es) (.app2 (.zcmp op h) a b) :=
+  ⟨ha.refs ++ hb.refs, fun rs => CheckedInt.comparison op (ha.lower rs) (hb.lower rs), by
+    intro rs hs g ν
+    rw [eval_zcmp]
+    exact CheckedInt.comparison_correct _ _ _ _ _ _
       (ha.correct rs (fun r hm => hs r (List.mem_append_left _ hm)) g ν)
       (hb.correct rs (fun r hm => hs r (List.mem_append_right _ hm)) g ν)⟩
 
@@ -470,6 +590,8 @@ def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → 
     | .le => do return comparison .le rfl h rfl (← CheckedValue.ofTermIn? ps a) (← CheckedValue.ofTermIn? ps b)
     | .ge => do return comparison .ge rfl h rfl (← CheckedValue.ofTermIn? ps a) (← CheckedValue.ofTermIn? ps b)
     | _ => none
+  | _ + 1, _, .app2 (.zcmp op h) a b => do
+    return zcmp op h (← KIntValue.ofTermIn? ps a) (← KIntValue.ofTermIn? ps b)
   | _ + 1, _, t => scalar? t
 
 def ofTermIn? (ps : List Parameter) (t : LTm C (.val .bool)) : Option (BooleanValue (ps := ps) (es := es) t) := ofTermFuel? ps 1024 t

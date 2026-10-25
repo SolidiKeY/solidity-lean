@@ -118,6 +118,26 @@ def addWBad : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x +% 1; ] y > x }
 def subWOk : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x -% 1; uint w = y +% 1; ] w == x }
 def subWBad : Fml Bank [] := dl!{ ∀ uint x; [ uint y = x -% 1; ] y < x }
 
+/-! ### KeY `int` (M7, plan step 3)
+
+`toInt(x)` widens a `uint` to KeY's unbounded `int` (`Srt.kint`): `+`, `-`
+and products by a literal never overflow there, and the comparisons are
+exact (`KIntValue`, `CheckedInt`). -/
+
+def kintOk : Fml Bank [] := dl!{ ∀ uint x; toInt(x) + 1 > toInt(x) }
+def kintBad : Fml Bank [] := dl!{ ∀ uint x; ∀ uint y; toInt(x) - toInt(y) < 5 }
+/-- A sum past `2^256` is no overflow. -/
+def kintWide : Fml Bank [] := dl!{ ∀ uint x; ∀ uint y; toInt(x) + toInt(y) >= toInt(x) }
+/-- The difference of two words is negative where the second is larger. -/
+def kintNeg : Fml Bank [] := dl!{ ∀ uint x; ∀ uint y; x < y → toInt(x) - toInt(y) < 0 }
+def kintScale : Fml Bank [] := dl!{ ∀ uint x; 3 * toInt(x) - toInt(x) = toInt(x) * 2 }
+def kintScaleBad : Fml Bank [] := dl!{ ∀ uint x; 3 * toInt(x) <= toInt(x) * 2 }
+/-- A transaction field widened. -/
+def kintValue : Fml Bank [] := dl!{ toInt(msg.value) + toInt(msg.value) >= toInt(msg.value) }
+/-- A storage read widened, past a write. -/
+def kintRead : Fml Bank [] :=
+  dl!{ ∀ uint k; [ balances[k] = 7; ] toInt(balances[k]) - 7 = 0 }
+
 /-- Guards outside the fragment: a disequality, arithmetic on the index. -/
 def guardNe : Fml Bank [] := dl!{ (∀ uint k; k != 3 → balances[k] == 0) → balances[5] == 0 }
 def guardArith : Fml Bank [] := dl!{ (∀ uint k; k + 1 < 10 → balances[k] == 0) → balances[5] == 0 }
@@ -193,6 +213,21 @@ theorem shl_covered : shlOk.Covered = true := by decide +kernel
 theorem mask_covered : maskOk.Covered = true := by decide +kernel
 theorem addW_covered : addWOk.Covered = true := by decide +kernel
 theorem subW_covered : subWOk.Covered = true := by decide +kernel
+
+/-- info: ["proved", "refuted", "proved", "proved", "proved", "refuted", "proved", "proved"] -/
+#guard_msgs in #eval [kintOk, kintBad, kintWide, kintNeg, kintScale, kintScaleBad, kintValue,
+  kintRead].map verdict
+
+/-- info: true -/
+#guard_msgs in #eval [kintOk, kintBad, kintWide, kintNeg, kintScale, kintScaleBad, kintValue,
+  kintRead].all Fml.Covered
+
+theorem kint_covered : kintOk.Covered = true := by decide +kernel
+theorem kintScale_covered : kintScale.Covered = true := by decide +kernel
+
+/-- `decideLeaf_proved_iff`, applied to a KeY `int` leaf. -/
+theorem kint_iff : decideLeaf kintOk = .proved ↔ Fml.Valid kintOk :=
+  decideLeaf_proved_iff kint_covered
 
 /-- `decideLeaf_proved_iff`, applied to a cut leaf. -/
 theorem div_iff : decideLeaf divOk = .proved ↔ Fml.Valid divOk :=

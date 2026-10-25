@@ -73,6 +73,31 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src false tru
   | err => intro _ _; exact ⟨.err, fun _ h => nomatch h⟩
   | root r h => intro _ _; exact ⟨.root r h, fun _ h => nomatch h⟩
   | ofNum _ ih => intro prev n; obtain ⟨h1, h2⟩ := ih prev n; exact ⟨.ofNum h1, h2⟩
+  | zlit c => intro _ _; exact ⟨.zlit c, fun _ h => nomatch h⟩
+  | @zint a _ ih => intro prev n; obtain ⟨h1, h2⟩ := ih prev n; exact ⟨.zint h1, h2⟩
+  | @zadd h a b _ _ iha ihb =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    exact ⟨.zadd h h1 h3, defs_append h2 h4⟩
+  | @zsub h a b _ _ iha ihb =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    exact ⟨.zsub h h1 h3, defs_append h2 h4⟩
+  | @zcmp op h a b _ _ iha ihb =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    exact ⟨.zcmp op h h1 h3, defs_append h2 h4⟩
+  | @zmulL h c b _ ihb =>
+    intro prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ []) n
+    exact ⟨.zmulL h c h3, defs_append (fun _ h => nomatch h) h4⟩
+  | @zmulR h a c _ iha =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    exact ⟨.zmulR h c h1, defs_append h2 (fun _ h => nomatch h)⟩
   | @word p q _ ih => intro prev n; obtain ⟨h1, h2⟩ := ih prev n; exact ⟨.word h1, h2⟩
   | @field sn f T h q _ ih => intro prev n; obtain ⟨h1, h2⟩ := ih prev n; exact ⟨.field h h1, h2⟩
   | @key K V q i _ _ ihq ihi =>

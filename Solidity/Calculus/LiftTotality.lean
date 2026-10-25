@@ -33,8 +33,18 @@ theorem LTm.Src.sort_bool {c w : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C 
     k = .bool → s = .val .bool := by
   intro k s t h
   induction h with
-  | ofNum | not | and | or | eqB | neB | eqN | neN | lt | gt | le | ge | seqB | seqN =>
+  | ofNum | not | and | or | eqB | neB | eqN | neN | lt | gt | le | ge | seqB | seqN | zcmp =>
     intro _; rfl
+  | kite _ _ _ _ _ _ _ _ iht => intro hk; exact iht hk
+  | ite _ _ _ _ _ _ iht => intro hk; exact iht hk
+  | _ => intro hk; cases hk
+
+/-- A KeY `int` term is at the sort `kint`. -/
+theorem LTm.Src.sort_znum {c w : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src c w k →
+    k = .znum → s = .kint := by
+  intro k s t h
+  induction h with
+  | zlit | zint | zadd | zsub | zmulL | zmulR => intro _; rfl
   | kite _ _ _ _ _ _ _ _ iht => intro hk; exact iht hk
   | ite _ _ _ _ _ _ iht => intro hk; exact iht hk
   | _ => intro hk; cases hk
@@ -241,6 +251,28 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true tr
     exact SplitOK.un (fun a' => LTm.app1 (.unop .bnot h) a') (fun _ h' => .bnot h h') (fun _ => rfl) ih rfl rfl
   | @not a _ ih =>
     exact SplitOK.un (fun a' => LTm.app1 (.unop .not rfl) a') (fun _ h' => .not h') (fun _ => rfl) ih rfl rfl
+  | zlit => intro r hr; cases hr
+  | @zint a _ ih =>
+    exact SplitOK.un (fun a' => LTm.app1 .toInt a') (fun _ h' => .zint h') (fun _ => rfl) ih rfl rfl
+  | @zadd h a b hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app2 (.zbin .add h) x' y') (fun _ _ hx' hy' => .zadd h hx' hy')
+      (fun _ _ => rfl) hx hy ihx ihy rfl rfl
+  | @zsub h a b hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app2 (.zbin .sub h) x' y') (fun _ _ hx' hy' => .zsub h hx' hy')
+      (fun _ _ => rfl) hx hy ihx ihy rfl rfl
+  | @zcmp op h a b hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app2 (.zcmp op h) x' y') (fun _ _ hx' hy' => .zcmp op h hx' hy')
+      (fun _ _ => rfl) hx hy ihx ihy rfl rfl
+  | @zmulL h n b _ ih =>
+    exact SplitOK.un (fun b' => LTm.app2 (.zbin .mul h) (.app0 (.zlit n)) b') (fun _ h' => .zmulL h n h')
+      (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
+  | @zmulR h a n _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.zbin .mul h) a' (.app0 (.zlit n))) (fun _ h' => .zmulR h n h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.zbin .mul h) x (.app0 (.zlit n)))
+          (fun y => LTm.app2 (.zbin .mul h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
   | @ofNum t _ ih =>
     intro r hr
     obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8⟩ := ih r hr
@@ -256,6 +288,7 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true tr
         cases hq
         exact .ofNum .err
       | path => exact absurd rfl hk
+      | znum => exact absurd (ht.sort_znum rfl) (fun h => by cases h)
     refine ⟨ht, he, hbad, ⟨hx, hy⟩, ?_, ?_, ?_, ?_⟩ <;> simp only [LTm.conds, CondGuard.conds] <;> omega
   | @ite hc p k hk d t e hd ht he _ _ _ =>
     intro r hr
@@ -268,6 +301,7 @@ theorem LTm.Src.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true tr
         cases hq
         exact .ofNum .err
       | path => exact absurd rfl hk
+      | znum => exact absurd (ht.sort_znum rfl) (fun h => by cases h)
     refine ⟨ht, he, hbad, hd, ?_, ?_, ?_, ?_⟩ <;>
       simp only [LTm.conds, CondGuard.conds, Op3.iteN] <;> omega
 
@@ -414,6 +448,30 @@ theorem LTm.Src.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src true t
   | ofNum _ ih => intro hn; exact .ofNum (ih hn)
   | kite => intro hn; cases hn
   | ite => intro hn; cases hn
+  | zlit n => intro _; exact .zlit n
+  | @zint a _ ih =>
+    intro hn
+    exact .zint (ih (Option.map_eq_none_iff.mp hn))
+  | @zadd h a b _ _ ihx ihy =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.zbin .add h) x' _) (fy := fun y' => LTm.app2 (.zbin .add h) _ y') hn
+    exact .zadd h (ihx h2.1) (ihy h2.2)
+  | @zsub h a b _ _ ihx ihy =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.zbin .sub h) x' _) (fy := fun y' => LTm.app2 (.zbin .sub h) _ y') hn
+    exact .zsub h (ihx h2.1) (ihy h2.2)
+  | @zcmp op h a b _ _ ihx ihy =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.zcmp op h) x' _) (fy := fun y' => LTm.app2 (.zcmp op h) _ y') hn
+    exact .zcmp op h (ihx h2.1) (ihy h2.2)
+  | @zmulL h n b _ ih =>
+    intro hn
+    exact .zmulL h n (ih (Option.map_eq_none_iff.mp hn))
+  | @zmulR h a n _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.zbin .mul h) x' (.app0 (.zlit n)))
+      (fy := fun y' => LTm.app2 (.zbin .mul h) a y') hn
+    exact .zmulR h n (ih h2.1)
 
 /-! ## Formulas -/
 

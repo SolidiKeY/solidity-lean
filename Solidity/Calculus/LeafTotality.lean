@@ -146,6 +146,30 @@ theorem CheckedBool.W.comparison {n : Nat} {p : PrimTy} (op : BinOp) {a b : Chec
     AFml.width_and (AFml.width_and ha.2 hb.2)
       (AFml.width_not (Affine.width_compare op (ha.1.offset _) (hb.1.offset _)))⟩
 
+/-- A checked KeY `int` over the first `n` variables. -/
+def CheckedInt.W (n : Nat) (a : CheckedInt) : Prop := a.code.W n ∧ a.defined.width ≤ n
+
+theorem CheckedInt.W.lit (n : Nat) (c : Int) : (CheckedInt.lit c).W n :=
+  ⟨Affine.W.literal n c, Nat.zero_le n⟩
+
+theorem CheckedInt.W.ofUint {n : Nat} {a : CheckedScalar .uint} (ha : a.W n) :
+    (CheckedInt.ofUint a).W n := ha
+
+theorem CheckedInt.W.arith {n : Nat} (subtract : Bool) {a b : CheckedInt} (ha : a.W n)
+    (hb : b.W n) : (CheckedInt.arith subtract a b).W n := by
+  refine ⟨?_, AFml.width_and ha.2 hb.2⟩
+  cases subtract
+  · exact ha.1.add hb.1
+  · exact ha.1.sub hb.1
+
+theorem CheckedInt.W.scale {n : Nat} (c : Int) {a : CheckedInt} (ha : a.W n) :
+    (CheckedInt.scale c a).W n := ⟨ha.1.scale c, ha.2⟩
+
+theorem CheckedInt.W.comparison {n : Nat} (op : BinOp) {a b : CheckedInt} (ha : a.W n)
+    (hb : b.W n) : (CheckedInt.comparison op a b).W n :=
+  ⟨AFml.width_and (AFml.width_and ha.2 hb.2) (Affine.width_compare op ha.1 hb.1),
+    AFml.width_and (AFml.width_and ha.2 hb.2) (AFml.width_not (Affine.width_compare op ha.1 hb.1))⟩
+
 end Solidity.Linear
 
 namespace Solidity.Decide
@@ -414,6 +438,104 @@ theorem CheckedValue.ofTermIn?_good {ps : List Parameter} {es : List EnvKey} {p 
     ∃ v, CheckedValue.ofTermIn? (C := C) (es := es) ps t = some v ∧ v.Good :=
   CheckedValue.ofTermFuel?_good ps es h 1024 (by omega)
 
+/-- The KeY `int` terms `KIntValue` encodes: literals, a `uint` widened,
+`+`, `-` and products by a literal. -/
+inductive LTm.ZNum (ps : Parameter → Prop) (es : EnvKey → Prop) : LTm C .kint → Prop
+  | zlit (n : Int) : LTm.ZNum ps es (.app0 (.zlit n))
+  | toInt {a : LTm C (.val .uint)} : a.Num ps es → LTm.ZNum ps es (.app1 .toInt a)
+  | add (h : BinOp.add.zArith = true) {a b : LTm C .kint} :
+      LTm.ZNum ps es a → LTm.ZNum ps es b → LTm.ZNum ps es (.app2 (.zbin .add h) a b)
+  | sub (h : BinOp.sub.zArith = true) {a b : LTm C .kint} :
+      LTm.ZNum ps es a → LTm.ZNum ps es b → LTm.ZNum ps es (.app2 (.zbin .sub h) a b)
+  | mulL (h : BinOp.mul.zArith = true) (n : Int) {b : LTm C .kint} :
+      LTm.ZNum ps es b → LTm.ZNum ps es (.app2 (.zbin .mul h) (.app0 (.zlit n)) b)
+  | mulR (h : BinOp.mul.zArith = true) {a : LTm C .kint} (n : Int) :
+      LTm.ZNum ps es a → LTm.ZNum ps es (.app2 (.zbin .mul h) a (.app0 (.zlit n)))
+
+/-- A compiled KeY `int` mentions only the inputs of its layout. -/
+def KIntValue.Good {ps : List Parameter} {es : List EnvKey} {t : LTm C .kint}
+    (v : KIntValue (ps := ps) (es := es) t) : Prop :=
+  ∀ rs : List (Ref C), (∀ r ∈ v.refs, r ∈ rs) → (v.lower rs).W (es.length + (ps.length + rs.length))
+
+theorem KIntValue.ofTermFuel?_good (ps : List Parameter) (es : List EnvKey) :
+    ∀ {t : LTm C .kint}, t.ZNum (· ∈ ps) (· ∈ es) → ∀ (n : Nat), t.depth < n → t.depth ≤ 1023 →
+      ∃ v, KIntValue.ofTermFuel? (C := C) (es := es) ps n t = some v ∧ v.Good := by
+  intro t h
+  induction h with
+  | zlit c =>
+    intro n hn _
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    exact ⟨KIntValue.zlit c, rfl, fun _ _ => CheckedInt.W.lit _ c⟩
+  | @toInt a ha =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hd
+    obtain ⟨w, hw, gw⟩ := CheckedValue.ofTermIn?_good (es := es) ha (by omega)
+    refine ⟨KIntValue.toInt w, ?_, fun rs hr => CheckedInt.W.ofUint (gw rs hr)⟩
+    change (CheckedValue.ofTermIn? (C := C) (es := es) ps a).map KIntValue.toInt = _
+    rw [hw]
+    rfl
+  | @add h a b _ _ iha ihb =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn hd
+    obtain ⟨va, hva, ga⟩ := iha n (by omega) (by omega)
+    obtain ⟨vb, hvb, gb⟩ := ihb n (by omega) (by omega)
+    refine ⟨KIntValue.arith false .add h rfl va vb, ?_, fun rs hr => CheckedInt.W.arith false
+      (ga rs (fun r hm => hr r (List.mem_append_left _ hm)))
+      (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))⟩
+    change (Option.bind (KIntValue.ofTermFuel? (C := C) (es := es) ps n a) fun x =>
+      Option.bind (KIntValue.ofTermFuel? (C := C) (es := es) ps n b) fun y =>
+        some (KIntValue.arith false .add h rfl x y)) = _
+    rw [hva, hvb]
+    rfl
+  | @sub h a b _ _ iha ihb =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn hd
+    obtain ⟨va, hva, ga⟩ := iha n (by omega) (by omega)
+    obtain ⟨vb, hvb, gb⟩ := ihb n (by omega) (by omega)
+    refine ⟨KIntValue.arith true .sub h rfl va vb, ?_, fun rs hr => CheckedInt.W.arith true
+      (ga rs (fun r hm => hr r (List.mem_append_left _ hm)))
+      (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))⟩
+    change (Option.bind (KIntValue.ofTermFuel? (C := C) (es := es) ps n a) fun x =>
+      Option.bind (KIntValue.ofTermFuel? (C := C) (es := es) ps n b) fun y =>
+        some (KIntValue.arith true .sub h rfl x y)) = _
+    rw [hva, hvb]
+    rfl
+  | @mulL h c b _ ihb =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn hd
+    obtain ⟨vb, hvb, gb⟩ := ihb n (by omega) (by omega)
+    refine ⟨KIntValue.mulLit h c rfl vb, ?_, fun rs hr => CheckedInt.W.scale c (gb rs hr)⟩
+    change (Option.bind (KIntValue.ofTermFuel? (C := C) (es := es) ps n b) fun y =>
+      some (KIntValue.mulLit h c rfl y)) = _
+    rw [hvb]
+    rfl
+  | @mulR h a c _ iha =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn hd
+    obtain ⟨va, hva, ga⟩ := iha n (by omega) (by omega)
+    cases hz : a.zlit? with
+    | some r =>
+      obtain ⟨m, rfl⟩ := r
+      have hn1 : 0 < n := by simp only [LTm.depth] at hn; omega
+      obtain ⟨n', rfl⟩ : ∃ k, n = k + 1 := ⟨n - 1, by omega⟩
+      refine ⟨KIntValue.mulLit h m rfl (KIntValue.zlit c), ?_, fun _ _ => CheckedInt.W.scale m
+        (CheckedInt.W.lit _ c)⟩
+      rfl
+    | none =>
+      refine ⟨KIntValue.litMul h c rfl va, ?_, fun rs hr => CheckedInt.W.scale c (ga rs hr)⟩
+      simp only [KIntValue.ofTermFuel?, hz, hva]
+      rfl
+
+theorem KIntValue.ofTermIn?_good {ps : List Parameter} {es : List EnvKey}
+    {t : LTm C .kint} (h : t.ZNum (· ∈ ps) (· ∈ es)) (hd : t.depth ≤ 1023) :
+    ∃ v, KIntValue.ofTermIn? (C := C) (es := es) ps t = some v ∧ v.Good :=
+  KIntValue.ofTermFuel?_good ps es h 1024 (by omega) hd
+
 /-- The Boolean terms `BooleanValue` encodes. -/
 inductive LTm.BoolV (ps : Parameter → Prop) (es : EnvKey → Prop) : LTm C (.val .bool) → Prop
   | var (k : Nat) (h : ps ⟨.bool, k⟩) : LTm.BoolV ps es (.var (p := .bool) k)
@@ -444,6 +566,9 @@ inductive LTm.BoolV (ps : Parameter → Prop) (es : EnvKey → Prop) : LTm C (.v
       LTm.BoolV ps es (.seq d a)
   | seqN {q : PrimTy} (hq : q.isNumeric = true) {d : LTm C (.val q)} {a : LTm C (.val .bool)} :
       LTm.Num ps es d → LTm.BoolV ps es a → LTm.BoolV ps es (.seq d a)
+  /-- A comparison of KeY `int`s. -/
+  | zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint} :
+      LTm.ZNum ps es a → LTm.ZNum ps es b → LTm.BoolV ps es (.app2 (.zcmp op h) a b)
 
 theorem LTm.Num.toBoolV {ps : Parameter → Prop} {es : EnvKey → Prop} :
     ∀ {p : PrimTy} {t : LTm C (.val p)}, t.Num ps es → (h : p = .bool) →
@@ -654,6 +779,20 @@ theorem BooleanValue.ofTermFuel?_good (ps : List Parameter) (es : List EnvKey) :
       change (Option.bind (CheckedValue.ofTermIn? (C := C) (es := es) ps d) fun x => Option.bind (BooleanValue.ofTermFuel? (C := C) (es := es) ps n a) fun y => some (BooleanValue.seq (CheckedValue.defined x) y)) = _
       rw [hvd, hva]
       rfl
+  | @zcmp op h a b ha hb =>
+    intro n hn hd
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn hd
+    obtain ⟨va, hva, ga⟩ := KIntValue.ofTermIn?_good ha (by omega)
+    obtain ⟨vb, hvb, gb⟩ := KIntValue.ofTermIn?_good hb (by omega)
+    refine ⟨BooleanValue.zcmp op h va vb, ?_, fun rs hr => CheckedInt.W.comparison op
+      (ga rs (fun r hm => hr r (List.mem_append_left _ hm)))
+      (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))⟩
+    change (Option.bind (KIntValue.ofTermIn? (C := C) (es := es) ps a) fun x =>
+      Option.bind (KIntValue.ofTermIn? (C := C) (es := es) ps b) fun y =>
+        some (BooleanValue.zcmp op h x y)) = _
+    rw [hva, hvb]
+    rfl
 
 theorem BooleanValue.ofTermIn?_good {ps : List Parameter} {es : List EnvKey}
     {t : LTm C (.val .bool)} (h : t.BoolV (· ∈ ps) (· ∈ es)) (hd : t.depth ≤ 1023) :

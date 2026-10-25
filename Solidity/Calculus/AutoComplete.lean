@@ -66,6 +66,34 @@ theorem LTm.mulSrc?_right {c w : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = t
   | some r => obtain ⟨w, hw⟩ := r; rfl
   | none => rfl
 
+/-- A KeY `int` product with a literal factor, recognized with its evidence. -/
+def LTm.zmulSrc? {c w : Bool} (h : BinOp.mul.zArith = true) (a b : LTm C .kint)
+    (sa : Option (PLift (a.Src c w .znum))) (sb : Option (PLift (b.Src c w .znum))) :
+    Option (PLift ((LTm.app2 (.zbin .mul h) a b).Src c w .znum)) :=
+  match a.zlit?, b.zlit? with
+  | some ⟨n, hn⟩, _ => sb.map fun ⟨hb⟩ => ⟨by subst hn; exact .zmulL h n hb⟩
+  | none, some ⟨n, hn⟩ => sa.map fun ⟨ha⟩ => ⟨by subst hn; exact .zmulR h n ha⟩
+  | none, none => none
+
+theorem LTm.zmulSrc?_left {c w : Bool} (h : BinOp.mul.zArith = true) (n : Int) (b : LTm C .kint)
+    (sa : Option (PLift ((LTm.app0 (C := C) (.zlit n)).Src c w .znum)))
+    (sb : Option (PLift (b.Src c w .znum))) (hb : sb.isSome = true) :
+    (LTm.zmulSrc? h (.app0 (.zlit n)) b sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
+  rfl
+
+theorem LTm.zmulSrc?_right {c w : Bool} (h : BinOp.mul.zArith = true) (a : LTm C .kint) (n : Int)
+    (sa : Option (PLift (a.Src c w .znum)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.zlit n)).Src c w .znum))) (ha : sa.isSome = true)
+    (hb : sb.isSome = true) :
+    (LTm.zmulSrc? h a (.app0 (.zlit n)) sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
+  obtain ⟨y, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.zmulSrc?
+  cases hl : a.zlit? with
+  | some r => obtain ⟨w, hw⟩ := r; rfl
+  | none => rfl
+
 /-- A literal low mask on the left of `&`. -/
 def LTm.bandLSrc? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
     (sb : Option (PLift (b.Src c true .num))) :
@@ -108,6 +136,7 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
     | .bool, .lit (p := .bool) v => some ⟨.ofNum (.lit v)⟩
     | .num, .env e => some ⟨.env e⟩
     | .path, .root r h => some ⟨.root r h⟩
+    | .znum, .zlit n => some ⟨.zlit n⟩
     | _, _ => none
   | _, k, s, .err =>
     match k, s with
@@ -269,6 +298,28 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
       let ⟨he⟩ ← e.src? true .bool
       return ⟨.ite (k := .bool) rfl (fun h => nomatch h) hd ht he⟩
     | _, _ => none
+  -- KeY `int` nodes, under a variable symbol so that the cases above do not
+  -- discriminate on the sort.
+  | c, k, s, .app1 (a := u) o x =>
+    match u, s, o, x, k with
+    | _, _, .toInt, x, .znum => (x.src? c .num).map fun ⟨h⟩ => ⟨.zint h⟩
+    | _, _, _, _, _ => none
+  | c, k, s, .app2 (a := u) (b := v) o x y =>
+    match u, v, s, o, x, y, k with
+    | _, _, _, .zbin .add h, x, y, .znum => do
+      let ⟨ha⟩ ← x.src? c .znum
+      let ⟨hb⟩ ← y.src? c .znum
+      return ⟨.zadd h ha hb⟩
+    | _, _, _, .zbin .sub h, x, y, .znum => do
+      let ⟨ha⟩ ← x.src? c .znum
+      let ⟨hb⟩ ← y.src? c .znum
+      return ⟨.zsub h ha hb⟩
+    | _, _, _, .zbin .mul h, x, y, .znum => LTm.zmulSrc? h x y (x.src? c .znum) (y.src? c .znum)
+    | _, _, _, .zcmp op h, x, y, .bool => do
+      let ⟨ha⟩ ← x.src? c .znum
+      let ⟨hb⟩ ← y.src? c .znum
+      return ⟨.zcmp op h ha hb⟩
+    | _, _, _, _, _, _, _ => none
   | _, _, _, _ => none
 
 /-- The source leaf, recognized with its evidence. -/
@@ -395,6 +446,42 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
       rw [hx]
       rfl
   | ofNum _ ih => exact ⟨ih.2 rfl rfl, fun hk => by cases hk⟩
+  | zlit n => exact ⟨rfl, fun hk => by cases hk⟩
+  | @zint a _ ih =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1
+    show ((LTm.src? false .num a).map _).isSome = true
+    rw [hx]
+    rfl
+  | @zadd h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.src? false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.src? false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zsub h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.src? false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.src? false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zcmp op h a b _ _ iha ihb =>
+    refine ⟨?_, fun hk => by cases hk⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.src? false .znum a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.src? false .znum b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @zmulL h n b _ ihb => exact ⟨LTm.zmulSrc?_left h n b _ _ ihb.1, fun hk => by cases hk⟩
+  | @zmulR h a n _ iha => exact ⟨LTm.zmulSrc?_right h a n _ _ iha.1 rfl, fun hk => by cases hk⟩
   | @not a _ ih =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨x⟩, hx⟩ := Option.isSome_iff_exists.mp ih.1

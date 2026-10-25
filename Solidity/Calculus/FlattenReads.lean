@@ -170,6 +170,26 @@ theorem LTm.eval_agree_below (g : State C []) {s : Srt} (t : LTm C s) {ν μ : A
       ihe (h.mono (Nat.le_trans (Nat.le_max_right _ _)
         (Nat.le_trans (Nat.le_max_right _ _) (Nat.le_max_right _ _))))]
 
+/-- The KeY `int` nodes (`Srt.kint`, M7 step 3): a literal, `toInt`, and
+`zbin`/`zcmp` with their operands flattened by `rec`.  A separate function,
+so that `flattenFuel?`'s other cases do not discriminate on the sort. -/
+def flattenKInt? (rec : Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
+      Option (Flattened t start × Nat)) :
+    Nat → {s : Srt} → (t : LTm C s) → (start : Nat) → Option (Flattened t start × Nat)
+  | remaining, _, .app0 (.zlit n), start => some (.pure (.app0 (.zlit n)) start, remaining)
+  | remaining, _, .app1 .toInt q, start => do
+    let (a, remaining) ← rec remaining q start
+    return (.app1 .toInt a, remaining)
+  | remaining, _, .app2 (.zbin op h) t w, start => do
+    let (a, remaining) ← rec remaining t start
+    let (b, remaining) ← rec remaining w a.next
+    return (.app2 (.zbin op h) a b, remaining)
+  | remaining, _, .app2 (.zcmp op h) t w, start => do
+    let (a, remaining) ← rec remaining t start
+    let (b, remaining) ← rec remaining w a.next
+    return (.app2 (.zcmp op h) a b, remaining)
+  | _, _, _, _ => none
+
 /-- The second budget is shared across sibling branches. Exhaustion has no
 semantic verdict; each accepted node carries its evaluation equivalence. -/
 def flattenFuel? : Nat → Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
@@ -213,7 +233,20 @@ def flattenFuel? : Nat → Nat → {s : Srt} → (t : LTm C s) → (start : Nat)
     let (thn, remaining) ← flattenFuel? depth remaining t b.next
     let (els, remaining) ← flattenFuel? depth remaining e thn.next
     return (.kite a b thn els, remaining)
-  | _ + 1, _ + 1, _, _, _ => none
+  | depth + 1, remaining + 1, _, t, start => flattenKInt? (flattenFuel? depth) remaining t start
+
+/-- `flattenFuel?` at a `zbin` node: `flattenKInt?`. -/
+theorem flattenFuel?_zbin (d r : Nat) (op : BinOp) (h : op.zArith = true) (t w : LTm C .kint)
+    (start : Nat) :
+    flattenFuel? (d + 1) (r + 1) (.app2 (.zbin op h) t w) start =
+      flattenKInt? (flattenFuel? d) r (.app2 (.zbin op h) t w) start := rfl
+
+theorem flattenKInt?_zbin (rec : Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
+      Option (Flattened t start × Nat)) (r : Nat) (op : BinOp) (h : op.zArith = true)
+    (t w : LTm C .kint) (start : Nat) :
+    flattenKInt? rec r (.app2 (.zbin op h) t w) start =
+      (rec r t start).bind fun p => (rec p.2 w p.1.next).bind fun q =>
+        some (Flattened.app2 (.zbin op h) p.1 q.1, q.2) := rfl
 
 /-- Flatten a source term with a shared node/depth budget and an explicit
 fresh-atom start. Callers composing terms share the resulting `next`. -/

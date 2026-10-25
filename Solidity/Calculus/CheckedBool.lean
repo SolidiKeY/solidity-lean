@@ -146,4 +146,88 @@ theorem comparison_correct {p : PrimTy} (op : BinOp) (a b : CheckedScalar p) (x 
 
 end CheckedBool
 
+/-- **A partial KeY `int` computation** (`Srt.kint`, unbounded): its value
+as an affine form over the codes and its definedness guard.  No range: a
+KeY `int` never overflows, so only an operand's failure fails it. -/
+structure CheckedInt where
+  code : Affine
+  defined : AFml
+
+namespace CheckedInt
+
+/-- Exact relation to the interpreter's optional result. -/
+def Correct (a : CheckedInt) (x : Nat → Nat) : Option Int → Prop
+  | none => ¬ a.defined.holds x
+  | some v => a.defined.holds x ∧ a.code.eval x = v
+
+/-- A literal. -/
+def lit (n : Int) : CheckedInt := ⟨.literal n, .tt⟩
+
+theorem lit_correct (n : Int) (x : Nat → Nat) : (lit n).Correct x (some n) :=
+  ⟨trivial, Affine.eval_literal n x⟩
+
+/-- A `uint` read as a KeY `int` (`toInt`): its code is its value. -/
+def ofUint (a : CheckedScalar .uint) : CheckedInt := ⟨a.code, a.defined⟩
+
+theorem ofUint_correct (a : CheckedScalar .uint) (x : Nat → Nat) (va : Option PrimTy.uint.Denote)
+    (ha : a.Correct x va) : (ofUint a).Correct x (va.map fun n => n.1) := by
+  cases va with
+  | none => exact ha
+  | some v =>
+    refine ⟨ha.1, ?_⟩
+    show a.code.eval x = v.1
+    rw [ha.2, ScalarCode.encode_integer]
+    simp only [ScalarCode.integer, ScalarCode.offset, Int.add_zero]
+
+/-- `a + b` (`subtract = false`) or `a - b`, both operands returning. -/
+def arith (subtract : Bool) (a b : CheckedInt) : CheckedInt :=
+  ⟨if subtract then a.code.sub b.code else a.code.add b.code, .and a.defined b.defined⟩
+
+theorem arith_correct (subtract : Bool) (a b : CheckedInt) (x : Nat → Nat) (va vb : Option Int)
+    (ha : a.Correct x va) (hb : b.Correct x vb) :
+    (arith subtract a b).Correct x (va.bind fun v => vb.map fun w =>
+      if subtract then v - w else v + w) := by
+  cases va with
+  | none => exact fun hg => ha hg.1
+  | some v =>
+    cases vb with
+    | none => exact fun hg => hb hg.2
+    | some w =>
+      refine ⟨⟨ha.1, hb.1⟩, ?_⟩
+      cases subtract <;> simp only [arith, Bool.false_eq_true, ↓reduceIte, Affine.eval_add,
+        Affine.eval_sub, ha.2, hb.2]
+
+/-- `c · a`. -/
+def scale (c : Int) (a : CheckedInt) : CheckedInt := ⟨a.code.scale c, a.defined⟩
+
+theorem scale_correct (c : Int) (a : CheckedInt) (x : Nat → Nat) (va : Option Int)
+    (ha : a.Correct x va) : (scale c a).Correct x (va.map (c * ·)) := by
+  cases va with
+  | none => exact ha
+  | some v => exact ⟨ha.1, by simp only [scale, Affine.eval_scale, ha.2]⟩
+
+/-- `a ⊲ b`, both operands returning. -/
+def comparison (op : BinOp) (a b : CheckedInt) : CheckedBool :=
+  let predicate := a.code.compare op b.code
+  ⟨.and (.and a.defined b.defined) predicate, .and (.and a.defined b.defined) (.not predicate)⟩
+
+theorem comparison_correct (op : BinOp) (a b : CheckedInt) (x : Nat → Nat) (va vb : Option Int)
+    (ha : a.Correct x va) (hb : b.Correct x vb) :
+    (comparison op a b).Correct x (va.bind fun v => vb.map fun w => op.cmpZ v w) := by
+  cases va with
+  | none =>
+    simp_all only [Correct, CheckedBool.Correct, comparison, AFml.holds, false_and,
+      Option.bind_none, reduceCtorEq, iff_self, and_self]
+  | some v =>
+    cases vb with
+    | none =>
+      simp_all only [Correct, CheckedBool.Correct, comparison, AFml.holds, true_and,
+        false_and, Option.bind_some, Option.map_none, reduceCtorEq, iff_self, and_self]
+    | some w =>
+      simp only [CheckedBool.Correct, comparison, AFml.holds, ha.1, hb.1, true_and,
+        Affine.holds_compare, ha.2, hb.2, Option.bind_some, Option.map_some,
+        Option.some.injEq, Bool.eq_false_iff, iff_self, and_self]
+
+end CheckedInt
+
 end Solidity.Linear
