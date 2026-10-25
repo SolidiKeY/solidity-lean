@@ -428,6 +428,17 @@ terminating with a proof or a counterexample; CI fails on anything else.
   guards, array reads only at the quantified indices); outside it the
   closer may answer *unknown*.  Over 2^256-long storages the general case
   is decidable only by enumerating storages, which the theorem forbids.
+* **Decided (2026-10-25):** division, modulo, `**`, shifts and bitwise
+  operators with two symbolic operands may answer *unknown*, as products
+  do; `x ** e` with a literal `e ≥ 2` is a product (c′); `c / x` and
+  `c % x` with a symbolic divisor belong to the division class; `{havoc}`,
+  `{anon}`, `allocAll`, `grow` and storage-typed `bind` in a negative
+  position over formulas that read storage fall under (d).
+* **Hashes (2026-10-25, e3, being refined):** the user chose to assume
+  collision-freeness.  A global assumption would be false (keccak maps
+  unbounded byte strings to 256 bits) and the theorem vacuous; the proposal
+  is a premise per goal on its own hash terms, with *unknown* for verdicts
+  that depend on an `ecrecover` value (an `opaque` function) or a preimage.
 * A counterexample is a concrete typed state, certified by kernel
   evaluation.  One that needs a storage array of `2^255` elements could not
   be built: `invariantClosedFormSum` is false in the model (`s + 2`
