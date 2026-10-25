@@ -161,6 +161,7 @@ theorem compile_trace_complete (hP : inFragP F P = some F') (hm : Sim C L b F σ
     obtain ⟨μs, htr⟩ := exec_eq_ok_iff.mp htgt
     exact ⟨m', μs, htr, hstk, hsim⟩
   · rcases hbad with hr | ⟨_, hr⟩ <;> rw [hrun] at hr <;> cases hr
+  · rename_i hdiv; cases hrun.symm.trans hdiv.1
 
 /-- Exact successful termination correspondence, stated using CSLib traces.
 This is a trace theorem for the existing compiler, not a bisimulation with

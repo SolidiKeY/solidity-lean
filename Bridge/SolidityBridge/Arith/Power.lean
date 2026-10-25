@@ -1,4 +1,4 @@
-import Solidity.Syntax.Elab
+import Solidity.Syntax.Splice
 import Solidity.Semantics.Run
 
 /-! Counterexamples to the requested uniform overflow/panic statement. -/
