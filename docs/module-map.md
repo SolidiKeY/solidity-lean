@@ -517,6 +517,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Calculus/DeclarationReduction.lean` | Exact removal of certified declaration premises through logical connectives and typed quantifiers (`declaration_reduce`, `declaration_read_reduce`, `DeclarationReadReduction.valid_iff`). |
 | `Calculus/LinearDecision.lean` | Complete binary-derivative decision of Boolean combinations of linear equations and inequalities over natural assignments (`AFml.decide_iff`); no external dependencies. |
 | `Calculus/LinearCountermodel.lean` | Traced graph exploration equivalent to the arithmetic decision, guaranteed counterassignment extraction, finite-list witnesses and a proof-or-model verifier using one traversal. |
+| `Calculus/PresburgerDecision.lean` | Quantified linear arithmetic over naturals (`QFml`: `AFml` atoms read through variable maps, `∃` by position): its binary derivatives with projection (states over lists of the body's derivatives, a finite universe never computed), the zero test as reachability, the decision `QFml.decide_iff` and a proof-or-counterassignment `QFml.verify` (M7, step 4). |
 | `Calculus/LinearSyntax.lean` | Macro-only `linear!{ … }` notation for the arithmetic intermediate language and its numbered-variable printer. |
 | `Calculus/ScalarCode.lean` | Exact primitive-value codes, signed offset, checked decoding, codec inverses and arithmetic range constraints. |
 | `Calculus/TypedLinear.lean` | Complete guarded arithmetic decisions over finite heterogeneous primitive contexts with decoded typed counterassignments. |

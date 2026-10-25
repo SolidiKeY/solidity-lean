@@ -383,6 +383,7 @@ import Solidity.Calculus.DeclarationReduction
 import Solidity.Examples.DeclarationReduction
 import Solidity.Calculus.LinearDecision
 import Solidity.Calculus.LinearCountermodel
+import Solidity.Calculus.PresburgerDecision
 import Solidity.Calculus.LinearSyntax
 import Solidity.Examples.LinearDecision
 import Solidity.Calculus.ScalarCode
