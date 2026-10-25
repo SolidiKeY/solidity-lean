@@ -1469,4 +1469,75 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
 
 end Realized
 
+/-! ## The actual observations satisfy the antecedent -/
+
+/-- The live length of a read's root, as a word (a fixed array's reads have
+no length read: the default). -/
+def lenVal {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
+    (ar : ArrTy R (.prim e)) (st : Storage C) : PrimTy.uint.Denote :=
+  match R, h, ar with
+  | _, h, .dyn => uintOfNat (st.obs.len (.ref (SRef.ofRoot a h)))
+  | _, _, .fixed => PrimTy.dflt .uint
+
+theorem lenDesc_lenVal {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
+    (ar : ArrTy R (.prim e)) (st : Storage C) : lenDesc a h ar st (lenVal a h ar st) := by
+  cases ar <;> trivial
+
+theorem dyn_shape_val {e : PrimTy} (v : SVal (.ref (.array (.prim e)))) :
+    ∃ B : Nat, (∀ k : PrimTy.uint.Denote, v.obs.has (.at k .nil) = decide (k.1.toNat < B)) ∧
+      (∀ k : PrimTy.uint.Denote, ¬ k.1.toNat < B → v.obs.word (.at k .nil) = PrimTy.dflt e) ∧
+      (uintOfNat (v.obs.len .nil)).1.toNat ≤ B := by
+  cases v with
+  | array el sh hn =>
+    refine ⟨(el.toList ++ sh.toList).length, fun k => ?_, fun k hk => ?_, ?_⟩
+    · simp only [SVal.obs_has, SVal.findM]
+      by_cases hk : k.1.toNat < (el.toList ++ sh.toList).length
+      · rw [List.getElem?_eq_getElem hk]; simp only [Option.isSome_some, hk, decide_true]
+      · rw [List.getElem?_eq_none (Nat.le_of_not_lt hk)]
+        simp only [Option.isSome_none, hk, decide_false]
+    · simp only [SVal.obs_word, SVal.findM]
+      rw [List.getElem?_eq_none (Nat.le_of_not_lt hk)]
+      rfl
+    · show (uintOfNat (SVal.lenOf (some (SVal.array el sh hn)))).1.toNat ≤ _
+      simp only [SVal.lenOf, SVal.view_array]
+      rw [uintOfNat_val hn, List.length_append, SVec.length_toList]
+      omega
+
+theorem fixed_shape_val {e : PrimTy} {n : Nat} (v : SVal (.ref (.fixed (.prim e) n))) :
+    (∀ k : PrimTy.uint.Denote, v.obs.has (.atF k .nil) = decide (k.1.toNat < n)) ∧
+      (∀ k : PrimTy.uint.Denote, ¬ k.1.toNat < n → v.obs.word (.atF k .nil) = PrimTy.dflt e) := by
+  cases v with
+  | fixed el =>
+    refine ⟨fun k => ?_, fun k hk => ?_⟩
+    · simp only [SVal.obs_has, SVal.findM]
+      by_cases hk : k.1.toNat < n
+      · rw [List.getElem?_eq_getElem (by rw [SVec.length_toList]; exact hk)]
+        simp only [Option.isSome_some, hk, decide_true]
+      · rw [List.getElem?_eq_none (by rw [SVec.length_toList]; exact Nat.le_of_not_lt hk)]
+        simp only [Option.isSome_none, hk, decide_false]
+    · simp only [SVal.obs_word, SVal.findM]
+      rw [List.getElem?_eq_none (by rw [SVec.length_toList]; exact Nat.le_of_not_lt hk)]
+      rfl
+
+/-- **An actual array's shape**: past a bound no slot is there and every
+word is the default; below it every slot is there; the live length is
+within it. -/
+theorem arr_shape {R : RefTy} {e : PrimTy} (a : Name) (h : C.rootType a = some (.ref R))
+    (ar : ArrTy R (.prim e)) (st : Storage C) :
+    ∃ B : Nat, (∀ k, st.obs.has (.ref ((SRef.ofRoot a h).index (.arr ar) k)) = decide (k.1.toNat < B)) ∧
+      (∀ k, ¬ k.1.toNat < B → st.obs.word (.ref ((SRef.ofRoot a h).index (.arr ar) k)) = PrimTy.dflt e) ∧
+      (lenVal a h ar st).1.toNat ≤ B := by
+  cases ar with
+  | dyn =>
+    have hp : ∀ k : PrimTy.uint.Denote, ((SRef.ofRoot a h).index (.arr .dyn) k).path = .at k .nil :=
+      fun k => by simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_dyn, Path.append_nil]
+    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, lenVal, Storage.obs_len_ref]
+    exact dyn_shape_val (st.get h)
+  | @fixed _ n =>
+    have hp : ∀ k : PrimTy.uint.Denote, ((SRef.ofRoot a h).index (.arr .fixed) k).path = .atF k .nil :=
+      fun k => by simp only [SRef.index, SRef.append, SRef.ofRoot, Path.index_fixed, Path.append_nil]
+    simp only [Storage.obs_has_ref, Storage.obs_word_ref, hp, lenVal]
+    obtain ⟨h1, h2⟩ := fixed_shape_val (st.get h)
+    exact ⟨n, h1, h2, Nat.zero_le _⟩
+
 end Solidity.Decide
