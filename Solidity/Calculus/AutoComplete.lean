@@ -36,6 +36,35 @@ variable {C : Contract}
 
 /-! ## Recognizing the source fragment -/
 
+/-- A product with a literal factor, recognized with its evidence from the
+factors' (`sa`, `sb`). -/
+def LTm.mulSrc? {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (a b : LTm C (.val p))
+    (sa : Option (PLift (a.Src c .num))) (sb : Option (PLift (b.Src c .num))) :
+    Option (PLift ((LTm.app2 (.binop .mul h) a b).Src c .num)) :=
+  match a.lit?, b.lit? with
+  | some ⟨v, hv⟩, _ => sb.map fun ⟨hb⟩ => ⟨by subst hv; exact .mulL h v hb⟩
+  | none, some ⟨v, hv⟩ => sa.map fun ⟨ha⟩ => ⟨by subst hv; exact .mulR h v ha⟩
+  | none, none => none
+
+theorem LTm.mulSrc?_left {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote)
+    (b : LTm C (.val p)) (sa : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c .num)))
+    (sb : Option (PLift (b.Src c .num))) (hb : sb.isSome = true) :
+    (LTm.mulSrc? h (.app0 (.lit v)) b sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp hb
+  rfl
+
+theorem LTm.mulSrc?_right {c : Bool} {p : PrimTy} (h : BinOp.mul.accepts p = true)
+    (a : LTm C (.val p)) (v : p.Denote) (sa : Option (PLift (a.Src c .num)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.lit v)).Src c .num))) (ha : sa.isSome = true)
+    (hb : sb.isSome = true) :
+    (LTm.mulSrc? h a (.app0 (.lit v)) sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
+  obtain ⟨y, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.mulSrc?
+  cases hl : a.lit? with
+  | some r => obtain ⟨w, hw⟩ := r; rfl
+  | none => rfl
+
 /-- The source fragment, recognized with its evidence. -/
 def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → Option (PLift (t.Src c k))
   | _, k, _, .var (p := p) i =>
@@ -82,6 +111,7 @@ def LTm.src? : (c : Bool) → (k : SrcKind) → {s : Srt} → (t : LTm C s) → 
       let ⟨ha⟩ ← a.src? c .num
       let ⟨hb⟩ ← b.src? c .num
       return ⟨.sub h ha hb⟩
+    | .num, .mul, _ => LTm.mulSrc? h a b (a.src? c .num) (b.src? c .num)
     | .bool, .and, .bool => do
       let ⟨ha⟩ ← a.src? c .bool
       let ⟨hb⟩ ← b.src? c .bool
@@ -247,6 +277,22 @@ theorem LTm.src?_complete : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.Src fal
         simpa only [BinOp.ret, BinOp.isArith, if_true] using this
       subst hb
       cases h
+  | @mulL p h v b _ ihb =>
+    refine ⟨LTm.mulSrc?_left h v b _ _ ihb.1, ?_⟩
+    intro _ hs
+    have hb : p = .bool := by
+      have := congrArg (fun | Srt.val q => q | _ => PrimTy.bool) hs
+      simpa only [BinOp.ret, BinOp.isArith, if_true] using this
+    subst hb
+    cases h
+  | @mulR p h a v _ iha =>
+    refine ⟨LTm.mulSrc?_right h a v _ _ iha.1 (by cases p <;> rfl), ?_⟩
+    intro _ hs
+    have hb : p = .bool := by
+      have := congrArg (fun | Srt.val q => q | _ => PrimTy.bool) hs
+      simpa only [BinOp.ret, BinOp.isArith, if_true] using this
+    subst hb
+    cases h
   | @seq q p d a hd ha ihd iha =>
     refine ⟨?_, ?_⟩
     · obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp ihd.1
@@ -558,7 +604,7 @@ elimination and the folding of trivial conditionals, as
 def leafOf? (φ : Fml C []) : Option (LFml C) := do
   let d ← ProgramNormalization.ofFormula? 2048 φ
   let r ← sourceReduction? d.formula
-  return r.leaf.elim.condSimp
+  return r.leaf.elim.condSimp.prenex
 
 /-- A lifted leaf the arithmetic stages accept: a universal prefix (shorter
 than 1024) binding every atom of a body in `LFml.Src false`. -/
@@ -712,8 +758,8 @@ theorem dependentReduction?_isSome (φ : Fml C []) (h : φ.inExact = true)
     obtain ⟨F, hF⟩ := Option.isSome_iff_exists.mp
       (flattenedArithmetic?_isSome u.body hs' (hub ▸ hn) (hub ▸ hw))
     have hcap := LFml.liftCondB_isSome _ hdepth hn
-    have hnone : (r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget).isNone = false := by
-      cases hX : r.leaf.elim.condSimp.liftCondB condLiftFuel liftBudget with
+    have hnone : (r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget).isNone = false := by
+      cases hX : r.leaf.elim.condSimp.prenex.liftCondB condLiftFuel liftBudget with
       | none => rw [hX] at hcap; cases hcap
       | some _ => rfl
     simp only [dependentReduction?, hd, hr, hu, Option.bind_eq_bind, Option.bind_some, hnone,

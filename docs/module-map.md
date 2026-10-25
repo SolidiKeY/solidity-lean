@@ -51,6 +51,34 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 The separate dependency-bearing package is indexed in [bridge.md](bridge.md).
 Its root is `Bridge/SolidityBridge.lean`; it never enters the core import graph.
 
+Optional independent checks: `Bridge/SolidityBridge/CompilerSimulation.lean`
+(CSLib program-boundary bisimulation), `Bridge/SolidityBridge/ExternalEvm/Environment.lean`
+(EvmYul account/transaction observations), `Bridge/SolidityBridge/LoopFixpoint.lean`
+(least-fixed-point and well-founded loop rules), `Bridge/SolidityBridge/AdversaryPolicy.lean`
+(fixed-callee reachable-return correspondence), and
+`Bridge/SolidityBridge/PropertyChecks.lean` (Plausible local-rule debugger,
+run by `Bridge/RuleCheck.lean`). Further reference checks live in
+`Bridge/SolidityBridge/ExternalEvm/WordOps.lean` (comparisons, shifts, unary words),
+`Bridge/SolidityBridge/ExternalEvm/SignedOps.lean` (signed comparisons/division/remainder),
+`Bridge/SolidityBridge/ExternalEvm/Power.lean` (upstream exponentiation by squaring),
+`Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` (actual EVM opcode dispatcher),
+`Bridge/SolidityBridge/ExternalEvm/StackOps.lean` (legal DUP/SWAP), and
+`Bridge/SolidityBridge/ExternalEvm/Obstructions.lean` (checked macro/slot mismatches).
+`Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean` gives relative compactness,
+upward/downward Löwenheim–Skolem and elementary-submodel preservation.
+`Bridge/SolidityBridge/CallbackTrace.lean` relates operational callees to observable
+traces and strong/weak bisimulation; `Bridge/SolidityBridge/CallbackModalTrace.lean`
+gives CSLib trace/bisimulation invariance for every framed callback modality.
+See `docs/bridge.md` for scope and commands.
+
+| Bridge module | What it defines |
+|---|---|
+| `Bridge/SolidityBridge/Loom.lean` | Loom's exception algebra with the actual modal halt policy, equality to `afterRunTR` and the existing bridge WP, and bind inherited from `wp_comp`. |
+| `Bridge/SolidityBridge/LoomRules.lean` | One translation and soundness theorem for all taclets, plus Loom generators from `Fml.Leads`, `Fml.Steps`, and the existing bounded strategy, with fixed deep posts. |
+| `Bridge/SolidityBridge/LoomVCGen.lean` | Deep-post annotations for the actual core run, one generic Loom specification registration, and the strategy-leaf/continuation-entailment VC equation. |
+| `Bridge/SolidityBridge/LoomExamples.lean` | Loom VC generation for straight-line Solidity, a Solidity function inside a Lean bind/if program, halt-policy boundaries, and the existing invariant loop rule. |
+| `Bridge/vendor/Loom/MonadAlgebras/WP/Tactic.lean` | The upstream Loom VC-generator import closure, with two explicit instance names for editor checks; provenance and checksums in `Bridge/vendor/Loom/VENDOR.md`. |
+
 | Module | What it defines |
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
@@ -502,11 +530,13 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Calculus/LeafArithmetic.lean` | Automatic typed input collection and complete arithmetic decisions/counterstates for flattened leaves, with a pair-count budget. |
 | `Calculus/LeafInputs.lean` | Term/formula agreement at exactly their typed atom inputs and universal-prefix assignment agreement. |
 | `Calculus/CondLift.lean` | The elimination's conditionals (`kite`, `ite`) folded where trivial (`LTm.condSimp`, `LFml.condSimp_holds`) and lifted out of equations into three-way case splits preserving definedness (`LTm.condSplit`, `CondGuard.split`, `LFml.liftCond`, `LFml.liftCond_holds`); recursor forms with `match` twins. |
-| `Calculus/DependentReduction.lean` | Automatic dependent-read original-source proofs/counterstates through exact normalization, folded and lifted conditionals (lifted first within a node budget: `LFml.liftCondB`, `liftBudget`, `LFml.liftCondB_eq`), covered universal parameters and guarded arithmetic. |
+| `Calculus/DependentReduction.lean` | Automatic dependent-read original-source proofs/counterstates through exact normalization, folded conditionals, consequent quantifiers prenexed (`LFml.prenex`), lifted conditionals (lifted first within a node budget: `LFml.liftCondB`, `liftBudget`, `LFml.liftCondB_eq`), covered universal parameters and guarded arithmetic. |
 | `Calculus/LeafTotality.lean` | The arithmetic compiler never refuses its fragment (M4): `LTm.Num`, `LTm.BoolV`, `LFml.Arith`; widths (`Affine.W`, `CheckedScalar.W`, `CheckedBool.W`); `CheckedValue.ofTermFuel?_good`, `BooleanValue.ofTermFuel?_good`, `StorageEncoding.ofFormula?_good`, `leafArithmetic?_isSome`. |
 | `Calculus/FlattenTotality.lean` | Read flattening never refuses its fragment (M4): the source fragment `LTm.Src`/`LFml.Src`, path views and guards (`SPath.viewFuel?_PathF`, `TSegs.guardFuel?_FK`), occurrence layouts (`Laid`, `occurrenceLayout?_isSome`), alias constraints in the arithmetic fragment, `flattenFuel?_Src`, `flattenFormulaFuel?_Src`, `flattenedArithmetic?_isSome`. |
 | `Calculus/LiftTotality.lean` | Lifting removes every conditional of the fragment (M4): splits of `LTm.Src true` terms (`LTm.Src.split`, `LTm.Src.noCond`), the weight `LFml.condMax`, `LFml.liftCond_src`, lifting adds no atom (`LFml.liftCond_params`), and folding and lifting keep a leaf with no conditional (`LFml.liftCond_condSimp_of_conds`). |
 | `Calculus/AutoComplete.lean` | The fragment of the automatic decision and its completeness (M4): the recognizers `LTm.src?`/`LFml.src?` (complete: `LTm.src?_complete`), the eliminated leaf `leafOf?`, `Fml.inExact`, `Fml.exactBounded`, `dependentReduction?_isSome`, `auto_complete`, `auto_countermodel`. |
+| `Calculus/Prenex.lean` | A universal quantifier moved out of an implication's consequent, where the antecedent reads no atom of it (`LFml.prenex`, `LFml.prenex_holds`; M7), ahead of the universal prefix. |
+| `Calculus/Decision.lean` | The closer's theorem (M7): `LeafVerdict`, `decideLeaf` and `decideGoal` (sound, certified refutations, complete on `Fml.Covered`), the goal's own hash premise (`Fml.HashFree`, `Fml.holdsH`, `Fml.ValidH`, e3′), the fragment the user named (`Fml.inTarget`, its `Waivers`, the array property check `Fml.apfBlock`) and the open statement `DecisionTheorem`. |
 | `Calculus/DeclarationReduction.lean` | Exact removal of certified declaration premises through logical connectives and typed quantifiers (`declaration_reduce`, `declaration_read_reduce`, `DeclarationReadReduction.valid_iff`). |
 | `Calculus/LinearDecision.lean` | Complete binary-derivative decision of Boolean combinations of linear equations and inequalities over natural assignments (`AFml.decide_iff`); no external dependencies. |
 | `Calculus/LinearCountermodel.lean` | Traced graph exploration equivalent to the arithmetic decision, guaranteed counterassignment extraction, finite-list witnesses and a proof-or-model verifier using one traversal. |
@@ -536,6 +566,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Examples/ReadFlattening.lean` | Automatic dependent leaves, positive/negative arithmetic, actual mixed storage, high fresh positions, failed/overflowing keys, alternatives and resource budgets. |
 | `Examples/DependentReduction.lean` | Public original-function dependent-read verdicts, mixed arguments, minimal reports, forged-code rejection and retained quantified requirements. |
 | `Examples/AutoComplete.lean` | `auto_complete` on writes at symbolic mapping keys read at another key: the eliminated leaf's conditionals, kernel-checked `bool`-keyed verdicts and countermodel, `uint`-keyed compiled verdict and code-checked refutation. |
+| `Examples/Decision.lean` | `decideGoal` on products by a literal and on quantifiers in a consequent (both outside M4's fragment), kernel-checked coverage, compiled verdicts; leaves of `Fml.inTarget` inside and outside the array property fragment. |
 | `Examples/DeclarationReduction.lean` | Generated declaration premises removed exactly, also beneath parameters, with true/false user requirements preserved and false quantified facts rejected. |
 | `Examples/LinearDecision.lean` | Parity validity and extracted arithmetic models, negative coefficients/targets, different widths, finite-list witnesses and both verifier verdicts. |
 | `Examples/TypedLinear.lean` | Codec boundaries and rejection, Boolean range constraints, unsigned 17 and mixed Boolean/signed/unsigned counterassignments. |
@@ -614,6 +645,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/StorageSuite.lean`, `StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |
 | `Examples/Tactics/Join.lean` | The join after a conditional (`ifElseJoin`): `n` sequential `if (c) { x = x + 1; }` in `5n + 3` nodes and one leaf, pinned; the M6 family proved. |
+| `Examples/Tactics/PolySize.lean` | The size of symbolic execution (`docs/automation.md`, M8): `#proof_size` (nodes, branches, open goals, the largest leaf in `Fml.tmSize`) of sequential `if`s that both assign, literal-bounded loops under their invariants, and the two combined, pinned for small `k`. |
 | `Examples/Tactics/CallSummary.lean` | A call by its callee's summary (`internalCallSummary`): the family `f₀(x) = x + 1`, `fₖ(x) = fₖ₋₁(fₖ₋₁(x))`, its walk pinned (one node per call, where inlining made `7·2^(k+1) − 3`), proved for `k = 1…6`; a callee whose body drops an owed value is inlined; the checked family `f₀(x) = x * 3` proved for `k = 1…5`, its leaf one call site at a time (`Calculus/LeafShare.lean`), a false leaf failing within the heartbeats, and the leaf of sixteen products evaluated whole (`triplingFourWhole`). |
 | `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |

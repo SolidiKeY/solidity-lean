@@ -98,6 +98,14 @@ theorem CheckedScalar.W.arith {n : Nat} {p : PrimTy} (subtract : Bool) {a b : Ch
   · exact (ha.1.add hb.1).offset _
   · exact (ha.1.sub hb.1).offset _
 
+theorem Affine.W.scale {n : Nat} {a : Affine} (ha : a.W n) (c : Int) : (a.scale c).W n := by
+  simp only [Affine.W, Affine.scale, Lin.length_scale]
+  exact ha
+
+theorem CheckedScalar.W.scale {n : Nat} {p : PrimTy} (c : Int) {a : CheckedScalar p} (ha : a.W n) :
+    (CheckedScalar.scale c a).W n :=
+  CheckedScalar.W.guard ha.2 (CheckedScalar.W.ofInt p (((ha.1.offset _).scale c).offset _))
+
 theorem CheckedScalar.W.eq {n : Nat} {p : PrimTy} {a b : CheckedScalar p} (ha : a.W n)
     (hb : b.W n) : (a.eq b).width ≤ n :=
   AFml.width_and ha.2 (AFml.width_and hb.2 (Affine.width_eq ha.1 hb.1))
@@ -166,6 +174,10 @@ inductive LTm.Num (ps : Parameter → Prop) (es : EnvKey → Prop) : {p : PrimTy
       LTm.Num ps es a → LTm.Num ps es b → LTm.Num ps es (.app2 (.binop .add h) a b)
   | sub {p : PrimTy} (h : BinOp.sub.accepts p = true) {a b : LTm C (.val p)} :
       LTm.Num ps es a → LTm.Num ps es b → LTm.Num ps es (.app2 (.binop .sub h) a b)
+  | mulL {p : PrimTy} (h : BinOp.mul.accepts p = true) (v : p.Denote) {b : LTm C (.val p)} :
+      LTm.Num ps es b → LTm.Num ps es (.app2 (.binop .mul h) (.app0 (.lit v)) b)
+  | mulR {p : PrimTy} (h : BinOp.mul.accepts p = true) {a : LTm C (.val p)} (v : p.Denote) :
+      LTm.Num ps es a → LTm.Num ps es (.app2 (.binop .mul h) a (.app0 (.lit v)))
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.Num ps es d → LTm.Num ps es a → LTm.Num ps es (.seq d a)
   | err {p : PrimTy} : LTm.Num ps es (LTm.err (C := C) (s := .val p))
@@ -305,6 +317,39 @@ theorem CheckedValue.ofTermFuel?_good (ps : List Parameter) (es : List EnvKey) :
       refine ⟨CheckedValue.sub hp va vb, by simp only [CheckedValue.ofTermFuel?, hs, hva, hvb]; rfl, ?_⟩
       intro rs hr
       exact CheckedScalar.W.arith true (ga rs (fun r hm => hr r (List.mem_append_left _ hm))) (gb rs (fun r hm => hr r (List.mem_append_right _ hm)))
+  | @mulL p hp v b _ ihb =>
+    intro n hn
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn
+    obtain ⟨vb, hvb, gb⟩ := ihb n (by omega)
+    cases hs : StaticValue.ofTerm? (LTm.app2 (.binop .mul hp) (.app0 (.lit v)) b) with
+    | some w => exact ⟨_, by simp only [CheckedValue.ofTermFuel?, hs], CheckedValue.good_ofStatic w⟩
+    | none =>
+      refine ⟨CheckedValue.mulLit hp v rfl vb,
+        by simp only [CheckedValue.ofTermFuel?, hs, LTm.lit?, hvb]; rfl, ?_⟩
+      intro rs hr
+      exact CheckedScalar.W.scale _ (gb rs hr)
+  | @mulR p hp a v _ iha =>
+    intro n hn
+    obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
+    simp only [LTm.depth] at hn
+    obtain ⟨va, hva, ga⟩ := iha n (by omega)
+    cases hs : StaticValue.ofTerm? (LTm.app2 (.binop .mul hp) a (.app0 (.lit v))) with
+    | some w => exact ⟨_, by simp only [CheckedValue.ofTermFuel?, hs], CheckedValue.good_ofStatic w⟩
+    | none =>
+      cases hl : a.lit? with
+      | some r =>
+        obtain ⟨w, hw⟩ := r
+        obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+        refine ⟨CheckedValue.mulLit hp w hw (CheckedValue.ofStatic (.lit v)),
+          by simp only [CheckedValue.ofTermFuel?, hs, hl]; rfl, ?_⟩
+        intro rs hr
+        exact CheckedScalar.W.scale _ (CheckedValue.good_ofStatic (.lit v) rs hr)
+      | none =>
+        refine ⟨CheckedValue.litMul hp v rfl va,
+          by simp only [CheckedValue.ofTermFuel?, hs, hl, hva]; rfl, ?_⟩
+        intro rs hr
+        exact CheckedScalar.W.scale _ (ga rs hr)
   | @seq q p d a _ _ ihd iha =>
     intro n hn
     obtain ⟨n, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by simp only [LTm.depth] at hn; omega⟩
@@ -384,6 +429,11 @@ theorem LTm.Num.toBoolV {ps : Parameter → Prop} {es : EnvKey → Prop} :
     subst hb
     cases hp
   | @sub p hp a b _ _ _ _ =>
+    intro h
+    have hb : p = .bool := by simpa only [BinOp.ret, BinOp.isArith, if_true] using h
+    subst hb
+    cases hp
+  | @mulL p hp v b _ _ | @mulR p hp b v _ _ =>
     intro h
     have hb : p = .bool := by simpa only [BinOp.ret, BinOp.isArith, if_true] using h
     subst hb

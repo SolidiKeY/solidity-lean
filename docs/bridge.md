@@ -11,6 +11,138 @@ Both packages must use the same `lean-toolchain`. The bridge's manifest pins
 its dependencies; the external EVM modules have an upstream commit and
 verified checksums in `Bridge/vendor/EvmYul/VENDOR.md`.
 
+## Loom
+
+The adapter uses upstream Loom commit
+`78928abc9054b31d0bea85985496490baae95244`, which already pins Lean and
+Mathlib 4.24.0. The WP/VC-generator import closure is vendored
+under `Bridge/vendor/Loom` (provenance, exclusions, and file hashes in its
+`VENDOR.md`). Two CCPO instances receive explicit upstream names so editor
+checks agree with the build under the vendored path; no proof body changes.
+It needs no toolchain backport, lean-auto, Velvet, or SMT backend.
+The bridge gate verifies those hashes. The root dependency manifest and
+the `Solidity/` import graph remain independent of Loom.
+
+`Bridge/SolidityBridge/Loom.lean` selects Loom's `MAlgExcept` algebra for
+`ExceptT THalt Id`, definitionally the actual `TRes`. A Solidity program is
+the Kleisli arrow `fun σ => Prog.runFrames σ P κ`; the contexts may change,
+and the runner itself retains the heap-extension evidence until projecting
+the returned state. No `StateT` or alternative interpreter is introduced.
+`loomWp_iff_afterRunTR` proves Loom's WP equals the core reading, and
+`loomWp_eq_wp` identifies the resulting transformer with the existing
+bridge WP. `loomWp_bind` is derived from `wp_comp`, without another
+operational proof.
+
+| Halt | Box accepts | Diamond accepts |
+|---|---|---|
+| `revert` | yes | no |
+| `revertWith data` | yes | no |
+| `diverge` | yes | no |
+| `exhausted` | yes | yes |
+| `panic` | no | no |
+
+`Modality.onTHalt` alone accepts panic for box; the separate panic exclusion
+in `afterRunTR` is part of the selected handler. Loom's base `MAlgOrdered`
+does not demand preservation of top or arbitrary infima, so it fits this
+policy. There is deliberately no `NoFailure` instance for either modality:
+`wp_top` is unavailable (box of top is precisely panic freedom). The
+existing nonempty intersection and binary meet laws remain applicable;
+empty intersection preservation and unconditional box/diamond duality
+are not claimed. Loom's CCPO-based loop rules and partial/total algebra
+instances are not supplied for this adapter; Solidity loops use the
+existing core loop taclets (including `whileInvariantBox`) and their
+existing soundness proofs.
+
+`Bridge/SolidityBridge/LoomRules.lean` defines `Premise.toLoom` once and
+proves `Premise.toLoom_sound` once from `Stmt.sound`, `holds_modal`, and
+the WP correspondence. It does not inspect statements or premises.
+`generator` packages `Fml.Leads`; `stepsGenerator` uses `Fml.Steps.sound`;
+`symexGenerator` uses the existing bounded strategy and its certificate.
+These are **sufficient preconditions**, in the `Leads` direction. The
+strategy's last line is not asserted to be weakest.
+
+The strategy post is restricted to `holds · ψ` for
+`ψ : Fml C Γ₀`. A `Post C Γ₀` additionally carries the no-fresh-name and
+inactive evidence used to step around an opaque post. Loom's actual
+`WPGen.get` must accept every Lean predicate, so the fixed-post generator
+uses Loom's own `WPGen.spec_triple`: its VC is the last line together with
+entailment from the fixed deep post to the requested continuation. At the
+same deep post, `generator_get` proves the VC is exactly the last line.
+`Bridge/SolidityBridge/LoomVCGen.lean` supplies `runWithPost` and one
+`@[loomSpec]` generator for all programs. The annotation exposes the deep
+post and VC budget to Loom's specification lookup; its execution is
+definitionally `Prog.runFrames`. `runWithPost_wp` also identifies its WP
+with the existing bridge WP. The budget bounds symbolic execution only:
+exhausting it leaves a modal obligation, without changing program execution.
+Loom's `mwp` combines this generator with its own bind, pure and conditional
+generators. `runWithPostGenerator_get` exposes the core strategy leaf and
+the explicit continuation entailment.
+
+Direct automatic generation against an uninterpreted Lean parameter
+`Q : State C Γ₀ → Prop`, without a deep post or an entailment proof, is
+outside this interface. Existing taclets transform `Fml`, which cannot
+contain that parameter. Users instead choose an existing deep `ψ` and
+prove `∀ τ, holds τ ψ → Q τ` when composing the Solidity step. Ordinary
+Lean continuations may use arbitrary predicates; this obligation records
+exactly what the fixed Solidity specification supplies. The core formula
+language is retained without an opaque predicate constructor.
+
+`Bridge/SolidityBridge/LoomExamples.lean` is imported by both the bridge root
+and its regression module. Its proofs exercise the real VCG, rather than
+calling the bridge soundness theorem directly:
+
+| Example | Checked behavior |
+|---|---|
+| `straight_via_loom` | `mwp` selects the registered Solidity generator; `sol_decide` closes its core strategy leaf. A `#wp` output pin and `straight_vc_is_wp_leaf` identify that leaf exactly. |
+| `mixed_via_loom` | An ordinary Lean bind, a Solidity `seven()` call, and a Lean conditional compose through Loom's bind/pure/if generators. The deep post `x = 7` supplies the fact needed to prove the Lean result is `8`. `mixed_returns` also checks actual successful execution at the initial state, excluding a vacuous box specification. |
+| `panic_rejected`, `revert_accepted` | The actual `assert(false)` is rejected with a true deep post; the actual revert is accepted even with a false deep post. |
+| `invariant_via_loom` | The counting loop uses its core invariant taclet, pinned by `#step` as `whileInvariantBox`. Its generated quantified leaf is normalized and closed by `sol_close`; no Loom loop rule is applied to Solidity code. This is box partial correctness, not a termination claim. |
+
+The read-only finder/skeptic review confirmed that execution and rule
+soundness are reused, that all five halt cases agree with `afterRunTR`,
+and that the generator's fixed-post restriction and sufficient direction
+are stated accurately. The confirmed wording fix describes the existing
+core loop taclets generally, rather than implying only box invariants
+are supported. The skeptic also verified that the two vendor patches
+only make existing instance names explicit; no types or proof bodies change.
+The completion review also checked the generic Loom registration, the
+successful mixed-program witness, and the deep-post-to-Lean entailment;
+the finder and skeptic identified no remaining code issues.
+
+The original six adapter audits are retained; the front end and examples
+add ten more imported `#guard_msgs` axiom audits. All sixteen allow only
+`propext`, `Classical.choice`, and `Quot.sound`. Building the existing WP
+laws exposed a missing `Solidity.Syntax.Splice` import for their `sol[...]`
+regression; the bridge import is corrected without changing those laws.
+`Bridge/SolidityBridge/Arith/Power.lean` needed the same notation-import fix
+for its existing `sol{...}` regressions; no arithmetic statement changes.
+The full bridge gate also exposed a missing divergence alternative in
+`Bridge/SolidityBridge/Evm.lean`'s existing `compile_trace_complete` proof.
+The added case contradicts its successful-run hypothesis; its statement
+and compiler correspondence are unchanged.
+`Bridge/SolidityBridge/Arith/Lowering.lean`'s `narrowCheck_guard` equation
+also omitted the current core's self-frame panic-data branch when overflow
+mode is unset. Its right-hand side now includes `panicStmt 17` in that
+case, as the existing source does; no hypothesis or execution definition
+changes.
+
+Integration with master `c7e634f5` accounts for its new `CallMemo` layer in
+`ElabM`: `ctx_run`, `nctx_run`, and the two narrow-check equations return
+`pure` in the cache state monad, preserving any incoming cache. The cast
+capture and guard proofs quantify that cache and unfold the existing
+transformers; no elaborator implementation is copied or changed.
+
+Final validation of the deep-post interface: `./scripts/check-bridge.sh`
+passes (1,723 jobs), including both vendor hash manifests, the sixteen Loom
+axiom pins, and the printed leaf/rule regressions; the final log contains
+no errors. Per-file Lean MCP diagnostics also pass for every edited Lean
+file, including the root and `Checks` imports.
+The core source, root dependency manifest, both toolchains, and `AGENTS.md`
+are unchanged, so the core-only checks were not run.
+
+The completed interface intentionally retains this deep-post restriction.
+No extension of the core `Fml` datatype is part of the integration.
+
 ## October 22 milestone
 
 Implements the concrete correctness directions discussed with Claude on
@@ -279,3 +411,218 @@ and admitted operator family. It confirmed the stated frontend boundaries
 and that the refuted laws keep B3 gated. The prose-path script still reports
 13 pre-existing missing upstream/vendor references; no reference in this
 updated document is missing. No unrelated path or core file was changed.
+
+## Independent checks and debugging (2026-10-25)
+
+This follow-up leaves arithmetic and weakest-precondition work (items 1
+and 4) to their separate implementation. It extends the other existing
+bridges rather than duplicating the core's rule-soundness proofs.
+
+- `Bridge/SolidityBridge/ExternalEvm/Environment.lean` relates SELFBALANCE
+  to EvmYul's actual account-map lookup and its `stateOp` transformer,
+  including absent accounts. ADDRESS, CALLER, CALLVALUE and TIMESTAMP
+  agree on shared observations as well. `referenceMachine_agrees` gives a
+  representing machine for every upstream state, so the relation does not
+  assume zero balances or equal caller/executing addresses. Each opcode
+  theorem also preserves that shared-state relation after execution. This extends
+  the eight existing binary-word comparisons; it does not establish every
+  instruction, gas, byte memory, account-changing CALL or bytecode dispatch.
+- `Bridge/SolidityBridge/CompilerSimulation.lean` supplies CSLib
+  `IsBisimulation`, `Simulation` and `TraceEq` for successful program
+  boundaries. Each target transition contains an actual instruction trace
+  in `Evm.lts`; labels retain the typed source program. Traces compose over
+  any number of admitted, payment-free programs, including inlined calls.
+  Fragment admission and local-space bounds remain explicit. Instruction
+  labels are grouped into those boundary transitions; failure and divergence
+  are outside this successful-execution LTS. The existing trace-completeness
+  proof now handles the core theorem's divergence alternative explicitly.
+- `Bridge/SolidityBridge/LoopFixpoint.lean` identifies `OrderHom.lfp` of
+  the one-iteration outcome transformer with Mathlib's `PFun.fix` outcomes.
+  Well-founded induction gives total correctness with decreases required
+  only on invariant states. The postcondition chooses whether terminal
+  errors are acceptable. This argument invokes no core loop rule.
+- `Bridge/SolidityBridge/AdversaryPolicy.lean` proves that each fixed
+  operational callee has exactly the completed outcomes of its reachable
+  return policy. Internal callee labels are retained when lifting traces.
+  This strengthens the existing theorem quantifying over all callees;
+  returns must still preserve the assumed invariant, and infinite callee
+  runs are not completed outcomes.
+- `FO.finite_storage_support` in `Bridge/SolidityBridge/ModelTheory.lean`
+  applies compactness to the contract theory together with supplied
+  first-order storage facts. It extracts a finite subset of the supplied
+  facts while leaving the contract theory available in full. This is
+  semantic entailment, without a calculus-completeness claim.
+
+### Plausible for rule debugging
+
+Run `cd Bridge && lake exe rulecheck`, or supply `--seed 42 --samples 1000`.
+`Bridge/SolidityBridge/PropertyChecks.lean` uses Plausible (Lean's QuickCheck)
+to test 36 named signed/unsigned local-rule cases: five binary assignments,
+five compound assignments, and all four increment/decrement forms both
+alone and with assignment. Each case receives 200 samples by default.
+The generator mixes zero, one, word maximum, signed minimum and maximum
+with uniformly sampled full-width words; shrinking reduces failing operands.
+
+The checker independently executes the emitted update and the typed
+statement, compares both locals, and distinguishes ordinary revert from
+panic and fuel exhaustion. Unsupported premise shapes fail the corpus
+check rather than counting as successes. The general observation API also
+receives the global state for future storage/heap/ledger/balance tests.
+This initial corpus does not claim coverage of every taclet or random
+storage layouts. A deliberate missing-assignment mutation must be rejected
+by the same Plausible path, checking that the harness can find a bad rule.
+No test result is installed as a theorem or proof axiom.
+
+The bridge root runs the fixed-seed corpus during a fresh build. The
+`rulecheck` executable runs it again on every invocation, including when
+build artifacts are cached. Zero samples and malformed options fail.
+`AGENTS.md` and the rule-repair guide point to this workflow. All tooling
+and dependencies remain in the optional Bridge package.
+
+### Validation and review
+
+The six new/extended proof-and-test module targets and `rulecheck` build
+independently under Lean 4.24.0. The default seed passes 36 × 200 samples;
+seed 42 passes 36 × 1,000. Both runs reject the deliberate bad assignment.
+The executable rejects zero samples, malformed numbers, unknown flags and
+missing option values with exit status 2. The eight new pinned axiom audits
+permit only `propext`, `Classical.choice` and `Quot.sound`.
+
+The full Bridge root was also attempted. It remains blocked in the
+untouched item-1/item-4 files: source-notation parse errors in
+`Bridge/SolidityBridge/Arith/Power.lean` and
+`Bridge/SolidityBridge/WeakestPreLaws.lean`, and a failed reflexivity proof
+in `Bridge/SolidityBridge/Arith/Lowering.lean`. Those files are reserved for
+the separate arithmetic/WP work and were not changed here. The independent
+targets above do not import them. Vendor checksums, whitespace, core import
+layering and module reachability pass; the prose-path check retains its
+13 previously recorded missing references.
+
+Independent read-only finder/skeptic reviews found two debugger issues:
+the observation API initially exposed only locals, and build-time failures
+initially omitted their seed. Both are fixed. The reviews confirmed the
+documented program-boundary, environment-opcode and completed-callee scope;
+neither reviewer invoked Lean or edited files.
+
+### Model theory and callback trace follow-up (2026-10-25)
+
+`Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean` adds:
+
+- `FO.solTheory_compact`: `SolTheory C ∪ facts` is satisfiable exactly when
+  every finite subset of `facts` is satisfiable together with the whole theory.
+- `FO.solTheory_models_of_card`: a model at every infinite cardinal at least
+  the language cardinal. The proof supplies the concrete state's infinite
+  logical-integer carrier, rather than assuming an infinite model exists.
+- `FO.solTheory_elementary_submodel`: downward Löwenheim–Skolem with explicit
+  language, parameter-set and ambient-model cardinal bounds, retaining the
+  parameters and every contract axiom.
+- `FO.holds_iff_submodel_realize`: an elementary submodel of a concrete state
+  preserves each translated closed first-order leaf, including leaves that
+  are not valid in every state.
+
+The cardinality results concern abstract first-order models. They assert
+neither that these models are concrete Solidity states nor that the entire
+Solidity signature is countable.
+
+`Bridge/SolidityBridge/CallbackTrace.lean` labels completed outcomes with the
+full returned state. `holdsC_iff_weakObservable_traces` identifies the transfer
+callback modality with safety on every callee's observable traces. CSLib
+saturation treats internal computation as silent:
+`weakTraceEq_callSafe` and `weakBisim_callSafe` preserve every postcondition,
+even when callees perform different amounts of internal work.
+`holdsC_iff_weakTraceEquivalent_callee` permits replacing the universal callee
+by an implementation with the same weak traces. Strong trace/bisimulation
+versions are provided too; those count internal transitions.
+
+`Bridge/SolidityBridge/CallbackModalTrace.lean` supplies `holdsC_iff_traceSafe`,
+`traceEq_holdsC` and `bisim_holdsC` for every program, frame stack and modality.
+Its LTS reuses `ExecP` and `ExecF`: it is an adapter establishing CSLib
+invariance, rather than an independent implementation of callback execution.
+The separate operational callee correspondence concerns one transfer boundary.
+Both results cover finite completed outcomes under invariant-preserving
+returns; even diamond safety does not assert termination of an arbitrary callee.
+
+Read-only finder/skeptic review confirmed these distinctions and the need for
+weak rather than strong equivalence when internal-step counts differ. Neither
+reviewer invoked Lean or edited files.
+
+### Expanded independent EVM audit (2026-10-25)
+
+The vendor now contains the 53-module import closure of the pinned upstream
+primitive and full EVM dispatchers. Its Lean 4.24 compatibility patch adds one
+`UInt256` type annotation to the upstream EVM semantics, alongside the existing
+JSON compatibility patch. Original and patched checksums are retained.
+
+`Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` connects the core's actual
+instruction steps to `EvmYul.EVM.step` on all numeric represented stacks for
+18 binary and two unary word operators, the five account/transaction
+observations, numeric PUSH and POP. The binary/unary/POP correspondences
+include stack underflow. `Bridge/SolidityBridge/ExternalEvm/StackOps.lean`
+compares legal DUP1–DUP16 and SWAP1–SWAP16 with explicit stack-depth premises.
+Signed division/remainder and exponentiation are proved against the upstream
+implementations, including exponentiation by squaring, zero divisors, and
+signed-minimum division by minus one.
+
+These are projected opcode proofs. The shared relation observes the numeric
+stack and account/transaction fields, balances modulo `2^256`, and 160-bit
+account addresses. It does not equate memory, storage, PC, code, exact
+unbounded balances or gas. The dispatcher is supplied its opcode/immediate
+with positive evaluator fuel and zero charged gas; instruction fetching and
+the gas/stack-limit/static-mode checks in the upstream `X` driver are not
+verified by these theorems.
+
+The full requested instruction correspondence is **not complete**. The
+remaining constructors and their required representation work are explicit:
+
+| Core instructions | Remaining obligation |
+|---|---|
+| `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
+| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
+| `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
+| `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
+| `revert` | Return-data operands and the driver's halting relation. |
+
+Symbolic-slot PUSH/ADD and DUP/SWAP depths outside 1–16 are also outside the
+numeric correspondence. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
+proves concrete disagreements for same-stack CALL/REVERT/JUMP/JUMPI and fixed
+memory opcodes, non-wrapping symbolic offsets, and impossibility of a globally
+injective encoding of all symbolic slots into finite EVM words. These results
+rule out an unrestricted one-opcode identity theorem; they do not rule out
+verified macro lowerings under explicit representation assumptions.
+
+Read-only finder/skeptic review confirmed the arithmetic equations and required the
+modular-balance, 160-bit-address and driver limitations above. A proof-checking
+performance issue in signed operations was resolved by normalizing finite
+multiplication by minus one before projecting to naturals, avoiding kernel
+expansion of a huge numeral. No heartbeat limit or proof axiom was added.
+
+Final follow-up validation: the independent targets build successfully
+(1,428 jobs), including the new model-theory/callback modules, dispatcher,
+stack proofs, obstruction proofs, previous loop/compiler/callee extensions,
+and `rulecheck`. Seventeen additional pinned headline audits admit only
+`propext`, `Classical.choice` and `Quot.sound`. Plausible again passes 36 ×
+1,000 samples at seed 42; its default fixed-seed 36 × 200 corpus also passes.
+Upstream and build vendor checksums, patch dry-run, whitespace, core layering,
+and reachability of all 48 Bridge modules pass. A fresh full-root build
+still fails only in the reserved arithmetic/WP files recorded above; the
+prose-path check retains the same 13 unrelated missing references.
+
+To check the new work independently of those reserved files, run from `Bridge/`:
+
+```sh
+lake build SolidityBridge.ModelTheory.LowenheimSkolem \
+  SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
+  SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
+  SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
+  SolidityBridge.AdversaryPolicy rulecheck
+lake exe rulecheck --seed 42 --samples 1000
+```
+
+Post-integration validation (2026-10-25): after merging `master` at
+`507ac062`, the full Bridge root and `scripts/check-bridge.sh` pass (1,660
+jobs), and the Plausible executable again passes 36,000 samples at seed 42.
+The earlier arithmetic/WP blockers were fixed upstream; this change does
+not modify those reserved files. Core layering and module reachability
+also pass. The separate core trust-inventory gate reports 23 existing
+drift findings from that master revision, reproduced by GitHub CI; this
+feature changes no core source or trust-inventory entries.

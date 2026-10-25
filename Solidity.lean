@@ -220,6 +220,7 @@ import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch
 import Solidity.Examples.Tactics.Join
+import Solidity.Examples.Tactics.PolySize
 import Solidity.Examples.Tactics.CallSummary
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
@@ -434,12 +435,14 @@ import Solidity.Calculus.DependentReduction
 import Solidity.Calculus.LeafTotality
 import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.LiftTotality
+import Solidity.Calculus.Prenex
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
 import Solidity.Examples.AutoComplete
+import Solidity.Examples.Decision
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify

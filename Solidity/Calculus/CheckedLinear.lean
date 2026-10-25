@@ -55,6 +55,11 @@ structure CheckedValue {p : PrimTy} (t : LTm C (.val p)) (ps : List Parameter :=
     ∀ (g : State C []) (ν : AEnv),
       (lower rs).Correct (Inputs.observe es ps rs g ν).codes (t.eval g ν)
 
+/-- The term is a literal: its value. -/
+def LTm.lit? {p : PrimTy} : (t : LTm C (.val p)) → Option {v : p.Denote // t = .app0 (.lit v)}
+  | .app0 (.lit v) => some ⟨v, rfl⟩
+  | _ => none
+
 namespace CheckedValue
 
 def parameter {p : PrimTy} (k : Nat) (h : Parameter.mk p k ∈ ps) :
@@ -128,6 +133,36 @@ def sub {p : PrimTy} (hp : BinOp.sub.accepts p = true) {a b : LTm C (.val p)}
     | bool => cases hp
     | uint | int => exact ih⟩
 
+/-- Checked multiplication by the literal `v` on the left. -/
+def mulLit {p : PrimTy} (hp : BinOp.mul.accepts p = true) {a b : LTm C (.val p)} (v : p.Denote)
+    (ha : a = .app0 (.lit v)) (hb : CheckedValue (ps := ps) (es := es) b) :
+    CheckedValue (ps := ps) (es := es) (.app2 (.binop .mul hp) a b) :=
+  ⟨hb.refs, fun rs => .scale (integer p v) (hb.lower rs), by
+    intro rs hr g ν
+    subst ha
+    have hpa : p.isNumeric = true := hp
+    have ih := CheckedScalar.scale_correct hpa (integer p v) (hb.lower rs)
+      (Inputs.observe es ps rs g ν).codes (b.eval g ν) (hb.correct rs hr g ν)
+    rw [LTm.eval_app2, Close.Op2.eval_binop]
+    cases p with
+    | bool => cases hp
+    | uint | int => exact ih⟩
+
+/-- Checked multiplication by the literal `v` on the right. -/
+def litMul {p : PrimTy} (hp : BinOp.mul.accepts p = true) {a b : LTm C (.val p)} (v : p.Denote)
+    (hb : b = .app0 (.lit v)) (ha : CheckedValue (ps := ps) (es := es) a) :
+    CheckedValue (ps := ps) (es := es) (.app2 (.binop .mul hp) a b) :=
+  ⟨ha.refs, fun rs => .scale (integer p v) (ha.lower rs), by
+    intro rs hr g ν
+    subst hb
+    have hpa : p.isNumeric = true := hp
+    have ih := CheckedScalar.scale_correct' hpa (integer p v) (ha.lower rs)
+      (Inputs.observe es ps rs g ν).codes (a.eval g ν) (ha.correct rs hr g ν)
+    rw [LTm.eval_app2, Close.Op2.eval_binop]
+    cases p with
+    | bool => cases hp
+    | uint | int => exact ih⟩
+
 /-- A primitive guard must return before the value does. This is the
 definedness sequencing emitted by read-occurrence flattening. -/
 def seq {q p : PrimTy} {d : LTm C (.val q)} {t : LTm C (.val p)}
@@ -157,6 +192,13 @@ def ofTermFuel? (ps : List Parameter) : Nat → {p : PrimTy} → (t : LTm C (.va
       | .app0 (.env e) => if h : e ∈ es then some (environment e h) else none
       | .app2 (.binop .add h) a b => do return add h (← ofTermFuel? ps fuel a) (← ofTermFuel? ps fuel b)
       | .app2 (.binop .sub h) a b => do return sub h (← ofTermFuel? ps fuel a) (← ofTermFuel? ps fuel b)
+      | .app2 (.binop .mul h) a b =>
+        match a.lit? with
+        | some ⟨v, hv⟩ => do return mulLit h v hv (← ofTermFuel? ps fuel b)
+        | none =>
+          match b.lit? with
+          | some ⟨v, hv⟩ => do return litMul h v hv (← ofTermFuel? ps fuel a)
+          | none => none
       | .seq (s' := .val _) d a => do return seq (← ofTermFuel? ps fuel d) (← ofTermFuel? ps fuel a)
       | .err => some failed
       | _ => none
