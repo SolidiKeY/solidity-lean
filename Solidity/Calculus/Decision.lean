@@ -44,13 +44,17 @@ strings at a time, from a family whose hashes are distinct
 (`Fml.swInst`, `Fml.swInst_refutes`, `Calculus/HashReduction.lean`), which
 meets the premise; exact on the fragment `Fml.hashCovered`
 (`Fml.swPrefix_exact`, `Calculus/HashComplete.lean`, through the
-relabeling of `Calculus/HashRelabel.lean`).
+relabeling of `Calculus/HashRelabel.lean`).  A string hashed by two kinds
+stands for one word per kind (`decideHash2`, `Calculus/HashKinds.lean`):
+the second kind's words binders of their own, linked to the first's by
+the premise, the result read by the one-kind swap.
 
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
-today: `Examples/Decision.lean`'s `rowApf` (a block over an inner mapping)
-is in the fragment and answered `unknown`.  A statement of the form "some decider is complete" would
+today: `Examples/Decision.lean` pins a leaf of the fragment answered
+`unknown` for each shape left (`gapColumn` … `gapHashUnderForall`,
+`docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
 rounds extend.

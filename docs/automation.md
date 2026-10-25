@@ -1124,9 +1124,12 @@ It contains everything except what the user allowed to answer *unknown*:
 The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
-`Examples/Decision.lean` pins `rowApf` (a block over an inner mapping,
-`allow[3][k]`), in the fragment (`rowApf_inTarget`, kernel-checked) and
-answered *unknown*.  `apf`, the witness until step 5, is decided.
+`Examples/Decision.lean` pins one counterexample per shape still answered
+*unknown* (`gapColumn` … `gapHashUnderForall`, each in the fragment by the
+kernel, `*_inTarget`), listed under "What is not proved" below.  The
+witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
+over an inner mapping, `allow[3][k]`) and `namesTwoKinds` (two kinds of
+hash of one string), the last two since 2026-10-25.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, never a superset:
@@ -1177,16 +1180,21 @@ Three properties of the reading are worth knowing.
 | `quantReduction?_isSome` | `φ.quantCovered = true → (quantReduction? φ).isSome` |
 | `Prep.valid_iff` | a preparation's body is valid exactly where the body is |
 | `hoistPrep_valid_iff` | hoisting reads out of quantifiers is exact |
-| `apfPrep_valid_iff` | array property instantiation is exact on its fragment (the body kept outside it) |
+| `apfPrep_valid_iff` | array property instantiation is exact on its fragment (the body kept outside it), mappings at roots and inner mappings at their last key |
 | `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma) |
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
+| `Fml.tk_validH` | a valid reading with the second kind's words (`Fml.tk`) makes the leaf valid under its premise |
+| `Fml.tk_refutes` | a refutation of an instance with the second kind's words fixed refutes the leaf under its premise |
+| `Fml.tk_complete` | on the fragment, where the reading with the second kind's words is not valid, an instance at some classes, those words fixed, is not |
+| `decideHash2_complete` | `φ.coveredK2 k₁ k₂ = true → decideHash2 k₁ k₂ φ ≠ .unknown` |
 
 `#print axioms` of each of the six `decide*` theorems, of
 `decideGoal_complete_hash` and of the hash reduction's four
 (`Fml.swPrefix_validH`, `Fml.swInst_refutes`, `Fml.swPrefix_complete`,
 `Fml.swPrefix_exact`) is pinned in
-`Calculus/Decision.lean`, of `QFml.decide_iff` and `QFml.verify` in
+`Calculus/Decision.lean`, of the two kinds' three (`Fml.tk_validH`,
+`Fml.tk_refutes`, `Fml.tk_complete`) in `Calculus/HashKinds.lean`, of `QFml.decide_iff` and `QFml.verify` in
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
 `Calculus/QuantTotality.lean`, of the preparations' in
 `Calculus/QuantHoist.lean` and `Calculus/ArrayProperty.lean`: `propext`,
@@ -1319,6 +1327,16 @@ its own pipeline):
    (`valid_of_main`, `countermodelOfBody`), as `dependentReduction?` does.
    `bodyPrep` composes the two preparations (`Prep.trans`), and
    `Fml.quantCovered` reads the prepared body.
+   Inner mappings (2026-10-25): a root whose type is mappings down to a
+   `mapping(uint => p)` (`MShape`; `allow[3][k]`, `owed[a][k]` with an
+   outer key of any type) read at a block variable as its last key.  The
+   outer keys are any terms that read alike (`ApfTm.rkey`, a path at a root
+   of the blocks); the rebuilt root holds the floor construction of its last
+   mapping under every outer key (`MShape.rebuild`: each outer entry and the
+   default rebuilt), so the outer keys need not be in the index set
+   (`MShape.rebuild_word`, `MRoot.surgery_at`, `Surg.keyAt` for any
+   reference to a last mapping).  A bound outer key (`allow[i][3]`) is not
+   taken (`gapColumn`).
 
 8. **KeY `int`** (plan step 3, `Srt.kint`): a literal, a `uint` widened
    (`toInt`), `+`, `-`, a product by a literal on either side, and the
@@ -1387,17 +1405,53 @@ its own pipeline):
       word sent to its class's free word, each keyed root's entry at a
       fixed key moved from the free one (`RelRL`, `relabel_state`,
       `Fml.rl_holds`).  So `Fml.ValidH φ ↔ Fml.Valid φ'` on the fragment.
-    `Fml.hashCovered` is the fragment: a hash, and for some kind the
-    swapped leaf and every instance in `Fml.Covered`, at most four
-    strings (`famBound`), the swapped leaf in `Fml.rl` over the roots its
-    words key (`Fml.vRoots`), each `mapping(uint => uint)` (`kTypedB`), the
-    prefix's string levels the words' (`Fml.prefixOK`).
+    `Fml.hashCovered` is the fragment: a hash, and for some way of
+    deciding it (`hashTries`) its coverage: for one kind, the swapped leaf
+    and every instance in `Fml.Covered`, at most four strings
+    (`famBound`), the swapped leaf in `Fml.rl` over the roots its words key
+    (`Fml.vRoots`), each `mapping(uint => uint)` (`kTypedB`), the prefix's
+    string levels the words' (`Fml.prefixOK`) (`Fml.coveredK`); for two,
+    `Fml.coveredK2`, below.
+
+11. **Two kinds of hash** (2026-10-25, `decideHash2`,
+    `Calculus/HashKinds.lean`): a string hashed by two kinds stands for one
+    word per kind.  For an ordered pair `k₁`, `k₂` (`hashTries` tries the
+    six), every string `k₂` hashes must be hashed by both kinds where the
+    premise reads them (outside update continuations, `Fml.topLevels`):
+    * **the second kind's words** (`Fml.tk`): past the prefix, one new
+      `∀ uint` per string `k₂` hashes (`Fml.allN`), each `k₂` node of the
+      string read as its word, the rest of the body read past the new
+      binders (`Tm.xk`, `Fml.xk`, a thinning and the strings' words,
+      `XMap`; `Fml.xk_holds`), and the premise per kind assumed as the link
+      of the two kinds' words: for each pair of those strings,
+      `k₁(sᵢ) == k₁(sⱼ)` exactly where `eᵢ == eⱼ` (`linkE`).  The result has
+      hashes of `k₁` only, which the one-kind swap reads;
+    * **valid** (`Fml.tk_validH`): each word set to its string's hash, the
+      link holds by the premise (equal outputs of one kind, equal inputs,
+      equal outputs of the other, `Grown.hashId_of_input`), and the
+      result's premise is the body's (`Fml.xk_hashIn`);
+    * **refuted** (`Fml.tk_refutes`): the instance at classes (`Fml.swInst`)
+      of the result with the words fixed to a family string's two hashes
+      (`fixE`, `famPairE`: `k₁(s) = famHash k₁ j ∧ e = famHash k₂ j` for
+      some `j`); refuted, it refutes the leaf with the family's strings,
+      where every kind's hashes are distinct (`Fml.hashFree_memNodes`);
+    * **complete** (`Fml.tk_complete`): the one-kind completeness
+      (`Fml.swPrefix_complete`) relabels the first kind's words; at the new
+      binders the link makes the free words of the second kind follow the
+      classes, so they are relabeled to the family's second hashes, their
+      roots' entries moved (`RelRL` over the new binders' levels,
+      `relabel_stateΓ`, `RelRL.envOfSw`, `Fml.tkBody_fix_complete`).
+    `Fml.coveredK2` is the fragment: `Fml.coveredK`'s conditions on the
+    result for `k₁`, every instance with the words fixed covered, and the
+    swapped body over the new binders in `Fml.rl` of their levels and the
+    roots they key, each `mapping(uint => uint)` (`Fml.tkRL`).
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
 and eight and nine (no atom of `Srt.kint`, no ledger read); ten was
-answered `unknown` (`decideGoal` read no hash).
+answered `unknown` (`decideGoal` read no hash), and eleven too (the swap
+reads one kind).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1436,10 +1490,20 @@ strings with the same bytes; `keccak256(s) == keccak256(t) → ids[s] ==
 ids[t]` (`namesEq`) proved and `keccak256(s) == keccak256(t)`
 (`namesEqBad`) refuted by two strings with different bytes; `namesSet_covered`
 and `namesEqBad_covered` kernel-checked (about 4 s each),
-`namesSet_answers` by `decideGoal_complete_hash`.  `namesTwoKinds`
-(`sha256(s) == sha256(t) → keccak256(s) == keccak256(t)`, valid only under
-the premise) is in the named fragment and `unknown`; `namesBound` (the
-strings as hidden binders) is outside it and `unknown`.
+`namesSet_answers` by `decideGoal_complete_hash`.  `namesBound` (the
+strings as hidden binders) is outside the fragment and `unknown`.  For
+feature 11: `namesTwoKinds` (`sha256(s) == sha256(t) → keccak256(s) ==
+keccak256(t)`, valid only under the premise) proved, `namesTwoKindsBad`
+refuted (one string twice), `namesTwoKinds_covered` kernel-checked (about
+16 s) and `namesTwoKinds_answers`; over `Names2`
+(`mapping(string => uint) ids; mapping(uint => uint) shas`), `twoKeys`
+(`sha256(s) ≠ sha256(t)`, a write at `ids[keccak256(t)]` leaves
+`ids[keccak256(s)]` and `shas[sha256(s)]`) proved, `twoKeysBad` refuted,
+`twoKeys_covered` kernel-checked (about 28 s).
+For the inner mappings of feature 7: `rowApf` (`allow[3][k]`) and `rowVar`
+(a parameter row) proved, `rowBad` (another row) and `rowOut` (a key past
+the guard) refuted; `rowApf_covered`, `rowBad_covered` kernel-checked,
+`rowApf_answers`, `rowApf_iff`.
 
 ### Running time (the walks)
 
@@ -1535,46 +1599,58 @@ of about two thousand nodes, about a millisecond a state).  The
   rebuilt mapping lists one entry per key below `U`'s largest value, so a
   guard bound near `2^256` gives a refutation that exists but cannot be
   built in practice.
-* On the fragment, `decideGoal` still answers *unknown* on:
-  * a quantifier past the prefix whose body reads storage at a variable it
-    binds outside the array property shapes `apfPrep` decides, or reads a
-    transaction field: blocks over inner mappings (`m[3][k]`,
-    `Examples/Decision.lean`, `rowApf`), over mappings keyed by `int` or
-    `bool`, over arrays, memory or the ledger; blocks under another
-    quantifier, or in a positive position the prefix does not reach; guards
-    with a partial ground operand (`k < x / y`); a read at a bound variable
-    through another path of the same root;
-  * a KeY `int` binder (`∀ int k` of KeY's sort: `LFml` has no
-    unbounded binder), `/`, `%` and products of KeY `int`s, and a read of
-    the ledger past a ledger write (`pay`, `store(net, …)`);
-  * division and modulo at `int`, `<<` at `int`, `|` and `^` with a
-    literal, `&` with a literal that is not a low mask `2^k - 1`, `**` and
-    `**%` with a literal exponent, and `*%` by a literal: each needs an
-    encoding with a coefficient of `2^256` or a disjunction per bit, and
-    none was carried through the stages (the cut and its proofs extend to
+* `DecisionTheorem` fails on the leaves below, each in `Fml.inTarget`
+  (by the kernel, `*_inTarget`) and answered *unknown*
+  (`Examples/Decision.lean`, the pinned verdicts).  The search
+  (2026-10-25) went through each construct `Fml.inTarget` admits and
+  `decideGoal`'s stages refuse; one leaf stands for each shape:
+  * **quantifiers over contents outside `apfPrep`'s shapes** (feature 7):
+    a block whose bound index is not the last of its path
+    (`gapColumn`, `allow[i][3]`: the floor construction one level up, the
+    whole inner mapping copied, is not carried); a root read at a bound
+    index at two depths (`gapTwoPaths`); a block over a mapping keyed by
+    `int` (`gapIntKeyed`: the floor's base at `-2^255`) or by `bool`
+    (`gapBoolKeyed`); a block reading a struct's member past the bound
+    index (`gapStructValue`, `accs[k].v`); a block over an array
+    (`gapArrayBlock`: lengths, M4 (b)) or over the ledger
+    (`gapLedgerBlock`); a guard with a partial ground operand
+    (`gapPartialGuard`, `k < x - 1`: the index set takes total operands);
+    a positive quantifier the prefix does not reach, reading at its
+    variable (`gapPositiveForall`, `∀ k` inside a conjunction);
+  * **arrays, memory, the ledger and KeY `int` without quantifiers**: a
+    dynamic array's element at a checked index (`gapArrayRead`) and a fixed
+    array's at a literal one (`gapFixedRead`): `Tm.agreeB` is false on
+    `a[i]` (the Theory reads a default past the length, the interpreter
+    halts), the path guards refuse `.at`, the read queries carry no index
+    or length evidence (M4 (b)); a memory read (`gapMemory`:
+    `LTm.Elimable` refuses the memory sorts, no stage realizes a heap); a
+    binder of KeY's `int` (`gapKIntBinder`: `LFml` has no unbounded binder);
+    a ledger read past a payment (`gapLedgerWrite`: the leaf builder
+    refuses a read past a write, `SymS.netOk`); more reads than
+    `Fml.exactBounded` admits (`gapManyReads`, fifty: 511 lifted nodes,
+    45 reads, the stages' fuel);
+  * **operators with a literal operand** not carried through the stages:
+    `/` and `%` at `int` (`gapIntDiv`, `gapIntMod`), `|` and `^` with a
+    literal (`gapOr`, `gapXor`), `&` with a literal that is not a low mask
+    (`gapAnd`), `**` by a literal (`gapPow`, `x ** 1`; `**%` alike) and
+    `*%` by one (`gapMulW`): each needs an encoding with a coefficient of
+    `2^256` or a disjunction per bit (the cut and its proofs extend to
     them as to `<<`);
-  * memory reads and writes: `LTm.Elimable` refuses the memory sorts, and
-    no stage realizes a heap;
-  * fixed and dynamic array indices (M4 (b)): a checked read `a[i]` is
-    not pushed exactly through updates (`Tm.agreeB` is false on it: the
-    Theory reads a default past the length, the interpreter halts), the
-    path guards refuse `.at`, and the read queries and realization carry
-    no index or length evidence;
-  * hashes outside `Fml.hashCovered` (feature 10): two kinds of hash of
-    one string (`namesTwoKinds`: one word per string cannot be both its
-    hashes; it needs the relabeling of one kind's words into the other's),
-    a hash stored in a local (`{se := keccak256(memory, s)}`, the form
-    symbolic execution leaves, and a key read through that local), a hash
-    of memory the leaf writes or of a string not fresh (a program's
-    `bytes memory b = "ab"`, a parameter), more than four strings, a keyed
-    root that is not `mapping(uint => uint)` or is read or written other
-    than at a key (`sfind`, `delete`, `wt`), a quantifier in the body, and
-    a leaf with a modality.  Of these `Fml.inTarget` takes two kinds of
-    hash of one string, hashes of memory the leaf writes in equations,
-    more than four strings (a refutation needing a fifth class answers
-    `unknown`), keyed roots of other types and quantifiers in the body; it
-    takes no stored hash, no hash of a hidden binder's string, and a hash
-    key only of a memory local in the starting memory.
+  * **hashes outside `Fml.hashCovered`** (features 10 and 11): three kinds
+    of hash of one string (`gapThreeKinds`: `Fml.tk` adds one kind's
+    words); two kinds where no kind hashes every string the other does at
+    the premise's top (`gapMixedKinds`, `ids[keccak256(s)]` and
+    `shas[sha256(t)]`: the link needs both of a string's words, and a
+    string's word of a kind that does not hash it is free, so the classes
+    cannot follow it); more than four strings, refuted only by five
+    classes (`gapFiveStrings`: `famBound`); a quantifier in the body past
+    a connective (`gapHashUnderForall`: the swap takes a binder-free body).
+  Not counterexamples, since `Fml.inTarget` excludes them: a hash stored
+  in a local, a hash of a hidden binder's string or under an anonymising
+  update, a hash key of anything but a memory local, a product of two
+  symbolic terms and the waived operator classes, nested blocks under a
+  negative quantifier, a strict comparison of two bound variables, two
+  bound indices on one path.
 
 ### The plan for the rest
 
@@ -1608,11 +1684,15 @@ in this order:
    set (the goal's index terms and the guards' bounds, Bradley–Manna–
    Sipma), the instance decided by the quantifier-free pipeline; the
    instantiation proved exact on the fragment (`apfPrep_valid_iff`).
-   Left: inner mappings (`m[u][k]`: the same floor construction over the
-   inner mapping of every outer key), `int`-keyed mappings (the floor's
-   base at `-2^255`), arrays (lengths: M4 (b)), memory, the ledger;
-   blocks inside other quantifiers (an index set per instance of the outer
-   variables).
+   Inner mappings at their last key done (2026-10-25: the floor
+   construction over the inner mapping of every outer key).  Left: a bound
+   outer key (`m[i][3]`: the floor one level up, the subtree copied; with
+   one level per root the same proof carries), a root read at a bound key
+   at two depths, struct members past the bound key, `int`- and
+   `bool`-keyed mappings (the floor's base at `-2^255`; a two-valued key
+   enumerated), arrays (lengths: M4 (b)), memory, the ledger; guards with
+   partial ground operands; positive quantifiers past the prefix (the
+   counterexamples `gapColumn` … `gapPositiveForall`).
 6. **Memory, array indices**: realization cases for memory and in-range
    evidence for array indices (`Calculus/ReadRealization.lean`).  Not
    started: an array leaf is refused before realization, at update
@@ -1625,8 +1705,12 @@ in this order:
    by hashes of one kind (feature 10): no stage reads memory, so the
    inputs are free, and their equality is the hashes' (the swap); the
    bounded `∀` over words is needed only once memory reads are, at step 6.
-   Left: two kinds per string, stored hashes, hashes of written memory,
-   strings not fresh, more than four strings.
+   Two kinds per string done (2026-10-25, feature 11).  Left: three
+   kinds, two kinds where neither hashes every string the other does,
+   more than four strings, a quantifier in the body (in the fragment:
+   `gapThreeKinds`, `gapMixedKinds`, `gapFiveStrings`,
+   `gapHashUnderForall`); stored hashes, hashes of written memory, strings
+   not fresh (outside it).
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
    the size bounds by fuel computed from the formula.
