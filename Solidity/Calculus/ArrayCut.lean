@@ -176,6 +176,15 @@ structure ARead (C : Contract) where
 /-- The index atom of the `j`-th read. -/
 abbrev xAt (N j : Nat) : LTm C (.val .uint) := .var (N + 2 * j)
 
+/-- The atom a term is, if it is one. -/
+def LTm.varIdx? : LTm C (.val .uint) → Option Nat
+  | .var k => some k
+  | _ => none
+
+theorem LTm.eq_of_varIdx? {t : LTm C (.val .uint)} {k : Nat} (h : t.varIdx? = some k) :
+    t = .var k := by
+  cases t <;> first | (simp only [LTm.varIdx?, Option.some.injEq] at h; subst h; rfl) | cases h
+
 /-- The value atom of the `j`-th read. -/
 abbrev vAt (p : PrimTy) (N j : Nat) : LTm C (.val p) := .var (N + 2 * j + 1)
 
@@ -265,10 +274,21 @@ abbrev LTm.leU (a b : LTm C (.val .uint)) : LTm C (.val .bool) := .app2 (.binop 
 the first. -/
 def eqVal (N j k : Nat) (p : PrimTy) : LFml C := .eq (vAt p N j) (vAt p N k)
 
+/-- The position of the `j`-th read's index: the atom its index is, if it is
+one, else its own index atom (so an index that is a parameter adds no
+variable to the arithmetic). -/
+def ARead.xPos (N j : Nat) (r : ARead C) : Nat :=
+  match r.idx.varIdx? with
+  | some k => k
+  | none => N + 2 * j
+
+/-- The `j`-th read's index, as an atom. -/
+abbrev ARead.xTm (N j : Nat) (r : ARead C) : LTm C (.val .uint) := .var (r.xPos N j)
+
 /-- What one read makes of itself: its index atom the index; at a fixed
 array, a slot past the length reads the default and is not there. -/
 def ARead.self (N j : Nat) (r : ARead C) : List (LFml C) :=
-  let x := xAt (C := C) N j
+  let x := r.xTm N j
   match r.kind with
   | .len => []
   | .word =>
@@ -288,15 +308,15 @@ second). -/
 def ARead.pair (N j k : Nat) (r s : ARead C) : List (LFml C) :=
   if r.root = s.root then
     match r.kind, s.kind with
-    | .word, .word => [.imp (.eq (xAt N j) (xAt N k)) (eqVal N j k r.e)]
+    | .word, .word => [.imp (.eq (r.xTm N j) (s.xTm N k)) (eqVal N j k r.e)]
     | .len, .len => [eqVal N j k .uint]
     | .has, .has =>
-      [.imp (LFml.isT (vAt .bool N j)) (.imp (LFml.isT (LTm.leU (xAt N k) (xAt N j)))
+      [.imp (LFml.isT (vAt .bool N j)) (.imp (LFml.isT (LTm.leU (s.xTm N k) (r.xTm N j)))
         (LFml.isT (vAt .bool N k)))]
     | .has, .len =>
-      [.imp (LFml.isT (LTm.ltU (xAt N j) (vAt .uint N k))) (LFml.isT (vAt .bool N j))]
+      [.imp (LFml.isT (LTm.ltU (r.xTm N j) (vAt .uint N k))) (LFml.isT (vAt .bool N j))]
     | .has, .word =>
-      [.imp (LFml.isF (vAt .bool N j)) (.imp (LFml.isT (LTm.leU (xAt N j) (xAt N k)))
+      [.imp (LFml.isF (vAt .bool N j)) (.imp (LFml.isT (LTm.leU (r.xTm N j) (s.xTm N k)))
         (.eq (vAt s.e N k) (LTm.dfltLit s.e)))]
     | _, _ => []
   else []
@@ -339,9 +359,9 @@ length). -/
 def ARead.Describes (r : ARead C) (g : State C []) (st : Storage C) (ν : AEnv) (N j : Nat) : Prop :=
   match r.kind with
   | .word => ∀ k, (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k →
-      ν.u (N + 2 * j) = k ∧ ν.get r.e (N + 2 * j + 1) = st.obs.word (.ref (r.loc k))
+      ν.u (r.xPos N j) = k ∧ ν.get r.e (N + 2 * j + 1) = st.obs.word (.ref (r.loc k))
   | .has => ∀ k, (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k →
-      ν.u (N + 2 * j) = k ∧ ν.b (N + 2 * j + 1) = st.obs.has (.ref (r.loc k))
+      ν.u (r.xPos N j) = k ∧ ν.b (N + 2 * j + 1) = st.obs.has (.ref (r.loc k))
   | .len => lenDesc r.root r.h r.ar st (ν.u (N + 2 * j + 1))
 
 /-- Every read described. -/
@@ -768,7 +788,10 @@ section Realize
 variable (ν : AEnv) (N : Nat) (rs : List (ARead C))
 
 /-- The index atom of the `j`-th read, as a number. -/
-def idxV (j : Nat) : Nat := (ν.u (N + 2 * j)).1.toNat
+def idxV (j : Nat) : Nat :=
+  match rs[j]? with
+  | some r => (ν.u (r.xPos N j)).1.toNat
+  | none => 0
 
 /-- The `j`-th read reads the root `a` and observes `k`. -/
 def isRd (a : Name) (k : AKind) (j : Nat) : Bool :=
@@ -785,7 +808,7 @@ def lenOf (a : Name) : Nat :=
 /-- The word the atoms give the slot `t` of the root `a`: its first word
 read's there. -/
 def wordAt (a : Name) (e : PrimTy) (t : Nat) : e.Denote :=
-  match (List.range rs.length).find? (fun j => isRd rs a .word j && idxV ν N j == t) with
+  match (List.range rs.length).find? (fun j => isRd rs a .word j && idxV ν N rs j == t) with
   | some j => ν.get e (N + 2 * j + 1)
   | none => PrimTy.dflt e
 
@@ -793,7 +816,7 @@ def wordAt (a : Name) (e : PrimTy) (t : Nat) : e.Denote :=
 def bump (a : Name) (e : PrimTy) (j : Nat) : Nat :=
   if (isRd rs a .has j && ν.b (N + 2 * j + 1)) ||
       (isRd rs a .word j && !decide (ν.get e (N + 2 * j + 1) = PrimTy.dflt e)) then
-    idxV ν N j + 1
+    idxV ν N rs j + 1
   else 0
 
 /-- The slots of the rebuilt root `a`: past the live length, past every
@@ -1184,7 +1207,7 @@ theorem holds_eqDflt {p : PrimTy} (a : Nat) :
 
 theorem pair_ww (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} (hjk : j ≠ k)
     (hr : rs[j]? = some r) (hs : rs[k]? = some s) (hroot : r.root = s.root) (hkr : r.kind = .word)
-    (hks : s.kind = .word) (hx : ν.u (N + 2 * j) = ν.u (N + 2 * k)) :
+    (hks : s.kind = .word) (hx : ν.u (r.xPos N j) = ν.u (s.xPos N k)) :
     ν.get r.e (N + 2 * j + 1) = ν.get r.e (N + 2 * k + 1) := by
   have hp := cons_pair hC hjk hr hs
   simp only [ARead.pair, hroot, if_true, hkr, hks, List.mem_singleton, forall_eq] at hp
@@ -1200,7 +1223,7 @@ theorem pair_ll (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} 
 theorem pair_hh (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} (hjk : j ≠ k)
     (hr : rs[j]? = some r) (hs : rs[k]? = some s) (hroot : r.root = s.root) (hkr : r.kind = .has)
     (hks : s.kind = .has) (hj : ν.b (N + 2 * j + 1) = true)
-    (hle : (ν.u (N + 2 * k)).1 ≤ (ν.u (N + 2 * j)).1) : ν.b (N + 2 * k + 1) = true := by
+    (hle : (ν.u (s.xPos N k)).1 ≤ (ν.u (r.xPos N j)).1) : ν.b (N + 2 * k + 1) = true := by
   have hp := cons_pair hC hjk hr hs
   simp only [ARead.pair, hroot, if_true, hkr, hks, List.mem_singleton, forall_eq] at hp
   have := hp ((holds_isT _).mpr (by rw [LTm.eval_var]; exact congrArg some hj))
@@ -1210,7 +1233,7 @@ theorem pair_hh (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} 
 
 theorem pair_hl (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} (hjk : j ≠ k)
     (hr : rs[j]? = some r) (hs : rs[k]? = some s) (hroot : r.root = s.root) (hkr : r.kind = .has)
-    (hks : s.kind = .len) (hlt : (ν.u (N + 2 * j)).1 < (ν.u (N + 2 * k + 1)).1) :
+    (hks : s.kind = .len) (hlt : (ν.u (r.xPos N j)).1 < (ν.u (N + 2 * k + 1)).1) :
     ν.b (N + 2 * j + 1) = true := by
   have hp := cons_pair hC hjk hr hs
   simp only [ARead.pair, hroot, if_true, hkr, hks, List.mem_singleton, forall_eq] at hp
@@ -1221,7 +1244,7 @@ theorem pair_hl (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} 
 theorem pair_hw (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} (hjk : j ≠ k)
     (hr : rs[j]? = some r) (hs : rs[k]? = some s) (hroot : r.root = s.root) (hkr : r.kind = .has)
     (hks : s.kind = .word) (hj : ν.b (N + 2 * j + 1) = false)
-    (hle : (ν.u (N + 2 * j)).1 ≤ (ν.u (N + 2 * k)).1) :
+    (hle : (ν.u (r.xPos N j)).1 ≤ (ν.u (s.xPos N k)).1) :
     ν.get s.e (N + 2 * k + 1) = PrimTy.dflt s.e := by
   have hp := cons_pair hC hjk hr hs
   simp only [ARead.pair, hroot, if_true, hkr, hks, List.mem_singleton, forall_eq] at hp
@@ -1231,9 +1254,9 @@ theorem pair_hw (hC : (ARead.cons N rs).holds g ν) {j k : Nat} {r s : ARead C} 
 /-- A word or slot read's index atom is its index. -/
 theorem self_idx (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
     (hk : r.kind = .word ∨ r.kind = .has) {k : PrimTy.uint.Denote}
-    (hi : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k) : ν.u (N + 2 * j) = k := by
+    (hi : (r.idx.eval g ν : Option PrimTy.uint.Denote) = some k) : ν.u (r.xPos N j) = k := by
   have hs := cons_self hC hr
-  have hd : (LFml.imp (.eq r.idx r.idx) (.eq r.idx (xAt N j))).holds g ν := by
+  have hd : (LFml.imp (.eq r.idx r.idx) (.eq r.idx (r.xTm N j))).holds g ν := by
     rcases hk with hk | hk <;> exact hs _ (by simp only [ARead.self, hk, List.mem_append,
       List.mem_singleton, true_or])
   have := hd ((LFml.holds_rets g ν r.idx).mpr ⟨k, hi⟩)
@@ -1249,6 +1272,10 @@ end ConsFacts
 section Realized
 
 variable {g : State C []} {ν : AEnv} {N : Nat} {rs : List (ARead C)}
+
+theorem idxV_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
+    idxV ν N rs j = (ν.u (r.xPos N j)).1.toNat := by
+  simp only [idxV, hr]
 
 theorem isRd_of {j : Nat} {r : ARead C} (hr : rs[j]? = some r) : isRd rs r.root r.kind j = true := by
   simp only [isRd, hr, beq_self_eq_true, Bool.and_self]
@@ -1283,11 +1310,11 @@ theorem bump_le_slots (a : Name) (e : PrimTy) {j : Nat} (hj : j < rs.length) :
 
 /-- The slot of a word read holds its value atom. -/
 theorem wordAt_eq (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
-    (hk : r.kind = .word) : wordAt ν N rs r.root r.e (idxV ν N j) = ν.get r.e (N + 2 * j + 1) := by
+    (hk : r.kind = .word) : wordAt ν N rs r.root r.e (idxV ν N rs j) = ν.get r.e (N + 2 * j + 1) := by
   unfold wordAt
   have hj : j < rs.length := (List.getElem?_eq_some_iff.mp hr).1
   cases hf : (List.range rs.length).find?
-      (fun j' => isRd rs r.root .word j' && idxV ν N j' == idxV ν N j) with
+      (fun j' => isRd rs r.root .word j' && idxV ν N rs j' == idxV ν N rs j) with
   | none =>
     have := List.find?_range_eq_none.mp hf j hj
     rw [← hk, isRd_of hr] at this
@@ -1298,15 +1325,16 @@ theorem wordAt_eq (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C} (h
     obtain ⟨r₀, hr₀, hroot₀, hk₀⟩ := isRd_some hp.1
     by_cases e : j₀ = j
     · subst e; rfl
-    · have hw := pair_ww hC e hr₀ hr (hroot₀.trans rfl) hk₀ hk
-        (uint_ext_toNat hp.2)
+    · have h2 := hp.2
+      rw [idxV_of hr₀, idxV_of hr] at h2
+      have hw := pair_ww hC e hr₀ hr (hroot₀.trans rfl) hk₀ hk (uint_ext_toNat h2)
       rw [ARead.e_eq_of_root r₀ r hroot₀] at hw
       exact hw
 
 /-- A word read past the slots reads the default. -/
 theorem word_past (a : Name) (e : PrimTy) {j : Nat} {r : ARead C} (hr : rs[j]? = some r)
     (hroot : r.root = a) (hk : r.kind = .word)
-    (hS : ¬ idxV ν N j < slotsOf ν N rs a e) : ν.get e (N + 2 * j + 1) = PrimTy.dflt e := by
+    (hS : ¬ idxV ν N rs j < slotsOf ν N rs a e) : ν.get e (N + 2 * j + 1) = PrimTy.dflt e := by
   have hj : j < rs.length := (List.getElem?_eq_some_iff.mp hr).1
   refine Classical.byContradiction fun hne => hS ?_
   have hb := bump_le_slots (ν := ν) (N := N) a e hj
@@ -1318,8 +1346,9 @@ theorem word_past (a : Name) (e : PrimTy) {j : Nat} {r : ARead C} (hr : rs[j]? =
 /-- A slot read that says no slot is there reads past every slot. -/
 theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead C}
     (hr : rs[j]? = some r) (hk : r.kind = .has) (hb : ν.b (N + 2 * j + 1) = false) :
-    slotsOf ν N rs r.root r.e ≤ idxV ν N j := by
-  have hj0 := uint_nonneg (ν.u (N + 2 * j))
+    slotsOf ν N rs r.root r.e ≤ idxV ν N rs j := by
+  have hj0 := uint_nonneg (ν.u (r.xPos N j))
+  rw [idxV_of hr]
   apply foldl_max_le
   · unfold lenOf
     split
@@ -1329,7 +1358,7 @@ theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead
       have hne : j ≠ j₁ := fun e => by subst e; rw [hr] at hr₁; cases hr₁; rw [hk] at hk₁; cases hk₁
       refine Classical.byContradiction fun hlt => ?_
       have h1 := uint_nonneg (ν.u (N + 2 * j₁ + 1))
-      have := pair_hl hC hne hr hr₁ hroot₁.symm hk hk₁ (by unfold idxV at hlt; omega)
+      have := pair_hl hC hne hr hr₁ hroot₁.symm hk hk₁ (by omega)
       rw [hb] at this; cases this
     · exact Nat.zero_le _
   · intro m hm
@@ -1341,15 +1370,17 @@ theorem has_false_slots (hC : (ARead.cons N rs).holds g ν) {j : Nat} {r : ARead
       rcases hcond with ⟨hrd, hbm⟩ | ⟨hrd, hne⟩
       · obtain ⟨rm, hrm, hrootm, hkm⟩ := isRd_some hrd
         have hmj : m ≠ j := fun e => by subst e; rw [hb] at hbm; cases hbm
+        rw [idxV_of hrm]
         refine Classical.byContradiction fun hlt => ?_
-        have h1 := uint_nonneg (ν.u (N + 2 * m))
-        have := pair_hh hC hmj hrm hr hrootm hkm hk hbm (by unfold idxV at hlt; omega)
+        have h1 := uint_nonneg (ν.u (rm.xPos N m))
+        have := pair_hh hC hmj hrm hr hrootm hkm hk hbm (by omega)
         rw [hb] at this; cases this
       · obtain ⟨rm, hrm, hrootm, hkm⟩ := isRd_some hrd
         have hjm : j ≠ m := fun e => by subst e; rw [hr] at hrm; cases hrm; rw [hk] at hkm; cases hkm
+        rw [idxV_of hrm]
         refine Classical.byContradiction fun hlt => ?_
-        have h1 := uint_nonneg (ν.u (N + 2 * m))
-        have := pair_hw hC hjm hr hrm hrootm.symm hk hkm hb (by unfold idxV at hlt; omega)
+        have h1 := uint_nonneg (ν.u (rm.xPos N m))
+        have := pair_hw hC hjm hr hrm hrootm.symm hk hkm hb (by omega)
         rw [ARead.e_eq_of_root rm r hrootm] at this
         exact hne this
     · exact Nat.zero_le _
@@ -1385,7 +1416,7 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
       refine ⟨hx, ?_⟩
       show _ = (realizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
       rw [realize_dyn_word ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N j := by rw [idxV, hx]
+      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
       rw [hk']
       split
       · exact (wordAt_eq hC hr rfl).symm
@@ -1398,7 +1429,7 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
       refine ⟨hx, ?_⟩
       show _ = (realizeSt ν N rs g.storage).obs.has (.ref ((SRef.ofRoot a h).index (.arr .dyn) k))
       rw [realize_dyn_has ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N j := by rw [idxV, hx]
+      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
       rw [hk']
       cases hb : ν.b (N + 2 * j + 1) with
       | false =>
@@ -1437,7 +1468,7 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
       refine ⟨hx, ?_⟩
       show _ = (realizeSt ν N rs g.storage).obs.word (.ref ((SRef.ofRoot a h).index (.arr .fixed) k))
       rw [realize_fixed_word ν N rs g.storage h harr k]
-      have hk' : k.1.toNat = idxV ν N j := by rw [idxV, hx]
+      have hk' : k.1.toNat = idxV ν N rs j := by rw [idxV_of hr, hx]
       rw [hk']
       split
       · exact (wordAt_eq hC hr rfl).symm
@@ -1446,8 +1477,8 @@ theorem describes_realize (hC : (ARead.cons N rs).holds g ν) :
           or_false, forall_eq_or_imp, forall_eq] at hs
         refine (holds_eqDflt _).mp (hs.2 ((holds_isF _).mpr ?_))
         rw [eval_ltLit, uintOfNat_val hn]
-        have h0 := uint_nonneg (ν.u (N + 2 * j))
-        unfold idxV at hS
+        have h0 := uint_nonneg (ν.u (ARead.xPos N j ⟨a, _, h, harr, e, .fixed, .word, idx⟩))
+        rw [idxV_of hr] at hS
         exact congrArg some (decide_eq_false (by omega))
     | has =>
       simp only [ARead.Describes]
@@ -1707,6 +1738,22 @@ theorem fill_val {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (p : PrimTy) :
 
 variable {g ν N rs}
 
+theorem fill_xPos (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+    (hr : rs[j]? = some r) : (fill g ν N rs).u (r.xPos N j) = idxVal g ν r := by
+  unfold ARead.xPos
+  cases hv : r.idx.varIdx? with
+  | none => exact fill_idx g ν N rs hr
+  | some k =>
+    have he := LTm.eq_of_varIdx? hv
+    have hk : k < N := by
+      have := hb r (List.mem_of_getElem? hr)
+      rw [he] at this
+      simp only [LTm.atomBound] at this
+      omega
+    show fillAt g ν N rs .uint k = _
+    rw [fillAt, if_pos hk, idxVal, he]
+    rfl
+
 theorem idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {r : ARead C} (hr : r ∈ rs) :
     (r.idx.eval g (fill g ν N rs) : Option PrimTy.uint.Denote) = r.idx.eval g ν :=
   LTm.eval_agree_below g r.idx ((fill_below g ν N rs).mono (hb r hr))
@@ -1727,13 +1774,13 @@ theorem describes_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
   | word =>
     intro k hk'
     rw [hi] at hk'
-    refine ⟨by rw [fill_idx g ν N rs hr, idxVal_of hk'], ?_⟩
+    refine ⟨by rw [fill_xPos hb hr, idxVal_of hk'], ?_⟩
     rw [fill_val g ν N rs hr, valAt, hk]
     simp only [idxVal_of hk', dite_true]
   | has =>
     intro k hk'
     rw [hi] at hk'
-    refine ⟨by rw [fill_idx g ν N rs hr, idxVal_of hk'], ?_⟩
+    refine ⟨by rw [fill_xPos hb hr, idxVal_of hk'], ?_⟩
     show (fill g ν N rs).get .bool (N + 2 * j + 1) = _
     rw [fill_val g ν N rs hr, valAt, hk]
     simp only [idxVal_of hk', dite_true]
@@ -1755,7 +1802,7 @@ theorem fixed_obs {a : Name} {e : PrimTy} {n : Nat} (h : C.rootType a = some (.r
 
 theorem self_idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
     (hr : rs[j]? = some r) :
-    (LFml.imp (.eq r.idx r.idx) (.eq r.idx (xAt N j))).holds g (fill g ν N rs) := by
+    (LFml.imp (.eq r.idx r.idx) (.eq r.idx (r.xTm N j))).holds g (fill g ν N rs) := by
   intro h
   rw [LFml.holds_rets] at h
   obtain ⟨k, hk⟩ := h
@@ -1763,8 +1810,8 @@ theorem self_idx_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : 
     (idx_fill hb (List.mem_of_getElem? hr)).symm.trans hk
   rw [LFml.holds_eq_iff]
   refine ⟨k, hk, ?_⟩
-  show some ((fill g ν N rs).u (N + 2 * j)) = some k
-  rw [fill_idx g ν N rs hr, idxVal_of hk']
+  show some ((fill g ν N rs).u (r.xPos N j)) = some k
+  rw [fill_xPos hb hr, idxVal_of hk']
 
 /-- What one read makes of itself holds of the actual observations. -/
 theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
@@ -1788,8 +1835,9 @@ theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
         rw [holds_eqDflt, fill_val g ν N rs hr]
         simp only [valAt, dite_true]
         have hn := fixed_lt_bound h harr
-        have hx := fill_idx g ν N rs hr
-        have e1 : ((LTm.ltU (xAt N j) (.app0 (.lit (uintOfNat n))) : LTm C (.val .bool)).eval g
+        have hx := fill_xPos (g := g) (ν := ν) hb hr
+        have e1 : ((LTm.ltU (ARead.xTm N j ⟨a, _, h, harr, e, .fixed, .word, idx⟩)
+            (.app0 (.lit (uintOfNat n))) : LTm C (.val .bool)).eval g
             (fill g ν N rs) : Option Bool) = some (decide ((idxVal g ν
               ⟨a, _, h, harr, e, .fixed, .word, idx⟩).1 < n)) := by
           rw [eval_ltLit, hx, uintOfNat_val hn]
@@ -1807,7 +1855,7 @@ theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
       rcases hd with rfl | rfl
       · exact hi
       · have hn := fixed_lt_bound h harr
-        have hx := fill_idx g ν N rs hr
+        have hx := fill_xPos (g := g) (ν := ν) hb hr
         rw [LFml.holds_eq_iff, eval_ltLit, hx, uintOfNat_val hn]
         refine ⟨_, ?_, rfl⟩
         show some ((fill g ν N rs).get .bool (N + 2 * j + 1)) = _
@@ -1817,10 +1865,11 @@ theorem self_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARea
         have h0 := uint_nonneg (idxVal g ν ⟨a, _, h, harr, e, .fixed, .has, idx⟩)
         exact congrArg some (decide_eq_decide.mpr (by omega))
 
-theorem fill_x {j : Nat} {r : ARead C} (hr : rs[j]? = some r) :
-    ((xAt N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
+theorem fill_x (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j : Nat} {r : ARead C}
+    (hr : rs[j]? = some r) :
+    ((r.xTm N j : LTm C (.val .uint)).eval g (fill g ν N rs) : Option PrimTy.uint.Denote) =
       some (idxVal g ν r) := by
-  rw [LTm.eval_var]; exact congrArg some (fill_idx g ν N rs hr)
+  rw [LTm.eval_var]; exact congrArg some (fill_xPos hb hr)
 
 theorem fill_word {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .word) :
     ((vAt r.e N j : LTm C (.val r.e)).eval g (fill g ν N rs) : Option r.e.Denote) =
@@ -1838,7 +1887,8 @@ theorem fill_len {j : Nat} {r : ARead C} (hr : rs[j]? = some r) (hk : r.kind = .
   rw [LTm.eval_var, fill_val g ν N rs hr, valAt, hk]; simp only [dite_true]
 
 /-- What two reads make of each other holds of the actual observations. -/
-theorem pair_fill {j k : Nat} {r s : ARead C} (hr : rs[j]? = some r) (hs : rs[k]? = some s) :
+theorem pair_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) {j k : Nat} {r s : ARead C}
+    (hr : rs[j]? = some r) (hs : rs[k]? = some s) :
     ∀ d ∈ r.pair N j k s, d.holds g (fill g ν N rs) := by
   intro d hd
   unfold ARead.pair at hd
@@ -1856,8 +1906,8 @@ theorem pair_fill {j k : Nat} {r s : ARead C} (hr : rs[j]? = some r) (hs : rs[k]
     have har : ar = ar' := ArrTy.subsingleton _ _
     subst har
     obtain ⟨B, hB1, hB2, hB3⟩ := arr_shape a h ar g.storage
-    have xj := fill_x (g := g) (ν := ν) (N := N) hr
-    have xk := fill_x (g := g) (ν := ν) (N := N) hs
+    have xj := fill_x (g := g) (ν := ν) (N := N) hb hr
+    have xk := fill_x (g := g) (ν := ν) (N := N) hb hs
     have nj := uint_nonneg (idxVal g ν ⟨a, R, h, harr, e, ar, kr, ir⟩)
     have nk := uint_nonneg (idxVal g ν ⟨a, R, h', harr', e, ar, ks, is⟩)
     cases kr <;> cases ks <;> simp only [List.mem_singleton, List.not_mem_nil] at hd <;> subst hd
@@ -1877,7 +1927,7 @@ theorem pair_fill {j k : Nat} {r s : ARead C} (hr : rs[j]? = some r) (hs : rs[k]
       intro h1 h2
       rw [holds_isF, fill_has hr rfl, hB1] at h1
       rw [holds_isT, eval_leU] at h2
-      rw [fill_idx g ν N rs hr, fill_idx g ν N rs hs] at h2
+      rw [fill_xPos hb hr, fill_xPos hb hs] at h2
       simp only [Option.some.injEq, decide_eq_false_iff_not, decide_eq_true_eq] at h1 h2
       rw [LFml.holds_eq_iff]
       refine ⟨_, fill_word hs rfl, ?_⟩
@@ -1888,17 +1938,18 @@ theorem pair_fill {j k : Nat} {r s : ARead C} (hr : rs[j]? = some r) (hs : rs[k]
       intro h1 h2
       rw [holds_isT, fill_has hr rfl, hB1] at h1
       rw [holds_isT, eval_leU] at h2
-      rw [fill_idx g ν N rs hs, fill_idx g ν N rs hr] at h2
+      rw [fill_xPos hb hs, fill_xPos hb hr] at h2
       rw [holds_isT, fill_has hs rfl, hB1]
       simp only [Option.some.injEq, decide_eq_true_eq] at h1 h2 ⊢
       omega
     · -- has, len
       intro h1
       rw [holds_isT] at h1
-      have e1 : ((LTm.ltU (xAt N j) (vAt .uint N k) : LTm C (.val .bool)).eval g (fill g ν N rs) :
+      have e1 : ((LTm.ltU (ARead.xTm N j ⟨a, R, h, harr, e, ar, .has, ir⟩) (vAt .uint N k) :
+          LTm C (.val .bool)).eval g (fill g ν N rs) :
           Option Bool) = some (decide ((idxVal g ν ⟨a, R, h, harr, e, ar, .has, ir⟩).1 <
             (lenVal a h' ar g.storage).1)) := by
-        rw [eval_ltU, fill_idx g ν N rs hr]
+        rw [eval_ltU, fill_xPos hb hr]
         rw [show (fill g ν N rs).u (N + 2 * k + 1) = lenVal a h' ar g.storage from
           Option.some.inj (fill_len hs rfl)]
       rw [e1] at h1
@@ -1931,7 +1982,7 @@ theorem cons_fill (hb : ∀ r ∈ rs, r.idx.atomBound ≤ N) :
         dsimp only at hd
         split at hd
         · cases hd
-        · exact pair_fill hr hs d hd
+        · exact pair_fill hb hr hs d hd
 
 end Fill
 
