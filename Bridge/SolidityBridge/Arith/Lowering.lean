@@ -34,7 +34,7 @@ theorem castPlan_typed (C : Contract) (Γ : ECtx) (f : String) (e : RawExpr)
   rfl
 
 theorem ctx_run (scope : ElabScope) (st : ECtx × Nat) :
-    ctx scope st = .ok (st.1, st) := rfl
+    ctx scope st = pure (st.1, st) := rfl
 
 theorem castCapture_factor (C : Contract) (f : String) (e : RawExpr) (p : PrimTy) (n : Nat)
     (hf : castTy? f = some (p, n)) :
@@ -42,10 +42,11 @@ theorem castCapture_factor (C : Contract) (f : String) (e : RawExpr) (p : PrimTy
       let Γ ← ctx
       let r ← ElabM.lift (castPlan C Γ f p n e)
       castTail C p n r) := by
-  funext scope st
+  funext scope st memo
   delta castCapture
   rewrite [hf]
-  simp only [bind, ReaderT.bind, StateT.bind, ctx_run, Except.bind]
+  simp only [bind, ReaderT.bind, StateT.bind, ctx_run, Except.bind,
+    pure, StateT.pure, Except.pure]
   cases ht : intTyOf C st.1 e with
   | none =>
     cases hl : e.litVal?
@@ -88,8 +89,10 @@ theorem castCapture_typed (C : Contract) (scope : ElabScope) (st : ECtx × Nat)
     (hf : castTy? f = some (p, n)) (ht : intTyOf C st.1 e = some (q, m))
     (hl : e.litVal? = none) :
     castCapture C f e scope st = castTail C p n (castTemplate p q n m e) scope st := by
+  funext memo
   rw [castCapture_factor C f e p n hf]
-  simp only [bind, ReaderT.bind, StateT.bind, ctx_run, Except.bind]
+  simp only [bind, ReaderT.bind, StateT.bind, ctx_run, Except.bind,
+    pure, StateT.pure, Except.pure]
   rw [castPlan_typed C st.1 f e p q n m ht hl]
   rfl
 
@@ -152,17 +155,18 @@ theorem narrowWrap_int_div (C : Contract) (Γ : ECtx) (a b : RawExpr) (n : Nat)
   split <;> rfl
 
 theorem nctx_run (scope : ElabScope) (st : ECtx × Nat) :
-    nctx scope st = .ok (st.1.toNCtx, st) := rfl
+    nctx scope st = pure (st.1.toNCtx, st) := rfl
 
 /-- Exact selection of default require, explicit assert, self-call panic-data, or ignoring guard. -/
 theorem narrowCheck_guard (C : Contract) (scope : ElabScope) (st : ECtx × Nat)
     (p : PrimTy) (n : Nat) (hn : n < 256) (e : RawExpr)
     (v : Val C st.1.toNCtx.ctx .bool)
     (hc : Solidity.check C st.1.toNCtx .bool (inTyCond p n e) = .ok v) :
-    narrowCheck C p n e scope st = .ok
+    narrowCheck C p n e scope st = pure
       ([.of st.1.toNCtx (match scope.overflow with
         | some o => o.guardStmt v scope.selfFrame
         | none => if scope.selfFrame then panicStmt 17 v else .require v)], st) := by
+  funext memo
   delta narrowCheck
   rw [if_neg (not_le.mpr hn)]
   simp only [bind, ReaderT.bind, StateT.bind, nctx_run, Except.bind, pure, ReaderT.pure, StateT.pure, Except.pure]
@@ -171,7 +175,7 @@ theorem narrowCheck_guard (C : Contract) (scope : ElabScope) (st : ECtx × Nat)
 
 theorem narrowCheck_full (C : Contract) (scope : ElabScope) (st : ECtx × Nat)
     (p : PrimTy) (n : Nat) (hn : 256 ≤ n) (e : RawExpr) :
-    narrowCheck C p n e scope st = .ok ([], st) := by
+    narrowCheck C p n e scope st = pure ([], st) := by
   delta narrowCheck
   rw [if_pos hn]
   rfl

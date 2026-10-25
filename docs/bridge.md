@@ -94,7 +94,13 @@ and compiler correspondence are unchanged.
 also omitted the current core's self-frame panic-data branch when overflow
 mode is unset. Its right-hand side now includes `panicStmt 17` in that
 case, as the existing source does; no hypothesis or execution definition
-changes, and the proof body is unchanged.
+changes.
+
+Integration with master `c7e634f5` accounts for its new `CallMemo` layer in
+`ElabM`: `ctx_run`, `nctx_run`, and the two narrow-check equations return
+`pure` in the cache state monad, preserving any incoming cache. The cast
+capture and guard proofs quantify that cache and unfold the existing
+transformers; no elaborator implementation is copied or changed.
 
 Final validation for phases 0–2: `./scripts/check-bridge.sh` passes
 (1,624 jobs), including both vendor hash manifests and the imported axiom
@@ -105,7 +111,7 @@ are unchanged, so the phase-3-only core checks were not run.
 
 Phase 3 remains gated on explicit user approval. Adding `Fml.pred` gives
 every recursion over `Fml` another case; the import-fanout tool reports
-448 dependent modules above `Calculus.Fml`, with bridge consumers also
+453 dependent modules above `Calculus.Fml`, with bridge consumers also
 needing rebuilding. `git log -S` searches for predicate/atom/pure
 constructors and a typed-state predicate field found no earlier removal
 of a comparable constructor for speed in the inspected formula histories.
