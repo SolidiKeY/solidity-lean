@@ -685,4 +685,510 @@ theorem GuardP.mono {g : State C []} {st' : Storage C} {Rs : List Name} {S : Lis
         | (rw [LTm.eval_app2, Close.Op2.eval_binop, hx', hy']; rfl)
         | (rw [LTm.eval_app2, Close.Op2.eval_binop, hx, hy]; rfl)
 
+/-! ## Instances -/
+
+/-- `t[u/k]`: the `uint` position `k` replaced by `u`. -/
+def LTm.subst1 (k : Nat) (u : LTm C (.val .uint)) : {s : Srt} → LTm C s → LTm C s
+  | _, @LTm.var _ .uint j => if j = k then u else .var j
+  | _, .var j => .var j
+  | _, .app0 o => .app0 o
+  | _, .app1 o a => .app1 o (LTm.subst1 k u a)
+  | _, .app2 o a b => .app2 o (LTm.subst1 k u a) (LTm.subst1 k u b)
+  | _, .app3 o a b c => .app3 o (LTm.subst1 k u a) (LTm.subst1 k u b) (LTm.subst1 k u c)
+  | _, .index it q i => .index it (LTm.subst1 k u q) (LTm.subst1 k u i)
+  | _, .obsW q => .obsW (LTm.subst1 k u q)
+  | _, .obsL q => .obsL (LTm.subst1 k u q)
+  | _, .obsH q => .obsH (LTm.subst1 k u q)
+  | _, .seq d a => .seq (LTm.subst1 k u d) (LTm.subst1 k u a)
+  | _, .orElse a b => .orElse (LTm.subst1 k u a) (LTm.subst1 k u b)
+  | _, .kite a b t e => .kite (LTm.subst1 k u a) (LTm.subst1 k u b) (LTm.subst1 k u t) (LTm.subst1 k u e)
+  | _, .err => .err
+
+theorem AEnv.get_set_uint_other (ν : AEnv) (k j : Nat) (v : PrimTy.uint.Denote) {p : PrimTy}
+    (hp : p ≠ .uint) : (ν.set .uint k v).get p j = ν.get p j := by
+  cases p
+  · rfl
+  · exact absurd rfl hp
+  · rfl
+
+/-- **Substitution is evaluation at the value.** -/
+theorem LTm.eval_subst1 (g : State C []) (ν : AEnv) (k : Nat) (u : LTm C (.val .uint))
+    {v : PrimTy.uint.Denote} (hu : (u.eval g ν : Option PrimTy.uint.Denote) = some v) {s : Srt}
+    (t : LTm C s) : (LTm.subst1 k u t).eval g ν = t.eval g (ν.set .uint k v) := by
+  induction t with
+  | @var p j =>
+    cases p with
+    | uint =>
+      show ((if j = k then u else LTm.var j).eval g ν : Option _) = some ((ν.set .uint k v).get .uint j)
+      by_cases hj : j = k
+      · subst hj; rw [if_pos rfl, hu, AEnv.get_set_self]
+      · rw [if_neg hj, AEnv.get_set_ne ν .uint .uint v hj]; rfl
+    | bool => exact congrArg some (AEnv.get_set_uint_other ν k j v (by decide)).symm
+    | int => exact congrArg some (AEnv.get_set_uint_other ν k j v (by decide)).symm
+  | app0 o => rfl
+  | app1 o a ih => show (LTm.app1 o _).eval g ν = _; rw [LTm.eval_app1, LTm.eval_app1, ih]
+  | app2 o a b iha ihb => show (LTm.app2 o _ _).eval g ν = _; rw [LTm.eval_app2, LTm.eval_app2, iha, ihb]
+  | app3 o a b c iha ihb ihc =>
+    show (LTm.app3 o _ _ _).eval g ν = _; rw [LTm.eval_app3, LTm.eval_app3, iha, ihb, ihc]
+  | index it q i ihq ihi => show (LTm.index it _ _).eval g ν = _; rw [LTm.eval_index, LTm.eval_index, ihq, ihi]
+  | obsW q ih => show (LTm.obsW _).eval g ν = _; rw [LTm.eval_obsW, LTm.eval_obsW, ih]
+  | obsL q ih => show (LTm.obsL _).eval g ν = _; rw [LTm.eval_obsL, LTm.eval_obsL, ih]
+  | obsH q ih => show (LTm.obsH _).eval g ν = _; rw [LTm.eval_obsH, LTm.eval_obsH, ih]
+  | seq d a ihd iha => show (LTm.seq _ _).eval g ν = _; rw [LTm.eval_seq, LTm.eval_seq, ihd, iha]
+  | orElse a b iha ihb => show (LTm.orElse _ _).eval g ν = _; rw [LTm.eval_orElse, LTm.eval_orElse, iha, ihb]
+  | kite a b t e iha ihb iht ihe =>
+    show (LTm.kite _ _ _ _).eval g ν = _; rw [LTm.eval_kite, LTm.eval_kite, iha, ihb, iht, ihe]
+  | err => rfl
+
+/-- Quantifier-free. -/
+def LFml.qfB : LFml C → Bool
+  | .tt | .eq _ _ => true
+  | .not φ => φ.qfB
+  | .and φ ψ | .imp φ ψ => φ.qfB && ψ.qfB
+  | .all .. => false
+
+/-- `φ[u/k]`, on a quantifier-free formula. -/
+def LFml.subst1 (k : Nat) (u : LTm C (.val .uint)) : LFml C → LFml C
+  | .tt => .tt
+  | .eq a b => .eq (LTm.subst1 k u a) (LTm.subst1 k u b)
+  | .not φ => .not (φ.subst1 k u)
+  | .and φ ψ => .and (φ.subst1 k u) (ψ.subst1 k u)
+  | .imp φ ψ => .imp (φ.subst1 k u) (ψ.subst1 k u)
+  | .all j p φ => .all j p φ
+
+theorem LFml.qfB_subst1 (k : Nat) (u : LTm C (.val .uint)) : ∀ φ : LFml C, φ.qfB = true → (φ.subst1 k u).qfB = true
+  | .tt, _ | .eq _ _, _ => rfl
+  | .not φ, h => LFml.qfB_subst1 k u φ h
+  | .and φ ψ, h | .imp φ ψ, h => by
+    simp only [LFml.qfB, Bool.and_eq_true] at h
+    simp only [LFml.subst1, LFml.qfB, LFml.qfB_subst1 k u φ h.1, LFml.qfB_subst1 k u ψ h.2, Bool.and_self]
+
+theorem LFml.holds_subst1 (g : State C []) (ν : AEnv) (k : Nat) (u : LTm C (.val .uint))
+    {v : PrimTy.uint.Denote} (hu : (u.eval g ν : Option PrimTy.uint.Denote) = some v) :
+    ∀ φ : LFml C, φ.qfB = true → ((φ.subst1 k u).holds g ν ↔ φ.holds g (ν.set .uint k v))
+  | .tt, _ => Iff.rfl
+  | .eq a b, _ => by simp only [LFml.subst1, LFml.holds, LTm.eval_subst1 g ν k u hu]
+  | .not φ, h => not_congr (LFml.holds_subst1 g ν k u hu φ h)
+  | .and φ ψ, h => by
+    simp only [LFml.qfB, Bool.and_eq_true] at h
+    exact and_congr (LFml.holds_subst1 g ν k u hu φ h.1) (LFml.holds_subst1 g ν k u hu ψ h.2)
+  | .imp φ ψ, h => by
+    simp only [LFml.qfB, Bool.and_eq_true] at h
+    exact imp_congr (LFml.holds_subst1 g ν k u hu φ h.1) (LFml.holds_subst1 g ν k u hu ψ h.2)
+
+/-- A chain of `uint` binders over a quantifier-free body. -/
+def LFml.chainQF : LFml C → Bool
+  | .all _ .uint φ => φ.chainQF
+  | φ => φ.qfB
+
+/-- The chain's variables. -/
+def LFml.chainVars : LFml C → List Nat
+  | .all k .uint φ => k :: φ.chainVars
+  | _ => []
+
+/-- The chain's body. -/
+def LFml.chainBody : LFml C → LFml C
+  | .all _ .uint φ => φ.chainBody
+  | φ => φ
+
+/-- **The block's instances at `us`**: one per tuple, each guarded by its
+terms returning. -/
+def LFml.inst (us : List (LTm C (.val .uint))) : LFml C → LFml C
+  | .all k .uint φ => LFml.conj (us.map fun u => .imp (.eq u u) ((φ.inst us).subst1 k u))
+  | φ => φ
+
+theorem LFml.qfB_conj : ∀ ds : List (LFml C), (∀ d ∈ ds, d.qfB = true) → (LFml.conj ds).qfB = true
+  | [], _ => rfl
+  | [d], h => h d List.mem_cons_self
+  | d :: e :: ds, h => by
+    show (d.qfB && (LFml.conj (e :: ds)).qfB) = true
+    rw [h d List.mem_cons_self, LFml.qfB_conj (e :: ds) fun d' hd' => h d' (List.mem_cons_of_mem _ hd')]
+    rfl
+
+theorem LFml.qfB_inst (us : List (LTm C (.val .uint))) : ∀ φ : LFml C, φ.chainQF = true → (φ.inst us).qfB = true
+  | .all k .uint φ, h => LFml.qfB_conj _ fun d hd => by
+      obtain ⟨u, -, rfl⟩ := List.mem_map.1 hd
+      show (true && ((φ.inst us).subst1 k u).qfB) = true
+      rw [LFml.qfB_subst1 k u _ (LFml.qfB_inst us φ h)]
+      rfl
+  | .all _ .bool _, h | .all _ .int _, h => h
+  | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h => h
+
+/-- **The block implies its instances.** -/
+theorem LFml.inst_sound (g : State C []) (us : List (LTm C (.val .uint))) :
+    ∀ (φ : LFml C) (ν : AEnv), φ.chainQF = true → φ.holds g ν → (φ.inst us).holds g ν
+  | .all k .uint φ, ν, hc, h => by
+    show (LFml.conj _).holds g ν
+    rw [LFml.holds_conj]
+    intro d hd
+    obtain ⟨u, -, rfl⟩ := List.mem_map.1 hd
+    intro hu
+    obtain ⟨v, hv, -⟩ := (LFml.holds_eq_iff g ν u u).1 hu
+    rw [LFml.holds_subst1 g ν k u hv _ (LFml.qfB_inst us φ hc)]
+    exact LFml.inst_sound g us φ _ hc (h v)
+  | .all _ .bool _, _, _, h | .all _ .int _, _, _, h => h
+  | .tt, _, _, h | .eq _ _, _, _, h | .not _, _, _, h | .and _ _, _, _, h | .imp _ _, _, _, h => h
+
+/-! ## Blocks, instantiated at their polarity -/
+
+/-- The term reads a root of `Rs` at a variable of `ks`. -/
+def LTm.readsAtVar (Rs : List Name) (ks : List Nat) : {s : Srt} → LTm C s → Bool
+  | _, .obsW (.index (k := .uint) (V := .prim _) .map (.app0 (.root r _)) (.var j)) =>
+    decide (r ∈ Rs) && decide (j ∈ ks)
+  | _, .app1 _ a | _, .obsW a | _, .obsL a | _, .obsH a => a.readsAtVar Rs ks
+  | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.readsAtVar Rs ks || b.readsAtVar Rs ks
+  | _, .app3 _ a b c => a.readsAtVar Rs ks || b.readsAtVar Rs ks || c.readsAtVar Rs ks
+  | _, .kite a b t e => a.readsAtVar Rs ks || b.readsAtVar Rs ks || t.readsAtVar Rs ks || e.readsAtVar Rs ks
+  | _, _ => false
+
+/-- The roots the term reads at a variable of `ks`. -/
+def LTm.rootsAtVar (ks : List Nat) : {s : Srt} → LTm C s → List Name
+  | _, .obsW (.index (k := .uint) (V := .prim _) .map (.app0 (.root r _)) (.var j)) =>
+    if j ∈ ks then [r] else []
+  | _, .app1 _ a | _, .obsW a | _, .obsL a | _, .obsH a => a.rootsAtVar ks
+  | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.rootsAtVar ks ++ b.rootsAtVar ks
+  | _, .app3 _ a b c => a.rootsAtVar ks ++ b.rootsAtVar ks ++ c.rootsAtVar ks
+  | _, .kite a b t e => a.rootsAtVar ks ++ b.rootsAtVar ks ++ t.rootsAtVar ks ++ e.rootsAtVar ks
+  | _, _ => []
+
+def LFml.readsAtVar (Rs : List Name) (ks : List Nat) : LFml C → Bool
+  | .tt => false
+  | .eq a b => a.readsAtVar Rs ks || b.readsAtVar Rs ks
+  | .not φ | .all _ _ φ => φ.readsAtVar Rs ks
+  | .and φ ψ | .imp φ ψ => φ.readsAtVar Rs ks || ψ.readsAtVar Rs ks
+
+def LFml.rootsAtVar (ks : List Nat) : LFml C → List Name
+  | .tt => []
+  | .eq a b => a.rootsAtVar ks ++ b.rootsAtVar ks
+  | .not φ | .all _ _ φ => φ.rootsAtVar ks
+  | .and φ ψ | .imp φ ψ => φ.rootsAtVar ks ++ ψ.rootsAtVar ks
+
+/-- **A block of the fragment's shape**: `uint` binders over a
+quantifier-free body reading a root of `Rs` at one of them. -/
+def LFml.isBlock (Rs : List Name) (φ : LFml C) : Bool :=
+  φ.chainQF && !φ.chainVars.isEmpty && φ.chainBody.readsAtVar Rs φ.chainVars
+
+/-- The roots the negative chains outside binders read at their
+variables. -/
+def LFml.blockRoots : Bool → LFml C → List Name
+  | pol, .not φ => φ.blockRoots (!pol)
+  | pol, .and φ ψ => φ.blockRoots pol ++ ψ.blockRoots pol
+  | pol, .imp φ ψ => φ.blockRoots (!pol) ++ ψ.blockRoots pol
+  | pol, .all k p φ =>
+    if !pol && (LFml.all k p φ).chainQF then (LFml.all k p φ).chainBody.rootsAtVar (LFml.all k p φ).chainVars
+    else []
+  | _, _ => []
+
+/-- **The body, each negative block replaced by its instances at `us`.** -/
+def LFml.apfInst (Rs : List Name) (us : List (LTm C (.val .uint))) : Bool → LFml C → LFml C
+  | pol, .not φ => .not (φ.apfInst Rs us (!pol))
+  | pol, .and φ ψ => .and (φ.apfInst Rs us pol) (ψ.apfInst Rs us pol)
+  | pol, .imp φ ψ => .imp (φ.apfInst Rs us (!pol)) (ψ.apfInst Rs us pol)
+  | pol, .all k p φ =>
+    if !pol && (LFml.all k p φ).isBlock Rs then (LFml.all k p φ).inst us else .all k p φ
+  | _, φ => φ
+
+/-- **Instantiation is sound**: at a positive polarity the instantiated
+formula implies the formula, at a negative one the converse. -/
+theorem LFml.apfInst_sound (g : State C []) (Rs : List Name) (us : List (LTm C (.val .uint))) :
+    ∀ (φ : LFml C) (pol : Bool) (ν : AEnv),
+      (pol = true → (φ.apfInst Rs us pol).holds g ν → φ.holds g ν) ∧
+      (pol = false → φ.holds g ν → (φ.apfInst Rs us pol).holds g ν)
+  | .not φ, pol, ν => by
+    have ih := LFml.apfInst_sound g Rs us φ (!pol) ν
+    cases pol
+    · exact ⟨nofun, fun _ h h' => h (ih.1 rfl h')⟩
+    · exact ⟨fun _ h h' => h (ih.2 rfl h'), nofun⟩
+  | .and φ ψ, pol, ν => by
+    have ih1 := LFml.apfInst_sound g Rs us φ pol ν
+    have ih2 := LFml.apfInst_sound g Rs us ψ pol ν
+    exact ⟨fun hp h => ⟨ih1.1 hp h.1, ih2.1 hp h.2⟩, fun hp h => ⟨ih1.2 hp h.1, ih2.2 hp h.2⟩⟩
+  | .imp φ ψ, pol, ν => by
+    have ih1 := LFml.apfInst_sound g Rs us φ (!pol) ν
+    have ih2 := LFml.apfInst_sound g Rs us ψ pol ν
+    cases pol
+    · exact ⟨nofun, fun _ h h' => ih2.2 rfl (h (ih1.1 rfl h'))⟩
+    · exact ⟨fun _ h h' => ih2.1 rfl (h (ih1.2 rfl h')), nofun⟩
+  | .all k p φ, pol, ν => by
+    refine ⟨fun hp h => ?_, fun hp h => ?_⟩
+    · subst hp
+      simpa only [LFml.apfInst, Bool.not_true, Bool.false_and, if_false] using h
+    · subst hp
+      show LFml.holds g ν (if (!false && (LFml.all k p φ).isBlock Rs) = true then
+        (LFml.all k p φ).inst us else .all k p φ)
+      split
+      · rename_i hb
+        simp only [LFml.isBlock, Bool.not_false, Bool.true_and, Bool.and_eq_true] at hb
+        exact LFml.inst_sound g us _ ν hb.1.1 h
+      · exact h
+  | .tt, _, _ => ⟨fun _ h => h, fun _ h => h⟩
+  | .eq _ _, _, _ => ⟨fun _ h => h, fun _ h => h⟩
+
+/-! ## The refutation: a failing instance, a failing block -/
+
+/-- The formulas of the fragment. -/
+inductive AFml (Rs : List Name) : LFml C → Type where
+  | tt : AFml Rs .tt
+  | eq {p : PrimTy} {a b : LTm C (.val p)} (ha : ATm Rs a) (hb : ATm Rs b) : AFml Rs (.eq a b)
+  | not {φ : LFml C} (h : AFml Rs φ) : AFml Rs (.not φ)
+  | and {φ ψ : LFml C} (h₁ : AFml Rs φ) (h₂ : AFml Rs ψ) : AFml Rs (.and φ ψ)
+  | imp {φ ψ : LFml C} (h₁ : AFml Rs φ) (h₂ : AFml Rs ψ) : AFml Rs (.imp φ ψ)
+  | all (k : Nat) (p : PrimTy) {φ : LFml C} (h : AFml Rs φ) : AFml Rs (.all k p φ)
+
+def AFml.ofFormula? (Rs : List Name) : (φ : LFml C) → Option (AFml Rs φ)
+  | .tt => some .tt
+  | .eq a b => do return .eq (← ATm.ofTerm? Rs a) (← ATm.ofTerm? Rs b)
+  | .not φ => (ofFormula? Rs φ).map .not
+  | .and φ ψ => do return .and (← ofFormula? Rs φ) (← ofFormula? Rs ψ)
+  | .imp φ ψ => do return .imp (← ofFormula? Rs φ) (← ofFormula? Rs ψ)
+  | .all k p φ => (ofFormula? Rs φ).map (.all k p)
+
+section Refute
+
+variable {Rs : List Name} {Gd Lo : LTm C (.val .uint) → Prop} {Bs : List Parameter}
+
+/-- **A formula reading alike in the rebuilt storage**: each term ground
+(`ATm.Rel` at no block variable), each binder among `Bs`. -/
+def AFml.Frame (Bs : List Parameter) (Gd : LTm C (.val .uint) → Prop) : {φ : LFml C} → AFml Rs φ → Prop
+  | _, .tt => True
+  | _, .eq ha hb => ha.Rel [] Bs Gd ∧ hb.Rel [] Bs Gd
+  | _, .not h => h.Frame Bs Gd
+  | _, .and h₁ h₂ | _, .imp h₁ h₂ => h₁.Frame Bs Gd ∧ h₂.Frame Bs Gd
+  | _, .all k p h => (⟨p, k⟩ : Parameter) ∈ Bs ∧ h.Frame Bs Gd
+
+variable {g : State C []} {st' : Storage C} {S : List Int} {ks : List Nat} {ν μ' μ : AEnv}
+
+/-- The setting under a binder of `Bs` that is no block variable. -/
+theorem Setting.set (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (p : PrimTy) (k : Nat) (v : p.Denote)
+    (hB : (⟨p, k⟩ : Parameter) ∈ Bs) (hk : (⟨p, k⟩ : Parameter) ∉ ATm.ksP ks) :
+    Setting g st' Rs S Gd Lo ks Bs ν (μ'.set p k v) (μ.set p k v) where
+  surg := hs.surg
+  gdS := hs.gdS
+  loS := hs.loS
+  hμ q hq := by
+    by_cases he : q = ⟨p, k⟩
+    · subst he; exact (Parameter.read_set ⟨p, k⟩ μ' v).trans (Parameter.read_set ⟨p, k⟩ μ v).symm
+    · exact (Parameter.read_set_ne q ⟨p, k⟩ he μ' v).trans ((hs.hμ q hq).trans
+        (Parameter.read_set_ne q ⟨p, k⟩ he μ v).symm)
+  hk j hj := by
+    have hne : (⟨p, k⟩ : Parameter) ≠ ⟨.uint, j⟩ := fun e => hk (e ▸ List.mem_map.2 ⟨j, hj, rfl⟩)
+    have h1 : (μ.set p k v).get .uint j = μ.get .uint j :=
+      Parameter.read_set_ne ⟨.uint, j⟩ ⟨p, k⟩ (Ne.symm hne) μ v
+    have h2 : (μ'.set p k v).get .uint j = μ'.get .uint j :=
+      Parameter.read_set_ne ⟨.uint, j⟩ ⟨p, k⟩ (Ne.symm hne) μ' v
+    rw [h1, h2]
+    exact hs.hk j hj
+  hν q hq := by
+    have hne : q ≠ ⟨p, k⟩ := fun e => hq (e ▸ hB)
+    exact (Parameter.read_set_ne q ⟨p, k⟩ hne μ v).trans (hs.hν q hq)
+
+/-- **Outside the blocks the formula reads alike.** -/
+theorem AFml.frame_holds : ∀ {φ : LFml C} (h : AFml Rs φ) {μ : AEnv},
+    Setting g st' Rs S Gd Lo [] Bs ν μ μ → h.Frame Bs Gd →
+      (φ.holds { g with storage := st' } μ ↔ φ.holds g μ)
+  | _, .tt, _, _, _ => Iff.rfl
+  | _, .eq ha hb, _, hs, hf => by
+    rw [LFml.holds_eq_iff, LFml.holds_eq_iff, hs.eval ha hf.1, hs.eval hb hf.2]
+  | _, .not h, _, hs, hf => not_congr (AFml.frame_holds h hs hf)
+  | _, .and h₁ h₂, _, hs, hf => and_congr (AFml.frame_holds h₁ hs hf.1) (AFml.frame_holds h₂ hs hf.2)
+  | _, .imp h₁ h₂, _, hs, hf => imp_congr (AFml.frame_holds h₁ hs hf.1) (AFml.frame_holds h₂ hs hf.2)
+  | _, .all k p h, _, hs, hf => forall_congr' fun v =>
+      AFml.frame_holds h (hs.set p k v hf.1 (fun h => nomatch h)) hf.2
+
+/-- **A guard atom**: a guard against `true`, or an equation of operands. -/
+inductive GAtom (Gd Lo : LTm C (.val .uint) → Prop) (ks : List Nat) (Bs : List Parameter) :
+    {p : PrimTy} → {a b : LTm C (.val p)} → ATm Rs a → ATm Rs b → Prop where
+  | tt {G : LTm C (.val .bool)} {hG : ATm Rs G} : GuardP Gd Lo ks Bs hG →
+      GAtom Gd Lo ks Bs hG (ATm.lit (p := .bool) true)
+  | idx {a b : LTm C (.val .uint)} {ha : ATm Rs a} {hb : ATm Rs b} {va vb : Bool} :
+      IdxP Gd Lo ks Bs va ha → IdxP Gd Lo ks Bs vb hb → GAtom Gd Lo ks Bs ha hb
+
+/-- **A block body of the fragment**, at a polarity: guard atoms only in
+negative positions, every other atom read alike. -/
+def AFml.BodyOk (Gd Lo : LTm C (.val .uint) → Prop) (ks : List Nat) (Bs : List Parameter) :
+    Bool → {φ : LFml C} → AFml Rs φ → Prop
+  | _, _, .tt => True
+  | pol, _, .eq ha hb => (ha.Rel ks Bs Gd ∧ hb.Rel ks Bs Gd) ∨ (pol = false ∧ GAtom Gd Lo ks Bs ha hb)
+  | pol, _, .not h => h.BodyOk Gd Lo ks Bs (!pol)
+  | pol, _, .and h₁ h₂ => h₁.BodyOk Gd Lo ks Bs pol ∧ h₂.BodyOk Gd Lo ks Bs pol
+  | pol, _, .imp h₁ h₂ => h₁.BodyOk Gd Lo ks Bs (!pol) ∧ h₂.BodyOk Gd Lo ks Bs pol
+  | _, _, .all .. => False
+
+theorem GAtom.holds (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) {p : PrimTy} {a b : LTm C (.val p)}
+    {ha : ATm Rs a} {hb : ATm Rs b} (hg : GAtom Gd Lo ks Bs ha hb) :
+    (LFml.eq a b).holds { g with storage := st' } μ' → (LFml.eq a b).holds g μ := by
+  cases hg with
+  | tt hG =>
+    obtain ⟨x', x, hx', hx, ht⟩ := hG.mono hs
+    intro h
+    simp only [LFml.holds, hx', hx] at h ⊢
+    exact ht h
+  | idx ia ib =>
+    obtain ⟨x', x, hx', hx, hfx⟩ := ia.values hs
+    obtain ⟨y', y, hy', hy, hfy⟩ := ib.values hs
+    intro h
+    simp only [LFml.holds, hx', hx, hy', hy] at h ⊢
+    exact Subtype.ext (eq_mono S (uintVal_bounds x').1 hfx hfy (congrArg Subtype.val h))
+
+/-- **A block body true at the floors is true at the keys.** -/
+theorem AFml.body_holds (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) :
+    ∀ (pol : Bool) {φ : LFml C} (h : AFml Rs φ), h.BodyOk Gd Lo ks Bs pol →
+      (pol = true → φ.holds g μ → φ.holds { g with storage := st' } μ') ∧
+      (pol = false → φ.holds { g with storage := st' } μ' → φ.holds g μ)
+  | _, _, .tt, _ => ⟨fun _ h => h, fun _ h => h⟩
+  | pol, _, @AFml.eq _ _ _ a b ha hb, hok => by
+    rcases hok with ⟨hr₁, hr₂⟩ | ⟨rfl, hg⟩
+    · have e : (LFml.eq a b).holds { g with storage := st' } μ' ↔ (LFml.eq a b).holds g μ := by
+        rw [LFml.holds_eq_iff, LFml.holds_eq_iff, hs.eval ha hr₁, hs.eval hb hr₂]
+      exact ⟨fun _ h => e.2 h, fun _ h => e.1 h⟩
+    · exact ⟨nofun, fun _ => hg.holds hs⟩
+  | pol, _, .not h, hok => by
+    have ih := AFml.body_holds hs (!pol) h hok
+    cases pol
+    · exact ⟨nofun, fun _ hn h' => hn (ih.1 rfl h')⟩
+    · exact ⟨fun _ hn h' => hn (ih.2 rfl h'), nofun⟩
+  | pol, _, .and h₁ h₂, hok => by
+    have ih₁ := AFml.body_holds hs pol h₁ hok.1
+    have ih₂ := AFml.body_holds hs pol h₂ hok.2
+    exact ⟨fun hp h => ⟨ih₁.1 hp h.1, ih₂.1 hp h.2⟩, fun hp h => ⟨ih₁.2 hp h.1, ih₂.2 hp h.2⟩⟩
+  | pol, _, .imp h₁ h₂, hok => by
+    have ih₁ := AFml.body_holds hs (!pol) h₁ hok.1
+    have ih₂ := AFml.body_holds hs pol h₂ hok.2
+    cases pol
+    · exact ⟨nofun, fun _ h h' => ih₂.2 rfl (h (ih₁.1 rfl h'))⟩
+    · exact ⟨fun _ h h' => ih₂.1 rfl (h (ih₁.2 rfl h')), nofun⟩
+  | _, _, .all .., hok => hok.elim
+
+/-- The setting with one more block variable, set at the key and at its floor. -/
+theorem Setting.push (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (k : Nat) (i : PrimTy.uint.Denote)
+    (hB : (⟨.uint, k⟩ : Parameter) ∈ Bs) :
+    Setting g st' Rs S Gd Lo (ks ++ [k]) Bs ν (μ'.set .uint k i) (μ.set .uint k (floorU S i)) where
+  surg := hs.surg
+  gdS := hs.gdS
+  loS := hs.loS
+  hμ q hq := by
+    have hne : q ≠ ⟨.uint, k⟩ := fun e => hq (by
+      rw [e]; exact List.mem_map.2 ⟨k, List.mem_append_right _ List.mem_cons_self, rfl⟩)
+    exact (Parameter.read_set_ne q _ hne μ' i).trans ((hs.hμ q fun h => hq (by
+      obtain ⟨j, hj, rfl⟩ := List.mem_map.1 h
+      exact List.mem_map.2 ⟨j, List.mem_append_left _ hj, rfl⟩)).trans
+        (Parameter.read_set_ne q _ hne μ (floorU S i)).symm)
+  hk j hj := by
+    by_cases he : j = k
+    · subst he; rw [AEnv.get_set_self, AEnv.get_set_self]
+    · rw [AEnv.get_set_ne μ .uint .uint _ he, AEnv.get_set_ne μ' .uint .uint _ he]
+      exact hs.hk j ((List.mem_append.1 hj).resolve_right fun h => he (List.mem_singleton.1 h))
+  hν q hq := by
+    have hne : q ≠ ⟨.uint, k⟩ := fun e => hq (e ▸ hB)
+    exact (Parameter.read_set_ne q _ hne μ (floorU S i)).trans (hs.hν q hq)
+
+/-- **The block holds where its instances hold** (Bradley, Manna, Sipma):
+at the keys `μ'` read in the rebuilt storage, by the instance at their
+floors, which the index set `us` names. -/
+theorem LFml.block_refute (us : List (LTm C (.val .uint)))
+    (hus : ∀ u ∈ us, ∀ q ∈ u.parameters, q ∉ Bs)
+    (hcover : ∀ s ∈ S, ∃ u ∈ us, ∃ v : PrimTy.uint.Denote, (u.eval g ν : Option _) = some v ∧ v.1 = s)
+    (h0 : (0 : Int) ∈ S) :
+    ∀ (φ : LFml C) (done : List Nat) (μ' μ : AEnv), φ.chainQF = true →
+      Setting g st' Rs S Gd Lo done Bs ν μ' μ →
+      (∀ k ∈ φ.chainVars, (⟨.uint, k⟩ : Parameter) ∈ Bs) →
+      ∀ hb : AFml Rs φ.chainBody, hb.BodyOk Gd Lo (done ++ φ.chainVars) Bs true →
+      (φ.inst us).holds g μ → φ.holds { g with storage := st' } μ'
+  | .all k .uint φ, done, μ', μ, hc, hs, hB, hb, hok, hi => by
+    intro i
+    have hkB : (⟨.uint, k⟩ : Parameter) ∈ Bs := hB k List.mem_cons_self
+    have hfS : (floorU S i).1 ∈ S := by
+      rcases floorIn_mem S i.1 with h | h
+      · show floorIn S i.1 ∈ S
+        rw [h]; exact h0
+      · exact h
+    obtain ⟨u, hu, v, hv, hvs⟩ := hcover _ hfS
+    have hv' : v = floorU S i := Subtype.ext hvs
+    subst hv'
+    have huμ : (u.eval g μ : Option PrimTy.uint.Denote) = some (floorU S i) := by
+      rw [← hv]; exact u.eval_agree_parameters g fun q hq => hs.hν q (hus u hu q hq)
+    have hconj := (LFml.holds_conj g μ _).1 hi _ (List.mem_map.2 ⟨u, hu, rfl⟩)
+    have hsub := hconj ((LFml.holds_eq_iff g μ u u).2 ⟨_, huμ, huμ⟩)
+    rw [LFml.holds_subst1 g μ k u huμ _ (LFml.qfB_inst us φ hc)] at hsub
+    exact LFml.block_refute us hus hcover h0 φ (done ++ [k]) _ _ hc (hs.push k i hkB)
+      (fun j hj => hB j (List.mem_cons_of_mem _ hj)) hb
+      (by rw [List.append_assoc, List.singleton_append]; exact hok) hsub
+  | .all _ .bool _, _, _, _, hc, _, _, _, _, _ | .all _ .int _, _, _, _, hc, _, _, _, _, _ => by
+    simp only [LFml.chainQF, LFml.qfB, Bool.false_eq_true] at hc
+  | .tt, done, μ', μ, _, hs, _, hb, hok, hi | .eq _ _, done, μ', μ, _, hs, _, hb, hok, hi
+  | .not _, done, μ', μ, _, hs, _, hb, hok, hi | .and _ _, done, μ', μ, _, hs, _, hb, hok, hi
+  | .imp _ _, done, μ', μ, _, hs, _, hb, hok, hi =>
+    (AFml.body_holds hs true hb (by simpa only [LFml.chainVars, List.append_nil] using hok)).1 rfl hi
+
+/-- **The conditions the refutation needs**, outside the blocks: terms
+read alike; at a negative block, its variables among `Bs` and its body
+of the fragment; at any other quantifier, a formula read alike. -/
+def AFml.TopOk (Gd Lo : LTm C (.val .uint) → Prop) (Bs : List Parameter) :
+    Bool → {φ : LFml C} → AFml Rs φ → Prop
+  | _, _, .tt => True
+  | _, _, .eq ha hb => ha.Rel [] Bs Gd ∧ hb.Rel [] Bs Gd
+  | pol, _, .not h => h.TopOk Gd Lo Bs (!pol)
+  | pol, _, .and h₁ h₂ => h₁.TopOk Gd Lo Bs pol ∧ h₂.TopOk Gd Lo Bs pol
+  | pol, _, .imp h₁ h₂ => h₁.TopOk Gd Lo Bs (!pol) ∧ h₂.TopOk Gd Lo Bs pol
+  | pol, _, @AFml.all _ _ k p φ h =>
+    if (!pol && (LFml.all k p φ).isBlock Rs) = true then
+      (∀ j ∈ (LFml.all k p φ).chainVars, (⟨.uint, j⟩ : Parameter) ∈ Bs) ∧
+        ∃ hb : AFml Rs (LFml.all k p φ).chainBody, hb.BodyOk Gd Lo (LFml.all k p φ).chainVars Bs true
+    else (⟨p, k⟩ : Parameter) ∈ Bs ∧ h.Frame Bs Gd
+
+/-- **Instantiation is exact**: where the instantiated formula fails at
+`ν`, the formula fails at `ν` in the rebuilt storage. -/
+theorem AFml.apfInst_refute (us : List (LTm C (.val .uint)))
+    (hus : ∀ u ∈ us, ∀ q ∈ u.parameters, q ∉ Bs)
+    (hcover : ∀ s ∈ S, ∃ u ∈ us, ∃ v : PrimTy.uint.Denote, (u.eval g ν : Option _) = some v ∧ v.1 = s)
+    (h0 : (0 : Int) ∈ S) (hs : Setting g st' Rs S Gd Lo [] Bs ν ν ν) :
+    ∀ (pol : Bool) {φ : LFml C} (h : AFml Rs φ), h.TopOk Gd Lo Bs pol →
+      (pol = true → φ.holds { g with storage := st' } ν → (φ.apfInst Rs us pol).holds g ν) ∧
+      (pol = false → (φ.apfInst Rs us pol).holds g ν → φ.holds { g with storage := st' } ν)
+  | _, _, .tt, _ => ⟨fun _ h => h, fun _ h => h⟩
+  | _, _, @AFml.eq _ _ _ a b ha hb, hok => by
+    have e : (LFml.eq a b).holds { g with storage := st' } ν ↔ (LFml.eq a b).holds g ν := by
+      rw [LFml.holds_eq_iff, LFml.holds_eq_iff, hs.eval ha hok.1, hs.eval hb hok.2]
+    exact ⟨fun _ h => e.1 h, fun _ h => e.2 h⟩
+  | pol, _, .not h, hok => by
+    have ih := AFml.apfInst_refute us hus hcover h0 hs (!pol) h hok
+    cases pol
+    · exact ⟨nofun, fun _ hn h' => hn (ih.1 rfl h')⟩
+    · exact ⟨fun _ hn h' => hn (ih.2 rfl h'), nofun⟩
+  | pol, _, .and h₁ h₂, hok => by
+    have ih₁ := AFml.apfInst_refute us hus hcover h0 hs pol h₁ hok.1
+    have ih₂ := AFml.apfInst_refute us hus hcover h0 hs pol h₂ hok.2
+    exact ⟨fun hp h => ⟨ih₁.1 hp h.1, ih₂.1 hp h.2⟩, fun hp h => ⟨ih₁.2 hp h.1, ih₂.2 hp h.2⟩⟩
+  | pol, _, .imp h₁ h₂, hok => by
+    have ih₁ := AFml.apfInst_refute us hus hcover h0 hs (!pol) h₁ hok.1
+    have ih₂ := AFml.apfInst_refute us hus hcover h0 hs pol h₂ hok.2
+    cases pol
+    · exact ⟨nofun, fun _ h h' => ih₂.2 rfl (h (ih₁.1 rfl h'))⟩
+    · exact ⟨fun _ h h' => ih₂.1 rfl (h (ih₁.2 rfl h')), nofun⟩
+  | pol, _, @AFml.all _ _ k p φ h, hok => by
+    unfold AFml.TopOk at hok
+    by_cases hb : (!pol && (LFml.all k p φ).isBlock Rs) = true
+    · rw [if_pos hb] at hok
+      have hpol : pol = false := by cases pol <;> simp_all only [Bool.not_true, Bool.false_and,
+        Bool.false_eq_true]
+      subst hpol
+      obtain ⟨hB, hbd, hok⟩ := hok
+      have hc : (LFml.all k p φ).chainQF = true := by
+        simp only [LFml.isBlock, Bool.not_false, Bool.true_and, Bool.and_eq_true] at hb
+        exact hb.1.1
+      refine ⟨nofun, fun _ hi => ?_⟩
+      have hi' : ((LFml.all k p φ).inst us).holds g ν := by
+        simpa only [LFml.apfInst, hb, if_true] using hi
+      exact LFml.block_refute us hus hcover h0 _ [] ν ν hc hs hB hbd
+        (by simpa only [List.nil_append] using hok) hi'
+    · rw [if_neg hb] at hok
+      have e := AFml.frame_holds (.all k p h) hs hok
+      have hx : (LFml.all k p φ).apfInst Rs us pol = .all k p φ := by
+        simp only [LFml.apfInst, hb]
+        rfl
+      rw [hx]
+      exact ⟨fun _ h => e.1 h, fun _ h => e.2 h⟩
+
+end Refute
+
 end Solidity.Decide
