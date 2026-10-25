@@ -38,22 +38,28 @@ starting memory.
 A leaf with hashes (`decideHash`, plan step 7) is decided where its memory
 locals are fresh byte strings read only by hashes of one kind: read with
 each string the word its hash returns (`Fml.swPrefix`,
-`Calculus/HashSwap.lean`), valid whatever the hash
-(`Fml.swPrefix_validH`); refuted by choosing the strings, a class of equal
-strings at a time, from a family whose hashes are distinct
-(`Fml.swInst`, `Fml.swInst_refutes`, `Calculus/HashReduction.lean`), which
-meets the premise; exact on the fragment `Fml.hashCovered`
-(`Fml.swPrefix_exact`, `Calculus/HashComplete.lean`, through the
-relabeling of `Calculus/HashRelabel.lean`).  A string hashed by two kinds
-stands for one word per kind (`decideHash2`, `Calculus/HashKinds.lean`):
-the second kind's words binders of their own, linked to the first's by
-the premise, the result read by the one-kind swap.
+`Calculus/HashSwap.lean`), valid whatever the hash where the body's value
+binders are positive (`Fml.swPrefix_validH`, `Fml.posAll`); refuted by
+choosing the strings, a class of equal strings at a time, from a family
+whose hashes are distinct (`Fml.swInst`, `Fml.swInst_refutes`,
+`Calculus/HashReduction.lean`; `famN` strings, the kernel's theorem up to
+`famBound`, computed past it, `famCheck`), which meets the premise.  A
+string hashed by two kinds stands for one word per kind (`decideHash2`,
+`Calculus/HashKinds.lean`): the second kind's words binders of their own,
+linked to the first's by the premise, the result read by the one-kind
+swap.  `decideHash` answers on `Fml.hashCovered`
+(`decideGoal_complete_hash`, through `Fml.swPrefix_complete` and
+`Fml.tk_complete`, the relabeling of `Calculus/HashRelabel.lean`); for one
+kind the reduction is moreover exact on its fragment (`Fml.swPrefix_exact`,
+`Calculus/HashComplete.lean`: keyed roots `mapping(uint => uint)`, the
+swapped leaf in `Fml.rl`, the prefix's string levels the words', at most
+`N` strings with the family of `N` checked, positive binders).
 
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapColumn` … `gapHashUnderForall`,
+`unknown` for each shape left (`gapColumn` … `gapHashNegForall`,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -67,7 +73,10 @@ quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 `QFml.decide_iff`): reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`), negative array-property blocks over mappings at
-roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
+roots instantiated at the index set (`apfPrep`, sound by
+`LFml.apfInst_sound` and exact by `ApfFml.apfInst_refute` wherever it
+instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
+preparation has); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
 `decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
@@ -87,8 +96,11 @@ stored by an update, a hash key of a nested mapping or of anything but a
 memory local in the starting memory, a hash under a hidden memory binder
 or an anonymising update,
 and an `ecrecover` term are outside.  So
-`Fml.inTarget` is a subset of the fragment the user named, never a
-superset.
+`Fml.inTarget` is a subset of the fragment the user named, with one known
+exception: a hash under a negative-position value quantifier whose hash
+pairs the scope above does not read (`gapHashNegForall`), where the leaf
+can be false only at a collision, which no refutation can exhibit;
+excluding it narrows `Fml.inTarget`, which needs the user's approval.
 -/
 
 namespace Solidity.Decide
@@ -597,7 +609,7 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
             cases he
             cases hs : (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ hokA φ φF hF) with
             | none => exact absurd hs this
-            | some r => simp only [hs]; exact fun h => nomatch h
+            | some r => exact fun h => nomatch h
 
 /-- A leaf with hashes of one kind. -/
 def tryK (k : HashKind) (hk : k ≠ .ecrecover) : HashTry C :=
@@ -1137,6 +1149,15 @@ def DecisionTheorem (w : Waivers := {}) : Prop :=
 
 /-- info: 'Solidity.Decide.decideGoal_complete_hash' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideGoal_complete_hash
+
+/-- info: 'Solidity.Decide.decideHash2_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_sound
+
+/-- info: 'Solidity.Decide.decideHash2_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_refutes
+
+/-- info: 'Solidity.Decide.decideHash2_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_complete
 
 /-- info: 'Solidity.Fml.swPrefix_validH' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Fml.swPrefix_validH

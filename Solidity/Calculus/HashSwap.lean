@@ -9,8 +9,9 @@ A leaf `∀ fresh s t. ψ` whose memory locals are byte strings
 (`hash(memory, s)`, not `ecrecover`) is read with each such local replaced
 by the word its hash returns: `Fml.swPrefix` replaces the binder by
 `∀ uint` and each hash node by the local (`Tm.sw`, `Fml.sw`), on a body of
-equations, the connectives and one-element updates (a storage write, a
-value local declared or set).  The rest of the leaf reads no memory.
+equations, the connectives, one-element updates (a storage write, a value
+local declared or set) and value binders.  The rest of the leaf reads no
+memory.
 
 `SwRel` relates a state of the leaf to one of its swapped reading: one
 storage, ledger, balance and transaction, the heaps free (the swapped
@@ -19,9 +20,12 @@ is its object's hash.  Over it every term reads alike (`Tm.sw_eval`,
 `Tm.sw_denote`) and so does every formula (`Fml.sw_holds`).
 
 Here the leaf's hashes are free variables: a valid swapped reading makes
-the leaf valid, whatever the hash function (`Fml.swPrefix_validH`).  The
-converse, a refutation that meets the goal's own hash premise, is in
-`Calculus/HashReduction.lean`.
+the leaf valid, whatever the hash function (`Fml.swPrefix_validH`), where
+the body's value binders are positive (`Fml.posAll`): the premise is read
+at each binder's instance, which weakens a positive binder
+(`Fml.holdsS_of_sw`) and would make a negative one's hypothesis vacuous
+where its hashes collide.  The converse, a refutation that meets the
+goal's own hash premise, is in `Calculus/HashReduction.lean`.
 -/
 
 namespace Solidity.Decide

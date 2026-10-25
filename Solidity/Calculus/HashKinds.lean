@@ -10,21 +10,32 @@ word per kind.  The second kind's words are value binders of their own,
 past the prefix (`Fml.tk`): each node of the second kind of a string read
 as its word (`Tm.xk`, the rest of the body read past the new binders), and
 the premise per kind written as the link of the two kinds' words
-(`(k₁(sᵢ) == k₁(sⱼ)) ↔ (eᵢ == eⱼ)`, which the premise makes true of every
-pair of strings both kinds hash at the body's top).  The result has hashes
-of the first kind only, which the one-kind swap reads:
+(`(k₁(sᵢ) == k₁(sⱼ)) ↔ (eᵢ == eⱼ)`).  The strings the second kind hashes
+(at least one) may be hashed anywhere, past an update too, where the
+premise reads them if the update lands (`Fml.HashIn`); each is hashed by
+the first kind where the premise always reads it, outside every update's
+continuation (`Fml.topLevels`).  The result has hashes of the first kind
+only, which the one-kind swap reads:
 
 * **valid** (`Fml.tk_validH`): a valid reading of the result is valid
-  under the leaf's premise (each extra word set to its string's hash, the
-  link true by the premise);
+  under the leaf's premise: each extra word is its string's hash where the
+  premise reads that hash and a word that keeps the link elsewhere
+  (`linkChoice`; `XRelQ`, `Fml.xk_holdsQ`: the body reads the extra word
+  only where the premise reads the hash);
 * **refuted** (`Fml.tk_refutes`): the instance at classes of strings, with
   the extra words fixed to the second kind's hashes of the family's strings
-  (`Fix`), refuted, refutes the leaf in the state with the family's strings;
-* **complete** (`Fml.tk_complete`): where the reading is not valid, an
-  instance at some classes is not: the first kind's words relabeled by the
-  one-kind completeness (`Fml.swPrefix_complete`), the second kind's
-  by a relabeling of their own (`RelRL`, over the words of the second kind
-  and the roots they key).
+  (`fixE`, `famPairE`, a family of `N` strings checked for every kind,
+  `famOKAll`), refuted, refutes the leaf in the state with the family's
+  strings;
+* **complete** (`Fml.tk_complete`): on the fragment (the result's swap in
+  `Fml.rl` over the strings' levels and the roots their words key, those
+  roots `mapping(uint => uint)` (`KTyped`), the prefix's string levels the
+  words' (`Fml.prefixOK`), the second kind's words in `Fml.rl` of their
+  own levels and roots (`Fml.tkRL`), at most `N` strings, the family of `N`
+  checked), where the reading is not valid, an instance at some classes
+  is not: the first kind's words relabeled by the one-kind completeness
+  (`Fml.swPrefix_complete`), the second kind's by a relabeling of their
+  own (`RelRL`, over the words of the second kind and the roots they key).
 -/
 
 namespace Solidity.Decide

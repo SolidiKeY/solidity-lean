@@ -17,27 +17,37 @@ decided by the quantified pipeline.
   fails, a state where the body fails: each mapping read at a block
   variable is rebuilt (`MRoot.surgery`) so that its key `i` holds what key
   `⌊i⌋` held, `⌊i⌋` the largest value of the index set at most `i`
-  (`floorIn`).  Reads at the index set keep their values, so everything
-  outside the blocks reads as before (`ApfTm.eval_rel`); a guard true at `i`
-  is true at `⌊i⌋` (`GuardP.mono`: guards compare a variable with a ground
-  term, or two variables by `≤`, `≥`, `==`, never `<`), so each block
-  holds by its instance at `⌊i⌋`.
+  (`floorIn`), or its largest value where `i` lies past the second largest
+  and the largest bounds no strict guard (`lastIn`).  Reads at the index
+  set keep their values, so everything outside the blocks reads as before
+  (`ApfTm.eval_rel`); a guard true at `i` is true at `⌊i⌋` (`GuardP.mono`:
+  guards compare a variable with a ground term, or two variables by `≤`,
+  `≥`, `==`, never `<`), so each block holds by its instance at `⌊i⌋`.
 
 The fragment (`apfPrep`): roots whose type is mappings down to a
 `mapping(uint => p)` (`MShape`: `m[k]`, `m[o][k]`, `m[a][o][k]` with outer
 keys of any type), read at a block variable or at a ground key as the
-last key, the outer keys any terms that read alike (`ApfTm.rkey`); the
-rebuilt root holds, under every outer key, the floor construction of its
-last mapping (`MShape.rebuild`), so the outer keys need not be in the index
-set.  Block variables of type `uint`, compared in guards (atoms in negative
+last key; the outer keys are terms of the fragment (`ApfTm.rkey`) at a key
+type (`bool`, `uint`, `int`), which may mention the leaf's binders but no
+block variable (`ApfTm.Rel`); the rebuilt root holds, under every outer
+key, the floor construction of its last mapping (`MShape.rebuild`), so the
+outer keys need not be in the index set.  Block variables of type `uint`, compared in guards (atoms in negative
 positions of the block body) and read only as last keys; every other read
 of such a root outside the fragment.  A bound outer key (`m[i][3]`) and
 nested mappings `m[i][j]` with two bound indices are outside (the second a
 decision recorded in `docs/automation.md`, M7).
 
-The rebuilt mapping lists one entry per key below the index set's
-largest value (keys above read its default): a refutation is as long as
-that value, which bounds the cost of constructing it, not its existence.
+The rebuilt mapping lists one entry per key below `lastBound`: the index
+set's second largest value plus one where its largest value bounds no
+strict guard (the keys past it read the largest value's word, the
+mapping's default), the largest value otherwise.  So a refutation whose
+solver places one key far (`x > 2^200`) lists a dozen entries; one whose
+two largest values are both far still lists about the second.  No
+construction is polynomial in the index set in general: a mapping lists
+its entries one key at a time with a single default, and a sorted mapping
+(`∀ i j. i <= j → m[i] <= m[j]`) read at three far keys `a < b < c` with
+increasing words has, in every state that refutes such a leaf, the keys
+between `a` and `b` listed or those past `c`.
 -/
 
 namespace Solidity.Decide
@@ -1980,9 +1990,12 @@ def apfPrep (B : LFml C) : Prep B :=
       else Prep.id B
   else Prep.id B
 
-/-- **Array property instantiation is exact** (Bradley, Manna, Sipma, for
-the shapes `apfPrep` admits): the instantiated body is valid exactly where
-the body is; outside the fragment the body is kept. -/
+/-- **The prepared body is valid exactly where the body is**: this is
+`Prep.valid_iff`, which every preparation has (`Prep.id` too).  What the
+fragment adds is that `apfPrep` instantiates where its checks pass, the
+instantiation sound (`LFml.apfInst_sound`) and exact
+(`ApfFml.apfInst_refute`, Bradley, Manna, Sipma) there; outside the
+fragment the body is kept. -/
 theorem apfPrep_valid_iff (B : LFml C) : (apfPrep B).body.Valid ↔ B.Valid := (apfPrep B).valid_iff
 
 /-- info: 'Solidity.Decide.apfPrep_valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
