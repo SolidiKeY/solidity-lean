@@ -109,6 +109,119 @@ theorem namesSet_answers : decideGoal namesSet ≠ .unknown := decideGoal_comple
 
 theorem namesEqBad_covered : namesEqBad.hashCovered = true := by decide +kernel
 
+/-! #### A hash past an update
+
+The usual shape past symbolic execution: the hypotheses at the top, the
+conclusion past an update.  The premise reads a hash in an update's
+continuation where the update lands (`Fml.HashIn`), so the second kind's
+words may be read there; the first kind's hash of each string is read at
+the top (`Fml.tkBody`). -/
+
+/-- `{ storage := save(storage, ids[0], 1) } φ`: `ids[0] = 1;`. -/
+def set0 {Γ : Ctx} (φ : Fml Names Γ) : Fml Names Γ :=
+  .upd .box (.snoc .nil (.storage (.app3 .save (.app0 .storage) (idsAt (num 0)) (.app1 .sval (num 1))))) φ
+
+/-- **`sha256(s) == sha256(t) → [ ids[0] = 1; ] keccak256(s) == keccak256(t)`**:
+proved; without the hypothesis, refuted. -/
+def namesLanded : Fml Names [] := strings (.imp (.eq shaS shaT) (set0 (.eq hS hT)))
+def namesLandedBad : Fml Names [] := strings (set0 (.eq hS hT))
+
+/-- A value local set in the leaf (`{ x := 1 }`): `∀ x s t. sha256(s) ==
+sha256(t) → { x := 1 } (keccak256(s) == keccak256(t) ∧ x == 1)`, proved;
+its false variant (`x == 2`) refuted. -/
+abbrev Γx : Ctx := [.mem Str, .mem Str, .val .uint]
+def xL : Tm Names Γx (.val .uint) := .pvV (.there (.there .here))
+def sha2 (i : Idx Γx (.mem Str)) : Tm Names Γx (.val .uint) := .app2 (.hash .sha256) (.app0 .memory) (.pvI i)
+def kec2 (i : Idx Γx (.mem Str)) : Tm Names Γx (.val .uint) := .app2 (.hash .keccak) (.app0 .memory) (.pvI i)
+def setX (n : Nat) (φ : Fml Names Γx) : Fml Names Γx :=
+  .upd .box (.snoc .nil (.local (.there (.there .here)) (.val (num n)))) φ
+def withX (φ : Fml Names Γx) : Fml Names [] :=
+  .all (.user "x") .uint (.allocAll (.user "s") Str (.allocAll (.user "t") Str φ))
+def namesSetLocal : Fml Names [] :=
+  withX (.imp (.eq (sha2 (.there .here)) (sha2 .here))
+    (setX 1 (.and (.eq (kec2 (.there .here)) (kec2 .here)) (.eq xL (num 1)))))
+def namesSetLocalBad : Fml Names [] :=
+  withX (.imp (.eq (sha2 (.there .here)) (sha2 .here))
+    (setX 1 (.and (.eq (kec2 (.there .here)) (kec2 .here)) (.eq xL (num 2)))))
+
+/-- info: ["proved", "refuted", "proved", "refuted"] -/
+#guard_msgs in #eval [namesLanded, namesLandedBad, namesSetLocal, namesSetLocalBad].map verdict
+
+/-- info: [true, true, true, true] -/
+#guard_msgs in
+#eval [namesLanded, namesLandedBad, namesSetLocal, namesSetLocalBad].map
+  (fun φ => φ.hashCovered && φ.inTarget {})
+
+/-- A hash past an update, by the kernel. -/
+theorem namesLanded_covered : namesLanded.hashCovered = true := by decide +kernel
+
+/-- `decideGoal_complete_hash`, applied past an update. -/
+theorem namesLanded_answers : decideGoal namesLanded ≠ .unknown :=
+  decideGoal_complete_hash namesLanded_covered
+
+/-! #### More strings than `famBound`
+
+A refutation picks one string of the family per class of equal strings,
+so a leaf of `n` strings needs `n` strings with distinct hashes.  Up to
+`famBound` the family is the kernel's theorem (`famOKAll_bound`); past it,
+`famCheck` computes the family's `3n` hashes (`famN`, `famOKAll`), and a
+coverage check asks for the same (`famCovered`). -/
+
+abbrev Γ5 : Ctx := [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str]
+def h5 (i : Idx Γ5 (.mem Str)) : Tm Names Γ5 (.val .uint) := .app2 (.hash .keccak) (.app0 .memory) (.pvI i)
+def s0 : Idx Γ5 (.mem Str) := .here
+def s1 : Idx Γ5 (.mem Str) := .there .here
+def s2 : Idx Γ5 (.mem Str) := .there (.there .here)
+def s3 : Idx Γ5 (.mem Str) := .there (.there (.there .here))
+def s4 : Idx Γ5 (.mem Str) := .there (.there (.there (.there .here)))
+def strings5 (φ : Fml Names Γ5) : Fml Names [] :=
+  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str
+    (.allocAll (.user "d") Str (.allocAll (.user "e") Str φ))))
+/-- **Two of five strings read alike**: refuted only by five classes, five
+strings with distinct bytes (`gapFiveStrings` until 2026-10-25). -/
+def fiveStrings : Fml Names [] :=
+  strings5 (Fml.orL [.eq (h5 s0) (h5 s1), .eq (h5 s0) (h5 s2), .eq (h5 s0) (h5 s3), .eq (h5 s0) (h5 s4),
+    .eq (h5 s1) (h5 s2), .eq (h5 s1) (h5 s3), .eq (h5 s1) (h5 s4), .eq (h5 s2) (h5 s3), .eq (h5 s2) (h5 s4),
+    .eq (h5 s3) (h5 s4)])
+/-- A chain of equal hashes: proved. -/
+def fiveChain : Fml Names [] :=
+  strings5 (.imp (.eq (h5 s0) (h5 s1)) (.imp (.eq (h5 s1) (h5 s2)) (.imp (.eq (h5 s2) (h5 s3))
+    (.imp (.eq (h5 s3) (h5 s4)) (.eq (h5 s0) (h5 s4))))))
+
+/-- info: ["refuted", "proved"] -/
+#guard_msgs in #eval [fiveStrings, fiveChain].map verdict
+
+/-- info: [true, true] -/
+#guard_msgs in #eval [fiveStrings, fiveChain].map (fun φ => φ.hashCovered && φ.inTarget {})
+
+/-- Five strings, by the kernel: the family of five checked (`famOKAll 5`,
+fifteen hashes) and the 52 instances covered. -/
+theorem fiveChain_covered : fiveChain.hashCovered = true := by decide +kernel
+
+/-! #### A value quantifier in the body
+
+The swap reads a value binder in the body as one (`Fml.sw`).  The premise
+is read at each of its instances (`Fml.holdsS`), which only weakens a
+positive binder, so a positive one is proved by the swapped leaf
+(`Fml.posAll`, `Fml.holdsS_of_sw`). -/
+
+/-- **`keccak256(s) == keccak256(t) → ∀ x. x == 0 → keccak256(s) ==
+keccak256(t)`** (`gapHashUnderForall` until 2026-10-25): proved; without
+the hypothesis, refuted. -/
+def namesUnderForall : Fml Names [] := strings (.imp (.eq hS hT) (.all (.user "x") .uint
+  (.imp (.eq (Tm.pvV .here) (num 0)) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT)))))
+def namesUnderForallBad : Fml Names [] := strings (.all (.user "x") .uint
+  (.imp (.eq (Tm.pvV .here) (num 0)) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT))))
+
+/-- info: ["proved", "refuted"] -/
+#guard_msgs in #eval [namesUnderForall, namesUnderForallBad].map verdict
+
+/-- info: [true, true] -/
+#guard_msgs in #eval [namesUnderForall, namesUnderForallBad].map (fun φ => φ.hashCovered && φ.inTarget {})
+
+/-- A value quantifier in the body, by the kernel. -/
+theorem namesUnderForall_covered : namesUnderForall.hashCovered = true := by decide +kernel
+
 /-- The strings as hidden binders (`Fml.bind`), which range over an unset
 reference too: its hash reads nothing and a key of nothing reads the
 default key `0`, so the verdict turns on whether a string hashes to `0`, a

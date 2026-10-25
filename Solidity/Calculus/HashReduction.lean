@@ -14,7 +14,11 @@ two.  A state that refutes it refutes the leaf: the strings allocated with
 those bytes hash to exactly those words (`State.alloc_hashId_self`), and a
 heap of the family's strings alone meets every premise of the leaf
 (`Fml.hashFree_fam`), the family's hashes being distinct and nonzero
-(`famOK`, checked in the kernel for four classes of each kind, `famOK_bound`).
+(`famOK`).  The family has `famN n` strings for a leaf of `n`: `famBound`
+(four) by the kernel's theorem (`famOK_bound`, `famOKAll_bound`), and past
+it the family's `3n` hashes computed (`famCheck`; a coverage check asks the
+same, `famCovered`).  In such a heap the premise is read nowhere
+(`Fml.holdsS_fam`).
 -/
 
 namespace Solidity.Decide
@@ -54,7 +58,8 @@ theorem famOK_inj {k : HashKind} {n : Nat} (h : famOK k n = true) {i j : Nat} (h
   · exact h'
   · exact absurd (congrArg Subtype.val e) h'
 
-/-- The most classes of strings a leaf's refutation is built for. -/
+/-- The family's size checked once, in the kernel: a leaf with at most this
+many strings is refuted at it. -/
 def famBound : Nat := 4
 
 theorem famOK_keccak : famOK .keccak famBound = true := by decide +kernel
@@ -68,6 +73,50 @@ theorem famOK_bound (k : HashKind) (hk : k ≠ .ecrecover) : famOK k famBound = 
   | sha256 => exact famOK_sha256
   | ripemd160 => exact famOK_ripemd160
   | ecrecover => exact absurd rfl hk
+
+/-- **The family for a leaf of `n` strings**: `famBound` strings, or `n`
+past it (`n` classes at most). -/
+def famN (n : Nat) : Nat := max famBound n
+
+theorem le_famN (n : Nat) : n ≤ famN n := Nat.le_max_right _ _
+
+/-- The family checked for every kind the premise reads. -/
+def famOKAll (N : Nat) : Bool := famOK .keccak N && famOK .sha256 N && famOK .ripemd160 N
+
+theorem famOKAll_ok {N : Nat} (h : famOKAll N = true) {k : HashKind} (hk : k ≠ .ecrecover) :
+    famOK k N = true := by
+  simp only [famOKAll, Bool.and_eq_true] at h
+  cases k with
+  | keccak => exact h.1.1
+  | sha256 => exact h.1.2
+  | ripemd160 => exact h.2
+  | ecrecover => exact absurd rfl hk
+
+theorem famOKAll_bound : famOKAll famBound = true := by
+  simp only [famOKAll, famOK_keccak, famOK_sha256, famOK_ripemd160, Bool.and_self]
+
+/-- **The family checked for a leaf of `n` strings**: by the kernel's
+theorem up to `famBound`, computed past it (`3n` hashes of one word). -/
+def famCheck (n : Nat) : Decidable (famOKAll (famN n) = true) :=
+  if h : n ≤ famBound then isTrue (by rw [famN, Nat.max_eq_left h]; exact famOKAll_bound)
+  else inferInstance
+
+/-- What a coverage check asks of the family: nothing up to `famBound`, the
+computed check past it. -/
+def famCovered (n : Nat) : Bool := decide (n ≤ famBound) || famOKAll n
+
+theorem famOKAll_famN {n : Nat} (h : famCovered n = true) : famOKAll (famN n) = true := by
+  simp only [famCovered, Bool.or_eq_true, decide_eq_true_eq] at h
+  rcases h with h | h
+  · rw [famN, Nat.max_eq_left h]; exact famOKAll_bound
+  · by_cases h' : n ≤ famBound
+    · rw [famN, Nat.max_eq_left h']; exact famOKAll_bound
+    · rw [famN, Nat.max_eq_right (Nat.le_of_lt (Nat.lt_of_not_le h'))]; exact h
+
+theorem famCheck_isTrue {n : Nat} (h : famOKAll (famN n) = true) : ∃ hok, famCheck n = isTrue hok := by
+  cases hc : famCheck n with
+  | isTrue hok => exact ⟨hok, rfl⟩
+  | isFalse hn => exact absurd h hn
 
 
 /-! ## A heap of the family's strings meets every premise -/
@@ -302,7 +351,8 @@ theorem _root_.Solidity.Fml.sw_hashIn {k k' : HashKind} {Γ : Ctx} (φ : Fml C �
         | _ => cases hU
       | _ => cases hU
     · cases e
-  | modal | havoc | all | bind | anon | allocAll | grow => intro _ e; cases e
+  | all => intro _ _ _ _ _ h; exact h.elim
+  | modal | havoc | bind | anon | allocAll | grow => intro _ e; cases e
 
 /-- **A heap of the family's strings meets the premise** of a formula
 `Fml.sw` takes. -/
@@ -320,6 +370,82 @@ theorem _root_.Solidity.Fml.hashFree_fam {k : HashKind} {Γ : Ctx} {φ : Fml C �
   · exact absurd (congrArg Subtype.val ((hh₂.symm.trans ho₂.symm).trans (ho₁.trans hh₁))).symm
       (famOK_ne hok hj₁)
   · rw [hi₁, hi₂, famOK_inj hok hj₁ hj₂ ((hh₁.symm.trans ho₁.symm).trans (ho₂.trans hh₂))]
+
+/-- A one-element update `Fml.sw` takes keeps the heap. -/
+theorem famHeap_landed_sw1 {k : HashKind} {N : Nat} {Γ Δ : Ctx} (U : Upd C Γ Δ)
+    {U' : Upd C (Ctx.sw Γ) (Ctx.sw Δ)} (hU : U.sw1? k = some U') (τ : State C Γ)
+    (hF : FamHeap N τ.glob) {g : GlobT C τ.H} {σ' : State C Δ} (hL : U.Lands τ g σ') :
+    FamHeap N σ'.glob := by
+  cases U with
+  | snoc U₀ e₀ =>
+    cases U₀ with
+    | nil =>
+      cases e₀ with
+      | storage s =>
+        have hg' : (s.eval τ).bind (fun st => some (τ.globG.withStorage st)) = some g := hL.1
+        obtain ⟨st, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+        have hσ : σ'.glob = { τ.glob with storage := st } := hL.2.1
+        rw [hσ]
+        exact fun {_} r => hF r
+      | «local» i r =>
+        have hg' : (r.eval τ).bind (fun _ => some τ.globG) = some g := hL.1
+        obtain ⟨_, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+        have hσ : σ'.glob = τ.glob := hL.2.1
+        rw [hσ]
+        exact fun {_} r => hF r
+      | _ => cases hU
+    | _ => cases hU
+  | decl U₀ x r =>
+    cases U₀ with
+    | nil =>
+      have hg' : (r.eval τ).bind (fun _ => some τ.globG) = some g := hL.1
+      obtain ⟨_, -, ⟨⟩⟩ := Option.bind_eq_some_iff.1 hg'
+      have hσ : σ'.glob = τ.glob := hL.2.1
+      rw [hσ]
+      exact fun {_} r => hF r
+    | _ => cases hU
+  | _ => cases hU
+
+/-- **In a heap of the family the premise is read nowhere**: on a formula
+`Fml.sw` takes, every scope's premise holds (`Fml.hashFree_fam`), so
+`Fml.holdsS` is `holds`. -/
+theorem _root_.Solidity.Fml.holdsS_fam {k : HashKind} {N : Nat} (hok : famOK k N = true) {Γ : Ctx}
+    (φ : Fml C Γ) : ∀ {φ' : Fml C (Ctx.sw Γ)}, φ.sw k = some φ' → ∀ τ : State C Γ,
+      FamHeap N τ.glob → (Fml.holdsS τ φ ↔ holds τ φ) := by
+  induction φ with
+  | tt | eq | wellFormed => intro _ _ _ _; exact Iff.rfl
+  | not φ ih =>
+    intro _ e τ hF
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact not_congr (ih hφ τ hF)
+  | and φ ψ ihφ ihψ =>
+    intro _ e τ hF
+    obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
+    obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact and_congr (ihφ hφ τ hF) (ihψ hψ τ hF)
+  | imp φ ψ ihφ ihψ =>
+    intro _ e τ hF
+    obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
+    obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact imp_congr (ihφ hφ τ hF) (ihψ hψ τ hF)
+  | upd m U φ ih =>
+    intro _ e τ hF
+    obtain ⟨U', hU, e⟩ := Option.bind_eq_some_iff.1 e
+    split at e
+    · obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+      show U.afterT m τ (Fml.holdsS · φ) ↔ U.afterT m τ (holds · φ)
+      unfold Upd.afterT
+      split
+      · exact Iff.rfl
+      · exact forall_congr' fun σ' => forall_congr' fun hL =>
+          ih hφ σ' (famHeap_landed_sw1 U hU τ hF hL)
+    · cases e
+  | all x p φ ih =>
+    intro _ e τ hF
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact forall_congr' fun v => ⟨fun h => (ih hφ _ hF).1 (h (Fml.hashFree_fam hφ _ hF hok)),
+      fun h _ => (ih hφ _ hF).2 h⟩
+  | modal | havoc | bind | anon | allocAll | grow => intro _ e; cases e
 
 /-! ## The leaf with its strings chosen -/
 
@@ -387,8 +513,8 @@ theorem _root_.Solidity.Fml.swInst_holds {k : HashKind} {N : Nat} (hok : famOK k
           (hs o (Fml.hashFree_inst hφ _ hF' hok))
       · cases e
   | tt | eq | wellFormed | not | and | imp | upd =>
-    intro cs _ e _ τ τ' h _ hs
-    exact (Fml.sw_holds _ e τ τ' h).2 ((Fml.holdsS_of_sw _ e τ).1 hs)
+    intro cs _ e _ τ τ' h hF hs
+    exact (Fml.sw_holds _ e τ τ' h).2 ((Fml.holdsS_fam hok _ e τ hF).1 hs)
   | modal | havoc | bind | anon | grow => intro _ _ e; cases e
 
 /-- The state with no memory. -/

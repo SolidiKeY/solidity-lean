@@ -506,10 +506,11 @@ theorem _root_.Solidity.Fml.swInstV_length (k : HashKind) {Γ : Ctx} (φ : Fml C
 
 /-- **Completeness of the refutations**: where the swapped leaf is not
 valid, an instance of the leaf at some classes of its strings is not. -/
-theorem _root_.Solidity.Fml.swPrefix_complete {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C []}
+theorem _root_.Solidity.Fml.swPrefix_complete {k : HashKind} {N : Nat} (hok : famOK k N = true)
+    {φ : Fml C []}
     {φ' : Fml C []} (e : φ.swPrefix k = some φ') {V : List Nat} {K : List Name}
     (hK : KTyped C K) (hrl : φ.swRL k V K = true) (hpre : φ.prefixOK V = true)
-    (hn : φ.allocCount ≤ famBound) (hnv : ¬ Fml.Valid φ') :
+    (hn : φ.allocCount ≤ N) (hnv : ¬ Fml.Valid φ') :
     ∃ cs ∈ rgs φ.allocCount, ∃ φf, φ.swInst k cs = some φf ∧ ¬ Fml.Valid φf := by
   have : ∃ σ', ¬ holds σ' φ' := Classical.byContradiction fun hc =>
     hnv fun σ => Classical.byContradiction fun hσ => hc ⟨σ, hσ⟩
@@ -519,12 +520,11 @@ theorem _root_.Solidity.Fml.swPrefix_complete {k : HashKind} (hk : k ≠ .ecreco
   let F := repsAux [] vs
   have hcs : cs ∈ rgs φ.allocCount := hl ▸ classesOf_mem vs
   have hz := classesAux_zip vs []
-  have hFlen : F.length ≤ famBound := by
+  have hFlen : F.length ≤ N := by
     have := repsAux_length vs []
     simp only [List.length_nil, Nat.zero_add] at this
-    show (repsAux [] vs).length ≤ famBound
+    show (repsAux [] vs).length ≤ N
     omega
-  have hok := famOK_bound k hk
   -- `ρ` sends the hash of a class's number to the class's first word
   let ρ : HWord → HWord := fun x => (F.find? fun w => famHash k (posOf w F) == x).getD x
   have hρ : ∀ v ∈ F, ρ (famHash k (posOf v F)) = v := by
@@ -588,19 +588,20 @@ theorem _root_.Solidity.Fml.swPrefix_complete {k : HashKind} (hk : k ≠ .ecreco
 /-- **The reduction is exact under the premise**: on the fragment, the leaf
 is valid under its own hash premise exactly where its swapped reading is
 valid. -/
-theorem _root_.Solidity.Fml.swPrefix_exact {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C []}
+theorem _root_.Solidity.Fml.swPrefix_exact {k : HashKind} {N : Nat} (hok : famOK k N = true)
+    {φ : Fml C []}
     {φ' : Fml C []} (e : φ.swPrefix k = some φ') {V : List Nat} {K : List Name}
     (hK : KTyped C K) (hrl : φ.swRL k V K = true) (hpre : φ.prefixOK V = true)
-    (hn : φ.allocCount ≤ famBound) : Fml.ValidH φ ↔ Fml.Valid φ' := by
-  refine ⟨fun hv => Classical.byContradiction fun hnv => ?_, Fml.swPrefix_validH e⟩
-  obtain ⟨cs, hcs, φf, hf, hnf⟩ := Fml.swPrefix_complete hk e hK hrl hpre hn hnv
+    (hn : φ.allocCount ≤ N) (hp : φ.posAll = true) : Fml.ValidH φ ↔ Fml.Valid φ' := by
+  refine ⟨fun hv => Classical.byContradiction fun hnv => ?_, Fml.swPrefix_validH e hp⟩
+  obtain ⟨cs, hcs, φf, hf, hnf⟩ := Fml.swPrefix_complete hok e hK hrl hpre hn hnv
   have : ∃ σ, ¬ holds σ φf := Classical.byContradiction fun hc =>
     hnf fun σ => Classical.byContradiction fun hσ => hc ⟨σ, hσ⟩
   obtain ⟨σ, hσ⟩ := this
-  have hb : ∀ j ∈ cs, j < famBound := fun j hj => by
+  have hb : ∀ j ∈ cs, j < N := fun j hj => by
     have := rgsFrom_bound φ.allocCount 0 cs hcs j hj
     omega
-  exact Fml.swInst_refutes (famOK_bound k hk) hf hb hσ (hv σ.noHeap)
+  exact Fml.swInst_refutes hok hf hb hσ (hv σ.noHeap)
 
 end Complete
 

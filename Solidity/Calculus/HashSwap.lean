@@ -9,8 +9,9 @@ A leaf `∀ fresh s t. ψ` whose memory locals are byte strings
 (`hash(memory, s)`, not `ecrecover`) is read with each such local replaced
 by the word its hash returns: `Fml.swPrefix` replaces the binder by
 `∀ uint` and each hash node by the local (`Tm.sw`, `Fml.sw`), on a body of
-equations, the connectives and one-element updates (a storage write, a
-value local declared or set).  The rest of the leaf reads no memory.
+equations, the connectives, one-element updates (a storage write, a value
+local declared or set) and value binders.  The rest of the leaf reads no
+memory.
 
 `SwRel` relates a state of the leaf to one of its swapped reading: one
 storage, ledger, balance and transaction, the heaps free (the swapped
@@ -19,9 +20,12 @@ is its object's hash.  Over it every term reads alike (`Tm.sw_eval`,
 `Tm.sw_denote`) and so does every formula (`Fml.sw_holds`).
 
 Here the leaf's hashes are free variables: a valid swapped reading makes
-the leaf valid, whatever the hash function (`Fml.swPrefix_validH`).  The
-converse, a refutation that meets the goal's own hash premise, is in
-`Calculus/HashReduction.lean`.
+the leaf valid, whatever the hash function (`Fml.swPrefix_validH`), where
+the body's value binders are positive (`Fml.posAll`): the premise is read
+at each binder's instance, which weakens a positive binder
+(`Fml.holdsS_of_sw`) and would make a negative one's hypothesis vacuous
+where its hashes collide.  The converse, a refutation that meets the
+goal's own hash premise, is in `Calculus/HashReduction.lean`.
 -/
 
 namespace Solidity.Decide
@@ -512,9 +516,9 @@ def _root_.Solidity.Upd.sw1? (k : HashKind) {Γ : Ctx} :
   | _, .decl .nil x r => (r.sw k).map (.decl .nil x)
   | _, _ => none
 
-/-- **A formula, swapped**: equations, `wt`, the connectives and one-element
-updates with no push, its terms swapped (`Tm.sw`); `none` on any binder or
-program. -/
+/-- **A formula, swapped**: equations, `wt`, the connectives, one-element
+updates with no push and value binders, its terms swapped (`Tm.sw`);
+`none` on any other binder or program. -/
 def _root_.Solidity.Fml.sw (k : HashKind) : {Γ : Ctx} → Fml C Γ → Option (Fml C (Ctx.sw Γ))
   | _, .tt => some .tt
   | _, .eq a b => (a.sw k).bind fun a' => (b.sw k).map fun b' => .eq a' b'
@@ -524,6 +528,7 @@ def _root_.Solidity.Fml.sw (k : HashKind) : {Γ : Ctx} → Fml C Γ → Option (
   | _, .imp φ ψ => (Fml.sw k φ).bind fun φ' => (Fml.sw k ψ).map fun ψ' => .imp φ' ψ'
   | _, .upd m U φ => (U.sw1? k).bind fun U' =>
       if U.pushFree && U'.pushFree then (Fml.sw k φ).map (.upd m U') else none
+  | _, .all x p φ => (Fml.sw k φ).map (.all x p)
   | _, _ => none
 
 /-- **A swapped formula holds as the formula.** -/
@@ -612,7 +617,11 @@ theorem _root_.Solidity.Fml.sw_holds {k : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
         | _ => cases hU
       | _ => cases hU
     · cases e
-  | modal | havoc | all | bind | anon | allocAll | grow => intro _ e; cases e
+  | all x p φ ih =>
+    intro _ e τ τ' h
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    exact forall_congr' fun v => ih hφ _ _ (h.push v)
+  | modal | havoc | bind | anon | allocAll | grow => intro _ e; cases e
 
 /-! ## Fresh objects and their hashes -/
 
@@ -711,61 +720,113 @@ def _root_.Solidity.Fml.swPrefix (k : HashKind) : {Γ : Ctx} → Fml C Γ → Op
   | _, .upd m U φ => Fml.sw k (.upd m U φ)
   | _, .modal .. | _, .havoc _ | _, .bind .. | _, .anon .. | _, .grow _ => none
 
-/-- On a formula `Fml.sw` takes the premise is read nowhere: it has no binder. -/
+/-- **Value binders in positive positions only** (`pol`: the formula's own
+polarity).  The premise is read at each binder's instance
+(`Fml.holdsS`): at a positive binder that only weakens the formula, at a
+negative one it would make the hypothesis vacuous where the binder's
+hashes collide. -/
+def _root_.Solidity.Fml.allPos : {Γ : Ctx} → Bool → Fml C Γ → Bool
+  | _, _, .tt | _, _, .eq .. | _, _, .wellFormed _ => true
+  | _, pol, .not φ => Fml.allPos (!pol) φ
+  | _, pol, .and φ ψ => Fml.allPos pol φ && Fml.allPos pol ψ
+  | _, pol, .imp φ ψ => Fml.allPos (!pol) φ && Fml.allPos pol ψ
+  | _, pol, .upd _ _ φ => Fml.allPos pol φ
+  | _, pol, .all _ _ φ => pol && Fml.allPos pol φ
+  | _, _, .modal .. | _, _, .havoc _ | _, _, .bind .. | _, _, .anon .. | _, _, .allocAll ..
+  | _, _, .grow _ => true
+
+/-- A leaf whose body's value binders are all positive (`Fml.allPos`), past
+its prefix of `∀` and fresh strings. -/
+def _root_.Solidity.Fml.posAll : {Γ : Ctx} → Fml C Γ → Bool
+  | _, .all _ _ φ => Fml.posAll φ
+  | _, .allocAll _ _ φ => Fml.posAll φ
+  | _, .tt => true
+  | _, .eq .. => true
+  | _, .wellFormed _ => true
+  | _, .not φ => Fml.allPos false φ
+  | _, .and φ ψ => Fml.allPos true φ && Fml.allPos true ψ
+  | _, .imp φ ψ => Fml.allPos false φ && Fml.allPos true ψ
+  | _, .upd _ _ φ => Fml.allPos true φ
+  | _, .modal .. | _, .havoc _ | _, .bind .. | _, .anon .. | _, .grow _ => true
+
+/-- **The premise weakens a positive binder**: on a formula `Fml.sw` takes,
+`holds` gives `Fml.holdsS` at a positive polarity, and `Fml.holdsS` gives
+`holds` at a negative one. -/
 theorem _root_.Solidity.Fml.holdsS_of_sw {k : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
-    ∀ {φ' : Fml C (Ctx.sw Γ)}, φ.sw k = some φ' → ∀ τ : State C Γ, (Fml.holdsS τ φ ↔ holds τ φ) := by
+    ∀ {φ' : Fml C (Ctx.sw Γ)}, φ.sw k = some φ' → ∀ (pol : Bool), φ.allPos pol = true →
+      ∀ τ : State C Γ, (pol = true → holds τ φ → Fml.holdsS τ φ) ∧
+        (pol = false → Fml.holdsS τ φ → holds τ φ) := by
   induction φ with
-  | tt | eq | wellFormed => intro _ _ _; exact Iff.rfl
+  | tt | eq | wellFormed => intro _ _ _ _ _; exact ⟨fun _ h => h, fun _ h => h⟩
   | not φ ih =>
-    intro _ e τ
+    intro _ e pol hp τ
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact not_congr (ih hφ τ)
+    have := ih hφ (!pol) hp τ
+    cases pol
+    · exact ⟨fun h => (nomatch h), fun _ h h' => h ((this.1 rfl) h')⟩
+    · exact ⟨fun _ h h' => h ((this.2 rfl) h'), fun h => nomatch h⟩
   | and φ ψ ihφ ihψ =>
-    intro _ e τ
+    intro _ e pol hp τ
     obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact and_congr (ihφ hφ τ) (ihψ hψ τ)
+    simp only [Fml.allPos, Bool.and_eq_true] at hp
+    have a := ihφ hφ pol hp.1 τ
+    have b := ihψ hψ pol hp.2 τ
+    exact ⟨fun hp h => ⟨a.1 hp h.1, b.1 hp h.2⟩, fun hp h => ⟨a.2 hp h.1, b.2 hp h.2⟩⟩
   | imp φ ψ ihφ ihψ =>
-    intro _ e τ
+    intro _ e pol hp τ
     obtain ⟨φ', hφ, e⟩ := Option.bind_eq_some_iff.1 e
     obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact imp_congr (ihφ hφ τ) (ihψ hψ τ)
+    simp only [Fml.allPos, Bool.and_eq_true] at hp
+    have a := ihφ hφ (!pol) hp.1 τ
+    have b := ihψ hψ pol hp.2 τ
+    cases pol
+    · exact ⟨fun h => (nomatch h), fun _ h h' => b.2 rfl (h (a.1 rfl h'))⟩
+    · exact ⟨fun _ h h' => b.1 rfl (h (a.2 rfl h')), fun h => nomatch h⟩
   | upd m U φ ih =>
-    intro _ e τ
+    intro _ e pol hp τ
     obtain ⟨U', _, e⟩ := Option.bind_eq_some_iff.1 e
     split at e
     · obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-      exact ⟨fun h => Upd.afterT_imp h fun σ' => (ih hφ σ').1,
-        fun h => Upd.afterT_imp h fun σ' => (ih hφ σ').2⟩
+      exact ⟨fun hp' h => Upd.afterT_imp h fun σ' => (ih hφ pol hp σ').1 hp',
+        fun hp' h => Upd.afterT_imp h fun σ' => (ih hφ pol hp σ').2 hp'⟩
     · cases e
-  | modal | havoc | all | bind | anon | allocAll | grow => intro _ e; cases e
+  | all x p φ ih =>
+    intro _ e pol hp τ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+    simp only [Fml.allPos, Bool.and_eq_true] at hp
+    obtain ⟨rfl, hp⟩ := hp
+    exact ⟨fun _ h v _ => (ih hφ true hp _).1 rfl (h v), fun h => nomatch h⟩
+  | modal | havoc | bind | anon | allocAll | grow => intro _ e; cases e
 
 /-- **The swapped leaf's validity is the leaf's**, at related states: what
 the swapped reading says, the leaf says under its premise. -/
 theorem _root_.Solidity.Fml.swPrefix_sound {k : HashKind} {Γ : Ctx} (φ : Fml C Γ) :
-    ∀ {φ' : Fml C (Ctx.sw Γ)}, φ.swPrefix k = some φ' → ∀ (τ : State C Γ) (τ' : State C (Ctx.sw Γ)),
+    ∀ {φ' : Fml C (Ctx.sw Γ)}, φ.swPrefix k = some φ' → φ.posAll = true →
+      ∀ (τ : State C Γ) (τ' : State C (Ctx.sw Γ)),
       SwRel k τ τ' → holds τ' φ' → Fml.holdsS τ φ := by
   induction φ with
   | all x p φ ih =>
-    intro _ e τ τ' h hv
+    intro _ e hp τ τ' h hv
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
-    exact fun v _ => ih hφ _ _ (h.push v) (hv v)
+    exact fun v _ => ih hφ hp _ _ (h.push v) (hv v)
   | allocAll x R φ ih =>
-    intro _ e τ τ' h hv
+    intro _ e hp τ τ' h hv
     simp only [Fml.swPrefix] at e
     split at e
     · obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
       intro o _
-      exact ih hφ _ _ ((h.alloc o).pushMem _) (hv _)
+      exact ih hφ hp _ _ ((h.alloc o).pushMem _) (hv _)
     · cases e
   | tt | eq | wellFormed | not | and | imp | upd =>
-    intro _ e τ τ' h hv
-    exact (Fml.holdsS_of_sw _ e τ).2 ((Fml.sw_holds _ e τ τ' h).1 hv)
+    intro _ e hp τ τ' h hv
+    exact (Fml.holdsS_of_sw _ e true hp τ).1 rfl ((Fml.sw_holds _ e τ τ' h).1 hv)
   | modal | havoc | bind | anon | grow => intro _ e; cases e
 
-/-- **A valid swapped leaf is valid under the leaf's premise.** -/
+/-- **A valid swapped leaf is valid under the leaf's premise**, its body's
+value binders positive. -/
 theorem _root_.Solidity.Fml.swPrefix_validH {k : HashKind} {φ : Fml C []} {φ' : Fml C []}
-    (e : φ.swPrefix k = some φ') (hv : Fml.Valid φ') : Fml.ValidH φ :=
-  fun σ _ => Fml.swPrefix_sound φ e σ σ ⟨⟨rfl, rfl, rfl, rfl⟩, fun i => nomatch i⟩ (hv σ)
+    (e : φ.swPrefix k = some φ') (hp : φ.posAll = true) (hv : Fml.Valid φ') : Fml.ValidH φ :=
+  fun σ _ => Fml.swPrefix_sound φ e hp σ σ ⟨⟨rfl, rfl, rfl, rfl⟩, fun i => nomatch i⟩ (hv σ)
 
 end Solidity.Decide

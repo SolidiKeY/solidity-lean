@@ -205,6 +205,12 @@ def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → 
 def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
 def rowOut : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][12] == 0 }
 def rowVar : Fml Allow [] := dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[x][k] == 0) → allow[x][5] == 0 }
+/-- A key the solver places past `2^200`: refuted by a rebuilt mapping of a
+dozen entries, the keys between the guard's bound and the key read at the
+key (`lastIn`, `lastBound`), not `2^200` entries. -/
+def rowFar : Fml Allow [] :=
+  dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[3][k] == 0) →
+    x > 1606938044258990275541962092341162602522202993782792835301376 → allow[3][x] == 0 }
 /-- Outside the named fragment: two bound indices on one path, and a
 strict comparison of two bound variables. -/
 def gridApf : Fml Allow [] := dl!{ (∀ uint i; ∀ uint j; allow[i][j] == 0) → allow[1][2] == 0 }
@@ -378,6 +384,26 @@ theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 theorem rowApf_covered : rowApf.Covered = true := by decide +kernel
 theorem rowBad_covered : rowBad.Covered = true := by decide +kernel
 
+/-- The entries of `allow`'s rows in a state: the outer keys', each row's. -/
+def allowRows (σ : State Allow []) : List Nat :=
+  match σ.storage.get (f := "allow") (T := .ref (.mapping .uint (.ref (.mapping .uint (.prim .uint))))) rfl with
+  | .map m d => (m.toList.map fun e => match e.2 with | .map m' _ => m'.toList.length) ++
+      [match d with | .map m' _ => m'.toList.length]
+
+/-- info: ("refuted", true, true) -/
+#guard_msgs in #eval (verdict rowFar, rowFar.Covered, rowFar.inTarget {})
+
+/-! The refutation's `allow`: the row it reads (`3`) and the default row,
+twelve entries each (keys `0` to `11`: the guard's bound and its successor;
+past them the default, the far key's word), where the floor construction
+listed `2^200` keys. -/
+
+/-- info: some [12, 12] -/
+#guard_msgs in #eval match decideGoal rowFar with | .refuted σ => some (allowRows σ) | _ => none
+
+/-- The far key's leaf, by the kernel. -/
+theorem rowFar_covered : rowFar.Covered = true := by decide +kernel
+
 /-- `decideGoal_complete`, applied to a block over an inner mapping. -/
 theorem rowApf_answers : decideGoal rowApf ≠ .unknown := decideGoal_complete rowApf_covered rfl
 
@@ -513,26 +539,23 @@ def gapThreeKinds : Fml Names [] :=
 against. -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
-/-- Five strings, refuted only by five classes: past `famBound`. -/
-def gapFiveStrings : Fml Names [] :=
-  let h (i : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str)) :
-      Tm Names [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.val .uint) :=
-    .app2 (.hash .keccak) (.app0 .memory) (.pvI i)
-  let i0 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .here
-  let i1 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there .here
-  let i2 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) := .there (.there .here)
-  let i3 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
-    .there (.there (.there .here))
-  let i4 : Idx [.mem Str, .mem Str, .mem Str, .mem Str, .mem Str] (.mem Str) :=
-    .there (.there (.there (.there .here)))
-  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str
-    (.allocAll (.user "d") Str (.allocAll (.user "e") Str
-      (Fml.orL [.eq (h i0) (h i1), .eq (h i0) (h i2), .eq (h i0) (h i3), .eq (h i0) (h i4),
-        .eq (h i1) (h i2), .eq (h i1) (h i3), .eq (h i1) (h i4), .eq (h i2) (h i3), .eq (h i2) (h i4),
-        .eq (h i3) (h i4)])))))
-/-- A quantifier in the body, past a connective. -/
-def gapHashUnderForall : Fml Names [] := strings (.imp (.eq hS hT) (.all (.user "x") .uint
-  (.imp (.eq (Tm.pvV .here) (.app0 (.lit (uintOfNat 0)))) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT)))))
+/-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
+keccak256(t)`.  The verdict turns on the strings' bytes past the write,
+which no stage reads (memory, plan step 6). -/
+def gapWrittenMemory : Fml Names [] :=
+  strings (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory)
+    (.app2 (.mat .dyn) (.pvI (.there .here)) (num 0)) (.app1 .mval (num 1))))) (.eq hS hT))
+/-- A hash under a negative value quantifier whose nodes the top premise
+does not read: `∀ s t. (∀ x. keccak256(s) != keccak256(t)) → !(∀ y.
+keccak256(s) == keccak256(t))`.  Valid as `holds` reads it, and false
+under the premise exactly at two strings with different bytes and one
+hash, where both inner premises fail: the only refutation is a
+collision, which cannot be exhibited.  Not decidable without narrowing
+`Fml.inTarget` (`docs/automation.md`, M7). -/
+def gapHashNegForall : Fml Names [] :=
+  let hs : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hS
+  let ht : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hT
+  strings (.imp (.all (.user "x") .uint (.not (.eq hs ht))) (.not (.all (.user "y") .uint (.eq hs ht))))
 
 end GapHashes
 
@@ -558,8 +581,8 @@ theorem gapPow_inTarget : gapPow.inTarget {} = true := by decide +kernel
 theorem gapMulW_inTarget : gapMulW.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
-theorem gapFiveStrings_inTarget : gapFiveStrings.inTarget {} = true := by decide +kernel
-theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := by decide +kernel
+theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
+theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by decide +kernel
 
 /-- info: true -/
 #guard_msgs in
@@ -569,7 +592,7 @@ theorem gapHashUnderForall_inTarget : gapHashUnderForall.inTarget {} = true := b
 
 /-- info: ["unknown", "unknown", "unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapFiveStrings, verdict gapHashUnderForall]
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapWrittenMemory, verdict gapHashNegForall]
 
 /-! ### Storage arrays at symbolic indices (M7, plan step 6)
 

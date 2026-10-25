@@ -17,27 +17,37 @@ decided by the quantified pipeline.
   fails, a state where the body fails: each mapping read at a block
   variable is rebuilt (`MRoot.surgery`) so that its key `i` holds what key
   `⌊i⌋` held, `⌊i⌋` the largest value of the index set at most `i`
-  (`floorIn`).  Reads at the index set keep their values, so everything
-  outside the blocks reads as before (`ApfTm.eval_rel`); a guard true at `i`
-  is true at `⌊i⌋` (`GuardP.mono`: guards compare a variable with a ground
-  term, or two variables by `≤`, `≥`, `==`, never `<`), so each block
-  holds by its instance at `⌊i⌋`.
+  (`floorIn`), or its largest value where `i` lies past the second largest
+  and the largest bounds no strict guard (`lastIn`).  Reads at the index
+  set keep their values, so everything outside the blocks reads as before
+  (`ApfTm.eval_rel`); a guard true at `i` is true at `⌊i⌋` (`GuardP.mono`:
+  guards compare a variable with a ground term, or two variables by `≤`,
+  `≥`, `==`, never `<`), so each block holds by its instance at `⌊i⌋`.
 
 The fragment (`apfPrep`): roots whose type is mappings down to a
 `mapping(uint => p)` (`MShape`: `m[k]`, `m[o][k]`, `m[a][o][k]` with outer
 keys of any type), read at a block variable or at a ground key as the
-last key, the outer keys any terms that read alike (`ApfTm.rkey`); the
-rebuilt root holds, under every outer key, the floor construction of its
-last mapping (`MShape.rebuild`), so the outer keys need not be in the index
-set.  Block variables of type `uint`, compared in guards (atoms in negative
+last key; the outer keys are terms of the fragment (`ApfTm.rkey`) at a key
+type (`bool`, `uint`, `int`), which may mention the leaf's binders but no
+block variable (`ApfTm.Rel`); the rebuilt root holds, under every outer
+key, the floor construction of its last mapping (`MShape.rebuild`), so the
+outer keys need not be in the index set.  Block variables of type `uint`, compared in guards (atoms in negative
 positions of the block body) and read only as last keys; every other read
 of such a root outside the fragment.  A bound outer key (`m[i][3]`) and
 nested mappings `m[i][j]` with two bound indices are outside (the second a
 decision recorded in `docs/automation.md`, M7).
 
-The rebuilt mapping lists one entry per key below the index set's
-largest value (keys above read its default): a refutation is as long as
-that value, which bounds the cost of constructing it, not its existence.
+The rebuilt mapping lists one entry per key below `lastBound`: the index
+set's second largest value plus one where its largest value bounds no
+strict guard (the keys past it read the largest value's word, the
+mapping's default), the largest value otherwise.  So a refutation whose
+solver places one key far (`x > 2^200`) lists a dozen entries; one whose
+two largest values are both far still lists about the second.  No
+construction is polynomial in the index set in general: a mapping lists
+its entries one key at a time with a single default, and a sorted mapping
+(`∀ i j. i <= j → m[i] <= m[j]`) read at three far keys `a < b < c` with
+increasing words has, in every state that refutes such a leaf, the keys
+between `a` and `b` listed or those past `c`.
 -/
 
 namespace Solidity.Decide
@@ -326,6 +336,187 @@ theorem floorU_top (S : List Int) (hS : ∀ s ∈ S, s < ((2 ^ 256 : Nat) : Int)
   rw [floorIn_top S (x := k.1) (fun s hs => by have := hmax s hs; unfold floorTop at hk; omega),
     floorIn_top S (x := uintMax.1) (fun s hs => by have := hS s hs; rw [uintMax_val]; omega)]
 
+/-! ## The floor, its last interval read at the top
+
+A refutation lists the rebuilt mapping's entries one key at a time, so
+the floor construction's last interval below the index set's largest
+value (`apfSecond`, `apfTop`) would cost that value in entries.  Where the
+largest value bounds no strict guard from above (`ApfSet.strict`), the
+keys of that interval read the largest value instead (`lastIn`): a guard
+true there is true at it, and the rebuilt mapping lists the keys up to the
+second largest value only (`lastBound`), the default past them. -/
+
+/-- The index set's values, and those of the strict guards' ground
+operands (`k < t`: `t` bounds the keys strictly from above). -/
+structure ApfSet where
+  vals : List Int
+  strict : List Int
+
+instance : Membership Int ApfSet := ⟨fun S s => s ∈ S.vals⟩
+
+theorem ApfSet.mem_def {S : ApfSet} {s : Int} : s ∈ S ↔ s ∈ S.vals := Iff.rfl
+
+/-- The largest value, `0` where none is. -/
+def apfTop (S : List Int) : Int := S.foldl max 0
+
+/-- The second largest: the largest value below `apfTop`, `0` where none is. -/
+def apfSecond (S : List Int) : Int := (S.filter (· < apfTop S)).foldl max 0
+
+/-- The keys of the last interval below the largest value read it. -/
+def ApfSet.region (S : ApfSet) (x : Int) : Prop :=
+  apfSecond S.vals < x ∧ x < apfTop S.vals ∧ apfTop S.vals ∉ S.strict ∧ apfTop S.vals < ((2 ^ 256 : Nat) : Int)
+
+instance (S : ApfSet) (x : Int) : Decidable (S.region x) := by unfold ApfSet.region; infer_instance
+
+/-- **The key a key reads in the rebuilt mapping**: its floor, the largest
+value in its last interval below it. -/
+def lastIn (S : ApfSet) (x : Int) : Int := if S.region x then apfTop S.vals else floorIn S.vals x
+
+section LastIn
+
+variable (S : ApfSet)
+
+theorem apfTop_ge {s : Int} (hs : s ∈ S.vals) : s ≤ apfTop S.vals := (foldl_max_spec S.vals 0).2.1 s hs
+
+theorem apfTop_nonneg : 0 ≤ apfTop S.vals := (foldl_max_spec S.vals 0).1
+
+theorem apfTop_mem (h : 0 < apfTop S.vals) : apfTop S.vals ∈ S.vals :=
+  ((foldl_max_spec S.vals 0).2.2).resolve_left (by unfold apfTop at h; omega)
+
+theorem apfSecond_ge {s : Int} (hs : s ∈ S.vals) (h : s < apfTop S.vals) : s ≤ apfSecond S.vals :=
+  (foldl_max_spec _ 0).2.1 s (List.mem_filter.2 ⟨hs, by simpa only [decide_eq_true_eq] using h⟩)
+
+theorem apfSecond_nonneg : 0 ≤ apfSecond S.vals := (foldl_max_spec _ 0).1
+
+/-- Past the second largest value, a value is the largest. -/
+theorem eq_top_of_second {s : Int} (hs : s ∈ S.vals) (h : apfSecond S.vals < s) : s = apfTop S.vals := by
+  have := apfTop_ge S hs
+  by_cases hl : s < apfTop S.vals
+  · have := apfSecond_ge S hs hl; omega
+  · omega
+
+theorem floorIn_le_top (x : Int) : floorIn S.vals x ≤ apfTop S.vals := by
+  rcases floorIn_mem S.vals x with h | h
+  · rw [h]; exact apfTop_nonneg S
+  · exact apfTop_ge S h
+
+theorem lastIn_fix {s : Int} (hs : s ∈ S) (h0 : 0 ≤ s) : lastIn S s = s := by
+  unfold lastIn
+  split
+  · rename_i hr
+    have := eq_top_of_second S hs hr.1
+    omega
+  · exact floorIn_fix S.vals hs h0
+
+theorem lastIn_ge (x : Int) {s : Int} (hs : s ∈ S) (h : s ≤ x) : s ≤ lastIn S x := by
+  unfold lastIn
+  split
+  · exact apfTop_ge S hs
+  · exact floorIn_ge S.vals x hs h
+
+theorem lastIn_le {x s : Int} (hx : 0 ≤ x) (hs : s ∈ S) (h : x ≤ s) : lastIn S x ≤ s := by
+  unfold lastIn
+  split
+  · rename_i hr
+    have := eq_top_of_second S hs (by have := hr.1; omega)
+    omega
+  · have := floorIn_le S.vals hx; omega
+
+theorem lastIn_lt {x t : Int} (hx : 0 ≤ x) (ht : t ∈ S) (hts : t ∈ S.strict) (h : x < t) : lastIn S x < t := by
+  unfold lastIn
+  split
+  · rename_i hr
+    have he := eq_top_of_second S ht (by have := hr.1; omega)
+    exact absurd (he ▸ hts) hr.2.2.1
+  · have := floorIn_le S.vals hx; omega
+
+theorem floorIn_le_lastIn (x : Int) : floorIn S.vals x ≤ lastIn S x := by
+  unfold lastIn
+  split
+  · exact floorIn_le_top S x
+  · exact Int.le_refl _
+
+theorem lastIn_mono {x y : Int} (hx : 0 ≤ x) (h : x ≤ y) : lastIn S x ≤ lastIn S y := by
+  by_cases hr : S.region x
+  · have hpos : 0 < apfTop S.vals := by have := apfSecond_nonneg S; have := hr.1; have := hr.2.1; omega
+    have hmem := apfTop_mem S hpos
+    have e : lastIn S x = apfTop S.vals := by unfold lastIn; rw [if_pos hr]
+    rw [e]
+    by_cases hy : y < apfTop S.vals
+    · have hry : S.region y := ⟨by have := hr.1; omega, hy, hr.2.2⟩
+      unfold lastIn; rw [if_pos hry]; exact Int.le_refl _
+    · exact lastIn_ge S y hmem (by omega)
+  · have e : lastIn S x = floorIn S.vals x := by unfold lastIn; rw [if_neg hr]
+    rw [e]
+    exact Int.le_trans (floorIn_mono S.vals hx h) (floorIn_le_lastIn S y)
+
+theorem lastIn_mem (x : Int) : lastIn S x = 0 ∨ lastIn S x ∈ S.vals := by
+  unfold lastIn
+  split
+  · rename_i hr
+    exact .inr (apfTop_mem S (by have := apfSecond_nonneg S; have := hr.1; have := hr.2.1; omega))
+  · exact floorIn_mem S.vals x
+
+theorem lastIn_nonneg (x : Int) : 0 ≤ lastIn S x := by
+  rcases lastIn_mem S x with h | h
+  · omega
+  · unfold lastIn at h ⊢
+    split
+    · exact apfTop_nonneg S
+    · exact floorIn_nonneg S.vals x
+
+theorem lastIn_bound {x : Int} (hx : 0 ≤ x) (hx' : x < ((2 ^ 256 : Nat) : Int)) :
+    lastIn S x < ((2 ^ 256 : Nat) : Int) := by
+  unfold lastIn
+  split
+  · rename_i hr; exact hr.2.2.2
+  · have := floorIn_le S.vals hx; omega
+
+end LastIn
+
+/-- `lastIn` at `uint`. -/
+def lastU (S : ApfSet) (k : PrimTy.uint.Denote) : PrimTy.uint.Denote :=
+  ⟨lastIn S k.1, by
+    have hk := uintVal_bounds k
+    have h1 := lastIn_bound S hk.1 hk.2
+    have h2 := lastIn_nonneg S k.1
+    simp only [PrimTy.inRange, decide_eq_true_eq]
+    omega⟩
+
+/-- **The keys a refutation lists**: up to the second largest value where
+the last interval reads the largest, up to the largest otherwise. -/
+def lastBound (S : ApfSet) : Nat :=
+  if apfTop S.vals ∉ S.strict ∧ apfTop S.vals < ((2 ^ 256 : Nat) : Int) then (apfSecond S.vals).toNat + 1
+  else (apfTop S.vals).toNat
+
+/-- Past `lastBound` every key reads the largest value. -/
+theorem lastU_top (S : ApfSet) (hS : ∀ s ∈ S.vals, s < ((2 ^ 256 : Nat) : Int)) (k : PrimTy.uint.Denote)
+    (hk : lastBound S ≤ k.1.toNat) : lastU S k = lastU S uintMax := by
+  have hb := uintVal_bounds k
+  have hT := apfTop_nonneg S
+  have hT' : apfTop S.vals < ((2 ^ 256 : Nat) : Int) := by
+    rcases (foldl_max_spec S.vals 0).2.2 with h | h
+    · unfold apfTop; omega
+    · exact hS _ h
+  have htopv : ∀ x : Int, apfTop S.vals ≤ x → lastIn S x = apfTop S.vals := by
+    intro x hx
+    unfold lastIn
+    rw [if_neg (fun hr => by have := hr.2.1; omega)]
+    exact floorIn_top S.vals (fun s hs => Int.le_trans (apfTop_ge S hs) hx)
+  have hmax : lastIn S uintMax.1 = apfTop S.vals := htopv _ (by rw [uintMax_val]; omega)
+  apply Subtype.ext
+  show lastIn S k.1 = lastIn S uintMax.1
+  rw [hmax]
+  by_cases hge : apfTop S.vals ≤ k.1
+  · exact htopv _ hge
+  · unfold lastBound at hk
+    split at hk
+    · rename_i hc
+      have hr : S.region k.1 := ⟨by have := apfSecond_nonneg S; omega, by omega, hc.1, hc.2⟩
+      unfold lastIn
+      rw [if_pos hr]
+    · omega
+
 /-! ## The fragment's terms -/
 
 /-- **A term of the fragment** (`false`): roots of `Rs` read only at a
@@ -564,41 +755,42 @@ theorem ApfTm.eval_rel {Rs : List Name} (g : State C []) (st' : Storage C)
 /-! ## Guards: true at a key, true at its floor -/
 
 /-- How an operand's value relates to its value at the floor: a block
-variable's is its floor; a ground operand's is the same, in the index set
-with its successor. -/
-def FRel (S : List Int) (v : Bool) (x' x : Int) : Prop :=
-  if v then x = floorIn S x' else x = x' ∧ x ∈ S ∧ (x + 1 < ((2 ^ 256 : Nat) : Int) → x + 1 ∈ S)
+variable's is its floor (`lastIn`); a ground operand's is the same, in the
+index set with its successor, and among the strict guards' operands. -/
+def FRel (S : ApfSet) (v : Bool) (x' x : Int) : Prop :=
+  if v then x = lastIn S x'
+  else x = x' ∧ x ∈ S ∧ x ∈ S.strict ∧ (x + 1 < ((2 ^ 256 : Nat) : Int) → x + 1 ∈ S)
 
-theorem le_mono (S : List Int) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x') (h0' : 0 ≤ y')
+theorem le_mono (S : ApfSet) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x') (h0' : 0 ≤ y')
     (hx : FRel S vx x' x) (hy : FRel S vy y' y) (h : x' ≤ y') : x ≤ y := by
   unfold FRel at hx hy
   cases vx <;> cases vy <;> simp only [Bool.false_eq_true, if_false, if_true] at hx hy
   · omega
-  · obtain ⟨rfl, hm, -⟩ := hx; rw [hy]; exact floorIn_ge S y' hm h
-  · obtain ⟨rfl, -, -⟩ := hy; rw [hx]; exact Int.le_trans (floorIn_le S h0) h
-  · rw [hx, hy]; exact floorIn_mono S h0 h
+  · obtain ⟨rfl, hm, -⟩ := hx; rw [hy]; exact lastIn_ge S y' hm h
+  · obtain ⟨rfl, hm, -⟩ := hy; rw [hx]; exact lastIn_le S h0 hm h
+  · rw [hx, hy]; exact lastIn_mono S h0 h
 
-theorem lt_mono (S : List Int) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x')
+theorem lt_mono (S : ApfSet) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x')
     (hb : y' < ((2 ^ 256 : Nat) : Int)) (hx : FRel S vx x' x) (hy : FRel S vy y' y)
     (hv : (vx && vy) = false) (h : x' < y') : x < y := by
   unfold FRel at hx hy
   cases vx <;> cases vy <;> simp only [Bool.false_eq_true, if_false, if_true, Bool.and_self] at hx hy hv
   · omega
-  · obtain ⟨rfl, -, hs⟩ := hx
+  · obtain ⟨rfl, -, -, hs⟩ := hx
     rw [hy]
-    have := floorIn_ge S y' (hs (by omega)) (by omega)
+    have := lastIn_ge S y' (hs (by omega)) (by omega)
     omega
-  · obtain ⟨rfl, -, -⟩ := hy; rw [hx]; have := floorIn_le S h0; omega
+  · obtain ⟨rfl, hm, ht, -⟩ := hy; rw [hx]; exact lastIn_lt S h0 hm ht h
   · cases hv
 
-theorem eq_mono (S : List Int) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x')
+theorem eq_mono (S : ApfSet) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x')
     (hx : FRel S vx x' x) (hy : FRel S vy y' y) (h : x' = y') : x = y := by
   subst h
   unfold FRel at hx hy
   cases vx <;> cases vy <;> simp only [Bool.false_eq_true, if_false, if_true] at hx hy
   · omega
-  · obtain ⟨rfl, hm, -⟩ := hx; rw [hy, floorIn_fix S hm h0]
-  · obtain ⟨rfl, hm, -⟩ := hy; rw [hx, floorIn_fix S hm h0]
+  · obtain ⟨rfl, hm, -⟩ := hx; rw [hy, lastIn_fix S hm h0]
+  · obtain ⟨rfl, hm, -⟩ := hy; rw [hx, lastIn_fix S hm h0]
   · rw [hx, hy]
 
 /-- A comparison at `uint`. -/
@@ -621,7 +813,7 @@ def _root_.Solidity.BinOp.isStrict : BinOp → Bool
   | _ => false
 
 /-- **A comparison true of the values is true of their floors.** -/
-theorem cmp_mono (S : List Int) (op : BinOp) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x') (h0' : 0 ≤ y')
+theorem cmp_mono (S : ApfSet) (op : BinOp) {vx vy : Bool} {x' y' x y : Int} (h0 : 0 ≤ x') (h0' : 0 ≤ y')
     (hb : x' < ((2 ^ 256 : Nat) : Int)) (hb' : y' < ((2 ^ 256 : Nat) : Int))
     (hx : FRel S vx x' x) (hy : FRel S vy y' y) (hs : op.isStrict = true → (vx && vy) = false)
     (h : cmpOf op x' y' = true) : cmpOf op x y = true := by
@@ -670,23 +862,24 @@ def IsTrue : (p : PrimTy) → p.Denote → Prop
 /-- The setting of a rebuilt storage: `μ'` reads the keys, `μ` their
 floors; both are `ν` off the binders; the terms `Gd` and their successors
 `Lo` are in the index set at `ν`. -/
-structure Setting (g : State C []) (st' : Storage C) (Rs : List Name) (S : List Int)
+structure Setting (g : State C []) (st' : Storage C) (Rs : List Name) (S : ApfSet)
     (Gd Lo : LTm C (.val .uint) → Prop) (ks : List Nat) (Bs : List Parameter) (ν μ' μ : AEnv) : Prop where
-  surg : Surg g st' Rs (floorU S)
-  gdS : ∀ x, Gd x → InS S g ν x
-  loS : ∀ x, Lo x → InSucc S g ν x
+  surg : Surg g st' Rs (lastU S)
+  gdS : ∀ x, Gd x → InS S.vals g ν x
+  loS : ∀ x, Lo x → InSucc S.vals g ν x
+  loT : ∀ x, Lo x → InS S.strict g ν x
   hμ : ∀ q, q ∉ ApfTm.ksP ks → q.read μ' = q.read μ
-  hk : ∀ k ∈ ks, μ.get .uint k = floorU S (μ'.get .uint k)
+  hk : ∀ k ∈ ks, μ.get .uint k = lastU S (μ'.get .uint k)
   hν : ∀ q, q ∉ Bs → q.read μ = q.read ν
 
 section Setting
 
-variable {g : State C []} {st' : Storage C} {Rs : List Name} {S : List Int}
+variable {g : State C []} {st' : Storage C} {Rs : List Name} {S : ApfSet}
   {Gd Lo : LTm C (.val .uint) → Prop} {ks : List Nat} {Bs : List Parameter} {ν μ' μ : AEnv}
 
 theorem Setting.gd (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) :
-    ∀ x, Gd x → ∀ v, (x.eval g ν : Option PrimTy.uint.Denote) = some v → floorU S v = v :=
-  fun _ hx v hv => Subtype.ext (floorIn_fix S (hs.gdS _ hx v hv) (uintVal_bounds v).1)
+    ∀ x, Gd x → ∀ v, (x.eval g ν : Option PrimTy.uint.Denote) = some v → lastU S v = v :=
+  fun _ hx v hv => Subtype.ext (lastIn_fix S (hs.gdS _ hx v hv) (uintVal_bounds v).1)
 
 theorem Setting.eval (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) {s : Srt}
     {t : LTm C s} (ht : ApfTm Rs false t) (hr : ht.Rel ks Bs Gd) :
@@ -700,14 +893,15 @@ theorem IdxP.values (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) {v : Bool}
   cases hi with
   | var k hk _ =>
     refine ⟨μ'.get .uint k, μ.get .uint k, rfl, rfl, ?_⟩
-    show (μ.get .uint k).1 = floorIn S (μ'.get .uint k).1
+    show (μ.get .uint k).1 = lastIn S (μ'.get .uint k).1
     rw [hs.hk k hk]
     rfl
   | gnd ha hr hb ht hsS hl =>
     obtain ⟨x, hx⟩ := Option.isSome_iff_exists.1 (LTm.totalB_eval g μ a ht)
     have hxν : (a.eval g ν : Option PrimTy.uint.Denote) = some x := by
       rw [← hx]; exact (a.eval_agree_parameters g fun q hq => hs.hν q (hb q hq)).symm
-    exact ⟨x, x, (hs.eval ha hr).trans hx, hx, rfl, hs.gdS _ hsS x hxν, hs.loS _ hl x hxν⟩
+    exact ⟨x, x, (hs.eval ha hr).trans hx, hx, rfl, hs.gdS _ hsS x hxν, hs.loT _ hl x hxν,
+      hs.loS _ hl x hxν⟩
 
 end Setting
 
@@ -718,7 +912,7 @@ theorem binopT_orB (h : BinOp.or.accepts .bool = true) (x y : Bool) :
     binopT .or h x (some y) = some (x || y) := by cases x <;> cases y <;> rfl
 
 /-- **A guard true at the keys is true at their floors.** -/
-theorem GuardP.mono {g : State C []} {st' : Storage C} {Rs : List Name} {S : List Int}
+theorem GuardP.mono {g : State C []} {st' : Storage C} {Rs : List Name} {S : ApfSet}
     {Gd Lo : LTm C (.val .uint) → Prop} {ks : List Nat} {Bs : List Parameter} {ν μ' μ : AEnv}
     (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) {p : PrimTy}
     {t : LTm C (.val p)} {ht : ApfTm Rs false t} (hg : GuardP Gd Lo ks Bs ht) :
@@ -1036,7 +1230,7 @@ def ApfFml.Frame (Bs : List Parameter) (Gd : LTm C (.val .uint) → Prop) : {φ 
   | _, .and h₁ h₂ | _, .imp h₁ h₂ => h₁.Frame Bs Gd ∧ h₂.Frame Bs Gd
   | _, .all k p h => (⟨p, k⟩ : Parameter) ∈ Bs ∧ h.Frame Bs Gd
 
-variable {g : State C []} {st' : Storage C} {S : List Int} {ks : List Nat} {ν μ' μ : AEnv}
+variable {g : State C []} {st' : Storage C} {S : ApfSet} {ks : List Nat} {ν μ' μ : AEnv}
 
 /-- The setting under a binder of `Bs` that is no block variable. -/
 theorem Setting.set (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (p : PrimTy) (k : Nat) (v : p.Denote)
@@ -1045,6 +1239,7 @@ theorem Setting.set (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (p : PrimTy)
   surg := hs.surg
   gdS := hs.gdS
   loS := hs.loS
+  loT := hs.loT
   hμ q hq := by
     by_cases he : q = ⟨p, k⟩
     · subst he; exact (Parameter.read_set ⟨p, k⟩ μ' v).trans (Parameter.read_set ⟨p, k⟩ μ v).symm
@@ -1142,17 +1337,18 @@ theorem ApfFml.body_holds (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) :
 /-- The setting with one more block variable, set at the key and at its floor. -/
 theorem Setting.push (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (k : Nat) (i : PrimTy.uint.Denote)
     (hB : (⟨.uint, k⟩ : Parameter) ∈ Bs) :
-    Setting g st' Rs S Gd Lo (ks ++ [k]) Bs ν (μ'.set .uint k i) (μ.set .uint k (floorU S i)) where
+    Setting g st' Rs S Gd Lo (ks ++ [k]) Bs ν (μ'.set .uint k i) (μ.set .uint k (lastU S i)) where
   surg := hs.surg
   gdS := hs.gdS
   loS := hs.loS
+  loT := hs.loT
   hμ q hq := by
     have hne : q ≠ ⟨.uint, k⟩ := fun e => hq (by
       rw [e]; exact List.mem_map.2 ⟨k, List.mem_append_right _ List.mem_cons_self, rfl⟩)
     exact (Parameter.read_set_ne q _ hne μ' i).trans ((hs.hμ q fun h => hq (by
       obtain ⟨j, hj, rfl⟩ := List.mem_map.1 h
       exact List.mem_map.2 ⟨j, List.mem_append_left _ hj, rfl⟩)).trans
-        (Parameter.read_set_ne q _ hne μ (floorU S i)).symm)
+        (Parameter.read_set_ne q _ hne μ (lastU S i)).symm)
   hk j hj := by
     by_cases he : j = k
     · subst he; rw [AEnv.get_set_self, AEnv.get_set_self]
@@ -1160,7 +1356,7 @@ theorem Setting.push (hs : Setting g st' Rs S Gd Lo ks Bs ν μ' μ) (k : Nat) (
       exact hs.hk j ((List.mem_append.1 hj).resolve_right fun h => he (List.mem_singleton.1 h))
   hν q hq := by
     have hne : q ≠ ⟨.uint, k⟩ := fun e => hq (e ▸ hB)
-    exact (Parameter.read_set_ne q _ hne μ (floorU S i)).trans (hs.hν q hq)
+    exact (Parameter.read_set_ne q _ hne μ (lastU S i)).trans (hs.hν q hq)
 
 /-- **The block holds where its instances hold** (Bradley, Manna, Sipma):
 at the keys `μ'` read in the rebuilt storage, by the instance at their
@@ -1177,15 +1373,15 @@ theorem LFml.block_refute (us : List (LTm C (.val .uint)))
   | .all k .uint φ, done, μ', μ, hc, hs, hB, hb, hok, hi => by
     intro i
     have hkB : (⟨.uint, k⟩ : Parameter) ∈ Bs := hB k List.mem_cons_self
-    have hfS : (floorU S i).1 ∈ S := by
-      rcases floorIn_mem S i.1 with h | h
-      · show floorIn S i.1 ∈ S
+    have hfS : (lastU S i).1 ∈ S := by
+      rcases lastIn_mem S i.1 with h | h
+      · show lastIn S i.1 ∈ S
         rw [h]; exact h0
       · exact h
     obtain ⟨u, hu, v, hv, hvs⟩ := hcover _ hfS
-    have hv' : v = floorU S i := Subtype.ext hvs
+    have hv' : v = lastU S i := Subtype.ext hvs
     subst hv'
-    have huμ : (u.eval g μ : Option PrimTy.uint.Denote) = some (floorU S i) := by
+    have huμ : (u.eval g μ : Option PrimTy.uint.Denote) = some (lastU S i) := by
       rw [← hv]; exact u.eval_agree_parameters g fun q hq => hs.hν q (hus u hu q hq)
     have hconj := (LFml.holds_conj g μ _).1 hi _ (List.mem_map.2 ⟨u, hu, rfl⟩)
     have hsub := hconj ((LFml.holds_eq_iff g μ u u).2 ⟨_, huμ, huμ⟩)
@@ -1696,6 +1892,25 @@ theorem mem_apfValues {us : List (IdxKey C)} {g : State C []} {ν : AEnv} {s : I
     s ∈ apfValues us g ν ↔ ∃ e ∈ us, ∃ v : PrimTy.uint.Denote, (e.1.eval g ν : Option _) = some v ∧ v.1 = s := by
   simp only [apfValues, List.mem_filterMap, Option.map_eq_some_iff, IdxKey.value_eq]
 
+/-- **The index set without repeated terms**: a term written twice is one
+instance, not two (`LTm.beqR`, structural). -/
+def dedupKeys : List (IdxKey C) → List (IdxKey C)
+  | [] => []
+  | e :: l => e :: (dedupKeys l).filter fun e' => !(e'.1.beqR e.1)
+
+theorem dedupKeys_mem : ∀ {l : List (IdxKey C)} {e : IdxKey C}, e ∈ l → ∃ e' ∈ dedupKeys l, e'.1 = e.1
+  | e₀ :: l, e, h => by
+    rcases List.mem_cons.1 h with rfl | h
+    · exact ⟨e, List.mem_cons_self, rfl⟩
+    · obtain ⟨e', he', hee⟩ := dedupKeys_mem h
+      by_cases hb : e'.1.beqR e₀.1 = true
+      · rw [LTm.beqR_eq_beqM] at hb
+        have := LTm.eq_of_beqM _ _ hb
+        exact ⟨e₀, List.mem_cons_self, by
+          rw [← hee]; exact (eq_of_heq (Sigma.ext_iff.1 this).2).symm⟩
+      · exact ⟨e', List.mem_cons_of_mem _ (List.mem_filter.2 ⟨he', by simp only [hb, Bool.not_false]⟩),
+          hee⟩
+
 /-- The shape of a type, if it has one. -/
 def MShape.of? : (T : Ty) → Option ((p : PrimTy) × MShape T p)
   | .ref (.mapping .uint (.prim p)) => some ⟨p, .last p⟩
@@ -1719,20 +1934,21 @@ def apfPrep (B : LFml C) : Prep B :=
     match ApfFml.ofFormula? Rs B with
     | none => Prep.id B
     | some h =>
-      let us := IdxKey.zero :: (h.topGd B.binders true ++ (h.topLo B.binders true).map IdxKey.succ)
+      let us := dedupKeys (IdxKey.zero :: (h.topGd B.binders true ++ (h.topLo B.binders true).map IdxKey.succ))
       if hc : h.topB B.binders true = true ∧
           us.all (fun e => e.1.parameters.all fun q => decide (q ∉ B.binders)) = true then
         { body := B.apfInst Rs (us.map (·.1)) true
           sound := fun hv g ν => (LFml.apfInst_sound g Rs _ B true ν).1 rfl (hv g ν)
           refute := fun g ν hneg =>
-            let S := apfValues us g ν
-            ⟨{ g with storage := surgeryAll (floorU S) (floorTop S) roots g.storage }, by
-              have hS : ∀ s ∈ S, s < ((2 ^ 256 : Nat) : Int) := fun s hs => by
+            let lo := h.topLo B.binders true
+            let S : ApfSet := ⟨apfValues us g ν, apfValues lo g ν⟩
+            ⟨{ g with storage := surgeryAll (lastU S) (lastBound S) roots g.storage }, by
+              have hS : ∀ s ∈ S.vals, s < ((2 ^ 256 : Nat) : Int) := fun s hs => by
                 obtain ⟨_, _, v, _, rfl⟩ := mem_apfValues.1 hs
                 exact (uintVal_bounds v).2
-              have hsurg : Surg g (surgeryAll (floorU S) (floorTop S) roots g.storage) Rs (floorU S) :=
+              have hsurg : Surg g (surgeryAll (lastU S) (lastBound S) roots g.storage) Rs (lastU S) :=
                 ⟨fun r hr => surgeryAll_other _ _ _ r roots hr,
-                  fun r hr k => surgeryAll_at _ _ _ (floorU_top S hS) r k roots hn.1 hr⟩
+                  fun r hr k => surgeryAll_at _ _ _ (lastU_top S hS) r k roots hn.1 hr⟩
               have hall := List.all_eq_true.1 hc.2
               have hus : ∀ u ∈ us.map (·.1), ∀ q ∈ u.parameters, q ∉ B.binders := fun u hu q hq => by
                 obtain ⟨e, he, rfl⟩ := List.mem_map.1 hu
@@ -1744,32 +1960,42 @@ def apfPrep (B : LFml C) : Prep B :=
                 exact ⟨e.1, List.mem_map.2 ⟨e, he, rfl⟩, v, hv, rfl⟩
               have h0 : (0 : Int) ∈ S := mem_apfValues.2 ⟨IdxKey.zero, List.mem_cons_self, uintOfNat 0, rfl,
                 uintOfNat_val (by omega)⟩
-              have hset : Setting g (surgeryAll (floorU S) (floorTop S) roots g.storage) Rs S
-                  (fun x => x ∈ us.map (·.1)) (fun x => x.succU ∈ us.map (·.1)) [] B.binders ν ν ν :=
+              have hset : Setting g (surgeryAll (lastU S) (lastBound S) roots g.storage) Rs S
+                  (fun x => x ∈ us.map (·.1)) (fun x => x ∈ lo.map (·.1)) [] B.binders ν ν ν :=
                 { surg := hsurg
                   gdS := fun x hx v hv => by
                     obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
                     exact mem_apfValues.2 ⟨e, he, v, hv, rfl⟩
                   loS := fun x hx v hv hb => by
                     obtain ⟨w, hw, hw1⟩ := LTm.eval_succU g ν x hv hb
-                    obtain ⟨e, he, he1⟩ := List.mem_map.1 hx
-                    exact mem_apfValues.2 ⟨e, he, w, by rw [he1]; exact hw, hw1⟩
+                    obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
+                    obtain ⟨e', he', hee⟩ := dedupKeys_mem (List.mem_cons_of_mem IdxKey.zero
+                      (List.mem_append_right _ (List.mem_map.2 ⟨e, he, rfl⟩)))
+                    exact mem_apfValues.2 ⟨e', he', w, by rw [hee]; exact hw, hw1⟩
+                  loT := fun x hx v hv => by
+                    obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
+                    exact mem_apfValues.2 ⟨e, he, v, hv, rfl⟩
                   hμ := fun _ _ => rfl
                   hk := fun _ h => nomatch h
                   hν := fun _ _ => rfl }
               have htop := ApfFml.topB_sound (Gd := fun x => x ∈ us.map (·.1))
-                (Lo := fun x => x.succU ∈ us.map (·.1)) true h hc.1
-                (fun e he => List.mem_map.2 ⟨e, List.mem_cons_of_mem _ (List.mem_append_left _ he), rfl⟩)
-                (fun e he => List.mem_map.2 ⟨e.succ, List.mem_cons_of_mem _
-                  (List.mem_append_right _ (List.mem_map.2 ⟨e, he, rfl⟩)), rfl⟩)
+                (Lo := fun x => x ∈ lo.map (·.1)) true h hc.1
+                (fun e he => by
+                  obtain ⟨e', he', hee⟩ := dedupKeys_mem (List.mem_cons_of_mem IdxKey.zero
+                    (List.mem_append_left _ he))
+                  exact List.mem_map.2 ⟨e', he', hee⟩)
+                (fun e he => List.mem_map.2 ⟨e, he, rfl⟩)
               exact fun hB => hneg ((ApfFml.apfInst_refute (us.map (·.1)) hus hcover h0 hset true h htop).1
                 rfl hB)⟩ }
       else Prep.id B
   else Prep.id B
 
-/-- **Array property instantiation is exact** (Bradley, Manna, Sipma, for
-the shapes `apfPrep` admits): the instantiated body is valid exactly where
-the body is; outside the fragment the body is kept. -/
+/-- **The prepared body is valid exactly where the body is**: this is
+`Prep.valid_iff`, which every preparation has (`Prep.id` too).  What the
+fragment adds is that `apfPrep` instantiates where its checks pass, the
+instantiation sound (`LFml.apfInst_sound`) and exact
+(`ApfFml.apfInst_refute`, Bradley, Manna, Sipma) there; outside the
+fragment the body is kept. -/
 theorem apfPrep_valid_iff (B : LFml C) : (apfPrep B).body.Valid ↔ B.Valid := (apfPrep B).valid_iff
 
 /-- info: 'Solidity.Decide.apfPrep_valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
