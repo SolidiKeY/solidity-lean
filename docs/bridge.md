@@ -19,7 +19,8 @@ Mathlib 4.24.0. The WP/VC-generator import closure is vendored
 under `Bridge/vendor/Loom` (provenance, exclusions, and file hashes in its
 `VENDOR.md`). Two CCPO instances receive explicit upstream names so editor
 checks agree with the build under the vendored path; no proof body changes.
-It needs no toolchain backport, lean-auto, Velvet, or SMT backend.
+The adapter needs no toolchain backport, lean-auto, Velvet, or SMT backend;
+Velvet, vendored beside it ("Velvet" below), adds lean-auto to Bridge.
 The bridge gate verifies those hashes. The root dependency manifest and
 the `Solidity/` import graph remain independent of Loom.
 
@@ -142,6 +143,41 @@ are unchanged, so the core-only checks were not run.
 
 The completed interface intentionally retains this deep-post restriction.
 No extension of the core `Fml` datatype is part of the integration.
+
+## Velvet
+
+Velvet, the Dafny-style verifier built on Loom, is vendored beside it under
+`Bridge/vendor/CaseStudies` (provenance, the files kept and checksums in
+`Bridge/vendor/CaseStudies/VENDOR.md`). It is the Loom-based Velvet of Loom's
+commit `2c7dbe71`, on Lean and Mathlib 4.24, like the rest of Bridge; the
+current Velvet (<https://github.com/verse-lab/velvet>) moved to Lean 4.35 and
+Lean's own VC generator and does not build on this toolchain. Velvet needs
+seven more Loom modules (`Bridge/vendor/Loom/VENDOR.md`) and, for
+`Loom.SMT`, lean-auto, which `Bridge/lakefile.toml` requires at Loom's
+manifest revision. The z3/cvc5 binaries Loom's Lake file downloads are not
+fetched: `loom_solve` runs its default solver, `grind`, and the four
+upstream examples kept are the ones that close with it.
+
+Three libraries are default targets of Bridge: `Velvet` (the front end:
+`method`, `prove_correct`, `loom_solve`), `VelvetExamples` (four of
+upstream's examples) and `SolidityVelvet` (`Bridge/SolidityVelvet.lean`).
+The last states three Solidity programs of the core as Velvet methods,
+proved by `loom_solve` and run by `#eval`: the counting loop of
+`LoomExamples`, a scan for the largest balance and ERC20's `transfer` over
+a ledger. They are Lean programs and are not related to `Stmt.run`; the
+theorems about Solidity's own semantics are the Loom adapter's above.
+`SolidityVelvet` imports Velvet alone and nothing imports it, so Velvet's
+keywords (`method`, `require`, `ensures`, `invariant`) and its global
+`grind` attributes do not reach `SolidityBridge`.
+
+To build only Velvet, from `Bridge/`:
+
+```sh
+lake exe cache get
+lake build Velvet VelvetExamples SolidityVelvet
+```
+
+These examples are also on the examples site (`docs/site.md`).
 
 ## October 22 milestone
 

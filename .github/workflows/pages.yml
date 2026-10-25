@@ -1,0 +1,108 @@
+name: pages
+
+# The examples site (`docs/site.md`): each project is built, its examples are
+# opened in Lean's language server and what the server shows is recorded
+# (`scripts/site/export.mjs`), and the static viewer in `site/` is published
+# with those records. Deploys only from the default branch; on another branch
+# (workflow_dispatch) the jobs run and upload the site as an artifact, which
+# is how a change to the site is checked before it merges.
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  solidity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: "Solidity"
+          use-mathlib-cache: "false"
+          test: "false"
+          lint: "false"
+      - name: Record the examples
+        run: node scripts/site/export.mjs --project Solidity --out _site
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-data-solidity
+          path: _site
+          if-no-files-found: ignore
+
+  velvet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Velvet's libraries and the examples alone: neither imports the core,
+      # so this builds Mathlib's cache, lean-auto, Loom and Velvet only.
+      - name: Build Velvet
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: "Bridge"
+          build-args: "Velvet VelvetExamples SolidityVelvet"
+          use-mathlib-cache: "true"
+          test: "false"
+          lint: "false"
+      - name: Record the examples
+        run: node scripts/site/export.mjs --project Velvet --out _site
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-data-velvet
+          path: _site
+          if-no-files-found: ignore
+
+  # The viewer with whatever was recorded: a project whose job failed is
+  # shown as not recorded rather than holding back the other.
+  assemble:
+    needs: [solidity, velvet]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: site-data-*
+          merge-multiple: true
+          path: _site
+      - name: Add the viewer
+        run: |
+          cp site/index.html site/app.js site/style.css site/examples.json _site/
+          touch _site/.nojekyll
+          find _site -maxdepth 3 -name index.json -print
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: assemble
+    if: always() && needs.assemble.result == 'success' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

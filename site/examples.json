@@ -1,0 +1,52 @@
+{
+  "repository": "https://github.com/SolidiKeY/solidity-lean",
+  "projects": [
+    {
+      "id": "Solidity",
+      "title": "Solidity",
+      "root": ".",
+      "description": "The Solidity-in-KeY calculus: programs, their proofs and the strategy's output.",
+      "examples": [
+        { "group": "Start here", "file": "Solidity/Examples/Tactics/Tour.lean" },
+        { "group": "Start here", "file": "Solidity/Examples/Verify.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/SimpleStorage.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Counter.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Coin.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/ERC20.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/EtherWallet.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Mapping.lean" },
+        { "group": "Contracts", "file": "Solidity/Examples/Benchmark/Purchase.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Revert.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Payment.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Calls.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Recursion.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Loops.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Checked.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/TryCatch.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Inheritance.lean" },
+        { "group": "Language", "file": "Solidity/Examples/Tactics/Callback.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Symex.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Spec.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SolSpec.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/Derive.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Chains/Arithmetic.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Chains/Payment.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/ProofTree.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" }
+      ]
+    },
+    {
+      "id": "Velvet",
+      "title": "Velvet",
+      "root": "Bridge",
+      "description": "Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
+      "examples": [
+        { "group": "Solidity patterns", "file": "SolidityVelvet.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/MaxElem.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/IsSorted.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/SumOfDigits.lean" },
+        { "group": "Velvet's examples", "file": "vendor/CaseStudies/Velvet/VelvetExamples/GCD.lean" }
+      ]
+    }
+  ]
+}
