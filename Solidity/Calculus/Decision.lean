@@ -22,14 +22,17 @@ it (`docs/automation.md`, M6, decisions c, c′, d and their extensions):
 
 Hashes are read as e3′ has it: each goal under the premise that its own
 hash terms are free of collisions (`Fml.HashFree`, `Fml.holdsH`,
-`Fml.ValidH`), no axiom and no global assumption.  In the fragment a hash
+`Fml.ValidH`), no axiom and no global assumption; the premise is taken
+per scope, each binder's instance under its own.  In the fragment a hash
 term stands where that premise settles it: against a hash of its kind
 (`==`, `!=`), or as the key of a mapping at a root whose keys are all
 hashes (`Fml.inTarget`); `ecrecover` stands nowhere.
 
-The fragment is `Fml.inTarget`, the open statement `DecisionTheorem`, both
+The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
-without a hash).  A statement of the form "some decider is complete" would
+without a hash).  The statement is the goal of the rounds to come, not true
+today: `Examples/Decision.lean`'s `apf` is in the fragment and answered
+`unknown`.  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
 rounds extend.
@@ -39,15 +42,18 @@ are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`decideLeaf_complete`), the fragment M4 proves total
 (`dependentReduction?_isSome`) as extended since; `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
-`decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered ⊆
-Fml.inTarget` is not proved: `Fml.Covered` is read on the eliminated leaf,
-`Fml.inTarget` on the source.
+`decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
+also holds of formulas with programs, which `Fml.inTarget` (on leaves)
+excludes; on program-free leaves the inclusion `Fml.Covered ⊆
+Fml.inTarget` is not proved (`Fml.Covered` is read on the eliminated leaf,
+`Fml.inTarget` on the source).
 
 The array-property check is syntactic and conservative: an update or a
 program under a quantifier counts as reading at its variable, the body of a
-negative-position block must be quantifier-free, and an index guard may not
-negate a comparison of bound variables; a hash stored by an update, a
-hash key of a nested mapping and an `ecrecover` term are outside.  So
+negative-position block must be quantifier-free, and an index guard is an
+`&&`/`||` of comparisons (never `!=`) of index terms, a bound variable or a
+term mentioning none; a hash stored by an update, a hash key of a nested
+mapping and an `ecrecover` term are outside.  So
 `Fml.inTarget` is a subset of the fragment the user named, never a
 superset.
 -/
@@ -135,27 +141,29 @@ each goal is read under the premise that *its own* hash terms are free of
 collisions, distinct inputs giving distinct outputs.  The premise is part
 of the goal's reading, not an axiom and not a global assumption.
 
-`Fml.HashIn k inp out σ φ`: some hash term of `φ`, of kind `k`, evaluated
-in a state `φ`'s reading reaches from `σ` (past its updates, at some value
-of each binder), reads `inp` and returns `out`.  `Fml.holdsH` instantiates
-the leaf's leading universal binders first (its parameters), so the
-premise is about one instance's hash terms; a hash under a further binder
-contributes every input that binder reaches. -/
+`Fml.HashIn k inp out σ φ`: some hash term of `φ`, of kind `k`, outside
+`φ`'s binders, evaluated at `σ` (or past `φ`'s updates), reads the bytes
+`inp` and returns `out`.  The premise is taken at every scope: `Fml.holdsH`
+is `holds` with each binder's body read under the premise of that
+instance, so a premise is about finitely many hash evaluations, false only
+at an actual collision among them.  `ecrecover` is no hash of the premise:
+it is `0` on every invalid signature. -/
 
-/-- The bytes a hash of the object `id` reads: `none` where `id` names no
-object of type `R` (the hash is then `0`). -/
+/-- The bytes a hash of the object `id` reads, each word modulo `256` as
+`HashKind.apply` reads it: `none` where `id` names no object of type `R`
+(the hash is then `0`). -/
 def _root_.Solidity.Grown.hashInput {H : HTy} (m : Grown H (fun _ => Unit)) (R : RefTy) (id : Nat) :
-    Option (List Int) :=
-  (HRef.ofId? m.H' R id).map fun r => MObj.words R (m.heap.get r)
+    Option (List Nat) :=
+  (HRef.ofId? m.H' R id).map fun r => (MObj.words R (m.heap.get r)).map fun b => b.toNat % 256
 
 /-- A hash node, evaluated: kind `k`, input `inp`, output `out`. -/
-def _root_.Solidity.Op2.HashIn {H : HTy} (k : HashKind) (inp : Option (List Int))
+def _root_.Solidity.Op2.HashIn {H : HTy} (k : HashKind) (inp : Option (List Nat))
     (out : PrimTy.uint.Denote) {a b s : Srt} :
     Op2 C a b s → Option (a.Den C H) → Option (b.Den C H) → Prop
   | @Op2.hash _ R k', some m, some id => k' = k ∧ inp = m.hashInput R id ∧ out = m.hashId k' R id
   | _, _, _ => False
 
-def _root_.Solidity.Tm.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+def _root_.Solidity.Tm.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
     (out : PrimTy.uint.Denote) : {s : Srt} → Tm C Γ s → Prop
   | _, .netOf _ a | _, .app1 _ a => a.HashIn σ k inp out
   | _, .app2 o x y => o.HashIn (H := σ.H) k inp out (x.eval σ) (y.eval σ) ∨ x.HashIn σ k inp out ∨
@@ -163,7 +171,7 @@ def _root_.Solidity.Tm.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp :
   | _, .app3 _ x y z => x.HashIn σ k inp out ∨ y.HashIn σ k inp out ∨ z.HashIn σ k inp out
   | _, _ => False
 
-def _root_.Solidity.Rhs.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+def _root_.Solidity.Rhs.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
     (out : PrimTy.uint.Denote) {t : LTy} : Rhs C Γ t → Prop
   | .val a | .zint a => a.HashIn σ k inp out
   | .path q => q.HashIn σ k inp out
@@ -172,21 +180,21 @@ def _root_.Solidity.Rhs.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp 
   | .unset | .saveNet | .saveNetMt => False
 
 def _root_.Solidity.UpdElem.HashIn {Γ Δ : Ctx} (σ : State C Γ) (k : HashKind)
-    (inp : Option (List Int)) (out : PrimTy.uint.Denote) : UpdElem C Γ Δ → Prop
+    (inp : Option (List Nat)) (out : PrimTy.uint.Denote) : UpdElem C Γ Δ → Prop
   | .local _ r => r.HashIn σ k inp out
   | .storage s => s.HashIn σ k inp out
   | .memory m => m.HashIn σ k inp out
   | .selfBalance _ a | .setBalance a => a.HashIn σ k inp out
   | .net r _ a | .pay r a | .netMt r a => r.HashIn σ k inp out ∨ a.HashIn σ k inp out
 
-def _root_.Solidity.Upd.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Int))
+def _root_.Solidity.Upd.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
     (out : PrimTy.uint.Denote) : {Δ : Ctx} → Upd C Γ Δ → Prop
   | _, .nil => False
   | _, .snoc U e => U.HashIn σ k inp out ∨ e.HashIn σ k inp out
   | _, .decl U _ r => U.HashIn σ k inp out ∨ r.HashIn σ k inp out
   | _, .pop U _ | _, .drop U _ => U.HashIn σ k inp out
 
-def _root_.Solidity.Fml.HashIn (k : HashKind) (inp : Option (List Int)) (out : PrimTy.uint.Denote) :
+def _root_.Solidity.Fml.HashIn (k : HashKind) (inp : Option (List Nat)) (out : PrimTy.uint.Denote) :
     {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => False
   | _, σ, .eq a b => a.HashIn σ k inp out ∨ b.HashIn σ k inp out
@@ -195,26 +203,39 @@ def _root_.Solidity.Fml.HashIn (k : HashKind) (inp : Option (List Int)) (out : P
   | _, σ, .and φ ψ | _, σ, .imp φ ψ => Fml.HashIn k inp out σ φ ∨ Fml.HashIn k inp out σ ψ
   | _, σ, .upd _ U φ => U.HashIn σ k inp out ∨
       ∃ g σ', U.globT σ = some g ∧ U.Lands σ g σ' ∧ Fml.HashIn k inp out σ' φ
-  | _, _, .modal .. => False
-  | _, σ, .havoc φ => ∃ st nt sb, Fml.HashIn k inp out (σ.havoc st nt sb) φ
-  | _, σ, .all _ p φ => ∃ v : p.Denote, Fml.HashIn k inp out (σ.push (t := .val p) v) φ
-  | _, σ, .bind _ _ t φ => ∃ v : t.TDenote C σ.H, Fml.HashIn k inp out (σ.push v) φ
-  | _, σ, .anon xs φ => ∃ b, Fml.HashIn k inp out (σ.anon xs b) φ
-  | _, σ, .allocAll _ R φ => ∃ o : MObj σ.H R,
-      Fml.HashIn k inp out ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
-  | _, σ, .grow φ => ∃ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap ∧
-      Fml.HashIn k inp out (σ.adopt g).1 φ
+  | _, _, .modal .. | _, _, .havoc _ | _, _, .all .. | _, _, .bind .. | _, _, .anon .. | _, _, .allocAll ..
+  | _, _, .grow _ => False
 
-/-- **The goal's hash premise**: its hash terms of one kind returning one
-output read one input. -/
+/-- **A scope's hash premise**: its hash terms of one kind (not
+`ecrecover`) returning one output read one input. -/
 def _root_.Solidity.Fml.HashFree {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
-  ∀ k i₁ i₂ out, Fml.HashIn k i₁ out σ φ → Fml.HashIn k i₂ out σ φ → i₁ = i₂
+  ∀ k, k ≠ .ecrecover → ∀ i₁ i₂ out, Fml.HashIn k i₁ out σ φ → Fml.HashIn k i₂ out σ φ → i₁ = i₂
 
-/-- **A leaf holds under its own hash premise**, past its leading binders. -/
-def _root_.Solidity.Fml.holdsH : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
-  | _, σ, .all _ p φ => ∀ v : p.Denote, Fml.holdsH (σ.push (t := .val p) v) φ
-  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => Fml.holdsH (σ.push v) φ
-  | _, σ, φ => φ.HashFree σ → holds σ φ
+/-- `holds`, each binder's body under its instance's premise. -/
+def _root_.Solidity.Fml.holdsS : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
+  | _, _, .tt => True
+  | _, σ, .eq a b => holds σ (.eq a b)
+  | _, σ, .wellFormed s => holds σ (.wellFormed s)
+  | _, σ, .not φ => ¬ Fml.holdsS σ φ
+  | _, σ, .and φ ψ => Fml.holdsS σ φ ∧ Fml.holdsS σ ψ
+  | _, σ, .imp φ ψ => Fml.holdsS σ φ → Fml.holdsS σ ψ
+  | _, σ, .upd m U φ => U.afterT m σ (Fml.holdsS · φ)
+  | _, σ, .modal m P κ φ => holds σ (.modal m P κ φ)
+  | _, σ, .havoc φ => ∀ st nt sb, φ.HashFree (σ.havoc st nt sb) → Fml.holdsS (σ.havoc st nt sb) φ
+  | _, σ, .all _ p φ => ∀ v : p.Denote, φ.HashFree (σ.push (t := .val p) v) →
+      Fml.holdsS (σ.push (t := .val p) v) φ
+  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => φ.HashFree (σ.push v) →
+      Fml.holdsS (σ.push v) φ
+  | _, σ, .anon xs φ => ∀ b, φ.HashFree (σ.anon xs b) → Fml.holdsS (σ.anon xs b) φ
+  | _, σ, .allocAll _ R φ => ∀ o : MObj σ.H R,
+      φ.HashFree ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) →
+        Fml.holdsS ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
+  | _, σ, .grow φ => ∀ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap →
+      φ.HashFree (σ.adopt g).1 → Fml.holdsS (σ.adopt g).1 φ
+
+/-- **A leaf holds under its own hash premise.** -/
+def _root_.Solidity.Fml.holdsH {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
+  φ.HashFree σ → Fml.holdsS σ φ
 
 /-- **Validity as the theorem reads it.** -/
 def _root_.Solidity.Fml.ValidH (φ : Fml C []) : Prop := ∀ σ : State C [], Fml.holdsH σ φ
@@ -261,13 +282,13 @@ def _root_.Solidity.Fml.hasHash : {Γ : Ctx} → Fml C Γ → Bool
   | _, .and φ ψ | _, .imp φ ψ => φ.hasHash || ψ.hasHash
   | _, .upd _ U φ => U.hasHash || φ.hasHash
 
-theorem _root_.Solidity.Op2.isHash_of_HashIn {H : HTy} {k : HashKind} {inp : Option (List Int)}
+theorem _root_.Solidity.Op2.isHash_of_HashIn {H : HTy} {k : HashKind} {inp : Option (List Nat)}
     {out : PrimTy.uint.Denote} {a b s : Srt} (o : Op2 C a b s) (x : Option (a.Den C H))
     (y : Option (b.Den C H)) (h : o.HashIn k inp out x y) : o.isHash = true := by
   cases o <;> first | rfl | exact h.elim
 
 theorem _root_.Solidity.Tm.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Int)} {out : PrimTy.uint.Denote} {s : Srt} (t : Tm C Γ s)
+    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} {s : Srt} (t : Tm C Γ s)
     (h : t.HashIn σ k inp out) : t.hasHash = true := by
   induction t with
   | netOf _ a ih | app1 _ a ih => exact ih h
@@ -286,12 +307,12 @@ theorem _root_.Solidity.Tm.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : H
   | _ => exact h.elim
 
 theorem _root_.Solidity.Rhs.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Int)} {out : PrimTy.uint.Denote} {t : LTy} (r : Rhs C Γ t)
+    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} {t : LTy} (r : Rhs C Γ t)
     (h : r.HashIn σ k inp out) : r.hasHash = true := by
   cases r <;> first | exact h.elim | exact Tm.hasHash_of_HashIn σ _ h
 
 theorem _root_.Solidity.UpdElem.hasHash_of_HashIn {Γ Δ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Int)} {out : PrimTy.uint.Denote} (e : UpdElem C Γ Δ)
+    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} (e : UpdElem C Γ Δ)
     (h : e.HashIn σ k inp out) : e.hasHash = true := by
   cases e with
   | «local» _ r => exact Rhs.hasHash_of_HashIn σ r h
@@ -303,7 +324,7 @@ theorem _root_.Solidity.UpdElem.hasHash_of_HashIn {Γ Δ : Ctx} (σ : State C Γ
     · exact .inr (Tm.hasHash_of_HashIn σ a h)
 
 theorem _root_.Solidity.Upd.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Int)} {out : PrimTy.uint.Denote} :
+    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} :
     ∀ {Δ : Ctx} (U : Upd C Γ Δ), U.HashIn σ k inp out → U.hasHash = true
   | _, .nil, h => h.elim
   | _, .snoc U e, h => by
@@ -318,10 +339,11 @@ theorem _root_.Solidity.Upd.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : 
     · exact .inr (Rhs.hasHash_of_HashIn σ r h)
   | _, .pop U _, h | _, .drop U _, h => Upd.hasHash_of_HashIn σ U h
 
-theorem _root_.Solidity.Fml.hasHash_of_HashIn {k : HashKind} {inp : Option (List Int)}
+theorem _root_.Solidity.Fml.hasHash_of_HashIn {k : HashKind} {inp : Option (List Nat)}
     {out : PrimTy.uint.Denote} : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
       Fml.HashIn k inp out σ φ → φ.hasHash = true
-  | _, _, .tt, h | _, _, .modal .., h => h.elim
+  | _, _, .tt, h | _, _, .modal .., h | _, _, .havoc _, h | _, _, .all .., h | _, _, .bind .., h
+  | _, _, .anon .., h | _, _, .allocAll .., h | _, _, .grow _, h => h.elim
   | _, σ, .eq a b, h => by
     simp only [Fml.hasHash, Bool.or_eq_true]
     rcases h with h | h
@@ -339,26 +361,41 @@ theorem _root_.Solidity.Fml.hasHash_of_HashIn {k : HashKind} {inp : Option (List
     rcases h with h | ⟨_, σ', _, _, h⟩
     · exact .inl (Upd.hasHash_of_HashIn σ U h)
     · exact .inr (Fml.hasHash_of_HashIn σ' φ h)
-  | _, _, .havoc φ, h => by rcases h with ⟨_, _, _, h⟩; exact Fml.hasHash_of_HashIn _ φ h
-  | _, _, .all _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
-  | _, _, .bind _ _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
-  | _, _, .anon _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
-  | _, _, .allocAll _ _ φ, h => by rcases h with ⟨_, h⟩; exact Fml.hasHash_of_HashIn _ φ h
-  | _, _, .grow φ, h => by rcases h with ⟨_, _, h⟩; exact Fml.hasHash_of_HashIn _ φ h
 
 theorem _root_.Solidity.Fml.hashFree_of_hasHash {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ)
     (h : φ.hasHash = false) : φ.HashFree σ :=
-  fun _ _ _ _ h₁ _ => absurd (Fml.hasHash_of_HashIn σ φ h₁) (by rw [h]; decide)
+  fun _ _ _ _ _ h₁ _ => absurd (Fml.hasHash_of_HashIn σ φ h₁) (by rw [h]; decide)
+
+theorem _root_.Solidity.Fml.holdsS_iff : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
+    φ.hasHash = false → (Fml.holdsS σ φ ↔ holds σ φ)
+  | _, _, .tt, _ | _, _, .eq _ _, _ | _, _, .wellFormed _, _ | _, _, .modal .., _ => Iff.rfl
+  | _, σ, .not φ, h => not_congr (Fml.holdsS_iff σ φ h)
+  | _, σ, .and φ ψ, h => by
+    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
+    exact and_congr (Fml.holdsS_iff σ φ h.1) (Fml.holdsS_iff σ ψ h.2)
+  | _, σ, .imp φ ψ, h => by
+    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
+    exact imp_congr (Fml.holdsS_iff σ φ h.1) (Fml.holdsS_iff σ ψ h.2)
+  | _, σ, .upd m U φ, h => by
+    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
+    exact ⟨fun hh => Upd.afterT_imp hh fun σ' => (Fml.holdsS_iff σ' φ h.2).mp,
+      fun hh => Upd.afterT_imp hh fun σ' => (Fml.holdsS_iff σ' φ h.2).mpr⟩
+  | _, σ, .havoc φ, h => forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
+      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
+        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
+  | _, σ, .all _ _ φ, h | _, σ, .bind _ _ _ φ, h | _, σ, .anon _ φ, h | _, σ, .allocAll _ _ φ, h =>
+    forall_congr' fun _ =>
+      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
+        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
+  | _, σ, .grow φ, h => forall_congr' fun _ => imp_congr_right fun _ =>
+      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
+        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
 
 /-- **Without a hash the premise is empty**: the reading is `holds`. -/
-theorem _root_.Solidity.Fml.holdsH_iff : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
-    φ.hasHash = false → (Fml.holdsH σ φ ↔ holds σ φ)
-  | _, _, .all _ _ φ, h => forall_congr' fun _ => Fml.holdsH_iff _ φ h
-  | _, _, .bind _ _ _ φ, h => forall_congr' fun _ => Fml.holdsH_iff _ φ h
-  | _, σ, .tt, h | _, σ, .eq _ _, h | _, σ, .wellFormed _, h | _, σ, .not _, h | _, σ, .and _ _, h
-  | _, σ, .imp _ _, h | _, σ, .upd .., h | _, σ, .modal .., h | _, σ, .havoc _, h
-  | _, σ, .anon _ _, h | _, σ, .allocAll .., h | _, σ, .grow _, h =>
-    ⟨fun hh => hh (Fml.hashFree_of_hasHash σ _ h), fun hh _ => hh⟩
+theorem _root_.Solidity.Fml.holdsH_iff {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ)
+    (h : φ.hasHash = false) : Fml.holdsH σ φ ↔ holds σ φ :=
+  ⟨fun hh => (Fml.holdsS_iff σ φ h).mp (hh (Fml.hashFree_of_hasHash σ φ h)),
+    fun hh _ => (Fml.holdsS_iff σ φ h).mpr hh⟩
 
 theorem _root_.Solidity.Fml.validH_iff {φ : Fml C []} (h : φ.hasHash = false) :
     Fml.ValidH φ ↔ Fml.Valid φ :=
@@ -574,7 +611,8 @@ def _root_.Solidity.Tm.mentions {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C 
 /-- The term reads contents at a bound variable. -/
 def _root_.Solidity.Tm.readsAt {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s → Bool
   | _, .netOf _ a => a.mentions qs || a.readsAt qs
-  | _, .app1 o x => (match o with | .net => x.mentions qs | _ => false) || x.readsAt qs
+  | _, .app1 o x => (match o with | .net | .wt | .cleanTail => x.mentions qs | _ => false) ||
+      x.readsAt qs
   | _, .app2 o x y => (o.isRead && (x.mentions qs || y.mentions qs)) || x.readsAt qs || y.readsAt qs
   | _, .app3 _ x y z => x.readsAt qs || y.readsAt qs || z.readsAt qs
   | _, _ => false
@@ -582,7 +620,7 @@ def _root_.Solidity.Tm.readsAt {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C �
 /-- The term reads contents at all. -/
 def _root_.Solidity.Tm.readsAny {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
   | _, .netOf _ _ => true
-  | _, .app1 o x => (match o with | .net => true | _ => false) || x.readsAny
+  | _, .app1 o x => (match o with | .net | .wt | .cleanTail => true | _ => false) || x.readsAny
   | _, .app2 o x y => o.isRead || x.readsAny || y.readsAny
   | _, .app3 _ x y z => x.readsAny || y.readsAny || z.readsAny
   | _, _ => false
@@ -610,27 +648,29 @@ def _root_.Solidity.Tm.apfV {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s
     | _ => !(x.mentions qs || y.mentions qs || z.mentions qs)
   | _, _ => true
 
-def _root_.Solidity.Op1.isNot {a s : Srt} : Op1 C a s → Bool
-  | .unop .not _ => true
+/-- An index term (Bradley, Manna and Sipma): a bound variable, or a term
+mentioning none. -/
+def _root_.Solidity.Tm.indexTerm {Γ : Ctx} (qs : List Nat) {s : Srt} (t : Tm C Γ s) : Bool :=
+  t.isBound qs || !t.mentions qs
+
+/-- A guard comparison: `<`, `>`, `<=`, `>=`, `==`, never `!=`. -/
+def _root_.Solidity.Op2.isGuardCmp {a b s : Srt} : Op2 C a b s → Bool
+  | .binop .lt _ | .binop .gt _ | .binop .le _ | .binop .ge _ | .binop .eqB _ => true
+  | .zcmp .lt _ | .zcmp .gt _ | .zcmp .le _ | .zcmp .ge _ | .zcmp .eqB _ => true
   | _ => false
 
-def _root_.Solidity.Op2.isNeB {a b s : Srt} : Op2 C a b s → Bool
-  | .binop .neB _ => true
+def _root_.Solidity.Op2.isAndOr {a b s : Srt} : Op2 C a b s → Bool
+  | .binop .and _ | .binop .or _ => true
   | _ => false
 
-/-- No `!=`, `!` over a bound variable: a guard is positive in them. -/
-def _root_.Solidity.Tm.positiveIn {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s → Bool
-  | _, .app1 o x => if o.isNot then !x.mentions qs else x.positiveIn qs
-  | _, .netOf _ x => x.positiveIn qs
-  | _, .app2 o x y => if o.isNeB then !(x.mentions qs || y.mentions qs)
-      else x.positiveIn qs && y.positiveIn qs
-  | _, .app3 _ x y z => x.positiveIn qs && y.positiveIn qs && z.positiveIn qs
-  | _, _ => true
-
-/-- An index-guard term: linear in the bound variables (`Tm.inTarget`),
-positive in them, reading nothing at them. -/
-def _root_.Solidity.Tm.apfG {Γ : Ctx} (qs : List Nat) {s : Srt} (t : Tm C Γ s) : Bool :=
-  !t.readsAt qs && t.positiveIn qs
+/-- **An index-guard term**: `&&`/`||` of comparisons of index terms, or a
+term mentioning no bound variable. -/
+def _root_.Solidity.Tm.apfG {Γ : Ctx} (qs : List Nat) : {s : Srt} → Tm C Γ s → Bool
+  | _, .app2 o x y =>
+    if o.isAndOr then x.apfG qs && y.apfG qs
+    else if o.isGuardCmp then x.indexTerm qs && y.indexTerm qs
+    else !(x.mentions qs || y.mentions qs)
+  | _, t => !t.mentions qs
 
 /-- The literal `true`. -/
 def _root_.Solidity.Tm.isTrueLit {Γ : Ctx} {p : PrimTy} : Tm C Γ (.val p) → Bool
@@ -653,7 +693,9 @@ def _root_.Solidity.Fml.apfGuard {Γ : Ctx} (qs : List Nat) : Fml C Γ → Bool
   | .and φ ψ => φ.apfGuard qs && ψ.apfGuard qs
   | φ@(@Fml.eq _ _ p a b) =>
     φ.groundQF qs ||
-      (a.apfG qs && b.apfG qs && (match p with | .bool => a.isTrueLit || b.isTrueLit | _ => true))
+      (match p with
+        | .bool => (a.apfG qs && b.isTrueLit) || (a.isTrueLit && b.apfG qs)
+        | _ => a.indexTerm qs && b.indexTerm qs)
   | φ => φ.groundQF qs
 
 /-- A quantifier-free value formula over `Tm.apfV` terms. -/
@@ -744,38 +786,38 @@ hash keys compare as their inputs under the premise, a hash key and any
 other key as a preimage question.  So a root with a hash key must have hash
 keys only. -/
 
-/-- The keys at the mappings at roots: the root and whether the key is a
-hash the premise settles. -/
-def _root_.Solidity.Tm.mapKeys {Γ : Ctx} : {s : Srt} → Tm C Γ s → List (Name × Bool)
+/-- The keys at the mappings at roots: the root and the key's hash kind,
+where the premise settles it. -/
+def _root_.Solidity.Tm.mapKeys {Γ : Ctx} : {s : Srt} → Tm C Γ s → List (Name × Option HashKind)
   | _, .netOf _ a | _, .app1 _ a => a.mapKeys
   | _, .app2 o x y =>
     (if o.isMapAt then (match x.rootNameD? with
-      | some r => [(r, y.hashable?.isSome)]
+      | some r => [(r, y.hashable?)]
       | none => [])
     else []) ++ x.mapKeys ++ y.mapKeys
   | _, .app3 _ x y z => x.mapKeys ++ y.mapKeys ++ z.mapKeys
   | _, _ => []
 
-def _root_.Solidity.Rhs.mapKeys {Γ : Ctx} {t : LTy} : Rhs C Γ t → List (Name × Bool)
+def _root_.Solidity.Rhs.mapKeys {Γ : Ctx} {t : LTy} : Rhs C Γ t → List (Name × Option HashKind)
   | .val a | .zint a => a.mapKeys
   | .path q => q.mapKeys
   | .mref i => i.mapKeys
   | .store s => s.mapKeys
   | .unset | .saveNet | .saveNetMt => []
 
-def _root_.Solidity.UpdElem.mapKeys {Γ Δ : Ctx} : UpdElem C Γ Δ → List (Name × Bool)
+def _root_.Solidity.UpdElem.mapKeys {Γ Δ : Ctx} : UpdElem C Γ Δ → List (Name × Option HashKind)
   | .local _ r => r.mapKeys
   | .storage s | .memory s => s.mapKeys
   | .selfBalance _ a | .setBalance a => a.mapKeys
   | .net r _ a | .pay r a | .netMt r a => r.mapKeys ++ a.mapKeys
 
-def _root_.Solidity.Upd.mapKeys {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List (Name × Bool)
+def _root_.Solidity.Upd.mapKeys {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List (Name × Option HashKind)
   | _, .nil => []
   | _, .snoc U e => U.mapKeys ++ e.mapKeys
   | _, .decl U _ r => U.mapKeys ++ r.mapKeys
   | _, .pop U _ | _, .drop U _ => U.mapKeys
 
-def _root_.Solidity.Fml.mapKeys : {Γ : Ctx} → Fml C Γ → List (Name × Bool)
+def _root_.Solidity.Fml.mapKeys : {Γ : Ctx} → Fml C Γ → List (Name × Option HashKind)
   | _, .tt | _, .modal .. => []
   | _, .eq a b => a.mapKeys ++ b.mapKeys
   | _, .wellFormed s => s.mapKeys
@@ -784,9 +826,9 @@ def _root_.Solidity.Fml.mapKeys : {Γ : Ctx} → Fml C Γ → List (Name × Bool
   | _, .and φ ψ | _, .imp φ ψ => φ.mapKeys ++ ψ.mapKeys
   | _, .upd _ U φ => U.mapKeys ++ φ.mapKeys
 
-/-- A root with a hash key has hash keys only. -/
-def keysAgree (ks : List (Name × Bool)) : Bool :=
-  ks.all fun (r, h) => h || !(ks.any fun (r', h') => r' == r && h')
+/-- A root with a hash key has hash keys of that kind only. -/
+def keysAgree (ks : List (Name × Option HashKind)) : Bool :=
+  ks.all fun (r, h) => ks.all fun (r', h') => r' != r || h == h'
 
 /-- **The fragment the user named**, on a scoped leaf: no program, every
 operator admitted (`Waivers`), every quantifier over contents in the array

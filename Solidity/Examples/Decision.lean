@@ -11,7 +11,8 @@ also over a storage read), and a universal quantifier in the consequent of
 an implication (a postcondition's `\forall`), moved to the prefix.  The
 verdicts are the compiled ones: the kernel's arithmetic decision over
 256-bit codes is too deep for the language server (as in
-`Examples/AutoComplete.lean`); the fragment checks are the kernel's.
+`Examples/AutoComplete.lean`); the theorems' fragment checks are the
+kernel's, the `#eval` pins the compiled ones.
 
 `Fml.inTarget` is the fragment the user named, on program-free leaves: a
 negative-position quantifier over a mapping is in it exactly when it is in
@@ -55,6 +56,10 @@ outside it (the index read as a value). -/
 def apf : Fml Bank [] := dl!{ (∀ uint k; k < 10 → balances[k] == 0) → balances[5] == 0 }
 def notApf : Fml Bank [] := dl!{ (∀ uint k; balances[k] == k) → balances[5] == 5 }
 
+/-- Guards outside the fragment: a disequality, arithmetic on the index. -/
+def guardNe : Fml Bank [] := dl!{ (∀ uint k; k != 3 → balances[k] == 0) → balances[5] == 0 }
+def guardArith : Fml Bank [] := dl!{ (∀ uint k; k + 1 < 10 → balances[k] == 0) → balances[5] == 0 }
+
 end
 
 def verdict {C : Contract} (φ : Fml C []) : String :=
@@ -84,8 +89,15 @@ theorem double_iff : decideLeaf double = .proved ↔ Fml.Valid double :=
 /-- info: ["proved", "proved", "refuted"] -/
 #guard_msgs in #eval [nested, written, writtenBad].map verdict
 
-/-- info: [true, false] -/
-#guard_msgs in #eval [apf, notApf].map (Fml.inTarget {})
+/-- info: [true, false, false, false] -/
+#guard_msgs in #eval [apf, notApf, guardNe, guardArith].map (Fml.inTarget {})
+
+/-- A program-free leaf both covered and in the named fragment. -/
+theorem nested_inTarget : nested.inTarget {} = true := by decide +kernel
+
+/-- `DecisionTheorem` is not yet true: `apf` is in the fragment, and
+answered `unknown`. -/
+theorem apf_inTarget : apf.inTarget {} = true := by decide +kernel
 
 /-- info: ["unknown", "unknown"] -/
 #guard_msgs in #eval [apf, notApf].map verdict

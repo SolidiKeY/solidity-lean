@@ -988,29 +988,36 @@ It contains everything except what the user allowed to answer *unknown*:
   is an `∃` of the negation, so it needs no check.  A negative-position
   `∀` block whose body reads at its variables must be the
   Bradley–Manna–Sipma shape (`Fml.apfBlock`): a quantifier-free body made of
-  `guard → value` parts and their conjunctions; guards linear and positive
-  in the bound variables, reading nothing at them; values reading the bound
-  variables only as indices, never in a nested index (`a[a[i]]`), and
-  writing nothing at them.  A Presburger quantifier, one whose body reads
+  `guard → value` parts and their conjunctions; guards `&&`/`||` of
+  comparisons (`<`, `<=`, `==`, never `!=`) of index terms, a bound
+  variable or a term mentioning none; values reading the bound variables
+  only as indices, never in a nested index (`a[a[i]]`), and writing
+  nothing at them.  A Presburger quantifier, one whose body reads
   nothing at its variable, is in the fragment at any polarity, but past a
   negative-position one only further Presburger quantifiers are.  Negative
   `havoc`/`anon`/`allocAll`/`grow` and storage binders over a body that
   reads contents fall under d.
 * (e3′) hashes.  Each goal is read under its own collision-freeness
-  premise: `Fml.HashFree σ φ` says that the hash terms of `φ` (in each
-  state `φ`'s reading reaches from `σ`) whose outputs agree read one input.
-  `Fml.holdsH` instantiates the leaf's leading binders, its parameters,
-  before the premise is taken, so the premise is about one instance.
-  `Fml.ValidH` is validity so read.  It is no axiom and no global
+  premise.  `Fml.HashFree σ φ` says that the hash terms of `φ` outside its
+  binders, evaluated at `σ` or past its updates, whose outputs agree read
+  the same bytes (each word modulo 256, as `HashKind.apply` reads them).
+  `ecrecover` is excluded: it is `0` on every invalid signature.
+  `Fml.holdsH` is `holds` with the premise taken at every scope, each
+  binder's body under its instance's premise.  So each premise is about
+  finitely many evaluations and fails only at an actual collision among
+  them.  `Fml.ValidH` is validity so read.  It is no axiom and no global
   assumption; on a leaf without a hash it is `Fml.Valid` (`Fml.validH_iff`).
   A hash term is in the fragment only where the premise settles it: as an
   operand of `==`/`!=` against a hash of its kind, or as a key of a mapping
-  at a root all of whose keys are hashes.  Elsewhere its verdict may turn
+  at a root all of whose keys are hashes of that kind.  Elsewhere its verdict may turn
   on a preimage, which the user allowed to answer unknown. `ecrecover` (an
   `opaque` function) is outside everywhere.
 
 The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
+It is the goal of the rounds to come, not true today:
+`Examples/Decision.lean` pins `apf`, in the fragment
+(`apf_inTarget`, kernel-checked) and answered *unknown*.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, never a superset:
@@ -1019,10 +1026,19 @@ fragment the user named, never a superset:
 * an index guard may not negate a comparison of bound variables;
 * a hash stored by an update, a hash key of a nested mapping and a hash
   under any other operator are outside, even where the premise would
-  settle them;
-* a hash under a binder past the leading prefix contributes every input
-  that binder reaches, so for a binder over unbounded byte strings the
-  premise is false for the real Keccak and the goal holds vacuously.
+  settle them.
+
+Three properties of the reading are worth knowing.
+* The per-scope premise depends on where the binders stand:
+  `pre → ∀ k. ψ` and `∀ k. pre → ψ` take different premises, so
+  `LFml.prenex` is exact for `holds` but not for `Fml.holdsH`.
+  `decideGoal` answers only on leaves without a hash, where the two
+  readings agree (`Fml.holdsH_iff`).
+* A hash of an identity that names no object reads `none` and returns
+  `0`; an object hashing to `0` would count as colliding with it.
+* A program's hashes are not read by the premise.  The fragment holds no
+  program, and on a formula with one, `decideGoal` answers by `Fml.Valid`,
+  the stronger reading.
 
 ### What is proved
 
@@ -1060,17 +1076,20 @@ compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
-its false variant (refuted).  Coverage there is kernel-checked
-(`decide +kernel`); the verdicts are the compiled ones, since the kernel's
-arithmetic decision over 256-bit codes is too deep for the language
-server.
+its false variant (refuted).  The coverage of `double` and `nested` is
+kernel-checked (`decide +kernel`); the other rows and the verdicts are the
+compiled ones (`#eval` pins), since the kernel's arithmetic decision over
+256-bit codes is too deep for the language server.
 
 ### What is not proved
 
-* `DecisionTheorem` itself, and `Fml.Covered ⊆ Fml.inTarget`:
-  `Fml.Covered` is read on the eliminated leaf, `Fml.inTarget` on the
-  source, and M4's "what blocks the rest" (normalization's budget, update
-  pushing's `Tm.agreeB`/`Tm.toL`, elimination's invariant) stands.
+* `DecisionTheorem` itself; it is false today (above).
+* `Fml.Covered ⊆ Fml.inTarget` on program-free leaves.  It holds of
+  neither direction in general: `Fml.Covered` also takes formulas with
+  programs, which `Fml.inTarget` excludes.  `Fml.Covered` is read on the
+  eliminated leaf, `Fml.inTarget` on the source, and M4's "what blocks the
+  rest" stands: normalization's budget, update pushing's
+  `Tm.agreeB`/`Tm.toL`, elimination's invariant.
 * The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
   which come from the stages' fuel.
 * On the fragment, `decideGoal` still answers *unknown* on:
@@ -1112,9 +1131,29 @@ in this order:
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.
-8. **`Fml.Covered ⊆ Fml.inTarget`**: characterize normalization and update
-   pushing syntactically (M4's list), then lift the size bounds by fuel
-   computed from the formula.
+8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
+   normalization and update pushing syntactically (M4's list), then lift
+   the size bounds by fuel computed from the formula.
+
+**Review (2026-10-25).** A read-only review found nine issues, fixed here.
+* Guards: `!=` written another way, and arithmetic on the bound variables,
+  passed.  Guards are now comparisons of index terms.
+* Hash keys of two kinds at one root passed.  Keys now record their kind.
+* The premise compared words where the hash reads bytes.
+* `ecrecover` was inside the premise.
+* The premise ranged over every value of every binder, so a leaf with a
+  binder over byte strings held vacuously by pigeonhole.  It is now taken
+  per scope.
+* `wt`/`cleanTail` were not counted as reads.
+* The docs overclaimed the inclusion `Fml.Covered ⊆ Fml.inTarget` (it
+  fails on programs), the truth of `DecisionTheorem` (it is the goal, not
+  true today) and the kernel-checked coverage.
+
+One concern remains unconfirmed: nested mappings `m[i][j]` at two bound
+indices are admitted (Bradley–Manna–Sipma state their result for arrays
+of one dimension).  A hash key reached through an alias or `atIn` is
+outside the fragment (its position is not admitted), so the key-kind check
+need not see it.
 
 ## Review (2026-10-20)
 
