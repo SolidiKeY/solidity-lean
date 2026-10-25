@@ -11,6 +11,11 @@ judgement written in the calculus's notation, and a sound proof system.
 `docs/kernel-port.md` says which chapter landed where and what is still to
 port.
 
+**Use dependent types as much as possible.** New code states its invariants
+in its types (indexed families, typed positions, `Fin`, subtypes) rather than
+in side predicates or runtime checks; an untyped representation needs a
+written reason.
+
 **The model is intrinsic** (`docs/intrinsic.md`). A statement is
 `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): its locals are positions `Idx Γ t` in a
 context (`Scope.lean`), so a local read out of scope or at another type cannot
