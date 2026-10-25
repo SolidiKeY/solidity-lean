@@ -14,7 +14,7 @@ two.  A state that refutes it refutes the leaf: the strings allocated with
 those bytes hash to exactly those words (`State.alloc_hashId_self`), and a
 heap of the family's strings alone meets every premise of the leaf
 (`Fml.hashFree_fam`), the family's hashes being distinct and nonzero
-(`famOK`, checked in the kernel for four classes, `famOK_four`).
+(`famOK`, checked in the kernel for four classes of each kind, `famOK_bound`).
 -/
 
 namespace Solidity.Decide

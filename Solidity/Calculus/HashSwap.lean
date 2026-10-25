@@ -7,10 +7,10 @@ import Solidity.Theory.Typed.Mem
 A leaf `∀ fresh s t. ψ` whose memory locals are byte strings
 (`Fml.allocAll` at `uint[]`, any contents) read only by hashes of one kind
 (`hash(memory, s)`, not `ecrecover`) is read with each such local replaced
-by the word its hash returns: `Fml.sw` replaces the binder by `∀ uint`
-and each hash node by the local (`Tm.sw`), on a body of equations, the
-connectives and one-element updates (a storage write, a value local declared
-or set).  The rest of the leaf reads no memory.
+by the word its hash returns: `Fml.swPrefix` replaces the binder by
+`∀ uint` and each hash node by the local (`Tm.sw`, `Fml.sw`), on a body of
+equations, the connectives and one-element updates (a storage write, a
+value local declared or set).  The rest of the leaf reads no memory.
 
 `SwRel` relates a state of the leaf to one of its swapped reading: one
 storage, ledger, balance and transaction, the heaps free (the swapped

@@ -32,7 +32,8 @@ term stands where that premise settles it: against a hash of its kind
 hashes (`Fml.inTarget`); `ecrecover` stands nowhere, and neither does a
 hash under a hidden memory binder or an anonymising update (an unset
 reference hashes to nothing, a key of nothing reads the default key `0`:
-a preimage question) or a hash key of anything but a memory local.
+a preimage question) or a hash key of anything but a memory local in the
+starting memory.
 
 A leaf with hashes (`decideHash`, plan step 7) is decided where its memory
 locals are fresh byte strings read only by hashes of one kind: read with
@@ -79,7 +80,8 @@ variables) of index terms, a bound variable or a term mentioning none; a
 path indexes at most one bound variable (no `m[i][j]` with both bound, as
 Bradley, Manna and Sipma state their result for one dimension); a hash
 stored by an update, a hash key of a nested mapping or of anything but a
-memory local, a hash under a hidden memory binder or an anonymising update,
+memory local in the starting memory, a hash under a hidden memory binder
+or an anonymising update,
 and an `ecrecover` term are outside.  So
 `Fml.inTarget` is a subset of the fragment the user named, never a
 superset.
@@ -294,8 +296,7 @@ def decideHash (φ : Fml C []) : LeafVerdict C :=
     | v => v
   | v => v
 
-theorem decideHash_cases {φ : Fml C []} {v : LeafVerdict C} (h : decideHash φ = v)
-    (hv : v ≠ .unknown) :
+theorem decideHash_cases {φ : Fml C []} {v : LeafVerdict C} (h : decideHash φ = v) :
     decideHashK .keccak (by decide) φ = v ∨ decideHashK .sha256 (by decide) φ = v ∨
       decideHashK .ripemd160 (by decide) φ = v := by
   unfold decideHash at h
@@ -308,11 +309,11 @@ theorem decideHash_cases {φ : Fml C []} {v : LeafVerdict C} (h : decideHash φ 
   | _ => rw [h1] at h; exact .inl h
 
 theorem decideHash_sound {φ : Fml C []} (h : decideHash φ = .proved) : Fml.ValidH φ := by
-  rcases decideHash_cases h (fun h => nomatch h) with h | h | h <;> exact decideHashK_sound h
+  rcases decideHash_cases h with h | h | h <;> exact decideHashK_sound h
 
 theorem decideHash_refutes {φ : Fml C []} {σ : State C []} (h : decideHash φ = .refuted σ) :
     ¬ Fml.holdsH σ φ := by
-  rcases decideHash_cases h (fun h => nomatch h) with h | h | h <;> exact decideHashK_refutes h
+  rcases decideHash_cases h with h | h | h <;> exact decideHashK_refutes h
 
 /-! ### Completeness on leaves with hashes -/
 
@@ -602,10 +603,16 @@ def _root_.Solidity.Tm.isPvI {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
   | .pvI _ => true
   | _ => false
 
-/-- A hash of a memory local: a key it reads is a hash's, not the default a
-key with no value reads. -/
+/-- The starting memory. -/
+def _root_.Solidity.Tm.isMemory {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .app0 .memory => true
+  | _ => false
+
+/-- A hash of a memory local in the starting memory: a key it reads is a
+hash's, never the default a key with no value reads (a memory written past
+a string's end has none). -/
 def _root_.Solidity.Tm.hashOfLocal {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
-  | .app2 o _ y => o.isHash && y.isPvI
+  | .app2 o x y => o.isHash && x.isMemory && y.isPvI
   | _ => false
 
 /-- Two hash terms of one kind: their equation is their inputs' under the

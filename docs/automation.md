@@ -1367,8 +1367,7 @@ its own pipeline):
       one storage, ledger and transaction, any heaps, each string's word
       its hash, read every term alike (`SwRel`, `Tm.sw_eval`,
       `Tm.sw_denote`, `Fml.sw_holds`), so a valid swapped leaf is valid
-      whatever the hash, under the premise or not
-      (`Fml.swPrefix_validH`): `decideLeaf` decides it;
+      whatever the hash (`Fml.swPrefix_validH`): `decideLeaf` decides it;
     * **the refutation** (`Fml.swInst`): the swapped leaf with each word
       fixed (`∀ v. v == c → …`) to the hash of a family's one-word string,
       one per class of equal strings (`rgs`, the restricted growth
@@ -1512,8 +1511,12 @@ strings as hidden binders) is outside it and `unknown`.
     `bytes memory b = "ab"`, a parameter), more than four strings, a keyed
     root that is not `mapping(uint => uint)` or is read or written other
     than at a key (`sfind`, `delete`, `wt`), a quantifier in the body, and
-    a leaf with a modality.  `Fml.inTarget` takes the first three (with a
-    hash key a memory local's).
+    a leaf with a modality.  Of these `Fml.inTarget` takes two kinds of
+    hash of one string, hashes of memory the leaf writes in equations,
+    more than four strings (a refutation needing a fifth class answers
+    `unknown`), keyed roots of other types and quantifiers in the body; it
+    takes no stored hash, no hash of a hidden binder's string, and a hash
+    key only of a memory local in the starting memory.
 
 ### The plan for the rest
 
@@ -1564,7 +1567,8 @@ in this order:
    by hashes of one kind (feature 10): no stage reads memory, so the
    inputs are free, and their equality is the hashes' (the swap); the
    bounded `∀` over words is needed only once memory reads are, at step 6.
-   Left: two kinds per string, stored hashes, hashes of written memory.
+   Left: two kinds per string, stored hashes, hashes of written memory,
+   strings not fresh, more than four strings.
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
    the size bounds by fuel computed from the formula.
@@ -1604,9 +1608,14 @@ anonymising update ranges over an unset reference, whose hash reads
 nothing, and a key of nothing reads the default key `0`; so
 `ids[keccak256(s)]` with `s` unset reads `ids[0]`, and a verdict turns on
 whether another string hashes to `0`, a preimage question
-(`namesBound`).  `Fml.inTarget` now admits no hash under either, and a
-hash key only of a memory local (`Tm.hashOfLocal`).  Fresh strings
-(`Fml.allocAll`) are always set.
+(`namesBound`).  The same holds of a hash of a memory a failing write
+leaves (`write(memory, a, v)` at an address past a string's end returns
+nothing).  `Fml.inTarget` now admits no hash under either binder, and a
+hash key only of a memory local in the starting memory
+(`Tm.hashOfLocal`).  Fresh strings (`Fml.allocAll`) are always set.  The
+review found no other source of an undefined hash key: an update setting
+a memory local to nothing does not land, and an equation of two hashes
+compares their readings as options, reading no default.
 
 ## M8 · Polynomial size (2026-10-25)
 

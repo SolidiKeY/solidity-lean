@@ -12,10 +12,10 @@ So a state refuting the free reading is relabeled into one refuting the
 fixed one: the words moved to the family's, the keyed roots' entries moved
 with them (`RelRL`), every other part of the state kept.
 
-`ρ` maps each fixed word to the free word of its class, the free words
-outside the fixed ones to a word `z` none of them is, and is the identity
-elsewhere; so the only fixed key it sends to a free one is that free word's
-own.  `Tm.rl` is the fragment: the words compared or as keys of the roots
+`ρ` maps each fixed word to the free word of its class, one to one on the
+fixed words (`RelRL.inj`); the fixed keys are the only keys of a keyed root
+the relabeled state is read or written at, so `ρ` is free elsewhere (the
+identity, in `Fml.swPrefix_complete`).  `Tm.rl` is the fragment: the words compared or as keys of the roots
 `K`, the storage read only at a path (`find(storage, p)`) and written only
 by a one-element update; `Fml.rl` adds the connectives, equations, `∀` and
 the one-element updates.
