@@ -12,10 +12,10 @@ PresburgerDecision.lean`): each equation by the shared checked compiler
 range.  The compiled formula holds exactly where the leaf does, at every
 assignment that represents the valuation at those positions (`QArith`).
 
-An equation's compiled form may name storage scalars (the compiler's
-static reads); the equation is read-free (`readFreeFormula?`), so it holds
-alike in every storage, and those variables are given positions of their
-own, any value in range.
+The equation is read-free (`readFreeFormula?`), so it holds alike in every
+storage.  Any storage scalar its compiled form still names (the compiler's
+static reads; none is expected under that check, but the proof does not
+rely on it) gets a position of its own, any value in range.
 
 Positions are named, not de Bruijn: `.all k p φ` binds the variable at
 `pos ⟨p, k⟩`, shadowing it as `AEnv.set` does.

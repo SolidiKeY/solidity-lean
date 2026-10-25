@@ -1145,7 +1145,7 @@ Three properties of the reading are worth knowing.
 | `LFml.prenex_holds` | prenexing is exact |
 | `CheckedScalar.scale_correct` | checked multiplication by a literal is encoded exactly |
 | `QFml.decide_iff` | `F.decide = true ↔ F.Valid`: quantified linear arithmetic decided |
-| `QuantReduction.valid_of_sentence`, `QuantReduction.verify` | the quantified sentence's verdict is the leaf's, a false assignment a refuting state |
+| `QuantReduction.valid_of_sentence`, `QuantReduction.verify` | a valid sentence makes the leaf valid; a false assignment gives a refuting state |
 | `quantReduction?_isSome` | `φ.quantCovered = true → (quantReduction? φ).isSome` |
 
 `#print axioms` of each of the six `decide*` theorems is pinned in
@@ -1186,8 +1186,9 @@ features, each with its completeness proved through every stage
      `∃ xᵢ. ⋁ S` reads both bits of `xᵢ` (the projection of the bit
      automaton): its states are lists over the body's universe, finite and
      never computed (it only bounds `reach`); the zero test of an `∃` is a
-     reachability with the other bits `0`.  A 256-bit bound is an atom
-     `x ≤ 2^256 - 1` whose derivatives halve it: no value is enumerated.
+     reachability with the other bits `0`.  A bound is an atom
+     `x < bound p` (`2^256` at a word) whose derivatives halve it: no
+     value is enumerated.
    Validity of the sentence is validity of the leaf (`bⱼ` set to `Qⱼ`'s
    truth); a false assignment is realized as in M4, the flattening's
    countermodel keeping each `bⱼ` equal to `Qⱼ` there, since `Qⱼ` reads no
@@ -1195,9 +1196,10 @@ features, each with its completeness proved through every stage
    fragment, on the eliminated leaf: a prefix binding the body's free
    parameters, the lift within budget, the abstracted body in
    `LFml.Src false` within M4's bounds, each `Qⱼ` in `LFml.qfrag`
-   (connectives, `∀`, equations of `LTm.Num`/`LTm.BoolV` terms of value
-   locals and literals, recognized with their evidence by `LTm.num?`,
-   `LTm.bool?`).
+   (connectives, `∀`, equations of the checked compiler's `LTm.Num`/
+   `LTm.BoolV` terms over value locals and literals, recognized with their
+   evidence by `LTm.num?`, `LTm.bool?`).  It asks no quantifier to be
+   left: a quantifier-free leaf M4 refuses may pass here.
 
 All three were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`).
@@ -1224,6 +1226,12 @@ is too deep for the language server.
   `Tm.agreeB`/`Tm.toL`, elimination's invariant.
 * The size bounds of `Fml.exactBounded` (511 lifted nodes, 45 reads),
   which come from the stages' fuel.
+* A time bound for the quantified decision: `QFml.verify` has no node
+  budget.  Each state has `2^n` successors (`n` the free variables), an
+  `∃` state's zero test is a reachability of its own, not memoized, and
+  an `∃` state's list keeps its order (two orders, two states).  The pins
+  take well under a second; a large leaf may not.  `quantReduction?`
+  also re-runs the front `dependentReduction?` refused.
 * On the fragment, `decideGoal` still answers *unknown* on:
   * a quantifier past the prefix whose body reads storage or a transaction
     field, even at no bound variable (`Examples/Decision.lean`,

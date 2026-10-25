@@ -73,7 +73,7 @@ def evenWrite : Fml Bank [] :=
 def oddWrite : Fml Bank [] :=
   dl!{ ∀ uint k; (∃ uint y; y + y + 1 == k) → [ balances[k] = k; ] balances[k] != 1 }
 
-/-- A quantifier whose body reads storage is outside (step 5 and beyond). -/
+/-- A quantifier whose body reads storage is outside (step 4's remainder). -/
 def evenRead : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 7 }
 
 /-- Guards outside the fragment: a disequality, arithmetic on the index. -/

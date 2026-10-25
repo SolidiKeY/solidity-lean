@@ -25,8 +25,8 @@ binder at `i` shadows the variable `i`, as `AEnv.set` does), and
 
 Validity is that every reachable state holds at zero (`QFml.search_iff`);
 a reachable state false at zero gives a counterassignment directly
-(`QFml.verify`).  A bounded variable is an atom `xᵢ ≤ 2^256 - 1` under the
-binder: its derivatives halve the constant, and no value is enumerated.
+(`QFml.verify`).  A bounded variable is an atom `xᵢ < bound p` (`2^256` at a word)
+under the binder: its derivatives halve the constant, and no value is enumerated.
 -/
 
 namespace Solidity.Linear

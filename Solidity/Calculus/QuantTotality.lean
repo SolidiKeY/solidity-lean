@@ -9,9 +9,11 @@ the eliminated leaf (`leafOf?`) has a universal prefix binding its free
 parameters; its lifted body, quantified subformulas abstracted, is in the
 quantifier-free fragment of `Fml.Covered` (`LFml.Src false`, the size
 bounds); and each abstracted subformula is a Presburger formula
-(`LFml.qfrag`): `¬`, `∧`, `→`, `∀` over equations of checked scalar or
-Boolean terms of value locals and literals (`LTm.Num`, `LTm.BoolV`, no
-transaction field, no storage).
+(`LFml.qfrag`): `¬`, `∧`, `→`, `∀` over equations of the checked
+compiler's scalar or Boolean terms over value locals and literals
+(`LTm.Num`, `LTm.BoolV`: `+`, `-`, products by a literal, comparisons,
+`seq`, a failed term; no transaction field, no storage).  The fragment
+asks no quantifier to be left: a quantifier-free body passes too.
 -/
 
 namespace Solidity.Decide
