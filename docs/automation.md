@@ -270,14 +270,18 @@ a guard equation is over a conditional's operands, so each step lowers the
 weight (`LTm.Src.split`, `LTm.Src.split_weight`).  Lifting adds no atom
 (`LFml.liftCond_params`).
 
-### (b) Fixed arrays at literal indices: not done
+### (b) Fixed arrays at literal indices: not done here
 
-Not cheap: the path guards refuse `.atF` (`TSegs.guardFuel?`), `ReadExpr`
-has no fixed-array index, and the realization layer that turns an
+Not in M4's pipeline: the path guards refuse `.atF` (`TSegs.guardFuel?`),
+`ReadExpr` has no fixed-array index, and the realization layer that turns an
 alias-consistent assignment into an actual storage
 (`Calculus/ReadRealization.lean`, `Ref.Declared`) covers root, field and
-mapping-key paths only.  Each needs a case; the realization one needs
-in-range evidence.  Dynamic arrays are out, as planned.
+mapping-key paths only.  M7 step 6 (feature 10 below) answers on leaves
+that read arrays of primitives at roots, fixed and dynamic, at symbolic
+indices (on `Fml.arrayCovered`, within its fuels and M4's bounds), by a
+pipeline of its own
+(`arrayReduction?`) that cuts them to atoms before these stages run, so
+they stay as they are.
 
 ### (c) The fragment
 
@@ -1128,8 +1132,9 @@ It is the goal of the rounds to come, not true today:
 *unknown* (`gapColumn` … `gapHashUnderForall`, each in the fragment by the
 kernel, `*_inTarget`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
-over an inner mapping, `allow[3][k]`) and `namesTwoKinds` (two kinds of
-hash of one string), the last two since 2026-10-25.
+over an inner mapping, `allow[3][k]`), `namesTwoKinds` (two kinds of
+hash of one string) and `arrayRead`, `fixedRead` (storage-array reads,
+feature 10), the last four since 2026-10-25.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, never a superset:
@@ -1147,7 +1152,7 @@ Three properties of the reading are worth knowing.
   `LFml.prenex` is exact for `holds` but not for `Fml.holdsH`.
   `decideGoal` prenexes only leaves without a hash, where the two
   readings agree (`Fml.holdsH_iff`), and the swapped readings of leaves
-  with hashes (feature 10), which have none; a leaf with hashes it takes
+  with hashes (feature 11), which have none; a leaf with hashes it takes
   has its quantifiers in front (`Fml.swPrefix`), where the premise is the
   body's.
 * A hash of an identity that names no object reads `none` and returns
@@ -1188,6 +1193,10 @@ Three properties of the reading are worth knowing.
 | `Fml.tk_refutes` | a refutation of an instance with the second kind's words fixed refutes the leaf under its premise |
 | `Fml.tk_complete` | on the fragment, where the reading with the second kind's words is not valid, an instance at some classes, those words fixed, is not |
 | `decideHash2_complete` | `φ.coveredK2 k₁ k₂ = true → decideHash2 k₁ k₂ φ ≠ .unknown` |
+| `Tm.toLT_sound` | an array element read in the Theory pushed in exactly (`Calculus/TheoryRead.lean`) |
+| `LFml.orLift_holds`, `LFml.gx_holds`, `LFml.hasFold_holds` | fallbacks lifted, guards extracted, slot tests a length check settles folded: exact |
+| `LFml.aCut_valid_iff`, `LFml.aCut_refutes` | the array cut is exact; a refutation of the cut leaf refutes the leaf in the state its arrays are rebuilt in |
+| `arrayReduction?_isSome` | `φ.arrayCovered = true → (arrayReduction? φ).isSome` |
 
 `#print axioms` of each of the six `decide*` theorems, of
 `decideGoal_complete_hash` and of the hash reduction's four
@@ -1204,7 +1213,7 @@ Three properties of the reading are worth knowing.
 features 1, 2, 4, 5 and 8, each with its completeness proved through every
 stage (recognizer, lifting, flattening, compilers), or `Fml.quantCovered`
 (features 3, 6 and 7, its own pipeline), or `Fml.ledgerCovered` (feature 9,
-its own pipeline):
+its own pipeline), or `Fml.arrayCovered` (feature 10, its own pipeline):
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1351,8 +1360,8 @@ its own pipeline):
    the sort.
 9. **Reads of the starting ledger** (plan step 3, `net(a)`, an address a
    scalar of the fragment).  `decideLeaf` falls back to
-   `ledgerReduction?` (`Calculus/LedgerReduction.lean`) where the other
-   two refuse.  The lifted body's reads are cut (`LFml.ledgerCut`,
+   `ledgerReduction?` (`Calculus/LedgerReduction.lean`) where the
+   others refuse (the array pipeline runs before it).  The lifted body's reads are cut (`LFml.ledgerCut`,
    `Calculus/LedgerCut.lean`): the `j`-th read `net(aⱼ)` becomes
    `seq aⱼ (net(j))`, and `aᵢ == aⱼ → net(i) == net(j)` for each pair is
    put in the antecedent.  The cut is exact in a universal reading
@@ -1373,7 +1382,56 @@ its own pipeline):
    `store(net, …)`) stays outside: the leaf builder refuses a read past a
    write (`SymS.netOk`).
 
-10. **Hashes under the premise** (plan step 7, `decideHash`,
+10. **Storage arrays at symbolic indices** (plan step 6, arrays of
+   primitives at roots, dynamic and fixed).  `decideLeaf` falls back to
+   `arrayReduction?` (`Calculus/ArrayReduction.lean`) where
+   `dependentReduction?` and `quantReduction?` refuse, ahead of the
+   ledger's pipeline (on an array leaf that one recurses deeply enough to
+   overflow the stack of a command-line `lean`).  Stage by stage:
+   * *update pushing*: an equation over a formula's `a[i]` (the Theory
+     reads every slot, the default past them; the interpreter halts past
+     the live length) was read one way at each polarity.  `Tm.toLT`
+     pushes it in exactly, as `orElse(find(S, a[i]), 0)` over the storage
+     `S` the updates left (`Tm.toLT_sound`); `ExactAt.ofFormula?` takes
+     an equation so where `directional?` refuses (`ExactAt.eqT?`).
+   * *the eliminated leaf*: a slot test `has(a[i])` that a length check
+     `i < a.length` of the same index guards is replaced by `true`
+     (`LFml.hasFold`, `Calculus/ArrayFold.lean`), then the fallbacks are
+     lifted out of equations (`LFml.orLift`, `Calculus/OrLift.lean`).
+   * *the cut* (`Calculus/ArrayCut.lean`): the path guards, the read
+     queries and the realization layer are not extended.  Instead every
+     read of an array root (`obsW(a[i])`, `obsH(a[i])`, `obsL(a)`) becomes
+     atoms before them: the index (the index itself where it is an atom)
+     and the value, `seq i v`; the antecedent says what actual arrays make
+     of them (`ARead.cons`: reads at equal indices one word, lengths of a
+     root one, a slot there below the length and below a slot there, the
+     default past a slot not there, exactly the slots below `n` in a fixed
+     array of length `n`).  Exact in a universal reading
+     (`LFml.aCut_valid_iff`): the actual observations satisfy the
+     antecedent (`cons_fill`, `describes_fill`), and atoms that satisfy it
+     rebuild a storage (`arrRealize`: each array root the array whose live
+     length is the length atom and whose slots hold what the reads give
+     them, up to the last slot the atoms need) in which the leaf reads
+     what the cut leaf reads (`describes_realize`, `frames_realize`).  An
+     index that reads an array root, and any other read of one, refuse
+     the cut.
+   * *the rest*: guards extracted (`LFml.gx`: an equation of guarded terms
+     as its guards' conjunction and the values' equation), conditionals
+     lifted, flattened and decided as in M4.  A false assignment is shrunk
+     code by code while the arithmetic stays false at it
+     (`ArrayReduction.shrinkCodes`, checked again by `AFml.check`), then
+     realized as in M4 and its arrays rebuilt from the atoms, built
+     eagerly.  The shrinking is a heuristic: the arithmetic is free to pick
+     a length near `2^256`, and where the shrinking cannot bring it down
+     (or a fixed array is long) the refuting state exists but cannot be
+     built in practice.
+   `Fml.arrayCovered` is the fragment, on the eliminated leaf: the array
+   stages succeed, their leaf in `LFml.Src true` within the lifting fuel,
+   budget and M4's bounds; `arrayReduction?_isSome` proves the pipeline
+   never refuses it, through `LFml.liftCond_src` and
+   `flattenedArithmetic?_isSome`.
+
+11. **Hashes under the premise** (plan step 7, `decideHash`,
     `Calculus/HashSwap.lean` … `Calculus/HashComplete.lean`).  A leaf whose
     memory locals are fresh byte strings (`∀ fresh s.`, `Fml.allocAll` at
     `uint[]`, any bytes) read only by hashes of one kind (not `ecrecover`):
@@ -1413,7 +1471,7 @@ its own pipeline):
     string levels the words' (`Fml.prefixOK`) (`Fml.coveredK`); for two,
     `Fml.coveredK2`, below.
 
-11. **Two kinds of hash** (2026-10-25, `decideHash2`,
+12. **Two kinds of hash** (2026-10-25, `decideHash2`,
     `Calculus/HashKinds.lean`): a string hashed by two kinds stands for one
     word per kind.  For an ordered pair `k₁`, `k₂` (`hashTries` tries the
     six), every string `k₂` hashes must be hashed by both kinds where the
@@ -1449,9 +1507,10 @@ its own pipeline):
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
-and eight and nine (no atom of `Srt.kint`, no ledger read); ten was
-answered `unknown` (`decideGoal` read no hash), and eleven too (the swap
-reads one kind).
+and eight and nine (no atom of `Srt.kint`, no ledger read), and ten
+(`sourceReduction?` refused a formula's `a[i]` after an update, and no
+stage read an array path); eleven was answered `unknown` (`decideGoal`
+read no hash), and twelve too (the swap reads one kind).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1479,7 +1538,25 @@ feature 9: `net(a) = 7 → net(a) + 1 = 8`, reads at equal addresses
 (`netSame`), a ledger entry against a storage read and past a write,
 proved; `net(a) >= 0` and `net(a) = 7 → net(b) = 7`, refuted;
 `net_covered`, `netSame_covered`, `netSwap_covered` kernel-checked.
-For feature 10, `Examples/DecisionHashes.lean` pins, over `Names` of
+For feature 10: an in-range read with its element read again in the
+postcondition (`inRange`, proved; `inRangeBad`, refuted), a read past the
+length under the diamond (`pastEnd`, refuted) and below it
+(`inRangeReturns`, proved), a write then a read at equal indices
+(`writeSame`), at different ones keeping the old word (`writeKeep`) and the
+written word read back (`writeRead`), proved; at any indices
+(`writeOther`), refuted; a fixed array written below its length
+(`rowWrite`, proved) and past it (`rowPast`, refuted), read past it (the
+default, `rowPastRead`, proved); the slots past the live length, which
+the Theory reads as they are (`shadowRead`, refuted); an element stored
+in a mapping (`owedRead`, proved); and the two leaves once pinned as
+counterexamples (`arrayRead`, an element at a checked index, `fixedRead`,
+a fixed array's at a literal one), proved, in `Fml.inTarget` and
+`Fml.Covered` by the kernel.  `pastEnd_covered`, `writeSame_covered` and
+`inRange_covered` are kernel-checked; `pastEnd_answers`,
+`writeSame_answers` and `inRange_iff` apply the theorems.  The array verdicts are
+evaluated one after another (`set_option Elab.async false`): evaluated
+in parallel they overflow a command-line `lean`'s stack.
+For feature 11, `Examples/DecisionHashes.lean` pins, over `Names` of
 `Examples/Tactics/Hashing.lean` §3
 (`mapping(string => uint) ids`, keyed by `keccak256`): `namesSet`, the leaf
 `∀ s t. keccak256(s) != keccak256(t) → ids[s] == 0 → {ids[t] := 1}
@@ -1492,7 +1569,7 @@ ids[t]` (`namesEq`) proved and `keccak256(s) == keccak256(t)`
 and `namesEqBad_covered` kernel-checked (about 4 s each),
 `namesSet_answers` by `decideGoal_complete_hash`.  `namesBound` (the
 strings as hidden binders) is outside the fragment and `unknown`.  For
-feature 11: `namesTwoKinds` (`sha256(s) == sha256(t) → keccak256(s) ==
+feature 12: `namesTwoKinds` (`sha256(s) == sha256(t) → keccak256(s) ==
 keccak256(t)`, valid only under the premise) proved, `namesTwoKindsBad`
 refuted (one string twice), `namesTwoKinds_covered` kernel-checked (about
 16 s) and `namesTwoKinds_answers`; over `Names2`
@@ -1617,12 +1694,9 @@ of about two thousand nodes, about a millisecond a state).  The
     (`gapPartialGuard`, `k < x - 1`: the index set takes total operands);
     a positive quantifier the prefix does not reach, reading at its
     variable (`gapPositiveForall`, `∀ k` inside a conjunction);
-  * **arrays, memory, the ledger and KeY `int` without quantifiers**: a
-    dynamic array's element at a checked index (`gapArrayRead`) and a fixed
-    array's at a literal one (`gapFixedRead`): `Tm.agreeB` is false on
-    `a[i]` (the Theory reads a default past the length, the interpreter
-    halts), the path guards refuse `.at`, the read queries carry no index
-    or length evidence (M4 (b)); a memory read (`gapMemory`:
+  * **memory, the ledger and KeY `int` without quantifiers** (the plain
+    storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
+    decided by feature 10): a memory read (`gapMemory`:
     `LTm.Elimable` refuses the memory sorts, no stage realizes a heap); a
     binder of KeY's `int` (`gapKIntBinder`: `LFml` has no unbounded binder);
     a ledger read past a payment (`gapLedgerWrite`: the leaf builder
@@ -1636,7 +1710,7 @@ of about two thousand nodes, about a millisecond a state).  The
     `*%` by one (`gapMulW`): each needs an encoding with a coefficient of
     `2^256` or a disjunction per bit (the cut and its proofs extend to
     them as to `<<`);
-  * **hashes outside `Fml.hashCovered`** (features 10 and 11): three kinds
+  * **hashes outside `Fml.hashCovered`** (features 11 and 12): three kinds
     of hash of one string (`gapThreeKinds`: `Fml.tk` adds one kind's
     words); two kinds where no kind hashes every string the other does at
     the premise's top (`gapMixedKinds`, `ids[keccak256(s)]` and
@@ -1651,6 +1725,16 @@ of about two thousand nodes, about a millisecond a state).  The
   symbolic terms and the waived operator classes, nested blocks under a
   negative quantifier, a strict comparison of two bound variables, two
   bound indices on one path.
+* Array reads outside feature 10: arrays below a field or a mapping
+  key, of structs or of arrays (`a[i][j]`), an index that reads an array
+  (`a[a[0]]`), a read of the whole array (`delete a`, a copy), a leaf with
+  more than `orBudget` fallbacks (Theory reads after writes); blocks over
+  arrays (`gapArrayBlock`: the array property fragment over arrays needs
+  the lengths in the index set).
+* A time bound with arrays: each read is up to two variables of the
+  arithmetic, whose search grows with their number; a counterassignment
+  the shrinking leaves with a length near `2^256` is out of reach to
+  realize in practice.
 
 ### The plan for the rest
 
@@ -1693,19 +1777,21 @@ in this order:
    enumerated), arrays (lengths: M4 (b)), memory, the ledger; guards with
    partial ground operands; positive quantifiers past the prefix (the
    counterexamples `gapColumn` … `gapPositiveForall`).
-6. **Memory, array indices**: realization cases for memory and in-range
-   evidence for array indices (`Calculus/ReadRealization.lean`).  Not
-   started: an array leaf is refused before realization, at update
-   pushing (`Tm.agreeB`, the halting read past the length) and at the path
-   guards (`TSegs.guardFuel?` refuses `.at`); memory at elimination
-   (`LTm.Elimable`).  Each is a stage of its own to make exact first.
+6. **Memory, array indices**: array indices done (2026-10-25, feature 10)
+   for arrays of primitives at roots: update pushing made exact for the
+   Theory's reads (`Tm.toLT`), and instead of in-range evidence through
+   the path guards, read queries and `Calculus/ReadRealization.lean`, the
+   array reads cut to atoms before those stages, with the arrays rebuilt
+   from the atoms (`Calculus/ArrayCut.lean`).  Left: arrays below fields
+   and keys, of structs and arrays, blocks over arrays; memory, refused
+   at elimination (`LTm.Elimable`), with no stage that realizes a heap.
 7. **Hashes under the premise**: a hash–hash equation as its inputs'
    equality (length and elementwise words, a bounded `∀` as in step 5), a hash key
    as its input's word list.  Done (2026-10-25) for fresh strings read only
-   by hashes of one kind (feature 10): no stage reads memory, so the
+   by hashes of one kind (feature 11): no stage reads memory, so the
    inputs are free, and their equality is the hashes' (the swap); the
    bounded `∀` over words is needed only once memory reads are, at step 6.
-   Two kinds per string done (2026-10-25, feature 11).  Left: three
+   Two kinds per string done (2026-10-25, feature 12).  Left: three
    kinds, two kinds where neither hashes every string the other does,
    more than four strings, a quantifier in the body (in the fragment:
    `gapThreeKinds`, `gapMixedKinds`, `gapFiveStrings`,

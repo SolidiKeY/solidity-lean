@@ -2,6 +2,7 @@ import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.HashKinds
+import Solidity.Calculus.ArrayReduction
 
 /-!
 # The closer's decision, stated (M7)
@@ -67,7 +68,9 @@ quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 `QFml.decide_iff`): reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`), negative array-property blocks over mappings at
-roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
+roots instantiated at the index set (`apfPrep_valid_iff`); or the leaves
+that read the starting ledger (`Fml.ledgerCovered`) or storage arrays at
+symbolic indices (`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
 `decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
@@ -113,8 +116,9 @@ arithmetic decided by the verified procedure (`AFml.decide_iff`), a `false`
 answer turned into a typed countermodel (`DependentReduction.verify`); on a
 leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
 the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
-on a leaf both refuse, the pipeline with ledger reads (`ledgerReduction?`,
-`LedgerReduction.verify`). -/
+on a leaf both refuse, the pipeline with storage array reads
+(`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
+(`ledgerReduction?`, `LedgerReduction.verify`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -128,12 +132,18 @@ def decideLeaf (φ : Fml C []) : LeafVerdict C :=
       | .inl _ => .proved
       | .inr cm => .refuted cm.1
     | none =>
-      match ledgerReduction? φ with
+      match arrayReduction? φ with
       | some q =>
         match q.verify with
         | .inl _ => .proved
         | .inr cm => .refuted cm.state
-      | none => .unknown
+      | none =>
+        match ledgerReduction? φ with
+        | some q =>
+          match q.verify with
+          | .inl _ => .proved
+          | .inr cm => .refuted cm.state
+        | none => .unknown
 
 /-- **Soundness.** -/
 theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
@@ -153,7 +163,12 @@ theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Val
         · rename_i hv _
           exact hv.down
         · cases h
-      · cases h
+      · split at h
+        · split at h
+          · rename_i hv _
+            exact hv.down
+          · cases h
+        · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
 theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
@@ -177,17 +192,24 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
         · rename_i cm _
           cases h
           exact cm.refutes
-      · cases h
+      · split at h
+        · split at h
+          · cases h
+          · rename_i cm _
+            cases h
+            exact cm.refutes
+        · cases h
 
 theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
     ¬ Fml.Valid φ :=
   fun hv => decideLeaf_refutes h (hv σ)
 
 /-- **The fragment proved complete**: M4's, on the eliminated leaf, and the
-quantified one (`Fml.quantCovered`, M7 step 4), and the one with ledger
-reads (`Fml.ledgerCovered`, M7 step 3). -/
+quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
+reads (`Fml.ledgerCovered`, M7 step 3), and the one with storage array reads
+(`Fml.arrayCovered`, M7 step 6). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
-  φ.inExact && φ.exactBounded || φ.quantCovered || φ.ledgerCovered
+  φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered
 
 /-- **Completeness on `Fml.Covered`.** -/
 theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
@@ -198,7 +220,7 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
     dsimp only
     split <;> exact fun h => nomatch h
   | none =>
-    rcases h with (h | h) | h
+    rcases h with ((h | h) | h) | h
     · have := dependentReduction?_isSome φ h.1 h.2
       rw [hd] at this
       cases this
@@ -207,13 +229,22 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
       rw [hq]
       dsimp only
       split <;> exact fun h => nomatch h
-    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayReduction?_isSome φ h)
       dsimp only
       split
       · split <;> exact fun h => nomatch h
       · rw [hq]
         dsimp only
         split <;> exact fun h => nomatch h
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
+      dsimp only
+      split
+      · split <;> exact fun h => nomatch h
+      · split
+        · split <;> exact fun h => nomatch h
+        · rw [hq]
+          dsimp only
+          split <;> exact fun h => nomatch h
 
 /-- On the fragment the verdict is exact. -/
 theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :

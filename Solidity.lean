@@ -395,6 +395,11 @@ import Solidity.Calculus.ReadLayout
 import Solidity.Calculus.StaticLinear
 import Solidity.Calculus.CheckedScalar
 import Solidity.Calculus.CheckedBool
+import Solidity.Calculus.TheoryRead
+import Solidity.Calculus.OrLift
+import Solidity.Calculus.ArrayCut
+import Solidity.Calculus.ArrayFold
+import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ExactUpdates
 import Solidity.Calculus.ParameterLayout
 import Solidity.Calculus.CheckedLinear
