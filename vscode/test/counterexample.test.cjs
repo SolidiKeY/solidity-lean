@@ -61,3 +61,12 @@ test('renders model labels without guessing source parameters and escapes contro
   assert.match(detail, /\\u001b\[31m\\u000afake-header/);
   assert.doesNotMatch(detail, /constructor-reachable|execution trace|exploit/i);
 });
+
+test('does not present unvalidated transport fields as certificate observations', () => {
+  const witness = evidence();
+  witness.transaction.futureClaim = { arbitrary: 'not validated' };
+  witness.outcome.futureClaim = 'not validated';
+  witness.initialLedger = [{ address:'0', amount:'1', futureClaim:'not validated' }];
+  validateCounterexample(row(witness));
+  assert.doesNotMatch(counterexampleDetail(row(witness)), /futureClaim|not validated/);
+});

@@ -55,6 +55,11 @@ function escapedText(text) {
 function counterexampleDetail(row) {
   if (row.status !== 'refuted') return '';
   const evidence = row.counterexample;
+  // Display only fields this adapter validates; future transport fields need
+  // their own validation before they become user-visible certificate data.
+  const tx = Object.fromEntries(['msgSender', 'selfAddress', 'msgValue', 'timestamp', 'ext'].map(field => [field, evidence.transaction[field]]));
+  const ledger = evidence.initialLedger.map(({address,amount}) => ({address,amount}));
+  const result = evidence.outcome === undefined ? undefined : evidence.outcome.kind === 'halt' ? {kind:'halt',halt:evidence.outcome.halt} : {kind:'postStorage',storage:evidence.outcome.storage};
   const lines = [
     'certified model prestate',
     `Certificate: ${escapedText(evidence.certificateDeclaration)}`,
@@ -64,9 +69,9 @@ function counterexampleDetail(row) {
     }),
     `Initial balance: ${evidence.initialBalance}`,
     `Initial storage: ${escapedText(evidence.initialStorage)}`,
-    `Initial ledger: ${escapedText(JSON.stringify(evidence.initialLedger))}`,
-    `Transaction: ${escapedText(JSON.stringify(evidence.transaction))}`,
-    ...(evidence.outcome === undefined ? [] : [`Outcome: ${escapedText(JSON.stringify(evidence.outcome))}`]),
+    `Initial ledger: ${escapedText(JSON.stringify(ledger))}`,
+    `Transaction: ${escapedText(JSON.stringify(tx))}`,
+    ...(evidence.outcome === undefined ? [] : [`Outcome: ${escapedText(JSON.stringify(result))}`]),
     ...evidence.lines.map(escapedText)
   ];
   return `\n${lines.join('\n')}`;
