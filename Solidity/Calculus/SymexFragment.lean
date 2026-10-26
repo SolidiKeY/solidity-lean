@@ -116,18 +116,19 @@ theorem Decide.BEnv.Ok.thin : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {e : BEnv C
   | _, _, .drop h, _, he => BEnv.Ok.thin h he.2
 
 /-- **A symbolic state the elimination reads**: its bindings, its
-storage and its balance elimable. -/
+storage and its balance elimable, no ledger write (the step fragment
+writes none, `UpdElem.ElimOk`). -/
 def Decide.SymS.Ok {Γ : Ctx} (ρ : SymS C Γ) : Prop :=
-  ρ.loc.Ok ∧ ρ.stor.Elimable ∧ ρ.bal.Elimable
+  ρ.loc.Ok ∧ ρ.stor.Elimable ∧ ρ.bal.Elimable ∧ ρ.netW = []
 
 /-- Its bindings and balance elimable, its storage in save normal form. -/
 def Decide.SymS.OkNF {Γ : Ctx} (ρ : SymS C Γ) : Prop :=
-  ρ.loc.Ok ∧ ρ.stor.SaveNF ∧ ρ.bal.Elimable
+  ρ.loc.Ok ∧ ρ.stor.SaveNF ∧ ρ.bal.Elimable ∧ ρ.netW = []
 
 theorem Decide.SymS.OkNF.ok {Γ : Ctx} {ρ : SymS C Γ} (h : ρ.OkNF) : ρ.Ok :=
   ⟨h.1, h.2.1.elimable, h.2.2⟩
 
-theorem Decide.SymS.init_okNF : (SymS.init : SymS C []).OkNF := ⟨trivial, .storage, .app0 rfl⟩
+theorem Decide.SymS.init_okNF : (SymS.init : SymS C []).OkNF := ⟨trivial, .storage, .app0 rfl, rfl⟩
 
 theorem Decide.SymS.Ok.push {Γ : Ctx} {t : LTy} {ρ : SymS C Γ} (h : ρ.Ok)
     {b : Option (LTm C t.bs)} (hb : ∀ x, b = some x → x.Elimable) : (ρ.push b).Ok :=
@@ -221,17 +222,17 @@ theorem Op0.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {s : Srt} (o : Op0 C s)
     simp only [Op0.toL, Option.some.injEq] at h <;> subst h
   all_goals first | exact .app0 rfl | exact hρ.2.1 | skip
   rename_i k
-  cases k <;> first | exact hρ.2.2 | exact .app0 rfl
+  cases k <;> first | exact hρ.2.2.1 | exact .app0 rfl
 
 theorem Op1.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a s : Srt} (o : Op1 C a s)
     (ho : o.elimOk = true) {x : LTm C a} (hx : x.Elimable) {l : LTm C s} (h : o.toL ρ x = some l) :
     l.Elimable := by
   cases o <;> simp only [Op1.elimOk, Bool.false_eq_true] at ho
   case net =>
-    simp only [Op1.toL] at h
-    split at h
-    · cases h; exact .app1 rfl hx
-    · cases h
+    simp only [Op1.toL, Option.some.injEq] at h
+    subst h
+    rw [hρ.2.2.2]
+    exact .app1 rfl hx
   all_goals
     simp only [Op1.toL, Option.some.injEq] at h
     subst h
@@ -401,11 +402,22 @@ theorem Rhs.ElimOk.toL {ρ : SymS C Γ} (hρ : ρ.Ok) {t : LTy} {r : Rhs C Γ t}
     {b : LTm C t.bs × LTm C (.val .bool)} (h : r.toL ρ = some b) :
     b.1.Elimable ∧ b.2.Elimable := by
   cases r with
-  | val x | path x | mref x | store x | zint x =>
+  | val x | path x | mref x | store x =>
     simp only [Rhs.toL, Option.map_eq_some_iff] at h
     obtain ⟨x', hx, rfl⟩ := h
     have hx' := Tm.ElimOk.toL hρ hr hx
     exact ⟨hx', Decide.seqL_elimable hx' Decide.tt_elimable⟩
+  | zint x =>
+    simp only [Rhs.toL, Option.map_eq_some_iff] at h
+    obtain ⟨x', hx, rfl⟩ := h
+    have hx' := Tm.ElimOk.toL hρ hr hx
+    refine ⟨hx', ?_⟩
+    unfold zRets
+    split
+    · cases hx'
+      rename_i ha
+      exact Decide.seqL_elimable ha Decide.tt_elimable
+    · exact Decide.seqL_elimable hx' Decide.tt_elimable
   | unset => exact hr.elim
   | saveNet =>
     simp only [Rhs.toL] at h

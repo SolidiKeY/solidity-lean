@@ -1160,7 +1160,8 @@ feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25;
 2026-10-26; `gapIntKeyed` and `gapLedgerBlock` (features 20 and 21) since
 2026-10-26, their astronomically large refutations returned as terms;
 `gapIntAnd` and `gapAddmod` (feature 22), `gapMemInner` (feature 23) and
-`gapMemWrite` (feature 24) since 2026-10-26.
+`gapMemWrite` (feature 24) since 2026-10-26;
+`gapLedgerWrite` and `gapKIntBinder` (features 25 and 26) since 2026-10-26.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named:
@@ -1246,6 +1247,7 @@ Three properties of the reading are worth knowing.
 | `arrayReduction?_isSome` | `φ.arrayCovered = true → (arrayReduction? φ).isSome` |
 | `Fml.mx_holds`, `Fml.mxTop_holds` | the fresh memory arrays' cut is exact at every state (`Calculus/MemSwap.lean`) |
 | `decideMem_sound`, `decideMem_refutes`, `decideMem_complete` | the memory lane: a proof of the cut leaf proves the leaf, a state refuting it refutes the leaf, it answers on `Fml.memCovered` |
+| `Fml.zT_valid`, `Fml.holds_zT`, `decideKInt_sound`, `decideKInt_refutes`, `decideKInt_complete` | binders of KeY's `int` read as ledger entries (feature 26): a valid rewriting makes the leaf valid, a state refuting it refutes the leaf, it answers on `Fml.kintCovered` |
 
 `#print axioms` of each of the six `decide*` theorems, of
 `decideGoal_complete_hash`, of `decideHash2_sound`, `decideHash2_refutes`,
@@ -1259,10 +1261,11 @@ Three properties of the reading are worth knowing.
 `Calculus/QuantHoist.lean`, `Calculus/QuantExpand.lean` and
 `Calculus/ArrayProperty.lean`, of the ledger blocks' in
 `Calculus/LedgerBlock.lean`, of
-`Fml.mxTop_holds` in `Calculus/MemSwap.lean`: `propext`,
+`Fml.mxTop_holds` in `Calculus/MemSwap.lean`, of `Fml.zT_valid` and
+`Fml.holds_zT` in `Calculus/KIntBinder.lean`: `propext`,
 `Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
-`Fml.Covered` is `Fml.CoveredA || Fml.memCovered`.  `Fml.CoveredA`, the
+`Fml.Covered` is `Fml.CoveredA || Fml.memCovered || Fml.kintCovered`.  `Fml.CoveredA`, the
 pipelines' fragment (`decideLeafA`), is `Fml.inExact && Fml.exactBounded`
 (M4), extended by features 1, 2, 4, 5, 8, 14 and 15, each with its
 completeness proved through every stage (recognizer, lifting, flattening,
@@ -1272,7 +1275,8 @@ or `Fml.ledgerCovered` (feature 9, its own pipeline), or
 `Fml.arrayCovered` (feature 10, its own pipeline), or
 `Fml.ledgerBlockCovered` (feature 21, its own pipeline); `Fml.memCovered` is
 feature 13's, a leaf with fresh memory arrays whose cut is in
-`Fml.CoveredA`:
+`Fml.CoveredA`; `Fml.kintCovered` feature 26's, a leaf with binders of
+KeY's `int` whose rewriting is in `Fml.CoveredA`:
 
 1. **Checked multiplication by a literal**, on either side (`LTm.Src.mulL`,
    `mulR`; `LTm.Num.mulL`, `mulR`; `CheckedValue.mulLit`, `litMul`;
@@ -1440,8 +1444,7 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
    cut; `LFml.ledgerCut_src` (`Calculus/LedgerTotality.lean`) maps the
    fragment with reads at addresses to the one with reads at constants.
    A read under the symbolic execution's own ledger writes (`pay`,
-   `store(net, …)`) stays outside: the leaf builder refuses a read past a
-   write (`SymS.netOk`).
+   `store(net, …)`) was outside until feature 25.
 
 10. **Storage arrays at symbolic indices** (plan step 6, arrays of
    primitives at roots, dynamic and fixed).  `decideLeaf` falls back to
@@ -1826,6 +1829,66 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     Pins: `gapMemWrite`, `memWriteOther` proved, `memWriteBad`,
     `memWriteDia` refuted (`Examples/DecisionMemory.lean`).
 
+25. **Ledger reads past ledger writes** (2026-10-26,
+    `Calculus/DecideScoped.lean`, `Calculus/DecideTyped.lean`): the
+    symbolic state keeps the ledger writes its updates made (`SymS.netW`,
+    the latest first; `NetW.op` for `net := store(net, r, net(r) ± a)`,
+    `NetW.pay` for `pay(r, a)`, `NetW.mt` for `net := store(mtSt, r, a)`),
+    each with its operands read where its update is applied.  A read
+    `net(x)` past them is the starting ledger's entry moved by each write at
+    the address it names (`NetW.read`): `net(x) ± toInt(x == r ? a : 0)`,
+    `net(x) - toInt(x == r ? (r == this ? 0 : a) : 0)` for a payment,
+    `toInt(x == r ? a : 0)` past `mtSt`.  The conditional is a `kite` at a
+    word, the shape the elimination gives a read past a storage write, so
+    the source fragment, `LTm.condSplit` and the lift take it unchanged
+    (`LTm.SrcL.kite` under `zint`), and the lifted leaf goes through the
+    ledger pipeline of feature 9.  A payment also moves the balance as
+    `State.pay` does, from the balance its update is applied at
+    (`payBal`: `b` where `r` is the contract, `b - a` where `a ≤ b`, `0`
+    otherwise).  The builder's agreement reads the ledger past the writes
+    (`AgreesV.netRd`, at each literal address; `NetW.read_eval` moves a read
+    at a term to its value), and freshness likewise (`SymS.Fresh.net`);
+    `NetW.read_op`, `NetW.read_pay`, `NetW.read_mt` and `payBal_eval` are
+    the four landing lemmas.  A snapshot `x := net` past a write stays
+    outside (`SymS.netOk`, now `netW = []`), and so does the step
+    fragment's (`SymS.Ok` asks `netW = []`: `UpdElem.ElimOk` writes no
+    ledger).  `gapLedgerWrite` is refuted (the payee `0`, its entry `0`),
+    `ledgerWriteOk` and `payBalanceOk` proved, `payBalanceBad` refuted, the
+    first three's coverage kernel-checked.  Each write multiplies the
+    lifted leaf by the conditional's cases: two payments to one address
+    read once already pass `Fml.exactBounded`'s 511 nodes.
+
+26. **Binders of KeY's `int`** (2026-10-26, `Calculus/KIntBinder.lean`,
+    `decideKInt`, after `decideMem` in `decideLeaf`).  The leaf language
+    binds atoms of a `PrimTy` only, but the ledger has an unbounded
+    position: an entry of the starting ledger is any integer in some state,
+    and the ledger pipeline (feature 9) compiles it as two unbounded natural
+    codes.  So a binder `∀ int z` in a positive position (under `∀`, `∧`, a
+    consequent) of a leaf that reads no ledger is read as the entry at an
+    address of its own, the `n`-th binder on a path at the address `n`:
+    `∀ int z. φ` becomes `{z := net(n)} φ` (`Fml.zT`).  Where the leaf holds
+    the rewriting holds, each binder at the entry its address holds
+    (`Fml.holds_zT`), so a state refuting the rewriting refutes the leaf.
+    Where the rewriting holds in every state the leaf holds
+    (`Fml.zT_valid`): at a state and a binder's value, the rewriting holds
+    with the ledger holding the value at the binder's address and the outer
+    binders' at theirs (`LedgerAgree`, `Fml.zT_holds`), and past the
+    binders the leaf reads no ledger, so it holds whatever the ledger
+    (`Fml.netFree`, `holds_setNet`).  The fragment `Fml.zOK`: the binders
+    under `∀`, `∧`, a consequent; everything else first-order (equations,
+    `wt`, the connectives, value quantifiers) reading no ledger and no
+    `copyMem` (whose denotation the frame lemma does not unfold); at most
+    `2^256` binders on a path (`Fml.zDepth`), so that their addresses are
+    distinct.  The declaration's guard is the address's (`zRets`: a ledger
+    read returns where its address does), so the rewriting is in the ledger
+    fragment.  `Fml.kintCovered` is the leaf in `Fml.zOK` with its
+    rewriting in `Fml.CoveredA` (`decideKInt_complete`).  `gapKIntBinder`
+    (`∀ int z. z + 1 > z`) proved, `kintBinderBad` (`∀ int z. z + 1 > 5`)
+    refuted by the entry `0` at the address `0`, `kintBinderTwo` (two
+    binders) proved, the first two's coverage kernel-checked.  A binder in
+    a negative position (an `∃`, `gapKIntNeg`) is outside: it needs the
+    unbounded binder of the leaf language and of `QFml` (below).
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -2129,29 +2192,19 @@ stack would lift this.
   * **the ledger and KeY `int` without quantifiers** (the plain
     storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
     decided by feature 10, the fresh memory array's, `gapMemory`, by
-    feature 13, and fifty reads, `gapManyReads`, by feature 15): a
-    binder of KeY's `int` (`gapKIntBinder`, `∀ int z. z + 1 > z`): an atom
-    position holds a `bool`, `uint` or `int` (`AEnv`), `LTm.var` and the
-    binder `LFml.all k p` are sorted by `PrimTy`, so the leaf has no
-    position of sort `Srt.kint` to bind.  It needs one (a field of `AEnv`
-    and a `kint` variable of `LTm`, or an `allZ` binder of `LFml`, with
-    every recursion over them extended, some forty modules), the prefix
-    taking it as a parameter compiled as two unbounded natural codes (as
-    the ledger entries are, `Inputs.AgreeZ`), and, past the prefix, an
-    unbounded binder of `QFml` (no range atom; Presburger over ℤ as two
-    naturals); a ledger read past a payment (`gapLedgerWrite`,
-    `{pay(x, 1)} net(x) ≥ 0`): `UpdElem.toLS` refuses `pay` outright (its
-    balance change is not encoded) and a `net`/`netMt` write sets
-    `SymS.netOk := false`, after which `Op1.toL` refuses `net`.  It needs
-    the symbolic state to keep the ledger writes (address, operation,
-    amount) and the balance `pay` leaves (`GlobT.paid`: the recipient's
-    entry less the amount unless it is the contract, the balance
-    `σ.pay`), a read `net(a)` past them as nested conditionals on the
-    addresses at sort `Srt.kint` (`kite a r (net(a) - v) (net(a))`, which
-    the source fragment, `LTm.condSplit` and the lift take only at value
-    sorts today), and the builder's agreement (`DecideTyped`, `AgreesV`'s
-    `net` field) restated from the starting ledger to it with the writes
-    applied;
+    feature 13, and fifty reads, `gapManyReads`, by feature 15; a
+    positive binder of KeY's `int`, `gapKIntBinder`, by feature 26; the
+    ledger read past a payment, `gapLedgerWrite`, by feature 25): a
+    binder of KeY's `int` in a negative position (`gapKIntNeg`, `(∀ int z.
+    z > 0) → 0 == 1`, an `∃`), or in a positive one of a leaf that reads
+    the ledger elsewhere (feature 26 needs the ledger free for its
+    binders): an atom position holds a `bool`, `uint` or `int` (`AEnv`),
+    `LTm.var` and the binder `LFml.all k p` are sorted by `PrimTy`, so the
+    leaf has no position of sort `Srt.kint` to bind.  It needs one (a field
+    of `AEnv` and a `kint` variable of `LTm`, or an `allZ` binder of
+    `LFml`, with every recursion over them extended, some forty modules),
+    and, past the prefix, an unbounded binder of `QFml` (no range atom;
+    Presburger over ℤ as two naturals);
   * **hashes outside `Fml.hashCovered`** (features 11 and 12):
     * three kinds of hash of one string (`gapThreeKinds`).  `Fml.tk` reads
       one second kind's words.  Applied twice it is sound (`Fml.tk_validH`
@@ -2219,9 +2272,10 @@ in this order:
 3. **KeY `int`**: an atom sort in `LTm` and `AEnv`, encoded as the
    difference of two natural codes in `AFml`.  Done (2026-10-25) for the
    linear operations, `toInt` and the comparisons (feature 8), and for
-   reads of the starting ledger as atoms (feature 9).  Left: a binder of
-   KeY's `int`, which needs an unbounded binder in `LFml` and its
-   prefix, and ledger reads past ledger writes.
+   reads of the starting ledger as atoms (feature 9); ledger reads past
+   ledger writes (feature 25) and positive binders of KeY's `int` read as
+   ledger entries (feature 26) on 2026-10-26.  Left: a negative binder of
+   KeY's `int`, which needs an unbounded binder in `LFml` and `QFml`.
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
    by projection in the binary-derivative automaton (`QFml.decide_iff`),
    and negative-position Presburger quantifiers and alternation over value

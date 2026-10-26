@@ -212,6 +212,8 @@ structure SymS.Fresh {Γ : Ctx} (ρ : SymS C Γ) : Prop where
   mem : Decide.Fresh ρ.next ρ.mem
   loc : ρ.loc.Fresh ρ.next
   bal : Decide.Fresh ρ.next ρ.bal
+  /-- A ledger read past the writes, at a literal address. -/
+  net : ∀ n : PrimTy.uint.Denote, Decide.Fresh ρ.next (NetW.read (.lit n) ρ.netW)
 
 /-- **The reduction's state `ρ`, read in `g₀` and `ν`, stands for the
 global part `G` and the locals `ℓ`.** -/
@@ -224,8 +226,11 @@ structure AgreesV (g₀ : State C []) (ν : AEnv) {Γ : Ctx} (ρ : SymS C Γ) (G
   bal : (ρ.bal.eval g₀ ν : Option PrimTy.uint.Denote) = some G.selfBalance
   loc : ∀ {t : LTy} (i : Idx Γ t) (b : LTm C t.bs), ρ.loc.get i = some b →
     (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt (ℓ t i)
-  /-- The ledger is the start state's: the fragment writes none. -/
+  /-- With no ledger write, the ledger is the start state's (a snapshot reads it). -/
   net : ρ.netOk = true → G.net = g₀.net
+  /-- A ledger read past the writes reads `G`'s ledger. -/
+  netRd : ∀ n : PrimTy.uint.Denote, ((NetW.read (.lit n) ρ.netW).eval g₀ ν : Option Int) =
+    some ((Semantics.lookupBy n G.net).getD 0)
   /-- A bound snapshot of the ledger is the start state's. -/
   netLoc : ∀ (i : Idx Γ .oldNet) (b : LTm C .kint), ρ.loc.get i = some b → ℓ .oldNet i = g₀.net
 
@@ -330,6 +335,158 @@ theorem Op2.toL_ne {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     (hat : o.isAt = false) : o.toL ρ x y = some (foldRead2 o x y) := by
   cases o <;> simp only [Op2.isAt, reduceCtorEq] at hat <;> rfl
 
+/-- A ledger read past the writes reads its address first, then the
+entry there: the same as at the literal address. -/
+theorem NetW.read_eval (g : State C []) (ν : AEnv) (x : LTm C (.val .uint)) :
+    (ws : List (NetW C)) → ((NetW.read x ws).eval g ν : Option Int) =
+      (x.eval g ν : Option PrimTy.uint.Denote).bind fun n => (NetW.read (.lit n) ws).eval g ν
+  | [] => by
+    cases hx : (x.eval g ν : Option PrimTy.uint.Denote) with
+    | none => simp only [NetW.read, List.foldr, LTm.eval_app1, hx, Option.bind_none]; rfl
+    | some n => simp only [NetW.read, List.foldr, LTm.eval_app1, hx, Option.bind_some]; rfl
+  | w :: ws => by
+    have ih := NetW.read_eval g ν x ws
+    show ((NetW.rd x w (NetW.read x ws)).eval g ν : Option Int) =
+      (x.eval g ν : Option PrimTy.uint.Denote).bind fun n =>
+        (NetW.rd (.lit n) w (NetW.read (.lit n) ws)).eval g ν
+    cases hx : (x.eval g ν : Option PrimTy.uint.Denote) with
+    | none =>
+      rw [hx, Option.bind_none] at ih
+      rcases w with ⟨r, o, a⟩ | ⟨r, a⟩ | ⟨r, a⟩
+      · cases o <;> simp only [NetW.rd, LTm.eval_app2, ih, Option.bind_none] <;> rfl
+      · simp only [NetW.rd, LTm.eval_app2, ih, Option.bind_none]; rfl
+      · simp only [NetW.rd, LTm.eval_app1, LTm.eval_kite, hx, Option.bind_none]; rfl
+    | some n =>
+      rw [hx, Option.bind_some] at ih
+      rcases w with ⟨r, o, a⟩ | ⟨r, a⟩ | ⟨r, a⟩
+      · cases o <;> simp only [NetW.rd, LTm.eval_app2, LTm.eval_app1, LTm.eval_kite, hx, ih,
+          Option.bind_some] <;> rfl
+      · simp only [NetW.rd, LTm.eval_app2, LTm.eval_app1, LTm.eval_kite, hx, ih,
+          Option.bind_some]; rfl
+      · simp only [NetW.rd, LTm.eval_app1, LTm.eval_kite, hx, Option.bind_some]; rfl
+
+theorem atL_lit_eval (g : State C []) (ν : AEnv) (m : PrimTy.uint.Denote) {r a : LTm C (.val .uint)}
+    {addr : PrimTy.uint.Denote} {amt : PrimTy.uint.Denote} (hr : (r.eval g ν : Option _) = some addr)
+    (ha : (a.eval g ν : Option _) = some amt) :
+    ((atL (.lit m) r a).eval g ν : Option PrimTy.uint.Denote) =
+      some (if m = addr then amt else uintOfNat 0) := by
+  rw [LTm.eval_kite, hr, ha]
+  show (if m = addr then some amt else some (uintOfNat 0)) = _
+  by_cases h : m = addr
+  · rw [if_pos h, if_pos h]
+  · rw [if_neg h, if_neg h]
+
+theorem lookupBy_setBy_getD (m addr : PrimTy.uint.Denote) (v : Int) (L : Ledger) :
+    (Semantics.lookupBy m (Semantics.setBy addr v L)).getD 0 =
+      if m = addr then v else (Semantics.lookupBy m L).getD 0 := by
+  by_cases h : m = addr
+  · subst h; simp only [Semantics.lookupBy_setBy_self, Option.getD_some, if_true]
+  · rw [Semantics.lookupBy_setBy_ne h, if_neg h]
+
+/-- A ledger read past one more write `net := store(net, r, net(r) ± a)`. -/
+theorem NetW.read_op (g : State C []) (ν : AEnv) (m : PrimTy.uint.Denote) {ws : List (NetW C)}
+    {L : Ledger} (hp : ((NetW.read (.lit m) ws).eval g ν : Option Int) =
+      some ((Semantics.lookupBy m L).getD 0))
+    {r a : LTm C (.val .uint)} {addr amt : PrimTy.uint.Denote}
+    (hr : (r.eval g ν : Option _) = some addr) (ha : (a.eval g ν : Option _) = some amt) (o : IntOp) :
+    ((NetW.read (.lit m) (.op r o a :: ws)).eval g ν : Option Int) = some ((Semantics.lookupBy m
+      (Semantics.setBy addr (o.apply ((Semantics.lookupBy addr L).getD 0) amt.1) L)).getD 0) := by
+  have hk := atL_lit_eval g ν m hr ha
+  rw [lookupBy_setBy_getD]
+  cases o <;>
+  · simp only [NetW.read, List.foldr, NetW.rd, LTm.eval_app2, LTm.eval_app1]
+    rw [← NetW.read.eq_1, hp, hk]
+    by_cases h : m = addr
+    · subst h; simp only [if_true]; rfl
+    · simp only [h, if_false]
+      exact congrArg some (by
+        show _ + (uintOfNat 0).1 = _; rw [uintOfNat_val (Nat.two_pow_pos 256)]; omega)
+
+/-- A ledger read past one more payment of `a` to `r`, `self` the contract. -/
+theorem NetW.read_pay (g : State C []) (ν : AEnv) (m : PrimTy.uint.Denote) {ws : List (NetW C)}
+    {L : Ledger} (hp : ((NetW.read (.lit m) ws).eval g ν : Option Int) =
+      some ((Semantics.lookupBy m L).getD 0))
+    {r a : LTm C (.val .uint)} {addr amt self : PrimTy.uint.Denote}
+    (hr : (r.eval g ν : Option _) = some addr) (ha : (a.eval g ν : Option _) = some amt)
+    (hs : ((selfL : LTm C (.val .uint)).eval g ν : Option _) = some self) :
+    ((NetW.read (.lit m) (.pay r a :: ws)).eval g ν : Option Int) = some ((Semantics.lookupBy m
+      (if addr.1 = self.1 then L
+        else Semantics.setBy addr ((Semantics.lookupBy addr L).getD 0 - amt.1) L)).getD 0) := by
+  have hi : ((LTm.kite r selfL (.lit (uintOfNat 0)) a).eval g ν : Option PrimTy.uint.Denote) =
+      some (if addr = self then uintOfNat 0 else amt) := by
+    rw [LTm.eval_kite, hr, hs, ha]
+    show (if addr = self then some (uintOfNat 0) else some amt) = _
+    by_cases h : addr = self
+    · rw [if_pos h, if_pos h]
+    · rw [if_neg h, if_neg h]
+  have hk := atL_lit_eval g ν m hr hi
+  simp only [NetW.read, List.foldr, NetW.rd, LTm.eval_app2, LTm.eval_app1]
+  rw [← NetW.read.eq_1, hp, hk]
+  have h0 : (uintOfNat 0).1 = 0 := by rw [uintOfNat_val (Nat.two_pow_pos 256)]; rfl
+  by_cases hs' : addr = self
+  · have e : addr.1 = self.1 := congrArg Subtype.val hs'
+    rw [if_pos e, if_pos hs']
+    show some (_ - (if m = addr then uintOfNat 0 else uintOfNat 0).1) = _
+    rw [ite_self, h0, Int.sub_zero]
+  · have e : ¬ addr.1 = self.1 := fun e => hs' (Subtype.ext e)
+    rw [if_neg e, if_neg hs', lookupBy_setBy_getD]
+    show some (_ - (if m = addr then amt else uintOfNat 0).1) = _
+    by_cases h : m = addr
+    · subst h; rw [if_pos rfl, if_pos rfl]
+    · rw [if_neg h, if_neg h, h0, Int.sub_zero]
+
+/-- A ledger read past one more write `net := store(mtSt, r, a)`. -/
+theorem NetW.read_mt (g : State C []) (ν : AEnv) (m : PrimTy.uint.Denote) (ws : List (NetW C))
+    {r a : LTm C (.val .uint)} {addr amt : PrimTy.uint.Denote}
+    (hr : (r.eval g ν : Option _) = some addr) (ha : (a.eval g ν : Option _) = some amt) :
+    ((NetW.read (.lit m) (.mt r a :: ws)).eval g ν : Option Int) =
+      some ((Semantics.lookupBy m [(addr, amt.1)]).getD 0) := by
+  have hk := atL_lit_eval g ν m hr ha
+  simp only [NetW.read, List.foldr, NetW.rd, LTm.eval_app1]
+  rw [hk]
+  show some (if m = addr then amt else uintOfNat 0).1 = some ((if m = addr then some amt.1 else none).getD 0)
+  by_cases h : m = addr
+  · rw [if_pos h, if_pos h]; rfl
+  · rw [if_neg h, if_neg h, uintOfNat_val (Nat.two_pow_pos 256)]; rfl
+
+/-- The balance a payment leaves, read (`State.pay`). -/
+theorem payBal_eval (g : State C []) (ν : AEnv) {b r a : LTm C (.val .uint)}
+    {bal addr amt self : PrimTy.uint.Denote} (hb : (b.eval g ν : Option _) = some bal)
+    (hr : (r.eval g ν : Option _) = some addr) (ha : (a.eval g ν : Option _) = some amt)
+    (hs : ((selfL : LTm C (.val .uint)).eval g ν : Option _) = some self) :
+    ((payBal b r a).eval g ν : Option PrimTy.uint.Denote) =
+      some (if addr.1 = self.1 then bal else uintOfNat (bal.1 - amt.1).toNat) := by
+  unfold payBal
+  rw [LTm.eval_kite, hr, hs]
+  by_cases hs' : addr = self
+  · have e : addr.1 = self.1 := congrArg Subtype.val hs'
+    show (if addr = self then _ else _) = _
+    rw [if_pos hs', if_pos e, hb]
+  · have e : ¬ addr.1 = self.1 := fun e => hs' (Subtype.ext e)
+    show (if addr = self then _ else _) = _
+    rw [if_neg hs', if_neg e, LTm.eval_kite, LTm.eval_app2, ha, hb]
+    show ((some (decide (amt.1 ≤ bal.1))).bind fun x => (some true).bind fun y =>
+      if x = y then LTm.eval g ν (LTm.app2 (Op2.binop BinOp.sub rfl) b a)
+      else some (uintOfNat 0)) = _
+    have hbal : 0 ≤ bal.1 ∧ bal.1 < ((2 ^ 256 : Nat) : Int) := by
+      have := bal.2; simp only [PrimTy.inRange, decide_eq_true_eq] at this; exact this
+    have hamt : 0 ≤ amt.1 ∧ amt.1 < ((2 ^ 256 : Nat) : Int) := by
+      have := amt.2; simp only [PrimTy.inRange, decide_eq_true_eq] at this; exact this
+    by_cases hl : amt.1 ≤ bal.1
+    · simp only [hl, decide_true, Option.bind_some, if_true]
+      rw [LTm.eval_app2, hb, ha]
+      show PrimTy.uint.ofInt? (bal.1 - amt.1) = _
+      have hr : PrimTy.uint.inRange (bal.1 - amt.1) = true := by
+        simp only [PrimTy.inRange, decide_eq_true_eq]; omega
+      simp only [PrimTy.ofInt?, hr, dif_pos, Option.some.injEq]
+      apply Subtype.ext
+      rw [uintOfNat_val (by omega)]
+      show bal.1 - amt.1 = _
+      omega
+    · simp only [hl, decide_false, Option.bind_some]
+      show (if false = true then _ else _) = _
+      rw [if_neg Bool.false_ne_true, show (bal.1 - amt.1).toNat = 0 by omega]
+
 /-- **A term pushed in reads what the scoped term reads.** -/
 theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) → t.toL ρ = some t' →
@@ -374,16 +531,15 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     cases hn : o.isNet with
     | true =>
       cases o <;> simp only [Op1.isNet, reduceCtorEq] at hn
-      simp only [Op1.toL] at ht
-      split at ht
-      case isFalse => cases ht
-      rename_i hok
-      cases ht
-      show Option.map _ (x'.eval g₀ ν : Option PrimTy.uint.Denote) =
-        Option.map _ (x.eval τ : Option PrimTy.uint.Denote)
-      rw [show (x'.eval g₀ ν : Option PrimTy.uint.Denote) = x.eval τ from hx]
-      show _ = Option.map (fun n => (Semantics.lookupBy n τ.glob.net).getD 0) _
-      rw [h.net hok]
+      simp only [Op1.toL, Option.some.injEq] at ht
+      subst ht
+      show ((NetW.read x' ρ.netW).eval g₀ ν : Option Int) =
+        Option.map (fun n => (Semantics.lookupBy n τ.glob.net).getD 0)
+          (x.eval τ : Option PrimTy.uint.Denote)
+      rw [NetW.read_eval, show (x'.eval g₀ ν : Option PrimTy.uint.Denote) = x.eval τ from hx]
+      cases (x.eval τ : Option PrimTy.uint.Denote) with
+      | none => rfl
+      | some n => exact h.netRd n
     | false =>
       cases hm : o.isNext with
       | true =>
@@ -551,6 +707,29 @@ theorem Fresh.foldNext {E : Ty} {n : Nat} {S : LTm C .st} {x : LTm C (.path (.re
   simp only [foldNext_eval]
   exact Fresh.app2 .nextIn hS hx g ν p k v hk
 
+theorem Fresh.kite {q : PrimTy} {s : Srt} {n : Nat} {a b : LTm C (.val q)} {t e : LTm C s}
+    (ha : Fresh n a) (hb : Fresh n b) (ht : Fresh n t) (he : Fresh n e) :
+    Fresh n (LTm.kite a b t e) := fun g ν p k v hk => by
+  rw [LTm.eval_kite, LTm.eval_kite, ha g ν p k v hk, hb g ν p k v hk, ht g ν p k v hk,
+    he g ν p k v hk]
+
+/-- A ledger write's operands fresh from `n` on. -/
+def NetW.Fresh (n : Nat) : NetW C → Prop
+  | .op r _ a | .pay r a | .mt r a => Decide.Fresh n r ∧ Decide.Fresh n a
+
+/-- A read past one more write is fresh where the read before it and the
+write's operands are. -/
+theorem NetW.fresh_rd {n : Nat} {x : LTm C (.val .uint)} {e : LTm C .kint} (hx : Decide.Fresh n x)
+    (he : Decide.Fresh n e) : (w : NetW C) → w.Fresh n → Decide.Fresh n (w.rd x e)
+  | .op r o a, ⟨hr, ha⟩ => by
+    have h0 := Fresh.app1 .toInt (Fresh.kite hx hr ha (Fresh.app0 n (.lit (uintOfNat 0))))
+    cases o
+    · exact Fresh.app2 _ he h0
+    · exact Fresh.app2 _ he h0
+  | .pay r a, ⟨hr, ha⟩ => Fresh.app2 _ he (Fresh.app1 .toInt (Fresh.kite hx hr
+      (Fresh.kite hr (Fresh.app0 _ _) (Fresh.app0 _ _) ha) (Fresh.app0 _ _)))
+  | .mt r a, ⟨hr, ha⟩ => Fresh.app1 .toInt (Fresh.kite hx hr ha (Fresh.app0 _ _))
+
 /-- **A term pushed in is fresh where the state is.** -/
 theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) →
     t.toL ρ = some t' → Fresh ρ.next t'
@@ -570,10 +749,13 @@ theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : L
     have hx := Tm.toL_fresh hF x x' hx'
     cases o
     case net =>
-      simp only [Op1.toL] at ht
-      split at ht
-      · cases ht; exact Fresh.app1 _ hx
-      · cases ht
+      simp only [Op1.toL, Option.some.injEq] at ht
+      subst ht
+      intro g ν p k v hk
+      rw [NetW.read_eval, NetW.read_eval, hx g ν p k v hk]
+      congr 1
+      funext n
+      exact hF.net n g ν p k v hk
     all_goals (cases ht; first | exact Fresh.fold1 _ hx | exact Fresh.app1 _ hx | exact Fresh.foldNext hF.stor hx)
   | _, .app2 o x y, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
@@ -603,6 +785,16 @@ theorem seqL_tt_drel {s : Srt} {x : LTm C s} {y : Option (s.Den C τ.H)} (h : Sr
     | (cases h; rfl)
     | (cases hx : x.eval g₀ ν <;> cases hy : y <;> rw [hx, hy] at h <;>
         simp only [Srt.DRel, Option.map_none, Option.map_some, reduceCtorEq] at h <;> rfl)
+
+theorem zRets_eval (g : State C []) (ν : AEnv) (t : LTm C .kint) :
+    ((zRets t).eval g ν : Option Bool) = (t.eval g ν : Option Int).map fun _ => true := by
+  unfold zRets
+  split
+  · rename_i a
+    rw [seqL_tt_eval, LTm.eval_app1]
+    show _ = Option.map _ (Option.map _ _)
+    rw [Option.map_map]; rfl
+  · exact seqL_tt_eval g ν _
 
 /-- **A right-hand side pushed in**: its guard returns where it does, and
 its binding reads what it sets the local to. -/
@@ -679,7 +871,7 @@ theorem Rhs.toL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh) {t : LTy
     simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨x', hx', rfl, rfl⟩ := h
     have hd := Tm.toL_drel hA x x' hx'
-    refine ⟨seqL_tt_drel hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx', fun _ _ e => nomatch e⟩
+    refine ⟨by rw [zRets_eval]; exact congrArg (Option.map _) hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx', fun _ _ e => nomatch e⟩
     show (x'.eval g₀ ν : Option Int) = some v
     rw [show (x'.eval g₀ ν : Option Int) = x.eval τ from hd]; exact hv
 
@@ -687,8 +879,8 @@ theorem AgreesV.setLoc {Δ : Ctx} {ρ : SymS C Δ} {G : State C []} {ℓ : LocsV
     (h : AgreesV g₀ ν ρ G ℓ) {t : LTy} (i : Idx Δ t) {b : LTm C t.bs} {v : t.VDen C}
     (hb : (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt v)
     (hn : ∀ (e : t = .oldNet), (e ▸ v : LTy.VDen C .oldNet) = g₀.net) :
-    AgreesV g₀ ν ⟨ρ.loc.set i (some b), ρ.stor, ρ.mem, ρ.bal, ρ.next, ρ.netOk⟩ G (ℓ.set i v) := by
-  refine ⟨h.stor, h.mem, h.tx, h.bal, fun {u} j b' hj => ?_, h.net, fun j b' hj => ?_⟩
+    AgreesV g₀ ν ⟨ρ.loc.set i (some b), ρ.stor, ρ.mem, ρ.bal, ρ.next, ρ.netW⟩ G (ℓ.set i v) := by
+  refine ⟨h.stor, h.mem, h.tx, h.bal, fun {u} j b' hj => ?_, h.net, h.netRd, fun j b' hj => ?_⟩
   · by_cases e : i.toNat = j.toNat
     · obtain rfl := Idx.ty_eq_of_toNat e
       obtain rfl := Idx.toNat_inj i j e
@@ -723,7 +915,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     obtain ⟨hg, hv, hfb, hnv⟩ := Rhs.toL_sound hA hF0 r hr
     refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
-      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal⟩, rfl⟩
+      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
     · rw [hg]
       show _ = Option.map _ (Option.bind _ _)
       cases r.eval τ <;> rfl
@@ -739,7 +931,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     obtain ⟨s', hs', h⟩ := h
     cases h
     have hd := Tm.toL_drel hA st s' hs'
-    refine ⟨?_, ?_, ⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
+    refine ⟨?_, ?_, ⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
     · rw [seqL_tt_drel hd]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (st.eval τ : Option (Storage C)) <;> rfl
@@ -749,13 +941,13 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
       exact ⟨by rw [show (s'.eval g₀ ν : Option (Storage C)) = st.eval τ from hd, hx]; rfl,
-        hρ.mem, hρ.tx, hρ.bal, hρ.loc, hρ.net, hρ.netLoc⟩
+        hρ.mem, hρ.tx, hρ.bal, hρ.loc, hρ.net, hρ.netRd, hρ.netLoc⟩
   | memory m =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨m', hm', h⟩ := h
     cases h
     have hd := Tm.toL_drel hA m m' hm'
-    refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal⟩, rfl⟩
+    refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
     · rw [seqMemL_tt_eval, seqL_tt_drel hd]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (m.eval τ : Option (Grown _ _)) <;> rfl
@@ -764,7 +956,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
           (fun g' => some (g', ℓ)) = some q := hq
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
-      refine ⟨hρ.stor, ?_, hρ.tx, hρ.bal, hρ.loc, hρ.net, hρ.netLoc⟩
+      refine ⟨hρ.stor, ?_, hρ.tx, hρ.bal, hρ.loc, hρ.net, hρ.netRd, hρ.netLoc⟩
       have hd' : (m'.eval g₀ ν : Option (Grown g₀.H _)).map Grown.forget =
           (some x : Option (Grown τ.H _)).map Grown.forget := by
         rw [← hx]; exact hd
@@ -776,7 +968,10 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     have hdr := Tm.toL_drel hA r r' hr'
     have hda := Tm.toL_drel hA a a' ha'
-    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal,
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.op r' op a') ⟨hfr, hfa⟩⟩, rfl⟩
     · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (r.eval τ : Option PrimTy.uint.Denote)
@@ -788,16 +983,49 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
           (fun g' => some (g', ℓ))) = some q := hq
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
-      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
-      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc, (fun h => nomatch h), hρ.netLoc⟩
-  | pay r a => cases h
+      obtain ⟨_, ⟨addr, hra, amt, haa, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc, (fun h => nomatch h),
+        fun m => NetW.read_op g₀ ν m (hρ.netRd m) (hdr.trans hra) (hda.trans haa) op, hρ.netLoc⟩
+  | pay r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', hr', a', ha', h⟩ := h
+    cases h
+    have hdr := Tm.toL_drel hA r r' hr'
+    have hda := Tm.toL_drel hA a a' ha'
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc,
+      Fresh.kite hfr (Fresh.app0 _ _) (hF0.bal.mono hn) (Fresh.kite (Fresh.app2 _ hfa (hF0.bal.mono hn))
+        (Fresh.app0 _ _) (Fresh.app2 _ (hF0.bal.mono hn) hfa) (Fresh.app0 _ _)),
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.pay r' a') ⟨hfr, hfa⟩⟩, rfl⟩
+    · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (r.eval τ : Option PrimTy.uint.Denote)
+      · rfl
+      · simp only [Option.bind_some]
+        rw [seqL_tt_drel hda]
+        cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
+    · intro q hq
+      have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt =>
+          some (G.paid τ addr amt)).bind (fun g' => some (g', ℓ))) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨addr, hra, amt, haa, rfl⟩, rfl⟩ := hq'
+      have hs : ((selfL : LTm C (.val .uint)).eval g₀ ν : Option _) = some τ.tx.selfAddress := by
+        show some g₀.tx.selfAddress = _
+        rw [hA.tx]; rfl
+      exact ⟨hρ.stor, hρ.mem, hρ.tx,
+        payBal_eval g₀ ν hA.bal (hdr.trans hra) (hda.trans haa) hs, hρ.loc, (fun h => nomatch h),
+        fun m => NetW.read_pay g₀ ν m (hρ.netRd m) (hdr.trans hra) (hda.trans haa) hs, hρ.netLoc⟩
   | netMt r a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
     obtain ⟨r', hr', a', ha', h⟩ := h
     cases h
     have hdr := Tm.toL_drel hA r r' hr'
     have hda := Tm.toL_drel hA a a' ha'
-    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal,
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.mt r' a') ⟨hfr, hfa⟩⟩, rfl⟩
     · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (r.eval τ : Option PrimTy.uint.Denote)
@@ -809,14 +1037,15 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
           (fun g' => some (g', ℓ))) = some q := hq
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
-      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
-      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc, (fun h => nomatch h), hρ.netLoc⟩
+      obtain ⟨_, ⟨addr, hra, amt, haa, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc, (fun h => nomatch h),
+        fun m => NetW.read_mt g₀ ν m _ (hdr.trans hra) (hda.trans haa), hρ.netLoc⟩
   | setBalance a =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨a', ha', h⟩ := h
     cases h
     have hda := Tm.toL_drel hA a a' ha'
-    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn⟩, rfl⟩
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn, hFρ.net⟩, rfl⟩
     · rw [seqL_tt_drel hda]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
@@ -827,7 +1056,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
       exact ⟨hρ.stor, hρ.mem, hρ.tx,
         by rw [show (a'.eval g₀ ν : Option _) = a.eval τ from hda, hx]; rfl, hρ.loc, hρ.net,
-        hρ.netLoc⟩
+        hρ.netRd, hρ.netLoc⟩
 
 theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : Ctx} (e : UpdElem C Γ Δ)
     {ρ ρ'' : SymS C Δ} {gde : LTm C (.val .bool)} (h : e.toLS ρ₀ ρ = some (ρ'', gde))
@@ -839,34 +1068,49 @@ theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     obtain ⟨-, -, hfb, -⟩ := Rhs.toL_sound hA hF0 r hr
     exact ⟨⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
-      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal⟩, rfl⟩
+      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
   | storage st =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨s', hs', h⟩ := h
     cases h
-    exact ⟨⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
+    exact ⟨⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
   | memory m =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨m', hm', h⟩ := h
     cases h
-    exact ⟨⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal⟩, rfl⟩
+    exact ⟨⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal, hFρ.net⟩, rfl⟩
   | selfBalance op a => cases h
   | net r op a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
-    obtain ⟨r', -, a', -, h⟩ := h
+    obtain ⟨r', hr', a', ha', h⟩ := h
     cases h
-    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
-  | pay r a => cases h
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal,
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.op r' op a') ⟨hfr, hfa⟩⟩, rfl⟩
+  | pay r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', hr', a', ha', h⟩ := h
+    cases h
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc,
+      Fresh.kite hfr (Fresh.app0 _ _) (hF0.bal.mono hn) (Fresh.kite (Fresh.app2 _ hfa (hF0.bal.mono hn))
+        (Fresh.app0 _ _) (Fresh.app2 _ (hF0.bal.mono hn) hfa) (Fresh.app0 _ _)),
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.pay r' a') ⟨hfr, hfa⟩⟩, rfl⟩
   | netMt r a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
-    obtain ⟨r', -, a', -, h⟩ := h
+    obtain ⟨r', hr', a', ha', h⟩ := h
     cases h
-    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
+    have hfr := (Tm.toL_fresh hF0 r r' hr').mono hn
+    have hfa := (Tm.toL_fresh hF0 a a' ha').mono hn
+    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, hFρ.bal,
+      fun m => NetW.fresh_rd (Fresh.app0 _ _) (hFρ.net m) (.mt r' a') ⟨hfr, hfa⟩⟩, rfl⟩
   | setBalance a =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨a', ha', h⟩ := h
     cases h
-    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn⟩, rfl⟩
+    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn, hFρ.net⟩, rfl⟩
 
 /-- **An update pushed in**: its guard returns exactly where the update
 returns, and the state it leaves agrees with what the update leaves. -/
@@ -916,7 +1160,7 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
     obtain ⟨hgb, hvb, hfb, hnb⟩ := Rhs.toL_sound hA hF0 r hr
     refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor.mono (Nat.le_succ _), hf₁.mem.mono (Nat.le_succ _),
       ⟨fun b' hb' => by cases hb'; exact hfb.mono (Nat.le_trans hn₁ (Nat.le_succ _)),
-        hf₁.loc.mono (Nat.le_succ _)⟩, hf₁.bal.mono (Nat.le_succ _)⟩, Nat.le_trans hn₁ (Nat.le_succ _)⟩
+        hf₁.loc.mono (Nat.le_succ _)⟩, hf₁.bal.mono (Nat.le_succ _), fun n => (hf₁.net n).mono (Nat.le_succ _)⟩, Nat.le_trans hn₁ (Nat.le_succ _)⟩
     · show (seqL gd₁ gdb).eval g₀ ν = Option.map _ ((U.applyV τ).bind _)
       rw [seqL_eval, hg₁, hgb]
       cases U.applyV τ <;> try rfl
@@ -927,7 +1171,7 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨p, hp, v, hv, rfl⟩ := hq'
       have hag := ha₁ p hp
-      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, fun j b' hj => ?_⟩
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, hag.netRd, fun j b' hj => ?_⟩
       · cases j with
         | here =>
           simp only [SymS.push, BEnv.get, Option.some.injEq] at hj
@@ -940,20 +1184,20 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
   | pop U h ih =>
     intro ρ' gd hh
     have h' : (U.toLS ρ₀).map
-        (fun p => ((⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩ : SymS C _), p.2)) =
+        (fun p => ((⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩ : SymS C _), p.2)) =
         some (ρ', gd) := hh
     rw [Option.map_eq_some_iff] at h'
     obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
     cases hp
     obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
-    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.drop h hf₁.loc, hf₁.bal⟩, hn₁⟩
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.drop h hf₁.loc, hf₁.bal, hf₁.net⟩, hn₁⟩
     · show _ = Option.map _ ((U.applyV τ).bind _)
       rw [hg₁]; cases U.applyV τ <;> rfl
     · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.drop h)) = some q := hq
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨p, hp, rfl⟩ := hq'
       have hag := ha₁ p hp
-      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, fun j b' hj => ?_⟩
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, hag.netRd, fun j b' hj => ?_⟩
       · rw [BEnv.get_drop] at hj
         exact hag.loc _ b' hj
       · rw [BEnv.get_drop] at hj
@@ -961,20 +1205,20 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
   | drop U h ih =>
     intro ρ' gd hh
     have h' : (U.toLS ρ₀).map
-        (fun p => ((⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩ : SymS C _), p.2)) =
+        (fun p => ((⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩ : SymS C _), p.2)) =
         some (ρ', gd) := hh
     rw [Option.map_eq_some_iff] at h'
     obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
     cases hp
     obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
-    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.thin h hf₁.loc, hf₁.bal⟩, hn₁⟩
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.thin h hf₁.loc, hf₁.bal, hf₁.net⟩, hn₁⟩
     · show _ = Option.map _ ((U.applyV τ).bind _)
       rw [hg₁]; cases U.applyV τ <;> rfl
     · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.thin h)) = some q := hq
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨p, hp, rfl⟩ := hq'
       have hag := ha₁ p hp
-      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, fun j b' hj => ?_⟩
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_, hag.net, hag.netRd, fun j b' hj => ?_⟩
       · rw [BEnv.get_thin] at hj
         exact hag.loc _ b' hj
       · rw [BEnv.get_thin] at hj
@@ -1121,7 +1365,7 @@ theorem Tm.retsS_eval {Γ : Ctx} (τ : State C Γ) {p : PrimTy} {t : Tm C Γ (.v
 theorem Agrees.pushQ {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
     (hF : ρ.Fresh) (p : PrimTy) (v : p.Denote) :
     Agrees g₀ (ν.set p ρ.next v) (ρ.pushQ p) (τ.push (t := .val p) v) := by
-  refine ⟨?_, ?_, hA.tx, ?_, fun {u} j b hj => ?_, hA.net, fun j b hj => ?_⟩
+  refine ⟨?_, ?_, hA.tx, ?_, fun {u} j b hj => ?_, hA.net, ?_, fun j b hj => ?_⟩
   · show (ρ.stor.eval g₀ (ν.set p ρ.next v) : Option (Storage C)) = some τ.storage
     rw [hF.stor g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.stor
   · show (ρ.mem.eval g₀ (ν.set p ρ.next v) : Option (Grown _ _)).map Grown.forget = _
@@ -1138,6 +1382,9 @@ theorem Agrees.pushQ {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (
     | there j =>
       rw [(hF.loc.get j b hj) g₀ ν p ρ.next v (Nat.le_refl _)]
       exact hA.loc j b hj
+  · intro m
+    show ((NetW.read (.lit m) ρ.netW).eval g₀ (ν.set p ρ.next v) : Option Int) = _
+    rw [hF.net m g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.netRd m
   · cases j with
     | there j => exact hA.netLoc j b hj
 
@@ -1150,11 +1397,11 @@ theorem SymS.Fresh.pushQ {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (p : PrimTy
       intro g ν q k v hk
       simp only [SymS.pushQ, SymS.push] at hk
       rw [LTm.eval_var, LTm.eval_var, AEnv.get_set_ne _ _ _ _ (by omega)]),
-    hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _)⟩
+    hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _), fun n => (hF.net n).mono (Nat.le_succ _)⟩
 
 theorem Agrees.push {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
     {t : LTy} (v : t.TDenote C τ.H) : Agrees g₀ ν (ρ.push (t := t) none) (τ.push v) := by
-  refine ⟨hA.stor, hA.mem, hA.tx, hA.bal, fun {u} j b hj => ?_, hA.net, fun j b hj => ?_⟩
+  refine ⟨hA.stor, hA.mem, hA.tx, hA.bal, fun {u} j b hj => ?_, hA.net, hA.netRd, fun j b hj => ?_⟩
   · rw [State.locV_push]
     cases j with
     | here => simp only [SymS.push, BEnv.get, reduceCtorEq] at hj
@@ -1166,7 +1413,7 @@ theorem Agrees.push {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (h
 theorem SymS.Fresh.push {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (t : LTy) :
     (ρ.push (t := t) none).Fresh :=
   ⟨hF.stor.mono (Nat.le_succ _), hF.mem.mono (Nat.le_succ _),
-    ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _)⟩
+    ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _), fun n => (hF.net n).mono (Nat.le_succ _)⟩
 
 theorem guardM_holds {ν : AEnv} {Γ : Ctx} {τ : State C Γ} {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ)
     {x : Option (LTm C (.val .bool))} {gd : LTm C (.val .bool)} {ψ : LFml C} {φ : Fml C Δ}
@@ -1396,10 +1643,10 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
 
 /-- The empty state agrees with every typed state of the empty context. -/
 theorem Agrees.init (τ : State C []) (ν : AEnv) : Agrees τ ν SymS.init τ :=
-  ⟨rfl, rfl, rfl, rfl, fun i => (nomatch i), fun _ => rfl, fun i => nomatch i⟩
+  ⟨rfl, rfl, rfl, rfl, fun i => (nomatch i), fun _ => rfl, fun _ => rfl, fun i => nomatch i⟩
 
 theorem SymS.Fresh.init : (SymS.init : SymS C []).Fresh :=
-  ⟨Fresh.app0 _ _, Fresh.app0 _ _, trivial, Fresh.app0 _ _⟩
+  ⟨Fresh.app0 _ _, Fresh.app0 _ _, trivial, Fresh.app0 _ _, fun _ => Fresh.app1 _ (Fresh.app0 _ _)⟩
 
 end Fml
 

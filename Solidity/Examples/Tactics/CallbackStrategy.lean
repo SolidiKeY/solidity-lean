@@ -131,7 +131,7 @@ info: Try this:
       sol_decide
     case upd =>
       sol_leaf
-      sol_close
+      sol_decide
     case upd =>
       sol_leaf
       sol_decide
