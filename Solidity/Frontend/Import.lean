@@ -549,12 +549,16 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Its users still fail expansion because the named modifier is absent.
   let modifierMembers := c.modifierMembers.filter fun m =>
     match parse `sol_member m with | .ok _ => true | .error _ => false
+  -- A standalone signature check needs the same validated type declarations
+  -- as the final contract; storage and initializers are not part of this check.
+  let typeMembers := c.members.filter fun member =>
+    member.startsWith "struct " || member.startsWith "enum "
   let mut funMembers : Array String := #[]
   let mut badMembers : List (String × String) := []
   for (g, m) in c.funMembers do
     let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
     let r ← match callsLeftOut? badMembers calls,
-        parse `term (contractText [" ".intercalate modifierMembers, m]) with
+        parse `term (contractText (typeMembers ++ [" ".intercalate modifierMembers, m])) with
       | some e, _ => pure (some e)
       | none, .error e => pure (some s!"its declaration does not parse: {e}")
       | none, .ok s => liftTermElabM (contractError? s)

@@ -349,3 +349,178 @@ before stripping it, then evaluates the receiver once. Exact byte-kind checks
 remain in force. A native execution regression retains the valid explicit
 `bytes4(bytes(text))` conversion from a string-backed memory reference.
 No Lean diagnostics or builds were run by the patch worker.
+
+## Upstream Group 06: finite library struct identity (2026-10-26)
+
+Status: **partial repair**, on `task/group06-structs-libraries` from
+`006fcd593f5beeb540e7adf2bc76de4638566924`. All 15 assigned fixtures were
+reproduced first on that current master: all were broken in both required
+pipelines, so none is an already-fixed case. The older imported results remain
+historical evidence on `cadb628c`; they were not overwritten.
+
+[Complete before/after evidence](../../tests/upstream/group06.json) retains each
+exact fixture path, source SHA-256, original report hashes, both pipeline reports
+and all observations, commands and wall times. Five fixtures now work in both
+legacy and viaIR; ten remain broken, with no final adapter/resource block:
+
+| Fixture basename | Before | After (legacy / viaIR) |
+| --- | --- | --- |
+| `internal_call_attached_with_parentheses.sol` | broken / broken | working / working (`10`) |
+| `internal_library_function_attached_to_enum.sol` | broken / broken | broken / broken |
+| `internal_library_function_attached_to_struct.sol` | broken / broken | working / working (`2`) |
+| `internal_library_function_return_var_size.sol` | broken / broken | working / working (`7`) |
+| `library_enum_as_an_expression.sol` | broken / broken | broken / broken |
+| `library_struct_as_an_expression.sol` | broken / broken | broken / broken |
+| `using_for_storage_structs.sol` | broken / broken | working / working (`7, 7`) |
+| `array_of_recursive_struct.sol` | broken / broken | broken / broken |
+| `lone_struct_array_type.sol` | broken / broken | broken / broken |
+| `memory_structs_nested.sol` | broken / broken | working / working (`1, 2, 3, 4`) |
+| `recursive_structs.sol` | broken / broken | broken / broken |
+| `struct_reference.sol` | broken / broken | broken / broken |
+| `mapping_contract_key.sol` | broken / broken | broken / broken |
+| `nested_tuples.sol` | broken / broken | broken / broken |
+| `tuple_assign_multi_slot_grow.sol` | broken / broken | broken / broken |
+
+Called-function signature checks now include the final contract's existing
+struct/enum declarations. They still exclude storage and initializers from that
+temporary check and retain dependency-failure propagation. A bounded worklist
+follows compiler-resolved function, modifier, operator-function and struct
+references to discover foreign library layouts. It retains the previous lexical
+ordering and does not traverse all members merely because a library is named.
+Thus an unrelated mutually recursive library cannot poison a scalar contract.
+All layouts still pass the existing validation and intrinsic elaboration.
+
+Struct constructors and declared types retain declaration-ID lookup. Pushed
+member and discarded native-member receivers now use canonical type names;
+older fixtures may use an unambiguous short-name fallback. Equal short names
+are not interchangeable. Generated struct names also avoid every declared or
+renamed struct name: a real library declaration ID `4` must not capture a
+source-declared `Box_4` and replace its `uint8` layout with `uint256`. The
+`StructNameCollision.sol` regression returns `0` after unchecked increment of
+`255` in both interpreter modes. Its false `256` property remains in the proof
+controls. Redundant parentheses around a callee use the existing
+`unparen` reader before attached-call classification, preserving the implicit
+receiver argument and its single evaluation.
+
+No core representation, rule, interpreter, callback semantics, proof limit or
+external dependency changed. The existing soundness theorems remain in use;
+this importer repair adds no compiler-correctness theorem or universal source
+execution theorem. Runtime agreement below is observational evidence. No new
+axiom, `sorry`, native proof or heartbeat override was added. The history's
+`1a7d5b0e` shared-callee memoization and existing encoded struct representation
+are retained; no representation refactor was undertaken.
+
+The new `tests/solc/LibraryStructCalls.sol` controls retain storage/memory frame
+ownership, distinct equal-name and equal-layout declarations, direct pushed
+member writes, discarded pop references, nested parentheses, an operator's
+library-type dependency and an unused mutually recursive library. Nine positive
+calls complete with all assertions true in both interpreter modes, using the
+repository source-test compiler 0.8.34. These controls are separate from the
+assigned upstream tests, all of which use SHA-checked 0.8.38. The separate collision control returns zero in both modes. All twenty
+mode-specific call observations are retained. Both false postconditions remain
+in the source-proof controls.
+
+### Reproduction and provenance
+
+Source `/workspace/.setup/activate.sh` in `/workspace/solidity-lean`. The managed
+runtime gate passes with Lean 4.24.0, Lake 5.0.0-src+797c613 and
+`lake build Solidity.KeySort Solidity.Tools.Upstream`.
+`node scripts/solidity-upstream.mjs verify` verifies all 11,622 archived files.
+For each full path recorded in the evidence, the exact pattern is:
+
+```sh
+node scripts/solidity-upstream.mjs run \
+  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --filter "$fixture_path" --batch-size 1 \
+  --out ".lake/upstream/group06-reviewed/$fixture_name"
+```
+
+Before reports are in `.lake/upstream/group06-before`; the intermediate broad
+collection experiment is in `.lake/upstream/group06-after`; the first final
+attempt in `.lake/upstream/group06-final` preceded the collision correction.
+The reviewed reports in `.lake/upstream/group06-reviewed` are the final patch's
+evidence and all have the same model hash. SHA-256 pins:
+
+- compiler: `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`
+- archive: `9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d`
+- runner: `c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468`
+- historical model: `c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df`
+- reproduced master model: `c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`
+- final model: `c776b32765d9f61c86cd96337d1946debe06c7111f5efa5de8886beae5e88070`
+
+Per-fixture reviewed wall times are 10.335–17.630 s, including archive
+verification, compiler work and source import/replay. These are not isolated
+interpreter benchmarks. An earlier first command took 180.479 s including a
+frontend rebuild under a simultaneous cold source-proof build; it is not a
+performance baseline. No speedup or history-scaling result is claimed.
+
+### Validation, review and remaining work
+
+Final upstream JavaScript regressions pass (14 tests). The five existing Lean
+replay checks pass after refreshing their imports; an earlier concurrent attempt
+reported an out-of-date target and was rerun. Strict automation passes with 491
+automatic and 61 budgeted proofs, 11 refuted and zero pending. Reachability is
+667 modules with no orphan; layering has 143 core modules with no elaborator
+reach. The frozen TestSuite audit passes with 552 derived, 11 refuted and zero
+pending. Frozen SolKey sort checking passes: 377 taclets, all 131 read-bearing
+annotations covered. The source trust audit has 25 findings; comparing the
+complete lists against unchanged `006fcd59` gives identical findings. Its
+inventory was not refreshed.
+
+Lean MCP diagnostics are unavailable in this thread. Configured per-file Lean
+checks use `lake env lean --tstack=131072 FILE`: all three edited files pass,
+and the final changed `Body.lean` was rechecked after the collision correction
+(32.443 s). The nine library assertion controls prove; the collision assertion and its
+returning function prove too. Both false postconditions remain `pending` with
+open proof goals. These are kernel-checked declarations under the framework's
+existing `cleanTail(storage) = true` reading, not a new all-state source theorem.
+The framework checks that every public entry elaborates, takes no storage
+reference and exposes no reference before using the reachable clean-tail
+invariant, and rejects proof dependencies outside `propext`, `Classical.choice`
+and `Quot.sound`. The exact readings/statuses/timings are in the evidence.
+All final affected-source checks pass: file-level structs, own structs, free/
+library calls, the updated hidden-library width case and both new control suites
+(six selected JavaScript test cases). The final source controls contain eleven
+proved obligations, two deliberately pending false properties and one internal
+frame; all proved obligations report the clean reading. Long build/check logs
+are retained under `/tmp/group06-*` and copied to
+`.lake/upstream/group06-validation/` in the managed executor. The documentation
+path checker retains the 13 pre-existing missing vendor/external paths; the new
+milestone paths resolve. The reviewed
+`lake build SolidityCorpus` hit the 600 s process limit at 233/257 jobs without
+reported errors; its result is **inconclusive/resource-blocked**, and the parity
+probe depending on that build did not run. The earlier broad attempt was stopped
+as superseded when review found the width collision. The reviewed full
+`run-lean.sh` gate also reached its 600 s limit at 246/649 jobs with no reported
+errors. Its default library build is incomplete; the script's subsequent
+TestSuite build was not reached. These broad checks are **resource-blocked**,
+not passing or demonstrated semantic regressions. Neither an interrupted build
+nor a timeout is counted as proof coverage or a passing corpus gate.
+
+The required independent read-only finder and skeptic opened no Lean workers.
+They confirmed the missing temporary type context and library layouts, then
+identified unused-cycle pollution, ambiguous short receiver names, the operator
+reference edge and the missing direct-push control. The final patch addresses
+those findings. The skeptic subsequently confirmed a generated-name collision
+that could collapse member widths; freshening and the real-ID wrapping control
+fix that defect, and its independent follow-up found no remaining code issue.
+The existing hidden-library overflow control now exposes its real false property
+as `pending`, replacing the verified obsolete `unsupported` coverage expectation;
+its source assertion is unchanged. The initial multi-function new proof-control
+batch timed out at 300 s. It was not counted as passing and is retried one
+function per batch with unchanged process and heartbeat budgets. The combined
+push control was still expensive in isolation, so its alias/discard assertions
+and two direct-push result assertions were split into three smaller controls.
+Every original assertion and the sequential runtime observations are retained;
+the final two new source suites pass.
+
+Remaining scope is explicit: enum conversions require identity-safe enum model
+names and bounds; type-only expression statements require structural validation
+before no-op lowering; contract mapping keys require nominal ABI ranges and
+source dispatch identity; nested tuple lowering must preserve simultaneous
+snapshots, discarded RHS evaluation and pipeline ordering. The two recursive
+array fixtures and recursive mapping fixture remain ordinary-model exclusions,
+reported as broken import gaps rather than passing tests. The standalone graph
+storage foundation does not establish ordinary source/interpreter agreement;
+see [recursive-types.md](recursive-types.md). Source bytes, expectations, archive
+pins and historical results are unchanged. No push or merge to master was made.

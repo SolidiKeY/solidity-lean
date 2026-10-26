@@ -201,3 +201,16 @@ Historical M1 validation logs and timing JSON live under
 `recursive-types.status.json`. M2 was delivered as a patch with original base
 bytes and SHA-256 hashes; the primary owns combined integration validation. The full recursive-types group
 remains incomplete and its catalog status stays missing.
+
+## Upstream Group 06 reproduction (2026-10-26)
+
+The Group 06 current-master reproduction confirms that
+`array_of_recursive_struct.sol`, `recursive_structs.sol` and
+`struct_reference.sol` remain broken in both required pipelines at the ordinary
+import boundary. The finite library-struct repair does not broaden recursive
+source admission or migrate the core representation. These are explicit
+ordinary-model exclusions, not adapter passes or universal counterexamples to
+the standalone graph foundation. Complete gaps and provenance are retained in
+[the Group 06 evidence](../../tests/upstream/group06.json); the finite repair and
+its remaining boundaries are recorded in
+[declarations-metadata.md](declarations-metadata.md#upstream-group-06-finite-library-struct-identity-2026-10-26).

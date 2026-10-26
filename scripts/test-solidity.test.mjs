@@ -137,12 +137,12 @@ test("file-level structs and library references retain declaration identity", ()
   assert.equal(testsPassed(report), false);
 });
 
-test("a nested struct of other widths is the contract's own; a hidden one stays out of reach", () => {
+test("a nested struct of other widths retains library member widths", () => {
   const report = runSolidityTests(["tests/solc/FileLevelStructGaps.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.results.filter(r => r.contract !== 'HiddenStructLib')
     .map(r => [r.contract, r.function, r.status]), [
-    ['HiddenStructCaller', 'narrowLibraryMember', 'unsupported'],
+    ['HiddenStructCaller', 'narrowLibraryMember', 'pending'],
     ['InvalidNestedStruct', 'narrowMember', 'pending']
   ]);
   assert.equal(testsPassed(report), false);
@@ -962,4 +962,27 @@ test("callbacks: value calls through a function and loops of them, by their inva
   assert.equal(status.storageLostInLoop, "pending");
   // a loop whose body is a `try`, by its invariant (the `try`'s frame)
   assert.equal(status.loopOfTries, "proved");
+});
+
+test("library struct signatures preserve storage and memory receivers and declaration identity", () => {
+  const report = runSolidityTests(["tests/solc/LibraryStructCalls.sol"],
+    {build:false, contract:'LibraryStructCalls', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.frame, 'internal');
+  for (const name of ['storageReceiver', 'memoryReceiver', 'distinctDeclarations',
+    'parenthesizedReceiver', 'sameLayoutDeclarations', 'pushedReceivers',
+    'directPushedA', 'directPushedB', 'operatorDependency']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falsePost, 'pending');
+});
+
+test("generated struct identity names cannot capture a declared ID suffix", () => {
+  const report = runSolidityTests(["tests/solc/StructNameCollision.sol"],
+    {build:false, contract:'StructNameCollision', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.wraps, 'proved');
+  assert.equal(status.falsePost, 'pending');
 });

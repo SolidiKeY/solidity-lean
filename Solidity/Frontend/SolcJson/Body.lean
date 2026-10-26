@@ -481,11 +481,23 @@ struct has that name.  Declaration keys preserve solc's resolution when a
 contract shadows a file-level name.  Also the own ones, by declaration. -/
 def readStructs (ren : List (String × String)) (defs : List Json) :
     Structs × List (Json × String) := Id.run do
+  let declaredNames := defs.map fun d =>
+    let n := (J.str? d "name").getD ""
+    (lookupBy n ren).getD n
   let printed (d : Json) : String :=
     let n := (J.str? d "name").getD ""
     let m := (lookupBy n ren).getD n
     let clash := defs.any fun e => J.str? e "name" == some n && J.id? e != J.id? d
-    if clash then s!"{m}_{(J.id? d).getD 0}" else m
+    if clash then
+      -- A source declaration may already spell the generated ID suffix.
+      -- Generated stems end in distinct declaration IDs; fresh suffixes end
+      -- in underscores, so avoiding declared names also keeps them distinct.
+      let rec fresh (fuel : Nat) (candidate : String) : String :=
+        match fuel with
+        | 0 => candidate
+        | fuel + 1 => if declaredNames.contains candidate then fresh fuel (candidate ++ "_") else candidate
+      fresh (declaredNames.length + 1) s!"{m}_{(J.id? d).getD 0}"
+    else m
   let identities := defs.filterMap fun d => do
     let i ← J.id? d
     pure (s!"#solc{i}", printed d)
@@ -539,7 +551,10 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
       (d, n, checkedShape)
   let S : Structs := checked.flatMap fun (d, n, check) =>
     let check := check.map (·.1)
-    ((J.id? d).toList.map fun i => (s!"#solc{i}", check)) ++ [(n, check)]
+    let canonical := (J.str? d "canonicalName").toList.map fun name => ("#canonical" ++ name, check)
+    let unique := !(defs.any fun other => J.str? other "name" == some n && J.id? other != J.id? d)
+    ((J.id? d).toList.map fun i => (s!"#solc{i}", check)) ++ canonical ++
+      (if unique then [("#short" ++ n, check)] else []) ++ [(n, check)]
   let own := checked.filterMap fun (d, _, check) =>
     match check with
     | .ok (p, true) => some (d, p)
@@ -1057,9 +1072,11 @@ def pushedTy (j : Json) : PM String := do
   let t := J.tyStr j
   let t := (t.replace " storage ref" "").replace " storage pointer" ""
   let t := if t.startsWith "struct " then
-      ((t.drop 7).splitOn ".").getLast!
+      t.drop 7
     else t
-  match lookupBy t (← get).structs with
+  let structs := (← get).structs
+  match (lookupBy ("#canonical" ++ t) structs).orElse (fun _ =>
+      lookupBy ("#short" ++ ((t.splitOn ".").getLast!)) structs) with
   | some (.ok m) => pure (typeIdentText m)
   | some (.error g) => throw g
   | none => unsupported s!"a member of a pushed `{t}`"
@@ -1072,8 +1089,10 @@ def storageRefTy (j : Json) : PM String := do
   let base := t.takeWhile (· != '[')
   let dims := t.drop base.length
   let base ← if base.startsWith "struct " then
-      let n := ((base.drop 7).splitOn ".").getLast!
-      match lookupBy n (← get).structs with
+      let n := base.drop 7
+      let structs := (← get).structs
+      match (lookupBy ("#canonical" ++ n) structs).orElse (fun _ =>
+          lookupBy ("#short" ++ ((n.splitOn ".").getLast!)) structs) with
       | some (.ok m) => pure (typeIdentText m)
       | some (.error g) => throw g
       | none => unsupported s!"a reference to `{n}`"
@@ -1275,6 +1294,13 @@ def abiCallBytesParams? (declarations : List Json) (target : Json) :
     guard (J.kind ty == "ElementaryTypeName")
     let name ← J.str? ty "name"
     bytesTy? name)
+
+/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
+partial def unparen (j : Json) : Json :=
+  match J.kind j, (J.arr? j "components").map (·.toList) with
+  | "TupleExpression", some [c] =>
+    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
+  | _, _ => j
 
 mutual
 
@@ -1485,7 +1511,7 @@ partial def operand (j : Json) (pow : Bool) : PM String := do
   pure (if compound j || (pow && J.kind j == "UnaryOperation") then s!"({s})" else s)
 
 partial def call (j : Json) : PM String := do
-  let f ← PM.lift (J.get j "expression")
+  let f := unparen (← PM.lift (J.get j "expression"))
   let args ← PM.lift (J.arr j "arguments")
   if let some (c, a, b) := condCallee? j then
     unless condCalleeOk j do unsupported condCalleeMsg
@@ -1644,13 +1670,6 @@ partial def call (j : Json) : PM String := do
   | k => unsupported s!"a call of kind `{k}`"
 
 end
-
-/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
-partial def unparen (j : Json) : Json :=
-  match J.kind j, (J.arr? j "components").map (·.toList) with
-  | "TupleExpression", some [c] =>
-    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
-  | _, _ => j
 
 /-- Is the node a tuple of several components, `(a, b)`, and not an inline
 array (`SolJSONParser.isTuple`)? -/
