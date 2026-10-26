@@ -92,6 +92,14 @@ See `docs/bridge.md` for scope and commands.
 | `Language/Features.lean` | Pinned Solidity language catalog, scope/current-status records, finite structured exclusions and diagnostics, requirements/backlog lists, and a feature-parameterized syntax subset. Generated from `docs/solidity-features.json`. |
 | `Eqns.lean` | `attribute [sol_eqns l₁ … lₙ] f` (Mathlib's `@[eqns]`, named apart for `Bridge/`): hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |
 | `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table (a contract's own struct a name spelling its members, `StructEnc`, kept by `structDefEnc`'s check; `structDef_rec`), operators, `Var`; the association lists (`lookupBy`, `setBy`, `nodupKeysB`) and their laws (`lookupBy_setBy_self`, …, moved here at W10.5.6). |
+| `TypeGraph.lean` | Separate finite declaration graph, typed member positions and inline-layout rank certificate; excludes direct/fixed cycles while allowing mapping/dynamic-array recursion. |
+| `Semantics/RecursiveStorage.lean` | Standalone graph-storage API umbrella; not yet used by Contract, State or the run. |
+| `Semantics/RecursiveStorage/Values.lean` | Typed well-founded values with dependent field functions, bounded array extents and demand-driven slots. |
+| `Semantics/RecursiveStorage/Defaults.lean` | Defaults by guarded layout rank, with lazy fields and guarded edges. |
+| `Semantics/RecursiveStorage/Paths.lean` | Finite typed paths, bounds-sensitive read/save, printers and generic read-after-save/composition proofs. |
+| `Semantics/RecursiveStorage/Clear.lean` | Mapping-barrier deletion, retained-tail frame, idempotence and preservation of defaults. |
+| `Semantics/RecursiveStorage/Arrays.lean` | Empty push, pop, live/retained reads, typed observations and array preservation laws. |
+| `Examples/RecursiveStorage.lean` | Kernel recursive mapping/array/mutual schemas, retained-slot and bounds regressions, and headline axiom output. |
 | `Syntax.lean` | The grammar behind `sol[C]{…}` and `contract!{…}` (`sol_stmt`, `sol_expr`, `sol_ty`; the raw syntax `RawStmt`, `RawExpr`), `Contract`/`FunDecl`, expression scheduling (`EvalOrder`), the index types of the typed syntax (`ArrTy`, `IndexTy`), and the quoters' helpers (`rflTrue`, `rflSome`, …); the typed syntax is `Syntax/Scoped.lean`'s.  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
 | `Syntax/Raw.lean` | The raw syntax `sol{ … }` reads (`RawStmt`), the contract (its storage types certified by `vars_ok`, its root names by `vars_nodup`; `Contract.root_okDeep`), narrow, byte and function types, index types, printing helpers. |
 | `Syntax/Grammar.lean` | The grammar of `sol{ … }` and the taclets' schema forms, expanded. |
@@ -105,9 +113,11 @@ See `docs/bridge.md` for scope and commands.
 | `Syntax/Inlined.lean` | A scoped block printed with its calls inlined, for display (`Prog.inlinedStr`, `Prog.inlinedShow`): each call as KeY's `expand_function_body` leaves it, the arguments, return variables, body and result; a `{ … }` block's statements in place. |
 | `Keccak.lean` | Keccak-256 over bytes, computed (`#guard`ed against known digests and SHA3-256's sponge): the selectors the elaborator folds as solc does (`Keccak.selector`); no proof reads it (`docs/semantic-gaps.md`, "Hashing and the ABI"). |
 | `Hashes.lean` | SHA-256 and RIPEMD-160 over bytes, computed as `Keccak.lean` is (`#guard`ed against the standard vectors): `sha256` and `ripemd160` of a program (`sha256Bytes`, `ripemd160Bytes`, `Semantics/Heap.lean`; `docs/semantic-gaps.md`, "Hashing and the ABI"). |
+| `ERC7201.lean` | Namespace formula over bytes with a bounded result and an alignment theorem; runtime/literal lowering uses the same operations. |
+| `Secp256k1.lean` | Bounded modular arithmetic and checked curve points for computed address recovery; no general group-law or EVM-equivalence proof. |
 | `Syntax/Elab.lean` | The elaborator (W8.1): the raw passes that fix solc's evaluation order and the fresh names (`hoist`, `captureExpr`, `lowerLoops`, `lowerReturns`, `wrapMods`, `renameStmts`, `freshenBlocks`), then `synth`/`check` into the scoped syntax, a local by `NCtx.find`; statements typed where they are elaborated (`SStmt`) and chained into a block (`SProg.chain`, weakened past a flat block's locals); named contexts (`NCtx`, `NCtx.find`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
 | `Syntax/Elab/Context.lean` | Named contexts (`NCtx`) and the raw passes the typing leaves alone: traversals, `calldata` parameters, block locals renamed apart, calldata slices, the recursion thunk. |
-| `Syntax/Elab/Values.lean` | Memory objects, function values, selectors and external function values, narrow widths, byte types. |
+| `Syntax/Elab/Values.lean` | Memory objects, function values, selectors and external function values, narrow widths, byte types; implementation helpers have no source function values. |
 | `Syntax/Elab/Lower.lean` | Inlining a call, loops lowered, `abi.*`/`string.concat`/`bytes.concat` and the ABI of nested types. |
 | `Syntax/Elab/Arms.lean` | `ElabRec` and the large arms that take it (`hoistWith`, `abiEncodeWith`, `elabCallRetWith`, `hoistStmtWith`, `elabStmtPWith`, `elabStmt1With`). |
 | `Syntax/Elab/Stmt.lean` | The `mutual` block that ties the arms (`elabRec`): statements, calls, blocks. |
@@ -482,8 +492,14 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | Module | What it defines |
 |---|---|
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; a struct the table's when its members are, else the contract's own, declared (`readStructs`, `ownStructMembers`), struct constructors printed; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
-| `Frontend/SolcJson/Body.lean` | What is left out, reading the JSON, types, expressions and statements. |
+| `Frontend/SolcJson/Body.lean` | What is left out, reading the JSON, types, expressions and statements; declaration-ID metadata and lazy selector receiver helpers. |
 | `Frontend/SolcJson/Contract.lean` | A contract read off the JSON. |
+| `Frontend/Source.lean` | Exact compiler and mode provenance, accepted pragma gates and an admission result certifying its extracted feature list. |
+| `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |
+| `Examples/Tactics/SourceLiteralsImport.lean` | Pinned literal, byte, address and constant execution, universal remainder correctness and a false-property counterexample. |
+| `Examples/Tactics/SourceIdentifiersImport.lean` | Raw source names, builtin shadowing, address fields and specifications with dollar names. |
+| `Examples/Tactics/SourceAdmissionImport.lean` | Scope roots, metadata-only references, ABI modes, malformed AST metadata and provenance regressions. |
+| `Examples/Tactics/DeclarationMetadata.lean` | Compiled declaration metadata: interface IDs, receiver evaluation/laziness and rejection of malformed or anonymous selectors. |
 | `Frontend/Testing.lean` | `#solkey_test`: kernel-checked function and specification tests with checkpointed JSON results; `scripts/test-solidity.mjs` compiles and tests `.sol` files/directories ([solidity-testing.md](solidity-testing.md)). |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N Γ Γ'` per function (read in its parameters' context, quoted hash-consed and checked by the kernel), `N.constructor : Prog N Γ Γ'` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. Large contract tables compile in list segments, with a kernel-checked equality to the original literal. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 551 function rows and pinned import report. |
@@ -663,6 +679,9 @@ the scoped calculus (`open scoped Solidity.Scoped`):
 | `Examples/Tactics/CheckedBlock.lean` | `checked { … }`: an underflow refuted inside the block and valid outside it, what the block writes, guards discharged by the closer, `&&` and a loop's condition in evaluation order, a narrow type's `assert`; `ignoringOverflow { … }`: a diamond that holds only with the overflow assumed away. |
 | `Examples/Tactics/Bytes.lean` | `bytesN`, `bytes` and `string` as solc runs them, on the elaborator's reading (`docs/semantic-gaps.md`, "Bytes and strings"): literals left-aligned, comparison, bitwise operators, indexing (out of range reverts), `.length`, conversions between sizes and to `uintM`, implicit widening; in state variables, mapping keys and values, parameters and returns. |
 | `Examples/Tactics/Hashing.lean` | `keccak256` (one byte string hashed twice), `abi.encode`/`abi.encodePacked` layouts proved, `abi.decode`, the `concat`s and a dynamic encoding run (`#run`), a `mapping(string => uint)` keyed by the hash (`docs/semantic-gaps.md`, "Hashing and the ABI"). |
+| `Examples/Tactics/AbiFeatures.lean` | Kernel ERC-7201/byte-roundtrip proofs, ABI layouts, type rejection and malformed decoder input regressions. |
+| `Examples/Tactics/AbiFeaturesImport.lean` | Exact-solc-0.8.38 source fixture, namespace/ABI/recovery runs and a deliberately false assertion. |
+| `Examples/Tactics/Recovery.lean` | Kernel generator/address reductions and valid/high-s/invalid/boundary recovery vectors. |
 | `Examples/Tactics/RevertData.lean` | Revert data reaching a `catch` (`docs/semantic-gaps.md`, "Revert data"): a self-call's `require(false, "boom")` reason bound by `catch Error(string memory r)` and its bytes proved, two reasons over-approximated, `catch (bytes memory d)`, the run on a concrete state, `catchDataBox` pinned; a custom error of a symbolic argument (`symbolicCustom`, data known in part) and another contract's reason (`externalReason`, `Fml.allocAll`). |
 | `Examples/Tactics/ComputedRevert.lean` | Exact execution certificates for computed reasons, alias writes, empty payloads and eager require arguments; nested catch executable guards and rejected assembly imports. |
 | `Examples/Tactics/FunctionTypes.lean` | Internal function types on the elaborator's reading (`docs/semantic-gaps.md`, "Function types"): a value is its function's tag, a call through it a dispatch over the functions of its signature; in locals, parameters, returns, state variables and struct members; an unassigned value reverts when called, `delete`, `==`. |
@@ -678,6 +697,9 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Tour.lean` | The running example end to end. |
 | `Examples/Tactics/PushReceiver.lean` | Kernel-checked primitive push binding execution, dirty-slot behavior and old-target-index positive/false cases; native capture rule-name pins in both modalities and a simple-alias update pin. |
 | `Examples/Tactics/NewArrays.lean` | Kernel execution checks for fresh primitive and nested arrays, allocation-size effects and target evaluation order, with false-value and empty-read cases. |
+| `Examples/Tactics/Aggregates.lean` | Inline common typing, snapshot timing, aliasing, tuple captures, negative admission and kernel execution checks. |
+| `Examples/Tactics/AggregatesImport.lean` | Pinned Solidity 0.8.38 aggregate fixture, imported nonvacuity runs and a symbolic literal proof. |
+| `Examples/Tactics/AggregateSlices.lean` | Stable slice identities, endpoint/index effects, binary schedules and catchable bounds panic. |
 | `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
 | `Examples/Tactics/StorageSuite.lean`, `StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |

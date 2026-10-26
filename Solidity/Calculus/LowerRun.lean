@@ -283,6 +283,14 @@ theorem Src.lower_valueT {T : Ty} (r : Src C Γ T) :
     refine TRes.AgreesO.bind (SPath.lower_resolveT σ p) fun r => ?_
     exact TRes.AgreesO.map (TRes.AgreesO.ofOpt_id (σ.storage.find r))
       (g := id) (k := shape.apply) (k' := shape.apply) fun _ => rfl
+  | @fixedCopyMem E n R p shape =>
+    change TRes.AgreesO id (do pure (shape.apply (MVal.copyMToSt σ.heap (← p.mvalT σ))))
+      (((p.lower.eval σ).bind fun mv => (HRef.ofId? σ.glob.H (.fixed E n) mv).bind fun r =>
+        some (MVal.copyMToSt (T := .ref (.fixed E n)) σ.heap r)).map shape.apply)
+    rw [Option.map_bind]
+    refine TRes.AgreesO.bind (MPath.lower_mvalT σ p) fun mv => ?_
+    simp only [Function.comp_apply, HRef.ofId?_id]
+    rfl
 
 /-- A memory slot as a memory write writes it: a word, or an identity. -/
 def MVal.toT {H : HTy} : (T : Ty) → MVal H T → MvT T

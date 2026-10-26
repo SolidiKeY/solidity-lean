@@ -15,14 +15,14 @@ def Src.isMemory {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
 
 /-- A native typed view of a fixed-array snapshot at another outer shape. -/
 def Src.isFixedCopy {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
-  | .fixedCopy .. => true
+  | .fixedCopy .. | .fixedCopyMem .. => true
   | _ => false
 
 /-- Upstream captures primitive/storage expressions; a memory source is
 directly covered when it is a memory variable. -/
 def Src.keyPushSource {C : Contract} {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
   | .copyMem p => p.isSimple
-  | .fixedCopy .. => false
+  | .fixedCopy .. | .fixedCopyMem .. => false
   | _ => true
 
 /-- A typed shape-copy source requires its explicit adapter rule. -/
@@ -40,6 +40,7 @@ theorem Src.keyPushSource_wk {C : Contract} {Γ Δ : Ctx} {T : Ty}
   | val v => rfl
   | copy p hm => rfl
   | fixedCopy p shape hm => rfl
+  | fixedCopyMem p shape => rfl
   | copyMem p => exact MPath.isSimple_wk h p
 
 /-- A primitive storage path, such as `rows[i].value`, read as a value. -/

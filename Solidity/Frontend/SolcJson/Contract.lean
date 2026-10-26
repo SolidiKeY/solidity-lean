@@ -1,4 +1,4 @@
-import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SolcJson.Admission
 
 /-!
 # solc's JSON: a contract
@@ -24,6 +24,7 @@ def docText (n : Json) : String :=
 structure KeyClause where
   kind : String
   text : String
+  lexicalNames : List String := []
   deriving Inhabited
 
 /-- A line's leading tag (`@` and a letter, then word characters, `:` or
@@ -143,8 +144,9 @@ def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
   if cs.any (·.kind == "box") then return .box
   return .diamond
 
-/-- Every local declaration that needs a model name: unnamed parameters and
-returns get a fresh identity-based name; state/keyword clashes get `_`. -/
+/-- Every local declaration that needs a model name: unnamed input parameters
+get a fresh identity-based name; state/keyword clashes get `_`. Unnamed
+returns retain the existing return-frame naming convention. -/
 def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   let decls := (J.nodes f).filter fun n =>
     J.kind n == "VariableDeclaration" &&
@@ -157,10 +159,13 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   let specNames := annotations.flatMap fun text => (specTokens text).flatMap (·.splitOn ".")
   let taken := stateVars ++ specNames ++
     decls.filterMap fun d => J.str? d "name"
+  let inputs := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
+    |>.toList.filterMap J.id?
   (decls.foldl (fun (acc : List String × List (Int × String)) d =>
     let (taken, out) := acc
     match J.str? d "name", J.id? d with
-    | some n, some i => if n == "" || stateVars.contains n || leanKeywords.contains n then
+    | some n, some i => if (n == "" && inputs.contains i) ||
+        (n != "" && (stateVars.contains n || leanKeywords.contains n)) then
       let rec fresh (k : Nat) (x : String) : String :=
         match k with
         | 0 => x
@@ -192,6 +197,32 @@ partial def calleeArms (e : Json) : List Json :=
   | _ => [e]
 
 /-- The functions among `ids` that `f` calls by name, in order, each once. -/
+partial def executableNodes (declarations : List Json) (j : Json) : List Json :=
+  if J.kind j == "MemberAccess" &&
+      ((J.opt j "expression").any fun receiver =>
+        match declarationMetadata declarations receiver ((J.str? j "memberName").getD "") with
+        | .ok (some _) => true
+        | _ => false) then [j]
+  else match j with
+  | .arr values => values.toList.flatMap (executableNodes declarations)
+  | .obj fields =>
+    let children := fields.toList.flatMap fun (_, value) => executableNodes declarations value
+    if (J.str? j "nodeType").isSome then j :: children else children
+  | _ => []
+
+def unresolvedValueCalls (declarations : List Json) (root : Json) : List Json :=
+  (executableNodes declarations root).filter fun node =>
+    J.kind node == "FunctionCall" && J.str? node "kind" == some "functionCall" &&
+      ((J.opt node "expression").toList.flatMap calleeArms).any fun callee =>
+        let id := J.ref? callee
+        ((id.bind fun id => declarations.find? (J.id? · == some id)).any fun decl =>
+          J.kind decl == "VariableDeclaration" && (J.tyStr decl).startsWith "function ") ||
+        (isValueCallee callee && id.isNone)
+
+def nativePayment (root : Json) : Bool := (J.nodes root).any fun node =>
+  (valueCall? node).isSome || (J.kind node == "MemberAccess" && nativeMember node &&
+    ["send", "transfer"].contains ((J.str? node "memberName").getD ""))
+
 def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
     (aliases : List (Int × Int) := []) (contracts : List Int := [])
     (supers : List (Int × Int) := []) : List Int :=
@@ -201,8 +232,10 @@ def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
           if J.kind e == "Identifier" then
             (J.ref? e).map fun id => (lookupBy id aliases).getD id
           else if isSuperMember e then (J.ref? e).bind (lookupBy · supers)
-          else if (isBaseMember contracts e ||
-              (J.kind e == "MemberAccess" && (J.ref? e).any freeFunctions.contains)) then J.ref? e
+          else if isBaseMember contracts e then J.ref? e
+          else if isExternalMember e && (J.ref? e).any ids.contains then
+            (J.ref? e).map fun id => (lookupBy id aliases).getD id
+          else if J.kind e == "MemberAccess" && (J.ref? e).any freeFunctions.contains then J.ref? e
           else none
       else []
     rs.foldl (init := acc) fun acc r => if ids.contains r && !acc.contains r then acc ++ [r] else acc
@@ -288,15 +321,15 @@ def mergeC3 : Nat → List (List Int) → Except String (List Int)
 /-- A function as a `contract!` member, its body `ss`:
 `function f(uint x) returns (uint lo, uint) { … }`. -/
 def SolcFun.member (f : SolcFun) (ss : List String) : String :=
-  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
+  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {identText x}")
   let rs := if f.rets.isEmpty then "" else
-    s!" returns ({", ".intercalate (f.rets.map fun (x, t) => if x.isEmpty then t else s!"{t} {x}")})"
-  s!"{f.specMembers}function {f.name}({ps}){if f.payable then " payable" else ""}{f.modifierApps}{rs} \{ {String.join (ss.map (· ++ "; "))}}"
+    s!" returns ({", ".intercalate (f.rets.map fun (x, t) => if x.isEmpty then t else s!"{t} {identText x}")})"
+  s!"{f.specMembers}function {identText f.name}({ps}){if f.payable then " payable" else ""}{f.modifierApps}{rs} \{ {String.join (ss.map (· ++ "; "))}}"
 
 /-- The constructor as a `contract!` member, its body `ss`:
 `constructor(uint a) payable { … }`. -/
 def SolcFun.ctorMember (f : SolcFun) (ss : List String) : String :=
-  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
+  let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {identText x}")
   s!"{f.specMembers}constructor({ps}){if f.payable then " payable" else ""}{f.modifierApps} \{ {String.join (ss.map (· ++ "; "))}}"
 
 /-- Solc's complete, most-derived-first C3 order. The ancestry graph checks
@@ -343,7 +376,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         else .error "specification needs renamed locals: not imported")
     (rewriteLoop : List (String × String) → String → Except String String :=
       fun names text => if names.any (fun (a, b) => a != b) then
-        .error "loop specification needs renamed locals: not imported" else .ok text) :
+        .error "loop specification needs renamed locals: not imported" else .ok text)
+    (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -358,6 +393,20 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let ownNodes := membersOf c
   let nodes := lineage.reverse.flatMap membersOf
   let c3Nodes := lineage.flatMap membersOf
+  let ownReceive := ownNodes.find? fun node => J.kind node == "FunctionDefinition" &&
+    J.str? node "kind" == some "receive"
+  let paymentIssues (root : Json) : List Source.Diagnostic :=
+    if !nativePayment root then [] else
+      let unsupported := match ownReceive with
+        | some receive => !(J.arrD receive "modifiers").isEmpty
+        | none => c3Nodes.any fun node => J.kind node == "FunctionDefinition" &&
+            ["receive", "fallback"].contains ((J.str? node "kind").getD "")
+      if unsupported then [{
+        kind := .missingImplementation
+        name := `solidity.selfPayment
+        reason := "self-payment needs inherited receive, fallback or modifier dispatch"
+        line := J.line root
+        feature := some .emptyDataValueCall }] else []
   let baseContracts := lineage.filterMap J.id?
   let functionAliases ← if lineage.length == 1 then pure [] else
     overrideAliases c3Nodes (c3Nodes.filter (J.kind · == "FunctionDefinition")) "baseFunctions"
@@ -374,8 +423,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       if J.kind v == "VariableDeclaration" then J.str? v "name" else none
     let (constantValues, constantBlocked) := specConstantScope units scope (J.id? owner)
     let values := specEnumValues units scope enumDefs
-    pure (cs.map fun c =>
-      { c with text := resolveSpecEnums values stateNames (resolveSpecConstants constantValues constantBlocked c.text) })
+    cs.mapM fun c => do
+      let text := resolveSpecEnums values stateNames (resolveSpecConstants constantValues constantBlocked c.text)
+      pure { c with text := ← rewriteSpec c.kind [] [] text, lexicalNames := stateNames }
   let baseSpec ← lineage.tail.reverse.flatMapM fun base => do
     let baseName := (J.str? base "name").getD "?"
     let clauses ← (keyClauses (docText base)).mapError fun message =>
@@ -471,7 +521,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let enumMembers : List String := (nodes.filter (J.kind · == "EnumDefinition")).filterMap fun e => do
     let n ← J.str? e "name"
     let ms := (J.arrD e "members").toList.filterMap (J.str? · "name")
-    pure s!"enum {n} \{ {", ".intercalate ms} }"
+    pure s!"enum {identText n} \{ {", ".intercalate (ms.map identText)} }"
   -- the contract's own structs, declared: a struct whose members do not print
   -- leaves out what uses it, as an unreadable struct does
   let structMembers := ownStructs.filterMap fun o => (ownStructMembers S [o]).toOption.bind (·.head?)
@@ -482,7 +532,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       let n ← J.str? e "name"
       let ps ← (J.opt e "parameters").bind fun ps => (J.arrD ps "parameters").toList.mapM fun p =>
         ((J.get p "typeName").toOption.bind fun t => (tyText S t).toOption)
-      pure s!"error {n}({", ".intercalate ps});"
+      pure s!"error {identText n}({", ".intercalate ps});"
   let mut members : List String := invariants ++ enumMembers ++ structMembers ++
     errorMembers.eraseDups
   -- the variables kept: name, `sol` type, declaration
@@ -511,7 +561,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
         tyText S typeNode : Except Gap String) with
     | .ok t =>
-      members := members ++ [s!"{t} {n};"]
+      members := members ++ [s!"{t} {identText n};"]
       kept := kept ++ [(n, t, v)]
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
@@ -586,6 +636,35 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (id, resolved)
   -- the renamed state variables, read by their identity like a function
   let funRenames := funRenames ++ stateRenames
+  let selectorHelperIds := (J.nodes ast).filterMap fun node => do
+    guard (J.kind node == "MemberAccess" && J.str? node "memberName" == some "selector")
+    let target ← J.opt node "expression"
+    guard (J.kind target == "MemberAccess")
+    let receiver ← J.opt target "expression"
+    guard (!(J.kind receiver == "Identifier" && J.ref? receiver == some (-28)))
+    guard (!((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any
+      (J.kind · == "ContractDefinition"))
+    J.ref? target
+  let selectorHelpers : List (Int × String) := Id.run do
+    let localAliases := (funs ++ nodes.filter (J.kind · == "ModifierDefinition")).flatMap fun d =>
+      (renames stateVars d).map (·.2)
+    let mut taken := declarations.filterMap (J.str? · "name") ++ funRenames.map (·.2) ++ localAliases
+    let mut out := []
+    for d in declarations do
+      if J.kind d != "FunctionDefinition" || (J.str? d "functionSelector").isNone then continue
+      let some id := J.id? d | continue
+      if !selectorHelperIds.contains id then continue
+      let mut name := s!"solcMetadataSelector{id}"
+      for _ in [:taken.length + 1] do
+        if !taken.contains name then break
+        name := name ++ "_"
+      taken := name :: taken
+      out := out ++ [(id, name)]
+    return out
+  let selectorMembers := selectorHelpers.filterMap fun (id, name) => do
+    let d ← declarations.find? (J.id? · == some id)
+    let value ← (declarationSelector d "functionSelector" 4).toOption
+    pure (name, s!"function {name}(address solcReceiver) returns (bytes4) \{ return {value.val}; }")
   let funParams : List (Int × List String) := funs.filterMap fun f => do
     let i ← J.id? f
     let ps ← (f.getObjVal? "parameters").toOption
@@ -613,16 +692,17 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let (specConstants, scopeConstBlocked) :=
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
-    { declarations, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
+    { declarations, selectorHelpers, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
+      sourceStateNames := J.varDeclNames scopeNodes, sourceModelNames := stateVars, scanLoop,
       specConstBlocked := scopeConstBlocked ++ localNames, specLocals := specBodyBindings d names,
       rewriteLoop }
-  let modifierReads : List (Int × Except Gap String) := modifierDefs.filterMap fun m =>
+  let modifierReadResults : List (Int × Except Gap (String × Source.ScopeScan)) := modifierDefs.filterMap fun m =>
     (J.id? m).map fun id => (id, do
       let st := specState m (renames stateVars m ++ funRenames)
-      let (text, _) ← (do
+      let (text, finalState) ← (do
         unless (J.nodes m).any (J.kind · == "PlaceholderStatement") do
           unsupported "a modifier without a placeholder"
         let ps ← PM.lift (J.get m "parameters")
@@ -647,10 +727,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
               if !taken.contains name then return name
               name := name ++ "_"
             return name
-          pure s!"{t} {n}"
+          pure s!"{t} {identText n}"
         let b ← block (← PM.lift (J.get m "body"))
         pure s!"modifier solcModifier{id}({", ".intercalate ps}) {b}").run st
-      pure text)
+      pure (text, finalState.sourceScope))
+  let modifierReads := modifierReadResults.map fun (id, result) => (id, result.map (·.1))
+  let modifierScopes := modifierReadResults.map fun (id, result) =>
+    (id, (result.toOption.map (·.2)).getD default)
   let modifierMembers := modifierReads.filterMap fun (_, text) => text.toOption
   -- a constructor's `B(5)` is a base constructor's arguments, not a modifier
   let modifierInvocations (f : Json) : List Json :=
@@ -727,7 +810,33 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
             pure (t ++ loc, ← nameOf p) : PM (String × String)).run st
         pure (x, t)
     let tag := tagOf cspec f
-    let body : Except Gap (List (Nat × String)) := do
+    let modifierRoots := (modifierInvocations f).flatMap fun invocation =>
+      ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).toList
+    let lexicalStateNames := J.varDeclNames (scopeNodesOf f)
+    let functionClauses := fspec.filterMap fun clause =>
+      if ["requires", "ensures", "invariant", "assignable"].contains clause.kind then
+        let bindings := parameters ++ if clause.kind == "ensures" then bindingsOf "returnParameters" else []
+        let bound := lexicalStateNames ++ J.varDeclNames bindings ++ (specRenamesOf bindings).map (·.2)
+        some (bound, s!"{clause.kind} {clause.text};")
+      else none
+    let contractClauses := cspec.filterMap fun clause =>
+      if ["requires", "ensures", "invariant", "assignable"].contains clause.kind then
+        some (clause.lexicalNames, s!"{clause.kind} {clause.text};") else none
+    let sourceScope := scanSource {
+      entry := f
+      evaluatedRoots := f :: modifierRoots
+      declarationRoots := [c]
+      constantIds := constants.map Prod.fst
+      specifications := if testing then contractClauses ++ functionClauses else []
+      modelBindings := stateVars ++ J.varDeclNames (parameters ++ bindingsOf "returnParameters") ++
+        (specRenamesOf (parameters ++ bindingsOf "returnParameters")).map (·.2)
+      unresolvedDispatch := (f :: modifierRoots).flatMap (unresolvedValueCalls declarations)
+      diagnostics := paymentIssues f ++ (modifierInvocations f).flatMap (fun invocation =>
+        ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).toList.flatMap paymentIssues) }
+    let sourceScope := (modifierRoots.foldl (fun scan root =>
+      scan.append (((J.id? root).bind (lookupBy · modifierScopes)).getD default)) sourceScope).normalize
+    let bodyRead : Except Gap (List (Nat × String) × Source.ScopeScan) := do
+      sourceScope.ensure
       if let .error m := tag then throw (.unsupported s!"its NatSpec: {m}" (J.line f))
       if testing && rawSpec.any ledgerAssignable then
         throw (.unsupported "ledger locations in assignable clauses are not modelled" (J.line f))
@@ -744,12 +853,17 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       if let some m := refused then throw (.unsupported m (J.line f))
       let _ ← apps
       let b ← J.get f "body"
-      let (ss, _) ← ((← J.arr b "statements").flatMapM fun s => do
+      let (ss, finalState) ← ((← J.arr b "statements").flatMapM fun s => do
         pure ((← stmt s).map (J.line s, ·))).run st
-      pure ss
+      pure (ss, finalState.sourceScope)
+    let sourceScope := (sourceScope.append ((bodyRead.toOption.map (·.2)).getD default)).normalize
+    let body : Except Gap (List (Nat × String)) := do
+      sourceScope.ensure
+      pure (← bodyRead).1
     let sourceParams := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
     let sourceTypes := sourceParams.toList.map fun p => sourceType (J.tyStr p)
     { name := fname, sourceName := nameOfFun f,
+      sourceScope,
       sourceSignature := s!"{nameOfFun f}({",".intercalate sourceTypes})",
       modifierApps := apps.toOption.getD "",
       line := J.line f, tag := (tag.toOption).getD .malformed,
@@ -776,7 +890,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           return (x, 0, 255, none)
         guard (J.kind t == "ArrayTypeName" && mem)
         let b ← J.opt t "baseType"
-        let len : Option Nat := (J.opt t "length").bind fun l => (J.str? l "value").bind (·.toNat?)
+        let len : Option Nat := (J.opt t "length").bind fun l =>
+          (solcArrayLength? t).orElse fun _ => (J.str? l "value").bind String.toNat?
         guard ((J.opt t "length").isNone || len.isSome)
         if let some n := (J.ref? b).bind (lookupBy · enumBounds) then
           return (x, 0, n, len)
@@ -794,35 +909,49 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
-  let inits : Except Gap (List String) := kept.mapM fun (n, t, v) => do
-    let some e := J.opt v "value" | pure s!"{t} {n};"
+  let initSt : PState := { declarations, selectorHelpers, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initScope := scanSource {
+    entry := c, evaluatedRoots := kept.map (·.2.2), declarationRoots := [c]
+    constantIds := constants.map Prod.fst
+    unresolvedDispatch := kept.flatMap fun (_, _, node) => unresolvedValueCalls declarations node
+    diagnostics := kept.flatMap fun (_, _, node) => paymentIssues node }
+  let inits : Except Gap (List String) := do
+    initScope.ensure
+    kept.mapM fun (n, t, v) => do
+    let some e := J.opt v "value" | pure s!"{t} {identText n};"
     match (expr e).run' { initSt with superNames := superNamesOf v } with
-    | .ok x => pure s!"{t} {n} = {x};"
+    | .ok x => pure s!"{t} {identText n} = {x};"
     | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
     | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
   -- the internal calls: a function is read with every function it reaches,
   -- and the ones called are the contract's members, callees first
   let ids := funs.filterMap J.id?
   -- an initializer's calls are the constructor's, declared or implicit
-  let initCalls : List Int := (kept.filterMap fun (_, _, v) => (J.opt v "value").map (fun e => callees ids e freeFunctions functionAliases baseContracts (supersOf v)))
-    |>.flatten.eraseDups
+  let initCalls : List Int := ((kept.filterMap fun (_, _, v) => (J.opt v "value").map (fun e => callees ids e freeFunctions functionAliases baseContracts (supersOf v)))
+    |>.flatten) ++ (if kept.any (nativePayment ∘ (·.2.2)) then ownReceive.toList.filterMap J.id? else []) |>.eraseDups
   let ctorId : Option Int := (funs.find? (kindOf · == "constructor")).bind J.id?
+  let receiveId := (ownNodes.find? fun n =>
+    J.kind n == "FunctionDefinition" && kindOf n == "receive").bind J.id?
+  let pays := nativePayment
   let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map fun i =>
     let modCalls := (modifierInvocations f).flatMap fun invocation =>
       ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id))
         |>.toList.flatMap (fun m => callees ids m freeFunctions functionAliases baseContracts (supersOf m))
-    (i, (callees ids f freeFunctions functionAliases baseContracts (supersOf f) ++ modCalls ++ (if ctorId == some i then initCalls else [])).eraseDups)
+    let receives := if pays f || (modifierInvocations f).any (fun invocation =>
+      ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).any pays)
+      then receiveId.toList else []
+    (i, (callees ids f freeFunctions functionAliases baseContracts (supersOf f) ++ modCalls ++
+      receives ++ (if ctorId == some i then initCalls else [])).eraseDups)
   -- function values (`fnDispatch`): a function named as a value comes before
   -- the function naming it, and before every function that calls through a
   -- value (a variable of a function type), whose dispatch inlines it
   let varIds : List Int := (J.nodes c).filterMap fun n =>
     if J.kind n == "VariableDeclaration" then J.id? n else none
-  let heads (f : Json) : List Int := (J.nodes f).filterMap fun n =>
+  let heads (f : Json) : List Int := (executableNodes declarations f).filterMap fun n =>
     if J.kind n == "FunctionCall" then (J.opt n "expression").bind J.ref? else none
   -- `this.g` named as an external value too (`extDispatch` runs `g` when
   -- declared before the caller)
-  let refs (f : Json) : List Int := (J.nodes f).filterMap fun n =>
+  let refs (f : Json) : List Int := (executableNodes declarations f).filterMap fun n =>
     if J.kind n == "Identifier" || J.kind n == "MemberAccess" then (J.ref? n).filter ids.contains
     else none
   -- named more often than called: named as a value
@@ -846,7 +975,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let byId : List (Int × SolcFun) := (funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)
   let nameAt (i : Int) : String := ((lookupBy i byId).map (·.name)).getD "?"
   let withCalls (i : Int) (r : SolcFun) : SolcFun :=
+    let cs := ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast
+    let sourceScope := (cs.foldl (fun scan id =>
+      match lookupBy id byId with
+      | some f => scan.append f.sourceScope
+      | none => scan) r.sourceScope).normalize
     let body : Except Gap (List (Nat × String)) := do
+      sourceScope.ensure
       let ss ← r.body
       match reach calls (ids.length + 1) [] [] i with
       | .error g => throw (.unsupported s!"the calls from `{nameAt g}` are nested past the \
@@ -858,9 +993,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
               | .excluded m _ => .excluded s!"it calls `{nameAt c}`, which is left out: {m}" r.line
               | .unsupported m _ => .unsupported s!"it calls `{nameAt c}`, which is left out: {m}" r.line)
         pure ss
-    let cs := ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast
     let writes := r.writingCall || cs.any fun c => (lookupBy c byId).all (·.writingCall)
-    { r with body, calls := cs.map nameAt, writingCall := writes }
+    { r with body, sourceScope, calls := cs.map nameAt, writingCall := writes }
   let closed : List (Int × SolcFun) := byId.map fun (i, r) => (i, withCalls i r)
   let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
   -- Base constructors, as solc's legacy creation code runs them
@@ -911,10 +1045,28 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         pure (initSt, args.toList, b)
   let compositeCalls : List Int := (baseCtors.flatMap fun (k, f) =>
       callees ids f freeFunctions functionAliases baseContracts (supersOf f) ++
+        (modifierInvocations f).flatMap (fun invocation =>
+          ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).toList.flatMap
+            (fun m => callees ids m freeFunctions functionAliases baseContracts (supersOf m))) ++
         (((ctorArgs k).map fun (_, _, node) =>
           callees ids node freeFunctions functionAliases baseContracts).getD [])).eraseDups
   let compositeReach : List Int := (compositeCalls.flatMap fun i =>
     (reach calls (ids.length + 1) [] [] i).toOption.getD []).eraseDups
+  let compositeRoots := (baseCtors.map (·.2) ++ ownCtor.toList) ++
+    (baseCtors.flatMap fun (k, _) => ((ctorArgs k).map (·.2.2)).toList) ++
+    ((baseCtors.map (·.2) ++ ownCtor.toList).flatMap fun f =>
+      (modifierInvocations f).flatMap fun invocation =>
+        ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).toList)
+  let compositeScope := (compositeReach.foldl (fun scan id =>
+      match lookupBy id byId with
+      | some f => scan.append f.sourceScope
+      | none => scan) (initScope.append (scanSource {
+        entry := c, evaluatedRoots := compositeRoots, declarationRoots := [c]
+        constantIds := constants.map Prod.fst
+        unresolvedDispatch := compositeRoots.flatMap (unresolvedValueCalls declarations)
+        diagnostics := compositeRoots.flatMap paymentIssues }))).normalize
+  let compositeScope := (compositeRoots.foldl (fun scan root =>
+    scan.append (((J.id? root).bind (lookupBy · modifierScopes)).getD default)) compositeScope).normalize
   -- a constructor body with modifiers, or a base one with a `return`, as a
   -- member of its own (`solcCtorBody<id>`) that the composite calls with its
   -- parameters: its modifiers wrap its body alone, after the base
@@ -923,7 +1075,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     !(modifierInvocations f).isEmpty ||
       (ownCtor.bind J.id? != J.id? f && (J.nodes f).any (J.kind · == "Return"))
   let bodyMemberName (f : Json) : String := s!"solcCtorBody{(J.id? f).getD 0}"
-  let compositeBody : Except Gap (List (Nat × String) × List (String × String)) := do
+  let compositeBody : Except Gap (List (Nat × String) × List (String × String) × Source.ScopeScan) := do
+    compositeScope.ensure
     for i in compositeCalls do
       match reach calls (ids.length + 1) [] [] i with
       | .error g => throw (.unsupported s!"the call of `{nameAt g}` is recursive: \
@@ -937,6 +1090,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
                 .unsupported s!"a base constructor calls `{nameAt x}`, which is left out: {m}")
     let mut carry : Nat × Nat := (0, 0)
     let mut out : List (Nat × String) := []
+    let mut loopScope : Source.ScopeScan := default
     let mut helpers : List (String × String) := []
     -- the arguments, derived to base
     for (k, f) in baseCtors do
@@ -962,7 +1116,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
             let pre := (← get).pre
             modify fun st => { st with pre := #[] }
             let n := ((J.id? p).bind (lookupBy · names)).getD ((J.str? p "name").getD "")
-            pure (pre.toList ++ [s!"{t}{loc} {n} = {e}"]) : PM (List String)).run
+            pure (pre.toList ++ [s!"{t}{loc} {identText n} = {e}"]) : PM (List String)).run
           { st with fresh := carry.1, discards := carry.2 }
         carry := (st'.fresh, st'.discards)
         out := out ++ ss.map (J.line f, ·)
@@ -972,6 +1126,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       let st0 := { ctorState f with fresh := carry.1, discards := carry.2 }
       let (ss, st') ← ((← J.arr b "statements").flatMapM fun s => do
           pure ((← stmt s).map (J.line s, ·))).run st0
+      loopScope := loopScope.append st'.sourceScope
       carry := (st'.fresh, st'.discards)
       if !bodyMember? f then
         out := out ++ ss
@@ -996,11 +1151,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           let args ← (J.arrD m "arguments").toList.mapM expr
           pure s!" solcModifier{id}({", ".intercalate args})" : PM (List String)).run st0
       let n := bodyMemberName f
-      let psText := ", ".intercalate (ps.map fun (x, t) => s!"{t} {x}")
+      let psText := ", ".intercalate (ps.map fun (x, t) => s!"{t} {identText x}")
       helpers := helpers ++ [(n, s!"function {n}({psText}){String.join apps} \{ \
         {String.join (ss.map (·.2 ++ "; "))}}")]
-      out := out ++ [(J.line f, s!"{n}({", ".intercalate (ps.map (·.1))})")]
-    pure (out, helpers)
+      out := out ++ [(J.line f, s!"{n}({", ".intercalate (ps.map (identText ∘ Prod.fst))})")]
+    pure (out, helpers, loopScope)
   let called := (ownIds.flatMap fun i =>
     ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast) ++
     initCalls.flatMap (fun i => (reach calls (ids.length + 1) [] [] i).toOption.getD []) ++
@@ -1013,8 +1168,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (r.name, r.member (ss.map (·.2)))
   -- the constructor bodies the composite calls, after every function
   let ctorHelpers := if baseCtors.isEmpty then [] else
-    ((compositeBody.toOption.map (·.2)).getD [])
-  let funMembers := funMembers ++ ctorHelpers
+    ((compositeBody.toOption.map (·.2.1)).getD [])
+  let funMembers := selectorMembers ++ funMembers ++ ctorHelpers
   -- an initializer that does not print, or calls a function left out
   let initGap : Option Gap := match inits with
     | .error g => some g
@@ -1029,7 +1184,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)
   let ctor := (all.find? (·.1)).map fun (_, r) =>
-    { r with body := do
+    { r with sourceScope := r.sourceScope.append initScope |>.normalize, body := do
         let ss ← r.body
         if let some g := initGap then throw g
         pure ss }
@@ -1039,14 +1194,17 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         line := J.line c, tag := if isSpecified cspec then .specified else .diamond,
         params := [], body := do if let some g := initGap then throw g else pure [],
         writingCall := false }
+    let sourceScope := (own.sourceScope.append compositeScope |>.append
+      ((compositeBody.toOption.map (·.2.2)).getD default)).normalize
     some { own with
-      body := do let _ ← own.body; pure (← compositeBody).1,
+      sourceScope,
+      body := do sourceScope.ensure; let _ ← own.body; pure (← compositeBody).1,
       -- its own modifiers wrap its body's member alone (`bodyMember?`)
       modifierApps := "",
       calls := (own.calls ++ compositeReach.map nameAt ++ ctorHelpers.map (·.1)).eraseDups,
       writingCall := own.writingCall || baseCtors.any (writingCall ·.2) ||
         compositeReach.any fun x => (lookupBy x byId).all (·.writingCall) }
   let funs := all.filterMap fun (c, r) => if c then none else some r
-  pure { name, members, dropped := droppedNames, funs, funMembers, modifierMembers, ctor, initMembers, initGap }
+  pure { name, members, dropped := droppedNames, funs, funMembers, internalFuns := selectorHelpers.map (·.2), modifierMembers, ctor, initMembers, initGap }
 
 end Solidity.Frontend

@@ -35,6 +35,14 @@ argument, including with named arguments and tuple returns. Independent rows
 belong to contracts and libraries; top-level free functions have no independent
 test row. Recursion and unsupported helper signatures remain import gaps.
 
+Declaration metadata uses solc identities and canonical selector fields:
+`type(C).name`, an interface's own-function XOR ID, error/event selectors,
+and static function selectors. Anonymous events have no selector. Dynamic
+selector receivers retain their evaluation and lazy expression position.
+Unnamed input parameters receive fresh model names. See
+[the declaration milestone](feature-work/declarations-metadata.md) for
+verified shapes and remaining gaps.
+
 **What `proved` states.** The runner reads the actual obligation, including
 `cspec` rows. Whenever `Fml.callsBack false` holds it proves
 `ValidT .noCallback` by the callback calculus. Otherwise plain rows retain

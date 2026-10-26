@@ -172,6 +172,7 @@ theorem Src.valueT_revertOnly {T : Ty} : (r : Src C Γ T) → (r.valueT σ).Reve
   | .fixedCopy p _ _ => (SPath.resolveT_revertOnly σ p).bind fun _ =>
       (TRes.RevertOnly.ofOpt _).bind fun _ => TRes.RevertOnly.ok _
   | .copyMem p => (MPath.mvalT_revertOnly σ p).bind fun _ => TRes.RevertOnly.ok _
+  | .fixedCopyMem p _ => (MPath.mvalT_revertOnly σ p).bind fun _ => TRes.RevertOnly.ok _
 
 theorem MSrc.mvalT_revertOnly {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).RevertOnly
   | .val v => Val.evalT_revertOnly σ v

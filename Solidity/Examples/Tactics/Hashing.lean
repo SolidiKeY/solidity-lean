@@ -116,8 +116,9 @@ The precompiles hash as `keccak256` does, a symbol of the memory
 (`Val.hash`, `HashKind`): `sha256` is SHA-256 and `ripemd160` RIPEMD-160
 of the bytes (`Hashes.lean`, `@[irreducible]` program-level functions as
 `keccakBytes` is), `ecrecover(h, v, r, s)` an address of the precompile's
-four words, `0` where the signature is malformed and uninterpreted
-(`ecrecoverKey`, an `opaque` function) where it is not. -/
+four words, `0` where recovery fails and the computed address otherwise
+(`ecrecoverKey`, an irreducible definition).
+`Examples/Tactics/Recovery.lean` pins valid and invalid recovery vectors. -/
 
 /-- SHA-256 of `"abc"`, by evaluation in the kernel. -/
 theorem sha256Abc : (sha256Bytes [97, 98, 99]).1 =

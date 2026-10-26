@@ -118,7 +118,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -135,7 +141,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -152,7 +164,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -186,7 +204,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -203,7 +227,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -220,7 +250,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -237,7 +273,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -288,7 +330,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Body.lean"
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -296,7 +344,7 @@
       "category": "lexical",
       "syntax": "pragma abicoder v1/v2; experimental ABIEncoderV2",
       "scope": "model",
-      "current": "missing",
+      "current": "partial",
       "requirement": "Record ABI-coder selection and its validation restrictions; do not silently apply v2 to a v1 compilation.",
       "upstream": [
         {
@@ -304,14 +352,21 @@
           "line": 29
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
+      ]
     },
     {
       "id": "pragmaOther",
       "category": "lexical",
       "syntax": "other pragmas and experimental feature gates",
       "scope": "model",
-      "current": "missing",
+      "current": "partial",
       "requirement": "Delegate acceptance to pinned solc and reject unknown enabled language modes; compiler settings are part of provenance.",
       "upstream": [
         {
@@ -319,7 +374,14 @@
           "line": 29
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
+      ]
     },
     {
       "id": "sourceUnits",
@@ -454,7 +516,8 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/DeclarationMetadata.sol"
       ]
     },
     {
@@ -1161,15 +1224,22 @@
       "category": "expressions",
       "syntax": "[a,b,...]",
       "scope": "model",
-      "current": "missing",
-      "requirement": "Infer the fixed array's common element type using Solidity's first-element/context rules and allocate a memory array.",
+      "current": "partial",
+      "requirement": "Infer the fixed memory array independently of its target using the first mobile element type and implicit common types; preserve allocation and element-copy timing. Nominal element identities and recursive shapes remain partial.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
           "line": 423
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Syntax/Grammar.lean",
+        "Solidity/Syntax/Elab/Lower.lean",
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Examples/Tactics/Aggregates.lean",
+        "Solidity/Examples/Tactics/AggregatesImport.lean",
+        "docs/feature-work/aggregates.md"
+      ]
     },
     {
       "id": "memberAccess",
@@ -1219,7 +1289,9 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Grammar.lean"
+        "Solidity/Syntax/Grammar.lean",
+        "Solidity/Examples/Tactics/AggregateSlices.lean",
+        "docs/feature-work/aggregates.md"
       ]
     },
     {
@@ -1924,7 +1996,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -1941,7 +2016,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -1958,7 +2036,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -1967,7 +2048,7 @@
       "syntax": "ecrecover(hash,v,r,s)",
       "scope": "abstract",
       "current": "partial",
-      "requirement": "Specify accepted inputs, zero-on-failure and recovery relation; never infer signer authorization without premises.",
+      "requirement": "Computed bounded recovery validates v/r/s and returns zero on failure; concrete kernel/EVM vectors pass. General group-law and precompile-equivalence proofs remain open; signer authorization requires separate premises.",
       "upstream": [
         {
           "path": "libsolidity/analysis/GlobalContext.cpp",
@@ -1975,7 +2056,13 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md",
+        "Solidity/Secp256k1.lean",
+        "Solidity/Semantics/Heap.lean",
+        "Solidity/Examples/Tactics/Recovery.lean"
       ]
     },
     {
@@ -1983,7 +2070,7 @@
       "category": "builtins",
       "syntax": "erc7201(string memory id) returns(uint)",
       "scope": "model",
-      "current": "missing",
+      "current": "present",
       "requirement": "Evaluate the ERC-7201 namespace formula for runtime strings and constant-foldable inputs: hash the string bytes, subtract one modulo 2^256, hash the encoded word, and clear the low eight bits. Producing a namespace integer does not expose physical storage.",
       "upstream": [
         {
@@ -1999,7 +2086,13 @@
           "line": 2405
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md",
+        "Solidity/ERC7201.lean",
+        "Solidity/Syntax/Elab/Lower.lean"
+      ]
     },
     {
       "id": "wrapUnwrap",
@@ -2032,7 +2125,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2049,7 +2145,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2561,7 +2660,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2578,7 +2680,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2596,7 +2701,10 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab/Lower.lean",
-        "Solidity/Syntax/Elab/Arms.lean"
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2614,7 +2722,10 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab/Lower.lean",
-        "Solidity/Syntax/Elab/Arms.lean"
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2632,7 +2743,10 @@
       ],
       "localEvidence": [
         "Solidity/Syntax/Elab/Lower.lean",
-        "Solidity/Syntax/Elab/Arms.lean"
+        "Solidity/Syntax/Elab/Arms.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2641,7 +2755,7 @@
       "syntax": "abi.decode(bytes,(T,...))",
       "scope": "model",
       "current": "partial",
-      "requirement": "Validate offsets, lengths, alignment, ranges and truncation for supported nested types; reject malformed inputs and explicitly gate unsupported shapes.",
+      "requirement": "Validate offsets, lengths, ranges, truncation and fixed-byte padding before traversal/allocation; preserve noncanonical unaligned and overlapping layouts that solc accepts. Nominal enum metadata and complete recursive ABI coverage remain partial.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.cpp",
@@ -2649,7 +2763,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab.lean"
+        "Solidity/Syntax/Elab.lean",
+        "Solidity/Examples/Tactics/AbiFeatures.lean",
+        "Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+        "docs/feature-work/abi-hashes.md"
       ]
     },
     {
@@ -2674,7 +2791,7 @@
       "category": "metadata",
       "syntax": "type(C).name",
       "scope": "model",
-      "current": "missing",
+      "current": "present",
       "requirement": "Return compiler-resolved contract name bytes as a compile-time value.",
       "upstream": [
         {
@@ -2682,14 +2799,19 @@
           "line": 4293
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Examples/Tactics/DeclarationMetadata.lean",
+        "tests/solc/DeclarationMetadata.sol",
+        "docs/feature-work/declarations-metadata.md"
+      ]
     },
     {
       "id": "interfaceId",
       "category": "metadata",
       "syntax": "type(I).interfaceId",
       "scope": "model",
-      "current": "missing",
+      "current": "present",
       "requirement": "Compute the XOR of the interface's own external function selectors according to Solidity rules; inherited functions are excluded.",
       "upstream": [
         {
@@ -2697,7 +2819,12 @@
           "line": 4297
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Examples/Tactics/DeclarationMetadata.lean",
+        "tests/solc/DeclarationMetadata.sol",
+        "docs/feature-work/declarations-metadata.md"
+      ]
     },
     {
       "id": "functionSelector",
@@ -2713,7 +2840,9 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab/Values.lean"
+        "Solidity/Syntax/Elab/Values.lean",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/DeclarationMetadata.sol"
       ]
     },
     {
@@ -2730,7 +2859,9 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Elab/Values.lean"
+        "Solidity/Syntax/Elab/Values.lean",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/DeclarationMetadata.sol"
       ]
     },
     {
@@ -2738,7 +2869,7 @@
       "category": "metadata",
       "syntax": "E.selector for errors/events where accepted",
       "scope": "model",
-      "current": "missing",
+      "current": "present",
       "requirement": "Compute bytes4 for error signatures and bytes32 for non-anonymous event signatures, respecting solc declaration resolution; anonymous events have no selector member.",
       "upstream": [
         {
@@ -2746,7 +2877,12 @@
           "line": 3399
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "Solidity/Examples/Tactics/DeclarationMetadata.lean",
+        "tests/solc/DeclarationMetadata.sol",
+        "docs/feature-work/declarations-metadata.md"
+      ]
     },
     {
       "id": "arrayLength",
@@ -2985,7 +3121,13 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -3019,7 +3161,9 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "Solidity/Examples/Tactics/Aggregates.lean",
+        "docs/feature-work/aggregates.md"
       ]
     },
     {
@@ -3193,7 +3337,13 @@
         }
       ],
       "localEvidence": [
-        "docs/solc-alignment.md"
+        "docs/solc-alignment.md",
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -3201,7 +3351,7 @@
       "category": "semantics",
       "syntax": "transitive declaration-aware feature extraction",
       "scope": "model",
-      "current": "missing",
+      "current": "partial",
       "requirement": "Collect features from initializers, modifiers, inherited bodies, callees, payloads, specifications and call options; reject unknown AST nodes instead of default admission.",
       "upstream": [
         {
@@ -3209,7 +3359,14 @@
           "line": 65
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+        "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
+        "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
+        "docs/feature-work/source-admission.md"
+      ]
     },
     {
       "id": "inlineAssembly",

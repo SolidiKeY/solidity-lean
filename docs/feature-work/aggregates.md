@@ -1,0 +1,123 @@
+# Aggregate milestone, 2026-10-25
+
+Inline array expressions now allocate fixed memory before evaluating and
+storing each element in source order. Type inference starts at the first
+mobile element type and folds Solidity implicit common types, independently
+of the target (`[1,256]` is `uint16[2]`; a `uint16[2]` memory target does not
+make `[1,2]` cease being `uint8[2]`). Numeric, Boolean, fixed-byte, finite nested-array and struct
+elements are exercised by native and compiler-imported examples. Storage
+reference elements copy at each element's evaluation; memory references alias.
+
+`Src.fixedCopyMem` retains the typed `MPath` and `FixedCopy` witness. Its
+value and lower term compose memory-to-storage copying with the existing
+fixed-shape conversion; `Src.lower_valueT`, weakening, hereditary invariants,
+clean tails and sound save/push integration cover the new source. Mapping
+freedom comes from the indexed memory path. Generic fixed-copy adapters remain
+Lean-only. The conservative KeY fragment and EVM compiler explicitly exclude
+the adapter, as they already exclude storage fixed-copy adapters.
+
+Fixed memory snapshots may copy into compatible dynamic or longer fixed
+storage arrays, including reference pushes and deferred getter receivers.
+Storage value copies may widen numeric element widths; aliases and memory
+bindings retain exact element shapes. Byte-width widening is not modeled by
+this conversion because it requires shifting values. Snapshot evaluation
+stays after the receiver's effects when the native receiver statement defers it.
+
+Local memory and storage-alias tuple targets capture all RHS references before
+rebinding. Multiple nonlocal targets, effectful/dependent targets and duplicate
+targets retain their restrictions. Calldata read-only propagation now includes
+nested assignment roots and computes a finite fixed point, so tuples and
+array elements cannot create untracked writable aliases.
+
+Slice bases are captured before endpoints and remain stable through source
+rebinding. Nonconstant bounds are read once. Relative bounds are checked before
+adding outer offsets. Inline reads, lengths and decoding open at the actual
+expression position. Relative indices are captured once; invalid indices use
+the base's out-of-range index, preserving bounds Panic(0x32) without evaluating
+an overflowing offset. Endpoint range failures retain Solidity's ordinary
+revert. The source reference is Solidity 0.8.38 commit
+`1835d247de183f23e7b0e2bc4a50732af525b77c`,
+`YulUtilFunctions::calldataArrayIndexRangeAccess`.
+
+## Review
+
+A read-only finder and an independent skeptic reviewed both source/core and
+frontend areas without calling Lean. Confirmed issues fixed in this milestone:
+
+- Nested RHS reference assignments escaped calldata taint; propagation now
+  includes those roots and reaches a finite fixed point. Regression checks
+  include a five-link reverse alias chain and a nested tuple rebinding and container-element assignment.
+- Literal-lvalue rejection also rejected legal literals inside index
+  expressions. It now rejects only a whole literal target; indexed temporary elements
+  remain writable, with write/delete/increment regressions.
+- Import scalar casts were applied to reference elements of nested arrays.
+  Scalar context is now applied only to immediate scalar element types; an
+  imported narrow nested-array regression covers the affected path.
+- Slice test expectations now distinguish legacy right-first and via-IR
+  left-first schedules. A catchable-code test distinguishes Panic(0x32) from
+  Panic(0x11). Ordinary declarations also shadow the virtual view table.
+
+Reference pushes also validate captured source widths against the direct
+receiver or the deferred getter return metadata, rejecting narrowing through
+a literal.
+
+The broad examples also caught inline slice decoding entering generic call
+admission. Private descriptors now retain whole-base checking, and tuple
+assignments/declarations resume the ABI decoder after opening the stable
+view. Both existing `Hashing` examples and a new tuple-decode case pass the
+expanded 246-job focused build.
+
+The final axiom audit of `Src.lower_valueT`, `Src.valueT_wk` and the new
+literal/imported/slice/Panic32/via-IR headline proofs lists only `propext`,
+`Classical.choice` and `Quot.sound`. No additional trusted assumption,
+dependency or heartbeat override was added.
+
+## Validation
+
+The initial 181-job targeted core build passed. Per-file checks passed for the
+new native and compiler-imported array examples and the slice effect suite.
+The pinned-fixture JavaScript regression passes on the host: the imported
+literal assertion is proved and the false assertion stays pending. It could
+not launch its process group inside the sandbox (EPERM). Frozen TestSuite
+static audit: 552 derived, 11 refuted, zero pending. Layering: 126 core
+modules, zero elaborator reachability. Feature audit: 211 features and 783
+upstream symbols. Automation gate: 491 automatic plus 61 budgeted, 11 refuted,
+zero pending.
+
+One profiler sample per declaration, with other build work running, measured:
+
+| Proof | Before (s) | After (s) |
+|---|---:|---:|
+| Fixed storage shape copy | 0.095 | 0.071 |
+| Simple slice read | 0.425 | 0.438 |
+| Nested slice read | 0.902 | 1.057 |
+
+These are indicative timings, not a controlled benchmark. The nested slice
+cost increased with the stable captures and relative checks; no heartbeat
+limits changed.
+
+Final `./run-lean.sh` passed: 587 library jobs, 243 TestSuite jobs and the
+frozen `473da8944c` sort gate (377 taclets, 131 read-bearing annotations,
+zero mismatches). The existing `Examples/Decision.lean` checked in 852 s.
+The frozen corpus passed all 774 obligations with no verdict or generated
+output drift. The default-compiler testing API also proves the new literal
+property; the committed AST remains generated by the exact 0.8.38 compiler.
+The final fixture import was rechecked after its compatible pragma update.
+
+`git diff --check`, layering, feature audit and the automatic gate pass.
+Orphan/doc-path checks report the same 33 pre-existing scratch orphans and
+13 pre-existing missing vendor/external document paths, with no new finding.
+The temporary timing module was removed. Source changes remain uncommitted
+for shared-checkout integration.
+
+## Remaining interfaces
+
+This is a checked implementation milestone, not completion of every aggregate
+feature in the catalog. Passing, hashing or materializing a slice still needs
+location-aware view/copy interfaces. Writable calldata-to-memory copies and
+external calls with reference arguments remain limited. Nominal enum/UDVT and
+function-valued element identities belong to the type/function groups;
+recursive shapes belong to recursive-types. Explicit address-literal elements
+currently lose their source identity in the native address-cast parser; typed
+address variables retain their metadata. Heterogeneous reference-return
+tuples remain a function-return interface. The feature catalog remains partial.

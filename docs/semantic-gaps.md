@@ -108,7 +108,7 @@ contract's invariant.
 | closer: quantifier instances at non-literal indices | closer limit, not a semantic gap | The scoped `allLeftHide` pre-pass handles literals and locals already in the premise's scope (`InstLit.loc`, `Calculus/AllLeft.lean`). A bounded closer fallback now opens later binders and applies universal proofs at numeric locals and typed projections (`Calculus/CloseAll.lean`), including an anonymised invariant-loop counter (`Examples/Tactics/AllLeftLater.lean`). It retains Theory equations so premises and conclusions read alike. Arbitrary ABI memory-array loops still need further memory-read/length normalization and suitable invariants; this is not complete quantified-array automation. |
 | the original four `SolcLoopsOpen` functions | search and closer limits, not semantic gaps | `binomialFaithfulRowsSmall` now proves through the actual runner and its pinned-solc regression, after demanded memory-read folding (M13). `binomialRowsNine` proves in `Examples/Tactics/OpenLoops.lean` with identities named by their allocations (`copyRes`) and its walk checked in chunks (`sol_prove (chunk := 128)`), and through the runner, which checks a walk past 1024 steps in chunks (with `--timeout-ms` past the default 300 s). Two remain open: `pushNoArgs2dLoop` is false under `.solc` tails and holds under `ValidTail .clean` (O6), which the runner states, but its 43 unrolled pushes exceed the search budget; and `multiArrayFillByPushLoops` needs exposed recycled-slot handling. See `docs/loops.md` and `docs/assurance.md`. |
 | a quotient `x / k` of a parameter left open (constructors and functions alike) | closer | closed: `sol_close`'s arithmetic reads a quotient of a nonnegative dividend as `div` (`Int.tdiv_eq_ediv_of_nonneg`, solkey's `sdiv_axiom`; `Calculus/Close.lean`, `tests/solc/CtorDivision.sol`) |
-| narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  A tuple of references stays refused whatever its types (`elabTuple`) |
+| narrow leftovers: push arithmetic on a narrow element, whole uses in a conditional of references or a struct constructor's argument, a modifier's reference parameter | elaborator | closed: the appended slot checked (`pushedSlot`), the branches and members shape-checked (`narrowWholeAt?`), a modifier's reference parameter a local at its location (`ModApp.locs`, `rawTyW`); `tests/solc/NarrowNested.sol`, `tests/solc/Modifiers.sol`, `Examples/Tactics/Checked.lean`.  Local memory and storage-alias tuple targets capture references before rebinding; multiple nonlocal targets and reference-return tuples remain limited (`elabTuple`, `docs/feature-work/aggregates.md`) |
 | a struct the struct table does not list (a contract's own, or the table's name with other members) | semantics, solc import | closed: a contract's own struct is the table's struct whose name spells its members ("Struct table" below; `contract!{ struct S { … } }`, `Examples/Tactics/OwnStructs.lean`, `tests/solc/OwnStructs.sol`); a struct recursive through an array stays refused, a library's struct its caller cannot see stays a row |
 | a public function's memory array of narrow elements: ABI decoding reverts on one out of range | chain fact | closed: the obligation assumes each element in range (`Problem.callPre`, `SolcFun.elemRanges`), and `sol_leaf` instantiates the quantified premise at the literal indices the leaf reads (`allLeftHide`, `Calculus/AllLeft.lean`; `NarrowNested.abiElementInRange`).  A parameter index is offered too (`InstLit.loc`, lane `open-abi2`, `abiElementAtParameter`); a loop counter is not (row above) |
 | push arithmetic inside `unchecked` (`small.push() -= 1`, `small.push()--`) | elaborator | closed: the appended slot starts at `0`, so the statement pushes `0 op r` wrapped at the element's width (`r` for `+=`, `0` for `*=`, `r`'s negation modulo `2^N` for `-=`, a signed minimum itself; a literal folded), `r` evaluated once before the push (`elabStmtP`, `Syntax/Elab.lean`; `tests/solc/NarrowNested.sol`) |
@@ -116,6 +116,12 @@ contract's invariant.
 | the narrow shape error names a capture (`mv1`) | elaborator | closed: a reference argument's shape is checked as written, before `hoistCallArgs` captures it (`Examples/Tactics/Checked.lean`) |
 
 ## Struct table
+
+The standalone guarded type-graph/storage foundation is now checked
+(`TypeGraph.lean`, `Semantics/RecursiveStorage.lean`;
+[implementation and remaining interfaces](feature-work/recursive-types.md)).
+It does not yet change this table or admit recursive ordinary programs;
+`recursiveTypes` remains missing in the source/interpreter/calculus pipeline.
 
 **The gap.** Structs are one global, closed table (`Semantics.structDef :
 Name → List (Name × Ty)`, `AST.lean`), so a contract can only use a struct
@@ -333,26 +339,26 @@ theorems are unchanged.
   their ABI range as a memory one's (`elemRanges`).  Slices `b[i:j]` are
   views (lane `open-abi2`), below.  Tests: `tests/solc/Calldata.sol`,
   `Examples/Tactics/Bytes.lean` §5–6.
-- Calldata slices `b[i:j]` (lane `open-abi2`): a view of the caller's data,
-  as solc reads it, not a copy (a copy is a loop with no invariant, so no
-  obligation over it would be proved).  `RawStmt.sliceViews`
-  (`Syntax/Elab.lean`, applied by the `contract!` and `sol_raw!` macros to a
-  body with a slice, outside `hoist`) rewrites the body: a view is its base
-  and its start and end in it, after solc's checks `i <= j <= length` (a
-  revert); a bound that is not a literal or the base's length a local
-  assigned once.  `t[k]` is `b[o + k]` after `require(o + k < f)` where
-  every evaluation of the statement reads it (a checked subtraction that
-  underflows past the view where only a branch does: solc's `Panic(0x32)`
-  and the model's revert are one outcome), `t.length` is `f - o`, and
-  `abi.decode(t, …)` decodes the view in place (`#sliceV`, `ByteSrc`).  A
-  slice of a slice adds the offsets.  So reads, lengths and decodings are
-  loop-free and proved (`sliceRead`, `sliceOfSlice`, `slicePast`,
-  `sliceLength`, `decodeShortView`).  A slice handed to a function,
-  hashed, copied, indexed by an expression with an effect, or whose base
-  is assigned while it is open is refused (`sliceRefusedName`, reported by
-  `calldataCheck`).  The closer is the cost: a read beside a second guard
-  on the same length (`require(k + 1 < xs.length)` with the view's own
-  check) is past its heartbeats, so `sliceRead` reads `xs[1 + k]`.
+- Calldata slices `b[i:j]`: loop-free views with a stable captured base,
+  source-ordered endpoint captures and relative endpoint checks before
+  offset arithmetic. Reads capture their relative index where the expression
+  is evaluated; an invalid index uses the base's bounds failure without
+  computing an overflowing offset. Inline reads/lengths/decoding stay at
+  their evaluation position. Source rebinding and endpoint/index effects
+  are covered by `Examples/Tactics/AggregateSlices.lean`, including legacy
+  and via-IR binary schedules and a catchable bounds panic. Reads, lengths
+  and decoding remain proved by the existing `Bytes` examples. Passing,
+  hashing and copying a view still require location-aware interfaces.
+- Inline arrays allocate a fixed memory array before evaluating/storing
+  elements in source order. The first element's mobile type and subsequent
+  implicit common types determine its element type; the assignment target
+  supplies no type. Primitive, finite nested-array and struct elements are
+  covered. Memory elements alias; storage elements copy at each element's
+  evaluation. Fixed memory snapshots can copy into a compatible dynamic or
+  longer fixed storage array and reference pushes. Local reference tuples
+  capture all RHS references before rebinding. Nominal enum/UDVT/function
+  element types, recursive shapes and heterogeneous reference-return tuples
+  remain interfaces for their owning groups. See `feature-work/aggregates.md`.
 - A byte type as a struct member: closed ("Struct table", "Byte and function
   types as members").
 
@@ -584,13 +590,17 @@ s)`, the precompile's 128 bytes, then the hash `.ecrecover` into an
 `address` (`hoistHashWith`, `Syntax/Elab.lean`): `ecrecoverBytes` is `0`
 where the precompile fails (`v` not `27` or `28`, `r` or `s` outside
 `[1, n)` for secp256k1's order `n`), as solc returns the zero address, and
-otherwise `ecrecoverKey h v r s mod 2^160`, an `opaque` function: no proof
-unfolds it, so what is proved holds of every recovery function (no axiom);
-`#run` evaluates it to `0`.  Assumed: nothing about which address a valid
-signature recovers to (it may be `0`, as the point at infinity is on the
-EVM).  Tests: `tests/solc/Hashing.sol` (`sha256Parameter`,
-`ripemd160Parameter`, `recoverSigner`), `Examples/Tactics/Hashing.lean`
-(`sha256Abc`, `ripemd160Abc`, `recoverBadV`, the runs, `sha256Twice`).
+otherwise the computed address from `Secp256k1.lean` through the irreducible
+`ecrecoverKey` interpretation. `#run` now computes valid recoveries. Coordinates,
+scalars and checked curve points are bounded; malformed roots and infinity
+return zero, and high-s signatures are accepted. Concrete generator/address
+reductions are kernel-checked, and independent pinned-solc/EVM vectors cover
+valid and invalid cases. No authorization or cryptographic injectivity premise
+is inferred. A general proof of modular inversion/group laws or equivalence to
+the EVM precompile remains open. See [the ABI milestone](feature-work/abi-hashes.md)
+for exact evidence, runtime ERC-7201 support, decoder repairs and remaining
+metadata/return interfaces. Earlier hash tests remain in `tests/solc/Hashing.sol`
+and `Examples/Tactics/Hashing.lean`.
 Cost: `Val`, `Op2` and the Lean rules keep their constructor counts; every
 match on `keccak` gained the kind (`.hash _ b _`).  The lowering is a
 function outside `hoist`'s `mutual` block, handed the recursive calls.

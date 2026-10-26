@@ -694,7 +694,7 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
   | some src =>
     cases src with
     | copyMem p => cases hwp
-    | fixedCopy p shape hm => cases hwp
+    | fixedCopy p shape hm | fixedCopyMem p shape => cases hwp
     | @val p e =>
       rw [pushIn] at hwp
       simp only [Bool.and_eq_true] at hwp

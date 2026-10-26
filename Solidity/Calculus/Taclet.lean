@@ -802,7 +802,7 @@ theorem LeanTaclet.storageMemorySourceSave.toStep {T : Ty} {loc : Loc C Γ T}
   cases src with
   | val v => cases hmem
   | copy p hm => cases hmem
-  | fixedCopy p shape hm => cases hmem
+  | fixedCopy p shape hm | fixedCopyMem p shape => cases hmem
   | copyMem p => cases loc <;> rfl
 
 /-- A compatible fixed-array source uses the native typed save update. -/
@@ -811,7 +811,7 @@ theorem LeanTaclet.storageFixedCopySave.toStep {T : Ty} {loc : Loc C Γ T}
     Stmt.step k m (.assign loc src) = .save loc src := by
   cases src with
   | val | copy | copyMem => cases hshape
-  | fixedCopy => cases loc <;> rfl
+  | fixedCopy | fixedCopyMem => cases loc <;> rfl
 
 /-- A converted fixed-array snapshot is pushed by the ordinary push symbol. -/
 theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)}
@@ -819,7 +819,7 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
     Stmt.step k m (.push sp (some src) rfl) = .upd1 (UpdElem.push sp src) := by
   cases src with
   | val | copy | copyMem => cases hshape
-  | fixedCopy => simp only [Stmt.step, pushStep, hsp, ↓reduceIte]
+  | fixedCopy | fixedCopyMem => simp only [Stmt.step, pushStep, hsp, ↓reduceIte]
 
 /-- A revert with data under the box: `true`, as `revert();`. -/
 theorem LeanTaclet.revertDataBox.toStep {d : List (RevPart C Γ)} :

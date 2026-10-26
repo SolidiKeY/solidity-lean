@@ -799,6 +799,11 @@ theorem Src.valueT_ct {Γ : Ctx} {σ : State C Γ} {T : Ty} (hs : σ.storage.All
     obtain ⟨sv, _, h⟩ := tbind_ok_inv h
     cases h
     exact SVal.plain_ct (shape.apply_plain sv hm)
+  | .fixedCopyMem p shape, v, h => by
+    obtain ⟨mv, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact SVal.plain_ct (shape.apply_plain (MVal.copyMToSt σ.heap mv) p.mapFree)
+
 
 /-- An alias's right-hand side: clean tails, every live reference kept live,
 and the reference it names live. -/

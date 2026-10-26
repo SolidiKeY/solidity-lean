@@ -546,6 +546,8 @@ theorem Src.lower_pushFree {T : Ty} (r : Src C Γ T) : r.lower.pushFree = true :
     simp only [Src.lower, Tm.pushFree, Op2.pushFree, SPath.lower_pushFree p, Bool.and_self]
   | copyMem p =>
     simp only [Src.lower, Tm.pushFree, Op2.pushFree, MPath.lower_pushFree p, Bool.and_self]
+  | fixedCopyMem p shape =>
+    simp only [Src.lower, Tm.pushFree, Op2.pushFree, MPath.lower_pushFree p, Bool.and_self]
 
 theorem MSrc.lower_pushFree {T : Ty} (r : MSrc C Γ T) : r.lower.pushFree = true := by
   cases r with

@@ -3,6 +3,7 @@ import Solidity.KeySort
 import Solidity.Language.Features
 import Solidity.Eqns
 import Solidity.AST
+import Solidity.TypeGraph
 import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
@@ -20,6 +21,7 @@ import Solidity.Semantics
 import Solidity.Semantics.Value
 import Solidity.Semantics.Ops
 import Solidity.Semantics.Storage
+import Solidity.Semantics.RecursiveStorage
 import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Heap
 import Solidity.Semantics.State
@@ -230,6 +232,9 @@ import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.CheckedBlock
 import Solidity.Examples.Tactics.Bytes
 import Solidity.Examples.Tactics.Hashing
+import Solidity.Examples.Tactics.AbiFeatures
+import Solidity.Examples.Tactics.AbiFeaturesImport
+import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.FunctionTypes
 import Solidity.Examples.Tactics.SignedCasts
 import Solidity.Examples.Tactics.SolcOpen
@@ -522,3 +527,13 @@ import Solidity.Examples.Tactics.Lifetime
 
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Examples.Tactics.SymbolicCounterexample
+
+import Solidity.Examples.Tactics.Aggregates
+import Solidity.Examples.Tactics.AggregatesImport
+import Solidity.Examples.Tactics.AggregateSlices
+import Solidity.Frontend.Source
+import Solidity.Frontend.SolcJson.Admission
+import Solidity.Examples.Tactics.SourceLiteralsImport
+import Solidity.Examples.Tactics.SourceIdentifiersImport
+import Solidity.Examples.Tactics.SourceAdmissionImport
+import Solidity.Examples.RecursiveStorage

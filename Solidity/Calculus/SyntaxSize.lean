@@ -73,7 +73,7 @@ def Src.size {T : Ty} : Src C Γ T → Nat
   | .val v => 1 + v.size
   | .copy p _ => 1 + p.size
   | .fixedCopy p _ _ => 1 + p.size
-  | .copyMem p => 1 + p.size
+  | .copyMem p | .fixedCopyMem p _ => 1 + p.size
 
 def MSrc.size {T : Ty} : MSrc C Γ T → Nat
   | .val v => 1 + v.size

@@ -349,6 +349,8 @@ def Src.valueT (σ : State C Γ) {T : Ty} : Src C Γ T → TRes (SVal T)
     pure (shape.apply v)
   | .copyMem p => do
     pure (MVal.copyMToSt σ.heap (← p.mvalT σ))
+  | .fixedCopyMem p shape => do
+    pure (shape.apply (MVal.copyMToSt σ.heap (← p.mvalT σ)))
 
 /-- The slot a memory source writes. -/
 def MSrc.mvalT (σ : State C Γ) {T : Ty} : MSrc C Γ T → TRes (MVal σ.H T)
