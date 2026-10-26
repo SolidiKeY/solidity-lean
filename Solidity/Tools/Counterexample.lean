@@ -460,6 +460,7 @@ def specNums : SpecExpr → List Int
   | .num n | .uintLit n => [n]
   | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => specNums e
   | .index a b | .binop _ a b | .imp a b | .iff a b => specNums a ++ specNums b
+  | .member _ key items => specNums key ++ items.flatMap specNums
   | .bool _ | .name _ | .result => []
 
 /-- The integer literals a location's keys mention. -/

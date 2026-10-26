@@ -149,6 +149,8 @@ partial def SpecExpr.fmt : SpecExpr → String
   | .iff a b => s!"{SpecExpr.fmt.at 20 a} <-> {SpecExpr.fmt.at 21 b}"
   | .all p x e => s!"\\forall {Ty.toStr (.prim p)} {x}; {SpecExpr.fmt e}"
   | .ex p x e => s!"\\exists {Ty.toStr (.prim p)} {x}; {SpecExpr.fmt e}"
+  | .member p key items =>
+    s!"\\in {Ty.toStr (.prim p)} ({SpecExpr.fmt key}; {", ".intercalate (items.map SpecExpr.fmt)})"
 where
   /-- An operand where the grammar expects precedence `p`: parenthesised
   if it binds less tightly. -/

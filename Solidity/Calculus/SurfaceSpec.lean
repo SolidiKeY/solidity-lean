@@ -134,6 +134,11 @@ def SpecExpr.foldMap {α : Type} (leaf : α) (join : α → α → α) (here : S
     match here e with
     | some r => r
     | none => join (a.foldMap leaf join here) (b.foldMap leaf join here)
+  | e@(.member _ key items) =>
+    match here e with
+    | some r => r
+    | none => items.foldl (fun acc item => join acc (item.foldMap leaf join here))
+        (key.foldMap leaf join here)
   | e@(.num _) | e@(.uintLit _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
 
 /-- Whether a node `here` picks out occurs, and what it says of it. -/
@@ -349,7 +354,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := fa
       throw s!"operands of {BinOp.sym op} of types {pa'.toStr} and {pb'.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
     pure (.prim (op.ret p), .binop op ta tb)
-  | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
+  | .imp .. | .iff .. | .all .. | .ex .. | .member .. => throw "a formula where a value is expected"
 
 /-- Select the ledger context from the operands' result shapes, then compile
 each operand once. A ledger read resets its address operand's context without
@@ -399,6 +404,18 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
   | .all p x e => do pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
   | .ex p x e => do
     pure (.not (.all (.ofName x) p (.not (← e.fml { ctx with locals := (x, p) :: ctx.locals }))))
+  | .member p key items => do
+    let (_, keyTerm) ← key.term C ctx
+    let terms : List (NTerm C) ← items.mapM fun item => do
+      let (_, t) ← item.term C ctx
+      pure t
+    pure fun Γ => do
+      -- Check every term at one fixed sort before folding. The key is checked
+      -- even for an empty collection; no erased operand can hide an error.
+      let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
+      let values : List (Tm C Γ.ctx (.val p)) ← terms.mapM fun t => t.check (.val p) Γ
+      pure (values.foldr (fun item rest =>
+        .not (.and (.not (.eq value item)) (.not rest))) .ff)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.fml ctx.old
