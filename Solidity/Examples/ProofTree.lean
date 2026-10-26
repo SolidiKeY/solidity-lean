@@ -1,6 +1,7 @@
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Derive
+import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProvesDerive
 import Solidity.Tools.CompleteVerification
@@ -1045,5 +1046,113 @@ example : ⊢ dl!{
   sol_prove (steps := 128)
 
 end Rigid
+
+namespace CallbackPlain
+
+/--
+info: Try this:
+  refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+-/
+#guard_msgs in
+example : ProvesC (C := StandardExample) .tt false [] .nil .tt := by
+  sol_derive?
+
+-- The fixed-stage replay has no stage search and stays in Proves after plain.
+example : ProvesC (C := StandardExample) .tt false [] .nil .tt := by
+  refine ProvesC.plain ?_ rfl
+  sol_prove (steps := 128)
+
+/-- A sequent whose outer scope is nonempty retains the structural fallback. -/
+example : ProvesC (C := StandardExample) .tt false [.val .uint] .nil .tt := by
+  sol_prove
+
+/--
+info: Try this:
+  refine ProvesC.plain ?_ rfl
+    exact Proves.closeTrue rfl
+-/
+#guard_msgs in
+set_option sol.prove.compiledPlain false in
+example : ProvesC (C := StandardExample) .tt false [] .nil .tt := by
+  sol_derive?
+
+end CallbackPlain
+
+namespace CallbackPruning
+
+-- A reverting catch does not need a proof that its callee can finish.
+/--
+info: Try this:
+  refine ProvesC.hideLeft ?_
+    refine ProvesC.plain ?_ rfl
+    sol_prove (steps := 128)
+-/
+#guard_msgs in
+example : ProvesC (C := StandardExample) .tt false [] .nil
+    (.imp (.not (.modal .diamond (.cons .revert .nil) .nil .tt))
+      (.modal .box (.cons .revert .nil) .nil .ff)) := by
+  sol_derive?
+
+example : ProvesC (C := StandardExample) .tt false [] .nil
+    (.imp (.not (.modal .diamond (.cons .revert .nil) .nil .tt))
+      (.modal .box (.cons .revert .nil) .nil .ff)) := by
+  refine ProvesC.hideLeft ?_
+  refine ProvesC.plain ?_ rfl
+  sol_prove (steps := 128)
+
+#guard CallbackWalk.refutePrefix 8 (C := StandardExample)
+  ((Hyps.pre .nil .ff).havoc.pre .tt)
+#guard !CallbackWalk.refutePrefix 8 (C := StandardExample)
+  ((Hyps.pre .nil .tt).havoc.pre .tt)
+
+/--
+info: Try this:
+  sol_prefix_false 8
+-/
+#guard_msgs in
+example : ProvesC (C := StandardExample) .tt false [] (Hyps.pre .nil .ff) .ff := by
+  sol_derive?
+
+-- Keep the suggested replay; it does not rerun the compiled probe.
+example : ProvesC (C := StandardExample) .tt false [] (Hyps.pre .nil .ff) .ff := by
+  sol_prefix_false 8
+
+/-- A true assumption cannot refute the context, even under callbacks. -/
+theorem trueContext_not_refuted :
+    ¬ ProvesC (C := StandardExample) .tt false [] (Hyps.pre .nil .tt) .ff := by
+  intro h
+  have hf := ProvesC.sound_of rfl rfl h (State.init StandardExample)
+  exact hf trivial trivial
+
+private def failingUpdate : Upd StandardExample [] [.val .uint] :=
+  .decl .nil (.user "bad")
+    (.val (.app2 (.binop .div rfl) (.lit ⟨1, rfl⟩) (.lit ⟨0, rfl⟩)))
+
+-- The contradiction check must retain successful execution of this prefix.
+#guard !Seq.refuteS (C := StandardExample) (Hyps.upd .nil .diamond failingUpdate) .ff
+
+#guard !CallbackWalk.refutePrefix 8 (C := StandardExample)
+  (((Hyps.upd .nil .diamond failingUpdate).pre .ff).havoc.pre .tt)
+#guard CallbackWalk.refutePrefix 8 (C := StandardExample)
+  (((Hyps.pre .nil .ff).upd .diamond failingUpdate).havoc.pre .tt)
+
+example : ProvesC (C := StandardExample) .tt false []
+    ((Hyps.pre .nil .ff).havoc.pre .tt) .ff := by
+  refine ProvesC.closeFalse ?_ (by rfl)
+  exact CallbackWalk.refutePrefix_sound 8 _ (by rfl) (by rfl)
+
+/-- A false branch assumption cannot erase a diamond update that fails
+before the branch is reached (`uint bad = 1 / 0; if (false) ...`). -/
+theorem failingDiamond_not_refuted :
+    ¬ ProvesC (C := StandardExample) .tt false []
+      ((Hyps.upd .nil .diamond failingUpdate).pre .ff) .ff := by
+  intro h
+  have hf := ProvesC.sound_of rfl rfl h (State.init StandardExample)
+  change failingUpdate.afterT .diamond (State.init StandardExample)
+    (fun σ => holdsC .tt false σ (.imp .ff .ff)) at hf
+  exact hf.of_noExh rfl rfl
+
+end CallbackPruning
 
 end Solidity.Examples.ProofTree

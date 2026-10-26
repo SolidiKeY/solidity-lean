@@ -87,6 +87,8 @@ structure SolcFun where
   name : String
   /-- The Solidity name, before disambiguating overloaded declarations. -/
   sourceName : String := ""
+  /-- Exact source role and ABI identity, before model-name/type lowering. -/
+  sourceDecl : Option SourceFunction := none
   /-- The source parameter types, before enums, aliases or addresses are lowered. -/
   sourceSignature : String := ""
   /-- The scope scan is independent of the implementation inventory. -/
@@ -134,6 +136,8 @@ structure SolcContract where
   /-- Compiler lowering helpers are callable only by their generated direct
   calls; they do not denote source-level function values or ABI entries. -/
   internalFuns : List String := []
+  /-- Metadata for emitted function members, including synthesized getters. -/
+  sourceDecls : List (String × SourceFunction) := []
   modifierMembers : List String := []
   /-- The constructor, named `constructor` (solc names it `""`), if the
   contract declares one. -/
@@ -194,6 +198,23 @@ def id? (j : Json) : Option Int := (j.getObjValAs? Int "id").toOption
 def tyStr (j : Json) : String :=
   ((j.getObjVal? "typeDescriptions").toOption.bind
     fun t => J.str? t "typeString").getD ""
+
+/-- Nominal scalar identity retained by modern fixtures for user-defined value types. -/
+def tyId (j : Json) : String :=
+  ((J.opt j "typeDescriptions").bind (J.str? · "typeIdentifier")).getD ""
+
+/-- The annotation belongs to an operator, including malformed/null annotations. -/
+def hasOperatorFunction (j : Json) : Bool :=
+  ["UnaryOperation", "BinaryOperation"].contains (kind j) &&
+    (j.getObjVal? "function").isOk
+
+/-- An operator's resolved callee, when its annotation is an integer. -/
+def operatorFunction? (j : Json) : Option Int :=
+  if hasOperatorFunction j then (j.getObjValAs? Int "function").toOption else none
+
+/-- A nominal type node names its compiler declaration, including path nodes. -/
+def typeRef? (j : Json) : Option Int :=
+  (ref? j).orElse fun _ => (opt j "pathNode").bind ref?
 
 /-- The names of the variable declarations among `ns`. -/
 def varDeclNames (ns : List Json) : List String :=
@@ -260,6 +281,49 @@ def sourceCast (t value : String) : String :=
   if t == "bool" then s!"({value})"
   else if t == "address" || t == "address payable" then s!"address({value})"
   else s!"{t}({value})"
+
+/-- Function visibility from the outer type only. A nested parameter or return
+may itself be an external function; that must not admit an internal receiver.
+Normalized compiler fixtures may omit `typeIdentifier`, so inspect the same
+source type string that the rest of the reader consumes. -/
+private def externalFunctionType (ty : String) : Bool := Id.run do
+  if !ty.startsWith "function " then return false
+  let mut depth : Nat := 0
+  let mut outer := ""
+  for c in ty.toList do
+    if c == '(' || c == '[' then
+      if depth == 0 then outer := outer.push ' '
+      depth := depth + 1
+    else if c == ')' || c == ']' then
+      depth := depth - 1
+      if depth == 0 then outer := outer.push ' '
+    else if depth == 0 then outer := outer.push c
+  let words := (outer.split Char.isWhitespace).filter (· != "")
+  return words.contains "external" && !words.contains "internal"
+
+/-- A stored external function projection whose numeric lowering may safely
+read the receiver twice. Restrict receivers to stable places: the native
+selector lowering duplicates its receiver, so calls, increments and assignments
+must stay refused until that lowering captures their value exactly once.
+The explicit result cast preserves the ABI kind after `fnPure` erases the
+function marker into arithmetic. -/
+def storedFunctionMemberType? (j : Json) : Option String := do
+  guard (J.kind j == "MemberAccess")
+  let member ← J.str? j "memberName"
+  let result ← match member with
+    | "address" => some "address"
+    | "selector" => some "bytes4"
+    | _ => none
+  guard (J.tyStr j == result)
+  let receiver ← J.opt j "expression"
+  guard (externalFunctionType (J.tyStr receiver))
+  let desc ← J.opt receiver "typeDescriptions"
+  if let some typeId := J.str? desc "typeIdentifier" then
+    guard (typeId.startsWith "t_function_external_")
+  guard ((J.nodes receiver).all fun node =>
+    ["Identifier", "MemberAccess", "IndexAccess", "Literal"].contains (J.kind node) ||
+      (J.kind node == "TupleExpression" && (J.arrD node "components").size == 1))
+  pure result
 
 /-- The evaluated outer dimension supplied by solc. A named bound has no
 literal `value`; nested types must use their last, outermost dimension. -/
@@ -552,6 +616,12 @@ structure PState where
   /-- Pure selector helpers evaluate a receiver argument in its original
   expression position, including a lazy conditional arm. -/
   selectorHelpers : List (Int × String) := []
+  /-- Member resolution is separate from bare identifiers: a getter's alias
+  must never replace the storage root of the same declaration identity. -/
+  externalNames : List (Int × String) := []
+  /-- Unsupported getters are refused at their use, never treated as an
+  unspecified self-call which the external world could answer. -/
+  getterGaps : List (Int × Gap) := []
   names : List (Int × String) := []
   /-- Original function-version names, for an explicit `Base.f()` call. -/
   staticNames : List (Int × String) := []
@@ -593,6 +663,107 @@ structure PState where
   fresh : Nat := 0
   pushOk : Bool := false
   deriving Inhabited
+
+/-- Supported scalar UDVT underlyings keep the existing typed primitive and
+its exact source width/byte/address metadata; no new runtime value is introduced. -/
+def valueTypeSupported (t : String) : Bool :=
+  (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome ||
+    t == "address payable"
+
+/-- A UDVT expression cannot fall back to a builtin operator when its resolved
+annotation is absent. Name fallback is only a rejection check for old fixtures. -/
+def valueTypeExpr (declarations : List Json) (j : Json) : Bool :=
+  if (J.tyId j).startsWith "t_userDefinedValueType" then true else
+  let t := J.tyStr j
+  -- Ordinary arithmetic avoids a declaration-table scan on each operand.
+  if (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome ||
+      ["uint256", "int256", "address payable"].contains t ||
+      t.startsWith "int_const " || t.startsWith "rational_const " then false else
+  declarations.any fun d =>
+    J.kind d == "UserDefinedValueTypeDefinition" &&
+      (J.tyStr j == (J.str? d "canonicalName").getD ((J.str? d "name").getD "") ||
+       J.tyStr j == (J.str? d "name").getD "")
+
+/-- Validate solc's resolved operator annotation before either admission or
+printing. JSON is the external compiler boundary, not a second executable term
+language. The result is only a declaration identity and its source operands;
+the printer lowers it through the existing intrinsically typed call elaborator.
+In particular, matching erased primitive types never establishes nominal equality. -/
+def operatorAlias? (declarations : List Json) (j : Json) :
+    Except Gap (Option (Int × List Json)) := do
+  unless ["UnaryOperation", "BinaryOperation"].contains (J.kind j) do return none
+  let unary := J.kind j == "UnaryOperation"
+  let args ← if unary then do pure [← J.get j "subExpression"]
+    else do pure [← J.get j "leftExpression", ← J.get j "rightExpression"]
+  let op ← J.str j "operator"
+  unless J.hasOperatorFunction j do
+    if op != "delete" && args.any (valueTypeExpr declarations) then
+      throw (.unsupported "a UDVT operator lacks its resolved function annotation" (J.line j))
+    return none
+  let some id := J.operatorFunction? j |
+    throw (.unsupported "a malformed resolved operator function annotation" (J.line j))
+  unless id > 0 do
+    throw (.unsupported "an operator alias must name a positive declaration identity" (J.line j))
+  unless (if unary then ["-", "~"] else
+      ["&", "|", "^", "+", "/", "%", "*", "-", "==", ">", ">=", "<", "<=", "!="]).contains op do
+    throw (.unsupported "an illegal user-defined operator signature" (J.line j))
+  if unary && J.opt j "prefix" != some (.bool true) then
+    throw (.unsupported "a user-defined unary operator must be a prefix" (J.line j))
+  let some target := declarations.find? (J.id? · == some id) |
+    throw (.unsupported s!"operator function #{id} is absent from the compiler AST" (J.line j))
+  unless J.kind target == "FunctionDefinition" && J.str? target "kind" == some "freeFunction" &&
+      J.str? target "stateMutability" == some "pure" &&
+      (J.opt target "body").any (J.kind · == "Block") do
+    throw (.unsupported "an operator alias must resolve to a defined pure free function" (J.line j))
+  let ps ← J.arr (← J.get target "parameters") "parameters"
+  unless ps.length == args.length do
+    throw (.unsupported "an operator alias has the wrong parameter arity" (J.line j))
+  let some first := ps.head? |
+    throw (.unsupported "an operator alias has no UDVT parameter" (J.line j))
+  let some tn := J.opt first "typeName" |
+    throw (.unsupported "an operator parameter lacks its nominal type" (J.line j))
+  let some typeId := J.typeRef? tn |
+    throw (.unsupported "an operator parameter lacks its type declaration identity" (J.line j))
+  let some typeDecl := declarations.find? (J.id? · == some typeId) |
+    throw (.unsupported "an operator parameter type declaration is missing" (J.line j))
+  unless typeId > 0 && J.kind tn == "UserDefinedTypeName" &&
+      J.kind typeDecl == "UserDefinedValueTypeDefinition" do
+    throw (.unsupported "an operator parameter is not a user-defined value type" (J.line j))
+  let underlying ← tyText [] (← J.get typeDecl "underlyingType")
+  unless valueTypeSupported underlying do
+    throw (.unsupported s!"unsupported operator underlying type `{underlying}`" (J.line j))
+  let nominal := J.tyId first
+  unless nominal.startsWith "t_userDefinedValueType" &&
+      nominal.endsWith ("_$" ++ toString typeId) &&
+      ps.all (fun p => (J.opt p "typeName").any (fun t =>
+        J.kind t == "UserDefinedTypeName" && J.typeRef? t == some typeId) &&
+        J.tyId p == nominal) && args.all (fun a => J.tyId a == nominal) do
+    throw (.unsupported "operator operands do not match the same nominal UDVT (regenerate a modern fixture)" (J.line j))
+  let rs ← J.arr (← J.get target "returnParameters") "parameters"
+  let [r] := rs |
+    throw (.unsupported "an operator alias must return exactly one value" (J.line j))
+  let comparison := ["==", "!=", "<", ">", "<=", ">="].contains op
+  if comparison then
+    unless (J.opt r "typeName").any (fun t => J.kind t == "ElementaryTypeName" &&
+        J.str? t "name" == some "bool") && J.tyStr r == "bool" && J.tyStr j == "bool" do
+      throw (.unsupported "a comparison alias must return bool" (J.line j))
+  else
+    unless (J.opt r "typeName").any (fun t =>
+        J.kind t == "UserDefinedTypeName" && J.typeRef? t == some typeId) &&
+        J.tyId r == nominal && J.tyId j == nominal do
+      throw (.unsupported "an operator alias must return its nominal operand type" (J.line j))
+  return some (id, args)
+
+/-- The source expression's lowered scalar type, including a discarded UDVT
+operator result. The original declarations remain available for alias checking. -/
+def modelExprType (st : PState) (j : Json) : String :=
+  match st.valueTypes.find? (fun (id, _) =>
+      (J.tyId j).startsWith "t_userDefinedValueType" &&
+        (J.tyId j).endsWith ("_$" ++ toString id)) with
+  | some (_, t) => t
+  | none => match lookupBy (J.tyStr j) st.structs with
+    | some (.ok t) => t
+    | _ => elemTy (J.tyStr j) false
 
 abbrev PM := StateT PState (Except Gap)
 
@@ -787,6 +958,17 @@ def declarationSelector (d : Json) (key : String) (bytes : Nat) :
   if bound : value < 2 ^ (8 * bytes) then return ⟨value, bound⟩
   else throw (.unsupported s!"out-of-range {key}")
 
+/-- `this.x`/`c.x` denotes a public variable's synthesized getter. A bare
+function-valued variable `x` instead denotes its stored value; its selector
+must never be mistaken for the getter's declaration selector. -/
+def isPublicGetterMember (declaration member : Json) : Bool :=
+  J.kind declaration == "VariableDeclaration" &&
+    J.opt declaration "stateVariable" == some (.bool true) &&
+    J.str? declaration "visibility" == some "public" &&
+    J.kind member == "MemberAccess" && (J.tyStr member).startsWith "function " &&
+    ((J.tyStr member).splitOn " external").length > 1 &&
+    !(J.opt member "expression").any (fun owner => (J.tyStr owner).startsWith "struct ")
+
 /-- Declaration metadata is resolved by solc identity, never a short name.
 Only a static declaration or `this.f` can fold a function selector here:
 an arbitrary receiver expression must retain its evaluation effects. -/
@@ -823,6 +1005,7 @@ def declarationMetadata (declarations : List Json) (e : Json) (member : String) 
       throw (.unsupported "an anonymous event has no selector")
     return some s!"bytes32({(← declarationSelector d "eventSelector" 32).val})"
   | "FunctionDefinition" | "VariableDeclaration" =>
+    if J.kind d == "VariableDeclaration" && !isPublicGetterMember d e then return none
     let static := (J.ref? e).isSome &&
       (J.kind e == "Identifier" || J.kind e == "IdentifierPath" ||
         (J.kind e == "MemberAccess" && ((J.opt e "expression").any fun receiver =>
@@ -947,9 +1130,9 @@ partial def pureExpr (j : Json) : Bool :=
   let sub (k : String) : Bool := (J.opt j k).all pureExpr
   match J.kind j with
   | "Literal" | "Identifier" | "ElementaryTypeNameExpression" => true
-  | "BinaryOperation" => sub "leftExpression" && sub "rightExpression"
+  | "BinaryOperation" => !J.hasOperatorFunction j && sub "leftExpression" && sub "rightExpression"
   | "UnaryOperation" =>
-    !(J.opt j "operator").any (fun o => o == .str "++" || o == .str "--" || o == .str "delete") &&
+    !J.hasOperatorFunction j && !(J.opt j "operator").any (fun o => o == .str "++" || o == .str "--" || o == .str "delete") &&
       sub "subExpression"
   | "IndexAccess" => sub "baseExpression" && sub "indexExpression"
   | "MemberAccess" => sub "expression"
@@ -1010,9 +1193,97 @@ def byteLiteralText (kind : String) (j : Json) : Except Gap String := do
     if kind == "hexString" then throw (.unsupported "a hex literal without its bytes")
     return (← J.str j "value").quote
 
+/-- Parentheses carry no literal coercion of their own. Bound their traversal
+independently of the declaration/type graph; a missing/omitted component fails. -/
+def abiUnparen? : Nat → Json → Option Json
+  | 0, _ => none
+  | fuel + 1, j =>
+    if J.kind j == "TupleExpression" &&
+        !((J.opt j "isInlineArray").any (· == .bool true)) then
+      match J.arr? j "components" with
+      | some #[a] => abiUnparen? fuel a
+      | _ => none
+    else some j
+
+/-- A numeric hex token's digits, retaining leading zeros but ignoring legal
+separators. Unlike hex-string literals, numeric tokens require one exact target
+width; a decimal numeral with the same value has no such coercion. -/
+def abiHexDigits? (token : String) : Option String := do
+  guard (token.startsWith "0x")
+  let chars := (token.drop 2).toList
+  let isDigit (c : Char) : Bool :=
+    c.isDigit || ('a' ≤ c && c ≤ 'f') || ('A' ≤ c && c ≤ 'F')
+  let mut previous := false
+  let mut digits : List Char := []
+  for (c, i) in chars.zipIdx do
+    if c == '_' then
+      guard (previous && (chars[i + 1]?).any isDigit)
+      previous := false
+    else
+      guard (isDigit c)
+      digits := c :: digits
+      previous := true
+  guard previous
+  pure (String.mk digits.reverse)
+
+/-- Source lexical evidence admitted for one `bytesN` argument. The successful
+value carries its byte-width bound; this is importer input evidence, never a
+new untyped program/value in the intrinsic calculus. Address literals, decimal
+constants, arithmetic expressions and shorter/longer hex tokens do not qualify. -/
+def abiHexLiteral? (n : Nat) (j : Json) : Option (Fin (2 ^ (8 * n))) := do
+  guard (0 < n && n ≤ 32)
+  let j ← abiUnparen? 64 j
+  guard (J.kind j == "Literal" && J.str? j "kind" == some "number" && constTy j)
+  let token ← J.str? j "value"
+  let digits ← abiHexDigits? token
+  guard (digits.length == 2 * n)
+  let bytes ← hexBytes? digits
+  let value := bytes.foldl (fun v b => v * 256 + b) 0
+  if h : value < 2 ^ (8 * n) then some ⟨value, h⟩ else none
+
+/-- Keep the direct tuple shape used by solc. Parentheses around a
+multi-argument tuple create one tuple-valued component, not extra grouping:
+flattening it would admit source calls that solc rejects. -/
+def abiCallComponents? (j : Json) : Option (List Json) := do
+  if J.kind j != "TupleExpression" ||
+      (J.opt j "isInlineArray").any (· == .bool true) then return [j]
+  let cs ← J.arr? j "components"
+  guard (cs.all fun c => !(J.kind c).isEmpty)
+  pure cs.toList
+
+/-- Retained declaration identity determines contextual argument widths. A
+function declaration and an external function-typed variable use the same
+parameter-list shape. Other parameter types remain `none`, so this reader
+cannot turn a numeric argument into a reference, enum or arbitrary byte kind. -/
+def abiCallBytesParams? (declarations : List Json) (target : Json) :
+    Option (List (Option Nat)) := do
+  let target ← abiUnparen? 64 target
+  let id ← J.ref? target
+  let d ← declarations.find? (J.id? · == some id)
+  let params ← match J.kind d with
+    | "FunctionDefinition" => do
+      guard (["public", "external"].contains ((J.str? d "visibility").getD ""))
+      J.opt d "parameters"
+    | "VariableDeclaration" => do
+      let ty ← J.opt d "typeName"
+      guard (J.kind ty == "FunctionTypeName" && J.str? ty "visibility" == some "external")
+      J.opt ty "parameterTypes"
+    | _ => none
+  let params ← J.arr? params "parameters"
+  pure (params.toList.map fun p => do
+    let ty ← J.opt p "typeName"
+    guard (J.kind ty == "ElementaryTypeName")
+    let name ← J.str? ty "name"
+    bytesTy? name)
+
 mutual
 
 partial def expr (j : Json) : PM String := do
+  if let some (id, args) ← PM.lift (operatorAlias? (← get).declarations j) then
+    let some name := lookupBy id (← get).names |
+      unsupported s!"operator function #{id} is not in the resolved call graph"
+    let args ← args.mapM expr
+    return s!"{identText name}({", ".intercalate args})"
   if constTy j && ["Literal", "UnaryOperation", "BinaryOperation", "TupleExpression"].contains
       (J.kind j) then
     let some q := constVal j
@@ -1119,6 +1390,16 @@ partial def expr (j : Json) : PM String := do
     let m ← PM.lift (J.str j "memberName")
     if let some value ← PM.lift (declarationMetadata (← get).declarations e m) then
       return value
+    -- Keep stored projections typed for ABI/concat consumers. Known function
+    -- declarations keep their selector helper, which evaluates the receiver.
+    let declarations := (← get).declarations
+    let knownFunction := ((J.ref? e).bind fun id =>
+      declarations.find? (J.id? · == some id)).any fun declaration =>
+        J.kind declaration == "FunctionDefinition" || isPublicGetterMember declaration e
+    if !knownFunction then
+      if let some t := storedFunctionMemberType? j then
+        let value ← expr e
+        return sourceCast t s!"{value}.{m}"
     -- `fnPure` folds a known function's selector. A pure helper consumes
     -- the receiver first, in this expression's original (possibly lazy)
     -- position; hoisting into `pre` would eagerly evaluate a skipped arm.
@@ -1126,13 +1407,20 @@ partial def expr (j : Json) : PM String := do
       let declarations := (← get).declarations
       if let some d := (J.ref? e).bind fun id =>
           declarations.find? (J.id? · == some id) then
-        if J.kind d == "FunctionDefinition" && (J.str? d "functionSelector").isSome then
+        if (J.kind d == "FunctionDefinition" || isPublicGetterMember d e) &&
+            (J.str? d "functionSelector").isSome then
           let receiver ← PM.lift (J.get e "expression")
           let value ← expr receiver
           let _ ← PM.lift (declarationSelector d "functionSelector" 4)
           let some name := (J.id? d).bind (lookupBy · (← get).selectorHelpers)
             | unsupported "a dynamic function selector without its receiver helper"
           return s!"{identText name}(address({value}))"
+    if isExternalMember j then
+      if let some id := J.ref? j then
+        if let some gap := lookupBy id (← get).getterGaps then throw gap
+        if let some name := lookupBy id (← get).externalNames then
+          let receiver ← expr e
+          return s!"({receiver}).{identText name}"
     if let some bound := typeBound? (← get).enumBounds e m then
       let t := if (J.tyStr j).startsWith "enum " then "uint" else elemTy (J.tyStr j) false
       return s!"{t}({bound})"
@@ -1210,6 +1498,35 @@ partial def call (j : Json) : PM String := do
         if J.kind owner == "ElementaryTypeNameExpression" then
           let n ← PM.lift (J.str (← PM.lift (J.get owner "typeName")) "name")
           return s!"{n}.concat({", ".intercalate (← args.mapM expr)})"
+    -- Consume lexical hex evidence before `expr` folds a numeric constant
+    -- to decimal text. Only the call's declared fixed-byte argument supplies
+    -- context; ordinary abi.encode(0xabcd) keeps its numeric ABI kind.
+    if member == "encodeCall" && (J.opt f "expression").any (builtinNamed · "abi") then
+      match args with
+      | [target, tuple] =>
+        -- Getter identities refer to VariableDeclaration, not FunctionDefinition.
+        -- They still consume the direct tuple shape. Native encodeCall validates
+        -- its exact signature; lack of a fixed-byte context never invents one.
+        let components? := abiCallComponents? tuple
+        let knownWidths := abiCallBytesParams? (← get).declarations target
+        let widths := knownWidths.getD (List.replicate (components?.getD []).length none)
+        let some components := components? |
+          unsupported "abi.encodeCall: incomplete argument tuple"
+        unless components.length == widths.length do
+          unsupported "abi.encodeCall: argument tuple disagrees with its declaration"
+        let values ← (widths.zip components).mapM fun (width, a) => do
+          if let some n := width then
+            if let some value := abiHexLiteral? n a then
+              return sourceCast s!"bytes{n}" (toString value.val)
+          let value ← expr a
+          -- Metadata such as `this.f.selector` may deliberately print as
+          -- a numeral. Preserve its established byte kind, as at the
+          -- other ABI encoders, without inventing a kind for plain numbers.
+          let ty := J.tyStr a
+          return if (bytesTy? ty).isSome && !(value.startsWith (ty ++ "(")) then
+            sourceCast ty value else value
+        return s!"abi.encodeCall({← expr target}, ({", ".intercalate values}))"
+      | _ => unsupported "abi.encodeCall with other than two arguments"
     -- `abi.decode(b, (T, U))`: the types written as names
     if member == "decode" && (J.opt f "expression").any (fun o =>
         builtinNamed o "abi") then
@@ -1302,7 +1619,11 @@ partial def call (j : Json) : PM String := do
         -- `I(0).f`: the receiver an address, `address(0).f` (`0.f` does not parse)
         let r ← expr (← PM.lift (J.get f "expression"))
         let r := if r.front.isDigit then s!"address({r})" else r
-        pure s!"({r}).{identText (← PM.lift (J.str f "memberName"))}"
+        if let some id := J.ref? f then
+          if let some gap := lookupBy id (← get).getterGaps then throw gap
+        let original ← PM.lift (J.str f "memberName")
+        let name := ((J.ref? f).bind (lookupBy · (← get).externalNames)).getD original
+        pure s!"({r}).{identText name}"
       else if valueCallee && J.kind f == "FunctionCall" then pure s!"({← expr f})"
       else expr f
     pure s!"{name}({", ".intercalate as})"
@@ -1393,9 +1714,8 @@ def declText (d : Json) : PM String := do
   let loc ← match J.opt d "storageLocation" with
     | some (.str "storage") => pure " storage"
     | some (.str "memory") => pure " memory"
-    -- a calldata local: a memory one bound to calldata, read only
-    -- (`calldataCheck`)
-    | some (.str "calldata") => pure " memory"
+    -- Preserve the location: slice locals retain views, memory locals copy.
+    | some (.str "calldata") => pure " calldata"
     | _ => pure ""
   let name ← nameOf d
   if let some source := J.str? d "name" then
@@ -1467,6 +1787,16 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "PlaceholderStatement" => pure ["_"]
   | "ExpressionStatement" =>
     let e ← PM.lift (J.get j "expression")
+    -- Reading a resolved scalar variable as an expression statement has no
+    -- effects or failing bounds. The source admission walker still checks its
+    -- declaration; do not drop unresolved names, calls or indexed reads.
+    let scalar := (PrimTy.ofName? (J.tyStr e)).isSome ||
+      (narrowTy? (J.tyStr e)).isSome || (bytesTy? (J.tyStr e)).isSome ||
+      ["address", "address payable"].contains (J.tyStr e)
+    let declarations := (← get).declarations
+    if J.kind e == "Identifier" && scalar then
+      if ((J.ref? e).bind fun id => declarations.find? (J.id? · == some id)).any
+          (J.kind · == "VariableDeclaration") then return []
     if J.kind e == "Assignment" && (J.opt e "operator").any (· == .str "=") &&
         (J.opt e "leftHandSide").any (isTuple ∘ unparen) then
       -- `(a, , b) = v`, and `((a, b)) = v` as it
@@ -1502,7 +1832,7 @@ partial def stmt1 (j : Json) : PM (List String) := do
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
     if ["BinaryOperation", "Conditional"].contains (J.kind e) then
-      let t := elemTy (J.tyStr e) false
+      let t := modelExprType (← get) e
       let k := (← get).discards + 1
       modify fun st => { st with discards := k }
       return [s!"{t} discarded{k} = {← expr e}"]
@@ -1611,6 +1941,41 @@ partial def stmt1 (j : Json) : PM (List String) := do
     pure [s!"assembly \{ revert(add({identText name}, 32), mload({identText name})) }"]
   -- `revert E(a, b);`: the custom error by its name, declared as a member
   -- (`errorMembers`)
+  | "EmitStatement" =>
+    let call ← PM.lift (J.get j "eventCall")
+    unless J.kind call == "FunctionCall" && J.str? call "kind" == some "functionCall" do
+      unsupported "an emit without a direct event call"
+    let callee ← PM.lift (J.get call "expression")
+    unless J.kind callee == "Identifier" do
+      unsupported "an event named through a qualified expression"
+    let some id := J.ref? callee | unsupported "an event without its declaration identity"
+    let [declaration] := (← get).declarations.filter (fun d => J.id? d == some id)
+      | unsupported "an event whose declaration identity is missing or ambiguous"
+    unless J.kind declaration == "EventDefinition" do
+      unsupported "an emit whose resolved declaration is not an event"
+    let some name := J.str? declaration "name" | unsupported "an unnamed event declaration"
+    unless !name.isEmpty && J.str? callee "name" == some name do
+      unsupported "an emit whose name disagrees with its resolved event"
+    let parameters ← PM.lift (J.get declaration "parameters")
+    let params ← PM.lift (J.arr parameters "parameters")
+    let args ← PM.lift (J.arr call "arguments")
+    unless params.length == args.length && params.all (fun p => J.kind p == "VariableDeclaration") do
+      unsupported "an emit whose arguments disagree with its resolved event"
+    let rawNames := (J.arrD call "names").toList
+    let names := rawNames.filterMap (·.getStr?.toOption)
+    unless names.length == rawNames.length do unsupported "malformed named event arguments"
+    unless names.isEmpty do
+      let ps := params.map (fun p => (J.str? p "name").getD "")
+      unless names.length == args.length && names.eraseDups.length == names.length &&
+          ps.all (fun p => !p.isEmpty && names.contains p) do
+        unsupported "named event arguments disagree with their resolved parameters"
+      -- Legacy orders named operands by parameters; viaIR keeps source order.
+      -- The body printer has no pipeline context, so do not guess a schedule.
+      unsupported "named event arguments require pipeline-aware lowering"
+    -- Logs are abstracted, but positional operands still run in source order
+    -- in both supported pipelines. Resolve overloads by declaration identity.
+    let args ← args.mapM expr
+    pure [s!"emit {identText name}({", ".intercalate args})"]
   | "RevertStatement" =>
     let call ← PM.lift (J.get j "errorCall")
     let callee ← PM.lift (J.get call "expression")

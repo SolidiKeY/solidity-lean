@@ -78,10 +78,9 @@ error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains error
 example : Prog.toStr [] (sol{ emit Paid(owner, total); emit Paid(owner, total + 1); }) =
     "uint se1 = total + 1;" := rfl
 
-/-- An `++` in an event's argument happens, after the arguments before it
-are read. -/
+/-- An `++` in an event's argument happens; unused infallible reads need no capture. -/
 example : Prog.toStr [] (sol{ emit Paid(owner, total++); }) =
-    "uint se1 = owner; uint se2; se2 = total++;" := rfl
+    "uint se1; se1 = total++;" := rfl
 
 /-- `require` with a message or an error, `revert` with an error or a
 message. -/
@@ -92,7 +91,7 @@ example : Prog.toStr [] (sol{ require(total > 0, "empty"); require(total > 0, To
 /-- An error's argument that may revert is evaluated when the condition
 holds, as solc evaluates it before the check. -/
 example : Prog.toStr [] (sol{ require(total > 0, TooLow(total + 1, 2)); }) =
-    "if (total > 0) { uint se1 = total + 1; } else { revert(); }" := rfl
+    "if (total > 0) { uint se1 = total + 1; } else { uint se2 = total + 1; revert(); }" := rfl
 
 /-! ## Enums -/
 

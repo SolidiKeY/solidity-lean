@@ -73,6 +73,14 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   two readings agree. -/
   | plain {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : Proves C .all Γ₀ H φ)
       (hφ : (H.wrap φ).callsBack pay = false) : ProvesC I pay Γ₀ H φ
+  /-- `closeFalse`, as in `Proves.closeFalse`: a callback-free context
+  proved contradictory closes even a goal that may call back. For example,
+  `false → [try I(7).ping() {} catch {}] false` needs no call expansion.
+  The whole wrapped contradiction must be callback-free; a deterministic
+  refutation after a callback does not justify this rule. -/
+  | closeFalse {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
+      (h : Proves C .all Γ₀ H .ff)
+      (hH : (H.wrap .ff).callsBack pay = false) : ProvesC I pay Γ₀ H φ
   /-- `impRight`. -/
   | intro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : ProvesC I pay Γ₀ (H.pre a) φ) :
       ProvesC I pay Γ₀ H (.imp a φ)
@@ -106,7 +114,7 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
       (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.update U))
-      (hs : s.forksIn pay = false)
+      (hs : s.callsBack pay = false)
       (h : ProvesC I pay Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- Two updates in sequence, as in `a.push() += x`, on a statement that

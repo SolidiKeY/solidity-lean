@@ -817,6 +817,10 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     ∀ σ, holdsC I pay σ (H.wrap φ) := by
   induction d with
   | plain h hφ => exact fun σ => (holdsC_iff_holds _ hφ σ).2 (Proves.sound h σ)
+  | @closeFalse Γ H φ h hH =>
+    exact fun σ => H.wrapC_mono (φ := .ff) (ψ := φ)
+      (fun _ hf => (hf trivial).elim) σ
+      ((holdsC_iff_holds _ hH σ).2 (Proves.sound h σ))
   | intro _ ih => exact ih
   | @notLeft Γ H X φ _ ih =>
     exact fun σ => Hyps.wrapC_mono (ψ := .imp (.not X) φ) _ (fun _ hX hn => (hn hX).elim) σ (ih σ)

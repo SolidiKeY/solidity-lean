@@ -107,7 +107,7 @@ theorem elementCall : ⊨ᶠ dl!{ ⟨ fs.push(triple); fs[0] = double; uint y = 
 /-- A call's value, `choose(true)(4)`, and a call statement through a member. -/
 theorem callCall : ⊨ᶠ dl!{ ⟨ uint y = choose(true)(4); hold.f = double; hold.f(1); ⟩ y == 8 } := by
   sol_symex
-  sol_close
+  sol_decide
 
 /-- At a symbolic argument: only the branch of the value's tag is reached. -/
 theorem symbolic : ⊨ᶠ dl!{ x < 100 → ⟨ function (uint) pure returns (uint) h = triple;
@@ -186,6 +186,37 @@ def runLast {Γ : Ctx} (P : Prog Ext [] (.val .uint :: Γ)) : Option Int :=
 -- a call through `this.double` runs `double`: a self-call (O8)
 #guard runLast (sol[Ext]{ uint y = viaThis(3); }) == some 6
 
+/-- The native API deliberately admits addresses wider than the EVM's 160
+bits. Native function-value calls keep that address and still dispatch to self. -/
+private def runLastAt {D : Contract} {Γ : Ctx} (a : PrimTy.uint.Denote)
+    (P : Prog D [] (.val .uint :: Γ)) : Option Int :=
+  let σ := State.ofStorage (Storage.init D)
+  match Prog.run { σ with tx := { σ.tx with selfAddress := a } } P with
+  | .ok o => some (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+  | .error _ => none
+
+#guard runLastAt ⟨2^200, by decide +kernel⟩
+    (sol[Ext]{ uint y = viaThis(3); }) == some 6
+
+/-- Source metadata selects address cleanup without changing the callable
+bodies. This isolated lowering control supplements the actual compiler-import
+`externalValue` regression in the source FunctionTypes suite. -/
+private def SourceExt : Contract :=
+  { Ext with funs := Ext.funs.map fun (name, d) =>
+      (name, { d with sourceDecl := some {
+        name := name
+        signature := fnSignature? Ext name
+        callable := .abi .publicFn .selected none } }) }
+
+-- At a genuine EVM address, cleanup preserves the selector and self-call.
+#guard runLastAt ⟨7, by decide⟩
+    (sol[SourceExt]{ uint y = viaThis(3); }) == some 6
+
+-- This intentionally out-of-EVM state exposes the conversion: the source
+-- receiver becomes zero and reverts, while the native control above returns.
+#guard runLastAt ⟨2^200, by decide +kernel⟩
+    (sol[SourceExt]{ uint y = viaThis(3); }) == none
+
 /-- `this.double` and the value it names, as the elaborator writes them. -/
 example : Prog.toStr [] (sol[Ext]{ function (uint) external returns (uint) h = this.double;
     uint s = h.selector; }) =
@@ -198,6 +229,85 @@ theorem addressOfValue : ⊨ᶠ dl[Ext]{ [ function (uint) external returns (uin
     uint a = h.address; uint t = address(this); ] a == t } := by
   sol_symex
   sol_decide
+
+/-- `h.selector` of `this.double` is its selector in every typed initial
+state where packing returns. The box also retains packing failure: after
+`cancelDiv` the selector read is `(address(this) * 2^32 + s) - address(this) * 2^32`. -/
+theorem selectorOfValue : ⊨ᶠ dl[Ext]{ [ function (uint) external returns (uint) h = this.double;
+    uint s = h.selector; ] s == 4008276486 } := by
+  sol_symex
+  sol_decide
+
+/-- Successful packing and selector projection at address `7` give a normal
+result, independently of the universally quantified box proof. -/
+theorem selectorOfValue_returns :
+    runLast (sol[Ext]{ function (uint) external returns (uint) h = this.double;
+      uint s = h.selector; }) = some 4008276486 := by
+  decide +kernel
+
+section Cancellation
+
+private def noFacts : Decide.Facts Ext := {}
+private def uOne : Decide.LTm Ext (.val .uint) := .lit ⟨1, rfl⟩
+private def uTwo : Decide.LTm Ext (.val .uint) := .lit ⟨2, rfl⟩
+private def uMax : Decide.LTm Ext (.val .uint) := .lit ⟨2 ^ 256 - 1, by decide +kernel⟩
+private def iMin : Decide.LTm Ext (.val .int) := .lit ⟨-(2 ^ 255), by decide +kernel⟩
+private def iNegOne : Decide.LTm Ext (.val .int) := .lit ⟨-1, by decide⟩
+private def iOne : Decide.LTm Ext (.val .int) := .lit ⟨1, by decide⟩
+private def uSum (a b : Decide.LTm Ext (.val .uint)) : Decide.LTm Ext (.val .uint) :=
+  .app2 (.binop .add rfl) a b
+private def iSum (a b : Decide.LTm Ext (.val .int)) : Decide.LTm Ext (.val .int) :=
+  .app2 (.binop .add rfl) a b
+
+/-- `(1 + 2) - 1` takes the new left-summand branch. -/
+example : noFacts.cancel (uSum uOne uTwo) uOne = some uTwo := by rfl
+
+/-- `(1 + 2) - 2` retains the original right-summand branch. -/
+example : noFacts.cancel (uSum uOne uTwo) uTwo = some uOne := by rfl
+
+/-- Both orders also return the surviving signed operand. -/
+example : noFacts.cancel (iSum iNegOne iOne) iNegOne = some iOne ∧
+    noFacts.cancel (iSum iNegOne iOne) iOne = some iNegOne := by
+  exact ⟨rfl, rfl⟩
+
+/-- Both operands return, but their unsigned sum overflows: neither
+cancellation is permitted to erase that failure. -/
+example : noFacts.returns uMax = true ∧ noFacts.returns uOne = true ∧
+    noFacts.returns (uSum uMax uOne) = false ∧
+    noFacts.cancel (uSum uMax uOne) uMax = none ∧
+    noFacts.cancel (uSum uMax uOne) uOne = none := by
+  exact ⟨by decide +kernel, rfl, by decide +kernel,
+    Option.isNone_iff_eq_none.mp (by decide +kernel),
+    Option.isNone_iff_eq_none.mp (by decide +kernel)⟩
+
+/-- Signed underflow is retained too, in either cancellation direction. -/
+example : noFacts.returns iMin = true ∧ noFacts.returns iNegOne = true ∧
+    noFacts.returns (iSum iMin iNegOne) = false ∧
+    noFacts.cancel (iSum iMin iNegOne) iMin = none ∧
+    noFacts.cancel (iSum iMin iNegOne) iNegOne = none := by
+  exact ⟨by decide +kernel, rfl, by decide +kernel,
+    Option.isNone_iff_eq_none.mp (by decide +kernel),
+    Option.isNone_iff_eq_none.mp (by decide +kernel)⟩
+
+/-- A failed operand cannot disappear even when it is the cancelled summand. -/
+example : noFacts.cancel (uSum .err uOne) .err = none ∧
+    noFacts.cancel (uSum uOne .err) uOne = none := by
+  exact ⟨rfl, rfl⟩
+
+/-- `(maxUint + 1) - maxUint` cannot establish a diamond: cancellation
+must preserve the overflow before subtraction. -/
+theorem cancelOverflowDiamond : ¬ (⊨ᶠ dl[Ext]{
+    ⟨ uint a = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+      uint z = (a + 1) - a; ⟩ z == 1 }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+/-- A signed overflowing sum cannot establish a diamond either. -/
+theorem cancelSignedOverflowDiamond : ¬ (⊨ᶠ dl[Ext]{
+    ⟨ int a = -57896044618658097711785492504343953926634992332820282019728792003956564819968;
+      int z = (a + (-1)) - a; ⟩ true }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _)) (by decide +kernel)
+
+end Cancellation
 
 /-! ## 4 · Recursion through a value
 

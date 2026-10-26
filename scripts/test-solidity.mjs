@@ -78,7 +78,9 @@ export function runSolidityTests(paths, options = {}) {
   let selfClause = '';
   if (options.selfAddress !== undefined) {
     if (!/^(0x[0-9a-fA-F]+|[0-9]+)$/.test(String(options.selfAddress))) throw new Error("self address must be a number");
-    selfClause = ` self ${BigInt(options.selfAddress).toString()}`;
+    const selfAddress = BigInt(options.selfAddress);
+    if (selfAddress >= (1n << 160n)) throw new Error("self address must fit 160 bits");
+    selfClause = ` self ${selfAddress.toString()}`;
   }
   if (options.build !== false) runTool("lake", ["build", "Solidity.Frontend.Testing"], timeoutMs);
   const results = [], errors = [];

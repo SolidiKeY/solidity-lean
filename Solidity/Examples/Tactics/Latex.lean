@@ -137,54 +137,78 @@ theorem conditional (_h : 1 = 1) : 2 = 2 := by rfl
 #latex_expr (macros := true) dl!{ ∀ uint x; [ x−−; ] true }
 
 -- `fixedCopy`: written in the plain backend, its source alone in the macros one.
-/-- info: \mathit{wt}(\mathit{storage}) \rightarrow \langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} -/
+/--
+info: \begin{aligned}
+&\mathit{this} < 1461501637330902918203684832716283019655932542976 \rightarrow \mathit{wt}(\mathit{storage}) \\
+&\qquad \rightarrow \langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true}
+\end{aligned}
+-/
 #guard_msgs in
 #latex_obligation Solc.Latex.C.f
-/-- info: \wellformed{\storage} \rightarrow \dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} -/
+/--
+info: \begin{aligned}
+&\code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}}
+\end{aligned}
+-/
 #guard_msgs in
 #latex_obligation (macros := true) Solc.Latex.C.f
-/-- info: \begin{aligned}
-&\Gamma = \{\mathit{wt}(\mathit{storage})\}\\[4pt]
-&\langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
-&\rightsquigarrow^{*}\ \{\mathit{x} \mathrel{:=} 0\}\langle \texttt{d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
-&\overset{\mathsf{storageFixedCopySave}}{\rightsquigarrow}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
+/--
+info: \begin{aligned}
+&\Gamma = \{\mathit{this} < 1461501637330902918203684832716283019655932542976\}\\[4pt]
+&\mathit{wt}(\mathit{storage}) \rightarrow \langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
+&\rightsquigarrow^{*}\ \mathit{wt}(\mathit{storage}) \rightarrow \{\mathit{x} \mathrel{:=} 0\}\langle \texttt{d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
+&\overset{\mathsf{storageFixedCopySave}}{\rightsquigarrow}\ \mathit{wt}(\mathit{storage}) \rightarrow \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
 &\qquad \langle \texttt{x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
-&\overset{\mathsf{storageLengthRead}}{\rightsquigarrow}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
+&\overset{\mathsf{storageLengthRead}}{\rightsquigarrow}\ \mathit{wt}(\mathit{storage}) \rightarrow \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
 &\qquad \{\mathit{x} \mathrel{:=} \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{d2}.\mathit{length})\}\langle \texttt{assert(x == 9);}\rangle \mathit{true} \\
-&\rightsquigarrow^{*}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
+&\rightsquigarrow^{*}\ \mathit{wt}(\mathit{storage}) \rightarrow \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
 &\qquad \{\mathit{x} \mathrel{:=} \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{d2}.\mathit{length})\}\{\mathit{se1} \mathrel{:=} \mathit{x} = 9\}((\mathit{se1} = \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} = \mathit{true})
-\end{aligned} -/
+\end{aligned}
+-/
 #guard_msgs in
 #latex_derivation (past := false) Solc.Latex.C.f
-/-- info: \begin{aligned}
-&\Gamma = \{\wellformed{\storage}\}\\[4pt]
-&\dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
-&\rightsquigarrow^{*}\ \{\mathit{x} \upd 0\}\dlf{d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
-&\rightsquigarrow\ \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \dlf{x = d2.length; assert(x == 9);}{\mathit{true}} \\
-&\rightsquigarrow\ \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{assert(x == 9);}{\mathit{true}} \\
-&\rightsquigarrow^{*}\ \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\{\mathit{se1} \upd \mathit{x} = 9\}((\mathit{se1} = \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} = \mathit{true})
-\end{aligned} -/
-#guard_msgs in
-#latex_derivation (macros := true) (past := false) Solc.Latex.C.f
-/-- info: \begin{aligned}
+/--
+info: \begin{aligned}
+&\Gamma = \{\code{self} < 1461501637330902918203684832716283019655932542976\}\\[4pt]
 &\wellformed{\storage} \rightarrow \dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
 &\rightsquigarrow^{*}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\dlf{d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
-&\overset{\ruleName{storageFixedCopySave}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\rightsquigarrow\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
 &\qquad \dlf{x = d2.length; assert(x == 9);}{\mathit{true}} \\
-&\overset{\ruleName{storageLengthRead}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\rightsquigarrow\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
 &\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{assert(x == 9);}{\mathit{true}} \\
-&\overset{\ruleName{assertConditionCapture}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{bool se1 = x == 9; assert(se1);}{\mathit{true}} \\
-&\overset{\ruleName{localValueDeclInitDrop}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{se1 = x == 9; assert(se1);}{\mathit{true}} \\
-&\overset{\ruleName{binopAssignment}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\{\mathit{se1} \upd \mathit{x} = 9\}\dlf{assert(se1);}{\mathit{true}} \\
-&\overset{\ruleName{assertSimple}}{\rightsquigarrow}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\rightsquigarrow^{*}\ \wellformed{\storage} \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
 &\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\{\mathit{se1} \upd \mathit{x} = 9\}((\mathit{se1} = \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} = \mathit{true})
-\end{aligned} -/
+\end{aligned}
+-/
+#guard_msgs in
+#latex_derivation (macros := true) (past := false) Solc.Latex.C.f
+/--
+info: \begin{aligned}
+&\code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
+&\rightsquigarrow^{*}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\dlf{d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} \\
+&\overset{\ruleName{storageFixedCopySave}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \dlf{x = d2.length; assert(x == 9);}{\mathit{true}} \\
+&\overset{\ruleName{storageLengthRead}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{assert(x == 9);}{\mathit{true}} \\
+&\overset{\ruleName{assertConditionCapture}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{bool se1 = x == 9; assert(se1);}{\mathit{true}} \\
+&\overset{\ruleName{localValueDeclInitDrop}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\dlf{se1 = x == 9; assert(se1);}{\mathit{true}} \\
+&\overset{\ruleName{binopAssignment}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\{\mathit{se1} \upd \mathit{x} = 9\}\dlf{assert(se1);}{\mathit{true}} \\
+&\overset{\ruleName{assertSimple}}{\rightsquigarrow}\ \code{self} < 1461501637330902918203684832716283019655932542976 \rightarrow \wellformed{\storage} \\
+&\qquad \rightarrow \{\mathit{x} \upd 0\}\{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
+&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\{\mathit{se1} \upd \mathit{x} = 9\}((\mathit{se1} = \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} = \mathit{true})
+\end{aligned}
+-/
 #guard_msgs in
 #latex_derivation (macros := true) (past := false) (labels := over) (collapse := [valueDeclSkip])
   (premise := false) Solc.Latex.C.f

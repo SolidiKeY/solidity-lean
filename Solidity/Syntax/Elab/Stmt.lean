@@ -135,13 +135,18 @@ partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
   let (Q, l) ← hoist l
   pure (P ++ Pc ++ Q, .assign l r)
 
-/-- A call's arguments, left to right: one read before a later argument's
-effect is captured first, as a binary operator's operand is. -/
+/-- A call's arguments, left to right. A non-simple earlier value is held
+before hoisting any later argument: casts, fixed-length bases, narrow checks
+and modular guards can fail even when they do not modify the state. Bare
+names still use the effect-aware capture policy. Already held fresh values
+and literals need no additional capture (`captureExpr`). -/
 partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
   | [] => pure ([], [])
   | a :: as => do
     let (P, a) ← hoist a
-    let (Pc, a) ← captureBefore C a as
+    let (Pc, a) ← if !as.isEmpty && !(a matches .name _) then
+        captureExpr C a
+      else captureBefore C a as
     let (Q, as) ← hoistArgs as
     pure (P ++ Pc ++ Q, a :: as)
 
@@ -238,11 +243,11 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   pure (P, prepared)
 
 /-- **A call through a function value** `h(a)`, `h` of the function type
-`ty` (`fnTyOf?`): the arguments that are not pure captured, left to right,
+`ty` (`fnTyOf?`): its arguments captured once, left to right,
 then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
 if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
-`Panic(0x51)`, which the model reads as a revert, as it reads an index out
-of range's `Panic(0x32)` (`Storage.checkIndex`, the solkey reading).  A function
+`Panic(0x51)`, transported as literal data in a self-call frame and otherwise
+read as the ordinary solkey revert. A function
 of `ty` this one may not call (declared after it) is refused when it is named
 as a value in the contract; one that is not cannot reach here (`fnTag`).
 With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
@@ -261,7 +266,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   let taken := fnTaken C
   let mut cands : List (String × Nat) := []
   for ((g, d), i) in C.funs.zipIdx do
-    if fnSource C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
       if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
       else if taken.contains g then
         throw s!"{h}(…) may call {g}, which is not declared before this function: \
@@ -269,19 +274,31 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   let mut pre : List RawStmt := []
   let mut as : List RawExpr := []
   for (a, c) in args.zip ps do
-    if a.isPure then as := as ++ [a] else
-      let y := toString (← freshCapture "se")
-      pre := pre ++ [.decl (.named c) y (some a)]
-      as := as ++ [.name y]
+    -- All operands are evaluated before dispatch, including total reads
+    -- whose value a later argument can change and failing member reads.
+    -- The formal type supplies the contextual type of a literal expression.
+    let y := toString (← freshCapture "se")
+    pre := pre ++ [.decl (.named c) y (some a)]
+    as := as ++ [.name y]
   let call (g : String) : RawStmt := match res with
     | some (x, _) => .assign (.name (toString x)) (.call g as)
     | none => .call (.name g) as
-  let disp := cands.foldr (fun (g, t) els =>
-    [RawStmt.ite (.binop .eqB (.name h) (.num t)) [call g] els]) [RawStmt.revert]
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
-  let P ← elabBranch (pre ++ disp)
+  let P ← withReader (fun sc => { sc with top := false }) do
+    let P ← elabStmtsP pre
+    let Γ ← nctx
+    -- A self-call transports exact bytes, so Panic(0x51) is independent
+    -- of the transaction oracle's fallback code for an unclassified panic.
+    let mut disp : Stmt C Γ.ctx Γ.ctx :=
+      if (← read).selfFrame then .revertData [.bytes (Semantics.encodePanic 0x51)]
+      else .revert
+    for (g, t) in cands.reverse do
+      let c ← checkIn C Γ .bool (.binop .eqB (.name h) (.num t))
+      let body ← elabScope Γ [call g]
+      disp := .ite c body.2 (.cons disp .nil)
+    pure (P ++ [.of Γ disp])
   modify fun (_, k) => (Γ0, k)
   pure P
 
@@ -292,7 +309,9 @@ so the call is an external call to `h / 2^32` (`extCallStmt`), dispatched on
 the selector `h - h / 2^32 * 2^32` over the functions of `C` of that type, so that one
 to `this` runs the function (`Stmt.tryCall`'s `self`, O8); any other
 selector is a call the model names `#selector`, its first argument the
-selector, whose response the world chooses as for any external call. -/
+selector, whose response the world chooses as for any external call. Imported
+source declarations additionally clean the receiver to `address(h / 2^32)`;
+the selector still uses the raw quotient. -/
 partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawExpr)
     (res : Option (Var × PrimTy)) (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
   unless ps.length == args.length do
@@ -300,9 +319,21 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
   if 1 < rs.length then throw s!"{h}(…): an external function value of several returns"
   let a := toString (← freshCapture "se")
   let sl := toString (← freshCapture "se")
-  let mut pre : List RawStmt := [.decl (.named "address") a (some (.binop .div (.name h) (.num selShift))),
+  -- Source addresses are 160 bits. Keep the uncleaned quotient for the
+  -- selector subtraction, then capture its genuine address conversion in a
+  -- separate local before the try-call. Declaring the quotient as address
+  -- would mark it already clean and make addressCapture skip the conversion.
+  -- Native contracts retain their existing, wider transaction-address API.
+  let source := C.funs.any fun (_, d) => d.sourceDecl.isSome
+  let mut pre : List RawStmt := [.decl (.named (if source then "uint" else "address")) a
+      (some (.binop .div (.name h) (.num selShift))),
     .decl (.named "uint") sl
       (some (.binop .sub (.name h) (.binop .mul (.name a) (.num selShift))))]
+  let mut receiver := a
+  if source then
+    let clean := toString (← freshCapture "se")
+    pre := pre ++ [.decl (.named "address") clean (some (.call "address" [.name a]))]
+    receiver := clean
   let mut as : List RawExpr := []
   for (x, c) in args.zip ps do
     if x.isPure then as := as ++ [x] else
@@ -311,12 +342,12 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
       as := as ++ [.name y]
   let mut cands : List (String × Nat) := []
   for (g, d) in C.funs do
-    if fnSource C g && FunDecl.extTy? C d == some ty then
+    if fnExternalEntry C g && FunDecl.extTy? C d == some ty then
       if let some sel := fnSelector? C g then cands := cands ++ [(g, sel)]
-  let other ← extCallStmt (.name a) "#selector" (.name sl :: as) rs res
+  let other ← extCallStmt (.name receiver) "#selector" (.name sl :: as) rs res
   let mut disp : List RawStmt := [other]
   for (g, sel) in cands.reverse do
-    disp := [.ite (.binop .eqB (.name sl) (.num sel)) [← extCallStmt (.name a) g as rs res] disp]
+    disp := [.ite (.binop .eqB (.name sl) (.num sel)) [← extCallStmt (.name receiver) g as rs res] disp]
   let (Γ0, _) ← get
   if resNew then
     if let some (x, p) := res then declare C (toString x) (.val p resW)
@@ -467,6 +498,7 @@ parameters take the arguments' types and whose return variables are the
 function may not call: the restriction that keeps the run structural). -/
 partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
     ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
+  unless fnExternalEntry C g do return none
   let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
   unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
   unless d.rets.all (fun (_, T) => T matches .prim _) do return none
@@ -478,9 +510,15 @@ partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx))
       pure (some P)) fun _ => pure none
   let some [st] := r | pure none
   if h : st.Γ.ctx = Γ.ctx then
-    -- its failures with solc's `Panic` data, which the `catch` reads
+    -- Compiler-generated getters use empty-data bounds failures. Their
+    -- source plan has already placed a require before every array index;
+    -- instrumenting the guarded reads as ordinary Solidity expressions
+    -- would invent unreachable Panic(0x32) data in catchData's analysis.
+    let getter := d.sourceDecl.any fun source => match source.callable with
+      | .getter _ => true
+      | _ => false
     pure ((Stmt.selfCall? C ρ (h ▸ st.s)).map fun ⟨ps, Γf, sargs, sbody⟩ =>
-      ⟨ps, Γf, sargs, sbody.withPanics⟩)
+      ⟨ps, Γf, sargs, if getter then sbody else sbody.withPanics⟩)
   else pure none
 
 /-- **The body a value call runs when its receiver is the contract itself**

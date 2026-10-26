@@ -300,10 +300,14 @@ theorem LTm.mulArgs?_eq {s : Srt} {t : LTm C s} {e : EqF C} (h : t.mulArgs? = so
     | _ => simp only [LTm.mulArgs?, Op2.mulArgs, reduceCtorEq] at h
   | _ => simp only [LTm.mulArgs?, reduceCtorEq] at h
 
-/-- `(a + b) - b`, cancelled to `a` where the sum returns. -/
+/-- Cancel either summand of a checked sum: `(a + b) - b` to `a`,
+`(a + b) - a` to `b`. The whole sum must return; successful operands alone
+do not rule out overflow. -/
 def Facts.cancel (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val p)) :=
   match x.addArgs? with
-  | some e => if e.r.beqR y && F.returns x then e.l.castTo? else none
+  | some e =>
+    if e.r.beqR y && F.returns x then e.l.castTo?
+    else if e.l.beqR y && F.returns x then e.r.castTo? else none
   | none => none
 
 theorem ofInt?_ival_self {p : PrimTy} (hp : p.isNumeric = true) (v : p.Denote) :
@@ -359,7 +363,45 @@ theorem Facts.cancel_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (hs : BinO
           | int =>
             show some va = PrimTy.int.ofInt? (PrimTy.ival vx - PrimTy.ival vb)
             rw [hd]; exact (ofInt?_ival_self rfl va).symm
-    · cases h
+    · split at h
+      · rename_i hb
+        simp only [Bool.and_eq_true] at hb
+        obtain ⟨hp, hx⟩ := LTm.addArgs?_eq he
+        obtain ⟨q, l, r⟩ := e
+        cases hx
+        cases LTm.castTo?_eq h
+        cases LTm.eq_of_beqR hb.1
+        obtain ⟨vx, hvx⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF _ hb.2)
+        have hnum : q.isNumeric = true := by
+          cases q <;> first | rfl | cases hp
+        rw [LTm.eval_app2] at hvx
+        cases hl : (l.eval g ν : Option q.Denote) with
+        | none => rw [hl] at hvx; cases hvx
+        | some va =>
+          rw [hl] at hvx
+          have h1 : binopT .add _ va (r.eval g ν) = some vx := hvx
+          unfold binopT at h1
+          simp only [BinOp.shortT] at h1
+          cases hr : (r.eval g ν : Option q.Denote) with
+          | none => rw [hr] at h1; cases h1
+          | some vb =>
+            rw [hr, Option.bind_some] at h1
+            have hsum := evalT_add h1
+            rw [LTm.eval_app2, LTm.eval_app2, hl, hr]
+            show some vb = (binopT .add _ va (some vb)).bind fun z => binopT .sub _ z (some va)
+            unfold binopT
+            simp only [BinOp.shortT, Option.bind_some]
+            rw [h1, Option.bind_some]
+            have hd : PrimTy.ival vx - PrimTy.ival va = PrimTy.ival vb := by omega
+            cases q with
+            | bool => cases hnum
+            | uint =>
+              show some vb = PrimTy.uint.ofInt? (PrimTy.ival vx - PrimTy.ival va)
+              rw [hd]; exact (ofInt?_ival_self rfl vb).symm
+            | int =>
+              show some vb = PrimTy.int.ofInt? (PrimTy.ival vx - PrimTy.ival va)
+              rw [hd]; exact (ofInt?_ival_self rfl vb).symm
+      · cases h
   · cases h
 
 /-- `(a - b) + b`, cancelled to `a` where the difference returns. -/

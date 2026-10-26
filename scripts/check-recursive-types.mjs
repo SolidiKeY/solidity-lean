@@ -15,6 +15,7 @@ const solc = createRequire(import.meta.url)(resolve(compiler));
 assert.match(solc.cwrap('solidity_version','string',[])(), /^0\.8\.38\+commit\.1835d247/);
 const compile = solc.cwrap('solidity_compile','string',['string','number','number']);
 const source = readFileSync(fileURLToPath(new URL('../tests/recursive-0.8.38/RecursiveTypes.sol',import.meta.url)),'utf8');
+const copySource = readFileSync(fileURLToPath(new URL('../tests/recursive-0.8.38/RecursiveCopy.sol',import.meta.url)),'utf8');
 function build(content, viaIR=false) {
   return JSON.parse(compile(JSON.stringify({language:'Solidity',sources:{'RecursiveTypes.sol':{content}},
     settings:{viaIR,optimizer:{enabled:true},evmVersion:'cancun',
@@ -25,7 +26,9 @@ const bad = [
   ['fixed','struct N { N[1] child; } N root;','2046'],
   ['mutual inline','struct A { B b; } struct B { A a; } A root;','2046'],
   ['recursive public ABI','struct N { N[] children; } function f(N memory n) external pure returns(uint) { return n.children.length; }','4103'],
-  ['mapping memory','struct N { mapping(uint=>N) next; } function f(N memory) internal {}','4061']
+  ['mapping memory','struct N { mapping(uint=>N) next; } function f(N memory) internal {}','4061'],
+  ['mapping struct copy','struct N {uint value; mapping(uint=>N) next;} N a; N b; function f() external {a=b;}','9214'],
+  ['nested mapping copy','struct N {mapping(uint=>uint) values;} N[] a; N[] b; function f() external {a=b;}','9214']
 ];
 for (const [label, body, code] of bad) {
   const out=build('pragma solidity 0.8.38; contract Bad { '+body+' }');
@@ -53,6 +56,28 @@ for (const viaIR of [false,true]) {
     ['arrayDelete',[0n,0n,0n]],['retainedWrite',[7n]],
     ['mutualDepth',[0n]],['memoryCycle',[9n]]
   ]) {
+    const r=await vm.evm.runCode({code,to:address,data:hexToBytes(iface.encodeFunctionData(name,[])),gasLimit:30000000n});
+    assert.equal(r.exceptionError,undefined,`${name}, viaIR=${viaIR}: ${r.exceptionError}`);
+    assert.deepEqual(Array.from(iface.decodeFunctionResult(name,bytesToHex(r.returnValue))),expected,
+      `${name}, viaIR=${viaIR}`);
+    count++;
+  }
+}
+for (const viaIR of [false,true]) {
+  const out=build(copySource,viaIR);
+  assert.deepEqual((out.errors??[]).filter(e=>e.severity==='error'),[]);
+  const c=out.contracts['RecursiveTypes.sol'].RecursiveCopyConformance;
+  const iface=new Interface(c.abi);
+  const code=hexToBytes('0x'+c.evm.deployedBytecode.object);
+  for (const [name,expected] of [
+    ['recursiveCopy',[5n,1n,7n,9n,0n,0n]],
+    ['retainedDestination',[13n]],['ignoredSourceShadow',[0n]],
+    ['ordinarySubtree',[31n,37n]]
+  ]) {
+    // A fresh account per vector keeps source-only/destination-only histories independent.
+    const vm=await createVM({common:new Common({chain:Mainnet,hardfork:Hardfork.Cancun})});
+    const address=createAddressFromString('0x'+'2'.repeat(40));
+    await vm.stateManager.putAccount(address,new Account());
     const r=await vm.evm.runCode({code,to:address,data:hexToBytes(iface.encodeFunctionData(name,[])),gasLimit:30000000n});
     assert.equal(r.exceptionError,undefined,`${name}, viaIR=${viaIR}: ${r.exceptionError}`);
     assert.deepEqual(Array.from(iface.decodeFunctionResult(name,bytesToHex(r.returnValue))),expected,

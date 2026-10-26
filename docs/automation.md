@@ -1887,7 +1887,8 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     refuted by the entry `0` at the address `0`, `kintBinderTwo` (two
     binders) proved, the first two's coverage kernel-checked.  A binder in
     a negative position (an `∃`, `gapKIntNeg`) is outside: it needs the
-    unbounded binder of the leaf language and of `QFml` (below).
+    unbounded binder of the leaf language and of `QFml` (below).  Feature 30
+    below handles bounded linear comparisons in either polarity.
 
 27. **A second kind hashing one string** (2026-10-26, `Fml.tkBody`):
     feature 12 asked each string the second kind hashes to be hashed by
@@ -1951,6 +1952,18 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     `sha256` only) proved and `mixedSomeBad` refuted, the first two's
     coverage kernel-checked.  `Fml.tk3` keeps both layers linked
     (`Fml.tkLinked` in `Fml.tk3RL`).
+
+30. **Binders of KeY's `int` over two words** (2026-10-26,
+    `Calculus/KIntEncode.lean`, `decideKEnc`). Linear comparisons with
+    bounded remainders are unchanged when the binder is clamped outside
+    the computed bound. Encoding that finite interval with two `uint`
+    binders gives an equivalence at every state (`Fml.holds_kenc`), in
+    either polarity. `Fml.kencCovered` records whether the rewritten
+    leaf reaches an existing decision stage. `Examples/DecisionKInt.lean`
+    pins negative binders and positive binders beside independent ledger
+    reads, with proved and refuted variants. Comparisons with unbounded
+    remainders, including ledger entries and other KeY `int` locals,
+    remain outside this encoder.
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
@@ -2254,22 +2267,13 @@ stack would lift this.
     `Person` has reference members, whose objects a realized struct
     needs, so the cut would be exact only at heaps holding them and the
     refutation would have to build them);
-  * **the ledger and KeY `int` without quantifiers** (the plain
-    storage-array reads once pinned here, `arrayRead` and `fixedRead`, are
-    decided by feature 10, the fresh memory array's, `gapMemory`, by
-    feature 13, and fifty reads, `gapManyReads`, by feature 15; a
-    positive binder of KeY's `int`, `gapKIntBinder`, by feature 26; the
-    ledger read past a payment, `gapLedgerWrite`, by feature 25): a
-    binder of KeY's `int` in a negative position (`gapKIntNeg`, `(∀ int z.
-    z > 0) → 0 == 1`, an `∃`), or in a positive one of a leaf that reads
-    the ledger elsewhere (feature 26 needs the ledger free for its
-    binders): an atom position holds a `bool`, `uint` or `int` (`AEnv`),
-    `LTm.var` and the binder `LFml.all k p` are sorted by `PrimTy`, so the
-    leaf has no position of sort `Srt.kint` to bind.  It needs one (a field
-    of `AEnv` and a `kint` variable of `LTm`, or an `allZ` binder of
-    `LFml`, with every recursion over them extended, some forty modules),
-    and, past the prefix, an unbounded binder of `QFml` (no range atom;
-    Presburger over ℤ as two naturals);
+  * **unbounded remainders in KeY `int` comparisons**: feature 30 decides
+    negative binders (`gapKIntNeg`) and positive binders beside independent
+    ledger reads when their comparisons have bounded remainders. A binder
+    compared directly with a ledger entry (`gapKIntNet`) or with another
+    KeY `int` binder (`gapKIntNested`) remains outside that encoding:
+    the remainder has no finite bound. `Examples/DecisionKInt.lean` pins
+    both as `unknown`;
   * **hashes outside `Fml.hashCovered`** (features 11, 12, 27 to 29; three
     kinds, `gapThreeKinds`, and second kinds hashing strings the first
     does not, `gapMixedKinds` and `gapMixedPairs`, are decided since 27 to
@@ -2807,3 +2811,32 @@ findings; each is fixed.
    premise's updates and formulas); the punctuation of the
    `Semantics/StorageWt.lean` and `Typing/Values.lean` rows of
    `docs/module-map.md`.
+
+## M7-close · A checkpoint of the theorem (planned 2026-10-26)
+
+Not started.  It closes the M7 lanes and states what is proved so far,
+without changing the goal.
+
+1. **Finish the running lanes.** `kintneg` (`gapKIntNeg`) and
+   `apfarrays` (`gapArrayBlock`, `gapMemInnerNeg`, `gapWrittenMemory`)
+   run to completion.  A gap not done within one more build cycle is
+   committed to its branch, what is left is recorded in M7, and the lane
+   stops.  Whatever passes the full build and the strict gate
+   (`node scripts/check-automatic.mjs --strict`) is merged.
+2. **The checkpoint theorem, `DecisionTheorem'`.** For every leaf in
+   `Fml.inTarget` that is not in `Fml.Residue`, `decideGoal` either
+   closes the goal or returns a counterexample.  It needs
+   `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`, with no `sorry` and no
+   new axioms.  `Fml.Residue` is a decidable predicate that names exactly
+   the gaps still pinned, each with a one-line reason.
+3. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
+   later milestones may only shrink `Fml.Residue`.
+4. **Split `Examples/Decision.lean`** into smaller modules, each building
+   in under 300 s.
+5. **Tag** the result `milestone-m7-close`, record it here, and push to
+   master.
+6. **Stop.** The milestone ends at the tag: no work toward the full
+   `DecisionTheorem`, no new lanes, no further shrinking of
+   `Fml.Residue` until the user's next instruction.
+7. Throughout: at most two lanes at a time, builds with
+   `LEAN_NUM_THREADS=4`.

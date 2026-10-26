@@ -896,7 +896,22 @@ def revertErrParts (Γ : NCtx) (e : String) (args : List RawExpr) :
     throw s!"`{e}` is not an error this contract declares with value parameters"
   unless d.params.length == args.length do
     throw s!"`{e}` takes {d.params.length} arguments, given {args.length}"
-  let parts ← (d.params.zip args).mapM fun ((_, T), a) => do
+  let parts ← (d.params.zip args).mapM fun ((n, T), a) => do
+    -- The model stores bytesN as its compact uint8N value. ABI words put
+    -- those N bytes at the left; uint/int/address words remain right-aligned.
+    -- Read the declaration, since eager captures may have erased the marker.
+    let a ← match lookupBy (n ++ "#bytes") d.widths with
+      | none => pure a
+      | some w => do
+        unless T == .prim .uint && 0 < w && w ≤ 32 do
+          throw s!"`{e}`: invalid fixed-byte custom-error parameter {n}"
+        let shift := 8 * (32 - w)
+        pure (match a with
+          | .num k => .num (k * 2 ^ shift)
+          -- checkIn constructs the intrinsic uint Val directly below. Its
+          -- shift is 256-bit already; raw casts inserted after hoisting are
+          -- not expressions synth can accept and would lose the self body.
+          | a => .binop .shl a (.num shift))
     match T, a with
     | .prim _, .num n => pure (RevPart.bytes (Semantics.wordBytes n))
     | .prim _, .bool b => pure (RevPart.bytes (Semantics.wordBytes (if b then 1 else 0)))
@@ -1539,6 +1554,18 @@ def abiMarks (args : List RawExpr) : ElabM (List (Option AbiKind)) := do
       | some n => some (.bytesN n)
       | none => marked a
     | a => marked a)
+
+/-- A typed self frame bypasses byte encoding. Integer widths share the same
+word representation and may be rechecked at the requested width; fixed bytes
+must retain exactly their byte width and alignment. In particular bytes2 is
+not compact bytes4 or uint16, even though all erase to `PrimTy.uint`. -/
+def selfReturnAbiCompatible (actual requested : String) : Bool :=
+  match valueKind? actual, valueKind? requested with
+  | some (.uint _), some (.uint _) => true
+  | some (.int _), some (.int _) => true
+  | some (.bytesN n), some (.bytesN m) => n == m
+  | some .bool, some .bool => true
+  | _, _ => actual == requested
 
 /-- `try r.g(as) returns (T v) { x = v; } catch { revert(); }`: an external
 call whose every failure reverts the caller, as a call outside a `try` does,
