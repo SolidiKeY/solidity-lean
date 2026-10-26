@@ -12,6 +12,7 @@ function createExtension(vscode, context, backend = runBackend) {
   const controller = vscode.tests.createTestController('solidityLean', 'Solidity Lean');
   const output = vscode.window.createOutputChannel('Solidity Lean');
   const active = new Map(), reports = new Map(), metadata = new Map();
+  let discoveryVersion = 0;
   const key = uri => uri.toString();
   const isSolidity = doc => doc?.uri.scheme === 'file' && extname(doc.uri.fsPath).toLowerCase() === '.sol';
   const toRange = range => new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character);
@@ -24,7 +25,10 @@ function createExtension(vscode, context, backend = runBackend) {
   }
   function cancel(uri) {
     if (uri) active.get(key(uri))?.abort();
-    else for (const job of active.values()) job.abort();
+    else {
+      discoveryVersion++;
+      for (const job of active.values()) job.abort();
+    }
   }
   function clear(uri) {
     cancel(uri);
@@ -109,8 +113,10 @@ function createExtension(vscode, context, backend = runBackend) {
   }
   async function discover() {
     if (!vscode.workspace.isTrusted) return;
-    const uris = await vscode.workspace.findFiles('**/*.sol', '**/{.git,.lake,node_modules}/**', 200);
+    const generation = ++discoveryVersion;
+    const uris = await vscode.workspace.findFiles('**/*.sol', '**/{.git,.lake,node_modules}/**');
     for (const uri of uris) {
+      if (generation !== discoveryVersion) break;
       try { await verify(await vscode.workspace.openTextDocument(uri), { listing: true }); }
       catch (error) { showError(error); }
     }

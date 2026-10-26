@@ -131,6 +131,23 @@ test('source hashes accept the BOM hidden by the editor without accepting other 
   assert.equal(env.api.reports.size, 1);
 });
 
+test('workspace discovery has no silent file cap and cancellation stops queued files', async () => {
+  let calls = 0, finish, globArgs;
+  const env = setup((args, env) => {
+    calls++;
+    return new Promise(resolve => { finish = () => resolve({results:[row(env)], errors:[]}); });
+  });
+  env.vscode.workspace.findFiles = async (...args) => { globArgs = args; return [env.doc.uri, env.doc.uri]; };
+  const discovery = env.controller.resolveHandler();
+  await settle();
+  assert.equal(globArgs.length, 2, 'discovery must not silently omit files after a fixed cap');
+  assert.equal(calls, 1);
+  env.commands.get('solidityLean.cancel')();
+  finish();
+  await discovery;
+  assert.equal(calls, 1, 'cancellation must stop the workspace queue');
+});
+
 test('suppresses closed documents and superseded jobs even when backend ignores cancellation', async () => {
   const pending = [];
   const env = setup((args, env) => new Promise(resolve => pending.push({ args, finish: () => resolve({ results: [row(env)], errors: [] }) })));

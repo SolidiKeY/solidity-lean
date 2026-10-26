@@ -28,7 +28,7 @@ facility must not be conflated.
 | `preconditions` | specification | present | [Specifications.md:34](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Specifications.md#L34) | Requires clauses and imported NatSpec preconditions already generate checked obligations. **Next:** Preserve argument binding and definedness; add source-associated diagnostics. |
 | `postconditions` | specification | present | [Specifications.md:65](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Specifications.md#L65) | Ensures, result values and contract invariants are already supported for admitted source shapes. **Next:** Associate failed obligations with their source specifications. |
 | `old-state` | specification | partial | [Expressions.md:677](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Expressions.md#L677) | Entry snapshots cover storage and ledger; there is no general labeled-state expression surface. **Next:** Add typed labeled snapshots and reusable two-state predicates if needed. |
-| `quantifiers` | specification | partial | [Expressions.md:1266](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Expressions.md#L1266) | Both forall and exists are supported over primitive domains; general collection domains and automatic quantifier alternation are not established. **Next:** Extend typed specification domains and checked quantifier automation. |
+| `quantifiers` | specification | partial | [Expressions.md:1266](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Expressions.md#L1266) | Both forall and exists are supported over primitive domains, including checked Presburger quantifier alternation and array-property fragments. General specification collection domains remain incomplete. **Next:** Extend typed specification domains and checked quantifier automation. |
 | `function-frames` | specification | partial | [Specifications.md:633](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Specifications.md#L633) | Assignable syntax already names roots, fields, indices and wildcard descendants; general modular frame application remains limited. Dafny write restrictions and local final-state framing differ. **Next:** Carry precise assigns information into effectful contract application. |
 | `loop-invariants` | verification | present | [Specifications.md:706](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Specifications.md#L706) | Supported invariant loop rules have soundness proofs; present does not cover every memory or callback body. **Next:** Extend explicitly unsupported loop-body shapes. |
 | `loop-frames` | verification | partial | [Statements.md:1592](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Statements.md#L1592) | Computed loop anonymisation tracks storage roots. Aliases, memory and finer locations remain conservative. **Next:** Introduce typed finer location sets, alias-aware effects and memory frames. |
@@ -185,7 +185,7 @@ terminates detached descendant tool processes.
 
 Validation on 2026-10-26:
 
-- 32 offline inventory, source-location, controller and subprocess tests pass.
+- 33 offline inventory, source-location, controller and subprocess tests pass.
 - Real solc/Lean integration checks pass for overload/source metadata, the
   Runner fixture and selection/listing; inline assembly retains its current
   source-policy verdict `excluded` (an older test expected `unsupported`).
@@ -205,7 +205,13 @@ their children and a regression requires each function to run once. Their
 position findings led to the BOM/CR fixes. A final launcher review found stale
 caller-supplied success files could produce a false pass; every launch now uses
 a fresh temporary report and only copies checked evidence to the requested
-output. Tests cover both stale rejection and fresh success.
+output. Tests cover both stale rejection and fresh success. Workspace discovery
+also drops its silent 200-file cap, and cancellation stops its queued files;
+a regression covers that queue boundary.
+
+The final source review also confirmed existing Presburger quantifier alternation in
+`Solidity/Calculus/QuantArithmetic.lean` and its decision examples; the quantifier
+family now records that supported fragment explicitly.
 
 The remaining semantic work above is still open. No semantic parity or new
 verification soundness claim follows from adding this editor interface.

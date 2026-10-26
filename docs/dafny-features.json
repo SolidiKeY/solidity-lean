@@ -168,9 +168,11 @@
       ],
       "localEvidence": [
         "Solidity/SpecSyntax.lean",
-        "Solidity/Calculus/Fml.lean"
+        "Solidity/Calculus/Fml.lean",
+        "Solidity/Calculus/QuantArithmetic.lean",
+        "Solidity/Examples/Decision.lean"
       ],
-      "assessment": "Both forall and exists are supported over primitive domains; general collection domains and automatic quantifier alternation are not established.",
+      "assessment": "Both forall and exists are supported over primitive domains, including checked Presburger quantifier alternation and array-property fragments. General specification collection domains remain incomplete.",
       "next": "Extend typed specification domains and checked quantifier automation."
     },
     {
