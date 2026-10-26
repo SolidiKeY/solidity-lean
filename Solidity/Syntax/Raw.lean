@@ -390,10 +390,12 @@ operators and assignment targets keep their existing sequencing. -/
 structure EvalOrder where
   binaryLeftToRight : Bool := false
   modularLeftToRight : Bool := false
+  /-- Modifier placeholders have separate function parameter/return slots. -/
+  modifierFrames : Bool := false
   deriving Repr, Inhabited
 
 /-- Solidity's IR code generator evaluates ordinary expressions in source order. -/
-def EvalOrder.viaIR : EvalOrder := ⟨true, true⟩
+def EvalOrder.viaIR : EvalOrder := ⟨true, true, true⟩
 
 /-- A contract carries the validity of its storage declaration. The proof
 fields are erased when programs run; literals discharge them by computation. -/

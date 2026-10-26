@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

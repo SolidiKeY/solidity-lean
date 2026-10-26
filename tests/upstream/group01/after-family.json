@@ -1,0 +1,813 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/modifiers/",
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/access_through_contract_name.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/access_through_contract_name.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/access_through_contract_name.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/access_through_module_name.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/access_through_module_name.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f(), g()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/access_through_module_name.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/break_in_modifier.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/break_in_modifier.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/break_in_modifier.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/continue_in_modifier.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/continue_in_modifier.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/continue_in_modifier.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/evaluation_order.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "dynamic/aggregate/bytes/function ABI vector not adapted"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_calling_functions_in_creation_context.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor(), f3(), f4()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor(), f3(), f4()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_calling_functions_in_creation_context.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor(), f3(), f4()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_calling_functions_in_creation_context.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_empty.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_empty.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_empty.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_for_constructor.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_for_constructor.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: getData(): no imported function for getData(); available: [constructor()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_for_constructor.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "frontend import gaps",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+          "gaps": [
+            {
+              "status": "unsupported",
+              "reason": "function_modifier_library_inheritance.sol:29: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+              "function": "f()"
+            }
+          ]
+        },
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+          "gaps": [
+            {
+              "status": "unsupported",
+              "reason": "function_modifier_library_inheritance.sol:29: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+              "function": "f()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "frontend import gaps",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+          "gaps": [
+            {
+              "status": "unsupported",
+              "reason": "function_modifier_library.sol:23: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+              "function": "f()"
+            }
+          ]
+        },
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+          "gaps": [
+            {
+              "status": "unsupported",
+              "reason": "function_modifier_library.sol:23: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+              "function": "f()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_local_variables.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_local_variables.sol",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "3"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_local_variables.sol",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "3"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol",
+          "observed": [
+            {
+              "values": [
+                "10"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_with_return.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_with_return.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times_local_vars.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times_local_vars.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times_local_vars.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: a(): no imported function for a(); available: [f(uint)]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_overriding.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_overriding.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: f(): no imported function for f(); available: []",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_overriding.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+          "observed": [
+            {
+              "values": [
+                "2",
+                "3"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+          "observed": [
+            {
+              "values": [
+                "2",
+                "3"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_return_parameter_complex.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "revert-data expectation not adapted (panic codes cannot be inferred from generic panic)"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_return_parameter.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "dynamic/aggregate/bytes/function ABI vector not adapted"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/modifer_recursive.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: called(): no imported function for called(); available: [f(uint)]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: called(): no imported function for called(); available: [f(uint)]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/modifer_recursive.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: called(): no imported function for called(); available: [f(uint)]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/modifer_recursive.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/modifier_in_constructor_ice.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/modifier_in_constructor_ice.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "constructor",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/modifier_in_constructor_ice.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "constructor",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/modifier_init_return.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "dynamic/aggregate/bytes/function ABI vector not adapted"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/modifiers_in_construction_context.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/modifiers_in_construction_context.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "constructor",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/modifiers_in_construction_context.sol",
+          "observed": [
+            {
+              "values": [],
+              "signature": "constructor",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/return_does_not_skip_modifier.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/return_does_not_skip_modifier.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/return_does_not_skip_modifier.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/return_in_modifier.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/return_in_modifier.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/return_in_modifier.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/stacked_return_with_modifiers.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/stacked_return_with_modifiers.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "call does not elaborate: x(): no imported function for x(); available: [f()]",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/stacked_return_with_modifiers.sol"
+        }
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+        },
+        {
+          "status": "broken",
+          "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+        }
+      ]
+    }
+  ]
+}

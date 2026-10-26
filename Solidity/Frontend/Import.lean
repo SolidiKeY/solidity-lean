@@ -627,7 +627,7 @@ def elabSolcImport : CommandElab := fun stx => do
       if provenance.pipeline == some .viaIR then
         liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := EvalOrder.viaIR } : Contract))
       else
-        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := Solidity.EvalOrder.mk false false } : Contract))
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := Solidity.EvalOrder.mk false false false } : Contract))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
