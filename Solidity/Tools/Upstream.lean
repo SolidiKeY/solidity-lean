@@ -66,15 +66,24 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       | .ok o => state := o.st.glob
       deployed := true
     let normaliseSignature (s : String) :=
-      ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
+      match s.splitOn "(" with
+      | [] => s
+      | name :: args =>
+        if args.isEmpty then name else
+          let parameters := "(".intercalate args
+          let parameters := ((parameters.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
+          name ++ "(" ++ parameters
     let function := (rows.find? fun r =>
       -- The imported function already carries its declaration-indexed ABI
       -- identity. Nominal UDVT spellings in the report are not ABI types.
       let source := (Semantics.lookupBy r.name C.funs).bind (·.sourceDecl)
-      let abi := match source with
-        | some declaration => if declaration.externalEntry then declaration.signature else none
-        | none => some r.sourceSignature -- native replay controls
-      abi.any fun abi => normaliseSignature abi == normaliseSignature signature).map (·.name)
+      match source with
+      | some declaration =>
+        -- Imported signatures are canonical already. Never rewrite a function
+        -- name containing type-like text such as `route_uint256`.
+        declaration.externalEntry && declaration.signature == some signature
+      | none => -- native replay controls retain parameter-type aliases only
+        normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
     let program := if ctor then ctorProgS C args else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
       elabProgS C [← runStmt C name args]
