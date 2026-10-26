@@ -1,0 +1,308 @@
+test/libsolidity/semanticTests/accessor/accessor_for_const_state_variable.sol	lean-runtime	call does not elaborate: ticketPrice(): no imported function for ticketPrice(); available: []
+test/libsolidity/semanticTests/accessor/accessor_for_state_variable.sol	lean-runtime	call does not elaborate: ticketPrice(): no imported function for ticketPrice(); available: []
+test/libsolidity/semanticTests/array/copying/dirty_memory_bytes_to_storage_copy_ir.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/array/copying/dirty_memory_bytes_to_storage_copy.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/array/delete/delete_memory_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/array/delete/delete_storage_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/array/push/push_no_args_struct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/builtinFunctions/erc7201_param_ternary_operator.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/cleanup/cleanup_address_types_shortening.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constants/asm_constant_file_level.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constants/assign_type_info.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constructor/inline_member_init_inheritence_without_constructor.sol	lean-runtime	call does not elaborate: getBMember(): no imported function for getBMember(); available: [getDMember()]
+test/libsolidity/semanticTests/constructor/state_variable_initialization.sol	lean-runtime	call does not elaborate: i(): no imported function for i(); available: [constructor()]
+test/libsolidity/semanticTests/constructor/store_function_in_constructor_packed.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constructor/store_function_in_constructor.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constructor/store_internal_unused_function_in_constructor.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constructor/store_internal_unused_library_function_in_constructor.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/bound_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/library_function_deployed.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/library_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/static_base_function_deployed.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/static_base_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/super_function_deployed.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/super_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/virtual_function_deployed.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/deployedCodeExclusion/virtual_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/ecrecover/failing_ecrecover_invalid_input_asm.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/errors/require_error_evaluation_order_1.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/exponentiation/signed_base.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/exponentiation/small_exp.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/expressions/bit_operators.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/expressions/conditional_expression_functions.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/expressions/conditional_expression_storage_memory_2.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/expressions/conditional_expression_tuples.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/expressions/tuple_from_ternary_expression.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/freeFunctions/free_runtimecode.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionCall/call_function_returning_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionCall/call_function_returning_nothing_via_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionCall/call_internal_function_via_expression.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionCall/calling_other_functions.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionCall/inheritance/base_base_overload.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [cInit(uint), cInit(uint,uint), bInit(uint), bInit(uint,uint)]
+test/libsolidity/semanticTests/functionCall/inheritance/base_overload.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [cInit(uint), cInit(uint,uint)]
+test/libsolidity/semanticTests/functionCall/inheritance/call_unimplemented_base.sol	lean-runtime	call does not elaborate: b(): no imported function for b(); available: [a()]
+test/libsolidity/semanticTests/functionTypes/address_member.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionTypes/pass_function_types_internally.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionTypes/same_function_in_construction_and_runtime.sol	lean-runtime	call does not elaborate: initial(): no imported function for initial(); available: [constructor(), double(uint), runtime(uint)]
+test/libsolidity/semanticTests/functionTypes/struct_with_functions.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/getters/array_mapping_struct.sol	lean-runtime	call does not elaborate: m(uint256,uint256): no imported function for m(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/getters/arrays.sol	lean-runtime	call does not elaborate: a(uint256,uint256): no imported function for a(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/getters/mapping_array_struct.sol	lean-runtime	call does not elaborate: m(uint256,uint256): no imported function for m(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/getters/mapping_to_struct.sol	lean-runtime	call does not elaborate: x(uint256,uint256): no imported function for x(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/getters/mapping_with_names.sol	lean-runtime	call does not elaborate: x(uint256,uint256): no imported function for x(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/getters/mapping.sol	lean-runtime	call does not elaborate: x(uint256,uint256): no imported function for x(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/immutable/assign_at_declaration.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/immutable/assign_from_immutables.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [constructor()]
+test/libsolidity/semanticTests/immutable/delete.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [constructor()]
+test/libsolidity/semanticTests/immutable/getter.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: []
+test/libsolidity/semanticTests/immutable/internal_function_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/immutable/multiple_initializations.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/immutable/small_types_in_reverse.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/access_base_storage.sol	lean-runtime	call does not elaborate: getViaBase(): no imported function for getViaBase(); available: [setData(uint,uint), getViaDerived()]
+test/libsolidity/semanticTests/inheritance/constructor_inheritance_init_order_3_legacy.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/constructor_inheritance_init_order_3_viaIR.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/constructor_with_params_inheritance_2.sol	lean-runtime	call does not elaborate: i(): no imported function for i(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/inherited_function_through_dispatch.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inheritance/pass_dynamic_arguments_to_the_base_base_with_gap.sol	lean-runtime	call does not elaborate: m_i(): no imported function for m_i(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/pass_dynamic_arguments_to_the_base_base.sol	lean-runtime	call does not elaborate: m_i(): no imported function for m_i(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/pass_dynamic_arguments_to_the_base.sol	lean-runtime	call does not elaborate: m_i(): no imported function for m_i(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/state_variables_init_order_2.sol	lean-runtime	call does not elaborate: z(): no imported function for z(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/state_variables_init_order_3.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [constructor()]
+test/libsolidity/semanticTests/inheritance/state_variables_init_order.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: []
+test/libsolidity/semanticTests/inheritance/super_in_constructor_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/inlineAssembly/chainid.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/external_function_pointer_address.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/external_identifier_access_shadowing.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/for_loop_break.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/for_loop_continue.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/for_loop_nested.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/function_name_clash.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_for2.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_if.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_in_modifiers.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_read_and_write_stack.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_recursion.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_inside_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_local_var.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access_via_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_storage_access.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_switch.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/inlineAssembly/inlineasm_empty_let.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/keccak256_optimization.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_bug_different_memory_location.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/keccak256_optimizer_cache_bug.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/leave.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/optimize_memory_store_multi_block.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/prevrandao.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/returndatacopy_using_stale_returndatasize.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/shadowing_local_function_opcode.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/slot_access_via_mapping_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/transient_storage_creation.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/transient_storage_multiple_transactions.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/transient_storage_reset_between_creation_runtime.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/transient_storage_sanity_checks.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/transient_storage_simple_reentrancy_lock.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/inlineAssembly/truefalse.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_internal_function_type_named_selector.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_internal_function_type.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/literals/fractional_denominations.sol	lean-runtime	call does not elaborate: g(): no imported function for g(); available: []
+test/libsolidity/semanticTests/memoryManagement/assembly_access.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/memoryManagement/return_variable.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/memoryManagement/static_memory_array_allocation.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/memoryManagement/struct_allocation.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/modifiers/access_through_contract_name.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f(), g()]
+test/libsolidity/semanticTests/modifiers/access_through_module_name.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f(), g()]
+test/libsolidity/semanticTests/modifiers/break_in_modifier.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f()]
+test/libsolidity/semanticTests/modifiers/continue_in_modifier.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f()]
+test/libsolidity/semanticTests/modifiers/function_modifier_calling_functions_in_creation_context.sol	lean-runtime	call does not elaborate: getData(): no imported function for getData(); available: [constructor(), f3(), f4()]
+test/libsolidity/semanticTests/modifiers/function_modifier_empty.sol	lean-runtime	call does not elaborate: f(): no imported function for f(); available: []
+test/libsolidity/semanticTests/modifiers/function_modifier_for_constructor.sol	lean-runtime	call does not elaborate: getData(): no imported function for getData(); available: [constructor()]
+test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/modifiers/function_modifier_library.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol	lean-runtime	runtime expectation mismatch: f()
+test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol	lean-runtime	runtime expectation mismatch: f(bool)
+test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times_local_vars.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [f(uint)]
+test/libsolidity/semanticTests/modifiers/function_modifier_multiple_times.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: [f(uint)]
+test/libsolidity/semanticTests/modifiers/function_modifier_overriding.sol	lean-runtime	call does not elaborate: f(): no imported function for f(); available: []
+test/libsolidity/semanticTests/modifiers/modifer_recursive.sol	lean-runtime	call does not elaborate: called(): no imported function for called(); available: [f(uint)]
+test/libsolidity/semanticTests/modifiers/return_does_not_skip_modifier.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f()]
+test/libsolidity/semanticTests/modifiers/return_in_modifier.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f()]
+test/libsolidity/semanticTests/modifiers/stacked_return_with_modifiers.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: [f()]
+test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/operators/shifts/bitwise_shifting_constantinople_combined.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/bitwise_shifting_constantinople.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/bitwise_shifting_constants_constantinople.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_cleanup_garbled.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_constant_left.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: []
+test/libsolidity/semanticTests/operators/shifts/shift_constant_right.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: []
+test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_negative_constant_left.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: []
+test/libsolidity/semanticTests/operators/shifts/shift_negative_constant_right.sol	lean-runtime	call does not elaborate: a(): no imported function for a(); available: []
+test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/shifts/shifts.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/operators/userDefined/all_possible_operators.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/all_possible_user_defined_value_types_with_operators.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/attaching_and_defining_operator_with_same_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/consecutive_operator_invocations.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/fixed_point_udvt_with_operators.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/multiple_operator_definitions_different_types_different_functions_separate_directives.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/multiple_operator_definitions_same_type_same_function_same_directive.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/operator_definition_shadowing_builtin_keccak256.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/operator_parameter_and_return_cleanup_between_calls.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/operator_parameter_cleanup.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/operator_precendence.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/operator_return_parameter_cleanup.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/operators/userDefined/unchecked_operators.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/optimizer/reassigned_reference_memory_alias_from_storage_minimal.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/optimizer/reassigned_reference_memory_alias.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/optimizer/reassigned_reference_storage_alias.sol	lean-runtime	call does not elaborate: a(uint256): no imported function for a(uint256); available: [g(uint,uint,uint,uint), rmw(uint,uint)]
+test/libsolidity/semanticTests/optimizer/shift_bytes.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/reverts/invalid_instruction.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/reverts/revert.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/state/gasleft.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/storage/accessors_mapping_for_array.sol	lean-runtime	call does not elaborate: data(uint256,uint256): no imported function for data(uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/storage/array_accessor.sol	lean-runtime	call does not elaborate: data(uint256): no imported function for data(uint256); available: [constructor()]
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/storage/simple_accessor.sol	lean-runtime	call does not elaborate: data(): no imported function for data(); available: [constructor()]
+test/libsolidity/semanticTests/storage/struct_accessor.sol	lean-runtime	call does not elaborate: data(uint256): no imported function for data(uint256); available: [constructor()]
+test/libsolidity/semanticTests/storageLayoutSpecifier/base_slot_max_value.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storageLayoutSpecifier/function_from_base_contract.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/getters.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inheritance_from_abstract_contract.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inheritance_from_interface.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inheritance_simple.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inheritance_state_variable_slot_offset.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inline_assembly_direct_load.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/inline_assembly_direct_store.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/last_allowed_storage_slot.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/multiple_inheritance_state_var_slots.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_arithmetic_expression.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_constant_and_immutable.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_enum.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_slot_offset.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storageLayoutSpecifier/storage_reference_inheritance.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/storageLayoutSpecifier/virtual_functions.sol	lean-runtime	solc_import: the initializers are left out: solidity.storageLayout: Logical typed paths intentionally omit slot arithmetic, packing and the physical storage address space.
+test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/lone_struct_array_type.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/memory_structs_nested.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/recursive_struct_2.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/recursive_structs.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/struct_delete_storage_small.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/struct_named_constructor.sol	lean-runtime	call does not elaborate: s(): no imported function for s(); available: [constructor()]
+test/libsolidity/semanticTests/structs/struct_reference.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/structs/struct_storage_to_memory_function_ptr.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/types/array_mapping_abstract_constructor_param.sol	lean-runtime	call does not elaborate: m(uint256,uint256,uint256): no imported function for m(uint256,uint256,uint256); available: [constructor()]
+test/libsolidity/semanticTests/types/mapping_abstract_constructor_param.sol	lean-runtime	call does not elaborate: m(uint256): no imported function for m(uint256); available: [constructor()]
+test/libsolidity/semanticTests/types/mapping_contract_key.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/types/mapping_enum_key_v2.sol	lean-runtime	call does not elaborate: get(uint8): no imported function for get(uint8); available: [get(enum E), set(enum E,uint8)]
+test/libsolidity/semanticTests/types/nested_tuples.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/underscore/as_function.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/uninitializedFunctionPointer/uninitialized_internal_storage_function_legacy.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/uninitializedFunctionPointer/uninitialized_internal_storage_function_via_yul.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/userDefinedValueType/constant.sol	lean-runtime	call does not elaborate: s(): no imported function for s(); available: []
+test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/userDefinedValueType/mapping_key.sol	lean-runtime	call does not elaborate: set(int256,int256): no imported function for set(int256,int256); available: [set(MyInt,int), set_unwrapped(int,int)]
+test/libsolidity/semanticTests/userDefinedValueType/storage_layout.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap_via_contract_name.sol	lean-runtime	call does not elaborate: f(uint256): no imported function for f(uint256); available: [f(C.T), g(uint), h(uint), i(C.T)]
+test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/variables/delete_local.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/variables/delete_locals.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/variables/mapping_local_tuple_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/variables/public_state_overridding.sol	lean-runtime	call does not elaborate: test(): no imported function for test(); available: [set()]
+test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol	lean-runtime	solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state
+test/libsolidity/semanticTests/various/byte_optimization_bug.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/code_access_padding.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/cross_contract_types.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/gasleft_decrease.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/inline_member_init_inheritence.sol	lean-runtime	call does not elaborate: getBMember(): no imported function for getBMember(); available: [constructor(), getDMember()]
+test/libsolidity/semanticTests/various/iszero_bnot_correct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/positive_integers_to_signed.sol	lean-runtime	call does not elaborate: x(): no imported function for x(); available: []
+test/libsolidity/semanticTests/various/single_copy_with_multiple_inheritance.sol	lean-runtime	call does not elaborate: getViaB(): no imported function for getViaB(); available: []
+test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/super_alone.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/super_parentheses.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/cleanup/comparison.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/comparison_functions.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/conditional/conditional_tuple.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/conversion/implicit_cast_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/conversion/implicit_cast_function_call.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/conversion/implicit_cast_local_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/dirty_memory_dynamic_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/dirty_memory_int32.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/dirty_memory_static_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/dirty_memory_struct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/dirty_memory_uint32.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/empty_return_corrupted_free_memory_pointer.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/exp_literals_success.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/exp_neg.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/local_tuple_assignment.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/mapping_enum_key_getter.sol	lean-runtime	call does not elaborate: table(uint8): no imported function for table(uint8); available: [set(enum test.E,uint8)]
+test/libsolidity/semanticTests/viaYul/memory_struct_allow.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/negation_bug.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/return_and_convert.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/simple_inline_asm.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/dirty_storage_bytes_long.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/dirty_storage_bytes.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/dirty_storage_dynamic_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/dirty_storage_static_array.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/dirty_storage_struct.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/storage/mappings.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/tuple_evaluation_order.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/various_inline_asm.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/viaYul/virtual_functions.sol	lean-runtime	call does not elaborate: f(): no imported function for f(); available: [f1(), f2(), f3(), g()]
+test/libsolidity/semanticTests/virtualFunctions/internal_virtual_function_calls_through_dispatch.sol	lean-runtime	frontend import gaps
+test/libsolidity/semanticTests/virtualFunctions/internal_virtual_function_calls.sol	lean-runtime	call does not elaborate: f(): no imported function for f(); available: [g()]
+test/libsolidity/semanticTests/virtualFunctions/virtual_function_calls.sol	lean-runtime	call does not elaborate: f(): no imported function for f(); available: [g()]

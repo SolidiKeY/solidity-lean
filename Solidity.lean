@@ -564,3 +564,4 @@ import Solidity.Calculus.ContractWorld
 import Solidity.Frontend.WorldImport
 import Solidity.Examples.Tactics.ContractWorld
 import Solidity.Examples.Tactics.ContractWorldSource
+import Solidity.Tools.Upstream
