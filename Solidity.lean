@@ -79,6 +79,7 @@ import Solidity.Calculus.TermAgree
 import Solidity.Calculus.TermEval
 import Solidity.Calculus.Logic
 import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.FilteredMembership
 import Solidity.Calculus.Preconditions
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms
@@ -210,6 +211,7 @@ import Solidity.Examples.Tactics.LexDiamond
 import Solidity.Examples.Preconditions
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.Tactics.FiniteSets
+import Solidity.Examples.Tactics.FilteredSets
 import Solidity.Examples.Tactics.LexAnnotations
 import Solidity.Examples.ContractTypes
 import Solidity.Examples.Chains.Storage

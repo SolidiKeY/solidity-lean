@@ -125,6 +125,7 @@ def SpecExpr.prec : SpecExpr → Nat
     | _ => 60
   | .imp .. => 25
   | .iff .. => 20
+  | .memberFilter .. => 50
   | .all .. | .ex .. => 0
   | .unop .. => 75
   | _ => 100
@@ -151,6 +152,8 @@ partial def SpecExpr.fmt : SpecExpr → String
   | .ex p x e => s!"\\exists {Ty.toStr (.prim p)} {x}; {SpecExpr.fmt e}"
   | .member p key items =>
     s!"\\in {Ty.toStr (.prim p)} ({SpecExpr.fmt key}; {", ".intercalate (items.map SpecExpr.fmt)})"
+  | .memberFilter p key x items guard =>
+    s!"{SpecExpr.fmt.at 51 key} \\in {Ty.toStr (.prim p)} ({x}; {", ".intercalate (items.map SpecExpr.fmt)}; {SpecExpr.fmt guard})"
 where
   /-- An operand where the grammar expects precedence `p`: parenthesised
   if it binds less tightly. -/

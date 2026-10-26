@@ -527,13 +527,35 @@ def specReadsName (name : String) : List String → Bool
     (!specBuiltinHead token rest && (token == name || token.startsWith (name ++ "."))) ||
       specReadsName name rest
 
-/-- Resolve only unshadowed literal names. Clauses with quantifiers or escaped
+/-- Count separators belonging to this parenthesis, including no nested ones. -/
+private def specParenSemicolons : Nat → List String → Nat
+  | _, [] => 0
+  | 0, ")" :: _ => 0
+  | depth + 1, ")" :: rest => specParenSemicolons depth rest
+  | depth, "(" :: rest => specParenSemicolons (depth + 1) rest
+  | 0, ";" :: rest => 1 + specParenSemicolons 0 rest
+  | depth, _ :: rest => specParenSemicolons depth rest
+
+/-- The filtered form has two outer separators, unlike prefix membership.
+This conservative lexical query only prevents substitution; the parser and
+typed compiler still validate the entire clause. -/
+def specHasFilteredMembership (text : String) : Bool :=
+  scan ((specTokens text).filter fun t => !t.toList.all Char.isWhitespace)
+where
+  scan : List String → Bool
+    | "\\" :: "in" :: _ :: "(" :: rest =>
+      decide (2 ≤ specParenSemicolons 0 rest) || scan rest
+    | _ :: rest => scan rest
+    | [] => false
+
+/-- Resolve only unshadowed literal names. Clauses with quantifiers, filters or escaped
 identifiers stay verbatim: resolving their binders needs the specification
 parser, including its comments. Parameters, returns and locals block a head;
 ambiguous aliases remain unresolved instead of choosing a declaration. -/
 def resolveSpecValues (format : Nat → String) (values : List (String × Nat)) (blocked : List String)
     (text : String) : String :=
   if text.contains '«' || text.contains '»' ||
+      specHasFilteredMembership text ||
       (text.splitOn "forall").length > 1 || (text.splitOn "exists").length > 1 then text else
   String.join (resolveSpecTokens format values blocked (specTokens text))
 
@@ -1634,6 +1656,8 @@ partial def loopSpec (j : Json) : PM String := do
   let mut out := ""
   for c in cs do
     let some t := c.getStr?.toOption | unsupported "a loop clause that is not text"
+    if specHasFilteredMembership t then
+      unsupported "filtered finite membership in a loop clause is not yet supported"
     -- a quantifier, `\forall T x; …`, reads as a loop clause of its own
     -- (`RawInv`); the rest of the specification language does not
     if t.contains '\\' && (!t.startsWith "invariant \\forall " ||

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Close
-import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.FilteredMembership
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.RefInputs
 import Solidity.Syntax.Elab
@@ -145,6 +145,11 @@ def SpecExpr.foldMap {α : Type} (leaf : α) (join : α → α → α) (here : S
     | some r => r
     | none => items.foldl (fun acc item => join acc (item.foldMap leaf join here))
         (key.foldMap leaf join here)
+  | e@(.memberFilter _ key _ items guard) =>
+    match here e with
+    | some r => r
+    | none => join (items.foldl (fun acc item => join acc (item.foldMap leaf join here))
+        (key.foldMap leaf join here)) (guard.foldMap leaf join here)
   | e@(.num _) | e@(.uintLit _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
 
 /-- Whether a node `here` picks out occurs, and what it says of it. -/
@@ -202,8 +207,27 @@ partial def layoutAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (k : 
   | _ => []
 
 /-- The names a clause reads. -/
-def SpecExpr.names : SpecExpr → List String :=
-  SpecExpr.foldMap [] (· ++ ·) fun | .name x => some [x] | _ => none
+def SpecExpr.names : SpecExpr → List String
+  | .name x => [x]
+  | .memberFilter _ key x items guard =>
+    key.names ++ items.flatMap SpecExpr.names ++ (guard.names.filter (· != x))
+  | .member _ key items => key.names ++ items.flatMap SpecExpr.names
+  | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => e.names
+  | .index a b | .binop _ a b | .imp a b | .iff a b => a.names ++ b.names
+  | .num _ | .uintLit _ | .bool _ | .result => []
+
+/-- A filtered domain is literal-only and intrinsically typed before lowering.
+Dynamic values, arithmetic expressions and ledger integers are not domains. -/
+def SpecExpr.domainLiteral (p : PrimTy) : SpecExpr → Except String p.Denote
+  | .num n => numLit (toString n) n p
+  | .uintLit n => do
+    unless p = .uint do throw "a fixed uint literal in a non-uint filtered domain"
+    numLit s!"uint({n})" n p
+  | .unop .neg (.num n) => numLit s!"-{n}" (-(Int.ofNat n)) p
+  | .bool b => match p with
+    | .bool => pure b
+    | _ => throw "a boolean literal in a non-bool filtered domain"
+  | _ => throw "a filtered membership domain requires primitive literals"
 
 /-- The layout premises of the state variables among `rs`: those the
 clauses read.  What only the body reads needs none: a read the program
@@ -364,7 +388,8 @@ partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := fa
       throw s!"operands of {BinOp.sym op} of types {pa'.toStr} and {pb'.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
     pure (.prim (op.ret p), .binop op ta tb)
-  | .imp .. | .iff .. | .all .. | .ex .. | .member .. => throw "a formula where a value is expected"
+  | .imp .. | .iff .. | .all .. | .ex .. | .member .. | .memberFilter .. =>
+    throw "a formula where a value is expected"
 
 /-- Select the ledger context from the operands' result shapes, then compile
 each operand once. A ledger read resets its address operand's context without
@@ -428,6 +453,16 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
       let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
       let values : List (Tm C Γ.ctx (.val p)) ← terms.mapM fun t => t.check (.val p) Γ
       pure (Fml.finiteMember value values)
+  | .memberFilter p key x items guard => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
+    let (_, keyTerm) ← key.term C ctx
+    let values : List p.Denote ← items.mapM (SpecExpr.domainLiteral p)
+    let guardFml ← guard.fml { ctx with locals := (x, p) :: ctx.locals }
+    pure fun Γ => do
+      -- Check the key before extending its scope, even when the domain is empty.
+      let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
+      let predicate ← guardFml ((.ofName x, .val p) :: Γ)
+      pure (Fml.filteredMember (.ofName x) value values predicate)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.fml ctx.old
@@ -691,10 +726,10 @@ macro "sol_spec_prep" : tactic => `(tactic|
    -- state: every premise introduced, every conjunct its own goal
    all_goals (repeat' (first | intro _ | apply And.intro))))
 
-/-- The last step of `sol_spec_close`: `omega` or `grind`, `grind`'s
-instantiation bounded, since the layout premises are quantified. -/
+/-- Arithmetic, then the existing bounded KeY `allLeft` fallback or bounded
+`grind`. Every chosen universal instance is a checked proof application. -/
 macro "sol_spec_finish" : tactic => `(tactic|
-  first | omega | grind (gen := 3))
+  first | omega | (sol_close_all; first | omega | grind (gen := 3)) | grind (gen := 3))
 
 /-- The closing half of `sol_spec`: `sol_spec_prep`, then `sol_spec_finish`
 on every goal. -/

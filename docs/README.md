@@ -8,6 +8,7 @@ the others link to it.
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature-family audit, Solidity relevance, existing support, semantic differences, remaining work and offline evidence checks. |
 | [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Well-founded scoped loop termination, typed finite membership, and certified precondition audits in Lean, the CLI and editor. |
+| [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Typed finite literal filters, outer key scope, snapshots, source capture handling and semantic boundaries. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
 | [feature-work/aggregates.md](feature-work/aggregates.md) | Inline arrays, fixed memory snapshots, local reference tuples, slice effects and validation limits. |
 | [feature-work/recursive-types.md](feature-work/recursive-types.md) | Guarded type graphs and checked standalone storage foundation; ordinary interpreter integration remains pending. |

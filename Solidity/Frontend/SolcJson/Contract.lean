@@ -416,7 +416,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       fun names text => if names.any (fun (a, b) => a != b) then
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
-    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default) :
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
+    (readsSpec : String → String → List String → String → Except String Bool :=
+      fun name _ bound text => .ok (!bound.contains name && specReadsName name (specTokens text))) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -882,10 +884,17 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         if let .error reason := fspecResult then
           throw (.unsupported reason (J.line f))
       if testing then
-        if let some (name, gap) := droppedNames.find? fun (name, _) =>
-            !(parameters.any fun p => J.str? p "name" == some name) &&
-              resolvedSpec.any fun clause => specReadsName name (specTokens clause.text) then
-          throw (.unsupported s!"its specification reads omitted state variable `{name}`: {gap.msg}" (J.line f))
+        for (name, gap) in droppedNames do
+          for clause in resolvedSpec do
+            -- Keep unrelated omitted declarations on the cheap lexical path.
+            if !specReadsName name (specTokens clause.text) then continue
+            -- Preserve the existing parameter exemption. Named returns are
+            -- deliberately not an exemption: `old` disables their scope.
+            let bound := J.varDeclNames parameters
+            let reads ← (readsSpec name clause.kind bound clause.text).mapError
+              fun reason => Gap.unsupported reason (J.line f)
+            if reads then
+              throw (.unsupported s!"its specification reads omitted state variable `{name}`: {gap.msg}" (J.line f))
       if testing && ((keyClauses (docText f)).toOption.getD []).any (·.kind == "invariant") then
         throw (.unsupported "function-level invariant: put invariants on the contract" (J.line f))
       if let some m := refused then throw (.unsupported m (J.line f))

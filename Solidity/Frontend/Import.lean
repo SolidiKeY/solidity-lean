@@ -305,6 +305,13 @@ private partial def escapeSpecBindings (names : List String) : List String → L
 
 private partial def renameSpecSyntax (params rets : List (String × String)) (stx : Syntax) : Syntax :=
   match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    -- The key and domain remain outside the guard's binder scope.
+    let bound := x.getId.toString false
+    let key' := renameSpecSyntax params rets key
+    let guard' := renameSpecSyntax (params.filter (·.1 != bound)) (rets.filter (·.1 != bound)) guard
+    let items' := items.elemsAndSeps.map (renameSpecSyntax params rets)
+    stx.setArg 0 key' |>.setArg 7 (stx[7].setArgs items') |>.setArg 9 guard'
   | `(spec_expr| \forall $T:ident $x:ident; $body) =>
     let _ := T
     stx.setArg (stx.getNumArgs - 1)
@@ -422,6 +429,9 @@ private partial def specFeatures (bound : List String) (stx : Syntax) : List Sou
   let uses (root member : String) :=
     if bound.contains root then [] else (specEnvironment root member).map (⟨·, 0⟩)
   match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    specFeatures bound key ++ items.elemsAndSeps.toList.flatMap (specFeatures bound) ++
+      specFeatures ((x.getId.toString false) :: bound) guard
   | `(spec_expr| \forall $_T:ident $x:ident; $body) =>
     specFeatures ((x.getId.toString false) :: bound) body
   | `(spec_expr| \exists $_T:ident $x:ident; $body) =>
@@ -445,6 +455,34 @@ private partial def specFeatures (bound : List String) (stx : Syntax) : List Sou
     | root :: member :: _ => uses root member
     | _ => []
   | _ => stx.getArgs.toList.flatMap (specFeatures bound)
+
+/-- Free root-name reads in parsed specifications. Binder scope applies to
+the guard only; member labels are not root reads. -/
+partial def specReadsFreeName (name : String) (bound : List String) (stx : Syntax) : Bool :=
+  let reads (x : Ident) :=
+    let root := (x.getId.components.map (·.toString false)).headD ""
+    root == name && !bound.contains root
+  match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    specReadsFreeName name bound key ||
+      items.elemsAndSeps.any (specReadsFreeName name bound) ||
+      specReadsFreeName name ((x.getId.toString false) :: bound) guard
+  | `(spec_expr| \forall $_T:ident $x:ident; $body) =>
+    specReadsFreeName name ((x.getId.toString false) :: bound) body
+  | `(spec_expr| \exists $_T:ident $x:ident; $body) =>
+    specReadsFreeName name ((x.getId.toString false) :: bound) body
+  | `(spec_expr| $a:spec_expr.$_f:ident) => specReadsFreeName name bound a
+  | `(spec_expr| $x:ident) => reads x
+  | `(spec_loc| $a:spec_loc.$_f:ident) => specReadsFreeName name bound a
+  | `(spec_loc| $x:ident) => reads x
+  | _ => stx.getArgs.any (specReadsFreeName name bound)
+
+private def readsSpecification (env : Environment) (sourceNames : List String)
+    (name kind : String) (bound : List String) (text : String) : Except String Bool := do
+  unless ["requires", "ensures", "invariant", "assignable"].contains kind do return false
+  let escaped := String.join (escapeSpecBindings sourceNames (specTokens text))
+  let parsed ← Parser.runParserCategory env `sol_member s!"{kind} {escaped};"
+  pure (specReadsFreeName name bound parsed)
 
 private def scanSpecifications (env : Environment) (sourceNames : List String)
     (request : Source.AdmissionRequest) : Source.ScopeScan :=
@@ -527,7 +565,8 @@ def elabSolcImport : CommandElab := fun stx => do
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }))
+        specifications := [(bound, "/// @custom:key " ++ text)] })
+    (readsSpecification env sourceNames))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
