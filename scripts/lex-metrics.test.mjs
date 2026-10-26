@@ -12,10 +12,8 @@ test('tuple annotations preserve ordinary safety proofs and do not claim automat
   const report = runSolidityTests([source],{build:false,contract:'LexMetrics'});
   assert.deepEqual(report.errors,[]);
   const rows = new Map(report.results.map(row => [row.function,row]));
-  for (const name of ['resetInner','triple','forScope','doWhileLoop','breakLoop','continueLoop','renamed','nested','earlyReturn'])
+  for (const name of ['resetInner','triple','forScope','doWhileLoop','breakLoop','continueLoop','renamed','shadowed','nested','earlyReturn'])
     assert.equal(rows.get(name)?.status,'proved',`${name}: ${rows.get(name)?.reason}`);
-  assert.equal(rows.get('shadowed')?.status,'unsupported');
-  assert.match(rows.get('shadowed')?.reason,/already declared/);
   assert.equal(rows.get('diamondStillOpen')?.status,'pending');
   assert.equal(rows.get('callback')?.status,'proved');
   assert.equal(testsPassed(report),false);
@@ -23,7 +21,7 @@ test('tuple annotations preserve ordinary safety proofs and do not claim automat
 
 test('every malformed or effectful tuple component remains an explicit import gap', () => {
   const report = runSolidityTests([source],{build:false,contract:'InvalidLexMetrics'});
-  const names = ['wrongType','badSecond','badThird','unknown','nestedTuple','effect','cast','empty','trailing','duplicate','noInvariant','conflicting'];
+  const names = ['schemaEscape','wrongType','badSecond','badThird','unknown','nestedTuple','effect','cast','empty','trailing','duplicate','noInvariant','conflicting'];
   for (const name of names) {
     const row = report.results.find(row => row.function === name);
     assert.ok(row,`${name}: missing result`);
@@ -67,6 +65,7 @@ example : (tupleTextsP Imported.LexMetrics.doWhileLoop).map List.length = [2] :=
 example : (tupleTextsP Imported.LexMetrics.breakLoop).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.continueLoop).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.renamed).map List.length = [2] := by decide +kernel
+example : (tupleTextsP Imported.LexMetrics.shadowed).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.nested).map List.length = [2, 2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.earlyReturn).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.callback).map List.length = [2] := by decide +kernel

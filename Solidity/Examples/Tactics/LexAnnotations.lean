@@ -14,6 +14,22 @@ namespace Solidity.Examples.Tactics.LexAnnotations
 
 open scoped Scoped
 
+open scoped Schema in
+/-- A symbolic tuple on `while (cond) body` reconstructs the exact erasure rule.
+The replacement's bare invariant uses the existing scalar `dec` schema slot. -/
+example {C : Contract} {Γ Γb : Ctx} {k n : Nat} {m : Modality}
+    {inv cond : Val C Γ .bool} {metrics : LoopMetrics C Γ (n + 2)}
+    {brk : Bool} {qs : List (LoopQ C Γ)} {body : Prog C Γ Γb} :
+    let dec : Option (Val C Γ .uint) := none
+    dl[LeanTaclet C k]{ ⟨[
+      /// @custom:key invariant inv
+      /// @custom:key decreases ‹metrics›
+      while (cond) body;
+    ]⟩ ⇝ ⟨[
+      /// @custom:key invariant inv
+      while (cond) body;
+    ]⟩ } := LeanTaclet.loopLexErase
+
 def Counter : Contract := contract!{ uint n; }
 local instance : InContract := ⟨Counter⟩
 

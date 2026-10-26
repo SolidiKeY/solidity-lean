@@ -636,11 +636,15 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
           let some rest ← components tail | return none
           return some (#[head] ++ rest)
         | _ => return none
-      let some metrics ← components metrics | escape
-      if metrics.size < 2 then return ← escape
-      let first ← ppExprS ns metrics[0]!
-      let rest ← liftM <| metrics[1:].toArray.mapM (ppExprS ns)
-      let mut w ← clause "decreases" (← `(sol_expr| ($first:sol_expr, $(Syntax.TSepArray.ofElems rest),*))) w
+      let decrease : TSyntax `sol_expr ← match ← components metrics with
+        | some values =>
+          if values.size < 2 then `(sol_expr| ‹$(← escapeTerm metrics):term›)
+          else do
+            let first ← ppExprS ns values[0]!
+            let rest ← liftM <| values[1:].toArray.mapM (ppExprS ns)
+            `(sol_expr| ($first:sol_expr, $(Syntax.TSepArray.ofElems rest),*))
+        | none => `(sol_expr| ‹$(← escapeTerm metrics):term›)
+      let mut w ← clause "decreases" decrease w
       if let some qs ← listElems? qs then
         for q in qs.reverse do
           let_expr LoopQ.all _ _ x p b := (← whnf q) | return ← escape

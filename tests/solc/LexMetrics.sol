@@ -126,6 +126,12 @@ contract LexTarget {
 }
 
 contract InvalidLexMetrics {
+    function schemaEscape() public pure {
+        /// @custom:key invariant true
+        /// @custom:key decreases ‹LoopMetrics.nil›
+        while (false) {}
+    }
+
     function wrongType(bool flag) public pure {
         /// @custom:key invariant true
         /// @custom:key decreases (flag, 0)
