@@ -502,6 +502,12 @@ TestSuite build's log).  It failed on one pending obligation until the symbolic 
   declaration's count since its start.  `bitAndSymbolic` and
   `invariantForBreakSkipsUpdate` and `invariantQuantifiedOverPrefix`
   (`TestSuite/Derived20.lean`).
+* Leaf classification (`Derive.searchLeaf`, `Seq.goalFits`) also gets its own
+  inherited heartbeat budget before the closing attempts. Earlier checked
+  leaves can spend the enclosing command's budget; the next leaf must still
+  be classified under the same fresh cap as its own attempts. If classification
+  fails, the search skips reduction and tries the existing conservative closers.
+  Proof construction, kernel checking and replay accounting are unchanged.
 * `sol_close`: the write facts and reads are skipped past 10 M heartbeats
   on a leaf past a `{havoc}` (`sol_close_saturate`, `sol_skip_after`; a
   budget is `Core.Context.maxHeartbeats`, not the option), so an

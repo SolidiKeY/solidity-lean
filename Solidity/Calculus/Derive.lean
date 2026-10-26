@@ -64,13 +64,16 @@ def leafTacs (small : Bool := true) : Array (Array String) :=
 
 /-- The first of `leafTacs` that closes the leaf `l`, with the raw
 heartbeats it used; `none` when none does.  Each try runs with its own
-heartbeats and its state rolled back when it fails.  A leaf past the
+heartbeats and its state rolled back when it fails. Classification has its
+own budget too: an earlier checked walk or leaf must not spend the next
+leaf's budget before its first reduction. A leaf past the
 closer's bounds (`fits`, the scoped leaf's `Seq.goalFits`,
 `Calculus/ProvesDerive.lean`) is not reduced. -/
 def searchLeaf (l : MVarId) (fits : MVarId → MetaM Bool) :
     TacticM (Option (Array String × Nat)) := do
   let env ← getEnv
-  for src in leafTacs (← fits l) do
+  let small ← tryCatchRuntimeEx (withCurrHeartbeats (fits l)) fun _ => pure false
+  for src in leafTacs small do
     let t ← src.mapM fun line =>
       match Parser.runParserCategory env `tactic line with
       | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
