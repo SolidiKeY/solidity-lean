@@ -2,8 +2,9 @@
 
 How to take the language inventory (`docs/solidity-features.json`,
 `docs/solidity-feature-inventory.md`) from mostly `partial` to `present`,
-step by step, each step one cloud VM: 16 GB of RAM, several hours, a fresh
-clone of `origin/master`, one branch, one reviewable patch.
+in parallel: each step is one cloud VM (16 GB of RAM, several hours, a
+fresh clone of `origin/master`, one branch, one reviewable patch), and every
+step of a wave runs at the same time.
 
 The yardstick is the upstream corpus (`docs/solidity-upstream-tests.md`): a
 step is done when its fixtures agree in every pipeline they require, with
@@ -32,8 +33,8 @@ prompts in `tests/cloud/prompts/`) on 632 of those rows: the via-IR modifier
 mismatches, getters and entry points, operator aliases, signed arithmetic,
 function values and dispatch, structs and libraries, tuples and
 references, declarations and scopes, transient storage, and ABI vectors
-with revert data. **This plan starts after their patches are merged**; step
-0 measures what they left.
+with revert data. **This plan starts after their patches are merged**; each
+step reproduces its own rows first, so it sees what they left.
 
 ## Rules every step follows
 
@@ -47,10 +48,13 @@ with revert data. **This plan starts after their patches are merged**; step
   the log for `error`. A cold clone has no Lake artifact cache: the
   environment's setup script should build the default targets once, so a
   step starts warm (step 0 measures the cold time).
-- **Core edits are serial.** A step that edits `Syntax`, `Semantics`,
-  `Rules` or `Decide` rebuilds everything above them and conflicts with
-  every other core step: at most one such step runs at a time (the `core`
-  column below). Front-end, harness and closer steps run in parallel.
+- **Parallel without conflicts.** Every step of a wave starts from the same
+  master. A step that edits the core (`Syntax`, `Semantics`, `Rules`,
+  `Decide`: the `core` column) keeps its change additive and in modules of
+  its own, and touches the shared types (`State`, `THalt`, `Stmt`) only
+  through what step H added. Shared front-end files (`Frontend/SolcJson/`)
+  get narrow edits, listed in the hand-off. Each VM has its own RAM, so the
+  local limit of two Lean agents does not apply across VMs.
 - **Soundness.** A new `Stmt` constructor needs its rule and soundness proof
   in the same step (`Stmt.step` has one rule per statement). Until a
   feature's rules are proved, the elaborator refuses it with a named gap.
@@ -66,9 +70,12 @@ with revert data. **This plan starts after their patches are merged**; step
   touched the core. Then a read-only finder and skeptic review, the inventory
   row updated (`scripts/solidity-feature-audit.py`), and the feature's doc
   updated in place: what works, what is refused and why, what is left.
-- **Hand-off.** Per-fixture before/after, commands, pipelines, axioms,
-  build time and peak memory, what is left. The coordinator merges, runs
-  the combined build and pushes to master.
+- **Hand-off and merging.** Per-fixture before/after, commands, pipelines,
+  axioms, build time and peak memory, what is left. Steps merge as they
+  finish, in finish order: before its final gates a core step rebases on
+  the master of that moment; the coordinator merges, runs the combined
+  build and pushes. A step that does not finish in its VM hands off what
+  it has and its rest goes to the next wave.
 
 ## Decisions for the user
 
@@ -81,37 +88,43 @@ alone:
   unblocks part of the 334 host rows. Recommended: yes.
 - **D2. Observable logs.** Events run their arguments but the log is
   erased. Making logs observable (a trace in the state) lets specs talk about
-  events and unblocks the `~ emit` rows. Recommended: yes, after step 6.
+  events and unblocks the `~ emit` rows. Recommended: yes.
 - **D3. Assembly, `delegatecall`, gas, physical layout** stay excluded: they
   need a Yul or EVM layer (`docs/solc-validation.md` I), a separate project.
 
 ## Steps
 
-`core`: edits the core, runs alone. Hours are a guess for one VM; step 0
-replaces them with measured times.
+Three waves. Every step of a wave runs at once, each on its own VM; a wave
+starts when the steps it needs are merged. `core`: edits the core (merged
+with a rebase, see above).
 
-| # | Step | Inventory rows | core | needs |
+| # | Step | Inventory rows | core | wave |
 |---|---|---|---|---|
-| 0 | Baseline | all | no | groups merged |
-| 1 | Entry points left | `publicGetters`, `receiveFunction`, `fallbackFunction`, `overrideDeclarations` | no | 0 |
-| 2 | Imports and source units | `imports`, `sourceUnits`, `usingFor`, `errorDeclarations` | no | 0 |
-| 3 | Expressions and references left | `tupleExpressions`, `conditional`, `rangeAccess`, `implicitConversions`, `shifts` | no | 0 |
-| 4 | Panic codes and revert data | `panicCodes`, `revertPayloads`, `revertStatement` | yes | 0 |
-| 5 | Environment (D1) | `blockNumber`, `blockChainid`, … `txOrigin`, `blockhashBuiltin` | yes | 4, D1 |
-| 6 | Contract world | `newContract`, `creationTry`, `externalLibraryCalls`, `externalTypedCalls` | yes | 5 |
-| 7 | Recursive types | `recursiveTypes`, `structTypes` | yes | 6 |
-| 8 | Transient state, rest | `transientState` | yes | 6, group 09 |
-| 9 | Logs (D2) | `emitStatement`, `eventDeclarations` | yes | 6, D2 |
-| 10 | Revert-outcome modality | `revertPayloads`, `catchClauses` | no | 4 |
-| 11 | Diamond calls | `tryStatement`, `sendTransfer`, `callbackSemantics` | no | 6 |
-| 12 | Specs, loops, callbacks left | `whileStatement`, `forStatement`, `staticCallRestriction` | no | 6 |
-| 13 | Closer gaps | (automation) | no | user's go on M7-next |
-| 14 | Generated differential tests | all | no | 3 |
-| 15 | solkey re-pin | — | no | — |
+| 0 | Baseline | all | no | 0 |
+| H | Core hooks | — | yes | 0 |
+| 1 | Entry points left | `publicGetters`, `receiveFunction`, `fallbackFunction`, `overrideDeclarations` | no | 1 |
+| 2 | Imports and source units | `imports`, `sourceUnits`, `usingFor`, `errorDeclarations` | no | 1 |
+| 3 | Expressions and references left | `tupleExpressions`, `conditional`, `rangeAccess`, `implicitConversions`, `shifts` | no | 1 |
+| 4 | Panic codes and revert data | `panicCodes`, `revertPayloads`, `revertStatement` | yes | 1 |
+| 5 | Environment (D1) | `blockNumber`, `blockChainid`, … `txOrigin`, `blockhashBuiltin` | yes | 1 |
+| 6 | Contract world | `newContract`, `creationTry`, `externalLibraryCalls`, `externalTypedCalls` | yes | 1 |
+| 7 | Recursive types | `recursiveTypes`, `structTypes` | yes | 1 |
+| 8 | Transient state, rest | `transientState` | yes | 1 |
+| 9 | Logs (D2) | `emitStatement`, `eventDeclarations` | yes | 1 |
+| 12 | Specs, loops, callbacks left | `whileStatement`, `forStatement`, `staticCallRestriction` | no | 1 |
+| 13 | Closer gaps | (automation) | no | 1, on the user's go |
+| 14 | Generated differential tests | all | no | 1 |
+| 15 | solkey re-pin | — | no | 1 |
+| 10 | Revert-outcome modality | `revertPayloads`, `catchClauses` | no | 2 (after 4) |
+| 11 | Diamond calls | `tryStatement`, `sendTransfer`, `callbackSemantics` | no | 2 (after 6) |
+| R | Rerun and second pass | all | — | 2 |
 
-### 0. Baseline
+Wave 0 is two VMs for a few hours, wave 1 up to fourteen, wave 2 three plus
+whatever wave 1 left. Step 0 replaces the hour guesses with measured times.
 
-Merge state check: which of the ten groups' patches landed. Rerun the whole
+### 0. Baseline and H. Core hooks
+
+**0. Baseline.** Merge state check: which of the ten groups' patches landed. Rerun the whole
 upstream corpus on master (`docs/solidity-upstream-tests.md`, "Reproduce"),
 into a new results directory, keeping the historical one. Add a `gap` field
 to each `partial` row of `docs/solidity-features.json`: the concrete shape
@@ -119,6 +132,14 @@ still refused or unproved, taken from the fixtures' `variants[].gaps` and
 from the "Left" section of the feature's doc. Measure a cold and a warm
 `./run-lean.sh` on the VM and write the times here. Output: the next steps'
 fixture lists, regenerated from the new results. No Lean edits.
+
+**H. Core hooks.** The one core change wave 1 builds on, so its core steps
+do not edit the same declarations: `THalt`'s panic and revert outcomes carry
+a code and bytes (default empty, read by nothing yet); the state's
+environment record has room for the block and transaction fields (after
+D1) and a log (after D2). Every match over them is updated once, here.
+Warn first if this slows checking (`git log` for earlier speed changes);
+`./run-lean.sh` before and after, with the times.
 
 ### 1–3. Front end
 
@@ -141,12 +162,12 @@ the elaborator's. They run in parallel; keep shared edits to
 
 ### 4–9. Core semantics
 
-One at a time, in this order. Each adds the semantics, its elaborator and
+In parallel, each in modules of its own on top of step H. Each adds the semantics, its elaborator and
 import support, its rules with soundness, and the tests. Closer support
 can stay with the step or go to its own step.
 
-4. **Panic codes and revert data**: `THalt` carries the panic code and the
-   revert bytes, so the 85 revert-data rows and the 49 `revertStrings` rows
+4. **Panic codes and revert data**: the run fills the code and bytes step H
+   gave `THalt`, so the 85 revert-data rows and the 49 `revertStrings` rows
    can be compared; `0x41` on a too-long allocation; the length bound
    `2^64` (`docs/solc-alignment.md`, "Remaining deltas";
    `docs/semantic-gaps.md`, "Revert data"). Rules keep reading only the
@@ -190,6 +211,11 @@ can stay with the step or go to its own step.
     "Still open").
 13. **Closer gaps**: the six pinned `DecisionTheorem` gaps and M7-next
     (`docs/automation.md`). Only on the user's go.
+
+### R. Rerun and second pass
+
+After wave 1 merges: rerun the upstream corpus and the inventory audit on
+master, then one VM per step that handed off a rest.
 
 ### 14–15. Validation
 
