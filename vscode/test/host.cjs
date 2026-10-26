@@ -241,8 +241,8 @@ contract FilteredHost {
         assert.ok(item.range.isEqual(declarationRange));
         const rowHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', filteredDocument.uri, new vscode.Position(line, 20));
         assert.ok(rowHovers.some(hover => hover.range?.isEqual(declarationRange) && hover.contents.some(content => {
-          const text = content.value || String(content);
-          return text.includes(name) && text.includes(status);
+          const text = (content.value || String(content)).replace(/&nbsp;/g, ' ');
+          return text.includes(name) && text.includes(`: ${status}`);
         })), `${name}: actual hover provider retains its own status and source range`);
         assert.ok(rowHovers.every(hover => hover.contents.every(content =>
           !/certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))));
