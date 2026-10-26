@@ -98,6 +98,26 @@ async function run() {
       assert.equal(auditDiagnostics[0].code, 'preconditions-impossible');
       assert.match(auditDiagnostics[0].message, /vacuous/);
       checks.push('real impossible entry certificate', 'real possible entry certificate', 'vacuous proof diagnostic');
+      const witnessSource = join(root, 'ModelWitness.sol');
+      writeFileSync(witnessSource, 'pragma solidity ^0.8.34;\ncontract ModelWitness {\n/// @custom:key requires x == 2\n/// @custom:key ensures false\nfunction wrong(uint x) public pure {}\n}\n');
+      await config.update('auditPreconditions', false, vscode.ConfigurationTarget.Global);
+      await config.update('counterexamples', true, vscode.ConfigurationTarget.Global);
+      const witnessDocument = await vscode.workspace.openTextDocument(witnessSource);
+      await vscode.window.showTextDocument(witnessDocument);
+      const witnessed = await api.verify(witnessDocument);
+      assert.deepEqual(witnessed.errors, []);
+      const wrong = witnessed.results.find(row => row.function === 'wrong');
+      assert.equal(wrong.status, 'refuted');
+      assert.equal(wrong.counterexample.arguments[0].value, '2');
+      assert.equal(wrong.counterexample.arguments[0].sourceName, 'x');
+      assert.match(wrong.counterexample.certificateDeclaration, /refuted$/);
+      const modelDiagnostic = vscode.languages.getDiagnostics(witnessDocument.uri).find(d => d.code === 'refuted');
+      assert.equal(modelDiagnostic.severity, vscode.DiagnosticSeverity.Error);
+      assert.equal(modelDiagnostic.range.start.line, 4);
+      const modelHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', witnessDocument.uri, new vscode.Position(4, 15));
+      assert.ok(modelHovers.some(hover => hover.contents.some(content => /certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))),
+        JSON.stringify({hovers:modelHovers,rows:witnessed.results.map(row => ({status:row.status,sourceId:row.sourceId,range:row.range}))}));
+      checks.push('real exact-goal refutation certificate', 'real model argument source mapping', 'real model diagnostic and hover');
     }
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {

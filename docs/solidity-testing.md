@@ -9,6 +9,7 @@ node scripts/test-solidity.mjs --json path/to/test-directory
 node scripts/test-solidity.mjs --contract Test --function example path/to/Test.sol
 node scripts/test-solidity.mjs --list path/to/test-directory
 node scripts/test-solidity.mjs --audit-preconditions path/to/Contract.sol
+node scripts/test-solidity.mjs --counterexamples path/to/Contract.sol
 ```
 
 Directories are recursive, sorted and deduplicated. Every source is compiled
@@ -57,6 +58,7 @@ reading. See [correctness.md](correctness.md) for public `Spec` correctness.
 | Result | Meaning |
 |---|---|
 | `proved` | Kernel-checked proof, using only Lean's standard three axioms. |
+| `refuted` | Opt-in, exact-goal kernel-checked refutation with the same candidate's model prestate. |
 | `pending` | Ordinary open proof goals; no claim of falsity. Runtime and budget failures are errors. |
 | `skipped` / `skip` | Explicit NatSpec skip tag. |
 | `internal` | Internal helper; no independent obligation. |
@@ -100,7 +102,7 @@ The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from
 `scripts/test-solidity.mjs`. It is synchronous. The options are `contract`,
 `function`, `list`, `timeoutMs`, `solkey`, `soljson`, `build`, `batchSize`,
-`onProgress`, `renaming` and `auditPreconditions`. A function selector may be a source name (all its
+`onProgress`, `renaming`, `auditPreconditions` and `counterexamples`. A function selector may be a source name (all its
 overloads) or its source signature (one overload). Reports retain source types
 before enum, address or value-type lowering.
 
@@ -111,6 +113,17 @@ postconditions. Audited rows add `preconditions` and `preconditionReason`;
 Plain functions report `notApplicable`. Listing and auditing cannot be combined.
 The [verification notes](feature-work/dafny-verification.md) describe the
 certificates, finite-membership syntax and exact limits.
+
+`counterexamples: true` (`--counterexamples`) searches ordinary pending,
+specified functions with primitive inputs and storage under the internal
+`Fml.Valid` reading. An accepted candidate adds `counterexample` and changes the
+status to `refuted` only after the exact tested goal's negation is retained as a
+kernel-checked theorem using standard axioms. The report preserves decimal
+strings for integers and exact source argument names when available. A refuted
+suite fails. Unsupported callback, recursive, reference-storage and plain
+obligations stay pending; an inconclusive search supplies no evidence. Listing
+cannot request counterexamples. These are typed model prestates, with no
+constructor-reachability or transaction-replay claim.
 
 For an existing solc fixture, the Lean entry point is:
 

@@ -30,6 +30,7 @@
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/Spec.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/FiniteSets.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Preconditions.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/SourceCounterexample.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/SolSpec.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/Derive.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Chains/Arithmetic.lean" },

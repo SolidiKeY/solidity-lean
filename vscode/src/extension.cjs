@@ -181,7 +181,10 @@ function createExtension(vscode, context, backend = runBackend) {
     vscode.workspace.onDidCloseTextDocument(doc => clear(doc.uri)),
     vscode.languages.registerHoverProvider({ scheme: 'file', pattern: '**/*.sol' }, {
       provideHover(doc, position) {
-        const row = reports.get(key(doc.uri))?.results.find(row => toRange(model.rangeOf(row)).contains(position));
+        const matches = reports.get(key(doc.uri))?.results.filter(row => toRange(model.rangeOf(row)).contains(position));
+        // A synthesized constructor spans the contract. Prefer the function
+        // declaration under the cursor to that broader deployment result.
+        const row = matches?.find(row => Number.isSafeInteger(row.sourceId) && row.sourceId >= 0) || matches?.[0];
         if (!row) return null;
         const markdown = new vscode.MarkdownString();
         markdown.appendText(model.detail(row));

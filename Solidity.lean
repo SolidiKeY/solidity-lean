@@ -197,6 +197,7 @@ import Solidity.Calculus.TermLib
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.Termination
 import Solidity.Examples.Preconditions
+import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.Tactics.FiniteSets
 import Solidity.Examples.ContractTypes
 import Solidity.Examples.Chains.Storage
@@ -384,6 +385,7 @@ import Solidity.Tools.Taclet
 import Solidity.Tools.DiffTest
 import Solidity.Tools.LazyStorage
 import Solidity.Tools.Counterexample
+import Solidity.Tools.SourceCounterexample
 import Solidity.Tools.Preconditions
 import Solidity.Calculus.DeclarationFacts
 import Solidity.Calculus.ReadRealization

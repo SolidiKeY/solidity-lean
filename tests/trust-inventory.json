@@ -685,11 +685,6 @@
     "code": "let k \u2190 liftTermElabM <| unsafe evalExpr (Option (Nat \u00d7 Nat)) (mkApp (mkConst ``Option [0])"
   },
   {
-    "file": "Solidity/Semantics/Heap.lean",
-    "kind": "opaque",
-    "code": "opaque ecrecoverKey : Nat \u2192 Nat \u2192 Nat \u2192 Nat \u2192 Nat"
-  },
-  {
     "file": "Solidity/Semantics/Run.lean",
     "kind": "override",
     "code": "@[implemented_by runImpl']"
@@ -945,11 +940,6 @@
     "code": "let C \u2190 unsafe evalExpr Contract (Lean.mkConst ``Contract) cE"
   },
   {
-    "file": "Solidity/Tools/Counterexample.lean",
-    "kind": "unsafe",
-    "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) ty \u03c6E"
-  },
-  {
     "file": "Solidity/Tools/Elementary.lean",
     "kind": "unsafe",
     "code": "let rows \u2190 unsafe Chain.evalQuoted (List (Option (Expr \u00d7 Expr))) ty"
@@ -1028,5 +1018,140 @@
     "file": "Solidity/Evm/Machine.lean",
     "kind": "override",
     "code": "@[implemented_by loopImpl]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Tm.substEM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Tm.strictReadsM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Tm.normM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Stmt.symM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Prog.symM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Tm.valOnlyM]"
+  },
+  {
+    "file": "Solidity/Calculus/CallSummary.lean",
+    "kind": "override",
+    "code": "@[implemented_by Prog.hasCallM]"
+  },
+  {
+    "file": "Solidity/Calculus/MemRead/Spine.lean",
+    "kind": "override",
+    "code": "@[implemented_by LTm.peelM]"
+  },
+  {
+    "file": "Solidity/Examples/SourceCounterexample.lean",
+    "kind": "unsafe",
+    "code": "let quotedValues \u2190 unsafe evalExpr (List (Var \u00d7 Semantics.CallValue))"
+  },
+  {
+    "file": "Solidity/Examples/Tactics/PolySize.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Nat (mkConst ``Nat) (\u2190 mkAppM ``Fml.tmSize #[ty.appArg!])"
+  },
+  {
+    "file": "Solidity/Frontend/Testing.lean",
+    "kind": "unsafe",
+    "code": "tryCatchRuntimeEx (unsafe evalExpr Bool (mkConst ``Bool) e) fun _ => pure true"
+  },
+  {
+    "file": "Solidity/Semantics/RunAccel.lean",
+    "kind": "override",
+    "code": "@[implemented_by Stmt.runAC]"
+  },
+  {
+    "file": "Solidity/Semantics/RunAccel.lean",
+    "kind": "override",
+    "code": "@[implemented_by Prog.runAC]"
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Values.lean",
+    "kind": "override",
+    "code": "@[implemented_by CallMemo.bodyImpl?]"
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Values.lean",
+    "kind": "override",
+    "code": "@[implemented_by CallMemo.setBodyImpl]"
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Values.lean",
+    "kind": "unsafe",
+    "code": "unsafe def CallMemo.bodyImpl? (C : Contract) (key : String) (k\u2080 : Nat) :"
+  },
+  {
+    "file": "Solidity/Syntax/Elab/Values.lean",
+    "kind": "unsafe",
+    "code": "unsafe def CallMemo.setBodyImpl (C : Contract) (key : String) (k\u2080 : Nat) (P : SProg C)"
+  },
+  {
+    "file": "Solidity/Syntax/Quote.lean",
+    "kind": "override",
+    "code": "@[implemented_by QMemo.findImpl]"
+  },
+  {
+    "file": "Solidity/Syntax/Quote.lean",
+    "kind": "override",
+    "code": "@[implemented_by QMemo.addImpl]"
+  },
+  {
+    "file": "Solidity/Syntax/Quote.lean",
+    "kind": "unsafe",
+    "code": "unsafe def QMemo.findImpl {m : Type \u2192 Type} [Monad m] [MonadStateOf QMemo m] {\u03b1 : Type}"
+  },
+  {
+    "file": "Solidity/Syntax/Quote.lean",
+    "kind": "unsafe",
+    "code": "unsafe def QMemo.addImpl {m : Type \u2192 Type} [Monad m] [MonadStateOf QMemo m] {\u03b1 : Type}"
+  },
+  {
+    "file": "Solidity/Tools/Counterexample.lean",
+    "kind": "unsafe",
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) cE"
+  },
+  {
+    "file": "Solidity/Tools/Counterexample.lean",
+    "kind": "unsafe",
+    "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) ty (\u2190 Solidity.Symex.evaluable \u03c6E)"
+  },
+  {
+    "file": "Solidity/Tools/Counterexample.lean",
+    "kind": "unsafe",
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) cE"
+  },
+  {
+    "file": "Solidity/Tools/Counterexample.lean",
+    "kind": "unsafe",
+    "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6E) (\u2190 Solidity.Symex.evaluable \u03c6E)"
+  },
+  {
+    "file": "Solidity/Tools/SourceCounterexample.lean",
+    "kind": "unsafe",
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) cE"
+  },
+  {
+    "file": "Solidity/Tools/SourceCounterexample.lean",
+    "kind": "unsafe",
+    "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6E) (\u2190 Symex.evaluable \u03c6E)"
   }
 ]

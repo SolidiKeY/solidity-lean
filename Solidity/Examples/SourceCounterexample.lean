@@ -71,7 +71,7 @@ run_cmd liftTermElabM do
   let name := `Solidity.Examples.SourceCounterexample.badRefuted
   addDecl <| .thmDecl {name, levelParams := [], type := mkNot goal, value := evidence.proof}
   unless (← collectAxioms name).all ([``propext, ``Classical.choice, ``Quot.sound].contains ·) do
-    throwError "the source refutation uses a nonstandard axiom"
+    throwError "the source refutation uses a nonstandard dependency"
 
 example : ¬ Fml.Valid badSpec := badRefuted
 

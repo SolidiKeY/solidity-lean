@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { sourceHash, sourceRange, sourceLocations } from './source-locations.mjs';
+import { sourceHash, sourceRange, sourceLocations, sourceWitness } from './source-locations.mjs';
 
 test('solc byte offsets become zero-based UTF-16 positions across CRLF and Unicode', () => {
   const prefix = '// 🐦 é\r\ncontract C { /* 🦉 */ ';
@@ -45,4 +45,29 @@ test('declaration IDs distinguish same-line overloads, contracts and renamed fun
   assert.equal(locate('C', {function:'f'}), undefined);
   assert.equal(locate('C', {sourceId:-1,function:'constructor'}).start.character, 0);
   assert.equal(locate('C', {sourceId:-1,function:'f'}), undefined);
+});
+
+test('witness names use exact parameter positions across renamed and unnamed overloads', () => {
+  const parameter = (name, typeString) => ({name,typeDescriptions:{typeString}});
+  const ast = {nodes:[{nodeType:'ContractDefinition',name:'C',nodes:[
+    {nodeType:'FunctionDefinition',id:12,parameters:{parameters:[parameter('from','address')]}},
+    {nodeType:'FunctionDefinition',id:24,parameters:{parameters:[parameter('value_','uint256'),parameter('$x','int256'),parameter('','bool')]}},
+  ]}]};
+  const big = (2n ** 255n + 1n).toString();
+  const row = {sourceId:24,function:'renamed',counterexample:{kind:'model-state',arguments:[
+    {modelName:'value__',paramIndex:0,type:'uint',value:big},
+    {modelName:'x_',paramIndex:1,type:'int',value:'-3'},
+    {modelName:'arg2',paramIndex:2,type:'bool',value:true},
+    {modelName:'from_',type:'uint',value:'0'},
+  ]}};
+  const args = sourceWitness(ast,'C',row).arguments;
+  assert.equal(args[0].sourceName,'value_');
+  assert.equal(args[0].sourceType,'uint256');
+  assert.equal(args[0].value,big);
+  assert.equal(args[1].sourceName,'$x');
+  assert.equal(args[2].sourceName,'');
+  assert.equal(args[3].sourceName,undefined);
+  assert.ok(sourceWitness(ast,'Other',row).arguments.every(a => a.sourceName === undefined));
+  assert.ok(sourceWitness(ast,'C',{...row,sourceId:99}).arguments.every(a => a.sourceName === undefined));
+  assert.equal(sourceWitness(ast,'C',{}),undefined);
 });

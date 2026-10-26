@@ -1,4 +1,8 @@
 import Solidity.Theorems
+import Solidity.Semantics.Termination
+import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.Preconditions
+import Solidity.Examples.SourceCounterexample
 import Solidity.Evm.Memory
 import Solidity.Evm.MemoryStructExamples
 import Solidity.Evm.MemoryStructDefaultExamples
@@ -488,7 +492,18 @@ run_cmd do
     ``Solidity.Evm.Memory.ArrayRepr.keeps,
     ``Solidity.Evm.Memory.AllocExamples.initial_repr,
     ``Solidity.Evm.Memory.AllocExamples.written_repr,
-    ``Solidity.Evm.Memory.AllocExamples.twoArrays_repr]
+    ``Solidity.Evm.Memory.AllocExamples.twoArrays_repr,
+    ``Solidity.TLoop.finite_of_wellFounded,
+    ``Solidity.TLoop.run_measure,
+    ``Solidity.TLoop.run_lex,
+    ``Solidity.Stmt.loop_terminates_of_wellFounded,
+    ``Solidity.holds_finiteMember,
+    ``Solidity.Fml.EntryNegative.holds_source,
+    ``Solidity.Fml.EntryNegative.unique,
+    ``Solidity.Fml.PreconditionsImpossible.valid,
+    ``Solidity.Fml.PreconditionsImpossible.not_possible,
+    ``Solidity.Examples.SourceCounterexample.badRefuted,
+    ``Solidity.Examples.SourceCounterexample.wideRefuted]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

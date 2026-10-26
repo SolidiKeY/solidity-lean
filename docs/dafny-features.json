@@ -94,11 +94,36 @@
         "path": "Source/DafnyLanguageServer.Test/Synchronization/EditDocumentTest.cs",
         "blob": "4f38a9ac8fbf47167dfb073f623c0cce7ded70c6",
         "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+        "blob": "6647c1f6b6ed3505868f8b2160ec3ca8b2764815",
+        "inspection": "counterexample request name at line 11"
+      },
+      {
+        "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleParams.cs",
+        "blob": "d20dfda2f7dc0ac8718457350949cd24e747a51a",
+        "inspection": "request transport fields and default depth at lines 6–11"
+      },
+      {
+        "path": "Source/DafnyLanguageServer/Handlers/Custom/DafnyCounterExampleHandler.cs",
+        "blob": "20d70713a81d8c3e8a177c37cb75986855c16cc0",
+        "inspection": "verification synchronization, cancellation, model extraction and positioned assumptions at lines 30–112"
+      },
+      {
+        "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleItem.cs",
+        "blob": "d1aadd9f3bd90b51070beb9aecbd0ae43adafbd7",
+        "inspection": "response position and assumption text at lines 5–12"
+      },
+      {
+        "path": "Source/DafnyLanguageServer.Test/Various/CounterExampleTest.cs",
+        "blob": "d57d6dc0f1890ecac00cff52856cc075ac5adc52",
+        "inspection": "request and representative positioned/model-value regressions at lines 21–26, 43–158, 569–779 and 945–959"
       }
     ]
   },
   "localBaseline": "23d23377",
-  "scope": "Selected-section review of language, verification and tooling feature families, covering reference-manual chapters 3\u201315. Not an exhaustive AST-constructor audit or a claim of complete implementation.",
+  "scope": "Selected-section review of language, verification and tooling feature families, covering reference-manual chapters 3–15. Not an exhaustive AST-constructor audit or a claim of complete implementation.",
   "features": [
     {
       "id": "preconditions",
@@ -691,14 +716,40 @@
         {
           "path": "docs/DafnyRef/UserGuide.md",
           "line": 1048
+        },
+        {
+          "path": "Source/DafnyLanguageServer/DafnyRequestNames.cs",
+          "line": 11
+        },
+        {
+          "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleParams.cs",
+          "line": 6
+        },
+        {
+          "path": "Source/DafnyLanguageServer/Handlers/Custom/DafnyCounterExampleHandler.cs",
+          "line": 30
+        },
+        {
+          "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleItem.cs",
+          "line": 5
+        },
+        {
+          "path": "Source/DafnyLanguageServer.Test/Various/CounterExampleTest.cs",
+          "line": 84
         }
       ],
       "localEvidence": [
         "Solidity/Tools/Counterexample.lean",
-        "Solidity/Examples/Verify.lean"
+        "Solidity/Examples/Verify.lean",
+        "Solidity/Tools/SourceCounterexample.lean",
+        "Solidity/Frontend/Testing.lean",
+        "scripts/counterexamples.test.mjs",
+        "scripts/source-locations.mjs",
+        "vscode/src/counterexample.cjs",
+        "vscode/test/counterexample.test.cjs"
       ],
-      "assessment": "Kernel-certified counterexamples and exact-fragment counterstates exist; full source-to-editor witness display is separate work.",
-      "next": "Render certified witnesses with exact source association."
+      "assessment": "The opt-in source pipeline exposes a kernel-certified refutation of the exact original Fml.Valid obligation with the same typed model prestate. Primitive argument values, transaction, initial storage, ledger and balance are retained; exact declaration IDs and parameter indices add source names. The editor validates the transport and suppresses stale or unsolicited results. Positioned model-state sequences, general collection expansion, constructor reachability, replay, complete post-states and general callback or recursive witnesses remain open.",
+      "next": "Extend certified source witnesses to additional semantic readings and positioned intermediate model states."
     },
     {
       "id": "audit-vacuity-dead-code",
@@ -791,10 +842,12 @@
         "vscode/src/extension.cjs",
         "vscode/src/backend.cjs",
         "vscode/src/model.cjs",
-        "vscode/test/host.cjs"
+        "vscode/test/host.cjs",
+        "vscode/src/counterexample.cjs",
+        "vscode/test/counterexample.test.cjs"
       ],
-      "assessment": "The added Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Optional entry-condition audits show vacuous proofs. Completion/navigation and counterexample visualization remain outside this extension.",
-      "next": "Add source witness presentation and further language services using explicit compiler evidence."
+      "assessment": "The Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Opt-in entry audits show vacuous proofs, and exact-goal refutations display certified model prestates. Completion/navigation and positioned execution traces remain open.",
+      "next": "Add completion/navigation and further source-associated language services using explicit compiler evidence."
     },
     {
       "id": "plugins-backends",

@@ -142,8 +142,10 @@ See `docs/bridge.md` for scope and commands.
 | `Calculus/Preconditions.lean` | An entry-condition check indexed by its source formula, impossible/possible certificates, uniqueness, vacuous validity and mutual exclusion. |
 | `Calculus/FiniteMembership.lean` | Typed finite equality-membership and its general denotation theorem against Theory equality. |
 | `Tools/Preconditions.lean` | Bounded kernel-checked entry-condition audits, the reusable runner API and `#audit_preconditions`. |
+| `Tools/SourceCounterexample.lean` | Exact-goal refutation proofs coupled to the same serialized typed model prestate; primitive storage and input binders, bounded initial search and shrinking. |
 | `Examples/Termination.lean` | Lexicographic reset proofs for generic and source-elaborated Solidity loops, with actual divergent/exhausted/reverting negative cases. |
 | `Examples/Preconditions.lean` | Possible and impossible source preconditions, a vacuous specification and unknown-shape reporting, with axiom pins. |
+| `Examples/SourceCounterexample.lean` | Exact-goal source refutations tied to the displayed candidate, rejected unsupported/open/mismatched goals, full-width values and certificate axiom pins. |
 | `Examples/Tactics/FiniteSets.lean` | Typed finite membership in specifications: checked source proofs, malformed operands, snapshot traversal and parser/printer roundtrips. |
 | `Semantics/RevertMemory.lean` | Current-heap computed/raw revert operands, unset sources and exact statement data; bounded non-divergent halts and successful runs lifted to unbounded execution. |
 | `Semantics/RevertData.lean` | `Panic(uint256)`'s code decoded as a word (`decodePanic`); the byte layouts are `RevertBytes.lean`'s. |

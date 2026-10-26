@@ -42,3 +42,18 @@ export function sourceLocations(ast, bytes) {
     return undefined;
   };
 }
+
+/** Presentation names for a witness, matched by declaration ID and the exact
+ * parameter index exported by the verifier. Model names remain available. */
+export function sourceWitness(ast, contractName, row) {
+  if (!row.counterexample) return undefined;
+  const contract = (ast.nodes ?? []).find(node => node.nodeType === 'ContractDefinition' && node.name === contractName);
+  const declaration = (contract?.nodes ?? []).find(node => node.nodeType === 'FunctionDefinition' && node.id === row.sourceId);
+  const parameters = declaration?.parameters?.parameters;
+  return {...row.counterexample, arguments:row.counterexample.arguments.map(argument => {
+    const parameter = Number.isSafeInteger(argument.paramIndex) && argument.paramIndex >= 0
+      ? parameters?.[argument.paramIndex] : undefined;
+    return parameter && typeof parameter.name === 'string' && typeof parameter.typeDescriptions?.typeString === 'string'
+      ? {...argument, sourceName:parameter.name, sourceType:parameter.typeDescriptions.typeString} : argument;
+  })};
+}

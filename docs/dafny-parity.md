@@ -2,7 +2,7 @@
 
 The audit pins [dafny-lang/dafny at `de36f2ec1f9c530080eff7929ae28229f45da069`](https://github.com/dafny-lang/dafny/tree/de36f2ec1f9c530080eff7929ae28229f45da069), inspected on 2026-10-26, and compares it with local baseline `23d23377`.
 The [machine-readable inventory](dafny-features.json) records 36 feature families,
-18 inspected upstream files and their Git blob IDs, source sections, local
+23 inspected upstream files and their Git blob IDs, source sections, local
 implementation evidence, assessments and next actions. `localBaseline` identifies
 the initial checkout; subsequent checked additions are reflected in the current
 assessments and recorded in [the implementation notes](feature-work/dafny-verification.md). Reference-manual
@@ -57,11 +57,11 @@ facility must not be conflated.
 | `nondeterminism-havoc` | verification | partial | [Statements.md:200](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Statements.md#L200) | Typed havoc and external response/callback abstractions exist. Such-that assignments and arbitrary ghost nondeterminism lack a general source surface. **Next:** Retain explicit typed models and abstraction premises. |
 | `automation-budgets` | tooling | partial | [Attributes.md:401](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Attributes.md#L401) | Bounded search, heartbeat limits, chunked proofs and runner timeouts exist; editor resource and cancellation behavior needs tests. **Next:** Expose stable per-obligation timing and reliable cancellation. |
 | `triggers-induction` | host | partial | [Attributes.md:883](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Attributes.md#L883); [Topics.md:1150](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Topics.md#L1150) | Lean induction and checked replay provide host proof automation. Dafny SMT trigger syntax is not implemented or necessary for existing kernel proofs. **Next:** Prefer checked reusable lemmas and bounded replay to unchecked solver claims. |
-| `counterexamples` | tooling | partial | [UserGuide.md:1048](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L1048) | Kernel-certified counterexamples and exact-fragment counterstates exist; full source-to-editor witness display is separate work. **Next:** Render certified witnesses with exact source association. |
+| `counterexamples` | tooling | partial | [UserGuide.md:1048](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L1048) | The opt-in source pipeline exposes a kernel-certified refutation of the exact original Fml.Valid obligation with the same typed model prestate. Primitive argument values, transaction, initial storage, ledger and balance are retained; exact declaration IDs and parameter indices add source names. The editor validates the transport and suppresses stale or unsolicited results. Positioned model-state sequences, general collection expansion, constructor reachability, replay, complete post-states and general callback or recursive witnesses remain open. **Next:** Extend certified source witnesses to additional semantic readings and positioned intermediate model states. |
 | `audit-vacuity-dead-code` | tooling | partial | [UserGuide.md:418](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L418) | Axiom checks remain. Entry-condition auditing now retains kernel-checked certificates of impossibility or possibility tied to the original scoped obligation; bounded failure is unknown. CLI and editor auditing are opt-in and impossible/unknown checks cannot pass strict suites. Constructor reachability and general dead-code analysis remain open. **Next:** Extend assurance to constructor reachability and unreachable branches; entry possibility alone does not establish a successful execution. |
 | `unit-tests-generation` | tooling | partial | [UserGuide.md:601](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L601) | Source verification runners and checked fixtures exist. General Dafny-style coverage-guided test generation is not implemented. **Next:** Export certified counterexamples as reproducible regression inputs. |
 | `cli-project-artifacts` | tooling | partial | [UserGuide.md:850](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/UserGuide.md#L850) | Lake artifacts, source runners and JSON reports exist. A stable editor/CLI protocol is a separate integration contract. **Next:** Preserve report status, source identity and configuration semantics across clients. |
-| `ide-language-services` | tooling | partial | [VSCodeIDE.md:3](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/VSCodeIDE.md#L3) | The added Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Optional entry-condition audits show vacuous proofs. Completion/navigation and counterexample visualization remain outside this extension. **Next:** Add source witness presentation and further language services using explicit compiler evidence. |
+| `ide-language-services` | tooling | partial | [VSCodeIDE.md:3](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/VSCodeIDE.md#L3) | The Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Opt-in entry audits show vacuous proofs, and exact-goal refutations display certified model prestates. Completion/navigation and positioned execution traces remain open. **Next:** Add completion/navigation and further source-associated language services using explicit compiler evidence. |
 | `plugins-backends` | notApplicable | notApplicable | [Plugins.md:1](https://github.com/dafny-lang/dafny/blob/de36f2ec1f9c530080eff7929ae28229f45da069/docs/DafnyRef/Plugins.md#L1) | Lean metaprogramming and optional Bridge provide extension points. Dafny compiler backends for other languages are not Solidity requirements. **Next:** Keep the core dependency-free; place optional adapters in separate packages. |
 
 ## Semantic boundaries that affect a port
@@ -98,10 +98,10 @@ requirements for a Solidity verifier.
 ## Remaining semantic work
 
 The main reusable directions are precise effectful call summaries and read
-frames; finer computed loop frames through aliases and memory; source measure syntax and total recursive
+frames; finer computed loop frames through aliases and memory; source tuple measures and total recursive
 termination; typed ghost collections, comprehensions and reusable source
 predicates; labeled old-state and fresh/allocated observations; and evidence for
-precondition satisfiability and unreachable branches. Each needs a separately
+broader condition satisfiability and unreachable branches. Each needs a separately
 stated invariant, denotation and soundness proof. Existing contracts, quantifiers,
 recursive contracts, loop invariants and certified counterexamples should be
 extended from their current implementations.
@@ -164,17 +164,17 @@ check pass.
 Read-only finder and skeptic reviews checked the inventory, evidence, validator
 and tests without invoking Lean. Neither found a blocking parity or validation
 issue. The skeptic suggested validating the inspection date; this is now checked,
-including an impossible-date regression. All 18 inspected sources are explicitly
+including an impossible-date regression. All 18 sources inspected at that stage were explicitly
 cited by a feature. The scope remains a family audit, not full Dafny implementation.
 
 ## Source verification extension
 
-The subsequent implementation adds [a VS Code extension](../vscode/README.md)
+The first extension milestone added [a VS Code extension](../vscode/README.md)
 for this repository. It provides verify/discover/cancel commands, optional
 verification on save, per-signature Test Explorer runs, diagnostics and proof
 status hover. It preserves the backend's proved/pending/import-gap/process-error
-distinctions. It does not add Solidity completion, source ghost syntax,
-counterexample visualizations or Dafny's general language services.
+distinctions. That milestone did not add Solidity completion, source ghost syntax
+or counterexample presentation; subsequent additions are recorded below.
 
 The importer retains solc declaration IDs through `SolcFun`, `ImportRow` and
 the testing JSON. The file runner associates exact function ranges by those IDs,
@@ -223,3 +223,13 @@ family now records that supported fragment explicitly.
 
 The remaining semantic work above is still open. No semantic parity or new
 verification soundness claim follows from adding this editor interface.
+
+## Verification and model-prestate additions
+
+The [implementation notes](feature-work/dafny-verification.md) describe the
+dependency-free well-founded and lexicographic loop theorems, typed finite
+primitive membership, certified entry-condition audits, and opt-in exact-goal
+source refutations with editor model-prestate display. The audit now records
+23 upstream blobs, including the pinned counterexample request, handler, response
+and regression tests. These additions retain the partial assessments and
+remaining work in the current inventory; they do not establish full Dafny parity.

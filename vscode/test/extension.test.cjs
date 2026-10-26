@@ -76,6 +76,15 @@ test('pending is warning, runtime errors are errors and ready is not a proof', a
   await env.commands.get('solidityLean.list')();
   assert.equal(env.diagnosticMap.get(env.doc.uri.toString()).length, 1);
 });
+test('function hover takes precedence over a synthesized constructor spanning the contract', async () => {
+  const env = setup(async (_, env) => ({results:[
+    row(env,{sourceId:-1,function:'constructor',signature:'constructor()',range:{start:{line:0,character:0},end:{line:10,character:0}}}),
+    row(env,{sourceId:7,status:'pending',reason:'function-specific open goals'}),
+  ],errors:[]}));
+  await env.api.verify(env.doc);
+  assert.match(env.events.hover.provideHover(env.doc,{line:1,character:5}).contents.value,/function-specific open goals/);
+  assert.match(env.events.hover.provideHover(env.doc,{line:0,character:0}).contents.value,/constructor/);
+});
 test('refuses execution in untrusted workspace and unsaved virtual documents', async () => {
   let calls = 0;
   const env = setup(async () => { calls++; });

@@ -25,6 +25,11 @@ const inspectedPaths = [
   'Source/DafnyLanguageServer.Test/Diagnostics/VerificationDiagnostics.cs',
   'Source/DafnyLanguageServer.Test/Various/CancelVerificationTest.cs',
   'Source/DafnyLanguageServer.Test/Synchronization/EditDocumentTest.cs',
+  'Source/DafnyLanguageServer/DafnyRequestNames.cs',
+  'Source/DafnyLanguageServer/Handlers/Custom/CounterExampleParams.cs',
+  'Source/DafnyLanguageServer/Handlers/Custom/DafnyCounterExampleHandler.cs',
+  'Source/DafnyLanguageServer/Handlers/Custom/CounterExampleItem.cs',
+  'Source/DafnyLanguageServer.Test/Various/CounterExampleTest.cs',
 ];
 const relativePath = p => typeof p === 'string' && p.length > 0 &&
   !p.includes('\\') && !p.startsWith('/') && p.split('/').every(s => s && s !== '.' && s !== '..');

@@ -5,6 +5,7 @@ import Solidity.Calculus.Recursion
 import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.ProveChunked
 import Solidity.Tools.Preconditions
+import Solidity.Tools.SourceCounterexample
 
 /-!
 # Testing imported Solidity files
@@ -112,10 +113,41 @@ def oneCheckSteps : Nat := 1024
 /-- The steps of a chunk of a walk past `oneCheckSteps`. -/
 def chunkSteps : Nat := 128
 
+/-- Retain an exact-goal refutation only after kernel and transitive axiom
+checks. JSON is presentation of the candidate used by that same proof. -/
+private def testCounterexample (ty : Expr) (name : Lean.Name) (r : ImportRow) :
+    TermElabM (Option Json) := do
+  let saved ← Term.saveState
+  let messages ← Core.getMessageLog
+  let result ← withCurrHeartbeats <| tryCatchRuntimeEx (do
+    let some witness ← Tools.refuteSource? ty | return none
+    if witness.proof.hasMVar || witness.proof.hasFVar || witness.proof.hasSorry then return none
+    addDecl <| .thmDecl {name, levelParams := [], type := mkNot ty, value := witness.proof}
+    let axioms ← collectAxioms name
+    unless axioms.all (standardAxioms.contains ·) do return none
+    let .ok arguments := witness.report.getObjValAs? (Array Json) "arguments" | return none
+    let arguments := arguments.map fun argument =>
+      match argument.getObjValAs? String "modelName" with
+      | .error _ => argument
+      | .ok modelName => match List.findIdx? (fun (p : String × String) => p.1 == modelName) r.params with
+        | none => argument
+        | some index => argument.setObjVal! "paramIndex" (toJson index)
+    return some <| witness.report
+      |>.setObjVal! "arguments" (toJson arguments)
+      |>.setObjVal! "certified" (toJson true)
+      |>.setObjVal! "goalKind" (toJson "fmlValid")
+      |>.setObjVal! "certificateDeclaration" (toJson name.toString)
+      |>.setObjVal! "axioms" (toJson (axioms.map Lean.Name.toString)))
+    fun _ => pure none
+  if result.isNone then saved.restore
+  else Core.setMessageLog messages
+  return result
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
-def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
+def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
+    (counterexampleOutput : Option (IO.Ref (Option Json)) := none) :
     CommandElabM (String × String × TailMode) := do
   let f := r.declName N
   let env ← getEnv
@@ -245,7 +277,13 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
           else
             let some s ← out.get | throwError "search did not run"
             pure s.open_
-      unless goals.isEmpty do return ("pending", "open proof goals", mode)
+      unless goals.isEmpty do
+        if r.tag == .specified && !cb then
+          if let some output := counterexampleOutput then
+            if let some witness ← testCounterexample ty (f ++ `refuted) r then
+              output.set (some witness)
+              return ("refuted", "kernel-checked counterexample to the tested obligation", mode)
+        return ("pending", "open proof goals", mode)
       let proof ← instantiateMVars g
       if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
       let name := f ++ `tested
@@ -271,7 +309,8 @@ def testPreconditions (N : Lean.Name) (r : ImportRow) : CommandElabM (String × 
 no proof search. Every selected import row is retained, including gaps and
 functions whose specification has no plain box/diamond obligation. -/
 syntax (name := solkeyTest) "#solkey_test " ident (&" only " str)?
-  (&" from " num)? (&" count " num)? (&" listing")? (&" audit_preconditions")? " to " str : command
+  (&" from " num)? (&" count " num)? (&" listing")? (&" audit_preconditions")?
+  (&" counterexamples")? " to " str : command
 
 @[command_elab solkeyTest]
 def elabSolkeyTest : CommandElab := fun stx => do
@@ -281,7 +320,9 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let count? := if stx[4].isNone then none else stx[4][1].isNatLit?
   let listing := !stx[5].isNone
   let audit := !stx[6].isNone
+  let counterexamples := !stx[7].isNone
   if listing && audit then throwError "precondition auditing requires verification, not listing"
+  if listing && counterexamples then throwError "counterexample search requires verification, not listing"
   let auditFields (status reason : String) : List (String × Json) :=
     if audit then [("preconditions", toJson status), ("preconditionReason", toJson reason)] else []
   let allRows ← reportRows N
@@ -290,7 +331,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let rows := count?.map (selected.take ·) |>.getD selected
   if rows.isEmpty && (!allRows.isEmpty || only?.isSome) then
     throwError "#solkey_test: no functions selected"
-  let output := stx[8].isStrLit?.getD ""
+  let output := stx[9].isStrLit?.getD ""
   -- Checkpoint before search, then after every function: a process timeout
   -- preserves completed results and explicitly marks the unattempted rows.
   let mut results : Array Json := rows.toArray.map fun r => Json.mkObj ([
@@ -305,25 +346,28 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let tail ← contractTailMode N allRows
   for r in rows, i in [:rows.length] do
     let t0 ← IO.monoMsNow
+    let witnessOutput ← IO.mkRef (none : Option Json)
     let (status, reason, mode) ← if r.status != .elaborated then
         pure (r.status.toStr, r.reason, TailMode.solc)
       else if r.tag == .internal || r.tag == .skip then pure (r.tag.toStr, "", .solc)
       else if r.tag != .specified && r.tag.modality?.isNone then
         pure ("unsupported", s!"{r.tag.toStr}: no obligation", .solc)
       else if listing then pure ("ready", "", tail)
-      else testObligation N r tail
+      else testObligation N r tail (if counterexamples then some witnessOutput else none)
     let (preconditions, preconditionReason) ← if !audit then pure ("notRequested", "")
       else if r.status != .elaborated || r.tag != .specified then
         pure ("notApplicable", "no admitted function specification")
       else testPreconditions N r
     let elapsed ← IO.monoMsNow
+    let witness ← witnessOutput.get
     results := results.set! i <| Json.mkObj ([
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
       ("sourceId", toJson r.sourceId),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
-      ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason)
+      ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason ++
+        (witness.map (fun value => [("counterexample", value)]) |>.getD []))
     IO.FS.writeFile output (Json.arr results).pretty
 
 end Solidity.Frontend

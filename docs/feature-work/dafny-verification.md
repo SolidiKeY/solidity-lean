@@ -126,11 +126,54 @@ allocating it. Oversized pools use the existing bounded random search instead;
 regressions cover a 40-parameter product, empty factors and a real source audit
 with 12 primitive parameters. An exhausted search still reports unknown.
 
+## Certified source model prestates
+
+`--counterexamples` (JavaScript option `counterexamples: true`) runs an opt-in
+search after an ordinary specified function leaves open proof goals. The first
+fragment admits primitive storage and primitive named input binders. Callback,
+recursive and plain obligations retain their existing results. Reference storage,
+unsupported shapes and unsuccessful search or certification supply no witness.
+
+`Tools.refuteSource?` receives the exact original `Fml.Valid` goal. It searches
+once, constructs a proof of that goal's negation with the found candidate, and
+serializes that same candidate. The frontend retains the theorem at
+`function.refuted`, kernel checks the exact negated goal, and checks its transitive
+axioms before emitting `status: "refuted"`. A found candidate without an accepted
+certificate stays pending. The initial search is capped at 256 candidates, with
+the existing bounded shrinking afterward; subprocess and heartbeat limits also
+apply. The cardinality preflight above runs before product allocation.
+
+The optional `counterexample` JSON contains a certificate declaration and axiom
+names, typed argument values, transaction inputs, initial storage, ledger and
+balance, plus an optional halt or post-storage outcome and readable lines.
+Numerical values remain decimal strings, including full-width unsigned and signed
+words. The empty external-response table is checked before serialization.
+Argument `paramIndex` comes from an exact model-name lookup in the import row's
+source-order parameter list. The JavaScript adapter uses the original solc
+declaration ID and this index for source names and types, preserving model names
+and unnamed parameters without underscore or overload guesses.
+
+The extension validates this transport envelope, renders only validated fields,
+escapes model text, and reports refutations as failed tests and error diagnostics.
+Existing source-hash, document-version and cancellation checks govern witnesses.
+An envelope is evidence from the configured backend; the editor does not itself
+run the Lean kernel on a theorem received through JSON.
+
+These are arbitrary typed model prestates under the specification's premises.
+They do not establish constructor reachability, replayable transactions, a full
+post-ledger/heap, or a sequence of intermediate execution states. The inspected
+Dafny handler instead emits source-positioned noninitial model-state assumptions
+(`DafnyCounterExampleHandler.cs`, lines 103–112). Its request depth defaults to 5,
+but the inspected handler does not use it as a serialization bound. The inventory
+now pins five additional counterexample server/test blobs; it retains a partial
+assessment for this family.
+
 ## Validation commands
 
 ```sh
 lake build Solidity.Examples.Termination Solidity.Examples.Preconditions Solidity.Examples.Tactics.FiniteSets Solidity.Frontend.Testing
 node --test scripts/preconditions.test.mjs scripts/finite-spec-sets.test.mjs
+node --test scripts/counterexamples.test.mjs
 node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
 node scripts/check-layers.mjs
 node scripts/check-orphans.mjs
@@ -155,3 +198,53 @@ A follow-up pass checked the candidate cardinality preflight, including positive
 counts, division before multiplication, odd budgets, empty factors and exact
 candidate order. Neither reviewer found a remaining issue. The bound limits the
 number of combinations, not the size of every candidate or all proof execution.
+
+Separate read-only finder and skeptic passes checked source witness generation,
+the retained exact-goal proof, transitive axiom checks and the editor transport.
+They confirmed that serialization uses the certified candidate and that input
+indices follow the original solc parameter array, independently of formula-binder
+order. Rendering was tightened to display only validated transaction, ledger and
+outcome fields. Search-budget wording was clarified to distinguish initial
+candidates from subsequent bounded shrinking.
+
+The source trust gate exposed 25 inventory drifts already present at the initial
+`23d23377` checkout. An audit of those exact Git blobs confirmed there were no
+forbidden proof constructs. Finder and skeptic reviewed the current cache,
+compiled implementation and evaluator sites before reconciliation: two obsolete
+entries were removed and 27 exact occurrences added, including the three new
+search/presentation evaluator sites. The checker and forbidden-construct policy
+remain unchanged. This records frontend and native implementation surfaces; it
+does not prove cache correctness or EVM conformance. The independent transitive
+axiom audit also includes the new termination, membership, entry-condition and
+retained source-refutation theorems.
+
+Real editor-host testing exposed hover selection of a synthesized constructor's
+whole-contract range ahead of its function. Function declaration IDs now take
+precedence; a controller regression and the real certified-witness hover check
+cover the correction.
+
+## Validation results (2026-10-26)
+
+- `./run-lean.sh`: the final checkout passed 631 default build jobs, 248 imported
+  solkey suite jobs, and the 377-taclet/131-annotation cross-check.
+- 51 fast inventory, source-position, controller, protocol and subprocess tests
+  passed. The two trust-checker tests also passed.
+- Five finite-membership/entry-audit source tests passed, including wide parameter
+  pools and interrupted-batch metadata. Three source-witness tests passed for
+  overloads, exact source names, full-width values and unsupported readings.
+- The real VSCodium extension host passed 20 checks, including actual solc/Lean
+  membership proofs, entry certificates, an exact-goal refutation, source mapping,
+  diagnostics and hover. Transport fixture checks remain distinct from those
+  real-backend checks.
+- The transitive audit passed for 479 headline theorems. The unchanged source
+  trust checker reports 662 sources, 231 implementation/recovery sites and zero
+  findings. Layering reports 137 core modules with no elaborator reach; all 649
+  modules are reachable with no orphans.
+- Version 0.3.0 packaged and installed in an isolated editor profile. Its manifest
+  and every runtime source matched the tested checkout. The local artifact is
+  `.gen/solidity-lean-0.3.0.vsix`.
+
+The repository-wide prose-path check still reports the same 13 pre-existing
+external/vendor references; none names the new files. No core package dependency,
+proof axiom or raised heartbeat limit was introduced. The remaining gaps in the
+inventory stay open.
