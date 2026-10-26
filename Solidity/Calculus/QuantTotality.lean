@@ -72,6 +72,33 @@ def LTm.num? (ps : List Parameter) : {s : Srt} → (t : LTm C s) →
     | _, _ => none
   | _, _ => none
 
+/-- `LTm.ZNum` at KeY's `int`, `False` elsewhere. -/
+def LTm.ZNumS (P : Parameter → Prop) (E : EnvKey → Prop) : {s : Srt} → LTm C s → Prop
+  | .kint, t => t.ZNum P E
+  | _, _ => False
+
+/-- The KeY `int` terms of value locals `ps` and literals (feature 8's
+`LTm.ZNum`: literals, a `uint` widened, `+`, `-`, a product by a literal),
+with evidence. -/
+def LTm.znum? (ps : List Parameter) : {s : Srt} → (t : LTm C s) →
+    Option (PLift (t.ZNumS (· ∈ ps) (· ∈ ([] : List EnvKey))))
+  | _, .app0 (.zlit n) => some ⟨.zlit n⟩
+  | _, .app1 .toInt a => (LTm.num? ps a).map fun ⟨h⟩ => ⟨.toInt h⟩
+  | _, .app2 (.zbin .add h) a b => do
+    let ⟨ha⟩ ← LTm.znum? ps a
+    let ⟨hb⟩ ← LTm.znum? ps b
+    return ⟨.add h ha hb⟩
+  | _, .app2 (.zbin .sub h) a b => do
+    let ⟨ha⟩ ← LTm.znum? ps a
+    let ⟨hb⟩ ← LTm.znum? ps b
+    return ⟨.sub h ha hb⟩
+  | _, .app2 (.zbin .mul h) a b =>
+    match a, b with
+    | .app0 (.zlit n), b => (LTm.znum? ps b).map fun ⟨hb⟩ => ⟨.mulL h n hb⟩
+    | a, .app0 (.zlit n) => (LTm.znum? ps a).map fun ⟨ha⟩ => ⟨.mulR h n ha⟩
+    | _, _ => none
+  | _, _ => none
+
 /-- `LTm.BoolV` at the Boolean sort, `False` elsewhere. -/
 def LTm.BoolS (P : Parameter → Prop) (E : EnvKey → Prop) : {s : Srt} → LTm C s → Prop
   | .val .bool, t => t.BoolV P E
@@ -147,6 +174,10 @@ def LTm.bool? (ps : List Parameter) : {s : Srt} → (t : LTm C s) →
       let ⟨hb⟩ ← LTm.num? ps b
       return ⟨.ge h ha hb⟩
     | _, _ => none
+  | _, .app2 (.zcmp op h) a b => do
+    let ⟨ha⟩ ← LTm.znum? ps a
+    let ⟨hb⟩ ← LTm.znum? ps b
+    return ⟨.zcmp op h ha hb⟩
   | s, .seq (s' := s') d a =>
     match s', s with
     | .val .bool, .val .bool => do
