@@ -489,27 +489,44 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
   }
 });
 
-test("function types: values in locals, parameters, returns, storage, struct members, external", () => {
-  // tests/solc/FunctionTypes.sol: a value is its function's tag, a call
-  // through it a dispatch over the functions of its signature
-  // (docs/semantic-gaps.md, "Function types")
+test("function values retain direct metadata and explicit source dispatch gaps", () => {
+  // The intrinsic model's tag dispatch is broader than modern source admission.
+  // Source calls through values require a finite set of typed dispatch targets;
+  // stored external ABI observations must not use the model's packed arithmetic.
   const report = runSolidityTests(["tests/solc/FunctionTypes.sol"], {build:false});
   assert.deepEqual(report.errors, []);
-  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
-  for (const name of ['applyAndCompose', 'localValue', 'storedByFlag', 'returnedValue',
-    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality',
-    // calls through values that are not names (`callValueName`)
-    'memberCall', 'elementCall', 'callResultCall',
-    // an external function's selector, folded as solc folds it; a dispatch
-    // that recurses (`Stmt.callRec`)
-    'ext', 'externalSelector', 'recursionThroughValue',
-    // an external value's `address * 2^32 + selector` read back to its
-    // address (`Facts.cancelDiv`)
-    'externalValue'])
-    assert.equal(status[name], 'proved', name);
-  // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
-  assert.equal(status.unassignedDiamond, 'pending');
-  assert.equal(status.falsePost, 'pending');
+  const expected = [
+    ['ExternalFunctionTypes.ext', 'proved'],
+    ['ExternalFunctionTypes.externalValue', 'unsupported'],
+    ['ExternalFunctionTypes.externalSelector', 'proved'],
+    ['FunctionTypes.double', 'internal'],
+    ['FunctionTypes.triple', 'internal'],
+    ['FunctionTypes.applyTo', 'unsupported'],
+    ['FunctionTypes.compose', 'unsupported'],
+    ['FunctionTypes.choose', 'internal'],
+    ['FunctionTypes.applyAndCompose', 'unsupported'],
+    ['FunctionTypes.localValue', 'unsupported'],
+    ['FunctionTypes.storedByFlag', 'unsupported'],
+    ['FunctionTypes.returnedValue', 'unsupported'],
+    ['FunctionTypes.unassignedPanics', 'unsupported'],
+    ['FunctionTypes.memberValue', 'unsupported'],
+    ['FunctionTypes.deletedPanics', 'unsupported'],
+    ['FunctionTypes.unassignedDiamond', 'unsupported'],
+    ['FunctionTypes.falsePost', 'unsupported'],
+    ['FunctionTypes.equality', 'proved'],
+    ['FunctionTypes.memberCall', 'unsupported'],
+    ['FunctionTypes.elementCall', 'unsupported'],
+    ['FunctionTypes.callResultCall', 'unsupported'],
+    ['RecursiveFunctionValues.applyRec', 'unsupported'],
+    ['RecursiveFunctionValues.countThrough', 'unsupported'],
+    ['RecursiveFunctionValues.recursionThroughValue', 'unsupported'],
+  ];
+  assert.deepEqual(report.results.map(row => [`${row.contract}.${row.function}`, row.status]), expected);
+  for (const row of report.results.filter(row => row.status === 'unsupported'))
+    assert.match(row.reason,
+      /solidity\.functionDispatch: this call needs a finite set of typed dispatch targets/,
+      `${row.contract}.${row.function}`);
+  assert.equal(testsPassed(report), false);
 });
 
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {

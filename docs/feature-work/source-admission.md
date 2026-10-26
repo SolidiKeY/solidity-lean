@@ -84,3 +84,24 @@ Frozen TestSuite AST regeneration was byte-identical. Final library, TestSuite,
 sort/corpus, automation and structural checks are pending the final validation
 run. The pre-existing baseline has 33 scratch-module orphans and 13 missing
 external/vendor documentation paths; these are not introduced by this milestone.
+
+### Function-value source regression alignment
+
+The combined Dafny/editor validation exposed older function-value test
+expectations that predate admission commit `ea06b814`, already present in the
+initial `23d23377` checkout. The modern source interface refuses unresolved
+value-call dispatch and stored ABI-kind observations; the intrinsic tag model
+does not justify admitting them as source proofs.
+
+The updated integration test pins all 24 qualified function rows in source
+order: three direct proofs, three internal helpers and eighteen explicit
+`solidity.functionDispatch` gaps. Every gap retains its exact diagnostic reason,
+the report has no global errors, and the strict suite verdict remains false.
+Direct `ext`, `externalSelector` and `equality` proofs remain required. Unrelated
+functions named `externalValue` in the binding and inheritance fixtures retain
+their original proof expectations.
+
+The focused real-source test passed in 11.14 seconds. Independent read-only
+finder and skeptic reviews confirmed the complete row roster, baseline policy
+and strict verdict; neither ran Lean. This changes test expectations, not the
+admission policy or the runtime model.
