@@ -194,3 +194,29 @@ certificate or corpus corollary repairs. The remaining static findings are
 the pre-existing 33 ignored scratch orphans, 13 missing vendor/external doc
 paths and 25 inventoried trust-drift entries; no new source or dependency
 was introduced for those baseline findings.
+
+## Branch consolidation (2026-10-26)
+
+The current remote decision-procedure work and the committed `kintneg`
+encoder are integrated with the source-feature work above. The encoder is
+feature 30; the later uncommitted integer-anchor and array-block experiments
+remain separate. No external dependency was added.
+
+Read-only finder and skeptic reviews found stale feature numbers, missing
+module-map entries and an obsolete description of negative KeY `int` binders
+as undecided. These are corrected in the module guide and automation document.
+The callback merge preserves the source-feature declarations and updates only
+the generated send replay pin and its explanation.
+
+The static integration gates pass: 143 core modules reach no elaborator,
+strict automation reports zero pending obligations, and the frozen TestSuite
+audit reports 552 derived, 11 refuted and one excluded function. The existing
+33 ignored scratch orphans and 13 missing documentation references remain.
+
+The final `./run-lean.sh` passes with current shared-cache artifacts: 646
+library jobs, 249 TestSuite jobs and frozen SolKey's 377 taclets / 131
+read-bearing annotations. Validation ran with a 10 GiB hard memory cap and
+swap disabled. A fresh sequential check of the unchanged
+`TestSuite/Derived17.lean` exceeded that cap and was stopped by the cgroup;
+its matching shared-cache artifact subsequently allowed the full gate to
+pass. A clean rebuild within 10 GiB is therefore not established.
