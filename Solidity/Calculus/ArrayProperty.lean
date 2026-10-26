@@ -85,6 +85,9 @@ inductive FloorShape (K : PrimTy) : Ty → Type where
   | keep (T : Ty) : FloorShape K T
   | floor {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K V))
   | outer (K' : PrimTy) {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K' V))
+  /-- A dynamic array of primitives at a `uint` pass: each slot floored,
+  the live length kept (feature 30). -/
+  | arr {e : PrimTy} (hK : K = .uint) : FloorShape K (.ref (.array (.prim e)))
 
 /-- `floor` at a key type `K'` that is `K`. -/
 def FloorShape.floorEq {K' : PrimTy} {V : Ty} (h : K' = K) (s : FloorShape K V) :
@@ -97,7 +100,62 @@ floored. -/
 def FloorShape.of (K : PrimTy) : (T : Ty) → FloorShape K T
   | .ref (.mapping K' V) =>
     if h : K' = K then FloorShape.floorEq h (FloorShape.of K V) else .outer K' (FloorShape.of K V)
+  | .ref (.array (.prim _)) => if h : K = .uint then .arr h else .keep _
   | T => .keep T
+
+/-- The shape floors an array's slots here. -/
+def FloorShape.isArr {T : Ty} : FloorShape K T → Bool
+  | .arr _ => true
+  | _ => false
+
+/-- The shape floors an array's slots somewhere. -/
+def FloorShape.hasArr {T : Ty} : FloorShape K T → Bool
+  | .arr _ => true
+  | .floor s | .outer _ s => s.hasArr
+  | .keep _ => false
+
+/-- A floor at the pass's key type, read at `uint`. -/
+def FloorShape.fU (hK : K = .uint) (f : K.Denote → K.Denote) : PrimTy.uint.Denote → PrimTy.uint.Denote :=
+  hK ▸ f
+
+/-- **A floor an array can be rebuilt at** (feature 30): monotone, and
+never above its key, so the slots below the live length stay there. -/
+def ArrOK (ok : OrdK K) (f : K.Denote → K.Denote) : Prop :=
+  (∀ x y : K.Denote, ok.val x ≤ ok.val y → ok.val (f x) ≤ ok.val (f y)) ∧ ∀ x : K.Denote, ok.val (f x) ≤ ok.val x
+
+/-- The least value of `B` where `P` holds, `hi` where none does. -/
+def cutIn (hi : Int) (B : List Int) (P : Int → Bool) : Int := B.foldl (fun a b => if P b = true ∧ b < a then b else a) hi
+
+theorem cutIn_spec (B : List Int) (P : Int → Bool) : ∀ a : Int,
+    B.foldl (fun a b => if P b = true ∧ b < a then b else a) a ≤ a ∧
+      (∀ b ∈ B, P b = true → B.foldl (fun a b => if P b = true ∧ b < a then b else a) a ≤ b) ∧
+      (B.foldl (fun a b => if P b = true ∧ b < a then b else a) a = a ∨
+        (B.foldl (fun a b => if P b = true ∧ b < a then b else a) a ∈ B ∧
+          P (B.foldl (fun a b => if P b = true ∧ b < a then b else a) a) = true)) := by
+  induction B with
+  | nil => intro a; exact ⟨Int.le_refl _, (fun _ h _ => nomatch h), .inl rfl⟩
+  | cons s B ih =>
+    intro a
+    simp only [List.foldl_cons]
+    obtain ⟨h1, h2, h3⟩ := ih (if P s = true ∧ s < a then s else a)
+    by_cases hc : P s = true ∧ s < a
+    · rw [if_pos hc] at h1 h2 h3 ⊢
+      refine ⟨by omega, fun b hb hP => ?_, ?_⟩
+      · rcases List.mem_cons.1 hb with rfl | hb
+        · exact h1
+        · exact h2 b hb hP
+      · rcases h3 with h | ⟨h, hp⟩
+        · exact .inr ⟨by rw [h]; exact List.mem_cons_self, by rw [h]; exact hc.1⟩
+        · exact .inr ⟨List.mem_cons_of_mem _ h, hp⟩
+    · rw [if_neg hc] at h1 h2 h3 ⊢
+      refine ⟨h1, fun b hb hP => ?_, ?_⟩
+      · rcases List.mem_cons.1 hb with rfl | hb
+        · have : ¬ b < a := fun hl => hc ⟨hP, hl⟩
+          omega
+        · exact h2 b hb hP
+      · rcases h3 with h | ⟨h, hp⟩
+        · exact .inl h
+        · exact .inr ⟨List.mem_cons_of_mem _ h, hp⟩
 
 theorem FloorShape.of_self (K : PrimTy) (V : Ty) :
     FloorShape.of K (.ref (.mapping K V)) = .floor (FloorShape.of K V) := by
@@ -149,6 +207,11 @@ def FloorShape.rebuild (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) 
       fun v => v.beq dflt)) dflt
   | _, .outer _ s, .map m d =>
     SVal.map (SMap.ofList (m.toList.map fun e => (e.1, s.rebuild ok f B e.2))) (s.rebuild ok f B d)
+  | _, .arr _, .array (n := n) es sh hn =>
+    let L := es.toList ++ sh.toList
+    let m := cutIn ok.hi B fun b => decide ((L.length : Int) ≤ ok.val (f (ok.ofInt b)))
+    let slots := (List.range m.toNat).map fun (t : Nat) => L.getD (ok.val (f (ok.ofInt (t : Int)))).toNat (.prim (PrimTy.dflt _))
+    .array (SVec.ofList (slots.take n)) (SList.ofList (slots.drop n)) (SVal.take_lt_bound slots hn)
 
 /-- **A path's keys at their floors**: `f` at each floored mapping, the
 rest kept. -/
@@ -156,12 +219,14 @@ def FloorShape.floorPath (f : K.Denote → K.Denote) :
     {T U : Ty} → FloorShape K T → Path T U → Path T U
   | _, _, .floor s, .key k p => .key (f k) (s.floorPath f p)
   | _, _, .outer _ s, .key k p => .key k (s.floorPath f p)
+  | _, _, .arr hK, .at i p => .at (FloorShape.fU hK f i) p
   | _, _, _, p => p
 
 /-- The shape a path reaches. -/
 def FloorShape.follow : {T U : Ty} → FloorShape K T → Path T U → FloorShape K U
   | _, _, .floor s, .key _ p => s.follow p
   | _, _, .outer _ s, .key _ p => s.follow p
+  | _, _, .arr _, .at _ _ => .keep _
   | _, _, .keep _, _ => .keep _
   | _, _, s, .nil => s
 
@@ -196,6 +261,11 @@ theorem FloorShape.floorPath_append (f : K.Denote → K.Denote) :
     show Path.key k (s.floorPath f (p.append q)) = (Path.key k (s.floorPath f p)).append _
     rw [Path.append_key, FloorShape.floorPath_append f s p q]
     rfl
+  | _, _, _, .arr hK, .at i p, q => by
+    cases p
+    cases q
+    simp only [FloorShape.floorPath, FloorShape.follow, Path.append_at, Path.append_nil,
+      FloorShape.floorPath_keep]
 
 theorem FloorShape.follow_append :
     ∀ {T U W : Ty} (s : FloorShape K T) (p : Path T U) (q : Path U W),
@@ -210,6 +280,19 @@ theorem FloorShape.follow_append :
   | _, _, _, .outer _ s, .key k p, q => by
     rw [Path.append_key]
     exact FloorShape.follow_append s p q
+  | _, _, _, .arr hK, .at i p, q => by
+    cases p
+    cases q
+    simp only [FloorShape.follow, Path.append_at, Path.append_nil, FloorShape.follow_keep]
+
+/-- A shape reached floors an array only where the shape does. -/
+theorem FloorShape.hasArr_follow : ∀ {T U : Ty} (s : FloorShape K T) (q : Path T U),
+    (s.follow q).hasArr = true → s.hasArr = true
+  | _, _, s, .nil, h => by rwa [FloorShape.follow_nil] at h
+  | _, _, .keep _, q, h => by rw [FloorShape.follow_keep] at h; exact h
+  | _, _, .floor s, .key _ q, h => FloorShape.hasArr_follow s q h
+  | _, _, .outer _ s, .key _ q, h => FloorShape.hasArr_follow s q h
+  | _, _, .arr _, .at _ _, _ => rfl
 
 /-- A reference at its floors. -/
 def _root_.Solidity.SRef.floorRef (K : PrimTy) (f : K.Denote → K.Denote) {U : Ty} (r : SRef C U) :
@@ -224,6 +307,14 @@ def MRoot.surgery (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : L
 theorem word_of_get {st st' : Storage C} {P : PrimTy} (r : SRef C (.prim P))
     (h : st'.get r.hroot = st.get r.hroot) : st'.obs.word (.ref r) = st.obs.word (.ref r) := by
   rw [Storage.obs_word_ref, Storage.obs_word_ref, h]
+
+theorem has_of_get {st st' : Storage C} {U : Ty} (r : SRef C U)
+    (h : st'.get r.hroot = st.get r.hroot) : st'.obs.has (.ref r) = st.obs.has (.ref r) := by
+  rw [Storage.obs_has_ref, Storage.obs_has_ref, h]
+
+theorem len_of_get {st st' : Storage C} {E : Ty} (r : SRef C (.ref (.array E)))
+    (h : st'.get r.hroot = st.get r.hroot) : st'.obs.len (.ref r) = st.obs.len (.ref r) := by
+  rw [Storage.obs_len_ref, Storage.obs_len_ref, h]
 
 /-- Another root reads as before. -/
 theorem MRoot.surgery_other (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
@@ -247,72 +338,287 @@ def FloorsOn (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) : Prop :=
   (∀ b ∈ B, ok.lo ≤ b ∧ b < ok.hi) ∧ ok.lo ∈ B ∧
     ∀ k : K.Denote, f (ok.ofInt (floorIn ok.lo B (ok.val k))) = f k
 
+/-- The slots a rebuilt array keeps: the first breakpoint whose floor is
+past the old slots, `2^256` where none is. -/
+abbrev arrCut (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : List Int) (len : Nat) : Int :=
+  cutIn OrdK.uint.hi B fun b => decide ((len : Int) ≤ OrdK.uint.val (f (OrdK.uint.ofInt b)))
+
+theorem arrCut_spec (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : List Int) (len : Nat) :
+    arrCut f B len ≤ OrdK.uint.hi ∧
+      (∀ b ∈ B, (len : Int) ≤ OrdK.uint.val (f (OrdK.uint.ofInt b)) → arrCut f B len ≤ b) ∧
+      (arrCut f B len = OrdK.uint.hi ∨ (arrCut f B len ∈ B ∧
+        (len : Int) ≤ OrdK.uint.val (f (OrdK.uint.ofInt (arrCut f B len))))) := by
+  obtain ⟨h1, h2, h3⟩ := cutIn_spec B (fun b => decide ((len : Int) ≤ OrdK.uint.val (f (OrdK.uint.ofInt b))))
+    OrdK.uint.hi
+  refine ⟨h1, fun b hb hl => h2 b hb (decide_eq_true hl), ?_⟩
+  rcases h3 with h | ⟨h, hp⟩
+  · exact .inl h
+  · exact .inr ⟨h, of_decide_eq_true hp⟩
+
+theorem uint_ofInt_toNat (i : PrimTy.uint.Denote) : OrdK.uint.ofInt ((i.1.toNat : Nat) : Int) = i := by
+  have h0 := (OrdK.uint.bounds i).1
+  have e : ((i.1.toNat : Nat) : Int) = OrdK.uint.val i := Int.toNat_of_nonneg h0
+  rw [e, OrdK.ofInt_val]
+
+/-- **A rebuilt array's slot**: the old array's slot at the floor, there
+exactly where that one is. -/
+theorem arr_rebuild_slot {e : PrimTy} (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : List Int)
+    (hf : FloorsOn .uint f B) (hA : ArrOK .uint f) (L : List (SVal (.prim e))) (d : SVal (.prim e))
+    (i : PrimTy.uint.Denote) :
+    ((List.range (arrCut f B L.length).toNat).map
+        fun (t : Nat) => L.getD (OrdK.uint.val (f (OrdK.uint.ofInt (t : Int)))).toNat d)[i.1.toNat]? =
+      L[(f i).1.toNat]? := by
+  obtain ⟨hm1, hm2, hm3⟩ := arrCut_spec f B L.length
+  have hi := OrdK.uint.bounds i
+  have hfi := OrdK.uint.bounds (f i)
+  simp only [OrdK.lo, OrdK.val] at hi hfi
+  rw [List.getElem?_map]
+  by_cases ht : i.1.toNat < (arrCut f B L.length).toNat
+  · rw [List.getElem?_range ht, Option.map_some, uint_ofInt_toNat]
+    have hlt : (f i).1.toNat < L.length := by
+      apply Classical.byContradiction
+      intro hn
+      have hle : (L.length : Int) ≤ OrdK.uint.val (f i) := by
+        show (L.length : Int) ≤ (f i).1
+        omega
+      have hbB : floorIn 0 B i.1 ∈ B := by
+        rcases floorIn_mem 0 B i.1 with h | h
+        · rw [h]; exact hf.2.1
+        · exact h
+      have hfb : f (OrdK.uint.ofInt (floorIn 0 B i.1)) = f i := hf.2.2 i
+      have h1 := hm2 _ hbB (by rw [hfb]; exact hle)
+      have h2 := floorIn_le 0 B (x := i.1) hi.1
+      omega
+    show some (L.getD (f i).1.toNat d) = _
+    rw [List.getD_eq_getElem?_getD, List.getElem?_eq_getElem hlt]
+    rfl
+  · rw [List.getElem?_eq_none (by rw [List.length_range]; omega), Option.map_none]
+    have hmi : arrCut f B L.length ≤ i.1 := by omega
+    rcases hm3 with h | ⟨hmB, hmP⟩
+    · have : i.1 < OrdK.uint.hi := hi.2
+      omega
+    · have h0 := (hf.1 _ hmB).1
+      have hmono := hA.1 (OrdK.uint.ofInt (arrCut f B L.length)) i (by
+        rw [OrdK.val_ofInt _ h0 (hf.1 _ hmB).2]; exact hmi)
+      have : L.length ≤ (f i).1.toNat := by
+        have := Int.le_trans hmP hmono
+        simp only [OrdK.val] at this
+        omega
+      exact (List.getElem?_eq_none this).symm
+
+/-- **A rebuilt array keeps its live length**: the floors never pass their
+keys, so the slots below it stay. -/
+theorem arr_rebuild_len (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : List Int)
+    (hf : FloorsOn .uint f B) (hA : ArrOK .uint f) {n len : Nat} (hn : n ≤ len) (hn' : n < 2 ^ 256) :
+    n ≤ (arrCut f B len).toNat := by
+  obtain ⟨-, -, hm3⟩ := arrCut_spec f B len
+  apply Classical.byContradiction
+  intro hlt
+  rcases hm3 with h | ⟨hmB, hmP⟩
+  · rw [h] at hlt
+    simp only [OrdK.hi] at hlt
+    omega
+  · have h0 := (hf.1 _ hmB)
+    have := hA.2 (OrdK.uint.ofInt (arrCut f B len))
+    rw [OrdK.val_ofInt _ h0.1 h0.2] at this
+    omega
+
 /-- **A rebuilt value reads at a path what the old one read at its
-floors**, where `f` is constant on the regions. -/
-theorem FloorShape.rebuild_word (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+floors**, the value there rebuilt as the shape it reaches has it, where
+`f` is constant on the regions (and, where the shape floors an array's
+slots, monotone and never above its key). -/
+theorem FloorShape.rebuild_find (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
     (hf : FloorsOn ok f B) :
-    ∀ {T : Ty} (s : FloorShape K T) (v : SVal T) {P : PrimTy} (q : Path T (.prim P)),
-      SVal.wordOf ((s.rebuild ok f B v).findM q) = SVal.wordOf (v.findM (s.floorPath f q))
-  | _, .keep _, v, _, q => by rw [FloorShape.floorPath_keep]; rfl
-  | _, .floor s, .map m d, _, q => by
+    ∀ {T : Ty} (s : FloorShape K T), (s.hasArr = true → ArrOK ok f) → ∀ (v : SVal T) {U : Ty} (q : Path T U),
+      (s.rebuild ok f B v).findM q = (v.findM (s.floorPath f q)).map ((s.follow q).rebuild ok f B)
+  | _, .keep _, _, v, _, q => by
+    rw [FloorShape.floorPath_keep, FloorShape.follow_keep]
+    show v.findM q = _
+    cases v.findM q <;> rfl
+  | _, .floor s, hA, .map m d, _, q => by
     cases q with
+    | nil => rfl
     | key k q' =>
-      simp only [FloorShape.rebuild, FloorShape.floorPath]
+      simp only [FloorShape.rebuild, FloorShape.floorPath, FloorShape.follow]
       rw [findM_key_entryAt, findM_key_entryAt, entryAt_regionList ok B _ _ hf.1 hf.2.1 k, hf.2.2 k,
-        FloorShape.rebuild_word ok f B hf s _ q']
-  | _, .outer _ s, .map m d, _, q => by
+        FloorShape.rebuild_find ok f B hf s hA _ q']
+  | _, .outer _ s, hA, .map m d, _, q => by
     cases q with
+    | nil => rfl
     | key o q' =>
-      simp only [FloorShape.rebuild, FloorShape.floorPath, SVal.findM, SMap.toList_ofList]
+      simp only [FloorShape.rebuild, FloorShape.floorPath, FloorShape.follow, SVal.findM, SMap.toList_ofList]
       rw [lookupBy_mapSnd (s.rebuild ok f B) o m.toList]
       cases lookupBy o m.toList with
-      | none => exact FloorShape.rebuild_word ok f B hf s d q'
-      | some x => exact FloorShape.rebuild_word ok f B hf s x q'
+      | none => exact FloorShape.rebuild_find ok f B hf s hA d q'
+      | some x => exact FloorShape.rebuild_find ok f B hf s hA x q'
+  | _, .arr hK, hA, .array es sh hn, _, q => by
+    have hA' := hA rfl
+    cases ok with
+    | int => exact nomatch hK
+    | uint =>
+    cases q with
+    | nil => rfl
+    | «at» i q' =>
+      cases q'
+      simp only [FloorShape.rebuild, FloorShape.floorPath, FloorShape.follow, SVal.findM,
+        SVec.toList_ofList, SList.toList_ofList, List.take_append_drop]
+      rw [arr_rebuild_slot f B hf hA' _ _ i, show FloorShape.fU hK f = f from rfl]
+      cases (es.toList ++ sh.toList)[(f i).1.toNat]? <;> rfl
 
-/-- **The rebuilt root reads at its floors.** -/
-theorem MRoot.surgery_at (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
-    (st : Storage C) (hf : FloorsOn ok f B) {P : PrimTy}
-    (r : SRef C (.prim P)) (hr : r.root = R.name) :
-    (R.surgery ok f B st).obs.word (.ref r) = st.obs.word (.ref (r.floorRef K f)) := by
+/-- **A rebuilt value reads the word its floors held.** -/
+theorem FloorShape.rebuild_word (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (hf : FloorsOn ok f B) {T : Ty} (s : FloorShape K T) (hA : s.hasArr = true → ArrOK ok f)
+    (v : SVal T) {P : PrimTy} (q : Path T (.prim P)) :
+    SVal.wordOf ((s.rebuild ok f B v).findM q) = SVal.wordOf (v.findM (s.floorPath f q)) := by
+  rw [FloorShape.rebuild_find ok f B hf s hA v q]
+  generalize s.follow q = s'
+  cases s' with
+  | keep => cases v.findM (s.floorPath f q) <;> rfl
+
+/-- **A rebuilt value has a location exactly where its floors had one.** -/
+theorem FloorShape.rebuild_has (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (hf : FloorsOn ok f B) {T : Ty} (s : FloorShape K T) (hA : s.hasArr = true → ArrOK ok f)
+    (v : SVal T) {U : Ty} (q : Path T U) :
+    ((s.rebuild ok f B v).findM q).isSome = (v.findM (s.floorPath f q)).isSome := by
+  rw [FloorShape.rebuild_find ok f B hf s hA v q]
+  cases v.findM (s.floorPath f q) <;> rfl
+
+/-- **A rebuilt array keeps its live length.** -/
+theorem FloorShape.rebuild_lenOf (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (hf : FloorsOn ok f B) {E : Ty} (s : FloorShape K (.ref (.array E))) (hA : s.hasArr = true → ArrOK ok f)
+    (v : SVal (.ref (.array E))) : SVal.lenOf (some (s.rebuild ok f B v)) = SVal.lenOf (some v) := by
+  cases s with
+  | keep => rfl
+  | arr hK =>
+    have hA' := hA rfl
+    cases ok with
+    | int => exact nomatch hK
+    | uint =>
+    cases v with
+    | @array _ n es sh hn =>
+      simp only [FloorShape.rebuild, SVal.lenOf, SVal.view_array]
+      rw [List.length_take, List.length_map, List.length_range]
+      have hl : n ≤ (es.toList ++ sh.toList).length := by
+        rw [List.length_append, SVec.length_toList]; exact Nat.le_add_right _ _
+      exact Nat.min_eq_left (arr_rebuild_len f B hf hA' hl hn)
+
+/-- **A rebuilt array reads the live length its floors held.** -/
+theorem FloorShape.rebuild_len (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (hf : FloorsOn ok f B) {T : Ty} (s : FloorShape K T) (hA : s.hasArr = true → ArrOK ok f)
+    (v : SVal T) {E : Ty} (q : Path T (.ref (.array E))) :
+    SVal.lenOf ((s.rebuild ok f B v).findM q) = SVal.lenOf (v.findM (s.floorPath f q)) := by
+  rw [FloorShape.rebuild_find ok f B hf s hA v q]
+  cases hx : v.findM (s.floorPath f q) with
+  | none => rfl
+  | some x =>
+    show SVal.lenOf (some ((s.follow q).rebuild ok f B x)) = _
+    exact FloorShape.rebuild_lenOf ok f B hf _ (fun h => hA (FloorShape.hasArr_follow s q h)) x
+
+/-- **The rebuilt root reads at its floors**, the value there rebuilt as
+the shape it reaches has it. -/
+theorem MRoot.surgery_find (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (st : Storage C) (hf : FloorsOn ok f B) (hA : (FloorShape.of K R.ty).hasArr = true → ArrOK ok f)
+    {U : Ty} (r : SRef C U) (hr : r.root = R.name) :
+    ((R.surgery ok f B st).get r.hroot).findM r.path =
+      ((st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path)).map
+        (((FloorShape.of K r.ty).follow r.path).rebuild ok f B) := by
   obtain ⟨root, hroot, path⟩ := r
   simp only at hr
   subst hr
   obtain ⟨n, T, hT⟩ := R
   have e : T = _ := (Option.some.inj (hT.symm.trans hroot))
   subst e
-  rw [Storage.obs_word_ref, Storage.obs_word_ref]
-  show SVal.wordOf (((st.set hT _).get hroot).findM path) =
-    SVal.wordOf ((st.get hroot).findM ((FloorShape.of K _).floorPath f path))
+  show ((st.set hT _).get hroot).findM path = _
   rw [SFields.get_set_same]
-  exact FloorShape.rebuild_word ok f B hf _ _ path
+  exact FloorShape.rebuild_find ok f B hf _ hA _ path
+
+/-- Another root is kept. -/
+theorem MRoot.surgery_get_ne (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
+    (st : Storage C) {T : Ty} {a : Name} (h : C.rootType a = some T) (ha : a ≠ R.name) :
+    (R.surgery ok f B st).get h = st.get h :=
+  SFields.get_set_ne st R.h h (Ne.symm ha) _
 
 /-- Every root of `Rs` rebuilt, the first last. -/
 def surgeryAll (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) : List (MRoot C) → Storage C → Storage C
   | [], st => st
   | R :: Rs, st => R.surgery ok f B (surgeryAll ok f B Rs st)
 
-theorem surgeryAll_other (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
-    {P : PrimTy} (r : SRef C (.prim P)) : ∀ Rs : List (MRoot C), r.root ∉ Rs.map (·.name) →
-      (surgeryAll ok f B Rs st).obs.word (.ref r) = st.obs.word (.ref r)
+theorem surgeryAll_get_ne (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
+    {T : Ty} {a : Name} (h : C.rootType a = some T) : ∀ Rs : List (MRoot C), a ∉ Rs.map (·.name) →
+      (surgeryAll ok f B Rs st).get h = st.get h
   | [], _ => rfl
-  | R :: Rs, h => by
-    simp only [List.map_cons, List.mem_cons, not_or] at h
-    rw [surgeryAll, MRoot.surgery_other R ok f B _ r h.1, surgeryAll_other ok f B st r Rs h.2]
+  | R :: Rs, hn => by
+    simp only [List.map_cons, List.mem_cons, not_or] at hn
+    rw [surgeryAll, MRoot.surgery_get_ne R ok f B _ h hn.1, surgeryAll_get_ne ok f B st h Rs hn.2]
 
-theorem surgeryAll_at (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
-    (hf : FloorsOn ok f B) {P : PrimTy} (r : SRef C (.prim P)) :
-    ∀ Rs : List (MRoot C), (Rs.map (·.name)).Nodup → r.root ∈ Rs.map (·.name) →
-      (surgeryAll ok f B Rs st).obs.word (.ref r) = st.obs.word (.ref (r.floorRef K f))
-  | [], _, h => nomatch h
-  | R' :: Rs, hn, hR => by
+theorem surgeryAll_find (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
+    (hf : FloorsOn ok f B) {U : Ty} (r : SRef C U) :
+    ∀ Rs : List (MRoot C), (Rs.map (·.name)).Nodup →
+      (∀ R ∈ Rs, (FloorShape.of K R.ty).hasArr = true → ArrOK ok f) → r.root ∈ Rs.map (·.name) →
+      ((surgeryAll ok f B Rs st).get r.hroot).findM r.path =
+        ((st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path)).map
+          (((FloorShape.of K r.ty).follow r.path).rebuild ok f B)
+  | [], _, _, h => nomatch h
+  | R' :: Rs, hn, hA, hR => by
     rw [List.map_cons, List.nodup_cons] at hn
     rw [surgeryAll]
     by_cases he : r.root = R'.name
-    · rw [MRoot.surgery_at R' ok f B _ hf r he]
-      exact surgeryAll_other ok f B st (r.floorRef K f) Rs (he ▸ hn.1)
-    · rw [MRoot.surgery_other R' ok f B _ r he]
+    · rw [MRoot.surgery_find R' ok f B _ hf (hA R' List.mem_cons_self) r he,
+        surgeryAll_get_ne ok f B st r.hroot Rs (he ▸ hn.1)]
+    · rw [MRoot.surgery_get_ne R' ok f B _ r.hroot he]
       rw [List.map_cons, List.mem_cons] at hR
-      exact surgeryAll_at ok f B st hf r Rs hn.2 (hR.resolve_left he)
+      exact surgeryAll_find ok f B st hf r Rs hn.2 (fun R hR => hA R (List.mem_cons_of_mem _ hR))
+        (hR.resolve_left he)
+
+theorem wordOf_map_rebuild (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) {P : PrimTy}
+    (s : FloorShape K (.prim P)) (x : Option (SVal (.prim P))) :
+    SVal.wordOf (x.map (s.rebuild ok f B)) = SVal.wordOf x := by
+  cases s with
+  | keep => cases x <;> rfl
+
+theorem surgeryAll_word (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
+    (hf : FloorsOn ok f B) {P : PrimTy} (r : SRef C (.prim P)) (Rs : List (MRoot C))
+    (hn : (Rs.map (·.name)).Nodup) (hA : ∀ R ∈ Rs, (FloorShape.of K R.ty).hasArr = true → ArrOK ok f)
+    (hR : r.root ∈ Rs.map (·.name)) :
+    (surgeryAll ok f B Rs st).obs.word (.ref r) = st.obs.word (.ref (r.floorRef K f)) := by
+  rw [Storage.obs_word_ref, Storage.obs_word_ref]
+  show SVal.wordOf (((surgeryAll ok f B Rs st).get r.hroot).findM r.path) =
+    SVal.wordOf ((st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path))
+  rw [surgeryAll_find ok f B st hf r Rs hn hA hR, wordOf_map_rebuild]
+
+theorem surgeryAll_has (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
+    (hf : FloorsOn ok f B) {U : Ty} (r : SRef C U) (Rs : List (MRoot C))
+    (hn : (Rs.map (·.name)).Nodup) (hA : ∀ R ∈ Rs, (FloorShape.of K R.ty).hasArr = true → ArrOK ok f)
+    (hR : r.root ∈ Rs.map (·.name)) :
+    (surgeryAll ok f B Rs st).obs.has (.ref r) = st.obs.has (.ref (r.floorRef K f)) := by
+  rw [Storage.obs_has_ref, Storage.obs_has_ref]
+  show (((surgeryAll ok f B Rs st).get r.hroot).findM r.path).isSome =
+    ((st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path)).isSome
+  rw [surgeryAll_find ok f B st hf r Rs hn hA hR]
+  cases (st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path) <;> rfl
+
+theorem surgeryAll_len (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) (st : Storage C)
+    (hf : FloorsOn ok f B) {E : Ty} (r : SRef C (.ref (.array E))) (Rs : List (MRoot C))
+    (hn : (Rs.map (·.name)).Nodup) (hA : ∀ R ∈ Rs, (FloorShape.of K R.ty).hasArr = true → ArrOK ok f)
+    (hR : r.root ∈ Rs.map (·.name)) :
+    (surgeryAll ok f B Rs st).obs.len (.ref r) = st.obs.len (.ref (r.floorRef K f)) := by
+  rw [Storage.obs_len_ref, Storage.obs_len_ref]
+  show SVal.lenOf (((surgeryAll ok f B Rs st).get r.hroot).findM r.path) =
+    SVal.lenOf ((st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path))
+  rw [surgeryAll_find ok f B st hf r Rs hn hA hR]
+  obtain ⟨R, hRm, hRn⟩ := List.mem_map.1 hR
+  have hA' : (FloorShape.of K r.ty).hasArr = true → ArrOK ok f := by
+    obtain ⟨n, T, hT⟩ := R
+    simp only at hRn
+    have e : T = r.ty := Option.some.inj (hT.symm.trans (hRn ▸ r.hroot))
+    subst e
+    exact hA _ hRm
+  cases hx : (st.get r.hroot).findM ((FloorShape.of K r.ty).floorPath f r.path) with
+  | none => rfl
+  | some x =>
+    show SVal.lenOf (some (((FloorShape.of K r.ty).follow r.path).rebuild ok f B x)) = _
+    exact FloorShape.rebuild_lenOf ok f B hf _
+      (fun h => hA' (FloorShape.hasArr_follow _ r.path h)) x
 
 /-! ## The ledger rebuilt -/
 
@@ -395,6 +701,22 @@ inductive ApfTm (Rs : ARoots) : Bool → {s : Srt} → LTm C s → Type where
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zbin op h) a b)
   | zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint} (ha : ApfTm Rs false a)
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zcmp op h) a b)
+  /-- An array element along a path of a root of `Rs` (feature 30). -/
+  | rat {R : RefTy} {E : Ty} (ar : ArrTy R E) {q : LTm C (.path (.ref R))} {i : LTm C (.val .uint)}
+      (hq : ApfTm Rs true q) (hi : ApfTm Rs false i) : ApfTm Rs true (.index (.arr ar) q i)
+  /-- An array element elsewhere. -/
+  | aidx {R : RefTy} {E : Ty} (ar : ArrTy R E) {q : LTm C (.path (.ref R))} {i : LTm C (.val .uint)}
+      (hq : ApfTm Rs false q) (hi : ApfTm Rs false i) : ApfTm Rs false (.index (.arr ar) q i)
+  /-- Whether a location is there, along a path of a root of `Rs`, or elsewhere. -/
+  | rhas {T : Ty} {q : LTm C (.path T)} (hq : ApfTm Rs true q) : ApfTm Rs false (.obsH q)
+  | has {T : Ty} {q : LTm C (.path T)} (hq : ApfTm Rs false q) : ApfTm Rs false (.obsH q)
+  /-- An array's live length, along a path of a root of `Rs`, or elsewhere. -/
+  | rlen {E : Ty} {q : LTm C (.path (.ref (.array E)))} (hq : ApfTm Rs true q) : ApfTm Rs false (.obsL q)
+  | len {E : Ty} {q : LTm C (.path (.ref (.array E)))} (hq : ApfTm Rs false q) : ApfTm Rs false (.obsL q)
+  /-- A conditional value (the Theory's read of a slot: its word where it is
+  there, `⊥` where not). -/
+  | ite {p : PrimTy} {c : LTm C (.val .bool)} {a b : LTm C (.val p)} (hc : ApfTm Rs false c)
+      (ha : ApfTm Rs false a) (hb : ApfTm Rs false b) : ApfTm Rs false (.app3 .ite c a b)
 
 namespace ApfTm
 
@@ -421,39 +743,30 @@ def ofTerm? (Rs : ARoots) : (b : Bool) → {s : Srt} → (t : LTm C s) → Optio
     match ofTerm? Rs true q with
     | some hq => some (.rword hq)
     | none => (ofTerm? Rs false q).map .word
-  | false, _, .index .map q i => do return .index (← ofTerm? Rs false q) (← ofTerm? Rs false i)
-  | true, _, .index .map q i => do return .rkey (← ofTerm? Rs true q) (← ofTerm? Rs false i)
+  | false, _, .index it q i =>
+    match it, q, i with
+    | .map, q, i => do return .index (← ofTerm? Rs false q) (← ofTerm? Rs false i)
+    | .arr ar, q, i => do return .aidx ar (← ofTerm? Rs false q) (← ofTerm? Rs false i)
+  | true, _, .index it q i =>
+    match it, q, i with
+    | .map, q, i => do return .rkey (← ofTerm? Rs true q) (← ofTerm? Rs false i)
+    | .arr ar, q, i => do return .rat ar (← ofTerm? Rs true q) (← ofTerm? Rs false i)
   | false, _, .seq d a => do return .seq (← ofTerm? Rs false d) (← ofTerm? Rs false a)
   | false, _, .orElse a b => do return .orElse (← ofTerm? Rs false a) (← ofTerm? Rs false b)
   | false, _, .kite a b t e => do
     return .kite (← ofTerm? Rs false a) (← ofTerm? Rs false b) (← ofTerm? Rs false t) (← ofTerm? Rs false e)
   | false, _, .err => some .err
+  | false, _, .app3 .ite c a b => do
+    return .ite (← ofTerm? Rs false c) (← ofTerm? Rs false a) (← ofTerm? Rs false b)
+  | false, _, .obsH q =>
+    match ofTerm? Rs true q with
+    | some hq => some (.rhas hq)
+    | none => (ofTerm? Rs false q).map .has
+  | false, _, .obsL q =>
+    match ofTerm? Rs true q with
+    | some hq => some (.rlen hq)
+    | none => (ofTerm? Rs false q).map .len
   | _, _, _ => none
-
-/-- The read query of a term of the fragment. -/
-def toRead : {b : Bool} → {s : Srt} → {t : LTm C s} → ApfTm Rs b t → ReadExpr t
-  | _, _, _, .var k => .var k
-  | _, _, _, .lit v => .lit v
-  | _, _, _, .env k => .env k
-  | _, _, _, .root r h _ => .root r h
-  | _, _, _, .rroot r h _ => .root r h
-  | _, _, _, .field h hq => .field h hq.toRead
-  | _, _, _, .rfield h hq => .field h hq.toRead
-  | _, _, _, .index hq hi => .index hq.toRead hi.toRead
-  | _, _, _, .rkey hq hi => .index hq.toRead hi.toRead
-  | _, _, _, .word hq => .word hq.toRead
-  | _, _, _, .rword hq => .word hq.toRead
-  | _, _, _, .unop op h ht => .unop op h ht.toRead
-  | _, _, _, .binop op h ha hb => .binop op h ha.toRead hb.toRead
-  | _, _, _, .seq hd ha => .seq hd.toRead ha.toRead
-  | _, _, _, .orElse ha hb => .orElse ha.toRead hb.toRead
-  | _, _, _, .kite ha hb ht he => .kite ha.toRead hb.toRead ht.toRead he.toRead
-  | _, _, _, .err => .err
-  | _, _, _, .zlit n => .zlit n
-  | _, _, _, .toInt ht => .toInt ht.toRead
-  | _, _, _, .net ht => .net ht.toRead
-  | _, _, _, .zbin op h ha hb => .zbin op h ha.toRead hb.toRead
-  | _, _, _, .zcmp op h ha hb => .zcmp op h ha.toRead hb.toRead
 
 /-- A path of a root of `Rs` still along its mappings: keys only. -/
 def pre : {b : Bool} → {s : Srt} → {t : LTm C s} → ApfTm Rs b t → Bool
@@ -473,7 +786,9 @@ theorem RootsAt.none (Rs : ARoots) (b : Bool) {H : HTy} : ∀ s : Srt, RootsAt (
 theorem rootsAt (g : State C []) (ν : AEnv) {b : Bool} {s : Srt} {t : LTm C s} (ht : ApfTm Rs b t) :
     RootsAt Rs b s (t.eval g ν) := by
   induction ht with
-  | var | lit | env | word | rword | unop | binop | zlit | toInt | net | zbin | zcmp => trivial
+  | var | lit | env | word | rword | unop | binop | zlit | toInt | net | zbin | zcmp | rhas | has | rlen | len
+  | ite =>
+    trivial
   | root r h hr => exact decide_eq_false hr
   | rroot r h hr => exact decide_eq_true hr
   | @field _ _ _ h q hq ih | @rfield _ _ _ h q hq ih =>
@@ -481,7 +796,8 @@ theorem rootsAt (g : State C []) (ν : AEnv) {b : Bool} {s : Srt} {t : LTm C s} 
     cases hq' : (q.eval g ν : Option (SRef C _)) with
     | none => exact RootsAt.none Rs _ _
     | some r => rw [hq'] at ih; exact ih
-  | @index _ _ q i hq hi ihq ihi | @rkey _ _ q i hq hi ihq ihi =>
+  | @index _ _ q i hq hi ihq ihi | @rkey _ _ q i hq hi ihq ihi | @aidx _ _ _ q i hq hi ihq ihi
+  | @rat _ _ _ q i hq hi ihq ihi =>
     rw [LTm.eval_index]
     cases hq' : (q.eval g ν : Option (SRef C _)) with
     | none => exact RootsAt.none Rs _ _
@@ -563,6 +879,16 @@ def Rel (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) (Gd : LTm C (.val K)
   | _, _, _, .orElse ha hb => ha.Rel ok ks Bs Gd ∧ hb.Rel ok ks Bs Gd
   | _, _, _, .kite ha hb ht he =>
     ha.Rel ok ks Bs Gd ∧ hb.Rel ok ks Bs Gd ∧ ht.Rel ok ks Bs Gd ∧ he.Rel ok ks Bs Gd
+  | _, _, _, .aidx _ hq hi => hq.Rel ok ks Bs Gd ∧ hi.Rel ok ks Bs Gd
+  | _, _, _, .rat (R := R) (i := i) _ hq hi =>
+    hq.Rel ok ks Bs Gd ∧ (if h : PrimTy.uint = K then
+      (if (hq.pre && (FloorShape.of K (.ref R)).isArr) = true then
+        (∃ k ∈ ks, castKey h i = .var k) ∨
+          ((∀ q ∈ i.parameters, q ∉ Bs) ∧ Gd (castKey h i) ∧ hi.Rel ok ks Bs Gd)
+        else hi.Rel ok ks Bs Gd)
+      else hi.Rel ok ks Bs Gd)
+  | _, _, _, .rhas hq | _, _, _, .has hq | _, _, _, .rlen hq | _, _, _, .len hq => hq.Rel ok ks Bs Gd
+  | _, _, _, .ite hc ha hb => hc.Rel ok ks Bs Gd ∧ ha.Rel ok ks Bs Gd ∧ hb.Rel ok ks Bs Gd
 
 end ApfTm
 
@@ -573,10 +899,13 @@ of `Rs` at the floors of their keys (`SRef.floorRef`); the ledger, or its
 entries at their floors where `Rs` reads it. -/
 structure Surg (ok : OrdK K) (g : State C []) (st' : Storage C) (nt' : Ledger) (Rs : ARoots)
     (f : K.Denote → K.Denote) : Prop where
-  other : ∀ {P : PrimTy} (r : SRef C (.prim P)), r.root ∉ Rs.names →
-    st'.obs.word (.ref r) = g.storage.obs.word (.ref r)
+  other : ∀ {T : Ty} {a : Name} (h : C.rootType a = some T), a ∉ Rs.names → st'.get h = g.storage.get h
   keyAt : ∀ {P : PrimTy} (r : SRef C (.prim P)), r.root ∈ Rs.names →
     st'.obs.word (.ref r) = g.storage.obs.word (.ref (r.floorRef K f))
+  hasAt : ∀ {U : Ty} (r : SRef C U), r.root ∈ Rs.names →
+    st'.obs.has (.ref r) = g.storage.obs.has (.ref (r.floorRef K f))
+  lenAt : ∀ {E : Ty} (r : SRef C (.ref (.array E))), r.root ∈ Rs.names →
+    st'.obs.len (.ref r) = g.storage.obs.len (.ref (r.floorRef K f))
   netKeep : Rs.net = false → nt' = g.net
   netAt : Rs.net = true → NetFloor ok f nt' g.net
 
@@ -641,6 +970,78 @@ theorem SRef.follow_field {s fn : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
     (FloorShape.of K (r.field h).ty).follow (r.field h).path = .keep T := by
   show (FloorShape.of K r.ty).follow (r.path.append (.field h .nil)) = _
   rw [FloorShape.follow_append, hk, FloorShape.follow_keep]
+
+/-- Only a `uint` pass floors an array's slots. -/
+theorem FloorShape.of_isArr {T : Ty} (h : (FloorShape.of K T).isArr = true) : K = .uint := by
+  unfold FloorShape.of at h
+  split at h
+  · split at h
+    · rename_i hK'
+      subst hK'
+      simp only [FloorShape.floorEq, FloorShape.isArr, Bool.false_eq_true] at h
+    · simp only [FloorShape.isArr, Bool.false_eq_true] at h
+  · split at h
+    · assumption
+    · simp only [FloorShape.isArr, Bool.false_eq_true] at h
+  · simp only [FloorShape.isArr, Bool.false_eq_true] at h
+
+/-- An array type's shape: floored slots, or kept. -/
+theorem FloorShape.of_arr_keep {R : RefTy} {E : Ty} (ar : ArrTy R E)
+    (h : (FloorShape.of K (.ref R)).isArr = false) : FloorShape.of K (.ref R) = .keep _ := by
+  cases ar with
+  | dyn =>
+    cases E with
+    | prim e =>
+      by_cases hK : K = .uint
+      · simp only [FloorShape.of, dif_pos hK, FloorShape.isArr, Bool.true_eq_false] at h
+      · simp only [FloorShape.of, dif_neg hK]
+    | _ => rfl
+  | fixed => rfl
+
+/-- An array step reaches a kept shape. -/
+theorem FloorShape.follow_arrStep {R : RefTy} {E : Ty} (s : FloorShape K (.ref R)) (ar : ArrTy R E)
+    (k : PrimTy.uint.Denote) : s.follow (Path.index (.arr ar) k) = .keep E := by
+  cases ar with
+  | dyn =>
+    rw [Path.index_dyn]
+    cases s with
+    | keep => rfl
+    | arr => rfl
+  | fixed =>
+    rw [Path.index_fixed]
+    cases s with
+    | keep => rfl
+
+theorem SRef.follow_at {R : RefTy} {E : Ty} (r : SRef C (.ref R)) (ar : ArrTy R E) (k : PrimTy.uint.Denote) :
+    (FloorShape.of K (r.index (.arr ar) k).ty).follow (r.index (.arr ar) k).path = .keep E := by
+  show (FloorShape.of K r.ty).follow (r.path.append (Path.index (.arr ar) k)) = _
+  rw [FloorShape.follow_append, FloorShape.follow_arrStep]
+
+/-- An array step past a kept shape is kept. -/
+theorem SRef.floorRef_at_keep (f : K.Denote → K.Denote) {R : RefTy} {E : Ty} (r : SRef C (.ref R))
+    (ar : ArrTy R E) (k : PrimTy.uint.Denote) (hk : (FloorShape.of K r.ty).follow r.path = .keep _) :
+    (r.index (.arr ar) k).floorRef K f = (r.floorRef K f).index (.arr ar) k := by
+  show (⟨r.root, r.hroot, (FloorShape.of K r.ty).floorPath f (r.path.append (Path.index (.arr ar) k))⟩ :
+    SRef C E) = ⟨r.root, r.hroot, ((FloorShape.of K r.ty).floorPath f r.path).append (Path.index (.arr ar) k)⟩
+  rw [FloorShape.floorPath_append, hk, FloorShape.floorPath_keep]
+
+/-- An array step where the shape floors the slots: at its floor. -/
+theorem SRef.floorRef_at_arr (f : PrimTy.uint.Denote → PrimTy.uint.Denote) {R : RefTy} {E : Ty}
+    (r : SRef C (.ref R)) (ar : ArrTy R E) (k : PrimTy.uint.Denote)
+    (hk : ((FloorShape.of .uint r.ty).follow r.path).isArr = true) :
+    (r.index (.arr ar) k).floorRef .uint f = (r.floorRef .uint f).index (.arr ar) (f k) := by
+  show (⟨r.root, r.hroot, (FloorShape.of .uint r.ty).floorPath f (r.path.append (Path.index (.arr ar) k))⟩ :
+    SRef C E) = ⟨r.root, r.hroot, ((FloorShape.of .uint r.ty).floorPath f r.path).append (Path.index (.arr ar) (f k))⟩
+  rw [FloorShape.floorPath_append]
+  generalize (FloorShape.of .uint r.ty).follow r.path = s at hk ⊢
+  cases ar with
+  | dyn =>
+    cases s with
+    | keep => simp only [FloorShape.isArr, Bool.false_eq_true] at hk
+    | arr hK => rw [Path.index_dyn, Path.index_dyn]; rfl
+  | fixed =>
+    cases s with
+    | keep => simp only [FloorShape.isArr, Bool.false_eq_true] at hk
 
 /-- **A ledger address reads at its floor.** -/
 theorem NetRel.eval (ok : OrdK K) {g : State C []} {st' : Storage C} {nt' : Ledger} {Rs : ARoots}
@@ -813,7 +1214,7 @@ theorem ApfTm.eval_trel {Rs : ARoots} (ok : OrdK K) (g : State C []) (st' : Stor
     | none => rfl
     | some r =>
       rw [hq'] at hroot
-      exact congrArg some (hS.other r (of_decide_eq_false hroot))
+      exact congrArg some (word_of_get r (hS.other r.hroot (of_decide_eq_false hroot)))
   | @rword p q hq ih =>
     obtain ⟨hx, -⟩ := ih hr
     apply TRel.of_eq
@@ -863,6 +1264,122 @@ theorem ApfTm.eval_trel {Rs : ARoots} (ok : OrdK K) (g : State C []) (st' : Stor
     apply TRel.of_eq
     rw [LTm.eval_kite, LTm.eval_kite, (iha hr.1).of_false, (ihb hr.2.1).of_false, (iht hr.2.2.1).of_false,
       (ihe hr.2.2.2).of_false]
+  | aidx ar hq hi ihq ihi =>
+    apply TRel.of_eq
+    rw [LTm.eval_index, LTm.eval_index, (ihq hr.1).of_false, (ihi hr.2).of_false]
+  | ite hc ha hb ihc iha ihb =>
+    apply TRel.of_eq
+    rw [LTm.eval_app3, LTm.eval_app3, (ihc hr.1).of_false, (iha hr.2.1).of_false, (ihb hr.2.2).of_false]
+    rfl
+  | @has T q hq ih =>
+    apply TRel.of_eq
+    rw [LTm.eval_obsH, LTm.eval_obsH, (ih hr).of_false]
+    have hroot := ApfTm.rootsAt g μ hq
+    cases hq' : (q.eval g μ : Option (SRef C T)) with
+    | none => rfl
+    | some r =>
+      rw [hq'] at hroot
+      exact congrArg some (has_of_get r (hS.other r.hroot (of_decide_eq_false hroot)))
+  | @rhas T q hq ih =>
+    obtain ⟨hx, -⟩ := ih hr
+    apply TRel.of_eq
+    rw [LTm.eval_obsH, LTm.eval_obsH, hx]
+    have hroot := ApfTm.rootsAt { g with storage := st', net := nt' } μ' hq
+    cases hq' : (q.eval { g with storage := st', net := nt' } μ' : Option (SRef C T)) with
+    | none => rfl
+    | some r =>
+      rw [hq'] at hroot
+      exact congrArg some (hS.hasAt r (of_decide_eq_true hroot))
+  | @len E q hq ih =>
+    apply TRel.of_eq
+    rw [LTm.eval_obsL, LTm.eval_obsL, (ih hr).of_false]
+    have hroot := ApfTm.rootsAt g μ hq
+    cases hq' : (q.eval g μ : Option (SRef C (.ref (.array E)))) with
+    | none => rfl
+    | some r =>
+      rw [hq'] at hroot
+      exact congrArg (fun n => some (uintOfNat n)) (len_of_get r (hS.other r.hroot (of_decide_eq_false hroot)))
+  | @rlen E q hq ih =>
+    obtain ⟨hx, -⟩ := ih hr
+    apply TRel.of_eq
+    rw [LTm.eval_obsL, LTm.eval_obsL, hx]
+    have hroot := ApfTm.rootsAt { g with storage := st', net := nt' } μ' hq
+    cases hq' : (q.eval { g with storage := st', net := nt' } μ' : Option (SRef C (.ref (.array E)))) with
+    | none => rfl
+    | some r =>
+      rw [hq'] at hroot
+      exact congrArg (fun n => some (uintOfNat n)) (hS.lenAt r (of_decide_eq_true hroot))
+  | @rat R E ar q i hq hi ihq ihi =>
+    obtain ⟨hx, hsh⟩ := ihq hr.1
+    show TRel f false true _ _ _
+    rw [LTm.eval_index, LTm.eval_index, hx]
+    cases hq' : (q.eval { g with storage := st', net := nt' } μ' : Option (SRef C (.ref R))) with
+    | none => exact ⟨rfl, fun _ h => nomatch h⟩
+    | some r' =>
+      have hshr := hsh r' (by rw [hq']; rfl)
+      dsimp only [Option.map_some, Option.bind_some]
+      have hr2 := hr.2
+      have hkeep : ¬ (PrimTy.uint = K ∧ (hq.pre && (FloorShape.of K (.ref R)).isArr) = true) →
+          (FloorShape.of K r'.ty).follow r'.path = .keep _ := by
+        intro hn
+        rw [hshr]
+        cases hp : hq.pre with
+        | false => rfl
+        | true =>
+          rw [if_pos rfl]
+          apply FloorShape.of_arr_keep ar
+          cases h' : (FloorShape.of K (.ref R)).isArr with
+          | false => rfl
+          | true => exact absurd ⟨(FloorShape.of_isArr h').symm, by rw [hp, h']; rfl⟩ hn
+      by_cases hc : PrimTy.uint = K ∧ (hq.pre && (FloorShape.of K (.ref R)).isArr) = true
+      · obtain ⟨hK, hpa⟩ := hc
+        subst hK
+        rw [dif_pos rfl, if_pos hpa] at hr2
+        rw [Bool.and_eq_true] at hpa
+        have hfol : ((FloorShape.of .uint r'.ty).follow r'.path).isArr = true := by
+          rw [hshr, if_pos hpa.1]; exact hpa.2
+        have hkeys : (i.eval g μ : Option PrimTy.uint.Denote) =
+            (i.eval { g with storage := st', net := nt' } μ' : Option PrimTy.uint.Denote).map f := by
+          rcases hr2 with ⟨k, hk', he⟩ | ⟨hb, hg, hx'⟩
+          · rw [castKey_rfl] at he
+            subst he
+            show some (μ.get .uint k) = some (f (μ'.get .uint k))
+            rw [hk k hk']
+          · rw [castKey_rfl] at hg
+            rw [← (ihi hx').of_false]
+            cases he : (i.eval { g with storage := st', net := nt' } μ' : Option PrimTy.uint.Denote) with
+            | none => rfl
+            | some v =>
+              have hv : (i.eval g ν : Option PrimTy.uint.Denote) = some v := by
+                rw [← he, (ihi hx').of_false]
+                exact (i.eval_agree_parameters g fun q hq => hν q (hb q hq)).symm
+              rw [Option.map_some, hGd i hg v hv]
+        rw [hkeys]
+        cases (i.eval { g with storage := st', net := nt' } μ' : Option PrimTy.uint.Denote) with
+        | none => exact ⟨rfl, fun _ h => nomatch h⟩
+        | some k' =>
+          refine ⟨?_, fun r'' hr'' => ?_⟩
+          · show some ((r'.floorRef .uint f).index (.arr ar) (f k')) =
+              some ((r'.index (.arr ar) k').floorRef .uint f)
+            rw [SRef.floorRef_at_arr f r' ar k' hfol]
+          · obtain rfl : r'.index (.arr ar) k' = r'' := Option.some.inj hr''
+            exact SRef.follow_at r' ar k'
+      · have hk0 := hkeep hc
+        have hir : hi.Rel ok ks Bs Gd := by
+          by_cases hK : PrimTy.uint = K
+          · rw [dif_pos hK, if_neg (fun h => hc ⟨hK, h⟩)] at hr2
+            exact hr2
+          · rw [dif_neg hK] at hr2
+            exact hr2
+        rw [← (ihi hir).of_false]
+        cases (i.eval { g with storage := st', net := nt' } μ' : Option PrimTy.uint.Denote) with
+        | none => exact ⟨rfl, fun _ h => nomatch h⟩
+        | some k' =>
+          refine ⟨?_, fun r'' hr'' => ?_⟩
+          · show some ((r'.floorRef K f).index (.arr ar) k') = some ((r'.index (.arr ar) k').floorRef K f)
+            rw [SRef.floorRef_at_keep f r' ar k' hk0]
+          · obtain rfl : r'.index (.arr ar) k' = r'' := Option.some.inj hr''
+            exact SRef.follow_at r' ar k'
 
 /-- **A term reads alike** in the rebuilt storage at `μ'` and the old one at
 `μ`. -/
@@ -1348,14 +1865,14 @@ theorem LFml.inst_sound (g : State C []) (us : List (LTm C (.val K))) :
 /-- The root a path of keys and members starts at. -/
 def LTm.pathRoot? : {s : Srt} → LTm C s → Option Name
   | _, .app0 (.root r _) => some r
-  | _, .index .map q _ => q.pathRoot?
+  | _, .index _ q _ => q.pathRoot?
   | _, .app1 (.field _) q => q.pathRoot?
   | _, _ => none
 
 /-- The term reads a root of `Rs` at a variable of `ks` as a key of type
 `K` of a path, or the ledger at one (`Rs.net`, at `uint`). -/
 def LTm.readsAtVar (K : PrimTy) (Rs : ARoots) (ks : List Nat) : {s : Srt} → LTm C s → Bool
-  | _, .index (k := K') .map q (.var j) =>
+  | _, .index (k := K') _ q (.var j) =>
     (decide (K' = K) && q.pathRoot?.any (· ∈ Rs.names) && decide (j ∈ ks)) || q.readsAtVar K Rs ks
   | _, .app1 .net (.var j) => decide (K = .uint) && Rs.net && decide (j ∈ ks)
   | _, .app1 _ a | _, .obsW a | _, .obsL a | _, .obsH a => a.readsAtVar K Rs ks
@@ -1367,7 +1884,7 @@ def LTm.readsAtVar (K : PrimTy) (Rs : ARoots) (ks : List Nat) : {s : Srt} → LT
 
 /-- The roots the term reads at a variable of `ks`, as a key of type `K`. -/
 def LTm.rootsAtVar (K : PrimTy) (ks : List Nat) : {s : Srt} → LTm C s → List Name
-  | _, .index (k := K') .map q (.var j) =>
+  | _, .index (k := K') _ q (.var j) =>
     (if K' = K ∧ j ∈ ks then q.pathRoot?.toList else []) ++ q.rootsAtVar K ks
   | _, .app1 _ a | _, .obsW a | _, .obsL a | _, .obsH a => a.rootsAtVar K ks
   | _, .app2 _ a b | _, .index _ a b | _, .seq a b | _, .orElse a b => a.rootsAtVar K ks ++ b.rootsAtVar K ks
@@ -1762,10 +2279,48 @@ theorem ApfFml.apfInst_refute (us : List (LTm C (.val K)))
 
 end Refute
 
+/-! ## Terms evaluated -/
+
+/-- **`LTm.eval`, computed**: by `match`, the symbols by their compiled
+`eval`s; the index set's values (`IdxKey.value`) read through it. -/
+def LTm.evalC (g : State C []) (ν : AEnv) : {s : Srt} → LTm C s → Option (s.Den C g.H)
+  | _, .var k => some (ν.get _ k)
+  | _, .app0 o => o.eval g
+  | _, .app1 o x => o.eval g (x.evalC g ν)
+  | _, .app2 o x y => o.eval g (x.evalC g ν) (y.evalC g ν)
+  | _, .app3 o x y z => o.eval g (x.evalC g ν) (y.evalC g ν) (z.evalC g ν)
+  | _, .index it q i => (q.evalC g ν).bind fun r => (i.evalC g ν).bind fun j => some (r.index it j)
+  | _, .obsW q => (q.evalC g ν).bind fun r => some (g.storage.obs.word (.ref r))
+  | _, .obsL q => (q.evalC g ν).bind fun r => some (uintOfNat (g.storage.obs.len (.ref r)))
+  | _, .obsH q => (q.evalC g ν).bind fun r => some (g.storage.obs.has (.ref r))
+  | _, .seq d a => (d.evalC g ν).bind fun _ => a.evalC g ν
+  | _, .orElse a b => (a.evalC g ν).or (b.evalC g ν)
+  | _, .kite (p := p) a b t e =>
+    (a.evalC g ν : Option p.Denote).bind fun x => (b.evalC g ν : Option p.Denote).bind fun y =>
+      if x = y then t.evalC g ν else e.evalC g ν
+  | _, .err => none
+
+theorem LTm.evalC_eq (g : State C []) (ν : AEnv) : ∀ {s : Srt} (t : LTm C s), t.evalC g ν = t.eval g ν := by
+  intro s t
+  induction t with
+  | var k => rfl
+  | app0 o => rfl
+  | app1 o x ih => rw [LTm.evalC, ih]; rfl
+  | app2 o x y ihx ihy => rw [LTm.evalC, ihx, ihy]; rfl
+  | app3 o x y z ihx ihy ihz => rw [LTm.evalC, ihx, ihy, ihz]; rfl
+  | index it q i ihq ihi => rw [LTm.evalC, ihq, ihi]; rfl
+  | obsW q ih => rw [LTm.evalC, ih]; rfl
+  | obsL q ih => rw [LTm.evalC, ih]; rfl
+  | obsH q ih => rw [LTm.evalC, ih]; rfl
+  | seq d a ihd iha => rw [LTm.evalC, ihd, iha]; rfl
+  | orElse a b iha ihb => rw [LTm.evalC, iha, ihb]; rfl
+  | kite a b t e iha ihb iht ihe => rw [LTm.evalC, iha, ihb, iht, ihe]; rfl
+  | err => rfl
+
 /-! ## The checks, computed -/
 
 /-- An index term with its read query. -/
-abbrev IdxKey (C : Contract) (K : PrimTy) := (u : LTm C (.val K)) × ReadExpr u
+abbrev IdxKey (C : Contract) (K : PrimTy) := LTm C (.val K)
 
 /-- An index term of type `K'` at `K`, where they are one type. -/
 def castIdx {K' : PrimTy} (h : K' = K) (e : IdxKey C K') : IdxKey C K := h ▸ e
@@ -1808,6 +2363,15 @@ def relB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) :
   | _, _, _, .orElse ha hb => ha.relB ok ks Bs && hb.relB ok ks Bs
   | _, _, _, .kite ha hb ht he =>
     ha.relB ok ks Bs && hb.relB ok ks Bs && ht.relB ok ks Bs && he.relB ok ks Bs
+  | _, _, _, .aidx _ hq hi => hq.relB ok ks Bs && hi.relB ok ks Bs
+  | _, _, _, .rat (R := R) (i := i) _ hq hi =>
+    hq.relB ok ks Bs && (if PrimTy.uint = K then
+      (if (hq.pre && (FloorShape.of K (.ref R)).isArr) = true then
+        i.isBVar ks || (i.parameters.all (fun q => decide (q ∉ Bs)) && hi.relB ok ks Bs)
+        else hi.relB ok ks Bs)
+      else hi.relB ok ks Bs)
+  | _, _, _, .rhas hq | _, _, _, .has hq | _, _, _, .rlen hq | _, _, _, .len hq => hq.relB ok ks Bs
+  | _, _, _, .ite hc ha hb => hc.relB ok ks Bs && ha.relB ok ks Bs && hb.relB ok ks Bs
 
 /-- The ground keys of type `K` along the mappings of the roots of `Rs`
 (`pre`), and the ground ledger addresses where `Rs` reads the ledger. -/
@@ -1817,19 +2381,27 @@ def gkeys (ok : OrdK K) (ks : List Nat) : {b : Bool} → {s : Srt} → {t : LTm 
   | _, _, _, .field _ hq | _, _, _, .rfield _ hq | _, _, _, .word hq | _, _, _, .rword hq
   | _, _, _, .unop _ _ hq | _, _, _, .toInt hq => hq.gkeys ok ks
   | _, _, _, .net (t := i) hi =>
-    (if Rs.net && !i.isBVar ks then netIdx ok ⟨i, hi.toRead⟩ else []) ++ hi.gkeys ok ks
+    (if Rs.net && !i.isBVar ks then netIdx ok i else []) ++ hi.gkeys ok ks
   | _, _, _, .index hq hi => hq.gkeys ok ks ++ hi.gkeys ok ks
   | _, _, _, .rkey (K := K') (i := i) hq hi =>
     hq.gkeys ok ks ++ (if h : K' = K then
-      (if hq.pre && !i.isBVar ks then castIdx h ⟨i, hi.toRead⟩ :: hi.gkeys ok ks else hi.gkeys ok ks)
+      (if hq.pre && !i.isBVar ks then castIdx h i :: hi.gkeys ok ks else hi.gkeys ok ks)
       else hi.gkeys ok ks)
   | _, _, _, .binop _ _ ha hb | _, _, _, .seq ha hb | _, _, _, .orElse ha hb | _, _, _, .zbin _ _ ha hb
   | _, _, _, .zcmp _ _ ha hb => ha.gkeys ok ks ++ hb.gkeys ok ks
   | _, _, _, .kite ha hb ht he => ha.gkeys ok ks ++ hb.gkeys ok ks ++ ht.gkeys ok ks ++ he.gkeys ok ks
+  | _, _, _, .aidx _ hq hi => hq.gkeys ok ks ++ hi.gkeys ok ks
+  | _, _, _, .rat (R := R) (i := i) _ hq hi =>
+    hq.gkeys ok ks ++ (if h : PrimTy.uint = K then
+      (if hq.pre && (FloorShape.of K (.ref R)).isArr && !i.isBVar ks then castIdx h i :: hi.gkeys ok ks
+        else hi.gkeys ok ks)
+      else hi.gkeys ok ks)
+  | _, _, _, .rhas hq | _, _, _, .has hq | _, _, _, .rlen hq | _, _, _, .len hq => hq.gkeys ok ks
+  | _, _, _, .ite hc ha hb => hc.gkeys ok ks ++ ha.gkeys ok ks ++ hb.gkeys ok ks
 
 theorem netB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd : LTm C (.val K) → Prop}
-    {i : LTm C (.val .uint)} {hi : ApfTm Rs false i} {r : Bool} {R : Prop} (hr : r = true → R)
-    (h : netB ok ks Bs i r = true) (hg : ∀ e ∈ (if !i.isBVar ks then netIdx ok ⟨i, hi.toRead⟩ else []), Gd e.1) :
+    {i : LTm C (.val .uint)} {r : Bool} {R : Prop} (hr : r = true → R)
+    (h : netB ok ks Bs i r = true) (hg : ∀ e ∈ (if !i.isBVar ks then netIdx ok i else []), Gd e) :
     NetRel ok ks Bs Gd i R := by
   cases ok with
   | int => simp only [netB, Bool.false_eq_true] at h
@@ -1842,7 +2414,7 @@ theorem netB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd : LTm
 
 theorem relB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd : LTm C (.val K) → Prop} :
     ∀ {b : Bool} {s : Srt} {t : LTm C s} (ht : ApfTm Rs b t), ht.relB ok ks Bs = true →
-      (∀ e ∈ ht.gkeys ok ks, Gd e.1) → ht.Rel ok ks Bs Gd
+      (∀ e ∈ ht.gkeys ok ks, Gd e) → ht.Rel ok ks Bs Gd
   | _, _, _, .var _, h, _ => by simpa only [relB, decide_eq_true_eq] using h
   | _, _, _, .lit _, _, _ | _, _, _, .env _, _, _ | _, _, _, .root .., _, _ | _, _, _, .rroot .., _, _
   | _, _, _, .err, _, _ | _, _, _, .zlit _, _, _ => trivial
@@ -1878,7 +2450,7 @@ theorem relB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd : LTm
       rw [if_neg hn] at h
       exact relB_sound hi h hg2
   | _, _, _, .rkey (K := K') (i := x) hq hx, h, hg => by
-    have ihx : hx.relB ok ks Bs = true → (∀ e ∈ hx.gkeys ok ks, Gd e.1) → hx.Rel ok ks Bs Gd := relB_sound hx
+    have ihx : hx.relB ok ks Bs = true → (∀ e ∈ hx.gkeys ok ks, Gd e) → hx.Rel ok ks Bs Gd := relB_sound hx
     unfold gkeys at hg
     simp only [relB, Bool.and_eq_true] at h
     refine ⟨relB_sound hq h.1 fun e he => hg e (List.mem_append_left _ he), ?_⟩
@@ -1906,6 +2478,50 @@ theorem relB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd : LTm
       rw [if_neg hK] at h2
       rw [dif_neg hK] at hg'
       exact ihx h2 hg'
+  | _, _, _, .aidx _ hq hi, h, hg => by
+    simp only [relB, Bool.and_eq_true] at h
+    exact ⟨relB_sound hq h.1 fun e he => hg e (List.mem_append_left _ he),
+      relB_sound hi h.2 fun e he => hg e (List.mem_append_right _ he)⟩
+  | _, _, _, .rhas hq, h, hg | _, _, _, .has hq, h, hg | _, _, _, .rlen hq, h, hg
+  | _, _, _, .len hq, h, hg => relB_sound hq h hg
+  | _, _, _, .ite hc ha hb, h, hg => by
+    simp only [relB, Bool.and_eq_true] at h
+    simp only [gkeys, List.append_assoc] at hg
+    exact ⟨relB_sound hc h.1.1 fun e h' => hg e (List.mem_append_left _ h'),
+      relB_sound ha h.1.2 fun e h' => hg e (List.mem_append_right _ (List.mem_append_left _ h')),
+      relB_sound hb h.2 fun e h' => hg e (List.mem_append_right _ (List.mem_append_right _ h'))⟩
+  | _, _, _, .rat (R := R) (i := x) _ hq hx, h, hg => by
+    have ihx : hx.relB ok ks Bs = true → (∀ e ∈ hx.gkeys ok ks, Gd e) → hx.Rel ok ks Bs Gd := relB_sound hx
+    unfold gkeys at hg
+    simp only [relB, Bool.and_eq_true] at h
+    refine ⟨relB_sound hq h.1 fun e he => hg e (List.mem_append_left _ he), ?_⟩
+    have hg' := fun e he => hg e (List.mem_append_right _ he)
+    have h2 := h.2
+    by_cases hK : PrimTy.uint = K
+    · subst hK
+      rw [dif_pos rfl]
+      rw [if_pos rfl] at h2
+      rw [dif_pos rfl] at hg'
+      by_cases hpa : (hq.pre && (FloorShape.of PrimTy.uint (.ref R)).isArr) = true
+      · rw [if_pos hpa]
+        rw [if_pos (by simpa only [Bool.and_eq_true] using hpa)] at h2
+        by_cases hv : x.isBVar ks = true
+        · exact .inl (by rw [castKey_rfl]; exact LTm.isBVar_spec hv)
+        · simp only [hpa, hv, Bool.not_false, Bool.and_self, if_true] at hg'
+          simp only [hv, Bool.false_or, Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq] at h2
+          exact .inr ⟨h2.1, hg' _ List.mem_cons_self,
+            ihx h2.2 fun e he => hg' e (List.mem_cons_of_mem _ he)⟩
+      · rw [if_neg hpa]
+        rw [if_neg (by simpa only [Bool.and_eq_true] using hpa)] at h2
+        have hpa' : (hq.pre && (FloorShape.of PrimTy.uint (.ref R)).isArr && !x.isBVar ks) = false := by
+          simp only [Bool.not_eq_true] at hpa
+          rw [hpa, Bool.false_and]
+        rw [hpa'] at hg'
+        exact ihx h2 hg'
+    · rw [dif_neg hK]
+      rw [if_neg hK] at h2
+      rw [dif_neg hK] at hg'
+      exact ihx h2 hg'
 
 /-- An operand of a guard comparison, computed. -/
 def idxB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) {s : Srt} {a : LTm C s} (ha : ApfTm Rs false a) :
@@ -1915,15 +2531,15 @@ def idxB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) {s : Srt} {a : LTm 
 /-- An operand's terms in the index set: itself and its keys, at `K`. -/
 def idxGd (ok : OrdK K) (ks : List Nat) {p : PrimTy} {a : LTm C (.val p)} (ha : ApfTm Rs false a) :
     List (IdxKey C K) :=
-  if h : p = K then (if a.isBVar ks then [] else castIdx h ⟨a, ha.toRead⟩ :: ha.gkeys ok ks) else []
+  if h : p = K then (if a.isBVar ks then [] else castIdx h a :: ha.gkeys ok ks) else []
 
 /-- An operand whose successor is in the index set, at `K`. -/
-def idxLo (ks : List Nat) {p : PrimTy} {a : LTm C (.val p)} (ha : ApfTm Rs false a) : List (IdxKey C K) :=
-  if h : p = K then (if a.isBVar ks then [] else [castIdx h ⟨a, ha.toRead⟩]) else []
+def idxLo (ks : List Nat) {p : PrimTy} {a : LTm C (.val p)} (_ha : ApfTm Rs false a) : List (IdxKey C K) :=
+  if h : p = K then (if a.isBVar ks then [] else [castIdx h a]) else []
 
 theorem idxB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd Lo : LTm C (.val K) → Prop}
     {a : LTm C (.val K)} (ha : ApfTm Rs false a) (h : ha.idxB ok ks Bs = true)
-    (hg : ∀ e ∈ idxGd ok ks ha, Gd e.1) (hl : ∀ e ∈ idxLo ks ha, Lo e.1) :
+    (hg : ∀ e ∈ idxGd ok ks ha, Gd e) (hl : ∀ e ∈ idxLo ks ha, Lo e) :
     IdxP ok Gd Lo ks Bs (a.isBVar ks) ha := by
   by_cases hv : a.isBVar ks = true
   · obtain ⟨k, hk, rfl⟩ := LTm.isBVar_spec hv
@@ -1944,7 +2560,8 @@ def guardTot (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfTm Rs false t 
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root .. | _, _, .field .. | _, _, .index ..
   | _, _, .word _ | _, _, .rword .. | _, _, .unop .. | _, _, .seq .. | _, _, .orElse ..
   | _, _, .kite .. | _, _, .err | _, _, .zlit _ | _, _, .toInt _ | _, _, .net _ | _, _, .zbin ..
-  | _, _, .zcmp .. => true
+  | _, _, .zcmp .. | _, _, .aidx .. | _, _, .rhas _ | _, _, .has _ | _, _, .rlen _ | _, _, .len _
+  | _, _, .ite .. => true
 
 /-- Whether a guard returns at the floors where it returned at the keys
 (`GuardP`'s `ds`). -/
@@ -1956,7 +2573,8 @@ def guardDs (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfTm Rs false t �
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root .. | _, _, .field .. | _, _, .index ..
   | _, _, .word _ | _, _, .rword .. | _, _, .unop .. | _, _, .seq .. | _, _, .orElse ..
   | _, _, .kite .. | _, _, .err | _, _, .zlit _ | _, _, .toInt _ | _, _, .net _ | _, _, .zbin ..
-  | _, _, .zcmp .. => true
+  | _, _, .zcmp .. | _, _, .aidx .. | _, _, .rhas _ | _, _, .has _ | _, _, .rlen _ | _, _, .len _
+  | _, _, .ite .. => true
 
 /-- A guard, computed. -/
 def guardB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) :
@@ -1969,7 +2587,8 @@ def guardB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) :
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root .. | _, _, .field .. | _, _, .index ..
   | _, _, .word _ | _, _, .rword .. | _, _, .unop .. | _, _, .seq .. | _, _, .orElse ..
   | _, _, .kite .. | _, _, .err | _, _, .zlit _ | _, _, .toInt _ | _, _, .net _ | _, _, .zbin ..
-  | _, _, .zcmp .. => false
+  | _, _, .zcmp .. | _, _, .aidx .. | _, _, .rhas _ | _, _, .has _ | _, _, .rlen _ | _, _, .len _
+  | _, _, .ite .. => false
 
 /-- A guard's terms in the index set. -/
 def guardGd (ok : OrdK K) (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfTm Rs false t → List (IdxKey C K)
@@ -1979,7 +2598,8 @@ def guardGd (ok : OrdK K) (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfT
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root .. | _, _, .field .. | _, _, .index ..
   | _, _, .word _ | _, _, .rword .. | _, _, .unop .. | _, _, .seq .. | _, _, .orElse ..
   | _, _, .kite .. | _, _, .err | _, _, .zlit _ | _, _, .toInt _ | _, _, .net _ | _, _, .zbin ..
-  | _, _, .zcmp .. => []
+  | _, _, .zcmp .. | _, _, .aidx .. | _, _, .rhas _ | _, _, .has _ | _, _, .rlen _ | _, _, .len _
+  | _, _, .ite .. => []
 
 /-- A guard's terms whose successors are in the index set. -/
 def guardLo (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfTm Rs false t → List (IdxKey C K)
@@ -1989,18 +2609,19 @@ def guardLo (ks : List Nat) : {s : Srt} → {t : LTm C s} → ApfTm Rs false t �
   | _, _, .var _ | _, _, .lit _ | _, _, .env _ | _, _, .root .. | _, _, .field .. | _, _, .index ..
   | _, _, .word _ | _, _, .rword .. | _, _, .unop .. | _, _, .seq .. | _, _, .orElse ..
   | _, _, .kite .. | _, _, .err | _, _, .zlit _ | _, _, .toInt _ | _, _, .net _ | _, _, .zbin ..
-  | _, _, .zcmp .. => []
+  | _, _, .zcmp .. | _, _, .aidx .. | _, _, .rhas _ | _, _, .has _ | _, _, .rlen _ | _, _, .len _
+  | _, _, .ite .. => []
 
 theorem guardB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd Lo : LTm C (.val K) → Prop} :
     ∀ {p : PrimTy} {t : LTm C (.val p)} (ht : ApfTm Rs false t), ht.guardB ok ks Bs = true →
-      (∀ e ∈ ht.guardGd ok ks, Gd e.1) → (∀ e ∈ ht.guardLo (K := K) ks, Lo e.1) →
+      (∀ e ∈ ht.guardGd ok ks, Gd e) → (∀ e ∈ ht.guardLo (K := K) ks, Lo e) →
         GuardP ok Gd Lo ks Bs (ht.guardTot ks) (ht.guardDs ks) ht
   | _, _, @ApfTm.binop _ _ op p h a b ha hb, hg, hd, hl => by
-    have iha : ha.guardB ok ks Bs = true → (∀ e ∈ ha.guardGd ok ks, Gd e.1) →
-        (∀ e ∈ ha.guardLo (K := K) ks, Lo e.1) →
+    have iha : ha.guardB ok ks Bs = true → (∀ e ∈ ha.guardGd ok ks, Gd e) →
+        (∀ e ∈ ha.guardLo (K := K) ks, Lo e) →
         GuardP ok Gd Lo ks Bs (ha.guardTot ks) (ha.guardDs ks) ha := guardB_sound ha
-    have ihb : hb.guardB ok ks Bs = true → (∀ e ∈ hb.guardGd ok ks, Gd e.1) →
-        (∀ e ∈ hb.guardLo (K := K) ks, Lo e.1) →
+    have ihb : hb.guardB ok ks Bs = true → (∀ e ∈ hb.guardGd ok ks, Gd e) →
+        (∀ e ∈ hb.guardLo (K := K) ks, Lo e) →
         GuardP ok Gd Lo ks Bs (hb.guardTot ks) (hb.guardDs ks) hb := guardB_sound hb
     simp only [guardGd, guardLo] at hd hl
     simp only [guardB, Bool.or_eq_true, Bool.and_eq_true, beq_iff_eq] at hg
@@ -2034,7 +2655,8 @@ theorem guardB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd Lo 
   | _, _, .var _, hg, _, _ | _, _, .lit _, hg, _, _ | _, _, .env _, hg, _, _ | _, _, .word _, hg, _, _
   | _, _, .rword .., hg, _, _ | _, _, .unop .., hg, _, _ | _, _, .seq .., hg, _, _
   | _, _, .orElse .., hg, _, _ | _, _, .kite .., hg, _, _ | _, _, .err, hg, _, _
-  | _, _, .zcmp .., hg, _, _ => by
+  | _, _, .zcmp .., hg, _, _ | _, _, .rhas _, hg, _, _ | _, _, .has _, hg, _, _
+  | _, _, .rlen _, hg, _, _ | _, _, .len _, hg, _, _ | _, _, .ite .., hg, _, _ => by
     simp only [guardB, Bool.false_eq_true] at hg
 
 end ApfTm
@@ -2056,8 +2678,8 @@ def eqGuardB (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) {p : PrimTy} {a
 theorem eqGuardB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd Lo : LTm C (.val K) → Prop}
     {p : PrimTy} {a b : LTm C (.val p)} (ha : ApfTm Rs false a) (hb : ApfTm Rs false b)
     (h : eqGuardB ok ks Bs ha hb = true)
-    (hd : ∀ e ∈ ha.guardGd ok ks ++ ApfTm.idxGd ok ks ha ++ ApfTm.idxGd ok ks hb, Gd e.1)
-    (hl : ∀ e ∈ ha.guardLo (K := K) ks ++ ApfTm.idxLo ks ha ++ ApfTm.idxLo ks hb, Lo e.1) :
+    (hd : ∀ e ∈ ha.guardGd ok ks ++ ApfTm.idxGd ok ks ha ++ ApfTm.idxGd ok ks hb, Gd e)
+    (hl : ∀ e ∈ ha.guardLo (K := K) ks ++ ApfTm.idxLo ks ha ++ ApfTm.idxLo ks hb, Lo e) :
     GAtom ok Gd Lo ks Bs ha hb := by
   simp only [eqGuardB, Bool.or_eq_true, Bool.and_eq_true, beq_iff_eq] at h
   rcases h with ⟨ht, hg⟩ | ⟨⟨⟨rfl, h1⟩, h2⟩⟩
@@ -2109,7 +2731,7 @@ def bodyLo (ok : OrdK K) (ks : List Nat) (Bs : List Parameter) : {φ : LFml C} �
 
 theorem bodyB_sound {ok : OrdK K} {ks : List Nat} {Bs : List Parameter} {Gd Lo : LTm C (.val K) → Prop} :
     ∀ (pol : Bool) {φ : LFml C} (h : ApfFml Rs φ), h.bodyB ok ks Bs pol = true →
-      (∀ e ∈ h.bodyGd ok ks Bs, Gd e.1) → (∀ e ∈ h.bodyLo ok ks Bs, Lo e.1) → h.BodyOk ok Gd Lo ks Bs pol
+      (∀ e ∈ h.bodyGd ok ks Bs, Gd e) → (∀ e ∈ h.bodyLo ok ks Bs, Lo e) → h.BodyOk ok Gd Lo ks Bs pol
   | _, _, .tt, _, _, _ => trivial
   | pol, _, .eq ha hb, hb', hd, hl => by
     unfold bodyGd at hd
@@ -2153,7 +2775,7 @@ def frameGd (ok : OrdK K) : {φ : LFml C} → ApfFml Rs φ → List (IdxKey C K)
   | _, .and h₁ h₂ | _, .imp h₁ h₂ => h₁.frameGd ok ++ h₂.frameGd ok
 
 theorem frameB_sound {ok : OrdK K} {Bs : List Parameter} {Gd : LTm C (.val K) → Prop} :
-    ∀ {φ : LFml C} (h : ApfFml Rs φ), h.frameB ok Bs = true → (∀ e ∈ h.frameGd ok, Gd e.1) → h.Frame ok Bs Gd
+    ∀ {φ : LFml C} (h : ApfFml Rs φ), h.frameB ok Bs = true → (∀ e ∈ h.frameGd ok, Gd e) → h.Frame ok Bs Gd
   | _, .tt, _, _ => trivial
   | _, .eq ha hb, hf, hd => by
     simp only [frameB, Bool.and_eq_true] at hf
@@ -2216,7 +2838,7 @@ def topLo (ok : OrdK K) (Bs : List Parameter) : Bool → {φ : LFml C} → ApfFm
 
 theorem topB_sound {ok : OrdK K} {Bs : List Parameter} {Gd Lo : LTm C (.val K) → Prop} :
     ∀ (pol : Bool) {φ : LFml C} (h : ApfFml Rs φ), h.topB ok Bs pol = true →
-      (∀ e ∈ h.topGd ok Bs pol, Gd e.1) → (∀ e ∈ h.topLo ok Bs pol, Lo e.1) → h.TopOk ok Gd Lo Bs pol
+      (∀ e ∈ h.topGd ok Bs pol, Gd e) → (∀ e ∈ h.topLo ok Bs pol, Lo e) → h.TopOk ok Gd Lo Bs pol
   | _, _, .tt, _, _, _ => trivial
   | _, _, .eq ha hb, ht, hd, _ => by
     simp only [topB, Bool.and_eq_true] at ht
@@ -2271,44 +2893,40 @@ theorem LTm.eval_succO (ok : OrdK K) (g : State C []) (ν : AEnv) (x : LTm C (.v
   exact ok.add_one v hb
 
 /-- The successor's key. -/
-def IdxKey.succ (ok : OrdK K) (e : IdxKey C K) : IdxKey C K := ⟨e.1.succO ok, .binop .add ok.addOk e.2 (.lit _)⟩
+def IdxKey.succ (ok : OrdK K) (e : IdxKey C K) : IdxKey C K := e.succO ok
 
 /-- The key type's least value. -/
-def IdxKey.base (ok : OrdK K) : IdxKey C K := ⟨.app0 (.lit (ok.ofInt ok.lo)), .lit _⟩
+def IdxKey.base (ok : OrdK K) : IdxKey C K := .app0 (.lit (ok.ofInt ok.lo))
 
 /-- The key type's largest value. -/
-def IdxKey.top (ok : OrdK K) : IdxKey C K := ⟨.app0 (.lit ok.top), .lit _⟩
+def IdxKey.top (ok : OrdK K) : IdxKey C K := .app0 (.lit ok.top)
 
-/-- A key's value at `g`, `ν`, by its read query. -/
-def IdxKey.value (g : State C []) (ν : AEnv) (e : IdxKey C K) : Option K.Denote :=
-  (e.2.query g ν).runStorage g.storage
+/-- A key's value at `g`, `ν`, computed (`LTm.evalC`). -/
+def IdxKey.value (g : State C []) (ν : AEnv) (e : IdxKey C K) : Option K.Denote := e.evalC g ν
 
 theorem IdxKey.value_eq (g : State C []) (ν : AEnv) (e : IdxKey C K) :
-    e.value g ν = (e.1.eval g ν : Option K.Denote) := by
-  have := ReadExpr.query_sound g ν e.2 g.storage
-  rw [ReadDen.erase_val, Option.map_id] at this
-  exact this
+    e.value g ν = (e.eval g ν : Option K.Denote) := LTm.evalC_eq g ν e
 
 /-- **The index set's values** at `g`, `ν`. -/
 def apfValues (ok : OrdK K) (us : List (IdxKey C K)) (g : State C []) (ν : AEnv) : List Int :=
   us.filterMap fun e => (e.value g ν).map ok.val
 
 theorem mem_apfValues {ok : OrdK K} {us : List (IdxKey C K)} {g : State C []} {ν : AEnv} {s : Int} :
-    s ∈ apfValues ok us g ν ↔ ∃ e ∈ us, ∃ v : K.Denote, (e.1.eval g ν : Option _) = some v ∧ ok.val v = s := by
+    s ∈ apfValues ok us g ν ↔ ∃ e ∈ us, ∃ v : K.Denote, (e.eval g ν : Option _) = some v ∧ ok.val v = s := by
   simp only [apfValues, List.mem_filterMap, Option.map_eq_some_iff, IdxKey.value_eq]
 
 /-- **The index set without repeated terms**: a term written twice is one
 instance, not two (`LTm.beqR`, structural). -/
 def dedupKeys : List (IdxKey C K) → List (IdxKey C K)
   | [] => []
-  | e :: l => e :: (dedupKeys l).filter fun e' => !(e'.1.beqR e.1)
+  | e :: l => e :: (dedupKeys l).filter fun e' => !(e'.beqR e)
 
-theorem dedupKeys_mem : ∀ {l : List (IdxKey C K)} {e : IdxKey C K}, e ∈ l → ∃ e' ∈ dedupKeys l, e'.1 = e.1
+theorem dedupKeys_mem : ∀ {l : List (IdxKey C K)} {e : IdxKey C K}, e ∈ l → ∃ e' ∈ dedupKeys l, e' = e
   | e₀ :: l, e, h => by
     rcases List.mem_cons.1 h with rfl | h
     · exact ⟨e, List.mem_cons_self, rfl⟩
     · obtain ⟨e', he', hee⟩ := dedupKeys_mem h
-      by_cases hb : e'.1.beqR e₀.1 = true
+      by_cases hb : e'.beqR e₀ = true
       · rw [LTm.beqR_eq_beqM] at hb
         have := LTm.eq_of_beqM _ _ hb
         exact ⟨e₀, List.mem_cons_self, by
@@ -2336,21 +2954,44 @@ def apfRoots (ok : OrdK K) (B : LFml C) : List (MRoot C) × ARoots :=
 ledger or is an `int` one (the regions past the goal's keys then read a
 free word, not the last key's); the conditions' terms and the successors
 of the guards' operands, each term once. -/
-def apfKeys (ok : OrdK K) (Rs : ARoots) (B : LFml C) (h : ApfFml Rs B) : List (IdxKey C K) :=
+def apfKeys (ok : OrdK K) (Rs : ARoots) (B : LFml C) (h : ApfFml Rs B) (extra : List (IdxKey C K) := []) :
+    List (IdxKey C K) :=
   dedupKeys (IdxKey.base ok :: ((if Rs.net || !ok.netB then [IdxKey.top ok] else []) ++
-    (h.topGd ok B.binders true ++ (h.topLo ok B.binders true).map (IdxKey.succ ok))))
+    ((h.topGd ok B.binders true ++ (h.topLo ok B.binders true).map (IdxKey.succ ok)) ++ extra)))
 
-theorem mem_apfKeys_gd {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} {e : IdxKey C K}
-    (he : e ∈ h.topGd ok B.binders true) : ∃ e' ∈ apfKeys ok Rs B h, e'.1 = e.1 :=
-  dedupKeys_mem (List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_append_left _ he)))
+theorem mem_apfKeys_gd {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} {extra : List (IdxKey C K)}
+    {e : IdxKey C K} (he : e ∈ h.topGd ok B.binders true) : ∃ e' ∈ apfKeys ok Rs B h extra, e' = e :=
+  dedupKeys_mem (List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_append_left _
+    (List.mem_append_left _ he))))
 
-theorem mem_apfKeys_lo {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} {e : IdxKey C K}
-    (he : e ∈ h.topLo ok B.binders true) : ∃ e' ∈ apfKeys ok Rs B h, e'.1 = (IdxKey.succ ok e).1 :=
-  dedupKeys_mem (List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_append_right _
-    (List.mem_map.2 ⟨e, he, rfl⟩))))
+theorem mem_apfKeys_lo {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} {extra : List (IdxKey C K)}
+    {e : IdxKey C K} (he : e ∈ h.topLo ok B.binders true) :
+    ∃ e' ∈ apfKeys ok Rs B h extra, e' = IdxKey.succ ok e :=
+  dedupKeys_mem (List.mem_cons_of_mem _ (List.mem_append_right _ (List.mem_append_left _
+    (List.mem_append_right _ (List.mem_map.2 ⟨e, he, rfl⟩)))))
 
-theorem base_mem_apfKeys {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} :
-    IdxKey.base ok ∈ apfKeys ok Rs B h := List.mem_cons_self
+theorem base_mem_apfKeys {ok : OrdK K} {Rs : ARoots} {B : LFml C} {h : ApfFml Rs B} {extra : List (IdxKey C K)} :
+    IdxKey.base ok ∈ apfKeys ok Rs B h extra := List.mem_cons_self
+
+/-- Where every value of the index set bounds a strict guard, no key reads
+the largest value past its floor (`ApfSet.region`): `lastIn` is the floor. -/
+theorem lastIn_eq_floorIn (S : ApfSet) (h : ∀ v ∈ S.vals, v ∈ S.strict) (x : Int) :
+    lastIn S x = floorIn S.lo S.vals x := by
+  unfold lastIn
+  rw [if_neg]
+  intro hr
+  rcases apfTop_mem' S with ht | ht
+  · have := hr.1; have := hr.2.1; have := apfSecond_ge_lo S; omega
+  · exact hr.2.2.1 (h _ ht)
+
+/-- **Such floors rebuild arrays** (`ArrOK`). -/
+theorem lastK_arrOK (ok : OrdK K) (S : ApfSet) (hlo : S.lo = ok.lo) (hhi : S.hi = ok.hi)
+    (h : ∀ v ∈ S.vals, v ∈ S.strict) : ArrOK ok (lastK ok S) := by
+  refine ⟨fun x y hxy => ?_, fun x => ?_⟩
+  · rw [lastK_val ok S hlo hhi, lastK_val ok S hlo hhi]
+    exact lastIn_mono S (by rw [hlo]; exact (ok.bounds x).1) hxy
+  · rw [lastK_val ok S hlo hhi, lastIn_eq_floorIn S h]
+    exact floorIn_le S.lo S.vals (by rw [hlo]; exact (ok.bounds x).1)
 
 /-- **The rebuilt state is set**: the roots floored, the ledger too where
 the pass reads it, every guard monotone; so a state refuting the
@@ -2389,69 +3030,73 @@ theorem apfNetFloor (ok : OrdK K) (B : LFml C) {f : K.Denote → K.Denote} {Bk :
 variables, and over the ledger at a `uint` pass, instantiated at the index
 set; the body itself where there is none, or where the body is outside
 the fragment. -/
-def apfPrepK (ok : OrdK K) (B : LFml C) : Prep B :=
+def apfPrepK (ok : OrdK K) (B : LFml C) (extra : List (IdxKey C K) := []) : Prep B :=
   let roots := (apfRoots ok B).1
   let Rs := (apfRoots ok B).2
   if hn : Rs.names.Nodup ∧ (Rs.names ≠ [] ∨ Rs.net = true) then
     match ApfFml.ofFormula? Rs B with
     | none => Prep.id B
     | some h =>
-      let us := apfKeys ok Rs B h
+      let us := apfKeys ok Rs B h extra
       if hc : h.topB ok B.binders true = true ∧
-          us.all (fun e => e.1.parameters.all fun q => decide (q ∉ B.binders)) = true then
-        { body := B.apfInst Rs (us.map (·.1)) true
+          us.all (fun e => e.parameters.all fun q => decide (q ∉ B.binders)) = true then
+        { body := B.apfInst Rs us true
           sound := fun hv g ν => (LFml.apfInst_sound g Rs _ B true ν).1 rfl (hv g ν)
           refute := fun g ν hneg =>
             let lo := h.topLo ok B.binders true
-            let S : ApfSet := ⟨apfValues ok us g ν, apfValues ok lo g ν, ok.lo, ok.hi⟩
+            let arrs := roots.any fun R => (FloorShape.of K R.ty).hasArr
+            let S : ApfSet := ⟨apfValues ok us g ν,
+              apfValues ok lo g ν ++ (if arrs then apfValues ok us g ν else []), ok.lo, ok.hi⟩
             ⟨apfState ok S roots Rs g, by
               have hf := apfFloors ok S rfl rfl
+              have hA : ∀ R ∈ roots, (FloorShape.of K R.ty).hasArr = true → ArrOK ok (lastK ok S) :=
+                fun R hR ha => lastK_arrOK ok S rfl rfl fun v hv => by
+                  have harr : arrs = true := List.any_eq_true.2 ⟨R, hR, ha⟩
+                  show v ∈ apfValues ok lo g ν ++ (if arrs then apfValues ok us g ν else [])
+                  rw [if_pos harr]
+                  exact List.mem_append_right _ hv
               have hsurg : Surg ok g (surgeryAll ok (lastK ok S) S.breaks roots g.storage)
                   (if Rs.net then netRebuild ok (lastK ok S) S.breaks g.net else g.net) Rs (lastK ok S) :=
-                { other := fun r hr => surgeryAll_other _ _ _ _ r roots hr
-                  keyAt := fun r hr => surgeryAll_at _ _ _ _ hf r roots hn.1 hr
+                { other := fun h hr => surgeryAll_get_ne _ _ _ _ h roots hr
+                  keyAt := fun r hr => surgeryAll_word _ _ _ _ hf r roots hn.1 hA hr
+                  hasAt := fun r hr => surgeryAll_has _ _ _ _ hf r roots hn.1 hA hr
+                  lenAt := fun r hr => surgeryAll_len _ _ _ _ hf r roots hn.1 hA hr
                   netKeep := fun he => if_neg (by rw [he]; exact Bool.false_ne_true)
                   netAt := fun he => by
                     rw [if_pos he]
                     exact apfNetFloor ok B hf g.net he }
               have hall := List.all_eq_true.1 hc.2
-              have hus : ∀ u ∈ us.map (·.1), ∀ q ∈ u.parameters, q ∉ B.binders := fun u hu q hq => by
-                obtain ⟨e, he, rfl⟩ := List.mem_map.1 hu
-                have := List.all_eq_true.1 (hall e he) q hq
+              have hus : ∀ u ∈ us, ∀ q ∈ u.parameters, q ∉ B.binders := fun u hu q hq => by
+                have := List.all_eq_true.1 (hall u hu) q hq
                 simpa only [decide_eq_true_eq] using this
-              have hcover : ∀ s ∈ S, ∃ u ∈ us.map (·.1), ∃ v : K.Denote,
+              have hcover : ∀ s ∈ S, ∃ u ∈ us, ∃ v : K.Denote,
                   (u.eval g ν : Option _) = some v ∧ ok.val v = s := fun s hs => by
                 obtain ⟨e, he, v, hv, rfl⟩ := mem_apfValues.1 hs
-                exact ⟨e.1, List.mem_map.2 ⟨e, he, rfl⟩, v, hv, rfl⟩
+                exact ⟨e, he, v, hv, rfl⟩
               have h0 : S.lo ∈ S := mem_apfValues.2 ⟨IdxKey.base ok, base_mem_apfKeys, ok.ofInt ok.lo, rfl,
                 ok.val_ofInt (Int.le_refl _) (by have := ok.lo_lt; omega)⟩
               have hset : Setting ok g (surgeryAll ok (lastK ok S) S.breaks roots g.storage)
                   (if Rs.net then netRebuild ok (lastK ok S) S.breaks g.net else g.net) Rs S
-                  (fun x => x ∈ us.map (·.1)) (fun x => x ∈ lo.map (·.1)) [] B.binders ν ν ν :=
+                  (fun x => x ∈ us) (fun x => x ∈ lo) [] B.binders ν ν ν :=
                 { lo := rfl
                   hi := rfl
                   surg := hsurg
-                  gdS := fun x hx v hv => by
-                    obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
-                    exact mem_apfValues.2 ⟨e, he, v, hv, rfl⟩
+                  gdS := fun x hx v hv => mem_apfValues.2 ⟨x, hx, v, hv, rfl⟩
                   loS := fun x hx v hv hb => by
                     obtain ⟨w, hw, hw1⟩ := LTm.eval_succO ok g ν x hv hb
-                    obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
-                    obtain ⟨e', he', hee⟩ := mem_apfKeys_lo he
+                    obtain ⟨e', he', hee⟩ := mem_apfKeys_lo hx
                     exact mem_apfValues.2 ⟨e', he', w, by rw [hee]; exact hw, hw1⟩
-                  loT := fun x hx v hv => by
-                    obtain ⟨e, he, rfl⟩ := List.mem_map.1 hx
-                    exact mem_apfValues.2 ⟨e, he, v, hv, rfl⟩
+                  loT := fun x hx v hv => List.mem_append_left _ (mem_apfValues.2 ⟨x, hx, v, hv, rfl⟩)
                   hμ := fun _ _ => rfl
                   hk := fun _ h => nomatch h
                   hν := fun _ _ => rfl }
-              have htop := ApfFml.topB_sound (Gd := fun x => x ∈ us.map (·.1))
-                (Lo := fun x => x ∈ lo.map (·.1)) true h hc.1
+              have htop := ApfFml.topB_sound (Gd := fun x => x ∈ us)
+                (Lo := fun x => x ∈ lo) true h hc.1
                 (fun e he => by
                   obtain ⟨e', he', hee⟩ := mem_apfKeys_gd he
-                  exact List.mem_map.2 ⟨e', he', hee⟩)
-                (fun e he => List.mem_map.2 ⟨e, he, rfl⟩)
-              exact fun hB => hneg ((ApfFml.apfInst_refute (us.map (·.1)) hus hcover h0 hset true h htop).1
+                  exact hee ▸ he')
+                (fun e he => he)
+              exact fun hB => hneg ((ApfFml.apfInst_refute us hus hcover h0 hset true h htop).1
                 rfl hB)⟩ }
       else Prep.id B
   else Prep.id B
@@ -2459,6 +3104,11 @@ def apfPrepK (ok : OrdK K) (B : LFml C) : Prep B :=
 /-- **Array property instantiation as a preparation**: the `uint` blocks
 (the ledger's among them), then the `int` ones. -/
 def apfPrep (B : LFml C) : Prep B := (apfPrepK .uint B).trans (apfPrepK .int _)
+
+/-- **Array property instantiation with more index terms** at the `uint`
+pass (feature 30: an array's live length, read as an atom). -/
+def apfPrepWith (extra : List (IdxKey C .uint)) (B : LFml C) : Prep B :=
+  (apfPrepK .uint B extra).trans (apfPrepK .int _)
 
 /-- **The prepared body is valid exactly where the body is**: this is
 `Prep.valid_iff`, which every preparation has (`Prep.id` too).  What the
@@ -2478,3 +3128,4 @@ theorem apfPrep_valid_iff (B : LFml C) : (apfPrep B).body.Valid ↔ B.Valid := (
 #guard_msgs in #print axioms ApfFml.apfInst_refute
 
 end Solidity.Decide
+

@@ -4,6 +4,7 @@ import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
 
@@ -171,7 +172,13 @@ def decideLeafA (φ : Fml C []) : LeafVerdict C :=
             match q.verify with
             | .inl _ => .proved
             | .inr cm => .refuted cm.1
-          | none => .unknown
+          | none =>
+            match arrayBlockReduction? φ with
+            | some q =>
+              match q.verify with
+              | .inl _ => .proved
+              | .inr cm => .refuted cm.1
+            | none => .unknown
 
 /-- **Soundness.** -/
 theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.Valid φ := by
@@ -201,7 +208,12 @@ theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.V
             · rename_i hv _
               exact hv.down
             · cases h
-          · cases h
+          · split at h
+            · split at h
+              · rename_i hv _
+                exact hv.down
+              · cases h
+            · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
 theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA φ = .refuted σ) :
@@ -237,7 +249,13 @@ theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA �
             · rename_i cm _
               cases h
               exact cm.2
-          · cases h
+          · split at h
+            · split at h
+              · cases h
+              · rename_i cm _
+                cases h
+                exact cm.2
+            · cases h
 
 /-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
 quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
@@ -246,7 +264,7 @@ reads (`Fml.ledgerCovered`, M7 step 3), the one with storage array reads
 (`Fml.ledgerBlockCovered`, feature 21). -/
 def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
   φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered ||
-    φ.ledgerBlockCovered
+    φ.ledgerBlockCovered || φ.arrayBlockCovered
 
 /-- **Completeness on `Fml.CoveredA`.** -/
 theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLeafA φ ≠ .unknown := by
@@ -257,7 +275,7 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
     dsimp only
     split <;> exact fun h => nomatch h
   | none =>
-    rcases h with (((h | h) | h) | h) | h
+    rcases h with ((((h | h) | h) | h) | h) | h
     · have := dependentReduction?_isSome φ h.1 h.2
       rw [hd] at this
       cases this
@@ -293,6 +311,19 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
           · rw [hq]
             dsimp only
             split <;> exact fun h => nomatch h
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayBlockReduction?_isSome φ h)
+      dsimp only
+      split
+      · split <;> exact fun h => nomatch h
+      · split
+        · split <;> exact fun h => nomatch h
+        · split
+          · split <;> exact fun h => nomatch h
+          · split
+            · split <;> exact fun h => nomatch h
+            · rw [hq]
+              dsimp only
+              split <;> exact fun h => nomatch h
 
 
 /-! ### Fresh memory arrays (M7, plan step 6)

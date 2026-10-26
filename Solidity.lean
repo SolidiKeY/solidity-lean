@@ -405,6 +405,7 @@ import Solidity.Calculus.OrLift
 import Solidity.Calculus.ArrayCut
 import Solidity.Calculus.ArrayFold
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.ExactUpdates
 import Solidity.Calculus.ParameterLayout
 import Solidity.Calculus.CheckedLinear
