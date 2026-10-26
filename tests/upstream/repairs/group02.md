@@ -109,3 +109,21 @@ and byte-preserved archive; all observations of each passing fixture are present
 | --- | ---: | ---: | ---: |
 | legacy | 65 | 0 | 0 |
 | viaIR | 64 | 2 | 0 |
+
+
+The managed runtime gate passes: Lean 4.24.0, Lake 5.0.0-src+797c613 and
+`lake build Solidity.KeySort`. Final library (649 jobs), compiled TestSuite
+(249 jobs), frozen sort and frozen corpus gates pass. The corpus retains all
+774 existing obligation rows without verdict/generated-output drift.
+TestSuite derivations required a serial retry after concurrent workers hit
+the 16 GiB memory boundary; all 21 targets passed with `LEAN_NUM_THREADS=1`
+(maximum 129.6 s), with proof limits unchanged. The interrupted log is retained.
+
+The required JavaScript suite passes 14/14; entrypoint controls, replay,
+strict automation, layering and reachability pass. A separate affected source
+suite reproduces the same 5 passes and 3 failures on master and patch: one
+unsupported stored-function observation and two unchanged 300-second timeouts.
+See [validation evidence](group02-validation.json) for exact commands,
+resource blocks, trust/axiom inventory, reviewer findings and long-log paths.
+The reviewable patch is on `repair/group02-entrypoints`, based on
+`006fcd593f5beeb540e7adf2bc76de4638566924`; nothing was pushed or merged.

@@ -81,7 +81,8 @@
     "finder": "Confirmed constructor ABI-range omission and contradictory elementary/enum metadata. Both fixed and controlled. Final pass found no further issue.",
     "skeptic": "Independent read-only review; constructor rollback/decode controls and inherited helper closure confirmed; negative narrow constant and nominal refusal controls added.",
     "leanWorkersOpened": false,
-    "evidenceAudit": "Independent skeptic recomputed all 67 cases/131 modes, verified all 134 report hashes, source hashes, expectation lines and final model digest; no reporting issue found. Final constructor-to-runtime getter continuity control also passes in both pipelines."
+    "evidenceAudit": "Independent skeptic recomputed all 67 cases/131 modes, verified all 134 report hashes, source hashes, expectation lines and final model digest; no reporting issue found.",
+    "finalGateAudit": "Read-only finder and independent skeptic both matched all 23 gate commands to logs/manifest, verified library/TestSuite/sort/corpus counts and source-suite baseline limitations; no correction found, no edits or Lean workers."
   },
   "audits": {
     "trust": "25 existing inventory findings; exact output matches pre-edit audit; 232 implementation/recovery sites unchanged",
@@ -89,14 +90,213 @@
       "missing": 13,
       "ambiguous": 28,
       "status": "pre-existing findings; exact output matches pre-edit audit",
-      "log": "/workspace/group02-docpaths-final.log"
+      "log": "/workspace/group02-docpaths-final.log",
+      "finalHandoffLog": "/workspace/group02-docpaths-handoff.log"
     }
   },
   "remainingAssignedScope": [
     "viaIR constructor initializer ordering: x() returns 4, expected 2",
     "viaIR state initializer ordering: c() returns 126, expected 51"
   ],
-  "fullGates": "running; updated after completion",
+  "fullGates": {
+    "status": "pass",
+    "commands": [
+      {
+        "command": "lake build Solidity.TestSuite.Derived20",
+        "exit": 0,
+        "seconds": 129.55651787200077,
+        "log": "/workspace/group02-serial-derived20.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived17",
+        "exit": 0,
+        "seconds": 125.2304133589987,
+        "log": "/workspace/group02-serial-derived17.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived15",
+        "exit": 0,
+        "seconds": 75.03688788900035,
+        "log": "/workspace/group02-serial-derived15.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived12",
+        "exit": 0,
+        "seconds": 34.635309362000044,
+        "log": "/workspace/group02-serial-derived12.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived1",
+        "exit": 0,
+        "seconds": 14.610441640999852,
+        "log": "/workspace/group02-serial-derived1.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived2",
+        "exit": 0,
+        "seconds": 16.113408078999782,
+        "log": "/workspace/group02-serial-derived2.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived3",
+        "exit": 0,
+        "seconds": 40.22857800300153,
+        "log": "/workspace/group02-serial-derived3.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived4",
+        "exit": 0,
+        "seconds": 23.91594128199904,
+        "log": "/workspace/group02-serial-derived4.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived5",
+        "exit": 0,
+        "seconds": 15.870471199001258,
+        "log": "/workspace/group02-serial-derived5.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived6",
+        "exit": 0,
+        "seconds": 22.1023724759998,
+        "log": "/workspace/group02-serial-derived6.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived7",
+        "exit": 0,
+        "seconds": 107.41756945000088,
+        "log": "/workspace/group02-serial-derived7.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived8",
+        "exit": 0,
+        "seconds": 54.51642379700024,
+        "log": "/workspace/group02-serial-derived8.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived9",
+        "exit": 0,
+        "seconds": 16.71894809600053,
+        "log": "/workspace/group02-serial-derived9.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived10",
+        "exit": 0,
+        "seconds": 21.042376453999168,
+        "log": "/workspace/group02-serial-derived10.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived11",
+        "exit": 0,
+        "seconds": 5.969643084999916,
+        "log": "/workspace/group02-serial-derived11.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived13",
+        "exit": 0,
+        "seconds": 0.15925245300059032,
+        "log": "/workspace/group02-serial-derived13.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived14",
+        "exit": 0,
+        "seconds": 0.15894022199972824,
+        "log": "/workspace/group02-serial-derived14.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived16",
+        "exit": 0,
+        "seconds": 0.15869576099976257,
+        "log": "/workspace/group02-serial-derived16.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived18",
+        "exit": 0,
+        "seconds": 0.16159332999995968,
+        "log": "/workspace/group02-serial-derived18.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived19",
+        "exit": 0,
+        "seconds": 0.1573018540002522,
+        "log": "/workspace/group02-serial-derived19.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "lake build Solidity.TestSuite.Derived21",
+        "exit": 0,
+        "seconds": 0.16117698299967742,
+        "log": "/workspace/group02-serial-derived21.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "bash run-lean.sh",
+        "exit": 0,
+        "seconds": 13.759731934000229,
+        "log": "/workspace/group02-final-run-lean-serial.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": "bash scripts/check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples",
+        "exit": 0,
+        "seconds": 53.173013400000855,
+        "log": "/workspace/group02-final-corpus.log",
+        "LEAN_NUM_THREADS": 1
+      }
+    ],
+    "libraryJobs": 649,
+    "testSuiteJobs": 249,
+    "corpusObligations": 774,
+    "corpusDrift": false,
+    "frozenEnvironment": {
+      "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "SOLKEY_EXAMPLES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+    },
+    "sort": "377 taclets; 131 read-bearing; zero annotation mismatches",
+    "interruptedAttempts": [
+      {
+        "status": "interrupted before completion",
+        "log": "/workspace/group02-final-run-lean.log",
+        "reason": "Original executor process disappeared at 643/649 jobs; no successful full-build verdict inferred."
+      },
+      {
+        "status": "resource-blocked/interrupted",
+        "reason": "Four TestSuite derivation workers saturated the 16 GiB memory boundary; no additional job completed during about ten minutes of reclaim. Retry unfinished modules serially; no proof limit change.",
+        "pids": [
+          30851,
+          30852,
+          30853,
+          31328,
+          31393,
+          31497,
+          31525,
+          31623
+        ],
+        "libraryBuild": "pass: 649 jobs; Decision 956 s; DecisionArrays 2328 s",
+        "log": "/workspace/group02-final-run-lean-resumed.log"
+      }
+    ],
+    "retry": "One derivation target at a time with LEAN_NUM_THREADS=1, then complete run-lean.sh and frozen corpus. No heartbeat, proof fuel, process timeout or expected result increased."
+  },
   "frontendBuild": {
     "command": "lake build Solidity.Tools.Upstream Solidity.Frontend.Testing",
     "status": "pass",
@@ -141,6 +341,20 @@
         "lines": 200
       }
     ],
-    "note": "No representation change; existing body memoization/segmentation retained. Cold full-library timing includes many unrelated cache misses and is not an isolated before/after comparison."
-  }
+    "note": "No representation change; existing body memoization/segmentation retained. Cold full-library timing includes many unrelated cache misses and is not an isolated before/after comparison.",
+    "coldLibraryExamplesSeconds": {
+      "Decision": 956,
+      "DecisionArrays": 2328
+    },
+    "serialTestSuiteMaxSeconds": 129.55651787200077
+  },
+  "constructorRuntimeControl": "Final constructor-to-runtime getter continuity control passes in both pipelines (per-file Lean check).",
+  "runtimeGate": {
+    "status": "pass",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "command": "source /workspace/.setup/activate.sh; lean --version; lake --version; lake build Solidity.KeySort",
+    "log": "/workspace/group02-runtime-gate.log"
+  },
+  "logsArchive": "/workspace/group02-validation-logs.tar.gz"
 }

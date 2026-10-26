@@ -426,3 +426,33 @@ line, source/model hashes and timings. Later calls after the first mismatch
 remain unobserved rather than being counted as matches. Constructor/initializer
 sequencing by pipeline remains an integration dependency, with no unpublished
 changes assumed from another group.
+
+
+### Final build and corpus validation
+
+The managed runtime gate passed with Lean 4.24.0, Lake 5.0.0-src+797c613
+and `lake build Solidity.KeySort`. The full 649-job library build passed;
+existing `Examples.Decision` and `Examples.DecisionArrays` took 956 and
+2,328 seconds on the cold build. These costs are consistent with the existing
+slow-check notes in `docs/automation.md`; no representation was changed.
+
+The first process disappeared at 643 jobs. A resumed build completed the
+library, but four concurrent TestSuite derivation workers saturated the
+16 GiB environment and made no further completion during about ten minutes
+of reclaim. That attempt was interrupted and retained as a resource block.
+The unfinished modules were retried one target at a time with
+`LEAN_NUM_THREADS=1`; all 21 derivation targets passed, with a maximum of
+129.6 seconds. The complete `bash run-lean.sh` then passed the 249-job
+TestSuite gate and frozen sort check (377 taclets, 131 read-bearing).
+`bash scripts/check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples`
+passed all 774 existing obligation rows without verdict or generated-output
+drift. Existing unsupported/unported rows remain so; a passing corpus gate
+is not a claim that those rows are proved.
+
+The affected JavaScript suite passes 14/14, replay and new entrypoint controls
+pass, and strict automation, reachability and layering pass. The separate
+source-suite comparison remains 5 passing and 3 failing on both master and
+this patch: one unsupported stored-function observation and two unchanged
+300-second source-proof timeouts. No expected result or proof limit changed.
+Full commands, logs and review findings are retained in
+[group02-validation.json](../../tests/upstream/repairs/group02-validation.json).
