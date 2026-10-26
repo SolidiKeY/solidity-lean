@@ -187,17 +187,21 @@ node --test --test-isolation=none scripts/solidity-upstream.test.mjs
 ```
 
 
-Final assigned result: **65 working, two broken, zero blocked** across 67
-fixtures and 131 required pipeline runs (129 working, two broken). No assigned
-case was already fixed or is an expected exclusion. Both remaining failures
-are now observable via-IR initialization-order mismatches: `x() = 4` versus
-`2` in `constructor_inheritance_init_order_3_viaIR.sol`, and `c() = 126` versus
-`51` in `state_variables_init_order_3.sol`. Their legacy/matching observations
-are retained; neither is converted into an expected failure.
+Final assigned result after initialization-order completion: **67 working,
+zero broken, zero blocked, zero exclusions**, across all 131 required pipeline
+runs (65 legacy, 66 viaIR). Neither upstream inputs nor expectations changed.
+The viaIR constructor-order case now returns `x = 2`; the independent legacy
+companion still returns `4`. The state-initialization case now completes all
+eight expected calls, including `c = 51` and the five previously unobserved calls.
 
 The complete [per-fixture handoff](../tests/upstream/repairs/group02.md) links
 all before/after reports, exact commands, required pipelines, raw and compiled
 source hashes, compiler/archive/runner/model hashes and timings. Historical
 model hash `c042a72f…` belongs to the imported `cadb628c` run; fresh master
-reproduction uses `c86945ed…`, and final repair uses `87539855…`. Runtime
-agreement is observational, with no claim of universal compiler correctness.
+reproduction uses `c86945ed…`, the first repair `87539855…`, and completed repair
+`4def0e38…`. Every earlier report remains retained as a distinct phase.
+Runtime agreement is observational, with no claim of universal compiler
+correctness. Eleven kernel-checked initialization controls are in
+`tests/upstream/InitializationOrder.lean`; their source is independently pinned
+for both legacy and viaIR. Reproduce the completed 67-fixture run with
+`bash tests/upstream/repairs/group02-init-commands.sh`.

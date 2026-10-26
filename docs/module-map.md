@@ -507,7 +507,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 |---|---|
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; a struct the table's when its members are, else the contract's own, declared (`readStructs`, `ownStructMembers`), struct constructors printed; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`).  Split by topic into the pieces below (`docs/parallelism.md`), this module the umbrella. |
 | `Frontend/SolcJson/Body.lean` | What is left out, reading the JSON, types, expressions and statements; declaration-ID metadata and lazy selector receiver helpers. |
-| `Frontend/SolcJson/Contract.lean` | A contract read off the JSON. |
+| `Frontend/SolcJson/Contract.lean` | A contract read off the JSON; inherited constructor initialization follows verified legacy/viaIR provenance. |
 | `Frontend/SolcJson/Getters.lean` | Bounded source ABI identity and public-getter plans, lowered through ordinary function members; explicit reference-return refusal and empty-data array bounds. |
 | `Frontend/Source.lean` | Exact compiler and mode provenance, accepted pragma gates and an admission result certifying its extracted feature list. |
 | `Frontend/SolcJson/Admission.lean` | Bounded AST scope classification and declaration-header closure over resolved execution roots; structured policy, upstream and implementation diagnostics. |

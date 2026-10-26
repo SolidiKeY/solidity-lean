@@ -528,7 +528,8 @@ def elabSolcImport : CommandElab := fun stx => do
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }) (!stx[9].isNone))
+        specifications := [(bound, "/// @custom:key " ++ text)] }) (!stx[9].isNone)
+    (!provenance.legacyFixture && provenance.pipeline == some .viaIR))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then

@@ -1,10 +1,10 @@
 # Group 02 callable-entry handoff
 
-Final fixture counts: 65 working, 2 broken.
+Final fixture counts: **67 working, 0 broken, 0 blocked; 0 exclusions**.
 
 Every before status below is a fresh reproduction on `006fcd59`, distinct from the historical `cadb628c` evidence. None was already fixed.
 
-The full reports, source hashes, exact pipeline observations and per-fixture command configuration are in [group02.json](group02.json). Exact final commands are in [group02-commands.sh](group02-commands.sh).
+The full reports, source hashes, exact pipeline observations and per-fixture command configuration are in [group02.json](group02.json). Exact completion commands are in [group02-init-commands.sh](group02-init-commands.sh). The prior [command transcript](group02-commands.sh) is retained as history; use the new distinct output paths to preserve its reports.
 
 | Fixture under `test/libsolidity/semanticTests/` | Before | Final pipelines |
 | --- | --- | --- |
@@ -28,13 +28,13 @@ The full reports, source hashes, exact pipeline observations and per-fixture com
 | `immutable/small_types_in_reverse.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/access_base_storage.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/constructor_inheritance_init_order_3_legacy.sol` | broken | legacy: working |
-| `inheritance/constructor_inheritance_init_order_3_viaIR.sol` | broken | viaIR: broken |
+| `inheritance/constructor_inheritance_init_order_3_viaIR.sol` | broken | viaIR: working |
 | `inheritance/constructor_with_params_inheritance_2.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/pass_dynamic_arguments_to_the_base_base_with_gap.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/pass_dynamic_arguments_to_the_base_base.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/pass_dynamic_arguments_to_the_base.sol` | broken | legacy: working; viaIR: working |
 | `inheritance/state_variables_init_order_2.sol` | broken | legacy: working; viaIR: working |
-| `inheritance/state_variables_init_order_3.sol` | broken | viaIR: broken |
+| `inheritance/state_variables_init_order_3.sol` | broken | viaIR: working |
 | `inheritance/state_variables_init_order.sol` | broken | legacy: working; viaIR: working |
 | `literals/fractional_denominations.sol` | broken | legacy: working; viaIR: working |
 | `modifiers/access_through_contract_name.sol` | broken | legacy: working; viaIR: working |
@@ -77,42 +77,51 @@ The full reports, source hashes, exact pipeline observations and per-fixture com
 | `virtualFunctions/virtual_function_calls.sol` | broken | legacy: working; viaIR: working |
 
 
-The two remaining failures are initialization-order observations, not missing
-entries or matching expected failures:
+At `1d99d00d`, the first entrypoint repair had exposed two initialization-order
+mismatches. This completion fixes both without changing their upstream inputs:
 
-- `inheritance/constructor_inheritance_init_order_3_viaIR.sol`: `x()` returns
-  `4`; upstream requires `2`. The legacy companion passes.
-- `inheritance/state_variables_init_order_3.sol`: `a() = 17` and `b() = 42`
-  match, then `c()` returns `126`; upstream requires `51`.
+- `inheritance/constructor_inheritance_init_order_3_viaIR.sol`: `x()` now returns
+  the required `2` (previously `4`). The independent legacy companion still returns `4`.
+- `inheritance/state_variables_init_order_3.sol`: all eight observations now match:
+  `a=17`, `b=42`, `c=51`, `b_a=17`, `b_b=42`, `b_c=51`, `d=23`, `e=42`.
 
-There are 131 required pipeline results: 129 working and two broken, both
-via-IR. No assigned fixture is excluded or blocked, and none was already fixed
-at the original adapter boundary. The command transcript returns nonzero while
-these two mismatches remain. Pipeline-specific constructor/initializer ordering
-is an integration dependency; this patch does not change its expected results
-or substitute an entrypoint that happens to produce them.
+Verified compiler provenance selects the source construction schedule. Legacy
+retains global initialization before base arguments/bodies. ViaIR captures base
+arguments first, then interleaves each reverse-C3 owner's initializers and body.
+Compiler declaration IDs select ownership, including implicit constructors.
+The intrinsic run, constructor helpers, modifier/return handling and checked
+assignment operations are unchanged.
 
-The final fixture run took 1,207.628 seconds in total (median 16.952 seconds,
-maximum 33.252 seconds per fixture), while full builds/source suites also ran.
-Before timings are not a meaningful execution comparison: the old adapter
-stopped before the missing calls. Frontend compilation retained the existing
-body memoization and segmented compilation; the contract reader built in about
-16 seconds before and after the narrow entrypoint change. These are not isolated
-performance measurements. No fuel, heartbeat or process limit was increased.
-
-Broken reports retain the existing first-mismatch stop policy. In the state
-initialization case, the later five calls are unobserved and are not counted
-as matches. Every original expectation line is retained in the evidence JSON
-and byte-preserved archive; all observations of each passing fixture are present.
+Every required pipeline now completes every original observation. The previous
+first-mismatch prefixes (and the five then-unobserved calls) remain recorded in
+per-case `priorEntryRepairAfter` reports; no earlier evidence was overwritten.
+Fresh initialization-before reports for both failures and the legacy companion
+are also retained. All 67 original fresh-master reproductions remain broken;
+none was already fixed or is an expected exclusion.
 
 | Pipeline | Working | Broken | Blocked |
 | --- | ---: | ---: | ---: |
 | legacy | 65 | 0 | 0 |
-| viaIR | 64 | 2 | 0 |
+| viaIR | 66 | 0 | 0 |
 
+The completion model SHA-256 is
+`4def0e389306e966b857dc45c30fde97248d5b15fced83983c0f416428a93ec6`.
+The first repair's `87539855…` reports, timings and hashes are preserved as a
+separate phase. The new 67-fixture replay took 442.990 seconds total (median
+6.123 seconds, maximum 16.249 seconds); some per-file controls ran concurrently,
+so this is not an isolated performance comparison with the prior 1,207.628-second
+run. No fuel, heartbeat or process timeout was increased.
 
-The managed runtime gate passes: Lean 4.24.0, Lake 5.0.0-src+797c613 and
-`lake build Solidity.KeySort`. Final library (649 jobs), compiled TestSuite
+Eleven kernel-checked source controls cover arguments, implicit owners,
+constructor modifier suffixes and early returns, width refusal, and failure
+ordering. All use only `propext`, `Classical.choice` and `Quot.sound`.
+The legacy narrow-width control pins the existing model's empty-revert guard,
+not the EVM `Panic(0x11)` payload. The exact legacy assert panic versus viaIR
+base revert demonstrates that a failed base prevents later IR initialization.
+These are concrete typed-run proofs, not a universal compiler/lowering theorem.
+
+At the prior milestone, the managed runtime gate passed: Lean 4.24.0, Lake 5.0.0-src+797c613 and
+`lake build Solidity.KeySort`. Its library (649 jobs), compiled TestSuite
 (249 jobs), frozen sort and frozen corpus gates pass. The corpus retains all
 774 existing obligation rows without verdict/generated-output drift.
 TestSuite derivations required a serial retry after concurrent workers hit
@@ -120,10 +129,19 @@ the 16 GiB memory boundary; all 21 targets passed with `LEAN_NUM_THREADS=1`
 (maximum 129.6 s), with proof limits unchanged. The interrupted log is retained.
 
 The required JavaScript suite passes 14/14; entrypoint controls, replay,
-strict automation, layering and reachability pass. A separate affected source
-suite reproduces the same 5 passes and 3 failures on master and patch: one
+strict automation, layering and reachability pass. The prior affected source-suite
+comparison retained 5 passes and 3 failures on both master and patch: one
 unsupported stored-function observation and two unchanged 300-second timeouts.
+That Node source-suite comparison was not rerun for this initializer-only
+follow-up; constructor and inheritance Lean examples were checked fresh.
 See [validation evidence](group02-validation.json) for exact commands,
 resource blocks, trust/axiom inventory, reviewer findings and long-log paths.
 The reviewable patch is on `repair/group02-entrypoints`, based on
 `006fcd593f5beeb540e7adf2bc76de4638566924`; nothing was pushed or merged.
+
+
+Completion verification and final build results are recorded separately in the
+updated [validation evidence](group02-validation.json); the complete earlier
+validation object remains under `priorMilestoneValidation`. The original patch
+and log archive remain at their existing paths; the completed patch will be
+exported as `/workspace/group02-entrypoints-complete.patch`.

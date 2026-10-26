@@ -415,7 +415,7 @@ explicit refusal controls. The independent skeptic found no further confirmed
 issue in this extension; neither reviewer opened Lean workers. Scalar/nested
 getter source IDs and native result widths are pinned by the source controls.
 
-### Final assigned compatibility result
+### First entrypoint repair result (1d99d00d)
 
 All 67 missing-entrypoint failures reproduced on fresh master. Final results
 are 65 working fixtures and two initialization-order mismatches, with zero
@@ -428,7 +428,7 @@ sequencing by pipeline remains an integration dependency, with no unpublished
 changes assumed from another group.
 
 
-### Final build and corpus validation
+### First build and corpus validation (1d99d00d)
 
 The managed runtime gate passed with Lean 4.24.0, Lake 5.0.0-src+797c613
 and `lake build Solidity.KeySort`. The full 649-job library build passed;
@@ -456,3 +456,55 @@ this patch: one unsupported stored-function observation and two unchanged
 300-second source-proof timeouts. No expected result or proof limit changed.
 Full commands, logs and review findings are retained in
 [group02-validation.json](../../tests/upstream/repairs/group02-validation.json).
+
+
+### Group 02 initialization-order completion
+
+Resumed the existing lane at `1d99d00d`, preserving both prior commits and
+all reports. Both outstanding via-IR mismatches reproduced, while the exact
+legacy companion still returned `x = 4`. The source reader now receives the
+verified pipeline from import provenance. Legacy retains all-initializers,
+arguments, bodies. Via-IR captures base arguments first and then emits each
+reverse-C3 owner's initializers immediately before its constructor body,
+including implicit intermediate/derived constructors. It selects fields by
+compiler declaration identity and carries expression prefixes and fresh names.
+The native typed assignment, constructor helpers, modifier wrapping, return
+boundaries, admission and call closure remain in use. No intrinsic model,
+calculus rule, core representation, expected result or proof limit changed.
+
+`tests/upstream/InitializationOrder.lean` imports the same independent source
+under pinned 0.8.38 legacy and via-IR settings. Eleven kernel-checked theorems
+cover effectful base arguments, interleaved bodies, implicit owners, modifier
+suffixes and early returns, checked-width refusal and first-failure ordering.
+The exact legacy assertion panic versus via-IR base revert demonstrates that
+failed base construction prevents later initialization; failed deployment
+returns no committed state. Swapped pipeline expectations are rejected.
+All headline theorems use only `propext`, `Classical.choice` and `Quot.sound`.
+The narrow-overflow control explicitly pins the existing model's empty-revert
+range guard; it does not claim EVM `Panic(0x11)` payload fidelity.
+
+Read-only finder and independent skeptic reviews found no confirmed schedule
+bug and requested the modifier/return, failure-order and narrow-width controls.
+Those controls were added and passed; neither reviewer opened a Lean worker.
+
+
+Fresh full-scope completion replay passes **67/67 fixtures and all 131 required
+modes** (65 legacy, 66 viaIR), with all 442 expected call observations retained.
+There are zero failures, blocks or exclusions in the assigned scope. The former
+state-initialization mismatch now completes all eight calls. The completion
+model hash is `4def0e389306e966b857dc45c30fde97248d5b15fced83983c0f416428a93ec6`.
+Per-case `priorEntryRepairAfter` fields preserve the earlier 65/2 reports and
+mismatch prefixes exactly, and the entire earlier validation object remains
+under `priorMilestoneValidation`. Fresh reproductions of both initialization
+failures and the passing legacy companion are also retained. Independent
+finder and skeptic evidence audits verified every report/source hash, all
+expectation lines, 67 exact commands and complete observations. A wording
+clarification distinguishes the retained prior Node source-suite comparison
+from this follow-up's fresh constructor/inheritance Lean checks.
+
+The required JavaScript suite passes 14/14; fresh getter/replay and affected
+constructor/inheritance Lean checks pass. Strict automation, reachability,
+layering, immutable archive verification and the frozen TestSuite static audit
+pass. Trust findings match the retained baseline exactly. Final dependency-
+ordered serial builds and full build/corpus checks are still running; their
+completed results will be added to the validation record before final handoff.

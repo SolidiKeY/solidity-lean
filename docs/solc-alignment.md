@@ -458,7 +458,8 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `immutable` the constructor writes is a storage root with its
   initializer, so the constructor's obligation reads what it wrote, and a
   function's reads any value (true of the deployed code, never refuted).
-- **Base constructors run in solc's legacy order**: every initializer, most
+- **Source construction follows its recorded compiler pipeline.** Legacy runs
+  every initializer, most
   base first; then the base constructors' arguments, derived to base; then
   the constructor bodies, base to derived (`readContract`'s
   `compositeBody`, one constructor member, each argument a local named as
@@ -472,7 +473,15 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   that page's description of the legacy order puts the arguments before
   the initializers, which the emitted code does not:
   `tests/solc/Inheritance.sol`'s `CtorLeaf` passes an initialized `late`
-  on and asserts it.  A base constructor's virtual calls dispatch to the
+  on and asserts it. Modern verified via-IR imports now select that interleaved
+  schedule in `readContract`: arguments are captured before initialization,
+  then reverse-C3 owners each run their initializers followed by their body.
+  Owners with implicit constructors still receive their initialization stage.
+  Root declarations stay uninitialized in this path; the staged writes use the
+  same typed assignments as native constructor initialization, selected by
+  declaration identity. Historical fixtures without pipeline provenance retain
+  legacy scheduling. No core syntax or run rule changes.
+  A base constructor's virtual calls dispatch to the
   most-derived contract.  Arguments come from the first contract in the C3
   order giving them, in its constructor's header (`B(a)`) or its
   inheritance specifier (`is B(5)`) ("Arguments for Base Constructors").

@@ -586,7 +586,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
     (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
-    (entrypoints : Bool := false) :
+    (entrypoints : Bool := false) (viaIR : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -1311,6 +1311,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let initScope := (initCalls.foldl (fun scan id =>
     scan.append (((lookupBy id closed).map (·.sourceScope)).getD default)) initScope).normalize
   let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
+  -- Legacy creation runs all initializers before these arguments/bodies.
+  -- Verified viaIR imports instead place each owner's initializers immediately
+  -- before its body, after all base arguments have been captured.
   -- Base constructors, as solc's legacy creation code runs them
   -- (`ContractCompiler::appendInitAndConstructorCode`): every initializer,
   -- most base first (`initMembers`' declarations); then the most-derived
@@ -1322,6 +1325,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     J.kind n == "FunctionDefinition" && J.str? n "kind" == some "constructor"
   let baseCtors : List (Json × Json) := lineage.tail.filterMap fun k => (ctorNodeOf k).map (k, ·)
   let ownCtor := ctorNodeOf c
+  -- Without an explicit base body the two initializer schedules coincide.
+  let stagedInits := viaIR && !baseCtors.isEmpty
   let paramsOf (f : Json) : List Json :=
     ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[] |>.toList
   let localNames (f : Json) : List String := J.varDeclNames (J.nodes f)
@@ -1445,8 +1450,24 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           { st with fresh := carry.1, discards := carry.2 }
         carry := (st'.fresh, st'.discards)
         out := out ++ ss.map (J.line f, ·)
-    -- the bodies, base to derived
-    for f in baseCtors.reverse.map (·.2) ++ ownCtor.toList do
+    -- Initializers and bodies follow reverse C3, including owners with no
+    -- explicit constructor. Match storage roots by declaration identity, never
+    -- by their (possibly shadowed) source name.
+    for k in lineage.reverse do
+      if stagedInits then
+        for (n, _, v) in kept do
+          let some id := J.id? v
+            | throw (.unsupported "a staged initializer without declaration identity" (J.line v))
+          unless (membersOf k).any (J.id? · == some id) do continue
+          let some e := J.opt v "value" | continue
+          let ((value, pre), st') ← (do
+              let value ← expr e
+              pure (value, (← get).pre.toList) : PM (String × List String)).run
+            { initSt with superNames := superNamesOf v, fresh := carry.1, discards := carry.2 }
+          loopScope := loopScope.append st'.sourceScope
+          carry := (st'.fresh, st'.discards)
+          out := out ++ (pre ++ [s!"{identText n} = {value}"]).map (J.line v, ·)
+      let some f := ctorNodeOf k | continue
       let b ← J.get f "body"
       let st0 := { ctorState f with fresh := carry.1, discards := carry.2 }
       let (ss, st') ← ((← J.arr b "statements").flatMapM fun s => do
@@ -1511,7 +1532,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
       | _ => none
   let initMembers := match initGap, inits with
-    | none, .ok ms => invariants ++ enumMembers ++ structMembers ++ errorMembers.eraseDups ++ ms
+    | none, .ok ms => if stagedInits then members else
+        invariants ++ enumMembers ++ structMembers ++ errorMembers.eraseDups ++ ms
     | _, _ => members
   let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)
