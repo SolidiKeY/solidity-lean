@@ -1145,7 +1145,9 @@ It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
 *unknown* (`gapArrayBlock` … `gapWrittenMemory`, each in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
-(`gapMemInnerNeg` … `gapMemStruct`), listed under "What is not proved" below.  The
+(`gapMemInnerNeg` … `gapMemStruct`), `Examples/DecisionKInt.lean` those of
+KeY's `int` and the ledger (`gapKIntTwoAnchors`, `gapQuantLedger`), listed
+under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
 over an inner mapping, `allow[3][k]`), `namesTwoKinds` (two kinds of
 hash of one string), `arrayRead`, `fixedRead` (storage-array reads,
@@ -1965,9 +1967,10 @@ words, the result in `Fml.CoveredA` or `Fml.kintCovered`:
     for a bound read off the body (`Tm.zl`), and past `R` on either side
     the comparison has the sign of `c·z`.  So the body holds at `z`
     exactly where it holds at `z` clamped to `[-R-1, R+1]`
-    (`Fml.zl_holds`, `Fml.zl_clamp`, two values `ZSim` alike), the range
-    of `c·toInt(a) - toInt(b) - (R+1)` over two words (`zEncT`, `zMul`,
-    `zEnc_onto`): `∀ int z. φ` is `∀ uint a b. φ[z := …]` at every state
+    (`Fml.zl_holds`, `Fml.zl_clamp`, two values `ZSim` alike), an
+    interval inside the range of `c·toInt(a) - toInt(b) - (R+1)` over two
+    words (`zEncT`, `zMul`, `zEnc_onto`; `c ≤ 2^256`, so that `b = c - r`
+    is a word, which bounds `R` near `2^511`): `∀ int z. φ` is `∀ uint a b. φ[z := …]` at every state
     and in either polarity (`Fml.holds_kencAt`, by a substitution that may
     send a local to a term, `Sb`, `Fml.holds_sb`).  The rewritten leaf
     (`Fml.kencB`, innermost binders first, `Fml.holds_kenc`) is decided by
@@ -1984,13 +1987,17 @@ words, the result in `Fml.CoveredA` or `Fml.kintCovered`:
     modules, the closer's among them); the ledger's addresses
     (feature 26 extended) cannot give a negative binder its `∃` nor avoid
     a symbolic address the leaf reads.  The clamp is one module and one
-    stage, and reuses the quantified and ledger pipelines unchanged.  Two
-    uint words keep the arithmetic's codes below `2^257` (a base-`2^256`
-    encoding, `2^256·a + b`, took more than twenty minutes to evaluate).
+    stage, and reuses the quantified and ledger pipelines unchanged.  The
+    multiplier `c` is the least that covers the interval (`1` where `R` is
+    below `2^255`, `3` for a word's remainder); a base-`2^256` encoding,
+    `2^256·a + b`, took more than twenty minutes to evaluate.
     `gapKIntNeg` proved, `kintNegBad` refuted; `kintNetElse` (a positive
     binder in a leaf reading the ledger elsewhere) proved,
     `kintNetElseBad` refuted; `kintNegWord` (`z > toInt(x)`, multiplier
-    `3`) proved (`Examples/DecisionKInt.lean`, coverage kernel-checked).
+    `3`) proved (`Examples/DecisionKInt.lean`: coverage kernel-checked for
+    the others, the verdicts recorded there, evaluated in a scratch module;
+    the interpreted evaluation in the module itself overflowed the
+    language server's stack and outran `lake build`).
 31. **Binders read past an anchor** (2026-10-26, `Calculus/KIntEncode.lean`).
     A comparison reading the binder against an unbounded term at another
     coefficient (`z == net(a)`, `y > z` for an outer `z`) has no bounded
@@ -2007,6 +2014,20 @@ words, the result in `Fml.CoveredA` or `Fml.kintCovered`:
     `kintNested` (`(∀ int z. ∀ int y. y > z) → 0 == 1`, anchor `z` for
     `y`, after which `z`'s coefficients agree) proved, `kintNetBad` and
     `kintNestedBad` refuted.
+    Left from the review (2026-10-26, not yet in the code, which a build
+    cycle did not allow): `Calculus/KIntEncode.lean`'s module docstring
+    calls `[-R-1, R+1]` the encoding's range (it lies inside it), `c` a
+    word (`c ≤ 2^256`; `b` is the word) and its "Outside" paragraph should
+    state the key-sum condition above; `Fml.kencB`'s docstring cites
+    `Fml.kencAt?` (it uses `Fml.kencAtA?`); `AKey`'s positions are
+    `Nat`s (`TEnv.kAt`, `TEnv.uAt`, `State.zν`'s defaults, `Idx.ofNat?`)
+    where `AKey Γ` over `Idx Γ .kint` and `Idx Γ (.val .uint)` would make
+    `State.zν` and `AKey.tm?` total; `Idx.eq_of_toNat_eq` duplicates
+    `Idx.toNat_inj`; the side goals `s ≠ .kint` use bare `simp`;
+    `decideKEnc` and `Fml.kencCovered` compute `φ.kencB` more than once;
+    `Op2.zl` drops the literal of a product or sum of literals (`(1+1)*z`
+    is refused); `kencAtA?` retries repeated literal addresses; a
+    `kintNegWord_covered` pin.
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
@@ -2029,7 +2050,9 @@ no `addmod`/`mulmod`), twenty-three by the cut's binder order (the reads'
 atoms stand at the array's binder, past which `i` is bound) and
 twenty-four by the cut too (it took no update); twenty-seven to twenty-nine were
 `unknown` (`Fml.tkBody` asked every string of the second kind for a hash
-of the first, and `hashTries` tried two kinds at most).
+of the first, and `hashTries` tried two kinds at most); thirty and
+thirty-one too (`Fml.toLS` refuses a binder of KeY's `int` in a negative
+position, and `Fml.zOK` a leaf reading the ledger).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -2310,17 +2333,32 @@ stack would lift this.
     `Person` has reference members, whose objects a realized struct
     needs, so the cut would be exact only at heaps holding them and the
     refutation would have to build them);
-  * **KeY's `int` past features 30 and 31** (`Examples/DecisionKInt.lean`):
-    a binder compared with two unbounded terms no one anchor cancels
-    (`gapKIntTwoAnchors`, `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`:
-    past the anchor `z`, `y`'s comparison with `0` reads `z`), which is
-    Presburger alternation over `ℤ` and needs the plan's unbounded binder
-    of `LFml` and `QFml` (or a case split over the anchors, Cooper's test
-    points); and a negative quantifier in a leaf that reads the ledger
-    (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`, whatever the
-    binder's type: `quantReduction?` reads no ledger and `ledgerReduction?`
-    no quantifier past the prefix; `(∀ int z. z > net(0)) → …` is encoded
-    by feature 31 and lands there);
+  * **KeY's `int` past features 30 and 31** (`Examples/DecisionKInt.lean`).
+    The condition (`Tm.zl`, `Op2.zl`): every comparison whose sides read
+    the binder with different coefficients has sides whose sums of keys
+    cancel, directly or past one anchor of the binder's context.  Left:
+    * comparisons whose key sums differ past every anchor.  With two
+      unbounded thresholds (`gapKIntTwoAnchors`, `(∀ int z. ∀ int y. y > z
+      → y > 0) → 0 == 1`: past the anchor `z`, `y`'s comparison with `0`
+      keeps `z`) this is Presburger alternation over `ℤ`: it needs the
+      plan's unbounded binder of `LFml` and `QFml` (`AEnv`, `LTm`, every
+      recursion over them, `QArith.compile`), or a case split over the
+      anchors (Cooper's test points: `Fml.kencAtA?` trying each anchor
+      per comparison, the disjunction of the instances).  With one
+      unbounded threshold and a bounded one (`∀ int z. net(0) == z → z >
+      0`, not pinned) a one-point rule decides it: `z == U → φ(z)` is
+      `φ(U)`, a substitution `Sb` already performs (next step: a
+      `Fml.onePoint` pass before `Fml.kencB`, its lemma by `Fml.holds_sb`);
+    * a negative quantifier in a leaf that reads the ledger
+      (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`, whatever the
+      binder's type): `quantReduction?` reads no ledger and
+      `ledgerReduction?` no quantifier past the prefix; `(∀ int z. z >
+      net(0)) → …` is encoded by feature 31 and lands there.  Next step:
+      the ledger cut (`LFml.ledgerCut`) ahead of `quantReduction?`'s
+      abstraction, the entries as parameters of the abstracted
+      subformulas (`Rep`, `QArith.compile` over two codes an entry);
+    * products of two symbolic terms (waived) and remainders past about
+      `2^511` (`zMul n ≤ 2^256`);
   * **hashes outside `Fml.hashCovered`** (features 11, 12, 27 to 29; three
     kinds, `gapThreeKinds`, and second kinds hashing strings the first
     does not, `gapMixedKinds` and `gapMixedPairs`, are decided since 27 to
@@ -2376,9 +2414,11 @@ in this order:
    ledger entries (feature 26) on 2026-10-26; binders compared linearly
    with bounded terms, in either polarity, read over two words
    (feature 30), and past one unbounded anchor (feature 31), on
-   2026-10-26.  Left: binders compared with two unbounded terms
-   (`gapKIntTwoAnchors`), which need an unbounded binder in `LFml` and
-   `QFml`, and quantifiers beside ledger reads (`gapQuantLedger`).
+   2026-10-26.  Left (M7, "What is not proved"): comparisons whose key
+   sums differ past every anchor (`gapKIntTwoAnchors`: an unbounded
+   binder in `LFml` and `QFml`, or a case split over anchors; a one-point
+   rule where one side is an equation), and quantifiers beside ledger
+   reads (`gapQuantLedger`).
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
    by projection in the binary-derivative automaton (`QFml.decide_iff`),
    and negative-position Presburger quantifiers and alternation over value
@@ -2868,7 +2908,8 @@ findings; each is fixed.
 Not started.  It closes the M7 lanes and states what is proved so far,
 without changing the goal.
 
-1. **Finish the running lanes.** `kintneg` (`gapKIntNeg`) and
+1. **Finish the running lanes.** `kintneg` (`gapKIntNeg`: done, features
+   30 and 31; what is left is under "What is not proved") and
    `apfarrays` (`gapArrayBlock`, `gapMemInnerNeg`, `gapWrittenMemory`)
    run to completion.  A gap not done within one more build cycle is
    committed to its branch, what is left is recorded in M7, and the lane

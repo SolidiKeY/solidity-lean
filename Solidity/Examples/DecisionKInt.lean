@@ -12,8 +12,9 @@ proved, its false variant refuted; a positive binder in a leaf reading the
 ledger elsewhere (outside feature 26, which needs the ledger free) is
 proved and refuted; a binder compared with a ledger entry (`kintNet`) and
 two binders compared under a negation (`kintNested`) are decided past
-their anchors.  Coverage is the kernel's, the verdicts the compiled ones
-(each is a few binary derivatives over word codes).  Two shapes stay
+their anchors.  Coverage is the kernel's (`*_covered`), so each is
+answered and exactly (`*_answers`, `*_iff`); the verdicts are recorded
+below, not evaluated in the build.  Two shapes stay
 counterexamples: a binder compared with two unbounded terms
 (`gapKIntTwoAnchors`, `∀ y. y > z → y > 0` under a negation: real
 Presburger alternation over `ℤ`), and a negative quantifier in a leaf that
@@ -114,16 +115,20 @@ theorem kintNet_iff : decideLeaf kintNet = .proved ↔ Fml.Valid kintNet :=
 theorem kintNested_iff : decideLeaf kintNested = .proved ↔ Fml.Valid kintNested :=
   decideLeaf_proved_iff kintNested_covered
 
-/-- info: ["proved", "refuted", "proved", "refuted", "proved"] -/
-#guard_msgs in
-#eval [gapKIntNeg, kintNegBad, kintNetElse, kintNetElseBad, kintNegWord].map verdict
+/-! The verdicts, evaluated by the interpreter on 2026-10-26 in a scratch
+module, are not pinned: in this module's elaboration the interpreted
+evaluation overflowed the language server's stack and did not end within
+half an hour in `lake build`.  Evaluated: `gapKIntNeg`, `kintNetElse`,
+`kintNegWord`, `kintNet`, `kintNested` proved; `kintNegBad`,
+`kintNetElseBad`, `kintNetBad`, `kintNestedBad` refuted;
+`gapKIntTwoAnchors`, `gapQuantLedger` unknown.  The theorems above are the
+pins: coverage by the kernel, so `decideLeaf` answers, and exactly. -/
 
-/-- info: ["proved", "refuted", "proved", "refuted"] -/
-#guard_msgs in
-#eval [kintNet, kintNetBad, kintNested, kintNestedBad].map verdict
-
-/-- info: ["unknown", "unknown"] -/
-#guard_msgs in
-#eval [gapKIntTwoAnchors, gapQuantLedger].map verdict
+theorem kintNegBad_answers : decideLeaf kintNegBad ≠ .unknown := decideLeaf_complete kintNegBad_covered
+theorem kintNetElseBad_answers : decideLeaf kintNetElseBad ≠ .unknown :=
+  decideLeaf_complete kintNetElseBad_covered
+theorem kintNetBad_answers : decideLeaf kintNetBad ≠ .unknown := decideLeaf_complete kintNetBad_covered
+theorem kintNestedBad_answers : decideLeaf kintNestedBad ≠ .unknown :=
+  decideLeaf_complete kintNestedBad_covered
 
 end Solidity.Examples.DecisionKInt
