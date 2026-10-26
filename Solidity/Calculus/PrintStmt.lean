@@ -1107,6 +1107,13 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
 
 /-! ## Premises -/
 
+/-- An omitted schema argument must be the exact local that its canonical
+name resolves to. A later binder with the same user name changes replay. -/
+private def isCanonicalSchemaLocal (e : Expr) (name : Lean.Name) : MetaM Bool := do
+  let .fvar id := (← instantiateMVars e).consumeMData | return false
+  let some decl := (← getLCtx).findFromUserName? name | return false
+  return decl.fvarId == id
+
 /-- A scoped premise read at `ns`: its goals labelled by `labels` (solkey's, `Taclet.branchLabels`), the blocks of
 `branches` in the box's brackets when `box`. -/
 partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
@@ -1121,8 +1128,9 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
   if e.isAppOfArity ``LoopLex.diamondPremise 11 then
     let a := e.getAppArgs
     if a[7]!.consumeMData.isFVar &&
-        (← fvarName? a[3]!) == some "k" && (← fvarName? a[9]!) == some "xs" &&
-        (← fvarName? a[10]!) == some "hv" then
+        (← isCanonicalSchemaLocal a[3]! `k) &&
+        (← isCanonicalSchemaLocal a[9]! `xs) &&
+        (← isCanonicalSchemaLocal a[10]! `hv) then
       let I ← ppExprS ns a[4]!
       let c ← ppExprS ns a[5]!
       let metrics ← escapeTerm a[7]!
