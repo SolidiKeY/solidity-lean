@@ -252,10 +252,13 @@
       ],
       "localEvidence": [
         "Solidity/Calculus/SoundLoops.lean",
-        "Solidity/Calculus/Recursion.lean"
+        "Solidity/Calculus/Recursion.lean",
+        "Solidity/Semantics/Termination.lean",
+        "Solidity/Examples/Termination.lean",
+        "Bridge/SolidityBridge/LoopFixpoint.lean"
       ],
-      "assessment": "Unsigned loop variants exist; Dafny general lexicographic decreases and total recursive termination are distinct missing results.",
-      "next": "Prove typed lexicographic well-founded measures without equating exhaustion to termination."
+      "assessment": "Unsigned source loop variants remain. The dependency-free core now proves finite outer-iteration witnesses and successful scoped loop termination under arbitrary well-founded or lexicographic measures. The optional Bridge already had a Mathlib fixed-point theorem. NatSpec tuple measures and total recursive termination remain open.",
+      "next": "Compile source lexicographic measures to the checked API and add a separate total recursive termination rule."
     },
     {
       "id": "modular-calls",
@@ -397,7 +400,7 @@
       "id": "spec-collections",
       "category": "types",
       "relevance": "specification",
-      "status": "missing",
+      "status": "partial",
       "upstream": [
         {
           "path": "docs/DafnyRef/Types.md",
@@ -406,10 +409,13 @@
       ],
       "localEvidence": [
         "Solidity/SpecSyntax.lean",
-        "Solidity/Calculus/Fml.lean"
+        "Solidity/Calculus/Fml.lean",
+        "Solidity/Calculus/FiniteMembership.lean",
+        "Solidity/Examples/Tactics/FiniteSets.lean",
+        "tests/solc/FiniteSets.sol"
       ],
-      "assessment": "Host Lean can express immutable models, but source specs lack general set, multiset, sequence and mathematical map expressions.",
-      "next": "Add typed ghost collections and bridge lemmas to storage observations."
+      "assessment": "Explicitly typed finite equality-membership is admitted in source specifications with every operand checked at one primitive sort, including empty keys. It follows existing KeY equality, including halting terms. First-class collections, cardinality, sequences, multisets and mathematical maps remain absent from the source interface.",
+      "next": "Add reusable collection models and operations with explicit definedness and typed denotation; preserve the distinction from finite equality-membership."
     },
     {
       "id": "comprehensions",
@@ -708,10 +714,14 @@
       "localEvidence": [
         "TrustAudit.lean",
         "scripts/check-trust.mjs",
-        "docs/assurance.md"
+        "docs/assurance.md",
+        "Solidity/Calculus/Preconditions.lean",
+        "Solidity/Tools/Preconditions.lean",
+        "Solidity/Examples/Preconditions.lean",
+        "scripts/preconditions.test.mjs"
       ],
-      "assessment": "Trust and axiom inventories exist. They do not establish general precondition satisfiability or report every unreachable branch.",
-      "next": "Add explicit satisfiability and reachability evidence for vacuity reports."
+      "assessment": "Axiom checks remain. Entry-condition auditing now retains kernel-checked certificates of impossibility or possibility tied to the original scoped obligation; bounded failure is unknown. CLI and editor auditing are opt-in and impossible/unknown checks cannot pass strict suites. Constructor reachability and general dead-code analysis remain open.",
+      "next": "Extend assurance to constructor reachability and unreachable branches; entry possibility alone does not establish a successful execution."
     },
     {
       "id": "unit-tests-generation",
@@ -777,10 +787,14 @@
       "localEvidence": [
         ".vscode/settings.json",
         "scripts/site/export.mjs",
-        "scripts/site/export.test.mjs"
+        "scripts/site/export.test.mjs",
+        "vscode/src/extension.cjs",
+        "vscode/src/backend.cjs",
+        "vscode/src/model.cjs",
+        "vscode/test/host.cjs"
       ],
-      "assessment": "Lean language services are configured. This audit baseline contains no Solidity VS Code extension package; a new extension lane must be assessed separately.",
-      "next": "Test activation, source ranges, status, cancellation, stale results and witnesses."
+      "assessment": "The added Solidity Lean extension provides verify/discover/cancel, optional save verification, Test Explorer, diagnostics, hover, exact source IDs/ranges/hashes and stale-result suppression. Optional entry-condition audits show vacuous proofs. Completion/navigation and counterexample visualization remain outside this extension.",
+      "next": "Add source witness presentation and further language services using explicit compiler evidence."
     },
     {
       "id": "plugins-backends",

@@ -127,7 +127,7 @@ ERC-7201 and secp256k1 modules:
   pieces), `Typing/**` (12), `Theory/**` (6 at P1, 9 with
   `Theory/Typed/Obs`'s);
 - the rules: `Calculus.{Fml,Rules,RuleSyntax,RuleKit,KeyTaclets,Step,Arms,
-  Blocks,Taclet,Proves,Logic,Hyp,Correct,FirstOrder}` and `RuleSyntax`'s
+  Blocks,Taclet,Proves,Logic,Preconditions,FiniteMembership,Hyp,Correct,FirstOrder}` and `RuleSyntax`'s
   pieces;
 - their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;

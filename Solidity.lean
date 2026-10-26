@@ -26,6 +26,7 @@ import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Heap
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
+import Solidity.Semantics.Termination
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
 import Solidity.Semantics.AllocBytes
@@ -76,6 +77,8 @@ import Solidity.Calculus.EvalEqs
 import Solidity.Calculus.TermAgree
 import Solidity.Calculus.TermEval
 import Solidity.Calculus.Logic
+import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.Preconditions
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundPush
@@ -192,6 +195,9 @@ import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.TermLib
 import Solidity.Examples.ScopedRuns
+import Solidity.Examples.Termination
+import Solidity.Examples.Preconditions
+import Solidity.Examples.Tactics.FiniteSets
 import Solidity.Examples.ContractTypes
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays
@@ -378,6 +384,7 @@ import Solidity.Tools.Taclet
 import Solidity.Tools.DiffTest
 import Solidity.Tools.LazyStorage
 import Solidity.Tools.Counterexample
+import Solidity.Tools.Preconditions
 import Solidity.Calculus.DeclarationFacts
 import Solidity.Calculus.ReadRealization
 import Solidity.Examples.ReadRealization

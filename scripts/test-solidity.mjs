@@ -65,12 +65,15 @@ function renameClause(renaming = {}) {
 /**
  * Compile each source once, discover all its contracts, and test each selected
  * function. Returns { results, errors }; pending is never a counterexample.
- * options: contract, function, list, timeoutMs, solkey, soljson, build, selfAddress.
+ * options: contract, function, list, timeoutMs, solkey, soljson, build, selfAddress,
+ * auditPreconditions. Entry audits are independent of the postcondition proof.
  * The timeout bounds each compiler/Lean subprocess, including a whole contract.
  */
 export function runSolidityTests(paths, options = {}) {
   const files = solidityFiles(paths);
   if (!files.length) throw new Error("no Solidity files selected");
+  if (options.list && options.auditPreconditions)
+    throw new Error('precondition auditing requires verification; omit --list');
   const timeoutMs = options.timeoutMs ?? 300000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeout must be positive milliseconds");
   const batchSize = options.batchSize ?? 32;
@@ -114,7 +117,7 @@ export function runSolidityTests(paths, options = {}) {
           writeFileSync(wrapper, `import Solidity.Frontend.Testing
 solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${name}${renameClause(options.renaming)} testing
 solc_scoped_problems ${name} decl${selfClause}
-#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""} to ${leanString(output)}
+#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""}${options.auditPreconditions && !listing ? " audit_preconditions" : ""} to ${leanString(output)}
 `);
           // `lake lean` supplies the artifact-cache import map. `lake env lean`
           // only sees local oleans, which a freshly cached worktree need not have.
@@ -142,7 +145,10 @@ solc_scoped_problems ${name} decl${selfClause}
           for (let first=0; first<rows.length; first+=batchSize) {
             const part = invoke(first,batchSize,false);
             // A failed batch with no checkpoint must retain its discovered functions.
-            results.push(...(part.length ? part : rows.slice(first,first+batchSize).map(r => ({...r,status:'notRun',reason:'batch failed before checkpoint'}))));
+            results.push(...(part.length ? part : rows.slice(first,first+batchSize).map(r => ({
+              ...r, status:'notRun', reason:'batch failed before checkpoint',
+              ...(options.auditPreconditions ? {preconditions:'notRun',preconditionReason:'batch failed before checkpoint'} : {}),
+            }))));
             options.onProgress?.({results,errors});
           }
         } else {
@@ -161,7 +167,8 @@ solc_scoped_problems ${name} decl${selfClause}
 export function testsPassed(report, listing = false) {
   const active = listing ? "ready" : "proved";
   return report.errors.length === 0 && report.results.some(r => r.status === active)
-    && report.results.every(r => [active, "skip", "skipped", "internal"].includes(r.status));
+    && report.results.every(r => [active, "skip", "skipped", "internal"].includes(r.status)
+      && (r.preconditions === undefined || ['possible', 'notApplicable'].includes(r.preconditions)));
 }
 
 function main(args) {
@@ -169,10 +176,11 @@ function main(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--help") {
-      writeFileSync(1, "usage: node scripts/test-solidity.mjs [--json] [--list] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...\n");
+      writeFileSync(1, "usage: node scripts/test-solidity.mjs [--json] [--list] [--audit-preconditions] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...\n");
       return 0;
     } else if (arg === "--json") options.json = true;
     else if (arg === "--list") options.list = true;
+    else if (arg === "--audit-preconditions") options.auditPreconditions = true;
     else if (arg === "--no-build") options.build = false;
     else if (["--contract", "--function", "--timeout-ms", "--solkey", "--soljson", "--self-address"].includes(arg)) {
       if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error(`${arg} needs a value`);
@@ -186,7 +194,7 @@ function main(args) {
   // before exiting, including when stdout is a pipe with asynchronous writes.
   if (options.json) writeFileSync(1, JSON.stringify(report, null, 2) + '\n');
   else {
-    for (const r of report.results) writeFileSync(1, `${r.source}:${r.contract}.${r.function}: ${r.status}${r.reason ? ` (${r.reason})` : ""}\n`);
+    for (const r of report.results) writeFileSync(1, `${r.source}:${r.contract}.${r.function}: ${r.status}${r.reason ? ` (${r.reason})` : ""}${r.preconditions ? `; preconditions: ${r.preconditions}` : ''}\n`);
     for (const e of report.errors) writeFileSync(2, `${e.source}${e.contract ? `:${e.contract}` : ""}: error: ${e.reason}\n`);
   }
   return testsPassed(report, options.list) ? 0 : 1;

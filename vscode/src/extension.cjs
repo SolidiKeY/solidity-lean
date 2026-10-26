@@ -21,7 +21,7 @@ function createExtension(vscode, context, backend = runBackend) {
     const workspace = vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
     const configured = cfg.get('backendPath', '');
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
-    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000) };
+    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false) };
   }
   function cancel(uri) {
     if (uri) active.get(key(uri))?.abort();
@@ -64,7 +64,7 @@ function createExtension(vscode, context, backend = runBackend) {
       const id = `${fileId}#${encodeURIComponent(row.contract)}:${encodeURIComponent(row.signature || row.function)}`;
       const item = file.children.get(id) || controller.createTestItem(id, model.label(row), doc.uri);
       item.range = toRange(model.rangeOf(row));
-      item.description = row.status;
+      item.description = model.status(row);
       metadata.set(id, { uri: doc.uri, row });
       return item;
     });

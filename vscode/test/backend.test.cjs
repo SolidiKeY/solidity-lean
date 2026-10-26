@@ -18,6 +18,18 @@ test('validates report structure and preserves pending as incomplete', () => {
   assert.deepEqual(parseReport(JSON.stringify({ results: [row], errors: [] })).results, [row]);
   for (const invalid of ['not json', 'null', '{}', JSON.stringify({ results: [{ ...row, status: 'counterexample' }], errors: [] }), JSON.stringify({ results: [], errors: [null] })]) assert.throws(() => parseReport(invalid), /invalid/);
 });
+test('validates precondition audit statuses and forwards auditing only for verification', async t => {
+  assert.throws(() => parseReport(JSON.stringify({results:[{...row, preconditions:'guessed'}],errors:[]})), /precondition audit/);
+  assert.throws(() => parseReport(JSON.stringify({results:[{...row, preconditionReason:42}],errors:[]})), /precondition reason/);
+  const root = fixture(t, `import {writeSync} from 'node:fs';writeSync(1,JSON.stringify({results:[${JSON.stringify({...row,preconditions:'notApplicable'})}],errors:[],args:process.argv.slice(2)}));`);
+  const options = {backendPath:root,nodePath:process.execPath,source:'/tmp/x.sol',auditPreconditions:true};
+  assert.ok((await runBackend(options)).args.includes('--audit-preconditions'));
+  const listing = await runBackend({...options,listing:true});
+  assert.ok(listing.args.includes('--list'));
+  assert.equal(listing.args.includes('--audit-preconditions'), false);
+  writeFileSync(join(root, 'scripts/test-solidity.mjs'), `import {writeSync} from 'node:fs';writeSync(1,JSON.stringify({results:[${JSON.stringify(row)}],errors:[]}));`);
+  await assert.rejects(runBackend(options), /requested precondition audit/);
+});
 test('launches backend without shell and accepts unsuccessful verification report', async t => {
   const root = fixture(t, `import {writeSync} from 'node:fs';writeSync(1,JSON.stringify({results:[${JSON.stringify({ ...row, status: 'pending' })}],errors:[],args:process.argv.slice(2)}));process.exitCode=1;`);
   const report = await runBackend({ backendPath: root, nodePath: process.execPath, source: '/tmp/source with space;echo unsafe.sol', listing: true, contract: 'C', function: 'f(uint256)' });

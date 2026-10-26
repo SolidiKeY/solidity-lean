@@ -8,6 +8,7 @@ node scripts/test-solidity.mjs path/to/Test.sol
 node scripts/test-solidity.mjs --json path/to/test-directory
 node scripts/test-solidity.mjs --contract Test --function example path/to/Test.sol
 node scripts/test-solidity.mjs --list path/to/test-directory
+node scripts/test-solidity.mjs --audit-preconditions path/to/Contract.sol
 ```
 
 Directories are recursive, sorted and deduplicated. Every source is compiled
@@ -99,9 +100,17 @@ The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from
 `scripts/test-solidity.mjs`. It is synchronous. The options are `contract`,
 `function`, `list`, `timeoutMs`, `solkey`, `soljson`, `build`, `batchSize`,
-`onProgress` and `renaming`. A function selector may be a source name (all its
+`onProgress`, `renaming` and `auditPreconditions`. A function selector may be a source name (all its
 overloads) or its source signature (one overload). Reports retain source types
 before enum, address or value-type lowering.
+
+`auditPreconditions: true` (`--audit-preconditions`) additionally certifies whether
+specified functions have possible entry states. It is separate from proving
+postconditions. Audited rows add `preconditions` and `preconditionReason`;
+`impossible`, `unknown` and interrupted `notRun` audits cannot pass strict suites.
+Plain functions report `notApplicable`. Listing and auditing cannot be combined.
+The [verification notes](feature-work/dafny-verification.md) describe the
+certificates, finite-membership syntax and exact limits.
 
 For an existing solc fixture, the Lean entry point is:
 

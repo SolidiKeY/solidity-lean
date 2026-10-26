@@ -4,6 +4,7 @@ const { resolve, join } = require('node:path');
 const { existsSync } = require('node:fs');
 
 const statuses = new Set(['proved', 'pending', 'skipped', 'skip', 'internal', 'unsupported', 'excluded', 'ready', 'notRun', 'error']);
+const preconditions = new Set(['possible', 'impossible', 'unknown', 'notApplicable', 'notRun']);
 
 function parseReport(stdout) {
   let report;
@@ -11,6 +12,8 @@ function parseReport(stdout) {
   if (!report || !Array.isArray(report.results) || !Array.isArray(report.errors)) throw new Error('Verifier returned an invalid report');
   for (const row of report.results) {
     if (!row || typeof row.source !== 'string' || typeof row.contract !== 'string' || typeof row.function !== 'string' || !statuses.has(row.status)) throw new Error('Verifier returned an invalid obligation');
+    if (row.preconditions !== undefined && !preconditions.has(row.preconditions)) throw new Error('Verifier returned an invalid precondition audit');
+    if (row.preconditionReason !== undefined && typeof row.preconditionReason !== 'string') throw new Error('Verifier returned an invalid precondition reason');
   }
   for (const error of report.errors) if (!error || typeof error.reason !== 'string') throw new Error('Verifier returned an invalid error');
   return report;
@@ -42,13 +45,14 @@ function terminateTree(child) {
   kill(child.pid);
 }
 
-function runBackend({ backendPath, nodePath = 'node', source, listing = false, contract, function: functionName, timeoutMs = 600000, signal }) {
+function runBackend({ backendPath, nodePath = 'node', source, listing = false, auditPreconditions = false, contract, function: functionName, timeoutMs = 600000, signal }) {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1) return Promise.reject(new Error('Verification timeout must be positive milliseconds'));
   const root = resolve(backendPath);
   const script = join(root, 'scripts', 'test-solidity.mjs');
   if (!existsSync(script)) return Promise.reject(new Error(`Solidity Lean backend not found: ${script}`));
   const args = [script, '--json', '--timeout-ms', String(timeoutMs)];
   if (listing) args.push('--list');
+  if (auditPreconditions && !listing) args.push('--audit-preconditions');
   if (contract) args.push('--contract', contract);
   if (functionName) args.push('--function', functionName);
   args.push(resolve(source));
@@ -82,7 +86,12 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, c
     child.on('close', (code, killedBy) => {
       if (finished) return;
       if (code !== 0 && code !== 1) { finish(new Error(`Verifier ${killedBy ? `terminated by ${killedBy}` : `exited ${code}`}${stderr ? `: ${stderr.trim()}` : ''}`)); return; }
-      try { finish(null, parseReport(stdout)); } catch (error) { finish(error); }
+      try {
+        const report = parseReport(stdout);
+        if (auditPreconditions && !listing && report.results.some(row => row.preconditions === undefined))
+          throw new Error('Verifier did not return the requested precondition audit');
+        finish(null, report);
+      } catch (error) { finish(error); }
     });
   });
 }

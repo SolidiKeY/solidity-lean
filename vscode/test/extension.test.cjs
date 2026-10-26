@@ -24,6 +24,37 @@ test('model distinguishes incomplete proof, import gap, runtime error and succes
   assert.equal(model.validRange({ start: { line: 2, character: 0 }, end: { line: 1, character: 0 } }), false);
   assert.equal(model.validRange({ start: { line: -1, character: 0 }, end: { line: 1, character: 0 } }), false);
 });
+
+test('impossible preconditions remain visible even when the postcondition is proved', async () => {
+  let options;
+  const env = setup(async (args, env) => {
+    options = args;
+    return {results:[row(env,{preconditions:'impossible',preconditionReason:'kernel-checked'})],errors:[]};
+  });
+  env.config.auditPreconditions = true;
+  await env.api.verify(env.doc);
+  assert.equal(options.auditPreconditions, true);
+  const diagnostics = env.diagnosticMap.get(env.doc.uri.toString());
+  assert.equal(diagnostics.length, 1);
+  assert.equal(diagnostics[0].severity, 1);
+  assert.equal(diagnostics[0].code, 'preconditions-impossible');
+  assert.match(diagnostics[0].message, /vacuous/);
+  const file = [...env.controller.items.values()][0];
+  assert.match([...file.children.values()][0].description, /vacuous/);
+  await env.controller.run({include:[file]}, token);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','errored','end']);
+});
+
+test('unknown audits require attention while possible entry states preserve a pass', () => {
+  const base = {contract:'C',function:'f',status:'proved'};
+  assert.equal(model.resultKind({...base,preconditions:'unknown'}), 'errored');
+  assert.equal(model.resultKind({...base,preconditions:'notRun'}), 'errored');
+  assert.equal(model.resultKind({...base,preconditions:'possible'}), 'passed');
+  const unknown = model.diagnostics({results:[{...base,preconditions:'unknown',preconditionReason:'budget'}],errors:[]});
+  assert.equal(unknown[0].code, 'preconditions-unknown');
+  assert.doesNotMatch(unknown[0].message, /counterexample|impossible|vacuous/);
+  assert.deepEqual(model.diagnostics({results:[{...base,preconditions:'possible'}],errors:[]}), []);
+});
 test('verify command registers proof status, Test Explorer function and hover', async () => {
   const env = setup();
   await env.commands.get('solidityLean.verify')();

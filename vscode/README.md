@@ -11,6 +11,12 @@ Hover over a function to see its result and obligation reading. Edits clear
 obsolete results and cancel verification. **Cancel Verification** stops active
 jobs; verify-on-save is optional and disabled initially.
 
+Enable `solidityLean.auditPreconditions` to check that specified functions have
+possible entry states. A proved postcondition with an impossible entry is shown
+as a vacuous-specification warning. Unknown audits require attention too. This
+option is off by default and discovery does not run audits. See the repository's
+verification notes for the certificates and their model limits.
+
 ## Setup
 
 Install Node.js 18 or later and the Lean/Lake version in the repository's
@@ -36,7 +42,7 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.1.0.vsix
+code --install-extension solidity-lean-0.2.0.vsix
 ```
 
 ## Tests

@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.RefInputs
 import Solidity.Syntax.Elab
@@ -414,8 +415,7 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
       -- even for an empty collection; no erased operand can hide an error.
       let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
       let values : List (Tm C Γ.ctx (.val p)) ← terms.mapM fun t => t.check (.val p) Γ
-      pure (values.foldr (fun item rest =>
-        .not (.and (.not (.eq value item)) (.not rest))) .ff)
+      pure (Fml.finiteMember value values)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.fml ctx.old

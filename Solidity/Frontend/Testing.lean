@@ -4,6 +4,7 @@ import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.ProveChunked
+import Solidity.Tools.Preconditions
 
 /-!
 # Testing imported Solidity files
@@ -254,11 +255,23 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       return ("proved", "", mode))
       fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
 
+/-- Check a specified row's entry condition separately from its postcondition. -/
+def testPreconditions (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) :=
+  withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
+    liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
+      let φ ← elabClosed (← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) }))
+      let name := r.declName N ++ `entryAudited
+      match ← Tools.auditPreconditions φ name with
+      | .impossible => pure ("impossible", s!"kernel-checked: {name}")
+      | .possible => pure ("possible", s!"kernel-checked: {name}")
+      | .unknown reason => pure ("unknown", reason))
+    fun e => do pure ("unknown", ← e.toMessageData.toString)
+
 /-- Machine-readable testing entry point for a solc import. Listing performs
 no proof search. Every selected import row is retained, including gaps and
 functions whose specification has no plain box/diamond obligation. -/
 syntax (name := solkeyTest) "#solkey_test " ident (&" only " str)?
-  (&" from " num)? (&" count " num)? (&" listing")? " to " str : command
+  (&" from " num)? (&" count " num)? (&" listing")? (&" audit_preconditions")? " to " str : command
 
 @[command_elab solkeyTest]
 def elabSolkeyTest : CommandElab := fun stx => do
@@ -267,21 +280,26 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let first := if stx[3].isNone then 0 else stx[3][1].isNatLit?.getD 0
   let count? := if stx[4].isNone then none else stx[4][1].isNatLit?
   let listing := !stx[5].isNone
+  let audit := !stx[6].isNone
+  if listing && audit then throwError "precondition auditing requires verification, not listing"
+  let auditFields (status reason : String) : List (String × Json) :=
+    if audit then [("preconditions", toJson status), ("preconditionReason", toJson reason)] else []
   let allRows ← reportRows N
   let selected := (allRows.filter fun r =>
     only?.all fun n => n == r.name || n == r.displayName || n == r.signature).drop first
   let rows := count?.map (selected.take ·) |>.getD selected
   if rows.isEmpty && (!allRows.isEmpty || only?.isSome) then
     throwError "#solkey_test: no functions selected"
-  let output := stx[7].isStrLit?.getD ""
+  let output := stx[8].isStrLit?.getD ""
   -- Checkpoint before search, then after every function: a process timeout
   -- preserves completed results and explicitly marks the unattempted rows.
-  let mut results : Array Json := rows.toArray.map fun r => Json.mkObj [
+  let mut results : Array Json := rows.toArray.map fun r => Json.mkObj ([
     ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
     ("signature", toJson r.signature),
     ("sourceId", toJson r.sourceId),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
-    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))]
+    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))] ++
+      auditFields "notRun" "contract run interrupted")
   IO.FS.writeFile output (Json.arr results).pretty
   -- the tails reading (O6): clean where every function exposes nothing
   let tail ← contractTailMode N allRows
@@ -294,14 +312,18 @@ def elabSolkeyTest : CommandElab := fun stx => do
         pure ("unsupported", s!"{r.tag.toStr}: no obligation", .solc)
       else if listing then pure ("ready", "", tail)
       else testObligation N r tail
+    let (preconditions, preconditionReason) ← if !audit then pure ("notRequested", "")
+      else if r.status != .elaborated || r.tag != .specified then
+        pure ("notApplicable", "no admitted function specification")
+      else testPreconditions N r
     let elapsed ← IO.monoMsNow
-    results := results.set! i <| Json.mkObj [
+    results := results.set! i <| Json.mkObj ([
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
       ("sourceId", toJson r.sourceId),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
-      ("elapsedMs", toJson (elapsed - t0))]
+      ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason)
     IO.FS.writeFile output (Json.arr results).pretty
 
 end Solidity.Frontend
