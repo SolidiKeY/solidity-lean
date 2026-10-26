@@ -136,7 +136,9 @@ private def nodeFeatures (j : Json) : Option (List Feature) :=
         then [.rawCalldata, .rawReturndata] else []
       | _ => [])
   | "VariableDeclaration" => some ([.variableDeclarations] ++
-      (if J.opt j "stateVariable" == some (.bool true) then [.stateVariables] else []) ++
+      (if J.opt j "stateVariable" == some (.bool true) then
+        [.stateVariables] ++ (if J.str? j "visibility" == some "public" then [.publicGetters] else [])
+       else []) ++
       (if J.opt j "constant" == some (.bool true) then [.constants] else []) ++
       (if J.str? j "mutability" == some "immutable" then [.immutables] else []) ++
       match J.str? j "storageLocation" with
@@ -270,9 +272,6 @@ private def validateNode (provenance : Provenance) (j : Json) : Except Diagnosti
       !(["number", "bool", "string", "unicodeString", "hexString"].contains ((J.str? j "kind").getD "")) then
     throw (diagnostic j .invalidAst `solidity.literalKind "unknown literal kind")
   if ["UnaryOperation", "BinaryOperation"].contains (J.kind j) then
-    if ((j.getObjValAs? Int "function").toOption).any (· ≥ 0) then
-      throw (diagnostic j .missingImplementation `solidity.operatorAliases
-        "user-defined operators need declaration-aware operator lowering" (some .operatorAliases))
     let allowed := if J.kind j == "UnaryOperation" then ["!", "-", "+", "~", "++", "--", "delete"]
       else ["+", "-", "*", "/", "%", "**", "&", "|", "^", "<<", ">>", ">>>",
         "==", "!=", "<", ">", "<=", ">=", "&&", "||"]
@@ -331,13 +330,19 @@ private def walk (provenance : Provenance) (declarations : List Json) :
   | 0, j, _ => throw (diagnostic j .invalidAst `solidity.astDepth "AST depth bound exhausted")
   | fuel + 1, j, payment => do
     validateNode provenance j
+    let resolvedOperator ← match operatorAlias? declarations j with
+      | .ok call => pure call
+      | .error gap => throw (diagnostic j .invalidAst `solidity.operatorAliases
+          gap.msg (some .operatorAliases))
     if J.kind j == "MemberAccess" then
       let member := (J.str? j "memberName").getD ""
       if ["address", "selector"].contains member then
         if let some receiver := J.opt j "expression" then
           if (J.tyStr receiver).startsWith "function " &&
+              (storedFunctionMemberType? j).isNone &&
               !((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any
-                (J.kind · == "FunctionDefinition") then
+                (fun declaration => J.kind declaration == "FunctionDefinition" ||
+                  isPublicGetterMember declaration receiver) then
             throw (diagnostic j .missingImplementation `solidity.functionMemberKind
               "stored function members need typed ABI address/selector observations"
               (some (if member == "address" then .functionAddress else .functionSelector)))
@@ -349,10 +354,11 @@ private def walk (provenance : Provenance) (declarations : List Json) :
     let features := if payment && J.kind j == "MemberAccess" then
         features.filter (· != .lowLevelCall) ++ [.emptyDataValueCall] else features
     let commonType := ((J.opt j "commonType").bind (J.str? · "typeString")).getD ""
-    let features := features ++ if commonType.startsWith "fixed" || commonType.startsWith "ufixed"
-      then [.fixedPoint] else []
+    let features := features ++ (if resolvedOperator.isSome then [.operatorAliases] else []) ++
+      if commonType.startsWith "fixed" || commonType.startsWith "ufixed" then [.fixedPoint] else []
     let mut found : Found := {
-      uses := (atNode j features).toArray, references := (J.ref? j).toList.filter (· ≥ 0) }
+      uses := (atNode j features).toArray, references :=
+        (J.ref? j).toList.filter (· ≥ 0) ++ resolvedOperator.toList.map (·.1) }
     match j with
     | .arr values =>
       for value in values do found := found.append (← walk provenance declarations fuel value false)

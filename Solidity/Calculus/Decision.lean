@@ -368,7 +368,7 @@ theorem decideKInt_refutes {φ : Fml C []} {σ : State C []} (h : decideKInt φ 
   · exact fun hφ => decideLeafA_refutes h (Fml.holds_zT 0 φ σ hφ)
   · cases h
 
-/-! ### Binders of KeY's `int` over two words (M7, feature 27)
+/-! ### Binders of KeY's `int` over two words (M7, features 30 and 31)
 
 A leaf whose binders of KeY's `int` read them linearly against bounded
 terms is read with each such binder over two words (`Fml.kencB`,
@@ -471,7 +471,7 @@ def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
 arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
 binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
-feature 27). -/
+features 30 and 31). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
   φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered
 

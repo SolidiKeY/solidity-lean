@@ -70,6 +70,14 @@ test("empty and untested suites cannot pass", () => {
   assert.throws(() => runSolidityTests([], { build: false }), /no Solidity/);
 });
 
+test("out-of-EVM self addresses are rejected before any proof or compiler job", () => {
+  for (const selfAddress of [(1n << 160n).toString(), `0x${(1n << 160n).toString(16)}`,
+    (1n << 200n).toString()]) {
+    assert.throws(() => runSolidityTests(["tests/solc/Runner.sol"],
+      {build:false, selfAddress}), /self address must fit 160 bits/);
+  }
+});
+
 test("Solidity source through solc and kernel-checked proof search", () => {
   const checkpoints = [];
   const report = runSolidityTests(["tests/solc/Runner.sol"], { build: false, batchSize:3,
@@ -426,9 +434,10 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
     // a slice is a view: its offset and length (`RawStmt.sliceViews`)
     'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
     assert.equal(status[name], 'proved', name);
-  // a memory copy written (solc copies, the model would share), a slice hashed
+  // Ordinary whole-calldata writable copies remain a separate interface.
   assert.equal(status.writesCopy, 'unsupported');
-  assert.equal(status.sliceHashed, 'unsupported');
+  // Slice hashing is admitted. Symbolic copy-loop proof search may stay open.
+  assert.match(status.sliceHashed, /^(proved|pending)$/);
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {

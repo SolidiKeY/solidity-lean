@@ -27,7 +27,7 @@ info: \programVariables {
 }
 
 \problem {
-    wt(storage) -> \[{ additionStorageWrite(x, y)@TestSuite; }\](true)
+    (self < 1461501637330902918203684832716283019655932542976) -> (wt(storage)) -> \[{ additionStorageWrite(x, y)@TestSuite; }\](true)
 }
 -/
 #guard_msgs in
@@ -39,7 +39,7 @@ info: \programVariables {
 }
 
 \problem {
-    wt(storage) -> \<{ boolIsTrueOrFalse(b)@TestSuite; }\>(true)
+    (self < 1461501637330902918203684832716283019655932542976) -> (wt(storage)) -> \<{ boolIsTrueOrFalse(b)@TestSuite; }\>(true)
 }
 -/
 #guard_msgs in

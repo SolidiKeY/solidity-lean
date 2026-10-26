@@ -167,6 +167,29 @@ example : failedArgument.run initial = .error .revert ∧
 
 example : allocationCostProg failedArgument initial = 3 := by decide +kernel
 
+/-- IR evaluates all constructor arguments before allocating the object. -/
+private def irContract : Contract := { C with evalOrder := .viaIR }
+
+private def failedArgumentIR := (sol[irContract]{
+  Record memory r = Record(5 / 0, true, -3);
+} : Prog irContract [] _)
+
+example : allocationCostProg failedArgumentIR (State.init irContract) = 0 := by decide +kernel
+
+/-- The last IR field must finish before allocation too; merely forcing
+arguments which precede another argument would still allocate incorrectly. -/
+private def failedLastArgumentIR := (sol[irContract]{
+  Record memory r = Record(5, true, -3 / 0);
+} : Prog irContract [] _)
+
+example : allocationCostProg failedLastArgumentIR (State.init irContract) = 0 := by decide +kernel
+
+private def failedLastArgumentLegacy := (sol{
+  Record memory r = Record(5, true, -3 / 0);
+} : Prog C [] _)
+
+example : allocationCostProg failedLastArgumentLegacy initial = 3 := by decide +kernel
+
 private def unreached := (sol{
   require(false);
   Record memory r = Record(5, true, -3);

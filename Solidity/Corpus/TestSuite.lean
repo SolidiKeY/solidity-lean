@@ -24,2592 +24,2592 @@ set_option maxRecDepth 575
 /-- solkey `TestSuite.storageRootReadWrite` (`TestSuite.sol`). -/
 theorem storageRootReadWrite :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootReadWrite.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootReadWrite.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootReadWrite.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteRead` (`TestSuite.sol`). -/
 theorem storageFieldWriteRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteRead.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldWriteRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldWriteRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepAddAssign` (`TestSuite.sol`). -/
 theorem storageFieldDeepAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldGlobalAge` (`TestSuite.sol`). -/
 theorem storageFieldGlobalAge :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldGlobalAge.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldGlobalAge.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldGlobalAge.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAliasWrite` (`TestSuite.sol`). -/
 theorem storageAliasWrite :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAliasWrite.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAliasWrite.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAliasWrite.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexRootMapping` (`TestSuite.sol`). -/
 theorem storageIndexRootMapping :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexRootMapping.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexRootMapping.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexRootMapping.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexAddAssign` (`TestSuite.sol`). -/
 theorem storageIndexAddAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexAddAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexAddAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingAddAssign` (`TestSuite.sol`). -/
 theorem storageIndexMappingAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem storageIndexArrayAddAssignOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexArrayReadOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem storageIndexArrayReadOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexReadComplexReceiverBindLocalRoot` (`TestSuite.sol`). -/
 theorem storageIndexReadComplexReceiverBindLocalRoot :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexWriteComplexReceiverCopySource` (`TestSuite.sol`). -/
 theorem storageIndexWriteComplexReceiverCopySource :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteRootRhsComplexReceiver` (`TestSuite.sol`). -/
 theorem storageFieldWriteRootRhsComplexReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldWriteRootRhsComplexReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexWriteRootRhsComplexReceiver` (`TestSuite.sol`). -/
 theorem storageIndexWriteRootRhsComplexReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexWriteRootRhsComplexReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushValue` (`TestSuite.sol`). -/
 theorem storagePushValue :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushValue.problem :=
-  box_of_proved Solkey.TestSuite.storagePushValue.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushValue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushValueCopySource` (`TestSuite.sol`). -/
 theorem storagePushValueCopySource :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushValueCopySource.problem :=
-  box_of_proved Solkey.TestSuite.storagePushValueCopySource.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushValueCopySource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushMemoryCopySource` (`TestSuite.sol`). -/
 theorem storagePushMemoryCopySource :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushMemoryCopySource.problem :=
-  box_of_proved Solkey.TestSuite.storagePushMemoryCopySource.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushMemoryCopySource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushMemoryStructCopySource` (`TestSuite.sol`). -/
 theorem storagePushMemoryStructCopySource :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushMemoryStructCopySource.problem :=
-  box_of_proved Solkey.TestSuite.storagePushMemoryStructCopySource.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushMemoryStructCopySource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushCompoundTarget` (`TestSuite.sol`). -/
 theorem storagePushCompoundTarget :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushCompoundTarget.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushCompoundTarget.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushCompoundTarget.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushDivModTarget` (`TestSuite.sol`). -/
 theorem storagePushDivModTarget :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushDivModTarget.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushDivModTarget.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushDivModTarget.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushIncrementTarget` (`TestSuite.sol`). -/
 theorem storagePushIncrementTarget :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushIncrementTarget.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushIncrementTarget.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushIncrementTarget.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushCompoundSigned` (`TestSuite.sol`). -/
 theorem storagePushCompoundSigned :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushCompoundSigned.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushCompoundSigned.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushCompoundSigned.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushPopCallReceiver` (`TestSuite.sol`). -/
 theorem storagePushPopCallReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushPopCallReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushPopCallReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushPopCallReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageArrayMethodReferences` (`TestSuite.sol`). -/
 theorem storageArrayMethodReferences :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageArrayMethodReferences.problem :=
-  diamond_of_proved Solkey.TestSuite.storageArrayMethodReferences.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageArrayMethodReferences.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageArrayMethodReferencesCallReceiver` (`TestSuite.sol`). -/
 theorem storageArrayMethodReferencesCallReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopReferenceOutOfBounds` (`TestSuite.sol`). -/
 theorem storagePopReferenceOutOfBounds :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopReferenceOutOfBounds.problem :=
-  box_of_proved Solkey.TestSuite.storagePopReferenceOutOfBounds.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePopReferenceOutOfBounds.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopReferenceCallOutOfBounds` (`TestSuite.sol`). -/
 theorem storagePopReferenceCallOutOfBounds :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopReferenceCallOutOfBounds.problem :=
-  box_of_proved Solkey.TestSuite.storagePopReferenceCallOutOfBounds.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePopReferenceCallOutOfBounds.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.newArrayCaptureStorageRoot` (`TestSuite.sol`). -/
 theorem newArrayCaptureStorageRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.newArrayCaptureStorageRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.newArrayCaptureStorageRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.newArrayCaptureStorageRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.requireTrueLiteral` (`TestSuite.sol`). -/
 theorem requireTrueLiteral :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.requireTrueLiteral.problem :=
-  diamond_of_proved Solkey.TestSuite.requireTrueLiteral.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.requireTrueLiteral.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.requireFalseLiteral` (`TestSuite.sol`). -/
 theorem requireFalseLiteral :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.requireFalseLiteral.problem :=
-  box_of_proved Solkey.TestSuite.requireFalseLiteral.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.requireFalseLiteral.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolRootReadWrite` (`TestSuite.sol`). -/
 theorem storageBoolRootReadWrite :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolRootReadWrite.problem :=
-  diamond_of_proved Solkey.TestSuite.storageBoolRootReadWrite.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageBoolRootReadWrite.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolRootCopy` (`TestSuite.sol`). -/
 theorem storageBoolRootCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolRootCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.storageBoolRootCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageBoolRootCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolFieldRead` (`TestSuite.sol`). -/
 theorem storageBoolFieldRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolFieldRead.problem :=
-  diamond_of_proved Solkey.TestSuite.storageBoolFieldRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageBoolFieldRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolMappingRead` (`TestSuite.sol`). -/
 theorem storageBoolMappingRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolMappingRead.problem :=
-  diamond_of_proved Solkey.TestSuite.storageBoolMappingRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageBoolMappingRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolArrayRead` (`TestSuite.sol`). -/
 theorem storageBoolArrayRead :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolArrayRead.problem :=
-  box_of_proved Solkey.TestSuite.storageBoolArrayRead.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageBoolArrayRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageBoolFieldStoreRoot` (`TestSuite.sol`). -/
 theorem storageBoolFieldStoreRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageBoolFieldStoreRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.storageBoolFieldStoreRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageBoolFieldStoreRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryDeclDefault` (`TestSuite.sol`). -/
 theorem memoryDeclDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryDeclDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryDeclDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryDeclDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryArrayIndex` (`TestSuite.sol`). -/
 theorem memoryArrayIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryArrayIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryArrayIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryArrayIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryNewIntoStructField` (`TestSuite.sol`). -/
 theorem memoryNewIntoStructField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryNewIntoStructField.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryNewIntoStructField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryNewIntoStructField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryNewIntoNestedField` (`TestSuite.sol`). -/
 theorem memoryNewIntoNestedField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryNewIntoNestedField.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryNewIntoNestedField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryNewIntoNestedField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryNewIntoIndex` (`TestSuite.sol`). -/
 theorem memoryNewIntoIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryNewIntoIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryNewIntoIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryNewIntoIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageNewIntoField` (`TestSuite.sol`). -/
 theorem storageNewIntoField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageNewIntoField.problem :=
-  diamond_of_proved Solkey.TestSuite.storageNewIntoField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageNewIntoField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageComplexReceiverEmptyPush` (`TestSuite.sol`). -/
 theorem testStorageComplexReceiverEmptyPush :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageComplexReceiverEmptyPush.problem :=
-  box_of_proved Solkey.TestSuite.testStorageComplexReceiverEmptyPush.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageComplexReceiverEmptyPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionBothStorage` (`TestSuite.sol`). -/
 theorem additionBothStorage :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionBothStorage.problem :=
-  diamond_of_proved Solkey.TestSuite.additionBothStorage.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionBothStorage.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionSimple` (`TestSuite.sol`). -/
 theorem additionSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.additionSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionStorageRead` (`TestSuite.sol`). -/
 theorem additionStorageRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionStorageRead.problem :=
-  diamond_of_proved Solkey.TestSuite.additionStorageRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionStorageRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.divisionSimple` (`TestSuite.sol`). -/
 theorem divisionSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.divisionSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.divisionSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.divisionSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.greaterEqualSimple` (`TestSuite.sol`). -/
 theorem greaterEqualSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.greaterEqualSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.greaterEqualSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.greaterEqualSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.greaterThanSimple` (`TestSuite.sol`). -/
 theorem greaterThanSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.greaterThanSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.greaterThanSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.greaterThanSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.lessEqualSimple` (`TestSuite.sol`). -/
 theorem lessEqualSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.lessEqualSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.lessEqualSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.lessEqualSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.lessThanSimple` (`TestSuite.sol`). -/
 theorem lessThanSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.lessThanSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.lessThanSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.lessThanSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalAndSimple` (`TestSuite.sol`). -/
 theorem logicalAndSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalAndSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalAndSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalAndSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalAndShortCircuitRhs` (`TestSuite.sol`). -/
 theorem logicalAndShortCircuitRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalAndShortCircuitRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalAndShortCircuitRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalAndShortCircuitRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAssignmentValueNested` (`TestSuite.sol`). -/
 theorem storageAssignmentValueNested :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAssignmentValueNested.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAssignmentValueNested.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAssignmentValueNested.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAssignmentValueIndexOnce` (`TestSuite.sol`). -/
 theorem storageAssignmentValueIndexOnce :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAssignmentValueIndexOnce.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAssignmentValueIndexOnce.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAssignmentValueIndexOnce.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAssignmentValueRhsBeforeIndex` (`TestSuite.sol`). -/
 theorem storageAssignmentValueRhsBeforeIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalAndStorageAssignmentSkipsIndex` (`TestSuite.sol`). -/
 theorem logicalAndStorageAssignmentSkipsIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalOrStorageAssignmentSkipsIndex` (`TestSuite.sol`). -/
 theorem logicalOrStorageAssignmentSkipsIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalNotSimple` (`TestSuite.sol`). -/
 theorem logicalNotSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalNotSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalNotSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalNotSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalOrSimple` (`TestSuite.sol`). -/
 theorem logicalOrSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalOrSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalOrSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalOrSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalOrShortCircuitRhs` (`TestSuite.sol`). -/
 theorem logicalOrShortCircuitRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalOrShortCircuitRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalOrShortCircuitRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalOrShortCircuitRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ternaryCaptureCond` (`TestSuite.sol`). -/
 theorem ternaryCaptureCond :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ternaryCaptureCond.problem :=
-  diamond_of_proved Solkey.TestSuite.ternaryCaptureCond.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ternaryCaptureCond.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ternaryToIf` (`TestSuite.sol`). -/
 theorem ternaryToIf :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ternaryToIf.problem :=
-  diamond_of_proved Solkey.TestSuite.ternaryToIf.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ternaryToIf.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifUnfold` (`TestSuite.sol`). -/
 theorem ifUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.ifUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifElseUnfold` (`TestSuite.sol`). -/
 theorem ifElseUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifElseUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.ifElseUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifElseUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifSplit` (`TestSuite.sol`). -/
 theorem ifSplit :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifSplit.problem :=
-  diamond_of_proved Solkey.TestSuite.ifSplit.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifSplit.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifElseSplit` (`TestSuite.sol`). -/
 theorem ifElseSplit :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifElseSplit.problem :=
-  diamond_of_proved Solkey.TestSuite.ifElseSplit.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifElseSplit.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifTrue` (`TestSuite.sol`). -/
 theorem ifTrue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifTrue.problem :=
-  diamond_of_proved Solkey.TestSuite.ifTrue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifTrue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifFalse` (`TestSuite.sol`). -/
 theorem ifFalse :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifFalse.problem :=
-  diamond_of_proved Solkey.TestSuite.ifFalse.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifFalse.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifElseTrue` (`TestSuite.sol`). -/
 theorem ifElseTrue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifElseTrue.problem :=
-  diamond_of_proved Solkey.TestSuite.ifElseTrue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifElseTrue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifElseFalse` (`TestSuite.sol`). -/
 theorem ifElseFalse :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifElseFalse.problem :=
-  diamond_of_proved Solkey.TestSuite.ifElseFalse.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifElseFalse.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ifElseNegated` (`TestSuite.sol`). -/
 theorem ifElseNegated :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ifElseNegated.problem :=
-  diamond_of_proved Solkey.TestSuite.ifElseNegated.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ifElseNegated.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryDeepField` (`TestSuite.sol`). -/
 theorem memoryDeepField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryDeepField.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryDeepField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryDeepField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldAddAssign` (`TestSuite.sol`). -/
 theorem memoryFieldAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldSubAssign` (`TestSuite.sol`). -/
 theorem memoryFieldSubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldSubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldSubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldMulAssign` (`TestSuite.sol`). -/
 theorem memoryFieldMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldDivAssign` (`TestSuite.sol`). -/
 theorem memoryFieldDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldModAssign` (`TestSuite.sol`). -/
 theorem memoryFieldModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldAddAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldAddAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldAddAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldAddAssignNse` (`TestSuite.sol`). -/
 theorem memoryFieldAddAssignNse :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldAddAssignNse.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssignNse.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldAddAssignNse.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPreincrement` (`TestSuite.sol`). -/
 theorem memoryFieldPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostincrement` (`TestSuite.sol`). -/
 theorem memoryFieldPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPredecrement` (`TestSuite.sol`). -/
 theorem memoryFieldPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostdecrement` (`TestSuite.sol`). -/
 theorem memoryFieldPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPreincrementAssignment` (`TestSuite.sol`). -/
 theorem memoryFieldPreincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPreincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostincrementAssignment` (`TestSuite.sol`). -/
 theorem memoryFieldPostincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPredecrementAssignment` (`TestSuite.sol`). -/
 theorem memoryFieldPredecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPredecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostdecrementAssignment` (`TestSuite.sol`). -/
 theorem memoryFieldPostdecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostdecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPreincrementUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldPreincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPreincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPreincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldAlias` (`TestSuite.sol`). -/
 theorem memoryFieldAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldReferenceAssign` (`TestSuite.sol`). -/
 theorem memoryFieldReferenceAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldReferenceAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldReferenceAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldReferenceAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayAddAssign` (`TestSuite.sol`). -/
 theorem memoryIndexArrayAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArraySubAssign` (`TestSuite.sol`). -/
 theorem memoryIndexArraySubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArraySubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArraySubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArraySubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayMulAssign` (`TestSuite.sol`). -/
 theorem memoryIndexArrayMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayDivAssign` (`TestSuite.sol`). -/
 theorem memoryIndexArrayDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayModAssign` (`TestSuite.sol`). -/
 theorem memoryIndexArrayModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayAddAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayAddAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayAddAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayAddAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayAddAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPreincrementUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPreincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPreincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPreincrement` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostdecrement` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostincrementAssignment` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPredecrementAssignment` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPredecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPredecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryRootAlias` (`TestSuite.sol`). -/
 theorem memoryRootAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryRootAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryRootAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryRootAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryRootDeleteFresh` (`TestSuite.sol`). -/
 theorem memoryRootDeleteFresh :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryRootDeleteFresh.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryRootDeleteFresh.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryRootDeleteFresh.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryStructArrayIndex` (`TestSuite.sol`). -/
 theorem memoryStructArrayIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryStructArrayIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryStructArrayIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryStructArrayIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryToStorage` (`TestSuite.sol`). -/
 theorem memoryToStorage :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryToStorage.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryToStorage.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryToStorage.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryToStorageIndexMappingCopyRootExample` (`TestSuite.sol`). -/
 theorem memoryToStorageIndexMappingCopyRootExample :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryToStorageIndexMappingCopyRootExample.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryToStorageIndexMappingCopyRootExample.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryToStorageIndexMappingCopyRootExample.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryToStorageIndexArrayCopyRootExample` (`TestSuite.sol`). -/
 theorem memoryToStorageIndexArrayCopyRootExample :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.memoryToStorageIndexArrayCopyRootExample.problem :=
-  box_of_proved Solkey.TestSuite.memoryToStorageIndexArrayCopyRootExample.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.memoryToStorageIndexArrayCopyRootExample.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem memoryToStorageIndexArrayCopyRootOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.moduloSimple` (`TestSuite.sol`). -/
 theorem moduloSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.moduloSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.moduloSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.moduloSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.multiplicationSimple` (`TestSuite.sol`). -/
 theorem multiplicationSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.multiplicationSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.multiplicationSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.multiplicationSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.notEqualSimple` (`TestSuite.sol`). -/
 theorem notEqualSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.notEqualSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.notEqualSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.notEqualSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.powerSimple` (`TestSuite.sol`). -/
 theorem powerSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.powerSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.powerSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.powerSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.requireHoldsDiamond` (`TestSuite.sol`). -/
 theorem requireHoldsDiamond :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.requireHoldsDiamond.problem :=
-  diamond_of_proved Solkey.TestSuite.requireHoldsDiamond.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.requireHoldsDiamond.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAliasRebindAlias` (`TestSuite.sol`). -/
 theorem storageAliasRebindAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAliasRebindAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAliasRebindAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAliasRebindAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageDeepFieldPostincrement` (`TestSuite.sol`). -/
 theorem storageDeepFieldPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageDeepFieldPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageDeepFieldPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageDeepFieldPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageDeepFieldPreincrement` (`TestSuite.sol`). -/
 theorem storageDeepFieldPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageDeepFieldPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageDeepFieldPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageDeepFieldPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldAddAssign` (`TestSuite.sol`). -/
 theorem storageFieldAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldCopyStruct` (`TestSuite.sol`). -/
 theorem storageFieldCopyStruct :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldCopyStruct.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldCopyStruct.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldCopyStruct.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldCopyValueField` (`TestSuite.sol`). -/
 theorem storageFieldCopyValueField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldCopyValueField.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldCopyValueField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldCopyValueField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepDivAssign` (`TestSuite.sol`). -/
 theorem storageFieldDeepDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepModAssign` (`TestSuite.sol`). -/
 theorem storageFieldDeepModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepMulAssign` (`TestSuite.sol`). -/
 theorem storageFieldDeepMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepSubAssign` (`TestSuite.sol`). -/
 theorem storageFieldDeepSubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepSubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepSubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepWriteRead` (`TestSuite.sol`). -/
 theorem storageFieldDeepWriteRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepWriteRead.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepWriteRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepWriteRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDelete` (`TestSuite.sol`). -/
 theorem storageFieldDelete :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDelete.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDelete.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDelete.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeleteThenCopy` (`TestSuite.sol`). -/
 theorem storageFieldDeleteThenCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeleteThenCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeleteThenCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeleteThenCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeleteThenCopyDeep` (`TestSuite.sol`). -/
 theorem storageFieldDeleteThenCopyDeep :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeleteThenCopyDeep.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeleteThenCopyDeep.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeleteThenCopyDeep.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDivAssign` (`TestSuite.sol`). -/
 theorem storageFieldDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldModAssign` (`TestSuite.sol`). -/
 theorem storageFieldModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldMulAssign` (`TestSuite.sol`). -/
 theorem storageFieldMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPostdecrementAssign` (`TestSuite.sol`). -/
 theorem storageFieldPostdecrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPostdecrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPostdecrement` (`TestSuite.sol`). -/
 theorem storageFieldPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPostincrementAssign` (`TestSuite.sol`). -/
 theorem storageFieldPostincrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPostincrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPostincrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPostincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPostincrement` (`TestSuite.sol`). -/
 theorem storageFieldPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPredecrementAssign` (`TestSuite.sol`). -/
 theorem storageFieldPredecrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPredecrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPredecrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPredecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPredecrement` (`TestSuite.sol`). -/
 theorem storageFieldPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPreincrementAssign` (`TestSuite.sol`). -/
 theorem storageFieldPreincrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPreincrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPreincrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPreincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPreincrement` (`TestSuite.sol`). -/
 theorem storageFieldPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldReadBindLocal` (`TestSuite.sol`). -/
 theorem storageFieldReadBindLocal :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldReadBindLocal.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldReadBindLocal.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldReadBindLocal.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldReadStoreRoot` (`TestSuite.sol`). -/
 theorem storageFieldReadStoreRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldReadStoreRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldReadStoreRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldReadStoreRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldSubAssign` (`TestSuite.sol`). -/
 theorem storageFieldSubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldSubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldSubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteCaptureSrc` (`TestSuite.sol`). -/
 theorem storageFieldWriteCaptureSrc :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteCaptureSrc.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldWriteCaptureSrc.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldWriteCaptureSrc.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexCopysourceAfterPush` (`TestSuite.sol`). -/
 theorem storageIndexCopysourceAfterPush :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexCopysourceAfterPush.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexCopysourceAfterPush.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexCopysourceAfterPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDecomposeAfterPush` (`TestSuite.sol`). -/
 theorem storageIndexDecomposeAfterPush :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDecomposeAfterPush.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexDecomposeAfterPush.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexDecomposeAfterPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDeleteMappingBool` (`TestSuite.sol`). -/
 theorem storageIndexDeleteMappingBool :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDeleteMappingBool.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexDeleteMappingBool.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexDeleteMappingBool.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDeleteMappingStruct` (`TestSuite.sol`). -/
 theorem storageIndexDeleteMappingStruct :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDeleteMappingStruct.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexDeleteMappingStruct.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexDeleteMappingStruct.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDelete` (`TestSuite.sol`). -/
 theorem storageIndexDelete :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDelete.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexDelete.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexDelete.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDivAssign` (`TestSuite.sol`). -/
 theorem storageIndexDivAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDivAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexDivAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexModAssign` (`TestSuite.sol`). -/
 theorem storageIndexModAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexModAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexModAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMulAssign` (`TestSuite.sol`). -/
 theorem storageIndexMulAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMulAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexMulAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMultipleWrites` (`TestSuite.sol`). -/
 theorem storageIndexMultipleWrites :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMultipleWrites.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexMultipleWrites.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexMultipleWrites.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostdecrementAssign` (`TestSuite.sol`). -/
 theorem storageIndexPostdecrementAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostdecrementAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPostdecrementAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPostdecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostdecrement` (`TestSuite.sol`). -/
 theorem storageIndexPostdecrement :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostdecrement.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPostdecrement.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostincrementAssign` (`TestSuite.sol`). -/
 theorem storageIndexPostincrementAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostincrementAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPostincrementAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPostincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostincrement` (`TestSuite.sol`). -/
 theorem storageIndexPostincrement :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostincrement.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPostincrement.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPredecrementAssign` (`TestSuite.sol`). -/
 theorem storageIndexPredecrementAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPredecrementAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPredecrementAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPredecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPredecrement` (`TestSuite.sol`). -/
 theorem storageIndexPredecrement :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPredecrement.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPredecrement.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPreincrementAssign` (`TestSuite.sol`). -/
 theorem storageIndexPreincrementAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPreincrementAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPreincrementAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPreincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPreincrement` (`TestSuite.sol`). -/
 theorem storageIndexPreincrement :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPreincrement.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexPreincrement.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexSubAssign` (`TestSuite.sol`). -/
 theorem storageIndexSubAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexSubAssign.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexSubAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageLocalDeclSkip` (`TestSuite.sol`). -/
 theorem storageLocalDeclSkip :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageLocalDeclSkip.problem :=
-  diamond_of_proved Solkey.TestSuite.storageLocalDeclSkip.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageLocalDeclSkip.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageMatrixWriteRead` (`TestSuite.sol`). -/
 theorem storageMatrixWriteRead :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageMatrixWriteRead.problem :=
-  box_of_proved Solkey.TestSuite.storageMatrixWriteRead.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageMatrixWriteRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopAfterPush` (`TestSuite.sol`). -/
 theorem storagePopAfterPush :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopAfterPush.problem :=
-  box_of_proved Solkey.TestSuite.storagePopAfterPush.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePopAfterPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopNonempty` (`TestSuite.sol`). -/
 theorem storagePopNonempty :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopNonempty.problem :=
-  box_of_proved Solkey.TestSuite.storagePopNonempty.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePopNonempty.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopUnknownLength` (`TestSuite.sol`). -/
 theorem storagePopUnknownLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopUnknownLength.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePopUnknownLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePopUnknownLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushEmpty` (`TestSuite.sol`). -/
 theorem storagePushEmpty :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushEmpty.problem :=
-  box_of_proved Solkey.TestSuite.storagePushEmpty.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushEmpty.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushLengthPositive` (`TestSuite.sol`). -/
 theorem storagePushLengthPositive :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushLengthPositive.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushLengthPositive.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushLengthPositive.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushLocalBind` (`TestSuite.sol`). -/
 theorem storagePushLocalBind :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushLocalBind.problem :=
-  box_of_proved Solkey.TestSuite.storagePushLocalBind.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushLocalBind.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushReadBack` (`TestSuite.sol`). -/
 theorem storagePushReadBack :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushReadBack.problem :=
-  diamond_of_proved Solkey.TestSuite.storagePushReadBack.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storagePushReadBack.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushReturnAssign` (`TestSuite.sol`). -/
 theorem storagePushReturnAssign :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushReturnAssign.problem :=
-  box_of_proved Solkey.TestSuite.storagePushReturnAssign.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushReturnAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePushReturnPrimitiveBind` (`TestSuite.sol`). -/
 theorem storagePushReturnPrimitiveBind :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePushReturnPrimitiveBind.problem :=
-  box_of_proved Solkey.TestSuite.storagePushReturnPrimitiveBind.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePushReturnPrimitiveBind.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootAddAssign` (`TestSuite.sol`). -/
 theorem storageRootAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootCopySource` (`TestSuite.sol`). -/
 theorem storageRootCopySource :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootCopySource.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootCopySource.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootCopySource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootCopyStruct` (`TestSuite.sol`). -/
 theorem storageRootCopyStruct :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootCopyStruct.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootCopyStruct.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootCopyStruct.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootDeleteStruct` (`TestSuite.sol`). -/
 theorem storageRootDeleteStruct :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootDeleteStruct.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootDeleteStruct.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootDeleteStruct.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootDeleteThenCopy` (`TestSuite.sol`). -/
 theorem storageRootDeleteThenCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootDeleteThenCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootDeleteThenCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootDeleteThenCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootDelete` (`TestSuite.sol`). -/
 theorem storageRootDelete :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootDelete.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootDelete.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootDelete.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootDisjoint` (`TestSuite.sol`). -/
 theorem storageRootDisjoint :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootDisjoint.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootDisjoint.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootDisjoint.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootDivAssign` (`TestSuite.sol`). -/
 theorem storageRootDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootModAssign` (`TestSuite.sol`). -/
 theorem storageRootModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootMulAssign` (`TestSuite.sol`). -/
 theorem storageRootMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootMultipleWrites` (`TestSuite.sol`). -/
 theorem storageRootMultipleWrites :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootMultipleWrites.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootMultipleWrites.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootMultipleWrites.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPostdecrementAssign` (`TestSuite.sol`). -/
 theorem storageRootPostdecrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPostdecrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPostdecrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPostdecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPostincrementAssign` (`TestSuite.sol`). -/
 theorem storageRootPostincrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPostincrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPostincrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPostincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPostincrement` (`TestSuite.sol`). -/
 theorem storageRootPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPredecrement` (`TestSuite.sol`). -/
 theorem storageRootPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPreincrementAssign` (`TestSuite.sol`). -/
 theorem storageRootPreincrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPreincrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPreincrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPreincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPreincrement` (`TestSuite.sol`). -/
 theorem storageRootPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootSubAssign` (`TestSuite.sol`). -/
 theorem storageRootSubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootSubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootSubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageToMemory` (`TestSuite.sol`). -/
 theorem storageToMemory :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageToMemory.problem :=
-  diamond_of_proved Solkey.TestSuite.storageToMemory.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageToMemory.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.subtractionSimple` (`TestSuite.sol`). -/
 theorem subtractionSimple :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.subtractionSimple.problem :=
-  diamond_of_proved Solkey.TestSuite.subtractionSimple.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.subtractionSimple.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.subtractionStorageRead` (`TestSuite.sol`). -/
 theorem subtractionStorageRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.subtractionStorageRead.problem :=
-  diamond_of_proved Solkey.TestSuite.subtractionStorageRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.subtractionStorageRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDeepPopDoesNotResetMappingMember` (`TestSuite.sol`). -/
 theorem testDeepPopDoesNotResetMappingMember :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.problem :=
-  box_of_proved Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testDeepPopDoesNotResetMappingMember.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDeleteArrayDoesNotResetElementMappingMember` (`TestSuite.sol`). -/
 theorem testDeleteArrayDoesNotResetElementMappingMember :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.problem :=
-  box_of_proved Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testDeleteArrayDoesNotResetElementMappingMember.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryAliasing` (`TestSuite.sol`). -/
 theorem testMemoryAliasing :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryAliasing.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryAliasing.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryAliasing.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryDeleteAlias` (`TestSuite.sol`). -/
 theorem testMemoryDeleteAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryDeleteAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryDeleteAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryDeleteAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryDeleteIdentityFieldFreshensSlot` (`TestSuite.sol`). -/
 theorem testMemoryDeleteIdentityFieldFreshensSlot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryDeleteIdentityFieldFreshensSlot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryDeletePrimitiveField` (`TestSuite.sol`). -/
 theorem testMemoryDeletePrimitiveField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryDeletePrimitiveField.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryDeletePrimitiveField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryDeletePrimitiveField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryEvaluationOrder` (`TestSuite.sol`). -/
 theorem testMemoryEvaluationOrder :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryEvaluationOrder.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryEvaluationOrder.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryEvaluationOrder.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryFieldShallowCopy` (`TestSuite.sol`). -/
 theorem testMemoryFieldShallowCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryFieldShallowCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryFieldShallowCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryFieldShallowCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs` (`TestSuite.sol`). -/
 theorem testMemoryIndexWriteImpureIndexPrimitiveRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryIndexWriteImpureIndexRefRhs` (`TestSuite.sol`). -/
 theorem testMemoryIndexWriteImpureIndexRefRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryIndexWriteImpureIndexRefRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryRootAlias` (`TestSuite.sol`). -/
 theorem testMemoryRootAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryRootAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryRootAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryRootAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryRootDeleteRebindsOnlyLocal` (`TestSuite.sol`). -/
 theorem testMemoryRootDeleteRebindsOnlyLocal :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryRootDeleteRebindsOnlyLocal.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryToStorageCopyComplexSource` (`TestSuite.sol`). -/
 theorem testMemoryToStorageCopyComplexSource :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryToStorageCopyComplexSource.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyComplexSource.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyComplexSource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryToStorageCopyComplexTarget` (`TestSuite.sol`). -/
 theorem testMemoryToStorageCopyComplexTarget :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryToStorageCopyComplexTarget.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyComplexTarget.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyComplexTarget.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryToStorageCopyField` (`TestSuite.sol`). -/
 theorem testMemoryToStorageCopyField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryToStorageCopyField.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryToStorageCopyRoot` (`TestSuite.sol`). -/
 theorem testMemoryToStorageCopyRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryToStorageCopyRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryToStorageCopyRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryToStorageIndexCopyImpureIndex` (`TestSuite.sol`). -/
 theorem testMemoryToStorageIndexCopyImpureIndex :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryToStorageIndexCopyImpureIndex.problem :=
-  box_of_proved Solkey.TestSuite.testMemoryToStorageIndexCopyImpureIndex.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testMemoryToStorageIndexCopyImpureIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryTokenArrayAuxiliaryCases` (`TestSuite.sol`). -/
 theorem testMemoryTokenArrayAuxiliaryCases :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryTokenArrayAuxiliaryCases.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryUintArrayAuxiliaryCases` (`TestSuite.sol`). -/
 theorem testMemoryUintArrayAuxiliaryCases :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayAuxiliaryCases.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryUintArrayPostdecrement` (`TestSuite.sol`). -/
 theorem testMemoryUintArrayPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryUintArrayPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryUintArrayPostincrement` (`TestSuite.sol`). -/
 theorem testMemoryUintArrayPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryUintArrayPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryUintArrayPredecrement` (`TestSuite.sol`). -/
 theorem testMemoryUintArrayPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryUintArrayPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryUintArrayPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs` (`TestSuite.sol`). -/
 theorem testNestedIndexWriteImpureIndexPrimitiveRhs :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.problem :=
-  box_of_proved Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testNestedIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNestedIndexReadImpureIndex` (`TestSuite.sol`). -/
 theorem testNestedIndexReadImpureIndex :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testNestedIndexReadImpureIndex.problem :=
-  box_of_proved Solkey.TestSuite.testNestedIndexReadImpureIndex.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testNestedIndexReadImpureIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNestedIndexWriteImpureReceiverAndIndex` (`TestSuite.sol`). -/
 theorem testNestedIndexWriteImpureReceiverAndIndex :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.problem :=
-  box_of_proved Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testNestedIndexWriteImpureReceiverAndIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNestedIndexReadImpureReceiverAndIndex` (`TestSuite.sol`). -/
 theorem testNestedIndexReadImpureReceiverAndIndex :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.problem :=
-  box_of_proved Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testNestedIndexReadImpureReceiverAndIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageDeleteImpureReceiver` (`TestSuite.sol`). -/
 theorem testStorageDeleteImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageDeleteImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.testStorageDeleteImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageDeleteImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStoragePushImpureReceiver` (`TestSuite.sol`). -/
 theorem testStoragePushImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStoragePushImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.testStoragePushImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStoragePushImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCompoundAssignImpureReceiver` (`TestSuite.sol`). -/
 theorem testCompoundAssignImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testCompoundAssignImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.testCompoundAssignImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testCompoundAssignImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryFieldWriteImpureReceiver` (`TestSuite.sol`). -/
 theorem testMemoryFieldWriteImpureReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryFieldWriteImpureReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryFieldWriteImpureReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryFieldWriteImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testIndexWriteReceiverReadsMutatedVar` (`TestSuite.sol`). -/
 theorem testIndexWriteReceiverReadsMutatedVar :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.problem :=
-  box_of_proved Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testIndexWriteReceiverReadsMutatedVar.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNestedStorageWrites` (`TestSuite.sol`). -/
 theorem testNestedStorageWrites :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testNestedStorageWrites.problem :=
-  diamond_of_proved Solkey.TestSuite.testNestedStorageWrites.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testNestedStorageWrites.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageAliases` (`TestSuite.sol`). -/
 theorem testStorageAliases :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageAliases.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageAliases.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageAliases.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageArrayReadWrite` (`TestSuite.sol`). -/
 theorem testStorageArrayReadWrite :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageArrayReadWrite.problem :=
-  box_of_proved Solkey.TestSuite.testStorageArrayReadWrite.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageArrayReadWrite.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageComplexReceiverPushFieldLvalue` (`TestSuite.sol`). -/
 theorem testStorageComplexReceiverPushFieldLvalue :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.problem :=
-  box_of_proved Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageComplexReceiverPushFieldLvalue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageComplexReceiverPushLvalueCopy` (`TestSuite.sol`). -/
 theorem testStorageComplexReceiverPushLvalueCopy :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.problem :=
-  box_of_proved Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageComplexReceiverPushLvalueCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageDeletePaperCase` (`TestSuite.sol`). -/
 theorem testStorageDeletePaperCase :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageDeletePaperCase.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageDeletePaperCase.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageDeletePaperCase.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs` (`TestSuite.sol`). -/
 theorem testStorageIndexWriteImpureIndexPrimitiveRhs :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.problem :=
-  box_of_proved Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageIndexWriteImpureIndexPrimitiveRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageIndexWriteImpureIndexRefRhs` (`TestSuite.sol`). -/
 theorem testStorageIndexWriteImpureIndexRefRhs :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.problem :=
-  box_of_proved Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageIndexWriteImpureIndexRefRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageEvaluationOrder` (`TestSuite.sol`). -/
 theorem testStorageEvaluationOrder :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageEvaluationOrder.problem :=
-  box_of_proved Solkey.TestSuite.testStorageEvaluationOrder.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageEvaluationOrder.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageFieldDeepCopy` (`TestSuite.sol`). -/
 theorem testStorageFieldDeepCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageFieldDeepCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageFieldDeepCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageFieldDeepCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageMapReadWriteAndDelete` (`TestSuite.sol`). -/
 theorem testStorageMapReadWriteAndDelete :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageMapReadWriteAndDelete.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageMapReadWriteAndDelete.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageMapReadWriteAndDelete.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageMapStructCopy` (`TestSuite.sol`). -/
 theorem testStorageMapStructCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageMapStructCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageMapStructCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageMapStructCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageNestedPushReturnAlias` (`TestSuite.sol`). -/
 theorem testStorageNestedPushReturnAlias :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageNestedPushReturnAlias.problem :=
-  box_of_proved Solkey.TestSuite.testStorageNestedPushReturnAlias.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageNestedPushReturnAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStoragePushFieldLvalue` (`TestSuite.sol`). -/
 theorem testStoragePushFieldLvalue :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStoragePushFieldLvalue.problem :=
-  box_of_proved Solkey.TestSuite.testStoragePushFieldLvalue.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStoragePushFieldLvalue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStoragePushLvalueCopiesStorageSource` (`TestSuite.sol`). -/
 theorem testStoragePushLvalueCopiesStorageSource :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.problem :=
-  box_of_proved Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStoragePushLvaluePrimitive` (`TestSuite.sol`). -/
 theorem testStoragePushLvaluePrimitive :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStoragePushLvaluePrimitive.problem :=
-  box_of_proved Solkey.TestSuite.testStoragePushLvaluePrimitive.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStoragePushLvaluePrimitive.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStoragePushReturnAlias` (`TestSuite.sol`). -/
 theorem testStoragePushReturnAlias :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStoragePushReturnAlias.problem :=
-  box_of_proved Solkey.TestSuite.testStoragePushReturnAlias.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStoragePushReturnAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testArrayCopyClearsOldElements` (`TestSuite.sol`). -/
 theorem testArrayCopyClearsOldElements :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testArrayCopyClearsOldElements.problem :=
-  diamond_of_proved Solkey.TestSuite.testArrayCopyClearsOldElements.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testArrayCopyClearsOldElements.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageIndexDeleteOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem testStorageIndexDeleteOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedArrayDeleteKeepsLength` (`TestSuite.sol`). -/
 theorem testFixedArrayDeleteKeepsLength :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedArrayDeleteKeepsLength.problem :=
-  box_of_proved Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedArrayLength` (`TestSuite.sol`). -/
 theorem testFixedArrayLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedArrayLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedArrayLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedArrayIndexInBounds` (`TestSuite.sol`). -/
 theorem testFixedArrayIndexInBounds :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedArrayIndexInBounds.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedArrayIndexInBounds.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedArrayIndexInBounds.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedStructArrayLength` (`TestSuite.sol`). -/
 theorem testFixedStructArrayLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedStructArrayLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedStructArrayLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedStructArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStructFixedMemberLength` (`TestSuite.sol`). -/
 theorem testStructFixedMemberLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStructFixedMemberLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testStructFixedMemberLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStructFixedMemberLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryStructFixedMemberLength` (`TestSuite.sol`). -/
 theorem testMemoryStructFixedMemberLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryStructFixedMemberLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryStructFixedMemberLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryStructFixedMemberLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedElementOfDynamicArrayLength` (`TestSuite.sol`). -/
 theorem testFixedElementOfDynamicArrayLength :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedElementOfDynamicArrayLength.problem :=
-  box_of_proved Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testFixedElementOfDynamicArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryFixedArrayLength` (`TestSuite.sol`). -/
 theorem testMemoryFixedArrayLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryFixedArrayLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryFixedArrayLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryFixedArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryNestedFixedArrayLength` (`TestSuite.sol`). -/
 theorem testMemoryNestedFixedArrayLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryNestedFixedArrayLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryNestedFixedArrayLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryNestedFixedArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testNewArrayOfFixedElementLength` (`TestSuite.sol`). -/
 theorem testNewArrayOfFixedElementLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testNewArrayOfFixedElementLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testNewArrayOfFixedElementLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testNewArrayOfFixedElementLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testMemoryDynamicArrayDefaultLength` (`TestSuite.sol`). -/
 theorem testMemoryDynamicArrayDefaultLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testMemoryDynamicArrayDefaultLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testMemoryDynamicArrayDefaultLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testMemoryDynamicArrayDefaultLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedStructArrayDeleteResetsElements` (`TestSuite.sol`). -/
 theorem testFixedStructArrayDeleteResetsElements :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.problem :=
-  box_of_proved Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testFixedStructArrayDeleteResetsElements.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStructWithFixedArrayDeleteKeepsLength` (`TestSuite.sol`). -/
 theorem testStructWithFixedArrayDeleteKeepsLength :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.problem :=
-  box_of_proved Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStructWithFixedArrayCopy` (`TestSuite.sol`). -/
 theorem testStructWithFixedArrayCopy :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testStructWithFixedArrayCopy.problem :=
-  box_of_proved Solkey.TestSuite.testStructWithFixedArrayCopy.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testStructWithFixedArrayCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedMappingArrayDeleteKeepsEntries` (`TestSuite.sol`). -/
 theorem testFixedMappingArrayDeleteKeepsEntries :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.problem :=
-  box_of_proved Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPopKeepsMappingElementEntries` (`TestSuite.sol`). -/
 theorem testPopKeepsMappingElementEntries :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPopKeepsMappingElementEntries.problem :=
-  diamond_of_proved Solkey.TestSuite.testPopKeepsMappingElementEntries.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPopKeepsMappingElementEntries.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDeleteKeepsMappingElementEntries` (`TestSuite.sol`). -/
 theorem testDeleteKeepsMappingElementEntries :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testDeleteKeepsMappingElementEntries.problem :=
-  diamond_of_proved Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPushBindMappingElement` (`TestSuite.sol`). -/
 theorem testPushBindMappingElement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPushBindMappingElement.problem :=
-  diamond_of_proved Solkey.TestSuite.testPushBindMappingElement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPushBindMappingElement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageRootDeepCopy` (`TestSuite.sol`). -/
 theorem testStorageRootDeepCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageRootDeepCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageRootDeepCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageRootDeepCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageStructDeleteSkipsMappingMember` (`TestSuite.sol`). -/
 theorem testStorageStructDeleteSkipsMappingMember :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageToMemoryCopyComplexPath` (`TestSuite.sol`). -/
 theorem testStorageToMemoryCopyComplexPath :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageToMemoryCopyComplexPath.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyComplexPath.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyComplexPath.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageToMemoryCopyField` (`TestSuite.sol`). -/
 theorem testStorageToMemoryCopyField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageToMemoryCopyField.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageToMemoryCopyRoot` (`TestSuite.sol`). -/
 theorem testStorageToMemoryCopyRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageToMemoryCopyRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageToMemoryCopyRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testStorageWriteAndRead` (`TestSuite.sol`). -/
 theorem testStorageWriteAndRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testStorageWriteAndRead.problem :=
-  diamond_of_proved Solkey.TestSuite.testStorageWriteAndRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testStorageWriteAndRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDecomposition` (`TestSuite.sol`). -/
 theorem storageFieldDecomposition :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDecomposition.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDecomposition.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDecomposition.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeepValue` (`TestSuite.sol`). -/
 theorem storageFieldDeepValue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeepValue.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeepValue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeepValue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDecomposition` (`TestSuite.sol`). -/
 theorem storageIndexDecomposition :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDecomposition.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexDecomposition.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexDecomposition.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexRootArray` (`TestSuite.sol`). -/
 theorem storageIndexRootArray :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexRootArray.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexRootArray.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexRootArray.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDisjointFields` (`TestSuite.sol`). -/
 theorem storageFieldDisjointFields :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDisjointFields.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDisjointFields.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDisjointFields.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDisjointRoots` (`TestSuite.sol`). -/
 theorem storageFieldDisjointRoots :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDisjointRoots.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDisjointRoots.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDisjointRoots.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryAssignForms` (`TestSuite.sol`). -/
 theorem memoryAssignForms :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryAssignForms.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryAssignForms.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryAssignForms.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryDelete` (`TestSuite.sol`). -/
 theorem memoryDelete :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryDelete.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryDelete.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryDelete.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageAliasRebindOriginal` (`TestSuite.sol`). -/
 theorem storageAliasRebindOriginal :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageAliasRebindOriginal.problem :=
-  diamond_of_proved Solkey.TestSuite.storageAliasRebindOriginal.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageAliasRebindOriginal.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testSimpleAssert` (`TestSuite.sol`). -/
 theorem testSimpleAssert :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testSimpleAssert.problem :=
-  diamond_of_proved Solkey.TestSuite.testSimpleAssert.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testSimpleAssert.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexWriteRefSourceImpureIndex` (`TestSuite.sol`). -/
 theorem storageIndexWriteRefSourceImpureIndex :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexWriteRefSourceImpureIndex.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexWriteRefSourceImpureIndex.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexWriteRefSourceImpureIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteRefSourceImpureReceiver` (`TestSuite.sol`). -/
 theorem storageFieldWriteRefSourceImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteRefSourceImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.storageFieldWriteRefSourceImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageFieldWriteRefSourceImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteStorageRefImpureReceiver` (`TestSuite.sol`). -/
 theorem storageFieldWriteStorageRefImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteStorageRefImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.storageFieldWriteStorageRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageFieldWriteStorageRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldWriteRootRefImpureReceiver` (`TestSuite.sol`). -/
 theorem storageFieldWriteRootRefImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldWriteRootRefImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.storageFieldWriteRootRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageFieldWriteRootRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldWriteMemRefImpureReceiver` (`TestSuite.sol`). -/
 theorem memoryFieldWriteMemRefImpureReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldWriteMemRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexWriteRootRefImpureReceiver` (`TestSuite.sol`). -/
 theorem storageIndexWriteRootRefImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexWriteRootRefImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexWriteRootRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexWriteRootRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexWriteStorageRefImpureReceiver` (`TestSuite.sol`). -/
 theorem storageIndexWriteStorageRefImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexWriteStorageRefImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexWriteStorageRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexWriteStorageRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryToStorageIndexImpureReceiver` (`TestSuite.sol`). -/
 theorem memoryToStorageIndexImpureReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.memoryToStorageIndexImpureReceiver.problem :=
-  box_of_proved Solkey.TestSuite.memoryToStorageIndexImpureReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.memoryToStorageIndexImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteMemRefImpureReceiver` (`TestSuite.sol`). -/
 theorem memoryIndexWriteMemRefImpureReceiver :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexWriteMemRefImpureReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionLeftImpureRightReadFirst` (`TestSuite.sol`). -/
 theorem additionLeftImpureRightReadFirst :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionLeftImpureRightReadFirst.problem :=
-  diamond_of_proved Solkey.TestSuite.additionLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionRightImpure` (`TestSuite.sol`). -/
 theorem additionRightImpure :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionRightImpure.problem :=
-  diamond_of_proved Solkey.TestSuite.additionRightImpure.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionRightImpure.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.additionBothOperandsImpure` (`TestSuite.sol`). -/
 theorem additionBothOperandsImpure :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.additionBothOperandsImpure.problem :=
-  diamond_of_proved Solkey.TestSuite.additionBothOperandsImpure.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.additionBothOperandsImpure.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.subtractionLeftImpureRightReadFirst` (`TestSuite.sol`). -/
 theorem subtractionLeftImpureRightReadFirst :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.subtractionLeftImpureRightReadFirst.problem :=
-  diamond_of_proved Solkey.TestSuite.subtractionLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.subtractionLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.lessThanLeftImpureRightReadFirst` (`TestSuite.sol`). -/
 theorem lessThanLeftImpureRightReadFirst :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.lessThanLeftImpureRightReadFirst.problem :=
-  diamond_of_proved Solkey.TestSuite.lessThanLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.lessThanLeftImpureRightReadFirst.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyRootKeepsValueMembers` (`TestSuite.sol`). -/
 theorem testCopyRootKeepsValueMembers :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyRootKeepsValueMembers.problem :=
-  diamond_of_proved Solkey.TestSuite.testCopyRootKeepsValueMembers.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testCopyRootKeepsValueMembers.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyFieldNested` (`TestSuite.sol`). -/
 theorem testCopyFieldNested :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyFieldNested.problem :=
-  diamond_of_proved Solkey.TestSuite.testCopyFieldNested.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testCopyFieldNested.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyOfCopy` (`TestSuite.sol`). -/
 theorem testCopyOfCopy :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyOfCopy.problem :=
-  box_of_proved Solkey.TestSuite.testCopyOfCopy.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testCopyOfCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyArrayMemberElements` (`TestSuite.sol`). -/
 theorem testCopyArrayMemberElements :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyArrayMemberElements.problem :=
-  box_of_proved Solkey.TestSuite.testCopyArrayMemberElements.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testCopyArrayMemberElements.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyPrimitiveRoot` (`TestSuite.sol`). -/
 theorem testCopyPrimitiveRoot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyPrimitiveRoot.problem :=
-  diamond_of_proved Solkey.TestSuite.testCopyPrimitiveRoot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testCopyPrimitiveRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyStoreRootFromField` (`TestSuite.sol`). -/
 theorem testCopyStoreRootFromField :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyStoreRootFromField.problem :=
-  diamond_of_proved Solkey.TestSuite.testCopyStoreRootFromField.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testCopyStoreRootFromField.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testCopyStoreRootFromIndex` (`TestSuite.sol`). -/
 theorem testCopyStoreRootFromIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testCopyStoreRootFromIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.testCopyStoreRootFromIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testCopyStoreRootFromIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPushCopyThenDeleteTarget` (`TestSuite.sol`). -/
 theorem testPushCopyThenDeleteTarget :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testPushCopyThenDeleteTarget.problem :=
-  box_of_proved Solkey.TestSuite.testPushCopyThenDeleteTarget.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testPushCopyThenDeleteTarget.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexWriteBothImpureStorageRef` (`TestSuite.sol`). -/
 theorem indexWriteBothImpureStorageRef :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.indexWriteBothImpureStorageRef.problem :=
-  box_of_proved Solkey.TestSuite.indexWriteBothImpureStorageRef.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.indexWriteBothImpureStorageRef.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexWriteBothImpureMemToStorage` (`TestSuite.sol`). -/
 theorem indexWriteBothImpureMemToStorage :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.indexWriteBothImpureMemToStorage.problem :=
-  box_of_proved Solkey.TestSuite.indexWriteBothImpureMemToStorage.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.indexWriteBothImpureMemToStorage.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexWriteBothImpureMemoryValue` (`TestSuite.sol`). -/
 theorem indexWriteBothImpureMemoryValue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.indexWriteBothImpureMemoryValue.problem :=
-  diamond_of_proved Solkey.TestSuite.indexWriteBothImpureMemoryValue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.indexWriteBothImpureMemoryValue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexWriteBothImpureMemRef` (`TestSuite.sol`). -/
 theorem indexWriteBothImpureMemRef :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.indexWriteBothImpureMemRef.problem :=
-  diamond_of_proved Solkey.TestSuite.indexWriteBothImpureMemRef.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.indexWriteBothImpureMemRef.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.nestedMappingWriteRead` (`TestSuite.sol`). -/
 theorem nestedMappingWriteRead :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.nestedMappingWriteRead.problem :=
-  diamond_of_proved Solkey.TestSuite.nestedMappingWriteRead.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.nestedMappingWriteRead.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.nestedMappingRowAlias` (`TestSuite.sol`). -/
 theorem nestedMappingRowAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.nestedMappingRowAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.nestedMappingRowAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.nestedMappingRowAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.arrayOfMappingsIndex` (`TestSuite.sol`). -/
 theorem arrayOfMappingsIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.arrayOfMappingsIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.arrayOfMappingsIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.arrayOfMappingsIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.mappingOfLedgerMember` (`TestSuite.sol`). -/
 theorem mappingOfLedgerMember :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.mappingOfLedgerMember.problem :=
-  diamond_of_proved Solkey.TestSuite.mappingOfLedgerMember.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.mappingOfLedgerMember.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.mappingPointerTernary` (`TestSuite.sol`). -/
 theorem mappingPointerTernary :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.mappingPointerTernary.problem :=
-  diamond_of_proved Solkey.TestSuite.mappingPointerTernary.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.mappingPointerTernary.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.mappingReadAsKey` (`TestSuite.sol`). -/
 theorem mappingReadAsKey :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.mappingReadAsKey.problem :=
-  diamond_of_proved Solkey.TestSuite.mappingReadAsKey.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.mappingReadAsKey.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldAsMappingKey` (`TestSuite.sol`). -/
 theorem memoryFieldAsMappingKey :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldAsMappingKey.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldAsMappingKey.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldAsMappingKey.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.mappingEntryThroughMemoryToMappingEntry` (`TestSuite.sol`). -/
 theorem mappingEntryThroughMemoryToMappingEntry :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.mappingEntryThroughMemoryToMappingEntry.problem :=
-  diamond_of_proved Solkey.TestSuite.mappingEntryThroughMemoryToMappingEntry.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.mappingEntryThroughMemoryToMappingEntry.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.boolKeyMapping` (`TestSuite.sol`). -/
 theorem boolKeyMapping :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.boolKeyMapping.problem :=
-  diamond_of_proved Solkey.TestSuite.boolKeyMapping.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.boolKeyMapping.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.numberLiteralForms` (`TestSuite.sol`). -/
 theorem numberLiteralForms :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.numberLiteralForms.problem :=
-  diamond_of_proved Solkey.TestSuite.numberLiteralForms.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.numberLiteralForms.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localAddAssign` (`TestSuite.sol`). -/
 theorem localAddAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localAddAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.localAddAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localAddAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localMulAssign` (`TestSuite.sol`). -/
 theorem localMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.localMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localDivAssign` (`TestSuite.sol`). -/
 theorem localDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.localDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localModAssign` (`TestSuite.sol`). -/
 theorem localModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.localModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localPostincrement` (`TestSuite.sol`). -/
 theorem localPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.localPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localPreincrementAssign` (`TestSuite.sol`). -/
 theorem localPreincrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localPreincrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.localPreincrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localPreincrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localPostdecrement` (`TestSuite.sol`). -/
 theorem localPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.localPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localPredecrement` (`TestSuite.sol`). -/
 theorem localPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.localPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localDeclPostdecrement` (`TestSuite.sol`). -/
 theorem localDeclPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localDeclPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.localDeclPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localDeclPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.localDeclPredecrement` (`TestSuite.sol`). -/
 theorem localDeclPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.localDeclPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.localDeclPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.localDeclPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.subAssignValueRhsCapture` (`TestSuite.sol`). -/
 theorem subAssignValueRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.subAssignValueRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.subAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.subAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.mulAssignValueRhsCapture` (`TestSuite.sol`). -/
 theorem mulAssignValueRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.mulAssignValueRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.mulAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.mulAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.divAssignValueRhsCapture` (`TestSuite.sol`). -/
 theorem divAssignValueRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.divAssignValueRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.divAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.divAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modAssignValueRhsCapture` (`TestSuite.sol`). -/
 theorem modAssignValueRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modAssignValueRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.modAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modAssignValueRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexWriteValueRhsCapture` (`TestSuite.sol`). -/
 theorem indexWriteValueRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.indexWriteValueRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.indexWriteValueRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.indexWriteValueRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteStorageRefRhsCapture` (`TestSuite.sol`). -/
 theorem memoryIndexWriteStorageRefRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteStorageRefRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteStorageStructCopy` (`TestSuite.sol`). -/
 theorem memoryIndexWriteStorageStructCopy :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteStorageStructCopy.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageStructCopy.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageStructCopy.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteStorageRefImpureIndex` (`TestSuite.sol`). -/
 theorem memoryIndexWriteStorageRefImpureIndex :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteStorageRefImpureIndex.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefImpureIndex.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefImpureIndex.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem memoryIndexWriteStorageRefOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts` (`TestSuite.sol`). -/
 theorem memoryIndexWriteStorageRefSourceOutOfBoundsReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.problem :=
-  box_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexWriteMemRefRhsCapture` (`TestSuite.sol`). -/
 theorem memoryIndexWriteMemRefRhsCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexWriteMemRefRhsCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexDeleteNonSimpleIndexCapture` (`TestSuite.sol`). -/
 theorem memoryIndexDeleteNonSimpleIndexCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexDeleteNonSimpleIndexCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.boolInequalityCaptureLhs` (`TestSuite.sol`). -/
 theorem boolInequalityCaptureLhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.boolInequalityCaptureLhs.problem :=
-  diamond_of_proved Solkey.TestSuite.boolInequalityCaptureLhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.boolInequalityCaptureLhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.boolInequalityCaptureRhs` (`TestSuite.sol`). -/
 theorem boolInequalityCaptureRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.boolInequalityCaptureRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.boolInequalityCaptureRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.boolInequalityCaptureRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.greaterThanCaptureRhs` (`TestSuite.sol`). -/
 theorem greaterThanCaptureRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.greaterThanCaptureRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.greaterThanCaptureRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.greaterThanCaptureRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.greaterEqualCaptureLhs` (`TestSuite.sol`). -/
 theorem greaterEqualCaptureLhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.greaterEqualCaptureLhs.problem :=
-  diamond_of_proved Solkey.TestSuite.greaterEqualCaptureLhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.greaterEqualCaptureLhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.greaterEqualCaptureRhs` (`TestSuite.sol`). -/
 theorem greaterEqualCaptureRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.greaterEqualCaptureRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.greaterEqualCaptureRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.greaterEqualCaptureRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.lessEqualCaptureLhs` (`TestSuite.sol`). -/
 theorem lessEqualCaptureLhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.lessEqualCaptureLhs.problem :=
-  diamond_of_proved Solkey.TestSuite.lessEqualCaptureLhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.lessEqualCaptureLhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.lessEqualCaptureRhs` (`TestSuite.sol`). -/
 theorem lessEqualCaptureRhs :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.lessEqualCaptureRhs.problem :=
-  diamond_of_proved Solkey.TestSuite.lessEqualCaptureRhs.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.lessEqualCaptureRhs.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.logicalNotCapture` (`TestSuite.sol`). -/
 theorem logicalNotCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.logicalNotCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.logicalNotCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.logicalNotCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.unaryMinusCapture` (`TestSuite.sol`). -/
 theorem unaryMinusCapture :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.unaryMinusCapture.problem :=
-  diamond_of_proved Solkey.TestSuite.unaryMinusCapture.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.unaryMinusCapture.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.multiplicationUnfoldLeft` (`TestSuite.sol`). -/
 theorem multiplicationUnfoldLeft :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.multiplicationUnfoldLeft.problem :=
-  diamond_of_proved Solkey.TestSuite.multiplicationUnfoldLeft.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.multiplicationUnfoldLeft.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.multiplicationUnfoldRight` (`TestSuite.sol`). -/
 theorem multiplicationUnfoldRight :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.multiplicationUnfoldRight.problem :=
-  diamond_of_proved Solkey.TestSuite.multiplicationUnfoldRight.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.multiplicationUnfoldRight.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.divisionUnfoldLeft` (`TestSuite.sol`). -/
 theorem divisionUnfoldLeft :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.divisionUnfoldLeft.problem :=
-  diamond_of_proved Solkey.TestSuite.divisionUnfoldLeft.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.divisionUnfoldLeft.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.divisionUnfoldRight` (`TestSuite.sol`). -/
 theorem divisionUnfoldRight :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.divisionUnfoldRight.problem :=
-  diamond_of_proved Solkey.TestSuite.divisionUnfoldRight.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.divisionUnfoldRight.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.moduloUnfoldLeft` (`TestSuite.sol`). -/
 theorem moduloUnfoldLeft :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.moduloUnfoldLeft.problem :=
-  diamond_of_proved Solkey.TestSuite.moduloUnfoldLeft.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.moduloUnfoldLeft.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.moduloUnfoldRight` (`TestSuite.sol`). -/
 theorem moduloUnfoldRight :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.moduloUnfoldRight.problem :=
-  diamond_of_proved Solkey.TestSuite.moduloUnfoldRight.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.moduloUnfoldRight.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.signedDivisionTruncates` (`TestSuite.sol`). -/
 theorem signedDivisionTruncates :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.signedDivisionTruncates.problem :=
-  diamond_of_proved Solkey.TestSuite.signedDivisionTruncates.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.signedDivisionTruncates.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.signedModuloTakesDividendSign` (`TestSuite.sol`). -/
 theorem signedModuloTakesDividendSign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.signedModuloTakesDividendSign.problem :=
-  diamond_of_proved Solkey.TestSuite.signedModuloTakesDividendSign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.signedModuloTakesDividendSign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageSignedDivModAssign` (`TestSuite.sol`). -/
 theorem storageSignedDivModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageSignedDivModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageSignedDivModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageSignedDivModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.powerUnfoldLeft` (`TestSuite.sol`). -/
 theorem powerUnfoldLeft :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.powerUnfoldLeft.problem :=
-  diamond_of_proved Solkey.TestSuite.powerUnfoldLeft.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.powerUnfoldLeft.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.powerUnfoldRight` (`TestSuite.sol`). -/
 theorem powerUnfoldRight :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.powerUnfoldRight.problem :=
-  diamond_of_proved Solkey.TestSuite.powerUnfoldRight.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.powerUnfoldRight.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.subtractionUnfoldRight` (`TestSuite.sol`). -/
 theorem subtractionUnfoldRight :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.subtractionUnfoldRight.problem :=
-  diamond_of_proved Solkey.TestSuite.subtractionUnfoldRight.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.subtractionUnfoldRight.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.parenthesizedRightOperand` (`TestSuite.sol`). -/
 theorem parenthesizedRightOperand :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.parenthesizedRightOperand.problem :=
-  diamond_of_proved Solkey.TestSuite.parenthesizedRightOperand.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.parenthesizedRightOperand.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.parenthesizedLeftOperand` (`TestSuite.sol`). -/
 theorem parenthesizedLeftOperand :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.parenthesizedLeftOperand.problem :=
-  diamond_of_proved Solkey.TestSuite.parenthesizedLeftOperand.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.parenthesizedLeftOperand.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.parenthesizedCondition` (`TestSuite.sol`). -/
 theorem parenthesizedCondition :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.parenthesizedCondition.problem :=
-  diamond_of_proved Solkey.TestSuite.parenthesizedCondition.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.parenthesizedCondition.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldSubAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldSubAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldSubAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldSubAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldSubAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldMulAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldMulAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldMulAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldMulAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldMulAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldDivAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldDivAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldDivAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldDivAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldDivAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldModAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldModAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldModAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldModAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldModAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostincrementUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldPostincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPredecrementUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldPredecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPredecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPredecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldPostdecrementUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldPostdecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldPostdecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldPostdecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldDeleteUnfold` (`TestSuite.sol`). -/
 theorem memoryFieldDeleteUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldDeleteUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldDeleteUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldDeleteUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryFieldReadUnfoldResult` (`TestSuite.sol`). -/
 theorem memoryFieldReadUnfoldResult :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryFieldReadUnfoldResult.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryFieldReadUnfoldResult.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryFieldReadUnfoldResult.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexReadUnfoldResult` (`TestSuite.sol`). -/
 theorem memoryIndexReadUnfoldResult :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexReadUnfoldResult.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexReadUnfoldResult.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexReadUnfoldResult.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArraySubAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArraySubAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArraySubAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArraySubAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArraySubAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayMulAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayMulAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayDivAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayDivAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayDivAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDivAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDivAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayModAssignUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayModAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayModAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayModAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayModAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostincrementUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPredecrementUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPredecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPredecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostdecrementUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostdecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostdecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayDeleteUnfold` (`TestSuite.sol`). -/
 theorem memoryIndexArrayDeleteUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayDeleteUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDeleteUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayDeleteUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostincrement` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPredecrement` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPreincrementAssignment` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPreincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPreincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPreincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.memoryIndexArrayPostdecrementAssignment` (`TestSuite.sol`). -/
 theorem memoryIndexArrayPostdecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.memoryIndexArrayPostdecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.memoryIndexArrayPostdecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldDeleteUnfold` (`TestSuite.sol`). -/
 theorem storageFieldDeleteUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldDeleteUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldDeleteUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldDeleteUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPredecrementUnfold` (`TestSuite.sol`). -/
 theorem storageFieldPredecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPredecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPredecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPredecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageFieldPostdecrementUnfold` (`TestSuite.sol`). -/
 theorem storageFieldPostdecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageFieldPostdecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageFieldPostdecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexAddAssignUnfold` (`TestSuite.sol`). -/
 theorem storageIndexAddAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexAddAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexAddAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexAddAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexSubAssignUnfold` (`TestSuite.sol`). -/
 theorem storageIndexSubAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexSubAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexSubAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexSubAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMulAssignUnfold` (`TestSuite.sol`). -/
 theorem storageIndexMulAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMulAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMulAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMulAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexDivAssignUnfold` (`TestSuite.sol`). -/
 theorem storageIndexDivAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexDivAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexDivAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexDivAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexModAssignUnfold` (`TestSuite.sol`). -/
 theorem storageIndexModAssignUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexModAssignUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexModAssignUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexModAssignUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPreincrementUnfold` (`TestSuite.sol`). -/
 theorem storageIndexPreincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPreincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexPreincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexPreincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostincrementUnfold` (`TestSuite.sol`). -/
 theorem storageIndexPostincrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostincrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexPostincrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexPostincrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPredecrementUnfold` (`TestSuite.sol`). -/
 theorem storageIndexPredecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPredecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexPredecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexPredecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexPostdecrementUnfold` (`TestSuite.sol`). -/
 theorem storageIndexPostdecrementUnfold :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexPostdecrementUnfold.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexPostdecrementUnfold.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexPostdecrementUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingSubAssign` (`TestSuite.sol`). -/
 theorem storageIndexMappingSubAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingSubAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingSubAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingSubAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingMulAssign` (`TestSuite.sol`). -/
 theorem storageIndexMappingMulAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingMulAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingMulAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingMulAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingDivAssign` (`TestSuite.sol`). -/
 theorem storageIndexMappingDivAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingDivAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingDivAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingDivAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingModAssign` (`TestSuite.sol`). -/
 theorem storageIndexMappingModAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingModAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingModAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingModAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPreincrement` (`TestSuite.sol`). -/
 theorem storageIndexMappingPreincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPreincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPreincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPreincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPostincrement` (`TestSuite.sol`). -/
 theorem storageIndexMappingPostincrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPostincrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostincrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostincrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPredecrement` (`TestSuite.sol`). -/
 theorem storageIndexMappingPredecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPredecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPredecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPredecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPostdecrement` (`TestSuite.sol`). -/
 theorem storageIndexMappingPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPreincrementAssignment` (`TestSuite.sol`). -/
 theorem storageIndexMappingPreincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPreincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPreincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPreincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPostincrementAssignment` (`TestSuite.sol`). -/
 theorem storageIndexMappingPostincrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPostincrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostincrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostincrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPredecrementAssignment` (`TestSuite.sol`). -/
 theorem storageIndexMappingPredecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPredecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPredecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPredecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexMappingPostdecrementAssignment` (`TestSuite.sol`). -/
 theorem storageIndexMappingPostdecrementAssignment :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.problem :=
-  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageIndexMappingPostdecrementAssignment.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageIndexReadArrayStoreRoot` (`TestSuite.sol`). -/
 theorem storageIndexReadArrayStoreRoot :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storageIndexReadArrayStoreRoot.problem :=
-  box_of_proved Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storageIndexReadArrayStoreRoot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storagePopUnfold` (`TestSuite.sol`). -/
 theorem storagePopUnfold :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.storagePopUnfold.problem :=
-  box_of_proved Solkey.TestSuite.storagePopUnfold.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.storagePopUnfold.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPostdecrement` (`TestSuite.sol`). -/
 theorem storageRootPostdecrement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPostdecrement.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPostdecrement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPostdecrement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageRootPredecrementAssign` (`TestSuite.sol`). -/
 theorem storageRootPredecrementAssign :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageRootPredecrementAssign.problem :=
-  diamond_of_proved Solkey.TestSuite.storageRootPredecrementAssign.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageRootPredecrementAssign.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.ternaryToIfStorage` (`TestSuite.sol`). -/
 theorem ternaryToIfStorage :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.ternaryToIfStorage.problem :=
-  diamond_of_proved Solkey.TestSuite.ternaryToIfStorage.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.ternaryToIfStorage.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.transferToOwner` (`TestSuite.sol`). -/
 theorem transferToOwner :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.transferToOwner.problem :=
-  box_of_proved Solkey.TestSuite.transferToOwner.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.transferToOwner.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.transferUnfoldReceiver` (`TestSuite.sol`). -/
 theorem transferUnfoldReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.transferUnfoldReceiver.problem :=
-  box_of_proved Solkey.TestSuite.transferUnfoldReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.transferUnfoldReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.transferUnfoldArgument` (`TestSuite.sol`). -/
 theorem transferUnfoldArgument :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.transferUnfoldArgument.problem :=
-  box_of_proved Solkey.TestSuite.transferUnfoldArgument.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.transferUnfoldArgument.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.sendToOwner` (`TestSuite.sol`). -/
 theorem sendToOwner :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.sendToOwner.problem :=
-  box_of_proved Solkey.TestSuite.sendToOwner.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.sendToOwner.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.sendUnfoldReceiver` (`TestSuite.sol`). -/
 theorem sendUnfoldReceiver :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.sendUnfoldReceiver.problem :=
-  box_of_proved Solkey.TestSuite.sendUnfoldReceiver.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.sendUnfoldReceiver.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.sendUnfoldArgument` (`TestSuite.sol`). -/
 theorem sendUnfoldArgument :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.sendUnfoldArgument.problem :=
-  box_of_proved Solkey.TestSuite.sendUnfoldArgument.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.sendUnfoldArgument.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.callToSender` (`TestSuite.sol`). -/
 theorem callToSender :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.callToSender.problem :=
-  box_of_proved Solkey.TestSuite.callToSender.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.callToSender.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tryCallCatchKeepsState` (`TestSuite.sol`). -/
 theorem tryCallCatchKeepsState :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.tryCallCatchKeepsState.problem :=
-  box_of_proved Solkey.TestSuite.tryCallCatchKeepsState.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.tryCallCatchKeepsState.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tryCallBindsReturnAndPanicCode` (`TestSuite.sol`). -/
 theorem tryCallBindsReturnAndPanicCode :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.tryCallBindsReturnAndPanicCode.problem :=
-  box_of_proved Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tryCallUnmatchedFailureReverts` (`TestSuite.sol`). -/
 theorem tryCallUnmatchedFailureReverts :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.tryCallUnmatchedFailureReverts.problem :=
-  box_of_proved Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.bitAndOneValues` (`TestSuite.sol`). -/
 theorem bitAndOneValues :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.bitAndOneValues.problem :=
-  diamond_of_proved Solkey.TestSuite.bitAndOneValues.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.bitAndOneValues.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.bitAndGeneralValues` (`TestSuite.sol`). -/
 theorem bitAndGeneralValues :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.bitAndGeneralValues.problem :=
-  diamond_of_proved Solkey.TestSuite.bitAndGeneralValues.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.bitAndGeneralValues.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.bitAndOperandEvaluation` (`TestSuite.sol`). -/
 theorem bitAndOperandEvaluation :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.bitAndOperandEvaluation.problem :=
-  diamond_of_proved Solkey.TestSuite.bitAndOperandEvaluation.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.bitAndOperandEvaluation.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.conditionalCalleeEffects` (`TestSuite.sol`). -/
 theorem conditionalCalleeEffects :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.conditionalCalleeEffects.problem :=
-  diamond_of_proved Solkey.TestSuite.conditionalCalleeEffects.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.conditionalCalleeEffects.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.internalCallDeclaration` (`TestSuite.sol`). -/
 theorem internalCallDeclaration :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.internalCallDeclaration.problem :=
-  diamond_of_proved Solkey.TestSuite.internalCallDeclaration.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.internalCallDeclaration.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.internalCallInExpression` (`TestSuite.sol`). -/
 theorem internalCallInExpression :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.internalCallInExpression.problem :=
-  diamond_of_proved Solkey.TestSuite.internalCallInExpression.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.internalCallInExpression.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.internalCallToStorage` (`TestSuite.sol`). -/
 theorem internalCallToStorage :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.internalCallToStorage.problem :=
-  diamond_of_proved Solkey.TestSuite.internalCallToStorage.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.internalCallToStorage.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnEarly` (`TestSuite.sol`). -/
 theorem returnEarly :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnEarly.problem :=
-  diamond_of_proved Solkey.TestSuite.returnEarly.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnEarly.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleReturnPair` (`TestSuite.sol`). -/
 theorem tupleReturnPair :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleReturnPair.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleReturnPair.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleReturnPair.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleReturnReadsReturnVariables` (`TestSuite.sol`). -/
 theorem tupleReturnReadsReturnVariables :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleReturnReadsReturnVariables.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleReturnReadsReturnVariables.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleReturnReadsReturnVariables.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleReturnDiscardsComponents` (`TestSuite.sol`). -/
 theorem tupleReturnDiscardsComponents :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleReturnDiscardsComponents.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleReturnDiscardsComponents.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleReturnDiscardsComponents.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleReturnAssignsExisting` (`TestSuite.sol`). -/
 theorem tupleReturnAssignsExisting :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleReturnAssignsExisting.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleReturnAssignsExisting.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleReturnAssignsExisting.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleAssignmentRotates` (`TestSuite.sol`). -/
 theorem tupleAssignmentRotates :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleAssignmentRotates.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleAssignmentRotates.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleAssignmentRotates.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.tupleDeclaration` (`TestSuite.sol`). -/
 theorem tupleDeclaration :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.tupleDeclaration.problem :=
-  diamond_of_proved Solkey.TestSuite.tupleDeclaration.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.tupleDeclaration.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnLeavesNestedBlocks` (`TestSuite.sol`). -/
 theorem returnLeavesNestedBlocks :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnLeavesNestedBlocks.problem :=
-  diamond_of_proved Solkey.TestSuite.returnLeavesNestedBlocks.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnLeavesNestedBlocks.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnOrFallThroughNamed` (`TestSuite.sol`). -/
 theorem returnOrFallThroughNamed :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnOrFallThroughNamed.problem :=
-  diamond_of_proved Solkey.TestSuite.returnOrFallThroughNamed.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnOrFallThroughNamed.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnFromNestedCall` (`TestSuite.sol`). -/
 theorem returnFromNestedCall :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnFromNestedCall.problem :=
-  diamond_of_proved Solkey.TestSuite.returnFromNestedCall.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnFromNestedCall.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnAfterRevertGuard` (`TestSuite.sol`). -/
 theorem returnAfterRevertGuard :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnAfterRevertGuard.problem :=
-  diamond_of_proved Solkey.TestSuite.returnAfterRevertGuard.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnAfterRevertGuard.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnFromTryBranches` (`TestSuite.sol`). -/
 theorem returnFromTryBranches :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.returnFromTryBranches.problem :=
-  box_of_proved Solkey.TestSuite.returnFromTryBranches.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.returnFromTryBranches.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnFromVoidFunction` (`TestSuite.sol`). -/
 theorem returnFromVoidFunction :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnFromVoidFunction.problem :=
-  diamond_of_proved Solkey.TestSuite.returnFromVoidFunction.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnFromVoidFunction.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultsAreZero` (`TestSuite.sol`). -/
 theorem returnDefaultsAreZero :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultsAreZero.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultsAreZero.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultsAreZero.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultAddressIsZero` (`TestSuite.sol`). -/
 theorem returnDefaultAddressIsZero :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultAddressIsZero.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultAddressIsZero.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultAddressIsZero.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultEnumIsFirstMember` (`TestSuite.sol`). -/
 theorem returnDefaultEnumIsFirstMember :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultEnumIsFirstMember.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultEnumIsFirstMember.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultEnumIsFirstMember.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultMemoryArrayIsEmpty` (`TestSuite.sol`). -/
 theorem returnDefaultMemoryArrayIsEmpty :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultMemoryArrayIsEmpty.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultMemoryArrayIsEmpty.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultMemoryArrayIsEmpty.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnInThenBranchElseIsDefault` (`TestSuite.sol`). -/
 theorem returnInThenBranchElseIsDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnInThenBranchElseIsDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.returnInThenBranchElseIsDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnInThenBranchElseIsDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnInElseBranchThenIsDefault` (`TestSuite.sol`). -/
 theorem returnInElseBranchThenIsDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnInElseBranchThenIsDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.returnInElseBranchThenIsDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnInElseBranchThenIsDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultIsFreshPerCall` (`TestSuite.sol`). -/
 theorem returnDefaultIsFreshPerCall :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultIsFreshPerCall.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultIsFreshPerCall.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultIsFreshPerCall.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnEnumOtherBranchIsDefault` (`TestSuite.sol`). -/
 theorem returnEnumOtherBranchIsDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnEnumOtherBranchIsDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.returnEnumOtherBranchIsDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnEnumOtherBranchIsDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnUnassignedComponentIsDefault` (`TestSuite.sol`). -/
 theorem returnUnassignedComponentIsDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnUnassignedComponentIsDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.returnUnassignedComponentIsDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnUnassignedComponentIsDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnDefaultIsVisibleInBody` (`TestSuite.sol`). -/
 theorem returnDefaultIsVisibleInBody :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnDefaultIsVisibleInBody.problem :=
-  diamond_of_proved Solkey.TestSuite.returnDefaultIsVisibleInBody.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnDefaultIsVisibleInBody.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.overloadedInternalCall` (`TestSuite.sol`). -/
 theorem overloadedInternalCall :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.overloadedInternalCall.problem :=
-  diamond_of_proved Solkey.TestSuite.overloadedInternalCall.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.overloadedInternalCall.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierArgument` (`TestSuite.sol`). -/
 theorem modifierArgument :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierArgument.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierArgument.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierArgument.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierResumesAfterReturn` (`TestSuite.sol`). -/
 theorem modifierResumesAfterReturn :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierResumesAfterReturn.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierResumesAfterReturn.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierResumesAfterReturn.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierFirstListedOutermost` (`TestSuite.sol`). -/
 theorem modifierFirstListedOutermost :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierFirstListedOutermost.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierFirstListedOutermost.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierFirstListedOutermost.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierOnObligation` (`TestSuite.sol`). -/
 theorem modifierOnObligation :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierOnObligation.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierOnObligation.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierOnObligation.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.whileCountsUp` (`TestSuite.sol`). -/
 theorem whileCountsUp :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.whileCountsUp.problem :=
-  diamond_of_proved Solkey.TestSuite.whileCountsUp.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.whileCountsUp.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.whileBodyDeclaresLocal` (`TestSuite.sol`). -/
 theorem whileBodyDeclaresLocal :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.whileBodyDeclaresLocal.problem :=
-  diamond_of_proved Solkey.TestSuite.whileBodyDeclaresLocal.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.whileBodyDeclaresLocal.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.whileBreakLeavesLoop` (`TestSuite.sol`). -/
 theorem whileBreakLeavesLoop :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.whileBreakLeavesLoop.problem :=
-  diamond_of_proved Solkey.TestSuite.whileBreakLeavesLoop.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.whileBreakLeavesLoop.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.whileContinueSkipsRest` (`TestSuite.sol`). -/
 theorem whileContinueSkipsRest :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.whileContinueSkipsRest.problem :=
-  diamond_of_proved Solkey.TestSuite.whileContinueSkipsRest.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.whileContinueSkipsRest.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.forContinueStillUpdates` (`TestSuite.sol`). -/
 theorem forContinueStillUpdates :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.forContinueStillUpdates.problem :=
-  diamond_of_proved Solkey.TestSuite.forContinueStillUpdates.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.forContinueStillUpdates.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.forBreakKeepsCounter` (`TestSuite.sol`). -/
 theorem forBreakKeepsCounter :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.forBreakKeepsCounter.problem :=
-  diamond_of_proved Solkey.TestSuite.forBreakKeepsCounter.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.forBreakKeepsCounter.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.doWhileRunsBodyFirst` (`TestSuite.sol`). -/
 theorem doWhileRunsBodyFirst :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.doWhileRunsBodyFirst.problem :=
-  diamond_of_proved Solkey.TestSuite.doWhileRunsBodyFirst.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.doWhileRunsBodyFirst.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.forWritesStorageArray` (`TestSuite.sol`). -/
 theorem forWritesStorageArray :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.forWritesStorageArray.problem :=
-  box_of_proved Solkey.TestSuite.forWritesStorageArray.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.forWritesStorageArray.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.returnLeavesNestedLoops` (`TestSuite.sol`). -/
 theorem returnLeavesNestedLoops :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.returnLeavesNestedLoops.problem :=
-  diamond_of_proved Solkey.TestSuite.returnLeavesNestedLoops.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.returnLeavesNestedLoops.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.invariantForCountsArrayLength` (`TestSuite.sol`). -/
 theorem invariantForCountsArrayLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.invariantForCountsArrayLength.problem :=
-  diamond_of_proved Solkey.TestSuite.invariantForCountsArrayLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.invariantForCountsArrayLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.invariantQuantifiedOverPrefix` (`TestSuite.sol`). -/
 theorem invariantQuantifiedOverPrefix :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.invariantQuantifiedOverPrefix.problem :=
-  box_of_proved Solkey.TestSuite.invariantQuantifiedOverPrefix.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.invariantQuantifiedOverPrefix.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.constantInlined` (`TestSuite.sol`). -/
 theorem constantInlined :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.constantInlined.problem :=
-  diamond_of_proved Solkey.TestSuite.constantInlined.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.constantInlined.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.contractQualifiedConstantAndEnum` (`TestSuite.sol`). -/
 theorem contractQualifiedConstantAndEnum :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.contractQualifiedConstantAndEnum.problem :=
-  diamond_of_proved Solkey.TestSuite.contractQualifiedConstantAndEnum.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.contractQualifiedConstantAndEnum.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.fileLevelConstantEnumAndFunction` (`TestSuite.sol`). -/
 theorem fileLevelConstantEnumAndFunction :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.fileLevelConstantEnumAndFunction.problem :=
-  diamond_of_proved Solkey.TestSuite.fileLevelConstantEnumAndFunction.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.fileLevelConstantEnumAndFunction.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.fileLevelStructThroughLibrary` (`TestSuite.sol`). -/
 theorem fileLevelStructThroughLibrary :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.fileLevelStructThroughLibrary.problem :=
-  diamond_of_proved Solkey.TestSuite.fileLevelStructThroughLibrary.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.fileLevelStructThroughLibrary.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.libraryCallAndUsingFor` (`TestSuite.sol`). -/
 theorem libraryCallAndUsingFor :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.libraryCallAndUsingFor.problem :=
-  diamond_of_proved Solkey.TestSuite.libraryCallAndUsingFor.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.libraryCallAndUsingFor.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.valueTypeWrapUnwrap` (`TestSuite.sol`). -/
 theorem valueTypeWrapUnwrap :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.valueTypeWrapUnwrap.problem :=
-  diamond_of_proved Solkey.TestSuite.valueTypeWrapUnwrap.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.valueTypeWrapUnwrap.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.typeBounds` (`TestSuite.sol`). -/
 theorem typeBounds :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.typeBounds.problem :=
-  diamond_of_proved Solkey.TestSuite.typeBounds.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.typeBounds.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.addmodMulmod` (`TestSuite.sol`). -/
 theorem addmodMulmod :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.addmodMulmod.problem :=
-  diamond_of_proved Solkey.TestSuite.addmodMulmod.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.addmodMulmod.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierCallsInternalFunction` (`TestSuite.sol`). -/
 theorem modifierCallsInternalFunction :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierCallsInternalFunction.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierCallsInternalFunction.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierCallsInternalFunction.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.indexParameter` (`TestSuite.sol`). -/
 theorem indexParameter :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.indexParameter.problem :=
-  diamond_of_proved Solkey.TestSuite.indexParameter.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.indexParameter.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageStructParameter` (`TestSuite.sol`). -/
 theorem storageStructParameter :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageStructParameter.problem :=
-  diamond_of_proved Solkey.TestSuite.storageStructParameter.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageStructParameter.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageMappingParameter` (`TestSuite.sol`). -/
 theorem storageMappingParameter :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageMappingParameter.problem :=
-  diamond_of_proved Solkey.TestSuite.storageMappingParameter.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageMappingParameter.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.namedArgumentsBindByName` (`TestSuite.sol`). -/
 theorem namedArgumentsBindByName :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.namedArgumentsBindByName.problem :=
-  diamond_of_proved Solkey.TestSuite.namedArgumentsBindByName.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.namedArgumentsBindByName.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierLocalsArePerApplication` (`TestSuite.sol`). -/
 theorem modifierLocalsArePerApplication :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierLocalsArePerApplication.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierLocalsArePerApplication.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierLocalsArePerApplication.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierRepeatedReturnAndLocals` (`TestSuite.sol`). -/
 theorem modifierRepeatedReturnAndLocals :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierRepeatedReturnAndLocals.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierRepeatedReturnAndLocals.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierRepeatedReturnAndLocals.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierReentersArguments` (`TestSuite.sol`). -/
 theorem modifierReentersArguments :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierReentersArguments.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierReentersArguments.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierReentersArguments.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierSkippedPlaceholder` (`TestSuite.sol`). -/
 theorem modifierSkippedPlaceholder :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierSkippedPlaceholder.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierSkippedPlaceholder.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierSkippedPlaceholder.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierTakenPlaceholder` (`TestSuite.sol`). -/
 theorem modifierTakenPlaceholder :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierTakenPlaceholder.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierTakenPlaceholder.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierTakenPlaceholder.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierReturnResumesOuterSuffix` (`TestSuite.sol`). -/
 theorem modifierReturnResumesOuterSuffix :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierReturnResumesOuterSuffix.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierReturnResumesOuterSuffix.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierReturnResumesOuterSuffix.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierLoopBodyReturnStaysInFrame` (`TestSuite.sol`). -/
 theorem modifierLoopBodyReturnStaysInFrame :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierLoopBodyReturnStaysInFrame.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierLoopBodyReturnStaysInFrame.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierLoopBodyReturnStaysInFrame.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierWhileJumps` (`TestSuite.sol`). -/
 theorem modifierWhileJumps :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierWhileJumps.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierWhileJumps.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierWhileJumps.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.modifierDoWhileJumps` (`TestSuite.sol`). -/
 theorem modifierDoWhileJumps :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.modifierDoWhileJumps.problem :=
-  diamond_of_proved Solkey.TestSuite.modifierDoWhileJumps.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.modifierDoWhileJumps.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.uninitialisedLocalsAreDefault` (`TestSuite.sol`). -/
 theorem uninitialisedLocalsAreDefault :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.uninitialisedLocalsAreDefault.problem :=
-  diamond_of_proved Solkey.TestSuite.uninitialisedLocalsAreDefault.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.uninitialisedLocalsAreDefault.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageStaticToDynamicCopyKeepsLength` (`TestSuite.sol`). -/
 theorem storageStaticToDynamicCopyKeepsLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageStaticToDynamicCopyKeepsLength.problem :=
-  diamond_of_proved Solkey.TestSuite.storageStaticToDynamicCopyKeepsLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageStaticToDynamicCopyKeepsLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.storageShorterStaticCopyClearsTail` (`TestSuite.sol`). -/
 theorem storageShorterStaticCopyClearsTail :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.storageShorterStaticCopyClearsTail.problem :=
-  diamond_of_proved Solkey.TestSuite.storageShorterStaticCopyClearsTail.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.storageShorterStaticCopyClearsTail.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedArrayOfFixedArraysLength` (`TestSuite.sol`). -/
 theorem testFixedArrayOfFixedArraysLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedArrayOfFixedArraysLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedArrayOfFixedArraysLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedArrayOfFixedArraysLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testEmptyPushReadsDefaultValue` (`TestSuite.sol`). -/
 theorem testEmptyPushReadsDefaultValue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testEmptyPushReadsDefaultValue.problem :=
-  diamond_of_proved Solkey.TestSuite.testEmptyPushReadsDefaultValue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testEmptyPushReadsDefaultValue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPopPushValueResetsValue` (`TestSuite.sol`). -/
 theorem testPopPushValueResetsValue :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPopPushValueResetsValue.problem :=
-  diamond_of_proved Solkey.TestSuite.testPopPushValueResetsValue.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPopPushValueResetsValue.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedCopyThenEmptyPushReadsZero` (`TestSuite.sol`). -/
 theorem testFixedCopyThenEmptyPushReadsZero :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedCopyThenEmptyPushReadsZero.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedCopyThenEmptyPushReadsZero.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedCopyThenEmptyPushReadsZero.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShorterCopyThenEmptyPushClearsTail` (`TestSuite.sol`). -/
 theorem testShorterCopyThenEmptyPushClearsTail :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShorterCopyThenEmptyPushClearsTail.problem :=
-  diamond_of_proved Solkey.TestSuite.testShorterCopyThenEmptyPushClearsTail.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShorterCopyThenEmptyPushClearsTail.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPushMappingOfFixedArrayPreservesEntries` (`TestSuite.sol`). -/
 theorem testPushMappingOfFixedArrayPreservesEntries :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPushMappingOfFixedArrayPreservesEntries.problem :=
-  diamond_of_proved Solkey.TestSuite.testPushMappingOfFixedArrayPreservesEntries.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPushMappingOfFixedArrayPreservesEntries.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShapeCopyFixedTailAndSourceIndependence` (`TestSuite.sol`). -/
 theorem testShapeCopyFixedTailAndSourceIndependence :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShapeCopyFixedTailAndSourceIndependence.problem :=
-  diamond_of_proved Solkey.TestSuite.testShapeCopyFixedTailAndSourceIndependence.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShapeCopyFixedTailAndSourceIndependence.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShapeCopyDynamicShrinkClearsReusedSlot` (`TestSuite.sol`). -/
 theorem testShapeCopyDynamicShrinkClearsReusedSlot :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShapeCopyDynamicShrinkClearsReusedSlot.problem :=
-  diamond_of_proved Solkey.TestSuite.testShapeCopyDynamicShrinkClearsReusedSlot.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShapeCopyDynamicShrinkClearsReusedSlot.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShapeCopyNestedSelfAliasPreservesValues` (`TestSuite.sol`). -/
 theorem testShapeCopyNestedSelfAliasPreservesValues :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShapeCopyNestedSelfAliasPreservesValues.problem :=
-  diamond_of_proved Solkey.TestSuite.testShapeCopyNestedSelfAliasPreservesValues.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShapeCopyNestedSelfAliasPreservesValues.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedArrayOfMappingsOfFixedArraysLength` (`TestSuite.sol`). -/
 theorem testFixedArrayOfMappingsOfFixedArraysLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedArrayOfMappingsOfFixedArraysLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedArrayOfMappingsOfFixedArraysLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedArrayOfMappingsOfFixedArraysLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDynamicArrayOfMappingsOfFixedArraysLength` (`TestSuite.sol`). -/
 theorem testDynamicArrayOfMappingsOfFixedArraysLength :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.testDynamicArrayOfMappingsOfFixedArraysLength.problem :=
-  box_of_proved Solkey.TestSuite.testDynamicArrayOfMappingsOfFixedArraysLength.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.testDynamicArrayOfMappingsOfFixedArraysLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPushIndexedPrimitiveSourceOnce` (`TestSuite.sol`). -/
 theorem testPushIndexedPrimitiveSourceOnce :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPushIndexedPrimitiveSourceOnce.problem :=
-  diamond_of_proved Solkey.TestSuite.testPushIndexedPrimitiveSourceOnce.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPushIndexedPrimitiveSourceOnce.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testPushIndexedFixedArraySourceOnce` (`TestSuite.sol`). -/
 theorem testPushIndexedFixedArraySourceOnce :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testPushIndexedFixedArraySourceOnce.problem :=
-  diamond_of_proved Solkey.TestSuite.testPushIndexedFixedArraySourceOnce.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testPushIndexedFixedArraySourceOnce.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedShapePopPushResetsFixedElement` (`TestSuite.sol`). -/
 theorem testFixedShapePopPushResetsFixedElement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedShapePopPushResetsFixedElement.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedShapePopPushResetsFixedElement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedShapePopPushResetsFixedElement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedShapeDeleteFixedElementKeepsLength` (`TestSuite.sol`). -/
 theorem testFixedShapeDeleteFixedElementKeepsLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedShapeDeleteFixedElementKeepsLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedShapeDeleteFixedElementKeepsLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedShapeDeleteFixedElementKeepsLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement` (`TestSuite.sol`). -/
 theorem testFixedShapeDeleteDynamicThenPushFixedElement :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testFixedShapeFixedElementStorageAlias` (`TestSuite.sol`). -/
 theorem testFixedShapeFixedElementStorageAlias :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.problem :=
-  diamond_of_proved Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.arithmeticAssignmentValues` (`TestSuite.sol`). -/
 theorem arithmeticAssignmentValues :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.arithmeticAssignmentValues.problem :=
-  diamond_of_proved Solkey.TestSuite.arithmeticAssignmentValues.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.arithmeticAssignmentValues.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.arithmeticDiscardKeepsSideEffects` (`TestSuite.sol`). -/
 theorem arithmeticDiscardKeepsSideEffects :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.problem :=
-  diamond_of_proved Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.arithmeticDiscardKeepsZeroDivisorRevert` (`TestSuite.sol`). -/
 theorem arithmeticDiscardKeepsZeroDivisorRevert :
     Obligation.Box (State.init Solkey.TestSuite) Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.problem :=
-  box_of_proved Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.proved Solkey.TestSuite.initState_wt
+  box_of_proved Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDeleteArrayLeavesDataPastLength` (`TestSuite.sol`). -/
 theorem testDeleteArrayLeavesDataPastLength :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.problem :=
-  diamond_of_proved Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDanglingReferenceSurvivesPush` (`TestSuite.sol`). -/
 theorem testDanglingReferenceSurvivesPush :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testDanglingReferenceSurvivesPush.problem :=
-  diamond_of_proved Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testArrayCopyKeepsDestinationTail` (`TestSuite.sol`). -/
 theorem testArrayCopyKeepsDestinationTail :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testArrayCopyKeepsDestinationTail.problem :=
-  diamond_of_proved Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testDanglingInnerArrayReappearsAfterPush` (`TestSuite.sol`). -/
 theorem testDanglingInnerArrayReappearsAfterPush :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.problem :=
-  diamond_of_proved Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShiftRightNegativeRoundsDown` (`TestSuite.sol`). -/
 theorem testShiftRightNegativeRoundsDown :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShiftRightNegativeRoundsDown.problem :=
-  diamond_of_proved Solkey.TestSuite.testShiftRightNegativeRoundsDown.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShiftRightNegativeRoundsDown.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShiftLeftFitsUint8` (`TestSuite.sol`). -/
 theorem testShiftLeftFitsUint8 :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShiftLeftFitsUint8.problem :=
-  diamond_of_proved Solkey.TestSuite.testShiftLeftFitsUint8.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShiftLeftFitsUint8.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-- solkey `TestSuite.testShiftOperandEvaluation` (`TestSuite.sol`). -/
 theorem testShiftOperandEvaluation :
     Obligation.Diamond (State.init Solkey.TestSuite) Solkey.TestSuite.testShiftOperandEvaluation.problem :=
-  diamond_of_proved Solkey.TestSuite.testShiftOperandEvaluation.proved Solkey.TestSuite.initState_wt
+  diamond_of_proved Solkey.TestSuite.testShiftOperandEvaluation.proved Solkey.TestSuite.initState_wt (by rfl)
 
 /-! One corollary's axioms, for those of `initState_wt`: with the pins of
 `Corpus/Imported.lean` and `TestSuite/Report.lean`, every corollary here

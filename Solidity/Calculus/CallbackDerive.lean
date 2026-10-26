@@ -2,6 +2,9 @@ import Solidity.Calculus.Derive
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.CapturePayments
+import Solidity.Calculus.LeafDerive
+import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.RuleExists
 
 /-!
 # The strategy with callbacks: `sol_derive` and `sol_prove` on `ValidT`
@@ -10,8 +13,12 @@ import Solidity.Calculus.CapturePayments
 sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
 `apply` per rule, as `sol_derive`'s walk of `Proves` (`Calculus/Derive.lean`):
 
+* a new premise refuted by the bounded scoped closer: `closeFalse`,
+  with the wrapped contradiction checked to contain no callback;
 * where nothing in the sequent calls back (`Fml.callsBack pay`), `plain`,
-  and `Proves`' walk from there;
+  and one fixed 128-step compiled `Proves` walk from there when closing,
+  each ordinary leaf closed with the same invariant-aware closer; a refused
+  compiled attempt keeps the structural walk;
 * a `transfer`, a `send` or a `try` that hands control to a callee that
   calls back: its callback taclet (`transferWithCallbackBox`,
   `sendWithCallbackBox`, `tryCallWithCallbackBox`; under the diamond
@@ -44,11 +51,41 @@ namespace Solidity
 
 open Solidity (Modality)
 
+/-- Reconstruct a named rule at its typed `Rule` goal.  The statement fixes
+the typed hole and path arguments before the constructor's side conditions
+are checked, just as in the rule-existence replay. -/
+syntax (name := solCallbackRule) "sol_callback_rule " ident : tactic
+
+open Lean Elab Tactic Meta in
+@[tactic solCallbackRule]
+def evalSolCallbackRule : Tactic := fun stx => withMainContext do
+  let g ← getMainGoal
+  let c := stx[1].getId
+  let (some (_, r), _) ← RuleExists.leaf (← g.getType) (some c)
+    | throwError "sol_callback_rule: {c} does not match this typed rule goal"
+  g.assign r
+  replaceMainGoal []
+
 /-- The test runner's reading of `sol_prove` (`Frontend/Testing.lean`): it
 reports only whether a leaf is left, so the walk stops at the first. -/
 register_option sol.prove.stopAtOpen : Bool := {
   defValue := false
   descr := "sol_prove with callbacks: stop at the first leaf left open"
+}
+
+/-- Enable the bounded contradiction check at a newly assumed premise.
+This only changes the proof search; each pruned branch has an explicit
+`ProvesC.closeFalse` derivation. -/
+register_option sol.prove.pruneFalse : Bool := {
+  defValue := true
+  descr := "sol_prove with callbacks: prune contradictory callback-free contexts"
+}
+
+/-- Use one bounded compiled walk on ordinary `Proves` residues reached
+through the callback calculus's existing `plain` rule. -/
+register_option sol.prove.compiledPlain : Bool := {
+  defValue := true
+  descr := "sol_prove with callbacks: compile ordinary Proves residues before walking them"
 }
 
 namespace CallbackWalk
@@ -83,9 +120,10 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   let plain ← `(tactic| refine $(← ProofTree.short ``ProvesC.plain) ?_ $(mkIdent `rfl):ident)
   -- not `plain` on a recursive call (no rule of `Proves` steps over it, and
   -- `rfl` would unroll its frames) or a `{havoc}` (`Proves` has no rule for
-  -- it): the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
+  -- it). An explicit try calls back too, so avoid an ordinary-proof
+  -- attempt on every capture before it: the walk goes on in `ProvesC` (`Calculus/RecursionCallback.lean`)
   let φi ← instantiateMVars φ0
-  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Fml.havoc ||
+  let noPlain := (φi.find? fun e => e.isConstOf ``Stmt.callRec || e.isConstOf ``Stmt.tryCall || e.isConstOf ``Fml.havoc ||
     e.isConstOf ``Fml.grow).isSome
   let φ ← whnf φ0
   let rest : Array (Array (TSyntax `tactic)) ← match φ.getAppFn.constName? with
@@ -130,33 +168,38 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
           | _ => pure #[]
         -- the rule `Stmt.step` fires, on a statement that hands control to nobody
         let k := mkAppN (mkConst ``Hyps.freshC) #[ty.getArg! 0, ty.getArg! 3, ty.getArg! 4, I, H, φ]
-        let ordinary : Array (Array (TSyntax `tactic)) ← do
-          match ← tryCatchRuntimeEx (ProofTree.ruleAt? k m P) (fun _ => pure none) with
-          | some (_, r, _, c) =>
-            match ctorC? c with
-            | some (cC, n) =>
-              let rule := mkIdent (Lean.Name.mkSimple r.getString!)
-              -- `whileUnwind`'s mode is read off the loop (`core_while_unwind`)
-              let d ← if r == ``Taclet.whileUnwind then
-                  `(term| (.$(mkIdent `key):ident (by core_while_unwind)))
-                else if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
-                else `(term| (.$(mkIdent `lean):ident .$rule:ident))
-              let rfls := (List.replicate n rflT).toArray
-              let f ← ProofTree.short cC
-              -- a capture whose rest calls back: `ProvesC.capture`, its
-              -- side condition the capture's lemma (`Stmt.CapturesAs`)
-              let cap ← if c == ``Proves.unfold then
-                  captureLemmas.mapM fun (l, k) => do
-                    let fc ← ProofTree.short ``ProvesC.capture
-                    if k == 0 then pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
-                    else
-                      let rs := (List.replicate k rflT).toArray
-                      pure #[← `(tactic| apply $fc $d (.$(mkIdent l):ident $rs*))]
-                else pure #[]
-              pure (#[#[← `(tactic| apply $f $d $rfls*)],
-                #[← `(tactic| apply $f (by exact $d) $rfls*)]] ++ cap)
+        -- A try's ordinary box rule produces branches, which ctorC? does
+        -- not translate; its diamond done rule cannot satisfy forksIn=false.
+        -- Avoid reducing that discarded rule before the own callback moves.
+        let ordinary : Array (Array (TSyntax `tactic)) ←
+          if s.isAppOf ``Stmt.tryCall then pure #[] else do
+            match ← tryCatchRuntimeEx (ProofTree.ruleAt? k m P) (fun _ => pure none) with
+            | some (_, r, _, c) =>
+              match ctorC? c with
+              | some (cC, n) =>
+                let rule := mkIdent (Lean.Name.mkSimple r.getString!)
+                -- `whileUnwind`'s mode is read off the loop (`core_while_unwind`)
+                let d ← if r == ``Taclet.whileUnwind then
+                    `(term| (.$(mkIdent `key):ident (by core_while_unwind)))
+                  else if r.getPrefix == ``Taclet then `(term| (.$(mkIdent `key):ident .$rule:ident))
+                  else `(term| (.$(mkIdent `lean):ident .$rule:ident))
+                let typed ← `(term| (by sol_callback_rule $(mkIdent r):ident))
+                let rfls := (List.replicate n rflT).toArray
+                let f ← ProofTree.short cC
+                -- a capture whose rest calls back: `ProvesC.capture`, its
+                -- side condition the capture's lemma (`Stmt.CapturesAs`)
+                let cap ← if c == ``Proves.unfold then
+                    captureLemmas.mapM fun (l, k) => do
+                      let fc ← ProofTree.short ``ProvesC.capture
+                      if k == 0 then pure #[← `(tactic| apply $fc $d .$(mkIdent l):ident)]
+                      else
+                        let rs := (List.replicate k rflT).toArray
+                        pure #[← `(tactic| apply $fc $d (.$(mkIdent l):ident $rs*))]
+                  else pure #[]
+                pure (#[#[← `(tactic| apply $f $d $rfls*)],
+                  #[← `(tactic| apply $f $typed $rfls*)]] ++ cap)
+              | none => pure #[]
             | none => pure #[]
-          | none => pure #[]
         -- a transfer calls back only where `pay` is set: `transferNoCallbackBox`
         -- (`ordinary`) first, which fires where it does not
         let after : Array (Array (TSyntax `tactic)) ← match s.getAppFn.constName? with
@@ -196,6 +239,164 @@ def closeLeaf (g : MVarId) (inv : Bool) : TacticM (Option (Array String)) := do
     s.restore
   return none
 
+/-- One fixed compiled attempt on an ordinary `Proves` goal. In
+particular, this does not turn a `ProvesC` goal into a deterministic goal:
+`plain` has already checked the whole sequent has no callback. The same
+sequent, context and rule set are passed to `Seq.prove`. The bound is at
+most 128 nodes and at most the callback walk's remaining fuel. On success
+the caller charges that entire bound; on failure it keeps the original
+state and structural walk.
+
+The fixed bound is recorded in the replay, so `sol_derive?` does not repeat
+stage selection. Every resulting leaf remains an ordinary scoped sequent,
+closed separately by `closeLeaf`, including invariant-aware fallbacks. -/
+def compiledPlain (g : MVarId) (steps : Nat) :
+    TacticM (Option (List MVarId)) := do
+  unless sol.prove.compiledPlain.get (← getOptions) do return none
+  if steps == 0 || 128 < steps then return none
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (withCurrHeartbeats <| g.withContext do
+      let ty ← instantiateMVars (← g.getType)
+      let_expr Proves C R Γ₀ Γ H φ := ty | return none
+      unless (← whnfR Γ₀).isAppOf ``List.nil do return none
+      -- `some steps` is a single stage, never Seq.prove's increasing search.
+      some <$> Seq.prove g C R Γ H φ (some steps) (oneCheck := steps))
+    fun _ => pure none
+  if result.isNone then saved.restore
+  return result
+
+/-- Search at most `fuel` context constructors for a contradictory prefix.
+A premise is tested before looking below it; every context constructor consumes
+one unit. This can find a contradiction before havoc without dropping any
+update, binder or earlier assumption from the prefix being checked. -/
+def refutePrefix {C : Contract} : Nat → {Γ : Ctx} → Hyps C [] Γ → Bool
+  | 0, _, _ => false
+  | _ + 1, _, .nil => false
+  | n + 1, _, .pre H c => Seq.refuteS H c || refutePrefix n H
+  | n + 1, _, .upd H _ _ | n + 1, _, .havoc H | n + 1, _, .all H _ _
+  | n + 1, _, .bind H _ _ _ | n + 1, _, .anon H _
+  | n + 1, _, .allocAll H _ _ | n + 1, _, .grow H => refutePrefix n H
+
+/-- A checked contradictory prefix proves every continuation under its entire
+context. In particular, a prefix update under the diamond must still land:
+only the suffix after the contradiction is replaced, by monotonicity. -/
+theorem refutePrefix_valid {C : Contract} (fuel : Nat) :
+    {Γ : Ctx} → (H : Hyps C [] Γ) → refutePrefix fuel H = true →
+      ∀ φ : Fml C Γ, Fml.Valid (H.wrap φ) := by
+  induction fuel with
+  | zero =>
+    intro Γ H h
+    simp only [refutePrefix, Bool.false_eq_true] at h
+  | succ n ih =>
+    intro Γ H h φ
+    cases H with
+    | nil => simp only [refutePrefix, Bool.false_eq_true] at h
+    | pre before c =>
+      change (Seq.refuteS before c || refutePrefix n before) = true at h
+      simp only [Bool.or_eq_true] at h
+      rcases h with h | h
+      · intro σ
+        exact (before.pre c).wrap_mono
+          (fun _ hf => (hf trivial).elim) σ
+          (Proves.sound (Seq.refuteS_sound (R := .all) before c h) σ)
+      · exact ih before h (.imp c φ)
+    | upd before m U => exact ih before h (.upd m U φ)
+    | havoc before => exact ih before h (.havoc φ)
+    | all before x p => exact ih before h (.all x p φ)
+    | bind before m x t => exact ih before h (.bind m x t φ)
+    | anon before xs => exact ih before h (.anon xs φ)
+    | allocAll before x A => exact ih before h (.allocAll x A φ)
+    | grow before => exact ih before h (.grow φ)
+
+/-- The checked prefix certificate closes the original ordinary sequent. Its
+whole wrapped formula must still be modal-free; the callback bridge separately
+checks that the whole wrapped contradiction contains no callbacks. -/
+theorem refutePrefix_sound {C : Contract} {R : RuleSet} {Γ : Ctx}
+    (fuel : Nat) (H : Hyps C [] Γ) (h : refutePrefix fuel H = true)
+    (hm : (H.wrap .ff).modalFree = true) : Proves C R [] H .ff :=
+  Proves.closeHolds (refutePrefix_valid fuel H h .ff) hm
+
+/-- Check one fixed prefix certificate directly in the kernel, as
+Seq.leafValid/Seq.prove do. All dependent arguments are supplied explicitly;
+no tactic elaboration or dependent-context inference is needed to build it.
+Every equality is checked synchronously before assigning the final proof. -/
+def closePrefixFalse (g : MVarId) (fuel : Nat) : MetaM Unit := g.withContext do
+  unless fuel ≤ 8 do throwError "sol_prefix_false: at most eight context layers"
+  let ty ← instantiateMVars (← g.getType)
+  let_expr ProvesC C I pay Γ₀ Γ H φ := ty
+    | throwError "sol_prefix_false: expected a callback sequent"
+  unless (← whnfR Γ₀).isAppOf ``List.nil do
+    throwError "sol_prefix_false: expected a closed outer scope"
+  let probe := mkAppN (mkConst ``refutePrefix) #[C, mkNatLit fuel, Γ, H]
+  if probe.hasFVar || probe.hasMVar then
+    throwError "sol_prefix_false: the certificate is not closed"
+  let hc ← Decide.trueLemma probe
+  let ff := mkApp2 (mkConst ``Fml.ff) C Γ
+  let wrapped := mkAppN (mkConst ``Hyps.wrap) #[C, Γ₀, Γ, H, ff]
+  let mf := mkApp3 (mkConst ``Fml.modalFree) C Γ₀ wrapped
+  let hm ← Decide.trueLemma mf
+  let callbacks := mkAppN (mkConst ``Fml.callsBack) #[C, pay, Γ₀, wrapped]
+  let hnc ← Derive.kernelLemma
+    (← mkEq callbacks (mkConst ``Bool.false))
+    (← mkEqRefl (mkConst ``Bool.false))
+  let contradiction := mkAppN (mkConst ``refutePrefix_sound)
+    #[C, mkConst ``RuleSet.all, Γ, mkNatLit fuel, H, hc, hm]
+  g.assign (mkAppN (mkConst ``ProvesC.closeFalse)
+    #[C, I, pay, Γ₀, Γ, H, φ, contradiction, hnc])
+
+/-- Deterministic replay of the fixed checked certificate; no arithmetic
+fallback or tactic search is performed. -/
+syntax "sol_prefix_false " num : tactic
+
+elab_rules : tactic
+  | `(tactic| sol_prefix_false $n:num) => do
+    closePrefixFalse (← getMainGoal) n.getNat
+    replaceMainGoal []
+
+/-- Probe a newly assumed premise with one eight-constructor prefix check.
+The fixed checker is replayed by a synchronous kernel certificate, retaining
+all preceding updates and diamond landing requirements. A refusal or timeout
+restores the original elaboration state. -/
+def pruneFalse (g : MVarId) : TacticM (Option (Array String)) := do
+  unless sol.prove.pruneFalse.get (← getOptions) do return none
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (withCurrHeartbeats <| g.withContext do
+      let ty ← instantiateMVars (← g.getType)
+      let_expr ProvesC C _ _ Γ₀ Γ H _ := ty | return none
+      unless (← whnfR Γ₀).isAppOf ``List.nil do return none
+      let H ← whnfR H
+      unless H.isAppOf ``Hyps.pre do return none
+      let probe := mkAppN (mkConst ``refutePrefix) #[C, mkNatLit 8, Γ, H]
+      if probe.hasFVar || probe.hasMVar then return none
+      let refuted ← unsafe evalExpr Bool (mkConst ``Bool) probe
+      unless refuted do return none
+      let replay ← `(tactic| sol_prefix_false 8)
+      let closed ← Budget.bounded 16384 do
+        closePrefixFalse g 8
+        return true
+      unless closed == some true do return none
+      return some (← ProofTree.tacLines replay))
+    fun _ => pure none
+  if result.isNone then saved.restore
+  return result
+
+/-- A catch continuation beginning with an explicit revert under the box
+needs none of its failed-self-call premise. Detect just this head statement;
+no callee, argument, update or remainder is reduced to choose the move. -/
+def revertingConsequent (g : MVarId) : MetaM Bool := g.withContext do
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOf ``ProvesC do return false
+  let φ ← whnf ty.getAppArgs.back!
+  unless φ.isAppOf ``Fml.imp do return false
+  let consequent ← whnf φ.getAppArgs.back!
+  unless consequent.isAppOf ``Fml.modal do return false
+  let args := consequent.getAppArgs
+  unless args[args.size - 4]!.isConstOf ``Modality.box do return false
+  let P ← whnf args[args.size - 3]!
+  unless P.isAppOf ``Prog.cons do return false
+  let s ← whnf (P.getArg! (P.getAppNumArgs - 2))
+  return s.isAppOf ``Stmt.revert
+
 /-- The walk from the `ProvesC` goal `g`: its script and its leaves, as
 `Walk.walk` writes them. -/
 partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId)
@@ -205,8 +406,23 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   if n == 0 then throwError "sol_derive: more than {Derive.fuel} steps"
   fuel.set (n - 1)
   let ty ← instantiateMVars (← g.getType)
-  -- a goal of `Proves`, past `plain`: `Proves`' walk
+  -- A goal of `Proves`, past `plain`: compile this exact ordinary
+  -- residue first, with the original structural walk as the fallback.
   if ty.isAppOf ``Proves then
+    if close then
+      let steps := min 128 (← fuel.get)
+      if let some gs ← compiledPlain g steps then
+        fuel.modify (· - steps)
+        let mut found : List (Lean.Name × Array String) := []
+        for leaf in gs do
+          let name ← leaf.getTag
+          if !(← stopped leaves) then
+            if let some lines ← closeLeaf leaf inv then
+              found := found ++ [(name, lines)]
+              continue
+          leaves.modify (·.push leaf)
+          found := found ++ [(name, #[r"sorry"])]
+        return Derive.replayLines found (some steps)
     let fuel' ← IO.mkRef (← fuel.get)
     let ls ← IO.mkRef #[]
     let s ← saveState
@@ -239,30 +455,45 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
         | [] => pure ()
       out := out.push line
     return out
+  -- Refute the new assumption before expanding any remaining calls.
+  if close then
+    if let some lines ← pruneFalse g then return lines
   -- `¬X → ψ`, `X` a program's, where something calls back: `X` proved
   -- instead where the walk closes it (`notLeft`), else the premise hidden
   -- (`hideLeft`), as `Walk.walk` does
   if ← tryCatchRuntimeEx (withCurrHeartbeats (Walk.negModalGoal? g)) fun _ => pure false then
-    let s ← saveState
-    let pl ← `(tactic| refine $(← ProofTree.short ``ProvesC.plain) ?_ $(mkIdent `rfl):ident)
-    let viaPlain ← tryCatchRuntimeEx
-      (withCurrHeartbeats do return (← ProofTree.runOn g #[pl]).length == 1)
-      fun _ => pure false
-    s.restore
-    unless viaPlain do
-      let nl ← `(tactic| refine $(← ProofTree.short ``ProvesC.notLeft) ?_)
-      let r ← tryCatchRuntimeEx (do
-          let [gx] ← withCurrHeartbeats (ProofTree.runOn g #[nl]) | return none
-          let ls ← IO.mkRef #[]
-          let lines ← walk fuel ls gx true inv
-          return if (← ls.get).isEmpty then some lines else none)
+    -- Ordinary call syntax lowers unhandled catches to revert. Proving the
+    -- failed-self-call premise by its diamond duplicates the getter's proof
+    -- without helping this branch; hide it by the existing structural rule.
+    if ← tryCatchRuntimeEx (withCurrHeartbeats (revertingConsequent g)) fun _ => pure false then
+      let saved ← saveState
+      let hidden ← `(tactic| refine $(← ProofTree.short ``ProvesC.hideLeft) ?_)
+      let result ← tryCatchRuntimeEx (do
+          let [child] ← withCurrHeartbeats (ProofTree.runOn g #[hidden]) | return none
+          let localLeaves ← IO.mkRef #[]
+          let lines ← walk fuel localLeaves child close inv
+          unless (← localLeaves.get).isEmpty do return none
+          return some ((← ProofTree.tacLines hidden) ++ lines))
         fun _ => pure none
-      if let some lines := r then return (← ProofTree.tacLines nl) ++ lines
-      s.restore
-      let hl ← `(tactic| refine $(← ProofTree.short ``ProvesC.hideLeft) ?_)
-      let [g'] ← withCurrHeartbeats (ProofTree.runOn g #[hl])
-        | throwError "sol_derive: hideLeft failed"
-      return (← ProofTree.tacLines hl) ++ (← walk fuel leaves g' close inv)
+      if let some lines := result then return lines
+      saved.restore
+    -- Even a callback-free residue needs the full closer on the positive
+    -- diamond before falling back to its catch continuation. Deferring this
+    -- choice through plain can leave the negative modality in a leaf.
+    let s ← saveState
+    let nl ← `(tactic| refine $(← ProofTree.short ``ProvesC.notLeft) ?_)
+    let r ← tryCatchRuntimeEx (do
+        let [gx] ← withCurrHeartbeats (ProofTree.runOn g #[nl]) | return none
+        let ls ← IO.mkRef #[]
+        let lines ← walk fuel ls gx true inv
+        return if (← ls.get).isEmpty then some lines else none)
+      fun _ => pure none
+    if let some lines := r then return (← ProofTree.tacLines nl) ++ lines
+    s.restore
+    let hl ← `(tactic| refine $(← ProofTree.short ``ProvesC.hideLeft) ?_)
+    let [g'] ← withCurrHeartbeats (ProofTree.runOn g #[hl])
+      | throwError "sol_derive: hideLeft failed"
+    return (← ProofTree.tacLines hl) ++ (← walk fuel leaves g' close inv)
   let mut step := none
   let moves ← tryCatchRuntimeEx (withCurrHeartbeats (movesAt g)) fun _ => pure #[]
   for tacs in moves do

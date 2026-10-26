@@ -17,7 +17,8 @@
  * `referencedDeclaration` and the `id` of a declaration it points to,
  * documentation text, and `src` with the 1-based source `line` it starts at
  * on every statement and declaration.  The rest (`isPure`, name locations,
- * `typeIdentifier`, …) is noise that changes with unrelated edits.  A
+ * primitive `typeIdentifier`, …) is noise that changes with unrelated edits.
+ * Modern fixtures retain scalar UDVT type identifiers for nominal operator checks.  A
  * function's `modifiers` and a contract's `baseContracts` are kept when they
  * are not empty: the import refuses what it would otherwise drop.
  *
@@ -54,6 +55,7 @@
  *   --wrapper     the importing module (default Solidity/Solkey/TestSuite.lean):
  *                 the literal rewritten is the one of the import of `--out`'s file
  *   --no-wrapper  leave the importing module's hash literal alone
+ *   --world-metadata  retain explicit abstractness for strict world admission
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
  *                 output for the same source (`~/.cache/solkey/solc/<soljson>/`,
  *                 keyed by the sha256 of `SolcWrapper`'s input), when there is one
@@ -274,8 +276,13 @@ function trim(n, parentKey) {
     const hexBytes = k === "hexValue" && n.nodeType === "Literal" &&
       (n.kind === "hexString" || typeof n.value !== "string" ||
         (!legacyFixture && ["string", "unicodeString"].includes(n.kind)));
-    const selector = k === 'functionSelector' && selectorDeclarations.has(n.id);
-    if (NOISE.has(k) && !hexBytes && !selector && !(k === "commonType" && !legacyFixture) &&
+    const selector = k === 'functionSelector' && (selectorDeclarations.has(n.id) ||
+      (!legacyFixture && ['FunctionDefinition', 'VariableDeclaration'].includes(n.nodeType) &&
+        ['public', 'external'].includes(n.visibility)));
+    const getterKeyName = !legacyFixture && k === 'keyName' &&
+      n.nodeType === 'Mapping' && typeof v === 'string' && v.length > 0;
+    const worldMetadata = k === 'abstract' && args.includes('--world-metadata');
+    if (NOISE.has(k) && !hexBytes && !selector && !getterKeyName && !worldMetadata && !(k === "commonType" && !legacyFixture) &&
         !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !(legacyFixture ? isDeclaration(n) : modernDeclaration(n))) continue;
@@ -287,7 +294,14 @@ function trim(n, parentKey) {
       continue;
     }
     if (k === "typeDescriptions") {
-      if (v && v.typeString !== undefined) out.typeDescriptions = { typeString: v.typeString };
+      if (v && v.typeString !== undefined) {
+        out.typeDescriptions = { typeString: v.typeString };
+        // Operator aliases must retain nominal identity, even when two UDVTs
+        // have the same underlying primitive or spelling in separate scopes.
+        if (!legacyFixture && typeof v.typeIdentifier === "string" &&
+            v.typeIdentifier.startsWith("t_userDefinedValueType"))
+          out.typeDescriptions.typeIdentifier = v.typeIdentifier;
+      }
       continue;
     }
     out[k] = trim(v, k);
@@ -342,24 +356,42 @@ function serialize(v, indent) {
     .join(",\n")}\n${" ".repeat(indent)}}`;
 }
 const text = serialize(fixture, 0) + "\n";
+
+// FNV-1a 64 over the actual bytes: what the importing commands check.
+function fixtureHash(data) {
+  let h = 0xcbf29ce484222325n;
+  for (const b of data) h = ((h ^ BigInt(b)) * 0x100000001b3n) & 0xffffffffffffffffn;
+  return h;
+}
+// Read the old bytes before replacing OUT: every valid import may name them,
+// while deliberate stale-fixture regressions must retain their wrong literal.
+const previousHash = existsSync(OUT) ? fixtureHash(readFileSync(OUT)) : null;
+const hash = `0x${fixtureHash(Buffer.from(text, "utf8")).toString(16).padStart(16, "0")}`;
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, text);
 
-// FNV-1a 64 over the bytes: what `solc_import … hash 0x…` checks.
-let h = 0xcbf29ce484222325n;
-for (const b of Buffer.from(text, "utf8")) {
-  h ^= BigInt(b);
-  h = (h * 0x100000001b3n) & 0xffffffffffffffffn;
-}
-const hash = `0x${h.toString(16).padStart(16, "0")}`;
-
 if (!args.includes("--no-wrapper") && existsSync(WRAPPER)) {
   const w = readFileSync(WRAPPER, "utf8");
-  // the import of this fixture's literal, and the stale-fixture test's
-  // expected message: a module may import several fixtures
-  const file = OUT.split("/").pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const w2 = w.replace(new RegExp(`(solc_import\\s+"[^"]*${file}"\\s+hash\\s+)0x[0-9a-f]+`), `$1${hash}`)
-    .replace(new RegExp(`(${file} has the hash )0x[0-9a-f]+`, "g"), `$1${hash}`);
+  let initializedImport = false;
+  const w2 = w.replace(
+    /(\bsolc_(?:import|world_factory|world_library)\s+"([^"]+)"\s+hash\s+)(0[xX][0-9a-fA-F_]+)/g,
+    (match, prefix, path, literal) => {
+      if (resolve(dirname(WRAPPER), path) !== resolve(OUT)) return match;
+      if (previousHash !== null) {
+        if (BigInt(literal.replaceAll("_", "")) !== previousHash) return match;
+      } else if (prefix.startsWith("solc_import")) {
+        // With no prior fixture there is no validity evidence. Retain the
+        // historical bootstrap convention: initialize the first ordinary
+        // import, leaving later deliberate stale imports alone. World
+        // commands retain their existing initial-generation placeholders.
+        if (initializedImport) return match;
+        initializedImport = true;
+      }
+      return prefix + hash;
+    })
+    // A stale-fixture diagnostic reports the new actual hash, even though its
+    // intentionally wrong import literal above remains unchanged.
+    .replace(new RegExp(`(${OUT.split("/").pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} has the hash )0x[0-9a-f]+`, "g"), `$1${hash}`);
   if (w2 !== w) writeFileSync(WRAPPER, w2);
 }
 let cacheDiffers = false;

@@ -560,7 +560,7 @@ def kintBinderTwo : Fml Gaps [] := .bind .box (.user "z") .kint (.bind .box (.us
     (isT (.app2 (.zcmp .gt rfl) (.pvZ (.there .here))
       (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit (-1))))))))
 /-- A binder of KeY's `int` in a negative position, an `∃`: `(∀ int z.
-z > 0) → 0 == 1`.  A counterexample once; proved since feature 27 (the
+z > 0) → 0 == 1`.  A counterexample once; proved since feature 30 (the
 binder read over two words, `Examples/DecisionKInt.lean`). -/
 def gapKIntNeg : Fml Gaps [] :=
   .imp (.bind .box (.user "z") .kint (isT (.app2 (.zcmp .gt rfl) (.pvZ .here) (.app0 (.zlit 0)))))

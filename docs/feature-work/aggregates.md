@@ -1,5 +1,10 @@
 # Aggregate milestone, 2026-10-25
 
+Integration status (2026-10-26): included in the shared checkout. Current
+combined validation is tracked in [integration.md](integration.md).
+Worker handoff statuses and isolated validation results below are historical;
+they neither report the current combined checks nor establish full source support.
+
 Inline array expressions now allocate fixed memory before evaluating and
 storing each element in source order. Type inference starts at the first
 mobile element type and folds Solidity implicit common types, independently
@@ -113,11 +118,11 @@ for shared-checkout integration.
 ## Remaining interfaces
 
 This is a checked implementation milestone, not completion of every aggregate
-feature in the catalog. Passing, hashing or materializing a slice still needs
-location-aware view/copy interfaces. Writable calldata-to-memory copies and
-external calls with reference arguments remain limited. Nominal enum/UDVT and
-function-valued element identities belong to the type/function groups;
-recursive shapes belong to recursive-types. Explicit address-literal elements
-currently lose their source identity in the native address-cast parser; typed
-address variables retain their metadata. Heterogeneous reference-return
+feature in the catalog. The integrated [primitive slice-copy continuation](../calldata-slice-copies.md)
+now supplies materialization, internal passing/returns, hashing and existing
+storage-copy consumers. Reference-element slices, general writable whole-calldata
+copies and external calls with reference arguments remain limited. Nominal
+enum/UDVT and function-valued element identities belong to the type/function
+groups; recursive shapes belong to recursive-types. Scalar captures retain
+address and fixed-byte source markers. Heterogeneous reference-return
 tuples remain a function-return interface. The feature catalog remains partial.

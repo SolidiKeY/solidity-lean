@@ -2,6 +2,7 @@ import Solidity.Frontend.Import
 import Solidity.Calculus.Problem
 import Solidity.Calculus.Spec
 import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.Print
 
 /-!
 # The obligations of an imported contract
@@ -44,11 +45,12 @@ a narrow integer or an enum parameter in its range, and each element of a
 memory array of one, which solc's ABI decoder enforces, `msg.value = 0` where the function is not `payable`
 and reads `msg.value`, and `msg.value < 2^128` where it is `payable` and
 reads it (a chain fact: the ether supply is below `2^128` wei).  Each is
-stated only where it says something, so an obligation without them is
-unchanged.
+stated only where it says something. Every plain imported source obligation also
+assumes `address(this) < 2^160`, the EVM address domain; the native state
+retains its broader 256-bit field. See `docs/source-inputs.md`.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
-  (`Problem.text`), to compare with `--print-problem`: `N.f.problem`, or the
+  (`sourceProblemText`), to compare with `--print-problem`: `N.f.problem`, or the
   statement `solc_scoped_problems` would declare where it has not run.
 * `#solkey_scan N` runs `sol_prove`'s walk on every statement with
   compiled code and lists what it leaves, with times: a search, to choose the
@@ -80,12 +82,21 @@ body, so the obligation holds of every call that does.  So does each element
 of a memory array parameter of a narrow integer or an enum (`elems`: the
 decoder reverts on one out of range), `∀ uint i; i < xs.length → lo ≤ xs[i]
 ∧ xs[i] ≤ hi` (a fixed array's length its own).  A premise that does not read
-is `true`: the obligation is then stronger, never weaker. -/
+is `true`: the obligation is then stronger, never weaker.
+`boundSelfAddress` adds the EVM environment premise `address(this) < 2^160`;
+all plain imported source obligations request it, including constructors. The
+default leaves direct/native callers unchanged (`docs/source-inputs.md`). -/
 def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
     (ranges : List (Var × Int × Int)) (boundValue : Bool := false)
-    (elems : List (Var × Int × Int × Option Nat) := []) : Fml C Γ.ctx :=
+    (elems : List (Var × Int × Int × Option Nat) := [])
+    (boundSelfAddress : Bool := false) : Fml C Γ.ctx :=
   let value : List (NRead C) := if noValue then [NRead.eq (.env .msgValue) (.num 0)]
     else if boundValue then [NRead.cmp .lt (.env .msgValue) (.num etherBound)] else []
+  -- 2^160 as a literal: printers unfold this source premise through NRead,
+  -- so retaining Int.pow here spends their recursion budget on a constant.
+  let self : List (NRead C) := if boundSelfAddress then
+    [NRead.cmp .lt (.env .selfAddress)
+      (.num 1461501637330902918203684832716283019655932542976)] else []
   let bounds : List (NRead C) := ranges.map fun (x, lo, hi) =>
     NRead.and (NRead.cmp .le (.num lo) (.pv x)) (NRead.cmp .le (.pv x) (.num hi))
   -- the index, a name no parameter has (`Var.fresh` of no prefix in use)
@@ -97,7 +108,7 @@ def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
       | none => .mlen .memory (.pv x)
     NRead.all i .uint (NRead.imp (NRead.cmp .lt (.pv i) n)
       (NRead.and (NRead.cmp .le (.num lo) e) (NRead.cmp .le e (.num hi))))
-  match NRead.conj (value ++ bounds ++ elemBounds) Γ with
+  match NRead.conj (value ++ self ++ bounds ++ elemBounds) Γ with
   | .ok φ => φ
   | .error _ => .tt
 
@@ -128,6 +139,8 @@ where solkey states no plain obligation (the tag) or a parameter is of no
 value type. -/
 def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) (selfAddr : Option Nat := none) :
     Except String (Option Expr) := do
+  if selfAddr.any (fun A => A ≥ 2^160) then
+    throw "self address must fit 160 bits"
   let some m := r.tag.modality? | return none
   unless r.params.length == r.paramTypes.length do
     throw s!"{r.name}: its parameter types are missing"
@@ -157,11 +170,12 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) (selfAddr : O
   let ranges : List (Var × Int × Int) := r.paramRanges.map fun (x, b) => (Var.ofName x, b)
   let elems : List (Var × Int × Int × Option Nat) :=
     r.elemRanges.map fun (x, b) => (Var.ofName x, b)
-  let body := if noValue || boundValue || !ranges.isEmpty || !elems.isEmpty then
-      mkAppN (mkConst ``Fml.imp) #[c, Γe,
-        mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges,
-          toExpr boundValue, toExpr elems], body]
-    else body
+  -- Every source execution has a 160-bit EVM address, including when a
+  -- callee or a synthesized dispatch branch is the first reader of it.
+  -- Do not infer this input domain from a syntactic search through the body.
+  let body := mkAppN (mkConst ``Fml.imp) #[c, Γe,
+    mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges,
+      toExpr boundValue, toExpr elems, toExpr true], body]
   -- the deployment address, when the run asks for it (`Problem.selfPre`)
   let body := match selfAddr with
     | some A => mkAppN (mkConst ``Fml.imp) #[c, Γe,
@@ -183,6 +197,10 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) (selfAddr : O
 when `compile`.  How many. -/
 def declareObligations (N : Lean.Name) (compile : Bool) (selfAddr : Option Nat := none) :
     CommandElabM Nat := do
+  -- Reject before declaring any table: an impossible explicit self premise
+  -- must not turn the canonical EVM input condition into a vacuous proof.
+  if selfAddr.any (fun A => A ≥ 2^160) then
+    throwError "self address must fit 160 bits"
   let rows ← reportRows N
   let nilCtx := ctxE []
   let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
@@ -227,7 +245,7 @@ def declareObligations (N : Lean.Name) (compile : Bool) (selfAddr : Option Nat :
 (`obligation`), an entry of one table `N.problems`, compiled, or with
 `decl` not compiled (the scoped `sol_prove` reads an obligation by its
 value, `Symex.evaluable`); with `self A`, each assuming `address(this) == A`
-(`Problem.selfPre`); an info names how many. -/
+(`Problem.selfPre`, `A < 2^160` required); an info names how many. -/
 syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")?
   (&" self " num)? : command
 
@@ -251,6 +269,54 @@ def statement? (N f : Lean.Name) : CommandElabM (Option Expr) := do
   | .ok φ => return φ
   | .error _ => return none
 
+/-- Source obligations carry actual input premises in addition to storage
+well-formedness. Keep their typed binders and render each premise, rather
+than asking native `Problem.parts` to recognize or discard an implication.
+Reference binders show their modality explicitly in the declaration's sort;
+that label is a source-output extension, not a new KeY sort. -/
+private def sourceProblemParts [FreshNames] (c : Expr) :
+    {Γ : Ctx} → List Var → Fml C Γ →
+    MetaM (Option (List (String × Var) × List String × Bool × Modality))
+  | _, ns, .all x p φ => do
+    let some (xs, ps, deploy, m) ← sourceProblemParts c (x :: ns) φ | return none
+    return some ((p.keySort, x) :: xs, ps, deploy, m)
+  | _, ns, .bind mode x t φ => do
+    let some (xs, ps, deploy, m) ← sourceProblemParts c (x :: ns) φ | return none
+    let mode := match mode with | .box => "box" | .diamond => "diamond"
+    return some ((s!"bind[{mode}] {t.toStr}", x) :: xs, ps, deploy, m)
+  | _, ns, .imp pre φ => do
+    let some (xs, ps, deploy, m) ← sourceProblemParts c ns φ | return none
+    let text ← match pre with
+      | .wellFormed t =>
+        if Problem.isWt t then pure "wt(storage)" else pre.show c ns
+      | _ => pre.show c ns
+    return some (xs, text :: ps, deploy, m)
+  | _, _, .modal m _ .nil .tt => return some ([], [], false, m)
+  | _, _, .upd m U (.modal m' _ .nil .tt) =>
+    return if Problem.isDeploy U && m == m' then some ([], [], true, m) else none
+  | _, _, _ => return none
+
+/-- KeY-style source problem text, retaining all initial input premises.
+Quantifiers inside premises are printed by the existing typed formula
+printer in the names of the surrounding binders. Native `Problem.text`
+continues to print its original, narrower obligation shape. -/
+def sourceProblemText [FreshNames] (c : Expr) (contract fn : String)
+    (φ : Fml C []) : MetaM String := withOptions (fun o => o.setBool `pp.sol.key true) do
+  let some (xs, ps, deploy, m) ← sourceProblemParts c [] φ
+    | throwError "#solkey_problem: unsupported source obligation shape"
+  let vars := if xs.isEmpty then "" else
+    "\\programVariables {\n" ++
+      String.join (xs.map fun (sort, x) => s!"    {sort} {x};\n") ++ "}\n\n"
+  let call := s!"{fn}({", ".intercalate (xs.map fun (_, x) => toString x)})@{contract};"
+  let pre := String.join (ps.map fun p => s!"({p}) -> ")
+  let deploy := if deploy then
+      "{storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} "
+    else ""
+  let body := match m with
+    | .box => s!"{pre}{deploy}\\[\{ {call} }\\](true)"
+    | .diamond => s!"{pre}{deploy}\\<\{ {call} }\\>(true)"
+  return vars ++ "\\problem {\n    " ++ body ++ "\n}"
+
 syntax (name := solkeyProblem) "#solkey_problem " ident : command
 
 /-- `#solkey_problem N.f`: the statement of `N.f` in solkey's syntax. -/
@@ -259,9 +325,10 @@ def elabSolkeyProblem : CommandElab := fun stx => do
   let f := stx[1].getId
   let N := f.getPrefix
   let some φ ← statement? N f | throwError "#solkey_problem: {f} has no statement"
-  let e := mkAppN (mkConst ``Problem.text) #[mkConst N, toExpr N.getString!,
-    toExpr f.getString!, φ]
-  let s ← liftTermElabM <| unsafe evalExpr String (mkConst ``String) e
+  let s ← liftTermElabM do
+    let C ← unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)
+    let body ← unsafe evalExpr (Fml C []) (← inferType φ) (← Symex.evaluable φ)
+    sourceProblemText (mkConst N) N.getString! f.getString! body
   logInfo s
 
 syntax (name := solkeyScan) "#solkey_scan " ident (&" walk")? : command

@@ -179,6 +179,8 @@ syntax sol_ty &"storage" ident : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr : sol_stmt
 syntax sol_ty &"memory" ident : sol_stmt
 syntax sol_ty &"memory" ident " = " sol_expr : sol_stmt
+/-- A read-only calldata local retains its slice descriptor, unlike memory. -/
+syntax (name := solCalldataLocal) sol_ty &"calldata" ident " = " sol_expr : sol_stmt
 syntax (name := solDelete) "delete" ppSpace sol_expr : sol_stmt
 -- `.push(`, `.push()` and `.pop()` are tokens, so a push on a member or an
 -- entry is spelt with them; one on a name is an identifier `values.push`
@@ -814,7 +816,10 @@ where
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( )) => do
       match funName? f with
       | some g => assignTo l (← `(RawExpr.call $(quote g) []))
-      | none => `(RawStmt.assignPush $(← expandExpr l) $(← pushRecv f))
+      | none =>
+        if let some b ← pushRecv? f then
+          `(RawStmt.assignPush $(← expandExpr l) $b)
+        else assignTo l (← expandExpr.expandCall f #[] callMsg)
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $as:sol_expr,* )) => do
       if let some s ← send? none (← expandExpr l) f as.getElems then return s
       assignTo l (← expandExpr.expandCall f as.getElems callMsg)
@@ -823,7 +828,11 @@ where
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( )) => do
       match funName? f with
       | some g => `(RawStmt.decl $(← expandTy T) $(strLit x) (some (RawExpr.call $(quote g) [])))
-      | none => `(RawStmt.declPush $(← expandTy T) $(strLit x) $(← pushRecv f))
+      | none =>
+        if let some b ← pushRecv? f then
+          `(RawStmt.declPush $(← expandTy T) $(strLit x) $b)
+        else `(RawStmt.decl $(← expandTy T) $(strLit x)
+          (some $(← expandExpr.expandCall f #[] callMsg)))
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
       if let some s ← send? (some (← expandTy T)) (← `(RawExpr.name $(strLit x))) f as.getElems then
         return s
@@ -848,6 +857,9 @@ where
       `(RawStmt.declStorage $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty storage $x:ident) => do
       `(RawStmt.declStorage $(← expandTy T) $(strLit x) none)
+  | `(sol_stmt| $T:sol_ty calldata $x:ident = $e) => do
+      `(RawStmt.declMemory $(← expandTy T) $(strLit x)
+        (some (RawExpr.call "#sliceBind" [$(← expandExpr e)])))
   | `(sol_stmt| $T:sol_ty memory $x:ident = $e) => do
       `(RawStmt.declMemory $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty memory $x:ident) => do
@@ -1039,7 +1051,7 @@ macro_rules
       let body ← `([$(← ss.mapM expandStmt),*])
       -- a slice read as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
       if ss.any (fun s => (s.raw.find? fun s =>
-          [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll].contains s.getKind).isSome) then
+          [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll, ``solCalldataLocal].contains s.getKind).isSome) then
         `($(mkIdent `Solidity.RawStmt.sliceViews) $body)
       else pure body
 

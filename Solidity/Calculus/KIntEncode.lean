@@ -2,7 +2,7 @@ import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.MemHoist
 
 /-!
-# Binders of KeY's `int` read over two words (M7, feature 27)
+# Binders of KeY's `int` read over two words (M7, features 30 and 31)
 
 A binder of KeY's unbounded `int` (`Fml.bind _ _ .kint`) has no position in
 the leaf language (`LFml` binds a `PrimTy`'s values only), and feature 26
@@ -33,10 +33,18 @@ local of KeY's `int` to a term (`SbT.tm`), read in the state whose locals
 are pulled back along it (`State.sbPull`, `Tm.eval_sb`, `Fml.holds_sb`),
 as `Calculus/MemHoist.lean`'s renamings are.
 
-Outside: a binder one of whose comparisons reads it beside an unbounded
-term with another coefficient (a ledger entry, another local of KeY's
-`int`, a product of two symbolic terms), and a remainder past `2^511`
-(`c` would exceed a word).
+Unbounded terms a comparison may cancel are keys (`AKey`: a local of
+KeY's `int`, a ledger entry at a `uint` local or a literal), summed apart
+from the bounded remainder (`ZL.u`, `uval`).  A binder compared with one
+of them at another coefficient (`z == net(a)`, `y > z`) is first read past
+it (feature 31): `∀ int z. A` is `∀ int d. A[z := U + d]` at every state
+(`Fml.holds_shift`), the anchor `U` a key of the binder's context, after
+which the keys cancel (`Fml.kencAtA?`).
+
+Outside: a binder compared with two unbounded terms that no one anchor
+cancels (`∀ int y. y > z → y > 0`: Presburger alternation over `ℤ`), with
+a product of two symbolic terms, or with a remainder past `2^511` (`c`
+would exceed a word).
 -/
 
 namespace Solidity

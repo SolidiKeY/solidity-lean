@@ -29,6 +29,13 @@ existing deployment obligations. Internal functions are helpers rather than
 independent obligations. These are verification obligations over typed states
 and all arguments, not calls at a few concrete inputs.
 
+Every plain imported source obligation additionally assumes the EVM address
+domain `address(this) < 2^160`, including constructors. This is an input
+premise; the native transaction type remains a 256-bit word.
+`--self-address A` (or Lean `solc_scoped_problems N self A`) adds the optional
+equality to a deployment address and rejects `A >= 2^160` before proof
+generation. See [source-inputs.md](source-inputs.md) for the scope and controls.
+
 Source-unit free functions and library functions can be inlined as helpers,
 resolved by solc declaration identity. Extension receivers are the first
 argument, including with named arguments and tuple returns. Independent rows
@@ -93,7 +100,7 @@ The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from
 `scripts/test-solidity.mjs`. It is synchronous. The options are `contract`,
 `function`, `list`, `timeoutMs`, `solkey`, `soljson`, `build`, `batchSize`,
-`onProgress` and `renaming`. A function selector may be a source name (all its
+`onProgress`, `renaming` and `selfAddress`. A function selector may be a source name (all its
 overloads) or its source signature (one overload). Reports retain source types
 before enum, address or value-type lowering.
 

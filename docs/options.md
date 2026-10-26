@@ -138,6 +138,35 @@ as `Proves` takes it. `sol_prove` closes a `Proves` leaf by
 (`Examples/Tactics/CallbackStrategy.lean` pins one: the hand-written
 `withdrawSafe`, rule for rule).
 
+Before expanding more calls, `sol_prove` also checks a newly assumed
+premise and up to eight earlier typed context layers with the existing
+bounded scoped refutation (`Seq.refuteS`), including a prefix before havoc. When
+the complete context proves `false` and its wrapped contradiction contains
+no callback, `ProvesC.closeFalse` closes the branch. Thus an impossible
+`address(this) != address(this)` branch does not expand later self-calls.
+The context is kept intact: in particular, a diamond update that cannot
+land cannot be pruned by simply projecting the condition. Failed checks
+restore tactic state and continue the walk. `sol_derive?` offers the
+fixed `sol_prefix_false 8` replay, with the refutation and both full-context
+guards checked synchronously by the kernel. Set
+`sol.prove.pruneFalse` to `false` to compare proof-search costs; it changes
+no theorem's semantic reading.
+The metaprogram's evaluated Boolean only selects an attempt. The resulting
+`refutePrefix_sound` application and its modal-free and callback-free
+guards are checked by the kernel, and the probe is recorded in the trust
+inventory.
+
+After `plain` has produced an ordinary `Proves` goal, closing mode tries
+one compiled `Seq.prove` stage of at most 128 steps, capped by the callback
+walk's remaining fuel. A successful attempt charges the entire bound;
+its exact ordinary leaves still use the invariant-aware `closeLeaf`.
+Failure restores the original goal before the structural walk continues.
+The replay records `sol_prove (steps := n)` and the selected leaf closers,
+so it repeats no stage search. This route never applies to a `ProvesC`
+goal and never changes the callback reading. The nonclosing `sol_derive`
+walk remains structural. Set `sol.prove.compiledPlain` to `false` to
+compare this optimization with the structural route.
+
 `Proves` was not merged into `ProvesC`, nor given an option index: the
 merge would make every `Proves` soundness proof one against the callback
 reading, and `sol_prove`'s kernel-evaluated walk (`Seq.residue`) would carry

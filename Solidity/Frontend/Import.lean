@@ -222,6 +222,12 @@ private def compileListSegments (owner : Lean.Name) (value : Expr) : TermElabM E
       rebuilt := mkConst name
   return rebuilt
 
+/-- Attach compiler identities after the syntax macro has built the function table. -/
+private def attachSourceDeclarations (model : Contract)
+    (declarations : List (String × SourceFunction)) : Contract :=
+  { model with funs := model.funs.map fun entry =>
+      (entry.1, { entry.2 with sourceDecl := Semantics.lookupBy entry.1 declarations }) }
+
 /-- Define an imported contract such as `TestSuite` without compiling its
 whole function table in one expression. A kernel-checked reflexivity proof
 certifies that segmentation preserves the complete original contract. -/
@@ -598,6 +604,20 @@ def elabSolcImport : CommandElab := fun stx => do
     let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)
     liftTermElabM <| `(let model : Contract := $(⟨ctStx⟩)
       { model with widths := $(quote markers) ++ model.widths })
+  let ctStx ← if c.sourceDecls.isEmpty then pure ctStx else do
+    let metadataName ← liftTermElabM do
+      let name ← mkFreshUserName (N ++ `_sourceDecls)
+      let value : Expr := toExpr c.sourceDecls
+      let valueTy : Expr ← inferType value
+      addAndCompile <| .defnDecl {
+        name
+        levelParams := []
+        type := valueTy
+        value
+        hints := .regular 0
+        safety := .safe }
+      pure name
+    liftTermElabM <| `(attachSourceDeclarations $(⟨ctStx⟩) $(mkIdent metadataName))
   let ctStx ← if provenance.legacyFixture then
       if stx[8].isNone then pure ctStx else
         liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
@@ -607,7 +627,7 @@ def elabSolcImport : CommandElab := fun stx => do
       if provenance.pipeline == some .viaIR then
         liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := EvalOrder.viaIR } : Contract))
       else
-        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := ({} : EvalOrder) } : Contract))
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := Solidity.EvalOrder.mk false false } : Contract))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)

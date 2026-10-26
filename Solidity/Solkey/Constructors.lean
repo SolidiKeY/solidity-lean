@@ -98,7 +98,7 @@ info: 3 functions (1 diamond, 0 box, 0 skip, 1 specified, 1 internal): 3 elabora
 
 /--
 info: \problem {
-    {storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} \<{ constructor()@EtherWallet; }\>(true)
+    (self < 1461501637330902918203684832716283019655932542976) -> {storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} \<{ constructor()@EtherWallet; }\>(true)
 }
 -/
 #guard_msgs in
