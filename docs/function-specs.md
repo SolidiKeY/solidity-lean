@@ -90,6 +90,12 @@ reads `net(a)`.
 `[0, 2^256)`). `sol_close` reads it as a Lean `∀` over the range
 (`CloseS.forall_uint`, `forall_int`), and `grind` instantiates it.
 
+Logical binders reserve `old`, `oldNet`, `result` and names starting with
+`result_`, preserving the identities of snapshots and return values. A primitive
+binder shadows any same-named storage or memory reference: reading that binder
+as a value is valid, but using its `.length`, field or index is a type error.
+These checks also apply behind false guards.
+
 **The obligation is solkey's box** (`spec[C]{f}`; `spec!{f}` for the file's
 `InContract`; `specObligation`):
 

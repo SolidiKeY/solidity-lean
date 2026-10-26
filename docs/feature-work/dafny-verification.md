@@ -404,3 +404,21 @@ The revised six-group tuple suite passes all 18 retained rows: five proofs and
 thirteen explicit pending cases, including the do-while invariant limitation and
 actual underflow. The standalone quantifier hygiene repair and final combined
 source/global gates remain in progress.
+
+## Logical binder scope repair
+
+A separate narrow compiler repair rejects logical binders named `old`, `oldNet`,
+`result` or `result_*`, and gives primitive locals precedence over outer storage
+and memory reference paths. This prevents a same-typed logical binder from
+capturing a function's special return value, and prevents a primitive binder's
+field/index access from silently reading an outer reference. Parameter-name
+policy stays the same. The check deliberately rejects reserved names even in
+vacuous guards.
+
+The focused 84/253-job builds pass. Both new tests pass: 26 distinct source rows
+retain seven kernel-checked proofs, eighteen explicit compiler errors and one
+pending false actual-return claim. Direct compiler patterns check inner and
+outer result positions. Existing finite membership and source return/renaming
+regressions also pass (three tests, 108 seconds). Read-only finder/skeptic review
+corrected one generated test syntax typo and found no remaining production
+blocker. The pending false claim is not reported as a certified refutation.

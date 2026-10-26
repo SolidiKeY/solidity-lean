@@ -73,7 +73,7 @@ jobs:
           curl --fail --location --retry 3 \
             https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js \
             --output "$SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js"
-          node --test --test-concurrency=1 scripts/preconditions.test.mjs scripts/finite-spec-sets.test.mjs scripts/counterexamples.test.mjs scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs
+          node --test --test-concurrency=1 scripts/preconditions.test.mjs scripts/finite-spec-sets.test.mjs scripts/counterexamples.test.mjs scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs scripts/spec-hygiene.test.mjs
           node --test --test-concurrency=1 scripts/test-solidity.test.mjs scripts/aggregates.test.mjs scripts/declarations-metadata.test.mjs
       - name: Install real backend editor test launcher
         run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
