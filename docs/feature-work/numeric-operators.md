@@ -255,18 +255,18 @@ statuses.
 | `exp_neg.sol` | broken | working / working | 25 |
 
 Every rerun used the complete snapshot path with `--filter`, `--batch-size 1`
-and its own `.lake/upstream/group04-final/<basename>` output directory; no
+and its own `.lake/upstream/group04-final-corpus/<basename>` output directory; no
 execution or proof limit was raised. The runner's compiler SHA-256 is
 `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
 The source archive SHA-256 remains
 `9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d`.
 
 Before model SHA-256: `c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`.
-After model SHA-256: `d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7`.
+After model SHA-256: `6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc`.
 
-The eleven final runner invocations took 44.837 seconds in total (3.666–5.026
+The eleven final runner invocations took 35.543 seconds in total (2.980–3.801
 seconds each, including both modes and runner setup). The final source-control
-file checked in 7.017 seconds, with maximum child RSS 827,788 KiB, with no
+file checked in 5.191 seconds, with maximum child RSS 848,136 KiB, with no
 concurrent Lean build. These are measured costs, not a controlled speedup
 comparison. `git log` records `1a7d5b0e` (one callee body elaborated/quoted once)
 and `63ac4b63` (split elaboration); this patch preserves both designs.
@@ -278,5 +278,23 @@ zero frontend reachability), strict automation (491 automatic, 61 with budgets,
 11 refuted, zero pending), and frozen TestSuite audit. Frozen SolKey
 473da8944c sort checking passed (377 taclets, 131 read-bearing annotations).
 The documentation-path checker retains its 13 pre-existing missing references.
-Full-library/TestSuite/corpus validation is recorded separately when complete;
-none of these targeted results upgrades an unfinished broad build to passing.
+Final broad gates passed: `lake build Solidity solkeycheck SolkeyTestSuite SolidityCorpus`
+(692 jobs), then `./run-lean.sh` and the frozen corpus parity check without
+`--update`. Long build logs, including nonfinal repair attempts, are retained
+compressed under `tests/upstream/group04/logs`; their classifications and hashes
+are in the validation record. The full decision example retained its original
+proved/refuted and coverage pins. Its build took 1,228 seconds; the unchanged
+array-decision example took 2,303 seconds. No proof limit was raised.
+
+Corpus parity exposed two genuine improvements: the existing signed-base even
+and odd concrete controls now have kernel proofs. Only their generated Lean
+proofs, verdict records and scoreboard changed. Their pre-existing
+`b = minusTwo` concretization notes remain; this adds no new concretization and
+claims no general corpus-function theorem. The frozen source is untouched.
+Corpus totals are now 72 proved, 35 unsupported and 101 unported outside the
+TestSuite's 552 derived, 11 refuted, one excluded and two skipped obligations.
+
+The implementation is saved locally on the task branch; no pushes or merges
+were performed. All eleven final fixture reports were refreshed after the
+corpus proof generation changed the model digest, retaining the same 224
+observations. `tests/upstream/results` and the pinned archive remain unchanged.

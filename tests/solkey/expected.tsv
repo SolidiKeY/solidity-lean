@@ -582,8 +582,8 @@ solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves thi
 solc	SolcExpressions	exponentiationIsRightAssociative	proved		kernel-checked concrete run
 solc	SolcExpressions	exponentiationZeroBaseZeroExponent	proved		kernel-checked concrete run
 solc	SolcExpressions	exponentiationZeroExponent	proved		kernel-checked concrete run
-solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	Solidity elaboration failed: operator ** does not take int
-solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	Solidity elaboration failed: operator ** does not take int
+solc	SolcExpressions	exponentiationSignedBaseEvenExponent	proved	concretized: solkey proves this for all parameters; ported at b = minusTwo	kernel-checked concrete run
+solc	SolcExpressions	exponentiationSignedBaseOddExponent	proved	concretized: solkey proves this for all parameters; ported at b = minusTwo	kernel-checked concrete run
 solc	SolcStructs	deleteMemberThroughStorageAlias	proved		kernel-checked concrete run
 solc	SolcStructs	deleteStructLeavesNeighbours	proved		kernel-checked concrete run
 solc	SolcStructs	deleteStructResetsArrayLength	proved		kernel-checked concrete run

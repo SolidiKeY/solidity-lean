@@ -15,10 +15,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/exp_cleanup_nonzero_base"
+        ".lake/upstream/group04-final-corpus/exp_cleanup_nonzero_base"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 4.626,
+      "elapsedSeconds": 3.555,
       "before": {
         "report": "tests/upstream/group04/exp_cleanup_nonzero_base-before.json",
         "sha256": "da887ec22f57b0b06cf68e0ab8409592487e8e66ce5d8d5f70da1ac497ef3540",
@@ -81,7 +81,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/exp_cleanup_nonzero_base-after.json",
-        "sha256": "f5c473505da28f4c405daf4586e7dcb751b87dc60088b69f5a0521b816f0b2f0",
+        "sha256": "19f26fe24ca9353f53b8e4094df9a35bc0c2c161bbde6b914e9cd3c7933d6cb8",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -89,7 +89,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -171,10 +171,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_left_larger_type"
+        ".lake/upstream/group04-final-corpus/shift_left_larger_type"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.666,
+      "elapsedSeconds": 3.126,
       "before": {
         "report": "tests/upstream/group04/shift_left_larger_type-before.json",
         "sha256": "a26f869b3c050ece1572952a42178b119aad4461f9c8fa533b60bf316058963a",
@@ -237,7 +237,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_left_larger_type-after.json",
-        "sha256": "01d1e129e2dd546ca31f943f37d8582e6e8212768144ec08c29133992ac9fe03",
+        "sha256": "7d79a4f63f672f01313c51db3d80cad63bdb6d9828ad6f02e957b0c1c292bdfb",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -245,7 +245,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -327,10 +327,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_overflow"
+        ".lake/upstream/group04-final-corpus/shift_overflow"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 4.006,
+      "elapsedSeconds": 3.108,
       "before": {
         "report": "tests/upstream/group04/shift_overflow-before.json",
         "sha256": "3d8b22d02d5d33cb704060911729efeab01a4320e9afbda4424e4630a93a2a26",
@@ -393,7 +393,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_overflow-after.json",
-        "sha256": "caf977b381822671bb9444170613526082f10a1c2989222719c62824d87d7efe",
+        "sha256": "267c0a4bb747d62310f693e9232ea07372e06d8d22c7f120fa9673f851b5eab3",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -401,7 +401,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -539,10 +539,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_literal"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_literal"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 5.026,
+      "elapsedSeconds": 3.801,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_literal-before.json",
         "sha256": "bfc2b0bdad5f2dc2686af39a31564f6670f4d30f2c24eeb1dd604bf9c3bed17c",
@@ -715,7 +715,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_literal-after.json",
-        "sha256": "5e7b712a78cd812bdd80cba6a147429a3b791f7afc127279a68e4187feadfe56",
+        "sha256": "0c061b252a62a97e5c3d3dc2092a9375512061d8c47178c023168adb2782e646",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -723,7 +723,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -959,10 +959,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_assignment"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_lvalue_assignment"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.753,
+      "elapsedSeconds": 3.028,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_assignment-before.json",
         "sha256": "f051c0a616a0212877830080b649d146b50808f59501a1f31594adc853704892",
@@ -1025,7 +1025,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_assignment-after.json",
-        "sha256": "28c354faba51ff7fcd2b0f875aabc07a2f47ca3caa66bbf8a22469de94b233ea",
+        "sha256": "786bc68c0cb19d728aac663296d138161ee832951b300e906d937c68acbfe051",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -1033,7 +1033,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1269,10 +1269,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int16"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_lvalue_int16"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 4.251,
+      "elapsedSeconds": 3.009,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int16-before.json",
         "sha256": "5f9964f2307e68082c35c999d81262aa55a834056c7da5d3bdf2a4b0291634b4",
@@ -1335,7 +1335,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int16-after.json",
-        "sha256": "10d00d2b7c2aad04d89ddf27ee645a4f8e7a3eaaa3604115bad74101e64393e6",
+        "sha256": "6215f2c7e614e08a1de309a35f6b1b429d764216cbaa3363eaef802a18ffed1d",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -1343,7 +1343,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1579,10 +1579,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int32"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_lvalue_int32"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.892,
+      "elapsedSeconds": 3.016,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int32-before.json",
         "sha256": "68f51f74dca2f69c03deae71efd53edb13d8f8486d9f2414973c312bef62310d",
@@ -1645,7 +1645,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int32-after.json",
-        "sha256": "d67e61dbcde0b63eebd0342582a79886b598ad9880f0748e730203c228a387d2",
+        "sha256": "2676757b528ca7d87b39b5eba0bd8928a4c9ef3346dc030c1b0e8d2df3ac2bd3",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -1653,7 +1653,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1889,10 +1889,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int8"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_lvalue_int8"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.708,
+      "elapsedSeconds": 3.076,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int8-before.json",
         "sha256": "a8f84816e2827e288ac74f7a05429d36c960489142e209f309c6a275b1b2a574",
@@ -1955,7 +1955,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue_int8-after.json",
-        "sha256": "8a9f996b48f12cd9b0bd13389e113d094b0dc829953050c1a418e24cacec7fba",
+        "sha256": "146f38c5f4eaa2958de12964b68c009f3f881fdd230fbbcb857e68646e099d26",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -1963,7 +1963,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2199,10 +2199,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue"
+        ".lake/upstream/group04-final-corpus/shift_right_negative_lvalue"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.756,
+      "elapsedSeconds": 2.98,
       "before": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue-before.json",
         "sha256": "e48b9c3001f6d16577e51924f4623e3517c15a7f0814e948d5264ce9daabef78",
@@ -2265,7 +2265,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/shift_right_negative_lvalue-after.json",
-        "sha256": "8829eeeb01895e7924c4f4fcce4890920a26b9b96db128ee0847c7c508692669",
+        "sha256": "01dec1da6262f5f704feb0375d32687845cc8ab50bf1a40e1a4d39bddc9eee85",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -2273,7 +2273,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2509,10 +2509,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/exp_literals_success"
+        ".lake/upstream/group04-final-corpus/exp_literals_success"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 4.441,
+      "elapsedSeconds": 3.713,
       "before": {
         "report": "tests/upstream/group04/exp_literals_success-before.json",
         "sha256": "f97f9046f07840adf7edc19693df68962f68249dc4ede88d735ae4d41ecc681e",
@@ -2605,7 +2605,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/exp_literals_success-after.json",
-        "sha256": "8aa6753fc4bc41aac269f9e62a2d319a1a6f409068fa98db72daae69d7aaeccb",
+        "sha256": "b606de54ec2ae8429e90393385a08289fbda27d4447ef2ef59993dd181601662",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -2613,7 +2613,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2793,10 +2793,10 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group04-final-patch/exp_neg"
+        ".lake/upstream/group04-final-corpus/exp_neg"
       ],
       "exitCode": 0,
-      "elapsedSeconds": 3.712,
+      "elapsedSeconds": 3.131,
       "before": {
         "report": "tests/upstream/group04/exp_neg-before.json",
         "sha256": "99ba0de908437b766495699b87131f8bdb89669a8a35ffb0eb90a2b35caa8b49",
@@ -2859,7 +2859,7 @@
       },
       "after": {
         "report": "tests/upstream/group04/exp_neg-after.json",
-        "sha256": "0e43783bd94435bb5e9f86e3dcfd52c6bc1bb447b99c0d8c8f8fc9c216481b96",
+        "sha256": "7cc9c1b4e6513f05c579d0cbf0b87b4aab47dde5465b26a2cc61e3a348b296df",
         "metadata": {
           "version": 1,
           "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
@@ -2867,7 +2867,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -3292,11 +3292,11 @@
     "assignedExpectedExclusions": 0,
     "assignedAdapterOrResourceBlocks": 0,
     "modelBeforeSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
-    "modelAfterSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+    "modelAfterSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
     "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
     "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
     "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-    "fixtureElapsedSeconds": 44.837
+    "fixtureElapsedSeconds": 35.543
   },
   "sourceControls": {
     "command": [
@@ -3307,9 +3307,9 @@
       "Solidity/Examples/Tactics/SignedNumericImport.lean"
     ],
     "exitCode": 0,
-    "elapsedSeconds": 7.017,
-    "maxRssKb": 827788,
-    "log": "/tmp/group04-controls-final-model.log",
+    "elapsedSeconds": 5.191,
+    "maxRssKb": 848136,
+    "log": "/tmp/group04-controls-post-corpus.log",
     "inputs": [
       {
         "path": "tests/solc/SignedNumeric.sol",
@@ -3328,9 +3328,9 @@
         "sha256": "bdf04dffe185b8a407a2bfa5849bae012ce237a23dd34f291ba936dd314a425e"
       }
     ],
-    "modelSha256AtCheck": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+    "modelSha256AtCheck": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
     "logSha256": "75090c867142265400afbfd62080ae06b15473d3622eb82dad43c15230871995",
-    "retainedLog": "tests/upstream/group04/logs/group04-controls-final-model.log.gz",
+    "retainedLog": "tests/upstream/group04/logs/group04-controls-post-corpus.log.gz",
     "retainedLogSha256": "681ccd26711f7335664ff664ba9b4a37712815856dddf82c4f484ce9db323cd4"
   },
   "proofAxioms": [
@@ -3530,10 +3530,61 @@
           "reference": "test/widget_basic.lean"
         }
       ],
-      "log": "/tmp/group04-doc-paths-patch.log",
+      "log": "/tmp/group04-doc-paths-closure.log",
       "logSha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb",
-      "retainedLog": "tests/upstream/group04/logs/group04-doc-paths-patch.log.gz",
+      "retainedLog": "tests/upstream/group04/logs/group04-doc-paths-closure.log.gz",
       "retainedLogSha256": "caee1166414171ff2a1ee0d0a96e558463034ea445b2b6b10e8c3ba3ab1517d0"
+    },
+    {
+      "name": "all-targets",
+      "command": "lake build Solidity solkeycheck SolkeyTestSuite SolidityCorpus",
+      "exitCode": 0,
+      "log": "/tmp/group04-all-targets-final.log",
+      "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "logSha256": "45a58ad3f82f7eab1325384a21586c2f5e485902df99b827da8cf66f68945ca0",
+      "retainedLog": "tests/upstream/group04/logs/group04-all-targets-final.log.gz",
+      "retainedLogSha256": "753f6831ecdc80a6c13cbdb7c2b1707b337787e071b5592df18606c1e226a944"
+    },
+    {
+      "name": "final-library-testsuite-sort",
+      "command": "./run-lean.sh",
+      "exitCode": 0,
+      "log": "/tmp/group04-final-wrapper-post-corpus.log",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
+      "logSha256": "f1d125b004774b4aff20c2413efbc00177e82da0c2e3540c44fe85801d74cc3e",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-wrapper-post-corpus.log.gz",
+      "retainedLogSha256": "df10ec51d18fd8b61f745b06b08eda6b7c1a5cea6cfa8b0370b5d5244f836f35"
+    },
+    {
+      "name": "frozen-corpus-update",
+      "command": "./scripts/check-corpus.sh --update --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "exitCode": 0,
+      "log": "/tmp/group04-corpus-update.log",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
+      "logSha256": "b09d39b1f1d1ecf1e2ea9ea7d7df3f33f514dd48b8f4b2a06fd5aee2cf9968cc",
+      "retainedLog": "tests/upstream/group04/logs/group04-corpus-update.log.gz",
+      "retainedLogSha256": "57c69429b8888a00f62c540737a89f099a9bc8bc610439d205ce02cf3f1b1af4"
+    },
+    {
+      "name": "frozen-corpus-parity",
+      "command": "./scripts/check-corpus.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "exitCode": 0,
+      "log": "/tmp/group04-corpus-confirm.log",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
+      "logSha256": "b09d39b1f1d1ecf1e2ea9ea7d7df3f33f514dd48b8f4b2a06fd5aee2cf9968cc",
+      "retainedLog": "tests/upstream/group04/logs/group04-corpus-confirm.log.gz",
+      "retainedLogSha256": "57c69429b8888a00f62c540737a89f099a9bc8bc610439d205ce02cf3f1b1af4"
+    },
+    {
+      "name": "corpus-proof-axioms",
+      "command": "lake env lean --tstack=131072 tests/upstream/group04/CorpusAxioms.lean",
+      "exitCode": 0,
+      "log": "/tmp/group04-corpus-axioms-replay.log",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
+      "logSha256": "a5d7f1b3ff77831e69ac351dae08b0dcb0734138f70212e45cc4112452636551",
+      "retainedLog": "tests/upstream/group04/logs/group04-corpus-axioms-replay.log.gz",
+      "retainedLogSha256": "fdf728dee185db6e0b18a6267831395b0efcf6ef36f4e6f95bff2ca14c5f2aa1",
+      "inputSha256": "3e353358663feb1562aff15a540b23d636af72cc11d08691fa0e500cedf45294"
     }
   ],
   "sourceHashScope": "Each fixture sourceSha256 hashes the complete pinned archived fixture bytes, including its settings and expected observations.",
@@ -3600,6 +3651,41 @@
       "retainedLog": "tests/upstream/group04/logs/group04-controls-patch.log.gz",
       "logSha256": "1ad6d1a577b896d77dc771d764ca47c19376d891c6254dcdee2b41c18053e1c0",
       "retainedLogSha256": "a46dae3d0aac0b34a067fa30a6292c804e9d4438126c82fad42b034ce0104558"
+    },
+    {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SignedNumericImport.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 7.017,
+      "maxRssKb": 827788,
+      "log": "/tmp/group04-controls-final-model.log",
+      "inputs": [
+        {
+          "path": "tests/solc/SignedNumeric.sol",
+          "sha256": "0a9509919c38fda16e303d8d605fc655fbf3efd24efc6b55792342191ac98515"
+        },
+        {
+          "path": "tests/solc/SignedNumeric.ast.json",
+          "sha256": "6810df9826ab98ba94c6e4e4880eae323e6379addb3d070908ffa6ec5badde7c"
+        },
+        {
+          "path": "tests/solc/SignedNumericIR.ast.json",
+          "sha256": "80432231216d153b965c6918acf824fa20fc92b45461851575088f69cc486553"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/SignedNumericImport.lean",
+          "sha256": "bdf04dffe185b8a407a2bfa5849bae012ce237a23dd34f291ba936dd314a425e"
+        }
+      ],
+      "modelSha256AtCheck": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "logSha256": "75090c867142265400afbfd62080ae06b15473d3622eb82dad43c15230871995",
+      "retainedLog": "tests/upstream/group04/logs/group04-controls-final-model.log.gz",
+      "retainedLogSha256": "681ccd26711f7335664ff664ba9b4a37712815856dddf82c4f484ce9db323cd4"
     }
   ],
   "reviews": [
@@ -3607,15 +3693,94 @@
       "role": "finder",
       "mode": "read-only",
       "leanWorkers": false,
-      "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
       "confirmedResidualIssues": 0
     },
     {
       "role": "independent skeptic",
       "mode": "read-only",
       "leanWorkers": false,
-      "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
       "confirmedResidualIssues": 0
     }
-  ]
+  ],
+  "nonfinalBuildAttempts": [
+    {
+      "log": "/tmp/group04-final-build.log",
+      "classification": "nonfinal overlapping/evolving-source build; failures not used as final results",
+      "logSha256": "1ecfb97ec78035bf3d06a7a4642f7dc43857af4af396f26df63e6db968c6bd4e",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-build.log.gz",
+      "retainedLogSha256": "b1b9f6879ac860fee80178f14d9fcde0dacd1d48c2df98c9657178a71d790ff4"
+    },
+    {
+      "log": "/tmp/group04-final-build-serial.log",
+      "classification": "repair regressions found: negative-index diagnostic pin and signed-shift decision coverage; both fixed",
+      "logSha256": "978cd1d4aa0fcd9d9e2c636319a470b5a7a20be6e7bd544fa3e364ab185cccef",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-build-serial.log.gz",
+      "retainedLogSha256": "d40632086570001ae5e4918f74e039a4453202d2f099be84bb877ac5e6f75f99"
+    },
+    {
+      "log": "/tmp/group04-final-build-serial2.log",
+      "classification": "interrupted unchanged failing decision check while repairing literal-count coverage",
+      "logSha256": "50673fda3455e971c0c1315f76c3a40305e44236473827b4630c9fee08628861",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-build-serial2.log.gz",
+      "retainedLogSha256": "4794a6b7ea4c27ea07493f8b086074c072a876f8f153d9c51257d84820d66cae"
+    },
+    {
+      "log": "/tmp/group04-final-build-serial3.log",
+      "classification": "interrupted to prioritize exact fixture reruns",
+      "logSha256": "697377b73a7e52075c8d3e34bfbc7e7cdb4086aba955e978a6243edd9c34b0f8",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-build-serial3.log.gz",
+      "retainedLogSha256": "e077f56e1bc15f38f7260a79ffa37a7de2c70e7af0cfe99c12cb1bc0b3b976cf"
+    },
+    {
+      "log": "/tmp/group04-final-build-serial4.log",
+      "classification": "interrupted to replace sequential target scheduling with one combined dependency-aware build",
+      "logSha256": "06b9494d551de05a18fe619db8c1029557f79811a38bb5c8e64c8e854bf1beb7",
+      "retainedLog": "tests/upstream/group04/logs/group04-final-build-serial4.log.gz",
+      "retainedLogSha256": "a50f3034c1027810f8ecae615bbc84ba1c15e1969fa4b86a3d0608ed027f40bd"
+    },
+    {
+      "log": "/tmp/group04-corpus-gate-final.log",
+      "classification": "detected two genuine unsupported-to-proved corpus improvements; regenerated proofs and verdict records without changing inputs",
+      "logSha256": "4def1684f06e1e111ed21373610a0fddcb6ae2fbf43026c0ab22d2245f758f8b",
+      "retainedLog": "tests/upstream/group04/logs/group04-corpus-gate-final.log.gz",
+      "retainedLogSha256": "d3a5cf45633f4020d0392f26d6dacae4c1815e51410fb2d272eed5c928cda8a0"
+    }
+  ],
+  "corpusUpgrades": {
+    "sourceCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "cases": [
+      "exponentiationSignedBaseEvenExponent",
+      "exponentiationSignedBaseOddExponent"
+    ],
+    "before": "unsupported",
+    "after": "kernel-checked concrete proof",
+    "existingConcretization": "b = minusTwo; retained unchanged, not a new parameter generalization",
+    "newConcretizations": 0,
+    "totals": {
+      "derived": 552,
+      "refuted": 11,
+      "excluded": 1,
+      "skip": 2,
+      "proved": 72,
+      "unsupported": 35,
+      "unported": 101
+    }
+  },
+  "implementationCommit": "f2a05987279ea62fc47942f89b7d5bca0542f274",
+  "finalValidation": {
+    "modelSha256": "6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc",
+    "assignedFixtures": 11,
+    "requiredPipelineRuns": 22,
+    "retainedObservations": 224,
+    "libraryBuild": "passed",
+    "frozenTestSuiteBuild": "passed",
+    "frozenSort": "passed",
+    "corpusBuild": "passed",
+    "corpusParityWithoutUpdate": "passed",
+    "documentationPaths": "13 verified pre-existing missing references",
+    "pushes": 0,
+    "merges": 0
+  }
 }
