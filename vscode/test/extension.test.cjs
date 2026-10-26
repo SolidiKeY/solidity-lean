@@ -108,6 +108,29 @@ test('Test Explorer respects exclusions and maps pending without counterexample 
   assert.doesNotMatch(env.runs[1].calls[1][2].message, /counterexample/i);
 });
 
+test('Test Explorer runs each child once when result publication replaces children', async () => {
+  const calls = [];
+  const env = setup(async (args, env) => {
+    calls.push(args.function || 'list');
+    assert.ok(calls.length <= 3, 'a file run must not restart after publication');
+    const rows = [row(env), row(env, {function:'g',signature:'g()'})];
+    return {results:args.function ? rows.filter(row => row.signature === args.function) : rows, errors:[]};
+  });
+  await env.api.verify(env.doc, {listing:true});
+  const file = [...env.controller.items.values()][0];
+  await env.controller.run({include:[file]}, token);
+  assert.deepEqual(calls, ['list','f(uint256)','g()']);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','passed','started','passed','end']);
+});
+
+test('source hashes accept the BOM hidden by the editor without accepting other text', async () => {
+  const env = setup(async (_, env) => ({results:[row(env, {
+    sourceHash:createHash('sha256').update('\uFEFF' + env.doc.text).digest('hex'),
+  })], errors:[]}));
+  await env.api.verify(env.doc);
+  assert.equal(env.api.reports.size, 1);
+});
+
 test('suppresses closed documents and superseded jobs even when backend ignores cancellation', async () => {
   const pending = [];
   const env = setup((args, env) => new Promise(resolve => pending.push({ args, finish: () => resolve({ results: [row(env)], errors: [] }) })));

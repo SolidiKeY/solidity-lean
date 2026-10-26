@@ -862,7 +862,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       pure (← bodyRead).1
     let sourceParams := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
     let sourceTypes := sourceParams.toList.map fun p => sourceType (J.tyStr p)
-    { name := fname, sourceName := nameOfFun f,
+    { name := fname, sourceName := nameOfFun f, sourceId := (J.id? f).getD (-1),
       sourceScope,
       sourceSignature := s!"{nameOfFun f}({",".intercalate sourceTypes})",
       modifierApps := apps.toOption.getD "",

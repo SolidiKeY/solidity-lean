@@ -65,7 +65,13 @@ reading. See [correctness.md](correctness.md) for public `Spec` correctness.
 
 The JSON report is `{results, errors}`. Each result includes the absolute source
 path, contract, function, signature, tag, status, reason, reading and elapsed
-milliseconds.  `reading` is the tails reading the obligation was stated under
+milliseconds. Editor clients also receive the exact solc `sourceId`, the compiled
+source's SHA-256 as `sourceHash`, and a `range` with zero-based UTF-16 positions
+when a source declaration is available. Synthesized constructors use the contract
+range. The runner checks that source bytes still match the compiler fixture
+before associating positions. These fields locate results; they are not part of
+the proof claim. See [the extension](../vscode/README.md) for commands and tests.
+`reading` is the tails reading the obligation was stated under
 (`docs/options.md`, O6): `clean` (`⊢ cleanTail(storage) = true → N.f.problem`)
 for a plain obligation of a contract every function of which exposes nothing
 (`Prog.exposesNone`), so that clean tails are its invariant; `solc` otherwise,

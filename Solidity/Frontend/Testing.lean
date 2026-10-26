@@ -279,6 +279,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let mut results : Array Json := rows.toArray.map fun r => Json.mkObj [
     ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
     ("signature", toJson r.signature),
+    ("sourceId", toJson r.sourceId),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
     ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))]
   IO.FS.writeFile output (Json.arr results).pretty
@@ -297,6 +298,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
     results := results.set! i <| Json.mkObj [
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
+      ("sourceId", toJson r.sourceId),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
       ("elapsedMs", toJson (elapsed - t0))]

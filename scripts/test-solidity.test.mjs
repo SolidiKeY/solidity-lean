@@ -5,6 +5,32 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { runSolidityTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
+import { sourceHash } from './source-locations.mjs';
+
+test('editor reports retain exact overload identities, source hashes and UTF-16 ranges', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-editor-'));
+  const source = join(dir, 'Editor.sol');
+  const prefix = '// 🐦 source positions\r\npragma solidity ^0.8.34;\r\n';
+  const text = prefix + 'contract Editor { /* 🦉 */ function f() public pure { assert(true); } function f(uint x) public pure { assert(x == x); } }\r\n';
+  writeFileSync(source, text);
+  try {
+    const report = runSolidityTests([source], {build:false, list:true});
+    assert.deepEqual(report.errors, []);
+    const rows = report.results.filter(r => r.function === 'f');
+    assert.equal(rows.length, 2);
+    assert.equal(new Set(rows.map(r => r.sourceId)).size, 2);
+    assert.ok(rows.every(r => Number.isSafeInteger(r.sourceId) && r.sourceId >= 0));
+    assert.deepEqual(rows.map(r => r.signature).sort(), ['f()', 'f(uint)']);
+    assert.ok(rows.every(r => r.sourceHash === sourceHash(Buffer.from(text))));
+    const line = text.split('\r\n')[2];
+    for (const row of rows) {
+      assert.equal(row.range.start.line, 2);
+      const offset = row.signature === 'f()' ? line.indexOf('function') : line.lastIndexOf('function');
+      assert.equal(row.range.start.character, offset);
+      assert.match(line.slice(row.range.start.character, row.range.end.character), /^function f\(/);
+    }
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+});
 
 test("timed-out tool jobs terminate their descendant processes", {skip:process.platform === 'win32'}, async () => {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-timeout-'));
@@ -76,6 +102,9 @@ test("Solidity source through solc and kernel-checked proof search", () => {
     onProgress: part => checkpoints.push(part.results.length) });
   assert.deepEqual(report.errors, []);
   assert.ok(checkpoints.length > 3);
+  const compiledHash = sourceHash(readFileSync('tests/solc/Runner.sol'));
+  assert.ok(report.results.every(r => r.sourceHash === compiledHash));
+  assert.ok(report.results.filter(r => r.sourceId >= 0).every(r => r.range));
   assert.equal(checkpoints.at(-1),report.results.length);
   assert.ok(checkpoints.every((n,i) => i === 0 || n >= checkpoints[i-1]));
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
@@ -84,7 +113,8 @@ test("Solidity source through solc and kernel-checked proof search", () => {
   assert.equal(status.staysOpen, "pending");
   assert.equal(status.ignored, "skipped");
   assert.equal(status.helper, "internal");
-  assert.equal(status.assemblyGap, "unsupported");
+  // Modern source admission classifies inline assembly as an explicit exclusion.
+  assert.equal(status.assemblyGap, "excluded");
   assert.equal(status.specified, "proved");
   assert.equal(status.badSpec, "pending");
   assert.equal(status.boxRevert, "proved");

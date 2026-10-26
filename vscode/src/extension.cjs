@@ -83,7 +83,9 @@ function createExtension(vscode, context, backend = runBackend) {
       const report = await backend({ ...config, source: doc.uri.fsPath, listing: options.listing, contract: options.contract, function: options.function, signal: abort.signal });
       if (abort.signal.aborted || active.get(id) !== abort || doc.version !== version || doc.getText() !== text || doc.isClosed) return null;
       if (report.results.some(row => resolve(row.source) !== resolve(doc.uri.fsPath))) throw new Error('Verifier report refers to a different source file');
-      if (report.results.some(row => row.sourceHash !== hash(text))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
+      // VS Code removes an initial UTF-8 BOM from getText(); the compiler hashes bytes.
+      const hashes = new Set([hash(text), hash('\uFEFF' + text)]);
+      if (report.results.some(row => !hashes.has(row.sourceHash))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
       // An individual test updates only its own row, retaining sibling obligations.
       const existing = reports.get(id);
       const merged = options.function && existing ? {
@@ -124,7 +126,8 @@ function createExtension(vscode, context, backend = runBackend) {
       const meta = metadata.get(item.id);
       if (!meta) return;
       if (!meta.row) {
-        for (const [, child] of item.children) await runItem(child);
+        // Publishing each result replaces this collection. Iterate the run's snapshot.
+        for (const [, child] of [...item.children]) await runItem(child);
         return;
       }
       if (token.isCancellationRequested) { run.skipped(item); return; }

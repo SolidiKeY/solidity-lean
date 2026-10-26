@@ -152,9 +152,9 @@ unsupported statuses and malformed entries. It does not download or rehash
 upstream blobs, verify remote line bounds, or establish semantic completeness.
 Repinning upstream requires a new source review.
 
-The inventory and six tests pass offline at this milestone. No Lean source is
-changed; no new core dependency, proof axiom or semantic parity theorem is
-introduced. The repository-wide documentation-path checker reports 13 existing
+The inventory and six tests pass offline at this milestone. The inventory-only
+audit introduces no Lean source change, core dependency, proof axiom or semantic
+parity theorem. The repository-wide documentation-path checker reports 13 existing
 missing references in vendored metadata and an external Mathlib reference;
 none names the new audit files. The focused evidence checker and diff whitespace
 check pass.
@@ -164,3 +164,48 @@ and tests without invoking Lean. Neither found a blocking parity or validation
 issue. The skeptic suggested validating the inspection date; this is now checked,
 including an impossible-date regression. All 18 inspected sources are explicitly
 cited by a feature. The scope remains a family audit, not full Dafny implementation.
+
+## Source verification extension
+
+The subsequent implementation adds [a VS Code extension](../vscode/README.md)
+for this repository. It provides verify/discover/cancel commands, optional
+verification on save, per-signature Test Explorer runs, diagnostics and proof
+status hover. It preserves the backend's proved/pending/import-gap/process-error
+distinctions. It does not add Solidity completion, source ghost syntax,
+counterexample visualizations or Dafny's general language services.
+
+The importer retains solc declaration IDs through `SolcFun`, `ImportRow` and
+the testing JSON. The file runner associates exact function ranges by those IDs,
+converts UTF-8 bytes to UTF-16 positions, and checks the compiler header's source
+hash. This handles overloaded/renamed declarations without name guessing.
+Synthesized constructors point to their contract. The editor rejects obsolete
+document versions and mismatched hashes; BOMs and CR/CRLF/LF positions are
+covered. Backend execution is asynchronous and bounded, and cancellation also
+terminates detached descendant tool processes.
+
+Validation on 2026-10-26:
+
+- 32 offline inventory, source-location, controller and subprocess tests pass.
+- Real solc/Lean integration checks pass for overload/source metadata, the
+  Runner fixture and selection/listing; inline assembly retains its current
+  source-policy verdict `excluded` (an older test expected `unsupported`).
+- The 236-job `Solidity.Frontend.Testing` build passes.
+- A real VSCodium 1.143.17183 extension host passes ten checks: activation,
+  command dispatch, a backend process, Test Explorer items, hover, diagnostics,
+  edit invalidation, actual solc/Lean proof, an actual pending obligation and
+  compiler declaration ranges. This uses Code's extension API; the CI job
+  separately configures Microsoft's VS Code through `@vscode/test-electron`.
+- Packaging produces an installable VSIX; installation in an isolated editor
+  profile succeeds. Core layering, module reachability and both feature
+  inventories pass their offline checks.
+
+The finder and skeptic independently reproduced a file-run loop caused by
+publishing results into the collection being iterated. File runs now snapshot
+their children and a regression requires each function to run once. Their
+position findings led to the BOM/CR fixes. A final launcher review found stale
+caller-supplied success files could produce a false pass; every launch now uses
+a fresh temporary report and only copies checked evidence to the requested
+output. Tests cover both stale rejection and fresh success.
+
+The remaining semantic work above is still open. No semantic parity or new
+verification soundness claim follows from adding this editor interface.

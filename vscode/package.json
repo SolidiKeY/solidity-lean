@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "SolidiKeY",
   "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/SolidiKeY/solidity-lean.git", "directory": "vscode" },
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Programming Languages", "Testing"],
   "main": "./src/extension.cjs",

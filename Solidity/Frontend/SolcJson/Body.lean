@@ -89,6 +89,8 @@ structure SolcFun where
   sourceName : String := ""
   /-- The source parameter types, before enums, aliases or addresses are lowered. -/
   sourceSignature : String := ""
+  /-- solc declaration identity, for source diagnostics; generated constructors have none. -/
+  sourceId : Int := -1
   /-- The scope scan is independent of the implementation inventory. -/
   sourceScope : Source.ScopeScan := default
   /-- Modifier applications in source order, for the existing inliner. -/

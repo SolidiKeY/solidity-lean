@@ -29,6 +29,10 @@ jobs:
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter
         run: node --test scripts/site/export.test.mjs
+      - name: Check Dafny inventory and editor integration
+        run: |
+          node scripts/check-dafny-features.mjs
+          node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
       - name: Check layering
@@ -71,6 +75,22 @@ jobs:
           lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
       - name: Automation gate
         run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log
+
+  editor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install editor test launcher
+        run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
+      - name: Test actual VS Code extension host
+        env:
+          NODE_PATH: /tmp/solidity-lean-editor-host/node_modules
+          SOLIDITY_LEAN_NODE_EXECUTABLE: node
+        run: xvfb-run -a node vscode/test/run-host.cjs
 
   bridge:
     runs-on: ubuntu-latest

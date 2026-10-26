@@ -42,7 +42,26 @@ async function run() {
     edit.insert(document.uri, new vscode.Position(0, 0), '// changed\n');
     await vscode.workspace.applyEdit(edit);
     assert.equal(vscode.languages.getDiagnostics(document.uri).filter(d => d.source === 'Solidity Lean').length, 0, 'edits clear stale verification');
-    if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks: ['activation', 'command', 'backend process', 'Test Explorer items', 'hover', 'diagnostics', 'edit invalidation'] }));
+    const checks = ['activation', 'command', 'backend process', 'Test Explorer items', 'hover', 'diagnostics', 'edit invalidation'];
+    if (process.env.SOLIDITY_LEAN_REAL_BACKEND) {
+      await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
+      await config.update('backendPath', process.env.SOLIDITY_LEAN_REAL_BACKEND, vscode.ConfigurationTarget.Global);
+      const realSource = join(root, 'Real.sol');
+      writeFileSync(realSource, 'pragma solidity ^0.8.34;\ncontract Real { function passes() public pure { assert(true); } function staysOpen() public pure { assert(false); } }\n');
+      const realDocument = await vscode.workspace.openTextDocument(realSource);
+      await vscode.window.showTextDocument(realDocument);
+      const report = await api.verify(realDocument);
+      assert.deepEqual(report.errors, []);
+      assert.equal(report.results.find(row => row.function === 'passes').status, 'proved');
+      assert.equal(report.results.find(row => row.function === 'staysOpen').status, 'pending');
+      assert.ok(report.results.filter(row => row.sourceId >= 0).every(row => row.range && row.sourceHash));
+      const realDiagnostics = vscode.languages.getDiagnostics(realDocument.uri).filter(d => d.source === 'Solidity Lean');
+      assert.equal(realDiagnostics.length, 1);
+      assert.equal(realDiagnostics[0].severity, vscode.DiagnosticSeverity.Warning);
+      assert.equal(realDiagnostics[0].range.start.line, 1);
+      checks.push('real solc + Lean proof', 'real pending obligation', 'real declaration ranges');
+    }
+    if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: false, error: error.stack }));
     throw error;

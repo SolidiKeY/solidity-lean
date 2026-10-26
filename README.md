@@ -54,6 +54,11 @@ theorem per obligation (`lake build SolkeyTestSuite`):
 
 ## Build
 
+The [VS Code extension](vscode/README.md) verifies Solidity files through the same
+runner, with Test Explorer, diagnostics, hover status and cancellation. The
+[Dafny feature audit](docs/dafny-parity.md) records reusable verification features
+and the remaining semantic gaps.
+
 ```sh
 lake build Solidity     # the formalization; elaboration is the test suite
 ./run-lean.sh           # the same, then the solkey cross-check below

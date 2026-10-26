@@ -84,6 +84,8 @@ structure ImportRow where
   /-- The Solidity name; `name` identifies the generated Lean declaration. -/
   sourceName : String := ""
   sourceSignature : String := ""
+  /-- Exact solc declaration identity; -1 for a synthesized declaration. -/
+  sourceId : Int := -1
   /-- Modern fixtures undergo the source scan; legacy fixtures do not. -/
   admissionChecked : Bool := false
   sourceFeatures : List Language.Feature := []
@@ -111,6 +113,7 @@ deriving instance ToExpr for ImportRow
 /-- The row of an imported function. -/
 def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
   { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+    sourceId := f.sourceId,
     sourceFeatures := f.sourceScope.features, sourceDiagnostic := f.sourceScope.diagnostic?,
     tag := f.tag, params := f.params, status, reason, payable := f.payable,
     writingCall := f.writingCall, paramRanges := f.paramRanges, elemRanges := f.elemRanges }

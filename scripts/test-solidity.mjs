@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { sourceHash, sourceLocations } from './source-locations.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ignored = new Set([".git", ".lake", "node_modules"]);
@@ -92,6 +93,12 @@ export function runSolidityTests(paths, options = {}) {
       runTool(process.execPath, args, timeoutMs);
       stage = "discovery";
       const data = readFileSync(fixture);
+      const parsed = JSON.parse(data);
+      const sourceBytes = readFileSync(source);
+      const compiledHash = parsed.header?.sourceSha256;
+      if (compiledHash !== sourceHash(sourceBytes))
+        throw new Error('source changed during compilation; retry verification');
+      const location = sourceLocations(parsed.ast, sourceBytes);
       let hash = 0xcbf29ce484222325n;
       for (const byte of data) hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
       const contracts = JSON.parse(data).ast.nodes.filter(n => n.nodeType === "ContractDefinition")
@@ -120,7 +127,10 @@ solc_scoped_problems ${name} decl${selfClause}
             ...(e.tool ? {tool:e.tool} : {}) }); }
         if (existsSync(output)) {
           try {
-            for (const row of JSON.parse(readFileSync(output, "utf8"))) found.push({ source, contract, ...row });
+            for (const row of JSON.parse(readFileSync(output, "utf8"))) found.push({
+              ...row, source, contract, sourceHash: compiledHash,
+              ...(location(contract, row) ? { range: location(contract, row) } : {}),
+            });
           } catch (e) { errors.push({ source, contract, reason: `invalid result checkpoint: ${e.message}` }); }
         }
           return found;
@@ -159,7 +169,7 @@ function main(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--help") {
-      console.log("usage: node scripts/test-solidity.mjs [--json] [--list] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...");
+      writeFileSync(1, "usage: node scripts/test-solidity.mjs [--json] [--list] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...\n");
       return 0;
     } else if (arg === "--json") options.json = true;
     else if (arg === "--list") options.list = true;
@@ -172,15 +182,17 @@ function main(args) {
     else paths.push(arg);
   }
   const report = runSolidityTests(paths, options);
-  if (options.json) console.log(JSON.stringify(report, null, 2));
+  // The CLI is also an editor subprocess protocol: finish writing the report
+  // before exiting, including when stdout is a pipe with asynchronous writes.
+  if (options.json) writeFileSync(1, JSON.stringify(report, null, 2) + '\n');
   else {
-    for (const r of report.results) console.log(`${r.source}:${r.contract}.${r.function}: ${r.status}${r.reason ? ` (${r.reason})` : ""}`);
-    for (const e of report.errors) console.error(`${e.source}${e.contract ? `:${e.contract}` : ""}: error: ${e.reason}`);
+    for (const r of report.results) writeFileSync(1, `${r.source}:${r.contract}.${r.function}: ${r.status}${r.reason ? ` (${r.reason})` : ""}\n`);
+    for (const e of report.errors) writeFileSync(2, `${e.source}${e.contract ? `:${e.contract}` : ""}: error: ${e.reason}\n`);
   }
   return testsPassed(report, options.list) ? 0 : 1;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { process.exitCode = main(process.argv.slice(2)); }
-  catch (e) { console.error(`test-solidity: ${e.message}`); process.exitCode = 2; }
+  catch (e) { writeFileSync(2, `test-solidity: ${e.message}\n`); process.exitCode = 2; }
 }
