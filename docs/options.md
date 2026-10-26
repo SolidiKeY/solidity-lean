@@ -1,10 +1,10 @@
-# Calculus options (branch `options`)
+# Calculus options
 
 solkey selects calculus variants with KeY options (`\withOptions`, `-O
 category:choice`, `optionsDeclarations.key`): `transferSemantics:
 noCallback | withCallback` is the one about the semantics, and integers are
 KeY's unbounded `int` with no option. Its own `docs/semantics-bugs-fix-ideas.md`
-lists the two gaps this lane closes in Lean: bug 5 (a `try` and a
+lists the two gaps these options close in Lean: bug 5 (a `try` and a
 `call{value}` read as callees that keep the caller's storage) and bug 6
 (no overflow semantics: KeY Java's `intRules` has three: `javaSemantics`,
 `arithmeticSemanticsCheckingOF`, `arithmeticSemanticsIgnoringOF`; O2 and O5
@@ -66,8 +66,8 @@ either flag (`holdsC_transferCb`, `holdsC_sendCb`: a run that does not call
 back is a resumption that changed nothing).
 
 **The value call.** `Stmt.send` carries `full`; the solc import keeps
-`(bool ok, ) = R.call{value: V}("")` as written (it lowered it to
-`bool ok = R.send(V)`, as solkey does), and `sol{ … }` reads and prints it.
+`(bool ok, ) = R.call{value: V}("")` as written (solkey lowers it to
+`bool ok = R.send(V)`), and `sol{ … }` reads and prints it.
 The send rules match either kind: the deterministic run is the same.
 
 **Not done.** solkey's 5D (a `view`/`pure` callee keeps storage): an
@@ -280,8 +280,8 @@ the caller's locals as a block). Their soundness relates the call's callback
 run, its body in its own frame (`ExecS.callBody`), to the inlined block's
 (`ExecS.callNone_inline`, `ExecS.callRets_inline`), by forward callback
 weakening (`Prog.exec_wk`), as the deterministic `Stmt.runSt_callNone` does by
-`Prog.run_wk`. A call that returns one value (`y = f(x)`) or a memory or
-storage one has no rule yet (O3, "Not covered"); a specification's
+`Prog.run_wk`. Calls returning one value, a storage or a memory reference
+are O3's `ProvesC.callVal`, `callStorage`, `callMem`; a specification's
 obligation calls by `.rets`, so `spec[C]{f}` is covered.
 
 **The invariant a specification declares.** `invariant[C]` is `C`'s
@@ -437,9 +437,9 @@ premise.
 
 **Decision.** `scripts/test-solidity.mjs` reports `proved` for a
 kernel-checked statement, and `⊢ N.f.problem` states `Fml.Valid`, bug 5
-included: `tests/solc/open`'s `trySuccessKeepsStorageUnsound` and
-`callKeepsStorageUnsound` were proved, and fail on the EVM, where the callee
-is the contract itself. So `testObligation` (`Frontend/Testing.lean`) states
+included, which would prove `trySuccessKeepsStorageUnsound` and
+`callKeepsStorageUnsound` (`tests/solc/open`), false on the EVM where the
+callee is the contract itself. So `testObligation` (`Frontend/Testing.lean`) states
 the actual obligation, plain or specified, as callback validity whenever
 `Fml.callsBack false` is true (a value that does not reduce counts as true).
 `SolcFun.writingCall` records bare high-level external calls as well as
@@ -457,8 +457,7 @@ over the callback runs (`ProvesC.recContract`, `ProvesC.recContractM`,
 
 **Callee mutability.** The operational `ExtCall` does not yet record static
 call restrictions (O1, 5D). Consequently even a `view` or `pure` external
-call receives the conservative callback reading. Some previously proved
-static-call rows may remain pending until that restriction is represented
+call receives the conservative callback reading. Static-call rows may stay pending until that restriction is represented
 and proved; metadata alone does not justify plain validity.
 
 **Where it lives.** In the runner alone: `N.f.problem` is still one table
@@ -623,31 +622,6 @@ the callee once more per `catch` goal to prove it; a value call in a
 contract with a `receive` carries `receive`'s body and splits on the
 receiver.
 
-**Status.** Done but the items under *Left*.
-
-## Review
-
-One read-only pass after O5, a finder per area, each finding checked
-against the code; fixed on the branch:
-
-* O2/O5: the guards of `x = e`, `x ⊕= e`, the memory assignments and
-  `push() ⊕= e` were asserted target first, where the run evaluates the
-  right side first; a getter's push source was guarded before the getter
-  ran; a binary operator's halting left operand was read after the right
-  one's guards (`Checked.touch`, `haltsFirst`); `checked` inside
-  `unchecked` checked nothing silently (now an error); the docs claimed the
-  guards could not halt and the ordering held exactly.
-* O3/O4: the walk took `transferWithCallbackBox` (a `{havoc}`) for a
-  gas-limited transfer under `noCallback`, before `transferNoCallbackBox`
-  (`transferThenTry`); a `Proves` leaf written `· sorry` under a bullet was
-  not paired with its goal; the `Proves` sub-walk caught no timeout and did
-  not charge its steps to the walk's budget; the uncovered shapes were
-  understated (one-value calls, loops by invariant); the rule map's header
-  counts were stale.
-* Not changed: a call with non-simple arguments under callbacks is inlined
-  without `functionCallArgCapture` first (sound; the walk's rule names
-  differ from `Proves`').
-
 ## O9. Expression evaluation order
 
 `Contract.evalOrder : EvalOrder` selects the schedule used while elaborating
@@ -681,8 +655,5 @@ schedule from Solidity source compiled through IR.
 runs, including nested calls, modular arguments, failure priority, conditional
 evaluation, a calculus proof and an imported contract.
 
-**Review.** A read-only finder/skeptic pass confirmed that an earlier failing
-array read could be postponed past a later narrow-overflow assertion. The
-shared `captureBefore` now saves that read before explicit guards, for binary
-operands and argument lists in either schedule. Four kernel regressions cover
-`checked`, `ignoringOverflow`, IR modular arguments and the legacy direction.
+A failing read is saved before later explicit guards (`captureBefore`),
+for binary operands and argument lists in either schedule.

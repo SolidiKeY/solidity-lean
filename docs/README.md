@@ -1,55 +1,59 @@
 # The documents
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
-the others link to it. The integrated feature foundations and source subsets
-are summarized in [feature-work/integration.md](feature-work/integration.md);
-combined validation is **in progress**. An integrated foundation does not imply
-full ordinary source, interpreter or calculus support.
+the others link to it. Finished work is recorded as what is in force; its
+history is in git.
+
+**Language coverage**
 
 | Document | Holds |
 |---|---|
-| [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
-| [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
-| [feature-work/integration.md](feature-work/integration.md) | Ten-chat shared-checkout recovery, delivered boundaries, review repairs and combined validation in progress. |
-| [feature-work/proof-automation.md](feature-work/proof-automation.md) | Guarded symmetric cancellation, selector projection regressions and pending integration validation. |
-| [feature-work/aggregates.md](feature-work/aggregates.md) | Inline arrays, fixed memory snapshots, local reference tuples, slice effects and validation limits. |
-| [calldata-slice-copies.md](calldata-slice-copies.md) | Fresh primitive slice copies, internal passing/returns, hashes, storage copies and explicit source/type limits. |
-| [feature-work/recursive-types.md](feature-work/recursive-types.md) | Integrated graph-storage/copy foundations and ordinary-value subtree bridge; recursive source/State/calculus support remains missing. |
-| [feature-work/abi-hashes.md](feature-work/abi-hashes.md) | ABI boundary repairs, ERC-7201, computed recovery, reference vectors and remaining typed interfaces. |
-| [feature-work/declarations-metadata.md](feature-work/declarations-metadata.md) | Declaration metadata, primitive public getters/source ABI identities, box safety and concrete runs; external-call diamond automation remains limited. |
-| [feature-work/transient-storage.md](feature-work/transient-storage.md) | Integrated typed transient supplement and lifetime entry/reset; ordinary transient source declarations remain refused. |
-| [feature-work/contract-world.md](feature-work/contract-world.md) | Typed creation/call/library frames and restricted source fragments; no general Solidity world or joint transient/world execution. |
-| [feature-work/source-admission.md](feature-work/source-admission.md) | Compiler provenance, declaration-aware admission, exact literals, raw names and validation boundaries. |
-| [feature-work/calls-exceptions.md](feature-work/calls-exceptions.md) | Eager error operands, failure priority, self-call panic payloads, exact catch transport and validation boundaries. |
-| [latex.md](latex.md) | LeanTeX paper notation, symbol-definition links, checked traces and the Lean LaTeX/JSON export API. |
-| [module-map.md](module-map.md) | One row per module: where things live. |
-| [parallelism.md](parallelism.md) | The core apart from the elaborator, large files split by topic, one soundness file per rule: the layering check, the fan-out tool and the measured costs. |
-| [rule-repair.md](rule-repair.md) | Semantics-first rule repair, lazy reads, rejection gates, proof budgets and soundness integration. |
-| [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, the design decisions, what is still open. |
-| [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, and its update and theory symbols, to Lean names. |
-| [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
-| [assurance.md](assurance.md) | Trust source inventory, headline axiom gate, non-vacuity witnesses and the remaining assurance/automation work. |
-| [correctness.md](correctness.md) | Direct `Spec` correctness, strict equations, proved calculus bridges, callbacks and October audit repairs. |
-| [lifetime.md](lifetime.md) | Constructor-rooted transaction traces, whole-contract safety, possible reachability, invariant induction, payment/rollback and observation limits. |
-| [bridge.md](bridge.md) | Optional Mathlib/CSLib and external EVM word adapters, Loom and Velvet, correctness theorems, build command and exact scope. |
-| [site.md](site.md) | The examples site on GitHub Pages: how it is recorded from Lean's language server, built, deployed, and how to add an example. |
-| [key-equality.md](key-equality.md) | One equation, KeY's `=`: no definedness test, `wt(s)` a predicate, conditions read by the program, how the closers read an equation. |
-| [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
-| [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
-| [complete-verification.md](complete-verification.md) | Declaration certificates, exact reductions, automatic dependent-read compilation, guarded aliases, original-source countermodels and the complete `#verify` fragment. |
-| [solkey-migration.md](solkey-migration.md) | Pinned upstream inputs, migration tooling, evidence and remaining parity work. |
-| [source-inputs.md](source-inputs.md) | EVM input premises of imported source obligations, canonical self addresses and explicit-self rejection. |
-| [solidity-testing.md](solidity-testing.md) | Testing `.sol` files and directories: CLI, JavaScript and Lean APIs, results and limits. |
-| [cli.md](cli.md) | Native `solidity-lean` CLI: verification, discovery, inspection, concrete calls, rule audits, JSON and runtime packaging. |
-| [solidity-upstream-tests.md](solidity-upstream-tests.md) | Complete pinned Solidity test snapshot, working/broken/blocked fixture lists, reference diagnostics and typed runtime replay. |
-| [testsuite-proofs.md](testsuite-proofs.md) | Proving solkey's TestSuite by `⊢`: the decisions, the milestones, the measured costs. |
-| [corpus-parity.md](corpus-parity.md) | The solkey corpus verdicts per contract. Generated by `scripts/solkey-port.mjs`; do not edit. |
-| [solkey-feedback.md](solkey-feedback.md) | Open improvement requests flowing Lean → solkey. |
-| [solc-validation.md](solc-validation.md) | Plan, not built: checking the semantics and the rules against solc. |
-| [intrinsic.md](intrinsic.md) | The intrinsic refactor (branch `intrinsic`): what changed, what stays extrinsic on purpose, the decisions, gates, the removal of the surface syntax (W8, decision 11), and what is left of M6c. |
-| [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics the model leaves open or out of scope, and the chain facts an obligation assumes: the work list. |
-| [options.md](options.md) | Calculus options, callbacks, overflow, clean tails, and legacy/via-IR expression evaluation order. |
-| [automation.md](automation.md) | Towards a deciding closer: the leaves of a type, the expansions (Theory, interpreter, chain links), M4's complete fragment, the size of what a rule emits; M0–M5; M6 the automation gate and what blocks the full theorem. |
-| [loops.md](loops.md) | `while`/`for`/`do … while`/`break`/`continue`: the decisions and the stages; L1–L4 (syntax, semantics, typing, unwinding, the invariant rules) built; L5–L7 planned. |
+| [coverage-plan.md](coverage-plan.md) | The plan for covering the features: steps, one VM each, their order and gates. |
+| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
+| [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
+| [semantic-gaps.md](semantic-gaps.md) | What of Solidity's semantics is still open, and the chain facts an obligation assumes: the work list. |
+| [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why; the remaining deltas. |
+| [solidity-upstream-tests.md](solidity-upstream-tests.md) | The pinned solc test snapshot, its runner and the working/broken/blocked lists. |
+| [solc-validation.md](solc-validation.md) | What is checked against solc, and the checks still to build. |
+| [feature-work/integration.md](feature-work/integration.md) | Index of the per-feature documents in `feature-work/` (source admission, declarations, operators, aggregates, recursive types, ABI and hashes, transient storage, contract world, calls and exceptions, finite dispatch) and their shared decisions. |
+| [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
+| [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
 
-- [Resolved operator aliases](feature-work/numeric-operators.md): declaration-ID lowering, nominal admission and the source validation targets.
+**The calculus and its proofs**
+
+| Document | Holds |
+|---|---|
+| [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, update and theory symbols to Lean names. |
+| [options.md](options.md) | Calculus options: callbacks, overflow, clean tails, evaluation order. |
+| [loops.md](loops.md) | Loops: decisions, the invariant rules, status. |
+| [correctness.md](correctness.md) | Direct `Spec` correctness, the bridges from proofs, and the model choices behind the statements. |
+| [key-equality.md](key-equality.md) | KeY's `=`: no definedness test, `wt(s)` a predicate, how the closers read an equation. |
+| [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
+| [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
+| [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
+| [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
+| [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
+| [intrinsic.md](intrinsic.md) | The intrinsic design: decisions in force, gate G0, what stays extrinsic, open items. |
+| [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, and what is still open. |
+
+**solkey**
+
+| Document | Holds |
+|---|---|
+| [solkey-migration.md](solkey-migration.md) | The pinned solkey, migration tooling, how to re-pin, remaining parity gaps. |
+| [testsuite-proofs.md](testsuite-proofs.md) | Proving solkey's TestSuite by `⊢`: decisions, pipeline, measured costs. |
+| [corpus-parity.md](corpus-parity.md) | The solkey corpus verdicts per contract. Generated by `scripts/solkey-port.mjs`; do not edit. |
+| [solkey-feedback.md](solkey-feedback.md) | Open improvement requests to solkey. |
+
+**Tools and build**
+
+| Document | Holds |
+|---|---|
+| [cli.md](cli.md) | The native `solidity-lean` CLI. |
+| [solidity-testing.md](solidity-testing.md) | Testing `.sol` files: CLI, JavaScript and Lean APIs. |
+| [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
+| [bridge.md](bridge.md) | The optional Bridge package: Mathlib/CSLib, EVMYulLean, Loom and Velvet adapters. |
+| [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
+| [latex.md](latex.md) | LaTeX notation and the checked trace export. |
+| [site.md](site.md) | The examples site on GitHub Pages. |

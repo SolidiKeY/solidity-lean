@@ -69,13 +69,8 @@ It does not add a dependency to Lake or write outputs. It executes both legacy
 and via-IR bytecode and checks source rejections. The fixture records AST
 analysis provenance, not compiler/lowering equivalence.
 
-This continuation is integrated; combined validation is **in progress** and
-tracked in [feature-work/integration.md](feature-work/integration.md). Its worker
-handoff was `patch_ready_unvalidated`: that worker ran independent reference
-checks against temporary files without Lean or shared-checkout writes. Those
-preparation results are separate from the primary's combined Lean, axiom and
-repository gates. Existing view proofs spell their local `calldata` location
-so that their programs remain loop-free.
+View proofs spell their local `calldata` location so that their programs
+remain loop-free.
 
 ## Remaining interfaces
 
@@ -93,3 +88,45 @@ binder: the type-checking alias is private, so a postcondition cannot silently
 observe the whole base as if it were the sliced array. Materialize into a
 named memory local when its value must remain available outside source
 rewriting. The aggregate group and feature catalog remain incomplete.
+
+## Calldata origins and aliases
+
+An ordinary `T calldata v = e` (not an explicit slice) is a read-only alias of
+a known calldata origin, never an unchecked memory alias. This is frontend
+preprocessing only: no core statement and no new simulation theorem.
+
+### Supported
+
+- `RawStmt.sliceViews` takes the known calldata roots (empty for standalone
+  raw programs); `contract!` passes the function's calldata parameter names
+  before parameter expansion drops their locations.
+- An ordinary declaration's initializer must be a stable name/member/index
+  place rooted in a known origin, with pure indices. The alias keeps that
+  origin, so aliases of aliases are read-only too. Shadowing clears origins,
+  and nested scopes restore both the origins and the slice descriptors.
+- A calldata pointer may be rebound to another admitted stable calldata place.
+  A slice captured earlier keeps its original base.
+- Struct and fixed-array aliases of calldata parameters keep their typed
+  memory-alias representation and read behaviour.
+- Explicit slice descriptors keep their native reading (an interpreter
+  example may give a read-only slice a memory-backed array); materializing a
+  slice allocates an independent primitive array
+  (above).
+
+Regressions: `Examples/Tactics/SliceCopies.lean` (transitive aliases, writes
+through array/struct/fixed-array aliases, scope exit, memory bindings
+disguised as calldata, effectful initializers).
+
+### Refused
+
+- Writes through an ordinary alias, in statements and nested expressions.
+  Write-target detection follows assignment results and both branches of
+  reference conditionals, so neither can hide a calldata origin.
+- A memory origin introduced by a bare or nested assignment.
+- Rebinding a virtual slice descriptor.
+- Effectful or conditional initializers (calls, effects, conditional
+  references): an explicit elaboration limit, though some are valid Solidity.
+
+`calldataCheck` still checks copies, return bindings and calls to memory
+parameters. Its memory-return alias pruning keeps the recursive
+memory-argument and nested-assignment checks conservative.

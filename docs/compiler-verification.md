@@ -14,361 +14,86 @@ the memory fragment for primitive arrays, primitive struct fields, and
 primitive-member struct construction and copies from storage roots. It returns code together with a fragment
 certificate; `Compiler.Compilation.correct` (`Main.compiler_checked`) proves
 their common source/machine agreement. The selected path determines its
-explicit input and output state relation. The original `inFragP` and
-`compile_correct` continue to describe the core path.
+explicit input and output state relation; `inFragP` and `compile_correct`
+describe the core path.
 
 ## Memory operations
 
-The memory path reads and writes dynamic arrays of primitive values through
-typed pointer locals, reads their lengths, declares primitive locals with
-initializers or defaults, and declares/rebinds aliases. Array reads compose
-in indices and RHS values, including `a[a[0]]` and writes whose index or RHS
-reads another array. Checked binary/unary operators, short-circuit Boolean
-operators and conditional expressions recursively compile memory operands.
-Primitive storage writes and `require`/`revert` statements compose with these
-operations while preserving the heap and pointer relation. Declarations
-`T[] memory xs = new T[](n)` allocate primitive arrays, with a simple length
-expression (the source elaborator captures effects before it). Allocating
-rebinding `xs = new T[](n)` uses the same allocator and changes only that
-local's reference; older aliases retain their previous object and address.
+`Compiler.compile` selects one compiler for the whole program: the core path
+(no memory) or the memory path. The core path's output relation is `Sim`
+only; using it as a prefix to memory compilation needs separate preservation
+evidence.
 
-Primitive struct fields also read and write through typed local pointers.
-Their values compose with array reads and checked operators in the same
-value compiler. Alias declarations and rebinding copy the actual typed
-reference and runtime base, including struct aliases. Each field occupies
-one word in member order, with no array header; reference-valued members
-reserve cells. Checked pointer paths follow those words through existing
-structs, supporting nested primitive-field and primitive-array reads/lengths,
-and alias declarations/rebinding to the referenced objects. Primitive fields
-and array elements also support direct writes, deletion, numeric compound
-updates and standalone bumps through such paths. Reference-valued field
-assignment redirects that member to an existing typed child reference,
-preserving older aliases and child objects. Captured bumps retain the typed syntax's simple
-receiver requirement; the elaborator first captures a complex receiver into
-an alias.
-Default declarations of structs with only primitive members also allocate.
-The ordinary elaborator lowers positional/named literals into a default
-declaration and field writes, so constructor initializers and allocating
-rebinding through such literals use these same checked clauses.
+**What the memory path accepts.** Dynamic arrays of primitive values and
+structs whose members are primitive (or reference-valued, reserved as one
+cell each), through typed pointer locals: element and field reads and
+writes, lengths, array reads composed in indices and RHS values (`a[a[0]]`),
+checked operators, short-circuit and conditional expressions over memory
+operands, primitive storage writes, `require`/`revert`, blocks and
+statement-level `if`. Allocation: `new T[](n)` with a simple length (the
+elaborator captures effects first), a declaration without initializer (the
+same as `new T[](0)`), default and literal construction of primitive-member
+structs (the elaborator lowers literals to a default declaration and field
+writes), and allocating rebinding. Older aliases keep their objects. `delete`
+of an element, a field, a whole array local (a fresh empty array) or a whole
+struct local (a fresh default object). Numeric `+=` `-=` `*=` `/=` `%=` and
+standalone or captured `++`/`−−` on elements, fields and locals (the result
+word stays on the stack during the checked bump, so `i = xs[i]++` and
+`i = i++` are right). Nested paths through reference-valued fields
+(`Evm/MemoryPaths.lean`) for reads, aliases and primitive writes;
+reference-field assignment redirects a member to an existing child
+(`Evm/MemoryRefWrite.lean`); deleting a reference member allocates a fresh
+empty array or primitive-member struct (`Evm/MemoryRefDelete.lean`); copies
+of a primitive-member struct from a storage root (`Record memory fresh =
+stored;`, `Evm/MemoryStructCopyCode.lean`).
 
-`delete xs[i]` writes the element's typed default through the same checked
-index code. `delete r.f` writes a primitive field's typed default through its
-runtime struct pointer, preserving aliases and independent fields/objects.
-`delete xs` instead rebinds that local to a fresh empty array,
-consuming one header cell even when it was already empty. Older aliases
-retain their object, including earlier writes and element deletions. The
-compiler reuses the default-write and allocating-rebind simulations; its
-reached-allocation cost includes these fresh empty headers.
+**The representation.** `Memory.StateRepr` extends the core simulation with
+an identity-to-base map, disjoint bounded array intervals (length cell then
+elements), separated headerless struct intervals (one word per member in
+order, `StructHeapRepr`, `StructArraySeparated`), initialized pointer locals,
+reference-member words (`RefFieldsRepr`) and a reserved frame limit
+(`frameNeedProg`: the largest context anywhere in the program). Arrays and
+structs lie above every reserved local cell. Reads and writes revert on the
+same out-of-bounds accesses as the typed run. The machine stays
+word-addressed: this is no bytecode or gas equivalence claim.
 
-Numeric `+=`, `-=`, `*=`, `/=` and `%=` apply to primitive-array elements,
-numeric struct fields and primitive locals, including RHS values read from memory. Their fragment
-certificates reuse the checked binary value and ordinary write/assignment
-certificates. The source equalities account for the different orders of pure
-reads: each evaluator either returns its value or reverts, so no other halt
-can be hidden by this reordering. Range and zero-divisor checks remain those
-of the existing binary compiler.
+**The allocator.** A bump allocator with its cursor in cell zero and zeroed
+free memory (`Evm/MemoryAlloc.lean`). The array-only allocator cannot be
+reused once structs exist: a zero-valued struct can sit in the "unused" zero
+tail (`legacy_write_breaks_allocator` is the counterexample), so
+`StructAllocatorRepr` requires every live struct interval to end before the
+cursor. `Memory.GrowingResult` threads the extended map through the program
+(`BaseExtends`); `GrowsAllocator` records the exact cursor advance. A struct
+reserves `max 1 memberCount` cells, so every reached allocation costs
+something. **Capacity is a theorem premise** (`AllocationInput`: an inhabited
+allocator, frame base `0 < b`, room for the cost the source run reaches,
+`cursor + size + 1 < 2^256`); the generated code does no runtime capacity
+check. The cost follows successful source prefixes only: an earlier revert
+needs no capacity for an unreachable allocation, and without allocation the
+premise is vacuous. solc can panic on an allocation size the typed run
+permits, which is why this is evidence and not a check.
 
-`Memory.StateRepr` extends the core simulation with an identity-to-base map,
-disjoint bounded array intervals (length cell then elements), separated struct
-intervals, initialized pointer locals, reference-member words and a reserved
-frame limit. `RefFieldsRepr` maps every such word to its actual typed child
-identity under the same address map. Every memory
-local on entry must have a represented typed pointer. Arrays and structs lie
-above every reserved local cell and outside each other's regions. A primitive-array
-or struct-field write preserves the other objects and all
-local cells; a local assignment/declaration preserves the heap. Every
-accepted statement retains its outer locals; blocks and branches pop their
-temporary locals while keeping heap objects and updates to older locals.
-The explicit `frameNeedProg` bound reserves the largest context used anywhere
-in the program, including either branch, even when the final context is smaller.
-Reads and writes
-revert on the same out-of-bounds accesses as the typed interpreter. The
-machine remains word-addressed; this is not a bytecode/gas equivalence claim.
+**Evaluation order.** Compound updates read their operands in a different
+order on the two sides; each evaluator either returns or reverts, so no
+other halt can be hidden by the reordering. Reference RHS values are
+evaluated before the parent path; a deletion resolves its parent before
+allocating.
 
-`Solidity/Evm/MemoryAlloc.lean` supplies the target allocation foundation:
-a checked bump sequence using the existing instructions, a cursor in cell
-zero, zeroed unused memory, and an identity-map extension for an actual
-fresh typed primitive array. The representation is preserved across repeated
-allocations and intervening writes, including old aliases and disjoint arrays.
-Capacity is explicit: `cursor + size + 1 < 2^256` keeps the next cursor a word.
-`Solidity/Evm/MemoryAllocExamples.lean` witnesses the assumptions, writes a nonzero value,
-allocates again, and checks the old alias, reserved cell and empty-array bounds.
-The public compiler rejects allocating declarations and rebinding at `b = 0`, reserving
-cell zero from locals. Programs without allocations retain their earlier
-frame-base choices.
+**Out of the memory path**: reference-element arrays, construction of structs
+with reference members, other reference-member default layouts, copies other
+than the primitive-member storage-root clause (including memory back to
+storage and runtime-length objects, which need iteration), loops, `assert`,
+calls, payments, and compound storage writes in a mixed memory program.
 
-`Solidity/Evm/MemoryAllocSource.lean` connects this allocator to the actual
-scoped `new T[](n)` declaration run for primitive elements. Its local
-simulation evaluates the existing simple length expression, allocates the
-fresh typed object, extends the address map, and binds the actual pointer.
-Both `StateRepr` and the combined `StructAllocatorRepr` hold afterward. The explicit premises
-require `0 < b`, room for the new local and the strict cursor-capacity bound.
-`Solidity/Evm/MemoryAllocSourceExamples.lean` supplies a joint inhabited
-source/machine witness, with a local length and consecutive int/empty-bool
-allocations. It also checks public compilation across alias declaration, a
-nonzero write, a length-local assignment and another allocation: the later
-array has the updated length, while the old alias retains its written value.
-The allocating-rebinding simulation similarly proves the actual source run,
-new pointer store and retained old pointers. Its public fixture rebinds twice,
-keeping both the old aliased object and an intermediate object that no longer
-has a local reference; source and target checks retain their distinct values.
-An ordinary `sol{…}` acceptance regression also covers the elaborator's
-declaration, alias, write, allocating rebinding and read-guard path.
-
-Blocks and statement-level `if` also compile through this path. A branch's
-condition uses the checked value compiler, including memory reads and their
-reversion. Each branch drops its temporary locals, and the output fragment
-meets the retained core alias flags. Allocations survive scope exit, including
-objects referenced by an outer local. Branch costs include only the selected
-body; a failed condition contributes no body allocation cost.
-
-`Memory.GrowingResult` threads an extended map through the entire program,
-preserving each input reference's address (`BaseExtends`). `GrowsAllocator`
-records the exact cursor advance and preserves the separated heap and zeroed
-free tail whenever a combined struct/array allocator was supplied. The existing statement results
-now preserve an available allocator through local, heap and storage changes.
-The compiler's `AllocationInput` requires an inhabited allocator, `0 < b`
-and sufficient space when a source execution reaches allocation. Its cost
-follows successful source prefixes, counts array headers/elements and struct
-member/padding reservations (including empty arrays)
-and omits the suffix after an error. A prior revert therefore requires no
-capacity for an unreachable allocation. Cost calculation stops interpreting
-once the suffix contains no further allocation; rejecting an oversized last
-request does not construct its source heap. Capacity is a theorem premise; the
-generated code does not perform a runtime capacity check. Without allocation,
-the premise reduces to zero cost and does not require an allocator.
-
-`Compiler.compile` selects one compiler for the entire program. The memory
-path currently refuses reference-element array access/construction,
-construction of structs with reference members, other reference-member
-default layouts, copies outside the primitive-member storage-root clause,
-loops, `assert`, calls and payments. Deletion is supported for primitive-array
-elements, primitive fields and whole primitive-array/primitive-member struct locals. The core path's output relation is `Sim` only;
-using it as a prefix to memory compilation needs separate preservation
-evidence. `Solidity/Evm/MemoryCompileExamples.lean` checks populated source aliases,
-distinct objects, both dispatch paths, declarations/rebinding, nested reads,
-composed writes, frame capacity and exact RHS/index-read reversion.
-`Solidity/Evm/MemoryExprExamples.lean` checks arithmetic over array reads,
-short-circuit and conditional skips of invalid reads, signed negation, checked
-underflow/overflow/division failure, true/false guards and a memory-to-storage
-write followed by a storage-to-memory write. These run both actual source
-programs and code returned by the public compiler.
-Compound regressions cover all five operators, a local index, shared aliases,
-an independent array, failed operands and unsigned range/divisor failures.
-`Solidity/Evm/MemoryAllocSourceExamples.lean` also checks deletion through
-computed indices, old aliases after repeated local deletion, signed/Boolean
-defaults, empty/nonempty bounds failures, and a failed index that skips later
-allocations. Each path has an inhabited public-compiler simulation input.
-Signed surface compound updates also test truncating division, negative
-remainders, overflow and the minimum-int division edge. Standalone prefix/postfix
-increments and decrements reuse the checked addition/subtraction-by-one
-certificates for array elements and primitive locals. Tests retain aliases,
-computed indices, signed values, range failures and reached allocation capacity.
-Captured prefix/postfix results also compile: the result word stays on the
-stack while the checked bump runs, then goes into the destination local. This
-keeps the original index for `i = xs[i]++` and handles `i = i++` correctly.
-Hoisted effects in a larger expression compose in source evaluation order.
-Compound storage writes in a mixed memory program remain outside this path.
-
-### Struct fields and shared ownership (M20–M30)
-
-`Solidity/Evm/MemoryStruct.lean` proves local read/write simulations over the
-actual typed struct heap. Each member occupies one word, including reserved
-reference-member cells; there is no dynamic-array length header. Primitive
-members use their own Solidity types, and a bound on the whole interval
-prevents address wrap. `StructHeapRepr` uses one base per object identity,
-keeps distinct structs apart and reserves the local frame. `StructArraySeparated`
-and the framing theorems in `Solidity/Evm/MemoryStructHeap.lean` preserve
-structs across array writes and arrays across struct writes.
-
-The array-only allocator cannot safely be reused for these writes. A
-zero-valued struct can satisfy `StructRepr` in its purported unused zero tail;
-`legacy_allocator`, `legacy_struct_repr` and
-`legacy_write_breaks_allocator` give a concrete counterexample.
-`Solidity/Evm/MemoryStructAlloc.lean` therefore introduces
-`StructAllocatorRepr`: all live struct intervals end before the cursor,
-alongside the existing array ownership. Its local, struct and array writes
-preserve the cursor, zero tail and both represented layouts. The witnesses
-include two populated structs, an independent array, a reserved local,
-Boolean and unsigned fields, a negative signed field and a rejected wrapping
-base. They establish that the new premises are inhabited.
-
-`Solidity/Evm/MemoryStructGrow.lean` extends this invariant through both typed
-primitive-array allocation and headerless struct allocation (M21). Old object
-identities keep their bases and fields, and the fresh interval is separated
-from every older array and struct. Struct allocation advances the cursor by
-the member count, using the existing zero tail for primitive defaults. Its
-capacity premise also leaves the next cursor representable without wrapping
-to the reserved cursor cell. Reference member cells are reserved; their
-pointer values and recursive source construction remain outside this layer.
-Mixed witnesses allocate an array, then allocate and write a struct. Separate
-continuations reuse an old array reference and allocate an empty array while
-retaining all older data.
-
-M22 connects the field instructions to the actual typed statement run in
-`Solidity/Evm/MemoryStructSource.lean`. `MemoryCompile` and the public checked
-entry now accept primitive field reads/writes, struct alias declarations and
-rebinding. The existing array allocations, scopes, local/storage writes and
-expression clauses preserve the stronger shared state relation. Allocating
-programs require ownership of all live struct intervals too; the old array-only
-allocator is retained as a lower-level relation, with an explicit bridge for
-heaps containing no structs.
-
-The public mixed witness starts with two aliases, an independent populated
-struct and an array. It declares and rebinds a scoped struct alias, combines
-field/array reads in arithmetic, writes both layouts, retains the changed heap
-after scope exit and allocates a new array. Source and target observations
-pin the distinct fields, array contents, result, stack, cursor and reserved
-local cells. A failed field RHS divides by zero and reverts on both sides.
-The large computed compiler result is marked irreducible for elaboration;
-kernel checks still unfold it, while opening the input no longer reruns the
-compiler at every unification step.
-
-M23 proves that the actual default-copy fold for a struct with only primitive
-members creates exactly one typed heap object. `Solidity/Evm/MemoryStructDefault.lean`
-connects its declaration, grown local pointers and allocator to headerless
-target allocation. Source allocations reserve `max 1 memberCount` cells:
-ordinary nonempty structs use their member count, while zero-field layouts
-admitted only by the raw model reserve a padding cell. This keeps every
-reached allocation's cost positive and its allocator premise mandatory.
-
-`Solidity/Evm/MemoryStructDefaultExamples.lean` checks ordinary Solidity
-positional/named constructors, signed fields, aliases, array allocation and
-allocating rebinding to a new literal. The typed run and target retain the
-old aliased object, the other struct, the signed words and the array's data.
-A failed constructor field RHS charges the object already allocated by its
-elaborated prefix; an earlier revert charges no later constructor. Capacity
-and frame bounds remain theorem premises, and allocation at frame base zero
-is refused.
-
-M24 extends the same field-write certificate to primitive field deletion,
-numeric compound updates and standalone/captured prefix/postfix bumps. The
-source equalities retain the full typed result, including failure; target
-arithmetic and stack capture reuse their existing checked implementations.
-The ordinary source fixture checks all five compound operators at unsigned
-and signed fields, all four unsigned standalone/captured bump forms, signed
-captures, nondefault deletion, aliases, a distinct struct and an array. Seven
-inhabited failure programs cover unsigned/signed range edges, zero division/
-modulo and signed minimum divided by minus one. This field-update clause
-does not add reference-member construction or whole-struct copies.
-
-M25 connects whole-local struct deletion to the interpreter's fresh default
-object and compiles its allocation plus destination pointer store. The new
-object has the same primitive-member restriction and positive reservation
-cost as a declaration; older aliases retain the previous object. The public
-fixture checks repeated deletion, retains earlier aliases, scoped
-and conditional deletion, an independent struct and array, exact twenty-cell
-growth, source identities and target contents. An earlier revert omits the
-unreached deletion's cost, and insufficient capacity and frame base zero
-are rejected. Capacity remains an input premise, without a generated runtime
-capacity check.
-
-M26 accepts primitive-array declarations without an initializer. The full
-source result is definitionally the same as `new T[](0)`, so the compiler
-reuses its allocation certificate and reserves one header cell. A source
-fixture covers `uint[]`, `int[]` and `bool[]` defaults, retained aliases,
-allocating rebinding/deletion, a populated struct and scoped/selected-branch
-operations. Source/target observations and a reached fourteen-cell cost are
-checked with inhabited public inputs. An earlier revert gives zero reached
-cost and needs no allocator, even with a zero cursor. Reference-element
-arrays and fixed-array defaults remain outside this clause.
-
-M27 adds `Solidity/Evm/MemoryRefs.lean` and `Solidity/Evm/MemoryPaths.lean`.
-The former tracks typed child pointer words and preserves them across every
-supported state operation and primitive allocation. The latter follows
-initialized locals and reference-valued struct fields without losing endpoint
-types. Its certificates support nested primitive-field reads, primitive-array
-reads/lengths and aliases to existing child objects. The public compiler keeps
-its existing direct-local fast paths and adds these checked fallbacks.
-
-`Solidity/Evm/MemoryPathExamples.lean` supplies a populated typed `Prog`
-fixture: wrapper, holder, leaf and array with actual pointer words, separated
-intervals and allocator ownership. Alias writes update the child objects;
-scoped primitive writes and later array/primitive-struct allocations preserve
-the pointer relationships. Named observations pin source identities, target
-contents, reserved cells and four-cell cursor growth. A wrong pointer word is
-refuted, and a nested out-of-bounds read has inhabited public input and exact
-source/target reversion. These are typed-program regressions; reference-bearing
-source construction and reference-element paths remain outside M27; M28
-adds direct primitive writes through its field paths. The pointer compiler recurses structurally over a
-variable full endpoint type, so acceptance reduces in the kernel as well as
-at runtime; no native reduction is trusted.
-
-M28 compiles assignments, primitive deletion, all five numeric compound
-operators and standalone prefix/postfix increments/decrements directly through
-these paths. New write lemmas retain the complete source result and emit the
-RHS before receiver/index evaluation, reusing the checked field/array writes
-and allocator preservation. The existing update/bump source equalities supply
-the other clauses. Captured direct nested bumps are not new typed statements:
-`Stmt.assignIncDec` requires a simple receiver, supplied by the elaborator's
-alias capture.
-
-The typed `PathExamples.Direct` fixture checks all five compound operators
-and all four standalone bump forms at a nested unsigned field and array
-element, nondefault field/element deletion, retained pointer words and a later
-array allocation. Named source/target observations and inhabited public
-agreement pin two-cell growth. Three accepted failure programs cover a nested
-out-of-bounds write, unsigned maximum increment and zero-divisor RHS. M28
-does not add reference-member assignment/deletion; M29 and M30 extend those
-cases. Recursive construction and reference-element array paths remain
-unsupported.
-
-M29 adds `Solidity/Evm/MemoryRefWrite.lean` and compiles reference-valued
-struct-field assignment. The emitted code evaluates the reference RHS before
-the parent path and stores the child's existing runtime base in the member
-cell. Its source theorem updates the actual typed child reference; it neither
-copies nor allocates an object. Primitive values, other pointer words, mixed
-ownership, frame cells, stack and an available allocator are preserved.
-
-The typed `PathExamples.ReferenceWrite` fixture redirects a holder's struct
-and array members to fresh populated children, modifies them through those
-updated paths, self-assigns a nested pointer, and restores its earlier links.
-Earlier aliases and the fresh children retain distinct values. A later
-allocation checks continued ownership; named public input/agreement and
-source/target observations pin child identities, pointer words and six-cell
-growth. M29 itself covers assignment; M30 adds selected reference-member
-deletion. M31 below adds primitive-member storage-root copies. Recursive
-reference-bearing construction and reference-element array paths remain
-unsupported.
-
-M30 adds `Solidity/Evm/MemoryRefDelete.lean`. Deleting a reference-valued
-struct member allocates a fresh empty primitive array or a default struct
-whose members are all primitive. The source resolves its parent before
-allocation, then weakens that reference into the grown heap and installs the
-fresh child. The target retains the parent pointer on the stack across
-allocation, swaps the two pointers and writes the member. Older aliases
-retain their objects; the strengthened heap relation and exact cursor growth
-hold afterward. Other default child layouts remain unsupported.
-
-The checked allocation cost charges only a successfully resolved parent:
-one array header or the struct's positive member/padding reservation. The
-public entry still requires a nonzero frame base and sufficient reached
-capacity. Typed regressions cover repeated/scoped struct and array member
-deletion, retained older and earlier-fresh aliases, an old-alias write and a
-later array allocation. Named public input/agreement and source/target
-observations pin fresh identities, defaults, pointer words and eleven-cell
-growth. Insufficient capacity is refuted. An unset parent has zero cost and
-reverts, and its public input is refuted; a prior revert has valid public
-agreement with zero cost and an unusable zero cursor.
-
-M31 adds checked storage-root copies of primitive-member structs:
-`Record memory fresh = stored;` and allocating rebinding `fresh = stored;`.
-The source creates one independent object with the stored values at their
-actual types. `Solidity/Evm/MemoryStructCopyCode.lean` checks each member
-lookup and load, loads all values before allocation, then emits stores that
-retain the fresh pointer and the caller's stack. The populated reservation
-preserves old objects, typed reference words, separated intervals, reserved
-frame cells and the zero tail beyond its exact new cursor. Empty raw-model
-layouts still reserve their one padding cell.
-
-The ordinary Solidity fixture proves inhabited public input/agreement and
-checks populated unsigned, Boolean and signed copies, retained old aliases,
-independent changes, allocating rebinding, scoped copying, deletion and a
-later primitive array allocation. Named source/target observations pin twenty
-cells of growth and storage independence. Insufficient capacity is refuted;
-a prior revert has zero copy cost and valid input at a zero allocator cursor.
-This clause does not copy other storage paths, reference-bearing objects or
-runtime-length arrays, or copy memory back into storage.
+**Regressions** (each runs the actual source program and the public
+compiler's code, with an inhabited public input):
+`Evm/MemoryCompileExamples.lean`, `Evm/MemoryExprExamples.lean`,
+`Evm/MemoryAllocExamples.lean`, `Evm/MemoryAllocSourceExamples.lean`,
+`Evm/MemoryStructDefaultExamples.lean`, `Evm/MemoryPathExamples.lean`. The
+large computed compiler results there are marked irreducible for
+elaboration; kernel checks still unfold them, and the pointer compiler
+recurses structurally so acceptance reduces in the kernel (no native
+reduction is trusted).
 
 ## What is proved
 
@@ -560,7 +285,7 @@ Out, and why:
 
 | Construct | Why |
 | --- | --- |
-| memory on the core path | The checked entry also selects the separate memory certificate/relation, including primitive arrays, primitive struct fields/construction, reference-field paths and primitive-member storage-root copies as described above. The original core predicate still excludes memory. Unbounded runtime allocation needs explicit reached-capacity evidence: solc can panic on allocation size while the typed interpreter permits any representable length. Copies of runtime-length dynamic objects require iteration, which the forward-only machine does not yet support. |
+| memory on the core path | The checked entry selects the memory path instead (above). |
 | loops whose body pushes, pays or shrinks | A loop is one structured instruction, `LOOP cond body` (`Instr.loop`, `loopRun`: its turns, a fault where none ends it; an assembler writes the `JUMPDEST` and the `JUMP` back), simulated turn by turn (`loop_sim`, `TurnRel`, by induction on the turns). Its body may not push (the bound `L + Prog.pushes P ≤ 2^64` counts each push once), pay (a refused payment stops the machine while the typed run goes on, and the run's later turns are not related), or shrink (the fragile aliases a turn forgets must be forgotten before every turn). |
 | storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length; the machine has no loops. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
@@ -581,4 +306,4 @@ they do, so the proof needs no argument about it.
 `lake build Solidity.Evm.Interpreter` builds the modules. `Evm/Examples.lean`
 is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
 raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
-per family, held to `maxHeartbeats 11000` (10000 until O8).
+per family, held to `maxHeartbeats 11000`.

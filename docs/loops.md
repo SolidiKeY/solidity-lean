@@ -1,29 +1,13 @@
 # Loops
 
-`while`, `for`, `do … while`, `break`, `continue`: four decisions and the
-stages that implement them. L1 to L4 are built (the
-syntax, the lowering, the semantics, the typing, unwinding and the
-invariant rules; `Examples/Tactics/Loops.lean`): an unannotated loop is unwound
-within the proof search budget (`Taclet.whileUnwind`). An explicit
+`while`, `for`, `do … while`, `break`, `continue`: four decisions and their
+status (`Examples/Tactics/Loops.lean`). An unannotated loop is unwound
+within the proof search budget (`Taclet.whileUnwind`); an explicit
 `/// @custom:key unwind k` clause limits it to that bound
 (`LeanTaclet.loopExit`), or it is proved by its invariant
-(`Taclet.whileInvariantBox`, `whileInvariantDiamond`).
-Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
-"One rule per statement" and "Conditions" are the decisions this plan
-extends).
-
-## Later counter instances
-
-Quantified premises can now be instantiated at counters introduced after the
-premise was stated. `Calculus/CloseAll.lean` applies the universal proof only
-after the closer opens the leaf's binders; anonymised counters are typed
-value projections. The search proves range/guard arguments and is bounded by
-declaration, expression, candidate, application, binder and heartbeat limits.
-`Examples/Tactics/AllLeftLater.lean` proves an actual invariant loop that reads
-`balances[i]` from an earlier quantified premise. The loop still supplies its
-invariant. General ABI memory-array scans remain open where their reads and
-lengths do not yet normalize together; this does not resolve the four large
-open loop ports below.
+(`Taclet.whileInvariantBox`, `whileInvariantDiamond`). Background:
+`docs/kernel-port.md` (its topics "Modalities", "Semantics", "One rule per
+statement" and "Conditions" are the decisions this extends).
 
 ## What solkey has
 
@@ -91,24 +75,18 @@ also on the iteration a `return` ends.  Under the box an iteration that
 ends in `(¬broke → inv) ∧ (broke → ⟨[ ]⟩)`); under the diamond the
 invariant still holds where the `break` leaves, as upstream.
 
-Loops block Ballot and BlindAuction (after `bytes32` and events),
-`MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
 Lean's rules take solkey's names (`whileUnwind`, `whileInvariantBox`,
-`whileInvariantDiamond`). At the current pin they are `Taclet` constructors,
-with their correspondence recorded by `RuleShapes.tacletOrigins`. Lean retains
-its explicit unwind bound, capture-free conditions, boolean-expression
-invariants, conservative frame restrictions and unsigned variant. KeY accepts
-formula invariants and an unbounded integer variant; those broader shapes are
-not claimed here. The origin table checks inventory coverage; soundness comes
-from the existing kernel theorems, and upstream shape correspondence from the
-recorded review. What solkey
-lacks (`loopExit`, the bound's end) stays a `LeanTaclet`.
+`whileInvariantDiamond`) as `Taclet` constructors (`RuleShapes.tacletOrigins`).
+Lean keeps its explicit unwind bound, capture-free conditions,
+boolean-expression invariants (with quantified clauses), conservative frame
+restrictions and an unsigned variant; KeY's formula invariants and unbounded
+integer variant are not claimed. What solkey lacks (`loopExit`, the bound's
+end) stays a `LeanTaclet`.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
-Since the intrinsic refactor the run is typed (`Semantics/Run.lean`, over
-`State C Γ`; `docs/intrinsic.md`): the names below are its, and the loop's
-body is a scope whose locals are popped each iteration.
+The run is typed (`Semantics/Run.lean`, over `State C Γ`); the loop's body
+is a scope whose locals are popped each iteration.
 
 - `Stmt.loop (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁)`
   (`Syntax/Scoped.lean`).
@@ -159,10 +137,7 @@ within its frame), the typed state (well-typed by construction,
 `Stmt.keeps_all` of `Typing/HeredRun.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
 `Stmt.exec_run`/`ExecS` (`Semantics/Callback.lean`: a loop whose body has no
-transfer is `det`). Set `Stmt.forks (.loop …) := Prog.hasTransfer body`
-(`Stmt.forksIn pay (.loop …) := Prog.callsBack pay body` since
-`docs/options.md`'s O1), not
-`true`: a forking statement with no `ExecS` constructor has no runs, so every
+transfer is `det`). `Stmt.forksIn pay (.loop …) := Prog.callsBack pay body`, not `true`: a forking statement with no `ExecS` constructor has no runs, so every
 modality over it would hold vacuously. `stmt_sim` is out of the fragment
 ("The EVM").
 
@@ -173,21 +148,20 @@ exits, iterates (`loopIter`), stops in its body, or diverges
 so `loopDiverge` over-approximates: a loop whose body pays may always
 diverge. A box accepts a divergence, and the callback reading is box-only
 (solkey's), so nothing is lost; a diamond over such a loop is never valid.
-Each constructor requires `Prog.callsBack J.pay body` (`Prog.hasTransfer`
-before `docs/options.md`'s O1), so a loop where nothing calls back has only
+Each constructor requires `Prog.callsBack J.pay body`, so a loop where nothing calls back has only
 its deterministic run (`ExecS.det`), and
 `Stmt.exec_run` and `Stmt.eq_run` keep their statements.
 
 ## Decision 2: `break`, `continue`, `for`, `do … while` are lowered
 
-The elaborator lowers them and the kernel sees only `Stmt.loop`. `Res` and
-`Halt` gain nothing (beyond `diverge`), so no `cases` on an outcome gets a
+The elaborator lowers them and the kernel sees only `Stmt.loop`. `TRes` and
+`THalt` gain nothing (beyond `diverge`), so no `cases` on an outcome gets a
 new arm. This is the choice `return` already made (no abrupt completion in
 `Stmt.run`; `lowerReturns` in `Syntax.lean`), and how KeY's loop scope works:
 a boolean records the abrupt completion.
 
 The pass is solkey's `LoopLowering`, shape for shape (the table in "What
-solkey has"), as `lowerLoops` in `Syntax.lean`:
+solkey has"), as `lowerLoops` (`Syntax/Elab/Lower.lean`):
 
 - **`break`/`continue`/`return`** in a loop body set fresh flags
   `brk`/`cnt`/`ret` (`freshCapture`), each made only when used; the rest of
@@ -265,22 +239,13 @@ that workflow an explicit unwind bound or invariant.
 `.unwind 0` is not `assert(!c)`: a failed `assert` panics, so running out of
 unwindings would be a failure of the program rather than of the bound.
 
-**The annotation is a `Val`, not a `Fml`**: `Fml` (`Update.lean`) contains
-`Prog`, so a `Stmt` carrying one would make `Stmt`, `Term` and `Fml` one
-mutual inductive. A boolean program expression is effect-free, lowered
-exactly (`Val.lower_evalT`, `Calculus/LowerRun.lean`), and how solkey's spec language compiles, but has
-no quantifier: Ballot's `∀ q < p. proposals[q].voteCount ≤ winningVoteCount`
-needs `Fml.all` (`docs/function-specs.md`) and a table of formulas outside
-`Stmt` that the loop names by index.
-
-**Termination** (`Calculus/Termination`, retired with it at W4 `calc-del`
-of `docs/intrinsic.md`: the scoped strategy is fuelled). `.unwind k` weighs
-`(k + 1) · (c.cost + c.pen + Prog.weight body + 3)`, so `whileUnwind` gets
-smaller; `.inv I _` weighs `c.cost + c.pen + Prog.weight body + I.cost + 2`,
-and its premise (`body` alone, `ω` alone) is lighter than `loop :: ω` under
-`2 ^ weight · (measure φ + 1)`. `Fml.step_wellFounded` and `symex_normalizes`
-survived the loops lane. Without the annotation, unwinding would copy the loop and no weight
-could decrease.
+**The annotation is a `Val`, not a `Fml`**: `Fml` contains `Prog`, so a
+`Stmt` carrying one would make `Stmt`, `Term` and `Fml` one mutual
+inductive. A boolean program expression is effect-free and lowered exactly
+(`Val.lower_evalT`, `Calculus/LowerRun.lean`). Quantified clauses
+`\forall T x; a -> c` are `LoopQ` (`Val`s under binders), which the box rule
+reads as `∀` (`invFml`); under the diamond a quantified invariant closes to
+`false` (`whileNoVariantDiamond`).
 
 ## Decision 4: the invariant rule and its soundness (built)
 
@@ -321,7 +286,7 @@ and `Prog.frame_keeps` (the storage, the ledger, the balance;
 `Semantics/RunFrame.lean`); `holds_anonHavoc` (`Calculus/SoundLoops.lean`)
 turns them into the premise at every loop head.
 
-**Modifies sets** (built 2026-10-25).  KeY frames a loop by its
+**Modifies sets**.  KeY frames a loop by its
 `assignable` clause and anonymises only the locations it lists; Dafny has
 `modifies`.  Here the set is computed, at the granularity of the roots:
 `Stmt.storeAt` (`Calculus/Blocks.lean`) is `some L`, the state variables a
@@ -366,17 +331,10 @@ only).  Separation logic is not needed for any of these: disjointness can
 be stated in the location sets themselves (dynamic frames), which is the
 first step if aliasing of memory references becomes the bottleneck.
 
-*Review (2026-10-25).*  A read-only pass found no soundness gap (every
-statement whose modifies set is `some L` checked against its run; every
-statement that calls back has `none`).  Fixed after it: the anonymising
-binder and update are produced under the box under both modalities, as
-`{havoc}` is, so a diamond loop's context stays one `closeTrue` reads
-(`Hyps.boxOnly`); `Locs.union` names each root once; `#latex_program`
-prints the roots (`symDoc`'s `Op2.anon` arm); the `dl!` reader refuses a
-root that is not a state variable; `docs/options.md` and `ProvesC.invBox`'s
-docstring no longer describe the frame as a flag.  Left as it is: the
-binder's printed name `anonStorage` is the same in nested loops (it is a
-hidden binder; the update names it positionally).
+The anonymising binder and update are produced under the box under both
+modalities, as `{havoc}` is, so a diamond loop's context stays one
+`closeTrue` reads (`Hyps.boxOnly`); every statement that calls back has
+modifies set `none`.
 
 **The flags are typed by the invariant.** An anonymised `brk`, `ret` or
 `first` may hold anything, but the condition reads it; `lowerLoops`
@@ -398,20 +356,14 @@ body (a diamond) can halt.
 diamond) for a walk, its goals `init` ("invariant initially valid") and
 `thn`, `els` past the context's anonymising update `Hyps.anonHavoc` ("body
 preserves invariant", "use case"), which the proof tree labels as solkey
-does. (Before the intrinsic refactor: `Premise.invFml`, `Proves.invLean`,
-`Hyp.loopAnon` and a third goal `cov`.)
+does.
 `sol_close` reads `{anon(…)}` (`CloseS.holds_anon`, `CloseS.anon_cons`:
 an anonymised local is set to `b x`, a binding nobody knows);
-`sol_decide` and `sol_prove`'s closer do not (`Fml.inLS` is `false` on `anon`,
-as on `havoc`), so `sol_prove` leaves such a leaf to `sol_close`. Under the
+`sol_decide` and `sol_prove`'s closer do not (`anon` and `havoc` are
+outside `Calculus/DecideLang.lean`'s language), so `sol_prove` leaves such a leaf to `sol_close`. Under the
 diamond the closer is slow: a counting loop closes, a loop with a `break`
 (whose flag is read through the cover) and a sum do not within the default
 heartbeats; their box versions close (`Examples/Tactics/Loops.lean`).
-
-**Termination** (retired at W4 `calc-del`). `.inv I _` weighed `c.cost + c.pen + Prog.weight body +
-I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
-`{anon}`, `{U}` and conditions) measured less than `loop :: ω`
-(`Premise.measure_lt`, `Fml.loopAnon_measure`).
 
 **Typing and declarations.** In the scoped syntax (`Syntax/Scoped.lean`) a
 loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
@@ -435,415 +387,104 @@ or `if (!(i < len())) break;` at the head of its body, is the workaround.
 
 ## The EVM
 
-The machine has only relative forward jumps, so `exec` (`Evm/Machine.lean`)
-is structural; the one loop solc emits for the current fragment
-(`checked_exp_helper`'s) is unrolled 255 times (`expLoop`, `Evm/Exp.lean`).
-Backward jumps need absolute `JUMP`/`JUMPDEST` with a program counter and
-fuel; a "code at offset `o` is `compile s`" invariant in place of
-`exec_append` and the skip-count lemmas that every case of `stmt_sim` uses;
-a third arm in `ValOutT` (`Evm/SimLemmas.lean`)/`StmtOut` (`Evm/Stmt.lean`) for "out of fuel
-at every fuel"; and a new bound on a loop's pushes, since
-`L + pushesP P ≤ 2^64` no longer holds (the interpreter's `push` would revert
-at `2^64` as solc does, or the bound becomes a run-time invariant of `Sim`).
-That is comparable to rewriting the compiler's correctness proof (about 2,300 lines).
-**Decision** (until 2026-10-23): `inFrag` (`Evm/Compile.lean`) refused a
-loop.  **Built** (2026-10-23, L7 without absolute jumps): a loop is one
-structured instruction, `LOOP cond body` (`Instr.loop`), so `exec` stays
-structural and the skip-count lemmas stand; its turns are `loopRun`'s,
-classical as `TLoop.run`'s, a fault where no number of them ends it (the
-fourth outcome, `StmtOut.diverge`); the simulation is by induction on the
-turns (`loop_sim`, `Evm/Correct.lean`).  The fragment takes a loop whose body
-pushes, pays and shrinks nothing and keeps the fragment's flags
-(`docs/compiler-verification.md`); lowering `LOOP` to `JUMPDEST`/`JUMP` is
-an assembler's step, as absolute targets already are. Loops also unblock its
-gaps "storage copies of a dynamic array" and "`push()` of a struct", so the
-EVM stage is worth doing once, for all.
+A loop is one structured instruction, `LOOP cond body` (`Instr.loop`,
+`Evm/Machine.lean`), so `exec` stays structural and the skip-count lemmas
+stand; its turns are `loopRun`'s, classical as `TLoop.run`'s, a fault where
+no number of them ends it (`StmtOut.diverge`); the simulation is by
+induction on the turns (`loop_sim`, `Evm/Correct.lean`). The fragment takes
+a loop whose body pushes, pays and shrinks nothing and keeps the fragment's
+flags (`docs/compiler-verification.md`). Lowering `LOOP` to
+`JUMPDEST`/`JUMP` is an assembler's step. Absolute jumps were rejected: they
+need a program counter and fuel, a "code at offset `o`" invariant in place of
+`exec_append`, and a run-time bound on a loop's pushes, comparable to
+rewriting the compiler proof. Loops would also unblock the compiler's gaps
+"storage copies of a dynamic array" and "`push()` of a struct".
 
-## Plan
+## Status
 
-The stages' files are named as they were when each was built; the intrinsic
-refactor (`docs/intrinsic.md`) moved the loop onto the scoped syntax and the
-typed run (`TLoop`, `Semantics/Run.lean`), its rules onto `Calculus/Blocks.lean`
-and their soundness onto `Calculus/SoundLoops.lean`.
+| Stage | Status |
+|---|---|
+| **L1** Syntax, lowering and semantics (`LoopAnn`, `Stmt.loop`, `lowerLoops`, `TLoop`) | built |
+| **L2** Typing (the loop cases of `Typing/`, by `TLoop.run_induct`) | built |
+| **L3** Unwinding (`whileUnwind`, `loopExit`) | built |
+| **L4** Invariant rules (`whileInvariantBox`, `whileInvariantDiamond`, `Fml.anonHavoc`, `Calculus/SoundLoops.lean`) | built; the diamond is slow in the closer |
+| **L5** Quantified invariants | partly: `\forall T x; a -> c` clauses (`LoopQ`) under the box; open: quantified invariants under the diamond, and the solkey examples that need them (Ballot's `winningProposal`, BlindAuction; also blocked on `bytes32`, events) |
+| **L6** Callbacks | built under the box (`ProvesC.invBox`, `ProvesC.loopExit`, unwinding; `docs/options.md`); no diamond over a loop that calls back can be sound |
+| **L7** EVM | built with a structured loop instruction (above) |
 
-| Stage | Scope (files) | Risk |
-|---|---|---|
-| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. The untyped frame kit (deleted at W10): `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Syntax/Quote.lean`, `Calculus/SurfaceNotation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
-| **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
-| **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** (built) | `Calculus/Fml.lean` (`Fml.anon`), `Update.lean` (`State.anon`), `Calculus/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic`, `Termination`, `CloseScoped` (`CloseS.holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
-| **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
-| **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
-| **L7 EVM** (built, 2026-10-23) | `Evm/{Machine,Compile,Sim,Stmt,Correct}.lean`: `Instr.loop`, `loopRun`, `StmtOut.diverge`, `loop_sim`; loops that push, pay or shrink stay out. | Done with a structured loop instruction rather than absolute jumps. |
+`tests/solc/Loops.sol` is the fixture (`Examples/Tactics/LoopsImport.lean`);
+`scripts/solc-ast.mjs` reads the `///` clauses above a loop as solkey's
+`KeyNatspec.of` does (a clause may span lines; only `invariant`,
+`decreases` and Lean's `unwind`). Counterexample search runs loops with fuel
+(`Prog.runF`, `Tools/Counterexample.lean`), so a counterexample through a
+loop is certified.
 
-L1 to L4 make loops provable. L5 is what Ballot and BlindAuction need once
-their other blockers (`bytes32`, events, `keccak256`) are gone. L3 and L4
-each add a `docs/solkey-feedback.md` entry: the rules solkey's plan asks
-for, with their soundness side conditions (the frame, the cover, the
-variant bound).
+## Automation notes
 
-## L1–L4 review (2026-10-07)
+- **Later counter instances.** A quantified premise is instantiated at
+  counters introduced after it (`Calculus/CloseAll.lean`, after the closer
+  opens the leaf's binders; anonymised counters are typed value
+  projections), bounded by declaration, expression, candidate, application,
+  binder and heartbeat limits (`Examples/Tactics/AllLeftLater.lean`).
+- **ABI memory scans** (`Examples/Tactics/ArrayScans.lean`): signed and
+  unsigned element ranges from solc-imported ABI premises with a supplied
+  invariant (`i <= xs.length`; variant `xs.length - i` under the diamond).
+  The combined signed diamond uses `sol_symex; sol_close`; its `sol_prove`
+  version exceeds the declaration budget.
+- **Demanded memory observations.** `foldMem2` applies the memory
+  read/length/identity taclets as the scoped reducer forms each
+  observation, keeping a result only when it does not grow the tree; the
+  full optional result's equality is proved in `DecideTyped.lean`, so a
+  failed write cannot become an unguarded read.
+- **Rigid local conditions.** `Seq.refuteLanded` reads a literal-local
+  guard back through its local updates (`Fml.substU`), with a 512-node cap
+  per substitution; the live sibling stays an obligation
+  (`Hyps.rigid_lift`), since a refuted guard alone does not prove the
+  prefix succeeds. Ground conditions past the bounds keep both branches.
+- **The fresh index is carried** (`Seq.runK`, `Hyps.maxIdxH`,
+  `Hyps.fresh_eq_freshK`): asking `Hyps.fresh` at every step made a walk
+  `O(n²)` in the kernel (a 1024-step walk 658k → 465k heartbeats).
+- **Budgets are checked between compiled stages** of `Seq.prove`: nothing
+  checks heartbeats between `sol_prove`'s kernel lemma and the end of the
+  declaration, so a stage past the budget is reported and no longer stage
+  runs.
+- **Reads past exposing updates** (`exposeBound` = 5,
+  `Calculus/ReadBounds.lean`, `LTm.exposeDepth`): over an unknown history a
+  read through an update exposing a slot past a live end (`Op2.exposes`)
+  branches, growing the elimination about sevenfold per update; past the
+  bound an early read stays lazy and a refutation is not asked
+  (`LFml.refuteOk`).
+- **Copy identities by their allocations.** A copy's root is formed over the
+  memory without its writes (`LTm.stripW`, stopping at the newest `addM`;
+  `copyRes`), where every word its writes land on folds to `true`
+  (`guardQ`), since an identity depends on the heap typing alone
+  (`SVal.copyStToM_H'`). Otherwise leaves double with each row of a
+  binomial-style fill. `memFuel` is 256.
+- **Walks in chunks.** `sol_prove (chunk := n)` (`Calculus/ProveChunked.lean`)
+  checks a long walk `n` steps at a time, each chunk and leaf under its own
+  heartbeat budget (the compiled walk proposing a chunk heeds none). On
+  `binomialRowsNine` chunk 128 is the sweet spot (about 4 min, under 6 GiB;
+  512 passes 14 GiB). The runner (`Frontend/Testing.lean`) chunks a walk of
+  more than `oneCheckSteps` (1024) steps by `chunkSteps` (128).
 
-A finder and a skeptic per area; what the skeptic confirmed, fixed:
+## Open loop ports
 
-- **A `return` inside a loop on import.** `solc_import` lowered a body's
-  `return`s without its loops first, so a public function with one was
-  refused.  It now runs `lowerLoops` before `lowerReturns`, as `contract!`
-  and solkey's `ExpandFunctionBody` do (`Frontend/Import.lean`,
-  `lowerBodyLoops`); a body with such a loop is renamed fresh first, so a
-  `for`'s declaration spliced over the statements after the loop does not
-  clash with a sibling `for (uint i …)`.  Pinned by `loopNestedReturn`
-  (solkey's) and `returnBeforeSiblingLoop` in `tests/solc/Loops.sol`.
-- **Unbounded runs in the counterexample search.** `Fml.eval3` ran programs
-  through `Prog.run`, whose compiled `Loop.runImpl` heeds no heartbeats.  It
-  now runs the typed run with fuel, `Prog.runF`
-  (`Semantics/RunFuel.lean`, read by `Tools/Counterexample.lean`):
-  each loop at most `loopFuel` iterations, `unknown` past them, proved to
-  agree with `Prog.run` wherever it does not say `diverge`
-  (`Prog.runF_approx`).  The kernel reduces it, so a counterexample
-  through a loop is certified (`Examples/Verify.lean`).
-- **Loop specifications as solkey reads them.** `scripts/solc-ast.mjs`
-  joins the `///` lines above a loop and splits them at a line that starts
-  with a tag, as `KeyNatspec.of`: a clause over two lines is kept whole
-  (`invariantTwoLines`).  It reads them only where the loop starts its line,
-  and refuses a directive other than `invariant`, `decreases` and Lean's
-  `unwind`.  `--source` resolves in this repository first, needs `--out`,
-  and `--wrapper` names the importing module (the ctor lane's flags, so the
-  two merge); `Examples/Tactics/LoopsImport.lean` names the command.
-- **The fixture.** `tests/solc/Loops.sol` says which clauses (`unwind`) and
-  functions are Lean's own, and has solkey's
-  `invariantVariantSkipsBreakIteration` with its `break`.  Five of its seven
-  obligations are proved; `forContinueStillUpdates` (`sol_symex` passes
-  `simp`'s step bound, `sol_prove` `Derive.budget`) and
-  `invariantVariantSkipsBreakIteration` (the diamond's cover) are named in
-  `LoopsImport.lean` as not proved.
-- **A condition that needs a capture** (a call, a cast, a narrow operation,
-  a constructor) is refused with a message that says so, and the
-  restriction is written above (Typing and declarations) and in the rule
-  map.
-- **`invBox`**: under the box the invariant rule has solkey's two goals past
-  `init` in the walk and the proof tree (`Calculus/Symex.lean`,
-  `Calculus/ProofTree.lean`), its then third goal `cov` proved by
-  `closeTrue`, as `splitBox` did (the scoped rule has no `cov`).
-- **Pins.** `#taclet whileNoVariantDiamond`, `#step` pins of `whileClose`
-  and `whileNoVariantDiamond` firing, the `sol_derive?` walks of an unwound
-  loop and an invariant loop (`Examples/ProofTree.lean`), a loop inside a
-  `try` clause lowered (solkey's `LoopLowering` leaves it,
-  `docs/solkey-feedback.md` §10).
-- **Wording.** Memory is refused for an invariant as in solkey; push, pop,
-  alias and external call are Lean's own refusals (`Stmt.within`).
-  `ed7849d5b6` is the commit that added loops, after the pinned
-  `1b4341a303`.  The modifier contract of several `_;` is `ModifierRuns`
-  in `Examples/Tactics/Loops.lean` only.  `docs/README.md`,
-  `docs/solc-alignment.md`, `docs/module-map.md` and
-  `scripts/solkey-port.mjs` describe loops as built.
+solkey's four open loop ports are `tests/solc/OpenLoops.sol`
+(`Examples/Tactics/OpenLoops.lean`; run one with
+`node scripts/test-solidity.mjs --function f tests/solc/OpenLoops.sol`).
 
-**Cost.**  After the fixes, the whole `Solidity` target rebuilt, then
-`Derived1`, `Derived12`, `Derived14` and `SolkeyTestSuite.lean` checked
-clean one at a time: `Report.lean`'s pin still reads 435 derived.  Each
-file copied to a scratch module with `set_option Elab.async false`, timed
-by `IO.monoMsNow` at its first and last command, load average under 1 (the
-other lanes idle); master `2979bb8` is the ctor lane's measurement under
-the same method (`docs/testsuite-proofs.md`, "Constructors review"):
-
-| File | master `2979bb8` | `loops` | change |
-|---|---:|---:|---:|
-| `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 120.8 s | −4% |
-| `Calculus/Uniqueness` | 151.6 s, 151.6 s | 154.7 s | +2% |
-| `TestSuite/Derived14.lean` | — | 75.3 s | — |
-
-Both within 10%.  `Derived14` has no master time under this method (W7's
-155 s predates its review), so it is recorded for the next lane.
-
-## Open loops lane (2026-10-20): `SolcLoopsOpen.sol`
-
-Running notes of the `open-loops` lane on solkey's four open loop ports
-(`Solidity/Scratch/open/SolcLoopsOpen.sol`, run by
-`node scripts/test-solidity.mjs --json --function f`; heartbeats are
-`maxHeartbeats` units, `IO.getNumHeartbeats / 1000`).
-
-**Baseline** (master `ee769637`, runner, default 200000 heartbeats):
-
-| Function | Status | Wall | Peak RSS |
-|---|---|---:|---:|
-| `pushNoArgs2dLoop` | error, timeout at `whnf` | 68 s | 6.8 GB |
-| `multiArrayFillByPushLoops` | killed by the runner's 900 s limit (no heartbeat check reached) | > 900 s | — |
-| `binomialFaithfulRowsSmall` | error, timeout at `isDefEq` | 90 s | 1.5 GB |
-| `binomialRowsNine` | error, timeout at `isDefEq` | 80 s | 1.5 GB |
-
-**`pushNoArgs2dLoop` is not valid in the model.**  `array2d.push()` on a
-`uint[][]` recycles the first shadow slot as it is (`pushSlot`,
-`Semantics/Storage.lean`; solkey's `storagePushLengthSave`), and
-`wt(storage)` clears only the shadow slots of word arrays (`tightHB`,
-`Semantics/StorageWt.lean`): a reachable storage with `array2d.length == 0`
-may hold a dangling `uint[]` of length `L > 0` past the end, and then
-`array2d[0].length == 43 + L`.  Its walk leaves three leaves (the three
-asserts); `assert(ll == 43)` is false there (true under clean tails,
-`ValidTail .clean`, `docs/options.md` O6), so the best `⊢` can report is
-`pending`.
-
-**Where its heartbeats go** (`sol_prove`'s walk at 1024 steps, measured in
-a scratch module):  compiled walk 65k (plus about 45k for the failed 128,
-256 and 512 stages), kernel check 658k.  Of the kernel's: `Hyps.fresh`,
-which wraps and scans the whole context at every step, about 200k (the
-same walk with a constant fresh index: 458k); the three leaves 24–28k each
-in isolation; the 94 refutations (47 splits, the first branch of each
-tried in vain) the rest with the walk.  A refutation alone, checked in
-isolation late in the loop, is about 108k (cached across the walk).
-Slicing the context's premises before `toLS` (by the binders they read,
-through the updates) left the kernel total unchanged (675k): the
-refutations' cost is not in the premises' terms.
-
-**`binomial*`**: under the diamond a refutation must also prove every
-memory allocation's landing obligation of the history, and the memory
-terms are trees that double with each `rows[i][j] = rows[i-1][j-1] +
-rows[i-1][j]` (a write reading the memory twice): at 133 context entries
-(`binomialFaithful(3, 1)`) the refutation is past `normalizationSize`
-(24000 nodes) and fails, so the outer loop's guard is never refuted and the
-walk unwinds until its budget runs out.  Slicing premises does not help:
-the obligations are conjuncts the diamond asks, not premises.
-
-**`multiArrayFillByPushLoops`**: `nests.push()` recycles a `Nest` whose
-`d` is a dangling array of unknown length, so the second and third loops'
-guards read unknown lengths; the history is unknown (`Op2.exposes`), and
-the refutation of the second loop's guard at four to six stacked storage
-updates (within `normalizationDepth` 12, `boundsOk` true) overflows the
-interpreter's stack in the language server, and runs past 15 minutes in
-the runner.
-
-**The fresh index, carried** (`Seq.runK`, `Calculus/ProvesDerive.lean`).
-Each step of the walk asked `Hyps.fresh`, which wraps the whole context
-around the goal and scans it (`Fml.maxIdx`): a walk of `n` steps over a
-context that grows with it costs the kernel `O(n²)`.  The walk now carries
-the context's largest index (`Hyps.maxIdxH`, `max`ed with each entry it
-adds) and asks `freshK k φ`, which is `Hyps.fresh` by `Hyps.maxIdx_wrap`
-(`Hyps.fresh_eq_freshK`); `run` is `runK` from `H.maxIdxH`, so
-`residueWithin` and its callers are unchanged.  Measured:
-
-| | before | after |
-|---|---:|---:|
-| `pushNoArgs2dLoop`, kernel check of the 1024-step walk | 658k hb, 44.8 s | 465k hb, 29.9 s |
-| `TestSuite/Derived17.lean` (whole file, alone) | 100.9 s | 97.1 s |
-| its heaviest, `returnLeavesNestedLoops` (interpretation + type checking) | 14.8 s + 63.8 s | 13.6 s + 61.5 s |
-| `Examples/Tactics/Loops.lean` | 24.8 s | 24.8 s |
-| `Examples/Tactics/LoopsImport.lean` | 14.3 s | 13.8 s |
-
-(Scratch copies under `set_option Elab.async false`, timed by
-`IO.monoMsNow` at their first and last command; peak RSS 8.2 GB for
-`Derived17`, 3.0 GB `Loops`, 1.7 GB `LoopsImport`, unchanged.)
-
-**Heartbeats past the budget.**  `returnLeavesNestedLoops` passes with its
-kernel check past the default 200000 heartbeats: nothing checks the budget
-between `sol_prove`'s kernel lemma and the end of the declaration, so a
-check there (proposal (c) of the slicing lane) fails it.  `Seq.prove`
-therefore checks only between its compiled stages: a stage that ran past
-the budget is reported by its bound, and no longer stage is run.
-
-**Reads past exposing updates** (`exposeBound`,
-`Calculus/ReadBounds.lean`).  Over an unknown history, a read through an
-update that exposes a slot past a live end (`Op2.exposes`: an empty push of
-a reference element, a pop, a shrink) branches on whether it is the exposed
-slot, and the elimination's output grows about sevenfold with each:
-`multiArrayFillByPushLoops`' refutations at four to seven stacked
-`pushSlot`s eliminate to 980, 4937, 35938 and 476239 nodes
-(`normalizationDepth` admits 12).  The same elimination runs where `toLS`
-forms a read (`LTm.literalRead`, `Calculus/DecideScoped.lean`): its
-`toLS` took 16 ms, 184 ms and 5.5 s at four, five and six, and did not
-return at seven (the runner's 15-minute hang, the server's stack overflow).
-Both now read through at most `exposeBound` (5) such updates where the
-history is not known (`LTm.exposeDepth`): an early read past it stays lazy,
-and a refutation past it is not asked (`LFml.refuteOk`,
-`Calculus/LeafDerive.lean`), the split's two branches walked.
-`multiArrayFillByPushLoops` now ends in 112 s with "timeout at `sol_prove's
-compiled walk, after its 1024-step stage`": its second loop's guard reads
-the dangling `d`'s unknown length, which only a refutation at seven exposing
-updates could bound, so the walk unwinds until the budget is gone.  Even a
-complete walk would leave about 30 leaves past `stackSize` (12 to 14
-storage updates over an unknown history): `pending` at best without a
-closer for exposed slots.
-
-**Proposal (b)** (a `require(len == 0)` making push histories known) does
-not apply: `pushNoArgs2dLoop`'s three leaves stack 45 storage updates,
-past `concreteDepth` (40) too, and its push at `next(storage, array2d)`
-is an exposing `pushSlot` of a `uint[]` element, which no length fact makes
-known (the exposed slot is the dangling one above); the same holds of
-`nests.push()`.
-
-**After the lane** (`a97fba7f`), the runner on the four:
-
-| Function | Before | After |
-|---|---|---|
-| `pushNoArgs2dLoop` | error, timeout at `whnf`, 68 s, 6.8 GB | error, timeout at `whnf`, 67 s, 6.6 GB (kernel check 465k hb instead of 658k; not valid under `.solc` tails, `pending` at best) |
-| `multiArrayFillByPushLoops` | no answer in 900 s | error, timeout at "`sol_prove`'s compiled walk, after its 1024-step stage", 112 s, 1.6 GB |
-| `binomialFaithfulRowsSmall` | error, timeout at `isDefEq`, 90 s | error, timeout "after its 8192-step stage", 64 s, 1.6 GB |
-| `binomialRowsNine` | error, timeout at `isDefEq`, 80 s | error, timeout "after its 8192-step stage", 66 s, 1.6 GB |
-
-With the early-read bound in, the regression files again: `Loops` 24.5 s,
-`LoopsImport` 13.6 s, `Derived17` 103.1 s and 100.0 s (two runs; peak RSS
-3.0, 1.7 and 8.4 GB), `Examples/Tactics/Decide.lean` clean, and
-`scripts/test-solidity.test.mjs`' failures the same four assertions as an
-earlier master run (its solc/open test, 51 rows, passes).
-
-**What is left.**  None of the four closes within the default budget, and
-none can by the cheap routes:
-
-- `pushNoArgs2dLoop` is not valid under `⊢` (the dangling `uint[]` above);
-  under `ValidTail .clean` it is, and its walk would still need the
-  kernel's 465k heartbeats cut to well under 100k: the walk carrying the
-  closer's state (proposal (a)), since what is left is the refutations'
-  `wrap`/`toLS` over the whole context at each split, the leaves, and the
-  steps, each linear in the context.
-- `multiArrayFillByPushLoops` needs a closer for exposed slots: its loops'
-  guards read a recycled `Nest`'s unknown lengths, whose reads branch
-  sevenfold per exposing update.
-- The binomials need the memory's terms shared (a DAG-aware or
-  value-naming reduction): under the diamond each refutation proves every
-  allocation's landing obligation, and those terms double with each write
-  that reads the memory twice.
-
-**Lane `open-closer` (2026-10-21), the runner on the four again** (after
-the closer's nonlinear, byte and hash clauses; `node scripts/test-solidity.mjs
---json --no-build --function f`, wall time with the build cached):
-
-| Function | Result | Wall |
-|---|---|---:|
-| `pushNoArgs2dLoop` | error, timeout at `whnf` (200000 heartbeats) | 55 s |
-| `binomialFaithfulRowsSmall` | error, timeout "after its 8192-step stage" | 57 s |
-| `binomialRowsNine` | error, timeout "after its 8192-step stage" | 58 s |
-| `multiArrayFillByPushLoops` | error, timeout "after its 512-step stage" | 38 s |
-
-None is within reach of a closer clause: the first is the walk's kernel
-check (465k heartbeats of a 200k budget, above), the binomials the
-unshared memory terms of their refutations, and `multiArrayFillByPushLoops`
-the unknown lengths of recycled slots its guards read (its search now
-stops after the 512-step stage, in 38 s, where `a97fba7f` stopped after the
-1024-step one in 112 s; still a timeout).  What is left stays the list
-above.
-
-## ABI memory scans (assurance M7)
-
-`Examples/Tactics/ArrayScans.lean` checks signed and unsigned array element
-ranges from actual solc-imported ABI premises after the loop introduces its
-counter. The supplied `i <= xs.length` invariant suffices for the box scans;
-the diamond checks both signed bounds and supplies `xs.length - i` as its variant.
-The closer preserves memory observations across local captures and counter
-updates, instantiates the earlier premise, then reuses its typed read witness.
-These are supplied-invariant proofs, not inferred invariants or a resolution
-of the four open loops above. The combined signed diamond uses
-`sol_symex; sol_close` to avoid the walk's repeated expansion of separate
-leaves; its `sol_prove` version still exceeds the declaration budget.
-
-## Demanded memory observations (assurance M13)
-
-`foldMem2` applies the existing memory read/length/identity taclets as the
-scoped reducer forms each observation. Input size is bounded, and the result
-is retained only when it does not increase the tree's node count. Equality
-of the full optional result is proved in `DecideTyped.lean`, so an invalid
-address or a failed write cannot become an unguarded successful read.
-
-This resolves the original `binomialFaithfulRowsSmall` timeout: the actual
-runner proves it in about seven seconds, and `Examples/Tactics/OpenLoops.lean`
-checks the same pinned-solc source with `sol_prove` under the ordinary
-declaration budget. No invariant annotation was added to that source.
-
-The other three remain open under the same 200000-heartbeat runner budget:
-`binomialRowsNine` times out after its 1024-step stage (about 58 seconds),
-`multiArrayFillByPushLoops` after its 512-step stage (about 37 seconds), and
-`pushNoArgs2dLoop` at kernel reduction (about 59 seconds). The push-loop
-measurement uses the runner's clean-tail premise; the earlier `.solc`
-counterexample remains relevant outside that reading. This is one repaired
-timeout, not general loop invariant inference.
-
-### Rigid local conditions (M19)
-
-`Seq.refuteLanded` reads a literal-local guard back through its local updates,
-using `Fml.substU` from `applyOnRigidFormula`. It avoids expanding unrelated
-memory histories just to decide a loop counter. The live sibling remains a
-proof obligation: `Hyps.rigid_lift` transports the condition through the
-original context, including failure and exhaustion of its diamond updates.
-A refuted guard alone cannot prove that the prefix succeeds.
-
-The projection checks a 512-node cap on its condition and update before
-each substitution, and checks the final condition too. Thus repeated
-`x := x + x` assignments refuse before an exponential tree can accumulate.
-Ground conditions outside the projection or closer bounds keep both branches;
-non-ground guards retain the existing contextual refutation. Ignoring unused
-premises can lose pruning when those premises contradict each other. The
-regressions pin that conservative choice, memory writes in an eight-iteration
-diamond loop, and a failing prefix that remains invalid.
-
-On the original nine-row source an isolated compiled walk reached two leaves
-at 2048 steps in about five seconds, versus the previous timeout after the
-1024-step stage. This is a walk measurement, not a theorem: the public proof
-construction then exceeded the session's 16 GiB RAM limit, including when run
-alone. The original obligation stayed open until the next section.
-
-### Identities by their allocations, and the walk in chunks (2026-10-23)
-
-`binomialRowsNine` is proved (`Examples/Tactics/OpenLoops.lean`) by two
-changes, and so is it by the solc runner (below).
-
-**The leaf.** The reduction named a copy's root `copy(M, S)`, `M` the whole
-memory before it. A row's writes address the row's root, and the next row's
-root carries the memory those writes built, so the leaf grew with each row
-by a factor of its writes: about 12 000 nodes at three rows, 76 000 at four,
-86 million at five. An identity depends on the heap typing alone
-(`SVal.copyStToM_H'`, `SVal.copyStToM_id_eq`), which a write keeps, so a
-copy's root is now formed over the memory without its writes (`LTm.stripW`,
-which keeps the copies and stops at the newest `addM`; `copyRes`,
-`Op2.memRes`'s `.copy` arm, applied at formation by `foldRead2`) where every
-word its writes land on folds to `true` (`guardQ`); else the root is kept
-as it was, so that the copy's laws still read it. A memory's own landing guard is read the same way
-(`UpdElem.toLS`, `seqMemL_tt_eval`), and so are a copy's laws: the spine test
-(`LTm.onSpineS`), the length (`lenAtN`, `LTm.base_eval`) and the reads of a
-fresh copy (`LTm.unstripAddr`, `LTm.read_unstrip`). `memFuel` is 256. The
-five- and six-row binomials then close inside the walk; every rewrite is an
-equation of reads, as before (`copyRes_eval`, `LTm.stripW_eval`).
-
-**The walk.** About two thousand steps over a context of some 360 updates:
-one kernel check of the whole walk (`sol_prove`) passed 14 GiB.
-`sol_prove (chunk := n)` (`Calculus/ProveChunked.lean`) checks it `n` steps
-at a time (`Seq.cutK`, `runK` whose spent step budget leaves the sequent as
-a leaf; `Proves.of_cutWithin`), each chunk's kernel check and each leaf's
-`sol_leaf; sol_close` under a heartbeat budget of its own (the compiled walk
-that proposes a chunk heeds none, as `sol_prove`'s does not). On the nine
-rows:
-
-| chunk | kernel | compile and evaluate | final leaf | total | memory |
-|---:|---:|---:|---:|---:|---|
-| 32 | 240 s | 91 s | 50 s | 390 s | below 6 GiB |
-| 128 | 146 s | 19 s | 75 s | 242 s | below 6 GiB |
-| 512 | 90 s for the first three chunks | | | | past 14 GiB, stopped |
-
-The theorem uses 128. What is left is the kernel's evaluation of the walk
-itself, linear in the context at each step.
-
-**The runner** (`Frontend/Testing.lean`) checks a plain walk of more than
-`oneCheckSteps` (1024) steps in chunks of `chunkSteps` (128): `Seq.prove`
-refuses such a walk before its kernel check (`oneCheck`, `longWalkNote`),
-and `Seq.proveChunked` walks it, each leaf searched as `sol_prove?` searches
-it (`Derive.searchLeaf`, the chunked walk's `close`).  `node
-scripts/test-solidity.mjs --function binomialRowsNine --timeout-ms 1800000
-tests/solc/OpenLoops.sol` reports it proved in 4 min 34 s (one core); the
-default 300 s per contract is too short for it.
-
-`pushNoArgs2dLoop` under clean tails: in chunks its walk now passes (one
-kernel check of it was 465k heartbeats), and leaves its three asserts, each
-over 45 stacked saves of one length slot (`pointer.length := pointer.length +
-1`). `sol_close` times out on each: the reads of that slot stay symbolic at
-formation, since its starting length is known only through the premises
-(`array2d.length == 0`, clean tails), which formation-time folding does not
-read, and the stack is past `concreteDepth`. `multiArrayFillByPushLoops`
-remains open for the reason above.
-
-Review (read-only finder, then the findings checked against the code): no
-unsoundness, the compiled twins agree (`LTm.stripW_eq_stripWM`). Fixed from
-it: a copy's root wrapped in an unfolded guard hid it from the copy's laws
-(now kept unwrapped unless every guard folds); a chunk that made no step was
-walked again up to `chunkFuel` times (now left, with a note); a goal that is
-neither `⊢ φ` nor `⊨ᶠ φ` was left silently (now an error); a stopped leaf's
-note now carries the closer's own error; and the docs claimed more than the
-code for `LTm.stripW` (it stops at an `addM`) and for the heartbeat budget
-(the compiled walk heeds none). Not changed: `memFuel` 256 and the guard
-read at every memory update cost more evaluation per update; the full build
-(below) measures it.
+- `binomialFaithfulRowsSmall`: proved (demanded memory observations).
+- `binomialRowsNine`: proved with chunk 128; through the runner it needs
+  `--timeout-ms 1800000` (the default 300 s per contract is too short).
+- `pushNoArgs2dLoop`: **not valid under `.solc` tails** — `array2d.push()`
+  on a `uint[][]` recycles a shadow slot as it is (`pushSlot`), and
+  `wt(storage)` clears only word arrays' shadow slots (`tightHB`), so a
+  dangling `uint[]` can make `array2d[0].length == 43 + L`. Valid under
+  `ValidTail .clean` (`docs/options.md` O6), which the runner states; in
+  chunks its walk passes, but `sol_close` times out on each of its three
+  asserts (45 stacked saves of one length slot, past `concreteDepth`, whose
+  start is known only through premises formation-time folding does not
+  read).
+- `multiArrayFillByPushLoops`: open; `nests.push()` recycles a `Nest` whose
+  `d` is a dangling array of unknown length, so the later loops' guards
+  read unknown lengths. It needs a closer for exposed slots.

@@ -1,413 +1,202 @@
 # Validating the semantics and the rules against solc
 
-Every theorem here is about the typed run (`Prog.run`) and the rule
-table. This plan finds out
-whether they say what solc-compiled code does: which checks to run, in what
-order, and what each can show. Status: a plan. "What exists" lists what is
-built; the lettered checks A to O are not built unless stated. Read "The chain
-of trust" for what is unproved, "What solc's source shows" for the decisions it
-forces, and "Order of work" for the sequence. `docs/solc-alignment.md` records
-decisions taken and remaining deltas; `docs/compiler-verification.md` records
-`compile_correct`.
-
-Claims about solc were read in the 0.8.37 source (`solidity_0.8.37/` in the
-local package cache; paths below are relative to it). The installed `solc` is
-0.8.33 and SolidCore (below) pins 0.8.35, so any comparison pins one version.
+Every theorem here is about the typed run (`Prog.run`) and the rule table.
+This document says how far that is checked against what solc-compiled code
+does: what exists, and the checks still to build (lettered A to O; the
+letters are kept so plans can cite them). `docs/solc-alignment.md` records
+the decisions taken and the remaining deltas; `docs/compiler-verification.md`
+records `compile_correct`. The pinned solc is 0.8.38 (`1835d247`, the
+[upstream corpus](solidity-upstream-tests.md) and the
+[feature inventory](solidity-feature-inventory.md)); older fixtures use 0.8.34.
 
 ## The chain of trust
 
 ```
-Solidity source ──(1) sol{…} / contract!{…}──▶ Prog C ──(2) Prog.run──▶ State
+Solidity source ──(1) sol{…} / solc_import──▶ Prog C ──(2) Prog.run──▶ State
       │                                           │
       └──(3) solc (legacy | via-IR) ──▶ EVM bytecode ──(4) EVM──▶ storage slots
 ```
 
-Proved: the rules are sound for (2) (`Stmt.sound` with `Rule.toStep`, `Proves.sound`,
-`ProvesC.sound_of`/`ProvesC.fmlValid`); the repository's compiler agrees with (2) (`compile_correct`)
-on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
-state it simulates.  (2) is never stuck, by construction: the typed run halts
-only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
-hold values of their types (`Semantics/State.lean`), and the closer's term
-model reads the typed state, so it meets no ill-sorted value on a state a
-run reaches (`docs/intrinsic.md`, decisions 39, 40 and 50).  There is no
-untyped run of a statement left to be stuck.
-Not proved, and not provable without a model of solc: that (1) reads a program
-as solc does, and that (2) plus the layout equals (3) plus (4). **Every proof
-reaches solc-compiled contracts only through that square.** A rule is wrong
-about Solidity only through one of four links:
+Proved: the rules are sound for (2) (`Stmt.sound`, `Proves.sound`,
+`ProvesC.sound_of`); the repository's compiler agrees with (2) on the
+programs it compiles (`compile_correct` over `inFragP`, and the memory path;
+`docs/compiler-verification.md`); no `try`, `send` or data reverts. (2) is never stuck: the typed run halts only by `THalt`
+(`docs/intrinsic.md`). Not proved, and not provable without a model of solc:
+that (1) reads a program as solc does, and that (2) plus the layout equals (3)
+plus (4). **Every proof reaches solc-compiled contracts only through that
+square.** A rule is wrong about Solidity only through one of four links:
 
-- **L1. The typed run is wrong** (`Semantics/Run.lean`, with
-  `Semantics.lean`'s operations); the rule is sound against it.
-- **L2. The elaborator misreads `sol{…}`** (`Syntax/Elab.lean`, `hoist`): evaluation
-  order, what it captures, what it accepts.
-- **L3. The rule is sound but too strong**: its premise asks for more than the
-  program needs. `Stmt.rule_exists` is coverage, not logical completeness. The
-  `assert` rule was the known case the other way round: it mirrored `require`,
-  so a failed `assert` satisfied every box formula and a box obligation proved
-  nothing. A failed `assert` now panics (`THalt.panic`, solc's `Panic(0x01)`),
-  which no modality accepts, and `Taclet.assertSimple` owes its condition under
-  both, as KeY's "Violated" branch does; none is known.
-- **L4. The trusted base leaks**: `sorry`, `native_decide`, `implemented_by`, or
-  a side condition that proves too much.
+- **L1. The typed run is wrong** (`Semantics/Run.lean`); the rule is sound
+  against it.
+- **L2. The elaborator misreads the source** (`hoist`, the solc import):
+  evaluation order, captures, what it accepts.
+- **L3. The rule is sound but too strong.** `Stmt.rule_exists` is coverage,
+  not completeness.
+- **L4. The trusted base leaks**: `sorry`, `native_decide`,
+  `implemented_by`, or a side condition that proves too much.
 
-"Correct" must name which solc: the two generators disagree, and solc's
-`docs/bugs.json` lists 66 known miscompilations. A disagreement with an oracle
+"Correct" must name which solc: the two pipelines disagree, and solc's
+`docs/bugs.json` lists known miscompilations. A disagreement with an oracle
 has four outcomes: the model is wrong; the pipelines disagree and the model
-picked one; solc is wrong (a `bugs.json` row, or a new one); the program is
-outside solc's language.
+picked one; solc is wrong; the program is outside solc's language.
 
-**What `compile_correct` checks.** It looks like a check of L1, but Lean checks
-the proof against the definitions, not the definitions against the EVM. It pins
-the typed run only as far as three trusted definitions are right: `Instr.step`
-(the EVM), `Evm.compileStmt` (what solc emits), and `Sim` with the theorem's shape.
-A machine written *from the interpreter* makes it hold by construction. That
-was `transfer`'s case until `CALL` moved real balances (check C below): it
-was `transferAt` re-spelled, a `net` field no EVM has beside the
-interpreter's.
+`compile_correct` is not a check of L1 by itself: Lean checks the proof
+against three trusted definitions (`Instr.step`, `Evm.compileStmt`, `Sim`). A
+machine written *from the interpreter* makes it hold by construction; that is
+why `CALL` moves real balances (`bal`, `accepts`) and `Sim` relates `net` to
+them (`Sim.netSelf`, `compile_net`), so a wrong `net` update fails the
+theorem.
 
 ## What exists
 
-- **A hand audit**, `docs/solc-alignment.md`.
-- **The corpus**: 551 rows in `tests/solkey/expected.tsv` (224 proved, 67
-  evaluated, 226 unsupported, 34 unported), checked by `scripts/check-corpus.sh`.
-  73 come from solkey's `solc/*.sol`, hand ports of solc's `semanticTests` that
-  solkey's `SolidityRuntimeExecutionTest` also runs on a Besu EVM. That is the
-  only contact with solc: indirect, one state per function, asserts only.
+- **A hand audit**: `docs/solc-alignment.md`.
+- **A. The trusted base**: `bash scripts/check-trust.sh` (source lint against
+  `tests/trust-inventory.json`) and `TrustAudit.lean` (the headline theorems'
+  transitive axioms: only `propext`, `Classical.choice`, `Quot.sound`); CI runs
+  both ([assurance.md](assurance.md), M1).
+- **The solkey corpus**: `tests/solkey/expected.tsv`, `scripts/check-corpus.sh`.
+  Its `solc/*.sol` rows are solkey's hand ports of solc's `semanticTests`:
+  indirect, one state per function, asserts only.
 - **`#difftest`** (`Tools/DiffTest.lean`): the interpreter against the
-  repository's own compiler on random well-typed storages, from a start where
-  `compile_correct`'s hypotheses hold. It tests those hypotheses and the
-  generator, not solc. Its layout differs from solc's in two details: slots are
-  terms (`Slot.root`/`hash`/`data`), and `bool` takes a whole slot where solc
-  packs one byte (`libsolidity/ast/Types.h:720`).
-- **Not built**: a trusted-base check, pinned solc facts (`Counterexamples/`
-  refutes design decisions and cites no solc), a printer from `Stmt` to Solidity
-  (`Calculus/RuleSyntax.lean` prints `sol{…}` notation only), any run of
-  `solc --ir`/`--storage-layout`, any use of solc's test suites, `symex_complete`.
+  repository's own compiler on random well-typed storages. It tests
+  `compile_correct`'s hypotheses and the generator, not solc.
+- **F, in part: solc's own suites** ([solidity-upstream-tests.md](solidity-upstream-tests.md),
+  `scripts/solidity-upstream.mjs`, results in `tests/upstream/results/`). The
+  complete 0.8.38 `test/` tree is archived. `syntaxTests` diagnostics are
+  compared with the pinned solc (a reference check: it does not test what
+  `sol{}` or the import refuses). `semanticTests` scalar vectors are replayed
+  on the typed interpreter through `solc_import`, in legacy and via-IR source
+  modes; each fixture is working, broken (a frontend gap or a mismatch) or
+  blocked (no adapter: gas, logs, revert data, aggregate/bytes ABI inputs,
+  host behaviour). Two via-IR modifier mismatches are real deltas
+  (`docs/solc-alignment.md`, "Remaining deltas").
+- **D, in part: hand-written EVM vectors.** `scripts/check-abi-vectors.mjs`,
+  `check-call-exception-vectors.mjs`, `check-transient-vectors.mjs`,
+  `check-slice-copies.mjs`, `check-recursive-types.mjs` compile fixed
+  programs with the SHA-pinned solc and run them on an externally supplied
+  EthereumJS VM, legacy and via-IR, against expected results. Optional; no Lake
+  dependency. Per-feature evidence, not a generated differential harness.
+- **Operand order is decided**: legacy by default, `Contract.evalOrder :=
+  .viaIR` for source order (`docs/options.md` O9).
 
-## What solc's source shows
+## Still to build
 
-**Operand order depends on the pipeline: one live disagreement.** Legacy
-evaluates a binary operator's **right operand first**
-(`libsolidity/codegen/ExpressionCompiler.cpp`, `visit(BinaryOperation)`); IR
-the **left first** (`libsolidity/codegen/ir/IRGeneratorForStatements.cpp:868-869`).
-`docs/ir-breaking-changes.rst:161-180`: `++a + a` at `a = 1` is `3` in legacy and
-`4` via IR, neither guaranteed. The elaborator follows legacy (`captureExpr`), so
-`x = i++ + i;` is proved about legacy and false under `--via-ir`. Options: (1) an
-elaborator parameter `legacy | ir`, default legacy; (2) refuse an effect in an
-operand whose order is observable, as `hoist` already does under `&&`/`||`, so a
-proof holds for both; (3) keep legacy and record it. Only (2) holds however the
-contract is compiled; take (1) if the corpus needs these programs.
+**B. solc facts, pinned.** One theorem per solc behaviour, closed by `decide`
+or `#guard`, in `Solidity/Counterexamples/`, citing solc's file and line at
+the pin: `a[i++] = i` writes `a[0] = 0`; `++a + a` at `a = 1` is `3` legacy and
+`4` via IR; `pop` zeroes the slot it frees; `delete` keeps a mapping.
+SolidCore's divergence log (below) is the fastest source.
 
-**Where the pipelines agree, and the model with them** (elaboration table in
-`solc-alignment.md`): assignment and `op=` do the right-hand side, then the target
-(legacy `ExpressionCompiler.cpp:319,331`; IR `:436,455`); `x++` reads, modifies,
-writes once (IR `:757-771`); base before index; call arguments left to right
-(legacy `:710-712`); `&&`/`||` short-circuit (IR `:855-859`); constants are folded
-(IR `:862-866`). Via IR, a modifier's parameters are re-initialised at each `_;`
-(`docs/ir-breaking-changes.rst:106-157`; with one `_;` outside a loop they agree,
-and with several, or one in a loop, the elaborator follows legacy: `wrapMods`
-runs the body again in the same locals) and `delete` of a storage struct zeroes padding too (`:77-104`; visible
-only with packed types and a low-level read).
+**C. The machine against a real EVM.** Every instruction of `Instr.step`
+against revm/evmone or Ethereum's `GeneralStateTests`; `compileStmt` against
+`solc --ir` statement by statement, `Evm/Compile.lean`'s pieces named after
+the helpers they mirror. The stipend is not modelled (a refusal stands for
+it).
 
-**Layout and panics.** `Evm/Repr.lean` is solc's layout
-(`docs/internals/layout_in_storage.rst:21-28`) except for `bool` beside a packable
-neighbour, so a slot-by-slot comparison is exact only for bool-free contracts;
-D compares *decoded values* using `solc --storage-layout` instead. Panic codes
-(`libsolutil/ErrorCodes.h:25-37`) collapse to `THalt.revert` in the model, except
-0x01 (a failed `assert`), which is `THalt.panic`; a harness records the code as an
-expected-cause tag, to catch a revert for the wrong reason.
-`unchecked` selects `wrapping_*` over `checked_*` helpers
-(`IRGeneratorForStatements.cpp:567-584`); `mod_…` checks a zero divisor in both.
+**D. A generated differential harness.** Lean generates a program, prints it
+as Solidity, a Node harness compiles it under legacy and via-IR, with and
+without the optimizer, runs it on an EVM, decodes storage by
+`--storage-layout`, and diffs with `Prog.runT`. Needs a printer from `Stmt C`
+to Solidity with a `#guard`ed round trip (none exists: `Calculus/RuleSyntax.lean`
+prints `sol{…}` only); the start state as a program (`Build.rootsProg`,
+`Typing/Constructibility.lean`, printed as `setUp()`); a `lean_exe` importing
+only `Syntax`, `Semantics` and `Tools/Show.lean`, so mutants (H) rebuild
+without proofs. The harness records the panic selector `0x4e487b71` and its
+code as an expected-cause tag. Verdicts `agree`, `model`, `unspecified`,
+`solc-bug`, `rejected`, pinned in a TSV with a check script. `Evm/Repr.lean`
+is solc's layout except `bool` beside a packable neighbour, so compare
+decoded values, not slots.
 
-**The IR is a composition of named helpers** from
-`libsolidity/codegen/YulUtilFunctions.cpp` (`checked_add_<T>`, `array_pop_<T>`,
-`copy_struct_to_storage_from_<F>_to_<T>` at `:3763`, `cleanup_storage_array_end_<T>`,
-`panic_error_0x<nn>`), named by type identifiers (`Types.cpp:264-285`). `solc --ir`
-lists every helper a contract instantiates: a coverage measure for E and the finite
-lemma set for I.
+**E. Test inputs.** Bounded enumeration over one universe contract with every
+shape, values from pools (`0`, `1`, `2^256-1`, `±2^255`, `-1`); coverage
+targets (every `Taclet`/`LeanTaclet` constructor under both modalities, a
+succeeding and a reverting case per guard, the `solc --ir` helper names
+reached); path-directed inputs from `sol_symex`'s path conditions; a source
+generator for `hoist`/`captureExpr` (`a[i++] = i`, `m[k][k++] = …`,
+`p.age += i++`).
 
-**Open decisions in the model.**
-- *Struct and array sources are not right-hand-side first* in solc (target
-  resolved, then member-by-member copy); the interpreter is value-first
-  (`solc-alignment.md`, "Known divergence").
-- *`transfer` assumes the world pays.* `TRun.transfer` books `net` and nothing
-  else: no funds check, no refusing recipient. The machine has both (`bal`,
-  `accepts`), and `compile_correct` states the difference as a third outcome,
-  the machine reverting alone in code that pays, so the box carries over
-  (`compile_box`) and the diamond does not: a payment has no rule under the
-  diamond (`transferDiamond` closes it to `false`), since the EVM gives no
-  termination the calculus could promise. Receivers are `uint`,
-  not cut to 160 bits.
-- *The callback reading belongs to `call{value:}`.* Under the 2300-gas stipend a
-  callee cannot change storage, `net` or `selfBalance` (EIP-2200), so for `transfer`
-  and `send` the right reading is no callback, the recipient free to revert.
-  `a.call{value: v}("")` forwards all gas; the front end lowers
-  `(bool ok, ) = a.call{value: v}("")` to `bool ok = a.send(v)`, as solkey does,
-  so only `Semantics/Callback.lean`'s havoc (`holdsC`) reads it faithfully
-  (`docs/solc-alignment.md`).
+**F, the rest.** Widen the runtime adapter past its blocked list; use
+`syntaxTests` as the oracle for what the import must refuse and accept; turn
+each fragment-relevant `bugs.json` row into a regression expecting the fixed
+behaviour under its `conditions`.
 
-## Deterministic checks
+**G. Each rule against solc directly.** Per constructor (`#enum_ctors`,
+`Calculus/RuleShapes.lean`): a canonical instance, its premise evaluated
+through the updates and `Tm.denote` (a path independent of the interpreter),
+and the instance compiled and run: three computations, so a disagreement says
+which is wrong.
 
-**A. The trusted base, in CI.** `#print axioms` on `Stmt.sound` (`Calculus/Sound.lean`), `Proves.sound`,
-`Proves.fmlValid`, `ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
-`Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
-the closure (`Calculus/RuleShapes.lean:44` uses them; the
-closure decides). A day; every other check assumes it (L4).
+**H. Mutation testing.** Mutate the typed run one decision at a time (RHS
+after target, a range check dropped, `pop` not clearing, `delete` resetting
+mappings, a push not reusing its slot, `**` unchecked, `transfer` not
+debiting) and `Calculus/Rules.lean` (drop a guard, swap a capture order);
+require the suite to kill each. A survivor is a decision no test observes.
 
-**B. solc facts, pinned.** One theorem per solc behaviour, closed by `decide` or
-`#guard`, in `Solidity/Counterexamples/`, citing solc's file and line at the pinned
-version: `a[i++] = i` writes `a[0] = 0`; `++a + a` at `a = 1` is `3` legacy and `4`
-via IR; `pop` zeroes the slot it frees; `delete` keeps a mapping. Re-check the
-citations when re-pinning.
+**I. Translation validation through solc's Yul** (a sibling repository: a Yul
+semantics such as EVMYulLean pulls Mathlib). One lemma per `--ir` helper
+instantiation (done twice: `Evm/Signed.lean`, `Evm/Exp.lean`); a validator
+matching `fun_f_<id>` to the `Stmt` and emitting a simulation proof. Trusted:
+the Yul optimizer and assembly. Legacy has no IR; D covers it alone.
 
-**C. The machine and compiler against reality (L1 via `compile_correct`).**
-- *Done:* `CALL` from the Yellow Paper: a world state (`bal : Nat → Nat`, the
-  contract's address `self`) in place of `net`; a transfer to itself moves nothing;
-  the callee's acceptance is a parameter (`accepts`) and the theorem quantifies over
-  every one. The stipend is not modelled: a refusal stands for it.
-- *Done:* `Sim` relates real quantities: `net(a) = bal₀ a - bal a` at every address
-  but the contract's own, whose entry is pinned to `0` (`Sim.netSelf`), so a wrong
-  `net` update fails the theorem, a payment to the contract itself that books
-  something included; `compile_net` reads the ledger off a run.
-- Every instruction against a real EVM (revm/evmone or Ethereum's
-  `GeneralStateTests`): `#difftest` compares interpreter with machine, this compares
-  machine with EVM.
-- `compileStmt` against `solc --ir` statement by statement (compiled `transfer` as
-  `send`, with an interpreter that did not revert, and the theorem would still hold).
-  Name `Evm/Compile.lean`'s pieces after the helpers they mirror; where shapes cannot
-  match are the documented deltas.
+**J. A rule-to-solc map**, `docs/rule-solc-map.md` beside
+`docs/lean-key-rule-map.md`: per constructor the legacy and IR code site, the
+`YulUtilFunctions.cpp` helper, the `TRun.*` clause and witnesses, with a
+script checking every constructor has a row.
 
-## Differential testing on an EVM
+**K. Blind prediction.** An agent sees only solc's source and a snippet and
+predicts the outcome; another compares with the Lean. Each disagreement
+becomes a B fact or a G case. Checklist: evaluation order per pipeline, which
+checks fire, cleanup, reference or copy, dangling references, effects before a
+revert, `bugs.json` rows.
 
-**D. The harness.** Lean generates a program `P`, prints it as a Solidity case
-(`source`, `setUp`, `calls`), a Node harness compiles it with solc under legacy and
-via-IR, with and without the optimizer, at pinned versions, runs it on an EVM, decodes
-the storage by `--storage-layout`, and diffs with the typed run (`Prog.runT`, `Tools/Run.lean`). The Lean side, with no
-dependency:
-- a **printer** from `Stmt C` to Solidity (`Solidity.Tools.Emit`), its round trip
-  `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated
-  programs, so a mismatch is the interpreter's fault);
-- the **start state as a program**: `Build.rootsProg` (`Typing/Constructibility.lean`;
-  `reachable_iff`: it builds every reachable storage whose words, keys and
-  slots are in range) printed as `setUp()`, so no
-  storage is encoded into slots and past-end slots come from push, pop and aliases;
-- **`lake exe solcases`**, a `lean_exe` beside `solkeycheck` importing only `Syntax`,
-  `Semantics` and `Tools/Show.lean`, so mutation runs (H) rebuild it without the
-  proofs.
+**L. Adversaries.** For each surviving mutant, a program that tells it apart;
+for each solc helper the model has an opinion on (`array_pop_<T>` against
+`storagePopSave`, `cleanup_storage_array_end_<T>` against the past-end
+shadow), the cases where they could differ. Dangling references and past-end
+slots are the richest target.
 
-Per case and pipeline the harness reads the status and panic selector `0x4e487b71`
-and every variable's storage (arrays to the larger of the old and new length,
-mappings at the keys the case mentions). solkey's Besu `EvmContractRunner` is the
-shortest path; evmone is what solc's tests use (`test/EVMHost.cpp`,
-`test/Common.h:41-48`). Pin the EVM version: 0.8.37 defaults to Osaka
-(`liblangutil/EVMVersion.h:174`). Verdicts: `agree`; `model` (differs from both
-pipelines); `unspecified` (the pipelines differ; the case records which one the model
-follows); `solc-bug` (matches a `bugs.json` row's `conditions` at the pinned
-version); `rejected` (solc refuses the printed program: a printer or typing bug here).
-They live in a TSV beside `expected.tsv` with a check script like `check-corpus.sh`,
-so a changed verdict fails CI.
+**M. Symbolic execution is exact.** Proved: one rule per statement
+(`Stmt.rule_exists`, `Rule.iff_step`, `Rule.premise_unique`) and
+`symex_sound`. Missing: `Premise.Sound` as an equivalence and
+`symex_complete : holds σ φ → holds σ (symex n φ)`, which would make L3 a
+theorem for loop-free formulas. The callback calculus is incomplete by design
+(havoc); loops make completeness relative to invariants.
 
-**E. Test inputs.** They compose:
-- *Bounded enumeration*: one universe contract with every shape (`uint`/`int`/`bool`
-  roots, dynamic and fixed arrays, a struct with a word, `bool`, mapping and array
-  member, an array of it, a mapping to it, memory locals), every well-typed program up
-  to a size bound, values from pools (`0`, `1`, `2`, `2^256-1`, `±2^255`, `-1`),
-  reduced by symmetry, sized by `#eval`. The small-scope hypothesis; it would have
-  found the operand-order issue mechanically.
-- *Coverage targets*: every `Taclet`/`LeanTaclet` constructor under both modalities in
-  at least *k* agreeing cases, a succeeding and a reverting one per guard (`Rule.iff_step`
-  makes it a function of the program); every `.error .revert` site in `Semantics.lean`
-  on both sides; the union of `solc --ir` helper names against the
-  `YulUtilFunctions.cpp` families reachable from the fragment. Rule × helper exposes a
-  rule tested through only one of several solc paths (storage-to-storage and
-  memory-to-storage copies are one rule, two helper instantiations).
-- *Path-directed inputs*: `sol_symex` leaves one goal per path; solving its path
-  condition (`z3` on SMT-LIB, or `Tools/Counterexample.lean`'s witness search) gives one
-  test per path, including the exact overflow boundary.
-- *A source-level generator* for `hoist`/`captureExpr`, which the printer never tests:
-  effects inside expressions (`a[i++] = i`, `m[k][k++] = …`, `xs[i++].push(i)`,
-  `p.age += i++`), the same text to solc and `sol{…}`.
+**N. Reflective decision procedures.** `sol_decide`'s reduction is sound
+(`Fml.Valid.of_reduceS`); replace its last `omega | grind` step by fragment:
+key equalities and reads of writes, linear arithmetic, then 256-bit words on
+`BitVec` with `bv_decide`.
 
-**F. solc's own suites and bugs.**
-- `test/libsolidity/semanticTests/` (1697 files: a contract plus expected calls such
-  as `// g() -> FAILURE, hex"4e487b71", 0x11`, run in solc's CI under legacy, IR and
-  SSA-CFG). The expected values are the oracle, so no EVM: a translator from isoltest
-  to `#run` plus `#guard`, what solkey did by hand for `solc/*.sol`. One agent per
-  directory (`array` 228, `viaYul` 92, `various` 66, `operators` 63, `structs` 61,
-  `storage` 44, …), recording why each file is out of the fragment, which measures its
-  width.
-- `test/libsolidity/syntaxTests/` (3535 files with expected errors): the oracle for the
-  static side, what `sol{…}` must refuse (`Src.copy`'s `mapFree`, data locations,
-  lvalues) and accept.
-- `docs/bugs.json`: each fragment-relevant row (`DynamicArrayCleanup`,
-  `StorageWriteRemovalBeforeConditionalTermination`,
-  `FullInlinerNonExpressionSplitArgumentEvaluationOrder`, `SignedArrayStorageCopy`, …)
-  is a regression case expecting the *fixed* behaviour; its `conditions` (`viaIR`,
-  `optimizer`, `evmVersion`) name the configuration that must show the bug, which tests
-  the harness too.
-
-**G. Each rule against solc directly**, bypassing the typed run. For each
-`Taclet`/`LeanTaclet` constructor (`#enum_ctors`, `Calculus/RuleShapes.lean`): a
-canonical instance and start state; evaluate the rule's premise through the updates and
-`Tm.denote` over `State.abs` (a different path from the interpreter); compile the
-instance with solc and run it. Three independent computations, so a disagreement says
-which is wrong. Runner: `solc --ir` with `test/tools/yulInterpreter/`, or evmone.
-
-**H. Mutation testing.** A suite that always agrees may be too weak to disagree.
-Mutate the typed run (`Semantics/Run.lean`, `Semantics/Storage.lean`) one decision at
-a time (RHS after target, a range check of `PrimTy.ofInt?`
-dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its slot,
-an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
-to kill each. Mutate `Calculus/Rules.lean` too (drop a guard, swap a capture order): if
-`Stmt.sound` still builds, the semantics does not constrain that detail (a freedom or
-a hole in the typed run); if G misses it, G is too weak. A survivor is a decision no test
-observes. Proofs do not build on a mutant, hence `solcases` must not import them.
-
-## Translation validation through solc's Yul
-
-**I.** For a program that matters (a benchmark, a published specification), *prove*
-that solc's output agrees with the typed run, checking each output instead of trusting the
-compiler (CompCert's approach to an untrusted pass).
-1. A **Yul semantics in Lean** for what `--ir` emits. EVMYulLean (below) is one but
-   pulls Mathlib, so the bridge lives in a sibling repository requiring both, as the
-   `SolKey` reader does.
-2. **One lemma per helper instantiation**, from the `--ir` helper list over E's
-   universe contract. Done twice: `checked_add_t_int256` and siblings
-   (`Evm/Signed.lean`), `checked_exp_unsigned` (`Evm/Exp.lean`). The rest is the same
-   work per family.
-3. **A structural match per program**: `fun_f_<id>` is `f`'s statements in order, each a
-   composition of helper calls on fresh `expr_<n>` variables. A validator parses
-   `solc --ir` (or `--ir-ast-json`), matches the body to the `Stmt`, discharges each call
-   with its lemma, and emits a Lean proof that the Yul simulates `Prog.run P` under the
-   layout.
-4. **Trusted**: the Yul optimizer and Yul-to-EVM assembly. `--ir-optimized` is still Yul,
-   but the match weakens into an equivalence proof. Legacy has no IR: D covers it alone.
-
-By-product: `--ast-compact-json` as a second front end checks the elaborator's name
-resolution against solc's (it would have caught the `sol!` name-typing gap in
-`solc-alignment.md`).
-
-## Checks an LLM does by reading the code
-
-**The LLM proposes, the harness decides**: an agent hands in something checkable (a
-witness program with solc's expected result, a table row a script checks), never a
-verdict alone.
-
-**J. A rule-to-solc map**, `docs/rule-solc-map.md` beside `docs/lean-key-rule-map.md`:
-per constructor, the legacy function and line, the IR function and line with its
-`YulUtilFunctions.cpp` helper, the typed run's clause (`TRun.*`), and witnesses (B facts, G cases).
-One agent per rule family; `scripts/check-rule-solc-map.mjs`
-checks that every constructor has a row and every cited witness
-exists.
-
-**K. Blind prediction, one checklist.** One agent sees only solc's source and the
-snippet, never the Lean, and predicts the outcome; a second compares with the Lean.
-That avoids anchoring; each disagreement becomes a B fact or a G case. All agents use
-one checklist: evaluation order per pipeline; which checks fire (overflow, bounds, zero
-divisor, empty `pop`); cleanup (`pop`, `delete`, past-the-end slots); reference or
-copy, dangling references; memory or storage source; effects before a revert;
-`bugs.json` rows at the pinned version.
-
-**L. Adversaries.** Each mutant of H that nothing kills goes to an agent whose only job
-is a program that tells it from the original. For each solc helper behind a statement
-the model has an opinion on, an agent reads helper and Lean side by side and writes the
-cases where they could differ (`copyStructToStorageFunction` against
-`Storage.write`/`SVal.overlay`; `array_pop_<T>` against `storagePopSave`;
-`cleanup_storage_array_end_<T>` against the past-end `shadow`). Dangling references and
-past-end slots are the richest target, including the delta no test reads (`arr.push(v)`
-of a struct over a recycled slot).
-
-## Completeness and automation
-
-Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`,
-`Rule.iff_step`, `Rule.premise_unique`). Symbolic execution is fuelled
-(`symex n`): a program it does not finish leaves a modality, which
-`sol_prove` rejects; its progress and termination (`Fml.active_iff_step`,
-`symex_terminates`) were retired at W4 `calc-del` (`docs/intrinsic.md`). Not proved: `⊨ᶠ φ ↔ ⊨ᶠ symex n φ`
-(`symex_sound` is one direction). How much of Solidity the fragment covers is a
-measurement (F, `docs/corpus-parity.md`), not a theorem.
-
-**M. Symbolic execution is exact; premises as equivalences.** The rules are
-equivalences in substance (an update arm is an equation between runs, `*_agrees`, `Calculus/SoundArms.lean`);
-the update rules are one way only (`UpdRuleS.sound`: over the typed state a merged update
-may reach a state the two in turn do not). Missing: `Premise.Sound` as an equivalence and
-`symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid
-exactly when its modality-free form is: relative completeness, so the calculus is never
-why a proof fails, and L3 becomes a theorem.  The typed run has no `stuck` (it halts by
-`THalt` alone), so the converse needs no side condition of that kind.  The callback
-calculus is
-incomplete by design (havoc); loops (`docs/loops.md`) make completeness relative to
-invariants.
-
-**N. Reflective decision procedures.** A tactic cannot be proved complete; a function
-`dec : LFml → Bool` with `dec ψ = true ↔ ∀ σ, ψ.holds σ` can, and `sol_decide`'s
-reduction is sound (`Fml.Valid.of_reduceS`) and its reads' elimination an equivalence
-(`LFml.valid_iff_cons`; the last step is `omega | grind`). Replace that step by fragment: key equalities and
-reads-of-writes (congruence closure over symbolic keys; small; first), linear arithmetic
-over bounded integers, then nonlinear, `**` and bitwise on 256-bit words (finite, so
-decidable: `bv_decide` gives kernel-checked LRAT certificates, so stating the arithmetic
-on `BitVec 256` makes automation complete up to SAT time). Quantifiers leave
-decidability; test them (O).
-
-**O. Testing the heuristic automation** (`sol_close`, `sol_spec`, `grind` glue).
-- *Known-valid goals from runs*: state a generated program's exact final state as the
-  postcondition; `#verify` must answer ✓, a perturbed conjunct ✗ with a certified
-  witness. A "gave up" on a valid goal is a gap; count gaps in a TSV and fail CI when the
-  count rises.
-- *Two-sided agreement*: each generated goal is proved or refuted by `Fml.eval3`
-  (`Tools/Counterexample.lean`); on a `sol_decide` failure, `z3` or `bv_decide` on the
-  reduced formula tells an invalid goal from `omega` giving up.
-- *Metamorphic tests*: a proof survives renaming locals, reordering independent
-  statements, `x += a` as `x = x + a`, `unchecked` around a non-overflowing statement,
-  and introducing an alias.
-- *A budget*: heartbeats per goal, so a slowdown shows before a failure.
+**O. Testing the heuristic automation** (`sol_close`, `sol_spec`). Known-valid
+goals from runs (`#verify` must answer ✓, a perturbed conjunct ✗); two-sided
+agreement with `Fml.eval3` (`Tools/Counterexample.lean`); metamorphic tests
+(renaming, reordering independent statements, `x += a` as `x = x + a`); a
+heartbeat budget per goal.
 
 ## Related Lean projects
 
-All pull Mathlib (directly or through EVMYulLean), so none can be a `[[require]]` here:
-use them as data, as external programs, or from a sibling repository.
+All pull Mathlib, so none can be a `[[require]]` here: use them as data, as
+external programs, or from a sibling repository.
 
-- **SolidCore** (`paradigmxyz/solidity-lean`, read at `f22b110`, 2026-09-30): an
-  executable semantics of Solidity 0.8.35 (legacy) whose observable results match solc
-  bytecode on a real EVM through Foundry; about 1,188 `.sol` cases and a harness
-  (`tests/forge-harness`), which is D working. Its `DIVERGENCE-LOG.md` (135 EVM-verified
-  rows) is the fastest source of B facts: #187 (legacy evaluates the right operand
-  first, `ExpressionCompiler.cpp:614-615`), #189/#190 (tuple components and siblings
-  left to right), #177 (a storage reference to an element is bounds-checked once, so
-  after `pop()` it reads the zeroed slot), #204 (`push()` only bumps the length, so a
-  write through a dangling reference survives the re-grow: the recorded
-  push-over-a-recycled-slot delta). D's printer should emit their case format; a sibling
-  repository can run the typed run and their interpreter on the same programs with no EVM in
-  the loop, and later prove a simulation, so `Stmt.sound` reaches a semantics tested
-  against the EVM. Methods to copy: a pinning test per fix (99 witness modules), a classed
-  divergence log, fault-injected detectors.
-- **EVMYulLean** (`NethermindEth/EVMYulLean`): EVM and Yul at Cancun, 22,330 of 22,332
-  conformance tests; I's Yul semantics and C's reference. Use Paradigm's fork
-  (`danrobinson/EVMYulLean`), which carries corrections.
-- **Clear** (`NethermindEth/Clear`): optimised Yul into Lean with verification-condition
-  templates; its parser could be I's matcher. From 2024, tied to optimiser flags.
-- **Solidus** (<https://www.paradigm.xyz/writing/solidus>): a verified compiler from
-  SolidCore to EVM, so proofs tied to SolidCore reach Solidus output (not solc's). Its
-  cost (about 1,700 agent-hours, $150k, humans on design and specification) is the
+- **SolidCore** (`paradigmxyz/solidity-lean`): an executable semantics of
+  Solidity (legacy) matched against solc bytecode on a real EVM through
+  Foundry, about 1,188 cases. Its `DIVERGENCE-LOG.md` is a source of B facts
+  (legacy right operand first; a storage reference bounds-checked once; a
+  write through a dangling reference surviving `push()`).
+- **EVMYulLean** (`NethermindEth/EVMYulLean`; Paradigm's fork carries
+  corrections): EVM and Yul, I's semantics and C's reference.
+- **Clear** (`NethermindEth/Clear`): optimised Yul into Lean; its parser
+  could be I's matcher.
+- **Solidus**: a verified compiler from SolidCore to EVM; its cost is the
   reference for I.
 
 ## Order of work
 
-Each step is useful alone and fans out to parallel agents.
-
-1. **A**; **B** seeded with the open decisions; decide the operand order and fix
-   `solc-alignment.md`; **C**'s `CALL` (done: real balances, `compile_correct`'s
-   third outcome).
-2. Triage SolidCore's divergence log against the fragment, one agent: each relevant row a
-   B fact or a `Counterexamples/` entry.
-3. **J** and **K**, one agent per rule family.
-4. **D** emitting SolidCore's case format over E's universe contract, through their
-   Foundry harness or solkey's Besu runner.
-5. **F**, one agent per directory, then **G**.
-6. Coverage reports (rule, halt cause, helper), **H**, **L**. After this "the semantics
-   agrees with solc" and "the rules match Solidity" are measured claims: which programs,
-   states and pipelines, and which mutants are killed.
-7. **M**, then **N** (key equalities, then `bv_decide`), and **O** as automation grows.
-8. **I** in a sibling repository: Yul semantics, helper lemmas per family, the per-program
-   matcher for the benchmark contracts; and the Lean-to-Lean run with SolidCore. After
-   this the claim is proved for the contracts that matter.
+1. **B**, seeded from SolidCore's divergence log; **J** and **K** per rule
+   family.
+2. **F**'s rest: the runtime adapter's blocked families, `syntaxTests` as the
+   import's oracle, `bugs.json`.
+3. **D** with **E**'s universe contract, then **G**.
+4. Coverage reports, **H**, **L**.
+5. **M**, **N**, **O** as automation grows.
+6. **C** against a real EVM; **I** in a sibling repository.

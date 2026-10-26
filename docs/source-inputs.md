@@ -36,15 +36,8 @@ wider native countermodel, and premise inclusion even without a direct read.
 The CLI regression rejects decimal and hexadecimal out-of-range inputs before
 starting compiler or proof jobs.
 
-The source `FunctionTypes.sol` positive `externalValue` verdict remains
-`proved`; its assertions and expected status are not weakened. Combined
-validation of these changes is **in progress** in
-[feature-work/integration.md](feature-work/integration.md).
-
 The source problem printer evaluates the imported contract and formula only to
-render their typed data. These two metaprogramming sites replace the former
-string-evaluation site in the trust inventory; they neither create proofs nor
-decide whether an obligation holds.
+render them (two trust-inventory sites); it creates no proofs.
 
 `#solkey_problem` preserves the source premises in its displayed obligation:
 each implication is shown before the named call, with nested quantified
