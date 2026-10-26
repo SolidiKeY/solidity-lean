@@ -182,7 +182,9 @@ The patch reuses existing declaration-indexed alias/call machinery:
   a nominal source name such as `Fixed` against ABI `int128`. Internal helpers
   cannot capture an ABI call. Rows without a source declaration retain the
   existing signature fallback used by native controls. A present declaration
-  without a canonical signature does not fall back.
+  without a canonical signature does not fall back. Imported canonical
+  signatures compare exactly. Native fallback normalizes parameter types only,
+  preserving function names containing text such as `uint256` or `int256`.
 * An inconclusive runtime call retains the completed observations, the current
   blocked vector and the precise fuel/panic/return diagnostic. It remains blocked
   before expectation comparison. This repairs reporting, not runtime semantics.
@@ -236,14 +238,14 @@ unexecuted, so the complete fixture is blocked. No expected failure is inferred
 from exhaustion.
 
 The broad value-type fixture already passed on master. An intermediate rerun
-timed out under concurrent verification; that evidence is retained. Its final
+timed out under concurrent verification; that evidence is retained. Its pre-canonical
 serial rerun passed both modes with the original 120,000 ms per-process timeout
 and 1,000 loop fuel (238.135 seconds including both modes and setup).
 
 Full before/intermediate/final reports, per-source SHA-256 values and exact
 argument lists are saved in [group03-results.json](../../tests/upstream/group03-results.json).
 The final model SHA-256 is
-`0e9eb4d5e568b5b51a223d5e3be435b34088b20a7e4176112e4ce32e8ef23b8f`.
+`ea3cf959ff9eaee92b01f4aa6f36a4b799440607f5c43662a236d016143d9796`.
 The current-master before hash is
 `c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`.
 Historical model hashes remain in the original results. All stages use compiler
@@ -284,8 +286,8 @@ with `--via-ir` for the IR fixture.
 
 Lean MCP diagnostics were not exposed. Configured per-file commands checked
 Body, Contract and Upstream with `lake --no-build lean FILE -- --tstack=131072`.
-Their wall times were 32.920 s, 32.471 s and 3.073 s respectively. Final focused
-operator controls took 10.499 s and final replay controls 5.047 s. No heartbeat
+The earlier wall times were 32.920 s, 32.471 s and 3.073 s respectively.
+Final canonical operator controls took 6.935 s and replay controls 5.067 s. No heartbeat
 limit was raised. The 14 adapter tests, strict automation (491 automatic,
 61 budgeted, 11 refuted, zero pending), reachability (667 modules, zero orphans),
 layering (143 core modules, zero frontend reach), frozen TestSuite audit and
@@ -307,3 +309,83 @@ plus blocked-prefix evidence in Upstream. No unpublished group patch is required
 Runtime fixture agreement is observational evidence; only the stated algebra
 and concrete regression claims are kernel proofs, not a universal solc/model
 correspondence theorem. Compiler acceptance is reference-solc evidence.
+
+### Canonical function-name identity control
+
+A final read-only review exposed a separate adapter bug: global replacement of
+`uint256`/`int256` also changed function names. `route_uint256()` incorrectly
+selected an earlier `route_uint()`, returning 11 instead of 22; a deliberately
+wrong expectation of 11 falsely passed. Both compiler pipelines and native
+replay reproduced the defect before the repair. Imported declaration signatures
+are canonical already and now compare exactly; native signature compatibility
+normalizes only the parameter suffix. The selected-external-entry guard remains.
+
+`tests/upstream/AbiIdentity.lean` now checks four distinct function identities and
+rejects the former false-passing output in legacy, via-IR and native replay.
+All six checks pass. The independently reviewed implementation is commit
+`49ce97cb`, following `663a6113`; neither commit was pushed or merged.
+
+### Broader validation and executor resource limits
+
+The first cold `run-lean.sh` was interrupted by an environment restart after
+542/649 jobs, with no errors reported. Its complete log is retained at
+`.lake/upstream/group03-full-build.log`. Runtime versions and the successful
+`Solidity.KeySort` gate were rechecked after reconnection.
+
+The resumed broad library run reached 643/649 jobs. The unchanged
+`Solidity.Examples.Decision` regression did not finish within a declared
+900-second per-file validation budget and was stopped after 918 seconds. Its
+297-module transitive import closure contains none of the three changed model
+files. This broader gate is **resource-blocked**, not passing and not an observed
+semantic regression. The full resumed log and dependency evidence are retained
+at `.lake/upstream/group03-full-build-resumed.log` and
+`.lake/upstream/group03-decision-independence.json`. No proof limit was raised.
+
+The first frozen-corpus build lost `TestSuite.Derived17` with exit 137.
+`/sys/fs/cgroup/memory.max` reported 16 GiB, and `memory.events` confirmed one
+out-of-memory kill. Its complete build log was retained before the existing
+check script deleted its temporary output. An isolated
+`LEAN_NUM_THREADS=1 lake build Solidity.TestSuite.Derived17` passed in
+256.844 seconds with no additional OOM event. `lake build SolkeyTestSuite` then
+passed. The frozen-corpus rerun passed with `check-corpus: ok` against
+SolKey `473da8944c`; the 774-obligation partition is unchanged. This changes
+build concurrency, not statements, premises, proof budgets or expected results.
+
+The final frozen sort rerun passed (377 taclets, 131 read-bearing annotations).
+`#print axioms` for the existing `custom_zero_valid` and
+`false_builtin_invalid` headline results also reports only the allowed standard
+axioms. Final task-specific commands additionally include:
+
+```sh
+lake --no-build lean tests/upstream/AbiIdentity.lean -- --tstack=131072
+LEAN_NUM_THREADS=1 lake build Solidity.TestSuite.Derived17
+LEAN_NUM_THREADS=1 lake build SolkeyTestSuite
+LEAN_NUM_THREADS=1 scripts/check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples
+```
+
+### Final handoff evidence
+
+Final canonical-identity revalidation again gives ten working fixtures in both
+required pipelines, three explicit assembly exclusions and one fuel block. The
+largest value-type fixture completed both modes in 193.933 seconds, with the
+same 120-second per-process limit and 1,000 fuel. Earlier reports are retained
+as separate attempts; none was overwritten or merged into historical results.
+
+[group03-validation.json](../../tests/upstream/group03-validation.json) records
+exact commands, exit statuses, complete-log hashes, timings, all twelve checked
+axiom sets, executor memory evidence and the unchanged decision dependency
+closure. [group03-results.json](../../tests/upstream/group03-results.json) embeds
+all per-fixture observations and hashes, including the final canonical attempt.
+The implementation is `49ce97cb` on `codex/group03-operators`, based on the
+requested `006fcd59`; the preceding repair is `663a6113`. No push or merge was
+performed. The broader library gate remains explicitly resource-blocked at the
+unchanged decision regression; TestSuite, frozen sort, frozen corpus, affected
+modules, source controls and structural gates passed. The documentation-path
+gate retains only its thirteen baseline missing references.
+
+The final read-only finder and independent skeptic verified all 57 report hashes,
+17 validation-log hashes, fourteen archived source hashes, control fixture hashes,
+the final model digest and all twelve standard axiom sets. Neither opened a Lean
+worker or ran a build. The skeptic's timing-label correction is applied above;
+no confirmed implementation, proof, fixture-status or resource-classification
+issue remains.
