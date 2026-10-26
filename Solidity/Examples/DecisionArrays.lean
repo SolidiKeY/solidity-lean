@@ -1,7 +1,7 @@
 import Solidity.Examples.Decision
 
 /-!
-# The closer's decision on blocks over storage arrays (M7, feature 31)
+# The closer's decision on blocks over storage arrays (M7, feature 32)
 
 `decideLeaf` (`Calculus/Decision.lean`) on a negative block over a storage
 array, over `Gaps` of `Examples/Decision.lean`: the counterexample once

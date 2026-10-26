@@ -465,7 +465,7 @@ local instance : InContract := ⟨Gaps⟩
 /-! ### Quantifiers over contents
 
 Outside `apfPrep`'s shapes once; all decided since (features 16 to 21,
-pinned below; `gapArrayBlock` by feature 31, `Examples/DecisionArrays.lean`). -/
+pinned below; `gapArrayBlock` by feature 32, `Examples/DecisionArrays.lean`). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }

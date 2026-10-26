@@ -91,7 +91,7 @@ preparation has), reads at no bound variable hoisted out
 (`Fml.ledgerCovered`), with blocks over it instantiated likewise
 (`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices,
 with blocks over them instantiated likewise (`Fml.arrayBlockCovered`,
-`arrayBlockReduction?_isSome`, feature 31)
+`arrayBlockReduction?_isSome`, feature 32)
 (`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
 `int` read as ledger entries (`Fml.kintCovered`, `decideKInt`), or binders of
 KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`); `decideGoal` likewise
@@ -147,7 +147,7 @@ on a leaf both refuse, the pipeline with storage array reads
 (`ledgerReduction?`, `LedgerReduction.verify`); then the one with blocks
 over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`);
 then the one with blocks over storage arrays (`arrayBlockReduction?`,
-`ArrayBlockReduction.verify`, feature 31). -/
+`ArrayBlockReduction.verify`, feature 32). -/
 def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -268,7 +268,7 @@ quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
 reads (`Fml.ledgerCovered`, M7 step 3), the one with storage array reads
 (`Fml.arrayCovered`, M7 step 6), the one with blocks over the ledger
 (`Fml.ledgerBlockCovered`, feature 21), and the one with blocks over storage
-arrays (`Fml.arrayBlockCovered`, feature 31). -/
+arrays (`Fml.arrayBlockCovered`, feature 32). -/
 def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
   φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered ||
     φ.ledgerBlockCovered || φ.arrayBlockCovered
@@ -404,7 +404,7 @@ theorem decideKInt_refutes {φ : Fml C []} {σ : State C []} (h : decideKInt φ 
   · exact fun hφ => decideLeafA_refutes h (Fml.holds_zT 0 φ σ hφ)
   · cases h
 
-/-! ### Binders of KeY's `int` over two words (M7, feature 30)
+/-! ### Binders of KeY's `int` over two words (M7, features 30 and 31)
 
 A leaf whose binders of KeY's `int` read them linearly against bounded
 terms is read with each such binder over two words (`Fml.kencB`,
@@ -507,7 +507,7 @@ def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
 arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
 binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
-feature 30). -/
+features 30 and 31). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
   φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered
 

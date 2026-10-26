@@ -57,7 +57,7 @@ positions of the block body); every other read of such a root outside
 the fragment.  Nested mappings `m[i][j]` with two bound indices on one
 path are outside (a decision recorded in `docs/automation.md`, M7).
 
-Dynamic arrays of primitives (feature 31): at a `uint` pass a block may
+Dynamic arrays of primitives (feature 32): at a `uint` pass a block may
 read a root's array at its variables (`ApfTm.rat`, the slot test `rhas`,
 the length `rlen`, the Theory's conditional read `ite`).  The rebuilt
 array (`FloorShape.arr`) keeps its live length and holds at slot `i` what
@@ -100,7 +100,7 @@ inductive FloorShape (K : PrimTy) : Ty → Type where
   | floor {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K V))
   | outer (K' : PrimTy) {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K' V))
   /-- A dynamic array of primitives at a `uint` pass: each slot floored,
-  the live length kept (feature 31). -/
+  the live length kept (feature 32). -/
   | arr {e : PrimTy} (hK : K = .uint) : FloorShape K (.ref (.array (.prim e)))
 
 /-- `floor` at a key type `K'` that is `K`. -/
@@ -132,7 +132,7 @@ def FloorShape.hasArr {T : Ty} : FloorShape K T → Bool
 def FloorShape.fU (hK : K = .uint) (f : K.Denote → K.Denote) : PrimTy.uint.Denote → PrimTy.uint.Denote :=
   hK ▸ f
 
-/-- **A floor an array can be rebuilt at** (feature 31): monotone, and
+/-- **A floor an array can be rebuilt at** (feature 32): monotone, and
 never above its key, so the slots below the live length stay there. -/
 def ArrOK (ok : OrdK K) (f : K.Denote → K.Denote) : Prop :=
   (∀ x y : K.Denote, ok.val x ≤ ok.val y → ok.val (f x) ≤ ok.val (f y)) ∧ ∀ x : K.Denote, ok.val (f x) ≤ ok.val x
@@ -709,7 +709,7 @@ inductive ApfTm (Rs : ARoots) : Bool → {s : Srt} → LTm C s → Type where
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zbin op h) a b)
   | zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint} (ha : ApfTm Rs false a)
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zcmp op h) a b)
-  /-- An array element along a path of a root of `Rs` (feature 31). -/
+  /-- An array element along a path of a root of `Rs` (feature 32). -/
   | rat {R : RefTy} {E : Ty} (ar : ArrTy R E) {q : LTm C (.path (.ref R))} {i : LTm C (.val .uint)}
       (hq : ApfTm Rs true q) (hi : ApfTm Rs false i) : ApfTm Rs true (.index (.arr ar) q i)
   /-- An array element elsewhere. -/
@@ -2963,7 +2963,7 @@ def apfRoots (ok : OrdK K) (B : LFml C) : List (MRoot C) × ARoots :=
 ledger or is an `int` one (the regions past the goal's keys then read a
 free word, not the last key's); the conditions' terms and the successors
 of the guards' operands; the terms `extra` (an array's length atom,
-feature 31); each term once. -/
+feature 32); each term once. -/
 def apfKeys (ok : OrdK K) (Rs : ARoots) (B : LFml C) (h : ApfFml Rs B) (extra : List (IdxKey C K) := []) :
     List (IdxKey C K) :=
   dedupKeys (IdxKey.base ok :: ((if Rs.net || !ok.netB then [IdxKey.top ok] else []) ++
@@ -3118,7 +3118,7 @@ def apfPrepK (ok : OrdK K) (B : LFml C) (extra : List (IdxKey C K) := []) : Prep
 def apfPrep (B : LFml C) : Prep B := (apfPrepK .uint B).trans (apfPrepK .int _)
 
 /-- **Array property instantiation with more index terms** at the `uint`
-pass (feature 31: an array's live length, read as an atom). -/
+pass (feature 32: an array's live length, read as an atom). -/
 def apfPrepWith (extra : List (IdxKey C .uint)) (B : LFml C) : Prep B :=
   (apfPrepK .uint B extra).trans (apfPrepK .int _)
 

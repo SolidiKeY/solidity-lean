@@ -2,7 +2,7 @@ import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayProperty
 
 /-!
-# Leaves with blocks over storage arrays (M7, feature 31)
+# Leaves with blocks over storage arrays (M7, feature 32)
 
 `arrayReduction?` (`Calculus/ArrayReduction.lean`) takes a leaf whose body
 reads storage arrays at symbolic indices and holds no quantifier; the

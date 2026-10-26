@@ -1,19 +1,25 @@
 import Solidity.Examples.Decision
 
 /-!
-# Binders of KeY's `int` over two words (M7, feature 30)
+# Binders of KeY's `int` over two words (M7, features 30 and 31)
 
 `decideKEnc` (`Calculus/Decision.lean`, `Calculus/KIntEncode.lean`) reads a
 binder of KeY's `int` whose comparisons read it against bounded terms over
-two words, at every state.  The former counterexample `gapKIntNeg`, a
-negative binder (an `∃` over `ℤ`), is proved, its false variant refuted;
-a positive binder in a leaf reading the ledger elsewhere (outside feature
-26, which needs the ledger free) is proved and refuted.  Coverage is the
-kernel's, the verdicts the compiled ones (each is a few binary derivatives
-over word codes).  Two shapes stay counterexamples: a binder compared with
-an unbounded term at another coefficient (a ledger entry, `gapKIntNet`),
-and two binders compared with each other under a negation
-(`gapKIntNested`).
+two words, at every state (feature 30), past an anchor of its context
+where they read it against one unbounded term (feature 31).  The former
+counterexample `gapKIntNeg`, a negative binder (an `∃` over `ℤ`), is
+proved, its false variant refuted; a positive binder in a leaf reading the
+ledger elsewhere (outside feature 26, which needs the ledger free) is
+proved and refuted; a binder compared with a ledger entry (`kintNet`) and
+two binders compared under a negation (`kintNested`) are decided past
+their anchors.  Coverage is the kernel's (`*_covered`), so each is
+answered and exactly (`*_answers`, `*_iff`); the verdicts are recorded
+below, not evaluated in the build.  Two shapes stay
+counterexamples: a binder compared with two unbounded terms
+(`gapKIntTwoAnchors`, `∀ y. y > z → y > 0` under a negation: real
+Presburger alternation over `ℤ`), and a negative quantifier in a leaf that
+reads the ledger (`gapQuantLedger`, `(∀ uint y. y > 0) → net(0) > 0`: no
+pipeline takes both, whatever the binder's type).
 -/
 
 namespace Solidity.Examples.DecisionKInt
@@ -48,23 +54,46 @@ def kintNetElseBad : Fml Gaps [] :=
 def kintNegWord : Fml Gaps [] :=
   .all (.user "x") .uint (.imp (bindZ "z" (zcmp .gt rfl zv (.app1 .toInt (.pvV (.there .here))))) ff)
 
-/-- Counterexamples still: a binder compared with a ledger entry,
-`∀ int z. net(0) == z → net(0) + 1 > z` (the remainder `net(0)` unbounded),
-and two binders compared under a negation, `(∀ int z. ∀ int y. y > z) → 0 == 1`. -/
-def gapKIntNet : Fml Gaps [] :=
+/-- Past an anchor (feature 31): a binder compared with a ledger entry,
+`∀ int z. net(0) == z → net(0) + 1 > z` (proved, anchor `net(0)`), its
+false variant `∀ int z. net(0) == z → net(0) > z`; two binders compared
+under a negation, `(∀ int z. ∀ int y. y > z) → 0 == 1` (proved: the
+hypothesis fails, anchor `z`), its false variant
+`(∀ int z. ∀ int y. y > z → y >= z) → 0 == 1`. -/
+def kintNet : Fml Gaps [] :=
   bindZ "z" (.imp (zcmp .eqB rfl net0 zv) (zcmp .gt rfl (zplus net0 (zlit 1)) zv))
-def gapKIntNested : Fml Gaps [] :=
+def kintNetBad : Fml Gaps [] :=
+  bindZ "z" (.imp (zcmp .eqB rfl net0 zv) (zcmp .gt rfl net0 zv))
+def kintNested : Fml Gaps [] :=
   .imp (bindZ "z" (bindZ "y" (zcmp .gt rfl zv (.pvZ (.there .here))))) ff
+def kintNestedBad : Fml Gaps [] :=
+  .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here)))
+    (zcmp .ge rfl zv (.pvZ (.there .here)))))) ff
+
+/-- Counterexamples still: a binder compared with two unbounded terms (`z`
+and the threshold `0` past the anchor `z`), and a negative quantifier
+(here of `uint`) in a leaf that reads the ledger. -/
+def gapKIntTwoAnchors : Fml Gaps [] :=
+  .imp (bindZ "z" (bindZ "y" (.imp (zcmp .gt rfl zv (.pvZ (.there .here))) (zcmp .gt rfl zv (zlit 0))))) ff
+def gapQuantLedger : Fml Gaps [] :=
+  .imp (.all (.user "y") .uint (isT (.app2 (.binop .gt rfl) (.pvV .here) (litU 0))))
+    (zcmp .gt rfl net0 (zlit 0))
 
 theorem kintNegBad_inTarget : kintNegBad.inTarget {} = true := by decide +kernel
 theorem kintNetElse_inTarget : kintNetElse.inTarget {} = true := by decide +kernel
-theorem gapKIntNet_inTarget : gapKIntNet.inTarget {} = true := by decide +kernel
-theorem gapKIntNested_inTarget : gapKIntNested.inTarget {} = true := by decide +kernel
+theorem kintNet_inTarget : kintNet.inTarget {} = true := by decide +kernel
+theorem kintNested_inTarget : kintNested.inTarget {} = true := by decide +kernel
+theorem gapKIntTwoAnchors_inTarget : gapKIntTwoAnchors.inTarget {} = true := by decide +kernel
+theorem gapQuantLedger_inTarget : gapQuantLedger.inTarget {} = true := by decide +kernel
 
 theorem gapKIntNeg_covered : gapKIntNeg.Covered = true := by decide +kernel
 theorem kintNegBad_covered : kintNegBad.Covered = true := by decide +kernel
 theorem kintNetElse_covered : kintNetElse.Covered = true := by decide +kernel
 theorem kintNetElseBad_covered : kintNetElseBad.Covered = true := by decide +kernel
+theorem kintNet_covered : kintNet.Covered = true := by decide +kernel
+theorem kintNetBad_covered : kintNetBad.Covered = true := by decide +kernel
+theorem kintNested_covered : kintNested.Covered = true := by decide +kernel
+theorem kintNestedBad_covered : kintNestedBad.Covered = true := by decide +kernel
 
 /-- `decideGoal_complete`, applied: no hash, so no premise. -/
 theorem gapKIntNeg_answers : decideGoal gapKIntNeg ≠ .unknown :=
@@ -80,12 +109,26 @@ theorem kintNetElse_answers : decideGoal kintNetElse ≠ .unknown :=
 theorem kintNetElse_iff : decideLeaf kintNetElse = .proved ↔ Fml.Valid kintNetElse :=
   decideLeaf_proved_iff kintNetElse_covered
 
-/-- info: ["proved", "refuted", "proved", "refuted", "proved"] -/
-#guard_msgs in
-#eval [gapKIntNeg, kintNegBad, kintNetElse, kintNetElseBad, kintNegWord].map verdict
+theorem kintNet_iff : decideLeaf kintNet = .proved ↔ Fml.Valid kintNet :=
+  decideLeaf_proved_iff kintNet_covered
 
-/-- info: ["unknown", "unknown"] -/
-#guard_msgs in
-#eval [gapKIntNet, gapKIntNested].map verdict
+theorem kintNested_iff : decideLeaf kintNested = .proved ↔ Fml.Valid kintNested :=
+  decideLeaf_proved_iff kintNested_covered
+
+/-! The verdicts, evaluated by the interpreter on 2026-10-26 in a scratch
+module, are not pinned: in this module's elaboration the interpreted
+evaluation overflowed the language server's stack and did not end within
+half an hour in `lake build`.  Evaluated: `gapKIntNeg`, `kintNetElse`,
+`kintNegWord`, `kintNet`, `kintNested` proved; `kintNegBad`,
+`kintNetElseBad`, `kintNetBad`, `kintNestedBad` refuted;
+`gapKIntTwoAnchors`, `gapQuantLedger` unknown.  The theorems above are the
+pins: coverage by the kernel, so `decideLeaf` answers, and exactly. -/
+
+theorem kintNegBad_answers : decideLeaf kintNegBad ≠ .unknown := decideLeaf_complete kintNegBad_covered
+theorem kintNetElseBad_answers : decideLeaf kintNetElseBad ≠ .unknown :=
+  decideLeaf_complete kintNetElseBad_covered
+theorem kintNetBad_answers : decideLeaf kintNetBad ≠ .unknown := decideLeaf_complete kintNetBad_covered
+theorem kintNestedBad_answers : decideLeaf kintNestedBad ≠ .unknown :=
+  decideLeaf_complete kintNestedBad_covered
 
 end Solidity.Examples.DecisionKInt
