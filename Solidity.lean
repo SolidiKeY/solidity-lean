@@ -477,6 +477,7 @@ import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
+import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
@@ -484,6 +485,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.AutoComplete
 import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
+import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
