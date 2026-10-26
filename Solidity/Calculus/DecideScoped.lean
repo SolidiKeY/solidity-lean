@@ -383,6 +383,12 @@ section Upd
 
 variable {Γ : Ctx}
 
+/-- What a KeY `int` must return for: a ledger read returns where its
+address does, so a read at a literal (`Fml.zT`'s binders) needs nothing. -/
+def zRets : LTm C .kint → LTm C (.val .bool)
+  | .app1 .net a => seqL a .tt
+  | t => seqL t .tt
+
 /-- What a right-hand side binds its local to: the term pushed in, an unset
 alias to nothing that returns (`err`, which reads as no reference). -/
 def _root_.Solidity.Rhs.toL (ρ : SymS C Γ) {t : LTy} (r : Rhs C Γ t) :
@@ -395,7 +401,7 @@ def _root_.Solidity.Rhs.toL (ρ : SymS C Γ) {t : LTy} (r : Rhs C Γ t) :
     (fun s => (s.toL ρ).map fun s' => (s', seqL s' .tt))
     -- A snapshot taken before any ledger write is of the start state's ledger.
     (if ρ.netOk then some (.app0 (.zlit 0), .tt) else none) none
-    (fun x => (x.toL ρ).map fun x' => (x', seqL x' .tt))
+    (fun x => (x.toL ρ).map fun x' => (x', zRets x'))
 
 /-- One element applied to the state `ρ`, read in `ρ₀`; its guard. -/
 def _root_.Solidity.UpdElem.toLS {Δ : Ctx} (ρ₀ : SymS C Γ) (e : UpdElem C Γ Δ) (ρ : SymS C Δ) :

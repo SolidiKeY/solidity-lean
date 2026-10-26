@@ -402,11 +402,22 @@ theorem Rhs.ElimOk.toL {ρ : SymS C Γ} (hρ : ρ.Ok) {t : LTy} {r : Rhs C Γ t}
     {b : LTm C t.bs × LTm C (.val .bool)} (h : r.toL ρ = some b) :
     b.1.Elimable ∧ b.2.Elimable := by
   cases r with
-  | val x | path x | mref x | store x | zint x =>
+  | val x | path x | mref x | store x =>
     simp only [Rhs.toL, Option.map_eq_some_iff] at h
     obtain ⟨x', hx, rfl⟩ := h
     have hx' := Tm.ElimOk.toL hρ hr hx
     exact ⟨hx', Decide.seqL_elimable hx' Decide.tt_elimable⟩
+  | zint x =>
+    simp only [Rhs.toL, Option.map_eq_some_iff] at h
+    obtain ⟨x', hx, rfl⟩ := h
+    have hx' := Tm.ElimOk.toL hρ hr hx
+    refine ⟨hx', ?_⟩
+    unfold zRets
+    split
+    · cases hx'
+      rename_i ha
+      exact Decide.seqL_elimable ha Decide.tt_elimable
+    · exact Decide.seqL_elimable hx' Decide.tt_elimable
   | unset => exact hr.elim
   | saveNet =>
     simp only [Rhs.toL] at h

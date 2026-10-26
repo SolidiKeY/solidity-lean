@@ -786,6 +786,16 @@ theorem seqL_tt_drel {s : Srt} {x : LTm C s} {y : Option (s.Den C τ.H)} (h : Sr
     | (cases hx : x.eval g₀ ν <;> cases hy : y <;> rw [hx, hy] at h <;>
         simp only [Srt.DRel, Option.map_none, Option.map_some, reduceCtorEq] at h <;> rfl)
 
+theorem zRets_eval (g : State C []) (ν : AEnv) (t : LTm C .kint) :
+    ((zRets t).eval g ν : Option Bool) = (t.eval g ν : Option Int).map fun _ => true := by
+  unfold zRets
+  split
+  · rename_i a
+    rw [seqL_tt_eval, LTm.eval_app1]
+    show _ = Option.map _ (Option.map _ _)
+    rw [Option.map_map]; rfl
+  · exact seqL_tt_eval g ν _
+
 /-- **A right-hand side pushed in**: its guard returns where it does, and
 its binding reads what it sets the local to. -/
 theorem Rhs.toL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh) {t : LTy} (r : Rhs C Γ t)
@@ -861,7 +871,7 @@ theorem Rhs.toL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh) {t : LTy
     simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨x', hx', rfl, rfl⟩ := h
     have hd := Tm.toL_drel hA x x' hx'
-    refine ⟨seqL_tt_drel hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx', fun _ _ e => nomatch e⟩
+    refine ⟨by rw [zRets_eval]; exact congrArg (Option.map _) hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx', fun _ _ e => nomatch e⟩
     show (x'.eval g₀ ν : Option Int) = some v
     rw [show (x'.eval g₀ ν : Option Int) = x.eval τ from hd]; exact hv
 

@@ -5,6 +5,7 @@ import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashKinds
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.MemSwap
+import Solidity.Calculus.KIntBinder
 
 /-!
 # The closer's decision, stated (M7)
@@ -83,7 +84,8 @@ preparation has), reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`); or the leaves that read the starting ledger
 (`Fml.ledgerCovered`), with blocks over it instantiated likewise
 (`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices
-(`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
+(`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
+`int` read as ledger entries (`Fml.kintCovered`, `decideKInt`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
 `decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
@@ -332,18 +334,53 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
     · cases h
   · cases h
 
+/-! ### Binders of KeY's `int` (M7, feature 23)
+
+A leaf binding KeY's `int` in positive positions and reading no ledger
+(`Fml.zOK`) is read with each binder the starting ledger's entry at an
+address of its own (`Fml.zT`, `Calculus/KIntBinder.lean`), and that leaf
+decided by `decideLeafA` (the ledger's pipeline, its entries two unbounded
+natural codes).  A proof of it proves the leaf (`Fml.zT_valid`); a state
+refuting it refutes the leaf (`Fml.holds_zT`). -/
+
+/-- The leaf's binders of KeY's `int` read as ledger entries, the result
+decided. -/
+def decideKInt (φ : Fml C []) : LeafVerdict C :=
+  if φ.hasZ && φ.zOK && decide (φ.zDepth ≤ 2 ^ 256) then decideLeafA (φ.zT 0) else .unknown
+
+theorem decideKInt_sound {φ : Fml C []} (h : decideKInt φ = .proved) : Fml.Valid φ := by
+  unfold decideKInt at h
+  split at h
+  · rename_i hc
+    simp only [Bool.and_eq_true, decide_eq_true_eq] at hc
+    exact Fml.zT_valid hc.1.2 hc.2 (decideLeafA_sound h)
+  · cases h
+
+theorem decideKInt_refutes {φ : Fml C []} {σ : State C []} (h : decideKInt φ = .refuted σ) :
+    ¬ holds σ φ := by
+  unfold decideKInt at h
+  split at h
+  · exact fun hφ => decideLeafA_refutes h (Fml.holds_zT 0 φ σ hφ)
+  · cases h
+
 /-- **The decision**: `decideLeafA`, then on a leaf it answers `unknown` on,
-the one with its fresh arrays cut (`decideMem`). -/
+the one with its fresh arrays cut (`decideMem`), then the one with its
+binders of KeY's `int` read as ledger entries (`decideKInt`). -/
 def decideLeaf (φ : Fml C []) : LeafVerdict C :=
   match decideLeafA φ with
-  | .unknown => decideMem φ
+  | .unknown =>
+    match decideMem φ with
+    | .unknown => decideKInt φ
+    | v => v
   | v => v
 
 /-- **Soundness.** -/
 theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
   unfold decideLeaf at h
   split at h
-  · exact decideMem_sound h
+  · split at h
+    · exact decideKInt_sound h
+    · exact decideMem_sound h
   · exact decideLeafA_sound h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
@@ -351,7 +388,9 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
     ¬ holds σ φ := by
   unfold decideLeaf at h
   split at h
-  · exact decideMem_refutes h
+  · split at h
+    · exact decideKInt_refutes h
+    · exact decideMem_refutes h
   · exact decideLeafA_refutes h
 
 theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
@@ -365,9 +404,17 @@ def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
     | some ψ => ψ.CoveredA
     | none => false
 
+/-- **The fragment with binders of KeY's `int`**: the leaf binds one where
+`Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
+def _root_.Solidity.Fml.kintCovered (φ : Fml C []) : Bool :=
+  φ.hasZ && φ.zOK && decide (φ.zDepth ≤ 2 ^ 256) && (φ.zT 0).CoveredA
+
 /-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with fresh
-arrays whose cut is in it (`Fml.memCovered`, M7 step 6). -/
-def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool := φ.CoveredA || φ.memCovered
+arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
+binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
+feature 23). -/
+def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
+  φ.CoveredA || φ.memCovered || φ.kintCovered
 
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
@@ -379,15 +426,28 @@ theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMe
   · exact decideLeafA_complete h
   · cases h
 
+theorem decideKInt_complete {φ : Fml C []} (h : φ.kintCovered = true) :
+    decideKInt φ ≠ .unknown := by
+  unfold Fml.kintCovered at h
+  simp only [Bool.and_eq_true] at h
+  obtain ⟨hc, h⟩ := h
+  unfold decideKInt
+  rw [if_pos (by simp only [Bool.and_eq_true]; exact hc)]
+  exact decideLeafA_complete h
+
 /-- **Completeness on `Fml.Covered`.** -/
 theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
   unfold decideLeaf
   split
   · rename_i hv
     simp only [Fml.Covered, Bool.or_eq_true] at h
-    rcases h with h | h
-    · exact absurd hv (decideLeafA_complete h)
-    · exact decideMem_complete h
+    split
+    · rename_i hm
+      rcases h with (h | h) | h
+      · exact absurd hv (decideLeafA_complete h)
+      · exact absurd hm (decideMem_complete h)
+      · exact decideKInt_complete h
+    · assumption
   · assumption
 
 /-- On the fragment the verdict is exact. -/
