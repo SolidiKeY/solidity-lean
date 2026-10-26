@@ -1,7 +1,7 @@
 import Solidity.Calculus.HashKinds
 
 /-!
-# Strings hashed by three kinds (M7, plan step 7)
+# Strings hashed by three kinds (M7, plan step 7, feature 28)
 
 `Fml.tk` (`Calculus/HashKinds.lean`) reads one second kind's words as
 binders of their own, linked to the first kind's.  With three kinds (the

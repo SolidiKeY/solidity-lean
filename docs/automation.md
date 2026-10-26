@@ -1898,9 +1898,9 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     `hnodeIn` past one string), and completeness relabels one word, one to
     one whatever its class.  `gapMixedKinds` (`ids[keccak256(s)] == 1 →
     shas[sha256(t)] == 1`, no string hashed by both) is refuted, its
-    variant `mixedKinds` proved, both covered by the kernel.  The order
-    matters: `keccak256` first, the one `sha256` string unlinked.  Several
-    such strings: feature 29.
+    variant `mixedKinds` proved, both covered by the kernel (each kind
+    hashes one string, so either order is feature 27's; `hashTries` tries
+    `keccak256` first).  Several such strings: feature 29.
 
 28. **Three kinds** (2026-10-26, `Calculus/HashKinds3.lean`, `decideHash3`,
     six orders in `hashTries`).  The third kind's words are a layer

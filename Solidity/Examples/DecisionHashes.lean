@@ -287,6 +287,9 @@ def mixedSomeBad : Fml Names [] :=
 #guard_msgs in #eval [mixedSome, mixedSomeBad].map verdict
 
 theorem mixedSome_covered : mixedSome.hashCovered = true := by decide +kernel
+/-- Covered `keccak256` first, where `b` is unlinked (with `sha256` first,
+`keccak256` hashes `c` and `d` only, both linked: feature 12). -/
+theorem mixedSome_coveredK2 : mixedSome.coveredK2 .keccak .sha256 = true := by decide +kernel
 
 end Hashes
 

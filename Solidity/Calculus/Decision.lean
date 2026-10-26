@@ -941,8 +941,10 @@ theorem decideHash3_refutes {k₁ k₂ k₃ : HashKind} {hk₁ : k₁ ≠ .ecrec
               exact r.refutes
             · cases h
 
-/-- **The covered leaves with hashes of three kinds**: `Fml.coveredK2`'s
-conditions with both layers (`Fml.tk3`, `Fml.tk3RL`). -/
+/-- **The covered leaves with hashes of three kinds**: the conditions of
+`Fml.coveredK2` before feature 29 (no full reading, no `Fml.tkMove`), with
+both layers (`Fml.tk3`) and every pair of each layer linked (`Fml.tkLinked`
+in `Fml.tk3RL`). -/
 def _root_.Solidity.Fml.coveredK3 (k₁ k₂ k₃ : HashKind) (φ : Fml C []) : Bool :=
   match φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) false false with
   | none => false

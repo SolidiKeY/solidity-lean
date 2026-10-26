@@ -660,12 +660,7 @@ there are two of them (feature 27 takes one).  A counterexample once,
 decided since feature 29 (the unlinked words moved, `Fml.tk_complete_move`,
 below). -/
 def gapMixedPairs : Fml Names [] :=
-  let Γ4 : Ctx := [.mem Str, .mem Str, .mem Str, .mem Str]
-  let h4 (k : HashKind) (i : Idx Γ4 (.mem Str)) : Tm Names Γ4 (.val .uint) :=
-    .app2 (.hash k) (.app0 .memory) (.pvI i)
-  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str (.allocAll (.user "d") Str
-    (.imp (.eq (h4 .keccak .here) (h4 .keccak (.there .here)))
-      (.eq (h4 .sha256 (.there (.there .here))) (h4 .sha256 (.there (.there (.there .here)))))))))
+  strings4 (.imp (.eq (h4 .keccak sA) (h4 .keccak sB)) (.eq (h4 .sha256 sC) (h4 .sha256 sD)))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
 keccak256(t)`.  The verdict turns on the strings' bytes past the write,
 which no stage reads (memory, plan step 6). -/

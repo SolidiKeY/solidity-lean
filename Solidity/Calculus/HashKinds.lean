@@ -21,9 +21,9 @@ which the one-kind swap reads:
 
 * **valid** (`Fml.tk_validH`): a valid reading of the result is valid
   under the leaf's premise: each extra word is its string's hash where the
-  premise reads that hash and a word that keeps the link elsewhere
-  (`linkChoice`; `XRelQ`, `Fml.xk_holdsQ`: the body reads the extra word
-  only where the premise reads the hash);
+  premise reads that hash and, elsewhere, a word that keeps the link of
+  the kept pairs (`linkChoiceP`; `XRelQ`, `Fml.xk_holdsQ`: the body reads
+  the extra word only where the premise reads the hash);
 * **refuted** (`Fml.tk_refutes`): the instance at classes of strings, with
   the extra words fixed to the second kind's hashes of the family's strings
   (`fixE`, `famPairE`, a family of `N` strings checked for every kind,
@@ -1155,8 +1155,8 @@ def _root_.Solidity.Fml.memNodes : {Γ : Ctx} → Fml C Γ → Bool
   | _, _ => false
 
 /-- **The strings the link keeps**: every one (`full`, a reading only the
-completeness proof takes), or those the first kind hashes where the
-premise always reads them.  A string of the second kind the first kind
+completeness proof and its coverage check, `Fml.coveredK2`, take), or those
+the first kind hashes where the premise always reads them.  A string of the second kind the first kind
 hashes nowhere has a word read only where its extra word is (M7, feature
 29). -/
 def _root_.Solidity.Fml.tkKeep (k₁ : HashKind) {Γ : Ctx} (ψ : Fml C Γ) (full : Bool) : Nat → Bool :=
@@ -1168,7 +1168,9 @@ hash in an update's continuation where the update lands), each hashed by
 `k₁` where the premise always reads it (outside every continuation,
 `Fml.topLevels`) when there are two or more to link (one string has no
 pair: M7 feature 27), or hashed by it nowhere, its word then linked to none
-(`Fml.tkKeep`, feature 29); `m` new binders, the link of the two kinds
+(`Fml.tkKeep`, feature 29: soundness reads the first kind's hashes of the
+kept pairs only; "nowhere" keeps the unlinked strings' swapped words
+unread, which completeness moves); `m` new binders, the link of the two kinds
 (the pairs `Fml.tkKeep` keeps, every pair where `full`, `linkE`;
 and, for an instance, `fixE`) assumed, the body read past them with each
 node of kind `k₂` its word. -/
@@ -1806,7 +1808,8 @@ theorem linkChoiceP {n : Nat} (hn : n * (n + 1) < 2 ^ 256) (w r : Fin n → Prim
 /-- **The body with the second kind's words is sound**: where its reading
 under the premise holds, the body holds under the body's premise.  The
 extra words are the strings' hashes of the second kind where the premise
-reads them (`linkChoice`), and else words that keep the link. -/
+reads them, and else words that keep the link of the pairs it keeps
+(`linkChoiceP`): only those pairs' strings' first-kind hashes are read. -/
 theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
     (hk₂ : k₂ ≠ .ecrecover) {Γ : Ctx} (ψ : Fml C Γ) {φ₂ : Fml C Γ} (e : ψ.tkBody k₁ k₂ N false = some φ₂)
     (τ : State C Γ) (hstr : ∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome)
