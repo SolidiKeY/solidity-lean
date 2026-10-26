@@ -118,7 +118,12 @@ test("fixed-array copy shapes preserve tails, snapshots and evaluation order", (
 
 test("implicit initializer omissions cannot silently pass", () => {
   const report = runSolidityTests(["tests/solc/InitGap.sol"], { build: false });
-  assert.ok(report.errors.some(e => e.reason.includes("initializers are left out")));
+  assert.deepEqual(report.errors, []);
+  const ctor = report.results.find(r => r.function === "constructor");
+  assert.equal(ctor?.status, "excluded");
+  assert.match(ctor.reason, /an initializer calls `cap`/);
+  assert.match(ctor.reason, /solidity\.inlineAssembly/);
+  assert.equal(report.results.find(r => r.function === "get")?.status, "proved");
   assert.equal(testsPassed(report), false);
 });
 

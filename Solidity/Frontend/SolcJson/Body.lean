@@ -1090,6 +1090,13 @@ def isPushCall (e : Json) : Bool :=
 def isPushedMember (e : Json) : Bool :=
   J.kind e == "MemberAccess" && (J.opt e "expression").any isPushCall
 
+/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
+partial def unparen (j : Json) : Json :=
+  match J.kind j, (J.arr? j "components").map (·.toList) with
+  | "TupleExpression", some [c] =>
+    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
+  | _, _ => j
+
 /-- A contract-qualified member, never an object or `this` call. -/
 def isBaseMember (contracts : List Int) (f : Json) : Bool :=
   J.kind f == "MemberAccess" && (J.opt f "expression").any fun receiver =>
@@ -1114,7 +1121,9 @@ def isValueCallee (f : Json) : Bool :=
           (J.tyStr b).startsWith "struct " && !((J.tyStr b).splitOn "[").length > 1))
 
 def isSuperMember (f : Json) : Bool :=
+  let f := unparen f
   J.kind f == "MemberAccess" && (J.opt f "expression").any fun receiver =>
+    let receiver := unparen receiver
     J.kind receiver == "Identifier" && J.opt receiver "name" == some (.str "super")
 
 /-- `x` run where a pushed member may be hoisted, or not. -/
@@ -1435,6 +1444,14 @@ partial def expr (j : Json) : PM String := do
         let value ← expr value
         modify fun st => { st with constStack := stack }
         return sourceCast t value
+    -- A contract-qualified inherited state declaration denotes this instance's
+    -- root, not an external receiver. Resolve it by compiler identity only.
+    if isBaseMember (← get).baseContracts j then
+      if let some r := J.ref? j then
+        if ((← get).declarations.find? (J.id? · == some r)).any (fun d =>
+            J.kind d == "VariableDeclaration" && J.opt d "stateVariable" == some (.bool true)) then
+          if let some (_, gap) := lookupBy r (← get).dropped then throw gap
+          return identText ((lookupBy r (← get).names).getD m)
     if isPushCall e then
       -- `x.push().f`: the element read through a storage local first
       unless (← get).pushOk do
@@ -1485,7 +1502,7 @@ partial def operand (j : Json) (pow : Bool) : PM String := do
   pure (if compound j || (pow && J.kind j == "UnaryOperation") then s!"({s})" else s)
 
 partial def call (j : Json) : PM String := do
-  let f ← PM.lift (J.get j "expression")
+  let f := unparen (← PM.lift (J.get j "expression"))
   let args ← PM.lift (J.arr j "arguments")
   if let some (c, a, b) := condCallee? j then
     unless condCalleeOk j do unsupported condCalleeMsg
@@ -1540,7 +1557,7 @@ partial def call (j : Json) : PM String := do
       | _ => unsupported "abi.decode with other than two arguments"
     if member == "wrap" || member == "unwrap" then
       if let some owner := J.opt f "expression" then
-        if let some t := (J.ref? owner).bind (lookupBy · (← get).valueTypes) then
+        if let some t := (J.ref? (unparen owner)).bind (lookupBy · (← get).valueTypes) then
           match args with
           | [a] => return sourceCast t (← expr a)
           | _ => unsupported "wrap or unwrap with multiple arguments"
@@ -1592,6 +1609,15 @@ partial def call (j : Json) : PM String := do
     -- elaborator captures first (`callValueName`)
     let valueCallee := !isSuperMember f && !staticBase && !attached && isValueCallee f
     let as ← args.mapM expr
+    -- An inline string-array element loses its string marker in native
+    -- expression synthesis. Preserve solc's resolved string kind explicitly
+    -- at the builtin boundary, without admitting a bytes argument or a
+    -- user-defined function that happens to share the builtin's name.
+    let as := if builtinNamed f "erc7201" then
+      (args.zip as).map fun (a, text) =>
+        if ["string", "string memory", "string calldata", "string storage ref"].contains (J.tyStr a)
+        then s!"string({text})" else text
+      else as
     -- `abi.encodePacked` packs an enum at one byte: a member, printed as its
     -- position, is printed as the enum's conversion `E(n)` so that it keeps
     -- its type (`markOf?`)
@@ -1644,13 +1670,6 @@ partial def call (j : Json) : PM String := do
   | k => unsupported s!"a call of kind `{k}`"
 
 end
-
-/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
-partial def unparen (j : Json) : Json :=
-  match J.kind j, (J.arr? j "components").map (·.toList) with
-  | "TupleExpression", some [c] =>
-    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
-  | _, _ => j
 
 /-- Is the node a tuple of several components, `(a, b)`, and not an inline
 array (`SolJSONParser.isTuple`)? -/
@@ -1786,7 +1805,23 @@ partial def stmt1 (j : Json) : PM (List String) := do
   match J.kind j with
   | "PlaceholderStatement" => pure ["_"]
   | "ExpressionStatement" =>
-    let e ← PM.lift (J.get j "expression")
+    let e := unparen (← PM.lift (J.get j "expression"))
+    -- Only static declaration references have no receiver to evaluate. Calls,
+    -- object members, indexing and dynamic function values retain evaluation.
+    let declarations := (← get).declarations
+    if J.kind e == "ElementaryTypeNameExpression" then return []
+    if J.kind e == "Identifier" then
+      if builtinNamed e "super" then return []
+      if ((J.ref? e).bind fun id => declarations.find? (J.id? · == some id)).any
+          (J.kind · == "FunctionDefinition") then return []
+    if J.kind e == "MemberAccess" then
+      let owner := unparen ((J.opt e "expression").getD .null)
+      let member := (J.str? e "memberName").getD ""
+      if builtinNamed owner "abi" &&
+          ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "decode"].contains member then
+        return []
+      if ["wrap", "unwrap"].contains member &&
+          ((J.ref? owner).bind (lookupBy · (← get).valueTypes)).isSome then return []
     -- Reading a resolved scalar variable as an expression statement has no
     -- effects or failing bounds. The source admission walker still checks its
     -- declaration; do not drop unresolved names, calls or indexed reads.

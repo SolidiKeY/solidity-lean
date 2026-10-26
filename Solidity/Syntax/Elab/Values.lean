@@ -691,6 +691,12 @@ def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
   | some (.shape ws) => ws
   | _ => []
 
+/-- A local storage mapping alias, whose binding can be rebound. -/
+def storageMappingAlias? (Γ : ECtx) (e : RawExpr) : Bool :=
+  match synth C Γ.toNCtx e with
+  | .ok (.path (.ref (.mapping _ _)) (.alias _)) => true
+  | _ => false
+
 /-- Where the widths of the place `e` are kept: a width table, `e`'s key in
 it, and `e`'s type.  A state variable's table is `Contract.widths`
 (`values[i]` is `values[]`), a reference local's its shape (`m[i]` is `[]`,
@@ -702,6 +708,8 @@ def widthPath? (Γ : ECtx) : RawExpr → Option (List (String × Nat) × String 
     | some (.alias R) | some (.mem R) => some (localShape Γ x, "", .ref R)
     | some _ => none
     | none => (C.rootType x).map (C.widths, x, ·)
+  | .assign l _ =>
+    if storageMappingAlias? C Γ l then widthPath? Γ l else none
   | .index e _ => do
     let (tb, k, t) ← widthPath? Γ e
     match t with
@@ -762,6 +770,13 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
       | _ => []
     | none => []
   | e => placeShape C Γ e
+
+/-- An assignment expression keeps its mapping target's declared shape.
+Admission checks the RHS shape separately. -/
+theorem mappingAssignmentShape (Γ : ECtx) (l r : RawExpr)
+    (h : storageMappingAlias? C Γ l = true) :
+    exprShape C Γ (.assign l r) = placeShape C Γ l := by
+  simp only [exprShape, placeShape, widthPath?, h, ↓reduceIte]
 
 /-- A computed Error reason retains its source string type before byte casts
 and ABI lowering erase it. Raw assembly buffers need no string marker. -/
@@ -1055,7 +1070,11 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
     as.zipIdx.findSome? fun (a, i) =>
       if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
-  | .binop _ a b | .assign a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .assign a b =>
+    if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
+      (narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
+    else (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .binop _ a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? Γ a
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b

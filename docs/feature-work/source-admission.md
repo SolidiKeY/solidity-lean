@@ -27,7 +27,12 @@ compiler/lowering equivalence.
 `Frontend/SolcJson/Admission.lean` scans known nodes, semantic type metadata,
 call options, arguments, selected modifiers, execution dependencies and lexical
 specifications. Declaration references follow headers by compiler identity;
-mutable initializers and base-constructor arguments execute only for deployment.
+executable state initializers (including immutable initializers) and base-constructor
+arguments execute only for deployment. Unsupported initializers retain a refused
+constructor row even when the constructor is implicit; native initialization
+elaboration failure also cannot become a warning-only default deployment.
+Pipeline-specific inheritance scheduling and the regression evidence are recorded
+in [Group 08 of the declaration milestone](declarations-metadata.md#group-08-source-lowering-repair-2026-10-26).
 Metadata-only selectors do not pull unrelated function bodies into admission.
 Possible self-calls include cast/aliased receivers. Payment dispatch requiring
 inherited receive, fallback or receive modifiers is refused until that dispatch

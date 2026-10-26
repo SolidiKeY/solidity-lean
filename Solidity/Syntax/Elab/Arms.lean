@@ -107,7 +107,12 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- the base first, then the index: `matrix[k][k++]` indexes `matrix[0]`
     let (P, e) ← hoist e
     if k.hasIncDec then
-      let (Pc, e) ← captureExpr C e
+      let ec ← ctx
+      let rebinds := k.any fun
+        | .assign target _ => storageMappingAlias? C ec target
+        | _ => false
+      let (Pc, e) ← if storageMappingAlias? C ec e && rebinds then forceArg C e
+        else captureExpr C e
       let (Q, k) ← hoist k
       pure (P ++ Pc ++ Q, .index e k)
     else if k.hasIdxLen || k.hasCast || hasNarrow C (← ctx) k then
@@ -480,7 +485,11 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- one written, held first (solkey's `storageCopyAssignmentValue`:
     -- `pv = e; sp = pv; v = pv;`)
     let (P, r) ← hoist r
-    let (Pc, r) ← captureExpr C r
+    -- The expression yields the old RHS reference, even if a later index
+    -- rebinds its source alias. A fresh typed snapshot cannot be rebound by
+    -- source syntax and retains the same key/value-width metadata.
+    let (Pc, r) ← if storageMappingAlias? C (← ctx) l then forceArg C r
+      else captureExpr C r
     let Q ← elabStmtsP [.assign l r]
     pure (P ++ Pc ++ Q, r)
   | .opAssign op l r => do
@@ -1011,9 +1020,18 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   | .declMemory T x (some (.newArr T' n)) => do
     let (P, n) ← hoist n
     pure (P, .declMemory T x (some (.newArr T' n)))
+  | .delete target => do
+    let (P, e) ← hoist target
+    -- A scalar temporary introduced by hoisting is not a source place.
+    -- Keep reference targets on their existing path, including effectful
+    -- receivers; only a named value local may use assignLocal deletion.
+    unless target matches .name _ do
+      if let .ok (.val ..) := synth C (← nctx) e then
+        throw "`delete` needs a local, storage or memory location"
+    pure (P, .delete e)
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
-  | s@(.declPush ..) | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
+  | s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
   | s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
@@ -1527,7 +1545,15 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       match hd : T.defaultOkS with
       | true => pure [.of Γ (.deleteMem p hd)]
       | false => throw "`delete` of a memory object whose default is not well-formed"
-    | .val .. => throw "`delete` needs a storage or a memory location"
+    | .val p (.simple (.local i)) =>
+      -- Solidity deletes a value local by assigning its type's default.
+      -- Reuse assignLocal, retaining the existing run and soundness rule.
+      let zero : Val C Γ.ctx p := match p with
+        | .bool => .simple (.bool false)
+        | .uint => .simple (.lit 0 rfl)
+        | .int => .simple (.lit 0 rfl)
+      pure [.of Γ (.assignLocal i zero)]
+    | .val .. => throw "`delete` needs a local, storage or memory location"
   | .opAssign op l r => do
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
     -- effects already captured (`hoistStmt`), so reading it twice is safe

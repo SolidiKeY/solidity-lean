@@ -349,3 +349,269 @@ before stripping it, then evaluates the receiver once. Exact byte-kind checks
 remain in force. A native execution regression retains the valid explicit
 `bytes4(bytes(text))` conversion from a string-backed memory reference.
 No Lean diagnostics or builds were run by the patch worker.
+
+## Group 08 source-lowering repair (2026-10-26)
+
+This is a **partial repair**, not completion of the declaration group. The branch
+`codex/group08-source-lowering` starts at current `origin/master`
+`006fcd593f5beeb540e7adf2bc76de4638566924`. All 23 assigned historical rows were
+reproduced before editing and were still broken. Final isolated runs have **20
+working, three broken, zero blocked**, zero already-fixed cases and zero expected
+exclusions. Every working fixture agrees in both required pipelines with all
+observations retained. Runtime agreement is observational evidence, not a
+universal compiler/lowering correctness theorem. Compiler diagnostics remain
+reference-solc checks, not Lean coverage.
+
+[Before/after evidence](../../tests/upstream/group08-results.json) retains exact
+commands, every pipeline, gap and observation, source/expectation SHA-256 values,
+report hashes, compiler/archive/runner/model hashes and execution limits. The
+historical `tests/upstream/results/`, upstream bytes and pinned archive are
+unchanged. The historical import was produced on `cadb628c`
+(model `c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df`);
+that assignment evidence is separate from fresh task-base reproduction.
+Fresh baseline model SHA-256:
+`c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`;
+patched model SHA-256:
+`85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7`.
+
+The source changes reuse existing intrinsic statements, typed roots and proof
+rules. Local `delete` emits assignment of the type's default. Duplicate lexical
+declarations receive collision-avoiding names by compiler identity, preserving
+outer reads before activation and within initializers. Narrow/fixed-byte
+constants retain source casts; literal narrow immutables retain their source
+values. Qualified state accesses resolve only lineage contract identities and
+retain dropped-declaration refusals. Parentheses preserve super/UDVT identities.
+Static declaration-reference statements with no runtime receiver are discarded;
+object/indexed receivers and calls retain evaluation or explicit refusal. Foreign
+struct discovery follows referenced identities transitively, stopping at a fixed
+point. Invoked foreign modifiers retain their defining lexical scope, bodies,
+admission dependencies and payment/call analysis. Unrelated foreign declarations
+do not expand selected supported shapes. Foreign-modifier-local struct types can
+still fail closed.
+
+Computed immutable initializers retain deployment roots even when their values
+are never read. Unsupported declarations with initializers remain in admission
+and block deployment rather than disappearing. Folded literals use deployment
+defaults before their declaration initializes. Nonphased initializer calls that
+would reach a future folded immutable through a shared runtime body are refused;
+that boundary is pinned by a negative control. Known implicit-constructor gaps
+retain their admission diagnostics in an explicit refused constructor row. Late
+native-elaboration failure of the complete initialization contract also produces
+a refused row; neither path can warn and silently deploy defaults. Synthesized
+phased constructors retain direct/transitive initializer callback metadata.
+
+Inheritance needs distinct initialization schedules. The import passes the
+validated pipeline provenance to the frontend. Legacy retains its existing
+all-initializers-before-constructor-arguments schedule. For viaIR inheritance,
+immutable values retain typed roots; constructor arguments execute derived to
+base, then each owner's initializers and constructor body execute base to derived.
+The traversal includes owners with implicit constructors and synthesizes a
+constructor when necessary. Initializers are rendered once; shared callees
+remain shared, with their admission/call dependencies retained. Pinned compiler
+IR inspection confirms base-before-derived initialization and argument-before-
+base-initialization in the review counterexamples; this inspection is not an EVM
+execution theorem. Testing imports also expose inherited public/external ABI
+entries by declaration identity, excluding overridden and internal helpers.
+The original `multiple_initializations.sol` now replays inherited `get()` at 255
+in both pipelines; the test does not substitute a wrapper observation.
+
+ERC-7201 arguments with an exact validated source string type retain that kind
+through the existing explicit string conversion. This repairs inline string-array
+indexing without relaxing native bytes admission or changing user-defined
+functions sharing the builtin name. Arguments occur once at their original
+expression positions.
+
+Storage mapping alias assignments now retain their full declared key/value
+shape; RHS shape equality is checked separately and mismatched widths remain
+refused. Existing typed `forceArg` snapshots preserve the RHS reference yielded
+by assignment and a mapping receiver before an effectful key rebinds its alias.
+The skeptic caught `(m=n)[(n=a)[0]]=7` in the first metadata-only probe; the
+corrected snapshots write through the original reference and are pinned alongside
+bare receiver rebinding, single index evaluation, width-sensitive overflow and
+rollback. This is restricted to mapping aliases, not a general reference-capture
+refactor. Snapshots add typed locals; the possible checking cost was disclosed.
+History traces the shortcut to W8.1 (`30611d7c`), with a no-rebinding assumption,
+not a separately documented speed rationale. Callee bodies remain shared.
+
+`mappingAssignmentShape` proves syntactic metadata propagation; admission checks
+RHS equality independently. `snapshot_rebind` proves preservation of the fresh
+typed alias under a later rebind of an older local. These reuse existing typed
+rebind/run soundness and do not establish compiler equivalence. Guarded axiom
+reports are respectively `propext`, `Quot.sound` and `propext`, `Classical.choice`,
+`Quot.sound`. Kernel/source controls live in `tests/upstream/MappingDeclarations.lean`;
+source replay checks both pipelines and preserves the pre-failure state.
+
+No core representation, run semantics, taclet, external dependency, proof limit
+or `maxHeartbeats` setting changes. No obsolete SolKey reader changes. Before
+adding viaIR deployment roots, the possible checking cost was disclosed and git
+history inspected: immutable folding (`fa96f08d`) had no recorded speed rationale;
+the one-body-per-callee optimization (`1a7d5b0e`) remains intact. Factoring
+initializer rendering out of the large importer kept elaboration within the
+existing heartbeat limit after an intermediate deterministic timeout; limits were
+not raised. General effectful loop conditions and all source-printer forms are
+not claimed supported by this patch.
+
+| Fixture basename | Before | After (legacy / viaIR) |
+| --- | --- | --- |
+| `abi_functions_member_access.sol` | broken | working / working |
+| `as_function.sol` | broken | working / working |
+| `assign_at_declaration.sol` | broken | working / working |
+| `assign_type_info.sol` | broken | broken / broken |
+| `c99_scoping_activation.sol` | broken | working / working |
+| `crazy_elementary_typenames_on_stack.sol` | broken | working / working |
+| `cross_contract_types.sol` | broken | working / working |
+| `delete_local.sol` | broken | working / working |
+| `delete_locals.sol` | broken | working / working |
+| `erc7201_param_array_string_literal.sol` | broken | working / working |
+| `function_modifier_library.sol` | broken | working / working |
+| `function_modifier_library_inheritance.sol` | broken | working / working |
+| `in_parenthesis.sol` | broken | working / working |
+| `keccak256_optimized.sol` | broken | working / working |
+| `mapping_local_compound_assignment.sol` | broken | working / working |
+| `multiple_initializations.sol` | broken | working / working |
+| `packed_storage_structs_enum.sol` | broken | broken / broken |
+| `state_variable_local_variable_mixture.sol` | broken | working / working |
+| `state_variable_under_contract_name.sol` | broken | working / working |
+| `super_alone.sol` | broken | working / working |
+| `super_parentheses.sol` | broken | working / working |
+| `typed_multi_variable_declaration.sol` | broken | broken / broken |
+| `wrap_unwrap.sol` | broken | working / working |
+
+Remaining roots, without weakened expectations:
+
+- `assign_type_info`: compiler creation/runtime bytecode constants are unavailable
+  in the current constant representation. They must not become runtime slots.
+- `packed_storage_structs_enum`: struct validation does not resolve enum members
+  through its struct-only dependency table. A repair must retain enum ranges.
+- `typed_multi_variable_declaration`: tuple declaration printing fails first. An
+  isolated lowering probe preserving explicit storage declarations then exposes
+  `storage` on a function with several returns in both modes. The intrinsic
+  multiple-return call-frame gap remains; removing `storage` would change provenance.
+  The failed probe is retained outside the patch, not counted as coverage.
+
+### Reproduction and validation
+
+Use the attached managed executor at `/workspace/solidity-lean`:
+
+```sh
+source /workspace/.setup/activate.sh
+lean --version
+lake --version
+lake build Solidity.KeySort
+node scripts/solidity-upstream.mjs verify
+```
+
+The concrete runtime gate passes: Lean 4.24.0, commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613; KeySort
+build succeeds. Snapshot verification checks all 11,622 files. The runner's
+SHA-checked compiler is
+`/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js`, SHA-256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+For every exact path in the evidence file:
+
+```sh
+node scripts/solidity-upstream.mjs run \
+  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --filter EXACT_PATH --batch-size 1 \
+  --out .lake/upstream/group08/BASENAME-handoff
+```
+
+Baseline directories use `BASENAME` (except `delete_local-before`); final reports
+use `BASENAME-handoff`. Intermediate after/final/stable/verified/audited/reviewed/sealed and
+phase-exploration reports are not merged into final evidence. Every final run
+uses timeout 120,000 ms and loop fuel 1,000. No limits were raised. All final
+model hashes agree. Logs/timings are retained under `.lake/upstream/group08/`.
+Initial overlapping Lake writes produced code 135 before fixture verdicts;
+sequential retries succeeded and those process failures were never called passes.
+An environment reconnect interrupted an earlier broad build; its partial log is
+not a successful final gate.
+
+The `lean-verify` workflow was read. No Lean MCP diagnostics tools are exposed;
+configured per-file `lake --quiet --no-build lean FILE -- --tstack=131072`
+checks and Lake builds were used. Body, Contract,
+Arms and Import build successfully. Final Contract build: about 21 seconds;
+Body: 8.3 seconds; Import: 6.4 seconds. The earlier Arms check took about 78 seconds. Final declaration controls take 17.722 seconds, mapping controls 3.197 seconds;
+existing replay checks take 2.937 seconds (cached imports).
+
+`tests/upstream/Declarations.lean` proves universal agreement of emitted local
+assignment with typed `setLocal` of `PrimTy.dflt`; its guarded axiom report is
+exactly `propext`, `Classical.choice`, `Quot.sound`. Kernel controls cover unsigned,
+signed and Boolean deletion, false preserved-value claims, one evaluation of an
+incrementing index and an effectful storage receiver. Negative controls reject
+non-place deletion, including hoisted `delete make()` and `delete x++`, and keep
+storage-pointer deletion refused. Source controls pin stateful calls, signed
+immutables, lexical activation, packed byte widths, unread effectful initialization,
+255 versus omitted-effect 253, direct forward defaults, unsupported initialization
+refusal, transitive struct/modifier admission, inherited ABI override/visibility,
+legacy/viaIR construction phases, implicit constructors and string-array ERC-7201. An unread unsupported initializer
+with an unrelated matching output still refuses implicit deployment. Paired
+callback/pure metadata controls check synthesized constructor classification;
+they do not execute an unavailable external host.
+Each positive replay has a false-observation negative; raw bytes remain refused
+without an explicit string conversion. No new axioms or `sorry`; no universal
+source-lowering theorem is claimed.
+
+Final managed-executor gates (exact commands, durations and log hashes in
+`tests/upstream/group08-validation.json`):
+
+- `bash run-lean.sh`: passed (exit 0, 6035.157 seconds, `LEAN_NUM_THREADS=2`).
+- `lake build SolidityCorpus`: passed (exit 0, 45.124 seconds, `LEAN_NUM_THREADS=1`).
+- `bash scripts/check-corpus.sh`: passed (exit 0, 13.248 seconds, `LEAN_NUM_THREADS=1`).
+- `node --test --test-isolation=none scripts/declarations-metadata.test.mjs scripts/test-solidity.test.mjs`: failed (exit 1, 3787.667 seconds, `LEAN_NUM_THREADS=1`).
+
+The runtime gate, 11,622-file snapshot verification, 14 runner tests, both new
+per-file controls, existing replay checks, strict automation, module reachability,
+core layering and frozen TestSuite audit pass. The initial Constructors per-file
+precheck reported a stale SurfaceNotation dependency (exit 3); the final full
+build successfully recompiles the Constructors regression. An earlier corpus
+attempt was killed with exit 137 and is retained as a resource-blocked attempt;
+the final single-worker retry above has its own result. No limits were raised.
+
+The affected source API suite finishes with 46 passed and 15 failed tests (not a
+passing gate). Nine failures reproduce on the exact task base in the isolated
+`codex/group08-baseline-check` worktree: metadata selectors, assembly status,
+malformed NatSpec diagnostics, byte indexing, modern full-source TestSuite
+recursion/code generation, a stale pending reference-copy expectation, omitted
+specification status, `tryScopeExit`, and `tryArgumentSideEffect`. The source API's
+modern TestSuite discovery resource failure is distinct from the passing frozen
+TestSuite build/audit and corpus gate. Three source subprocesses exit 135 for
+PushSources, MemoryPush and StorageReturns; focused unchanged-model retries
+have no errors and match all 36 existing expected rows and clean readings,
+including negative observations. The original process failures remain in the log.
+Calldata, Hashing and RevertData each hit the unchanged 300-second timeout and
+remain resource blocked/inconclusive. No expected statuses or proof limits were
+changed to make these checks pass. All baseline comparison commands and focused
+report hashes are in the validation manifest. The final runtime and Constructors
+per-file rechecks pass. A transient environment-unavailable notification occurred;
+the same managed executor and original source-suite process survived it.
+
+The documentation-path check still reports 13 missing vendor references. The
+citing files are unchanged on the task base and all targets were absent there;
+`sealed-doc-paths-baseline.json` in the log package records that baseline proof.
+This unrelated check is a baseline failure, not a pass. Historical results,
+upstream source/expectation bytes, archive and frozen SolKey inputs are unchanged.
+
+Selected long logs, exact fixture reports and rejected probe evidence are packaged
+in `.lake/upstream/group08/group08-logs.tar.gz`; the reviewable per-fixture record
+is `tests/upstream/group08-results.json`.
+
+### Read-only review and integration
+
+Finder and independent skeptic reviews inspected all changed areas without
+opening Lean workers. Confirmed findings were fixed: repeated struct closure
+scans, non-place deletion after hoisting, omitted unread immutable initializers,
+forward folded reads, inherited virtual/argument phase ordering and missing
+inherited ABI entries, warning-only implicit initialization refusals, and
+initializer callback metadata, and mapping-alias snapshot provenance. The late native-elaboration warning branch was
+closed structurally, without claiming a reproduced source counterexample for it.
+The final phased schedule and string-kind boundary had no
+remaining confirmed findings. Earlier conservative phase exclusions were replaced
+by explicit scheduling and positive/negative controls. The three assigned gaps
+above and the nonphased shared-callee forward boundary remain explicit.
+
+Shared implementation changes are limited to Import, Body, Contract, Arms and Values;
+integration must carry them with the controls. The existing Constructors regression
+and source API test now require an explicit refusal row instead of the obsolete
+warning-only behavior; the empty-initializer and non-passing verdict checks remain.
+The source API's warning-handling comment is aligned; its behavior is unchanged. No unpublished changes from other groups
+are assumed. No push or merge to master is performed.

@@ -116,7 +116,7 @@ solc_scoped_problems ${name} decl${selfClause}
           // The API's build step above owns rebuilding; keep this check read-only.
           const diagnostics = runTool("lake", ["--quiet", "--no-build", "lean", wrapper,
             "--", "--tstack=131072"], timeoutMs);
-          // Implicit-constructor gaps are currently warnings, not ImportRows.
+          // Keep other/legacy import warnings visible alongside refused deployment rows.
           if (diagnostics.includes("warning: solc_import:")) errors.push({ source, contract, reason: diagnostics.trim() });
           } catch (e) { errors.push({ source, contract, stage: "lean", reason: e.message,
             ...(e.tool ? {tool:e.tool} : {}) }); }

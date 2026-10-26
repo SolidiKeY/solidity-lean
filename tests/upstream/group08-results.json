@@ -1,0 +1,2786 @@
+{
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "branch": "codex/group08-source-lowering",
+  "beforeMetadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "afterMetadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "counts": {
+    "working": 20,
+    "broken": 3,
+    "blocked": 0
+  },
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+      "sourceAndExpectationsSha256": "a693d3ed210bb99dbf043e3f906d73fce51e10c524a5f3ab8af60011fcc33669",
+      "before": {
+        "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "abi_functions_member_access.sol:4: the printed text does not parse: <input>:1:20: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "abi_functions_member_access.sol:4: the printed text does not parse: <input>:1:20: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/abi_functions_member_access/results.json",
+      "beforeReportSha256": "f137e5540a5433f83a06cc82d608a3288445a525142e1edb546a66307af16a40",
+      "afterReport": ".lake/upstream/group08/abi_functions_member_access-handoff/results.json",
+      "afterReportSha256": "92430d6eb68ebc925bd9f0363cc606962551996a15e3e11a950bc905e7894422",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/abi_functions_member_access"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/abi_functions_member_access-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+      "sourceAndExpectationsSha256": "fa8c17e93d63ba8eab4df3b93e82655a51c4b4c849b96abbd32d8d75f3ea1a22",
+      "before": {
+        "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "as_function.sol:12: the printed text does not parse: <input>:1:26: expected '=', 'storage' or identifier",
+                "function": "h()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "as_function.sol:12: the printed text does not parse: <input>:1:26: expected '=', 'storage' or identifier",
+                "function": "h()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+            "observed": [
+              {
+                "values": [
+                  "88"
+                ],
+                "signature": "_()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "88"
+                ],
+                "signature": "g()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "33"
+                ],
+                "signature": "h()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
+            "observed": [
+              {
+                "values": [
+                  "88"
+                ],
+                "signature": "_()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "88"
+                ],
+                "signature": "g()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "33"
+                ],
+                "signature": "h()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/as_function/results.json",
+      "beforeReportSha256": "5794cd1dd3fd86f551862b3e099e7b5587260da3eff7b5b41f7f5dd383d94658",
+      "afterReport": ".lake/upstream/group08/as_function-handoff/results.json",
+      "afterReportSha256": "3281016f74c8a072a9f93e1f62fa22a108029eac239d42c35cab4c8418696530",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/underscore/as_function.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/as_function"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/underscore/as_function.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/as_function-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+      "sourceAndExpectationsSha256": "e318f52aa3f71b35f7f4d151d292b6b995690fd4fa2694a62d4062cbd5c5106b",
+      "before": {
+        "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_at_declaration.sol:6: it reads the state variable `a`: `a` (line 4) is immutable: a value fixed before any call, not a storage slot",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_at_declaration.sol:6: it reads the state variable `a`: `a` (line 4) is immutable: a value fixed before any call, not a storage slot",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/assign_at_declaration/results.json",
+      "beforeReportSha256": "8a3eb175fed825494774492f67297f3f56b0832e4c224b792bfc928efee81625",
+      "afterReport": ".lake/upstream/group08/assign_at_declaration-handoff/results.json",
+      "afterReportSha256": "d6764b1d6042b47a9552dcd9f2349577468c5b51b75795d57631e1e159d795fe",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_at_declaration"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_at_declaration-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+      "sourceAndExpectationsSha256": "9f3e44ee79b2525d32e260c8d808a4d949e2ada1aed18954266896aa918749c1",
+      "before": {
+        "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_type_info.sol:11: it reads the state variable `creationCode`: `creationCode` (line 7) is constant: a value fixed before any call, not a storage slot",
+                "function": "nonEmptyCode()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_type_info.sol:11: it reads the state variable `creationCode`: `creationCode` (line 7) is constant: a value fixed before any call, not a storage slot",
+                "function": "nonEmptyCode()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_type_info.sol:11: it reads the state variable `creationCode`: `creationCode` (line 7) is constant: a value fixed before any call, not a storage slot",
+                "function": "nonEmptyCode()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "assign_type_info.sol:11: it reads the state variable `creationCode`: `creationCode` (line 7) is constant: a value fixed before any call, not a storage slot",
+                "function": "nonEmptyCode()"
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/assign_type_info/results.json",
+      "beforeReportSha256": "a737af991670dbd60dc293d54627ac358dba61fe5c996053651a07c42e204555",
+      "afterReport": ".lake/upstream/group08/assign_type_info-handoff/results.json",
+      "afterReportSha256": "c9f02974c2f9064950bd336a082ad976793ed7600bf5c9ff90ab1bb2d2d4ef00",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_type_info"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_type_info-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+      "sourceAndExpectationsSha256": "6b5ffebc7efbb22d959721ff1432f3531fd5c4954d6aba14b291c971cc7f1d17",
+      "before": {
+        "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:4: x is already declared, or names a state variable",
+                "function": "f()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:13: x is already declared, or names a state variable",
+                "function": "g()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:21: x is already declared, or names a state variable",
+                "function": "h()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:30: x is already declared, or names a state variable",
+                "function": "i()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:4: x is already declared, or names a state variable",
+                "function": "f()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:13: x is already declared, or names a state variable",
+                "function": "g()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:21: x is already declared, or names a state variable",
+                "function": "h()"
+              },
+              {
+                "status": "unsupported",
+                "reason": "c99_scoping_activation.sol:30: x is already declared, or names a state variable",
+                "function": "i()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+            "observed": [
+              {
+                "values": [
+                  "3"
+                ],
+                "signature": "f()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "g()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "3",
+                  "3",
+                  "4"
+                ],
+                "signature": "h()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "3",
+                  "3"
+                ],
+                "signature": "i()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+            "observed": [
+              {
+                "values": [
+                  "3"
+                ],
+                "signature": "f()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "g()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "3",
+                  "3",
+                  "4"
+                ],
+                "signature": "h()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "3",
+                  "3"
+                ],
+                "signature": "i()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/c99_scoping_activation/results.json",
+      "beforeReportSha256": "928e1c344bf467620e72284c6805afcfd2efed151cf087bd7c94bf07759b0010",
+      "afterReport": ".lake/upstream/group08/c99_scoping_activation-handoff/results.json",
+      "afterReportSha256": "a53ee44257f6d4be6ce2d51d456ec44979cb172bfeed4a0d0ef064f31a74f552",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/c99_scoping_activation"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/c99_scoping_activation-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+      "sourceAndExpectationsSha256": "cdddc0b47deceeedf19db5b3dbbfbedbd17cae27475039a67b3fb09cb17770ec",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "crazy_elementary_typenames_on_stack.sol:5: the expression `ElementaryTypeNameExpression`",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "crazy_elementary_typenames_on_stack.sol:5: the expression `ElementaryTypeNameExpression`",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+            "observed": [
+              {
+                "values": [
+                  "115792089237316195423570985008687907853269984665640564039457584007913129639929"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+            "observed": [
+              {
+                "values": [
+                  "115792089237316195423570985008687907853269984665640564039457584007913129639929"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/crazy_elementary_typenames_on_stack/results.json",
+      "beforeReportSha256": "92bddbb47a9fc7fb1b237c8097dc81281f917d4ee8f975b66d419b22daabdafa",
+      "afterReport": ".lake/upstream/group08/crazy_elementary_typenames_on_stack-handoff/results.json",
+      "afterReportSha256": "35b9860360d244127c5af5b9ddef55b882d8a5cc0f90a08b5ada6669eeec75f0",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/crazy_elementary_typenames_on_stack"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/crazy_elementary_typenames_on_stack-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+      "sourceAndExpectationsSha256": "2edb2aac530ca66de16b187e96e584e87b3a5f0eb05988ae75ec77180630d8e1",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "cross_contract_types.sol:13: type declaration #6 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "cross_contract_types.sol:13: type declaration #6 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+            "observed": [
+              {
+                "values": [
+                  "3"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+            "observed": [
+              {
+                "values": [
+                  "3"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/cross_contract_types/results.json",
+      "beforeReportSha256": "4da3dd20155b1df43bb875ad4efed2eeabef3b9448f990da25abb9534e248b06",
+      "afterReport": ".lake/upstream/group08/cross_contract_types-handoff/results.json",
+      "afterReportSha256": "54330ca3ccc3d837c85eb06afbfef7d90456b80167ea95eb9eb7ab0947387960",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/cross_contract_types"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/cross_contract_types-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+      "sourceAndExpectationsSha256": "465dbc1c79b19445473e4873e6a8e16ba2b49953ab88c1a685f24fb612c51742",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "delete_local.sol:4: `delete` needs a storage or a memory location",
+                "function": "delLocal()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "delete_local.sol:4: `delete` needs a storage or a memory location",
+                "function": "delLocal()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+            "observed": [
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "delLocal()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
+            "observed": [
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "delLocal()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/delete_local-before/results.json",
+      "beforeReportSha256": "c693f1172e0a63c6e67314669b5c7ae9147063fc3dbc038146e26d0e3930ba1e",
+      "afterReport": ".lake/upstream/group08/delete_local-handoff/results.json",
+      "afterReportSha256": "f13316e6883bd34e9f52ddf7dcd44f408d7cd42d0a38c94d4910c5bf3b610ceb",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_local.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_local-before"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_local.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_local-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+      "sourceAndExpectationsSha256": "6ed7fa8b26c4197fabf0c926a82cbfe09ce9da1b5535b645a7df13b8f10810a1",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "delete_locals.sol:4: `delete` needs a storage or a memory location",
+                "function": "delLocal()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "delete_locals.sol:4: `delete` needs a storage or a memory location",
+                "function": "delLocal()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+            "observed": [
+              {
+                "values": [
+                  "6",
+                  "7"
+                ],
+                "signature": "delLocal()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
+            "observed": [
+              {
+                "values": [
+                  "6",
+                  "7"
+                ],
+                "signature": "delLocal()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/delete_locals/results.json",
+      "beforeReportSha256": "2b1ffa255580b9612da8f984e6c0a5c62de2e915f916b740f565da3e5bcba804",
+      "afterReport": ".lake/upstream/group08/delete_locals-handoff/results.json",
+      "afterReportSha256": "2bc12c9a9311082d5a7943d2bbbf252d28e16afcf9fc7244779a5ca413cc75c5",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_locals.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_locals"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_locals.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_locals-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+      "sourceAndExpectationsSha256": "8e1b55f673f6f55a190f1377397a8db066ccb209d861ed39296e0355deb5b7ef",
+      "before": {
+        "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "erc7201_param_array_string_literal.sol:4: erc7201 takes a string; convert bytes with string(data)",
+                "function": "test()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "erc7201_param_array_string_literal.sol:4: erc7201 takes a string; convert bytes with string(data)",
+                "function": "test()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "test()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "test()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/erc7201_param_array_string_literal/results.json",
+      "beforeReportSha256": "82d1fec7e6fc6a39697b71b342d6254efc079d228af4a796867ea00a96aafa03",
+      "afterReport": ".lake/upstream/group08/erc7201_param_array_string_literal-handoff/results.json",
+      "afterReportSha256": "82780526492e93f6821da116c1d7032eaaa1030da65bdbc5b4e189afb7e8b6a7",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/erc7201_param_array_string_literal"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/erc7201_param_array_string_literal-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+      "sourceAndExpectationsSha256": "9e0cb69e1a603b8973ac1dae95ba90a1a7884ffa9de01006b667e70e19cd0d7c",
+      "before": {
+        "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "function_modifier_library.sol:23: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "function_modifier_library.sol:23: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+            "observed": [
+              {
+                "values": [
+                  "514"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+            "observed": [
+              {
+                "values": [
+                  "514"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/function_modifier_library/results.json",
+      "beforeReportSha256": "767812abc6001e23794198de60223634b7be798e0b007be41588123033f43ed4",
+      "afterReport": ".lake/upstream/group08/function_modifier_library-handoff/results.json",
+      "afterReportSha256": "9f1a461df89de22339d1e9438a99653433bb935fe2f9ed5feff9ea78e9a16854",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+      "sourceAndExpectationsSha256": "13c5878873cfae175c0f1918d3a9ca213ea3c6b64222ef86afd09f411506abad",
+      "before": {
+        "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "function_modifier_library_inheritance.sol:29: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "function_modifier_library_inheritance.sol:29: it reads the state variable `s`: type declaration #4 is not among the visible validated types",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+            "observed": [
+              {
+                "values": [
+                  "514"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+            "observed": [
+              {
+                "values": [
+                  "514"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/function_modifier_library_inheritance/results.json",
+      "beforeReportSha256": "e15de4027039c2e2ff6417d87d283d47e382919adb9bccbe481e161dabb6dab9",
+      "afterReport": ".lake/upstream/group08/function_modifier_library_inheritance-handoff/results.json",
+      "afterReportSha256": "3c9bcf55ec0204a90e291b91f4d994e8fd6b0fb50511c8f1c7f570b48bb0537c",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library_inheritance"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library_inheritance-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+      "sourceAndExpectationsSha256": "4e84098525f27b67e455882b9be03dd59c7a62fde8efd290268a755b0a1f90f8",
+      "before": {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "in_parenthesis.sol:5: the printed text does not parse: <input>:1:42: expected '='",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "in_parenthesis.sol:5: the printed text does not parse: <input>:1:42: expected '='",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+            "observed": [
+              {
+                "values": [
+                  "5",
+                  "10"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+            "observed": [
+              {
+                "values": [
+                  "5",
+                  "10"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/in_parenthesis/results.json",
+      "beforeReportSha256": "6ec49ee8ef1d86ce3f33e4022cd315b2418442352f41f7fb0a344a82bb9fd526",
+      "afterReport": ".lake/upstream/group08/in_parenthesis-handoff/results.json",
+      "afterReportSha256": "a4c5c5b661a9b0e4975c9d44761fae36bd45ac8c9f63b2d9e462ad5d0b006dc0",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/in_parenthesis"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/in_parenthesis-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+      "sourceAndExpectationsSha256": "a257cdfb2f3f05fb8f9f43d328b261f31f604d3d16a2d4cfec0c7631ca607b16",
+      "before": {
+        "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "keccak256_optimized.sol:14: it reads the state variable `sc`: `sc` (line 10) is constant: a value fixed before any call, not a storage slot",
+                "function": "long()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "keccak256_optimized.sol:14: it reads the state variable `sc`: `sc` (line 10) is constant: a value fixed before any call, not a storage slot",
+                "function": "long()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "short()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "1",
+                  "1"
+                ],
+                "signature": "long()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "short()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "1",
+                  "1"
+                ],
+                "signature": "long()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/keccak256_optimized/results.json",
+      "beforeReportSha256": "e229a1f70811f9a844429d79842cb44e58f041e5117a7c818e6091caf78a8f4f",
+      "afterReport": ".lake/upstream/group08/keccak256_optimized-handoff/results.json",
+      "afterReportSha256": "50ec60e4822976e3b7dc4debc2a5da5620f7793e8170947a7c2ee7eb3808e8e8",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/keccak256_optimized"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/keccak256_optimized-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+      "sourceAndExpectationsSha256": "41679897f6d2215ec222ac5b744b792a48e29c3d6ec9c998cfac31de1bba1763",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "mapping_local_compound_assignment.sol:6: m has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are expected, not whole",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "mapping_local_compound_assignment.sol:6: m has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are expected, not whole",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "42",
+                  "0",
+                  "0",
+                  "21"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "42",
+                  "0",
+                  "0",
+                  "21"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/mapping_local_compound_assignment/results.json",
+      "beforeReportSha256": "386d9cf62e72c824af5cd3b18c8fe0c28fd6c9e2d034f615635c8036b968ed7e",
+      "afterReport": ".lake/upstream/group08/mapping_local_compound_assignment-handoff/results.json",
+      "afterReportSha256": "d2cc40e455399da0e146e127db5b7d1e3109e1f475963867eaa16fca5486a0b6",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/mapping_local_compound_assignment"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/mapping_local_compound_assignment-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+      "sourceAndExpectationsSha256": "3b6bdd6d5e27998ec3a56ef05310120277d786b529f0a6869e0657adc1a0b23a",
+      "before": {
+        "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "multiple_initializations.sol:26: unknown name A",
+                "function": "constructor()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "multiple_initializations.sol:26: unknown name A",
+                "function": "constructor()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+            "observed": [
+              {
+                "values": [
+                  "255"
+                ],
+                "signature": "get()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+            "observed": [
+              {
+                "values": [
+                  "255"
+                ],
+                "signature": "get()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/multiple_initializations/results.json",
+      "beforeReportSha256": "9ad1a5ba3f46b5a7147ed811380ece30b57adc00d724372af0f584cbe1f7f146",
+      "afterReport": ".lake/upstream/group08/multiple_initializations-handoff/results.json",
+      "afterReportSha256": "f81591b17883ccf7bd582804464e7ef5ee4298d6e1be972acc8bbdea55058075",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/multiple_initializations"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/multiple_initializations-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+      "sourceAndExpectationsSha256": "76c95d8ef7b806497e72002f3b827c59f9dad92d585fbc7adc154d9f970b319c",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "packed_storage_structs_enum.sol:15: it reads the state variable `data`: struct `str`, member `a`: type declaration #6 is not among the visible structs",
+                "function": "test()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "packed_storage_structs_enum.sol:15: it reads the state variable `data`: struct `str`, member `a`: type declaration #6 is not among the visible structs",
+                "function": "test()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "packed_storage_structs_enum.sol:15: it reads the state variable `data`: struct `str`, member `a`: type declaration #6 is not among the visible structs",
+                "function": "test()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "packed_storage_structs_enum.sol:15: it reads the state variable `data`: struct `str`, member `a`: type declaration #6 is not among the visible structs",
+                "function": "test()"
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/packed_storage_structs_enum/results.json",
+      "beforeReportSha256": "b44fa2d658cac8b72f92dbb3a8475c494e1fefaddae09e1d23388b67f72cafff",
+      "afterReport": ".lake/upstream/group08/packed_storage_structs_enum-handoff/results.json",
+      "afterReportSha256": "36b9b8bf97ea9b6b18b35980ab0bebcbeed2689789ad793158338e141924bc20",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/packed_storage_structs_enum"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/packed_storage_structs_enum-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+      "sourceAndExpectationsSha256": "46f4d07c3855d80b31cf75db087f0740565037987103422151ecc59bd05f4966",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "state_variable_local_variable_mixture.sol:7: unknown name A",
+                "function": "a()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "state_variable_local_variable_mixture.sol:7: unknown name A",
+                "function": "a()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "a()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "a()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/state_variable_local_variable_mixture/results.json",
+      "beforeReportSha256": "89c80947eca86694e532ac75f44dccb22548dee9742b6956b75c38780e990ea0",
+      "afterReport": ".lake/upstream/group08/state_variable_local_variable_mixture-handoff/results.json",
+      "afterReportSha256": "92070372baa71bfc4e738356fe166b09a5d23600e1c6307918af06ba9c4c318d",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_local_variable_mixture"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_local_variable_mixture-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+      "sourceAndExpectationsSha256": "63c523b89af7052c2cd307161681889c00ecf6017abe094305f34de265ab2770",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "state_variable_under_contract_name.sol:6: unknown name Scope",
+                "function": "getStateVar()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "state_variable_under_contract_name.sol:6: unknown name Scope",
+                "function": "getStateVar()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+            "observed": [
+              {
+                "values": [
+                  "42"
+                ],
+                "signature": "getStateVar()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+            "observed": [
+              {
+                "values": [
+                  "42"
+                ],
+                "signature": "getStateVar()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/state_variable_under_contract_name/results.json",
+      "beforeReportSha256": "517ec729c0cbce85f09f2e51fb02c9bfa23050562352c689c48c3baf97099c0b",
+      "afterReport": ".lake/upstream/group08/state_variable_under_contract_name-handoff/results.json",
+      "afterReportSha256": "9c00f168cffb907a1bd4e2347a71e1d2e180f8b9fcf8a28351bdaaff0fa49b8b",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_under_contract_name"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_under_contract_name-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+      "sourceAndExpectationsSha256": "48e02d3c3f3d0b6af0f248a1b45fd90ef989f1f12ae8a1dd20ec91586f226291",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "super_alone.sol:4: the printed text does not parse: <input>:1:15: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "super_alone.sol:4: the printed text does not parse: <input>:1:15: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/super_alone.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/super_alone/results.json",
+      "beforeReportSha256": "09a8acfeeccd43409e887de26c2f5bb062d862025d79e0bf4609a5eca26d7f10",
+      "afterReport": ".lake/upstream/group08/super_alone-handoff/results.json",
+      "afterReportSha256": "ee6409ed4359d8f4086646b1b820b59d013cbc5687da47f257fb46af05f47bbb",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_alone.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_alone"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_alone.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_alone-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+      "sourceAndExpectationsSha256": "6fe68d48443fafa78d7624689a6ffb25d61d3c42d12d3229607bc5af987a1929",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "super_parentheses.sol:25: super.f(\u2026): the callee is not a function value",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "super_parentheses.sol:25: super.f(\u2026): the callee is not a function value",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+            "observed": [
+              {
+                "values": [
+                  "15"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
+            "observed": [
+              {
+                "values": [
+                  "15"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/super_parentheses/results.json",
+      "beforeReportSha256": "3c0ba4f0d8a50fda78e5da3a38e716fe94ece876587c397cf4197fe38fafd18b",
+      "afterReport": ".lake/upstream/group08/super_parentheses-handoff/results.json",
+      "afterReportSha256": "957431918d48625db52f1e64216a91993c8fb298feeb3d52ae2f553365d96743",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_parentheses.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_parentheses"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_parentheses.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_parentheses-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+      "sourceAndExpectationsSha256": "c0497247a6a9f93c35b5d2042a7a2e079e52e891046d82bd49f453d498fbd08e",
+      "before": {
+        "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "typed_multi_variable_declaration.sol:14: the printed text does not parse: <input>:1:47: expected ')'",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "typed_multi_variable_declaration.sol:14: the printed text does not parse: <input>:1:47: expected ')'",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "typed_multi_variable_declaration.sol:14: the printed text does not parse: <input>:1:47: expected ')'",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "typed_multi_variable_declaration.sol:14: the printed text does not parse: <input>:1:47: expected ')'",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/typed_multi_variable_declaration/results.json",
+      "beforeReportSha256": "e9927dbd2f7e851ff78adf7a7af09e1a3f6c693dbccca8644bfe20d68fe91272",
+      "afterReport": ".lake/upstream/group08/typed_multi_variable_declaration-handoff/results.json",
+      "afterReportSha256": "84924be151d7fc52409deb19fe6aa12e25af13594327a28cf61445b54d102e08",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/typed_multi_variable_declaration"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/typed_multi_variable_declaration-handoff"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+      "sourceAndExpectationsSha256": "e466b4ea80b2f2e38d31eeb6a7d6c408491a831d6b822c738684be60525a0ae5",
+      "before": {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "wrap_unwrap.sol:5: the printed text does not parse: <input>:1:26: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "wrap_unwrap.sol:5: the printed text does not parse: <input>:1:26: expected '=', 'storage' or identifier",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "beforeReport": ".lake/upstream/group08/wrap_unwrap/results.json",
+      "beforeReportSha256": "a7d5b3aa7eacdbba797682e4fd035796351c091625561c8a05b2d51eeaded835",
+      "afterReport": ".lake/upstream/group08/wrap_unwrap-handoff/results.json",
+      "afterReportSha256": "53cba508ecce0b6295cb6e09f98405790a6da7a52b7a7e19cf50b7fe89e84813",
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/wrap_unwrap"
+      ],
+      "afterCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/wrap_unwrap-handoff"
+      ]
+    }
+  ],
+  "coverageNotes": {
+    "alreadyFixed": 0,
+    "expectedExclusions": 0,
+    "historicalResultsUnchanged": true,
+    "meaning": "Observational scalar runtime agreement in each required source pipeline; not a universal lowering correctness theorem."
+  },
+  "historicalBaseline": {
+    "importCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+    "baseCommit": "cadb628c20e9324a45de4aff622d732907de8ef8",
+    "summary": "tests/upstream/results/summary.json",
+    "summarySha256": "9a47a4776353ab6da2f0b5ef361877c347fb8d2c0a4071be01994f40422d5ea6",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+    "meaning": "Historical assignment evidence, not a fresh failure run on origin/master. beforeMetadata and before rows are the separate fresh reproduction on the task base."
+  }
+}

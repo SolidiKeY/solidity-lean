@@ -166,7 +166,8 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
     let (taken, out) := acc
     match J.str? d "name", J.id? d with
     | some n, some i => if (n == "" && inputs.contains i) ||
-        (n != "" && (stateVars.contains n || leanKeywords.contains n)) then
+        (n != "" && (stateVars.contains n || leanKeywords.contains n ||
+          (decls.filter (fun other => J.str? other "name" == some n)).length > 1)) then
       let rec fresh (k : Nat) (x : String) : String :=
         match k with
         | 0 => x
@@ -576,6 +577,24 @@ def contractLineage (units : List Json) (c : Json) : Except String (List Json) :
   unless ids == expected do throw "Solc C3 metadata disagrees with the inheritance order"
   ids.mapM find
 
+/-- Render declaration headers and optional construction assignments once.
+The deployment table sees only earlier folded literal immutable values. -/
+def renderInitializers (kept : List (String × String × Json)) (st : PState)
+    (staticConstants immutables : List (Int × (String × Json)))
+    (fixedBefore : Json → List Int) (superNamesOf : Json → List (Int × String))
+    (phased : Bool) : Except Gap (List (Json × String × Option String)) :=
+  kept.mapM fun (n, t, v) => do
+    let declaration := s!"{t} {identText n};"
+    let some e := J.opt v "value" | pure (v, declaration, none)
+    let initialized := fixedBefore v
+    let constants := staticConstants ++ immutables.map fun (id, ty, value) =>
+      (id, ty, if initialized.contains id then value else defaultLiteral ty)
+    match (expr e).run' { st with constants, superNames := superNamesOf v } with
+    | .ok rhs => pure (v, (if phased then declaration else s!"{t} {identText n} = {rhs};"),
+        some s!"{identText n} = {rhs}")
+    | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
+    | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
+
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
 def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
     (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
@@ -585,7 +604,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       fun names text => if names.any (fun (a, b) => a != b) then
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
-    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default) :
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
+    (viaIR : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -595,6 +615,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       J.kind u == "ContractDefinition" && J.str? u "name" == some name
     | throw s!"no contract `{name}` in the AST"
   let lineage ← contractLineage units c
+  let phasedInits := viaIR && lineage.length > 1
   let membersOf (node : Json) : List Json :=
     J.arrD node "nodes" |>.toList
   let ownNodes := membersOf c
@@ -666,8 +687,24 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let valueTypes : List (Int × String) := aliases.map fun (i, _, _, t) => (i, t)
   let aliasNames : Structs := aliases.flatMap fun (i, _, qualified, t) =>
     [(s!"#solc{i}", .ok t), (qualified, .ok t)]
-  let structDefs := (nodes.filter (J.kind · == "StructDefinition")) ++
+  let ownStructDefs := (nodes.filter (J.kind · == "StructDefinition")) ++
     (units.filter (J.kind · == "StructDefinition"))
+  -- Follow only referenced foreign struct identities, including their member
+  -- types. Unrelated declarations do not enter the visible type table.
+  let allStructs := (J.nodes ast).filter (J.kind · == "StructDefinition")
+  let structDefs := Id.run do
+    let mut selected := ownStructDefs
+    for _ in [:allStructs.length] do
+      let refs := (nodes ++ selected).flatMap fun node =>
+        (J.nodes node).filterMap fun t =>
+          if J.kind t == "UserDefinedTypeName" then
+            (J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?
+          else none
+      let added := allStructs.filter fun d =>
+        !(selected.any (J.id? · == J.id? d)) && (J.id? d).any refs.contains
+      if added.isEmpty then break
+      selected := selected ++ added
+    return selected
   let (SS, ownStructs) := readStructs ren structDefs
   let S := SS ++ enumNames ++ aliasNames
   let constants : List (Int × (String × Json)) := (J.nodes ast).filterMap fun v => do
@@ -676,7 +713,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let value ← J.opt v "value"
     let typeNode ← J.opt v "typeName"
     let t ← (tyText S typeNode).toOption
-    guard (PrimTy.ofName? t).isSome
+    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome)
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
@@ -685,20 +722,24 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- roots are unsafe too, even if no selected body mentions the variable.
   if vars.any (fun v => J.str? v "storageLocation" == some "transient") then
     throw "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet"
-  -- an immutable nothing writes is a constant: its compile-time initializer,
-  -- or its type's default; one the constructor writes is a storage root
+  -- Inline only an unwritten immutable with a known literal/default value.
+  -- Other immutables retain a deployment root: even an unread initializer
+  -- may mutate another root, allocate, call, fail or read the environment.
   let written := writtenIds ast
   let immutables : List (Int × (String × Json)) := vars.filterMap fun v => do
-    guard ((J.str? v "mutability") == some "immutable")
+    guard (!phasedInits && (J.str? v "mutability") == some "immutable")
     let i ← J.id? v
     guard !(written.contains i)
     let t ← (tyText S (← J.opt v "typeName")).toOption
-    guard (PrimTy.ofName? t).isSome
+    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome)
     match J.opt v "value" with
     | some value => do guard ((constVal value).isSome || J.kind value == "Literal"); pure (i, t, value)
     | none => pure (i, t, defaultLiteral t)
-  let constants := constants ++ immutables
+  let staticConstants := constants
+  let constants := staticConstants ++ immutables
   let fixedIds := immutables.map (·.1)
+  let fixedBefore (v : Json) : List Int :=
+    (vars.takeWhile (· != v)).filterMap J.id?
   -- a base's `private` variable of a name a later one declares again is a
   -- root of its own: renamed by its declaration's identity, as a local is
   -- (`x` of `PrivateRoot`, beside the derived `x`, is `x_PrivateRoot`), and
@@ -759,7 +800,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let n := (lookupBy i stateRenames).getD ((J.str? v "name").getD "")
     let mutab := (J.str? v "mutability").getD "mutable"
     let fixed := (v.getObjValAs? Bool "constant").toOption == some true ||
-      (mutab != "mutable" && !(mutab == "immutable" && written.contains i))
+      (mutab != "mutable" && !(mutab == "immutable" && !fixedIds.contains i))
     match (do
         if fixedIds.contains i then
           throw (.unsupported s!"`{n}` (line {J.line v}) is immutable and never written: \
@@ -787,6 +828,16 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let ownIds := ownFuns.filterMap J.id?
   let inheritedFuns := nodes.filter fun node =>
     J.kind node == "FunctionDefinition" && !(J.id? node).any ownIds.contains
+  -- A testing import exposes the inherited ABI entry, with its existing
+  -- declaration identity and shared body. Overridden and non-public helpers
+  -- stay dependencies rather than duplicate externally callable entries.
+  let entryIds := ownIds ++ (if testing then inheritedFuns.filterMap fun f => do
+    guard (J.str? f "kind" == some "function")
+    guard (["public", "external"].contains ((J.str? f "visibility").getD ""))
+    let id ← J.id? f
+    guard ((lookupBy id functionAliases).getD id == id)
+    pure id
+    else [])
   let libraryNodes := units.filter fun unit => J.opt unit "contractKind" == some (.str "library")
   let libraries := libraryNodes.filterMap J.id?
   let freeHelpers := (units.filter (J.kind · == "FunctionDefinition") ++
@@ -968,7 +1019,21 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let ps ← ps.getArr?.toOption
     pure (i, ps.toList.filterMap fun p => J.str? p "name")
   let funParams := funParams ++ getterReads.map fun (id, _, names) => (id, names)
-  let modifierDefs := nodes.filter (J.kind · == "ModifierDefinition")
+  -- a constructor's `B(5)` is a base constructor's arguments, not a modifier
+  let modifierInvocations (f : Json) : List Json :=
+    J.arrD f "modifiers" |>.toList.filter (J.str? · "kind" != some "baseConstructorSpecifier")
+  let modifierId (m : Json) : Option Int := do
+    let name ← J.opt m "modifierName"
+    let id ← J.ref? name
+    let text := (J.str? name "name").getD ""
+    if text.startsWith "super." then none
+    else if text.contains '.' then some id
+    else some ((lookupBy id modifierAliases).getD id)
+  let localModifierDefs := nodes.filter (J.kind · == "ModifierDefinition")
+  let invokedModifiers := funs.flatMap fun f => (modifierInvocations f).filterMap modifierId
+  let modifierDefs := localModifierDefs ++ (J.nodes ast).filter fun d =>
+    J.kind d == "ModifierDefinition" &&
+      !(localModifierDefs.any (J.id? · == J.id? d)) && (J.id? d).any invokedModifiers.contains
   let scopedIds := (funs ++ modifierDefs).filterMap J.id?
   let lexicalScopes ← (units.filter fun unit =>
       J.kind unit == "ContractDefinition" &&
@@ -1032,16 +1097,6 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let modifierScopes := modifierReadResults.map fun (id, result) =>
     (id, (result.toOption.map (·.2)).getD default)
   let modifierMembers := modifierReads.filterMap fun (_, text) => text.toOption
-  -- a constructor's `B(5)` is a base constructor's arguments, not a modifier
-  let modifierInvocations (f : Json) : List Json :=
-    J.arrD f "modifiers" |>.toList.filter (J.str? · "kind" != some "baseConstructorSpecifier")
-  let modifierId (m : Json) : Option Int := do
-    let name ← J.opt m "modifierName"
-    let id ← J.ref? name
-    let text := (J.str? name "name").getD ""
-    if text.startsWith "super." then none
-    else if text.contains '.' then some id
-    else some ((lookupBy id modifierAliases).getD id)
   let read := funs.map fun f =>
     let fname := internalName f
     let st := specState f (renames stateVars f ++ funRenames)
@@ -1212,19 +1267,25 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
   let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let omittedInitializers := vars.filter fun v =>
+    J.opt v "constant" != some (.bool true) &&
+      !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&
+      !(kept.any fun (_, _, declaration) => declaration == v)
+  let deploymentRoots := kept.map (·.2.2) ++ omittedInitializers
   let initScope := scanSource {
-    entry := c, evaluatedRoots := kept.map (·.2.2), declarationRoots := [c]
+    entry := c, evaluatedRoots := deploymentRoots, declarationRoots := [c]
     constantIds := constants.map Prod.fst
-    unresolvedDispatch := kept.flatMap fun (_, _, node) => (dispatchOf node).unresolved
-    diagnostics := kept.flatMap fun (_, _, node) => paymentIssues node }
-  let inits : Except Gap (List String) := do
+    unresolvedDispatch := deploymentRoots.flatMap fun node => (dispatchOf node).unresolved
+    diagnostics := deploymentRoots.flatMap paymentIssues }
+  -- Each initializer is rendered once; viaIR inheritance places its
+  -- assignment in its owner's construction phase instead of the field header.
+  let initRows : Except Gap (List (Json × String × Option String)) := do
     initScope.ensure
-    kept.mapM fun (n, t, v) => do
-    let some e := J.opt v "value" | pure s!"{t} {identText n};"
-    match (expr e).run' { initSt with superNames := superNamesOf v } with
-    | .ok x => pure s!"{t} {identText n} = {x};"
-    | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
-    | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
+    if let some v := omittedInitializers.head? then
+      throw (.unsupported s!"the initializer of `{(J.str? v "name").getD "?"}` cannot be omitted: \
+        its state declaration has no supported deployment root" (J.line v))
+    renderInitializers kept initSt staticConstants immutables fixedBefore superNamesOf phasedInits
+  let inits := initRows.map fun rows => rows.map (·.2.1)
   -- the internal calls: a function is read with every function it reaches,
   -- and the ones called are the contract's members, callees first
   let ids := funs.filterMap J.id? ++ getterReads.map (·.1)
@@ -1282,6 +1343,30 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     | some (vs, cv) => (i, (cs ++ vs ++ (if cv then taken.filter (· != i) else [])).eraseDups)
     | none => (i, cs)
   let calls (i : Int) : List Int := (lookupBy i callsOf).getD []
+  -- A shared runtime callee may already contain folded immutable reads.
+  -- Refuse a call needing a not-yet-initialized immutable rather than clone
+  -- its body or substitute the final value during deployment.
+  let initForwardGap : Option Gap := if fixedIds.isEmpty then none else
+    kept.findSome? fun (_, _, v) => do
+      let _ ← J.opt v "value"
+      let future := fixedIds.filter fun id => !(fixedBefore v).contains id
+      if future.isEmpty then none else do
+        let targets := callees ids v freeFunctions functionAliases baseContracts (supersOf v)
+          (getterNames.map (·.1)) ++ (dispatchOf v).targets
+        let reached := targets.flatMap fun id =>
+          (reach calls (ids.length + 1) [] [] id).toOption.getD []
+        let bad ← reached.findSome? fun id =>
+          if (getterNames.any (·.1 == id)) && future.contains id then some id else do
+            let f ← funs.find? (J.id? · == some id)
+            let modifiers := (modifierInvocations f).filterMap fun app =>
+              (modifierId app).bind fun key => modifierDefs.find? (J.id? · == some key)
+            ((f :: modifiers).flatMap J.nodes).findSome? fun node => do
+              guard (["Identifier", "MemberAccess"].contains (J.kind node))
+              let ref ← J.ref? node
+              guard (future.contains ref)
+              pure ref
+        pure (.unsupported s!"the initializer of `{(J.str? v "name").getD "?"}` reaches immutable \
+          declaration #{bad} before initialization through a shared runtime callee" (J.line v))
   let byId : List (Int × SolcFun) := ((funs.zip read).filterMap fun (f, r) => (J.id? f).map (·, r)) ++
     getterReads.map fun (id, f, _) => (id, f)
   let nameAt (i : Int) : String := ((lookupBy i byId).map (·.name)).getD "?"
@@ -1316,7 +1401,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- constructor, which evaluates the next base constructor's arguments and
   -- runs it first, and so on down the C3 order.  So: every argument, derived
   -- to base, bound to its base constructor's parameter as a local, then the
-  -- bodies, base to derived, all in the one constructor member.
+  -- bodies, base to derived, all in the one constructor member. viaIR
+  -- instead interleaves initializers below; both retain shared callee bodies.
   let ctorNodeOf (k : Json) : Option Json := (membersOf k).find? fun n =>
     J.kind n == "FunctionDefinition" && J.str? n "kind" == some "constructor"
   let baseCtors : List (Json × Json) := lineage.tail.filterMap fun k => (ctorNodeOf k).map (k, ·)
@@ -1444,8 +1530,15 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           { st with fresh := carry.1, discards := carry.2 }
         carry := (st'.fresh, st'.discards)
         out := out ++ ss.map (J.line f, ·)
-    -- the bodies, base to derived
-    for f in baseCtors.reverse.map (·.2) ++ ownCtor.toList do
+    -- viaIR evaluates constructor arguments first, then interleaves each
+    -- owner's initializers with its constructor body, base to derived.
+    for owner in lineage.reverse do
+      if phasedInits then
+        for (declaration, _, assignment) in ← initRows do
+          if (membersOf owner).any (J.id? · == J.id? declaration) then
+            if let some statement := assignment then
+              out := out ++ [(J.line declaration, statement)]
+      let some f := ctorNodeOf owner | continue
       let b ← J.get f "body"
       let st0 := { ctorState f with fresh := carry.1, discards := carry.2 }
       let (ss, st') ← ((← J.arr b "statements").flatMapM fun s => do
@@ -1481,24 +1574,24 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         {String.join (ss.map (·.2 ++ "; "))}}")]
       out := out ++ [(J.line f, s!"{n}({", ".intercalate (ps.map (identText ∘ Prod.fst))})")]
     pure (out, helpers, loopScope)
-  let called := (ownIds.flatMap fun i =>
+  let called := (entryIds.flatMap fun i =>
     ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast) ++
     initCalls.flatMap (fun i => (reach calls (ids.length + 1) [] [] i).toOption.getD []) ++
-    (if baseCtors.isEmpty then [] else compositeReach)
+    (if baseCtors.isEmpty && !phasedInits then [] else compositeReach)
   let funMembers := order.filterMap fun i => do
     let r ← lookupBy i closed
     guard (ctorId != some i && (called.contains i || (getterNames.any (·.1 == i)) ||
-      (ownIds.contains i && (testing || !r.modifierApps.isEmpty))))
+      (entryIds.contains i && (testing || !r.modifierApps.isEmpty))))
     let ss ← r.body.toOption
     pure (r.name, r.member (ss.map (·.2)))
   -- the constructor bodies the composite calls, after every function
-  let ctorHelpers := if baseCtors.isEmpty then [] else
+  let ctorHelpers := if baseCtors.isEmpty && !phasedInits then [] else
     ((compositeBody.toOption.map (·.2.1)).getD [])
   let funMembers := selectorMembers ++ funMembers ++ ctorHelpers
   -- an initializer that does not print, or calls a function left out
   let initGap : Option Gap := match inits with
     | .error g => some g
-    | .ok _ => initCalls.findSome? fun c => match lookupBy c closed with
+    | .ok _ => initForwardGap.orElse fun _ => initCalls.findSome? fun c => match lookupBy c closed with
       | some { body := .error g, .. } =>
         let m := s!"an initializer calls `{nameAt c}`, which is left out: {g.msg}"
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
@@ -1506,7 +1599,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let initMembers := match initGap, inits with
     | none, .ok ms => invariants ++ enumMembers ++ structMembers ++ errorMembers.eraseDups ++ ms
     | _, _ => members
-  let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
+  let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any entryIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)
   let ctor := (all.find? (·.1)).map fun (_, r) =>
     { r with
@@ -1516,7 +1609,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let ss ← r.body
         if let some g := initGap then throw g
         pure ss }
-  let ctor := if baseCtors.isEmpty then ctor else
+  let ctor := if baseCtors.isEmpty && !phasedInits then ctor else
     let own : SolcFun := ctor.getD
       { name := "constructor", sourceName := "constructor", sourceSignature := "constructor()",
         line := J.line c, tag := if isSpecified cspec then .specified else .diamond,
@@ -1529,10 +1622,20 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do sourceScope.ensure; let _ ← own.body; pure (← compositeBody).1,
       -- its own modifiers wrap its body's member alone (`bodyMember?`)
       modifierApps := "",
-      calls := (own.calls ++ compositeReach.map nameAt ++ ctorHelpers.map (·.1)).eraseDups,
-      writingCall := own.writingCall || compositeRoots.any (fun root => (dispatchOf root).external) ||
+      calls := (own.calls ++ compositeReach.map nameAt ++ ctorHelpers.map (·.1) ++
+        (initCalls.flatMap fun i => (reach calls (ids.length + 1) [] [] i).toOption.getD []).map nameAt).eraseDups,
+      writingCall := own.writingCall ||
+        kept.any (fun (_, _, node) => writingCall node || (dispatchOf node).external) ||
+        initCalls.any (fun id => (lookupBy id closed).all (·.writingCall)) || compositeRoots.any (fun root => (dispatchOf root).external) ||
         baseCtors.any (writingCall ·.2) ||
         compositeReach.any fun x => (lookupBy x byId).all (·.writingCall) }
+  -- An implicit constructor must retain an initializer refusal in the report.
+  -- A warning alone would let a replay deploy the default-only contract.
+  let ctor := match ctor, initGap with
+    | none, some gap => some {
+        name := "constructor", sourceName := "constructor", sourceSignature := "constructor()",
+        line := J.line c, tag := .diamond, params := [], sourceScope := initScope, body := .error gap }
+    | _, _ => ctor
   let funs := all.filterMap fun (c, r) => if c then none else some r
   let internalFuns := selectorHelpers.map (·.2) ++ ctorHelpers.map (·.1)
   let sourceDecls := byId.filterMap fun (_, f) => f.sourceDecl.map (f.name, ·)

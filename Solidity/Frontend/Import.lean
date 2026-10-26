@@ -528,7 +528,8 @@ def elabSolcImport : CommandElab := fun stx => do
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }))
+        specifications := [(bound, "/// @custom:key " ++ text)] })
+    (provenance.pipeline == some .viaIR))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -598,7 +599,13 @@ def elabSolcImport : CommandElab := fun stx => do
         (at_ f 0 s!"the contract with its constructor and initializers: {e}"))
       ctorMember := none
     | some e, _, _ =>
-      logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
+      -- An implicit initializer that renders but fails native elaboration
+      -- must remain a deployment refusal, not a warning and default state.
+      let f : SolcFun := {
+        name := "constructor", sourceName := "constructor", sourceSignature := "constructor()",
+        line := 0, tag := .diamond, params := [], body := .ok [] }
+      ctorRow := some (.ofFun f .unsupported
+        (at_ f 0 s!"the contract with its initializers: {e}"))
   let ctStx ← ofExcept (parse `term (contractText memberList))
   let ctStx ← if c.internalFuns.isEmpty then pure ctStx else
     let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)

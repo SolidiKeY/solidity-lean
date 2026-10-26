@@ -36,11 +36,14 @@ solc_import "../../tests/solc/EtherWallet.ast.json" hash 0x381a46a368c7fa67 as S
 
 solc_import "../../tests/solc/CtorGap.ast.json" hash 0xc422f333726d501d as Solkey.CtorGap
 
-/--
-warning: solc_import: the initializers are left out: an initializer calls `cap`, which is left out: assembly other than revert(add(data, 32), mload(data))
--/
-#guard_msgs in
 solc_import "../../tests/solc/InitGap.ast.json" hash 0x1fb55aa0ceab10b9 as Solkey.InitGap
+
+-- An implicit initializer refusal is a deployment row, not only a warning.
+#guard (Solkey.InitGap.report.find? (·.sourceSignature == "constructor()")).any
+  (fun row => row.status == .unsupported)
+#guard Solkey.InitGap.ctor.isNone
+#guard (Solkey.InitGap.report.find? (·.sourceSignature == "get()")).any
+  (fun row => row.status == .elaborated)
 
 /-! `EtherWallet`'s obligations (`solc_scoped_problems`): each stated on
 its program `N.f`, read in its parameters' context, `N.f.problem`. -/
@@ -122,9 +125,9 @@ pending:
 
 `CtorGap`'s constructor contains inline assembly, so it is left out (a row), and
 its initializer `limit = 5` with it: the implicit constructor would run
-the initializer alone.  `InitGap`'s implicit constructor has an
+the initializer alone. `InitGap`'s implicit constructor has an
 initializer that calls `cap`, left out for its inline assembly: the initializers
-are left out, with a warning at the import. -/
+are left out and the refused implicit deployment is retained as a constructor row. -/
 
 /--
 info: 2 functions (2 diamond, 0 box, 0 skip): 1 elaborated, 0 skipped, 0 excluded, 1 unsupported
