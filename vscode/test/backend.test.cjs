@@ -63,3 +63,10 @@ test('already cancelled jobs never spawn', async t => {
   const abort = new AbortController(); abort.abort();
   await assert.rejects(runBackend({ backendPath: root, nodePath: process.execPath, source: '/tmp/x.sol', signal: abort.signal }), error => error.code === 'CANCELLED');
 });
+
+test('decodes split UTF-8 messages from backend pipes', async t => {
+  const report = { results: [{ ...row, reason: '∀账户😀' }], errors: [] };
+  const root = fixture(t, `import {writeSync} from 'node:fs';const bytes=Buffer.from(${JSON.stringify(JSON.stringify(report))});let i=0;const timer=setInterval(()=>{writeSync(1,bytes.subarray(i,i+1));if(++i===bytes.length)clearInterval(timer);},1);`);
+  const out = await runBackend({ backendPath: root, nodePath: process.execPath, source: '/tmp/x.sol' });
+  assert.equal(out.results[0].reason, '∀账户😀');
+});

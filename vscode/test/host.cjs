@@ -47,7 +47,7 @@ async function run() {
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: false, error: error.stack }));
     throw error;
   } finally {
-    await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+    await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
     for (const key of keys) await config.update(key, previous[key], vscode.ConfigurationTarget.Global);
     rmSync(root, { recursive: true, force: true });
   }

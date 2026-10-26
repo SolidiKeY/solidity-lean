@@ -62,7 +62,7 @@ test('saves dirty files and passes configured executable, timeout and backend', 
   assert.equal(env.doc.isDirty, false); assert.equal(args.backendPath, '/workspace/other');
   assert.equal(args.nodePath, '/custom/node'); assert.equal(args.timeoutMs, 123);
 });
-test('suppresses results from modified, closed or superseded documents', async () => {
+test('suppresses results from modified documents', async () => {
   let finish, signal;
   const env = setup((args, env) => new Promise(resolve => { signal = args.signal; finish = () => resolve({ results: [row(env)], errors: [] }); }));
   const promise = env.api.verify(env.doc); await settle();
@@ -106,4 +106,16 @@ test('Test Explorer respects exclusions and maps pending without counterexample 
   await env.controller.run({ include: [item] }, token);
   assert.deepEqual(env.runs[1].calls.map(call => call[0]), ['started', 'failed', 'end']);
   assert.doesNotMatch(env.runs[1].calls[1][2].message, /counterexample/i);
+});
+
+test('suppresses closed documents and superseded jobs even when backend ignores cancellation', async () => {
+  const pending = [];
+  const env = setup((args, env) => new Promise(resolve => pending.push({ args, finish: () => resolve({ results: [row(env)], errors: [] }) })));
+  const first = env.api.verify(env.doc); await settle();
+  const second = env.api.verify(env.doc); await settle();
+  assert.equal(pending[0].args.signal.aborted, true);
+  pending[0].finish(); assert.equal(await first, null);
+  env.doc.isClosed = true;
+  pending[1].finish(); assert.equal(await second, null);
+  assert.equal(env.reports?.size || env.api.reports.size, 0);
 });

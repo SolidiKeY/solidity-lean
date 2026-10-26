@@ -64,6 +64,7 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, c
       if (error) reject(error); else resolvePromise(report);
     };
     const stop = (message, code) => {
+      if (finished) return;
       terminateTree(child);
       finish(Object.assign(new Error(message), { code }));
     };
@@ -71,6 +72,8 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, c
     const timer = setTimeout(() => stop(`Verification timed out after ${timeoutMs} ms`, 'TIMEOUT'), timeoutMs);
     signal?.addEventListener('abort', cancel, { once: true });
     child.on('error', error => finish(error));
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
     child.stdout.on('data', chunk => {
       stdout += chunk;
       if (Buffer.byteLength(stdout) > 32 * 1024 * 1024) stop('Verifier output exceeded 32 MiB', 'OUTPUT_LIMIT');
