@@ -86,7 +86,7 @@ inductive FloorShape (K : PrimTy) : Ty → Type where
   | floor {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K V))
   | outer (K' : PrimTy) {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K' V))
   /-- A dynamic array of primitives at a `uint` pass: each slot floored,
-  the live length kept (feature 30). -/
+  the live length kept (feature 31). -/
   | arr {e : PrimTy} (hK : K = .uint) : FloorShape K (.ref (.array (.prim e)))
 
 /-- `floor` at a key type `K'` that is `K`. -/
@@ -118,7 +118,7 @@ def FloorShape.hasArr {T : Ty} : FloorShape K T → Bool
 def FloorShape.fU (hK : K = .uint) (f : K.Denote → K.Denote) : PrimTy.uint.Denote → PrimTy.uint.Denote :=
   hK ▸ f
 
-/-- **A floor an array can be rebuilt at** (feature 30): monotone, and
+/-- **A floor an array can be rebuilt at** (feature 31): monotone, and
 never above its key, so the slots below the live length stay there. -/
 def ArrOK (ok : OrdK K) (f : K.Denote → K.Denote) : Prop :=
   (∀ x y : K.Denote, ok.val x ≤ ok.val y → ok.val (f x) ≤ ok.val (f y)) ∧ ∀ x : K.Denote, ok.val (f x) ≤ ok.val x
@@ -701,7 +701,7 @@ inductive ApfTm (Rs : ARoots) : Bool → {s : Srt} → LTm C s → Type where
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zbin op h) a b)
   | zcmp (op : BinOp) (h : op.zCmp = true) {a b : LTm C .kint} (ha : ApfTm Rs false a)
       (hb : ApfTm Rs false b) : ApfTm Rs false (.app2 (.zcmp op h) a b)
-  /-- An array element along a path of a root of `Rs` (feature 30). -/
+  /-- An array element along a path of a root of `Rs` (feature 31). -/
   | rat {R : RefTy} {E : Ty} (ar : ArrTy R E) {q : LTm C (.path (.ref R))} {i : LTm C (.val .uint)}
       (hq : ApfTm Rs true q) (hi : ApfTm Rs false i) : ApfTm Rs true (.index (.arr ar) q i)
   /-- An array element elsewhere. -/
@@ -3106,7 +3106,7 @@ def apfPrepK (ok : OrdK K) (B : LFml C) (extra : List (IdxKey C K) := []) : Prep
 def apfPrep (B : LFml C) : Prep B := (apfPrepK .uint B).trans (apfPrepK .int _)
 
 /-- **Array property instantiation with more index terms** at the `uint`
-pass (feature 30: an array's live length, read as an atom). -/
+pass (feature 31: an array's live length, read as an atom). -/
 def apfPrepWith (extra : List (IdxKey C .uint)) (B : LFml C) : Prep B :=
   (apfPrepK .uint B extra).trans (apfPrepK .int _)
 

@@ -1143,7 +1143,7 @@ The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
-*unknown* (`gapArrayBlock` … `gapWrittenMemory`, each in the fragment by the
+*unknown* (`gapKIntNeg` … `gapWrittenMemory`, each in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
 (`gapMemInnerNeg` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
@@ -1161,7 +1161,8 @@ feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25;
 2026-10-26, their astronomically large refutations returned as terms;
 `gapIntAnd` and `gapAddmod` (feature 22), `gapMemInner` (feature 23) and
 `gapMemWrite` (feature 24) since 2026-10-26;
-`gapLedgerWrite` and `gapKIntBinder` (features 25 and 26) since 2026-10-26.
+`gapLedgerWrite` and `gapKIntBinder` (features 25 and 26) since 2026-10-26;
+`gapArrayBlock` (feature 31, `Examples/DecisionArrays.lean`) since 2026-10-26.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named:
@@ -1965,6 +1966,51 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     remainders, including ledger entries and other KeY `int` locals,
     remain outside this encoder.
 
+31. **Blocks over storage arrays** (2026-10-26, `Calculus/ArrayBlock.lean`,
+    `Calculus/ArrayProperty.lean`, `arrayBlockReduction?`, after the
+    ledger blocks' pipeline in `decideLeafA`).  The arrays' pipeline of
+    feature 10 with a preparation between the prefix and the array
+    stages, as feature 21 put one before the ledger cut:
+    * **the fragment's array paths** (`ApfTm.rat`, an element along a
+      path of a root of the blocks; `aidx` elsewhere; `rhas`/`has`,
+      `rlen`/`len`; `ite`, the Theory's conditional read), and a dynamic
+      array of primitives floored slot by slot at a `uint` pass
+      (`FloorShape.arr`): the rebuilt array keeps its live length and
+      holds at slot `i` what slot `⌊i⌋` held, there exactly where `⌊i⌋` is
+      below the old slots (`arr_rebuild_slot`, `arr_rebuild_len`), its
+      slot count the first breakpoint whose floor is past the old ones
+      (`arrCut`).  The floor must be monotone and never above its key
+      (`ArrOK`): a pass that rebuilds an array lists every value of the
+      index set among the strict guards' operands, so no key reads the
+      largest value past its floor (`lastIn_eq_floorIn`, `lastK_arrOK`).
+      A rebuilt value reads at a path what the old one read at its floors,
+      rebuilt as the shape reached has it (`FloorShape.rebuild_find`, of
+      which `rebuild_word`, `rebuild_has`, `rebuild_len` are read off);
+      `Surg` keeps other roots whole (`other`) and reads words, slot tests
+      and lengths at the floors (`keyAt`, `hasAt`, `lenAt`).  The index set
+      is evaluated by `LTm.evalC` (`IdxKey` is a term; `ReadExpr` takes no
+      slot test or length);
+    * **the lengths as atoms** (`lenPrep`): each dynamic array the blocks
+      read at their variables gets an atom past the body's, its length
+      reads replaced (`LTm.lenRep`), its definition in front (`HDef`), and
+      the atom joins the index set (`apfPrepWith`, `lenKeys`).  The cut
+      takes no index that reads an array, so the length could not be an
+      index term itself; with it in the index set a realized array's slots
+      stop at its length (`arrCut` meets it) instead of running to `2^256`;
+    * **the instances folded** (`LFml.litFold`: comparisons of literals and
+      of an atom with itself; `LFml.slotFold`: the Theory's
+      `orElse(if has(q) then find(q) else ⊥, 0)` at a total path is
+      `find(q)`, the storage's word at a missing slot being the default),
+      both exact at every state.  `gapArrayBlock`'s cut leaf went from
+      1626 lifted nodes to 187 (M4's bound is 511).
+    `Fml.arrayBlockCovered` is the fragment (`arrayBlockReduction?_isSome`);
+    the refutation is the realized state (`arrRealize`) rebuilt at the
+    floors (`blockPrep`'s refutation).  Pins (`Examples/DecisionArrays.lean`):
+    `gapArrayBlock` proved, `arrayBlockBad` (an element past the guard)
+    refuted, `arrayLenBlock` (the guard `i < arr.length`) proved, the
+    first two covered by the kernel and answering (`*_answers`,
+    `gapArrayBlock_iff`).
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -2236,16 +2282,17 @@ stack would lift this.
     decided since 2026-10-26, features 16 to 19, and `int` keys and the
     ledger since features 20 and 21, their refutations of `2^255` keys or
     `2^256 - 6` addresses returned as terms no evaluation builds):
-    * a block over a storage array (`gapArrayBlock`).  The quantified
-      pipeline reads no array (the Theory's `has`/`orElse` reads are
-      outside `LFml.Src false`), the arrays' (`arrayReduction?`) has no
-      preparation stage.  It needs the block instantiated before the array
-      cut, the index set taking each array's live length and slot count
-      (a read below the slots reads the slot, past them the default), and
-      each array rebuilt with slot `i` holding what slot `⌊i⌋` held, its
-      length and slots kept, on top of `arrRealize`.  An array has no
-      default inside its slots, so a refutation lists every slot up to its
-      length, as feature 10's do;
+    * a block over a storage array: `gapArrayBlock` is decided since
+      feature 31 (dynamic arrays of primitives at roots).  Left: fixed
+      arrays read at a block variable (`FloorShape.of` keeps them; they
+      need a `fixed` shape and their literal length in the index set),
+      arrays below a mapping key read at a bound index (floored, but no
+      length atom: a refutation's slots may run to `2^256`), and leaves
+      whose cut instance passes M4's 511 nodes (each instance at most two
+      reads; a two-variable block over arrays is past it).  A realized
+      array with a slot or a non-default word past its length still
+      rebuilds to the next value of the index set past it, `2^256` slots
+      where there is none (no term names the slot count);
     * a `||` whose left operand contains a `&&` with a halting right
       operand (`(k < 3 && k < x - 1) || k == 7 → …`; no `dl!` spelling,
       so no pin): `apfPrep` refuses it (feature 19), since the floor proof
@@ -2258,7 +2305,15 @@ stack would lift this.
     `(∀ i. i < len(s) → s[i] == 0) → s[0] == 0`: `Fml.hoist` moves no
     binder out of an antecedent, so `i` stays bound after `s`; it needs
     Bradley, Manna and Sipma's instantiation over a memory array, its
-    length in the index set); a hidden memory binder (`gapMemParam`: it
+    length in the index set).  Not started (2026-10-26).  The next step:
+    in `Calculus/MemSwap.lean`, before the cut (`Fml.mx`), instantiate a
+    negative `∀ i` over a fresh array's reads at the index set of the
+    array's other reads, its length binder `n` and the guards' operands
+    with their successors (the instance is the `Fml` analogue of
+    `LFml.apfInst`); exactness needs a memory-array floor: the object
+    `mxRealize` builds holds at index `i` the word of `⌊i⌋`, its length
+    kept (feature 31's `arr_rebuild_slot` argument, over `MxMap` instead
+    of `SVal`); a hidden memory binder (`gapMemParam`: it
     ranges over the objects already in the given heap, which may alias,
     and over none, so a refutation needs a heap whose object holds the
     witness words, which `decideLeafA`'s state does not carry, and the cut
@@ -2284,7 +2339,12 @@ stack would lift this.
       elements and writes, but no hash (`decideMem` is `decideLeaf`'s,
       not `decideHash`'s), and the hash swap reads no memory: the inputs'
       equality would be their lengths' and every word's, a bounded `∀`
-      over the written arrays (step 7), which no stage takes;
+      over the written arrays (step 7), which no stage takes.  Not
+      started (2026-10-26).  The next step: run `decideMem`'s cut inside
+      `decideHash` (the swap first reads each string as its hash's word;
+      with writes the inputs' equality is the lengths' and every word's,
+      a negative `∀` over the written arrays, which the step above, the
+      memory block instantiation, would then take);
   Not counterexamples, since `Fml.inTarget` excludes them: a negative
   value quantifier over hash pairs its scope does not read
   (`gapHashNegForall`, e3″), a hash stored
@@ -2297,8 +2357,8 @@ stack would lift this.
   key, of structs or of arrays (`a[i][j]`), an index that reads an array
   (`a[a[0]]`), a read of the whole array (`delete a`, a copy), a leaf with
   more than `orBudget` fallbacks (Theory reads after writes); blocks over
-  arrays (`gapArrayBlock`: the array property fragment over arrays needs
-  the lengths in the index set).
+  fixed arrays and over arrays below a mapping key (feature 31 takes
+  dynamic arrays at roots).
 * A time bound with arrays: each read is up to two variables of the
   arithmetic, whose search grows with their number; a counterassignment
   the shrinking leaves with a length near `2^256` is out of reach to
@@ -2350,9 +2410,10 @@ in this order:
    features 20 and 21): `int`-keyed mappings, refutations listed region by
    region (those of `2^255` keys terms no evaluation builds), and the
    ledger, `apfPrep` inside the ledger's pipeline (`ledgerBlockReduction?`).
-   Left: arrays (`gapArrayBlock`: lengths and slot counts in
-   the index set, `apfPrep` inside `arrayReduction?`), memory, a `||`
-   whose left operand may halt.
+   Done (2026-10-26, feature 31): dynamic arrays of primitives at roots
+   (`gapArrayBlock`), their lengths as atoms in the index set,
+   `arrayBlockReduction?`.  Left: fixed arrays and arrays below keys,
+   memory (`gapMemInnerNeg`), a `||` whose left operand may halt.
 6. **Memory, array indices**: array indices done (2026-10-25, feature 10)
    for arrays of primitives at roots: update pushing made exact for the
    Theory's reads (`Tm.toLT`), and instead of in-range evidence through

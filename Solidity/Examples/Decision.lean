@@ -464,8 +464,8 @@ local instance : InContract := ⟨Gaps⟩
 
 /-! ### Quantifiers over contents
 
-Outside `apfPrep`'s shapes once; all but `gapArrayBlock` decided since
-(features 16 to 21, pinned below). -/
+Outside `apfPrep`'s shapes once; all decided since (features 16 to 21,
+pinned below; `gapArrayBlock` by feature 31, `Examples/DecisionArrays.lean`). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
@@ -710,10 +710,6 @@ theorem gapMixedPairs_inTarget : gapMixedPairs.inTarget {} = true := by decide +
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
 /-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
 theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
-
-/-- info: true -/
-#guard_msgs in
-#eval ([gapArrayBlock].map verdict).all (· == "unknown")
 
 /-! Binders of KeY's `int` (M7, feature 26): the former counterexample
 `gapKIntBinder` proved, its false variant refuted (the binder's entry `0`),

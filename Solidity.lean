@@ -488,6 +488,7 @@ import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify
