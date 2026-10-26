@@ -14,7 +14,8 @@ the premise per kind written as the link of the two kinds' words
 (at least one) may be hashed anywhere, past an update too, where the
 premise reads them if the update lands (`Fml.HashIn`); each is hashed by
 the first kind where the premise always reads it, outside every update's
-continuation (`Fml.topLevels`).  The result has hashes of the first kind
+continuation (`Fml.topLevels`), unless it is the only one (no pair to
+link).  The result has hashes of the first kind
 only, which the one-kind swap reads:
 
 * **valid** (`Fml.tk_validH`): a valid reading of the result is valid
@@ -1152,7 +1153,8 @@ def _root_.Solidity.Fml.memNodes : {Γ : Ctx} → Fml C Γ → Bool
 (`L`, at least one; anywhere, past the updates too: the premise reads a
 hash in an update's continuation where the update lands), each hashed by
 `k₁` where the premise always reads it (outside every continuation,
-`Fml.topLevels`); `m` new binders, the link of the two kinds (`linkE`;
+`Fml.topLevels`) when there are two or more to link (one string has no
+pair: M7 feature 27); `m` new binders, the link of the two kinds (`linkE`;
 and, for an instance, `fixE`) assumed, the body read past them with each
 node of kind `k₂` its word. -/
 def _root_.Solidity.Fml.tkBody (k₁ k₂ : HashKind) (N : Nat) (fix : Bool) {Γ : Ctx} (ψ : Fml C Γ) :

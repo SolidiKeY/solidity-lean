@@ -1889,6 +1889,47 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     a negative position (an `∃`, `gapKIntNeg`) is outside: it needs the
     unbounded binder of the leaf language and of `QFml` (below).
 
+27. **A second kind hashing one string** (2026-10-26, `Fml.tkBody`):
+    feature 12 asked each string the second kind hashes to be hashed by
+    the first where the premise always reads it, for the link of the two
+    kinds' words.  With one such string there is no pair to link
+    (`linkE` is empty), so the condition holds of it vacuously: soundness
+    reads the first kind's hashes only to link a pair (`Fml.tkBody_sound`,
+    `hnodeIn` past one string), and completeness relabels one word, one to
+    one whatever its class.  `gapMixedKinds` (`ids[keccak256(s)] == 1 →
+    shas[sha256(t)] == 1`, no string hashed by both) is refuted, its
+    variant `mixedKinds` proved, both covered by the kernel.  The order
+    matters: `keccak256` first, the one `sha256` string unlinked; and a
+    leaf whose second kind hashes two strings, one without a hash of the
+    first, is still `unknown` (`gapMixedPairs`, below).
+
+28. **Three kinds** (2026-10-26, `Calculus/HashKinds3.lean`, `decideHash3`,
+    six orders in `hashTries`).  The third kind's words are a layer
+    *inside* the second's (`Fml.tk3`, `Fml.tkBody3`): the body read past
+    the second kind's words is read by `Fml.tkBody` for the third, under
+    the second layer's link, `∀ e₂. fix₂ → link₂ → ∀ e₃. fix₃ → link₃ →
+    ψ''`, so each layer's link and fixing hypotheses stand in their own
+    context and none is read past the other's binders.
+    * **valid** (`Fml.tk3_validH`): `Fml.tkBody_sound` for the second kind,
+      its body's reading given by `Fml.tkBody_sound` for the third at each
+      value of the second kind's words (`holdsS_allN_intro`);
+    * **refuted** (`Fml.tk3_refutes`): the second layer's instance holds in
+      a heap of the family (`tkInst_core`, `Fml.tkBody_inst_holds` with its
+      body abstracted), its body the inner layer's
+      (`Fml.tkBody_inst_holds` for the third kind);
+    * **complete** (`Fml.tk3_complete`): from the instance with both
+      layers fixed, the second kind's words relabeled first (`tkFix_core`,
+      `Fml.tkBody_fix_complete` with its body abstracted: the inner layer,
+      fixed), then the third kind's at each value of the second kind's
+      words, under the outer layer's free binders and link, which reads
+      no storage (`holds_swLink_withStorage`).  `Fml.tk3RL` is the
+      fragment: the third kind's words in `Fml.rl` of their levels and
+      roots (`Fml.tkBodyRL` of the body read past the second kind's), the
+      second kind's over the inner layer with its words fixed.
+    `gapThreeKinds` (`keccak256(s) == keccak256(t) → sha256(s) == sha256(t)
+    → ripemd160(s) == ripemd160(t)`) is proved, `namesThreeKindsBad`
+    refuted, both covered by the kernel.
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -1908,7 +1949,9 @@ block variable; a ledger read at one, and no pipeline taking both).
 Twenty-two was refused by the cut (it wrote no `int` bitwise operator and
 no `addmod`/`mulmod`), twenty-three by the cut's binder order (the reads'
 atoms stand at the array's binder, past which `i` is bound) and
-twenty-four by the cut too (it took no update).
+twenty-four by the cut too (it took no update); twenty-seven and twenty-eight were
+`unknown` (`Fml.tkBody` asked every string of the second kind for a hash
+of the first, and `hashTries` tried two kinds at most).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -2205,27 +2248,24 @@ stack would lift this.
     `LFml`, with every recursion over them extended, some forty modules),
     and, past the prefix, an unbounded binder of `QFml` (no range atom;
     Presburger over ℤ as two naturals);
-  * **hashes outside `Fml.hashCovered`** (features 11 and 12):
-    * three kinds of hash of one string (`gapThreeKinds`).  `Fml.tk` reads
-      one second kind's words.  Applied twice it is sound (`Fml.tk_validH`
-      composes) and its refutations chain, but completeness does not
-      compose: `Fml.tkBody_fix_complete` relabels the second kind's words
-      in a body with nothing between the prefix and the link, and past
-      the first layer the third kind's words sit under the second's
-      binders, link and fixing hypotheses.  It needs that relabeling
-      restated under a prefix of earlier extra words, or `Fml.tk` over a
-      list of kinds (a link and a relabeling per kind; their keyed roots
-      are disjoint by the key-kind check);
-    * two kinds where some string hashed by the second kind has no hash of
-      the first at the top (`gapMixedKinds`, `ids[keccak256(s)] == 1 →
-      shas[sha256(t)] == 1`: in either order the second kind's string has
-      no word of the first kind to link with).  Giving such a string's
-      extra word no link (or a link through a class word `linkChoice`
-      picks) stays sound; completeness then needs the swap's classes,
-      read off the first kind's words (`classesOf`), to follow that extra
-      word, whose string's first-kind word is read nowhere: the countermodel
-      must first be moved (that word set to its extra word's class) inside
-      `Fml.swPrefix_complete`'s relabeling, which is not proved;
+  * **hashes outside `Fml.hashCovered`** (features 11, 12, 27, 28; three
+    kinds, `gapThreeKinds`, and a second kind hashing one string,
+    `gapMixedKinds`, are decided since 27 and 28):
+    * two kinds each hashing several strings, some without a hash of the
+      other kind (`gapMixedPairs`, `keccak256(a) == keccak256(b) →
+      sha256(c) == sha256(d)`: in either order the second kind's strings
+      have no word of the first kind to link with, and there are two of
+      them).  Giving such strings' extra words no link stays sound (the
+      first kind's hashes are read only to link a pair, feature 27);
+      completeness then needs the swap's classes, read off the first
+      kind's words (`classesOf`), to follow the extra words, whose
+      strings' first-kind words are read nowhere: the countermodel must
+      first be moved (each such word set by `linkChoice`, with the roles
+      of the two kinds swapped, to follow its extra word's class), a
+      walk of the swapped prefix with the dead words changed one level at
+      a time (each change framed by `Fml.rl_holds` at that one level), and
+      `Fml.swPrefix_complete` run on the reading with every pair linked,
+      which the decision does not itself read;
     * a hash of written memory (`gapWrittenMemory`, `∀ s t. [ s[0] = 1; ]
       keccak256(s) == keccak256(t)`): the verdict turns on the strings'
       bytes past the write; features 13 and 24 read fresh arrays'
@@ -2332,8 +2372,9 @@ in this order:
    hashes past updates and value locals set in the body since; any
    number of strings (the family computed past four) and positive value
    quantifiers in the body done (2026-10-25).  Left, in the fragment:
-   three kinds (`gapThreeKinds`), two kinds where a string of the second
-   has no hash of the first at the top (`gapMixedKinds`), hashes of
+   two kinds each hashing several strings, some without a hash of the
+   other (`gapMixedPairs`; three kinds and a second kind hashing one
+   string done, 2026-10-26, features 28 and 27), hashes of
    written memory (`gapWrittenMemory`: in the fragment, not outside it as
    this step said before; it waits for memory writes and hashes of memory
    read, step 6).  Outside it: stored hashes, strings not fresh, and a

@@ -653,6 +653,17 @@ against.  A counterexample once, decided since feature 27 (one string of
 the second kind needs no link, below). -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
+/-- Two kinds each hashing two strings, no string hashed by both:
+`keccak256(a) == keccak256(b) → sha256(c) == sha256(d)`.  In either order
+the second kind's strings have no word of the first to link with, and
+there are two of them (feature 27 takes one). -/
+def gapMixedPairs : Fml Names [] :=
+  let Γ4 : Ctx := [.mem Str, .mem Str, .mem Str, .mem Str]
+  let h4 (k : HashKind) (i : Idx Γ4 (.mem Str)) : Tm Names Γ4 (.val .uint) :=
+    .app2 (.hash k) (.app0 .memory) (.pvI i)
+  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str (.allocAll (.user "d") Str
+    (.imp (.eq (h4 .keccak .here) (h4 .keccak (.there .here)))
+      (.eq (h4 .sha256 (.there (.there .here))) (h4 .sha256 (.there (.there (.there .here)))))))))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
 keccak256(t)`.  The verdict turns on the strings' bytes past the write,
 which no stage reads (memory, plan step 6). -/
@@ -698,6 +709,7 @@ theorem gapIntAnd_inTarget : gapIntAnd.inTarget {} = true := by decide +kernel
 theorem gapAddmod_inTarget : gapAddmod.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
+theorem gapMixedPairs_inTarget : gapMixedPairs.inTarget {} = true := by decide +kernel
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
 /-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
 theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
@@ -914,9 +926,9 @@ theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_comp
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
-/-- info: ["unknown", "unknown"] -/
+/-- info: ["unknown", "unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapWrittenMemory, verdict gapHashNegForall]
+#eval [verdict gapMixedPairs, verdict gapWrittenMemory, verdict gapHashNegForall]
 
 /-! Three kinds (feature 28, `Fml.tk3`) and a second kind hashing one string
 with no hash of the first (feature 27): both former counterexamples

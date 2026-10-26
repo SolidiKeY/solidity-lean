@@ -53,7 +53,8 @@ whose hashes are distinct (`Fml.swInst`, `Fml.swInst_refutes`,
 string hashed by two kinds stands for one word per kind (`decideHash2`,
 `Calculus/HashKinds.lean`): the second kind's words binders of their own,
 linked to the first's by the premise, the result read by the one-kind
-swap.  `decideHash` answers on `Fml.hashCovered`
+swap; a string hashed by three kinds, two such layers, the third kind's
+inside the second's (`decideHash3`, `Calculus/HashKinds3.lean`).  `decideHash` answers on `Fml.hashCovered`
 (`decideGoal_complete_hash`, through `Fml.swPrefix_complete` and
 `Fml.tk_complete`, the relabeling of `Calculus/HashRelabel.lean`); for one
 kind the reduction is moreover exact on its fragment (`Fml.swPrefix_exact`,
