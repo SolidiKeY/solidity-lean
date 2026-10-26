@@ -2,7 +2,7 @@ import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
-import Solidity.Calculus.HashKinds
+import Solidity.Calculus.HashKinds3
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
@@ -835,6 +835,185 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
             | none => exact absurd hs this
             | some r => exact fun h => nomatch h
 
+/-! ### Three kinds (`Calculus/HashKinds3.lean`) -/
+
+/-- A refutation of the leaf with three kinds at the classes `cs`: the
+instance with the second and third kinds' words fixed (`Fml.tk3`), refuted
+by `decideLeaf`. -/
+def refuteAt3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    (hk₃ : k₃ ≠ .ecrecover) {N : Nat}
+    (hokA : famOKAll N = true) (φ φF : Fml C []) (he : φ.tk3 k₁ k₂ k₃ N true true = some φF) (cs : List Nat) :
+    Option (HashRefutation φ) :=
+  if hcs : ∀ j ∈ cs, j < N then
+    match hi : φF.swInst k₁ cs with
+    | none => none
+    | some inst =>
+      match hd : decideLeaf inst with
+      | .refuted σ => some ⟨σ.noHeap, Fml.tk3_refutes hk₁ hk₃ hokA he hi hcs (decideLeaf_refutes hd)⟩
+      | _ => none
+  else none
+
+/-- **A leaf with strings hashed by three kinds** (`k₁`, `k₂`, `k₃`): the
+second and third kinds' words as two layers of binders (`Fml.tk3`), the
+result read by the one-kind swap; proved by it, or refuted at the first
+class of strings whose instance, both layers' words fixed, is refuted. -/
+def decideHash3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    (hk₃ : k₃ ≠ .ecrecover) (φ : Fml C []) :
+    LeafVerdict C :=
+  match φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) false false with
+  | none => .unknown
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => .unknown
+    | some φ₂' =>
+      match decideLeaf φ₂' with
+      | .proved => if φ₂.posAll = true then .proved else .unknown
+      | _ =>
+        match famCheck φ.allocCount with
+        | isFalse _ => .unknown
+        | isTrue hokA =>
+          match he : φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) true true with
+          | none => .unknown
+          | some φF =>
+            match (rgs φ₂.allocCount).findSome? (refuteAt3 k₁ k₂ k₃ hk₁ hk₂ hk₃ hokA φ φF he) with
+            | some r => .refuted r.state
+            | none => .unknown
+
+theorem decideHash3_sound {k₁ k₂ k₃ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {hk₃ : k₃ ≠ .ecrecover}
+    {φ : Fml C []} (h : decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃ φ = .proved) : Fml.ValidH φ := by
+  unfold decideHash3 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      split at h
+      · rename_i hd
+        split at h
+        · rename_i hp
+          exact Fml.tk3_validH hk₁ hk₂ hk₃ e₂ (Fml.swPrefix_validH e' hp (decideLeaf_sound hd))
+        · cases h
+      · split at h
+        · cases h
+        · split at h
+          · cases h
+          · split at h <;> cases h
+
+theorem decideHash3_refutes {k₁ k₂ k₃ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {hk₃ : k₃ ≠ .ecrecover}
+    {φ : Fml C []} {σ : State C []} (h : decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃ φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  unfold decideHash3 at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · split at h
+      · split at h <;> cases h
+      · split at h
+        · cases h
+        · split at h
+          · cases h
+          · split at h
+            · rename_i r _
+              cases h
+              exact r.refutes
+            · cases h
+
+/-- **The covered leaves with hashes of three kinds**: `Fml.coveredK2`'s
+conditions with both layers (`Fml.tk3`, `Fml.tk3RL`). -/
+def _root_.Solidity.Fml.coveredK3 (k₁ k₂ k₃ : HashKind) (φ : Fml C []) : Bool :=
+  match φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) false false with
+  | none => false
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => false
+    | some φ₂' =>
+      match φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) true true with
+      | none => false
+      | some φF =>
+        let V := φ₂.allocLevels
+        let K := φ₂'.vRoots V
+        φ₂'.Covered && famCovered φ.allocCount &&
+          (rgs φ₂.allocCount).all (fun cs => (φF.swInst k₁ cs).any Fml.Covered) &&
+          φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tk3RL k₁ k₂ k₃ (famN φ.allocCount) && φ₂.posAll
+
+/-- **Completeness for three kinds.** -/
+theorem decideHash3_complete {k₁ k₂ k₃ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    (hk₃ : k₃ ≠ .ecrecover) {φ : Fml C []} (h : φ.coveredK3 k₁ k₂ k₃ = true) : decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃ φ ≠ .unknown := by
+  unfold Fml.coveredK3 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      split at h
+      · cases h
+      · rename_i φF hF
+        simp only [Bool.and_eq_true, List.all_eq_true] at h
+        obtain ⟨⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩, hpos⟩ := h
+        obtain ⟨hokA, hck⟩ := famCheck_isTrue (famOKAll_famN hn)
+        have hlen : φ₂.allocCount ≤ famN φ.allocCount := by
+          rw [Fml.tk3_allocCount φ e₂]; exact le_famN _
+        unfold decideHash3
+        rw [e₂]
+        simp only
+        rw [e']
+        simp only
+        cases hd : decideLeaf φ₂' with
+        | proved => simp only [hpos, ↓reduceIte]; exact fun h => nomatch h
+        | unknown => exact absurd hd (decideLeaf_complete hcov)
+        | refuted σ =>
+          simp only
+          rw [hck]
+          simp only
+          have hinst : ∀ cs ∈ rgs φ₂.allocCount, ∃ φF instF,
+              φ.tk3 k₁ k₂ k₃ (famN φ.allocCount) true true = some φF ∧ φF.swInst k₁ cs = some instF := by
+            intro cs hcs
+            have := hall cs hcs
+            cases hi : φF.swInst k₁ cs with
+            | none => rw [hi] at this; cases this
+            | some instF => exact ⟨φF, instF, hF, hi⟩
+          obtain ⟨cs, hcs, φF', instF, hF', hi, hnf⟩ := Fml.tk3_complete hk₁ hk₂ hk₃ hokA e₂ e' (kTyped_of hK)
+            hrl hpre hlen hrl₂ hinst (decideLeaf_not_valid hd)
+          rw [hF] at hF'
+          cases hF'
+          have hcovf : instF.Covered = true := by
+            have := hall cs hcs
+            rw [hi] at this
+            exact this
+          have href : refuteAt3 k₁ k₂ k₃ hk₁ hk₂ hk₃ hokA φ φF hF cs ≠ none := by
+            unfold refuteAt3
+            have hb : ∀ j ∈ cs, j < famN φ.allocCount := fun j hj => by
+              have := rgsFrom_bound φ₂.allocCount 0 cs hcs j hj
+              omega
+            rw [dif_pos hb]
+            split
+            · rename_i he; rw [hi] at he; cases he
+            · rename_i inst' he
+              rw [hi] at he
+              cases he
+              split
+              · exact fun h => nomatch h
+              · rename_i hne
+                exfalso
+                cases hv : decideLeaf instF with
+                | proved => exact hnf (decideLeaf_sound hv)
+                | unknown => exact decideLeaf_complete hcovf hv
+                | refuted σ => exact hne σ hv
+          have := findSome?_ne_none hcs href
+          split
+          · rename_i he; rw [hF] at he; cases he
+          · rename_i φF'' he
+            rw [hF] at he
+            cases he
+            cases hs : (rgs φ₂.allocCount).findSome? (refuteAt3 k₁ k₂ k₃ hk₁ hk₂ hk₃ hokA φ φF hF) with
+            | none => exact absurd hs this
+            | some r => exact fun h => nomatch h
+
 /-- A leaf with hashes of one kind. -/
 def tryK (k : HashKind) (hk : k ≠ .ecrecover) : HashTry C :=
   ⟨decideHashK k hk, Fml.coveredK k, decideHashK_sound, decideHashK_refutes, decideHashK_complete hk⟩
@@ -844,13 +1023,25 @@ def tryK2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠
   ⟨decideHash2 k₁ k₂ hk₁ hk₂, Fml.coveredK2 k₁ k₂, decideHash2_sound, decideHash2_refutes,
     decideHash2_complete hk₁ hk₂⟩
 
+/-- A leaf with hashes of three kinds. -/
+def tryK3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    (hk₃ : k₃ ≠ .ecrecover) : HashTry C :=
+  ⟨decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃, Fml.coveredK3 k₁ k₂ k₃, decideHash3_sound, decideHash3_refutes,
+    decideHash3_complete hk₁ hk₂ hk₃⟩
+
 /-- **The ways of deciding a leaf with hashes**: of one kind, each kind in
-turn; of two, each ordered pair. -/
+turn; of two, each ordered pair; of three, each order. -/
 def hashTries : List (HashTry C) :=
   [tryK .keccak (by decide), tryK .sha256 (by decide), tryK .ripemd160 (by decide),
     tryK2 .keccak .sha256 (by decide) (by decide), tryK2 .sha256 .keccak (by decide) (by decide),
     tryK2 .keccak .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .keccak (by decide) (by decide),
-    tryK2 .sha256 .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .sha256 (by decide) (by decide)]
+    tryK2 .sha256 .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .sha256 (by decide) (by decide),
+    tryK3 .keccak .sha256 .ripemd160 (by decide) (by decide) (by decide),
+    tryK3 .keccak .ripemd160 .sha256 (by decide) (by decide) (by decide),
+    tryK3 .sha256 .keccak .ripemd160 (by decide) (by decide) (by decide),
+    tryK3 .sha256 .ripemd160 .keccak (by decide) (by decide) (by decide),
+    tryK3 .ripemd160 .keccak .sha256 (by decide) (by decide) (by decide),
+    tryK3 .ripemd160 .sha256 .keccak (by decide) (by decide) (by decide)]
 
 /-- **A leaf with hashes**: the first way that answers. -/
 def decideHash (φ : Fml C []) : LeafVerdict C := firstKnown (hashTries.map (·.run)) φ
@@ -1463,6 +1654,15 @@ def DecisionTheorem (w : Waivers := {}) : Prop :=
 
 /-- info: 'Solidity.Decide.decideHash2_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideHash2_complete
+
+/-- info: 'Solidity.Decide.decideHash3_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash3_sound
+
+/-- info: 'Solidity.Decide.decideHash3_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash3_refutes
+
+/-- info: 'Solidity.Decide.decideHash3_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash3_complete
 
 /-- info: 'Solidity.Fml.swPrefix_validH' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Fml.swPrefix_validH

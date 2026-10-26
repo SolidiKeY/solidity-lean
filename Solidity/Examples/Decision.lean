@@ -635,20 +635,22 @@ def addmodZero : Fml Gaps [] := allU (isT (.app2 (.binop .eqB rfl) (.app3 (.modu
 
 end GapTerms
 
-/-! ### Hashes outside `Fml.hashCovered` -/
+/-! ### Hashes outside `Fml.hashCovered` (two of them inside since features 27 and 28) -/
 
 section GapHashes
 
 open Solidity.Examples.DecisionHashes
 open Solidity.Examples.Tactics.Hashing (Names)
 
-/-- Three kinds of hash of one string. -/
+/-- Three kinds of hash of one string: a counterexample once, decided since
+feature 28 (`Fml.tk3`, below). -/
 def gapThreeKinds : Fml Names [] :=
   strings (.imp (.eq hS hT) (.imp (.eq shaS shaT)
     (.eq (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here)))
       (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)))))
 /-- Two kinds, no string hashed by both: no kind to read the other's words
-against. -/
+against.  A counterexample once, decided since feature 27 (one string of
+the second kind needs no link, below). -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
@@ -912,9 +914,25 @@ theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_comp
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
-/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+/-- info: ["unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapWrittenMemory, verdict gapHashNegForall]
+#eval [verdict gapWrittenMemory, verdict gapHashNegForall]
+
+/-! Three kinds (feature 28, `Fml.tk3`) and a second kind hashing one string
+with no hash of the first (feature 27): both former counterexamples
+covered, by the kernel, so answered; `gapThreeKinds` proved,
+`gapMixedKinds` refuted (their variants in `Examples/DecisionHashes.lean`). -/
+
+theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel
+theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel
+theorem gapThreeKinds_answers : decideGoal gapThreeKinds ≠ .unknown :=
+  decideGoal_complete_hash gapThreeKinds_covered
+theorem gapMixedKinds_answers : decideGoal gapMixedKinds ≠ .unknown :=
+  decideGoal_complete_hash gapMixedKinds_covered
+
+/-- info: ["proved", "refuted"] -/
+#guard_msgs in
+#eval [verdict gapThreeKinds, verdict gapMixedKinds]
 
 /-! ### Storage arrays at symbolic indices (M7, plan step 6)
 

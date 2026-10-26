@@ -233,6 +233,27 @@ def namesBound : Fml Names [] :=
 /-- info: (false, "unknown") -/
 #guard_msgs in #eval (namesBound.inTarget {}, verdict namesBound)
 
+/-! #### Three kinds
+
+A string hashed by three kinds stands for one word per kind: the second
+kind's words a layer of binders linked to the first kind's, the third
+kind's a layer inside it (`Fml.tk3`, `Calculus/HashKinds3.lean`, M7
+feature 28).  Each layer is relabeled in turn (`Fml.tk3_complete`). -/
+
+def ripS : Tm Names Γst (.val .uint) := .app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here))
+def ripT : Tm Names Γst (.val .uint) := .app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)
+/-- **`keccak256(s) == keccak256(t) → sha256(s) == sha256(t) →
+ripemd160(s) == ripemd160(t)`** (`gapThreeKinds`): proved; with `!=` last,
+refuted by one string twice. -/
+def namesThreeKinds : Fml Names [] := strings (.imp (.eq hS hT) (.imp (.eq shaS shaT) (.eq ripS ripT)))
+def namesThreeKindsBad : Fml Names [] :=
+  strings (.imp (.eq hS hT) (.imp (.eq shaS shaT) (.not (.eq ripS ripT))))
+
+/-- info: ["proved", "refuted"] -/
+#guard_msgs in #eval [namesThreeKinds, namesThreeKindsBad].map verdict
+
+theorem namesThreeKindsBad_covered : namesThreeKindsBad.hashCovered = true := by decide +kernel
+
 end Hashes
 
 /-! ### Two kinds as keys
@@ -283,6 +304,20 @@ def twoKeysBad : Fml Names2 [] :=
 #guard_msgs in #eval [twoKeys, twoKeysBad].map (fun φ => φ.hashCovered && φ.inTarget {})
 
 theorem twoKeys_covered : twoKeys.hashCovered = true := by decide +kernel
+
+/-- **A second kind hashing one string**, which the first kind does not
+hash (`gapMixedKinds`, M7 feature 27): its word needs no link, so the
+string needs no hash of the first kind.  `ids[keccak256(s)] == 1 →
+shas[sha256(t)] == 2 → ids[keccak256(s)] != shas[sha256(t)]`, proved;
+`gapMixedKinds` (`ids[keccak256(s)] == 1 → shas[sha256(t)] == 1`) refuted. -/
+def mixedKinds : Fml Names2 [] :=
+  strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.imp (.eq (rd2 "shas" rfl sT) (n2 2))
+    (.not (.eq (rd2 "ids" rfl kS) (rd2 "shas" rfl sT)))))
+
+/-- info: "proved" -/
+#guard_msgs in #eval verdict mixedKinds
+
+theorem mixedKinds_covered : mixedKinds.hashCovered = true := by decide +kernel
 
 end TwoKeys
 
