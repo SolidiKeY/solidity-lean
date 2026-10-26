@@ -49,7 +49,7 @@ end
 def Src.keyValue {Γ : Ctx} {T : Ty} : Src C Γ T → Bool
   | .val v => v.keyValue
   | .copy p _ | .copyMem p => p.keyValue
-  | .fixedCopy .. => false
+  | .fixedCopy .. | .fixedCopyMem .. => false
 
 /-- A fixed-array shape adapter is outside the conservative upstream
 program fragment until it has a direct same-sort source representation. -/

@@ -43,6 +43,8 @@
  *   --soljson     the directory holding the pinned soljson (default the
  *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
  *                 clone has none, so point it at another checkout's)
+ *   --compiler-file  an explicitly selected soljson file; requires --compiler-sha256
+ *   --compiler-sha256  the selected compiler's exact SHA-256 (default remains SolKeY's pin)
  *   --source      the source: an absolute path, else a path in this repository if
  *                 there is one, else in the checkout (default
  *                 keyext.solidity.examples/TestSuite.sol);
@@ -55,6 +57,13 @@
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
  *                 output for the same source (`~/.cache/solkey/solc/<soljson>/`,
  *                 keyed by the sha256 of `SolcWrapper`'s input), when there is one
+ *   --legacy-fixture  preserve historical trimming and its four-field header
+ *   --via-ir      record the IR pipeline (effective ABI coder v2)
+ *   --evm-version  explicit EVM target (modern default osaka)
+ *
+ * Modern output records an exact supported compiler pin, source digest,
+ * accepted pragmas, explicit settings and AST-analysis validation stage.
+ * This is external-analysis provenance, not compiler-equivalence evidence.
  *
  * The loops fixture:
  *   node scripts/solc-ast.mjs --solkey <clone at the pin> --soljson <dir> \
@@ -70,6 +79,7 @@ import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const args = process.argv.slice(2);
+const legacyFixture = args.includes("--legacy-fixture");
 const optionOf = (flag, fallback) => {
   const i = args.indexOf(flag);
   return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
@@ -95,11 +105,18 @@ if (args.includes("--source") && !OUT_ARG) {
 
 // The pinned compiler, checked against the checkout's build script.
 const gradle = readFileSync(join(SOLKEY, "keyext.solidity.core/build.gradle"), "utf8");
+const compilerFile = optionOf("--compiler-file", null);
+const compilerSha = optionOf("--compiler-sha256", null);
+if ((compilerFile === null) !== (compilerSha === null) ||
+    (compilerSha !== null && !/^[0-9a-f]{64}$/.test(compilerSha)))
+  fail("--compiler-file and --compiler-sha256 must be supplied together (SHA-256: 64 lowercase hex digits)");
+if (compilerFile !== null && (!OUT_ARG || !args.includes("--source")))
+  fail("a compiler override needs explicit --source and --out: the default fixture is frozen");
 const soljsonFile = gradle.match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)?.[1];
-const soljsonSha = gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)?.[1];
+const soljsonSha = compilerSha ?? gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)?.[1];
 if (!soljsonFile || !soljsonSha) fail("no soljsonFile/soljsonSha256 in build.gradle");
 const soljsonDir = resolve(optionOf("--soljson", join(SOLKEY, "keyext.solidity.core/build/soljson")));
-const soljsonPath = join(soljsonDir, soljsonFile);
+const soljsonPath = compilerFile ? resolve(compilerFile) : join(soljsonDir, soljsonFile);
 if (!existsSync(soljsonPath)) {
   fail(`${soljsonPath} is missing: run solkey's \`./gradlew downloadSoljson\` first`);
 }
@@ -112,11 +129,33 @@ const solc = createRequire(import.meta.url)(soljsonPath);
 const compile = solc.cwrap("solidity_compile", "string", ["string", "number", "number"]);
 const version = solc.cwrap("solidity_version", "string", [])();
 
-const source = readFileSync(SOURCE_PATH, "utf8");
+// Modern source admission uses only these audited binaries. The historical
+// serialization remains available explicitly for byte-for-byte fixture checks.
+const compilerPins = [
+  { version: "0.8.34+commit.80d5c536.Emscripten.clang",
+    file: "soljson-v0.8.34+commit.80d5c536.js",
+    sha256: "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8" },
+  { version: "0.8.38+commit.1835d247.Emscripten.clang",
+    file: "soljson-v0.8.38+commit.1835d247.js",
+    sha256: "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390" },
+];
+const pin = compilerPins.find(p => p.version === version && p.sha256 === soljsonSha);
+if (!legacyFixture && !pin) fail("modern provenance requires a supported exact compiler pin");
+if (legacyFixture && (args.includes("--via-ir") || args.includes("--evm-version")))
+  fail("--legacy-fixture cannot record pipeline/settings overrides");
+const bytes = readFileSync(SOURCE_PATH);
+let source;
+try { source = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes); }
+catch { fail("source is not valid UTF-8"); }
+const settings = legacyFixture
+  ? { outputSelection: { "*": { "": ["ast"] } } }
+  : { viaIR: args.includes("--via-ir"), evmVersion: optionOf("--evm-version", "osaka"),
+      optimizer: { enabled: false, runs: 200 }, libraries: {}, remappings: [],
+      outputSelection: { "*": { "": ["ast"] } } };
 const input = {
   language: "Solidity",
   sources: { [UNIT]: { content: source } },
-  settings: { outputSelection: { "*": { "": ["ast"] } } },
+  settings,
 };
 const output = JSON.parse(compile(JSON.stringify(input), 0, 0));
 const errors = (output.errors || []).filter((e) => e.severity === "error");
@@ -124,19 +163,16 @@ if (errors.length) fail(errors.map((e) => e.formattedMessage || e.message).join(
 const ast = output.sources?.[UNIT]?.ast;
 if (!ast) fail("solc produced no AST");
 
-// 1-based line of a character offset.
+// src counts UTF-8 bytes. Index byte positions once, including non-ASCII
+// comments/strings, instead of decoding the whole prefix for every node.
 const lineStarts = [0];
-for (let i = 0; i < source.length; i++) if (source[i] === "\n") lineStarts.push(i + 1);
-// `src` counts bytes; the source is ASCII outside comments, so a byte offset is
-// converted through the UTF-8 encoding to be safe.
-const bytes = Buffer.from(source, "utf8");
+for (let i = 0; i < bytes.length; i++) if (bytes[i] === 10) lineStarts.push(i + 1);
 const lineOfByte = (b) => {
-  const chars = bytes.subarray(0, b).toString("utf8").length;
   let lo = 0;
   let hi = lineStarts.length - 1;
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1;
-    if (lineStarts[mid] <= chars) lo = mid; else hi = mid - 1;
+    if (lineStarts[mid] <= b) lo = mid; else hi = mid - 1;
   }
   return lo + 1;
 };
@@ -185,6 +221,8 @@ walkAst(ast, node => {
   }
 });
 const isDeclaration = n => DECLS.has(n.nodeType) || selectorDeclarations.has(n.id);
+const modernDeclaration = n => isDeclaration(n) ||
+  ["EventDefinition", "ErrorDefinition", "SourceUnit"].includes(n.nodeType);
 // The nodes `src` and `line` are kept on.
 const located = (n, parentKey) =>
   isDeclaration(n) || parentKey === "statements" || n.nodeType === "TryCatchClause";
@@ -234,13 +272,15 @@ function trim(n, parentKey) {
     // A hex literal's bytes are its `hexValue` (its `value` is their text,
     // when they are UTF-8 at all); a number's is noise.
     const hexBytes = k === "hexValue" && n.nodeType === "Literal" &&
-      (n.kind === "hexString" || typeof n.value !== "string");
+      (n.kind === "hexString" || typeof n.value !== "string" ||
+        (!legacyFixture && ["string", "unicodeString"].includes(n.kind)));
     const selector = k === 'functionSelector' && selectorDeclarations.has(n.id);
-    if (NOISE.has(k) && !hexBytes && !selector && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
+    if (NOISE.has(k) && !hexBytes && !selector && !(k === "commonType" && !legacyFixture) &&
+        !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
-    if (k === "id" && !isDeclaration(n)) continue;
+    if (k === "id" && !(legacyFixture ? isDeclaration(n) : modernDeclaration(n))) continue;
     if (k === "src") {
-      if (located(n, parentKey)) {
+      if (located(n, parentKey) || (!legacyFixture && typeof n.nodeType === "string")) {
         out.src = v;
         out.line = lineOfByte(Number(v.split(":")[0]));
       }
@@ -271,9 +311,17 @@ if (existsSync(join(SOLKEY, "snapshot.json"))) {
 const fixture = {
   header: {
     solcVersion: version,
-    sourceSha256: sha256(Buffer.from(source, "utf8")),
+    sourceSha256: sha256(bytes),
     solkeyCommit,
     source: SOURCE,
+    ...(!legacyFixture ? {
+      provenanceVersion: 1,
+      compilerFile: pin.file,
+      compilerSha256: pin.sha256,
+      validationStage: "analysis",
+      settings,
+      acceptedPragmas: ast.nodes.filter(n => n.nodeType === "PragmaDirective").map(n => n.literals),
+    } : {}),
   },
   ast: trim(ast, ""),
 };

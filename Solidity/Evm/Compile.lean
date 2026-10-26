@@ -171,7 +171,7 @@ def pushIn {Γ : Ctx} (F : Frag Γ) : {E : Ty} → Option (Solidity.Src C Γ E) 
   | _, some (.val e), b => spathIn F false b && valIn F e
   | _, some (@Solidity.Src.copy _ _ R q _), b =>
     static (.ref R) && leavesFit (.ref R) && spathIn F false b && spathIn F false q
-  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ => false
+  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ | _, some (.fixedCopyMem ..), _ => false
 
 mutual
 /-- Whether a statement may shrink an array (a `pop` or a `delete`, in a
@@ -213,7 +213,7 @@ def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Src C Γ T →
   | _, .val v, l => locIn F false l && valIn F v
   | _, @Solidity.Src.copy _ _ R q _, l =>
     static (.ref R) && leavesFit (.ref R) && spathIn F false q && locIn F false l
-  | _, .copyMem _, _ | _, .fixedCopy .., _ => false
+  | _, .copyMem _, _ | _, .fixedCopy .., _ | _, .fixedCopyMem .., _ => false
 
 /-- A storage alias declared: unset (not readable), or bound to a path of
 the fragment. -/
@@ -383,7 +383,7 @@ def pushCode (b : Nat) {Γ : Ctx} : {E : Ty} → Option (Solidity.Src C Γ E) �
     compileSPath b q ++ compileSPath b p ++ loadLeaves (leaves (.ref R)) ++
       [.pop, .dup ((leaves (.ref R)).length + 1)] ++ pushSlotCode (size (.ref R)) ++
       storeLeaves (leaves (.ref R)).reverse ++ [.pop, .pop]
-  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ => []
+  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ | _, some (.fixedCopyMem ..), _ => []
 
 /-- A call's parameters bound, each argument evaluated in the caller's
 context and stored at its level in the frame, which starts at `b + Γ.length`. -/
@@ -413,7 +413,7 @@ def assignCode (b : Nat) {Γ : Ctx} : {T : Ty} → Solidity.Src C Γ T →
   | _, @Solidity.Src.copy _ _ R q _, l =>
     compileSPath b q ++ loadLeaves (leaves (.ref R)) ++ [.pop] ++ compileLoc b l ++
       storeLeaves (leaves (.ref R)).reverse ++ [.pop]
-  | _, .copyMem _, _ | _, .fixedCopy .., _ => []
+  | _, .copyMem _, _ | _, .fixedCopy .., _ | _, .fixedCopyMem .., _ => []
 
 /-- The code of an update of `l` (`op=`, `++`): `onLocal` a local's cell,
 `onLoc` a storage location; nothing for a memory target. -/

@@ -15,13 +15,29 @@ open Lean (Json toJson)
 open Frontend
 open scoped Scoped
 
-solc_import "../../../tests/solc/DeclarationMetadata.ast.json" hash 0x724d9face267bd99
+solc_import "../../../tests/solc/DeclarationMetadata.ast.json" hash 0x22c417e9ab4111f1
   as Imported.DeclarationMetadata testing
 solc_scoped_problems Imported.DeclarationMetadata decl
 
 /-- Only the child's own method contributes to its interface ID. -/
 theorem ownInterface : ⊢ Imported.DeclarationMetadata.interfaceOwnOnly.problem := by
   sol_prove
+
+/-- Reading a selector still evaluates its receiver exactly once. -/
+theorem evaluatesReceiver : ⊢ Imported.DeclarationMetadata.receiverEffects.problem := by
+  sol_prove
+
+/-- Selector receivers in skipped boolean/conditional arms stay skipped. -/
+theorem lazyReceiver : ⊢ Imported.DeclarationMetadata.lazyReceiverEffects.problem := by
+  sol_prove
+
+/-- A generated receiver helper has no source-level internal function value. -/
+example : (fnTag Imported.DeclarationMetadata "solcMetadataSelector239__").isOk = false := by
+  decide +kernel
+
+/-- Nor can an ABI function selector expose the implementation helper. -/
+example : fnSelector? Imported.DeclarationMetadata "solcMetadataSelector239__" = none := by
+  decide +kernel
 
 private def event (anonymous : Bool) : Json := Json.mkObj [
   ("nodeType", .str "EventDefinition"), ("id", toJson (1 : Int)),

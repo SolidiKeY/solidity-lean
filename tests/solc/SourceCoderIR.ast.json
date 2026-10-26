@@ -1,0 +1,42 @@
+{
+ "header": {
+  "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sourceSha256": "63dca8c1158f274d72e03e8447a7bcfc76847a8f0572fccbbdaef9c532d76403",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/solc/SourceCoder.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": true,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "^",
+    "0.8",
+    ".0"
+   ],
+   [
+    "abicoder",
+    "v1"
+   ]
+  ]
+ },
+ "ast": {"id":20,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","^","0.8",".0"],"nodeType":"PragmaDirective","src":"32:23:0","line":2},{"literals":["abicoder","v1"],"nodeType":"PragmaDirective","src":"56:19:0","line":3},{"canonicalName":"SourceCoder","contractKind":"contract","id":19,"name":"SourceCoder","nodeType":"ContractDefinition","nodes":[{"body":{"nodeType":"Block","src":"166:49:0","line":5,"statements":[{"expression":{"arguments":[{"name":"data","nodeType":"Identifier","referencedDeclaration":4,"src":"194:4:0","line":6,"typeDescriptions":{"typeString":"bytes memory"}},{"components":[{"nodeType":"ElementaryTypeNameExpression","src":"201:5:0","line":6,"typeDescriptions":{"typeString":"type(uint8)"},"typeName":{"name":"uint8","nodeType":"ElementaryTypeName","src":"201:5:0","line":6}}],"isInlineArray":false,"nodeType":"TupleExpression","src":"200:7:0","line":6,"typeDescriptions":{"typeString":"type(uint8)"}}],"expression":{"expression":{"name":"abi","nodeType":"Identifier","referencedDeclaration":-1,"src":"183:3:0","line":6,"typeDescriptions":{"typeString":"abi"}},"memberName":"decode","nodeType":"MemberAccess","src":"183:10:0","line":6,"typeDescriptions":{"typeString":"function () pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"183:25:0","line":6,"typeDescriptions":{"typeString":"uint8"}},"nodeType":"Return","src":"176:32:0","line":6}]},"id":18,"kind":"function","name":"decode","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":4,"mutability":"mutable","name":"data","nodeType":"VariableDeclaration","src":"119:17:0","line":5,"stateVariable":false,"storageLocation":"memory","typeDescriptions":{"typeString":"bytes"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName","src":"119:5:0","line":5,"typeDescriptions":{"typeString":"bytes"}},"visibility":"internal"}],"src":"118:19:0","line":5},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":7,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"159:5:0","line":5,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint8"},"typeName":{"name":"uint8","nodeType":"ElementaryTypeName","src":"159:5:0","line":5,"typeDescriptions":{"typeString":"uint8"}},"visibility":"internal"}],"src":"158:7:0","line":5},"src":"103:112:0","line":5,"stateMutability":"pure","visibility":"public"}],"src":"76:141:0","line":4}],"src":"32:186:0","line":2}
+}

@@ -116,10 +116,11 @@ the same counts.
 ### The core
 
 112 modules at P1, 123 since P2 split some of them (`CORE` in
-`scripts/check-layers.mjs`):
+`scripts/check-layers.mjs`); the current list also includes the computed
+ERC-7201 and secp256k1 modules:
 
 - `KeySort`, `Eqns`, `AST`, `Scope`, `SpecSyntax`, `Hashes`, `Keccak`,
-  `RevertBytes`, `Syntax`, `Signature`, `Update`;
+  `ERC7201`, `Secp256k1`, `TypeGraph`, `RevertBytes`, `Syntax`, `Signature`, `Update`;
 - `Syntax.{Scoped,Checked,Inlined,PushSource,Join}`, and since P2 `Syntax`'s
   pieces `Syntax.{Raw,Grammar,Contract}`;
 - `Semantics` and `Semantics/**` (29 at P1, 31 with `Semantics/Storage`'s

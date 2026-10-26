@@ -748,7 +748,7 @@ theorem Src.lower_elimOk {T : Ty} (r : Src C Γ T) (h : r.Frag = true) : r.lower
   | val v => exact .app1 rfl (Val.lower_elimOk v h)
   | copy p _ => exact .app2 rfl (.app0 rfl) (SPath.lower_elimOk p h)
   | fixedCopy p _ _ => exact .app1 rfl (.app2 rfl (.app0 rfl) (SPath.lower_elimOk p h))
-  | copyMem _ => exact absurd h Bool.false_ne_true
+  | copyMem _ | fixedCopyMem _ _ => exact absurd h Bool.false_ne_true
 
 end Lower
 
@@ -956,7 +956,7 @@ theorem copyStep_elimOk {R : RefTy} (l : Loc C Γ (.ref R)) (hm : (Ty.ref R).map
 theorem assignStep_elimOk {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) (hl : l.MemFree = true)
     (hr : r.Frag = true) : (assignStep k l r).ElimOk := by
   cases r with
-  | copyMem q => exact absurd hr Bool.false_ne_true
+  | copyMem q | fixedCopyMem q _ => exact absurd hr Bool.false_ne_true
   | fixedCopy q shape hm => cases l <;> exact Premise.elimOk_save _ _ hl hr
   | val e =>
     cases l with

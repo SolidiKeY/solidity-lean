@@ -502,6 +502,7 @@ index, then the source. -/
 def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Premise C Γ Γ
   | _, l, .copyMem p => .save l (.copyMem p)
   | _, l, .fixedCopy p shape hm => .save l (.fixedCopy p shape hm)
+  | _, l, .fixedCopyMem p shape => .save l (.fixedCopyMem p shape)
   -- storageRootWriteStore, storageRootWriteValueRhsCapture
   | _, .root r h, .val e =>
     (VHole.store (.root r h)).step k (fun se => .save (.root r h) (.val (.simple se))) e
@@ -704,6 +705,7 @@ def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
       else .captureMV (fmv k) p
         (.push b.up (some (.copyMem (.var .here p.mapFree))) rfl)
     | _, b, some (.fixedCopy p shape hm) => .upd1 (UpdElem.push b (.fixedCopy p shape hm))
+    | _, b, some (.fixedCopyMem p shape) => .upd1 (UpdElem.push b (.fixedCopyMem p shape))
   -- storagePush_unfold_leftFstReceiver, storagePushValue_unfold_leftFstReceiver
   else .captureSP (fsp k) b (.push (.alias .here) (v.map Src.up) (by
     cases v <;> exact hd))

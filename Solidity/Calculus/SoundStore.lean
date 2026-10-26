@@ -252,7 +252,7 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
           (fun _ _ _ _ e hq => by cases hq; subst e; exact sound_save σ _ _)
           (fun _ _ _ _ e hq => by cases hq; subst e; exact sound_save σ _ _) q hs
     | copyMem p => cases hs; exact sound_save σ _ _
-    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm | fixedCopyMem p shape => cases hs; exact sound_save σ _ _
   | field b f h =>
     cases r with
     | val e =>
@@ -268,7 +268,7 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
       · exact copyStep_sound σ k (.field b f h) hm p q hs
       · cases hs; exact sound_fieldWriteRefUnfold σ b f h p hm _
     | copyMem p => cases hs; exact sound_save σ _ _
-    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm | fixedCopyMem p shape => cases hs; exact sound_save σ _ _
   | index it b i =>
     cases r with
     | val e =>
@@ -291,7 +291,7 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
         | _ => cases hs; exact sound_indexRefCaptureAll σ k it b _ p hm
       · cases hs; exact sound_indexRefCaptureAll σ k it b i p hm
     | copyMem p => cases hs; exact sound_save σ _ _
-    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm | fixedCopyMem p shape => cases hs; exact sound_save σ _ _
 
 /-- `memoryToStorageField_unfold_leftFst`: the receiver bound first; the
 statement reads the memory source first. -/
@@ -530,7 +530,7 @@ theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Optio
         split at hs
         · cases hs; exact sound_pushSome σ b _ rfl
         · cases hs; exact sound_pushMemoryCapture σ b p _
-      | fixedCopy p shape hm => cases hs; exact sound_pushSome σ b _ hd
+      | fixedCopy p shape hm | fixedCopyMem p shape => cases hs; exact sound_pushSome σ b _ hd
   · cases hs; exact sound_pushRecvCapture σ b v hd _ _
 
 /-- `y = matrix[i].push()`: bind its receiver before appending and assigning. -/

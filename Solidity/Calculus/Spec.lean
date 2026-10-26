@@ -106,7 +106,7 @@ open Lean Elab Term Meta in
 elab_rules : term
   | `(cspec[ $c:term ]{ $f:ident }) =>
     elabAgainst c fun q =>
-      `((specObligation ($c) $(quote f.getId.toString)).map (Fml.quote $q))
+      `((specObligation ($c) $(quote (f.getId.toString false))).map (Fml.quote $q))
   | `(cproblem[ $c:term ]{ constructor }) =>
     elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Fml.quote $q))
   | `(cinv[ $c:term ]) => elabAgainst c fun q => `((specInv ($c)).map (Fml.quote $q))

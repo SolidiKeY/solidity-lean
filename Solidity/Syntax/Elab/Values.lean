@@ -63,6 +63,11 @@ A function's value is its tag, its position in `C.funs` from `1`
 ("Function types", `Syntax.lean`); a call through a value is a dispatch over
 the functions of its signature (`fnDispatch`). -/
 
+/-- Imported implementation helpers have direct calls only. The reserved
+width-table key cannot be a Solidity storage path; no model type changes. -/
+def fnSource (g : String) : Bool :=
+  (lookupBy (g ++ "#internalEntry") C.widths).isNone
+
 /-- The functions of `C` named as a value somewhere in its code (not as a
 callee): only these may be reached through a value taken inside `C`. -/
 def fnTaken : List String :=
@@ -71,7 +76,7 @@ def fnTaken : List String :=
   let es : List RawExpr := C.funs.flatMap (fun (_, d) => d.mods.flatMap (·.args)) ++
     C.inits.map (·.2)
   let ns := RawStmt.namesList stmts ++ es.flatMap RawExpr.names
-  (C.funs.map (·.1)).filter ns.contains
+  (C.funs.map (·.1)).filter fun g => fnSource C g && ns.contains g
 
 /-- Whether the function `d` (its modifiers too) calls through a name that is
 not a function: a parameter, a local or a state variable, possibly of a
@@ -85,16 +90,17 @@ def callsThroughValue (d : FunDecl) : Bool :=
 in the contract, or no function declared before it (nor it) calls through a
 value (`fnTag` refuses `g`'s value elsewhere). -/
 def fnReachable (g : String) : Bool :=
-  (fnTaken C).contains g ||
+  fnSource C g && ((fnTaken C).contains g ||
     match C.funs.findIdx? (·.1 == g) with
     | some i => !(C.funs.take (i + 1)).any (callsThroughValue C ·.2)
-    | none => false
+    | none => false)
 
 /-- The tag of the function `g`.  One named as a value only outside `C`'s code
 (a `sol{ … }` program) is refused when a function declared before it, or it,
 calls through a value: that function's dispatch leaves `g` out
 (`fnDispatch`), as `g` is not declared before it. -/
 def fnTag (g : String) : Except String (Option Nat) := do
+  unless fnSource C g do throw s!"{g}: an implementation helper has no Solidity function value"
   let some i := C.funs.findIdx? (·.1 == g) | return none
   unless fnReachable C g do
     throw s!"{g} is taken as a value only outside the contract's functions, and a function \
@@ -286,6 +292,16 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     if let .simple (.lit n _) := m then
       if n == 0 then throw s!"{op.toStr}: arithmetic modulo zero"
     pure (.val .uint (.modular op (← check Γ .uint a) (← check Γ .uint b) m))
+  | .call "address" [a] => do
+    if let some v := a.litVal? then
+      unless 0 ≤ v && v < (2 : Int) ^ 160 do
+        throw "an address literal does not fit 160 bits"
+      return .val .uint (← check Γ .uint a)
+    if let .env k := a then
+      if k == .msgSender || k == .selfAddress then
+        return .val .uint (.simple (.env k rfl))
+    pure (.val .uint (.binop .mod rfl rfl (← check Γ .uint a)
+      (.simple (← litAt C Γ .uint (2 ^ 160)))))
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
   | .named f .. => throw s!"the constructor {f}(\{…}) under a short-circuit operator or in a conditional's branch"
   | .env k => pure (.val .uint (.simple (.env k rfl)))
@@ -370,6 +386,23 @@ def checkStorageCopy (Γ : NCtx) (R : RefTy) (e : RawExpr) : Except String (Src 
             else throw "an array copy changes its element type"
           | _ => throw s!"{e.toStr}: incompatible storage-copy shapes {T} and {Ty.ref R}"
       | _, _ => throw s!"{e.toStr}: a storage reference to a {T} where a {Ty.ref R} is expected"
+  | .mpath T p =>
+    if ht : T = .ref R then pure (.copyMem (ht ▸ p))
+    else match T, p with
+      | .ref (.fixed E n), p =>
+        match R with
+        | .array E' =>
+          if he : E = E' then
+            if hb : n < 2 ^ 256 then pure (he ▸ Src.fixedCopyMem p (.dynamic hb))
+            else throw "a fixed-array length exceeds the dynamic-array bound"
+          else throw "an array copy changes its element type"
+        | .fixed E' m =>
+          if he : E = E' then
+            if hf : n ≤ m then pure (he ▸ Src.fixedCopyMem p (.fixed m hf))
+            else throw "a fixed-array copy would truncate source elements"
+          else throw "an array copy changes its element type"
+        | _ => throw s!"{e.toStr}: incompatible memory-to-storage copy shapes {T} and {Ty.ref R}"
+      | _, _ => throw s!"{e.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
   | _ => throw "a value where a storage reference is expected"
 
 /-- `e` as a memory path of type `T`. -/
@@ -695,6 +728,9 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
   | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
   | .ternary _ a _ => exprShape Γ a
   | .call f as =>
+    if (f == "bytes" || f == "string") && as.length == 1 && (lookupBy f C.funs).isNone then
+      dynBytesRowsOf f else
+    if f == "string.concat" && (lookupBy f C.funs).isNone then dynBytesRowsOf "string" else
     if f == bytesLitName || (encodeBuiltin f && (lookupBy f C.funs).isNone) then dynBytesRows else
     -- `abi.decode` of a byte string (`abiDecodeBytes`)
     if (f == "abi.decode" || f == "#abiDecode") && (lookupBy f C.funs).isNone then
@@ -735,12 +771,27 @@ def shapeStr (ws : List (String × Nat)) : String :=
 /-- A whole use of `e` where `ws` is expected: the narrow positions must agree
 (solc converts no reference type to one of another element type). -/
 def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) : RawExpr → Except String Unit
+  | .call "#array" _ => pure () -- checked on the inferred memory local after hoisting
   | .ternary _ a b => do shapeCheck Γ ws a; shapeCheck Γ ws b
   | e => do
   let got := exprShape C Γ e
   unless sameShape got ws do
     throw s!"{e.toStr} has narrow positions {shapeStr got} where {shapeStr ws} are expected: \
       solc converts no reference type to one of another element type"
+
+/-- A storage value copy may widen integer elements. Unlike an alias, the
+copy observes values rather than reusing an object at a different type.
+Noninteger source markers stay exact; byte widening needs a value shift. -/
+def storageCopyShape (Γ : ECtx) (ws : List (String × Nat)) (e : RawExpr) : Except String Unit := do
+  if e matches .call "#array" _ then return ()
+  let got := exprShape C Γ e
+  if sameShape got ws then return ()
+  let marks := fun (rs : List (String × Nat)) => rs.filter (fun r => r.1.contains '#')
+  unless (marks got).all (marks ws |>.contains ·) && (marks ws).all (marks got |>.contains ·) do
+    throw "a storage copy changes a noninteger source type"
+  let keys := ((got ++ ws).filter (fun r => !r.1.contains '#')).map (·.1)
+  unless keys.all (fun k => (lookupBy k got).getD 256 ≤ (lookupBy k ws).getD 256) do
+    throw "a storage copy would narrow an integer element"
 
 /-- Whether `e` names, whole, a place with a narrow position below it (`small`
 of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[]) lists`, a
@@ -784,6 +835,7 @@ partial def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option S
 
 /-- The canonical signature of the function `g` of `C`, `g(uint256,address)`. -/
 def fnSignature? (g : String) : Option String := do
+  guard (fnSource C g)
   let d ← lookupBy g C.funs
   let ps ← d.params.mapM fun (n, T) => abiTyName d.widths n T
   pure s!"{g}({",".intercalate ps})"
@@ -816,7 +868,7 @@ def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
 the receiver and `g`. -/
 def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
   | .field r g =>
-    if (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
+    if fnSource C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
   | _ => none
 
 /-- The function type of the expression `e`, as `canonFnTy` spells it: a
@@ -838,57 +890,55 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       (fnRow? tb k).map canon
 
-/-- External function values and their members, as `uint`s: `r.g` (`g` a
-function of `C`, `r` an address or `this`) is `r * 2^32 + selector(g)`;
-`h.selector` of an external function value `h` is `h % 2^32`, `h.address`
-`h / 2^32` (`r.g.selector` the literal, `r.g.address` `r`), the remainder
-written `h - h / 2^32 * 2^32`.  The callee of
-a call through a value (`callValueName`) is left as written. -/
-partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
-  | .call f (h :: as) =>
-    -- `abi.encodeCall(this.g, …)`: the function, whose selector it reads
-    if f == "abi.encodeCall" then do
-      let h' ← match extMember? C Γ h with
-        | some (_, g) => pure (.name g)
-        | none => fnPure Γ h
-      return .call f (h' :: (← as.mapM (fnPure Γ)))
-    else if f == callValueName then do
-      let h' ← match extMember? C Γ h with
-        | some (r, g) => do pure (.field (← fnPure Γ r) g)
-        | none => fnPure Γ h
-      pure (.call f (h' :: (← as.mapM (fnPure Γ))))
-    else do pure (.call f ((← fnPure Γ h) :: (← as.mapM (fnPure Γ))))
-  | .field e m => do
-    if m == "selector" || m == "address" then
-      if let some (r, g) := extMember? C Γ e then
-        if m == "address" then return ← fnPure Γ r
-        let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
-        return .num sel
-      if let some ty := fnTyOfExpr C Γ e then
-        if let some (_, _, true) := fnParts? ty then
-          let e' ← fnPure Γ e
-          -- the selector as `h - h / 2^32 * 2^32`, which the closers read as
-          -- linear arithmetic over the quotient (a remainder they do not)
-          let a : RawExpr := .binop .div e' (.num selShift)
-          return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
-    match extMember? C Γ (.field e m) with
-    | some (r, g) =>
-      let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
-      pure (.binop .add (.binop .mul (← fnPure Γ r) (.num selShift)) (.num sel))
-    | none => do pure (.field (← fnPure Γ e) m)
-  | .call f as => do pure (.call f (← as.mapM (fnPure Γ)))
-  | .index a b => do pure (.index (← fnPure Γ a) (← fnPure Γ b))
-  | .binop op a b => do pure (.binop op (← fnPure Γ a) (← fnPure Γ b))
-  | .unop op a => do pure (.unop op (← fnPure Γ a))
-  | .ternary c a b => do pure (.ternary (← fnPure Γ c) (← fnPure Γ a) (← fnPure Γ b))
-  | .incDec op e => do pure (.incDec op (← fnPure Γ e))
-  | .newArr T e => do pure (.newArr T (← fnPure Γ e))
-  | .modular op a b k => do pure (.modular op (← fnPure Γ a) (← fnPure Γ b) (← fnPure Γ k))
-  | .named f ns as => do pure (.named f ns (← as.mapM (fnPure Γ)))
-  | .tuple as => do pure (.tuple (← as.mapM (fnPure Γ)))
-  | .assign l r => do pure (.assign l (← fnPure Γ r))
-  | .opAssign op l r => do pure (.opAssign op l (← fnPure Γ r))
-  | e => pure e
+/-- Function ABI components retain the parameter markers that dispatch's
+canonical signature intentionally erases. Mutability is not represented here. -/
+def FunDecl.rawExtTy? (d : FunDecl) : Option String := do
+  let component (n : Name) (t : Ty) : Option String :=
+    (fnRow? d.widths n).orElse fun _ => abiTyName d.widths n t
+  let ps ← d.params.mapM fun (n, t) => component n t
+  let rs ← d.rets.mapM fun (n, t) => component n t
+  pure (fnTyStr ps rs true)
+
+/-- A function value's source components before dispatch canonicalization. -/
+partial def rawFnTyOfExpr? (Γ : ECtx) : RawExpr → Option String
+  | .name g =>
+    match lookupBy g Γ with
+    | some (.val ..) => localFn? Γ g
+    | some _ => none
+    | none => fnRow? C.widths g
+  | .ternary _ a b => do
+    let ta ← rawFnTyOfExpr? Γ a
+    guard (rawFnTyOfExpr? Γ b == some ta)
+    pure ta
+  | .call g _ => do
+    let d ← lookupBy g C.funs
+    let (r, .prim _) ← d.ret | none
+    fnRow? d.widths r
+  | e => do
+    if let some (_, g) := extMember? C Γ e then
+      return ← (lookupBy g C.funs).bind FunDecl.rawExtTy?
+    let (tb, k, .prim _) ← widthPath? C Γ e | none
+    fnRow? tb k
+
+/-- Raw ABI parameter spellings, before function-dispatch canonicalization
+forgets address, enum and fixed-byte distinctions. -/
+def encodeCallTypes? (Γ : ECtx) (h : RawExpr) : Option (List String) := do
+  let declared (g : String) : Option (List String) := do
+    let d ← lookupBy g C.funs
+    d.params.mapM fun (n, T) => (fnRow? d.widths n).orElse fun _ => abiTyName d.widths n T
+  match h with
+  | .name g =>
+    if (lookupBy g Γ).isNone && (C.rootType g).isNone then
+      if let some ps := declared g then return ps
+    let ty ← (localFn? Γ g).orElse fun _ => fnRow? C.widths g
+    let (ps, _, true) ← fnParts? ty | none
+    pure ps
+  | e =>
+    if let some (_, g) := extMember? C Γ e then return ← declared g
+    let (tb, k, .prim _) ← widthPath? C Γ e | none
+    let ty ← fnRow? tb k
+    let (ps, _, true) ← fnParts? ty | none
+    pure ps
 
 /-- A capture of the reference `e`, declared at `t`, with its narrow positions
 (`exprShape`, `LocalTy.shape`). -/
@@ -952,12 +1002,13 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   -- a function's reference argument: its shape is checked against the
   -- parameter's (`elabCallRet`); a struct constructor's arguments, each
   -- against its member's, by the member writes it is lowered to (`hoist`)
+  | .call "#array" as => as.findSome? (narrowWholeAt? Γ)
   | .call f as =>
     if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
       as.findSome? (narrowWholeAt? Γ)
     -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
     -- no other array)
-    else if (lookupBy f C.funs).isNone && (byteBuiltin f || f == sliceViewName) then
+    else if (lookupBy f C.funs).isNone && (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice") then
       as.findSome? (narrowBase? Γ)
     else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
@@ -1098,6 +1149,12 @@ def markOf? (Γ : ECtx) (m : String) : RawExpr → Option Nat
     | none => lookupBy (x ++ m) C.widths
   | .env k =>
     if m == "#address" && (k == .msgSender || k == .selfAddress) then some 20 else none
+  | .call "address" [_] => if m == "#address" then some 20 else none
+  | .ternary _ a b => do
+    let left ← markOf? Γ m a
+    let right ← markOf? Γ m b
+    guard (left == right)
+    pure left
   | .call f _ =>
     if m == "#enum" && (lookupBy f C.enums).isSome then some 1 else do
       let d ← lookupBy f C.funs
@@ -1154,6 +1211,155 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
   | .ternary _ a b => joinBytes (bytesOf? Γ a) (bytesOf? Γ b)
   | .assign l _ | .opAssign _ l _ => bytesOf? Γ l
   | _ => none
+
+/-- ABI aliases normalize without erasing integer widths or byte/address kinds. -/
+partial def abiFnType (T : String) : String :=
+  match fnParts? T with
+  | some (ps, rs, ext) => fnTyStr (ps.map abiFnType) (rs.map abiFnType) ext
+  | none =>
+    if T.startsWith "(" && T.endsWith ")" then
+      "(" ++ ",".intercalate ((splitTopCommas ((T.drop 1).dropRight 1)).map abiFnType) ++ ")"
+    else match T.splitOn "[" with
+    | base :: rest@(_ :: _) => abiFnType base ++ "[" ++ "[".intercalate rest
+    | _ => if T == "uint" then "uint256" else if T == "int" then "int256" else T
+
+/-- Check the implicit conversion before contextual ABI encoding. The raw
+syntax retains widths/byte markers, but not nominal enum identity; that limit
+is shared with declaration metadata, not repaired by an explicit narrowing cast. -/
+def encodeCallArg (Γ : ECtx) (T : String) (a : RawExpr) : Except String RawExpr := do
+  let bad : Except String RawExpr := throw s!"abi.encodeCall: {a.toStr} is not implicitly convertible to {T}"
+  if let some n := bytesTy? T then
+    if let some bs := a.bytesLit? then
+      if bs.length ≤ n then return .call T [a] else return ← bad
+    if let some m := bytesOf? C Γ a then
+      if m ≤ n then return .call T [a] else return ← bad
+    return ← bad
+  if let some expected := fnParts? T then
+    if expected.2.2 && (rawFnTyOfExpr? C Γ a).map abiFnType == some (abiFnType T) then return a
+    return ← bad
+  if T == "bytes" || T == "string" then
+    if a.bytesLit?.isSome then return a
+    let ws := exprShape C Γ a
+    if ws.contains ("[]#bytes", 1) && ((T == "string") == ws.contains ("#string", 1)) then return a
+    return ← bad
+  let prim := if T == "bool" then some (PrimTy.bool, 256)
+    else if T == "address" then some (PrimTy.uint, 160) else castTy? T
+  if let some (p, n) := prim then
+    if (bytesOf? C Γ a).isSome || (rawFnTyOfExpr? C Γ a).isSome then return ← bad
+    let addr := (markOf? C Γ "#address" a).isSome ||
+      (match a with | .call "address" [_] => true | _ => false)
+    if T == "address" then
+      if addr then return a
+      -- Numeric address literals in the imported AST have already passed solc.
+      if let some v := a.litVal? then
+        if 0 ≤ v && v < (2^160 : Nat) then return a
+      return ← bad
+    if addr || (markOf? C Γ "#enum" a).isSome then return ← bad
+    if let some v := a.litVal? then
+      if p == .bool then return ← bad
+      let (lo, hi) := intRange p n
+      if lo ≤ v && v ≤ hi then return .call T [a]
+      return ← bad
+    let some (q, m) := intTyOf C Γ a | return ← bad
+    if p == .bool then
+      if q == .bool then return a else return ← bad
+    if q == .bool || n < m || (p == .uint && q == .int) ||
+        (p == .int && q == .uint && n ≤ m) then return ← bad
+    -- Reference expressions must not pass through intTyOf's fallback.
+    if let .ok (.path (.ref _) _) := synth C Γ.toNCtx a then return ← bad
+    if let .ok (.mpath (.ref _) _) := synth C Γ.toNCtx a then return ← bad
+    return .call T [a]
+  let ty ← match a with
+    | .newArr R _ => (elabTyW C R).map (·.1)
+    | .call f _ => do
+      let some d := lookupBy f C.funs | throw s!"abi.encodeCall: unknown reference argument {a.toStr}"
+      let some (_, t) := d.ret | throw "abi.encodeCall: argument has no return value"
+      pure t
+    | _ => do
+      match ← synth C Γ.toNCtx a with
+      | .path t _ | .mpath t _ => pure t
+      | _ => throw s!"abi.encodeCall: {a.toStr} is not a reference argument"
+  if abiTyName (exprShape C Γ a) "" ty == some T then return a
+  return ← bad
+
+/-- External function values and their members, as `uint`s: `r.g` (`g` a
+function of `C`, `r` an address or `this`) is `r * 2^32 + selector(g)`;
+`h.selector` of an external function value `h` is `h % 2^32`, `h.address`
+`h / 2^32` (`r.g.selector` the literal, `r.g.address` `r`), the remainder
+written `h - h / 2^32 * 2^32`.  The callee of
+a call through a value (`callValueName`) is left as written. -/
+partial def fnPure (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .call f (h :: as) =>
+    -- `abi.encodeCall(this.g, …)`: the function, whose selector it reads
+    if f == "abi.encodeCall" then do
+      let h' ← match extMember? C Γ h with
+        | some (r, g) => do pure (.field (← fnPure Γ r) g)
+        | none => fnPure Γ h
+      let [t] := as | throw "abi.encodeCall takes a function and an argument tuple"
+      let actual := match t with | .tuple xs => xs | a => [a]
+      let some expected := encodeCallTypes? C Γ h |
+        throw "abi.encodeCall: the function's ABI parameter types are unavailable"
+      unless actual.length == expected.length do
+        throw s!"abi.encodeCall takes {expected.length} arguments, not {actual.length}"
+      let converted ← (expected.zip actual).mapM fun (T, a) => do
+        let a ← encodeCallArg C Γ T a
+        let lowered ← fnPure Γ a
+        if ((rawFnTyOfExpr? C Γ a).bind fnParts?).any (·.2.2) then
+          return RawExpr.call "bytes24" [lowered]
+        return lowered
+      return .call f [h', .tuple converted]
+    else if encodeBuiltin f && (lookupBy f C.funs).isNone then do
+      let encoded ← (h :: as).mapM fun a => do
+        let lowered ← fnPure Γ a
+        if let some ty := rawFnTyOfExpr? C Γ a then
+          if f == "bytes.concat" || f == "string.concat" then
+            throw "concat does not accept function values"
+          let some (_, _, true) := fnParts? ty |
+            throw "ABI encoding an internal function value is not allowed"
+          return RawExpr.call "bytes24" [lowered]
+        if let .name g := a then
+          if (lookupBy g Γ).isNone && (C.rootType g).isNone &&
+              fnSource C g && (lookupBy g C.funs).isSome then
+            throw "ABI encoding an internal function value is not allowed"
+        return lowered
+      return .call f encoded
+    else if f == callValueName then do
+      let h' ← match extMember? C Γ h with
+        | some (r, g) => do pure (.field (← fnPure Γ r) g)
+        | none => fnPure Γ h
+      pure (.call f (h' :: (← as.mapM (fnPure Γ))))
+    else do pure (.call f ((← fnPure Γ h) :: (← as.mapM (fnPure Γ))))
+  | .field e m => do
+    if m == "selector" || m == "address" then
+      if let some (r, g) := extMember? C Γ e then
+        if m == "address" then return ← fnPure Γ r
+        let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+        return .num sel
+      if let some ty := fnTyOfExpr C Γ e then
+        if let some (_, _, true) := fnParts? ty then
+          let e' ← fnPure Γ e
+          -- the selector as `h - h / 2^32 * 2^32`, which the closers read as
+          -- linear arithmetic over the quotient (a remainder they do not)
+          let a : RawExpr := .binop .div e' (.num selShift)
+          return if m == "selector" then .binop .sub e' (.binop .mul a (.num selShift)) else a
+    match extMember? C Γ (.field e m) with
+    | some (r, g) =>
+      let some sel := fnSelector? C g | throw s!"{g}: its signature has a type the ABI does not name"
+      pure (.binop .add (.binop .mul (← fnPure Γ r) (.num selShift)) (.num sel))
+    | none => do pure (.field (← fnPure Γ e) m)
+  | .call f as => do pure (.call f (← as.mapM (fnPure Γ)))
+  | .index a b => do pure (.index (← fnPure Γ a) (← fnPure Γ b))
+  | .binop op a b => do pure (.binop op (← fnPure Γ a) (← fnPure Γ b))
+  | .unop op a => do pure (.unop op (← fnPure Γ a))
+  | .ternary c a b => do pure (.ternary (← fnPure Γ c) (← fnPure Γ a) (← fnPure Γ b))
+  | .incDec op e => do pure (.incDec op (← fnPure Γ e))
+  | .newArr T e => do pure (.newArr T (← fnPure Γ e))
+  | .modular op a b k => do pure (.modular op (← fnPure Γ a) (← fnPure Γ b) (← fnPure Γ k))
+  | .named f ns as => do pure (.named f ns (← as.mapM (fnPure Γ)))
+  | .tuple as => do pure (.tuple (← as.mapM (fnPure Γ)))
+  | .assign l r => do pure (.assign l (← fnPure Γ r))
+  | .opAssign op l r => do pure (.opAssign op l (← fnPure Γ r))
+  | e => pure e
 
 /-- The bytes `bs` as a `bytesN`: left-aligned, the rest zero. -/
 def bytesAlign (n : Nat) (bs : List Nat) : Except String Nat := do
@@ -1212,7 +1418,21 @@ operations (`docs/semantic-gaps.md`, "Bytes and strings"): a conversion, an
 index, `.length`, a literal of bytes, an implicit widening; read bottom up,
 the types from the expression as written. -/
 partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .call "#array" as => pure (.call "#array" as)
   | .call f as => do
+    if f == "string.concat" && (lookupBy f C.funs).isNone then
+      unless as.all (stringReason? C Γ) do throw "string.concat takes strings"
+    if f == "bytes.concat" && (lookupBy f C.funs).isNone then
+      let bytesArg (a : RawExpr) : Bool :=
+        if a.bytesLit?.isSome || (bytesOf? C Γ a).isSome then true else
+        match a with
+        | .call "bytes" [_] => true
+        | _ => let ws := exprShape C Γ a
+               ws.contains ("[]#bytes", 1) && !ws.contains ("#string", 1)
+      unless as.all bytesArg do throw "bytes.concat takes bytes or fixed bytes"
+    if f == "erc7201" && (lookupBy f C.funs).isNone then
+      let [a] := as | throw "erc7201 takes one string argument"
+      unless stringReason? C Γ a do throw "erc7201 takes a string; convert bytes with string(data)"
     let as' ← as.mapM (bytesPure Γ)
     if let some n := bytesTy? f then
       let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
@@ -1229,10 +1449,13 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
     -- an argument of the ABI's that is a `bytesN`: marked, its width lost to
     -- the rewrite (`abiBytesMark`)
     if encodeBuiltin f && (lookupBy f C.funs).isNone then
-      return .call f ((as.zip as').map fun (o, a) =>
-        match bytesOf? C Γ o with
+      let mark (o a : RawExpr) : RawExpr := match bytesOf? C Γ o with
         | some n => .call (abiBytesMark n) [a]
-        | none => a)
+        | none => a
+      return .call f ((as.zip as').map fun (o, a) =>
+        match o, a with
+        | .tuple os, .tuple vs => .tuple ((os.zip vs).map fun (o, a) => mark o a)
+        | _, _ => mark o a)
     match lookupBy f C.funs with
     | some d =>
       if d.params.length != as.length then return .call f as'
@@ -1494,6 +1717,20 @@ def castCapture (f : String) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let v ← checkIn C Γn p r
   let x ← captureAs C "se" (.val p n)
   pure ([.of Γn (.declLocal p x (some v))], .name (toString x))
+
+/-- Retain the source address kind in the frontend's shape table while the
+intrinsic statement carries its cleaned uint value. -/
+def addressCapture (e : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let context := (← get).1
+  if (markOf? C context "#address" e).isSome then return ([], e)
+  let Γ ← nctx
+  let value ← ElabM.lift (check C Γ .uint (.call "address" [e]))
+  -- Contextual kind inference has already read the wrapper before hoisting.
+  -- A checked literal needs no extra local or reduction tree.
+  if e.litVal?.isSome then return ([], e)
+  let x ← captureAs C "se" (.val .uint 256)
+  declareShape (toString x) addressRows
+  pure ([.of Γ (.declLocal .uint x (some value))], .name (toString x))
 
 /-- A conversion `E(e)` to an enum of `n` members, `e`'s captures made: a
 fresh `uint` holding `e`, then `assert` that it names a member (solc panics,

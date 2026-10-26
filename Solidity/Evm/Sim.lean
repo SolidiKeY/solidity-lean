@@ -958,12 +958,13 @@ theorem noStore_pushCode (b : Nat) {Γ : Ctx} {E : Ty} (v : Option (Solidity.Src
     (q : Solidity.SPath C Γ (.array E)) : NoStore (pushCode b v q) := by
   have := noStore_compileSPath b q
   have := noStore_pushSlotCode 1
-  rcases v with _ | (v | q' | mp | shape)
+  rcases v with _ | (v | q' | mp | shape | fixedMem)
   · simp only [pushCode]; no_store
   · have := noStore_compileVal b v
     simp only [pushCode]; no_store
   · have := noStore_compileSPath b q'
     simp only [pushCode]; no_store
+  · rfl
   · rfl
   · rfl
 
@@ -983,7 +984,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .assign l (.copy q _) => by
     have := noStore_compileSPath b q; have := noStore_compileLoc b l
     simp only [compileStmt, assignCode]; stores_from
-  | .assign _ (.copyMem _) | .assign _ (.fixedCopy ..) => storesFrom_nil _
+  | .assign _ (.copyMem _) | .assign _ (.fixedCopy ..) | .assign _ (.fixedCopyMem ..) => storesFrom_nil _
   | .rebind i (.path q) => by
     have := noStore_compileSPath b q
     simp only [compileStmt]; stores_from

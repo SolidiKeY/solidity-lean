@@ -16,7 +16,7 @@ trap 'rm -rf "$scratch"' EXIT
 status=0
 # one compile: the run prints the hash of what it wrote, and exits 1 (after
 # printing it) when solkey's cached output differs
-out="$(node scripts/solc-ast.mjs --no-wrapper --compare-cache --out "$scratch/TestSuite.ast.json" "$@" 2>&1)" || status=1
+out="$(node scripts/solc-ast.mjs --legacy-fixture --no-wrapper --compare-cache --out "$scratch/TestSuite.ast.json" "$@" 2>&1)" || status=1
 printf '%s\n' "$out"
 if ! diff -q tests/solc/TestSuite.ast.json "$scratch/TestSuite.ast.json" >/dev/null; then
   diff -u tests/solc/TestSuite.ast.json "$scratch/TestSuite.ast.json" | head -40

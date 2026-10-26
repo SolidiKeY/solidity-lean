@@ -166,6 +166,37 @@ theorem LTm.litSrc?_left {c : Bool} {p : PrimTy} (op : BinOp) (h : op.accepts p 
     dsimp only [LTm.lit?] at hl
     cases hl
 
+/-- `mulmod` at a literal modulus with a literal factor on the right, or on the
+left, recognized with its evidence. -/
+def LTm.mulmodSrc? {c : Bool} (a b : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (sa : Option (PLift (a.SrcL c true l .num))) (sb : Option (PLift (b.SrcL c true l .num))) :
+    Option (PLift ((LTm.app3 (.modular .mulmod) a b (.app0 (.lit v))).SrcL c true l .num)) :=
+  match b.lit?, a.lit? with
+  | some ⟨k, hk⟩, _ => sa.map fun ⟨ha⟩ => ⟨by subst hk; exact .mulmodL rfl k v ha⟩
+  | none, some ⟨k, hk⟩ => sb.map fun ⟨hb⟩ => ⟨by subst hk; exact .mulmodR rfl k v hb⟩
+  | none, none => none
+
+theorem LTm.mulmodSrc?_right {c : Bool} (a : LTm C (.val .uint)) (k v : PrimTy.uint.Denote)
+    (sa : Option (PLift (a.SrcL c true l .num)))
+    (sb : Option (PLift ((LTm.app0 (C := C) (.lit k)).SrcL c true l .num))) (ha : sa.isSome = true) :
+    (LTm.mulmodSrc? a (.app0 (.lit k)) v sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
+  rfl
+
+theorem LTm.mulmodSrc?_left {c : Bool} (k : PrimTy.uint.Denote) (b : LTm C (.val .uint))
+    (v : PrimTy.uint.Denote) (sa : Option (PLift ((LTm.app0 (C := C) (.lit k)).SrcL c true l .num)))
+    (sb : Option (PLift (b.SrcL c true l .num))) (ha : sa.isSome = true) (hb : sb.isSome = true) :
+    (LTm.mulmodSrc? (.app0 (.lit k)) b v sa sb).isSome = true := by
+  obtain ⟨x, rfl⟩ := Option.isSome_iff_exists.mp ha
+  obtain ⟨y, rfl⟩ := Option.isSome_iff_exists.mp hb
+  unfold LTm.mulmodSrc?
+  split
+  · rfl
+  · rfl
+  · rename_i hl
+    dsimp only [LTm.lit?] at hl
+    cases hl
+
 /-- `&` by a low mask, else through the others. -/
 def LTm.bandAll? {c : Bool} (h : BinOp.band.accepts .uint = true) (a b : LTm C (.val .uint))
     (sa : Option (PLift (a.SrcL c true l .num))) (sb : Option (PLift (b.SrcL c true l .num))) :
@@ -263,6 +294,9 @@ def LTm.srcL? (l : LedgerMode) : (c : Bool) → (k : SrcKind) → {s : Srt} → 
     | .num, .mulW, .uint => LTm.litSrc? .mulW h a b (a.srcL? l c .num) (b.srcL? l c .num)
     | .num, .bor, .uint => LTm.litSrc? .bor h a b (a.srcL? l c .num) (b.srcL? l c .num)
     | .num, .bxor, .uint => LTm.litSrc? .bxor h a b (a.srcL? l c .num) (b.srcL? l c .num)
+    | .num, .band, .int => LTm.litSrc? .band h a b (a.srcL? l c .num) (b.srcL? l c .num)
+    | .num, .bor, .int => LTm.litSrc? .bor h a b (a.srcL? l c .num) (b.srcL? l c .num)
+    | .num, .bxor, .int => LTm.litSrc? .bxor h a b (a.srcL? l c .num) (b.srcL? l c .num)
     | .num, .shr, _ =>
       match b with
       | .app0 (.lit v) => (a.srcL? l c .num).map fun ⟨ha⟩ => ⟨.shrL rfl h v ha⟩
@@ -375,6 +409,17 @@ def LTm.srcL? (l : LedgerMode) : (c : Bool) → (k : SrcKind) → {s : Srt} → 
       let ⟨ht⟩ ← t.srcL? l true .bool
       let ⟨he⟩ ← e.srcL? l true .bool
       return ⟨.ite (k := .bool) rfl (fun h => nomatch h) hd ht he⟩
+    | _, _ => none
+  | c, k, _, .app3 (.modular .addmod) a b z =>
+    match k, z with
+    | .num, .app0 (.lit v) => do
+      let ⟨ha⟩ ← a.srcL? l c .num
+      let ⟨hb⟩ ← b.srcL? l c .num
+      return ⟨.addmodL rfl v ha hb⟩
+    | _, _ => none
+  | c, k, _, .app3 (.modular .mulmod) a b z =>
+    match k, z with
+    | .num, .app0 (.lit v) => LTm.mulmodSrc? a b v (a.srcL? l c .num) (b.srcL? l c .num)
     | _, _ => none
   -- KeY `int` nodes, under a variable symbol so that the cases above do not
   -- discriminate on the sort.
@@ -681,6 +726,21 @@ theorem LTm.srcL?_complete (hpost : l ≠ .post) : ∀ {k : SrcKind} {s : Srt} {
     show (Option.bind (LTm.srcL? l false .bool b) _).isSome = true
     rw [hxb]
     rfl
+  | @addmodL _ a b v _ _ iha ihb =>
+    refine ⟨?_, fun _ hs => by cases hs⟩
+    obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1
+    obtain ⟨⟨xb⟩, hxb⟩ := Option.isSome_iff_exists.mp ihb.1
+    show (Option.bind (LTm.srcL? l false .num a) _).isSome = true
+    rw [hxa]
+    show (Option.bind (LTm.srcL? l false .num b) _).isSome = true
+    rw [hxb]
+    rfl
+  | @mulmodL _ a k v _ ih =>
+    exact ⟨LTm.mulmodSrc?_right a k v _ (LTm.srcL? l false .num (.app0 (.lit k))) ih.1,
+      fun _ hs => by cases hs⟩
+  | @mulmodR _ k b v _ ih =>
+    exact ⟨LTm.mulmodSrc?_left k b v (LTm.srcL? l false .num (.app0 (.lit k))) _ rfl ih.1,
+      fun _ hs => by cases hs⟩
   | @or a b _ _ iha ihb =>
     refine ⟨?_, fun hk => by cases hk⟩
     obtain ⟨⟨xa⟩, hxa⟩ := Option.isSome_iff_exists.mp iha.1

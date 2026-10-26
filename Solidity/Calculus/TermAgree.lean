@@ -165,6 +165,11 @@ def Op3.isIteB {a b c s : Srt} : Op3 C a b c s → Bool
   | .ite => true
   | _ => false
 
+/-- `addmod`, `mulmod`. -/
+def Op3.isModB {a b c s : Srt} : Op3 C a b c s → Bool
+  | .modular _ => true
+  | _ => false
+
 /-- A value the Theory reads as the interpreter does: one that returns, or a
 symbol the Theory reads alike over such values. -/
 def Tm.agreeB : {s : Srt} → Tm C Γ s → Bool
@@ -177,7 +182,7 @@ def Tm.agreeB : {s : Srt} → Tm C Γ s → Bool
   | _, .app1 o x => o.agreesB && x.agreeB
   | _, .app2 o x y =>
     (o.agreesB && x.agreeB && y.agreeB) || o.memReadB || Tm.totB (.app2 o x y)
-  | _, .app3 o c x y => o.isIteB && c.agreeB && x.agreeB && y.agreeB
+  | _, .app3 o c x y => (o.isIteB || o.isModB) && c.agreeB && x.agreeB && y.agreeB
   | _, .pvZ _ => true
 
 /-- What `Tm.agreeB` gives, by sort. -/
@@ -273,13 +278,21 @@ theorem Tm.agreeB_sound {s : Srt} (t : Tm C Γ s) : t.agreeB = true → Tm.Agree
     intro h
     cases o with
     | ite =>
-      simp only [Tm.agreeB, Op3.isIteB, Bool.true_and, Bool.and_eq_true] at h
+      simp only [Tm.agreeB, Op3.isIteB, Op3.isModB, Bool.or_false, Bool.true_and,
+        Bool.and_eq_true] at h
       intro σ
       show (c.denote σ).bind (fun v => cond v (x.denote σ) (y.denote σ)) =
         (c.eval σ).bind (fun v => cond v (x.eval σ) (y.eval σ))
       rw [ihc h.1.1 σ, ihx h.1.2 σ, ihy h.2 σ]
-    | _ => first | trivial | simp only [Tm.agreeB, Op3.isIteB, Bool.false_and,
-        Bool.false_eq_true] at h
+    | modular op =>
+      simp only [Tm.agreeB, Op3.isIteB, Op3.isModB, Bool.false_or, Bool.true_and,
+        Bool.and_eq_true] at h
+      intro σ
+      show (do op.evalT (← c.denote σ) (← x.denote σ) (← y.denote σ)) =
+        (do op.evalT (← c.eval σ) (← x.eval σ) (← y.eval σ))
+      rw [ihc h.1.1 σ, ihx h.1.2 σ, ihy h.2 σ]
+    | _ => first | trivial | simp only [Tm.agreeB, Op3.isIteB, Op3.isModB, Bool.false_or,
+        Bool.false_and, Bool.false_eq_true] at h
   | pvP _ | pvS _ | pvI _ => exact fun h => by simp only [Tm.agreeB, Bool.false_eq_true] at h
 
 /-- **A value that agrees reads in the Theory as it evaluates.** -/

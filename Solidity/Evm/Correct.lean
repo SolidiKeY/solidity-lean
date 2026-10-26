@@ -612,7 +612,7 @@ theorem assign_family {T : Ty} (l : Solidity.Loc C Γ T) (r : Solidity.Src C Γ 
     simp only [assignIn, Bool.and_eq_true] at hok
     exact copy_sim l q hq hok.1.1.1 hok.1.1.2 hm hok.1.2 hok.2
   | copyMem p => cases hok
-  | fixedCopy p shape hm => cases hok
+  | fixedCopy p shape hm | fixedCopyMem p shape => cases hok
 
 theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.ARhs C Γ R)
     {F' : Frag Γ} (hm : Sim C L b F σ m)

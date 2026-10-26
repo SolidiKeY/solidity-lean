@@ -467,17 +467,17 @@ def Feature.info : Feature → FeatureInfo
     { category := "lexical", spelling := "identifiers; contextual from/error/revert/global/transient/layout/at",
       scope := .model, current := .limited,
       requirement := r#"Preserve declaration identity, lexical scope, shadowing and qualified names; builtin spelling alone is insufficient."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .comments =>
     { category := "lexical", spelling := "// and /* */; NatSpec /// and /** */",
       scope := .model, current := .limited,
       requirement := r#"Ignore ordinary comments after lexing; preserve source spans and requested specification annotations; NatSpec is not executable Solidity."#,
-      upstream := [{ path := "libsolidity/ast/AST.h", line := 443 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "libsolidity/ast/AST.h", line := 443 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .numericLiterals =>
     { category := "lexical", spelling := "decimal, hexadecimal, underscores, scientific notation, fractional literals",
       scope := .model, current := .limited,
       requirement := r#"Fold exact arbitrary-precision rationals before contextual integer typing; reject invalid denominators and out-of-range conversions."#,
-      upstream := [{ path := "docs/grammar/SolidityLexer.g4", line := 240 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityLexer.g4", line := 240 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .booleanLiterals =>
     { category := "lexical", spelling := "true; false",
       scope := .model, current := .present,
@@ -487,22 +487,22 @@ def Feature.info : Feature → FeatureInfo
     { category := "lexical", spelling := "single/double quotes, escapes, adjacent strings",
       scope := .model, current := .limited,
       requirement := r#"Decode bytes and escapes; concatenate adjacent literals; enforce Solidity literal conversions rather than host string semantics."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 438 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 438 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .unicodeLiterals =>
     { category := "lexical", spelling := "unicode\"...\"",
       scope := .model, current := .limited,
       requirement := r#"Validate UTF-8 at compile time and retain the resulting bytes."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 446 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 446 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .hexLiterals =>
     { category := "lexical", spelling := "hex\"...\"; adjacent hex strings",
       scope := .model, current := .limited,
       requirement := r#"Decode exact byte sequences, including empty values and separators allowed upstream."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 442 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 442 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .addressLiterals =>
     { category := "lexical", spelling := "0x followed by address-sized hexadecimal digits",
       scope := .model, current := .limited,
       requirement := r#"Enforce address-literal length/checksum and 160-bit bounds; distinguish numeric literals and addresses."#,
-      upstream := [{ path := "libsolidity/analysis/TypeChecker.cpp", line := 3954 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "libsolidity/analysis/TypeChecker.cpp", line := 3954 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .etherUnits =>
     { category := "lexical", spelling := "wei; gwei; ether",
       scope := .model, current := .present,
@@ -517,17 +517,17 @@ def Feature.info : Feature → FeatureInfo
     { category := "lexical", spelling := "pragma solidity version constraints",
       scope := .model, current := .limited,
       requirement := r#"Check the selected compiler/version range before importing a validated AST; record the compiler version."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .pragmaAbicoder =>
     { category := "lexical", spelling := "pragma abicoder v1/v2; experimental ABIEncoderV2",
-      scope := .model, current := .missing,
+      scope := .model, current := .limited,
       requirement := r#"Record ABI-coder selection and its validation restrictions; do not silently apply v2 to a v1 compilation."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := [] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := ["Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .pragmaOther =>
     { category := "lexical", spelling := "other pragmas and experimental feature gates",
-      scope := .model, current := .missing,
+      scope := .model, current := .limited,
       requirement := r#"Delegate acceptance to pinned solc and reject unknown enabled language modes; compiler settings are part of provenance."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := [] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 29 }], localEvidence := ["Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .sourceUnits =>
     { category := "declarations", spelling := "source files and top-level declarations",
       scope := .model, current := .limited,
@@ -567,7 +567,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "declarations", spelling := "function f(...) returns (...)",
       scope := .model, current := .limited,
       requirement := r#"Preserve parameter/return order, named return defaults, overload resolution, implicit return and visibility."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 19 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 19 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/DeclarationMetadata.sol"] }
   | .freeFunctions =>
     { category := "declarations", spelling := "file-level function definitions",
       scope := .model, current := .limited,
@@ -775,9 +775,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 419 }], localEvidence := ["Solidity/Syntax/Grammar.lean"] }
   | .inlineArrays =>
     { category := "expressions", spelling := "[a,b,...]",
-      scope := .model, current := .missing,
-      requirement := r#"Infer the fixed array's common element type using Solidity's first-element/context rules and allocate a memory array."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 423 }], localEvidence := [] }
+      scope := .model, current := .limited,
+      requirement := r#"Infer the fixed memory array independently of its target using the first mobile element type and implicit common types; preserve allocation and element-copy timing. Nominal element identities and recursive shapes remain partial."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 423 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean", "Solidity/Examples/Tactics/Aggregates.lean", "Solidity/Examples/Tactics/AggregatesImport.lean", "docs/feature-work/aggregates.md"] }
   | .memberAccess =>
     { category := "expressions", spelling := "e.f",
       scope := .model, current := .limited,
@@ -792,7 +792,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "expressions", spelling := "a[start:end]; omitted endpoints",
       scope := .model, current := .limited,
       requirement := r#"Model legal calldata views with zero-based derived lengths, endpoint checks and shared immutable content."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 385 }], localEvidence := ["Solidity/Syntax/Grammar.lean", "Solidity/Examples/Tactics/AggregateSlices.lean", "docs/feature-work/aggregates.md"] }
   | .unaryArithmetic =>
     { category := "expressions", spelling := "-x; ~x; !x",
       scope := .model, current := .limited,
@@ -997,27 +997,27 @@ def Feature.info : Feature → FeatureInfo
     { category := "builtins", spelling := "keccak256(bytes)",
       scope := .abstract, current := .limited,
       requirement := r#"Use the existing Keccak semantics/explicit abstraction over bytes; injectivity and collision resistance are not unconditional equations."#,
-      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 91 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 91 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .sha256Builtin =>
     { category := "builtins", spelling := "sha256(bytes)",
       scope := .abstract, current := .limited,
       requirement := r#"Use an explicit deterministic cryptographic interpretation; opaque axioms must not claim collision freedom."#,
-      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 102 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 102 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .ripemd160Builtin =>
     { category := "builtins", spelling := "ripemd160(bytes)",
       scope := .abstract, current := .limited,
       requirement := r#"Preserve the 20-byte result and explicit interpretation independently of precompile gas."#,
-      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 100 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 100 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .ecrecoverBuiltin =>
     { category := "builtins", spelling := "ecrecover(hash,v,r,s)",
       scope := .abstract, current := .limited,
-      requirement := r#"Specify accepted inputs, zero-on-failure and recovery relation; never infer signer authorization without premises."#,
-      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 88 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      requirement := r#"Computed bounded recovery validates v/r/s and returns zero on failure; concrete kernel/EVM vectors pass. General group-law and precompile-equivalence proofs remain open; signer authorization requires separate premises."#,
+      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 88 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md", "Solidity/Secp256k1.lean", "Solidity/Semantics/Heap.lean", "Solidity/Examples/Tactics/Recovery.lean"] }
   | .erc7201Builtin =>
     { category := "builtins", spelling := "erc7201(string memory id) returns(uint)",
-      scope := .model, current := .missing,
+      scope := .model, current := .present,
       requirement := r#"Evaluate the ERC-7201 namespace formula for runtime strings and constant-foldable inputs: hash the string bytes, subtract one modulo 2^256, hash the encoded word, and clear the low eight bits. Producing a namespace integer does not expose physical storage."#,
-      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 89 }, { path := "docs/units-and-global-variables.rst", line := 250 }, { path := "libsolidity/analysis/TypeChecker.cpp", line := 2405 }], localEvidence := [] }
+      upstream := [{ path := "libsolidity/analysis/GlobalContext.cpp", line := 89 }, { path := "docs/units-and-global-variables.rst", line := 250 }, { path := "libsolidity/analysis/TypeChecker.cpp", line := 2405 }], localEvidence := ["Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md", "Solidity/ERC7201.lean", "Solidity/Syntax/Elab/Lower.lean"] }
   | .wrapUnwrap =>
     { category := "builtins", spelling := "T.wrap(x); T.unwrap(x)",
       scope := .model, current := .limited,
@@ -1027,12 +1027,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "builtins", spelling := "bytes.concat(...)",
       scope := .model, current := .limited,
       requirement := r#"Concatenate exact bytes/bytesN in argument order with fresh result memory."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3930 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3930 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .stringConcat =>
     { category := "builtins", spelling := "string.concat(...)",
       scope := .model, current := .limited,
       requirement := r#"Concatenate byte content, preserving argument evaluation and fresh allocation."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3930 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3930 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .msgSender =>
     { category := "environment", spelling := "msg.sender",
       scope := .abstract, current := .present,
@@ -1192,32 +1192,32 @@ def Feature.info : Feature → FeatureInfo
     { category := "abi", spelling := "abi.encode(...)",
       scope := .model, current := .limited,
       requirement := r#"Implement canonical head/tail, offsets, padding and recursive value shapes; current supported shape is narrower than all Solidity ABI types."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4212 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4212 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .abiEncodePacked =>
     { category := "abi", spelling := "abi.encodePacked(...)",
       scope := .model, current := .limited,
       requirement := r#"Preserve packed widths and array restrictions; ambiguity/collisions of packed encodings are real and must not be erased."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4222 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4222 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .abiEncodeWithSelector =>
     { category := "abi", spelling := "abi.encodeWithSelector(bytes4,...)",
       scope := .model, current := .limited,
       requirement := r#"Prefix a selector to canonical encoding; selector bytes are data, independent of raw CALL support. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4232 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4232 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .abiEncodeWithSignature =>
     { category := "abi", spelling := "abi.encodeWithSignature(string,...)",
       scope := .model, current := .limited,
       requirement := r#"Derive bytes4(keccak256(signature)) then canonical encoding; do not assert hashes are injective. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4252 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4252 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .abiEncodeCall =>
     { category := "abi", spelling := "abi.encodeCall(f,(args))",
       scope := .model, current := .limited,
       requirement := r#"Check exact function/tuple compatibility, derive selector and encode typed arguments. Existing selector-prefix lowering supports restricted argument shapes; complete recursive ABI shape coverage remains to be established."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4242 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4242 }], localEvidence := ["Solidity/Syntax/Elab/Lower.lean", "Solidity/Syntax/Elab/Arms.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .abiDecode =>
     { category := "abi", spelling := "abi.decode(bytes,(T,...))",
       scope := .model, current := .limited,
-      requirement := r#"Validate offsets, lengths, alignment, ranges and truncation for supported nested types; reject malformed inputs and explicitly gate unsupported shapes."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4262 }], localEvidence := ["Solidity/Syntax/Elab.lean"] }
+      requirement := r#"Validate offsets, lengths, ranges, truncation and fixed-byte padding before traversal/allocation; preserve noncanonical unaligned and overlapping layouts that solc accepts. Nominal enum metadata and complete recursive ABI coverage remain partial."#,
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4262 }], localEvidence := ["Solidity/Syntax/Elab.lean", "Solidity/Examples/Tactics/AbiFeatures.lean", "Solidity/Examples/Tactics/AbiFeaturesImport.lean", "docs/feature-work/abi-hashes.md"] }
   | .typeBounds =>
     { category := "metadata", spelling := "type(integer/enum).min/max",
       scope := .model, current := .limited,
@@ -1225,29 +1225,29 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4305 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean"] }
   | .typeName =>
     { category := "metadata", spelling := "type(C).name",
-      scope := .model, current := .missing,
+      scope := .model, current := .present,
       requirement := r#"Return compiler-resolved contract name bytes as a compile-time value."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4293 }], localEvidence := [] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4293 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Examples/Tactics/DeclarationMetadata.lean", "tests/solc/DeclarationMetadata.sol", "docs/feature-work/declarations-metadata.md"] }
   | .interfaceId =>
     { category := "metadata", spelling := "type(I).interfaceId",
-      scope := .model, current := .missing,
+      scope := .model, current := .present,
       requirement := r#"Compute the XOR of the interface's own external function selectors according to Solidity rules; inherited functions are excluded."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4297 }], localEvidence := [] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4297 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Examples/Tactics/DeclarationMetadata.lean", "tests/solc/DeclarationMetadata.sol", "docs/feature-work/declarations-metadata.md"] }
   | .functionSelector =>
     { category := "metadata", spelling := "f.selector; C.f.selector",
       scope := .model, current := .limited,
       requirement := r#"Preserve canonical signature and four-byte selector without exposing code addresses or asserting uniqueness. Existing lowering handles modeled external function values; all declaration contexts still need validation."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := ["Solidity/Syntax/Elab/Values.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := ["Solidity/Syntax/Elab/Values.lean", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/DeclarationMetadata.sol"] }
   | .functionAddress =>
     { category := "metadata", spelling := "externalFunction.address",
       scope := .model, current := .limited,
       requirement := r#"Project the bounded receiver identity from an external function value. Existing lowering handles modeled external function values; all declaration contexts still need validation."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := ["Solidity/Syntax/Elab/Values.lean"] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := ["Solidity/Syntax/Elab/Values.lean", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/DeclarationMetadata.sol"] }
   | .errorEventSelector =>
     { category := "metadata", spelling := "E.selector for errors/events where accepted",
-      scope := .model, current := .missing,
+      scope := .model, current := .present,
       requirement := r#"Compute bytes4 for error signatures and bytes32 for non-anonymous event signatures, respecting solc declaration resolution; anonymous events have no selector member."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := [] }
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 3399 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Examples/Tactics/DeclarationMetadata.lean", "tests/solc/DeclarationMetadata.sol", "docs/feature-work/declarations-metadata.md"] }
   | .arrayLength =>
     { category := "storage", spelling := "arrays/bytes/bytesN .length",
       scope := .model, current := .limited,
@@ -1317,7 +1317,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "semantics", spelling := "rational/constant-expression evaluation",
       scope := .model, current := .limited,
       requirement := r#"Evaluate exact rationals and contextual/mobile literal types before runtime integer operations."#,
-      upstream := [{ path := "docs/types/value-types.rst", line := 481 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/types/value-types.rst", line := 481 }], localEvidence := ["docs/solc-alignment.md", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .defaultInitialization =>
     { category := "semantics", spelling := "zero/default locals, fields and returns",
       scope := .model, current := .limited,
@@ -1327,7 +1327,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "semantics", spelling := "storage/memory/calldata assignment matrix",
       scope := .model, current := .limited,
       requirement := r#"Define every allowed location pair, reference binding versus deep copy, and nested element compatibility explicitly."#,
-      upstream := [{ path := "docs/types/reference-types.rst", line := 64 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/types/reference-types.rst", line := 64 }], localEvidence := ["docs/solc-alignment.md", "Solidity/Examples/Tactics/Aggregates.lean", "docs/feature-work/aggregates.md"] }
   | .panicCodes =>
     { category := "semantics", spelling := "Panic 0x00/01/11/12/21/22/31/32/41/51",
       scope := .model, current := .limited,
@@ -1377,12 +1377,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "semantics", spelling := "solc validation, nominal types, overloads and mutability",
       scope := .model, current := .limited,
       requirement := r#"Import only validated ASTs from the pinned compiler/settings; the catalog is not a replacement type checker."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["docs/solc-alignment.md"] }
+      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["docs/solc-alignment.md", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .featureDetection =>
     { category := "semantics", spelling := "transitive declaration-aware feature extraction",
-      scope := .model, current := .missing,
+      scope := .model, current := .limited,
       requirement := r#"Collect features from initializers, modifiers, inherited bodies, callees, payloads, specifications and call options; reject unknown AST nodes instead of default admission."#,
-      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := [] }
+      upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
   | .inlineAssembly =>
     { category := "excluded", spelling := "arbitrary assembly / Yul including memory-safe flags",
       scope := .exclude, current := .notApplicable,

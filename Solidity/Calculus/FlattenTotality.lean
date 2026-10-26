@@ -391,6 +391,17 @@ inductive LTm.SrcL (c : Bool) (w : Bool) (l : LedgerMode) : SrcKind → {s : Srt
   | litL (hw : w = true) {p : PrimTy} (op : BinOp) (h : op.accepts p = true) (v : p.Denote)
       (hv : litCutL op p = true) {b : LTm C (.val p)} :
       LTm.SrcL c w l .num b → LTm.SrcL c w l .num (.app2 (.binop op h) (.app0 (.lit v)) b)
+  /-- `addmod` at a literal modulus, `mulmod` at a literal modulus and a literal
+  factor (`cut3`), before the cut. -/
+  | addmodL (hw : w = true) {a b : LTm C (.val .uint)} (v : PrimTy.uint.Denote) :
+      LTm.SrcL c w l .num a → LTm.SrcL c w l .num b →
+      LTm.SrcL c w l .num (.app3 (.modular .addmod) a b (.app0 (.lit v)))
+  | mulmodL (hw : w = true) {a : LTm C (.val .uint)} (k v : PrimTy.uint.Denote) :
+      LTm.SrcL c w l .num a →
+      LTm.SrcL c w l .num (.app3 (.modular .mulmod) a (.app0 (.lit k)) (.app0 (.lit v)))
+  | mulmodR (hw : w = true) (k : PrimTy.uint.Denote) {b : LTm C (.val .uint)} (v : PrimTy.uint.Denote) :
+      LTm.SrcL c w l .num b →
+      LTm.SrcL c w l .num (.app3 (.modular .mulmod) (.app0 (.lit k)) b (.app0 (.lit v)))
   | seq {q p : PrimTy} {d : LTm C (.val q)} {a : LTm C (.val p)} :
       LTm.SrcL c w l .num d → LTm.SrcL c w l .num a → LTm.SrcL c w l .num (.seq d a)
   | err {p : PrimTy} : LTm.SrcL c w l .num (LTm.err (C := C) (s := .val p))
@@ -501,7 +512,7 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | kite hc => cases hc
   | ite hc => cases hc
   | toInt hw | toUint hw | divL hw | modL hw | shrL hw | shlL hw | addW hw | subW hw | bandR hw
-    | bandL hw | litR hw | litL hw => cases hw
+    | bandL hw | litR hw | litL hw | addmodL hw | mulmodL hw | mulmodR hw => cases hw
   | @var p k =>
     intro d r start hd hr hb hs
     obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
@@ -2246,6 +2257,30 @@ theorem LTm.SrcL.readExpr {w : Bool} {l : LedgerMode} : ∀ {k : SrcKind} {s : S
         Option.bind (ReadExpr.ofTerm? y) fun y' => some (ReadExpr.binop _ h x' y')) = _
       rw [he, show ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v)) = some (.lit v) by cases p <;> rfl]
       rfl⟩
+  | @addmodL _ x y v _ _ iha ihb =>
+    obtain ⟨ea, hea⟩ := iha
+    obtain ⟨eb, heb⟩ := ihb
+    exact ⟨ReadExpr.modular .addmod ea eb (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? x) fun x' => Option.bind (ReadExpr.ofTerm? y) fun y' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun k' =>
+          some (ReadExpr.modular .addmod x' y' k')) = _
+      rw [hea, heb]; rfl⟩
+  | @mulmodL _ x k v _ iha =>
+    obtain ⟨ea, hea⟩ := iha
+    exact ⟨ReadExpr.modular .mulmod ea (.lit k) (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? x) fun x' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit k))) fun y' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun k' =>
+          some (ReadExpr.modular .mulmod x' y' k')) = _
+      rw [hea]; rfl⟩
+  | @mulmodR _ k y v _ ihb =>
+    obtain ⟨eb, heb⟩ := ihb
+    exact ⟨ReadExpr.modular .mulmod (.lit k) eb (.lit v), by
+      change (Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit k))) fun x' =>
+        Option.bind (ReadExpr.ofTerm? y) fun y' =>
+        Option.bind (ReadExpr.ofTerm? (LTm.app0 (C := C) (.lit v))) fun k' =>
+          some (ReadExpr.modular .mulmod x' y' k')) = _
+      rw [heb]; rfl⟩
   | @bandR _ h x v _ _ ih =>
     obtain ⟨e, he⟩ := ih
     exact ⟨ReadExpr.binop _ h e (.lit v), by

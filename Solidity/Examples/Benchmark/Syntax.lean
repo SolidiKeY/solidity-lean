@@ -10,7 +10,7 @@ and leave the statements they stand for (`Syntax.lean`, "What elaborates
 away").  Each is pinned here by what it elaborates to, printed.
 
 * an ether or time unit on a literal is the literal times the unit;
-* `payable(e)` and `address(e)` of a value are `e`;
+* address conversions retain their ABI kind and clean numeric inputs;
 * `emit E(a, b);` evaluates what of its arguments may revert or has an
   effect, and drops the log; `event` and `error` declarations are dropped;
 * `require(c, "msg")`, `require(c, Err(a))` are `require(c)` (or a branch,
@@ -55,9 +55,11 @@ local instance : InContract := ⟨Elaborates⟩
 example : Prog.toStr [] (sol{ total = 2 ether + 3 days; total = 1 gwei; }) =
     "total = 2000000000000259200; total = 1000000000;" := rfl
 
-/-- `payable(e)` and `address(e)` are `e`. -/
+/-- Numeric address conversion truncates to 160 bits once. A second
+conversion of that address is an identity. -/
 example : Prog.toStr [] (sol{ owner = payable(address(total)); owner = address(0); }) =
-    "owner = total; owner = 0;" := rfl
+    "uint se1 = total % 1461501637330902918203684832716283019655932542976; \
+     owner = se1; owner = 0;" := rfl
 
 /-- `address(this)` is the contract's own address, an environment value. -/
 example : Prog.toStr [] (sol{ owner = address(this); }) = "owner = address(this);" := rfl

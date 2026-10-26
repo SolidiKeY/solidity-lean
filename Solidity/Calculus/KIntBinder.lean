@@ -1,7 +1,7 @@
 import Solidity.Calculus.LedgerCut
 
 /-!
-# Binders of KeY's `int` read as ledger entries (M7, feature 23)
+# Binders of KeY's `int` read as ledger entries (M7, feature 26)
 
 The leaf language (`LFml`, `LTm`) binds atoms of a `PrimTy` only (`AEnv`,
 `LFml.all`), so a binder of KeY's unbounded `int` (`Fml.bind _ _ .kint`)

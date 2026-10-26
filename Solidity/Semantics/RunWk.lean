@@ -444,6 +444,9 @@ theorem Src.valueT_wk {T : Ty} (r : Src C Γ T) : (r.wk h).valueT (τ.lift h d) 
   | fixedCopy p shape _ =>
     simp only [Src.wk, Src.valueT, SPath.resolveT_wk]
     rfl
+  | fixedCopyMem p shape =>
+    simp only [Src.wk, Src.valueT, MPath.mvalT_wk]
+    rfl
 
 theorem MSrc.mvalT_wk {T : Ty} (r : MSrc C Γ T) : (r.wk h).mvalT (τ.lift h d) = r.mvalT τ := by
   cases r with

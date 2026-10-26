@@ -150,6 +150,9 @@ def Src.quote : {T : Ty} → Src C Γ T → Lean.Expr
       SPath.quote c Γe p, FixedCopy.quote shape, rflTrue]
   | _, @Src.copyMem _ _ R p =>
     mkAppN (mkConst ``Src.copyMem) #[c, Γe, toExpr R, MPath.quote c Γe p]
+  | _, @Src.fixedCopyMem _ _ E n R p shape =>
+    mkAppN (mkConst ``Src.fixedCopyMem) #[c, Γe, toExpr E, toExpr n, toExpr R,
+      MPath.quote c Γe p, FixedCopy.quote shape]
 
 def ARhs.quote {R : RefTy} : ARhs C Γ R → Lean.Expr
   | .path p => mkAppN (mkConst ``ARhs.path) #[c, Γe, toExpr R, SPath.quote c Γe p]

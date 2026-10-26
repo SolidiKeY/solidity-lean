@@ -16,6 +16,8 @@ open Semantics
 
 declare_syntax_cat sol_expr (behavior := both)
 syntax:max num : sol_expr
+/-- A nonempty fixed memory array literal; its element type is inferred before allocation. -/
+syntax:max (name := solInlineArray) "[" sol_expr,+ "]" : sol_expr
 syntax:max ident : sol_expr
 /-- `"ab"`: a literal of bytes, a `bytesN`'s left-aligned or a `bytes`/`string`'s
 (`RawExpr.bytesLit`). -/
@@ -31,6 +33,8 @@ syntax:max (name := solSlice) sol_expr:max "[" sol_expr ":" sol_expr "]" : sol_e
 syntax:max (name := solSliceFrom) sol_expr:max "[" sol_expr ":" "]" : sol_expr
 @[inherit_doc solSlice]
 syntax:max (name := solSliceTo) sol_expr:max "[" ":" sol_expr "]" : sol_expr
+/-- Both endpoints omitted: the whole calldata view. -/
+syntax:max (name := solSliceAll) sol_expr:max "[" ":" "]" : sol_expr
 /-- `T[]` where a type stands in an expression: `abi.decode(d, (uint[]))`
 (`RawExpr.name "uint[]"`). -/
 syntax:max (name := solArrTyExpr) atomic(ident "[" "]") : sol_expr
@@ -105,7 +109,7 @@ syntax:max &"address" "(" &"this" ")" "." &"balance" : sol_expr
 
 /-! What elaborates away (`sol{ … }` reads it, no statement or value holds
 it): an ether or time unit on a number literal (`2 ether`, `3 days`), the
-casts `payable(e)` and `address(e)` of a value (identities: an address is a
+casts `payable(e)` and `address(e)` retain their kind until frontend typing (the model value is a
 `uint`), a struct constructor with named arguments (`T({f: a, g: b})`), and
 a call's (`f({q: b, p: a})`). -/
 
@@ -381,7 +385,7 @@ partial def spellFnTy (T : TSyntax `sol_ty) : MacroM String := do
     let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩) else pure []
     return fnTyStr ps rs ext
   match T with
-  | `(sol_ty| $x:ident) => pure x.getId.toString
+  | `(sol_ty| $x:ident) => pure (x.getId.toString false)
   | `(sol_ty| address payable) => pure "address"
   | `(sol_ty| mapping ( $k => $v )) => return s!"mapping({← spellFnTy k}=>{← spellFnTy v})"
   | `(sol_ty| $t[]) => return (← spellFnTy t) ++ "[]"
@@ -393,7 +397,7 @@ partial def expandTy (T : TSyntax `sol_ty) : MacroM Term := do
   expandTy1 T
 where
   expandTy1 : TSyntax `sol_ty → MacroM Term
-  | `(sol_ty| $x:ident) => `(RawTy.named $(quote x.getId.toString))
+  | `(sol_ty| $x:ident) => `(RawTy.named $(quote (x.getId.toString false)))
   | `(sol_ty| address payable) => `(RawTy.named "address")
   | `(sol_ty| mapping ( $k => $v )) => do `(RawTy.mapping $(← expandTy k) $(← expandTy v))
   | `(sol_ty| $t[]) => do `(RawTy.array $(← expandTy t))
@@ -422,7 +426,7 @@ def EnvKey.ident : EnvKey → Ident
   | .selfAddress => mkIdent ``EnvKey.selfAddress
 
 /-- A name, as a string literal. -/
-def strLit (x : Ident) : Term := quote x.getId.toString
+def strLit (x : Ident) : Term := quote (x.getId.toString false)
 
 /-- `e.f.g`: the members `fs` of `e`. -/
 def fieldChain (e : Term) (fs : List String) : MacroM Term :=
@@ -495,7 +499,7 @@ def pushMethodBase? : TSyntax `sol_expr → MacroM (Option (TSyntax `sol_expr))
       return some (← `(sol_expr| $(mkIdentFrom x n):ident))
     | _ => return none
   | `(sol_expr| $b:sol_expr . $f:ident) =>
-    pure (if f.getId.toString == "push" then some b else none)
+    pure (if (f.getId.toString false) == "push" then some b else none)
   | _ => pure none
 
 /-- `b.push()` as a compound or increment lvalue, optionally parenthesized. -/
@@ -567,7 +571,7 @@ def typeBoundExpr (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (g : 
   unless funName? f == some "type" do return none
   let #[a] := as | return none
   let some T := funName? a | return none
-  let m := g.getId.toString
+  let m := (g.getId.toString false)
   unless m == "max" || m == "min" do
     Macro.throwErrorAt g s!"type({T}).{m}: only `max` and `min` are modelled"
   match castTy? T with
@@ -581,6 +585,8 @@ def typeBoundExpr (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (g : 
   | none => return some (← `(RawExpr.field (.name $(quote T)) $(quote s!"type({m})")))
 
 partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
+  if e.raw.isOfKind ``solInlineArray then
+    return ← `(RawExpr.call "#array" [$(← e.raw[1].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
   if e.raw.isOfKind ``solTupleExpr then
     let es := #[e.raw[1]] ++ e.raw[3].getSepArgs
     return ← `(RawExpr.tuple [$(← es.mapM (expandExpr ⟨·⟩)),*])
@@ -613,13 +619,15 @@ where
   | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandExpr e) $(← expandExpr k))
-  | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[]")))
-  | `(sol_expr| $x:ident [ ] [ ]) => `(RawExpr.name $(quote (x.getId.toString ++ "[][]")))
+  | `(sol_expr| $x:ident [ ]) => `(RawExpr.name $(quote ((x.getId.toString false) ++ "[]")))
+  | `(sol_expr| $x:ident [ ] [ ]) => `(RawExpr.name $(quote ((x.getId.toString false) ++ "[][]")))
   | `(sol_expr| $e:sol_expr [ $i:sol_expr : $j:sol_expr ]) => do
       `(RawExpr.call "#slice" [$(← expandExpr e), $(← expandExpr i), $(← expandExpr j)])
   | `(sol_expr| $e:sol_expr [ $i:sol_expr : ]) => do
       let b ← expandExpr e
-      `(RawExpr.call "#slice" [$b, $(← expandExpr i), RawExpr.field $b "length"])
+      `(RawExpr.call "#slice" [$b, $(← expandExpr i), RawExpr.call "#sliceEnd" []])
+  | `(sol_expr| $e:sol_expr [ : ]) => do
+      `(RawExpr.call "#slice" [$(← expandExpr e), RawExpr.num 0, RawExpr.call "#sliceEnd" []])
   | `(sol_expr| $e:sol_expr [ : $j:sol_expr ]) => do
       `(RawExpr.call "#slice" [$(← expandExpr e), RawExpr.num 0, $(← expandExpr j)])
   | `(sol_expr| ( $e:sol_expr )) => expandExpr e
@@ -632,11 +640,11 @@ where
       `(RawExpr.newArr $(← expandTy T) $(← expandExpr n))
   | `(sol_expr| address ( this ) . balance) => `(RawExpr.env .selfBalance)
   | `(sol_expr| $n:num $u:ident) => do
-      let some k := unitFactor? u.getId.toString |
+      let some k := unitFactor? (u.getId.toString false) |
         Macro.throwErrorAt u "a unit is one of wei gwei ether seconds minutes hours days weeks"
       `(RawExpr.num $(quote (n.getNat * k)))
-  | `(sol_expr| payable ( $e:sol_expr )) => expandExpr e
-  | `(sol_expr| address ( $e:sol_expr )) => expandExpr e
+  | `(sol_expr| payable ( $e:sol_expr )) => do `(RawExpr.call "address" [$(← expandExpr e)])
+  | `(sol_expr| address ( $e:sol_expr )) => do `(RawExpr.call "address" [$(← expandExpr e)])
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do
@@ -699,9 +707,9 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireReason =>
     `(RawStmt.requireReason $(← expandExpr ⟨s.raw[2]⟩) $(← expandExpr ⟨s.raw[4]⟩))
   | ``solRequireErr =>
-    `(RawStmt.requireErr $(← expandExpr ⟨s.raw[2]⟩) $(quote s.raw[4].getId.toString)
+    `(RawStmt.requireErr $(← expandExpr ⟨s.raw[2]⟩) $(quote (s.raw[4].getId.toString false))
       [$(← exprs s.raw[6]),*])
-  | ``solRevertErr => `(RawStmt.revertErr $(quote s.raw[1].getId.toString) [$(← exprs s.raw[3]),*])
+  | ``solRevertErr => `(RawStmt.revertErr $(quote (s.raw[1].getId.toString false)) [$(← exprs s.raw[3]),*])
   | ``solRevertMsg =>
     let some m := s.raw[2].isStrLit? | Macro.throwErrorAt s.raw[2] "a string literal"
     `(RawStmt.revertMsg $(quote m))
@@ -709,7 +717,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRevertRaw => do
     unless s.raw[8].isNatLit? == some 32 && s.raw[6].getId == s.raw[13].getId do
       Macro.throwErrorAt s "raw rethrow expects revert(add(data, 32), mload(data))"
-    `(RawStmt.revertRaw (RawExpr.name $(quote s.raw[6].getId.toString)))
+    `(RawStmt.revertRaw (RawExpr.name $(quote (s.raw[6].getId.toString false))))
   | ``solHole => `(RawStmt.hole)
   | ``solBreak => `(RawStmt.brk)
   | ``solContinue => `(RawStmt.cont)
@@ -727,7 +735,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
         qinv := qinv.push (← expandStmt.loopForall cl[8] cl[9] cl[11])
         cur := cur[1]
         continue
-      let k := cl[5].getId.toString
+      let k := (cl[5].getId.toString false)
       let e := cl[6]
       match k with
       | "invariant" => inv := inv.push (← expandExpr ⟨e⟩)
@@ -787,7 +795,7 @@ where
   /-- `\forall T x; b`, a quantified invariant clause (`RawInv`); a sort as the
   specification language reads it, an `address` a `uint`. -/
   loopForall (T x body : Syntax) : MacroM Term := do
-    let p ← match T.getId.toString with
+    let p ← match (T.getId.toString false) with
       | "uint" | "address" => `(PrimTy.uint)
       | "int" => `(PrimTy.int)
       | "bool" => `(PrimTy.bool)
@@ -956,7 +964,7 @@ where
   /-- A clause's parameter: its type and its name, if it has one. -/
   tparam (p : Syntax) : MacroM (Term × Option String) := do
     let T ← expandTy ⟨p[0]⟩
-    pure (T, if p[2].getNumArgs > 0 then some p[2][0].getId.toString else none)
+    pure (T, if p[2].getNumArgs > 0 then some (p[2][0].getId.toString false) else none)
   /-- The receiver of an external call: `I(a)` and `address(a)` are `a`. -/
   extRecv (r : TSyntax `sol_expr) : MacroM Term := do
     match r with
@@ -1031,7 +1039,7 @@ macro_rules
       let body ← `([$(← ss.mapM expandStmt),*])
       -- a slice read as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
       if ss.any (fun s => (s.raw.find? fun s =>
-          [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome) then
+          [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll].contains s.getKind).isSome) then
         `($(mkIdent `Solidity.RawStmt.sliceViews) $body)
       else pure body
 

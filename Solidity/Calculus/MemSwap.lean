@@ -28,6 +28,12 @@ leaf, its objects any.
 An index of a read must name no local bound past its array (it is read at
 the binder) and be a term whose reading is its denotation (`Tm.ixOk`:
 value locals, literals, the transaction's fields, operators).
+
+A memory update of words written into the fresh arrays is cut too: the
+table's entries are rewritten past each write, and the update's landing
+becomes a guard (`mx_updMem`).  The landed state is related to the same
+state of the cut leaf (`MxRel.wrs`): its memory is the written one, whose
+reads the rewritten entries give (`MxInv`, `MxEnt.wr_inv`).
 -/
 
 namespace Solidity.Decide
@@ -181,6 +187,11 @@ structure MxRel {Γ Δ : Ctx} (θ : MxMap C Γ Δ) (τ : State C Γ) (ρ : State
   loc : ∀ {t : LTy} (i : Idx Γ t) (j : Idx Δ t), θ.loc i = some j → ρ.getV j = τ.getV i
   tbl : ∀ en ∈ θ.tbl, en.2.2.eval ρ = Srt.trO (.val en.1) (en.2.1.tm.eval τ) ∧
     en.2.2.denote ρ = en.2.1.tm.denote τ
+  /-- Every memory local names an object (a fresh one). -/
+  obj : ∀ {R : RefTy} (i : Idx Γ (.mem R)), (τ.getV i).isSome = true
+  /-- Two memory locals name two objects. -/
+  apart : ∀ {R R' : RefTy} (i : Idx Γ (.mem R)) (j : Idx Γ (.mem R')), i.toNat ≠ j.toNat →
+    τ.getV i ≠ τ.getV j
 
 theorem MxMap.look_spec {Γ Δ : Ctx} (θ : MxMap C Γ Δ) {s : Srt} (t : Tm C Γ s) {r : Tm C Δ s}
     (h : θ.look t = some r) :
@@ -597,6 +608,14 @@ theorem MxRel.push {Γ Δ : Ctx} {θ : MxMap C Γ Δ} {τ : State C Γ} {ρ : St
     rw [MxOrig.tm_wk, Tm.eval_wk, Tm.eval_wk, Tm.denote_wk, Tm.denote_wk, mxThin_drop_push,
       mxThin_drop_push]
     exact h
+  obj := fun {R} i => by
+    cases i with
+    | there i => exact hr.obj i
+  apart := fun {R R'} i j hij => by
+    cases i with
+    | there i =>
+      cases j with
+      | there j => exact hr.apart i j (fun h => hij (by simp only [Idx.toNat, h]))
 
 /-! ## The reads of a fresh array -/
 
@@ -637,6 +656,7 @@ def _root_.Solidity.Fml.mxIdx {Γ : Ctx} : {Γc : Ctx} → Thin Γ Γc → Nat �
   | _, h, hx, .imp φ ψ => φ.mxIdx h hx ++ ψ.mxIdx h hx
   | _, h, hx, .all _ _ φ => φ.mxIdx (.drop h) (hx + 1)
   | _, h, hx, .allocAll _ _ φ => φ.mxIdx (.drop h) (hx + 1)
+  | _, h, hx, .upd _ (.snoc .nil (.memory M)) φ => M.mxIdx h hx ++ φ.mxIdx h hx
   | _, _, _, _ => []
 
 /-- Terms without repeats. -/
@@ -730,6 +750,144 @@ def mxCons : Fml C (MxCtx θ (q := q) ps) :=
 
 end Alloc
 
+/-! ## Writes to fresh arrays
+
+A leaf's update `{memory := write(…write(memory, x[e₁], v₁)…, x[eₙ], vₙ)}`
+writes words into fresh arrays.  The cut keeps its table of reads and
+rewrites the entries the writes reach: past a write of `v` at `x[e]`, a read
+of `x[e₁]` reads `e₁ == e ? v : w` (`MxEnt.wr`), reads of other objects as
+they were, since fresh objects are apart (`MxRel.apart`).  The update itself
+becomes its landing condition, each index below its array's bound and each
+value returning (`mxGuard`), an implication under the box and a conjunction
+under the diamond. -/
+
+/-- The bound of a write's index into the local `s`: a dynamic array's
+length entry, a fixed array's length. -/
+def mxBndOf? {Γ Δ : Ctx} (θ : MxMap C Γ Δ) {R : RefTy} {q : PrimTy} :
+    ArrTy R (.prim q) → Idx Γ (.mem R) → Option (Tm C Δ (.val .uint))
+  | .dyn, s => θ.look (MxOrig.len s).tm
+  | @ArrTy.fixed _ N, _ => if N < 2 ^ 256 then some (.app0 (.lit (uintOfNat N))) else none
+
+/-- **A write the cut takes**: `x[e] = v` into the memory local `x`, its index
+and value read as they denote (`Tm.ixOk`), cut, and the bound of its index. -/
+structure MxW {Γ Δ : Ctx} (θ : MxMap C Γ Δ) where
+  R : RefTy
+  q : PrimTy
+  s : Idx Γ (.mem R)
+  a : ArrTy R (.prim q)
+  e : Tm C Γ (.val .uint)
+  he : e.ixOk = true
+  e' : Tm C Δ (.val .uint)
+  hme : e.mx θ = some e'
+  v : Tm C Γ (.val q)
+  hv : v.ixOk = true
+  v' : Tm C Δ (.val q)
+  hmv : v.mx θ = some v'
+  bnd : Tm C Δ (.val .uint)
+  hbnd : mxBndOf? θ a s = some bnd
+
+/-- The write `x[e] = v`, where the cut takes it. -/
+def mxW? {Γ Δ : Ctx} (θ : MxMap C Γ Δ) {R : RefTy} {q : PrimTy} (a : ArrTy R (.prim q))
+    (s : Idx Γ (.mem R)) (e : Tm C Γ (.val .uint)) (v : Tm C Γ (.val q)) : Option (MxW θ) :=
+  if he : e.ixOk = true then
+    if hv : v.ixOk = true then
+      match hme : e.mx θ, hmv : v.mx θ, hb : mxBndOf? θ a s with
+      | some e', some v', some b => some ⟨R, q, s, a, e, he, e', hme, v, hv, v', hmv, b, hb⟩
+      | _, _, _ => none
+    else none
+  else none
+
+/-- A memory local's position, at a term `.pvI s`. -/
+def mxPvI? {Γ : Ctx} {R : RefTy} : (x : Tm C Γ (.ident R)) → Option {s : Idx Γ (.mem R) // x = .pvI s}
+  | .pvI s => some ⟨s, rfl⟩
+  | _ => none
+
+/-- The element address `x[e]`. -/
+def Op2.mxAt? {Γ : Ctx} {a b : Srt} {T : Ty} : (o : Op2 C a b (.addr T)) → (x : Tm C Γ a) →
+    (y : Tm C Γ b) → Option ((R : RefTy) × (r : ArrTy R T × Idx Γ (.mem R) × Tm C Γ (.val .uint)) ×'
+      Tm.app2 o x y = .app2 (.mat r.1) (.pvI r.2.1) r.2.2)
+  | .mat a, x, e => (mxPvI? x).map fun ⟨s, h⟩ => ⟨_, (a, s, e), by rw [h]⟩
+
+/-- An element address of a memory local: its local, how it is indexed and
+the index. -/
+def mxAt? {Γ : Ctx} {T : Ty} : (y : Tm C Γ (.addr T)) →
+    Option ((R : RefTy) × (r : ArrTy R T × Idx Γ (.mem R) × Tm C Γ (.val .uint)) ×'
+      y = .app2 (.mat r.1) (.pvI r.2.1) r.2.2)
+  | .app2 o x y => Op2.mxAt? o x y
+  | _ => none
+
+/-- A written word `z = mval(v)`. -/
+structure MxVal {Γ : Ctx} {T : Ty} (z : Tm C Γ (.mv T)) where
+  p : PrimTy
+  h : T = .prim p
+  v : Tm C Γ (.val p)
+  eq : z = h ▸ .app1 .mval v
+
+/-- A written word: `mval(v)`. -/
+def Op1.mxVal? {Γ : Ctx} {a : Srt} {T : Ty} : (o : Op1 C a (.mv T)) → (x : Tm C Γ a) →
+    Option (MxVal (.app1 o x))
+  | .mval, v => some ⟨_, rfl, v, rfl⟩
+  | _, _ => none
+
+def mxVal? {Γ : Ctx} {T : Ty} : (z : Tm C Γ (.mv T)) → Option (MxVal z)
+  | .app1 o x => Op1.mxVal? o x
+  | _ => none
+
+/-- A write `write(M, x[e], v)` past the writes `ws` of `M`. -/
+def mxWrite3 {Γ Δ : Ctx} (θ : MxMap C Γ Δ) {a b c s : Srt} (o : Op3 C a b c s) (y : Tm C Γ b)
+    (z : Tm C Γ c) (ws : Option (List (MxW θ))) : Option (List (MxW θ)) :=
+  match o, y, z with
+  | .write, y, z =>
+    match mxAt? y, mxVal? z with
+    | some ⟨_, (a, s, e), _⟩, some ⟨_, h, v, _⟩ =>
+      ws.bind fun ws => (mxW? θ (h ▸ a) s e v).map fun w => ws ++ [w]
+    | _, _ => none
+  | _, _, _ => none
+
+/-- **The writes of a memory term**, innermost first: `none` past anything
+but writes of words at array elements of locals. -/
+def mxWrites? {Γ Δ : Ctx} (θ : MxMap C Γ Δ) : {s : Srt} → Tm C Γ s → Option (List (MxW θ))
+  | _, .app0 .memory => some []
+  | _, .app3 o M y z => mxWrite3 θ o y z (mxWrites? θ M)
+  | _, _ => none
+
+/-- `t` is `true`. -/
+abbrev mxIsT {Δ : Ctx} (t : Tm C Δ (.val .bool)) : Fml C Δ := .eq t (.app0 (.lit (p := .bool) true))
+
+/-- A write lands: its index below its bound, its value returning. -/
+def MxW.guard {Γ Δ : Ctx} {θ : MxMap C Γ Δ} (w : MxW θ) : Fml C Δ :=
+  .and (mxIsT (.app2 (.binop .lt rfl) w.e' w.bnd)) (mxIsT (.app2 (.binop .eqB rfl) w.v' w.v'))
+
+/-- Every write lands. -/
+def mxGuard {Γ Δ : Ctx} {θ : MxMap C Γ Δ} (ws : List (MxW θ)) : Fml C Δ := mxConj (ws.map MxW.guard)
+
+/-- **An entry past a write**: a read of the written local at an index `e₁`
+reads `e₁ == e ? v : w`; `none` where the types disagree. -/
+def MxEnt.wr {Γ Δ : Ctx} (θ : MxMap C Γ Δ) (w : MxW θ) : MxEnt C Γ Δ → Option (MxEnt C Γ Δ)
+  | ⟨p, .elem i a e he, t⟩ =>
+    if i.toNat = w.s.toNat then
+      if hp : w.q = p then
+        (e.mx θ).map fun e₁ =>
+          ⟨p, .elem i a e he, .app3 .ite (.app2 (.binop .eqB rfl) e₁ w.e') (hp ▸ w.v') t⟩
+      else none
+    else some ⟨p, .elem i a e he, t⟩
+  | en => some en
+
+/-- Entries past a write, each. -/
+def MxMap.wrAll {Γ Δ : Ctx} (θ : MxMap C Γ Δ) (w : MxW θ) :
+    List (MxEnt C Γ Δ) → Option (List (MxEnt C Γ Δ))
+  | [] => some []
+  | en :: ens => (MxEnt.wr θ w en).bind fun en' => (MxMap.wrAll θ w ens).map (en' :: ·)
+
+/-- The table past a write. -/
+def MxMap.wr {Γ Δ : Ctx} (θ : MxMap C Γ Δ) (w : MxW θ) (θ₀ : MxMap C Γ Δ) : Option (MxMap C Γ Δ) :=
+  (θ.wrAll w θ₀.tbl).map fun tbl => ⟨θ₀.loc, tbl⟩
+
+/-- The table past writes, innermost first. -/
+def MxMap.wrs {Γ Δ : Ctx} (θ : MxMap C Γ Δ) : List (MxW θ) → MxMap C Γ Δ → Option (MxMap C Γ Δ)
+  | [], θ₀ => some θ₀
+  | w :: ws, θ₀ => (θ.wr w θ₀).bind (θ.wrs ws)
+
 /-! ## Formulas -/
 
 /-- **A formula, cut**: equations, the connectives, `∀`, and fresh arrays of
@@ -742,6 +900,13 @@ def _root_.Solidity.Fml.mx : {Γ Δ : Ctx} → MxMap C Γ Δ → Fml C Γ → Op
   | _, _, θ, .and φ ψ => (Fml.mx θ φ).bind fun φ' => (Fml.mx θ ψ).map fun ψ' => .and φ' ψ'
   | _, _, θ, .imp φ ψ => (Fml.mx θ φ).bind fun φ' => (Fml.mx θ ψ).map fun ψ' => .imp φ' ψ'
   | _, _, θ, .all x p φ => (Fml.mx (θ.push (.val p)) φ).map (.all x p)
+  | _, _, θ, .upd m (.snoc .nil (.memory M)) φ =>
+    if M.pushFree then
+      (mxWrites? θ M).bind fun ws => (θ.wrs ws θ).bind fun θ' => (Fml.mx θ' φ).map fun φ' =>
+        match m with
+        | .box => .imp (mxGuard ws) φ'
+        | .diamond => .and (mxGuard ws) φ'
+    else none
   | _, _, θ, .allocAll x R φ =>
     match R.mxArr? with
     | none => none
@@ -1101,6 +1266,46 @@ theorem MxRel.alloc (hr : MxRel θ τ ρ) (a : ArrTy R (.prim q)) (ps : List (Mx
         exact key.trans hR.symm
       · rw [mxReadT_denote, hE.2, hB.2, hw, MxOrig.denote_eq]
         exact key.trans hR.symm
+  obj := fun {R'} i => by
+    match i with
+    | .here => rfl
+    | .there i =>
+      show Option.isSome ((τ.alloc o).1.getV i) = true
+      rw [State.getV_alloc]
+      exact hr.obj i
+  apart := fun {R₁ R₂} i j hij => by
+    have hnew : ∀ {R' : RefTy} (j : Idx Γ (.mem R')),
+        τ.getV j ≠ some ((τ.alloc o).2 : HRef _ R).id := by
+      intro R' j h
+      have hge := Grown.alloc_id_ge (⟨List.prefix_refl _, τ.heap, o⟩ : Grown τ.H (MObj · R))
+      have hg : τ.getV j = (TEnv.get j τ.env).map (·.id) := rfl
+      rw [hg] at h
+      cases hj : TEnv.get j τ.env with
+      | none => rw [hj] at h; cases h
+      | some r =>
+        rw [hj, Option.map_some, Option.some.injEq] at h
+        have hlt := (List.getElem?_eq_some_iff.1 r.get?).1
+        have : ((τ.alloc o).2 : HRef _ R).id = ((Grown.alloc (⟨List.prefix_refl _, τ.heap, o⟩ :
+            Grown τ.H (MObj · R))).val : HRef _ R).id := rfl
+        omega
+    cases i with
+    | here =>
+      cases j with
+      | here => exact absurd rfl hij
+      | there j =>
+        show some ((τ.alloc o).2 : HRef _ R).id ≠ (τ.alloc o).1.getV j
+        rw [State.getV_alloc]
+        exact fun h => hnew j h.symm
+    | there i =>
+      cases j with
+      | here =>
+        show (τ.alloc o).1.getV i ≠ some ((τ.alloc o).2 : HRef _ R).id
+        rw [State.getV_alloc]
+        exact hnew i
+      | there j =>
+        show (τ.alloc o).1.getV i ≠ (τ.alloc o).1.getV j
+        rw [State.getV_alloc, State.getV_alloc]
+        exact hr.apart i j (fun h => hij (by simp only [Idx.toNat, h]))
 
 end AllocRel
 
@@ -1255,6 +1460,243 @@ theorem mxFillN_len {H : HTy} {R : RefTy} (a : ArrTy R (.prim q)) (hok : mxArrOk
 
 end Realize
 
+/-! ## Reads past writes -/
+
+theorem mxArrTy_eq {R : RefTy} {E E' : Ty} (a : ArrTy R E) (a' : ArrTy R E') : E = E' := by
+  cases a <;> cases a' <;> rfl
+
+theorem mxArrTy_heq {R : RefTy} {E : Ty} (a a' : ArrTy R E) : a = a' := by
+  cases a <;> cases a' <;> rfl
+
+/-- A write of a word at an array element lands exactly where the element
+reads. -/
+theorem mxWrite_isSome {H : HTy} (m : Grown H (fun _ => Unit)) {R : RefTy} {q : PrimTy} (id : Nat)
+    (a : ArrTy R (.prim q)) (k : PrimTy.uint.Denote) (w : q.Denote) :
+    (m.writeT (MAddrT.index id a k) w).isSome = (m.readId (MAddrT.index id a k)).isSome := by
+  unfold Grown.writeT Grown.readId Grown.readT
+  rw [MAddrT.resolve_eq_resolveM]
+  simp only [MAddrT.resolveM, Option.bind_eq_bind]
+  cases HRef.ofId? m.H' R id with
+  | none => rfl
+  | some r =>
+    simp only [Option.map_some, Option.bind_some, MvT.toMVal, Heap.writeAddr, Heap.readAddr,
+      Heap.setIndex, Heap.index]
+    split
+    · rename_i hk
+      simp only [Option.bind_some, Option.isSome_some, Option.isSome_map,
+        List.getElem?_eq_getElem hk]
+    · rename_i hk
+      simp only [Option.bind_none, Option.isSome_none, Option.isSome_map]
+      rw [List.getElem?_eq_none (by omega)]
+      rfl
+
+/-- **The table's reads in a memory `μ`**, at `τ`'s locals. -/
+def MxOrig.readIn {Γ : Ctx} (τ : State C Γ) {H : HTy} (μ : Grown H (fun _ => Unit)) {p : PrimTy} :
+    MxOrig C Γ p → Option p.Denote
+  | .len (E := E) i => (τ.getV i).bind fun id => μ.lenId E id
+  | .elem i a e _ => (τ.getV i).bind fun id => (e.eval τ).bind fun k =>
+      μ.readId (MAddrT.index id a k)
+
+theorem MxOrig.eval_readIn {Γ : Ctx} (σ : State C Γ) {p : PrimTy} (o : MxOrig C Γ p) :
+    (o.tm.eval σ : Option p.Denote) = o.readIn σ σ.glob.memT := by
+  cases o with
+  | @len E i =>
+    show Op2.eval σ.glob .mlen (some σ.glob.memT) (σ.getV i) =
+      (σ.getV i).bind fun id => σ.glob.memT.lenId E id
+    rw [Op2.eval_eq_evalM]
+    cases σ.getV i <;> rfl
+  | elem i a e he =>
+    show Op2.eval σ.glob .read (some σ.glob.memT) (Op2.eval σ.glob (.mat a) (σ.getV i) (e.eval σ)) =
+      (σ.getV i).bind fun id => (e.eval σ).bind fun k => σ.glob.memT.readId (MAddrT.index id a k)
+    rw [Op2.eval_eq_evalM, Op2.eval_eq_evalM]
+    cases σ.getV i with
+    | none => rfl
+    | some id =>
+      cases e.eval σ with
+      | none => rfl
+      | some k =>
+        show σ.glob.memT.readT (MAddrT.index id a k) = (σ.glob.memT.readT _).map _
+        cases σ.glob.memT.readT (MAddrT.index id a k) <;> rfl
+
+theorem MxOrig.readIn_congr {Γ : Ctx} {τ τ' : State C Γ} (hg : GAgree τ.glob τ'.glob)
+    (hl : ∀ {t : LTy} (i : Idx Γ t), τ'.getV i = τ.getV i) {H : HTy} (μ : Grown H (fun _ => Unit))
+    {p : PrimTy} (o : MxOrig C Γ p) : o.readIn τ' μ = o.readIn τ μ := by
+  cases o with
+  | len i => simp only [MxOrig.readIn, hl]
+  | elem i a e he =>
+    have he' : (e.eval τ' : Option PrimTy.uint.Denote) = e.eval τ :=
+      Tm.ixOk_eval hg (fun i => hl i) e he
+    simp only [MxOrig.readIn, hl, he']
+
+theorem mxWrite_same {H : HTy} {m m' : Grown H (fun _ => Unit)} {R : RefTy} {q : PrimTy} {id : Nat}
+    {a : ArrTy R (.prim q)} {k : PrimTy.uint.Denote} {x : q.Denote}
+    (h : m.writeT (MAddrT.index id a k) x = some m') : m'.readId (MAddrT.index id a k) = some x :=
+  (Grown.writeT_facts h).1
+
+theorem mxWrite_frame {H : HTy} {m m' : Grown H (fun _ => Unit)} {R : RefTy} {q : PrimTy} {id : Nat}
+    {a : ArrTy R (.prim q)} {k : PrimTy.uint.Denote} {x : q.Denote}
+    (h : m.writeT (MAddrT.index id a k) x = some m') {R' : RefTy} {p : PrimTy} (id' : Nat)
+    (a' : ArrTy R' (.prim p)) (k' : PrimTy.uint.Denote) (hne : ¬ id = id' ∨ ¬ k = k') :
+    m'.readId (MAddrT.index id' a' k') = m.readId (MAddrT.index id' a' k') :=
+  (Grown.writeT_facts h).2 _ hne
+
+theorem mxWrite_lenId {H : HTy} {m m' : Grown H (fun _ => Unit)} {R : RefTy} {q : PrimTy} {id : Nat}
+    {a : ArrTy R (.prim q)} {k : PrimTy.uint.Denote} {x : q.Denote}
+    (h : m.writeT (MAddrT.index id a k) x = some m') (E : Ty) (id' : Nat) :
+    m'.lenId E id' = m.lenId E id' := by
+  have := Grown.writeT_lenU h (E := E) id'
+  unfold Grown.lenId
+  cases h1 : HRef.ofId? m'.H' (.array E) id' <;> cases h2 : HRef.ofId? m.H' (.array E) id' <;>
+    rw [h1, h2] at this <;> simp_all
+
+section Writes
+
+variable {Γ Δ : Ctx} {θ : MxMap C Γ Δ}
+
+/-- A write applied to `μ`, its index and value read in `τ`. -/
+def MxW.run (τ : State C Γ) (w : MxW θ) {H : HTy} (μ : Grown H (fun _ => Unit)) :
+    Option (Grown H (fun _ => Unit)) :=
+  (τ.getV w.s).bind fun id => (w.e.eval τ).bind fun k => (w.v.eval τ).bind fun x =>
+    μ.writeT (MAddrT.index id w.a k) x
+
+/-- Writes applied in order. -/
+def mxRun (τ : State C Γ) {H : HTy} : List (MxW θ) → Grown H (fun _ => Unit) →
+    Option (Grown H (fun _ => Unit))
+  | [], μ => some μ
+  | w :: ws, μ => (w.run τ μ).bind (mxRun τ ws)
+
+theorem mxRun_append (τ : State C Γ) {H : HTy} (ws : List (MxW θ)) (w : MxW θ)
+    (μ : Grown H (fun _ => Unit)) : mxRun τ (ws ++ [w]) μ = (mxRun τ ws μ).bind (w.run τ) := by
+  induction ws generalizing μ with
+  | nil =>
+    show (w.run τ μ).bind (mxRun τ []) = (some μ).bind (w.run τ)
+    rw [Option.bind_some]
+    cases w.run τ μ <;> rfl
+  | cons w' ws ih =>
+    show (w'.run τ μ).bind (mxRun τ (ws ++ [w])) = ((w'.run τ μ).bind (mxRun τ ws)).bind _
+    cases w'.run τ μ with
+    | none => rfl
+    | some μ' => exact ih μ'
+
+/-- **A write chain evaluates as its writes run.** -/
+theorem mxWrites_eval (τ : State C Γ) {s : Srt} (M : Tm C Γ s) :
+    ∀ {ws : List (MxW θ)}, mxWrites? θ M = some ws → ∀ (hs : s = .mem),
+      ((hs ▸ M : Tm C Γ .mem).eval τ) = mxRun τ ws τ.glob.memT := by
+  induction M with
+  | app0 o =>
+    intro ws h hs
+    cases o <;> simp only [mxWrites?, reduceCtorEq] at h
+    cases h
+    rfl
+  | app3 o x y z ihx _ _ =>
+    intro ws h hs
+    change mxWrite3 θ o y z (mxWrites? θ x) = some ws at h
+    cases o with
+    | @write T =>
+      cases hy : mxAt? y with
+      | none => simp only [mxWrite3, hy, reduceCtorEq] at h
+      | some ry =>
+        cases hz : mxVal? z with
+        | none => simp only [mxWrite3, hy, hz, reduceCtorEq] at h
+        | some rz =>
+          obtain ⟨R, ⟨a, sx, e⟩, hyeq⟩ := ry
+          obtain ⟨p, hT, v, hzeq⟩ := rz
+          subst hT
+          simp only [mxWrite3, hy, hz] at h
+          obtain ⟨ws0, h0, h⟩ := Option.bind_eq_some_iff.1 h
+          obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 h
+          subst hyeq hzeq
+          rw [mxRun_append, ← ihx h0 rfl]
+          unfold mxW? at hw
+          split at hw
+          · split at hw
+            · split at hw
+              · cases hw
+                show Op3.eval τ.glob .write _ (Op2.eval τ.glob (.mat a) (τ.getV sx) (e.eval τ))
+                  (v.eval τ) = _
+                rw [Op3.eval_eq_evalM, Op2.eval_eq_evalM]
+                change Op3.evalM τ.glob .write (x.eval τ)
+                  (Op2.evalM τ.glob (.mat a) (τ.getV sx) (e.eval τ)) (v.eval τ) = (x.eval τ).bind _
+                unfold MxW.run
+                cases (x.eval τ : Option _) <;> cases τ.getV sx <;> cases e.eval τ <;>
+                  cases v.eval τ <;> rfl
+              · cases hw
+            · cases hw
+          · cases hw
+    | _ => simp only [mxWrite3, reduceCtorEq] at h
+  | _ => intro ws h hs; simp only [mxWrites?, reduceCtorEq] at h
+
+theorem MxMap.wrAll_mem (w : MxW θ) : ∀ {ens ens' : List (MxEnt C Γ Δ)},
+    θ.wrAll w ens = some ens' → ∀ en' ∈ ens', ∃ en ∈ ens, MxEnt.wr θ w en = some en'
+  | [], ens', h => by
+    cases h
+    intro en' hm
+    cases hm
+  | en :: ens, ens', h => by
+    obtain ⟨e1, h1, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨l, hl, rfl⟩ := Option.map_eq_some_iff.1 h
+    intro en' hm
+    rcases List.mem_cons.1 hm with rfl | hm
+    · exact ⟨en, List.mem_cons_self, h1⟩
+    · obtain ⟨e0, h0, he⟩ := MxMap.wrAll_mem w hl en' hm
+      exact ⟨e0, List.mem_cons_of_mem _ h0, he⟩
+
+theorem MxMap.wrs_loc : ∀ (ws : List (MxW θ)) {θ₀ θ₁ : MxMap C Γ Δ}, θ.wrs ws θ₀ = some θ₁ →
+    ∀ {t : LTy} (i : Idx Γ t), θ₁.loc i = θ₀.loc i
+  | [], θ₀, θ₁, h => by cases h; exact fun _ => rfl
+  | w :: ws, θ₀, θ₁, h => by
+    obtain ⟨θm, hm, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨l, -, rfl⟩ := Option.map_eq_some_iff.1 hm
+    exact MxMap.wrs_loc ws h
+
+/-- An element read by identity, in a state's memory, returns exactly below
+the object's length. -/
+theorem mxBase_isSome (g : State C []) {R : RefTy} {q : PrimTy} (a : ArrTy R (.prim q))
+    (r : HRef g.H R) (k : PrimTy.uint.Denote) :
+    (g.memT.readId (MAddrT.index r.id a k)).isSome =
+      decide (k.1.toNat < (MObj.elems a (g.heap.get r)).length) := by
+  have h := mxReadAt_eval g a r k
+  rw [Op2.eval_eq_evalM] at h
+  change (g.memT.readT (MAddrT.index r.id a k) : Option q.Denote) = _ at h
+  unfold Grown.readId
+  rw [Option.isSome_map]
+  change ((g.memT.readT (MAddrT.index r.id a k) : Option q.Denote)).isSome = _
+  rw [h]
+  cases hk : decide (k.1.toNat < (MObj.elems a (g.heap.get r)).length)
+  · rw [List.getElem?_eq_none (by simpa using hk)]; rfl
+  · rw [List.getElem?_eq_getElem (by simpa using hk)]; rfl
+
+/-- **What a write needs to land**, read in `τ`'s memory. -/
+def MxW.Fits (τ : State C Γ) (w : MxW θ) : Prop :=
+  ∃ id k x, τ.getV w.s = some id ∧ w.e.eval τ = some k ∧ w.v.eval τ = some x ∧
+    (τ.glob.memT.readId (MAddrT.index id w.a k)).isSome = true
+
+/-- A memory that reads where `τ`'s does, at the locals' objects. -/
+def MxShape (τ : State C Γ) {H : HTy} (μ : Grown H (fun _ => Unit)) : Prop :=
+  ∀ {R : RefTy} {q : PrimTy} (s : Idx Γ (.mem R)) (a : ArrTy R (.prim q)) (id : Nat)
+    (k : PrimTy.uint.Denote), τ.getV s = some id →
+      (μ.readId (MAddrT.index id a k)).isSome = (τ.glob.memT.readId (MAddrT.index id a k)).isSome
+
+theorem MxW.run_isSome (τ : State C Γ) (w : MxW θ) {H : HTy} {μ : Grown H (fun _ => Unit)}
+    (hμ : MxShape τ μ) : (w.run τ μ).isSome = true ↔ w.Fits τ := by
+  unfold MxW.run MxW.Fits
+  cases hs : τ.getV w.s with
+  | none => simp only [Option.bind_none, Option.isSome_none, Bool.false_eq_true, reduceCtorEq,
+      false_and, exists_false]
+  | some id =>
+    cases he : (w.e.eval τ : Option PrimTy.uint.Denote) with
+    | none => simp only [Option.bind_some, Option.bind_none, Option.isSome_none,
+        Bool.false_eq_true, reduceCtorEq, false_and, and_false, exists_false]
+    | some k =>
+      cases hv : (w.v.eval τ : Option w.q.Denote) with
+      | none => simp only [Option.bind_some, Option.bind_none, Option.isSome_none,
+          Bool.false_eq_true, reduceCtorEq, false_and, and_false, exists_false]
+      | some x =>
+        simp only [Option.bind_some, Option.some.injEq, exists_and_left, exists_eq_left']
+        rw [mxWrite_isSome, hμ w.s w.a id k hs]
+
+end Writes
+
 /-! ## The cut is exact -/
 
 section Exact
@@ -1299,6 +1741,371 @@ theorem holds_mxCons (hr : MxRel θ τ ρ) (ps : List (MxIx θ)) (n : PrimTy.uin
     · cases hf
       exact (one j l).2 (hc j l)
     · cases hf
+
+theorem mxEqB_self (q : PrimTy) (y : q.Denote) : binopT .eqB rfl y (some y) = some true := by
+  cases q <;> simp only [binopT, BinOp.shortT, BinOp.evalT, BinOp.evalNum, BinOp.evalBool,
+    decide_true, Option.bind_some]
+
+/-- A write's bound denotes the array's length. -/
+theorem mxBndOf_denote (hr : MxRel θ τ ρ) {R : RefTy} {q : PrimTy} :
+    (a : ArrTy R (.prim q)) → (s : Idx Γ (.mem R)) → (r : HRef τ.H R) → τ.getV s = some r.id →
+    {bnd : Tm C Δ (.val .uint)} → mxBndOf? θ a s = some bnd →
+    ∃ n : PrimTy.uint.Denote, bnd.denote ρ = some n ∧
+      n.1 = ((MObj.elems a (τ.glob.heap.get r)).length : Int)
+  | .dyn, s, r, hs, bnd, hbnd => by
+    have hl : θ.look (MxOrig.len (E := .prim q) s).tm = some bnd := hbnd
+    refine ⟨τ.glob.heap.lenU r, ?_, rfl⟩
+    rw [(hr.look _ hl).2, MxOrig.denote_eq, MxOrig.eval_readIn]
+    show (τ.getV s).bind (fun id => τ.glob.memT.lenId _ id) = _
+    rw [hs, Option.bind_some]
+    exact Grown.lenId_ref τ.glob.memT r
+  | @ArrTy.fixed _ N, s, r, hs, bnd, hbnd => by
+    change (if N < 2 ^ 256 then some (Tm.app0 (Op0.lit (uintOfNat N))) else none) = some bnd
+      at hbnd
+    by_cases hN : N < 2 ^ 256
+    · rw [if_pos hN, Option.some.injEq] at hbnd
+      subst hbnd
+      refine ⟨uintOfNat N, rfl, ?_⟩
+      rw [uintOfNat_val hN, MObj.elems_fixed, (τ.glob.heap.get r).2]
+    · rw [if_neg hN] at hbnd
+      cases hbnd
+
+/-- A write keeps the shape of the memory. -/
+theorem MxShape.run (hr : MxRel θ τ ρ) (w : MxW θ) {H : HTy} {μ μ' : Grown H (fun _ => Unit)}
+    (hμ : MxShape τ μ) (h : w.run τ μ = some μ') : MxShape τ μ' := by
+  obtain ⟨Rw, qw, sw, aw, ew, hew, ew', hmew, vw, hvw, vw', hmvw, bw, hbw⟩ := w
+  unfold MxW.run at h
+  obtain ⟨idw, hsw, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨kw, hkw, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨x, hx, h⟩ := Option.bind_eq_some_iff.1 h
+  intro R q s a id k hs
+  by_cases hid : idw = id
+  · by_cases hk : kw = k
+    · subst hid hk
+      have hst : s.toNat = sw.toNat := by
+        refine Classical.byContradiction fun hne => ?_
+        exact hr.apart s sw hne (hs.trans hsw.symm)
+      have hR := Idx.ty_eq_of_toNat hst
+      cases hR
+      obtain rfl := Idx.toNat_inj s sw hst
+      cases mxArrTy_eq a aw
+      cases mxArrTy_heq a aw
+      have h' : μ.writeT (MAddrT.index idw aw kw) x = some μ' := h
+      have hw : (μ.writeT (MAddrT.index idw aw kw) x).isSome = true := by rw [h']; rfl
+      rw [mxWrite_isSome, hμ s aw idw kw hs] at hw
+      rw [mxWrite_same h', hw]
+      rfl
+    · rw [mxWrite_frame h id a k (.inr hk)]
+      exact hμ s a id k hs
+  · rw [mxWrite_frame h id a k (.inl hid)]
+    exact hμ s a id k hs
+
+theorem mxRun_fits (hr : MxRel θ τ ρ) : ∀ (ws : List (MxW θ)) {H : HTy} {μ : Grown H (fun _ => Unit)},
+    MxShape τ μ → ((mxRun τ ws μ).isSome = true ↔ ∀ w ∈ ws, w.Fits τ)
+  | [], _, μ, _ => by
+    simp only [mxRun, Option.isSome_some, List.not_mem_nil, false_imp_iff, imp_true_iff]
+  | w :: ws, _, μ, hμ => by
+    show ((w.run τ μ).bind (mxRun τ ws)).isSome = true ↔ _
+    cases h : w.run τ μ with
+    | none =>
+      have hn : ¬ w.Fits τ := fun hf => by
+        have := (MxW.run_isSome τ w hμ).2 hf
+        rw [h] at this
+        cases this
+      simp only [Option.bind_none, Option.isSome_none, Bool.false_eq_true, false_iff]
+      exact fun hall => hn (hall w List.mem_cons_self)
+    | some μ' =>
+      have hf : w.Fits τ := (MxW.run_isSome τ w hμ).1 (by rw [h]; rfl)
+      rw [Option.bind_some, mxRun_fits hr ws (MxShape.run hr w hμ h)]
+      exact ⟨fun h' w' hw' => (List.mem_cons.1 hw').elim (fun e => e ▸ hf) (h' w'),
+        fun h' w' hw' => h' w' (List.mem_cons_of_mem _ hw')⟩
+
+/-- **A write's guard holds where it lands.** -/
+theorem MxW.guard_iff (hr : MxRel θ τ ρ) (w : MxW θ) : holds ρ w.guard ↔ w.Fits τ := by
+  obtain ⟨R, q, s, a, e, he, e', hme, v, hv, v', hmv, bnd, hbnd⟩ := w
+  have hE : e'.denote ρ = e.eval τ := (Tm.mx_denote hr e hme).trans (Tm.ixOk_denote τ e he)
+  have hV : v'.denote ρ = v.eval τ := (Tm.mx_denote hr v hmv).trans (Tm.ixOk_denote τ v hv)
+  have hobj : ((TEnv.get s τ.env).map (·.id)).isSome = true := hr.obj s
+  obtain ⟨r, hrs⟩ : ∃ r, TEnv.get s τ.env = some r := by
+    cases h : TEnv.get s τ.env with
+    | none => rw [h] at hobj; cases hobj
+    | some r => exact ⟨r, rfl⟩
+  have hs : τ.getV s = some r.id := by
+    show (TEnv.get s τ.env).map (·.id) = _
+    rw [hrs]; rfl
+  have hB := mxBndOf_denote hr a s r hs hbnd
+  obtain ⟨n, hn, hnv⟩ := hB
+  show ((e'.denote ρ).bind fun x => binopT .lt rfl x (bnd.denote ρ)) = some true ∧
+    ((v'.denote ρ).bind fun x => binopT .eqB rfl x (v'.denote ρ)) = some true ↔ _
+  rw [hE, hV, hn]
+  unfold MxW.Fits
+  dsimp only
+  rw [hs]
+  cases hk : (e.eval τ : Option PrimTy.uint.Denote) with
+  | none => simp only [Option.bind_none, reduceCtorEq, false_and, and_false, exists_false]
+  | some k =>
+    cases hx : (v.eval τ : Option q.Denote) with
+    | none => simp only [Option.bind_none, reduceCtorEq, and_false, false_and, exists_false]
+    | some x =>
+      have hlt : binopT .lt rfl k (some n) = some (decide (k.1 < n.1)) := rfl
+      simp only [Option.bind_some, hlt, mxEqB_self, Option.some.injEq, and_true,
+        decide_eq_true_eq, exists_and_left, exists_eq_left']
+      rw [mxBase_isSome τ.glob a r k, decide_eq_true_eq, hnv]
+      have := mxUint_nonneg k
+      omega
+
+theorem mxGuard_iff (hr : MxRel θ τ ρ) (ws : List (MxW θ)) :
+    holds ρ (mxGuard ws) ↔ (mxRun τ ws τ.glob.memT).isSome = true := by
+  rw [mxGuard, holds_mxConj, mxRun_fits hr ws (fun _ _ _ _ _ => rfl)]
+  constructor
+  · intro h w hw
+    exact (MxW.guard_iff hr w).1 (h _ (List.mem_map_of_mem hw))
+  · intro h f hf
+    obtain ⟨w, hw, rfl⟩ := List.mem_map.1 hf
+    exact (MxW.guard_iff hr w).2 (h w hw)
+
+/-- **The table reads the memory `μ`**: each entry's term reads its read in
+`μ`, at `τ`'s locals. -/
+def MxInv (τ : State C Γ) (ρ : State C Δ) {H : HTy} (μ : Grown H (fun _ => Unit))
+    (θ₀ : MxMap C Γ Δ) : Prop :=
+  ∀ en ∈ θ₀.tbl, (en.2.2.eval ρ : Option en.1.Denote) = en.2.1.readIn τ μ ∧
+    en.2.2.denote ρ = en.2.1.readIn τ μ
+
+theorem MxInv.base (hr : MxRel θ τ ρ) : MxInv τ ρ τ.glob.memT θ := fun en hm => by
+  obtain ⟨h1, h2⟩ := hr.tbl en hm
+  refine ⟨?_, ?_⟩
+  · rw [h1]; exact MxOrig.eval_readIn τ en.2.1
+  · rw [h2, MxOrig.denote_eq]; exact MxOrig.eval_readIn τ en.2.1
+
+/-- **An entry past a write reads the written memory.** -/
+theorem MxEnt.wr_inv (hr : MxRel θ τ ρ) (w : MxW θ) {H : HTy} {μ μ' : Grown H (fun _ => Unit)}
+    (hw : w.run τ μ = some μ') {en en' : MxEnt C Γ Δ} (he : MxEnt.wr θ w en = some en')
+    (h : (en.2.2.eval ρ : Option en.1.Denote) = en.2.1.readIn τ μ ∧
+      en.2.2.denote ρ = en.2.1.readIn τ μ) :
+    (en'.2.2.eval ρ : Option en'.1.Denote) = en'.2.1.readIn τ μ' ∧
+      en'.2.2.denote ρ = en'.2.1.readIn τ μ' := by
+  obtain ⟨Rw, qw, sw, aw, ew, hew, ew', hmew, vw, hvw, vw', hmvw, bw, hbw⟩ := w
+  unfold MxW.run at hw
+  obtain ⟨idw, hsw, hw⟩ := Option.bind_eq_some_iff.1 hw
+  obtain ⟨kw, hkw, hw⟩ := Option.bind_eq_some_iff.1 hw
+  obtain ⟨x, hx, hw⟩ := Option.bind_eq_some_iff.1 hw
+  obtain ⟨p, o, t⟩ := en
+  cases o with
+  | @len E i =>
+    simp only [MxEnt.wr, Option.some.injEq] at he
+    subst he
+    simp only [MxOrig.readIn, mxWrite_lenId hw] at h ⊢
+    exact h
+  | elem i a e hie =>
+    simp only [MxEnt.wr] at he
+    by_cases hi : i.toNat = sw.toNat
+    · rw [if_pos hi] at he
+      have hR := Idx.ty_eq_of_toNat hi
+      cases hR
+      have hii := Idx.toNat_inj i sw hi
+      subst hii
+      by_cases hp : qw = p
+      · subst hp
+        rw [dif_pos rfl] at he
+        obtain ⟨e₁, he₁, rfl⟩ := Option.map_eq_some_iff.1 he
+        have ha := mxArrTy_heq a aw
+        subst ha
+        have hw' : μ.writeT (MAddrT.index idw a kw) x = some μ' := hw
+        have hs' : τ.getV i = some idw := hsw
+        have hk' : (ew.eval τ : Option PrimTy.uint.Denote) = some kw := hkw
+        have hx' : (vw.eval τ : Option qw.Denote) = some x := hx
+        have hE1 : (e₁.eval ρ : Option PrimTy.uint.Denote) = e.eval τ := Tm.mx_eval hr e he₁
+        have hD1 : e₁.denote ρ = e.eval τ :=
+          (Tm.mx_denote hr e he₁).trans (Tm.ixOk_denote τ e hie)
+        have hE' : (ew'.eval ρ : Option PrimTy.uint.Denote) = some kw :=
+          (Tm.mx_eval hr ew hmew).trans hk'
+        have hD' : ew'.denote ρ = some kw :=
+          ((Tm.mx_denote hr ew hmew).trans (Tm.ixOk_denote τ ew hew)).trans hk'
+        have hV : (vw'.eval ρ : Option qw.Denote) = some x := (Tm.mx_eval hr vw hmvw).trans hx'
+        have hVD : vw'.denote ρ = some x :=
+          ((Tm.mx_denote hr vw hmvw).trans (Tm.ixOk_denote τ vw hvw)).trans hx'
+        obtain ⟨h1, h2⟩ := h
+        have hro : ∀ (μ₀ : Grown H (fun _ => Unit)), (MxOrig.elem i a e hie).readIn τ μ₀ =
+            (e.eval τ).bind fun k => μ₀.readId (MAddrT.index idw a k) := by
+          intro μ₀
+          show (τ.getV i).bind _ = _
+          rw [hs', Option.bind_some]
+        change (t.eval ρ : Option qw.Denote) = (MxOrig.elem i a e hie).readIn τ μ at h1
+        change t.denote ρ = (MxOrig.elem i a e hie).readIn τ μ at h2
+        show (Tm.eval ρ (Tm.app3 .ite (.app2 (.binop .eqB rfl) e₁ ew') vw' t) : Option qw.Denote) =
+            (MxOrig.elem i a e hie).readIn τ μ' ∧
+          Tm.denote ρ (Tm.app3 .ite (.app2 (.binop .eqB rfl) e₁ ew') vw' t) =
+            (MxOrig.elem i a e hie).readIn τ μ'
+        have hev : (Tm.eval ρ (Tm.app3 .ite (.app2 (.binop .eqB rfl) e₁ ew') vw' t) :
+            Option qw.Denote) = (e.eval τ).bind fun k =>
+              (binopT .eqB rfl k (some kw)).bind fun c => cond c (some x) (t.eval ρ) := by
+          show Op3.eval ρ.glob .ite (Op2.eval ρ.glob (.binop .eqB rfl) (e₁.eval ρ) (ew'.eval ρ))
+            (vw'.eval ρ) (t.eval ρ) = _
+          rw [Op3.eval_eq_evalM, Op2.eval_eq_evalM, hE1, hE', hV]
+          cases e.eval τ <;> rfl
+        have hdv : Tm.denote ρ (Tm.app3 .ite (.app2 (.binop .eqB rfl) e₁ ew') vw' t) =
+            (e.eval τ).bind fun k =>
+              (binopT .eqB rfl k (some kw)).bind fun c => cond c (some x) (t.denote ρ) := by
+          show ((e₁.denote ρ).bind fun y => binopT .eqB rfl y (ew'.denote ρ)).bind
+            (fun c => cond c (vw'.denote ρ) (t.denote ρ)) = _
+          rw [hD1, hD', hVD]
+          cases (e.eval τ : Option PrimTy.uint.Denote) <;> rfl
+        rw [hev, hdv, h1, h2, hro, hro]
+        cases (e.eval τ : Option PrimTy.uint.Denote) with
+        | none => exact ⟨rfl, rfl⟩
+        | some k =>
+          simp only [Option.bind_some]
+          by_cases hkk : k = kw
+          · subst hkk
+            rw [mxEqB_self .uint k, mxWrite_same hw']
+            exact ⟨rfl, rfl⟩
+          · have hf : binopT .eqB rfl k (some kw) = some false := by
+              show some (decide (k.1 = kw.1)) = some false
+              rw [decide_eq_false (fun h => hkk (Subtype.ext h))]
+            rw [hf, mxWrite_frame hw' idw a k (.inr (Ne.symm hkk))]
+            exact ⟨rfl, rfl⟩
+      · rw [dif_neg hp] at he
+        cases he
+    · rw [if_neg hi, Option.some.injEq] at he
+      subst he
+      obtain ⟨h1, h2⟩ := h
+      have hfr : (MxOrig.elem i a e hie).readIn τ μ' = (MxOrig.elem i a e hie).readIn τ μ := by
+        show (τ.getV i).bind _ = (τ.getV i).bind _
+        cases hgi : τ.getV i with
+        | none => rfl
+        | some id =>
+          have hne : idw ≠ id := fun h => hr.apart i sw hi (hgi.trans (h ▸ hsw.symm))
+          simp only [Option.bind_some]
+          cases (e.eval τ : Option PrimTy.uint.Denote) with
+          | none => rfl
+          | some k => exact mxWrite_frame hw id a k (.inl hne)
+      exact ⟨h1.trans hfr.symm, h2.trans hfr.symm⟩
+
+theorem MxMap.wr_inv (hr : MxRel θ τ ρ) (w : MxW θ) {H : HTy} {μ μ' : Grown H (fun _ => Unit)}
+    (hw : w.run τ μ = some μ') {θ₀ θ₁ : MxMap C Γ Δ} (h : θ.wr w θ₀ = some θ₁)
+    (hi : MxInv τ ρ μ θ₀) : MxInv τ ρ μ' θ₁ := by
+  obtain ⟨l, hl, rfl⟩ := Option.map_eq_some_iff.1 h
+  intro en' hm
+  obtain ⟨en, hen, he⟩ := MxMap.wrAll_mem w hl en' hm
+  exact MxEnt.wr_inv hr w hw he (hi en hen)
+
+theorem mxWrs_inv (hr : MxRel θ τ ρ) : ∀ (ws : List (MxW θ)) {H : HTy}
+    {μ μ' : Grown H (fun _ => Unit)} {θ₀ θ₁ : MxMap C Γ Δ}, θ.wrs ws θ₀ = some θ₁ →
+    mxRun τ ws μ = some μ' → MxInv τ ρ μ θ₀ → MxInv τ ρ μ' θ₁
+  | [], _, _, _, _, _, h1, h2, hi => by
+    cases h1
+    cases h2
+    exact hi
+  | w :: ws, _, _, _, _, _, h1, h2, hi => by
+    obtain ⟨θm, hm, h1⟩ := Option.bind_eq_some_iff.1 h1
+    obtain ⟨μm, hμ, h2⟩ := Option.bind_eq_some_iff.1 h2
+    exact mxWrs_inv hr ws h1 h2 (MxMap.wr_inv hr w hμ hm hi)
+
+/-- The reads in a state's memory, where the state took the memory `μ`. -/
+theorem MxOrig.readIn_withMem {σ : State C Γ} {H : HTy} (g : GlobT C H)
+    (μ : Grown H (fun _ => Unit)) (hg : σ.glob = (g.withMem μ).1) {p : PrimTy} (o : MxOrig C Γ p) :
+    o.readIn σ σ.glob.memT = o.readIn σ μ := by
+  have : ∀ y : State C [], y = (g.withMem μ).1 → o.readIn σ y.memT = o.readIn σ μ := by
+    intro y hy
+    subst hy
+    cases o <;> rfl
+  exact this _ hg
+
+/-- **Past the writes, the table reads the state the update lands on.** -/
+theorem MxRel.wrs (hr : MxRel θ τ ρ) {ws : List (MxW θ)} {θ' : MxMap C Γ Δ}
+    (hθ : θ.wrs ws θ = some θ') {μ : Grown τ.H (fun _ => Unit)}
+    (hμ : mxRun τ ws τ.glob.memT = some μ) {σ' : State C Γ}
+    (hg : σ'.glob = (τ.globG.withMem μ).1) (hl : ∀ {t : LTy} (i : Idx Γ t), σ'.getV i = τ.getV i) :
+    MxRel θ' σ' ρ where
+  glob := by
+    have h := hr.glob
+    rw [hg]
+    exact ⟨h.storage, h.net, h.bal, h.tx⟩
+  loc := fun i j h => by
+    rw [hl]
+    exact hr.loc i j (by rw [← MxMap.wrs_loc ws hθ i]; exact h)
+  tbl := fun en hm => by
+    have hi := mxWrs_inv hr ws hθ hμ (MxInv.base hr) en hm
+    have hgA : GAgree τ.glob σ'.glob := by
+      rw [hg]
+      exact ⟨rfl, rfl, rfl, rfl⟩
+    have e1 : (en.2.1.tm.eval σ' : Option en.1.Denote) = en.2.1.readIn τ μ := by
+      rw [MxOrig.eval_readIn, MxOrig.readIn_withMem _ μ hg, MxOrig.readIn_congr hgA hl]
+    refine ⟨?_, ?_⟩
+    · rw [hi.1]
+      exact e1.symm
+    · rw [hi.2, MxOrig.denote_eq]
+      exact e1.symm
+  obj := fun i => by
+    rw [hl]
+    exact hr.obj i
+  apart := fun i j h => by
+    rw [hl, hl]
+    exact hr.apart i j h
+
+theorem mxVDen_wk {H H' : HTy} (e : H <+: H') :
+    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _
+  | .kint, _ => rfl
+
+/-- **A memory update of writes, cut.** -/
+theorem mx_updMem {m : Modality} {M : Tm C Γ .mem} {φ : Fml C Γ}
+    (ih : ∀ {Δ : Ctx} (θ : MxMap C Γ Δ) {φ' : Fml C Δ}, φ.mx θ = some φ' →
+      ∀ (τ : State C Γ) (ρ : State C Δ), MxRel θ τ ρ → (holds τ φ ↔ holds ρ φ'))
+    (hM : M.pushFree = true) {ws : List (MxW θ)} (hws : mxWrites? θ M = some ws)
+    {θ' : MxMap C Γ Δ} (hθ : θ.wrs ws θ = some θ') {φ' : Fml C Δ} (hφ : φ.mx θ' = some φ')
+    (hr : MxRel θ τ ρ) :
+    holds τ (.upd m (.snoc .nil (.memory M)) φ) ↔ holds ρ (match m with
+      | .box => .imp (mxGuard ws) φ'
+      | .diamond => .and (mxGuard ws) φ') := by
+  have hev : M.eval τ = mxRun τ ws τ.glob.memT := mxWrites_eval τ M hws rfl
+  have hglob : (Upd.snoc .nil (.memory M) : Upd C Γ Γ).globT τ =
+      (mxRun τ ws τ.glob.memT).map fun μ => τ.globG.withMem μ := by
+    show (some τ.globG).bind (UpdElem.globT (Δ := Γ) τ (.memory M)) = _
+    rw [Option.bind_some, UpdElem.globT_eq_globTM]
+    show (M.eval τ).bind (fun μ => some (τ.globG.withMem μ)) = _
+    rw [hev]
+    cases mxRun τ ws τ.glob.memT <;> rfl
+  have hexh : (Upd.snoc .nil (.memory M) : Upd C Γ Γ).exh τ = false :=
+    Upd.exh_of_pushFree (by show (true && M.pushFree) = true; rw [hM]; rfl)
+  have hG := mxGuard_iff hr ws
+  show Upd.afterT m τ (.snoc .nil (.memory M)) (holds · φ) ↔ _
+  unfold Upd.afterT
+  rw [hglob]
+  cases hrun : mxRun τ ws τ.glob.memT with
+  | none =>
+    have hng : ¬ holds ρ (mxGuard ws) := fun h => by
+      have := hG.1 h
+      rw [hrun] at this
+      cases this
+    cases m
+    · show Modality.onHalt .diamond ∨ _ = true ↔ holds ρ (mxGuard ws) ∧ holds ρ φ'
+      rw [hexh]
+      exact ⟨fun h => h.elim (fun h => nomatch h) (fun h => nomatch h), fun h => absurd h.1 hng⟩
+    · show Modality.onHalt .box ∨ _ = true ↔ (holds ρ (mxGuard ws) → holds ρ φ')
+      exact ⟨fun _ h => absurd h hng, fun _ => Or.inl trivial⟩
+  | some μ =>
+    have hgd : holds ρ (mxGuard ws) := hG.2 (by rw [hrun]; rfl)
+    have hrel : ∀ σ', Upd.Lands τ (Upd.snoc .nil (.memory M)) (τ.globG.withMem μ) σ' →
+        MxRel θ' σ' ρ := fun σ' hL => MxRel.wrs hr hθ hrun hL.2.1 (fun i => hL.2.2 i)
+    have key : (∀ σ', Upd.Lands τ (Upd.snoc .nil (.memory M)) (τ.globG.withMem μ) σ' →
+        holds σ' φ) ↔ holds ρ φ' := by
+      constructor
+      · intro h
+        have hL : Upd.Lands τ (Upd.snoc .nil (.memory M)) (τ.globG.withMem μ) (τ.adopt μ).1 := by
+          refine ⟨by rw [hglob, hrun]; rfl, rfl, fun {t} i => ?_⟩
+          show LTy.VDen.ofT t (TEnv.get i (TEnv.wk μ.ext Γ τ.env)) = τ.getV i
+          rw [TEnv.get_wk, mxVDen_wk]
+        exact (ih θ' hφ _ ρ (hrel _ hL)).1 (h _ hL)
+      · intro h σ' hL
+        exact (ih θ' hφ σ' ρ (hrel σ' hL)).2 h
+    cases m
+    · show (∀ σ', _ → _) ↔ holds ρ (mxGuard ws) ∧ holds ρ φ'
+      rw [key]
+      exact ⟨fun h => ⟨hgd, h⟩, fun h => h.2⟩
+    · show (∀ σ', _ → _) ↔ (holds ρ (mxGuard ws) → holds ρ φ')
+      rw [key]
+      exact ⟨fun h _ => h, fun h => h hgd⟩
 
 /-- **The cut formula holds exactly where the formula does**, at related
 states. -/
@@ -1360,7 +2167,26 @@ theorem _root_.Solidity.Fml.mx_holds {Γ : Ctx} (φ : Fml C Γ) : {Δ : Ctx} →
         refine (ih _ hφ _ _ hrel).2 ?_
         have h' := (holds_mxAll x q ps.length _ _).1 (h n) ws
         exact h' ((holds_mxCons hr ps n ws).2 (mxFill_consistent τ a ps o))
-  | wellFormed | upd | modal | havoc | bind | anon | grow =>
+  | upd m U φ ih =>
+    intro Δ θ φ' e τ ρ hr
+    cases U with
+    | snoc U el =>
+      cases U with
+      | nil =>
+        cases el with
+        | memory M =>
+          simp only [Fml.mx] at e
+          split at e
+          · rename_i hM
+            obtain ⟨ws, hws, e⟩ := Option.bind_eq_some_iff.1 e
+            obtain ⟨θ', hθ, e⟩ := Option.bind_eq_some_iff.1 e
+            obtain ⟨φ'', hφ, rfl⟩ := Option.map_eq_some_iff.1 e
+            cases m <;> exact mx_updMem (fun θ _ h => ih θ h) hM hws hθ hφ hr
+          · cases e
+        | _ => cases e
+      | _ => cases e
+    | _ => cases e
+  | wellFormed | modal | havoc | bind | anon | grow =>
     intro _ _ _ e; cases e
 
 end Exact
@@ -1369,7 +2195,8 @@ end Exact
 theorem _root_.Solidity.Fml.mxTop_holds {φ ψ : Fml C []} (h : φ.mxTop = some ψ) (σ : State C []) :
     holds σ φ ↔ holds σ ψ :=
   Fml.mx_holds φ MxMap.id0 h σ σ
-    { glob := ⟨rfl, rfl, rfl, rfl⟩, loc := (fun i _ _ => nomatch i), tbl := (fun _ hm => nomatch hm) }
+    { glob := ⟨rfl, rfl, rfl, rfl⟩, loc := (fun i _ _ => nomatch i), tbl := (fun _ hm => nomatch hm),
+      obj := fun i => (nomatch i), apart := fun i _ _ => (nomatch i) }
 
 theorem _root_.Solidity.Fml.mxTop_valid {φ ψ : Fml C []} (h : φ.mxTop = some ψ) :
     Fml.Valid φ ↔ Fml.Valid ψ :=

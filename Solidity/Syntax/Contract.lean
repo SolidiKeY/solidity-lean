@@ -113,8 +113,8 @@ partial def expandMemberTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM Term :=
   if T.raw.isOfKind ``solFnTy then `(Ty.uint) else
   match T with
   | `(sol_ty| $x:ident) =>
-    if env.enums.contains x.getId.toString then `(Ty.uint)
-    else match lookupBy x.getId.toString env.structs with
+    if env.enums.contains (x.getId.toString false) then `(Ty.uint)
+    else match lookupBy (x.getId.toString false) env.structs with
       | some e => `(Ty.struct $(quote e))
       | none => `(ty!($T))
   | `(sol_ty| $E:sol_ty []) => do `(Ty.array $(← expandMemberTy env E))
@@ -134,7 +134,7 @@ partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
   -- an `address` as written: a `uint` and its marker
   | `(sol_ty| address payable) => pure "address"
   | `(sol_ty| $x:ident) =>
-    let n := x.getId.toString
+    let n := (x.getId.toString false)
     if env.enums.contains n then return "uint"
     if let some e := lookupBy n env.structs then return e
     if n == "address" then return n
@@ -158,17 +158,17 @@ structs its members name are; one that names itself, through any chain, is
 refused, as the table's rank refuses it (`structDef_rank_lt`). -/
 def expandStructs (enums : List String) (decls : Array (Ident × Array (TSyntax `sol_ty × Ident))) :
     MacroM (List (String × String)) := do
-  let names := decls.toList.map (·.1.getId.toString)
+  let names := decls.toList.map ((·.1.getId.toString false))
   let mut done : List (String × String) := []
   for _ in [0:decls.size] do
     for (S, ms) in decls do
-      let n := S.getId.toString
+      let n := (S.getId.toString false)
       if (lookupBy n done).isSome then continue
       let waits := ms.any fun (T, _) => (T.raw.find? fun x =>
-        x.isIdent && names.contains x.getId.toString && (lookupBy x.getId.toString done).isNone).isSome
+        x.isIdent && names.contains (x.getId.toString false) && (lookupBy (x.getId.toString false) done).isNone).isSome
       if waits then continue
       let env : TyEnv := { enums, structs := done }
-      let fields ← ms.mapM fun (T, f) => do pure s!"{f.getId.toString}:{← spellTy env T}"
+      let fields ← ms.mapM fun (T, f) => do pure s!"{(f.getId.toString false)}:{← spellTy env T}"
       if fields.isEmpty then Macro.throwErrorAt S s!"struct {n}: a struct has a member"
       let enc := n ++ "{" ++ ";".intercalate fields.toList ++ "}"
       let some fs := Semantics.StructEnc.decode enc |
@@ -183,8 +183,8 @@ def expandStructs (enums : List String) (decls : Array (Ident × Array (TSyntax 
           (`structRankCap`)"
       done := done ++ [(n, e)]
   for (S, _) in decls do
-    if (lookupBy S.getId.toString done).isNone then
-      Macro.throwErrorAt S s!"struct {S.getId.toString} contains itself: no struct of the \
+    if (lookupBy (S.getId.toString false) done).isNone then
+      Macro.throwErrorAt S s!"struct {(S.getId.toString false)} contains itself: no struct of the \
         table does (`structDef_rank_lt`)"
   pure done
 
@@ -193,7 +193,7 @@ its width. -/
 def expandMemberTyW (enums : TyEnv) (T : TSyntax `sol_ty) : MacroM (Term × Option Nat) :=
   match T with
   | `(sol_ty| $x:ident) =>
-    match narrowTy? x.getId.toString with
+    match narrowTy? (x.getId.toString false) with
     | some (.int, n) => do pure (← `(Ty.int), some n)
     | some (_, n) => do pure (← `(Ty.uint), some n)
     | none => do pure (← expandMemberTy enums T, none)
@@ -210,8 +210,8 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     MacroM (Term × List (String × Nat)) := do
   let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × List (String × Nat)) := match K with
     | `(sol_ty| $x:ident) =>
-      if enums.enums.contains x.getId.toString then some (.uint, enumRows)
-      else valueRows? x.getId.toString
+      if enums.enums.contains (x.getId.toString false) then some (.uint, enumRows)
+      else valueRows? (x.getId.toString false)
     | `(sol_ty| address payable) => some (.uint, addressRows)
     | _ => none
   -- a function type: its tag, a `uint`, and its marker (`valueRows?`)
@@ -220,11 +220,11 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
   match T with
   | `(sol_ty| address payable) => return (← `(Ty.uint), addressRows)
   | `(sol_ty| $x:ident) =>
-    if dynBytesTy x.getId.toString then
-      return (← `(Ty.array Ty.uint), dynBytesRowsOf x.getId.toString)
+    if dynBytesTy (x.getId.toString false) then
+      return (← `(Ty.array Ty.uint), dynBytesRowsOf (x.getId.toString false))
     -- an enum: a `uint` and its marker (`enumRows`)
-    if enums.enums.contains x.getId.toString then return (← `(Ty.uint), enumRows)
-    match valueRows? x.getId.toString with
+    if enums.enums.contains (x.getId.toString false) then return (← `(Ty.uint), enumRows)
+    match valueRows? (x.getId.toString false) with
     | some (.int, ws) => pure (← `(Ty.int), ws)
     | some (_, ws) => pure (← `(Ty.uint), ws)
     | none => pure (← expandMemberTy enums T, [])
@@ -240,7 +240,7 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     let (t, ws) ← expandStateTyW enums V
     -- a byte string as a key: its `keccak256`, a `uint` (`hashKeyRows`)
     if let `(sol_ty| $k:ident) := K then
-      if dynBytesTy k.getId.toString then
+      if dynBytesTy (k.getId.toString false) then
         return (← `(Ty.mapping PrimTy.uint $t), hashKeyRows ++ ws.map fun (k, n) => ("[]" ++ k, n))
     let (kt, kw) ← match narrow? K with
       | some (.int, ws) => pure (← `(PrimTy.int), ws.map fun (k, n) => ("{}" ++ k, n))
@@ -266,7 +266,7 @@ def expandParamsW (enums : TyEnv) (ps : Array (TSyntax `sol_param)) :
       | _ => Macro.throwUnsupported
     let (t, w) ← expandStateTyW enums T
     rows := rows.push (← `(($(strLit x), $t)))
-    for (k, n) in w do ws := ws.push (← `(($(quote (x.getId.toString ++ k)), $(quote n))))
+    for (k, n) in w do ws := ws.push (← `(($(quote ((x.getId.toString false) ++ k)), $(quote n))))
     if let some loc := loc then
       let l ← match loc with
         | .memory => `(ParamLoc.memory)
@@ -286,7 +286,7 @@ def expandModifier (enums : TyEnv) (m : Ident) (ps : Array (TSyntax `sol_param))
   -- `uint` of its width, a reference one (`uint8[] memory xs`) its location
   -- and its narrow positions (`ModApp.widths`, `ModApp.locs`)
   let (rows, ws, locs) ← expandParamsW enums ps
-  pure (m.getId.toString, rows, ← `([$(← ss.mapM expandStmt),*]), ws, locs)
+  pure ((m.getId.toString false), rows, ← `([$(← ss.mapM expandStmt),*]), ws, locs)
 
 /-- A function's declaration, as a term: its return variable and its
 modifiers read off its attributes. -/
@@ -315,7 +315,7 @@ def expandFun (enums : TyEnv)
       for i in [0:ps.size] do
         -- A location also reads as the return variable's name: take the location.
         let p := preferReading ps[i]! (!·[1].isNone)
-        let n := (p[2].getOptional?.map (·.getId.toString)).getD
+        let n := (p[2].getOptional?.map ((·.getId.toString false))).getD
           (if ps.size == 1 then "_ret" else s!"_ret{i}")
         let (t, w) ← expandStateTyW enums ⟨p[0]⟩
         for (k, b) in w do ws := ws.push (← `(($(quote (n ++ k)), $(quote b))))
@@ -325,7 +325,7 @@ def expandFun (enums : TyEnv)
       continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
-      let name := m.getId.toString
+      let name := (m.getId.toString false)
       if attrKeywords.contains name then continue
       let some (_, params, mb, mws, mlocs) := mods.find? (·.1 == name) |
         Macro.throwErrorAt m s!"{name} is not a modifier of this contract"
@@ -336,7 +336,7 @@ def expandFun (enums : TyEnv)
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   -- a body with a slice reads it as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
-  let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo].contains s.getKind).isSome
+  let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll].contains s.getKind).isSome
     then `($(mkIdent `Solidity.RawStmt.sliceViews) $body) else pure body
   `(($(strLit f),
     ({ params := [$ps,*], paramLocs := [$locs,*], rets := [$rets,*], retMem := $(quote retMem),
@@ -356,7 +356,7 @@ macro_rules
       for m in ms do
         match m with
         | `(sol_member| enum $e:ident { $xs:ident,* }) =>
-          enums := enums ++ [e.getId.toString]
+          enums := enums ++ [(e.getId.toString false)]
           enumRows := enumRows.push (← `(($(strLit e), [$(xs.getElems.map strLit),*])))
         | _ => pure ()
       let mut decls := #[]
@@ -401,12 +401,12 @@ macro_rules
           let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
-            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
+            widthRows := widthRows.push (← `(($(Lean.quote ((x.getId.toString false) ++ k)), $(Lean.quote n))))
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
           let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
-            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
+            widthRows := widthRows.push (← `(($(Lean.quote ((x.getId.toString false) ++ k)), $(Lean.quote n))))
           initRows := initRows.push (← `(($(strLit x), $(← expandExpr e))))
         | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
           if ctor.isSome then Lean.Macro.throwErrorAt m "a second constructor: a contract declares one"
@@ -422,7 +422,7 @@ macro_rules
           ctor := some (← `(some ($d).2))
           reqs := #[]; enss := #[]; skip := false; asg := none
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
-          if f.getId.toString == "constructor" then
+          if (f.getId.toString false) == "constructor" then
             Lean.Macro.throwErrorAt f "`constructor` names the constructor, not a function"
           let asgT ← match asg with
             | some ls => `(some $ls)
