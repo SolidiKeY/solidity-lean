@@ -185,11 +185,16 @@ terminates detached descendant tool processes.
 
 Validation on 2026-10-26:
 
-- 33 offline inventory, source-location, controller and subprocess tests pass.
+- 35 offline inventory, source-location, controller and subprocess tests pass.
 - Real solc/Lean integration checks pass for overload/source metadata, the
   Runner fixture and selection/listing; inline assembly retains its current
   source-policy verdict `excluded` (an older test expected `unsupported`).
 - The 236-job `Solidity.Frontend.Testing` build passes.
+- Full `./run-lean.sh` passes: 622 default-target jobs, the 247-job
+  TestSuite target, and all 131 read-bearing annotations from 377 solkey taclets.
+  A concurrent TestSuite attempt hit this environment's 16 GiB memory limit;
+  retrying with `LEAN_NUM_THREADS=1 lake build SolkeyTestSuite` succeeded before
+  the final wrapper run completed.
 - A real VSCodium 1.143.17183 extension host passes ten checks: activation,
   command dispatch, a backend process, Test Explorer items, hover, diagnostics,
   edit invalidation, actual solc/Lean proof, an actual pending obligation and
@@ -207,7 +212,8 @@ caller-supplied success files could produce a false pass; every launch now uses
 a fresh temporary report and only copies checked evidence to the requested
 output. Tests cover both stale rejection and fresh success. Workspace discovery
 also drops its silent 200-file cap, and cancellation stops its queued files;
-a regression covers that queue boundary.
+regressions cover that queue boundary, opening a document, and saving a dirty
+file before a backend starts.
 
 The final source review also confirmed existing Presburger quantifier alternation in
 `Solidity/Calculus/QuantArithmetic.lean` and its decision examples; the quantifier

@@ -74,7 +74,9 @@ function createExtension(vscode, context, backend = runBackend) {
   async function verify(doc, options = {}) {
     if (!vscode.workspace.isTrusted) throw new Error('Verification requires a trusted workspace');
     if (!isSolidity(doc)) throw new Error('Open a Solidity file on disk to verify');
+    const cancellationVersion = discoveryVersion;
     if (doc.isDirty && !(await doc.save())) throw new Error('Save the Solidity file before verification');
+    if (cancellationVersion !== discoveryVersion || options.token?.isCancellationRequested) return null;
     const config = settings(doc);
     const id = key(doc.uri), version = doc.version, text = doc.getText();
     cancel(doc.uri);
@@ -117,7 +119,11 @@ function createExtension(vscode, context, backend = runBackend) {
     const uris = await vscode.workspace.findFiles('**/*.sol', '**/{.git,.lake,node_modules}/**');
     for (const uri of uris) {
       if (generation !== discoveryVersion) break;
-      try { await verify(await vscode.workspace.openTextDocument(uri), { listing: true }); }
+      try {
+        const doc = await vscode.workspace.openTextDocument(uri);
+        if (generation !== discoveryVersion) break;
+        await verify(doc, { listing: true });
+      }
       catch (error) { showError(error); }
     }
   }

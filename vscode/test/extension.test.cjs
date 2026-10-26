@@ -148,6 +148,31 @@ test('workspace discovery has no silent file cap and cancellation stops queued f
   assert.equal(calls, 1, 'cancellation must stop the workspace queue');
 });
 
+test('cancellation during document opening cannot start a delayed discovery job', async () => {
+  let calls = 0, finishOpen;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)], errors:[]}; });
+  env.vscode.workspace.openTextDocument = () => new Promise(resolve => { finishOpen = () => resolve(env.doc); });
+  const discovery = env.controller.resolveHandler();
+  await settle();
+  env.commands.get('solidityLean.cancel')();
+  finishOpen();
+  await discovery;
+  assert.equal(calls, 0);
+});
+
+test('cancellation during save cannot start a delayed verification job', async () => {
+  let calls = 0, finishSave;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)], errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { finishSave = () => { env.doc.isDirty = false; resolve(true); }; });
+  const verification = env.api.verify(env.doc);
+  await settle();
+  env.commands.get('solidityLean.cancel')();
+  finishSave();
+  assert.equal(await verification, null);
+  assert.equal(calls, 0);
+});
+
 test('suppresses closed documents and superseded jobs even when backend ignores cancellation', async () => {
   const pending = [];
   const env = setup((args, env) => new Promise(resolve => pending.push({ args, finish: () => resolve({ results: [row(env)], errors: [] }) })));
