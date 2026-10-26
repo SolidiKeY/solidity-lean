@@ -335,9 +335,15 @@ private def walk (provenance : Provenance) (declarations : List Json) :
       let member := (J.str? j "memberName").getD ""
       if ["address", "selector"].contains member then
         if let some receiver := J.opt j "expression" then
+          -- Errors/events have compiler-resolved declaration selectors, not
+          -- stored function values. No such exemption applies to `.address`.
+          let declarationMember := ((J.ref? receiver).bind fun id =>
+            declarations.find? (J.id? · == some id)).any fun declaration =>
+              J.kind declaration == "FunctionDefinition" ||
+                (member == "selector" &&
+                  ["ErrorDefinition", "EventDefinition"].contains (J.kind declaration))
           if (J.tyStr receiver).startsWith "function " &&
-              !((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any
-                (J.kind · == "FunctionDefinition") then
+              !declarationMember then
             throw (diagnostic j .missingImplementation `solidity.functionMemberKind
               "stored function members need typed ABI address/selector observations"
               (some (if member == "address" then .functionAddress else .functionSelector)))

@@ -42,6 +42,27 @@ assertion must remain pending. The Lean example retains kernel-checked
 interface-ID and receiver-evaluation proofs and malformed/anonymous metadata
 rejection cases.
 
+Modern admission distinguishes declaration selectors by their resolved solc
+IDs. Error and event declarations have function-shaped compiler types, but
+their `.selector` members are checked metadata, not stored function values.
+They receive no `.address` exemption. Unresolved identities and same-named
+variable declarations remain refused; selector width, hexadecimal and
+anonymous-event checks remain in the metadata reader.
+The pinned solc 0.8.34 accepts `MetadataForeign.Problem.selector` and
+`MetadataForeign.Changed.selector`, but rejects their
+`MetadataForeign(receiver())` instance forms with TypeError 9582 (member not
+found or visible). Thus the error/event exemption does not discard effects
+from a valid compiler-accepted instance receiver.
+
+The older fixture's `functionMetadata` function observes a local stored
+function value. It remains unsupported under modern admission with
+`solidity.functionMemberKind`: that lowering still needs typed ABI-kind
+observations rather than arithmetic over the model's packed/hash encoding.
+This is the existing boundary in [source-admission.md](source-admission.md),
+not a newly supported stored-function interface. The modern source regression
+therefore expects 12 proved functions, one internal function, one pending
+false property and this one unsupported function.
+
 ### Review and validation
 
 The read-only finder and skeptic reviewed importer metadata, compiler-field
@@ -98,6 +119,15 @@ The unfiltered orphan check reports 33 pre-existing scratch modules; the new
 example is reachable. Layering remains clean. Existing artifact-cache hardlinks
 for `KeySort.ilean` and `KeyTaclets.ilean` were read-only; their local build
 copies were detached without changing the shared cache.
+
+The modern admission follow-up was reviewed read-only by the finder and
+skeptic. Its focused API/admission-example build passes (255 jobs), including
+declaration-selector admission, missing/malformed/unresolved IDs, same-named
+stored-value rejection and the error/event `.address` boundary. The real
+source suite passes with the current 12 proved, one internal, one pending and
+one unsupported roster; this supersedes the historical 13-proved source count
+above. The stored-value reason is pinned to `solidity.functionMemberKind`.
+No body lowering, proof rules, trust primitives or resource limits changed.
 
 ### Remaining declaration work
 

@@ -95,4 +95,61 @@ run_cmd do
   unless !(Source.read (put fixture "header" downgraded) ast).isOk do
     throwError "modern metadata silently became a legacy fixture"
 
+-- Declaration identity, rather than the function-shaped compiler type or
+-- a matching short name, distinguishes static error/event selector metadata.
+run_cmd do
+  let fixture ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/SourceAdmission.ast.json"))
+  let provenance ← ofExcept (Source.read fixture (← ofExcept (fixture.getObjVal? "ast")))
+  let metadata ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/DeclarationMetadata.ast.json"))
+  let ast ← ofExcept (metadata.getObjVal? "ast")
+  let nodes := J.nodes ast
+  let declaration (receiver : Json) := (J.ref? receiver).bind fun id =>
+    nodes.find? (J.id? · == some id)
+  let members := nodes.filter fun node => J.kind node == "MemberAccess" &&
+    J.str? node "memberName" == some "selector"
+  let declared := members.filter fun node =>
+    ((J.opt node "expression").bind declaration).any fun d =>
+      ["ErrorDefinition", "EventDefinition"].contains (J.kind d)
+  unless declared.length == 3 do
+    throwError "expected unqualified/qualified errors and a non-anonymous event selector"
+  let scan (node : Json) : Source.ScopeScan :=
+    Admission.scan ast provenance {entry := node, evaluatedRoots := [node]}
+  let memberGap (node : Json) (feature : Solidity.Language.Feature) : Elab.Command.CommandElabM Unit := do
+    let diagnostic : Option Source.Diagnostic := (scan node).diagnostic?
+    unless (diagnostic.map (·.name)) == some `solidity.functionMemberKind &&
+        (diagnostic.map (·.kind)) == some .missingImplementation &&
+        (diagnostic.bind (·.feature)) == some feature do
+      throwError "function-member admission lost its typed ABI boundary: {repr diagnostic}"
+  for node in declared do
+    unless (scan node).diagnostic?.isNone do
+      throwError "a resolved declaration selector was refused: {repr (scan node).diagnostic?}"
+    let receiver ← ofExcept (node.getObjVal? "expression")
+    unless (← Lean.ofExcept ((declarationMetadata nodes receiver "selector").mapError (·.msg))).isSome do
+      throwError "an admitted declaration selector lacks checked metadata"
+    memberGap (put node "memberName" (.str "address")) .functionAddress
+    -- Missing, malformed and unresolved IDs must not acquire a name-based
+    -- metadata exemption, even with the original declaration's spelling.
+    for changed in [put receiver "referencedDeclaration" .null,
+        put receiver "referencedDeclaration" (.str "64"),
+        put receiver "referencedDeclaration" (toJson (999999 : Int)),
+        put receiver "referencedDeclaration" (toJson (-1 : Int))] do
+      memberGap (put node "expression" changed) .functionSelector
+      unless (declarationMetadata nodes changed "selector").toOption == some none do
+        throwError "unresolved selector metadata acquired a literal"
+  let some stored := members.find? fun node =>
+      ((J.opt node "expression").bind declaration).any (J.kind · == "VariableDeclaration")
+    | throwError "expected a stored function selector in the metadata fixture"
+  memberGap stored .functionSelector
+  memberGap (put stored "memberName" (.str "address")) .functionAddress
+  let storedReceiver ← ofExcept (stored.getObjVal? "expression")
+  let renamed := put storedReceiver "name" (.str "Problem")
+  memberGap (put stored "expression" renamed) .functionSelector
+  unless (declarationMetadata nodes renamed "selector").toOption == some none do
+    throwError "a stored value was mistaken for a same-named error declaration"
+  let some directFunction := members.find? fun node =>
+      ((J.opt node "expression").bind declaration).any (J.kind · == "FunctionDefinition")
+    | throwError "expected a direct function declaration selector"
+  unless (scan directFunction).diagnostic?.isNone do
+    throwError "direct function metadata lost its existing admission"
+
 end Solidity.Examples.Tactics.SourceAdmissionImport
