@@ -388,16 +388,173 @@ atoms (`lenPrep`), then the blocks instantiated with them in the index set
 (`apfPrepWith`). -/
 @[irreducible] def blockPrep (B : LFml C) : Prep B := (lenPrep B).trans (apfPrepWith (lenKeys B) (lenPrep B).body)
 
+/-! ## The Theory's slot reads folded
+
+The elimination reads an element `q` of a storage array as the Theory
+reads it, `orElse(if has(q) then find(q) else ⊥, d)` with `d` the
+default: the slot's word where it is there, the default where not.  The
+storage's own word at a slot not there is the default too, so at a total
+path that is `find(q)` (`LTm.slotFold`): one read where there were two,
+and no fallback to lift. -/
+
+/-- The path of a slot test. -/
+def LTm.hasPath? : LTm C (.val .bool) → Option ((T : Ty) × LTm C (.path T))
+  | .obsH q => some ⟨_, q⟩
+  | _ => none
+
+/-- The path of a word read. -/
+def LTm.wordPath? {p : PrimTy} : LTm C (.val p) → Option (LTm C (.path (.prim p)))
+  | .obsW q => some q
+  | _ => none
+
+theorem LTm.eq_of_hasPath? {c : LTm C (.val .bool)} {T : Ty} {q : LTm C (.path T)}
+    (h : c.hasPath? = some ⟨T, q⟩) : c = .obsH q := by
+  cases c <;> simp only [LTm.hasPath?, reduceCtorEq, Option.some.injEq] at h
+  obtain ⟨rfl, h⟩ := Sigma.mk.inj h
+  cases eq_of_heq h
+  rfl
+
+theorem LTm.eq_of_wordPath? {p : PrimTy} {x : LTm C (.val p)} {q : LTm C (.path (.prim p))}
+    (h : x.wordPath? = some q) : x = .obsW q := by
+  cases x <;> simp only [LTm.wordPath?, reduceCtorEq, Option.some.injEq] at h
+  subst h
+  rfl
+
+theorem LTm.eq_of_isErr {s : Srt} {y : LTm C s} (h : y.isErr = true) : y = .err := by
+  cases y <;> first | rfl | simp only [LTm.isErr, Bool.false_eq_true] at h
+
+/-- `orElse(if has(q) then find(q) else ⊥, d)`, `q` total and `d` the
+default: `find(q)`. -/
+def slotIte? {p : PrimTy} (c : LTm C (.val .bool)) (x y d : LTm C (.val p)) : Option (LTm C (.val p)) :=
+  match c.hasPath?, x.wordPath? with
+  | some ⟨_, qh⟩, some qw =>
+    if (qh.beqR qw && y.isErr && qw.totalB && (d.litVal? : Option p.Denote) == some (PrimTy.dflt p)) = true
+    then some (.obsW qw) else none
+  | _, _ => none
+
+def _root_.Solidity.Op3.slotRead? {a b c s : Srt} :
+    Op3 C a b c s → LTm C a → LTm C b → LTm C c → LTm C s → Option (LTm C s)
+  | .ite, c, x, y, d => slotIte? c x y d
+  | _, _, _, _, _ => none
+
+/-- The slot read of `orElse(a, d)`, if it is one. -/
+def LTm.slotRead? {s : Srt} : LTm C s → LTm C s → Option (LTm C s)
+  | .app3 o c x y, d => o.slotRead? c x y d
+  | _, _ => none
+
+/-- **The Theory's slot reads folded**, in every term. -/
+def LTm.slotFold : {s : Srt} → LTm C s → LTm C s
+  | _, .var k => .var k
+  | _, .app0 o => .app0 o
+  | _, .app1 o x => .app1 o x.slotFold
+  | _, .app2 o x y => .app2 o x.slotFold y.slotFold
+  | _, .app3 o x y z => .app3 o x.slotFold y.slotFold z.slotFold
+  | _, .index it q i => .index it q.slotFold i.slotFold
+  | _, .obsW q => .obsW q.slotFold
+  | _, .obsL q => .obsL q.slotFold
+  | _, .obsH q => .obsH q.slotFold
+  | _, .seq d a => .seq d.slotFold a.slotFold
+  | _, .orElse a b =>
+    match a.slotRead? b with
+    | some t => t
+    | none => .orElse a.slotFold b.slotFold
+  | _, .kite a b t e => .kite a.slotFold b.slotFold t.slotFold e.slotFold
+  | _, .err => .err
+
+theorem slotIte?_eval (g : State C []) (ν : AEnv) {p : PrimTy} {c : LTm C (.val .bool)}
+    {x y d t : LTm C (.val p)} (h : slotIte? c x y d = some t) :
+    t.eval g ν = (LTm.orElse (.app3 .ite c x y) d).eval g ν := by
+  unfold slotIte? at h
+  split at h
+  · rename_i T qh qw hc hx
+    split at h
+    · rename_i hb
+      cases h
+      simp only [Bool.and_eq_true, beq_iff_eq] at hb
+      obtain ⟨⟨⟨hq, hy⟩, ht⟩, hd⟩ := hb
+      have e := LTm.sigma_eq_of_beqR hq
+      obtain ⟨hT, e⟩ := Sigma.mk.inj e
+      injection hT with hT'
+      subst hT'
+      cases eq_of_heq e
+      rw [LTm.eq_of_hasPath? hc, LTm.eq_of_wordPath? hx, LTm.eq_of_isErr hy]
+      have hdv : (d.eval g ν : Option p.Denote) = some (PrimTy.dflt p) := LTm.litVal?_ok g ν d _ hd
+      obtain ⟨r, hr⟩ := Option.isSome_iff_exists.1 (LTm.totalB_eval g ν qw ht)
+      rw [LTm.eval_orElse, LTm.eval_app3, Close.Op3.eval_ite, LTm.eval_obsH, LTm.eval_obsW, hr, hdv]
+      simp only [Option.bind_some]
+      cases hh : g.storage.obs.has (.ref r) with
+      | true => rfl
+      | false =>
+        show some (g.storage.obs.word (.ref r)) = some (PrimTy.dflt p)
+        rw [Storage.obs_has_ref] at hh
+        rw [Storage.obs_word_ref]
+        show some (SVal.wordOf ((g.storage.get r.hroot).findM r.path)) = _
+        cases hf : (g.storage.get r.hroot).findM r.path with
+        | none => rfl
+        | some v =>
+          have : ((g.storage.get r.hroot).findM r.path).isSome = false := hh
+          rw [hf] at this
+          cases this
+    · cases h
+  · cases h
+
+theorem LTm.slotRead?_eval (g : State C []) (ν : AEnv) {s : Srt} (a d t : LTm C s)
+    (h : a.slotRead? d = some t) : t.eval g ν = (LTm.orElse a d).eval g ν := by
+  cases a with
+  | app3 o c x y =>
+    cases o with
+    | ite => exact slotIte?_eval g ν h
+    | _ => simp only [LTm.slotRead?, Op3.slotRead?, reduceCtorEq] at h
+  | _ => simp only [LTm.slotRead?, reduceCtorEq] at h
+
+theorem LTm.eval_slotFold (g : State C []) (ν : AEnv) : ∀ {s : Srt} (t : LTm C s),
+    t.slotFold.eval g ν = t.eval g ν := by
+  intro s t
+  induction t with
+  | var | app0 | err => rfl
+  | app1 o x ih => rw [LTm.slotFold, LTm.eval_app1, LTm.eval_app1, ih]
+  | app2 o x y ihx ihy => rw [LTm.slotFold, LTm.eval_app2, LTm.eval_app2, ihx, ihy]
+  | app3 o x y z ihx ihy ihz => rw [LTm.slotFold, LTm.eval_app3, LTm.eval_app3, ihx, ihy, ihz]
+  | index it q i ihq ihi => rw [LTm.slotFold, LTm.eval_index, LTm.eval_index, ihq, ihi]
+  | obsW q ih => rw [LTm.slotFold, LTm.eval_obsW, LTm.eval_obsW, ih]
+  | obsL q ih => rw [LTm.slotFold, LTm.eval_obsL, LTm.eval_obsL, ih]
+  | obsH q ih => rw [LTm.slotFold, LTm.eval_obsH, LTm.eval_obsH, ih]
+  | seq d a ihd iha => rw [LTm.slotFold, LTm.eval_seq, LTm.eval_seq, ihd, iha]
+  | kite a b t e iha ihb iht ihe => rw [LTm.slotFold, LTm.eval_kite, LTm.eval_kite, iha, ihb, iht, ihe]
+  | orElse a b iha ihb =>
+    unfold LTm.slotFold
+    split
+    · rename_i t ht
+      exact LTm.slotRead?_eval g ν a b t ht
+    · rw [LTm.eval_orElse, LTm.eval_orElse, iha, ihb]
+
+/-- The slot reads of a formula folded. -/
+def LFml.slotFold : LFml C → LFml C
+  | .tt => .tt
+  | .eq a b => .eq a.slotFold b.slotFold
+  | .not φ => .not φ.slotFold
+  | .and φ ψ => .and φ.slotFold ψ.slotFold
+  | .imp φ ψ => .imp φ.slotFold ψ.slotFold
+  | .all k p φ => .all k p φ.slotFold
+
+theorem LFml.slotFold_holds (g : State C []) : ∀ (φ : LFml C) (ν : AEnv), φ.slotFold.holds g ν ↔ φ.holds g ν
+  | .tt, _ => Iff.rfl
+  | .eq a b, ν => by simp only [LFml.slotFold, LFml.holds, LTm.eval_slotFold]
+  | .not φ, ν => not_congr (LFml.slotFold_holds g φ ν)
+  | .and φ ψ, ν => and_congr (LFml.slotFold_holds g φ ν) (LFml.slotFold_holds g ψ ν)
+  | .imp φ ψ, ν => imp_congr (LFml.slotFold_holds g φ ν) (LFml.slotFold_holds g ψ ν)
+  | .all k p φ, ν => forall_congr' fun v => LFml.slotFold_holds g φ _
+
 /-- The body with its blocks instantiated (`apfPrep`), comparisons of
 literals folded, its slot tests folded and its fallbacks lifted. -/
 @[irreducible] def LFml.blockLift (B : LFml C) : LFml C :=
-  ((blockPrep B).body.litFold.hasFold.orLift orFuel).litFold
+  ((blockPrep B).body.slotFold.litFold.hasFold.orLift orFuel).litFold
 
 theorem LFml.blockLift_holds (g : State C []) (B : LFml C) (ν : AEnv) :
     B.blockLift.holds g ν ↔ (blockPrep B).body.holds g ν := by
   unfold LFml.blockLift
   exact (LFml.litFold_holds g _ ν).trans ((LFml.orLift_holds g orFuel _ ν).trans
-    ((LFml.hasFold_holds g _ ν).trans (LFml.litFold_holds g _ ν)))
+    ((LFml.hasFold_holds g _ ν).trans ((LFml.litFold_holds g _ ν).trans (LFml.slotFold_holds g _ ν))))
 
 /-- **The array stages of a body with blocks**: its universal prefix, the
 blocks instantiated (`apfPrep`), the fallbacks lifted and the arrays cut. -/
@@ -466,7 +623,7 @@ end ArrayBlockBody
 def arrayBlockBody? (ψ : LFml C) : Option (ArrayBlockBody ψ) := do
   let u ← UniversalPrefix.ofFormula? 1024 ψ
   if hc : ∀ q ∈ u.body.freeParams, q ∈ u.parameters then
-    if (blockPrep u.body).body.litFold.ors ≤ orBudget then
+    if (blockPrep u.body).body.slotFold.litFold.ors ≤ orBudget then
       match hk : u.body.blockLift.aCut? u.body.blockLift.atomBound with
       | some (K, rs) => some ⟨u, hc, K, rs, hk⟩
       | none => none
