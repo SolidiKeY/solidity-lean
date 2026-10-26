@@ -24,6 +24,7 @@ def ReadExpr.readBound : {s : Srt} → {t : LTm C s} → ReadExpr t → Nat
     q.readBound + k.readBound
   | _, _, .word q => q.readBound + 1
   | _, _, .kite a b t e => a.readBound + (b.readBound + (t.readBound + e.readBound))
+  | _, _, .modular _ a b k => a.readBound + (b.readBound + k.readBound)
 
 /-- Every query generated from a supported term fits its structural bound. -/
 theorem ReadExpr.query_within (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C s}
@@ -35,6 +36,9 @@ theorem ReadExpr.query_within (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C 
   | index _ _ ihq ihk | binop _ _ _ _ ihq ihk | zbin _ _ _ _ ihq ihk | zcmp _ _ _ _ ihq ihk =>
     exact Query.within_bind _ _ ihq (fun _ => Query.within_bind _ _ ihk
       (fun _ => Query.within_pure _ 0))
+  | modular _ _ _ _ iha ihb ihk =>
+    exact Query.within_bind _ _ iha (fun _ => Query.within_bind _ _ ihb (fun _ =>
+      Query.within_bind _ _ ihk (fun _ => Query.within_pure _ 0)))
   | word _ ih =>
     apply Query.within_bind _ _ ih
     intro q

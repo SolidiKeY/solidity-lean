@@ -451,6 +451,12 @@ terminating with a proof or a counterexample; CI fails on anything else.
   (keccak maps unbounded byte strings to 256 bits) and make the theorem
   vacuous; the closer may answer *unknown* on a verdict that depends on an
   `ecrecover` value (an `opaque` function) or on a hash preimage.
+* **Decided (2026-10-26, option e3″):** with them, a negative-position
+  value quantifier whose body compares two hashes the premise of the scope
+  it stands in does not read may answer *unknown*: the premise is taken per
+  scope, so the leaf can be false only at a collision of those hashes, and
+  no certified refutation exists (`gapHashNegForall`, M7).  The exclusion is
+  syntactic and no wider (`Fml.negPairUnread`).
 * A counterexample is a concrete typed state, certified by kernel
   evaluation.  One that needs a storage array of `2^255` elements could not
   be built: `invariantClosedFormSum` is false in the model (`s + 2`
@@ -1127,12 +1133,17 @@ It contains everything except what the user allowed to answer *unknown*:
   reference, whose hash reads nothing, and a key of nothing reads the
   default key `0`, so the verdict turns on whether a string hashes to `0`
   (`namesBound`, step 7's review, below).
+* (e3″) a negative-position value quantifier (`∀`, a value or KeY `int`
+  binder) whose body compares two hashes (`==`/`!=`) not both among the
+  hash nodes the scope it stands in reads, outside that scope's binders
+  (`Fml.negPairUnread`): false only at a collision of those hashes
+  (`gapHashNegForall`, outside by the kernel, `gapHashNegForall_outside`).
 
 The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
-*unknown* (`gapColumn` … `gapHashNegForall`, each in the fragment by the
+*unknown* (`gapColumn` … `gapWrittenMemory`, each in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
 (`gapMemWrite` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
@@ -1146,7 +1157,7 @@ the last five since 2026-10-25; `gapFiveStrings` (now `fiveStrings`) and
 feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
-fragment the user named, with one known exception (below, `gapHashNegForall`):
+fragment the user named:
 * an update or a program under a quantifier counts as reading at its
   variable;
 * an index guard may not negate a comparison of bound variables;
@@ -1176,8 +1187,14 @@ Three properties of the reading are worth knowing.
   keccak256(s) == keccak256(t))` holds as `holds` reads it and fails under
   the premise exactly at two strings with different bytes and one hash
   (`gapHashNegForall`).  Its only refutations are collisions, which cannot
-  be exhibited, so no decision answers it; `Fml.inTarget` admits it, and
-  excluding it narrows the fragment, which needs the user's approval.
+  be exhibited, so no decision answers it.  The user approved leaving it
+  *unknown* (decision e3″, 2026-10-26, M6): `Fml.inTarget` excludes a
+  negative-position value quantifier (`∀`, a value or KeY `int` binder)
+  whose body compares two hashes (`==`, `!=`, `Tm.hashPair`) not both
+  among the hash nodes the scope it stands in reads (`Fml.scopeHashes`,
+  outside that scope's binders, weakened under the quantifier;
+  `Fml.pairsRead`, `Fml.negPairUnread`), and nothing else;
+  `gapHashNegForall_outside` pins it.
 
 ### What is proved
 
@@ -1940,12 +1957,9 @@ stack would lift this.
       bytes past the write; feature 13 reads fresh arrays' elements, but
       takes no memory write in an update and no hash (`decideMem` is
       `decideLeaf`'s, not `decideHash`'s);
-    * a hash under a negative-position value quantifier whose hash pairs
-      the scope above does not read (`gapHashNegForall`, the statement's
-      exception above): false only at collisions, which no refutation can
-      exhibit; deciding it is impossible, excluding it narrows
-      `Fml.inTarget` (the user's call).
-  Not counterexamples, since `Fml.inTarget` excludes them: a hash stored
+  Not counterexamples, since `Fml.inTarget` excludes them: a negative
+  value quantifier over hash pairs its scope does not read
+  (`gapHashNegForall`, e3″), a hash stored
   in a local, a hash of a hidden binder's string or under an anonymising
   update, a hash key of anything but a memory local, a product of two
   symbolic terms and the waived operator classes, nested blocks under a
@@ -2039,9 +2053,9 @@ in this order:
    has no hash of the first at the top (`gapMixedKinds`), hashes of
    written memory (`gapWrittenMemory`: in the fragment, not outside it as
    this step said before; it waits for memory writes and hashes of memory
-   read, step 6), and a negative quantifier over unread hash pairs
-   (`gapHashNegForall`: not decidable, the user's call).  Outside it:
-   stored hashes, strings not fresh.
+   read, step 6).  Outside it: stored hashes, strings not fresh, and a
+   negative quantifier over unread hash pairs (`gapHashNegForall`: not
+   decidable, outside since decision e3″).
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
    the size bounds by fuel computed from the formula.  Done for the reads

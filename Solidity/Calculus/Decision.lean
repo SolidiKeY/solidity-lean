@@ -23,7 +23,9 @@ it (`docs/automation.md`, M6, decisions c, c′, d and their extensions):
   property fragment (Bradley, Manna and Sipma), negative-position
   `havoc`/`anon`/`allocAll`/`grow` and storage binders among them;
 * a verdict that turns on an `ecrecover` value (an `opaque` function) or
-  on a hash preimage (e3′, 2026-10-25).
+  on a hash preimage (e3′, 2026-10-25), or on a collision of hashes a
+  negative-position value quantifier compares and its scope's premise
+  does not read (e3″, 2026-10-26, `Fml.negPairUnread`).
 
 Hashes are read as e3′ has it: each goal under the premise that its own
 hash terms are free of collisions (`Fml.HashFree`, `Fml.holdsH`,
@@ -61,7 +63,7 @@ The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapColumn` … `gapHashNegForall`,
+`unknown` for each shape left (`gapColumn` … `gapWrittenMemory`,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -99,12 +101,11 @@ Bradley, Manna and Sipma state their result for one dimension); a hash
 stored by an update, a hash key of a nested mapping or of anything but a
 memory local in the starting memory, a hash under a hidden memory binder
 or an anonymising update,
-and an `ecrecover` term are outside.  So
-`Fml.inTarget` is a subset of the fragment the user named, with one known
-exception: a hash under a negative-position value quantifier whose hash
-pairs the scope above does not read (`gapHashNegForall`), where the leaf
-can be false only at a collision, which no refutation can exhibit;
-excluding it narrows `Fml.inTarget`, which needs the user's approval.
+and an `ecrecover` term are outside, and so (e3″) is a negative-position
+value quantifier comparing hashes the scope it stands in does not read
+(`gapHashNegForall`), where the leaf can be false only at a collision,
+which no refutation can exhibit.  So `Fml.inTarget` is a subset of the
+fragment the user named.
 -/
 
 namespace Solidity.Decide
@@ -1246,11 +1247,92 @@ def _root_.Solidity.Fml.mapKeys : {Γ : Ctx} → Fml C Γ → List (Name × Opti
 def keysAgree (ks : List (Name × Option HashKind)) : Bool :=
   ks.all fun (r, h) => ks.all fun (r', h') => r' != r || h == h'
 
+/-! ### Hash pairs a scope does not read (decision e3″, 2026-10-26)
+
+The premise is taken per scope (`Fml.holdsH`): a binder's instance reads the
+hash nodes of its body outside further binders.  Under a negative-position
+value quantifier whose body compares two hashes the scope it stands in
+does not read, the hypothesis is vacuous exactly where those hashes
+collide, so the leaf can be false only at a collision, and no state
+certifies it (`gapHashNegForall`).  The user approved (e3″) leaving that
+shape `unknown`, with `ecrecover` values and preimages: it is outside
+`Fml.inTarget`, by the syntactic check below and nothing wider. -/
+
+/-- The hash nodes of a term, the ones `Fml.HashIn` reads. -/
+def _root_.Solidity.Tm.hashNodes {Γ : Ctx} : {s : Srt} → Tm C Γ s → List (Tm C Γ (.val .uint))
+  | _, .netOf _ a | _, .app1 _ a => a.hashNodes
+  | _, .app2 (.hash k) x y => .app2 (.hash k) x y :: (x.hashNodes ++ y.hashNodes)
+  | _, .app2 _ x y => x.hashNodes ++ y.hashNodes
+  | _, .app3 _ x y z => x.hashNodes ++ y.hashNodes ++ z.hashNodes
+  | _, _ => []
+
+def _root_.Solidity.Rhs.hashNodes {Γ : Ctx} {t : LTy} : Rhs C Γ t → List (Tm C Γ (.val .uint))
+  | .val a | .zint a => a.hashNodes
+  | .path q => q.hashNodes
+  | .mref i => i.hashNodes
+  | .store s => s.hashNodes
+  | .unset | .saveNet | .saveNetMt => []
+
+def _root_.Solidity.UpdElem.hashNodes {Γ Δ : Ctx} : UpdElem C Γ Δ → List (Tm C Γ (.val .uint))
+  | .local _ r => r.hashNodes
+  | .storage s | .memory s => s.hashNodes
+  | .selfBalance _ a | .setBalance a => a.hashNodes
+  | .net r _ a | .pay r a | .netMt r a => r.hashNodes ++ a.hashNodes
+
+def _root_.Solidity.Upd.hashNodes {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List (Tm C Γ (.val .uint))
+  | _, .nil => []
+  | _, .snoc U e => U.hashNodes ++ e.hashNodes
+  | _, .decl U _ r => U.hashNodes ++ r.hashNodes
+  | _, .pop U _ | _, .drop U _ => U.hashNodes
+
+/-- **The hash nodes a scope's premise reads** in its own context: outside
+its binders, an update's own terms (past an update the nodes are read in
+the update's context, `Fml.negPairUnread`). -/
+def _root_.Solidity.Fml.scopeHashes {Γ : Ctx} : Fml C Γ → List (Tm C Γ (.val .uint))
+  | .eq a b => a.hashNodes ++ b.hashNodes
+  | .wellFormed s => s.hashNodes
+  | .not φ => φ.scopeHashes
+  | .and φ ψ | .imp φ ψ => φ.scopeHashes ++ ψ.scopeHashes
+  | .upd _ U _ => U.hashNodes
+  | _ => []
+
+/-- Every hash pair (`==`/`!=` of two hashes of one kind) of the formula
+compares nodes in `rd`, weakened under the binders; past an update or an
+anonymising or havocking scope, nodes of no outer scope. -/
+def _root_.Solidity.Fml.pairsRead : {Γ : Ctx} → List (Tm C Γ (.val .uint)) → Fml C Γ → Bool
+  | _, rd, .eq a b => !(a.hashPair b) || (rd.any (·.beqR a) && rd.any (·.beqR b))
+  | _, rd, .not φ => φ.pairsRead rd
+  | _, rd, .and φ ψ | _, rd, .imp φ ψ => φ.pairsRead rd && ψ.pairsRead rd
+  | _, rd, .all _ _ φ | _, rd, .bind _ _ _ φ | _, rd, .allocAll _ _ φ =>
+    φ.pairsRead (rd.map (Tm.wk (.drop .refl)))
+  | _, _, .upd _ _ φ | _, _, .havoc φ | _, _, .anon _ φ | _, _, .grow φ => φ.pairsRead []
+  | _, _, _ => true
+
+/-- **A negative-position value quantifier comparing hashes its scope does
+not read** (e3″): standing in a scope whose premise reads the nodes `rd`,
+at the polarity `pol`, its body holds a hash pair not both in `rd`. -/
+def _root_.Solidity.Fml.negPairUnread : {Γ : Ctx} → List (Tm C Γ (.val .uint)) → Bool → Fml C Γ → Bool
+  | _, rd, pol, .not φ => φ.negPairUnread rd (!pol)
+  | _, rd, pol, .and φ ψ => φ.negPairUnread rd pol || ψ.negPairUnread rd pol
+  | _, rd, pol, .imp φ ψ => φ.negPairUnread rd (!pol) || ψ.negPairUnread rd pol
+  | _, _, pol, .upd _ _ φ => φ.negPairUnread φ.scopeHashes pol
+  | _, rd, pol, .all _ _ φ =>
+    (!pol && !φ.pairsRead (rd.map (Tm.wk (.drop .refl)))) || φ.negPairUnread φ.scopeHashes pol
+  | _, rd, pol, .bind _ _ t φ =>
+    (match t with
+      | .val _ | .kint => !pol && !φ.pairsRead (rd.map (Tm.wk (.drop .refl)))
+      | _ => false) || φ.negPairUnread φ.scopeHashes pol
+  | _, _, pol, .havoc φ | _, _, pol, .anon _ φ | _, _, pol, .grow φ | _, _, pol, .allocAll _ _ φ =>
+    φ.negPairUnread φ.scopeHashes pol
+  | _, _, _, _ => false
+
 /-- **The fragment the user named**, on a scoped leaf: no program, every
 operator admitted (`Waivers`), every quantifier over contents in the array
-property fragment, every hash where the goal's premise settles it. -/
+property fragment, every hash where the goal's premise settles it, and no
+negative-position value quantifier comparing hashes its scope does not
+read (e3″). -/
 def _root_.Solidity.Fml.inTarget (w : Waivers) (φ : Fml C []) : Bool :=
-  φ.target w true false && keysAgree φ.mapKeys
+  φ.target w true false && keysAgree φ.mapKeys && !φ.negPairUnread φ.scopeHashes true
 
 /-- **The open theorem**: on the fragment, `decideGoal` answers; its
 verdicts are read under the goal's hash premise (`decideGoal_sound`,

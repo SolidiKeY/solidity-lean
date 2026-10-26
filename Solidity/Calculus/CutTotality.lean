@@ -137,9 +137,98 @@ theorem mulWLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {c m : Na
   · exact ⟨.seq ha (.lit _), hds⟩
   · exact mulWGo_src ha c c ds m hds
 
+theorem rem_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {c : PrimTy.uint.Denote} {m : Nat}
+    (hc : c.val ≠ 0) (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (CutTm.rem prev a c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (CutTm.rem prev a c ds m).defs, d.SrcL false false l :=
+  ⟨.sub rfl ha (.mulR rfl _ (.var _)), quotAtom_src hds (LFml.defn_src rfl ha (.defDiv rfl rfl _ hc _ ha))⟩
+
+theorem amodAtom_src {g u v : LTm C (.val .uint)} {c : PrimTy.uint.Denote} {ds : List (LFml C)} {m : Nat}
+    (hg : g.SrcL false false l .num) (hu : u.SrcL false false l .num) (hv : v.SrcL false false l .num)
+    (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (amodAtom g u v c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (amodAtom g u v c ds m).defs, d.SrcL false false l := by
+  refine ⟨.seq hg (.var _), defs_append hds (defs_single ?_)⟩
+  have hG : (amodGuard g u v c).SrcL false false l .num :=
+    .seq hg (.seq (.sub rfl (.lit c) (.add rfl hu (.lit _))) (.sub rfl (.lit c) (.add rfl hv (.lit _))))
+  have hC : (amodCond u v c).SrcL false false l := .eqB (.lt rfl hu (.sub rfl (.lit c) hv)) (.ofNum (.lit _))
+  exact .imp (.eqN rfl hG hG) (.and (.imp hC (.eqN rfl (.add rfl hu hv) (.var _)))
+    (.imp (.not hC) (.eqN rfl (.sub rfl hu (.sub rfl (.lit c) hv)) (.var _))))
+
+theorem addmodLit_src {prev ds : List (LFml C)} {a b : LTm C (.val .uint)} {c : PrimTy.uint.Denote}
+    {m : Nat} (hc : c.val ≠ 0) (ha : a.SrcL false false l .num) (hb : b.SrcL false false l .num)
+    (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (addmodLit prev a b c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (addmodLit prev a b c ds m).defs, d.SrcL false false l := by
+  unfold addmodLit
+  dsimp only
+  obtain ⟨h1, h2⟩ := rem_src (prev := prev) (m := m) hc ha hds
+  obtain ⟨h3, h4⟩ := rem_src (prev := prev) (m := (CutTm.rem prev a c ds m).next) hc hb h2
+  exact amodAtom_src (.seq ha hb) h1 h3 h4
+
+theorem mulmodGo_src {a : LTm C (.val .uint)} {c : PrimTy.uint.Denote} (ha : a.SrcL false false l .num) :
+    ∀ (f k : Nat) (ds : List (LFml C)) (m : Nat), (∀ d ∈ ds, d.SrcL false false l) →
+    (mulmodGo a c f k ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (mulmodGo a c f k ds m).defs, d.SrcL false false l
+  | 0, _, _, _, hds => ⟨ha, hds⟩
+  | f + 1, k, ds, m, hds => by
+    unfold mulmodGo
+    split
+    · exact ⟨ha, hds⟩
+    · obtain ⟨h1, h2⟩ := mulmodGo_src ha f (k / 2) ds m hds
+      have hD := amodAtom_src (c := c) (m := (mulmodGo a c f (k / 2) ds m).next) ha h1 h1 h2
+      dsimp only
+      split
+      · exact hD
+      · exact amodAtom_src ha hD.1 ha hD.2
+
+theorem mulmodLit_src {prev ds : List (LFml C)} {a : LTm C (.val .uint)} {k c : PrimTy.uint.Denote}
+    {m : Nat} (hc : c.val ≠ 0) (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l) :
+    (mulmodLit prev a k c ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (mulmodLit prev a k c ds m).defs, d.SrcL false false l := by
+  unfold mulmodLit
+  split
+  · exact ⟨.seq ha (.lit _), hds⟩
+  · dsimp only
+    obtain ⟨h1, h2⟩ := rem_src (prev := prev) (m := m) hc ha hds
+    exact mulmodGo_src h1 _ _ _ _ h2
+
 theorem lit?_none {p : PrimTy} {t : LTm C (.val p)} {v : p.Denote} (h : t.lit? = none)
     (ht : t = .app0 (.lit v)) : False := by
   subst ht; cases h
+
+theorem intBit_src {prev ds : List (LFml C)} {a : LTm C (.val .int)} {m : Nat}
+    {mk : LTm C (.val .uint) → List (LFml C) → Nat → CutTm C (.val .uint)}
+    (ha : a.SrcL false false l .num) (hds : ∀ d ∈ ds, d.SrcL false false l)
+    (hmk : ∀ t ds' m', t.SrcL false false l .num → (∀ d ∈ ds', d.SrcL false false l) →
+      (mk t ds' m').term.SrcL false false l .num ∧ ∀ d ∈ (mk t ds' m').defs, d.SrcL false false l) :
+    (intBit prev mk a ds m).term.SrcL false false l .num ∧
+      ∀ d ∈ (intBit prev mk a ds m).defs, d.SrcL false false l := by
+  unfold intBit CutTm.atom
+  dsimp only
+  have hU := quotAtom_src (prev := prev) (m := m) hds (LFml.defn_src rfl ha (.defToUint rfl rfl _ ha))
+  obtain ⟨h1, h2⟩ := hmk _ _ _ (.seq ha (.var _)) hU
+  exact ⟨.seq h1 (.var _), quotAtom_src h2 (LFml.defn_src rfl h1 (.defToInt rfl rfl _ h1))⟩
+
+/-- **`&`, `|`, `^` at `int` with a literal operand**, both cut. -/
+theorem cut2_int_src {op : BinOp} (h : op.accepts .int = true) (hop : litCutL op .int = true)
+    {prev : List (LFml C)} {A B : CutTm C (.val .int)} (hA : A.term.SrcL false false l .num)
+    (hB : B.term.SrcL false false l .num) (hds : ∀ d ∈ A.defs ++ B.defs, d.SrcL false false l)
+    (hlit : (∃ v, A.term = .app0 (.lit v)) ∨ (∃ v, B.term = .app0 (.lit v))) :
+    (cut2 (.binop op h) prev A B).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut2 (.binop op h) prev A B).defs, d.SrcL false false l := by
+  cases op <;> simp only [litCutL, Bool.false_eq_true] at hop
+  all_goals
+    dsimp only [cut2]
+    split
+    · exact intBit_src hA hds (fun t ds' m' ht hd' =>
+        by first | exact bandLit_src ht hd' | exact borLit_src ht hd' | exact bxorLit_src ht hd')
+    · exact intBit_src hB hds (fun t ds' m' ht hd' =>
+        by first | exact bandLit_src ht hd' | exact borLit_src ht hd' | exact bxorLit_src ht hd')
+    · rename_i hb ha
+      rcases hlit with ⟨v, hv⟩ | ⟨v, hv⟩
+      · exact (lit?_none ha hv).elim
+      · exact (lit?_none hb hv).elim
 
 /-- **A commutative operator with a literal operand**, both cut. -/
 theorem cut2_comm_src {op : BinOp} (h : op.accepts .uint = true) (hop : litCutL op .uint = true)
@@ -347,6 +436,8 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     cases op <;> cases p <;> simp only [litCutR, Bool.false_eq_true, Bool.or_eq_true, beq_iff_eq] at hv
     case band.uint | bor.uint | bxor.uint | mulW.uint =>
       exact cut2_comm_src h rfl h1 (.lit v) h2' (.inr ⟨v, rfl⟩)
+    case band.int | bor.int | bxor.int =>
+      exact cut2_int_src h rfl h1 (.lit v) h2' (.inr ⟨v, rfl⟩)
     case pow.uint | powW.uint =>
       dsimp only [cut2]
       unfold powLit
@@ -381,9 +472,63 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     obtain ⟨h3, h4⟩ := ih (prev ++ []) n
     show (cut2 (.binop op h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).term.SrcL false false l .num ∧
       ∀ d ∈ (cut2 (.binop op h) prev ⟨.app0 (.lit v), [], n⟩ (b.cut (prev ++ []) n)).defs, d.SrcL false false l
-    cases p <;> simp only [litCutL] at hv <;>
-      try (cases op <;> simp only [litCutL, Bool.false_eq_true] at hv)
-    all_goals exact cut2_comm_src h rfl (.lit v) h3 (defs_append (fun _ h => nomatch h) h4) (.inl ⟨v, rfl⟩)
+    cases p with
+    | bool => cases op <;> simp only [litCutL, Bool.false_eq_true] at hv
+    | uint =>
+      exact cut2_comm_src h hv (.lit v) h3 (defs_append (fun _ h => nomatch h) h4) (.inl ⟨v, rfl⟩)
+    | int =>
+      exact cut2_int_src h hv (.lit v) h3 (defs_append (fun _ h => nomatch h) h4) (.inl ⟨v, rfl⟩)
+  | @addmodL _ a b v _ _ iha ihb =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ (a.cut prev n).defs) (a.cut prev n).next
+    have hds := defs_append (defs_append h2 h4) (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h)
+    show (cut3 (.modular .addmod) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)
+        ⟨.app0 (.lit v), [], (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next⟩).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut3 (.modular .addmod) prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)
+        ⟨.app0 (.lit v), [], (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next⟩).defs, d.SrcL false false l
+    dsimp only [cut3, LTm.lit?]
+    split
+    · exact ⟨.seq (.seq h1 h3) .err, hds⟩
+    · rename_i hv
+      exact addmodLit_src hv h1 h3 hds
+  | @mulmodL _ a k v _ iha =>
+    intro prev n
+    obtain ⟨h1, h2⟩ := iha prev n
+    have hds := defs_append (defs_append h2 (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h))
+      (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h)
+    show (cut3 (.modular .mulmod) prev (a.cut prev n) ⟨.app0 (.lit k), [], (a.cut prev n).next⟩
+        ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut3 (.modular .mulmod) prev (a.cut prev n) ⟨.app0 (.lit k), [], (a.cut prev n).next⟩
+        ⟨.app0 (.lit v), [], (a.cut prev n).next⟩).defs, d.SrcL false false l
+    dsimp only [cut3, LTm.lit?]
+    split
+    · exact ⟨.seq h1 .err, hds⟩
+    · rename_i hv
+      exact mulmodLit_src hv h1 hds
+  | @mulmodR _ k b v _ ihb =>
+    intro prev n
+    obtain ⟨h3, h4⟩ := ihb (prev ++ []) n
+    have hds := defs_append (defs_append (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h) h4)
+      (fun _ (h : _ ∈ ([] : List (LFml C))) => nomatch h)
+    show (cut3 (.modular .mulmod) prev ⟨.app0 (.lit k), [], n⟩ (b.cut (prev ++ []) n)
+        ⟨.app0 (.lit v), [], (b.cut (prev ++ []) n).next⟩).term.SrcL false false l .num ∧
+      ∀ d ∈ (cut3 (.modular .mulmod) prev ⟨.app0 (.lit k), [], n⟩ (b.cut (prev ++ []) n)
+        ⟨.app0 (.lit v), [], (b.cut (prev ++ []) n).next⟩).defs, d.SrcL false false l
+    dsimp only [cut3]
+    split
+    · split
+      · exact ⟨.seq (.lit k) .err, hds⟩
+      · rename_i hv
+        exact mulmodLit_src hv (.lit k) hds
+    · split
+      · exact ⟨.seq h3 .err, hds⟩
+      · rename_i hv
+        exact mulmodLit_src hv h3 hds
+    · rename_i h1 h2
+      cases hb : (b.cut (prev ++ []) n).term.lit? with
+      | some kb => exact (h1 ⟨v, rfl⟩ kb rfl hb).elim
+      | none => exact (h2 ⟨v, rfl⟩ ⟨k, rfl⟩ rfl hb rfl).elim
   | @addW _ h a b _ _ iha ihb =>
     intro prev n
     obtain ⟨h1, h2⟩ := iha prev n

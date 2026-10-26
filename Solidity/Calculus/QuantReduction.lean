@@ -260,8 +260,90 @@ theorem powLit_atomBound (h a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
     · exact Nat.le_refl _
     · exact hh
 
+theorem intBit_atomBound (prev : List (LFml C))
+    {mk : LTm C (.val .uint) → List (LFml C) → Nat → CutTm C (.val .uint)}
+    (hmk : ∀ t ds m, t.atomBound ≤ (mk t ds m).term.atomBound) (a : LTm C (.val .int))
+    (ds : List (LFml C)) (m : Nat) : a.atomBound ≤ (intBit prev mk a ds m).term.atomBound := by
+  unfold intBit CutTm.atom
+  dsimp only
+  refine Nat.le_trans ?_ (Nat.le_max_left _ _)
+  refine Nat.le_trans ?_ (hmk _ _ _)
+  exact Nat.le_max_left _ _
+
+theorem intBitMk_atomBound (op : BinOp) (prev : List (LFml C)) (v : PrimTy.int.Denote) :
+    ∀ t ds m, t.atomBound ≤ (intBitMk op prev v t ds m).term.atomBound := by
+  intro t ds m
+  cases op
+  case band => exact bandLit_atomBound prev t _ ds m
+  case bor => exact borLit_atomBound prev t _ ds m
+  all_goals exact bxorLit_atomBound prev t _ ds m
+
 theorem lit_atomBound {p : PrimTy} {t : LTm C (.val p)} {v : p.Denote} (h : t = .app0 (.lit v)) :
     t.atomBound = 0 := by subst h; rfl
+
+theorem mulmodGo_atomBound (a : LTm C (.val .uint)) (c : PrimTy.uint.Denote) :
+    ∀ (f k : Nat) (ds : List (LFml C)) (m : Nat), a.atomBound ≤ (mulmodGo a c f k ds m).term.atomBound
+  | 0, _, _, _ => Nat.le_refl _
+  | f + 1, k, ds, m => by
+    unfold mulmodGo
+    split
+    · exact Nat.le_refl _
+    · dsimp only
+      split <;> exact Nat.le_max_left _ _
+
+theorem mulmodLit_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (k c : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : a.atomBound ≤ (mulmodLit prev a k c ds m).term.atomBound := by
+  unfold mulmodLit
+  split
+  · exact Nat.le_max_left _ _
+  · dsimp only
+    refine Nat.le_trans ?_ (mulmodGo_atomBound (CutTm.rem prev a c ds m).term c _ _ _ _)
+    exact Nat.le_max_left _ _
+
+theorem addmodLit_atomBound (prev : List (LFml C)) (a b : LTm C (.val .uint)) (c : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) :
+    max a.atomBound b.atomBound ≤ (addmodLit prev a b c ds m).term.atomBound :=
+  Nat.le_max_left _ _
+
+/-- The cut ternary node keeps the atoms of its cut operands. -/
+theorem cut3_atomBound {a b c s : Srt} (o : Op3 C a b c s) (prev : List (LFml C)) (A : CutTm C a)
+    (B : CutTm C b) (K : CutTm C c) :
+    max A.term.atomBound (max B.term.atomBound K.term.atomBound) ≤ (cut3 o prev A B K).term.atomBound := by
+  cases o with
+  | modular op =>
+    cases op with
+    | addmod =>
+      dsimp only [cut3]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        split
+        · show _ ≤ max (max A.term.atomBound B.term.atomBound) 0
+          omega
+        · have := addmodLit_atomBound prev A.term B.term r.1 (A.defs ++ B.defs ++ K.defs) K.next
+          omega
+      · exact Nat.le_refl _
+    | mulmod =>
+      dsimp only [cut3]
+      split
+      · rename_i r k _ _
+        have h0 := lit_atomBound r.2
+        have h1 := lit_atomBound k.2
+        split
+        · show _ ≤ max A.term.atomBound 0
+          omega
+        · have := mulmodLit_atomBound prev A.term k.1 r.1 (A.defs ++ B.defs ++ K.defs) K.next
+          omega
+      · rename_i r k _ _ _
+        have h0 := lit_atomBound r.2
+        have h1 := lit_atomBound k.2
+        split
+        · show _ ≤ max B.term.atomBound 0
+          omega
+        · have := mulmodLit_atomBound prev B.term k.1 r.1 (A.defs ++ B.defs ++ K.defs) K.next
+          omega
+      · exact Nat.le_refl _
+  | _ => exact Nat.le_refl _
 
 /-- The cut node `X` keeps the atoms of its cut operands `A`, `B`. -/
 def CutKeeps {a b s : Srt} (A : CutTm C a) (B : CutTm C b) (X : CutTm C s) : Prop :=
@@ -332,6 +414,42 @@ theorem cut2_atomBound {a b s : Srt} (o : Op2 C a b s) (prev : List (LFml C)) (A
         have h1 := bxorLit_atomBound prev B.term r.1 (A.defs ++ B.defs) B.next
         simp only [CutKeeps, h0]; omega
       · exact Nat.le_refl _
+    case band.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .band prev r.1) A.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .band prev r.1) B.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
+    case bor.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .bor prev r.1) A.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .bor prev r.1) B.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
+    case bxor.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .bxor prev r.1) A.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := intBit_atomBound prev (intBitMk_atomBound .bxor prev r.1) B.term (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
     case pow.uint | powW.uint =>
       dsimp only [cut2]
       split
@@ -366,7 +484,11 @@ theorem LTm.atomBound_le_cut : ∀ {s : Srt} (t : LTm C s) (prev : List (LFml C)
     have h3 := LTm.atomBound_le_cut c (prev ++ (a.cut prev n).defs ++
       (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
       (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next
-    simp only [LTm.cut, LTm.atomBound]
+    have h4 := cut3_atomBound o prev (a.cut prev n) (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next)
+      (c.cut (prev ++ (a.cut prev n).defs ++
+        (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
+        (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next)
+    show max a.atomBound (max b.atomBound c.atomBound) ≤ (cut3 o prev _ _ _).term.atomBound
     omega
   | _, .index _ a b, prev, n | _, .seq a b, prev, n | _, .orElse a b, prev, n => by
     have h1 := LTm.atomBound_le_cut a prev n

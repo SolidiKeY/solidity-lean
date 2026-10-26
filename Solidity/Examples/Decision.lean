@@ -523,10 +523,13 @@ def gapAnd : Fml Gaps [] := allU (isT (.app2 (.binop .le rfl) (.app2 (.binop .ba
 def gapPow : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 1)) xU)
 def gapMulW : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) xU (litU 3)) (litU 0)))
 
-/-- Still outside `Fml.Covered`: `&` at `int` with a literal (two's
-complement), and `addmod` with a literal modulus. -/
+/-- Counterexamples once (decided since feature 16, below): `&` at `int`
+with a literal (two's complement), and `addmod` with a literal modulus. -/
 def gapIntAnd : Fml Gaps [] := allI (isT (.app2 (.binop .le rfl) (.app2 (.binop .band rfl) xI (litI 6)) (litI 6)))
 def gapAddmod : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .addmod) xU xU (litU 7)) (litU 7)))
+/-- `x | 1 ≥ x` at `int`; `mulmod` by a literal factor on the left. -/
+def intOr : Fml Gaps [] := allI (isT (.app2 (.binop .ge rfl) (.app2 (.binop .bor rfl) xI (litI 1)) xI))
+def mulmodLt : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .mulmod) (litU 3) xU (litU 7)) (litU 7)))
 
 /-! ### Operators with a literal operand, decided: false variants -/
 
@@ -538,6 +541,12 @@ def xorBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bx
 def andBad : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app2 (.binop .band rfl) (litU 6) xU) (litU 6)))
 def powBad : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 0)) xU)
 def mulWBad : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) (litU 3) xU) xU))
+def intAndBad : Fml Gaps [] := allI (isT (.app2 (.binop .lt rfl) (.app2 (.binop .band rfl) (litI 6) xI) (litI 6)))
+def intXorBad : Fml Gaps [] := allI (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bxor rfl) xI (litI 1)) xI))
+def addmodBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app3 (.modular .addmod) xU (litU 1) (litU 7)) (litU 0)))
+def mulmodBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app3 (.modular .mulmod) xU (litU 3) (litU 7)) (litU 0)))
+/-- A zero modulus fails, as `x / 0` does. -/
+def addmodZero : Fml Gaps [] := allU (isT (.app2 (.binop .eqB rfl) (.app3 (.modular .addmod) xU (litU 1) (litU 0)) (litU 0)))
 
 end GapTerms
 
@@ -568,8 +577,8 @@ does not read: `∀ s t. (∀ x. keccak256(s) != keccak256(t)) → !(∀ y.
 keccak256(s) == keccak256(t))`.  Valid as `holds` reads it, and false
 under the premise exactly at two strings with different bytes and one
 hash, where both inner premises fail: the only refutation is a
-collision, which cannot be exhibited.  Not decidable without narrowing
-`Fml.inTarget` (`docs/automation.md`, M7). -/
+collision, which cannot be exhibited.  Outside `Fml.inTarget` since
+decision e3″ (2026-10-26, `Fml.negPairUnread`, `docs/automation.md`, M6). -/
 def gapHashNegForall : Fml Names [] :=
   let hs : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hS
   let ht : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hT
@@ -602,13 +611,13 @@ theorem gapAddmod_inTarget : gapAddmod.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
-theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by decide +kernel
+/-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
+theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
 
 /-- info: true -/
 #guard_msgs in
 #eval ([gapColumn, gapTwoPaths, gapIntKeyed, gapBoolKeyed, gapStructValue, gapArrayBlock, gapLedgerBlock,
-  gapPartialGuard, gapPositiveForall, gapKIntBinder, gapLedgerWrite, gapIntAnd,
-  gapAddmod].map verdict).all (· == "unknown")
+  gapPartialGuard, gapPositiveForall, gapKIntBinder, gapLedgerWrite].map verdict).all (· == "unknown")
 
 /-! Fifty reads (M7, 2026-10-25): the flattener's budget is the leaf's own
 (`readBudget`), no longer a fixed 45 reads. -/
@@ -645,6 +654,27 @@ theorem mulWBad_covered : mulWBad.Covered = true := by decide +kernel
 theorem gapOr_answers : decideGoal gapOr ≠ .unknown := decideGoal_complete gapOr_covered rfl
 theorem gapMulW_iff : decideLeaf gapMulW = .proved ↔ Fml.Valid gapMulW :=
   decideLeaf_proved_iff gapMulW_covered
+
+/-! Feature 16 (2026-10-26): `&`, `|`, `^` at `int` with a literal, through
+the words (`intBit`: `int(uint(x) ⊙ word(c))`), and `addmod`/`mulmod` at a
+literal modulus, each sum modulo `c` one atom defined by cases (`amodDef`,
+`addmodLit`, `mulmodLit`): the two former counterexamples proved, false
+variants refuted, coverage kernel-checked. -/
+
+/-- info: ["proved", "proved", "proved", "proved"] -/
+#guard_msgs in #eval [gapIntAnd, intOr, gapAddmod, mulmodLt].map verdict
+
+/-- info: ["refuted", "refuted", "refuted", "refuted", "refuted"] -/
+#guard_msgs in #eval [intAndBad, intXorBad, addmodBad, mulmodBad, addmodZero].map verdict
+
+theorem gapIntAnd_covered : gapIntAnd.Covered = true := by decide +kernel
+theorem gapAddmod_covered : gapAddmod.Covered = true := by decide +kernel
+theorem mulmodLt_covered : mulmodLt.Covered = true := by decide +kernel
+theorem intAndBad_covered : intAndBad.Covered = true := by decide +kernel
+
+theorem gapAddmod_answers : decideGoal gapAddmod ≠ .unknown := decideGoal_complete gapAddmod_covered rfl
+theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
+  decideLeaf_proved_iff gapIntAnd_covered
 
 /-- info: ["unknown", "unknown", "unknown", "unknown"] -/
 #guard_msgs in
