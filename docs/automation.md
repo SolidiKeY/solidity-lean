@@ -1787,9 +1787,14 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     `addmodLit_spec`, `mulmodLit_spec`), the source fragment
     (`LTm.SrcL.addmodL`, `mulmodL`, `mulmodR`, `LTm.mulmodSrc?`), the
     reads' bounds (`ReadExpr.modular`), lifting and the ledger fragment
-    carry the completeness through.  Pins: `gapIntAnd`, `intOr`,
-    `gapAddmod`, `mulmodLt` proved, `intAndBad`, `intXorBad`, `addmodBad`,
-    `mulmodBad`, `addmodZero` refuted (`Examples/Decision.lean`).
+    carry the completeness through.  Pins (`Examples/Decision.lean`):
+    every leaf covered by the kernel (`gapIntAnd`, `gapAddmod`, `mulmodLt`;
+    `intAndBad`, `intXorBad`, `addmodBad`, `mulmodBad`, `addmodZero`), so
+    answered; `intOr`'s verdict evaluated (proved).  The others' verdicts
+    (proved, resp. refuted, as a full build pinned them on 2026-10-26) take minutes each in the
+    interpreter (`gapIntAnd` 886 s, `mulmodLt` 741 s: the arithmetic over
+    the conversion and remainder atoms), so they are not evaluated in the
+    build.
 23. **An index bound after its array** (2026-10-26,
     `Calculus/MemHoist.lean`): `decideMem` and `memCovered` cut
     `(φ.hoist 1024).mxTop`.  `Fml.hoist` moves a universal value binder

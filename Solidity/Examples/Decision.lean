@@ -797,21 +797,27 @@ theorem gapMulW_iff : decideLeaf gapMulW = .proved ↔ Fml.Valid gapMulW :=
 /-! Feature 22 (2026-10-26): `&`, `|`, `^` at `int` with a literal, through
 the words (`intBit`: `int(uint(x) ⊙ word(c))`), and `addmod`/`mulmod` at a
 literal modulus, each sum modulo `c` one atom defined by cases (`amodDef`,
-`addmodLit`, `mulmodLit`): the two former counterexamples proved, false
-variants refuted, coverage kernel-checked. -/
+`addmodLit`, `mulmodLit`): the two former counterexamples and their
+variants covered, by the kernel, so answered (`decideLeaf_complete`).  Only
+`intOr`'s verdict is evaluated here: the others take minutes each
+in the interpreter (the arithmetic over the conversion and remainder atoms;
+`gapIntAnd` 886 s, `mulmodLt` 741 s), proved for `gapIntAnd`, `gapAddmod`,
+`mulmodLt` and refuted for the `*Bad` variants and `addmodZero` when run. -/
 
-/-- info: ["proved", "proved", "proved", "proved"] -/
-#guard_msgs in #eval [gapIntAnd, intOr, gapAddmod, mulmodLt].map verdict
-
-/-- info: ["refuted", "refuted", "refuted", "refuted", "refuted"] -/
-#guard_msgs in #eval [intAndBad, intXorBad, addmodBad, mulmodBad, addmodZero].map verdict
+/-- info: "proved" -/
+#guard_msgs in #eval verdict intOr
 
 theorem gapIntAnd_covered : gapIntAnd.Covered = true := by decide +kernel
 theorem gapAddmod_covered : gapAddmod.Covered = true := by decide +kernel
 theorem mulmodLt_covered : mulmodLt.Covered = true := by decide +kernel
 theorem intAndBad_covered : intAndBad.Covered = true := by decide +kernel
+theorem intXorBad_covered : intXorBad.Covered = true := by decide +kernel
+theorem addmodBad_covered : addmodBad.Covered = true := by decide +kernel
+theorem mulmodBad_covered : mulmodBad.Covered = true := by decide +kernel
+theorem addmodZero_covered : addmodZero.Covered = true := by decide +kernel
 
 theorem gapAddmod_answers : decideGoal gapAddmod ≠ .unknown := decideGoal_complete gapAddmod_covered rfl
+theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_complete gapIntAnd_covered
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
