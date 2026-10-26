@@ -61,6 +61,37 @@ theorem prog_afterPush {Γ Γ' : Ctx} {p : PrimTy} (P : Prog C Γ Γ')
 
 end CallbackCapture
 
+namespace CallbackCapture
+
+/-- Changing only the annotation of `while (c) body` preserves every callback
+run, including the deterministic case where the body calls nobody. -/
+theorem loop_ann_all {J : StateInv C} {Γ Γb : Ctx} {a a' : LoopAnn C Γ}
+    {c : Val C Γ .bool} {body : Prog C Γ Γb} {σ : State C Γ}
+    {o : COut C σ.H Γ} (h : ExecS J σ (.loop a c body) o) :
+    ExecS J σ (.loop a' c body) o := by
+  have hl := CallbackUnwk.asLoop h
+  clear h
+  induction hl with
+  | det hf => exact .det hf
+  | halt ht hc => exact .loopHalt ht hc
+  | exit ht hc => exact .loopExit ht hc
+  | iter ht hc hp _ ih => exact .loopIter ht hc hp ih
+  | stop ht hc hp hn => exact .loopStop ht hc hp hn
+  | diverge ht => exact .loopDiverge ht
+
+end CallbackCapture
+
+open CallbackCapture in
+/-- A one-statement program with another `while` annotation has the same
+callback runs. This proves no property of a written termination measure. -/
+theorem Stmt.CapturesAs.loopAnnotation {pay : Bool} {m : Modality} {Γ Γb : Ctx}
+    {a a' : LoopAnn C Γ} {c : Val C Γ .bool} {body : Prog C Γ Γb} :
+    (Stmt.loop a c body).CapturesAs pay m
+      (.cons (.loop a' c body) .nil) .refl := by
+  intro J _ σ o he
+  refine .inr ⟨o, execP_single (loop_ann_all he), ?_⟩
+  cases o <;> rfl
+
 open CallbackCapture in
 /-- **`ifElseUnfold` with callbacks**: `if (nse) S₁ else S₂` runs as
 `bool se = nse; if (se) S₁ else S₂`, whatever its branches call. -/

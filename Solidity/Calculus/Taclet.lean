@@ -857,6 +857,7 @@ theorem LeanTaclet.catchDataDiamond.toStep {ρ ps Γf Γ₁ : Ctx} {call : ExtCa
   assumeFalse "."
   recursiveCallUnfold "."
   loopExit "."
+  loopLexErase "."
 
 /-! ## The rule `Stmt.step` fires -/
 

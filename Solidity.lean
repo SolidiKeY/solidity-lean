@@ -27,6 +27,7 @@ import Solidity.Semantics.Heap
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.Semantics.Termination
+import Solidity.Semantics.LexMetrics
 import Solidity.RevertBytes
 import Solidity.Semantics.RevertData
 import Solidity.Semantics.AllocBytes
@@ -196,9 +197,11 @@ import Solidity.Calculus.TreeData
 import Solidity.Calculus.TermLib
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.Termination
+import Solidity.Examples.LexMetrics
 import Solidity.Examples.Preconditions
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.Tactics.FiniteSets
+import Solidity.Examples.Tactics.LexAnnotations
 import Solidity.Examples.ContractTypes
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays

@@ -105,6 +105,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
+      | .invLex .. => false
       | .inv _ dec _ qs => body.frame.isSome && (m == .box || (dec.isSome && qs.isEmpty)))
     (block := fun _ => true)
     (pushOpAssign := fun _ _ _ b r => !r.isSimple || b.isSimple)

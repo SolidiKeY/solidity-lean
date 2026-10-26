@@ -30,8 +30,9 @@ scoped results use Lean's standard three axioms.
 The optional `Bridge/SolidityBridge/LoopFixpoint.lean` already supplied a Mathlib
 fixed-point proof of generic well-founded correctness. The core addition avoids
 that dependency and adds finite witnesses, a scoped bridge and lexicographic
-examples. NatSpec tuple `decreases` syntax and total recursive termination remain
-separate work. Bounded recursive contracts retain their existing exhaustion policy.
+examples. Typed source tuple annotations and their strict certificates are
+described below. Automatic lexicographic VCs and total recursive termination
+remain separate work. Bounded recursive contracts retain their exhaustion policy.
 
 ## Finite primitive membership
 
@@ -248,3 +249,58 @@ The repository-wide prose-path check still reports the same 13 pre-existing
 external/vendor references; none names the new files. No core package dependency,
 proof axiom or raised heartbeat limit was introduced. The remaining gaps in the
 inventory stay open.
+
+## Source tuple follow-up
+
+`LoopMetrics C Γ (n + 2)` now retains at least two unsigned components in source
+order. NatSpec `decreases (outer, inner)` and longer tuples pass every component
+through the existing capture-free `loopExpr` check before construction. Both
+quoters, source and calculus printers, weakening and size accounting preserve
+the tuple. Malformed, effectful, unknown and wrongly typed components are refused,
+including invalid second and third components.
+
+The explicit Lean-only `loopLexErase` rule reaches the existing invariant proof
+without transforming runtime code. Its annotation size strictly decreases;
+ordinary and callback erasure have separate checked semantic lemmas. This supports
+the existing partial-correctness proof path without asserting that a source tuple
+decreases. The scalar variant path is preserved. Automatic tuple diamond VCs and
+broader metric sorts remain open.
+
+`Semantics/LexMetrics.lean` evaluates the typed tuple into an unbounded nested
+natural product and proves its lexicographic relation well founded. The strict
+certificate requires defined components at every invariant head, successful
+invariant-preserving body runs and a decrease after every body turn. It derives
+an actual `.ok` result. These sufficient conditions are conservative at exit,
+break and return; they read ordinary `Stmt.run`, not callback total semantics.
+
+Review identified an identity distinction: the run erases annotations, so a
+successful-run proposition alone cannot certify the declared tuple. The added
+`LoopMetrics.SourceCertificate I G actualLoop` is indexed by the actual statement
+syntax and retains the certificate for its stored tuple, condition and body.
+`SourceCertificate.checks` recovers that exact check; `.valid` projects successful
+execution given an initial proof of `I`. The semantic invariant and postcondition
+are explicit and do not silently certify the annotation's invariant clauses.
+A false invariant is vacuous; the entry witness remains necessary.
+
+`Examples/LexMetrics.lean` retains this indexed object for an actual annotated
+source program, proves its successful execution and rejects equal, increasing,
+undefined and exhausted-body certificates at live, inhabited heads. A regression
+shows that runtime results themselves erase metric choice. The imported-source
+tests separately verify safety proofs, invalid components, tuple lengths and
+order, loop lowering and a retained callback-semantics proof. Source local-variable
+shadowing stays an explicit pre-existing gap, rather than a misbound tuple.
+
+Read-only finder and skeptic passes checked component validation, typing, scope,
+quotation, rule partition/coverage, callback capture and the fallback ranking
+function's guarded use. Review corrected fixture tags: untagged functions use
+diamond obligations, while the safety cases require explicit box tags. The
+remaining source gaps and strict-certificate boundaries are documented in
+[loops.md](../loops.md#typed-tuple-measures).
+
+Focused validation for this follow-up passes: 222 Lean jobs, the three imported
+tuple tests (safety, explicit gaps and kernel-checked source shapes/callback
+reading), 51 fast tests, and 23 real editor-host checks. The source trust scan
+reports 666 sources, 231 inventoried implementation/recovery sites and zero
+findings; layering finds 139 core modules with no elaborator reach and 653
+reachable modules with no orphans. Final default-library, imported-suite and
+headline-axiom checks are running against the completed change.

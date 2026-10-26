@@ -1,5 +1,8 @@
 import Solidity.Theorems
 import Solidity.Semantics.Termination
+import Solidity.Semantics.LexMetrics
+import Solidity.Examples.LexMetrics
+import Solidity.Examples.Tactics.LexAnnotations
 import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.Preconditions
 import Solidity.Examples.SourceCounterexample
@@ -503,7 +506,20 @@ run_cmd do
     ``Solidity.Fml.PreconditionsImpossible.valid,
     ``Solidity.Fml.PreconditionsImpossible.not_possible,
     ``Solidity.Examples.SourceCounterexample.badRefuted,
-    ``Solidity.Examples.SourceCounterexample.wideRefuted]
+    ``Solidity.Examples.SourceCounterexample.wideRefuted,
+    ``Solidity.LoopMetrics.NatTuple.wellFounded,
+    ``Solidity.LoopMetrics.Certificate.valid,
+    ``Solidity.LoopMetrics.SourceCertificate.valid,
+    ``Solidity.LoopMetrics.SourceCertificate.checks,
+    ``Solidity.Examples.LexMetrics.sourceProgram_success,
+    ``Solidity.Examples.LexMetrics.equal_source_rejected,
+    ``Solidity.Examples.LexMetrics.increasing_source_rejected,
+    ``Solidity.Examples.LexMetrics.undefined_source_rejected,
+    ``Solidity.Premise.sound_loopAnnotation,
+    ``Solidity.CallbackCapture.loop_ann_all,
+    ``Solidity.Stmt.CapturesAs.loopAnnotation,
+    ``Solidity.LoopAnn.lex_erasure_size,
+    ``Solidity.Examples.Tactics.LexAnnotations.ordinaryBox]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

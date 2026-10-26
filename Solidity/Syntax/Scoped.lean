@@ -264,7 +264,7 @@ def LoopMetrics.toList {C : Contract} {Γ : Ctx} : {n : Nat} →
     (metrics : LoopMetrics C Γ n) : metrics.toList.length = n := by
   induction metrics with
   | nil => rfl
-  | cons head tail ih => simp [toList, ih]
+  | cons head tail ih => simp only [toList, List.length_cons, ih]
 
 /-- A checked list, retaining its length in the resulting index. -/
 def LoopMetrics.ofList {C : Contract} {Γ : Ctx} : (values : List (Val C Γ .uint)) →

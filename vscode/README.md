@@ -25,6 +25,12 @@ the backend provides a declaration mapping. These certificates concern the
 verification model; constructor reachability is a separate property. Discovery
 does not search for model prestates. The option is disabled initially.
 
+Proof status refers to the selected obligation. Ordinary box proofs establish
+partial correctness. Tuple `decreases` annotations are type checked and retained,
+but regular verification does not automatically prove that the tuple decreases.
+Separate successful-termination certificates are described in
+[the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
+
 ## Setup
 
 Install Node.js 18 or later and the Lean/Lake version in the repository's

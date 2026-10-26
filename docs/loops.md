@@ -104,6 +104,44 @@ from the existing kernel theorems, and upstream shape correspondence from the
 recorded review. What solkey
 lacks (`loopExit`, the bound's end) stays a `LeanTaclet`.
 
+## Typed tuple measures
+
+Loop annotations also accept `/// @custom:key decreases (outer, inner)` and
+longer tuples of unsigned values. `LoopMetrics C Γ (n + 2)` retains every
+component at its type and scope. Each component passes the existing capture-free
+loop-expression check before the annotation is constructed. Empty, singleton
+raw tuples, nested tuples, wrong types, unknown names and expressions requiring
+statements are refused. Ordinary parenthesized scalar expressions keep their
+existing meaning. Clause uniqueness and invariant/unwind restrictions still
+apply.
+
+The explicit Lean-only `loopLexErase` step replaces the tuple annotation with
+the same invariant, quantified clauses and break flag, then uses the existing
+partial-correctness rules. It does not check metric decrease. In particular,
+ordinary box proofs are safety proofs; the diamond path remains open without a
+separate checked rule. Callback erasure has its own execution/capture theorem.
+
+For strict successful termination, `Semantics/LexMetrics.lean` supplies
+`LoopMetrics.SourceCertificate I G actualLoop`. Its indexed constructor retains
+the check of the tuple actually stored on that loop. The semantic invariant `I`
+and postcondition `G` are explicit proof parameters; they are not implicitly
+identified with the annotation clauses. An initial proof of `I` is required to
+project an actual `.ok` result. Every invariant head must define all components,
+every live body must succeed and preserve `I`, and every body turn must decrease
+lexicographically. Later components may increase when an earlier one decreases;
+no bounded-word packing is used.
+
+These sufficient conditions are conservative at break/return and exit heads.
+Exhaustion, divergence and revert are not successful witnesses. The certificate
+reads `Stmt.run`; callback total termination needs its own proof. A successful
+run proposition alone cannot identify an annotation, since execution erases it;
+source tools must retain the syntax-indexed certificate for claims that a declared
+tuple was checked. `Examples/LexMetrics.lean` proves an actual annotated source
+program succeeds and rejects bad metric certificates. Imported NatSpec coverage
+is in `scripts/lex-metrics.test.mjs`; source local-variable shadowing remains an
+explicit importer gap. Automatic tuple termination VCs and total recursive
+termination remain open.
+
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
 Since the intrinsic refactor the run is typed (`Semantics/Run.lean`, over

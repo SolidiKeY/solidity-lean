@@ -72,7 +72,7 @@ def ctorC? (c : Lean.Name) : Option (Lean.Name × Nat) :=
 each `ProvesC.capture`'s side condition: `Stmt.CapturesAs.<name>`.
 Each with the number of `rfl`s its own side conditions take. -/
 def captureLemmas : Array (Lean.Name × Nat) :=
-  #[(`ite, 0), (`loop, 1), (`transferAmt, 1), (`transferRecv, 1), (`sendAmt, 1), (`sendRecv, 1)]
+  #[(`ite, 0), (`loopAnnotation, 0), (`loop, 1), (`transferAmt, 1), (`transferRecv, 1), (`sendAmt, 1), (`sendRecv, 1)]
 
 /-- The steps that may apply at the `ProvesC` goal `g`, in the order tried. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do

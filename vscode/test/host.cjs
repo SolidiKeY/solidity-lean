@@ -118,6 +118,21 @@ async function run() {
       assert.ok(modelHovers.some(hover => hover.contents.some(content => /certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))),
         JSON.stringify({hovers:modelHovers,rows:witnessed.results.map(row => ({status:row.status,sourceId:row.sourceId,range:row.range}))}));
       checks.push('real exact-goal refutation certificate', 'real model argument source mapping', 'real model diagnostic and hover');
+      const tupleSource = join(root, 'TupleMetrics.sol');
+      writeFileSync(tupleSource, 'pragma solidity ^0.8.34;\ncontract TupleMetrics {\n/// @custom:key box\nfunction passes() public pure {\nuint n = 1;\n/// @custom:key invariant n <= 1\n/// @custom:key decreases (n, 0)\nwhile(n > 0) { n--; }\nassert(n == 0);\n}\nfunction rejected(bool flag) public pure {\n/// @custom:key invariant true\n/// @custom:key decreases (0, flag)\nwhile(false) {}\n}\n}\n');
+      await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
+      const tupleDocument = await vscode.workspace.openTextDocument(tupleSource);
+      await vscode.window.showTextDocument(tupleDocument);
+      const tuples = await api.verify(tupleDocument);
+      assert.equal(tuples.results.find(row => row.function === 'passes').status, 'proved');
+      const rejected = tuples.results.find(row => row.function === 'rejected');
+      assert.ok(['error', 'unsupported', 'excluded'].includes(rejected.status));
+      const tupleDiagnostic = vscode.languages.getDiagnostics(tupleDocument.uri).find(d => d.code === rejected.status);
+      assert.ok(tupleDiagnostic);
+      assert.equal(tupleDiagnostic.range.start.line, 10);
+      const tupleHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', tupleDocument.uri, new vscode.Position(3, 15));
+      assert.ok(tupleHovers.some(hover => hover.contents.some(content => /proved/.test(content.value || String(content)))));
+      checks.push('real tuple-annotated safety proof', 'real invalid tuple component diagnostic', 'real tuple result hover');
     }
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {

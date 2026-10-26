@@ -1121,6 +1121,16 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
 
 
 
+  /-- A tuple annotation on `while (cond) body` is retained in the source
+  statement, then erased for the existing partial-correctness rules. This
+  packed, length-indexed annotation has no scalar schema variable; successful
+  termination is certified separately against its actual components. -/
+  | loopLexErase {Γ Γb : Ctx} {n : Nat} {inv cond : Val C Γ .bool}
+      {metrics : LoopMetrics C Γ (n + 2)} {brk : Bool} {qs : List (LoopQ C Γ)}
+      {body : Prog C Γ Γb} :
+      LeanTaclet C k m (.loop (.invLex inv metrics brk qs) cond body)
+        (.unfold (.cons (.loop (.inv inv none brk qs) cond body) .nil) .refl)
+
   /-- A loop with an invariant whose body has no frame closes to `false`,
   under either modality: sound, and nothing about it is derived.  solkey
   unwinds it instead (it has no annotation to choose by). -/

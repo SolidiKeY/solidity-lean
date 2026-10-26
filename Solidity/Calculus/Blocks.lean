@@ -852,6 +852,10 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
   | .unwind (n + 1) =>
     loopUnwindStep (.bounded n) c body
   | .auto => loopUnwindStep .automatic c body
+  -- Tuple metrics are retained on the source loop. This explicit annotation
+  -- erasure reuses partial-correctness rules and proves no tuple decrease.
+  | .invLex I _ brk qs =>
+    .unfold (.cons (.loop (.inv I none brk qs) c body) .nil) .refl
   | .inv I dec brk qs =>
     match body.frame with
     -- whileClose

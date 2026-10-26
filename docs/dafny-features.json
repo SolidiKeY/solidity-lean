@@ -280,10 +280,15 @@
         "Solidity/Calculus/Recursion.lean",
         "Solidity/Semantics/Termination.lean",
         "Solidity/Examples/Termination.lean",
-        "Bridge/SolidityBridge/LoopFixpoint.lean"
+        "Bridge/SolidityBridge/LoopFixpoint.lean",
+        "Solidity/Semantics/LexMetrics.lean",
+        "Solidity/Examples/LexMetrics.lean",
+        "Solidity/Examples/Tactics/LexAnnotations.lean",
+        "Solidity/Calculus/Sound/LoopLexErase.lean",
+        "scripts/lex-metrics.test.mjs"
       ],
-      "assessment": "Unsigned source loop variants remain. The dependency-free core now proves finite outer-iteration witnesses and successful scoped loop termination under arbitrary well-founded or lexicographic measures. The optional Bridge already had a Mathlib fixed-point theorem. NatSpec tuple measures and total recursive termination remain open.",
-      "next": "Compile source lexicographic measures to the checked API and add a separate total recursive termination rule."
+      "assessment": "Unsigned scalar variants and typed NatSpec tuple measures are supported. LoopMetrics retains every component at its type and scope; statement-indexed SourceCertificate values retain checks of the exact declared tuple and derive actual successful runs. Ordinary tuple annotations use explicit erasure for partial-correctness proofs, without automatic lexicographic termination discharge. The dependency-free core also supports arbitrary well-founded measures; the optional Bridge already had a Mathlib fixed-point theorem. Signed/general source metrics and total recursive termination remain open.",
+      "next": "Add automatic lexicographic VCs and broader metric sorts; establish total recursive termination separately from accepted exhaustion."
     },
     {
       "id": "modular-calls",
@@ -644,9 +649,11 @@
       "localEvidence": [
         "Solidity/Syntax/Scoped.lean",
         "Solidity/Semantics/Run.lean",
-        "docs/solidity-features.json"
+        "docs/solidity-features.json",
+        "tests/solc/LexMetrics.sol",
+        "scripts/lex-metrics.test.mjs"
       ],
-      "assessment": "Assignments, calls, branches, loops and break/continue already exist; admitted shapes and remaining gaps are in the Solidity inventory. Dafny match/binding guards are separate constructs.",
+      "assessment": "Assignments, calls, branches, loops and break/continue already exist; admitted shapes and remaining gaps are in the Solidity inventory. Tuple annotations survive loop-local scope, renaming, nested loops and break/continue/return lowering. Local-variable shadowing remains an explicit source-import gap. Dafny match/binding guards are separate constructs.",
       "next": "Complete admitted Solidity shapes rather than introducing unrelated Dafny syntax."
     },
     {

@@ -1202,6 +1202,19 @@ theorem assertStep_bounded (c : Val C Γ .bool) : (assertStep k c).Bounded 3 := 
 
 /-! ### Loops -/
 
+/-- Every typed metric tuple carries at least its spine node. -/
+theorem LoopMetrics.size_pos (metrics : LoopMetrics C Γ n) : 0 < metrics.size := by
+  cases metrics <;> simp only [LoopMetrics.size] <;> omega
+
+/-- Erasing a tuple annotation strictly reduces syntax size, even when the
+runtime loop and its invariant remain identical. -/
+theorem LoopAnn.lex_erasure_size (I : Val C Γ .bool) (metrics : LoopMetrics C Γ (n + 2))
+    (brk : Bool) (qs : List (LoopQ C Γ)) :
+    (LoopAnn.inv I none brk qs).size < (LoopAnn.invLex I metrics brk qs).size := by
+  have h := metrics.size_pos
+  simp only [LoopAnn.size]
+  omega
+
 theorem LoopQ.toFml_size : {Γ : Ctx} → (q : LoopQ C Γ) → q.toFml.tmSize ≤ 3 * q.size + 2
   | _, .val a => by
     have := Val.lower_size a
@@ -1254,6 +1267,7 @@ theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Va
       simp only [Fml.tmSize, Upd.tmSize, Rhs.size, Tm.size]; omega
     | succ n => bnil
   | auto => bnil
+  | invLex => bnil
   | inv I dec brk qs =>
     have hI := Val.lower_size I
     have hinv := invFml_size I qs
