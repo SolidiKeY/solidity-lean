@@ -446,3 +446,31 @@ explicitly marked and inventoried; the actual correctness theorems retain kernel
 and transitive axiom checks. The headline audit now includes the six generic
 filtered-membership facts and five public correctness examples. Final combined
 source, editor and whole-tree validation is still required.
+
+## Integration with current origin
+
+The integration with upstream `aa1b76c5` preserves both the native CLI inspection
+helpers and the editor runner's entry audits, exact-goal refutations, source
+hashes, declaration IDs, ranges and interrupted-batch checkpoints. Goal display
+and witness output have separate named arguments. The CLI action path retains
+its own request command; audit and witness flags apply to verification requests.
+
+Upstream finite dispatch and typed stable external-function projections
+supersede the initial baseline's unsupported function-value roster. The merged
+integration test requires all 26 qualified rows: sixteen proofs, seven internal
+helpers and three deliberately pending false claims. Metadata again requires
+thirteen proofs, one internal helper and one pending false claim. Declaration
+selectors still resolve by compiler identity; stored projections use their
+separate typed ABI path. Malformed and effectful projections remain rejected.
+
+Read-only finder and skeptic reviews found no blocking merge defect. The
+focused Lean build passes all 269 jobs, including CLI, selector admission,
+filtered-set proofs and tuple-loop proofs. Both native executables build, all
+56 fast integration tests pass, and trust, layering, reachability and inventory
+checks pass. This is focused integration validation, not a new whole-tree or
+real-editor-host run. Some CLI action and synthetic getter rows lack source IDs;
+range enrichment remains conditional on explicit compiler evidence.
+
+All sixteen focused source/CLI checks also pass: entry audits, certified
+witnesses, metadata, native verification and inspection, concrete execution,
+source-range mapping and the complete function-value verdict roster.

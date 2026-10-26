@@ -10,13 +10,8 @@ test('declaration metadata proves canonical values and keeps a false property op
   assert.equal(report.results.length, 15);
   for (const row of report.results)
     assert.equal(row.status, row.function === 'falseMetadata' ? 'pending' :
-      row.function === 'receiver' ? 'internal' :
-      row.function === 'functionMetadata' ? 'unsupported' : 'proved',
+      row.function === 'receiver' ? 'internal' : 'proved',
       `${row.function}: ${row.reason}`);
-  // Stored function values still need typed ABI observations; declaration
-  // selectors must not turn the older arithmetic/hash encoding into a proof.
-  assert.match(report.results.find(row => row.function === 'functionMetadata').reason,
-    /solidity\.functionMemberKind: stored function members need typed ABI address\/selector observations$/);
   const overloads = report.results.filter(row => row.function === 'overloaded');
   assert.equal(overloads.length, 2);
   assert.deepEqual(new Set(overloads.map(row => row.signature)),

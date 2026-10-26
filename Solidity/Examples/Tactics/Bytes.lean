@@ -1,3 +1,4 @@
+import Solidity.Semantics.RunFuel
 import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
@@ -267,13 +268,13 @@ loop: what reads a slice is proved as any read. -/
 
 /-- Slices of a calldata parameter. -/
 def Sl : Contract := contract!{
-  function pick(uint[] calldata xs, uint k) returns (uint r) { uint[] memory t = xs[1:]; r = t[k]; }
+  function pick(uint[] calldata xs, uint k) returns (uint r) { uint[] calldata t = xs[1:]; r = t[k]; }
   function len(uint[] calldata xs, uint i, uint j) returns (uint r) { r = xs[i:j].length; }
   function inner(uint[] calldata xs) returns (uint r) {
-    uint[] memory t = xs[1:3]; uint[] memory u = t[1:]; r = u[0];
+    uint[] calldata t = xs[1:3]; uint[] calldata u = t[1:]; r = u[0];
   }
   function first(uint[] memory ys) returns (uint r) { r = ys[0]; }
-  function handOn(uint[] calldata xs) returns (uint r) { uint[] memory t = xs[1:]; r = first(t); }
+  function handOn(uint[] calldata xs) returns (uint r) { uint[] calldata t = xs[1:]; r = first(t); }
 }
 
 /-- A read of the view is a read of the base, past the offset. -/
@@ -304,7 +305,18 @@ theorem sliceOfSlice : ⊨ᶠ dl[Sl]{ ⟨ uint[] memory a = new uint[](4); a[2] 
   sol_symex
   sol_decide
 
-/-- error: Solidity elaboration failed: a calldata slice `t` used other than indexed, its `.length` read or decoded (`abi.decode`): refused (docs/semantic-gaps.md, "Bytes and strings") -/
-#guard_msgs in #check sol[Sl]{ uint[] memory a = new uint[](2); uint v = handOn(a); }
+private def passed := sol[Sl]{
+  uint[] memory a = new uint[](2); a[1] = 13; uint v = handOn(a); assert(v == 13);
+}
+/-- `first(t)` materializes the flat slice before entering its memory frame. -/
+theorem slicePassed : (Prog.run (State.init Sl) passed).isOk = true := by
+  have h : (Prog.runF 4 passed (State.init Sl)).isOk = true := by decide +kernel
+  have hn : Prog.runF 4 passed (State.init Sl) ≠ .error .diverge := by
+    intro he
+    rw [he] at h
+    cases h
+  change (passed.runR (State.init Sl)).isOk = true
+  rw [← (Prog.runF_approx 4 passed (State.init Sl)).eq hn]
+  exact h
 
 end Solidity.Examples.Tactics.Bytes

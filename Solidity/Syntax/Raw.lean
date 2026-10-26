@@ -238,22 +238,22 @@ inductive RawStmt where
   | hole
   deriving Repr, Inhabited
 
-/-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
-or a member of one (`msg.sender`, `State.Created`). -/
+/-- A syntactically simple operand. This is not a totality test: a member
+read through an unset reference can fail. Discarding an operand also needs
+the elaborator's typed `canDiscardArg` check. -/
 def RawExpr.isPure : RawExpr → Bool
   | .num _ | .bool _ | .name _ => true
   | .field e _ => e.isPure
   | .env _ => true
   | _ => false
 
-/-- `require(c, Err(a, b));` and `require(c, "msg");`: solc evaluates the
-condition, then the error's arguments, then reverts if the condition is
-false.  With arguments that cannot revert nor have an effect that is
-`require(c);`; with others, `if (c) { eval(a, b) } else { revert(); }`, the
-same run: a false condition reverts whatever the arguments do, and a true one
-evaluates them after the condition, as solc does. -/
+/-- `require(c, Err(a, b));`: evaluate the condition first, then the
+arguments on either branch. An argument's panic takes priority over the
+require's revert, even when `c` is false. The elaborator may omit arguments
+only after checking their typed reads cannot fail. -/
 def RawStmt.requireWith (c : RawExpr) (args : List RawExpr) : RawStmt :=
-  if args.all RawExpr.isPure then .require c else .ite c [.eval args] [.revert]
+  if args.isEmpty then .require c
+  else .ite c [.eval args] [.eval args, .revert]
 
 /-- A reference parameter's declared data location. -/
 inductive ParamLoc where
@@ -277,6 +277,64 @@ structure ModApp where
   locs : List (Name × ParamLoc) := []
   deriving Repr, Inhabited
 
+/-- Source visibility of a function which has no ABI entry. -/
+inductive SourceLocalVisibility where
+  | privateFn | internalFn | freeFn
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- Public functions also have internal values; external functions do not. -/
+inductive SourceAbiVisibility where
+  | publicFn | externalFn
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- A retained base body is callable internally, but is not the selected ABI entry. -/
+inductive SourceSelection where
+  | selected | retained
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+inductive SourceMutability where
+  | nonpayable | pureFn | viewFn | payable
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- Compiler declaration roles. Only ABI declarations and getters carry
+selectors, bounded to four bytes. Special entries have no ordinary selector. -/
+inductive SourceCallable where
+  | local (visibility : SourceLocalVisibility)
+  | abi (visibility : SourceAbiVisibility) (selection : SourceSelection)
+      (selector : Option (Fin (2 ^ 32)))
+  | getter (selector : Fin (2 ^ 32))
+  | constructor
+  | receive (selection : SourceSelection)
+  | fallback (selection : SourceSelection)
+  | implementation
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- Source ABI identity survives model-name disambiguation. The signature is
+computed before enum, contract and value-type erasure; an absent signature
+never licenses hashing a generated model name. Native declarations use `none`. -/
+structure SourceFunction where
+  declaration : Option Int := none
+  name : String := ""
+  signature : Option String := none
+  mutability : SourceMutability := .nonpayable
+  callable : SourceCallable := .implementation
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+def SourceFunction.internalValue (d : SourceFunction) : Bool :=
+  match d.callable with
+  | .local _ | .abi .publicFn _ _ => true
+  | _ => false
+
+def SourceFunction.externalValue (d : SourceFunction) : Bool :=
+  match d.callable with
+  | .abi .. | .getter _ => true
+  | _ => false
+
+def SourceFunction.externalEntry (d : SourceFunction) : Bool :=
+  match d.callable with
+  | .abi _ .selected _ | .getter _ => true
+  | _ => false
+
 /-- An internal function as the contract declares it: its parameters and
 its return variables (`returns (uint r)`; unnamed, `returns (uint)`, it is
 called `_ret`, and the `i`-th of several `_ret{i}`, solkey's `ret{i}`;
@@ -285,6 +343,8 @@ at its location), at their types, and its
 body as read.  The elaborator types the body where the function is called
 and inlines it there (`Stmt.call`). -/
 structure FunDecl where
+  /-- Imported source identity, independent of this function's model alias. -/
+  sourceDecl : Option SourceFunction := none
   params : List (Name × Ty)
   /-- Reference parameters retain their locations separately from their types. -/
   paramLocs : List (Name × ParamLoc) := []

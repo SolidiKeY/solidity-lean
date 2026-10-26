@@ -812,6 +812,11 @@ theorem Fml.not_holds_imp_of_eval3 (dom : TDom) {Γ : Ctx} {σ : State C Γ} {pr
     (hp : holds σ pre) (hb : body.eval3 dom σ = .ff) : ¬ holds σ (.imp pre body) :=
   fun h => Fml.eval3_ff hb (h hp)
 
+/-- A proved entry premise preserves a refutation of the rest. -/
+theorem Fml.not_holds_imp_of_not_holds {Γ : Ctx} {σ : State C Γ} {pre body : Fml C Γ}
+    (hp : holds σ pre) (hb : ¬ holds σ body) : ¬ holds σ (.imp pre body) :=
+  fun h => hb (h hp)
+
 /-- Entry premises are proved conjunct by conjunct without dropping any. -/
 theorem Fml.holds_and_intro {Γ : Ctx} {σ : State C Γ} {φ ψ : Fml C Γ}
     (hφ : holds σ φ) (hψ : holds σ ψ) : holds σ (.and φ ψ) := ⟨hφ, hψ⟩
@@ -1309,9 +1314,10 @@ def kernelWhnf? (e : Expr) : MetaM (Option Expr) := do
   | .error _ => return none
 
 /-- **The certificate of a long-array candidate**: `¬ ⊨ᶠ φ` for `φ`, its
-leading parameters bound to `vals`, of the shape `wt(storage) → ψ`, from the
-candidate's typed state: the premise by `holds_wt_of`, `ψ` evaluated to
-`ff` (`Fml.not_holds_imp_of_eval3`).  The peeled formula is read by the
+leading parameters bound to `vals`, with evaluable entry premises before
+`wt(storage) → ψ`. Each entry premise is certified by `Fml.eval3_tt`, the
+storage premise by `holds_wt_of`, and `ψ` evaluated to `ff`
+(`Fml.not_holds_imp_of_eval3`). The peeled formula is read by the
 kernel (`kernelWhnf?`) and the proof built with its arguments written, so
 nothing is unified at the formula's depth: the default `maxRecDepth`
 suffices.  `none` when the formula is not of that shape or the kernel does
@@ -1336,16 +1342,35 @@ def certifyLong (cE φE : Expr) (vals : List (Var × Semantics.CallValue)) (lc :
     let some pr ← kernelWhnf? (pk.getArg! 3) | return none
     unless pr.isAppOfArity ``Prod.mk 4 do return none
     let σ' := pr.getArg! 2
-    let some ψ ← kernelWhnf? (pr.getArg! 3) | return none
-    unless ψ.isAppOfArity ``Fml.imp 4 do return none
-    let (pre, body) := (ψ.getArg! 2, ψ.getArg! 3)
-    unless ← isDefEq pre (mkAppN (mkConst ``Fml.wt) #[cE, Δ]) do return none
+    let mut ψ := pr.getArg! 3
+    let wt := mkAppN (mkConst ``Fml.wt) #[cE, Δ]
+    let mut prefixes : Array (Expr × Expr × Expr) := #[]
+    let mut last : Option (Expr × Expr) := none
+    -- Imported source obligations put their input-domain premise outside
+    -- `wt(storage)`. Prove each such premise at this concrete witness.
+    for _ in [:8] do
+      let some imp ← kernelWhnf? ψ | return none
+      unless imp.isAppOfArity ``Fml.imp 4 do return none
+      let (pre, body) := (imp.getArg! 2, imp.getArg! 3)
+      if ← isDefEq pre wt then
+        last := some (pre, body)
+        break
+      let evPre := mkAppN (mkConst ``Fml.eval3) #[cE, domE, Δ, σ', pre]
+      let hTrue ← mkDecideProof (← mkEq evPre (mkConst ``Tri.tt))
+      let hp := mkAppN (mkConst ``Fml.eval3_tt) #[cE, domE, Δ, σ', pre, hTrue]
+      prefixes := prefixes.push (pre, body, hp)
+      ψ := body
+    let some (pre, body) := last | return none
     let h1 ← proveMembersAllB (mkConst ``canonHB) stE
     let h2 ← proveMembersAllB (mkConst ``tightHB) stE
     let hp := mkAppN (mkConst ``holds_wt_of) #[cE, Δ, σ', h1, h2]
     let ev := mkAppN (mkConst ``Fml.eval3) #[cE, domE, Δ, σ', body]
     let hb ← mkDecideProof (← mkEq ev (mkConst ``Tri.ff))
-    let h := mkAppN (mkConst ``Fml.not_holds_imp_of_eval3) #[cE, domE, Δ, σ', pre, body, hp, hb]
+    let mut h := mkAppN (mkConst ``Fml.not_holds_imp_of_eval3)
+      #[cE, domE, Δ, σ', pre, body, hp, hb]
+    for (pre, body, hp) in prefixes.reverse do
+      h := mkAppN (mkConst ``Fml.not_holds_imp_of_not_holds)
+        #[cE, Δ, σ', pre, body, hp, h]
     let value := mkAppN (mkConst ``Fml.not_valid_of_peel) #[cE, valsE, σE, φE, h]
     if value.hasSorry || value.hasMVar then return none
     let decl := Declaration.thmDecl {

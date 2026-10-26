@@ -96,6 +96,14 @@ test("empty and untested suites cannot pass", () => {
   assert.throws(() => runSolidityTests([], { build: false }), /no Solidity/);
 });
 
+test("out-of-EVM self addresses are rejected before any proof or compiler job", () => {
+  for (const selfAddress of [(1n << 160n).toString(), `0x${(1n << 160n).toString(16)}`,
+    (1n << 200n).toString()]) {
+    assert.throws(() => runSolidityTests(["tests/solc/Runner.sol"],
+      {build:false, selfAddress}), /self address must fit 160 bits/);
+  }
+});
+
 test("Solidity source through solc and kernel-checked proof search", () => {
   const checkpoints = [];
   const report = runSolidityTests(["tests/solc/Runner.sol"], { build: false, batchSize:3,
@@ -456,9 +464,10 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
     // a slice is a view: its offset and length (`RawStmt.sliceViews`)
     'tail', 'sliceLength', 'sliceRead', 'sliceOfSlice', 'slicePast', 'decodeShortView'])
     assert.equal(status[name], 'proved', name);
-  // a memory copy written (solc copies, the model would share), a slice hashed
+  // Ordinary whole-calldata writable copies remain a separate interface.
   assert.equal(status.writesCopy, 'unsupported');
-  assert.equal(status.sliceHashed, 'unsupported');
+  // Slice hashing is admitted. Symbolic copy-loop proof search may stay open.
+  assert.match(status.sliceHashed, /^(proved|pending)$/);
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
@@ -489,43 +498,40 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
   }
 });
 
-test("function values retain direct metadata and explicit source dispatch gaps", () => {
-  // The intrinsic model's tag dispatch is broader than modern source admission.
-  // Source calls through values require a finite set of typed dispatch targets;
-  // stored external ABI observations must not use the model's packed arithmetic.
+test("finite function values preserve source proofs and false obligations", () => {
+  // Finite dispatch retains source identities, and stable external projections
+  // retain their ABI kinds through the native function-value lowering.
   const report = runSolidityTests(["tests/solc/FunctionTypes.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const expected = [
     ['ExternalFunctionTypes.ext', 'proved'],
-    ['ExternalFunctionTypes.externalValue', 'unsupported'],
+    ['ExternalFunctionTypes.externalValue', 'proved'],
+    ['ExternalFunctionTypes.selectorOfValue', 'proved'],
+    ['ExternalFunctionTypes.falseSelectorOfValue', 'pending'],
     ['ExternalFunctionTypes.externalSelector', 'proved'],
     ['FunctionTypes.double', 'internal'],
     ['FunctionTypes.triple', 'internal'],
-    ['FunctionTypes.applyTo', 'unsupported'],
-    ['FunctionTypes.compose', 'unsupported'],
+    ['FunctionTypes.applyTo', 'internal'],
+    ['FunctionTypes.compose', 'internal'],
     ['FunctionTypes.choose', 'internal'],
-    ['FunctionTypes.applyAndCompose', 'unsupported'],
-    ['FunctionTypes.localValue', 'unsupported'],
-    ['FunctionTypes.storedByFlag', 'unsupported'],
-    ['FunctionTypes.returnedValue', 'unsupported'],
-    ['FunctionTypes.unassignedPanics', 'unsupported'],
-    ['FunctionTypes.memberValue', 'unsupported'],
-    ['FunctionTypes.deletedPanics', 'unsupported'],
-    ['FunctionTypes.unassignedDiamond', 'unsupported'],
-    ['FunctionTypes.falsePost', 'unsupported'],
+    ['FunctionTypes.applyAndCompose', 'proved'],
+    ['FunctionTypes.localValue', 'proved'],
+    ['FunctionTypes.storedByFlag', 'proved'],
+    ['FunctionTypes.returnedValue', 'proved'],
+    ['FunctionTypes.unassignedPanics', 'proved'],
+    ['FunctionTypes.memberValue', 'proved'],
+    ['FunctionTypes.deletedPanics', 'proved'],
+    ['FunctionTypes.unassignedDiamond', 'pending'],
+    ['FunctionTypes.falsePost', 'pending'],
     ['FunctionTypes.equality', 'proved'],
-    ['FunctionTypes.memberCall', 'unsupported'],
-    ['FunctionTypes.elementCall', 'unsupported'],
-    ['FunctionTypes.callResultCall', 'unsupported'],
-    ['RecursiveFunctionValues.applyRec', 'unsupported'],
-    ['RecursiveFunctionValues.countThrough', 'unsupported'],
-    ['RecursiveFunctionValues.recursionThroughValue', 'unsupported'],
+    ['FunctionTypes.memberCall', 'proved'],
+    ['FunctionTypes.elementCall', 'proved'],
+    ['FunctionTypes.callResultCall', 'proved'],
+    ['RecursiveFunctionValues.applyRec', 'internal'],
+    ['RecursiveFunctionValues.countThrough', 'internal'],
+    ['RecursiveFunctionValues.recursionThroughValue', 'proved'],
   ];
   assert.deepEqual(report.results.map(row => [`${row.contract}.${row.function}`, row.status]), expected);
-  for (const row of report.results.filter(row => row.status === 'unsupported'))
-    assert.match(row.reason,
-      /solidity\.functionDispatch: this call needs a finite set of typed dispatch targets/,
-      `${row.contract}.${row.function}`);
   assert.equal(testsPassed(report), false);
 });
 

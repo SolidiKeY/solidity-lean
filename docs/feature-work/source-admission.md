@@ -1,5 +1,10 @@
 # Source admission milestone
 
+Integration status (2026-10-26): included in the shared checkout. Current
+combined validation is tracked in [integration.md](integration.md).
+Worker handoff statuses and isolated validation results below are historical;
+they neither report the current combined checks nor establish full source support.
+
 Modern `scripts/solc-ast.mjs` output records the exact supported compiler file,
 version and SHA-256; source SHA-256; accepted pragma tokens; AST analysis stage;
 and explicit pipeline, EVM target, optimizer and output settings. Both pinned
@@ -26,12 +31,15 @@ mutable initializers and base-constructor arguments execute only for deployment.
 Metadata-only selectors do not pull unrelated function bodies into admission.
 Possible self-calls include cast/aliased receivers. Payment dispatch requiring
 inherited receive, fallback or receive modifiers is refused until that dispatch
-is implemented. General function-value dispatch and used operator aliases also
-remain implementation gaps. Scope decisions never depend on inventory status.
-Stored external-function `.address`/`.selector` observations also need a typed
-ABI-kind interface: the existing function-value lowering turns them into plain
-arithmetic. Modern admission refuses that shape so a wrongly packed value cannot
-support a source proof. Direct declaration metadata remains supported.
+is implemented. Unbounded function-value dispatch remains an implementation gap. Resolved scalar
+operator aliases use the declaration-aware validator and typed call lowering
+described in [the numeric milestone](numeric-operators.md); missing, malformed
+or nominally mismatched annotations are refused. Scope decisions never depend on inventory status.
+Stored external-function `.address`/`.selector` observations retain explicit ABI-kind
+casts through lowering. Stable pure places are supported; effectful receivers
+remain refused. Direct declaration metadata remains supported. Finite dynamic
+dispatch and synthesized getter candidates follow [finite-dispatch.md](finite-dispatch.md)
+and [getter-dispatch.md](getter-dispatch.md).
 
 The declaration index is finite and rejects duplicate or missing identities.
 Depth and declaration traversal have explicit bounds. Unknown node kinds,
@@ -85,7 +93,7 @@ sort/corpus, automation and structural checks are pending the final validation
 run. The pre-existing baseline has 33 scratch-module orphans and 13 missing
 external/vendor documentation paths; these are not introduced by this milestone.
 
-### Function-value source regression alignment
+### Initial function-value source regression alignment
 
 The combined Dafny/editor validation exposed older function-value test
 expectations that predate admission commit `ea06b814`, already present in the
@@ -103,5 +111,33 @@ their original proof expectations.
 
 The focused real-source test passed in 11.14 seconds. Independent read-only
 finder and skeptic reviews confirmed the complete row roster, baseline policy
-and strict verdict; neither ran Lean. This changes test expectations, not the
-admission policy or the runtime model.
+and strict verdict; neither ran Lean. This changed test expectations, not the
+admission policy or the runtime model. The later upstream finite-dispatch and
+typed stored-observation implementations supersede this initial 24-row roster;
+the integrated tests require their newly supported cases to prove.
+
+## Stored external function observations
+
+The source reader retains `address` and `bytes4` casts around stored external
+function members before the native `fnPure` pass turns them into quotient and
+remainder arithmetic. ABI packed addresses therefore occupy 20 bytes and packed
+selectors four; standard selectors remain left aligned in a 32-byte word.
+
+Admission accepts this path only with matching result metadata, an external
+function type at the outer level (and matching type identity when retained),
+and a stable receiver place. Calls, assignments,
+increments and compound indices remain refused: the native selector lowering
+reads its receiver twice, so accepting an effectful receiver would duplicate
+effects or callbacks. No new callback semantics or dispatch targets are assumed.
+Direct function declaration selectors retain their existing receiver helper.
+
+Regression checks pin the source casts, reject internal/malformed/effectful
+receivers, and execute the ABI packed/standard/concat layouts in
+`Examples/Tactics/SourceAdmissionImport.lean`. The existing false
+`storedFunctionKind` assertion becomes admitted rather than being rejected for
+missing implementation; accepting its syntax is not a proof of that assertion.
+
+This patch has not run Lean diagnostics or builds; integration must validate
+`Frontend/SolcJson/Body.lean`, `Frontend/SolcJson/Admission.lean`, and the
+regression module before claiming coverage. General function dispatch admission
+remains a separate prerequisite for the full FunctionTypes source suite.

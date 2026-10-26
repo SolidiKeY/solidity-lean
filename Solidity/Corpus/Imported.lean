@@ -68,7 +68,8 @@ The `TestSuite` obligations are derived by the scoped `⊢`
 (`Proves`, `docs/intrinsic.md`, W3c): `N.f.proved : ⊢ N.f.problem`, on
 the import's scoped program `N.f` (`Prog`, W8).  Its corollary at the initial storage is
 stated over the typed run of that program, as every other corpus row is
-(`Corpus/Basic.lean`): `N.f.problem` is `wt(storage) → ⟨ Q ⟩ true`, and
+(`Corpus/Basic.lean`): `N.f.problem` has its source input premise followed
+by `wt(storage) → ⟨ Q ⟩ true`, and
 `Q`'s typed run from the initial state ends normally, or is exhausted
 (`Runs`, decision 15).  It is the scoped
 `⊢`'s soundness (`Proves.fmlValid`) at that state, whose storage is
@@ -79,41 +80,46 @@ namespace Solidity.Corpus
 variable {C : Contract}
 
 /-- solkey's `\<{ f(); }\>(true)` at `σ`, for an obligation `φ` of no
-parameters: `φ` is `wt(storage) → ⟨ Q ⟩ true` (`Problem.fml`) and
+parameters: `φ` has a proved source input premise before
+`wt(storage) → ⟨ Q ⟩ true` (`Problem.fml`) and
 `Q`'s typed run from `σ` ends normally, or is exhausted (`Runs`,
 decision 15). -/
 def Obligation.Diamond (σ : State C []) (φ : Fml C []) : Prop :=
-  ∃ (Γ' : Ctx) (Q : Prog C [] Γ'), φ = Problem.fml .diamond [] Q ∧ Runs .diamond σ Q
+  ∃ (pre : Fml C []) (Γ' : Ctx) (Q : Prog C [] Γ'),
+    φ = .imp pre (Problem.fml .diamond [] Q) ∧ holds σ pre ∧ Runs .diamond σ Q
 
 /-- solkey's `\[{ f(); }\](true)` at `σ`, for an obligation `φ` of no
-parameters: `φ` is `wt(storage) → [ Q ] true` and `Q`'s typed run from `σ`
+parameters: `φ` has a proved source input premise before
+`wt(storage) → [ Q ] true` and `Q`'s typed run from `σ`
 does not panic. -/
 def Obligation.Box (σ : State C []) (φ : Fml C []) : Prop :=
-  ∃ (Γ' : Ctx) (Q : Prog C [] Γ'), φ = Problem.fml .box [] Q ∧ Runs .box σ Q
+  ∃ (pre : Fml C []) (Γ' : Ctx) (Q : Prog C [] Γ'),
+    φ = .imp pre (Problem.fml .box [] Q) ∧ holds σ pre ∧ Runs .box σ Q
 
 /-- **A derived obligation of no parameters holds at the initial state**:
 its program, run typed from there, under its modality.  `wt(storage)` there
 is `initStorage_wt`'s. -/
 theorem runs_of_proved {m : Modality} {Γ' : Ctx} {Q : Prog C [] Γ'}
-    (h : Proves C .all [] .nil (Problem.fml m [] Q))
+    {pre : Fml C []} (h : Proves C .all [] .nil (.imp pre (Problem.fml m [] Q)))
+    (hp : holds (State.init C) pre)
     (hw : holds (State.init C) (Fml.wt C)) : Runs m (State.init C) Q :=
-  h.fmlValid (State.init C) hw
+  (h.fmlValid (State.init C) hp) hw
 
 /-- A derived diamond obligation with no parameters holds at the initial
 state (`runs_of_proved`). -/
 theorem diamond_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
-    (h : Proves C .all [] .nil (Problem.fml .diamond [] Q))
-    (hw : holds (State.init C) (Fml.wt C)) :
-    Obligation.Diamond (State.init C) (Problem.fml .diamond [] Q) :=
-  ⟨_, Q, rfl, runs_of_proved h hw⟩
+    {pre : Fml C []} (h : Proves C .all [] .nil (.imp pre (Problem.fml .diamond [] Q)))
+    (hw : holds (State.init C) (Fml.wt C)) (hp : holds (State.init C) pre) :
+    Obligation.Diamond (State.init C) (.imp pre (Problem.fml .diamond [] Q)) :=
+  ⟨pre, _, Q, rfl, hp, runs_of_proved h hp hw⟩
 
 /-- A derived box obligation with no parameters holds at the initial state
 (`runs_of_proved`). -/
 theorem box_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
-    (h : Proves C .all [] .nil (Problem.fml .box [] Q))
-    (hw : holds (State.init C) (Fml.wt C)) :
-    Obligation.Box (State.init C) (Problem.fml .box [] Q) :=
-  ⟨_, Q, rfl, runs_of_proved h hw⟩
+    {pre : Fml C []} (h : Proves C .all [] .nil (.imp pre (Problem.fml .box [] Q)))
+    (hw : holds (State.init C) (Fml.wt C)) (hp : holds (State.init C) pre) :
+    Obligation.Box (State.init C) (.imp pre (Problem.fml .box [] Q)) :=
+  ⟨pre, _, Q, rfl, hp, runs_of_proved h hp hw⟩
 
 /-! A corollary of `Corpus/TestSuite.lean` uses the axioms of its `⊢`
 theorem, which `TestSuite/Report.lean`'s pin checks, of `initState_wt`,

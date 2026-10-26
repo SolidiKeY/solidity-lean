@@ -85,6 +85,28 @@ jobs:
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
           LEAN_NUM_THREADS: '1'
         run: xvfb-run -a node vscode/test/run-host.cjs
+      - name: Build and test the command line interface
+        run: |
+          export SOLKEY_ROOT="$RUNNER_TEMP/solidity-cli-solkey"
+          cp -a tests/migration/solkey "$SOLKEY_ROOT"
+          node --input-type=module <<'JS'
+          import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
+          import {join} from 'node:path';
+          import {createHash} from 'node:crypto';
+          const root = process.env.SOLKEY_ROOT;
+          const gradle = readFileSync(join(root, 'keyext.solidity.core/build.gradle'), 'utf8');
+          const file = gradle.match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)[1];
+          const sha = gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)[1];
+          const response = await fetch(`https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/${file}`);
+          if (!response.ok) throw new Error(`compiler download: HTTP ${response.status}`);
+          const data = Buffer.from(await response.arrayBuffer());
+          if (createHash('sha256').update(data).digest('hex') !== sha) throw new Error('compiler hash mismatch');
+          const dir = join(root, 'keyext.solidity.core/build/soljson');
+          mkdirSync(dir, {recursive:true});
+          writeFileSync(join(dir, file), data);
+          JS
+          lake build solidity-lean solkeycheck
+          node --test scripts/solidity-lean.test.mjs scripts/tool-job.test.mjs
       # The automation gate: every TestSuite obligation is derived by the
       # automatic prover (`sol_prove` and the replay `sol_prove?` writes) or
       # refuted by `sol_refute`, and none is pending

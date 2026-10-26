@@ -1,5 +1,10 @@
 # Declarations and metadata
 
+Integration status (2026-10-26): included in the shared checkout. Current
+combined validation is tracked in [integration.md](integration.md).
+Worker handoff statuses and isolated validation results below are historical;
+they neither report the current combined checks nor establish full source support.
+
 ## M1: compiler-resolved metadata (2026-10-25)
 
 `Frontend/SolcJson/Body.lean` resolves `type(C).name` from the contract
@@ -45,8 +50,9 @@ rejection cases.
 Modern admission distinguishes declaration selectors by their resolved solc
 IDs. Error and event declarations have function-shaped compiler types, but
 their `.selector` members are checked metadata, not stored function values.
-They receive no `.address` exemption. Unresolved identities and same-named
-variable declarations remain refused; selector width, hexadecimal and
+They receive no `.address` exemption. Unresolved identities receive no
+declaration exemption, and a local variable matching an error name is not
+folded as that error declaration. Selector width, hexadecimal and
 anonymous-event checks remain in the metadata reader.
 The pinned solc 0.8.34 accepts `MetadataForeign.Problem.selector` and
 `MetadataForeign.Changed.selector`, but rejects their
@@ -54,14 +60,12 @@ The pinned solc 0.8.34 accepts `MetadataForeign.Problem.selector` and
 found or visible). Thus the error/event exemption does not discard effects
 from a valid compiler-accepted instance receiver.
 
-The older fixture's `functionMetadata` function observes a local stored
-function value. It remains unsupported under modern admission with
-`solidity.functionMemberKind`: that lowering still needs typed ABI-kind
-observations rather than arithmetic over the model's packed/hash encoding.
-This is the existing boundary in [source-admission.md](source-admission.md),
-not a newly supported stored-function interface. The modern source regression
-therefore expects 12 proved functions, one internal function, one pending
-false property and this one unsupported function.
+The fixture's `functionMetadata` function observes a stable local external
+function value. The integrated upstream typed ABI-kind projection path admits
+these observations, preserving explicit `address` and `bytes4` casts. The source
+regression requires 13 proved functions, one internal function and the pending
+false property. Effectful or malformed stored projections remain rejected; see
+[source-admission.md](source-admission.md).
 
 ### Review and validation
 
@@ -123,11 +127,12 @@ copies were detached without changing the shared cache.
 The modern admission follow-up was reviewed read-only by the finder and
 skeptic. Its focused API/admission-example build passes (255 jobs), including
 declaration-selector admission, missing/malformed/unresolved IDs, same-named
-stored-value rejection and the error/event `.address` boundary. The real
-source suite passes with the current 12 proved, one internal, one pending and
-one unsupported roster; this supersedes the historical 13-proved source count
-above. The stored-value reason is pinned to `solidity.functionMemberKind`.
-No body lowering, proof rules, trust primitives or resource limits changed.
+stored-value rejection and the error/event `.address` boundary. Its source
+run retained 12 proved, one internal, one pending and one unsupported row before
+upstream supplied typed stored-function projections. The merged tests now
+require those projections to be admitted without folding them into declaration
+metadata; the full source roster again requires 13 proofs. The selector fix
+adds no proof rule, trust primitive or resource-limit change.
 
 ### Remaining declaration work
 
@@ -156,3 +161,221 @@ array members. Getter functions returning references also need the world's
 return-value interface; the existing external-call elaborator currently
 accepts primitive returns there. These interfaces should be coordinated with
 contract-world before adding a second getter-only representation.
+
+## M2: public getter and source ABI patch (2026-10-26)
+
+Worker handoff (historical): `patch_ready_unvalidated`. This milestone was produced outside the
+checkout. No Lean, MCP, source prover runner or repository build was run by
+the implementation worker. That is the historical preparation boundary;
+current combined checks are tracked in integration.md. Feature inventory upgrades
+still require the corresponding source-support evidence.
+
+Public state variables synthesize ordinary function members beside their
+storage roots. Mapping keys and ordinary array indexes become parameters;
+terminal elementary values become results. A terminal struct keeps its
+non-mapping/non-array fields in declaration order. Unsupported returned fields
+cause refusal of the whole getter: bytes/string are **not** incorrectly
+omitted as ordinary arrays. The implemented return/input subset is elementary
+Boolean, address, integer and fixed bytes types. Nominal enum/UDVT/contract and
+function-typed inputs/results, dynamic bytes/string keys/results, and nested
+aggregate results remain unsupported. Existing `uint` constant/unwritten
+immutable expression inlining is reused; narrow or fixed-byte constants not
+recognized by that collector remain unsupported.
+
+Getter members participate in the same dependency ordering, intrinsic
+elaboration and self-call inlining as source functions. Scalar, mapping,
+fixed/dynamic/nested array getters work through ordinary external self calls;
+primitive struct tuples work through `try ... returns (...)`. Ordinary tuple
+assignment from an external call and reference ABI returns remain separate
+interfaces. Public variables overriding interface functions resolve through
+solc's `baseFunctions` identity relation. Mapping key names are retained in
+modern compiler fixtures so named arguments reorder into their declared order.
+Bare identifiers retain storage identity: the separate external-member alias
+table never turns a state read into a getter call or function value.
+
+Array bounds need a distinct wrapper: the pinned compiler's public getter
+reverts with **empty data** out of bounds, while an ordinary array read panics.
+Each generated array step checks its index before reading or descending.
+`require(index < path.length)` preserves the empty-data failure; a subsequent
+ordinary indexed read is reached only in bounds. This was checked against
+both pinned compilers and both pipelines. The source regression catches the
+empty bytes and deliberately leaves a false panic-length property pending.
+
+`FunDecl.sourceDecl` is defaulted source metadata. Its sums distinguish local
+and ABI functions, selected and retained base bodies, getters, special entries
+and implementation helpers. ABI selectors are `Fin (2^32)`. Canonical source
+signatures are computed before enum/UDVT/contract/struct lowering; generated
+model names are never selector inputs. Modern AST serialization retains all
+public/external source selectors; legacy trimming stays unchanged and may use
+an exact source signature when the selector is absent. Malformed selectors
+fail closed. No hash injectivity or selector uniqueness is assumed. A public variable's
+getter is recognized only as an external member (`this.x`/`c.x`): a bare
+function-valued slot `x.selector` must not fold to its getter's selector.
+The paired function-slot regression admits getter metadata and keeps a false
+comparison with the actual stored selector pending. The rebased upstream's
+typed stored-function projection path is preserved. Dynamic getter selectors
+use the receiver-consuming helper, preserving an indexed receiver's bounds
+panic even though the selector itself is constant.
+
+Internal function values exclude external declarations, getters and special
+entries. External values exclude source-local/free/library helpers. Selector
+dispatch and direct self-body lookup admit only selected ordinary entries and
+getters; retained overridden base bodies remain available to direct internal
+calls. This metadata records declaration mutability but does not claim to fix
+the existing erasure of mutability in function types. Foreign-world linking
+must still consume source identity rather than a model alias; this patch does
+not build the contract world or complete receive/fallback dispatch.
+
+All generated function/getter/constructor aliases avoid source names, generated
+local/state aliases and printed struct renamings. Constructor body declarations
+and calls share one allocated name. Emitted constructor helpers join selector
+helpers in `internalFuns` and receive implementation roles, so they cannot be
+exposed as source function values or ABI entries. Regressions collide with the
+actual getter/constructor IDs and with a printed struct-constructor alias.
+
+### Review and validation handoff
+
+The read-only finder and skeptic inspected the implementation without Lean.
+The finder confirmed a dependency regression, fixed in the patch: adding getter IDs to
+the call graph must not count bare state references as getter function values,
+or ordinary bytes/nominal reads would depend on unsupported getters. Bare
+identifier callees of stored function values also exclude getter identities.
+`GetterReferences.localBytes` pins the ordinary-read case. The skeptic required
+an inherited-function ABI encoding regression because `.selector` alone folds
+compiler metadata before reaching the new function-value packer; the fixture
+now uses `abi.encodeCall(this.inherited, ...)` and pins the alias's selector.
+The patch was rebased onto the primary's `c48c52e7` merge, preserving its
+new operator-alias and finite function-dispatch admission analysis. Stored
+getter function-value dispatch is not claimed; its synthetic candidates need
+integration with that separate analysis if it refuses such calls.
+The independent compiler/EVM oracle found the getter bounds distinction above,
+which is reflected in the generated guards and true/false source cases.
+
+The standalone JavaScript oracle runs entirely in memory with optional
+external reference dependencies; none are added to Lake. The worker ran it
+with SHA-pinned Solidity 0.8.34 and 0.8.38, legacy and IR pipelines, including
+three compiler rejection cases (missing array indexes and omitted struct
+outputs). Its final results are recorded in the patch manifest. Those runs
+validate Solidity reference behavior, **not** the Lean implementation.
+
+Integrator checks:
+
+- Run per-file Lean error diagnostics on Raw, Getters, Body, Contract, Import,
+  Values, Stmt, Admission and the example, then review its theorem axiom sets.
+- Run `node --test scripts/public-getters.test.mjs` and the existing declaration,
+  inheritance/constructor, function-value, modifier and source-admission suites.
+  The false getter, getter-panic-length, stored-selector comparison and constructor
+  properties must stay pending.
+- Run the existing layer/orphan, frozen AST, TestSuite, corpus and frozen SolKey
+  gates. Keep unrelated pending source-admission or frame changes intact.
+- Register `Solidity/Examples/Tactics/PublicGetters.lean` in `site/examples.json`.
+  The patch worker was explicitly forbidden from editing that manifest.
+- Measure import/check time before/after applying the patch. The new defaulted
+  field touches low syntax and causes a broad rebuild; the metadata table is
+  compiled once and existing segmented compilation/body memoization remains.
+  It does not undo `1a7d5b0e`'s one-body-per-callee optimization.
+
+This remains one connected milestone of an incomplete declaration group.
+Imports/remappings and multi-source scope, broader using-for/operator linking,
+reference-valued getters and tuple external returns, nominal getter types,
+qualified custom-error reverts, receive/fallback/world registration and other
+constructor/immutable/visibility distinctions still need dedicated work.
+
+## Getter lowering follow-up
+
+Public getter indexes now canonicalize explicit `uint256`/`int256`, including
+synthetic array-index declarations without redundant compiler type descriptions.
+Zero-argument member calls in local declarations and assignments use the normal
+call expansion; the special push-result path remains reserved for `push()`.
+The source ABI encodeCall reader consumes a getter's direct tuple of arguments
+even though its declaration is a VariableDeclaration. It preserves actual byte
+metadata and leaves exact signature/implicit conversion checking to the typed
+native encoder; nested tuples are not flattened.
+
+Narrow primitive external returns are supported for a statically `this` receiver
+only after its typed self frame resolves. Success locals retain their widths and
+ABI marker rows; explicit range checks reject invalid returned values before the
+success body. These decoder failures revert the caller with empty data and are
+outside that call's catch clauses. Unknown-address narrow returns remain refused:
+world ABI bytesN words have padding/alignment that differ from typed self values.
+No core run or proof rule changes, range-check removal, or verdict changes are
+part of this follow-up. Existing getter bounds guards still precede storage reads
+and use empty revert data. Enum getters remain explicitly unsupported, while
+ordinary explicit enum conversion retains its membership/Panic(0x21) check.
+
+Added regressions execute signed/unsigned/bytes self returns and byte layouts,
+and show a failed narrow decode cannot be caught as a successful return. These
+patch-worker changes have not run Lean diagnostics or builds; integration must
+validate the changed frontend, grammar and elaborator, then PublicGetters.
+
+### Self-return ABI representation review
+
+The skeptic found that erased primitive agreement did not imply equal ABI
+representation: a bytes2 self return bound as bytes4 must not reuse compact
+0x1234, and a uint8 self return must not masquerade as bytes1. The typed-self
+path now checks the callee's retained source result kind and the requested
+result kind before inlining. Fixed byte widths must match exactly and byte/
+integer crossings are refused. Numeric widths with the same signedness retain
+the existing caller-side range checks, including safe widening. Function result
+markers are compared before their signature information is erased.
+
+Regressions reject bytes2-to-bytes4, bytes2-to-uint16 and uint8-to-bytes1 native
+try bindings, preserve exact bytes2 layout, and execute uint8-to-uint16 widening.
+The worker did not run Lean diagnostics or builds; current checks belong to
+the combined integration recorded in integration.md. The change does not replace ABI encoding/decoding with casts.
+
+### Caller modalities, prefix conversions and concrete execution
+
+The initial getter examples incorrectly expected default diamond obligations to
+close across external calls. The existing calculus deliberately returns false
+for every try diamond, including self calls. These new source caller cases now
+request explicit `@custom:key box`, as the existing FunctionTypes examples do;
+this proves safety rather than termination. Diamond automation across external
+calls remains missing. Separate kernel-checked concrete runF successes are
+transported to the actual typed run via runF_approx for every positive caller.
+Both false assertions retain concrete panic controls.
+
+The frontend drops an unused bare scalar identifier only when its declaration
+identity resolves to a VariableDeclaration and its scalar type is known. Calls,
+unknown names and bounds-bearing expressions retain their evaluation. Dynamic
+bytes-to-fixed-bytes casts evaluate the receiver once, extract at most N guarded
+bytes and right pad short inputs with zero. Storage operands are materialized
+first, so the N-byte extraction bound does not bound the preceding full copy. This bounded lowering uses existing typed
+statements and checks the exact bytes marker; arbitrary uint8 arrays and direct
+string conversions are refused. Explicit bytes(string) conversion remains valid;
+both branches of a conditional must retain the bytes kind.
+The converter stays under its original lazy branch.
+
+The fixture was regenerated with the SHA-pinned Solidity 0.8.38 compiler and
+retains real generated-name collisions after its new NatSpec declarations.
+Additional concrete/independent EVM cases cover empty/short/leading-zero/long
+prefixes, effectful receivers evaluated once and skipped lazy receivers.
+The patch worker ran no Lean diagnostics or builds. The primary records combined
+Lean and independent-oracle validation in integration.md.
+
+### Getter catch-data and native run review
+
+Getter self frames retain their generated empty-revert bounds checks. Ordinary
+functions still receive withPanics instrumentation; applying that pass to a
+generated getter had added unreachable Panic(0x32) alternatives to the syntactic
+catch-data analysis, although its explicit bounds require already reverted
+empty. Preserving the getter body's empty-revert convention removes those
+invented alternatives without deleting any bound or changing the run rules.
+
+The native NarrowSelf demonstrations now start at an explicit nonzero self
+address. Their former default state used address zero and therefore reverted
+before reaching either the callee or its decoder. The failedDecode example
+now exercises its intended caller-side range check. The selector-receiver proof
+uses the existing scoped leaf/closer replay for its remaining Boolean guard.
+These patch-worker changes have not run Lean diagnostics or builds.
+
+### Capturing prefix results
+
+A fixed-byte prefix is a lowering builtin, including when it is the whole
+initializer or assignment RHS. These two capture sites now hoist that builtin
+whole rather than treating it as an ordinary callee and independently hoisting
+its explicit bytes-kind witness. The prefix's own path validates the witness
+before stripping it, then evaluates the receiver once. Exact byte-kind checks
+remain in force. A native execution regression retains the valid explicit
+`bytes4(bytes(text))` conversion from a string-backed memory reference.
+No Lean diagnostics or builds were run by the patch worker.

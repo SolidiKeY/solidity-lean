@@ -36,7 +36,7 @@ info: \programVariables {
 }
 
 \problem {
-    wt(storage) -> \[{ additionStorageWrite(x, y)@ScopedFlip; }\](true)
+    (self < 1461501637330902918203684832716283019655932542976) -> (wt(storage)) -> \[{ additionStorageWrite(x, y)@ScopedFlip; }\](true)
 }
 -/
 #guard_msgs in

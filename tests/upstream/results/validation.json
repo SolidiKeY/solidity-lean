@@ -1,0 +1,80 @@
+{
+  "baseRepositoryCommit": "cadb628c20e9324a45de4aff622d732907de8ef8",
+  "leanVersion": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+  "nodeVersion": "v24.19.0",
+  "checks": [
+    {
+      "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+      "status": "passed",
+      "tests": 14
+    },
+    {
+      "command": "lake --quiet --no-build lean tests/upstream/Replay.lean -- --tstack=131072",
+      "status": "passed",
+      "checks": 5
+    },
+    {
+      "command": "lake --quiet --no-build lean TrustAudit.lean -- --tstack=131072",
+      "status": "passed",
+      "headlineTheorems": 468
+    },
+    {
+      "command": "node scripts/solidity-upstream.mjs verify",
+      "status": "passed",
+      "files": 11622
+    },
+    {
+      "command": "python3 scripts/snapshot-solidity-upstream.py CHECKOUT --out TEMP",
+      "status": "passed",
+      "archiveAndManifestReproduceByteForByte": true
+    },
+    {
+      "command": "node scripts/check-orphans.mjs",
+      "status": "passed",
+      "reachableModules": 643,
+      "orphans": 0
+    },
+    {
+      "command": "node scripts/check-layers.mjs",
+      "status": "passed",
+      "coreModules": 134,
+      "layerViolations": 0
+    },
+    {
+      "command": "python3 scripts/solidity-feature-audit.py --check",
+      "status": "passed",
+      "features": 211,
+      "upstreamSymbols": 783
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/check-trust.test.mjs",
+      "status": "passed",
+      "tests": 2
+    },
+    {
+      "command": "bash scripts/check-trust.sh",
+      "status": "pre-existing-failures",
+      "findings": 25,
+      "exactlyMatchesOriginalCheckout": true,
+      "newFindings": 0
+    },
+    {
+      "command": "./scripts/check-doc-paths.sh",
+      "status": "pre-existing-failures",
+      "missingReferences": 13
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "libraryBuild": {
+    "command": "lake build Solidity",
+    "status": "inconclusive",
+    "completedTargets": 614,
+    "totalTargets": 618,
+    "stoppedAfterMinutes": 45,
+    "pendingModule": "Solidity/Examples/Decision.lean",
+    "reason": "Broader cold-build time budget exhausted; no build errors observed before termination. The new upstream module and all five replay checks completed successfully."
+  }
+}

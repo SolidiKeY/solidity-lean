@@ -115,6 +115,12 @@ the same counts.
 
 ### The core
 
+`Semantics/Transient.lean` and `Calculus/Transient.lean` are additive core
+modules for the explicitly composed transient-effect interpreter and ordinary
+correctness bridge. They import no elaborator or printer; the source syntax
+examples stay in `Examples/Tactics/TransientStorage.lean`. No existing indexed
+state or loop-frame datatype changes in this milestone.
+
 112 modules at P1, 123 since P2 split some of them (`CORE` in
 `scripts/check-layers.mjs`); the current list also includes the computed
 ERC-7201 and secp256k1 modules:
@@ -127,7 +133,7 @@ ERC-7201 and secp256k1 modules:
   pieces), `Typing/**` (12), `Theory/**` (6 at P1, 9 with
   `Theory/Typed/Obs`'s);
 - the rules: `Calculus.{Fml,Rules,RuleSyntax,RuleKit,KeyTaclets,Step,Arms,
-  Blocks,Taclet,Proves,Logic,Preconditions,FiniteMembership,FilteredMembership,Hyp,Correct,FirstOrder}` and `RuleSyntax`'s
+  Blocks,Taclet,Proves,Logic,Preconditions,FiniteMembership,FilteredMembership,Hyp,Correct,FirstOrder,Lifetime,ContractWorld}` and `RuleSyntax`'s
   pieces;
 - their soundness: `Calculus.{Sound*,StmtSound,ProvesSound,PremiseSound,
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
@@ -425,3 +431,10 @@ The cold `lake build SolkeyTestSuite` could not be timed whole at 12
 threads: three `TestSuite/Derived*` modules were killed by the session's
 32 GiB cap (exit 137); the gate's runs at 4 threads pass.  The row above
 sums the modules both cold runs built.
+
+## Contract-world modules
+
+`Semantics/ContractWorld` and `Calculus/ContractWorld` are core modules.
+They compose the existing typed run and closed constructor/method programs;
+source extraction stays in `Frontend/WorldImport`. The layer checker includes
+the world and Lifetime correctness bridges explicitly.

@@ -294,6 +294,14 @@ def expandFun (enums : TyEnv)
     (mods : List (String × Array Term × Term × Array Term × Array Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
+  -- Keep source locations before expandParamsW replaces parameters by
+  -- their typed declarations: only these names establish calldata origin.
+  let calldataRoots : List String := ps.toList.filterMap fun p =>
+    match p.raw with
+    | `(sol_param| $T:sol_ty calldata $x:ident) =>
+      let _ := T
+      some (x.getId.toString false)
+    | _ => none
   let (ps, ws, locs) ← expandParamsW enums ps
   let mut ws := ws
   -- `payable` is an atom of the keyword reading and an identifier of the
@@ -336,8 +344,8 @@ def expandFun (enums : TyEnv)
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   -- a body with a slice reads it as a view (`RawStmt.sliceViews`, `Syntax/Elab.lean`)
-  let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll].contains s.getKind).isSome
-    then `($(mkIdent `Solidity.RawStmt.sliceViews) $body) else pure body
+  let body ← if (b.raw.find? fun s => [``solSlice, ``solSliceFrom, ``solSliceTo, ``solSliceAll, ``solCalldataLocal].contains s.getKind).isSome
+    then `($(mkIdent `Solidity.RawStmt.sliceViews) $body $(quote calldataRoots)) else pure body
   `(($(strLit f),
     ({ params := [$ps,*], paramLocs := [$locs,*], rets := [$rets,*], retMem := $(quote retMem),
        retStorage := $(quote retStorage), body := $body,

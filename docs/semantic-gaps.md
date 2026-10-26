@@ -95,7 +95,7 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); calldata slices `b[i:j]` as views, reads, `.length` and `abi.decode` loop-free (lane `open-abi2`, `RawStmt.sliceViews`; `tests/solc/Calldata.sol`, `Examples/Tactics/Bytes.lean` §6); a slice handed on, hashed or copied stays refused |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); a byte-string key and the `concat`s since "Hashing and the ABI"; a byte type as a struct member (lane `open-left2`: the struct spells it, `StructEnc`); `calldata` parameters and locals, read only (lane `open-small`, `calldataCheck`); calldata slices `b[i:j]` as views, reads, `.length` and `abi.decode` loop-free (lane `open-abi2`, `RawStmt.sliceViews`; `tests/solc/Calldata.sol`, `Examples/Tactics/Bytes.lean` §6); flat primitive slices now materialize for passing, hashing and copying; reference-element copies stay refused (see `calldata-slice-copies.md`) |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`, `bytes.concat`, `mapping(string => …)`/`mapping(bytes => …)` | semantics: builtins | closed ("Hashing and the ABI" below; `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol`): `keccak256` an uninterpreted function of the bytes (collision resistance not assumed), the ABI's byte layouts lowered by the elaborator, a byte-string key hashed; `abi.encode` of arrays and structs of values, `abi.decode` of `bytes`/`string`, `abi.encodeWithSelector`/`encodeWithSignature`/`encodeCall` (a selector folded by Keccak-256 at elaboration), an `address`/enum packed at 20 bytes/one (lane `open-left2`); `sha256`, `ripemd160` computed and `ecrecover` an address uninterpreted where the signature is well formed, `abi.decode` of `T[]`, `T[k]` and structs of values (lane `open-small`); a locally built byte string's hash evaluated (`keccakAt`) and a symbolic word's packed bytes read back (`hornerU?`; lane `open-closer`); nested types, head and tail recursively (lane `open-abi2`, `AbiTy`: `uint[][]`, `bytes[]`, a struct with a `uint[]`/`bytes`/struct member, run in `Codec3`; a static nested struct proved, `encodeStaticNested`); open: the closer under `⟨⟩` on a hash of a byte string built in the function, runner proofs over a nested encoding (its loops have no invariant) |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | closed by the elaborator's reading ("Function types" below; `Examples/Tactics/FunctionTypes.lean`, `tests/solc/FunctionTypes.sol`); external function types (an address and a selector), a call through a value that is not a name (`s.f(x)`, `fs[i](x)`, `choose(b)(x)`), a dispatch that recurses (lane `open-left2`); open: reference parameters in a function type, a value of an external function this contract does not declare (`I(a).g` of an interface) |
 | revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics, calculus | closed for a self-call's literal reasons and, in lane `open-alloc`, for another contract's data and data known in part ("Revert data" below; `Examples/Tactics/RevertData.lean`, `tests/solc/RevertData.sol`): the reason reaches `catch Error(string memory r)` / `catch (bytes memory d)` in the run and in the calculus (`catchDataBox`), another contract's as any bytes (`Fml.allocAll`), a custom error of a symbolic argument by its pattern (`Pat`); open: a reason not literal (refused by `sol{}`), a fresh object's bytes read by the closer past its heartbeats (about 400k of 200k, "Revert data", lane `open-closer`), the callback reading's leaves on the bound array |
@@ -347,8 +347,12 @@ theorems are unchanged.
   their evaluation position. Source rebinding and endpoint/index effects
   are covered by `Examples/Tactics/AggregateSlices.lean`, including legacy
   and via-IR binary schedules and a catchable bounds panic. Reads, lengths
-  and decoding remain proved by the existing `Bytes` examples. Passing,
-  hashing and copying a view still require location-aware interfaces.
+  and decoding retain the existing loop-free lowering. Whole-value uses of
+  flat primitive slices now materialize fresh memory for internal calls,
+  memory bindings/returns, hashing and existing storage copies. Source import
+  preserves `calldata` locals as views, distinct from writable memory copies.
+  Reference-element and nominal-element materialization remain refused.
+  Proof scripts and validation limits: [calldata-slice-copies.md](calldata-slice-copies.md).
 - Inline arrays allocate a fixed memory array before evaluating/storing
   elements in source order. The first element's mobile type and subsequent
   implicit common types determine its element type; the assignment target
@@ -791,16 +795,18 @@ the data has `Error`'s selector and decodes, `r` the decoded string;
   callee that may call back, the `ProvesC` rule is `false`.
 - *Panic codes.*  `THalt.panic` keeps no code: the model panics on a failed
   `assert` (`0x01`) and on an overflow inside `checked { … }` (solc's
-  `0x11`, read as an assertion, `docs/options.md` O2); division by zero
-  (`0x12`), an enum out of range (`0x21`), an index out of range (`0x32`),
-  a too-large allocation (`0x41`) and an unset function value (`0x51`)
-  revert in the model (the solkey reading).  In a self-call's callee, where
+  `0x11`, read as an assertion, `docs/options.md` O2), as does the
+  enum conversion's ordinary assertion (`0x21` in solc). Division by zero
+  (`0x12`), an index out of range (`0x32`), a too-large allocation (`0x41`)
+  and an unset function value (`0x51`) revert in the ordinary model reading.  In a self-call's callee, where
   a `catch` reads the data, every statement is preceded by the checks it
   meets with their codes (`Prog.withPanics`, `Syntax/Checked.lean`): an
   overflow `0x11` (outside `checked { … }` too), a division or modulo by
   zero `0x12`, an empty `pop()` `0x31`, an index past a length `0x32`; the
-  allocation's `0x41`, the enum's `0x21` and the function value's `0x51`
-  are not.  A self-call's `Panic` clause
+  allocation's `0x41` is still absent. Enum conversion emits literal
+  `Panic(0x21)` data in a self frame, and internal-function dispatch ends
+  with literal `Panic(0x51)` data there. Outside a self frame their previous
+  assertion/revert readings remain unchanged. A self-call's `Panic` clause
   binds the table's code, `1` without one, as before; its rule's goal is
   behind the codes its callee's data carries (`Prog.panicCodes`,
   `docs/options.md` O8, "The `Panic` goal per code").
@@ -940,6 +946,21 @@ references; other assembly and word-array buffers remain unsupported.
 `Examples/Tactics/ComputedRevert.lean` proves computed, aliased and empty
 execution outcomes; nested raw catching and outer Error decoding also have
 executable guards from pinned solc source. These guards are not proof axioms.
+
+**Error-operand priority (calls/exceptions M1).** Custom-error arguments
+are evaluated on both branches of `require`, and before an ordinary
+`revert E(args)` discards the frame. Each operand is hoisted and forced before
+the next one's calls or guards. Discarding a raw-pure operand additionally
+checks its typed primitive read cannot halt; fields through unset aliases
+are not silently dropped. A reason's condition is forced before its reason
+allocation. Function dispatch captures all operands at their formal types
+before selecting a target or reporting an unset value. The exact self-call
+panic codes above use existing literal-data statements and catch rules.
+`Semantics/RevertMemory.lean` also relates actual callee halt bytes to the
+exact catch allocation, for arbitrary byte lists, without changing the
+calculus's conservative unknown-memory-payload rule. See
+[feature-work/calls-exceptions.md](feature-work/calls-exceptions.md) for
+source regressions, proof obligations and the patch's unvalidated status.
 
 **Left open, with the reason.**
 - The calculus still enumerates static payload patterns. A memory operand

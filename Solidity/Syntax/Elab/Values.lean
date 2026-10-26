@@ -64,9 +64,20 @@ A function's value is its tag, its position in `C.funs` from `1`
 the functions of its signature (`fnDispatch`). -/
 
 /-- Imported implementation helpers have direct calls only. The reserved
-width-table key cannot be a Solidity storage path; no model type changes. -/
+width-table marker remains compatible with older imported contracts;
+`sourceDecl` supplies the ordinary source visibility and entry distinctions. -/
 def fnSource (g : String) : Bool :=
   (lookupBy (g ++ "#internalEntry") C.widths).isNone
+
+/-- Source-only roles constrain values; native contracts retain their existing API. -/
+def fnInternal (g : String) : Bool :=
+  fnSource C g && ((lookupBy g C.funs).bind (·.sourceDecl)).all SourceFunction.internalValue
+
+def fnExternalValue (g : String) : Bool :=
+  fnSource C g && ((lookupBy g C.funs).bind (·.sourceDecl)).all SourceFunction.externalValue
+
+def fnExternalEntry (g : String) : Bool :=
+  fnSource C g && ((lookupBy g C.funs).bind (·.sourceDecl)).all SourceFunction.externalEntry
 
 /-- The functions of `C` named as a value somewhere in its code (not as a
 callee): only these may be reached through a value taken inside `C`. -/
@@ -76,7 +87,7 @@ def fnTaken : List String :=
   let es : List RawExpr := C.funs.flatMap (fun (_, d) => d.mods.flatMap (·.args)) ++
     C.inits.map (·.2)
   let ns := RawStmt.namesList stmts ++ es.flatMap RawExpr.names
-  (C.funs.map (·.1)).filter fun g => fnSource C g && ns.contains g
+  (C.funs.map (·.1)).filter fun g => fnInternal C g && ns.contains g
 
 /-- Whether the function `d` (its modifiers too) calls through a name that is
 not a function: a parameter, a local or a state variable, possibly of a
@@ -90,7 +101,7 @@ def callsThroughValue (d : FunDecl) : Bool :=
 in the contract, or no function declared before it (nor it) calls through a
 value (`fnTag` refuses `g`'s value elsewhere). -/
 def fnReachable (g : String) : Bool :=
-  fnSource C g && ((fnTaken C).contains g ||
+  fnInternal C g && ((fnTaken C).contains g ||
     match C.funs.findIdx? (·.1 == g) with
     | some i => !(C.funs.take (i + 1)).any (callsThroughValue C ·.2)
     | none => false)
@@ -100,7 +111,7 @@ def fnReachable (g : String) : Bool :=
 calls through a value: that function's dispatch leaves `g` out
 (`fnDispatch`), as `g` is not declared before it. -/
 def fnTag (g : String) : Except String (Option Nat) := do
-  unless fnSource C g do throw s!"{g}: an implementation helper has no Solidity function value"
+  unless fnInternal C g do throw s!"{g}: this declaration has no Solidity internal function value"
   let some i := C.funs.findIdx? (·.1 == g) | return none
   unless fnReachable C g do
     throw s!"{g} is taken as a value only outside the contract's functions, and a function \
@@ -727,6 +738,8 @@ first branch's (`narrowWholeAt?` admits one whose branches agree). -/
 def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
   | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
   | .ternary _ a _ => exprShape Γ a
+  | .call "#sliceCopy" [v] | .call "#sliceRaw" [v, _, _]
+  | .call "#sliceDesc" [v, _, _] => exprShape Γ v
   | .call f as =>
     if (f == "bytes" || f == "string") && as.length == 1 && (lookupBy f C.funs).isNone then
       dynBytesRowsOf f else
@@ -763,6 +776,13 @@ def stringReason? (Γ : ECtx) : RawExpr → Bool
     match e.bytesLit? with
     | some bs => (String.fromUTF8? ⟨bs.toArray.map UInt8.ofNat⟩).isSome
     | none => (exprShape C Γ e).contains ("#string", 1)
+
+/-- Fixed byte prefixes accept byte strings, retaining the string/bytes ABI distinction. -/
+def dynamicBytesExpr (Γ : ECtx) : RawExpr → Bool
+  | .ternary _ a b => dynamicBytesExpr Γ a && dynamicBytesExpr Γ b
+  | e =>
+    let ws := exprShape C Γ e
+    sameShape ws dynBytesRows && !ws.any (fun row => row.1.endsWith "#string")
 
 /-- The narrow positions of `ws`, below a place written `·` (`·[]` 8 bits wide). -/
 def shapeStr (ws : List (String × Nat)) : String :=
@@ -837,6 +857,9 @@ partial def abiTyName (ws : List (String × Nat)) (k : String) : Ty → Option S
 def fnSignature? (g : String) : Option String := do
   guard (fnSource C g)
   let d ← lookupBy g C.funs
+  if let some source := d.sourceDecl then
+    guard source.externalValue
+    return ← source.signature
   let ps ← d.params.mapM fun (n, T) => abiTyName d.widths n T
   pure s!"{g}({",".intercalate ps})"
 
@@ -847,7 +870,16 @@ def errorSignature? (e : String) : Option (FunDecl × String) := do
   pure (d, s!"{e}({",".intercalate ps})")
 
 /-- The selector of the function `g` of `C` (`Keccak.selector`). -/
-def fnSelector? (g : String) : Option Nat := (fnSignature? C g).map Keccak.selector
+def fnSelector? (g : String) : Option Nat := do
+  guard (fnExternalValue C g)
+  let d ← lookupBy g C.funs
+  if let some source := d.sourceDecl then
+    match source.callable with
+    | .getter selector => return selector.val
+    | .abi _ _ (some selector) => return selector.val
+    | .abi _ _ none => return Keccak.selector (← source.signature)
+    | _ => none
+  else (fnSignature? C g).map Keccak.selector
 
 /-- The external function type of `g`, as `canonFnTy` spells it. -/
 def FunDecl.extTy? (d : FunDecl) : Option String :=
@@ -868,7 +900,7 @@ def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
 the receiver and `g`. -/
 def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
   | .field r g =>
-    if fnSource C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
+    if fnExternalValue C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
   | _ => none
 
 /-- The function type of the expression `e`, as `canonFnTy` spells it: a
@@ -1004,11 +1036,20 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   -- against its member's, by the member writes it is lowered to (`hoist`)
   | .call "#array" as => as.findSome? (narrowWholeAt? Γ)
   | .call f as =>
+    if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
+      -- The prefix lowering validates the bytes kind before hoisting.
+      as.findSome? fun a => narrowWholeAt? Γ (match a with
+        | .call "bytes" [v] => v
+        | _ => a)
+    else
     if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
       as.findSome? (narrowWholeAt? Γ)
     -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
     -- no other array)
-    else if (lookupBy f C.funs).isNone && (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice") then
+    else if (lookupBy f C.funs).isNone &&
+        (byteBuiltin f || f == "erc7201" || f == sliceViewName || f.startsWith "#slice" ||
+          ((bytesTy? f).isSome && as.length == 1 &&
+            as.all (fun a => dynamicBytesExpr C Γ a))) then
       as.findSome? (narrowBase? Γ)
     else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
@@ -1190,7 +1231,9 @@ partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       lookupBy (k ++ "#bytes") tb
   | .field _ "length" => none
-  | e@(.field _ _) => do
+  | e@(.field f m) => do
+    if m == "selector" && ((extMember? C Γ f).isSome ||
+        ((fnTyOfExpr C Γ f).bind fnParts?).any (·.2.2)) then return 4
     let (tb, k, .prim _) ← widthPath? C Γ e | none
     lookupBy (k ++ "#bytes") tb
   | .call f _ =>
@@ -1420,6 +1463,20 @@ the types from the expression as written. -/
 partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .call "#array" as => pure (.call "#array" as)
   | .call f as => do
+    -- A lazy branch is elaborated as a statement again. Validate the raw
+    -- prefix witness before recursively rewriting its backing value, then
+    -- rebuild the bytes marker that an ordinary bytes conversion would erase.
+    if f.startsWith "#bytesPrefix" && (lookupBy f C.funs).isNone then
+      let some n := (f.drop 12).toNat? | throw "a fixed byte prefix needs its width"
+      unless 0 < n && n ≤ 32 do throw "a fixed byte prefix needs one through 32 bytes"
+      let [witness] := as | throw "a fixed byte prefix takes one bytes argument"
+      unless dynamicBytesExpr C Γ witness do
+        throw "a fixed byte prefix takes bytes, not another reference type"
+      let backing := match witness with
+        | .call "bytes" [value] => value
+        | value => value
+      let backing ← bytesPure Γ backing
+      return .call f [.call "bytes" [backing]]
     if f == "string.concat" && (lookupBy f C.funs).isNone then
       unless as.all (stringReason? C Γ) do throw "string.concat takes strings"
     if f == "bytes.concat" && (lookupBy f C.funs).isNone then
@@ -1437,6 +1494,13 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
     if let some n := bytesTy? f then
       let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
       if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
+      -- A dynamic bytes-to-fixed-bytes conversion takes the first N bytes,
+      -- right padded with zero, rather than converting a memory reference
+      -- numerically. A hidden bounded lowering captures the receiver once.
+      if dynamicBytesExpr C Γ o then
+        -- Keep the bytes kind explicit when `bytesPure` erased a valid
+        -- `bytes(text)` conversion from a string-backed memory reference.
+        return .call ("#bytesPrefix" ++ toString n) [.call "bytes" [a]]
       return match bytesOf? C Γ o with
         | some m =>
           if m == n then a
@@ -1733,8 +1797,8 @@ def addressCapture (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   pure ([.of Γ (.declLocal .uint x (some value))], .name (toString x))
 
 /-- A conversion `E(e)` to an enum of `n` members, `e`'s captures made: a
-fresh `uint` holding `e`, then `assert` that it names a member (solc panics,
-`0x21`, on one that does not). -/
+fresh `uint` holding `e`, then a membership check: an ordinary assertion,
+or literal `Panic(0x21)` data in a self-call frame. -/
 def enumCapture (n : Nat) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let Γ ← nctx
   let v ← checkIn C Γ .uint e
@@ -1742,7 +1806,8 @@ def enumCapture (n : Nat) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e' : RawExpr := .name (toString x)
   let Γ' ← nctx
   let c ← checkIn C Γ' .bool (.binop .lt e' (.num n))
-  pure ([.of Γ (.declLocal .uint x (some v)), .of Γ' (.assert c)], e')
+  let check := if (← read).selfFrame then panicStmt 0x21 c else .assert c
+  pure ([.of Γ (.declLocal .uint x (some v)), .of Γ' check], e')
 
 /-- `e`'s value, or the reference it names, held in a fresh local before a
 later operand's effect: under the default legacy schedule, `x = i++ + i;`
@@ -1772,8 +1837,77 @@ def captureExpr (e : RawExpr) : ElabM (SProg C × RawExpr) := do
     return ([.of Γ (.declMem R x (some (.alias mp)) rfl mp.mapFree)], .name (toString x))
   | _, t =>
     let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
-    let x ← captureAs C "se" (.val p (widthIn C (← ctx) e))
+    let ec ← ctx
+    -- A scalar capture must retain source-kind markers, not only its bit
+    -- width: bytes widening pads on the right, addresses pack at 20 bytes,
+    -- and function/enum observations must keep their original kind.
+    let mut ws := match widthPath? C ec e with
+      | some (tb, key, .prim _) => shapeUnder tb key
+      | _ => match e with
+        | .name name => localShape ec name
+        | _ => exprShape C ec e
+    if let some ty := (rawFnTyOfExpr? C ec e).orElse (fun _ => fnTyOfExpr C ec e) then
+      ws := ("#" ++ ty, 0) :: ws
+    if let some n := bytesOf? C ec e then ws := ("#bytes", n) :: ws
+    for marker in ["#address", "#enum"] do
+      if let some n := markOf? C ec marker e then ws := (marker, n) :: ws
+    let x ← captureAs C "se" (.val p (widthIn C ec e))
+    declareShape (toString x) ws
     return ([.of Γ (.declLocal p x (some v))], .name (toString x))
+
+/-- A discarded argument needs no runtime read only when its raw syntax
+has no operation or effect and its typed primitive value cannot halt.
+In particular `p.x`, `a.length` and named references are not assumed total. -/
+def canDiscardArg (e : RawExpr) : ElabM Bool := do
+  unless e.isPure do return false
+  -- This query also runs before function/byte members are normalized.
+  -- A failed synthesis is not an admission error: the ordinary passes may
+  -- still lower `this.f.selector`, for example. It simply cannot be omitted.
+  match synth C (← nctx) e with
+  | .error _ => pure false
+  | .ok t =>
+    let some ⟨_, v⟩ := t.toVal? | return false
+    pure (!v.mayHalt)
+
+/-- Evaluate a residual operand now, including a named reference. The usual
+`captureExpr` may leave reference names alone because effects cannot rebind
+them; a discarded/error argument must still detect an unset reference. -/
+def forceArg (e : RawExpr) (expected : Option PrimTy := none) : ElabM (SProg C × RawExpr) := do
+  if e.isLit || e.bytesLit?.isSome || e matches .bool _ then return ([], e)
+  let ⟨Γ, t⟩ ← synthM C e
+  match t with
+  | .path (.ref R) sp =>
+    let x ← captureRef C "sp" (.alias R) e
+    pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
+  | .mpath (.ref R) mp =>
+    let x ← captureRef C "mv" (.mem R) e
+    pure ([.of Γ (.declMem R x (some (.alias mp)) rfl mp.mapFree)], .name (toString x))
+  | _ =>
+    match expected with
+    | none => captureExpr C e
+    | some p =>
+      -- Literal operations not folded by constRat? still take their
+      -- contextual type from the error's parameter (e.g. int(2 ** 3)).
+      let v ← checkIn C Γ p e
+      let x ← captureAs C "se" (.val p (widthIn C (← ctx) e))
+      pure ([.of Γ (.declLocal p x (some v))], .name (toString x))
+
+/-- Finish each argument before starting the next one's hoisting. This
+preserves both failure priority and values read before a later effect.
+With `discard`, total primitive reads can be omitted because their values
+will never be encoded or passed to a callee. -/
+def eagerArgsWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (args : List RawExpr) (discard : Bool := false)
+    (expected : List (Option PrimTy) := []) : ElabM (SProg C × List RawExpr) := do
+  let mut P : SProg C := []
+  let mut values : List RawExpr := []
+  for (a, i) in args.zipIdx do
+    let (Q, a) ← hoist a
+    let (Q', a) ← if discard && (← canDiscardArg C a) then pure ([], a)
+      else forceArg C a ((expected[i]?).getD none)
+    P := P ++ Q ++ Q'
+    values := values ++ [a]
+  pure (P, values)
 
 /-- Hold an earlier read before a later effect or explicit overflow guard.
 Even a guard without a state change may panic or assume the run away, so an

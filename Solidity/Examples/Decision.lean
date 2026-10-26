@@ -464,8 +464,8 @@ local instance : InContract := ⟨Gaps⟩
 
 /-! ### Quantifiers over contents
 
-Outside `apfPrep`'s shapes once; all but `gapArrayBlock` decided since
-(features 16 to 21, pinned below). -/
+Outside `apfPrep`'s shapes once; all decided since (features 16 to 21,
+pinned below; `gapArrayBlock` by feature 32, `Examples/DecisionArrays.lean`). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
@@ -560,8 +560,8 @@ def kintBinderTwo : Fml Gaps [] := .bind .box (.user "z") .kint (.bind .box (.us
     (isT (.app2 (.zcmp .gt rfl) (.pvZ (.there .here))
       (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit (-1))))))))
 /-- A binder of KeY's `int` in a negative position, an `∃`: `(∀ int z.
-z > 0) → 0 == 1`.  Outside feature 26 (`Fml.zOK` takes positive binders
-only). -/
+z > 0) → 0 == 1`.  A counterexample once; proved since feature 30 (the
+binder read over two words, `Examples/DecisionKInt.lean`). -/
 def gapKIntNeg : Fml Gaps [] :=
   .imp (.bind .box (.user "z") .kint (isT (.app2 (.zcmp .gt rfl) (.pvZ .here) (.app0 (.zlit 0)))))
     (.eq (litU 0) (litU 1))
@@ -635,22 +635,32 @@ def addmodZero : Fml Gaps [] := allU (isT (.app2 (.binop .eqB rfl) (.app3 (.modu
 
 end GapTerms
 
-/-! ### Hashes outside `Fml.hashCovered` -/
+/-! ### Hashes outside `Fml.hashCovered` (three of them inside since features 27 to 29) -/
 
 section GapHashes
 
 open Solidity.Examples.DecisionHashes
 open Solidity.Examples.Tactics.Hashing (Names)
 
-/-- Three kinds of hash of one string. -/
+/-- Three kinds of hash of one string: a counterexample once, decided since
+feature 28 (`Fml.tk3`, below). -/
 def gapThreeKinds : Fml Names [] :=
   strings (.imp (.eq hS hT) (.imp (.eq shaS shaT)
     (.eq (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here)))
       (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)))))
 /-- Two kinds, no string hashed by both: no kind to read the other's words
-against. -/
+against.  A counterexample once, decided since feature 27 (one string of
+the second kind needs no link, below). -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
+/-- Two kinds each hashing two strings, no string hashed by both:
+`keccak256(a) == keccak256(b) → sha256(c) == sha256(d)`.  In either order
+the second kind's strings have no word of the first to link with, and
+there are two of them (feature 27 takes one).  A counterexample once,
+decided since feature 29 (the unlinked words moved, `Fml.tk_complete_move`,
+below). -/
+def gapMixedPairs : Fml Names [] :=
+  strings4 (.imp (.eq (h4 .keccak sA) (h4 .keccak sB)) (.eq (h4 .sha256 sC) (h4 .sha256 sD)))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
 keccak256(t)`.  The verdict turns on the strings' bytes past the write,
 which no stage reads (memory, plan step 6). -/
@@ -696,13 +706,10 @@ theorem gapIntAnd_inTarget : gapIntAnd.inTarget {} = true := by decide +kernel
 theorem gapAddmod_inTarget : gapAddmod.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
+theorem gapMixedPairs_inTarget : gapMixedPairs.inTarget {} = true := by decide +kernel
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
 /-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
 theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
-
-/-- info: true -/
-#guard_msgs in
-#eval ([gapArrayBlock, gapKIntNeg].map verdict).all (· == "unknown")
 
 /-! Binders of KeY's `int` (M7, feature 26): the former counterexample
 `gapKIntBinder` proved, its false variant refuted (the binder's entry `0`),
@@ -912,9 +919,29 @@ theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_comp
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
-/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+/-- info: ["unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapWrittenMemory, verdict gapHashNegForall]
+#eval [verdict gapWrittenMemory, verdict gapHashNegForall]
+
+/-! Three kinds (feature 28, `Fml.tk3`), a second kind hashing one string
+with no hash of the first (feature 27) and several such strings (feature
+29): the former counterexamples covered, by the kernel, so answered;
+`gapThreeKinds` proved, `gapMixedKinds` and `gapMixedPairs` refuted (their
+variants in `Examples/DecisionHashes.lean`). -/
+
+theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel
+theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel
+theorem gapThreeKinds_answers : decideGoal gapThreeKinds ≠ .unknown :=
+  decideGoal_complete_hash gapThreeKinds_covered
+theorem gapMixedKinds_answers : decideGoal gapMixedKinds ≠ .unknown :=
+  decideGoal_complete_hash gapMixedKinds_covered
+theorem gapMixedPairs_covered : gapMixedPairs.hashCovered = true := by decide +kernel
+theorem gapMixedPairs_answers : decideGoal gapMixedPairs ≠ .unknown :=
+  decideGoal_complete_hash gapMixedPairs_covered
+
+/-- info: ["proved", "refuted", "refuted"] -/
+#guard_msgs in
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapMixedPairs]
 
 /-! ### Storage arrays at symbolic indices (M7, plan step 6)
 

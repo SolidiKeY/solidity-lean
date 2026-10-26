@@ -110,6 +110,17 @@ contract ExternalFunctionTypes {
         assert(h.selector == this.ext.selector && h.address == address(this));
         assert(h(x) == 2 * x);
     }
+    // Isolate selector projection from the indirect-call obligation above.
+    /// @custom:key box
+    function selectorOfValue() public view {
+        function (uint) external pure returns (uint) h = this.ext;
+        assert(h.selector == this.ext.selector);
+    }
+    // Deliberately false: a successful packing must not prove a wrong selector.
+    function falseSelectorOfValue() public view {
+        function (uint) external pure returns (uint) h = this.ext;
+        assert(h.selector != this.ext.selector);
+    }
     function externalSelector() public pure {
         assert(this.ext.selector == bytes4(0x0be5edb6));
     }

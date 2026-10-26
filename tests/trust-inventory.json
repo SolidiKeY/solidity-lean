@@ -677,11 +677,6 @@
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
-    "code": "let s \u2190 liftTermElabM <| unsafe evalExpr String (mkConst ``String) e"
-  },
-  {
-    "file": "Solidity/Frontend/Problems.lean",
-    "kind": "unsafe",
     "code": "let k \u2190 liftTermElabM <| unsafe evalExpr (Option (Nat \u00d7 Nat)) (mkApp (mkConst ``Option [0])"
   },
   {
@@ -1158,5 +1153,45 @@
     "file": "Solidity/Examples/Tactics/FilteredSets.lean",
     "kind": "unsafe",
     "code": "let decoded \u2190 unsafe Lean.Meta.evalExpr SpecExpr (Lean.mkConst ``SpecExpr) expression"
+  },
+  {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let contract \u2190 unsafe evalExpr Contract (mkConst ``Contract) C"
+  },
+  {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let body \u2190 unsafe evalExpr (Fml contract []) (\u2190 inferType \u03c6) (\u2190 Symex.evaluable \u03c6)"
+  },
+  {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
+  },
+  {
+    "file": "Solidity/Frontend/Problems.lean",
+    "kind": "unsafe",
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
+  },
+  {
+    "file": "Solidity/Frontend/Problems.lean",
+    "kind": "unsafe",
+    "code": "let body \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6) (\u2190 Symex.evaluable \u03c6)"
+  },
+  {
+    "file": "Solidity/Frontend/WorldImport.lean",
+    "kind": "unsafe",
+    "code": "let rows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (targetFull ++ `report)"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let refuted \u2190 unsafe evalExpr Bool (mkConst ``Bool) probe"
+  },
+  {
+    "file": "Solidity/Tools/Upstream.lean",
+    "kind": "unsafe",
+    "code": "unsafe evalExpr Json (mkConst ``Json) expression"
   }
 ]
