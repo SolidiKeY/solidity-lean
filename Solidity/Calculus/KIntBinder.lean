@@ -26,7 +26,7 @@ the address `n` (`Fml.zT`): `∀ int z. φ` becomes `{z := net(n)} φ`.
 The fragment (`Fml.zOK`): binders of KeY's `int` under `∀`, `∧` and the
 consequent of `→`, everything else reading no ledger and first-order
 (`Fml.netFree`: equations, `wt`, the connectives and value quantifiers),
-fewer than `2^256` binders on a path (`Fml.zDepth`), so that their
+at most `2^256` binders on a path (`Fml.zDepth`), so that their
 addresses are distinct.  A binder in a negative position (an `∃` of KeY's
 `int`) is outside: it needs an unbounded binder of the leaf language.
 -/

@@ -1242,7 +1242,8 @@ Three properties of the reading are worth knowing.
 `Calculus/QuantHoist.lean`, `Calculus/QuantExpand.lean` and
 `Calculus/ArrayProperty.lean`, of the ledger blocks' in
 `Calculus/LedgerBlock.lean`, of
-`Fml.mxTop_holds` in `Calculus/MemSwap.lean`: `propext`,
+`Fml.mxTop_holds` in `Calculus/MemSwap.lean`, of `Fml.zT_valid` and
+`Fml.holds_zT` in `Calculus/KIntBinder.lean`: `propext`,
 `Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
 `Fml.Covered` is `Fml.CoveredA || Fml.memCovered || Fml.kintCovered`.  `Fml.CoveredA`, the
@@ -1795,7 +1796,7 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     (`Fml.netFree`, `holds_setNet`).  The fragment `Fml.zOK`: the binders
     under `∀`, `∧`, a consequent; everything else first-order (equations,
     `wt`, the connectives, value quantifiers) reading no ledger and no
-    `copyMem` (whose denotation the frame lemma does not unfold); fewer than
+    `copyMem` (whose denotation the frame lemma does not unfold); at most
     `2^256` binders on a path (`Fml.zDepth`), so that their addresses are
     distinct.  The declaration's guard is the address's (`zRets`: a ledger
     read returns where its address does), so the rewriting is in the ledger

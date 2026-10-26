@@ -573,8 +573,9 @@ def gapLedgerWrite : Fml Gaps [] := allU (.upd .box (.snoc .nil (.pay xU (litU 1
   (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0)))))
 /-- Its true variant: `net(x) >= 1 → {pay(x, 1)} net(x) >= 0`; and the
 balance a payment leaves, `this.balance >= 2 → x != this → {pay(x, 1)}
-this.balance >= 1`, with its false variant (`x` the contract, or the
-balance short). -/
+this.balance >= 1`, with its false variant (no `x != this`, and
+`this.balance >= 2` after: false at a balance of `2` and `x` any other
+address). -/
 def ledgerWriteOk : Fml Gaps [] := allU (.imp (isT (.app2 (.zcmp .ge rfl) (.app1 .net xU) (.app0 (.zlit 1))))
   (.upd .box (.snoc .nil (.pay xU (litU 1)))
     (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0))))))
