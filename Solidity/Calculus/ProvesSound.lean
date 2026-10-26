@@ -153,9 +153,10 @@ theorem Fml.binds_mono : {Γ : Ctx} → (bs : List (Modality × Var × LTy)) →
   | _, (_, _, _) :: bs, _, _, h, _, hσ =>
     Modality.forallB_imp (fun _ hv => Fml.binds_mono bs h _ hv) hσ
 
-theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))
-    (hv : Bool) (φ : Fml C Γ) : (H.anonHavoc xs hv).wrap φ = H.wrap (Fml.anonHavoc xs hv φ) := by
-  cases hv <;> rfl
+theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ)
+    (xs : List ((t : LTy) × Idx Γ t)) (hv : Option (List Name)) (φ : Fml C Γ) :
+    (H.anonHavoc xs hv).wrap φ = H.wrap (Fml.anonHavoc xs hv φ) := by
+  rcases hv with _ | _ | ⟨_, _⟩ <;> rfl
 
 end Wrap
 

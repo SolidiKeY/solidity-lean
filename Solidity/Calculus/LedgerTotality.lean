@@ -74,6 +74,12 @@ theorem LTm.SrcL.remode {w : Bool} {l l' : LedgerMode} :
   | bandL hw h v hv _ ih =>
     intro _; obtain ⟨b1, b2⟩ := ih (.inl rfl)
     exact ⟨.bandL hw h v hv b1, by simp only [LTm.netFree, b2, Bool.and_self]⟩
+  | litR hw op h v hv _ ih =>
+    intro _; obtain ⟨a1, a2⟩ := ih (.inl rfl)
+    exact ⟨.litR hw op h v hv a1, by simp only [LTm.netFree, a2, Bool.and_self]⟩
+  | litL hw op h v hv _ ih =>
+    intro _; obtain ⟨b1, b2⟩ := ih (.inl rfl)
+    exact ⟨.litL hw op h v hv b1, by simp only [LTm.netFree, b2, Bool.and_self]⟩
   | addW hw h _ _ iha ihb =>
     intro _; obtain ⟨a1, a2⟩ := iha (.inl rfl); obtain ⟨b1, b2⟩ := ihb (.inl rfl)
     exact ⟨.addW hw h a1 b1, by simp only [LTm.netFree, a2, b2, Bool.and_self]⟩
@@ -152,6 +158,8 @@ theorem LTm.SrcL.netCut {w : Bool} : ∀ {k : SrcKind} {s : Srt} {t : LTm C s},
   | shlL hw h v ha => exact LTm.SrcL.netCut_num (.shlL hw h v ha) (.inl rfl)
   | bandR hw h v hv ha => exact LTm.SrcL.netCut_num (.bandR hw h v hv ha) (.inl rfl)
   | bandL hw h v hv hb => exact LTm.SrcL.netCut_num (.bandL hw h v hv hb) (.inl rfl)
+  | litR hw op h v hv ha => exact LTm.SrcL.netCut_num (.litR hw op h v hv ha) (.inl rfl)
+  | litL hw op h v hv hb => exact LTm.SrcL.netCut_num (.litL hw op h v hv hb) (.inl rfl)
   | addW hw h ha hb => exact LTm.SrcL.netCut_num (.addW hw h ha hb) (.inl rfl)
   | subW hw h ha hb => exact LTm.SrcL.netCut_num (.subW hw h ha hb) (.inl rfl)
   | seq hd ha => exact LTm.SrcL.netCut_num (.seq hd ha) (.inl rfl)
@@ -313,6 +321,7 @@ theorem LFml.SrcL.netCut : ∀ {φ : LFml C}, φ.SrcL false true .pre →
     exact ⟨.imp a1 b1, fun x hx => (List.mem_append.1 hx).elim (a2 x) (b2 x),
       by simp only [LFml.netOK, a3, b3, Bool.and_self]⟩
   | defDiv hw => cases hw
+  | defDivI hw => cases hw
   | defShr hw => cases hw
   | defAddW hw => cases hw
   | defSubW hw => cases hw

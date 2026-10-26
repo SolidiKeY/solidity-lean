@@ -216,15 +216,16 @@ not. -/
       ProvesC I pay Γ₀ H (.modal .box (.cons (.loop (.unwind 0) c body) ω) κ φ)
   /-- **`whileInvariantBox` with callbacks** (`Proves.inv`'s goals, under the
   box): the invariant now ("invariant initially valid"); from every state
-  the body's frame allows (`{anon(xs)}`, with `{havoc}` when the body may
-  write the storage: a body that calls back pays, so its frame has it), the
+  the body's frame allows (`{anon(xs)}`, and for the storage the roots of
+  its modifies set, or `{havoc}` where it has none: a body that calls back
+  has none, `Fml.anonHavoc`), the
   invariant holding, the body to the invariant where the condition holds
   ("body preserves invariant"), the rest where it does not ("use case").
   Whatever the body calls: a callback leaves a state the frame allows. -/
   | invBox {Γ Γb Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {Iv : Val C Γ .bool}
       {dec : Option (Val C Γ .uint)} {brk : Bool} {qs : List (LoopQ C Γ)} {c : Val C Γ .bool}
       {body : Prog C Γ Γb} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
-      {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
+      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
       (hf : body.frame = some (xs, hv))
       (init : ProvesC I pay Γ₀ H ((invFml Iv qs).invHyp (loopBreak brk c)))
       (thn : ProvesC I pay Γ₀ ((((H.anonHavoc xs hv).pre ((invFml Iv qs).invHyp (loopBreak brk c))).upd

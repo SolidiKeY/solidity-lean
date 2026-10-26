@@ -1,4 +1,5 @@
 import Solidity.Calculus.FlattenReads
+import Solidity.Calculus.BitArith
 
 /-!
 # Operators cut out of a leaf into fresh atoms
@@ -130,6 +131,101 @@ def LTm.maskOf? : LTm C (.val .uint) → Option Nat
   | .app0 (.lit v) => lowMask? v
   | _ => none
 
+/-! ## Operators with a literal, written through the cut ones
+
+`x & c`, `x | c`, `x ^ c` and `x *% c` at a literal `c` that is not a low
+mask are written through quotient atoms by `2` and wrapped sums: `x & c`
+bit by bit from the lowest (`bandGo`: the atom `q` of `x / 2`, the low
+bit `x - 2q`, the rest `2 · (q & ⌊c/2⌋)`), `x | c` as `(x - (x & c)) + c`,
+`x ^ c` as `(x - (x & c)) + (c - (x & c))`, and `x *% c` by doubling
+(`mulWGo`: `x *% c` from `x *% ⌊c/2⌋`, a wrapped sum with itself and, for
+an odd `c`, with `x`).  Each stays within the compiler's definitions
+(`defDiv`, `defAddW`). -/
+
+/-- `2` at `uint`. -/
+def uintTwo : PrimTy.uint.Denote := ⟨2, uint_inRange (by decide) (by decide)⟩
+
+/-- `x & c` for `0 < c < 2^f`, the operand `a` returning: the low bit through the atom of
+`a / 2`, the rest after it. -/
+def bandGo (prev : List (LFml C)) : Nat → LTm C (.val .uint) → Nat → List (LFml C) → Nat →
+    CutTm C (.val .uint)
+  | 0, _, _, ds, m => ⟨.app0 (.lit (PrimTy.dflt .uint)), ds, m⟩
+  | f + 1, a, c, ds, m =>
+    if c / 2 = 0 then
+      ⟨a.remOf (quotAtom prev ds a (a.divLit uintTwo) m).1 uintTwo,
+        (quotAtom prev ds a (a.divLit uintTwo) m).2.1, (quotAtom prev ds a (a.divLit uintTwo) m).2.2⟩
+    else
+      let Q := quotAtom prev ds a (a.divLit uintTwo) m
+      let R := bandGo prev f (.var Q.1) (c / 2) Q.2.1 Q.2.2
+      let hi : LTm C (.val .uint) := .app2 (.binop .mul rfl) (.app0 (.lit uintTwo)) R.term
+      if c % 2 = 0 then ⟨hi, R.defs, R.next⟩
+      else ⟨.app2 (.binop .add rfl) (a.remOf Q.1 uintTwo) hi, R.defs, R.next⟩
+
+/-- `a & c` at a literal `c`, `a` evaluated first. -/
+def bandLit (prev : List (LFml C)) (a : LTm C (.val .uint)) (c : Nat) (ds : List (LFml C)) (m : Nat) :
+    CutTm C (.val .uint) :=
+  if c = 0 then ⟨.seq a (.app0 (.lit (PrimTy.dflt .uint))), ds, m⟩
+  else ⟨.seq a (bandGo prev c a c ds m).term, (bandGo prev c a c ds m).defs,
+    (bandGo prev c a c ds m).next⟩
+
+/-- `a | c`: `(a - (a & c)) + c`. -/
+def borLit (prev : List (LFml C)) (a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : CutTm C (.val .uint) :=
+  if v.val.toNat = 0 then ⟨a, ds, m⟩
+  else ⟨.app2 (.binop .add rfl) (.app2 (.binop .sub rfl) a (bandGo prev v.val.toNat a v.val.toNat ds m).term)
+      (.app0 (.lit v)), (bandGo prev v.val.toNat a v.val.toNat ds m).defs, (bandGo prev v.val.toNat a v.val.toNat ds m).next⟩
+
+/-- `a ^ c`: `(a - (a & c)) + (c - (a & c))`. -/
+def bxorLit (prev : List (LFml C)) (a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : CutTm C (.val .uint) :=
+  if v.val.toNat = 0 then ⟨a, ds, m⟩
+  else ⟨.app2 (.binop .add rfl) (.app2 (.binop .sub rfl) a (bandGo prev v.val.toNat a v.val.toNat ds m).term)
+      (.app2 (.binop .sub rfl) (.app0 (.lit v)) (bandGo prev v.val.toNat a v.val.toNat ds m).term),
+    (bandGo prev v.val.toNat a v.val.toNat ds m).defs, (bandGo prev v.val.toNat a v.val.toNat ds m).next⟩
+
+/-- `a *% c` for `0 < c < 2^f`: from `a *% ⌊c/2⌋`, doubled by a wrapped sum
+and, for an odd `c`, a wrapped sum with `a`; each sum an atom defined after `a`. -/
+def mulWGo (prev : List (LFml C)) (a : LTm C (.val .uint)) : Nat → Nat → List (LFml C) → Nat →
+    CutTm C (.val .uint)
+  | 0, _, ds, m => ⟨a, ds, m⟩
+  | f + 1, c, ds, m =>
+    if c / 2 = 0 then ⟨a, ds, m⟩
+    else
+      let H := mulWGo prev a f (c / 2) ds m
+      let D := quotAtom prev H.defs a (.app2 (.binop .addW rfl) H.term H.term) H.next
+      if c % 2 = 0 then ⟨.seq a (.var D.1), D.2.1, D.2.2⟩
+      else
+        let E := quotAtom prev D.2.1 a (.app2 (.binop .addW rfl) (.seq a (.var D.1)) a) D.2.2
+        ⟨.seq a (.var E.1), E.2.1, E.2.2⟩
+
+/-- `a *% c` at a literal `c`. -/
+def mulWLit (prev : List (LFml C)) (a : LTm C (.val .uint)) (c : Nat) (ds : List (LFml C)) (m : Nat) :
+    CutTm C (.val .uint) :=
+  if c = 0 then ⟨.seq a (.app0 (.lit (PrimTy.dflt .uint))), ds, m⟩ else mulWGo prev a c c ds m
+
+/-- `1` at `uint`. -/
+def uintOne : PrimTy.uint.Denote := ⟨1, uint_inRange (by decide) (by decide)⟩
+
+/-- `a ** v`, `a **% v` at `v ∈ {0, 1}`: `1` after `a`, `a`; the node otherwise. -/
+def powLit (h : LTm C (.val .uint)) (a : LTm C (.val .uint)) (v : PrimTy.uint.Denote) :
+    LTm C (.val .uint) :=
+  if v.val = 0 then .seq a (.app0 (.lit uintOne)) else if v.val = 1 then a else h
+
+/-- **The operators the cut writes through others at a literal right
+operand**: `&`, `|`, `^`, `*%` (any literal), `**`, `**%` at `0` and `1`,
+`/` and `%` at `int` (any literal), `/` and `%` at `uint` by `0`. -/
+def litCutR : (op : BinOp) → (p : PrimTy) → p.Denote → Bool
+  | .band, .uint, _ | .bor, .uint, _ | .bxor, .uint, _ | .mulW, .uint, _ => true
+  | .pow, .uint, v | .powW, .uint, v => v.val == 0 || v.val == 1
+  | .div, .int, _ | .mod, .int, _ => true
+  | .div, .uint, v | .mod, .uint, v => v.val == 0
+  | _, _, _ => false
+
+/-- At a literal left operand: the commutative ones. -/
+def litCutL : BinOp → PrimTy → Bool
+  | .band, .uint | .bor, .uint | .bxor, .uint | .mulW, .uint => true
+  | _, _ => false
+
 /-- `a & b` at `uint`, either side a low mask. -/
 def cutBand (prev : List (LFml C)) (h : BinOp.band.accepts .uint = true) (A B : CutTm C (.val .uint)) :
     CutTm C (.val .uint) :=
@@ -138,7 +234,11 @@ def cutBand (prev : List (LFml C)) (h : BinOp.band.accepts .uint = true) (A B : 
   | none =>
     match A.term.maskOf? with
     | some k => maskCut prev B.term k (A.defs ++ B.defs) B.next
-    | none => ⟨.app2 (.binop .band h) A.term B.term, A.defs ++ B.defs, B.next⟩
+    | none =>
+      match B.term.lit?, A.term.lit? with
+      | some r, _ => bandLit prev A.term r.1.val.toNat (A.defs ++ B.defs) B.next
+      | none, some r => bandLit prev B.term r.1.val.toNat (A.defs ++ B.defs) B.next
+      | none, none => ⟨.app2 (.binop .band h) A.term B.term, A.defs ++ B.defs, B.next⟩
 
 /-- A unary node, its operand cut; `prev` the definitions made before it. -/
 def cut1 : {a s : Srt} → Op1 C a s → List (LFml C) → CutTm C a → CutTm C s
@@ -162,15 +262,56 @@ def cut2 : {a b s : Srt} → Op2 C a b s → List (LFml C) → CutTm C a → Cut
   | _, _, _, .binop .div (p := .uint) h, prev, A, B =>
     match B.term with
     | .app0 (.lit v) =>
-      if v.val = 0 then ⟨.app2 (.binop .div h) A.term B.term, A.defs ++ B.defs, B.next⟩
+      if v.val = 0 then ⟨.seq A.term .err, A.defs ++ B.defs, B.next⟩
       else CutTm.atom prev (A.defs ++ B.defs) A.term (.app2 (.binop .div h) A.term B.term) B.next
     | _ => ⟨.app2 (.binop .div h) A.term B.term, A.defs ++ B.defs, B.next⟩
   | _, _, _, .binop .mod (p := .uint) h, prev, A, B =>
     match B.term with
     | .app0 (.lit v) =>
-      if v.val = 0 then ⟨.app2 (.binop .mod h) A.term B.term, A.defs ++ B.defs, B.next⟩
+      if v.val = 0 then ⟨.seq A.term .err, A.defs ++ B.defs, B.next⟩
       else CutTm.rem prev A.term v (A.defs ++ B.defs) B.next
     | _ => ⟨.app2 (.binop .mod h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .div (p := .int) h, prev, A, B =>
+    match B.term with
+    | .app0 (.lit v) =>
+      if v.val = 0 then ⟨.seq A.term .err, A.defs ++ B.defs, B.next⟩
+      else if v.val = -1 then ⟨.app1 (.unop .neg rfl) A.term, A.defs ++ B.defs, B.next⟩
+      else CutTm.atom prev (A.defs ++ B.defs) A.term (.app2 (.binop .div h) A.term B.term) B.next
+    | _ => ⟨.app2 (.binop .div h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .mod (p := .int) h, prev, A, B =>
+    match B.term with
+    | .app0 (.lit v) =>
+      if v.val = 0 then ⟨.seq A.term .err, A.defs ++ B.defs, B.next⟩
+      else if v.val = -1 then ⟨.seq A.term (.app0 (.lit (PrimTy.dflt .int))), A.defs ++ B.defs, B.next⟩
+      else
+        let Q := quotAtom prev (A.defs ++ B.defs) A.term (.app2 (.binop .div rfl) A.term B.term) B.next
+        ⟨.app2 (.binop .sub rfl) A.term (.app2 (.binop .mul rfl) (.var Q.1) (.app0 (.lit v))), Q.2.1, Q.2.2⟩
+    | _ => ⟨.app2 (.binop .mod h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .pow (p := .uint) h, _, A, B =>
+    match B.term with
+    | .app0 (.lit v) =>
+      ⟨powLit (.app2 (.binop .pow h) A.term B.term) A.term v, A.defs ++ B.defs, B.next⟩
+    | _ => ⟨.app2 (.binop .pow h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .powW (p := .uint) h, _, A, B =>
+    match B.term with
+    | .app0 (.lit v) =>
+      ⟨powLit (.app2 (.binop .powW h) A.term B.term) A.term v, A.defs ++ B.defs, B.next⟩
+    | _ => ⟨.app2 (.binop .powW h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .mulW (p := .uint) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => mulWLit prev A.term r.1.val.toNat (A.defs ++ B.defs) B.next
+    | none, some r => mulWLit prev B.term r.1.val.toNat (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .mulW h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .bor (p := .uint) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => borLit prev A.term r.1 (A.defs ++ B.defs) B.next
+    | none, some r => borLit prev B.term r.1 (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .bor h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .bxor (p := .uint) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => bxorLit prev A.term r.1 (A.defs ++ B.defs) B.next
+    | none, some r => bxorLit prev B.term r.1 (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .bxor h) A.term B.term, A.defs ++ B.defs, B.next⟩
   | _, _, _, .binop .shr h, prev, A, B =>
     match B.term with
     | .app0 (.lit _) =>
@@ -758,11 +899,12 @@ theorem shl_eval (h : BinOp.shl.accepts .uint = true) (x v q : PrimTy.uint.Denot
 
 /-- A binary operator the cut leaves: the node is rebuilt over its cut operands. -/
 theorem cut2_default {op : BinOp} {p : PrimTy} (h : op.accepts p = true)
-    (hop : op ≠ .div ∧ op ≠ .mod ∧ op ≠ .shr ∧ op ≠ .shl ∧ op ≠ .addW ∧ op ≠ .subW ∧ op ≠ .band)
+    (hop : op ≠ .div ∧ op ≠ .mod ∧ op ≠ .shr ∧ op ≠ .shl ∧ op ≠ .addW ∧ op ≠ .subW ∧ op ≠ .band ∧
+      op ≠ .pow ∧ op ≠ .powW ∧ op ≠ .mulW ∧ op ≠ .bor ∧ op ≠ .bxor)
     (prev : List (LFml C)) (A B : CutTm C (.val p)) :
     cut2 (.binop op h) prev A B = ⟨.app2 (.binop op h) A.term B.term, A.defs ++ B.defs, B.next⟩ := by
-  obtain ⟨h1, h2, h3, h4, h5, h6, h7⟩ := hop
-  cases op <;> cases p <;> first | rfl | exact absurd rfl h1 | exact absurd rfl h2 | exact absurd rfl h3 | exact absurd rfl h4 | exact absurd rfl h5 | exact absurd rfl h6 | exact absurd rfl h7
+  obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12⟩ := hop
+  cases op <;> cases p <;> first | rfl | exact absurd rfl h1 | exact absurd rfl h2 | exact absurd rfl h3 | exact absurd rfl h4 | exact absurd rfl h5 | exact absurd rfl h6 | exact absurd rfl h7 | exact absurd rfl h8 | exact absurd rfl h9 | exact absurd rfl h10 | exact absurd rfl h11 | exact absurd rfl h12
 
 /-- A unary operator the cut leaves. -/
 theorem cut1_default {op : UnOp} {p : PrimTy} (h : op.accepts p = true)
@@ -927,6 +1069,455 @@ theorem maskCut_good {n m : Nat} {prev ds : List (LFml C)} (hds : Defs.Good n m 
         uint_ofInt?_eq (uint_val_nonneg xv) (uint_val_lt xv)]
       rfl
 
+/-! ## The literal operators are good -/
+
+theorem ev_bin {op : BinOp} {p : PrimTy} (h : op.accepts p = true) (hop : op ≠ .and ∧ op ≠ .or)
+    {a b : LTm C (.val p)} {σ : State C []} {ν : AEnv} {x y : p.Denote}
+    (ha : a.eval σ ν = some x) (hb : b.eval σ ν = some y) :
+    (LTm.app2 (.binop op h) a b).eval σ ν = op.evalT h x y := by
+  rw [LTm.eval_binop_of h (shortT_none hop), ha, hb]; rfl
+
+theorem ev_add {a b : LTm C (.val .uint)} {σ : State C []} {ν : AEnv} {x y : PrimTy.uint.Denote}
+    (ha : a.eval σ ν = some x) (hb : b.eval σ ν = some y) (h1 : x.val + y.val < ((2 ^ 256 : Nat) : Int)) :
+    ∃ w : PrimTy.uint.Denote, (LTm.app2 (.binop .add rfl) a b).eval σ ν = some w ∧ w.val = x.val + y.val :=
+  ⟨_, (ev_bin rfl ⟨by decide, by decide⟩ ha hb).trans
+    (uint_ofInt?_eq (by have := uint_val_nonneg x; have := uint_val_nonneg y; omega) h1), rfl⟩
+
+theorem ev_sub {a b : LTm C (.val .uint)} {σ : State C []} {ν : AEnv} {x y : PrimTy.uint.Denote}
+    (ha : a.eval σ ν = some x) (hb : b.eval σ ν = some y) (h0 : y.val ≤ x.val) :
+    ∃ w : PrimTy.uint.Denote, (LTm.app2 (.binop .sub rfl) a b).eval σ ν = some w ∧ w.val = x.val - y.val :=
+  ⟨_, (ev_bin rfl ⟨by decide, by decide⟩ ha hb).trans
+    (uint_ofInt?_eq (by omega) (by have := uint_val_lt x; have := uint_val_nonneg y; omega)), rfl⟩
+
+theorem ev_mul {a b : LTm C (.val .uint)} {σ : State C []} {ν : AEnv} {x y : PrimTy.uint.Denote}
+    (ha : a.eval σ ν = some x) (hb : b.eval σ ν = some y) (h1 : x.val * y.val < ((2 ^ 256 : Nat) : Int)) :
+    ∃ w : PrimTy.uint.Denote, (LTm.app2 (.binop .mul rfl) a b).eval σ ν = some w ∧ w.val = x.val * y.val :=
+  ⟨_, (ev_bin rfl ⟨by decide, by decide⟩ ha hb).trans
+    (uint_ofInt?_eq (Int.mul_nonneg (uint_val_nonneg x) (uint_val_nonneg y)) h1), rfl⟩
+
+theorem ev_lit {p : PrimTy} (v : p.Denote) (σ : State C []) (ν : AEnv) :
+    (LTm.app0 (C := C) (.lit v)).eval σ ν = some v := rfl
+
+/-- The atom of `a / 2` holds `a`'s value halved. -/
+theorem half_val {a : LTm C (.val .uint)} {q : Nat} {σ : State C []} {ν : AEnv}
+    (hd : (LFml.defn a (a.divLit uintTwo) q).holds σ ν) {x : PrimTy.uint.Denote} (hx : a.eval σ ν = some x) :
+    (ν.get .uint q).val = x.val / 2 := by
+  have h := LFml.defn_eval hd hx
+  rw [LTm.divLit, ev_bin rfl ⟨by decide, by decide⟩ hx (ev_lit _ σ ν)] at h
+  have hx0 := uint_val_nonneg x
+  have hx1 := uint_val_lt x
+  have : ((if (2 : Int) = 0 then none else some (Int.tdiv x.val 2)).bind PrimTy.uint.ofInt?) =
+      some (ν.get .uint q) := h
+  rw [if_neg (by decide), Option.bind_some, Int.tdiv_eq_ediv_of_nonneg hx0,
+    uint_ofInt?_eq (Int.ediv_nonneg hx0 (by decide)) (by omega), Option.some.injEq] at this
+  rw [← this]
+
+theorem half_isSome (a : LTm C (.val .uint)) (σ : State C []) (ν : AEnv)
+    (hg : (a.eval σ ν).isSome = true) : ((a.divLit uintTwo).eval σ ν).isSome = true := by
+  rw [LTm.divLit, isSome_binop_lit rfl ⟨by decide, by decide⟩ a (.app0 (.lit _)) _ rfl
+    (fun x => div_isSome rfl x _ (by decide))]
+  exact hg
+
+/-- **`x & c` bit by bit**: the definitions good, and the term `x & c`
+wherever they hold. -/
+theorem bandGo_spec {prev : List (LFml C)} {n : Nat} (hprev : Defs.Below n prev) :
+    ∀ (f : Nat) (a : LTm C (.val .uint)) (c : Nat) (ds : List (LFml C)) (m : Nat),
+    Defs.Good n m ds → a.atomBound ≤ m → 0 < c → c < 2 ^ f →
+    Defs.Good n (bandGo prev f a c ds m).next (bandGo prev f a c ds m).defs ∧
+    m ≤ (bandGo prev f a c ds m).next ∧
+    (bandGo prev f a c ds m).term.atomBound ≤ (bandGo prev f a c ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (bandGo prev f a c ds m).defs →
+      LFml.AllHold σ ν ds ∧ ∀ (X : Nat) (x : PrimTy.uint.Denote), a.eval σ ν = some x → x.val = X →
+        ∃ w : PrimTy.uint.Denote, (bandGo prev f a c ds m).term.eval σ ν = some w ∧
+          w.val = ((X &&& c : Nat) : Int)
+  | 0, a, c, ds, m, _, _, hc, hcf => absurd hcf (by simp only [Nat.pow_zero]; omega)
+  | f + 1, a, c, ds, m, hds, ha, hc, hcf => by
+    obtain ⟨hQg, hQlt, hQm, -, hQh⟩ := quotAtom_good (prev := prev) hds hprev (g := a)
+      (e := a.divLit uintTwo) ha (by show max a.atomBound 0 ≤ m; omega) (half_isSome a)
+    have hlow : ∀ σ ν, (LFml.defn a (a.divLit uintTwo) (quotAtom prev ds a (a.divLit uintTwo) m).1).holds σ ν →
+        ∀ (X : Nat) (x : PrimTy.uint.Denote), a.eval σ ν = some x → x.val = X →
+        ∃ w : PrimTy.uint.Denote,
+          (a.remOf (quotAtom prev ds a (a.divLit uintTwo) m).1 uintTwo).eval σ ν = some w ∧
+          w.val = ((X % 2 : Nat) : Int) := by
+      intro σ ν hd X x hx hX
+      have hq := half_val hd hx
+      have hx1 := uint_val_lt x
+      obtain ⟨u, hu, hu'⟩ := ev_mul (a := LTm.var (C := C) (p := .uint) (quotAtom prev ds a (a.divLit uintTwo) m).1)
+        (b := .app0 (.lit uintTwo)) (LTm.eval_var σ ν _) (ev_lit _ σ ν)
+        (by show (ν.get .uint _).val * 2 < _; rw [hq]; omega)
+      obtain ⟨w, hw, hw'⟩ := ev_sub hx hu (by rw [hu']; show (ν.get .uint _).val * 2 ≤ _; rw [hq]; omega)
+      refine ⟨w, hw, ?_⟩
+      rw [hw', hu']
+      show x.val - (ν.get .uint _).val * 2 = _
+      rw [hq]; omega
+    unfold bandGo
+    split
+    · rename_i h2
+      have hc1 : c = 1 := by omega
+      subst hc1
+      dsimp only
+      refine ⟨hQg, hQm, ?_, fun σ ν hp hd => ?_⟩
+      · show max a.atomBound (max (max (_ + 1) 0) 0) ≤ _
+        omega
+      · obtain ⟨hds', hdefn⟩ := hQh σ ν hp hd
+        refine ⟨hds', fun X x hx hX => ?_⟩
+        rw [Nat.and_one_is_mod]
+        exact hlow σ ν hdefn X x hx hX
+    · rename_i h2
+      dsimp only
+      obtain ⟨hRg, hRm, hRb, hRh⟩ := bandGo_spec hprev f (.var (quotAtom prev ds a (a.divLit uintTwo) m).1)
+        (c / 2) _ _ hQg (by show _ + 1 ≤ _; omega) (by omega)
+        (by rw [Nat.pow_succ] at hcf; omega)
+      have hval : ∀ σ ν, LFml.AllHold σ ν prev →
+          LFml.AllHold σ ν (bandGo prev f (.var (quotAtom prev ds a (a.divLit uintTwo) m).1) (c / 2)
+            (quotAtom prev ds a (a.divLit uintTwo) m).2.1 (quotAtom prev ds a (a.divLit uintTwo) m).2.2).defs →
+          LFml.AllHold σ ν ds ∧ ∀ (X : Nat) (x : PrimTy.uint.Denote), a.eval σ ν = some x → x.val = X →
+            (∃ w : PrimTy.uint.Denote, (a.remOf (quotAtom prev ds a (a.divLit uintTwo) m).1 uintTwo).eval σ ν = some w ∧
+              w.val = ((X % 2 : Nat) : Int)) ∧
+            ∃ w : PrimTy.uint.Denote, (LTm.app2 (.binop .mul rfl) (.app0 (.lit uintTwo))
+              (bandGo prev f (.var (quotAtom prev ds a (a.divLit uintTwo) m).1) (c / 2)
+                (quotAtom prev ds a (a.divLit uintTwo) m).2.1 (quotAtom prev ds a (a.divLit uintTwo) m).2.2).term).eval σ ν = some w ∧
+              w.val = ((2 * ((X / 2) &&& (c / 2)) : Nat) : Int) := by
+        intro σ ν hp hd
+        obtain ⟨hQd, hrest⟩ := hRh σ ν hp hd
+        obtain ⟨hds', hdefn⟩ := hQh σ ν hp hQd
+        refine ⟨hds', fun X x hx hX => ⟨hlow σ ν hdefn X x hx hX, ?_⟩⟩
+        have hq := half_val hdefn hx
+        obtain ⟨r, hr, hr'⟩ := hrest (X / 2) _ (LTm.eval_var σ ν _) (by rw [hq, hX]; omega)
+        have hle := Nat.and_le_left (n := X / 2) (m := c / 2)
+        have hx1 := uint_val_lt x
+        obtain ⟨w, hw, hw'⟩ := ev_mul (ev_lit uintTwo σ ν) hr
+          (by rw [hr']; show 2 * _ < _; omega)
+        exact ⟨w, hw, by rw [hw', hr']; show 2 * _ = _; omega⟩
+      split
+      · rename_i h3
+        dsimp only
+        refine ⟨hRg, by omega, by show max 0 _ ≤ _; omega, fun σ ν hp hd => ?_⟩
+        obtain ⟨hds', hv⟩ := hval σ ν hp hd
+        refine ⟨hds', fun X x hx hX => ?_⟩
+        obtain ⟨-, w, hw, hw'⟩ := hv X x hx hX
+        refine ⟨w, hw, ?_⟩
+        rw [hw', BitArith.and_split X c, h3]
+        simp only [Nat.mul_zero, Nat.zero_add]
+      · rename_i h3
+        dsimp only
+        refine ⟨hRg, by omega, ?_, fun σ ν hp hd => ?_⟩
+        · show max (max a.atomBound (max (max (_ + 1) 0) 0)) (max 0 _) ≤ _
+          omega
+        obtain ⟨hds', hv⟩ := hval σ ν hp hd
+        refine ⟨hds', fun X x hx hX => ?_⟩
+        obtain ⟨⟨l, hl, hl'⟩, w, hw, hw'⟩ := hv X x hx hX
+        have hle := Nat.and_le_left (n := X / 2) (m := c / 2)
+        have hx1 := uint_val_lt x
+        obtain ⟨u, hu, hu'⟩ := ev_add hl hw (by rw [hl', hw']; omega)
+        refine ⟨u, hu, ?_⟩
+        rw [hu', hl', hw', BitArith.and_split X c, show c % 2 = 1 by omega, Nat.mul_one]
+        omega
+
+theorem ev_addW {a b : LTm C (.val .uint)} {σ : State C []} {ν : AEnv} {x y : PrimTy.uint.Denote}
+    (ha : a.eval σ ν = some x) (hb : b.eval σ ν = some y) :
+    ∃ w : PrimTy.uint.Denote, (LTm.app2 (.binop .addW rfl) a b).eval σ ν = some w ∧
+      w.val = (x.val + y.val) % ((2 ^ 256 : Nat) : Int) :=
+  ⟨_, (ev_bin rfl ⟨by decide, by decide⟩ ha hb).trans
+    (uint_ofInt?_eq (Int.emod_nonneg _ (by decide)) (Int.emod_lt_of_pos _ (by decide))), rfl⟩
+
+/-- An atom whose definition holds, past a returning `g`, holds the value its node returns. -/
+theorem atom_val {p r : PrimTy} {g : LTm C (.val p)} {e : LTm C (.val r)} {q : Nat} {σ : State C []}
+    {ν : AEnv} (hd : (LFml.defn g e q).holds σ ν) {x : p.Denote} (hx : g.eval σ ν = some x)
+    {w : r.Denote} (hw : e.eval σ ν = some w) : ν.get r q = w := by
+  have h := LFml.defn_eval hd hx
+  rw [hw] at h
+  exact (Option.some.inj h).symm
+
+theorem seq_var_isSome {p r : PrimTy} (a : LTm C (.val p)) (q : Nat) (σ : State C []) (ν : AEnv) :
+    ((LTm.seq a (LTm.var (p := r) q)).eval σ ν).isSome = (a.eval σ ν).isSome := by
+  rw [LTm.eval_seq]
+  cases a.eval σ ν <;> rfl
+
+theorem seq_var_eval {p r : PrimTy} {a : LTm C (.val p)} (q : Nat) {σ : State C []} {ν : AEnv}
+    {x : p.Denote} (hx : a.eval σ ν = some x) :
+    (LTm.seq a (LTm.var (p := r) q)).eval σ ν = some (ν.get r q) := by
+  rw [LTm.eval_seq, hx]; rfl
+
+/-- **`x *% c` by doubling**: the definitions good, the term returning
+exactly where `a` does, and `x·c mod 2^256` wherever they hold. -/
+theorem mulWGo_spec {prev : List (LFml C)} {n : Nat} (hprev : Defs.Below n prev) (a : LTm C (.val .uint)) :
+    ∀ (f c : Nat) (ds : List (LFml C)) (m : Nat), Defs.Good n m ds → a.atomBound ≤ m → 0 < c → c < 2 ^ f →
+    Defs.Good n (mulWGo prev a f c ds m).next (mulWGo prev a f c ds m).defs ∧
+    m ≤ (mulWGo prev a f c ds m).next ∧
+    (mulWGo prev a f c ds m).term.atomBound ≤ (mulWGo prev a f c ds m).next ∧
+    (∀ σ ν, ((mulWGo prev a f c ds m).term.eval σ ν).isSome = (a.eval σ ν).isSome) ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (mulWGo prev a f c ds m).defs →
+      LFml.AllHold σ ν ds ∧ ∀ x : PrimTy.uint.Denote, a.eval σ ν = some x →
+        ∃ w : PrimTy.uint.Denote, (mulWGo prev a f c ds m).term.eval σ ν = some w ∧
+          w.val = x.val * (c : Int) % ((2 ^ 256 : Nat) : Int)
+  | 0, c, _, _, _, _, hc, hcf => absurd hcf (by simp only [Nat.pow_zero]; omega)
+  | f + 1, c, ds, m, hds, ha, hc, hcf => by
+    unfold mulWGo
+    split
+    · rename_i h2
+      have hc1 : c = 1 := by omega
+      subst hc1
+      dsimp only
+      refine ⟨hds, Nat.le_refl _, ha, fun _ _ => rfl, fun σ ν _ hd => ⟨hd, fun x hx => ⟨x, hx, ?_⟩⟩⟩
+      rw [show ((1 : Nat) : Int) = 1 from rfl, Int.mul_one, Int.emod_eq_of_lt (uint_val_nonneg x) (uint_val_lt x)]
+    · rename_i h2
+      obtain ⟨hHg, hHm, hHb, hHs, hHh⟩ := mulWGo_spec hprev a f (c / 2) ds m hds ha (by omega)
+        (by rw [Nat.pow_succ] at hcf; omega)
+      have hHt : ∀ σ ν, (a.eval σ ν).isSome = true →
+          ((LTm.app2 (.binop .addW rfl) (mulWGo prev a f (c / 2) ds m).term
+            (mulWGo prev a f (c / 2) ds m).term).eval σ ν).isSome = true := by
+        intro σ ν hg
+        obtain ⟨x, hx⟩ := Option.isSome_iff_exists.mp ((hHs σ ν).trans hg)
+        obtain ⟨w, hw, -⟩ := ev_addW hx hx
+        rw [hw]; rfl
+      obtain ⟨hDg, hDlt, hDm, -, hDh⟩ := quotAtom_good (prev := prev) hHg hprev (g := a)
+        (e := .app2 (.binop .addW rfl) (mulWGo prev a f (c / 2) ds m).term (mulWGo prev a f (c / 2) ds m).term)
+        (by omega) (by show max _ _ ≤ _; omega) hHt
+      have hDv : ∀ σ ν, LFml.AllHold σ ν prev →
+          LFml.AllHold σ ν (quotAtom prev (mulWGo prev a f (c / 2) ds m).defs a
+            (.app2 (.binop .addW rfl) (mulWGo prev a f (c / 2) ds m).term (mulWGo prev a f (c / 2) ds m).term)
+            (mulWGo prev a f (c / 2) ds m).next).2.1 →
+          LFml.AllHold σ ν ds ∧ ∀ x : PrimTy.uint.Denote, a.eval σ ν = some x →
+            (ν.get .uint (quotAtom prev (mulWGo prev a f (c / 2) ds m).defs a
+              (.app2 (.binop .addW rfl) (mulWGo prev a f (c / 2) ds m).term (mulWGo prev a f (c / 2) ds m).term)
+              (mulWGo prev a f (c / 2) ds m).next).1).val =
+              x.val * ((2 * (c / 2) : Nat) : Int) % ((2 ^ 256 : Nat) : Int) := by
+        intro σ ν hp hd
+        obtain ⟨hHd, hdefn⟩ := hDh σ ν hp hd
+        obtain ⟨hds', hH⟩ := hHh σ ν hp hHd
+        refine ⟨hds', fun x hx => ?_⟩
+        obtain ⟨u, hu, hu'⟩ := hH x hx
+        obtain ⟨w, hw, hw'⟩ := ev_addW hu hu
+        have hq : ν.get PrimTy.uint _ = w := atom_val hdefn hx hw
+        rw [hq, hw', hu', BitArith.mulMod_double]
+        congr 2
+      split
+      · rename_i h3
+        dsimp only
+        refine ⟨hDg, by omega, by show max a.atomBound (_ + 1) ≤ _; omega, fun σ ν => seq_var_isSome a _ σ ν,
+          fun σ ν hp hd => ?_⟩
+        obtain ⟨hds', hv⟩ := hDv σ ν hp hd
+        refine ⟨hds', fun x hx => ⟨_, seq_var_eval _ hx, ?_⟩⟩
+        rw [hv x hx]
+        congr 2
+        omega
+      · rename_i h3
+        dsimp only
+        have hEt : ∀ σ ν, (a.eval σ ν).isSome = true →
+            ((LTm.app2 (.binop .addW rfl) (LTm.seq a (LTm.var (p := .uint) (quotAtom prev
+              (mulWGo prev a f (c / 2) ds m).defs a (.app2 (.binop .addW rfl) (mulWGo prev a f (c / 2) ds m).term
+                (mulWGo prev a f (c / 2) ds m).term) (mulWGo prev a f (c / 2) ds m).next).1)) a).eval σ ν).isSome = true := by
+          intro σ ν hg
+          obtain ⟨x, hx⟩ := Option.isSome_iff_exists.mp hg
+          obtain ⟨w, hw, -⟩ := ev_addW (seq_var_eval _ hx) hx
+          rw [hw]; rfl
+        obtain ⟨hEg, hElt, hEm, -, hEh⟩ := quotAtom_good (prev := prev) hDg hprev (g := a)
+          (by omega) (by show max (max a.atomBound (_ + 1)) a.atomBound ≤ _; omega) hEt
+        refine ⟨hEg, by omega, by show max a.atomBound (_ + 1) ≤ _; omega, fun σ ν => seq_var_isSome a _ σ ν,
+          fun σ ν hp hd => ?_⟩
+        obtain ⟨hDd, hdefn⟩ := hEh σ ν hp hd
+        obtain ⟨hds', hv⟩ := hDv σ ν hp hDd
+        refine ⟨hds', fun x hx => ⟨_, seq_var_eval _ hx, ?_⟩⟩
+        obtain ⟨w, hw, hw'⟩ := ev_addW (seq_var_eval _ hx) hx
+        have hq : ν.get PrimTy.uint _ = w := atom_val hdefn hx hw
+        rw [hq, hw', hv x hx, BitArith.mulMod_succ]
+        congr 2
+        omega
+
+theorem uint_ofInt?_of_val {w : PrimTy.uint.Denote} {n : Int} (h : w.val = n) :
+    PrimTy.uint.ofInt? n = some w := by
+  rw [← h, uint_ofInt?_eq (uint_val_nonneg w) (uint_val_lt w)]
+  rfl
+
+theorem uint_toNat_cast (x : PrimTy.uint.Denote) : ((x.val.toNat : Nat) : Int) = x.val :=
+  Int.toNat_of_nonneg (uint_val_nonneg x)
+
+theorem uint_toNat_lt (x : PrimTy.uint.Denote) : x.val.toNat < 2 ^ 256 := by
+  have h := uint_val_lt x
+  rw [← uint_toNat_cast x] at h
+  exact Int.ofNat_lt.mp h
+
+theorem bitwise_toNat (f : Nat → Nat → Nat) (x v : PrimTy.uint.Denote) :
+    Semantics.uintBitwise f x.val v.val = ((f x.val.toNat v.val.toNat : Nat) : Int) := by
+  obtain ⟨X, hX⟩ := Int.eq_ofNat_of_zero_le (uint_val_nonneg x)
+  obtain ⟨V, hV⟩ := Int.eq_ofNat_of_zero_le (uint_val_nonneg v)
+  rw [hX, hV]; rfl
+
+/-- A cut term that evaluates as `t` wherever its definitions hold. -/
+theorem good_bind {r p : PrimTy} {t : LTm C (.val r)} {a : LTm C (.val p)} {F : p.Denote → Option r.Denote}
+    {R : CutTm C (.val r)} {ds : List (LFml C)} {n : Nat} {prev : List (LFml C)}
+    (hR : Defs.Good n R.next R.defs) (hb : R.term.atomBound ≤ R.next)
+    (hRe : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν R.defs →
+      LFml.AllHold σ ν ds ∧ R.term.eval σ ν = (a.eval σ ν).bind F)
+    (ht : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν ds → t.eval σ ν = (a.eval σ ν).bind F) :
+    CutTm.Good t n prev R :=
+  ⟨hR, hb, fun σ ν hp hd => by obtain ⟨h1, h2⟩ := hRe σ ν hp hd; rw [h2, ht σ ν hp h1]⟩
+
+theorem bandGo_top {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) {c : Nat} (hc0 : 0 < c)
+    (hc : c < 2 ^ 256) (σ : State C []) (ν : AEnv) (hp : LFml.AllHold σ ν prev)
+    (hd : LFml.AllHold σ ν (bandGo prev c a c ds m).defs) (x : PrimTy.uint.Denote)
+    (hx : a.eval σ ν = some x) :
+    (bandGo prev c a c ds m).term.eval σ ν = some ⟨_, uint_inRange (n := ((x.val.toNat &&& c : Nat) : Int))
+      (Int.natCast_nonneg _) (Int.ofNat_lt.mpr (Nat.lt_of_le_of_lt Nat.and_le_left (uint_toNat_lt x)))⟩ := by
+  obtain ⟨-, -, -, h⟩ := bandGo_spec hprev c a c ds m hds ha hc0 Nat.lt_two_pow_self
+  obtain ⟨w, hw, hw'⟩ := (h σ ν hp hd).2 x.val.toNat x hx (uint_toNat_cast x).symm
+  rw [hw]
+  exact congrArg some (Subtype.ext hw')
+
+theorem bandLit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) {c : Nat}
+    (hc : c < 2 ^ 256) :
+    Defs.Good n (bandLit prev a c ds m).next (bandLit prev a c ds m).defs ∧
+    (bandLit prev a c ds m).term.atomBound ≤ (bandLit prev a c ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (bandLit prev a c ds m).defs →
+      LFml.AllHold σ ν ds ∧ (bandLit prev a c ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => PrimTy.uint.ofInt? ((x.val.toNat &&& c : Nat) : Int) := by
+  unfold bandLit
+  split
+  · rename_i h0
+    dsimp only
+    subst h0
+    refine ⟨hds, by show max _ 0 ≤ _; omega, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    show (a.eval σ ν).bind (fun _ => some (PrimTy.dflt .uint)) = _
+    cases a.eval σ ν with
+    | none => simp only [Option.bind_none]
+    | some x =>
+      simp only [Option.bind_some, Nat.and_zero]
+      exact (uint_ofInt?_of_val (w := PrimTy.dflt .uint) rfl).symm
+  · rename_i h0
+    dsimp only
+    obtain ⟨hg, hm, hb, h⟩ := bandGo_spec hprev c a c ds m hds ha (by omega) Nat.lt_two_pow_self
+    refine ⟨hg, by show max _ _ ≤ _; omega, fun σ ν hp hd => ⟨(h σ ν hp hd).1, ?_⟩⟩
+    rw [LTm.eval_seq]
+    cases hx : a.eval σ ν with
+    | none => simp only [Option.bind_none]
+    | some x =>
+      obtain ⟨w, hw, hw'⟩ := (h σ ν hp hd).2 _ x hx (uint_toNat_cast x).symm
+      rw [Option.bind_some, Option.bind_some, hw]
+      exact (uint_ofInt?_of_val hw').symm
+
+theorem borLit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (v : PrimTy.uint.Denote) :
+    Defs.Good n (borLit prev a v ds m).next (borLit prev a v ds m).defs ∧
+    (borLit prev a v ds m).term.atomBound ≤ (borLit prev a v ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (borLit prev a v ds m).defs →
+      LFml.AllHold σ ν ds ∧ (borLit prev a v ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => PrimTy.uint.ofInt? ((x.val.toNat ||| v.val.toNat : Nat) : Int) := by
+  unfold borLit
+  split
+  · rename_i h0
+    dsimp only
+    refine ⟨hds, ha, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    cases a.eval σ ν with
+    | none => simp only [Option.bind_none]
+    | some x =>
+      rw [Option.bind_some, h0, Nat.or_zero, uint_toNat_cast,
+        uint_ofInt?_eq (uint_val_nonneg x) (uint_val_lt x)]
+      rfl
+  · rename_i h0
+    dsimp only
+    have hc := uint_toNat_lt v
+    obtain ⟨hg, hm, hb, h⟩ := bandGo_spec hprev v.val.toNat a v.val.toNat ds m hds ha (by omega) Nat.lt_two_pow_self
+    refine ⟨hg, by show max (max _ _) 0 ≤ _; omega, fun σ ν hp hd => ⟨(h σ ν hp hd).1, ?_⟩⟩
+    cases hx : a.eval σ ν with
+    | none =>
+      rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩),
+        LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩), hx]
+      simp only [Option.bind_none]
+    | some x =>
+      obtain ⟨t, ht, ht'⟩ := (h σ ν hp hd).2 _ x hx (uint_toNat_cast x).symm
+      have hle := Nat.and_le_left (n := x.val.toNat) (m := v.val.toNat)
+      have hor := BitArith.and_or_eq x.val.toNat v.val.toNat
+      have hlt := Nat.or_lt_two_pow (uint_toNat_lt x) hc
+      have hX := uint_toNat_cast x
+      have hV := uint_toNat_cast v
+      obtain ⟨w1, hw1, hw1'⟩ := ev_sub hx ht (by rw [ht']; omega)
+      obtain ⟨w2, hw2, hw2'⟩ := ev_add hw1 (ev_lit v σ ν) (by rw [hw1', ht']; omega)
+      rw [hw2, Option.bind_some]
+      exact (uint_ofInt?_of_val (by rw [hw2', hw1', ht']; omega)).symm
+
+theorem bxorLit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (v : PrimTy.uint.Denote) :
+    Defs.Good n (bxorLit prev a v ds m).next (bxorLit prev a v ds m).defs ∧
+    (bxorLit prev a v ds m).term.atomBound ≤ (bxorLit prev a v ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (bxorLit prev a v ds m).defs →
+      LFml.AllHold σ ν ds ∧ (bxorLit prev a v ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => PrimTy.uint.ofInt? ((x.val.toNat ^^^ v.val.toNat : Nat) : Int) := by
+  unfold bxorLit
+  split
+  · rename_i h0
+    dsimp only
+    refine ⟨hds, ha, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    cases a.eval σ ν with
+    | none => simp only [Option.bind_none]
+    | some x =>
+      rw [Option.bind_some, h0, Nat.xor_zero, uint_toNat_cast,
+        uint_ofInt?_eq (uint_val_nonneg x) (uint_val_lt x)]
+      rfl
+  · rename_i h0
+    dsimp only
+    have hc := uint_toNat_lt v
+    obtain ⟨hg, hm, hb, h⟩ := bandGo_spec hprev v.val.toNat a v.val.toNat ds m hds ha (by omega) Nat.lt_two_pow_self
+    refine ⟨hg, by show max (max _ _) (max 0 _) ≤ _; omega, fun σ ν hp hd => ⟨(h σ ν hp hd).1, ?_⟩⟩
+    cases hx : a.eval σ ν with
+    | none =>
+      rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩),
+        LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩), hx]
+      simp only [Option.bind_none]
+    | some x =>
+      obtain ⟨t, ht, ht'⟩ := (h σ ν hp hd).2 _ x hx (uint_toNat_cast x).symm
+      have hle := Nat.and_le_left (n := x.val.toNat) (m := v.val.toNat)
+      have hle' := Nat.and_le_right (n := x.val.toNat) (m := v.val.toNat)
+      have hxor := BitArith.xor_and_eq x.val.toNat v.val.toNat
+      have hlt := Nat.xor_lt_two_pow (uint_toNat_lt x) hc
+      have hX := uint_toNat_cast x
+      have hV := uint_toNat_cast v
+      obtain ⟨w1, hw1, hw1'⟩ := ev_sub hx ht (by rw [ht']; omega)
+      obtain ⟨w3, hw3, hw3'⟩ := ev_sub (ev_lit v σ ν) ht (by rw [ht']; omega)
+      obtain ⟨w2, hw2, hw2'⟩ := ev_add hw1 hw3 (by rw [hw1', hw3', ht']; omega)
+      rw [hw2, Option.bind_some]
+      exact (uint_ofInt?_of_val (by rw [hw2', hw1', hw3', ht']; omega)).symm
+
+theorem mulWLit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (v : PrimTy.uint.Denote) :
+    Defs.Good n (mulWLit prev a v.val.toNat ds m).next (mulWLit prev a v.val.toNat ds m).defs ∧
+    (mulWLit prev a v.val.toNat ds m).term.atomBound ≤ (mulWLit prev a v.val.toNat ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (mulWLit prev a v.val.toNat ds m).defs →
+      LFml.AllHold σ ν ds ∧ (mulWLit prev a v.val.toNat ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => BinOp.evalT .mulW rfl x v := by
+  unfold mulWLit
+  have hV := uint_toNat_cast v
+  split
+  · rename_i h0
+    dsimp only
+    refine ⟨hds, by show max _ 0 ≤ _; omega, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    show (a.eval σ ν).bind (fun _ => some (PrimTy.dflt .uint)) = _
+    cases a.eval σ ν with
+    | none => simp only [Option.bind_none]
+    | some x =>
+      simp only [Option.bind_some]
+      have hv0 : v.val = 0 := by omega
+      show _ = (some (x.val * v.val % Semantics.uintBound)).bind PrimTy.uint.ofInt?
+      rw [hv0, Int.mul_zero, Int.zero_emod, Option.bind_some, uint_ofInt?_eq (by decide) (by decide)]
+      rfl
+  · rename_i h0
+    obtain ⟨hg, hm, hb, hs, h⟩ := mulWGo_spec hprev a v.val.toNat v.val.toNat ds m hds ha (by omega) Nat.lt_two_pow_self
+    refine ⟨hg, hb, fun σ ν hp hd => ⟨(h σ ν hp hd).1, ?_⟩⟩
+    cases hx : a.eval σ ν with
+    | none =>
+      have := hs σ ν
+      rw [hx] at this
+      cases hr : (mulWGo prev a v.val.toNat v.val.toNat ds m).term.eval σ ν with
+      | none => simp only [Option.bind_none]
+      | some _ => rw [hr] at this; cases this
+    | some x =>
+      obtain ⟨w, hw, hw'⟩ := (h σ ν hp hd).2 x hx
+      rw [hw, Option.bind_some]
+      show _ = (some (x.val * v.val % Semantics.uintBound)).bind PrimTy.uint.ofInt?
+      rw [Option.bind_some, uint_ofInt?_of_val (w := w) (by rw [hw', hV]; rfl)]
+
 theorem cut1_good {a s : Srt} (o : Op1 C a s) {x : LTm C a} {n : Nat} {prev : List (LFml C)}
     {A : CutTm C a} (hA : CutTm.Good x n prev A) (hprev : Defs.Below n prev) :
     CutTm.Good (.app1 o x) n prev (cut1 o prev A) := by
@@ -948,6 +1539,196 @@ theorem cut1_good {a s : Srt} (o : Op1 C a s) {x : LTm C a} {n : Nat} {prev : Li
         | none => rfl
         | some y => simp only [Option.bind_some, toUint_isSome, Option.isSome_some]) hev
   | _ => exact hgen
+
+/-! ## The literal cases of `cut2` -/
+
+theorem good_litR {op : BinOp} {p : PrimTy} (h : op.accepts p = true) (hop : op ≠ .and ∧ op ≠ .or)
+    {x y : LTm C (.val p)} {n : Nat} {prev : List (LFml C)} {A B : CutTm C (.val p)} {v : p.Denote}
+    (heq : B.term = .app0 (.lit v))
+    (hxe : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (A.defs ++ B.defs) → A.term.eval σ ν = x.eval σ ν)
+    (hye : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (A.defs ++ B.defs) → B.term.eval σ ν = y.eval σ ν)
+    {R : CutTm C (.val (op.ret p))} (hR : Defs.Good n R.next R.defs) (hb : R.term.atomBound ≤ R.next)
+    (hRe : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν R.defs → LFml.AllHold σ ν (A.defs ++ B.defs) ∧
+      R.term.eval σ ν = (A.term.eval σ ν).bind fun xv => op.evalT h xv v) :
+    CutTm.Good (.app2 (.binop op h) x y) n prev R :=
+  good_bind (a := A.term) (F := fun xv => op.evalT h xv v) hR hb hRe (fun σ ν hp hd => by
+    rw [LTm.eval_binop_of h (shortT_none hop), ← hxe σ ν hp hd, ← hye σ ν hp hd, heq]; rfl)
+
+theorem good_litL {op : BinOp} {p : PrimTy} (h : op.accepts p = true) (hop : op ≠ .and ∧ op ≠ .or)
+    {x y : LTm C (.val p)} {n : Nat} {prev : List (LFml C)} {A B : CutTm C (.val p)} {v : p.Denote}
+    (heq : A.term = .app0 (.lit v))
+    (hxe : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (A.defs ++ B.defs) → A.term.eval σ ν = x.eval σ ν)
+    (hye : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (A.defs ++ B.defs) → B.term.eval σ ν = y.eval σ ν)
+    {R : CutTm C (.val (op.ret p))} (hR : Defs.Good n R.next R.defs) (hb : R.term.atomBound ≤ R.next)
+    (hRe : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν R.defs → LFml.AllHold σ ν (A.defs ++ B.defs) ∧
+      R.term.eval σ ν = (B.term.eval σ ν).bind fun yv => op.evalT h v yv) :
+    CutTm.Good (.app2 (.binop op h) x y) n prev R :=
+  good_bind (a := B.term) (F := fun yv => op.evalT h v yv) hR hb hRe (fun σ ν hp hd => by
+    rw [LTm.eval_binop_of h (shortT_none hop), ← hxe σ ν hp hd, ← hye σ ν hp hd, heq]
+    show _ = (B.term.eval σ ν).bind _
+    cases B.term.eval σ ν <;> rfl)
+
+/-- `a` then failure: `a / 0`, `a % 0`. -/
+theorem seq_err_spec {p : PrimTy} {n m : Nat} {ds prev : List (LFml C)} (hds : Defs.Good n m ds)
+    {a : LTm C (.val p)} (ha : a.atomBound ≤ m) {r : PrimTy} {F : p.Denote → Option r.Denote}
+    (hF : ∀ x, F x = none) :
+    Defs.Good n m ds ∧ (LTm.seq a (LTm.err (s := .val r))).atomBound ≤ m ∧
+      ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν ds → LFml.AllHold σ ν ds ∧
+        (LTm.seq a (LTm.err (s := .val r))).eval σ ν = (a.eval σ ν).bind F :=
+  ⟨hds, by show max _ 0 ≤ _; omega, fun σ ν _ hd => ⟨hd, by
+    rw [LTm.eval_seq]; cases a.eval σ ν with
+    | none => rfl
+    | some x => rw [Option.bind_some, Option.bind_some, hF]; rfl⟩⟩
+
+theorem div_zero {p : PrimTy} (h : BinOp.div.accepts p = true) (x v : p.Denote) (hp : p.isNumeric = true)
+    (hv : Linear.ScalarCode.integer p v = 0) : BinOp.evalT .div h x v = none := by
+  cases p with
+  | bool => cases hp
+  | uint => show (if v.val = 0 then none else _).bind _ = none; rw [if_pos (show v.val = 0 from hv)]; rfl
+  | int => show (if v.val = 0 then none else _).bind _ = none; rw [if_pos (show v.val = 0 from hv)]; rfl
+
+theorem mod_zero {p : PrimTy} (h : BinOp.mod.accepts p = true) (x v : p.Denote) (hp : p.isNumeric = true)
+    (hv : Linear.ScalarCode.integer p v = 0) : BinOp.evalT .mod h x v = none := by
+  cases p with
+  | bool => cases hp
+  | uint => show (if v.val = 0 then none else _).bind _ = none; rw [if_pos (show v.val = 0 from hv)]; rfl
+  | int => show (if v.val = 0 then none else _).bind _ = none; rw [if_pos (show v.val = 0 from hv)]; rfl
+
+theorem band_val (h : BinOp.band.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    BinOp.evalT .band h x v = PrimTy.uint.ofInt? ((x.val.toNat &&& v.val.toNat : Nat) : Int) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.uint.ofInt? = _
+  rw [Option.bind_some, bitwise_toNat]
+
+theorem bor_val (h : BinOp.bor.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    BinOp.evalT .bor h x v = PrimTy.uint.ofInt? ((x.val.toNat ||| v.val.toNat : Nat) : Int) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.uint.ofInt? = _
+  rw [Option.bind_some, bitwise_toNat]
+
+theorem bxor_val (h : BinOp.bxor.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    BinOp.evalT .bxor h x v = PrimTy.uint.ofInt? ((x.val.toNat ^^^ v.val.toNat : Nat) : Int) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.uint.ofInt? = _
+  rw [Option.bind_some, bitwise_toNat]
+
+theorem mulW_comm (h : BinOp.mulW.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    BinOp.evalT .mulW h v x = BinOp.evalT .mulW rfl x v := by
+  show (some (v.val * x.val % Semantics.uintBound)).bind PrimTy.uint.ofInt? =
+    (some (x.val * v.val % Semantics.uintBound)).bind PrimTy.uint.ofInt?
+  rw [Int.mul_comm]
+
+/-- `x ** 0 = 1`, `x ** 1 = x`. -/
+theorem pow_lit (h : BinOp.pow.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    (v.val = 0 → BinOp.evalT .pow h x v = some uintOne) ∧ (v.val = 1 → BinOp.evalT .pow h x v = some x) := by
+  have hx0 := uint_val_nonneg x
+  have hx1 := uint_val_lt x
+  refine ⟨fun hv => ?_, fun hv => ?_⟩
+  · show (if v.val < 0 then none else some (x.val ^ v.val.toNat)).bind PrimTy.uint.ofInt? = _
+    rw [hv, if_neg (by decide), Option.bind_some, show (0 : Int).toNat = 0 from rfl, Int.pow_zero]
+    exact uint_ofInt?_eq (by decide) (by decide)
+  · show (if v.val < 0 then none else some (x.val ^ v.val.toNat)).bind PrimTy.uint.ofInt? = _
+    rw [hv, if_neg (by decide), Option.bind_some, show (1 : Int).toNat = 1 from rfl, Int.pow_succ, Int.pow_zero, Int.one_mul,
+      uint_ofInt?_eq hx0 hx1]
+    rfl
+
+/-- `x **% 0 = 1`, `x **% 1 = x`. -/
+theorem powW_lit (h : BinOp.powW.accepts .uint = true) (x v : PrimTy.uint.Denote) :
+    (v.val = 0 → BinOp.evalT .powW h x v = some uintOne) ∧ (v.val = 1 → BinOp.evalT .powW h x v = some x) := by
+  have hx0 := uint_val_nonneg x
+  have hx1 := uint_val_lt x
+  refine ⟨fun hv => ?_, fun hv => ?_⟩
+  · show (if v.val < 0 then none else some (x.val ^ v.val.toNat % Semantics.uintBound)).bind
+      PrimTy.uint.ofInt? = _
+    rw [hv, if_neg (by decide), Option.bind_some, show (0 : Int).toNat = 0 from rfl, Int.pow_zero]
+    exact uint_ofInt?_eq (by decide) (by decide)
+  · show (if v.val < 0 then none else some (x.val ^ v.val.toNat % Semantics.uintBound)).bind
+      PrimTy.uint.ofInt? = _
+    rw [hv, if_neg (by decide), Option.bind_some, show (1 : Int).toNat = 1 from rfl, Int.pow_succ, Int.pow_zero, Int.one_mul]
+    show PrimTy.uint.ofInt? (x.val % ((2 ^ 256 : Nat) : Int)) = _
+    rw [Int.emod_eq_of_lt hx0 hx1, uint_ofInt?_eq hx0 hx1]
+    rfl
+
+theorem powLit_spec (h : BinOp.pow.accepts .uint = true)
+    {n m : Nat} {ds prev : List (LFml C)} (hds : Defs.Good n m ds) {a : LTm C (.val .uint)}
+    (ha : a.atomBound ≤ m) (v : PrimTy.uint.Denote) (hv : v.val = 0 ∨ v.val = 1) :
+    Defs.Good n m ds ∧ (powLit (.app2 (.binop .pow h) a (.app0 (.lit v))) a v).atomBound ≤ m ∧
+      ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν ds → LFml.AllHold σ ν ds ∧
+        (powLit (.app2 (.binop .pow h) a (.app0 (.lit v))) a v).eval σ ν =
+          (a.eval σ ν).bind fun xv => BinOp.evalT .pow h xv v := by
+  unfold powLit
+  rcases hv with hv | hv
+  · rw [if_pos hv]
+    refine ⟨hds, by show max _ 0 ≤ _; omega, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    rw [LTm.eval_seq]
+    cases a.eval σ ν with
+    | none => rfl
+    | some x => rw [Option.bind_some, Option.bind_some, (pow_lit h x v).1 hv]; rfl
+  · rw [if_neg (by omega), if_pos hv]
+    refine ⟨hds, ha, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    cases a.eval σ ν with
+    | none => rfl
+    | some x => rw [Option.bind_some, (pow_lit h x v).2 hv]
+
+theorem powWLit_spec (h : BinOp.powW.accepts .uint = true)
+    {n m : Nat} {ds prev : List (LFml C)} (hds : Defs.Good n m ds) {a : LTm C (.val .uint)}
+    (ha : a.atomBound ≤ m) (v : PrimTy.uint.Denote) (hv : v.val = 0 ∨ v.val = 1) :
+    Defs.Good n m ds ∧ (powLit (.app2 (.binop .powW h) a (.app0 (.lit v))) a v).atomBound ≤ m ∧
+      ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν ds → LFml.AllHold σ ν ds ∧
+        (powLit (.app2 (.binop .powW h) a (.app0 (.lit v))) a v).eval σ ν =
+          (a.eval σ ν).bind fun xv => BinOp.evalT .powW h xv v := by
+  unfold powLit
+  rcases hv with hv | hv
+  · rw [if_pos hv]
+    refine ⟨hds, by show max _ 0 ≤ _; omega, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    rw [LTm.eval_seq]
+    cases a.eval σ ν with
+    | none => rfl
+    | some x => rw [Option.bind_some, Option.bind_some, (powW_lit h x v).1 hv]; rfl
+  · rw [if_neg (by omega), if_pos hv]
+    refine ⟨hds, ha, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    cases a.eval σ ν with
+    | none => rfl
+    | some x => rw [Option.bind_some, (powW_lit h x v).2 hv]
+
+theorem int_div_neg_one (h : BinOp.div.accepts .int = true) (x v : PrimTy.int.Denote) (hv : v.val = -1) :
+    BinOp.evalT .div h x v = UnOp.evalT .neg rfl x := by
+  show (if v.val = 0 then none else some (Int.tdiv x.val v.val)).bind PrimTy.int.ofInt? =
+    PrimTy.int.ofInt? (-x.val)
+  rw [hv, if_neg (by decide), Option.bind_some, BitArith.tdiv_neg_one]
+
+theorem int_mod_neg_one (h : BinOp.mod.accepts .int = true) (x v : PrimTy.int.Denote) (hv : v.val = -1) :
+    BinOp.evalT .mod h x v = some (PrimTy.dflt .int) := by
+  show (if v.val = 0 then none else some (Int.tmod x.val v.val)).bind PrimTy.int.ofInt? = _
+  rw [hv, if_neg (by decide), Option.bind_some, BitArith.tmod_neg_one]
+  rfl
+
+theorem int_div_isSome (h : BinOp.div.accepts .int = true) (x v : PrimTy.int.Denote) (hv0 : v.val ≠ 0)
+    (hv1 : v.val ≠ -1) : (BinOp.evalT .div h x v).isSome = true := by
+  have hx := int_val_bounds x
+  show ((if v.val = 0 then none else some (Int.tdiv x.val v.val)).bind PrimTy.int.ofInt?).isSome = true
+  rw [if_neg hv0, Option.bind_some]
+  have := BitArith.tdiv_bounds x.val v.val _ hx.1 hx.2 hv0 hv1
+  exact ofInt?_isSome' rfl (int_inRange this.1 this.2)
+
+theorem int_rem_eval (h : BinOp.mod.accepts .int = true) (x v q : PrimTy.int.Denote) (hv : v.val ≠ 0)
+    (hq : BinOp.evalT .div rfl x v = some q) :
+    (BinOp.evalT .mul rfl q v).bind (BinOp.evalT .sub rfl x) = BinOp.evalT .mod h x v := by
+  have hx := int_val_bounds x
+  have hq' : q.val = Int.tdiv x.val v.val := by
+    have : ((if v.val = 0 then none else some (Int.tdiv x.val v.val)).bind PrimTy.int.ofInt?) = some q := hq
+    rw [if_neg hv, Option.bind_some, PrimTy.ofInt?_eq_some_iff rfl] at this
+    exact this
+  have hm := Int.tmod_def x.val v.val
+  have hb := BitArith.tmod_bounds x.val v.val
+  have hqv : q.val * v.val = x.val - Int.tmod x.val v.val := by rw [hm, hq', Int.mul_comm]; omega
+  show ((PrimTy.int.ofInt? (q.val * v.val)).bind fun w => PrimTy.int.ofInt? (x.val - w.val)) =
+    (if v.val = 0 then none else some (Int.tmod x.val v.val)).bind PrimTy.int.ofInt?
+  rw [if_neg hv, Option.bind_some]
+  have hin : PrimTy.int.inRange (q.val * v.val) = true := int_inRange (by omega) (by omega)
+  rw [show PrimTy.int.ofInt? (q.val * v.val) = some ⟨_, hin⟩ by simp only [PrimTy.ofInt?, dif_pos hin],
+    Option.bind_some]
+  show PrimTy.int.ofInt? (x.val - q.val * v.val) = _
+  rw [hqv]
+  congr 1
+  omega
 
 theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n : Nat}
     {prev : List (LFml C)} {A : CutTm C a} {B : CutTm C b} (hA : CutTm.Good x n prev A)
@@ -978,7 +1759,10 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
       split
       · rename_i v heq
         split
-        · exact hgen
+        · rename_i hv
+          obtain ⟨g1, g2, g3⟩ := seq_err_spec (prev := prev) (r := .uint) hds hAb
+            (F := fun xv => BinOp.evalT .div h xv v) (fun xv => div_zero h xv v rfl hv)
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
         · rename_i hv
           exact CutTm.Good.atom hds hprev' hAb
             (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)
@@ -990,7 +1774,10 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
       split
       · rename_i v heq
         split
-        · exact hgen
+        · rename_i hv
+          obtain ⟨g1, g2, g3⟩ := seq_err_spec (prev := prev) (r := .uint) hds hAb
+            (F := fun xv => BinOp.evalT .mod h xv v) (fun xv => mod_zero h xv v rfl hv)
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
         · rename_i hv
           refine CutTm.Good.quot hds hprev' (fun k => A.term.remOf k v) hAb
             (by show max A.term.atomBound 0 ≤ B.next; omega)
@@ -1100,12 +1887,156 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
           cases B.term.eval σ ν with
           | none => rfl
           | some yv => exact (band_comm h yv v).trans (band_mask h yv v k hv)
-        · exact hgen
+        · split
+          · rename_i r _
+            have heq := r.2
+            obtain ⟨g1, g2, g3⟩ := bandLit_spec hds hprev' hAb (uint_toNat_lt r.1)
+            exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+              obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+              exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (band_val h xv _).symm))⟩)
+          · rename_i r _ _
+            have heq := r.2
+            obtain ⟨g1, g2, g3⟩ := bandLit_spec hds hprev' hB.bound (uint_toNat_lt r.1)
+            exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+              obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+              exact ⟨r1, r2.trans (congrArg _ (funext fun yv => ((band_comm h yv _).trans (band_val h yv _)).symm))⟩)
+          · exact hgen
     case addW.uint =>
       exact CutTm.Good.atom hds hprev'
         (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)
         (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)
         (isSome_binop2 h ⟨by decide, by decide⟩ A.term B.term (addW_isSome h)) hev
+    case pow.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i v heq
+        by_cases hv : v.val = 0 ∨ v.val = 1
+        · obtain ⟨g1, g2, g3⟩ := powLit_spec (prev := prev) h hds hAb v hv
+          rw [← heq] at g2 g3
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
+        · have : powLit (.app2 (.binop .pow h) A.term B.term) A.term v = .app2 (.binop .pow h) A.term B.term := by
+            unfold powLit; rw [if_neg (by omega), if_neg (by omega)]
+          rw [this]; exact hgen
+      · exact hgen
+    case powW.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i v heq
+        by_cases hv : v.val = 0 ∨ v.val = 1
+        · obtain ⟨g1, g2, g3⟩ := powWLit_spec (prev := prev) h hds hAb v hv
+          rw [← heq] at g2 g3
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
+        · have : powLit (.app2 (.binop .powW h) A.term B.term) A.term v = .app2 (.binop .powW h) A.term B.term := by
+            unfold powLit; rw [if_neg (by omega), if_neg (by omega)]
+          rw [this]; exact hgen
+      · exact hgen
+    case mulW.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := mulWLit_spec hds hprev' hAb r.1
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := mulWLit_spec hds hprev' hB.bound r.1
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => (mulW_comm h yv _).symm))⟩)
+      · exact hgen
+    case bor.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := borLit_spec hds hprev' hAb r.1
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (bor_val h xv _).symm))⟩)
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := borLit_spec hds hprev' hB.bound r.1
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => by rw [Nat.or_comm]; exact (bor_val h _ _).symm))⟩)
+      · exact hgen
+    case bxor.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := bxorLit_spec hds hprev' hAb r.1
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (bxor_val h xv _).symm))⟩)
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := bxorLit_spec hds hprev' hB.bound r.1
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => by rw [Nat.xor_comm]; exact (bxor_val h _ _).symm))⟩)
+      · exact hgen
+    case div.int =>
+      dsimp only [cut2]
+      split
+      · rename_i v heq
+        split
+        · rename_i hv
+          obtain ⟨g1, g2, g3⟩ := seq_err_spec (prev := prev) (r := .int) hds hAb
+            (F := fun xv => BinOp.evalT .div h xv v) (fun xv => div_zero h xv v rfl hv)
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
+        · split
+          · rename_i hv0 hv1
+            refine good_litR h ⟨by decide, by decide⟩ heq hxe hye hds hAb (fun σ ν _ hd => ⟨hd, ?_⟩)
+            rw [LTm.eval_app1, Close.Op1.eval_unop]
+            congr 1; funext xv; rw [int_div_neg_one h xv v hv1]
+          · rename_i hv0 hv1
+            exact CutTm.Good.atom hds hprev' hAb
+              (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)
+              (isSome_binop_lit h ⟨by decide, by decide⟩ A.term B.term v heq
+                (fun xv => int_div_isSome h xv v hv0 hv1)) hev
+      · exact hgen
+    case mod.int =>
+      dsimp only [cut2]
+      split
+      · rename_i v heq
+        split
+        · rename_i hv
+          obtain ⟨g1, g2, g3⟩ := seq_err_spec (prev := prev) (r := .int) hds hAb
+            (F := fun xv => BinOp.evalT .mod h xv v) (fun xv => mod_zero h xv v rfl hv)
+          exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 g3
+        · split
+          · rename_i hv0 hv1
+            refine good_litR h ⟨by decide, by decide⟩ heq hxe hye hds
+              (by show max A.term.atomBound 0 ≤ B.next; omega) (fun σ ν _ hd => ⟨hd, ?_⟩)
+            rw [LTm.eval_seq]
+            cases A.term.eval σ ν with
+            | none => rfl
+            | some xv => rw [Option.bind_some, Option.bind_some, int_mod_neg_one h xv v hv1]; rfl
+          · rename_i hv0 hv1
+            refine CutTm.Good.quot hds hprev' (fun k => LTm.app2 (.binop .sub rfl) A.term
+              (.app2 (.binop .mul rfl) (.var k) (.app0 (.lit v)))) hAb
+              (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)
+              (fun k j hk hm => by
+                show max A.term.atomBound (max (k + 1) 0) ≤ j
+                omega)
+              (fun σ ν hg => by
+                rw [isSome_binop_lit rfl ⟨by decide, by decide⟩ A.term B.term v heq
+                  (fun xv => int_div_isSome rfl xv v hv0 hv1)]
+                exact hg) ?_
+            intro σ ν k hp hd hdefn
+            have hy : y.eval σ ν = some v := by rw [← hye σ ν hp hd, heq]; rfl
+            rw [LTm.eval_binop_of h (shortT_none ⟨by decide, by decide⟩) x y, hy, ← hxe σ ν hp hd,
+              LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩)]
+            cases hx : A.term.eval σ ν with
+            | none => rfl
+            | some xv =>
+              have hq := LFml.defn_eval hdefn hx
+              rw [ev_bin rfl ⟨by decide, by decide⟩ hx (by rw [heq]; rfl)] at hq
+              simp only [Option.bind_some]
+              rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩)]
+              exact int_rem_eval h xv v _ hv0 hq
+      · exact hgen
     case subW.uint =>
       exact CutTm.Good.atom hds hprev'
         (by show max A.term.atomBound B.term.atomBound ≤ B.next; have := hB.bound; omega)

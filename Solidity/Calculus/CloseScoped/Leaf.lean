@@ -256,6 +256,12 @@ theorem eval_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (a b : Tm C Γ (.val p)
 theorem eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
     (Tm.app3 .save s q v).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
       (v.eval σ).bind fun w => st.write r w := rfl
+/-- `anon(s, L, s')`: the roots `L` names from `s'` (KeY's anonymising
+update of a loop body's frame, `Fml.anonHavoc`); a read of it is
+`Storage.find_anon`'s. -/
+theorem eval_anon (L : List Name) (s s' : Tm C Γ .st) :
+    (Tm.app2 (.anon L) s s').eval σ =
+      (s.eval σ).bind fun a => (s'.eval σ).bind fun b => some (Storage.anon L a b) := rfl
 theorem eval_push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
     (v : Tm C Γ (.sv E)) : (Tm.app3 .push s q v).eval σ = (s.eval σ).bind fun st =>
       (q.eval σ).bind fun r => st.push r fun _ => (v.eval σ).map SVal.strip := rfl
@@ -964,6 +970,35 @@ theorem holds_bind_oldNet (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C
   Iff.rfl
 theorem holds_bind_kint (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.kint :: Γ)) :
     holds σ (.bind m x .kint φ) ↔ ∀ v : Int, holds (σ.push (t := .kint) v) φ := Iff.rfl
+/-- **A loop frame's anonymised storage, read as a frame**: for every
+storage `st` that differs from the state's only at the roots `L` names
+(`Storage.Framed`), the state with its storage replaced by `st` (as
+`{havoc}` replaces it, the ledger and the balance kept).  So the leaf has
+the shape a `{havoc}` gives it, and, as a premise the contextual pass
+rewrites by, every read of a root outside `L` as it was
+(`Storage.Framed.find_eq`). -/
+theorem holds_bind_anonSt (σ : State C Γ) (m m' : Modality) (x : Var) (L : List Name)
+    (φ : Fml C Γ) :
+    holds σ (.bind m x .old (.upd m' (Upd.anonSt L) φ)) ↔
+      ∀ st : Storage C, Storage.Framed L σ.storage st →
+        (∀ {U : Ty} (r : SRef C U), r.root ∉ L → st.find r = σ.storage.find r) →
+          holds (σ.havoc st σ.net σ.selfBalance) φ := by
+  constructor
+  · intro h st hst _
+    have h₁ := Upd.afterT.of_lands (Modality.forallB_all h st) (Upd.lands_anonSt L σ st)
+    have e : Storage.anon L σ.storage st = st := hst
+    rw [e] at h₁
+    exact h₁
+  · intro h
+    refine Modality.forallB_intro fun st => Upd.afterT_intro (fun he => ?_) fun _ σ' hL => ?_
+    · have hl := (Upd.lands_anonSt (C := C) L σ st).1
+      rw [he] at hl
+      cases hl
+    · rw [← Upd.Lands.eq (Upd.lands_anonSt L σ st) hL]
+      have hF : Storage.Framed L σ.storage (Storage.anon L σ.storage st) :=
+        Storage.Framed.ofAnon L σ.storage st
+      exact h _ hF fun r hr => hF.find_eq hr
+
 theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
     holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
 /-- A fresh object of any contents: one more object, its reference the new
@@ -1147,6 +1182,7 @@ end CloseS
 /-! ## The set -/
 
 attribute [close_rw_s high] CloseS.holds_eqAtom CloseS.holds_eqT CloseS.holds_eqA CloseS.atT_map_root
+  CloseS.holds_bind_anonSt
 
 attribute [close_rw_s]
   -- formulas
@@ -1217,7 +1253,8 @@ attribute [close_rw_s]
   CloseS.eval_binop CloseS.eval_find CloseS.eval_sfind CloseS.eval_delAt CloseS.eval_at
   CloseS.eval_len CloseS.eval_pushSlot CloseS.eval_pop CloseS.eval_shrink CloseS.eval_extend
   CloseS.eval_nextIn CloseS.eval_mat
-  CloseS.eval_ite CloseS.eval_save CloseS.eval_push
+  CloseS.eval_ite CloseS.eval_save CloseS.eval_push CloseS.eval_anon Storage.find_anon
+  List.mem_cons List.not_mem_nil
   CloseS.eval_memory CloseS.eval_alloc CloseS.eval_addM CloseS.eval_read CloseS.eval_mlen
   CloseS.eval_hash
   CloseS.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt CloseS.eval_write

@@ -185,6 +185,7 @@ def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .copySt _ => "copySt"
   | .zbin op _ => s!"zbin {op.sym}"
   | .zcmp op _ => s!"zcmp {op.sym}"
+  | .anon L => s!"anon {L}"
 
 def Op3.key {a b c s : Srt} : Op3 C a b c s → String
   | .ite => "ite"
@@ -681,6 +682,12 @@ def NSTerm.pushSlot (s : NSTerm C) (p : NPTerm C) : NSTerm C := NSTerm.arrOp "pu
 def NSTerm.pop (s : NSTerm C) (p : NPTerm C) : NSTerm C := NSTerm.arrOp "pop" .pop s p
 def NSTerm.shrink (s : NSTerm C) (p : NPTerm C) : NSTerm C := NSTerm.arrOp "shrink" .shrink s p
 def NSTerm.extend (s : NSTerm C) (p : NPTerm C) : NSTerm C := NSTerm.arrOp "extend" .extend s p
+
+/-- `anon(s, r₁, …, rₙ, s')`: the roots `rᵢ` from `s'`, the others from `s`
+(KeY's `anon(heap, locset, anonHeap)`, `Op2.anon`). -/
+def NSTerm.anon (s : NSTerm C) (L : List Name) (s' : NSTerm C) : NSTerm C :=
+  syn s!"anon({s.key}, {L}, {s'.key})" s!"anon({s.text}, {", ".intercalate L}, {s'.text})"
+    fun Γ => do pure ⟨_, .app2 (.anon L) (← s.topStorage Γ) (← s'.topStorage Γ)⟩
 
 /-- `select(s, r)`: the struct at the root `r`, or at the member `r` under
 another `select`. -/

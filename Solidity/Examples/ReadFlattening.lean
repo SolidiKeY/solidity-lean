@@ -37,7 +37,7 @@ example : (flattened.layout.entries (State.init Bank)
 
 def countermodel : encoded.Countermodel := leaf_countermodel[encoded]
 
-/-- info: (3, 3) -/
+/-- info: (0, 0) -/
 #guard_msgs in #eval ((three.read countermodel.state.storage).val,
   ((balance (three.read countermodel.state.storage)).read countermodel.state.storage).val)
 

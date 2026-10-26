@@ -1437,4 +1437,33 @@ theorem Upd.Lands.eq {Γ Δ : Ctx} {σ₀ : State C Γ} {U : Upd C Γ Δ} {g g' 
     | pos j => exact fun a b => a.trans b.symm
     | rhs r => exact fun a b => Option.some.inj (a.symm.trans b)
 
+/-! ## A loop frame's anonymising update -/
+
+section AnonSt
+
+variable {Γ : Ctx}
+
+/-- A storage set after an update lands on the state it lands on, its
+storage replaced. -/
+theorem Upd.lands_snoc_storage {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : GlobT C σ₀.H}
+    {σ' : State C Δ} (hL : U.Lands σ₀ g σ') {s : Tm C Γ .st} {st : Storage C}
+    (hs : s.eval σ₀ = some st) :
+    (U.snoc (.storage s)).Lands σ₀ (g.withStorage st) (σ'.withStorage st) := by
+  refine ⟨?_, ?_, fun i => hL.2.2 i⟩
+  · show (U.globT σ₀).bind (UpdElem.globT σ₀ (.storage s)) = _
+    rw [hL.1, Option.bind_some, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, hs, Option.bind_some]
+  · show { σ'.glob with storage := st } = { g.1 with storage := st }
+    rw [hL.2.1]
+
+/-- **`{storage := anon(storage, L, s')}`, `s'` popped, lands** on the state
+with the roots `L` names taken from `s'`. -/
+theorem Upd.lands_anonSt (L : List Name) (σ : State C Γ) (st : Storage C) :
+    (Upd.anonSt L).Lands (σ.push (t := .old) st)
+      ((σ.push (t := .old) st).globG.withStorage (Storage.anon L σ.storage st))
+      (σ.withStorage (Storage.anon L σ.storage st)) :=
+  Upd.lands_snoc_storage (Upd.lands_pop_nil (.push .refl) (σ.push (t := .old) st)) rfl
+
+end AnonSt
+
 end Solidity

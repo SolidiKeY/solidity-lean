@@ -199,9 +199,12 @@ used by the walk, which inlines.
 **A loop by its invariant** (`ProvesC.invBox`, `whileInvariantBox`'s goals,
 under the box): the body's goal is read over its callback runs, from every
 state the body's frame allows (`{anon(xs)}`, `{havoc}`): a body that calls
-back pays, so its frame has `hv`, and a callback replaces only the storage
-and the ledger, which that frame may write (`ExecP.frame`,
-`Semantics/CallbackFrame.lean`).  The invariant is the loop's own: what the
+back has no modifies set (`Stmt.storeAt` is `none`, so its frame is
+`{havoc}`), and a callback replaces only the storage and the ledger, which
+that frame may write (`ExecP.frame`, `Semantics/CallbackFrame.lean`); a
+body with a modifies set calls nobody back (`Prog.callsBack_of_storeAt`), so
+its callback run is its run, and only the roots it names are anonymised
+(`docs/loops.md`, "Modifies sets").  The invariant is the loop's own: what the
 callee may change it does not keep unless it restates the contract's
 invariant (`Examples/Tactics/CallbackStrategy.lean`, `pingNInv`).  Sound by
 `holdsC_invBox`, by induction over the iterations (`ExecS.loop_box`).  A

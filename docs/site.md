@@ -18,7 +18,9 @@ it in an editor (the page's About box has the commands).
 `.github/workflows/pages.yml` runs on every push to the default branch, and
 by hand (`workflow_dispatch`) on any branch:
 
-1. **Build** the project's libraries: `lake build Solidity` in the root, or
+1. **Build** the project's libraries: `lake build Solidity`, then
+   `lake build SolkeyTestSuite` (solkey's test suite, allowed to fail: its
+   pages then show Lean's errors and the rest still records) in the root, or
    `lake build Velvet VelvetExamples SolidityVelvet` in `Bridge/` (Mathlib
    from its cache). The two projects are separate jobs.
 2. **Record** with `node scripts/site/export.mjs --project <id> --out _site`.
@@ -33,8 +35,11 @@ by hand (`workflow_dispatch`) on any branch:
 3. **Assemble** the viewer (`site/index.html`, `site/app.js`,
    `site/style.css`, `site/examples.json`) with whatever was recorded. A
    project whose job failed shows as not recorded; the other still deploys.
-4. **Deploy** to Pages, from the default branch only. On another branch the
-   site is uploaded as the run's `github-pages` artifact instead.
+4. **Deploy** to Pages, from the default branch only, and never from a
+   cancelled run. On the default branch a push queues behind the build in
+   progress instead of cancelling it (the core's build is longer than the
+   gap between pushes); on another branch the newer run cancels the older,
+   and the site is uploaded as the run's `github-pages` artifact instead.
 
 The repository's Pages source must be **GitHub Actions** (Settings → Pages →
 Build and deployment → Source), once.
@@ -46,8 +51,8 @@ stand-in language server, without Lean; `lean.yml` runs it.
 
 Add a row to `site/examples.json` under its project: the `file` relative to
 the project's `root`, and a `group` for the picker. The file must be built by
-the project's step 1 (for the core, imported from `Solidity.lean`, as every
-example already is). The title and summary come from the file's module
+the project's step 1 (for the core, imported from `Solidity.lean` or
+`SolkeyTestSuite.lean`). The title and summary come from the file's module
 docstring; give `title` in the row for a file without one. A long file costs
 its elaboration time again in the site's build, plus one or two goal requests
 per line.

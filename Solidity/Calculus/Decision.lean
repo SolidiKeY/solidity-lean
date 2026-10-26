@@ -1,6 +1,9 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
+import Solidity.Calculus.HashKinds
+import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.MemSwap
 
 /-!
 # The closer's decision, stated (M7)
@@ -28,13 +31,38 @@ hash terms are free of collisions (`Fml.HashFree`, `Fml.holdsH`,
 per scope, each binder's instance under its own.  In the fragment a hash
 term stands where that premise settles it: against a hash of its kind
 (`==`, `!=`), or as the key of a mapping at a root whose keys are all
-hashes (`Fml.inTarget`); `ecrecover` stands nowhere.
+hashes (`Fml.inTarget`); `ecrecover` stands nowhere, and neither does a
+hash under a hidden memory binder or an anonymising update (an unset
+reference hashes to nothing, a key of nothing reads the default key `0`:
+a preimage question) or a hash key of anything but a memory local in the
+starting memory.
+
+A leaf with hashes (`decideHash`, plan step 7) is decided where its memory
+locals are fresh byte strings read only by hashes of one kind: read with
+each string the word its hash returns (`Fml.swPrefix`,
+`Calculus/HashSwap.lean`), valid whatever the hash where the body's value
+binders are positive (`Fml.swPrefix_validH`, `Fml.posAll`); refuted by
+choosing the strings, a class of equal strings at a time, from a family
+whose hashes are distinct (`Fml.swInst`, `Fml.swInst_refutes`,
+`Calculus/HashReduction.lean`; `famN` strings, the kernel's theorem up to
+`famBound`, computed past it, `famCheck`), which meets the premise.  A
+string hashed by two kinds stands for one word per kind (`decideHash2`,
+`Calculus/HashKinds.lean`): the second kind's words binders of their own,
+linked to the first's by the premise, the result read by the one-kind
+swap.  `decideHash` answers on `Fml.hashCovered`
+(`decideGoal_complete_hash`, through `Fml.swPrefix_complete` and
+`Fml.tk_complete`, the relabeling of `Calculus/HashRelabel.lean`); for one
+kind the reduction is moreover exact on its fragment (`Fml.swPrefix_exact`,
+`Calculus/HashComplete.lean`: keyed roots `mapping(uint => uint)`, the
+swapped leaf in `Fml.rl`, the prefix's string levels the words', at most
+`N` strings with the family of `N` checked, positive binders).
 
 The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
-without a hash).  The statement is the goal of the rounds to come, not true
-today: `Examples/Decision.lean`'s `rowApf` (a block over an inner mapping)
-is in the fragment and answered `unknown`.  A statement of the form "some decider is complete" would
+without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
+today: `Examples/Decision.lean` pins a leaf of the fragment answered
+`unknown` for each shape left (`gapColumn` … `gapHashNegForall`,
+`docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
 rounds extend.
@@ -47,9 +75,15 @@ quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 `QFml.decide_iff`): reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`), negative array-property blocks over mappings at
-roots instantiated at the index set (`apfPrep_valid_iff`); `decideGoal` likewise
+roots instantiated at the index set (`apfPrep`, sound by
+`LFml.apfInst_sound` and exact by `ApfFml.apfInst_refute` wherever it
+instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
+preparation has); or the leaves that read the starting ledger
+(`Fml.ledgerCovered`) or storage arrays at symbolic indices
+(`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
-`decideGoal_complete`, on covered leaves without a hash).  `Fml.Covered`
+`decideGoal_complete` on covered leaves without a hash,
+`decideGoal_complete_hash` on `Fml.hashCovered`).  `Fml.Covered`
 also holds of formulas with programs, which `Fml.inTarget` (on leaves)
 excludes; on program-free leaves the inclusion `Fml.Covered ⊆
 Fml.inTarget` is not proved (`Fml.Covered` is read on the eliminated leaf,
@@ -62,10 +96,15 @@ negative-position block must be quantifier-free, and an index guard is an
 variables) of index terms, a bound variable or a term mentioning none; a
 path indexes at most one bound variable (no `m[i][j]` with both bound, as
 Bradley, Manna and Sipma state their result for one dimension); a hash
-stored by an update, a hash key of a nested mapping and an `ecrecover` term
-are outside.  So
-`Fml.inTarget` is a subset of the fragment the user named, never a
-superset.
+stored by an update, a hash key of a nested mapping or of anything but a
+memory local in the starting memory, a hash under a hidden memory binder
+or an anonymising update,
+and an `ecrecover` term are outside.  So
+`Fml.inTarget` is a subset of the fragment the user named, with one known
+exception: a hash under a negative-position value quantifier whose hash
+pairs the scope above does not read (`gapHashNegForall`), where the leaf
+can be false only at a collision, which no refutation can exhibit;
+excluding it narrows `Fml.inTarget`, which needs the user's approval.
 -/
 
 namespace Solidity.Decide
@@ -85,14 +124,15 @@ inductive LeafVerdict (C : Contract) where
   /-- Neither: allowed only outside the fragment. -/
   | unknown
 
-/-- **The decision**: the automatic pipeline (`dependentReduction?`), its
+/-- **The pipelines**: the automatic pipeline (`dependentReduction?`), its
 arithmetic decided by the verified procedure (`AFml.decide_iff`), a `false`
 answer turned into a typed countermodel (`DependentReduction.verify`); on a
 leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
 the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
-on a leaf both refuse, the pipeline with ledger reads (`ledgerReduction?`,
-`LedgerReduction.verify`). -/
-def decideLeaf (φ : Fml C []) : LeafVerdict C :=
+on a leaf both refuse, the pipeline with storage array reads
+(`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
+(`ledgerReduction?`, `LedgerReduction.verify`). -/
+def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
     match r.verify with
@@ -105,16 +145,22 @@ def decideLeaf (φ : Fml C []) : LeafVerdict C :=
       | .inl _ => .proved
       | .inr cm => .refuted cm.1
     | none =>
-      match ledgerReduction? φ with
+      match arrayReduction? φ with
       | some q =>
         match q.verify with
         | .inl _ => .proved
         | .inr cm => .refuted cm.state
-      | none => .unknown
+      | none =>
+        match ledgerReduction? φ with
+        | some q =>
+          match q.verify with
+          | .inl _ => .proved
+          | .inr cm => .refuted cm.state
+        | none => .unknown
 
 /-- **Soundness.** -/
-theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
-  unfold decideLeaf at h
+theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.Valid φ := by
+  unfold decideLeafA at h
   split at h
   · split at h
     · rename_i hv _
@@ -130,12 +176,17 @@ theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Val
         · rename_i hv _
           exact hv.down
         · cases h
-      · cases h
+      · split at h
+        · split at h
+          · rename_i hv _
+            exact hv.down
+          · cases h
+        · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
-theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA φ = .refuted σ) :
     ¬ holds σ φ := by
-  unfold decideLeaf at h
+  unfold decideLeafA at h
   split at h
   · split at h
     · cases h
@@ -154,28 +205,31 @@ theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ 
         · rename_i cm _
           cases h
           exact cm.refutes
-      · cases h
+      · split at h
+        · split at h
+          · cases h
+          · rename_i cm _
+            cases h
+            exact cm.refutes
+        · cases h
 
-theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
-    ¬ Fml.Valid φ :=
-  fun hv => decideLeaf_refutes h (hv σ)
+/-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
+quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
+reads (`Fml.ledgerCovered`, M7 step 3), and the one with storage array reads
+(`Fml.arrayCovered`, M7 step 6). -/
+def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
+  φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered
 
-/-- **The fragment proved complete**: M4's, on the eliminated leaf, and the
-quantified one (`Fml.quantCovered`, M7 step 4), and the one with ledger
-reads (`Fml.ledgerCovered`, M7 step 3). -/
-def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
-  φ.inExact && φ.exactBounded || φ.quantCovered || φ.ledgerCovered
-
-/-- **Completeness on `Fml.Covered`.** -/
-theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
-  simp only [Fml.Covered, Bool.or_eq_true, Bool.and_eq_true] at h
-  unfold decideLeaf
+/-- **Completeness on `Fml.CoveredA`.** -/
+theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLeafA φ ≠ .unknown := by
+  simp only [Fml.CoveredA, Bool.or_eq_true, Bool.and_eq_true] at h
+  unfold decideLeafA
   cases hd : dependentReduction? φ with
   | some r =>
     dsimp only
     split <;> exact fun h => nomatch h
   | none =>
-    rcases h with (h | h) | h
+    rcases h with ((h | h) | h) | h
     · have := dependentReduction?_isSome φ h.1 h.2
       rw [hd] at this
       cases this
@@ -184,13 +238,123 @@ theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf
       rw [hq]
       dsimp only
       split <;> exact fun h => nomatch h
-    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayReduction?_isSome φ h)
       dsimp only
       split
       · split <;> exact fun h => nomatch h
       · rw [hq]
         dsimp only
         split <;> exact fun h => nomatch h
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerReduction?_isSome φ h)
+      dsimp only
+      split
+      · split <;> exact fun h => nomatch h
+      · split
+        · split <;> exact fun h => nomatch h
+        · rw [hq]
+          dsimp only
+          split <;> exact fun h => nomatch h
+
+
+/-! ### Fresh memory arrays (M7, plan step 6)
+
+A leaf the pipelines above refuse and that binds fresh arrays of
+primitives (`Fml.allocAll`) is read with its reads of them cut into atoms
+(`Fml.mxTop`, `Calculus/MemSwap.lean`), exactly at every state
+(`Fml.mxTop_holds`), and the cut leaf decided by `decideLeafA`. -/
+
+/-- The formula binds a fresh memory object. -/
+def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
+  | .allocAll .. => true
+  | .not φ => φ.hasAllocAll
+  | .and φ ψ | .imp φ ψ => φ.hasAllocAll || ψ.hasAllocAll
+  | .all _ _ φ => φ.hasAllocAll
+  | _ => false
+
+/-- The leaf's fresh arrays cut, the cut leaf decided. -/
+def decideMem (φ : Fml C []) : LeafVerdict C :=
+  if φ.hasAllocAll then
+    match φ.mxTop with
+    | some ψ => decideLeafA ψ
+    | none => .unknown
+  else .unknown
+
+theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid φ := by
+  unfold decideMem at h
+  split at h
+  · split at h
+    · rename_i ψ hψ
+      exact (Fml.mxTop_valid hψ).2 (decideLeafA_sound h)
+    · cases h
+  · cases h
+
+theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
+    ¬ holds σ φ := by
+  unfold decideMem at h
+  split at h
+  · split at h
+    · rename_i ψ hψ
+      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 hφ)
+    · cases h
+  · cases h
+
+/-- **The decision**: `decideLeafA`, then on a leaf it answers `unknown` on,
+the one with its fresh arrays cut (`decideMem`). -/
+def decideLeaf (φ : Fml C []) : LeafVerdict C :=
+  match decideLeafA φ with
+  | .unknown => decideMem φ
+  | v => v
+
+/-- **Soundness.** -/
+theorem decideLeaf_sound {φ : Fml C []} (h : decideLeaf φ = .proved) : Fml.Valid φ := by
+  unfold decideLeaf at h
+  split at h
+  · exact decideMem_sound h
+  · exact decideLeafA_sound h
+
+/-- **Refutations are certified**: the state returned refutes the leaf. -/
+theorem decideLeaf_refutes {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+    ¬ holds σ φ := by
+  unfold decideLeaf at h
+  split at h
+  · exact decideMem_refutes h
+  · exact decideLeafA_refutes h
+
+theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf φ = .refuted σ) :
+    ¬ Fml.Valid φ :=
+  fun hv => decideLeaf_refutes h (hv σ)
+
+/-- **The fragment with fresh arrays**: the leaf binds one, its cut is
+defined and in `Fml.CoveredA`. -/
+def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
+  φ.hasAllocAll && match φ.mxTop with
+    | some ψ => ψ.CoveredA
+    | none => false
+
+/-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with fresh
+arrays whose cut is in it (`Fml.memCovered`, M7 step 6). -/
+def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool := φ.CoveredA || φ.memCovered
+
+theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
+  unfold Fml.memCovered at h
+  simp only [Bool.and_eq_true] at h
+  obtain ⟨ha, h⟩ := h
+  unfold decideMem
+  rw [if_pos ha]
+  split at h
+  · exact decideLeafA_complete h
+  · cases h
+
+/-- **Completeness on `Fml.Covered`.** -/
+theorem decideLeaf_complete {φ : Fml C []} (h : φ.Covered = true) : decideLeaf φ ≠ .unknown := by
+  unfold decideLeaf
+  split
+  · rename_i hv
+    simp only [Fml.Covered, Bool.or_eq_true] at h
+    rcases h with h | h
+    · exact absurd hv (decideLeafA_complete h)
+    · exact decideMem_complete h
+  · assumption
 
 /-- On the fragment the verdict is exact. -/
 theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :
@@ -201,301 +365,447 @@ theorem decideLeaf_proved_iff {φ : Fml C []} (h : φ.Covered = true) :
   | refuted σ => exact absurd hv (decideLeaf_not_valid hd)
   | unknown => exact absurd hd (decideLeaf_complete h)
 
-/-! ## The goal under its own hash premise (e3′)
+/-! ### Leaves with hashes (M7, plan step 7)
 
-A hash is the real function of its bytes (`Heap.hash`), so a leaf may turn
-on a collision no one can exhibit.  The user's reading (2026-10-25, e3′):
-each goal is read under the premise that *its own* hash terms are free of
-collisions, distinct inputs giving distinct outputs.  The premise is part
-of the goal's reading, not an axiom and not a global assumption.
+A leaf whose memory locals are fresh byte strings read only by hashes of
+one kind (`Fml.swPrefix`, `Calculus/HashSwap.lean`): its swapped reading,
+each string a word, decided by `decideLeaf`; a proof proves the leaf
+(`Fml.swPrefix_validH`).  Otherwise the strings are chosen, a class of
+equal strings at a time (`rgs`: the restricted growth strings, one class
+per string), each class one of a family of strings with distinct hashes
+(`Fml.swInst`, `Calculus/HashReduction.lean`), and the first instance
+`decideLeaf` refutes gives a state, which meets the leaf's premise and
+refutes it (`Fml.swInst_refutes`). -/
 
-`Fml.HashIn k inp out σ φ`: some hash term of `φ`, of kind `k`, outside
-`φ`'s binders, evaluated at `σ` (or past `φ`'s updates), reads the bytes
-`inp` and returns `out`.  The premise is taken at every scope: `Fml.holdsH`
-is `holds` with each binder's body read under the premise of that
-instance, so a premise is about finitely many hash evaluations, false only
-at an actual collision among them.  `ecrecover` is no hash of the premise:
-it is `0` on every invalid signature. -/
+/-- A refutation under the goal's own premise. -/
+structure HashRefutation (φ : Fml C []) where
+  state : State C []
+  refutes : ¬ Fml.holdsH state φ
 
-/-- The bytes a hash of the object `id` reads, each word modulo `256` as
-`HashKind.apply` reads it: `none` where `id` names no object of type `R`
-(the hash is then `0`). -/
-def _root_.Solidity.Grown.hashInput {H : HTy} (m : Grown H (fun _ => Unit)) (R : RefTy) (id : Nat) :
-    Option (List Nat) :=
-  (HRef.ofId? m.H' R id).map fun r => (MObj.words R (m.heap.get r)).map fun b => b.toNat % 256
+/-- The instance of the leaf at the classes `cs`, refuted by `decideLeaf`:
+a refutation of the leaf. -/
+def refuteAt (k : HashKind) {N : Nat} (hok : famOK k N = true) (φ : Fml C []) (cs : List Nat) :
+    Option (HashRefutation φ) :=
+  if hcs : ∀ j ∈ cs, j < N then
+    match he : φ.swInst k cs with
+    | none => none
+    | some φf =>
+      match hd : decideLeaf φf with
+      | .refuted σ => some ⟨σ.noHeap, Fml.swInst_refutes hok he hcs (decideLeaf_refutes hd)⟩
+      | _ => none
+  else none
 
-/-- A hash node, evaluated: kind `k`, input `inp`, output `out`. -/
-def _root_.Solidity.Op2.HashIn {H : HTy} (k : HashKind) (inp : Option (List Nat))
-    (out : PrimTy.uint.Denote) {a b s : Srt} :
-    Op2 C a b s → Option (a.Den C H) → Option (b.Den C H) → Prop
-  | @Op2.hash _ R k', some m, some id => k' = k ∧ inp = m.hashInput R id ∧ out = m.hashId k' R id
-  | _, _, _ => False
+/-- **A leaf with hashes of kind `k`**: proved by its swapped reading, or
+refuted at the first class of strings whose instance is refuted. -/
+def decideHashK (k : HashKind) (hk : k ≠ .ecrecover) (φ : Fml C []) : LeafVerdict C :=
+  match φ.swPrefix k with
+  | none => .unknown
+  | some φ' =>
+    match decideLeaf φ' with
+    | .proved => if φ.posAll = true then .proved else .unknown
+    | _ =>
+      match famCheck φ.allocCount with
+      | isFalse _ => .unknown
+      | isTrue hok =>
+        match (rgs φ.allocCount).findSome? (refuteAt k (famOKAll_ok hok hk) φ) with
+        | some r => .refuted r.state
+        | none => .unknown
 
-def _root_.Solidity.Tm.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
-    (out : PrimTy.uint.Denote) : {s : Srt} → Tm C Γ s → Prop
-  | _, .netOf _ a | _, .app1 _ a => a.HashIn σ k inp out
-  | _, .app2 o x y => o.HashIn (H := σ.H) k inp out (x.eval σ) (y.eval σ) ∨ x.HashIn σ k inp out ∨
-      y.HashIn σ k inp out
-  | _, .app3 _ x y z => x.HashIn σ k inp out ∨ y.HashIn σ k inp out ∨ z.HashIn σ k inp out
-  | _, _ => False
+theorem decideHashK_sound {k : HashKind} {hk : k ≠ .ecrecover} {φ : Fml C []}
+    (h : decideHashK k hk φ = .proved) : Fml.ValidH φ := by
+  unfold decideHashK at h
+  split at h
+  · cases h
+  · rename_i φ' he
+    split at h
+    · rename_i hd
+      split at h
+      · rename_i hp
+        exact Fml.swPrefix_validH he hp (decideLeaf_sound hd)
+      · cases h
+    · split at h
+      · cases h
+      · split at h <;> cases h
 
-def _root_.Solidity.Rhs.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
-    (out : PrimTy.uint.Denote) {t : LTy} : Rhs C Γ t → Prop
-  | .val a | .zint a => a.HashIn σ k inp out
-  | .path q => q.HashIn σ k inp out
-  | .mref i => i.HashIn σ k inp out
-  | .store s => s.HashIn σ k inp out
-  | .unset | .saveNet | .saveNetMt => False
+theorem decideHashK_refutes {k : HashKind} {hk : k ≠ .ecrecover} {φ : Fml C []} {σ : State C []}
+    (h : decideHashK k hk φ = .refuted σ) : ¬ Fml.holdsH σ φ := by
+  unfold decideHashK at h
+  split at h
+  · cases h
+  · split at h
+    · split at h <;> cases h
+    · split at h
+      · cases h
+      · split at h
+        · rename_i r _
+          cases h
+          exact r.refutes
+        · cases h
 
-def _root_.Solidity.UpdElem.HashIn {Γ Δ : Ctx} (σ : State C Γ) (k : HashKind)
-    (inp : Option (List Nat)) (out : PrimTy.uint.Denote) : UpdElem C Γ Δ → Prop
-  | .local _ r => r.HashIn σ k inp out
-  | .storage s => s.HashIn σ k inp out
-  | .memory m => m.HashIn σ k inp out
-  | .selfBalance _ a | .setBalance a => a.HashIn σ k inp out
-  | .net r _ a | .pay r a | .netMt r a => r.HashIn σ k inp out ∨ a.HashIn σ k inp out
+/-! ### Completeness on leaves with hashes -/
 
-def _root_.Solidity.Upd.HashIn {Γ : Ctx} (σ : State C Γ) (k : HashKind) (inp : Option (List Nat))
-    (out : PrimTy.uint.Denote) : {Δ : Ctx} → Upd C Γ Δ → Prop
-  | _, .nil => False
-  | _, .snoc U e => U.HashIn σ k inp out ∨ e.HashIn σ k inp out
-  | _, .decl U _ r => U.HashIn σ k inp out ∨ r.HashIn σ k inp out
-  | _, .pop U _ | _, .drop U _ => U.HashIn σ k inp out
+/-- **The covered leaves with hashes of kind `k`**: the swapped leaf and each
+instance at classes of its strings covered (`Fml.Covered`), the family of
+`famN` strings checked (`famCovered`: by the kernel's theorem up to
+`famBound`, computed past it), the swapped leaf in the relabeling fragment
+over its keyed roots, which map words to words. -/
+def _root_.Solidity.Fml.coveredK (k : HashKind) (φ : Fml C []) : Bool :=
+  match φ.swPrefix k with
+  | none => false
+  | some φ' =>
+    let V := φ.allocLevels
+    let K := φ'.vRoots V
+    φ'.Covered && famCovered φ.allocCount &&
+      (rgs φ.allocCount).all (fun cs => (φ.swInst k cs).any Fml.Covered) &&
+      φ.swRL k V K && φ.prefixOK V && kTypedB C K && φ.posAll
 
-def _root_.Solidity.Fml.HashIn (k : HashKind) (inp : Option (List Nat)) (out : PrimTy.uint.Denote) :
-    {Γ : Ctx} → State C Γ → Fml C Γ → Prop
-  | _, _, .tt => False
-  | _, σ, .eq a b => a.HashIn σ k inp out ∨ b.HashIn σ k inp out
-  | _, σ, .wellFormed s => s.HashIn σ k inp out
-  | _, σ, .not φ => Fml.HashIn k inp out σ φ
-  | _, σ, .and φ ψ | _, σ, .imp φ ψ => Fml.HashIn k inp out σ φ ∨ Fml.HashIn k inp out σ ψ
-  | _, σ, .upd _ U φ => U.HashIn σ k inp out ∨
-      ∃ g σ', U.globT σ = some g ∧ U.Lands σ g σ' ∧ Fml.HashIn k inp out σ' φ
-  | _, _, .modal .. | _, _, .havoc _ | _, _, .all .. | _, _, .bind .. | _, _, .anon .. | _, _, .allocAll ..
-  | _, _, .grow _ => False
+theorem findSome?_ne_none {α β : Type} {f : α → Option β} {a : α} :
+    {l : List α} → a ∈ l → f a ≠ none → l.findSome? f ≠ none
+  | [], h, _ => absurd h List.not_mem_nil
+  | b :: l, h, hf => by
+    rw [List.findSome?_cons]
+    cases hb : f b with
+    | some _ => exact fun h => nomatch h
+    | none =>
+      rcases List.mem_cons.1 h with rfl | h
+      · exact absurd hb hf
+      · exact findSome?_ne_none h hf
 
-/-- **A scope's hash premise**: its hash terms of one kind (not
-`ecrecover`) returning one output read one input. -/
-def _root_.Solidity.Fml.HashFree {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
-  ∀ k, k ≠ .ecrecover → ∀ i₁ i₂ out, Fml.HashIn k i₁ out σ φ → Fml.HashIn k i₂ out σ φ → i₁ = i₂
+/-- **Completeness for one kind.** -/
+theorem decideHashK_complete {k : HashKind} (hk : k ≠ .ecrecover) {φ : Fml C []}
+    (h : φ.coveredK k = true) : decideHashK k hk φ ≠ .unknown := by
+  unfold Fml.coveredK at h
+  split at h
+  · cases h
+  · rename_i φ' e
+    simp only [Bool.and_eq_true, List.all_eq_true] at h
+    obtain ⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hpos⟩ := h
+    obtain ⟨hokA, hck⟩ := famCheck_isTrue (famOKAll_famN hn)
+    unfold decideHashK
+    rw [e]
+    simp only
+    cases hd : decideLeaf φ' with
+    | proved => simp only [hpos, ↓reduceIte]; exact fun h => nomatch h
+    | unknown => exact absurd hd (decideLeaf_complete hcov)
+    | refuted σ =>
+      simp only
+      rw [hck]
+      simp only
+      have hnv := decideLeaf_not_valid hd
+      obtain ⟨cs, hcs, φf, hf, hnf⟩ := Fml.swPrefix_complete (famOKAll_ok hokA hk) e (kTyped_of hK) hrl hpre
+        (le_famN _) hnv
+      have hcovf : φf.Covered = true := by
+        have := hall cs hcs
+        rw [hf] at this
+        exact this
+      have href : refuteAt k (famOKAll_ok hokA hk) φ cs ≠ none := by
+        unfold refuteAt
+        have hb : ∀ j ∈ cs, j < famN φ.allocCount := fun j hj => by
+          have := rgsFrom_bound φ.allocCount 0 cs hcs j hj
+          have := le_famN φ.allocCount
+          omega
+        rw [dif_pos hb]
+        split
+        · rename_i he; rw [hf] at he; cases he
+        · rename_i φf' he
+          rw [hf] at he
+          cases he
+          split
+          · exact fun h => nomatch h
+          · rename_i hne
+            exfalso
+            cases hv : decideLeaf φf with
+            | proved => exact hnf (decideLeaf_sound hv)
+            | unknown => exact decideLeaf_complete hcovf hv
+            | refuted σ => exact hne σ hv
+      have := findSome?_ne_none hcs href
+      cases hs : (rgs φ.allocCount).findSome? (refuteAt k (famOKAll_ok hokA hk) φ) with
+      | none => exact absurd hs this
+      | some r => exact fun h => nomatch h
 
-/-- `holds`, each binder's body under its instance's premise. -/
-def _root_.Solidity.Fml.holdsS : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
-  | _, _, .tt => True
-  | _, σ, .eq a b => holds σ (.eq a b)
-  | _, σ, .wellFormed s => holds σ (.wellFormed s)
-  | _, σ, .not φ => ¬ Fml.holdsS σ φ
-  | _, σ, .and φ ψ => Fml.holdsS σ φ ∧ Fml.holdsS σ ψ
-  | _, σ, .imp φ ψ => Fml.holdsS σ φ → Fml.holdsS σ ψ
-  | _, σ, .upd m U φ => U.afterT m σ (Fml.holdsS · φ)
-  | _, σ, .modal m P κ φ => holds σ (.modal m P κ φ)
-  | _, σ, .havoc φ => ∀ st nt sb, φ.HashFree (σ.havoc st nt sb) → Fml.holdsS (σ.havoc st nt sb) φ
-  | _, σ, .all _ p φ => ∀ v : p.Denote, φ.HashFree (σ.push (t := .val p) v) →
-      Fml.holdsS (σ.push (t := .val p) v) φ
-  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => φ.HashFree (σ.push v) →
-      Fml.holdsS (σ.push v) φ
-  | _, σ, .anon xs φ => ∀ b, φ.HashFree (σ.anon xs b) → Fml.holdsS (σ.anon xs b) φ
-  | _, σ, .allocAll _ R φ => ∀ o : MObj σ.H R,
-      φ.HashFree ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) →
-        Fml.holdsS ((σ.alloc o).1.push (t := .mem R) (some (σ.alloc o).2)) φ
-  | _, σ, .grow φ => ∀ g : Grown σ.H (fun _ => Unit), Heap.Keeps g.ext σ.heap g.heap →
-      φ.HashFree (σ.adopt g).1 → Fml.holdsS (σ.adopt g).1 φ
+/-- A refutation of the leaf with two kinds at the classes `cs`: the
+instance with the second kind's words fixed (`Fml.tk`), refuted by
+`decideLeaf`. -/
+def refuteAt2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) {N : Nat}
+    (hokA : famOKAll N = true) (φ φF : Fml C []) (he : φ.tk k₁ k₂ N true = some φF) (cs : List Nat) :
+    Option (HashRefutation φ) :=
+  if hcs : ∀ j ∈ cs, j < N then
+    match hi : φF.swInst k₁ cs with
+    | none => none
+    | some inst =>
+      match hd : decideLeaf inst with
+      | .refuted σ => some ⟨σ.noHeap, Fml.tk_refutes hk₁ hk₂ hokA he hi hcs (decideLeaf_refutes hd)⟩
+      | _ => none
+  else none
 
-/-- **A leaf holds under its own hash premise.** -/
-def _root_.Solidity.Fml.holdsH {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Prop :=
-  φ.HashFree σ → Fml.holdsS σ φ
+/-- **A leaf with strings hashed by two kinds** (`k₁`, `k₂`): the second
+kind's words as binders of their own (`Fml.tk`), the result read by the
+one-kind swap; proved by it, or refuted at the first class of strings whose
+instance, the second kind's words fixed, is refuted. -/
+def decideHash2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) (φ : Fml C []) :
+    LeafVerdict C :=
+  match φ.tk k₁ k₂ (famN φ.allocCount) false with
+  | none => .unknown
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => .unknown
+    | some φ₂' =>
+      match decideLeaf φ₂' with
+      | .proved => if φ₂.posAll = true then .proved else .unknown
+      | _ =>
+        match famCheck φ.allocCount with
+        | isFalse _ => .unknown
+        | isTrue hokA =>
+          match he : φ.tk k₁ k₂ (famN φ.allocCount) true with
+          | none => .unknown
+          | some φF =>
+            match (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ hokA φ φF he) with
+            | some r => .refuted r.state
+            | none => .unknown
 
-/-- **Validity as the theorem reads it.** -/
-def _root_.Solidity.Fml.ValidH (φ : Fml C []) : Prop := ∀ σ : State C [], Fml.holdsH σ φ
+theorem decideHash2_sound {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {φ : Fml C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .proved) : Fml.ValidH φ := by
+  unfold decideHash2 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      split at h
+      · rename_i hd
+        split at h
+        · rename_i hp
+          exact Fml.tk_validH hk₁ hk₂ e₂ (Fml.swPrefix_validH e' hp (decideLeaf_sound hd))
+        · cases h
+      · split at h
+        · cases h
+        · split at h
+          · cases h
+          · split at h <;> cases h
 
-/-! ### A leaf without a hash: the premise is empty -/
+theorem decideHash2_refutes {k₁ k₂ : HashKind} {hk₁ : k₁ ≠ .ecrecover} {hk₂ : k₂ ≠ .ecrecover}
+    {φ : Fml C []} {σ : State C []} (h : decideHash2 k₁ k₂ hk₁ hk₂ φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  unfold decideHash2 at h
+  split at h
+  · cases h
+  · split at h
+    · cases h
+    · split at h
+      · split at h <;> cases h
+      · split at h
+        · cases h
+        · split at h
+          · cases h
+          · split at h
+            · rename_i r _
+              cases h
+              exact r.refutes
+            · cases h
 
-def _root_.Solidity.Op2.isHash {a b s : Srt} : Op2 C a b s → Bool
-  | .hash _ => true
-  | _ => false
+/-- One way of deciding a leaf with hashes, with its fragment. -/
+structure HashTry (C : Contract) where
+  run : Fml C [] → LeafVerdict C
+  covers : Fml C [] → Bool
+  sound : ∀ {φ}, run φ = .proved → Fml.ValidH φ
+  refutes : ∀ {φ σ}, run φ = .refuted σ → ¬ Fml.holdsH σ φ
+  complete : ∀ {φ}, covers φ = true → run φ ≠ .unknown
 
-def _root_.Solidity.Tm.hasHash {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
-  | _, .netOf _ a | _, .app1 _ a => a.hasHash
-  | _, .app2 o x y => o.isHash || x.hasHash || y.hasHash
-  | _, .app3 _ x y z => x.hasHash || y.hasHash || z.hasHash
-  | _, _ => false
+/-- The first answer of a list of decisions. -/
+def firstKnown : List (Fml C [] → LeafVerdict C) → Fml C [] → LeafVerdict C
+  | [], _ => .unknown
+  | t :: ts, φ =>
+    match t φ with
+    | .unknown => firstKnown ts φ
+    | v => v
 
-def _root_.Solidity.Rhs.hasHash {Γ : Ctx} {t : LTy} : Rhs C Γ t → Bool
-  | .val a | .zint a => a.hasHash
-  | .path q => q.hasHash
-  | .mref i => i.hasHash
-  | .store s => s.hasHash
-  | .unset | .saveNet | .saveNetMt => false
+theorem firstKnown_mem {φ : Fml C []} {v : LeafVerdict C} (hv : v ≠ .unknown) :
+    (ts : List (Fml C [] → LeafVerdict C)) → firstKnown ts φ = v → ∃ t ∈ ts, t φ = v
+  | [], h => absurd h.symm hv
+  | t :: ts, h => by
+    unfold firstKnown at h
+    split at h
+    · obtain ⟨t', ht', e⟩ := firstKnown_mem hv ts h
+      exact ⟨t', List.mem_cons_of_mem _ ht', e⟩
+    · rename_i hne
+      exact ⟨t, List.mem_cons_self, by rw [← h]⟩
 
-def _root_.Solidity.UpdElem.hasHash {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool
-  | .local _ r => r.hasHash
-  | .storage s | .memory s => s.hasHash
-  | .selfBalance _ a | .setBalance a => a.hasHash
-  | .net r _ a | .pay r a | .netMt r a => r.hasHash || a.hasHash
+theorem firstKnown_ne {φ : Fml C []} :
+    (ts : List (Fml C [] → LeafVerdict C)) → (∃ t ∈ ts, t φ ≠ .unknown) → firstKnown ts φ ≠ .unknown
+  | [], ⟨_, h, _⟩ => nomatch h
+  | t :: ts, ⟨t', ht', hne⟩ => by
+    unfold firstKnown
+    split
+    · rename_i hu
+      rcases List.mem_cons.1 ht' with rfl | ht'
+      · exact absurd hu hne
+      · exact firstKnown_ne ts ⟨t', ht', hne⟩
+    · rename_i v hv
+      exact hv
 
-def _root_.Solidity.Upd.hasHash {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
-  | _, .nil => false
-  | _, .snoc U e => U.hasHash || e.hasHash
-  | _, .decl U _ r => U.hasHash || r.hasHash
-  | _, .pop U _ | _, .drop U _ => U.hasHash
 
-/-- The leaf mentions a hash (a program's are not read: `Fml.HashIn` reads
-none either). -/
-def _root_.Solidity.Fml.hasHash : {Γ : Ctx} → Fml C Γ → Bool
-  | _, .tt | _, .modal .. => false
-  | _, .eq a b => a.hasHash || b.hasHash
-  | _, .wellFormed s => s.hasHash
-  | _, .not φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ | _, .allocAll _ _ φ
-  | _, .grow φ => φ.hasHash
-  | _, .and φ ψ | _, .imp φ ψ => φ.hasHash || ψ.hasHash
-  | _, .upd _ U φ => U.hasHash || φ.hasHash
+/-- **The covered leaves with hashes of two kinds** (`k₁`, `k₂`): the
+reading with the second kind's words in the one-kind fragment of `k₁`
+(`Fml.coveredK`'s conditions on it), each instance with the second kind's
+words fixed covered, and the second kind's words in the relabeling
+fragment (`Fml.tkRL`). -/
+def _root_.Solidity.Fml.coveredK2 (k₁ k₂ : HashKind) (φ : Fml C []) : Bool :=
+  match φ.tk k₁ k₂ (famN φ.allocCount) false with
+  | none => false
+  | some φ₂ =>
+    match φ₂.swPrefix k₁ with
+    | none => false
+    | some φ₂' =>
+      match φ.tk k₁ k₂ (famN φ.allocCount) true with
+      | none => false
+      | some φF =>
+        let V := φ₂.allocLevels
+        let K := φ₂'.vRoots V
+        φ₂'.Covered && famCovered φ.allocCount &&
+          (rgs φ₂.allocCount).all (fun cs => (φF.swInst k₁ cs).any Fml.Covered) &&
+          φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂ && φ₂.posAll
 
-theorem _root_.Solidity.Op2.isHash_of_HashIn {H : HTy} {k : HashKind} {inp : Option (List Nat)}
-    {out : PrimTy.uint.Denote} {a b s : Srt} (o : Op2 C a b s) (x : Option (a.Den C H))
-    (y : Option (b.Den C H)) (h : o.HashIn k inp out x y) : o.isHash = true := by
-  cases o <;> first | rfl | exact h.elim
+/-- **Completeness for two kinds.** -/
+theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+    {φ : Fml C []} (h : φ.coveredK2 k₁ k₂ = true) : decideHash2 k₁ k₂ hk₁ hk₂ φ ≠ .unknown := by
+  unfold Fml.coveredK2 at h
+  split at h
+  · cases h
+  · rename_i φ₂ e₂
+    split at h
+    · cases h
+    · rename_i φ₂' e'
+      split at h
+      · cases h
+      · rename_i φF hF
+        simp only [Bool.and_eq_true, List.all_eq_true] at h
+        obtain ⟨⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩, hpos⟩ := h
+        obtain ⟨hokA, hck⟩ := famCheck_isTrue (famOKAll_famN hn)
+        have hlen : φ₂.allocCount ≤ famN φ.allocCount := by
+          rw [Fml.tk_allocCount φ e₂]; exact le_famN _
+        unfold decideHash2
+        rw [e₂]
+        simp only
+        rw [e']
+        simp only
+        cases hd : decideLeaf φ₂' with
+        | proved => simp only [hpos, ↓reduceIte]; exact fun h => nomatch h
+        | unknown => exact absurd hd (decideLeaf_complete hcov)
+        | refuted σ =>
+          simp only
+          rw [hck]
+          simp only
+          have hinst : ∀ cs ∈ rgs φ₂.allocCount, ∃ φF instF,
+              φ.tk k₁ k₂ (famN φ.allocCount) true = some φF ∧ φF.swInst k₁ cs = some instF := by
+            intro cs hcs
+            have := hall cs hcs
+            cases hi : φF.swInst k₁ cs with
+            | none => rw [hi] at this; cases this
+            | some instF => exact ⟨φF, instF, hF, hi⟩
+          obtain ⟨cs, hcs, φF', instF, hF', hi, hnf⟩ := Fml.tk_complete hk₁ hk₂ hokA e₂ e' (kTyped_of hK)
+            hrl hpre hlen hrl₂ hinst (decideLeaf_not_valid hd)
+          rw [hF] at hF'
+          cases hF'
+          have hcovf : instF.Covered = true := by
+            have := hall cs hcs
+            rw [hi] at this
+            exact this
+          have href : refuteAt2 k₁ k₂ hk₁ hk₂ hokA φ φF hF cs ≠ none := by
+            unfold refuteAt2
+            have hb : ∀ j ∈ cs, j < famN φ.allocCount := fun j hj => by
+              have := rgsFrom_bound φ₂.allocCount 0 cs hcs j hj
+              omega
+            rw [dif_pos hb]
+            split
+            · rename_i he; rw [hi] at he; cases he
+            · rename_i inst' he
+              rw [hi] at he
+              cases he
+              split
+              · exact fun h => nomatch h
+              · rename_i hne
+                exfalso
+                cases hv : decideLeaf instF with
+                | proved => exact hnf (decideLeaf_sound hv)
+                | unknown => exact decideLeaf_complete hcovf hv
+                | refuted σ => exact hne σ hv
+          have := findSome?_ne_none hcs href
+          split
+          · rename_i he; rw [hF] at he; cases he
+          · rename_i φF'' he
+            rw [hF] at he
+            cases he
+            cases hs : (rgs φ₂.allocCount).findSome? (refuteAt2 k₁ k₂ hk₁ hk₂ hokA φ φF hF) with
+            | none => exact absurd hs this
+            | some r => exact fun h => nomatch h
 
-theorem _root_.Solidity.Tm.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} {s : Srt} (t : Tm C Γ s)
-    (h : t.HashIn σ k inp out) : t.hasHash = true := by
-  induction t with
-  | netOf _ a ih | app1 _ a ih => exact ih h
-  | app2 o x y ihx ihy =>
-    simp only [Tm.hasHash, Bool.or_eq_true]
-    rcases h with h | h | h
-    · exact .inl (.inl (o.isHash_of_HashIn _ _ h))
-    · exact .inl (.inr (ihx h))
-    · exact .inr (ihy h)
-  | app3 _ x y z ihx ihy ihz =>
-    simp only [Tm.hasHash, Bool.or_eq_true]
-    rcases h with h | h | h
-    · exact .inl (.inl (ihx h))
-    · exact .inl (.inr (ihy h))
-    · exact .inr (ihz h)
-  | _ => exact h.elim
+/-- A leaf with hashes of one kind. -/
+def tryK (k : HashKind) (hk : k ≠ .ecrecover) : HashTry C :=
+  ⟨decideHashK k hk, Fml.coveredK k, decideHashK_sound, decideHashK_refutes, decideHashK_complete hk⟩
 
-theorem _root_.Solidity.Rhs.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} {t : LTy} (r : Rhs C Γ t)
-    (h : r.HashIn σ k inp out) : r.hasHash = true := by
-  cases r <;> first | exact h.elim | exact Tm.hasHash_of_HashIn σ _ h
+/-- A leaf with hashes of two kinds. -/
+def tryK2 (k₁ k₂ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover) : HashTry C :=
+  ⟨decideHash2 k₁ k₂ hk₁ hk₂, Fml.coveredK2 k₁ k₂, decideHash2_sound, decideHash2_refutes,
+    decideHash2_complete hk₁ hk₂⟩
 
-theorem _root_.Solidity.UpdElem.hasHash_of_HashIn {Γ Δ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} (e : UpdElem C Γ Δ)
-    (h : e.HashIn σ k inp out) : e.hasHash = true := by
-  cases e with
-  | «local» _ r => exact Rhs.hasHash_of_HashIn σ r h
-  | storage s | memory s | selfBalance _ s | setBalance s => exact Tm.hasHash_of_HashIn σ s h
-  | net r _ a | pay r a | netMt r a =>
-    simp only [UpdElem.hasHash, Bool.or_eq_true]
-    rcases h with h | h
-    · exact .inl (Tm.hasHash_of_HashIn σ r h)
-    · exact .inr (Tm.hasHash_of_HashIn σ a h)
+/-- **The ways of deciding a leaf with hashes**: of one kind, each kind in
+turn; of two, each ordered pair. -/
+def hashTries : List (HashTry C) :=
+  [tryK .keccak (by decide), tryK .sha256 (by decide), tryK .ripemd160 (by decide),
+    tryK2 .keccak .sha256 (by decide) (by decide), tryK2 .sha256 .keccak (by decide) (by decide),
+    tryK2 .keccak .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .keccak (by decide) (by decide),
+    tryK2 .sha256 .ripemd160 (by decide) (by decide), tryK2 .ripemd160 .sha256 (by decide) (by decide)]
 
-theorem _root_.Solidity.Upd.hasHash_of_HashIn {Γ : Ctx} (σ : State C Γ) {k : HashKind}
-    {inp : Option (List Nat)} {out : PrimTy.uint.Denote} :
-    ∀ {Δ : Ctx} (U : Upd C Γ Δ), U.HashIn σ k inp out → U.hasHash = true
-  | _, .nil, h => h.elim
-  | _, .snoc U e, h => by
-    simp only [Upd.hasHash, Bool.or_eq_true]
-    rcases h with h | h
-    · exact .inl (Upd.hasHash_of_HashIn σ U h)
-    · exact .inr (UpdElem.hasHash_of_HashIn σ e h)
-  | _, .decl U _ r, h => by
-    simp only [Upd.hasHash, Bool.or_eq_true]
-    rcases h with h | h
-    · exact .inl (Upd.hasHash_of_HashIn σ U h)
-    · exact .inr (Rhs.hasHash_of_HashIn σ r h)
-  | _, .pop U _, h | _, .drop U _, h => Upd.hasHash_of_HashIn σ U h
+/-- **A leaf with hashes**: the first way that answers. -/
+def decideHash (φ : Fml C []) : LeafVerdict C := firstKnown (hashTries.map (·.run)) φ
 
-theorem _root_.Solidity.Fml.hasHash_of_HashIn {k : HashKind} {inp : Option (List Nat)}
-    {out : PrimTy.uint.Denote} : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
-      Fml.HashIn k inp out σ φ → φ.hasHash = true
-  | _, _, .tt, h | _, _, .modal .., h | _, _, .havoc _, h | _, _, .all .., h | _, _, .bind .., h
-  | _, _, .anon .., h | _, _, .allocAll .., h | _, _, .grow _, h => h.elim
-  | _, σ, .eq a b, h => by
-    simp only [Fml.hasHash, Bool.or_eq_true]
-    rcases h with h | h
-    · exact .inl (Tm.hasHash_of_HashIn σ a h)
-    · exact .inr (Tm.hasHash_of_HashIn σ b h)
-  | _, σ, .wellFormed s, h => Tm.hasHash_of_HashIn σ s h
-  | _, σ, .not φ, h => Fml.hasHash_of_HashIn σ φ h
-  | _, σ, .and φ ψ, h | _, σ, .imp φ ψ, h => by
-    simp only [Fml.hasHash, Bool.or_eq_true]
-    rcases h with h | h
-    · exact .inl (Fml.hasHash_of_HashIn σ φ h)
-    · exact .inr (Fml.hasHash_of_HashIn σ ψ h)
-  | _, σ, .upd _ U φ, h => by
-    simp only [Fml.hasHash, Bool.or_eq_true]
-    rcases h with h | ⟨_, σ', _, _, h⟩
-    · exact .inl (Upd.hasHash_of_HashIn σ U h)
-    · exact .inr (Fml.hasHash_of_HashIn σ' φ h)
+theorem decideHash_sound {φ : Fml C []} (h : decideHash φ = .proved) : Fml.ValidH φ := by
+  obtain ⟨t, ht, e⟩ := firstKnown_mem (φ := φ) (v := .proved) (fun h => nomatch h) _ h
+  obtain ⟨T, -, rfl⟩ := List.mem_map.1 ht
+  exact T.sound e
 
-theorem _root_.Solidity.Fml.hashFree_of_hasHash {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ)
-    (h : φ.hasHash = false) : φ.HashFree σ :=
-  fun _ _ _ _ _ h₁ _ => absurd (Fml.hasHash_of_HashIn σ φ h₁) (by rw [h]; decide)
+theorem decideHash_refutes {φ : Fml C []} {σ : State C []} (h : decideHash φ = .refuted σ) :
+    ¬ Fml.holdsH σ φ := by
+  obtain ⟨t, ht, e⟩ := firstKnown_mem (φ := φ) (v := .refuted σ) (fun h => nomatch h) _ h
+  obtain ⟨T, -, rfl⟩ := List.mem_map.1 ht
+  exact T.refutes e
 
-theorem _root_.Solidity.Fml.holdsS_iff : ∀ {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ),
-    φ.hasHash = false → (Fml.holdsS σ φ ↔ holds σ φ)
-  | _, _, .tt, _ | _, _, .eq _ _, _ | _, _, .wellFormed _, _ | _, _, .modal .., _ => Iff.rfl
-  | _, σ, .not φ, h => not_congr (Fml.holdsS_iff σ φ h)
-  | _, σ, .and φ ψ, h => by
-    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
-    exact and_congr (Fml.holdsS_iff σ φ h.1) (Fml.holdsS_iff σ ψ h.2)
-  | _, σ, .imp φ ψ, h => by
-    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
-    exact imp_congr (Fml.holdsS_iff σ φ h.1) (Fml.holdsS_iff σ ψ h.2)
-  | _, σ, .upd m U φ, h => by
-    simp only [Fml.hasHash, Bool.or_eq_false_iff] at h
-    exact ⟨fun hh => Upd.afterT_imp hh fun σ' => (Fml.holdsS_iff σ' φ h.2).mp,
-      fun hh => Upd.afterT_imp hh fun σ' => (Fml.holdsS_iff σ' φ h.2).mpr⟩
-  | _, σ, .havoc φ, h => forall_congr' fun _ => forall_congr' fun _ => forall_congr' fun _ =>
-      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
-        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
-  | _, σ, .all _ _ φ, h | _, σ, .bind _ _ _ φ, h | _, σ, .anon _ φ, h | _, σ, .allocAll _ _ φ, h =>
-    forall_congr' fun _ =>
-      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
-        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
-  | _, σ, .grow φ, h => forall_congr' fun _ => imp_congr_right fun _ =>
-      ⟨fun hh => (Fml.holdsS_iff _ φ h).mp (hh (Fml.hashFree_of_hasHash _ φ h)),
-        fun hh _ => (Fml.holdsS_iff _ φ h).mpr hh⟩
+/-- **The covered leaves with hashes**: of some way of deciding them. -/
+def _root_.Solidity.Fml.hashCovered (φ : Fml C []) : Bool :=
+  φ.hasHash && (hashTries (C := C)).any (·.covers φ)
 
-/-- **Without a hash the premise is empty**: the reading is `holds`. -/
-theorem _root_.Solidity.Fml.holdsH_iff {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ)
-    (h : φ.hasHash = false) : Fml.holdsH σ φ ↔ holds σ φ :=
-  ⟨fun hh => (Fml.holdsS_iff σ φ h).mp (hh (Fml.hashFree_of_hasHash σ φ h)),
-    fun hh _ => (Fml.holdsS_iff σ φ h).mpr hh⟩
-
-theorem _root_.Solidity.Fml.validH_iff {φ : Fml C []} (h : φ.hasHash = false) :
-    Fml.ValidH φ ↔ Fml.Valid φ :=
-  forall_congr' fun σ => Fml.holdsH_iff σ φ h
+theorem decideHash_complete {φ : Fml C []} (h : (hashTries (C := C)).any (·.covers φ) = true) :
+    decideHash φ ≠ .unknown := by
+  obtain ⟨T, hT, hc⟩ := List.any_eq_true.1 h
+  exact firstKnown_ne _ ⟨T.run, List.mem_map_of_mem hT, T.complete hc⟩
 
 /-! ### The decision, read so -/
 
 /-- **The decision the theorem is about**: `decideLeaf` on a leaf without
-a hash; `unknown` on one with a hash, which no stage reads yet. -/
+a hash, `decideHash` on one with a hash. -/
 def decideGoal (φ : Fml C []) : LeafVerdict C :=
-  if φ.hasHash then .unknown else decideLeaf φ
-
-theorem decideGoal_eq {φ : Fml C []} {v : LeafVerdict C} (h : decideGoal φ = v) (hv : v ≠ .unknown) :
-    φ.hasHash = false ∧ decideLeaf φ = v := by
-  unfold decideGoal at h
-  cases hh : φ.hasHash
-  · rw [hh] at h
-    exact ⟨rfl, h⟩
-  · rw [hh] at h
-    exact absurd h.symm hv
+  if φ.hasHash then decideHash φ else decideLeaf φ
 
 /-- **Soundness**, under the goal's premise. -/
 theorem decideGoal_sound {φ : Fml C []} (h : decideGoal φ = .proved) : Fml.ValidH φ := by
-  obtain ⟨hh, hd⟩ := decideGoal_eq h (fun h => nomatch h)
-  exact (Fml.validH_iff hh).mpr (decideLeaf_sound hd)
+  unfold decideGoal at h
+  cases hh : φ.hasHash
+  · rw [hh, if_neg Bool.false_ne_true] at h
+    exact (Fml.validH_iff hh).mpr (decideLeaf_sound h)
+  · rw [hh, if_pos rfl] at h
+    exact decideHash_sound h
 
 /-- **Refutations are certified**: the state's instance meets the premise
 and refutes the leaf. -/
 theorem decideGoal_refutes {φ : Fml C []} {σ : State C []} (h : decideGoal φ = .refuted σ) :
     ¬ Fml.holdsH σ φ := by
-  obtain ⟨hh, hd⟩ := decideGoal_eq h (fun h => nomatch h)
-  exact fun hv => decideLeaf_refutes hd ((Fml.holdsH_iff σ φ hh).mp hv)
+  unfold decideGoal at h
+  cases hh : φ.hasHash
+  · rw [hh, if_neg Bool.false_ne_true] at h
+    exact fun hv => decideLeaf_refutes h ((Fml.holdsH_iff σ φ hh).mp hv)
+  · rw [hh, if_pos rfl] at h
+    exact decideHash_refutes h
 
 /-- **Completeness on the covered leaves without a hash.** -/
 theorem decideGoal_complete {φ : Fml C []} (h : φ.Covered = true) (hh : φ.hasHash = false) :
@@ -503,6 +813,14 @@ theorem decideGoal_complete {φ : Fml C []} (h : φ.Covered = true) (hh : φ.has
   unfold decideGoal
   rw [hh]
   exact decideLeaf_complete h
+
+/-- **Completeness on the covered leaves with hashes** (`Fml.hashCovered`). -/
+theorem decideGoal_complete_hash {φ : Fml C []} (h : φ.hashCovered = true) :
+    decideGoal φ ≠ .unknown := by
+  simp only [Fml.hashCovered, Bool.and_eq_true] at h
+  unfold decideGoal
+  rw [if_pos h.1]
+  exact decideHash_complete h.2
 
 /-! ## The fragment the user named -/
 
@@ -519,9 +837,6 @@ structure Waivers where
   /-- `&`, `|`, `^`: two symbolic operands. -/
   bitwise : Bool := true
 
-/-- The level of a position: `0` for the outermost local, stable under
-binders further in. -/
-def _root_.Solidity.Idx.level {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat := Γ.length - 1 - i.toNat
 
 /-- A literal's integer. -/
 def _root_.Solidity.Op0.litValue? {s : Srt} : Op0 C s → Option Int
@@ -598,6 +913,23 @@ def _root_.Solidity.Tm.hashable? {Γ : Ctx} {s : Srt} : Tm C Γ s → Option Has
     | k => k
   | _ => none
 
+/-- A memory local. -/
+def _root_.Solidity.Tm.isPvI {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .pvI _ => true
+  | _ => false
+
+/-- The starting memory. -/
+def _root_.Solidity.Tm.isMemory {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .app0 .memory => true
+  | _ => false
+
+/-- A hash of a memory local in the starting memory: a key it reads is a
+hash's, never the default a key with no value reads (a memory written past
+a string's end has none). -/
+def _root_.Solidity.Tm.hashOfLocal {Γ : Ctx} {s : Srt} : Tm C Γ s → Bool
+  | .app2 o x y => o.isHash && x.isMemory && y.isPvI
+  | _ => false
+
 /-- Two hash terms of one kind: their equation is their inputs' under the
 goal's premise. -/
 def _root_.Solidity.Tm.hashPair {Γ : Ctx} {s s' : Srt} (x : Tm C Γ s) (y : Tm C Γ s') : Bool :=
@@ -615,7 +947,7 @@ def _root_.Solidity.Tm.inTarget {Γ : Ctx} (w : Waivers) (hashOK : Bool) : {s : 
   | _, .app1 _ x => x.inTarget w false
   | _, .app2 o x y =>
     let eqH := o.isEqNe && x.hashPair y
-    let keyH := o.isMapAt && x.rootNameD?.isSome && y.hashable?.isSome
+    let keyH := o.isMapAt && x.rootNameD?.isSome && y.hashable?.isSome && y.hashOfLocal
     x.inTarget w eqH && y.inTarget w (eqH || keyH) &&
       (if o.isHash then hashOK else o.admits w x.isLitV y.isLitV y.litValue?)
   | _, .app3 o x y z => x.inTarget w false && y.inTarget w false && z.inTarget w false &&
@@ -855,8 +1187,12 @@ def _root_.Solidity.Fml.target (w : Waivers) : {Γ : Ctx} → Bool → Bool → 
       else if n then false
       else if pol then φ.target w pol n
       else φ.apfBlock w [Γ.length]
+    | .mem _ =>
+      !φ.hasHash && if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
     | _ => if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
-  | _, pol, n, .havoc φ | _, pol, n, .anon _ φ | _, pol, n, .grow φ | _, pol, n, .allocAll _ _ φ =>
+  | _, pol, n, .anon _ φ =>
+    !φ.hasHash && if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
+  | _, pol, n, .havoc φ | _, pol, n, .grow φ | _, pol, n, .allocAll _ _ φ =>
     if pol && !n then φ.target w pol n else !φ.readsAny && φ.target w pol true
 
 /-! ### Hashes as mapping keys
@@ -939,5 +1275,29 @@ def DecisionTheorem (w : Waivers := {}) : Prop :=
 
 /-- info: 'Solidity.Decide.decideGoal_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms decideGoal_complete
+
+/-- info: 'Solidity.Decide.decideGoal_complete_hash' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideGoal_complete_hash
+
+/-- info: 'Solidity.Decide.decideHash2_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_sound
+
+/-- info: 'Solidity.Decide.decideHash2_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_refutes
+
+/-- info: 'Solidity.Decide.decideHash2_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms decideHash2_complete
+
+/-- info: 'Solidity.Fml.swPrefix_validH' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_validH
+
+/-- info: 'Solidity.Fml.swInst_refutes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swInst_refutes
+
+/-- info: 'Solidity.Fml.swPrefix_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_complete
+
+/-- info: 'Solidity.Fml.swPrefix_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Fml.swPrefix_exact
 
 end Solidity.Decide

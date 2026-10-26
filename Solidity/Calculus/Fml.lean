@@ -288,7 +288,7 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   per way the statement may end (a `send`). -/
   | cases (fs : List (Fml C Γ)) (us : List (Upd C Γ Γ)) : Premise C Γ Γ
   /-- A loop's invariant rule: the invariant `I` now, and, whatever the body's
-  frame holds (`{anon(xs)}`, with `{havoc}` when `hv`), from where `I`
+  frame holds (`{anon(xs)}`, and the roots `hv` names, or `{havoc}`: `Fml.anonHavoc`), from where `I`
   holds and after `U` (the condition's value, and under the diamond the
   variant's, declared on top of `Γ`), the body `P` to `post` where `c`
   holds, the rest where `c'` does.  The condition's local is popped before
@@ -297,7 +297,8 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   break test `B` (solkey's `\getLoopBreak`) the loop starts and each
   iteration assumes `I ∧ ¬B`, and the body ends in `post` where `B` does not
   hold, in the rest where it does (`Fml.invHyp`, `Fml.invPost`). -/
-  | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (B : Option (Fml C Γ)) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)
+  | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (B : Option (Fml C Γ)) (xs : List ((t : LTy) × Idx Γ t))
+      (hv : Option (List Name))
       (U : Upd C Γ Δ) (c c' : Fml C Δ) (hu : Ext Γ Δ₀) (hb : Ext Δ₀ Δ) (P : Prog C Δ₀ Γ₁)
       (post : Fml C Δ₀) : Premise C Γ Γ
   /-- `⟨[ P ]⟩` whose end drops the locals of `Γ''` that `Γ'` does not keep,
@@ -324,11 +325,29 @@ def Fml.allocGoal {Γ : Ctx} (m : Modality) (Q : Prog C Γ Γ) (x : Var) (A : Re
   .modal m Q .nil (.allocAll x A
     (Option.casesOn (motive := fun _ => Fml C (.mem A :: Γ)) h G fun c => .imp c G))
 
-/-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
-storage too (`hv`): solkey's `#loopAnon`. -/
-def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) (φ : Fml C Γ) :
-    Fml C Γ :=
-  if hv then .anon xs (.havoc φ) else .anon xs φ
+/-- The name of the storage a loop body's frame leaves (KeY's anonymous
+heap): a hidden binder's, so never printed but in `anon(storage, L, ·)`. -/
+def anonStorage : Var := .user "anonStorage"
+
+/-- `storage := anon(storage, L, s')`, `s'` the local on top, popped: the
+storage with the roots `L` names taken from `s'`. -/
+@[reducible] def Upd.anonSt {Γ : Ctx} (L : List Name) : Upd C (.old :: Γ) Γ :=
+  (Upd.nil.pop (.push .refl)).snoc (.storage (.app2 (.anon L) (.app0 .storage) (.pvS .here)))
+
+/-- **The anonymising update of a loop body's frame** (solkey's `#loopAnon`):
+`{anon(xs)} φ` for the locals `xs`, and for the storage what `hv` says
+(`Prog.frame`): nothing (`some []`), the roots of the modifies set `L`, by
+KeY's anonymising update `{storage := anon(storage, L, s')}` for every
+storage `s'` (`some L`), or the storage and the ledger, `{havoc}` (`none`).
+The binder and the update are produced under the box under both modalities,
+as `{havoc}` is: the update always lands, so the readings agree, and the
+context stays one the box closes (`Hyps.boxOnly`). -/
+def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t))
+    (hv : Option (List Name)) (φ : Fml C Γ) : Fml C Γ :=
+  match hv with
+  | none => .anon xs (.havoc φ)
+  | some [] => .anon xs φ
+  | some L => .anon xs (.bind .box anonStorage .old (.upd .box (Upd.anonSt L) φ))
 
 /-- A modality whose program is done goes through its frames: a scope end
 pops its locals (an update of pops, which prints as nothing), the rest of

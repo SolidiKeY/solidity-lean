@@ -76,7 +76,7 @@ def arithmetic : nested.Arithmetic where
 def counterstore : { st : Storage Bank // nested.runStorage st = false } :=
   query_countermodel[arithmetic]
 
-/-- info: (3, 3) -/
+/-- info: (0, 0) -/
 #guard_msgs in #eval ((three.read counterstore.val).val,
   ((balance (three.read counterstore.val)).read counterstore.val).val)
 

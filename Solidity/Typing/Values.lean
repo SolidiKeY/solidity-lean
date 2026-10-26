@@ -1096,27 +1096,6 @@ theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh s
   subst hnm
   rw [SVec.eq_of_toList_eq e e' he, ← SList.ofList_toList sh, hs, SList.ofList_toList]
 
-theorem SFields.set_get_self {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
-    (h : lookupBy f fs = some T) → x.set h (x.get h) = x
-  | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons v rest, h => by
-    rw [SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true, SFields.set_cons]
-    · simp only [e, dite_false, SFields.set_cons, SFields.set_get_self rest]
-
-theorem SFields.set_set {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
-    (h : lookupBy f fs = some T) → (a b : SVal T) → (x.set h a).set h b = x.set h b
-  | [], _, .nil, h, _, _ => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons v rest, h, a, b => by
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [SFields.set_cons, e, dite_true]
-    · simp only [SFields.set_cons, e, dite_false, SFields.set_set rest]
-
 /-- **A save is idempotent**: saving again what a save left changes nothing
 (the key a save through a mapping's default added is there now). -/
 theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v : SVal U) →

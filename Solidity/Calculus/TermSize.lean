@@ -351,7 +351,7 @@ theorem cases {n : Nat} {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)}
     exact hf ψ hψ⟩
 
 theorem inv {n : Nat} {Δ₀ Δ Γ₁ : Ctx} {I : Fml C Γ} {B : Option (Fml C Γ)}
-    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {U : Upd C Γ Δ} {c c' : Fml C Δ}
     {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₁} {post : Fml C Δ₀}
     (hI : I.tmSize ≤ n) (hB : ∀ b, B = some b → b.tmSize ≤ n) (hU : U.length ≤ 2)
     (hU' : U.tmSize ≤ n) (hc : c.tmSize ≤ n) (hc' : c'.tmSize ≤ n) (hp : post.tmSize ≤ n) :

@@ -509,7 +509,7 @@ checked after it only where the condition holds again.  The fresh `b` and
 
 /--
 info: Solidity.Taclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool}
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool}
   {qs : List (LoopQ C Γ)} {cond inv : Val C Γ PrimTy.bool},
   dl{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ∧ ¬broke ; "invariant preserved and used": { anon(body) } (inv = true ∧
@@ -522,8 +522,8 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.Taclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {qs : List (LoopQ C Γ)} {brk : Bool} {cond inv : Val C Γ PrimTy.bool}
-  {dec : Val C Γ PrimTy.uint},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {qs : List (LoopQ C Γ)} {brk : Bool}
+  {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
   dl{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
@@ -571,6 +571,37 @@ theorem breakKeepsBound :
              while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
   sol_symex
   sol_close
+
+/-! ### Modifies sets
+
+A body that writes the storage anonymises only the roots it may write, its
+modifies set (`Prog.storeAt`, KeY's `assignable`): the premise's storage is
+`anon(storage, b, anonStorage)` (KeY's `anon(heap, locset, anonHeap)`),
+every other root as it was before the loop (`Stmt.run_keeps`, the frame
+theorem).  So the invariant need not restate what the body leaves: here it
+says nothing of `a`, which the postcondition reads. -/
+
+/-- Two counters, the loop below bumping one. -/
+def TwoCounters : Contract := contract!{ uint a; uint b; }
+
+section Frames
+
+local instance : InContract := ⟨TwoCounters⟩
+
+/-- The loop's modifies set is `b`, the root its body writes. -/
+example : (sol{ uint i = 0; while (i < 3) { b = b + 1; i = i + 1; } } :
+    Prog TwoCounters [] [.val .uint]).storeAt = some ["b"] := by decide
+
+/-- **A root the body does not write keeps its value past the loop**: the
+invariant says nothing of `a`, the frame does. -/
+theorem untouchedRoot :
+    ⊨ᶠ dl!{ [ uint a0 = a; uint i = 0;
+             /// @custom:key invariant i <= n
+             while (i < n) { b = b + 1; i = i + 1; }; ] a == a0 } := by
+  sol_symex
+  sol_close
+
+end Frames
 
 /-- A quantified clause, solkey's specification language above a loop
 (`\forall uint q; a -> c`, `LoopQ`): every number below `i` is below `n` at

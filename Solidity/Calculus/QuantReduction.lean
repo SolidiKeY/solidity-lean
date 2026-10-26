@@ -225,6 +225,44 @@ theorem LTm.maskOf?_atomBound {t : LTm C (.val .uint)} {k : Nat} (h : t.maskOf? 
   · rfl
   · cases h
 
+theorem bandLit_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (c : Nat) (ds : List (LFml C))
+    (m : Nat) : a.atomBound ≤ (bandLit prev a c ds m).term.atomBound := by
+  unfold bandLit; split <;> exact Nat.le_max_left _ _
+
+theorem borLit_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : a.atomBound ≤ (borLit prev a v ds m).term.atomBound := by
+  unfold borLit; split
+  · exact Nat.le_refl _
+  · show a.atomBound ≤ max (max a.atomBound _) _; omega
+
+theorem bxorLit_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : a.atomBound ≤ (bxorLit prev a v ds m).term.atomBound := by
+  unfold bxorLit; split
+  · exact Nat.le_refl _
+  · show a.atomBound ≤ max (max a.atomBound _) _; omega
+
+theorem mulWLit_atomBound (prev : List (LFml C)) (a : LTm C (.val .uint)) (c : Nat) (ds : List (LFml C))
+    (m : Nat) : a.atomBound ≤ (mulWLit prev a c ds m).term.atomBound := by
+  unfold mulWLit; split
+  · exact Nat.le_max_left _ _
+  · unfold mulWGo
+    split
+    · exact Nat.le_refl _
+    · split
+      · exact Nat.le_refl _
+      · dsimp only; split <;> exact Nat.le_max_left _ _
+
+theorem powLit_atomBound (h a : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (hh : a.atomBound ≤ h.atomBound) : a.atomBound ≤ (powLit h a v).atomBound := by
+  unfold powLit; split
+  · exact Nat.le_max_left _ _
+  · split
+    · exact Nat.le_refl _
+    · exact hh
+
+theorem lit_atomBound {p : PrimTy} {t : LTm C (.val p)} {v : p.Denote} (h : t = .app0 (.lit v)) :
+    t.atomBound = 0 := by subst h; rfl
+
 /-- The cut node `X` keeps the atoms of its cut operands `A`, `B`. -/
 def CutKeeps {a b s : Srt} (A : CutTm C a) (B : CutTm C b) (X : CutTm C s) : Prop :=
   max A.term.atomBound B.term.atomBound ≤ X.term.atomBound
@@ -248,7 +286,60 @@ theorem cut2_atomBound {a b s : Srt} (o : Op2 C a b s) (prev : List (LFml C)) (A
           have h1 := maskCut_atomBound prev B.term k (A.defs ++ B.defs) B.next
           simp only [CutKeeps, h0]
           omega
-        · exact Nat.le_refl _
+        · split
+          · rename_i r _
+            have h0 := lit_atomBound r.2
+            have h1 := bandLit_atomBound prev A.term r.1.val.toNat (A.defs ++ B.defs) B.next
+            simp only [CutKeeps, h0]; omega
+          · rename_i r _ _
+            have h0 := lit_atomBound r.2
+            have h1 := bandLit_atomBound prev B.term r.1.val.toNat (A.defs ++ B.defs) B.next
+            simp only [CutKeeps, h0]; omega
+          · exact Nat.le_refl _
+    case mulW.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := mulWLit_atomBound prev A.term r.1.val.toNat (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := mulWLit_atomBound prev B.term r.1.val.toNat (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
+    case bor.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := borLit_atomBound prev A.term r.1 (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := borLit_atomBound prev B.term r.1 (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
+    case bxor.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have h0 := lit_atomBound r.2
+        have h1 := bxorLit_atomBound prev A.term r.1 (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · rename_i r _ _
+        have h0 := lit_atomBound r.2
+        have h1 := bxorLit_atomBound prev B.term r.1 (A.defs ++ B.defs) B.next
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
+    case pow.uint | powW.uint =>
+      dsimp only [cut2]
+      split
+      · rename_i v heq
+        have h0 := lit_atomBound heq
+        have h1 := powLit_atomBound (.app2 (.binop _ h) A.term B.term) A.term v (Nat.le_max_left _ _)
+        simp only [CutKeeps, h0]; omega
+      · exact Nat.le_refl _
     all_goals dsimp only [cut2, cutShl]
     all_goals (repeat' split)
     all_goals first | exact Nat.le_refl _ |
@@ -725,7 +816,7 @@ def quantReduction? (φ : Fml C []) : Option (QuantReduction φ) := do
     let P := bodyPrep sentence.body
     if (P.body.liftCondB condLiftFuel liftBudget).isNone then none
     else
-      let M ← flattenedArithmetic? 2048 (abstracted P.body).1
+      let M ← flattenedArithmetic? (readBudget (abstracted P.body).1.cutAll) (abstracted P.body).1
       let L := layoutOf M (abstracted P.body).2
       let D ← QDefs.compile L.pos L.P (L.pos_inj (layoutOf_W M _))
         (abstracted P.body).2 L.top (L.pos_lt (layoutOf_W M _))

@@ -273,11 +273,14 @@ def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
       (fun H _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H => Hyps.boxOnly H)
   termination_by structural _ H => H
 
-/-- `{anon(xs)}`, and `{anon(xs)} {havoc}` when the loop's frame writes the
-storage too (`Fml.anonHavoc`), joined to the context. -/
-def Hyps.anonHavoc {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) :
-    Hyps C Γ₀ Γ :=
-  if hv then (H.anon xs).havoc else H.anon xs
+/-- A loop body's anonymising update (`Fml.anonHavoc`), joined to the
+context. -/
+def Hyps.anonHavoc {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))
+    (hv : Option (List Name)) : Hyps C Γ₀ Γ :=
+  match hv with
+  | none => (H.anon xs).havoc
+  | some [] => H.anon xs
+  | some L => ((H.anon xs).bind .box anonStorage .old).upd .box (Upd.anonSt L)
 
 /-- `Hyps.rwEqC`'s compiled twin. -/
 def Hyps.rwEqCM {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ : Ctx} :
@@ -473,7 +476,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   (`Fml.invHyp`, `Fml.invPost`). -/
   | inv {Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {I : Fml C Γ} {B : Option (Fml C Γ)}
-      {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
+      {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {U : Upd C Γ Δ} {c c' : Fml C Δ}
       {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₃} {post : Fml C Δ₀}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m =
         .inv I B xs hv U c c' hu hb P post)

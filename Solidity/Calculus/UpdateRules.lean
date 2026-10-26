@@ -62,7 +62,10 @@ theorem _root_.Solidity.Op2.denote_same {a b s : Srt} (o : Op2 C a b s)
     o.denote g₀ x y da db = o.denote g₁ x' y' da db := by
   rcases hc with rfl | hf
   · rw [Srt.SameO.eq hx, Srt.SameO.eq hy]
-  · cases o <;> first | rfl | exact absurd hf Bool.false_ne_true
+  · cases o <;> first
+      | rfl
+      | exact absurd hf Bool.false_ne_true
+      | (rw [Srt.sameO_st] at hx hy; subst hx hy; cases x <;> cases y <;> rfl)
 
 end DenoteSame
 

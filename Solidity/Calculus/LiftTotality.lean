@@ -180,6 +180,16 @@ theorem LTm.SrcL.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL true 
   | @bandL hw h v hv b _ ih =>
     exact SplitOK.un (fun b' => LTm.app2 (.binop .band h) (.app0 (.lit v)) b') (fun _ h' => .bandL hw h v hv h')
       (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
+  | @litR hw p op h a v hv _ ih =>
+    exact SplitOK.un (fun a' => LTm.app2 (.binop op h) a' (.app0 (.lit v))) (fun _ h' => .litR hw op h v hv h')
+      (fun _ => Nat.add_zero _) ih (by
+        show CondSplit.first a.condSplit none (fun x => LTm.app2 (.binop op h) x (.app0 (.lit v)))
+          (fun y => LTm.app2 (.binop op h) a y) = a.condSplit.map _
+        cases a.condSplit <;> rfl)
+      (Nat.add_zero _)
+  | @litL hw p op h v hv b _ ih =>
+    exact SplitOK.un (fun b' => LTm.app2 (.binop op h) (.app0 (.lit v)) b') (fun _ h' => .litL hw op h v hv h')
+      (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
   | @addW hw h a b hx hy ihx ihy =>
     exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .addW h) x' y') (fun _ _ hx' hy' => .addW hw h hx' hy') (fun _ _ => rfl)
       hx hy ihx ihy rfl rfl
@@ -360,6 +370,14 @@ theorem LTm.SrcL.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL true
   | @bandL hw h v hv b _ ih =>
     intro hn
     exact .bandL hw h v hv (ih (Option.map_eq_none_iff.mp hn))
+  | @litR hw p op h a v hv _ ih =>
+    intro hn
+    have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop op h) x' (.app0 (.lit v)))
+      (fy := fun y' => LTm.app2 (.binop op h) a y') hn
+    exact .litR hw op h v hv (ih h2.1)
+  | @litL hw p op h v hv b _ ih =>
+    intro hn
+    exact .litL hw op h v hv (ih (Option.map_eq_none_iff.mp hn))
   | @addW hw h a b _ _ ihx ihy =>
     intro hn
     have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .addW h) x' _) (fy := fun y' => LTm.app2 (.binop .addW h) _ y') hn
@@ -569,7 +587,7 @@ theorem LFml.liftCond_src : ∀ (n : Nat) {φ : LFml C}, φ.SrcL true true l →
     show (φ.mapEq (LFml.liftEq (LFml.liftCond n))).SrcL false true l
     induction hφ with
     | tt => exact .tt
-    | defDiv hw | defShr hw | defAddW hw | defSubW hw | defToInt hw | defToUint hw => cases hw
+    | defDiv hw | defDivI hw | defShr hw | defAddW hw | defSubW hw | defToInt hw | defToUint hw => cases hw
     | @eqB a b ha hb =>
       show (LFml.liftEq (LFml.liftCond n) a b).SrcL false true l
       unfold LFml.liftEq

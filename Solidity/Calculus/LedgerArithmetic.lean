@@ -127,6 +127,7 @@ theorem LFml.Arith.ledger_restrict {P : Parameter → Prop} {E : EnvKey → Prop
     exact .imp (ih1 fun v hv => hL v (List.mem_append_left _ hv))
       (ih2 fun v hv => hL v (List.mem_append_right _ hv))
   | defDiv h c hc k ha hk hd => intro _; exact .defDiv h c hc k ha hk hd
+  | defDivI h c hc k ha hk hd => intro _; exact .defDivI h c hc k ha hk hd
   | defShr h v k ha hk hd => intro _; exact .defShr h v k ha hk hd
   | defAddW h k ha hb hk hda hdb => intro _; exact .defAddW h k ha hb hk hda hdb
   | defSubW h k ha hb hk hda hdb => intro _; exact .defSubW h k ha hb hk hda hdb
@@ -355,32 +356,32 @@ theorem leafArithmeticZ?_isSome (φ : LFml C)
   rfl
 
 theorem readFlatten?_arithZ (φ : LFml C) (h : φ.SrcL false false .post) (hn : φ.nodes ≤ 511)
-    (hw : φ.words * φ.words ≤ 2048) :
-    ∃ r, readFlatten? 2048 φ = some r ∧ r.flat.reads.length * r.flat.reads.length ≤ 2048 ∧
+    {B : Nat} (hB : 2048 ≤ B) (hw : φ.words * φ.words ≤ B) :
+    ∃ r, readFlatten? B φ = some r ∧ r.flat.reads.length * r.flat.reads.length ≤ B ∧
       (leafArithmeticZ? r.formula).isSome = true := by
   have hd := LFml.depth_le_nodes φ
   obtain ⟨a, ha, aok, alen, alaid, aocc⟩ :=
-    flattenFormulaFuel?_Src (l := .post) (by decide) h 2048 2048 φ.atomBound (by omega) (by omega)
+    flattenFormulaFuel?_Src (l := .post) (by decide) h B B φ.atomBound (by omega) (by omega)
       (Nat.le_refl _) hn
   obtain ⟨src, hsrc⟩ := h.readFormula
-  have hwl : φ.words ≤ 2048 := Nat.le_trans (Nat.le_mul_self _) hw
-  obtain ⟨L, hL⟩ := Option.isSome_iff_exists.mp (occurrenceLayout?_isSome 2048 alaid (by omega))
+  have hwl : φ.words ≤ B := Nat.le_trans (Nat.le_mul_self _) hw
+  obtain ⟨L, hL⟩ := Option.isSome_iff_exists.mp (occurrenceLayout?_isSome B alaid (by omega))
   obtain ⟨rf, hrf, hrf0⟩ := aok.readFree
-  have hflat : flattenFormula? 2048 φ = some a := by
-    show Option.map Prod.fst (flattenFormulaFuel? 2048 2048 φ φ.atomBound) = _
+  have hflat : flattenFormula? B φ = some a := by
+    show Option.map Prod.fst (flattenFormulaFuel? B B φ φ.atomBound) = _
     rw [ha]
     rfl
   have hRF : readFreeFormula? a.formula = some ⟨rf, hrf0⟩ := by
     simp only [readFreeFormula?, hrf, Option.bind_eq_bind, Option.bind_some, hrf0, dif_pos]
     rfl
-  have hR : readFlatten? 2048 φ = some ⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ := by
+  have hR : readFlatten? B φ = some ⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ := by
     simp only [readFlatten?, hflat, hsrc, hL, hRF, Option.bind_eq_bind, Option.bind_some]
     rfl
   have harith : (ReadFlattening.formula (⟨a, src, Nat.le_refl _, L, ⟨rf, hrf0⟩⟩ :
       ReadFlattening φ φ.atomBound)).Arith (fun _ => True) (fun _ => True)
         (fun _ => LedgerMode.post = .post) :=
     .imp ((ReadOccurrence.constraints_arith aocc).ledger_mono (fun _ h => h.elim)) aok
-  have hsq : a.reads.length * a.reads.length ≤ 2048 := by rw [alen]; exact hw
+  have hsq : a.reads.length * a.reads.length ≤ B := by rw [alen]; exact hw
   exact ⟨_, hR, hsq, leafArithmeticZ?_isSome _ ((harith.restrict
     (fun q hq => (List.mem_eraseDups' _ q).mpr hq)
     (fun e he => ((Inputs.unique_spec _).2 e).mpr he)).ledger_restrict
@@ -388,10 +389,11 @@ theorem readFlatten?_arithZ (φ : LFml C) (h : φ.SrcL false false .post) (hn : 
 
 /-- **The flattened arithmetic with ledger entries never refuses its fragment.** -/
 theorem flattenedArithmeticZ?_isSome (φ : LFml C) (h : φ.SrcL false true .post)
-    (hn : φ.cutAll.nodes ≤ 511) (hw : φ.cutAll.words * φ.cutAll.words ≤ 2048) :
-    (flattenedArithmeticZ? 2048 φ).isSome = true := by
+    (hn : φ.cutAll.nodes ≤ 511) :
+    (flattenedArithmeticZ? (readBudget φ.cutAll) φ).isSome = true := by
   obtain ⟨src, hsrc⟩ := h.readFormula
-  obtain ⟨r, hr, hsq, hE⟩ := readFlatten?_arithZ φ.cutAll (LFml.cutAll_src h) hn hw
+  obtain ⟨r, hr, hsq, hE⟩ := readFlatten?_arithZ φ.cutAll (LFml.cutAll_src h) hn
+    (le_readBudget _) (words_le_readBudget _)
   obtain ⟨E, hE'⟩ := Option.isSome_iff_exists.mp hE
   simp only [flattenedArithmeticZ?, hsrc, hr, Option.bind_eq_bind, Option.bind_some, hsq, if_true, hE']
   rfl

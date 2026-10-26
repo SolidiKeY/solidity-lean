@@ -811,8 +811,14 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NSTerm C)
   | .app "save" [s, p, v] => do pure (.save (← R.stor s) (← pathIn C R s p) (← R.sval v))
   | .app "delAt" [s, p] => do pure (.delAt (← R.stor s) (← pathIn C R s p))
   | .app "select" [s, .name r] => do pure (.select (← R.stor s) r)
-  | _ => throw "not a storage: `storage`, `store(s, r, v)`, `save(s, p, v)`, `delAt(s, p)` or \
-      `select(s, r)`"
+  | .app "anon" (s :: r :: rest) => do
+    let roots ← ((r :: rest).dropLast).mapM fun
+      | .name r => if (C.rootType r).isSome then pure r
+          else throw s!"`anon(s, r₁, …, rₙ, s')`: `{r}` is not a state variable"
+      | _ => throw "`anon(s, r₁, …, rₙ, s')`: the roots it anonymises are named"
+    pure (.anon (← R.stor s) roots (← R.stor ((r :: rest).getLast (List.cons_ne_nil _ _))))
+  | _ => throw "not a storage: `storage`, `store(s, r, v)`, `save(s, p, v)`, `delAt(s, p)`, \
+      `select(s, r)` or `anon(s, r₁, …, rₙ, s')`"
 
 /-- What a storage `save` writes. -/
 def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (NSValT C)

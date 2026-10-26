@@ -1,4 +1,4 @@
-import Solidity.Calculus.ExactReduction
+import Solidity.Calculus.TheoryRead
 
 /-!
 # Exact updates without memory locals or exhaustion
@@ -124,6 +124,45 @@ def directional? {Γ : Ctx} (ρ : SymS C Γ) (φ : Fml C Γ) : Option (ExactAt �
             (Fml.toLS_sound φ false hn' τ ν ha hf).2 rfl⟩⟩
       else none
 
+/-- An equation of two terms pushed in as the Theory reads them
+(`Tm.toLT`, `Calculus/TheoryRead.lean`): their equation where one of them
+always returns, the equation of their readings, a halt included,
+otherwise. -/
+def eqLeafT {p : PrimTy} (a' b' : LTm C (.val p)) : LFml C :=
+  if a'.retsS || a'.orRets || b'.retsS || b'.orRets then .eq a' b' else LFml.optEq a' b'
+
+theorem eqLeafT_holds (g : State C []) (ν : AEnv) {p : PrimTy} (a' b' : LTm C (.val p)) :
+    (eqLeafT a' b').holds g ν ↔ (a'.eval g ν : Option p.Denote) = b'.eval g ν := by
+  unfold eqLeafT
+  split
+  · rename_i h
+    rw [LFml.holds_eq_iff]
+    have hr : (∃ v, (a'.eval g ν : Option p.Denote) = some v) ∨
+        (∃ v, (b'.eval g ν : Option p.Denote) = some v) := by
+      simp only [Bool.or_eq_true] at h
+      rcases h with ((h | h) | h) | h
+      · exact .inl (LTm.retsS_eval h)
+      · exact .inl (LTm.orRets_eval g ν h)
+      · exact .inr (LTm.retsS_eval h)
+      · exact .inr (LTm.orRets_eval g ν h)
+    constructor
+    · rintro ⟨x, ha, hb⟩; rw [ha, hb]
+    · intro e
+      rcases hr with ⟨v, hv⟩ | ⟨v, hv⟩
+      · exact ⟨v, hv, e ▸ hv⟩
+      · exact ⟨v, e ▸ hv, hv⟩
+  · exact LFml.optEq_holds g ν a' b'
+
+/-- **An equation read as the Theory reads it**, exactly at either polarity,
+where its sides push in by `Tm.toLT`. -/
+def eqT? {Γ : Ctx} (ρ : SymS C Γ) {p : PrimTy} (a b : Tm C Γ (.val p)) :
+    Option (ExactAt ρ (.eq a b)) :=
+  match ha : a.toLT ρ, hb : b.toLT ρ with
+  | some a', some b' => some ⟨eqLeafT a' b', fun _ _ _ hA _ =>
+      (eqLeafT_holds _ _ a' b').trans (by
+        rw [holds_eq, ← Tm.toLT_sound hA a ha, ← Tm.toLT_sound hA b hb])⟩
+  | _, _ => none
+
 def not {Γ : Ctx} {ρ : SymS C Γ} {φ : Fml C Γ} (r : ExactAt ρ φ) : ExactAt ρ (.not φ) :=
   ⟨.not r.leaf, fun g₀ ν τ ha hf => not_congr (r.correct g₀ ν τ ha hf)⟩
 
@@ -171,6 +210,7 @@ def ofFormula? : Nat → {Γ : Ctx} → (ρ : SymS C Γ) → (φ : Fml C Γ) →
         | some (ρ', _) => (ofFormula? fuel ρ' φ).map (update m U hf hl hu)
       else none
     else none
+  | _ + 1, _, ρ, .eq a b => (directional? ρ (.eq a b)).orElse fun _ => eqT? ρ a b
   | _ + 1, _, ρ, φ => directional? ρ φ
 
 end ExactAt

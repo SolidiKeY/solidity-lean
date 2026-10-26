@@ -23,12 +23,6 @@ namespace Solidity
 
 variable {C : Contract}
 
-theorem TRes.ofOpt_ok {α : Type} {x : Option α} {a : α} (h : TRes.ofOpt x = .ok a) :
-    x = some a := by
-  cases x with
-  | none => exact nomatch h
-  | some b => cases h; rfl
-
 /-! ## Typed locals that satisfy a predicate -/
 
 /-- Locals of value and memory types only. -/

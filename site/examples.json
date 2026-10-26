@@ -32,15 +32,20 @@
         { "group": "Proofs", "file": "Solidity/Examples/Chains/Arithmetic.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Chains/Payment.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/ProofTree.lean" },
-        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" }
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/SymbolicCounterexample.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/Solkey/TestSuite.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Report.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Derived1.lean" },
+        { "group": "solkey's test suite", "file": "Solidity/TestSuite/Refuted.lean", "title": "solkey's TestSuite, refuted" }
       ]
     },
     {
       "id": "Velvet",
       "title": "Velvet",
       "root": "Bridge",
-      "description": "Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
+      "description": "Solidity contracts verified by Velvet, the Dafny-style verifier built on Loom, from the optional Bridge package.",
       "examples": [
+        { "group": "Solidity patterns", "file": "SolidityVelvet/TestSuite.lean" },
         { "group": "Solidity patterns", "file": "SolidityVelvet.lean" },
         { "group": "Solidity patterns", "file": "SolidityVelvet/Bank.lean" },
         { "group": "Solidity patterns", "file": "SolidityVelvet/Token.lean" },

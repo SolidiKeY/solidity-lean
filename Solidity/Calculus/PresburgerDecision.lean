@@ -337,6 +337,41 @@ theorem mkEx_cases (i : Nat) (l : List QFml) :
     · exact .inr (.inl rfl)
     · exact .inr (.inr rfl)
 
+/-! ### Canonical lists
+
+An `∃` state lists its body's derivatives; two orders of one list would be
+two states.  `canon` sorts them by hash before dropping repeats, so the
+derivatives of an `∃` reached along two paths are one state (up to hash
+ties). -/
+
+mutual
+/-- A formula's hash (`AFml.hashN` at the atoms). -/
+def hashN : QFml → Nat
+  | .atom φ m => hmix (hmix 17 φ.hashN) (m.foldl hmix 19)
+  | .not s => hmix 23 s.hashN
+  | .and s t => hmix (hmix 29 s.hashN) t.hashN
+  | .ex i ss => hmix (hmix 31 i) (hashL ss)
+/-- A list's hash. -/
+def hashL : List QFml → Nat
+  | [] => 37
+  | s :: ss => hmix s.hashN (hashL ss)
+end
+
+/-- The list sorted by hash, without repeats. -/
+def canon (l : List QFml) : List QFml :=
+  uniq (((l.map fun s => (s.hashN, s)).mergeSort fun a b => a.1 ≤ b.1).map Prod.snd)
+
+theorem mem_canon (x : QFml) (l : List QFml) : x ∈ canon l ↔ x ∈ l := by
+  simp only [canon, mem_uniq, List.mem_map, List.mem_mergeSort]
+  constructor
+  · rintro ⟨_, ⟨s, hs, rfl⟩, rfl⟩; exact hs
+  · intro hx; exact ⟨_, ⟨x, hx, rfl⟩, rfl⟩
+
+theorem nodup_canon (l : List QFml) : (canon l).Nodup := nodup_uniq _
+
+theorem holdsL_canon (x : Nat → Nat) (ss : List QFml) : holdsL (canon ss) x ↔ holdsL ss x := by
+  simp only [holdsL_iff, mem_canon]
+
 mutual
 /-- **What is left of a formula once the low bits `B` are read**: each atom
 its `AFml.deriv` at its variables' bits; under `∃ xᵢ` both bits of `xᵢ`. -/
@@ -344,7 +379,7 @@ def deriv (B : Nat → Bool) : QFml → QFml
   | .atom φ m => mkAtom (φ.deriv (localBits B m φ.width)) m
   | .not s => mkNot (s.deriv B)
   | .and s t => mkAnd (s.deriv B) (t.deriv B)
-  | .ex i ss => mkEx i (uniq (derivL (setBit B i false) ss ++ derivL (setBit B i true) ss))
+  | .ex i ss => mkEx i (canon (derivL (setBit B i false) ss ++ derivL (setBit B i true) ss))
 /-- The derivatives of a list. -/
 def derivL (B : Nat → Bool) : List QFml → List QFml
   | [] => []
@@ -367,7 +402,7 @@ theorem holds_deriv : ∀ (s : QFml) (x : Nat → Nat), s.holds x ↔ (s.deriv (
     simp only [holds, deriv, holds_mkAnd]; exact and_congr (holds_deriv s x) (holds_deriv t x)
   | .ex i ss, x => by
     simp only [deriv, holds_mkEx]
-    simp only [holds, holdsL_uniq, holdsL_append]
+    simp only [holds, holdsL_canon, holdsL_append]
     constructor
     · rintro ⟨n, hn⟩
       rw [holdsL_deriv ss, bitsAt_updAt, halve_updAt] at hn
@@ -553,20 +588,20 @@ theorem deriv_mem_univ (B : Nat → Bool) : ∀ (F G : QFml), G ∈ F.univ → G
     · exact fls_mem_univ _
     obtain ⟨l, hl, rfl⟩ := List.mem_map.1 h
     have hsub := of_mem_lists hl
-    have hin : ∀ a ∈ uniq (derivL (setBit B i false) l ++ derivL (setBit B i true) l), a ∈ univL ss := by
+    have hin : ∀ a ∈ canon (derivL (setBit B i false) l ++ derivL (setBit B i true) l), a ∈ univL ss := by
       intro a ha
-      have ha := (mem_uniq a _).1 ha
+      have ha := (mem_canon a _).1 ha
       rw [derivL_eq_map, derivL_eq_map] at ha
       rcases List.mem_append.1 ha with ha | ha <;>
       · obtain ⟨g, hg, rfl⟩ := List.mem_map.1 ha
         exact deriv_mem_univL _ ss g (hsub g hg)
-    rcases mkEx_cases i (uniq (derivL (setBit B i false) l ++ derivL (setBit B i true) l)) with e | e | e <;>
+    rcases mkEx_cases i (canon (derivL (setBit B i false) l ++ derivL (setBit B i true) l)) with e | e | e <;>
       simp only [deriv, e]
     · exact tru_mem_univ _
     · exact fls_mem_univ _
     · refine mem_consts (.inr (.inr (List.mem_map.2 ⟨_, mem_lists _ _ ?_ ?_, rfl⟩)))
       · exact fun a ha => hin a (List.mem_filter.1 ha).1
-      · exact length_le_of_nodup _ ((nodup_uniq _).filter _) fun a ha => hin a (List.mem_filter.1 ha).1
+      · exact length_le_of_nodup _ ((nodup_canon _).filter _) fun a ha => hin a (List.mem_filter.1 ha).1
 theorem deriv_mem_univL (B : Nat → Bool) : ∀ (ss : List QFml) (G : QFml), G ∈ univL ss →
     G.deriv B ∈ univL ss
   | [], _, h => nomatch h
@@ -1066,13 +1101,14 @@ structure Node (root : QFml) where
   state : QFml
   back : (Nat → Nat) → Nat → Nat
   correct : ∀ y, state.holds y ↔ root.holds (back y)
+  mem : state ∈ root.univ
 
 namespace Node
 
 variable {root : QFml}
 
 /-- The formula itself. -/
-def initial (root : QFml) : Node root := ⟨root, id, fun _ => Iff.rfl⟩
+def initial (root : QFml) : Node root := ⟨root, id, fun _ => Iff.rfl, self_mem_univ root⟩
 
 /-- Reading the bits `B`. -/
 def child (n : Node root) (B : Nat → Bool) : Node root where
@@ -1083,6 +1119,7 @@ def child (n : Node root) (B : Nat → Bool) : Node root where
     have h := holds_deriv n.state (withBitsAt B y)
     rw [bitsAt_withBitsAt, halve_withBitsAt] at h
     exact h.symm.trans (n.correct _)
+  mem := deriv_mem_univ _ root n.state n.mem
 
 end Node
 
@@ -1229,17 +1266,295 @@ theorem holdsL_simp : ∀ (ss : List QFml) (x : Nat → Nat), holdsL (simpL ss) 
   | s :: ss, x => by simp only [simpL, holdsL]; exact or_congr (holds_simp s x) (holdsL_simp ss x)
 end
 
-/-- **Decide** a quantified formula: simplify its atoms, then search. -/
-def decide (root : QFml) : Bool := root.simp.search
+/-! ## The walk
+
+`search` collects every reachable state in a list before testing one, and
+tests each `∃` state's zero test afresh.  The walk (`walkC`,
+`Calculus/VisitedSet.lean`) visits the states depth first, seen ones in an
+`HSet` keyed by `hashN`, stops at the first state false at zero (its
+reconstruction a counterassignment), and memoizes the zero test of each
+`∃` it meets (`atZeroC`, a cache of tests it computed, `ZGood`).  Where it
+closes, the states it saw are closed under reading bits and hold at zero,
+so the formula is valid (`walkFrom_closed`).  Its fuel is not proved to
+suffice; where it runs out, `search`'s answer stands. -/
+
+/-! ### The zero test of an `∃`, by a walk
+
+`(∃ xᵢ. ⋁ S).atZero` asks whether some state reachable from `S` reading
+only `xᵢ`'s bits holds at zero (`zeroReach`), collecting every such state
+first.  `exTest` walks them instead, stopping at the first that holds at
+zero, its value of `xᵢ` reconstructed (`ZNode`).  The states of a walk
+that closes reach none: each is false at `updAt 0 i n` for every `n`
+(`NGood`), and later walks stop there (`zkids`). -/
+
+/-- A state of the zero test's walk, with the value of `xᵢ` put back. -/
+structure ZNode (i : Nat) (ss : List QFml) where
+  state : QFml
+  back : Nat → Nat
+  sound : ∀ m, state.holds (updAt (fun _ => 0) i m) → holdsL ss (updAt (fun _ => 0) i (back m))
+
+theorem holds_zeroBits (s : QFml) (i m : Nat) (b : Bool) :
+    (s.deriv (zeroBits i b)).holds (updAt (fun _ => 0) i m) ↔
+      s.holds (updAt (fun _ => 0) i ((if b then 1 else 0) + 2 * m)) := by
+  rw [holds_deriv s, bitsAt_zero_updAt, halve_zero_updAt]
+  have h1 : (((if b then 1 else 0) + 2 * m) % 2 == 1) = b := by
+    cases b
+    · rw [show ((if false = true then 1 else 0) + 2 * m) % 2 = 0 by simp only [Bool.false_eq_true, ↓reduceIte]; omega]; rfl
+    · rw [show ((if true = true then 1 else 0) + 2 * m) % 2 = 1 by simp only [↓reduceIte]; omega]; rfl
+  have h2 : ((if b then 1 else 0) + 2 * m) / 2 = m := by cases b <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> omega
+  rw [h1, h2]
+
+namespace ZNode
+
+variable {i : Nat} {ss : List QFml}
+
+/-- A formula of `S`. -/
+def start (t : QFml) (ht : t ∈ ss) : ZNode i ss := ⟨t, id, fun _ h => (holdsL_iff _ ss).2 ⟨t, ht, h⟩⟩
+
+/-- Reading the bit `b` of `xᵢ`, every other bit `0`. -/
+def child (n : ZNode i ss) (b : Bool) : ZNode i ss where
+  state := n.state.deriv (zeroBits i b)
+  back := fun m => n.back ((if b then 1 else 0) + 2 * m)
+  sound := fun m h => n.sound _ ((holds_zeroBits _ i m b).1 h)
+
+end ZNode
+
+/-- States known to reach no state true at zero: `(i, t)`, `t` false at
+`updAt 0 i n` for every `n`. -/
+abbrev NCache := HSet (Nat × QFml)
+
+/-- Every cached state is so. -/
+def NGood (C : NCache) : Prop := ∀ p, C.Mem p → ∀ m, ¬ p.2.holds (updAt (fun _ => 0) p.1 m)
+
+/-- A cached state's key. -/
+def nkey (i : Nat) (t : QFml) : Nat := hmix i t.hashN
+
+/-- Both successors, those known to reach nothing dropped. -/
+def zkids (C : NCache) (i : Nat) {ss : List QFml} (n : ZNode i ss) : List (ZNode i ss) :=
+  [n.child false, n.child true].filter fun c => !C.contains (nkey i c.state) (i, c.state)
+
+/-- The formulas of `S`, as states. -/
+def starts (i : Nat) (ss : List QFml) : List (ZNode i ss) := ss.attach.map fun t => ZNode.start t.1 t.2
+
+/-- The zero test's walk from `S`, stopping at a state true at zero. -/
+def exWalk (C : NCache) (i : Nat) (ss : List QFml) : Walk QFml (ZNode i ss) :=
+  let p := pushNew ZNode.state hashN (starts i ss) HSet.leaf []
+  walk ZNode.state hashN (zkids C i) (fun n => !n.state.atZero) (2 ^ 64) p.1 p.2
+
+/-- The states of a closed walk added to the cache. -/
+def addAll (i : Nat) : List QFml → NCache → NCache
+  | [], C => C
+  | t :: ts, C => addAll i ts (C.insert (nkey i t) (i, t))
+
+theorem mem_addAll (i : Nat) (p : Nat × QFml) : ∀ (ts : List QFml) (C : NCache),
+    (addAll i ts C).Mem p ↔ C.Mem p ∨ ∃ t ∈ ts, p = (i, t)
+  | [], C => by simp only [addAll, List.not_mem_nil, false_and, exists_false, or_false]
+  | t :: ts, C => by
+    rw [addAll, mem_addAll i p ts, HSet.mem_insert]
+    simp only [List.mem_cons, exists_eq_or_imp]
+    constructor
+    · rintro ((h | h) | h)
+      · exact .inr (.inl h)
+      · exact .inl h
+      · exact .inr (.inr h)
+    · rintro (h | h | h)
+      · exact .inl (.inr h)
+      · exact .inl (.inl h)
+      · exact .inr h
+
+/-- **The zero test of `∃ xᵢ. ⋁ S`**, by the walk, the cache grown by the
+states of a walk that closes; `atZero` where the fuel runs out. -/
+def exTest (C : NCache) (i : Nat) (ss : List QFml) : Bool × NCache :=
+  match exWalk C i ss with
+  | .refuted _ => (true, C)
+  | .closed V => (false, addAll i V.toList C)
+  | .out => ((QFml.ex i ss).atZero, C)
+
+theorem exTest_spec (C : NCache) (i : Nat) (ss : List QFml) (hC : NGood C) :
+    (exTest C i ss).1 = (QFml.ex i ss).atZero ∧ NGood (exTest C i ss).2 := by
+  have hz : (QFml.ex i ss).atZero = true ↔ ∃ n, holdsL ss (updAt (fun _ => 0) i n) :=
+    (holds_zero (.ex i ss) (fun _ => 0) (fun _ _ => rfl)).symm
+  unfold exTest
+  split
+  · next r h =>
+    have hr := walk_refuted _ _ _ _ _ _ _ _ h
+    simp only [Bool.not_eq_false'] at hr
+    have ht : r.state.holds (updAt (fun _ => 0) i 0) := by
+      rw [zero_updAt_zero]; exact (holds_zero r.state (fun _ => 0) (fun _ _ => rfl)).2 hr
+    exact ⟨(hz.2 ⟨_, r.sound 0 ht⟩).symm, hC⟩
+  · next V h =>
+    have hI : WalkInv ZNode.state (zkids C i) (fun n => !n.state.atZero)
+        (pushNew ZNode.state hashN (starts i ss) HSet.leaf []).1
+        (pushNew ZNode.state hashN (starts i ss) HSet.leaf []).2 := by
+      obtain ⟨-, h2, h3, -, h5⟩ := pushNew_spec ZNode.state hashN (starts i ss) HSet.leaf []
+      refine ⟨fun r hr => ?_, fun s hs => ?_⟩
+      · rcases h3 r hr with h' | h'
+        · cases h'
+        · exact h2 r h'
+      · rcases h5 s hs with h' | h'
+        · exact h'.elim
+        · exact .inl h'
+    obtain ⟨hk, hall⟩ := walk_closed _ _ _ _ _ _ _ V h hI
+    have hss : ∀ t ∈ ss, V.Mem t := by
+      intro t ht
+      obtain ⟨-, h2, -, -, -⟩ := pushNew_spec ZNode.state hashN (starts i ss) HSet.leaf []
+      exact hk _ (h2 (ZNode.start t ht) (List.mem_map.2 ⟨⟨t, ht⟩, List.mem_attach _ _, rfl⟩))
+    have hneg : ∀ m t, V.Mem t → ¬ t.holds (updAt (fun _ => 0) i m) := by
+      intro m
+      induction m using Nat.strongRecOn with
+      | _ m ih =>
+        intro t ht htm
+        obtain ⟨n, rfl, hok, hkids⟩ := hall t ht
+        simp only [Bool.not_eq_true'] at hok
+        by_cases h0 : m = 0
+        · subst h0
+          rw [zero_updAt_zero] at htm
+          rw [(holds_zero n.state (fun _ => 0) (fun _ _ => rfl)).1 htm] at hok
+          exact Bool.noConfusion hok
+        · have hm : m = (if (m % 2 == 1) then 1 else 0) + 2 * (m / 2) := by
+            rcases Nat.mod_two_eq_zero_or_one m with e | e <;> simp only [e] <;> simp <;> omega
+          rw [hm, ← holds_zeroBits] at htm
+          by_cases hc : C.contains (nkey i (n.child (m % 2 == 1)).state) (i, (n.child (m % 2 == 1)).state)
+          · exact hC _ (HSet.mem_of_contains hc) _ htm
+          · have hmem : n.child (m % 2 == 1) ∈ zkids C i n := by
+              apply List.mem_filter.2
+              refine ⟨?_, by simp only [hc, Bool.not_false]⟩
+              cases m % 2 == 1 <;> simp only [List.mem_cons, true_or, or_true]
+            exact ih (m / 2) (by omega) _ (hkids _ hmem) htm
+    refine ⟨?_, fun p hp => ?_⟩
+    · cases e : (QFml.ex i ss).atZero
+      · rfl
+      · obtain ⟨m, hm⟩ := hz.1 e
+        obtain ⟨t, ht, htm⟩ := (holdsL_iff _ ss).1 hm
+        exact (hneg m t (hss t ht) htm).elim
+    · rcases (mem_addAll i p _ C).1 hp with hp | ⟨t, ht, rfl⟩
+      · exact hC p hp
+      · exact fun m => hneg m t (HSet.mem_toList.1 ht)
+  · exact ⟨rfl, hC⟩
+
+/-- Zero tests computed, each with its formula. -/
+abbrev ZCache := HSet (QFml × Bool)
+
+/-- Every cached test is the formula's. -/
+def ZGood (c : ZCache) : Prop := ∀ e, c.Mem e → e.1.atZero = e.2
+
+/-- `atZero`, each `∃` looked up in the cache, or tested (`exTest`) and
+added. -/
+def atZeroC (c : ZCache × NCache) : QFml → Bool × (ZCache × NCache)
+  | .atom φ _ => (φ.atZero, c)
+  | .not s => ((atZeroC c s).1 = false, (atZeroC c s).2)
+  | .and s t => if (atZeroC c s).1 then atZeroC (atZeroC c s).2 t else (false, (atZeroC c s).2)
+  | .ex i ss =>
+    match c.1.find? (QFml.ex i ss).hashN (fun e => decide (e.1 = .ex i ss)) with
+    | some e => (e.2, c)
+    | none =>
+      let r := exTest c.2 i ss
+      (r.1, (c.1.insert (QFml.ex i ss).hashN (.ex i ss, r.1), r.2))
+
+/-- Both caches good. -/
+def CGood (c : ZCache × NCache) : Prop := ZGood c.1 ∧ NGood c.2
+
+theorem atZeroC_spec : ∀ (s : QFml) (c : ZCache × NCache), CGood c →
+    (atZeroC c s).1 = s.atZero ∧ CGood (atZeroC c s).2
+  | .atom φ m, c, hc => by rw [atZero]; exact ⟨rfl, hc⟩
+  | .not s, c, hc => by
+    obtain ⟨h1, h2⟩ := atZeroC_spec s c hc
+    rw [atZero]; simp only [atZeroC, h1, h2, and_true]; cases s.atZero <;> rfl
+  | .and s t, c, hc => by
+    obtain ⟨h1, h2⟩ := atZeroC_spec s c hc
+    obtain ⟨h3, h4⟩ := atZeroC_spec t _ h2
+    rw [atZero]; simp only [atZeroC, h1]
+    cases s.atZero
+    · exact ⟨rfl, h2⟩
+    · exact ⟨h3, h4⟩
+  | .ex i ss, c, hc => by
+    simp only [atZeroC]
+    split
+    · next e he =>
+      obtain ⟨hm, hp⟩ := HSet.find?_some he
+      have := hc.1 e hm
+      simp only [decide_eq_true_eq] at hp
+      rw [hp] at this
+      exact ⟨this.symm, hc⟩
+    · obtain ⟨h1, h2⟩ := exTest_spec c.2 i ss hc.2
+      refine ⟨h1, fun e he => ?_, h2⟩
+      rcases HSet.mem_insert.1 he with rfl | he
+      · exact h1.symm
+      · exact hc.1 e he
+
+/-- The walk from `root`, its zero tests memoized. -/
+def walkFrom (root : QFml) : Walk QFml (Node root) :=
+  walkC Node.state hashN (step root) (fun c n => atZeroC c n.state) (2 ^ 64)
+    ((HSet.leaf, HSet.leaf) : ZCache × NCache) (HSet.leaf.insert root.hashN root) [Node.initial root]
+
+theorem walkFrom_eq (root : QFml) : root.walkFrom =
+    walk Node.state hashN (step root) (fun n => n.state.atZero) (2 ^ 64)
+      (HSet.leaf.insert (Node.initial root).state.hashN (Node.initial root).state) [Node.initial root] :=
+  walkC_eq _ _ _ _ _ CGood (fun c n hc => atZeroC_spec n.state c hc) _ _ _ _
+    ⟨fun _ h => h.elim, fun _ h => h.elim⟩
+
+/-- **A closed walk proves its formula**: by induction on the sum of the
+free variables, as `search_iff`. -/
+theorem walkFrom_closed {root : QFml} {V : HSet QFml} (h : root.walkFrom = .closed V) : root.Valid := by
+  rw [walkFrom_eq] at h
+  obtain ⟨hk, hall⟩ := walk_closed _ _ _ _ _ _ _ V h (walkInv_initial _ _ _ _ _)
+  have hfree : ∀ n : Node root, ∀ j ∈ n.state.free, j ∈ vars root := fun n j hj =>
+    (mem_uniq j _).2 (free_of_mem_univ root n.state n.mem j hj)
+  suffices H : ∀ m (x : Nat → Nat), sumOn (vars root) x = m → ∀ s, V.Mem s → s.holds x from
+    fun x => H _ x rfl _ (hk _ (HSet.mem_insert.2 (.inl rfl)))
+  intro m
+  induction m using Nat.strongRecOn with
+  | _ m ih =>
+    intro x hm s hs
+    obtain ⟨n, rfl, hz, hc⟩ := hall s hs
+    by_cases h0 : m = 0
+    · subst h0
+      exact (holds_zero n.state x fun j hj => sumOn_eq_zero _ x hm j (hfree n j hj)).2 hz
+    · rw [holds_deriv]
+      have he : n.state.deriv (bitsAt x) =
+          n.state.deriv (assignBits (vars root) ((vars root).map (bitsAt x))) :=
+        deriv_congr _ _ _ fun j hj => (assignBits_map _ _ j (hfree n j hj)).symm
+      have hcm : (n.child (assignBits (vars root) ((vars root).map (bitsAt x)))) ∈ step root n :=
+        List.mem_map.2 ⟨_, mem_vecs (List.length_map _), rfl⟩
+      rw [he]
+      exact ih _ (hm ▸ sumOn_halve_lt _ x (by omega)) _ rfl _ (hc _ hcm)
+
+/-- **Proof or counterassignment by the walk**, `none` where its fuel runs
+out. -/
+def fastVerify (root : QFml) : Option (Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x }) :=
+  match h : root.walkFrom with
+  | .closed _ => some (.inl ⟨walkFrom_closed h⟩)
+  | .refuted n => some (.inr ⟨n.back (fun _ => 0), fun hv => by
+      rw [walkFrom_eq] at h
+      have hn := walk_refuted _ _ _ _ _ _ _ _ h
+      have ht := (holds_zero n.state (fun _ => 0) fun _ _ => rfl).1 ((n.correct _).2 hv)
+      exact Bool.noConfusion (hn.symm.trans ht)⟩)
+  | .out => none
+
+/-- **Decide** a quantified formula: simplify its atoms, then walk; where
+the walk's fuel runs out, search. -/
+def decide (root : QFml) : Bool :=
+  match root.simp.fastVerify with
+  | some (.inl _) => true
+  | some (.inr _) => false
+  | none => root.simp.search
 
 /-- **`decide` decides validity**: `true` exactly for the valid formulas. -/
-theorem decide_iff (root : QFml) : root.decide = true ↔ root.Valid :=
-  (search_iff root.simp).trans (forall_congr' fun x => holds_simp root x)
+theorem decide_iff (root : QFml) : root.decide = true ↔ root.Valid := by
+  have hs : root.simp.Valid ↔ root.Valid := forall_congr' fun x => holds_simp root x
+  unfold decide
+  split
+  · next v _ => exact ⟨fun _ => hs.1 v.down, fun _ => rfl⟩
+  · next cm _ => exact ⟨fun h => (nomatch h), fun hv => absurd (hs.2 hv cm.1) cm.2⟩
+  · exact (search_iff root.simp).trans hs
 
 /-- **Proof or counterassignment** from one traversal: a reachable state
 false at zero is false at `0`, so the formula is false at its
 reconstruction. -/
 def verifyCore (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x } :=
+  match root.fastVerify with
+  | some r => r
+  | none =>
   match h : (nodes root).find? (fun n => !n.state.atZero) with
   | some n => .inr ⟨n.back (fun _ => 0), fun hv => by
       have hn : n.state.atZero = false := by simpa only [Bool.not_eq_true'] using List.find?_some h
@@ -1251,8 +1566,7 @@ def verifyCore (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ ro
       | true => rfl
       | false => exact (hx (by rw [he]; rfl)).elim)⟩
 
-
-/-- **Proof or counterassignment**, from one traversal of the simplified
+/-- **Proof or counterassignment**, from the walk of the simplified
 formula's states. -/
 def verify (root : QFml) : Sum (PLift root.Valid) { x : Nat → Nat // ¬ root.holds x } :=
   match verifyCore root.simp with

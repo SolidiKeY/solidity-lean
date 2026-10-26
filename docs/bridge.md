@@ -161,17 +161,32 @@ upstream examples kept are the ones that close with it.
 Three libraries are default targets of Bridge: `Velvet` (the front end:
 `method`, `prove_correct`, `loom_solve`), `VelvetExamples` (four of
 upstream's examples) and `SolidityVelvet` (`Bridge/SolidityVelvet.lean`).
-The last states three Solidity programs of the core as Velvet methods,
-proved by `loom_solve` and run by `#eval`: the counting loop of
-`LoomExamples`, a scan for the largest balance and ERC20's `transfer` over
-a ledger. Its modules add a bank (`Bridge/SolidityVelvet/Bank.lean`), a
-token's `mint` and `transferFrom` (`Bridge/SolidityVelvet/Token.lean`) and
-loops over storage arrays with their invariants
-(`Bridge/SolidityVelvet/Loops.lean`). They are Lean programs and are not related to `Stmt.run`; the
-theorems about Solidity's own semantics are the Loom adapter's above.
-`SolidityVelvet` imports Velvet alone and nothing imports it, so Velvet's
-keywords (`method`, `require`, `ensures`, `invariant`) and its global
-`grind` attributes do not reach `SolidityBridge`.
+The last writes its examples as Solidity, not as Velvet's `do` notation:
+`contract C { … }` (`Bridge/SolidityVelvet/Contract.lean`) reads a whole
+contract, its storage and its functions with their `ensures` and loop
+`invariant`s, and states each function as the Velvet method `C.f`, which
+`prove_correct C.f by loom_solve` proves. A function takes the storage it
+mentions (as `mut` parameters when it writes them), then `msg.sender`, then
+its arguments; `uint` is `Nat`, a `mapping` a `Mapping` (unwritten keys read
+zero, `@[grind =]` on its read-over-write), and Solidity's reverts (a
+`require`, overflow and underflow, an index past the length, a division by
+zero) are Loom `assume`s, so an `ensures` speaks of the calls that do not
+revert. `Bridge/SolidityVelvet/TestSuite.lean` is solkey's `TestSuite.sol` read
+this way: 83 of its functions, under their names, in one contract, each
+stating with `assert` what holds after the feature it tests, all proved by
+`prove_contract TestSuite by loom_solve`; those that need structs, aliases,
+memory, calls, `break`/`continue` or effects inside expressions are left
+out. The other contracts are three Solidity programs of the core (the counting
+loop of `LoomExamples`, a scan for the largest balance, ERC20's `transfer`),
+a bank (`Bridge/SolidityVelvet/Bank.lean`), an ERC20 token's `mint`,
+`transfer`, `approve` and `transferFrom` (`Bridge/SolidityVelvet/Token.lean`)
+and loops over storage arrays with their invariants
+(`Bridge/SolidityVelvet/Loops.lean`). They are Lean programs and are not
+related to `Stmt.run`; the theorems about Solidity's own semantics are the
+Loom adapter's above. `SolidityVelvet` imports Velvet alone and nothing
+imports it, so Velvet's keywords (`method`, `require`, `ensures`,
+`invariant`), the contract grammar's (`contract`, `function`, `mapping`) and
+Velvet's global `grind` attributes do not reach `SolidityBridge`.
 
 To build only Velvet, from `Bridge/`:
 

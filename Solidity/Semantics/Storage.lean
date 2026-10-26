@@ -1,5 +1,6 @@
 import Solidity.Semantics.Storage.Values
 import Solidity.Semantics.Storage.Ops
+import Solidity.Semantics.Storage.Anon
 
 /-!
 # Typed storage
@@ -37,6 +38,7 @@ state their equations and are irreducible, so a proof rewrites them as it
 would a `match` (`Solidity/Eqns.lean`).
 
 The module is split by topic, each piece importing the one before
-(`Semantics/Storage/Values.lean`, `Semantics/Storage/Ops.lean`);
+(`Semantics/Storage/Values.lean`, `Semantics/Storage/Ops.lean`,
+`Semantics/Storage/Anon.lean`);
 this module imports them all.
 -/
