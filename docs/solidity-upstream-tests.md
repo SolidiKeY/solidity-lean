@@ -53,11 +53,20 @@ Two different checks have different meanings:
 
 Runtime results are observations, not universal correctness proofs. They do
 not exercise generated solc EVM/SSA code, the repository's EVM compiler, gas
-costs or the upstream C++ EVM host. Unsupported gas/log/revert-data checks,
-aggregate/dynamic/bytes ABI inputs, noncanonical calldata, external host
-behavior and source imports remain blocked rather than being dropped.
-Only empty-data function failures are currently replayed; the model's generic
-panic cannot certify an expected ABI panic code. Loop fuel is 1,000 per loop;
+costs or the upstream C++ EVM host. Unsupported gas/log/host observations
+remain blocked. The Group 10 adapter additionally replays canonical typed ABI
+aggregates/bytes and v2 primitive decoder checks from raw calldata words,
+retaining exact encoded returns. Actual declaration types must agree with the
+compiler ABI. Aggregate/function input bytes must round-trip canonically;
+malformed/lazy calldata reference layouts, nominal enum ranges, v1 raw input,
+physical assembly layouts and unimplemented wrapper types remain blocked.
+Failure payloads use supported native word/string/hex formatting and compare
+complete retained revert bytes, including constructors. Empty failure means
+empty bytes; a generic panic cannot certify a concrete ABI panic code and
+remains blocked. Ordinary-call lowering can abstract data away, so a payload
+mismatch is an adapter/model observation, not an upstream EVM bug.
+See [ABI M3](feature-work/abi-hashes.md#m3-upstream-group-10-exact-retained-revert-data-2026-10-26)
+for the staged evidence and exact limits. Loop fuel remains 1,000 per loop;
 exhaustion or a process timeout is blocked, never a matching expected failure.
 Unsupported compiler configurations and EVM-version constraints are likewise
 explicit. Other upstream families (SMT checker, Yul optimizer, AST/NatSpec

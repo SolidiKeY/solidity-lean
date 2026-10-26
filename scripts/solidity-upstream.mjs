@@ -2,7 +2,7 @@
 /** Pinned upstream corpus, exact compiler diagnostics and typed runtime replay.
  * See docs/solidity-upstream-tests.md. No npm or Lake dependency is added.
  */
-import {readFileSync, writeFileSync, mkdirSync, mkdtempSync, readdirSync, existsSync, statSync} from 'node:fs';
+import {readFileSync, writeFileSync, mkdirSync, mkdtempSync, readdirSync, existsSync, statSync, renameSync, rmSync} from 'node:fs';
 import {resolve, dirname, join, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -33,12 +33,28 @@ export function verifySnapshot(destination = join(ROOT, '.lake/upstream/solidity
       throw new Error('unsafe or duplicate snapshot path: '+f.path);
     names.add(f.path);
   }
-  mkdirSync(destination, {recursive:true});
-  execFileSync('tar', ['--no-same-owner', '--no-same-permissions', '-xzf', archive, '-C', destination]);
-  for (const f of manifest.files) {
-    const bytes = readFileSync(join(destination, f.path));
-    if (bytes.length !== f.bytes || sha(bytes) !== f.sha256) throw new Error('snapshot file drift: '+f.path);
+  const check = directory => {
+    for (const f of manifest.files) {
+      const bytes = readFileSync(join(directory, f.path));
+      if (bytes.length !== f.bytes || sha(bytes) !== f.sha256) throw new Error('snapshot file drift: '+f.path);
+    }
+  };
+  // Never rewrite a populated snapshot while another runner may be reading it.
+  // Every invocation still hashes every pinned file, including a reused tree.
+  if (!existsSync(destination) || readdirSync(destination).length === 0) {
+    mkdirSync(dirname(destination), {recursive:true});
+    const staging=mkdtempSync(join(dirname(destination), '.snapshot-'));
+    try {
+      execFileSync('tar', ['--no-same-owner', '--no-same-permissions', '-xzf', archive, '-C', staging]);
+      check(staging);
+      try {renameSync(staging,destination);}
+      catch(e) {
+        if (!['EEXIST','ENOTEMPTY'].includes(e.code)) throw e;
+        // Another verified publisher won. Validate its complete bytes below.
+      }
+    } finally {rmSync(staging,{recursive:true,force:true});}
   }
+  check(destination);
   return {manifest, directory:destination};
 }
 
@@ -115,7 +131,7 @@ export function diagnosticLines(errors, offsets) {
 
 const scalarType = type => /^(u?int(?:\d+)?|bool|address(?: payable)?)$/.test(type);
 function integer(text) {
-  if (!/^-?(?:0x[0-9a-fA-F]+|\d+)$/.test(text)) throw new Error('unsupported ABI word: '+text);
+  if (!/^-?(?:0|[1-9]\d*)$|^0x[0-9a-fA-F]+$/.test(text)) throw new Error('unsupported ABI word: '+text);
   return text.startsWith('-0x') ? -BigInt(text.slice(1)) : BigInt(text);
 }
 function scalarArg(token, type) {
@@ -133,11 +149,89 @@ function scalarArg(token, type) {
   return n.toString();
 }
 
+/** Native TestFileParser parameters: numeric/Boolean words, aligned words,
+ * literal hex bytes and strings padded on the right to one word. */
+function stripFixtureComments(line) {
+  let quoted=false,escaped=false,result='';
+  for(let i=0;i<line.length;i++) {
+    const c=line[i];
+    if(!quoted && c==='#') {
+      const end=line.indexOf('#',i+1);
+      if(end<0) throw new Error('unterminated fixture comment');
+      const tail=line.slice(end+1).trimStart();
+      if(tail && !tail.startsWith('->')) throw new Error('fixture comment outside argument/expectation boundary');
+      result+=' ';i=end;continue;
+    }
+    result+=c;
+    if(escaped) escaped=false;
+    else if(quoted && c==='\\') escaped=true;
+    else if(c==='"') quoted=!quoted;
+  }
+  return result;
+}
+function parameterTokens(text) {
+  let quoted=false,escaped=false,start=0;const tokens=[];
+  for(let i=0;i<text.length;i++) {
+    const c=text[i];
+    if(escaped) escaped=false;
+    else if(quoted && c==='\\') escaped=true;
+    else if(c==='"') quoted=!quoted;
+    else if(!quoted && c===',') {tokens.push(text.slice(start,i).trim());start=i+1;}
+  }
+  if(quoted) throw new Error('unterminated ABI parameter string');
+  tokens.push(text.slice(start).trim());return tokens;
+}
+export function revertBytes(text) {
+  if (!text.trim()) throw new Error('missing revert-data expectation');
+  return parameterTokens(text).flatMap(token => {
+    const hex=/^hex"([0-9a-fA-F]*)"$/.exec(token);
+    if(hex) {
+      if(hex[1].length%2) throw new Error('odd-length revert hex string');
+      return [...Buffer.from(hex[1],'hex')];
+    }
+    if(token.startsWith('"') && token.endsWith('"')) {
+      const body=token.slice(1,-1),bytes=[];
+      for(let i=0;i<body.length;) {
+        if(body[i]==='"') throw new Error('invalid ABI string quote');
+        if(body[i]!=='\\') {
+          const ch=String.fromCodePoint(body.codePointAt(i));bytes.push(...Buffer.from(ch));i+=ch.length;continue;
+        }
+        const c=body[++i];i++;
+        if(c==='x') {
+          const match=/^[0-9a-fA-F]{1,2}/.exec(body.slice(i));
+          if(!match || (match[0].length===1 && i+1!==body.length)) throw new Error('unsupported ABI string hex escape');
+          bytes.push(parseInt(match[0],16));i+=match[0].length;
+        } else if(Object.hasOwn({'\\':92,n:10,r:13,t:9,'0':0},c)) bytes.push({'\\':92,n:10,r:13,t:9,'0':0}[c]);
+        else throw new Error('unsupported ABI string escape');
+      }
+      if(bytes.length>32) throw new Error('ABI string parameter exceeds one word');
+      return [...bytes,...Array(32-bytes.length).fill(0)];
+    }
+    let align='right';const aligned=/^(left|right)\(([^()]*)\)$/.exec(token);
+    if(aligned) {align=aligned[1];token=aligned[2].trim();}
+    let bytes;
+    if(token==='true'||token==='false') bytes=[token==='true'?1:0];
+    else if(/^0x[0-9a-fA-F]+$/.test(token)) {
+      let hex=token.slice(2);if(hex.length%2)hex='0'+hex;
+      bytes=[...Buffer.from(hex,'hex')];
+    } else {
+      if(!/^-?(?:0|[1-9]\d*)$/.test(token)) throw new Error('revert-data token not adapted: '+token);
+      const value=integer(token);
+      if(value<-(2n**255n)||value>=2n**256n) throw new Error('revert-data word outside ABI range');
+      let hex=BigInt.asUintN(256,value).toString(16);if(hex.length%2)hex='0'+hex;
+      bytes=[...Buffer.from(hex,'hex')];
+    }
+    if(bytes.length>32) throw new Error('revert-data word outside ABI range');
+    const padding=Array(32-bytes.length).fill(0);
+    return align==='left'?[...bytes,...padding]:[...padding,...bytes];
+  });
+}
+
 /** Refuse every unimplemented observation; never silently drop a gas/log/vector line. */
-export function semanticVectors(fixture, abi) {
+function scalarSemanticVectors(fixture, abi) {
   const vectors = [];
   for (let line of fixture.expectations) {
-    line = line.replace(/#[^#]*#/g, '').trim();
+    line = stripFixtureComments(line).trim();
     if (!line) continue;
     const match = /^(constructor\([^)]*\)|[A-Za-z_$][\w$]*\([^)]*\))\s*(?::\s*(.*?))?\s*->\s*(.*?)$/.exec(line);
     if (!match) throw new Error('unsupported runtime expectation: '+line);
@@ -152,9 +246,10 @@ export function semanticVectors(fixture, abi) {
     if (tokens.length !== declaration.inputs.length) throw new Error('noncanonical ABI argument count');
     const args = tokens.map((token,i)=>scalarArg(token, declaration.inputs[i].type));
     const expected = match[3].trim();
-    const failure = expected === 'FAILURE';
-    if (expected.startsWith('FAILURE,') || expected.startsWith('FAILURE '))
-      throw new Error('revert-data expectation not adapted (panic codes cannot be inferred from generic panic)');
+    const failureData = /^FAILURE,\s*(.*)$/.exec(expected);
+    const failure = expected === 'FAILURE' || !!failureData;
+    if (expected.startsWith('FAILURE ') && !failure)
+      throw new Error('revert-data expectation not adapted');
     const values = failure || !expected ? [] : expected.split(',').map(token => {
       token=token.trim();
       const value = token === 'true' ? 1n : token === 'false' ? 0n : integer(token);
@@ -162,10 +257,58 @@ export function semanticVectors(fixture, abi) {
     });
     if (!failure && values.length !== (declaration.outputs ?? []).length)
       throw new Error('noncanonical ABI return count');
-    vectors.push({signature:ctor ? 'constructor' : match[1], args, failure, expected:values});
+    vectors.push({signature:ctor ? 'constructor' : match[1], args, failure, expected:values,
+      ...(failureData ? {revertBytes:revertBytes(failureData[1])} : {})});
   }
   if (!vectors.length) throw new Error('no runtime vectors');
   return vectors;
+}
+
+/** ABI names retain tuple structure; internal enum identities need a separate
+ * cardinality adapter even when solc exposes their underlying uint8 ABI. */
+export function abiType(p) {
+  return p.type.startsWith('tuple') ? '('+(p.components ?? []).map(abiType).join(',')+')'+p.type.slice(5) : p.type;
+}
+function checkAbiMetadata(p) {
+  if (/^enum\s/.test(p.internalType ?? '')) throw new Error('nominal enum ABI range not adapted');
+  for (const c of p.components ?? []) checkAbiMetadata(c);
+}
+export function semanticVectors(fixture, abi) {
+  // Validate nominal metadata before either path can erase it.
+  for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p);
+  try { return scalarSemanticVectors(fixture,abi); } catch (scalarError) {
+    const sources=[...(fixture.sources?.values() ?? [])].join('\n');
+    if (fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
+        /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' ')))
+      throw scalarError;
+    const vectors=[];
+    for (let line of fixture.expectations) {
+      line=stripFixtureComments(line).trim(); if (!line) continue;
+      const start=/^([A-Za-z_$][\w$]*)\(/.exec(line);
+      if (!start) throw scalarError;
+      let depth=0,end=-1;
+      for (let i=start[1].length;i<line.length;i++) {
+        if(line[i]==='(') depth++;
+        if(line[i]===')' && --depth===0) {end=i+1;break;}
+      }
+      if(end<0) throw scalarError;
+      const signature=line.slice(0,end),ctor=start[1]==='constructor';
+      const rest=/^\s*(?::\s*(.*?))?\s*->\s*(.*?)$/.exec(line.slice(end));
+      if(!rest) throw scalarError;
+      if(ctor && vectors.length) throw new Error('redeployment vector needs a fresh EVM deployment');
+      const d=abi.find(d=>ctor ? d.type==='constructor' : d.type==='function' &&
+        `${d.name}(${(d.inputs ?? []).map(abiType).join(',')})`===signature);
+      if(!d) throw scalarError;
+      const expected=rest[2].trim(),failure=expected==='FAILURE'||expected.startsWith('FAILURE,');
+      const payload=failure ? (expected==='FAILURE' ? '' : expected.slice(8).trim()) : expected;
+      vectors.push({signature:ctor?'constructor':signature,
+        calldata:rest[1]?.trim()?revertBytes(rest[1]):[],
+        inputTypes:(d.inputs ?? []).map(abiType),outputTypes:(d.outputs ?? []).map(abiType),
+        failure,expectedBytes:payload?revertBytes(payload):[]});
+    }
+    if(!vectors.length) throw scalarError;
+    return vectors;
+  }
 }
 
 function compiler(path) {
@@ -231,7 +374,8 @@ function prepare(entry, directory, compile, work) {
   const contract = candidates.at(-1);
   if (!contract) return {path,stage,status:'blocked',reason:'no concrete deployment contract'};
   let blocked, vectors;
-  try {vectors=semanticVectors(fixture,out.contracts[fixture.mainSource][contract.name].abi);}
+  try {vectors=semanticVectors({...fixture,abiCoderV1:ast.nodes.some(n=>n.nodeType==='PragmaDirective' &&
+    n.literals?.[0]==='abicoder' && n.literals?.[1]==='v1')},out.contracts[fixture.mainSource][contract.name].abi);}
   catch(e) {blocked=e.message;}
   // Context and cross-contract behavior require the upstream EVM host. Refuse
   // rather than choose arbitrary values for its transaction/block environment.
@@ -246,6 +390,10 @@ function prepare(entry, directory, compile, work) {
       node.expression?.typeDescriptions?.typeIdentifier ?? '')) return true;
     return Object.values(node).some(value=>Array.isArray(value) ? value.some(hostBehavior) : hostBehavior(value));
   };
+  const hasAssembly = node => node && typeof node === 'object' &&
+    (node.nodeType === 'InlineAssembly' || Object.values(node).some(v=>Array.isArray(v)?v.some(hasAssembly):hasAssembly(v)));
+  if (vectors?.some(v=>v.calldata) && hasAssembly(ast))
+    blocked='raw ABI replay with physical calldata/memory assembly not adapted';
   const context = hostBehavior(ast);
   if (context) blocked='transaction/block/self-address or cross-contract host behavior not adapted';
   // Import success alone cannot discharge a vector we cannot execute.

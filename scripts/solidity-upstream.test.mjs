@@ -1,10 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {parseFixture,withPreamble,evmCompatible,diagnosticLines,semanticVectors,partition,runtimePipelines,combineVariants} from './solidity-upstream.mjs';
+import {parseFixture,withPreamble,evmCompatible,diagnosticLines,semanticVectors,partition,runtimePipelines,combineVariants,revertBytes,verifySnapshot} from './solidity-upstream.mjs';
 import {mergeRetry,compatible,mergeDirectories} from './merge-solidity-upstream-retries.mjs';
 import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 
 const abi=[{type:'function',name:'f',inputs:[{type:'uint256'},{type:'bool'}],outputs:[{type:'uint256'}]}];
 const fixture=expectations=>({expectations});
@@ -70,15 +72,33 @@ test('signed words are decoded and encoded with canonical ABI extension',()=>{
     {signature:'g(int256)',args:['-1'],failure:false,expected:[max]});
 });
 
-test('malformed ABI data cannot become a normal typed function call',()=>{
-  assert.throws(()=>semanticVectors(fixture(['f(uint256,bool): 1, 2 -> 0']),abi),/Boolean/);
-  assert.throws(()=>semanticVectors(fixture(['f(uint256,bool): 1 -> 0']),abi),/argument count/);
+test('noncanonical and truncated inputs retain raw bytes for typed decoder replay',()=>{
+  assert.throws(()=>semanticVectors(fixture(['f(uint256,bool): 010, true -> 0']),abi),/token not adapted/);
+  assert.throws(()=>semanticVectors(fixture(['f(uint256,bool): 1, true -> 010']),abi),/token not adapted/);
+  for (const line of ['f(uint256,bool): 1, 2 -> 0','f(uint256,bool): 1 -> 0']) {
+    const [v]=semanticVectors(fixture([line]),abi);
+    assert.ok(v.calldata); assert.equal(v.args,undefined);
+    assert.deepEqual(v.inputTypes,['uint256','bool']);
+  }
   const narrow=[{type:'function',name:'g',inputs:[{type:'uint8'}],outputs:[]}];
-  assert.throws(()=>semanticVectors(fixture(['g(uint8): 256 ->']),narrow),/noncanonical/);
+  assert.equal(semanticVectors(fixture(['g(uint8): 256 ->']),narrow)[0].calldata.at(-2),1);
+  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),settings:{ABIEncoderV1Only:'true'}},narrow),/noncanonical/);
+  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),sources:new Map([['a.sol','pragma abicoder /* comment */ v1;']])},narrow),/noncanonical/);
+  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),abiCoderV1:true},narrow),/noncanonical/);
+});
+
+test('aggregate vectors retain offsets, lengths, bytes and exact tuple schemas',()=>{
+  const aggregate=[{type:'function',name:'f',inputs:[{type:'tuple[]',components:[{type:'uint8'},{type:'bytes'}]}],outputs:[{type:'bytes4'}]}];
+  const [v]=semanticVectors(fixture(['f((uint8,bytes)[]): 32, 0 -> hex"6162636400000000000000000000000000000000000000000000000000000000"']),aggregate);
+  assert.deepEqual(v.inputTypes,['(uint8,bytes)[]']);
+  assert.equal(v.calldata.length,64); assert.equal(v.calldata[31],32);
+  assert.deepEqual(v.expectedBytes,[97,98,99,100,...Array(28).fill(0)]);
+  const nominal=structuredClone(aggregate);nominal[0].inputs[0].components[0].internalType='enum C.E';
+  assert.throws(()=>semanticVectors(fixture(['f((uint8,bytes)[]): 32, 0 ->']),nominal),/nominal enum/);
 });
 
 test('unsupported gas, logs, revert data and extra observations prevent success',()=>{
-  for (const line of ['gas legacy: 100','~ emit E(uint256): 1','f(uint256,bool): 1, true -> FAILURE, hex"4e487b71", 0x11'])
+  for (const line of ['gas legacy: 100','~ emit E(uint256): 1'])
     assert.throws(()=>semanticVectors(fixture(['f(uint256,bool): 1, true -> 3',line]),abi),/unsupported|not adapted/);
   assert.throws(()=>semanticVectors(fixture([]),abi),/no runtime vectors/);
 });
@@ -127,4 +147,48 @@ test('multiple retries of one fixture preserve every contributing report',()=>{
     assert.ok(retained.includes(readFileSync(join(a,'results.json'),'utf8')));
     assert.ok(retained.includes(readFileSync(join(b,'results.json'),'utf8')));
   } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('exact failure data retains raw selector bytes and complete signed ABI words',()=>{
+  const payload=revertBytes('hex"4e487b71", 0x12');
+  assert.deepEqual(payload,[0x4e,0x48,0x7b,0x71,...Array(31).fill(0),0x12]);
+  assert.deepEqual(revertBytes('hex"0001", -1'),[0,1,...Array(32).fill(255)]);
+  assert.deepEqual(revertBytes('hex""'),[]);
+  const [vector]=semanticVectors(fixture(['f(uint256,bool): 1, true -> FAILURE, hex"4e487b71", 0x12']),abi);
+  assert.equal(vector.failure,true);
+  assert.deepEqual(vector.expected,[]);
+  assert.deepEqual(vector.revertBytes,payload);
+  for (const invalid of ['hex"a"','hex"zz"','', 'hex"00",', 'left(hex"00")', '"'+'a'.repeat(33)+'"', '010', '-010', '-0x1', (2n**256n).toString()])
+    assert.throws(()=>revertBytes(invalid));
+});
+
+
+test('concurrent snapshot publication retains complete bytes; reuse rejects drift',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'upstream-snapshot-')),destination=join(root,'tree');
+  const script=`import {verifySnapshot} from ${JSON.stringify(new URL('./solidity-upstream.mjs',import.meta.url).href)}; verifySnapshot(process.argv[1]);`;
+  try {
+    await Promise.all([0,1].map(()=>promisify(execFile)(process.execPath,['--input-type=module','-e',script,destination])));
+    const {manifest}=verifySnapshot(destination);
+    const file=join(destination,manifest.files[0].path);
+    writeFileSync(file,'drift');
+    assert.throws(()=>verifySnapshot(destination),/snapshot file drift/);
+    assert.equal(readFileSync(file,'utf8'),'drift');
+  } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('native parameter alignment, quoted commas/hash and byte escapes are exact',()=>{
+  assert.deepEqual(revertBytes('left(0x0001), right(0x0001), true, false'),
+    [0,1,...Array(30).fill(0),...Array(31).fill(0),1,...Array(31).fill(0),1,...Array(32).fill(0)]);
+  assert.deepEqual(revertBytes('"a,b#c"'),[97,44,98,35,99,...Array(27).fill(0)]);
+  assert.deepEqual(revertBytes(String.raw`"a\n\r\t\0\x41\\"`),[97,10,13,9,0,65,92,...Array(25).fill(0)]);
+  assert.deepEqual(revertBytes(String.raw`"\xf"`),[15,...Array(31).fill(0)]);
+  assert.throws(()=>revertBytes(String.raw`"\xfg"`),/escape/);
+  assert.throws(()=>revertBytes(String.raw`"\q"`),/escape/);
+  const noArgs=[{type:'function',name:'g',inputs:[],outputs:[]}];
+  const [v]=semanticVectors(fixture(['g() -> FAILURE, "a,b#c" # explanation #']),noArgs);
+  assert.deepEqual(v.revertBytes,revertBytes('"a,b#c"'));
+  assert.throws(()=>semanticVectors(fixture(['g() -> FAILURE, left(# comment #1)']),noArgs),/comment/);
+  assert.throws(()=>semanticVectors(fixture(['g() -> FAILURE, 1# comment #2']),noArgs),/comment/);
 });

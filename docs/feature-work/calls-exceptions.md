@@ -201,3 +201,14 @@ intrinsic uint shift directly; it neither re-enters narrow-width lowering nor
 asks `synth` to interpret a cast that only `hoist` handles. This restores the
 resolved self body instead of falling back after a swallowed elaboration error.
 The native selector and complete source raw-catch proofs stay unchanged.
+
+
+### Upstream Group 10: retained payload adapter (2026-10-26)
+
+The Group 10 adapter compares complete retained failure bytes, executes typed
+ABI wrappers once, and keeps earlier observations on inconclusive exits.
+Canonical aggregate probes run separately and cannot certify lazy decoder
+failures. It does not change exception
+semantics or infer a concrete panic code from `.panic`. Implementation,
+validation, review and remaining scope are recorded in
+[ABI M3](abi-hashes.md#m3-upstream-group-10-exact-retained-revert-data-2026-10-26).
