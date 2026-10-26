@@ -252,7 +252,9 @@ default. -/
 
 /-- The index set's values, those of the strict guards' ground operands
 (`k < t`: `t` bounds the keys strictly from above), and the key type's
-range `[lo, hi)`. -/
+range `[lo, hi)`.  Untyped on purpose: the lemmas below are about
+integers, shared by both key types, and a refutation states the range it
+uses (`lastK_val`'s `S.lo = ok.lo`, `S.hi = ok.hi`). -/
 structure ApfSet where
   vals : List Int
   strict : List Int
@@ -389,12 +391,13 @@ theorem lastIn_bound {x : Int} (hx : S.lo ≤ x) (hx' : x < S.hi) : lastIn S x <
 /-- A list with each value once, the last copy kept. -/
 def dedupInt : List Int → List Int
   | [] => []
-  | x :: l => if x ∈ dedupInt l then dedupInt l else x :: dedupInt l
+  | x :: l => let r := dedupInt l; if x ∈ r then r else x :: r
 
 theorem mem_dedupInt {x : Int} : ∀ {l : List Int}, x ∈ dedupInt l ↔ x ∈ l
   | [] => Iff.rfl
   | y :: l => by
     unfold dedupInt
+    dsimp only
     split
     · rename_i hy
       rw [mem_dedupInt, List.mem_cons]

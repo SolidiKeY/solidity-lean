@@ -346,7 +346,10 @@ theorem netRebuild_floor (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : Li
 /-! ## The fragment's terms -/
 
 /-- **What a pass rebuilds**: the roots its blocks read at their
-variables, and whether they read the ledger so (`uint` passes only). -/
+variables, and whether they read the ledger so (`uint` passes only:
+`apfRoots` sets `net` from `OrdK.netB`, and `NetRel`, `NetFloor` are
+`False` at `int`; a flag rather than an index of `OrdK`, so the terms'
+fragment `ApfTm` stays one type for both passes). -/
 structure ARoots where
   names : List Name
   net : Bool

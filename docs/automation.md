@@ -1247,7 +1247,7 @@ Three properties of the reading are worth knowing.
 pipelines' fragment (`decideLeafA`), is `Fml.inExact && Fml.exactBounded`
 (M4), extended by features 1, 2, 4, 5, 8, 14 and 15, each with its
 completeness proved through every stage (recognizer, lifting, flattening,
-compilers), or `Fml.quantCovered` (features 3, 6, 7 and 16 to 19, its own
+compilers), or `Fml.quantCovered` (features 3, 6, 7 and 16 to 20, its own
 pipeline),
 or `Fml.ledgerCovered` (feature 9, its own pipeline), or
 `Fml.arrayCovered` (feature 10, its own pipeline), or
@@ -1662,8 +1662,9 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     another type, `keep` past the mappings: a struct, an array, a word),
     and `FloorShape.rebuild` holds at each floored key what its floor held,
     the whole value under it copied.  A read at a root of the blocks is a
-    path of its own (`ApfTm.rroot`, `rkeyU` at a `uint` key, `rkey` at
-    another, `rfield` past the mappings, `rword` the word there), and
+    path of its own (`ApfTm.rroot`, `rkey` at a key, floored where its
+    type is the pass's since feature 20, `rfield` past the mappings,
+    `rword` the word there), and
     reads at its keys' floors (`FloorShape.rebuild_word`, `SRef.floorRef`,
     `FloorShape.floorPath_append`; `ApfTm.eval_trel` carries the shape the path
     reaches, `ApfTm.pre`).  So a bound key need not be the last
@@ -1735,7 +1736,14 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     prepared body to be in the ledger fragment with no conditional
     (`LFml.srcL? .pre false`) within M4's bounds.  A leaf whose every
     refutation lists `2^256 - 6` addresses (`ledgerFar`) is decided so,
-    its refuting ledger a term; `ledgerBlockBad`'s is built at once.
+    its refuting ledger a term; `ledgerBlockBad`'s is built at once.  The
+    pipeline also takes mapping blocks beside ground ledger reads.
+    Whether a refutation is small depends on the arithmetic's free words:
+    a region is left out only where the solver's word at its floor is the
+    default (`0` for the ledger, the largest key's word for a mapping), so
+    a leaf with a small refutation may be answered by a large one, which
+    evaluating the verdict would then try to build (`regionKeys` is a
+    list); the pinned refutations are small.
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
@@ -1747,13 +1755,12 @@ read no hash), and twelve too (the swap reads one kind), and thirteen
 (`ExactAt` has no case for `allocAll`, `LTm.Elimable` refuses the memory
 sorts); fourteen was refused by the cut, which wrote no `|`, `^`, `*%`,
 other masks or `int` quotients, and fifteen by the fixed 45 reads;
-twenty and twenty-one were outside `apfPrep`'s shapes too (an `int`
-block variable; a ledger read at one, and no pipeline taking both);
 sixteen to nineteen were outside `apfPrep`'s shapes (a `bool` block, a
 bound key not the last, at two depths or before a member, a halting guard
 operand) or reached no stage (`quantReduction?` abstracts a positive `∀`
 reading storage at its variable to a quantified subformula outside
-`LFml.qfrag`).
+`LFml.qfrag`); twenty and twenty-one were outside them too (an `int`
+block variable; a ledger read at one, and no pipeline taking both).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and

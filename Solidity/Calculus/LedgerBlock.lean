@@ -7,7 +7,7 @@ import Solidity.Calculus.QuantReduction
 `ledgerReduction?` (`Calculus/LedgerReduction.lean`) takes a leaf whose
 body reads the starting ledger and holds no quantifier; the quantified
 pipeline (`quantReduction?`) reads no ledger.  A negative block over the
-ledger (`(∀ uint a; a > 5 → net(a) == 1) → net(3) == 1`) reached neither.
+ledger (`(∀ uint a; a > 5 → net(a) = 1) → net(3) = 1`) reached neither.
 This pipeline is the ledger's with a preparation stage between the prefix
 and the cut: the body's blocks instantiated at the index set (`apfPrep`,
 `Calculus/ArrayProperty.lean`, the ledger floored as a mapping is), the
@@ -100,7 +100,7 @@ end LedgerBlockReduction
 prefix (shorter than 1024) of the lifted leaf binding the body's free
 parameters, the lift within `liftBudget`; the prepared body
 (`apfPrep`) in the ledger fragment with no conditional
-(`LFml.srcL? .pre false`), fewer than `2^256` ledger reads, its ledger cut
+(`LFml.srcL? .pre false`), at most `2^256` ledger reads, its ledger cut
 then cut within the size bound. -/
 def LFml.ledgerBlockCovered (ψ : LFml C) : Bool :=
   let body := (ψ.liftCond condLiftFuel).stripAll

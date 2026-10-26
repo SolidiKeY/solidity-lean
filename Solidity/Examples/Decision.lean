@@ -217,9 +217,10 @@ def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → 
 def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
 def rowOut : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][12] == 0 }
 def rowVar : Fml Allow [] := dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[x][k] == 0) → allow[x][5] == 0 }
-/-- A key the solver places past `2^200`: refuted by a rebuilt mapping of a
-dozen entries, the keys between the guard's bound and the key read at the
-key (`lastIn`, `lastBound`), not `2^200` entries. -/
+/-- A key the solver places past `2^200`: refuted by a rebuilt mapping
+listed region by region, the keys past the guard's bound up to the far
+key reading the far key's word, the default (`lastIn`, `regionList`), not
+`2^200` entries. -/
 def rowFar : Fml Allow [] :=
   dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[3][k] == 0) →
     x > 1606938044258990275541962092341162602522202993782792835301376 → allow[3][x] == 0 }
@@ -726,7 +727,8 @@ instance the decision refutes is refuted by its arithmetic (computed for
 `intTwoSides` below, the instance's state small), and the leaf's refuting
 state is that state's mappings or ledger
 rebuilt at the floors (`ApfFml.apfInst_refute`): a term whose reads are
-proved region by region, two regions of `2^255` keys for `intTwoSides`,
+proved region by region, the negative region of `2^255` keys for
+`intTwoSides` (the positive one holds the default, the largest key's `2`),
 one of `2^256 - 6` addresses for `ledgerFar`, which no evaluation builds. -/
 
 theorem intTwoSides_inTarget : intTwoSides.inTarget {} = true := by decide +kernel
