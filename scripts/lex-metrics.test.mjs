@@ -22,7 +22,7 @@ test('tuple annotations preserve safety proofs and prove the supported ordinary 
 
 const diamondSource = 'tests/solc/LexDiamond.sol';
 const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset'];
-const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','overflowMetric','reverting'];
+const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','undefinedAfter','returnUnchanged','overflowMetric','reverting'];
 const conservativeDiamonds = ['breakDiamond','quantifiedDiamond','noFrameDiamond','callbackDiamond'];
 let diamondReport;
 function diamondRows() {

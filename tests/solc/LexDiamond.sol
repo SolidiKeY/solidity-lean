@@ -64,6 +64,27 @@ contract LexDiamond {
         while (n > 0) { n--; }
     }
 
+    // At the concrete entry x=1 and divisor=1, so both components (1,1/1)
+    // are defined. The successful body decreases x but makes the NEW later
+    // component undefined. A conservative all-head check may also reject it.
+    function undefinedAfter() public pure {
+        uint x = 1;
+        uint divisor = 1;
+        /// @custom:key invariant x <= 1 && divisor <= 1
+        /// @custom:key decreases (x, 1 / divisor)
+        while (x > 0) { x = 0; divisor = 0; }
+    }
+
+    // Runtime returns successfully, but this last successful turn leaves the
+    // tuple unchanged; it must not bypass the strict last-turn decrease check.
+    function returnUnchanged() public pure returns (uint) {
+        uint x = 1;
+        /// @custom:key invariant x <= 1
+        /// @custom:key decreases (x, 0)
+        while (x > 0) { return x; }
+        return 0;
+    }
+
     // A false guard does not excuse an overflowing initial metric at n=max.
     function overflowMetric() public view {
         /// @custom:key invariant true
