@@ -178,8 +178,11 @@ declare_syntax_cat dl_premise (behavior := both)
 /-- A symbolic-arity lexicographic invariant VC. It denotes the exact typed
 `LoopLex.diamondPremise`: capture every old metric and the guard, then require
 invariant preservation and capture every new metric for strict lexicographic
-comparison. The frame is the schema's `xs`/`hv` from the body's frame witness. -/
-syntax &"lexInvariant" "(" sol_expr ", " "‹" term "›" ", " sol_expr ", " sol_block ")" : dl_premise
+comparison. The frame is the schema's `xs`/`hv` from the body's frame witness.
+Optional labels name the initial invariant and preservation/use branches,
+respectively; like the expanded invariant notation, they do not change the VC. -/
+syntax &"lexInvariant" "(" (str ": ")? sol_expr ", " "‹" term "›" ", " sol_expr ", "
+  (str ": ")? sol_block ")" : dl_premise
 syntax dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
 syntax dl_upd ppSpace dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
 /-- SolKey's outer conditional for division/remainder push suffixes. -/

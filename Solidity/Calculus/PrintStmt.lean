@@ -1135,7 +1135,8 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       let c ← ppExprS ns a[5]!
       let metrics ← escapeTerm a[7]!
       let body ← ppBlockS ns a[8]!
-      return some (← `(dl_premise| lexInvariant($I:sol_expr, ‹$metrics:term›, $c:sol_expr, $body:sol_block)))
+      return some (← `(dl_premise| lexInvariant($[$l0:str :]? $I:sol_expr,
+        ‹$metrics:term›, $c:sol_expr, $[$l1:str :]? $body:sol_block)))
   if e.isAppOf ``ReceiverValue.step then
     let a := e.getAppArgs
     if ← [a[6]!, a[7]!, a[8]!, a[9]!].allM fun x =>

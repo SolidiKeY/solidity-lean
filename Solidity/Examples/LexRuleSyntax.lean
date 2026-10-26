@@ -21,6 +21,20 @@ example {C : Contract} {Γ Γb : Ctx} {k n : Nat} {inv cond : Val C Γ .bool}
     ⟩ ⇝ lexInvariant(inv, ‹metrics›, cond, body) } :=
   LeanTaclet.whileInvariantLexDiamond hf hb hq
 
+open scoped Schema in
+/-- The labelled rule retains the exact statement, tuple and frame parameters. -/
+example {C : Contract} {Γ Γb : Ctx} {k n : Nat} {inv cond : Val C Γ .bool}
+    {metrics : LoopMetrics C Γ (n + 2)} {brk : Bool} {qs : List (LoopQ C Γ)}
+    {body : Prog C Γ Γb} {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} :
+    (dl[LeanTaclet C k]{ ⟨
+      /// @custom:key invariant inv
+      /// @custom:key decreases ‹metrics›
+      while (cond) body;
+    ⟩ ⇝ lexInvariant("invariant initially valid": inv, ‹metrics›, cond,
+      "invariant preserved and used": body) }) =
+      LeanTaclet C k .diamond (.loop (.invLex inv metrics brk qs) cond body)
+        (LoopLex.diamondPremise k inv cond metrics body xs hv) := rfl
+
 /-- The erasure constructor is unavailable on exactly the new supported arm. -/
 example {C : Contract} {Γ Γb : Ctx} {brk : Bool} {qs : List (LoopQ C Γ)}
     {body : Prog C Γ Γb} {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
@@ -43,6 +57,9 @@ run_meta do
       throwError "lex rule escaped a scoped implementation helper: {text}"
     unless 1 < (text.splitOn "lexInvariant").length do
       throwError "lex rule lost its packed VC operator: {text}"
+    for label in ["invariant initially valid", "invariant preserved and used"] do
+      unless 1 < (text.splitOn s!"\"{label}\"").length do
+        throwError "lex rule lost branch label {label}: {text}"
     let .ok shownSyntax := Lean.Parser.runParserCategory (← Lean.getEnv) `term text
       | throwError "lex rule does not parse: {text}"
     let parsed ← Lean.Elab.Term.TermElabM.run' do

@@ -1141,8 +1141,11 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
       {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
       (hf : body.frame = some (xs, hv) := by side_cond)
       (hb : brk = false := by side_cond) (hq : qs = [] := by side_cond) :
-      LeanTaclet C k .diamond (.loop (.invLex inv metrics brk qs) cond body)
-        (LoopLex.diamondPremise k inv cond metrics body xs hv)
+      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
+          /// @custom:key decreases ‹metrics›
+          while (cond) body; ⟩ ⇝
+        lexInvariant("invariant initially valid": inv, ‹metrics›, cond,
+          "invariant preserved and used": body) }
 
   /-- A loop with an invariant whose body has no frame closes to `false`,
   under either modality: sound, and nothing about it is derived.  solkey

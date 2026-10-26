@@ -158,6 +158,31 @@ where
     unless written == ls do
       throw (IO.userError s!"{r} writes the labels {written}, Taclet.branchLabels {ls}")
 
+/-- `n = 1; while (n > 0) n--;`, with its declared pair of metrics. -/
+private def lexLabelFormula : Fml StandardExample [] := dl!{
+  ⟨ uint n = 1;
+    /// @custom:key invariant true
+    /// @custom:key decreases (n, 0)
+    while (n > 0) { n = n - 1; };
+  ⟩ true }
+
+/-- info: lexicographic invariant proof-tree branches retain their source labels -/
+#guard_msgs in
+run_meta do
+  let tree ← Lean.Elab.Term.TermElabM.run' do
+    let φ ← Lean.Meta.whnf (Lean.mkConst ``lexLabelFormula)
+    let ty ← Lean.Meta.inferType φ
+    -- Branch labels are visible before the leaves close; bound the tree walk.
+    Solidity.ProofTree.ofFormula ty.getAppArgs[0]! φ { maxNodes := 24 }
+  let rows := tree.rows
+  let some lex := rows.find? (·.name == "whileInvariantLexDiamond")
+    | throwError "lexicographic source loop did not select its invariant rule"
+  let labels := (rows.filter (·.parent == some lex.serial)).map (·.branchLabel)
+  unless labels == #[some "invariant initially valid",
+      some "invariant preserved and used", some "invariant preserved and used"] do
+    throwError "lexicographic invariant proof-tree labels changed: {repr labels}"
+  Lean.logInfo "lexicographic invariant proof-tree branches retain their source labels"
+
 /--
 info: 0: allRight
 1: allRight
