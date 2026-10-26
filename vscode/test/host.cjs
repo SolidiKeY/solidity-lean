@@ -200,6 +200,66 @@ assert(n == 0);
       assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.defaultDiamond()').description, 'proved');
       assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.badEqualTuple()').description, 'pending');
       checks.push('real default-diamond tuple VC proof', 'real equal tuple pending diagnostic', 'real tuple diamond proof and pending hovers', 'real tuple diamond Test Explorer statuses');
+      const filteredSource = join(root, 'FilteredHost.sol');
+      writeFileSync(filteredSource, `pragma solidity ^0.8.34;
+contract FilteredHost {
+  /// @custom:key ensures \\result \\in uint(v; 1, 2; v > 1)
+  function provesChoice() public pure returns(uint) { return 2; }
+  /// @custom:key ensures \\result \\in uint(v; 1, 2; v > 1)
+  function pendingChoice() public pure returns(uint) { return 1; }
+  /// @custom:key ensures \\exists uint result; result == 1 && \\result == 1
+  function captureResult() public pure returns(uint) { return 2; }
+}
+`);
+      await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
+      await config.update('auditPreconditions', false, vscode.ConfigurationTarget.Global);
+      const filteredDocument = await vscode.workspace.openTextDocument(filteredSource);
+      await vscode.window.showTextDocument(filteredDocument);
+      const filtered = await api.verify(filteredDocument);
+      assert.ok(filtered, 'a backend exit of 1 must retain the mixed source report');
+      assert.equal(filtered.results.length, 3, 'a malformed sibling must not erase completed obligations');
+      const filteredRows = new Map(filtered.results.map(row => [row.function, row]));
+      assert.deepEqual([...filteredRows.keys()].sort(), ['captureResult', 'pendingChoice', 'provesChoice']);
+      assert.ok(filtered.errors.some(error => error.stage === 'lean' && error.tool?.exitCode === 1),
+        'the compiler failure must propagate alongside retained sibling rows');
+      const filteredDiagnostics = vscode.languages.getDiagnostics(filteredDocument.uri).filter(d => d.source === 'Solidity Lean');
+      const filteredItems = [...api.controller.items.get(filteredDocument.uri.toString()).children].map(([, item]) => item);
+      assert.equal(filteredItems.length, 3);
+      for (const [name, status, line] of [['provesChoice', 'proved', 3], ['pendingChoice', 'pending', 5], ['captureResult', 'error', 7]]) {
+        const row = filteredRows.get(name);
+        assert.equal(row.status, status, `${name}: ${row.reason}`);
+        assert.equal(row.counterexample, undefined, 'no model evidence was requested');
+        assert.ok(Number.isSafeInteger(row.sourceId) && row.sourceId >= 0 && row.sourceHash);
+        const declarationRange = new vscode.Range(line, 2, line, filteredDocument.lineAt(line).text.length);
+        assert.deepEqual(row.range, {
+          start: {line, character: 2},
+          end: {line, character: filteredDocument.lineAt(line).text.length},
+        }, `${name}: preserve the actual compiler declaration range`);
+        const item = filteredItems.find(item => item.label === `FilteredHost.${name}()`);
+        assert.ok(item, `${name}: Test Explorer retains the sibling item`);
+        assert.equal(item.description, status);
+        assert.ok(item.range.isEqual(declarationRange));
+        const rowHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', filteredDocument.uri, new vscode.Position(line, 20));
+        assert.ok(rowHovers.some(hover => hover.range?.isEqual(declarationRange) && hover.contents.some(content => {
+          const text = content.value || String(content);
+          return text.includes(name) && text.includes(status);
+        })), `${name}: actual hover provider retains its own status and source range`);
+        assert.ok(rowHovers.every(hover => hover.contents.every(content =>
+          !/certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))));
+        const rowDiagnostic = filteredDiagnostics.find(d => d.code === status && d.range.isEqual(declarationRange));
+        if (status === 'proved')
+          assert.ok(!filteredDiagnostics.some(d => d.range.isEqual(declarationRange)), 'a proved sibling has no obligation diagnostic');
+        else {
+          assert.ok(rowDiagnostic, `${name}: diagnostic keeps its compiler range`);
+          assert.equal(rowDiagnostic.severity, status === 'pending' ? vscode.DiagnosticSeverity.Warning : vscode.DiagnosticSeverity.Error);
+        }
+      }
+      const captureDiagnostic = filteredDiagnostics.find(d => d.code === 'error' && d.range.start.line === 7);
+      assert.match(captureDiagnostic.message, /reserved specification binder name result/);
+      assert.ok(filteredDiagnostics.some(d => d.code === 'lean' && d.severity === vscode.DiagnosticSeverity.Error),
+        'the backend compiler error remains visible as well as the per-function diagnostic');
+      checks.push('real filtered membership proof and pending sibling', 'real reserved quantifier capture rejection',
+        'real mixed-failure retained source ranges', 'real filtered diagnostics and hovers', 'real filtered Test Explorer statuses');
     }
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {
