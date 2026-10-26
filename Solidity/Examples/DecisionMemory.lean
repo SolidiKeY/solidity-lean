@@ -125,7 +125,7 @@ theorem memAck_iff : decideLeaf memAck = .proved ↔ Fml.Valid memAck :=
 #guard_msgs in #print axioms memAck_iff
 
 
-/-! ### An index bound after its array (feature 21)
+/-! ### An index bound after its array (feature 23)
 
 `∀ fresh s. len(s) > 0 → ∀ i. i < len(s) → s[i] == 0` binds `i` after `s`.
 Universal value binders move out of consequents, conjuncts and fresh
@@ -139,7 +139,7 @@ def memInnerAck : Fml Gaps [] := .allocAll (.user "s") UA
     (.all (.user "i") .uint (.imp (isT (eqB (.pvV .here) (litU 0)))
       (.eq (mrdG .dyn (.there .here) (.pvV .here)) (litU 5)))))
 
-/-! ### Writes in a leaf's update (feature 22)
+/-! ### Writes in a leaf's update (feature 24)
 
 `{memory := write(memory, s[e], v)}` over fresh arrays: each read of the
 written local at an index `e₁` the table holds reads `e₁ == e ? v : w`
@@ -175,7 +175,7 @@ over an array's contents (its index bound after the array), a hidden memory
 binder (it ranges over the objects already there, and over none), a fresh
 struct's member (the cut takes arrays of primitives). -/
 
-/-- `∀ fresh s. len(s) > 0 → [s[0] := 5] s[0] == 5`: proved (feature 22). -/
+/-- `∀ fresh s. len(s) > 0 → [s[0] := 5] s[0] == 5`: proved (feature 24). -/
 def gapMemWrite : Fml Gaps [] := .allocAll (.user "s") UA
   (.imp (isT (gtB (mlenG .here) (litU 0)))
     (.upd .box (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 5))))
@@ -208,7 +208,7 @@ theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +ke
 #guard_msgs in
 #eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 
-/-! The index bound after its array, decided (feature 21). -/
+/-! The index bound after its array, decided (feature 23). -/
 
 /-- info: ["refuted", "proved"] -/
 #guard_msgs in #eval [verdict gapMemInner, verdict memInnerAck]
@@ -218,7 +218,7 @@ theorem memInnerAck_covered : memInnerAck.Covered = true := by decide +kernel
 theorem memInnerAck_inTarget : memInnerAck.inTarget {} = true := by decide +kernel
 theorem gapMemInner_answers : decideLeaf gapMemInner ≠ .unknown := decideLeaf_complete gapMemInner_covered
 
-/-! The writes in a leaf's update, decided (feature 22). -/
+/-! The writes in a leaf's update, decided (feature 24). -/
 
 /-- info: ["proved", "refuted", "proved", "refuted"] -/
 #guard_msgs in

@@ -454,6 +454,7 @@ import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantArithmetic
 import Solidity.Calculus.QuantHoist
 import Solidity.Calculus.QuantExpand
+import Solidity.Calculus.FloorRegion
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.QuantReduction
 import Solidity.Calculus.QuantTotality
@@ -461,6 +462,7 @@ import Solidity.Calculus.LedgerCut
 import Solidity.Calculus.LedgerArithmetic
 import Solidity.Calculus.LedgerTotality
 import Solidity.Calculus.LedgerReduction
+import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashPremise
 import Solidity.Calculus.HashSwap
 import Solidity.Calculus.HashReduction
