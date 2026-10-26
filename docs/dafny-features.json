@@ -450,16 +450,22 @@
         "Solidity/Calculus/Fml.lean",
         "Solidity/Calculus/FiniteMembership.lean",
         "Solidity/Examples/Tactics/FiniteSets.lean",
-        "tests/solc/FiniteSets.sol"
+        "tests/solc/FiniteSets.sol",
+        "Solidity/Calculus/FilteredMembership.lean",
+        "Solidity/Examples/Tactics/FilteredSets.lean",
+        "tests/solc/FilteredSets.sol",
+        "scripts/filtered-spec-sets.test.mjs",
+        "docs/feature-work/filtered-membership.md",
+        "docs/dafny-specification-research.json"
       ],
-      "assessment": "Explicitly typed finite equality-membership is admitted in source specifications with every operand checked at one primitive sort, including empty keys. It follows existing KeY equality, including halting terms. First-class collections, cardinality, sequences, multisets and mathematical maps remain absent from the source interface.",
+      "assessment": "Explicitly typed finite equality-membership and literal-domain filtered membership are admitted in source specifications. Filter keys must denote values and guards use a typed inner scope; the existing equality-membership semantics for halting terms is unchanged. First-class collections, cardinality, sequences, multisets and mathematical maps remain absent from the source interface.",
       "next": "Add reusable collection models and operations with explicit definedness and typed denotation; preserve the distinction from finite equality-membership."
     },
     {
       "id": "comprehensions",
       "category": "logic",
       "relevance": "specification",
-      "status": "missing",
+      "status": "partial",
       "upstream": [
         {
           "path": "docs/DafnyRef/Expressions.md",
@@ -467,10 +473,16 @@
         }
       ],
       "localEvidence": [
-        "Solidity/SpecSyntax.lean"
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/FilteredMembership.lean",
+        "Solidity/Examples/Tactics/FilteredSets.lean",
+        "tests/solc/FilteredSets.sol",
+        "scripts/filtered-spec-sets.test.mjs",
+        "docs/feature-work/filtered-membership.md",
+        "docs/dafny-specification-research.json"
       ],
-      "assessment": "General set, map and sequence comprehensions are not in the specification expression grammar.",
-      "next": "Start with bounded typed comprehensions and checked denotation."
+      "assessment": "Source specifications support finite literal-domain identity filters with a genuine typed guard binder. The key stays in the outer scope and must denote a value; every operand is checked even for an empty domain. Domains are primitive literals, guard equality retains existing KeY semantics, constants are handled conservatively and the new form is explicitly unsupported in loop annotations. General images, multiple binders and first-class collection values remain open.",
+      "next": "Extend domain and image fragments with typed denotation and explicit definedness; implement first-class collections and reusable source predicates separately."
     },
     {
       "id": "numeric-types",

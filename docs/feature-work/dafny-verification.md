@@ -422,3 +422,27 @@ outer result positions. Existing finite membership and source return/renaming
 regressions also pass (three tests, 108 seconds). Read-only finder/skeptic review
 corrected one generated test syntax typo and found no remaining production
 blocker. The pending false claim is not reported as a certified refutation.
+
+## Finite filtered membership
+
+The [implementation notes](filtered-membership.md) describe the new literal-domain
+identity filter, its typed binder and exact scoped denotation. The outer key and
+inner guard remain distinct through source aliases, nesting and snapshots.
+Existing prefix equality-membership keeps its original semantics. The new form
+is limited to primitive literal domains; general collection values, images and
+source predicates remain separate work.
+
+All focused proof/compiler/API/example checks pass. The final three source tests
+pass in 41.65 seconds: 24 admitted rows retain 21 kernel-checked proofs and three
+intentional pending claims; 29 invalid rows retain 28 errors and one explicit
+loop-annotation gap. The exact-goal certified witness also passes. Bounded
+`allLeft` equality hints close signed and quantified cases without increasing
+candidate, application or heartbeat caps; parsed free-root queries preserve
+binder scope when checking omitted state declarations. Final finder/skeptic
+review corrected one temporary candidate-array cap and found no remaining blocker.
+
+One syntax-round-trip inspection evaluates a `SpecExpr` in a meta command. It is
+explicitly marked and inventoried; the actual correctness theorems retain kernel
+and transitive axiom checks. The headline audit now includes the six generic
+filtered-membership facts and five public correctness examples. Final combined
+source, editor and whole-tree validation is still required.

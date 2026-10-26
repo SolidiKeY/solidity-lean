@@ -1153,5 +1153,10 @@
     "file": "Solidity/Tools/SourceCounterexample.lean",
     "kind": "unsafe",
     "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6E) (\u2190 Symex.evaluable \u03c6E)"
+  },
+  {
+    "file": "Solidity/Examples/Tactics/FilteredSets.lean",
+    "kind": "unsafe",
+    "code": "let decoded \u2190 unsafe Lean.Meta.evalExpr SpecExpr (Lean.mkConst ``SpecExpr) expression"
   }
 ]

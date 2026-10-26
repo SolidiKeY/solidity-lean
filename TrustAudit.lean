@@ -8,6 +8,8 @@ import Solidity.Calculus.Sound.LoopLexDiamond
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.Tactics.LexDiamond
 import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.FilteredMembership
+import Solidity.Examples.Tactics.FilteredSets
 import Solidity.Calculus.Preconditions
 import Solidity.Examples.SourceCounterexample
 import Solidity.Evm.Memory
@@ -549,7 +551,18 @@ run_cmd do
     ``Solidity.Examples.Tactics.LexDiamond.tripleCountdown,
     ``Solidity.Examples.Tactics.LexDiamond.pairReset,
     ``Solidity.Examples.Tactics.LexDiamond.tripleReset,
-    ``Solidity.Examples.Tactics.LexDiamond.scalarCountdown]
+    ``Solidity.Examples.Tactics.LexDiamond.scalarCountdown,
+    ``Solidity.holds_finiteValues,
+    ``Solidity.holds_filteredMember,
+    ``Solidity.holds_filteredMember_rename,
+    ``Solidity.holds_filteredMember_domain,
+    ``Solidity.not_holds_filteredMember_nil,
+    ``Solidity.not_holds_filteredMember_undefined,
+    ``Solidity.Examples.Tactics.FilteredSets.one_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.echo_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.empty_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.undefined_key_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

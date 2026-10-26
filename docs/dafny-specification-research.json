@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "research-planned",
+  "status": "research-partially-implemented",
   "upstream": {
     "repository": "dafny-lang/dafny",
     "commit": "de36f2ec1f9c530080eff7929ae28229f45da069",
@@ -250,9 +250,9 @@
     ]
   },
   "proposedComprehension": {
-    "status": "planned-not-implemented",
+    "status": "implemented-literal-domain-membership",
     "internalShape": "memberFilter(p, key, binder, finiteLiteralDomain, guard)",
-    "syntax": "Concrete NatSpec spelling is intentionally undecided; the internal shape does not prescribe a parser syntax.",
+    "syntax": "key \\in uint(x; 1, 2; guard), also int, bool and address; existing prefix equality-membership is unchanged.",
     "firstMilestone": [
       "One explicitly declared primitive sort and one bound variable.",
       "An explicitly finite literal-value domain checked at that primitive sort.",
@@ -301,7 +301,13 @@
       "Dynamic collection or interval domains",
       "Allocation-sensitive reference domains",
       "SMT trigger or solver-heuristic parity"
-    ]
+    ],
+    "implementation": {
+      "denotationTheorem": "Solidity.holds_filteredMember",
+      "sourceTests": "scripts/filtered-spec-sets.test.mjs",
+      "validation": "21 proved, 3 intentionally pending, 28 compiler errors and 1 explicit loop unsupported; exact-goal refutation checked separately.",
+      "limits": "Membership-only identity filters over primitive literal values; guard Theory equality is retained, constants conservative, loop annotations unsupported. Predicates remain planned."
+    }
   },
   "captureSnapshotAndImporterHazards": [
     {
@@ -437,7 +443,7 @@
     "comprehensions": "partial",
     "spec-collections": "partial",
     "lemmas-predicates": "partial",
-    "reason": "Membership-only finite identity filters and restricted predicates do not establish first-class collection support or complete Dafny semantic parity."
+    "reason": "Literal-domain filtered membership does not establish first-class collection support or full Dafny parity; reusable source predicates remain planned."
   },
   "implementationAudit": {
     "status": "read-only-feasibility-review",

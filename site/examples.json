@@ -33,6 +33,7 @@
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/FiniteSets.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/LexAnnotations.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/LexDiamond.lean" },
+        { "group": "Proofs", "file": "Solidity/Examples/Tactics/FilteredSets.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Preconditions.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/SourceCounterexample.lean" },
         { "group": "Proofs", "file": "Solidity/Examples/Tactics/SolSpec.lean" },

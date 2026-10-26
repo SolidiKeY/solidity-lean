@@ -131,7 +131,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
       | .error message => Lean.throwError m!"filtered membership printer did not parse: {message}"
     let expanded ← Lean.Elab.liftMacroM (expandSpec ⟨parsed⟩)
     let expression ← Lean.Elab.Term.elabTerm expanded (some (Lean.mkConst ``SpecExpr))
-    let decoded ← Lean.Meta.evalExpr SpecExpr (Lean.mkConst ``SpecExpr) expression
+    let decoded ← unsafe Lean.Meta.evalExpr SpecExpr (Lean.mkConst ``SpecExpr) expression
     unless reprStr decoded == reprStr original do
       Lean.throwError "filtered membership printer changed its syntax tree"
   -- Free key, domain, guard and sibling reads cannot inherit a guard binder.
