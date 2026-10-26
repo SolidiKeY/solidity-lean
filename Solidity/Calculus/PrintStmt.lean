@@ -1115,6 +1115,19 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
   let l0 := lbl 0
   let l1 := lbl 1
   let e := (← instantiateMVars e).consumeMData
+  -- Symbolic arity cannot enumerate ghost declarations. Use the typed packed
+  -- VC notation only when its ambient frame/fresh parameters reconstruct the
+  -- exact arguments; concrete metric constructors continue through expansion.
+  if e.isAppOfArity ``LoopLex.diamondPremise 11 then
+    let a := e.getAppArgs
+    if a[7]!.consumeMData.isFVar &&
+        (← fvarName? a[3]!) == some "k" && (← fvarName? a[9]!) == some "xs" &&
+        (← fvarName? a[10]!) == some "hv" then
+      let I ← ppExprS ns a[4]!
+      let c ← ppExprS ns a[5]!
+      let metrics ← escapeTerm a[7]!
+      let body ← ppBlockS ns a[8]!
+      return some (← `(dl_premise| lexInvariant($I:sol_expr, ‹$metrics:term›, $c:sol_expr, $body:sol_block)))
   if e.isAppOf ``ReceiverValue.step then
     let a := e.getAppArgs
     if ← [a[6]!, a[7]!, a[8]!, a[9]!].allM fun x =>

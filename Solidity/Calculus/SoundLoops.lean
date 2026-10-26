@@ -4,6 +4,7 @@ import Solidity.Calculus.SoundCalls
 import Solidity.Semantics.NoPanic
 import Solidity.Calculus.TermWk
 import Solidity.Calculus.Sound.LoopLexErase
+import Solidity.Calculus.Sound.LoopLexDiamond
 
 /-!
 # The rules of loops are sound
@@ -574,10 +575,35 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
     unfold loopStep at hp
     cases hp
     exact Premise.sound_whileUnwind .automatic c body σ
-  | invLex =>
-    dsimp only [loopStep] at hp
-    cases hp
-    exact Premise.sound_loopAnnotation σ _ _ _ _
+  | invLex I metrics brk qs =>
+    cases m with
+    | box =>
+      dsimp only [loopStep] at hp
+      cases hp
+      exact Premise.sound_loopAnnotation σ _ _ _ _
+    | diamond =>
+      cases brk with
+      | true =>
+        dsimp only [loopStep] at hp
+        cases hp
+        exact Premise.sound_loopAnnotation σ _ _ _ _
+      | false =>
+        cases qs with
+        | cons q qs =>
+          dsimp only [loopStep] at hp
+          cases hp
+          exact Premise.sound_loopAnnotation σ _ _ _ _
+        | nil =>
+          cases hf : body.frame with
+          | none =>
+            simp only [loopStep, hf] at hp
+            cases hp
+            exact Premise.sound_loopAnnotation σ _ _ _ _
+          | some frame =>
+            obtain ⟨xs, hv⟩ := frame
+            simp only [loopStep, hf] at hp
+            cases hp
+            exact LoopLex.diamondPremise_sound k I c metrics body hf σ
   | inv I dec brk qs =>
     cases hf : body.frame with
     | none =>

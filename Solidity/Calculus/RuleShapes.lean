@@ -595,9 +595,10 @@ the diamond closed to `false`, where solkey's diamond rules are not ported;
 `true` (solkey has no such statement); `loopExit`, the loop at its bound; and
 `whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
 `false` where its body has no frame or, under the diamond, it has no
-variant (solkey unwinds those). `loopLexErase` retains a typed source tuple,
-then erases that annotation for partial-correctness rules without certifying its
-decrease. `pushCompoundUnfoldReceiver` and
+variant (solkey unwinds those). `loopLexErase` erases typed tuples under the
+box and in unsupported diamond fragments. `whileInvariantLexDiamond` checks
+every declared component and strict lexicographic decrease in the supported
+ordinary diamond fragment, retaining its exhaustion policy. `pushCompoundUnfoldReceiver` and
 `pushIncrementUnfoldReceiver`, which capture a complex receiver when push is
 used as an arithmetic lvalue (upstream only captures the receiver of a bare
 push statement). `pushMemorySourceCapture` handles a complex memory push
@@ -619,7 +620,7 @@ constructors, so one added later has to say so here. -/
 def leanTaclets : List Lean.Name :=
   [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment, ``LeanTaclet.hashAssignment,
     ``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
-    ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.loopLexErase,
+    ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.loopLexErase, ``LeanTaclet.whileInvariantLexDiamond,
     ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
     ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,

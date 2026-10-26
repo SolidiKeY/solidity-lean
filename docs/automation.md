@@ -407,10 +407,18 @@ To prove totality the recognizers' helpers became public: `flattenFuel?`,
 ## M5 · The size of what a rule emits (`Calculus/TermSize.lean`)
 
 `Tm.size`, `Upd.length`, `Upd.tmSize`, `Fml.tmSize`, `Stmt.size` count
-nodes, never a type.  Every rule writes at most two elements an update
-(`Stmt.step_upds_le`), and the terms of its premise's updates and formulas
-(`Premise.upds`, `Premise.fmls`) are each at most `16 * s.size + 16`
-(`Stmt.step_tmSize_le`), one lemma per arm.  The terms inside a program a
+nodes, never a type. `Stmt.step_upds_le` bounds each generated update by
+`s.updateLimit m`: two for non-lexicographic dispatches, including tuple
+annotation erasure, and tuple arity plus one for the supported lexicographic
+diamond dispatch (every old metric component and the condition capture).
+`Stmt.step_upds_le_two` retains the two-element guarantee when the computed
+limit is two. `Premise.Bounded` keeps two as its default update-length budget;
+its optional explicit budget describes tuple snapshots without hiding their
+elements. `LoopLex.snapshot_length` counts every component exactly.
+The terms of the premise's updates and formulas (`Premise.upds`,
+`Premise.fmls`) are still each at most `16 * s.size + 16`
+(`Stmt.step_tmSize_le`), including all new-metric snapshots and all
+lexicographic comparison connectives, with one lemma per arm.  The terms inside a program a
 rule emits (a premise's continuation) are not bounded by it.
 
 ## M6 · The automation gate (2026-10-24)

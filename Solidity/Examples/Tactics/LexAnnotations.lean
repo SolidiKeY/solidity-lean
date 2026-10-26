@@ -19,7 +19,8 @@ open scoped Schema in
 The replacement's bare invariant uses the existing scalar `dec` schema slot. -/
 example {C : Contract} {Γ Γb : Ctx} {k n : Nat} {m : Modality}
     {inv cond : Val C Γ .bool} {metrics : LoopMetrics C Γ (n + 2)}
-    {brk : Bool} {qs : List (LoopQ C Γ)} {body : Prog C Γ Γb} :
+    {brk : Bool} {qs : List (LoopQ C Γ)} {body : Prog C Γ Γb}
+    (he : LoopLex.eraseAllowed m brk qs body.frame = true) :
     let dec : Option (Val C Γ .uint) := none
     dl[LeanTaclet C k]{ ⟨[
       /// @custom:key invariant inv
@@ -28,7 +29,7 @@ example {C : Contract} {Γ Γb : Ctx} {k n : Nat} {m : Modality}
     ]⟩ ⇝ ⟨[
       /// @custom:key invariant inv
       while (cond) body;
-    ]⟩ } := LeanTaclet.loopLexErase
+    ]⟩ } := LeanTaclet.loopLexErase he
 
 def Counter : Contract := contract!{ uint n; }
 local instance : InContract := ⟨Counter⟩

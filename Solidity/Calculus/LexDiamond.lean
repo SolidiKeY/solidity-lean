@@ -39,4 +39,12 @@ def diamondStep (k : Nat) (I c : Val C Γ .bool) {n : Nat}
   | false, [], some (xs, hv) => diamondPremise k I c metrics body xs hv
   | _, _, _ => .done false
 
+/-- Erasure is available exactly outside the supported ordinary diamond
+fragment. The actual frame is passed by the dispatcher in `Blocks`. -/
+def eraseAllowed (m : Modality) (brk : Bool) (qs : List (LoopQ C Γ))
+    (frame : Option (List ((t : LTy) × Idx Γ t) × Option (List Name))) : Bool :=
+  match m, brk, qs, frame with
+  | .diamond, false, [], some _ => false
+  | _, _, _, _ => true
+
 end Solidity.LoopLex
