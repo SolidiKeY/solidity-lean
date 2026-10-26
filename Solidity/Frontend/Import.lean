@@ -211,13 +211,15 @@ private def compileListSegments (owner : Lean.Name) (value : Expr) : TermElabM E
   while rest.isAppOfArity ``List.cons 3 do
     cells := cells.push rest
     rest ← whnf rest.appArg!
-  if cells.size ≤ 64 then return value
+  -- Small fields can be projections from a record update of the entire
+  -- contract. Rebuild their exposed spine too (or return the weak-head value
+  -- for a non-list), so native code need not compile that discarded record.
   let mut rebuilt : Expr := rest
   let mut count : Nat := 0
   for cell in cells.reverse do
     rebuilt := cell.appFn!.app rebuilt
     count := count + 1
-    if count % 64 == 0 then
+    if cells.size > 64 && count % 64 == 0 then
       let name ← mkFreshUserName (owner ++ `_list)
       addAndCompile <| .defnDecl {
         name, levelParams := [], type := ← inferType rebuilt, value := rebuilt,
@@ -724,8 +726,20 @@ def elabSolcImport : CommandElab := fun stx => do
         kind := .missingImplementation, name := `solidity.lowering,
         reason := row.reason } else none
     { row with admissionChecked := !provenance.legacyFixture, sourceDiagnostic }
+  -- A modern report retains source metadata at every row. Compile its large
+  -- literal in bounded segments too, certifying the complete original list
+  -- before exporting the report that tooling evaluates.
+  let originalReport := toExpr reportRows
+  let reportValue ← liftTermElabM do
+    let value ← compileListSegments rep originalReport
+    let certificate ← mkFreshUserName (rep ++ `_inputEq)
+    addDecl <| .thmDecl {
+      name := certificate, levelParams := [],
+      type := mkApp3 (mkConst ``Eq [1]) rowsTy originalReport value,
+      value := mkApp2 (mkConst ``Eq.refl [1]) rowsTy originalReport }
+    pure value
   liftCoreM <| addAndCompile <| .defnDecl {
-    name := rep, levelParams := [], type := rowsTy, value := toExpr reportRows,
+    name := rep, levelParams := [], type := rowsTy, value := reportValue,
     hints := .abbrev, safety := .safe }
   liftCoreM <| addAndCompile <| .defnDecl {
     name := rep ++ `provenance, levelParams := [], type := mkConst ``Source.Provenance,
