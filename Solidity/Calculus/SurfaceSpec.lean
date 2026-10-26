@@ -119,6 +119,11 @@ def oldNetVar : Var := .ofName "oldNet"
 /-- The local `\result` names, solkey's `result`. -/
 def resultVar : Var := .ofName "result"
 
+/-- The obligation owns its hidden snapshot and return names. Primitive
+logical binders cannot reuse them, including inside another quantifier. -/
+def reservedSpecName (x : String) : Bool :=
+  x == "old" || x == "oldNet" || x == "result" || x.startsWith "result_"
+
 /-- `\old(e)` is read against `old` and `oldNet`, and not nested. -/
 def SpecCtx.old (ctx : SpecCtx C) : SpecCtx C :=
   { ctx with storage := .pv oldVar, ensures := false, ledger := some oldNetVar, memory := none }
@@ -225,7 +230,9 @@ mutual
 /-- A memory parameter followed through its members and entries. -/
 partial def SpecExpr.memPath (ctx : SpecCtx C) :
     SpecExpr → Except String (Option (Ty × (NITerm C ⊕ NMAddr C)))
-  | .name x =>
+  | .name x => do
+    if (lookupBy x ctx.locals).isSome then
+      throw s!"{x} is a primitive local, not a reference path"
     match lookupBy x ctx.refs with
     | some (.mem R) =>
       if ctx.memory.isSome then pure (some (.ref R, .inl (.pv (.ofName x))))
@@ -256,7 +263,9 @@ partial def SpecExpr.memPath (ctx : SpecCtx C) :
 /-- A path of state variables, members and entries, and the type it names:
 `balances[a]` is `balances[a]` at `uint`. -/
 partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
-  | .name x =>
+  | .name x => do
+    if (lookupBy x ctx.locals).isSome then
+      throw s!"{x} is a primitive local, not a storage path"
     match lookupBy x ctx.refs with
     | some (.alias R) => pure (.ref R, .pv (.ofName x))
     | some (.mem _) => throw s!"{x} is a memory reference, not a storage path"
@@ -402,8 +411,11 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
   | .binop .or a b => do pure (.not (.and (.not (← a.fml ctx)) (.not (← b.fml ctx))))
   | .imp a b => do pure (.imp (← a.fml ctx) (← b.fml ctx))
   | .iff a b => iff a b
-  | .all p x e => do pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
+  | .all p x e => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
+    pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
   | .ex p x e => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
     pure (.not (.all (.ofName x) p (.not (← e.fml { ctx with locals := (x, p) :: ctx.locals }))))
   | .member p key items => do
     let (_, keyTerm) ← key.term C ctx
@@ -568,7 +580,7 @@ def specPieces (f : String) :
     | .prim p => some (n, p)
     | _ => none
   for (n, _) in d.params do
-    if n == "old" || n == "oldNet" || n == "result" || n.startsWith "result_" then
+    if reservedSpecName n then
       throw s!"{f}: a parameter named {n}, which the obligation names"
     -- `k1`, `k2`, …: the keys the layout and the frame quantify over
     if n.startsWith "k" && n.length > 1 && (n.drop 1).all Char.isDigit then
