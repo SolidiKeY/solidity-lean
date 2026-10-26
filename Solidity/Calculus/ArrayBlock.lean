@@ -545,8 +545,9 @@ theorem LFml.slotFold_holds (g : State C []) : ∀ (φ : LFml C) (ν : AEnv), φ
   | .imp φ ψ, ν => imp_congr (LFml.slotFold_holds g φ ν) (LFml.slotFold_holds g ψ ν)
   | .all k p φ, ν => forall_congr' fun v => LFml.slotFold_holds g φ _
 
-/-- The body with its blocks instantiated (`apfPrep`), comparisons of
-literals folded, its slot tests folded and its fallbacks lifted. -/
+/-- The body prepared (`blockPrep`: the lengths as atoms, the blocks
+instantiated), the Theory's slot reads and comparisons of literals folded,
+its slot tests folded and its fallbacks lifted. -/
 @[irreducible] def LFml.blockLift (B : LFml C) : LFml C :=
   ((blockPrep B).body.slotFold.litFold.hasFold.orLift orFuel).litFold
 
@@ -557,7 +558,7 @@ theorem LFml.blockLift_holds (g : State C []) (B : LFml C) (ν : AEnv) :
     ((LFml.hasFold_holds g _ ν).trans ((LFml.litFold_holds g _ ν).trans (LFml.slotFold_holds g _ ν))))
 
 /-- **The array stages of a body with blocks**: its universal prefix, the
-blocks instantiated (`apfPrep`), the fallbacks lifted and the arrays cut. -/
+body prepared (`blockPrep`) and folded (`LFml.blockLift`), the arrays cut. -/
 structure ArrayBlockBody (ψ : LFml C) where
   pre : UniversalPrefix ψ
   covered : ∀ q ∈ pre.body.freeParams, q ∈ pre.parameters
@@ -638,7 +639,8 @@ structure ArrayBlockReduction (φ : Fml C []) where
   flat : FlattenedArithmetic body.leaf
 
 /-- **The pipeline**: the arrays' (`arrayReduction?`), the body prepared by
-array property instantiation (`apfPrep`) before the array stages. -/
+lengths as atoms and array property instantiation (`blockPrep`) before the
+array stages. -/
 def arrayBlockReduction? (φ : Fml C []) : Option (ArrayBlockReduction φ) := do
   let d ← ProgramNormalization.ofFormula? 2048 φ
   let r ← sourceReduction? d.formula

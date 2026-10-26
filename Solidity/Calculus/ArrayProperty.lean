@@ -57,6 +57,18 @@ positions of the block body); every other read of such a root outside
 the fragment.  Nested mappings `m[i][j]` with two bound indices on one
 path are outside (a decision recorded in `docs/automation.md`, M7).
 
+Dynamic arrays of primitives (feature 31): at a `uint` pass a block may
+read a root's array at its variables (`ApfTm.rat`, the slot test `rhas`,
+the length `rlen`, the Theory's conditional read `ite`).  The rebuilt
+array (`FloorShape.arr`) keeps its live length and holds at slot `i` what
+slot `⌊i⌋` held, there exactly where `⌊i⌋` is below the old slots
+(`arr_rebuild_slot`); so the floor must be monotone and never above its
+key (`ArrOK`), and a pass that rebuilds an array turns `lastIn`'s
+largest-value region off (every value among the strict operands,
+`lastIn_eq_floorIn`).  The index set may take further terms (`extra`,
+`apfPrepWith`: an array's length read as an atom,
+`Calculus/ArrayBlock.lean`), and its values are computed by `LTm.evalC`.
+
 A rebuilt mapping is listed region by region (`regionList`), each region
 a symbolic run of keys between two breakpoints of the floor, skipped where
 it holds the default (what the largest key's floor held): its reads are
@@ -79,8 +91,10 @@ variable {C : Contract} {K : PrimTy}
 /-! ## The mappings rebuilt -/
 
 /-- **How a root the blocks read is rebuilt**: along its mappings each key
-of type `K` floored (`floor`), any other key kept (`outer`); past them (a
-struct, an array, a word) the value copied whole (`keep`). -/
+of type `K` floored (`floor`), any other key kept (`outer`); a dynamic
+array of primitives at a `uint` pass floored slot by slot (`arr`); past
+them (a struct, any other array, a word) the value copied whole
+(`keep`). -/
 inductive FloorShape (K : PrimTy) : Ty → Type where
   | keep (T : Ty) : FloorShape K T
   | floor {V : Ty} (s : FloorShape K V) : FloorShape K (.ref (.mapping K V))
@@ -96,7 +110,7 @@ def FloorShape.floorEq {K' : PrimTy} {V : Ty} (h : K' = K) (s : FloorShape K V) 
   | rfl => .floor s
 
 /-- **The shape of a type**: every key of type `K` along its mappings
-floored. -/
+floored, and at a `uint` pass the slots of a dynamic array of primitives. -/
 def FloorShape.of (K : PrimTy) : (T : Ty) → FloorShape K T
   | .ref (.mapping K' V) =>
     if h : K' = K then FloorShape.floorEq h (FloorShape.of K V) else .outer K' (FloorShape.of K V)
@@ -316,12 +330,6 @@ theorem len_of_get {st st' : Storage C} {E : Ty} (r : SRef C (.ref (.array E)))
     (h : st'.get r.hroot = st.get r.hroot) : st'.obs.len (.ref r) = st.obs.len (.ref r) := by
   rw [Storage.obs_len_ref, Storage.obs_len_ref, h]
 
-/-- Another root reads as before. -/
-theorem MRoot.surgery_other (R : MRoot C) (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int)
-    (st : Storage C) {P : PrimTy} (r : SRef C (.prim P)) (hr : r.root ≠ R.name) :
-    (R.surgery ok f B st).obs.word (.ref r) = st.obs.word (.ref r) :=
-  word_of_get r (SFields.get_set_ne st R.h r.hroot (Ne.symm hr) _)
-
 /-- A lookup in the entries with their values mapped. -/
 theorem lookupBy_mapSnd {κ V W : Type} [DecidableEq κ] (F : V → W) (k : κ) :
     ∀ l : List (κ × V), lookupBy k (l.map fun e => (e.1, F e.2)) = (lookupBy k l).map F
@@ -338,8 +346,8 @@ def FloorsOn (ok : OrdK K) (f : K.Denote → K.Denote) (B : List Int) : Prop :=
   (∀ b ∈ B, ok.lo ≤ b ∧ b < ok.hi) ∧ ok.lo ∈ B ∧
     ∀ k : K.Denote, f (ok.ofInt (floorIn ok.lo B (ok.val k))) = f k
 
-/-- The slots a rebuilt array keeps: the first breakpoint whose floor is
-past the old slots, `2^256` where none is. -/
+/-- The slots a rebuilt array keeps: the first breakpoint whose floor is at
+or past the old slots' count, `2^256` where none is. -/
 abbrev arrCut (f : PrimTy.uint.Denote → PrimTy.uint.Denote) (B : List Int) (len : Nat) : Int :=
   cutIn OrdK.uint.hi B fun b => decide ((len : Int) ≤ OrdK.uint.val (f (OrdK.uint.ofInt b)))
 
@@ -894,9 +902,10 @@ end ApfTm
 
 /-! ## Reads in the rebuilt storage -/
 
-/-- What the rebuilding keeps: other roots' words, and the words of a root
-of `Rs` at the floors of their keys (`SRef.floorRef`); the ledger, or its
-entries at their floors where `Rs` reads it. -/
+/-- What the rebuilding keeps: other roots whole, and the words, slot tests
+and lengths of a root of `Rs` at the floors of their keys and slots
+(`SRef.floorRef`); the ledger, or its entries at their floors where `Rs`
+reads it. -/
 structure Surg (ok : OrdK K) (g : State C []) (st' : Storage C) (nt' : Ledger) (Rs : ARoots)
     (f : K.Denote → K.Denote) : Prop where
   other : ∀ {T : Ty} {a : Name} (h : C.rootType a = some T), a ∉ Rs.names → st'.get h = g.storage.get h
@@ -2319,7 +2328,7 @@ theorem LTm.evalC_eq (g : State C []) (ν : AEnv) : ∀ {s : Srt} (t : LTm C s),
 
 /-! ## The checks, computed -/
 
-/-- An index term with its read query. -/
+/-- An index term; its value is computed by `LTm.evalC`. -/
 abbrev IdxKey (C : Contract) (K : PrimTy) := LTm C (.val K)
 
 /-- An index term of type `K'` at `K`, where they are one type. -/
@@ -2953,7 +2962,8 @@ def apfRoots (ok : OrdK K) (B : LFml C) : List (MRoot C) × ARoots :=
 /-- **The index set**: the least value; the largest where the pass reads the
 ledger or is an `int` one (the regions past the goal's keys then read a
 free word, not the last key's); the conditions' terms and the successors
-of the guards' operands, each term once. -/
+of the guards' operands; the terms `extra` (an array's length atom,
+feature 31); each term once. -/
 def apfKeys (ok : OrdK K) (Rs : ARoots) (B : LFml C) (h : ApfFml Rs B) (extra : List (IdxKey C K) := []) :
     List (IdxKey C K) :=
   dedupKeys (IdxKey.base ok :: ((if Rs.net || !ok.netB then [IdxKey.top ok] else []) ++
@@ -3028,8 +3038,10 @@ theorem apfNetFloor (ok : OrdK K) (B : LFml C) {f : K.Denote → K.Denote} {Bk :
 /-- **Array property instantiation of one key type as a preparation**
 (`Prep`): the negative blocks of `K` over the roots they read at their
 variables, and over the ledger at a `uint` pass, instantiated at the index
-set; the body itself where there is none, or where the body is outside
-the fragment. -/
+set (with the terms `extra`, `apfKeys`); the body itself where there is
+none, or where the body is outside the fragment.  A pass that rebuilds an
+array lists every value of the index set among the strict guards'
+operands, so no key reads the largest value past its floor (`ArrOK`). -/
 def apfPrepK (ok : OrdK K) (B : LFml C) (extra : List (IdxKey C K) := []) : Prep B :=
   let roots := (apfRoots ok B).1
   let Rs := (apfRoots ok B).2

@@ -69,7 +69,7 @@ The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapArrayBlock` … `gapWrittenMemory`,
+`unknown` for each shape left (`gapWrittenMemory`, and the memory ones,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -89,7 +89,9 @@ instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
 preparation has), reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`); or the leaves that read the starting ledger
 (`Fml.ledgerCovered`), with blocks over it instantiated likewise
-(`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices
+(`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices,
+with blocks over them instantiated likewise (`Fml.arrayBlockCovered`,
+`arrayBlockReduction?_isSome`, feature 31)
 (`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
 `int` read as ledger entries (`Fml.kintCovered`, `decideKInt`), or binders of
 KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`); `decideGoal` likewise
@@ -143,7 +145,9 @@ the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
 on a leaf both refuse, the pipeline with storage array reads
 (`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
 (`ledgerReduction?`, `LedgerReduction.verify`); then the one with blocks
-over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`). -/
+over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`);
+then the one with blocks over storage arrays (`arrayBlockReduction?`,
+`ArrayBlockReduction.verify`, feature 31). -/
 def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -262,8 +266,9 @@ theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA �
 /-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
 quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
 reads (`Fml.ledgerCovered`, M7 step 3), the one with storage array reads
-(`Fml.arrayCovered`, M7 step 6), and the one with blocks over the ledger
-(`Fml.ledgerBlockCovered`, feature 21). -/
+(`Fml.arrayCovered`, M7 step 6), the one with blocks over the ledger
+(`Fml.ledgerBlockCovered`, feature 21), and the one with blocks over storage
+arrays (`Fml.arrayBlockCovered`, feature 31). -/
 def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
   φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered ||
     φ.ledgerBlockCovered || φ.arrayBlockCovered

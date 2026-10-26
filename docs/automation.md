@@ -1143,7 +1143,7 @@ The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
-*unknown* (`gapKIntNeg` … `gapWrittenMemory`, each in the fragment by the
+*unknown* (`gapWrittenMemory`, in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
 (`gapMemInnerNeg` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
@@ -1235,6 +1235,7 @@ Three properties of the reading are worth knowing.
 | `FloorShape.rebuild_word`, `ApfTm.eval_trel`, `GuardP.mono` | a rebuilt root reads at a path what the old one read at its keys' floors; a term of the fragment reads alike, a path of a root of the blocks at its floors (`SRef.floorRef`), a ledger address at its floor (`NetRel.eval`); a guard true at the keys is true at their floors, a halting ground operand allowed unless a `&&` skips it inside a `||`'s left operand (`GuardP.floors`, `GuardP.defined`) |
 | `lookupBy_regionList`, `lastIn_breaks`, `netRebuild_floor` | a read in a region list finds its key's last breakpoint's region, nothing where that region is skipped; the floor is constant between breakpoints; a rebuilt ledger reads each address's floor's entry (features 20 and 21, `Calculus/FloorRegion.lean`) |
 | `LedgerBlockReduction.verify`, `ledgerBlockReduction?_isSome` | blocks over the ledger: a proof of the prepared, cut body proves the leaf, a false assignment refutes it in the rebuilt ledger; `φ.ledgerBlockCovered = true → (ledgerBlockReduction? φ).isSome` (feature 21) |
+| `ArrayBlockReduction.valid_iff`, `ArrayBlockReduction.verify`, `arrayBlockReduction?_isSome` | blocks over storage arrays: exact (`blockPrep`, `lenPrep`, `LFml.litFold_holds`, `LFml.slotFold_holds`, `LFml.aCut_valid_iff`); a false assignment refutes the leaf in the realized state rebuilt at the floors (`FloorShape.rebuild_find`, `arr_rebuild_slot`, `arr_rebuild_len`); `φ.arrayBlockCovered = true → (arrayBlockReduction? φ).isSome` (feature 31) |
 | `expandPrep_valid_iff`, `LFml.holds_expandB`, `LFml.dropOne_spec` | `bool` quantifiers expanded and positive quantifiers dropped to fresh atoms: exact at every state (features 16 and 17) |
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
@@ -1274,7 +1275,8 @@ compilers), or `Fml.quantCovered` (features 3, 6, 7 and 16 to 20, its own
 pipeline),
 or `Fml.ledgerCovered` (feature 9, its own pipeline), or
 `Fml.arrayCovered` (feature 10, its own pipeline), or
-`Fml.ledgerBlockCovered` (feature 21, its own pipeline); `Fml.memCovered` is
+`Fml.ledgerBlockCovered` (feature 21, its own pipeline), or
+`Fml.arrayBlockCovered` (feature 31, its own pipeline); `Fml.memCovered` is
 feature 13's, a leaf with fresh memory arrays whose cut is in
 `Fml.CoveredA`; `Fml.kintCovered` feature 26's, a leaf with binders of
 KeY's `int` whose rewriting is in `Fml.CoveredA`:
