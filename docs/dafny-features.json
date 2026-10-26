@@ -1,0 +1,803 @@
+{
+  "schemaVersion": 1,
+  "upstream": {
+    "repository": "dafny-lang/dafny",
+    "commit": "de36f2ec1f9c530080eff7929ae28229f45da069",
+    "inspectedOn": "2026-10-26",
+    "sources": [
+      {
+        "path": "docs/DafnyRef/Specifications.md",
+        "blob": "3ff5a06166c31723bcb596c06aecbeadd6c48347",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Statements.md",
+        "blob": "2a3e67332c568bb9dc8bd2e34b810f0e0d564772",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Types.md",
+        "blob": "f6e2ca86466a2442afeee727ab96048991d11566",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Expressions.md",
+        "blob": "52f641d36c8ae5f29198554fdc15f0ba185c2e0d",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Programs.md",
+        "blob": "6e9c1dd403081b9bc03e9b267bfbca60d0c2943d",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Modules.md",
+        "blob": "79f30bfb479979c1362640000872a6897c723943",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Refinement.md",
+        "blob": "5e1433a4133700b251565a102e69ce443394097f",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Attributes.md",
+        "blob": "377dc99c467eb42ac16d4783466783e2f0ed9449",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Topics.md",
+        "blob": "b58b06cb391137e2f7936c34244aacb092eb91d5",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/UserGuide.md",
+        "blob": "e04f62980f0427964549f20cbcbe90113fba89bb",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/VSCodeIDE.md",
+        "blob": "c4b73f42297a24f359b9204ec140d4d077e2ae07",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "docs/DafnyRef/Plugins.md",
+        "blob": "c044914d6a00824827255bb7eb3dea9d75bc17a0",
+        "inspection": "selected sections and chapter structure"
+      },
+      {
+        "path": "Source/DafnyCore/Verifier/Statements/BoogieGenerator.TrLoop.cs",
+        "blob": "c34788cb335db6d17e33bc405e2ad0e28db57153",
+        "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyCore/Verifier/Statements/BoogieGenerator.TrCall.cs",
+        "blob": "c8ae9092305cdfd7824ea8353e97e70b6bf0456c",
+        "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyCore/Verifier/BoogieGenerator.Decreases.cs",
+        "blob": "d77d91751feca2d926f7b675419567b195720efa",
+        "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyLanguageServer.Test/Diagnostics/VerificationDiagnostics.cs",
+        "blob": "35598dd4859f8dd2f4fc02c2858e2161a6d77270",
+        "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyLanguageServer.Test/Various/CancelVerificationTest.cs",
+        "blob": "c32b2930e3d6bbb519d1bec95baceeb916883676",
+        "inspection": "selected implementation or test sections"
+      },
+      {
+        "path": "Source/DafnyLanguageServer.Test/Synchronization/EditDocumentTest.cs",
+        "blob": "4f38a9ac8fbf47167dfb073f623c0cce7ded70c6",
+        "inspection": "selected implementation or test sections"
+      }
+    ]
+  },
+  "localBaseline": "23d23377",
+  "scope": "Selected-section review of language, verification and tooling feature families, covering reference-manual chapters 3\u201315. Not an exhaustive AST-constructor audit or a claim of complete implementation.",
+  "features": [
+    {
+      "id": "preconditions",
+      "category": "contracts",
+      "relevance": "specification",
+      "status": "present",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 34
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/SurfaceSpec.lean",
+        "Solidity/Calculus/Spec.lean"
+      ],
+      "assessment": "Requires clauses and imported NatSpec preconditions already generate checked obligations.",
+      "next": "Preserve argument binding and definedness; add source-associated diagnostics."
+    },
+    {
+      "id": "postconditions",
+      "category": "contracts",
+      "relevance": "specification",
+      "status": "present",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 65
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/Spec.lean"
+      ],
+      "assessment": "Ensures, result values and contract invariants are already supported for admitted source shapes.",
+      "next": "Associate failed obligations with their source specifications."
+    },
+    {
+      "id": "old-state",
+      "category": "contracts",
+      "relevance": "specification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Expressions.md",
+          "line": 677
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/FunContract.lean"
+      ],
+      "assessment": "Entry snapshots cover storage and ledger; there is no general labeled-state expression surface.",
+      "next": "Add typed labeled snapshots and reusable two-state predicates if needed."
+    },
+    {
+      "id": "quantifiers",
+      "category": "logic",
+      "relevance": "specification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Expressions.md",
+          "line": 1266
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/Fml.lean"
+      ],
+      "assessment": "Both forall and exists are supported over primitive domains; general collection domains and automatic quantifier alternation are not established.",
+      "next": "Extend typed specification domains and checked quantifier automation."
+    },
+    {
+      "id": "function-frames",
+      "category": "contracts",
+      "relevance": "specification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 633
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/Spec.lean",
+        "Solidity/Calculus/FunContract.lean"
+      ],
+      "assessment": "Assignable syntax already names roots, fields, indices and wildcard descendants; general modular frame application remains limited. Dafny write restrictions and local final-state framing differ.",
+      "next": "Carry precise assigns information into effectful contract application."
+    },
+    {
+      "id": "loop-invariants",
+      "category": "loops",
+      "relevance": "verification",
+      "status": "present",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 706
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/SoundLoops.lean",
+        "Solidity/Examples/Tactics/Loops.lean"
+      ],
+      "assessment": "Supported invariant loop rules have soundness proofs; present does not cover every memory or callback body.",
+      "next": "Extend explicitly unsupported loop-body shapes."
+    },
+    {
+      "id": "loop-frames",
+      "category": "loops",
+      "relevance": "verification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 1592
+        },
+        {
+          "path": "Source/DafnyCore/Verifier/Statements/BoogieGenerator.TrLoop.cs",
+          "line": 194
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Blocks.lean",
+        "Solidity/Semantics/RunFrame.lean",
+        "Solidity/Semantics/Storage/Anon.lean"
+      ],
+      "assessment": "Computed loop anonymisation tracks storage roots. Aliases, memory and finer locations remain conservative.",
+      "next": "Introduce typed finer location sets, alias-aware effects and memory frames."
+    },
+    {
+      "id": "termination-metrics",
+      "category": "loops",
+      "relevance": "verification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 93
+        },
+        {
+          "path": "Source/DafnyCore/Verifier/BoogieGenerator.Decreases.cs",
+          "line": 35
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/SoundLoops.lean",
+        "Solidity/Calculus/Recursion.lean"
+      ],
+      "assessment": "Unsigned loop variants exist; Dafny general lexicographic decreases and total recursive termination are distinct missing results.",
+      "next": "Prove typed lexicographic well-founded measures without equating exhaustion to termination."
+    },
+    {
+      "id": "modular-calls",
+      "category": "contracts",
+      "relevance": "verification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 731
+        },
+        {
+          "path": "Source/DafnyCore/Verifier/Statements/BoogieGenerator.TrCall.cs",
+          "line": 288
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/FunContract.lean",
+        "Solidity/Calculus/CallSummary.lean"
+      ],
+      "assessment": "UseContract already applies callee contracts. Automatic summaries cover restricted value computations and do not provide arbitrary precise effectful summaries.",
+      "next": "Add effectful summaries with checked frames and explicit read dependencies."
+    },
+    {
+      "id": "recursive-contracts",
+      "category": "contracts",
+      "relevance": "verification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Specifications.md",
+          "line": 93
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Recursion.lean",
+        "Solidity/Calculus/RecursionCallback.lean",
+        "Solidity/Examples/Tactics/Recursion.lean"
+      ],
+      "assessment": "Recursive contracts, including callbacks, are proved by induction over bounded unrolling with accepted exhaustion. This is not Dafny total-termination parity.",
+      "next": "Add a separately stated total-correctness result with genuine decreases."
+    },
+    {
+      "id": "ghost-variables",
+      "category": "proofs",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Topics.md",
+          "line": 193
+        },
+        {
+          "path": "docs/DafnyRef/Programs.md",
+          "line": 92
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Fml.lean",
+        "Solidity/SpecSyntax.lean"
+      ],
+      "assessment": "Lean supplies ghost proof variables; a source-level ghost declaration, update and erasure discipline is absent.",
+      "next": "If adding source ghost state, prove noninterference with runtime state."
+    },
+    {
+      "id": "lemmas-predicates",
+      "category": "proofs",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 4324
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Logic.lean",
+        "Solidity/SpecSyntax.lean"
+      ],
+      "assessment": "Lean definitions and theorems provide reusable lemmas; the source specification language has no general named predicate or lemma-call layer.",
+      "next": "Expose checked reusable specification predicates without new trusted axioms."
+    },
+    {
+      "id": "proof-blocks",
+      "category": "proofs",
+      "relevance": "host",
+      "status": "present",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 2365
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Chains.lean",
+        "Solidity/Examples/ProofTree.lean"
+      ],
+      "assessment": "Lean tactic blocks and checked calculus chains provide proof authoring facilities; Dafny source syntax is not implemented.",
+      "next": "Only add source-associated proof syntax for a concrete authoring need."
+    },
+    {
+      "id": "opacity-reveal",
+      "category": "proofs",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 2047
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/SeqRewrite.lean",
+        "Solidity/Calculus/TermLaws.lean"
+      ],
+      "assessment": "Lean abstraction and explicit rewriting cover host proof control; there is no Dafny reveal statement in Solidity specs.",
+      "next": "Use explicit checked rewrite lemmas; optional source proof surface remains separate."
+    },
+    {
+      "id": "assert-assume",
+      "category": "logic",
+      "relevance": "runtime",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 1851
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Calculus/Rules.lean",
+        "Solidity/Calculus/Logic.lean"
+      ],
+      "assessment": "Solidity assert panics at runtime whereas Dafny assert is erased. Proof assumptions must not be presented as proved runtime behavior.",
+      "next": "Keep ghost assertions distinct and report unchecked assumptions explicitly."
+    },
+    {
+      "id": "spec-collections",
+      "category": "types",
+      "relevance": "specification",
+      "status": "missing",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 1259
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean",
+        "Solidity/Calculus/Fml.lean"
+      ],
+      "assessment": "Host Lean can express immutable models, but source specs lack general set, multiset, sequence and mathematical map expressions.",
+      "next": "Add typed ghost collections and bridge lemmas to storage observations."
+    },
+    {
+      "id": "comprehensions",
+      "category": "logic",
+      "relevance": "specification",
+      "status": "missing",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Expressions.md",
+          "line": 1298
+        }
+      ],
+      "localEvidence": [
+        "Solidity/SpecSyntax.lean"
+      ],
+      "assessment": "General set, map and sequence comprehensions are not in the specification expression grammar.",
+      "next": "Start with bounded typed comprehensions and checked denotation."
+    },
+    {
+      "id": "numeric-types",
+      "category": "types",
+      "relevance": "runtime",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 219
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean",
+        "Solidity/Signature.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Solidity bounded signed/unsigned arithmetic and mathematical KeY int exist. Their semantics deliberately differ from Dafny unbounded numeric defaults.",
+      "next": "Preserve widths, checked overflow and division failures when extending admitted arithmetic."
+    },
+    {
+      "id": "floating-real-ordinal",
+      "category": "types",
+      "relevance": "notApplicable",
+      "status": "notApplicable",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 349
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean",
+        "docs/solidity-scope.md"
+      ],
+      "assessment": "Dafny floating-point, real and ordinal runtime types are not Solidity runtime types. Host mathematical models are separate.",
+      "next": "No runtime implementation required for Solidity parity."
+    },
+    {
+      "id": "refinement-types",
+      "category": "types",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 1935
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Scope.lean",
+        "Solidity/Semantics/State.lean",
+        "Solidity/AST.lean"
+      ],
+      "assessment": "Dependent contexts and bounded values encode invariants; Solidity value types follow Solidity semantics rather than Dafny subset/newtype rules.",
+      "next": "Use host refinements for proof invariants; source refinements need their own checked interface."
+    },
+    {
+      "id": "algebraic-datatypes",
+      "category": "types",
+      "relevance": "host",
+      "status": "present",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 3355
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean",
+        "Solidity/Syntax/Scoped.lean"
+      ],
+      "assessment": "Lean inductive families already model syntax and proof data. Solidity enum and struct behavior remains separate.",
+      "next": "No new runtime syntax required; optional ghost model types can remain host Lean."
+    },
+    {
+      "id": "arrays-aliasing-allocation",
+      "category": "memory",
+      "relevance": "runtime",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 2712
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/State.lean",
+        "Solidity/Semantics/Storage.lean",
+        "Solidity/Semantics/Heap.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Typed storage, memory and aliases are implemented with explicit remaining source and recursive-type gaps. Fresh/allocated specification expressions are not generally exposed.",
+      "next": "Add typed allocation observations and complete reference-bearing source shapes."
+    },
+    {
+      "id": "functions-lambdas-generics",
+      "category": "types",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 3123
+        }
+      ],
+      "localEvidence": [
+        "Solidity/AST.lean",
+        "Solidity/SpecSyntax.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Lean provides higher-order models. Solidity function values are separately inventoried; Dafny generic/lambda runtime semantics do not transfer directly.",
+      "next": "Separate higher-order ghost models from Solidity function-value execution."
+    },
+    {
+      "id": "classes-traits-inheritance",
+      "category": "declarations",
+      "relevance": "runtime",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 2379
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Contract inheritance, overrides and libraries already have a Solidity feature inventory; Dafny classes/traits are analogues, not equivalent semantics.",
+      "next": "Follow solc declaration identity, initialization and dispatch requirements."
+    },
+    {
+      "id": "modules-refinement",
+      "category": "declarations",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Modules.md",
+          "line": 1
+        },
+        {
+          "path": "docs/DafnyRef/Refinement.md",
+          "line": 1
+        }
+      ],
+      "localEvidence": [
+        "Solidity.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Lean modules organize proofs; Solidity imports are separately modeled. Dafny abstract/export/refinement modules have no direct Solidity counterpart.",
+      "next": "Express contract refinement as explicit correctness theorems when required."
+    },
+    {
+      "id": "iterators-coinduction",
+      "category": "types",
+      "relevance": "host",
+      "status": "notApplicable",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Types.md",
+          "line": 2910
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Semantics/Run.lean",
+        "docs/lifetime.md"
+      ],
+      "assessment": "Solidity has no Dafny yield/iterator construct. Lean can represent coinductive or trace models without changing Solidity runtime syntax.",
+      "next": "Add trace abstractions only for a concrete verification claim."
+    },
+    {
+      "id": "control-flow",
+      "category": "statements",
+      "relevance": "runtime",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 984
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Semantics/Run.lean",
+        "docs/solidity-features.json"
+      ],
+      "assessment": "Assignments, calls, branches, loops and break/continue already exist; admitted shapes and remaining gaps are in the Solidity inventory. Dafny match/binding guards are separate constructs.",
+      "next": "Complete admitted Solidity shapes rather than introducing unrelated Dafny syntax."
+    },
+    {
+      "id": "nondeterminism-havoc",
+      "category": "logic",
+      "relevance": "verification",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Statements.md",
+          "line": 200
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Fml.lean",
+        "Solidity/Semantics/Callback.lean"
+      ],
+      "assessment": "Typed havoc and external response/callback abstractions exist. Such-that assignments and arbitrary ghost nondeterminism lack a general source surface.",
+      "next": "Retain explicit typed models and abstraction premises."
+    },
+    {
+      "id": "automation-budgets",
+      "category": "automation",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Attributes.md",
+          "line": 401
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/ProveChunked.lean",
+        "scripts/test-solidity.mjs"
+      ],
+      "assessment": "Bounded search, heartbeat limits, chunked proofs and runner timeouts exist; editor resource and cancellation behavior needs tests.",
+      "next": "Expose stable per-obligation timing and reliable cancellation."
+    },
+    {
+      "id": "triggers-induction",
+      "category": "automation",
+      "relevance": "host",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Attributes.md",
+          "line": 883
+        },
+        {
+          "path": "docs/DafnyRef/Topics.md",
+          "line": 1150
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Calculus/Recursion.lean",
+        "Solidity/Calculus/Chains.lean"
+      ],
+      "assessment": "Lean induction and checked replay provide host proof automation. Dafny SMT trigger syntax is not implemented or necessary for existing kernel proofs.",
+      "next": "Prefer checked reusable lemmas and bounded replay to unchecked solver claims."
+    },
+    {
+      "id": "counterexamples",
+      "category": "assurance",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/UserGuide.md",
+          "line": 1048
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Tools/Counterexample.lean",
+        "Solidity/Examples/Verify.lean"
+      ],
+      "assessment": "Kernel-certified counterexamples and exact-fragment counterstates exist; full source-to-editor witness display is separate work.",
+      "next": "Render certified witnesses with exact source association."
+    },
+    {
+      "id": "audit-vacuity-dead-code",
+      "category": "assurance",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/UserGuide.md",
+          "line": 418
+        }
+      ],
+      "localEvidence": [
+        "TrustAudit.lean",
+        "scripts/check-trust.mjs",
+        "docs/assurance.md"
+      ],
+      "assessment": "Trust and axiom inventories exist. They do not establish general precondition satisfiability or report every unreachable branch.",
+      "next": "Add explicit satisfiability and reachability evidence for vacuity reports."
+    },
+    {
+      "id": "unit-tests-generation",
+      "category": "testing",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/UserGuide.md",
+          "line": 601
+        }
+      ],
+      "localEvidence": [
+        "scripts/test-solidity.mjs",
+        "scripts/test-solidity.test.mjs",
+        "Solidity/Examples/Verify.lean"
+      ],
+      "assessment": "Source verification runners and checked fixtures exist. General Dafny-style coverage-guided test generation is not implemented.",
+      "next": "Export certified counterexamples as reproducible regression inputs."
+    },
+    {
+      "id": "cli-project-artifacts",
+      "category": "tooling",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/UserGuide.md",
+          "line": 850
+        }
+      ],
+      "localEvidence": [
+        "lakefile.toml",
+        "scripts/test-solidity.mjs",
+        "docs/solidity-testing.md"
+      ],
+      "assessment": "Lake artifacts, source runners and JSON reports exist. A stable editor/CLI protocol is a separate integration contract.",
+      "next": "Preserve report status, source identity and configuration semantics across clients."
+    },
+    {
+      "id": "ide-language-services",
+      "category": "editor",
+      "relevance": "tooling",
+      "status": "partial",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/VSCodeIDE.md",
+          "line": 3
+        },
+        {
+          "path": "Source/DafnyLanguageServer.Test/Diagnostics/VerificationDiagnostics.cs",
+          "line": 16
+        },
+        {
+          "path": "Source/DafnyLanguageServer.Test/Various/CancelVerificationTest.cs",
+          "line": 16
+        },
+        {
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/EditDocumentTest.cs",
+          "line": 20
+        }
+      ],
+      "localEvidence": [
+        ".vscode/settings.json",
+        "scripts/site/export.mjs",
+        "scripts/site/export.test.mjs"
+      ],
+      "assessment": "Lean language services are configured. This audit baseline contains no Solidity VS Code extension package; a new extension lane must be assessed separately.",
+      "next": "Test activation, source ranges, status, cancellation, stale results and witnesses."
+    },
+    {
+      "id": "plugins-backends",
+      "category": "tooling",
+      "relevance": "notApplicable",
+      "status": "notApplicable",
+      "upstream": [
+        {
+          "path": "docs/DafnyRef/Plugins.md",
+          "line": 1
+        }
+      ],
+      "localEvidence": [
+        "Bridge/lakefile.toml",
+        "lakefile.toml",
+        "docs/bridge.md"
+      ],
+      "assessment": "Lean metaprogramming and optional Bridge provide extension points. Dafny compiler backends for other languages are not Solidity requirements.",
+      "next": "Keep the core dependency-free; place optional adapters in separate packages."
+    }
+  ]
+}

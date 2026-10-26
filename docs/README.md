@@ -5,6 +5,7 @@ the others link to it.
 
 | Document | Holds |
 |---|---|
+| [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature-family audit, Solidity relevance, existing support, semantic differences, remaining work and offline evidence checks. |
 | [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
 | [feature-work/aggregates.md](feature-work/aggregates.md) | Inline arrays, fixed memory snapshots, local reference tuples, slice effects and validation limits. |
