@@ -301,3 +301,29 @@ Additional completed controls:
   isolated reports. Its ambiguity finding was fixed: the field is now
   `additionalRequirementsBeyondSourceIntegration`, and a common source-integration
   requirement applies explicitly to every row, including empty additional lists.
+
+Final corpus gate:
+
+```sh
+source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1
+./scripts/check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples
+```
+
+Passed: probe/generator comparison and `SolidityCorpus` build (257 jobs),
+including the existing TestSuite derivations and report. The first corpus
+build was stopped to avoid overlapping Lake artifact writers; the sequential
+four-thread attempt reached the managed executor's 16 GiB memory limit and
+was also stopped. Neither interrupted attempt is a passing gate. The successful
+one-thread retry changes concurrency only, not heartbeats, proof limits, fuel
+or expectations. Full retained logs are
+`/workspace/.setup/logs/group09-corpus-serial.log` and
+`/workspace/.setup/logs/group09-corpus-serial-build.log`.
+
+The documentation-path checker still reports its 13 missing references in
+unchanged vendored documents and `Solidity/Eqns.lean`, with no finding in this
+patch. No broad default-library rebuild was performed: this patch changes only
+documentation and reproduction evidence; the targeted builds, proof controls,
+replay, source-admission, sort and corpus checks above are its completed gates.
+All shared frontend/runner and core files remain unchanged, so this evidence
+patch has no unpublished dependency on another group's implementation.
