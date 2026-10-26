@@ -2,9 +2,7 @@
 
 Internal formulas have one equation, `a = b` (`Fml.eq`), KeY's `=`: it compares
 what the sides denote in the Theory (`Tm.denote`), total as KeY's terms
-are.  There is no definedness test.  This records the change that removed
-`defined(t)` and `Fml.eqD` (`defined(a) ∧ defined(b) ∧ a ≐ b`), and what
-replaced each use.
+are.  There is no definedness test (`defined(t)` is gone).
 
 Public `Spec` equations instead require successful evaluation of both
 operands; see [correctness.md](correctness.md).
@@ -70,9 +68,3 @@ readings, a halt included (`holds_eq_of_agree`).
   (`Fml.eqCap`, `Fml.eqAtom`, `CloseS.holds_eqAtom`).  The leaf implies the formula (`Fml.evalEqs_sound`,
   `Calculus/EvalEqs.lean`); where a term's Booleans do not reduce (a free
   variable) the pass is skipped and the leaf read as it stands.
-
-## Costs
-
-`TestSuite/Derived15`'s `invariantVariantSkipsBreakIteration` needs
-185 000–200 000 heartbeats of its 200 000, on master and here alike; the
-unwrap pass is meta-level so as not to add to it.

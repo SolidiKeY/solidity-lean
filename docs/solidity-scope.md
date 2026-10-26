@@ -18,29 +18,11 @@ assert that every target feature already imports, executes, or proves correctly.
 | `Solidity/Language/Features.lean` | Generated, dependency-free Lean catalog, structured diagnostics and subset interface. |
 | `scripts/solidity-feature-audit.py` | Regeneration, metadata validation, source-drift and symbol-coverage checks. |
 
-The Lean API lives in `Solidity.Language`:
-
-```lean
--- Complete, finite vocabulary of classified feature families.
-Feature.all : List Feature
-Feature.info : Feature → FeatureInfo
-
--- Target semantics and explicit abstractions, independent of implementation status.
-modelFeatures : List Feature
-abstractFeatures : List Feature
-targetFeatures : List Feature
-
--- Separate implementation work from permanent scope decisions.
-presentFeatures : List Feature
-missingFeatures : List Feature
-partialFeatures : List Feature
-requirements : List (Feature × String)
-outsideScope : List Unmodelled
-rejectedByUpstream : List Feature
-
-Unmodelled.reason : Unmodelled → String
-Unmodelled.errorName : Unmodelled → Lean.Name
-```
+The Lean API (`Solidity.Language`): `Feature.all`/`Feature.info`; the scope lists
+`modelFeatures`, `abstractFeatures`, `targetFeatures`; the status lists
+`presentFeatures`, `partialFeatures`, `missingFeatures`, `requirements`;
+`outsideScope : List Unmodelled` with `Unmodelled.reason`/`errorName`; and
+`rejectedByUpstream`.
 
 Each `FeatureInfo` stores category, source spelling, scope, current status,
 required semantics, upstream source references, and local evidence paths.
@@ -108,7 +90,8 @@ execution; that extension is missing. Salt-based deployment remains excluded.
 ## What requires explicit abstraction
 
 The environment supplies caller, payment, contract identity, balance and
-timestamp; chain guarantees are premises. Arbitrary typed external calls
+timestamp; chain guarantees are premises (the list is
+[semantic-gaps.md](semantic-gaps.md), "Chain facts, as premises"). Arbitrary typed external calls
 need a call relation, typed responses, success/failure, payment rollback and
 a stated callback interpretation. Linked external library calls additionally
 need caller-storage execution context. Source `view` is not by itself a
@@ -163,18 +146,15 @@ the feature type.
 ## A subset of actual Solidity syntax
 
 The full syntax belongs to solc. Do not create a toy recursive tree and call
-it a complete Solidity AST. The catalog instead supplies this interface:
+it a complete Solidity AST. The catalog instead supplies
+`ProfileSyntax Syntax uses`, the ASTs whose used features are all
+`inProfile` (`WithinProfile`).
 
-```lean
-def WithinProfile (features : List Feature) : Prop :=
-  ∀ f ∈ features, f.inProfile
-
-def ProfileSyntax (Syntax : Type u) (uses : Syntax → List Feature) : Type u :=
-  { ast : Syntax // WithinProfile (uses ast) }
-```
-
-Instantiate `Syntax` with the actual validated AST representation. A future
-`uses` implementation must traverse initializers, inherited bodies,
+The solc importer's admission scan (`Frontend/SolcJson/Admission.lean`,
+`ScopeScan` in `Frontend/Source.lean`;
+[feature-work/source-admission.md](feature-work/source-admission.md)) is that
+extractor: a successful scan certifies its feature list is within the profile
+(`ScopeScan.within`). It must traverse initializers, inherited bodies,
 modifier bodies/arguments, callees, function-valued dispatch, ABI/error/event
 arguments and call options. It must resolve builtin identities and respect
 shadowing, rather than matching only names. Unknown nodes must fail closed.
@@ -189,9 +169,7 @@ additionally requires excluded `eventLog`. A verified canonical rethrow uses
 The many-to-many coverage ledger cannot be used directly as this extractor.
 
 Completeness of that extractor and lowering correctness are separate proof
-obligations. The wrapper alone does not establish either. This change adds
-the inventory and subset contract; it does not wire a new validator into the
-existing importer or change runtime semantics.
+obligations, not proved.
 
 ## Coverage, provenance and maintenance
 
@@ -202,15 +180,11 @@ global-variable documentation and release changelog. Source SHA-256 hashes
 and verified Git blob IDs in the manifest make the exact 19-file inspected
 corpus reproducible.
 
-The coverage ledger records 93 parser rules, 26 expression alternatives,
-195 lexer/fragment rules, 71 AST classes, 170 compiler tokens, 21 type
-categories, 43 builtin function kinds, 24 global names, 30 magic members,
-20 other native members, all nine native-member owner classes and 81 Yul
-builtin spellings. Dynamic member sets in contract, struct and module types
-are covered by declaration identity, field access and imported exports.
-Symbols can map to
-several features; shared punctuation is a coverage index, not an admission
-algorithm. Semantic requirements are additionally enumerated by hand.
+The coverage ledger maps every extracted symbol (parser rules, lexer rules,
+AST classes, tokens, type categories, builtins, globals, native members, Yul
+builtins) to feature families. Symbols can map to several features; shared
+punctuation is a coverage index, not an admission algorithm. Semantic
+requirements are additionally enumerated by hand.
 
 ANTLR and AST presence do not establish accepted Solidity: `>>>`, `years`,
 `throw`, old aliases and reserved words remain represented in some tables.
@@ -246,31 +220,3 @@ An upstream hash/symbol change requires a new review and explicit ledger
 updates; the checker never assigns newly discovered syntax a default scope.
 The normal CI check verifies generated-file consistency without downloading
 upstream sources.
-
-## Audit review
-
-Read-only coverage review identified the new `erc7201`/`slotnum` features,
-modifier placeholders omitted by ANTLR, stale upstream syntax, type metadata,
-transient-store feasibility and conditional existing abstractions. They are
-represented explicitly above and in the catalog. The finder and skeptic
-confirmed four repairs: zero-modulus `addmod`/`mulmod` raise Panic(0x12),
-`erc7201` admits runtime strings, invalid concrete modifier bodies belong to
-upstream diagnostics, and source hashes must preserve exact GitHub bytes.
-Source references now point at the relevant productions/native-member sites.
-Split elaborator inspection also confirmed existing partial selector-prefix
-ABI encoders and function-address projections; they are not missing features.
-
-Validation: the generated-file/source audit, three negative audit cases
-(missing parser classification, unknown feature ID and changed pinned source),
-module reachability and layering checks pass. All 19 upstream files were
-verified against GitHub's original blob IDs before recording their hashes.
-The Lean catalog and its metadata consistency proofs compile on Lean 4.24.0.
-The repository's doc-link check has 13 pre-existing missing references in
-unchanged vendor/external-reference files. The trust-scanner unit test passes;
-its repository inventory check has 13 pre-existing drifts in unchanged files,
-with no findings in the generated catalog. `lake build Solidity.Language.Features`
-passes. A broader `lake build Solidity` was attempted and stopped after more
-than 450 targets while compiling unchanged proof examples; it reported no
-Lean errors before stopping. Whole-library validation is therefore incomplete.
-The broader build used a writable temporary Lake cache and two workers after
-the default concurrency approached this environment's 16 GiB memory limit.

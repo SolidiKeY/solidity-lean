@@ -11,6 +11,14 @@ Both packages must use the same `lean-toolchain`. The bridge's manifest pins
 its dependencies; the external EVM modules have an upstream commit and
 verified checksums in `Bridge/vendor/EvmYul/VENDOR.md`.
 
+The root imports `Bridge/SolidityBridge/Checks.lean` (regressions and pinned
+axiom audits: only `propext`, `Classical.choice`, `Quot.sound`). The
+Plausible rule checker (`lake exe rulecheck`,
+`Bridge/SolidityBridge/PropertyChecks.lean`) is described in
+[rule-repair.md](rule-repair.md); it runs a fixed-seed corpus on a fresh
+build, rejects a deliberate bad assignment, and no test result is installed
+as a theorem.
+
 ## Loom
 
 The adapter uses upstream Loom commit
@@ -88,9 +96,9 @@ Lean continuations may use arbitrary predicates; this obligation records
 exactly what the fixed Solidity specification supplies. The core formula
 language is retained without an opaque predicate constructor.
 
-`Bridge/SolidityBridge/LoomExamples.lean` is imported by both the bridge root
-and its regression module. Its proofs exercise the real VCG, rather than
-calling the bridge soundness theorem directly:
+`Bridge/SolidityBridge/LoomExamples.lean` (imported by the root and the
+regression module) exercises the real VCG rather than calling the bridge
+soundness theorem directly:
 
 | Example | Checked behavior |
 |---|---|
@@ -98,51 +106,6 @@ calling the bridge soundness theorem directly:
 | `mixed_via_loom` | An ordinary Lean bind, a Solidity `seven()` call, and a Lean conditional compose through Loom's bind/pure/if generators. The deep post `x = 7` supplies the fact needed to prove the Lean result is `8`. `mixed_returns` also checks actual successful execution at the initial state, excluding a vacuous box specification. |
 | `panic_rejected`, `revert_accepted` | The actual `assert(false)` is rejected with a true deep post; the actual revert is accepted even with a false deep post. |
 | `invariant_via_loom` | The counting loop uses its core invariant taclet, pinned by `#step` as `whileInvariantBox`. Its generated quantified leaf is normalized and closed by `sol_close`; no Loom loop rule is applied to Solidity code. This is box partial correctness, not a termination claim. |
-
-The read-only finder/skeptic review confirmed that execution and rule
-soundness are reused, that all five halt cases agree with `afterRunTR`,
-and that the generator's fixed-post restriction and sufficient direction
-are stated accurately. The confirmed wording fix describes the existing
-core loop taclets generally, rather than implying only box invariants
-are supported. The skeptic also verified that the two vendor patches
-only make existing instance names explicit; no types or proof bodies change.
-The completion review also checked the generic Loom registration, the
-successful mixed-program witness, and the deep-post-to-Lean entailment;
-the finder and skeptic identified no remaining code issues.
-
-The original six adapter audits are retained; the front end and examples
-add ten more imported `#guard_msgs` axiom audits. All sixteen allow only
-`propext`, `Classical.choice`, and `Quot.sound`. Building the existing WP
-laws exposed a missing `Solidity.Syntax.Splice` import for their `sol[...]`
-regression; the bridge import is corrected without changing those laws.
-`Bridge/SolidityBridge/Arith/Power.lean` needed the same notation-import fix
-for its existing `sol{...}` regressions; no arithmetic statement changes.
-The full bridge gate also exposed a missing divergence alternative in
-`Bridge/SolidityBridge/Evm.lean`'s existing `compile_trace_complete` proof.
-The added case contradicts its successful-run hypothesis; its statement
-and compiler correspondence are unchanged.
-`Bridge/SolidityBridge/Arith/Lowering.lean`'s `narrowCheck_guard` equation
-also omitted the current core's self-frame panic-data branch when overflow
-mode is unset. Its right-hand side now includes `panicStmt 17` in that
-case, as the existing source does; no hypothesis or execution definition
-changes.
-
-Integration with master `c7e634f5` accounts for its new `CallMemo` layer in
-`ElabM`: `ctx_run`, `nctx_run`, and the two narrow-check equations return
-`pure` in the cache state monad, preserving any incoming cache. The cast
-capture and guard proofs quantify that cache and unfold the existing
-transformers; no elaborator implementation is copied or changed.
-
-Final validation of the deep-post interface: `./scripts/check-bridge.sh`
-passes (1,723 jobs), including both vendor hash manifests, the sixteen Loom
-axiom pins, and the printed leaf/rule regressions; the final log contains
-no errors. Per-file Lean MCP diagnostics also pass for every edited Lean
-file, including the root and `Checks` imports.
-The core source, root dependency manifest, both toolchains, and `AGENTS.md`
-are unchanged, so the core-only checks were not run.
-
-The completed interface intentionally retains this deep-post restriction.
-No extension of the core `Fml` datatype is part of the integration.
 
 ## Velvet
 
@@ -197,10 +160,7 @@ lake build Velvet VelvetExamples SolidityVelvet
 
 These examples are also on the examples site (`docs/site.md`).
 
-## October 22 milestone
-
-Implements the concrete correctness directions discussed with Claude on
-October 22, while keeping statements at the level actually proved:
+## Results by file
 
 | Direction | Checked result | Scope |
 |---|---|---|
@@ -212,93 +172,14 @@ October 22, while keeping statements at the level actually proved:
 | Adversarial reentrancy | `Bridge/SolidityBridge/Adversary.lean`: independently defined yield/resume and contract/callee LTSs; exact outcome correspondence with transfer semantics; `holdsC_iff_all_policies` and `holdsC_iff_all_callees`. | Callback-enabled transfer boundaries, including exit invariant violations and payment halts. A callee has arbitrary control/label types, entry/return relations and an LTS; `CallTr` executes its transitions. Safety covers finite completed traces **assuming invariant-preserving returns**, matching the core: violating returns cannot resume and infinite runs are not completed outcomes. Instantiating a callee with concrete Solidity callback bodies remains a correspondence obligation. |
 | First-order compactness | `FO.finite_support` in `Bridge/SolidityBridge/ModelTheory.lean`. | Semantic entailment from `SolTheory` has a finite supporting subtheory. This does not establish calculus completeness or finite support of arbitrary dynamic-logic proofs. |
 
-The bridge already includes the first-order term/formula interpretation,
-proof-system soundness, Lindenbaum Boolean algebra, rewriting systems,
-fresh names and the original loop/EVM adapters. The milestone repairs their
-drift: explicit reflexivity in reduction closures, `grow` cases, local
-valuation and ledger namespaces, noncomputable interpretations, and
-propositional proof-theory elaboration.
 
-## Review and validation
+### Arithmetic at every width (`Arith/`)
 
-The root imports `Bridge/SolidityBridge/Checks.lean`: checked/wrapping overflow,
-modal panic/exhaustion boundaries, external subtraction order and zero
-division/remainder, a context under heap growth, an operational callee with
-two internal steps, and pinned axiom audits for eight headline results.
-Those audits permit only `propext`, `Classical.choice` and `Quot.sound`.
-The separate bridge CI job builds the package and verifies the vendor hashes.
-
-Read-only finder/skeptic review found and confirmed the missing `grow` case
-in the formula-context API and the absence of bridge CI. Both are repaired,
-with an imported regression for the context. A second pass confirmed the
-upstream transformer linkage and operational callee traces; it emphasized
-the invariant-preserving-return assumption and the EVM fragment boundaries,
-which are stated above. Neither reviewer invoked Lean or edited files.
-
-Final validation: the bridge gate passes (1,523 build jobs, including the
-upstream dependency closure, regression module and axiom pins); the core
-default targets and the separate TestSuite target pass. Sort annotations
-match the frozen SolKey input: 377 taclets, 131 read-bearing annotations.
-The default sibling checkout is newer and reports one unannotated
-`localValueDelete` read; this milestone does not repin the core to it.
-Shell syntax, whitespace, bridge module reachability and new documentation
-paths pass. The core orphan check passes when its existing ignored scratch
-modules are allowed; the unfiltered check reports 25 scratch modules. The
-existing prose-path check reports 13 unrelated missing upstream/vendor
-references; none was introduced by this milestone. CI was configured locally
-but has not been run on GitHub in this task.
-
-## Bridge-theorems milestones (2026-10-24)
-
-### B0: build and dependency pins
-
-Work starts on `bridge-theorems` from `origin/master` at
-`82e75b10b180e72103be3a9e5884d1f44431a9b8`. This base already contains the
-separate Bridge package, its pinned manifest, and the opt-in
-`./run-lean.sh --bridge` gate. The default run is unchanged.
-
-The reported CSLib URL failure does not reproduce on this base:
-`https://github.com/leanprover/cslib` cloned and checked out
-`e1fea784d55eae30275c205291f12a1b4868eed3` successfully. There is no local
-`Bridge/build.log` in the fresh checkout. The current URL and revision are
-therefore retained rather than repinning a working dependency. CSLib,
-Mathlib `v4.24.0` (commit `f897ebcf72cd16f89ab4577d0c826cd14afaafc7`), Bridge,
-and the core all pin `leanprover/lean4:v4.24.0`; no toolchain change is needed.
-The external EVM vendor checksums and the bridge shell syntax checks pass.
-
-The required `cd Bridge && lake exe cache get` was attempted before the
-build, including a retry in the resumed environment. The proxy still denies
-`lakecache.blob.core.windows.net` with `CONNECT tunnel failed, response 403`,
-even though that hostname appears in the saved environment configuration.
-No public cache files were downloaded. The failed retry was stopped and
-`cd Bridge && lake build` then passed from source (1,528 jobs), including
-the imported regression module and its pinned axiom audits. Cache access is
-an optimization, not a logical prerequisite for this build.
-
-The core's default `lake build` passes under the same Lean 4.24.0 toolchain
-(453 jobs). Vendor checksums and shell syntax checks pass. Independent
-read-only finder and skeptic reviews confirm the installed dependencies
-match the pins and that the existing script is opt-in. Retaining these
-working pins is preferable to changing them solely to reproduce a stale
-URL report.
-
-B0 is complete. No configuration or manifest edit was needed: this base
-already contains the working dependency pins and opt-in runner. B0 changes
-only this validation record. The earlier October 22 results above describe
-the baseline and do not establish the requested all-width/operator coverage.
-
-### B1: arithmetic, widths, and exact failure policies
-
-`Bridge/SolidityBridge/Arith.lean` imports the family files below and preserves
-the original public theorem names. The numeric bridges cover every admitted
-integer operator and every legal Solidity width (8, 16, …, 256). Most width
-lemmas are stronger: unsigned `n ≤ 256`, signed `0 < n ≤ 256`.
-`unsignedN`/`signedN` embed **every** `BitVec n` value into the actual core
-primitive type; no overflow or operation-success assumption excludes inputs.
-
-The unqualified requested milestone is **not all green**: universal panic
-behavior and word-valued signed shift counts have the counterexamples in
-“Discrepancies”. The true equations and those findings are both retained.
+`Bridge/SolidityBridge/Arith.lean` imports the family files below. The
+numeric bridges cover every admitted integer operator and every legal
+Solidity width (8, 16, …, 256); `unsignedN`/`signedN` embed **every**
+`BitVec n` value into the core primitive type, with no overflow or
+success assumption. Two universal claims are false (see "Discrepancies").
 
 | Files under `Bridge/SolidityBridge/Arith/` | Proved behavior |
 |---|---|
@@ -348,24 +229,13 @@ by the primitive admission table. No evaluator is fabricated for those
 combinations. The extra homogeneous signed right-shift count is discussed
 below.
 
-Read-only finder/skeptic review confirmed nonvacuous width embeddings and
-numeric coverage. It identified the need to separate primitive postchecks
-from explicit preguards and expose literal source branches; both are now
-represented in the proofs and these claims. No heartbeat limit was raised.
-Some arithmetic/source modules increase recursion depth for the existing
-256-bit representations. Final validation and independent statement/doc
-review are recorded below.
+### Lattice laws and the two wp readings (`WeakestPreLaws.lean`)
 
-### B2: lattice laws and the two wp readings
+Mathlib's `Set` predicate lattice on the actual core predicates, with no
+termination, success, panic-freedom or consistency assumptions:
 
-`Bridge/SolidityBridge/WeakestPreLaws.lean` is imported by the package root.
-It uses Mathlib's `Set` predicate lattice (`Monotone`, `⊓`, `⊤`, and order
-homomorphisms) on the actual core predicates. There are no termination,
-success, panic-freedom, or postcondition-consistency assumptions in the
-monotonicity, binary-conjunction, or sequencing laws.
-
-- For the actual modality transformer `Bridge.wp`, `wp_mono`/`wpOrderHom`
-  were already present; `wp_inf` and `wp_comp` add binary conjunction and
+- For the actual modality transformer `Bridge.wp`, `wp_mono`/`wpOrderHom`,
+  `wp_inf` and `wp_comp`: monotonicity, binary conjunction and
   sequencing for arbitrary result-valued functions with the exact
   `Modality.afterRunTR` halt policy.
 - `stepWp` observes states returned by a core `TStep`. `stepWp_mono` and
@@ -380,97 +250,17 @@ monotonicity, binary-conjunction, or sequencing laws.
   is a different reading: it treats every error as `onHalt`. `rawWp`
   embeds exactly that helper into the same lattice. `rawWp_mono`,
   `rawWpOrderHom`, `rawWp_inf`, `rawWp_box_top`, and `rawWp_comp` prove its
-  four requested laws, with top preservation stated for box.
+  four laws, with top preservation stated for box.
 - `wp_eq_rawWp` proves the precise relation between the readings for
   arbitrary runs: actual wp is `(raw wp OR exhaustion) AND not panic`.
   The helper's top law therefore cannot establish top preservation for
   the actual box.
 
-The requested **unconditional top-preservation law for the actual box is
-false**, so B2 is not fully green as requested. `wp_box_top_iff` classifies
-the exact obstruction, without replacing the original statement by a
-restricted one. `assert_false_box_not_valid` and a minimal Lean `example`
-refute `[assert(false)] true`; another `example` refutes top preservation
-on the inhabited `Unit` state type. No postcondition or impossible input
-hypothesis makes those counterexamples disappear.
+The **unconditional top-preservation law for the actual box is false**:
+`wp_box_top_iff` classifies the obstruction, and `assert_false_box_not_valid`
+refutes `[assert(false)] true`.
 
-B3 is not started: its explicit B0–B2-green prerequisite is not met.
-Optional B4 is not attempted. The existing compiler and loop adapters
-remain the baseline results described above.
-
-### Discrepancies
-
-1. **Checked power overflow need not panic.** In
-   `Bridge/SolidityBridge/Arith/Power.lean`, `checked_pow_reverts` proves that
-   `checked { uint x = 2; uint y = 256; uint z = x ** y; }` reverts.
-   `checked_narrow_pow_reverts` proves the same for a `uint8` base/result.
-   Each has a minimal Lean `example` proving the run is not panic.
-   `checked_narrow_pow_panics` checks the boundary: replacing the exponent
-   by `8` at `uint8` does panic. The larger power fails the 256-bit
-   evaluator before its narrow guard. `Syntax/Checked.lean` explicitly
-   excludes full-width power from its checked guards. These are findings,
-   not corrected semantics or weakened agreement statements.
-2. **Negative signed shift counts differ from word-valued BitVec shifts.**
-   In `Bridge/SolidityBridge/Arith/Shifts.lean`, the accepted primitive `int(1) >> int(-1)`
-   returns `1`, because the core applies `Int.toNat` to the negative count.
-   BitVec's `sshiftRight'` reads the count's word as `2^256-1` and returns
-   `0`. The file contains a minimal inequality `example`. Solidity does
-   not admit a signed count; the primitive's admission/type representation
-   permits this extra case. This is not a claim that a valid Solidity
-   program with an unsigned count misexecutes.
-
-3. **Actual box does not preserve top.** `assert(false)` panics; the
-   actual box rejects panic even when its postcondition is true. This
-   agrees with the core's documented partial-correctness policy. The
-   simpler closer wp helper does preserve top under box, but differs on
-   both panic and exhaustion. The B2 file checks both readings explicitly.
-
-### Core changes wanted
-
-- Decide whether explicit `checked` mode must panic on every arithmetic
-  overflow. If so, power needs a guard before primitive evaluation,
-  including before an overflowing narrow intermediate; merely checking the
-  destination afterward cannot repair the demonstrated case.
-- Represent the shift count independently from the left operand's type:
-  reject signed counts while admitting the unsigned count of a signed
-  arithmetic right shift. The current homogeneous `BinOp.evalT` signature
-  and `BinOp.accepts` cannot express that distinction.
-
-- Preserve or explicitly reconsider the deliberate panic-rejecting box
-  policy before requesting its unconditional top-preservation law. The
-  bridge does not propose silently changing that policy to force a lattice
-  theorem. The closer helper and actual modality should continue to be
-  distinguished in any public wp API.
-
-No core file or root dependency manifest was changed. The discrepancies
-are findings; no numeric statement was weakened to conceal them.
-
-### Final bridge-theorems validation
-
-`./run-lean.sh --bridge` passes under Lean 4.24.0: the core default targets,
-the separate TestSuite target, the Bridge build (1,547 jobs), vendor hashes,
-and the frozen SolKey check (377 taclets, 131 read-bearing annotations).
-All 179 printed Bridge axiom audits, including 162 arithmetic audits,
-contain only `propext`, `Classical.choice`, and `Quot.sound`. Arithmetic
-source checks find no `sorry`, new axiom/opaque declaration, unrestricted
-simp, untyped `have`, or heartbeat-limit change. New arithmetic modules
-build without warnings. Whitespace and changed-path scope checks pass;
-the root still has zero dependency declarations and no core source diff.
-
-Independent read-only finder/skeptic passes confirm the arithmetic operand
-domains, multiplication guard protection, source-link boundaries, and the
-wp/validity statements. The final separate reviewer found no actionable theorem/doc mismatch or
-vacuous hypothesis and confirmed real numeric coverage of every legal width
-and admitted operator family. It confirmed the stated frontend boundaries
-and that the refuted laws keep B3 gated. The prose-path script still reports
-13 pre-existing missing upstream/vendor references; no reference in this
-updated document is missing. No unrelated path or core file was changed.
-
-## Independent checks and debugging (2026-10-25)
-
-This follow-up leaves arithmetic and weakest-precondition work (items 1
-and 4) to their separate implementation. It extends the other existing
-bridges rather than duplicating the core's rule-soundness proofs.
+### Independent checks
 
 - `Bridge/SolidityBridge/ExternalEvm/Environment.lean` relates SELFBALANCE
   to EvmYul's actual account-map lookup and its `stateOp` transformer,
@@ -507,58 +297,7 @@ bridges rather than duplicating the core's rule-soundness proofs.
   facts while leaving the contract theory available in full. This is
   semantic entailment, without a calculus-completeness claim.
 
-### Plausible for rule debugging
-
-Run `cd Bridge && lake exe rulecheck`, or supply `--seed 42 --samples 1000`.
-`Bridge/SolidityBridge/PropertyChecks.lean` uses Plausible (Lean's QuickCheck)
-to test 36 named signed/unsigned local-rule cases: five binary assignments,
-five compound assignments, and all four increment/decrement forms both
-alone and with assignment. Each case receives 200 samples by default.
-The generator mixes zero, one, word maximum, signed minimum and maximum
-with uniformly sampled full-width words; shrinking reduces failing operands.
-
-The checker independently executes the emitted update and the typed
-statement, compares both locals, and distinguishes ordinary revert from
-panic and fuel exhaustion. Unsupported premise shapes fail the corpus
-check rather than counting as successes. The general observation API also
-receives the global state for future storage/heap/ledger/balance tests.
-This initial corpus does not claim coverage of every taclet or random
-storage layouts. A deliberate missing-assignment mutation must be rejected
-by the same Plausible path, checking that the harness can find a bad rule.
-No test result is installed as a theorem or proof axiom.
-
-The bridge root runs the fixed-seed corpus during a fresh build. The
-`rulecheck` executable runs it again on every invocation, including when
-build artifacts are cached. Zero samples and malformed options fail.
-`AGENTS.md` and the rule-repair guide point to this workflow. All tooling
-and dependencies remain in the optional Bridge package.
-
-### Validation and review
-
-The six new/extended proof-and-test module targets and `rulecheck` build
-independently under Lean 4.24.0. The default seed passes 36 × 200 samples;
-seed 42 passes 36 × 1,000. Both runs reject the deliberate bad assignment.
-The executable rejects zero samples, malformed numbers, unknown flags and
-missing option values with exit status 2. The eight new pinned axiom audits
-permit only `propext`, `Classical.choice` and `Quot.sound`.
-
-The full Bridge root was also attempted. It remains blocked in the
-untouched item-1/item-4 files: source-notation parse errors in
-`Bridge/SolidityBridge/Arith/Power.lean` and
-`Bridge/SolidityBridge/WeakestPreLaws.lean`, and a failed reflexivity proof
-in `Bridge/SolidityBridge/Arith/Lowering.lean`. Those files are reserved for
-the separate arithmetic/WP work and were not changed here. The independent
-targets above do not import them. Vendor checksums, whitespace, core import
-layering and module reachability pass; the prose-path check retains its
-13 previously recorded missing references.
-
-Independent read-only finder/skeptic reviews found two debugger issues:
-the observation API initially exposed only locals, and build-time failures
-initially omitted their seed. Both are fixed. The reviews confirmed the
-documented program-boundary, environment-opcode and completed-callee scope;
-neither reviewer invoked Lean or edited files.
-
-### Model theory and callback trace follow-up (2026-10-25)
+### Model theory and callback traces
 
 `Bridge/SolidityBridge/ModelTheory/LowenheimSkolem.lean` adds:
 
@@ -596,16 +335,11 @@ The separate operational callee correspondence concerns one transfer boundary.
 Both results cover finite completed outcomes under invariant-preserving
 returns; even diamond safety does not assert termination of an arbitrary callee.
 
-Read-only finder/skeptic review confirmed these distinctions and the need for
-weak rather than strong equivalence when internal-step counts differ. Neither
-reviewer invoked Lean or edited files.
+### Independent EVM opcodes (`ExternalEvm/`)
 
-### Expanded independent EVM audit (2026-10-25)
-
-The vendor now contains the 53-module import closure of the pinned upstream
-primitive and full EVM dispatchers. Its Lean 4.24 compatibility patch adds one
-`UInt256` type annotation to the upstream EVM semantics, alongside the existing
-JSON compatibility patch. Original and patched checksums are retained.
+The vendor holds the import closure of the pinned upstream primitive and
+full EVM dispatchers, with two Lean 4.24 compatibility patches (a `UInt256`
+annotation, JSON); original and patched checksums are in its `VENDOR.md`.
 
 `Bridge/SolidityBridge/ExternalEvm/Dispatch.lean` connects the core's actual
 instruction steps to `EvmYul.EVM.step` on all numeric represented stacks for
@@ -625,8 +359,7 @@ with positive evaluator fuel and zero charged gas; instruction fetching and
 the gas/stack-limit/static-mode checks in the upstream `X` driver are not
 verified by these theorems.
 
-The full requested instruction correspondence is **not complete**. The
-remaining constructors and their required representation work are explicit:
+The full instruction correspondence is **not complete**; what remains:
 
 | Core instructions | Remaining obligation |
 |---|---|
@@ -644,24 +377,7 @@ injective encoding of all symbolic slots into finite EVM words. These results
 rule out an unrestricted one-opcode identity theorem; they do not rule out
 verified macro lowerings under explicit representation assumptions.
 
-Read-only finder/skeptic review confirmed the arithmetic equations and required the
-modular-balance, 160-bit-address and driver limitations above. A proof-checking
-performance issue in signed operations was resolved by normalizing finite
-multiplication by minus one before projecting to naturals, avoiding kernel
-expansion of a huge numeral. No heartbeat limit or proof axiom was added.
-
-Final follow-up validation: the independent targets build successfully
-(1,428 jobs), including the new model-theory/callback modules, dispatcher,
-stack proofs, obstruction proofs, previous loop/compiler/callee extensions,
-and `rulecheck`. Seventeen additional pinned headline audits admit only
-`propext`, `Classical.choice` and `Quot.sound`. Plausible again passes 36 ×
-1,000 samples at seed 42; its default fixed-seed 36 × 200 corpus also passes.
-Upstream and build vendor checksums, patch dry-run, whitespace, core layering,
-and reachability of all 48 Bridge modules pass. A fresh full-root build
-still fails only in the reserved arithmetic/WP files recorded above; the
-prose-path check retains the same 13 unrelated missing references.
-
-To check the new work independently of those reserved files, run from `Bridge/`:
+To build the independent targets alone, from `Bridge/`:
 
 ```sh
 lake build SolidityBridge.ModelTheory.LowenheimSkolem \
@@ -672,11 +388,46 @@ lake build SolidityBridge.ModelTheory.LowenheimSkolem \
 lake exe rulecheck --seed 42 --samples 1000
 ```
 
-Post-integration validation (2026-10-25): after merging `master` at
-`507ac062`, the full Bridge root and `scripts/check-bridge.sh` pass (1,660
-jobs), and the Plausible executable again passes 36,000 samples at seed 42.
-The earlier arithmetic/WP blockers were fixed upstream; this change does
-not modify those reserved files. Core layering and module reachability
-also pass. The separate core trust-inventory gate reports 23 existing
-drift findings from that master revision, reproduced by GitHub CI; this
-feature changes no core source or trust-inventory entries.
+## Discrepancies
+
+1. **Checked power overflow need not panic.** In
+   `Bridge/SolidityBridge/Arith/Power.lean`, `checked_pow_reverts` proves that
+   `checked { uint x = 2; uint y = 256; uint z = x ** y; }` reverts.
+   `checked_narrow_pow_reverts` proves the same for a `uint8` base/result.
+   Each has a minimal Lean `example` proving the run is not panic.
+   `checked_narrow_pow_panics` checks the boundary: replacing the exponent
+   by `8` at `uint8` does panic. The larger power fails the 256-bit
+   evaluator before its narrow guard. `Syntax/Checked.lean` explicitly
+   excludes full-width power from its checked guards. These are findings,
+   not corrected semantics or weakened agreement statements.
+2. **Negative signed shift counts differ from word-valued BitVec shifts.**
+   In `Bridge/SolidityBridge/Arith/Shifts.lean`, the accepted primitive `int(1) >> int(-1)`
+   returns `1`, because the core applies `Int.toNat` to the negative count.
+   BitVec's `sshiftRight'` reads the count's word as `2^256-1` and returns
+   `0`. The file contains a minimal inequality `example`. Solidity does
+   not admit a signed count; the primitive's admission/type representation
+   permits this extra case. This is not a claim that a valid Solidity
+   program with an unsigned count misexecutes.
+
+3. **Actual box does not preserve top.** `assert(false)` panics; the
+   actual box rejects panic even when its postcondition is true. This
+   agrees with the core's documented partial-correctness policy. The
+   simpler closer wp helper does preserve top under box, but differs on
+   both panic and exhaustion. `WeakestPreLaws.lean` checks both readings.
+
+## Core changes wanted
+
+- Decide whether explicit `checked` mode must panic on every arithmetic
+  overflow. If so, power needs a guard before primitive evaluation,
+  including before an overflowing narrow intermediate; merely checking the
+  destination afterward cannot repair the demonstrated case.
+- Represent the shift count independently from the left operand's type:
+  reject signed counts while admitting the unsigned count of a signed
+  arithmetic right shift. The current homogeneous `BinOp.evalT` signature
+  and `BinOp.accepts` cannot express that distinction.
+
+- Preserve or explicitly reconsider the deliberate panic-rejecting box
+  policy before requesting its unconditional top-preservation law. The
+  bridge does not propose silently changing that policy to force a lattice
+  theorem. The closer helper and actual modality should continue to be
+  distinguished in any public wp API.

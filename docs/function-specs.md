@@ -4,8 +4,7 @@ Per-function `requires`/`ensures` with `\old` and `\forall`, `assignable`
 frames, and the contract `invariant`, stated as one proof obligation per
 function and discharged by `sol_symex` + `sol_close` over symbolic
 parameters. The front end, the obligation, `sol_spec` and `#verify` are
-built; the last section lists what is not. Background: `docs/kernel-port.md`
-("Still open").
+built; the last section lists what is not.
 
 ## How solkey does it
 
@@ -146,50 +145,18 @@ back to `sol_spec_try` and on leftover goals searches for a counterexample
 `¬ ⊨ᶠ spec[C]{f}`, else tested by the interpreter), or given up on. `#verify C`
 runs every function with an obligation. Pinned in `Examples/Verify.lean`.
 
-Generated scalar/struct/mapping bounds can now be certified directly
-(`Calculus/DeclarationFacts.lean`, `sol_decl_facts`). Counterexample
-certification proves those quantified premises and every remaining conjunct
-before certifying a false body; it does not infer a universal premise from
-sampled keys. Exact leaf reduction and typed read reconstruction, with
-their remaining automatic-search and program-update limits, are documented
-in [complete-verification.md](complete-verification.md).
-
-`declaration_read_reduce[φ]` removes certified ranges by equivalence before
-exact read reduction, including quantified mapping bounds beneath function
-parameters. User requirements remain antecedents. The complete arithmetic
-core now handles equations and inequalities, with exact bounded typed
-contexts and guaranteed decoded counterassignments. `declaration_static_reduce[φ]`
-connects it to an automatic proof-or-counterstate API for logical combinations
-of static primitive storage/literal equalities. `declaration_checked_reduce[φ]`
-also compiles checked signed/unsigned addition and subtraction, comparisons
-and Boolean expressions, preserving intermediate overflow, failed equality
-and short-circuit order. Exact push-free updates whose output context has no
-memory locals now connect to this compiler when their resulting leaves and
-guards are supported. `declaration_parameter_reduce[φ]` additionally handles
-an outer typed universal parameter prefix, returning a proof or a counterstate
-with a failing parameter valuation. `declaration_input_reduce[φ]` adds exact
-source-program/call normalization and reconstruction of observed transaction
-fields. `#verify` uses this complete backend on its recognized fragment:
-exact positives offer `by sol_exact`, and exact negatives retain a checked
-original-state countermodel. `sol_exact?` offers an explicit proof for replay.
-`declaration_trace_reduce[φ]` supplies a separate exact source-to-query
-certificate for dependent mapping keys. Its `countermodelFromValues?` checks
-a supplied finite typed occurrence list, rejects conflicting aliases and
-returns an original-source counterstate. Every actual leaf-query run has a
-consistent finite witness bounded by its syntax. `Query.Arithmetic` in
-`Calculus/QueryArithmetic.lean` now supplies complete value selection for
-explicit alias-aware arithmetic certificates with fixed typed occurrence
-layouts. `query_countermodel[certificate]` computes and independently
-kernel-checks an actual counterstore; `TraceReduction.countermodelFromQuery`
-transports it to the original source formula. `aliasEncoding?` in
-`Calculus/AliasConstraints.lean` now recognizes existing source paths and
-compiles their alias tests using the closer's comparison and the shared
-arithmetic compiler. Its exact reference-equality theorem retains successful
-path evaluation. The generated finite read constraints characterize actual
-alias consistency; automatic source-to-occurrence flattening is still pending.
-Dependent keys, interior quantifiers, arrays, memory, ledger observations and
-remaining statement/arithmetic forms are outside that automatic fragment.
-Unsupported syntax and resource limits fall back without a semantic verdict.
+**The exact backend** `#verify` tries first: generated scalar/struct/mapping
+bounds are certified directly (`Calculus/DeclarationFacts.lean`,
+`sol_decl_facts`); `declaration_read_reduce`, `declaration_static_reduce`,
+`declaration_checked_reduce`, `declaration_parameter_reduce`,
+`declaration_input_reduce` and `declaration_trace_reduce` reduce a leaf
+exactly, returning a proof or a counterstate of the original source
+(`sol_exact`, `sol_exact?` for replay). Counterexample certification proves
+the quantified premises and every remaining conjunct; it does not infer a
+universal premise from sampled keys. The fragment is
+[complete-verification.md](complete-verification.md)'s; what stays open is
+[automation.md](automation.md), M7 "What is not proved". Unsupported syntax
+and resource limits fall back without a semantic verdict.
 
 **What is proved.** With `sol_spec`: `Examples/Benchmark/{Counter,
 SimpleStorage,Mapping,Coin}.lean` (`Coin.mint` only), and `Examples/Tactics/Specs.lean` (ERC20 with `msg.sender` itself, and `Tally`,
@@ -208,9 +175,9 @@ obligations, not `spec!`.
   `invariant[C]` compiles it (`specInv`), `ValidC invariant[C] spec[C]{f}`
   is the obligation with callbacks, and `sol_prove` runs `ProvesC`'s walk on
   it (`Calculus/CallbackDerive.lean`).  What is open, while something in
-  the obligation calls back: a loop by its invariant or at its bound, a loop
-  unwound whose body calls back, and an internal call that returns one value
-  (`y = f(x)`) or a memory or storage one.
+  the obligation calls back, is O3's "Not covered": a diamond over a loop
+  whose body calls back (unsound for any rule), and a recursive call
+  returning a reference.
 - **A recursive function's clauses** are its contract
   (`recSpecContract`, `Calculus/Recursion.lean`): `rec_auto` proves a
   recursive call by them and them by induction over the frames of the
@@ -218,17 +185,15 @@ obligations, not `spec!`.
   `f` included.  What is open: the contract assumes no invariant, and a
   recursive call under the callback reading (`ValidC`, `ValidT`) is not
   tried.
-- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inLS`.
+- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside its language
+  (`Calculus/DecideLang.lean`).
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.
-- **The corpus's 23 `concretized` rows** (TestSuite 14, SolcExpressions 4,
-  SolcControlFlow 5) fix parameters to constants, since solkey proves them
-  for all. 17 fit `sol_decide`'s fragment as symbolic diamond goals
-  `⊨ᶠ D ∧ R ∧ pre → ⟨ body ⟩ true`, with `pre` the dropped bounds, `R` the
-  ranges, and `D` the definedness of each storage word the body reads or
-  writes (a write succeeds exactly where a read of the path does,
-  `save_ok_iff_find_ok`), proved by `sol_symex; sol_decide`. The other 6
-  stay concretized: a real `push`, a storage copy, three memory rows, and
-  an `int` elaboration failure. The change is in `scripts/solkey-port.mjs`
-  and `Corpus/Basic.lean`, best done together with regenerating the corpus
-  (`docs/kernel-port.md`, "Still open").
+- **The corpus's `concretized` rows** (11 in `tests/solkey/expected.tsv`,
+  SolcExpressions and SolcControlFlow) fix parameters to constants, where
+  solkey proves them for all. Those in `sol_decide`'s fragment could be
+  symbolic diamond goals `⊨ᶠ D ∧ R ∧ pre → ⟨ body ⟩ true` (`pre` the dropped
+  bounds, `R` the ranges, `D` the definedness of each storage word the body
+  touches), proved by `sol_symex; sol_decide`. The change is in
+  `scripts/solkey-port.mjs` and `Corpus/Basic.lean`, best done when the
+  corpus is regenerated.

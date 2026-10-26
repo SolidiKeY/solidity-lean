@@ -393,9 +393,9 @@ theorem tupleReturnDiscardsComponents :
   sol_symex
   sol_close
 
-/-- A storage target among the targets (a box: the leaf's storage is read
-untyped, `docs/intrinsic.md` "What is left", and there the write to
-`total` may fail). -/
+/-- A storage target among the targets (a box: a write under the diamond at a
+path with an index leaves its leaf open, `docs/intrinsic.md` "Open", so
+the write to `total` is read under the box). -/
 theorem tupleReturnAssignsExisting :
     ⊨ᶠ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by
   sol_symex

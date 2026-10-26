@@ -1,9 +1,8 @@
 # Testing Solidity files
 
-The native `solidity-lean verify` and `list` commands expose this API with
-versioned JSON output. See [cli.md](cli.md) for their build and runtime setup,
-inspection, concrete execution and exit conventions. The JavaScript and Lean
-entry points below remain available.
+The native `solidity-lean verify` and `list` commands ([cli.md](cli.md))
+expose this API with versioned JSON output; the JavaScript and Lean entry
+points below are the same pipeline.
 
 The Lean API can compile a `.sol` source, discover its contracts and functions,
 generate their obligations, and check proofs. Run it from the repository root:
@@ -36,12 +35,8 @@ existing deployment obligations. Internal functions are helpers rather than
 independent obligations. These are verification obligations over typed states
 and all arguments, not calls at a few concrete inputs.
 
-Every plain imported source obligation additionally assumes the EVM address
-domain `address(this) < 2^160`, including constructors. This is an input
-premise; the native transaction type remains a 256-bit word.
-`--self-address A` (or Lean `solc_scoped_problems N self A`) adds the optional
-equality to a deployment address and rejects `A >= 2^160` before proof
-generation. See [source-inputs.md](source-inputs.md) for the scope and controls.
+Every plain imported source obligation also assumes `address(this) < 2^160`;
+`--self-address A` pins the address ([source-inputs.md](source-inputs.md)).
 
 Source-unit free functions and library functions can be inlined as helpers,
 resolved by solc declaration identity. Extension receivers are the first
@@ -218,43 +213,10 @@ an invalid specification. The pinned SolKey test sources and their expectation m
 `tests/migration/`; see [solkey-migration.md](solkey-migration.md) for the
 in-progress migration and its remaining coverage gaps.
 
-## Verification and review
+## Tests
 
 `node --test scripts/test-solidity.test.mjs` exercises compilation, multiple
-contracts, parameterized assertions, true and false specifications, box versus
-diamond on revert, internal/skip tags, unsupported assembly, omitted implicit
-initializers, selection and listing. Per-file Lean diagnostics check the API.
-
-The milestone's read-only finder and skeptic review confirmed the discarded
-initializer warning could silently hide coverage. The runner now retains it
-as an error, with a regression. The finder also identified whole-contract
-timeouts losing earlier rows; checkpointing now retains results and marks
-unattempted functions explicitly.
-The skeptic found contract invariants lost when the initializer member list
-replaced the plain member list. Both lists now carry the invariants. Regressions
-require an invariant-breaking function and constructor to stay pending.
-Both reviewers also identified function-level invariants becoming global
-premises and a lost `payable` flag weakening specification premises. Testing
-imports now refuse function-level invariants, and function members preserve
-`payable`; both boundaries have source-to-proof regressions.
-Each NatSpec clause is also parsed independently before it is included in a
-contract, preventing a malformed expression from introducing another member
-and changing the obligation's premises.
-
-Validation on 2026-10-15:
-
-- Per-file Lean MCP diagnostics: no errors in the changed frontend modules.
-- `node --test scripts/test-solidity.test.mjs`: 6 passed, 0 failed.
-- CLI smoke test with automatic build: `ScopedFlip.additionStorageWrite` proved.
-- SolKey's actual `benchmark/Counter.sol`, selecting `Counter.inc`: specified
-  obligation proved, with no import errors.
-- `./run-lean.sh`: default build and all `SolkeyTestSuite` modules passed;
-  the final `solkeycheck` failed on four annotation mismatches against the
-  current sibling checkout (336 taclets versus this repository's older pin).
-- `node scripts/check-orphans.mjs`: 296 reachable, zero orphaned.
-- `git diff --check`: passed.
-- `./scripts/check-doc-paths.sh`: six pre-existing missing references in
-  `vendor/LeanTeX/VENDOR.md`.
-- `./scripts/check-testsuite.sh`: the sibling SolKey TestSuite source hash
-  differs from the pinned AST fixture. Re-importing the suite and re-pinning
-  annotations are separate changes, not part of this API milestone.
+contracts, true and false specifications, box versus diamond on revert,
+internal/skip tags, unsupported assembly, omitted initializers (an error, not
+a silent omission), function-level invariants refused, `payable` kept,
+checkpointing on timeout, selection and listing.

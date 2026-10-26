@@ -55,10 +55,8 @@ kill the tool's process group, including descendant Lean workers on POSIX.
 `--no-build` requires up-to-date
 modules. Lean's existing heartbeat budgets also apply.
 
-`--self-address A` adds the existing optional deployment-address premise for
-plain obligations; addresses outside 160 bits are rejected before any jobs.
-Decimal and hexadecimal are accepted. See [source-inputs.md](source-inputs.md)
-for the exact scope of this premise.
+`--self-address A` (decimal or hexadecimal) adds the deployment-address
+premise ([source-inputs.md](source-inputs.md)).
 
 ## Inspect
 
@@ -170,34 +168,11 @@ An empty suite or one containing only skipped/helpers cannot pass. Existing
 source limitations, including imports/remappings, remain explicit frontend
 limitations; see [solidity-testing.md](solidity-testing.md).
 
-## Validation
+## Tests
 
 `node --test scripts/solidity-lean.test.mjs` exercises the compiled entry
-point, verification statuses, source premises, specified formulas, open
-goals, structured proof trees, concrete execution, exact large words,
-overloads, paths with spaces, JSON, exit codes and the frozen rule audit.
-Build the executable, `Solidity.Frontend.Cli`, and `solkeycheck` first.
-
-The required read-only finder/skeptic review confirmed verification retains
-the kernel and axiom gates. It identified unfinished inspection rows lost
-on timeout, options parsed past `--`, detached jobs surviving interruption,
-and a clean-tail fixture containing an import gap. The implementation and
-regressions address those findings. The supervisor preserves the runner's
-exit/signal/timeout metadata and kills POSIX descendant processes before exit.
-The eight CLI/interruption tests pass against the frozen compiler, and CI
-builds the native executable and runs them with that SHA-checked compiler.
-Seven existing runner regressions also pass, covering tool timeouts/signals,
-discovery, empty suites, EVM address rejection, selection/listing and overloads.
-The native executable and source adapter build successfully, and the default
-automatic-build verification command proves the ScopedFlip source fixture.
-The broader `./run-lean.sh` attempt was stopped after 650 of 653 default-build
-jobs passed: the unchanged `Examples/DecisionArrays.lean` regressions were
-still checking after more than fifteen minutes. That whole-library run and
-its subsequent TestSuite step are not claimed complete.
-
-The three new unsafe evaluation sites in `Frontend/Cli.lean` read contract
-and formula data for display or concrete execution; they do not construct
-proofs or bypass kernel checks. They are recorded in the trust inventory.
-The repository source audit still has the same 25 inventory-drift findings
-as the untouched base revision. The prose-path audit still reports its 13
-existing missing references. Layering and module reachability checks pass.
+point (statuses, source premises, open goals, proof trees, concrete runs,
+large words, overloads, paths with spaces, JSON, exit codes, interruption and
+the frozen rule audit). Build the executable, `Solidity.Frontend.Cli` and
+`solkeycheck` first. The display/execution `evalExpr` sites of
+`Frontend/Cli.lean` construct no proofs and are in the trust inventory.

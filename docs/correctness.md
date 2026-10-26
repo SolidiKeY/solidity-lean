@@ -40,65 +40,34 @@ in the [lifetime layer](lifetime.md). Its `AG`, `EF` and `AGEF` describe
 transaction-boundary safety and possible reachability; commits require actual
 successful outcomes, so an exhausted diamond does not witness reachability.
 
-## October 2026 audit repairs
+## Model choices behind the statements
 
-Transfers and sends check both available funds and the transaction's
-payment response. A successful payment to another address debits
-`selfBalance` and its ledger entry; self-payment moves neither. Refused
-transfers revert, and refused sends return false with unchanged balances.
-The EVM simulation relates spendable funds and payment responses explicitly;
-its fresh-state theorem requires `balance = bal self`.
+- **Payments.** Transfers and sends check both available funds and the
+  transaction's payment response. A successful payment to another address
+  debits `selfBalance` and its ledger entry; self-payment moves neither.
+  Refused transfers revert; refused sends return false with balances
+  unchanged. The EVM simulation's fresh-state theorem requires
+  `balance = bal self`.
+- **The payment update** records the hypothetical successful branch,
+  balance debit included, and prints as `pay(receiver, amount)` in Lean and
+  LaTeX. It does not assert that the recipient accepts: the transfer box
+  rule overapproximates, the send rules prove both success and refusal.
+  Payment updates are outside `sol_decide`'s language until it models their
+  balance effects; semantic closing still works.
+- **Callbacks** may replace storage, ledger and balance; pure/view frames
+  preserve them. The callback self-call rule proves the resumed body under
+  the non-self guard captured in the caller's state, not re-read after the
+  callback.
+- **Evaluation.** Constant arithmetic folds the whole rational expression
+  before typing or operand sequencing. Earlier call arguments and payment
+  receivers are captured before later effects under both evaluation
+  schedules. Parenthesized compound assignments stay unchecked inside
+  `unchecked`.
+- **The runner** selects callback validity from the actual obligation
+  (specified rows and bare external calls included). The call type does not
+  encode static calls, so view calls conservatively get callback semantics.
 
-The symbolic payment update records the hypothetical successful branch,
-including its balance debit, and prints as `pay(receiver, amount)` in both
-Lean and LaTeX output. The historical net-only conditional payment spelling is rejected because
-it conceals that balance change. It does not assert that the recipient accepts:
-the transfer box rule is an overapproximation, while send rules prove both
-success and refusal. Payment updates are excluded from the restricted
-decision language until that language models their balance effects;
-semantic closing remains available.
-
-Callbacks may replace storage, ledger and balance. Pure/view frames preserve
-them. The callback self-call rule proves the resumed external success body
-directly under the non-self guard captured in the caller's state: it does
-not re-read that guard after a callback changes the state.
-
-Constant arithmetic folds the whole rational expression before typing or
-operand sequencing, so intermediate negative or fractional literals do not
-force a word operation. Earlier call arguments and payment receivers are
-captured before later effects, under both configured evaluation schedules.
-Parenthesized compound assignments remain unchecked inside `unchecked`.
-
-The runner selects callback validity from the actual obligation, including
-specified rows and bare external calls. Mutability metadata is diagnostic;
-the operational call type does not yet encode static calls, so even view
-calls conservatively receive callback semantics.
-
-Read-only finder and skeptic reviews identified whole-expression folding
-at `hoistTop`, wrapping-operator preservation, unfunded legacy examples,
-fresh EVM balance agreement and recursive callback balance propagation.
-These findings are addressed by the source changes and regressions in
-`Examples/Tactics/AuditRepairs.lean`, `Examples/Tactics/Net.lean` and
-`Examples/Tactics/RunnerAudit.lean`. This remains correctness relative to
-the model: full solc/EVM equivalence, gas and static-call restrictions are
-outside the proved fragment.
-
-The final TestSuite pass also exposed a proof-cost regression in the storage
-loop's exit leaf. Its focused replay uses the invariant and stopped guard
-directly, without storage-frame saturation or a larger heartbeat budget.
-Finder and skeptic reviews confirmed that the obligation and assumptions
-are unchanged.
-
-Validation passed for the default library, `SolkeyTestSuite`, `SolidityCorpus`,
-six focused runner tests, and the frozen SolKey sort annotations (377
-taclets, 131 read-bearing annotations). The corpus also needed its remaining
-internal validity call renamed and its outcome printer made exhaustive for
-data-carrying reverts; read-only reviews confirmed these compatibility fixes.
-
-Separate checks still report existing issues: the TestSuite trust scan flags
-the preceding loop theorem's 205,000-heartbeat override, the path checker
-flags missing vendored references, and the orphan checker sees ignored scratch
-modules. The optional `Bridge` package's validity names are migrated, but its
-build still fails on separate Mathlib/CSLib port issues in `Loop.lean`,
-`Rewriting.lean` and `ModelTheory.lean`; it is not part of the passing core
-validation.
+Regressions: `Examples/Tactics/AuditRepairs.lean`,
+`Examples/Tactics/Net.lean`, `Examples/Tactics/RunnerAudit.lean`.
+Correctness is relative to the model: full solc/EVM equivalence, gas and
+static-call restrictions are outside the proved fragment.
