@@ -610,12 +610,16 @@ test("the full frozen TestSuite compiles its testing function table within defau
   assert.deepEqual(report.errors, []);
   const rows = report.results.filter(r => r.contract === 'TestSuite');
   // TestSuite at solkey 473da8944c (`TestSuite/Report.lean`): 617 functions,
-  // 563 obligations (546 derived, 17 pending) and 54 others.
+  // 563 obligations (552 derived, 11 refuted) and 54 others.
   assert.equal(rows.length, 617);
   const count = s => rows.filter(r => r.status === s).length;
-  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded')],
-    [563, 51, 2, 1]);
+  // Modern source imports report representation limits as implementation gaps;
+  // the historical fixture/report retains its original excluded row.
+  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded'), count('unsupported')],
+    [563, 51, 2, 0, 1]);
   const status = Object.fromEntries(rows.map(r => [r.function, r.status]));
+  assert.equal(status.recursiveStructMapping, 'unsupported');
+  assert.match(rows.find(r => r.function === 'recursiveStructMapping').reason, /recursive|infinite/);
   assert.equal(status.storagePushMemoryCopySource, 'ready');
   assert.equal(status.storagePushCompoundSigned, 'ready');
   assert.equal(status.whileCountsUp, 'ready');
