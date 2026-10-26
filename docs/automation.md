@@ -2971,32 +2971,123 @@ findings; each is fixed.
    `Semantics/StorageWt.lean` and `Typing/Values.lean` rows of
    `docs/module-map.md`.
 
-## M7-close · A checkpoint of the theorem (planned 2026-10-26)
+## M7-close · The M7 lanes closed (done at step 1, 2026-10-26)
 
-Not started.  It closes the M7 lanes and states what is proved so far,
-without changing the goal.
+M7-close was planned with seven steps (a checkpoint theorem modulo a
+residue, split examples, a tag).  On 2026-10-26 the user cut it to its
+first step: finish the two running lanes within one more build cycle
+each, merge what passes the full build and the strict gate, push the
+rest to the lanes' own branches, and stop.  Steps 2–5 moved to M7-next
+below, not started.
 
-1. **Finish the running lanes.** `kintneg` (`gapKIntNeg`: done, features
-   30 and 31; what is left is under "What is not proved") and
-   `apfarrays` (`gapArrayBlock`, `gapMemInnerNeg`, `gapWrittenMemory`)
-   run to completion.  A gap not done within one more build cycle is
-   committed to its branch, what is left is recorded in M7, and the lane
-   stops.  Whatever passes the full build and the strict gate
-   (`node scripts/check-automatic.mjs --strict`) is merged.
-2. **The checkpoint theorem, `DecisionTheorem'`.** For every leaf in
-   `Fml.inTarget` that is not in `Fml.Residue`, `decideGoal` either
-   closes the goal or returns a counterexample.  It needs
-   `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`, with no `sorry` and no
-   new axioms.  `Fml.Residue` is a decidable predicate that names exactly
-   the gaps still pinned, each with a one-line reason.
-3. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
+**Merged** (merge `738fdc77` on top of master `697d4236`, which had
+already taken `kintneg` up to `8f5bb273`; checked together by one
+`LEAN_NUM_THREADS=3 ./run-lean.sh` and `node scripts/check-automatic.mjs
+--strict`):
+* `kintneg` `fec5715d`…`2833329f`: features 30 (binders of KeY's `int`
+  over two words, `Calculus/KIntEncode.lean`, `decideKEnc`) and 31
+  (binders past an anchor).  Pins in `Examples/DecisionKInt.lean` by
+  kernel coverage and `*_answers`/`*_iff`; its interpreted `#eval`
+  verdicts were dropped (they overflowed the server's stack and ran over
+  30 min in `lake build`) and are recorded in a comment.
+* `apfarrays` `0254eb24`…`589f5859`: feature 32 (blocks over storage
+  arrays, `Calculus/ArrayBlock.lean`, `arrayBlockReduction?`; array paths
+  in `ApfTm`, lengths as atoms, `LFml.slotFold`).  Pins in
+  `Examples/DecisionArrays.lean`.
+* The lanes both numbered their feature 31; the merge renumbered the
+  arrays' to 32.
+
+**Decided by the two lanes**: `gapKIntNeg` (a KeY-`int` binder in a
+negative position) and a positive KeY-`int` binder in a leaf that reads
+the ledger elsewhere (`kintNetElse`), with refuted variants; `gapArrayBlock`
+(a quantified block over a dynamic storage array), with `arrayBlockBad`
+refuted and `arrayLenBlock` proved.
+
+**Still pinned, in `Fml.inTarget` and answered unknown** (details in M7,
+"What is not proved"):
+* `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`): comparisons whose
+  key sums differ past every anchor, Presburger alternation over ℤ; needs
+  an unbounded binder in `LFml`/`QFml` or Cooper's test points.
+* `gapQuantLedger` (`Examples/DecisionKInt.lean`): any negative
+  quantifier in a leaf that reads the ledger; needs the ledger cut ahead
+  of `quantReduction?`'s abstraction.
+* `gapMemInnerNeg` (`Examples/DecisionMemory.lean`): a negative quantifier
+  over a fresh memory array; needs Bradley–Manna–Sipma instantiation in
+  `Calculus/MemSwap.lean` and a memory-array floor with the length in the
+  index set.
+* `gapMemParam` (`Examples/DecisionMemory.lean`): a hidden memory binder
+  ranges over the given heap's objects, which may alias; a refutation needs
+  a heap object holding the witness words, which `decideLeafA`'s state does
+  not carry.
+* `gapMemStruct` (`Examples/DecisionMemory.lean`): a fresh struct with
+  reference members needs objects for them, so the cut is exact only at
+  heaps that have them.
+* `gapWrittenMemory` (`Examples/Decision.lean`): a hash of written memory;
+  needs `decideMem`'s cut inside `decideHash`, input equality as a negative
+  `∀` over the written arrays (after `gapMemInnerNeg`).
+
+Not pinned but recorded in M7: a one-point KeY-`int` case
+(`∀ int z. net(0) == z → z > 0`), fixed arrays and arrays below a mapping
+key in a block, cut leaves past 511 lifted nodes, KeY-`int` remainders past
+about 2^511.  Outside the target by the user's decisions:
+`gapHashNegForall` (e3″), `notApf` and the waived classes (M6).
+
+**Costs found**: interpreted verdicts take 12–15 min on some leaves
+(`gapIntAnd`, `mulmodLt`) and evaluating a goal whose only refutations are
+astronomically large builds them (out of memory); `Examples/Decision.lean`
+builds in about 460 s and `Examples/DecisionArrays.lean` in about 1500 s
+(likely its two `decide +kernel` coverage proofs, not yet profiled).  The
+300 s budget of the gate covers TestSuite modules only.
+
+## M7-next · A checkpoint of the theorem (not started)
+
+Waits for the user's go.  A fresh session starts here.
+
+**Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
+decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
+not proved", the plan); `docs/module-map.md`.  The modules:
+`Calculus/Decision.lean` (`decideLeaf`, `decideLeafA`, `decideGoal`,
+`Fml.Covered`, `Fml.CoveredA`, `Fml.inTarget`, `DecisionTheorem`), then the
+pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
+`LedgerBlock`, `KIntBinder`, `KIntEncode`, `MemSwap`, `MemHoist`,
+`HashKinds`, `HashKinds3`, `HashMove`), and the pins in
+`Examples/Decision.lean`, `Examples/DecisionHashes.lean`,
+`Examples/DecisionMemory.lean`, `Examples/DecisionKInt.lean`,
+`Examples/DecisionArrays.lean`.
+
+**Steps**:
+1. **`DecisionTheorem'`.** For every leaf in `Fml.inTarget` not in
+   `Fml.Residue`, `decideGoal` closes the goal or returns a
+   counterexample.  It needs `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`,
+   with no `sorry` and no new axioms (only propext, Classical.choice,
+   Quot.sound).  `Fml.Residue` is a decidable predicate that names
+   exactly the gaps still pinned (the six above, plus the unpinned shapes
+   the proof finds it needs), each with a one-line reason.
+2. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
    later milestones may only shrink `Fml.Residue`.
-4. **Split `Examples/Decision.lean`** into smaller modules, each building
-   in under 300 s.
-5. **Tag** the result `milestone-m7-close`, record it here, and push to
-   master.
-6. **Stop.** The milestone ends at the tag: no work toward the full
-   `DecisionTheorem`, no new lanes, no further shrinking of
-   `Fml.Residue` until the user's next instruction.
-7. Throughout: at most two lanes at a time, builds with
-   `LEAN_NUM_THREADS=4`.
+3. **Split `Examples/Decision.lean`** (and `Examples/DecisionArrays.lean`)
+   into modules that each build in under 300 s; profile the slow
+   `decide +kernel` coverage pins first.
+4. **Tag** the result `milestone-m7-next`, record it here, push to master,
+   and stop for the user's next instruction.
+
+**Rules** (the user's):
+* At most two lanes (git worktrees) at a time; each agent keeps at most
+  two files open in the Lean MCP.
+* Builds: `LEAN_NUM_THREADS=3 ./run-lean.sh`, one lane building at a
+  time, started only with at least 20 GiB available (`free -h`); kill the
+  lane's own build if available drops under 8 GiB.  Lake has no job flag;
+  without the variable a TestSuite build compiles about 20 modules at
+  1.5–3 GB each.
+* A lane is merged after its full build and the strict gate pass; never
+  `git stash`; never kill processes by a pattern that matches the
+  invoking shell.
+* Another session works in the main checkout
+  (`/home/guilherme/projects/solidity-lean`): do not commit or merge
+  there.  It has deleted `../solidity-lean-integ` twice and pushes to
+  master itself (it took `kintneg`'s early commits into master on
+  2026-10-26).  Recreate the integration worktree from origin/master
+  right before each merge
+  (`git worktree add ../solidity-lean-integ -B integ origin/master`), test
+  that the directory exists before running git there, and fetch before
+  pushing.
