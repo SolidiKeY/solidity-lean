@@ -116,7 +116,7 @@ example : True := by
   fail_if_success
     have : ⊨ᶠ dl!{ ⟨
       /// @custom:key invariant true
-      /// @custom:key invariant \\forall uint q; q < n -> q < n
+      /// @custom:key invariant \forall uint q; q < n -> q < n
       /// @custom:key decreases (n, 0)
       while (n > 0) { n−−; };
     ⟩ n == 0 } := by sol_symex; sol_close

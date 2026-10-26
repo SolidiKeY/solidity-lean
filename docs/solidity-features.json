@@ -124,7 +124,11 @@
         "Solidity/Examples/Tactics/SourceAdmissionImport.lean",
         "Solidity/Examples/Tactics/SourceLiteralsImport.lean",
         "Solidity/Examples/Tactics/SourceIdentifiersImport.lean",
-        "docs/feature-work/source-admission.md"
+        "docs/feature-work/source-admission.md",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/Shadowing.sol",
+        "scripts/source-shadowing.test.mjs",
+        "docs/feature-work/dafny-verification.md"
       ]
     },
     {
@@ -1631,7 +1635,11 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/Shadowing.sol",
+        "scripts/source-shadowing.test.mjs",
+        "docs/feature-work/dafny-verification.md"
       ]
     },
     {

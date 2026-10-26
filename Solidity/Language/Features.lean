@@ -467,7 +467,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "lexical", spelling := "identifiers; contextual from/error/revert/global/transient/layout/at",
       scope := .model, current := .limited,
       requirement := r#"Preserve declaration identity, lexical scope, shadowing and qualified names; builtin spelling alone is insufficient."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/Shadowing.sol", "scripts/source-shadowing.test.mjs", "docs/feature-work/dafny-verification.md"] }
   | .comments =>
     { category := "lexical", spelling := "// and /* */; NatSpec /// and /** */",
       scope := .model, current := .limited,
@@ -892,7 +892,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "statements", spelling := "{...}; nested scopes",
       scope := .model, current := .limited,
       requirement := r#"Allocate locals with Solidity lifetime, default initialization and shadowing; discard bindings when leaving the scope."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 456 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 456 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/Shadowing.sol", "scripts/source-shadowing.test.mjs", "docs/feature-work/dafny-verification.md"] }
   | .uncheckedBlock =>
     { category := "statements", spelling := "unchecked {...}",
       scope := .model, current := .limited,

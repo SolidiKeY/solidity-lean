@@ -198,6 +198,15 @@ import Solidity.Calculus.TermLib
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.Termination
 import Solidity.Examples.LexMetrics
+import Solidity.Calculus.LexVariant
+import Solidity.Calculus.LexVariantSound
+import Solidity.Calculus.LexDiamond
+import Solidity.Calculus.Sound.LoopLexDiamond
+import Solidity.Examples.LexVariant
+import Solidity.Examples.LexDiamond
+import Solidity.Examples.LexRuleSyntax
+import Solidity.Examples.LexTermSize
+import Solidity.Examples.Tactics.LexDiamond
 import Solidity.Examples.Preconditions
 import Solidity.Examples.SourceCounterexample
 import Solidity.Examples.Tactics.FiniteSets

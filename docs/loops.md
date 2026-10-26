@@ -115,11 +115,22 @@ statements are refused. Ordinary parenthesized scalar expressions keep their
 existing meaning. Clause uniqueness and invariant/unwind restrictions still
 apply.
 
-The explicit Lean-only `loopLexErase` step replaces the tuple annotation with
-the same invariant, quantified clauses and break flag, then uses the existing
-partial-correctness rules. It does not check metric decrease. In particular,
-ordinary box proofs are safety proofs; the diamond path remains open without a
-separate checked rule. Callback erasure has its own execution/capture theorem.
+For ordinary diamond loops with an admitted body frame, no break flag and no
+quantified invariant clauses, `whileInvariantLexDiamond` snapshots every metric
+at the loop head and after a successful body. Its verification condition requires
+all components to be defined, the invariant to be preserved, and the new tuple
+to be strictly smaller lexicographically. Every successful body turn must decrease,
+including the final turn. Later components may increase when an earlier one
+falls. Two- and three-component measures use separate typed ghost locals, with
+no bounded-word packing. Unsupported diamond shapes remain pending.
+
+The explicit Lean-only `loopLexErase` step retains the existing invariant safety
+path for box proofs and other admitted readings. It preserves quantified clauses
+and the break flag and does not check metric decrease. Callback erasure has its
+own execution/capture theorem; callback diamonds have no lexicographic bridge.
+The supported ordinary diamond path cannot bypass its metric checks by erasure.
+Ordinary diamonds still accept exhaustion: this rule does not construct a strict
+successful-termination certificate.
 
 For strict successful termination, `Semantics/LexMetrics.lean` supplies
 `LoopMetrics.SourceCertificate I G actualLoop`. Its indexed constructor retains
@@ -138,9 +149,10 @@ run proposition alone cannot identify an annotation, since execution erases it;
 source tools must retain the syntax-indexed certificate for claims that a declared
 tuple was checked. `Examples/LexMetrics.lean` proves an actual annotated source
 program succeeds and rejects bad metric certificates. Imported NatSpec coverage
-is in `scripts/lex-metrics.test.mjs`; source local-variable shadowing remains an
-explicit importer gap. Automatic tuple termination VCs and total recursive
-termination remain open.
+is in `scripts/lex-metrics.test.mjs`. Declaration-ID renaming preserves shadowed
+source locals and the innermost loop annotation binding; the additional scope
+regressions are in `scripts/source-shadowing.test.mjs`. Automatic strict
+certificates, broader metric sorts and total recursive termination remain open.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
@@ -258,9 +270,9 @@ invariant for a loop with `break` must say what holds when `brk` is set
 Unwinding and the invariant rule both apply to one loop. To keep "one rule
 per statement" (`Stmt.rule_exists`, `Rule.iff_step` in
 `Calculus/RuleExists.lean`; `Rule.premise_unique` in
-`Calculus/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
-`.inv (I : Val C .bool) (dec : Option (Val C .uint))` (an invariant and an
-optional variant), `.unwind (k : Nat)` or `.auto`. `Stmt.step`
+`Calculus/Taclet.lean`), the choice is syntax. `LoopAnn C Γ` has scalar
+`.inv` and tuple `.invLex` invariant annotations (both retaining break flags and
+quantified clauses), `.unwind (k : Nat)` and `.auto`. `Stmt.step`
 (`Calculus/Step.lean`, its loop arm `loopStep` in
 `Calculus/Blocks.lean`) dispatches:
 
@@ -271,6 +283,8 @@ optional variant), `.unwind (k : Nat)` or `.auto`. `Stmt.step`
 | `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.check` (walk: `apply checkLean r`) | same |
 | `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, `whileNoVariantDiamond`, the premise `done false` (sound, unprovable; solkey unwinds instead) |
 | `.inv I dec`, a body with no frame | `whileClose`: `done false` | same |
+| `.invLex I metrics false []`, with a frame | `loopLexErase`, then the invariant safety rule | `whileInvariantLexDiamond`: all components defined and strict decrease after every successful body turn |
+| Other `.invLex` shapes | `loopLexErase`, then the existing invariant rule | erasure reaches the conservative pending path; callback diamonds have no lexicographic bridge |
 
 In the source the annotation is solkey's specification (from solc's AST,
 `scripts/solc-ast.mjs` reads the clauses from the source by the loop's `src`

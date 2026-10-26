@@ -26,9 +26,10 @@ verification model; constructor reachability is a separate property. Discovery
 does not search for model prestates. The option is disabled initially.
 
 Proof status refers to the selected obligation. Ordinary box proofs establish
-partial correctness. Tuple `decreases` annotations are type checked and retained,
-but regular verification does not automatically prove that the tuple decreases.
-Separate successful-termination certificates are described in
+partial correctness. Supported ordinary diamond loops check tuple `decreases`
+annotations for defined components and strict lexicographic decrease after every
+successful body turn. Unsupported shapes remain pending. Ordinary diamonds
+accept exhaustion; separate successful-termination certificates are described in
 [the loop notes](https://github.com/SolidiKeY/solidity-lean/blob/master/docs/loops.md#typed-tuple-measures).
 
 ## Setup
@@ -89,7 +90,9 @@ compile and prove Solidity source through the real backend. Optional
 names a JSON results file. Linux headless runs need an X server.
 
 CI uses `vscode/test/run-host.cjs` with `@vscode/test-electron` installed only in
-its temporary test directory. For an existing offline editor executable, set
+its temporary test directory. The Lean build job also runs the host against the
+real compiler and verifier, including membership, entry audits, tuple annotations,
+lexical scope and certified witnesses. For an existing offline editor executable, set
 `VSCODE_EXECUTABLE_PATH` instead; `VSCODE_TEST_USER_DATA_DIR` and
 `VSCODE_TEST_EXTENSIONS_DIR` select isolated directories. The launcher requires
 the host's fresh JSON success report as well as a successful process exit.

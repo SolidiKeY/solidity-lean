@@ -3,6 +3,10 @@ import Solidity.Semantics.Termination
 import Solidity.Semantics.LexMetrics
 import Solidity.Examples.LexMetrics
 import Solidity.Examples.Tactics.LexAnnotations
+import Solidity.Calculus.LexVariantSound
+import Solidity.Calculus.Sound.LoopLexDiamond
+import Solidity.Examples.LexDiamond
+import Solidity.Examples.Tactics.LexDiamond
 import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.Preconditions
 import Solidity.Examples.SourceCounterexample
@@ -519,7 +523,33 @@ run_cmd do
     ``Solidity.CallbackCapture.loop_ann_all,
     ``Solidity.Stmt.CapturesAs.loopAnnotation,
     ``Solidity.LoopAnn.lex_erasure_size,
-    ``Solidity.Examples.Tactics.LexAnnotations.ordinaryBox]
+    ``Solidity.Examples.Tactics.LexAnnotations.ordinaryBox,
+    ``Solidity.LoopLex.snapshot_globT_iff_eval,
+    ``Solidity.LoopLex.snapshot_fails_of_undefined,
+    ``Solidity.LoopLex.snapshot_pushFree,
+    ``Solidity.LoopLex.snapshot_exh,
+    ``Solidity.LoopLex.snapshot_lands,
+    ``Solidity.LoopLex.snapshot_lands_eq,
+    ``Solidity.LoopLex.saveState_drop,
+    ``Solidity.LoopLex.metrics_eval_wk,
+    ``Solidity.LoopLex.metrics_eval_saved,
+    ``Solidity.LoopLex.lexFml_holds,
+    ``Solidity.LoopLex.snapshotsDecrease_holds,
+    ``Solidity.LoopLex.run_lex_or,
+    ``Solidity.LoopLex.diamondPremise_sound,
+    ``Solidity.LoopLex.diamondStep_sound,
+    ``Solidity.Stmt.step_upds_le,
+    ``Solidity.Stmt.step_upds_le_two,
+    ``Solidity.Stmt.step_tmSize_le,
+    ``Solidity.Examples.LexDiamond.exiting_source_diamond,
+    ``Solidity.Examples.LexDiamond.exhausting_source_diamond,
+    ``Solidity.Examples.LexDiamond.exhausting_not_strict,
+    ``Solidity.Examples.LexDiamond.return_flag_loop_succeeds,
+    ``Solidity.Examples.Tactics.LexDiamond.pairCountdown,
+    ``Solidity.Examples.Tactics.LexDiamond.tripleCountdown,
+    ``Solidity.Examples.Tactics.LexDiamond.pairReset,
+    ``Solidity.Examples.Tactics.LexDiamond.tripleReset,
+    ``Solidity.Examples.Tactics.LexDiamond.scalarCountdown]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

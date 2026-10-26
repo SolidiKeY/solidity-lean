@@ -438,5 +438,22 @@
     "spec-collections": "partial",
     "lemmas-predicates": "partial",
     "reason": "Membership-only finite identity filters and restricted predicates do not establish first-class collection support or complete Dafny semantic parity."
+  },
+  "implementationAudit": {
+    "status": "read-only-feasibility-review",
+    "filteredMembership": [
+      "Use a domain intrinsically typed at primitive sort p; compile the key in outer context \u0393 and only the guard under the typed binder.",
+      "Thin.drop Thin.refl is the existing weakening for the outer key; Tm.denote_wk and holds_finiteMember supply existing proof interfaces.",
+      "Preserve finiteMember semantics unchanged. The new key-denotes-some-value requirement is deliberate and applies only to new syntax.",
+      "Extend binder-aware renameSpecSyntax and specFeatures. Body.resolveSpecValues currently protects forall/exists only and must protect any new guard binder.",
+      "Cover foldMap, names, usesOld, usesOldNet, Show.prec/fmt and Counterexample.specNums traversals.",
+      "Body.loopSpec has a narrower grammar; keep new loop-annotation forms explicitly unsupported until their typed lowering is implemented."
+    ],
+    "predicates": [
+      "A source-only facility can expand earlier acyclic declarations into existing typed formulas without adding a runtime predicate environment to Contract.",
+      "Check every declaration, including unused declarations. Separate call heads from variable renaming and prohibit implicit state, result, old, net and free locals.",
+      "Introduce typed value witnesses for every actual argument, including unused formals; an unused 1/0 actual must not disappear.",
+      "Document source macro scope explicitly; no reads/decreases/opacity or recursive total-termination parity is implied."
+    ]
   }
 }

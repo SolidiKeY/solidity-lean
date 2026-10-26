@@ -31,8 +31,8 @@ The optional `Bridge/SolidityBridge/LoopFixpoint.lean` already supplied a Mathli
 fixed-point proof of generic well-founded correctness. The core addition avoids
 that dependency and adds finite witnesses, a scoped bridge and lexicographic
 examples. Typed source tuple annotations and their strict certificates are
-described below. Automatic lexicographic VCs and total recursive termination
-remain separate work. Bounded recursive contracts retain their exhaustion policy.
+described below. Total recursive termination
+remains separate work. Bounded recursive contracts retain their exhaustion policy.
 
 ## Finite primitive membership
 
@@ -263,8 +263,8 @@ The explicit Lean-only `loopLexErase` rule reaches the existing invariant proof
 without transforming runtime code. Its annotation size strictly decreases;
 ordinary and callback erasure have separate checked semantic lemmas. This supports
 the existing partial-correctness proof path without asserting that a source tuple
-decreases. The scalar variant path is preserved. Automatic tuple diamond VCs and
-broader metric sorts remain open.
+decreases. The scalar variant path is preserved. The automatic tuple diamond VC
+follow-up below extends this path; broader metric sorts remain open.
 
 `Semantics/LexMetrics.lean` evaluates the typed tuple into an unbounded nested
 natural product and proves its lexicographic relation well founded. The strict
@@ -287,8 +287,9 @@ source program, proves its successful execution and rejects equal, increasing,
 undefined and exhausted-body certificates at live, inhabited heads. A regression
 shows that runtime results themselves erase metric choice. The imported-source
 tests separately verify safety proofs, invalid components, tuple lengths and
-order, loop lowering and a retained callback-semantics proof. Source local-variable
-shadowing stays an explicit pre-existing gap, rather than a misbound tuple.
+order, loop lowering and a retained callback-semantics proof. Initial validation
+kept source local-variable shadowing as an explicit gap; the source-binding
+follow-up below closes that gap without changing the typed core's freshness rules.
 
 Read-only finder and skeptic passes checked component validation, typing, scope,
 quotation, rule partition/coverage, callback capture and the fallback ranking
@@ -302,5 +303,75 @@ tuple tests (safety, explicit gaps and kernel-checked source shapes/callback
 reading), 51 fast tests, and 23 real editor-host checks. The source trust scan
 reports 666 sources, 231 inventoried implementation/recovery sites and zero
 findings; layering finds 139 core modules with no elaborator reach and 653
-reachable modules with no orphans. Final default-library, imported-suite and
-headline-axiom checks are running against the completed change.
+reachable modules with no orphans. The headline audit accepts 492 theorems with
+only the standard axioms. The full build exposed a generic rule-printing gap:
+opaque tuple metrics escaped as an entire statement. Packed typed escapes now
+print and reconstruct the tuple annotation, while concrete source tuples still
+print every component. A typed schema regression and all 26 rule lines pass in
+a 227-job focused build. A source regression rejects the same Lean escape syntax
+inside NatSpec comments. Final global checks are still required after integration.
+
+## Source lexical scope follow-up
+
+The solc importer now assigns declaration-ID model names to declarations with
+colliding source or effective names. It preserves collision-free legacy aliases
+and reserves all source identifiers, specification binders and generated names.
+Body references still resolve through solc's `referencedDeclaration`, including
+outer-variable reads in a shadowing declaration's initializer. Source annotation
+bindings retain their lexical stack; function specifications use only the
+parameter/return scope, and named call arguments retain their original labels.
+
+The six new source tests check inner reads and writes, scope restoration, default
+and self-initialization, state/parameter/return/modifier/catch bindings, tuple
+declarations, quantified loop binders, named calls and attempted capture of an
+allocated model name. A kernel-checked tuple-shape assertion identifies the
+innermost local position. Certified counterexamples retain source parameter order
+and exact source names after model renaming; a false assertion remains pending
+without that opt-in search. The previously unsupported tuple-shadowing fixture
+and four C99 scope migration cases now prove from freshly compiled source.
+
+Read-only finder and skeptic reviews found no blocking allocator defect. Finder
+identified the older tuple test's unsupported expectation, which is updated with
+this integration. Duplicate-name scans add quadratic allocation work in the
+number of declarations; the frozen TestSuite compatibility check measures the
+existing large import. Historical migration snapshots are not rewritten to imply
+they were produced by the new importer. Constant/enum name resolution and the
+remaining source admission limits remain separate work.
+
+The complete source-addition suite passes all 17 tests (266 seconds), including
+the three tuple tests and six shadowing tests. Fast tests pass all 51 cases; the
+real editor host passes 26 checks, including source shadowing, renamed witness
+positions, exact diagnostics and hover content. CI runs both the broader source
+suite and the host against the real compiler/verifier. Its large frozen listing
+gate exposed a baseline code-generation recursion limit. Rebuilding exposed
+list spines and compiling certified 64-row report segments fixes both whole-model
+projection capture and large report serialization without increasing depth
+limits. Whole-contract and whole-report kernel equality checks remain. The actual
+617-row frozen listing gate now passes in 193 seconds (563 ready, 51 internal,
+two skipped and one unsupported recursive layout); the historical proof report
+retains its separate excluded classification.
+
+## Ordinary tuple diamond verification conditions
+
+The typed `LoopLex` snapshots retain all components in source order. Initial
+snapshots read the original context; subsequent body snapshots retain old ghost
+values while reading the changed state. The semantic bridge proves definedness,
+landing-state identity, context weakening and equivalence between the generated
+comparison formula and the well-founded natural-tuple relation.
+
+`whileInvariantLexDiamond` is selected for ordinary diamond loops with an
+admitted body frame, no break flag and no quantified invariant clauses. Its VC
+requires invariant preservation and strict decrease after every successful body
+turn, including the final turn. Unsupported shapes remain pending. The erasure
+rule has an explicit side condition preventing supported diamonds from bypassing
+these checks. Callback diamonds have no bridge. Ordinary diamond semantics still
+accept exhaustion, as a concrete exhausted-body regression demonstrates; the
+rule does not generate `SourceCertificate` values or claim strict termination.
+
+Rule metadata, printed syntax, replay and tree data retain the exact frame
+witness. The rule-size proof counts one initial update per metric and one for
+the condition, replacing the old universal two-update bound with an arity-aware
+bound. The two-update theorem remains available for existing shapes, and the
+global `16 * statement.size + 16` formula-size bound remains proved unchanged.
+Focused proof and syntax checks pass; public tactic, source and final global
+validation are in progress.

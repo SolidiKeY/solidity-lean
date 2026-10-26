@@ -140,6 +140,15 @@ See `docs/bridge.md` for scope and commands.
 | `Semantics/Run.lean` | The run, typed (M4), the only run of a statement: `SPath`/`Loc` to an `SRef`, `MLoc` to a heap address (`MAddr`: a struct member or an element of an `HRef`), `MPath` to the slot it holds (an `HRef` at a reference type), `Val.evalT` by `BinOp.evalT`/`UnOp.evalT`, `Stmt.run`/`Prog.run` on `State` (the recursor, `match` twin `runC`); halts only by `THalt` (`revert`, `panic`, `diverge`, `exhausted`: a push past the bound, decision 15), never stuck; loop induction (`TLoop.run_induct`).  Its example programs are `Examples/ScopedRuns.lean`'s. |
 | `Semantics/Termination.lean` | Dependency-free well-founded loop measures, explicit finite iteration witnesses, lexicographic reset measures, and successful termination of actual scoped loops. |
 | `Semantics/LexMetrics.lean` | Typed tuple evaluation, well-founded lexicographic natural ranks, and strict successful-loop certificates tied to the actual stored source metrics. |
+| `Calculus/LexVariant.lean` | Typed tuple snapshots and lexicographic formulas that retain every component and its source order. |
+| `Calculus/LexVariantSound.lean` | Snapshot definedness, canonical landing, state preservation and exact agreement of lexicographic formulas with natural-tuple order. |
+| `Calculus/LexDiamond.lean` | Ordinary tuple-diamond verification conditions, conservative final-turn decrease and explicit dispatch boundaries. |
+| `Calculus/Sound/LoopLexDiamond.lean` | Soundness of tuple verification conditions for ordinary diamonds, preserving their accepted-exhaustion policy. |
+| `Examples/LexVariant.lean` | Reset, equality, increase and undefined-later-component regressions for tuple snapshots and comparisons. |
+| `Examples/LexDiamond.lean` | Actual source-loop verification conditions, successful exits, accepted exhaustion and strict-certificate distinctions. |
+| `Examples/LexRuleSyntax.lean` | Exact typed replay of symbolic tuple rules, erasure disjointness and full rule-text coverage. |
+| `Examples/LexTermSize.lean` | Explicit tuple-arity update budgets, the non-lex two-update bound and the unchanged global linear node bound. |
+| `Examples/Tactics/LexDiamond.lean` | Automatic two/three-component diamonds, resets, scalar regression and rejected or unsupported tuple paths. |
 | `Calculus/Preconditions.lean` | An entry-condition check indexed by its source formula, impossible/possible certificates, uniqueness, vacuous validity and mutual exclusion. |
 | `Calculus/FiniteMembership.lean` | Typed finite equality-membership and its general denotation theorem against Theory equality. |
 | `Tools/Preconditions.lean` | Bounded kernel-checked entry-condition audits, the reusable runner API and `#audit_preconditions`. |

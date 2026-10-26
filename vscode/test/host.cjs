@@ -133,6 +133,73 @@ async function run() {
       const tupleHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', tupleDocument.uri, new vscode.Position(3, 15));
       assert.ok(tupleHovers.some(hover => hover.contents.some(content => /proved/.test(content.value || String(content)))));
       checks.push('real tuple-annotated safety proof', 'real invalid tuple component diagnostic', 'real tuple result hover');
+      const shadowSource = join(root, 'Shadowing.sol');
+      writeFileSync(shadowSource, 'pragma solidity ^0.8.34;\ncontract Shadowing {\nfunction passes() public pure { uint v = 1; { uint v = 2; assert(v == 2); } assert(v == 1); }\n/// @custom:key requires v == 2\n/// @custom:key ensures false\nfunction wrong(uint v, uint v_) public pure { { uint v = 7; assert(v == 7); } }\n}\n');
+      await config.update('counterexamples', true, vscode.ConfigurationTarget.Global);
+      const shadowDocument = await vscode.workspace.openTextDocument(shadowSource);
+      await vscode.window.showTextDocument(shadowDocument);
+      const shadowed = await api.verify(shadowDocument);
+      assert.deepEqual(shadowed.errors, []);
+      assert.equal(shadowed.results.find(row => row.function === 'passes').status, 'proved');
+      const shadowWrong = shadowed.results.find(row => row.function === 'wrong');
+      assert.equal(shadowWrong.status, 'refuted');
+      assert.deepEqual(shadowWrong.counterexample.arguments.map(argument => argument.sourceName), ['v', 'v_']);
+      assert.deepEqual(shadowWrong.counterexample.arguments.map(argument => argument.paramIndex), [0, 1]);
+      assert.equal(shadowWrong.counterexample.arguments[0].value, '2');
+      assert.match(shadowWrong.counterexample.arguments[0].modelName, /^solcLocal[0-9]+_*$/);
+      const shadowDiagnostics = vscode.languages.getDiagnostics(shadowDocument.uri).filter(d => d.source === 'Solidity Lean');
+      assert.equal(shadowDiagnostics.length, 1);
+      assert.equal(shadowDiagnostics[0].code, 'refuted');
+      assert.equal(shadowDiagnostics[0].range.start.line, 5);
+      const shadowHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', shadowDocument.uri, new vscode.Position(5, 15));
+      assert.ok(shadowHovers.some(hover => hover.contents.some(content => /certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))));
+      checks.push('real lexical shadowing proof', 'real renamed witness source positions', 'real shadowed function diagnostic and hover');
+      const tupleDiamondSource = join(root, 'TupleDiamond.sol');
+      writeFileSync(tupleDiamondSource, `pragma solidity ^0.8.34;
+contract TupleDiamond {
+function defaultDiamond() public pure {
+uint n = 1;
+/// @custom:key invariant n <= 1
+/// @custom:key decreases (n, 0)
+while(n > 0) { n--; }
+assert(n == 0);
+}
+function badEqualTuple() public pure {
+uint n = 1;
+/// @custom:key invariant n <= 1
+/// @custom:key decreases (0, 0)
+while(n > 0) { n--; }
+assert(n == 0);
+}
+}
+`);
+      await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
+      await config.update('auditPreconditions', false, vscode.ConfigurationTarget.Global);
+      const diamondDocument = await vscode.workspace.openTextDocument(tupleDiamondSource);
+      await vscode.window.showTextDocument(diamondDocument);
+      const diamonds = await api.verify(diamondDocument);
+      assert.deepEqual(diamonds.errors, []);
+      const defaultDiamond = diamonds.results.find(row => row.function === 'defaultDiamond');
+      assert.equal(defaultDiamond.tag, 'diamond', 'the positive test uses the ordinary default diamond modality');
+      assert.equal(defaultDiamond.status, 'proved');
+      const equalTuple = diamonds.results.find(row => row.function === 'badEqualTuple');
+      assert.equal(equalTuple.tag, 'diamond');
+      assert.equal(equalTuple.status, 'pending', 'an equal tuple cannot discharge the strict decrease VC');
+      assert.equal(equalTuple.counterexample, undefined, 'an open decrease VC is not a certified refutation');
+      const diamondDiagnostics = vscode.languages.getDiagnostics(diamondDocument.uri).filter(d => d.source === 'Solidity Lean');
+      assert.equal(diamondDiagnostics.length, 1);
+      assert.equal(diamondDiagnostics[0].code, 'pending');
+      assert.equal(diamondDiagnostics[0].severity, vscode.DiagnosticSeverity.Warning);
+      assert.equal(diamondDiagnostics[0].range.start.line, 9);
+      const defaultHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', diamondDocument.uri, new vscode.Position(2, 15));
+      assert.ok(defaultHovers.some(hover => hover.contents.some(content => /proved/.test(content.value || String(content)))));
+      const equalHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', diamondDocument.uri, new vscode.Position(9, 15));
+      assert.ok(equalHovers.some(hover => hover.contents.some(content => /pending/.test(content.value || String(content)))));
+      assert.ok(equalHovers.every(hover => hover.contents.every(content => !/certified model prestate/.test((content.value || String(content)).replace(/&nbsp;/g, ' ')))));
+      const diamondItems = [...api.controller.items.get(diamondDocument.uri.toString()).children].map(([, item]) => item);
+      assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.defaultDiamond()').description, 'proved');
+      assert.equal(diamondItems.find(item => item.label === 'TupleDiamond.badEqualTuple()').description, 'pending');
+      checks.push('real default-diamond tuple VC proof', 'real equal tuple pending diagnostic', 'real tuple diamond proof and pending hovers', 'real tuple diamond Test Explorer statuses');
     }
     if (process.env.SOLIDITY_LEAN_HOST_RESULT) writeFileSync(process.env.SOLIDITY_LEAN_HOST_RESULT, JSON.stringify({ passed: true, checks }));
   } catch (error) {

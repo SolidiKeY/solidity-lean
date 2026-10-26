@@ -103,27 +103,27 @@
       {
         "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleParams.cs",
         "blob": "d20dfda2f7dc0ac8718457350949cd24e747a51a",
-        "inspection": "request transport fields and default depth at lines 6–11"
+        "inspection": "request transport fields and default depth at lines 6\u201311"
       },
       {
         "path": "Source/DafnyLanguageServer/Handlers/Custom/DafnyCounterExampleHandler.cs",
         "blob": "20d70713a81d8c3e8a177c37cb75986855c16cc0",
-        "inspection": "verification synchronization, cancellation, model extraction and positioned assumptions at lines 30–112"
+        "inspection": "verification synchronization, cancellation, model extraction and positioned assumptions at lines 30\u2013112"
       },
       {
         "path": "Source/DafnyLanguageServer/Handlers/Custom/CounterExampleItem.cs",
         "blob": "d1aadd9f3bd90b51070beb9aecbd0ae43adafbd7",
-        "inspection": "response position and assumption text at lines 5–12"
+        "inspection": "response position and assumption text at lines 5\u201312"
       },
       {
         "path": "Source/DafnyLanguageServer.Test/Various/CounterExampleTest.cs",
         "blob": "d57d6dc0f1890ecac00cff52856cc075ac5adc52",
-        "inspection": "request and representative positioned/model-value regressions at lines 21–26, 43–158, 569–779 and 945–959"
+        "inspection": "request and representative positioned/model-value regressions at lines 21\u201326, 43\u2013158, 569\u2013779 and 945\u2013959"
       }
     ]
   },
   "localBaseline": "23d23377",
-  "scope": "Selected-section review of language, verification and tooling feature families, covering reference-manual chapters 3–15. Not an exhaustive AST-constructor audit or a claim of complete implementation.",
+  "scope": "Selected-section review of language, verification and tooling feature families, covering reference-manual chapters 3\u201315. Not an exhaustive AST-constructor audit or a claim of complete implementation.",
   "features": [
     {
       "id": "preconditions",
@@ -285,10 +285,15 @@
         "Solidity/Examples/LexMetrics.lean",
         "Solidity/Examples/Tactics/LexAnnotations.lean",
         "Solidity/Calculus/Sound/LoopLexErase.lean",
-        "scripts/lex-metrics.test.mjs"
+        "scripts/lex-metrics.test.mjs",
+        "Solidity/Calculus/LexVariantSound.lean",
+        "Solidity/Calculus/LexDiamond.lean",
+        "Solidity/Calculus/Sound/LoopLexDiamond.lean",
+        "Solidity/Examples/Tactics/LexDiamond.lean",
+        "Solidity/Examples/LexTermSize.lean"
       ],
-      "assessment": "Unsigned scalar variants and typed NatSpec tuple measures are supported. LoopMetrics retains every component at its type and scope; statement-indexed SourceCertificate values retain checks of the exact declared tuple and derive actual successful runs. Ordinary tuple annotations use explicit erasure for partial-correctness proofs, without automatic lexicographic termination discharge. The dependency-free core also supports arbitrary well-founded measures; the optional Bridge already had a Mathlib fixed-point theorem. Signed/general source metrics and total recursive termination remain open.",
-      "next": "Add automatic lexicographic VCs and broader metric sorts; establish total recursive termination separately from accepted exhaustion."
+      "assessment": "Unsigned scalar variants and typed NatSpec tuple measures are supported. Ordinary diamond loops with an admitted frame, no break flag and no quantified invariant clauses generate lexicographic VCs that require all components to be defined and a strict decrease after every successful body turn. Box and callback proofs retain partial-correctness erasure. Ordinary diamonds still accept exhaustion; separate statement-indexed SourceCertificate values certify successful runs of the exact declared tuple. Signed/general source metrics and total recursive termination remain open.",
+      "next": "Broaden admitted frames, invariant clauses and metric sorts; connect automatic VCs to strict successful-termination certificates and establish callback and recursive total termination."
     },
     {
       "id": "modular-calls",
@@ -651,9 +656,12 @@
         "Solidity/Semantics/Run.lean",
         "docs/solidity-features.json",
         "tests/solc/LexMetrics.sol",
-        "scripts/lex-metrics.test.mjs"
+        "scripts/lex-metrics.test.mjs",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/Shadowing.sol",
+        "scripts/source-shadowing.test.mjs"
       ],
-      "assessment": "Assignments, calls, branches, loops and break/continue already exist; admitted shapes and remaining gaps are in the Solidity inventory. Tuple annotations survive loop-local scope, renaming, nested loops and break/continue/return lowering. Local-variable shadowing remains an explicit source-import gap. Dafny match/binding guards are separate constructs.",
+      "assessment": "Assignments, calls, branches, loops and break/continue already exist; admitted shapes and remaining gaps are in the Solidity inventory. Tuple annotations survive loop-local scope, renaming, nested loops and break/continue/return lowering. Declaration-ID renaming preserves lexical shadowing, specification bindings, named call labels and counterexample source positions. Dafny match/binding guards are separate constructs.",
       "next": "Complete admitted Solidity shapes rather than introducing unrelated Dafny syntax."
     },
     {
