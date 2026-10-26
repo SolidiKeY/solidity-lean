@@ -10,8 +10,10 @@ earlier one decreases; the tuple is never packed into a bounded Solidity word.
 
 `Certificate` requires every invariant head to define every source component,
 a successful body step preserving the invariant, and a strictly decreasing
-pair of defined metric values. `Certificate.validLex` is tied to the exact tuple
-stored in the source annotation and concludes an actual successful `Stmt.run`.
+pair of defined metric values. `SourceCertificate` retains the actual statement
+as its type index, including the exact tuple stored in the source annotation.
+Its validity theorem concludes an actual successful `Stmt.run`. Successful-run
+propositions alone do not retain annotations, because execution erases them.
 A modal proof that accepts exhaustion is not such a certificate. The semantic
 invariant and terminal postcondition remain explicit proof parameters.
 
@@ -145,15 +147,44 @@ theorem no_certificate_of_body_halt {metrics : LoopMetrics C Γ n} {c : Val C Γ
   rw [he] at ho
   cases ho
 
-/-- Strict certification of exactly the tuple stored in a source loop annotation.
-The semantic invariant `I` is explicit; this theorem makes no unstated claim that
-it coincides with the annotation's boolean invariant or quantified clauses. -/
+/-- A semantic successful-run helper for a loop carrying this tuple. Execution
+erases annotations, so its result alone cannot establish that a source tuple was
+checked; use `SourceCertificate` to retain that syntactic claim. The semantic
+invariant `I` remains explicit and need not equal the annotation's invariant. -/
 theorem Certificate.validLex {metrics : LoopMetrics C Γ (n + 2)} {c : Val C Γ .bool}
     {body : Prog C Γ Γ₁} {I G : State C Γ → Prop}
     (certificate : Certificate metrics c body I G) (σ : State C Γ) (hI : I σ)
     (inv : Val C Γ .bool) (brk : Bool) (qs : List (LoopQ C Γ)) :
     ∃ o, Stmt.run σ (.loop (.invLex inv metrics brk qs) c body) = .ok o ∧ G o.st :=
   certificate.valid σ hI (.invLex inv metrics brk qs)
+
+/-- A checked source loop, indexed by its actual syntax rather than by the
+annotation-erasing run. Its only constructor retains the certificate for the
+exact stored metric tuple, condition and body. The semantic invariant and post
+remain explicit parameters; no equivalence to annotation clauses is assumed. -/
+inductive SourceCertificate (I G : State C Γ → Prop) : Stmt C Γ Γ → Prop where
+  | lex {n : Nat} {metrics : LoopMetrics C Γ (n + 2)}
+      {inv c : Val C Γ .bool} {brk : Bool} {qs : List (LoopQ C Γ)} {Γb : Ctx}
+      {body : Prog C Γ Γb} (checked : Certificate metrics c body I G) :
+      SourceCertificate I G (.loop (.invLex inv metrics brk qs) c body)
+
+/-- Projecting a source certificate forgets its syntactic evidence and produces
+the successful-run proposition for the indexed statement. -/
+theorem SourceCertificate.valid {I G : State C Γ → Prop} {s : Stmt C Γ Γ}
+    (source : SourceCertificate I G s) (σ : State C Γ) (hI : I σ) :
+    ∃ o, Stmt.run σ s = .ok o ∧ G o.st := by
+  cases source with
+  | lex checked => exact checked.valid σ hI .auto
+
+/-- Unlike a successful-run proposition, the indexed source certificate recovers
+the check of the exact tuple stored in this loop. -/
+theorem SourceCertificate.checks {metrics : LoopMetrics C Γ (n + 2)}
+    {inv c : Val C Γ .bool} {brk : Bool} {qs : List (LoopQ C Γ)}
+    {body : Prog C Γ Γ₁} {I G : State C Γ → Prop}
+    (source : SourceCertificate I G (.loop (.invLex inv metrics brk qs) c body)) :
+    Certificate metrics c body I G := by
+  cases source with
+  | lex checked => exact checked
 
 end LoopMetrics
 
@@ -163,3 +194,5 @@ end Solidity
 #guard_msgs in #print axioms Solidity.LoopMetrics.Certificate.valid
 /-- info: 'Solidity.LoopMetrics.Certificate.validLex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.LoopMetrics.Certificate.validLex
+/-- info: 'Solidity.LoopMetrics.SourceCertificate.valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.LoopMetrics.SourceCertificate.valid

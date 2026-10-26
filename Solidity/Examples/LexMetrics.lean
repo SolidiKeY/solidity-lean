@@ -62,10 +62,17 @@ theorem phase_certificate : Certificate metrics guard body (fun _ => True)
     · cases hc
     · cases hc
 
-/-- The actual source-shaped loop has a strict tuple certificate. -/
+/-- The source certificate retains the exact tuple on the annotated statement. -/
+theorem phase_source_certificate : SourceCertificate (fun _ => True)
+    (fun σ => outer σ = false ∧ inner σ = false)
+    (.loop (.invLex (.simple (.bool true)) metrics false []) guard body) :=
+  .lex phase_certificate
+
+/-- The source-indexed certificate projects to a successful semantic run. -/
 theorem phase_success (σ : State Flags FlagCtx) :
-    ∃ o, Stmt.run σ (.loop .auto guard body) = .ok o ∧ outer o.st = false ∧ inner o.st = false :=
-  phase_certificate.valid σ trivial .auto
+    ∃ o, Stmt.run σ (.loop (.invLex (.simple (.bool true)) metrics false []) guard body) = .ok o ∧
+      outer o.st = false ∧ inner o.st = false :=
+  phase_source_certificate.valid σ trivial
 
 example : NatTuple.Lt (n := 2) ((0, 100, ()) : NatTuple 2) (1, 0, ()) :=
   Prod.Lex.left _ _ (Nat.zero_lt_succ 0)
@@ -87,6 +94,20 @@ theorem equal_metrics_rejected : ¬ Certificate constantMetrics guard body (fun 
     (0, 0, ()) (0, 0, ()) trivial rfl (body_run initial) rfl rfl
   exact NatTuple.irrefl _ decreased
 
+/-- Indexed elimination cannot retag the valid source certificate with `(0, 0)`. -/
+theorem equal_source_rejected : ¬ SourceCertificate (fun _ => True)
+    (fun σ => outer σ = false ∧ inner σ = false)
+    (.loop (.invLex (.simple (.bool true)) constantMetrics false []) guard body) := by
+  intro source
+  cases source with
+  | lex checked => exact equal_metrics_rejected checked
+
+/-- The same two annotation choices are indistinguishable after execution is
+applied, which is why the source checker must retain the indexed object. -/
+theorem run_erases_metric_choice (σ : State Flags FlagCtx) :
+    Stmt.run σ (.loop (.invLex (.simple (.bool true)) metrics false []) guard body) =
+      Stmt.run σ (.loop (.invLex (.simple (.bool true)) constantMetrics false []) guard body) := rfl
+
 def reversedMetrics : LoopMetrics Flags FlagCtx 2 :=
   .cons (bit .here) (.cons (bit (.there .here)) .nil)
 
@@ -98,6 +119,14 @@ theorem increasing_metrics_rejected : ¬ Certificate reversedMetrics guard body 
     (0, 1, ()) (1, 0, ()) trivial rfl (body_run initial) rfl rfl
   exact (by decide : ¬ NatTuple.Lt (n := 2) (1, 0, ()) (0, 1, ())) decreased
 
+/-- A source certificate cannot attach the checked proof to the increasing tuple. -/
+theorem increasing_source_rejected : ¬ SourceCertificate (fun _ => True)
+    (fun σ => outer σ = false ∧ inner σ = false)
+    (.loop (.invLex (.simple (.bool true)) reversedMetrics false []) guard body) := by
+  intro source
+  cases source with
+  | lex checked => exact increasing_metrics_rejected checked
+
 def undefinedMetrics : LoopMetrics Flags FlagCtx 2 :=
   .cons (.binop .div rfl rfl (.simple (.lit 0 (by decide))) (.simple (.lit 0 (by decide))))
     (.cons (.simple (.lit 0 (by decide))) .nil)
@@ -108,6 +137,14 @@ theorem undefined_rejected : ¬ Certificate undefinedMetrics guard body (fun _ =
   apply no_certificate_of_undefined (σ := (State.init Flags).push (t := .val .bool) true |>.push (t := .val .bool) false)
     trivial (error := .revert)
   rfl
+
+/-- The indexed source object also refuses the undefined tuple annotation. -/
+theorem undefined_source_rejected : ¬ SourceCertificate (fun _ => True)
+    (fun σ => outer σ = false ∧ inner σ = false)
+    (.loop (.invLex (.simple (.bool true)) undefinedMetrics false []) guard body) := by
+  intro source
+  cases source with
+  | lex checked => exact undefined_rejected checked
 
 /-- `assume(false)` cannot discharge the successful body-run requirement. -/
 theorem exhausted_body_rejected : ¬ Certificate constantMetrics (.simple (.bool true))
@@ -144,7 +181,7 @@ theorem sourceProgram_success (σ : State Flags []) :
   have second : Stmt.run afterOuter
       (.declLocal .bool (.user "inner") (some (.simple (.bool false)))) =
       .ok ⟨afterInner, List.prefix_refl _⟩ := rfl
-  obtain ⟨o, ho, hpost⟩ := phase_certificate.validLex afterInner trivial (.simple (.bool true)) false []
+  obtain ⟨o, ho, hpost⟩ := phase_source_certificate.valid afterInner trivial
   refine ⟨o, ?_, hpost⟩
   rw [sourceProgram_shape, Prog.run_cons_ok first, Prog.run_cons_ok second,
     Prog.run_cons_ok ho, Prog.run_nil]
