@@ -41,6 +41,22 @@ contract LexDiamond {
         assert(n == 0 && m == 0);
     }
 
+    function forCountdown() public pure {
+        uint i = 2;
+        /// @custom:key invariant i <= 2
+        /// @custom:key decreases (i, 0)
+        for (; i > 0; i--) {}
+        assert(i == 0);
+    }
+
+    function doWhileCountdown() public pure {
+        uint x = 2;
+        /// @custom:key invariant x <= 2
+        /// @custom:key decreases (x, 0)
+        do { x--; } while (x > 0);
+        assert(x == 0);
+    }
+
     // These bodies count down, but the supplied tuple does not decrease.
     function equalTuple() public {
         /// @custom:key invariant true

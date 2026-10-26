@@ -21,7 +21,7 @@ test('tuple annotations preserve safety proofs and prove the supported ordinary 
 });
 
 const diamondSource = 'tests/solc/LexDiamond.sol';
-const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset'];
+const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset','forCountdown','doWhileCountdown'];
 const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','undefinedAfter','returnUnchanged','overflowMetric','reverting'];
 const conservativeDiamonds = ['breakDiamond','quantifiedDiamond','noFrameDiamond','callbackDiamond'];
 let diamondReport;
@@ -36,7 +36,7 @@ function diamondRows() {
   return rows;
 }
 
-test('source tuple diamonds prove two- and three-component countdowns and upward inner resets', () => {
+test('source tuple diamonds prove countdowns, upward inner resets and for/do lowering', () => {
   const rows = diamondRows();
   for (const name of provedDiamonds) {
     const row = rows.get(name);
