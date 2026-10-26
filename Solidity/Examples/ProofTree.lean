@@ -305,8 +305,6 @@ example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
 /--
 info: Try this:
   sol_prove (steps := 128)
-    sol_leaf
-    sol_close
 -/
 #guard_msgs in
 example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by

@@ -130,8 +130,8 @@ theorem transferThenTry :
 theorem sendEnds : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
   sol_prove
 
-/-! Its walk: `plain`, then `sendNoCallbackDiamond`'s goals, each leaf's
-closer in its `sorry`'s place. -/
+/-! Its replay enters the plain calculus, then runs `sol_prove` on the
+callback-free send. -/
 
 /--
 info: Try this:
@@ -139,8 +139,6 @@ info: Try this:
     try simp only [TransferSem.inv, TransferSem.pay]
     refine ProvesC.plain ?_ rfl
     sol_prove (steps := 128)
-    sol_leaf
-    sol_close
 -/
 #guard_msgs in
 example : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by

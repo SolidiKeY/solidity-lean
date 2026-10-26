@@ -190,6 +190,31 @@ theorem LTm.SrcL.split : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL true 
   | @litL hw p op h v hv b _ ih =>
     exact SplitOK.un (fun b' => LTm.app2 (.binop op h) (.app0 (.lit v)) b') (fun _ h' => .litL hw op h v hv h')
       (fun _ => Nat.zero_add _) ih rfl (Nat.zero_add _)
+  | @addmodL hw a b v hx hy ihx ihy =>
+    exact SplitOK.bin (fun x' y' => LTm.app3 (.modular .addmod) x' y' (.app0 (.lit v)))
+      (fun _ _ hx' hy' => .addmodL hw v hx' hy')
+      (fun _ _ => by simp only [LTm.conds, Op3.iteN, Nat.add_zero]) hx hy ihx ihy (by
+        show CondSplit.first3 a.condSplit b.condSplit none _ _ _ = _
+        cases a.condSplit <;> cases b.condSplit <;> rfl)
+      (by simp only [LTm.conds, Op3.iteN, Nat.add_zero])
+  | @mulmodL hw a k v _ ih =>
+    exact SplitOK.un (fun a' => LTm.app3 (.modular .mulmod) a' (.app0 (.lit k)) (.app0 (.lit v)))
+      (fun _ h' => .mulmodL hw k v h') (fun _ => by simp only [LTm.conds, Op3.iteN, Nat.add_zero]) ih (by
+        show CondSplit.first3 a.condSplit (none : Option (CondSplit C (.val .uint)))
+          (none : Option (CondSplit C (.val .uint))) _ _ _ = _
+        cases a.condSplit <;> rfl)
+      (by simp only [LTm.conds, Op3.iteN, Nat.add_zero])
+  | @mulmodR hw k b v _ ih =>
+    exact SplitOK.un (t := LTm.app3 (.modular .mulmod) (.app0 (.lit k)) b (.app0 (.lit v)))
+      (fun b' => LTm.app3 (.modular .mulmod) (.app0 (.lit k)) b' (.app0 (.lit v)))
+      (fun _ h' => .mulmodR hw k v h') (fun _ => by simp only [LTm.conds, Op3.iteN, Nat.add_zero, Nat.zero_add]) ih (by
+        show CondSplit.first3 (none : Option (CondSplit C (.val .uint))) b.condSplit
+          (none : Option (CondSplit C (.val .uint)))
+          (LTm.app3 (.modular .mulmod) · b (.app0 (.lit v)))
+          (LTm.app3 (.modular .mulmod) (.app0 (.lit k)) · (.app0 (.lit v)))
+          (LTm.app3 (.modular .mulmod) (.app0 (.lit k)) b ·) = _
+        cases b.condSplit <;> rfl)
+      (by simp only [LTm.conds, Op3.iteN, Nat.add_zero, Nat.zero_add])
   | @addW hw h a b hx hy ihx ihy =>
     exact SplitOK.bin (fun x' y' => LTm.app2 (.binop .addW h) x' y') (fun _ _ hx' hy' => .addW hw h hx' hy') (fun _ _ => rfl)
       hx hy ihx ihy rfl rfl
@@ -378,6 +403,37 @@ theorem LTm.SrcL.noCond : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL true
   | @litL hw p op h v hv b _ ih =>
     intro hn
     exact .litL hw op h v hv (ih (Option.map_eq_none_iff.mp hn))
+  | @addmodL hw a b v _ _ ihx ihy =>
+    intro hn
+    have h3 : CondSplit.first3 a.condSplit b.condSplit none
+        (LTm.app3 (.modular .addmod) · b (.app0 (.lit v))) (LTm.app3 (.modular .addmod) a · (.app0 (.lit v)))
+        (LTm.app3 (.modular .addmod) a b ·) = none := hn
+    unfold CondSplit.first3 at h3
+    split at h3
+    · cases h3
+    · rename_i ha
+      have h2 := CondSplit.first_none h3
+      exact .addmodL hw v (ihx ha) (ihy h2.1)
+  | @mulmodL hw a k v _ ih =>
+    intro hn
+    have h3 : CondSplit.first3 a.condSplit none none
+        (LTm.app3 (.modular .mulmod) · (.app0 (.lit k)) (.app0 (.lit v)))
+        (LTm.app3 (.modular .mulmod) a · (.app0 (.lit v)))
+        (LTm.app3 (.modular .mulmod) a (.app0 (.lit k)) ·) = none := hn
+    unfold CondSplit.first3 at h3
+    split at h3
+    · cases h3
+    · rename_i ha
+      exact .mulmodL hw k v (ih ha)
+  | @mulmodR hw k b v _ ih =>
+    intro hn
+    have h3 : CondSplit.first3 none b.condSplit none
+        (LTm.app3 (.modular .mulmod) · b (.app0 (.lit v)))
+        (LTm.app3 (.modular .mulmod) (.app0 (.lit k)) · (.app0 (.lit v)))
+        (LTm.app3 (.modular .mulmod) (.app0 (.lit k)) b ·) = none := hn
+    unfold CondSplit.first3 at h3
+    have h2 := CondSplit.first_none h3
+    exact .mulmodR hw k v (ih h2.1)
   | @addW hw h a b _ _ ihx ihy =>
     intro hn
     have h2 := CondSplit.first_none (fx := fun x' => LTm.app2 (.binop .addW h) x' _) (fy := fun y' => LTm.app2 (.binop .addW h) _ y') hn

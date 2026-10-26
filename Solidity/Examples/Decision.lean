@@ -25,14 +25,19 @@ Presburger quantifiers past the prefix (M7, step 4) are decided by the
 quantified pipeline (`quantReduction?`, `QFml.decide_iff`): an `∃` or a
 `∀` in a hypothesis, an alternation `∀∃`, beside a storage write, and one
 whose body reads storage at no variable it binds (`evenRead`: the read
-hoisted out, `hoistPrep`).
+hoisted out, `hoistPrep`; since feature 17 the `∃` of a hypothesis is
+dropped to a fresh atom first, and `evenGoal`'s, in a consequent, is
+hoisted).
 
 `Fml.inTarget` is the fragment the user named, on program-free leaves: a
 negative-position quantifier over a mapping is in it only when it is in
 the array property fragment (a conservative reading).  `decideLeaf` decides such a block over a
 mapping at a root (M7, step 5: `apf`, instantiated at the index set,
-`apfPrep`), and a block over an inner mapping whose bound index is the
-last (`rowApf`).  Two bound indices on one
+`apfPrep`), a block over an inner mapping (`rowApf`), and since features
+16 to 19 a bound index not the last of its path (`gapColumn`), at two
+depths (`gapTwoPaths`), past a member (`gapStructValue`), a `bool` block
+(`gapBoolKeyed`), a guard that may halt (`gapPartialGuard`) and a
+positive `∀` past the prefix (`gapPositiveForall`).  Two bound indices on one
 path (`gridApf`) and a strict comparison of two bound variables
 (`strictSorted`) are outside the named fragment (`docs/automation.md`, M7).
 -/
@@ -93,6 +98,11 @@ def oddWrite : Fml Bank [] :=
 hoisted out (step 4's remainder), and a false variant. -/
 def evenRead : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 7 }
 def evenReadBad : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 8 }
+/-- Since feature 17 the `∃` in those hypotheses is a positive `∀`, dropped
+to a fresh atom; a read under a negative quantifier is still hoisted: an
+`∃` in a consequent. -/
+def evenGoal : Fml Bank [] := dl!{ ∀ uint k; balances[k] == 4 → (∃ uint y; balances[k] == y + y) }
+def evenGoalBad : Fml Bank [] := dl!{ ∀ uint k; balances[k] == 5 → (∃ uint y; balances[k] == y + y) }
 
 /-! ### The array property fragment (M7, plan step 5) -/
 
@@ -201,15 +211,16 @@ section
 local instance : InContract := ⟨Allow⟩
 
 /-- A block over an inner mapping, its bound index the last (`apfPrep`,
-`MShape`): decided, and false variants (another row, a key past the guard);
+`FloorShape`): decided, and false variants (another row, a key past the guard);
 the row a parameter. -/
 def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][5] == 0 }
 def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
 def rowOut : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][12] == 0 }
 def rowVar : Fml Allow [] := dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[x][k] == 0) → allow[x][5] == 0 }
-/-- A key the solver places past `2^200`: refuted by a rebuilt mapping of a
-dozen entries, the keys between the guard's bound and the key read at the
-key (`lastIn`, `lastBound`), not `2^200` entries. -/
+/-- A key the solver places past `2^200`: refuted by a rebuilt mapping
+listed region by region, the keys past the guard's bound up to the far
+key reading the far key's word, the default (`lastIn`, `regionList`), not
+`2^200` entries. -/
 def rowFar : Fml Allow [] :=
   dl!{ ∀ uint x; (∀ uint k; k < 10 → allow[3][k] == 0) →
     x > 1606938044258990275541962092341162602522202993782792835301376 → allow[3][x] == 0 }
@@ -263,7 +274,12 @@ theorem double_iff : decideLeaf double = .proved ↔ Fml.Valid double :=
 #guard_msgs in
 #eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead, evenReadBad].map Fml.Covered
 
+/-- info: (["proved", "refuted"], [true, true]) -/
+#guard_msgs in #eval ([evenGoal, evenGoalBad].map verdict, [evenGoal, evenGoalBad].map Fml.Covered)
+
 /-- A read in a quantifier, hoisted: kernel-checked coverage. -/
+theorem evenGoal_covered : evenGoal.Covered = true := by decide +kernel
+
 theorem evenRead_covered : evenRead.Covered = true := by decide +kernel
 
 theorem evenHyp_covered : evenHyp.Covered = true := by decide +kernel
@@ -354,7 +370,7 @@ theorem apf_inTarget : apf.inTarget {} = true := by decide +kernel
 
 /-! Array property blocks (M7, step 5): each verdict exact, each refutation
 a state whose mapping holds, at each key, what the key's floor in the
-index set held (`MRoot.surgery`). -/
+index set held (`MRoot.surgery`, `FloorShape.rebuild`). -/
 
 /-- info: ["proved", "refuted", "refuted", "proved", "refuted"] -/
 #guard_msgs in #eval [apf, apfBad, apfOut, apfTwo, apfTwoBad].map verdict
@@ -372,8 +388,8 @@ theorem apf_answers : decideGoal apf ≠ .unknown := decideGoal_complete apf_cov
 theorem apfBad_iff : decideLeaf apfBad = .proved ↔ Fml.Valid apfBad :=
   decideLeaf_proved_iff apfBad_covered
 
-/-! A block over an inner mapping (`allow[3][k]`): the floor construction
-under every outer key (`MShape.rebuild`). -/
+/-! A block over an inner mapping (`allow[3][k]`): every `uint` key along
+`allow`'s mappings floored, the outer one too (`FloorShape.rebuild`). -/
 
 theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 
@@ -395,12 +411,12 @@ def allowRows (σ : State Allow []) : List Nat :=
 /-- info: ("refuted", true, true) -/
 #guard_msgs in #eval (verdict rowFar, rowFar.Covered, rowFar.inTarget {})
 
-/-! The refutation's `allow`: the row it reads (`3`) and the default row,
-twelve entries each (keys `0` to `11`: the guard's bound and its successor;
-past them the default, the far key's word), where the floor construction
-listed `2^200` keys. -/
+/-! The refutation's `allow`, listed region by region (`regionList`, a
+region left out where it holds the default, the far key's word): seven
+rows of twelve entries and an empty default row, where the floor
+construction listed `2^200` keys. -/
 
-/-- info: some [12, 12] -/
+/-- info: some [12, 12, 12, 12, 12, 12, 12, 0] -/
 #guard_msgs in #eval match decideGoal rowFar with | .refuted σ => some (allowRows σ) | _ => none
 
 /-- The far key's leaf, by the kernel. -/
@@ -446,14 +462,17 @@ section Gaps
 
 local instance : InContract := ⟨Gaps⟩
 
-/-! ### Quantifiers over contents outside `apfPrep`'s shapes -/
+/-! ### Quantifiers over contents
+
+Outside `apfPrep`'s shapes once; all but `gapArrayBlock` decided since
+(features 16 to 21, pinned below). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
 /-- A root read at a bound index at two depths. -/
 def gapTwoPaths : Fml Gaps [] :=
   dl!{ (∀ uint k; k < 10 → allow[3][k] == 0 && allow[k][3] == 0) → allow[3][5] == 0 }
-/-- A block over a mapping keyed by `int`, and by `bool`. -/
+/-- A block over a mapping keyed by `int` (feature 20), and by `bool`. -/
 def gapIntKeyed : Fml Gaps [] := dl!{ (∀ int k; k < 10 → ibal[k] == 0) → ibal[5] == 0 }
 def gapBoolKeyed : Fml Gaps [] := dl!{ (∀ bool b; flags[b] == 0) → flags[true] == 0 }
 /-- A block reading a struct's member past the bound index. -/
@@ -461,7 +480,7 @@ def gapStructValue : Fml Gaps [] := dl!{ (∀ uint k; k < 10 → accs[k].v == 0)
 /-- A block over an array. -/
 def gapArrayBlock : Fml Gaps [] :=
   dl!{ (∀ uint i; i < 3 → arr[i] == 0) → arr.length > 5 → arr[1] == 0 }
-/-- A block over the ledger. -/
+/-- A block over the ledger (feature 21). -/
 def gapLedgerBlock : Fml Gaps [] := dl!{ (∀ uint a; net(a) >= 0) → net(5) >= 0 }
 /-- A guard with a partial ground operand (`x - 1` reverts at `0`). -/
 def gapPartialGuard : Fml Gaps [] :=
@@ -470,6 +489,35 @@ def gapPartialGuard : Fml Gaps [] :=
 def gapPositiveForall : Fml Gaps [] :=
   dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == balances[k])) }
 
+/-- False variants of the shapes decided since (features 16 to 19, below):
+another column, another row, the other `bool`, another member, a guard
+that halts or bounds at most `1`, a positive `∀` that fails. -/
+def columnBad : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][4] == 0 }
+def twoPathsBad : Fml Gaps [] :=
+  dl!{ (∀ uint k; k < 10 → allow[3][k] == 0 && allow[k][3] == 0) → allow[4][5] == 0 }
+def boolKeyedBad : Fml Gaps [] := dl!{ (∀ bool b; b == true → flags[b] == 0) → flags[false] == 0 }
+def structValueBad : Fml Gaps [] :=
+  dl!{ (∀ uint k; k < 10 → accs[k].v == 0) → accs[5].live == false }
+def partialGuardBad : Fml Gaps [] :=
+  dl!{ ∀ uint x; (∀ uint k; k < x - 1 → balances[k] == 0) → balances[1] == 0 }
+def positiveForallBad : Fml Gaps [] :=
+  dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == 0)) }
+
+/-- False variants of the blocks over `int` keys and over the ledger
+(features 20 and 21, below): a key the guard leaves free, an address past
+the guard's bound. -/
+def intKeyedBad : Fml Gaps [] := dl!{ (∀ int k; k > 0 → ibal[k] == 0) → ibal[0] == 0 }
+def ledgerBlockBad : Fml Gaps [] := dl!{ (∀ uint a; a <= 4 → net(a) >= 0) → net(5) >= 0 }
+/-- Leaves of those shapes every refutation of which is astronomically
+large: in every state refuting `intTwoSides`, `ibal` holds `1` at each
+negative key and `2` at each positive one, so it lists at least
+`2^255 - 1` entries; in every state refuting `ledgerFar`, the ledger holds
+`1` at each address past `5`, `2^256 - 6` entries.  Decided by the
+theorem, their refuting states terms that no evaluation builds (below). -/
+def intTwoSides : Fml Gaps [] :=
+  dl!{ (∀ int k; k < 0 → ibal[k] == 1) → (∀ int k; k > 0 → ibal[k] == 2) → ibal[0] == 3 }
+def ledgerFar : Fml Gaps [] := dl!{ (∀ uint a; a > 5 → net(a) = 1) → net(3) = 1 }
+
 /-- Counterexamples once, decided by the arrays' pipeline (feature 10,
 below): a dynamic array's element at a checked index, and a fixed array's
 at a literal one. -/
@@ -477,6 +525,7 @@ def arrayRead : Fml Gaps [] := dl!{ ∀ uint i; i < arr.length → arr[i] == arr
 def fixedRead : Fml Gaps [] := dl!{ fixedArr[1] == fixedArr[1] }
 
 end Gaps
+
 
 section GapTerms
 
@@ -497,12 +546,48 @@ once, decided by the fresh arrays' lane (below). -/
 def gapMemory : Fml Gaps [] := .allocAll (.user "s") (.array (.prim .uint))
   (.imp (isT (.app2 (.binop .gt rfl) (.app2 .mlen (.app0 .memory) (.pvI .here)) (litU 0)))
     (.eq (.app2 .read (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (litU 0))) (litU 0)))
-/-- A binder of KeY's unbounded `int`: `∀ int z. z + 1 > z`. -/
+/-- A binder of KeY's unbounded `int`: `∀ int z. z + 1 > z`.  A
+counterexample once; proved since feature 26 (the binder read as a ledger
+entry, `Fml.zT`). -/
 def gapKIntBinder : Fml Gaps [] := .bind .box (.user "z") .kint
   (isT (.app2 (.zcmp .gt rfl) (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit 1))) (.pvZ .here)))
-/-- The ledger read past a payment: `{pay(x, 1)} net(x) >= 0`. -/
+/-- Its false variant, `∀ int z. z + 1 > 5`, and two binders,
+`∀ int z w. z > w → z > w - 1`. -/
+def kintBinderBad : Fml Gaps [] := .bind .box (.user "z") .kint
+  (isT (.app2 (.zcmp .gt rfl) (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit 1))) (.app0 (.zlit 5))))
+def kintBinderTwo : Fml Gaps [] := .bind .box (.user "z") .kint (.bind .box (.user "w") .kint
+  (.imp (isT (.app2 (.zcmp .gt rfl) (.pvZ (.there .here)) (.pvZ .here)))
+    (isT (.app2 (.zcmp .gt rfl) (.pvZ (.there .here))
+      (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit (-1))))))))
+/-- A binder of KeY's `int` in a negative position, an `∃`: `(∀ int z.
+z > 0) → 0 == 1`.  Outside feature 26 (`Fml.zOK` takes positive binders
+only). -/
+def gapKIntNeg : Fml Gaps [] :=
+  .imp (.bind .box (.user "z") .kint (isT (.app2 (.zcmp .gt rfl) (.pvZ .here) (.app0 (.zlit 0)))))
+    (.eq (litU 0) (litU 1))
+/-- The ledger read past a payment: `{pay(x, 1)} net(x) >= 0`.  A
+counterexample once; refuted since feature 25 (the symbolic state keeps
+the ledger writes, `NetW`): `x` any address but the contract's, its entry
+`0`. -/
 def gapLedgerWrite : Fml Gaps [] := allU (.upd .box (.snoc .nil (.pay xU (litU 1)))
   (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0)))))
+/-- Its true variant: `net(x) >= 1 → {pay(x, 1)} net(x) >= 0`; and the
+balance a payment leaves, `this.balance >= 2 → x != this → {pay(x, 1)}
+this.balance >= 1`, with its false variant (no `x != this`, and
+`this.balance >= 2` after: false at a balance of `2` and `x` any other
+address). -/
+def ledgerWriteOk : Fml Gaps [] := allU (.imp (isT (.app2 (.zcmp .ge rfl) (.app1 .net xU) (.app0 (.zlit 1))))
+  (.upd .box (.snoc .nil (.pay xU (litU 1)))
+    (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0))))))
+def payBalanceOk : Fml Gaps [] :=
+  allU (.imp (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))
+    (.imp (isT (.app2 (.binop .neB rfl) xU (.app0 (.env .selfAddress))))
+      (.upd .box (.snoc .nil (.pay xU (litU 1)))
+        (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 1))))))
+def payBalanceBad : Fml Gaps [] :=
+  allU (.imp (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))
+    (.upd .box (.snoc .nil (.pay xU (litU 1)))
+      (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))))
 /-- Fifty storage reads: past `Fml.exactBounded`'s bounds. -/
 def gapManyReads : Fml Gaps [] :=
   let bal (n : Nat) : Tm Gaps [.val .uint] (.val .uint) :=
@@ -523,10 +608,13 @@ def gapAnd : Fml Gaps [] := allU (isT (.app2 (.binop .le rfl) (.app2 (.binop .ba
 def gapPow : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 1)) xU)
 def gapMulW : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) xU (litU 3)) (litU 0)))
 
-/-- Still outside `Fml.Covered`: `&` at `int` with a literal (two's
-complement), and `addmod` with a literal modulus. -/
+/-- Counterexamples once (decided since feature 22, below): `&` at `int`
+with a literal (two's complement), and `addmod` with a literal modulus. -/
 def gapIntAnd : Fml Gaps [] := allI (isT (.app2 (.binop .le rfl) (.app2 (.binop .band rfl) xI (litI 6)) (litI 6)))
 def gapAddmod : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .addmod) xU xU (litU 7)) (litU 7)))
+/-- `x | 1 ≥ x` at `int`; `mulmod` by a literal factor on the left. -/
+def intOr : Fml Gaps [] := allI (isT (.app2 (.binop .ge rfl) (.app2 (.binop .bor rfl) xI (litI 1)) xI))
+def mulmodLt : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app3 (.modular .mulmod) (litU 3) xU (litU 7)) (litU 7)))
 
 /-! ### Operators with a literal operand, decided: false variants -/
 
@@ -538,25 +626,41 @@ def xorBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bx
 def andBad : Fml Gaps [] := allU (isT (.app2 (.binop .lt rfl) (.app2 (.binop .band rfl) (litU 6) xU) (litU 6)))
 def powBad : Fml Gaps [] := allU (.eq (.app2 (.binop .pow rfl) xU (litU 0)) xU)
 def mulWBad : Fml Gaps [] := allU (isT (.app2 (.binop .ge rfl) (.app2 (.binop .mulW rfl) (litU 3) xU) xU))
+def intAndBad : Fml Gaps [] := allI (isT (.app2 (.binop .lt rfl) (.app2 (.binop .band rfl) (litI 6) xI) (litI 6)))
+def intXorBad : Fml Gaps [] := allI (isT (.app2 (.binop .gt rfl) (.app2 (.binop .bxor rfl) xI (litI 1)) xI))
+def addmodBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app3 (.modular .addmod) xU (litU 1) (litU 7)) (litU 0)))
+def mulmodBad : Fml Gaps [] := allU (isT (.app2 (.binop .gt rfl) (.app3 (.modular .mulmod) xU (litU 3) (litU 7)) (litU 0)))
+/-- A zero modulus fails, as `x / 0` does. -/
+def addmodZero : Fml Gaps [] := allU (isT (.app2 (.binop .eqB rfl) (.app3 (.modular .addmod) xU (litU 1) (litU 0)) (litU 0)))
 
 end GapTerms
 
-/-! ### Hashes outside `Fml.hashCovered` -/
+/-! ### Hashes outside `Fml.hashCovered` (three of them inside since features 27 to 29) -/
 
 section GapHashes
 
 open Solidity.Examples.DecisionHashes
 open Solidity.Examples.Tactics.Hashing (Names)
 
-/-- Three kinds of hash of one string. -/
+/-- Three kinds of hash of one string: a counterexample once, decided since
+feature 28 (`Fml.tk3`, below). -/
 def gapThreeKinds : Fml Names [] :=
   strings (.imp (.eq hS hT) (.imp (.eq shaS shaT)
     (.eq (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI (.there .here)))
       (.app2 (.hash .ripemd160) (.app0 .memory) (.pvI .here)))))
 /-- Two kinds, no string hashed by both: no kind to read the other's words
-against. -/
+against.  A counterexample once, decided since feature 27 (one string of
+the second kind needs no link, below). -/
 def gapMixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.eq (rd2 "shas" rfl sT) (n2 1)))
+/-- Two kinds each hashing two strings, no string hashed by both:
+`keccak256(a) == keccak256(b) → sha256(c) == sha256(d)`.  In either order
+the second kind's strings have no word of the first to link with, and
+there are two of them (feature 27 takes one).  A counterexample once,
+decided since feature 29 (the unlinked words moved, `Fml.tk_complete_move`,
+below). -/
+def gapMixedPairs : Fml Names [] :=
+  strings4 (.imp (.eq (h4 .keccak sA) (h4 .keccak sB)) (.eq (h4 .sha256 sC) (h4 .sha256 sD)))
 /-- A hash of written memory: `∀ s t. [ s[0] = 1; ] keccak256(s) ==
 keccak256(t)`.  The verdict turns on the strings' bytes past the write,
 which no stage reads (memory, plan step 6). -/
@@ -568,8 +672,8 @@ does not read: `∀ s t. (∀ x. keccak256(s) != keccak256(t)) → !(∀ y.
 keccak256(s) == keccak256(t))`.  Valid as `holds` reads it, and false
 under the premise exactly at two strings with different bytes and one
 hash, where both inner premises fail: the only refutation is a
-collision, which cannot be exhibited.  Not decidable without narrowing
-`Fml.inTarget` (`docs/automation.md`, M7). -/
+collision, which cannot be exhibited.  Outside `Fml.inTarget` since
+decision e3″ (2026-10-26, `Fml.negPairUnread`, `docs/automation.md`, M6). -/
 def gapHashNegForall : Fml Names [] :=
   let hs : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hS
   let ht : Tm Names (.val .uint :: Γst) (.val .uint) := Tm.wk (.drop .refl) hT
@@ -588,6 +692,7 @@ theorem gapPartialGuard_inTarget : gapPartialGuard.inTarget {} = true := by deci
 theorem gapPositiveForall_inTarget : gapPositiveForall.inTarget {} = true := by decide +kernel
 theorem gapMemory_inTarget : gapMemory.inTarget {} = true := by decide +kernel
 theorem gapKIntBinder_inTarget : gapKIntBinder.inTarget {} = true := by decide +kernel
+theorem gapKIntNeg_inTarget : gapKIntNeg.inTarget {} = true := by decide +kernel
 theorem gapLedgerWrite_inTarget : gapLedgerWrite.inTarget {} = true := by decide +kernel
 theorem gapManyReads_inTarget : gapManyReads.inTarget {} = true := by decide +kernel
 theorem gapIntDiv_inTarget : gapIntDiv.inTarget {} = true := by decide +kernel
@@ -601,14 +706,159 @@ theorem gapIntAnd_inTarget : gapIntAnd.inTarget {} = true := by decide +kernel
 theorem gapAddmod_inTarget : gapAddmod.inTarget {} = true := by decide +kernel
 theorem gapThreeKinds_inTarget : gapThreeKinds.inTarget {} = true := by decide +kernel
 theorem gapMixedKinds_inTarget : gapMixedKinds.inTarget {} = true := by decide +kernel
+theorem gapMixedPairs_inTarget : gapMixedPairs.inTarget {} = true := by decide +kernel
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
-theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by decide +kernel
+/-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
+theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
 
 /-- info: true -/
 #guard_msgs in
-#eval ([gapColumn, gapTwoPaths, gapIntKeyed, gapBoolKeyed, gapStructValue, gapArrayBlock, gapLedgerBlock,
-  gapPartialGuard, gapPositiveForall, gapKIntBinder, gapLedgerWrite, gapIntAnd,
-  gapAddmod].map verdict).all (· == "unknown")
+#eval ([gapArrayBlock, gapKIntNeg].map verdict).all (· == "unknown")
+
+/-! Binders of KeY's `int` (M7, feature 26): the former counterexample
+`gapKIntBinder` proved, its false variant refuted (the binder's entry `0`),
+two binders proved; the coverage kernel-checked. -/
+
+/-- info: ["proved", "refuted", "proved"] -/
+#guard_msgs in
+#eval [gapKIntBinder, kintBinderBad, kintBinderTwo].map verdict
+
+-- The refuting state: the binder's address `0`, its entry `0`.
+/-- info: "[(0, 0)]" -/
+#guard_msgs in
+#eval match decideGoal kintBinderBad with
+  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2))
+  | _ => "-"
+
+theorem gapKIntBinder_covered : gapKIntBinder.Covered = true := by decide +kernel
+theorem kintBinderBad_covered : kintBinderBad.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied: no hash, so no premise. -/
+theorem gapKIntBinder_answers : decideGoal gapKIntBinder ≠ .unknown :=
+  decideGoal_complete gapKIntBinder_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the verdict is exact. -/
+theorem gapKIntBinder_iff : decideLeaf gapKIntBinder = .proved ↔ Fml.Valid gapKIntBinder :=
+  decideLeaf_proved_iff gapKIntBinder_covered
+
+/-! A ledger read past a payment (M7, feature 25): the former counterexample
+`gapLedgerWrite` refuted, its true variant proved, the balance a payment
+leaves read; the coverage kernel-checked. -/
+
+/-- info: ["refuted", "proved", "proved", "refuted"] -/
+#guard_msgs in
+#eval [gapLedgerWrite, ledgerWriteOk, payBalanceOk, payBalanceBad].map verdict
+
+-- The refuting state: the payee `0`, its entry `0`, the contract at `1`.
+/-- info: "[(0, 0), (0, 0), (0, 0), (0, 0)] self 1" -/
+#guard_msgs in
+#eval match decideGoal gapLedgerWrite with
+  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) ++
+      " self " ++ toString σ.tx.selfAddress.1
+  | _ => "-"
+
+theorem gapLedgerWrite_covered : gapLedgerWrite.Covered = true := by decide +kernel
+theorem ledgerWriteOk_covered : ledgerWriteOk.Covered = true := by decide +kernel
+theorem payBalanceOk_covered : payBalanceOk.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied: no hash, so no premise. -/
+theorem gapLedgerWrite_answers : decideGoal gapLedgerWrite ≠ .unknown :=
+  decideGoal_complete gapLedgerWrite_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the verdict on the true variant is exact. -/
+theorem ledgerWriteOk_iff : decideLeaf ledgerWriteOk = .proved ↔ Fml.Valid ledgerWriteOk :=
+  decideLeaf_proved_iff ledgerWriteOk_covered
+
+/-! Array property blocks past their last key and at two depths, over a
+`bool` key, past a member, with a guard that may halt, and a positive `∀`
+past the prefix (M7, features 16 to 19, 2026-10-26): each former
+counterexample proved, a false variant refuted, the coverage
+kernel-checked. -/
+
+/-- info: ["proved", "proved", "proved", "proved", "proved", "proved"] -/
+#guard_msgs in
+#eval [gapColumn, gapTwoPaths, gapBoolKeyed, gapStructValue, gapPartialGuard, gapPositiveForall].map verdict
+
+/-- info: ["refuted", "refuted", "refuted", "refuted", "refuted", "refuted"] -/
+#guard_msgs in
+#eval [columnBad, twoPathsBad, boolKeyedBad, structValueBad, partialGuardBad, positiveForallBad].map verdict
+
+theorem gapColumn_covered : gapColumn.Covered = true := by decide +kernel
+theorem gapTwoPaths_covered : gapTwoPaths.Covered = true := by decide +kernel
+theorem gapBoolKeyed_covered : gapBoolKeyed.Covered = true := by decide +kernel
+theorem gapStructValue_covered : gapStructValue.Covered = true := by decide +kernel
+theorem gapPartialGuard_covered : gapPartialGuard.Covered = true := by decide +kernel
+theorem gapPositiveForall_covered : gapPositiveForall.Covered = true := by decide +kernel
+theorem columnBad_covered : columnBad.Covered = true := by decide +kernel
+
+theorem gapColumn_answers : decideGoal gapColumn ≠ .unknown := decideGoal_complete gapColumn_covered rfl
+
+/-! Blocks over `int` keys and over the ledger (M7, features 20 and 21,
+2026-10-26): each former counterexample proved, a false variant refuted,
+the coverage kernel-checked.  An `int` block's index set has the type's
+least value `-2^255` as its base and its largest value too; the ledger's
+blocks are instantiated by the ledger pipeline's preparation stage
+(`ledgerBlockReduction?`).  A refutation rebuilds `ibal` (the ledger) region
+by region (`regionList`), a region holding the default (`0`) left out:
+`intKeyedBad`'s `ibal` lists one entry; `ledgerBlockBad`'s ledger, the
+largest address in the index set too, lists the addresses up to `5` whose
+floors' entries are not `0`, the addresses past `5` reading the free entry
+at the largest one. -/
+
+/-- info: ["proved", "proved"] -/
+#guard_msgs in #eval [gapIntKeyed, gapLedgerBlock].map verdict
+
+/-- info: ["refuted", "refuted"] -/
+#guard_msgs in #eval [intKeyedBad, ledgerBlockBad].map verdict
+
+/-- The entries of `ibal` in a state. -/
+def ibalEntries (σ : State Gaps []) : List (Int × Int) :=
+  match σ.storage.get (f := "ibal") (T := .ref (.mapping .int (.prim .uint))) rfl with
+  | .map m _ => m.toList.map fun e => (e.1.1, match e.2 with | .prim v => v.1)
+
+/-- info: some [(0, 1)] -/
+#guard_msgs in #eval match decideGoal intKeyedBad with | .refuted σ => some (ibalEntries σ) | _ => none
+
+/-- info: some [(0, 127), (4, 127), (1, 127), (2, 127), (3, 127), (5, -21)] -/
+#guard_msgs in
+#eval match decideGoal ledgerBlockBad with
+  | .refuted σ => some (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) | _ => none
+
+theorem gapIntKeyed_covered : gapIntKeyed.Covered = true := by decide +kernel
+theorem gapLedgerBlock_covered : gapLedgerBlock.Covered = true := by decide +kernel
+theorem intKeyedBad_covered : intKeyedBad.Covered = true := by decide +kernel
+theorem ledgerBlockBad_covered : ledgerBlockBad.Covered = true := by decide +kernel
+
+theorem gapIntKeyed_answers : decideGoal gapIntKeyed ≠ .unknown := decideGoal_complete gapIntKeyed_covered rfl
+theorem gapLedgerBlock_iff : decideLeaf gapLedgerBlock = .proved ↔ Fml.Valid gapLedgerBlock :=
+  decideLeaf_proved_iff gapLedgerBlock_covered
+
+/-! The astronomically large refutations: both leaves are in the fragment
+and covered by the kernel, so they answer (`decideGoal_complete`).  The
+instance the decision refutes is refuted by its arithmetic (computed for
+`intTwoSides` below, the instance's state small), and the leaf's refuting
+state is that state's mappings or ledger
+rebuilt at the floors (`ApfFml.apfInst_refute`): a term whose reads are
+proved region by region, the negative region of `2^255` keys for
+`intTwoSides` (the positive one holds the default, the largest key's `2`),
+one of `2^256 - 6` addresses for `ledgerFar`, which no evaluation builds. -/
+
+theorem intTwoSides_inTarget : intTwoSides.inTarget {} = true := by decide +kernel
+theorem ledgerFar_inTarget : ledgerFar.inTarget {} = true := by decide +kernel
+theorem intTwoSides_covered : intTwoSides.Covered = true := by decide +kernel
+theorem ledgerFar_covered : ledgerFar.Covered = true := by decide +kernel
+
+theorem intTwoSides_answers : decideGoal intTwoSides ≠ .unknown := decideGoal_complete intTwoSides_covered rfl
+theorem ledgerFar_answers : decideGoal ledgerFar ≠ .unknown := decideGoal_complete ledgerFar_covered rfl
+
+/-- info: "refuted" -/
+#guard_msgs in
+#eval match quantReduction? intTwoSides with
+  | some q => if q.Qs.isEmpty then (match q.main.verify with | .inl _ => "valid" | .inr _ => "refuted")
+    else "quantified"
+  | none => "none"
+theorem gapPartialGuard_iff : decideLeaf gapPartialGuard = .proved ↔ Fml.Valid gapPartialGuard :=
+  decideLeaf_proved_iff gapPartialGuard_covered
 
 /-! Fifty reads (M7, 2026-10-25): the flattener's budget is the leaf's own
 (`readBudget`), no longer a fixed 45 reads. -/
@@ -646,9 +896,56 @@ theorem gapOr_answers : decideGoal gapOr ≠ .unknown := decideGoal_complete gap
 theorem gapMulW_iff : decideLeaf gapMulW = .proved ↔ Fml.Valid gapMulW :=
   decideLeaf_proved_iff gapMulW_covered
 
-/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+/-! Feature 22 (2026-10-26): `&`, `|`, `^` at `int` with a literal, through
+the words (`intBit`: `int(uint(x) ⊙ word(c))`), and `addmod`/`mulmod` at a
+literal modulus, each sum modulo `c` one atom defined by cases (`amodDef`,
+`addmodLit`, `mulmodLit`): the two former counterexamples and their
+variants covered, by the kernel, so answered (`decideLeaf_complete`).  Only
+`intOr`'s verdict is evaluated here: the others take minutes each
+in the interpreter (the arithmetic over the conversion and remainder atoms;
+`gapIntAnd` 886 s, `mulmodLt` 741 s), proved for `gapIntAnd`, `gapAddmod`,
+`mulmodLt` and refuted for the `*Bad` variants and `addmodZero` when run. -/
+
+/-- info: "proved" -/
+#guard_msgs in #eval verdict intOr
+
+theorem gapIntAnd_covered : gapIntAnd.Covered = true := by decide +kernel
+theorem gapAddmod_covered : gapAddmod.Covered = true := by decide +kernel
+theorem mulmodLt_covered : mulmodLt.Covered = true := by decide +kernel
+theorem intAndBad_covered : intAndBad.Covered = true := by decide +kernel
+theorem intXorBad_covered : intXorBad.Covered = true := by decide +kernel
+theorem addmodBad_covered : addmodBad.Covered = true := by decide +kernel
+theorem mulmodBad_covered : mulmodBad.Covered = true := by decide +kernel
+theorem addmodZero_covered : addmodZero.Covered = true := by decide +kernel
+
+theorem gapAddmod_answers : decideGoal gapAddmod ≠ .unknown := decideGoal_complete gapAddmod_covered rfl
+theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_complete gapIntAnd_covered
+theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
+  decideLeaf_proved_iff gapIntAnd_covered
+
+/-- info: ["unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapWrittenMemory, verdict gapHashNegForall]
+#eval [verdict gapWrittenMemory, verdict gapHashNegForall]
+
+/-! Three kinds (feature 28, `Fml.tk3`), a second kind hashing one string
+with no hash of the first (feature 27) and several such strings (feature
+29): the former counterexamples covered, by the kernel, so answered;
+`gapThreeKinds` proved, `gapMixedKinds` and `gapMixedPairs` refuted (their
+variants in `Examples/DecisionHashes.lean`). -/
+
+theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel
+theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel
+theorem gapThreeKinds_answers : decideGoal gapThreeKinds ≠ .unknown :=
+  decideGoal_complete_hash gapThreeKinds_covered
+theorem gapMixedKinds_answers : decideGoal gapMixedKinds ≠ .unknown :=
+  decideGoal_complete_hash gapMixedKinds_covered
+theorem gapMixedPairs_covered : gapMixedPairs.hashCovered = true := by decide +kernel
+theorem gapMixedPairs_answers : decideGoal gapMixedPairs ≠ .unknown :=
+  decideGoal_complete_hash gapMixedPairs_covered
+
+/-- info: ["proved", "refuted", "refuted"] -/
+#guard_msgs in
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapMixedPairs]
 
 /-! ### Storage arrays at symbolic indices (M7, plan step 6)
 

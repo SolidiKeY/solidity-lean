@@ -216,6 +216,7 @@ operand**: `&`, `|`, `^`, `*%` (any literal), `**`, `**%` at `0` and `1`,
 `/` and `%` at `int` (any literal), `/` and `%` at `uint` by `0`. -/
 def litCutR : (op : BinOp) → (p : PrimTy) → p.Denote → Bool
   | .band, .uint, _ | .bor, .uint, _ | .bxor, .uint, _ | .mulW, .uint, _ => true
+  | .band, .int, _ | .bor, .int, _ | .bxor, .int, _ => true
   | .pow, .uint, v | .powW, .uint, v => v.val == 0 || v.val == 1
   | .div, .int, _ | .mod, .int, _ => true
   | .div, .uint, v | .mod, .uint, v => v.val == 0
@@ -224,6 +225,7 @@ def litCutR : (op : BinOp) → (p : PrimTy) → p.Denote → Bool
 /-- At a literal left operand: the commutative ones. -/
 def litCutL : BinOp → PrimTy → Bool
   | .band, .uint | .bor, .uint | .bxor, .uint | .mulW, .uint => true
+  | .band, .int | .bor, .int | .bxor, .int => true
   | _, _ => false
 
 /-- `a & b` at `uint`, either side a low mask. -/
@@ -239,6 +241,28 @@ def cutBand (prev : List (LFml C)) (h : BinOp.band.accepts .uint = true) (A B : 
       | some r, _ => bandLit prev A.term r.1.val.toNat (A.defs ++ B.defs) B.next
       | none, some r => bandLit prev B.term r.1.val.toNat (A.defs ++ B.defs) B.next
       | none, none => ⟨.app2 (.binop .band h) A.term B.term, A.defs ++ B.defs, B.next⟩
+
+/-- An `int` literal's two's complement word. -/
+def intWord (v : PrimTy.int.Denote) : PrimTy.uint.Denote :=
+  ⟨v.val % Semantics.uintBound, uint_inRange (Int.emod_nonneg _ (by decide)) (Int.emod_lt_of_pos _ (by decide))⟩
+
+/-- **`a ⊙ v` at `int`** (`⊙` one of `&`, `|`, `^`, `v` a literal) through the
+words: `int(uint(a) ⊙ word(v))`, each conversion an atom, the `uint`
+operator at the literal word written by `mk` (`bandLit`, `borLit`,
+`bxorLit`). -/
+def intBit (prev : List (LFml C)) (mk : LTm C (.val .uint) → List (LFml C) → Nat → CutTm C (.val .uint))
+    (a : LTm C (.val .int)) (ds : List (LFml C)) (m : Nat) : CutTm C (.val .int) :=
+  let U := CutTm.atom prev ds a (.app1 (.unop .toUint rfl) a) m
+  let T := mk U.term U.defs U.next
+  CutTm.atom prev T.defs T.term (.app1 (.unop .toInt rfl) T.term) T.next
+
+/-- The `uint` side of `intBit`, by the operator. -/
+def intBitMk (op : BinOp) (prev : List (LFml C)) (v : PrimTy.int.Denote) :
+    LTm C (.val .uint) → List (LFml C) → Nat → CutTm C (.val .uint) :=
+  match op with
+  | .band => fun t ds m => bandLit prev t (intWord v).val.toNat ds m
+  | .bor => fun t ds m => borLit prev t (intWord v) ds m
+  | _ => fun t ds m => bxorLit prev t (intWord v) ds m
 
 /-- A unary node, its operand cut; `prev` the definitions made before it. -/
 def cut1 : {a s : Srt} → Op1 C a s → List (LFml C) → CutTm C a → CutTm C s
@@ -322,6 +346,21 @@ def cut2 : {a b s : Srt} → Op2 C a b s → List (LFml C) → CutTm C a → Cut
     | .app0 (.lit v) => cutShl prev A v (A.defs ++ B.defs) B.next
     | _ => ⟨.app2 (.binop .shl h) A.term B.term, A.defs ++ B.defs, B.next⟩
   | _, _, _, .binop .band (p := .uint) h, prev, A, B => cutBand prev h A B
+  | _, _, _, .binop .band (p := .int) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => intBit prev (intBitMk .band prev r.1) A.term (A.defs ++ B.defs) B.next
+    | none, some r => intBit prev (intBitMk .band prev r.1) B.term (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .band h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .bor (p := .int) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => intBit prev (intBitMk .bor prev r.1) A.term (A.defs ++ B.defs) B.next
+    | none, some r => intBit prev (intBitMk .bor prev r.1) B.term (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .bor h) A.term B.term, A.defs ++ B.defs, B.next⟩
+  | _, _, _, .binop .bxor (p := .int) h, prev, A, B =>
+    match B.term.lit?, A.term.lit? with
+    | some r, _ => intBit prev (intBitMk .bxor prev r.1) A.term (A.defs ++ B.defs) B.next
+    | none, some r => intBit prev (intBitMk .bxor prev r.1) B.term (A.defs ++ B.defs) B.next
+    | none, none => ⟨.app2 (.binop .bxor h) A.term B.term, A.defs ++ B.defs, B.next⟩
   | _, _, _, .binop .addW (p := .uint) h, prev, A, B =>
     CutTm.atom prev (A.defs ++ B.defs) (.seq A.term B.term) (.app2 (.binop .addW h) A.term B.term)
       B.next
@@ -329,6 +368,94 @@ def cut2 : {a b s : Srt} → Op2 C a b s → List (LFml C) → CutTm C a → Cut
     CutTm.atom prev (A.defs ++ B.defs) (.seq A.term B.term) (.app2 (.binop .subW h) A.term B.term)
       B.next
   | _, _, _, o, _, A, B => ⟨.app2 o A.term B.term, A.defs ++ B.defs, B.next⟩
+
+/-! ## `addmod` and `mulmod` at a literal modulus
+
+Each sum modulo `c` of two operands below `c` is one atom, defined by
+cases (`amodDef`): `u + v` where `u < c - v`, `u - (c - v)` where not, under
+a guard that both are below `c`; the operands are first reduced by `c`
+through their quotients' atoms (`CutTm.rem`), and `mulmod` doubles. -/
+
+/-- `c - v` at `uint`. -/
+def LTm.subFrom (c : PrimTy.uint.Denote) (v : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  .app2 (.binop .sub rfl) (.app0 (.lit c)) v
+
+/-- `v + 1` at `uint`. -/
+def LTm.incr (v : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  .app2 (.binop .add rfl) v (.app0 (.lit uintOne))
+
+/-- `u < c - v`. -/
+def amodCond (u v : LTm C (.val .uint)) (c : PrimTy.uint.Denote) : LFml C :=
+  .eq (.app2 (.binop .lt rfl) u (LTm.subFrom c v)) (.app0 (.lit (p := .bool) true))
+
+/-- `g` returns, then `u < c` and `v < c` (`c - (u + 1)` returns). -/
+def amodGuard (g u v : LTm C (.val .uint)) (c : PrimTy.uint.Denote) : LTm C (.val .uint) :=
+  .seq g (.seq (LTm.subFrom c (LTm.incr u)) (LTm.subFrom c (LTm.incr v)))
+
+/-- **The atom `k` of `(u + v) mod c`** for `u, v < c`, by cases: `u + v`
+where `u < c - v`, `u - (c - v)` where not. -/
+def amodDef (g u v : LTm C (.val .uint)) (c : PrimTy.uint.Denote) (k : Nat) : LFml C :=
+  .imp (.eq (amodGuard g u v c) (amodGuard g u v c))
+    (.and (.imp (amodCond u v c) (.eq (.app2 (.binop .add rfl) u v) (.var k)))
+      (.imp (.not (amodCond u v c)) (.eq (.app2 (.binop .sub rfl) u (LTm.subFrom c v)) (.var k))))
+
+/-- `(u + v) mod c` as the atom `m`, sequenced after `g`. -/
+def amodAtom (g u v : LTm C (.val .uint)) (c : PrimTy.uint.Denote) (ds : List (LFml C)) (m : Nat) :
+    CutTm C (.val .uint) :=
+  ⟨.seq g (.var m), ds ++ [amodDef g u v c m], m + 1⟩
+
+/-- **`addmod(a, b, c)` at a nonzero literal `c`**: the operands' remainders
+by `c` through their quotients' atoms, and one atom for their sum modulo
+`c` (`amodAtom`), sequenced after both operands. -/
+def addmodLit (prev : List (LFml C)) (a b : LTm C (.val .uint)) (c : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : CutTm C (.val .uint) :=
+  let RA := CutTm.rem prev a c ds m
+  let RB := CutTm.rem prev b c RA.defs RA.next
+  amodAtom (.seq a b) RA.term RB.term c RB.defs RB.next
+
+/-- `x · k mod c` from `x < c` (the term `a`) for `0 < k < 2^f`: doubling,
+each step an atom of `amodAtom` sequenced after `a`. -/
+def mulmodGo (a : LTm C (.val .uint)) (c : PrimTy.uint.Denote) :
+    Nat → Nat → List (LFml C) → Nat → CutTm C (.val .uint)
+  | 0, _, ds, m => ⟨a, ds, m⟩
+  | f + 1, k, ds, m =>
+    if k / 2 = 0 then ⟨a, ds, m⟩
+    else
+      let H := mulmodGo a c f (k / 2) ds m
+      let D := amodAtom a H.term H.term c H.defs H.next
+      if k % 2 = 0 then D else amodAtom a D.term a c D.defs D.next
+
+/-- **`mulmod(a, k, c)` at nonzero literal `c` and a literal `k`**: `a`'s
+remainder by `c`, times `k mod c` by doubling (`mulmodGo`); `0` after `a`
+where `c` divides `k`. -/
+def mulmodLit (prev : List (LFml C)) (a : LTm C (.val .uint)) (k c : PrimTy.uint.Denote)
+    (ds : List (LFml C)) (m : Nat) : CutTm C (.val .uint) :=
+  if k.val.toNat % c.val.toNat = 0 then ⟨.seq a (.app0 (.lit (PrimTy.dflt .uint))), ds, m⟩
+  else
+    let R := CutTm.rem prev a c ds m
+    mulmodGo R.term c (k.val.toNat % c.val.toNat) (k.val.toNat % c.val.toNat) R.defs R.next
+
+/-- A ternary node, its operands cut: `addmod` at a literal modulus
+(`addmodLit`), `mulmod` at a literal modulus and a literal factor on either
+side (`mulmodLit`), a zero modulus failing after the operands. -/
+def cut3 : {a b c s : Srt} → Op3 C a b c s → List (LFml C) → CutTm C a → CutTm C b → CutTm C c →
+    CutTm C s
+  | _, _, _, _, .modular .addmod, prev, A, B, K =>
+    match K.term.lit? with
+    | some r =>
+      if r.1.val = 0 then ⟨.seq (.seq A.term B.term) .err, A.defs ++ B.defs ++ K.defs, K.next⟩
+      else addmodLit prev A.term B.term r.1 (A.defs ++ B.defs ++ K.defs) K.next
+    | none => ⟨.app3 (.modular .addmod) A.term B.term K.term, A.defs ++ B.defs ++ K.defs, K.next⟩
+  | _, _, _, _, .modular .mulmod, prev, A, B, K =>
+    match K.term.lit?, B.term.lit?, A.term.lit? with
+    | some r, some k, _ =>
+      if r.1.val = 0 then ⟨.seq A.term .err, A.defs ++ B.defs ++ K.defs, K.next⟩
+      else mulmodLit prev A.term k.1 r.1 (A.defs ++ B.defs ++ K.defs) K.next
+    | some r, none, some k =>
+      if r.1.val = 0 then ⟨.seq B.term .err, A.defs ++ B.defs ++ K.defs, K.next⟩
+      else mulmodLit prev B.term k.1 r.1 (A.defs ++ B.defs ++ K.defs) K.next
+    | _, _, _ => ⟨.app3 (.modular .mulmod) A.term B.term K.term, A.defs ++ B.defs ++ K.defs, K.next⟩
+  | _, _, _, _, o, _, A, B, K => ⟨.app3 o A.term B.term K.term, A.defs ++ B.defs ++ K.defs, K.next⟩
 
 /-- **The cut of a term**, after the definitions `prev`, its fresh atoms from `n`. -/
 def LTm.cut : {s : Srt} → LTm C s → List (LFml C) → Nat → CutTm C s
@@ -343,7 +470,7 @@ def LTm.cut : {s : Srt} → LTm C s → List (LFml C) → Nat → CutTm C s
     let A := a.cut prev n
     let B := b.cut (prev ++ A.defs) A.next
     let Cc := c.cut (prev ++ A.defs ++ B.defs) B.next
-    ⟨.app3 o A.term B.term Cc.term, A.defs ++ B.defs ++ Cc.defs, Cc.next⟩
+    cut3 o prev A B Cc
   | _, .index it a b, prev, n =>
     let A := a.cut prev n
     let B := b.cut (prev ++ A.defs) A.next
@@ -1518,6 +1645,589 @@ theorem mulWLit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hd
       show _ = (some (x.val * v.val % Semantics.uintBound)).bind PrimTy.uint.ofInt?
       rw [Option.bind_some, uint_ofInt?_of_val (w := w) (by rw [hw', hV]; rfl)]
 
+/-! ## `addmod` and `mulmod` at a literal modulus are good -/
+
+theorem emod_of_le_lt_two {s c : Int} (h0 : c ≤ s) (h1 : s < c + c) : s % c = s - c := by
+  have hc : 0 < c := by omega
+  rw [show s = (s - c) + c by omega, Int.add_emod_self, Int.emod_eq_of_lt (by omega) (by omega)]
+  omega
+
+theorem uint_ofInt?_isSome_iff (n : Int) :
+    (PrimTy.uint.ofInt? n).isSome = true ↔ 0 ≤ n ∧ n < ((2 ^ 256 : Nat) : Int) := by
+  simp only [PrimTy.ofInt?]
+  split
+  · rename_i hin
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hin
+    simp only [Option.isSome_some, true_iff]
+    exact hin
+  · rename_i hin
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hin
+    simp only [Option.isSome_none, Bool.false_eq_true, false_iff]
+    exact hin
+
+theorem subFrom_eval (c : PrimTy.uint.Denote) (w : LTm C (.val .uint)) (σ : State C []) (ν : AEnv) :
+    (LTm.subFrom c w).eval σ ν = (w.eval σ ν).bind fun y => PrimTy.uint.ofInt? (c.val - y.val) := by
+  unfold LTm.subFrom
+  rw [LTm.eval_binop_of _ (shortT_none ⟨by decide, by decide⟩), ev_lit, Option.bind_some]
+  rfl
+
+theorem incr_eval (w : LTm C (.val .uint)) (σ : State C []) (ν : AEnv) :
+    (LTm.incr w).eval σ ν = (w.eval σ ν).bind fun y => PrimTy.uint.ofInt? (y.val + 1) := by
+  unfold LTm.incr
+  rw [LTm.eval_binop_of _ (shortT_none ⟨by decide, by decide⟩)]
+  cases w.eval σ ν <;> rfl
+
+theorem subFrom_incr_isSome (c : PrimTy.uint.Denote) (w : LTm C (.val .uint)) (σ : State C []) (ν : AEnv) :
+    ((LTm.subFrom c (LTm.incr w)).eval σ ν).isSome = true ↔
+      ∃ x : PrimTy.uint.Denote, w.eval σ ν = some x ∧ x.val < c.val := by
+  rw [subFrom_eval, incr_eval]
+  have hc0 := uint_val_nonneg c
+  have hc1 := uint_val_lt c
+  cases w.eval σ ν with
+  | none => simp only [Option.bind_none, Option.isSome_none, Bool.false_eq_true, reduceCtorEq, false_and,
+      exists_false]
+  | some x =>
+    have hx0 := uint_val_nonneg x
+    have hx1 := uint_val_lt x
+    simp only [Option.bind_some, Option.some.injEq, exists_eq_left']
+    by_cases hr : x.val + 1 < ((2 ^ 256 : Nat) : Int)
+    · rw [uint_ofInt?_eq (by omega) hr, Option.bind_some, uint_ofInt?_isSome_iff]
+      dsimp only
+      constructor
+      · rintro ⟨h, -⟩; show x.val < c.val; omega
+      · intro h; constructor <;> omega
+    · have : PrimTy.uint.ofInt? (x.val + 1) = none := by
+        cases h : PrimTy.uint.ofInt? (x.val + 1) with
+        | none => rfl
+        | some _ =>
+          have := (uint_ofInt?_isSome_iff (x.val + 1)).mp (by rw [h]; rfl)
+          omega
+      rw [this]
+      simp only [Option.bind_none, Option.isSome_none, Bool.false_eq_true, false_iff]
+      omega
+
+theorem amodGuard_eval_isSome (g u v : LTm C (.val .uint)) (c : PrimTy.uint.Denote) (σ : State C [])
+    (ν : AEnv) : ((amodGuard g u v c).eval σ ν).isSome = true ↔ (g.eval σ ν).isSome = true ∧
+      (∃ x : PrimTy.uint.Denote, u.eval σ ν = some x ∧ x.val < c.val) ∧
+      (∃ y : PrimTy.uint.Denote, v.eval σ ν = some y ∧ y.val < c.val) := by
+  rw [← subFrom_incr_isSome c u σ ν, ← subFrom_incr_isSome c v σ ν]
+  unfold amodGuard
+  rw [LTm.eval_seq, LTm.eval_seq]
+  cases g.eval σ ν <;> cases (LTm.subFrom c (LTm.incr u)).eval σ ν <;>
+    cases (LTm.subFrom c (LTm.incr v)).eval σ ν <;> simp
+
+theorem amodGuard_isSome {g u v : LTm C (.val .uint)} {c : PrimTy.uint.Denote} {σ : State C []}
+    {ν : AEnv} {x y : PrimTy.uint.Denote} (hx : u.eval σ ν = some x) (hy : v.eval σ ν = some y)
+    (hxc : x.val < c.val) (hyc : y.val < c.val) :
+    ((amodGuard g u v c).eval σ ν).isSome = (g.eval σ ν).isSome := by
+  apply Bool.eq_iff_iff.mpr
+  rw [amodGuard_eval_isSome]
+  exact ⟨fun h => h.1, fun h => ⟨h, ⟨x, hx, hxc⟩, ⟨y, hy, hyc⟩⟩⟩
+
+/-- **The case definition, at returning operands below `c`.** -/
+theorem amodDef_iff {g u v : LTm C (.val .uint)} {c : PrimTy.uint.Denote} {k : Nat} {σ : State C []}
+    {ν : AEnv} {x y : PrimTy.uint.Denote} (hx : u.eval σ ν = some x) (hy : v.eval σ ν = some y)
+    (hxc : x.val < c.val) (hyc : y.val < c.val) :
+    (amodDef g u v c k).holds σ ν ↔
+      ((g.eval σ ν).isSome = true → (ν.get .uint k).val = (x.val + y.val) % c.val) := by
+  have hc1 := uint_val_lt c
+  have hx0 := uint_val_nonneg x
+  have hy0 := uint_val_nonneg y
+  obtain ⟨e, he, he'⟩ : ∃ e : PrimTy.uint.Denote, (LTm.subFrom c v).eval σ ν = some e ∧
+      e.val = c.val - y.val := ev_sub (ev_lit c σ ν) hy (Int.le_of_lt hyc)
+  have hC : (amodCond u v c).holds σ ν ↔ x.val < e.val := by
+    unfold amodCond
+    rw [LFml.holds_eq_iff, ev_bin rfl ⟨by decide, by decide⟩ hx he]
+    constructor
+    · rintro ⟨b, hb, hb'⟩
+      have hb1 : b = true := (Option.some.inj hb').symm
+      subst hb1
+      have : decide (x.val < e.val) = true := Option.some.inj hb
+      exact of_decide_eq_true this
+    · intro h
+      exact ⟨true, by show some (decide (x.val < e.val)) = some true; rw [decide_eq_true h], rfl⟩
+  have hG : (LFml.eq (amodGuard g u v c) (amodGuard g u v c)).holds σ ν ↔
+      (g.eval σ ν).isSome = true := by
+    rw [LFml.holds_rets, ← Option.isSome_iff_exists, amodGuard_isSome hx hy hxc hyc]
+  show ((LFml.eq (amodGuard g u v c) (amodGuard g u v c)).holds σ ν →
+      ((amodCond u v c).holds σ ν → (LFml.eq (.app2 (.binop .add rfl) u v) (.var k)).holds σ ν) ∧
+      (¬ (amodCond u v c).holds σ ν →
+        (LFml.eq (.app2 (.binop .sub rfl) u (LTm.subFrom c v)) (.var k)).holds σ ν)) ↔ _
+  rw [hG, hC]
+  by_cases hc : x.val < e.val
+  · obtain ⟨w, hw, hw'⟩ := ev_add hx hy (by omega)
+    have hE : (LFml.eq (.app2 (.binop .add rfl) u v) (.var (C := C) (p := .uint) k)).holds σ ν ↔
+        ν.get .uint k = w := by
+      rw [LFml.holds_eq_iff, hw, LTm.eval_var]
+      exact ⟨fun ⟨_, h1, h2⟩ => ((Option.some.inj h1 ▸ Option.some.inj h2).symm).symm,
+        fun h => ⟨w, rfl, by rw [h]⟩⟩
+    have hmod : (x.val + y.val) % c.val = x.val + y.val := Int.emod_eq_of_lt (by omega) (by omega)
+    rw [hE]
+    constructor
+    · intro h hgs; rw [(h hgs).1 hc, hw', hmod]
+    · intro h hgs
+      exact ⟨fun _ => Subtype.ext (by rw [h hgs, hw', hmod]), fun hn => absurd hc hn⟩
+  · obtain ⟨w, hw, hw'⟩ := ev_sub hx he (by omega)
+    have hE : (LFml.eq (.app2 (.binop .sub rfl) u (LTm.subFrom c v)) (.var (C := C) (p := .uint) k)).holds σ ν ↔
+        ν.get .uint k = w := by
+      rw [LFml.holds_eq_iff, hw, LTm.eval_var]
+      exact ⟨fun ⟨_, h1, h2⟩ => ((Option.some.inj h1 ▸ Option.some.inj h2).symm).symm,
+        fun h => ⟨w, rfl, by rw [h]⟩⟩
+    have hmod : (x.val + y.val) % c.val = x.val + y.val - c.val :=
+      emod_of_le_lt_two (by omega) (by omega)
+    rw [hE]
+    constructor
+    · intro h hgs; rw [(h hgs).2 hc, hw', hmod, he']; omega
+    · intro h hgs
+      exact ⟨fun h' => absurd h' hc, fun _ => Subtype.ext (by rw [h hgs, hw', hmod, he']; omega)⟩
+
+theorem Defs.Good.amod {n m : Nat} {ds : List (LFml C)} (h : Defs.Good n m ds) {g u v : LTm C (.val .uint)}
+    (c : PrimTy.uint.Denote) (hg : g.atomBound ≤ m) (hu : u.atomBound ≤ m) (hv : v.atomBound ≤ m) :
+    Defs.Good n (m + 1) (ds ++ [amodDef g u v c m]) := by
+  refine ⟨Nat.le_succ_of_le h.le, fun d hd => ?_, fun σ ν => ?_⟩
+  · rcases List.mem_append.mp hd with hd | hd
+    · exact Nat.le_succ_of_le (h.bound d hd)
+    · rw [List.mem_singleton.mp hd]
+      simp only [amodDef, amodGuard, amodCond, LTm.subFrom, LTm.incr, LFml.atomBound, LTm.atomBound]
+      omega
+  · obtain ⟨μ, hμ, hd⟩ := h.extend σ ν
+    let w : PrimTy.uint.Denote := ((u.eval σ μ).bind fun x => (v.eval σ μ).bind fun y =>
+      PrimTy.uint.ofInt? ((x.val + y.val) % c.val)).getD (PrimTy.dflt .uint)
+    have hagree : μ.AgreesBelow m (μ.set .uint m w) := AEnv.AgreesBelow.set_ge μ .uint (Nat.le_refl _) w
+    refine ⟨μ.set .uint m w, hμ.trans (hagree.mono h.le), (LFml.AllHold.append_iff σ _ _ _).mpr
+      ⟨fun d hd' => (LFml.holds_agree_below σ d (hagree.mono (h.bound d hd'))).mp (hd d hd'), ?_⟩⟩
+    intro d hd'
+    rw [List.mem_singleton.mp hd']
+    have hu' : u.eval σ (μ.set .uint m w) = u.eval σ μ := (u.eval_agree_below σ (hagree.mono hu)).symm
+    have hv' : v.eval σ (μ.set .uint m w) = v.eval σ μ := (v.eval_agree_below σ (hagree.mono hv)).symm
+    intro hG
+    have hGs : ((amodGuard g u v c).eval σ (μ.set .uint m w)).isSome = true :=
+      Option.isSome_iff_exists.mpr ((LFml.holds_rets σ _ _).mp hG)
+    obtain ⟨-, ⟨x, hx, hxc⟩, ⟨y, hy, hyc⟩⟩ := (amodGuard_eval_isSome g u v c σ _).mp hGs
+    refine (amodDef_iff (g := g) (k := m) hx hy hxc hyc).mpr (fun _ => ?_) hG
+    rw [AEnv.get_set_self]
+    have hx0 := uint_val_nonneg x
+    have hy0 := uint_val_nonneg y
+    have hc1 := uint_val_lt c
+    have hr0 : 0 ≤ (x.val + y.val) % c.val := Int.emod_nonneg _ (by omega)
+    have hr1 : (x.val + y.val) % c.val < c.val := Int.emod_lt_of_pos _ (by omega)
+    show (((u.eval σ μ).bind fun x => (v.eval σ μ).bind fun y =>
+      PrimTy.uint.ofInt? ((x.val + y.val) % c.val)).getD (PrimTy.dflt .uint)).val = _
+    rw [← hu', ← hv', hx, hy, Option.bind_some, Option.bind_some, uint_ofInt?_eq hr0 (by omega)]
+    rfl
+
+/-- **What `amodAtom` satisfies**: its definition good, and `(x + y) mod c`
+wherever it holds and the operands return below `c`. -/
+theorem amodAtom_spec {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    {g u v : LTm C (.val .uint)} (c : PrimTy.uint.Denote) (hg : g.atomBound ≤ m) (hu : u.atomBound ≤ m)
+    (hv : v.atomBound ≤ m) :
+    Defs.Good n (amodAtom g u v c ds m).next (amodAtom g u v c ds m).defs ∧
+    m ≤ (amodAtom g u v c ds m).next ∧
+    (amodAtom g u v c ds m).term.atomBound ≤ (amodAtom g u v c ds m).next ∧
+    (∀ σ ν, ((amodAtom g u v c ds m).term.eval σ ν).isSome = (g.eval σ ν).isSome) ∧
+    ∀ σ ν, LFml.AllHold σ ν (amodAtom g u v c ds m).defs → LFml.AllHold σ ν ds ∧
+      ∀ x y : PrimTy.uint.Denote, u.eval σ ν = some x → v.eval σ ν = some y → x.val < c.val →
+        y.val < c.val → (g.eval σ ν).isSome = true →
+        ∃ w : PrimTy.uint.Denote, (amodAtom g u v c ds m).term.eval σ ν = some w ∧
+          w.val = (x.val + y.val) % c.val := by
+  refine ⟨hds.amod c hg hu hv, Nat.le_succ _, by show max g.atomBound (m + 1) ≤ m + 1; omega,
+    fun σ ν => seq_var_isSome g m σ ν, fun σ ν hd => ?_⟩
+  obtain ⟨h1, h2⟩ := (LFml.AllHold.append_iff σ ν _ _).mp hd
+  refine ⟨h1, fun x y hx hy hxc hyc hgs => ?_⟩
+  obtain ⟨gv, hgv⟩ := Option.isSome_iff_exists.mp hgs
+  exact ⟨_, seq_var_eval m hgv, (amodDef_iff hx hy hxc hyc).mp (h2 _ List.mem_cons_self) hgs⟩
+
+/-- **A remainder by a nonzero literal**, through its quotient's atom. -/
+theorem rem_spec {prev ds : List (LFml C)} {n m : Nat} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (c : PrimTy.uint.Denote)
+    (hc : c.val ≠ 0) :
+    Defs.Good n (CutTm.rem prev a c ds m).next (CutTm.rem prev a c ds m).defs ∧
+    m ≤ (CutTm.rem prev a c ds m).next ∧
+    (CutTm.rem prev a c ds m).term.atomBound ≤ (CutTm.rem prev a c ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (CutTm.rem prev a c ds m).defs →
+      LFml.AllHold σ ν ds ∧ (a.eval σ ν = none → (CutTm.rem prev a c ds m).term.eval σ ν = none) ∧
+      ∀ x : PrimTy.uint.Denote, a.eval σ ν = some x →
+        ∃ w : PrimTy.uint.Denote, (CutTm.rem prev a c ds m).term.eval σ ν = some w ∧
+          w.val = x.val % c.val := by
+  unfold CutTm.rem
+  have hQ := quotAtom_good (prev := prev) hds hprev (g := a) (e := a.divLit c) ha
+    (by show max a.atomBound 0 ≤ m; omega) (fun σ ν hg => by
+      rw [LTm.divLit, isSome_binop_lit rfl ⟨by decide, by decide⟩ a (.app0 (.lit c)) c rfl
+        (fun x => div_isSome rfl x c hc)]
+      exact hg)
+  generalize quotAtom prev ds a (a.divLit c) m = Q at hQ ⊢
+  obtain ⟨hQg, hQlt, hQm, -, hQh⟩ := hQ
+  dsimp only
+  refine ⟨hQg, hQm, by simp only [LTm.remOf, LTm.atomBound]; omega, fun σ ν hp hd => ?_⟩
+  obtain ⟨hds', hdefn⟩ := hQh σ ν hp hd
+  refine ⟨hds', fun hx => ?_, fun x hx => ?_⟩
+  · show (LTm.app2 (.binop .sub rfl) a _).eval σ ν = none
+    rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩), hx]
+    rfl
+  · have hq := LFml.defn_eval hdefn hx
+    rw [LTm.divLit, ev_bin rfl ⟨by decide, by decide⟩ hx (ev_lit _ σ ν)] at hq
+    have hrem := rem_eval rfl x c _ hc hq
+    have hx0 := uint_val_nonneg x
+    have hx1 := uint_val_lt x
+    have hc0 := uint_val_nonneg c
+    have hc1 := uint_val_lt c
+    have hr0 : 0 ≤ x.val % c.val := Int.emod_nonneg _ hc
+    have hr1 : x.val % c.val < c.val := Int.emod_lt_of_pos _ (by omega)
+    refine ⟨⟨x.val % c.val, uint_inRange hr0 (by have := uint_val_lt c; omega)⟩, ?_, rfl⟩
+    show (LTm.app2 (.binop .sub rfl) a (.app2 (.binop .mul rfl) (.var _) (.app0 (.lit c)))).eval σ ν = _
+    rw [LTm.eval_binop_of rfl (shortT_none ⟨by decide, by decide⟩), hx, Option.bind_some,
+      ev_bin rfl ⟨by decide, by decide⟩ (LTm.eval_var σ ν _) (ev_lit c σ ν)]
+    rw [hrem]
+    show (if c.val = 0 then none else some (Int.tmod x.val c.val)).bind PrimTy.uint.ofInt? = _
+    rw [if_neg hc, Option.bind_some, Int.tmod_eq_emod_of_nonneg hx0, uint_ofInt?_eq hr0 (by omega)]
+
+theorem addmod_val (x y c : PrimTy.uint.Denote) (hc : c.val ≠ 0) :
+    ModOp.evalT .addmod x y c = PrimTy.uint.ofInt? ((x.val + y.val) % c.val) := by
+  unfold ModOp.evalT ModOp.wide
+  rw [if_neg hc]
+
+theorem mulmod_val (x y c : PrimTy.uint.Denote) (hc : c.val ≠ 0) :
+    ModOp.evalT .mulmod x y c = PrimTy.uint.ofInt? (x.val * y.val % c.val) := by
+  unfold ModOp.evalT ModOp.wide
+  rw [if_neg hc]
+
+theorem addmodLit_spec {prev ds : List (LFml C)} {n m : Nat} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a b : LTm C (.val .uint)} (ha : a.atomBound ≤ m) (hb : b.atomBound ≤ m)
+    (c : PrimTy.uint.Denote) (hc : c.val ≠ 0) :
+    Defs.Good n (addmodLit prev a b c ds m).next (addmodLit prev a b c ds m).defs ∧
+    (addmodLit prev a b c ds m).term.atomBound ≤ (addmodLit prev a b c ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (addmodLit prev a b c ds m).defs →
+      LFml.AllHold σ ν ds ∧ (addmodLit prev a b c ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => (b.eval σ ν).bind fun y => ModOp.evalT .addmod x y c := by
+  unfold addmodLit
+  dsimp only
+  have hA := rem_spec hds hprev ha c hc
+  generalize CutTm.rem prev a c ds m = RA at hA ⊢
+  obtain ⟨gA, mA, bA, hA⟩ := hA
+  have hB := rem_spec gA hprev (a := b) (by omega) c hc
+  generalize CutTm.rem prev b c RA.defs RA.next = RB at hB ⊢
+  obtain ⟨gB, mB, bB, hB⟩ := hB
+  obtain ⟨gD, -, bD, sD, hD⟩ := amodAtom_spec gB c (g := .seq a b) (u := RA.term) (v := RB.term)
+    (by show max a.atomBound b.atomBound ≤ _; omega) (by omega) bB
+  refine ⟨gD, bD, fun σ ν hp hd => ?_⟩
+  obtain ⟨hdB, hv⟩ := hD σ ν hd
+  obtain ⟨hdA, hBn, hBs⟩ := hB σ ν hp hdB
+  obtain ⟨hds', hAn, hAs⟩ := hA σ ν hp hdA
+  refine ⟨hds', ?_⟩
+  have hc0 := uint_val_nonneg c
+  have hcpos : 0 < c.val := by omega
+  cases hx : a.eval σ ν with
+  | none =>
+    have := sD σ ν
+    rw [LTm.eval_seq, hx] at this
+    simp only [Option.bind_none, Option.isSome_none] at this
+    cases ht : (amodAtom (LTm.seq a b) RA.term RB.term c RB.defs RB.next).term.eval σ ν with
+    | none => rfl
+    | some _ => rw [ht] at this; cases this
+  | some x =>
+    cases hy : b.eval σ ν with
+    | none =>
+      have := sD σ ν
+      rw [LTm.eval_seq, hx, hy] at this
+      simp only [Option.bind_some, Option.isSome_none] at this
+      cases ht : (amodAtom (LTm.seq a b) RA.term RB.term c RB.defs RB.next).term.eval σ ν with
+      | none => rfl
+      | some _ => rw [ht] at this; cases this
+    | some y =>
+      obtain ⟨u, hu, hu'⟩ := hAs x hx
+      obtain ⟨v, hv', hv''⟩ := hBs y hy
+      obtain ⟨w, hw, hw'⟩ := hv u v hu hv' (by rw [hu']; exact Int.emod_lt_of_pos _ hcpos)
+        (by rw [hv'']; exact Int.emod_lt_of_pos _ hcpos) (by rw [LTm.eval_seq, hx, hy]; rfl)
+      rw [hw, Option.bind_some, Option.bind_some, addmod_val x y c hc]
+      refine (uint_ofInt?_of_val ?_).symm
+      rw [hw', hu', hv'', ← Int.add_emod]
+
+theorem mulmodGo_spec {n : Nat} (a : LTm C (.val .uint)) (c : PrimTy.uint.Denote) :
+    ∀ (f k : Nat) (ds : List (LFml C)) (m : Nat), Defs.Good n m ds → a.atomBound ≤ m → 0 < k →
+    k < 2 ^ f →
+    Defs.Good n (mulmodGo a c f k ds m).next (mulmodGo a c f k ds m).defs ∧
+    m ≤ (mulmodGo a c f k ds m).next ∧
+    (mulmodGo a c f k ds m).term.atomBound ≤ (mulmodGo a c f k ds m).next ∧
+    (∀ σ ν, ((mulmodGo a c f k ds m).term.eval σ ν).isSome = (a.eval σ ν).isSome) ∧
+    ∀ σ ν, LFml.AllHold σ ν (mulmodGo a c f k ds m).defs → LFml.AllHold σ ν ds ∧
+      ∀ x : PrimTy.uint.Denote, a.eval σ ν = some x → x.val < c.val →
+        ∃ w : PrimTy.uint.Denote, (mulmodGo a c f k ds m).term.eval σ ν = some w ∧
+          w.val = x.val * (k : Int) % c.val
+  | 0, k, _, _, _, _, hk, hkf => absurd hkf (by simp only [Nat.pow_zero]; omega)
+  | f + 1, k, ds, m, hds, ha, hk, hkf => by
+    unfold mulmodGo
+    split
+    · rename_i h2
+      have hk1 : k = 1 := by omega
+      subst hk1
+      dsimp only
+      refine ⟨hds, Nat.le_refl _, ha, fun _ _ => rfl, fun σ ν hd => ⟨hd, fun x hx hxc => ⟨x, hx, ?_⟩⟩⟩
+      rw [show ((1 : Nat) : Int) = 1 from rfl, Int.mul_one,
+        Int.emod_eq_of_lt (uint_val_nonneg x) hxc]
+    · rename_i h2
+      obtain ⟨hHg, hHm, hHb, hHs, hHh⟩ := mulmodGo_spec a c f (k / 2) ds m hds ha (by omega)
+        (by rw [Nat.pow_succ] at hkf; omega)
+      generalize mulmodGo a c f (k / 2) ds m = H at hHg hHm hHb hHs hHh
+      dsimp only
+      obtain ⟨hDg, hDm, hDb, hDs, hDh⟩ := amodAtom_spec hHg c (g := a) (by omega) hHb hHb
+      have hDv : ∀ σ ν, LFml.AllHold σ ν (amodAtom a H.term H.term c H.defs H.next).defs →
+          LFml.AllHold σ ν ds ∧ ∀ x : PrimTy.uint.Denote, a.eval σ ν = some x → x.val < c.val →
+            ∃ w : PrimTy.uint.Denote, (amodAtom a H.term H.term c H.defs H.next).term.eval σ ν = some w ∧
+              w.val = x.val * ((2 * (k / 2) : Nat) : Int) % c.val := by
+        intro σ ν hd
+        obtain ⟨hHd, hD⟩ := hDh σ ν hd
+        obtain ⟨hds', hH⟩ := hHh σ ν hHd
+        refine ⟨hds', fun x hx hxc => ?_⟩
+        have hcpos : 0 < c.val := by have := uint_val_nonneg x; omega
+        obtain ⟨h, hh, hh'⟩ := hH x hx hxc
+        have hlt : h.val < c.val := by rw [hh']; exact Int.emod_lt_of_pos _ hcpos
+        obtain ⟨w, hw, hw'⟩ := hD h h hh hh hlt hlt (by rw [hx]; rfl)
+        refine ⟨w, hw, ?_⟩
+        rw [hw', hh', BitArith.mulMod_double]
+        congr 2
+      split
+      · rename_i h3
+        refine ⟨hDg, by omega, hDb, fun σ ν => (hDs σ ν), fun σ ν hd => ?_⟩
+        obtain ⟨hds', hv⟩ := hDv σ ν hd
+        refine ⟨hds', fun x hx hxc => ?_⟩
+        obtain ⟨w, hw, hw'⟩ := hv x hx hxc
+        refine ⟨w, hw, ?_⟩
+        rw [hw']
+        congr 2
+        omega
+      · rename_i h3
+        obtain ⟨hEg, hEm, hEb, hEs, hEh⟩ := amodAtom_spec hDg c (g := a) (u := (amodAtom a H.term H.term c H.defs H.next).term)
+          (v := a) (by omega) hDb (by omega)
+        refine ⟨hEg, by omega, hEb, fun σ ν => hEs σ ν, fun σ ν hd => ?_⟩
+        obtain ⟨hDd, hE⟩ := hEh σ ν hd
+        obtain ⟨hds', hv⟩ := hDv σ ν hDd
+        refine ⟨hds', fun x hx hxc => ?_⟩
+        have hcpos : 0 < c.val := by have := uint_val_nonneg x; omega
+        obtain ⟨d, hd', hd''⟩ := hv x hx hxc
+        have hlt : d.val < c.val := by rw [hd'']; exact Int.emod_lt_of_pos _ hcpos
+        obtain ⟨w, hw, hw'⟩ := hE d x hd' hx hlt hxc (by rw [hx]; rfl)
+        refine ⟨w, hw, ?_⟩
+        rw [hw', hd'', BitArith.mulMod_succ]
+        congr 2
+        omega
+
+theorem mulmodLit_spec {prev ds : List (LFml C)} {n m : Nat} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .uint)} (ha : a.atomBound ≤ m)
+    (k c : PrimTy.uint.Denote) (hc : c.val ≠ 0) :
+    Defs.Good n (mulmodLit prev a k c ds m).next (mulmodLit prev a k c ds m).defs ∧
+    (mulmodLit prev a k c ds m).term.atomBound ≤ (mulmodLit prev a k c ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (mulmodLit prev a k c ds m).defs →
+      LFml.AllHold σ ν ds ∧ (mulmodLit prev a k c ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => ModOp.evalT .mulmod x k c := by
+  have hc0 := uint_val_nonneg c
+  have hc1 := uint_val_lt c
+  have hk0 := uint_val_nonneg k
+  have hcpos : 0 < c.val := by omega
+  have hK : ((k.val.toNat % c.val.toNat : Nat) : Int) = k.val % c.val := by
+    rw [Int.natCast_emod, Int.toNat_of_nonneg hk0, Int.toNat_of_nonneg hc0]
+  unfold mulmodLit
+  split
+  · rename_i h0
+    refine ⟨hds, by dsimp only; simp only [LTm.atomBound]; omega, fun σ ν _ hd => ⟨hd, ?_⟩⟩
+    show (LTm.seq a _).eval σ ν = _
+    rw [LTm.eval_seq]
+    cases a.eval σ ν with
+    | none => rfl
+    | some x =>
+      rw [Option.bind_some, Option.bind_some, mulmod_val x k c hc]
+      refine (uint_ofInt?_of_val (w := PrimTy.dflt .uint) ?_).symm
+      have hz : k.val % c.val = 0 := by rw [← hK, h0]; rfl
+      rw [Int.mul_emod, hz, Int.mul_zero, Int.zero_emod]
+      rfl
+  · rename_i h0
+    dsimp only
+    have hR := rem_spec hds hprev ha c hc
+    generalize CutTm.rem prev a c ds m = R at hR ⊢
+    obtain ⟨gR, mR, bR, hR⟩ := hR
+    have hkc : k.val.toNat % c.val.toNat < 2 ^ (k.val.toNat % c.val.toNat) := Nat.lt_two_pow_self
+    obtain ⟨gG, -, bG, sG, hG⟩ := mulmodGo_spec R.term c _ _ R.defs R.next gR bR (by omega) hkc
+    refine ⟨gG, bG, fun σ ν hp hd => ?_⟩
+    obtain ⟨hdR, hv⟩ := hG σ ν hd
+    obtain ⟨hds', hRn, hRs⟩ := hR σ ν hp hdR
+    refine ⟨hds', ?_⟩
+    cases hx : a.eval σ ν with
+    | none =>
+      have h1 := sG σ ν
+      rw [hRn hx] at h1
+      simp only [Option.isSome_none] at h1
+      cases ht : (mulmodGo R.term c _ _ R.defs R.next).term.eval σ ν with
+      | none => rfl
+      | some _ => rw [ht] at h1; cases h1
+    | some x =>
+      obtain ⟨u, hu, hu'⟩ := hRs x hx
+      obtain ⟨w, hw, hw'⟩ := hv u hu (by rw [hu']; exact Int.emod_lt_of_pos _ hcpos)
+      rw [hw, Option.bind_some, mulmod_val x k c hc]
+      refine (uint_ofInt?_of_val ?_).symm
+      rw [hw', hu', hK, ← Int.mul_emod]
+
+/-! ## `&`, `|`, `^` at `int` with a literal, through the words -/
+
+/-- Two `int`s' bitwise operator is the one of their words, read back in two's
+complement, for an operator that keeps the nonnegative ones below `2^255`. -/
+theorem int_bitwise_eq (f : Nat → Nat → Nat)
+    (hf : ∀ a b, a < 2 ^ 255 → b < 2 ^ 255 → f a b < 2 ^ 255) (x y : Int)
+    (hx : -((2 ^ 255 : Nat) : Int) ≤ x ∧ x < ((2 ^ 255 : Nat) : Int))
+    (hy : -((2 ^ 255 : Nat) : Int) ≤ y ∧ y < ((2 ^ 255 : Nat) : Int)) :
+    Semantics.uintBitwise f x y = Semantics.signedOf (f (Semantics.wordOf x) (Semantics.wordOf y)) := by
+  cases x with
+  | ofNat a =>
+    cases y with
+    | ofNat b =>
+      simp only [Int.ofNat_eq_coe] at hx hy
+      have ha : a < 2 ^ 255 := by have := hx.2; omega
+      have hb : b < 2 ^ 255 := by have := hy.2; omega
+      have hw : ∀ c : Nat, c < 2 ^ 255 → Semantics.wordOf (Int.ofNat c) = c := fun c hc => by
+        unfold Semantics.wordOf
+        rw [Int.ofNat_eq_coe, Int.emod_eq_of_lt (Int.natCast_nonneg c) (by omega)]
+        rfl
+      show Int.ofNat (f a b) = _
+      rw [hw a ha, hw b hb]
+      unfold Semantics.signedOf
+      rw [if_pos (hf a b ha hb)]
+      rfl
+    | negSucc b => rfl
+  | negSucc a => cases y <;> rfl
+
+theorem and_lt255 (a b : Nat) (ha : a < 2 ^ 255) (_ : b < 2 ^ 255) : a &&& b < 2 ^ 255 :=
+  Nat.lt_of_le_of_lt Nat.and_le_left ha
+
+theorem or_lt255 (a b : Nat) (ha : a < 2 ^ 255) (hb : b < 2 ^ 255) : a ||| b < 2 ^ 255 :=
+  Nat.or_lt_two_pow ha hb
+
+theorem xor_lt255 (a b : Nat) (ha : a < 2 ^ 255) (hb : b < 2 ^ 255) : a ^^^ b < 2 ^ 255 :=
+  Nat.xor_lt_two_pow ha hb
+
+theorem band_int_val (h : BinOp.band.accepts .int = true) (x v : PrimTy.int.Denote) :
+    BinOp.evalT .band h x v = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf x.val &&& (intWord v).val.toNat)) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.int.ofInt? = _
+  rw [Option.bind_some, int_bitwise_eq _ and_lt255 x.val v.val (int_val_bounds x) (int_val_bounds v)]
+  rfl
+
+theorem bor_int_val (h : BinOp.bor.accepts .int = true) (x v : PrimTy.int.Denote) :
+    BinOp.evalT .bor h x v = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf x.val ||| (intWord v).val.toNat)) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.int.ofInt? = _
+  rw [Option.bind_some, int_bitwise_eq _ or_lt255 x.val v.val (int_val_bounds x) (int_val_bounds v)]
+  rfl
+
+theorem bxor_int_val (h : BinOp.bxor.accepts .int = true) (x v : PrimTy.int.Denote) :
+    BinOp.evalT .bxor h x v = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf x.val ^^^ (intWord v).val.toNat)) := by
+  show (some (Semantics.uintBitwise _ x.val v.val)).bind PrimTy.int.ofInt? = _
+  rw [Option.bind_some, int_bitwise_eq _ xor_lt255 x.val v.val (int_val_bounds x) (int_val_bounds v)]
+  rfl
+
+theorem band_int_valL (h : BinOp.band.accepts .int = true) (v y : PrimTy.int.Denote) :
+    BinOp.evalT .band h v y = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf y.val &&& (intWord v).val.toNat)) := by
+  rw [band_int_val h v y]
+  exact congrArg (fun k => PrimTy.int.ofInt? (Semantics.signedOf k)) (Nat.and_comm _ _)
+
+theorem bor_int_valL (h : BinOp.bor.accepts .int = true) (v y : PrimTy.int.Denote) :
+    BinOp.evalT .bor h v y = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf y.val ||| (intWord v).val.toNat)) := by
+  rw [bor_int_val h v y]
+  exact congrArg (fun k => PrimTy.int.ofInt? (Semantics.signedOf k)) (Nat.or_comm _ _)
+
+theorem bxor_int_valL (h : BinOp.bxor.accepts .int = true) (v y : PrimTy.int.Denote) :
+    BinOp.evalT .bxor h v y = PrimTy.int.ofInt?
+      (Semantics.signedOf (Semantics.wordOf y.val ^^^ (intWord v).val.toNat)) := by
+  rw [bxor_int_val h v y]
+  exact congrArg (fun k => PrimTy.int.ofInt? (Semantics.signedOf k)) (Nat.xor_comm _ _)
+
+/-- A word read back as an `int`: `signedOf`. -/
+theorem toInt_signed (w : PrimTy.uint.Denote) (r : Nat) (hw : w.val = (r : Int)) :
+    UnOp.evalT .toInt rfl w = PrimTy.int.ofInt? (Semantics.signedOf r) := by
+  show PrimTy.int.ofInt? (if w.val < Semantics.intBound then w.val else w.val - Semantics.uintBound) = _
+  unfold Semantics.signedOf
+  rw [hw]
+  by_cases hc : r < 2 ^ 255
+  · rw [if_pos (show (r : Int) < Semantics.intBound from Int.ofNat_lt.mpr hc), if_pos hc]
+  · rw [if_neg (show ¬ (r : Int) < Semantics.intBound from fun h => hc (Int.ofNat_lt.mp h)), if_neg hc]
+    rfl
+
+theorem wordOf_lt (x : Int) : Semantics.wordOf x < 2 ^ 256 := by
+  unfold Semantics.wordOf
+  have h0 := Int.emod_nonneg x (show ((2 ^ 256 : Nat) : Int) ≠ 0 by decide)
+  have h1 := Int.emod_lt_of_pos x (show (0 : Int) < ((2 ^ 256 : Nat) : Int) by decide)
+  omega
+
+/-- **`a ⊙ v` at `int` through the words**: the definitions good, and the
+operator's value wherever they hold. -/
+theorem intBit_spec {prev : List (LFml C)} {n m : Nat} {ds : List (LFml C)} (hds : Defs.Good n m ds)
+    (hprev : Defs.Below n prev) {a : LTm C (.val .int)} (ha : a.atomBound ≤ m)
+    {mk : LTm C (.val .uint) → List (LFml C) → Nat → CutTm C (.val .uint)} {F : Nat → Nat}
+    (hF : ∀ k, k < 2 ^ 256 → F k < 2 ^ 256)
+    (hmk : ∀ (t : LTm C (.val .uint)) (ds' : List (LFml C)) (m' : Nat), Defs.Good n m' ds' →
+      t.atomBound ≤ m' →
+      Defs.Good n (mk t ds' m').next (mk t ds' m').defs ∧ (mk t ds' m').term.atomBound ≤ (mk t ds' m').next ∧
+      ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (mk t ds' m').defs →
+        LFml.AllHold σ ν ds' ∧ (mk t ds' m').term.eval σ ν =
+          (t.eval σ ν).bind fun x => PrimTy.uint.ofInt? ((F x.val.toNat : Nat) : Int)) :
+    Defs.Good n (intBit prev mk a ds m).next (intBit prev mk a ds m).defs ∧
+    (intBit prev mk a ds m).term.atomBound ≤ (intBit prev mk a ds m).next ∧
+    ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (intBit prev mk a ds m).defs →
+      LFml.AllHold σ ν ds ∧ (intBit prev mk a ds m).term.eval σ ν =
+        (a.eval σ ν).bind fun x => PrimTy.int.ofInt? (Semantics.signedOf (F (Semantics.wordOf x.val))) := by
+  unfold intBit CutTm.atom
+  dsimp only
+  generalize hQ : quotAtom prev ds a (.app1 (.unop .toUint rfl) a) m = Q
+  have hU := quotAtom_good (prev := prev) hds hprev (g := a) (e := .app1 (.unop .toUint rfl) a) ha
+    (by show a.atomBound ≤ m; exact ha)
+    (fun σ ν hg => by
+      rw [LTm.eval_app1, Close.Op1.eval_unop]
+      obtain ⟨x, hx⟩ := Option.isSome_iff_exists.mp hg
+      rw [hx, Option.bind_some]
+      exact toUint_isSome rfl x)
+  rw [hQ] at hU
+  obtain ⟨hUg, hUlt, hUm, -, hUh⟩ := hU
+  have hUb : (LTm.seq a (LTm.var (p := .uint) Q.1)).atomBound ≤ Q.2.2 := by
+    show max a.atomBound (Q.1 + 1) ≤ Q.2.2; omega
+  obtain ⟨hTg, hTb, hTh⟩ := hmk (.seq a (.var Q.1)) Q.2.1 Q.2.2 hUg hUb
+  generalize hT : mk (.seq a (.var Q.1)) Q.2.1 Q.2.2 = T at hTg hTb hTh
+  have hR := quotAtom_good (prev := prev) hTg hprev (g := T.term)
+    (e := .app1 (.unop .toInt rfl) T.term) hTb (by show T.term.atomBound ≤ T.next; exact hTb) (fun σ ν hg => by
+      rw [LTm.eval_app1, Close.Op1.eval_unop]
+      obtain ⟨x, hx⟩ := Option.isSome_iff_exists.mp hg
+      rw [hx, Option.bind_some]
+      exact toInt_isSome rfl x)
+  obtain ⟨hRg, hRlt, hRm, -, hRh⟩ := hR
+  refine ⟨hRg, by show max T.term.atomBound (_ + 1) ≤ _; omega, fun σ ν hp hd => ?_⟩
+  obtain ⟨hTd, hdR⟩ := hRh σ ν hp hd
+  obtain ⟨hUd, hTe⟩ := hTh σ ν hp hTd
+  obtain ⟨hds', hdU⟩ := hUh σ ν hp hUd
+  refine ⟨hds', ?_⟩
+  rw [LTm.eval_seq]
+  cases hx : a.eval σ ν with
+  | none =>
+    rw [hTe, LTm.eval_seq, hx]
+    rfl
+  | some x =>
+    have hu : (LTm.app1 (.unop .toUint rfl) a).eval σ ν = some (ν.get .uint Q.1) := LFml.defn_eval hdU hx
+    rw [LTm.eval_app1, Close.Op1.eval_unop, hx, Option.bind_some] at hu
+    have hu' : (ν.get .uint Q.1).val = x.val % Semantics.uintBound := by
+      have : PrimTy.uint.ofInt? (x.val % Semantics.uintBound) = some (ν.get .uint Q.1) := hu
+      rw [uint_ofInt?_eq (n := x.val % Semantics.uintBound) (Int.emod_nonneg _ (by decide))
+        (Int.emod_lt_of_pos _ (by decide))] at this
+      rw [← Option.some.inj this]
+    have hTv : T.term.eval σ ν = PrimTy.uint.ofInt? ((F (Semantics.wordOf x.val) : Nat) : Int) := by
+      rw [hTe, seq_var_eval _ hx, Option.bind_some, hu']
+      rfl
+    have hlt := hF _ (wordOf_lt x.val)
+    have hw := uint_ofInt?_eq (n := ((F (Semantics.wordOf x.val) : Nat) : Int)) (Int.natCast_nonneg _)
+      (by omega)
+    have hTw := hTv.trans hw
+    have hr : (LTm.app1 (.unop .toInt rfl) T.term).eval σ ν = some (ν.get .int _) := LFml.defn_eval hdR hTw
+    rw [LTm.eval_app1, Close.Op1.eval_unop, hTw, Option.bind_some, toInt_signed _ _ rfl] at hr
+    rw [hTw, Option.bind_some, Option.bind_some]
+    exact hr.symm
+
 theorem cut1_good {a s : Srt} (o : Op1 C a s) {x : LTm C a} {n : Nat} {prev : List (LFml C)}
     {A : CutTm C a} (hA : CutTm.Good x n prev A) (hprev : Defs.Below n prev) :
     CutTm.Good (.app1 o x) n prev (cut1 o prev A) := by
@@ -1976,6 +2686,66 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
           obtain ⟨r1, r2⟩ := g3 σ ν hp hd
           exact ⟨r1, r2.trans (congrArg _ (funext fun yv => by rw [Nat.xor_comm]; exact (bxor_val h _ _).symm))⟩)
       · exact hgen
+    case band.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hAb (mk := intBitMk .band prev r.1)
+          (F := fun k => k &&& (intWord r.1).val.toNat) (fun k hk => Nat.lt_of_le_of_lt Nat.and_le_left hk)
+          (fun t ds' m' hds' ht => bandLit_spec hds' hprev' ht (uint_toNat_lt _))
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (band_int_val h xv _).symm))⟩)
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hB.bound (mk := intBitMk .band prev r.1)
+          (F := fun k => k &&& (intWord r.1).val.toNat) (fun k hk => Nat.lt_of_le_of_lt Nat.and_le_left hk)
+          (fun t ds' m' hds' ht => bandLit_spec hds' hprev' ht (uint_toNat_lt _))
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => (band_int_valL h _ yv).symm))⟩)
+      · exact hgen
+    case bor.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hAb (mk := intBitMk .bor prev r.1)
+          (F := fun k => k ||| (intWord r.1).val.toNat) (fun k hk => Nat.or_lt_two_pow hk (uint_toNat_lt _))
+          (fun t ds' m' hds' ht => borLit_spec hds' hprev' ht _)
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (bor_int_val h xv _).symm))⟩)
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hB.bound (mk := intBitMk .bor prev r.1)
+          (F := fun k => k ||| (intWord r.1).val.toNat) (fun k hk => Nat.or_lt_two_pow hk (uint_toNat_lt _))
+          (fun t ds' m' hds' ht => borLit_spec hds' hprev' ht _)
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => (bor_int_valL h _ yv).symm))⟩)
+      · exact hgen
+    case bxor.int =>
+      dsimp only [cut2]
+      split
+      · rename_i r _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hAb (mk := intBitMk .bxor prev r.1)
+          (F := fun k => k ^^^ (intWord r.1).val.toNat) (fun k hk => Nat.xor_lt_two_pow hk (uint_toNat_lt _))
+          (fun t ds' m' hds' ht => bxorLit_spec hds' hprev' ht _)
+        exact good_litR h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun xv => (bxor_int_val h xv _).symm))⟩)
+      · rename_i r _ _
+        have heq := r.2
+        obtain ⟨g1, g2, g3⟩ := intBit_spec hds hprev' hB.bound (mk := intBitMk .bxor prev r.1)
+          (F := fun k => k ^^^ (intWord r.1).val.toNat) (fun k hk => Nat.xor_lt_two_pow hk (uint_toNat_lt _))
+          (fun t ds' m' hds' ht => bxorLit_spec hds' hprev' ht _)
+        exact good_litL h ⟨by decide, by decide⟩ heq hxe hye g1 g2 (fun σ ν hp hd => by
+          obtain ⟨r1, r2⟩ := g3 σ ν hp hd
+          exact ⟨r1, r2.trans (congrArg _ (funext fun yv => (bxor_int_valL h _ yv).symm))⟩)
+      · exact hgen
     case div.int =>
       dsimp only [cut2]
       split
@@ -2044,6 +2814,116 @@ theorem cut2_good {a b s : Srt} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b} {n
         (isSome_binop2 h ⟨by decide, by decide⟩ A.term B.term (subW_isSome h)) hev
   | _ => exact hgen
 
+theorem eval_modular (g : State C []) (ν : AEnv) (op : ModOp) (x y z : LTm C (.val .uint)) :
+    (LTm.app3 (.modular op) x y z).eval g ν =
+      (x.eval g ν).bind fun a => (y.eval g ν).bind fun b => (z.eval g ν).bind fun k => op.evalT a b k := by
+  rw [LTm.eval_app3]
+  cases x.eval g ν <;> cases y.eval g ν <;> cases z.eval g ν <;> rfl
+
+theorem mulmod_comm (x y c : PrimTy.uint.Denote) : ModOp.evalT .mulmod x y c = ModOp.evalT .mulmod y x c := by
+  show (if c.val = 0 then none else PrimTy.uint.ofInt? (x.val * y.val % c.val)) =
+    (if c.val = 0 then none else PrimTy.uint.ofInt? (y.val * x.val % c.val))
+  rw [Int.mul_comm]
+
+/-- **A ternary node, cut, evaluates as the node.** -/
+theorem cut3_good {a b c s : Srt} (o : Op3 C a b c s) {x : LTm C a} {y : LTm C b} {z : LTm C c} {n : Nat}
+    {prev : List (LFml C)} {A : CutTm C a} {B : CutTm C b} {K : CutTm C c}
+    (hA : CutTm.Good x n prev A) (hB : CutTm.Good y A.next (prev ++ A.defs) B)
+    (hK : CutTm.Good z B.next (prev ++ A.defs ++ B.defs) K) (hprev : Defs.Below n prev) :
+    CutTm.Good (.app3 o x y z) n prev (cut3 o prev A B K) := by
+  have hgen : CutTm.Good (.app3 o x y z) n prev
+      ⟨.app3 o A.term B.term K.term, A.defs ++ B.defs ++ K.defs, K.next⟩ :=
+    hA.node3 hB hK (LTm.app3 o) (fun _ _ _ => Nat.le_refl _)
+      (fun g ν x' y' z' hx hy hz => by rw [LTm.eval_app3, LTm.eval_app3, hx, hy, hz])
+  have hds : Defs.Good n K.next (A.defs ++ B.defs ++ K.defs) := (hA.defs.append hB.defs).append hK.defs
+  have hAb : A.term.atomBound ≤ K.next := Nat.le_trans hA.bound (Nat.le_trans hB.defs.le hK.defs.le)
+  have hBb : B.term.atomBound ≤ K.next := Nat.le_trans hB.bound hK.defs.le
+  have hall : ∀ σ ν, LFml.AllHold σ ν prev → LFml.AllHold σ ν (A.defs ++ B.defs ++ K.defs) →
+      A.term.eval σ ν = x.eval σ ν ∧ B.term.eval σ ν = y.eval σ ν ∧ K.term.eval σ ν = z.eval σ ν := by
+    intro σ ν hp hd
+    obtain ⟨hab, hz⟩ := (LFml.AllHold.append_iff σ ν _ _).mp hd
+    obtain ⟨ha, hb'⟩ := (LFml.AllHold.append_iff σ ν _ _).mp hab
+    exact ⟨hA.eval σ ν hp ha, hB.eval σ ν (hp.append ha) hb',
+      hK.eval σ ν ((hp.append ha).append hb') hz⟩
+  cases o with
+  | modular op =>
+    cases op with
+    | addmod =>
+      dsimp only [cut3]
+      split
+      · rename_i r _
+        obtain ⟨rv, hr⟩ := r
+        dsimp only
+        split
+        · rename_i h0
+          refine ⟨hds, by dsimp only; simp only [LTm.atomBound]; omega, fun σ ν hp hd => ?_⟩
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd
+          rw [eval_modular, ← h1, ← h2, ← h3, hr, LTm.eval_seq, LTm.eval_seq]
+          cases A.term.eval σ ν <;> cases B.term.eval σ ν <;>
+            simp only [Option.bind_none, Option.bind_some]
+          show none = ModOp.evalT .addmod _ _ rv
+          unfold ModOp.evalT
+          rw [if_pos h0]
+        · rename_i h0
+          obtain ⟨g1, g2, g3⟩ := addmodLit_spec hds hprev hAb hBb rv h0
+          refine ⟨g1, g2, fun σ ν hp hd => ?_⟩
+          obtain ⟨hd', he⟩ := g3 σ ν hp hd
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd'
+          rw [he, eval_modular, ← h1, ← h2, ← h3, hr]
+          cases A.term.eval σ ν <;> cases B.term.eval σ ν <;> rfl
+      · exact hgen
+    | mulmod =>
+      dsimp only [cut3]
+      split
+      · rename_i r k _ _
+        obtain ⟨rv, hr⟩ := r
+        obtain ⟨kv, hk⟩ := k
+        dsimp only
+        split
+        · rename_i h0
+          refine ⟨hds, by dsimp only; simp only [LTm.atomBound]; omega, fun σ ν hp hd => ?_⟩
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd
+          rw [eval_modular, ← h1, ← h2, ← h3, hr, hk, LTm.eval_seq]
+          cases A.term.eval σ ν with
+          | none => rfl
+          | some _ =>
+            show none = ModOp.evalT .mulmod _ kv rv
+            unfold ModOp.evalT
+            rw [if_pos h0]
+        · rename_i h0
+          obtain ⟨g1, g2, g3⟩ := mulmodLit_spec hds hprev hAb kv rv h0
+          refine ⟨g1, g2, fun σ ν hp hd => ?_⟩
+          obtain ⟨hd', he⟩ := g3 σ ν hp hd
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd'
+          rw [he, eval_modular, ← h1, ← h2, ← h3, hr, hk]
+          cases A.term.eval σ ν <;> rfl
+      · rename_i r k _ _ _
+        obtain ⟨rv, hr⟩ := r
+        obtain ⟨kv, hk⟩ := k
+        dsimp only
+        split
+        · rename_i h0
+          refine ⟨hds, by dsimp only; simp only [LTm.atomBound]; omega, fun σ ν hp hd => ?_⟩
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd
+          rw [eval_modular, ← h1, ← h2, ← h3, hr, hk, LTm.eval_seq]
+          cases B.term.eval σ ν with
+          | none => rfl
+          | some _ =>
+            show none = ModOp.evalT .mulmod kv _ rv
+            unfold ModOp.evalT
+            rw [if_pos h0]
+        · rename_i h0
+          obtain ⟨g1, g2, g3⟩ := mulmodLit_spec hds hprev hBb kv rv h0
+          refine ⟨g1, g2, fun σ ν hp hd => ?_⟩
+          obtain ⟨hd', he⟩ := g3 σ ν hp hd
+          obtain ⟨h1, h2, h3⟩ := hall σ ν hp hd'
+          rw [he, eval_modular, ← h1, ← h2, ← h3, hr, hk]
+          cases B.term.eval σ ν with
+          | none => rfl
+          | some yv => exact (mulmod_comm _ _ _).symm
+      · exact hgen
+  | _ => exact hgen
+
 theorem Defs.Below.ext {n : Nat} {prev ds : List (LFml C)} {m : Nat} (hp : Defs.Below n prev)
     (hd : Defs.Good n m ds) : Defs.Below m (prev ++ ds) :=
   hp.append hd.le hd.bound
@@ -2067,8 +2947,7 @@ theorem LTm.cut_good : ∀ {s : Srt} (t : LTm C s) (prev : List (LFml C)) (n : N
     have hZ := LTm.cut_good c (prev ++ (a.cut prev n).defs ++ (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).defs)
       (b.cut (prev ++ (a.cut prev n).defs) (a.cut prev n).next).next
       (by have := hA.defs.le; have := hB.defs.le; omega) ((hp.ext hA.defs).ext hB.defs)
-    exact hA.node3 hB hZ (LTm.app3 o) (fun _ _ _ => Nat.le_refl _)
-      (fun g ν x' y' z' hx hy hz => by rw [LTm.eval_app3, LTm.eval_app3, hx, hy, hz])
+    exact cut3_good o hA hB hZ hp
   | _, .index it a b, prev, n, h, hp => by
     have hA := LTm.cut_good a prev n (Nat.le_trans (Nat.le_max_left _ _) h) hp
     have hB := LTm.cut_good b _ _ (Nat.le_trans (Nat.le_trans (Nat.le_max_right _ _) h) hA.defs.le)

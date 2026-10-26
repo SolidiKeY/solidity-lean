@@ -59,6 +59,9 @@ inductive ReadExpr : {s : Srt} → LTm C s → Type where
       (ha : ReadExpr a) (hb : ReadExpr b) (ht : ReadExpr t) (he : ReadExpr e) :
       ReadExpr (.kite a b t e)
   | err {s : Srt} : ReadExpr (LTm.err (C := C) (s := s))
+  /-- `addmod`, `mulmod`. -/
+  | modular (op : ModOp) {a b k : LTm C (.val .uint)} (ha : ReadExpr a) (hb : ReadExpr b)
+      (hk : ReadExpr k) : ReadExpr (.app3 (.modular op) a b k)
   /-- A KeY `int` literal. -/
   | zlit (n : Int) : ReadExpr (.app0 (.zlit n))
   /-- A `uint` read as a KeY `int`. -/
@@ -90,6 +93,7 @@ def ofTerm? : {s : Srt} → (t : LTm C s) → Option (ReadExpr t)
   | _, .orElse a b => do return .orElse (← ofTerm? a) (← ofTerm? b)
   | _, .kite a b t e => do return .kite (← ofTerm? a) (← ofTerm? b) (← ofTerm? t) (← ofTerm? e)
   | _, .err => some .err
+  | _, .app3 (.modular op) a b k => do return .modular op (← ofTerm? a) (← ofTerm? b) (← ofTerm? k)
   -- KeY `int` nodes, matched under a variable symbol so that the cases
   -- above do not discriminate on the sort.
   | s, .app0 o =>
@@ -145,6 +149,8 @@ def query (g : State C []) (ν : AEnv) : {s : Srt} → {t : LTm C s} →
       | some x, some y => @ite _ (x = y) (PrimTy.decEqDenote p x y) (ht.query g ν) (he.query g ν)
       | _, _ => .pure none
   | _, _, .err => .pure none
+  | _, _, .modular op ha hb hk => (ha.query g ν).bind fun a => (hb.query g ν).bind fun b =>
+      (hk.query g ν).bind fun k => .pure (a.bind fun x => b.bind fun y => k.bind fun z => op.evalT x y z)
   | _, _, .zlit n => .pure (some n)
   | _, _, .toInt ht => (ht.query g ν).bind fun v => .pure (v.map fun n => n.1)
   | _, _, .net ht => (ht.query g ν).bind fun v =>
@@ -202,6 +208,11 @@ theorem query_sound (g : State C []) (ν : AEnv) {s : Srt} {t : LTm C s}
       simp only [Option.bind_none, Option.bind_some, Query.run, Option.map_none]
     split <;> assumption
   | err => rfl
+  | modular op ha hb hk iha ihb ihk =>
+    simp only [query, Query.runStorage, Query.run_bind, Query.run, LTm.eval_app3, ← iha, ← ihb, ← ihk,
+      ReadDen.erase_val, Option.map_id, id_eq]
+    cases (ha.query g ν).run (fun r => r.read st) <;> cases (hb.query g ν).run (fun r => r.read st) <;>
+      cases (hk.query g ν).run (fun r => r.read st) <;> rfl
   | zlit n => rfl
   | toInt ht ih | net ht ih =>
     simp only [query, Query.runStorage, Query.run_bind, Query.run, LTm.eval_app1, ← ih]
