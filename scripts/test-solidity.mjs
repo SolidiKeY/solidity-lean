@@ -26,21 +26,29 @@ export function solidityFiles(paths) {
 
 /** Run one bounded tool job; a timed-out Lake job must not leave Lean running. */
 export function runTool(command, args, timeoutMs) {
-  const group = process.platform !== 'win32';
-  const p = spawnSync(command, args, {
-    cwd: ROOT, encoding: "utf8", timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024,
-    detached: group, killSignal: 'SIGKILL',
-  });
-  if (p.error || p.status !== 0) {
-    if (group && p.pid > 0) {
-      try { process.kill(-p.pid, 'SIGKILL'); }
-      catch (e) { if (e.code !== 'ESRCH') throw e; }
-    }
-    const tool = {command, exitCode:p.status, signal:p.signal,
-      errorCode:p.error?.code ?? null, timedOut:p.error?.code === 'ETIMEDOUT', timeoutMs};
+  const scratch = mkdtempSync(join(tmpdir(), 'solidity-job-'));
+  const checkpoint = join(scratch, 'status.json');
+  let p, status;
+  try {
+    p = spawnSync(process.execPath,
+      [fileURLToPath(new URL('./tool-job.mjs', import.meta.url)), checkpoint, String(timeoutMs), command, ...args], {
+      cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024,
+      // The supervisor remains in the foreground group to receive Ctrl-C. It
+      // owns a separate tool group and kills descendants before exiting.
+      killSignal: 'SIGTERM',
+      timeout: Math.min(2147483647, timeoutMs + 10000),
+    });
+    status = existsSync(checkpoint) ? JSON.parse(readFileSync(checkpoint, 'utf8')) : null;
+  } finally { rmSync(scratch, {recursive:true, force:true}); }
+  if (p.error || p.status !== 0 || !status || status.exitCode !== 0) {
+    const tool = {command, exitCode:status ? status.exitCode : p.status,
+      signal:status?.signal ?? p.signal,
+      errorCode:status?.errorCode ?? p.error?.code ?? null,
+      timedOut:status?.timedOut ?? (p.error?.code === 'ETIMEDOUT'), timeoutMs};
     const outcome = [p.error?.message,
-      p.signal ? `${command} terminated by ${p.signal}` : null,
-      p.status !== null ? `${command} exited ${p.status}` : null].filter(Boolean).join('; ');
+      tool.errorCode, tool.signal ? `${command} terminated by ${tool.signal}` : null,
+      tool.exitCode !== null ? `${command} exited ${tool.exitCode}` : null,
+      !status ? 'tool supervisor exited without a checkpoint' : null].filter(Boolean).join('; ');
     const failure = new Error([outcome, p.stdout, p.stderr].filter(Boolean).join("\n").trim());
     failure.tool = tool;
     throw failure;
@@ -82,7 +90,8 @@ export function runSolidityTests(paths, options = {}) {
     if (selfAddress >= (1n << 160n)) throw new Error("self address must fit 160 bits");
     selfClause = ` self ${selfAddress.toString()}`;
   }
-  if (options.build !== false) runTool("lake", ["build", "Solidity.Frontend.Testing"], timeoutMs);
+  const api = options.action ? "Solidity.Frontend.Cli" : "Solidity.Frontend.Testing";
+  if (options.build !== false) runTool("lake", ["build", api], timeoutMs);
   const results = [], errors = [];
   for (const source of files) {
     const scratch = mkdtempSync(join(tmpdir(), "solidity-test-"));
@@ -106,10 +115,15 @@ export function runSolidityTests(paths, options = {}) {
           try {
           const name = leanName(contract);
           const wrapper = join(scratch, "Test.lean");
-          writeFileSync(wrapper, `import Solidity.Frontend.Testing
+          const command = options.action
+            ? `#solidity_cli ${name} request ${leanString(JSON.stringify({action:options.action,
+                function:options.function ?? null, show:options.show ?? 'obligation',
+                args:options.args ?? [], state:options.state ?? {}}))} to ${leanString(output)}`
+            : `#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""} to ${leanString(output)}`;
+          writeFileSync(wrapper, `import ${api}
 solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${name}${renameClause(options.renaming)} testing
 solc_scoped_problems ${name} decl${selfClause}
-#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""} to ${leanString(output)}
+${command}
 `);
           // `lake lean` supplies the artifact-cache import map. `lake env lean`
           // only sees local oleans, which a freshly cached worktree need not have.
@@ -129,7 +143,7 @@ solc_scoped_problems ${name} decl${selfClause}
         }
         const node = JSON.parse(data).ast.nodes.find(n => n.nodeType === 'ContractDefinition' && n.name === contract);
         const large = node.nodes.filter(n => n.nodeType === 'FunctionDefinition').length > batchSize;
-        if (!options.list && !options.function && large) {
+        if (!options.action && !options.list && !options.function && large) {
           const rows = invoke(undefined, undefined, true);
           for (let first=0; first<rows.length; first+=batchSize) {
             const part = invoke(first,batchSize,false);

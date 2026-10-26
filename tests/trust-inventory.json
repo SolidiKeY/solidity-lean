@@ -655,6 +655,21 @@
     "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let contract ← unsafe evalExpr Contract (mkConst ``Contract) C"
+  },
+  {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let body ← unsafe evalExpr (Fml contract []) (← inferType φ) (← Symex.evaluable φ)"
+  },
+  {
+    "file": "Solidity/Frontend/Cli.lean",
+    "kind": "unsafe",
+    "code": "let C ← unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
+  },
+  {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
     "code": "let (C, bodies) \u2190 liftTermElabM <| unsafe evalExpr (Contract \u00d7 List (List RawStmt)) pairTy val"

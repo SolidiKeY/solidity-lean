@@ -64,6 +64,20 @@ The package declares no dependencies at all — no Mathlib, nothing — so
 NixOS, `run-lean.sh` uses the wrappers in `scripts/lean-vscode/bin` to select
 a compatible Lean and Lake installation.
 
+## Command line
+
+```sh
+lake build solidity-lean Solidity.Frontend.Cli
+.lake/build/bin/solidity-lean verify path/to/Contract.sol
+.lake/build/bin/solidity-lean list path/to/Contract.sol --json
+.lake/build/bin/solidity-lean inspect path/to/Contract.sol --function transfer --show goals
+```
+
+The native CLI also provides concrete `run` and `rules check` commands.
+It uses the existing kernel-checked source pipeline and requires its runtime
+checkout, Node, pinned Lean/Lake, and SHA-checked Solidity compiler.
+See [docs/cli.md](docs/cli.md) for setup, state files, output and exit codes.
+
 ## Relationship to solkey
 
 The calculus formalized here is implemented as KeY taclets by

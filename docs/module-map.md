@@ -91,6 +91,7 @@ See `docs/bridge.md` for scope and commands.
 
 | Module | What it defines |
 |---|---|
+| `Frontend/Cli.lean` | JSON request adapter for source obligation, goal and ordinary proof-tree inspection, and typed concrete calls; the native launcher is `SolidityLean.lean`. |
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `Language/Features.lean` | Pinned Solidity language catalog, scope/current-status records, finite structured exclusions and diagnostics, requirements/backlog lists, and a feature-parameterized syntax subset. Generated from `docs/solidity-features.json`. |
 | `Eqns.lean` | `attribute [sol_eqns l₁ … lₙ] f` (Mathlib's `@[eqns]`, named apart for `Bridge/`): hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |

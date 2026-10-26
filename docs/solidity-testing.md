@@ -1,5 +1,10 @@
 # Testing Solidity files
 
+The native `solidity-lean verify` and `list` commands expose this API with
+versioned JSON output. See [cli.md](cli.md) for their build and runtime setup,
+inspection, concrete execution and exit conventions. The JavaScript and Lean
+entry points below remain available.
+
 The Lean API can compile a `.sol` source, discover its contracts and functions,
 generate their obligations, and check proofs. Run it from the repository root:
 
