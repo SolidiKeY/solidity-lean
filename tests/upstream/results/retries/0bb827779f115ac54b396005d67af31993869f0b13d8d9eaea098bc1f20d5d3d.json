@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/memoryManagement/return_variable.sol",
+    "timeoutMs": 30000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/memoryManagement/return_variable.sol",
+      "stage": "lean-runtime",
+      "status": "broken",
+      "reason": "frontend import gaps",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/memoryManagement/return_variable.sol",
+          "gaps": [
+            {
+              "status": "excluded",
+              "reason": "return_variable.sol:5: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "memorySize()"
+            },
+            {
+              "status": "excluded",
+              "reason": "return_variable.sol:5: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "f()"
+            }
+          ]
+        },
+        {
+          "status": "broken",
+          "reason": "frontend import gaps",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/memoryManagement/return_variable.sol",
+          "gaps": [
+            {
+              "status": "excluded",
+              "reason": "return_variable.sol:5: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "memorySize()"
+            },
+            {
+              "status": "excluded",
+              "reason": "return_variable.sol:5: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+              "function": "f()"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
