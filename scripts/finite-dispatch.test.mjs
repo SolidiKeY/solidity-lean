@@ -55,7 +55,7 @@ function productionCheck(source, body) {
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
-    writeFileSync(check, `import Solidity.Frontend.Import
+    writeFileSync(check, `import Solidity.Tools.Upstream
 open Solidity Solidity.Frontend
 solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing
 ${body}
@@ -271,4 +271,49 @@ test('synthesized constructor body helpers are native non-dispatchable entries',
   !(name.startsWith "solcCtorBody") || !(fnSource Imported.C name)
 #guard (Imported.C.report.find? (·.name == "entry")).any fun row =>
   row.admissionChecked && row.status == .elaborated && row.sourceDiagnostic.isNone`);
+});
+
+
+test('discarded function projections preserve source names and evaluate array operands once', () => {
+  productionCheck(`contract C {
+    uint calls;
+    function f() public returns(uint, uint) {
+      uint discarded1 = 17;
+      [C(address(0x1234)).f.address, address(uint160(++calls))][0];
+      return (discarded1, calls);
+    }
+  }`, `#eval (do
+  let cases : List (List String × String) :=
+    [(["17", "1"], "working"), (["17", "0"], "broken"), (["4660", "1"], "broken")]
+  for (expected, status) in cases do
+    let vector := Lean.Json.mkObj [
+      ("signature", Lean.toJson ("f()" : String)),
+      ("args", Lean.toJson ([] : List String)),
+      ("failure", Lean.toJson false), ("expected", Lean.toJson expected)]
+    let data := Lean.Json.mkObj [("vectors", Lean.toJson [vector])]
+    let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+    unless (report.getObjValAs? String "status").toOption == some status do
+      throw (IO.userError report.pretty) : IO Unit)`);
+});
+
+test('effectful receiver address projection remains an explicit frontend exclusion', () => {
+  productionCheck(`contract C {
+    uint calls;
+    function receiver() internal returns(address) { calls++; return address(0x1234); }
+    function f() public returns(uint, uint) {
+      uint discarded1 = 17;
+      C(receiver()).f.address;
+      return (discarded1, calls);
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "f")).any fun row => row.status == .unsupported
+#eval (do
+  let vector := Lean.Json.mkObj [
+    ("signature", Lean.toJson ("f()" : String)),
+    ("args", Lean.toJson ([] : List String)),
+    ("failure", Lean.toJson false),
+    ("expected", Lean.toJson (["17", "1"] : List String))]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report
+    (Lean.Json.mkObj [("vectors", Lean.toJson [vector])])
+  unless (report.getObjValAs? String "status").toOption == some "broken" do
+    throw (IO.userError report.pretty) : IO Unit)`);
 });

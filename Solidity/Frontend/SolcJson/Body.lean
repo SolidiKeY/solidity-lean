@@ -769,6 +769,20 @@ abbrev PM := StateT PState (Except Gap)
 
 def PM.lift {α : Type} (x : Except Gap α) : PM α := StateT.lift x
 
+/-- Discard captures cannot shadow a source declaration or its model alias.
+Advance beyond every reserved decimal suffix in one bounded traversal; the
+counter also separates earlier generated captures in composite constructors. -/
+def freshDiscardName : PM String := do
+  let st ← get
+  let taken := st.declarations.filterMap (J.str? · "name") ++ st.names.map (·.2) ++
+    st.sourceStateNames ++ st.sourceModelNames ++ st.specLocals.map (·.2)
+  let k := taken.foldl (fun k name =>
+    if name.startsWith "discarded" then
+      ((name.drop 9).toNat?.map fun n => max k (n + 1)).getD k
+    else k) (st.discards + 1)
+  modify fun st => { st with discards := k }
+  pure s!"discarded{k}"
+
 /-- An exact rational in lowest terms, `den > 0`: the value solc gives an
 expression of literals only. -/
 structure Q where
@@ -1826,9 +1840,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
         (J.opt e "memberName").any (fun m => m == .str "pop" || m == .str "push") &&
         (J.tyStr e).startsWith "function" then
       let r ← PM.lift (J.get e "expression")
-      let k := (← get).discards + 1
-      modify fun st => { st with discards := k }
-      return [s!"{← storageRefTy r} storage discarded{k} = {← expr r}"]
+      let name ← freshDiscardName
+      return [s!"{← storageRefTy r} storage {name} = {← expr r}"]
     -- `(c ? f : g)();` of no value: `if (c) { f(); } else { g(); }`
     if let some (c, a, b) := condCallee? e then
       unless condCalleeOk e do unsupported condCalleeMsg
@@ -1845,9 +1858,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
     if ["BinaryOperation", "Conditional"].contains (J.kind e) ||
         (scalar && ["MemberAccess", "IndexAccess", "TupleExpression"].contains (J.kind e)) then
       let t := modelExprType (← get) e
-      let k := (← get).discards + 1
-      modify fun st => { st with discards := k }
-      return [s!"{t} discarded{k} = {← expr e}"]
+      let name ← freshDiscardName
+      return [s!"{t} {name} = {← expr e}"]
     pure [← withPush ok (if J.kind e == "Assignment" then assignText e else expr e)]
   | "VariableDeclarationStatement" =>
     if let some (d, r, v) := valueCall? j then
