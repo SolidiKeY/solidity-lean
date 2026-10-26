@@ -1415,6 +1415,17 @@ partial def expr (j : Json) : PM String := do
           let some name := (J.id? d).bind (lookupBy · (← get).selectorHelpers)
             | unsupported "a dynamic function selector without its receiver helper"
           return s!"{identText name}(address({value}))"
+    -- A statically selected internal function value has the same declaration
+    -- identity as a direct base/super call; it has no object receiver to read.
+    if (J.tyStr j).startsWith "function " && !isExternalMember j then
+      if isSuperMember j then
+        match (J.ref? j).bind (lookupBy · (← get).superNames) with
+        | some name => return identText name
+        | none => unsupported "a super function value with no implementation after its contract in the C3 order"
+      if isBaseMember (← get).baseContracts j then
+        match (J.ref? j).bind (lookupBy · (← get).staticNames) with
+        | some name => return identText name
+        | none => unsupported "a base-qualified function value without an imported function declaration"
     if isExternalMember j then
       if let some id := J.ref? j then
         if let some gap := lookupBy id (← get).getterGaps then throw gap
@@ -1831,7 +1842,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
       return [s!"try {← expr e} \{ } catch \{ revert(); }"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
-    if ["BinaryOperation", "Conditional"].contains (J.kind e) then
+    if ["BinaryOperation", "Conditional"].contains (J.kind e) ||
+        (scalar && ["MemberAccess", "IndexAccess", "TupleExpression"].contains (J.kind e)) then
       let t := modelExprType (← get) e
       let k := (← get).discards + 1
       modify fun st => { st with discards := k }

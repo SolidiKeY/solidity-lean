@@ -56,3 +56,52 @@ private def FailedDeployment : Contract := contract!{
   let report := replay FailedDeployment [] data
   unless (report.getObjValAs? String "status").toOption == some "blocked" do
     throw (IO.userError report.pretty) : IO Unit)
+
+-- Getter lookup uses source ABI identity, not a report row or model name.
+private def GetterCounter (callable : SourceCallable) : Contract :=
+  { Counter with funs := Counter.funs.map fun (name, d) =>
+      (name, if name == "set" then { d with sourceDecl := some {
+        name := "sourceGetter", signature := some "sourceGetter(uint256)", callable } } else d) }
+
+#eval (do
+  let .ok data := Json.parse "{\"vectors\":[{\"signature\":\"sourceGetter(uint256)\",\"args\":[\"12\"],\"failure\":false,\"expected\":[\"12\"]}]}"
+    | throw (IO.userError "bad test JSON")
+  for (role, status) in [(SourceCallable.getter ⟨0, by decide⟩, "working"),
+      (.implementation, "broken"), (.local .internalFn, "broken")] do
+    let report := replay (GetterCounter role) [] data
+    unless (report.getObjValAs? String "status").toOption == some status do
+      throw (IO.userError report.pretty) : IO Unit)
+
+-- Resource limits caught inside import rows are still inconclusive.
+#eval (do
+  let row : ImportRow := {
+      name := "set", sourceSignature := "set(uint)",
+      tag := .diamond, params := [], status := .unsupported,
+      reason := "callee left out: maximum recursion depth has been reached" }
+  let report := replay Counter [row] Json.null
+  unless (report.getObjValAs? String "status").toOption == some "blocked" do
+    throw (IO.userError report.pretty) : IO Unit)
+
+-- Type canonicalization must never rewrite the source declaration name.
+private def NameCollision : Contract :=
+  { Counter with funs := Counter.funs.map fun (name, d) =>
+      (name, { d with sourceDecl := some {
+        name := name, signature := (if name == "bump" then some "uint256value()" else if name == "fail" then some "uintvalue()" else none),
+        callable := .getter ⟨0, by decide⟩ } }) }
+
+#eval (do
+  let .ok data := Json.parse "{\"vectors\":[{\"signature\":\"uintvalue()\",\"args\":[],\"failure\":true,\"expected\":[]}]}"
+    | throw (IO.userError "bad test JSON")
+  let report := replay NameCollision [] data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)
+
+#eval (do
+  for messages in [["ordinary warning", "maximum recursion depth"],
+      ["heartbeats exhausted", "ordinary warning"]] do
+    let report := diagnosticFailure messages
+    unless (report.getObjValAs? String "status").toOption == some "blocked" &&
+        (report.getObjValAs? String "reason").toOption == some ("\n".intercalate messages) do
+      throw (IO.userError report.pretty)
+  unless ((diagnosticFailure ["ordinary error"]).getObjValAs? String "status").toOption == some "broken" do
+    throw (IO.userError "ordinary diagnostics were hidden") : IO Unit)

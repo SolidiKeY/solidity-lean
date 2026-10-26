@@ -911,7 +911,17 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
   match e with
   | .name x => fnTyOf? C Γ x
   | .ternary _ a _ => fnTyOfExpr Γ a
-  | .call g _ => do
+  | .call g args => do
+    if g == callValueName then
+      let h ← args.head?
+      let ty ← fnTyOfExpr Γ h
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
+    if let some ty := fnTyOf? C Γ g then
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
     let d ← lookupBy g C.funs
     let (r, .prim _) ← d.ret | none
     (fnRow? d.widths r).map canon
