@@ -1,0 +1,30 @@
+{
+  "name": "solidity-lean",
+  "displayName": "Solidity Lean Verification",
+  "description": "Run kernel-checked Solidity verification and inspect obligations, diagnostics and proof status.",
+  "version": "0.1.0",
+  "publisher": "SolidiKeY",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Programming Languages", "Testing"],
+  "main": "./src/extension.cjs",
+  "activationEvents": ["onLanguage:solidity", "workspaceContains:**/*.sol"],
+  "capabilities": { "untrustedWorkspaces": { "supported": false }, "virtualWorkspaces": false },
+  "contributes": {
+    "commands": [
+      { "command": "solidityLean.verify", "title": "Solidity Lean: Verify File" },
+      { "command": "solidityLean.list", "title": "Solidity Lean: Discover Obligations" },
+      { "command": "solidityLean.cancel", "title": "Solidity Lean: Cancel Verification" }
+    ],
+    "configuration": {
+      "title": "Solidity Lean",
+      "properties": {
+        "solidityLean.backendPath": { "type": "string", "default": "", "scope": "resource", "description": "Solidity Lean repository directory. Empty uses the Solidity file's workspace folder.", "restricted": true },
+        "solidityLean.nodePath": { "type": "string", "default": "node", "scope": "resource", "description": "Node.js executable used to launch verification.", "restricted": true },
+        "solidityLean.timeoutMs": { "type": "integer", "minimum": 1, "default": 600000, "scope": "resource", "description": "Overall verification timeout in milliseconds." },
+        "solidityLean.verifyOnSave": { "type": "boolean", "default": false, "scope": "resource", "description": "Verify Solidity files automatically when saved." }
+      }
+    }
+  },
+  "scripts": { "test": "node --test test/*.test.cjs" }
+}
