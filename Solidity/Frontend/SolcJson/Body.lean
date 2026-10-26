@@ -1355,7 +1355,13 @@ partial def expr (j : Json) : PM String := do
     match (← PM.lift (J.str j "operator")) with
     | "!" => pure s!"!{s}"
     | "-" => pure s!"-{s}"
-    | "~" => pure s!"~{s}"
+    | "~" =>
+      -- Signed complement is -1 - x. Both endpoints stay in the signed
+      -- range; unlike negating x first, this also handles the minimum value.
+      -- Keep the source width and evaluate the operand exactly once.
+      if ((castTy? (J.tyStr j)).map Prod.fst) == some .int then
+        pure s!"({sourceCast (J.tyStr j) "-1"} - {s})"
+      else pure s!"~{s}"
     | "++" => pure (if pre then s!"++{s}" else s!"{s}++")
     | "--" => pure (if pre then s!"−−{s}" else s!"{s}−−")
     | "delete" => pure s!"delete {s}"

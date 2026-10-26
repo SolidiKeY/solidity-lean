@@ -67,7 +67,14 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       deployed := true
     let normaliseSignature (s : String) :=
       ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
-    let function := (rows.find? fun r => normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
+    let function := (rows.find? fun r =>
+      -- The imported function already carries its declaration-indexed ABI
+      -- identity. Nominal UDVT spellings in the report are not ABI types.
+      let source := (Semantics.lookupBy r.name C.funs).bind (·.sourceDecl)
+      let abi := match source with
+        | some declaration => if declaration.externalEntry then declaration.signature else none
+        | none => some r.sourceSignature -- native replay controls
+      abi.any fun abi => normaliseSignature abi == normaliseSignature signature).map (·.name)
     let program := if ctor then ctorProgS C args else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
       elabProgS C [← runStmt C name args]
@@ -97,7 +104,10 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
           word value
         pure (false, values)
     let .ok (failed, values) := actual
-      | return result "blocked" "execution exhausted fuel or produced an unsupported return"
+      | return result "blocked" (match actual with
+          | .error reason => reason
+          | .ok _ => "unsupported execution result")
+          [("observed", toJson observed), ("blockedVector", vector)]
     observed := observed.push (Json.mkObj [("signature", str signature),
       ("failed", toJson failed), ("values", toJson values)])
     let .ok expectedFailure := vector.getObjValAs? Bool "failure"
