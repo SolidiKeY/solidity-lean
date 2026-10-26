@@ -469,6 +469,8 @@ import Solidity.Calculus.HashReduction
 import Solidity.Calculus.HashRelabel
 import Solidity.Calculus.HashComplete
 import Solidity.Calculus.HashKinds
+import Solidity.Calculus.HashKinds3
+import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
