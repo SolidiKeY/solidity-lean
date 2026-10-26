@@ -164,3 +164,40 @@ targets, while checking the existing `Examples/Decision.lean`; no build
 errors had been reported. Its result is inconclusive. The new upstream module
 and all replay checks completed successfully. Exact check outcomes are in
 `tests/upstream/results/validation.json`.
+
+## Group 02 callable-entry repair
+
+The group 02 branch starts at `006fcd593f5beeb540e7adf2bc76de4638566924`.
+The historical result directory and pinned archive remain unchanged. All 67
+assigned missing imported-function rows were reproduced before editing, with
+one exact fixture filter and `--batch-size 1` per output directory. New replay
+results distinguish resolved entrypoints from deeper initialization mismatches
+and explicit getter/import limitations. Runtime agreement remains observational.
+Implementation and read-only review details are recorded in
+[the declaration milestone](feature-work/declarations-metadata.md#group-02-upstream-callable-entry-replay-2026-10-26).
+
+The additional source controls run with:
+
+```sh
+source /workspace/.setup/activate.sh
+lake build Solidity.Tools.Upstream
+lake env lean --tstack=131072 tests/upstream/Entrypoints.lean
+lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072
+node --test --test-isolation=none scripts/solidity-upstream.test.mjs
+```
+
+
+Final assigned result: **65 working, two broken, zero blocked** across 67
+fixtures and 131 required pipeline runs (129 working, two broken). No assigned
+case was already fixed or is an expected exclusion. Both remaining failures
+are now observable via-IR initialization-order mismatches: `x() = 4` versus
+`2` in `constructor_inheritance_init_order_3_viaIR.sol`, and `c() = 126` versus
+`51` in `state_variables_init_order_3.sol`. Their legacy/matching observations
+are retained; neither is converted into an expected failure.
+
+The complete [per-fixture handoff](../tests/upstream/repairs/group02.md) links
+all before/after reports, exact commands, required pipelines, raw and compiled
+source hashes, compiler/archive/runner/model hashes and timings. Historical
+model hash `c042a72f…` belongs to the imported `cadb628c` run; fresh master
+reproduction uses `c86945ed…`, and final repair uses `87539855…`. Runtime
+agreement is observational, with no claim of universal compiler correctness.

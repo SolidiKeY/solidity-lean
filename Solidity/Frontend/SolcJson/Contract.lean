@@ -585,7 +585,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       fun names text => if names.any (fun (a, b) => a != b) then
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
-    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default) :
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
+    (entrypoints : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -676,7 +677,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let value ← J.opt v "value"
     let typeNode ← J.opt v "typeName"
     let t ← (tyText S typeNode).toOption
-    guard (PrimTy.ofName? t).isSome
+    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome)
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
@@ -1481,14 +1482,20 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         {String.join (ss.map (·.2 ++ "; "))}}")]
       out := out ++ [(J.line f, s!"{n}({", ".intercalate (ps.map (identText ∘ Prod.fst))})")]
     pure (out, helpers, loopScope)
-  let called := (ownIds.flatMap fun i =>
+  -- Runtime import keeps every selected ABI entry and its dependency closure.
+  -- Retained base bodies remain internal callees, never additional ABI entries.
+  let entryIds := if entrypoints then byId.filterMap fun (id, f) => do
+    guard (f.sourceDecl.any SourceFunction.externalEntry)
+    pure id
+    else []
+  let called := ((ownIds ++ entryIds).eraseDups.flatMap fun i =>
     ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast) ++
     initCalls.flatMap (fun i => (reach calls (ids.length + 1) [] [] i).toOption.getD []) ++
     (if baseCtors.isEmpty then [] else compositeReach)
   let funMembers := order.filterMap fun i => do
     let r ← lookupBy i closed
     guard (ctorId != some i && (called.contains i || (getterNames.any (·.1 == i)) ||
-      (ownIds.contains i && (testing || !r.modifierApps.isEmpty))))
+      (ownIds.contains i && (testing || !r.modifierApps.isEmpty)) || entryIds.contains i))
     let ss ← r.body.toOption
     pure (r.name, r.member (ss.map (·.2)))
   -- the constructor bodies the composite calls, after every function
@@ -1534,6 +1541,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         baseCtors.any (writingCall ·.2) ||
         compositeReach.any fun x => (lookupBy x byId).all (·.writingCall) }
   let funs := all.filterMap fun (c, r) => if c then none else some r
+  -- Getter gaps must remain visible even when no body could be emitted.
+  let extraEntries := if entrypoints then closed.filterMap fun (id, f) => do
+    guard (!(ownIds.contains id) &&
+      (entryIds.contains id || getterNames.any (·.1 == id)))
+    pure f
+    else []
+  let funs := funs ++ extraEntries
   let internalFuns := selectorHelpers.map (·.2) ++ ctorHelpers.map (·.1)
   let sourceDecls := byId.filterMap fun (_, f) => f.sourceDecl.map (f.name, ·)
   let sourceDecls := sourceDecls ++ internalFuns.map fun name =>

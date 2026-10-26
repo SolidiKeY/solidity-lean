@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "branch": "repair/group02-entrypoints",
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "managedEnvironment": "ccarenv_b64_Y2NhcmVudl9lMTU0NDkyMjA1ZmM4MTkxOWQyN2MyNzhkZDg4Mjc1Yw",
+  "leanDiagnostics": "Lean MCP tools were not exposed. Configured per-file lake env lean --tstack=131072 checks were used.",
+  "perFileChecks": [
+    {
+      "file": "Solidity/Frontend/SolcJson/Getters.lean",
+      "status": "pass",
+      "log": "/workspace/group02-getters-final-check.log",
+      "command": "lake env lean --tstack=131072 Solidity/Frontend/SolcJson/Getters.lean"
+    },
+    {
+      "file": "Solidity/Frontend/SolcJson/Contract.lean",
+      "status": "pass",
+      "log": "/workspace/group02-contract-final-check.log",
+      "command": "lake env lean --tstack=131072 Solidity/Frontend/SolcJson/Contract.lean"
+    },
+    {
+      "file": "Solidity/Frontend/Import.lean",
+      "status": "pass",
+      "log": "/workspace/group02-import-final-check.log",
+      "command": "lake env lean --tstack=131072 Solidity/Frontend/Import.lean"
+    },
+    {
+      "file": "Solidity/Tools/Upstream.lean",
+      "status": "pass",
+      "log": "/workspace/group02-upstream-check.log",
+      "command": "lake env lean --tstack=131072 Solidity/Tools/Upstream.lean"
+    },
+    {
+      "file": "tests/upstream/Entrypoints.lean",
+      "status": "pass",
+      "log": "/workspace/group02-controls-final-complete.log",
+      "command": "lake env lean --tstack=131072 tests/upstream/Entrypoints.lean"
+    },
+    {
+      "file": "tests/upstream/Replay.lean",
+      "status": "pass",
+      "log": "/workspace/group02-replay-final.log",
+      "command": "lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072"
+    }
+  ],
+  "javascript": {
+    "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+    "passed": 14,
+    "failed": 0,
+    "log": "/workspace/group02-js-final.log"
+  },
+  "structural": {
+    "strictAutomation": "491 automatic, 61 budgeted, 11 refuted, zero pending",
+    "layering": "143 core modules; zero reach elaborator",
+    "reachability": "667 reachable; zero orphaned"
+  },
+  "sourceSuiteComparison": {
+    "command": "node --test --test-isolation=none scripts/public-getters.test.mjs scripts/declarations-metadata.test.mjs",
+    "baselineCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+    "baselineLog": "/workspace/group02-baseline-source-tests.log",
+    "patchedLog": "/workspace/group02-source-tests-final.log",
+    "both": {
+      "pass": 5,
+      "implementationFailures": [
+        "DeclarationMetadata.errorSelector: solidity.functionMemberKind: stored function members need typed ABI address/selector observations"
+      ],
+      "resourceBlocks": [
+        "PublicGetters source proof run: 300000 ms timeout",
+        "GetterFunctionSlot source proof run: 300000 ms timeout"
+      ]
+    },
+    "note": "Identical failure categories on detached master and patch. No expected result or limit changed."
+  },
+  "proofBoundary": {
+    "coreSemanticsChanged": false,
+    "calculusRulesChanged": false,
+    "newAxioms": 0,
+    "newSorry": 0,
+    "claim": "Intrinsic typed lowering and observational replay; no universal compiler/lowering equivalence claim."
+  },
+  "reviews": {
+    "finder": "Confirmed constructor ABI-range omission and contradictory elementary/enum metadata. Both fixed and controlled. Final pass found no further issue.",
+    "skeptic": "Independent read-only review; constructor rollback/decode controls and inherited helper closure confirmed; negative narrow constant and nominal refusal controls added.",
+    "leanWorkersOpened": false,
+    "evidenceAudit": "Independent skeptic recomputed all 67 cases/131 modes, verified all 134 report hashes, source hashes, expectation lines and final model digest; no reporting issue found. Final constructor-to-runtime getter continuity control also passes in both pipelines."
+  },
+  "audits": {
+    "trust": "25 existing inventory findings; exact output matches pre-edit audit; 232 implementation/recovery sites unchanged",
+    "docPaths": {
+      "missing": 13,
+      "ambiguous": 28,
+      "status": "pre-existing findings; exact output matches pre-edit audit",
+      "log": "/workspace/group02-docpaths-final.log"
+    }
+  },
+  "remainingAssignedScope": [
+    "viaIR constructor initializer ordering: x() returns 4, expected 2",
+    "viaIR state initializer ordering: c() returns 126, expected 51"
+  ],
+  "fullGates": "running; updated after completion",
+  "frontendBuild": {
+    "command": "lake build Solidity.Tools.Upstream Solidity.Frontend.Testing",
+    "status": "pass",
+    "jobs": 245,
+    "log": "/workspace/group02-final-frontend-build2.log"
+  },
+  "snapshot": {
+    "command": "node scripts/solidity-upstream.mjs verify",
+    "status": "pass",
+    "files": 11622,
+    "log": "/workspace/group02-snapshot-final.log"
+  },
+  "initialAttempt": {
+    "status": "superseded resource/build block",
+    "reason": "An initial dependency build exited 135 while two builds overlapped; the unchanged model was then built and all 67 fresh-before runs completed. No fixture verdict was inferred from that build failure.",
+    "log": "/workspace/group02-first.log"
+  },
+  "performance": {
+    "fanout": [
+      {
+        "module": "Frontend.Import",
+        "fanOut": 68,
+        "fanIn": 30,
+        "lines": 774
+      },
+      {
+        "module": "Frontend.SolcJson.Contract",
+        "fanOut": 70,
+        "fanIn": 13,
+        "lines": 1568
+      },
+      {
+        "module": "Frontend.SolcJson.Getters",
+        "fanOut": 71,
+        "fanIn": 11,
+        "lines": 234
+      },
+      {
+        "module": "Tools.Upstream",
+        "fanOut": 1,
+        "fanIn": 71,
+        "lines": 200
+      }
+    ],
+    "note": "No representation change; existing body memoization/segmentation retained. Cold full-library timing includes many unrelated cache misses and is not an isolated before/after comparison."
+  }
+}

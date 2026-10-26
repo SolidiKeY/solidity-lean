@@ -32,6 +32,40 @@ private def word : Semantics.CallValue → Except String String
   | .int n => pure (toString (n.1 % (2^256 : Int)))
   | .bool b => pure (if b then "1" else "0")
 
+/-- Resolve source ABI entries by exact canonical signature and compiler identity.
+No source-local helper, retained override or special entry is a fallback target.
+The row-only path supports native (non-source) replay controls. -/
+def resolveEntry (C : Contract) (rows : List ImportRow) (signature : String) : Except String String := do
+  let source := C.funs.any fun (_, f) => f.sourceDecl.isSome
+  let candidates := if source then C.funs.filterMap fun (name, f) => do
+      let identity ← f.sourceDecl
+      guard (identity.declaration.isSome && identity.externalEntry &&
+        identity.signature == some signature)
+      pure name
+    else
+      let canonical (s : String) := match s.splitOn "(" with
+        | [name, args] => name ++ "(" ++
+          ((args.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
+        | _ => s
+      rows.filterMap fun r =>
+        if canonical r.sourceSignature == canonical signature &&
+            (Semantics.lookupBy r.name C.funs).isSome then some r.name else none
+  match candidates with
+  | [name] => pure name
+  | [] => throw s!"no imported ABI entry for {signature}"
+  | _ => throw s!"ambiguous imported ABI entry for {signature}"
+
+/-- ABI bounds retained by the source reader, including enum membership.
+The JavaScript adapter separately checks canonical word widths. -/
+private def inRanges (row : ImportRow) (vector : Json) : Bool := Id.run do
+  if row.paramRanges.isEmpty then return true
+  let .ok args := vector.getObjValAs? (List String) "args" | return false
+  if args.length != row.params.length then return false
+  let values := row.params.zip args
+  return row.paramRanges.all fun (name, lo, hi) =>
+    (values.find? fun ((param, _), _) => param == name).any fun (_, value) =>
+      value.toInt?.any fun n => lo ≤ n && n ≤ hi
+
 /-- Replay complete supported vector sequences. Fuel exhaustion is inconclusive. -/
 def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run do
   let bad := rows.filter fun r => r.status != .elaborated && r.status != .skipped
@@ -65,18 +99,20 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       | .error _ => return result "broken" "unexpected default deployment failure"
       | .ok o => state := o.st.glob
       deployed := true
-    let normaliseSignature (s : String) :=
-      ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
-    let function := (rows.find? fun r => normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
+    let resolved := resolveEntry C rows signature
+    let function := resolved.toOption
     let program := if ctor then ctorProgS C args else do
-      let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
+      let name ← resolved
       elabProgS C [← runStmt C name args]
     if let .error reason := program then
       return result "broken" s!"call does not elaborate: {signature}: {reason}"
     let .ok ⟨_, Q⟩ := program
       | return result "blocked" "missing call program"
     let before := state
-    let outcome := if ctor && !((C.ctor.map (·.payable)).getD false) && state.tx.msgValue.1 != 0
+    let rangeRow := if ctor then rows.find? (·.sourceName == "constructor")
+      else function.bind fun name => rows.find? (·.name == name)
+    let badRange := rangeRow.any (fun row => !inRanges row vector)
+    let outcome := if badRange then .error .revert else if ctor && !((C.ctor.map (·.payable)).getD false) && state.tx.msgValue.1 != 0
       then .error .revert else Prog.runF 1000 Q state
     let actual : Except String (Bool × List String) := do
       match outcome with
@@ -132,7 +168,7 @@ def elabUpstreamBatch : CommandElab := fun stx => do
       let contract ← ofExcept (entry.getObjValAs? String "contract")
       let name := Lean.Name.str `Upstream contract
       let bytes ← IO.FS.readBinFile fixture
-      let command := s!"solc_import {toJson fixture |>.compress} hash {hex16 (fnv1a64 bytes)} as Upstream.«{contract}» testing"
+      let command := s!"solc_import {toJson fixture |>.compress} hash {hex16 (fnv1a64 bytes)} as Upstream.«{contract}» testing entrypoints"
       let env ← getEnv
       let parsed ← ofExcept (Parser.runParserCategory env `command command)
       elabCommand parsed

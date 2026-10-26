@@ -349,3 +349,80 @@ before stripping it, then evaluates the receiver once. Exact byte-kind checks
 remain in force. A native execution regression retains the valid explicit
 `bytes4(bytes(text))` conversion from a string-backed memory reference.
 No Lean diagnostics or builds were run by the patch worker.
+
+## Group 02: upstream callable-entry replay (2026-10-26)
+
+The 67 historical missing-function rows were reproduced individually on
+`006fcd593f5beeb540e7adf2bc76de4638566924`; none was already fixed at the
+upstream adapter boundary. Getter bodies and source ABI identities already
+existed, but the replay selected only proof-report rows by source spelling.
+The final per-fixture evidence and validation are linked from
+[the upstream test documentation](../solidity-upstream-tests.md).
+
+The opt-in `solc_import ... testing entrypoints` mode retains selected inherited
+ABI bodies and their dependency closure, and reports their rows and synthesized
+getters, including getter gaps. Ordinary proof imports retain their previous
+report shape. Replay resolves exactly one compiler declaration with the requested
+canonical signature and an external-entry role. Internal helpers, retained
+base implementations, constructor/receive/fallback entries, missing identities,
+and ambiguous signatures cannot serve as a fallback. Source declaration IDs,
+getter parameter/result types and native widths remain in the existing tables.
+Source-local spellings such as enum and value-type names are never used as ABI
+signatures. The old row-based normalization remains only for native replay
+controls without source metadata and preserves the function name.
+
+Retained scalar ABI parameter ranges, including enum membership, are checked
+before executing either a runtime body or an explicit constructor. A failed
+decode reverts with empty data and cannot run body effects. The existing
+constructor sequencing, failed-call rollback and getter bounds guards remain
+active; no observation, expected value, fuel limit or heartbeat budget changed.
+No core representation, run rule or proof rule changes. No new axiom or `sorry`.
+This is executable adapter evidence, not a compiler/lowering equivalence theorem.
+Body memoization and segmented compilation remain intact.
+
+The pinned source controls in `tests/upstream/Entrypoints.sol` execute in both
+legacy and via-IR modes. They cover scalar and nested mapping/fixed/dynamic-array
+getters, bool keys, signed/narrow results, inherited entries calling an internal
+helper, selected overrides, overloads, canonical enum/value-type signatures,
+invalid enum decoding before mutation, constructor decoding, wrong signatures,
+missing getter indexes, internal/special entries, missing IDs and ambiguity.
+Reference-valued getter refusal remains explicit. Native replay's existing
+sequencing, rollback, exhaustion and panic controls also remain required.
+
+Read-only finder and independent skeptic reviews opened no Lean workers. The
+finder identified the initially omitted constructor parameter-range check;
+that was fixed and given valid/invalid constructor controls. The skeptic requested
+an inherited entry calling an internal helper; the source control now exercises
+that dependency closure and refuses that same helper as an ABI entry.
+
+### Nominal-key and narrow-constant completion
+
+The final replay also admits primitive UDVT getter inputs/results by their
+compiler declaration's elementary underlying type. Enum mapping keys retain
+canonical `uint8`, native width eight and an explicit empty-revert membership
+guard before storage access. Enum-valued results, contract/function nominal
+values and reference returns remain refused. Narrow integer constants use the
+existing declaration-based inlining, checked source casts and cycle stack;
+the source controls include a signed `int224` constant chain and a negative
+constant in both pipelines.
+
+Follow-up finder review caught contradictory key metadata: an elementary type
+carrying an enum reference could otherwise receive a different native width
+from its canonical ABI signature. Enum-key recognition now requires a nominal
+type node and cardinality 1..256, and elementary getter types reject nominal
+references. Missing UDVT identities/declarations and contradictory metadata have
+explicit refusal controls. The independent skeptic found no further confirmed
+issue in this extension; neither reviewer opened Lean workers. Scalar/nested
+getter source IDs and native result widths are pinned by the source controls.
+
+### Final assigned compatibility result
+
+All 67 missing-entrypoint failures reproduced on fresh master. Final results
+are 65 working fixtures and two initialization-order mismatches, with zero
+assigned exclusions or blocks. All 131 required modes completed; 129 match.
+The [per-fixture handoff](../../tests/upstream/repairs/group02.md) retains exact
+commands, full passing observations, both mismatch prefixes, every expectation
+line, source/model hashes and timings. Later calls after the first mismatch
+remain unobserved rather than being counted as matches. Constructor/initializer
+sequencing by pipeline remains an integration dependency, with no unpublished
+changes assumed from another group.

@@ -196,7 +196,7 @@ def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")?
-  (&"evalOrder" term)? : command
+  (&"evalOrder" term)? (&"entrypoints")? : command
 
 /-- A large imported function table, compiled in bounded list segments.
 For example, the testing import retains all of TestSuite's public functions.
@@ -528,7 +528,7 @@ def elabSolcImport : CommandElab := fun stx => do
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }))
+        specifications := [(bound, "/// @custom:key " ++ text)] }) (!stx[9].isNone))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
