@@ -1132,7 +1132,7 @@ The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
-*unknown* (`gapColumn` … `gapHashNegForall`, each in the fragment by the
+*unknown* (`gapIntKeyed` … `gapHashNegForall`, each in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
 (`gapMemWrite` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
@@ -1143,7 +1143,10 @@ the last five since 2026-10-25; `gapFiveStrings` (now `fiveStrings`) and
 `gapHashUnderForall` (now `namesUnderForall`) since the hash round of
 2026-10-25 (`Examples/DecisionHashes.lean`); `gapIntDiv`, `gapIntMod`,
 `gapOr`, `gapXor`, `gapAnd`, `gapPow`, `gapMulW` (literal operators,
-feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25.
+feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25;
+`gapBoolKeyed`, `gapPositiveForall`, `gapColumn`, `gapTwoPaths`,
+`gapStructValue` and `gapPartialGuard` (features 16 to 19) since
+2026-10-26.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, with one known exception (below, `gapHashNegForall`):
@@ -1206,7 +1209,9 @@ Three properties of the reading are worth knowing.
 | `Prep.valid_iff` | a preparation's body is valid exactly where the body is |
 | `hoistPrep_valid_iff` | hoisting reads out of quantifiers is exact |
 | `apfPrep_valid_iff` | `Prep.valid_iff` for `apfPrep`, which every preparation has (`Prep.id` too): sound and exact wherever `apfPrep` instantiates, by the next row; the body kept outside the fragment |
-| `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma; mappings at roots and inner mappings at their last key) |
+| `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma; every `uint` key along a root's mappings floored, feature 18; guards whose ground operands may halt, feature 19) |
+| `FloorShape.rebuild_word`, `ApfTm.eval_trel`, `GuardP.mono` | a rebuilt root reads at a path what the old one read at its keys' floors; a term of the fragment reads alike, a path of a root of the blocks at its floors (`SRef.floorRef`); a guard true at the keys is true at their floors, a halting ground operand allowed unless a `&&` skips it inside a `||`'s left operand (`GuardP.floors`, `GuardP.defined`) |
+| `expandPrep_valid_iff`, `LFml.holds_expandB`, `LFml.dropOne_spec` | `bool` quantifiers expanded and positive quantifiers dropped to fresh atoms: exact at every state (features 16 and 17) |
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
 | `Fml.tk_validH` | a valid reading with the second kind's words (`Fml.tk`) makes the leaf valid under its premise; the words read past updates where they land (`linkChoice`, `XRelQ`, `Fml.xk_holdsQ`) |
@@ -1229,7 +1234,8 @@ Three properties of the reading are worth knowing.
 `Fml.tk_refutes`, `Fml.tk_complete`) in `Calculus/HashKinds.lean`, of `QFml.decide_iff` and `QFml.verify` in
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
 `Calculus/QuantTotality.lean`, of the preparations' in
-`Calculus/QuantHoist.lean` and `Calculus/ArrayProperty.lean`, of
+`Calculus/QuantHoist.lean`, `Calculus/QuantExpand.lean` and
+`Calculus/ArrayProperty.lean`, of
 `Fml.mxTop_holds` in `Calculus/MemSwap.lean`: `propext`,
 `Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
@@ -1237,7 +1243,8 @@ Three properties of the reading are worth knowing.
 pipelines' fragment (`decideLeafA`), is `Fml.inExact && Fml.exactBounded`
 (M4), extended by features 1, 2, 4, 5, 8, 14 and 15, each with its
 completeness proved through every stage (recognizer, lifting, flattening,
-compilers), or `Fml.quantCovered` (features 3, 6 and 7, its own pipeline),
+compilers), or `Fml.quantCovered` (features 3, 6, 7 and 16 to 19, its own
+pipeline),
 or `Fml.ledgerCovered` (feature 9, its own pipeline), or
 `Fml.arrayCovered` (feature 10, its own pipeline); `Fml.memCovered` is
 feature 13's, a leaf with fresh memory arrays whose cut is in
@@ -1333,7 +1340,9 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
    (`HDef.fill`) where the prepared body is valid, the same state and atoms
    where it fails (its definitions hold, so each atom is its read).  Where
    every read was hoistable the quantified subformulas are then read-free;
-   the definitions are flattened with the rest of the body.  `evenRead` is decided so.
+   the definitions are flattened with the rest of the body.  `evenGoal` (an `∃` in
+   a consequent) is decided so; `evenRead`'s `∃` in a hypothesis is dropped
+   to a fresh atom since feature 17.
 7. **The array property fragment** (`Calculus/ArrayProperty.lean`, step
    5): a negative-position block `∀ k₁ … kₙ : uint. φ` outside binders,
    `φ` quantifier-free and reading a mapping `mapping(uint => p)` at a
@@ -1359,26 +1368,20 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
    `≥`, `==`); so each block holds by its instance at the floors
    (`LFml.block_refute`).  The fragment (`ApfFml.TopOk`, computed by
    `ApfFml.topB` with soundness `topB_sound`): every read of such a root a
-   key read (`ApfTm.rread`), at a block variable or at a ground key
-   mentioning no binder of the body; guard atoms (`g == true` of `&&`/`||`
-   of comparisons whose ground operands are total, or an equation of
-   operands) only in negative positions of the block body; every other
-   atom read alike.  With no quantifier left after instantiation,
+   read along its own path (feature 18), at a block variable or at a
+   ground key mentioning no binder of the body; guard atoms (`g == true`
+   of `&&`/`||` of comparisons, or an equation of operands; their ground
+   operands total until feature 19) only in negative positions of the
+   block body; every other atom read alike.  With no quantifier left after instantiation,
    `QuantReduction.verify` decides the main arithmetic by `AFml.decide`
    (`valid_of_main`, `countermodelOfBody`), as `dependentReduction?` does.
    `bodyPrep` composes the two preparations (`Prep.trans`), and
    `Fml.quantCovered` reads the prepared body.
-   Inner mappings (2026-10-25): a root whose type is mappings down to a
-   `mapping(uint => p)` (`MShape`; `allow[3][k]`, `owed[a][k]` with an
-   outer key of any type) read at a block variable as its last key.  The
-   outer keys are terms of the fragment (`ApfTm.rkey`, a path at a root of
-   the blocks) at a key type (`bool`, `uint`, `int`), which may mention the
-   leaf's binders but no block variable (`ApfTm.Rel`); the rebuilt root holds the floor construction of its last
-   mapping under every outer key (`MShape.rebuild`: each outer entry and the
-   default rebuilt), so the outer keys need not be in the index set
-   (`MShape.rebuild_word`, `MRoot.surgery_at`, `Surg.keyAt` for any
-   reference to a last mapping).  A bound outer key (`allow[i][3]`) is not
-   taken (`gapColumn`).
+   Inner mappings (2026-10-25): `allow[3][k]`, `owed[a][k]`, a bound
+   index as the last key under outer keys of any type, the floor
+   construction under every outer key.  Since feature 18 (below) the
+   outer `uint` keys are floored too, in the index set when ground, and
+   the shapes of 2026-10-25 (`MShape`, `ApfTm.rread`) are gone.
 
 8. **KeY `int`** (plan step 3, `Srt.kint`): a literal, a `uint` widened
    (`toInt`), `+`, `-`, a product by a literal on either side, and the
@@ -1625,6 +1628,64 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     take any budget past 2048 that covers the reads' pairs, so
     `Fml.exactBounded`, `LFml.ledgerBounded`, `LFml.quantCovered` and
     `Fml.arrayCovered` bound the nodes only.
+16. **`bool` quantifiers expanded** (2026-10-26, `Calculus/QuantExpand.lean`,
+    the first preparation of `bodyPrep`): `∀ bool b. φ` is
+    `φ[true/b] ∧ φ[false/b]` at any polarity (`LFml.expandB`, `LTm.substB`,
+    `LFml.substB` stopping at a binder of `b`; `LFml.holds_expandB`, exact
+    at every state, so `boolPrep`'s refutation is the state itself).  A
+    block over a `bool`-keyed mapping becomes its two instances,
+    quantifier-free (`gapBoolKeyed`).
+17. **Positive quantifiers past the prefix** (2026-10-26, `dropPrep`): a
+    `∀` in a positive position outside every negative-position `∀` is the
+    prefix's, read at a fresh atom: `B ∧ ∀ k. C` is `∀ k. B ∧ C`,
+    `(¬ ∀ k. C) → D` is `∀ k. ¬ C → D`, past `∧`, `→` and `¬` (the prenex
+    laws `LFml.prenex` applies only to a consequent).  One binder at a time,
+    the outermost first, renamed to the position past every atom
+    (`LFml.ren`, `LFml.holds_ren`); `LFml.dropOne_spec` says the formula
+    holds exactly where the result holds for every value of the new atom
+    (at a positive polarity; for some value at a negative one), so the
+    refutation is the state itself, at the same atoms.  A `∀` under a
+    negative one stays (its variable may depend on the outer one).  So
+    goes a `∀` inside a conjunction (`gapPositiveForall`), and a
+    Presburger `∃` in a hypothesis, which is such a positive `∀`
+    (`evenHyp`, `evenRead`: no quantifier left, decided by `AFml` and no
+    longer by `QFml`; `evenGoal` keeps a hoisted read).
+18. **Every `uint` key along a root's mappings floored** (2026-10-26,
+    `Calculus/ArrayProperty.lean`): the rebuilt root is `FloorShape.of` its
+    type (`floor` at a `mapping(uint => V)`, `outer` at a mapping keyed by
+    another type, `keep` past the mappings: a struct, an array, a word),
+    and `FloorShape.rebuild` holds at each floored key what its floor held,
+    the whole value under it copied.  A read at a root of the blocks is a
+    path of its own (`ApfTm.rroot`, `rkeyU` at a `uint` key, `rkey` at
+    another, `rfield` past the mappings, `rword` the word there), and
+    reads at its keys' floors (`FloorShape.rebuild_word`, `SRef.floorRef`,
+    `FloorShape.floorPath_append`; `ApfTm.eval_trel` carries the shape the path
+    reaches, `ApfTm.pre`).  So a bound key need not be the last
+    (`gapColumn`, `allow[i][3]`), a root may be read at a bound key at two
+    depths (`gapTwoPaths`, `allow[3][k]` and `allow[k][3]`, one floor for
+    both), and a member may follow the bound key (`gapStructValue`,
+    `accs[k].v`).  The price: a `uint` key along the mappings is in the
+    index set when it is ground (`ApfTm.gkeys`), so it may mention no
+    binder of the body (an outer key could before), and a refutation lists
+    `lastBound` entries at every floored level (`rowFar`: twelve rows of
+    twelve entries and a default row, where it listed one row and the
+    default).  Two bound indices on one path
+    stay outside (`gridApf`, the target's decision).
+19. **Guards whose ground operand may halt** (2026-10-26): `k < x - 1`
+    (`gapPartialGuard`).  An operand need not be total (`IdxP.gnd`); a
+    guard true at the keys returned there, so its operands did, and a
+    ground one reads the same at the floors (`IdxP.values`), so the guard
+    is true at the floors (`GuardP.mono`), except where a `||` evaluates
+    its left operand false at the keys and halting at the floors:
+    `(P && Q) || R` with `P` false at the keys, so the halting `Q` skipped,
+    and true at the floors.  So the left operand of every `||` must
+    return at the floors where it returned at the keys (`GuardP`'s `ds`,
+    `guardDs`: a comparison does, a `&&` whose left operand does and whose
+    right one returns wherever its atoms do, `tot`, `guardTot`;
+    `GuardP.floors`, `GuardP.defined`).  `(k < x - 1 || k == 7)` is taken
+    (no `dl!` spelling for a comparison under `||`, so not pinned).  The index set takes a guard's
+    comparison operands, no longer the operands' own subterms (`guardGd`:
+    `k < x - 1` puts `x - 1` and its successor in, not `x` and `1`).
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
@@ -1635,7 +1696,12 @@ stage read an array path); eleven was answered `unknown` (`decideGoal`
 read no hash), and twelve too (the swap reads one kind), and thirteen
 (`ExactAt` has no case for `allocAll`, `LTm.Elimable` refuses the memory
 sorts); fourteen was refused by the cut, which wrote no `|`, `^`, `*%`,
-other masks or `int` quotients, and fifteen by the fixed 45 reads.
+other masks or `int` quotients, and fifteen by the fixed 45 reads;
+sixteen to nineteen were outside `apfPrep`'s shapes (a `bool` block, a
+bound key not the last, at two depths or before a member, a halting guard
+operand) or reached no stage (`quantReduction?` abstracts a positive `∀`
+reading storage at its variable to a quantified subformula outside
+`LFml.qfrag`).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
 read, a doubling that overflows under the diamond (refuted), nested
 consequent quantifiers, a postcondition `∀ j` past a write (proved), and
@@ -1647,7 +1713,8 @@ coverage of `double`, `nested` and `evenHyp` is kernel-checked
 (`decide +kernel`); the other rows and the verdicts are the compiled ones
 (`#eval` pins), since the kernel's arithmetic decision over 256-bit codes
 is too deep for the language server.
-For features 6 and 7: `evenRead` (proved) and `evenReadBad` (refuted);
+For features 6 and 7: `evenRead` (proved) and `evenReadBad` (refuted),
+`evenGoal` (proved) and `evenGoalBad` (refuted), `evenGoal_covered`;
 `apf`, `apfTwo` (proved), `apfBad`, `apfOut`, `apfTwoBad` (refuted), the
 coverage of `evenRead`, `apf` and `apfBad` kernel-checked.
 For the fourth and fifth it pins a proved
@@ -1740,7 +1807,15 @@ coverage of each of the seven, `andBad` and `mulWBad` kernel-checked
 (`gapIntDiv_covered` …, under a second each), `gapOr_answers`,
 `gapMulW_iff`.  For feature 15: `gapManyReads` (fifty reads) covered by the
 kernel and answering (`gapManyReads_answers`, by `decideGoal_complete`);
-its verdict is not computed (below, "Running time").
+its verdict is not computed (below, "Running time").  For features 16 to
+19: the former counterexamples `gapBoolKeyed`, `gapPositiveForall`,
+`gapColumn`, `gapTwoPaths`, `gapStructValue` and `gapPartialGuard`
+proved; `boolKeyedBad` (`b == true → flags[b] == 0` against
+`flags[false]`), `positiveForallBad`, `columnBad` (another column),
+`twoPathsBad` (another row), `structValueBad` (the other member) and
+`partialGuardBad` (`x - 1` halting or below `2`) refuted; the coverage of
+the six and of `columnBad` kernel-checked (`gapColumn_covered` …),
+`gapColumn_answers`, `gapPartialGuard_iff`.
 
 ### Running time (the walks)
 
@@ -1846,7 +1921,8 @@ stack would lift this.
   the flattening (`sortedLe`, `∀ i j. i <= j → a[i] <= a[j]` against
   `a[2] <= a[5]`: nine instances, nineteen reads, a formula of about two
   thousand nodes, decided in about two minutes).  A refutation's rebuilt
-  mapping lists one entry a key below `lastBound`: `U`'s second largest
+  mapping lists one entry a key below `lastBound`, at every floored level
+  of a root (so `lastBound^d` at `d` levels): `U`'s second largest
   value plus one where its largest bounds no strict guard, its largest
   otherwise.  So two far values of `U`, or a far guard bound under the
   largest, still give a refutation that exists but cannot be built in
@@ -1860,19 +1936,52 @@ stack would lift this.
   (`Examples/Decision.lean`, the pinned verdicts).  The search
   (2026-10-25) went through each construct `Fml.inTarget` admits and
   `decideGoal`'s stages refuse; one leaf stands for each shape:
-  * **quantifiers over contents outside `apfPrep`'s shapes** (feature 7):
-    a block whose bound index is not the last of its path
-    (`gapColumn`, `allow[i][3]`: the floor construction one level up, the
-    whole inner mapping copied, is not carried); a root read at a bound
-    index at two depths (`gapTwoPaths`); a block over a mapping keyed by
-    `int` (`gapIntKeyed`: the floor's base at `-2^255`) or by `bool`
-    (`gapBoolKeyed`); a block reading a struct's member past the bound
-    index (`gapStructValue`, `accs[k].v`); a block over an array
-    (`gapArrayBlock`: lengths, M4 (b)) or over the ledger
-    (`gapLedgerBlock`); a guard with a partial ground operand
-    (`gapPartialGuard`, `k < x - 1`: the index set takes total operands);
-    a positive quantifier the prefix does not reach, reading at its
-    variable (`gapPositiveForall`, `∀ k` inside a conjunction);
+  * **quantifiers over contents outside `apfPrep`'s shapes** (features 7,
+    18 and 19; the bound key not the last, two depths, a member past the
+    key, `bool` keys, halting guard operands and positive quantifiers are
+    decided since 2026-10-26, features 16 to 19):
+    * a block over a mapping keyed by `int` (`gapIntKeyed`).  The floor
+      needs a base, and the `int` keys run on both sides of every value of
+      the index set, down to `-2^255`; a rebuilt mapping lists its entries
+      one key at a time with one default, so its two outer regions share a
+      value or one of them is listed.  Some leaves of the shape have only
+      astronomically large refutations: in every state refuting
+      `(∀ int k; k < 0 → ibal[k] == 1) → (∀ int k; k > 0 → ibal[k] == 2) →
+      ibal[0] == 3`, `ibal` holds `1` at each negative key and `2` at each
+      positive one, so it lists at least `2^255 - 1` entries.  At `uint` keys
+      `0` bounds the keys below, so only the top region needs the default
+      (`lastIn`).  A decision could return such a state as a term (the
+      theorem asks `≠ unknown`), but no evaluation builds it.  It needs
+      `int` block variables (`LFml.inst`, a substitution and `chainQF` at
+      `int`), a signed floor (the base `-2^255` in the index set, `floorIn`
+      and `lastIn` over `[-2^255, 2^255)`), the index set at `int`
+      (`IdxKey`, `Gd`, `Lo`) and `FloorShape` floors at `int` keys;
+    * a block over the ledger (`gapLedgerBlock`).  The ledger is a list of
+      entries with the fixed default `0` (`Ledger`), so a rebuilt ledger
+      lists every key it does not read as `0`: in every state refuting
+      `(∀ uint a; a > 5 → net(a) == 1) → net(3) == 1` the ledger lists
+      `2^256 - 6` entries.  And no pipeline takes both: the quantified one
+      reads no ledger (`LFml.src? false` refuses `net`), the ledger's
+      (`ledgerReduction?`) has no preparation stage; it needs `apfPrep`
+      inside `ledgerReduction?`, before the ledger cut, with the ledger
+      rebuilt at the floors;
+    * a block over a storage array (`gapArrayBlock`).  The quantified
+      pipeline reads no array (the Theory's `has`/`orElse` reads are
+      outside `LFml.Src false`), the arrays' (`arrayReduction?`) has no
+      preparation stage.  It needs the block instantiated before the array
+      cut, the index set taking each array's live length and slot count
+      (a read below the slots reads the slot, past them the default), and
+      each array rebuilt with slot `i` holding what slot `⌊i⌋` held, its
+      length and slots kept, on top of `arrRealize`.  An array has no
+      default inside its slots, so a refutation lists every slot up to its
+      length, as feature 10's do;
+    * a `||` whose left operand contains a `&&` with a halting right
+      operand (`(k < 3 && k < x - 1) || k == 7 → …`; no `dl!` spelling,
+      so no pin): `apfPrep` refuses it (feature 19), since the floor proof
+      needs the left operand to return at the floors where it returned at
+      the keys, and that `&&` need not (`false && ⊥` at the keys,
+      `true && ⊥` at the floors).  Whether the instantiation is exact there
+      is open;
   * **memory outside feature 13** (`Examples/DecisionMemory.lean`): a
     write in a leaf's update (`gapMemWrite`, `{memory := write(memory,
     s[0], 5)}`: the cut takes no update; it needs the reads past the write
@@ -1997,14 +2106,18 @@ in this order:
    Sipma), the instance decided by the quantifier-free pipeline; the
    instantiation proved exact on the fragment (`apfPrep_valid_iff`).
    Inner mappings at their last key done (2026-10-25: the floor
-   construction over the inner mapping of every outer key).  Left: a bound
-   outer key (`m[i][3]`: the floor one level up, the subtree copied; with
-   one level per root the same proof carries), a root read at a bound key
-   at two depths, struct members past the bound key, `int`- and
-   `bool`-keyed mappings (the floor's base at `-2^255`; a two-valued key
-   enumerated), arrays (lengths: M4 (b)), memory, the ledger; guards with
-   partial ground operands; positive quantifiers past the prefix (the
-   counterexamples `gapColumn` … `gapPositiveForall`).
+   construction over the inner mapping of every outer key).  Done
+   (2026-10-26, features 16 to 19): every `uint` key along a root's
+   mappings floored, the value under it copied (a bound key not the last,
+   two depths, members past it), `bool` blocks expanded, guards with
+   halting ground operands (except under a `&&` in a `||`'s left
+   operand), positive
+   quantifiers past the prefix dropped to fresh atoms.  Left: `int`-keyed
+   mappings (`gapIntKeyed`: refutations that list `2^255` keys), the
+   ledger (`gapLedgerBlock`: the fixed default `0`, and `apfPrep` inside
+   `ledgerReduction?`), arrays (`gapArrayBlock`: lengths and slot counts in
+   the index set, `apfPrep` inside `arrayReduction?`), memory, a `||`
+   whose left operand may halt.
 6. **Memory, array indices**: array indices done (2026-10-25, feature 10)
    for arrays of primitives at roots: update pushing made exact for the
    Theory's reads (`Tm.toLT`), and instead of in-range evidence through

@@ -25,14 +25,19 @@ Presburger quantifiers past the prefix (M7, step 4) are decided by the
 quantified pipeline (`quantReduction?`, `QFml.decide_iff`): an `∃` or a
 `∀` in a hypothesis, an alternation `∀∃`, beside a storage write, and one
 whose body reads storage at no variable it binds (`evenRead`: the read
-hoisted out, `hoistPrep`).
+hoisted out, `hoistPrep`; since feature 17 the `∃` of a hypothesis is
+dropped to a fresh atom first, and `evenGoal`'s, in a consequent, is
+hoisted).
 
 `Fml.inTarget` is the fragment the user named, on program-free leaves: a
 negative-position quantifier over a mapping is in it only when it is in
 the array property fragment (a conservative reading).  `decideLeaf` decides such a block over a
 mapping at a root (M7, step 5: `apf`, instantiated at the index set,
-`apfPrep`), and a block over an inner mapping whose bound index is the
-last (`rowApf`).  Two bound indices on one
+`apfPrep`), a block over an inner mapping (`rowApf`), and since features
+16 to 19 a bound index not the last of its path (`gapColumn`), at two
+depths (`gapTwoPaths`), past a member (`gapStructValue`), a `bool` block
+(`gapBoolKeyed`), a guard that may halt (`gapPartialGuard`) and a
+positive `∀` past the prefix (`gapPositiveForall`).  Two bound indices on one
 path (`gridApf`) and a strict comparison of two bound variables
 (`strictSorted`) are outside the named fragment (`docs/automation.md`, M7).
 -/
@@ -93,6 +98,11 @@ def oddWrite : Fml Bank [] :=
 hoisted out (step 4's remainder), and a false variant. -/
 def evenRead : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 7 }
 def evenReadBad : Fml Bank [] := dl!{ ∀ uint k; (∃ uint y; balances[k] == y + y) → balances[k] != 8 }
+/-- Since feature 17 the `∃` in those hypotheses is a positive `∀`, dropped
+to a fresh atom; a read under a negative quantifier is still hoisted: an
+`∃` in a consequent. -/
+def evenGoal : Fml Bank [] := dl!{ ∀ uint k; balances[k] == 4 → (∃ uint y; balances[k] == y + y) }
+def evenGoalBad : Fml Bank [] := dl!{ ∀ uint k; balances[k] == 5 → (∃ uint y; balances[k] == y + y) }
 
 /-! ### The array property fragment (M7, plan step 5) -/
 
@@ -201,7 +211,7 @@ section
 local instance : InContract := ⟨Allow⟩
 
 /-- A block over an inner mapping, its bound index the last (`apfPrep`,
-`MShape`): decided, and false variants (another row, a key past the guard);
+`FloorShape`): decided, and false variants (another row, a key past the guard);
 the row a parameter. -/
 def rowApf : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[3][5] == 0 }
 def rowBad : Fml Allow [] := dl!{ (∀ uint k; k < 10 → allow[3][k] == 0) → allow[4][5] == 0 }
@@ -263,7 +273,12 @@ theorem double_iff : decideLeaf double = .proved ↔ Fml.Valid double :=
 #guard_msgs in
 #eval [evenHyp, evenHypBad, leastHyp, above, below, evenWrite, oddWrite, evenRead, evenReadBad].map Fml.Covered
 
+/-- info: (["proved", "refuted"], [true, true]) -/
+#guard_msgs in #eval ([evenGoal, evenGoalBad].map verdict, [evenGoal, evenGoalBad].map Fml.Covered)
+
 /-- A read in a quantifier, hoisted: kernel-checked coverage. -/
+theorem evenGoal_covered : evenGoal.Covered = true := by decide +kernel
+
 theorem evenRead_covered : evenRead.Covered = true := by decide +kernel
 
 theorem evenHyp_covered : evenHyp.Covered = true := by decide +kernel
@@ -354,7 +369,7 @@ theorem apf_inTarget : apf.inTarget {} = true := by decide +kernel
 
 /-! Array property blocks (M7, step 5): each verdict exact, each refutation
 a state whose mapping holds, at each key, what the key's floor in the
-index set held (`MRoot.surgery`). -/
+index set held (`MRoot.surgery`, `FloorShape.rebuild`). -/
 
 /-- info: ["proved", "refuted", "refuted", "proved", "refuted"] -/
 #guard_msgs in #eval [apf, apfBad, apfOut, apfTwo, apfTwoBad].map verdict
@@ -372,8 +387,8 @@ theorem apf_answers : decideGoal apf ≠ .unknown := decideGoal_complete apf_cov
 theorem apfBad_iff : decideLeaf apfBad = .proved ↔ Fml.Valid apfBad :=
   decideLeaf_proved_iff apfBad_covered
 
-/-! A block over an inner mapping (`allow[3][k]`): the floor construction
-under every outer key (`MShape.rebuild`). -/
+/-! A block over an inner mapping (`allow[3][k]`): every `uint` key along
+`allow`'s mappings floored, the outer one too (`FloorShape.rebuild`). -/
 
 theorem rowApf_inTarget : rowApf.inTarget {} = true := by decide +kernel
 
@@ -395,12 +410,13 @@ def allowRows (σ : State Allow []) : List Nat :=
 /-- info: ("refuted", true, true) -/
 #guard_msgs in #eval (verdict rowFar, rowFar.Covered, rowFar.inTarget {})
 
-/-! The refutation's `allow`: the row it reads (`3`) and the default row,
-twelve entries each (keys `0` to `11`: the guard's bound and its successor;
-past them the default, the far key's word), where the floor construction
-listed `2^200` keys. -/
+/-! The refutation's `allow`: twelve rows (outer keys `0` to `11`, each
+the row of its floor in the index set, `3` among them) and the default
+row, twelve entries each (keys `0` to `11`: the guard's bound and its
+successor; past them the default, the far key's word), where the floor
+construction listed `2^200` keys. -/
 
-/-- info: some [12, 12] -/
+/-- info: some [12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12] -/
 #guard_msgs in #eval match decideGoal rowFar with | .refuted σ => some (allowRows σ) | _ => none
 
 /-- The far key's leaf, by the kernel. -/
@@ -446,7 +462,10 @@ section Gaps
 
 local instance : InContract := ⟨Gaps⟩
 
-/-! ### Quantifiers over contents outside `apfPrep`'s shapes -/
+/-! ### Quantifiers over contents
+
+Outside `apfPrep`'s shapes once; all but `gapIntKeyed`, `gapArrayBlock`
+and `gapLedgerBlock` decided since (features 16 to 19, pinned below). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
@@ -469,6 +488,20 @@ def gapPartialGuard : Fml Gaps [] :=
 /-- A positive quantifier the prefix does not reach, reading at its variable. -/
 def gapPositiveForall : Fml Gaps [] :=
   dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == balances[k])) }
+
+/-- False variants of the shapes decided since (features 16 to 19, below):
+another column, another row, the other `bool`, another member, a guard
+that halts or bounds at most `1`, a positive `∀` that fails. -/
+def columnBad : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][4] == 0 }
+def twoPathsBad : Fml Gaps [] :=
+  dl!{ (∀ uint k; k < 10 → allow[3][k] == 0 && allow[k][3] == 0) → allow[4][5] == 0 }
+def boolKeyedBad : Fml Gaps [] := dl!{ (∀ bool b; b == true → flags[b] == 0) → flags[false] == 0 }
+def structValueBad : Fml Gaps [] :=
+  dl!{ (∀ uint k; k < 10 → accs[k].v == 0) → accs[5].live == false }
+def partialGuardBad : Fml Gaps [] :=
+  dl!{ ∀ uint x; (∀ uint k; k < x - 1 → balances[k] == 0) → balances[1] == 0 }
+def positiveForallBad : Fml Gaps [] :=
+  dl!{ ∀ uint x; balances[x] == 0 → (balances[x] == 0 && (∀ uint k; balances[k] == 0)) }
 
 /-- Counterexamples once, decided by the arrays' pipeline (feature 10,
 below): a dynamic array's element at a checked index, and a fixed array's
@@ -606,9 +639,34 @@ theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by de
 
 /-- info: true -/
 #guard_msgs in
-#eval ([gapColumn, gapTwoPaths, gapIntKeyed, gapBoolKeyed, gapStructValue, gapArrayBlock, gapLedgerBlock,
-  gapPartialGuard, gapPositiveForall, gapKIntBinder, gapLedgerWrite, gapIntAnd,
+#eval ([gapIntKeyed, gapArrayBlock, gapLedgerBlock, gapKIntBinder, gapLedgerWrite, gapIntAnd,
   gapAddmod].map verdict).all (· == "unknown")
+
+/-! Array property blocks past their last key and at two depths, over a
+`bool` key, past a member, with a guard that may halt, and a positive `∀`
+past the prefix (M7, features 16 to 19, 2026-10-26): each former
+counterexample proved, a false variant refuted, the coverage
+kernel-checked. -/
+
+/-- info: ["proved", "proved", "proved", "proved", "proved", "proved"] -/
+#guard_msgs in
+#eval [gapColumn, gapTwoPaths, gapBoolKeyed, gapStructValue, gapPartialGuard, gapPositiveForall].map verdict
+
+/-- info: ["refuted", "refuted", "refuted", "refuted", "refuted", "refuted"] -/
+#guard_msgs in
+#eval [columnBad, twoPathsBad, boolKeyedBad, structValueBad, partialGuardBad, positiveForallBad].map verdict
+
+theorem gapColumn_covered : gapColumn.Covered = true := by decide +kernel
+theorem gapTwoPaths_covered : gapTwoPaths.Covered = true := by decide +kernel
+theorem gapBoolKeyed_covered : gapBoolKeyed.Covered = true := by decide +kernel
+theorem gapStructValue_covered : gapStructValue.Covered = true := by decide +kernel
+theorem gapPartialGuard_covered : gapPartialGuard.Covered = true := by decide +kernel
+theorem gapPositiveForall_covered : gapPositiveForall.Covered = true := by decide +kernel
+theorem columnBad_covered : columnBad.Covered = true := by decide +kernel
+
+theorem gapColumn_answers : decideGoal gapColumn ≠ .unknown := decideGoal_complete gapColumn_covered rfl
+theorem gapPartialGuard_iff : decideLeaf gapPartialGuard = .proved ↔ Fml.Valid gapPartialGuard :=
+  decideLeaf_proved_iff gapPartialGuard_covered
 
 /-! Fifty reads (M7, 2026-10-25): the flattener's budget is the leaf's own
 (`readBudget`), no longer a fixed 45 reads. -/
