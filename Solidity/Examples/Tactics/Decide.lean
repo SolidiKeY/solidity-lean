@@ -524,8 +524,8 @@ open scoped Scoped
 #guard_msgs in -- a read of the ledger, the start state's, is in the fragment
 #eval ((dl!{ { y := net(a) } y = 0 }).toLS true Solidity.Decide.SymS.init).isSome
 
-/-- info: false -/
-#guard_msgs in -- past a ledger write, a read of the ledger is outside it
+/-- info: true -/
+#guard_msgs in -- past a ledger write, a read of the ledger is the start state's moved by it
 #eval ((dl!{ { net := store(net, at(a), net(a) - 5) } net(a) = 0 }).toLS true
   Solidity.Decide.SymS.init).isSome
 

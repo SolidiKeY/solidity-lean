@@ -1147,7 +1147,8 @@ feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25;
 `gapBoolKeyed`, `gapPositiveForall`, `gapColumn`, `gapTwoPaths`,
 `gapStructValue` and `gapPartialGuard` (features 16 to 19) since
 2026-10-26; `gapIntKeyed` and `gapLedgerBlock` (features 20 and 21) since
-2026-10-26, their astronomically large refutations returned as terms.
+2026-10-26, their astronomically large refutations returned as terms;
+`gapLedgerWrite` (feature 22) since 2026-10-26.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, with one known exception (below, `gapHashNegForall`):
@@ -1421,8 +1422,7 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
    cut; `LFml.ledgerCut_src` (`Calculus/LedgerTotality.lean`) maps the
    fragment with reads at addresses to the one with reads at constants.
    A read under the symbolic execution's own ledger writes (`pay`,
-   `store(net, …)`) stays outside: the leaf builder refuses a read past a
-   write (`SymS.netOk`).
+   `store(net, …)`) was outside until feature 22.
 
 10. **Storage arrays at symbolic indices** (plan step 6, arrays of
    primitives at roots, dynamic and fixed).  `decideLeaf` falls back to
@@ -1745,6 +1745,35 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     evaluating the verdict would then try to build (`regionKeys` is a
     list); the pinned refutations are small.
 
+22. **Ledger reads past ledger writes** (2026-10-26,
+    `Calculus/DecideScoped.lean`, `Calculus/DecideTyped.lean`): the
+    symbolic state keeps the ledger writes its updates made (`SymS.netW`,
+    the latest first; `NetW.op` for `net := store(net, r, net(r) ± a)`,
+    `NetW.pay` for `pay(r, a)`, `NetW.mt` for `net := store(mtSt, r, a)`),
+    each with its operands read where its update is applied.  A read
+    `net(x)` past them is the starting ledger's entry moved by each write at
+    the address it names (`NetW.read`): `net(x) ± toInt(x == r ? a : 0)`,
+    `net(x) - toInt(x == r ? (r == this ? 0 : a) : 0)` for a payment,
+    `toInt(x == r ? a : 0)` past `mtSt`.  The conditional is a `kite` at a
+    word, the shape the elimination gives a read past a storage write, so
+    the source fragment, `LTm.condSplit` and the lift take it unchanged
+    (`LTm.SrcL.kite` under `zint`), and the lifted leaf goes through the
+    ledger pipeline of feature 9.  A payment also moves the balance as
+    `State.pay` does, from the balance its update is applied at
+    (`payBal`: `b` where `r` is the contract, `b - a` where `a ≤ b`, `0`
+    otherwise).  The builder's agreement reads the ledger past the writes
+    (`AgreesV.netRd`, at each literal address; `NetW.read_eval` moves a read
+    at a term to its value), and freshness likewise (`SymS.Fresh.net`);
+    `NetW.read_op`, `NetW.read_pay`, `NetW.read_mt` and `payBal_eval` are
+    the four landing lemmas.  A snapshot `x := net` past a write stays
+    outside (`SymS.netOk`, now `netW = []`), and so does the step
+    fragment's (`SymS.Ok` asks `netW = []`: `UpdElem.ElimOk` writes no
+    ledger).  `gapLedgerWrite` is refuted (the payee `0`, its entry `0`),
+    `ledgerWriteOk` and `payBalanceOk` proved, `payBalanceBad` refuted, the
+    first three's coverage kernel-checked.  Each write multiplies the
+    lifted leaf by the conditional's cases: two payments to one address
+    read once already pass `Fml.exactBounded`'s 511 nodes.
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -2050,19 +2079,8 @@ stack would lift this.
     taking it as a parameter compiled as two unbounded natural codes (as
     the ledger entries are, `Inputs.AgreeZ`), and, past the prefix, an
     unbounded binder of `QFml` (no range atom; Presburger over ℤ as two
-    naturals); a ledger read past a payment (`gapLedgerWrite`,
-    `{pay(x, 1)} net(x) ≥ 0`): `UpdElem.toLS` refuses `pay` outright (its
-    balance change is not encoded) and a `net`/`netMt` write sets
-    `SymS.netOk := false`, after which `Op1.toL` refuses `net`.  It needs
-    the symbolic state to keep the ledger writes (address, operation,
-    amount) and the balance `pay` leaves (`GlobT.paid`: the recipient's
-    entry less the amount unless it is the contract, the balance
-    `σ.pay`), a read `net(a)` past them as nested conditionals on the
-    addresses at sort `Srt.kint` (`kite a r (net(a) - v) (net(a))`, which
-    the source fragment, `LTm.condSplit` and the lift take only at value
-    sorts today), and the builder's agreement (`DecideTyped`, `AgreesV`'s
-    `net` field) restated from the starting ledger to it with the writes
-    applied;
+    naturals) (the ledger read past a payment once pinned here,
+    `gapLedgerWrite`, is decided by feature 22);
   * **operators with a literal operand still outside**: `&`, `|`, `^` at
     `int` (`gapIntAnd`; two's complement, `toInt(toUint(x) & c')` would
     carry it) and `addmod` with a literal modulus (`gapAddmod`; its sum may
@@ -2138,7 +2156,7 @@ in this order:
    linear operations, `toInt` and the comparisons (feature 8), and for
    reads of the starting ledger as atoms (feature 9).  Left: a binder of
    KeY's `int`, which needs an unbounded binder in `LFml` and its
-   prefix, and ledger reads past ledger writes.
+   prefix.  Ledger reads past ledger writes are done (feature 22).
 4. **Quantifiers in the arithmetic** (done, 2026-10-25): `QFml`, decided
    by projection in the binary-derivative automaton (`QFml.decide_iff`),
    and negative-position Presburger quantifiers and alternation over value

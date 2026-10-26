@@ -549,9 +549,28 @@ def gapMemory : Fml Gaps [] := .allocAll (.user "s") (.array (.prim .uint))
 /-- A binder of KeY's unbounded `int`: `∀ int z. z + 1 > z`. -/
 def gapKIntBinder : Fml Gaps [] := .bind .box (.user "z") .kint
   (isT (.app2 (.zcmp .gt rfl) (.app2 (.zbin .add rfl) (.pvZ .here) (.app0 (.zlit 1))) (.pvZ .here)))
-/-- The ledger read past a payment: `{pay(x, 1)} net(x) >= 0`. -/
+/-- The ledger read past a payment: `{pay(x, 1)} net(x) >= 0`.  A
+counterexample once; refuted since feature 22 (the symbolic state keeps
+the ledger writes, `NetW`): `x` any address but the contract's, its entry
+`0`. -/
 def gapLedgerWrite : Fml Gaps [] := allU (.upd .box (.snoc .nil (.pay xU (litU 1)))
   (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0)))))
+/-- Its true variant: `net(x) >= 1 → {pay(x, 1)} net(x) >= 0`; and the
+balance a payment leaves, `this.balance >= 2 → x != this → {pay(x, 1)}
+this.balance >= 1`, with its false variant (`x` the contract, or the
+balance short). -/
+def ledgerWriteOk : Fml Gaps [] := allU (.imp (isT (.app2 (.zcmp .ge rfl) (.app1 .net xU) (.app0 (.zlit 1))))
+  (.upd .box (.snoc .nil (.pay xU (litU 1)))
+    (isT (.app2 (.zcmp .ge rfl) (.app1 .net (.pvV .here)) (.app0 (.zlit 0))))))
+def payBalanceOk : Fml Gaps [] :=
+  allU (.imp (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))
+    (.imp (isT (.app2 (.binop .neB rfl) xU (.app0 (.env .selfAddress))))
+      (.upd .box (.snoc .nil (.pay xU (litU 1)))
+        (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 1))))))
+def payBalanceBad : Fml Gaps [] :=
+  allU (.imp (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))
+    (.upd .box (.snoc .nil (.pay xU (litU 1)))
+      (isT (.app2 (.binop .ge rfl) (.app0 (.env .selfBalance)) (litU 2)))))
 /-- Fifty storage reads: past `Fml.exactBounded`'s bounds. -/
 def gapManyReads : Fml Gaps [] :=
   let bal (n : Nat) : Tm Gaps [.val .uint] (.val .uint) :=
@@ -655,7 +674,35 @@ theorem gapHashNegForall_inTarget : gapHashNegForall.inTarget {} = true := by de
 
 /-- info: true -/
 #guard_msgs in
-#eval ([gapArrayBlock, gapKIntBinder, gapLedgerWrite, gapIntAnd, gapAddmod].map verdict).all (· == "unknown")
+#eval ([gapArrayBlock, gapKIntBinder, gapIntAnd, gapAddmod].map verdict).all (· == "unknown")
+
+/-! A ledger read past a payment (M7, feature 22): the former counterexample
+`gapLedgerWrite` refuted, its true variant proved, the balance a payment
+leaves read; the coverage kernel-checked. -/
+
+/-- info: ["refuted", "proved", "proved", "refuted"] -/
+#guard_msgs in
+#eval [gapLedgerWrite, ledgerWriteOk, payBalanceOk, payBalanceBad].map verdict
+
+-- The refuting state: the payee `0`, its entry `0`, the contract at `1`.
+/-- info: "[(0, 0), (0, 0), (0, 0), (0, 0)] self 1" -/
+#guard_msgs in
+#eval match decideGoal gapLedgerWrite with
+  | .refuted σ => toString (σ.net.map fun (e : PrimTy.uint.Denote × Int) => (e.1.1, e.2)) ++
+      " self " ++ toString σ.tx.selfAddress.1
+  | _ => "-"
+
+theorem gapLedgerWrite_covered : gapLedgerWrite.Covered = true := by decide +kernel
+theorem ledgerWriteOk_covered : ledgerWriteOk.Covered = true := by decide +kernel
+theorem payBalanceOk_covered : payBalanceOk.Covered = true := by decide +kernel
+
+/-- `decideGoal_complete`, applied: no hash, so no premise. -/
+theorem gapLedgerWrite_answers : decideGoal gapLedgerWrite ≠ .unknown :=
+  decideGoal_complete gapLedgerWrite_covered rfl
+
+/-- `decideLeaf_proved_iff`, applied: the verdict on the true variant is exact. -/
+theorem ledgerWriteOk_iff : decideLeaf ledgerWriteOk = .proved ↔ Fml.Valid ledgerWriteOk :=
+  decideLeaf_proved_iff ledgerWriteOk_covered
 
 /-! Array property blocks past their last key and at two depths, over a
 `bool` key, past a member, with a guard that may halt, and a positive `∀`

@@ -33,14 +33,18 @@ An update is applied element by element, each element read in the state
 the update is applied in (`Upd.toLS`), and its terms must return: a box
 update's guard is a premise of the rest, a diamond's a conjunct.
 
-The fragment is where `Fml.toLS` returns: a ledger write (`net`, `pay`,
-`netMt`: the reduction keeps no ledger), a balance moved by `selfBalance :=
-selfBalance ± a`, a snapshot of an empty ledger, a `select`, `havoc` and
-`anon` are outside it.  So the ledger is the start state's throughout: a
-ledger read is `net(a)` of the start state (`LTm.app1 .net`), and so is a
-read `x[a]` of a snapshot `x := net` (`Tm.netOf`, `Rhs.saveNet`).  A
-deployment's `selfBalance := a` sets the balance the state reads
-(`SymS.bal`, `SymS.envL`).  It has a polarity: under a negation or on the left of an
+The fragment is where `Fml.toLS` returns: a balance moved by
+`selfBalance := selfBalance ± a`, a snapshot of an empty ledger or of one
+written, a `select`, `havoc` and `anon` are outside it.  The ledger writes
+(`net`, `pay`, `netMt`) are kept (`SymS.netW`, `NetW`), each with its
+operands read where its update is applied, and a ledger read past them is
+the start state's `net(a)` (`LTm.app1 .net`) moved by each write at the
+address it names: `net(a) ± toInt(a == r ? v : 0)` (`NetW.read`), the
+conditional at a word, as the elimination writes a read past a storage
+write.  A read `x[a]` of a snapshot `x := net` taken before any write is the
+start state's (`Tm.netOf`, `Rhs.saveNet`).  A deployment's
+`selfBalance := a` sets the balance the state reads (`SymS.bal`,
+`SymS.envL`), and so does a payment (`payBal`).  It has a polarity: under a negation or on the left of an
 implication it takes first-order formulas only (`pos := false`), where the
 reduction and the formula agree both ways.
 
@@ -113,22 +117,56 @@ theorem thin_eq_thinM {Γ Δ : Ctx} (h : Thin Γ Δ) (e : BEnv C Δ) :
 
 end BEnv
 
+/-- A ledger write, its operands read in the state its update is applied
+in: `net := store(net, at(r), net(r) ± a)`, a payment `pay(r, a)` (no
+change where `r` is the contract), `net := store(mtSt, at(r), a)`. -/
+inductive NetW (C : Contract) where
+  | op (r : LTm C (.val .uint)) (o : IntOp) (a : LTm C (.val .uint))
+  | pay (r a : LTm C (.val .uint))
+  | mt (r a : LTm C (.val .uint))
+
+/-- The contract's address, a word of the transaction. -/
+abbrev selfL : LTm C (.val .uint) := .app0 (.env .selfAddress)
+
+/-- `x == r ? a : 0`, a word. -/
+abbrev atL (x r a : LTm C (.val .uint)) : LTm C (.val .uint) := .kite x r a (.lit (uintOfNat 0))
+
+/-- The entry at `x` past the write, from the entry `e` before it. -/
+def NetW.rd (x : LTm C (.val .uint)) : NetW C → LTm C .kint → LTm C .kint
+  | .op r .add a, e => .app2 (.zbin .add rfl) e (.app1 .toInt (atL x r a))
+  | .op r .sub a, e => .app2 (.zbin .sub rfl) e (.app1 .toInt (atL x r a))
+  | .pay r a, e => .app2 (.zbin .sub rfl) e (.app1 .toInt (atL x r (.kite r selfL (.lit (uintOfNat 0)) a)))
+  | .mt r a, _ => .app1 .toInt (atL x r a)
+
+/-- **A ledger read past the writes `ws`** (the latest first): the start
+state's entry at `x`, moved by each write. -/
+def NetW.read (x : LTm C (.val .uint)) (ws : List (NetW C)) : LTm C .kint :=
+  ws.foldr (NetW.rd x) (.app1 .net x)
+
+/-- The balance a payment of `a` to `r` leaves of `b`: `b` where `r` is the
+contract, `b - a` where it covers `a`, `0` where not (`State.pay`). -/
+def payBal (b r a : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  .kite r selfL b (.kite (.app2 (.binop .le rfl) a b) .tt (.app2 (.binop .sub rfl) b a) (.lit (uintOfNat 0)))
+
 /-- The updates so far, by position: what each local is bound to, the
 storage, the memory and the contract's balance they left, the next
-position a binder takes, and whether the ledger is still the start
-state's (no ledger write so far: a ledger read is then `net(a)` of the
-start state). -/
+position a binder takes, and the ledger writes they made, the latest
+first (a ledger read is `net(a)` of the start state moved by them,
+`NetW.read`). -/
 structure SymS (C : Contract) (Γ : Ctx) where
   loc : BEnv C Γ
   stor : LTm C .st
   mem : LTm C .mem
   bal : LTm C (.val .uint)
   next : Nat
-  netOk : Bool
+  netW : List (NetW C)
+
+/-- The ledger is still the start state's: no ledger write so far. -/
+def SymS.netOk {Γ : Ctx} (ρ : SymS C Γ) : Bool := ρ.netW.isEmpty
 
 /-- No update yet, no local. -/
 def SymS.init : SymS C [] :=
-  ⟨(), .app0 .storage, .app0 .memory, .app0 (.env .selfBalance), 0, true⟩
+  ⟨(), .app0 .storage, .app0 .memory, .app0 (.env .selfBalance), 0, []⟩
 
 /-- An environment value read in `ρ`: the balance the updates left, the
 transaction's values as they are. -/
@@ -138,7 +176,7 @@ def SymS.envL {Γ : Ctx} (ρ : SymS C Γ) : EnvKey → LTm C (.val .uint)
 
 /-- A local pushed, bound to `b` (or to nothing). -/
 def SymS.push {Γ : Ctx} {t : LTy} (ρ : SymS C Γ) (b : Option (LTm C t.bs)) : SymS C (t :: Γ) :=
-  ⟨(b, ρ.loc), ρ.stor, ρ.mem, ρ.bal, ρ.next + 1, ρ.netOk⟩
+  ⟨(b, ρ.loc), ρ.stor, ρ.mem, ρ.bal, ρ.next + 1, ρ.netW⟩
 
 /-- A quantifier's local pushed: the atom of its position. -/
 def SymS.pushQ {Γ : Ctx} (p : PrimTy) (ρ : SymS C Γ) : SymS C (.val p :: Γ) :=
@@ -226,13 +264,13 @@ def foldNext {E : Ty} (S : LTm C .st) (q : LTm C (.path (.ref (.array E)))) :
   else .app2 .nextIn S q
 
 /-- A unary symbol pushed in: an operator folded on a literal, `next`
-onto the storage the updates left; a read of the ledger as the start
-state's (the fragment writes no ledger, `UpdElem.toLS`). -/
+onto the storage the updates left; a read of the ledger past the ledger
+writes the updates made (`NetW.read`). -/
 def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
     Option (LTm C s) :=
   @Op1.casesOn C (fun a s _ => LTm C a → Option (LTm C s)) a s o
     (fun op {_} h x => some (fold1 (.unop op h) x))
-    (fun x => if ρ.netOk then some (.app1 .net x) else none)
+    (fun x => some (NetW.read x ρ.netW))
     (fun {_} x => some (.app1 .delValue x))
     (fun {_} {_} {_} h x => some (.app1 (.field h) x))
     (fun {_} x => some (foldNext ρ.stor x))
@@ -364,20 +402,20 @@ def _root_.Solidity.UpdElem.toLS {Δ : Ctx} (ρ₀ : SymS C Γ) (e : UpdElem C �
     Option (SymS C Δ × LTm C (.val .bool)) :=
   @UpdElem.casesOn C Γ Δ (fun _ => Option (SymS C Δ × LTm C (.val .bool))) e
     (fun {_} i r => (r.toL ρ₀).map fun b =>
-      (⟨ρ.loc.set i (some b.1), ρ.stor, ρ.mem, ρ.bal, ρ.next, ρ.netOk⟩, b.2))
-    (fun s => (s.toL ρ₀).map fun s' => (⟨ρ.loc, s', ρ.mem, ρ.bal, ρ.next, ρ.netOk⟩, seqL s' .tt))
-    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next, ρ.netOk⟩, seqMemL m' .tt))
+      (⟨ρ.loc.set i (some b.1), ρ.stor, ρ.mem, ρ.bal, ρ.next, ρ.netW⟩, b.2))
+    (fun s => (s.toL ρ₀).map fun s' => (⟨ρ.loc, s', ρ.mem, ρ.bal, ρ.next, ρ.netW⟩, seqL s' .tt))
+    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next, ρ.netW⟩, seqMemL m' .tt))
     (fun _ _ => none)
-    -- A ledger write is kept only as no longer the start state's ledger:
-    -- a ledger read past it is outside the fragment (`Op1.toL`).
-    (fun r _ a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' =>
-      (⟨ρ.loc, ρ.stor, ρ.mem, ρ.bal, ρ.next, false⟩, seqL r' (seqL a' .tt)))
-    -- Payments change the balance, which the old no-op encoding omitted.
-    -- Leave them to semantic closing until this fragment represents that change.
-    (fun _ _ => none)
+    (fun r o a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' =>
+      (⟨ρ.loc, ρ.stor, ρ.mem, ρ.bal, ρ.next, .op r' o a' :: ρ.netW⟩, seqL r' (seqL a' .tt)))
+    -- A payment moves the balance as `State.pay` does, from the balance the
+    -- update is applied at (`GlobT.paid`).
     (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' =>
-      (⟨ρ.loc, ρ.stor, ρ.mem, ρ.bal, ρ.next, false⟩, seqL r' (seqL a' .tt)))
-    (fun a => (a.toL ρ₀).map fun a' => (⟨ρ.loc, ρ.stor, ρ.mem, a', ρ.next, ρ.netOk⟩, seqL a' .tt))
+      (⟨ρ.loc, ρ.stor, ρ.mem, payBal ρ₀.bal r' a', ρ.next, .pay r' a' :: ρ.netW⟩,
+        seqL r' (seqL a' .tt)))
+    (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' =>
+      (⟨ρ.loc, ρ.stor, ρ.mem, ρ.bal, ρ.next, .mt r' a' :: ρ.netW⟩, seqL r' (seqL a' .tt)))
+    (fun a => (a.toL ρ₀).map fun a' => (⟨ρ.loc, ρ.stor, ρ.mem, a', ρ.next, ρ.netW⟩, seqL a' .tt))
 
 /-- `Upd.toLS`'s compiled twin. -/
 def _root_.Solidity.Upd.toLSM (ρ₀ : SymS C Γ) : {Δ : Ctx} → Upd C Γ Δ →
@@ -386,8 +424,8 @@ def _root_.Solidity.Upd.toLSM (ρ₀ : SymS C Γ) : {Δ : Ctx} → Upd C Γ Δ �
   | _, .snoc U e => (U.toLSM ρ₀).bind fun p => (e.toLS ρ₀ p.1).map fun q => (q.1, seqL p.2 q.2)
   | _, .decl U _ r => (U.toLSM ρ₀).bind fun p => (r.toL ρ₀).map fun b =>
     (p.1.push (some b.1), seqL p.2 b.2)
-  | _, .pop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩, p.2)
-  | _, .drop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩, p.2)
+  | _, .pop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩, p.2)
+  | _, .drop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩, p.2)
 
 /-- **An update pushed in**: the state it leaves and what must return for
 it to land; `none` outside the fragment.  By the recursor. -/
@@ -398,8 +436,8 @@ def _root_.Solidity.Upd.toLS (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
     (fun {_} _ e ih => ih.bind fun p => (e.toLS ρ₀ p.1).map fun q => (q.1, seqL p.2 q.2))
     (fun {_} {_} _ _ r ih => ih.bind fun p => (r.toL ρ₀).map fun b =>
       (p.1.push (some b.1), seqL p.2 b.2))
-    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩, p.2))
-    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netOk⟩, p.2))
+    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩, p.2))
+    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next, p.1.netW⟩, p.2))
     Δ U
 
 theorem _root_.Solidity.Upd.toLS_eq_toLSM (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
