@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Context
+import Solidity.Syntax.Numeric
 
 /-!
 # The elaborator's values
@@ -206,6 +207,7 @@ mutual
 
 def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
   | .num n => return .val .uint (.simple (← litAt C Γ .uint n))
+  | .unop .neg (.num n) => return .val .int (.simple (← litAt C Γ .int (-(n : Int))))
   | .bool b => pure (.val .bool (.simple (.bool b)))
   | .name x =>
     let v := Var.ofName x
@@ -274,9 +276,31 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       if v < 0 then return .val .int (.simple (← litAt C Γ .int v))
       else return .val .uint (.simple (← litAt C Γ .uint v))
     -- the operand type: the first operand that is not a literal gives it
-    let t ← if a.isLit then synth Γ b else synth Γ a
+    let t ← if a.isLit && !(op matches .pow | .powW | .shl | .shr) then synth Γ b else synth Γ a
     let some ⟨p, _⟩ := t.toVal? |
       throw s!"{(if a.isLit then b else a).toStr}: an operand of reference type {t.ty}"
+    if p == .int && op == .pow then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      return .val .int (.checkedSignedPower av bv)
+    if p == .int && op == .shr then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      -- Preserve the decision procedure's literal-count fragment after checking
+      -- Solidity's unsigned count range. Nonliteral counts still saturate below.
+      if let some n := b.litVal? then
+        let count : Val C Γ.ctx .int := .simple (← litAt C Γ .int (min n 256))
+        return .val .int (.binop .shr rfl rfl av count)
+      let limit : Val C Γ.ctx .uint := .simple (← litAt C Γ .uint 256)
+      -- Saturate before converting: a uint count can exceed int256.max.
+      let bounded : Val C Γ.ctx .uint := .ternary (.binop .lt rfl rfl bv limit) bv limit
+      let count : Val C Γ.ctx .int := .unop .toInt rfl rfl bounded
+      return .val .int (.binop .shr rfl rfl av count)
+    if p == .int && op == .shl then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      let word : Val C Γ.ctx .uint := .unop .toUint rfl rfl av
+      return .val .int (.unop .toInt rfl rfl (.binop .shl rfl rfl word bv))
     match h : op.accepts p with
     | true => pure (.val _ (.binop op h rfl (← check Γ p a) (← check Γ p b)))
     | false => throw s!"operator {BinOp.sym op} does not take {p.toStr}"
@@ -1668,6 +1692,12 @@ def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExp
         | .subW, some v => if v < 0 then .binop .addW (word a) (.num v.natAbs) else .binop op (word a) (word b)
         | _, _ => .binop op (word a) (word b)
       return .call (tyName .int n) [w]
+  if p == .int && n < 256 then
+    if let .binop .shl a b := e then
+      let word : RawExpr := match a.litVal? with
+        | some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat
+        | none => .call "uint" [a]
+      return .call (tyName .int n) [.binop .shl word b]
   if 256 ≤ n then return e
   match e with
   | .binop op a b =>

@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+          "observed": [
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_2(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_minus_2(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+              ],
+              "signature": "exp_uint_max(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_int_max(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "77037197775489434122239117703397092741524065928615527809597551822662353515625"
+              ],
+              "signature": "exp_5(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "100384649682218308599123161468008489304965171479917458477538073643380658936811"
+              ],
+              "signature": "exp_minus_5(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "452312848583266388373324160190187140051835877600158453279131187530910662656"
+              ],
+              "signature": "exp_256(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "115339776388732929035197660848497720713218148788040405586178452820382218977280"
+              ],
+              "signature": "exp_minus_256(uint256)",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+          "observed": [
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_2(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_minus_2(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+              ],
+              "signature": "exp_uint_max(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+              ],
+              "signature": "exp_int_max(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "77037197775489434122239117703397092741524065928615527809597551822662353515625"
+              ],
+              "signature": "exp_5(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "100384649682218308599123161468008489304965171479917458477538073643380658936811"
+              ],
+              "signature": "exp_minus_5(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "452312848583266388373324160190187140051835877600158453279131187530910662656"
+              ],
+              "signature": "exp_256(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "115339776388732929035197660848497720713218148788040405586178452820382218977280"
+              ],
+              "signature": "exp_minus_256(uint256)",
+              "failed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

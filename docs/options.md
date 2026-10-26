@@ -98,7 +98,7 @@ unary `-` at `int`, `x ⊕= e`, `x++`, `x−−` on the target's current value,
 `push() ⊕= e` on the default `0`; the right operand of `&&`/`||` only where
 it is evaluated, a conditional's branches under its condition, a loop's
 condition at its head and again at the end of its body, a deferred push's
-source at the end of its prefix. `**` is not (no closed bound: it reverts,
+source at the end of its prefix. Unsigned `**` is not (no closed bound: it reverts,
 as outside), nor division by zero (`Panic(0x12)`, a revert), nor the
 wrapping operators of `unchecked`, nor the source of a push on a getter's
 array (`f().push(v)`: it is read after the getter's body, which may change
@@ -117,6 +117,12 @@ terms. One order is not followed: a path's base whose read may halt before
 its index's guarded operation is not read first, so where the run
 reverts at that read the block asserts the guard first, failing inside
 `checked` and assuming the run away inside `ignoringOverflow`.
+
+The supported signed-power lowering uses existing value operations. Its final
+signed-range overflow witness is an overflowing signed add, so this extension
+can guard that witness; overflow of the intermediate unsigned magnitude power
+still reverts. This does not add a general power guard. See
+[the numeric milestone](feature-work/numeric-operators.md#group-04-signed-shifts-powers-and-literal-typing).
 
 **Why not a reading.** The calculus reads a failing term of an update as
 the modality's halt (`Upd.afterT`), with no cause attached: a reading in

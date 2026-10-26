@@ -1,0 +1,3621 @@
+{
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+      "sourceSha256": "0a3b2569f280826a6962e3cbffccc4a933aecb52f652cc85fe9c6f2c239d9c81",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/exp_cleanup_nonzero_base"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.626,
+      "before": {
+        "report": "tests/upstream/group04/exp_cleanup_nonzero_base-before.json",
+        "sha256": "da887ec22f57b0b06cf68e0ab8409592487e8e66ce5d8d5f70da1ac497ef3540",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_cleanup_nonzero_base.sol:4: x is already declared, or names a state variable",
+                    "function": "f()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_cleanup_nonzero_base.sol:4: x is already declared, or names a state variable",
+                    "function": "f()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/exp_cleanup_nonzero_base-after.json",
+        "sha256": "f5c473505da28f4c405daf4586e7dcb751b87dc60088b69f5a0521b816f0b2f0",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-exp_cleanup_nonzero_base"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+      "sourceSha256": "61d7cb84852d79919102a4a39e7818f47ffd5fecd963cedb9ad47b5ee7badb77",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_left_larger_type"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.666,
+      "before": {
+        "report": "tests/upstream/group04/shift_left_larger_type-before.json",
+        "sha256": "a26f869b3c050ece1572952a42178b119aad4461f9c8fa533b60bf316058963a",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_left_larger_type.sol:5: operator << does not take int",
+                    "function": "f()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_left_larger_type.sol:5: operator << does not take int",
+                    "function": "f()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_left_larger_type-after.json",
+        "sha256": "01d1e129e2dd546ca31f943f37d8582e6e8212768144ec08c29133992ac9fe03",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_left_larger_type.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_left_larger_type"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+      "sourceSha256": "f07755ac8f598bada514fbe1439addd17757669e4986051e44462323f5775fba",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_overflow"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.006,
+      "before": {
+        "report": "tests/upstream/group04/shift_overflow-before.json",
+        "sha256": "3d8b22d02d5d33cb704060911729efeab01a4320e9afbda4424e4630a93a2a26",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_overflow.sol:8: operator << does not take int",
+                    "function": "leftS(int8,uint8)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_overflow.sol:8: operator << does not take int",
+                    "function": "leftS(int8,uint8)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_overflow-after.json",
+        "sha256": "caf977b381822671bb9444170613526082f10a1c2989222719c62824d87d7efe",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "254"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "255"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639808"
+                    ],
+                    "signature": "leftS(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "64"
+                    ],
+                    "signature": "leftS(int8,uint8)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "254"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "255"
+                    ],
+                    "signature": "leftU(uint8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639808"
+                    ],
+                    "signature": "leftS(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "64"
+                    ],
+                    "signature": "leftS(int8,uint8)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_overflow.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_overflow"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+      "sourceSha256": "6b54c2832e14d3f69ae7eb2878b2861773a357604913201779268aacf101ecf0",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_literal"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.026,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_literal-before.json",
+        "sha256": "bfc2b0bdad5f2dc2686af39a31564f6670f4d30f2c24eeb1dd604bf9c3bed17c",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:4: operator - does not take uint",
+                    "function": "f1()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:8: operator - does not take uint",
+                    "function": "f2()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:12: operator - does not take uint",
+                    "function": "f3()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:16: operator - does not take uint",
+                    "function": "f4()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:20: operator - does not take uint",
+                    "function": "f5()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:24: operator - does not take uint",
+                    "function": "f6()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:28: operator - does not take uint",
+                    "function": "g1()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:32: operator - does not take uint",
+                    "function": "g2()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:36: operator - does not take uint",
+                    "function": "g3()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:40: operator - does not take uint",
+                    "function": "g4()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:44: operator - does not take uint",
+                    "function": "g5()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:48: operator - does not take uint",
+                    "function": "g6()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:4: operator - does not take uint",
+                    "function": "f1()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:8: operator - does not take uint",
+                    "function": "f2()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:12: operator - does not take uint",
+                    "function": "f3()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:16: operator - does not take uint",
+                    "function": "f4()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:20: operator - does not take uint",
+                    "function": "f5()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:24: operator - does not take uint",
+                    "function": "f6()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:28: operator - does not take uint",
+                    "function": "g1()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:32: operator - does not take uint",
+                    "function": "g2()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:36: operator - does not take uint",
+                    "function": "g3()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:40: operator - does not take uint",
+                    "function": "g4()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:44: operator - does not take uint",
+                    "function": "g5()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_literal.sol:48: operator - does not take uint",
+                    "function": "g6()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_literal-after.json",
+        "sha256": "5e7b712a78cd812bdd80cba6a147429a3b791f7afc127279a68e4187feadfe56",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f4()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f5()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f6()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g4()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g5()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g6()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f4()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f5()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f6()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g4()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g5()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "g6()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_literal.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_literal"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+      "sourceSha256": "b588ce72e9e3a58a909b1d48940b4dfb5fe067e2c2c437cc664f120a68ec5bc5",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_assignment"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.753,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_assignment-before.json",
+        "sha256": "f051c0a616a0212877830080b649d146b50808f59501a1f31594adc853704892",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_assignment.sol:4: a uint where a int is expected",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_assignment.sol:4: a uint where a int is expected",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_assignment-after.json",
+        "sha256": "28c354faba51ff7fcd2b0f875aabc07a2f47ca3caa66bbf8a22469de94b233ea",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_assignment.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_lvalue_assignment"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+      "sourceSha256": "3e761376cea386d70273fc97a3773cb1e27db01a3e1ce00a28907ba9519ca9a7",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int16"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.251,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int16-before.json",
+        "sha256": "5f9964f2307e68082c35c999d81262aa55a834056c7da5d3bdf2a4b0291634b4",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int16.sol:4: a uint where a int is expected",
+                    "function": "f(int16,uint16)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int16.sol:4: a uint where a int is expected",
+                    "function": "f(int16,uint16)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int16-after.json",
+        "sha256": "10d00d2b7c2aad04d89ddf27ee645a4f8e7a3eaaa3604115bad74101e64393e6",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int16,uint16)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int16.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_lvalue_int16"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+      "sourceSha256": "5c9a6a94a2ea293d072438255f2ae439dbddc6583c70ebe994bf0b0c6a2d0006",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int32"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.892,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int32-before.json",
+        "sha256": "68f51f74dca2f69c03deae71efd53edb13d8f8486d9f2414973c312bef62310d",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int32.sol:4: a uint where a int is expected",
+                    "function": "f(int32,uint32)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int32.sol:4: a uint where a int is expected",
+                    "function": "f(int32,uint32)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int32-after.json",
+        "sha256": "d67e61dbcde0b63eebd0342582a79886b598ad9880f0748e730203c228a387d2",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int32,uint32)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int32.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_lvalue_int32"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+      "sourceSha256": "f25a8f3a142acb6327e937d1204d895f0be7589ac991d4cf01bd44fe6952a55f",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue_int8"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.708,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int8-before.json",
+        "sha256": "a8f84816e2827e288ac74f7a05429d36c960489142e209f309c6a275b1b2a574",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int8.sol:4: a uint where a int is expected",
+                    "function": "f(int8,uint8)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue_int8.sol:4: a uint where a int is expected",
+                    "function": "f(int8,uint8)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue_int8-after.json",
+        "sha256": "8a9f996b48f12cd9b0bd13389e113d094b0dc829953050c1a418e24cacec7fba",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639870"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639903"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639931"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639869"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639902"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639931"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639870"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639903"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639931"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639869"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639902"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639931"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int8,uint8)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_int8.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_lvalue_int8"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+      "sourceSha256": "d72c2c0c63a13904870e7c09d3bfbf8ca2000ab4982d8fce60eb8b03330915e3",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/shift_right_negative_lvalue"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.756,
+      "before": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue-before.json",
+        "sha256": "e48b9c3001f6d16577e51924f4623e3517c15a7f0814e948d5264ce9daabef78",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue.sol:4: a uint where a int is expected",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "shift_right_negative_lvalue.sol:4: a uint where a int is expected",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/shift_right_negative_lvalue-after.json",
+        "sha256": "8829eeeb01895e7924c4f4fcce4890920a26b9b96db128ee0847c7c508692669",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635670"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637803"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129635669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129637802"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639669"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639919"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-shift_right_negative_lvalue"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+      "sourceSha256": "5707157222b3c6cc55eb9416ce79757d0eb225028efb65cf85e565676c0e3aeb",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/exp_literals_success"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.441,
+      "before": {
+        "report": "tests/upstream/group04/exp_literals_success-before.json",
+        "sha256": "f97f9046f07840adf7edc19693df68962f68249dc4ede88d735ae4d41ecc681e",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:7: operator - does not take uint",
+                    "function": "exp_minus_2(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:14: operator - does not take uint",
+                    "function": "exp_int_max(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:21: operator - does not take uint",
+                    "function": "exp_minus_5(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:28: operator - does not take uint",
+                    "function": "exp_minus_256(uint)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:7: operator - does not take uint",
+                    "function": "exp_minus_2(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:14: operator - does not take uint",
+                    "function": "exp_int_max(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:21: operator - does not take uint",
+                    "function": "exp_minus_5(uint)"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_literals_success.sol:28: operator - does not take uint",
+                    "function": "exp_minus_256(uint)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/exp_literals_success-after.json",
+        "sha256": "8aa6753fc4bc41aac269f9e62a2d319a1a6f409068fa98db72daae69d7aaeccb",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_2(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_minus_2(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "exp_uint_max(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_int_max(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "77037197775489434122239117703397092741524065928615527809597551822662353515625"
+                    ],
+                    "signature": "exp_5(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "100384649682218308599123161468008489304965171479917458477538073643380658936811"
+                    ],
+                    "signature": "exp_minus_5(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "452312848583266388373324160190187140051835877600158453279131187530910662656"
+                    ],
+                    "signature": "exp_256(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115339776388732929035197660848497720713218148788040405586178452820382218977280"
+                    ],
+                    "signature": "exp_minus_256(uint256)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_2(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_minus_2(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "exp_uint_max(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "exp_int_max(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "77037197775489434122239117703397092741524065928615527809597551822662353515625"
+                    ],
+                    "signature": "exp_5(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "100384649682218308599123161468008489304965171479917458477538073643380658936811"
+                    ],
+                    "signature": "exp_minus_5(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "452312848583266388373324160190187140051835877600158453279131187530910662656"
+                    ],
+                    "signature": "exp_256(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115339776388732929035197660848497720713218148788040405586178452820382218977280"
+                    ],
+                    "signature": "exp_minus_256(uint256)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/viaYul/exp_literals_success.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-exp_literals_success"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+      "sourceSha256": "cda117a22b4a3f12bc72b19525d2870af0c77b9e90a8e60ccfe73dca0cf4e22f",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-final-patch/exp_neg"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.712,
+      "before": {
+        "report": "tests/upstream/group04/exp_neg-before.json",
+        "sha256": "99ba0de908437b766495699b87131f8bdb89669a8a35ffb0eb90a2b35caa8b49",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_neg.sol:4: operator ** does not take int",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "exp_neg.sol:4: operator ** does not take int",
+                    "function": "f(int,uint)"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "after": {
+        "report": "tests/upstream/group04/exp_neg-after.json",
+        "sha256": "0e43783bd94435bb5e9f86e3dcfd52c6bc1bb447b99c0d8c8f8fc9c216481b96",
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "174251498233690814305510551794710260107945042018748343"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "16384"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570810757189674162455679155088769329197476062871110891593"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "16384"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "174251498233690814305510551794710260107945042018748343"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "16384"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570810757189674162455679155088769329197476062871110891593"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "16384"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "57896044618658097711785492504343953926634992332820282019728792003956564819968"
+                    ],
+                    "signature": "f(int256,uint256)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeCommand": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/viaYul/exp_neg.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group04-before-exp_neg"
+      ]
+    }
+  ],
+  "summary": {
+    "before": {
+      "broken": 11,
+      "working": 0,
+      "blocked": 0
+    },
+    "after": {
+      "working": 11,
+      "broken": 0,
+      "blocked": 0
+    },
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "observations": 224,
+    "alreadyFixedAtBase": 0,
+    "assignedExpectedExclusions": 0,
+    "assignedAdapterOrResourceBlocks": 0,
+    "modelBeforeSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+    "modelAfterSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "fixtureElapsedSeconds": 44.837
+  },
+  "sourceControls": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "--tstack=131072",
+      "Solidity/Examples/Tactics/SignedNumericImport.lean"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 7.017,
+    "maxRssKb": 827788,
+    "log": "/tmp/group04-controls-final-model.log",
+    "inputs": [
+      {
+        "path": "tests/solc/SignedNumeric.sol",
+        "sha256": "0a9509919c38fda16e303d8d605fc655fbf3efd24efc6b55792342191ac98515"
+      },
+      {
+        "path": "tests/solc/SignedNumeric.ast.json",
+        "sha256": "6810df9826ab98ba94c6e4e4880eae323e6379addb3d070908ffa6ec5badde7c"
+      },
+      {
+        "path": "tests/solc/SignedNumericIR.ast.json",
+        "sha256": "80432231216d153b965c6918acf824fa20fc92b45461851575088f69cc486553"
+      },
+      {
+        "path": "Solidity/Examples/Tactics/SignedNumericImport.lean",
+        "sha256": "bdf04dffe185b8a407a2bfa5849bae012ce237a23dd34f291ba936dd314a425e"
+      }
+    ],
+    "modelSha256AtCheck": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+    "logSha256": "75090c867142265400afbfd62080ae06b15473d3622eb82dad43c15230871995",
+    "retainedLog": "tests/upstream/group04/logs/group04-controls-final-model.log.gz",
+    "retainedLogSha256": "681ccd26711f7335664ff664ba9b4a37712815856dddf82c4f484ce9db323cd4"
+  },
+  "proofAxioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "limitations": [
+    "checkedSignedPower_correct assumes successful typed operand evaluation and projects results through toOption.map val; it is not source/compiler or panic-payload equivalence.",
+    "Magnitude overflow beyond uint256 retains the existing lack of precise self-call panic data.",
+    "Repeated pure evaluation can amplify nested-power cost.",
+    "No Lean MCP diagnostic tool was exposed; configured per-file CLI checks were used."
+  ],
+  "environment": {
+    "workspace": "/workspace/solidity-lean",
+    "activation": "source /workspace/.setup/activate.sh",
+    "leanVersion": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lakeVersion": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+    "runtimeGate": "lake build Solidity.KeySort",
+    "runtimeGateExitCode": 0,
+    "frozenSolkey": {
+      "commit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "manifestSha256": "c8d6166c3d728174eded3c3279fe499470f143943877a1307745f7a6b2da1b37",
+      "rules": "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "rulesSha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb",
+      "examples": "tests/migration/solkey/keyext.solidity.examples"
+    }
+  },
+  "completedChecks": [
+    {
+      "name": "frozen-sort",
+      "command": "./scripts/check-solkey.sh --key /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "exitCode": 0,
+      "log": "/tmp/group04-sort-frozen.log",
+      "logSha256": "b46e108b88231fc97fe8b1c1385f4e61d20afb45c24cf49ef613fba6367dcde0",
+      "retainedLog": "tests/upstream/group04/logs/group04-sort-frozen.log.gz",
+      "retainedLogSha256": "718b84dc3ed70d5c6652a7a3af92f0bcd2e50af7fafeeacc95e94cd49a9bb5c0"
+    },
+    {
+      "name": "negative-index-output-pin",
+      "command": "lake env lean --tstack=131072 Solidity/Examples/Tactics/Decide.lean",
+      "exitCode": 0,
+      "log": "/tmp/group04-decide-patch.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedLog": "tests/upstream/group04/logs/group04-decide-patch.log.gz",
+      "retainedLogSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "name": "archive",
+      "command": "node scripts/solidity-upstream.mjs verify",
+      "exitCode": 0,
+      "log": "/tmp/group04-verify-patch.log",
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6",
+      "retainedLog": "tests/upstream/group04/logs/group04-verify-patch.log.gz",
+      "retainedLogSha256": "2fb35d638ee10a17ff2196e842494152b49285d37306519a8e8c99a80b5349e9"
+    },
+    {
+      "name": "runner",
+      "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+      "exitCode": 0,
+      "log": "/tmp/group04-node-patch.log",
+      "logSha256": "30927aa00f3ab7a4054d3b3df009099ed528125530b5c774f6c0f250dd344f72",
+      "retainedLog": "tests/upstream/group04/logs/group04-node-patch.log.gz",
+      "retainedLogSha256": "c26b8dbbc43243afdb7e50590d1d82db838de1c3f9ecdaa10d693472a12590aa"
+    },
+    {
+      "name": "reachability",
+      "command": "node scripts/check-orphans.mjs",
+      "exitCode": 0,
+      "log": "/tmp/group04-orphans-patch.log",
+      "logSha256": "809625a6288e6212f624d5238a22d934fa00957f012333e0a3ac01b583176c19",
+      "retainedLog": "tests/upstream/group04/logs/group04-orphans-patch.log.gz",
+      "retainedLogSha256": "5408b009edd64a19ba0cb5ea70c2c5150b8fc7736ebec2a20a2cc62031176364"
+    },
+    {
+      "name": "layering",
+      "command": "node scripts/check-layers.mjs",
+      "exitCode": 0,
+      "log": "/tmp/group04-layers-patch.log",
+      "logSha256": "fdb77b95639b5872632e6ca0304fef02917640924ee16840dc55222269d5366f",
+      "retainedLog": "tests/upstream/group04/logs/group04-layers-patch.log.gz",
+      "retainedLogSha256": "5ca5e25b536f1072bffe556cbe5c808d70666a3ea508d8920a9bf85764b773a9"
+    },
+    {
+      "name": "automation",
+      "command": "node scripts/check-automatic.mjs --strict",
+      "exitCode": 0,
+      "log": "/tmp/group04-automatic-patch.log",
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "retainedLog": "tests/upstream/group04/logs/group04-automatic-patch.log.gz",
+      "retainedLogSha256": "bf24cff72b866f4bab0e4f12d0944b3ace5b4ad4482a96c4ad7685d78986d987"
+    },
+    {
+      "name": "frozen-testsuite-audit",
+      "command": "./scripts/check-testsuite.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "exitCode": 0,
+      "log": "/tmp/group04-testsuite-patch.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+      "retainedLog": "tests/upstream/group04/logs/group04-testsuite-patch.log.gz",
+      "retainedLogSha256": "907dad08dc6806fc125e31793144649ed4fac4440855715eb7d5b88a24d8a32c"
+    },
+    {
+      "name": "literal-saturation-proof",
+      "command": "lake env lean --tstack=131072 Solidity/Semantics/NumericLowering.lean",
+      "exitCode": 0,
+      "log": "/tmp/group04-shr-literal-proof.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedLog": "tests/upstream/group04/logs/group04-shr-literal-proof.log.gz",
+      "retainedLogSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "name": "shift-fragment",
+      "command": "lake env lean --tstack=131072 tests/upstream/group04/ShiftFragment.lean",
+      "exitCode": 0,
+      "log": "/tmp/group04-shift-fragment.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedLog": "tests/upstream/group04/logs/group04-shift-fragment.log.gz",
+      "retainedLogSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "inputSha256": "3b2e6176aa1c29d58094b32a36e4879321750d4c554fdc51b02c8e9ee1696ca4"
+    },
+    {
+      "name": "replay",
+      "command": "lake env lean --tstack=131072 tests/upstream/Replay.lean",
+      "exitCode": 0,
+      "log": "/tmp/group04-replay-patch.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retainedLog": "tests/upstream/group04/logs/group04-replay-patch.log.gz",
+      "retainedLogSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "name": "reference-solc",
+      "command": "node scripts/check-signed-numeric.mjs /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "exitCode": 0,
+      "classification": "Reference-solc diagnostics, not Lean coverage",
+      "log": "/tmp/group04-compiler-patch.log",
+      "logSha256": "2379b1dd6fa1928003848d24017f7def7ea3060b84f4586fe2a4bd466ac6ff39",
+      "retainedLog": "tests/upstream/group04/logs/group04-compiler-patch.log.gz",
+      "retainedLogSha256": "8584b5da72951a22c5604a3130bc667a7a7970505f5db43bf5809cf8b1d0f519"
+    },
+    {
+      "name": "documentation-paths",
+      "command": "./scripts/check-doc-paths.sh",
+      "exitCode": 1,
+      "classification": "13 pre-existing missing references, individually verified on base commit",
+      "baselineCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+      "missingReferences": [
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Foundations/Logic/InferenceSystem.lean"
+        },
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Foundations/Logic/LogicalEquivalence.lean"
+        },
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Foundations/Syntax/Congruence.lean"
+        },
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Foundations/Syntax/Context.lean"
+        },
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Logics/Propositional/Defs.lean"
+        },
+        {
+          "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+          "reference": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean"
+        },
+        {
+          "source": "Solidity/Eqns.lean",
+          "reference": "Mathlib/Tactic/Eqns.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "Main.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "Widget.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "lakefile.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "test/basic.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "test/subscript.lean"
+        },
+        {
+          "source": "vendor/LeanTeX/VENDOR.md",
+          "reference": "test/widget_basic.lean"
+        }
+      ],
+      "log": "/tmp/group04-doc-paths-patch.log",
+      "logSha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb",
+      "retainedLog": "tests/upstream/group04/logs/group04-doc-paths-patch.log.gz",
+      "retainedLogSha256": "caee1166414171ff2a1ee0d0a96e558463034ea445b2b6b10e8c3ba3ab1517d0"
+    }
+  ],
+  "sourceHashScope": "Each fixture sourceSha256 hashes the complete pinned archived fixture bytes, including its settings and expected observations.",
+  "priorSourceControls": [
+    {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SignedNumericImport.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 64.685,
+      "maxRssKb": 807236,
+      "retainedLog": "tests/upstream/group04/logs/group04-controls-final.log.gz",
+      "logSha256": "7689ec394d597065e514e132c659cbf3df3a632328ce050916845368581b38e5",
+      "inputs": [
+        {
+          "path": "tests/solc/SignedNumeric.sol",
+          "sha256": "0a9509919c38fda16e303d8d605fc655fbf3efd24efc6b55792342191ac98515"
+        },
+        {
+          "path": "tests/solc/SignedNumeric.ast.json",
+          "sha256": "6810df9826ab98ba94c6e4e4880eae323e6379addb3d070908ffa6ec5badde7c"
+        },
+        {
+          "path": "tests/solc/SignedNumericIR.ast.json",
+          "sha256": "80432231216d153b965c6918acf824fa20fc92b45461851575088f69cc486553"
+        }
+      ]
+    },
+    {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Examples/Tactics/SignedNumericImport.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.689,
+      "maxRssKb": 845516,
+      "log": "/tmp/group04-controls-patch.log",
+      "inputs": [
+        {
+          "path": "tests/solc/SignedNumeric.sol",
+          "sha256": "0a9509919c38fda16e303d8d605fc655fbf3efd24efc6b55792342191ac98515"
+        },
+        {
+          "path": "tests/solc/SignedNumeric.ast.json",
+          "sha256": "6810df9826ab98ba94c6e4e4880eae323e6379addb3d070908ffa6ec5badde7c"
+        },
+        {
+          "path": "tests/solc/SignedNumericIR.ast.json",
+          "sha256": "80432231216d153b965c6918acf824fa20fc92b45461851575088f69cc486553"
+        },
+        {
+          "path": "Solidity/Examples/Tactics/SignedNumericImport.lean",
+          "sha256": "a102b8a5b4636f618b74becfb5e24cbf98c2d3eafd13af5a3ea946ef67cd3f0d"
+        }
+      ],
+      "modelSha256AtCheck": "08f27b1b56465b97ce73f8d5b461a580bac7a510af7882300dcfe9e75ec5eb26",
+      "retainedLog": "tests/upstream/group04/logs/group04-controls-patch.log.gz",
+      "logSha256": "1ad6d1a577b896d77dc771d764ca47c19376d891c6254dcdee2b41c18053e1c0",
+      "retainedLogSha256": "a46dae3d0aac0b34a067fa30a6292c804e9d4438126c82fad42b034ce0104558"
+    }
+  ],
+  "reviews": [
+    {
+      "role": "finder",
+      "mode": "read-only",
+      "leanWorkers": false,
+      "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "confirmedResidualIssues": 0
+    },
+    {
+      "role": "independent skeptic",
+      "mode": "read-only",
+      "leanWorkers": false,
+      "modelSha256": "d3d9411b3bcadececfcc92fc0532b2d1463a9cd55fdd61bd644a8253906be6f7",
+      "confirmedResidualIssues": 0
+    }
+  ]
+}
