@@ -2011,7 +2011,12 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     `gapArrayBlock` proved, `arrayBlockBad` (an element past the guard)
     refuted, `arrayLenBlock` (the guard `i < arr.length`) proved, the
     first two covered by the kernel and answering (`*_answers`,
-    `gapArrayBlock_iff`).
+    `gapArrayBlock_iff`).  The module builds in 1505 s (2026-10-26, three threads), against
+    457 s for `Examples/Decision.lean`; the verdicts take seconds in the
+    language server, so the cost is presumably the two kernel coverage
+    checks (`gapArrayBlock_block`, `arrayBlockBad_block`), not measured
+    one by one.  Left: time them (`trace.profiler`), and if they are the
+    cost, keep one and pin the other by its compiled verdict.
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
