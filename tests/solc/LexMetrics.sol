@@ -18,7 +18,7 @@ contract LexMetrics {
     function triple() public pure {
         uint x = 1;
         /// @custom:key invariant x <= 1
-        /// @custom:key decreases (x, 0, 0)
+        /// @custom:key decreases (x, 1, 2)
         while (x > 0) { x--; }
         assert(x == 0);
     }

@@ -61,7 +61,7 @@ end
 
 example : (tupleTextsP Imported.LexMetrics.resetInner).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.triple).map List.length = [3] := by decide +kernel
-example : (tupleTextsP Imported.LexMetrics.triple).head!.drop 1 = ["0", "0"] := by decide +kernel
+example : (tupleTextsP Imported.LexMetrics.triple).head!.drop 1 = ["1", "2"] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.forScope).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.doWhileLoop).map List.length = [2] := by decide +kernel
 example : (tupleTextsP Imported.LexMetrics.breakLoop).map List.length = [2] := by decide +kernel
