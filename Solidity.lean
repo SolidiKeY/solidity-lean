@@ -31,6 +31,7 @@ import Solidity.Semantics.RevertData
 import Solidity.Semantics.AllocBytes
 import Solidity.Semantics.Deploy
 import Solidity.Semantics.Lifetime
+import Solidity.Semantics.Transient
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
@@ -69,6 +70,7 @@ import Solidity.Calculus.KeyValues
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
 import Solidity.Calculus.Correct
+import Solidity.Calculus.Transient
 import Solidity.Calculus.Lifetime
 import Solidity.Calculus.CorrectCallback
 import Solidity.Calculus.TermWk
@@ -234,6 +236,7 @@ import Solidity.Examples.Tactics.Bytes
 import Solidity.Examples.Tactics.Hashing
 import Solidity.Examples.Tactics.AbiFeatures
 import Solidity.Examples.Tactics.AbiFeaturesImport
+import Solidity.Examples.Tactics.AbiHexCall
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.FunctionTypes
 import Solidity.Examples.Tactics.SignedCasts
@@ -523,6 +526,7 @@ import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.ArrayShapeCopy
 import Solidity.Examples.Tactics.Inheritance
 import Solidity.Examples.Tactics.DeclarationMetadata
+import Solidity.Examples.Tactics.PublicGetters
 import Solidity.Examples.Tactics.Lifetime
 
 import Solidity.Examples.Tactics.Rigid
@@ -531,9 +535,21 @@ import Solidity.Examples.Tactics.SymbolicCounterexample
 import Solidity.Examples.Tactics.Aggregates
 import Solidity.Examples.Tactics.AggregatesImport
 import Solidity.Examples.Tactics.AggregateSlices
+import Solidity.Examples.Tactics.SliceCopies
+import Solidity.Examples.Tactics.SliceCopiesImport
 import Solidity.Frontend.Source
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Examples.Tactics.SourceLiteralsImport
 import Solidity.Examples.Tactics.SourceIdentifiersImport
 import Solidity.Examples.Tactics.SourceAdmissionImport
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.RecursiveCopy
+
+import Solidity.Examples.Tactics.OperatorAliasesImport
+import Solidity.Examples.Tactics.CallExceptions
+import Solidity.Examples.Tactics.TransientStorage
+import Solidity.Semantics.ContractWorld
+import Solidity.Calculus.ContractWorld
+import Solidity.Frontend.WorldImport
+import Solidity.Examples.Tactics.ContractWorld
+import Solidity.Examples.Tactics.ContractWorldSource

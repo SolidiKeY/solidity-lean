@@ -192,17 +192,29 @@ theorem holdsC_cons_det {s : Stmt C Γ Γ'} (hs : s.forksIn pay = false)
     | diamond => exact hd rfl
 
 /-- **An update, with callbacks.** -/
-theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forksIn pay = false)
+theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.callsBack pay = false)
     (hr : Premise.Runs m s (.update U) σ) (h : holdsC I pay σ (.upd m U (Fml.modalK m ω κ φ))) :
-    holdsC I pay σ (.modal m (.cons s ω) κ φ) :=
-  holdsC_cons_det hs
-    (fun _ hτ => Upd.afterT.of_lands h (Upd.lands_of_applyP (hr.1 _ hτ)).choose_spec)
-    fun e he => ⟨(hr.2 e he).1, fun hm => by
-      subst hm
+    holdsC I pay σ (.modal m (.cons s ω) κ φ) := by
+  have deterministic : ∀ {o : COut C σ.H Γ'}, ExecS (I.stateInv pay) σ s o →
+      o = .ofRes (s.run σ) := fun he => Stmt.eq_run (I.stateInv pay) s hs he
+  refine holdsC_cons fun o₁ he => ?_
+  rw [deterministic he]
+  cases ht : s.run σ with
+  | ok o =>
+    have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
+    exact COut.after_seq (holdsC_modalK o.st ω κ φ
+      (Upd.afterT.of_lands h (Upd.lands_of_applyP (hr.1 _ hst)).choose_spec))
+  | error e =>
+    have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
+    obtain ⟨hp, hd⟩ := hr.2 e hst
+    refine ⟨?_, hp⟩
+    cases m with
+    | box => trivial
+    | diamond =>
       by_cases hx : e = .exhausted
       · exact hx
-      · have hd := (hr.2 e he).2 rfl hx
-        exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV hd.1) hd.2).elim⟩
+      · have he := hd rfl hx
+        exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV he.1) he.2).elim
 
 /-- Two sequential updates, such as the append then save in
 `a.push() += x`, preserve the callback reading of the continuation. -/

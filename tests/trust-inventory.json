@@ -677,12 +677,22 @@
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
-    "code": "let s \u2190 liftTermElabM <| unsafe evalExpr String (mkConst ``String) e"
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
+  },
+  {
+    "file": "Solidity/Frontend/Problems.lean",
+    "kind": "unsafe",
+    "code": "let body \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6) (\u2190 Symex.evaluable \u03c6)"
   },
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
     "code": "let k \u2190 liftTermElabM <| unsafe evalExpr (Option (Nat \u00d7 Nat)) (mkApp (mkConst ``Option [0])"
+  },
+  {
+    "file": "Solidity/Frontend/WorldImport.lean",
+    "kind": "unsafe",
+    "code": "let rows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (targetFull ++ `report)"
   },
   {
     "file": "Solidity/Semantics/Heap.lean",
@@ -1028,5 +1038,10 @@
     "file": "Solidity/Evm/Machine.lean",
     "kind": "override",
     "code": "@[implemented_by loopImpl]"
+  },
+  {
+    "file": "Solidity/Calculus/CallbackDerive.lean",
+    "kind": "unsafe",
+    "code": "let refuted \u2190 unsafe evalExpr Bool (mkConst ``Bool) probe"
   }
 ]

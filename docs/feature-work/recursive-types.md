@@ -1,9 +1,83 @@
-# Recursive types: guarded storage foundation
+# Recursive types: storage foundation and copy compatibility
+
+Integration status (2026-10-26): included in the shared checkout. Current
+combined validation is tracked in [integration.md](integration.md).
+Worker handoff statuses and isolated validation results below are historical;
+they neither report the current combined checks nor establish full source support.
 
 `recursiveTypes` remains **missing in the ordinary source/interpreter/calculus
-pipeline**. This milestone supplies a checked, standalone type graph and
-storage API. It does not make `solc_import`, `Stmt`, `State`, `Spec`, terms,
+pipeline**. M1 supplies a checked standalone type graph and storage API.
+The M2 patch adds copy admission, snapshot copy and a finite-layout bridge to
+ordinary interpreter values. M2 was handed off as `patch_ready_unvalidated`
+and is now included in the combined integration; validation remains in progress
+in integration.md.
+It does not make `solc_import`, `Stmt`, `State`, `Spec`, terms,
 the heap or existing taclets accept recursive structs.
+
+## M2: integrated storage interfaces
+
+`Semantics/RecursiveStorage/Legacy.lean` imports the ordinary storage API.
+`Legacy.Layout G A B` and `FieldLayouts` relate existing intrinsic types and
+ordered fields to graph types. Encoding handles primitives, structs, dynamic
+arrays, legal fixed sizes and mappings. Mapping slots contain pointwise
+legacy lookup results, preserving arbitrary fallback values without a
+canonical-default hypothesis. Legacy shadows are capped at the word-addressable
+extent; there is no equality claim for larger raw extents.
+
+`writeLegacy` embeds an ordinary `SVal` and calls graph assignment at a typed
+path into a recursive root. `assignLegacy` additionally requires a copy
+permit. Proof scripts give read-back of that assignment and commutation of
+ordinary `SVal.find` with graph reads and head observations along every finite
+mapping-key chain. Concrete regressions also exercise struct fields, fixed
+arrays and live/retained dynamic-array reads. General field/index path
+commutation and operation-preserving compatibility remain open.
+
+`Solidity/Semantics/RecursiveStorage/Copy.lean` implements storage overlay by induction on present source values.
+An absent source slot clears its old destination instead of unfolding the
+schema, so implicit defaults cannot cause recursive allocation. Copy preserves
+destination mappings, ignores source shadows, clears the shortened destination
+live suffix and keeps older shadows. `write` copies a captured source;
+`copyAt` captures it before writing, including overlapping paths. The proof
+scripts cover copy read-back, default-copy/clear agreement, mapping barriers, source length,
+destination extent, shortened live slots and older shadows. They do not claim raw equality
+between the copy result and the source.
+
+`Admission.lean` checks a finite node marking against the actual schema. Its
+closure condition follows node, dynamic-array and fixed-array edges and rejects
+mappings; inline layout rank alone cannot establish mapping freedom.
+`CopyPermit.check` returns a typed certificate, and `assign`/`assignAt` require
+one. The `step`/`along` proof scripts inherit permits along every typed path;
+`no_mapping_path` rules out any reachable mapping endpoint. This accepts guarded mapping-free cycles while rejecting recursive
+mapping-containing assignments. It is an admission interface used by these
+graph clients; the ordinary JSON importer does not call it yet.
+
+`Solidity/Semantics/RecursiveStorage/Observations.lean` supplies proof scripts for equivalence laws, observation
+through appended paths, descent to successfully read subtrees, and equivalence
+of implicit versus explicit default mapping slots. Congruence under updates,
+deletion and copying still remains open.
+
+The updated reference script was executed only against temporary fixture
+copies with the pinned 0.8.38 compiler: **20 EVM vectors and seven rejection
+cases passed**, across legacy and via-IR pipelines. New positive vectors cover
+populated recursive storage copy, shortened nested contents, retained
+destination shadows, ignored source shadows and ordinary scalar subtrees.
+New negatives pin error 9214 for direct and nested mapping-containing storage
+assignment. The overlapping-path regression is a graph-kernel statement only;
+no compiler/Lean correspondence theorem or Solidity overlap claim is made.
+
+No core indexed representation was migrated. Existing match/recursor
+optimizations and the current upstream frame/loop APIs remain untouched.
+The bridge adds finite-layout recursion and list lookup; functional copy slots
+remain lazy and may retain source/destination closures. The primary must
+measure the new example and an unchanged struct example before any future
+migration, and separately check costs as history and depth grow. No speed or
+scaling result is asserted for M2.
+
+Integration must check the four new semantic modules and
+`Examples/RecursiveCopy.lean`, inspect the headline `#print axioms`, then run
+the library/TestSuite, sort, corpus, layering and trust gates after merging.
+Register the example in `site/examples.json` only during primary integration;
+the patch worker was explicitly forbidden to change that shared manifest.
 
 ## Representation and laws
 
@@ -41,12 +115,12 @@ and pop length/extent. The headline axiom output uses only standard
 heartbeat override was added.
 
 `Value.ObsEq` observes failed reads, primitive values, live lengths and
-retained extents. It is only a defined relation: congruence of save, deletion
-and push/pop is not yet proved. Raw equality distinguishes an absent child
+retained extents. M1 only defined it; M2 adds the laws listed above.
+Congruence of save, deletion and push/pop is not yet proved. Raw equality distinguishes an absent child
 from an explicitly stored default. There is no structural mapping get-put
 claim, path-level divergent-path frame law or save-composition theorem.
 
-## Validation and review
+## M1 validation and review (historical; not M2 validation)
 
 Per-file MCP diagnostics pass for every new Lean module. Kernel examples
 cover every depth of a self-mapping default path (including depth 64),
@@ -109,18 +183,21 @@ after). These single observations include ordinary run-to-run variation and
 are not a speedup, history-scaling or whole-interpreter performance claim.
 
 Remaining work includes extracting shared type foundations to avoid an
-AST/graph import cycle, admitting compiler declaration graphs, migrating the
-existing storage/heap/state/signature/terms and all relevant folds, proving
-the observational laws and copy laws, and connecting typing, source notation,
-printers, rules and soundness. A default allocator can recurse on guarded
+AST/graph import cycle, admitting compiler declaration graphs into the ordinary
+pipeline, migrating storage/heap/state/signature/terms and their folds,
+completing operation congruence and compatibility laws, and connecting typing,
+source notation, printers, rules and soundness. A default allocator can recurse on guarded
 layout rank, while copies of present storage children use value induction.
 Copying synthesized defaults requires that separate argument. Recursive
 memory-to-storage copying must additionally handle legal heap cycles through
 an explicit exhaustion/divergence policy; the old decreasing `tyRank` proof
-does not justify it. There is no acyclic compatibility bridge yet;
-compatibility with arbitrary legacy mapping defaults remains unproved.
+does not justify it. M2 introduces a finite-layout compatibility bridge and mapping-path proof
+scripts, including arbitrary legacy mapping defaults. Its general field/index
+path and update/copy correspondence theorems remain open. Combined M2 Lean
+and repository validation is tracked in integration.md.
 
-Validation logs and timing JSON live under
+Historical M1 validation logs and timing JSON live under
 `/tmp/solidity-lean-feature-groups-20261025/recursive-*`; final results are in
-`recursive-types.status.json`. Source changes are intentionally uncommitted
-under the shared-checkout protocol.
+`recursive-types.status.json`. M2 was delivered as a patch with original base
+bytes and SHA-256 hashes; the primary owns combined integration validation. The full recursive-types group
+remains incomplete and its catalog status stays missing.

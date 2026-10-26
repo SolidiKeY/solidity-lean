@@ -260,6 +260,35 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let P ← elabStmtsP pre
     let (Q, e) ← hoist (.call "abi.decode" (.call sliceViewName [.name v.base, v.off, v.len] :: rest))
     pure (P ++ Q, e)
+  | .call "#sliceCopy" [view] => do
+    let t := toString (← freshCapture "mv")
+    let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
+    let P ← elabStmtsP pre
+    let Γ ← ctx
+    let .mpath (.ref R@(.array (.prim _))) _ ← ElabM.lift (synth C Γ.toNCtx (.name v.base))
+      | throw "a slice copy needs a dynamic array of primitive elements; reference elements are refused"
+    let ws := exprShape C Γ (.name v.base)
+    if ws.any (fun (k, _) => k.endsWith "#enum" || (k.splitOn "#function").length > 1) then
+      throw "a slice copy of enum or function elements needs its nominal source type"
+    -- rawTyW preserves primitive widths, fixed bytes and address identities.
+    -- Dynamic bytes additionally needs its whole-value ABI marker.
+    let T := if abiTyName ws "" (.ref R) == some "bytes" then RawTy.named "bytes"
+      else rawTyW ws (.ref R) ""
+    let L := toString (← freshCapture "se")
+    let j := toString (← freshCapture "se")
+    let r := toString (← freshCapture "mv")
+    -- The bounds have already been checked. For j < L, off + j < fin;
+    -- copying primitive elements retains no reference to the input heap.
+    -- Use the existing typed allocation, indexing and loop elaboration.
+    let Q ← elabStmtsP [
+      .decl (.named "uint") L (some v.len),
+      .declMemory T r (some (.newArr T (.name L))),
+      .decl (.named "uint") j (some (.num 0)),
+      .whileLoop {} (.binop .lt (.name j) (.name L)) [
+        .assign (.index (.name r) (.name j))
+          (.index (.name v.base) (sliceAdd v.off (.name j))),
+        .assign (.name j) (.binop .add (.name j) (.num 1))]]
+    pure (P ++ Q, .name r)
   | .call "#array" args => do
     let T ← ElabM.lift (inlineArrayTy C (← ctx) args)
     let x := toString (← freshCapture "mv")
@@ -275,6 +304,25 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
     let builtin := (← read).funs.all (·.1 != f)
+    if builtin && f.startsWith "#bytesPrefix" then
+      let some n := (f.drop 12).toNat? | throw "a fixed byte prefix needs its width"
+      unless 0 < n && n ≤ 32 do throw "a fixed byte prefix needs one through 32 bytes"
+      let [a] := args | throw "a fixed byte prefix takes one bytes argument"
+      unless dynamicBytesExpr C (← ctx) a do
+        throw "a fixed byte prefix takes bytes, not another reference type"
+      let a := match a with | .call "bytes" [v] => v | _ => a
+      let (P, a) ← hoist a
+      ElabM.lift (shapeCheck C (← ctx) dynBytesRows a)
+      let (Q, b) ← abiMemBytes a
+      let w := toString (← freshCapture "se")
+      let step (i : Nat) : RawStmt :=
+        .ite (.binop .lt (.num i) (.field (.name b) "length"))
+          [.assign (.name w) (.binop .add (.binop .mul (.name w) (.num 256))
+            (.call "uint8" [.index (.name b) (.num i)]))]
+          [.assign (.name w) (.binop .mul (.name w) (.num 256))]
+      let R ← elabStmtsP (.decl (.named "uint") w (some (.num 0)) :: (List.range n).map step)
+      let (S, value) ← hoist (.call (tyName .uint (8 * n)) [.name w])
+      return (P ++ Q ++ R ++ S, value)
     if builtin && f == "erc7201" then return ← hoistERC7201With C hoist args
     -- the hashing builtins (`hoistHashWith`)
     if builtin && isHashName f then return ← hoistHashWith C hoist abiMemBytes elabStmtsP f args
@@ -340,19 +388,30 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       let (P, a) ← hoist a
       let (Q, e) ← castCapture C f a
       return (P ++ Q, e)
-    -- a struct's constructor (no function of that name): a fresh memory
-    -- object, its members written in order, after the arguments are evaluated
-    -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
+    -- Legacy code generation allocates the struct, then evaluates and
+    -- writes each field. IR evaluates every field (including implicit
+    -- storage-to-memory copies) before allocating the enclosing object.
+    -- Generic call argument hoisting must not move a field's failure ahead
+    -- of the legacy allocation or defer the IR's final field until after it.
     let flds := C.structFields f
     if (← read).funs.all (·.1 != f) && !flds.isEmpty then
-      -- a literal of bytes at a value member (a `bytesN`) stays a literal,
-      -- which the member's write aligns (`bytesStmt`)
-      let keep (a : RawExpr) (i : Nat) : Bool :=
-        a.bytesLit?.isSome && (flds[i]?.any fun (_, T) => T matches .prim _)
-      let (P, args') ← hoistArgs (args.zipIdx.map fun (a, i) => if keep a i then .num 0 else a)
-      let args := (args.zipIdx.zip args').map fun ((a, i), a') => if keep a i then a else a'
       unless flds.length == args.length do
         throw s!"{f} has {flds.length} members, not {args.length}"
+      let (P, args) ← if C.evalOrder.binaryLeftToRight then do
+          let some structName := C.structName? f | throw s!"{f}: a struct declaration"
+          let mut P : SProg C := []
+          let mut values : List RawExpr := []
+          for ((g, T), a) in flds.zip args do
+            let y := toString (← freshCapture (match T with | .prim _ => "se" | .ref _ => "mv"))
+            let rawType := rawTyW (structWidths structName) T g
+            let declaration := match T with
+              | .prim _ => RawStmt.decl rawType y (some a)
+              | .ref _ => RawStmt.declMemory rawType y (some a)
+            let Q ← elabStmtsP [declaration]
+            P := P ++ Q
+            values := values ++ [.name y]
+          pure (P, values)
+        else pure ([], args)
       let x := toString (← freshCapture "mv")
       let Q ← elabStmtsP (.declMemory (.named f) x none ::
         (flds.zip args).map fun ((g, _), a) => .assign (.field (.name x) g) a)
@@ -897,11 +956,13 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
     let (P, m) ← hoist m
     pure (P, .revertRaw m)
   | .requireReason c m => do
-    let (P, args) ← hoistArgs [c, m]
-    let [c, m] := args | throw "internal: require reason changed arity"
+    -- The condition must finish before the reason's allocation or effects.
+    let (P, c) ← hoist c
+    let (Pc, c) ← forceArg C c
+    let (Q, m) ← hoist m
     let x := toString (← freshCapture "mv")
-    let Q ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
-    pure (P ++ Q, .requireReason c (.name x))
+    let R ← rc.elabStmtsP [.declMemory (.named "string") x (some m)]
+    pure (P ++ Pc ++ Q ++ R, .requireReason c (.name x))
   | .pushOpAssign op b r => do
     let (P, r) ← hoist r
     let (Pc, r) ← if b.hasIncDec then captureExpr C r else pure ([], r)
@@ -930,14 +991,16 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
       pure (P ++ Pc ++ Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
       if (castTy? f).isSome || f == "address" || (lookupBy f C.enums).isSome ||
-          ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice") && (← read).funs.all (·.1 != f)) then hoistAssign l r
+          ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice" || f.startsWith "#bytesPrefix") &&
+            (← read).funs.all (·.1 != f)) then hoistAssign l r
       else
         let (P, args) ← hoistCallArgs f args
         pure (P, .assign l (.call f args))
     | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
     if (castTy? f).isSome || f == "address" || (lookupBy f C.enums).isSome ||
-        ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice") && (← read).funs.all (·.1 != f)) then
+        ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice" || f.startsWith "#bytesPrefix") &&
+            (← read).funs.all (·.1 != f)) then
       let (P, r) ← hoist (.call f args)
       return (P, .decl T x (some r))
     let (P, args) ← hoistCallArgs f args
@@ -1008,13 +1071,9 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
     let (Q, a) ← hoist a
     pure (P ++ Pc ++ Q, .send T x r a g)
   | .eval args => do
-    -- the effects captured, left to right; then what may still revert is
-    -- evaluated into a fresh local, which nothing reads
-    let (P, args) ← hoistArgs args
-    let mut Q := P
-    for a in args do
-      unless a.isPure do Q := Q ++ (← captureExpr C a).1
-    pure (Q, .eval [])
+    -- Finish each read before the next operand can introduce a guard.
+    let (P, _) ← eagerArgsWith C hoist args true
+    pure (P, .eval [])
   | s => pure ([], s)
 
 /-- `elabStmtP`, outside its `mutual` block (`elabRec`). -/
@@ -1025,8 +1084,13 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
     let Γ ← ctx
     let .mpath (.ref R@(.array _)) _ ← ElabM.lift (synth C Γ.toNCtx e)
       | throw "a calldata slice needs a dynamic array base"
-    let T := rawTyW (exprShape C Γ e) (.ref R) ""
+    let ws := exprShape C Γ e
+    let T := rawTyW ws (.ref R) ""
     let Q ← rc.elabStmtP (.declMemory T x (some e))
+    -- Retain source-only markers too (rawTyW intentionally omits enum
+    -- identity and whole string metadata). Copies must see them to refuse
+    -- unsupported nominal elements instead of treating them as integers.
+    declareShape x ws
     return P ++ Q
   -- Tuple decoding must retain its ABI continuation instead of taking
   -- the generic multi-return function-call path.
@@ -1055,13 +1119,32 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   -- custom errors (`revert E(a)`, `require(c, E(a))`): their data only where
   -- a `try` reads it, as `revertMsg`'s
   let self := (← read).selfFrame
-  let s : RawStmt := match s with
-    | .revertErr .. => if self then s else .revert
-    | .requireErr c e as =>
-      if (lookupBy e C.errors).isNone then .requireReason c (.call e as)
-      else if self then .ite c (if as.all RawExpr.isPure then [] else [.eval as]) [.revertErr e as]
-      else RawStmt.requireWith c as
-    | s => s
+  -- Apply implicit byte widening before fnPure/bytesPure erase source widths.
+  -- Both require branches evaluate operands at the custom error's types,
+  -- including a discarded fixed-byte literal (which is not a memory value).
+  let errorArgs (e : String) (args : List RawExpr) : ElabM (List RawExpr) := do
+    let some d := lookupBy e C.errors | pure args
+    unless d.params.length == args.length do
+      throw s!"`{e}` takes {d.params.length} arguments, given {args.length}"
+    let Γ ← ctx
+    (d.params.zip args).mapM fun ((n, _), a) =>
+      ElabM.lift (toBytesAt? C Γ (lookupBy (n ++ "#bytes") d.widths) a a)
+  let s ← match s with
+    | .revertErr e args => pure (.revertErr e (← errorArgs e args))
+    | .requireErr c e args => pure (.requireErr c e (← errorArgs e args))
+    | s => pure s
+  let s ← match s with
+    | .revertErr _ args =>
+      pure (if self then s else .block [.eval args, .revert])
+    | .requireErr c e args => do
+      if (lookupBy e C.errors).isNone then
+        pure (RawStmt.requireReason c (.call e args))
+      else do
+        let total ← args.allM (canDiscardArg C)
+        if self then
+          pure (.ite c (if total then [] else [.eval args]) [.revertErr e args])
+        else pure (if total then .require c else RawStmt.requireWith c args)
+    | s => pure s
   match s with
   | .revertReason m | .requireReason _ m => do
     let Γ ← ctx
@@ -1600,11 +1683,15 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
   -- `revert E(a, b)`: `E`'s selector, folded as solc folds it
   -- (`errorSignature?`), then each argument's ABI word (a literal's folded)
   | .revertErr e args => do
-    unless (← read).selfFrame do return [.of (← nctx) .revert]
-    -- the arguments' captures first (`hoistArgs`), left to right
-    let (P, args) ← hoistArgs args
+    -- Each operand is read before the next one's calls or guards. Even
+    -- ordinary reverts must preserve an argument's failure before reverting.
+    let expected := ((lookupBy e C.errors).map fun d =>
+      d.params.map fun (_, T) => match T with | .prim p => some p | _ => none).getD []
+    let (P, args) ← eagerArgsWith C rc.hoist args (expected := expected)
     let Γ ← nctx
-    pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
+    if (← read).selfFrame then
+      pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
+    else pure (P ++ [.of Γ .revert])
   | .requireErr c _ args => elabStmt1 (RawStmt.requireWith c args)
   | .assumeFalse => do pure [.of (← nctx) .assumeFalse]
   | .eval _ => pure []
@@ -1635,9 +1722,10 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       Q := Q ++ Q'
       args := args ++ [⟨Γa, ⟨p, se⟩⟩]
     let mut rets' : List (PrimTy × Var) := []
+    let mut retWidths : List Nat := []
     for (T, x) in rets do
       let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: an external call returns a value"
-      unless n == 256 do throw s!"{x}: a narrow return value of an external call"
+      retWidths := retWidths ++ [n]
       rets' := rets' ++ [(p, Var.ofName x)]
     -- the call is read where its arguments' captures leave
     let Γ ← nctx
@@ -1647,9 +1735,46 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
     let ⟨ρ, bs⟩ := Binders.ofList rets'
     let ⟨κ, cb⟩ := CodeBinder.ofOption (code.map Var.ofName)
     let sb ← trySelfBody g args' ρ
+    -- A concrete self frame returns typed numeric values, not encoded ABI
+    -- words. Enable narrow returns only on this path; unknown-address bytesN
+    -- words need distinct padding/alignment decoding and remain unsupported.
+    let staticSelf := match e with
+      | .env .selfAddress => true
+      | _ => false
+    if retWidths.any (· != 256) && !(staticSelf && sb.isSome) then
+      throw "a narrow return value of an external call needs a resolved self frame"
+    if staticSelf && sb.isSome && !rets.isEmpty then
+      let some d := lookupBy g funs | throw "a self-call result needs its callee declaration"
+      unless d.rets.length == rets.length do
+        throw "a self-call result needs its callee's return arity"
+      for ((T, _), (name, actualTy)) in rets.zip d.rets do
+        let some actual := (fnRow? d.widths name).orElse fun _ =>
+            abiTyName d.widths name actualTy
+          | throw "a self-call result needs its source ABI type"
+        let (requestedTy, requestedWidths) ← ElabM.lift (elabTyW C T)
+        let some requested := (fnRow? requestedWidths "").orElse fun _ =>
+            abiTyName requestedWidths "" requestedTy
+          | throw "a self-call result needs its requested ABI type"
+        unless selfReturnAbiCompatible actual requested do
+          throw "a self-call result has incompatible ABI type"
     let (Γe, _) ← get
-    for (p, x) in rets' do declare C (toString x) (.val p)
-    let ok ← elabStmtsP ok
+    let mut decodeChecks : List RawStmt := []
+    for (((T, x), (p, _)), n) in (rets.zip rets').zip retWidths do
+      declare C x (.val p n)
+      -- Retain source observations only on the resolved typed-self path.
+      -- Existing full-width world returns keep their existing representation.
+      if staticSelf && sb.isSome then
+        declareShape x (← ElabM.lift (bytesRowsOf C T))
+      if n != 256 then
+        -- Decode failure reverts the caller; its try's catches do not handle it.
+        decodeChecks := decodeChecks ++ [.require (inTyCond p n (.name x))]
+      else if staticSelf && sb.isSome then
+        if let .named type := T then
+          if type == "address" then
+            decodeChecks := decodeChecks ++ [.require (inTyCond .uint 160 (.name x))]
+          else if let some members := lookupBy type C.enums then
+            decodeChecks := decodeChecks ++ [.require (.binop .lt (.name x) (.num members.length))]
+    let ok ← elabStmtsP (decodeChecks ++ ok)
     let ok ← ElabM.lift (SProg.chain (bs.names ++ Γ.names) (ρ ++ Γ.ctx) ok)
     let (_, k) ← get
     set (Γe, k)

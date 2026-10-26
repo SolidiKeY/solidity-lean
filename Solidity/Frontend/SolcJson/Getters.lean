@@ -1,0 +1,210 @@
+import Solidity.Frontend.SolcJson.Body
+import Solidity.Keccak
+
+/-!
+# Source ABI identities and public getter plans
+
+The compiler JSON is an input format. A getter plan prints ordinary source
+members, then the existing elaborator checks their intrinsic types and
+inlines them through the ordinary self-call path. It introduces no alternate
+statement, state or return-value representation. Reference-valued results
+are refused until the external return interface supports them.
+-/
+
+namespace Solidity.Frontend
+open Lean (Json)
+
+/-- Bounded freshness for generated callable and local names. Every rejected
+candidate belongs to `taken`; one more candidate than its length suffices. -/
+def freshSourceName (taken : List String) (base : String) : String := Id.run do
+  let mut name := base
+  for _ in [:taken.length + 1] do
+    if !taken.contains name then return name
+    name := name ++ "_"
+  return name
+
+/-- ABI type spelling before the importer erases nominal source types.
+Recursive or unresolved shapes return `none`; no generated alias is hashed. -/
+def sourceAbiType (declarations : List Json) : Nat → Json → Option String
+  | 0, _ => none
+  | fuel + 1, node => do
+    match J.kind node with
+    | "ElementaryTypeName" =>
+      let name ← J.str? node "name"
+      if name == "uint" || name == "uint256" then pure "uint256"
+      else if name == "int" || name == "int256" then pure "int256"
+      else if ["address", "address payable"].contains name then pure "address"
+      else if ["bool", "bytes", "string"].contains name ||
+          (narrowTy? name).isSome || (bytesTy? name).isSome then pure name
+      else none
+    | "ArrayTypeName" =>
+      let base ← sourceAbiType declarations fuel (← J.opt node "baseType")
+      match J.opt node "length" with
+      | none => pure (base ++ "[]")
+      | some n =>
+        let length ← (solcArrayLength? node).orElse fun _ =>
+          (constVal n).bind fun q => do
+            let value ← q.int?
+            guard (0 ≤ value)
+            pure value.toNat
+        pure s!"{base}[{length}]"
+    | "UserDefinedTypeName" =>
+      let id ← (J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?
+      let declaration ← declarations.find? (J.id? · == some id)
+      match J.kind declaration with
+      | "ContractDefinition" => pure "address"
+      | "EnumDefinition" => pure "uint8"
+      | "UserDefinedValueTypeDefinition" =>
+        sourceAbiType declarations fuel (← J.opt declaration "underlyingType")
+      | "StructDefinition" =>
+        let members ← (J.arrD declaration "members").toList.mapM fun member => do
+          sourceAbiType declarations fuel (← J.opt member "typeName")
+        pure s!"({",".intercalate members})"
+      | _ => none
+    | "FunctionTypeName" =>
+      if J.str? node "visibility" == some "external" then pure "function" else none
+    | _ => none
+
+/-- Canonical ordinary function identity, resolved from declaration types. -/
+def sourceAbiSignature (declarations : List Json) (node : Json) : Option String := do
+  let name ← J.str? node "name"
+  let parameters ← (J.opt node "parameters").bind (J.arr? · "parameters")
+  let types ← parameters.toList.mapM fun p => do
+    sourceAbiType declarations (declarations.length + (J.nodes node).length + 1)
+      (← J.opt p "typeName")
+  pure s!"{name}({",".intercalate types})"
+
+/-- Imported ordinary/special functions retain their role even when a legacy
+fixture omits a selector. An exact canonical signature is the only fallback. -/
+def sourceFunction (declarations : List Json) (node : Json)
+    (selection : SourceSelection) (helper : Bool) : Except Gap SourceFunction := do
+  let selector ← if (J.opt node "functionSelector").isSome then
+      pure (some (← declarationSelector node "functionSelector" 4))
+    else pure none
+  let visibility := (J.str? node "visibility").getD "internal"
+  let callable := match (J.str? node "kind").getD "function" with
+    | "constructor" => SourceCallable.constructor
+    | "receive" => .receive selection
+    | "fallback" => .fallback selection
+    | _ =>
+      if helper || J.str? node "kind" == some "freeFunction" then .local .freeFn
+      else if visibility == "public" then .abi .publicFn selection selector
+      else if visibility == "external" then .abi .externalFn selection selector
+      else .local (if visibility == "private" then .privateFn else .internalFn)
+  let mutability := match J.str? node "stateMutability" with
+    | some "pure" => SourceMutability.pureFn
+    | some "view" => .viewFn
+    | some "payable" => .payable
+    | _ => .nonpayable
+  pure {
+    declaration := J.id? node
+    name := (J.str? node "name").getD ""
+    signature := sourceAbiSignature declarations node
+    mutability
+    callable }
+
+/-- Getter input/output text, later elaborated by the normal function reader.
+`sourceParams` retains mapping key names for named source calls. -/
+structure GetterPlan where
+  params : List (String × String) := []
+  sourceParams : List String := []
+  abiParams : List String := []
+  rets : List (String × String) := []
+  values : List String := []
+  /-- Public getter bounds fail with empty revert data, before the ordinary read. -/
+  guards : List String := []
+  deriving Inhabited
+
+/-- This milestone supports elementary value inputs/results. Bytes/string
+are references and must not be silently omitted from a struct getter. -/
+private def getterValueType (S : Structs) (node : Json) : Except Gap String := do
+  unless J.kind node == "ElementaryTypeName" do
+    throw (.unsupported "public getter needs a nominal or reference-valued ABI return/input")
+  let type ← tyText S node
+  unless (PrimTy.ofName? type).isSome || (narrowTy? type).isSome ||
+      (bytesTy? type).isSome || type == "address payable" do
+    throw (.unsupported "public getter needs reference-valued ABI returns/inputs")
+  pure type
+
+private def getterTerminal (S : Structs) (taken : List String) (id : Int)
+    (plan : GetterPlan) (values : List (Json × String)) : Except Gap GetterPlan := do
+  let mut plan := plan
+  let mut taken := taken
+  for (typeNode, value) in values do
+    let type ← getterValueType S typeNode
+    let name := freshSourceName taken s!"solcGetterReturn{id}_{plan.rets.length}"
+    taken := name :: taken
+    plan := { plan with rets := plan.rets ++ [(name, type)], values := plan.values ++ [value] }
+  unless !plan.rets.isEmpty do throw (.unsupported "a public getter with no returned members")
+  pure plan
+
+private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
+    Nat → List String → GetterPlan → Json → String → Except Gap GetterPlan
+  | 0, _, _, _, _ => throw (.unsupported "public getter type traversal exceeded its bound")
+  | fuel + 1, taken, plan, node, path => do
+    if J.kind node == "Mapping" || J.kind node == "ArrayTypeName" then
+      let mapping := J.kind node == "Mapping"
+      let typeNode ← if mapping then J.get node "keyType" else
+        pure (Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "uint256")])
+      let type ← getterValueType S typeNode
+      let some abi := sourceAbiType declarations (declarations.length + 1) typeNode
+        | throw (.unsupported "a public getter key without its canonical ABI type")
+      let name := freshSourceName taken s!"solcGetterArg{id}_{plan.params.length}"
+      let input := identText name
+      let key := if type == "bool" then s!"({input} ? 1 : 0)" else input
+      let sourceName := if mapping then (J.str? node "keyName").getD "" else ""
+      let guards := if mapping then plan.guards else
+        plan.guards ++ [s!"require({input} < {path}.length)"]
+      let plan := { plan with
+        guards
+        params := plan.params ++ [(name, type)]
+        sourceParams := plan.sourceParams ++ [sourceName]
+        abiParams := plan.abiParams ++ [abi] }
+      let next ← J.get node (if mapping then "valueType" else "baseType")
+      getterWalk S declarations id fuel (name :: taken) plan next s!"{path}[{key}]"
+    else if J.kind node == "UserDefinedTypeName" then
+      let some ref := (J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?
+        | throw (.unsupported "a public getter result without declaration identity")
+      let some declaration := declarations.find? (J.id? · == some ref)
+        | throw (.unsupported "a public getter result declaration is missing")
+      unless J.kind declaration == "StructDefinition" do
+        throw (.unsupported "public getter needs a nominal ABI return type")
+      let mut values := []
+      for member in (J.arrD declaration "members").toList do
+        let typeNode ← J.get member "typeName"
+        -- Solc omits these two kinds only. In particular bytes/string stay,
+        -- and cause an explicit unsupported result in getterTerminal.
+        if ["Mapping", "ArrayTypeName"].contains (J.kind typeNode) then continue
+        let name ← J.str member "name"
+        values := values ++ [(typeNode, s!"{path}.{identText name}")]
+      getterTerminal S taken id plan values
+    else getterTerminal S taken id plan [(node, path)]
+
+/-- Consume mapping keys and array indexes; keep a terminal value or exactly
+solc's non-array/non-mapping struct fields, in declaration order. -/
+def publicGetterPlan (S : Structs) (declarations : List Json) (taken : List String)
+    (declarationNode : Json) (root : String) : Except Gap GetterPlan := do
+  let some id := J.id? declarationNode | throw (.unsupported "public getter declaration has no identity")
+  let typeNode ← J.get declarationNode "typeName"
+  getterWalk S declarations id ((J.nodes typeNode).length + declarations.length + 1)
+    taken {} typeNode root
+
+/-- Compiler selectors are validated. Legacy fixtures may reconstruct one
+from the exact, unerased getter signature; truncation is never a fallback. -/
+def publicGetterIdentity (declarationNode : Json) (plan : GetterPlan) : Except Gap SourceFunction := do
+  let name ← J.str declarationNode "name"
+  let signature := s!"{name}({",".intercalate plan.abiParams})"
+  let selector ← if (J.opt declarationNode "functionSelector").isSome then
+      declarationSelector declarationNode "functionSelector" 4
+    else do
+      let n := Keccak.selector signature
+      if h : n < 2 ^ 32 then pure ⟨n, h⟩
+      else throw (.unsupported "a getter selector outside four bytes")
+  pure {
+    declaration := J.id? declarationNode
+    name
+    signature := some signature
+    mutability := .viewFn
+    callable := .getter selector }
+
+end Solidity.Frontend

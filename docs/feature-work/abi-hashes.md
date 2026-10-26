@@ -1,5 +1,10 @@
 # ABI, hashes and concatenation
 
+Integration status (2026-10-26): included in the shared checkout. Current
+combined validation is tracked in [integration.md](integration.md).
+Worker handoff statuses and isolated validation results below are historical;
+they neither report the current combined checks nor establish full source support.
+
 ## M1: computed recovery and ABI boundary repairs (2026-10-25)
 
 `ERC7201.root` implements the namespace formula over bytes: Keccak-256,
@@ -96,11 +101,11 @@ The feature catalog keeps general ABI coverage partial. Struct enum members
 lose nominal identity/cardinality in `Contract.spellTy`/`enumRows`; function
 mutability and some aggregate function markers are also absent. Exact legality
 and enum decoding require the declarations/type metadata group to preserve them.
-Raw numeric literals also erase their lexical hex width: Solidity accepts
-`0xabcd` implicitly at `bytes2` and rejects decimal `43981`, whereas both become
-one raw number here. Until that provenance is retained, use an explicit
-`bytes2(0xabcd)` argument; the implicit hex-literal case is gated rather than
-accepting arbitrary numeric arguments as fixed bytes.
+The source reader now consumes exact-width hex evidence at direct fixed-byte
+`abi.encodeCall` parameters (M2 below). The handwritten `sol{}` DSL still erases
+numeric literal spelling and requires an explicit `bytes2(0xabcd)` argument.
+It does not accept decimal `43981` as an implicit fixed-byte argument. Arrays
+of numeric hex literals and other aggregate contextual coercions remain open.
 Inherited renamed function values still need their source ABI identity.
 Recursive-type work must supply its agreed graph representation before ABI
 traversal can cover those graphs. No second graph representation was introduced.
@@ -145,3 +150,64 @@ the 33 pre-existing scratch modules; documentation checking retains 13 existing
 missing vendor/external references. No new finding was added to either list.
 `git diff --check` is clean. Changes are uncommitted; the shared checkout's
 other feature-group edits and unrelated logs were preserved.
+
+
+## M2: source hex-width boundary (2026-10-26; worker handoff was patch_ready_unvalidated)
+
+The source importer resolves an `abi.encodeCall` target by retained solc
+`referencedDeclaration`, then reads fixed-byte widths from its public/external
+function declaration or external function-variable signature. Before generic
+constant normalization, a direct numeric hex literal can acquire `bytesN`
+context only when its original token has exactly `2*N` hex digits and its
+compiler type is a numeric constant. Leading zeros, mixed case, legal digit
+separators and parentheses around individual scalar arguments survive this
+check. The admitted result is `Fin (2^(8*N))`; no new core value or statement
+representation is introduced. The raw AST is importer evidence only.
+
+Decimal numerals, short/long hex tokens, arithmetic expressions, typed numeric
+locals, missing evidence and address-typed 40-digit literals get no new
+coercion. Existing type checking handles their rejection. Ordinary
+`abi.encode(0xabcd)` keeps its numeric word layout. Byte-typed metadata such as
+`this.f.selector` retains its established kind when this contextual path is
+used. Tuple arity is preserved: extra parentheses around an entire
+multiargument tuple create one component and must not be flattened into a
+compiler-accepted call. No decoder, crypto implementation, frame or loop API
+changes are included; solc's accepted noncanonical decoder layouts remain
+unchanged.
+
+`tests/abi-0.8.38/HexCall.sol` and its independently pinned 0.8.38 AST exercise
+eight positive source cases and one deliberately false assertion.
+`Examples/Tactics/AbiHexCall.lean` supplies exact-width/rejection proof scripts,
+declaration-identity and malformed-input guards, concrete imported executions,
+a universal exact-width property and a refutation of the false property. These
+Lean scripts have **not** been elaborated or kernel-checked in the patch worker.
+The primary integrator owns those checks and the axiom audit after merging.
+No axiom, admitted proof, unsafe/native proof shortcut, raised heartbeat limit
+or external Lean dependency is introduced by the patch text.
+
+Regenerate only the new fixture (the frozen TestSuite pin remains intact):
+
+```sh
+node scripts/solc-ast.mjs --compiler-file /path/to/soljson-v0.8.38+commit.1835d247.js \
+  --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 \
+  --source tests/abi-0.8.38/HexCall.sol --out tests/abi-0.8.38/HexCall.ast.json --no-wrapper
+node scripts/check-abi-hex-call.mjs /external/node_modules \
+  /path/to/soljson-v0.8.38+commit.1835d247.js /path/to/soljson-v0.8.34+commit.80d5c536.js
+```
+
+The optional reference checker pins both compiler bytes and versions, then
+executes legacy and via-IR Cancun code with the M1 external Node dependencies.
+In the patch worker it passed 32 positive executions, four assertion panics
+with code 1, and 40 compiler rejections across the four configurations.
+Rejections cover decimal/width/type/arithmetic/address mismatches, tuple
+shape, omitted components and invalid separators. These are concrete vectors,
+not a general compiler/frontend or cryptographic correctness theorem.
+
+Read-only finder/skeptic review covered declaration resolution, lexical width,
+scalar parentheses, function-variable targets and preserved selector kinds.
+Pinned compiler rejection of whole-tuple grouping prompted a correction to
+keep direct components. The final review found no further concrete blocker.
+The group remains incomplete for enum/cardinality decoding, inherited renamed
+ABI identity, recursive ABI graphs, external reference-valued returns and the
+general recovery/precompile equivalence theorem. The site manifest is left to
+the primary integrator under the patch-only workflow.

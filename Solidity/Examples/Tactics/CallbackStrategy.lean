@@ -49,12 +49,14 @@ info: Try this:
     apply ProvesC.update (.key .storageRootOpAssign) rfl
     apply ProvesC.callback .transferWithCallbackBox
     · refine ProvesC.plain ?_ rfl
-      refine Proves.updIntro ?_
-      refine Proves.updIntro ?_
+      sol_prove (steps := 128)
       sol_leaf
       sol_close
     · refine ProvesC.plain ?_ rfl
-      exact Proves.assumeInv
+      sol_prove (steps := 128)
+      refine Proves.openInv ?_
+      sol_leaf
+      sol_close
 -/
 #guard_msgs in
 example :
@@ -76,6 +78,21 @@ def Pinger : Contract := contract!{ uint pings; uint fails; uint last; }
 
 /-- `fails <= pings`. -/
 def pingInv : Invariant Pinger := ⟨dl[Pinger]{ fails <= pings }, rfl⟩
+
+/-- A contradiction before a `try` closes without expanding its
+callbacks, even when the requested postcondition is false. -/
+theorem impossibleTry :
+    ValidT .noCallback dl[Pinger]{ false →
+      [ try I(7).ping() { } catch { }; ] false } := by
+  sol_prove
+
+/-- The explicit callback contradiction replay retains the whole prefix. -/
+theorem impossibleTry_replay :
+    ValidT .noCallback dl[Pinger]{ false →
+      [ try I(7).ping() { } catch { }; ] false } := by
+  apply ProvesC.validT
+  apply ProvesC.intro
+  sol_prefix_false 8
 
 /-- A `try` keeps the invariant with callbacks. -/
 theorem pingKeepsInv :
@@ -121,20 +138,9 @@ info: Try this:
   refine ProvesC.validT ?_
     try simp only [TransferSem.inv, TransferSem.pay]
     refine ProvesC.plain ?_ rfl
-    refine Proves.allRight ?_
-    apply Proves.update (Taclet.step_eq .valueDeclSkip)
-    apply Proves.cases (Taclet.step_eq .sendNoCallbackDiamond) rfl <;>
-        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
-      (try and_intros)
-    case fml =>
-      sol_leaf
-      sol_decide
-    case upd =>
-      sol_leaf
-      sol_close
-    case upd =>
-      sol_leaf
-      sol_decide
+    sol_prove (steps := 128)
+    sol_leaf
+    sol_close
 -/
 #guard_msgs in
 example : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
@@ -184,21 +190,13 @@ info: Try this:
     · apply ProvesC.update (.key .valueDeclSkip) rfl
       apply ProvesC.send .sendWithCallbackBox
       · refine ProvesC.plain ?_ rfl
-        refine Proves.updIntro ?_
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
+        sol_prove (steps := 128)
       · refine ProvesC.plain ?_ rfl
-        refine Proves.updIntro ?_
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
+        sol_prove (steps := 128)
       · refine ProvesC.plain ?_ rfl
-        refine Proves.updIntro ?_
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
+        sol_prove (steps := 128)
     · refine ProvesC.plain ?_ rfl
-      refine Proves.updIntro ?_
-      refine Proves.updIntro ?_
-      exact Proves.closeTrue rfl
+      sol_prove (steps := 128)
 -/
 #guard_msgs in
 example :
@@ -344,39 +342,13 @@ info: Try this:
     apply ProvesC.update (.key .valueDeclSkip) rfl
     apply ProvesC.send .sendWithCallbackBox
     · refine ProvesC.plain ?_ rfl
-      refine Proves.updIntro ?_
-      refine Proves.updIntro ?_
-      exact Proves.closeTrue rfl
+      sol_prove (steps := 128)
     · refine ProvesC.plain ?_ rfl
-      apply Proves.update (Taclet.step_eq .binopAssignment)
-      refine Proves.updIntro ?_
-      apply Proves.update (Taclet.step_eq .localValueAssign)
-      refine Proves.updIntro ?_
-      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
-      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
-      apply Proves.update (Taclet.step_eq .binopAssignment)
-      apply Proves.check (Taclet.step_eq .assertSimple)
-      case thn =>
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
-      case els =>
-        sol_leaf
-        sol_close
+      sol_prove (steps := 128)
+      sol_leaf
+      sol_close
     · refine ProvesC.plain ?_ rfl
-      apply Proves.update (Taclet.step_eq .binopAssignment)
-      refine Proves.updIntro ?_
-      apply Proves.update (Taclet.step_eq .localValueAssign)
-      refine Proves.updIntro ?_
-      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
-      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
-      apply Proves.update (Taclet.step_eq .binopAssignment)
-      apply Proves.check (Taclet.step_eq .assertSimple)
-      case thn =>
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
-      case els =>
-        sol_leaf
-        sol_decide
+      sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ValidT .noCallback dl[Payer]{ [ uint y = payOne(to, 1); assert(y == 2); ] true } := by
@@ -407,37 +379,24 @@ info: Try this:
     apply ProvesC.update (.key .localValueAssign) rfl
     apply ProvesC.invBox rfl
     · refine ProvesC.plain ?_ rfl
-      sol_leaf
-      sol_decide
+      sol_prove (steps := 128)
     · apply ProvesC.updIntro
       apply ProvesC.update (.key .valueDeclSkip) rfl
       apply ProvesC.send .sendWithCallbackBox
       · refine ProvesC.plain ?_ rfl
-        refine Proves.updIntro ?_
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
+        sol_prove (steps := 128)
       · refine ProvesC.plain ?_ rfl
-        apply Proves.update (Taclet.step_eq .binopAssignment)
-        refine Proves.updIntro ?_
+        sol_prove (steps := 128)
         sol_leaf
         sol_close
       · refine ProvesC.plain ?_ rfl
-        apply Proves.update (Taclet.step_eq .binopAssignment)
-        refine Proves.updIntro ?_
+        sol_prove (steps := 128)
         sol_leaf
         sol_close
     · refine ProvesC.plain ?_ rfl
-      refine Proves.updIntro ?_
-      apply Proves.unfold (Taclet.step_eq .assertConditionCapture)
-      apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
-      apply Proves.update (Taclet.step_eq .binopAssignment)
-      apply Proves.check (Taclet.step_eq .assertSimple)
-      case thn =>
-        refine Proves.updIntro ?_
-        exact Proves.closeTrue rfl
-      case els =>
-        sol_leaf
-        sol_close
+      sol_prove (steps := 128)
+      sol_leaf
+      sol_close
 -/
 #guard_msgs in
 example :
