@@ -82,8 +82,9 @@ inductive RawExpr where
   | named (f : String) (names : List String) (args : List RawExpr)
   /-- `msg.sender`, `address(this).balance`, …: a value of the environment. -/
   | env (k : EnvKey)
-  /-- `(a, b)`, two components or more: only the right-hand side of a tuple
-  assignment (`RawStmt.tupleAssign`) or a `return` of several values. -/
+  /-- `(a, b)`, two components or more: the right-hand side of a tuple
+  assignment (`RawStmt.tupleAssign`), a `return` of several values, or a
+  loop's ordered `uint` lexicographic variant. -/
   | tuple (es : List RawExpr)
   /-- `(l = r)` inside an expression: the value assigned, the write made
   before the statement (`hoist`; solkey's `localCopyAssignmentValue`,
@@ -111,7 +112,8 @@ def RawInv.exprs : RawInv → List RawExpr
 
 /-- A loop's specification as read, solkey's `///` lines above the loop:
 `/// @custom:key invariant e` (several conjoined), `/// @custom:key
-decreases e` (at most one) and, Lean only, `/// @custom:key unwind k`, the
+decreases e` (at most one; a scalar or a tuple of at least two `uint`
+expressions) and, Lean only, `/// @custom:key unwind k`, the
 bound on unwinding (`LoopAnn`). -/
 structure RawLoopSpec where
   inv : List RawExpr := []

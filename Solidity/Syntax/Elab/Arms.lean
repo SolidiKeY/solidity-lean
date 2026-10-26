@@ -1557,8 +1557,15 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       | i :: is, none => do
         let I ← loopExpr Γ .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
           "invariant"
-        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk
-          (← a.qinv.mapM (loopQ Γ)))
+        let qs ← a.qinv.mapM (loopQ Γ)
+        match a.dec with
+        | some (.tuple (first :: second :: rest)) =>
+          let first ← loopExpr Γ .uint first "variant component"
+          let second ← loopExpr Γ .uint second "variant component"
+          let rest ← rest.mapM fun d => loopExpr Γ .uint d "variant component"
+          pure (.invLex I (.cons first (.cons second (.ofList rest))) a.brk qs)
+        | some (.tuple _) => throw "a loop's lexicographic variant needs at least two components"
+        | dec => pure (.inv I (← dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk qs)
       | _ :: _, some _ => throw "a loop has an `invariant` or an `unwind` clause, not both"
     pure [.of Γ (.loop a c (← elabScope Γ body).2)]
   | .block b => elabBranch b

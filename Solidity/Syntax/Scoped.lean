@@ -248,6 +248,30 @@ inductive LoopQ (C : Contract) : Ctx → Type where
   | imp {Γ : Ctx} (a c : Val C Γ .bool) : LoopQ C Γ
   | all {Γ : Ctx} (x : Var) (p : PrimTy) (body : LoopQ C (.val p :: Γ)) : LoopQ C Γ
 
+/-- A loop's ordered, homogeneous `uint` ranking expressions. Its length is
+part of its type; a lexicographic annotation contains at least two. -/
+inductive LoopMetrics (C : Contract) (Γ : Ctx) : Nat → Type where
+  | nil : LoopMetrics C Γ 0
+  | cons {n : Nat} (head : Val C Γ .uint) (tail : LoopMetrics C Γ n) : LoopMetrics C Γ (n + 1)
+
+/-- The components in source order. -/
+def LoopMetrics.toList {C : Contract} {Γ : Ctx} : {n : Nat} →
+    LoopMetrics C Γ n → List (Val C Γ .uint)
+  | _, .nil => []
+  | _, .cons head tail => head :: tail.toList
+
+@[simp] theorem LoopMetrics.toList_length {C : Contract} {Γ : Ctx} {n : Nat}
+    (metrics : LoopMetrics C Γ n) : metrics.toList.length = n := by
+  induction metrics with
+  | nil => rfl
+  | cons head tail ih => simp [toList, ih]
+
+/-- A checked list, retaining its length in the resulting index. -/
+def LoopMetrics.ofList {C : Contract} {Γ : Ctx} : (values : List (Val C Γ .uint)) →
+    LoopMetrics C Γ values.length
+  | [] => .nil
+  | head :: tail => .cons head (ofList tail)
+
 /-- How a loop is proved: a written unwind bound, an invariant/variant,
 or automatic unwinding within the proof search's existing budget.  An
 invariant's `brk` says the loop was lowered with a `break` flag
@@ -256,6 +280,8 @@ clauses, conjoined after `I`. -/
 inductive LoopAnn (C : Contract) (Γ : Ctx) where
   | unwind (k : Nat)
   | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint)) (brk : Bool) (qs : List (LoopQ C Γ))
+  | invLex {n : Nat} (I : Val C Γ .bool) (metrics : LoopMetrics C Γ (n + 2))
+      (brk : Bool) (qs : List (LoopQ C Γ))
   | auto
 
 /-- The two ways the same `whileUnwind` taclet takes another iteration. -/
@@ -541,6 +567,10 @@ def LoopQ.toStr : {Γ : Ctx} → List Var → LoopQ C Γ → String
   | _, ns, .imp a c => s!"{a.toStr ns true} -> {c.toStr ns true}"
   | _, ns, .all x p b => s!"\\forall {p.toStr} {x}; {LoopQ.toStr (x :: ns) b}"
 
+/-- The ranking tuple as written, with the components in priority order. -/
+def LoopMetrics.toStr {Γ : Ctx} {n : Nat} (ns : List Var) (metrics : LoopMetrics C Γ n) : String :=
+  "(" ++ String.intercalate ", " (metrics.toList.map (·.toStr ns true)) ++ ")"
+
 def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
   | .auto => ""
   | .unwind k => s!"/// @custom:key unwind {k} "
@@ -548,6 +578,10 @@ def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
     s!"/// @custom:key invariant {I.toStr ns true} " ++
       String.join (qs.map fun q => s!"/// @custom:key invariant {q.toStr ns} ") ++
       ((dec.map fun d => s!"/// @custom:key decreases {d.toStr ns true} ").getD "")
+  | .invLex I metrics _ qs =>
+    s!"/// @custom:key invariant {I.toStr ns true} " ++
+      String.join (qs.map fun q => s!"/// @custom:key invariant {q.toStr ns} ") ++
+      s!"/// @custom:key decreases {metrics.toStr ns} "
 
 /-- The arguments as written, in order. -/
 def Args.toStrs {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → List String
@@ -994,9 +1028,16 @@ def LoopQ.wk : {Γ Δ : Ctx} → Thin Γ Δ → LoopQ C Γ → LoopQ C Δ
   | _, _, h, .imp a c => .imp (a.wk h) (c.wk h)
   | _, _, h, .all x p b => .all x p (LoopQ.wk h.keep b)
 
+/-- Weaken each ranking expression without changing the tuple's length. -/
+def LoopMetrics.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {n : Nat} →
+    LoopMetrics C Γ n → LoopMetrics C Δ n
+  | _, .nil => .nil
+  | _, .cons head tail => .cons (head.wk h) (tail.wk h)
+
 def LoopAnn.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : LoopAnn C Γ → LoopAnn C Δ
   | .unwind k => .unwind k
   | .inv I dec brk qs => .inv (I.wk h) (dec.map (·.wk h)) brk (qs.map (·.wk h))
+  | .invLex I metrics brk qs => .invLex (I.wk h) (metrics.wk h) brk (qs.map (·.wk h))
   | .auto => .auto
 
 def Args.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {ps : Ctx} → Args C Γ ps → Args C Δ ps

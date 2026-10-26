@@ -628,6 +628,29 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
           w ← `(sol_stmt| /// @custom:key invariant \forall $(mkIdent (Name.mkSimple T)):ident
             $xi:ident; $b:sol_loop_inv $w:sol_stmt)
       clause "invariant" (← ppExprS ns I) w
+    | LoopAnn.invLex _ _ _ I metrics _ qs =>
+      let rec components (metrics : Expr) : MetaM (Option (Array Expr)) := do
+        match_expr (← whnf metrics) with
+        | LoopMetrics.nil _ _ => return some #[]
+        | LoopMetrics.cons _ _ _ head tail =>
+          let some rest ← components tail | return none
+          return some (#[head] ++ rest)
+        | _ => return none
+      let some metrics ← components metrics | escape
+      if metrics.size < 2 then escape
+      let first ← ppExprS ns metrics[0]!
+      let rest ← metrics[1:].toArray.mapM (ppExprS ns)
+      let mut w ← clause "decreases" (← `(sol_expr| ($first:sol_expr, $rest,*))) w
+      if let some qs ← listElems? qs then
+        for q in qs.reverse do
+          let_expr LoopQ.all _ _ x p b := (← whnf q) | return ← escape
+          let x := x.consumeMData
+          let some xi ← ppVar? x | return ← escape
+          let some T ← primName? p | return ← escape
+          let some b ← ppLoopQ (x :: ns) b | return ← escape
+          w ← `(sol_stmt| /// @custom:key invariant \forall $(mkIdent (Name.mkSimple T)):ident
+            $xi:ident; $b:sol_loop_inv $w:sol_stmt)
+      clause "invariant" (← ppExprS ns I) w
     | _ => escape
   | _ => escape
 
