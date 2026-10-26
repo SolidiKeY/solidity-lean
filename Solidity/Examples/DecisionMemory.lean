@@ -139,20 +139,46 @@ def memInnerAck : Fml Gaps [] := .allocAll (.user "s") UA
     (.all (.user "i") .uint (.imp (isT (eqB (.pvV .here) (litU 0)))
       (.eq (mrdG .dyn (.there .here) (.pvV .here)) (litU 5)))))
 
+/-! ### Writes in a leaf's update (feature 22)
+
+`{memory := write(memory, s[e], v)}` over fresh arrays: each read of the
+written local at an index `e₁` the table holds reads `e₁ == e ? v : w`
+afterwards, two locals name two objects (`MxRel.apart`), and the update
+halts exactly where a write's index is not below its bound or its value
+does not return (`mxGuard`, `MxW.guard_iff`): a box reads it as a premise, a
+diamond as a conjunct. -/
+
+/-- The update `{memory := write(memory, s[k], v)}`. -/
+def wrU {Γ : Ctx} (i : Idx Γ (.mem UA)) (k v : Nat) : Upd Gaps Γ Γ :=
+  .snoc .nil (.memory (.app3 .write (.app0 .memory) (.app2 (.mat .dyn) (.pvI i) (litU k))
+    (.app1 .mval (litU v))))
+
+/-- `∀ fresh s. len(s) > 0 → [s[0] := 5] s[0] == 6`: refuted. -/
+def memWriteBad : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (isT (gtB (mlenG .here) (litU 0)))
+    (.upd .box (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 6))))
+/-- `∀ fresh s. s[0] == 7 → [s[1] := 5] s[0] == 7`: proved (a write
+elsewhere keeps the element). -/
+def memWriteOther : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (.eq (mrdG .dyn .here (litU 0)) (litU 7))
+    (.upd .box (wrU .here 1 5) (.eq (mrdG .dyn .here (litU 0)) (litU 7))))
+/-- `∀ fresh s. ⟨s[0] := 5⟩ s[0] == 5`: refuted (an empty array halts the
+write). -/
+def memWriteDia : Fml Gaps [] := .allocAll (.user "s") UA
+  (.upd .diamond (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 5)))
+
 /-! ### Counterexamples to `DecisionTheorem` left with memory
 
 Each in `Fml.inTarget` (by the kernel) and answered `unknown`
-(`docs/automation.md`, M7, "What is not proved"): a write in a leaf's update
-(the cut takes no update), an index bound after its array (the reads' atoms
-stand at the binder), a hidden memory binder (it ranges over the objects
-already there, and over none), a fresh struct's member (the cut takes
-arrays of primitives). -/
+(`docs/automation.md`, M7, "What is not proved"): a negative-position block
+over an array's contents (its index bound after the array), a hidden memory
+binder (it ranges over the objects already there, and over none), a fresh
+struct's member (the cut takes arrays of primitives). -/
 
+/-- `∀ fresh s. len(s) > 0 → [s[0] := 5] s[0] == 5`: proved (feature 22). -/
 def gapMemWrite : Fml Gaps [] := .allocAll (.user "s") UA
   (.imp (isT (gtB (mlenG .here) (litU 0)))
-    (.upd .box (.snoc .nil (.memory (.app3 .write (.app0 .memory) (.app2 (.mat .dyn) (.pvI .here) (litU 0))
-        (.app1 .mval (litU 5)))))
-      (.eq (mrdG .dyn .here (litU 0)) (litU 5))))
+    (.upd .box (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 5))))
 def gapMemInner : Fml Gaps [] := .allocAll (.user "s") UA
   (.imp (isT (gtB (mlenG .here) (litU 0)))
     (.all (.user "i") .uint (.imp (isT (gtB (mlenG (.there .here)) (.pvV .here)))
@@ -178,9 +204,9 @@ theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kern
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
 theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
 
-/-- info: ["unknown", "unknown", "unknown", "unknown"] -/
+/-- info: ["unknown", "unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapMemWrite, verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
+#eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 
 /-! The index bound after its array, decided (feature 21). -/
 
@@ -191,5 +217,24 @@ theorem gapMemInner_covered : gapMemInner.Covered = true := by decide +kernel
 theorem memInnerAck_covered : memInnerAck.Covered = true := by decide +kernel
 theorem memInnerAck_inTarget : memInnerAck.inTarget {} = true := by decide +kernel
 theorem gapMemInner_answers : decideLeaf gapMemInner ≠ .unknown := decideLeaf_complete gapMemInner_covered
+
+/-! The writes in a leaf's update, decided (feature 22). -/
+
+/-- info: ["proved", "refuted", "proved", "refuted"] -/
+#guard_msgs in
+#eval [verdict gapMemWrite, verdict memWriteBad, verdict memWriteOther, verdict memWriteDia]
+
+theorem gapMemWrite_covered : gapMemWrite.Covered = true := by decide +kernel
+theorem memWriteBad_covered : memWriteBad.Covered = true := by decide +kernel
+theorem memWriteDia_covered : memWriteDia.Covered = true := by decide +kernel
+theorem memWriteBad_inTarget : memWriteBad.inTarget {} = true := by decide +kernel
+theorem gapMemWrite_answers : decideLeaf gapMemWrite ≠ .unknown := decideLeaf_complete gapMemWrite_covered
+
+/-- `decideLeaf_proved_iff`, applied: the verdict on the write is exact. -/
+theorem gapMemWrite_iff : decideLeaf gapMemWrite = .proved ↔ Fml.Valid gapMemWrite :=
+  decideLeaf_proved_iff gapMemWrite_covered
+
+/-- info: 'Solidity.Examples.Decision.gapMemWrite_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms gapMemWrite_iff
 
 end Solidity.Examples.Decision
