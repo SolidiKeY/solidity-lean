@@ -8,15 +8,64 @@ import {runSolidityTests,testsPassed} from './test-solidity.mjs';
 
 const source = 'tests/solc/LexMetrics.sol';
 
-test('tuple annotations preserve ordinary safety proofs and do not claim automatic termination', () => {
+test('tuple annotations preserve safety proofs and prove the supported ordinary diamond', () => {
   const report = runSolidityTests([source],{build:false,contract:'LexMetrics'});
   assert.deepEqual(report.errors,[]);
   const rows = new Map(report.results.map(row => [row.function,row]));
   for (const name of ['resetInner','triple','forScope','doWhileLoop','breakLoop','continueLoop','renamed','shadowed','nested','earlyReturn'])
     assert.equal(rows.get(name)?.status,'proved',`${name}: ${rows.get(name)?.reason}`);
-  assert.equal(rows.get('diamondStillOpen')?.status,'pending');
+  assert.equal(rows.get('diamondCountdown')?.status,'proved',rows.get('diamondCountdown')?.reason);
+  assert.equal(rows.get('diamondCountdown')?.reason,'');
   assert.equal(rows.get('callback')?.status,'proved');
-  assert.equal(testsPassed(report),false);
+  assert.equal(testsPassed(report),true);
+});
+
+const diamondSource = 'tests/solc/LexDiamond.sol';
+const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset'];
+const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','overflowMetric','reverting'];
+const conservativeDiamonds = ['breakDiamond','quantifiedDiamond','noFrameDiamond','callbackDiamond'];
+let diamondReport;
+function diamondRows() {
+  // Import the complete source matrix once. Every case must be retained,
+  // including the admitted obligations whose unsupported proof remains open.
+  diamondReport ??= runSolidityTests([diamondSource],{build:false,contract:'LexDiamond'});
+  assert.deepEqual(diamondReport.errors,[]);
+  const rows = new Map(diamondReport.results.map(row => [row.function,row]));
+  assert.equal(rows.size,provedDiamonds.length + invalidDiamonds.length + conservativeDiamonds.length);
+  assert.equal(diamondReport.results.length,rows.size);
+  return rows;
+}
+
+test('source tuple diamonds prove two- and three-component countdowns and upward inner resets', () => {
+  const rows = diamondRows();
+  for (const name of provedDiamonds) {
+    const row = rows.get(name);
+    assert.ok(row,`${name}: missing result`);
+    assert.equal(row.status,'proved',`${name}: ${row.reason}`);
+    assert.equal(row.reason,'',name);
+  }
+});
+
+test('invalid source tuple variants and unsuccessful bodies stay pending with explicit open goals', () => {
+  const rows = diamondRows();
+  for (const name of invalidDiamonds) {
+    const row = rows.get(name);
+    assert.ok(row,`${name}: missing result`);
+    assert.equal(row.status,'pending',`${name}: ${row.status}: ${row.reason}`);
+    assert.equal(row.reason,'open proof goals',name);
+  }
+  assert.equal(testsPassed(diamondReport),false);
+});
+
+test('unsupported source diamond loop shapes retain conservative pending verdicts', () => {
+  const rows = diamondRows();
+  for (const name of conservativeDiamonds) {
+    const row = rows.get(name);
+    assert.ok(row,`${name}: missing result`);
+    assert.equal(row.status,'pending',`${name}: ${row.status}: ${row.reason}`);
+    assert.equal(row.reason,'open proof goals',name);
+  }
+  assert.equal(testsPassed(diamondReport),false);
 });
 
 test('every malformed or effectful tuple component remains an explicit import gap', () => {

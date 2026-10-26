@@ -112,7 +112,7 @@ contract LexMetrics {
         return 0;
     }
 
-    function diamondStillOpen() public pure {
+    function diamondCountdown() public pure {
         uint n = 1;
         /// @custom:key invariant n <= 1
         /// @custom:key decreases (n, 0)
