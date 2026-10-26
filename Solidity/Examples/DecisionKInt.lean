@@ -1,7 +1,7 @@
 import Solidity.Examples.Decision
 
 /-!
-# Binders of KeY's `int` over two words (M7, feature 27)
+# Binders of KeY's `int` over two words (M7, feature 30)
 
 `decideKEnc` (`Calculus/Decision.lean`, `Calculus/KIntEncode.lean`) reads a
 binder of KeY's `int` whose comparisons read it against bounded terms over

@@ -2,7 +2,7 @@ import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.MemHoist
 
 /-!
-# Binders of KeY's `int` read over two words (M7, feature 27)
+# Binders of KeY's `int` read over two words (M7, feature 30)
 
 A binder of KeY's unbounded `int` (`Fml.bind _ _ .kint`) has no position in
 the leaf language (`LFml` binds a `PrimTy`'s values only), and feature 26
