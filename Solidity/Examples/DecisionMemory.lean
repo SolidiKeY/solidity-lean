@@ -125,6 +125,20 @@ theorem memAck_iff : decideLeaf memAck = .proved ↔ Fml.Valid memAck :=
 #guard_msgs in #print axioms memAck_iff
 
 
+/-! ### An index bound after its array (feature 21)
+
+`∀ fresh s. len(s) > 0 → ∀ i. i < len(s) → s[i] == 0` binds `i` after `s`.
+Universal value binders move out of consequents, conjuncts and fresh
+objects' binders at every state (`Fml.hoist`, `Calculus/MemHoist.lean`), so
+it is read as `∀ i. ∀ fresh s. …` and cut as the others: refuted (the
+contents are any).  With Ackermann's premise it holds. -/
+
+/-- `∀ fresh s. s[0] == 5 → ∀ i. i == 0 → s[i] == 5`: proved. -/
+def memInnerAck : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (.eq (mrdG .dyn .here (litU 0)) (litU 5))
+    (.all (.user "i") .uint (.imp (isT (eqB (.pvV .here) (litU 0)))
+      (.eq (mrdG .dyn (.there .here) (.pvV .here)) (litU 5)))))
+
 /-! ### Counterexamples to `DecisionTheorem` left with memory
 
 Each in `Fml.inTarget` (by the kernel) and answered `unknown`
@@ -150,6 +164,15 @@ def gapMemStruct : Fml StandardExample [] := .allocAll (.user "p") (.struct "Per
       (.app1 (.mfield (s := "Person") (f := "age") (T := .prim .uint) (by decide)) (.pvI .here)))
     (.app0 (.lit (uintOfNat 0))))
 
+/-- A negative-position block over a fresh array's contents (Bradley,
+Manna and Sipma over a memory array, its length in the index set): not
+moved out, so its index is bound after the array. -/
+def gapMemInnerNeg : Fml Gaps [] := .allocAll (.user "s") UA
+  (.imp (.all (.user "i") .uint (.imp (isT (gtB (mlenG (.there .here)) (.pvV .here)))
+      (.eq (mrdG .dyn (.there .here) (.pvV .here)) (litU 0))))
+    (.eq (mrdG .dyn .here (litU 0)) (litU 0)))
+
+theorem gapMemInnerNeg_inTarget : gapMemInnerNeg.inTarget {} = true := by decide +kernel
 theorem gapMemWrite_inTarget : gapMemWrite.inTarget {} = true := by decide +kernel
 theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kernel
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
@@ -157,6 +180,16 @@ theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +ke
 
 /-- info: ["unknown", "unknown", "unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapMemWrite, verdict gapMemInner, verdict gapMemParam, verdict gapMemStruct]
+#eval [verdict gapMemWrite, verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
+
+/-! The index bound after its array, decided (feature 21). -/
+
+/-- info: ["refuted", "proved"] -/
+#guard_msgs in #eval [verdict gapMemInner, verdict memInnerAck]
+
+theorem gapMemInner_covered : gapMemInner.Covered = true := by decide +kernel
+theorem memInnerAck_covered : memInnerAck.Covered = true := by decide +kernel
+theorem memInnerAck_inTarget : memInnerAck.inTarget {} = true := by decide +kernel
+theorem gapMemInner_answers : decideLeaf gapMemInner ≠ .unknown := decideLeaf_complete gapMemInner_covered
 
 end Solidity.Examples.Decision

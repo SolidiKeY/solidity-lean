@@ -3,7 +3,7 @@ import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.HashKinds
 import Solidity.Calculus.ArrayReduction
-import Solidity.Calculus.MemSwap
+import Solidity.Calculus.MemHoist
 
 /-!
 # The closer's decision, stated (M7)
@@ -276,7 +276,7 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
 /-- The leaf's fresh arrays cut, the cut leaf decided. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
-    match φ.mxTop with
+    match (φ.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
     | none => .unknown
   else .unknown
@@ -286,7 +286,7 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
   split at h
   · split at h
     · rename_i ψ hψ
-      exact (Fml.mxTop_valid hψ).2 (decideLeafA_sound h)
+      exact fun σ => (Fml.hoist_holds 1024 φ σ).1 ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ)
     · cases h
   · cases h
 
@@ -296,7 +296,7 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
   split at h
   · split at h
     · rename_i ψ hψ
-      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 hφ)
+      exact fun hφ => decideLeafA_refutes h ((Fml.mxTop_holds hψ σ).1 ((Fml.hoist_holds 1024 φ σ).2 hφ))
     · cases h
   · cases h
 
@@ -329,7 +329,7 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
 /-- **The fragment with fresh arrays**: the leaf binds one, its cut is
 defined and in `Fml.CoveredA`. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
-  φ.hasAllocAll && match φ.mxTop with
+  φ.hasAllocAll && match (φ.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
     | none => false
 

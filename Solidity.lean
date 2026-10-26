@@ -468,6 +468,7 @@ import Solidity.Calculus.HashRelabel
 import Solidity.Calculus.HashComplete
 import Solidity.Calculus.HashKinds
 import Solidity.Calculus.MemSwap
+import Solidity.Calculus.MemHoist
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
