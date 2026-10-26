@@ -254,6 +254,40 @@ def namesThreeKindsBad : Fml Names [] :=
 
 theorem namesThreeKindsBad_covered : namesThreeKindsBad.hashCovered = true := by decide +kernel
 
+/-! #### Strings of the second kind the first does not hash
+
+The decision links a pair of strings' extra words only where the premise
+reads both strings' hashes of the first kind (`Fml.tkKeep`); a string the
+first kind hashes nowhere is linked to none (M7, feature 29).  Its swapped
+word is then read nowhere, and a refutation is moved, each such word set to
+follow its extra word's class, before the relabeling (`Fml.tk_complete_move`,
+`Calculus/HashMove.lean`). -/
+
+abbrev Γ4 : Ctx := [.mem Str, .mem Str, .mem Str, .mem Str]
+def h4 (k : HashKind) (i : Idx Γ4 (.mem Str)) : Tm Names Γ4 (.val .uint) :=
+  .app2 (.hash k) (.app0 .memory) (.pvI i)
+def strings4 (φ : Fml Names Γ4) : Fml Names [] :=
+  .allocAll (.user "a") Str (.allocAll (.user "b") Str (.allocAll (.user "c") Str (.allocAll (.user "d") Str φ)))
+/-- `d`, `c`, `b`, `a`, innermost first. -/
+def sD : Idx Γ4 (.mem Str) := .here
+def sC : Idx Γ4 (.mem Str) := .there .here
+def sB : Idx Γ4 (.mem Str) := .there (.there .here)
+def sA : Idx Γ4 (.mem Str) := .there (.there (.there .here))
+/-- **`keccak256(d) == keccak256(c) → sha256(b) == sha256(d) → sha256(b) ==
+sha256(c)`**: `c`, `d` linked, `b` hashed by `sha256` only: proved. -/
+def mixedSome : Fml Names [] :=
+  strings4 (.imp (.eq (h4 .keccak sD) (h4 .keccak sC)) (.imp (.eq (h4 .sha256 sB) (h4 .sha256 sD))
+    (.eq (h4 .sha256 sB) (h4 .sha256 sC))))
+/-- With `!=` last, refuted by one string three times. -/
+def mixedSomeBad : Fml Names [] :=
+  strings4 (.imp (.eq (h4 .keccak sD) (h4 .keccak sC)) (.imp (.eq (h4 .sha256 sB) (h4 .sha256 sD))
+    (.not (.eq (h4 .sha256 sB) (h4 .sha256 sC)))))
+
+/-- info: ["proved", "refuted"] -/
+#guard_msgs in #eval [mixedSome, mixedSomeBad].map verdict
+
+theorem mixedSome_covered : mixedSome.hashCovered = true := by decide +kernel
+
 end Hashes
 
 /-! ### Two kinds as keys

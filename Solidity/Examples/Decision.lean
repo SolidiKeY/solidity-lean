@@ -635,7 +635,7 @@ def addmodZero : Fml Gaps [] := allU (isT (.app2 (.binop .eqB rfl) (.app3 (.modu
 
 end GapTerms
 
-/-! ### Hashes outside `Fml.hashCovered` (two of them inside since features 27 and 28) -/
+/-! ### Hashes outside `Fml.hashCovered` (three of them inside since features 27 to 29) -/
 
 section GapHashes
 
@@ -656,7 +656,9 @@ def gapMixedKinds : Fml Names2 [] :=
 /-- Two kinds each hashing two strings, no string hashed by both:
 `keccak256(a) == keccak256(b) → sha256(c) == sha256(d)`.  In either order
 the second kind's strings have no word of the first to link with, and
-there are two of them (feature 27 takes one). -/
+there are two of them (feature 27 takes one).  A counterexample once,
+decided since feature 29 (the unlinked words moved, `Fml.tk_complete_move`,
+below). -/
 def gapMixedPairs : Fml Names [] :=
   let Γ4 : Ctx := [.mem Str, .mem Str, .mem Str, .mem Str]
   let h4 (k : HashKind) (i : Idx Γ4 (.mem Str)) : Tm Names Γ4 (.val .uint) :=
@@ -926,14 +928,15 @@ theorem gapIntAnd_answers : decideLeaf gapIntAnd ≠ .unknown := decideLeaf_comp
 theorem gapIntAnd_iff : decideLeaf gapIntAnd = .proved ↔ Fml.Valid gapIntAnd :=
   decideLeaf_proved_iff gapIntAnd_covered
 
-/-- info: ["unknown", "unknown", "unknown"] -/
+/-- info: ["unknown", "unknown"] -/
 #guard_msgs in
-#eval [verdict gapMixedPairs, verdict gapWrittenMemory, verdict gapHashNegForall]
+#eval [verdict gapWrittenMemory, verdict gapHashNegForall]
 
-/-! Three kinds (feature 28, `Fml.tk3`) and a second kind hashing one string
-with no hash of the first (feature 27): both former counterexamples
-covered, by the kernel, so answered; `gapThreeKinds` proved,
-`gapMixedKinds` refuted (their variants in `Examples/DecisionHashes.lean`). -/
+/-! Three kinds (feature 28, `Fml.tk3`), a second kind hashing one string
+with no hash of the first (feature 27) and several such strings (feature
+29): the former counterexamples covered, by the kernel, so answered;
+`gapThreeKinds` proved, `gapMixedKinds` and `gapMixedPairs` refuted (their
+variants in `Examples/DecisionHashes.lean`). -/
 
 theorem gapThreeKinds_covered : gapThreeKinds.hashCovered = true := by decide +kernel
 theorem gapMixedKinds_covered : gapMixedKinds.hashCovered = true := by decide +kernel
@@ -941,10 +944,13 @@ theorem gapThreeKinds_answers : decideGoal gapThreeKinds ≠ .unknown :=
   decideGoal_complete_hash gapThreeKinds_covered
 theorem gapMixedKinds_answers : decideGoal gapMixedKinds ≠ .unknown :=
   decideGoal_complete_hash gapMixedKinds_covered
+theorem gapMixedPairs_covered : gapMixedPairs.hashCovered = true := by decide +kernel
+theorem gapMixedPairs_answers : decideGoal gapMixedPairs ≠ .unknown :=
+  decideGoal_complete_hash gapMixedPairs_covered
 
-/-- info: ["proved", "refuted"] -/
+/-- info: ["proved", "refuted", "refuted"] -/
 #guard_msgs in
-#eval [verdict gapThreeKinds, verdict gapMixedKinds]
+#eval [verdict gapThreeKinds, verdict gapMixedKinds, verdict gapMixedPairs]
 
 /-! ### Storage arrays at symbolic indices (M7, plan step 6)
 

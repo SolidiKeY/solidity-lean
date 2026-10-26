@@ -15,8 +15,9 @@ the premise per kind written as the link of the two kinds' words
 premise reads them if the update lands (`Fml.HashIn`); each is hashed by
 the first kind where the premise always reads it, outside every update's
 continuation (`Fml.topLevels`), unless it is the only one (no pair to
-link).  The result has hashes of the first kind
-only, which the one-kind swap reads:
+link, M7 feature 27) or the first kind hashes it nowhere (linked to none,
+`Fml.tkKeep`, feature 29).  The result has hashes of the first kind only,
+which the one-kind swap reads:
 
 * **valid** (`Fml.tk_validH`): a valid reading of the result is valid
   under the leaf's premise: each extra word is its string's hash where the
@@ -28,7 +29,9 @@ only, which the one-kind swap reads:
   (`fixE`, `famPairE`, a family of `N` strings checked for every kind,
   `famOKAll`), refuted, refutes the leaf in the state with the family's
   strings;
-* **complete** (`Fml.tk_complete`): on the fragment (the result's swap in
+* **complete** (`Fml.tk_complete`, for the reading with every pair
+  linked, `full`; `Calculus/HashMove.lean` moves a refutation of the
+  decision's reading to one of it): on the fragment (the result's swap in
   `Fml.rl` over the strings' levels and the roots their words key, those
   roots `mapping(uint => uint)` (`KTyped`), the prefix's string levels the
   words' (`Fml.prefixOK`), the second kind's words in `Fml.rl` of their
@@ -1022,16 +1025,18 @@ def pairsFin (m : Nat) : List (Fin m × Fin m) :=
     if a < b then some (a, b) else none
 
 /-- **The premise per kind, linked**, past the new binders: for each pair
-of the strings `L` names, their hashes of the first kind are equal exactly
-where their extra words are. -/
-def linkE (k₁ : HashKind) {Γ : Ctx} (L : List Nat) :
+of the strings `L` names that `keep` keeps (by default every pair), their
+hashes of the first kind are equal exactly where their extra words are. -/
+def linkE (k₁ : HashKind) {Γ : Ctx} (L : List Nat) (keep : Nat → Bool := fun _ => true) :
     List (Fml C (List.replicate L.length (.val .uint) ++ Γ)) :=
   (pairsFin L.length).filterMap fun p =>
-    match strAt (Γ := Γ) L p.1, strAt (Γ := Γ) L p.2 with
-    | some ⟨_, i⟩, some ⟨_, j⟩ =>
-      some (Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
-        (.eq (.pvV (topIdx L.length p.1)) (.pvV (topIdx L.length p.2))))
-    | _, _ => none
+    if keep L[p.1] && keep L[p.2] then
+      match strAt (Γ := Γ) L p.1, strAt (Γ := Γ) L p.2 with
+      | some ⟨_, i⟩, some ⟨_, j⟩ =>
+        some (Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
+          (.eq (.pvV (topIdx L.length p.1)) (.pvV (topIdx L.length p.2))))
+      | _, _ => none
+    else none
 
 /-- `k₁(s) == famHash k₁ j ∧ e == famHash k₂ j`, for some `j`: the string
 and its extra word one of the family's. -/
@@ -1149,36 +1154,49 @@ def _root_.Solidity.Fml.memNodes : {Γ : Ctx} → Fml C Γ → Bool
   | _, .upd _ U φ => U.memNodes1 && φ.memNodes
   | _, _ => false
 
+/-- **The strings the link keeps**: every one (`full`, a reading only the
+completeness proof takes), or those the first kind hashes where the
+premise always reads them.  A string of the second kind the first kind
+hashes nowhere has a word read only where its extra word is (M7, feature
+29). -/
+def _root_.Solidity.Fml.tkKeep (k₁ : HashKind) {Γ : Ctx} (ψ : Fml C Γ) (full : Bool) : Nat → Bool :=
+  if full then fun _ => true else fun l => (ψ.topLevels k₁).contains l
+
 /-- **The body with the second kind's words**: the strings `k₂` hashes
 (`L`, at least one; anywhere, past the updates too: the premise reads a
 hash in an update's continuation where the update lands), each hashed by
 `k₁` where the premise always reads it (outside every continuation,
 `Fml.topLevels`) when there are two or more to link (one string has no
-pair: M7 feature 27); `m` new binders, the link of the two kinds (`linkE`;
+pair: M7 feature 27), or hashed by it nowhere, its word then linked to none
+(`Fml.tkKeep`, feature 29); `m` new binders, the link of the two kinds
+(the pairs `Fml.tkKeep` keeps, every pair where `full`, `linkE`;
 and, for an instance, `fixE`) assumed, the body read past them with each
 node of kind `k₂` its word. -/
-def _root_.Solidity.Fml.tkBody (k₁ k₂ : HashKind) (N : Nat) (fix : Bool) {Γ : Ctx} (ψ : Fml C Γ) :
-    Option (Fml C Γ) :=
+def _root_.Solidity.Fml.tkBody (k₁ k₂ : HashKind) (N : Nat) (fix : Bool) (full : Bool := false) {Γ : Ctx}
+    (ψ : Fml C Γ) : Option (Fml C Γ) :=
   let L := (ψ.hLevels k₂).eraseDups
   if ψ.memNodes && !L.isEmpty && decide (L.length * (L.length + 1) < 2 ^ 256) &&
-      L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (decide (L.length ≤ 1) || (ψ.topLevels k₁).contains l)) then
+      L.all (fun l => (Idx.memAtLevel? Γ l).isSome && (decide (L.length ≤ 1) ||
+        (ψ.topLevels k₁).contains l || !(ψ.hLevels k₁).contains l)) then
     (ψ.xk k₂ (XMap.extras L Γ)).map fun ψ₂ =>
       Fml.allN (.user "e") L.length
-        (.imp (Fml.conjL (if fix then fixE k₁ k₂ N L else [])) (.imp (Fml.conjL (linkE k₁ L)) ψ₂))
+        (.imp (Fml.conjL (if fix then fixE k₁ k₂ N L else []))
+          (.imp (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ full))) ψ₂))
   else none
 
 /-- **The leaf with the second kind's words** (`Fml.tkBody`) past its
 prefix of `∀` and fresh strings. -/
-def _root_.Solidity.Fml.tk (k₁ k₂ : HashKind) (N : Nat) (fix : Bool) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
-  | _, .all x p φ => (Fml.tk k₁ k₂ N fix φ).map (.all x p)
-  | _, .allocAll x R φ => (Fml.tk k₁ k₂ N fix φ).map (.allocAll x R)
-  | _, .tt => Fml.tkBody k₁ k₂ N fix .tt
-  | _, .eq a b => Fml.tkBody k₁ k₂ N fix (.eq a b)
-  | _, .wellFormed s => Fml.tkBody k₁ k₂ N fix (.wellFormed s)
-  | _, .not φ => Fml.tkBody k₁ k₂ N fix (.not φ)
-  | _, .and φ ψ => Fml.tkBody k₁ k₂ N fix (.and φ ψ)
-  | _, .imp φ ψ => Fml.tkBody k₁ k₂ N fix (.imp φ ψ)
-  | _, .upd m U φ => Fml.tkBody k₁ k₂ N fix (.upd m U φ)
+def _root_.Solidity.Fml.tk (k₁ k₂ : HashKind) (N : Nat) (fix : Bool) (full : Bool := false) :
+    {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
+  | _, .all x p φ => (Fml.tk k₁ k₂ N fix full φ).map (.all x p)
+  | _, .allocAll x R φ => (Fml.tk k₁ k₂ N fix full φ).map (.allocAll x R)
+  | _, .tt => Fml.tkBody k₁ k₂ N fix full .tt
+  | _, .eq a b => Fml.tkBody k₁ k₂ N fix full (.eq a b)
+  | _, .wellFormed s => Fml.tkBody k₁ k₂ N fix full (.wellFormed s)
+  | _, .not φ => Fml.tkBody k₁ k₂ N fix full (.not φ)
+  | _, .and φ ψ => Fml.tkBody k₁ k₂ N fix full (.and φ ψ)
+  | _, .imp φ ψ => Fml.tkBody k₁ k₂ N fix full (.imp φ ψ)
+  | _, .upd m U φ => Fml.tkBody k₁ k₂ N fix full (.upd m U φ)
   | _, .modal .. | _, .havoc _ | _, .bind .. | _, .anon .. | _, .grow _ => none
 
 /-! ## Facts of the strings' hash nodes -/
@@ -1389,26 +1407,69 @@ theorem pairsFin_mem {m : Nat} {a b : Fin m} (h : a < b) : (a, b) ∈ pairsFin m
   simp only [pairsFin, List.mem_flatMap, List.mem_filterMap]
   exact ⟨a, mem_finRange' a, b, mem_finRange' b, by rw [if_pos h]⟩
 
-theorem mem_linkE {k₁ : HashKind} {L : List Nat} {f : Fml C (List.replicate L.length (.val .uint) ++ Γ)}
-    (h : f ∈ linkE k₁ (Γ := Γ) L) : ∃ (a b : Fin L.length), a < b ∧ ∃ (R₁ R₂ : RefTy)
+theorem mem_linkE' {k₁ : HashKind} {L : List Nat} {keep : Nat → Bool}
+    {f : Fml C (List.replicate L.length (.val .uint) ++ Γ)}
+    (h : f ∈ linkE k₁ (Γ := Γ) L keep) : ∃ (a b : Fin L.length), a < b ∧ keep L[a] = true ∧
+      keep L[b] = true ∧ ∃ (R₁ R₂ : RefTy)
       (i : Idx Γ (.mem R₁)) (j : Idx Γ (.mem R₂)), strAt L a = some ⟨R₁, i⟩ ∧ strAt L b = some ⟨R₂, j⟩ ∧
       f = Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
         (.eq (.pvV (topIdx L.length a)) (.pvV (topIdx L.length b))) := by
   simp only [linkE, List.mem_filterMap] at h
   obtain ⟨⟨a, b⟩, hp, hf⟩ := h
   split at hf
-  · rename_i R₁ i R₂ j ha hb
-    cases hf
-    exact ⟨a, b, mem_pairsFin hp, R₁, R₂, i, j, ha, hb, rfl⟩
+  · rename_i hk
+    simp only [Bool.and_eq_true] at hk
+    split at hf
+    · rename_i R₁ i R₂ j ha hb
+      cases hf
+      exact ⟨a, b, mem_pairsFin hp, hk.1, hk.2, R₁, R₂, i, j, ha, hb, rfl⟩
+    · cases hf
   · cases hf
+
+theorem mem_linkE {k₁ : HashKind} {L : List Nat} {f : Fml C (List.replicate L.length (.val .uint) ++ Γ)}
+    (h : f ∈ linkE k₁ (Γ := Γ) L) : ∃ (a b : Fin L.length), a < b ∧ ∃ (R₁ R₂ : RefTy)
+      (i : Idx Γ (.mem R₁)) (j : Idx Γ (.mem R₂)), strAt L a = some ⟨R₁, i⟩ ∧ strAt L b = some ⟨R₂, j⟩ ∧
+      f = Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
+        (.eq (.pvV (topIdx L.length a)) (.pvV (topIdx L.length b))) := by
+  obtain ⟨a, b, hab, -, -, rest⟩ := mem_linkE' h
+  exact ⟨a, b, hab, rest⟩
+
+theorem linkE_mem' {k₁ : HashKind} {L : List Nat} {keep : Nat → Bool} {a b : Fin L.length} (hab : a < b)
+    (hka : keep L[a] = true) (hkb : keep L[b] = true) {R₁ R₂ : RefTy}
+    {i : Idx Γ (.mem R₁)} {j : Idx Γ (.mem R₂)} (ha : strAt L a = some ⟨R₁, i⟩)
+    (hb : strAt L b = some ⟨R₂, j⟩) :
+    Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
+      (.eq (.pvV (topIdx L.length a)) (.pvV (topIdx L.length b))) ∈
+        linkE k₁ (C := C) (Γ := Γ) L keep := by
+  simp only [linkE, List.mem_filterMap]
+  exact ⟨(a, b), pairsFin_mem hab, by simp only [hka, hkb, Bool.and_self, ↓reduceIte, ha, hb]⟩
 
 theorem linkE_mem {k₁ : HashKind} {L : List Nat} {a b : Fin L.length} (hab : a < b) {R₁ R₂ : RefTy}
     {i : Idx Γ (.mem R₁)} {j : Idx Γ (.mem R₂)} (ha : strAt L a = some ⟨R₁, i⟩)
     (hb : strAt L b = some ⟨R₂, j⟩) :
     Fml.iffF (.eq (hnode k₁ (i.wk (Thin.dropN L.length))) (hnode k₁ (j.wk (Thin.dropN L.length))))
-      (.eq (.pvV (topIdx L.length a)) (.pvV (topIdx L.length b))) ∈ linkE k₁ (C := C) (Γ := Γ) L := by
-  simp only [linkE, List.mem_filterMap]
-  exact ⟨(a, b), pairsFin_mem hab, by simp only [ha, hb]⟩
+      (.eq (.pvV (topIdx L.length a)) (.pvV (topIdx L.length b))) ∈ linkE k₁ (C := C) (Γ := Γ) L :=
+  linkE_mem' hab rfl rfl ha hb
+
+theorem filterMap_congr' {α β : Type} {f g : α → Option β} :
+    (l : List α) → (∀ x ∈ l, f x = g x) → l.filterMap f = l.filterMap g
+  | [], _ => rfl
+  | a :: l, h => by
+    rw [List.filterMap_cons, List.filterMap_cons, h a List.mem_cons_self,
+      filterMap_congr' l fun x hx => h x (List.mem_cons_of_mem _ hx)]
+
+/-- Where `keep` keeps every string, or there is no pair, the link is the
+whole link. -/
+theorem linkE_keep_eq {k₁ : HashKind} {L : List Nat} {keep : Nat → Bool}
+    (h : L.length ≤ 1 ∨ ∀ l ∈ L, keep l = true) : linkE k₁ (C := C) (Γ := Γ) L keep = linkE k₁ L := by
+  unfold linkE
+  refine filterMap_congr' _ fun p hp => ?_
+  have hlt := mem_pairsFin hp
+  rcases h with h | h
+  · have := p.2.2; have : p.1.val < p.2.val := hlt; omega
+  · have h1 : keep L[p.1] = true := h _ (List.getElem_mem _)
+    have h2 : keep L[p.2] = true := h _ (List.getElem_mem _)
+    simp only [h1, h2]
 
 theorem mem_fixE {k₁ k₂ : HashKind} {L : List Nat} {f : Fml C (List.replicate L.length (.val .uint) ++ Γ)}
     (h : f ∈ fixE k₁ k₂ N (Γ := Γ) L) : ∃ (d : Fin L.length) (R : RefTy) (i : Idx Γ (.mem R)),
@@ -1551,10 +1612,11 @@ theorem _root_.Solidity.Fml.pure_conjL {Γ : Ctx} : (fs : List (Fml C Γ)) → (
     simp only [Fml.conjL, Fml.pureB, Bool.and_eq_true]
     exact ⟨h f List.mem_cons_self, Fml.pure_conjL fs fun g hg => h g (List.mem_cons_of_mem _ hg)⟩
 
-theorem _root_.Solidity.Fml.pure_conjL_linkE {Γ : Ctx} (k₁ : HashKind) (L : List Nat) :
-    (Fml.conjL (linkE k₁ (C := C) (Γ := Γ) L)).pureB = true :=
+theorem _root_.Solidity.Fml.pure_conjL_linkE {Γ : Ctx} (k₁ : HashKind) (L : List Nat)
+    (keep : Nat → Bool := fun _ => true) :
+    (Fml.conjL (linkE k₁ (C := C) (Γ := Γ) L keep)).pureB = true :=
   Fml.pure_conjL _ fun f hf => by
-    obtain ⟨a, b, -, R₁, R₂, i, j, -, -, rfl⟩ := mem_linkE hf
+    obtain ⟨a, b, -, -, -, R₁, R₂, i, j, -, -, rfl⟩ := mem_linkE' hf
     rfl
 
 theorem _root_.Solidity.Fml.pure_conjL_fixE {Γ : Ctx} (k₁ k₂ : HashKind) (L : List Nat) :
@@ -1726,6 +1788,21 @@ theorem linkChoice {n : Nat} (hn : n * (n + 1) < 2 ^ 256) (w r : Fin n → PrimT
         have := fresh_inj _ _ h
         rw [← hrep_w a, ← hrep_w c, this]
 
+/-- **`linkChoice` on the strings `P` keeps**: the other words are the
+second kind's. -/
+theorem linkChoiceP {n : Nat} (hn : n * (n + 1) < 2 ^ 256) (w r : Fin n → PrimTy.uint.Denote)
+    (P Q : Fin n → Prop) (hQ : ∀ a b, P a → P b → Q a → Q b → (w a = w b ↔ r a = r b)) :
+    ∃ e : Fin n → PrimTy.uint.Denote, (∀ a, Q a → e a = r a) ∧
+      ∀ a b, P a → P b → (w a = w b ↔ e a = e b) := by
+  classical
+  obtain ⟨e', h1, h2⟩ := linkChoice hn w r (fun a => P a ∧ Q a)
+    (fun a b ha hb => hQ a b ha.1 hb.1 ha.2 hb.2)
+  refine ⟨fun a => if P a then e' a else r a, fun a ha => ?_, fun a b hpa hpb => ?_⟩
+  · by_cases hp : P a
+    · simp only [hp, ↓reduceIte]; exact h1 a ⟨hp, ha⟩
+    · simp only [hp, ↓reduceIte]
+  · simp only [hpa, hpb, ↓reduceIte]; exact h2 a b
+
 /-- **The body with the second kind's words is sound**: where its reading
 under the premise holds, the body holds under the body's premise.  The
 extra words are the strings' hashes of the second kind where the premise
@@ -1743,13 +1820,11 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
     simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq, List.all_eq_true,
       List.contains_iff_mem] at hcov
     obtain ⟨⟨_, hbound⟩, hcov'⟩ := hcov
-    -- past one string, the strings `L` names are hashed by the first kind where the premise
-    -- always reads them
-    have hnodeIn : 1 < L.length → ∀ {R : RefTy} (i : Idx Γ (.mem R)), i.level ∈ L → ∀ id,
+    -- the strings the link keeps are hashed by the first kind where the premise always reads them
+    have hnodeIn : ∀ {R : RefTy} (i : Idx Γ (.mem R)), i.level ∈ Fml.topLevels k₁ ψ → ∀ id,
           τ.getV i = some id →
           Fml.HashIn k₁ (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId k₁ R id) τ ψ := by
-      intro h2 R i hl id hv
-      have htop : i.level ∈ Fml.topLevels k₁ ψ := (hcov' _ hl).2.resolve_left (by omega)
+      intro R i htop id hv
       obtain ⟨R', i', hl', hin⟩ := Fml.topLevels_hashIn τ k₁ ψ htop
       have he := mem_level_eq hl'
       cases he
@@ -1768,11 +1843,11 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
     let Qd : Fin L.length → Prop := fun d => ∀ (R : RefTy) (i : Idx Γ (.mem R)) (id : Nat),
       i.level = L[d] → τ.getV i = some id →
         Fml.HashIn k₂ (τ.glob.memT.hashInput R id) (τ.glob.memT.hashId k₂ R id) τ ψ
-    have hQd : ∀ a b, Qd a → Qd b → (esOf k₁ L τ a = esOf k₁ L τ b ↔ esOf k₂ L τ a = esOf k₂ L τ b) := by
-      intro a b ha hb
-      by_cases hab : a = b
-      · subst hab
-        exact ⟨fun _ => rfl, fun _ => rfl⟩
+    -- the strings the link keeps
+    let P : Fin L.length → Prop := fun d => L[d] ∈ Fml.topLevels k₁ ψ
+    have hQd : ∀ a b, P a → P b → Qd a → Qd b →
+        (esOf k₁ L τ a = esOf k₁ L τ b ↔ esOf k₂ L τ a = esOf k₂ L τ b) := by
+      intro a b hpa hpb ha hb
       obtain ⟨R₁, i, idi, hli, hvi⟩ := hstrAt a
       obtain ⟨R₂, j, idj, hlj, hvj⟩ := hstrAt b
       obtain ⟨_, hvi₁, he₁a⟩ := esOf_spec k₁ L τ hstr a i hli
@@ -1782,22 +1857,18 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
       rw [hvi] at hvi₁ hvi₂; cases hvi₁; cases hvi₂
       rw [hvj] at hvj₁ hvj₂; cases hvj₁; cases hvj₂
       rw [he₁a, he₁b, he₂a, he₂b]
-      have hla : i.level ∈ L := by rw [hli]; exact List.getElem_mem _
-      have hlb : j.level ∈ L := by rw [hlj]; exact List.getElem_mem _
-      have h2L : 1 < L.length := by
-        have := a.2; have := b.2
-        have : a.val ≠ b.val := fun h => hab (Fin.ext h)
-        omega
+      have hla : i.level ∈ Fml.topLevels k₁ ψ := by rw [hli]; exact hpa
+      have hlb : j.level ∈ Fml.topLevels k₁ ψ := by rw [hlj]; exact hpb
       constructor
       · intro hw
-        have h2 := hnodeIn h2L j hlb idj hvj
+        have h2 := hnodeIn j hlb idj hvj
         rw [← hw] at h2
-        exact Grown.hashId_of_input _ k₂ (hf k₁ hk₁ _ _ _ (hnodeIn h2L i hla idi hvi) h2)
+        exact Grown.hashId_of_input _ k₂ (hf k₁ hk₁ _ _ _ (hnodeIn i hla idi hvi) h2)
       · intro hw
         have h2 := hb R₂ j idj hlj hvj
         rw [← hw] at h2
         exact Grown.hashId_of_input _ k₁ (hf k₂ hk₂ _ _ _ (ha R₁ i idi hli hvi) h2)
-    obtain ⟨es, hes₁, hes₂⟩ := linkChoice hbound (esOf k₁ L τ) (esOf k₂ L τ) Qd hQd
+    obtain ⟨es, hes₁, hes₂⟩ := linkChoiceP hbound (esOf k₁ L τ) (esOf k₂ L τ) P Qd hQd
     let Q : Option (List Nat) → PrimTy.uint.Denote → Prop := fun inp out => Fml.HashIn k₂ inp out τ ψ
     -- the extra words are the second kind's hashes where the premise reads them
     have hX : XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es τ.env) Q := by
@@ -1828,36 +1899,41 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
     have hBin : ∀ (es' : Fin L.length → PrimTy.uint.Denote),
         XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) Q → ∀ {k inp out},
           Fml.HashIn k inp out (τ.withEnv (envOf L.length es' τ.env))
-            (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) ψ₂)) → Fml.HashIn k inp out τ ψ := by
+            (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ false))) ψ₂)) → Fml.HashIn k inp out τ ψ := by
       intro es' hX' k inp out hi
       rw [← lift_dropN] at hi
       rcases hi with hi | hi | hi
       · exact hi.elim
       · obtain ⟨f, hf', hi⟩ := hashIn_conjL _ _ hi
-        obtain ⟨a, b, hab, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE hf'
-        have h2L : 1 < L.length := by have := b.2; have : a.val < b.val := hab; omega
+        obtain ⟨a, b, -, hka, hkb, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE' hf'
+        have hta : i.level ∈ Fml.topLevels k₁ ψ := by
+          rw [Idx.memAtLevel?_level ha]
+          simpa only [Fml.tkKeep, Bool.false_eq_true, ↓reduceIte, List.contains_iff_mem] using hka
+        have htb : j.level ∈ Fml.topLevels k₁ ψ := by
+          rw [Idx.memAtLevel?_level hb]
+          simpa only [Fml.tkKeep, Bool.false_eq_true, ↓reduceIte, List.contains_iff_mem] using hkb
         rcases hi with ((h | h) | (h | h)) | ((h | h) | (h | h))
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ i h
-          exact hnodeIn h2L i (strL a ha) id hv
+          exact hnodeIn i hta id hv
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ j h
-          exact hnodeIn h2L j (strL b hb) id hv
+          exact hnodeIn j htb id hv
         · exact h.elim
         · exact h.elim
         · exact h.elim
         · exact h.elim
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ i h
-          exact hnodeIn h2L i (strL a ha) id hv
+          exact hnodeIn i hta id hv
         · rw [hnode_wk_hashIn] at h
           obtain ⟨rfl, id, hv, rfl, rfl⟩ := hnode_hashIn τ _ j h
-          exact hnodeIn h2L j (strL b hb) id hv
+          exact hnodeIn j htb id hv
       · exact Fml.xk_hashIn _ hψ₂ τ _ hX' (fun _ _ hi => hi) hi
     have hfreeB : ∀ (es' : Fin L.length → PrimTy.uint.Denote),
         XRelQ k₂ (XMap.extras L Γ) τ (envOf L.length es' τ.env) Q →
           Fml.HashFree (τ.withEnv (envOf L.length es' τ.env))
-            (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) ψ₂)) :=
+            (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ false))) ψ₂)) :=
       fun es' hX' k hk i₁ i₂ out h₁ h₂ => hf k hk i₁ i₂ out (hBin es' hX' h₁) (hBin es' hX' h₂)
     have hHf := hashFree_allN (.user "e") L.length _ τ fun es' hm =>
       hfreeB es' (xrel_extras_nil k₂ hm τ _ Q)
@@ -1866,9 +1942,13 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
     rw [Fml.holdsS_of_xk ψ hψ' τ]
     -- the link holds at the chosen words
     have hlink : holds (τ.lift (Thin.dropN L.length) (envOf L.length es τ.env))
-        (Fml.conjL (linkE k₁ L)) := by
+        (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ false))) := by
       refine (holds_conjL _ _).2 fun f hf' => ?_
-      obtain ⟨a, b, -, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE hf'
+      obtain ⟨a, b, -, hka, hkb, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE' hf'
+      have hpa : P a := by
+        simpa only [Fml.tkKeep, Bool.false_eq_true, ↓reduceIte, List.contains_iff_mem] using hka
+      have hpb : P b := by
+        simpa only [Fml.tkKeep, Bool.false_eq_true, ↓reduceIte, List.contains_iff_mem] using hkb
       obtain ⟨idi, hvi⟩ := Option.isSome_iff_exists.1 (hstr i)
       obtain ⟨idj, hvj⟩ := Option.isSome_iff_exists.1 (hstr j)
       obtain ⟨idi', hvi', hei⟩ := esOf_spec k₁ L τ hstr a i (Idx.memAtLevel?_level ha)
@@ -1879,9 +1959,9 @@ theorem _root_.Solidity.Fml.tkBody_sound {k₁ k₂ : HashKind} (hk₁ : k₁ �
       rw [holds_eq, holds_eq, hnode_wk_denote, hnode_wk_denote, hnode_denote τ k₁ i hvi,
         hnode_denote τ k₁ j hvj, topIdx_denote, topIdx_denote, ← hei, ← hej, Option.some.injEq,
         Option.some.injEq]
-      exact ⟨(hes₂ a b).1, (hes₂ a b).2⟩
+      exact ⟨(hes₂ a b hpa hpb).1, (hes₂ a b hpa hpb).2⟩
     rw [← lift_dropN] at hS
-    have h3 := hS trivial ((Fml.holdsS_pure _ (Fml.pure_conjL_linkE k₁ L) _).2 hlink)
+    have h3 := hS trivial ((Fml.holdsS_pure _ (Fml.pure_conjL_linkE k₁ L (ψ.tkKeep k₁ false)) _).2 hlink)
     exact (Fml.xk_holdsQ ψ hψ₂ τ _ hX fun _ _ hi => hi).1 ((Fml.holdsS_img_xk ψ hψ₂ _).1 h3)
   · cases e
 
@@ -2173,9 +2253,9 @@ theorem allocCount_allN {Γ : Ctx} (x : Var) :
   | m + 1, ψ => allocCount_allN x m (.all x .uint ψ)
 
 /-- The leaf with the second kind's words has the leaf's fresh strings. -/
-theorem _root_.Solidity.Fml.tk_allocCount {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} (φ : Fml C Γ) :
-    ∀ {φ' : Fml C Γ}, φ.tk k₁ k₂ N fix = some φ' → φ'.allocCount = φ.allocCount := by
-  have body : ∀ {Γ : Ctx} (ψ φ' : Fml C Γ), ψ.tkBody k₁ k₂ N fix = some φ' → φ'.allocCount = 0 := by
+theorem _root_.Solidity.Fml.tk_allocCount {k₁ k₂ : HashKind} {fix full : Bool} {Γ : Ctx} (φ : Fml C Γ) :
+    ∀ {φ' : Fml C Γ}, φ.tk k₁ k₂ N fix full = some φ' → φ'.allocCount = φ.allocCount := by
+  have body : ∀ {Γ : Ctx} (ψ φ' : Fml C Γ), ψ.tkBody k₁ k₂ N fix full = some φ' → φ'.allocCount = 0 := by
     intro Γ ψ φ' e
     unfold Fml.tkBody at e
     cases fix
@@ -2199,8 +2279,8 @@ theorem _root_.Solidity.Fml.tk_allocCount {k₁ k₂ : HashKind} {fix : Bool} {�
   | tt | eq | wellFormed | not | and | imp | upd => intro _ e; exact body _ _ e
   | modal | havoc | bind | anon | grow => intro _ e; cases e
 
-theorem _root_.Solidity.Fml.tkBody_memNodes {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} {ψ φ' : Fml C Γ}
-    (e : ψ.tkBody k₁ k₂ N fix = some φ') : ψ.memNodes = true := by
+theorem _root_.Solidity.Fml.tkBody_memNodes {k₁ k₂ : HashKind} {fix full : Bool} {Γ : Ctx} {ψ φ' : Fml C Γ}
+    (e : ψ.tkBody k₁ k₂ N fix full = some φ') : ψ.memNodes = true := by
   unfold Fml.tkBody at e
   cases fix
   all_goals
@@ -2213,21 +2293,21 @@ theorem _root_.Solidity.Fml.tkBody_memNodes {k₁ k₂ : HashKind} {fix : Bool} 
 
 /-- **The leaf meets its premise in a heap of the family**, where it has
 the second kind's words. -/
-theorem _root_.Solidity.Fml.tk_hashFree {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} {φ φ' : Fml C Γ}
-    (e : φ.tk k₁ k₂ N fix = some φ') (hokA : famOKAll N = true) (σ : State C Γ) (hF : FamHeap N σ.glob) :
+theorem _root_.Solidity.Fml.tk_hashFree {k₁ k₂ : HashKind} {fix full : Bool} {Γ : Ctx} {φ φ' : Fml C Γ}
+    (e : φ.tk k₁ k₂ N fix full = some φ') (hokA : famOKAll N = true) (σ : State C Γ) (hF : FamHeap N σ.glob) :
     φ.HashFree σ := by
   cases φ with
   | all | allocAll => intro _ _ _ _ _ h; exact h.elim
   | modal | havoc | bind | anon | grow => cases e
   | _ => exact Fml.hashFree_memNodes (Fml.tkBody_memNodes e) hokA σ hF
 
-theorem _root_.Solidity.Fml.tkBody_eq {k₁ k₂ : HashKind} {fix : Bool} {Γ : Ctx} {ψ φ : Fml C Γ}
-    (e : ψ.tkBody k₁ k₂ N fix = some φ) :
+theorem _root_.Solidity.Fml.tkBody_eq {k₁ k₂ : HashKind} {fix full : Bool} {Γ : Ctx} {ψ φ : Fml C Γ}
+    (e : ψ.tkBody k₁ k₂ N fix full = some φ) :
     (∀ l ∈ (ψ.hLevels k₂).eraseDups, (Idx.memAtLevel? Γ l).isSome) ∧
       ∃ ψ₂, ψ.xk k₂ (XMap.extras (ψ.hLevels k₂).eraseDups Γ) = some ψ₂ ∧
         φ = Fml.allN (.user "e") (ψ.hLevels k₂).eraseDups.length
           (.imp (Fml.conjL (if fix then fixE k₁ k₂ N (ψ.hLevels k₂).eraseDups else []))
-            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups)) ψ₂)) := by
+            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups (ψ.tkKeep k₁ full))) ψ₂)) := by
   cases fix
   all_goals
     unfold Fml.tkBody at e
@@ -2246,17 +2326,18 @@ theorem _root_.Solidity.Fml.tkBody_eq {k₁ k₂ : HashKind} {fix : Bool} {Γ : 
 the family**, at a body `R` read past them that holds wherever the words are
 the strings' hashes of the second kind. -/
 theorem tkInst_core {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hokA : famOKAll N = true) {Γ : Ctx}
-    (L : List Nat) (R : Fml C (List.replicate L.length (.val .uint) ++ Γ)) {cs : List Nat}
+    (L : List Nat) (R : Fml C (List.replicate L.length (.val .uint) ++ Γ))
+    {lk : List (Fml C (List.replicate L.length (.val .uint) ++ Γ))} {cs : List Nat}
     {inst : Fml C (Ctx.sw Γ)}
     (ei : (Fml.allN (.user "e") L.length
-      (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L)) R))).swInst k₁ cs = some inst)
+      (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL lk) R))).swInst k₁ cs = some inst)
     (τ : State C Γ) (τ' : State C (Ctx.sw Γ)) (h : SwRel k₁ τ τ')
     (hF : FamHeap N τ.glob) (hstr : ∀ {Q : RefTy} (i : Idx Γ (.mem Q)), (τ.getV i).isSome)
     (hR : ∀ es : Fin L.length → PrimTy.uint.Denote, XRel k₂ (XMap.extras L Γ) τ (envOf L.length es τ.env) →
       holds (τ.lift (Thin.dropN L.length) (envOf L.length es τ.env)) R) : holds τ' inst := by
     rw [Fml.swInst_allN] at ei
     obtain ⟨B', hB', rfl⟩ := Option.map_eq_some_iff.1 ei
-    have hB'' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L)) R)) = some B' := hB'
+    have hB'' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL lk) R)) = some B' := hB'
     rw [holds_allNsw]
     intro es
     rw [Fml.sw_holds _ hB'' _ _ (h.envOf L.length es)]
@@ -2519,11 +2600,11 @@ theorem tkFix_core {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ :
     (R : Fml C (List.replicate L.length (.val .uint) ++ Γ))
     {Rs : Fml C (Ctx.sw (List.replicate L.length (.val .uint) ++ Γ))} (hRs : Fml.sw k₁ R = some Rs)
     {K : List Name} (hK : KTyped C K) (hrl1 : Rs.rl (extraLevels Γ.length L.length) K = true)
-    {cs : List Nat} {inst₂ instF : Fml C (Ctx.sw Γ)}
+    {keepF : Nat → Bool} {cs : List Nat} {inst₂ instF : Fml C (Ctx.sw Γ)}
     (ei₂ : (Fml.allN (.user "e") L.length
       (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) R))).swInst k₁ cs = some inst₂)
     (eiF : (Fml.allN (.user "e") L.length
-      (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L)) R))).swInst k₁ cs = some instF)
+      (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L keepF)) R))).swInst k₁ cs = some instF)
     (τ : State C (Ctx.sw Γ))
     (hW : ∀ {Q : RefTy} (i : Idx Γ (.mem Q)), ∃ j < N, TEnv.get i.sw τ.env = famHash k₁ j)
     (H : ∀ st, holds (τ.withStorage st) instF) : holds τ inst₂ := by
@@ -2531,7 +2612,7 @@ theorem tkFix_core {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ :
   obtain ⟨B₂, hB₂, rfl⟩ := Option.map_eq_some_iff.1 ei₂
   obtain ⟨BF, hBF, rfl⟩ := Option.map_eq_some_iff.1 eiF
   have hB₂' : Fml.sw k₁ (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) R)) = some B₂ := hB₂
-  have hBF' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L)) R)) =
+  have hBF' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ N L)) (.imp (Fml.conjL (linkE k₁ L keepF)) R)) =
     some BF := hBF
   obtain ⟨T, -, eB₂⟩ := Option.bind_eq_some_iff.1 hB₂'
   obtain ⟨B₂r, hB₂r, rfl⟩ := Option.map_eq_some_iff.1 eB₂
@@ -2541,8 +2622,10 @@ theorem tkFix_core {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ :
   cases hψ'
   obtain ⟨fx, hfx, eBF⟩ := Option.bind_eq_some_iff.1 hBF'
   obtain ⟨BFr, hBFr, rfl⟩ := Option.map_eq_some_iff.1 eBF
-  rw [hB₂r] at hBFr
-  cases hBFr
+  obtain ⟨lkF, hlkF, eBFr⟩ := Option.bind_eq_some_iff.1 hBFr
+  obtain ⟨Rs', hRs', rfl⟩ := Option.map_eq_some_iff.1 eBFr
+  rw [hRs] at hRs'
+  cases hRs'
   rw [holds_allNsw]
   intro es _ hlink
   -- the strings, their words of the first kind, the family's numbers of them
@@ -2635,9 +2718,9 @@ theorem tkFix_core {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ :
       exact (hjd d).2
     · show TEnv.get _ (envOfSw L.length es'' τ.env) = _
       rw [get_topIdx_sw]
-  have hlk' : holds ((τ.withStorage st).withEnv (envOfSw L.length es'' (τ.withStorage st).env)) lk := by
-    refine (sw_conjL_holds _ _ hlk).2 fun f hf g hg => ?_
-    obtain ⟨a, b, -, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE hf
+  have hlk' : holds ((τ.withStorage st).withEnv (envOfSw L.length es'' (τ.withStorage st).env)) lkF := by
+    refine (sw_conjL_holds _ _ hlkF).2 fun f hf g hg => ?_
+    obtain ⟨a, b, -, -, -, R₁, R₂, i, j, ha, hb, rfl⟩ := mem_linkE' hf
     rw [sw_link_elem] at hg
     cases hg
     rw [holds_wordIff]
@@ -2658,7 +2741,8 @@ words fixed is valid, the one with them free is: a state refuting the free
 one, its words relabeled to the family's, refutes the fixed one. -/
 theorem _root_.Solidity.Fml.tkBody_fix_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
     (hk₂ : k₂ ≠ .ecrecover) (hokA : famOKAll N = true) {Γ : Ctx} (ψ : Fml C Γ) {φ₂ φF : Fml C Γ}
-    (e₂ : ψ.tkBody k₁ k₂ N false = some φ₂) (eF : ψ.tkBody k₁ k₂ N true = some φF) {cs : List Nat}
+    {fullF : Bool} (e₂ : ψ.tkBody k₁ k₂ N false true = some φ₂) (eF : ψ.tkBody k₁ k₂ N true fullF = some φF)
+    {cs : List Nat}
     {inst₂ instF : Fml C (Ctx.sw Γ)} (ei₂ : φ₂.swInst k₁ cs = some inst₂)
     (eiF : φF.swInst k₁ cs = some instF) (hrl : ψ.tkBodyRL k₁ k₂ = true) (τ : State C (Ctx.sw Γ))
     (hW : ∀ {R : RefTy} (i : Idx Γ (.mem R)), ∃ j < N, TEnv.get i.sw τ.env = famHash k₁ j)
@@ -2675,15 +2759,16 @@ theorem _root_.Solidity.Fml.tkBody_fix_complete {k₁ k₂ : HashKind} (hk₁ : 
   simp only [Bool.and_eq_true] at hrl
   obtain ⟨hrl1, hK⟩ := hrl
   simp only [Bool.false_eq_true, ↓reduceIte] at ei₂ eiF
+  simp only [Fml.tkKeep, ↓reduceIte] at ei₂
   exact tkFix_core hk₁ hk₂ hokA _ hstr ψ₂ hψs (kTyped_of hK) hrl1 ei₂ eiF τ hW H
 
 /-- **Completeness through the prefix**: where the instance with the
 second kind's words fixed is valid at every storage, the one with them free
 holds; the strings' words of the first kind the family's. -/
 theorem _root_.Solidity.Fml.tk_fix_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
-    (hk₂ : k₂ ≠ .ecrecover) (hokA : famOKAll N = true) {Γ : Ctx} (φ : Fml C Γ) :
+    (hk₂ : k₂ ≠ .ecrecover) (hokA : famOKAll N = true) {Γ : Ctx} (φ : Fml C Γ) {fullF : Bool} :
     ∀ {cs : List Nat} {φ₂ φF : Fml C Γ} {inst₂ instF : Fml C (Ctx.sw Γ)},
-      φ.tk k₁ k₂ N false = some φ₂ → φ.tk k₁ k₂ N true = some φF → φ₂.swInst k₁ cs = some inst₂ →
+      φ.tk k₁ k₂ N false true = some φ₂ → φ.tk k₁ k₂ N true fullF = some φF → φ₂.swInst k₁ cs = some inst₂ →
       φF.swInst k₁ cs = some instF → (∀ j ∈ cs, j < N) → φ.tkRL k₁ k₂ = true →
       ∀ τ : State C (Ctx.sw Γ),
         (∀ {R : RefTy} (i : Idx Γ (.mem R)), ∃ j < N, TEnv.get i.sw τ.env = famHash k₁ j) →
@@ -2729,10 +2814,12 @@ theorem _root_.Solidity.Fml.tk_fix_complete {k₁ k₂ : HashKind} (hk₁ : k₁
   | modal | havoc | bind | anon | grow => intro _ _ _ _ _ e; cases e
 
 /-- **Completeness of the refutations with two kinds**: where the reading
-with the second kind's words is not valid, an instance at some classes of
-the strings, the second kind's words fixed, is not. -/
+with the second kind's words, every pair of strings linked (`full`), is not
+valid, an instance at some classes of the strings, the second kind's words
+fixed, is not.  The decision reads the link the premise gives
+(`Calculus/HashMove.lean` moves a refutation of it to this one). -/
 theorem _root_.Solidity.Fml.tk_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover)
-    (hk₂ : k₂ ≠ .ecrecover) (hokA : famOKAll N = true) {φ φ₂ φ₂' : Fml C []} (e₂ : φ.tk k₁ k₂ N false = some φ₂)
+    (hk₂ : k₂ ≠ .ecrecover) (hokA : famOKAll N = true) {φ φ₂ φ₂' : Fml C []} (e₂ : φ.tk k₁ k₂ N false true = some φ₂)
     (e' : φ₂.swPrefix k₁ = some φ₂') {V : List Nat} {K : List Name} (hK : KTyped C K)
     (hrl : φ₂.swRL k₁ V K = true) (hpre : φ₂.prefixOK V = true) (hn : φ₂.allocCount ≤ N)
     (hrl₂ : φ.tkRL k₁ k₂ = true)

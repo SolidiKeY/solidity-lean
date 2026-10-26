@@ -1899,9 +1899,8 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     one whatever its class.  `gapMixedKinds` (`ids[keccak256(s)] == 1 →
     shas[sha256(t)] == 1`, no string hashed by both) is refuted, its
     variant `mixedKinds` proved, both covered by the kernel.  The order
-    matters: `keccak256` first, the one `sha256` string unlinked; and a
-    leaf whose second kind hashes two strings, one without a hash of the
-    first, is still `unknown` (`gapMixedPairs`, below).
+    matters: `keccak256` first, the one `sha256` string unlinked.  Several
+    such strings: feature 29.
 
 28. **Three kinds** (2026-10-26, `Calculus/HashKinds3.lean`, `decideHash3`,
     six orders in `hashTries`).  The third kind's words are a layer
@@ -1930,6 +1929,29 @@ KeY's `int` whose rewriting is in `Fml.CoveredA`:
     → ripemd160(s) == ripemd160(t)`) is proved, `namesThreeKindsBad`
     refuted, both covered by the kernel.
 
+29. **Strings of the second kind the first does not hash** (2026-10-26,
+    `Fml.tkKeep`, `Calculus/HashMove.lean`).  `Fml.tkBody` takes a string
+    of the second kind the first kind hashes nowhere, and `linkE` links
+    only the pairs it keeps (`keep`, `Fml.tkKeep`: the strings the premise
+    reads a first-kind hash of):
+    * **valid**: the first kind's hashes are read only to link a kept pair
+      (`Fml.tkBody_sound`, `linkChoiceP`);
+    * **refuted**: as before (`tkInst_core` reads no link);
+    * **complete** (`Fml.tk_complete_move`): the unlinked strings' swapped
+      words are read nowhere, so a refutation of the decision's reading
+      is moved first: each such word set by `linkChoice`, the two kinds'
+      roles swapped, to follow its extra word's class, one level at a time
+      (`Moved`, `setMany`), each change framed by `Fml.rl_holds` at that
+      one level (`holds_setLocal_frame`).  The moved state refutes the
+      reading with every pair linked (`full`, `Fml.tkBody_move`,
+      `Fml.tk_move`), which `Fml.tk_complete` relabels.  `Fml.tkMove` is
+      the fragment: the swapped body in `Fml.rl` at each moved level.
+    `gapMixedPairs` (`keccak256(a) == keccak256(b) → sha256(c) ==
+    sha256(d)`) is refuted, `mixedSome` (two strings linked, one of
+    `sha256` only) proved and `mixedSomeBad` refuted, the first two's
+    coverage kernel-checked.  `Fml.tk3` keeps both layers linked
+    (`Fml.tkLinked` in `Fml.tk3RL`).
+
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
 and seven (`quantReduction?` compiled no storage read in a quantifier),
@@ -1949,7 +1971,7 @@ block variable; a ledger read at one, and no pipeline taking both).
 Twenty-two was refused by the cut (it wrote no `int` bitwise operator and
 no `addmod`/`mulmod`), twenty-three by the cut's binder order (the reads'
 atoms stand at the array's binder, past which `i` is bound) and
-twenty-four by the cut too (it took no update); twenty-seven and twenty-eight were
+twenty-four by the cut too (it took no update); twenty-seven to twenty-nine were
 `unknown` (`Fml.tkBody` asked every string of the second kind for a hash
 of the first, and `hashTries` tried two kinds at most).
 `Examples/Decision.lean` pins them: `2 * x`, `x * 3`, a doubled storage
@@ -2248,24 +2270,10 @@ stack would lift this.
     `LFml`, with every recursion over them extended, some forty modules),
     and, past the prefix, an unbounded binder of `QFml` (no range atom;
     Presburger over ℤ as two naturals);
-  * **hashes outside `Fml.hashCovered`** (features 11, 12, 27, 28; three
-    kinds, `gapThreeKinds`, and a second kind hashing one string,
-    `gapMixedKinds`, are decided since 27 and 28):
-    * two kinds each hashing several strings, some without a hash of the
-      other kind (`gapMixedPairs`, `keccak256(a) == keccak256(b) →
-      sha256(c) == sha256(d)`: in either order the second kind's strings
-      have no word of the first kind to link with, and there are two of
-      them).  Giving such strings' extra words no link stays sound (the
-      first kind's hashes are read only to link a pair, feature 27);
-      completeness then needs the swap's classes, read off the first
-      kind's words (`classesOf`), to follow the extra words, whose
-      strings' first-kind words are read nowhere: the countermodel must
-      first be moved (each such word set by `linkChoice`, with the roles
-      of the two kinds swapped, to follow its extra word's class), a
-      walk of the swapped prefix with the dead words changed one level at
-      a time (each change framed by `Fml.rl_holds` at that one level), and
-      `Fml.swPrefix_complete` run on the reading with every pair linked,
-      which the decision does not itself read;
+  * **hashes outside `Fml.hashCovered`** (features 11, 12, 27 to 29; three
+    kinds, `gapThreeKinds`, and second kinds hashing strings the first
+    does not, `gapMixedKinds` and `gapMixedPairs`, are decided since 27 to
+    29):
     * a hash of written memory (`gapWrittenMemory`, `∀ s t. [ s[0] = 1; ]
       keccak256(s) == keccak256(t)`): the verdict turns on the strings'
       bytes past the write; features 13 and 24 read fresh arrays'
@@ -2372,14 +2380,13 @@ in this order:
    hashes past updates and value locals set in the body since; any
    number of strings (the family computed past four) and positive value
    quantifiers in the body done (2026-10-25).  Left, in the fragment:
-   two kinds each hashing several strings, some without a hash of the
-   other (`gapMixedPairs`; three kinds and a second kind hashing one
-   string done, 2026-10-26, features 28 and 27), hashes of
-   written memory (`gapWrittenMemory`: in the fragment, not outside it as
-   this step said before; it waits for memory writes and hashes of memory
-   read, step 6).  Outside it: stored hashes, strings not fresh, and a
-   negative quantifier over unread hash pairs (`gapHashNegForall`: not
-   decidable, outside since decision e3″).
+   hashes of written memory (`gapWrittenMemory`: in the fragment, not
+   outside it as this step said before; it waits for memory writes and
+   hashes of memory read, step 6); three kinds and second kinds hashing
+   strings the first does not are done (2026-10-26, features 27 to 29).
+   Outside it: stored hashes, strings not fresh, and a negative
+   quantifier over unread hash pairs (`gapHashNegForall`: not decidable,
+   outside since decision e3″).
 8. **`Fml.Covered ⊆ Fml.inTarget` on program-free leaves**: characterize
    normalization and update pushing syntactically (M4's list), then lift
    the size bounds by fuel computed from the formula.  Done for the reads

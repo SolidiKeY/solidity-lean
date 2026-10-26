@@ -2,7 +2,7 @@ import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
-import Solidity.Calculus.HashKinds3
+import Solidity.Calculus.HashMove
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
@@ -54,9 +54,10 @@ string hashed by two kinds stands for one word per kind (`decideHash2`,
 `Calculus/HashKinds.lean`): the second kind's words binders of their own,
 linked to the first's by the premise, the result read by the one-kind
 swap; a string hashed by three kinds, two such layers, the third kind's
-inside the second's (`decideHash3`, `Calculus/HashKinds3.lean`).  `decideHash` answers on `Fml.hashCovered`
-(`decideGoal_complete_hash`, through `Fml.swPrefix_complete` and
-`Fml.tk_complete`, the relabeling of `Calculus/HashRelabel.lean`); for one
+inside the second's (`decideHash3`, `Calculus/HashKinds3.lean`).
+`decideHash` answers on `Fml.hashCovered` (`decideGoal_complete_hash`,
+through `Fml.swPrefix_complete`, `Fml.tk_complete_move` and
+`Fml.tk3_complete`, the relabeling of `Calculus/HashRelabel.lean`); for one
 kind the reduction is moreover exact on its fragment (`Fml.swPrefix_exact`,
 `Calculus/HashComplete.lean`: keyed roots `mapping(uint => uint)`, the
 swapped leaf in `Fml.rl`, the prefix's string levels the words', at most
@@ -742,10 +743,11 @@ theorem firstKnown_ne {φ : Fml C []} :
 
 
 /-- **The covered leaves with hashes of two kinds** (`k₁`, `k₂`): the
-reading with the second kind's words in the one-kind fragment of `k₁`
-(`Fml.coveredK`'s conditions on it), each instance with the second kind's
-words fixed covered, and the second kind's words in the relabeling
-fragment (`Fml.tkRL`). -/
+reading with the second kind's words covered, the one with every pair of
+strings linked (`full`) in the one-kind fragment of `k₁` (`Fml.coveredK`'s
+conditions on it), each instance with the second kind's words fixed
+covered, the second kind's words in the relabeling fragment (`Fml.tkRL`),
+and the unlinked strings' words read nowhere (`Fml.tkMove`). -/
 def _root_.Solidity.Fml.coveredK2 (k₁ k₂ : HashKind) (φ : Fml C []) : Bool :=
   match φ.tk k₁ k₂ (famN φ.allocCount) false with
   | none => false
@@ -756,11 +758,18 @@ def _root_.Solidity.Fml.coveredK2 (k₁ k₂ : HashKind) (φ : Fml C []) : Bool 
       match φ.tk k₁ k₂ (famN φ.allocCount) true with
       | none => false
       | some φF =>
-        let V := φ₂.allocLevels
-        let K := φ₂'.vRoots V
-        φ₂'.Covered && famCovered φ.allocCount &&
-          (rgs φ₂.allocCount).all (fun cs => (φF.swInst k₁ cs).any Fml.Covered) &&
-          φ₂.swRL k₁ V K && φ₂.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂ && φ₂.posAll
+        match φ.tk k₁ k₂ (famN φ.allocCount) false true with
+        | none => false
+        | some φ₂f =>
+          match φ₂f.swPrefix k₁ with
+          | none => false
+          | some φ₂f' =>
+            let V := φ₂f.allocLevels
+            let K := φ₂f'.vRoots V
+            φ₂'.Covered && famCovered φ.allocCount &&
+              (rgs φ₂.allocCount).all (fun cs => (φF.swInst k₁ cs).any Fml.Covered) &&
+              φ₂f.swRL k₁ V K && φ₂f.prefixOK V && kTypedB C K && φ.tkRL k₁ k₂ && φ.tkMove k₁ k₂ &&
+              φ₂.posAll
 
 /-- **Completeness for two kinds.** -/
 theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
@@ -775,11 +784,19 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
       split at h
       · cases h
       · rename_i φF hF
+        split at h
+        · cases h
+        rename_i φ₂f e₂f
+        split at h
+        · cases h
+        rename_i φ₂f' ef'
         simp only [Bool.and_eq_true, List.all_eq_true] at h
-        obtain ⟨⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩, hpos⟩ := h
+        obtain ⟨⟨⟨⟨⟨⟨⟨⟨hcov, hn⟩, hall⟩, hrl⟩, hpre⟩, hK⟩, hrl₂⟩, hmv⟩, hpos⟩ := h
         obtain ⟨hokA, hck⟩ := famCheck_isTrue (famOKAll_famN hn)
-        have hlen : φ₂.allocCount ≤ famN φ.allocCount := by
-          rw [Fml.tk_allocCount φ e₂]; exact le_famN _
+        have hac : φ₂f.allocCount = φ₂.allocCount := by
+          rw [Fml.tk_allocCount φ e₂f, Fml.tk_allocCount φ e₂]
+        have hlen : φ₂f.allocCount ≤ famN φ.allocCount := by
+          rw [Fml.tk_allocCount φ e₂f]; exact le_famN _
         unfold decideHash2
         rw [e₂]
         simp only
@@ -799,8 +816,9 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
             cases hi : φF.swInst k₁ cs with
             | none => rw [hi] at this; cases this
             | some instF => exact ⟨φF, instF, hF, hi⟩
-          obtain ⟨cs, hcs, φF', instF, hF', hi, hnf⟩ := Fml.tk_complete hk₁ hk₂ hokA e₂ e' (kTyped_of hK)
-            hrl hpre hlen hrl₂ hinst (decideLeaf_not_valid hd)
+          obtain ⟨cs, hcs, φF', instF, hF', hi, hnf⟩ := Fml.tk_complete_move hk₁ hk₂ hokA e₂ e' e₂f ef' hmv
+            (kTyped_of hK) hrl hpre hlen hrl₂ (by rw [hac]; exact hinst) (decideLeaf_not_valid hd)
+          rw [hac] at hcs
           rw [hF] at hF'
           cases hF'
           have hcovf : instF.Covered = true := by
@@ -841,7 +859,7 @@ theorem decideHash2_complete {k₁ k₂ : HashKind} (hk₁ : k₁ ≠ .ecrecover
 /-- A refutation of the leaf with three kinds at the classes `cs`: the
 instance with the second and third kinds' words fixed (`Fml.tk3`), refuted
 by `decideLeaf`. -/
-def refuteAt3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k₂ ≠ .ecrecover)
+def refuteAt3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (_hk₂ : k₂ ≠ .ecrecover)
     (hk₃ : k₃ ≠ .ecrecover) {N : Nat}
     (hokA : famOKAll N = true) (φ φF : Fml C []) (he : φ.tk3 k₁ k₂ k₃ N true true = some φF) (cs : List Nat) :
     Option (HashRefutation φ) :=

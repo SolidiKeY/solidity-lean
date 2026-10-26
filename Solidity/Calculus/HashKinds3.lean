@@ -24,7 +24,8 @@ of the first kind only, which the one-kind swap reads:
 * **complete** (`Fml.tk3_complete`): the second kind's words relabeled
   first (`tkFix_core`, the inner layer, fixed, its body), then the third
   kind's under the outer layer's free binders and link, which read no
-  storage (`holds_swLink_withStorage`).
+  storage (`holds_swLink_withStorage`).  Both layers keep every pair of
+  their strings linked there (`Fml.tkLinked`, in `Fml.tk3RL`).
 -/
 
 namespace Solidity.Decide
@@ -43,7 +44,7 @@ def _root_.Solidity.Fml.tkBody3 (k₁ k₂ k₃ : HashKind) (N : Nat) (fix₂ fi
       (ψ₂.tkBody k₁ k₃ N fix₃).map fun ψ₃ =>
         Fml.allN (.user "e") (ψ.hLevels k₂).eraseDups.length
           (.imp (Fml.conjL (if fix₂ then fixE k₁ k₂ N (ψ.hLevels k₂).eraseDups else []))
-            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups)) ψ₃))
+            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups (ψ.tkKeep k₁ false))) ψ₃))
 
 /-- **The leaf with the second and third kinds' words** (`Fml.tkBody3`)
 past its prefix of `∀` and fresh strings. -/
@@ -82,7 +83,7 @@ theorem _root_.Solidity.Fml.tkBody3_eq {k₁ k₂ k₃ : HashKind} {fix₂ fix�
       ψ₂.tkBody k₁ k₃ N fix₃ = some ψ₃ ∧
       φ = Fml.allN (.user "e") (ψ.hLevels k₂).eraseDups.length
           (.imp (Fml.conjL (if fix₂ then fixE k₁ k₂ N (ψ.hLevels k₂).eraseDups else []))
-            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups)) ψ₃)) := by
+            (.imp (Fml.conjL (linkE k₁ (ψ.hLevels k₂).eraseDups (ψ.tkKeep k₁ false))) ψ₃)) := by
   unfold Fml.tkBody3 at e
   obtain ⟨φ₂, e₂, e⟩ := Option.bind_eq_some_iff.1 e
   obtain ⟨ψ₂, hψ₂, e⟩ := Option.bind_eq_some_iff.1 e
@@ -180,8 +181,8 @@ theorem _root_.Solidity.Fml.tkBody3_sound {k₁ k₂ k₃ : HashKind} (hk₁ : k
   have hφ := H (hashFree_allN _ _ _ τ fun _ h => absurd h (by omega))
   refine holdsS_allN_intro _ _ _ τ (fun _ h => absurd h (by omega)) fun es hfB => ?_
   have hfB₃ : Fml.HashFree (τ.withEnv (envOf L.length es τ.env))
-      (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) (Fml.allN (.user "e") L₃.length
-        (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L₃)) ψ₃'))))) := by
+      (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ false))) (Fml.allN (.user "e") L₃.length
+        (.imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L₃ (ψ₂.tkKeep k₁ false))) ψ₃'))))) := by
     refine hashFree_mono (fun k inp out h => ?_) hfB
     rcases h with h | h | h
     · exact .inl h
@@ -190,7 +191,7 @@ theorem _root_.Solidity.Fml.tkBody3_sound {k₁ k₂ k₃ : HashKind} (hk₁ : k
   intro _ hlink
   have h₃ := holdsS_allN (.user "e") _ _ τ hφ es hfB₃ trivial hlink
   refine Fml.tkBody_sound hk₁ hk₃ ψ₂ e₃ _ (strOK_envOf hstr _ es) (fun _ => h₃) ?_
-  exact hashFree_mono (ψ := .imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L)) ψ₂))
+  exact hashFree_mono (ψ := .imp (Fml.conjL []) (.imp (Fml.conjL (linkE k₁ L (ψ.tkKeep k₁ false))) ψ₂))
     (fun k inp out h => Or.inr (Or.inr h)) hfB
 
 /-- **The leaf with two layers is sound**, through its prefix. -/
@@ -264,9 +265,9 @@ theorem _root_.Solidity.Fml.tkBody3_inst_holds {k₁ k₂ k₃ : HashKind} (hk�
   rw [Fml.swInst_allN] at ei'
   obtain ⟨B, hB, -⟩ := Option.map_eq_some_iff.1 ei'
   have hB' : Fml.sw k₁ (.imp (Fml.conjL (fixE k₁ k₂ N (Fml.hLevels k₂ ψ).eraseDups))
-      (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₂ ψ).eraseDups)) (Fml.allN (.user "e")
+      (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₂ ψ).eraseDups (ψ.tkKeep k₁ false))) (Fml.allN (.user "e")
         (Fml.hLevels k₃ ψ₂).eraseDups.length (.imp (Fml.conjL (fixE k₁ k₃ N (Fml.hLevels k₃ ψ₂).eraseDups))
-          (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₃ ψ₂).eraseDups)) ψ₃'))))) = some B := hB
+          (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₃ ψ₂).eraseDups (ψ₂.tkKeep k₁ false))) ψ₃'))))) = some B := hB
   obtain ⟨b₁, -, eB⟩ := Option.bind_eq_some_iff.1 hB'
   obtain ⟨Br, hBr, -⟩ := Option.map_eq_some_iff.1 eB
   obtain ⟨b₂, -, eBr⟩ := Option.bind_eq_some_iff.1 hBr
@@ -278,7 +279,8 @@ theorem _root_.Solidity.Fml.tkBody3_inst_holds {k₁ k₂ k₃ : HashKind} (hk�
   rw [lift_dropN]
   have hi₃ : (Fml.allN (.user "e") (Fml.hLevels k₃ ψ₂).eraseDups.length
       (.imp (Fml.conjL (fixE k₁ k₃ N (Fml.hLevels k₃ ψ₂).eraseDups))
-        (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₃ ψ₂).eraseDups)) ψ₃'))).swInst k₁ cs = some ψ₃s := by
+        (.imp (Fml.conjL (linkE k₁ (Fml.hLevels k₃ ψ₂).eraseDups (ψ₂.tkKeep k₁ false))) ψ₃'))).swInst k₁ cs =
+        some ψ₃s := by
     rw [swInst_allN_imp]; exact hψ₃s
   have := Fml.tkBody_inst_holds hk₁ hk₃ hokA ψ₂ e₃ hi₃ _ _ (h.envOf _ es) hF (strOK_envOf hstr _ es) hs₂
   exact (Fml.sw_holds _ hψ₃s _ _ (h.envOf _ es)).1 this
@@ -369,6 +371,33 @@ theorem _root_.Solidity.Fml.tk3_refutes {k₁ k₂ k₃ : HashKind} (hk₁ : k�
 
 /-! ## Completeness: each layer relabeled -/
 
+/-- **Every string of the second kind linked**: one string, or each hashed
+by the first kind where the premise always reads it.  Each layer of
+`Fml.tk3` is relabeled as `Fml.tk`'s is (`tkFix_core`), which reads the
+whole link. -/
+def _root_.Solidity.Fml.tkLinked (k₁ k₂ : HashKind) {Γ : Ctx} (ψ : Fml C Γ) : Bool :=
+  decide ((ψ.hLevels k₂).eraseDups.length ≤ 1) ||
+    (ψ.hLevels k₂).eraseDups.all fun l => (ψ.topLevels k₁).contains l
+
+theorem linkE_tkKeep {k₁ k₂ : HashKind} {Γ : Ctx} {ψ : Fml C Γ} (h : ψ.tkLinked k₁ k₂ = true)
+    (full : Bool) :
+    linkE k₁ (C := C) (Γ := Γ) (ψ.hLevels k₂).eraseDups (ψ.tkKeep k₁ full) = linkE k₁ (ψ.hLevels k₂).eraseDups := by
+  refine linkE_keep_eq ?_
+  simp only [Fml.tkLinked, Bool.or_eq_true, decide_eq_true_eq, List.all_eq_true] at h
+  rcases h with h | h
+  · exact .inl h
+  · refine .inr fun l hl => ?_
+    cases full
+    · simpa only [Fml.tkKeep, Bool.false_eq_true, ↓reduceIte] using h l hl
+    · rfl
+
+theorem _root_.Solidity.Fml.tkBody_linked {k₁ k₂ : HashKind} {Γ : Ctx} {ψ : Fml C Γ}
+    (h : ψ.tkLinked k₁ k₂ = true) (fix full full' : Bool) :
+    ψ.tkBody k₁ k₂ N fix full = ψ.tkBody k₁ k₂ N fix full' := by
+  unfold Fml.tkBody
+  dsimp only
+  rw [linkE_tkKeep h full, linkE_tkKeep h full']
+
 /-- **The fragment of the two relabelings**: the third kind's words in
 `Fml.rl` of their own levels and roots (`Fml.tkBodyRL` of the body read
 past the second kind's words), and the second kind's in `Fml.rl` of theirs
@@ -377,7 +406,7 @@ def _root_.Solidity.Fml.tkBody3RL (k₁ k₂ k₃ : HashKind) (N : Nat) {Γ : Ct
   match ψ.xk k₂ (XMap.extras (ψ.hLevels k₂).eraseDups Γ) with
   | none => false
   | some ψ₂ =>
-    ψ₂.tkBodyRL k₁ k₃ &&
+    ψ.tkLinked k₁ k₂ && ψ₂.tkLinked k₁ k₃ && ψ₂.tkBodyRL k₁ k₃ &&
       match ψ₂.tkBody k₁ k₃ N true with
       | none => false
       | some ψ₃ =>
@@ -406,14 +435,14 @@ section Complete
 variable {Γ : Ctx}
 
 /-- **A layer's link reads no storage.** -/
-theorem holds_swLink_withStorage {k₁ : HashKind} (L : List Nat)
+theorem holds_swLink_withStorage {k₁ : HashKind} (L : List Nat) {keep : Nat → Bool}
     {lk : Fml C (Ctx.sw (List.replicate L.length (.val .uint) ++ Γ))}
-    (h : Fml.sw k₁ (Fml.conjL (linkE k₁ L)) = some lk)
+    (h : Fml.sw k₁ (Fml.conjL (linkE k₁ L keep)) = some lk)
     (σ : State C (Ctx.sw (List.replicate L.length (.val .uint) ++ Γ))) (st : Storage C) :
     holds (σ.withStorage st) lk ↔ holds σ lk := by
   rw [sw_conjL_holds _ _ h, sw_conjL_holds _ _ h]
   refine forall_congr' fun f => forall_congr' fun hf => forall_congr' fun g => forall_congr' fun hg => ?_
-  obtain ⟨a, b, -, R₁, R₂, i, j, -, -, rfl⟩ := mem_linkE hf
+  obtain ⟨a, b, -, -, -, R₁, R₂, i, j, -, -, rfl⟩ := mem_linkE' hf
   rw [sw_link_elem] at hg
   cases hg
   rw [holds_wordIff, holds_wordIff]
@@ -434,21 +463,22 @@ theorem _root_.Solidity.Fml.tkBody3RL_eq {k₁ k₂ k₃ : HashKind} {ψ : Fml C
     (h : ψ.tkBody3RL k₁ k₂ k₃ N = true) {ψ₂ : Fml C (List.replicate (ψ.hLevels k₂).eraseDups.length (.val .uint) ++ Γ)}
     (hψ₂ : ψ.xk k₂ (XMap.extras (ψ.hLevels k₂).eraseDups Γ) = some ψ₂) {ψ₃}
     (e₃ : ψ₂.tkBody k₁ k₃ N true = some ψ₃) :
-    ψ₂.tkBodyRL k₁ k₃ = true ∧ ∃ Rs, Fml.sw k₁ ψ₃ = some Rs ∧
+    ψ.tkLinked k₁ k₂ = true ∧ ψ₂.tkLinked k₁ k₃ = true ∧ ψ₂.tkBodyRL k₁ k₃ = true ∧
+      ∃ Rs, Fml.sw k₁ ψ₃ = some Rs ∧
       Rs.rl (extraLevels Γ.length (ψ.hLevels k₂).eraseDups.length)
         (Rs.vRoots (extraLevels Γ.length (ψ.hLevels k₂).eraseDups.length)) = true ∧
       kTypedB C (Rs.vRoots (extraLevels Γ.length (ψ.hLevels k₂).eraseDups.length)) = true := by
   unfold Fml.tkBody3RL at h
   rw [hψ₂] at h
   simp only [Bool.and_eq_true] at h
-  obtain ⟨h1, h2⟩ := h
+  obtain ⟨⟨⟨l₂, l₃⟩, h1⟩, h2⟩ := h
   rw [e₃] at h2
   simp only at h2
   split at h2
   · cases h2
   · rename_i Rs hRs
     simp only [Bool.and_eq_true] at h2
-    exact ⟨h1, Rs, hRs, h2.1, h2.2⟩
+    exact ⟨l₂, l₃, h1, Rs, hRs, h2.1, h2.2⟩
 
 /-- **Completeness at the body**: where the instance with both layers'
 words fixed is valid, the one with them free holds; the strings' words of
@@ -468,8 +498,10 @@ theorem _root_.Solidity.Fml.tkBody3_fix_complete {k₁ k₂ k₃ : HashKind} (hk
   rw [hψ₂] at hψ₂'
   cases hψ₂'
   obtain ⟨hstr, -⟩ := Fml.tkBody_eq e₀
-  obtain ⟨hrl₃, Rs, hRs, hrl1, hK⟩ := Fml.tkBody3RL_eq hrl hψ₂ e₃F
+  obtain ⟨hl₂, hl₃, hrl₃, Rs, hRs, hrl1, hK⟩ := Fml.tkBody3RL_eq hrl hψ₂ e₃F
   simp only [Bool.false_eq_true, ↓reduceIte] at ei₂ eiF
+  rw [linkE_tkKeep hl₂] at ei₂ eiF
+  have e₃f : ψ₂.tkBody k₁ k₃ N false true = some ψ₃ := by rw [← Fml.tkBody_linked hl₃ false false true]; exact e₃
   generalize (Fml.hLevels k₂ ψ).eraseDups = L at *
   -- the instance with the second kind's words free, the third's fixed
   have eiF' := eiF
@@ -513,7 +545,7 @@ theorem _root_.Solidity.Fml.tkBody3_fix_complete {k₁ k₂ k₃ : HashKind} (hk
   have eiF₃ : ψ₃F.swInst k₁ cs = some XF := by
     obtain ⟨-, ψ₃', -, rfl⟩ := Fml.tkBody_eq e₃F
     rw [swInst_allN_imp]; exact hXF
-  refine Fml.tkBody_fix_complete hk₁ hk₃ hokA ψ₂ e₃ e₃F ei₃ eiF₃ hrl₃ _ (hW_envOfSw hW _ es) fun st => ?_
+  refine Fml.tkBody_fix_complete hk₁ hk₃ hokA ψ₂ e₃f e₃F ei₃ eiF₃ hrl₃ _ (hW_envOfSw hW _ es) fun st => ?_
   have h₁ := (holds_allNsw _ _ _ _).1 (step₁ st) es
   exact h₁ trivial ((holds_swLink_withStorage L hlk _ st).2 hl)
 
