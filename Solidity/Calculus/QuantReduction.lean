@@ -1,4 +1,5 @@
 import Solidity.Calculus.ArrayProperty
+import Solidity.Calculus.QuantExpand
 import Solidity.Calculus.DependentReduction
 
 /-!
@@ -604,10 +605,12 @@ theorem QFml.holds_atom_range (F : AFml) (W : Nat) (hw : F.width ≤ W) (x : Nat
   rw [List.getD_eq_getElem?_getD, List.getElem?_range (Nat.lt_of_lt_of_le hi hw)]
   rfl
 
-/-- **The body's preparations**: the negative array-property blocks
-instantiated at the index set (`apfPrep`), then the reads at no bound
-variable hoisted out of the remaining quantifiers (`hoistPrep`). -/
-def bodyPrep (B : LFml C) : Prep B := (apfPrep B).trans (hoistPrep _)
+/-- **The body's preparations**: the `bool` quantifiers expanded and the
+positive ones dropped to fresh atoms (`expandPrep`), the negative
+array-property blocks instantiated at the index set (`apfPrep`), then the
+reads at no bound variable hoisted out of the remaining quantifiers
+(`hoistPrep`). -/
+def bodyPrep (B : LFml C) : Prep B := (expandPrep B).trans ((apfPrep _).trans (hoistPrep _))
 
 /-- **A leaf whose remaining quantifiers are Presburger quantifiers**,
 reduced to one quantified linear sentence. -/

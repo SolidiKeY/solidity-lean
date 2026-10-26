@@ -63,7 +63,7 @@ The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapColumn` … `gapWrittenMemory`,
+`unknown` for each shape left (`gapIntKeyed` … `gapWrittenMemory`,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -75,12 +75,13 @@ are refutations (`decideLeaf_refutes`), and it answers on `Fml.Covered`
 (`dependentReduction?_isSome`) as extended since, or the leaves every
 quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
-`QFml.decide_iff`): reads at no bound variable hoisted out
-(`hoistPrep_valid_iff`), negative array-property blocks over mappings at
-roots instantiated at the index set (`apfPrep`, sound by
+`QFml.decide_iff`): `bool` quantifiers expanded and positive ones dropped
+to fresh atoms (`expandPrep_valid_iff`), negative array-property blocks
+over roots instantiated at the index set (`apfPrep`, sound by
 `LFml.apfInst_sound` and exact by `ApfFml.apfInst_refute` wherever it
 instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
-preparation has); or the leaves that read the starting ledger
+preparation has), reads at no bound variable hoisted out
+(`hoistPrep_valid_iff`); or the leaves that read the starting ledger
 (`Fml.ledgerCovered`) or storage arrays at symbolic indices
 (`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
