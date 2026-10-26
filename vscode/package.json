@@ -2,7 +2,7 @@
   "name": "solidity-lean",
   "displayName": "Solidity Lean Verification",
   "description": "Run kernel-checked Solidity verification and inspect obligations, diagnostics and proof status.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "SolidiKeY",
   "license": "MIT",
   "repository": { "type": "git", "url": "https://github.com/SolidiKeY/solidity-lean.git", "directory": "vscode" },
@@ -24,6 +24,7 @@
         "solidityLean.nodePath": { "type": "string", "default": "node", "scope": "resource", "description": "Node.js executable used to launch verification.", "restricted": true },
         "solidityLean.timeoutMs": { "type": "integer", "minimum": 1, "default": 600000, "scope": "resource", "description": "Overall verification timeout in milliseconds." },
         "solidityLean.verifyOnSave": { "type": "boolean", "default": false, "scope": "resource", "description": "Verify Solidity files automatically when saved." },
+        "solidityLean.counterexamples": { "type": "boolean", "default": false, "scope": "resource", "description": "Search for kernel-certified model prestates when a verification goal stays open. Refutations describe the verification model; they do not establish constructor reachability." },
         "solidityLean.auditPreconditions": { "type": "boolean", "default": false, "scope": "resource", "description": "Also check whether specified functions have a possible entry state. Impossible or unknown audits require attention even when the postcondition is proved." }
       }
     }

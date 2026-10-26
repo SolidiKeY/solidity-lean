@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join } = require('node:path');
+const { evidence } = require('./witness.cjs');
 async function run() {
   const vscode = require('vscode');
   const root = mkdtempSync(join(tmpdir(), 'solidity-lean-host-'));
@@ -13,16 +14,18 @@ async function run() {
   const script = join(root, 'scripts/test-solidity.mjs');
   function backend(status, preconditions) {
     const audit = preconditions ? {preconditions,preconditionReason:'kernel-checked fixture'} : {};
-    writeFileSync(script, `import {readFileSync,writeSync} from 'node:fs';import {createHash} from 'node:crypto';const source=process.argv.at(-1);const hash=createHash('sha256').update(readFileSync(source)).digest('hex');writeSync(1,JSON.stringify({results:[{source,sourceHash:hash,contract:'C',function:'f',signature:'f()',status:${JSON.stringify(status)},range:{start:{line:0,character:13},end:{line:0,character:35}},reason:${JSON.stringify(status === 'pending' ? 'open proof goals' : '')},...${JSON.stringify(audit)}}],errors:[]}));`);
+    const witness = status === 'refuted' ? {counterexample:evidence({arguments:[], lines:['[run](command:evil)', '\u001b[31mmodel']})} : {};
+    writeFileSync(script, `import {readFileSync,writeSync} from 'node:fs';import {createHash} from 'node:crypto';const source=process.argv.at(-1);const hash=createHash('sha256').update(readFileSync(source)).digest('hex');writeSync(1,JSON.stringify({results:[{source,sourceHash:hash,contract:'C',function:'f',signature:'f()',status:${JSON.stringify(status)},range:{start:{line:0,character:13},end:{line:0,character:35}},reason:${JSON.stringify(status === 'pending' ? 'open proof goals' : '')},...${JSON.stringify(audit)},...${JSON.stringify(witness)}}],errors:[]}));`);
   }
   const config = vscode.workspace.getConfiguration('solidityLean');
-  const keys = ['backendPath', 'nodePath', 'verifyOnSave', 'auditPreconditions'];
+  const keys = ['backendPath', 'nodePath', 'verifyOnSave', 'auditPreconditions', 'counterexamples'];
   const previous = Object.fromEntries(keys.map(key => [key, config.inspect(key)?.globalValue]));
   try {
     await config.update('backendPath', root, vscode.ConfigurationTarget.Global);
     await config.update('nodePath', process.env.SOLIDITY_LEAN_NODE_EXECUTABLE || 'node', vscode.ConfigurationTarget.Global);
     await config.update('verifyOnSave', false, vscode.ConfigurationTarget.Global);
     await config.update('auditPreconditions', false, vscode.ConfigurationTarget.Global);
+    await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
     const extension = vscode.extensions.getExtension('SolidiKeY.solidity-lean');
     assert.ok(extension, 'extension package must be installed in the development host');
     const api = await extension.activate();
@@ -40,6 +43,16 @@ async function run() {
     const diagnostic = vscode.languages.getDiagnostics(document.uri).find(d => d.source === 'Solidity Lean');
     assert.equal(diagnostic.severity, vscode.DiagnosticSeverity.Warning);
     assert.match(diagnostic.message, /pending/);
+    backend('refuted');
+    await config.update('counterexamples', true, vscode.ConfigurationTarget.Global);
+    await vscode.commands.executeCommand('solidityLean.verify');
+    const refuted = vscode.languages.getDiagnostics(document.uri).find(d => d.source === 'Solidity Lean');
+    assert.equal(refuted.code, 'refuted');
+    assert.equal(refuted.severity, vscode.DiagnosticSeverity.Error);
+    assert.match(refuted.message, /certified model prestate/);
+    const witnessHovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', document.uri, new vscode.Position(0, 20));
+    assert.ok(witnessHovers.some(hover => hover.contents.some(content => content.value?.includes('\\[run\\]') && !content.isTrusted && !content.supportHtml)), 'model text is escaped in the actual MarkdownString');
+    await config.update('counterexamples', false, vscode.ConfigurationTarget.Global);
     backend('proved', 'impossible');
     await config.update('auditPreconditions', true, vscode.ConfigurationTarget.Global);
     await vscode.commands.executeCommand('solidityLean.verify');
@@ -51,7 +64,7 @@ async function run() {
     edit.insert(document.uri, new vscode.Position(0, 0), '// changed\n');
     await vscode.workspace.applyEdit(edit);
     assert.equal(vscode.languages.getDiagnostics(document.uri).filter(d => d.source === 'Solidity Lean').length, 0, 'edits clear stale verification');
-    const checks = ['activation', 'command', 'backend process', 'Test Explorer items', 'hover', 'diagnostics', 'precondition audit diagnostics', 'edit invalidation'];
+    const checks = ['activation', 'command', 'backend process', 'Test Explorer items', 'hover', 'diagnostics', 'precondition audit diagnostics', 'certified model prestate diagnostics', 'escaped model hover', 'edit invalidation'];
     if (process.env.SOLIDITY_LEAN_REAL_BACKEND) {
       await vscode.commands.executeCommand('workbench.action.revertAndCloseActiveEditor');
       await config.update('backendPath', process.env.SOLIDITY_LEAN_REAL_BACKEND, vscode.ConfigurationTarget.Global);

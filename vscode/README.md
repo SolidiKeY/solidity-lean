@@ -17,6 +17,14 @@ as a vacuous-specification warning. Unknown audits require attention too. This
 option is off by default and discovery does not run audits. See the repository's
 verification notes for the certificates and their model limits.
 
+Enable `solidityLean.counterexamples` to search open goals for a certified model
+prestate. A refuted result is an error diagnostic and a failed test. Its hover,
+output and failure details show the model parameter names, exact decimal values,
+initial model state and certificate declaration. Source names appear only when
+the backend provides a declaration mapping. These certificates concern the
+verification model; constructor reachability is a separate property. Discovery
+does not search for model prestates. The option is disabled initially.
+
 ## Setup
 
 Install Node.js 18 or later and the Lean/Lake version in the repository's
@@ -42,7 +50,7 @@ To build an installable package from this directory:
 
 ```sh
 npx @vscode/vsce package
-code --install-extension solidity-lean-0.2.0.vsix
+code --install-extension solidity-lean-0.3.0.vsix
 ```
 
 ## Tests

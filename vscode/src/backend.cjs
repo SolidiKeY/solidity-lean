@@ -2,8 +2,9 @@
 const { spawn, spawnSync } = require('node:child_process');
 const { resolve, join } = require('node:path');
 const { existsSync } = require('node:fs');
+const { validateCounterexample } = require('./counterexample.cjs');
 
-const statuses = new Set(['proved', 'pending', 'skipped', 'skip', 'internal', 'unsupported', 'excluded', 'ready', 'notRun', 'error']);
+const statuses = new Set(['proved', 'pending', 'skipped', 'skip', 'internal', 'unsupported', 'excluded', 'ready', 'notRun', 'error', 'refuted']);
 const preconditions = new Set(['possible', 'impossible', 'unknown', 'notApplicable', 'notRun']);
 
 function parseReport(stdout) {
@@ -12,6 +13,7 @@ function parseReport(stdout) {
   if (!report || !Array.isArray(report.results) || !Array.isArray(report.errors)) throw new Error('Verifier returned an invalid report');
   for (const row of report.results) {
     if (!row || typeof row.source !== 'string' || typeof row.contract !== 'string' || typeof row.function !== 'string' || !statuses.has(row.status)) throw new Error('Verifier returned an invalid obligation');
+    validateCounterexample(row);
     if (row.preconditions !== undefined && !preconditions.has(row.preconditions)) throw new Error('Verifier returned an invalid precondition audit');
     if (row.preconditionReason !== undefined && typeof row.preconditionReason !== 'string') throw new Error('Verifier returned an invalid precondition reason');
   }
@@ -45,7 +47,7 @@ function terminateTree(child) {
   kill(child.pid);
 }
 
-function runBackend({ backendPath, nodePath = 'node', source, listing = false, auditPreconditions = false, contract, function: functionName, timeoutMs = 600000, signal }) {
+function runBackend({ backendPath, nodePath = 'node', source, listing = false, auditPreconditions = false, counterexamples = false, contract, function: functionName, timeoutMs = 600000, signal }) {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1) return Promise.reject(new Error('Verification timeout must be positive milliseconds'));
   const root = resolve(backendPath);
   const script = join(root, 'scripts', 'test-solidity.mjs');
@@ -53,6 +55,7 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, a
   const args = [script, '--json', '--timeout-ms', String(timeoutMs)];
   if (listing) args.push('--list');
   if (auditPreconditions && !listing) args.push('--audit-preconditions');
+  if (counterexamples && !listing) args.push('--counterexamples');
   if (contract) args.push('--contract', contract);
   if (functionName) args.push('--function', functionName);
   args.push(resolve(source));
@@ -88,6 +91,8 @@ function runBackend({ backendPath, nodePath = 'node', source, listing = false, a
       if (code !== 0 && code !== 1) { finish(new Error(`Verifier ${killedBy ? `terminated by ${killedBy}` : `exited ${code}`}${stderr ? `: ${stderr.trim()}` : ''}`)); return; }
       try {
         const report = parseReport(stdout);
+        if ((!counterexamples || listing) && report.results.some(row => row.status === 'refuted'))
+          throw new Error('Verifier returned unrequested certified model prestate evidence');
         if (auditPreconditions && !listing && report.results.some(row => row.preconditions === undefined))
           throw new Error('Verifier did not return the requested precondition audit');
         finish(null, report);

@@ -3,6 +3,7 @@ const { resolve, extname } = require('node:path');
 const { createHash } = require('node:crypto');
 const { runBackend } = require('./backend.cjs');
 const model = require('./model.cjs');
+const { validateCounterexample } = require('./counterexample.cjs');
 
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
@@ -21,7 +22,7 @@ function createExtension(vscode, context, backend = runBackend) {
     const workspace = vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.fsPath;
     const configured = cfg.get('backendPath', '');
     if (!configured && !workspace) throw new Error('Set solidityLean.backendPath to the Solidity Lean repository directory');
-    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false) };
+    return { backendPath: resolve(workspace || '.', configured || '.'), nodePath: cfg.get('nodePath', 'node'), timeoutMs: cfg.get('timeoutMs', 600000), auditPreconditions: cfg.get('auditPreconditions', false), counterexamples: cfg.get('counterexamples', false) };
   }
   function cancel(uri) {
     if (uri) active.get(key(uri))?.abort();
@@ -92,6 +93,9 @@ function createExtension(vscode, context, backend = runBackend) {
       // VS Code removes an initial UTF-8 BOM from getText(); the compiler hashes bytes.
       const hashes = new Set([hash(text), hash('\uFEFF' + text)]);
       if (report.results.some(row => !hashes.has(row.sourceHash))) throw new Error('Verifier source hash does not match the open file; use a current backend and save the file');
+      for (const row of report.results) validateCounterexample(row);
+      if ((!config.counterexamples || options.listing) && report.results.some(row => row.status === 'refuted'))
+        throw new Error('Verifier returned unrequested certified model prestate evidence');
       // An individual test updates only its own row, retaining sibling obligations.
       const existing = reports.get(id);
       const merged = options.function && existing ? {

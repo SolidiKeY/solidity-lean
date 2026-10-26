@@ -215,3 +215,64 @@ test('suppresses closed documents and superseded jobs even when backend ignores 
   pending[1].finish(); assert.equal(await second, null);
   assert.equal(env.reports?.size || env.api.reports.size, 0);
 });
+
+test('certified model prestates are opt-in and appear in hover, output and failed Test Explorer results', async () => {
+  const { evidence } = require('./witness.cjs');
+  const calls = [];
+  const witness = evidence({ lines: ['[run](command:evil)', '\u001b[31munsafe'] });
+  const env = setup(async (args, env) => {
+    calls.push(args);
+    return { results: [row(env, { status: 'refuted', counterexample: witness })], errors: [] };
+  });
+  env.config.counterexamples = true;
+  await env.api.verify(env.doc);
+  assert.equal(calls[0].counterexamples, true);
+  const diagnostic = env.diagnosticMap.get(env.doc.uri.toString())[0];
+  assert.equal(diagnostic.severity, 0); assert.equal(diagnostic.code, 'refuted');
+  assert.match(diagnostic.message, /certified model prestate/);
+  assert.ok(env.logs.some(line => line.includes(witness.arguments[0].value)));
+  const hover = env.events.hover.provideHover(env.doc, { line: 1, character: 5 });
+  assert.match(hover.contents.value, /certified model prestate/);
+  assert.match(hover.contents.value, /\\u001b/);
+  const item = [...[...env.controller.items.values()][0].children.values()][0];
+  await env.controller.run({ include: [item] }, token);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started', 'failed', 'end']);
+  assert.match(env.runs[0].calls[1][2].message, /certified model prestate/);
+  assert.doesNotMatch(env.runs[0].calls[1][2].message, /exploit|constructor-reachable/);
+  env.doc.version++; env.events.change({ document: env.doc, contentChanges: [{}] });
+  assert.equal(env.api.reports.size, 0);
+  assert.equal(env.events.hover.provideHover(env.doc, { line: 1, character: 5 }), null);
+  assert.equal(env.controller.items.size, 0);
+});
+test('rejects malformed witness evidence before publishing and retains default-off option', async () => {
+  let option;
+  const env = setup(async (args, env) => { option = args.counterexamples; return { results: [row(env, { status: 'refuted', counterexample: { certified: true } })], errors: [] }; });
+  await assert.rejects(env.api.verify(env.doc), /invalid certified model prestate/);
+  assert.equal(option, false);
+  assert.equal(env.api.reports.size, 0);
+});
+test('late witness results cannot survive cancellation, version changes or source hash mismatch', async () => {
+  const { evidence } = require('./witness.cjs');
+  const jobs = [];
+  const env = setup((args, env) => new Promise(resolve => {
+    const captured = row(env, { status: 'refuted', counterexample: evidence() });
+    jobs.push({ args, finish: () => resolve({ results: [captured], errors: [] }) });
+  }));
+  const cancelled = env.api.verify(env.doc); await settle();
+  env.api.cancel(); jobs[0].finish(); assert.equal(await cancelled, null);
+  const edited = env.api.verify(env.doc); await settle();
+  env.doc.version++; env.events.change({ document: env.doc, contentChanges: [{}] });
+  jobs[1].finish(); assert.equal(await edited, null);
+  const stale = setup(async (_, env) => ({ results: [row(env, { status: 'refuted', sourceHash: '0'.repeat(64), counterexample: evidence() })], errors: [] }));
+  await assert.rejects(stale.api.verify(stale.doc), /source hash/);
+  assert.equal(env.api.reports.size, 0); assert.equal(stale.api.reports.size, 0);
+});
+
+test('refuses unsolicited witness results when search is disabled or listing', async () => {
+  const { evidence } = require('./witness.cjs');
+  const env = setup(async (_, env) => ({ results: [row(env, {status:'refuted',counterexample:evidence()})], errors: [] }));
+  await assert.rejects(env.api.verify(env.doc), /unrequested certified model prestate/);
+  env.config.counterexamples = true;
+  await assert.rejects(env.api.verify(env.doc, {listing:true}), /unrequested certified model prestate/);
+  assert.equal(env.api.reports.size, 0);
+});

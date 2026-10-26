@@ -82,3 +82,22 @@ test('decodes split UTF-8 messages from backend pipes', async t => {
   const out = await runBackend({ backendPath: root, nodePath: process.execPath, source: '/tmp/x.sol' });
   assert.equal(out.results[0].reason, '∀账户😀');
 });
+
+test('counterexample search is opt-in and omitted from discovery', async t => {
+  const { evidence } = require('./witness.cjs');
+  const witnessRow = { ...row, status: 'refuted', counterexample: evidence() };
+  const root = fixture(t, `import {writeSync} from 'node:fs';const args=process.argv.slice(2);const row=args.includes('--counterexamples')?${JSON.stringify(witnessRow)}:${JSON.stringify({ ...row, status: 'ready' })};writeSync(1,JSON.stringify({results:[row],errors:[],args}));process.exitCode=args.includes('--counterexamples')?1:0;`);
+  const options = { backendPath: root, nodePath: process.execPath, source: '/tmp/source.sol' };
+  assert.equal((await runBackend(options)).args.includes('--counterexamples'), false);
+  const refuted = await runBackend({ ...options, counterexamples: true });
+  assert.ok(refuted.args.includes('--counterexamples'));
+  assert.deepEqual(refuted.results[0].counterexample, witnessRow.counterexample);
+  const listed = await runBackend({ ...options, counterexamples: true, listing: true });
+  assert.equal(listed.args.includes('--counterexamples'), false);
+  assert.equal(listed.results[0].counterexample, undefined);
+  writeFileSync(join(root, 'scripts/test-solidity.mjs'), `import {writeSync} from 'node:fs';writeSync(1,JSON.stringify({results:[${JSON.stringify({ ...row, status: 'refuted' })}],errors:[]}));process.exitCode=1;`);
+  await assert.rejects(runBackend({ ...options, counterexamples: true }), /invalid certified model prestate/);
+  writeFileSync(join(root, 'scripts/test-solidity.mjs'), `import {writeSync} from 'node:fs';writeSync(1,JSON.stringify({results:[${JSON.stringify(witnessRow)}],errors:[]}));process.exitCode=1;`);
+  await assert.rejects(runBackend(options), /unrequested certified model prestate/);
+  await assert.rejects(runBackend({ ...options, counterexamples: true, listing: true }), /unrequested certified model prestate/);
+});
