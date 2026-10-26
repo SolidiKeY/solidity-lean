@@ -1,6 +1,7 @@
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
+import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashKinds
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.MemSwap
@@ -61,7 +62,7 @@ The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapIntKeyed` … `gapHashNegForall`,
+`unknown` for each shape left (`gapArrayBlock` … `gapHashNegForall`,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -75,12 +76,13 @@ quantifier of which past the prefix is Presburger once the body is
 prepared (`Fml.quantCovered`, `quantReduction?_isSome`, decided by
 `QFml.decide_iff`): `bool` quantifiers expanded and positive ones dropped
 to fresh atoms (`expandPrep_valid_iff`), negative array-property blocks
-over roots instantiated at the index set (`apfPrep`, sound by
+over roots, keyed by `uint` or `int`, instantiated at the index set (`apfPrep`, sound by
 `LFml.apfInst_sound` and exact by `ApfFml.apfInst_refute` wherever it
 instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
 preparation has), reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`); or the leaves that read the starting ledger
-(`Fml.ledgerCovered`) or storage arrays at symbolic indices
+(`Fml.ledgerCovered`), with blocks over it instantiated likewise
+(`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices
 (`Fml.arrayCovered`, `arrayReduction?_isSome`); `decideGoal` likewise
 under the hash premise (`decideGoal_sound`, `decideGoal_refutes`,
 `decideGoal_complete` on covered leaves without a hash,
@@ -132,7 +134,8 @@ leaf it refuses, the quantified pipeline (`quantReduction?`), decided by
 the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
 on a leaf both refuse, the pipeline with storage array reads
 (`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
-(`ledgerReduction?`, `LedgerReduction.verify`). -/
+(`ledgerReduction?`, `LedgerReduction.verify`); then the one with blocks
+over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`). -/
 def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -157,7 +160,13 @@ def decideLeafA (φ : Fml C []) : LeafVerdict C :=
           match q.verify with
           | .inl _ => .proved
           | .inr cm => .refuted cm.state
-        | none => .unknown
+        | none =>
+          match ledgerBlockReduction? φ with
+          | some q =>
+            match q.verify with
+            | .inl _ => .proved
+            | .inr cm => .refuted cm.1
+          | none => .unknown
 
 /-- **Soundness.** -/
 theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.Valid φ := by
@@ -182,7 +191,12 @@ theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.V
           · rename_i hv _
             exact hv.down
           · cases h
-        · cases h
+        · split at h
+          · split at h
+            · rename_i hv _
+              exact hv.down
+            · cases h
+          · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
 theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA φ = .refuted σ) :
@@ -212,14 +226,22 @@ theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA �
           · rename_i cm _
             cases h
             exact cm.refutes
-        · cases h
+        · split at h
+          · split at h
+            · cases h
+            · rename_i cm _
+              cases h
+              exact cm.2
+          · cases h
 
 /-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
 quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
-reads (`Fml.ledgerCovered`, M7 step 3), and the one with storage array reads
-(`Fml.arrayCovered`, M7 step 6). -/
+reads (`Fml.ledgerCovered`, M7 step 3), the one with storage array reads
+(`Fml.arrayCovered`, M7 step 6), and the one with blocks over the ledger
+(`Fml.ledgerBlockCovered`, feature 21). -/
 def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
-  φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered
+  φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered ||
+    φ.ledgerBlockCovered
 
 /-- **Completeness on `Fml.CoveredA`.** -/
 theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLeafA φ ≠ .unknown := by
@@ -230,7 +252,7 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
     dsimp only
     split <;> exact fun h => nomatch h
   | none =>
-    rcases h with ((h | h) | h) | h
+    rcases h with (((h | h) | h) | h) | h
     · have := dependentReduction?_isSome φ h.1 h.2
       rw [hd] at this
       cases this
@@ -255,6 +277,17 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
         · rw [hq]
           dsimp only
           split <;> exact fun h => nomatch h
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (ledgerBlockReduction?_isSome φ h)
+      dsimp only
+      split
+      · split <;> exact fun h => nomatch h
+      · split
+        · split <;> exact fun h => nomatch h
+        · split
+          · split <;> exact fun h => nomatch h
+          · rw [hq]
+            dsimp only
+            split <;> exact fun h => nomatch h
 
 
 /-! ### Fresh memory arrays (M7, plan step 6)

@@ -1132,7 +1132,7 @@ The statement is about one computable function. "Some decider is
 complete" would be vacuous: `Classical.choice` gives a noncomputable one.
 It is the goal of the rounds to come, not true today:
 `Examples/Decision.lean` pins one counterexample per shape still answered
-*unknown* (`gapIntKeyed` … `gapHashNegForall`, each in the fragment by the
+*unknown* (`gapArrayBlock` … `gapHashNegForall`, each in the fragment by the
 kernel, `*_inTarget`), `Examples/DecisionMemory.lean` the memory ones
 (`gapMemWrite` … `gapMemStruct`), listed under "What is not proved" below.  The
 witnesses of earlier rounds are decided: `apf` (step 5), `rowApf` (a block
@@ -1146,7 +1146,8 @@ the last five since 2026-10-25; `gapFiveStrings` (now `fiveStrings`) and
 feature 14) and `gapManyReads` (fifty reads, feature 15) since 2026-10-25;
 `gapBoolKeyed`, `gapPositiveForall`, `gapColumn`, `gapTwoPaths`,
 `gapStructValue` and `gapPartialGuard` (features 16 to 19) since
-2026-10-26.
+2026-10-26; `gapIntKeyed` and `gapLedgerBlock` (features 20 and 21) since
+2026-10-26, their astronomically large refutations returned as terms.
 
 `Fml.inTarget` is a conservative syntactic reading, a subset of the
 fragment the user named, with one known exception (below, `gapHashNegForall`):
@@ -1209,8 +1210,10 @@ Three properties of the reading are worth knowing.
 | `Prep.valid_iff` | a preparation's body is valid exactly where the body is |
 | `hoistPrep_valid_iff` | hoisting reads out of quantifiers is exact |
 | `apfPrep_valid_iff` | `Prep.valid_iff` for `apfPrep`, which every preparation has (`Prep.id` too): sound and exact wherever `apfPrep` instantiates, by the next row; the body kept outside the fragment |
-| `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage (Bradley–Manna–Sipma; every `uint` key along a root's mappings floored, feature 18; guards whose ground operands may halt, feature 19) |
-| `FloorShape.rebuild_word`, `ApfTm.eval_trel`, `GuardP.mono` | a rebuilt root reads at a path what the old one read at its keys' floors; a term of the fragment reads alike, a path of a root of the blocks at its floors (`SRef.floorRef`); a guard true at the keys is true at their floors, a halting ground operand allowed unless a `&&` skips it inside a `||`'s left operand (`GuardP.floors`, `GuardP.defined`) |
+| `LFml.apfInst_sound`, `ApfFml.apfInst_refute` | the instantiation implied by the blocks; a failing instance a failing block, in the rebuilt storage and ledger (Bradley–Manna–Sipma; every key of the pass's type along a root's mappings floored, feature 18, at `uint` and `int`, feature 20; the ledger at a `uint` pass, feature 21; guards whose ground operands may halt, feature 19) |
+| `FloorShape.rebuild_word`, `ApfTm.eval_trel`, `GuardP.mono` | a rebuilt root reads at a path what the old one read at its keys' floors; a term of the fragment reads alike, a path of a root of the blocks at its floors (`SRef.floorRef`), a ledger address at its floor (`NetRel.eval`); a guard true at the keys is true at their floors, a halting ground operand allowed unless a `&&` skips it inside a `||`'s left operand (`GuardP.floors`, `GuardP.defined`) |
+| `lookupBy_regionList`, `lastIn_breaks`, `netRebuild_floor` | a read in a region list finds its key's last breakpoint's region, nothing where that region is skipped; the floor is constant between breakpoints; a rebuilt ledger reads each address's floor's entry (features 20 and 21, `Calculus/FloorRegion.lean`) |
+| `LedgerBlockReduction.verify`, `ledgerBlockReduction?_isSome` | blocks over the ledger: a proof of the prepared, cut body proves the leaf, a false assignment refutes it in the rebuilt ledger; `φ.ledgerBlockCovered = true → (ledgerBlockReduction? φ).isSome` (feature 21) |
 | `expandPrep_valid_iff`, `LFml.holds_expandB`, `LFml.dropOne_spec` | `bool` quantifiers expanded and positive quantifiers dropped to fresh atoms: exact at every state (features 16 and 17) |
 | `LFml.ledgerCut_valid_iff`, `LFml.ledgerCut_refutes` | the ledger cut is exact; a refutation of the cut leaf, its ledger pulled back, refutes the leaf |
 | `ledgerReduction?_isSome` | `φ.ledgerCovered = true → (ledgerReduction? φ).isSome` |
@@ -1235,7 +1238,8 @@ Three properties of the reading are worth knowing.
 `Calculus/PresburgerDecision.lean`, of the quantified reduction's in
 `Calculus/QuantTotality.lean`, of the preparations' in
 `Calculus/QuantHoist.lean`, `Calculus/QuantExpand.lean` and
-`Calculus/ArrayProperty.lean`, of
+`Calculus/ArrayProperty.lean`, of the ledger blocks' in
+`Calculus/LedgerBlock.lean`, of
 `Fml.mxTop_holds` in `Calculus/MemSwap.lean`: `propext`,
 `Classical.choice`, `Quot.sound`.  Everything is `sorry`-free.
 
@@ -1246,7 +1250,8 @@ completeness proved through every stage (recognizer, lifting, flattening,
 compilers), or `Fml.quantCovered` (features 3, 6, 7 and 16 to 19, its own
 pipeline),
 or `Fml.ledgerCovered` (feature 9, its own pipeline), or
-`Fml.arrayCovered` (feature 10, its own pipeline); `Fml.memCovered` is
+`Fml.arrayCovered` (feature 10, its own pipeline), or
+`Fml.ledgerBlockCovered` (feature 21, its own pipeline); `Fml.memCovered` is
 feature 13's, a leaf with fresh memory arrays whose cut is in
 `Fml.CoveredA`:
 
@@ -1358,9 +1363,10 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
    largest value of `U` at most `i` (`MRoot.surgery`, `floorIn`), or `U`'s
    largest value where `i` lies past the second largest and the largest
    bounds no strict guard from above (`lastIn`: a guard true at `i` is
-   true there).  The rebuilt mapping lists one entry a key below
-   `lastBound` (the second largest value plus one, or the largest), the
-   default past it: a solver's far key (`x > 2^200`) costs nothing.  Reads at `U`'s
+   true there).  The rebuilt mapping is listed region by region since
+   feature 20 (`regionList`), a region holding the default left out; until
+   then it listed one entry a key below the second largest value plus one:
+   either way a solver's far key (`x > 2^200`) costs nothing.  Reads at `U`'s
    values keep their words, so every term outside the blocks reads as
    before (`ApfTm.eval_rel`); a guard true at the keys is true at their
    floors (`GuardP.mono`, `cmp_mono`: a variable against a ground
@@ -1667,9 +1673,9 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     `accs[k].v`).  The price: a `uint` key along the mappings is in the
     index set when it is ground (`ApfTm.gkeys`), so it may mention no
     binder of the body (an outer key could before), and a refutation lists
-    `lastBound` entries at every floored level (`rowFar`: twelve rows of
-    twelve entries and a default row, where it listed one row and the
-    default).  Two bound indices on one path
+    entries at every floored level (`rowFar`: seven rows of twelve entries
+    and an empty default row since feature 20, where it listed one row and
+    the default before feature 18).  Two bound indices on one path
     stay outside (`gridApf`, the target's decision).
 19. **Guards whose ground operand may halt** (2026-10-26): `k < x - 1`
     (`gapPartialGuard`).  An operand need not be total (`IdxP.gnd`); a
@@ -1686,6 +1692,50 @@ feature 13's, a leaf with fresh memory arrays whose cut is in
     (no `dl!` spelling for a comparison under `||`, so not pinned).  The index set takes a guard's
     comparison operands, no longer the operands' own subterms (`guardGd`:
     `k < x - 1` puts `x - 1` and its successor in, not `x` and `1`).
+20. **Blocks over `int` keys, refutations by regions** (2026-10-26,
+    `Calculus/FloorRegion.lean`, `Calculus/ArrayProperty.lean`): the
+    instantiation is one pass per key type (`OrdK`: `uint` and `int`, each
+    value an integer in `[lo, hi)`; `apfPrepK`), the `uint` pass then the
+    `int` one (`apfPrep`), each instantiating the blocks whose variables
+    are all of its type (`LFml.chainQF K`, `LFml.inst`, `LTm.subst1` at
+    `K`) and flooring the keys of its type along the roots they read
+    (`FloorShape K`: `floor` at a `mapping(K => V)`, `outer` at any other
+    key, `rkey` one path step, floored where its key type is the pass's).
+    The floor has the type's least value as its base (`floorIn lo`,
+    `lastIn` over `ApfSet`'s `[lo, hi)`), which the index set takes
+    (`IdxKey.base`, `-2^255` at `int`), with the largest value at an `int`
+    pass (`IdxKey.top`), so the keys past the goal's read a free word.
+    A rebuilt mapping no longer lists one entry a key: the floor is
+    constant between consecutive breakpoints (`ApfSet.breaks`: `lo`,
+    `lo + 1`, the index set's values and their successors;
+    `lastIn_breaks`), so it is listed region by region (`regionList`: for
+    each breakpoint `b` the keys `[b, next b)` as one symbolic run,
+    `regionKeys`), a region whose value is the default (`SVal.beq`, the
+    largest key's floor's value) left out.  A read finds its key's last
+    breakpoint's region and nothing else (`lookupBy_regionList`), so the
+    refutation's reads are proved by region reasoning, the run's length
+    symbolic, never evaluated (`FloorShape.rebuild_word`, `FloorsOn`).  So
+    every `int`-keyed leaf of the shape is decided, also those whose every
+    refutation lists `2^255` keys (`intTwoSides`): the theorem asks
+    `≠ unknown`, and the refuting state is a term no evaluation builds;
+    one whose regions away from the goal's keys hold the default is built
+    at once (`intKeyedBad`: one entry).
+21. **Blocks over the ledger** (2026-10-26, `Calculus/LedgerBlock.lean`):
+    a `uint` block may read the starting ledger at its variables
+    (`ApfTm.net`, KeY `int` terms `zlit`, `toInt`, `zbin`, `zcmp`;
+    `ARoots.net`), and the pass then rebuilds the ledger as it rebuilds a
+    mapping (`netRebuild`, region by region, a region of `0`s, the
+    ledger's default, left out; `NetFloor`, `netRebuild_floor`,
+    `NetRel.eval`), the index set taking the largest address (`IdxKey.top`).
+    No pipeline took both: `ledgerBlockReduction?` is `ledgerReduction?`
+    with `apfPrep` between the prefix and the ledger cut
+    (`LedgerBlockReduction.valid_of_body`, `countermodelOfBody`, `verify`),
+    after the other four in `decideLeafA`; `Fml.ledgerBlockCovered`
+    (`LFml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`) asks the
+    prepared body to be in the ledger fragment with no conditional
+    (`LFml.srcL? .pre false`) within M4's bounds.  A leaf whose every
+    refutation lists `2^256 - 6` addresses (`ledgerFar`) is decided so,
+    its refuting ledger a term; `ledgerBlockBad`'s is built at once.
 
 All five were refused before (`dependentReduction?` returned `none`: the
 compiler read only `+`/`-`, and `LFml.src?` refuses `.all`); so were six
@@ -1697,6 +1747,8 @@ read no hash), and twelve too (the swap reads one kind), and thirteen
 (`ExactAt` has no case for `allocAll`, `LTm.Elimable` refuses the memory
 sorts); fourteen was refused by the cut, which wrote no `|`, `^`, `*%`,
 other masks or `int` quotients, and fifteen by the fixed 45 reads;
+twenty and twenty-one were outside `apfPrep`'s shapes too (an `int`
+block variable; a ledger read at one, and no pipeline taking both);
 sixteen to nineteen were outside `apfPrep`'s shapes (a `bool` block, a
 bound key not the last, at two depths or before a member, a halting guard
 operand) or reached no stage (`quantReduction?` abstracts a positive `∀`
@@ -1815,7 +1867,16 @@ proved; `boolKeyedBad` (`b == true → flags[b] == 0` against
 `twoPathsBad` (another row), `structValueBad` (the other member) and
 `partialGuardBad` (`x - 1` halting or below `2`) refuted; the coverage of
 the six and of `columnBad` kernel-checked (`gapColumn_covered` …),
-`gapColumn_answers`, `gapPartialGuard_iff`.
+`gapColumn_answers`, `gapPartialGuard_iff`.  For features 20 and 21: the
+former counterexamples `gapIntKeyed` and `gapLedgerBlock` proved;
+`intKeyedBad` (`(∀ int k; k > 0 → ibal[k] == 0) → ibal[0] == 0`, its
+refuting `ibal` one entry) and `ledgerBlockBad` (an address past the
+guard's bound) refuted; the four's coverage kernel-checked,
+`gapIntKeyed_answers`, `gapLedgerBlock_iff`; `intTwoSides` and `ledgerFar`
+(the leaves of the two shapes every refutation of which is astronomically
+large) in the fragment and covered by the kernel and answering
+(`intTwoSides_answers`, `ledgerFar_answers`), `intTwoSides`'s instance
+refuted by its arithmetic (computed), the refuting states not computed.
 
 ### Running time (the walks)
 
@@ -1921,11 +1982,11 @@ stack would lift this.
   the flattening (`sortedLe`, `∀ i j. i <= j → a[i] <= a[j]` against
   `a[2] <= a[5]`: nine instances, nineteen reads, a formula of about two
   thousand nodes, decided in about two minutes).  A refutation's rebuilt
-  mapping lists one entry a key below `lastBound`, at every floored level
-  of a root (so `lastBound^d` at `d` levels): `U`'s second largest
-  value plus one where its largest bounds no strict guard, its largest
-  otherwise.  So two far values of `U`, or a far guard bound under the
-  largest, still give a refutation that exists but cannot be built in
+  mapping is listed region by region (feature 20), at every floored level
+  of a root, each region not holding the default a run of keys: a region
+  between two far values of `U` whose word is not the default, or the
+  two outer regions of an `int`-keyed mapping holding different words,
+  give a refutation that exists, as a term, but cannot be built in
   practice.  No construction does better in general: a mapping lists its
   entries one key at a time with one default, and a sorted mapping
   (`∀ i j. i <= j → m[i] <= m[j]`) read at three far keys `a < b < c`
@@ -1939,32 +2000,9 @@ stack would lift this.
   * **quantifiers over contents outside `apfPrep`'s shapes** (features 7,
     18 and 19; the bound key not the last, two depths, a member past the
     key, `bool` keys, halting guard operands and positive quantifiers are
-    decided since 2026-10-26, features 16 to 19):
-    * a block over a mapping keyed by `int` (`gapIntKeyed`).  The floor
-      needs a base, and the `int` keys run on both sides of every value of
-      the index set, down to `-2^255`; a rebuilt mapping lists its entries
-      one key at a time with one default, so its two outer regions share a
-      value or one of them is listed.  Some leaves of the shape have only
-      astronomically large refutations: in every state refuting
-      `(∀ int k; k < 0 → ibal[k] == 1) → (∀ int k; k > 0 → ibal[k] == 2) →
-      ibal[0] == 3`, `ibal` holds `1` at each negative key and `2` at each
-      positive one, so it lists at least `2^255 - 1` entries.  At `uint` keys
-      `0` bounds the keys below, so only the top region needs the default
-      (`lastIn`).  A decision could return such a state as a term (the
-      theorem asks `≠ unknown`), but no evaluation builds it.  It needs
-      `int` block variables (`LFml.inst`, a substitution and `chainQF` at
-      `int`), a signed floor (the base `-2^255` in the index set, `floorIn`
-      and `lastIn` over `[-2^255, 2^255)`), the index set at `int`
-      (`IdxKey`, `Gd`, `Lo`) and `FloorShape` floors at `int` keys;
-    * a block over the ledger (`gapLedgerBlock`).  The ledger is a list of
-      entries with the fixed default `0` (`Ledger`), so a rebuilt ledger
-      lists every key it does not read as `0`: in every state refuting
-      `(∀ uint a; a > 5 → net(a) == 1) → net(3) == 1` the ledger lists
-      `2^256 - 6` entries.  And no pipeline takes both: the quantified one
-      reads no ledger (`LFml.src? false` refuses `net`), the ledger's
-      (`ledgerReduction?`) has no preparation stage; it needs `apfPrep`
-      inside `ledgerReduction?`, before the ledger cut, with the ledger
-      rebuilt at the floors;
+    decided since 2026-10-26, features 16 to 19, and `int` keys and the
+    ledger since features 20 and 21, their refutations of `2^255` keys or
+    `2^256 - 6` addresses returned as terms no evaluation builds):
     * a block over a storage array (`gapArrayBlock`).  The quantified
       pipeline reads no array (the Theory's `has`/`orElse` reads are
       outside `LFml.Src false`), the arrays' (`arrayReduction?`) has no
@@ -2112,10 +2150,11 @@ in this order:
    two depths, members past it), `bool` blocks expanded, guards with
    halting ground operands (except under a `&&` in a `||`'s left
    operand), positive
-   quantifiers past the prefix dropped to fresh atoms.  Left: `int`-keyed
-   mappings (`gapIntKeyed`: refutations that list `2^255` keys), the
-   ledger (`gapLedgerBlock`: the fixed default `0`, and `apfPrep` inside
-   `ledgerReduction?`), arrays (`gapArrayBlock`: lengths and slot counts in
+   quantifiers past the prefix dropped to fresh atoms.  Done (2026-10-26,
+   features 20 and 21): `int`-keyed mappings, refutations listed region by
+   region (those of `2^255` keys terms no evaluation builds), and the
+   ledger, `apfPrep` inside the ledger's pipeline (`ledgerBlockReduction?`).
+   Left: arrays (`gapArrayBlock`: lengths and slot counts in
    the index set, `apfPrep` inside `arrayReduction?`), memory, a `||`
    whose left operand may halt.
 6. **Memory, array indices**: array indices done (2026-10-25, feature 10)
