@@ -208,7 +208,7 @@ None was already fixed on the starting master. The mixed-reference row remains
 `broken` with its explicit frontend gap in the runner, not passing or silently
 excluded. There are no adapter/resource-blocked rows in the final isolated run.
 Earlier resource/artifact failures remain in their separate output directories.
-The final isolated commands took 3.04–4.75 seconds per fixture, including both
+The prior isolated commands took 3.04–4.75 seconds per fixture, including both
 pipelines, with unchanged 120-second process limits and loop fuel 1,000. These
 are wall observations, not a controlled before/after performance benchmark.
 
@@ -228,3 +228,27 @@ MCP diagnostics are unavailable; configured per-file Lean commands use
 `--tstack=131072`. A refreshed fixture run after updating the obsolete source
 rejection pin took 5.88–10.78 seconds per fixture with the broad build running;
 its source/model hashes are the final hashes in the validation JSON.
+
+Final gate outcome: the full frozen corpus check passes with
+`LEAN_NUM_THREADS=1`: all 774 obligations retain their scoreboard, generated
+modules and verdicts, and `SolidityCorpus` builds. Replay and all ten emitted
+program certificates pass on the final source. The strict automation, module
+reachability, layering and upstream Node tests pass. The frozen sort checker
+matches all 131 read-bearing annotations across 377 parsed taclets.
+
+The full default library gate is **blocked, not passed**. Combined proof work
+first reached less than 1 GiB available executor memory; the owned
+`DecisionArrays` worker was stopped, and the corpus's `Derived17` worker was
+also stopped when pressure returned. A serial single-thread corpus retry
+subsequently passed, including `Derived17`. The serial full-library retry was
+then interrupted by a managed executor reconnect while `DecisionArrays` was
+still incomplete. Its source is byte-identical to starting master, but a
+controlled baseline performance comparison was not completed, so this resource
+cost is not classified as an unrelated baseline failure. No heartbeat, search
+or proof limits were raised, and no interrupted build is counted as a pass.
+
+After reconnection, `lake build Solidity.KeySort SolkeyTestSuite` passes
+(249 jobs), and the rebuilt frozen sort checker passes. Final read-only finder
+and independent skeptic reviews found no new concrete code defect; both
+confirmed fixture/evidence hashes without opening Lean workers. Their stale
+build-status and timing-label findings were corrected before the handoff.

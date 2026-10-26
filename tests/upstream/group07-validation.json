@@ -1739,11 +1739,39 @@
     "layering": "143 core modules; 0 reach elaborator",
     "frozenTestSuiteAudit": "552 derived; 11 refuted; 0 pending; 1 excluded; 2 skip",
     "documentationPaths": "13 existing missing vendor/external references",
-    "finalBuilds": "pending; see managed executor logs",
+    "finalBuilds": "Full default library gate BLOCKED, not passed: resource-pressure attempt stopped; subsequent serial LEAN_NUM_THREADS=1 retry was externally interrupted by managed executor reconnect while unchanged DecisionArrays was incomplete. No source error from this module was reported. Baseline performance comparison unclassified.",
     "sourceCertificates": "9 imported-program + 1 native indexed-push kernel certificates pass; 6 certificate and 3 universal-theorem axiom audits use only propext, Classical.choice, Quot.sound",
     "replay": "7 replay checks pass, including source getter identity and model-alias rejection",
     "leanDiagnostics": "Lean MCP unavailable; configured per-file commands used with --tstack=131072",
-    "trustInventory": "25 findings on starting master and final patch; complete finding lists identical"
+    "trustInventory": "25 findings on starting master and final patch; complete finding lists identical",
+    "finalFrozenSort": "PASS after rebuilding checker: 377 taclets; 131 read-bearing; all 131 annotations match pinned frozen rules.",
+    "finalPerFileChecks": "Replay.lean and Group07.lean exit 0 on final source; logs group07-final-replay.log and group07-final-certificates.log",
+    "resourceAttempts": [
+      {
+        "gate": "./run-lean.sh",
+        "outcome": "resource-blocked, not pass",
+        "detail": "Stopped owned library worker while untouched DecisionArrays was incomplete and executor available memory was below 1 GiB during combined corpus work.",
+        "log": "/workspace/.setup/logs/group07-final-run-lean.log"
+      },
+      {
+        "gate": "frozen corpus build",
+        "outcome": "resource-blocked, not pass",
+        "detail": "Stopped Derived17 at 407 seconds with available memory below 1 GiB; exact verdict probe had no drift. Resource baseline comparison unclassified.",
+        "log": "/workspace/.setup/logs/group07-final-corpus-build.log"
+      }
+    ],
+    "resourceRetry": "Frozen corpus retry PASS with LEAN_NUM_THREADS=1. Full library retry interrupted externally; no proof limits changed.",
+    "frozenCorpus": "PASS with LEAN_NUM_THREADS=1: 774 obligations; no verdict/generated-module/scoreboard drift; SolidityCorpus build passes (check-corpus: ok).",
+    "logs": {
+      "fullLibraryInterrupted": "/workspace/.setup/logs/group07-single-thread-run-lean.log",
+      "frozenCorpus": "/workspace/.setup/logs/group07-single-thread-corpus.log",
+      "frozenCorpusBuild": "/workspace/.setup/logs/group07-single-thread-corpus-build.log",
+      "replay": "/workspace/.setup/logs/group07-final-replay.log",
+      "certificates": "/workspace/.setup/logs/group07-final-certificates.log",
+      "runtimeAndTestSuite": "/workspace/.setup/logs/group07-final-cached-gates.log",
+      "rebuiltFrozenSort": "/workspace/.setup/logs/group07-final-sort-rebuilt.log"
+    },
+    "finalRuntimeAndTestSuite": "PASS after reconnect: Lean 4.24.0, Lake 5.0.0-src+797c613; LEAN_NUM_THREADS=1 lake build Solidity.KeySort SolkeyTestSuite completed successfully (249 jobs)."
   },
   "proofBoundary": "Checked-calculus theorems and kernel certificates establish emitted-program properties. Runtime agreement is observational, not universal source/compiler equivalence. Standalone checked-narrow guards use ordinary revert; Solidity ABI panic-data agreement is not certified.",
   "review": "Read-only finder and independent skeptic; no Lean workers opened. Confirmed prefix placement, getter-name collision, push receiver mutation and source-shape issues were fixed and re-inspected.",
@@ -1846,6 +1874,12 @@
     "./run-lean.sh",
     "./scripts/check-corpus.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
     "bash scripts/check-trust.sh",
-    "./scripts/check-doc-paths.sh"
-  ]
+    "./scripts/check-doc-paths.sh",
+    "LEAN_NUM_THREADS=1 ./scripts/check-corpus.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+    "LEAN_NUM_THREADS=1 SOLKEY_EXAMPLES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples SOLKEY_RULES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key ./run-lean.sh",
+    "LEAN_NUM_THREADS=1 lake build Solidity.KeySort SolkeyTestSuite",
+    "./scripts/check-solkey.sh --key tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+  ],
+  "implementationCommit": "9c8b45d40fb0ff9822d06be7741ccb513c5c8c83",
+  "finalReadOnlyReview": "Finder and independent skeptic: no new concrete code defect, no writes or Lean workers. Confirmed model/fixture/control hashes and corpus pass; corrected stale pending build labels and prior-run timing label."
 }
