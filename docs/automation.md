@@ -2807,3 +2807,32 @@ findings; each is fixed.
    premise's updates and formulas); the punctuation of the
    `Semantics/StorageWt.lean` and `Typing/Values.lean` rows of
    `docs/module-map.md`.
+
+## M7-close · A checkpoint of the theorem (planned 2026-10-26)
+
+Not started.  It closes the M7 lanes and states what is proved so far,
+without changing the goal.
+
+1. **Finish the running lanes.** `kintneg` (`gapKIntNeg`) and
+   `apfarrays` (`gapArrayBlock`, `gapMemInnerNeg`, `gapWrittenMemory`)
+   run to completion.  A gap not done within one more build cycle is
+   committed to its branch, what is left is recorded in M7, and the lane
+   stops.  Whatever passes the full build and the strict gate
+   (`node scripts/check-automatic.mjs --strict`) is merged.
+2. **The checkpoint theorem, `DecisionTheorem'`.** For every leaf in
+   `Fml.inTarget` that is not in `Fml.Residue`, `decideGoal` either
+   closes the goal or returns a counterexample.  It needs
+   `Fml.inTarget ∧ ¬ Fml.Residue → Fml.Covered`, with no `sorry` and no
+   new axioms.  `Fml.Residue` is a decidable predicate that names exactly
+   the gaps still pinned, each with a one-line reason.
+3. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
+   later milestones may only shrink `Fml.Residue`.
+4. **Split `Examples/Decision.lean`** into smaller modules, each building
+   in under 300 s.
+5. **Tag** the result `milestone-m7-close`, record it here, and push to
+   master.
+6. **Stop.** The milestone ends at the tag: no work toward the full
+   `DecisionTheorem`, no new lanes, no further shrinking of
+   `Fml.Residue` until the user's next instruction.
+7. Throughout: at most two lanes at a time, builds with
+   `LEAN_NUM_THREADS=4`.
