@@ -1,0 +1,2555 @@
+{
+  "version": 1,
+  "date": "2026-10-26",
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "patchKind": "reproduction evidence only; requested source integration remains unimplemented",
+  "runtimeGate": {
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "command": "source /workspace/.setup/activate.sh; lake build Solidity.KeySort",
+    "exitCode": 0
+  },
+  "historicalSummarySha256": "9a47a4776353ab6da2f0b5ef361877c347fb8d2c0a4071be01994f40422d5ea6",
+  "counts": {
+    "fixtures": 28,
+    "historicalBroken": 28,
+    "currentBroken": 28,
+    "pipelineRefusals": 56,
+    "alreadyFixed": 0,
+    "currentWorking": 0,
+    "currentResourceBlocked": 0
+  },
+  "interpretation": "Current rows are pre-execution whole-contract refusals. No source runtime agreement or new soundness proof is claimed. afterRepair is null because no repair was implemented.",
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+      "upstreamSourceSha256": "a249900c559975086ef3baaa5d8b1e5a3d604f7774efc4890f3f222f796a2284",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "transient_state_variable_initialization.sol:4: solidity.transientState: transient storage is not ordinary persistent state",
+                "function": "constructor()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "gaps": [
+              {
+                "status": "unsupported",
+                "reason": "transient_state_variable_initialization.sol:4: solidity.transientState: transient storage is not ordinary persistent state",
+                "function": "constructor()"
+              }
+            ]
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/01"
+        ],
+        "exitCode": 1,
+        "seconds": 16.333
+      },
+      "reportSha256": "23501fb9480fe49960aeef55eb6110d04c4db176dd36ea48729146f05ebb0a6a",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+      "upstreamSourceSha256": "de29e8367b47982f35543fe1744e62ee2967d3f0bba971b885b947b6a4e3a8b0",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/02"
+        ],
+        "exitCode": 1,
+        "seconds": 2.806
+      },
+      "reportSha256": "f4bceab724d5714f41f0c530451c1706d4f0a23bbc652dfae4e8f357e8ebf2c3",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "typed internal-function-pointer transient cell"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+      "upstreamSourceSha256": "4d448b4df3c6fa8f39a3cf4ec1db65cd45ad3294b155ee2549ae2ac9b784a46d",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/03"
+        ],
+        "exitCode": 1,
+        "seconds": 3.475
+      },
+      "reportSha256": "d16970cfef796b22f7cf2a9ac8e8d3068f1fc645d0aeff3ff94fef86a4b87ae7",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+      "upstreamSourceSha256": "2c0693f394e1024fa2df931dddb51c4bcf07adb666603cf21d2ed0bd309c7da7",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/04"
+        ],
+        "exitCode": 1,
+        "seconds": 2.934
+      },
+      "reportSha256": "7224cb14ed0f9a49df8af26e8a44f359cade18e612b09d1fc7c78450997078b6",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+      "upstreamSourceSha256": "b0b3e80b80c3340af421165b0e0b91843fb54b20f0e1af7d4b9c8047eb94e21e",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/05"
+        ],
+        "exitCode": 1,
+        "seconds": 3.215
+      },
+      "reportSha256": "a13999ea2d394915f73c07d2f3561718a65d3d7d9d46342ab4929dc6d1af7784",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+      "upstreamSourceSha256": "0a096e2927a6f985da829c1e5989d341c67355b31c302bc3d0ded41675bde7b3",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/06"
+        ],
+        "exitCode": 1,
+        "seconds": 3.032
+      },
+      "reportSha256": "a24e90d53441b49f019dcd8600ddff364ec0255d2846420f2a37dc6496ba0061",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+      "upstreamSourceSha256": "dd753fc6e70457b83bf95b84dae300d7761ecfe8c8c12edd3d1d34bb8e6b2fbe",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/07"
+        ],
+        "exitCode": 1,
+        "seconds": 3.866
+      },
+      "reportSha256": "81868dcb0149ac859ab3c0ae8dad3a086d5ae49e1ba82f64270dbfff21089353",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+      "upstreamSourceSha256": "25db2b1778a0488ce963dbb1c6adc76e2e11d45fdcf4acb6931d0ff5cd9d1815",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/08"
+        ],
+        "exitCode": 1,
+        "seconds": 2.705
+      },
+      "reportSha256": "b31cf0ccbe850b2914fe4c7cb1aa53a932d2389d1e8881d98ba64f510228b9af",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+      "upstreamSourceSha256": "37e29cc1b15331783b439efe25a93eb7004833f9c26ec861dfcbd168291ce707",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/09"
+        ],
+        "exitCode": 1,
+        "seconds": 3.23
+      },
+      "reportSha256": "c17993232ef6b24c0e922cd496c0169a4ab4fceb3adf75ce8b2450b8783f828d",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+      "upstreamSourceSha256": "3aca49e59d9f20e07de2699bf06cb94e32114b15715331f1f0f69ae02ac4730f",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/10"
+        ],
+        "exitCode": 1,
+        "seconds": 2.864
+      },
+      "reportSha256": "6b1b160fcdca1d1e719ec0a82b00b8c3619ef06a6f54aeadd2d1350d5d37f284",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+      "upstreamSourceSha256": "2f52eab8aa99744fcb3c2ecd26e9b056760c473c33dd1695451fef6bd95ce4c4",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/11"
+        ],
+        "exitCode": 1,
+        "seconds": 3.033
+      },
+      "reportSha256": "51621db1dfb536652facbbf9966ec669b180afaaf72ba752911606d3de09faaa",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+      "upstreamSourceSha256": "c4497deeee5c73af61010ea3fc02515ab3f743b74a415ae9e2653200792142f6",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/12"
+        ],
+        "exitCode": 1,
+        "seconds": 2.806
+      },
+      "reportSha256": "63a53513bc5edcc90bedcf03c3793e85e7783d80b64ecdb78a84832779d05e05",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+      "upstreamSourceSha256": "d82241d322b6e0376665cb3b86d1037e0a9848f6de9c9f34d00f396d2f93a51f",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/13"
+        ],
+        "exitCode": 1,
+        "seconds": 3.265
+      },
+      "reportSha256": "305c75eeaade111cd9075d9498207bc691f625546204ee0733717ec20fa4cdec",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+      "upstreamSourceSha256": "ad9765e5934b7167f075b7d0169821854ebbf50dddcd1d2b199fb7c5cc28fc7e",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/14"
+        ],
+        "exitCode": 1,
+        "seconds": 2.929
+      },
+      "reportSha256": "805fe51cb33efc51762f95121f4d5e1820babecd2b3072555a0721953a3dce87",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+      "upstreamSourceSha256": "cb62a2ba5f4de6e902a90500098351d24b93624ffdeb471d1b40c3e48efc1c6a",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/15"
+        ],
+        "exitCode": 1,
+        "seconds": 3.455
+      },
+      "reportSha256": "c3ca99b294b08e8cc684df0049b6275768ac1213926978f13f9df08fbadc43b9",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+      "upstreamSourceSha256": "0af462263ab969668d7729eaf4dba63f029944a57893d313937f07fecbd5bd40",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/16"
+        ],
+        "exitCode": 1,
+        "seconds": 3.165
+      },
+      "reportSha256": "a5c1de0d66225fb11fa78fb3a667b133e832583c6e91d5d76906d422e877b131",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+      "upstreamSourceSha256": "5dbdc757e3bae6e6eae1eb5be0b4e2679da9df2b4121df6efedb0ebf631fff07",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/17"
+        ],
+        "exitCode": 1,
+        "seconds": 6.371
+      },
+      "reportSha256": "58ccab5d0509e4e6e20b1f5f66fbce8a1b93bc76367a0bed4c3f8c0200f52402",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+      "upstreamSourceSha256": "e962df3ebe5dc608f4c20d2fbf4e89ed3dd9f45d85d55a9ecb3ffc8805ed2b67",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/18"
+        ],
+        "exitCode": 1,
+        "seconds": 5.009
+      },
+      "reportSha256": "3a119b163e8c77b85005f4f3e971526d13fe14854011c12161dff996fe65974c",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+      "upstreamSourceSha256": "488c005b574062ce9bb1ed2eba20bed24f4f7adc551cfb904dd30e49a1045c0a",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/19"
+        ],
+        "exitCode": 1,
+        "seconds": 5.284
+      },
+      "reportSha256": "a3b376203ed6b358d3ac07faa52e2c8e408787f280e6f4891c0f6cf9dcbba502",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+      "upstreamSourceSha256": "f41c8fbac4563c75581fb8f93a013a87649f13e7c41511f5d8525a0fbc55d18c",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/20"
+        ],
+        "exitCode": 1,
+        "seconds": 5.182
+      },
+      "reportSha256": "fb06301cb099eaafd1ed5f3323add07be9021f7a48789387264c545d70c02ea8",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+      "upstreamSourceSha256": "783840503d70417b84f0e53b5c460d22797d395aa5f048fb4df58bbf0c7069a4",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/21"
+        ],
+        "exitCode": 1,
+        "seconds": 5.998
+      },
+      "reportSha256": "831324a7a463e33b8abbc21b569e5360d4679ebfd0489e95500e82575e4787f6",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+      "upstreamSourceSha256": "28f1757c696cbf235168dae5c61f17c4edab6f85b622c2b2be58503caa910395",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/22"
+        ],
+        "exitCode": 1,
+        "seconds": 5.541
+      },
+      "reportSha256": "b206017c7e8cb7bf99cae4418302623b540faca05bc2207b1a19ddea53f4e3dc",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+      "upstreamSourceSha256": "31c83ca1936e7e28722f75dfff52a4909342c9ac26c33ea7205c65e4eb25ca72",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/23"
+        ],
+        "exitCode": 1,
+        "seconds": 4.382
+      },
+      "reportSha256": "275c754d4fff556296412b6a265f3f9681c3a0e88a8cffaf96818d51258ab1a2",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+      "upstreamSourceSha256": "7027afd37224c8625bc82c918320ddabd6b8d5fe3407adede470db5ee6fe0967",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/24"
+        ],
+        "exitCode": 1,
+        "seconds": 3.051
+      },
+      "reportSha256": "8f71ee8b470a47a97c5e4eed38545a05978ce8b649a9b27f77094605c7c38e2c",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+      "upstreamSourceSha256": "f721c9d5b5f96fc7e1008a3f70bb6698a120c3d27b0337c00e627ac975f21b56",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/25"
+        ],
+        "exitCode": 1,
+        "seconds": 4.081
+      },
+      "reportSha256": "021eafb3fc9fd50702fa1cf05b123207f5d3bdc35417c60b372a7a521b244612",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+      "upstreamSourceSha256": "fb88443c14c6d90b9dce5e9a44f4667383a6365ab1f3730040d062e9f96eae97",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/26"
+        ],
+        "exitCode": 1,
+        "seconds": 3.492
+      },
+      "reportSha256": "49ea2366c4f6e483765644cbe2229aec92bd49b220062f00974dc3b7f9be9df8",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": [
+        "assembly/physical-layout behavior"
+      ]
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+      "upstreamSourceSha256": "19e6c45d3d512b1bf64ae1a451d3430d491dde1b41bb1ca2da916ff6c3a2fc47",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/27"
+        ],
+        "exitCode": 1,
+        "seconds": 3.646
+      },
+      "reportSha256": "c47925c676c9bf6c5d1478ca073ac7fdddd4c341cf5fdfa72c424535dd0a9561",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+      "upstreamSourceSha256": "b2eb96c2b63d186964446e288a8e207f00e6ca2600a50c8ce20a1448f8f6460f",
+      "historical": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solc_import: the initializers are left out: solidity.transientState: transient storage is not ordinary persistent state",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          }
+        ]
+      },
+      "current": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          }
+        ]
+      },
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/before/28"
+        ],
+        "exitCode": 1,
+        "seconds": 4.203
+      },
+      "reportSha256": "8735f039fcd9312139869de4499c8909445ea4f4128b5223e7684021a2371b61",
+      "afterRepair": null,
+      "additionalRequirementsBeyondSourceIntegration": []
+    }
+  ],
+  "commonRemainingRequirement": "Implement ordinary typed source transient storage with scoped calculus soundness, call/delegate ownership, rollback and transaction-entry reset. Empty additionalRequirementsBeyondSourceIntegration does not mean implemented or passing.",
+  "historicalBaseline": {
+    "baseCommit": "cadb628c",
+    "resultsImportedAt": "006fcd593f5beeb540e7adf2bc76de4638566924",
+    "summary": "tests/upstream/results/summary.json",
+    "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+    "freshFailuresOnCurrentMaster": false
+  }
+}

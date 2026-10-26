@@ -147,3 +147,157 @@ Semantics follow the manifest-pinned [Solidity v0.8.38 transient-storage
 chapter](https://github.com/argotorg/solidity/blob/1835d247de183f23e7b0e2bc4a50732af525b77c/docs/contracts/transient-storage.rst).
 The source/EVM tests use actual zero-value self-calls, successful descendants,
 an ancestor revert, static execution and top-level transaction boundaries.
+
+## Group 09 source-integration reproduction (2026-10-26)
+
+Status: **incomplete / reproduction only**. No source-integration repair was
+implemented. This evidence does not upgrade `transientState`, and is not a
+`patch_ready` handoff. Ordinary transient declarations remain refused.
+
+The attached managed executor was used at `/workspace/solidity-lean`, with
+`/workspace/.setup/activate.sh` sourced. The independent branch
+`codex/group09-transient-source` starts at current `origin/master`
+`006fcd593f5beeb540e7adf2bc76de4638566924`. No master push or merge was made.
+Lean reports `4.24.0` (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`), Lake
+`5.0.0-src+797c613`; `lake build Solidity.KeySort` passed. The runtime gate is
+an actual build, not the environment's readiness label.
+
+[The separate reproduction report](../../tests/upstream/group09-transient-source.json)
+retains all 28 assigned historical rows, including `variants[].gaps` where
+present, all fresh mode results, each exact command, fixture SHA-256, provenance
+and elapsed time. Historical `tests/upstream/results` and pinned source and
+expectation bytes are unchanged. `afterRepair` is null because no repair was
+implemented; it does not denote a second run or a passing result.
+
+All 28 fixtures were historically broken and remain broken in the current
+runner. All 56 required legacy/viaIR variants stop at the whole-contract
+`solidity.transientState` guard before runtime execution. None is already fixed;
+none of these isolated runs timed out or exhausted fuel. No observations were
+removed and no runtime agreement is claimed. The current reason is:
+
+> transient declarations require transaction-local execution; this contract is not supported yet
+
+The default 120,000 ms timeout and 1,000 loop fuel were retained. The 28 isolated
+commands took 119.353 seconds in total, including repeated verification/build
+checks (not a Lean semantic performance benchmark). Their command pattern is:
+
+```sh
+source /workspace/.setup/activate.sh
+node scripts/solidity-upstream.mjs verify
+node scripts/solidity-upstream.mjs run \
+  --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js \
+  --filter test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol \
+  --batch-size 1 --out .lake/upstream/group09/before/01
+```
+
+The report supplies the other 27 full paths and distinct output directories.
+The SHA-checked compiler is `0.8.38+commit.1835d247.Emscripten.clang`, SHA-256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+The archive hash is
+`9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d`;
+the runner hash is
+`c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468`.
+The fresh model hash is
+`c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`;
+the historical model hash is
+`c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df`.
+
+### Required migration and retained exclusions
+
+The read-only finder and independent skeptic both confirmed the following
+interfaces still need coordinated implementation and soundness proofs:
+
+- `State` has persistent storage only. `Contract`'s ordinary roots cannot
+  represent transient declarations. Source declaration identity, primitive
+  widths/signedness and function-pointer types must survive elaboration.
+- `TGFrame`, `FrameKeeps`, modifies sets and `Fml.anonHavoc` do not constrain
+  or quantify transient cells. Typed terms/updates, callback reading, loops,
+  recursive/function contracts and state reconstruction must migrate together.
+- `Tools.Upstream.replay` executes `Prog.runF` and retains `o.st.glob`.
+  It does not enter through `Transient.Program.transact`, which supplies the
+  supplement's fresh cells. Deployment effects, transaction reset and caught
+  descendant rollback must be connected to the actual source execution path.
+- The supplement supports zero-value self-calls. Distinct owner identities and
+  delegate ownership are absent; ordinary `ContractWorld` library execution
+  cannot supply those transient semantics merely by linking the modules.
+- `Calculus.Transient` bridges ordinary proofs and supplemental sequencing;
+  it does not implement transient scoped terms, taclets or source proofs.
+
+No representation refactor was attempted. History records `1a78f65f`'s core
+layering for checking speed and `2c1ce2e7`'s modifies-set loop frames. A future
+migration must warn about checking cost and preserve these interfaces' purpose.
+Removing admission guards alone would give persistent semantics to transaction
+storage and is unsound.
+
+Actual fixture source, rather than filename inference, identifies seven
+assembly/physical-observation exclusions that must remain even after typed
+source integration:
+
+- `inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol`
+- `storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol`
+- `storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol`
+- `storageLayoutSpecifier/transient_state_variable_slot_offset.sol`
+- `variables/transient_state_variable_cleanup_assignment.sol`
+- `variables/transient_state_variable_cleanup_tstore.sol`
+- `variables/transient_state_variable_slot_inline_assembly.sol`
+
+These are under `test/libsolidity/semanticTests/`. The function-pointer fixture
+also needs a typed internal-function-pointer transient cell, beyond the current
+primitive-only supplemental layout. The other 20 fixtures are not excluded by
+this review: their ordinary source semantics remain unimplemented. In
+particular, `state_variable_struct.sol`, `state_variables_transient.sol` and
+`transient_state_variable_slots_and_offsets.sol` contain no assembly and must
+not be excluded solely on their names or layout syntax. Required pipelines,
+all vectors and all observations remain obligations.
+
+### Reproduction validation
+
+No Lean MCP diagnostics tools are exposed in this thread. The repository's
+`lean-verify` skill was read; configured Lake commands were used instead.
+No Lean code, proof limit, premise, expectation, axiom or dependency changed.
+There are no new soundness theorems in this evidence patch.
+
+- Snapshot verification: all 11,622 files passed.
+- `lake build Solidity.KeySort Solidity.Tools.Upstream`: passed on retry.
+  The initial concurrent build exited 135 in `Tools.Run`; the successful
+  build and all fixture commands subsequently completed. Full logs are in
+  `/workspace/.setup/logs/group09-*`; this incident is not a source verdict.
+- `node --test --test-isolation=none scripts/solidity-upstream.test.mjs`:
+  all 14 passed with temporary-file write access. The first read-only-sandbox
+  attempt failed on `mkdtemp`, before rerunning successfully.
+- `lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072`:
+  all five existing sequencing/rollback/inconclusive-halt replay checks passed.
+- `lake build Solidity.Semantics.Transient Solidity.Calculus.Transient`: passed.
+- `node scripts/check-orphans.mjs`: 667 reachable, zero orphans.
+- `node scripts/check-layers.mjs`: 143 core modules, none reaches elaborator.
+- `node scripts/check-automatic.mjs --strict`: 491 automatic, 61 budgeted,
+  11 refuted, zero pending.
+- `./scripts/check-testsuite.sh --solkey tests/migration/solkey/keyext.solidity.examples`:
+  passed (552 derived, 11 refuted, one excluded, zero pending). The activation
+  script's external `SOLKEY_EXAMPLES` lacks its adjacent pin manifest, so the
+  frozen repository snapshot was supplied explicitly.
+- `lake exe solkeycheck --key tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key`:
+  passed, 377 parsed taclets and all 131 read-bearing annotations covered.
+
+Finder/skeptic reviews were read-only and opened no Lean workers. The skeptic
+verified all exact paths, source hashes, provenance and 56 refusal variants;
+confirmed the migration blockers; and rejected filename-based exclusions.
+It also checked pipeline selection: `Frontend.Import` derives evaluation
+order from compiler provenance when no explicit option is given. No pipeline
+selection defect is claimed here. Both reviews distinguish reproducible refusal
+from execution coverage. The source-integration task remains outstanding.
+
+Additional completed controls:
+
+- `lake build Solidity.Examples.Tactics.TransientStorage Solidity.Frontend.Testing`:
+  passed (244 jobs including cached dependencies). Existing `static_preserves`,
+  `attempt_rollback`, `transact_ordinary`, `holds_bind` and `ordinary_spec_box`
+  each printed exactly `[propext, Classical.choice, Quot.sound]`.
+- `node --test --test-isolation=none scripts/transient-storage.test.mjs`:
+  passed, including whole-contract refusal and the persistent positive/negative
+  controls (8.729 seconds). This is a safety regression, not transient source
+  execution coverage.
+- The independent skeptic also checked the written report against the raw
+  isolated reports. Its ambiguity finding was fixed: the field is now
+  `additionalRequirementsBeyondSourceIntegration`, and a common source-integration
+  requirement applies explicitly to every row, including empty additional lists.
