@@ -211,7 +211,7 @@ open Lean Elab Command Term Meta in
     let mut roots : Array Lean.Term := #[]
     for e in (envs?.map (·.getElems)).getD #[] do
       let `(runEnv| $k:ident := $v) := e | throwErrorAt e "#run: expected `name := value`"
-      let n := k.getId.toString
+      let n := (k.getId.toString false)
       match n with
       | "msg.sender" => sender ← `(some ($v : Int))
       | "msg.value" => value ← `(some ($v : Int))
@@ -266,7 +266,7 @@ open Lean Elab Command Term Meta in
     let mut time : Lean.Term ← `(0)
     for e in (envs?.map (·.getElems)).getD #[] do
       let `(runEnv| $k:ident := $v) := e | throwErrorAt e "#deploy: expected `name := value`"
-      match k.getId.toString with
+      match (k.getId.toString false) with
       | "msg.sender" => sender := v
       | "msg.value" => value := v
       | "block.timestamp" => time := v

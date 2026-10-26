@@ -101,6 +101,10 @@ inductive Src (C : Contract) (Γ : Ctx) : Ty → Type where
   | fixedCopy {E : Ty} {n : Nat} {R : RefTy} (p : SPath C Γ (.ref (.fixed E n)))
       (shape : FixedCopy E n R) (h : E.mapFree = true) : Src C Γ (.ref R)
   | copyMem {R : RefTy} (p : MPath C Γ (.ref R)) : Src C Γ (.ref R)
+  /-- A fixed memory snapshot copied to a compatible storage outer shape.
+  The memory path already carries mapping-freedom. -/
+  | fixedCopyMem {E : Ty} {n : Nat} {R : RefTy}
+      (p : MPath C Γ (.ref (.fixed E n))) (shape : FixedCopy E n R) : Src C Γ (.ref R)
 
 /-- What a storage alias is bound to: a path, or the slot `b.push()` appends. -/
 inductive ARhs (C : Contract) (Γ : Ctx) (R : RefTy) where
@@ -504,6 +508,7 @@ def Src.toStr {Γ : Ctx} {T : Ty} (ns : List Var) : Src C Γ T → String
   | .copy p _ => p.toStr ns
   | .fixedCopy p _ _ => p.toStr ns
   | .copyMem p => p.toStr ns
+  | .fixedCopyMem p _ => p.toStr ns
 
 def ARhs.toStr {Γ : Ctx} {R : RefTy} (ns : List Var) : ARhs C Γ R → String
   | .path p => p.toStr ns
@@ -942,6 +947,7 @@ def Src.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} : Src C Γ T → Src C Δ T
   | .copy p hm => .copy (p.wk h) hm
   | .fixedCopy p shape hm => .fixedCopy (p.wk h) shape hm
   | .copyMem p => .copyMem (p.wk h)
+  | .fixedCopyMem p shape => .fixedCopyMem (p.wk h) shape
 
 def ARhs.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {R : RefTy} : ARhs C Γ R → ARhs C Δ R
   | .path p => .path (p.wk h)

@@ -330,6 +330,11 @@ theorem Src.valueT_all {σ : State C Γ} {T : Ty} (hg : G T) (hs : σ.storage.Al
     obtain ⟨sv, _, h⟩ := tbind_ok_inv h
     cases h
     exact hP.plain _ hg (shape.apply_plain sv hm)
+  | .fixedCopyMem p shape, v, h => by
+    obtain ⟨mv, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact hP.plain _ hg (shape.apply_plain (MVal.copyMToSt σ.heap mv) p.mapFree)
+
 
 include hP hG
 

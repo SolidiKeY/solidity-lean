@@ -7,6 +7,11 @@ the others link to it.
 |---|---|
 | [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
+| [feature-work/aggregates.md](feature-work/aggregates.md) | Inline arrays, fixed memory snapshots, local reference tuples, slice effects and validation limits. |
+| [feature-work/recursive-types.md](feature-work/recursive-types.md) | Guarded type graphs and checked standalone storage foundation; ordinary interpreter integration remains pending. |
+| [feature-work/abi-hashes.md](feature-work/abi-hashes.md) | ABI boundary repairs, ERC-7201, computed recovery, reference vectors and remaining typed interfaces. |
+| [feature-work/declarations-metadata.md](feature-work/declarations-metadata.md) | Declaration metadata implementation, focused proofs, review findings and remaining frontend gaps. |
+| [feature-work/source-admission.md](feature-work/source-admission.md) | Compiler provenance, declaration-aware admission, exact literals, raw names and validation boundaries. |
 | [latex.md](latex.md) | LeanTeX paper notation, symbol-definition links, checked traces and the Lean LaTeX/JSON export API. |
 | [module-map.md](module-map.md) | One row per module: where things live. |
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, large files split by topic, one soundness file per rule: the layering check, the fan-out tool and the measured costs. |

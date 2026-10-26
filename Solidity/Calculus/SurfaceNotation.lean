@@ -221,10 +221,10 @@ and a member. -/
 def isSelfBalance (t : TSyntax `dl_term) (f : Ident) : Bool :=
   match t with
   | `(dl_term| $h:ident($as,*)) =>
-    h.getId.toString == "address" && f.getId.toString == "balance" &&
+    (h.getId.toString false) == "address" && (f.getId.toString false) == "balance" &&
       match as.getElems.toList with
       | [a] => match a with
-        | `(dl_term| $x:ident) => x.getId.toString == "this"
+        | `(dl_term| $x:ident) => (x.getId.toString false) == "this"
         | _ => false
       | _ => false
   | _ => false
@@ -267,7 +267,7 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
   | `(dl_term| select(net, at($a))) => do `(RawTerm.app "net" [$(← expandTerm a)])
   | `(dl_term| $f:ident($args,*)) => do
-      `(RawTerm.app $(quote f.getId.toString) [$(← args.getElems.mapM expandTerm),*])
+      `(RawTerm.app $(quote (f.getId.toString false)) [$(← args.getElems.mapM expandTerm),*])
   | stx@`(dl_term| ‹ $_:term ›) => noEscape stx
   | stx@`(dl_term| $_:dl_term ⊕ $_:dl_term) | stx@`(dl_term| ⊖ $_:dl_term)
   | stx@`(dl_term| $_:dl_term ± $_:dl_term) | stx@`(dl_term| $_:dl_term ⊕⊕) => schemaOnly stx
@@ -322,8 +322,8 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
         | `(dl_term| if($a = $t:ident) then $n':ident else store(net, at($a'), net($a'') - $v))
         | `(dl_term| if($a = $t:ident) then $n':ident
               else store(net, at($a'), select(net, at($a'')) - $v)) =>
-          unless t.getId.toString == "this" do Macro.throwErrorAt t "a payment compares with `this`"
-          unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
+          unless (t.getId.toString false) == "this" do Macro.throwErrorAt t "a payment compares with `this`"
+          unless (n'.getId.toString false) == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
           unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
             Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
           Macro.throwErrorAt r "use `pay(receiver, amount)`: a payment updates both ledger and balance"
@@ -379,9 +379,9 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $a:dl_term > $b:dl_term) => cmp ``BinOp.gt a b
   | `(dl_fml| $a:dl_term >= $b:dl_term) => cmp ``BinOp.ge a b
   | `(dl_fml| ∀ $T:ident $x:ident; $φ:dl_fml) => do
-      `(RawFml.all $(← specSort T) $(quote x.getId.toString) $(← expandFml r φ))
+      `(RawFml.all $(← specSort T) $(quote (x.getId.toString false)) $(← expandFml r φ))
   | `(dl_fml| ∃ $T:ident $x:ident; $φ:dl_fml) => do
-      `(RawFml.not (RawFml.all $(← specSort T) $(quote x.getId.toString)
+      `(RawFml.not (RawFml.all $(← specSort T) $(quote (x.getId.toString false))
         (RawFml.not $(← expandFml r φ))))
   | `(dl_fml| ¬ $φ:dl_fml) => do `(RawFml.not $(← expandFml r φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do

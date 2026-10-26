@@ -258,7 +258,7 @@ def Src.Frag {T : Ty} : Src C Γ T → Bool
   | .val v => v.MemFree
   | .copy p _ => p.MemFree
   | .fixedCopy p _ _ => p.MemFree
-  | .copyMem _ => false
+  | .copyMem _ | .fixedCopyMem .. => false
 
 /-- An alias's right-hand side, reading no memory. -/
 def ARhs.MemFree {R : RefTy} : ARhs C Γ R → Bool
@@ -363,7 +363,7 @@ theorem Src.frag_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} (r : Src C Γ T) :
   | val v => exact Val.memFree_wk h v
   | copy p _ => exact SPath.memFree_wk h p
   | fixedCopy p _ _ => exact SPath.memFree_wk h p
-  | copyMem _ => rfl
+  | copyMem _ | fixedCopyMem _ _ => rfl
 
 theorem ARhs.memFree_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {R : RefTy} (r : ARhs C Γ R) :
     (r.wk h).MemFree = r.MemFree := by
@@ -712,7 +712,7 @@ theorem copyStep_saveLike {R : RefTy} (l : Loc C Γ (.ref R)) (hm : (Ty.ref R).m
 theorem assignStep_saveLike {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) (hl : l.MemFree = true)
     (hr : r.Frag = true) : (assignStep k l r).SaveLike := by
   cases r with
-  | copyMem q => exact absurd hr Bool.false_ne_true
+  | copyMem q | fixedCopyMem q _ => exact absurd hr Bool.false_ne_true
   | fixedCopy q shape hm => cases l <;> exact Premise.saveLike_save _ _
   | val e =>
     simp only [Src.Frag] at hr

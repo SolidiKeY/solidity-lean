@@ -233,7 +233,7 @@ end
 def Src.guard {Γ : Ctx} {T : Ty} : Src C Γ T → Option (Val C Γ .bool)
   | .val v => v.guard
   | .copy p _ | .fixedCopy p _ _ => p.guard
-  | .copyMem p => p.guard
+  | .copyMem p | .fixedCopyMem p _ => p.guard
 
 def ARhs.guard {Γ : Ctx} {R : RefTy} : ARhs C Γ R → Option (Val C Γ .bool)
   | .path p => p.guard
@@ -482,7 +482,7 @@ end
 def Src.panics {Γ : Ctx} {T : Ty} : Src C Γ T → PGuards C Γ
   | .val v => v.panics
   | .copy p _ | .fixedCopy p _ _ => p.panics
-  | .copyMem p => p.panics
+  | .copyMem p | .fixedCopyMem p _ => p.panics
 
 def ARhs.panics {Γ : Ctx} {R : RefTy} : ARhs C Γ R → PGuards C Γ
   | .path p => p.panics

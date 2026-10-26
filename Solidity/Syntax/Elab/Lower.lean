@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Values
+import Solidity.ERC7201
 
 /-!
 # The elaborator's lowerings
@@ -20,6 +21,131 @@ variable [FreshNames]
 section Elab
 
 variable (C)
+
+
+/-! ### Inline arrays -/
+
+/-- Numeric source types that may widen implicitly. Address and byte types
+retain their own source identity instead of becoming integers here. -/
+def inlineNumeric? : RawTy → Option (PrimTy × Nat)
+  | .named s =>
+    if s == "address" then none else
+    match narrowTy? s, PrimTy.ofName? s with
+    | some (p, n), _ => if p.isNumeric then some (p, n) else none
+    | none, some p => if p.isNumeric then some (p, 256) else none
+    | _, _ => none
+  | _ => none
+
+/-- The implicit conversions relevant to a literal's common element type.
+Reference elements retain exactly their element widths and finite shape. -/
+def inlineImplicit (a b : RawTy) : Bool :=
+  if a.toStr == b.toStr then true else
+  match a, b with
+  | .named s, .named t =>
+    match bytesTy? s, bytesTy? t with
+    | some n, some m => n ≤ m
+    | some _, none | none, some _ => false
+    | none, none =>
+      match inlineNumeric? a, inlineNumeric? b with
+      | some (p, n), some (q, m) => p == q && n ≤ m
+      | _, _ => false
+  | _, _ => false
+
+/-- A still-rational literal converts directly to the current type, before
+considering the literal's mobile type (solc's Type::commonType). -/
+def inlineLiteralFits (T : RawTy) (e : RawExpr) : Bool :=
+  match T with
+  | .named s =>
+    match bytesTy? s with
+    | some n => match e.bytesLit?, e.litVal? with
+      | some bs, _ => bs.length ≤ n
+      | none, some v => v == 0
+      | _, _ => false
+    | none =>
+      if s == "string" then e.bytesLit?.isSome else
+      match inlineNumeric? T, e.litVal? with
+      | some (p, n), some v =>
+        let (lo, hi) := intRange p n
+        lo ≤ v && v ≤ hi
+      | _, _ => false
+  | _ => false
+
+mutual
+/-- An inline element's source type, before hoisting erases casts and aliases.
+The result is raw syntax only; allocation below rechecks it into indexed
+memory statements. Nominal kinds not retained by the current frontend fail
+rather than becoming integer elements. -/
+partial def inlineExprTy (Γ : ECtx) (e₀ : RawExpr) : Except String RawTy := do
+  let e ← e₀.foldConst
+  if let some v := e.litVal? then
+    let (p, n) := mobileTy v v
+    let (lo, hi) := intRange p n
+    unless lo ≤ v && v ≤ hi do throw "an inline array element has no mobile integer type"
+    return .named (tyName p n)
+  if e.bytesLit?.isSome then return .named "string"
+  if (fnTyOfExpr C Γ e).isSome then
+    throw "function-valued inline array elements need their nominal source type"
+  if (markOf? C Γ "#enum" e).isSome then
+    throw "enum-valued inline array elements need their declaration identity"
+  if let some n := bytesOf? C Γ e then return .named s!"bytes{n}"
+  if (markOf? C Γ "#address" e).isSome then return .named "address"
+  if (exprShape C Γ e).contains ("#string", 1) then return .named "string"
+  if let some (tb, k, T) := widthPath? C Γ e then return rawTyW tb T k
+  match e with
+  | .call "#array" es => return .fixed (← inlineArrayTy Γ es) es.length
+  | .newArr T _ =>
+    if let .named s := T then
+      if dynBytesTy s then return T
+    let (t, ws) ← elabTyW C T
+    return rawTyW ws t ""
+  | .call f _ =>
+    if dynBytesTy f then return .named f
+    if f == "string.concat" then return .named "string"
+    if encodeBuiltin f && (lookupBy f C.funs).isNone then return .named "bytes"
+    if let some (p, n) := castTy? f then
+      return .named (if f == "address" then "address" else tyName p n)
+    if let some d := lookupBy f C.funs then
+      let some (r, t) := d.ret | throw s!"{f} does not return one inline array element"
+      return rawTyW d.widths t r
+    if let some s := C.structName? f then return .named s
+    throw s!"cannot infer the inline array element type of {e.toStr}"
+  | .named f _ _ =>
+    if let some s := C.structName? f then return .named s
+    throw s!"cannot infer the inline array element type of {e.toStr}"
+  | .incDec _ l | .assign l _ | .opAssign _ l _ => inlineExprTy Γ l
+  | .index b _ =>
+    match ← inlineExprTy Γ b with
+    | .array T | .fixed T _ => pure T
+    | _ => throw s!"{b.toStr} is not an inline array element's array base"
+  | .field _ "length" => pure (.named "uint")
+  | .name x =>
+    if (lookupBy x Γ).isNone && C.funs.any (·.1 == x) then
+      throw "function-valued inline array elements need their nominal source type"
+    let t ← synth C Γ.toNCtx e
+    match t.ty with
+    | .prim p => pure (.named (tyName p (widthIn C Γ e)))
+    | .ref R => pure (rawTyW (exprShape C Γ e) (.ref R) "")
+  | _ =>
+    let t ← synth C Γ.toNCtx e
+    match t.ty with
+    | .prim p => pure (.named (tyName p (widthIn C Γ e)))
+    | .ref R => pure (rawTyW (exprShape C Γ e) (.ref R) "")
+
+/-- Solc starts at the first element's mobile type and folds implicit
+conversion over later elements. The assignment target contributes no type. -/
+partial def inlineArrayTy (Γ : ECtx) (es : List RawExpr) : Except String RawTy := do
+  let a :: rest := es | throw "an inline array is nonempty"
+  let mut T ← inlineExprTy Γ a
+  for e₀ in rest do
+    let e ← e₀.foldConst
+    if inlineLiteralFits T e then continue
+    let U ← inlineExprTy Γ e
+    if inlineImplicit U T then continue
+    if inlineImplicit T U then T := U
+    else throw s!"inline array elements {T.toStr} and {U.toStr} have no common type"
+  pure T
+end
+
 
 /-! ### Inlining a call -/
 
@@ -561,8 +687,8 @@ word, big-endian (an `intN` sign-extended, a `bytesN` left-aligned, a
 `bool` `0`/`1`), a `bytes`/`string` as an offset in the head and its length
 and bytes, padded to 32, in the tail; `abi.encodePacked` (and the two
 `concat`s) writes each value in its own width and a byte string's bytes
-bare.  An `address` and an enum are `uint`s to the model, so packed they
-take 32 bytes, not solc's 20 and 1. -/
+bare. Addresses, enums and external function values retain their source
+widths (20, 1 and 24 bytes respectively). -/
 
 /-- How `abi.encode` sees a value: its static type. -/
 inductive AbiKind where
@@ -597,14 +723,17 @@ def AbiKind.ofValue (p : PrimTy) (ws : List (String × Nat)) (k : String) : AbiK
     match lookupBy (k ++ "#bytes") ws with
     | some n => .bytesN n
     | none =>
-      if (lookupBy (k ++ "#address") ws).isSome then .uint 160
+      if ((fnRow? ws k).bind fnParts?).any (·.2.2) then .bytesN 24
+      else if (lookupBy (k ++ "#address") ws).isSome then .uint 160
       else if (lookupBy (k ++ "#enum") ws).isSome then .uint 8
       else .uint ((lookupBy k ws).getD 256)
 
 /-- A struct's members' kinds, if every member is a value. -/
 def AbiKind.ofStruct (s : String) : Option (List (String × AbiKind)) :=
   (structDef s).mapM fun (f, T) => match T with
-    | .prim p => some (f, AbiKind.ofValue p (structWidths s) f)
+    | .prim p =>
+      if ((fnRow? (structWidths s) f).bind fnParts?).any (!·.2.2) then none
+      else some (f, AbiKind.ofValue p (structWidths s) f)
     | .ref _ => none
 
 /-- The words a value of the kind takes in `abi.encode`'s head. -/
@@ -848,7 +977,9 @@ def AbiTy.flat : AbiTy → Bool
 keyed below `k`: `none` for a mapping. -/
 partial def AbiTy.of (T : Ty) (ws : List (String × Nat)) (k : String) : Option AbiTy :=
   match T with
-  | .prim p => some (.val (AbiKind.ofValue p ws k))
+  | .prim p =>
+    if ((fnRow? ws k).bind fnParts?).any (!·.2.2) then none
+    else some (.val (AbiKind.ofValue p ws k))
   | .ref (.array t) =>
     if lookupBy (k ++ "[]#bytes") ws == some 1 then some .bytes
     else (AbiTy.of t ws (k ++ "[]")).map .arr
@@ -1053,12 +1184,25 @@ def abiEncodeNested? (abiKind : RawExpr → ElabM AbiKind)
     .decl (.named "uint") p (some (.num base))] ++ selW ++ (← abiTupleWriteGen r ms p)
   return some (P ++ (← elabStmtsP S), .name r)
 
+/-- Check a byte interval before forming its end. The subtraction occurs
+only after the offset check, so hostile words cannot overflow the check. -/
+def abiBounds (d : ByteSrc) (o n : RawExpr) : List RawStmt :=
+  [.require (.binop .le o d.len),
+   .require (.binop .le n (.binop .sub d.len o))]
+
+/-- The complete element head must fit before allocation or iteration.
+Division avoids multiplying an untrusted length by its stride. -/
+def abiSeqBounds (d : ByteSrc) (stride : Nat) (n q : RawExpr) : List RawStmt :=
+  [.require (.binop .le q d.len)] ++
+  if stride == 0 then [] else
+    [.require (.binop .le n (.binop .div (.binop .sub d.len q) (.num stride)))]
+
 /-- The word at `o` of `d` read at the kind `k`, checked within the data
 first: the statements, and its value. -/
 def abiWordAt (d : ByteSrc) (k : AbiKind) (o : RawExpr) : ElabM (List RawStmt × RawExpr) := do
   let w ← abiFresh
   let some (reads, v) := abiDecodeAt k.tyName d w o | throw "internal: a kind abi.decode reads"
-  pure (.require (.binop .le (o.addN 32) d.len) :: reads, v)
+  pure (abiBounds d o (.num 32) ++ reads, v)
 
 mutual
 
@@ -1076,8 +1220,7 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
     let x := toString (← freshCapture "mv")
     let j ← abiFresh
     let start : RawExpr := p.addN 32
-    pure (s1 ++ [.decl (.named "uint") n (some L),
-      .require (.binop .le (.binop .add start (.name n)) d.len),
+    pure (s1 ++ [.decl (.named "uint") n (some L)] ++ abiBounds d start (.name n) ++ [
       .declMemory T x (some (.newArr T (.name n))),
       .decl (.named "uint") j (some (.num 0)),
       .whileLoop {} (.binop .lt (.name j) (.name n))
@@ -1088,18 +1231,20 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
     let (s1, L) ← abiWordAt d (.uint 256) p
     let n ← abiFresh
     let x := toString (← freshCapture "mv")
-    pure (s1 ++ [.decl (.named "uint") n (some L),
+    pure (s1 ++ [.decl (.named "uint") n (some L)] ++
+      abiSeqBounds d e.headSize (.name n) (p.addN 32) ++ [
       .declMemory T x (some (.newArr T (.name n)))] ++
       (← abiSeqReadGen d e T.elem (.name n) (p.addN 32) fun i v => .assign (.index (.name x) i) v) ++
       [put (.name x)])
   | .fixed e m =>
     let x := toString (← freshCapture "mv")
-    pure (.declMemory T x none ::
+    pure (abiSeqBounds d e.headSize (.num m) p ++ [.declMemory T x none] ++
       (← abiSeqReadGen d e T.elem (.num m) p fun i v => .assign (.index (.name x) i) v) ++
       [put (.name x)])
   | .tuple s ms =>
     let x := toString (← freshCapture "mv")
-    let mut ss : List RawStmt := [.declMemory T x none]
+    let mut ss : List RawStmt := abiBounds d p (.num ((ms.map (·.2.headSize)).sum)) ++
+      [.declMemory T x none]
     let mut hp := 0
     for (f, mt) in ms do
       let hpos : RawExpr := p.addN hp
@@ -1107,7 +1252,8 @@ partial def abiReadGen (d : ByteSrc) (t : AbiTy) (T : RawTy) (p : RawExpr)
       if mt.dynamic then
         let (s1, off) ← abiWordAt d (.uint 256) hpos
         let at0 ← abiFresh
-        ss := ss ++ s1 ++ [.decl (.named "uint") at0 (some (.binop .add p off))] ++
+        ss := ss ++ s1 ++ abiBounds d p off ++
+          [.decl (.named "uint") at0 (some (.binop .add p off))] ++
           (← abiReadGen d mt (abiMemberTy s f) (.name at0) putF)
       else
         ss := ss ++ (← abiReadGen d mt (abiMemberTy s f) hpos putF)
@@ -1126,11 +1272,12 @@ partial def abiSeqReadGen (d : ByteSrc) (e : AbiTy) (T : RawTy) (L q : RawExpr)
   let body ← if !e.dynamic then abiReadGen d e T (.name pos) (put (.name i)) else do
     let (s1, off) ← abiWordAt d (.uint 256) (.name pos)
     let at0 ← abiFresh
-    pure (s1 ++ [.decl (.named "uint") at0 (some (.binop .add (.name qn) off))] ++
+    pure (s1 ++ abiBounds d (.name qn) off ++
+      [.decl (.named "uint") at0 (some (.binop .add (.name qn) off))] ++
       (← abiReadGen d e T (.name at0) (put (.name i))))
-  pure [.decl (.named "uint") qn (some q), .decl (.named "uint") i (some (.num 0)),
-    .whileLoop {} (.binop .lt (.name i) L)
-      ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])]
+  pure ([.decl (.named "uint") qn (some q)] ++ abiSeqBounds d e.headSize L (.name qn) ++
+    [.decl (.named "uint") i (some (.num 0)), .whileLoop {} (.binop .lt (.name i) L)
+      ([.decl (.named "uint") pos (some posE)] ++ body ++ [next])])
 
 end
 
@@ -1265,8 +1412,8 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
       let body ← word kk (.binop .add start (.binop .mul (.name j) (.num 32)))
         (.assign (.index (.name x) (.name j)))
       pure ([enough] ++ abiAssemble d o (.num (32 * i)) 32 ++
-        [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
-        [.require (.binop .le (.binop .add start (.binop .mul (.name L) (.num 32))) len),
+        abiBounds d (.name o) (.num 32) ++ abiAssemble d L (.name o) 32 ++
+        abiSeqBounds d 32 (.name L) start ++ [
          .declMemory (.array (.named et)) x (some (.newArr (.array (.named et)) (.name L))),
          .decl (.named "uint") j (some (.num 0)),
          .whileLoop {} (.binop .lt (.name j) (.name L))
@@ -1283,23 +1430,26 @@ def encodeSelector? (Γ : ECtx) (f : String) (args : List RawExpr) :
   | "abi.encodeWithSelector", s :: rest => pure (some (s, rest))
   | "abi.encodeWithSignature", s :: rest =>
     match s.bytesLit? with
-    | some bs => pure (some (.num (Keccak.selector (String.mk (bs.map Char.ofNat))), rest))
+    | some bs => pure (some (.num (Keccak.keccak256Nat bs / 2 ^ 224), rest))
     | none => pure (some (.binop .shr (.call "keccak256" [s]) (.num 224), rest))
   | "abi.encodeCall", [g, t] => do
     let rest := match t with
       | .tuple as => as
       | a => [a]
     match g with
+    | e@(.field _ _) =>
+      if let some (_, g) := extMember? C Γ e then
+        if let some sel := fnSelector? C g then return some (.num sel, rest)
+      throw "abi.encodeCall: an external function member is required"
     | .name g =>
-      match fnSelector? C g with
-      | some sel => pure (some (.num sel, rest))
-      | none =>
-        if let some ty := fnTyOf? C Γ g then
-          if let some (_, _, true) := fnParts? ty then
-            let a : RawExpr := .binop .div (.name g) (.num selShift)
-            return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
-        throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
-          function value"
+      if let some ty := fnTyOf? C Γ g then
+        if let some (_, _, true) := fnParts? ty then
+          let a : RawExpr := .binop .div (.name g) (.num selShift)
+          return some (.binop .sub (.name g) (.binop .mul a (.num selShift)), rest)
+      if (lookupBy g Γ).isNone && (C.rootType g).isNone then
+        if let some sel := fnSelector? C g then return some (.num sel, rest)
+      throw s!"abi.encodeCall({g}, …): a function of the contract or an external \
+        function value"
     | _ => throw "abi.encodeCall(f, …): f a function of the contract or a function value"
   | _, _ => pure none
 
@@ -1329,6 +1479,18 @@ def hoistHashWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
   let R ← elabStmtsP [.decl (.named T) y (some (.field (.name b) (hashMember k)))]
   return (P ++ Q ++ R, .name y)
 
+/-- ERC-7201 uses the existing operations, including wrapping subtraction
+inside checked source code. A literal is folded by the same byte formula. -/
+def hoistERC7201With (hoist : RawExpr → ElabM (SProg C × RawExpr))
+    (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
+  let [a] := args | throw "erc7201 takes one string argument"
+  if let some bs := a.bytesLit? then
+    return ([], .num (ERC7201.root (bs.map UInt8.ofNat)).val)
+  let first : RawExpr := .call "uint256" [.call "keccak256" [a]]
+  let before : RawExpr := .binop .subW first (.num 1)
+  let second : RawExpr := .call "uint256" [.call "keccak256" [.call "abi.encode" [before]]]
+  hoist (.binop .band second (.num (2 ^ 256 - 256)))
+
 /-- The kind of an argument of `abi.encode` (`AbiKind`), by its static type. -/
 def abiKind (a : RawExpr) : ElabM AbiKind := do
   if a.bytesLit?.isSome then return .dyn
@@ -1348,9 +1510,14 @@ def abiKind (a : RawExpr) : ElabM AbiKind := do
     let ws := placeShape C Γ a
     match R with
     | .array (.prim p) =>
+      if ((fnRow? ws "[]").bind fnParts?).any (!·.2.2) then
+        throw "ABI encoding an array of internal function values is not allowed"
       if p == .uint && lookupBy "[]#bytes" ws == some 1 then pure .dyn
       else pure (.arr (.ofValue p ws "[]"))
-    | .fixed (.prim p) n => pure (.fixed (.ofValue p ws "[]") n)
+    | .fixed (.prim p) n =>
+      if ((fnRow? ws "[]").bind fnParts?).any (!·.2.2) then
+        throw "ABI encoding an array of internal function values is not allowed"
+      pure (.fixed (.ofValue p ws "[]") n)
     | .struct s =>
       if (AbiKind.ofStruct s).isSome then pure (.tuple s)
       else throw s!"{a.toStr}: a struct with a member that is not a value is not ABI-encoded here"

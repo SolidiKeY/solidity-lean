@@ -195,7 +195,7 @@ theorem Src.lower_size {T : Ty} (r : Src C Γ T) : r.lower.size ≤ 3 * r.size :
   | copy p _ => have := SPath.lower_size p; simp only [Src.lower, Tm.size, Src.size]; omega
   | fixedCopy p _ _ =>
     have := SPath.lower_size p; simp only [Src.lower, Tm.size, Src.size]; omega
-  | copyMem p => have := MPath.lower_size p; simp only [Src.lower, Tm.size, Src.size]; omega
+  | copyMem p | fixedCopyMem p _ => have := MPath.lower_size p; simp only [Src.lower, Tm.size, Src.size]; omega
 
 theorem MSrc.lower_size {T : Ty} (r : MSrc C Γ T) : r.lower.size ≤ 3 * r.size := by
   cases r with
@@ -628,7 +628,7 @@ theorem assignStep_bounded {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
   have hs := UpdElem.save_size l r
   cases r with
   | copyMem p => simp only [assignStep]; exact .upd1 (by omega)
-  | fixedCopy p shape hm => simp only [assignStep]; exact .upd1 (by omega)
+  | fixedCopy p shape hm | fixedCopyMem p shape => simp only [assignStep]; exact .upd1 (by omega)
   | val e =>
     cases l with
     | root r h =>
@@ -939,7 +939,7 @@ theorem pushStep_bounded {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C
         · exact .upd1 (Nat.le_trans (UpdElem.push_size b _) (by omega))
         · bnil
       · bnil
-    | fixedCopy p shape hm =>
+    | fixedCopy p shape hm | fixedCopyMem p shape =>
       simp only [pushStep]
       split
       · exact .upd1 (Nat.le_trans (UpdElem.push_size b _) (by omega))

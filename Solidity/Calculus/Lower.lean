@@ -113,6 +113,7 @@ def Src.lower {T : Ty} : Src C Γ T → Tm C Γ (.sv T)
   | .copy p _ => .app2 .sfind (.app0 .storage) p.lower
   | .fixedCopy p shape _ => .app1 (.fixedCopy shape) (.app2 .sfind (.app0 .storage) p.lower)
   | .copyMem p => .app2 .copyMem (.app0 .memory) p.lower
+  | .fixedCopyMem p shape => .app1 (.fixedCopy shape) (.app2 .copyMem (.app0 .memory) p.lower)
 
 /-- A memory write's source. -/
 def MSrc.lower {T : Ty} : MSrc C Γ T → Tm C Γ (.mv T)

@@ -637,7 +637,7 @@ syntax "pty!(" sol_ty ")" : term
 
 macro_rules
   | `(pty!($x:ident)) =>
-      match PrimTy.ofName? x.getId.toString with
+      match PrimTy.ofName? (x.getId.toString false) with
       | some .uint => `(PrimTy.uint)
       | some .int => `(PrimTy.int)
       | some .bool => `(PrimTy.bool)
@@ -647,7 +647,7 @@ macro_rules
 
 macro_rules
   | `(ty!($x:ident)) =>
-      let s := x.getId.toString
+      let s := (x.getId.toString false)
       match PrimTy.ofName? s with
       | some .uint => `(Ty.uint)
       | some .int => `(Ty.int)

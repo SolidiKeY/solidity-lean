@@ -232,6 +232,40 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let x ← captureRef C "mv" (.mem R) (.newArr T n)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
+  | .call "#sliceIndex" [off, len, k, past] => do
+    let (P, k) ← hoist k
+    let x := toString (← freshCapture "se")
+    let Q ← elabStmtsP [.decl (.named "uint") x (some k)]
+    -- The addition is evaluated only for an in-range relative index.
+    -- The base's own bounds check supplies Panic(0x32) otherwise.
+    let ix := RawExpr.ternary (.binop .lt (.name x) len) (sliceAdd off (.name x)) past
+    let (R, ix) ← hoist ix
+    pure (P ++ Q ++ R, ix)
+  | .call "#sliceAt" [view, k] => do
+    let t := toString (← freshCapture "mv")
+    let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
+    let P ← elabStmtsP pre
+    let (Q, e) ← hoist (.index (.name v.base)
+      (.call "#sliceIndex" [v.off, v.len, k, .field (.name v.base) "length"]))
+    pure (P ++ Q, e)
+  | .call "#sliceLength" [view] => do
+    let t := toString (← freshCapture "mv")
+    let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
+    let P ← elabStmtsP pre
+    let (Q, e) ← hoist v.len
+    pure (P ++ Q, e)
+  | .call "#sliceDecode" (view :: rest) => do
+    let t := toString (← freshCapture "mv")
+    let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
+    let P ← elabStmtsP pre
+    let (Q, e) ← hoist (.call "abi.decode" (.call sliceViewName [.name v.base, v.off, v.len] :: rest))
+    pure (P ++ Q, e)
+  | .call "#array" args => do
+    let T ← ElabM.lift (inlineArrayTy C (← ctx) args)
+    let x := toString (← freshCapture "mv")
+    let Q ← elabStmtsP (.declMemory (.fixed T args.length) x none ::
+      args.zipIdx.map fun (a, i) => .assign (.index (.name x) (.num i)) a)
+    pure (Q, .name x)
   | .call f args => do
     -- a literal of bytes where a `bytes` or a `string` stands: a fresh memory
     -- array of its bytes (`new bytes(n)`, then each byte written)
@@ -241,6 +275,7 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
     let builtin := (← read).funs.all (·.1 != f)
+    if builtin && f == "erc7201" then return ← hoistERC7201With C hoist args
     -- the hashing builtins (`hoistHashWith`)
     if builtin && isHashName f then return ← hoistHashWith C hoist abiMemBytes elabStmtsP f args
     -- `abi.encodeWithSelector(s, …)`, `abi.encodeWithSignature(sig, …)`,
@@ -252,6 +287,15 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         f == "abi.encodeCall") then
       let some (sel, rest) ← ElabM.lift (encodeSelector? C (← ctx) f args)
         | throw s!"{f}: its selector or signature first"
+      -- Only the selector is encoded, but evaluating a computed receiver may
+      -- still panic or have effects. Preserve it before evaluating arguments.
+      let H ← match f, args with
+        | "abi.encodeCall", [.field r _, _] => do
+          if r.isPure then pure [] else
+            let (P, r) ← hoist r
+            let (Q, _) ← captureExpr C r
+            pure (P ++ Q)
+        | _, _ => pure []
       -- a `bytes4` already marked (`bytesPure`) is marked once
       let sel := match sel with
         | .call g [x] => if (abiBytesMark? g).isSome then x else sel
@@ -265,7 +309,7 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       let (Q, rest') ← hoistArgs (rest.map fun a => if a.bytesLit?.isSome then .num 0 else a)
       let rest := (rest.zip rest').map fun (a, a') => if a.bytesLit?.isSome then a else a'
       let (R, e) ← abiEncode true false rest marks (sel := some sel)
-      return (P ++ Q ++ R, e)
+      return (H ++ P ++ Q ++ R, e)
     if builtin && (f == "abi.encode" || f == "abi.encodePacked" || f == "string.concat" ||
         f == "bytes.concat") then
       -- a `bytesN` marked (`abiBytesMark`); a literal byte string is not
@@ -281,6 +325,11 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- `abi.decode(b, (T))`, `#abiDecode(b, T, i, n)` (`abiDecodeWith`)
     if builtin && (f == "abi.decode" || f == abiDecodeName) then
       return ← abiDecodeWith C hoist abiMemBytes elabStmtsP abiDecodeBytes f args
+    if builtin && f == "address" then
+      let [a] := args | throw "an address conversion takes one argument"
+      let (P, a) ← hoist a
+      let (Q, e) ← addressCapture C a
+      return (P ++ Q, e)
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -880,15 +929,15 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
       let (Q, l) ← hoist l
       pure (P ++ Pc ++ Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
-      if (castTy? f).isSome || (lookupBy f C.enums).isSome ||
-          (byteBuiltin f && (← read).funs.all (·.1 != f)) then hoistAssign l r
+      if (castTy? f).isSome || f == "address" || (lookupBy f C.enums).isSome ||
+          ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice") && (← read).funs.all (·.1 != f)) then hoistAssign l r
       else
         let (P, args) ← hoistCallArgs f args
         pure (P, .assign l (.call f args))
     | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
-    if (castTy? f).isSome || (lookupBy f C.enums).isSome ||
-        (byteBuiltin f && (← read).funs.all (·.1 != f)) then
+    if (castTy? f).isSome || f == "address" || (lookupBy f C.enums).isSome ||
+        ((byteBuiltin f || f == "erc7201" || f.startsWith "#slice") && (← read).funs.all (·.1 != f)) then
       let (P, r) ← hoist (.call f args)
       return (P, .decl T x (some r))
     let (P, args) ← hoistCallArgs f args
@@ -937,6 +986,10 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
     pure (P ++ Pc ++ Q, .call (.field e m) args)
   | .call (.name f) args => do
     if (← read).funs.all (·.1 != f) then
+      if byteBuiltin f || f == "erc7201" then
+        let (P, e) ← hoist (.call f args)
+        let (Q, _) ← captureExpr C e
+        return (P ++ Q, .eval [])
       if let some op := ModOp.ofName? f then
         let [a, b, k] := args | throw s!"{f} takes three uint arguments"
         let (P, e) ← hoist (.modular op a b k)
@@ -967,6 +1020,35 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
 /-- `elabStmtP`, outside its `mutual` block (`elabRec`). -/
 def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   let hoistStmt := @ElabRec.hoistStmt C rc
+  if let .declMemory (.named "#sliceBase") x (some e) := s then
+    let (P, e) ← rc.hoist e
+    let Γ ← ctx
+    let .mpath (.ref R@(.array _)) _ ← ElabM.lift (synth C Γ.toNCtx e)
+      | throw "a calldata slice needs a dynamic array base"
+    let T := rawTyW (exprShape C Γ e) (.ref R) ""
+    let Q ← rc.elabStmtP (.declMemory T x (some e))
+    return P ++ Q
+  -- Tuple decoding must retain its ABI continuation instead of taking
+  -- the generic multi-return function-call path.
+  let slicedDecode := match s with
+    | .tupleAssign ts (.call "#sliceDecode" (view :: rest)) =>
+      some (view, fun data => RawStmt.tupleAssign ts (.call "abi.decode" (data :: rest)))
+    | .tupleDecl ts (.call "#sliceDecode" (view :: rest)) =>
+      some (view, fun data => RawStmt.tupleDecl ts (.call "abi.decode" (data :: rest)))
+    | _ => none
+  if let some (view, resume) := slicedDecode then
+    let t := toString (← freshCapture "mv")
+    let (v, pre) ← ElabM.lift (inlineSliceOpen t view)
+    let P ← rc.elabStmtsP pre
+    let Q ← rc.elabStmtP (resume (.call sliceViewName [.name v.base, v.off, v.len]))
+    return P ++ Q
+  let literalTarget : RawExpr → Bool
+    | .call "#array" _ => true
+    | _ => false
+  match s with
+  | .assign l _ | .opAssign _ l _ | .incDec _ l | .delete l =>
+    if literalTarget l then throw "an inline array literal is not an assignment or delete target"
+  | _ => pure ()
   let elabStmt1 := @ElabRec.elabStmt1 C rc
   let elabStmtsP := @ElabRec.elabStmtsP C rc
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
@@ -990,6 +1072,15 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
     unless stringReason? C Γ m && !invalid do
       throw "a revert reason is a string; convert bytes with string(data)"
   | _ => pure ()
+  -- Keep a discarded builtin whole through both source-type passes.
+  let s : RawStmt := match s with
+    | .call (.field (.name n) g) args =>
+      if builtinMember n g then .eval [.call (n ++ "." ++ g) args] else s
+    | .call (.name f) args =>
+      if (byteBuiltin f || f == "erc7201" || f.startsWith "#slice") && (lookupBy f C.funs).isNone then
+        .eval [.call f args]
+      else s
+    | _ => s
   -- a call statement through a value that is not a name, `s.f(x);`
   -- (`callValueName`); `push`, `pop` and `transfer` are the receivers' own
   let s := match s with
@@ -1100,13 +1191,29 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
         ElabM.lift (shapeCheck C Γ (placeShape C Γ l) (.index b (.num 0))); pure true
       else pure true
     | .assign l r =>
-      if isRef l then do ElabM.lift (shapeCheck C Γ (placeShape C Γ l) r); pure true
+      if isRef l then do
+        match synth C Γ.toNCtx l with
+        | .ok (.path (.ref _) (.loc _)) => ElabM.lift (storageCopyShape C Γ (placeShape C Γ l) r)
+        | _ => ElabM.lift (shapeCheck C Γ (placeShape C Γ l) r)
+        pure true
       else pure false
     | .declPush .. => pure true
     | _ => pure false
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
   -- a push's receiver, as a `.push` member's base
   let es : List (RawExpr × Bool) ← match s with
+    | .call (.field b "push") [a] =>
+      -- Reference values are checked after capture as well; permit their
+      -- whole source here without erasing the element-width metadata.
+      let funs := (← read).funs
+      let refValue : Bool := match synth C Γ.toNCtx b with
+        | .ok (.path (.ref (.array (.ref _))) _) => true
+        | _ => match b with
+          | .call f _ => ((lookupBy f funs).bind (·.ret)).any
+              (fun (_, T) => T matches .ref (.array (.ref _)))
+          | _ => false
+      if refValue then pure [(b, true), (a, true)]
+      else pure (s.exprs.map (·, whole))
     | .call (.name f) as => pure [(RawExpr.call f as, whole)]
     | .pushOpAssign _ b r => pure [(b, true), (r, whole)]
     | .pushIncDec _ b => pure [(b, true)]
@@ -1126,6 +1233,18 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
           expected, not whole"
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
+  -- Hoisting supplies the independently inferred array shape. Check it
+  -- before a target can erase its source widths.
+  let Γ' ← ctx
+  match s with
+  | .declStorage T _ (some e) | .declMemory T _ (some e) =>
+    ElabM.lift (shapeCheck C Γ' (← ElabM.lift (elabTyW C T)).2 e)
+  | .assign l r =>
+    if (widthPath? C Γ' l).any (fun (_, _, t) => t matches .ref _) then
+      match synth C Γ'.toNCtx l with
+      | .ok (.path (.ref _) (.loc _)) => ElabM.lift (storageCopyShape C Γ' (placeShape C Γ' l) r)
+      | _ => ElabM.lift (shapeCheck C Γ' (placeShape C Γ' l) r)
+  | _ => pure ()
   let P ← pure (P ++ (← elabStmt1 s))
   -- a reference local's narrow positions (`LocalTy.shape`)
   match s with
@@ -1224,7 +1343,7 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
         match ← ElabM.lift (synth C Γ r) with
         | .mpath T mp =>
           if hT : T = .ref R then pure [.of Γ (.assignFromMem l (hT ▸ mp))]
-          else throw s!"{r.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
+          else pure [.of Γ (.assign l (← ElabM.lift (checkStorageCopy C Γ R r)))]
         | _ => do pure [.of Γ (.assign l (← ElabM.lift (checkStorageCopy C Γ R r)))]
       | .path (.ref R) (.alias x) => do
         pure [.of Γ (.rebind x (.path (← ElabM.lift (checkPath C Γ (.ref R) r))))]
@@ -1387,9 +1506,7 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
         ElabM.lift (fitCheck C (← ctx) p (widthIn C (← ctx) (.index e (.num 0))) a)
         pure [.of Γ (.push b (some (.val (← checkIn C Γ p a))) rfl)]
       | .ref R =>
-        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γ a) then
-          let mp ← ElabM.lift (checkMPath C Γ (.ref R) a)
-          return [.of Γ (.push b (some (.copyMem mp)) rfl)]
+        ElabM.lift (storageCopyShape C (← ctx) (placeShape C (← ctx) (.index e (.num 0))) a)
         pure [.of Γ (.push b (some (← ElabM.lift (checkStorageCopy C Γ R a))) rfl)]
     | _ => throw "push takes at most one argument"
   | .call (.field e "pop") [] => do

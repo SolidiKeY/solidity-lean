@@ -84,6 +84,10 @@ structure ImportRow where
   /-- The Solidity name; `name` identifies the generated Lean declaration. -/
   sourceName : String := ""
   sourceSignature : String := ""
+  /-- Modern fixtures undergo the source scan; legacy fixtures do not. -/
+  admissionChecked : Bool := false
+  sourceFeatures : List Language.Feature := []
+  sourceDiagnostic : Option Source.Diagnostic := none
   tag : Tag
   params : List (String × String)
   /-- Elaborated parameter types, newest first, including reference locations. -/
@@ -107,6 +111,7 @@ deriving instance ToExpr for ImportRow
 /-- The row of an imported function. -/
 def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
   { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+    sourceFeatures := f.sourceScope.features, sourceDiagnostic := f.sourceScope.diagnostic?,
     tag := f.tag, params := f.params, status, reason, payable := f.payable,
     writingCall := f.writingCall, paramRanges := f.paramRanges, elemRanges := f.elemRanges }
 
@@ -258,8 +263,22 @@ private partial def specCommentTokens (depth : Nat) : List String → List Strin
     let (body, tail) := specCommentTokens depth rest
     (token :: body, tail)
 
+/-- Preserve literal contents while escaping source identifiers around them. -/
+private partial def specStringTokens : List String → List String × List String
+  | [] => ([], [])
+  | "\\" :: token :: rest =>
+    let (body, tail) := specStringTokens rest
+    (["\\", token] ++ body, tail)
+  | "\"" :: rest => (["\""], rest)
+  | token :: rest =>
+    let (body, tail) := specStringTokens rest
+    (token :: body, tail)
+
 private partial def escapeSpecBindings (names : List String) : List String → List String
   | [] => []
+  | "\"" :: rest =>
+    let (body, tail) := specStringTokens rest
+    "\"" :: body ++ escapeSpecBindings names tail
   | "\\" :: keyword :: rest => "\\" :: keyword :: escapeSpecBindings names rest
   | "«" :: rest =>
     let quoted := rest.takeWhile (· != "»")
@@ -275,7 +294,8 @@ private partial def escapeSpecBindings (names : List String) : List String → L
     ["/", "-"] ++ comment ++ escapeSpecBindings names tail
   | token :: rest =>
     let token := ".".intercalate (token.splitOn "." |>.map fun name =>
-      if names.contains name && leanKeywords.contains name then s!"«{name}»" else name)
+      if name.contains '$' || (names.contains name && leanKeywords.contains name)
+      then s!"«{name}»" else name)
     token :: escapeSpecBindings names rest
 
 private partial def renameSpecSyntax (params rets : List (String × String)) (stx : Syntax) : Syntax :=
@@ -283,17 +303,17 @@ private partial def renameSpecSyntax (params rets : List (String × String)) (st
   | `(spec_expr| \forall $T:ident $x:ident; $body) =>
     let _ := T
     stx.setArg (stx.getNumArgs - 1)
-      (renameSpecSyntax (params.filter (·.1 != x.getId.toString))
-        (rets.filter (·.1 != x.getId.toString)) body.raw)
+      (renameSpecSyntax (params.filter (·.1 != (x.getId.toString false)))
+        (rets.filter (·.1 != (x.getId.toString false))) body.raw)
   | `(spec_expr| \exists $T:ident $x:ident; $body) =>
     let _ := T
     stx.setArg (stx.getNumArgs - 1)
-      (renameSpecSyntax (params.filter (·.1 != x.getId.toString))
-        (rets.filter (·.1 != x.getId.toString)) body.raw)
+      (renameSpecSyntax (params.filter (·.1 != (x.getId.toString false)))
+        (rets.filter (·.1 != (x.getId.toString false))) body.raw)
   | `(spec_expr| \old($body)) =>
     stx.setArg (stx.getNumArgs - 2) (renameSpecSyntax params [] body.raw)
   | `(spec_expr| $x:ident) =>
-    match x.getId.components.map (·.toString) with
+    match x.getId.components.map (·.toString false) with
     | head :: tail =>
       match Semantics.lookupBy head (params ++ rets) with
       | none => stx
@@ -309,12 +329,12 @@ private partial def renameSpecSyntax (params rets : List (String × String)) (st
     | .node info kind args => .node info kind (args.map (renameSpecSyntax params rets))
     | _ => stx
 
-private def rewriteSpecBindings (env : Environment) (kind : String)
+private def rewriteSpecBindings (env : Environment) (sourceNames : List String) (kind : String)
     (params rets : List (String × String)) (text : String) : Except String String := do
   let names := params ++ rets
-  if names.isEmpty || !["requires", "ensures", "invariant", "assignable"].contains kind then
+  if !["requires", "ensures", "invariant", "assignable"].contains kind then
     return text
-  let escaped := String.join (escapeSpecBindings (names.map Prod.fst) (specTokens text))
+  let escaped := String.join (escapeSpecBindings (sourceNames ++ names.map Prod.fst) (specTokens text))
   let stx ← Parser.runParserCategory env `sol_member s!"{kind} {escaped};"
   let some member := (renameSpecSyntax params (if kind == "ensures" then rets else []) stx).reprint
     | throw "renamed specification cannot be printed"
@@ -328,8 +348,14 @@ private def rewriteSpecBindings (env : Environment) (kind : String)
 
 private partial def renameLoopSyntax (names : List (String × String)) (stx : Syntax) : Syntax :=
   match stx with
+  | `(sol_loop_clause| /// @custom:key invariant \forall $_T:ident $x:ident; $body) =>
+    stx.setArg (stx.getNumArgs - 1)
+      (renameLoopSyntax (names.filter (·.1 != (x.getId.toString false))) body)
+  | `(sol_loop_inv| \forall $_T:ident $x:ident; $body) =>
+    stx.setArg (stx.getNumArgs - 1)
+      (renameLoopSyntax (names.filter (·.1 != (x.getId.toString false))) body)
   | `(sol_expr| $x:ident) =>
-    match x.getId.components.map (·.toString) with
+    match x.getId.components.map (·.toString false) with
     | head :: tail =>
       match Semantics.lookupBy head names with
       | none => stx
@@ -345,18 +371,100 @@ private partial def renameLoopSyntax (names : List (String × String)) (stx : Sy
     | .node info kind args => .node info kind (args.map (renameLoopSyntax names))
     | _ => stx
 
-private def rewriteLoopBindings (env : Environment) (names : List (String × String))
+private def rewriteLoopBindings (env : Environment) (sourceNames : List String) (names : List (String × String))
     (text : String) : Except String String := do
-  unless names.any (fun (a, b) => a != b) do return text
   let text := text.trim
   let directive := text.takeWhile (!Char.isWhitespace ·)
   unless ["invariant", "decreases"].contains directive do return text
-  let expression := (text.drop directive.length).trimLeft
-  let escaped := String.join (escapeSpecBindings (names.map Prod.fst) (specTokens expression))
-  let stx ← Parser.runParserCategory env `sol_expr escaped
-  let some expression := (renameLoopSyntax names stx).reprint
+  let escaped := String.join (escapeSpecBindings (sourceNames ++ names.map Prod.fst) (specTokens text))
+  let stx ← Parser.runParserCategory env `sol_loop_clause ("/// @custom:key " ++ escaped)
+  let some clause := (renameLoopSyntax names stx).reprint
     | throw "renamed loop specification cannot be printed"
-  return directive ++ " " ++ expression
+  let clausePrefix := "/// @custom:key "
+  unless clause.startsWith clausePrefix do throw "renamed loop clause has an unexpected shape"
+  return clause.drop clausePrefix.length
+
+private def specEnvironment (root member : String) : List Language.Feature :=
+  match root, member with
+  | "block", "timestamp" => [.blockTimestamp]
+  | "block", "number" => [.blockNumber]
+  | "block", "coinbase" => [.blockCoinbase]
+  | "block", "difficulty" => [.blockDifficulty]
+  | "block", "prevrandao" => [.blockPrevrandao]
+  | "block", "gaslimit" => [.blockGaslimit]
+  | "block", "chainid" => [.blockChainid]
+  | "block", "basefee" => [.blockBasefee]
+  | "block", "blobbasefee" => [.blockBlobbasefee]
+  | "block", "slotnum" => [.blockSlotnum]
+  | "msg", "data" | "msg", "sig" => [.rawCalldata]
+  | "msg", "sender" => [.msgSender]
+  | "msg", "value" => [.msgValue]
+  | "tx", "origin" => [.txOrigin]
+  | "tx", "gasprice" => [.txGasprice]
+  | _, _ => []
+
+private partial def specRoot (stx : Syntax) : Option String :=
+  match stx with
+  | `(spec_expr| $x:ident) => some (x.getId.toString false)
+  | `(spec_expr| ($a)) => specRoot a
+  | `(sol_expr| $x:ident) => some (x.getId.toString false)
+  | `(sol_expr| ($a)) => specRoot a
+  | _ => none
+
+/-- Inspect parsed specification identifiers, respecting quantifier binders.
+String literals and comments contain no identifier syntax to inspect. -/
+private partial def specFeatures (bound : List String) (stx : Syntax) : List Source.Use :=
+  let uses (root member : String) :=
+    if bound.contains root then [] else (specEnvironment root member).map (⟨·, 0⟩)
+  match stx with
+  | `(spec_expr| \forall $_T:ident $x:ident; $body) =>
+    specFeatures ((x.getId.toString false) :: bound) body
+  | `(spec_expr| \exists $_T:ident $x:ident; $body) =>
+    specFeatures ((x.getId.toString false) :: bound) body
+  | `(sol_loop_clause| /// @custom:key invariant \forall $_T:ident $x:ident; $body) =>
+    specFeatures ((x.getId.toString false) :: bound) body
+  | `(sol_loop_inv| \forall $_T:ident $x:ident; $body) =>
+    specFeatures ((x.getId.toString false) :: bound) body
+  | `(spec_expr| $a:spec_expr.$f:ident) =>
+    ((specRoot a).toList.flatMap fun root => uses root (f.getId.toString false)) ++
+      specFeatures bound a
+  | `(spec_expr| $x:ident) =>
+    match x.getId.components.map (·.toString false) with
+    | root :: member :: _ => uses root member
+    | _ => []
+  | `(sol_expr| $a:sol_expr.$f:ident) =>
+    ((specRoot a).toList.flatMap fun root => uses root (f.getId.toString false)) ++
+      specFeatures bound a
+  | `(sol_expr| $x:ident) =>
+    match x.getId.components.map (·.toString false) with
+    | root :: member :: _ => uses root member
+    | _ => []
+  | _ => stx.getArgs.toList.flatMap (specFeatures bound)
+
+private def scanSpecifications (env : Environment) (sourceNames : List String)
+    (request : Source.AdmissionRequest) : Source.ScopeScan :=
+  request.specifications.foldl (fun scan (bound, text) =>
+    let escaped := String.join (escapeSpecBindings sourceNames (specTokens text))
+    let category := if escaped.startsWith "///" then `sol_loop_clause else `sol_member
+    match Parser.runParserCategory env category escaped with
+    | .ok parsed =>
+      let uses := specFeatures bound parsed
+      let classified := Source.ScopeScan.certify uses
+      let envRoots := uses.map fun use =>
+        let id := use.feature.id
+        if id.startsWith "msg" || use.feature == .rawCalldata then "msg"
+        else if id.startsWith "block" then "block"
+        else if id.startsWith "tx" then "tx" else ""
+      let collision := envRoots.any fun root => !root.isEmpty && request.modelBindings.contains root
+      let classified := if collision then classified.append (.rejected [] {
+        kind := .missingImplementation
+        name := `solidity.lexicalSpecification
+        reason := "an inherited builtin observation is shadowed in the executing contract"
+        line := J.line request.entry }) else classified
+      scan.append classified
+    | .error message => scan.append (.rejected [] {
+        kind := .missingImplementation, name := `solidity.specification,
+        reason := message, line := J.line request.entry })) default
 
 /-- The text of a contract with these members. -/
 private def contractText (members : List String) : String :=
@@ -384,7 +492,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let N : Lean.Name := stx[5].getId
   let ren : List (String × String) :=
     if stx[6].getNumArgs > 0 then
-      stx[6][1].getSepArgs.toList.map fun p => (p[0].getId.toString, p[2].getId.toString)
+      stx[6][1].getSepArgs.toList.map fun p => ((p[0].getId.toString false), (p[2].getId.toString false))
     else []
   let file := System.FilePath.mk (← getFileName)
   let fixture := (file.parent.getD ".") / path
@@ -396,12 +504,25 @@ def elabSolcImport : CommandElab := fun stx => do
   let some text := String.fromUTF8? bytes | throwError "{path} is not UTF-8"
   let j ← ofExcept (Json.parse text)
   let ast ← ofExcept (j.getObjVal? "ast")
+  let provenance ← ofExcept (Source.read j ast)
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
   let env ← getEnv
+  -- Quotation names are not semantic specification bindings.
+  let sourceNames := (J.nodes ast).filterMap (J.str? · "name")
+    |>.flatMap (·.splitOn ".") |>.eraseDups
   let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone)
-    (rewriteSpecBindings env) (rewriteLoopBindings env))
+    (rewriteSpecBindings env sourceNames) (rewriteLoopBindings env sourceNames)
+    (if provenance.legacyFixture then fun _ => default else fun request =>
+      (Admission.scan ast provenance { request with
+        declarationRoots := request.declarationRoots ++
+          [Admission.header [] ast] ++ (J.arrD ast "nodes").toList.filter (J.kind · == "PragmaDirective") }).append
+        (scanSpecifications env sourceNames request) |>.normalize)
+    (fun bound modelBindings text => if provenance.legacyFixture then default else
+      scanSpecifications env sourceNames {
+        entry := .null, evaluatedRoots := [], modelBindings,
+        specifications := [(bound, "/// @custom:key " ++ text)] }))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -473,8 +594,20 @@ def elabSolcImport : CommandElab := fun stx => do
     | some e, _, _ =>
       logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
   let ctStx ← ofExcept (parse `term (contractText memberList))
-  let ctStx ← if stx[8].isNone then pure ctStx else
-    liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
+  let ctStx ← if c.internalFuns.isEmpty then pure ctStx else
+    let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)
+    liftTermElabM <| `(let model : Contract := $(⟨ctStx⟩)
+      { model with widths := $(quote markers) ++ model.widths })
+  let ctStx ← if provenance.legacyFixture then
+      if stx[8].isNone then pure ctStx else
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
+    else do
+      unless stx[8].isNone do
+        throwError "modern source imports take evaluation order from their compiler provenance"
+      if provenance.pipeline == some .viaIR then
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := EvalOrder.viaIR } : Contract))
+      else
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := ({} : EvalOrder) } : Contract))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
@@ -493,12 +626,12 @@ def elabSolcImport : CommandElab := fun stx => do
     | .error (.unsupported m l) => rows := rows.push (row .unsupported (at_ f l m))
     | .ok ss =>
       let ss := if f.modifierApps.isEmpty then ss else
-        [(f.line, s!"{f.name}({", ".intercalate (f.params.map Prod.fst)})")]
+        [(f.line, s!"{identText f.name}({", ".intercalate (f.params.map (identText ∘ Prod.fst))})")]
       -- its return variables first, at their defaults
-      let ss := (retNames f).map (fun (x, t) => (f.line, s!"{t} {x}")) ++ ss
+      let ss := (retNames f).map (fun (x, t) => (f.line, s!"{t} {identText x}")) ++ ss
       -- a `calldata` parameter a memory local (`calldataCheck`, below)
       let params := f.params.map fun (x, t) =>
-        s!"{if t.endsWith " calldata" then t.dropRight 9 ++ " memory" else t} {x}; "
+        s!"{if t.endsWith " calldata" then t.dropRight 9 ++ " memory" else t} {identText x}; "
       let text := "sol_raw!{ " ++ String.join params ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
@@ -577,8 +710,23 @@ def elabSolcImport : CommandElab := fun stx => do
   -- `Frontend/Problems.lean`'s `obligation`)
   let rowsTy := mkApp (mkConst ``List [0]) (mkConst ``ImportRow)
   let rep : Lean.Name := N ++ `report
+  let reportRows := (ctorRow.toList ++ rows.toList).map fun row =>
+    -- Older lowering code calls representation limits "excluded". Modern
+    -- policy exclusions already have a scan diagnostic; the remaining cases
+    -- are implementation gaps, independent of catalog inventory status.
+    let row := if !provenance.legacyFixture && row.status == .excluded && row.sourceDiagnostic.isNone then
+      { row with status := .unsupported } else row
+    let sourceDiagnostic := row.sourceDiagnostic.orElse fun _ =>
+      if row.status == .unsupported then some {
+        kind := .missingImplementation, name := `solidity.lowering,
+        reason := row.reason } else none
+    { row with admissionChecked := !provenance.legacyFixture, sourceDiagnostic }
   liftCoreM <| addAndCompile <| .defnDecl {
-    name := rep, levelParams := [], type := rowsTy, value := toExpr (ctorRow.toList ++ rows.toList),
+    name := rep, levelParams := [], type := rowsTy, value := toExpr reportRows,
+    hints := .abbrev, safety := .safe }
+  liftCoreM <| addAndCompile <| .defnDecl {
+    name := rep ++ `provenance, levelParams := [], type := mkConst ``Source.Provenance,
+    value := toExpr provenance,
     hints := .abbrev, safety := .safe }
 
 /-- The value of the imported program `n` (a literal: the import does not

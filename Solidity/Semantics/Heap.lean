@@ -1,6 +1,7 @@
 import Solidity.Semantics.Storage
 import Solidity.Keccak
 import Solidity.Hashes
+import Solidity.Secp256k1
 
 /-!
 # Typed heap
@@ -494,12 +495,12 @@ the precompile at address `3`, below `2^160`: a `bytes20`. -/
 @[irreducible] def ripemd160Bytes (bs : List Int) : PrimTy.uint.Denote :=
   uintOfNat (Hashes.ripemd160Nat (bs.map fun b => b.toNat % 256))
 
-/-- The address a valid signature recovers to: uninterpreted.  Elliptic-curve
-recovery over secp256k1 is not computed; an `opaque` constant is a function
-no proof can unfold, so what is proved of it holds of every function of the
-four words (no axiom: `#print axioms` lists none for it), and `#run`
-evaluates it to `0`. -/
-opaque ecrecoverKey : Nat → Nat → Nat → Nat → Nat
+/-- Computed secp256k1 recovery, zero on failure. Irreducibility keeps
+symbolic proofs from expanding elliptic-curve arithmetic; the kernel can
+still compute concrete inputs. See `Secp256k1.lean` for checked curve points
+and the explicit algorithm/conformance boundary. -/
+@[irreducible] def ecrecoverKey (h v r s : Nat) : Nat :=
+  ((Secp256k1.recover h v r s).map Fin.val).getD 0
 
 /-- secp256k1's group order: a signature's `r` and `s` lie in `[1, n)`. -/
 def secp256k1N : Nat := 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
@@ -507,10 +508,9 @@ def secp256k1N : Nat := 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e
 /-- `ecrecover(h, v, r, s)` of its 128 bytes, the four ABI words (the
 precompile at address `1`): `0` where the precompile fails (`v` not `27` or
 `28`, `r` or `s` outside `[1, n)`, or the input not four words), where solc
-returns the zero address; else an address, uninterpreted
-(`ecrecoverKey`, modulo `2^160`).  What is assumed is only that: a valid
-signature recovers to some address, maybe `0` too, as on the EVM where the
-point at infinity also recovers none. -/
+returns the zero address; else the computed address (`ecrecoverKey`), or
+zero for a failed curve recovery. High `s` remains accepted, as in the
+precompile rather than transaction-signature validation. -/
 def ecrecoverBytes (bs : List Int) : PrimTy.uint.Denote :=
   let ns := bs.map fun b => b.toNat % 256
   let w (i : Nat) : Nat := Hashes.ofBytes ((ns.drop (32 * i)).take 32)

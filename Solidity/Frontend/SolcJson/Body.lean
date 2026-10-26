@@ -1,5 +1,6 @@
 import Lean.Data.Json
 import Solidity.Syntax
+import Solidity.Frontend.Source
 
 /-!
 # solc's JSON: types, expressions and statements
@@ -16,6 +17,17 @@ open Lean (Json)
 
 open Semantics
 
+/-- Quote only emitted syntax. Semantic names and declaration lookup keys stay
+raw, including Solidity's `$` names and names that Lean reserves. -/
+def identText (name : String) : String :=
+  if name.isEmpty then "" else "«" ++ name ++ "»"
+
+/-- A resolved type is either a primitive spelling or a declared identifier. -/
+def typeIdentText (name : String) : String :=
+  if ["bool", "address", "address payable", "string", "bytes", "uint", "int"].contains name ||
+      (narrowTy? name).isSome || (bytesTy? name).isSome then name else identText name
+
+
 /-- Why a function, or a state variable, is left out. -/
 inductive Gap where
   /-- The model has no counterpart (`docs/testsuite-proofs.md` lists them). -/
@@ -30,6 +42,18 @@ def Gap.msg : Gap → String
 /-- The source line of the statement it arose in, `0` if none. -/
 def Gap.line : Gap → Nat
   | .excluded _ l | .unsupported _ l => l
+
+/-- Scope diagnostics retain their category in the import report; the body
+reader uses the existing two lowering outcomes. -/
+def Source.Diagnostic.toGap (d : Source.Diagnostic) : Gap :=
+  match d.kind with
+  | .excluded => .excluded s!"{d.name}: {d.reason}" d.line
+  | _ => .unsupported s!"{d.name}: {d.reason}" d.line
+
+def Source.ScopeScan.ensure (scan : Source.ScopeScan) : Except Gap Unit :=
+  match scan.diagnostic? with
+  | none => .ok ()
+  | some diagnostic => .error diagnostic.toGap
 
 /-- solkey's obligation for a function, from its `@custom:key` clauses and
 its contract's (`tagOf`). -/
@@ -65,6 +89,8 @@ structure SolcFun where
   sourceName : String := ""
   /-- The source parameter types, before enums, aliases or addresses are lowered. -/
   sourceSignature : String := ""
+  /-- The scope scan is independent of the implementation inventory. -/
+  sourceScope : Source.ScopeScan := default
   /-- Modifier applications in source order, for the existing inliner. -/
   modifierApps : String := ""
   line : Nat
@@ -105,6 +131,9 @@ structure SolcContract where
   each as its `contract!` member (`function f(uint x) returns (uint) { … }`),
   callees first. -/
   funMembers : List (String × String) := []
+  /-- Compiler lowering helpers are callable only by their generated direct
+  calls; they do not denote source-level function values or ABI entries. -/
+  internalFuns : List String := []
   modifierMembers : List String := []
   /-- The constructor, named `constructor` (solc names it `""`), if the
   contract declares one. -/
@@ -181,6 +210,13 @@ partial def nodes (j : Json) : List Json :=
 
 end J
 
+/-- Solc gives language builtins negative declaration identities. -/
+def builtinNamed (node : Json) (name : String) : Bool :=
+  J.kind node == "Identifier" && J.str? node "name" == some name &&
+    (J.ref? node).any (· < 0)
+
+def nativeMember (node : Json) : Bool := (J.ref? node).all (· < 0)
+
 /-! ## Types -/
 
 /-- Lean's reserved words a Solidity local could be named. -/
@@ -219,11 +255,19 @@ def sourceType (s : String) : String := Id.run do
       word := ""
   return out ++ normalize word
 
-/-- Arithmetic casts preserve signedness and width. Solc-validated boolean
-and address expressions already retain their model type without a cast. -/
+/-- Contextual source casts retain the kind inspected by ABI and arrays. -/
 def sourceCast (t value : String) : String :=
-  if t == "bool" || t == "address" || t == "address payable" then s!"({value})"
+  if t == "bool" then s!"({value})"
+  else if t == "address" || t == "address payable" then s!"address({value})"
   else s!"{t}({value})"
+
+/-- The evaluated outer dimension supplied by solc. A named bound has no
+literal `value`; nested types must use their last, outermost dimension. -/
+def solcArrayLength? (j : Json) : Option Nat := do
+  let suffix ← ((J.tyStr j).splitOn "[").getLast?
+  let digits := suffix.takeWhile Char.isDigit
+  guard (!digits.isEmpty && (suffix.drop digits.length).startsWith "]")
+  digits.toNat?
 
 /-- A type node as `sol` text: a mapping's `bool` key is its `uint`.  A narrow
 type may stand inside it (`expandStateTyW`, `elabTyW`). -/
@@ -235,20 +279,23 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
   | "UserDefinedTypeName" =>
     if let some id := (J.ref? j).orElse fun _ => (J.opt j "pathNode").bind J.ref? then
       match lookupBy s!"#solc{id}" S with
-      | some resolved => return ← resolved
+      | some resolved => return typeIdentText (← resolved)
       | none => throw (.unsupported s!"type declaration #{id} is not among the visible validated types")
     let n ← match J.opt j "pathNode" with
       | some p => J.str p "name"
       | none => J.str j "name"
     match lookupBy n S with
-    | some (.ok m) => pure m
+    | some (.ok m) => pure (typeIdentText m)
     | some (.error g) => throw g
     | none => throw (.unsupported s!"type `{n}` is not a struct of the contract")
   | "ArrayTypeName" =>
     let b ← tyText S (← J.get j "baseType")
     match J.opt j "length" with
     | none => pure s!"{b}[]"
-    | some l => pure s!"{b}[{← J.str l "value"}]"
+    | some l =>
+      let some n := (solcArrayLength? j).orElse fun _ => (J.str? l "value").bind String.toNat?
+        | throw (.unsupported "an array without its evaluated compiler bound")
+      pure s!"{b}[{n}]"
   | "Mapping" =>
     let k ← tyText S (← J.get j "keyType")
     let k := if k == "bool" then "uint" else k
@@ -281,12 +328,12 @@ partial def abiTyText (S : Structs) (t : Json) : Except Gap String := do
     match J.opt t "indexExpression" with
     | none | some .null => pure s!"{b}[]"
     | some k =>
-      match (J.str? k "value").bind (·.toNat?) with
+      match (solcArrayLength? t).orElse fun _ => (J.str? k "value").bind String.toNat? with
       | some n => pure s!"{b}[{n}]"
-      | none => throw (.unsupported "abi.decode to an array whose length is not a literal")
+      | none => throw (.unsupported "abi.decode to an array without its evaluated compiler bound")
   | "Identifier" =>
     match (J.ref? t).bind fun id => lookupBy s!"#solc{id}" S with
-    | some (.ok m) => pure m
+    | some (.ok m) => pure (typeIdentText m)
     | _ => throw (.unsupported "abi.decode to a type other than a value type, an array of values \
         or a struct")
   | _ => throw (.unsupported "abi.decode to a type other than a value type, an array of values \
@@ -318,10 +365,9 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
     match (j.getObjVal? "length").toOption with
     | none | some .null => pure (.ref (.array b))
     | some l =>
-      let v ← l.getObjValAs? String "value"
-      match v.toNat? with
+      match (solcArrayLength? j).orElse fun _ => (J.str? l "value").bind String.toNat? with
       | some n => pure (.ref (.fixed b n))
-      | none => throw s!"array length `{v}`"
+      | none => throw "array without its evaluated compiler bound"
   | "Mapping" =>
     let key ← j.getObjVal? "keyType"
     -- a byte string as a key: its `keccak256`, a `uint` (`hashKeyRows`)
@@ -441,8 +487,8 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
 def ownStructMembers (S : Structs) (own : List (Json × String)) : Except Gap (List String) :=
   own.mapM fun (d, p) => do
     let ms ← (← J.arr d "members").mapM fun x => do
-      pure s!"{← tyText S (← J.get x "typeName")} {← J.str x "name"};"
-    pure s!"struct {p} \{ {" ".intercalate ms} }"
+      pure s!"{← tyText S (← J.get x "typeName")} {identText (← J.str x "name")};"
+    pure s!"struct {identText p} \{ {" ".intercalate ms} }"
 
 /-! ## Expressions and statements -/
 
@@ -503,6 +549,9 @@ structure PState where
   /-- Validated solc declarations, retained by identity for source metadata.
   This is importer input, not a second representation of typed model terms. -/
   declarations : List Json := []
+  /-- Pure selector helpers evaluate a receiver argument in its original
+  expression position, including a lazy conditional arm. -/
+  selectorHelpers : List (Int × String) := []
   names : List (Int × String) := []
   /-- Original function-version names, for an explicit `Base.f()` call. -/
   staticNames : List (Int × String) := []
@@ -526,6 +575,11 @@ structure PState where
   specConstBlocked : List String := []
   /-- Visible source locals, newest first, and their printed names. -/
   specLocals : List (String × String) := []
+  /-- State names of the declaration's lexical owner, excluding body locals. -/
+  sourceStateNames : List String := []
+  sourceModelNames : List String := []
+  sourceScope : Source.ScopeScan := default
+  scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default
   /-- The importer parses loop expressions before renaming their variables. -/
   rewriteLoop : List (String × String) → String → Except String String :=
     fun names text => if names.any (fun (a, b) => a != b) then
@@ -573,6 +627,11 @@ def int? (a : Q) : Option Int := if a.den == 1 then some a.num else none
 /-- `a ** e`, refused past 4096 bits, as solc refuses a too large constant. -/
 def pow (a : Q) (e : Q) : Option Q := do
   let e ← e.int?
+  if e == 0 then return ofInt 1
+  -- solc handles zero before the reciprocal of a negative power.
+  if a.num == 0 then return ofInt 0
+  if a.den == 1 && a.num == 1 then return ofInt 1
+  if a.den == 1 && a.num == -1 then return ofInt (if e.natAbs % 2 == 0 then 1 else -1)
   let bits : Nat := Nat.max (Nat.log2 a.num.natAbs) (Nat.log2 a.den) + 1
   if a.num.natAbs > 1 || a.den > 1 then
     if bits * e.natAbs > 4096 then none
@@ -605,8 +664,10 @@ def parseRational (s : String) : Option Q :=
       | [i, f] => some (i, f)
       | _ => none
     let digits := i ++ f
-    if digits.isEmpty || e.natAbs > 4096 then none
+    if digits.isEmpty then none
     let n ← digits.toNat?
+    if n == 0 then return Q.ofInt 0
+    if e.natAbs > 4096 then none
     let q ← Q.make n (10 ^ f.length)
     if e < 0 then Q.div q (Q.ofInt (10 ^ e.natAbs)) else Q.mul q (Q.ofInt (10 ^ e.natAbs))
 
@@ -615,9 +676,27 @@ def constTy (j : Json) : Bool :=
   let t := J.tyStr j
   t.startsWith "int_const" || t.startsWith "rational_const"
 
-/-- The value of an expression of literals only, as solc computes it: exact
-rational arithmetic, the bitwise operators and shifts on integers (`&`, `|`,
-`^` on non-negative ones), `%` with the dividend's sign. -/
+/-- Infinite two's-complement operations before contextual Solidity widths. -/
+private def constAnd : Int → Int → Int
+  | .ofNat a, .ofNat b => .ofNat (a &&& b)
+  | .negSucc a, .ofNat b => .ofNat (b - (a &&& b))
+  | .ofNat a, .negSucc b => .ofNat (a - (a &&& b))
+  | .negSucc a, .negSucc b => .negSucc (a ||| b)
+
+private def constOr : Int → Int → Int
+  | .ofNat a, .ofNat b => .ofNat (a ||| b)
+  | .negSucc a, .ofNat b => .negSucc (a - (a &&& b))
+  | .ofNat a, .negSucc b => .negSucc (b - (a &&& b))
+  | .negSucc a, .negSucc b => .negSucc (a &&& b)
+
+private def constXor : Int → Int → Int
+  | .ofNat a, .ofNat b => .ofNat (a ^^^ b)
+  | .negSucc a, .ofNat b => .negSucc (a ^^^ b)
+  | .ofNat a, .negSucc b => .negSucc (a ^^^ b)
+  | .negSucc a, .negSucc b => .ofNat (a ^^^ b)
+
+/-- Solc's exact literal arithmetic, including signed bit operations and
+rational remainder with the dividend's sign. -/
 partial def constVal (j : Json) : Option Q := do
   match J.kind j with
   | "Literal" =>
@@ -648,19 +727,24 @@ partial def constVal (j : Json) : Option Q := do
     | some "*" => a.mul b
     | some "/" => a.div b
     | some "%" =>
-      let x ← a.int?
-      let y ← b.int?
-      if y == 0 then none else pure (Q.ofInt (x.tmod y))
+      if b.num == 0 then none else
+        Q.make ((a.num * b.den).tmod (b.num * a.den)) (a.den * b.den)
     | some "**" => a.pow b
-    | some "&" => pure (Q.ofInt ((← nat a) &&& (← nat b)))
-    | some "|" => pure (Q.ofInt ((← nat a) ||| (← nat b)))
-    | some "^" => pure (Q.ofInt ((← nat a) ^^^ (← nat b)))
+    | some "&" => pure (Q.ofInt (constAnd (← a.int?) (← b.int?)))
+    | some "|" => pure (Q.ofInt (constOr (← a.int?) (← b.int?)))
+    | some "^" => pure (Q.ofInt (constXor (← a.int?) (← b.int?)))
     | some "<<" =>
+      let x ← a.int?
       let k ← nat b
-      if k > 4096 then none else pure (Q.ofInt ((← a.int?) * 2 ^ k))
+      if k ≥ 2 ^ 32 then none
+      else if x == 0 then pure (Q.ofInt 0)
+      else if k > 4096 then none else pure (Q.ofInt (x * 2 ^ k))
     | some ">>" =>
+      let x ← a.int?
       let k ← nat b
-      if k > 4096 then none else pure (Q.ofInt ((← nat a) / 2 ^ k))
+      if k ≥ 2 ^ 32 then none
+      else if k ≥ Nat.log2 x.natAbs + 1 then pure (Q.ofInt (if x < 0 then -1 else 0))
+      else pure (Q.ofInt (x >>> k))
     | _ => none
   | _ => none
 
@@ -689,16 +773,19 @@ def unsupported {α : Type} (msg : String) : PM α := throw (.unsupported msg)
 
 /-- A compiler-provided selector has exactly its ABI width; malformed or
 trimmed metadata fails closed instead of acquiring a default selector. -/
-def declarationSelector (d : Json) (key : String) (bytes : Nat) : Except Gap Nat := do
+def declarationSelector (d : Json) (key : String) (bytes : Nat) :
+    Except Gap (Fin (2 ^ (8 * bytes))) := do
   let text ← J.str d key
   unless text.length == 2 * bytes do
     throw (.unsupported s!"malformed {key} on declaration #{(J.id? d).getD 0}")
-  text.toList.foldlM (fun n c => do
+  let value ← text.toList.foldlM (fun n c => do
     let digit ← if c.isDigit then pure (c.toNat - '0'.toNat)
       else if 'a' ≤ c && c ≤ 'f' then pure (c.toNat - 'a'.toNat + 10)
       else if 'A' ≤ c && c ≤ 'F' then pure (c.toNat - 'A'.toNat + 10)
       else throw (.unsupported s!"non-hexadecimal {key}")
     pure (n * 16 + digit)) 0
+  if bound : value < 2 ^ (8 * bytes) then return ⟨value, bound⟩
+  else throw (.unsupported s!"out-of-range {key}")
 
 /-- Declaration metadata is resolved by solc identity, never a short name.
 Only a static declaration or `this.f` can fold a function selector here:
@@ -724,17 +811,17 @@ def declarationMetadata (declarations : List Json) (e : Json) (member : String) 
         J.str? f "kind" == some "function" &&
         [some "public", some "external"].contains (J.str? f "visibility")
     let value ← own.foldlM (fun value f => do
-      pure (value ^^^ (← declarationSelector f "functionSelector" 4))) 0
+      pure (value ^^^ (← declarationSelector f "functionSelector" 4).val)) 0
     return some s!"bytes4({value})"
   if member != "selector" then return none
   let some d := (J.ref? e).bind find | return none
   match J.kind d with
   | "ErrorDefinition" =>
-    return some s!"bytes4({← declarationSelector d "errorSelector" 4})"
+    return some s!"bytes4({(← declarationSelector d "errorSelector" 4).val})"
   | "EventDefinition" =>
     if (d.getObjValAs? Bool "anonymous").toOption == some true then
       throw (.unsupported "an anonymous event has no selector")
-    return some s!"bytes32({← declarationSelector d "eventSelector" 32})"
+    return some s!"bytes32({(← declarationSelector d "eventSelector" 32).val})"
   | "FunctionDefinition" | "VariableDeclaration" =>
     let static := (J.ref? e).isSome &&
       (J.kind e == "Identifier" || J.kind e == "IdentifierPath" ||
@@ -742,7 +829,12 @@ def declarationMetadata (declarations : List Json) (e : Json) (member : String) 
           ((J.ref? receiver).bind find).any (J.kind · == "ContractDefinition") ||
           (J.kind receiver == "Identifier" && J.ref? receiver == some (-28)))))
     if static && (J.str? d "functionSelector").isSome then
-      return some s!"bytes4({← declarationSelector d "functionSelector" 4})"
+      let value ← declarationSelector d "functionSelector" 4
+      -- Preserve the existing `fnPure` literal form of `this.f.selector`.
+      -- An extra cast introduces a capture into every function-value proof.
+      let self := (J.opt e "expression").any fun receiver =>
+        J.kind receiver == "Identifier" && J.ref? receiver == some (-28)
+      return some (if self then toString value.val else s!"bytes4({value.val})")
     return none
   | _ => return none
 
@@ -785,7 +877,7 @@ def pushedTy (j : Json) : PM String := do
       ((t.drop 7).splitOn ".").getLast!
     else t
   match lookupBy t (← get).structs with
-  | some (.ok m) => pure m
+  | some (.ok m) => pure (typeIdentText m)
   | some (.error g) => throw g
   | none => unsupported s!"a member of a pushed `{t}`"
 
@@ -799,7 +891,7 @@ def storageRefTy (j : Json) : PM String := do
   let base ← if base.startsWith "struct " then
       let n := ((base.drop 7).splitOn ".").getLast!
       match lookupBy n (← get).structs with
-      | some (.ok m) => pure m
+      | some (.ok m) => pure (typeIdentText m)
       | some (.error g) => throw g
       | none => unsupported s!"a reference to `{n}`"
     else pure (sourceType base)
@@ -809,7 +901,7 @@ def storageRefTy (j : Json) : PM String := do
 def isPushCall (e : Json) : Bool :=
   J.kind e == "FunctionCall" &&
     ((J.opt e "expression").any fun f => J.kind f == "MemberAccess" &&
-      J.str? f "memberName" == some "push")
+      J.str? f "memberName" == some "push" && nativeMember f)
 
 /-- Is the node `x.push().f`? -/
 def isPushedMember (e : Json) : Bool :=
@@ -893,6 +985,31 @@ def condCallee? (j : Json) : Option (Json × Json × Json) := do
   pure (← J.opt f "condition", j.setObjVal! "expression" (← J.opt f "trueExpression"),
     j.setObjVal! "expression" (← J.opt f "falseExpression"))
 
+/-- Canonical decoded bytes supplied by solc, rather than a source token. -/
+def validHexBytes (s : String) : Bool :=
+  s.length % 2 == 0 && s.toList.all fun c =>
+    c.isDigit || ('a' ≤ c && c ≤ 'f') || ('A' ≤ c && c ≤ 'F')
+
+/-- Ordinary strings may contain non-UTF8 escaped bytes. Unicode literals
+must decode as UTF8; two supplied representations must agree. -/
+def byteLiteralText (kind : String) (j : Json) : Except Gap String := do
+  match J.str? j "hexValue" with
+  | some h =>
+    unless validHexBytes h do throw (.unsupported "malformed compiler literal bytes")
+    let some bytes := hexBytes? h
+      | throw (.unsupported "malformed compiler literal bytes")
+    let encoded : ByteArray := ⟨(bytes.map UInt8.ofNat).toArray⟩
+    if kind == "unicodeString" then
+      unless (String.fromUTF8? encoded).isSome do
+        throw (.unsupported "a Unicode literal with invalid UTF8 bytes")
+    if let some value := J.str? j "value" then
+      unless value.toUTF8 == encoded do
+        throw (.unsupported "inconsistent compiler literal text and bytes")
+    return s!"hex\"{h}\""
+  | none =>
+    if kind == "hexString" then throw (.unsupported "a hex literal without its bytes")
+    return (← J.str j "value").quote
+
 mutual
 
 partial def expr (j : Json) : PM String := do
@@ -919,32 +1036,45 @@ partial def expr (j : Json) : PM String := do
         throw (match g with
           | .excluded m _ => .excluded s!"it reads the state variable `{v}`: {m}"
           | .unsupported m _ => .unsupported s!"it reads the state variable `{v}`: {m}")
-      pure ((lookupBy r (← get).names).getD n)
-    | none => pure n
+      let name := (lookupBy r (← get).names).getD n
+      pure (if r < 0 then name else identText name)
+    | none => pure (identText n)
   | "Literal" =>
-    let v ← PM.lift (J.str j "value")
     match (← PM.lift (J.str j "kind")) with
-    | "bool" => pure v
+    | "bool" =>
+      let v ← PM.lift (J.str j "value")
+      unless v == "true" || v == "false" do unsupported "a malformed boolean literal"
+      pure v
     | "number" =>
-      -- an address literal: its type is `address`, not a constant's
+      let v ← PM.lift (J.str j "value")
       match (parseRational v).bind Q.int? with
-      | some n => pure (toString n)
+      | some n =>
+        -- Its source type matters to packed ABI encoding and array inference.
+        if J.tyStr j == "address" then
+          unless v.startsWith "0x" && v.length == 42 &&
+              validHexBytes (v.drop 2) && 0 ≤ n && n < 2 ^ 160 do
+            unsupported "a malformed compiler address literal"
+          pure s!"address({n})"
+        else pure (toString n)
       | none => unsupported s!"the number literal `{v}`"
-    -- a literal of bytes, read at the type it meets (`RawExpr.bytesLit`):
-    -- quoted when its text is, else spelt by its bytes
-    | "string" | "unicodeString" =>
-      match J.str? j "value" with
-      | some v => pure v.quote
-      | none => match J.str? j "hexValue" with
-        | some h => pure s!"hex\"{h}\""
-        | none => unsupported "a string literal without its value"
-    | "hexString" =>
-      match J.str? j "hexValue" with
-      | some h => pure s!"hex\"{h}\""
-      | none => unsupported "a hex literal without its value"
+    | "string" => PM.lift (byteLiteralText "string" j)
+    | "unicodeString" => PM.lift (byteLiteralText "unicodeString" j)
+    | "hexString" => PM.lift (byteLiteralText "hexString" j)
     | k => unsupported s!"a {k} literal"
   | "TupleExpression" =>
-    match (← PM.lift (J.arr j "components")) with
+    let cs ← PM.lift (J.arr j "components")
+    if (J.opt j "isInlineArray").any (· == .bool true) then
+      -- Solc has already found a common element type. Preserve scalar
+      -- context before the model independently infers the array's shape.
+      let t := ((J.tyStr j).splitOn "[").head!
+      let scalar := ((J.tyStr j).splitOn "[").length == 2 &&
+        ((narrowTy? t).isSome || (bytesTy? t).isSome ||
+          t == "bool" || t == "uint" || t == "int" || t == "address")
+      let es ← cs.mapM fun c => do
+        let e ← expr c
+        pure (if !scalar then e else if t == "address" then s!"address({e})" else sourceCast t e)
+      pure s!"[{", ".intercalate es}]"
+    else match cs with
     | [c] => pure s!"({← expr c})"
     | _ => unsupported "a tuple"
   | "UnaryOperation" =>
@@ -989,8 +1119,9 @@ partial def expr (j : Json) : PM String := do
     let m ← PM.lift (J.str j "memberName")
     if let some value ← PM.lift (declarationMetadata (← get).declarations e m) then
       return value
-    -- `fnPure` folds a known function's selector. Capture a dynamic
-    -- receiver first, so its calls, checks and indexing still execute once.
+    -- `fnPure` folds a known function's selector. A pure helper consumes
+    -- the receiver first, in this expression's original (possibly lazy)
+    -- position; hoisting into `pre` would eagerly evaluate a skipped arm.
     if m == "selector" && J.kind e == "MemberAccess" then
       let declarations := (← get).declarations
       if let some d := (J.ref? e).bind fun id =>
@@ -998,20 +1129,16 @@ partial def expr (j : Json) : PM String := do
         if J.kind d == "FunctionDefinition" && (J.str? d "functionSelector").isSome then
           let receiver ← PM.lift (J.get e "expression")
           let value ← expr receiver
-          let st ← get
-          let taken := st.names.map (·.2)
-          let mut name := s!"solcMetadataReceiver{st.fresh + 1}"
-          for _ in [:taken.length + 1] do
-            if !taken.contains name then break
-            name := name ++ "_"
-          set { st with fresh := st.fresh + 1, pre := st.pre.push s!"address {name} = address({value})" }
-          return s!"bytes4({← PM.lift (declarationSelector d "functionSelector" 4)})"
+          let _ ← PM.lift (declarationSelector d "functionSelector" 4)
+          let some name := (J.id? d).bind (lookupBy · (← get).selectorHelpers)
+            | unsupported "a dynamic function selector without its receiver helper"
+          return s!"{identText name}(address({value}))"
     if let some bound := typeBound? (← get).enumBounds e m then
       let t := if (J.tyStr j).startsWith "enum " then "uint" else elemTy (J.tyStr j) false
       return s!"{t}({bound})"
     if let some r := J.ref? j then
       if (← get).freeFunctions.contains r then
-        if let some name := lookupBy r (← get).names then return name
+        if let some name := lookupBy r (← get).names then return identText name
       if let some value := lookupBy r (← get).enumValues then return toString value
       if let some (t, value) := lookupBy r (← get).constants then
         if (← get).constStack.contains r then unsupported "a cyclic constant definition"
@@ -1032,7 +1159,13 @@ partial def expr (j : Json) : PM String := do
       let st ← get
       let x := s!"pushRef{st.fresh + 1}"
       set { st with fresh := st.fresh + 1, pre := st.pre.push s!"{T} storage {x} = {call}" }
-      pure s!"{x}.{m}"
+      pure s!"{x}.{identText m}"
+    else if (J.ref? j).any (· ≥ 0) then
+      let receiver ← expr e
+      let magicName := J.kind e == "Identifier" &&
+        ["msg", "block", "tx", "this"].contains ((J.str? e "name").getD "")
+      let receiver := if compound e || magicName then s!"({receiver})" else receiver
+      pure s!"{receiver}.{identText m}"
     else pure s!"{← expr e}.{m}"
   | "FunctionCall" => call j
   | "NewExpression" =>
@@ -1079,7 +1212,7 @@ partial def call (j : Json) : PM String := do
           return s!"{n}.concat({", ".intercalate (← args.mapM expr)})"
     -- `abi.decode(b, (T, U))`: the types written as names
     if member == "decode" && (J.opt f "expression").any (fun o =>
-        J.kind o == "Identifier" && J.str? o "name" == some "abi") then
+        builtinNamed o "abi") then
       match args with
       | [b, ts] =>
         let tyName (t : Json) : PM String := do PM.lift (abiTyText (← get).structs t)
@@ -1099,12 +1232,13 @@ partial def call (j : Json) : PM String := do
     match args with
     | [a] =>
       let to := J.tyStr f
-      if to.startsWith "type(address" || to.startsWith "type(contract " then expr a
+      if to.startsWith "type(address" || to.startsWith "type(contract " then
+        pure s!"address({← expr a})"
       else if to.startsWith "type(enum " then
         -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
         -- elaborator asserts that `x` names one of its members
         let e := ((to.drop 10).dropRight 1).splitOn "." |>.getLast!
-        pure s!"{e}({← expr a})"
+        pure s!"{identText e}({← expr a})"
       else
         let n ← match J.kind f with
           | "ElementaryTypeNameExpression" =>
@@ -1144,22 +1278,31 @@ partial def call (j : Json) : PM String := do
     -- `abi.encodePacked` packs an enum at one byte: a member, printed as its
     -- position, is printed as the enum's conversion `E(n)` so that it keeps
     -- its type (`markOf?`)
-    let as := if J.kind f == "MemberAccess" && J.str? f "memberName" == some "encodePacked" then
+    let packed := J.str? f "memberName" == some "encodePacked"
+    let abiEncoder := J.kind f == "MemberAccess" &&
+      ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "encodeCall"].contains
+        ((J.str? f "memberName").getD "") &&
+      (J.opt f "expression").any (builtinNamed · "abi")
+    let as := if abiEncoder then
         (args.zip as).map fun (a, t) =>
-          if (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
-            s!"{(((J.tyStr a).drop 5).splitOn ".").getLast!}({t})"
+          -- Constant metadata can print as a numeral. Preserve the source
+          -- byte kind at ABI sites, including alignment in ordinary encode.
+          if (bytesTy? (J.tyStr a)).isSome && !(t.startsWith (J.tyStr a ++ "(")) then
+            sourceCast (J.tyStr a) t
+          else if packed && (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
+            s!"{identText ((((J.tyStr a).drop 5).splitOn ".").getLast!)}({t})"
           else t
       else as
-    let name ← if let some n := superName then pure n
+    let name ← if let some n := superName then pure (identText n)
       else if staticBase then
         match (J.ref? f).bind (lookupBy · (← get).staticNames) with
-        | some name => pure name
+        | some name => pure (identText name)
         | none => unsupported "a base-qualified call without an imported function declaration"
       else if isExternalMember f then
         -- `I(0).f`: the receiver an address, `address(0).f` (`0.f` does not parse)
         let r ← expr (← PM.lift (J.get f "expression"))
         let r := if r.front.isDigit then s!"address({r})" else r
-        pure s!"{r}.{← PM.lift (J.str f "memberName")}"
+        pure s!"({r}).{identText (← PM.lift (J.str f "memberName"))}"
       else if valueCallee && J.kind f == "FunctionCall" then pure s!"({← expr f})"
       else expr f
     pure s!"{name}({", ".intercalate as})"
@@ -1168,7 +1311,7 @@ partial def call (j : Json) : PM String := do
     -- import names it (the table's, or the contract's own)
     let some id := J.ref? f | unsupported "a struct constructor without its declaration"
     let name ← match lookupBy s!"#solc{id}" (← get).structs with
-      | some (.ok m) => pure m
+      | some (.ok m) => pure (typeIdentText m)
       | some (.error g) => unsupported g.msg
       | none => unsupported s!"a struct constructor of the type declaration #{id}"
     let as ← args.mapM expr
@@ -1176,7 +1319,7 @@ partial def call (j : Json) : PM String := do
       (·.toList.filterMap (·.getStr?.toOption)) |>.getD []
     if names.isEmpty then pure s!"{name}({", ".intercalate as})"
     else
-      pure s!"{name}(\{{", ".intercalate ((names.zip as).map fun (n, a) => s!"{n}: {a}")}})"
+      pure s!"{name}(\{{", ".intercalate ((names.zip as).map fun (n, a) => s!"{identText n}: {a}")}})"
   | k => unsupported s!"a call of kind `{k}`"
 
 end
@@ -1207,6 +1350,7 @@ one value call solkey reads, matched as `SolJSONParser.isValueCall` matches
 it: two declarations, a `bool` and an empty one; the options exactly
 `value`; the member `call`; one argument, the empty string. -/
 def valueCall? (j : Json) : Option (Json × Json × Json) := do
+  guard (J.kind j == "VariableDeclarationStatement")
   let [d, Json.null] := (J.arr? j "declarations").map (·.toList) |>.getD []
     | none
   let call ← J.opt j "initialValue"
@@ -1216,12 +1360,12 @@ def valueCall? (j : Json) : Option (Json × Json × Json) := do
   guard (J.kind call == "FunctionCall" && J.kind opts == "FunctionCallOptions")
   let [Json.str "value"] := (J.arr? opts "names").map (·.toList) |>.getD []
     | none
-  guard (J.kind m == "MemberAccess" && J.str? m "memberName" == some "call")
+  guard (J.kind m == "MemberAccess" && nativeMember m && J.str? m "memberName" == some "call")
   let [a] := (J.arr? call "arguments").map (·.toList) |>.getD []
     | none
   guard (J.kind a == "Literal" && J.str? a "kind" == some "string" &&
     J.str? a "value" == some "")
-  let v ← (J.arr? opts "options").bind (·[0]?)
+  let [v] ← (J.arr? opts "options").map Array.toList | none
   pure (d, ← J.opt m "expression", v)
 
 /-- A tuple's components, one left out printed empty: `(a, , b)`. -/
@@ -1238,7 +1382,7 @@ def tupleValue (v : Json) : PM String := do
   -- `abi.decode(d, (T, U))`: the elaborator decodes each component
   else if J.kind v == "FunctionCall" && (J.opt v "expression").any (fun f =>
       J.kind f == "MemberAccess" && J.str? f "memberName" == some "decode" &&
-        (J.opt f "expression").any (fun o => J.kind o == "Identifier" && J.str? o "name" == some "abi"))
+        (J.opt f "expression").any (builtinNamed · "abi"))
   then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
@@ -1257,7 +1401,7 @@ def declText (d : Json) : PM String := do
   if let some source := J.str? d "name" then
     unless source.isEmpty do
       modify fun st => { st with specLocals := (source, name) :: st.specLocals }
-  pure s!"{T}{loc} {name}"
+  pure s!"{T}{loc} {identText name}"
 
 /-- A source block, loop initializer or catch has a lexical local scope. -/
 def withSpecScope {α : Type} (action : PM α) : PM α := do
@@ -1273,7 +1417,7 @@ private def yulArgs? (name : String) (j : Json) : Option (List Json) := do
   (J.arr? j "arguments").map Array.toList
 
 /-- Only the canonical byte-buffer rethrow; no other assembly is erased. -/
-private def memoryRethrow? (j : Json) : Option String := do
+def memoryRethrow? (declarations : List Json) (j : Json) : Option Json := do
   let ast ← J.opt j "AST"
   guard (J.kind ast == "YulBlock")
   let [stmt] ← (J.arr? ast "statements").map Array.toList | none
@@ -1292,7 +1436,11 @@ private def memoryRethrow? (j : Json) : Option String := do
     guard ((r.getObjValAs? Nat "valueSize").toOption == some 1)
     (r.getObjValAs? Int "declaration").toOption
   guard ((declaration left).isSome && declaration left == declaration right)
-  pure name
+  let id ← declaration left
+  let decl ← declarations.find? (J.id? · == some id)
+  guard (J.kind decl == "VariableDeclaration" && J.tyStr decl == "bytes" &&
+    J.str? decl "storageLocation" == some "memory" && J.str? decl "name" == some name)
+  pure decl
 
 mutual
 
@@ -1333,6 +1481,7 @@ partial def stmt1 (j : Json) : PM (List String) := do
     -- dropped (solkey's `storagePopReference_unfold_leftFstReceiver`,
     -- `storagePopReferenceDiscard`)
     if J.kind e == "MemberAccess" &&
+        nativeMember e &&
         (J.opt e "memberName").any (fun m => m == .str "pop" || m == .str "push") &&
         (J.tyStr e).startsWith "function" then
       let r ← PM.lift (J.get e "expression")
@@ -1454,11 +1603,12 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "Break" => pure ["break"]
   | "Continue" => pure ["continue"]
   | "InlineAssembly" =>
-    let some source := memoryRethrow? j |
+    let some declaration := memoryRethrow? (← get).declarations j |
       unsupported "assembly other than revert(add(data, 32), mload(data))"
+    let some source := J.str? declaration "name" | unsupported "a raw rethrow without its source name"
     let some name := lookupBy source (← get).specLocals |
       unsupported "raw rethrow of a value outside the local scope"
-    pure [s!"assembly \{ revert(add({name}, 32), mload({name})) }"]
+    pure [s!"assembly \{ revert(add({identText name}, 32), mload({identText name})) }"]
   -- `revert E(a, b);`: the custom error by its name, declared as a member
   -- (`errorMembers`)
   | "RevertStatement" =>
@@ -1468,7 +1618,7 @@ partial def stmt1 (j : Json) : PM (List String) := do
       unsupported "a custom error named through a member access"
     let some e := J.str? callee "name" | unsupported "a custom error with no name"
     let as ← (← PM.lift (J.arr call "arguments")).mapM expr
-    pure [s!"revert {e}({", ".intercalate as})"]
+    pure [s!"revert {identText e}({", ".intercalate as})"]
   | k => unsupported s!"the statement `{k}`"
 
 /-- A loop's specification, the `/// @custom:key` clauses above it that the
@@ -1490,6 +1640,12 @@ partial def loopSpec (j : Json) : PM String := do
     let t := resolveSpecConstants (← get).specConstants (← get).specConstBlocked t
     let t := resolveSpecEnums (← get).specEnums (← get).specBlocked t
     let st ← get
+    let bound := st.sourceStateNames ++ st.specLocals.flatMap (fun (a, b) => [a, b])
+    let modelNames := st.sourceModelNames ++ st.specLocals.flatMap (fun (a, b) => [a, b])
+    let scan := match st.scanLoop bound modelNames t with
+      | .rejected features diagnostic => .rejected features { diagnostic with line := J.line j }
+      | scan => scan
+    modify fun state => { state with sourceScope := state.sourceScope.append scan }
     let t ← PM.lift ((st.rewriteLoop st.specLocals t).mapError (.unsupported · (J.line j)))
     out := out ++ s!"/// @custom:key {t}\n"
   pure out

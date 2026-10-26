@@ -167,6 +167,8 @@ def qSrc (Γ : Ctx) : (T : Ty) → Src C Γ T → QM Expr
   | _, @Src.fixedCopy _ _ E n R p shape _ => do
     ctor ``Src.fixedCopy Γ #[toExpr E, toExpr n, toExpr R, ← qSPath Γ _ p, FixedCopy.quote shape, rflTrue]
   | _, @Src.copyMem _ _ R p => do ctor ``Src.copyMem Γ #[toExpr R, ← qMPath Γ _ p]
+  | _, @Src.fixedCopyMem _ _ E n R p shape => do
+    ctor ``Src.fixedCopyMem Γ #[toExpr E, toExpr n, toExpr R, ← qMPath Γ _ p, FixedCopy.quote shape]
 
 def qARhs (Γ : Ctx) (R : RefTy) : ARhs C Γ R → QM Expr
   | .path p => do ctor ``ARhs.path Γ #[toExpr R, ← qSPath Γ _ p]

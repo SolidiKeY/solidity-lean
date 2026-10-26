@@ -169,8 +169,8 @@ partial def abiDecodeBytes (T : String) (d : ByteSrc) (h n : Nat) : ElabM (SProg
   let start : RawExpr := (RawExpr.name o).addN 32
   let S : List RawStmt :=
     [.require (.binop .ge len (.num (32 * n)))] ++ abiAssemble d o (.num h) 32 ++
-    [.require (.binop .le start len)] ++ abiAssemble d L (.name o) 32 ++
-    [.require (.binop .le (.binop .add start (.name L)) len),
+    abiBounds d (.name o) (.num 32) ++ abiAssemble d L (.name o) 32 ++
+    abiBounds d start (.name L) ++ [
      .declMemory (.named T) x (some (.newArr (.named T) (.name L))),
      .decl (.named "uint") j (some (.num 0)),
      .whileLoop {} (.binop .lt (.name j) (.name L))
@@ -261,7 +261,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   let taken := fnTaken C
   let mut cands : List (String × Nat) := []
   for ((g, d), i) in C.funs.zipIdx do
-    if FunDecl.sigTy? C d == some ty && fnReachable C g then
+    if fnSource C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
       if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
       else if taken.contains g then
         throw s!"{h}(…) may call {g}, which is not declared before this function: \
@@ -311,7 +311,7 @@ partial def extDispatch (h ty : String) (ps rs : List String) (args : List RawEx
       as := as ++ [.name y]
   let mut cands : List (String × Nat) := []
   for (g, d) in C.funs do
-    if FunDecl.extTy? C d == some ty then
+    if fnSource C g && FunDecl.extTy? C d == some ty then
       if let some sel := fnSelector? C g then cands := cands ++ [(g, sel)]
   let other ← extCallStmt (.name a) "#selector" (.name sl :: as) rs res
   let mut disp : List RawStmt := [other]
@@ -422,9 +422,10 @@ partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr
     let value ← (match E with
       | .prim p => do pure (Src.val (← checkIn C Γv p a))
       | .ref R => do
-        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γv a) then
-          pure (Src.copyMem (← ElabM.lift (checkMPath C Γv (.ref R) a)))
-        else ElabM.lift (checkStorageCopy C Γv R a)
+        let some d := lookupBy f (← read).funs | throw "a deferred receiver's declaration is missing"
+        let some (r, _) := d.ret | throw "a deferred receiver needs one return"
+        ElabM.lift (storageCopyShape C (← ctx) (shapeUnder d.widths (r ++ "[]")) a)
+        ElabM.lift (checkStorageCopy C Γv R a)
       : ElabM (Src C Γv.ctx E))
     let result ← if Q.isEmpty then do
       let h ← ElabM.lift (Γv.wkTo Γ)
@@ -653,7 +654,9 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   let mut nonLocal := 0
   for t in tgts do
     if t.hasIncDec then throw s!"{t.toStr}: a tuple's target with an effect"
-    unless (← synthM C t).2 matches .val _ (.simple (.local _)) do nonLocal := nonLocal + 1
+    unless (← synthM C t).2 matches
+        .val _ (.simple (.local _)) | .mpath (.ref _) (.var ..) | .path (.ref _) (.alias _) do
+      nonLocal := nonLocal + 1
     for u in tgts do
       if let .name x := u then
         if t.toStr != u.toStr && t.mentions x then throw s!"{t.toStr}: a tuple's target that reads {x}, another"
@@ -682,11 +685,17 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         if direct then
           tmps := tmps ++ [.assign t e]
           continue
-        let p ← match (← synthM C t).2 with
-          | .val p _ | .path (.prim p) _ | .mpath (.prim p) _ => pure p
-          | _ => throw s!"{t.toStr}: a tuple's component of a reference type"
-        let x := toString (← freshCapture "se")
-        tmps := tmps ++ [.decl (.named (tyName p (widthIn C (← ctx) t))) x (some e)]
+        let Γ ← ctx
+        let (base, bind) ← match (← synthM C t).2 with
+          | .val p _ | .path (.prim p) _ | .mpath (.prim p) _ =>
+            pure ("se", fun x => RawStmt.decl (.named (tyName p (widthIn C Γ t))) x (some e))
+          | .mpath (.ref R) (.var ..) =>
+            pure ("mv", fun x => RawStmt.declMemory (rawTyW (placeShape C Γ t) (.ref R) "") x (some e))
+          | .path (.ref R) (.alias _) =>
+            pure ("sp", fun x => RawStmt.declStorage (rawTyW (placeShape C Γ t) (.ref R) "") x (some e))
+          | _ => throw s!"{t.toStr}: a tuple's reference target must be a local alias"
+        let x := toString (← freshCapture base)
+        tmps := tmps ++ [bind x]
         asgs := asgs ++ [.assign t (.name x)]
       | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
     elabStmtsP (tmps ++ asgs)

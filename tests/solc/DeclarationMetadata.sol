@@ -59,6 +59,9 @@ contract DeclarationMetadata {
 
     function callback(uint256) public pure {}
     function callbackAddress(address) public pure {}
+    // callback's pinned declaration ID is 239. The helper must also avoid
+    // the underscored model alias of a local shadowing this state variable.
+    uint256 private solcMetadataSelector239;
 
     function receiver() internal returns (address) {
         receiverCount += 1;
@@ -67,10 +70,24 @@ contract DeclarationMetadata {
 
     /// @custom:key box
     function receiverEffects() public {
+        uint256 solcMetadataSelector239 = 5;
         receiverCount = 0;
         bytes4 value = DeclarationMetadata(receiver()).callback.selector;
         assert(receiverCount == 1);
         assert(value == this.callback.selector);
+        assert(solcMetadataSelector239 == 5);
+    }
+
+    /// @custom:key box
+    function inlineReceiverEffects() public { receiverEffects(); }
+
+    /// @custom:key box
+    function lazyReceiverEffects() public {
+        receiverCount = 0;
+        bool ignored = false && (DeclarationMetadata(receiver()).callback.selector == this.callback.selector);
+        assert(!ignored && receiverCount == 0);
+        bytes4 value = true ? this.callback.selector : DeclarationMetadata(receiver()).callback.selector;
+        assert(value == this.callback.selector && receiverCount == 0);
     }
 
     /// @custom:key box

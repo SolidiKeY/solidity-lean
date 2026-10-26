@@ -257,6 +257,7 @@ partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := d
   | Src.copy _ _ _ p _ => ppExprS ns p
   | Src.fixedCopy _ _ _ _ _ p _ _ => ppExprS ns p
   | Src.copyMem _ _ _ p => ppExprS ns p
+  | Src.fixedCopyMem _ _ _ _ _ p _ => ppExprS ns p
   | ARhs.path _ _ _ p => ppExprS ns p
   | MRhs.alias _ _ _ p => ppExprS ns p
   | MRhs.copy _ _ _ p _ => ppExprS ns p
