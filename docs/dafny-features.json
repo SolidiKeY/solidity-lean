@@ -293,7 +293,7 @@
         "Solidity/Examples/LexTermSize.lean"
       ],
       "assessment": "Unsigned scalar variants and typed NatSpec tuple measures are supported. Ordinary diamond loops with an admitted frame, no break flag and no quantified invariant clauses generate lexicographic VCs that require all components to be defined and a strict decrease after every successful body turn. Box and callback proofs retain partial-correctness erasure. Ordinary diamonds still accept exhaustion; separate statement-indexed SourceCertificate values certify successful runs of the exact declared tuple. Signed/general source metrics and total recursive termination remain open.",
-      "next": "Broaden admitted frames, invariant clauses and metric sorts; connect automatic VCs to strict successful-termination certificates and establish callback and recursive total termination."
+      "next": "Broaden admitted frames, invariant clauses and metric sorts; add checked first-iteration reasoning for do-while; connect automatic VCs to strict successful-termination certificates and establish callback and recursive total termination."
     },
     {
       "id": "modular-calls",

@@ -49,12 +49,23 @@ contract LexDiamond {
         assert(i == 0);
     }
 
+    // This source run is safe, but its invariant does not relate x to the
+    // synthetic first-iteration flag. The current havoced VC remains pending.
     function doWhileCountdown() public pure {
         uint x = 2;
         /// @custom:key invariant x <= 2
         /// @custom:key decreases (x, 0)
         do { x--; } while (x > 0);
         assert(x == 0);
+    }
+
+    // Unlike while, do-while executes the decrement even with x initially 0.
+    // This real underflow must stay unproved alongside the conservative case.
+    function doWhileUnderflow() public pure {
+        uint x = 0;
+        /// @custom:key invariant x <= 2
+        /// @custom:key decreases (x, 0)
+        do { x--; } while (x > 0);
     }
 
     // These bodies count down, but the supplied tuple does not decrease.

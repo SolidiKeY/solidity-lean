@@ -21,9 +21,9 @@ test('tuple annotations preserve safety proofs and prove the supported ordinary 
 });
 
 const diamondSource = 'tests/solc/LexDiamond.sol';
-const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset','forCountdown','doWhileCountdown'];
-const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','undefinedAfter','returnUnchanged','overflowMetric','reverting'];
-const conservativeDiamonds = ['breakDiamond','quantifiedDiamond','noFrameDiamond','callbackDiamond'];
+const provedDiamonds = ['pairCountdown','tripleCountdown','pairReset','tripleReset','forCountdown'];
+const invalidDiamonds = ['equalTuple','increasingTuple','undefinedLater','undefinedAfter','returnUnchanged','overflowMetric','reverting','doWhileUnderflow'];
+const conservativeDiamonds = ['breakDiamond','quantifiedDiamond','noFrameDiamond','callbackDiamond','doWhileCountdown'];
 let diamondReport;
 function diamondRows() {
   // Import the complete source matrix once. Every case must be retained,
@@ -33,10 +33,12 @@ function diamondRows() {
   const rows = new Map(diamondReport.results.map(row => [row.function,row]));
   assert.equal(rows.size,provedDiamonds.length + invalidDiamonds.length + conservativeDiamonds.length);
   assert.equal(diamondReport.results.length,rows.size);
+  for (const row of rows.values())
+    assert.equal(row.tag,'diamond',`${row.function}: tuple VC cases must retain the default diamond modality`);
   return rows;
 }
 
-test('source tuple diamonds prove countdowns, upward inner resets and for/do lowering', () => {
+test('source tuple diamonds prove countdowns, upward inner resets and for lowering', () => {
   const rows = diamondRows();
   for (const name of provedDiamonds) {
     const row = rows.get(name);
@@ -57,7 +59,7 @@ test('invalid source tuple variants and unsuccessful bodies stay pending with ex
   assert.equal(testsPassed(diamondReport),false);
 });
 
-test('unsupported source diamond loop shapes retain conservative pending verdicts', () => {
+test('source invariant approximations and unsupported diamond shapes retain pending verdicts', () => {
   const rows = diamondRows();
   for (const name of conservativeDiamonds) {
     const row = rows.get(name);

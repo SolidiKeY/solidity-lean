@@ -91,8 +91,9 @@ names a JSON results file. Linux headless runs need an X server.
 
 CI uses `vscode/test/run-host.cjs` with `@vscode/test-electron` installed only in
 its temporary test directory. The Lean build job also runs the host against the
-real compiler and verifier, including membership, entry audits, tuple annotations,
-lexical scope and certified witnesses. For an existing offline editor executable, set
+real compiler and verifier, including membership, entry audits, tuple diamond
+proofs, lexical scope and certified witnesses. CI also runs the source regression
+suite and frozen function listing. For an existing offline editor executable, set
 `VSCODE_EXECUTABLE_PATH` instead; `VSCODE_TEST_USER_DATA_DIR` and
 `VSCODE_TEST_EXTENSIONS_DIR` select isolated directories. The launcher requires
 the host's fresh JSON success report as well as a successful process exit.

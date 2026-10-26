@@ -80,8 +80,9 @@ reflexive).
 `ensures` reads `\old` or an `assignable` clause is given. `find(old, p)`
 checks `p`'s indices against the current storage and reads `old`;
 `sol_decide` cannot state that exactly, so `old` is outside its fragment and
-`sol_close` reads it semantically. `net(a)` is `Term.net`, read as a `uint`
-like `msg.value`; under `\old` it is `Tm.netOf oldNet a`, the snapshot
+`sol_close` reads it semantically. `net(a)` is an unbounded ledger integer
+(`Srt.kint`), while `msg.value` is a bounded `uint`; under `\old` it is
+`Tm.netOf oldNet a`, the snapshot
 `oldNet` (`Rhs.saveNet`, a local of type `oldNet`), taken only when an `\old(…)`
 reads `net(a)`.
 

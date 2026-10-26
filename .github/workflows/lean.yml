@@ -64,7 +64,7 @@ jobs:
           axiom-audit-allow: "propext,Classical.choice,Quot.sound"
       - name: Audit headline theorem dependencies
         run: lake env lean --tstack=131072 TrustAudit.lean
-      - name: Test source verification additions
+      - name: Test source verification and regression suites
         env:
           SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
           LEAN_NUM_THREADS: '1'
@@ -74,7 +74,7 @@ jobs:
             https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js \
             --output "$SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js"
           node --test --test-concurrency=1 scripts/preconditions.test.mjs scripts/finite-spec-sets.test.mjs scripts/counterexamples.test.mjs scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs
-          node --test --test-name-pattern='the full frozen TestSuite' scripts/test-solidity.test.mjs
+          node --test --test-concurrency=1 scripts/test-solidity.test.mjs scripts/aggregates.test.mjs scripts/declarations-metadata.test.mjs
       - name: Install real backend editor test launcher
         run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
       - name: Test editor with solc and Lean

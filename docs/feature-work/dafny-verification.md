@@ -373,5 +373,34 @@ witness. The rule-size proof counts one initial update per metric and one for
 the condition, replacing the old universal two-update bound with an arity-aware
 bound. The two-update theorem remains available for existing shapes, and the
 global `16 * statement.size + 16` formula-size bound remains proved unchanged.
-Focused proof and syntax checks pass; public tactic, source and final global
-validation are in progress.
+The public tactic matrix passes, including pair/triple countdowns and inner
+resets, scalar compatibility and negative cases. The broad build found a source
+branch-label mismatch in the new packed notation. Explicit optional labels now
+appear in the actual rule schema and round-trip through the printer. All 274
+focused jobs pass, including the unchanged source-label audit, exact typed
+premise identity, 181/27/4 printer coverage and actual source-loop tree labels.
+
+The source reset regression also exposed a budget boundary in leaf search:
+classification of a third leaf inherited the heartbeat count spent on earlier
+leaves. It now receives its own inherited cap, like the closing attempts. A
+failed classification selects only the existing conservative closers. No numeric
+limit or proof obligation changes; the source pair reset now proves at the
+unchanged 200000-heartbeat cap. Temporary diagnostic probes are removed. The
+remaining complete source, editor and global gates are being rerun.
+
+The source matrix also distinguishes a do-while invariant limitation from a
+runtime defect. Lowering introduces `first = true`, but the user invariant
+`x <= 2` does not retain its relation to the source initialization. The abstract
+head `first = true, x = 0` invalidates the generic decrease VC. The safe x=2 run
+therefore stays pending, beside a separate actual zero-start underflow negative.
+Finder and skeptic confirmed this classification. No first-phase relation is
+assumed, no runtime body is duplicated, and no source tuple component is changed.
+Checked phase strengthening and general entry-phase reasoning remain tracked work.
+
+Current editor validation passes all 30 real-host checks, including the ordinary
+source tuple proof, equal-tuple pending diagnostic/hover, Test Explorer statuses,
+source shadowing and exact certified witness display. All 60 fast tests pass.
+The revised six-group tuple suite passes all 18 retained rows: five proofs and
+thirteen explicit pending cases, including the do-while invariant limitation and
+actual underflow. The standalone quantifier hygiene repair and final combined
+source/global gates remain in progress.

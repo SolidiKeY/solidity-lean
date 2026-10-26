@@ -132,6 +132,16 @@ The supported ordinary diamond path cannot bypass its metric checks by erasure.
 Ordinary diamonds still accept exhaustion: this rule does not construct a strict
 successful-termination certificate.
 
+A source `do … while` also carries the lowering's synthetic first-iteration
+flag. A user invariant such as `x <= 2` does not relate that flag to `x`, so
+havoc admits `first = true, x = 0` and rejects a decrementing body. The actual
+source initialization `x = 2` is safe; that abstract head is not a reachable
+counterexample. This invariant limitation currently leaves the tuple do-while
+countdown pending. The source tests also reject the actual zero-start underflow.
+A future phase rule must check its initial relation and preservation. A checked
+strengthening `first → condition` could cover initially true pure guards; general
+do-first cases require separate entry-phase reasoning.
+
 For strict successful termination, `Semantics/LexMetrics.lean` supplies
 `LoopMetrics.SourceCertificate I G actualLoop`. Its indexed constructor retains
 the check of the tuple actually stored on that loop. The semantic invariant `I`
