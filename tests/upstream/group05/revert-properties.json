@@ -1,0 +1,426 @@
+{
+  "caveat": "The original full-contract test remains wall-time blocked. These are all ten original asserted properties, individually selected with the same proof and timeout limits; no expected verdict changed.",
+  "reports": [
+    {
+      "name": "reasonBytes",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "reasonBytes"
+      },
+      "seconds": 134.522,
+      "ok": false,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "pending",
+            "signature": "reasonBytes()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "function": "reasonBytes",
+            "elapsedMs": 126352
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "reasonBytes",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "open-proof-goals"
+    },
+    {
+      "name": "reasonOfBranch",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "reasonOfBranch"
+      },
+      "seconds": 79.216,
+      "ok": false,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "pending",
+            "signature": "reasonOfBranch()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "function": "reasonOfBranch",
+            "elapsedMs": 73729
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "reasonOfBranch",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "open-proof-goals"
+    },
+    {
+      "name": "emptyData",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "emptyData"
+      },
+      "seconds": 33.592,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "emptyData()",
+            "reason": "",
+            "reading": "solc",
+            "function": "emptyData",
+            "elapsedMs": 24411
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "emptyData",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    },
+    {
+      "name": "customSelector",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "customSelector"
+      },
+      "seconds": 37.254,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "customSelector()",
+            "reason": "",
+            "reading": "solc",
+            "function": "customSelector",
+            "elapsedMs": 32208
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "customSelector",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    },
+    {
+      "name": "customData",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "customData"
+      },
+      "seconds": 112.333,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "customData()",
+            "reason": "",
+            "reading": "solc",
+            "function": "customData",
+            "elapsedMs": 107318
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "customData",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    },
+    {
+      "name": "reasonPastCustom",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "reasonPastCustom"
+      },
+      "seconds": 24.809,
+      "ok": false,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "pending",
+            "signature": "reasonPastCustom(uint)",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "function": "reasonPastCustom",
+            "elapsedMs": 19175
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "reasonPastCustom",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "open-proof-goals"
+    },
+    {
+      "name": "externalReason",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "externalReason"
+      },
+      "seconds": 302.147,
+      "ok": false,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "notRun",
+            "signature": "externalReason(address)",
+            "reason": "contract run interrupted",
+            "reading": "solc",
+            "function": "externalReason",
+            "elapsedMs": 0
+          }
+        ],
+        "errors": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "stage": "lean",
+            "reason": "spawnSync lake ETIMEDOUT; lake terminated by SIGKILL\n\u26a0 [2/130] Replayed Solidity.AST\nwarning: Solidity/AST.lean:354:4: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [18/130] Replayed Solidity.Syntax.Quote\nwarning: Solidity/Syntax/Quote.lean:411:39: unused variable `ps`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [27/130] Replayed Solidity.Syntax.Elab.Arms\nwarning: Solidity/Syntax/Elab/Arms.lean:1194:11: unused variable `n`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [43/130] Replayed Solidity.Theory.Typed.Obs.Values\nwarning: Solidity/Theory/Typed/Obs/Values.lean:495:46: This simp argument is unused:\n  and_false\n\nHint: Omit it from the simp argument list.\n  simp only [TVal.delR, e, Nat.not_lt_zero, a\u0335n\u0335d\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335,\u0335 \u0335if_false, c.read_obsOpt]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Values.lean:563:48: This simp argument is unused:\n  and_false\n\nHint: Omit it from the simp argument list.\n  simp only [TVal.stripR, e, Nat.not_lt_zero, a\u0335n\u0335d\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335,\u0335 \u0335if_false]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Values.lean:717:73: This simp argument is unused:\n  and_false\n\nHint: Omit it from the simp argument list.\n  simp only [SVal.obsOpt_len_nil, SVal.lenOf, Nat.not_lt_zero, a\u0335n\u0335d\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335,\u0335 \u0335if_false, c.read_obsOpt]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [44/130] Replayed Solidity.Theory.Typed.Obs.Ops\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:170:44: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [if_true, uintOfNat_val hn, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:244:45: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [if_true, uintOfNat_val hkb, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335Int.toNat_natCast, List.getElem?_set_self hk,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332 \u0332 \u0332Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:355:35: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335if_true, Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:355:55: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, Int.natCast_nonneg, i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335 \u0335Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:363:35: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335if_true, Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:363:55: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, Int.natCast_nonneg, i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335 \u0335Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:373:37: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335if_true, Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:373:57: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val hn, Int.natCast_nonneg, i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335 \u0335Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:433:70: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val (show n - 1 < 2 ^ 256 by omega), I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335if_true, Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Theory/Typed/Obs/Ops.lean:433:90: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [uintOfNat_val (show n - 1 < 2 ^ 256 by omega), Int.natCast_nonneg, \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335\n                Int.toNat_natCast]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [75/130] Replayed Solidity.Typing.Constructibility\nwarning: Solidity/Typing/Constructibility.lean:515:38: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [arrOf, SVal.saveM, idxU, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335\u2193reduceIte, SVec.toList_ofList,\n  \u0335  \u0335 \u0335 \u0335SList.toList_ofList,\n  \u0332  \u0332 \u0332 \u0332Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,\n  \u0335  \u0335 \u0335 \u0335Option.bind_eq_bind,\n  \u0332  \u0332 \u0332 \u0332Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Typing/Constructibility.lean:515:58: This simp argument is unused:\n  \u2193reduceIte\n\nHint: Omit it from the simp argument list.\n  simp only [arrOf, SVal.saveM, idxU, Int.natCast_nonneg, \u2193\u0335r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335I\u0335t\u0335e\u0335,\u0335 \u0335SVec.toList_ofList, SList.toList_ofList,\n  \u0332  \u0332 \u0332 \u0332Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil, Option.bind_eq_bind,\n  \u0332  \u0332 \u0332 \u0332Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Typing/Constructibility.lean:529:38: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [arrOf, SVal.saveM, idxU, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335\u2193reduceIte, SVec.toList_ofList,\n  \u0335  \u0335 \u0335 \u0335SList.toList_ofList,\n  \u0332  \u0332 \u0332 \u0332Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,\n  \u0335  \u0335 \u0335 \u0335Option.bind_eq_bind,\n  \u0332  \u0332 \u0332 \u0332Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Typing/Constructibility.lean:529:58: This simp argument is unused:\n  \u2193reduceIte\n\nHint: Omit it from the simp argument list.\n  simp only [arrOf, SVal.saveM, idxU, Int.natCast_nonneg, \u2193\u0335r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335I\u0335t\u0335e\u0335,\u0335 \u0335SVec.toList_ofList, SList.toList_ofList,\n  \u0332  \u0332 \u0332 \u0332Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil, Option.bind_eq_bind,\n  \u0332  \u0332 \u0332 \u0332Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Typing/Constructibility.lean:542:31: This simp argument is unused:\n  Int.natCast_nonneg\n\nHint: Omit it from the simp argument list.\n  simp only [SVal.saveM, idxU, I\u0335n\u0335t\u0335.\u0335n\u0335a\u0335t\u0335C\u0335a\u0335s\u0335t\u0335_\u0335n\u0335o\u0335n\u0335n\u0335e\u0335g\u0335,\u0335 \u0335\u2193reduceIte, Int.toNat_natCast, List.getElem?_eq_getElem hl,\n  \u0332  \u0332 \u0332 \u0332SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Typing/Constructibility.lean:542:51: This simp argument is unused:\n  \u2193reduceIte\n\nHint: Omit it from the simp argument list.\n  simp only [SVal.saveM, idxU, Int.natCast_nonneg, \u2193\u0335r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335It\u0335e\u0335,\u0335 \u0335I\u0335nt.toNat_natCast,\n  \u0335  \u0335 \u0335 \u0335List.getElem?_eq_getElem hl,\n  \u0332  \u0332 \u0332 \u0332SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [77/130] Replayed Solidity.Calculus.RuleSyntax.Grammar\nwarning: Solidity/Calculus/RuleSyntax/Grammar.lean:598:21: unused variable `\u0393`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [78/130] Replayed Solidity.Calculus.RuleSyntax.Schemas\nwarning: Solidity/Calculus/RuleSyntax/Schemas.lean:447:108: unused variable `v`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/RuleSyntax/Schemas.lean:448:92: unused variable `v`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [88/130] Replayed Solidity.Calculus.CloseLemmas\nwarning: Solidity/Calculus/CloseLemmas.lean:137:28: This simp argument is unused:\n  h1\n\nHint: Omit it from the simp argument list.\n  simp only [uintBitwise, h1,\u0335 \u0335h\u03351\u0335', Nat.one_and_eq_mod_two, signedOf]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [104/130] Replayed Solidity.Calculus.LowerRun\nwarning: Solidity/Calculus/LowerRun.lean:275:51: This simp argument is unused:\n  Option.bind_some\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.eval_app0, Op0.eval, State.memT,\u0335 \u0335O\u0335p\u0335t\u0335i\u0335o\u0335n\u0335.\u0335b\u0335i\u0335n\u0335d\u0335_\u0335s\u0335o\u0335m\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [105/130] Replayed Solidity.Semantics.Callback\nwarning: Solidity/Semantics/Callback.lean:1319:65: This simp argument is unused:\n  Bool.false_eq_true\n\nHint: Omit it from the simp argument list.\n  simp_all only [Bool.true_eq_false,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335e\u0335q\u0335_\u0335t\u0335r\u0335u\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [117/130] Replayed Solidity.Calculus.Graft\nwarning: Solidity/Calculus/Graft.lean:1082:36: This simp argument is unused:\n  false_implies\n\nHint: Omit it from the simp argument list.\n  simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.isSome_none,\n        Option.isSome_some, imp_self, f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335implies,\u0335 \u0335i\u0335m\u0335p\u0335l\u0335i\u0335e\u0335s\u0335_true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [124/130] Replayed Solidity.Theory.Typed.Mem\nwarning: Solidity/Theory/Typed/Mem.lean:670:41: This simp argument is unused:\n  and_self\n\nHint: Omit it from the simp argument list.\n  simp_all only [Option.isSome_some, a\u0335n\u0335d\u0335_\u0335s\u0335e\u0335l\u0335f\u0335,\u0335 \u0335decide_true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [129/240] Replayed Solidity.Calculus.SoundCatch\nwarning: Solidity/Calculus/SoundCatch.lean:89:47: This simp argument is unused:\n  ha\n\nHint: Omit it from the simp argument list.\n  simp only [h\u0335a\u0335,\u0335 \u0335if_true, List.cons_append, List.nil_append,\n              List.mem_cons, true_or]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [142/240] Replayed Solidity.Calculus.StatePartsScoped\nwarning: Solidity/Calculus/StatePartsScoped.lean:625:36: This simp argument is unused:\n  false_implies\n\nHint: Omit it from the simp argument list.\n  simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.isSome_none,\n        Option.isSome_some, imp_self, f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335implies,\u0335 \u0335i\u0335m\u0335p\u0335l\u0335i\u0335e\u0335s\u0335_true]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/StatePartsScoped.lean:1280:32: unused variable `U`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [148/240] Replayed Solidity.Calculus.TermLaws.Storage\nwarning: Solidity/Calculus/TermLaws/Storage.lean:302:49: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [Path.labels, Theory.diverges,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:311:49: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [Path.labels, Theory.diverges,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:320:49: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [Path.labels, Theory.diverges,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:329:49: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [Path.labels, Theory.diverges,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:350:19: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [\u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335]\u0335 \u0335at h \u22a2\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:397:45: This simp argument is unused:\n  if_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [SRef.labels, Theory.diverges,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335] at hd\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Storage.lean:717:8: This simp argument is unused:\n  Bool.false_and\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.exhB, hx, Op2.exhB_none_fst, Option.isSome_none, Bool.and_false, B\u0335o\u0335o\u0335l\u0335.\u0335f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335a\u0335n\u0335d\u0335,\u0335 \u0335Bool.or_false,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332 \u0332 \u0332Bool.false_or, Bool.and_eq_true] at ht\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [149/240] Replayed Solidity.Calculus.TermLaws.Reads\nwarning: Solidity/Calculus/TermLaws/Reads.lean:644:62: This simp argument is unused:\n  Option.bind_some\n\nHint: Omit it from the simp argument list.\n  simp only [Storage.len, Storage.find_save_same hsave,\u0335 \u0335O\u0335p\u0335t\u0335i\u0335o\u0335n\u0335.\u0335b\u0335i\u0335n\u0335d\u0335_\u0335s\u0335o\u0335m\u0335e\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Reads.lean:665:58: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.svLit?, Op1.svStep,\u0335 \u0335r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335] at hw'\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Reads.lean:761:41: unused variable `E`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/TermLaws/Reads.lean:768:56: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.addrShape?, Op1.addrStep, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Reads.lean:775:56: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.addrShape?, Op2.addrStep, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [150/240] Replayed Solidity.Calculus.TermLaws.Fresh\nwarning: Solidity/Calculus/TermLaws/Fresh.lean:380:46: This simp argument is unused:\n  hk\n\nHint: Omit it from the simp argument list.\n  simp only [Heap.readAddr, Heap.index, h\u0335k\u0335,\u0335 \u0335if_true, List.getElem?_eq_getElem hlt]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/TermLaws/Fresh.lean:380:50: This simp argument is unused:\n  if_true\n\nHint: Omit it from the simp argument list.\n  simp only [Heap.readAddr, Heap.index, hk, i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335 \u0335List.getElem?_eq_getElem hlt]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [155/240] Replayed Solidity.Calculus.RewritePast.Apply\nwarning: Solidity/Calculus/RewritePast/Apply.lean:893:77: This simp argument is unused:\n  Bool.true_or\n\nHint: Omit it from the simp argument list.\n  simp only [Upd.exhAny, Upd.exhOk, ih\u2081, ih\u2082, UpdElem.exhB, UpdElem.okB,\n              Rhs.exhB_of_eval \u03c3\u2080 r hv, hv, Option.isSome_some, Bool.or_false, B\u0335o\u0335o\u0335l\u0335.\u0335t\u0335r\u0335u\u0335e\u0335_\u0335o\u0335r\u0335,\u0335Bool.and_true,\n              and_self]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/RewritePast/Apply.lean:911:45: This simp argument is unused:\n  Bool.true_or\n\nHint: Omit it from the simp argument list.\n  simp only [Upd.exhAny, Upd.exhOk, ih\u2081, ih\u2082, Rhs.exhB_of_eval \u03c3\u2080 r hv, hv,\n            Option.isSome_some, Bool.or_false, Bool.t\u0335r\u0335u\u0335e\u0335_\u0335o\u0335r\u0335,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335and_true, and_self]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [167/240] Replayed Solidity.Calculus.Decide\nwarning: Solidity/Calculus/Decide.lean:685:19: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Decide.lean:691:19: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Decide.lean:697:19: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Decide.lean:1309:28: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Decide.lean:1312:13: unused variable `E`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [171/240] Replayed Solidity.Calculus.Closer.Facts\nwarning: Solidity/Calculus/Closer/Facts.lean:247:84: This simp argument is unused:\n  hb\n\nHint: Omit it from the simp argument list.\n  simp only [PrimTy.ival, PrimTy.lo, PrimTy.hi,\u0335 \u0335h\u0335b\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Facts.lean:706:28: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Closer/Facts.lean:792:27: This simp argument is unused:\n  if_pos h0\n\nHint: Omit it from the simp argument list.\n  simp only [SVal.findM,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335h\u03350\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Facts.lean:795:15: This simp argument is unused:\n  SVal.findM_nil'\n\nHint: Omit it from the simp argument list.\n  simp only [S\u0335V\u0335a\u0335l\u0335.\u0335f\u0335i\u0335n\u0335d\u0335M\u0335_\u0335n\u0335i\u0335l\u0335'\u0335,\u0335 \u0335Option.isSome_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Facts.lean:817:27: This simp argument is unused:\n  if_pos h0\n\nHint: Omit it from the simp argument list.\n  simp only [SVal.findM,\u0335 \u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335h\u03350\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Facts.lean:820:15: This simp argument is unused:\n  SVal.findM_nil'\n\nHint: Omit it from the simp argument list.\n  simp only [S\u0335V\u0335a\u0335l\u0335.\u0335f\u0335i\u0335n\u0335d\u0335M\u0335_\u0335n\u0335i\u0335l\u0335'\u0335,\u0335 \u0335Option.isSome_some]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Facts.lean:826:13: unused variable `V`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Closer/Facts.lean:829:13: unused variable `E`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/Closer/Facts.lean:829:15: unused variable `a`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [172/240] Replayed Solidity.Calculus.Closer.Normal\nwarning: Solidity/Calculus/Closer/Normal.lean:567:61: This simp argument is unused:\n  hb\n\nHint: Omit it from the simp argument list.\n  simp only [\u0335h\u0335b\u0335,\u0335 \u0335i\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335[\u0332i\u0332f\u0332_\u0332t\u0332r\u0332u\u0332e\u0332,\u0332 if_false, Bool.false_eq_true,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332 \u0332 \u0332LTm.eval_app1, hx]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/Closer/Normal.lean:576:21: This simp argument is unused:\n  hb\n\nHint: Omit it from the simp argument list.\n  simp only [h\u0335b\u0335,\u0335 \u0335if_true, if_false, Bool.false_eq_true, LTm.eval_app1, hx]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [174/240] Replayed Solidity.Calculus.Closer.Leaf\nwarning: Solidity/Calculus/Closer/Leaf.lean:1297:76: unused variable `g`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [176/240] Replayed Solidity.Calculus.DecideEval.Readers\nwarning: Solidity/Calculus/DecideEval/Readers.lean:370:17: This simp argument is unused:\n  dif_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [d\u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335,\u0335 \u0335Path.strip?]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Readers.lean:389:30: This simp argument is unused:\n  e'\n\nHint: Omit it from the simp argument list.\n  simp only [e, if_false,\u0335 \u0335e\u0335'\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Readers.lean:406:30: This simp argument is unused:\n  e'\n\nHint: Omit it from the simp argument list.\n  simp only [e, if_false,\u0335 \u0335e\u0335'\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Readers.lean:423:30: This simp argument is unused:\n  e'\n\nHint: Omit it from the simp argument list.\n  simp only [e, if_false,\u0335 \u0335e\u0335'\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Readers.lean:938:60: This simp argument is unused:\n  ite_self\n\nHint: Omit it from the simp argument list.\n  simp only [Path.dfltOk, Bool.false_eq_true, if_false, SVec.toList_nil, SList.toList_nil,\n        List.append_nil, List.getElem?_nil, Option.bind_none,\u0335 \u0335i\u0335t\u0335e\u0335_\u0335s\u0335e\u0335l\u0335f\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [177/240] Replayed Solidity.Calculus.DecideEval.Storages\nwarning: Solidity/Calculus/DecideEval/Storages.lean:210:15: This simp argument is unused:\n  dif_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only \u0335[\u0335d\u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335]\u0335\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Storages.lean:215:30: This simp argument is unused:\n  dif_pos rfl\n\nHint: Omit it from the simp argument list.\n  simp only [SRef.strip?,\u0335 \u0335d\u0335i\u0335f\u0335_\u0335p\u0335o\u0335s\u0335 \u0335r\u0335f\u0335l\u0335]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [178/240] Replayed Solidity.Calculus.DecideEval.Memory\nwarning: Solidity/Calculus/DecideEval/Memory.lean:532:50: This simp argument is unused:\n  Option.bind_some\n\nHint: Omit it from the simp argument list.\n  simp only [Option.isSome_some, if_true, O\u0335p\u0335t\u0335i\u0335o\u0335n\u0335.\u0335b\u0335i\u0335n\u0335d\u0335_\u0335s\u0335o\u0335m\u0335e\u0335,\u0335 \u0335SVal.view_array, uintOfNat, dif_pos hn]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideEval/Memory.lean:894:12: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/DecideEval/Memory.lean:901:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/DecideEval/Memory.lean:902:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/DecideEval/Memory.lean:903:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [180/240] Replayed Solidity.Calculus.ElimFacts\nwarning: Solidity/Calculus/ElimFacts.lean:94:15: unused variable `t`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:95:9: unused variable `S`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:95:12: unused variable `t`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:103:12: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:112:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:113:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/ElimFacts.lean:114:13: unused variable `q`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [182/240] Replayed Solidity.Calculus.MemRead.Spine\nwarning: Solidity/Calculus/MemRead/Spine.lean:732:56: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.identView, Op1.identV, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335IdentV.alloc.injEq] at ht'\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [183/240] Replayed Solidity.Calculus.MemRead.Laws\nwarning: Solidity/Calculus/MemRead/Laws.lean:535:58: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.addrShape?, Op1.addrStepL, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Laws.lean:542:58: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.addrShape?, Op2.addrStepL, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Laws.lean:1007:60: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.fieldV?, Op1.fieldV, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at hfv\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [184/240] Replayed Solidity.Calculus.MemRead.Ok\nwarning: Solidity/Calculus/MemRead/Ok.lean:144:64: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.identView, Op1.identV, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335IdentV.alloc.injEq] at ht\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Ok.lean:733:62: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.identView, Op1.identV,\u0335 \u0335r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335] at ht\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Ok.lean:812:62: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.fieldObj?, Op1.fieldObj, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at ht\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Ok.lean:833:60: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.matObj?, Op2.matObj, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at hm\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Ok.lean:890:56: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.identView, Op1.identV, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335IdentV.alloc.injEq] at ht'\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [185/240] Replayed Solidity.Calculus.MemRead.Pass\nwarning: Solidity/Calculus/MemRead/Pass.lean:191:15: unused variable `R`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/MemRead/Pass.lean:257:60: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.mvArg?, Op1.mvArg, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at hv\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/MemRead/Pass.lean:332:60: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [LTm.mvArg?, Op1.mvArg, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Option.some.injEq] at hv\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [188/240] Replayed Solidity.Calculus.DecideTyped\nwarning: Solidity/Calculus/DecideTyped.lean:1343:79: This simp argument is unused:\n  Bool.false_or\n\nHint: Omit it from the simp argument list.\n  simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, hs, Bool.or_true, B\u0335o\u0335o\u0335l\u0335.\u0335f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335o\u0335r\u0335,\u0335Bool.true_and,\n        Bool.and_self]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1344:6: This simp argument is unused:\n  Bool.true_and\n\nHint: Omit it from the simp argument list.\n  simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, hs, Bool.or_true, Bool.false_or,\n        Bool.t\u0335r\u0335u\u0335e\u0335_\u0335and,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335a\u0335n\u0335d\u0335_self]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1362:37: This simp argument is unused:\n  reduceCtorEq\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.retsS, r\u0335e\u0335d\u0335u\u0335c\u0335e\u0335C\u0335t\u0335o\u0335r\u0335E\u0335q\u0335,\u0335 \u0335Bool.false_eq_true] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1362:51: This simp argument is unused:\n  Bool.false_eq_true\n\nHint: Omit it from the simp argument list.\n  simp only [Tm.retsS, reduceCtorEq,\u0335 \u0335B\u0335o\u0335o\u0335l\u0335.\u0335f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335e\u0335q\u0335_\u0335t\u0335r\u0335u\u0335e\u0335] at h\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1480:54: This simp argument is unused:\n  false_implies\n\nHint: Omit it from the simp argument list.\n  simp only [reduceCtorEq, false_and, exists_false, f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335implies,\u0335 \u0335i\u0335m\u0335p\u0335l\u0335i\u0335e\u0335s\u0335_true, and_self,\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335Option.some.injEq,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332exists_eq', exists_eq_left', true_implies, and_true, iff_true,\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335imp_false, not_true_eq_false,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332and_false, iff_false, true_and, exists_eq_right',\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335not_false_eq_true, eq_comm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1481:78: This simp argument is unused:\n  iff_true\n\nHint: Omit it from the simp argument list.\n  simp only [reduceCtorEq, false_and, exists_false, false_implies, implies_true, and_self,\n        Option.some.injEq, exists_eq', exists_eq_left', true_implies, and_true, if\u0335f\u0335_\u0335t\u0335r\u0335u\u0335e\u0335,\u0335\n  \u0335 \u0335 \u0335 \u0335 \u0335 \u0335 \u0335i\u0335mp_false,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332not_true_eq_false, and_false, iff_false, true_and, exists_eq_right',\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335not_false_eq_true,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332eq_comm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1482:47: This simp argument is unused:\n  iff_false\n\nHint: Omit it from the simp argument list.\n  simp only [reduceCtorEq, false_and, exists_false, false_implies, implies_true, and_self,\n        Option.some.injEq, exists_eq', exists_eq_left', true_implies, and_true, iff_true,\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335imp_false,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332not_true_eq_false, and_false, i\u0335f\u0335f\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335,\u0335 \u0335true_and, exists_eq_right',\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335not_false_eq_true, eq_comm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1482:58: This simp argument is unused:\n  true_and\n\nHint: Omit it from the simp argument list.\n  simp only [reduceCtorEq, false_and, exists_false, false_implies, implies_true, and_self,\n        Option.some.injEq, exists_eq', exists_eq_left', true_implies, and_true, iff_true, \u0332i\u0332m\u0332p\u0332_\u0332f\u0332a\u0332l\u0332s\u0332e\u0332,\u0332\n        i\u0335m\u0335p\u0335_\u0335f\u0335a\u0335l\u0335s\u0335e\u0335,\u0335 \u0335not_true_eq_false, and_false, iff_false, t\u0335r\u0335u\u0335e_\u0335a\u0335n\u0335d\u0335,\u0335 \u0335e\u0335xists_eq_right',\n  \u0335  \u0335 \u0335 \u0335 \u0335 \u0335not_false_eq_true, eq_comm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nwarning: Solidity/Calculus/DecideTyped.lean:1482:68: This simp argument is unused:\n  exists_eq_right'\n\nHint: Omit it from the simp argument list.\n  simp only [reduceCtorEq, false_and, exists_false, false_implies, implies_true, and_self,\n        Option.some.injEq, exists_eq', exists_eq_left', true_implies, and_true, iff_true, imp_false,\n  \u0332  \u0332 \u0332 \u0332 \u0332 \u0332not_true_eq_false, and_false, iff_false, true_and, e\u0335x\u0335i\u0335s\u0335t\u0335s\u0335_\u0335e\u0335q\u0335_\u0335r\u0335i\u0335g\u0335h\u0335t\u0335'\u0335,\u0335not_false_eq_true, eq_comm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [189/240] Replayed Solidity.Typing.CleanTailRun\nwarning: Solidity/Typing/CleanTailRun.lean:718:0: automatically included section variable(s) unused in theorem `Solidity.Loc.resolveT_liveAll`:\n  he\nconsider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:\n  omit he in theorem ...\n\nNote: This linter can be disabled with `set_option linter.unusedSectionVars false`\n\u26a0 [195/240] Replayed Solidity.Calculus.CloseScoped.Leaf\nwarning: Solidity/Calculus/CloseScoped/Leaf.lean:791:25: This simp argument is unused:\n  false_or\n\nHint: Omit it from the simp argument list.\n  simp only [Close.optRes, Modality.wp, Modality.onHalt, Option.some.injEq, reduceCtorEq,\n        and_self, or_true, f\u0335a\u0335l\u0335s\u0335e\u0335_\u0335or,\u0335 \u0335o\u0335r\u0335_false, and_false, false_and]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n\u26a0 [220/240] Replayed Solidity.Calculus.CallbackSound.Rules\nwarning: Solidity/Calculus/CallbackSound/Rules.lean:34:63: unused variable `hT`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n\u26a0 [232/240] Replayed Solidity.Calculus.RunFrameOwn\nwarning: Solidity/Calculus/RunFrameOwn.lean:159:54: unused variable `hH`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nwarning: Solidity/Calculus/RunFrameOwn.lean:177:51: unused variable `hp`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`",
+            "tool": {
+              "command": "lake",
+              "exitCode": null,
+              "signal": "SIGKILL",
+              "errorCode": "ETIMEDOUT",
+              "timedOut": true,
+              "timeoutMs": 300000
+            }
+          }
+        ]
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "externalReason",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "resource-blocked"
+    },
+    {
+      "name": "externalData",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "externalData"
+      },
+      "seconds": 50.088,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "externalData(address)",
+            "reason": "",
+            "reading": "solc",
+            "function": "externalData",
+            "elapsedMs": 43781
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "externalData",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    },
+    {
+      "name": "customSymbolic",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "customSymbolic"
+      },
+      "seconds": 44.061,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "customSymbolic(uint)",
+            "reason": "",
+            "reading": "solc",
+            "function": "customSymbolic",
+            "elapsedMs": 37444
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "customSymbolic",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    },
+    {
+      "name": "panicData",
+      "options": {
+        "build": false,
+        "contract": "RevertData",
+        "function": "panicData"
+      },
+      "seconds": 78.264,
+      "ok": true,
+      "report": {
+        "results": [
+          {
+            "source": "/workspace/solidity-lean/tests/solc/RevertData.sol",
+            "contract": "RevertData",
+            "tag": "box",
+            "status": "proved",
+            "signature": "panicData(uint)",
+            "reason": "",
+            "reading": "solc",
+            "function": "panicData",
+            "elapsedMs": 70964
+          }
+        ],
+        "errors": []
+      },
+      "expectedStatus": "proved",
+      "equivalentCli": [
+        "node",
+        "scripts/test-solidity.mjs",
+        "--json",
+        "--no-build",
+        "--contract",
+        "RevertData",
+        "--function",
+        "panicData",
+        "tests/solc/RevertData.sol"
+      ],
+      "classification": "proved"
+    }
+  ],
+  "source": "tests/solc/RevertData.sol",
+  "sourceSha256": "94ee0a48bb04233bf5e71306d9475eef403e10ec509e06cb0f2ebc2296011102",
+  "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "expectedStatus": "proved",
+  "timeoutMs": 300000,
+  "proofLimitsChanged": false,
+  "actualHarness": {
+    "path": ".lake/upstream/group05-revert-properties.mjs",
+    "sha256": "19984885ac340dce94e07d20d1cfcb90f50762fbfb836b69018cfa2b288ee05a",
+    "source": "import {runSolidityTests} from '../../scripts/test-solidity.mjs';import {writeFileSync} from 'node:fs';\nconst names=['reasonBytes','reasonOfBranch','emptyData','customSelector','customData','reasonPastCustom','externalReason','externalData','customSymbolic','panicData'];\nconst reports=[];\nfor(const name of names){const start=Date.now();const options={build:false,contract:'RevertData',function:name};const report=runSolidityTests(['tests/solc/RevertData.sol'],options);const row=report.results.find(r=>r.function===name);const ok=!report.errors.length&&row?.status==='proved';reports.push({name,options,seconds:(Date.now()-start)/1000,ok,report});writeFileSync('tests/upstream/group05/revert-properties.json',JSON.stringify({caveat:'The original full-contract test remains wall-time blocked. These are all ten original asserted properties, individually selected with the same proof and timeout limits; no expected verdict changed.',reports},null,2)+'\\n');console.log(name,ok,row?.status);}\nif(reports.some(r=>!r.ok))process.exitCode=1;\n"
+  },
+  "counts": {
+    "proved": 6,
+    "openProofGoals": 3,
+    "resourceBlocked": 1
+  }
+}
