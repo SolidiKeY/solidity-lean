@@ -126,3 +126,105 @@ enum/UDVT and function-valued element identities belong to the type/function
 groups; recursive shapes belong to recursive-types. Scalar captures retain
 address and fixed-byte source markers. Heterogeneous reference-return
 tuples remain a function-return interface. The feature catalog remains partial.
+
+## Group 07 upstream repair (2026-10-26)
+
+This lane starts at `006fcd593f5beeb540e7adf2bc76de4638566924` on
+`group07-tuples-references`. The historical corpus reports remain unchanged.
+All eleven assigned fixtures were reproduced independently before editing,
+with `--batch-size 1`, their full snapshot paths, and separate output directories.
+Every fixture still had frontend gaps in both required source pipelines.
+The attached managed executor passed Lean 4.24.0, Lake 5.0.0 and
+`lake build Solidity.KeySort`; the archive verified all 11,622 files.
+
+The lowering now uses existing intrinsic statements for tuple conditionals,
+reference-valued empty push operands, discarded unary expressions and scalar
+local deletion. Literal-string conditionals use a fresh memory binding and evaluate only the
+selected literal branch. Tuple RHS values are captured before primitive overlapping
+writes, whose order is right to left. The new overlapping-target path accepts
+only names, fields and literal indices; general dependent/effectful LHS
+locations still need typed location captures. Reference alias restrictions and
+mixed storage/memory conditional rejection remain explicit. Per-component
+capture declarations and assignments retain width/shape admission.
+
+Generated push aliases retain complete element shape metadata. A pushed-member
+store from a scalar stack local is admitted only when its receiver is pure;
+receiver mutation, ordinary calls and callback-capable expressions remain
+unsupported there. No runtime representation, calculus rule, core dependency,
+axiom, search budget or heartbeat limit changed. These are frontend emissions
+of existing statements and their existing soundness theorems.
+
+The upstream replay adapter now resolves generated public getters by source
+getter identity and ABI signature. Signature normalization preserves the source
+function name byte for byte. Every original stateful observation, constructor,
+rollback and required pipeline remains in the runner; unsupported observations
+and resource exhaustion retain their original inconclusive treatment.
+
+`Calls.duplicateCallTarget`, `Calls.duplicateStorageTarget` and `Calls.lazyTuple`
+prove emitted-program properties for arbitrary typed states, including false
+alternative output controls and an untaken division. `Checked.lean` pins tuple
+reference-width rejection. The separately compiled `tests/solc/Group07.sol`
+uses the SHA-checked 0.8.38 compiler; `tests/upstream/Group07.lean` kernel-checks
+its emitted programs, including lazy discarded tuple branches, checked rejection,
+unchecked negation, overlapping memory writes, owned strings and push aliases.
+Its standalone checked-narrow control uses the existing ordinary-revert guard;
+it does not certify Solidity's ABI Panic(0x11) encoding. Its effectful push
+receiver remains explicitly unsupported. These certificates
+are not a universal source/compiler correctness theorem. Runtime agreement is
+observational evidence only.
+
+The read-only finder identified generated push prefixes escaping discarded
+components/branches. `localStmt` now isolates and drains each prefix at its
+operand position. The independent skeptic confirmed this fix and identified
+three further boundaries: getter names containing ABI type spellings, receiver
+mutation before reading a local RHS, and nominal/string metadata on fresh push
+aliases. All were fixed and inspected again without opening Lean workers.
+Getter identity and model-alias rejection are pinned in `Replay.lean`.
+
+Validation and exact per-fixture provenance are recorded in
+[`tests/upstream/group07-validation.json`](../../tests/upstream/group07-validation.json).
+Long logs are retained under `/workspace/.setup/logs/group07-*` in the managed
+executor. Early overlapping build runs produced bus errors and out-of-date
+artifact failures; they are inconclusive, not passing checks or demonstrated
+model failures. Final validation is serialized over the final source state.
+
+Final isolated fixture results (each row requires both legacy and via-IR):
+
+| Path under `test/libsolidity/semanticTests/` | Before | After |
+|---|---|---|
+| `array/push/push_no_args_struct.sol` | broken | working |
+| `builtinFunctions/erc7201_param_ternary_operator.sol` | broken | working |
+| `expressions/conditional_expression_storage_memory_2.sol` | broken | explicit unsupported mixed-reference join |
+| `expressions/conditional_expression_tuples.sol` | broken | working |
+| `expressions/tuple_from_ternary_expression.sol` | broken | working |
+| `variables/mapping_local_tuple_assignment.sol` | broken | working |
+| `viaYul/comparison_functions.sol` | broken | working |
+| `viaYul/conditional/conditional_tuple.sol` | broken | working |
+| `viaYul/local_tuple_assignment.sol` | broken | working |
+| `viaYul/negation_bug.sol` | broken | working |
+| `viaYul/tuple_evaluation_order.sol` | broken | working |
+
+None was already fixed on the starting master. The mixed-reference row remains
+`broken` with its explicit frontend gap in the runner, not passing or silently
+excluded. There are no adapter/resource-blocked rows in the final isolated run.
+Earlier resource/artifact failures remain in their separate output directories.
+The final isolated commands took 3.04–4.75 seconds per fixture, including both
+pipelines, with unchanged 120-second process limits and loop fuel 1,000. These
+are wall observations, not a controlled before/after performance benchmark.
+
+The lane has no dependency on unpublished group changes. Integration touches
+shared frontend/elaborator files and the narrow getter lookup in
+`Tools/Upstream.lean`; adjacent edits to tuple admission, ternary hoisting or
+source-signature lookup require ordinary merge review. The optional Bridge and
+obsolete SolKey reader are unchanged. No pushes or merges to master are made.
+
+The native indexed-push control uses `(rows[i++].push)()` and proves that
+`i` increments once. The importer's unparenthesized indexed push-call spelling
+remains an explicit printer gap; its unsupported report is pinned separately.
+Six kernel-certificate headlines and all three universal tuple theorems have
+only `propext`, `Classical.choice` and `Quot.sound` in their axiom sets. The
+trust inventory's full 25-finding list is identical to starting master. Lean
+MCP diagnostics are unavailable; configured per-file Lean commands use
+`--tstack=131072`. A refreshed fixture run after updating the obsolete source
+rejection pin took 5.88–10.78 seconds per fixture with the broad build running;
+its source/model hashes are the final hashes in the validation JSON.

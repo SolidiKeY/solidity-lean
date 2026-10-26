@@ -136,6 +136,16 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     pure (P ++ Q, e)
   | .ternary c a b => do
     let (P, c) ← hoist c
+    -- Literal strings are owned memory values. Allocate only the selected
+    -- branch, including nested conditions; no storage/calldata alias joins.
+    let rec stringsOnly : RawExpr → Bool
+      | .ternary _ a b => stringsOnly a && stringsOnly b
+      | e => e.bytesLit?.isSome
+    if stringsOnly a && stringsOnly b then
+      let x := toString (← freshCapture "mv")
+      let Q ← elabStmtsP [.declMemory (.named "string") x none,
+        .ite c [.assign (.name x) a] [.assign (.name x) b]]
+      return (P ++ Q, .name x)
     if a.hasCall || b.hasCall || a.hasIncDec || b.hasIncDec ||
         hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
       -- a branch's effects, calls and checks run only in the branch solc
@@ -420,6 +430,18 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- type, from the callee
     if f == callValueName then
       let h :: rest := args | throw "internal: a call through a value with no callee"
+      if let .field b "push" := h then
+        if rest.isEmpty then
+          let (P, b) ← hoist b
+          let Γ ← ctx
+          if let .ok (.path (.ref (.array (.ref R))) _) := synth C Γ.toNCtx b then
+            let x := toString (← freshCapture "sp")
+            let ws := placeShape C Γ (.index b (.num 0))
+            let T := rawTyW ws (.ref R) ""
+            let Q ← elabStmtsP [.declStoragePush T x b]
+            -- Keep nominal/string provenance which rawTyW does not encode.
+            declareShape x ws
+            return (P ++ Q, .name x)
       if let .name g := h then
         if (← read).funs.any (·.1 == g) then return ← hoist (.call g rest)
       let some ty := fnTyOfExpr C (← ctx) h | throw s!"{h.toStr}(…): the callee is not a function value"
@@ -1285,6 +1307,10 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
   -- a push's receiver, as a `.push` member's base
   let es : List (RawExpr × Bool) ← match s with
+    -- Tuple lowering rechecks each captured source against its typed target
+    -- through ordinary declarations/assignments; a whole-reference scan here
+    -- cannot compare the individual source/target shapes.
+    | .tupleAssign .. | .tupleDecl .. => pure []
     | .call (.field b "push") [a] =>
       -- Reference values are checked after capture as well; permit their
       -- whole source here without erasing the element-width metadata.
@@ -1527,6 +1553,9 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       match hd : T.defaultOkS with
       | true => pure [.of Γ (.deleteMem p hd)]
       | false => throw "`delete` of a memory object whose default is not well-formed"
+    | .val p (.simple (.local x)) =>
+      let zero := if p == .bool then RawExpr.bool false else .num 0
+      pure [.of Γ (.assignLocal x (← checkIn C Γ p zero))]
     | .val .. => throw "`delete` needs a storage or a memory location"
   | .opAssign op l r => do
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's

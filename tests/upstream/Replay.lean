@@ -56,3 +56,34 @@ private def FailedDeployment : Contract := contract!{
   let report := replay FailedDeployment [] data
   unless (report.getObjValAs? String "status").toOption == some "blocked" do
     throw (IO.userError report.pretty) : IO Unit)
+
+private def GetterIdentityBase : Contract := contract!{
+  function one() returns (uint) { return 1; }
+  function two() returns (uint) { return 2; }
+}
+
+/-- Getter identity must retain names containing ABI type spellings. -/
+private def GetterIdentity : Contract :=
+  { GetterIdentityBase with funs := GetterIdentityBase.funs.map fun (name, d) =>
+      let sourceName := if name == "one" then "amountuint256" else "amountuint"
+      (name, { d with sourceDecl := some {
+        name := sourceName
+        signature := some (sourceName ++ "()")
+        callable := .getter ⟨0, by decide⟩ } }) }
+
+#eval (do
+  let .ok data := Json.parse "{\"vectors\":[
+    {\"signature\":\"amountuint256()\",\"args\":[],\"failure\":false,\"expected\":[\"1\"]},
+    {\"signature\":\"amountuint()\",\"args\":[],\"failure\":false,\"expected\":[\"2\"]}
+  ]}" | throw (IO.userError "bad getter test")
+  let report := replay GetterIdentity [] data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)
+
+#eval (do
+  let .ok data := Json.parse "{\"vectors\":[
+    {\"signature\":\"one()\",\"args\":[],\"failure\":false,\"expected\":[\"1\"]}
+  ]}" | throw (IO.userError "bad getter test")
+  let report := replay GetterIdentity [] data
+  unless (report.getObjValAs? String "status").toOption == some "broken" do
+    throw (IO.userError report.pretty) : IO Unit)

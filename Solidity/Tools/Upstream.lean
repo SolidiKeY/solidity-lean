@@ -66,8 +66,19 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       | .ok o => state := o.st.glob
       deployed := true
     let normaliseSignature (s : String) :=
-      ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
+      match s.splitOn "(" with
+      | [] => s
+      | name :: types =>
+        if types.isEmpty then name else
+          name ++ "(" ++ ((("(".intercalate types).replace "uint256" "uint").replace
+            "int256" "int").replace "address payable" "address"
     let function := (rows.find? fun r => normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
+      |>.orElse fun _ =>
+        -- Generated public getters have source identities but no import row.
+        -- Match only their exact source ABI signature, never a model alias.
+        (C.funs.find? fun (_, d) => d.sourceDecl.any fun src =>
+          (match src.callable with | .getter _ => true | _ => false) &&
+          src.signature.any (normaliseSignature · == normaliseSignature signature)).map (·.1)
     let program := if ctor then ctorProgS C args else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
       elabProgS C [← runStmt C name args]
