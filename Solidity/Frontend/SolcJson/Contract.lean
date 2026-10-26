@@ -145,8 +145,11 @@ def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
   return .diamond
 
 /-- Every local declaration that needs a model name: unnamed input parameters
-get a fresh identity-based name; state/keyword clashes get `_`. Unnamed
-returns retain the existing return-frame naming convention. -/
+get a fresh identity-based name; state/keyword clashes get `_`. Declarations
+whose source or effective names collide get declaration-ID names, so source
+shadowing needs no change to the scoped model's freshness policy. Unnamed
+returns retain the existing return-frame naming convention. Collision-free
+legacy mappings remain unchanged. -/
 def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   let decls := (J.nodes f).filter fun n =>
     J.kind n == "VariableDeclaration" &&
@@ -161,7 +164,7 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
     decls.filterMap fun d => J.str? d "name"
   let inputs := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
     |>.toList.filterMap J.id?
-  (decls.foldl (fun (acc : List String × List (Int × String)) d =>
+  let legacy := (decls.foldl (fun (acc : List String × List (Int × String)) d =>
     let (taken, out) := acc
     match J.str? d "name", J.id? d with
     | some n, some i => if (n == "" && inputs.contains i) ||
@@ -174,6 +177,41 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
       (name :: taken, out ++ [(i, name)])
       else acc
     | _, _ => acc) (taken, [])).2
+  -- Body expressions and declaration headers resolve these names by solc ID.
+  -- Comments instead use the reader's active source-to-model binding stack.
+  -- Reserve every identifier as well as annotation binders, preventing a new
+  -- model name from capturing either a source call or a quantified clause.
+  let originalNames := decls.filterMap fun d => do
+    let name ← J.str? d "name"
+    guard (!name.isEmpty)
+    pure name
+  let effective := decls.filterMap fun d => do
+    let name ← J.str? d "name"
+    let id ← J.id? d
+    guard (!name.isEmpty || inputs.contains id)
+    pure (id, (lookupBy id legacy).getD name)
+  let clashes := decls.filterMap fun d => do
+    let name ← J.str? d "name"
+    let id ← J.id? d
+    guard (!name.isEmpty || inputs.contains id)
+    let modelName := (lookupBy id legacy).getD name
+    guard ((!name.isEmpty && (originalNames.filter (· == name)).length > 1) ||
+      (effective.filter (·.2 == modelName)).length > 1)
+    pure id
+  let reserved := taken ++ legacy.map (·.2) ++ (J.nodes f).filterMap (J.str? · "name")
+  let repaired := (decls.foldl (fun (acc : List String × List (Int × String)) d =>
+    let (taken, out) := acc
+    match J.id? d with
+    | some id => if clashes.contains id then
+      let rec freshModel (k : Nat) (name : String) : String :=
+        match k with
+        | 0 => name
+        | k + 1 => if taken.contains name then freshModel k (name ++ "_") else name
+      let name := freshModel (taken.length + 1) s!"solcLocal{id}"
+      (name :: taken, out ++ [(id, name)])
+      else acc
+    | none => acc) (reserved, [])).2
+  legacy.filter (fun (id, _) => !clashes.contains id) ++ repaired
 
 /-- Parameters and named returns initially visible inside a source body. -/
 def specBodyBindings (f : Json) (names : List (Int × String)) : List (String × String) :=
