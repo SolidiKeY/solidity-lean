@@ -10,10 +10,11 @@ private def Counter : Contract := contract!{
   function fail() { x = 99; revert(); }
   function spin() { while (true) { } }
   function panics() { assert(false); }
+  function excluded() { assume(false); }
 }
 
 private def rows : List ImportRow :=
-  ["bump", "set", "fail", "spin", "panics"].map fun name =>
+  ["bump", "set", "fail", "spin", "panics", "excluded"].map fun name =>
     { name, sourceSignature := if name == "set" then "set(uint)" else name ++ "()",
       tag := .diamond, params := [], status := .elaborated, reason := "" }
 
@@ -59,7 +60,8 @@ private def FailedDeployment : Contract := contract!{
 
 -- An inconclusive later call retains the completed prefix and its exact cause.
 #eval (do
-  for (name, reason) in [("spin", "execution exhausted loop fuel/resources"),
+  for (name, reason) in [("spin", "execution exhausted loop fuel"),
+      ("excluded", "execution reached a model resource bound (including recursive unrolling); not an EVM failure"),
       ("panics", "generic model panic does not retain the ABI panic code")] do
     let text := "{\"vectors\":[" ++
       "{\"signature\":\"bump()\",\"args\":[],\"failure\":false,\"expected\":[\"6\"]}," ++

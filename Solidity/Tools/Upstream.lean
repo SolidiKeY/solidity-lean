@@ -60,8 +60,8 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       let .ok ⟨_, Q⟩ := ctorProgS C []
         | return result "broken" "default deployment does not elaborate"
       match Prog.runF 1000 Q state with
-      | .error .diverge | .error .exhausted =>
-        return result "blocked" "deployment exhausted loop fuel/resources"
+      | .error .diverge => return result "blocked" "deployment exhausted loop fuel"
+      | .error .exhausted => return result "blocked" "deployment reached a model resource bound"
       | .error _ => return result "broken" "unexpected default deployment failure"
       | .ok o => state := o.st.glob
       deployed := true
@@ -96,7 +96,9 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       then .error .revert else Prog.runF 1000 Q state
     let actual : Except String (Bool × List String) := do
       match outcome with
-      | .error .diverge | .error .exhausted => throw "execution exhausted loop fuel/resources"
+      | .error .diverge => throw "execution exhausted loop fuel"
+      | .error .exhausted =>
+        throw "execution reached a model resource bound (including recursive unrolling); not an EVM failure"
       | .error .revert => pure (true, [])
       | .error (.revertWith bytes) =>
         pure (true, if ctor then [] else [s!"revert-data: {bytes}"])
