@@ -680,11 +680,6 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
-  -- Never erase a transaction-local declaration into an ordinary storage root.
-  -- This is a header check: unused declarations, generated getters and inherited
-  -- roots are unsafe too, even if no selected body mentions the variable.
-  if vars.any (fun v => J.str? v "storageLocation" == some "transient") then
-    throw "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet"
   -- an immutable nothing writes is a constant: its compile-time initializer,
   -- or its type's default; one the constructor writes is a storage root
   let written := writtenIds ast
@@ -776,7 +771,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
         tyText S typeNode : Except Gap String) with
     | .ok t =>
-      members := members ++ [s!"{t} {identText n};"]
+      let region := if J.str? v "storageLocation" == some "transient" then "transient " else ""
+      members := members ++ [s!"{t} {region}{identText n};"]
       kept := kept ++ [(n, t, v)]
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
@@ -1220,7 +1216,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let inits : Except Gap (List String) := do
     initScope.ensure
     kept.mapM fun (n, t, v) => do
-    let some e := J.opt v "value" | pure s!"{t} {identText n};"
+    let region := if J.str? v "storageLocation" == some "transient" then "transient " else ""
+    let some e := J.opt v "value" | pure s!"{t} {region}{identText n};"
+    if !region.isEmpty then throw (.unsupported "a transient declaration cannot have an initializer")
     match (expr e).run' { initSt with superNames := superNamesOf v } with
     | .ok x => pure s!"{t} {identText n} = {x};"
     | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))

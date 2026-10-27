@@ -378,6 +378,55 @@ theorem Framed.find_eq {L : List Name} {a b : Storage C} {U : Ty} (h : Framed L 
   calc b.find r = (anon L a b).find r := by rw [h.eq_anon]
     _ = a.find r := by rw [find_anon, if_neg hr]
 
+/-- A top-level transaction starts with default transient cells. The logical
+store is a product over declaration identities, not physical persistent slots. -/
+def resetTransient (st : Storage C) : Storage C :=
+  anon C.transientRoots st (init C)
+
+/-- Every declared transient root reads its default after transaction reset. -/
+theorem resetTransient_get {r : Name} {T : Ty} (st : Storage C)
+    (h : lookupBy r C.vars = some T) :
+    (resetTransient st).get h =
+      if r ∈ C.transientRoots then (init C).get h else st.get h :=
+  get_anon _ _ _ h
+
+/-- Reset preserves all persistent paths, including array/mapping shadows. -/
+theorem resetTransient_find {U : Ty} (st : Storage C) (r : SRef C U) :
+    (resetTransient st).find r =
+      if r.root ∈ C.transientRoots then (init C).find r else st.find r :=
+  find_anon _ _ _ r
+
+/-- Repeated boundary normalization cannot change an already reset store. -/
+theorem resetTransient_idem (st : Storage C) :
+    resetTransient (resetTransient st) = resetTransient st :=
+  SFields.anon_anon _ _ _ _
+
+/-- Old contracts without transient declarations retain their exact store. -/
+theorem resetTransient_none (st : Storage C) (h : C.transientRoots = []) :
+    resetTransient st = st := by
+  simp only [resetTransient, h, anon, SFields.anon_nil]
+
+/-- A root with its Solidity storage region and type certified. No persistent
+root and transient root can name the same declaration in this product. -/
+structure RegionRoot (C : Contract) (transactionLocal : Bool) (T : Ty) where
+  name : Name
+  declared : lookupBy name C.vars = some T
+  region : C.transientRoots.contains name = transactionLocal
+
+/-- Typed persistent/transient projections have disjoint identities. -/
+theorem RegionRoot.disjoint (p : RegionRoot C false T) (t : RegionRoot C true U) :
+    p.name ≠ t.name := by
+  intro e
+  have h := congrArg (fun n => C.transientRoots.contains n) e
+  have impossible : false = true := p.region.symm.trans (h.trans t.region)
+  cases impossible
+
+/-- A transient assignment leaves every persistent projection unchanged. -/
+theorem RegionRoot.persistent_write (p : RegionRoot C false T)
+    (t : RegionRoot C true U) (st : Storage C) (v : SVal U) :
+    (st.set t.declared v).get p.declared = st.get p.declared :=
+  SFields.get_set_ne st t.declared p.declared (Ne.symm (p.disjoint t)) v
+
 end Storage
 
 end Solidity

@@ -29,6 +29,7 @@ syntax &"private" : sol_vis
 syntax &"internal" : sol_vis
 syntax &"immutable" : sol_vis
 syntax &"constant" : sol_vis
+syntax &"transient" : sol_vis
 
 /-- `uint public count;`: a state variable. -/
 syntax sol_ty sol_vis* ident ";" : sol_member
@@ -382,6 +383,7 @@ macro_rules
           mods := mods ++ [← expandModifier env f ((ps.map (·.getElems)).getD #[]) b]
         | _ => pure ()
       let mut rows := #[]
+      let mut transientRows : Array Lean.Term := #[]
       let mut widthRows : Array Lean.Term := #[]
       let mut errRows : Array Lean.Term := #[]
       let mut funs := #[]
@@ -405,12 +407,16 @@ macro_rules
           if asg.isSome then Lean.Macro.throwErrorAt m "one `assignable` clause per function"
           asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
-        | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
+        | `(sol_member| $T:sol_ty $vs:sol_vis* $x:ident ;) =>
+          if vs.any (fun v => (v.raw.find? fun a => a.isAtom && a.getAtomVal == "transient").isSome) then
+            transientRows := transientRows.push (strLit x)
           let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
             widthRows := widthRows.push (← `(($(Lean.quote ((x.getId.toString false) ++ k)), $(Lean.quote n))))
-        | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
+        | `(sol_member| $T:sol_ty $vs:sol_vis* $x:ident = $e:sol_expr ;) =>
+          if vs.any (fun v => (v.raw.find? fun a => a.isAtom && a.getAtomVal == "transient").isSome) then
+            Lean.Macro.throwErrorAt m "a transient declaration cannot have an initializer"
           let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
@@ -462,7 +468,7 @@ macro_rules
       let ctorT ← match ctor with
         | some t => pure t
         | none => `(none)
-      `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
+      `(({ vars := [$rows,*], transientRoots := [$transientRows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
            widths := [$widthRows,*], ctor := $ctorT, inits := [$initRows,*],
            structs := [$structRows,*], errors := [$errRows,*] } : Contract))
 /-! ### The contracts

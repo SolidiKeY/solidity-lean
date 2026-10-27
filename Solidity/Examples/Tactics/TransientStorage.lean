@@ -4,10 +4,11 @@ import Solidity.Calculus.Closers
 import Solidity.Calculus.Close
 import Solidity.Calculus.Sound
 
-/-! Composed interpreter regressions. Source transient declarations remain
-refused; the ordinary fragments below use the existing Solidity elaborator. -/
+/-! Typed transient effects, ordinary source integration and calculus controls. -/
 
 namespace Solidity.Examples.Tactics.TransientStorage
+
+open scoped Scoped
 
 open Transient
 
@@ -156,6 +157,125 @@ theorem panic_not_valid : ¬ Holds .box (Program.halt (C := C) (L := layout)
     (α := Unit) .panic) (fun _ _ => True) {} initial :=
   fun h => h.2 rfl
 
+/-- The declaration certificate rules out reference-valued transient roots. -/
+theorem transient_root_primitive {C : Contract} {T : Ty}
+    (root : Storage.RegionRoot C true T) : ∃ p, T = .prim p := by
+  have member : root.name ∈ C.transientRoots := by
+    simpa only [List.contains_iff_mem] using root.region
+  have allowed := Semantics.all_mem C.transient_ok root.name member
+  rw [root.declared] at allowed
+  cases T with
+  | prim p => exact ⟨p, rfl⟩
+  | ref R => cases allowed
+
+example {C : Contract} {R : RefTy} : ¬ Nonempty (Storage.RegionRoot C true (.ref R)) := by
+  intro ⟨root⟩
+  obtain ⟨p, impossible⟩ := transient_root_primitive root
+  cases impossible
+
+/-- error: a transient declaration cannot have an initializer -/
+#guard_msgs in #check (contract!{ uint transient invalid = 1; } : Contract)
+
+/-- Joint logical roots retain distinct persistent and transaction-local identities. -/
+def Source : Contract := contract!{
+  uint saved; uint transient scratch;
+  function set(uint x) { scratch = x; }
+  function fail() {
+    try this.set(11) {} catch {}
+    assert(scratch == 11);
+    saved = 99;
+    revert();
+  }
+}
+
+/-- The existing scoped calculus proves transient operations in every typed
+entry state; no transaction-initial-zero premise is smuggled into this proof. -/
+theorem source_calculus : Fml.Valid dl[Source]{
+    [ scratch = 7; saved = 3; delete scratch; ] (scratch == 0 ∧ saved == 3) } := by
+  sol_prove
+
+/-- Simultaneous source assignment captures both regions before either write. -/
+theorem source_tuple_swap : Fml.Valid dl[Source]{
+    [ scratch = 7; saved = 3; (scratch, saved) = (saved, scratch); ]
+      (scratch == 3 ∧ saved == 7) } := by
+  sol_prove
+
+/-- The tuple capture law holds for arbitrary typed input values. -/
+theorem source_tuple_generic : Fml.Valid dl[Source]{
+    ∀ uint a; ∀ uint b;
+    [ scratch = a; saved = b; (scratch, saved) = (saved, scratch); ]
+      (scratch == b ∧ saved == a) } := by
+  sol_prove
+
+/-- The false sequential-assignment interpretation panics in the actual run. -/
+example : (match (sol[Source]{
+    scratch = 7; saved = 3; (scratch, saved) = (saved, scratch);
+    assert(saved == 3);
+  }).run (State.init Source) with | .error .panic => true | _ => false) = true := by
+  decide +kernel
+
+-- Duplicate root targets remain rejected, including transient roots.
+/-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
+#guard_msgs in #check sol[Source]{ (scratch, scratch) = (saved, saved); }
+
+private def sourceEntry : State Source [] :=
+  { State.init Source with tx := { selfAddress := ⟨1, rfl⟩ } }
+
+/-- A concrete nonzero self call must succeed and adopt the transient write;
+a semantics that rejects every call cannot satisfy this control. -/
+def sourceShared : Prog Source [] [] := sol[Source]{
+  scratch = 7;
+  try this.set(9) { assert(scratch == 9); } catch { assert(false); }
+}
+theorem source_self_sharing : (sourceShared.run sourceEntry).isOk = true := by decide +kernel
+
+/-- The successful nested call reaches the ancestor's explicit revert, rather
+than a panic from losing its transient write. -/
+example : (match (sol[Source]{ fail(); }).run sourceEntry with
+    | .error .revert => true | _ => false) = true := by decide +kernel
+
+/-- An ancestor failure rolls back both regions, including descendant writes. -/
+theorem source_nested_rollback : ((sol[Source]{
+    scratch = 7; saved = 3;
+    try this.fail() {} catch {}
+    assert(scratch == 7 && saved == 3);
+  }).run sourceEntry).isOk = true := by decide +kernel
+
+/-- Persistent and transient projections cannot alias, independently of layout. -/
+def persistentRoot : Storage.RegionRoot Source false (.prim .uint) := ⟨"saved", rfl, rfl⟩
+def transientRoot : Storage.RegionRoot Source true (.prim .uint) := ⟨"scratch", rfl, rfl⟩
+
+example : persistentRoot.name ≠ transientRoot.name := persistentRoot.disjoint transientRoot
+
+/-- Both classes written in one transaction, then only transient cells erased. -/
+def sourceWritten : State Source [] :=
+  (((sol[Source]{ saved = 3; scratch = 7; }).run (State.init Source)).toOption.map
+    (fun o => o.st.glob)).getD (State.init Source)
+
+example : (sourceWritten.transactionEntry.storage.get persistentRoot.declared) =
+    .prim (⟨3, rfl⟩ : PrimTy.uint.Denote) := by decide +kernel
+example : (sourceWritten.transactionEntry.storage.get transientRoot.declared) =
+    .prim (PrimTy.dflt .uint) := by decide +kernel
+example : (sourceWritten.storage.get transientRoot.declared) ≠
+    sourceWritten.transactionEntry.storage.get transientRoot.declared := by decide +kernel
+
+/-- Captures retain byte alignment and function signatures, rather than
+coercing their existing tagged representations through an integer temporary. -/
+def Encoded : Contract := contract!{
+  bytes2 transient short; bytes2 savedBytes;
+  function one() returns (uint) { return 1; }
+  function two() returns (uint) { return 2; }
+  function () returns (uint) transient fp;
+  function () returns (uint) gp;
+}
+example : ((sol[Encoded]{ {
+    short = hex"abcd"; savedBytes = hex"1234";
+    (short, savedBytes) = (savedBytes, short);
+    assert(short == hex"1234" && savedBytes == hex"abcd");
+    fp = one; gp = two; (fp, gp) = (gp, fp);
+    uint a = fp(); uint b = gp(); assert(a == 2 && b == 1);
+  } }).run (State.init Encoded)).isOk = true := by decide +kernel
+
 end Solidity.Examples.Tactics.TransientStorage
 
 #print axioms Solidity.Transient.Program.static_preserves
@@ -163,3 +283,18 @@ end Solidity.Examples.Tactics.TransientStorage
 #print axioms Solidity.Transient.Program.transact_ordinary
 #print axioms Solidity.Transient.holds_bind
 #print axioms Solidity.Transient.ordinary_spec_box
+
+#print axioms Solidity.Storage.resetTransient_get
+#print axioms Solidity.Storage.resetTransient_find
+#print axioms Solidity.Storage.resetTransient_idem
+#print axioms Solidity.Storage.RegionRoot.disjoint
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_calculus
+
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_tuple_swap
+
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_self_sharing
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_nested_rollback
+
+#print axioms Solidity.Examples.Tactics.TransientStorage.transient_root_primitive
+
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_tuple_generic

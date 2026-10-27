@@ -1,0 +1,3113 @@
+{
+  "version": 1,
+  "date": "2026-10-27",
+  "branch": "codex/group09-transient-source",
+  "baseImportCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "priorLaneCommits": [
+    "600f49b6",
+    "efa1a6b4"
+  ],
+  "priorReport": {
+    "path": "tests/upstream/group09-transient-source.json",
+    "sha256": "e2ebd29b6fd6e77de51731a33311b09504c9163d43ea48da3c54e78948c1e0f9",
+    "unchanged": true
+  },
+  "status": "limited-source-repair; final repository gates in progress",
+  "counts": {
+    "fixtures": 28,
+    "beforeBroken": 28,
+    "verifiedPass": 21,
+    "expectedAssemblyExclusion": 7,
+    "runtimeMismatches": 0,
+    "resourceBlocks": 0,
+    "pipelines": 56,
+    "matchingPipelines": 42,
+    "excludedPipelines": 14
+  },
+  "suiteCompatible": false,
+  "suiteExitCode": 1,
+  "interpretation": "21 complete fixture vector sequences match in both required typed Lean source modes. Seven complete fixtures remain broken/excluded at retained assembly observations. These are observational results, not universal Solidity/EVM correctness. No source-world dispatch or physical slot semantics is claimed.",
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "b59b563b228a0f95ba024be4b16051f4b73ae5c91fe549bbb4ea6b8c84c1abdd",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "runtimeGate": {
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "command": "source /workspace/.setup/activate.sh; lake build Solidity.KeySort",
+    "exitCode": 0
+  },
+  "sourceControl": {
+    "source": "tests/solc/TransientSource.sol",
+    "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e",
+    "ast": "tests/solc/TransientSource.ast.json",
+    "astSha256": "45c28bb62990895fdebfaeca808207853905864bdaf2b95e8f1427cb2303a504",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "selfAddress": 1,
+    "claims": "box safety plus separate actual imported successful-run/panic controls"
+  },
+  "proofEvidence": {
+    "logs": [
+      "/workspace/.setup/logs/group09-source-proof-final2.log",
+      "/workspace/.setup/logs/group09-source-import-per-file2.log",
+      "/workspace/.setup/logs/group09-world-per-file.log"
+    ],
+    "allowedAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "newAxioms": false,
+    "newSorry": false,
+    "raisedHeartbeats": false
+  },
+  "validationComplete": false,
+  "validation": [
+    {
+      "name": "final-build",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Tools.Upstream",
+        "Solidity.Frontend.Testing",
+        "Solidity.Examples.Tactics.TransientStorage",
+        "Solidity.Examples.Tactics.TransientSourceImport",
+        "Solidity.Examples.Tactics.TransientWorld",
+        "Solidity.Examples.Tactics.Lifetime",
+        "Solidity.Examples.Tactics.Calls"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-build.log",
+      "exitCode": 0,
+      "seconds": 15.159
+    },
+    {
+      "name": "final-fixtures",
+      "command": [
+        "python3",
+        ".lake/upstream/group09/reproduce-final.py"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-fixtures.log",
+      "exitCode": 0,
+      "seconds": 97.126
+    },
+    {
+      "name": "final-replay",
+      "command": [
+        "lake",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-replay.log",
+      "exitCode": 0,
+      "seconds": 2.581
+    },
+    {
+      "name": "final-source-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/transient-storage.test.mjs"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-source-tests.log",
+      "exitCode": 0,
+      "seconds": 54.564
+    },
+    {
+      "name": "final-node-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-node-tests.log",
+      "exitCode": 0,
+      "seconds": 0.075
+    },
+    {
+      "name": "final-features",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-features.log",
+      "exitCode": 0,
+      "seconds": 0.041
+    },
+    {
+      "name": "final-automation",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-automation.log",
+      "exitCode": 0,
+      "seconds": 0.044
+    },
+    {
+      "name": "final-orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-orphans.log",
+      "exitCode": 0,
+      "seconds": 0.131
+    },
+    {
+      "name": "final-layers",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-layers.log",
+      "exitCode": 0,
+      "seconds": 0.142
+    },
+    {
+      "name": "final-testsuite",
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-testsuite.log",
+      "exitCode": 0,
+      "seconds": 0.199
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+      "sourceAndExpectationSha256": "a249900c559975086ef3baaa5d8b1e5a3d604f7774efc4890f3f222f796a2284",
+      "before": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/01"
+        ],
+        "exitCode": 0,
+        "seconds": 3.888
+      },
+      "rawReportSha256": "f97562e0cf9990f7c71bdb9a59df2b6a5b241606af31f26cb9e92609ea912047"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+      "sourceAndExpectationSha256": "de29e8367b47982f35543fe1744e62ee2967d3f0bba971b885b947b6a4e3a8b0",
+      "before": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "testComparison()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "testLocalAssignment()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "testComparison()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "testLocalAssignment()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/02"
+        ],
+        "exitCode": 0,
+        "seconds": 4.01
+      },
+      "rawReportSha256": "23e16c1ca7b8b707c8ae628ace3b0b52c66a9496357a13194179b48613b24f35"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+      "sourceAndExpectationSha256": "4d448b4df3c6fa8f39a3cf4ec1db65cd45ad3294b155ee2549ae2ac9b784a46d",
+      "before": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "1",
+                  "2",
+                  "2"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "1",
+                  "2",
+                  "2"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/03"
+        ],
+        "exitCode": 0,
+        "seconds": 3.906
+      },
+      "rawReportSha256": "6ba2926490e7803291592bc8fb9fa8c27a3b4ad416a6e09381040484f489e7fe"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+      "sourceAndExpectationSha256": "2c0693f394e1024fa2df931dddb51c4bcf07adb666603cf21d2ed0bd309c7da7",
+      "before": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/04"
+        ],
+        "exitCode": 0,
+        "seconds": 3.919
+      },
+      "rawReportSha256": "e1f865c19b4438bdb77ddc6570e426c35ee044b630db44653cd80f5b6d2ba438"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+      "sourceAndExpectationSha256": "b0b3e80b80c3340af421165b0e0b91843fb54b20f0e1af7d4b9c8047eb94e21e",
+      "before": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "inline_assembly_transient_storage_access_inside_function.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "inline_assembly_transient_storage_access_inside_function.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/05"
+        ],
+        "exitCode": 1,
+        "seconds": 3.366
+      },
+      "rawReportSha256": "681b326352227d0ce4b5862b28066d101ac5b3e32e0de611d78aa00c2cafec11"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+      "sourceAndExpectationSha256": "0a096e2927a6f985da829c1e5989d341c67355b31c302bc3d0ded41675bde7b3",
+      "before": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "100"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/06"
+        ],
+        "exitCode": 0,
+        "seconds": 3.144
+      },
+      "rawReportSha256": "3d4f1aa601a684cc2a8d16685cf4900dd898cec7944844eb72cb015b9e322b91"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+      "sourceAndExpectationSha256": "dd753fc6e70457b83bf95b84dae300d7761ecfe8c8c12edd3d1d34bb8e6b2fbe",
+      "before": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+            "observed": [
+              {
+                "values": [
+                  "7"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "11"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "60"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "220"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "353"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "32"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "334"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "371"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+            "observed": [
+              {
+                "values": [
+                  "7"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "11"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "60"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "220"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "353"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "32"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "334"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              },
+              {
+                "values": [
+                  "371"
+                ],
+                "signature": "f(uint256,uint256)",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/07"
+        ],
+        "exitCode": 0,
+        "seconds": 3.149
+      },
+      "rawReportSha256": "378f3b1b8f9b7b18067f5ab02f80281ecc754f2156006ca7abfb6f0395ba19c8"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+      "sourceAndExpectationSha256": "25db2b1778a0488ce963dbb1c6adc76e2e11d45fdcf4acb6931d0ff5cd9d1815",
+      "before": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+            "observed": [
+              {
+                "values": [
+                  "1"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/08"
+        ],
+        "exitCode": 0,
+        "seconds": 3.552
+      },
+      "rawReportSha256": "260115fdb3ddb4e531997ade8e16cd3e18eac9112bcacaf01396c855c293ef99"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+      "sourceAndExpectationSha256": "37e29cc1b15331783b439efe25a93eb7004833f9c26ec861dfcbd168291ce707",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "x()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "x()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/09"
+        ],
+        "exitCode": 0,
+        "seconds": 4.593
+      },
+      "rawReportSha256": "9839e4bfa6527150f1dd7c206063307a1e1563b4920b984d09c0fa676b57c86a"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+      "sourceAndExpectationSha256": "3aca49e59d9f20e07de2699bf06cb94e32114b15715331f1f0f69ae02ac4730f",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "delete_overlapping_transient_after_storage_array_pop_same_base_type.sol:20: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "getArr()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "delete_overlapping_transient_after_storage_array_pop_same_base_type.sol:20: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "getArr()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/10"
+        ],
+        "exitCode": 1,
+        "seconds": 3.212
+      },
+      "rawReportSha256": "09b6089150acbe9618bf0354aae285508cad3e8b3ed795e5592c5a97bb8b8da0"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "2f52eab8aa99744fcb3c2ecd26e9b056760c473c33dd1695451fef6bd95ce4c4",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1026210852590"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1026210852590"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/11"
+        ],
+        "exitCode": 0,
+        "seconds": 3.288
+      },
+      "rawReportSha256": "998e4262e764243a2923a4228eb2efa10349270cd4c5930d22bf1c0973564180"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "c4497deeee5c73af61010ea3fc02515ab3f743b74a415ae9e2653200792142f6",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "getM()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "getM()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/12"
+        ],
+        "exitCode": 0,
+        "seconds": 3.192
+      },
+      "rawReportSha256": "8dc30d41183ecf807dbc41208064bd2b7f16b8a02e0e1ed232ddbf0fd5d850e9"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "d82241d322b6e0376665cb3b86d1037e0a9848f6de9c9f34d00f396d2f93a51f",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "4660"
+                ],
+                "signature": "getS()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndDelete()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0",
+                  "0"
+                ],
+                "signature": "getS()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "4660"
+                ],
+                "signature": "getS()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndDelete()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0",
+                  "0"
+                ],
+                "signature": "getS()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/13"
+        ],
+        "exitCode": 0,
+        "seconds": 3.57
+      },
+      "rawReportSha256": "f3187f2a037bac02988dbf6aa9038a6a034405c45a7d5fbd583dbb8650f01377"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+      "sourceAndExpectationSha256": "ad9765e5934b7167f075b7d0169821854ebbf50dddcd1d2b199fb7c5cc28fc7e",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "x()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "x()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/14"
+        ],
+        "exitCode": 0,
+        "seconds": 3.089
+      },
+      "rawReportSha256": "258d0c419ae763ead67e2dba8f47b2456a57d4153bce61dee79fc6173077e4ac"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "cb62a2ba5f4de6e902a90500098351d24b93624ffdeb471d1b40c3e48efc1c6a",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1026210852590"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1026210852590"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "varStorage()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/15"
+        ],
+        "exitCode": 0,
+        "seconds": 3.322
+      },
+      "rawReportSha256": "c73de6967a1231834e982379a6ece0fdc7ec10fadb44ae186f75b0e7df40228c"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "0af462263ab969668d7729eaf4dba63f029944a57893d313937f07fecbd5bd40",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "getM()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "setAndClear()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "getM()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/16"
+        ],
+        "exitCode": 0,
+        "seconds": 3.51
+      },
+      "rawReportSha256": "6f57d02a0d000a41e11ee028490693c67a1c5d40fd04ecae621364827b9a65b4"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+      "sourceAndExpectationSha256": "5dbdc757e3bae6e6eae1eb5be0b4e2679da9df2b4121df6efedb0ebf631fff07",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "4660"
+                ],
+                "signature": "getS()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndDelete()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0",
+                  "0"
+                ],
+                "signature": "getS()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "4660"
+                ],
+                "signature": "getS()",
+                "failed": false
+              },
+              {
+                "values": [],
+                "signature": "setAndDelete()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "0",
+                  "0"
+                ],
+                "signature": "getS()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/17"
+        ],
+        "exitCode": 0,
+        "seconds": 3.44
+      },
+      "rawReportSha256": "5417781ea5ca1350fbba513009e225aba63758fac4346849757e894c2e66ac0e"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+      "sourceAndExpectationSha256": "e962df3ebe5dc608f4c20d2fbf4e89ed3dd9f45d85d55a9ecb3ffc8805ed2b67",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+            "observed": [
+              {
+                "values": [],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/18"
+        ],
+        "exitCode": 0,
+        "seconds": 3.472
+      },
+      "rawReportSha256": "97369968503cefc605e4721f994746f5006e5b888ea4aed7a27d223d03c2b477"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+      "sourceAndExpectationSha256": "488c005b574062ce9bb1ed2eba20bed24f4f7adc551cfb904dd30e49a1045c0a",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:22: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "s1SlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:23: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "dArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:24: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "sArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:25: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "bArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:26: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "strSlotOffset()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:22: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "s1SlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:23: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "dArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:24: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "sArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:25: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "bArraySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "state_variable_reference_types_slot_offset.sol:26: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "strSlotOffset()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/19"
+        ],
+        "exitCode": 1,
+        "seconds": 3.666
+      },
+      "rawReportSha256": "a8c7521b51cfbe435b252672341ae9d65139a72a34576719b718262f41556244"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+      "sourceAndExpectationSha256": "f41c8fbac4563c75581fb8f93a013a87649f13e7c41511f5d8525a0fbc55d18c",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+            "observed": [
+              {
+                "values": [
+                  "7",
+                  "2748",
+                  "1"
+                ],
+                "signature": "initS1()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "8",
+                  "3567",
+                  "0"
+                ],
+                "signature": "initS2()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "7",
+                  "2748",
+                  "1"
+                ],
+                "signature": "s1()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "8",
+                  "3567",
+                  "0"
+                ],
+                "signature": "s2()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+            "observed": [
+              {
+                "values": [
+                  "7",
+                  "2748",
+                  "1"
+                ],
+                "signature": "initS1()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "8",
+                  "3567",
+                  "0"
+                ],
+                "signature": "initS2()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "7",
+                  "2748",
+                  "1"
+                ],
+                "signature": "s1()",
+                "failed": false
+              },
+              {
+                "values": [
+                  "8",
+                  "3567",
+                  "0"
+                ],
+                "signature": "s2()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/20"
+        ],
+        "exitCode": 0,
+        "seconds": 4.289
+      },
+      "rawReportSha256": "1ec11fffb073afa4814ddca5cb3e41dbb035d0c1b7472191c5f79911443dad67"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+      "sourceAndExpectationSha256": "783840503d70417b84f0e53b5c460d22797d395aa5f048fb4df58bbf0c7069a4",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "test()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+            "observed": [
+              {
+                "values": [
+                  "2"
+                ],
+                "signature": "test()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/21"
+        ],
+        "exitCode": 0,
+        "seconds": 3.158
+      },
+      "rawReportSha256": "efd1ebd42b62720499c1015e6ea02d562d53753eb700e91a9ca44eec49bded3a"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+      "sourceAndExpectationSha256": "28f1757c696cbf235168dae5c61f17c4edab6f85b622c2b2be58503caa910395",
+      "before": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:9: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "xSlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "ySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:11: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "wSlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:12: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "zSlotOffset()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:9: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "xSlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "ySlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:11: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "wSlotOffset()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_offset.sol:12: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "zSlotOffset()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/22"
+        ],
+        "exitCode": 1,
+        "seconds": 3.2
+      },
+      "rawReportSha256": "86599ccc0edcccc83da12bec3b431a75571a532b6bd1a8a4a823dd9102e7dd05"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+      "sourceAndExpectationSha256": "31c83ca1936e7e28722f75dfff52a4909342c9ac26c33ea7205c65e4eb25ca72",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+            "observed": [
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+            "observed": [
+              {
+                "values": [
+                  "0"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/23"
+        ],
+        "exitCode": 0,
+        "seconds": 3.169
+      },
+      "rawReportSha256": "54d0035a2fc590c357e4e47cb94f5f404124c46e871afdb51083115f9d9da730"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+      "sourceAndExpectationSha256": "7027afd37224c8625bc82c918320ddabd6b8d5fe3407adede470db5ee6fe0967",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_cleanup_assignment.sol:7: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_cleanup_assignment.sol:7: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/24"
+        ],
+        "exitCode": 1,
+        "seconds": 3.175
+      },
+      "rawReportSha256": "ba905967b55d2aeb2d7ed43704678ce4f327a3aef358b8e1ed5d20be9071cad2"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+      "sourceAndExpectationSha256": "f721c9d5b5f96fc7e1008a3f70bb6698a120c3d27b0337c00e627ac975f21b56",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_cleanup_tstore.sol:6: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_cleanup_tstore.sol:6: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/25"
+        ],
+        "exitCode": 1,
+        "seconds": 3.091
+      },
+      "rawReportSha256": "6047fef454065f32dd140a8044f04f8492c19639013c2b0912bf97fcc41f6d22"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+      "sourceAndExpectationSha256": "fb88443c14c6d90b9dce5e9a44f4667383a6365ab1f3730040d062e9f96eae97",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:16: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "g()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:22: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "h()"
+              }
+            ]
+          },
+          {
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+            "gaps": [
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:10: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "f()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:16: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "g()"
+              },
+              {
+                "status": "excluded",
+                "reason": "transient_state_variable_slot_inline_assembly.sol:22: solidity.inlineAssembly: General Yul exposes machine memory, slots, opcodes and fork-dependent effects; only the separately recognized whole-buffer rethrow is abstracted.",
+                "function": "h()"
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "expected-assembly-exclusion",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/26"
+        ],
+        "exitCode": 1,
+        "seconds": 3.195
+      },
+      "rawReportSha256": "2690ef12c2d7e0d19c9e6983cc615911e62e27c00885449beed460c412b15ed4"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+      "sourceAndExpectationSha256": "19e6c45d3d512b1bf64ae1a451d3430d491dde1b41bb1ca2da916ff6c3a2fc47",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+            "observed": [
+              {
+                "values": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/27"
+        ],
+        "exitCode": 0,
+        "seconds": 3.246
+      },
+      "rawReportSha256": "7f065eb2da4db4b1f7f69e2fd110c426aba4349dd464c5b8d921d476af91506d"
+    },
+    {
+      "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+      "sourceAndExpectationSha256": "b2eb96c2b63d186964446e288a8e207f00e6ca2600a50c8ce20a1448f8f6460f",
+      "before": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "broken",
+        "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          },
+          {
+            "status": "broken",
+            "reason": "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol"
+          }
+        ]
+      },
+      "after": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "stage": "lean-runtime",
+        "status": "working",
+        "reason": "functional runtime vectors match in every required source evaluation mode",
+        "requiredPipelines": [
+          "legacy",
+          "viaIR"
+        ],
+        "variants": [
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "legacy",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          },
+          {
+            "status": "working",
+            "reason": "all scalar runtime vectors match",
+            "pipeline": "viaIR",
+            "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+            "observed": [
+              {
+                "values": [
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "signature": "f()",
+                "failed": false
+              }
+            ]
+          }
+        ]
+      },
+      "classification": "verified-pass",
+      "invocation": {
+        "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group09/after-final/28"
+        ],
+        "exitCode": 0,
+        "seconds": 3.269
+      },
+      "rawReportSha256": "0aee56e33e4ba3fd7020d194d2a98a55501356d62110ba40454721cf5fbf1c78"
+    }
+  ]
+}

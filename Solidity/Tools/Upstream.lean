@@ -68,6 +68,9 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
     let normaliseSignature (s : String) :=
       ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
     let function := (rows.find? fun r => normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
+      |>.orElse fun _ => (C.funs.find? fun (_, f) => f.sourceDecl.any fun d =>
+        (d.callable matches .getter _) &&
+        d.signature == some signature).map (·.1)
     let program := if ctor then ctorProgS C args else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
       elabProgS C [← runStmt C name args]
@@ -75,6 +78,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       return result "broken" s!"call does not elaborate: {signature}: {reason}"
     let .ok ⟨_, Q⟩ := program
       | return result "blocked" "missing call program"
+    if !ctor then state := state.transactionEntry
     let before := state
     let outcome := if ctor && !((C.ctor.map (·.payable)).getD false) && state.tx.msgValue.1 != 0
       then .error .revert else Prog.runF 1000 Q state

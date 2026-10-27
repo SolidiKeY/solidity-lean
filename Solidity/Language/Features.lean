@@ -234,6 +234,7 @@ inductive Feature where
   | addressCodehash
   | creationCode
   | runtimeCode
+  | logicalStorageBase
   | storageLayout
   | memoryLayout
   | transientLayout
@@ -448,6 +449,7 @@ def Feature.id : Feature → String
   | .addressCodehash => "addressCodehash"
   | .creationCode => "creationCode"
   | .runtimeCode => "runtimeCode"
+  | .logicalStorageBase => "logicalStorageBase"
   | .storageLayout => "storageLayout"
   | .memoryLayout => "memoryLayout"
   | .transientLayout => "transientLayout"
@@ -1295,9 +1297,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/types/reference-types.rst", line := 496 }], localEvidence := ["Solidity/Semantics/Storage/Ops.lean"] }
   | .transientState =>
     { category := "storage", spelling := "T transient x",
-      scope := .model, current := .missing,
-      requirement := r#"Add a separate logical transaction-local store, shared across reentrant frames, rolled back on frame failure and reset at transaction end; no gas model is needed."#,
-      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := [] }
+      scope := .model, current := .limited,
+      requirement := r#"Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells, failure rolls back the product, and lifetime/replay transaction boundaries reset cells. Physical layout, raw tload/tstore, raw function addresses and general source world/delegate execution remain unsupported."#,
+      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := ["Solidity/Semantics/Storage/Anon.lean", "Solidity/Semantics/Lifetime.lean", "Solidity/Examples/Tactics/TransientStorage.lean", "Solidity/Semantics/TransientWorld.lean", "Solidity/Examples/Tactics/TransientWorld.lean"] }
   | .checkedArithmetic =>
     { category := "semantics", spelling := "Solidity 0.8 default checked arithmetic",
       scope := .model, current := .limited,
@@ -1453,6 +1455,11 @@ def Feature.info : Feature → FeatureInfo
       scope := .exclude, current := .notApplicable,
       requirement := r#"Exact deployed code bytes depend on compilation and immutable/library substitution."#,
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4292 }], localEvidence := [] }
+  | .logicalStorageBase =>
+    { category := "storage", spelling := "literal layout at base with logical field observations",
+      scope := .model, current := .limited,
+      requirement := r#"Accept compiler-validated literal storage bases only for logical typed root operations. Raw slots, offsets, packing, tload/tstore and assembly remain excluded; the base does not change declaration identities or the disjoint persistent/transient root partition."#,
+      upstream := [{ path := "libsolidity/ast/AST.h", line := 635 }], localEvidence := ["Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Semantics/Storage/Anon.lean"] }
   | .storageLayout =>
     { category := "excluded", spelling := "layout at expr; physical slots/packing/offsets",
       scope := .exclude, current := .notApplicable,
@@ -1718,6 +1725,7 @@ def Feature.all : List Feature :=
     .addressCodehash,
     .creationCode,
     .runtimeCode,
+    .logicalStorageBase,
     .storageLayout,
     .memoryLayout,
     .transientLayout,

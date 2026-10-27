@@ -682,24 +682,35 @@ right (a component left out is not read).  From a tuple `(e₀, e₁, e₂)`: ea
 component with a target into a fresh temporary, left to right, then each
 target assigned its temporary, left to right; a component left out is
 dropped if it can neither revert nor have an effect, and evaluated
-otherwise (solc's; solkey keeps only a call).  Targets that may alias (the same name
-twice, two that are not stack locals, one that reads another) are refused:
+otherwise (solc's; solkey keeps only a call). Distinct scalar declaration names
+(stack locals or logical roots in either region) cannot alias, so their final
+writes commute. Other targets that may alias (the same name twice, two
+nonlocals not covered by this case, one that reads another) are refused:
 solc's order of their writes is not KeY's.  The variables of a tuple
 declaration, which no component reads, are assigned directly (`direct`). -/
 partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
     ElabM (SProg C) := do
   let tgts := ts.filterMap id
   let mut nonLocal := 0
+  let mut scalarNames := true
   for t in tgts do
     if t.hasIncDec then throw s!"{t.toStr}: a tuple's target with an effect"
-    unless (← synthM C t).2 matches
+    let target ← synthM C t
+    let scalarName := match t, target.2 with
+      | .name _, .val _ (.simple (.local _))
+      | .name _, .path (.prim _) (.loc (.root ..)) => true
+      | _, _ => false
+    scalarNames := scalarNames && scalarName
+    unless target.2 matches
         .val _ (.simple (.local _)) | .mpath (.ref _) (.var ..) | .path (.ref _) (.alias _) do
       nonLocal := nonLocal + 1
     for u in tgts do
       if let .name x := u then
         if t.toStr != u.toStr && t.mentions x then throw s!"{t.toStr}: a tuple's target that reads {x}, another"
-  if nonLocal > 1 then throw "a tuple assignment to two targets that are not stack locals"
-  unless (tgts.map (·.toStr)).eraseDups.length == tgts.length do
+  let distinct := (tgts.map (·.toStr)).eraseDups.length == tgts.length
+  if nonLocal > 1 && (!scalarNames || !distinct) then
+    throw "a tuple assignment to two targets that are not stack locals"
+  unless distinct do
     throw "a tuple assignment to the same target twice"
   match rhs with
   | .call f args =>
@@ -726,7 +737,14 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         let Γ ← ctx
         let (base, bind) ← match (← synthM C t).2 with
           | .val p _ | .path (.prim p) _ | .mpath (.prim p) _ =>
-            pure ("se", fun x => RawStmt.decl (.named (tyName p (widthIn C Γ t))) x (some e))
+            let ty := match fnTyOfExpr C Γ t with
+              | some fn => fn
+              | none => match bytesOf? C Γ t with
+                | some n => s!"bytes{n}"
+                | none => match widthPath? C Γ t with
+                  | some (ws, key, _) => declTyName ws key p
+                  | none => tyName p (widthIn C Γ t)
+            pure ("se", fun x => RawStmt.decl (.named ty) x (some e))
           | .mpath (.ref R) (.var ..) =>
             pure ("mv", fun x => RawStmt.declMemory (rawTyW (placeShape C Γ t) (.ref R) "") x (some e))
           | .path (.ref R) (.alias _) =>

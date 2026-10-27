@@ -559,9 +559,12 @@ import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.Tactics.OperatorAliasesImport
 import Solidity.Examples.Tactics.CallExceptions
 import Solidity.Examples.Tactics.TransientStorage
+import Solidity.Examples.Tactics.TransientSourceImport
 import Solidity.Semantics.ContractWorld
+import Solidity.Semantics.TransientWorld
 import Solidity.Calculus.ContractWorld
 import Solidity.Frontend.WorldImport
 import Solidity.Examples.Tactics.ContractWorld
 import Solidity.Examples.Tactics.ContractWorldSource
+import Solidity.Examples.Tactics.TransientWorld
 import Solidity.Tools.Upstream

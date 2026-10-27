@@ -150,6 +150,12 @@ def glob (σ : State C Γ) : State C [] :=
 /-- The storage replaced. -/
 def withStorage (σ : State C Γ) (st : Storage C) : State C Γ := { σ with storage := st }
 
+/-- A new external transaction resets transient cells and memory. Internal
+calls and caught failures never use this boundary operation. -/
+def transactionEntry (σ : State C []) : State C [] :=
+  { storage := Storage.resetTransient σ.storage, H := [], heap := Heap.empty,
+    env := (), net := σ.net, selfBalance := σ.selfBalance, tx := σ.tx }
+
 /-! ### Allocation -/
 
 /-- A grown heap adopted: its typing and objects, the locals weakened along
