@@ -348,3 +348,29 @@ private def FreshControls : Contract := contract!{
     | throw (IO.userError report.pretty)
   let actual := observations[0]?.bind fun j => (j.getObjValAs? (List Nat) "calldataBytes").toOption
   unless actual == some data do throw (IO.userError "trailing calldata was lost") : IO Unit)
+
+-- Fresh builtin results must own their bytes, even for a single input. Writes
+-- through the result cannot mutate the original read-only calldata object.
+private def FreshIsolation : Contract := contract!{
+  function concatenated(bytes calldata data) returns (uint a, uint b) {
+    bytes memory fresh = bytes.concat(data);
+    fresh[0] = 0xff;
+    a = uint8(data[0]); b = uint8(fresh[0]);
+  }
+  function decoded(bytes calldata data) returns (uint a, uint b) {
+    bytes memory fresh = abi.decode(data, (bytes));
+    fresh[0] = 0xff;
+    a = uint8(data[64]); b = uint8(fresh[0]);
+  }
+}
+#eval (do
+  let rows : List ImportRow := ["concatenated", "decoded"].map fun name =>
+    { name, sourceSignature := name ++ "(bytes)", tag := .diamond,
+      params := [], status := .elaborated, reason := "" }
+  let vectors := [abiVector "concatenated(bytes)" ["bytes"] ["uint256","uint256"]
+      (abiWords [32,1,97 * 2^248]) (abiWords [97,255]),
+    abiVector "decoded(bytes)" ["bytes"] ["uint256","uint256"]
+      (abiWords [32,96,32,1,97 * 2^248]) (abiWords [97,255])]
+  let report := replay FreshIsolation rows (Json.mkObj [("vectors",toJson vectors)])
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)
