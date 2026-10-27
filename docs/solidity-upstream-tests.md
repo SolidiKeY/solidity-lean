@@ -177,3 +177,13 @@ targets, while checking the existing `Examples/Decision.lean`; no build
 errors had been reported. Its result is inconclusive. The new upstream module
 and all replay checks completed successfully. Exact check outcomes are in
 `tests/upstream/results/validation.json`.
+
+The Group 10 continuation from `c31e76b6` is recorded separately in
+`tests/upstream/group10-resume-results.json`: all 437 original fixture paths,
+175 agreements / 102 failures / 160 blocks, with 57 new agreements and no
+regression of the previous 118. Its source/model/compiler hashes, per-fixture
+commands and complete required-pipeline observations are retained there;
+`tests/upstream/group10-resume-validation.json` records final checks. Previous
+Group 10 evidence and historical imported results remain unchanged. See
+[ABI M4](feature-work/abi-hashes.md#m4-group-10-continuation-from-c31e76b6-2026-10-27)
+for soundness boundaries, independent reviews and remaining actionable failures.

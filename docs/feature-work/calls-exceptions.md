@@ -230,3 +230,11 @@ execution controls reject wrong codes, empty or extended payloads and changed
 caller/value, and verify rollback after a nested narrow overflow. This adds no
 core exception or taclet constructor and does not claim universal solc/model
 equivalence. See ABI M4 for the continuation evidence and remaining exclusions.
+
+The complete continuation replay retains 175 agreeing fixtures (57 additional,
+zero regressions), 102 failures and 160 blocks across the assigned 437 paths.
+Exact before/after observations and every required pipeline are preserved in
+`tests/upstream/group10-resume-results.json`; the final validation record is
+`tests/upstream/group10-resume-validation.json`. Named-error payload order,
+modular-zero and exponentiation panic data remain explicit execution failures,
+not exclusions or inferred generic-panic successes.

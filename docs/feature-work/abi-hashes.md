@@ -481,7 +481,7 @@ listed above and remain explicit rather than being counted as passing.
 
 ## M4: Group 10 continuation from c31e76b6 (2026-10-27)
 
-Implementation checkpoint; complete fixture/build validation is in progress.
+The complete fixture replay is recorded below; the final build checks are recorded separately.
 The prior commit, patch and all M3 evidence remain preserved on
 `codex/group10-abi-vectors`. The continuation starts from the recorded
 118 agreements / 150 mismatches / 169 blocks; these are not fresh failures
@@ -525,8 +525,8 @@ no extra premise is assumed. Existing coverage checks and the exact
 `["proved", "refuted", "proved"]` output pin remain. The `csimp` equality
 rewrites only that closed sample, leaving general solver behavior/bounds
 unchanged. This is result replay, not a benchmark of original search or
-countermodel materialization. The repaired per-file check passes; the broad
-build is still pending at this checkpoint.
+countermodel materialization. The repaired per-file check passes; the complete Lake target now passes: unchanged `Decision` rebuilt in 738 s
+and the certified `DecisionArrays` module in 43 s.
 
 Read-only finder and independent skeptic reviews identified and closed the
 source/ABI instrumentation boundary and confirmed ignored-suffix admission
@@ -549,3 +549,101 @@ not a proof diagnostic. The unchanged target passed with resident-memory account
 no proof heartbeat, recursion, loop-fuel or fixture timeout limit is raised.
 A transient executor reconnect preserved the worktree; the concrete
 Lean/Lake/KeySort gate passed again after reconnecting.
+
+The complete continuation rerun is in
+`tests/upstream/group10-resume-results.json`: **175 agreements / 102 failures /
+160 blocked**, versus the preserved M3 **118 / 150 / 169**. All 118 previous
+agreements remain; 57 additional fixtures agree. The 347 passing pipeline
+variants retain all 1,348 observations. The collector independently recompiles
+the pinned ABI, reparses original vectors, and checks call order, failure flags,
+exact return/revert bytes and full raw calldata. Every fixture has its exact
+`--filter` command, `--batch-size 1`, distinct output directory, required modes,
+source hashes and before/after report hashes. No historical result is overwritten.
+
+The frozen model SHA256 is
+`e7776fa6b2affdf0715e3efa222c8b059ab94fe1aeae883897965dde432ad721`;
+runner SHA256
+`dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc`;
+compiler SHA256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+The compiler/source/archive pins remain M3's. Fixture elapsed times (including
+compilation, admission and concurrent validation) range from 997 ms to
+109,074 ms, median 3,969 ms; these are not proof benchmarks.
+
+Failures remain visible: 85 frontend-gap fixtures, six explicit source-profile
+refusals, six custom-error reference-argument elaboration failures, and five
+admitted-source execution mismatches. The latter are legacy addmod/mulmod-zero
+panic data, named-error payload order (two fixtures), exponentiation overflow,
+and fixed-bytes unary behavior. Another 159 fixtures retain adapter/host/configuration
+exclusions. The enormous-memory allocation fixture remains a resource block,
+not a certified panic. Named error repair must capture typed effects in each
+pipeline's evaluation order before assembling declaration-order payloads;
+sorting source expressions would be unsound. This continuation does not claim
+full repair or universal correctness from finite agreement.
+
+The final read-only finder and independent skeptic audits found no false-pass
+or provenance blocker. Both inspected the complete reports against the original
+fixtures. The finder independently checked all 706 retained raw input arrays;
+the skeptic recompiled pinned-solc ABI for every working fixture and regenerated
+all working vectors. Both confirmed all 1,348 observations, required pipelines,
+unchanged limits and previous evidence. Neither opened Lean workers or edited
+files. The five actual admitted-source failures above remain failures; neither
+review treats unsupported imports or resource termination as semantic success.
+
+
+The build-only resource retry uses a separate twelve-GiB RSS guard and one
+actual Lean worker after all fixtures and focused checks finish. The unchanged
+`DecisionHashes` target, previously stopped at six GiB, passes in 324 s. The
+unchanged `Decision` dependency passes in 738 s (the preserved prior run took
+935 s), and `DecisionArrays` passes in 43 s. These completed targets supersede
+the initial resource failures without changing proof budgets. All eight affected
+source-family checks pass, as do strict automation (491 automatic, 61 budgeted,
+11 refuted, zero pending), reachability (667 reachable, zero orphaned), and
+layering (143 core modules, none reaching the elaborator).
+
+Integration: the continuation is self-contained on the existing Group 10 lane;
+it assumes none of another group's unpublished changes. Shared frontend edits
+are limited to the failure-data policy/cache identity, allocating-builtin
+provenance, and recursive ABI type expression recognition. The runner change
+adds canonical-only v1 admission and corrects scope metadata. Resolve overlaps
+with other lanes by preserving those boundaries and the controls; no core
+representation, host implementation or optional Bridge dependency is required.
+
+Final build validation is complete: `./run-lean.sh` exits zero, including the
+649-job default build, 249-job Solkey TestSuite build and frozen sort check
+(377 taclets, 131 read-bearing annotations, all matching). The TestSuite audit
+finds no native proof shortcut, admitted theorem or mismatched axiom set in
+its 30 trust-scanned modules: 552 derived, 11 refuted, zero pending, one
+excluded and two skips. `SolidityCorpus` builds (257 jobs), and the frozen
+473da8944c corpus probe reproduces all 774 rows without drift. Snapshot
+verification, both Lean replay checks, all 19 Node controls and both independent
+reference suites pass. No Lean diagnostic MCP is exposed; configured per-file
+CLI checks were used. No new sorry, axiom, dependency or raised proof limit.
+Lake job durations include cache/scheduling effects and are not pure proof
+benchmarks. The cgroup OOM count remains at its prior three events.
+
+The documentation path gate remains failed on the exact c31 baseline:
+26 missing-reference diagnostics, consisting of 13 underlying omissions plus
+13 quotations in the preserved M3 validation JSON. A detached c31 worktree
+reproduces the identical missing-reference list without opening Lean workers.
+The new validation record stores unmarked diagnostic text and hashes the raw
+logs, avoiding further recursive quotations; historical evidence is unchanged.
+This is an existing gate failure, not a passing check.
+
+`tests/upstream/group10-resume-validation.json` records all commands, exits,
+log hashes, proof audits, resolved preliminary resource failures and runtime
+policies. Exported local artifacts are
+`.lake/upstream/group10-continuation.patch` (from c31),
+`.lake/upstream/group10-abi-vectors-v2.patch` (from 006fcd), and
+`.lake/upstream/group10-resume-evidence.tar.gz` (raw reports and validation
+logs). `.lake/upstream/group10-resume-export.json` records their SHA256 hashes
+and exact head/base commits. The original patch remains unchanged. No push or
+merge is performed. The 102 failures and 160 blocks remain explicit scope;
+this milestone does not claim that all 437 fixtures are repaired.
+
+The final read-only packaging finder and independent skeptic both approved:
+all 25 main-check logs, five supporting logs and five runtime artifacts match
+their recorded hashes and byte counts. Both confirmed the completed build,
+frozen sort, corpus and functional checks, the exact c31 documentation failure,
+and the remaining fixture scope. Neither opened Lean workers, ran builds or
+edited files; no confirmed issue remains in the patch/evidence packaging.
