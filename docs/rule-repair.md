@@ -20,7 +20,8 @@ candidate rule sound.
    to use it? Expand or correct `|=` only if its execution meaning is wrong
    or missing. Read `docs/module-map.md` and the conventions for that layer.
    Record a run change in `docs/solc-alignment.md`. For a closer change, start
-   from SolKey's actual taclets as required by "Following solkey".
+   from SolKey's actual taclets as required by
+   [Following SolKey](#following-solkey).
 3. **State the candidate before implementing it.** Write its precondition,
    transformation and postcondition in plain English, as SolKey's taclet
    workflow requires. State the semantic read equations, including the
@@ -68,6 +69,25 @@ candidate rule sound.
    `.claude/rules/rule-table.md` for registration and correspondence checks.
    No `sorry`, new axiom or weakened theorem to accept a prototype. Preserve
    the regression examples and measured costs, then run the review pass.
+
+## Following SolKey
+
+Every program, proof, term and update rule, and every storage/memory closer
+clause, follows its SolKey taclet: name, `\find` / `\replacewith` shape,
+schema-variable names, side conditions and branch labels. Canonical root
+spelling is `save` / `find`; `store` / `select` remain accepted aliases.
+Semantic deviations belong in [solc-alignment.md](solc-alignment.md).
+
+A closer feature starts from the actual `.key` taclets. Make each one a
+clause, use the interpreter lemma for soundness, cite the transcribing
+`Theory/` lemma and add its row to [lean-key-rule-map.md](lean-key-rule-map.md).
+Mark Lean-only clauses and deviations explicitly.
+
+Write taclets and sequents in `dl{ … }`, and terms in `tm{ … }`, including
+definition patterns and arms. Add notation and a printer with a new term
+language, so `#wp`, errors and pins show the same form. Notation consists
+only of macros: prove a restated type by `rfl` before checking downstream
+code, establishing that kernel and compiled code see the same terms.
 
 ## What lazy means here
 

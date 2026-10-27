@@ -9,6 +9,9 @@ paths:
 
 # Examples and the notation
 
+For formula syntax, tactics, chains and proof-tree commands, see
+[the calculus guide](../../docs/calculus.md).
+
 Two directories, by proof style:
 
 - `Examples/Chains/` — the calculus's worked examples, one file per section in

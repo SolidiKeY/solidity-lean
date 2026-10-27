@@ -28,6 +28,7 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [calculus.md](calculus.md) | Formula syntax, tactics, walks, chains, proof trees and symbolic updates. |
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, update and theory symbols to Lean names. |
 | [options.md](options.md) | Calculus options: callbacks, overflow, clean tails, evaluation order. |
 | [loops.md](loops.md) | Loops: decisions, the invariant rules, status. |
@@ -55,6 +56,7 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [contributing.md](contributing.md) | Verification commands, Lean setup, tactic development, worktrees and memory limits. |
 | [cli.md](cli.md) | The native `solidity-lean` CLI. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files: CLI, JavaScript and Lean APIs. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |

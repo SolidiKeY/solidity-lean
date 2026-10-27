@@ -65,7 +65,7 @@ One reviewable change; do the steps in this order.
    `docs/corpus-parity.md` is regenerated, never edited.
 7. **The feedback.** Re-check `docs/solkey-feedback.md`'s items against the
    new snapshot.
-8. `./run-lean.sh` and the gates of `AGENTS.md`.
+8. `./run-lean.sh` and the applicable [development gates](contributing.md#checks).
 
 ## The source baseline
 

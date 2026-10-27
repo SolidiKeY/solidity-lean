@@ -1,12 +1,24 @@
 # The intrinsic model
 
-The model is intrinsic: locals are positions in a context
-(`Stmt C Γ Γ'`, `Idx Γ t`), the state is typed by that context
-(`State C Γ`), the run is never stuck, and the calculus, the closer and the
-compiler read only those.  `AGENTS.md` states the shape and
-`docs/module-map.md` where each part lives.  This file keeps what a change
-must still respect: the conditions on kernel-evaluated code (Gate G0), the
-decisions in force, what stays extrinsic on purpose, and what is open.
+The model is intrinsic. A statement is `Stmt C Γ Γ'`
+(`Syntax/Scoped.lean`); its locals are positions `Idx Γ t` in a context
+(`Scope.lean`), so a local read out of scope or at another type cannot be
+written. `Stmt.run` (`Semantics/Run.lean`) reads `State C Γ`
+(`Semantics/State.lean`), with typed storage, heap and locals. It halts only
+by revert, panic, divergence or exhaustion; it is never stuck.
+
+The elaborator emits scoped syntax directly (`Syntax/Elab.lean`), the
+printers print it (`Calculus/PrintStmt.lean`), and formulas are `Fml C Γ`
+(`Calculus/Fml.lean`). Every layer reads the typed state: the closers, the
+Theory's observations (`Theory/Typed/Obs.lean`), run invariants (`Typing/`),
+EVM simulation (`Evm/`) and tools. KeY's unbounded `int` has its own sort
+(`Srt.kint`). External inputs and responses retain their Solidity types
+(`CallValue`, `ExtResult`, decoded by `PrimTy.ofWord?`). There is no untyped
+statement, formula, term, state or value.
+
+[module-map.md](module-map.md) locates the layers. This document records
+the conditions on kernel-evaluated code (Gate G0), decisions in force,
+what stays extrinsic on purpose and remaining work.
 
 The refactor ran from 2026-10-07 (M0) to 2026-10-14 (W11), with W12 item 1
 on 2026-10-25.  Its full record (lane notes, timings, gate tables, review
@@ -20,7 +32,6 @@ logs) is in git:
 
 Docstrings that cite a section of this file by name cite those versions;
 the labels themselves are summarised in "Milestones and waves" below.
-`scripts/check-doc-paths.sh` skips this file (decision 68).
 
 ## Milestones and waves
 
@@ -43,7 +54,7 @@ One line each; where the work lives now is in `docs/module-map.md`.
 | W2 | soundness over the typed run (`sound`), the strategy (`symex`: termination retired, the scoped strategy is fuelled), chains (`chains`, `Calculus/Chains.lean`, `Calculus/ChainKit.lean`), the tree (`tree`: `Calculus/CallbackHolds.lean`, the scoped switch `Calculus/Surface.lean`); W2.5: typed soundness of the arms and blocks, decisions 12–17' implemented |
 | W3 | the flip of the tactics, the TestSuite, the tree and the chains onto the scoped calculus (W3 `chains`: `evalExpr` without the kernel check of its throwaway definition, a third of a short chain's time); W3b (`testsuite`: `TestSuite/ScopedProblems.lean` a module of its own for its timing gate; the merge's exemption from Gate G0 condition 1, `Calculus/Merge.lean`); W3c (`tactics`: the sequent's update rules exempt too, `Calculus/Graft.lean`, `Calculus/UpdateRules.lean`, `Calculus/CallbackSound.lean`; `testsuite`; `tree`; an import's `N.f.proved : ⊢ N.f.problem`); captures by provenance (decision 30) |
 | W4 | the untyped run (`sem-del`) and calculus (`calc-del`: progress `Fml.active_iff_step` and the old rule table retired) deleted; `theorems` (`Theorems.lean` restated, decision 36); `contracts`; `modal`; item 11 (modules split out: `Calculus/RuleKit.lean`, `Calculus/TreeData.lean`, `Calculus/TacticSyntax.lean`); W4b `run40` (decisions 40, 50), `rules36` (36, 53), `printers` |
-| W5 | the rename (`Solidity.Core.X` → `Solidity.X`, decisions 62–72); the reader port (now outdated, `AGENTS.md`) |
+| W5 | the rename (`Solidity.Core.X` → `Solidity.X`, decisions 62–72); the reader port (now unmaintained; see [contributing.md](contributing.md#toolchain-and-proofs)) |
 | W6 | canonicity on the typed state (75), `Stmt.step` total (76), `Reachable → Fits` found false (77), M6c 6a–6c |
 | W7 | the `⊨ᶠ` route on the `⊢` walk (95), "only an `assert` panics" (`Prog.run_noPanic`), decision 77's conditional form (97), the closer on the scoped reduction, the scoped update rules and links given their consumers |
 | W8 | decision 11: the untyped statement, program and formula removed; the elaborator emits `Prog C Γ Γ'` (`Syntax/Elab.lean`); W8.2: the printers on the scoped syntax (`Calculus/PrintStmt.lean`) |
