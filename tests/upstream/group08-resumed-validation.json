@@ -1,0 +1,624 @@
+{
+  "resumedFrom": "62338a6f4d3f1b1a870ab6fa72f5590ac5533677",
+  "implementationCommit": "d02d12fc",
+  "branch": "codex/group08-source-lowering",
+  "runtime": {
+    "executor": "ccarenv_b64_Y2NhcmVudl8zYTJlY2UzNDA5OWM4MTkxOGFmMjEwNTYxNTQzYjk4NA",
+    "activation": "source /workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "keySortCommand": "lake build Solidity.KeySort",
+    "keySort": "successful (2 jobs)",
+    "perFileDiagnostics": "No Lean MCP diagnostic tools exposed; configured per-file lake --quiet --no-build lean FILE -- --tstack=131072 used."
+  },
+  "fixtures": {
+    "evidence": "tests/upstream/group08-resumed-results.json",
+    "working": 23,
+    "broken": 0,
+    "blocked": 0,
+    "variants": 46,
+    "observations": 58,
+    "seconds": 234.931,
+    "modelSha256": "ca4710564ff1b148a42492323ffe8e667745f2d9e1d5f331cca266481f0234cc"
+  },
+  "controlRuns": [
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/RemainingDeclarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 43.01,
+      "log": ".lake/upstream/group08/resume/sealed-control-0.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 3.53,
+      "log": ".lake/upstream/group08/resume/sealed-control-1.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Declarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 33.099,
+      "log": ".lake/upstream/group08/resume/sealed-control-2.log",
+      "logSha256": "85e84fa66700abd024c360cc01738569c9a0317281dc2cebd97858246a782396"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/MappingDeclarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 11.883,
+      "log": ".lake/upstream/group08/resume/sealed-control-3.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Examples/Tactics/OperatorAliasesImport.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 23.661,
+      "log": ".lake/upstream/group08/resume/sealed-control-4.log",
+      "logSha256": "67f1e00ed18352b41582c15c9760f06762cc9d4c59a1a834930dd58fc4b1d6b1"
+    }
+  ],
+  "quickGates": [
+    {
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "seconds": 1.06,
+      "log": ".lake/upstream/group08/resume/snapshot-sealed.log",
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs",
+        "scripts/solc-code.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.087,
+      "log": ".lake/upstream/group08/resume/runner-tests-sealed.log",
+      "logSha256": "c301e44b6343b0ef2c4f8e5320370af0b40240ba96d4ffd3997ab91cb351a6da"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.156,
+      "log": ".lake/upstream/group08/resume/orphans-sealed.log",
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.139,
+      "log": ".lake/upstream/group08/resume/layers-sealed.log",
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "seconds": 0.041,
+      "log": ".lake/upstream/group08/resume/automatic-sealed.log",
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 0.043,
+      "log": ".lake/upstream/group08/resume/catalog-sealed.log",
+      "logSha256": "6ed84a1af872116bc291537bf6abae1359b341e89c39e92f5ed0ce7629292b4d"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh"
+      ],
+      "exitCode": 0,
+      "seconds": 0.197,
+      "log": ".lake/upstream/group08/resume/testsuite-audit-sealed.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "seconds": 5.468,
+      "log": ".lake/upstream/group08/resume/doc-paths-sealed.log",
+      "logSha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 1,
+      "seconds": 3.43,
+      "log": ".lake/upstream/group08/resume/trust-sealed.log",
+      "logSha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 0.006,
+      "log": ".lake/upstream/group08/resume/diff-check-sealed.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "frozenTestSuiteAudit": {
+    "command": [
+      "bash",
+      "scripts/check-testsuite.sh"
+    ],
+    "exitCode": 0,
+    "seconds": 0.912,
+    "log": ".lake/upstream/group08/resume/testsuite-frozen-final.log",
+    "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+    "environment": {
+      "SOLKEY_EXAMPLES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+    }
+  },
+  "baselineAudits": {
+    "trust": {
+      "status": "baseline failure; byte-identical exact62338 output",
+      "findings": 25,
+      "current": {
+        "path": ".lake/upstream/group08/resume/trust-sealed.log",
+        "sha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+      },
+      "baseline": {
+        "path": ".lake/upstream/group08/resume/trust-62338-exact.log",
+        "sha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+      }
+    },
+    "docPaths": {
+      "status": "baseline failure; byte-identical exact62338 output",
+      "missing": 13,
+      "current": {
+        "path": ".lake/upstream/group08/resume/doc-paths-sealed.log",
+        "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+      },
+      "baseline": {
+        "path": ".lake/upstream/group08/resume/doc-paths-62338.log",
+        "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+      }
+    }
+  },
+  "buildGates": {
+    "status": "passed",
+    "environment": {
+      "LEAN_NUM_THREADS": "1",
+      "LAKE_OVERRIDE_LEAN": "true",
+      "LEAN_SYSROOT": "/workspace/solidity-lean/.lake/upstream/group08/resume/serial-toolchain",
+      "SOLKEY_EXAMPLES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+    },
+    "scheduling": "One build slot alongside the source suite; up to two after source completion. flock queues before Lean starts. LAKE_OVERRIDE_LEAN=true is required for the co-located Lake binary.",
+    "runs": [
+      {
+        "command": [
+          "bash",
+          "run-lean.sh"
+        ],
+        "exitCode": 0,
+        "seconds": 8304.21,
+        "log": ".lake/upstream/group08/resume/run-lean-final.log",
+        "logSha256": "2b78e255e2dd3553b24786027d38edfa2dc1162d5ebd428d0f5d4042ef64f3f6"
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "SolidityCorpus"
+        ],
+        "exitCode": 0,
+        "seconds": 41.442,
+        "log": ".lake/upstream/group08/resume/corpus-build-final.log",
+        "logSha256": "410149d12282dda2660786bae657ae289e386a348124aff47ce26484d83f9559"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/check-corpus.sh"
+        ],
+        "exitCode": 0,
+        "seconds": 28.773,
+        "log": ".lake/upstream/group08/resume/corpus-check-final.log",
+        "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+      }
+    ],
+    "coverage": {
+      "defaultJobs": 649,
+      "frozenTestSuiteJobs": 249,
+      "sortTaclets": 377,
+      "readBearingAnnotations": 131,
+      "corpusJobs": 257
+    },
+    "timingNote": "8304.210s includes serialized waiting behind exact-baseline and focused checks; not a controlled checking-speed benchmark."
+  },
+  "sourceSuite": {
+    "status": "failed47passed14failed; nine preserved baseline assertions/resources, three aggregate resource failures with complete successful focused expectation checks, and two exact-handoff baseline cases (Calldata resource/proof gaps; RevertData pending).",
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "scripts/declarations-metadata.test.mjs",
+      "scripts/test-solidity.test.mjs"
+    ],
+    "compiler": "configured pinned0.8.34 (upstream fixture checks use0.8.38)",
+    "timeoutMs": 300000,
+    "scheduling": "Original default32 retained; onlyCalldata/Hashing/RevertData explicitlybatch1; expectations unchanged.",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "focusedResourceMethod": "MemoryPush and NarrowNested aggregate failures get distinct full-row reports with batchSize1/threads2 and original assertions; 300000ms job bound and proof budgets unchanged. Full-suite failures remain recorded.",
+    "baselineCalldata": {
+      "path": ".lake/upstream/group08/resume/baseline-Calldata-report.json",
+      "rows": 18,
+      "toolErrors": 1,
+      "resourceBlock": "sliceHashed(bytes) still times out at300000ms on exact62338; symbolic slice materialization/hash diamond needs existing copy-loop automation, not related enum/code/tuple lowering.",
+      "driverExit": "Comparison report persisted completely; driver then exited1 from an invalid logging argument; Hashing/RevertData continued with separate driver."
+    },
+    "exact62338Comparisons": [
+      {
+        "path": ".lake/upstream/group08/resume/baseline-Calldata-report.json",
+        "sha256": "cfbb249d3d20511773a77e04b450e07ca003fcf287969bdd2106e73ed3328d28",
+        "modelSha256": "85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7",
+        "sourceSha256": "52fa7213c18fab08a93b4b9488284330f7dc27dcbfbba285cab689fe46018c31",
+        "rows": 18,
+        "statuses": {
+          "proved": 11,
+          "internal": 1,
+          "unsupported": 2,
+          "pending": 3,
+          "notRun": 1
+        },
+        "toolErrors": 1,
+        "seconds": 1033.123643677
+      },
+      {
+        "path": ".lake/upstream/group08/resume/baseline-Hashing-report.json",
+        "sha256": "542ca94b62195de66501e8e7e3eceecaea432d41813ba80f633f98f4d1326da0",
+        "modelSha256": "85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7",
+        "sourceSha256": "0535105c3ea7e9a660c82adf51ee2a07246a6da99f39e508de62dc242a91ed86",
+        "rows": 30,
+        "statuses": {
+          "proved": 26,
+          "error": 4
+        },
+        "toolErrors": 0,
+        "seconds": 1351.744795839
+      },
+      {
+        "path": ".lake/upstream/group08/resume/baseline-RevertData-report.json",
+        "sha256": "f929e47069251255d53d7693a1e1e043adcb50a9ec47d982861210071e933ca4",
+        "modelSha256": "85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7",
+        "sourceSha256": "94ee0a48bb04233bf5e71306d9475eef403e10ec509e06cb0f2ebc2296011102",
+        "rows": 18,
+        "statuses": {
+          "skipped": 8,
+          "pending": 3,
+          "proved": 7
+        },
+        "toolErrors": 0,
+        "seconds": 918.5481029819999
+      }
+    ],
+    "focusedMemoryPush": {
+      "path": ".lake/upstream/group08/resume/focused-MemoryPush-report.json",
+      "sha256": "ce40b48c71b4aefdd569603c085a45b72fdeac6694e5a7e28f51b50bf849d5d6",
+      "originalExpectationsMatch": true,
+      "allReadingsClean": true,
+      "rows": 9,
+      "statuses": {
+        "proved": 6,
+        "pending": 3
+      },
+      "toolErrors": 0,
+      "seconds": 619.081330215,
+      "batchSize": 1,
+      "timeoutMs": 300000,
+      "threads": 2
+    },
+    "currentCalldataCheckpointComparison": {
+      "path": ".lake/upstream/group08/resume/current-Calldata-checkpoints.json",
+      "sha256": "05e05c968cb849ba9d370bc5795543afdb24f2a63861e879aa192456c4da8e5e",
+      "rows": 18,
+      "complete": true,
+      "sameStatusesAs62338": true
+    },
+    "focusedNarrowNested": {
+      "path": ".lake/upstream/group08/resume/focused-NarrowNested-report.json",
+      "sha256": "7f7aef70eb02a14ed3ccf29da6ae0909a8f933ae3759731d9ebd772146fa865a",
+      "originalExpectationsMatch": true,
+      "rows": 30,
+      "statuses": {
+        "proved": 28,
+        "internal": 2
+      },
+      "toolErrors": 0,
+      "seconds": 610.553576647,
+      "batchSize": 1,
+      "timeoutMs": 300000,
+      "threads": 2
+    },
+    "currentHashingCheckpointComparison": {
+      "path": ".lake/upstream/group08/resume/current-Hashing-checkpoints.json",
+      "sha256": "091dd60a68ab19896f7cad9dd26b956235e94dc541ff7c13b4d0e854444e23b9",
+      "rows": 30,
+      "complete": true,
+      "sameStatusesAs62338": true
+    },
+    "focusedRecursion": {
+      "path": ".lake/upstream/group08/resume/focused-Recursion-report.json",
+      "sha256": "474b0ae38e0c146269445ea9f15a85ad484f7d6e59ae650acadf37fd6804d8fe",
+      "originalExpectationsMatch": true,
+      "rows": 15,
+      "statuses": {
+        "proved": 14,
+        "pending": 1
+      },
+      "toolErrors": 0,
+      "seconds": 543.2061685030001,
+      "batchSize": 1,
+      "timeoutMs": 300000,
+      "threads": 2
+    },
+    "exitCode": 1,
+    "summary": {
+      "tests": 61,
+      "suites": 0,
+      "pass": 47,
+      "fail": 14,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "duration_ms": 9024146.758072
+    },
+    "log": ".lake/upstream/group08/resume/source-suite-final.log",
+    "logSha256": "5db016e37df05ffcda07fc633d6dc9e151db5716033ad350f78877e84f23dfc1",
+    "environment": {
+      "LEAN_NUM_THREADS": "1",
+      "compiler": "0.8.34+commit.80d5c536"
+    },
+    "seconds": 9024.146758072,
+    "failures": [
+      {
+        "test": "declaration metadata",
+        "classification": "baseline assertion",
+        "detail": "selectors unsupported; expected proved"
+      },
+      {
+        "test": "Runner",
+        "classification": "baseline assertion",
+        "detail": "assembly excluded; expected unsupported"
+      },
+      {
+        "test": "NatSpec injection",
+        "classification": "baseline assertion",
+        "detail": "error count0; expected1"
+      },
+      {
+        "test": "MemoryPush",
+        "classification": "aggregate resource; focused expectations match",
+        "detail": "300000ms timeout; focused9rows6proved3pending, clean, no errors"
+      },
+      {
+        "test": "NarrowNested",
+        "classification": "aggregate resource; focused expectations match",
+        "detail": "300000ms timeout; focused30rows28proved2internal, no errors"
+      },
+      {
+        "test": "Bytes",
+        "classification": "baseline assertion",
+        "detail": "indexOutOfRange pending; expected proved"
+      },
+      {
+        "test": "Calldata",
+        "classification": "exact62338 baseline resource and proof gaps",
+        "detail": "sliceHashed300000ms timeout; all18current status/signature/reading fingerprints match baseline"
+      },
+      {
+        "test": "Recursion",
+        "classification": "aggregate resource; focused expectations match",
+        "detail": "300000ms timeout; focused15rows14proved1pending, no errors"
+      },
+      {
+        "test": "modern full-source frozen TestSuite API",
+        "classification": "baseline resource/code-generation limit",
+        "detail": "maximum recursion depth/code-generator failure; frozen249-job TestSuite build/audit separately pass"
+      },
+      {
+        "test": "ReferenceParameters",
+        "classification": "baseline stale expectation",
+        "detail": "copiesBeforeEffects proved; expected pending"
+      },
+      {
+        "test": "SpecImport",
+        "classification": "baseline assertion",
+        "detail": "excluded; expected unsupported"
+      },
+      {
+        "test": "SpecBindings",
+        "classification": "baseline proof gap",
+        "detail": "tryScopeExit pending; expected proved"
+      },
+      {
+        "test": "solc/open",
+        "classification": "baseline proof gap",
+        "detail": "tryArgumentSideEffect pending; expected proved"
+      },
+      {
+        "test": "RevertData",
+        "classification": "exact62338 baseline proof gaps",
+        "detail": "reasonBytes/reasonOfBranch/reasonPastCustom pending; all18current fingerprints match baseline"
+      }
+    ],
+    "priorNineBaselineReproductions": {
+      "evidence": "tests/upstream/group08-validation.json",
+      "sha256": "1a96ad711efb437b30390cb9b93b6411d19c8238671db9e1a21d4b287c1da4d3",
+      "base": "006fcd593f5beeb540e7adf2bc76de4638566924",
+      "note": "Preserved original independent exact-task-base reproductions; not reclassified as fresh failures on master."
+    },
+    "currentRevertDataCheckpointComparison": {
+      "path": ".lake/upstream/group08/resume/current-RevertData-checkpoints.json",
+      "sha256": "1840052c1b08dc449c2bfbc8c570946b07119122048001cedbaec58829a600fc",
+      "rows": 18,
+      "complete": true,
+      "sameStatusesAs62338": true
+    }
+  },
+  "proofEvidence": {
+    "newAxioms": 0,
+    "newSorry": 0,
+    "maxHeartbeatsRaised": false,
+    "scalar_projection_keeps_alias": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "scalar_projection_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "staticCompilerLength_agrees": [
+      "propext"
+    ],
+    "scope": "Local intrinsic binding/parser lemmas plus bounded kernel controls; no universal lowering or compiler correctness theorem."
+  },
+  "reviews": [
+    {
+      "agent": "finder",
+      "readOnly": true,
+      "leanWorkers": false,
+      "reviewedImplementation": "d02d12fc",
+      "finalEvidenceReview": {
+        "fixtureReports": 23,
+        "manifestReferencedHashes": 35,
+        "variants": 46,
+        "observations": 58,
+        "sourcePass": 47,
+        "sourceFail": 14
+      },
+      "remainingConfirmedIssues": 0
+    },
+    {
+      "agent": "skeptic",
+      "readOnly": true,
+      "leanWorkers": false,
+      "reviewedImplementation": "d02d12fc",
+      "finalEvidenceReview": {
+        "fixtureReports": 23,
+        "manifestReferencedHashes": 35,
+        "variants": 46,
+        "observations": 58,
+        "sourcePass": 47,
+        "sourceFail": 14
+      },
+      "remainingConfirmedIssues": 0,
+      "confirmedFixed": [
+        "numeric subdenomination projection",
+        "enum width/identity and whole-array padding",
+        "artifact source-unit identity",
+        "recursive composite enum ABI input refusal",
+        "unrelated enum checking-cost regression"
+      ]
+    }
+  ],
+  "preservedArtifacts": [
+    {
+      "path": ".lake/upstream/group08/group08.patch",
+      "sha256": "db3c3bdf1e0ad4abf1bcb9d446552e4f792c494b7522b7fb9beb9fc81977ccd3"
+    },
+    {
+      "path": ".lake/upstream/group08/group08-logs.tar.gz",
+      "sha256": "e55199d00b30b46a9350b1097511cda61e6cacbe4f3201542f46921d4fcf1c95"
+    }
+  ],
+  "developmentLimits": [
+    "Interrupted stale/development source-suite attempts are retained and are not passing gates.",
+    "Pre-fix CallExceptions.enum_code failure retained; narrowed final per-file check passes.",
+    "Co-located Lake needs LAKE_OVERRIDE_LEAN=true to honor local serial-toolchain; incomplete launcher attempt retained.",
+    "Quick TestSuite audit under setup-default paths fails configuration; separate frozen-input audit passes."
+  ],
+  "patchStatus": {
+    "implementationHead": "859b7bbc",
+    "pushes": 0,
+    "merges": 0,
+    "remainingAssignedFixtureFailures": 0,
+    "broaderSourceGatePassed": false,
+    "expectedExclusions": [
+      "unsupported mixed frames beyond the documented literal-coresult subset",
+      "composite enum ABI inputs and nominal enum/composite ABI decoding",
+      "missing/unlinked/oversized or mismatched static code artifacts"
+    ],
+    "artifacts": "Final local commit and artifact hashes recorded in .lake/upstream/group08/resume/handoff-artifacts.json after export.",
+    "exports": [
+      ".lake/upstream/group08/resume/group08-resumed.patch",
+      ".lake/upstream/group08/resume/group08-combined.patch",
+      ".lake/upstream/group08/resume/group08-resumed-logs.tar.gz"
+    ]
+  }
+}

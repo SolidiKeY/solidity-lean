@@ -623,7 +623,7 @@ its earlier patch, logs and evidence above remain historical artifacts. The
 [new exact before/after record](../../tests/upstream/group08-resumed-results.json)
 compares that lane's 20 working / 3 broken result with **23 working / 0 broken /
 0 blocked**. Every fixture was rerun with its exact path, `--batch-size 1` and
-a distinct `resume/final-*` output directory. All 46 required legacy/viaIR
+a distinct `resume/sealed-*` output directory. All 46 required legacy/viaIR
 variants retain all 58 observations, unchanged expected results and source bytes.
 The compiler remains SHA-checked 0.8.38; the new record includes model, runner,
 compiler-code adapter, report and log hashes. This is observational agreement,
@@ -703,3 +703,107 @@ The pre-fix build and incomplete concurrent suite remain development evidence,
 not passing final gates. Subsequent build jobs queue before Lean starts using
 a local `flock` launcher over the same 4.24.0 binary, rather than pausing a
 checker after it starts; independently timed source proof jobs are never paused.
+
+### Resumed validation evidence
+
+The attached executor reports Lean 4.24.0 (`797c613`) and Lake
+5.0.0-src+797c613; the concrete cached `lake build Solidity.KeySort` gate passes
+(two jobs). No Lean MCP diagnostics are exposed, so configured per-file
+`lake --quiet --no-build lean FILE -- --tstack=131072` checks are used.
+The five final upstream/import control files pass. The sealed 23-fixture runs
+take 234.931 seconds in total under model
+`ca4710564ff1b148a42492323ffe8e667745f2d9e1d5f331cca266481f0234cc`.
+Exact commands and individual pipeline observations are in the resumed fixture
+record; the preserved 20 already-repaired rows remain working.
+
+The source API compiler is separately pinned 0.8.34+80d5c536, SHA-256
+`c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8`.
+It is not the upstream fixture runner's 0.8.38 compiler. Exact `62338a6f`
+comparisons retain all rows: Calldata has 11 proved, one internal, two
+unsupported, three pending and one not-run row; Hashing has 26 proved and four
+bounded-walk errors; RevertData has seven proved, eight skipped and three
+pending. Hashing and RevertData finish without tool timeouts when scheduled one
+obligation at a time. The four nested codec errors are existing 20,000-step walk
+limits, not proof passes. RevertData's pending `reasonBytes`, `reasonOfBranch`
+and `reasonPastCustom` are baseline proof gaps. Calldata's `sliceHashed(bytes)`
+still reaches the unchanged 300-second bound even alone on the exact handoff:
+its symbolic slice materialization/hash under a diamond needs existing loop
+automation. It remains resource blocked; there is no blind longer retry.
+Current Calldata and Hashing checkpoints are complete and match every baseline
+status, signature and reading (18 and 30 rows respectively).
+
+Two additional aggregate source subprocesses hit their original wall limit.
+Separate complete checks change scheduling only: MemoryPush retains all nine
+original expectations (six proved, three pending negative controls), clean
+readings and no tool errors; NarrowNested retains all 30 rows (28 proved, two
+internal), with all 28 original positive expectations proved and no tool errors.
+They take 619.081 and 610.554 seconds respectively, with one obligation per job,
+two Lean threads and the same 300-second bound per job. The full-suite failures
+remain recorded; these focused results do not relabel the full suite as passing.
+
+Build timing includes intentional queueing alongside source checks and exact
+baseline comparisons; it is not a controlled performance benchmark. The default
+649-job build passes. `CallExceptions` passes in 23 seconds after the scoped
+carrier repair. OpenLoops passes in 941 seconds, within the retained 569/1,172
+second range. The frozen TestSuite, final corpus and source-suite outcomes follow below.
+
+The recursion source test also reaches its existing 300-second aggregate bound
+(the test already documents load sensitivity). Its complete per-function recheck
+retains all 15 original expectations: 14 proved, one pending negative control,
+no tool errors, 543.206 seconds total. No expectation or proof limit changes.
+
+Final managed-executor gates pass: `bash run-lean.sh` (8,304.210 seconds,
+including intentional serial queueing), `lake build SolidityCorpus` (41.442
+seconds, 257 jobs), and `bash scripts/check-corpus.sh` (28.773 seconds). The
+frozen TestSuite builds all 249 jobs; the sort check matches all 377 taclets and
+131 read-bearing annotations. These are separate from the source API's modern
+full-source compilation/code-generation limit.
+
+The unchanged affected source assertions finish **47 passed / 14 failed** in
+9,024.147 seconds; this gate does not pass. Nine failures are the previously
+independently reproduced task-base cases recorded above. MemoryPush,
+NarrowNested and Recursion have aggregate timeouts with complete, successful
+focused expectation checks. Calldata retains the exact-handoff `sliceHashed`
+resource block and other baseline gaps; RevertData retains three baseline
+pending proofs. All 18/30/18 current Calldata/Hashing/RevertData checkpoints are
+present and match the exact `62338a6f` status, signature and reading fingerprints.
+The remaining Hashing walk errors and RevertData/Calldata pending rows are not
+universal proof coverage. Historical source inputs and expected statuses remain
+unchanged; no timeout is counted as passing or as an expected semantic failure.
+Exact diagnostics, commands, hashes, timings and classifications are in
+[the resumed validation record](../../tests/upstream/group08-resumed-validation.json).
+
+Final non-Lean gates pass: all 17 runner/helper tests, verification of all
+11,622 snapshot files, strict automation (491 automatic, 61 with a step budget,
+11 refuted, zero pending), 667 reachable modules with no orphans, 143 core
+modules with no elaborator reachability, current feature-catalog generation and
+the frozen TestSuite audit. The documentation-path audit still fails on 13
+vendor references and the trust inventory still reports 25 findings; both final
+outputs are byte-identical to `62338a6f`, not passing audits or new trust sites.
+
+Finder and independent skeptic performed their final read-only reviews without
+opening Lean workers. Each checked the sealed fixture rows and hashes, current
+model hash, 35 manifest-referenced log/report hashes, build/corpus outcomes and
+source-failure classifications. No remaining confirmed issue was found. The
+confirmed implementation findings (unit scaling, enum identity/width/array
+padding, artifact unit identity, composite enum ABI admission and unrelated enum
+checking cost) were fixed with controls before this review.
+
+Integration keeps the frontend changes together: `Source.lean`, `Body.lean`,
+`Contract.lean` and `Import.lean` share the validated artifact/carrier/projection
+metadata. The new `scripts/solc-code.mjs` must accompany its two adapter callers;
+reports record its separate SHA. The feature catalog and generated inventory
+travel together. Source-test changes select batch size one only for the three
+measured contracts and preserve every original assertion. No unpublished lane
+changes, optional Bridge dependency, new core frame or obsolete reader work is
+required.
+
+The lane remains local, with no push or merge. The final handoff exports
+`group08-resumed.patch` from `62338a6f`, `group08-combined.patch` from `006fcd59`,
+and `group08-resumed-logs.tar.gz` under `.lake/upstream/group08/resume/`.
+`handoff-artifacts.json` records their hashes and final commit after export;
+the original Group08 patch/log archive remain unchanged. All 23 assigned
+fixtures are verified; broader composite enum decoding/input shapes, general
+mixed return frames and unavailable static artifacts retain explicit refusals.
+The failed source gate and remaining baseline proof/resource limits above remain
+open scope, rather than being relabeled as full-project repair.
