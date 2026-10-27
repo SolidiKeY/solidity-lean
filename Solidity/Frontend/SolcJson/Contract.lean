@@ -585,7 +585,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       fun names text => if names.any (fun (a, b) => a != b) then
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
-    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default) :
+    (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
+    (namedErrorSourceOrder : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -990,7 +991,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
     { declarations, selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
-      funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
+      funParams, namedErrorSourceOrder, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
       sourceStateNames := J.varDeclNames scopeNodes, sourceModelNames := stateVars, scanLoop,
@@ -1211,7 +1212,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, namedErrorSourceOrder, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let initScope := scanSource {
     entry := c, evaluatedRoots := kept.map (·.2.2), declarationRoots := [c]
     constantIds := constants.map Prod.fst

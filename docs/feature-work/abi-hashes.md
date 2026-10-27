@@ -647,3 +647,78 @@ their recorded hashes and byte counts. Both confirmed the completed build,
 frozen sort, corpus and functional checks, the exact c31 documentation failure,
 and the remaining fixture scope. Neither opened Lean workers, ran builds or
 edited files; no confirmed issue remains in the patch/evidence packaging.
+
+## M5: repair the five admitted execution mismatches (2026-10-27)
+
+This continuation preserves e430f436, all earlier reports/exports and the
+437 immutable upstream inputs. It repairs the five concrete admitted failures,
+rather than treating successful packaging as their completion. Diagnosis data
+in `.lake/upstream/group10-five-diagnosis/before.json` retains complete first
+mismatching bytes, one-based call positions, preceding observations, exact
+source text and both compiler ASTs (including resolved declarations, names,
+source positions and conversion types). Ten original and ten repaired entry
+programs are quoted and kernel-defined against identical ASTs; their traces
+and axiom outputs are retained there. The original model is executed in a
+detached e430f436 comparison checkout, without changing the active lane.
+
+Named reverts previously ignored argument names. `trigger2` was observation2
+and emitted words7,2 after trigger1 correctly emitted2,7; `intWidening` was
+observation1 and emitted200,1 instead of1,200. Both pipelines had the same
+word-order mismatch, not evidence of a signed conversion fault. The reader
+now resolves the error by declaration identity, validates its unique visible
+identity, name, parameter kinds, arity and complete name permutation, captures
+typed operands in legacy formal order or IR source order, then reorders only
+the captured values. A legacy explicit order override is evaluated once and
+quoted back consistently for body printing and the Contract. Its native data
+evaluation site is inventoried; no theorem result is accepted from it.
+
+Reference captures preserve storage aliases until encoding; copying into
+memory before a later operand clears storage would be unsound. The skeptic
+identified this and the corrected storage mutation controls now reject stale
+bytes in both modes. Ordinary revert lowering retains declaration types until
+its final abstract revert. Exact string/bytes error data reuses the existing
+typed ABI encoder, with checked declared shapes and primitive ABI kinds;
+unsupported aggregate reference interfaces remain explicit.
+
+Legacy addmod/mulmod already captured and checked the modulus first. Its early
+plain require produced empty bytes before the later modular panic guard.
+Exact-data observation now uses the existing0x12 guard at the SAME position.
+For fixed bytes, complement lowering now reads the original nominal width
+before literal casts erase it and uses the existing mask-minus wrapped-word
+operation. Generic complement bounds/involution and typed evalNum correspondence
+are kernel-proved; ordinary integer complement follows its existing path.
+
+Power overflow preceded narrow checks, and Checked.rangeU deliberately had no
+power guard. History documents this ordinary empty-revert reading, not a
+removed speed optimization. Only exact external-entry checked unsigned powers
+now lower to existing checked multiplications: both operands captured once in
+the pipeline order; zero/one/exponent-zero handled after those captures; for
+base at least2 an exponent at least256 emits0x11; otherwise at most255 loop
+iterations use existing multiplication and narrow guards. Ordinary, unchecked
+and explicit checking-option readings remain unchanged. The potential checking
+cost of expression-to-loop lowering was warned about before implementation;
+no intrinsic representation or core rule changed and no resource limit rose.
+
+FiveControls proves the mathematical checked-multiplication recurrence,
+cutoff and fuel bound, plus compact-byte word semantics. These facts are NOT
+a universal equivalence theorem for generated Prog.runF loops or Solidity's
+compiler. Kernel-checked typed programs and finite source controls separately
+cover the emitted loop, both operand failure priorities, narrow uint8,2^255
+fit/2^256 overflow, zero/one with huge exponents, unchanged unchecked/default
+reading, signed words, selectors, full word order, empty/truncated/extended
+payload rejection, source context, rollback and storage provenance. The new
+control ASTs are pinned0.8.38 analysis evidence; compiler/reference checks are
+not counted as Lean execution coverage.
+
+The five original fixtures agree in all required modes and complete sequential
+vectors in stage3, including every later dynamic-error and uint256 power
+observation. Final hash-consistent inventory replays all175 prior agreements,
+the five repairs, and six directly affected reference-error elaboration cases.
+The other251 explicit import/profile/host/configuration/resource cases retain
+their original evidence and are explicitly marked not rerun; they are not
+silently certified against the changed model. Final gate and inventory results
+follow below once complete. The full source trust scanner's25 unrelated
+inventory findings reproduce exactly at e430f436; only the new override site
+is added to its inventory. The c31 documentation failure also remains a known
+failure. No new axiom, sorry, native proof shortcut, dependency or raised proof
+heartbeat/fuel/timeout/resource bound is introduced.

@@ -1557,7 +1557,14 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
       let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
       return .binop op (← toBytesAt? C Γ n a a') (← toBytesAt? C Γ n b b')
     pure (.binop op a' b')
-  | .unop op a => do pure (.unop op (← bytesPure Γ a))
+  | .unop op a => do
+    let lowered ← bytesPure Γ a
+    if op == .bnot then
+      if let some n := bytesOf? C Γ a then
+        -- Keep the ORIGINAL nominal byte width before a literal cast folds.
+        -- Complement is mask minus the compact, bounded bytesN value.
+        return .binop .subW (.num (2 ^ (8 * n) - 1)) lowered
+    pure (.unop op lowered)
   | .ternary c a b => do
     let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
     pure (.ternary (← bytesPure Γ c) (← toBytesAt? C Γ n a (← bytesPure Γ a))

@@ -518,6 +518,15 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Quotation names are not semantic specification bindings.
   let sourceNames := (J.nodes ast).filterMap (J.str? · "name")
     |>.flatMap (·.splitOn ".") |>.eraseDups
+  let legacyOrderOverride : Option EvalOrder ←
+    if provenance.legacyFixture && !stx[8].isNone then
+      liftTermElabM do
+        let t ← Term.elabTermEnsuringType stx[8][1] (mkConst ``EvalOrder)
+        let v ← unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t
+        pure (some v)
+    else pure none
+  let namedErrorSourceOrder := (legacyOrderOverride.map (·.binaryLeftToRight)).getD
+    (provenance.pipeline == some .viaIR)
   let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone)
     (rewriteSpecBindings env sourceNames) (rewriteLoopBindings env sourceNames)
     (if provenance.legacyFixture then fun _ => default else fun request =>
@@ -528,7 +537,8 @@ def elabSolcImport : CommandElab := fun stx => do
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }))
+        specifications := [(bound, "/// @custom:key " ++ text)] })
+    namedErrorSourceOrder)
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -619,8 +629,12 @@ def elabSolcImport : CommandElab := fun stx => do
       pure name
     liftTermElabM <| `(attachSourceDeclarations $(⟨ctStx⟩) $(mkIdent metadataName))
   let ctStx ← if provenance.legacyFixture then
-      if stx[8].isNone then pure ctStx else
-        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
+      match legacyOrderOverride with
+      | none => pure ctStx
+      | some order => do
+        let eo ← liftTermElabM <| `(Solidity.EvalOrder.mk
+          $(quote order.binaryLeftToRight) $(quote order.modularLeftToRight))
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $eo } : Contract))
     else do
       unless stx[8].isNone do
         throwError "modern source imports take evaluation order from their compiler provenance"

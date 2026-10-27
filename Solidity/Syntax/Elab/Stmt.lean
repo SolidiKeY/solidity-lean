@@ -103,7 +103,10 @@ checks its narrow width after the write (`narrowPost`). -/
 partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e ← e.foldConst
   match e with
-  | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
+  | .binop op a b =>
+    if op.shortCircuits || (op == .pow && (← read).retainFailureData) then
+      hoist (.binop op a b)
+    else hoistBinop op a b
   | .unop op a => do
     let (P, a) ← hoist a
     pure (P, .unop op a)

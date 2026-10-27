@@ -205,3 +205,27 @@ test('v1 raw vectors require canonical-prefix replay without dropping suffix byt
   assert.equal(v2.canonicalOnly,undefined);
   assert.deepEqual(v2.calldata,v.calldata);
 });
+
+test('original named-error sequences retain every selector, word and dynamic observation', async()=>{
+  const archive=new URL('../tests/upstream/solidity-0.8.38.tar.gz',import.meta.url);
+  const extract=async path=>(await promisify(execFile)('tar',['-xOzf',archive.pathname,path],{maxBuffer:1024*1024})).stdout;
+  const word=n=>Array.from(Buffer.from(BigInt.asUintN(256,BigInt(n)).toString(16).padStart(64,'0'),'hex'));
+  const bytes=hex=>Array.from(Buffer.from(hex,'hex'));
+  const a=parseFixture(await extract('test/libsolidity/semanticTests/errors/revert_error_named_parameters.sol'));
+  const av=semanticVectors(a,Array.from({length:5},(_,i)=>({type:'function',name:`trigger${i+1}`,inputs:[],outputs:[]})));
+  assert.equal(av.length,5);
+  assert.deepEqual(av.map(v=>v.signature),['trigger1()','trigger2()','trigger3()','trigger4()','trigger5()']);
+  assert.deepEqual(av[0].revertBytes,bytes('59f176a3').concat(word(2),word(7)));
+  assert.deepEqual(av[1].revertBytes,av[0].revertBytes);
+  assert.deepEqual(av[2].revertBytes,bytes('b912b8d4').concat(word(2),word(7),word(9)));
+  assert.deepEqual(av[3].revertBytes,av[4].revertBytes);
+  assert.equal(av[3].revertBytes.length,4+6*32);
+  const b=parseFixture(await extract('test/libsolidity/semanticTests/errors/revert_error_named_parameters_literal_conversions.sol'));
+  const names=['intWidening','twoStringsUnordered','twoStringsOrdered','stringAndUint','bytesAndBool','mixedDynamic','addressConversion','smallInts'];
+  const bv=semanticVectors(b,names.map(name=>({type:'function',name,inputs:[],outputs:[]})));
+  assert.equal(bv.length,8);assert.deepEqual(bv.map(v=>v.signature),names.map(n=>n+'()'));
+  assert.deepEqual(bv[0].revertBytes,bytes('57685228').concat(word(1),word(200)));
+  assert.deepEqual(bv[1].revertBytes,bv[2].revertBytes);
+  assert.deepEqual(bv[7].revertBytes,bytes('641a758d').concat(word(1),word(200),word(300)));
+  for(const v of [...av,...bv])assert.equal(v.failure,true);
+});

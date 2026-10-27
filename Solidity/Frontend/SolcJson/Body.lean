@@ -635,6 +635,8 @@ structure PState where
   dropped : List (Int × String × Gap) := []
   structs : Structs := []
   funParams : List (Int × List String) := []
+  /-- Named-error operands: IR source order, legacy declaration order. -/
+  namedErrorSourceOrder : Bool := false
   constants : List (Int × (String × Json)) := []
   constStack : List Int := []
   enumValues : List (Int × Nat) := []
@@ -1982,8 +1984,66 @@ partial def stmt1 (j : Json) : PM (List String) := do
     unless J.kind callee == "Identifier" do
       unsupported "a custom error named through a member access"
     let some e := J.str? callee "name" | unsupported "a custom error with no name"
-    let as ← (← PM.lift (J.arr call "arguments")).mapM expr
-    pure [s!"revert {identText e}({", ".intercalate as})"]
+    let args ← PM.lift (J.arr call "arguments")
+    let rawNames := (J.arrD call "names").toList
+    let some id := J.ref? callee | unsupported "a custom error without its declaration identity"
+    let [decl] := (← get).declarations.filter (fun d => J.id? d == some id)
+      | unsupported "a custom error whose declaration is missing or ambiguous"
+    unless J.kind decl == "ErrorDefinition" && J.str? decl "name" == some e do
+      unsupported "a custom error whose name disagrees with its resolved declaration"
+    let st ← get
+    let owners := st.declarations.filter fun owner => J.kind owner == "SourceUnit" ||
+      (J.kind owner == "ContractDefinition" && (J.id? owner).any st.baseContracts.contains)
+    let visible := owners.flatMap fun owner => (J.arrD owner "nodes").toList
+    let [rendered] := visible.filter (fun d => J.kind d == "ErrorDefinition" &&
+        J.str? d "name" == some e)
+      | unsupported "custom error identities sharing a name need a nominal signature adapter"
+    unless J.id? rendered == some id do
+      unsupported "custom error identity is outside the rendered declaration scope"
+    let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
+    unless ps.length == args.length && ps.all (fun p => J.kind p == "VariableDeclaration") do
+      unsupported "custom error argument arity disagrees with declaration"
+    if rawNames.isEmpty then
+      let as ← args.mapM expr
+      return [s!"revert {identText e}({", ".intercalate as})"]
+    let names := rawNames.filterMap (·.getStr?.toOption)
+    let pn := ps.map (fun p => (J.str? p "name").getD "")
+    unless names.length == rawNames.length && names.length == args.length &&
+        names.length == ps.length && names.eraseDups.length == names.length &&
+        pn.eraseDups.length == pn.length && pn.all (fun p => !p.isEmpty && names.contains p) do
+      unsupported "named error arguments disagree with their resolved parameters"
+    -- Capture at the formal types BEFORE permuting values. In particular an
+    -- effect/failure must not move when names are out of declaration order.
+    let order := if (← get).namedErrorSourceOrder then names else pn
+    let mut captures : List (String × String) := []
+    let mut pre : List String := []
+    for n in order do
+      let some i := names.idxOf? n | unsupported "missing named error operand"
+      let some k := pn.idxOf? n | unsupported "unknown named error operand"
+      let some a := args[i]? | unsupported "missing named error operand"
+      let some p := ps[k]? | unsupported "missing named error parameter"
+      let ty ← PM.lift (tyText (← get).structs (← PM.lift (J.get p "typeName")))
+      let value ← expr a
+      let st ← get
+      let taken := J.varDeclNames st.declarations ++ st.names.map (·.2)
+      let mut x := s!"solcErrorCapture{st.fresh}"
+      for _ in [:taken.length + 1] do
+        if !taken.contains x then break
+        x := x ++ "_"
+      set { st with fresh := st.fresh + 1, pre := #[] }
+      pre := pre ++ st.pre.toList
+      let reference := ty == "string" || ty == "bytes" || ty.endsWith "]"
+      -- Storage operands are POINTERS until the encoder reads them. Copying
+      -- now would snapshot bytes before a later operand mutates storage.
+      let storage := (J.tyStr a).endsWith " storage ref" || (J.tyStr a).endsWith " storage pointer"
+      let loc := if reference then (if storage then " storage" else " memory") else ""
+      pre := pre ++ [s!"{ty}{loc} {identText x} = {value}"]
+      captures := captures ++ [(n, identText x)]
+    let as ← pn.mapM fun n => match lookupBy n captures with
+      | some x => pure x
+      | none => unsupported "missing captured named error operand"
+    pure (pre ++ [s!"revert {identText e}({", ".intercalate as})"])
+
   | k => unsupported s!"the statement `{k}`"
 
 /-- A loop's specification, the `/// @custom:key` clauses above it that the
