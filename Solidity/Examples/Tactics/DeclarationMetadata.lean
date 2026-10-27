@@ -77,10 +77,17 @@ private def put (json : Json) (key : String) (value : Json) : Json :=
 -- Exercise modern admission independently of the legacy fixture import above.
 -- The declaration bytes and expected canonical values remain unchanged.
 run_cmd do
-  let fixture ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/DeclarationMetadata.ast.json"))
+  let fixture ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/DeclarationMetadataAdmission.ast.json"))
   let ast ← ofExcept (fixture.getObjVal? "ast")
-  let modern ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/SourceAdmission.ast.json"))
-  let provenance ← ofExcept (Source.read modern (← ofExcept (modern.getObjVal? "ast")))
+  let provenance ← ofExcept (Source.read fixture ast)
+  let legacy ← ofExcept (Json.parse (← IO.FS.readFile "tests/solc/DeclarationMetadata.ast.json"))
+  let legacyAst ← ofExcept (legacy.getObjVal? "ast")
+  let some incomplete := (J.nodes legacyAst).find? (fun d =>
+    J.kind d == "FunctionDefinition" && J.str? d "name" == some "errorSelector")
+    | throwError "missing legacy selector control"
+  let rejected := Admission.scan legacyAst provenance { entry := incomplete, evaluatedRoots := [incomplete] }
+  unless (rejected.diagnostic?.map (·.name)) == some `solidity.commonType do
+    throwError "legacy input silently acquired modern expression metadata"
   let declarations := J.nodes ast
   let contract := (declarations.find? (fun d => J.kind d == "ContractDefinition" &&
     J.str? d "name" == some "DeclarationMetadata")).getD .null
