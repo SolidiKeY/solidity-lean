@@ -180,7 +180,9 @@ The additional source controls run with:
 
 ```sh
 source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1
 lake build Solidity.Tools.Upstream
+lake env lean --tstack=131072 tests/upstream/InitializationOrder.lean
 lake env lean --tstack=131072 tests/upstream/Entrypoints.lean
 lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072
 node --test --test-isolation=none scripts/solidity-upstream.test.mjs

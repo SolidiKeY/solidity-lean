@@ -506,5 +506,23 @@ The required JavaScript suite passes 14/14; fresh getter/replay and affected
 constructor/inheritance Lean checks pass. Strict automation, reachability,
 layering, immutable archive verification and the frozen TestSuite static audit
 pass. Trust findings match the retained baseline exactly. Final dependency-
-ordered serial builds and full build/corpus checks are still running; their
-completed results will be added to the validation record before final handoff.
+ordered serial builds and full build/corpus checks passed: all 75 recorded
+commands succeeded, including the 649-job library, 249-job TestSuite, frozen
+sort (377 taclets, 131 read-bearing, zero mismatches), and frozen corpus
+(774 existing obligation rows, no verdict/generated-output drift). Existing
+unsupported/unported corpus rows remain unchanged. One Lean worker was used;
+no resource failure occurred. The longest TestSuite derivation module took
+215.177 seconds, `OpenLoops` 734.213 seconds and `PublicGetters` 140.053 seconds.
+The 73 affected modules were built in dependency order before the aggregate
+gates; total recorded serial build time was 3,050.104 seconds. These are
+unisolated validation timings, not a performance equivalence claim.
+The implementation is committed as `6fceb880`, following both preserved prior
+commits. Exact commands, logs, model/source hashes and proof/axiom evidence are
+in the updated validation record and per-fixture handoff. No push or merge.
+
+
+The final read-only finder and independent skeptic gate reviews passed. Both
+matched all 75 manifest commands, log success markers, build/corpus counts,
+timings and preserved artifact hashes; neither opened Lean workers. No further
+issue was found. The original patch/log archive remain byte-preserved, and the
+completed export and follow-up validation archive use distinct filenames.

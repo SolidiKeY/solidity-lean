@@ -143,5 +143,17 @@ The reviewable patch is on `repair/group02-entrypoints`, based on
 Completion verification and final build results are recorded separately in the
 updated [validation evidence](group02-validation.json); the complete earlier
 validation object remains under `priorMilestoneValidation`. The original patch
-and log archive remain at their existing paths; the completed patch will be
-exported as `/workspace/group02-entrypoints-complete.patch`.
+and log archive remain at their existing paths; the completed patch is
+exported separately as `/workspace/group02-entrypoints-complete.patch`.
+
+
+Final completion gates all pass: 73 dependency-ordered affected builds followed
+by full `run-lean.sh` and frozen corpus verification, 75 successful commands.
+The library (649 jobs), TestSuite (249 jobs), frozen sort (377/131) and corpus
+(774 unchanged obligation rows) pass. No resource block occurred in this
+follow-up. One Lean worker was used; the maximum TestSuite derivation module
+time was 215.177 seconds. `OpenLoops` took 734.213 seconds and `PublicGetters`
+140.053 seconds. The completed gate manifest retains every command, exit,
+duration and log. Unsupported/unported corpus rows are unchanged, not newly
+claimed as proved. The implementation commit is `6fceb880`; the final validation
+commit follows on the same lane. Nothing was pushed or merged.

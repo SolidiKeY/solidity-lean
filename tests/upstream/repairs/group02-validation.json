@@ -501,24 +501,872 @@
     },
     "docPaths": {
       "status": "exact output matches retained baseline: 13 missing external/vendor paths and 28 ambiguous short citations",
-      "log": "/workspace/group02-init-docpaths.log"
+      "log": "/workspace/group02-init-docpaths.log",
+      "finalLog": "/workspace/group02-init-docpaths-final.log"
     }
   },
   "reviews": {
     "finder": "No confirmed implementation issue; requested modifier/return, width and failure-order controls were added and reviewed. No Lean workers.",
     "skeptic": "Independent review found no confirmed schedule bug; expanded source controls and explicit narrow guard limitation reviewed. No Lean workers.",
-    "finalEvidenceReview": "Finder and independent skeptic verified all 67 final reports, 131 modes, all 442 observations, original source/expectation bytes, preserved prior reports/validation, current model digest and exact commands. No evidence discrepancy; one wording ambiguity was clarified. Full build-gate audit remains pending."
+    "finalEvidenceReview": "Finder and independent skeptic verified all 67 final reports, 131 modes, all 442 observations, original source/expectation bytes, preserved prior reports/validation, current model digest and exact commands. No evidence discrepancy; one wording ambiguity was clarified. Final gate finder and independent skeptic verified all 75 manifest records, success markers, hashes, timings, preserved artifacts and prior/current limitations; no issue found."
   },
   "fullGates": {
-    "status": "running serial dependency-ordered affected builds, then complete run-lean.sh and frozen corpus",
+    "status": "pass",
+    "commands": [
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.SolcJson.Contract"
+        ],
+        "exit": 0,
+        "seconds": 0.173,
+        "log": "/workspace/group02-init-build-00.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.SolcJson"
+        ],
+        "exit": 0,
+        "seconds": 0.173,
+        "log": "/workspace/group02-init-build-01.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.Import"
+        ],
+        "exit": 0,
+        "seconds": 0.171,
+        "log": "/workspace/group02-init-build-02.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Solkey.TestSuite"
+        ],
+        "exit": 0,
+        "seconds": 60.367,
+        "log": "/workspace/group02-init-build-03.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Corpus.Imported"
+        ],
+        "exit": 0,
+        "seconds": 5.812,
+        "log": "/workspace/group02-init-build-04.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.Problems"
+        ],
+        "exit": 0,
+        "seconds": 4.919,
+        "log": "/workspace/group02-init-build-05.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Problems"
+        ],
+        "exit": 0,
+        "seconds": 1.566,
+        "log": "/workspace/group02-init-build-06.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.ScopedProblems"
+        ],
+        "exit": 0,
+        "seconds": 4.3,
+        "log": "/workspace/group02-init-build-07.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived1"
+        ],
+        "exit": 0,
+        "seconds": 29.581,
+        "log": "/workspace/group02-init-build-08.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived2"
+        ],
+        "exit": 0,
+        "seconds": 30.026,
+        "log": "/workspace/group02-init-build-09.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived3"
+        ],
+        "exit": 0,
+        "seconds": 83.322,
+        "log": "/workspace/group02-init-build-10.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived4"
+        ],
+        "exit": 0,
+        "seconds": 49.868,
+        "log": "/workspace/group02-init-build-11.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived5"
+        ],
+        "exit": 0,
+        "seconds": 27.231,
+        "log": "/workspace/group02-init-build-12.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived6"
+        ],
+        "exit": 0,
+        "seconds": 38.261,
+        "log": "/workspace/group02-init-build-13.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived7"
+        ],
+        "exit": 0,
+        "seconds": 215.177,
+        "log": "/workspace/group02-init-build-14.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived8"
+        ],
+        "exit": 0,
+        "seconds": 110.327,
+        "log": "/workspace/group02-init-build-15.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived9"
+        ],
+        "exit": 0,
+        "seconds": 26.483,
+        "log": "/workspace/group02-init-build-16.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived10"
+        ],
+        "exit": 0,
+        "seconds": 38.147,
+        "log": "/workspace/group02-init-build-17.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived11"
+        ],
+        "exit": 0,
+        "seconds": 10.49,
+        "log": "/workspace/group02-init-build-18.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived12"
+        ],
+        "exit": 0,
+        "seconds": 82.99,
+        "log": "/workspace/group02-init-build-19.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived13"
+        ],
+        "exit": 0,
+        "seconds": 3.531,
+        "log": "/workspace/group02-init-build-20.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived14"
+        ],
+        "exit": 0,
+        "seconds": 31.785,
+        "log": "/workspace/group02-init-build-21.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived15"
+        ],
+        "exit": 0,
+        "seconds": 140.101,
+        "log": "/workspace/group02-init-build-22.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived16"
+        ],
+        "exit": 0,
+        "seconds": 12.757,
+        "log": "/workspace/group02-init-build-23.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived17"
+        ],
+        "exit": 0,
+        "seconds": 146.094,
+        "log": "/workspace/group02-init-build-24.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived18"
+        ],
+        "exit": 0,
+        "seconds": 12.971,
+        "log": "/workspace/group02-init-build-25.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived19"
+        ],
+        "exit": 0,
+        "seconds": 81.479,
+        "log": "/workspace/group02-init-build-26.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived20"
+        ],
+        "exit": 0,
+        "seconds": 201.293,
+        "log": "/workspace/group02-init-build-27.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Derived21"
+        ],
+        "exit": 0,
+        "seconds": 126.408,
+        "log": "/workspace/group02-init-build-28.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Refuted"
+        ],
+        "exit": 0,
+        "seconds": 17.47,
+        "log": "/workspace/group02-init-build-29.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Report"
+        ],
+        "exit": 0,
+        "seconds": 22.872,
+        "log": "/workspace/group02-init-build-30.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Corpus.TestSuite"
+        ],
+        "exit": 0,
+        "seconds": 72.799,
+        "log": "/workspace/group02-init-build-31.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.Testing"
+        ],
+        "exit": 0,
+        "seconds": 6.28,
+        "log": "/workspace/group02-init-build-32.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Frontend.WorldImport"
+        ],
+        "exit": 0,
+        "seconds": 4.174,
+        "log": "/workspace/group02-init-build-33.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Solkey.ComputedRevert"
+        ],
+        "exit": 0,
+        "seconds": 1.575,
+        "log": "/workspace/group02-init-build-34.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Solkey.Constructors"
+        ],
+        "exit": 0,
+        "seconds": 9.584,
+        "log": "/workspace/group02-init-build-35.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Solkey.ScopedFlip"
+        ],
+        "exit": 0,
+        "seconds": 5.942,
+        "log": "/workspace/group02-init-build-36.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.TestSuite.Suggestions"
+        ],
+        "exit": 0,
+        "seconds": 17.234,
+        "log": "/workspace/group02-init-build-37.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Tools.LatexSolkey"
+        ],
+        "exit": 0,
+        "seconds": 2.989,
+        "log": "/workspace/group02-init-build-38.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Tools.Elementary"
+        ],
+        "exit": 0,
+        "seconds": 8.806,
+        "log": "/workspace/group02-init-build-39.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Tools.ProgramTrace"
+        ],
+        "exit": 0,
+        "seconds": 3.288,
+        "log": "/workspace/group02-init-build-40.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Tools.Upstream"
+        ],
+        "exit": 0,
+        "seconds": 0.278,
+        "log": "/workspace/group02-init-build-41.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.AbiFeaturesImport"
+        ],
+        "exit": 0,
+        "seconds": 24.846,
+        "log": "/workspace/group02-init-build-42.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.AbiHexCall"
+        ],
+        "exit": 0,
+        "seconds": 15.537,
+        "log": "/workspace/group02-init-build-43.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.AggregatesImport"
+        ],
+        "exit": 0,
+        "seconds": 17.529,
+        "log": "/workspace/group02-init-build-44.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.ArrayScans"
+        ],
+        "exit": 0,
+        "seconds": 49.636,
+        "log": "/workspace/group02-init-build-45.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.CallExceptions"
+        ],
+        "exit": 0,
+        "seconds": 36.088,
+        "log": "/workspace/group02-init-build-46.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.ComputedRevert"
+        ],
+        "exit": 0,
+        "seconds": 5.312,
+        "log": "/workspace/group02-init-build-47.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.ContractWorldSource"
+        ],
+        "exit": 0,
+        "seconds": 10.037,
+        "log": "/workspace/group02-init-build-48.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.DeclarationMetadata"
+        ],
+        "exit": 0,
+        "seconds": 45.372,
+        "log": "/workspace/group02-init-build-49.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.EvaluationOrder"
+        ],
+        "exit": 0,
+        "seconds": 3.942,
+        "log": "/workspace/group02-init-build-50.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.Inheritance"
+        ],
+        "exit": 0,
+        "seconds": 5.187,
+        "log": "/workspace/group02-init-build-51.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.Latex"
+        ],
+        "exit": 0,
+        "seconds": 7.385,
+        "log": "/workspace/group02-init-build-52.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.LoopsImport"
+        ],
+        "exit": 0,
+        "seconds": 39.877,
+        "log": "/workspace/group02-init-build-53.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.MemoryPush"
+        ],
+        "exit": 0,
+        "seconds": 4.005,
+        "log": "/workspace/group02-init-build-54.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.NewArrays"
+        ],
+        "exit": 0,
+        "seconds": 2.788,
+        "log": "/workspace/group02-init-build-55.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.OpenLoops"
+        ],
+        "exit": 0,
+        "seconds": 734.213,
+        "log": "/workspace/group02-init-build-56.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.OperatorAliasesImport"
+        ],
+        "exit": 0,
+        "seconds": 29.133,
+        "log": "/workspace/group02-init-build-57.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.ProgramTrace"
+        ],
+        "exit": 0,
+        "seconds": 14.121,
+        "log": "/workspace/group02-init-build-58.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.PublicGetters"
+        ],
+        "exit": 0,
+        "seconds": 140.053,
+        "log": "/workspace/group02-init-build-59.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.PushReceiver"
+        ],
+        "exit": 0,
+        "seconds": 3.71,
+        "log": "/workspace/group02-init-build-60.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.PushSource"
+        ],
+        "exit": 0,
+        "seconds": 3.307,
+        "log": "/workspace/group02-init-build-61.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.PushSuffixSource"
+        ],
+        "exit": 0,
+        "seconds": 5.589,
+        "log": "/workspace/group02-init-build-62.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.RunnerAudit"
+        ],
+        "exit": 0,
+        "seconds": 36.372,
+        "log": "/workspace/group02-init-build-63.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.SliceCopiesImport"
+        ],
+        "exit": 0,
+        "seconds": 24.203,
+        "log": "/workspace/group02-init-build-64.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.SourceAdmissionImport"
+        ],
+        "exit": 0,
+        "seconds": 8.246,
+        "log": "/workspace/group02-init-build-65.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.SourceIdentifiersImport"
+        ],
+        "exit": 0,
+        "seconds": 3.43,
+        "log": "/workspace/group02-init-build-66.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.SourceLiteralsImport"
+        ],
+        "exit": 0,
+        "seconds": 5.052,
+        "log": "/workspace/group02-init-build-67.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.StorageDangling"
+        ],
+        "exit": 0,
+        "seconds": 5.356,
+        "log": "/workspace/group02-init-build-68.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity.Examples.Tactics.StorageReturns"
+        ],
+        "exit": 0,
+        "seconds": 4.967,
+        "log": "/workspace/group02-init-build-69.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+Solidity"
+        ],
+        "exit": 0,
+        "seconds": 1.765,
+        "log": "/workspace/group02-init-build-70.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+SolkeyTestSuite"
+        ],
+        "exit": 0,
+        "seconds": 1.364,
+        "log": "/workspace/group02-init-build-71.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "lake",
+          "build",
+          "+SolidityCorpus"
+        ],
+        "exit": 0,
+        "seconds": 0.961,
+        "log": "/workspace/group02-init-build-72.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "bash",
+          "run-lean.sh"
+        ],
+        "exit": 0,
+        "seconds": 1.297,
+        "log": "/workspace/group02-init-run-lean.log",
+        "LEAN_NUM_THREADS": 1
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/check-corpus.sh",
+          "--solkey",
+          "tests/migration/solkey/keyext.solidity.examples"
+        ],
+        "exit": 0,
+        "seconds": 10.33,
+        "log": "/workspace/group02-init-corpus.log",
+        "LEAN_NUM_THREADS": 1
+      }
+    ],
     "manifest": "/workspace/group02-init-build-gates.json",
-    "LEAN_NUM_THREADS": 1
+    "manifestSha256": "4e0e0eb0d43d2766caa3b34503305da75ceafa8a6b0c0ce32d745a142a05f5c2",
+    "libraryJobs": 649,
+    "testSuiteJobs": 249,
+    "frozenSort": {
+      "taclets": 377,
+      "readBearing": 131,
+      "mismatches": 0
+    },
+    "corpusObligations": 774,
+    "corpusDrift": false,
+    "schedule": "73 affected modules built serially in dependency order, then complete run-lean.sh and frozen corpus check",
+    "LEAN_NUM_THREADS": 1,
+    "frozenEnvironment": {
+      "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "SOLKEY_EXAMPLES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+    }
   },
   "performance": {
     "totalSeconds": 442.99,
     "medianSeconds": 6.123,
     "maxSeconds": 16.249,
-    "note": "Serial fixture replay with at most one concurrent per-file validation worker; not an isolated performance comparison."
+    "note": "Serial fixture replay with at most one concurrent per-file validation worker; not an isolated performance comparison.",
+    "serialBuildTotalSeconds": 3050.104,
+    "maxTestSuiteDerivedSeconds": 215.177,
+    "OpenLoopsSeconds": 734.213,
+    "PublicGettersSeconds": 140.053,
+    "resourceFailures": 0
   },
   "remainingAssignedScope": [],
   "validationLimits": [
@@ -527,5 +1375,20 @@
     "Lean MCP diagnostics were unavailable; configured per-file Lean checks were used.",
     "The prior unrelated node source-suite comparison (5 pass / 3 fail: one unsupported stored-function observation and two unchanged 300000ms timeouts) is preserved under priorMilestoneValidation and was not rerun for this initializer-only followup. Affected constructor/inheritance Lean examples were checked fresh."
   ],
-  "expectedObservationCount": 442
+  "expectedObservationCount": 442,
+  "implementationCommit": "6fceb880",
+  "preservedArtifacts": {
+    "priorPatch": {
+      "path": "/workspace/group02-entrypoints.patch",
+      "sha256": "f3ec6f5ded19bc3fba446bbb26e20094c6e088c9e0c35279f2798160544b3201"
+    },
+    "priorLogsArchive": {
+      "path": "/workspace/group02-validation-logs.tar.gz",
+      "sha256": "be69cebf2c09e43149b521fb27f05ee8d2bbd7a5727574b641586fcfdd665dfd"
+    }
+  },
+  "logsArchive": "/workspace/group02-initialization-validation-logs.tar.gz",
+  "completedPatch": "/workspace/group02-entrypoints-complete.patch",
+  "logsArchiveSha256": "301b78534a78b6f5a83b83a7415cae6e44b4d56b3c01c8ae50168eaa66fbb832",
+  "logsArchiveFiles": 253
 }
