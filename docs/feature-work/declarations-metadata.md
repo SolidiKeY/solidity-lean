@@ -615,3 +615,67 @@ and source API test now require an explicit refusal row instead of the obsolete
 warning-only behavior; the empty-initializer and non-passing verdict checks remain.
 The source API's warning-handling comment is aligned; its behavior is unchanged. No unpublished changes from other groups
 are assumed. No push or merge to master is performed.
+
+## Group 08 resumed remaining declarations (2026-10-27)
+
+This continues `62338a6f` on the same `codex/group08-source-lowering` lane;
+its earlier patch, logs and evidence above remain historical artifacts. The
+[new exact before/after record](../../tests/upstream/group08-resumed-results.json)
+compares that lane's 20 working / 3 broken result with **23 working / 0 broken /
+0 blocked**. Every fixture was rerun with its exact path, `--batch-size 1` and
+a distinct `resume/final-*` output directory. All 46 required legacy/viaIR
+variants retain all 58 observations, unchanged expected results and source bytes.
+The compiler remains SHA-checked 0.8.38; the new record includes model, runner,
+compiler-code adapter, report and log hashes. This is observational agreement,
+not a universal correctness theorem or generated-EVM validation.
+
+The three actual roots and the bounded repairs are:
+
+- `constants/assign_type_info.sol`: static `type(C).creationCode/runtimeCode`
+  requires compiler artifacts, rather than runtime account code. A demand-driven
+  second compiler invocation retains source/settings/pipeline and requests the
+  exact identified contracts' full linked bytes. The Lean input boundary checks
+  source/compiler hashes, settings, unit, declaration identities, duplicate
+  names/IDs, lowercase hex and a 128 KiB materialization bound. It does not
+  authenticate the compiler or prove its output correct. Ordinary inputs avoid
+  code generation. Historical AST-only fixtures retain explicit exclusions for
+  missing artifacts. Length folding uses the same byte parser as the retained
+  complete byte literal; initialized runtime bytes remain deployment state.
+- `storage/packed_storage_structs_enum.sol`: validated enum identities are
+  terminal struct dependencies. Existing uint8 carrier metadata retains widths
+  through struct printing, locals, indexed values and arrays. Identity-resolved
+  native enum conversions check cardinality before exposing the uint8 carrier;
+  a same-named shadow enum cannot supply another declaration's range. Whole
+  enum arrays retain ABI array padding. Enum/composite `abi.decode` targets
+  remain refused because the native decoder lacks nominal cardinality checks.
+- `various/typed_multi_variable_declaration.sol`: a restricted source helper
+  uses the existing shared typed storage-return frame. Admission requires a
+  nonvirtual internal/private helper with no modifiers/specification, a single
+  lineage, one terminal explicit tuple return, exactly one storage result and
+  closed, source-range-checked scalar literals for the other slots. Every use
+  must be a matching tuple declaration. Unit literals use the existing constant
+  evaluator. The caller executes the helper once, captures a fresh typed alias,
+  then activates source targets in order; holes retain effects and reference
+  validation. Other mixed frames remain refused. There is no heterogeneous core
+  frame, body duplication or new core representation; the shared-body speed
+  decision recorded at `1a7d5b0e` remains intact.
+
+`tests/upstream/RemainingDeclarations.lean` and both SHA-pinned source fixtures
+exercise full byte content and storage initialization, malformed artifacts,
+enum local/indexed/whole-array widths and shadowed ranges, malformed enums,
+nominal decode refusal, mixed tuple holes, call counts, units and rollback.
+Positive replays have false-observation controls. The universal scalar binding
+lemmas establish preservation of the captured alias and the supplied scalar;
+they use only `propext`, `Classical.choice` and `Quot.sound`. The static length
+agreement lemma uses only `propext`. These local lemmas are not a universal
+source-rewrite theorem. No new axiom, `sorry`, proof-limit increase or changed
+historical expectation is involved. The optional Bridge remains separate.
+
+The source API now defaults to one obligation per subprocess, retaining all
+rows and the existing 300-second bound. Profiling isolated the previous
+Calldata aggregate timeout: `sliceLength` proved in 8.657 seconds,
+`sliceRead` remained pending in 91.951 seconds and `sliceOfSlice` remained
+pending in 92.757 seconds, each with no tool errors. Pending remains pending.
+This changes scheduling, not proof premises, search budgets or expected results.
+Development attempts made while dependencies were changing remain recorded as
+stale-dependency failures, not successful validation.

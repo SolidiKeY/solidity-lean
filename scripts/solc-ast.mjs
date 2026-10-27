@@ -73,6 +73,7 @@
  *     --wrapper Solidity/Examples/Tactics/LoopsImport.lean
  */
 
+import {compilerCode} from "./solc-code.mjs";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname, isAbsolute, resolve } from "node:path";
 import { createHash } from "node:crypto";
@@ -339,6 +340,13 @@ const fixture = {
   },
   ast: trim(ast, ""),
 };
+const code = compilerCode(input => JSON.parse(compile(JSON.stringify(input), 0, 0)),
+  input.sources, settings, ast, {compilerSha256:soljsonSha,sourceSha256:sha256(bytes)});
+if (code) {
+  if (legacyFixture) fail("compiled code constants require modern provenance");
+  fixture.compilerCode=code;
+  fixture.ast.absolutePath=ast.absolutePath;
+}
 // Indented down to the statements, each statement on one line: small, and a
 // diff names the statements that changed.
 const isStatement = (n) => n && typeof n === "object" && !Array.isArray(n) &&

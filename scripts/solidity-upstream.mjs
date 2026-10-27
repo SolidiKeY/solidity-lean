@@ -9,6 +9,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {execFileSync, spawnSync} from 'node:child_process';
 import {runTool} from './test-solidity.mjs';
+import {compilerCode} from './solc-code.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SNAPSHOT = join(ROOT, 'tests/upstream');
@@ -277,6 +278,11 @@ function prepare(entry, directory, compile, work) {
       if (errors.length) return {path,stage,status:'blocked',reason:'alternate source mode needs unadapted compiler settings',diagnostics:errors.map(e=>e.formattedMessage)};
       variant.ast=normalise(other.sources[fixture.mainSource].ast);
     }
+    try {
+      const code=compilerCode(compile,sources,{...settings,viaIR:pipeline==='viaIR'},
+        variant.ast,{compilerSha256:COMPILER_SHA,sourceSha256:variant.header.sourceSha256});
+      if (code) variant.compilerCode=code;
+    } catch(e) {return {path,stage,status:'blocked',reason:'static compiler-code materialization failed: '+e.message};}
     const fixturePath=join(work,sha(path+'#'+pipeline).slice(0,24)+'.ast.json');
     save(fixturePath,variant);
     jobs.push({path,pipeline,requiredPipelines:pipelines,contract:contract.name,fixture:fixturePath,vectors});
@@ -364,6 +370,7 @@ async function main(args) {
   const work=mkdtempSync(join(ROOT,'.lake/upstream/work-'));
   const metadata={version:1,commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
+    compilerCodeAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-code.mjs'))),
     modelSha256:modelDigest(),evmVersion:'osaka',loopFuel:1000,
     scope:'Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.',
     snapshotFiles:manifest.files.length,filter:options.filter ?? null,timeoutMs:options.timeoutMs,batchSize:options.batchSize};

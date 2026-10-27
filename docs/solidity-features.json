@@ -3550,33 +3550,41 @@
     },
     {
       "id": "creationCode",
-      "category": "excluded",
+      "category": "metadata",
       "syntax": "type(C).creationCode",
-      "scope": "exclude",
-      "current": "notApplicable",
-      "requirement": "Exact compiled init-code bytes depend on code generation, linking and compiler settings.",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Static compiler code constants require matching exact compiler/source/settings artifacts; deployed account code, unresolved linking and oversized materialization are not supported.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.cpp",
           "line": 4291
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "scripts/solc-code.mjs"
+      ]
     },
     {
       "id": "runtimeCode",
-      "category": "excluded",
+      "category": "metadata",
       "syntax": "type(C).runtimeCode",
-      "scope": "exclude",
-      "current": "notApplicable",
-      "requirement": "Exact deployed code bytes depend on compilation and immutable/library substitution.",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Static compiler code constants require matching exact compiler/source/settings artifacts; deployed account code, unresolved linking and oversized materialization are not supported.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.cpp",
           "line": 4292
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Frontend/Source.lean",
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "scripts/solc-code.mjs"
+      ]
     },
     {
       "id": "storageLayout",

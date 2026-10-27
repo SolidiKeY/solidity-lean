@@ -511,6 +511,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let j ← ofExcept (Json.parse text)
   let ast ← ofExcept (j.getObjVal? "ast")
   let provenance ← ofExcept (Source.read j ast)
+  let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
@@ -524,12 +525,12 @@ def elabSolcImport : CommandElab := fun stx => do
       (Admission.scan ast provenance { request with
         declarationRoots := request.declarationRoots ++
           [Admission.header [] ast] ++ (J.arrD ast "nodes").toList.filter (J.kind · == "PragmaDirective") }).append
-        (scanSpecifications env sourceNames request) |>.normalize)
+        (scanSpecifications env sourceNames request) |>.normalize |>.requireCompilerCode (!compilerCode.isEmpty))
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
         specifications := [(bound, "/// @custom:key " ++ text)] })
-    (provenance.pipeline == some .viaIR))
+    (provenance.pipeline == some .viaIR) compilerCode)
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -550,12 +551,17 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Its users still fail expansion because the named modifier is absent.
   let modifierMembers := c.modifierMembers.filter fun m =>
     match parse `sol_member m with | .ok _ => true | .error _ => false
+  -- A helper header may return or accept a source struct/enum. Validate it
+  -- in the same type-declaration context as the final contract; no state
+  -- initializer or other helper body is admitted by this precheck.
+  let typeMembers := c.members.filter fun member =>
+    member.startsWith "struct " || member.startsWith "enum "
   let mut funMembers : Array String := #[]
   let mut badMembers : List (String × String) := []
   for (g, m) in c.funMembers do
     let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
     let r ← match callsLeftOut? badMembers calls,
-        parse `term (contractText [" ".intercalate modifierMembers, m]) with
+        parse `term (contractText (typeMembers ++ [" ".intercalate modifierMembers, m])) with
       | some e, _ => pure (some e)
       | none, .error e => pure (some s!"its declaration does not parse: {e}")
       | none, .ok s => liftTermElabM (contractError? s)

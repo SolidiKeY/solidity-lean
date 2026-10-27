@@ -577,6 +577,51 @@ def contractLineage (units : List Json) (c : Json) : Except String (List Json) :
   unless ids == expected do throw "Solc C3 metadata disagrees with the inheritance order"
   ids.mapM find
 
+/-- Closed scalar co-results need no new runtime frame: their only storage
+result uses the existing shared storage-return call. No effects are folded. -/
+def storageTuplePlan? (S : Structs) (f : Json) : Option StorageTuplePlan := do
+  guard ([some "internal", some "private"].contains (J.str? f "visibility"))
+  guard (J.arrD f "modifiers" |>.isEmpty)
+  guard (J.opt f "virtual" != some (.bool true))
+  guard (docText f |>.isEmpty)
+  let returns ← J.opt f "returnParameters" >>= (J.arr? · "parameters")
+  let returns := returns.toList
+  guard (returns.length > 1 && returns.all (fun p => J.str? p "name" == some ""))
+  let indexed := returns.zipIdx.filter fun (p, _) => J.str? p "storageLocation" == some "storage"
+  let [(_, index)] := indexed | none
+  let body ← J.opt f "body"
+  let statements ← J.arr? body "statements"
+  let terminal ← statements.toList.getLast?
+  guard (J.kind terminal == "Return")
+  guard (((J.nodes body).filter (J.kind · == "Return")).length == 1)
+  let value ← J.opt terminal "expression"
+  guard (J.kind value == "TupleExpression")
+  let components ← J.arr? value "components"
+  guard (components.size == returns.length)
+  let rows ← returns.zipIdx.mapM fun (p, i) => do
+    let type ← J.opt p "typeName"
+    let spelling ← (tyText S type).toOption
+    if i == index then return (spelling ++ " storage", "")
+    guard (J.kind type == "ElementaryTypeName")
+    guard (J.str? p "storageLocation" == some "default")
+    let literal ← components[i]?
+    guard (J.kind literal == "Literal")
+    let text ← J.str? literal "value"
+    if spelling == "bool" then
+      guard (J.str? literal "kind" == some "bool" && ["true", "false"].contains text)
+      return (spelling, text)
+    guard (J.str? literal "kind" == some "number")
+    guard ((narrowTy? spelling).isSome || ["uint", "uint256", "int", "int256"].contains spelling)
+    let integer ← (constVal literal).bind (·.int?)
+    guard (integer ≥ 0)
+    let n := integer.toNat
+    let (primitive, width) ← (narrowTy? spelling).orElse fun _ =>
+      (PrimTy.ofName? spelling).map (·, 256)
+    guard (primitive != .bool)
+    guard (n < 2 ^ (if primitive == .int then width - 1 else width))
+    return (spelling, sourceCast spelling (toString n))
+  pure { index, types := rows.map (·.1), literals := rows.map (·.2) }
+
 /-- Render declaration headers and optional construction assignments once.
 The deployment table sees only earlier folded literal immutable values. -/
 def renderInitializers (kept : List (String × String × Json)) (st : PState)
@@ -605,7 +650,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         .error "loop specification needs renamed locals: not imported" else .ok text)
     (scanSource : Source.AdmissionRequest → Source.ScopeScan := fun _ => default)
     (scanLoop : List String → List String → String → Source.ScopeScan := fun _ _ _ => default)
-    (viaIR : Bool := false) :
+    (viaIR : Bool := false) (compilerCode : List (Int × (String × String)) := []) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -648,6 +693,17 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- specification is its bases' (most base first) and its own, each clause
   -- resolved in its own contract's scope.
   let enumDefs := (J.nodes ast).filter (J.kind · == "EnumDefinition")
+  for declaration in enumDefs do
+    let values ← (J.arr declaration "members").mapError Gap.msg
+    let names ← (values.mapM (J.str · "name")).mapError Gap.msg
+    let ids ← (values.mapM fun value => do
+      let some id := J.id? value | throw "enum value lacks declaration identity"
+      unless J.kind value == "EnumValue" && id ≥ 0 do throw "malformed enum value identity"
+      pure id)
+    unless !values.isEmpty && values.length ≤ 256 && names.all (!·.isEmpty) &&
+        names.eraseDups.length == names.length && ids.eraseDups.length == ids.length do
+      throw "malformed enum member table"
+
   let resolveIn (owner : Json) (cs : List KeyClause) : Except String (List KeyClause) := do
     let scope := (← contractLineage units owner).reverse.flatMap membersOf
     let stateNames := scope.filterMap fun v =>
@@ -668,7 +724,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let enumNames : Structs := enumDefs.flatMap fun e =>
     let n := (J.str? e "name").getD ""
     let canonical := (J.str? e "canonicalName").getD n
-    ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint")) ++ [(canonical, .ok "uint")]
+    ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint8")) ++ [(canonical, .ok "uint8")]
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
     let vs := J.arrD e "members"
     vs.toList.zipIdx |>.filterMap fun (v, i) => (J.id? v).map (·, i)
@@ -705,7 +761,27 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       if added.isEmpty then break
       selected := selected ++ added
     return selected
-  let (SS, ownStructs) := readStructs ren structDefs
+  -- Struct fields retain enum ABI width through the existing uint8 carrier.
+  -- Native enum declarations separately retain nominal conversion ranges by
+  -- identity. Do not reinterpret arbitrary user-defined types as integers.
+  let structEnums := ((nodes ++ units).filter (J.kind · == "EnumDefinition")).filterMap fun e => do
+    let id ← J.id? e
+    guard (structDefs.any fun definition => (J.nodes definition).any fun node =>
+      J.kind node == "UserDefinedTypeName" &&
+        ((J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?) == some id)
+    let values ← J.arr? e "members"
+    let names ← values.toList.mapM (J.str? · "name")
+    guard (!names.isEmpty && names.length ≤ 256 && names.eraseDups.length == names.length &&
+      names.all (!·.isEmpty))
+    let taken := (J.nodes ast).filterMap (J.str? · "name")
+    let printed := Id.run do
+      let mut printed := s!"solcStructEnum{id}"
+      for _ in [:taken.length + 1] do
+        if !taken.contains printed then return printed
+        printed := printed ++ "_"
+      return printed
+    pure (e, id, printed, names)
+  let (SS, ownStructs) := readStructs ren structDefs (structEnums.map (·.2.1))
   let S := SS ++ enumNames ++ aliasNames
   let constants : List (Int × (String × Json)) := (J.nodes ast).filterMap fun v => do
     guard (J.kind v == "VariableDeclaration" && J.opt v "constant" == some (.bool true))
@@ -713,7 +789,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let value ← J.opt v "value"
     let typeNode ← J.opt v "typeName"
     let t ← (tyText S typeNode).toOption
-    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome)
+    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome || dynBytesTy t)
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
@@ -780,7 +856,31 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure s!"enum {identText n} \{ {", ".intercalate (ms.map identText)} }"
   -- the contract's own structs, declared: a struct whose members do not print
   -- leaves out what uses it, as an unreadable struct does
-  let structMembers := ownStructs.filterMap fun o => (ownStructMembers S [o]).toOption.bind (·.head?)
+  let structEnumNames : Structs := structEnums.map fun (_, id, _, _) =>
+    (s!"#solc{id}", .ok "uint8")
+  let structEnumMembers := structEnums.map fun (_, _, printed, names) =>
+    s!"enum {identText printed} \{ {", ".intercalate (names.map identText)} }"
+  let enumMembers := enumMembers ++ structEnumMembers
+  let enumNativeNames : List (Int × String) := (structEnums.map fun (_, id, printed, _) => (id, printed)) ++
+    ((nodes.filter (J.kind · == "EnumDefinition")).filterMap fun e => do
+      pure (← J.id? e, ← J.str? e "name"))
+  let structMembers := ownStructs.filterMap fun o =>
+    (ownStructMembers (structEnumNames ++ S) [o]).toOption.bind (·.head?)
+  -- The native ABI decoder has no nominal enum-cardinality type. Refuse
+  -- enum/composite decode targets rather than widening them to uint8 values.
+  let enumDecodeTypes := Id.run do
+    let mut selected := enumDefs.filterMap J.id?
+    for _ in [:structDefs.length] do
+      let added := structDefs.filterMap fun definition => do
+        let id ← J.id? definition
+        guard (!selected.contains id)
+        guard ((J.nodes definition).any fun node =>
+          J.kind node == "UserDefinedTypeName" &&
+            ((J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?).any selected.contains)
+        pure id
+      if added.isEmpty then break
+      selected := selected ++ added
+    return selected
   -- the custom errors, the contract's and the file's, as `contract!`
   -- members: a `revert E(…)` folds its selector from the declared types
   let errorMembers : List String := ((nodes ++ units).filter (J.kind · == "ErrorDefinition")).filterMap
@@ -945,6 +1045,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         structs := S
         enumValues
         enumBounds
+        enumNativeNames
+        enumDecodeTypes
+        compilerCode
         valueTypes }
       unless rootState.pre.isEmpty do
         throw (.unsupported "a public getter root requires deferred initialization" (J.line declarationNode))
@@ -1049,13 +1152,31 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- A declaration's specification scope: lexical visibility belongs to the
   -- defining contract and its ancestors, rather than the most-derived
   -- contract that executes it.
+  let storageTuples := if lineage.length != 1 then [] else funs.filterMap fun f => do
+    let id ← J.id? f
+    let plan ← storageTuplePlan? S f
+    let references := (J.nodes ast).filter fun node =>
+      ["Identifier", "MemberAccess"].contains (J.kind node) && J.ref? node == some id
+    let allowed := (J.nodes ast).filterMap fun node => do
+      guard (J.kind node == "VariableDeclarationStatement")
+      let value ← J.opt node "initialValue"
+      guard (J.kind value == "FunctionCall")
+      let head ← J.opt value "expression"
+      guard (J.kind head == "Identifier" && J.ref? head == some id)
+      let targets ← J.arr? node "declarations"
+      guard (targets.size == plan.types.length)
+      pure head
+    guard (references.length == allowed.length)
+    pure (id, plan)
   let specState (d : Json) (names : List (Int × String)) : PState :=
     let scopeNodes := scopeNodesOf d
     let (specConstants, scopeConstBlocked) :=
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
-    { declarations, selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
-      funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
+    { declarations, storageTuples, compilerCode,
+      returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
+      selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
+      funParams, constants, enumValues, enumBounds, enumNativeNames, enumDecodeTypes, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
       sourceStateNames := J.varDeclNames scopeNodes, sourceModelNames := stateVars, scanLoop,
@@ -1152,7 +1273,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         pure (x, t))
     let rs : Except Gap (List (String × String)) := do
       let some pl := J.opt f "returnParameters" | pure []
-      (← J.arr pl "parameters").mapM fun p => do
+      let sourceReturns ← J.arr pl "parameters"
+      let sourceReturns := match (J.id? f).bind (lookupBy · storageTuples) with
+        | some plan => (sourceReturns[plan.index]?).toList
+        | none => sourceReturns
+      sourceReturns.mapM fun p => do
         let ((t, x), _) ← (do
             let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
             let loc := match J.opt p "storageLocation" with
@@ -1266,7 +1391,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, compilerCode, enumNativeNames, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let omittedInitializers := vars.filter fun v =>
     J.opt v "constant" != some (.bool true) &&
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&

@@ -404,7 +404,7 @@ partial def abiTyText (S : Structs) (t : Json) : Except Gap String := do
       or a struct")
 /-- A type node as a `Ty`, to compare a struct's members with the table: a
 narrow type is its `uint`/`int` (its width is `narrowShape`'s). -/
-partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := do
+partial def tyOf (S : List (String × String)) (j : Json) (enums : List Int := []) : Except String Ty := do
   match J.kind j with
   | "ElementaryTypeName" =>
     let n ← (j.getObjValAs? String "name")
@@ -417,6 +417,7 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
       else throw s!"type `{n}`"
   | "UserDefinedTypeName" =>
     if let some id := (J.ref? j).orElse fun _ => (J.opt j "pathNode").bind J.ref? then
+      if enums.contains id then return .uint
       match lookupBy s!"#solc{id}" S with
       | some m => return .ref (.struct m)
       | none => throw s!"type declaration #{id} is not among the visible structs"
@@ -425,7 +426,7 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
       | none => j.getObjValAs? String "name"
     pure (.ref (.struct ((lookupBy n S).getD n)))
   | "ArrayTypeName" =>
-    let b ← tyOf S (← j.getObjVal? "baseType")
+    let b ← tyOf S (← j.getObjVal? "baseType") enums
     match (j.getObjVal? "length").toOption with
     | none | some .null => pure (.ref (.array b))
     | some l =>
@@ -435,9 +436,9 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
   | "Mapping" =>
     let key ← j.getObjVal? "keyType"
     -- a byte string as a key: its `keccak256`, a `uint` (`hashKeyRows`)
-    let keyTy ← if dynBytesTy ((J.str? key "name").getD "") then pure Ty.uint else tyOf S key
+    let keyTy ← if dynBytesTy ((J.str? key "name").getD "") then pure Ty.uint else tyOf S key enums
     match keyTy with
-    | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType"))))
+    | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType") enums)))
     | t => throw s!"mapping key `{t.toStr}`"
   -- a function type's value is a tag (`fnTy?`)
   | "FunctionTypeName" => pure .uint
@@ -479,7 +480,7 @@ widths), else the contract's own, which the import declares as a `struct`
 member (`ownStructMembers`), under its name, or `S_<id>` when another visible
 struct has that name.  Declaration keys preserve solc's resolution when a
 contract shadows a file-level name.  Also the own ones, by declaration. -/
-def readStructs (ren : List (String × String)) (defs : List Json) :
+def readStructs (ren : List (String × String)) (defs : List Json) (enums : List Int := []) :
     Structs × List (Json × String) := Id.run do
   let printed (d : Json) : String :=
     let n := (J.str? d "name").getD ""
@@ -504,7 +505,7 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
           contains itself")
       let got ← ms.mapM fun x => do
         let f ← J.str x "name"
-        match tyOf (identities ++ ren) (← J.get x "typeName") with
+        match tyOf (identities ++ ren) (← J.get x "typeName") enums with
         | .ok t => pure (f, t)
         | .error e => throw (.unsupported s!"struct `{n}`, member `{f}`: {e}")
       -- the narrow members' widths, against the table's (`structWidths`)
@@ -513,7 +514,10 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
           ((J.str? x "name").getD "" ++ k, n)
       let tw := structWidths m
       let sameW := widths.all (tw.contains ·) && tw.all (widths.contains ·)
-      if structDef m == got && sameW && printed d == m then pure (m, false)
+      let hasEnum := ms.any fun member => (J.nodes member).any fun node =>
+        J.kind node == "UserDefinedTypeName" &&
+          ((J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?).any enums.contains
+      if !hasEnum && structDef m == got && sameW && printed d == m then pure (m, false)
       else pure (printed d, true)
     (d, n, check)
   let mut checked := shapes
@@ -530,6 +534,7 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
           for node in (J.nodes typeNode).filter (J.kind · == "UserDefinedTypeName") do
             let some id := (J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?
               | throw (.unsupported s!"struct `{n}` has a member type without declaration identity")
+            if enums.contains id then continue
             let some (_, dep, result) := checked.find? fun (decl, _, _) => J.id? decl == some id
               | throw (.unsupported s!"struct `{n}` refers to an unvalidated type declaration #{id}")
             match result with
@@ -604,6 +609,14 @@ def resolveSpecEnums := resolveSpecValues toString
 /-- A fixed uint constant must not acquire a numeral's contextual coercions. -/
 def resolveSpecConstants := resolveSpecValues fun n => s!"uint({n})"
 
+/-- A shared internal storage-return frame with closed scalar co-results.
+The source planner admits only one explicit terminal tuple return. -/
+structure StorageTuplePlan where
+  index : Nat
+  types : List String
+  literals : List String
+  deriving Inhabited
+
 /-- The printer's state: the name each declaration is printed as, the state
 variables left out, the structs, each function's parameter names (by its
 declaration's id), the statements to put before the current one (a pushed
@@ -613,6 +626,10 @@ structure PState where
   /-- Validated solc declarations, retained by identity for source metadata.
   This is importer input, not a second representation of typed model terms. -/
   declarations : List Json := []
+  storageTuples : List (Int × StorageTuplePlan) := []
+  compilerCode : List (Int × (String × String)) := []
+  returnStorageIndex : Option Nat := none
+  projectedCall : Bool := false
   /-- Pure selector helpers evaluate a receiver argument in its original
   expression position, including a lazy conditional arm. -/
   selectorHelpers : List (Int × String) := []
@@ -639,6 +656,8 @@ structure PState where
   constStack : List Int := []
   enumValues : List (Int × Nat) := []
   enumBounds : List (Int × Nat) := []
+  enumNativeNames : List (Int × String) := []
+  enumDecodeTypes : List Int := []
   specEnums : List (String × Nat) := []
   specBlocked : List String := []
   specConstants : List (String × Nat) := []
@@ -972,10 +991,11 @@ def isPublicGetterMember (declaration member : Json) : Bool :=
 /-- Declaration metadata is resolved by solc identity, never a short name.
 Only a static declaration or `this.f` can fold a function selector here:
 an arbitrary receiver expression must retain its evaluation effects. -/
-def declarationMetadata (declarations : List Json) (e : Json) (member : String) :
+def declarationMetadata (declarations : List Json) (e : Json) (member : String)
+    (code : List (Int × (String × String)) := []) :
     Except Gap (Option String) := do
   let find (id : Int) : Option Json := declarations.find? (J.id? · == some id)
-  if J.kind e == "FunctionCall" && ["name", "interfaceId"].contains member then
+  if J.kind e == "FunctionCall" && ["name", "interfaceId", "creationCode", "runtimeCode"].contains member then
     let some head := J.opt e "expression" | return none
     if J.kind head != "Identifier" || J.ref? head != some (-27) then return none
     let some args := J.arr? e "arguments" | return none
@@ -984,6 +1004,10 @@ def declarationMetadata (declarations : List Json) (e : Json) (member : String) 
     let some d := (J.ref? arg).bind find | return none
     if J.kind d != "ContractDefinition" then return none
     if member == "name" then return some (← J.str d "name").quote
+    if member == "creationCode" || member == "runtimeCode" then
+      let some bytes := (J.id? d).bind (lookupBy · code)
+        | throw (.unsupported "static compiler code is absent from the validated artifact table")
+      return some s!"bytes(hex\"{if member == "creationCode" then bytes.1 else bytes.2}\")"
     unless J.str? d "contractKind" == some "interface" do
       throw (.unsupported "interfaceId metadata requires an interface declaration")
     -- Inherited declarations are deliberately absent from this list. An
@@ -1096,6 +1120,33 @@ partial def unparen (j : Json) : Json :=
   | "TupleExpression", some [c] =>
     if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
   | _, _ => j
+
+/-- Use exactly the native literal parser when folding a static byte length. -/
+def staticCompilerLength? (hex : String) : Option Nat := (hexBytes? hex).map List.length
+
+/-- The folded length agrees with the bytes the native literal parser emits. -/
+theorem staticCompilerLength_agrees (hex : String) (bytes : List Nat)
+    (parsed : hexBytes? hex = some bytes) : staticCompilerLength? hex = some bytes.length := by
+  simp only [staticCompilerLength?, parsed, Option.map_some]
+
+/-- An exact static code literal has a total, source-independent byte length.
+This never inspects a deployed account or fabricates missing compiler output. -/
+def staticCompilerBytes? (declarations : List Json)
+    (code : List (Int × (String × String))) (j : Json) : Option String := do
+  let j := unparen j
+  guard (J.kind j == "MemberAccess")
+  let member ← J.str? j "memberName"
+  guard (["creationCode", "runtimeCode"].contains member)
+  let owner ← J.opt j "expression"
+  guard (J.kind owner == "FunctionCall")
+  let head ← J.opt owner "expression"
+  guard (J.kind head == "Identifier" && J.ref? head == some (-27))
+  let args ← J.arr? owner "arguments"
+  let [arg] := args.toList | none
+  let id ← J.ref? arg
+  guard (declarations.any fun d => J.id? d == some id && J.kind d == "ContractDefinition")
+  let bytes ← lookupBy id code
+  pure (if member == "creationCode" then bytes.1 else bytes.2)
 
 /-- A contract-qualified member, never an object or `this` call. -/
 def isBaseMember (contracts : List Int) (f : Json) : Bool :=
@@ -1347,12 +1398,14 @@ partial def expr (j : Json) : PM String := do
       -- Solc has already found a common element type. Preserve scalar
       -- context before the model independently infers the array's shape.
       let t := ((J.tyStr j).splitOn "[").head!
+      let enumScalar := ((J.tyStr j).splitOn "[").length == 2 && t.startsWith "enum "
       let scalar := ((J.tyStr j).splitOn "[").length == 2 &&
         ((narrowTy? t).isSome || (bytesTy? t).isSome ||
           t == "bool" || t == "uint" || t == "int" || t == "address")
       let es ← cs.mapM fun c => do
         let e ← expr c
-        pure (if !scalar then e else if t == "address" then s!"address({e})" else sourceCast t e)
+        pure (if enumScalar then sourceCast "uint8" e else
+          if !scalar then e else if t == "address" then s!"address({e})" else sourceCast t e)
       pure s!"[{", ".intercalate es}]"
     else match cs with
     | [c] => pure s!"({← expr c})"
@@ -1397,7 +1450,17 @@ partial def expr (j : Json) : PM String := do
   | "MemberAccess" =>
     let e ← PM.lift (J.get j "expression")
     let m ← PM.lift (J.str j "memberName")
-    if let some value ← PM.lift (declarationMetadata (← get).declarations e m) then
+    if m == "length" then
+      let st ← get
+      let value := if J.kind (unparen e) == "Identifier" then
+        (((J.ref? (unparen e)).bind (lookupBy · st.constants)).filter
+          (fun (type, _) => type == "bytes")).map (·.2) |>.getD e
+        else e
+      if let some bytes := staticCompilerBytes? (← get).declarations (← get).compilerCode value then
+        let some length := staticCompilerLength? bytes
+          | unsupported "malformed static compiler byte literal"
+        return toString length
+    if let some value ← PM.lift (declarationMetadata (← get).declarations e m (← get).compilerCode) then
       return value
     -- Keep stored projections typed for ABI/concat consumers. Known function
     -- declarations keep their selector helper, which evaluates the receiver.
@@ -1504,6 +1567,8 @@ partial def operand (j : Json) (pow : Bool) : PM String := do
 partial def call (j : Json) : PM String := do
   let f := unparen (← PM.lift (J.get j "expression"))
   let args ← PM.lift (J.arr j "arguments")
+  if ((J.ref? f).bind (lookupBy · (← get).storageTuples)).isSome && !(← get).projectedCall then
+    unsupported "a mixed storage tuple call outside its validated declaration context"
   if let some (c, a, b) := condCallee? j then
     unless condCalleeOk j do unsupported condCalleeMsg
     return s!"({← operand c false} ? {← call a} : {← call b})"
@@ -1549,6 +1614,9 @@ partial def call (j : Json) : PM String := do
         builtinNamed o "abi") then
       match args with
       | [b, ts] =>
+        let forbidden := (← get).enumDecodeTypes
+        if (J.nodes ts).any (fun node => (J.ref? node).any forbidden.contains) then
+          unsupported "ABI decoding of enum values requires nominal cardinality checks"
         let tyName (t : Json) : PM String := do PM.lift (abiTyText (← get).structs t)
         let names ← match J.kind ts, J.arr? ts "components" with
           | "TupleExpression", some cs => cs.toList.mapM tyName
@@ -1571,8 +1639,11 @@ partial def call (j : Json) : PM String := do
       else if to.startsWith "type(enum " then
         -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
         -- elaborator asserts that `x` names one of its members
-        let e := ((to.drop 10).dropRight 1).splitOn "." |>.getLast!
-        pure s!"{identText e}({← expr a})"
+        let some e := (J.ref? f).bind (lookupBy · (← get).enumNativeNames)
+          | unsupported "an enum conversion without its validated native declaration identity"
+        -- Keep the nominal range check, then expose the enum's ABI uint8
+        -- carrier to local/field/array consumers.
+        pure (sourceCast "uint8" s!"{identText e}({← expr a})")
       else
         let n ← match J.kind f with
           | "ElementaryTypeNameExpression" =>
@@ -1632,8 +1703,9 @@ partial def call (j : Json) : PM String := do
           -- byte kind at ABI sites, including alignment in ordinary encode.
           if (bytesTy? (J.tyStr a)).isSome && !(t.startsWith (J.tyStr a ++ "(")) then
             sourceCast (J.tyStr a) t
-          else if packed && (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
-            s!"{identText ((((J.tyStr a).drop 5).splitOn ".").getLast!)}({t})"
+          else if packed && (J.tyStr a).startsWith "enum " &&
+              ((J.tyStr a).splitOn "[").length == 1 then
+            sourceCast "uint8" t
           else t
       else as
     let name ← if let some n := superName then pure (identText n)
@@ -1879,6 +1951,35 @@ partial def stmt1 (j : Json) : PM (List String) := do
       return [s!"({← declText d}, ) = {← operand r false}.call\{value: {← expr v}}(\"\")"]
     let ds ← PM.lift (J.arr j "declarations")
     if ds.length ≥ 2 then
+      if let some value := J.opt j "initialValue" then
+        if J.kind value == "FunctionCall" then
+          if let some plan := ((J.opt value "expression").bind J.ref?).bind
+              (lookupBy · (← get).storageTuples) then
+            unless ds.length == plan.types.length do unsupported "mixed return tuple arity"
+            -- Capture the returned alias before any target becomes active.
+            -- Every scalar co-result is a checked closed literal at its source type.
+            let k := (← get).fresh + 1
+            modify fun st => { st with fresh := k }
+            let taken := ((← get).names.map (·.2)) ++
+              ((← get).declarations.filterMap (J.str? · "name"))
+            let tmp := Id.run do
+              let mut name := s!"solcStorageTuple{k}"
+              for _ in [:taken.length + 1] do
+                if !taken.contains name then return name
+                name := name ++ "_"
+              return name
+            let old := (← get).projectedCall
+            modify fun st => { st with projectedCall := true }
+            let rhs ← expr value
+            modify fun st => { st with projectedCall := old }
+            let mut out := [s!"{plan.types[plan.index]!} {identText tmp} = {rhs}"]
+            for (d, index) in ds.zipIdx do
+              if d == .null then continue
+              let target ← declText d
+              let result := if index == plan.index then identText tmp else plan.literals[index]!
+              out := out ++ [s!"{target} = {result}"]
+            return out
+    if ds.length ≥ 2 then
       -- `(uint a, , bool b) = v`
       -- a component's location left out: `sol{}`'s tuple declaration writes
       -- none, and the elaborator reads a reference component as memory
@@ -1896,7 +1997,12 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "Return" =>
     match J.opt j "expression" with
     | none => pure ["return"]
-    | some e => pure [s!"return {← if isTuple e then tuple e else expr e}"]
+    | some e =>
+      if let some index := (← get).returnStorageIndex then
+        let parts ← PM.lift (J.arr (unparen e) "components")
+        let some reference := parts[index]? | unsupported "mixed storage return arity"
+        return [s!"return {← expr reference}"]
+      pure [s!"return {← if isTuple e then tuple e else expr e}"]
   | "Block" => pure [← block j]
   | "UncheckedBlock" => pure [s!"unchecked {← block j}"]
   | "IfStatement" =>

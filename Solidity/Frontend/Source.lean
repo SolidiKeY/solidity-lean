@@ -235,6 +235,19 @@ def ScopeScan.diagnostic? : ScopeScan → Option Diagnostic
   | .admitted .. => none
   | .rejected _ d => some d
 
+/-- Historical AST-analysis-only inputs cannot gain code-generation observations
+from a profile change. Exact static bytes must be present as validated inputs. -/
+def ScopeScan.requireCompilerCode (available : Bool) : ScopeScan → ScopeScan
+  | scan@(.rejected ..) => scan
+  | scan@(.admitted features _) =>
+    if !available && (features.contains .creationCode || features.contains .runtimeCode) then
+      let feature := if features.contains .creationCode then Language.Feature.creationCode else .runtimeCode
+      .rejected features {
+        kind := .excluded, name := .str (.str .anonymous "solidity") feature.id,
+        feature := some feature,
+        reason := "This AST-analysis input has no validated static compiler-code artifacts." }
+    else scan
+
 /-- A successful scan certifies exactly its reported feature list. -/
 theorem ScopeScan.within : (scan : ScopeScan) → scan.diagnostic? = none →
     WithinProfile scan.features
@@ -290,3 +303,65 @@ structure AdmissionRequest where
 
 end Solidity.Frontend.Source
 
+
+namespace Solidity.Frontend.Source
+
+open Lean (Json)
+
+/-- Optional exact static compiler artifacts. These are compiler-output inputs,
+not observations of deployed accounts or immutable-substituted runtime state. -/
+def readCompilerCode (fixture ast : Json) (provenance : Provenance) :
+    Except String (List (Int × (String × String))) := do
+  let some code := (fixture.getObjVal? "compilerCode").toOption | return []
+  if provenance.legacyFixture then throw "static compiler code requires modern provenance"
+  unless onlyKeys code ["compilerSha256", "sourceSha256", "settings", "contracts"] do
+    throw "unknown static compiler-code field"
+  unless (← code.getObjValAs? String "compilerSha256") == provenance.compiler.sha256 &&
+      (← code.getObjValAs? String "sourceSha256") == provenance.sourceSha256 do
+    throw "static compiler-code provenance mismatch"
+  let base ← Json.parse provenance.settings
+  let settings ← code.getObjVal? "settings"
+  unless onlyKeys settings ["viaIR", "evmVersion", "optimizer", "libraries", "remappings", "outputSelection"] do
+    throw "unknown static compiler-code setting"
+  for key in ["viaIR", "evmVersion", "optimizer", "libraries", "remappings"] do
+    unless (← settings.getObjVal? key) == (← base.getObjVal? key) do
+      throw s!"static compiler-code setting mismatch: {key}"
+  let declarations ← ast.getObjValAs? (Array Json) "nodes"
+  let contracts ← code.getObjValAs? (Array Json) "contracts"
+  let mut seen : List Int := []
+  let mut names : List String := []
+  let mut result := []
+  for contract in contracts do
+    unless onlyKeys contract ["id", "name", "creationCode", "runtimeCode"] do
+      throw "unknown static compiler-code contract field"
+    let id ← contract.getObjValAs? Int "id"
+    let name ← contract.getObjValAs? String "name"
+    unless id ≥ 0 && !name.isEmpty do throw "malformed static compiler-code identity"
+    if seen.contains id || names.contains name then throw "duplicate static compiler-code identity"
+    unless declarations.any (fun d =>
+      (d.getObjValAs? String "nodeType").toOption == some "ContractDefinition" &&
+      (d.getObjValAs? Int "id").toOption == some id &&
+      (d.getObjValAs? String "name").toOption == some name) do
+      throw "static compiler-code declaration identity mismatch"
+    let hex (key : String) : Except String String := do
+      let text ← contract.getObjValAs? String key
+      unless text.length % 2 == 0 && text.length ≤ 262144 &&
+          text.toList.all (fun c => ('0' ≤ c && c ≤ '9') || ('a' ≤ c && c ≤ 'f')) do
+        throw "static compiler code is unlinked, malformed or exceeds its materialization bound"
+      return text
+    result := result ++ [(id, (← hex "creationCode", ← hex "runtimeCode"))]
+    seen := id :: seen
+    names := name :: names
+  let output ← settings.getObjVal? "outputSelection"
+  let .obj units := output | throw "invalid static code output selection"
+  let [(unitName, unit)] := units.toList | throw "static code needs a single compilation unit"
+  let expected ← ast.getObjValAs? String "absolutePath"
+  unless unitName == expected do throw "static compiler-code source unit mismatch"
+  unless onlyKeys unit names do throw "unknown static code output contract"
+  for name in names do
+    unless (← unit.getObjValAs? (Array String) name) ==
+        #["evm.bytecode.object", "evm.deployedBytecode.object"] do
+      throw "static compiler-code output selection mismatch"
+  return result
+
+end Solidity.Frontend.Source
