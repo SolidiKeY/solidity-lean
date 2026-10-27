@@ -717,7 +717,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let value ← J.opt v "value"
     let typeNode ← J.opt v "typeName"
     let t ← (tyText S typeNode).toOption
-    guard ((PrimTy.ofName? t).isSome || (narrowTy? t).isSome)
+    -- Keep the resolved scalar width/kind for the existing sourceCast path,
+    -- including a constant whose nominal UDVT resolves to a narrow primitive.
+    guard (valueTypeSupported t)
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true

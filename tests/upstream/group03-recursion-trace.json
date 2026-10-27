@@ -1,0 +1,1688 @@
+{
+  "version": 1,
+  "task": "Group 03 precise recursive operator diagnosis after be1e471f",
+  "branch": "codex/group03-operators",
+  "preservedHead": "be1e471f9b7b3a3f4cc65c14c7181a9e2f51668c",
+  "environmentId": "ccarenv_b64_Y2NhcmVudl9iZmUwOGFjOWEzY2M4MTkxYTVjNDQ2NGRjMTk5ODNlYw",
+  "managedRuntimeStatus": "connected/running; observations current; network policy enforced",
+  "fixture": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+  "sourceSha256": "3970df62e2963bd37aa66b0cc74b045d3770be61110d402ceb599da89adc26a1",
+  "modelSha256": "8c57f8874c6370ce6824a34ce9b47de18f8dcb3ef75dc547adb91e3e208ddaa4",
+  "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "requiredPipelines": [
+    "legacy",
+    "viaIR"
+  ],
+  "status": "blocked",
+  "stage": "typed interpreter recursive bottom-frame execution",
+  "rawLeanException": null,
+  "rawTypedOutcome": "TRes.error THalt.exhausted",
+  "rawReplayReason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+  "bounds": {
+    "recDepth": 1024,
+    "loopFuel": 1000,
+    "fixtureTimeoutMs": 120000,
+    "changed": false
+  },
+  "originalVectors": [
+    {
+      "signature": "testUnary(uint256)",
+      "args": [
+        "0"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testUnary(uint256)",
+      "args": [
+        "1"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testUnary(uint256)",
+      "args": [
+        "99999999999"
+      ],
+      "failure": true,
+      "expected": []
+    },
+    {
+      "signature": "testBinary(uint256,uint256)",
+      "args": [
+        "0",
+        "0"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testBinary(uint256,uint256)",
+      "args": [
+        "1",
+        "0"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testBinary(uint256,uint256)",
+      "args": [
+        "0",
+        "1"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testBinary(uint256,uint256)",
+      "args": [
+        "1",
+        "1"
+      ],
+      "failure": false,
+      "expected": [
+        "0"
+      ]
+    },
+    {
+      "signature": "testBinary(uint256,uint256)",
+      "args": [
+        "99999999999",
+        "99999999999"
+      ],
+      "failure": true,
+      "expected": []
+    }
+  ],
+  "declarations": {
+    "Uint": 3,
+    "unaryCountdown": 42,
+    "binaryCountdown": 97,
+    "eq": 119,
+    "testUnary": 132,
+    "testBinary": 149
+  },
+  "operatorNodes": {
+    "39": 42,
+    "129": 42,
+    "81": 97,
+    "94": 97,
+    "146": 97,
+    "23": 119,
+    "59": 119,
+    "65": 119,
+    "78": 119
+  },
+  "callGraph": {
+    "path": ".lake/upstream/group03-recursion-trace/call-graph.json",
+    "sha256": "a6cb9b73eaa896d58b61630bd72e7128a14f264f23f62d4bd6ec230aec9ebad0",
+    "report": {
+      "Operator": [
+        {
+          "sourceDeclaration": 119,
+          "recursive": false,
+          "name": "solcFunction119",
+          "callees": [
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 42,
+          "recursive": true,
+          "name": "solcFunction42",
+          "callees": [
+            "solcFunction119",
+            "uint",
+            "uint",
+            "solcFunction42",
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 132,
+          "recursive": false,
+          "name": "testUnary",
+          "callees": [
+            "solcFunction42"
+          ]
+        },
+        {
+          "sourceDeclaration": 97,
+          "recursive": true,
+          "name": "solcFunction97",
+          "callees": [
+            "solcFunction119",
+            "uint",
+            "solcFunction119",
+            "uint",
+            "uint",
+            "solcFunction119",
+            "uint",
+            "solcFunction97",
+            "solcFunction97",
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 149,
+          "recursive": false,
+          "name": "testBinary",
+          "callees": [
+            "solcFunction97"
+          ]
+        }
+      ],
+      "Direct": [
+        {
+          "sourceDeclaration": 120,
+          "recursive": false,
+          "name": "solcFunction120",
+          "callees": [
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 38,
+          "recursive": true,
+          "name": "solcFunction38",
+          "callees": [
+            "solcFunction120",
+            "uint",
+            "uint",
+            "solcFunction38",
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 134,
+          "recursive": false,
+          "name": "testUnary",
+          "callees": [
+            "solcFunction38"
+          ]
+        },
+        {
+          "sourceDeclaration": 98,
+          "recursive": true,
+          "name": "solcFunction98",
+          "callees": [
+            "solcFunction120",
+            "uint",
+            "solcFunction120",
+            "uint",
+            "uint",
+            "solcFunction120",
+            "uint",
+            "solcFunction98",
+            "solcFunction98",
+            "uint",
+            "uint"
+          ]
+        },
+        {
+          "sourceDeclaration": 152,
+          "recursive": false,
+          "name": "testBinary",
+          "callees": [
+            "solcFunction98"
+          ]
+        }
+      ]
+    }
+  },
+  "exactFixtureReport": {
+    "path": ".lake/upstream/group03-recursion-trace/exact/results.json",
+    "sha256": "11b3080641d15ae377fa493286dcdeb9f0ba51a8a5fa48e43c853bdb63c245de",
+    "report": {
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "8c57f8874c6370ce6824a34ce9b47de18f8dcb3ef75dc547adb91e3e208ddaa4",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "results": [
+        {
+          "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+          "stage": "lean-runtime",
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "requiredPipelines": [
+            "legacy",
+            "viaIR"
+          ],
+          "variants": [
+            {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "pipeline": "legacy",
+              "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                },
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            },
+            {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "pipeline": "viaIR",
+              "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                },
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "previousFixtureReport": {
+    "path": ".lake/upstream/group03-resume/lean-certified/recursive_operator/results.json",
+    "sha256": "11b3080641d15ae377fa493286dcdeb9f0ba51a8a5fa48e43c853bdb63c245de",
+    "report": {
+      "metadata": {
+        "version": 1,
+        "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+        "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+        "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+        "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+        "modelSha256": "8c57f8874c6370ce6824a34ce9b47de18f8dcb3ef75dc547adb91e3e208ddaa4",
+        "evmVersion": "osaka",
+        "loopFuel": 1000,
+        "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+        "snapshotFiles": 11622,
+        "filter": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+        "timeoutMs": 120000,
+        "batchSize": 1
+      },
+      "results": [
+        {
+          "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+          "stage": "lean-runtime",
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "requiredPipelines": [
+            "legacy",
+            "viaIR"
+          ],
+          "variants": [
+            {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "pipeline": "legacy",
+              "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                },
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            },
+            {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "pipeline": "viaIR",
+              "path": "test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                },
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "path": ".lake/upstream/group03-recursion-trace/trace-results.json",
+    "sha256": "aa880fb2d1f70cb886bf46ba73e6735dfb073036e4a39041225148d1d40cbb03",
+    "report": {
+      "OperatorLegacy": {
+        "rows": [
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testUnary(Uint)"
+          },
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testBinary(Uint,Uint)"
+          }
+        ],
+        "individualDiagnostics": [
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999",
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testBinary(uint256,uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999",
+                  "99999999999"
+                ]
+              }
+            }
+          }
+        ],
+        "fullSequence": {
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            }
+          ],
+          "blockedVector": {
+            "signature": "testUnary(uint256)",
+            "failure": true,
+            "expected": [],
+            "args": [
+              "99999999999"
+            ]
+          }
+        }
+      },
+      "OperatorIR": {
+        "rows": [
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testUnary(Uint)"
+          },
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testBinary(Uint,Uint)"
+          }
+        ],
+        "individualDiagnostics": [
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999",
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testBinary(uint256,uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999",
+                  "99999999999"
+                ]
+              }
+            }
+          }
+        ],
+        "fullSequence": {
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            }
+          ],
+          "blockedVector": {
+            "signature": "testUnary(uint256)",
+            "failure": true,
+            "expected": [],
+            "args": [
+              "99999999999"
+            ]
+          }
+        }
+      },
+      "DirectLegacy": {
+        "rows": [
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testUnary(Uint)"
+          },
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testBinary(Uint,Uint)"
+          }
+        ],
+        "individualDiagnostics": [
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999",
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testBinary(uint256,uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999",
+                  "99999999999"
+                ]
+              }
+            }
+          }
+        ],
+        "fullSequence": {
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            }
+          ],
+          "blockedVector": {
+            "signature": "testUnary(uint256)",
+            "failure": true,
+            "expected": [],
+            "args": [
+              "99999999999"
+            ]
+          }
+        }
+      },
+      "DirectIR": {
+        "rows": [
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testUnary(Uint)"
+          },
+          {
+            "status": "elaborated",
+            "reason": "",
+            "function": "testBinary(Uint,Uint)"
+          }
+        ],
+        "individualDiagnostics": [
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testUnary(uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testUnary(uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testUnary(uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999"
+                ]
+              }
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "0"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "0",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": false,
+              "expected": [
+                "0"
+              ],
+              "args": [
+                "1",
+                "1"
+              ]
+            },
+            "result": {
+              "status": "working",
+              "reason": "all scalar runtime vectors match",
+              "observed": [
+                {
+                  "values": [
+                    "0"
+                  ],
+                  "signature": "testBinary(uint256,uint256)",
+                  "failed": false
+                }
+              ]
+            }
+          },
+          {
+            "vector": {
+              "signature": "testBinary(uint256,uint256)",
+              "failure": true,
+              "expected": [],
+              "args": [
+                "99999999999",
+                "99999999999"
+              ]
+            },
+            "result": {
+              "status": "blocked",
+              "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+              "observed": [],
+              "blockedVector": {
+                "signature": "testBinary(uint256,uint256)",
+                "failure": true,
+                "expected": [],
+                "args": [
+                  "99999999999",
+                  "99999999999"
+                ]
+              }
+            }
+          }
+        ],
+        "fullSequence": {
+          "status": "blocked",
+          "reason": "execution reached a model resource bound (including recursive unrolling); not an EVM failure",
+          "observed": [
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            },
+            {
+              "values": [
+                "0"
+              ],
+              "signature": "testUnary(uint256)",
+              "failed": false
+            }
+          ],
+          "blockedVector": {
+            "signature": "testUnary(uint256)",
+            "failure": true,
+            "expected": [],
+            "args": [
+              "99999999999"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "diagnosticManifest": {
+    "path": ".lake/upstream/group03-recursion-trace/manifest.json",
+    "sha256": "9ae646d2d65375e9e04b72bacd8e2b42e1b4b60709a456314fc02e46945ae321",
+    "report": {
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "originalSourceSha256": "3970df62e2963bd37aa66b0cc74b045d3770be61110d402ceb599da89adc26a1",
+      "sourceTransformation": "Only replace resolved aliases with explicit calls, remove using directive; nominal Uint, all arithmetic/guards/wrappers unchanged. Diagnostic only; no upstream bytes changed.",
+      "variants": [
+        {
+          "name": "OperatorLegacy",
+          "astSha256": "b1e2f8ac6f3a99ce2a7e3344fbf675406ff0057343900f627d2f24a63b5259b7",
+          "sourceSha256": "81d3e67858c10807b47b1c7d37cc02f0c5c3891980aed4e29a00db7f8c00c913",
+          "inputSha256": "7f19267e2cae75b2599203eeab3a9ef70c3b449a1e179b35094bd70272c8fb63",
+          "pipeline": "legacy"
+        },
+        {
+          "name": "OperatorIR",
+          "astSha256": "ea0de38f161008d193779ce3a11279fc8df9134f53f9dc94901b4344fa3d2948",
+          "sourceSha256": "81d3e67858c10807b47b1c7d37cc02f0c5c3891980aed4e29a00db7f8c00c913",
+          "inputSha256": "9f02935ef1fa0fa17eb9c04f067587bff5ebf7d65ee434508c968a7fd8017e17",
+          "pipeline": "viaIR"
+        },
+        {
+          "name": "DirectLegacy",
+          "astSha256": "7ff234497e3bbe54c56eddc21d0149f4d0f59c6c43ac2d1ae113eacd4d9605e7",
+          "sourceSha256": "5603135472ac310ec4a96006753a8d380285bccfaa3291b4a61412eb48d444ca",
+          "inputSha256": "1527ef8a1f61df21b92f71f22b08fec6c52ebc2daa0f505d3c2114332142c853",
+          "pipeline": "legacy"
+        },
+        {
+          "name": "DirectIR",
+          "astSha256": "fec457de934a3148508d59c91ad3367396257a6eba60211b492e5c4c6829c222",
+          "sourceSha256": "5603135472ac310ec4a96006753a8d380285bccfaa3291b4a61412eb48d444ca",
+          "inputSha256": "615f1395a8a3ab9d144315aaf1d7bf1b8993da1c9330a387136ed7ea543e4aab",
+          "pipeline": "viaIR"
+        }
+      ]
+    }
+  },
+  "individualDiagnosticScope": "32 individually initialized pure calls; six working/two blocked per model. Four full-sequence reports remain blocked at vector3. No fixture-pass claim.",
+  "generatorAndInputs": [
+    {
+      "path": ".lake/upstream/group03-recursion-trace/prepare.mjs",
+      "sha256": "17460e7d88727613c346c0c61da1ce524e6826995a3c9102bd1540dd24f2c1b7",
+      "text": "import {readFileSync,writeFileSync,readdirSync} from 'node:fs';\nimport {createRequire} from 'node:module';\nimport {createHash} from 'node:crypto';\nimport {resolve} from 'node:path';\nconst dir='.lake/upstream/group03-recursion-trace';\nconst sha=s=>createHash('sha256').update(s).digest('hex');\nconst compiler='/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js';\nif(sha(readFileSync(compiler))!=='6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390')throw Error('compiler drift');\nconst solc=createRequire(import.meta.url)(compiler),compile=solc.cwrap('solidity_compile','string',['string','number','number']);\nconst old=JSON.parse(readFileSync('tests/upstream/group03-continuation.json')).fixtures.find(f=>f.path.endsWith('/recursive_operator.sol'));\nconst vectors=old.referenceEvm.report.result.variants[0].vectors;\nconst source=readFileSync('.lake/upstream/solidity/'+old.path,'utf8').split('// ----')[0];\nlet direct=source.replace('using {unaryCountdown as ~, binaryCountdown as ^, eq as ==} for Uint global;','');\nfor(const [a,b] of [['x == Uint.wrap(0)','eq(x, Uint.wrap(0))'],['y == Uint.wrap(0)','eq(y, Uint.wrap(0))'],['~Uint.wrap(Uint.unwrap(x) - 1)','unaryCountdown(Uint.wrap(Uint.unwrap(x) - 1))'],['y ^ x','binaryCountdown(y, x)'],['Uint.wrap(Uint.unwrap(x) - 1) ^ y','binaryCountdown(Uint.wrap(Uint.unwrap(x) - 1), y)'],['~x','unaryCountdown(x)'],['x ^ y','binaryCountdown(x, y)']])direct=direct.replaceAll(a,b);\nwriteFileSync(dir+'/Direct.sol',direct);\nlet lean='import Solidity.Tools.Upstream\\nopen Solidity Lean Solidity.Frontend Solidity.Tools.Upstream\\n';\nconst manifest={compilerSha256:sha(readFileSync(compiler)),originalSourceSha256:old.sourceSha256,sourceTransformation:'Only replace resolved aliases with explicit calls, remove using directive; nominal Uint, all arithmetic/guards/wrappers unchanged. Diagnostic only; no upstream bytes changed.',variants:[]};\nfor(const [kind,text] of [['Operator',source],['Direct',direct]])for(const [mode,viaIR]of [['Legacy',false],['IR',true]]){\n const content='pragma solidity >=0.0;\\n// SPDX-License-Identifier: GPL-3.0\\n'+text;\n const settings={viaIR,evmVersion:'osaka',optimizer:{enabled:false,runs:200},libraries:{},remappings:[],outputSelection:{'*':{'':['ast']}}};\n const input={language:'Solidity',sources:{'':{content}},settings};\n const output=JSON.parse(compile(JSON.stringify(input),0,0));\n if(output.errors?.some(x=>x.severity==='error'))throw Error(JSON.stringify(output.errors));\n function normal(v){if(Array.isArray(v))return v.map(normal);if(!v||typeof v!=='object')return v;const r={};for(const[k,x]of Object.entries(v))r[k]=['referencedDeclaration','scope','superFunction'].includes(k)&&Number.isInteger(x)&&x>=2**31?x-2**32:normal(x);if(typeof v.src==='string')r.line=Buffer.from(content).subarray(0,Number(v.src.split(':')[0])).toString().split('\\n').length;return r;}\n const ast=normal(output.sources[''].ast),header={...JSON.parse(readFileSync('.lake/upstream/work-wMfQxe/dc911c055e960494f4facae5.ast.json')).header,source:kind==='Operator'?old.path:'diagnostic/Direct.sol',sourceSha256:sha(content),settings};\n const name=kind+mode,path=dir+'/'+name+'.ast.json',bytes=JSON.stringify({header,ast},null,2)+'\\n';writeFileSync(path,bytes);\n let fnv=14695981039346656037n;for(const b of Buffer.from(bytes))fnv=BigInt.asUintN(64,(fnv^BigInt(b))*1099511628211n);\n lean+=\u0060solc_import ${JSON.stringify(resolve(path))} hash 0x${fnv.toString(16).padStart(16,'0')} as Trace.${name}.C testing\\n\u0060;\n manifest.variants.push({name,astSha256:sha(bytes),sourceSha256:sha(content),inputSha256:sha(JSON.stringify(input)),pipeline:viaIR?'viaIR':'legacy'});\n}\nlean+='\\nprivate def vectors : Json := (Json.parse '+JSON.stringify(JSON.stringify({vectors}))+').toOption.getD Json.null\\n';\nlean+='private def trace (C : Contract) (rows : List ImportRow) : Json := Json.mkObj [(\"rows\", toJson (rows.map fun r => Json.mkObj [(\"function\", toJson r.sourceSignature), (\"status\", toJson r.status.toStr), (\"reason\", toJson r.reason)])), (\"fullSequence\", replay C rows vectors), (\"individualDiagnostics\", toJson (((vectors.getObjValAs? (Array Json) \"vectors\").toOption.getD #[]).map fun v => Json.mkObj [(\"vector\", v), (\"result\", replay C rows (Json.mkObj [(\"vectors\", toJson #[v])]))]))]\\n';\nlean+='#eval IO.FS.writeFile '+JSON.stringify(resolve(dir+'/trace-results.json'))+' (Json.pretty (Json.mkObj ['+manifest.variants.map(({name})=>\u0060(${JSON.stringify(name)}, trace Trace.${name}.C Trace.${name}.C.report)\u0060).join(',')+']))\\n';\nwriteFileSync(dir+'/Trace.lean',lean);writeFileSync(dir+'/manifest.json',JSON.stringify(manifest,null,2)+'\\n');\n"
+    },
+    {
+      "path": ".lake/upstream/group03-recursion-trace/Trace.lean",
+      "sha256": "86da6fe043fa8bed3b9b13637ba52ecd9e27217024fc04597ab09507c2e99fe3",
+      "text": "import Solidity.Tools.Upstream\nopen Solidity Lean Solidity.Frontend Solidity.Tools.Upstream\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/OperatorLegacy.ast.json\" hash 0xf6c9edebaf786e3a as Trace.OperatorLegacy.C testing\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/OperatorIR.ast.json\" hash 0x0177087415a27029 as Trace.OperatorIR.C testing\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/DirectLegacy.ast.json\" hash 0x2105ce874747b285 as Trace.DirectLegacy.C testing\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/DirectIR.ast.json\" hash 0x9348fbad458cfb70 as Trace.DirectIR.C testing\n\nprivate def vectors : Json := (Json.parse \"{\\\"vectors\\\":[{\\\"signature\\\":\\\"testUnary(uint256)\\\",\\\"args\\\":[\\\"0\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testUnary(uint256)\\\",\\\"args\\\":[\\\"1\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testUnary(uint256)\\\",\\\"args\\\":[\\\"99999999999\\\"],\\\"failure\\\":true,\\\"expected\\\":[]},{\\\"signature\\\":\\\"testBinary(uint256,uint256)\\\",\\\"args\\\":[\\\"0\\\",\\\"0\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testBinary(uint256,uint256)\\\",\\\"args\\\":[\\\"1\\\",\\\"0\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testBinary(uint256,uint256)\\\",\\\"args\\\":[\\\"0\\\",\\\"1\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testBinary(uint256,uint256)\\\",\\\"args\\\":[\\\"1\\\",\\\"1\\\"],\\\"failure\\\":false,\\\"expected\\\":[\\\"0\\\"]},{\\\"signature\\\":\\\"testBinary(uint256,uint256)\\\",\\\"args\\\":[\\\"99999999999\\\",\\\"99999999999\\\"],\\\"failure\\\":true,\\\"expected\\\":[]}]}\").toOption.getD Json.null\nprivate def trace (C : Contract) (rows : List ImportRow) : Json := Json.mkObj [(\"rows\", toJson (rows.map fun r => Json.mkObj [(\"function\", toJson r.sourceSignature), (\"status\", toJson r.status.toStr), (\"reason\", toJson r.reason)])), (\"fullSequence\", replay C rows vectors), (\"individualDiagnostics\", toJson (((vectors.getObjValAs? (Array Json) \"vectors\").toOption.getD #[]).map fun v => Json.mkObj [(\"vector\", v), (\"result\", replay C rows (Json.mkObj [(\"vectors\", toJson #[v])]))]))]\n#eval IO.FS.writeFile \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/trace-results.json\" (Json.pretty (Json.mkObj [(\"OperatorLegacy\", trace Trace.OperatorLegacy.C Trace.OperatorLegacy.C.report),(\"OperatorIR\", trace Trace.OperatorIR.C Trace.OperatorIR.C.report),(\"DirectLegacy\", trace Trace.DirectLegacy.C Trace.DirectLegacy.C.report),(\"DirectIR\", trace Trace.DirectIR.C Trace.DirectIR.C.report)]))\n"
+    },
+    {
+      "path": ".lake/upstream/group03-recursion-trace/Graph.lean",
+      "sha256": "53a85dbbac91420839c820d81dc95d29bc1a4ac9ec3dddac64e72e9025e9bf26",
+      "text": "import Solidity.Tools.Upstream\nopen Solidity Lean Solidity.Frontend Solidity.Tools.Upstream\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/OperatorLegacy.ast.json\" hash 0xf6c9edebaf786e3a as Trace.OperatorLegacy.C testing\nsolc_import \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/DirectLegacy.ast.json\" hash 0x2105ce874747b285 as Trace.DirectLegacy.C testing\nprivate def graph (C : Contract) : Json := toJson (C.funs.map fun (name, f) => Json.mkObj [(\"name\", toJson name), (\"sourceDeclaration\", toJson (f.sourceDecl.bind (\u00b7.declaration))), (\"callees\", toJson (FunDecl.callees f)), (\"recursive\", toJson (isRecursiveC C name))])\n#eval IO.FS.writeFile \"/workspace/solidity-lean/.lake/upstream/group03-recursion-trace/call-graph.json\" (Json.pretty (Json.mkObj [(\"Operator\", graph Trace.OperatorLegacy.C), (\"Direct\", graph Trace.DirectLegacy.C)]))\n"
+    },
+    {
+      "path": ".lake/upstream/group03-recursion-trace/Direct.sol",
+      "sha256": "d3bb61089eb1e97e584f93f5d37764a500da3f2aaadb60ee8e3aa0efc37417bd",
+      "text": "type Uint is uint;\n\n\nfunction unaryCountdown(Uint x) pure returns (Uint) {\n    if (eq(x, Uint.wrap(0)))\n        return Uint.wrap(0);\n\n    return unaryCountdown(Uint.wrap(Uint.unwrap(x) - 1));\n}\n\nfunction binaryCountdown(Uint x, Uint y) pure returns (Uint) {\n    if (eq(x, Uint.wrap(0)) && eq(y, Uint.wrap(0)))\n        return Uint.wrap(0);\n    if (eq(x, Uint.wrap(0)))\n        return binaryCountdown(y, x);\n\n    return binaryCountdown(Uint.wrap(Uint.unwrap(x) - 1), y);\n}\n\nfunction eq(Uint x, Uint y) pure returns (bool) {\n    return Uint.unwrap(x) == Uint.unwrap(y);\n}\n\ncontract C {\n    function testUnary(Uint x) public pure returns (Uint) {\n        return unaryCountdown(x);\n    }\n\n    function testBinary(Uint x, Uint y) public pure returns (Uint) {\n        return binaryCountdown(x, y);\n    }\n}\n"
+    }
+  ],
+  "retainedFailedSetupLogs": [
+    {
+      "path": ".lake/upstream/group03-recursion-trace/trace-incomplete-provenance.log",
+      "sha256": "152a78f6de47ab289b4f41347ce194bac16981b4b2cc1eaaa24ddff5a95e8314",
+      "text": ".lake/upstream/group03-recursion-trace/Trace.lean:3:0: error: Natural number expected\n.lake/upstream/group03-recursion-trace/Trace.lean:4:0: error: Natural number expected\n.lake/upstream/group03-recursion-trace/Trace.lean:5:0: error: Natural number expected\n.lake/upstream/group03-recursion-trace/Trace.lean:6:0: error: Natural number expected\n.lake/upstream/group03-recursion-trace/Trace.lean:10:152: error: overloaded, errors \n  10:158 Unknown identifier \u0060Trace.OperatorLegacy\u0060\n  \n  10:158 Unknown identifier \u0060Trace.OperatorLegacy\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:223: error: overloaded, errors \n  10:229 Unknown identifier \u0060Trace.OperatorIR\u0060\n  \n  10:229 Unknown identifier \u0060Trace.OperatorIR\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:288: error: overloaded, errors \n  10:294 Unknown identifier \u0060Trace.DirectLegacy\u0060\n  \n  10:294 Unknown identifier \u0060Trace.DirectLegacy\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:353: error: overloaded, errors \n  10:359 Unknown identifier \u0060Trace.DirectIR\u0060\n  \n  10:359 Unknown identifier \u0060Trace.DirectIR\u0060\n"
+    },
+    {
+      "path": ".lake/upstream/group03-recursion-trace/trace-wrong-contract-name.log",
+      "sha256": "0ba0aceb4ec48230f58f6639979573bf383211642c4cd12b7959c9fb31b9d35c",
+      "text": ".lake/upstream/group03-recursion-trace/Trace.lean:3:0: error: no contract \u0060OperatorLegacy\u0060 in the AST\n.lake/upstream/group03-recursion-trace/Trace.lean:4:0: error: no contract \u0060OperatorIR\u0060 in the AST\n.lake/upstream/group03-recursion-trace/Trace.lean:5:0: error: no contract \u0060DirectLegacy\u0060 in the AST\n.lake/upstream/group03-recursion-trace/Trace.lean:6:0: error: no contract \u0060DirectIR\u0060 in the AST\n.lake/upstream/group03-recursion-trace/Trace.lean:10:152: error: overloaded, errors \n  10:158 Unknown identifier \u0060Trace.OperatorLegacy\u0060\n  \n  10:158 Unknown identifier \u0060Trace.OperatorLegacy\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:223: error: overloaded, errors \n  10:229 Unknown identifier \u0060Trace.OperatorIR\u0060\n  \n  10:229 Unknown identifier \u0060Trace.OperatorIR\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:288: error: overloaded, errors \n  10:294 Unknown identifier \u0060Trace.DirectLegacy\u0060\n  \n  10:294 Unknown identifier \u0060Trace.DirectLegacy\u0060\n.lake/upstream/group03-recursion-trace/Trace.lean:10:353: error: overloaded, errors \n  10:359 Unknown identifier \u0060Trace.DirectIR\u0060\n  \n  10:359 Unknown identifier \u0060Trace.DirectIR\u0060\n"
+    }
+  ],
+  "commands": [
+    {
+      "command": "source /workspace/.setup/activate.sh; lean --version; lake --version; lake build Solidity.KeySort",
+      "exitCode": 0,
+      "output": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)\nLake version 5.0.0-src+797c613 (Lean version 4.24.0)\nFailed to save input mappings to the local artifact cache.\nBuild completed successfully (2 jobs).",
+      "note": "Initial read-only invocation could not save optional cache input mappings; cached gate succeeded."
+    },
+    {
+      "command": "node scripts/solidity-upstream.mjs verify",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/verify.log",
+        "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6",
+        "text": "Verified 11622 files at 1835d247de183f23e7b0e2bc4a50732af525b77c\n"
+      }
+    },
+    {
+      "command": "node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol --batch-size 1 --out .lake/upstream/group03-recursion-trace/exact",
+      "exitCode": 1,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/exact.log",
+        "sha256": "3debf906d0f4ab5c3b377685f0fe5f23435ada48cea2b82746cad8c437eaae1d",
+        "text": "Prepared 1/1; 2 Lean replay jobs\nLean 1/2; {\"working\":0,\"broken\":0,\"blocked\":1}\nLean 2/2; {\"working\":0,\"broken\":0,\"blocked\":1}\n{\n  \"version\": 1,\n  \"commit\": \"1835d247de183f23e7b0e2bc4a50732af525b77c\",\n  \"compiler\": \"0.8.38+commit.1835d247.Emscripten.clang\",\n  \"compilerSha256\": \"6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390\",\n  \"archiveSha256\": \"9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d\",\n  \"runnerSha256\": \"c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468\",\n  \"modelSha256\": \"8c57f8874c6370ce6824a34ce9b47de18f8dcb3ef75dc547adb91e3e208ddaa4\",\n  \"evmVersion\": \"osaka\",\n  \"loopFuel\": 1000,\n  \"scope\": \"Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.\",\n  \"snapshotFiles\": 11622,\n  \"filter\": \"test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol\",\n  \"timeoutMs\": 120000,\n  \"batchSize\": 1,\n  \"totalFixtureFiles\": 1,\n  \"completedFixtureFiles\": 1,\n  \"complete\": true,\n  \"counts\": {\n    \"working\": 0,\n    \"broken\": 0,\n    \"blocked\": 1\n  },\n  \"stages\": {\n    \"lean-runtime\": {\n      \"working\": 0,\n      \"broken\": 0,\n      \"blocked\": 1\n    }\n  }\n}\n"
+      },
+      "note": "Completed blocked result; no timeout."
+    },
+    {
+      "command": "node .lake/upstream/group03-recursion-trace/prepare.mjs; LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Trace.lean",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/trace.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "text": ""
+      }
+    },
+    {
+      "command": "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Graph.lean",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/graph.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "text": ""
+      }
+    },
+    {
+      "command": "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 tests/upstream/RecursionResource.lean",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/kernel-controls.log",
+        "sha256": "ac76c20f9b738422614d1e41f539a129fccc9ceca00a83bfdc77d7466d3a8a8f",
+        "text": "'Solidity.Upstream.RecursionResource.bottom_exhausted' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Solidity.Upstream.RecursionResource.bottom_not_revert' depends on axioms: [propext, Classical.choice, Quot.sound]\n'Solidity.Upstream.RecursionResource.depth_annotation_irrelevant' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]\n'Solidity.Upstream.RecursionResource.recursive_call_is_call' depends on axioms: [propext, Classical.choice, Quot.sound]\n"
+      }
+    },
+    {
+      "command": "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 tests/upstream/Replay.lean",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/replay.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "text": ""
+      }
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/runner-tests.log",
+        "sha256": "9f48e8e47c0944d88a5ebe17d1322c70603c483881a72b523e670ad7c757b891",
+        "text": "\u2714 fixture boundaries preserve sources and ignore expectation text as Solidity (2.18198ms)\n\u2714 external sources and duplicate source units cannot silently disappear (0.718367ms)\n\u2714 preamble follows the native harness without rewriting fixture source (0.203124ms)\n\u2714 diagnostics retain exact order, messages, source names and byte offsets (0.262168ms)\n\u2714 EVM constraints are checked rather than ignored or retargeted (0.276026ms)\n\u2714 implicit and explicit upstream pipeline defaults both require two interpreter modes (0.416932ms)\n\u2714 runtime vectors retain every call and compare ABI words exactly (4.063178ms)\n\u2714 signed words are decoded and encoded with canonical ABI extension (0.284449ms)\n\u2714 malformed ABI data cannot become a normal typed function call (0.382234ms)\n\u2714 unsupported gas, logs, revert data and extra observations prevent success (0.522825ms)\n\u2714 a second constructor cannot accidentally retain the first deployment state (0.376265ms)\n\u2714 partitions are exhaustive and unknown/notRun results cannot pass (0.280293ms)\n\u2714 isolated retries retain completed modes and cannot change conclusive results (0.52074ms)\n\u2714 multiple retries of one fixture preserve every contributing report (12.229841ms)\n\u2139 tests 14\n\u2139 suites 0\n\u2139 pass 14\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 47.447009\n"
+      }
+    },
+    {
+      "command": "node scripts/check-automatic.mjs --strict",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/strict.log",
+        "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+        "text": "check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending\n"
+      }
+    },
+    {
+      "command": "node scripts/check-orphans.mjs",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/reachability.log",
+        "sha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f",
+        "text": "667 reachable, 0 orphaned, 0 not allowed\n"
+      }
+    },
+    {
+      "command": "node scripts/check-layers.mjs",
+      "exitCode": 0,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/layering.log",
+        "sha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562",
+        "text": "143 core modules, 0 reach the elaborator\n"
+      }
+    },
+    {
+      "command": "./scripts/check-doc-paths.sh",
+      "exitCode": 1,
+      "log": {
+        "path": ".lake/upstream/group03-recursion-trace/doc-paths.log",
+        "sha256": "b5563615b3d7145f166f7d174de4a5cce6a1a1075947591e1fef9f3a60cb3b3b",
+        "text": "ambiguous: .claude/rules/rule-table.md cites \u0060RuleSyntax.lean\u0060 (2 files share that name)\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Foundations/Logic/InferenceSystem.lean\u0060\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Foundations/Logic/LogicalEquivalence.lean\u0060\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Foundations/Syntax/Congruence.lean\u0060\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Foundations/Syntax/Context.lean\u0060\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Logics/Propositional/Defs.lean\u0060\nmissing:   Bridge/vendor/CslibBackport/VENDOR.md cites \u0060Cslib/Logics/Propositional/NaturalDeduction/Basic.lean\u0060\nmissing:   Solidity/Eqns.lean cites \u0060Mathlib/Tactic/Eqns.lean\u0060\nambiguous: Solidity/Examples/Notation.lean cites \u0060RuleSyntax.lean\u0060 (2 files share that name)\nambiguous: docs/automation.md cites \u0060AliasConstraints.lean\u0060 (2 files share that name)\nambiguous: docs/automation.md cites \u0060Join.lean\u0060 (2 files share that name)\nambiguous: docs/automation.md cites \u0060ProgramReduction.lean\u0060 (2 files share that name)\nambiguous: docs/automation.md cites \u0060QueryArithmetic.lean\u0060 (3 files share that name)\nambiguous: docs/automation.md cites \u0060ReadFlattening.lean\u0060 (2 files share that name)\nambiguous: docs/complete-verification.md cites \u0060CheckedLinear.lean\u0060 (2 files share that name)\nambiguous: docs/feature-work/recursive-types.md cites \u0060Admission.lean\u0060 (2 files share that name)\nambiguous: docs/kernel-port.md cites \u0060Memory.lean\u0060 (4 files share that name)\nambiguous: docs/kernel-port.md cites \u0060Payment.lean\u0060 (2 files share that name)\nambiguous: docs/lean-key-rule-map.md cites \u0060Decide.lean\u0060 (2 files share that name)\nambiguous: docs/lean-key-rule-map.md cites \u0060RuleSyntax.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060Callback.lean\u0060 (3 files share that name)\nambiguous: docs/module-map.md cites \u0060Checked.lean\u0060 (3 files share that name)\nambiguous: docs/module-map.md cites \u0060Decide.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060EvaluationOrder.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060MemoryDelete.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060Operators.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060RuleSyntax.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060StorageDelete.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060Theory.lean\u0060 (2 files share that name)\nambiguous: docs/module-map.md cites \u0060UpdateRules.lean\u0060 (2 files share that name)\nambiguous: docs/semantic-gaps.md cites \u0060Checked.lean\u0060 (3 files share that name)\nambiguous: docs/semantic-gaps.md cites \u0060RevertData.lean\u0060 (2 files share that name)\nambiguous: docs/solkey-migration.md cites \u0060ProofTree.lean\u0060 (4 files share that name)\nambiguous: docs/testsuite-proofs.md cites \u0060Decide.lean\u0060 (2 files share that name)\nambiguous: docs/testsuite-proofs.md cites \u0060Problems.lean\u0060 (2 files share that name)\nambiguous: scripts/latex-chains.sh cites \u0060Storage.lean\u0060 (3 files share that name)\nambiguous: tests/upstream/group03-validation.json cites \u0060Decide.lean\u0060 (2 files share that name)\nmissing:   tests/upstream/group03-validation.json cites \u0060Main.lean\u0060\nambiguous: tests/upstream/group03-validation.json cites \u0060Problems.lean\u0060 (2 files share that name)\nambiguous: tests/upstream/group03-validation.json cites \u0060ProofTree.lean\u0060 (4 files share that name)\nambiguous: tests/upstream/group03-validation.json cites \u0060Storage.lean\u0060 (3 files share that name)\nmissing:   tests/upstream/group03-validation.json cites \u0060Widget.lean\u0060\nmissing:   tests/upstream/group03-validation.json cites \u0060lakefile.lean\u0060\nmissing:   tests/upstream/group03-validation.json cites \u0060test/basic.lean\u0060\nmissing:   tests/upstream/group03-validation.json cites \u0060test/subscript.lean\u0060\nmissing:   tests/upstream/group03-validation.json cites \u0060test/widget_basic.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060Main.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060Widget.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060lakefile.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060test/basic.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060test/subscript.lean\u0060\nmissing:   vendor/LeanTeX/VENDOR.md cites \u0060test/widget_basic.lean\u0060\n\nFAIL: 19 reference(s) name a file that does not exist.\n"
+      },
+      "baselineComparison": "Same19missing lines as preserved c247c849 doc-paths-baseline.log; no new missing path."
+    }
+  ],
+  "kernelControls": {
+    "path": "tests/upstream/RecursionResource.lean",
+    "sha256": "9aca7793aa21c328d6d8e77968f50e09f1af4ebf2a63b3bc9427ce61ca0dcfc5",
+    "text": "import Solidity.Tools.Upstream\n\n/-!\nRecursion boundary controls. The depth annotation is quotation metadata, not an\nEVM stack counter. The abstract bottom frame remains inconclusive for replay.\nThese kernel equalities do not assert a machine stack-overflow theorem.\n-/\nnamespace Solidity.Upstream.RecursionResource\n\nvariable {C : Contract} {\u0393 \u0393' ps rs : Ctx}\n\n/-- The abstract bottom is exhausted for every loop-fuel value and typed state. -/\ntheorem bottom_exhausted (fuel : Nat) (\u03c3 : State C \u0393) :\n    Prog.runF fuel Prog.recBase \u03c3 = .error .exhausted := rfl\n\n/-- Exhaustion cannot be an explicit source revert. -/\ntheorem bottom_not_revert (fuel : Nat) (\u03c3 : State C \u0393) :\n    Prog.runF fuel Prog.recBase \u03c3 \u2260 .error .revert := by\n  rw [bottom_exhausted]\n  intro h\n  cases h\n\n/-- The depth label itself cannot implement machine stack accounting. -/\ntheorem depth_annotation_irrelevant (f : Name) (d e : Nat)\n    (args : Args C \u0393 ps) (ret : CallRet \u0393 rs \u0393')\n    (body : Unit \u2192 Prog C (rs ++ ps) (rs ++ ps)) (\u03c3 : State C \u0393) :\n    Stmt.run \u03c3 (.callRec f d args ret body) =\n      Stmt.run \u03c3 (.callRec f e args ret body) := rfl\n\n/-- Recursive calls use the same typed call implementation as ordinary calls. -/\ntheorem recursive_call_is_call (f : Name) (d : Nat)\n    (args : Args C \u0393 ps) (ret : CallRet \u0393 rs \u0393')\n    (body : Unit \u2192 Prog C (rs ++ ps) (rs ++ ps)) (\u03c3 : State C \u0393) :\n    Stmt.run \u03c3 (.callRec f d args ret body) =\n      Stmt.run \u03c3 (.call f args ret (body ())) := Stmt.run_callRec \u03c3 f d args ret body\n\n/-- The existing boundary is unchanged. -/\nexample : recDepth = 1024 := rfl\n\n#print axioms bottom_exhausted\n#print axioms bottom_not_revert\n#print axioms depth_annotation_irrelevant\n#print axioms recursive_call_is_call\nend Solidity.Upstream.RecursionResource\n"
+  },
+  "axioms": {
+    "Solidity.Upstream.RecursionResource.bottom_exhausted": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Upstream.RecursionResource.bottom_not_revert": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Upstream.RecursionResource.depth_annotation_irrelevant": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Upstream.RecursionResource.recursive_call_is_call": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "coreSemanticChanges": false,
+  "newAxioms": [],
+  "proofLimitsIncreased": false,
+  "historyInspected": "1a7d5b0e: One body a callee: elaborate and quote it once; existing sharing retained. No representation refactor.",
+  "missingInfrastructure": [
+    "Distinct concrete machine stack/gas resource semantics; current Evm.Machine omits both",
+    "Accounting for the recursive frame word usage of each compiled pipeline",
+    "Checked correspondence or Lean bytecode execution; Evm.Compile.inFrag excludes callRec, Correct marks it outside the fragment"
+  ],
+  "rejectedRepairs": [
+    "Memoization/lazy sharing cannot change the exhausted base and already exists",
+    "Mapping exhausted or depth annotation to FAILURE would conflate abstract bounds and concrete exceptions",
+    "A closed-form return-zero proof would not establish the expected stack failure; RecContract accepts abstract exhaustion"
+  ],
+  "priorEvidencePreserved": {
+    "tests/upstream/group03-continuation.json": "193901be6ab0e4797a72a79b3ac9d69ddf4e4e03308d2b0007fa3795bff34300",
+    "tests/upstream/group03-results.json": "4e2cec5db4d27a7d39db686563c30cb95240760f0a7259a29200e186b6455fbe",
+    "tests/upstream/group03-validation.json": "0052087cd7c311baf7f0ddf625c70d895356eaed32a2445f27c3c8929f5ed11d",
+    "tests/upstream/snapshot.json": "8aa1a5fb5fc7c3527a7328f0dca786e52dd3bb8360e3f1dfbb9fb8d754041095"
+  },
+  "reusedValidation": {
+    "source": "tests/upstream/group03-continuation.json",
+    "reason": "No Solidity model or runner source changed; only standalone kernel controls, new evidence and appended documentation. Previously passing broad gates remain applicable.",
+    "gates": [
+      "ordinary default library including Decision",
+      "TestSuite",
+      "frozen sort",
+      "frozen corpus",
+      "largest UDVT fixture both pipelines"
+    ]
+  },
+  "coverageUnchanged": {
+    "leanWorkingFixtures": 10,
+    "leanAssemblyExclusions": 3,
+    "leanRecursiveResourceBlocks": 1,
+    "referenceEvmWorkingFixtures": 14,
+    "referenceEvmNewRun": false
+  },
+  "reviews": {
+    "finder": "Final read-only review:22embedded artifact path/hash records verified, all4ASTs, imported graph, original vectors and all32diagnostics,4standard axiom sets, unchanged model/runner hashes; no confirmed issue; no edits/builds/Lean workers.",
+    "skeptic": "Final independent read-only review:22embedded artifact path/hash records and4prior evidence hashes verified, every full sequence remains blocked, individual diagnostics are not fixture passes, precise stage/bounds and concrete missing semantics accurate; no confirmed issue; no edits/builds/Lean workers.",
+    "reportingConstraintApplied": "Individually reset diagnostics are never counted as sequential fixture success."
+  }
+}

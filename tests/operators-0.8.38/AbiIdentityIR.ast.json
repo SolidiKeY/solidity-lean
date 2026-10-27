@@ -1,0 +1,37 @@
+{
+ "header": {
+  "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sourceSha256": "05b20b9775072e16cb9c190e6997e61a7d5156336cba6994d5c21f93b3055526",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/operators-0.8.38/AbiIdentity.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": true,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "0.8",
+    ".38"
+   ]
+  ]
+ },
+ "ast": {"id":35,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","0.8",".38"],"nodeType":"PragmaDirective","src":"36:23:0","line":2},{"canonicalName":"AbiIdentity","contractKind":"contract","id":34,"name":"AbiIdentity","nodeType":"ContractDefinition","nodes":[{"body":{"nodeType":"Block","src":"141:14:0","line":4,"statements":[{"expression":{"kind":"number","nodeType":"Literal","src":"150:2:0","line":4,"typeDescriptions":{"typeString":"int_const 11"},"value":"11"},"nodeType":"Return","src":"143:9:0","line":4}]},"functionSelector":"bf0b4b8c","id":9,"kind":"function","name":"route_uint","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"106:2:0","line":4},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":4,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"132:7:0","line":4,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint256","nodeType":"ElementaryTypeName","src":"132:7:0","line":4,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"131:9:0","line":4},"src":"87:68:0","line":4,"stateMutability":"pure","visibility":"external"},{"body":{"nodeType":"Block","src":"217:14:0","line":5,"statements":[{"expression":{"kind":"number","nodeType":"Literal","src":"226:2:0","line":5,"typeDescriptions":{"typeString":"int_const 22"},"value":"22"},"nodeType":"Return","src":"219:9:0","line":5}]},"functionSelector":"6c99c4f4","id":17,"kind":"function","name":"route_uint256","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"182:2:0","line":5},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":12,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"208:7:0","line":5,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint256","nodeType":"ElementaryTypeName","src":"208:7:0","line":5,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"207:9:0","line":5},"src":"160:71:0","line":5,"stateMutability":"pure","visibility":"external"},{"body":{"nodeType":"Block","src":"288:14:0","line":6,"statements":[{"expression":{"kind":"number","nodeType":"Literal","src":"297:2:0","line":6,"typeDescriptions":{"typeString":"int_const 33"},"value":"33"},"nodeType":"Return","src":"290:9:0","line":6}]},"functionSelector":"b3c09dea","id":25,"kind":"function","name":"route_int","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"254:2:0","line":6},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":20,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"280:6:0","line":6,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"int256"},"typeName":{"name":"int256","nodeType":"ElementaryTypeName","src":"280:6:0","line":6,"typeDescriptions":{"typeString":"int256"}},"visibility":"internal"}],"src":"279:8:0","line":6},"src":"236:66:0","line":6,"stateMutability":"pure","visibility":"external"},{"body":{"nodeType":"Block","src":"362:14:0","line":7,"statements":[{"expression":{"kind":"number","nodeType":"Literal","src":"371:2:0","line":7,"typeDescriptions":{"typeString":"int_const 44"},"value":"44"},"nodeType":"Return","src":"364:9:0","line":7}]},"functionSelector":"d6b54ab3","id":33,"kind":"function","name":"route_int256","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"328:2:0","line":7},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":28,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"354:6:0","line":7,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"int256"},"typeName":{"name":"int256","nodeType":"ElementaryTypeName","src":"354:6:0","line":7,"typeDescriptions":{"typeString":"int256"}},"visibility":"internal"}],"src":"353:8:0","line":7},"src":"307:69:0","line":7,"stateMutability":"pure","visibility":"external"}],"src":"60:318:0","line":3}],"src":"36:343:0","line":2}
+}
