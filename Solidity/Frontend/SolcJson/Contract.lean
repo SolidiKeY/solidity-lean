@@ -229,6 +229,7 @@ inductive Ty where
   | bool
   | word (signed : Bool) (width : Fin 32)
   | address
+  | memoryBytes
   | bytes (width : Fin 32)
   | function (external : Bool) (parameters returns : List Ty)
   deriving BEq, Repr
@@ -241,6 +242,7 @@ partial def Ty.native : Ty → String
     let base := if signed then "int" else "uint"
     if width.val == 31 then base else s!"{base}{8 * (width.val + 1)}"
   | .address => "uint"
+  | .memoryBytes => "bytesmemory"
   | .bytes width => s!"bytes{width.val + 1}"
   | .function external parameters returns =>
     fnTyStr (parameters.map Ty.native) (returns.map Ty.native) external
@@ -255,6 +257,7 @@ def parseType : Nat → String → Option Ty
     -- Nominal names are never recognized by the scalar cases below.
     let source := (((source.replace " pure" "").replace " view" "").replace " payable" "").replace " internal" ""
     let source := String.mk (source.toList.filter (!Char.isWhitespace ·))
+    if source == "bytesmemory" then return .memoryBytes
     if source == "bool" then return .bool
     if source == "address" then return .address
     if source == "uint" || source == "uint256" then return .word false ⟨31, by decide⟩
@@ -316,11 +319,19 @@ def candidate (structs : Structs) (id : Int) (modelName : String) (declaration :
         ty.startsWith "struct " || ty.startsWith "mapping(" ||
           ty.startsWith "bytes " || ty == "bytes" || ty == "string" || ty.startsWith "string " ||
           (!(ty.startsWith "function ") && ty.contains '['),
-    source := signature fuel declaration (fun p => parseType fuel (J.tyStr p)),
+    source := signature fuel declaration (fun p =>
+      let source := J.tyStr p
+      -- Normalized declaration type strings omit the location, unlike a
+      -- function-valued callee's type string. Read the retained declaration
+      -- location rather than conflating memory bytes with a primitive word.
+      let source := if source == "bytes" && J.str? p "storageLocation" == some "memory"
+        then source ++ " memory" else source
+      parseType fuel source),
     native := signature fuel declaration (fun p => do
       let typeNode ← J.opt p "typeName"
       let spelling ← (tyText structs typeNode).toOption
-      parseType fuel spelling) }
+      let loc := (J.str? p "storageLocation").getD ""
+      parseType fuel (spelling ++ (if loc == "memory" then "memory" else if loc == "storage" || loc == "calldata" then loc else ""))) }
 
 /-- Actual synthesized getter parameters/results retain primitive source
 kinds. A getter is usable only after its plan, identity and header scope all
@@ -380,7 +391,14 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
     unless dynamic do continue
     let some expected := parseType (callee.compress.length + 1) (J.tyStr callee) |
       return { result with unresolved := result.unresolved ++ [call] }
-    let .function external _ returns := expected |
+    let .function external parameters returns := expected |
+      return { result with unresolved := result.unresolved ++ [call] }
+    -- Keep the admitted whole signature equal to the implemented typed
+    -- dispatcher: reference arguments and external memory returns need their
+    -- own ABI/provenance path; they are never erased to scalar components.
+    if parameters.contains .memoryBytes ||
+        (returns.contains .memoryBytes &&
+          (external || !parameters.isEmpty || returns != [.memoryBytes])) then
       return { result with unresolved := result.unresolved ++ [call] }
     if external && 1 < returns.length then
       return { result with unresolved := result.unresolved ++ [call] }
@@ -413,7 +431,18 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
       if external && (!(["public", "external"].contains resolved.visibility) ||
           (!resolved.getter && resolved.modelName != resolved.sourceName)) then
         return { result with unresolved := result.unresolved ++ [call] }
-      result := { result with targets := (result.targets ++ [target.id, alias]).eraseDups }
+      -- An overridden abstract declaration retains its identity in the
+      -- source closure, but has no body to execute. Keep every concrete
+      -- candidate (including retained base implementations) as before.
+      let declarationOnly := target.id != alias &&
+        (declarations.find? (J.id? · == some target.id)).any (fun d =>
+          J.kind d == "FunctionDefinition" && J.opt d "implemented" == some (.bool false) &&
+          (J.opt d "body").all (· == .null)) &&
+        (declarations.find? (J.id? · == some alias)).any (fun d =>
+          J.kind d == "FunctionDefinition" && J.opt d "implemented" == some (.bool true) &&
+          (J.opt d "body").any (fun body => J.kind body == "Block"))
+      let executable := if declarationOnly then [alias] else [target.id, alias]
+      result := { result with targets := (result.targets ++ executable).eraseDups }
   return result
 
 /-- This visits only dynamically called expressions identified by the body
@@ -1253,16 +1282,22 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- value (a variable of a function type), whose dispatch inlines it
   let varIds : List Int := (J.nodes c).filterMap fun n =>
     if J.kind n == "VariableDeclaration" then J.id? n else none
+  -- Value dependencies use the same declaration selection as direct calls.
+  -- In particular, a virtual abstract source ID is not an executable body.
+  let valueTarget (f n : Json) : Option Int := do
+    let id ← (J.ref? n).filter ids.contains
+    if isSuperMember n then return (lookupBy id (supersOf f)).getD id
+    if isBaseMember baseContracts n then return id
+    return (lookupBy id functionAliases).getD id
   let heads (f : Json) : List Int := (executableNodes declarations f).filterMap fun n =>
-    if J.kind n == "FunctionCall" then (J.opt n "expression").bind J.ref? else none
+    if J.kind n == "FunctionCall" then (J.opt n "expression").bind (valueTarget f) else none
   -- `this.g` named as an external value too (`extDispatch` runs `g` when
   -- declared before the caller)
   let refs (f : Json) : List Int := (executableNodes declarations f).filterMap fun n =>
     if J.kind n == "Identifier" || J.kind n == "MemberAccess" then do
       let id ← (J.ref? n).filter ids.contains
-      -- A bare public variable is storage, not its external getter value.
       guard (!(getterNames.any (·.1 == id)) || isExternalMember n)
-      pure id
+      valueTarget f n
     else none
   -- named more often than called: named as a value
   let valuesOf (f : Json) : List Int :=

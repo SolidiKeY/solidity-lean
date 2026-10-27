@@ -170,9 +170,14 @@ y = se3; -/
 #guard_msgs in
 example : Prog StandardExample [] [] := sol{ break; }
 
-/-- error: Solidity elaboration failed: i++ < 3: a loop's condition needs a statement before it (an effect, a call, a cast, a narrow operation or a constructor), and is evaluated again each iteration -/
-#guard_msgs in
-example : Prog StandardExample [] [.val .uint] := sol{ uint i = 0; while (i++ < 3) { } }
+/-- The final false condition still increments `i`. -/
+def effectfulCondition := sol{ uint i = 0; while (i++ < 3) { } assert(i == 4); }
+example : (Prog.run (State.ofStorage (Storage.init StandardExample))
+    effectfulCondition).halt? = none := by
+  rcases Prog.runF_approx 8 effectfulCondition (State.ofStorage (Storage.init StandardExample)) with h | h
+  · exact absurd (congrArg TRes.halt? h) (by decide +kernel)
+  · rw [Prog.run, ← h]
+    decide +kernel
 
 /-- error: Solidity elaboration failed: a loop has an `invariant` or an `unwind` clause, not both -/
 #guard_msgs in

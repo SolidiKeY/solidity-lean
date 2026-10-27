@@ -472,6 +472,13 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
     | .doWhile a b c => (a, c, [], [], b, true)
     | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
     | _ => ({}, .bool true, [], [], [], false)
+  -- An effectful while condition is a statement at the iteration head, not
+  -- a prefix outside the loop. Lower its synthetic break with the original
+  -- jumps, so continue rechecks it and break/return suppress another check.
+  if (s matches .whileLoop ..) && c.hasIncDec && spec.inv.isEmpty &&
+      spec.qinv.isEmpty && spec.dec.isNone && spec.unwind.isNone then
+    return ← lowerLoop rs (.whileLoop spec (.bool true)
+      [.ite (.unop .not c) [.brk] [], .block body])
   let outer ← get
   let outermost := !outer.inLoop
   set ({ ret := if outermost then none else outer.ret, inLoop := true } : LoopFlags)

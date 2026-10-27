@@ -39,6 +39,7 @@ partial def elabRec (_ : Unit) : ElabRec C where
   abiEncode := @abiEncode
   hoistCallArgs := hoistCallArgs
   fnDispatch := fnDispatch
+  fnMemoryDispatch := fnMemoryDispatch
   callValue := callValue
   elabCall := @elabCall
   elabMemCall := elabMemCall
@@ -303,6 +304,35 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
   pure P
 
 
+/-- Internal zero-argument memory-byte dispatch uses the same source tags and
+scope checks as scalar dispatch. The shared destination is intrinsically a
+memory reference, and each branch binds the selected call's returned alias;
+no storage copy or scalar encoding of the returned reference is introduced. -/
+partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
+    ElabM (SProg C × RawExpr) := do
+  let some ([], ["bytesmemory"], false) := fnParts? ty
+    | throw "memory dispatch needs an internal zero-argument bytes-memory signature"
+  unless args.isEmpty do throw "memory dispatch takes no arguments"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if fnInternal C g && FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"memory dispatch may call {g}, which is not declared before this function"
+  let tag := toString (← freshCapture "se")
+  let dst := toString (← freshCapture "mv")
+  let P ← elabStmtsP [.decl (.named ty) tag (some h), .declMemory (.named "bytes") dst none]
+  let failure := if (← read).selfFrame then
+      RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
+  let dispatch := cands.foldr (fun (g, t) rest =>
+    RawStmt.ite (.binop .eqB (.name tag) (.num t))
+      [.assign (.name dst) (.call g [])] [rest]) failure
+  let Q ← elabStmtsP [dispatch]
+  pure (P ++ Q, .name dst)
+
+
 /-- **A call through an external function value** `h(a)`, `h` of the
 external function type `ty`: `h` is `address * 2^32 + selector` (`fnPure`),
 so the call is an external call to `h / 2^32` (`extCallStmt`), dispatched on
@@ -406,6 +436,18 @@ mv2;`, `m = mv2;` (the module docstring). -/
 partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
     (bind : (Γ : NCtx) → Var → (Ty.ref R).mapFree = true → Except String (SStmt C)) :
     ElabM (SProg C) := do
+  let dynamic ← if f == callValueName then do
+      let h :: rest := args | throw "memory call has no callee"
+      pure ((fnTyOfExpr C (← ctx) h).map fun ty => (h, ty, rest))
+    else if (← read).funs.all (·.1 != f) then
+      pure ((fnTyOf? C (← ctx) f).map fun ty => (RawExpr.name f, ty, args))
+    else pure none
+  if let some (h, ty, actuals) := dynamic then
+    unless R == bytesR do throw "memory function value returns a different reference type"
+    let (P, _) ← fnMemoryDispatch h ty actuals
+    let (r, _) :: Γ ← nctx | throw "internal: memory dispatch did not export its reference"
+    let ⟨hm⟩ ← ElabM.lift (memOk R)
+    return P ++ [← ElabM.lift (bind Γ r hm)]
   let (P, r, _) ← elabCallRet f args none
   match r with
   | some ⟨Γ, R', r, storage⟩ =>

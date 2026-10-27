@@ -46,6 +46,8 @@ structure ElabRec where
   hoistCallArgs : (f : String) → (args : List RawExpr) → ElabM (SProg C × List RawExpr)
   fnDispatch : (h ty : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
     (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
+  fnMemoryDispatch : (h : RawExpr) → (ty : String) → (args : List RawExpr) →
+    ElabM (SProg C × RawExpr)
   callValue : (h : RawExpr) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
     (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
   elabCall : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
@@ -425,6 +427,9 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       let some ty := fnTyOfExpr C (← ctx) h | throw s!"{h.toStr}(…): the callee is not a function value"
       let (P, rest) ← hoistArgs rest
       let some (_, [r], _) := fnParts? ty | throw s!"{h.toStr}(…) returns one value where a value stands"
+      if r == "bytesmemory" then
+        let (Q, result) ← rc.fnMemoryDispatch h ty rest
+        return (P ++ Q, result)
       let some (p, n) := fnCompTy? C r | throw s!"{h.toStr}(…) returns a {r}, not a value type"
       let Γ ← nctx
       let x ← freshCapture "se"
@@ -437,6 +442,9 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       if let some ty := fnTyOf? C (← ctx) f then
         let (P, args) ← hoistArgs args
         let some (_, [r], _) := fnParts? ty | throw s!"{f}(…) returns one value where a value stands"
+        if r == "bytesmemory" then
+          let (Q, result) ← rc.fnMemoryDispatch (.name f) ty args
+          return (P ++ Q, result)
         let some (p, n) := fnCompTy? C r | throw s!"{f}(…) returns a {r}, not a value type"
         let Γ ← nctx
         let x ← freshCapture "se"
@@ -694,11 +702,17 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
   if !ctor && f == callValueName then
     let h :: args := args | throw "internal: a call through a value with no callee"
     if targets then throw s!"{h.toStr}(…): a call through a function value in a tuple assignment"
+    if res.isNone && ((fnTyOfExpr C (← ctx) h).bind fnParts?).any (fun (_, rs, ext) =>
+        !ext && rs == ["bytesmemory"]) then
+      let some ty := fnTyOfExpr C (← ctx) h | throw "missing memory function type"
+      return ((← rc.fnMemoryDispatch h ty args).1, none, [])
     return (← callValue h args res resW resNew, none, [])
   -- a call through a function value (`fnDispatch`)
   if !ctor && funs.all (·.1 != f) then
     if let some ty := fnTyOf? C (← ctx) f then
       if targets then throw s!"{f}(…): a call through a function value in a tuple assignment"
+      if res.isNone && (fnParts? ty).any (fun (_, rs, ext) => !ext && rs == ["bytesmemory"]) then
+        return ((← rc.fnMemoryDispatch (.name f) ty args).1, none, [])
       return (← fnDispatch f ty args res resW resNew, none, [])
   let selfFrame := selfFrame || (← read).selfFrame
   -- a call of a recursive function whose body is being elaborated: the frame

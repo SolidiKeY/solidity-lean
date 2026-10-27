@@ -370,10 +370,18 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     -- one is printed too, and a call through it refused by the elaborator
     let ps := ((J.opt j "parameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
     let rs := ((J.opt j "returnParameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
-    if (ps ++ rs).any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
-      throw (.unsupported "a function type with a reference parameter or return")
+    if ps.any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
+      throw (.unsupported "a function type with a reference parameter")
     let ps ← ps.mapM fun p => do tyText S (← J.get p "typeName")
-    let rs ← rs.mapM fun p => do tyText S (← J.get p "typeName")
+    let rs ← rs.mapM fun p => do
+      let T ← tyText S (← J.get p "typeName")
+      let loc := (J.str? p "storageLocation").getD ""
+      if ["memory", "storage", "calldata"].contains loc then
+        unless loc == "memory" && T == "bytes" && ps.isEmpty && rs.length == 1 &&
+            J.str? j "visibility" != some "external" do
+          throw (.unsupported "this function type's reference return")
+        return T ++ " memory"
+      pure T
     let ext := if J.str? j "visibility" == some "external" then " external" else ""
     let ret := if rs.isEmpty then "" else s!" returns ({", ".intercalate rs})"
     pure s!"function ({", ".intercalate ps}){ext}{ret}"

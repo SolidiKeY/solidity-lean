@@ -553,3 +553,69 @@ Final read-only finder and independent skeptic reviews verify all 67 completed
 log digests and all 24 fixture/report/source/model hashes. Historical inputs
 and expected verdicts are unchanged. Both found no confirmed handoff issue
 and opened no Lean workers; the unresolved proof and resource gaps above remain.
+
+### Group05 resumed repair (2026-10-27)
+
+The existing lane and commits through `a4c84673` were preserved. The five
+remaining original fixtures required internal `bytes memory` function returns
+and an effectful unannotated `while` head. All 24 assigned fixtures now agree in legacy and viaIR (70 ordered
+observations): 12 were already fixed on the starting master, seven were fixed
+on the previous lane, and these five complete the remaining repair. The final
+combined evidence is recorded separately
+in `tests/upstream/group05/resumed-reproduction.json`, leaving the earlier
+19/24 milestone and historical upstream results intact.
+
+The function-type component grammar retains data locations. Admission and the
+native signature agree on the implemented boundary: internal, zero arguments,
+one `bytes memory` result. Reference arguments, external reference-return ABI
+calls, and other reference kinds still fail closed. The dispatcher captures
+the selected function once, keeps finite source-tag candidates and scope
+checks, and uses existing intrinsically typed memory-call/alias binding with
+a shared destination. Existing per-callee body memoization is retained; no
+core statement or state representation changes. The destination uses the
+existing memory allocation, not a scalar encoding of a reference. Exact
+Panic(0x51), independent returned memory, pointer mutation during a call,
+negative byte assertions and rollback have kernel/replay controls in
+`tests/upstream/FunctionDispatch.lean` and production source controls in
+`scripts/finite-dispatch.test.mjs`.
+
+Abstract source declaration identities remain in the reader metadata, while
+execution uses the resolved concrete body. Only explicitly `implemented=false`
+abstract declarations with a verified concrete alias can omit a nonexistent
+body from execution dependencies. The finder caught that missing body metadata
+alone was insufficient evidence; this was fixed and a malformed concrete-base
+negative control added. Ordinary virtual, static-base and super value
+references use the same resolution as their rendered bodies. Concrete base
+candidates continue to participate in admission. The modern AST adapter now
+retains explicit implementation metadata for this new memory-return family;
+legacy and primitive-only normalization remain unchanged. Both abstract and
+malformed concrete production controls pass.
+
+An unannotated effectful `while (c)` lowers to an iteration-head test with a
+synthetic break before its original body. Existing jump lowering then preserves
+continue, break, return, final-false effects and short circuiting. Annotated
+loops retain their existing path. The obsolete unsupported-effectful-head pin
+in `Solidity/Examples/Tactics/Loops.lean` becomes a positive kernel execution
+check on the same loop, including its final increment. Upstream sources,
+expected observations, default loop fuel and proof limits are unchanged.
+
+The earlier default-build interruption was profiled, rather than treated as
+an unavailable host. All three DecisionArrays kernel certificates finish;
+the compiled live-length verdict entered an expensive width-11 arithmetic
+walk for a goal already available as a conjunct of an implication hypothesis.
+`Solidity/Calculus/LinearHypotheses.lean` adds a bounded proof-producing
+propositional fast path. Every success carries validity; failure retains the
+original arithmetic/countermodel fallback and its hashed graph walk. History
+`5154e4e9` records that walk's speed rationale and it is preserved. The three
+unchanged isolated array verdicts return proved/refuted/proved in under one
+millisecond of measured compiled evaluation after this change; this is not a
+whole-build timing claim. No new axiom, `sorry`, heartbeat or recursion-depth
+limit is introduced. The skeptic independently checked conjunction projection,
+implication introduction, normalized-validity transport and unchanged fallback.
+
+Lean MCP diagnostics were unavailable in the exposed tools. Configured CLI
+checks and full logs are used instead. The final validation manifest records
+commands, timings, source/model hashes, proof axiom pins, resource results and
+remaining baseline limitations. Runtime agreement remains observational
+evidence; deployed bytecode inclusion/exclusion, gas and code generation are
+outside these functional replay observations.

@@ -685,9 +685,11 @@ syntax:max &"address" &"payable" : sol_ty
 /-- `function (uint) pure returns (uint)`: a function type, read as the
 `uint` tag of a function (`fnTy?`, "Function types" below); its mutability
 is dropped. -/
-syntax:max (name := solFnTy) &"function" "(" sol_ty,* ")"
+declare_syntax_cat sol_fn_component
+syntax sol_ty (ppSpace (&"memory" <|> &"storage" <|> &"calldata"))? : sol_fn_component
+syntax:max (name := solFnTy) &"function" "(" sol_fn_component,* ")"
   (ppSpace (&"internal" <|> &"external" <|> &"pure" <|> &"view" <|> &"payable"))*
-  (ppSpace &"returns" " (" sol_ty,* ")")? : sol_ty
+  (ppSpace &"returns" " (" sol_fn_component,* ")")? : sol_ty
 
 /-- `ty!(mapping(uint => Person))`: a type written as Solidity does. -/
 syntax "ty!(" sol_ty ")" : term

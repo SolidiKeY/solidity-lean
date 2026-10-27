@@ -379,12 +379,17 @@ open Lean
 written, a function type spelled. -/
 partial def spellFnTy (T : TSyntax `sol_ty) : MacroM String := do
   if T.raw.isOfKind ``solFnTy then
-    let ps ← T.raw[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩)
+    let component (t : Syntax) : MacroM String := do
+      let base ← spellFnTy ⟨t[0]⟩
+      let loc := (t[1].find? fun a => a.isAtom &&
+        ["memory", "storage", "calldata"].contains a.getAtomVal).map (·.getAtomVal)
+      pure (base ++ loc.getD "")
+    let ps ← T.raw[2].getSepArgs.toList.mapM component
     let ext := T.raw[4].getArgs.any fun m =>
       (m.find? fun a => a.isAtom && a.getAtomVal == "external").isSome
     -- `(returns (…))?`: a null node of its four parts, or of none
     let r := T.raw[5]
-    let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩) else pure []
+    let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM component else pure []
     return fnTyStr ps rs ext
   match T with
   | `(sol_ty| $x:ident) => pure (x.getId.toString false)
