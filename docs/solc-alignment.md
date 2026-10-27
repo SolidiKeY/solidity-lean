@@ -587,3 +587,23 @@ state, heap rollback included.
 See [feature-work/calls-exceptions.md](feature-work/calls-exceptions.md);
 its EVM reference checks are evidence about the pinned compilers, not a
 frontend-equivalence proof.
+
+## Modifier placeholder frames
+
+Legacy reuses the function's parameter and return slots across repeated
+modifier placeholders. ViaIR (`EvalOrder.modifierFrames`) gives each
+placeholder invocation separate slots: parameters are copied, incoming return
+slots are passed to each invocation, and the latest result is copied out.
+Modifier results initialize before argument evaluation; argument changes to
+named returns affect the incoming slots, not a skipped invocation's result.
+Memory/storage referents remain shared through reference parameter aliases.
+The elaborator retains and checks all recorded source-shape markers on copies.
+Memory return aliases are supported; viaIR modifier functions returning storage
+aliases are explicitly refused because unset incoming bindings cannot safely
+be copied by a source-level alias read.
+
+The two upstream viaIR return mismatches and distinct legacy controls are
+recorded in [solidity-upstream-tests.md](solidity-upstream-tests.md#group-01-viair-modifier-return-slots-2026-10-26).
+This lowering uses existing typed statements and sound rules. Runtime/EVM
+agreement and the fixed-program proof controls do not constitute a universal
+compiler-correctness theorem.

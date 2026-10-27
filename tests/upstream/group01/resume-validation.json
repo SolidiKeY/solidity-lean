@@ -1,0 +1,709 @@
+{
+  "version": 1,
+  "date": "2026-10-27",
+  "implementationCommit": "bfad51e37cd6be9a52e363f997afade940dfbac6",
+  "branch": "fix/group01-modifier-returns",
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "runtime": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl9mOGQ5ZDk1ZDZiNzQ4MTkxYWRjZmEzZWQ3M2Y2OWQzNQ",
+    "activate": "source /workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "keySortGate": "lake build Solidity.KeySort: exit 0, 2 jobs",
+    "cgroupMemoryMaxBytes": 17179869184,
+    "leanMcpDiagnostics": "not exposed; configured per-file Lean commands used"
+  },
+  "modelSha256": "56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402",
+  "modelUnchangedSinceImplementation": true,
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "compilerRestoredFrom": "https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.38+commit.1835d247.js",
+  "previousDefaultBuildStatus": "resource-blocked: cold run controlled stop at642/649 after4297.454s; one-worker 900.031s retry passed DecisionHashes at417s then timed out on unchanged Examples/Decision.lean at643/649. No semantic errors reported. Not a passing full build; no fresh current-base timing comparison.",
+  "defaultBuildStatus": "passed: 649 jobs, exit 0; remaining modules built serially first",
+  "diagnosis": {
+    "decisionSourceSha256": "abd0b1639019d3a52b0cea9b4528d5cbba5d9d42104e184fb987f886ef4eb4ba",
+    "decisionSourceIdenticalToBase": true,
+    "sourceChangesDuringResume": false,
+    "observations": [
+      "The extra configuration field invalidated downstream artifacts; Decision examples do not exercise modifier frames. No fresh base timing A/B was performed.",
+      "Scratch profiler localized sortedLe verdict to 198 seconds and the later ledger guard group to about105 seconds (5-second boundary sampling).",
+      "Profiler timings enter #guard_msgs output, so scratch guard failures are diagnostic contamination, not passing tests or runtime mismatches. The scratch profiler was stopped; uninstrumented Lake gates supply pass evidence.",
+      "Only the lane-owned diagnostic workers were stopped. No stale Lean workers existed at resume; serial final builds measured at most one Lean worker.",
+      "Existing faster visited-set/verified-walk changes were preserved; no representation, algorithm, proof bound, dependency, source expectation or Lean source was changed."
+    ],
+    "resourcePolicy": {
+      "perTargetCeilingSeconds": 5400,
+      "processTreeRssCeilingMiB": 14500,
+      "noCeilingReached": true,
+      "samplingIntervalSeconds": 2,
+      "measurementScope": "RSS peaks and maximum worker counts are observed two-second samples, not exact continuous maxima."
+    }
+  },
+  "serialBuilds": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Examples.Decision"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 758.689,
+      "peakProcessTreeRssKiB": 5385820,
+      "maxLeanWorkers": 1,
+      "stopReason": null,
+      "log": ".lake/upstream/group01-resume/decision-build.log"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Examples.DecisionKInt"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 6.02,
+      "peakProcessTreeRssKiB": 1710364,
+      "maxLeanWorkers": 1,
+      "stopReason": null,
+      "log": ".lake/upstream/group01-resume/decision-kint-build.log"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Examples.DecisionMemory"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 56.284,
+      "peakProcessTreeRssKiB": 1522156,
+      "maxLeanWorkers": 1,
+      "stopReason": null,
+      "log": ".lake/upstream/group01-resume/decision-memory-build.log"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Examples.DecisionArrays"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 2383.117,
+      "peakProcessTreeRssKiB": 12310812,
+      "maxLeanWorkers": 1,
+      "stopReason": null,
+      "log": ".lake/upstream/group01-resume/decision-arrays-build.log"
+    },
+    {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "elapsedSeconds": 4.017,
+      "peakProcessTreeRssKiB": 551420,
+      "maxLeanWorkers": 1,
+      "stopReason": null,
+      "log": ".lake/upstream/group01-resume/default-build.log"
+    }
+  ],
+  "freshChecks": [
+    {
+      "name": "verify",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.671,
+      "log": ".lake/upstream/group01-resume/verify.log"
+    },
+    {
+      "name": "modifier-controls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "tests/upstream/ModifierFrames.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.243,
+      "log": ".lake/upstream/group01-resume/modifier-controls.log"
+    },
+    {
+      "name": "modifier-proofs",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "tests/upstream/ModifierFrameProofs.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 20.828,
+      "log": ".lake/upstream/group01-resume/modifier-proofs.log"
+    },
+    {
+      "name": "function_modifier_loop_viair",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/function_modifier_loop_viair"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.677,
+      "log": ".lake/upstream/group01-resume/function_modifier_loop_viair.log"
+    },
+    {
+      "name": "function_modifier_multi_invocation_viair",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/function_modifier_multi_invocation_viair"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.207,
+      "log": ".lake/upstream/group01-resume/function_modifier_multi_invocation_viair.log"
+    },
+    {
+      "name": "function_modifier_loop",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/function_modifier_loop"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.005,
+      "log": ".lake/upstream/group01-resume/function_modifier_loop.log"
+    },
+    {
+      "name": "function_modifier_multi_invocation",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/function_modifier_multi_invocation"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.028,
+      "log": ".lake/upstream/group01-resume/function_modifier_multi_invocation.log"
+    },
+    {
+      "name": "function_modifier_return_reference",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        "/workspace/solidity-lean/.lake/upstream/group01-resume/function_modifier_return_reference"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.313,
+      "log": ".lake/upstream/group01-resume/function_modifier_return_reference.log"
+    },
+    {
+      "name": "node-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.317,
+      "log": ".lake/upstream/group01-resume/node-tests.log"
+    },
+    {
+      "name": "replay",
+      "command": [
+        "lake",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 2.393,
+      "log": ".lake/upstream/group01-resume/replay.log"
+    },
+    {
+      "name": "strict",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.124,
+      "log": ".lake/upstream/group01-resume/strict.log"
+    },
+    {
+      "name": "reachability",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.165,
+      "log": ".lake/upstream/group01-resume/reachability.log"
+    },
+    {
+      "name": "layering",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.164,
+      "log": ".lake/upstream/group01-resume/layering.log"
+    },
+    {
+      "name": "testsuite",
+      "command": [
+        "lake",
+        "build",
+        "SolkeyTestSuite"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.265,
+      "log": ".lake/upstream/group01-resume/testsuite.log"
+    },
+    {
+      "name": "testsuite-audit",
+      "command": [
+        "./scripts/check-testsuite.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.366,
+      "log": ".lake/upstream/group01-resume/testsuite-audit.log"
+    },
+    {
+      "name": "sort",
+      "command": [
+        "./scripts/check-solkey.sh",
+        "--key",
+        "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.917,
+      "log": ".lake/upstream/group01-resume/sort.log"
+    },
+    {
+      "name": "corpus-build",
+      "command": [
+        "lake",
+        "build",
+        "SolidityCorpus"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.315,
+      "log": ".lake/upstream/group01-resume/corpus-build.log"
+    },
+    {
+      "name": "corpus",
+      "command": [
+        "./scripts/check-corpus.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 14.332,
+      "log": ".lake/upstream/group01-resume/corpus.log"
+    }
+  ],
+  "fixtures": [
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+      "sourceSha256": "05593525b2e7ff15da8ad6d43704e61149311d3e82c87b07987f81cb7b34b5a5",
+      "status": "working",
+      "requiredPipelines": [
+        "viaIR"
+      ],
+      "observations": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ],
+      "report": "tests/upstream/group01/after-function_modifier_loop_viair.json",
+      "sha256": "21e2f2721c432e45d34d0735da0d54a3264dbd99e7adff3166ef2c7457db09e8",
+      "freshReport": ".lake/upstream/group01-resume/function_modifier_loop_viair/results.json",
+      "byteIdenticalToPreservedReport": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol",
+      "sourceSha256": "96a3dfb8872e051d6b5575000a3964d53dac16b5a316e6a152db4e643ab7f89d",
+      "status": "working",
+      "requiredPipelines": [
+        "viaIR"
+      ],
+      "observations": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ],
+      "report": "tests/upstream/group01/after-function_modifier_multi_invocation_viair.json",
+      "sha256": "cdc747c4389f408c0532fee0f38651eaccd8e429da5bd7accee54e5d37d1976e",
+      "freshReport": ".lake/upstream/group01-resume/function_modifier_multi_invocation_viair/results.json",
+      "byteIdenticalToPreservedReport": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol",
+      "sourceSha256": "f00bf085a67713fe0daab4f067c5965a6d8f7a5201338f7eb78da31ea5557c37",
+      "status": "working",
+      "requiredPipelines": [
+        "legacy"
+      ],
+      "observations": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol",
+          "observed": [
+            {
+              "values": [
+                "10"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ],
+      "report": "tests/upstream/group01/after-function_modifier_loop.json",
+      "sha256": "26fd432ea950a85971eddfa42c06581d9e02d8781c9ab764e8effe38e35cc06e",
+      "freshReport": ".lake/upstream/group01-resume/function_modifier_loop/results.json",
+      "byteIdenticalToPreservedReport": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol",
+      "sourceSha256": "67b76b68f1847c8db9a11ccbbe3b0e4cd9c2e88a956a759e39c0651983c81c52",
+      "status": "working",
+      "requiredPipelines": [
+        "legacy"
+      ],
+      "observations": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol",
+          "observed": [
+            {
+              "values": [
+                "1"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            },
+            {
+              "values": [
+                "2"
+              ],
+              "signature": "f(bool)",
+              "failed": false
+            }
+          ]
+        }
+      ],
+      "report": "tests/upstream/group01/after-function_modifier_multi_invocation.json",
+      "sha256": "fb46b64982544023928109a6f305996f39070226a235c98a7076e334cdddbda9",
+      "freshReport": ".lake/upstream/group01-resume/function_modifier_multi_invocation/results.json",
+      "byteIdenticalToPreservedReport": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+      "sourceSha256": "0f6814bd080f68ffa8e472dd18fc5209ca9479d0d72e548c9cc815414e9c2747",
+      "status": "working",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "observations": [
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+          "observed": [
+            {
+              "values": [
+                "2",
+                "3"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all scalar runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol",
+          "observed": [
+            {
+              "values": [
+                "2",
+                "3"
+              ],
+              "signature": "f()",
+              "failed": false
+            }
+          ]
+        }
+      ],
+      "report": "tests/upstream/group01/after-function_modifier_return_reference.json",
+      "sha256": "0b336393e36187374103723d05703fb0474ba3c9232f1ecc125a71332a161b7c",
+      "freshReport": ".lake/upstream/group01-resume/function_modifier_return_reference/results.json",
+      "byteIdenticalToPreservedReport": true
+    }
+  ],
+  "retainedPriorEvidence": [
+    "40 EVM reference vectors (20 legacy and20viaIR) and three focused source regressions remain passing evidence from bfad51e3; they were not rerun during this completion.",
+    "Original before/after reports and historical tests/upstream/results, snapshot manifest and pinned archive are unchanged.",
+    "Unassigned modifier-family status remains9working17broken5blocked from the prior family run, not a new family rerun."
+  ],
+  "remainingScope": [
+    "ViaIR modifier functions with storage-valued returns are explicitly excluded and their diagnostic is pinned.",
+    "Generic source-lowering agreement for arbitrary bodies is not proved; four semantic validity controls cover the affected fixed model programs.",
+    "Unassigned modifier-family cases retain17 adapter/import gaps and5 adapter blocks; no observations or expected values were dropped."
+  ],
+  "reviews": {
+    "finder": "read-only final evidence review passed; all5 byte-identical reports, log/report/model hashes, commands/results and scope verified; no Lean workers. Precision fixes for16GiB cgroup and sampled RSS incorporated.",
+    "skeptic": "independent read-only final evidence review passed: logs/hashes, five reports and pipelines, proof pins, scope and649-job success verified; no Lean workers. Confirmed16GiB wording corrected."
+  },
+  "logs": {
+    ".lake/upstream/group01-resume/corpus-build.log": {
+      "sha256": "57962c2120b9cf638ffe78a2bf640990710ff14d4c3bbd7a59b8353c369e0ee6",
+      "bytes": 43346
+    },
+    ".lake/upstream/group01-resume/corpus.log": {
+      "sha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078",
+      "bytes": 163
+    },
+    ".lake/upstream/group01-resume/decision-arrays-build.log": {
+      "sha256": "6c22198a5fee958af9460ed0f05a49474ba5f6e74a16922543e7c76d25a8ec2f",
+      "bytes": 38180
+    },
+    ".lake/upstream/group01-resume/decision-boundaries.log": {
+      "sha256": "e690a8fa63e5154406dcee756db8f5157e2d614aab39f13032e448a715d154ee",
+      "bytes": 12306
+    },
+    ".lake/upstream/group01-resume/decision-build.log": {
+      "sha256": "1c0b12282b73f02a60f84bcdcc82a5c4104c4e911cc625076c2be5e52c204850",
+      "bytes": 38173
+    },
+    ".lake/upstream/group01-resume/decision-kint-build.log": {
+      "sha256": "7623766f342a844e7125e9fc36668c8225244adb6cc56e8ee770e3a767d427fe",
+      "bytes": 38177
+    },
+    ".lake/upstream/group01-resume/decision-memory-build.log": {
+      "sha256": "dc055a66949f998de2a608920f5ca8585b5310e99adf8e917d3716a140598c16",
+      "bytes": 38178
+    },
+    ".lake/upstream/group01-resume/decision-profile.log": {
+      "sha256": "90696ffd867728d3de85fd01d053d7d7c1257aff111e076c730f3576b296cde7",
+      "bytes": 4114
+    },
+    ".lake/upstream/group01-resume/default-build.log": {
+      "sha256": "0c1a7688f74477db0d048c0324d57e1e6049ea0a95c200a630d3802ae11718a5",
+      "bytes": 87902
+    },
+    ".lake/upstream/group01-resume/function_modifier_loop.log": {
+      "sha256": "da59d7f18ca8adbee2f4583452a6ceae9890bb81d1aea2fd07277cf4226591dd",
+      "bytes": 1229
+    },
+    ".lake/upstream/group01-resume/function_modifier_loop_viair.log": {
+      "sha256": "4a7560b908b1a03eefe597ea34cb2406e524d70e71deb8fca85f7e4ff7fd4bfb",
+      "bytes": 1235
+    },
+    ".lake/upstream/group01-resume/function_modifier_multi_invocation.log": {
+      "sha256": "78f819000273b3dc1f7a39fe00feb4c1c932161a672a02f6b0147d6caa7d186b",
+      "bytes": 1241
+    },
+    ".lake/upstream/group01-resume/function_modifier_multi_invocation_viair.log": {
+      "sha256": "1cd597ff870aaaace0023a20263c084e780f26cb39b88ecb859f95bb2d04b857",
+      "bytes": 1247
+    },
+    ".lake/upstream/group01-resume/function_modifier_return_reference.log": {
+      "sha256": "31d017706f408459d6ccf38e3ab0d0441a32283c800c4a6831a8a7e98143d783",
+      "bytes": 1288
+    },
+    ".lake/upstream/group01-resume/layering.log": {
+      "sha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562",
+      "bytes": 41
+    },
+    ".lake/upstream/group01-resume/modifier-controls.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-resume/modifier-proofs.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-resume/node-tests.log": {
+      "sha256": "6024c91a193dc11b5ea0435100e32c9d46ed0f4ac08457453b8828e8f49d2f3c",
+      "bytes": 1335
+    },
+    ".lake/upstream/group01-resume/progress-monitor.jsonl": {
+      "sha256": "a983f25cca0d7a66519ecfdb3410e9019079e4e4712c0692e46b27073ce4048d",
+      "bytes": 3002
+    },
+    ".lake/upstream/group01-resume/reachability.log": {
+      "sha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f",
+      "bytes": 41
+    },
+    ".lake/upstream/group01-resume/replay.log": {
+      "sha256": "105de8230ee7a2e8cab2373f8b2c29477d99faada3415d1bf3b6ab261896a84f",
+      "bytes": 5124
+    },
+    ".lake/upstream/group01-resume/run-final-checks.py": {
+      "sha256": "cd1b5fc6670e25eb82f31f0ffb118e4f56c045830aad8b0f43b0b1bd37bae008",
+      "bytes": 2130
+    },
+    ".lake/upstream/group01-resume/run-serial.py": {
+      "sha256": "c5df1e6602d2f882d3baf16564559c8663eb2b6820e84261b2ff33128d89c79d",
+      "bytes": 2014
+    },
+    ".lake/upstream/group01-resume/sort.log": {
+      "sha256": "535033443b0e4baa365e1f3528e38316e4d911516098ae47365ad8415a402b7f",
+      "bytes": 231
+    },
+    ".lake/upstream/group01-resume/strict.log": {
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    ".lake/upstream/group01-resume/testsuite-audit.log": {
+      "sha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+      "bytes": 385
+    },
+    ".lake/upstream/group01-resume/testsuite.log": {
+      "sha256": "3bd0bd823897d3babd518195191a3dc850141965aba391efe5004b26ca0c2ccd",
+      "bytes": 43348
+    },
+    ".lake/upstream/group01-resume/verify.log": {
+      "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6",
+      "bytes": 65
+    },
+    ".lake/upstream/group01-resume/doc-paths.log": {
+      "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb",
+      "bytes": 3411
+    }
+  },
+  "patchStatus": "local branch; original implementation commit preserved; no push or merge to master",
+  "freshChecksEnvironment": {
+    "LEAN_NUM_THREADS": "1",
+    "setup": "source /workspace/.setup/activate.sh"
+  },
+  "referenceProvenance": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol",
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "documentationPaths": {
+    "status": "baseline failure",
+    "missingReferences": 13,
+    "newMissingReferences": 0,
+    "log": ".lake/upstream/group01-resume/doc-paths.log"
+  },
+  "exportPath": "/workspace/group01-modifier-returns.patch",
+  "logArchivePath": "/workspace/group01-validation-logs.tar.gz",
+  "logArchiveSha256": "c9583b3f229ba9b98a2429853d467871cfe331878889b5e424579e6f0d30a843"
+}

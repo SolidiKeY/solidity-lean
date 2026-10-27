@@ -648,7 +648,8 @@ def calleeBody (d : FunDecl) (ρ : List (String × String)) (ctor selfFrame : Bo
   let body ← renameStmts ρ d.body
   let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
   let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
-  let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
+  let frame := if C.evalOrder.modifierFrames then some (d, ρ) else none
+  let body ← wrapMods C body frame (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   -- a constructor's initializers: after its parameters are bound, before its
   -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
   let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body

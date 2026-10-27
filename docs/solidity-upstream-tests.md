@@ -131,3 +131,217 @@ words, the exhaustive partition and retry merging; `tests/upstream/Replay.lean`
 covers deployment initializers, stateful sequencing, rollback, real
 mismatches and inconclusive fuel/panic outcomes. The new `evalExpr` site of
 `Tools/Upstream.lean` is in the trust inventory.
+
+## Group 01: viaIR modifier return slots (2026-10-26)
+
+Task branch `fix/group01-modifier-returns` starts at current `origin/master`,
+`006fcd593f5beeb540e7adf2bc76de4638566924`. The managed executor passed the
+runtime gate with Lean 4.24.0 (`797c613`), Lake 5.0.0, and
+`lake build Solidity.KeySort`. The saved setup is activated with
+`source /workspace/.setup/activate.sh`; no scratch toolchain is involved.
+
+Both historical mismatches reproduced on this base, before editing:
+
+| Exact fixture under `test/libsolidity/semanticTests/modifiers/` | Required pipeline | Before | After |
+|---|---|---|---|
+| `function_modifier_loop_viair.sol` | viaIR | broken: `f()` returned 10, expected 1 | working: 1 |
+| `function_modifier_multi_invocation_viair.sol` | viaIR | broken: false returned 1, true returned 2; expected 1 for both | working: 1, 1 |
+| `function_modifier_loop.sol` | legacy | historical working control | working: 10 |
+| `function_modifier_multi_invocation.sol` | legacy | historical working control | working: 1, 2 |
+| `function_modifier_return_reference.sol` | legacy and viaIR | historical working control | working: 2, 3 in each pipeline |
+
+The last fixture concerns assignments to primitive named returns in modifier
+arguments, despite its filename. No assigned case was already fixed on the
+current base. Every exact-path run uses `--batch-size 1` and a distinct output
+directory. Complete selected reports, fixture SHA-256 values, model/compiler/
+runner/archive hashes and exact commands are preserved in
+[the Group 01 evidence](../tests/upstream/group01/validation.json).
+Historical `tests/upstream/results`, the pinned archive, source bytes and
+expectation bytes remain unchanged. The first loop attempt stopped during an
+overlapping runner build with Lean exit 135; the isolated sequential retry
+completed and supplies the before observation. This build failure is not a
+semantic observation.
+
+The pinned legacy `ContractCompiler.cpp` initializes function return slots once,
+then recursively emits modifier/body blocks from `appendModifierOrFunctionCode`
+without reinitializing them at placeholders. The pinned `IRGenerator.cpp`
+functions `generateModifier` and
+`generateFunctionWithModifierInner` distinguish incoming return slots from
+latest result slots. Every placeholder receives the modifier's incoming
+slots and fresh parameter slots. Results initialize before modifier arguments;
+arguments can change incoming named returns; a skipped body leaves the initial
+result. The lowering now mirrors those boundaries using typed declarations,
+blocks and result assignments. Primitive slots retain their widths and ABI/
+function markers; reference parameters and memory returns retain aliases.
+The new `EvalOrder.modifierFrames` flag is independent of operand order and
+is enabled by `EvalOrder.viaIR` and modern viaIR import provenance.
+Legacy keeps its previous expansion.
+
+The finder and independent skeptic reviewed the patch read-only, without
+Lean workers. They confirmed fixes for separate configuration, complete nested
+slot metadata and memory-return aliases. Their findings prompted enum packed
+ABI, nested enum, function-slot, storage-rebinding and memory-return controls.
+Native controls also cover argument mutation of named returns, skipped bodies,
+nested placeholders, parameter resets, narrow overflow and tuple results.
+No further concrete lowering defect was found. General source-lowering
+agreement for arbitrary bodies is not established by these controls.
+
+Storage-valued returns under viaIR modifiers are an explicit remaining
+exclusion: preserving an unset incoming storage alias needs a representation
+that copies its optional binding without reading it. Such calls now fail
+elaboration with a pinned diagnostic instead of inheriting legacy slot reuse.
+This is a compatibility restriction, not passing coverage. Memory returns
+are supported. Core statement/run/rule representations and their soundness
+proofs are unchanged; no dependency enters the core or optional Bridge.
+The configuration record gains one flag and generated frames add local
+copies, so dependent modules rebuild and proof terms may grow. Inspection of
+`git log` for the lowering found no speed-motivated change being reversed.
+No proof limit is raised.
+
+Reference and regression commands (after activation):
+
+```sh
+node scripts/check-modifier-frames.mjs \
+  /tmp/soljson-v0.8.38+commit.1835d247.js /tmp/group01-reference/node_modules
+lake env lean --tstack=131072 tests/upstream/ModifierFrames.lean
+lake env lean --tstack=131072 tests/upstream/ModifierFrameProofs.lean
+node --test --test-isolation=none scripts/solidity-upstream.test.mjs
+lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072
+node scripts/check-automatic.mjs --strict
+node scripts/check-orphans.mjs
+node scripts/check-layers.mjs
+./scripts/check-testsuite.sh --solkey tests/migration/solkey/keyext.solidity.examples
+```
+
+The optional EVM runner uses external EthereumJS vm/common/util 10.1.3 and
+ethers 6.17.0, outside the Lean package. All **40** vectors pass, 20 per
+pipeline, with SHA-checked solc 0.8.38, optimizer enabled and Cancun. These
+are separate compiler/EVM observations; the upstream Lean runner retains its
+recorded Osaka configuration and fuel 1,000. All 14 JavaScript tests, existing
+Lean replay checks, reachability (667 modules), layering (143 core modules),
+strict automation (0 pending) and frozen TestSuite audit pass. Documentation
+paths retain the 13 baseline missing references. Long build/diagnostic logs
+are retained under `.lake/upstream/group01-logs/`.
+
+Final proof/build/sort/corpus outcomes are recorded in the evidence manifest;
+resource exhaustion or incomplete checks are not counted as passing.
+
+### Group 01 final gate evidence
+
+The final per-file checks pass for Raw (6.0 s), Lower (27.9 s), Arms
+(93.9 s) and Import (19.3 s). The 34 native runtime/configuration/exclusion
+controls pass (16.5 s). Four fixed-program semantic validity proofs pass,
+with exact axiom-output pins allowing only `propext`, `Classical.choice`
+and `Quot.sound` (47.1 s). They establish the model's outcomes for the two
+affected programs and their distinct legacy controls; they are not a
+source-lowering simulation for arbitrary bodies. No Lean MCP tools were
+exposed, so checks used the configured per-file Lean commands.
+
+All three existing focused source regressions pass (195.1 s): modifiers,
+inheritance modifier dispatch and constructor wrapping. Their deliberately
+false/narrow-overflow obligations retain the expected pending statuses.
+This existing harness uses the frozen 0.8.34 compiler; the assigned upstream
+fixtures and independent EVM controls use SHA-checked 0.8.38.
+
+The complete current modifier family has 31 verdicts: **9 working, 17 broken,
+5 blocked**. Both assigned cases now work, and all seven historically working
+family fixtures still work. The other cases remain missing getter adapter
+entries, library state-type visibility gaps, transient-state exclusion, or
+unadapted aggregate/host/revert-data observations. Actual `variants[].gaps`
+were inspected and the complete report is retained in `group01/after-family.json`.
+Comparison with historical statuses is not a fresh base rerun of the
+unassigned gaps, and none are called passing by dropping their observations.
+
+The TestSuite build passes all 249 jobs (725.4 s observed), and current
+artifacts pass a no-build confirmation after an environment refresh detached
+its original controller. The frozen sort gate reports 377 taclets, 131
+read-bearing annotations and zero mismatches. `SolidityCorpus` builds
+(64.2 s), and the frozen corpus gate passes without verdict drift (24.2 s).
+
+The first cold default build completed 642/649 targets in 71m37s without
+semantic errors before a controlled resource stop. OpenLoops completed in
+1186 s immediately before the stop; DecisionHashes remained active while
+the combined workers approached this executor's 16 GiB cgroup memory cap. The
+historical baseline also left the broader decision-example build inconclusive;
+that is not a fresh current-base performance comparison. A bounded single-worker
+tail retry is recorded separately in the evidence manifest.
+
+Shared integration changes are limited to Raw's configuration flag, Import's
+legacy constructor arity, Arms' flag selection and Lower's frame implementation;
+apply these together. No upstream runner edits or unpublished sibling patches
+are required. Historical corpus inputs/results, proof limits, core dependencies
+and optional Bridge remain unchanged.
+
+The single-worker tail retry passed `Examples/DecisionHashes.lean` in 417 s,
+then reached its fixed 900-second timeout while checking the unchanged
+`Examples/Decision.lean`. At that handoff the default build remained **resource-blocked at
+643/649**, not passing; the completion below supersedes that status. No semantic error was emitted. Its source files are
+unchanged by this patch; the historical baseline had an inconclusive broader
+decision-example build, but no fresh current-base timing comparison was made.
+All focused, formal, source, TestSuite, frozen sort and frozen corpus gates
+passed. Long logs and process/resource records are retained, with log digests
+in the evidence manifest.
+
+The final read-only finder and independent skeptic passes found no remaining
+concrete defect or overclaim, opened no Lean workers, verified report/control
+hashes and the exact Node model digest, and confirmed the stated proof,
+exclusion and resource limits. No historical input/result was modified, no
+axiom or proof-limit override was added, and no push or merge to master was
+performed.
+
+
+### Group 01 default-build completion (2026-10-27)
+
+Resumed the same branch at `bfad51e3`, preserving its implementation, reports
+and historical inputs. The managed Lean/Lake/KeySort runtime gate passed again.
+No stale Lean worker existed. The configuration field invalidated downstream
+artifacts, but the decision examples do not exercise modifier frames.
+`Solidity/Examples/Decision.lean` is byte-identical to the base. No fresh base timing A/B was
+performed, so these measurements do not establish a performance regression
+or its absence. No Lean source, algorithm, proof limit or representation
+changed during this completion.
+
+Scratch boundary profiling located the existing `sortedLe` verdict at 198 s
+and the later ledger verdict group at about 105 s. Profiling also injects
+timing messages into `#guard_msgs`; that diagnostic was stopped and is not
+a passing check. Uninstrumented builds supply the final evidence.
+
+All remaining modules were then built separately with `LEAN_NUM_THREADS=1`,
+one Lean worker at a time, a 90-minute per-target ceiling and a 14,500 MiB
+process-tree RSS ceiling. Neither ceiling was reached; RSS and worker counts were sampled every two seconds:
+
+| Target | Result | Elapsed | Sampled peak process-tree RSS |
+|---|---|---|---|
+| `Solidity.Examples.Decision` | pass | 758.7 s | 5.14 GiB |
+| `Solidity.Examples.DecisionKInt` | pass | 6.0 s | 1.63 GiB |
+| `Solidity.Examples.DecisionMemory` | pass | 56.3 s | 1.45 GiB |
+| `Solidity.Examples.DecisionArrays` | pass | 2383.1 s | 11.74 GiB |
+| `lake build` | **pass, 649 jobs** | 4.0 s after those builds | 0.53 GiB |
+
+Fresh exact-path fixture runs, each with `--batch-size 1` and a distinct output
+directory, pass both assigned viaIR cases and all three existing control
+fixtures. Every fresh report is byte-identical to its preserved committed
+after-report, including all observations, pipelines and provenance hashes.
+The model digest remains `56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402`.
+The compiler lost from `/tmp` at reconnect was restored and SHA-checked.
+
+The 34 native controls and four semantic proofs with exact standard-axiom
+pins pass again, as do all 14 runner tests, existing replay, strict automation,
+reachability, layering, cached TestSuite build/audit, frozen sort and corpus
+build/check. The prior 40 EVM vectors and three focused source regressions
+remain retained evidence; they were not rerun in this completion.
+Storage-valued modifier returns remain excluded, generic source-lowering
+agreement remains unproved, and the unassigned family gaps remain outside
+this lane. No broader family rerun or universal compiler theorem is claimed.
+
+Exact commands, terminal results, fixture/report hashes, resource measurements
+and log digests are in [the completion evidence](../tests/upstream/group01/resume-validation.json).
+The old incomplete attempts remain recorded. The documentation-path gate
+retains the same 13 missing references; none were introduced here.
+
+The final read-only finder and independent skeptic verified the terminal logs,
+commands, report/model/compiler hashes, five byte-identical fixture reports,
+proof scope and remaining exclusions. Neither opened Lean workers. Their
+precision fixes distinguish the 16 GiB cgroup limit and sampled RSS peaks.
+The original implementation commit remains intact; the completion commit
+records evidence only. No push or merge to master was performed.

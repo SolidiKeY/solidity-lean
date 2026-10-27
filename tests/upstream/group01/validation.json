@@ -1,0 +1,455 @@
+{
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "sourceCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "fixtureHashes": {
+    "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol": "f00bf085a67713fe0daab4f067c5965a6d8f7a5201338f7eb78da31ea5557c37",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol": "05593525b2e7ff15da8ad6d43704e61149311d3e82c87b07987f81cb7b34b5a5",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol": "67b76b68f1847c8db9a11ccbbe3b0e4cd9c2e88a956a759e39c0651983c81c52",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol": "96a3dfb8872e051d6b5575000a3964d53dac16b5a316e6a152db4e643ab7f89d",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol": "0f6814bd080f68ffa8e472dd18fc5209ca9479d0d72e548c9cc815414e9c2747"
+  },
+  "reports": {
+    "after-function_modifier_loop.json": "26fd432ea950a85971eddfa42c06581d9e02d8781c9ab764e8effe38e35cc06e",
+    "after-function_modifier_loop_viair.json": "21e2f2721c432e45d34d0735da0d54a3264dbd99e7adff3166ef2c7457db09e8",
+    "after-function_modifier_multi_invocation.json": "fb46b64982544023928109a6f305996f39070226a235c98a7076e334cdddbda9",
+    "after-function_modifier_multi_invocation_viair.json": "cdc747c4389f408c0532fee0f38651eaccd8e429da5bd7accee54e5d37d1976e",
+    "after-function_modifier_return_reference.json": "0b336393e36187374103723d05703fb0474ba3c9232f1ecc125a71332a161b7c",
+    "before-loop.json": "baeb637cbf72366c750d82af146c917f368507caf0c0520970e9412c36c5569e",
+    "before-multi.json": "a06000962abdf71c1581ce8d6702dbcec1ea03ffde0ea31911d1499ff6579edb",
+    "after-family.json": "c0208e15d15681d8969a89b407df54a650b6dc9e84cd6554fe95fd4621beafe6"
+  },
+  "commands": [
+    "source /workspace/.setup/activate.sh",
+    "lean --version",
+    "lake --version",
+    "lake build Solidity.KeySort",
+    "node scripts/solidity-upstream.mjs verify",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol --batch-size 1 --out .lake/upstream/group01-after-function_modifier_loop",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol --batch-size 1 --out .lake/upstream/group01-after-function_modifier_loop_viair",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol --batch-size 1 --out .lake/upstream/group01-after-function_modifier_multi_invocation",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol --batch-size 1 --out .lake/upstream/group01-after-function_modifier_multi_invocation_viair",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol --batch-size 1 --out .lake/upstream/group01-after-function_modifier_return_reference",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol --batch-size 1 --out .lake/upstream/group01-before-loop-retry",
+    "node scripts/solidity-upstream.mjs run --compiler /tmp/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol --batch-size 1 --out .lake/upstream/group01-before-multi"
+  ],
+  "notes": [
+    "Historical tests/upstream/results and upstream source/expectation bytes remain unchanged.",
+    "Both assigned fixtures require viaIR only; exact legacy fixtures and reference vectors preserve legacy controls."
+  ],
+  "validation": {
+    "runtimeControls": "34 native runtime/exclusion/configuration controls passed, including named-return increments in modifier arguments and skipped bodies",
+    "referenceEvm": "40/40 passed, 20 legacy + 20 viaIR, Cancun optimizer enabled",
+    "nodeTests": "14/14 passed",
+    "replay": "passed",
+    "reachability": "667 reachable, 0 orphaned",
+    "layering": "143 core modules, 0 frontend reach",
+    "strictAutomation": "491 automatic, 61 bounded, 11 refuted, 0 pending",
+    "testsuiteAudit": "passed against tests/migration/solkey/keyext.solidity.examples",
+    "docPaths": "13 pre-existing missing references; no new references missing",
+    "proofs": "four fixed-program semantic validity theorems and exact axiom-output pins passed; only propext, Classical.choice, Quot.sound; 47.084 seconds final replay",
+    "defaultBuild": "passed: resumed serial builds completed Decision (758.689s), DecisionKInt (6.020s), DecisionMemory (56.284s), DecisionArrays (2383.117s); final lake build exit0,649 jobs (4.017s). Earlier incomplete attempts retained in finalGates and resume-validation.json.",
+    "sort": "passed frozen 473da8944c; 377 taclets, 131 read-bearing annotations, zero mismatches",
+    "corpus": "passed explicit SolidityCorpus build and frozen check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples",
+    "modifierFamily": "31 current fixtures: 9 working, 17 broken adapter/import gaps, 5 blocked. Both assigned cases work; all seven historically working family fixtures still work. Historical comparison is not a fresh base rerun for unassigned gaps.",
+    "sourceModifierTests": "3/3 passed: root modifiers, inheritance modifier dispatch, constructor modifier wrapping; expected pending negative obligations retained by the existing tests",
+    "testsuiteBuild": "passed 249 jobs; recovered detached build and confirmed current artifacts with lake --no-build build SolkeyTestSuite"
+  },
+  "adaptedSourceHashes": {
+    "test/libsolidity/semanticTests/modifiers/function_modifier_loop.sol": "85d48c928956684792746e4b17143f1b2e346bf0dde64b0f1a7bcb634627937e",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_loop_viair.sol": "625bc2c0e33d99be2b30e3906a68a89b6c20c9047ece0d825858d13cb224e860",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation.sol": "572f15a27ce0f1272a6a3f372a1ed20fb5bf01c3e254c73b70dc5405e00f9945",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_multi_invocation_viair.sol": "889d24de68506a0664bc408e44294b1169547997c3fda0d8e283ac1cf3b25a82",
+    "test/libsolidity/semanticTests/modifiers/function_modifier_return_reference.sol": "bb93554c83c6aba7c7aaaa3401a31a23a6ead7d840dffce056abaeb262148d6c"
+  },
+  "controlHashes": {
+    "tests/solc/ModifierFrames.sol": "62bdc69fda837c86615468057b88ef3c590c99102d582a70569c63874fb79d87",
+    "scripts/check-modifier-frames.mjs": "a3f8b9536b6cc4f1427d2380b748ac10b7d6d0494afec70875df930a8b9e62c4",
+    "tests/upstream/ModifierFrames.lean": "4585ed17b7b005f8f782c2d6c65f23aafcfd3b0ee6fbadce1eb0eff541521929",
+    "tests/upstream/ModifierFrameProofs.lean": "877074fca0e778230ce1857b5ce39e6adeb19cfff8379bfa879fec7f29ab8702"
+  },
+  "compilerImplementationHashes": {
+    "ContractCompiler.cpp": "5cc5cd10d9dbc3f1957485faf5add53a83f64c7b74b9f30bc675853c0988fd70",
+    "IRGenerator.cpp": "6d8fc8212b52b5b63bec236a9439b509c36b6fc3fdb0f210043488ae48c7670d"
+  },
+  "proofLimits": "unchanged maxHeartbeats; bounded sol_prove steps=256 for ten-iteration controls",
+  "leanMcp": "not exposed; per-file managed executor Lean commands used",
+  "integrationDependencies": [
+    "Apply Raw modifierFrames, Import legacy constructor arity, Arms flag selection and Lower frame implementation together.",
+    "No shared upstream runner changes or unpublished sibling patches are required."
+  ],
+  "resourceAttempts": [
+    "Initial overlapping upstream runner builds exited Lean 135; sequential exact retries completed.",
+    "Direct interpreter normalization exhausted unchanged proof resources; replaced by sound bounded symbolic proofs.",
+    "A virtual-address cap interfered with the Lean allocator and was discarded; it was not treated as semantic evidence.",
+    "Standalone proof checks during dependency rebuilds were discarded; checks rerun read-only after dependencies stabilized."
+  ],
+  "finalGates": [
+    {
+      "name": "raw-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Syntax/Raw.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 6.036,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/raw-final.log"
+    },
+    {
+      "name": "lower-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Syntax/Elab/Lower.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 27.862,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/lower-final.log"
+    },
+    {
+      "name": "arms-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Syntax/Elab/Arms.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 180,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 93.87,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/arms-final.log"
+    },
+    {
+      "name": "import-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/Import.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 19.255,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/import-final.log"
+    },
+    {
+      "name": "modifier-controls-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "tests/upstream/ModifierFrames.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 16.504,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/modifier-controls-final.log"
+    },
+    {
+      "name": "modifier-proofs-final",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "tests/upstream/ModifierFrameProofs.lean"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 47.084,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/modifier-proofs-final.log"
+    },
+    {
+      "name": "source-modifier-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "--test-name-pattern",
+        "modifiers|modifier dispatch",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "environment": {},
+      "timeoutSeconds": 1200,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 195.093,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/source-modifier-tests.log"
+    },
+    {
+      "name": "modifier-family",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/tmp/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group01-family-final"
+      ],
+      "environment": {},
+      "timeoutSeconds": 900,
+      "exitCode": 1,
+      "timedOut": false,
+      "seconds": 57.933,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/modifier-family.log"
+    },
+    {
+      "name": "testsuite-build",
+      "command": [
+        "lake",
+        "--no-build",
+        "build",
+        "SolkeyTestSuite"
+      ],
+      "environment": {},
+      "timeoutSeconds": 120,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 0.385,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/testsuite-build-confirmation.log",
+      "recoveredDetachedBuild": true,
+      "observedBuildSeconds": 725.407,
+      "originalCommand": [
+        "lake",
+        "build",
+        "SolkeyTestSuite"
+      ],
+      "originalEnvironment": {
+        "LEAN_NUM_THREADS": "2"
+      }
+    },
+    {
+      "name": "sort-frozen",
+      "command": [
+        "./scripts/check-solkey.sh",
+        "--key",
+        "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      ],
+      "environment": {},
+      "timeoutSeconds": 600,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 0.877,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/sort-frozen.log"
+    },
+    {
+      "name": "corpus-build",
+      "command": [
+        "lake",
+        "build",
+        "SolidityCorpus"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "2"
+      },
+      "timeoutSeconds": 1800,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 64.206,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/corpus-build.log"
+    },
+    {
+      "name": "corpus-frozen",
+      "command": [
+        "./scripts/check-corpus.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "2"
+      },
+      "timeoutSeconds": 1800,
+      "exitCode": 0,
+      "timedOut": false,
+      "seconds": 24.166,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/corpus-frozen.log"
+    },
+    {
+      "name": "default-build-tail",
+      "command": [
+        "lake",
+        "build"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "timeoutSeconds": 900,
+      "exitCode": -9,
+      "timedOut": true,
+      "seconds": 900.031,
+      "log": "/workspace/solidity-lean/.lake/upstream/group01-logs/default-build-tail.log"
+    }
+  ],
+  "environmentRefresh": "Same managed executor remained connected with files and child processes intact; orchestration was resumed from checkpoints; runtime versions and KeySort gate reverified.",
+  "reviews": {
+    "finder": "final read-only pass found no remaining concrete defect or overclaim; exact Node model digest and report/control hashes verified; no Lean workers",
+    "skeptic": "independent final read-only pass found no remaining concrete defect or overclaim; hashes, family counts, proof/exclusion/resource scope verified; no Lean workers"
+  },
+  "remainingScope": [
+    "ViaIR modifier functions with storage-valued returns are explicitly excluded and their diagnostic is pinned.",
+    "Generic source-lowering agreement for arbitrary bodies is not proved; four semantic validity controls cover the affected fixed model programs.",
+    "Unassigned modifier-family cases retain17 adapter/import gaps and5 adapter blocks; no observations or expected values were dropped."
+  ],
+  "patchStatus": "local task-branch commit on fix/group01-modifier-returns; no push or merge to master",
+  "logs": {
+    ".lake/upstream/group01-logs/after-runner-build.log": {
+      "sha256": "5518a53fec167f83d14d3230cee6afd4aca05b9260e51c7f97ccb93dad5807df",
+      "bytes": 5508
+    },
+    ".lake/upstream/group01-logs/arms-final.log": {
+      "sha256": "93083d108cb57da7931a4e9f7d0498e636888e9ddcca28d856b4ecef595a6bfc",
+      "bytes": 151
+    },
+    ".lake/upstream/group01-logs/corpus-build.log": {
+      "sha256": "231125d3c77ec10bef76545e3ca652abefd2d51070ae8ec91e257672dbe1c6c4",
+      "bytes": 43878
+    },
+    ".lake/upstream/group01-logs/corpus-frozen.log": {
+      "sha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078",
+      "bytes": 163
+    },
+    ".lake/upstream/group01-logs/default-build-tail.log": {
+      "sha256": "f62b9919d586ef3e1c967e2f959259b8a89336c8a408ccae877e440a3e00119a",
+      "bytes": 87883
+    },
+    ".lake/upstream/group01-logs/doc-paths-final.log": {
+      "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb",
+      "bytes": 3411
+    },
+    ".lake/upstream/group01-logs/doc-paths.log": {
+      "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb",
+      "bytes": 3411
+    },
+    ".lake/upstream/group01-logs/final-build.log": {
+      "sha256": "4efffccad3719ca0f3e686aa7662b8b19babe2c15c3068181ef2d250e53a85e0",
+      "bytes": 116800
+    },
+    ".lake/upstream/group01-logs/function_modifier_loop.log": {
+      "sha256": "da59d7f18ca8adbee2f4583452a6ceae9890bb81d1aea2fd07277cf4226591dd",
+      "bytes": 1229
+    },
+    ".lake/upstream/group01-logs/function_modifier_loop_viair.log": {
+      "sha256": "4a7560b908b1a03eefe597ea34cb2406e524d70e71deb8fca85f7e4ff7fd4bfb",
+      "bytes": 1235
+    },
+    ".lake/upstream/group01-logs/function_modifier_multi_invocation.log": {
+      "sha256": "78f819000273b3dc1f7a39fe00feb4c1c932161a672a02f6b0147d6caa7d186b",
+      "bytes": 1241
+    },
+    ".lake/upstream/group01-logs/function_modifier_multi_invocation_viair.log": {
+      "sha256": "1cd597ff870aaaace0023a20263c084e780f26cb39b88ecb859f95bb2d04b857",
+      "bytes": 1247
+    },
+    ".lake/upstream/group01-logs/function_modifier_return_reference.log": {
+      "sha256": "31d017706f408459d6ccf38e3ab0d0441a32283c800c4a6831a8a7e98143d783",
+      "bytes": 1288
+    },
+    ".lake/upstream/group01-logs/import-diagnostics.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/import-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/lower-diagnostics.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/lower-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/modifier-controls-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/modifier-controls-ready.log": {
+      "sha256": "97707b410ff788d263420e5122be2678bf25eff4ffe251d1c66eaa6420b127ae",
+      "bytes": 5124
+    },
+    ".lake/upstream/group01-logs/modifier-diagnostics.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/modifier-family.log": {
+      "sha256": "632d0e7b9b19c44cb1ba28dc98fef2819c9d642e626f6b9a628ae623fd76e616",
+      "bytes": 3477
+    },
+    ".lake/upstream/group01-logs/modifier-proofs-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/modifier-proofs-ready.log": {
+      "sha256": "b9ac7ac3bf1560251eb6d6941b146bb4d317bb2d168772974293bc403effa738",
+      "bytes": 35064
+    },
+    ".lake/upstream/group01-logs/modifier-proofs.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/node-tests.log": {
+      "sha256": "7169e767f8040cf7679ccf418c31d2d9896095740cba32aad159c37b62e12408",
+      "bytes": 1337
+    },
+    ".lake/upstream/group01-logs/raw-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    ".lake/upstream/group01-logs/reference-evm.log": {
+      "sha256": "be6b16d38d8b7a1dd7db8f22701b646b262152bc867d26fb70c4cd45d424a7e1",
+      "bytes": 323
+    },
+    ".lake/upstream/group01-logs/replay.log": {
+      "sha256": "105de8230ee7a2e8cab2373f8b2c29477d99faada3415d1bf3b6ab261896a84f",
+      "bytes": 5124
+    },
+    ".lake/upstream/group01-logs/sort-frozen.log": {
+      "sha256": "535033443b0e4baa365e1f3528e38316e4d911516098ae47365ad8415a402b7f",
+      "bytes": 231
+    },
+    ".lake/upstream/group01-logs/source-modifier-tests.log": {
+      "sha256": "03a4096a113149c5698e27883e5564dd66c6e6beca466b355079f1ad58bae211",
+      "bytes": 394
+    },
+    ".lake/upstream/group01-logs/testsuite-audit.log": {
+      "sha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+      "bytes": 385
+    },
+    ".lake/upstream/group01-logs/testsuite-build-confirmation.log": {
+      "sha256": "c4ab1e69f528c8b6acb8ab139b8da43b89b46d49121333c48160eae78903ceb1",
+      "bytes": 43342
+    },
+    ".lake/upstream/group01-logs/testsuite-build.log": {
+      "sha256": "d32967e1e53699766143f66578e44c4628172cf737877d84d18c76bf3e4e28c6",
+      "bytes": 44875
+    }
+  },
+  "completionEvidence": "tests/upstream/group01/resume-validation.json"
+}
