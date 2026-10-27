@@ -345,3 +345,46 @@ proof scope and remaining exclusions. Neither opened Lean workers. Their
 precision fixes distinguish the 16 GiB cgroup limit and sampled RSS peaks.
 The original implementation commit remains intact; the completion commit
 records evidence only. No push or merge to master was performed.
+
+## Group 02 callable-entry repair
+
+The group 02 branch starts at `006fcd593f5beeb540e7adf2bc76de4638566924`.
+The historical result directory and pinned archive remain unchanged. All 67
+assigned missing imported-function rows were reproduced before editing, with
+one exact fixture filter and `--batch-size 1` per output directory. New replay
+results distinguish resolved entrypoints from deeper initialization mismatches
+and explicit getter/import limitations. Runtime agreement remains observational.
+Implementation and read-only review details are recorded in
+[the declaration milestone](feature-work/declarations-metadata.md#group-02-upstream-callable-entry-replay-2026-10-26).
+
+The additional source controls run with:
+
+```sh
+source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1
+lake build Solidity.Tools.Upstream
+lake env lean --tstack=131072 tests/upstream/InitializationOrder.lean
+lake env lean --tstack=131072 tests/upstream/Entrypoints.lean
+lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072
+node --test --test-isolation=none scripts/solidity-upstream.test.mjs
+```
+
+
+Final assigned result after initialization-order completion: **67 working,
+zero broken, zero blocked, zero exclusions**, across all 131 required pipeline
+runs (65 legacy, 66 viaIR). Neither upstream inputs nor expectations changed.
+The viaIR constructor-order case now returns `x = 2`; the independent legacy
+companion still returns `4`. The state-initialization case now completes all
+eight expected calls, including `c = 51` and the five previously unobserved calls.
+
+The complete [per-fixture handoff](../tests/upstream/repairs/group02.md) links
+all before/after reports, exact commands, required pipelines, raw and compiled
+source hashes, compiler/archive/runner/model hashes and timings. Historical
+model hash `c042a72f…` belongs to the imported `cadb628c` run; fresh master
+reproduction uses `c86945ed…`, the first repair `87539855…`, and completed repair
+`4def0e38…`. Every earlier report remains retained as a distinct phase.
+Runtime agreement is observational, with no claim of universal compiler
+correctness. Eleven kernel-checked initialization controls are in
+`tests/upstream/InitializationOrder.lean`; their source is independently pinned
+for both legacy and viaIR. Reproduce the completed 67-fixture run with
+`bash tests/upstream/repairs/group02-init-commands.sh`.
