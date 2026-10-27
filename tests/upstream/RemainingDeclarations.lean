@@ -157,8 +157,9 @@ def check (ir wrong : Bool) : IO Unit := do
   let contracts ← IO.ofExcept (artifact.getObjValAs? (Array Json) "contracts")
   let creation ← IO.ofExcept (contracts[0]!.getObjValAs? String "creationCode")
   let runtime ← IO.ofExcept (contracts[0]!.getObjValAs? String "runtimeCode")
-  let vector (signature : String) (args expected : List String) (failure := false) := Json.mkObj
-    [("signature", toJson signature), ("args", toJson args), ("expected", toJson expected), ("failure", toJson failure)]
+  let vector (signature : String) (args expected : List String) (failure := false) (panic : Option Nat := none) := Json.mkObj
+    ([("signature", toJson signature), ("args", toJson args), ("expected", toJson expected), ("failure", toJson failure)] ++
+      (panic.toList.map fun code => ("revertBytes", toJson ((Semantics.encodePanic code).map UInt8.toNat))))
   let replay (C : Contract) (rows : List ImportRow) (vectors : List Json) :=
     Tools.Upstream.replay C rows (Json.mkObj [("vectors", toJson vectors)])
   let staticVectors := [vector "nonempty()" [] [if wrong then "0" else "1"],
@@ -171,7 +172,7 @@ def check (ir wrong : Bool) : IO Unit := do
     vector "arrayPacked()" [] ["1"], vector "wholeArrayPacked()" [] ["64"],
     vector "saved()" [] ["7"]]
   let mixedVectors := [vector "all()" [] [if wrong then "0" else "1"],
-    vector "referenceFailureDespiteHole()" [] [] true,
+    vector "referenceFailureDespiteHole()" [] [] true (some 0x32),
     vector "saved()" [] ["4"], vector "unitsValue()" [] ["1000000000000000120"],
     vector "saved()" [] ["5"]]
   let identityVectors := [vector "good()" [] [if wrong then "0" else "1"],

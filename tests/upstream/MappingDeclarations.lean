@@ -86,7 +86,15 @@ private def check (wrong : Bool) (ir : Bool) : IO Unit := do
     "{\"signature\":\"once()\",\"args\":[],\"failure\":false,\"expected\":[\"0\",\"9\",\"2\"]}," ++
     "{\"signature\":\"overflow()\",\"args\":[],\"failure\":true,\"expected\":[]}," ++
     "{\"signature\":\"value()\",\"args\":[],\"failure\":false,\"expected\":[\"7\"]}]}"
-  let data ← IO.ofExcept (Lean.Json.parse text)
+  let parsed ← IO.ofExcept (Lean.Json.parse text)
+  let vectors ← IO.ofExcept (parsed.getObjValAs? (Array Lean.Json) "vectors")
+  -- Checked uint8 addition overflows with Panic(0x11), not empty returndata.
+  let vectors := vectors.map fun v =>
+    if (v.getObjValAs? String "signature").toOption == some "overflow()" then
+      Lean.Json.mkObj (((v.getObj?).toOption.map (·.toList)).getD [] ++
+        [("revertBytes", Lean.toJson ((Semantics.encodePanic 0x11).map UInt8.toNat))])
+    else v
+  let data := Lean.Json.mkObj [("vectors", Lean.toJson vectors)]
   let result := Tools.Upstream.replay (if ir then Imported.IR.MappingAliases else Imported.MappingAliases)
     (if ir then Imported.IR.MappingAliases.report else Imported.MappingAliases.report) data
   unless (result.getObjValAs? String "status").toOption == some (if wrong then "broken" else "working") do

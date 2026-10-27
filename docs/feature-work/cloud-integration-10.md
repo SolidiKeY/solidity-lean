@@ -33,6 +33,8 @@ Original source inputs, expectations and evidence files are preserved.
 - Split source-admission setup and helper/deployment preparation out of the
   large import command after a combined elaboration exceeded its existing
   200,000-heartbeat limit. No limit was raised and no representation changed.
+- Preserve all three evaluation-order override fields, including modifier-frame
+  semantics; an explicit legacy override control pins the flag.
 - Preserve current documentation pruning and earlier lane handoffs; append only
   the new task 10 sections. Finder and skeptic review found the range identity
   and memory-dispatch issues above before final integration validation.
