@@ -1326,6 +1326,15 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         ((modifierId invocation).bind fun id => modifierDefs.find? (J.id? · == some id)).toList.flatMap paymentIssues) }
     let sourceScope := (modifierRoots.foldl (fun scan root =>
       scan.append (((J.id? root).bind (lookupBy · modifierScopes)).getD default)) sourceScope).normalize
+    -- Keep syntax errors distinct from unsupported source features. The test
+    -- API can diagnose a selection with no well-formed specification without
+    -- turning a usable mixed report into a whole-contract import failure.
+    let sourceScope := if testing then match fspecResult with
+      | .error reason => (Source.ScopeScan.rejected [] {
+          kind := .invalidAst, name := `solidity.specificationSyntax,
+          reason, line := J.line f }).append sourceScope
+      | .ok _ => sourceScope
+      else sourceScope
     let selection := if (J.id? f).any (fun id => (lookupBy id functionAliases).getD id == id)
       then SourceSelection.selected else .retained
     let identity := sourceFunction declarations f selection ((J.id? f).any freeFunctions.contains)

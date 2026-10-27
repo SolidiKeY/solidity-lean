@@ -338,7 +338,19 @@ private def walk (provenance : Provenance) (declarations : List Json) :
       let member := (J.str? j "memberName").getD ""
       if ["address", "selector"].contains member then
         if let some receiver := J.opt j "expression" then
-          if (J.tyStr receiver).startsWith "function " &&
+          -- Error/event references also have a function-shaped compiler type.
+          -- Admit only their validated static metadata path, never a receiver
+          -- that could have effects or a stored function's address/selector.
+          let staticDeclaration := J.kind receiver == "Identifier" ||
+            J.kind receiver == "IdentifierPath" ||
+            (J.kind receiver == "MemberAccess" &&
+              ((J.opt receiver "expression").bind J.ref?).any (fun id =>
+                declarations.any (fun d => J.id? d == some id && J.kind d == "ContractDefinition")))
+          let declarationSelector := member == "selector" && staticDeclaration &&
+            ((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any (fun d =>
+              (["ErrorDefinition", "EventDefinition"].contains (J.kind d)) &&
+              (Solidity.Frontend.declarationMetadata declarations receiver member).isOk)
+          if (J.tyStr receiver).startsWith "function " && !declarationSelector &&
               (storedFunctionMemberType? j).isNone &&
               !((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any
                 (fun declaration => J.kind declaration == "FunctionDefinition" ||

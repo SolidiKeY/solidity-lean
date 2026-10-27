@@ -100,6 +100,7 @@ export function runSolidityTests(paths, options = {}) {
         .map(n => n.name).filter(n => !options.contract || n === options.contract).sort();
       if (!contracts.length) throw new Error("no contracts selected");
       for (const contract of contracts) {
+        const firstResult = results.length;
         function invoke(first, count, listing) {
           const output = join(scratch, `${contract}.${first ?? 'all'}.${listing ? 'list' : 'proof'}.json`);
           const found = [];
@@ -139,6 +140,19 @@ solc_scoped_problems ${name} decl${selfClause}
           }
         } else {
           results.push(...invoke(undefined, undefined, options.list));
+          options.onProgress?.({results,errors});
+        }
+        // A mixed report keeps malformed clauses as local refusal rows. If
+        // every selected verification candidate depends on invalid clause syntax,
+        // there is no usable specification input; retain the rows and report
+        // one input error. Ordinary implementation gaps/pending proofs never
+        // satisfy this structured diagnostic test.
+        const candidates = results.slice(firstResult)
+          .filter(row => row.tag !== "internal" && row.tag !== "skip" &&
+            !["internal", "skip", "skipped"].includes(row.status));
+        if (candidates.length && candidates.every(row => row.status === "unsupported" && row.invalidSpecification === true)) {
+          errors.push({ source, contract, stage: "specification",
+            reason: `no selected well-formed specification: ${candidates.map(row => `${row.signature}: ${row.reason}`).join('; ')}` });
           options.onProgress?.({results,errors});
         }
       }
