@@ -147,6 +147,7 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
         .ite c [.assign (.name x) a] [.assign (.name x) b]]
       return (P ++ Q, .name x)
     if a.hasCall || b.hasCall || a.hasIncDec || b.hasIncDec ||
+        (a matches .ternary ..) || (b matches .ternary ..) ||
         hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
       -- a branch's effects, calls and checks run only in the branch solc
       -- evaluates: `T se; if (c) { se = a; } else { se = b; }`, solkey's
@@ -154,10 +155,37 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       -- not a literal, read after its effects are hoisted, which is undone
       let typed := if a.isLit then b else a
       let st ← get
+      let memo ← getThe CallMemo
       let (_, typed) ← hoist typed
       let ⟨_, t⟩ ← synthM C typed
       let w := widthIn C (← ctx) typed
       set st
+      modifyThe CallMemo fun _ => memo
+      if let .ref R := t.ty then
+        -- Probe types without emitting either branch. All effects and location
+        -- reads are emitted inside the selected arm, once, by elabStmtsP.
+        let probe (e : RawExpr) : ElabM (Ty × Bool) := do
+          let saved ← get
+          let memo ← getThe CallMemo
+          let (_, e) ← hoist e
+          let ⟨_, t⟩ ← synthM C e
+          let loc := match t with | .mpath .. => true | _ => false
+          let ty := t.ty
+          set saved
+          modifyThe CallMemo fun _ => memo
+          pure (ty, loc)
+        let (ta, ma) ← probe a
+        let (tb, mb) ← probe b
+        unless ta == .ref R && tb == .ref R && (ma || mb) do
+          throw "a conditional of references with effects in a branch needs one memory endpoint and equal types"
+        let Γ ← ctx
+        let ws := exprShape C Γ a
+        ElabM.lift (shapeCheck C Γ ws b)
+        let x := toString (← freshCapture "mv")
+        let D ← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") x none]
+        declareShape x ws
+        let Q ← elabStmtsP [.ite c [.assign (.name x) a] [.assign (.name x) b]]
+        return (P ++ D ++ Q, .name x)
       let some ⟨p, _⟩ := t.toVal? | throw "a conditional of references with effects in a branch"
       let x := toString (← freshCapture "se")
       let Q ← elabStmtsP [.decl (.named (tyName p w)) x none,
@@ -193,8 +221,43 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
             (.cons (.rebindMem ix (.alias (pb.wk th))) .nil))],
           .name (toString x))
       else throw "a conditional of two reference types"
-    | .ok (.path (.ref _) _), .ok (.mpath ..) | .ok (.mpath ..), .ok (.path (.ref _) _) =>
-      throw "a conditional of a storage and a memory reference"
+    | .ok (.path (.ref R) pa), .ok (.mpath (.ref R') pb) =>
+      if hR : R' = R then
+        let Γe ← ctx
+        ElabM.lift (shapeCheck C Γe (exprShape C Γe a) b)
+        let pb := hR ▸ pb
+        let c ← checkIn C Γ .bool c
+        let x ← captureRef C "mv" (.mem R) a
+        -- The join is memory: storage is copied only in its selected arm;
+        -- memory retains identity. The unreachable default avoids reading an
+        -- untaken (possibly indexed or unset) memory operand to seed the join.
+        let decl : Stmt C Γ.ctx (.mem R :: Γ.ctx) ←
+          match hd : (Ty.ref R).defaultOkS with
+          | true => pure (.declMem R x none (by simp only [Option.isSome_none, hd, Bool.or_true]) pb.mapFree)
+          | false => throw "a mixed reference conditional whose memory default is not well-formed"
+        let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.mem R)
+        pure (P ++ [.of Γ decl,
+          .of Γ' (.ite (c.wk th)
+            (.cons (.rebindMem ix (.copy (pa.wk th) pb.mapFree)) .nil)
+            (.cons (.rebindMem ix (.alias (pb.wk th))) .nil))], .name (toString x))
+      else throw "a conditional of two reference types"
+    | .ok (.mpath (.ref R) pa), .ok (.path (.ref R') pb) =>
+      if hR : R' = R then
+        let Γe ← ctx
+        ElabM.lift (shapeCheck C Γe (exprShape C Γe a) b)
+        let pb := hR ▸ pb
+        let c ← checkIn C Γ .bool c
+        let x ← captureRef C "mv" (.mem R) a
+        let decl : Stmt C Γ.ctx (.mem R :: Γ.ctx) ←
+          match hd : (Ty.ref R).defaultOkS with
+          | true => pure (.declMem R x none (by simp only [Option.isSome_none, hd, Bool.or_true]) pa.mapFree)
+          | false => throw "a mixed reference conditional whose memory default is not well-formed"
+        let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.mem R)
+        pure (P ++ [.of Γ decl,
+          .of Γ' (.ite (c.wk th)
+            (.cons (.rebindMem ix (.alias (pa.wk th))) .nil)
+            (.cons (.rebindMem ix (.copy (pb.wk th) pa.mapFree)) .nil))], .name (toString x))
+      else throw "a conditional of two reference types"
     | _, _ => pure (P, .ternary c a b)
   | .incDec op e => do
     let (P, e) ← hoist e
@@ -999,9 +1062,15 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
       let isRefLocal := match synth C (← nctx) l with
         | .ok (.mpath (.ref _) (.var ..)) | .ok (.path (.ref _) (.alias ..)) => true
         | _ => false
-      if (← read).funs.any (·.1 == f) && isRefLocal then
-        let (P, args) ← hoistCallArgs f args
-        return (P, .assign l (.call f args))
+      if let some (_, d) := (← read).funs.find? (·.1 == f) then
+        if isRefLocal then
+          -- A storage-returning call assigned to memory is a copy, not a
+          -- memory-return call. Capture its typed storage result first.
+          if d.retStorage && (synth C (← nctx) l).toOption.any (fun
+              | .mpath .. => true | _ => false) then
+            return ← hoistAssign l r
+          let (P, args) ← hoistCallArgs f args
+          return (P, .assign l (.call f args))
     match r, synth C (← nctx) l with
     | .incDec op e, .ok (.val _ (.simple (.local _))) =>
       let (P, e) ← hoist e
@@ -1039,7 +1108,7 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   | s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
-      if (← read).funs.any (·.1 == f) then
+      if ((← read).funs.find? (·.1 == f)).any (fun (_, d) => !d.retStorage) then
         let (P, args) ← hoistCallArgs f args
         return (P, .declMemory T x (some (.call f args)))
     if let .declStorage T x (some (.call f args)) := s then

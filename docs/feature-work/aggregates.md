@@ -129,6 +129,9 @@ tuples remain a function-return interface. The feature catalog remains partial.
 
 ## Group 07 upstream repair (2026-10-26)
 
+The following records the initial handoff at `3a6a037d`. The continuation
+below supersedes its remaining-gap and final-validation status.
+
 This lane starts at `006fcd593f5beeb540e7adf2bc76de4638566924` on
 `group07-tuples-references`. The historical corpus reports remain unchanged.
 All eleven assigned fixtures were reproduced independently before editing,
@@ -188,7 +191,7 @@ executor. Early overlapping build runs produced bus errors and out-of-date
 artifact failures; they are inconclusive, not passing checks or demonstrated
 model failures. Final validation is serialized over the final source state.
 
-Final isolated fixture results (each row requires both legacy and via-IR):
+Initial handoff fixture results (each row requires both legacy and via-IR):
 
 | Path under `test/libsolidity/semanticTests/` | Before | After |
 |---|---|---|
@@ -252,3 +255,95 @@ After reconnection, `lake build Solidity.KeySort SolkeyTestSuite` passes
 and independent skeptic reviews found no new concrete code defect; both
 confirmed fixture/evidence hashes without opening Lean workers. Their stale
 build-status and timing-label findings were corrected before the handoff.
+
+## Group 07 continuation: mixed references (2026-10-27)
+
+This continues the same `group07-tuples-references` lane from `9c8b45d4`
+and `3a6a037d`; no restart, push or master merge is involved. The original
+review patch remains byte-identical (SHA-256
+`b55bde20dafadca8a13ae7967c1799ad06f7f2d69d77c7353498f56ae46d16c4`).
+
+The final assigned import gap is implemented using existing intrinsic memory
+statements. Both branch endpoints must agree as `RefTy`, transported by their
+checked equality, and their complete width/nominal shape metadata must agree.
+The join is memory: its selected storage operand is copied at that evaluation
+point; its selected memory operand aliases the existing object. A fresh default
+object seeds the join without reading an untaken, possibly invalid path; it is
+unreachable after rebinding. Existing `mapFree` and `defaultOkS` admission remains.
+No runtime representation or external dependency changed.
+
+Nested/effectful branches are lowered inside the selected typed branch. Type-only
+probes restore both local/capture state and `CallMemo`, so they neither emit
+runtime effects nor retain speculative declaration identities. Complete metadata
+is restored before checking branch assignments. A storage-returning call used
+as a memory value now captures its typed storage result and copies it; the
+reference-call statement shortcut no longer treats it as memory-returning.
+Condition, receiver/index and selected calls are evaluated once.
+
+The independently proved `CloseS.readId_copySt_fixed` fills the precise closer
+gap found by the universal snapshot control. For every typed heap, fixed-array
+length, primitive type, source value and index, reading the copy returns the
+source word, or exactly `none` past bounds. Its proof reuses the typed mirror
+relation; it does not infer an unrestricted dynamic-array shadow read. It is a
+Lean-only fixed-array specialization of `readFromCopyToStorage` and is recorded
+in the rule map. The rewrite removes the copy/read head and has no reverse
+rule or expanded search budget. Its axioms are only `propext` and `Quot.sound`.
+
+`Group07Mixed.sol` is separately compiled with the SHA-checked 0.8.38 compiler
+into distinct legacy/viaIR ASTs with real compiler provenance. All 22 source
+certificates pass, covering memory identity, storage snapshots in both arm
+orders, lazy invalid paths, exact selected failures, one condition evaluation,
+effectful indices, nested joins, selected storage/memory-returning calls,
+string metadata and copied-array bounds. The three universal emitted-program
+properties (identity, snapshot and bounds failure) pass with only `propext`,
+`Classical.choice` and `Quot.sound`. Local arithmetic helper proofs keep the
+original bounds property and heartbeat limits. Ordinary writable calldata
+escape and mismatched reference widths remain explicit negative controls.
+These checks do not claim universal source/compiler equivalence.
+
+Finder and skeptic reviews used no Lean workers. They confirmed two issues
+which were fixed before validation: restoring the second state layer during
+probes, and installing full shape metadata before branch assignment checks.
+They then reviewed the call-copy path and generic copy law without finding a
+further concrete defect. A documentation escaping typo was corrected. Distinct
+legacy/viaIR wrapper hashes were independently checked against their own ASTs.
+
+All eleven assigned fixtures now pass every original observation in both required
+pipelines. The ten previously fixed rows retain byte-identical observed vectors;
+all 60 final observations are recorded. No assigned row is blocked or excluded.
+
+| Path under `test/libsolidity/semanticTests/` | Lane at `3a6a037d` | Final legacy / viaIR |
+|---|---|---|
+| `array/push/push_no_args_struct.sol` | already fixed | working / working |
+| `builtinFunctions/erc7201_param_ternary_operator.sol` | already fixed | working / working |
+| `expressions/conditional_expression_storage_memory_2.sol` | broken: mixed reference join | working / working |
+| `expressions/conditional_expression_tuples.sol` | already fixed | working / working |
+| `expressions/tuple_from_ternary_expression.sol` | already fixed | working / working |
+| `variables/mapping_local_tuple_assignment.sol` | already fixed | working / working |
+| `viaYul/comparison_functions.sol` | already fixed | working / working |
+| `viaYul/conditional/conditional_tuple.sol` | already fixed | working / working |
+| `viaYul/local_tuple_assignment.sol` | already fixed | working / working |
+| `viaYul/negation_bug.sol` | already fixed | working / working |
+| `viaYul/tuple_evaluation_order.sol` | already fixed | working / working |
+
+Final isolated commands took 3.26–5.06 seconds per fixture, with process limits
+120 seconds, batch size one and loop fuel 1,000 unchanged. This is not a
+controlled performance comparison. Final model SHA-256 is
+`19ae854dcfcc11baa01898ac1164793365aba291a7401c311453a3ee9e80999b`.
+Exact commands, source/compiler/archive/runner/model hashes, complete before/
+after reports, prior handoff evidence and control hashes are in the validation
+JSON. The pinned archive, historical results and all upstream expectation bytes
+remain unchanged.
+
+Full-gate validation is running in a detached serial job with one Lean worker,
+with durable status at `/workspace/.setup/logs/group07-resumed-gates-status.json`.
+Direct file-backed profiling established that `DecisionArrays`' theorem checks
+finish in about 1.2 seconds or less; its final verdict evaluation is the slow
+stage, consistent with the documented roughly 1,500-second baseline in
+`docs/automation.md`. `Elab.async false` stays unchanged because history records
+stack overflow with concurrent verdict evaluation. The library wall allowance
+is 5,400 seconds, followed by frozen corpus and replay checks; no proof,
+heartbeat, fixture timeout or loop-fuel limit was increased. These gates are
+not yet counted as passes. Strict automation, reachability, layering and the
+14 upstream Node tests pass. The full trust finding list remains identical
+(25), and the same 13 missing vendor/external documentation references remain.
