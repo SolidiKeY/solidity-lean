@@ -214,9 +214,11 @@ example : (match (sol[Source]{
   }).run (State.init Source) with | .error .panic => true | _ => false) = true := by
   decide +kernel
 
--- Duplicate root targets remain rejected, including transient roots.
-/-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
-#guard_msgs in #check sol[Source]{ (scratch, scratch) = (saved, saved); }
+/-- Overlapping transient targets capture first and store right to left. -/
+theorem source_tuple_overlap : Fml.Valid dl[Source]{
+    [ saved = 3; scratch = 0; (scratch, scratch) = (saved, 7); ]
+      (scratch == 3 ∧ saved == 3) } := by
+  sol_prove
 
 private def sourceEntry : State Source [] :=
   { State.init Source with tx := { selfAddress := ⟨1, rfl⟩ } }

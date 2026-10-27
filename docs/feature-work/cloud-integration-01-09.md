@@ -71,12 +71,20 @@ outcome, in both pipelines. Other unsupported forward-initialization guards
 remain. MCP diagnostics pass both updated files; finder and skeptic confirmed
 the changes independently without Lean calls.
 
+A full-build pin still expected overlapping transient tuple roots to be
+rejected. The combined scalar-tuple lowering supports them. Replace that pin
+with a kernel-checked `source_tuple_overlap` theorem using distinct right-hand
+values: right-to-left stores leave the first captured value at the shared root.
+Per-file MCP diagnostics pass; independent review confirmed the assignment order.
+
 ## Validation
 
 - Reachability: 699 modules, zero orphans or disallowed modules.
 - Core layering: 152 core modules, none reaches the elaborator.
 - Strict automation: 491 automatic, 61 budgeted, 11 refuted, zero pending.
 - JavaScript-only upstream/compiler-code regressions: 17/17 pass.
+- Compiler-backed source-import regressions: 22/22 pass.
+- Frozen SolKey sorts: 377 taclets parsed, all 131 read-bearing annotations match.
 - Trust inventory: 713 sources, 239 implementation/recovery sites, zero findings.
 - MCP diagnostics: Raw, Body, Contract and the focused combined regression pass.
 - Modifier-frame proof regression: retry passes after an initial process exit 135.
