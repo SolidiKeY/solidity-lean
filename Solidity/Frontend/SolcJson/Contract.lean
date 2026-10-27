@@ -286,6 +286,18 @@ partial def Ty.native : Ty → String
   | .function external parameters returns =>
     fnTyStr (parameters.map Ty.native) (returns.map Ty.native) external
 
+/-- A callable's components, without a scalar alternative or a redundant
+outer visibility flag. The call site selects internal or external dispatch;
+nested function components retain their own visibility in `Ty`. -/
+structure Signature where
+  parameters : List Ty
+  returns : List Ty
+  deriving BEq, Repr
+
+/-- The native key for this signature at the call site's dispatch mode. -/
+def Signature.native (signature : Signature) (external : Bool) : String :=
+  (Ty.function external signature.parameters signature.returns).native
+
 /-- Parse only the scalar/function portion that the native dispatcher can
 represent. Source ABI kinds are checked before a native-key comparison. The
 fuel is also consumed by nested function types. -/
@@ -316,6 +328,12 @@ def parseType : Nat → String → Option Ty
       if h : width - 1 < 32 then return .bytes ⟨width - 1, h⟩ else none
     else none
 
+/-- Only a function type can cross the callable boundary. Unknown components
+remain unknown rather than becoming an absent dispatch candidate. -/
+def parseCallable (fuel : Nat) (source : String) : Option (Bool × Signature) := do
+  let .function external ps rs ← parseType fuel source | none
+  return (external, ⟨ps, rs⟩)
+
 /-- A declaration-indexed source function, before generated selector helpers
 exist. The source and native signatures are kept together: equality of their
 erased native keys is never sufficient for admission. -/
@@ -328,8 +346,8 @@ structure Candidate where
   /-- Synthesized getters are external entries, never internal values. -/
   getter : Bool := false
   reference : Bool
-  source : Option Ty
-  native : Option Ty
+  source : Option Signature
+  native : Option Signature
   deriving Repr
 
 private def parameters (declaration : Json) (key : String) : Option (List Json) := do
@@ -337,11 +355,11 @@ private def parameters (declaration : Json) (key : String) : Option (List Json) 
   return (← J.arr? list "parameters").toList
 
 private def signature (fuel : Nat) (declaration : Json)
-    (component : Json → Option Ty) : Option Ty := do
+    (component : Json → Option Ty) : Option Signature := do
   let ps ← (← parameters declaration "parameters").mapM component
   let rs ← (← parameters declaration "returnParameters").mapM component
   guard (ps.length + rs.length ≤ fuel)
-  return .function false ps rs
+  return ⟨ps, rs⟩
 
 /-- Build native signatures from the same type spelling the body reader
 emits, preserving exact source signatures separately. Reference parameters
@@ -381,19 +399,15 @@ def getterCandidate (id : Int) (f : SolcFun) : Candidate :=
     identity.declaration == some id && (match identity.callable with
       | .getter _ => true
       | _ => false)
-  let signature : Option Ty := if valid then do
+  let signature : Option Signature := if valid then do
       let fuel := f.params.length + f.rets.length + 1
       let ps ← f.params.mapM fun (_, type) => parseType fuel type
       let rs ← f.rets.mapM fun (_, type) => parseType fuel type
-      pure (.function false ps rs)
+      pure ⟨ps, rs⟩
     else none
   { id, sourceName := f.sourceName, kind := "getter", modelName := f.name,
     visibility := "external", getter := true, reference := false,
     source := signature, native := signature }
-
-private def asExternal (external : Bool) : Ty → Option Ty
-  | .function _ ps rs => some (.function external ps rs)
-  | _ => none
 
 /-- Finite, conservative dependencies. A failure retains the original call
 node for the ordinary fail-closed admission diagnostic. -/
@@ -428,10 +442,10 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
     let dynamic := (declaration.any fun d => J.kind d == "VariableDeclaration" &&
         (J.tyStr d).startsWith "function ") || (isValueCallee callee && id.isNone)
     unless dynamic do continue
-    let some expected := parseType (callee.compress.length + 1) (J.tyStr callee) |
+    let some (external, expected) := parseCallable (callee.compress.length + 1) (J.tyStr callee) |
       return { result with unresolved := result.unresolved ++ [call] }
-    let .function external parameters returns := expected |
-      return { result with unresolved := result.unresolved ++ [call] }
+    let parameters := expected.parameters
+    let returns := expected.returns
     -- Keep the admitted whole signature equal to the implemented typed
     -- dispatcher: reference arguments and external memory returns need their
     -- own ABI/provenance path; they are never erased to scalar components.
@@ -442,6 +456,7 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
     if external && 1 < returns.length then
       return { result with unresolved := result.unresolved ++ [call] }
     result := { result with external := result.external || external }
+    let expectedNative := expected.native external
     for target in candidates do
       -- SourceFunction.internalValue excludes getters from native internal
       -- dispatch. External dispatch uses their retained getter identities.
@@ -450,13 +465,12 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
       -- signature we cannot reconstruct is unknown, not an ignorable target.
       if target.native.isNone && !target.reference then
         return { result with unresolved := result.unresolved ++ [call] }
-      let native := target.native.bind (asExternal external)
-      if native.map Ty.native != some expected.native then continue
+      if target.native.map (·.native external) != some expectedNative then continue
       -- receive/fallback are C.funs entries in native dispatch, but Solidity
       -- cannot name them as function values. Never silently omit them.
       if !(["function", "freeFunction"].contains target.kind) && !(external && target.getter) then
         return { result with unresolved := result.unresolved ++ [call] }
-      if target.source.bind (asExternal external) != some expected then
+      if target.source != some expected then
         return { result with unresolved := result.unresolved ++ [call] }
       if external && (!(["public", "external"].contains target.visibility) ||
           (!target.getter && target.modelName != target.sourceName)) then
@@ -464,8 +478,8 @@ def inspectCall (declarations : List Json) (candidates : List Candidate)
       let alias := (lookupBy target.id aliases).getD target.id
       let some resolved := candidates.find? (·.id == alias) |
         return { result with unresolved := result.unresolved ++ [call] }
-      if (resolved.native.bind (asExternal external)).map Ty.native != some expected.native ||
-          resolved.source.bind (asExternal external) != some expected then
+      if resolved.native.map (·.native external) != some expectedNative ||
+          resolved.source != some expected then
         return { result with unresolved := result.unresolved ++ [call] }
       if external && (!(["public", "external"].contains resolved.visibility) ||
           (!resolved.getter && resolved.modelName != resolved.sourceName)) then

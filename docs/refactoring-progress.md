@@ -129,8 +129,9 @@ before replacing legacy storage. Existing separate graph certificates do not
 establish that correspondence. The core compiler alternative is not selected:
 the public compilation entry already couples its recognizer and code through a
 certificate and the memory branch is intrinsic; another fragment AST has no
-demonstrated net simplification yet. Finite-dispatch signatures remain a modest
-follow-up. This investigation does not claim the architecture is fully optimized.
+demonstrated net simplification yet. Finite-dispatch signatures were deferred at
+that milestone; the follow-up below completes their migration. This investigation
+does not claim the architecture is fully optimized.
 
 Competing binding designs were a second name-to-shape map, a generic wrapper
 around every local, and constructor-attached metadata. A second map retains the
@@ -157,8 +158,8 @@ equivalent; a semantics-preserving target needs establishing first.
 ### Final second-pass verification
 
 Recorded on 2026-10-27, after both representation commits. No Lean code changed
-after these checks; the subsequent JavaScript repair strengthens an existing
-source regression's expected report.
+between these checks and the subsequent JavaScript repair, which strengthens an
+existing source regression's expected report. Later follow-up results are separate.
 
 | Check | Result |
 |---|---|
@@ -282,20 +283,49 @@ jobs filled RAM/swap; the completed proof artifacts were reused after headroom
 returned. No resource stop was counted as a passing check.
 
 Rebuild `Solidity.Frontend.Testing` before JavaScript regressions using
-`build:false`. Sandbox Node child-process EPERM calls for the same bounded host
+`build:false`, and `Solidity.Tools.Upstream` for the finite-dispatch production
+import checks. Sandbox Node child-process EPERM calls for the same bounded host
 check, not changed verdicts. No verification for the earlier getter/provenance
 increments is pending.
 
-## Remaining candidate
+## Finite-dispatch signature follow-up
 
-The lower-priority candidate is a dedicated parameter/result signature for
-finite-dispatch candidates in `Frontend/SolcJson/Contract.lean`. It would remove
-`asExternal`'s impossible scalar case. Keep `Ty` parsing at the external boundary
-and migrate `candidate`, `getterCandidate` and `inspectCall` together if pursued.
-Preserve unknown/reference candidates, source/native distinctions, alias checks
-and the restricted zero-argument internal memory-byte return.
+The continuation starts from `11ea6b34`. Candidates still stored a general `Ty`
+even though declaration/getter producers only built functions. Consumers rebuilt
+the outer function type for each internal/external call and returned `none` for
+an impossible scalar case. This was a representation invariant left to convention.
 
-This is future work, not an unfinished adapter in any completed increment.
-Validate any such change with `scripts/finite-dispatch.test.mjs` and
-`scripts/getter-dispatch.test.mjs` against rebuilt frontend artifacts; do not add
-another representation unless its simplification justifies those migration risks.
+The replacement `FiniteDispatch.Signature` contains parameter and result lists.
+Candidate source/native fields use `Option Signature`: unsupported source kinds
+and missing metadata remain explicit unknowns, not omitted targets. The call-site
+mode is separate from its signature; nested function components keep their own
+mode in `Ty`. `parseCallable` performs the scalar/function discrimination once
+at the external type-string boundary. Ordinary declaration and getter producers
+construct signatures directly, and all target/alias comparisons use them. The
+old `asExternal` adapter and comparison-time visibility rewriting are removed.
+Native rendering reuses `Ty.native` at one boundary, so it has no second spelling
+to synchronize with nested function types.
+
+This change preserves native-key spelling, source/native separation, unknown and
+reference refusals, getter visibility, alias checks, and the restricted internal
+zero-argument memory-byte return. A fresh source IR or a sum that conflates
+unknown metadata with known reference candidates would obscure those distinctions;
+neither is introduced. Relevant history records admission/getter changes rather
+than a checking-speed rationale for the old representation. This edit has 74
+frontend consumers, so verification remains sequential under the same memory cap.
+
+The changed Lean file's error diagnostics and the new signature regression pass.
+The regression checks a kernel equality of
+native-key rendering for arbitrary component lists, nested visibility, scalar and
+unknown/reference refusals, fuel exhaustion and memory-byte location retention.
+Read-only finder and skeptic reviews found no missed consumer or behavioral
+change. They traced unknown/reference handling, source-kind collisions, getter
+eligibility, visibility, aliases and nested function modes against the old code.
+
+The final frontend rebuild passed at 1.69 GiB peak aggregate RSS. The initial
+source-suite run passed 25 cases and refused to run six production-path checks
+because `Tools.Upstream` was out of date; no assertion verdict failed. That
+consumer was rebuilt successfully at 1.34 GiB peak. The complete 31-case source
+rerun passed with zero failures at 1.40 GiB peak; the new signature test also
+passed at 1.31 GiB peak. All 32 focused cases are covered without changing an
+existing verdict. Final library/TestSuite/frozen-sort confirmation remains pending.
