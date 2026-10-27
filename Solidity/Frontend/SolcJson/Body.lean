@@ -1807,8 +1807,10 @@ def tuple (j : Json) : PM String := do
 
 /-- What a tuple is assigned from: a tuple, or a call of a function of the
 contract (`SolJSONParser.requireTupleValue`). -/
-def tupleValue (v : Json) : PM String := do
-  if isTuple v then tuple v
+partial def tupleValue (v : Json) : PM String := do
+  if J.kind v == "Conditional" then
+    pure s!"({← expr (← PM.lift (J.get v "condition"))} ? {← tupleValue (← PM.lift (J.get v "trueExpression"))} : {← tupleValue (← PM.lift (J.get v "falseExpression"))})"
+  else if isTuple v then tuple v
   else if isNamedCall v (← get).freeFunctions (← get).baseContracts then expr v
   -- `abi.decode(d, (T, U))`: the elaborator decodes each component
   else if J.kind v == "FunctionCall" && (J.opt v "expression").any (fun f =>
@@ -1923,11 +1925,31 @@ partial def block (j : Json) : PM String := withSpecScope do
     else stmt j
   pure ("{ " ++ String.join (ss.map (· ++ "; ")) ++ "}")
 
+/-- Keep captures emitted by one operand inside that operand's position.
+An enclosing condition's prefix remains outside both branches. -/
+partial def localStmt (j : Json) : PM (List String) := do
+  let pre := (← get).pre
+  modify fun st => { st with pre := #[] }
+  let ss ← stmt j
+  modify fun st => { st with pre := pre }
+  pure ss
+
 partial def stmt1 (j : Json) : PM (List String) := do
   match J.kind j with
   | "PlaceholderStatement" => pure ["_"]
   | "ExpressionStatement" =>
-    let e ← PM.lift (J.get j "expression")
+    let e := unparen (← PM.lift (J.get j "expression"))
+    -- Tuple values are discarded component by component; the condition remains
+    -- an actual branch, so an untaken operand cannot run checks or effects.
+    if isTuple e then
+      return ← (← PM.lift (J.arr e "components")).flatMapM fun c => do
+        if (constVal c).isSome then pure []
+        else localStmt (j.setObjVal! "expression" c)
+    if J.kind e == "Conditional" && (J.tyStr e).startsWith "tuple(" then
+      let c ← expr (← PM.lift (J.get e "condition"))
+      let a ← localStmt (j.setObjVal! "expression" (← PM.lift (J.get e "trueExpression")))
+      let b ← localStmt (j.setObjVal! "expression" (← PM.lift (J.get e "falseExpression")))
+      return [s!"if ({c}) \{ {String.join (a.map (· ++ "; "))}} else \{ {String.join (b.map (· ++ "; "))}}"]
     -- Reading a resolved scalar variable as an expression statement has no
     -- effects or failing bounds. The source admission walker still checks its
     -- declaration; do not drop unresolved names, calls or indexed reads.
@@ -1949,9 +1971,17 @@ partial def stmt1 (j : Json) : PM (List String) := do
       if isTuple right && nested then return [← explicitTupleAssignment left right]
       return [s!"{← tuple left} = {← tupleValue right}"]
     -- `x.push().f = c`: solc pushes, then stores the constant
+    let purePushReceiver := ((J.opt e "leftHandSide").bind fun l =>
+      (J.opt l "expression").bind fun call =>
+      (J.opt call "expression").bind fun member => J.opt member "expression").any pureExpr
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
-        constTy r || (J.kind r == "Literal" && J.tyStr r == "bool")
+        constTy r || (J.kind r == "Literal" && J.tyStr r == "bool") ||
+        (purePushReceiver && J.kind r == "Identifier" &&
+          ((J.ref? r).bind fun id => declarations.find? (J.id? · == some id)).any fun d =>
+            J.kind d == "VariableDeclaration" && J.opt d "stateVariable" == some (.bool false) &&
+              ((PrimTy.ofName? (J.tyStr r)).isSome || (narrowTy? (J.tyStr r)).isSome ||
+                (bytesTy? (J.tyStr r)).isSome || J.tyStr r == "address"))
     -- `x.pop;`, `x.push;`: the member named, not called: the receiver is
     -- evaluated (its effects, its bounds checks) into a fresh storage alias and
     -- dropped (solkey's `storagePopReference_unfold_leftFstReceiver`,
@@ -1977,7 +2007,9 @@ partial def stmt1 (j : Json) : PM (List String) := do
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
     if ["BinaryOperation", "Conditional"].contains (J.kind e) ||
-        (scalar && ["MemberAccess", "IndexAccess", "TupleExpression"].contains (J.kind e)) then
+        (scalar && ["MemberAccess", "IndexAccess", "TupleExpression"].contains (J.kind e)) ||
+        (J.kind e == "UnaryOperation" &&
+          (J.str? e "operator").any (["-", "!", "~"].contains ·)) then
       let t := modelExprType (← get) e
       let name ← freshDiscardName
       return [s!"{t} {name} = {← expr e}"]
@@ -2006,7 +2038,14 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "Return" =>
     match J.opt j "expression" with
     | none => pure ["return"]
-    | some e => pure [s!"return {← if isTuple e then tuple e else expr e}"]
+    | some e =>
+      let e := unparen e
+      if J.kind e == "Conditional" then
+        let c ← expr (← PM.lift (J.get e "condition"))
+        let a ← localStmt (j.setObjVal! "expression" (← PM.lift (J.get e "trueExpression")))
+        let b ← localStmt (j.setObjVal! "expression" (← PM.lift (J.get e "falseExpression")))
+        return [s!"if ({c}) \{ {String.join (a.map (· ++ "; "))}} else \{ {String.join (b.map (· ++ "; "))}}"]
+      pure [s!"return {← if isTuple e then tuple e else expr e}"]
   | "Block" => pure [← block j]
   | "UncheckedBlock" => pure [s!"unchecked {← block j}"]
   | "IfStatement" =>

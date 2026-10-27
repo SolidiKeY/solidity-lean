@@ -410,6 +410,12 @@ target's: a reference type has no width to carry them. -/
 example : Prog.toStr [] (sol[NarrowNested]{ delete small; small.pop(); uint n = small.length; }) =
     "delete small; small.pop(); uint n = small.length;" := by decide
 
+-- Tuple capture must retain exactly the same narrow source/target check.
+/--
+error: Solidity elaboration failed: small has narrow positions ·[] 8 bits wide where none are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowNested]{ uint[] storage p; uint k; (p, k) = (small, 1); }
+
 -- A reference local of another shape: solc refuses the conversion too.
 /--
 error: Solidity elaboration failed: small has narrow positions ·[] 8 bits wide where none are expected: solc converts no reference type to one of another element type

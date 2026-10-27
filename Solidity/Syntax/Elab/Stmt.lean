@@ -724,26 +724,41 @@ right (a component left out is not read).  From a tuple `(e₀, e₁, e₂)`: ea
 component with a target into a fresh temporary, left to right, then each
 target assigned its temporary, left to right; a component left out is
 dropped if it can neither revert nor have an effect, and evaluated
-otherwise (solc's; solkey keeps only a call).  Targets that may alias (the same name
-twice, two that are not stack locals, one that reads another) are refused:
-solc's order of their writes is not KeY's.  The variables of a tuple
+otherwise (solc's; solkey keeps only a call). Primitive targets may overlap:
+the captured values are written right to left, as in Solidity. Reference targets
+that may alias, and targets reading another target, remain refused.  The variables of a tuple
 declaration, which no component reads, are assigned directly (`direct`). -/
 partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
     ElabM (SProg C) := do
   let tgts := ts.filterMap id
   let mut nonLocal := 0
+  let mut primitiveTargets := true
   for t in tgts do
     if t.hasIncDec then throw s!"{t.toStr}: a tuple's target with an effect"
+    unless (← synthM C t).2 matches .val _ _ | .path (.prim _) _ | .mpath (.prim _) _ do
+      primitiveTargets := false
     unless (← synthM C t).2 matches
         .val _ (.simple (.local _)) | .mpath (.ref _) (.var ..) | .path (.ref _) (.alias _) do
       nonLocal := nonLocal + 1
     for u in tgts do
       if let .name x := u then
         if t.toStr != u.toStr && t.mentions x then throw s!"{t.toStr}: a tuple's target that reads {x}, another"
-  if nonLocal > 1 then throw "a tuple assignment to two targets that are not stack locals"
-  unless (tgts.map (·.toStr)).eraseDups.length == tgts.length do
+  -- Until arbitrary LHS locations have their own typed capture, only stable
+  -- names/fields/literal indices enter the new overlapping-target path.
+  let rec stableTarget : RawExpr → Bool
+    | .name _ => true
+    | .field b _ => stableTarget b
+    | .index b (.num _) => stableTarget b
+    | _ => false
+  primitiveTargets := primitiveTargets && tgts.all stableTarget
+  if nonLocal > 1 && !primitiveTargets then throw "a tuple assignment to two targets that are not stack locals"
+  unless primitiveTargets || (tgts.map (·.toStr)).eraseDups.length == tgts.length do
     throw "a tuple assignment to the same target twice"
+  let reverseWrites := primitiveTargets &&
+    (nonLocal > 1 || (tgts.map (·.toStr)).eraseDups.length != tgts.length)
   match rhs with
+  | .ternary c a b =>
+    elabStmtsP [.ite c [.tupleAssign ts a] [.tupleAssign ts b]]
   | .call f args =>
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
@@ -752,7 +767,8 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     let (Q, _, rs) ← elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (p, r, w) in rs do declare C (toString r) (.val p w)
-    let R ← elabStmtsP ((ts.zip rs).filterMap fun (t, (_, r, _)) =>
+    let pairs := if reverseWrites then (ts.zip rs).reverse else ts.zip rs
+    let R ← elabStmtsP (pairs.filterMap fun (t, (_, r, _)) =>
       t.map fun t => .assign t (.name (toString r)))
     pure (P ++ Q ++ R)
   | .tuple es =>
@@ -778,7 +794,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         tmps := tmps ++ [bind x]
         asgs := asgs ++ [.assign t (.name x)]
       | none => unless e.isPure do tmps := tmps ++ [.eval [e]]
-    elabStmtsP (tmps ++ asgs)
+    elabStmtsP (tmps ++ (if reverseWrites then asgs.reverse else asgs))
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end

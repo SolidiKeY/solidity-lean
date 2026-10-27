@@ -454,11 +454,25 @@ example : Prog.toStr [] (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnS
 /-- error: Solidity elaboration failed: returnOrdered returns 2 values, which a tuple assignment takes -/
 #guard_msgs in #check sol[Tuples]{ uint a = returnOrdered(1, 2); }
 
-/-- error: Solidity elaboration failed: a tuple assignment to the same target twice -/
-#guard_msgs in #check sol[Tuples]{ uint a; (a, a) = returnOrdered(1, 2); }
+/-- Duplicate primitive call targets are written right to left, so the first
+return wins; the second return is retained and evaluated. -/
+theorem duplicateCallTarget :
+    ⊨ᶠ dl[Tuples]{ ⟨ uint a; (a, a) = returnOrdered(1, 2); ⟩ (a == 1 ∧ a != 2) } := by
+  sol_symex
+  sol_close
 
-/-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
-#guard_msgs in #check sol[Tuples]{ (total, total) = (1, 2); }
+/-- Overlapping storage targets use snapshots and right-to-left writes. -/
+theorem duplicateStorageTarget :
+    ⊨ᶠ dl[Tuples]{ ⟨ (total, total) = (1, 2); ⟩ (total == 1 ∧ total != 2) } := by
+  sol_symex
+  sol_close
+
+/-- Tuple conditionals evaluate only their selected branch. -/
+theorem lazyTuple :
+    ⊨ᶠ dl[Tuples]{ ⟨ uint a; uint b; (a, b) = true ? (1, 2) : (3 / total, 4); ⟩
+      (a == 1 ∧ b == 2) } := by
+  sol_symex
+  sol_close
 
 end Solidity.Examples.Tactics.Calls
 
