@@ -8,6 +8,7 @@ full ordinary source, interpreter or calculus support.
 
 | Document | Holds |
 |---|---|
+| [refactoring-progress.md](refactoring-progress.md) | Representation simplifications, ranked follow-ups, validation and resumption instructions. |
 | [solidity-scope.md](solidity-scope.md) | Pinned upstream language audit, scope policy, implementation limits, structured exclusions and the syntax-subset API. |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated feature-by-feature requirements, scope decisions, support assessments and upstream/local evidence. |
 | [feature-work/integration.md](feature-work/integration.md) | Ten-chat shared-checkout recovery, delivered boundaries, review repairs and combined validation in progress. |

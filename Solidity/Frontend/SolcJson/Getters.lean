@@ -103,17 +103,53 @@ def sourceFunction (declarations : List Json) (node : Json)
     mutability
     callable }
 
-/-- Getter input/output text, later elaborated by the normal function reader.
-`sourceParams` retains mapping key names for named source calls. -/
+/-- One getter argument, retaining its generated binding, source key name
+and unerased ABI type together. -/
+structure GetterInput where
+  name : String
+  type : String
+  sourceName : String
+  abiType : String
+  deriving Inhabited
+
+/-- A returned binding and the expression which supplies it. -/
+structure GetterOutput where
+  name : String
+  type : String
+  value : String
+  deriving Inhabited
+
+/-- A completed getter always returns at least one value. Input metadata and
+output expressions cannot get out of step with their generated bindings. -/
 structure GetterPlan where
-  params : List (String × String) := []
-  sourceParams : List String := []
-  abiParams : List String := []
-  rets : List (String × String) := []
-  values : List String := []
+  inputs : List GetterInput := []
+  first : GetterOutput
+  rest : List GetterOutput := []
   /-- Public getter bounds fail with empty revert data, before the ordinary read. -/
   guards : List String := []
   deriving Inhabited
+
+def GetterPlan.params (plan : GetterPlan) : List (String × String) :=
+  plan.inputs.map fun input => (input.name, input.type)
+
+def GetterPlan.sourceParams (plan : GetterPlan) : List String :=
+  plan.inputs.map (·.sourceName)
+
+def GetterPlan.abiParams (plan : GetterPlan) : List String :=
+  plan.inputs.map (·.abiType)
+
+def GetterPlan.rets (plan : GetterPlan) : List (String × String) :=
+  (plan.first :: plan.rest).map fun output => (output.name, output.type)
+
+def GetterPlan.returnText (plan : GetterPlan) : String :=
+  match plan.rest with
+  | [] => plan.first.value
+  | _ :: _ => s!"({", ".intercalate ((plan.first :: plan.rest).map (·.value))})"
+
+/-- Traversal has collected arguments and bounds, but has no result yet. -/
+private structure GetterPath where
+  inputs : List GetterInput := []
+  guards : List String := []
 
 /-- This milestone supports elementary value inputs/results. Bytes/string
 are references and must not be silently omitted from a struct getter. -/
@@ -127,19 +163,19 @@ private def getterValueType (S : Structs) (node : Json) : Except Gap String := d
   pure type
 
 private def getterTerminal (S : Structs) (taken : List String) (id : Int)
-    (plan : GetterPlan) (values : List (Json × String)) : Except Gap GetterPlan := do
-  let mut plan := plan
+    (path : GetterPath) (values : List (Json × String)) : Except Gap GetterPlan := do
+  let mut outputs : List GetterOutput := []
   let mut taken := taken
   for (typeNode, value) in values do
     let type ← getterValueType S typeNode
-    let name := freshSourceName taken s!"solcGetterReturn{id}_{plan.rets.length}"
+    let name := freshSourceName taken s!"solcGetterReturn{id}_{outputs.length}"
     taken := name :: taken
-    plan := { plan with rets := plan.rets ++ [(name, type)], values := plan.values ++ [value] }
-  unless !plan.rets.isEmpty do throw (.unsupported "a public getter with no returned members")
-  pure plan
+    outputs := outputs ++ [{ name, type, value }]
+  let first :: rest := outputs | throw (.unsupported "a public getter with no returned members")
+  pure { inputs := path.inputs, first, rest, guards := path.guards }
 
 private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
-    Nat → List String → GetterPlan → Json → String → Except Gap GetterPlan
+    Nat → List String → GetterPath → Json → String → Except Gap GetterPlan
   | 0, _, _, _, _ => throw (.unsupported "public getter type traversal exceeded its bound")
   | fuel + 1, taken, plan, node, path => do
     if J.kind node == "Mapping" || J.kind node == "ArrayTypeName" then
@@ -149,7 +185,7 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
       let type ← getterValueType S typeNode
       let some abi := sourceAbiType declarations (declarations.length + 1) typeNode
         | throw (.unsupported "a public getter key without its canonical ABI type")
-      let name := freshSourceName taken s!"solcGetterArg{id}_{plan.params.length}"
+      let name := freshSourceName taken s!"solcGetterArg{id}_{plan.inputs.length}"
       let input := identText name
       let key := if type == "bool" then s!"({input} ? 1 : 0)" else input
       let sourceName := if mapping then (J.str? node "keyName").getD "" else ""
@@ -157,9 +193,7 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
         plan.guards ++ [s!"require({input} < {path}.length)"]
       let plan := { plan with
         guards
-        params := plan.params ++ [(name, type)]
-        sourceParams := plan.sourceParams ++ [sourceName]
-        abiParams := plan.abiParams ++ [abi] }
+        inputs := plan.inputs ++ [{ name, type, sourceName, abiType := abi }] }
       let next ← J.get node (if mapping then "valueType" else "baseType")
       getterWalk S declarations id fuel (name :: taken) plan next s!"{path}[{key}]"
     else if J.kind node == "UserDefinedTypeName" then

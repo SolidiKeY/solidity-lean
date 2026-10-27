@@ -902,9 +902,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let body := do
       let p ← plan
       let _ ← identity
-      let result := if p.values.length == 1 then p.values.head! else
-        s!"({", ".intercalate p.values})"
-      pure ((p.guards ++ [s!"return {result}"]).map (J.line declarationNode, ·))
+      pure ((p.guards ++ [s!"return {p.returnText}"]).map (J.line declarationNode, ·))
     let f : SolcFun := {
       name
       sourceName := (J.str? declarationNode "name").getD ""
