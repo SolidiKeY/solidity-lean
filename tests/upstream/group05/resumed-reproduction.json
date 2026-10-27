@@ -230,6 +230,7 @@
         "reportSha256": "3bcebaf1fdc1d04ef6aa352c5547043b16fd5ed428de58a44f55c141bd470517"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -433,6 +434,7 @@
         "reportSha256": "c5b8a2c26e91cd88f4df8f78443f0d5fec84660096b8f9ed335bb3160d30a4dc"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -608,6 +610,7 @@
         "reportSha256": "cf7dccff79f2c1918b368124a4b014f9940b2e069b60aa8243db4892c923bc08"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -783,6 +786,7 @@
         "reportSha256": "b60bf300e8b96aa444f917c0c3ffa624e3d19c9b595d6426ec32d9b5765860a3"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -964,6 +968,7 @@
         "reportSha256": "f2f294f20bdc283eafc4b0b5f179b021519dc747214396568ea054440720346a"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -1145,6 +1150,7 @@
         "reportSha256": "eead64ac020e6c8acc622424079d0fe2fb6ab0fb3c46463243e80b2173f92075"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -1326,6 +1332,7 @@
         "reportSha256": "f0b00fc9f6ac9a4d778911e9dd01804220b6aa2f5c96455c1fd9c45dc00e0a34"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -1507,6 +1514,7 @@
         "reportSha256": "c5f6063e050b59a3e596531eec7cc7fe4636285003cc978419349fee165fb0ea"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -1710,6 +1718,7 @@
         "reportSha256": "4d84300b4a37bb59db2195868e73a4c85ff7999feed424ea0779f04be9070aa4"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -1885,6 +1894,7 @@
         "reportSha256": "c52c35c499b05a50145298e3160f1f30a535439df575275db051ed157e884bf3"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -2088,6 +2098,7 @@
         "reportSha256": "d0d04566c125d2a4b80aba2883d9fca8f7036ebbae17e024581b757b10efe220"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -2291,6 +2302,7 @@
         "reportSha256": "5d8f4a0d4a0838da9f363418aef6c03482fa89eae6732eb79cf3490c6f55db56"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -2518,6 +2530,7 @@
         "reportSha256": "c728f237260459ca71c8335658cfd7f5b520d7e7ab762f30a2bc18392a2553bf"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -2697,6 +2710,7 @@
         "reportSha256": "c7b15144a6d2df711e50b146f41aa824d4c63ec08b8712d2a72fd23ae5cbb65c"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -2872,6 +2886,7 @@
         "reportSha256": "026ae727ba7d35fbe1d2b4b472dd868c65526748a15c32b0b3c2d60fb867e32b"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3051,6 +3066,7 @@
         "reportSha256": "f27ba7bf8741e72565e931f3d0fc6308d3fb232efdc5e8167ba0bfd9da0b5b33"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3254,6 +3270,7 @@
         "reportSha256": "4ef1ae162bde37bd94f4083bbf1b81fb685d8e2c1db307bb882615ae1e576a55"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3429,6 +3446,7 @@
         "reportSha256": "e358ccf0f90ed97b130c85bdccb70008440dd5d9f0703479ce15222b0b5153ce"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3604,6 +3622,7 @@
         "reportSha256": "24710932f4619f94db8e5221ecad7ae410b09b72a4584585ad17c21bc43018c6"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3779,6 +3798,7 @@
         "reportSha256": "c7495e8e1eccaa6cf5d35ba85ef2021b15ce08b2553bb7f36c990d9ca3bc3042"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -3954,6 +3974,7 @@
         "reportSha256": "8c96de3a6a53c20a5d196bf6f3dffc1df3d57c816731c76a0545f2b77bd39023"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -4129,6 +4150,7 @@
         "reportSha256": "118e63959f2baba9b9db0eb0758cebb0694fed66eac4b75515df7cd17da5ad44"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -4320,6 +4342,7 @@
         "reportSha256": "53acc4e627a0a74cf5784c91c7282376800fa154ef4ba96c9bf3f675f461fd1a"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",
@@ -4495,6 +4518,7 @@
         "reportSha256": "5218d6f4c7fd44dfd22f9ed5eebb96106b310887032e6578969b3f5f7d363ac4"
       },
       "command": {
+        "executable": "node",
         "argv": [
           "scripts/solidity-upstream.mjs",
           "run",

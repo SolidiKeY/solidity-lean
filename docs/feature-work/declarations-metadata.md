@@ -619,3 +619,44 @@ commands, timings, source/model hashes, proof axiom pins, resource results and
 remaining baseline limitations. Runtime agreement remains observational
 evidence; deployed bytecode inclusion/exclusion, gas and code generation are
 outside these functional replay observations.
+
+The explicit proof-bridge audit confirms `AFml.hypVerify?` depends only on
+`propext`; `AFml.verify` retains the standard `propext`, `Classical.choice`,
+`Quot.sound` set. Existing sequential elaboration is retained: history
+`20e30b13` records that parallel decision pins overflowed the CLI stack.
+The unchanged loop module checked in 73 seconds, hashing example in 179
+seconds, and hash-decision example in 388 seconds. Those timings include
+checking their existing examples, not just the new fast path. A managed
+reconnect interrupted the first session-attached build after 309 completed
+jobs; the branch, evidence and cache survived. Runtime was reverified and
+validation resumed with detached drivers and serial compilation.
+
+Integration is self-contained on this lane from `006fcd593` through the
+preserved `a4c84673` milestone and resumed implementation `b599a178`. It uses
+no unpublished changes from other groups. Shared frontend edits concern
+function-type locations, reference-return dispatch admission and declaration
+resolution; the AST adapter adds only the required implementation metadata.
+The final export contains the complete lane; the separate resumed export
+applies after `a4c84673`. Neither export changes the earlier patch artifact.
+
+Final validation completed: all 24 assigned fixtures pass legacy and viaIR with
+all 70 ordered observations retained. The 22 dispatch, nine getter and 12
+affected inheritance/call/callback source tests pass, as do the three replay
+files and all 13 configured per-file Lean checks. The public audit confirms
+468 headline theorems use only standard axioms. Strict automation, reachability
+and layering pass. `run-lean.sh` passes all 650 default and 249 TestSuite jobs,
+then the frozen sort gate (377 taclets, 131 annotations). The unchanged
+`DecisionArrays` file completes in 10 seconds; the preceding `Decision` file
+takes 1,162 seconds. These are measured module timings, not a controlled
+whole-build speed comparison.
+
+The frozen corpus gate passes unchanged: 774 obligations, comprising 552
+derived, 11 refuted, one excluded, two skipped, 70 proved, 37 unsupported and
+101 unported. No assigned fixture remains excluded or blocked. The documentation
+path audit retains its 13 pre-existing missing references. Earlier unrelated
+DeclarationMetadata/RevertData coverage limits remain recorded in the prior
+milestone; their full source suites are not claimed repaired here. Peak
+resource observations and exact log hashes are in
+`tests/upstream/group05/resumed-validation.json`; long logs remain under
+`.lake/upstream/group05-resume/`. Both independent read-only reviews found no
+remaining confirmed issue and opened no Lean worker.

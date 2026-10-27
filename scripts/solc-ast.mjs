@@ -202,7 +202,7 @@ const DECLS = new Set([
 // declarations, not its inherited interface functions.
 // Internal memory-return dispatch distinguishes abstract declarations from
 // malformed concrete candidates. Retain implementation evidence only for
-// this newly supported function-value family; older fixtures stay unchanged.
+// this newly supported family; primitive-only and legacy trimming stay unchanged.
 let memoryReturnDispatch = false;
 const selectorDeclarations = new Set();
 const declarations = new Map();

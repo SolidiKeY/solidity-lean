@@ -1,0 +1,636 @@
+{
+  "completed": true,
+  "summary": {
+    "assignedFixtures": {
+      "working": 24,
+      "broken": 0,
+      "blocked": 0,
+      "excluded": 0
+    },
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ],
+    "orderedObservations": 70,
+    "dispatchSourceTests": 22,
+    "getterSourceTests": 9,
+    "affectedSourceTests": 12,
+    "replayFiles": 3,
+    "perFileChecks": 13,
+    "publicStandardAxiomTheorems": 468,
+    "frozenCorpus": {
+      "total": 774,
+      "derived": 552,
+      "refuted": 11,
+      "excluded": 1,
+      "skip": 2,
+      "proved": 70,
+      "unsupported": 37,
+      "unported": 101
+    },
+    "documentationPathBaselineMissing": 13
+  },
+  "branch": "codex/group05-function-dispatch",
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "resumedFrom": "a4c84673",
+  "finalModelSha256": "20a4e547b7c9bec59789a49f034bbab8adb6c04a33cd3c7f45faeef500ef51f1",
+  "cwd": "/workspace/solidity-lean",
+  "activationCommand": "source /workspace/.setup/activate.sh",
+  "environment": {
+    "LEAN_NUM_THREADS": "1",
+    "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+  },
+  "referenceFixtureCompiler": {
+    "version": "0.8.38+commit.1835d247",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "stage": "lean-runtime; 24fixtures, both pipelines, 70ordered observations"
+  },
+  "sourceRegressionCompiler": {
+    "version": "0.8.34+commit.80d5c536",
+    "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "scope": "Existing configured source-test harness, separate from the assigned pinned upstream compiler"
+  },
+  "managedExecutor": "ccarenv_b64_Y2NhcmVudl85Njk2YTI4YzM4Njg4MTkxOTEwMDk1M2Y0MzQ2MzQzZA",
+  "environmentReconnect": "A managed reconnect stopped session-attached workers; branch, exported patches, evidence, and309completed target jobs persisted. Runtime was reverified and serial validation resumed with detached drivers. The interrupted log is preserved; no pass claimed from it.",
+  "resourceObservationBeforeReconnect": {
+    "maxObservedLeanWorkers": 2,
+    "maxObservedCombinedLeanRssKiB": 7428004,
+    "maxObservedCgroupBytes": 10949087232,
+    "lastWorkers": [
+      [
+        "57356",
+        2460048
+      ]
+    ],
+    "finished": false
+  },
+  "mcpLimitation": "No Lean MCP diagnostic tools exposed; configured per-file CLI checks used.",
+  "proofLimitsChanged": false,
+  "immutableTrackedInputsUnchanged": true,
+  "resourceObservation": {
+    "maxObservedLeanWorkers": 2,
+    "maxObservedCombinedLeanRssKiB": 11594824,
+    "maxObservedCgroupBytes": 16743395328,
+    "finished": true
+  },
+  "sourceHashes": {
+    "Solidity.lean": "f0f48e90b3a416b4e8dae4463276a75836c785ef006746d997e571960a13a516",
+    "Solidity/Calculus/LinearCountermodel.lean": "b2a6ba4f212715ae9e4e329ae774914303d07687735d9973eb9cb6c6d2edfa79",
+    "Solidity/Calculus/LinearHypotheses.lean": "e99f94dc7ff4e7ad85ecf173611631abf33ac0efe6b311cfd0959ae497325b9b",
+    "Solidity/Examples/Tactics/Loops.lean": "88cdbf842cb664aa1702cd5758a8650c65804f55836edb94fb3d40cba9c9c7b3",
+    "Solidity/Frontend/SolcJson/Body.lean": "0dca809e741192b8691b2f96f15d39946c3900a43e75de105b9a4f987616cd9f",
+    "Solidity/Frontend/SolcJson/Contract.lean": "d86dee99377c01c970b8c7e639b1c5781e73ea430f3419508ba11b65cadcb761",
+    "Solidity/Syntax/Elab/Arms.lean": "4f5933939dcd8368b269e116c52b035e05964bd5fbc5834ee9f80b22e48dea34",
+    "Solidity/Syntax/Elab/Lower.lean": "149b1848d33cac39a3f2fa74ed671011d58256597801c6197de082278540ca32",
+    "Solidity/Syntax/Elab/Stmt.lean": "181883a6527b7b1e2cc2be6a8a043532ed71cd851776f844cde4b48d37305230",
+    "Solidity/Syntax/Elab/Values.lean": "c85646a5425000ebb8e305706e4eb5c8b1a3c58792a7b291204669afa998384a",
+    "Solidity/Syntax/Grammar.lean": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8",
+    "Solidity/Syntax/Raw.lean": "08c282258fe672bdd6e9af4f0804170d285a6d27c7462221a9fc54ebd9769ea2",
+    "tests/upstream/FunctionDispatch.lean": "d9c21264d5122efdba0eabc067402313059b4ecf7913691c4f168e52289cd69f",
+    "scripts/finite-dispatch.test.mjs": "88dbc7f3850935eed34cc872fdb2a5c7da68696133619d3191d8c6e9aac7b702",
+    "scripts/solc-ast.mjs": "a7102290892a69fff364b19c7a6575e4e940d9aab041d23c63f5e11a4b855b6c"
+  },
+  "perFileChecks": [
+    {
+      "file": "Solidity/Calculus/LinearCountermodel.lean",
+      "sourceSha256": "b2a6ba4f212715ae9e4e329ae774914303d07687735d9973eb9cb6c6d2edfa79",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Calculus/LinearCountermodel.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 1.299483300997963,
+      "log": ".lake/upstream/group05-resume/per-file-final/02.log"
+    },
+    {
+      "file": "Solidity/Frontend/SolcJson/Body.lean",
+      "sourceSha256": "0dca809e741192b8691b2f96f15d39946c3900a43e75de105b9a4f987616cd9f",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 11.190594388997852,
+      "log": ".lake/upstream/group05-resume/per-file-final/04.log"
+    },
+    {
+      "file": "Solidity/Frontend/SolcJson/Contract.lean",
+      "sourceSha256": "d86dee99377c01c970b8c7e639b1c5781e73ea430f3419508ba11b65cadcb761",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 27.61886819099891,
+      "log": ".lake/upstream/group05-resume/per-file-final/05.log"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Arms.lean",
+      "sourceSha256": "4f5933939dcd8368b269e116c52b035e05964bd5fbc5834ee9f80b22e48dea34",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Elab/Arms.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 84.69639186600034,
+      "log": ".lake/upstream/group05-resume/per-file-final/06.log"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Lower.lean",
+      "sourceSha256": "149b1848d33cac39a3f2fa74ed671011d58256597801c6197de082278540ca32",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Elab/Lower.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 10.178277243001503,
+      "log": ".lake/upstream/group05-resume/per-file-final/07.log"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Stmt.lean",
+      "sourceSha256": "181883a6527b7b1e2cc2be6a8a043532ed71cd851776f844cde4b48d37305230",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Elab/Stmt.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 9.66923123000015,
+      "log": ".lake/upstream/group05-resume/per-file-final/08.log"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Values.lean",
+      "sourceSha256": "c85646a5425000ebb8e305706e4eb5c8b1a3c58792a7b291204669afa998384a",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Elab/Values.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 10.750629786998616,
+      "log": ".lake/upstream/group05-resume/per-file-final/09.log"
+    },
+    {
+      "file": "Solidity/Syntax/Grammar.lean",
+      "sourceSha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Grammar.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 20.397750600001018,
+      "log": ".lake/upstream/group05-resume/per-file-final/10.log"
+    },
+    {
+      "file": "Solidity/Syntax/Raw.lean",
+      "sourceSha256": "08c282258fe672bdd6e9af4f0804170d285a6d27c7462221a9fc54ebd9769ea2",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Raw.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 7.656931723999151,
+      "log": ".lake/upstream/group05-resume/per-file-final/11.log"
+    },
+    {
+      "file": "Solidity/Calculus/LinearHypotheses.lean",
+      "sourceSha256": "e99f94dc7ff4e7ad85ecf173611631abf33ac0efe6b311cfd0959ae497325b9b",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Calculus/LinearHypotheses.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 1.9930673190028756,
+      "log": ".lake/upstream/group05-resume/per-file-final/12.log"
+    },
+    {
+      "file": "tests/upstream/FunctionDispatch.lean",
+      "sourceSha256": "d9c21264d5122efdba0eabc067402313059b4ecf7913691c4f168e52289cd69f",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/FunctionDispatch.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 5.4014881900002365,
+      "log": ".lake/upstream/group05-resume/per-file-final/13.log"
+    },
+    {
+      "file": "Solidity/Examples/Tactics/Loops.lean",
+      "sourceSha256": "88cdbf842cb664aa1702cd5758a8650c65804f55836edb94fb3d40cba9c9c7b3",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Examples/Tactics/Loops.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 112.34401357100433,
+      "log": ".lake/upstream/group05-resume/per-file-final/Solidity__Examples__Tactics__Loops.lean.log"
+    },
+    {
+      "file": "Solidity.lean",
+      "sourceSha256": "f0f48e90b3a416b4e8dae4463276a75836c785ef006746d997e571960a13a516",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 8.153103933997045,
+      "log": ".lake/upstream/group05-resume/per-file-final/Solidity.lean.log"
+    }
+  ],
+  "checks": [
+    {
+      "command": "lean --version; lake --version; lake build Solidity.KeySort",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/runtime-gate-final.log",
+      "logSha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "command": "lean --version; lake --version; lake build Solidity.KeySort (after reconnect)",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/runtime-gate-reconnected.log",
+      "logSha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "command": "lake --quiet --no-build lean .lake/upstream/group05-resume/ProofBridgeAudit.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/proof-bridge-audit.log",
+      "logSha256": "f1e034a3af4f2ff021e8eaaf166c347f8f9f9bc2a9135e3e1e9036c67ac6654a"
+    },
+    {
+      "command": "node scripts/solidity-upstream.mjs verify",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/verify-final.log",
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/runner-unit.log",
+      "logSha256": "e9bc738c006ef211d4ac77d588d6540cbddeef555b4d56411b03a8b9ce7b0101"
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/solc-ast-hashes.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/ast-hashes-final.log",
+      "logSha256": "68591c589fc0808b75b52bdf043a4e8fb75fc3668fcc82357d321abdaa6c5247"
+    },
+    {
+      "command": "node --test --test-isolation=none --test-name-pattern='internal memory-byte|abstract virtual|memory-return admission|concrete base candidate' scripts/finite-dispatch.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/new-source-controls-final3.log",
+      "logSha256": "98a8cbb4227d1a78ee7f18d899e79317eae38d5f9e7f62bda6a73e301165a1c3"
+    },
+    {
+      "command": "lake --quiet --no-build lean tests/upstream/FunctionDispatch.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/kernel-pins-final.log",
+      "logSha256": "a6b867dc0262ad81fa701515e1a453fcffc97e857dae1983bd34304593fa41b8"
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/finite-dispatch.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/finite-dispatch-final2.log",
+      "logSha256": "d1b516e883b6aa15590aff2009781ffd3bf775c5d49e71ebd793b2c14b132158"
+    },
+    {
+      "command": "node --test --test-isolation=none scripts/getter-dispatch.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/getter-final.log",
+      "logSha256": "ebcb71365b7905b15008ca7c300634c6be3b7ae3010c621741827b8032cd1b13"
+    },
+    {
+      "command": "node --test --test-isolation=none --test-name-pattern='inheritance|external calls|callbacks|self-calls|function values' scripts/test-solidity.test.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/affected-source-final.log",
+      "logSha256": "52d78aa41a3c4065654d9e69023880d3ae676bce9ffce4a725ad4ebae0eb9016"
+    },
+    {
+      "command": "lake --quiet --no-build lean tests/upstream/Replay.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/Replay-final.log",
+      "logSha256": "31908acb25a5b8e83211bf5d2c9ab332bcf570c242f4efef28920fd92438c824"
+    },
+    {
+      "command": "lake --quiet --no-build lean tests/upstream/ByteLiterals.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/ByteLiterals-final.log",
+      "logSha256": "00d14827b512f74cdd6123cef8a04863e6f4321802aed9f091d8d99abe4e011b"
+    },
+    {
+      "command": "lake --quiet --no-build lean tests/upstream/FunctionDispatch.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/FunctionDispatch-final.log",
+      "logSha256": "a6b867dc0262ad81fa701515e1a453fcffc97e857dae1983bd34304593fa41b8"
+    },
+    {
+      "command": "lake --quiet --no-build lean TrustAudit.lean -- --tstack=131072",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/trust-final.log",
+      "logSha256": "aae1eb6ae2200390105a0344eb9f51ceedfa02e28df33470768c3aff126e576b"
+    },
+    {
+      "command": "./run-lean.sh",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/run-lean-final.log",
+      "logSha256": "77c153ddd88801aa657812e6242b0839b1fdfb3022298a90021752e45d83d2f8",
+      "environment": {
+        "LEAN_NUM_THREADS": "1",
+        "note": "Full and targeted builds are serial after measuring high single-declaration memory; source/corpus checks each use one worker, at most two total."
+      }
+    },
+    {
+      "command": "lake build SolidityCorpus",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/corpus-build-final.log",
+      "logSha256": "3fa4421baa4d476a59ffa53e9757be3433cdf8296c549ffe5973dfee7fd3e2f1"
+    },
+    {
+      "command": "./scripts/check-corpus.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/corpus-final.log",
+      "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+    },
+    {
+      "command": "node scripts/check-automatic.mjs --strict",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/strict.log",
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": "node scripts/check-orphans.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/orphans.log",
+      "logSha256": "d2691a0f6b04430a248bd0f344b435217f138adea6f0d601631ab5e937a04de6"
+    },
+    {
+      "command": "node scripts/check-layers.mjs",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/layers.log",
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "command": "./scripts/check-testsuite.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "exitCode": 0,
+      "status": "pass",
+      "log": ".lake/upstream/group05-resume/testsuite-audit-final.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "command": "./scripts/check-doc-paths.sh",
+      "exitCode": 1,
+      "status": "known-baseline-failure",
+      "log": ".lake/upstream/group05-resume/doc-paths-final.log",
+      "logSha256": "4387fdad234c894bbe6aeb3fd8ee22253148c8dd0e0e02b73f456157800081a9",
+      "note": "13 missing paths were present on the prior lane; identify whether any new path fails."
+    }
+  ],
+  "proofEvidence": {
+    "kernelRegressionFile": "tests/upstream/FunctionDispatch.lean",
+    "kernelRegressionTheorems": 9,
+    "axioms": "Pinned exact standard sets: propext; or propext, Classical.choice, Quot.sound. No new axioms or sorry.",
+    "proofBridgeAxioms": {
+      "AFml.hypotheses_hold": [
+        "propext"
+      ],
+      "AFml.hypVerify?": [
+        "propext"
+      ],
+      "AFml.verify": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "hypothesesSoundness": "AFml.hypProof? returns an actual universally quantified proof on success; hypotheses_hold pinned to propext; failed fast path retains prior arithmetic fallback."
+  },
+  "performance": {
+    "oldResourceEvidence": "tests/upstream/group05/validation.json and .lake/upstream/group05-full-build-serial-final.log",
+    "diagnosis": "Three array kernel certificates finish; compiled live-length verdict stalls in width-11 arithmetic despite goal available as a conjunct of an implication hypothesis.",
+    "fastIsolatedVerdicts": "[\"proved\", \"refuted\", \"proved\"]; 0ms",
+    "scope": "Isolated compiled evaluation timing, not a whole-build comparison.",
+    "corpusProbeScheduling": "A PATH-local flock wrapper serializes the runner\u2019s parallel lake probe subprocesses; no proof or search limit is changed.",
+    "fullGateSeconds": 9535.0,
+    "slowestFullBuildModules": [
+      {
+        "module": "Solidity.Examples.Decision",
+        "seconds": 1162.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.OpenLoops",
+        "seconds": 633.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Recursion",
+        "seconds": 477.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.CallbackStrategy",
+        "seconds": 298.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.RevertData",
+        "seconds": 279.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Memory",
+        "seconds": 260.0
+      },
+      {
+        "module": "Solidity.TestSuite.Derived7",
+        "seconds": 210.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Calls",
+        "seconds": 209.0
+      },
+      {
+        "module": "Solidity.TestSuite.Derived20",
+        "seconds": 183.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.PublicGetters",
+        "seconds": 173.0
+      },
+      {
+        "module": "Solidity.TestSuite.Derived17",
+        "seconds": 157.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.AbiFeatures",
+        "seconds": 156.0
+      }
+    ],
+    "slowestInterruptedTargetModules": [
+      {
+        "module": "Solidity.Examples.DecisionHashes",
+        "seconds": 388.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Hashing",
+        "seconds": 179.0
+      },
+      {
+        "module": "Solidity.Calculus.Taclet",
+        "seconds": 88.0
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Loops",
+        "seconds": 73.0
+      },
+      {
+        "module": "Solidity.Calculus.RuleShapes",
+        "seconds": 67.0
+      },
+      {
+        "module": "Solidity.Semantics.Callback",
+        "seconds": 61.0
+      },
+      {
+        "module": "Solidity.Calculus.ArrayProperty",
+        "seconds": 37.0
+      },
+      {
+        "module": "Solidity.Calculus.PrintStmt",
+        "seconds": 36.0
+      },
+      {
+        "module": "Solidity.Calculus.HashReduction",
+        "seconds": 34.0
+      },
+      {
+        "module": "Solidity.Calculus.SurfaceNotation",
+        "seconds": 33.0
+      },
+      {
+        "module": "Solidity.Calculus.Decision",
+        "seconds": 33.0
+      },
+      {
+        "module": "Solidity.Calculus.MemRead.Spine",
+        "seconds": 31.0
+      }
+    ],
+    "knownSerialCosts": {
+      "LoopsSeconds": 73,
+      "TacticsHashingSeconds": 179,
+      "DecisionHashesSeconds": 388,
+      "DecisionPriorDocumentedSeconds": [
+        457,
+        966
+      ],
+      "OpenLoopsPriorSeconds": [
+        600,
+        624,
+        1728
+      ],
+      "OpenLoopsReason": "Two binomial proofs; second unrolls about2000steps in chunks128, bounded256chunks. Recorded costs in docs/automation and same-executor earlier full log; order/chunking unchanged.",
+      "sequentialReason": "20e30b13 intentionally disables async elaboration in Decision to avoid CLI stack failure exit135; retained."
+    },
+    "preservedSpeedHistory": [
+      "1a7d5b0e per-callee body sharing",
+      "5154e4e9 hashed arithmetic graph walk"
+    ]
+  },
+  "reviews": {
+    "finder": "Confirmed explicit implementation metadata guard required; fixed, with malformed concrete-base negative. Reviewed value-resolution graph and narrow adapter retention. Checked all24fixture reports/hashes and70ordered observations against originals. No remaining confirmed issue. No Lean workers.",
+    "skeptic": "Checked proof-carrying propositional path, normalized validity transport, unchanged fallback, kernel regressions and final evidence/prose. No confirmed soundness issue. No Lean workers."
+  },
+  "remainingScope": {
+    "assignedFixtures": "All24 working; no assigned exclusions or adapter/resource blocks.",
+    "outsideReplay": "Generated runtime-code membership, gas, EVM/SSA generation. Runtime replay agreement is not a universal correctness theorem.",
+    "implementationBoundary": "Only zero-argument internal function values returning one bytes-memory reference are newly supported. Reference arguments, other reference kinds, external reference-return ABI paths and annotated effectful while heads retain existing boundaries.",
+    "priorBaseline": "The earlier milestone records DeclarationMetadata admission gap, RevertData open/resource controls, feature-coverage audit drift and 13 missing documentation paths. Do not infer these repaired from assigned fixture success."
+  },
+  "patchStatus": {
+    "implementationCommit": "b599a178",
+    "resumedPatch": ".lake/upstream/group05-resumed.patch",
+    "localOnly": true,
+    "pushOrMerge": false,
+    "previousPatchPreserved": ".lake/upstream/group05-function-dispatch.patch",
+    "completedPatch": ".lake/upstream/group05-completed.patch"
+  }
+}
