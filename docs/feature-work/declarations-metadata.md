@@ -643,3 +643,14 @@ substitute is used to report them passing. This lane therefore remains an
 incomplete repair of the full fifteen-fixture assignment. No representation
 migration was undertaken; the speed-related history and warning requirements
 for such a migration remain applicable.
+
+The last performance review found that eager enumeration of all possible enum
+name suffixes allocated quadratic total underscore characters even when the
+first name was unused. The implementation now reuses the existing bounded
+`freshSourceName` helper, returning at the first available candidate. The finder
+confirmed the cost and the skeptic confirmed identical selected names. This
+changes no representation or proof limit. Contract's per-file check, all three
+new source regression cases, Replay and all fifteen isolated fixture reports
+were refreshed after this correction; the result remains twelve working and
+three recursive gaps. Earlier reports are retained separately. Frozen sort
+coverage passes with 377 taclets and all 131 read-bearing annotations.

@@ -27,7 +27,7 @@
       "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
       "sourceSha256": "5dbf635ac337b3df778cf27e2f547bd7f1a37759cc84362e57c5ea96f6a89d64",
       "beforeReportSha256": "e105aa2d959390ac38f064674cc1bcce0f7c249faf2826fcc2fa4a57a2fcf6bb",
-      "afterReportSha256": "b514daf259fc1a228fa4fd4feb98d1b0fe91f1001fe655fe5260a3ae15c6f8cf",
+      "afterReportSha256": "50dcc146bffe3696e53491e9b8599b96f9441d056d75008fbe03f145e49f066b",
       "before": {
         "metadata": {
           "version": 1,
@@ -94,7 +94,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -240,10 +240,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/internal_call_attached_with_parentheses"
+          ".lake/upstream/group06-resumed-fresh-final/internal_call_attached_with_parentheses"
         ],
         "exitCode": 0,
-        "seconds": 4.458755731582642
+        "seconds": 9.520458698272705
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -324,13 +324,93 @@
         ],
         "exitCode": 0,
         "seconds": 6.95564603805542
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "10"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "10"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "b514daf259fc1a228fa4fd4feb98d1b0fe91f1001fe655fe5260a3ae15c6f8cf",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/internal_call_attached_with_parentheses"
+        ],
+        "exitCode": 0,
+        "seconds": 4.458755731582642
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
       "sourceSha256": "08dc2a42041dc3143e024de74071857950892d655787483d3f590d2233abfca8",
       "beforeReportSha256": "4b6e30e0e7881ca7eb765ac3662415e5f5d2e3408c138874de160c04a5f22e25",
-      "afterReportSha256": "b2c550f7dd5caf35b6e379b040ebc3f66f4cc4d35574e76f6f1ae2e276fa436b",
+      "afterReportSha256": "c71143833d3fc626342fc5e1986bcc1baccb61c3caeef89d08c9d023cb00f493",
       "before": {
         "metadata": {
           "version": 1,
@@ -397,7 +477,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -553,10 +633,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/internal_library_function_attached_to_enum"
+          ".lake/upstream/group06-resumed-fresh-final/internal_library_function_attached_to_enum"
         ],
         "exitCode": 0,
-        "seconds": 3.9263482093811035
+        "seconds": 5.077399492263794
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -651,13 +731,107 @@
         ],
         "exitCode": 0,
         "seconds": 11.86140775680542
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "equalsA(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "equalsA(uint256)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "equalsA(uint256)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "equalsA(uint256)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "b2c550f7dd5caf35b6e379b040ebc3f66f4cc4d35574e76f6f1ae2e276fa436b",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/internal_library_function_attached_to_enum"
+        ],
+        "exitCode": 0,
+        "seconds": 3.9263482093811035
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
       "sourceSha256": "d0d668175e1a2c90da9905b4097ef8d0f8333e528b8f63e0a6d5478aadcdc6b4",
       "beforeReportSha256": "9e88888ed80409885e11ae23a4c356504d891cb0f0ce8a69db089e45f2a3b998",
-      "afterReportSha256": "f7320363f8776c73c7c9640b349cea52a6a7cb4ddc70c78b1546f7e3be073f55",
+      "afterReportSha256": "d7c44de58c469668d27350ee0bf621bda6e2ba936b789343607a8044e22dc651",
       "before": {
         "metadata": {
           "version": 1,
@@ -724,7 +898,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -870,10 +1044,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/internal_library_function_attached_to_struct"
+          ".lake/upstream/group06-resumed-fresh-final/internal_library_function_attached_to_struct"
         ],
         "exitCode": 0,
-        "seconds": 6.395789623260498
+        "seconds": 12.036750793457031
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -954,13 +1128,93 @@
         ],
         "exitCode": 0,
         "seconds": 9.536884784698486
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "f7320363f8776c73c7c9640b349cea52a6a7cb4ddc70c78b1546f7e3be073f55",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/internal_library_function_attached_to_struct"
+        ],
+        "exitCode": 0,
+        "seconds": 6.395789623260498
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
       "sourceSha256": "4234939d3bb9c5dc0679198f49f4f601ec87409ed0d04f136eaaadfa91f3911f",
       "beforeReportSha256": "08f9611c670bdbc317beb8161a1aaa436c9fe4ba3ce35647f7ca54557a7066ae",
-      "afterReportSha256": "8cc42d99402836024946e85dc183ed4e118d738bbb01c100df6d672b87806ad5",
+      "afterReportSha256": "b1194759dc512e66aad2145ba66d9bfa3e609e5aa90d45523326e0f5d4caf318",
       "before": {
         "metadata": {
           "version": 1,
@@ -1027,7 +1281,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1173,10 +1427,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/internal_library_function_return_var_size"
+          ".lake/upstream/group06-resumed-fresh-final/internal_library_function_return_var_size"
         ],
         "exitCode": 0,
-        "seconds": 3.212858200073242
+        "seconds": 4.219269275665283
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -1257,13 +1511,93 @@
         ],
         "exitCode": 0,
         "seconds": 10.119173049926758
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "8cc42d99402836024946e85dc183ed4e118d738bbb01c100df6d672b87806ad5",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/internal_library_function_return_var_size"
+        ],
+        "exitCode": 0,
+        "seconds": 3.212858200073242
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
       "sourceSha256": "9db6992d0020d7cb331847d7183a0966d4ed662f3b84874879495493a1487c2e",
       "beforeReportSha256": "e9df78d9ec1ee5df3c0c426ed2c0eb48bbf446282dacdba64af6b16e2e8b6602",
-      "afterReportSha256": "82225c2bfb213ec9f9510393ae8c5b7181b15ad617355e599463c596d7427873",
+      "afterReportSha256": "ad7b5352953a1937c0d7cd3f2d377e981a879be6a0bf7fd36259023610481eb0",
       "before": {
         "metadata": {
           "version": 1,
@@ -1330,7 +1664,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1472,10 +1806,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/library_enum_as_an_expression"
+          ".lake/upstream/group06-resumed-fresh-final/library_enum_as_an_expression"
         ],
         "exitCode": 0,
-        "seconds": 3.010437488555908
+        "seconds": 4.227910280227661
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -1556,13 +1890,93 @@
         ],
         "exitCode": 0,
         "seconds": 5.451697826385498
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "82225c2bfb213ec9f9510393ae8c5b7181b15ad617355e599463c596d7427873",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/library_enum_as_an_expression"
+        ],
+        "exitCode": 0,
+        "seconds": 3.010437488555908
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
       "sourceSha256": "d1ca22dedba94a84c863c2701f1690706aa7a0a953ffc77475fc5ff8b59f503e",
       "beforeReportSha256": "33172fd0dfea875d6885d85c4359fd898131682825a590b61a4b011f90462862",
-      "afterReportSha256": "5879285070ad4e7eb7ae997a0d5f2e96535297c2c9158e1820a1c3c859dc72f7",
+      "afterReportSha256": "ac06c9123ade64175a75ae8e08cd9c816d87c5f5981ddee35f7f2d3ac2d0adb9",
       "before": {
         "metadata": {
           "version": 1,
@@ -1629,7 +2043,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -1771,10 +2185,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/library_struct_as_an_expression"
+          ".lake/upstream/group06-resumed-fresh-final/library_struct_as_an_expression"
         ],
         "exitCode": 0,
-        "seconds": 4.570624351501465
+        "seconds": 10.10145616531372
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -1855,13 +2269,93 @@
         ],
         "exitCode": 0,
         "seconds": 6.985669136047363
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "5879285070ad4e7eb7ae997a0d5f2e96535297c2c9158e1820a1c3c859dc72f7",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/library_struct_as_an_expression"
+        ],
+        "exitCode": 0,
+        "seconds": 4.570624351501465
       }
     },
     {
       "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
       "sourceSha256": "b48f674d020f26de92405a7b3b2b713e28e1cecd5e5384211cbab567e033dbd0",
       "beforeReportSha256": "e38a90d8c3bdc32f7c7194126610849d88bcbf08866d85a5c572421135f56e79",
-      "afterReportSha256": "759d4579e7f2a1259ed67a5d7ed17708651dd422ccebc7fcc7340635a6152900",
+      "afterReportSha256": "036de6c3a79560208f6e6fcea77c44ffc13856b702a5708252cc0dadaa109408",
       "before": {
         "metadata": {
           "version": 1,
@@ -1938,7 +2432,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2088,10 +2582,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/using_for_storage_structs"
+          ".lake/upstream/group06-resumed-fresh-final/using_for_storage_structs"
         ],
         "exitCode": 0,
-        "seconds": 7.193108081817627
+        "seconds": 11.887459754943848
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -2174,13 +2668,95 @@
         ],
         "exitCode": 0,
         "seconds": 7.199195861816406
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "7",
+                      "7"
+                    ],
+                    "signature": "g()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "7",
+                      "7"
+                    ],
+                    "signature": "g()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "759d4579e7f2a1259ed67a5d7ed17708651dd422ccebc7fcc7340635a6152900",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/using_for_storage_structs"
+        ],
+        "exitCode": 0,
+        "seconds": 7.193108081817627
       }
     },
     {
       "path": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
       "sourceSha256": "8d35f490d2cc1dadd5e7938252af59d7460d6941f23308cc7248130a3a0b96f2",
       "beforeReportSha256": "d689f413d55d8eb157af7c4023f7df867d2bdc647b3c95958f5fe05facc0d033",
-      "afterReportSha256": "3b7cc94a7f5d26847ee7e3cada76e1b60e0d9b61d1a41412838246e56aac4999",
+      "afterReportSha256": "4231a943aa7694f8f0de1a0e0f4ec06e2cfe4db9ff217b0553bb2da2dd192313",
       "before": {
         "metadata": {
           "version": 1,
@@ -2247,7 +2823,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2385,10 +2961,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/array_of_recursive_struct"
+          ".lake/upstream/group06-resumed-fresh-final/array_of_recursive_struct"
         ],
         "exitCode": 1,
-        "seconds": 8.608646869659424
+        "seconds": 6.844020843505859
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -2465,13 +3041,89 @@
         ],
         "exitCode": 1,
         "seconds": 7.516934633255005
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "array_of_recursive_struct.sol:9: struct `RecursiveStruct` (line 4) is recursive through an array: the struct table is well-founded by rank (`structDef_rank_lt`), so no struct contains itself",
+                    "function": "func()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "array_of_recursive_struct.sol:9: struct `RecursiveStruct` (line 4) is recursive through an array: the struct table is well-founded by rank (`structDef_rank_lt`), so no struct contains itself",
+                    "function": "func()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "3b7cc94a7f5d26847ee7e3cada76e1b60e0d9b61d1a41412838246e56aac4999",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/array_of_recursive_struct"
+        ],
+        "exitCode": 1,
+        "seconds": 8.608646869659424
       }
     },
     {
       "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
       "sourceSha256": "f5dcfe54346092fcb4fefada135c71e503a04c282899a15d518d3a80a006d786",
       "beforeReportSha256": "93328f920f6ca9b8da871d2fd156d1473049531d2419ac2f6b5e88e83f51fbef",
-      "afterReportSha256": "3200d4618383b0c1b19f91887051253bc98266bbad529da5f1032520e6c21fbc",
+      "afterReportSha256": "5f82bedf483d702402d3b20f98b1af7edbd4481ba363e9168caf6a6dafd80f05",
       "before": {
         "metadata": {
           "version": 1,
@@ -2538,7 +3190,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2680,10 +3332,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/lone_struct_array_type"
+          ".lake/upstream/group06-resumed-fresh-final/lone_struct_array_type"
         ],
         "exitCode": 0,
-        "seconds": 5.432650327682495
+        "seconds": 8.224674224853516
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -2764,13 +3416,93 @@
         ],
         "exitCode": 0,
         "seconds": 6.421416759490967
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "3"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "3"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "3200d4618383b0c1b19f91887051253bc98266bbad529da5f1032520e6c21fbc",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/lone_struct_array_type"
+        ],
+        "exitCode": 0,
+        "seconds": 5.432650327682495
       }
     },
     {
       "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
       "sourceSha256": "3aeda855d0f3c9a753ed9b71de6c76aeeafc4fa82d8e1d2534d0164580be10ca",
       "beforeReportSha256": "68e6299e420e8670f05a73e6cd65cbb2d86e35626686392c03ab535326f3bb44",
-      "afterReportSha256": "dec70d3db21d3d1468b3ede60ed339e7c1a34a6d2c883d1233bf06c248ddcf25",
+      "afterReportSha256": "d45a6624f92d35dc0dcb8b57d6532352bbf1ed519cb31f0f6a046b3f0583264f",
       "before": {
         "metadata": {
           "version": 1,
@@ -2837,7 +3569,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -2995,10 +3727,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/memory_structs_nested"
+          ".lake/upstream/group06-resumed-fresh-final/memory_structs_nested"
         ],
         "exitCode": 0,
-        "seconds": 6.567802667617798
+        "seconds": 15.741949796676636
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -3085,13 +3817,99 @@
         ],
         "exitCode": 0,
         "seconds": 8.254544496536255
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1",
+                      "2",
+                      "3",
+                      "4"
+                    ],
+                    "signature": "test()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "1",
+                      "2",
+                      "3",
+                      "4"
+                    ],
+                    "signature": "test()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "dec70d3db21d3d1468b3ede60ed339e7c1a34a6d2c883d1233bf06c248ddcf25",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/memory_structs_nested"
+        ],
+        "exitCode": 0,
+        "seconds": 6.567802667617798
       }
     },
     {
       "path": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
       "sourceSha256": "4b2380d113c75dc58e1f30c2b4824af9f38ad56f53a73fe20ade9abeef7f4634",
       "beforeReportSha256": "c40ca91d21ca914378bbf678a27cba888993b10b77e1c20832f40d596045bf3d",
-      "afterReportSha256": "6d16561d69ed4b35e550c1e8151a75bce898b1835009006269ad5318803945c2",
+      "afterReportSha256": "0a17a3cb1a5a1712b72f98f704a776f71f4cc7165aff282687cba96ad2da1802",
       "before": {
         "metadata": {
           "version": 1,
@@ -3158,7 +3976,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -3296,10 +4114,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/recursive_structs"
+          ".lake/upstream/group06-resumed-fresh-final/recursive_structs"
         ],
         "exitCode": 1,
-        "seconds": 3.4155800342559814
+        "seconds": 10.029190063476562
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -3376,13 +4194,89 @@
         ],
         "exitCode": 1,
         "seconds": 3.84613037109375
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "recursive_structs.sol:10: struct `S` (line 4) is recursive through an array: the struct table is well-founded by rank (`structDef_rank_lt`), so no struct contains itself",
+                    "function": "f()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "recursive_structs.sol:10: struct `S` (line 4) is recursive through an array: the struct table is well-founded by rank (`structDef_rank_lt`), so no struct contains itself",
+                    "function": "f()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "6d16561d69ed4b35e550c1e8151a75bce898b1835009006269ad5318803945c2",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/recursive_structs"
+        ],
+        "exitCode": 1,
+        "seconds": 3.4155800342559814
       }
     },
     {
       "path": "test/libsolidity/semanticTests/structs/struct_reference.sol",
       "sourceSha256": "cbb7bb6153706b82c028f29dcf12e752208b9100122cb67c09985ac44260c6d4",
       "beforeReportSha256": "6ab49da4a00dfa0805b5d672478c93e4773559edccb30507bfb57f8df9b19fd7",
-      "afterReportSha256": "6dd0eb93b41aef62670f0ce3a683fe20d2ca578f63f272811c01b37e66cbe96d",
+      "afterReportSha256": "c794331b99b331b64af98236961573ebf5f738f33e2ef0bd29de5d923ec1cf90",
       "before": {
         "metadata": {
           "version": 1,
@@ -3459,7 +4353,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -3617,10 +4511,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/struct_reference"
+          ".lake/upstream/group06-resumed-fresh-final/struct_reference"
         ],
         "exitCode": 1,
-        "seconds": 3.350393295288086
+        "seconds": 9.047383308410645
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -3707,13 +4601,99 @@
         ],
         "exitCode": 1,
         "seconds": 5.051788568496704
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+            "stage": "lean-runtime",
+            "status": "broken",
+            "reason": "frontend import gaps",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "struct_reference.sol:10: it reads the state variable `data`: struct `s2` (line 4) is recursive through a mapping: its default value is infinite, and the model's are finite",
+                    "function": "check()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "struct_reference.sol:16: it reads the state variable `data`: struct `s2` (line 4) is recursive through a mapping: its default value is infinite, and the model's are finite",
+                    "function": "set()"
+                  }
+                ]
+              },
+              {
+                "status": "broken",
+                "reason": "frontend import gaps",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+                "gaps": [
+                  {
+                    "status": "unsupported",
+                    "reason": "struct_reference.sol:10: it reads the state variable `data`: struct `s2` (line 4) is recursive through a mapping: its default value is infinite, and the model's are finite",
+                    "function": "check()"
+                  },
+                  {
+                    "status": "unsupported",
+                    "reason": "struct_reference.sol:16: it reads the state variable `data`: struct `s2` (line 4) is recursive through a mapping: its default value is infinite, and the model's are finite",
+                    "function": "set()"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "6dd0eb93b41aef62670f0ce3a683fe20d2ca578f63f272811c01b37e66cbe96d",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/structs/struct_reference.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/struct_reference"
+        ],
+        "exitCode": 1,
+        "seconds": 3.350393295288086
       }
     },
     {
       "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
       "sourceSha256": "22553ceec123c1535be3210aceeaea43d5ee5234b3a16e4338d5d6dbc7c27020",
       "beforeReportSha256": "c0b78a0e2db45e110e4281cf97b3b308711cc17f14c78f58f2cd234bd0a44918",
-      "afterReportSha256": "edcbff10e4826aeb333436937eb0d1dcfc4104616199904de23b7c6779672308",
+      "afterReportSha256": "bec4a4190830f4798584d0314c28678ef4e863da01a21758b5bc164caf0f8934",
       "before": {
         "metadata": {
           "version": 1,
@@ -3790,7 +4770,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -4126,10 +5106,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/mapping_contract_key"
+          ".lake/upstream/group06-resumed-fresh-final/mapping_contract_key"
         ],
         "exitCode": 0,
-        "seconds": 3.884507656097412
+        "seconds": 15.82335090637207
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -4394,13 +5374,277 @@
         ],
         "exitCode": 0,
         "seconds": 4.783061504364014
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "161"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "239"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "161"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "239"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "5"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "161"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "239"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "161"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [],
+                    "signature": "set(address,uint8)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "239"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "5"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "0"
+                    ],
+                    "signature": "get(address)",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "edcbff10e4826aeb333436937eb0d1dcfc4104616199904de23b7c6779672308",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/mapping_contract_key"
+        ],
+        "exitCode": 0,
+        "seconds": 3.884507656097412
       }
     },
     {
       "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
       "sourceSha256": "3a5e6966c3ae67c62d8022772ebfebe1afb10b7f86e9c5b52e3dbbbda628fd85",
       "beforeReportSha256": "eb9474df36d0c4606f483f9834c05554f2d3fcac58fa98629899643fddb0a72f",
-      "afterReportSha256": "4afd4e52505994a3b9a63f3f73c7e3f7575fd9df4e72ebecff4275c56cb2b53c",
+      "afterReportSha256": "6c875f3c87303b0ae9eed436085840aeacee4e2d17d00255fd1d5d33a82d0bd8",
       "before": {
         "metadata": {
           "version": 1,
@@ -4497,7 +5741,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -4727,10 +5971,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/nested_tuples"
+          ".lake/upstream/group06-resumed-fresh-final/nested_tuples"
         ],
         "exitCode": 0,
-        "seconds": 3.8613922595977783
+        "seconds": 10.804120540618896
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -4869,13 +6113,151 @@
         ],
         "exitCode": 0,
         "seconds": 4.561713933944702
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2",
+                      "1"
+                    ],
+                    "signature": "f0()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "3"
+                    ],
+                    "signature": "f3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f4()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "2",
+                      "1"
+                    ],
+                    "signature": "f0()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "1"
+                    ],
+                    "signature": "f1()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "2"
+                    ],
+                    "signature": "f2()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "3"
+                    ],
+                    "signature": "f3()",
+                    "failed": false
+                  },
+                  {
+                    "values": [
+                      "4"
+                    ],
+                    "signature": "f4()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "4afd4e52505994a3b9a63f3f73c7e3f7575fd9df4e72ebecff4275c56cb2b53c",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/types/nested_tuples.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/nested_tuples"
+        ],
+        "exitCode": 0,
+        "seconds": 3.8613922595977783
       }
     },
     {
       "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
       "sourceSha256": "c942f61d6a6fdeda3bc591ded4e3d2cc5ed1a816e2a85b8fa7a7fbd4f4392876",
       "beforeReportSha256": "7ca0ac4a0e8ce62a39b2c159781630df91b9ea3f0547b20eb323f0cba7f438af",
-      "afterReportSha256": "ebe26b6ce5c8b7be85a016283b5f3370e25d0a9eb64a36c6b0515d03bc266125",
+      "afterReportSha256": "3dcf77e0088f518bea8fd8fd07a5b77f167cf2af1e6c52fd0618e80bce95137e",
       "before": {
         "metadata": {
           "version": 1,
@@ -4942,7 +6324,7 @@
           "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
           "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
           "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
           "evmVersion": "osaka",
           "loopFuel": 1000,
           "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -5088,10 +6470,10 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group06-resumed-address-final/tuple_assign_multi_slot_grow"
+          ".lake/upstream/group06-resumed-fresh-final/tuple_assign_multi_slot_grow"
         ],
         "exitCode": 0,
-        "seconds": 3.5203278064727783
+        "seconds": 5.63191556930542
       },
       "beforeAbiBoundaryCheck": {
         "metadata": {
@@ -5176,6 +6558,90 @@
         ],
         "exitCode": 0,
         "seconds": 5.752959489822388
+      },
+      "beforeFresheningOptimization": {
+        "metadata": {
+          "version": 1,
+          "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+          "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+          "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+          "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+          "evmVersion": "osaka",
+          "loopFuel": 1000,
+          "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+          "snapshotFiles": 11622,
+          "filter": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+          "timeoutMs": 120000,
+          "batchSize": 1
+        },
+        "results": [
+          {
+            "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+            "stage": "lean-runtime",
+            "status": "working",
+            "reason": "functional runtime vectors match in every required source evaluation mode",
+            "requiredPipelines": [
+              "legacy",
+              "viaIR"
+            ],
+            "variants": [
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "legacy",
+                "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "48",
+                      "49",
+                      "50"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              },
+              {
+                "status": "working",
+                "reason": "all scalar runtime vectors match",
+                "pipeline": "viaIR",
+                "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+                "observed": [
+                  {
+                    "values": [
+                      "48",
+                      "49",
+                      "50"
+                    ],
+                    "signature": "f()",
+                    "failed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "beforeFresheningOptimizationReportSha256": "ebe26b6ce5c8b7be85a016283b5f3370e25d0a9eb64a36c6b0515d03bc266125",
+      "beforeFresheningOptimizationRun": {
+        "argv": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+          "--batch-size",
+          "1",
+          "--out",
+          ".lake/upstream/group06-resumed-address-final/tuple_assign_multi_slot_grow"
+        ],
+        "exitCode": 0,
+        "seconds": 3.5203278064727783
       }
     }
   ],
@@ -5521,13 +6987,17 @@
           "seconds": 2.2230746746063232,
           "exitCode": 0
         }
-      ]
+      ],
+      "finalContractRecheck": {
+        "status": "passed",
+        "log": "group06-resume-fresh-perfile.log"
+      }
     },
     "replay": {
       "status": "passed",
       "checks": 9,
       "command": "lake --no-build lean tests/upstream/Replay.lean -- --tstack=131072",
-      "log": "group06-resume-replay-address.log"
+      "log": "group06-resume-fresh-replay.log"
     },
     "enumKernelExecutions": {
       "status": "passed",
@@ -5616,6 +7086,17 @@
     },
     "corpus": {
       "status": "queued after default/TestSuite/sort; no result claimed"
+    },
+    "freshnessRegression": {
+      "status": "passed",
+      "tests": 3,
+      "log": "group06-resume-fresh-controls.log"
+    },
+    "sort": {
+      "status": "passed",
+      "taclets": 377,
+      "readBearing": 131,
+      "log": "group06-resume-sort-final.log"
     }
   },
   "verificationAt615bd3fa": {
@@ -5737,7 +7218,7 @@
     "parentCommit": "615bd3fa63ffe008c326105e945a4f638979cb39",
     "branch": "task/group06-structs-libraries",
     "status": "partial-repair; seven additional finite fixtures repaired; three recursive fixtures remain broken",
-    "modelSha256": "01f628c9048e0f527c14376c7a68084e408754a1f5b231a1640db1dfc1abeeb6",
+    "modelSha256": "e686f6c20ef4432583598f307af57c1554a25511778447162a6986036761ee9d",
     "runtimeGateLog": "group06-resume-runtime-gate.log",
     "proofLimits": "unchanged; no maxHeartbeats increase",
     "representation": "unchanged intrinsic core; no graph migration or new semantic rule",
@@ -5751,9 +7232,16 @@
       "struct_reference.sol: recursive graph storage aliases and field/index operation correspondence"
     ],
     "fixtureWallSeconds": {
-      "minimum": 3.010437488555908,
-      "maximum": 8.608646869659424,
-      "interpretation": "complete fixture/compiler/import/replay while serial default build was active; not isolated semantic benchmarks"
+      "minimum": 4.219269275665283,
+      "maximum": 15.82335090637207,
+      "interpretation": "compiler/import/replay during serial default build, not isolated performance"
+    },
+    "implementationCommit": "02f478cc (finite repair); final bounded-name helper follow-up pending commit",
+    "fresheningReview": {
+      "finding": "eager List.range.map allocated quadratic total underscore characters per enum before first-match lookup",
+      "fix": "reuse existing bounded freshSourceName helper; same first available name, immediate early return",
+      "review": "finder confirmed finding; independent skeptic confirmed name equivalence; no Lean workers opened",
+      "status": "per-file Contract check, frontend build, 3 new regression cases and Replay passed; 12/15 fixtures still work in both pipelines"
     }
   },
   "continuationControls": {

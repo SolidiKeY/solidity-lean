@@ -674,10 +674,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let enumCasts : List (Int × String) := enumDefs.filterMap fun e => do
     let id ← J.id? e
     let stem := s!"enumType{id}"
-    let name := (List.range (declaredNames.length + 1)).map
-      (fun n => stem ++ String.mk (List.replicate n '_')) |>.find?
-        (fun name => !declaredNames.contains name)
-    pure (id, ← name)
+    pure (id, freshSourceName declaredNames stem)
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
     let vs := J.arrD e "members"
     vs.toList.zipIdx |>.filterMap fun (v, i) => (J.id? v).map (·, i)
