@@ -278,9 +278,8 @@ export function semanticVectors(fixture, abi) {
   for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p);
   try { return scalarSemanticVectors(fixture,abi); } catch (scalarError) {
     const sources=[...(fixture.sources?.values() ?? [])].join('\n');
-    if (fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
-        /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' ')))
-      throw scalarError;
+    const canonicalOnly = fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
+      /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' '));
     const vectors=[];
     for (let line of fixture.expectations) {
       line=stripFixtureComments(line).trim(); if (!line) continue;
@@ -303,6 +302,7 @@ export function semanticVectors(fixture, abi) {
       const payload=failure ? (expected==='FAILURE' ? '' : expected.slice(8).trim()) : expected;
       vectors.push({signature:ctor?'constructor':signature,
         calldata:rest[1]?.trim()?revertBytes(rest[1]):[],
+        ...(canonicalOnly ? {canonicalOnly:true} : {}),
         inputTypes:(d.inputs ?? []).map(abiType),outputTypes:(d.outputs ?? []).map(abiType),
         failure,expectedBytes:payload?revertBytes(payload):[]});
     }
@@ -513,7 +513,7 @@ async function main(args) {
   const metadata={version:1,commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     modelSha256:modelDigest(),evmVersion:'osaka',loopFuel:1000,
-    scope:'Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.',
+    scope:'Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.',
     snapshotFiles:manifest.files.length,filter:options.filter ?? null,timeoutMs:options.timeoutMs,batchSize:options.batchSize};
   const results=new Map();
   const variants=new Map();

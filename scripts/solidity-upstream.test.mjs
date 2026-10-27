@@ -82,9 +82,9 @@ test('noncanonical and truncated inputs retain raw bytes for typed decoder repla
   }
   const narrow=[{type:'function',name:'g',inputs:[{type:'uint8'}],outputs:[]}];
   assert.equal(semanticVectors(fixture(['g(uint8): 256 ->']),narrow)[0].calldata.at(-2),1);
-  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),settings:{ABIEncoderV1Only:'true'}},narrow),/noncanonical/);
-  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),sources:new Map([['a.sol','pragma abicoder /* comment */ v1;']])},narrow),/noncanonical/);
-  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 256 ->']),abiCoderV1:true},narrow),/noncanonical/);
+  assert.equal(semanticVectors({...fixture(['g(uint8): 256 ->']),settings:{ABIEncoderV1Only:'true'}},narrow)[0].canonicalOnly,true);
+  assert.equal(semanticVectors({...fixture(['g(uint8): 256 ->']),sources:new Map([['a.sol','pragma abicoder /* comment */ v1;']])},narrow)[0].canonicalOnly,true);
+  assert.equal(semanticVectors({...fixture(['g(uint8): 256 ->']),abiCoderV1:true},narrow)[0].canonicalOnly,true);
 });
 
 test('aggregate vectors retain offsets, lengths, bytes and exact tuple schemas',()=>{
@@ -191,4 +191,17 @@ test('native parameter alignment, quoted commas/hash and byte escapes are exact'
   assert.deepEqual(v.revertBytes,revertBytes('"a,b#c"'));
   assert.throws(()=>semanticVectors(fixture(['g() -> FAILURE, left(# comment #1)']),noArgs),/comment/);
   assert.throws(()=>semanticVectors(fixture(['g() -> FAILURE, 1# comment #2']),noArgs),/comment/);
+});
+
+test('v1 raw vectors require canonical-prefix replay without dropping suffix bytes',()=>{
+  const abi=[{type:'function',name:'f',inputs:[{type:'bytes'}],outputs:[{type:'uint256'}]}];
+  const line='f(bytes): 32, 0, hex"aabbff" -> 7';
+  const [v]=semanticVectors({...fixture([line]),abiCoderV1:true},abi);
+  assert.equal(v.canonicalOnly,true);
+  assert.deepEqual(v.calldata,revertBytes('32, 0, hex"aabbff"'));
+  assert.equal(v.calldata.length,67);
+  assert.deepEqual(v.expectedBytes,revertBytes('7'));
+  const [v2]=semanticVectors(fixture([line]),abi);
+  assert.equal(v2.canonicalOnly,undefined);
+  assert.deepEqual(v2.calldata,v.calldata);
 });

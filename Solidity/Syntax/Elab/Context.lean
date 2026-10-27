@@ -670,7 +670,7 @@ def roStmt (ro : List String) (s : RawStmt) (memoryReturns : List String := []) 
   -- Effects nested in a tuple or an array literal can rebind another
   -- local before the outer assignment. Retain those aliases too.
   let binds := s.exprs.flatMap fun e => e.names.filter fun x =>
-    e.any fun | .assign l r => l.root? == some x && ro.any (fun x => r.roMentions x) | _ => false
+    e.any fun | .assign l r => l.root? == some x && ro.any (fun x => r.roMentions x memoryReturns) | _ => false
   let ro := (binds ++ ro).eraseDups
   let mention (e : RawExpr) : Bool := ro.any (fun x => e.roMentions x memoryReturns)
   if s.exprs.any (RawExpr.roWrites ro) then
@@ -719,8 +719,13 @@ partial def calldataCheck (funs : List (String × FunDecl)) (fuel : Nat) (ro ret
   if ro.isEmpty then return
   -- Callee memory-argument checks below retain conservative mentions: a
   -- memory return that aliases a calldata argument must still be refused.
-  let memoryReturns := funs.filterMap fun (name, declaration) =>
-    if declaration.retMem && !declaration.retStorage && declaration.refRets.length == 1 then some name else none
+  let memoryReturns := (funs.filterMap fun (name, declaration) =>
+    if declaration.retMem && !declaration.retStorage && declaration.refRets.length == 1 then some name else none) ++
+    -- These builtin lowerings allocate fresh typed objects, even when their
+    -- operands read calldata. Do not exempt shadowed names or casts/views.
+    (["abi.decode", "abi.encode", "abi.encodePacked", "abi.encodeWithSelector",
+      "abi.encodeWithSignature", "string.concat", "bytes.concat"].filter fun name =>
+        funs.all (·.1 != name))
   let ss := body.flatMap (RawStmt.flatMapDeep fun s => [s])
   -- the names bound to the object, to a fixed point (a loop may bind late)
   let mut ro := ro.eraseDups

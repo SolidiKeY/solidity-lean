@@ -4,10 +4,10 @@ import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RevertMemory
 
 /-!
-# Replay upstream scalar semantic vectors
+# Replay upstream typed ABI semantic vectors
 
-The JavaScript adapter reads Solidity's fixture format and supplies ABI-decoded
-scalar arguments. This command imports each contract through `solc_import`, then
+The JavaScript adapter retains Solidity's native fixture bytes and supplies
+checked scalar arguments or typed ABI input bytes. This command imports each contract through `solc_import`, then
 executes the vectors in order on the typed interpreter, retaining storage and
 rolling back failed calls. It reports observations, not proofs. Unsupported
 vectors, import gaps and exhausted loop fuel cannot count as passing tests.
@@ -32,6 +32,57 @@ private def word : Semantics.CallValue → Except String String
   | .uint n => pure (toString n.1)
   | .int n => pure (toString (n.1 % (2^256 : Int)))
   | .bool b => pure (if b then "1" else "0")
+
+/-- External entry reading: retain actual failure data, but keep the supplied
+transaction environment. In particular this is not a self-call. Existing
+indexed guards generate concrete bytes before execution; no outcome is used
+to choose a panic code. Call arguments here are ABI-decoded locals or checked
+scalar literals; arbitrary effectful top-level argument expressions are outside
+this adapter. Ordinary calculus entry points remain unchanged. -/
+def entryProgParts (C : Contract) (pre body post : List RawStmt) : Except String (Blk C []) := do
+  let all := pre ++ body ++ post
+  let k := RawStmt.maxIdxs all + 1
+  let ss ← freshenBlocks (C.vars.map (·.1)) [] all
+  unless ss.length == all.length do throw "entry statement boundaries changed during freshening"
+  let action : ElabM (SProg C) := do
+    let P ← elabStmtsP C (ss.take pre.length)
+    let Q ← withReader (fun sc => { sc with retainFailureData := true })
+      (elabStmtsP C ((ss.drop pre.length).take body.length))
+    let R ← elabStmtsP C (ss.drop (pre.length + body.length))
+    pure (P ++ Q ++ R)
+  let P ← action.runFrom' { funs := C.funs } ([], k)
+  SProg.chain [] [] P
+
+/-- Observe only source execution; ABI preparation and serialization retain
+ordinary decoder/encoder semantics, including their failure policy. -/
+def entryProg (C : Contract) (ss : List RawStmt) : Except String (Blk C []) :=
+  entryProgParts C [] ss []
+
+/-- A failed generated guard emits exactly its own bytes, independent of the
+fixture's expectation and without evaluating a source body. -/
+theorem entryGuard_failed {C : Contract} {Γ : Ctx} (code fuel : Nat)
+    (g : Val C Γ .bool) (σ : State C Γ) (h : g.evalT σ = .ok false) :
+    (panicStmt code g).runF fuel σ =
+      .error (THalt.ofData (Semantics.encodePanic code)) := by
+  simp [panicStmt, Stmt.runF, TRun.ite, h, boolT, TRun.seq,
+    TRun.revertData, RevPart.evalT]
+  rfl
+
+/-- A successful guard preserves the entire typed state, including the
+transaction environment, heap, storage and ledger. -/
+theorem entryGuard_success {C : Contract} {Γ : Ctx} (code fuel : Nat)
+    (g : Val C Γ .bool) (σ : State C Γ) (h : g.evalT σ = .ok true) :
+    (panicStmt code g).runF fuel σ = .ok ⟨σ, List.prefix_refl _⟩ := by
+  simp only [panicStmt, Stmt.runF, TRun.ite, h, boolT, TRun.nil]
+  rfl
+
+/-- Evaluating a guard can itself fail; that earlier failure is forwarded,
+not replaced by the guard's panic code. -/
+theorem entryGuard_prior {C : Contract} {Γ : Ctx} (code fuel : Nat)
+    (g : Val C Γ .bool) (σ : State C Γ) (e : THalt) (h : g.evalT σ = .error e) :
+    (panicStmt code g).runF fuel σ = .error e := by
+  simp [panicStmt, Stmt.runF, TRun.ite, h]
+  rfl
 
 namespace ABI
 open Semantics
@@ -68,8 +119,10 @@ def shape : Nat → Ty → List (String × Nat) → String → Except String Str
 private def typeExpr : RawTy → Except String RawExpr
   | .named s => pure (.name s)
   | .array T => do
-    let .name s ← typeExpr T | throw "dynamic array of compound type needs a type-expression adapter"
-    pure (.name (s ++ "[]"))
+    let e ← typeExpr T
+    pure (match e with
+      | .name s => .name (s ++ "[]")
+      | _ => .call "#abiArrayType" [e])
   | .fixed T n => return .index (← typeExpr T) (.num n)
   | .mapping .. => throw "mapping is not an ABI type"
 
@@ -119,8 +172,8 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
       pure [RawStmt.tupleDecl targets call]
   let returns := if probe then args else
     (List.range d.rets.length).map fun i => RawExpr.name (retName i)
-  elabProgS C ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations ++ captures ++
-    [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))])
+  entryProgParts C ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+    captures [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))]
 
 private def findBytes (x : Var) : (Γ : Ctx) → List Var → Option (Idx Γ (.mem bytesR))
   | [], _ => none
@@ -148,12 +201,16 @@ def output {C : Contract} {Γ : Ctx} (σ : State C Γ) (names : List Var) : Exce
   readBytes σ i
 
 def canonical (C : Contract) (d : FunDecl) (f : String) (bytes : List Nat)
-    (σ : State C []) : Except String Unit := do
-  if !needsCanonical d then return ()
+    (σ : State C []) (force : Bool := false) : Except String Unit := do
+  if !force && !needsCanonical d then return ()
   let ⟨_,Q⟩ ← program C d f false true bytes
   let .ok o := Q.runF 1000 σ | throw "calldata requires lazy/noncanonical ABI decoder replay"
   let encoded ← output o.st (Q.outNames [])
-  unless encoded == bytes do throw "noncanonical calldata requires lazy ABI decoder replay"
+  -- External ABI entry permits trailing data. In this adapter raw calldata
+  -- observations (msg.data/assembly/host operations) are refused separately;
+  -- only the declared argument objects are available to the source body.
+  unless encoded == bytes.take encoded.length do
+    throw "noncanonical calldata requires lazy ABI decoder replay"
 
 end ABI
 
@@ -187,7 +244,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       | return stopped "blocked" "unsupported scalar argument"
     let ctor := signature == "constructor"
     if !deployed && !ctor then
-      let .ok ⟨_, Q⟩ := ctorProgS C []
+      let .ok ⟨_, Q⟩ := entryProg C (if C.ctor.isNone && C.inits.isEmpty then [] else [.call (.name "constructor") []])
         | return stopped "broken" "default deployment does not elaborate"
       match Prog.runF 1000 Q state with
       | .error .diverge | .error .exhausted =>
@@ -212,13 +269,16 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         let some d := Semantics.lookupBy f C.funs | throw "missing source ABI function"
         pure d
       ABI.validate d inputs outputs
-      ABI.canonical C d (function.getD "constructor") bytes state
+      let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
+        | .error _ => pure false
+        | .ok j => fromJson? j
+      ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
       ABI.program C d (function.getD "constructor") ctor false bytes
     if raw then
       if let .error reason := rawProgram then return stopped "blocked" reason
-    let program := if raw then rawProgram else if ctor then ctorProgS C args else do
+    let program := if raw then rawProgram else if ctor then entryProg C (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [.call (.name "constructor") args]) else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
-      elabProgS C [← runStmt C name args]
+      entryProg C [← runStmt C name args]
     if let .error reason := program then
       return stopped "broken" s!"call does not elaborate: {signature}: {reason}"
     let .ok ⟨_, Q⟩ := program
@@ -250,8 +310,9 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
           | .error reason => reason
           | .ok _ => "unsupported execution outcome")
           [("inconclusiveVector", vector)]
-    observed := observed.push (Json.mkObj [("signature", str signature),
-      ("failed", toJson failed), ("values", toJson values), ("revertBytes", toJson bytes), ("returnBytes", toJson returned)])
+    observed := observed.push (Json.mkObj ([("signature", str signature),
+      ("failed", toJson failed), ("values", toJson values), ("revertBytes", toJson bytes), ("returnBytes", toJson returned)] ++
+      if raw then [("calldataBytes", (vector.getObjVal? "calldata").toOption.getD Json.null)] else []))
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
       result status reason (("observed", toJson observed) :: extra)
     let .ok expectedFailure := vector.getObjValAs? Bool "failure"

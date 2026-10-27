@@ -292,7 +292,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
     -- A self-call transports exact bytes, so Panic(0x51) is independent
     -- of the transaction oracle's fallback code for an unclassified panic.
     let mut disp : Stmt C Γ.ctx Γ.ctx :=
-      if (← read).selfFrame then .revertData [.bytes (Semantics.encodePanic 0x51)]
+      if (← read).selfFrame || (← read).retainFailureData then .revertData [.bytes (Semantics.encodePanic 0x51)]
       else .revert
     for (g, t) in cands.reverse do
       let c ← checkIn C Γ .bool (.binop .eqB (.name h) (.num t))

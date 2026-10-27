@@ -54,14 +54,18 @@ Two different checks have different meanings:
 Runtime results are observations, not universal correctness proofs. They do
 not exercise generated solc EVM/SSA code, the repository's EVM compiler, gas
 costs or the upstream C++ EVM host. Unsupported gas/log/host observations
-remain blocked. The Group 10 adapter additionally replays canonical typed ABI
+remain blocked. The Group 10 adapter additionally replays canonical-prefix typed ABI
 aggregates/bytes and v2 primitive decoder checks from raw calldata words,
 retaining exact encoded returns. Actual declaration types must agree with the
-compiler ABI. Aggregate/function input bytes must round-trip canonically;
-malformed/lazy calldata reference layouts, nominal enum ranges, v1 raw input,
+compiler ABI. Aggregate/function inputs must have an exact canonical prefix; trailing bytes
+remain recorded and are unreachable under the raw-data/assembly/host exclusions.
+ABI v1 raw inputs require this prefix check even for primitive parameters; an
+eager v2 rejection cannot certify a v1 failure. Malformed/lazy layouts, nominal enum ranges,
 physical assembly layouts and unimplemented wrapper types remain blocked.
 Failure payloads use supported native word/string/hex formatting and compare
-complete retained revert bytes, including constructors. Empty failure means
+complete retained revert bytes, including constructors. The external-entry
+observer retains source failure bytes without self-call environment rewriting;
+ABI preparation/probes/serialization keep their ordinary failure policy. Empty failure means
 empty bytes; a generic panic cannot certify a concrete ABI panic code and
 remains blocked. Ordinary-call lowering can abstract data away, so a payload
 mismatch is an adapter/model observation, not an upstream EVM bug.

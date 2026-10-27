@@ -212,3 +212,21 @@ failures. It does not change exception
 semantics or infer a concrete panic code from `.panic`. Implementation,
 validation, review and remaining scope are recorded in
 [ABI M3](abi-hashes.md#m3-upstream-group-10-exact-retained-revert-data-2026-10-26).
+
+### Group 10 external-entry observation (2026-10-27)
+
+The upstream adapter can retain exact source failure data at an external
+entry without pretending the call is a self-call. `retainFailureData` is a
+separate elaboration policy and a callee-cache identity component; sender,
+value, constructor initialization, internal-call order and rollback remain
+unchanged. Existing typed panic guards and revert encodings are reused.
+`entryProgParts` enables this policy only for the source capture statements;
+ABI input/probe/output code retains its ordinary policy. The adapter supplies
+checked literals or ABI-decoded locals, not arbitrary failing top-level raw
+argument expressions. Generic model panic stays inconclusive.
+
+The guard failure/success/priority lemmas use only standard Lean axioms;
+execution controls reject wrong codes, empty or extended payloads and changed
+caller/value, and verify rollback after a nested narrow overflow. This adds no
+core exception or taclet constructor and does not claim universal solc/model
+equivalence. See ABI M4 for the continuation evidence and remaining exclusions.

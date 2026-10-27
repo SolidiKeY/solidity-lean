@@ -478,3 +478,74 @@ Lean workers or builds. No further correctness/provenance blocker was found.
 The staged patch remains on `codex/group10-abi-vectors`; no master push or
 merge is part of this handoff. Remaining semantic/adapter exclusions are
 listed above and remain explicit rather than being counted as passing.
+
+## M4: Group 10 continuation from c31e76b6 (2026-10-27)
+
+Implementation checkpoint; complete fixture/build validation is in progress.
+The prior commit, patch and all M3 evidence remain preserved on
+`codex/group10-abi-vectors`. The continuation starts from the recorded
+118 agreements / 150 mismatches / 169 blocks; these are not fresh failures
+on a newly fetched master.
+
+External-entry source bodies now opt into retained failure data through an
+elaboration flag separate from `selfFrame`. The original transaction caller
+and value are preserved, including internal calls and constructor initializers.
+The flag participates in callee cache identities; ordinary calculus entry
+points keep their existing reading and body sharing. ABI preparation, the
+canonical probe and output serialization stay outside this source-data mode.
+Existing indexed panic guards generate bytes before execution; generic panic
+results still cannot certify a code. Local guard theorems prove exact failure
+bytes, whole-state preservation on success, and priority of a prior failure.
+No semantic/rule/state representation, dependency, axiom or proof budget changes.
+
+Calldata provenance recognizes unshadowed allocating ABI/concatenation
+builtins as fresh results. Operand writes and nested alias assignments remain
+scanned; direct calldata aliases, casts and unsupported copying stay guarded.
+A type-only dynamic-array marker preserves compound dimension order through
+the existing typed recursive ABI decoder. Multiple reference returns and
+reference-valued public getters remain separate unsupported interfaces.
+
+Raw ABI v1 is admitted only behind a canonical-prefix probe, including its
+primitive inputs. V2 reference/function inputs use the same prefix boundary.
+Trailing bytes are retained in full as `calldataBytes`; high-level declared
+objects cannot reach them, while physical calldata, `msg.data`, host and gas
+observers remain excluded. Dirty/short prefixes and overlapping/noncanonical
+layouts are not turned into source failures. All observations and required
+pipelines remain mandatory. Runner scope metadata now describes this subset
+explicitly instead of retaining M3's understated scalar wording.
+
+The stopped `DecisionArrays` gate was investigated down to the arithmetic
+walk with its existing `2^64` node bound. Merely projecting a verdict before
+countermodel reconstruction did not remove that search cost. Its three
+original verdict calls now have one closed compiler-replay certificate:
+universal proofs of the two true source leaves and a checked finite arithmetic
+assignment for the false leaf, connected through the actual typed reduction
+and normalization equivalences. The kernel checks the normalized templates;
+no extra premise is assumed. Existing coverage checks and the exact
+`["proved", "refuted", "proved"]` output pin remain. The `csimp` equality
+rewrites only that closed sample, leaving general solver behavior/bounds
+unchanged. This is result replay, not a benchmark of original search or
+countermodel materialization. The repaired per-file check passes; the broad
+build is still pending at this checkpoint.
+
+Read-only finder and independent skeptic reviews identified and closed the
+source/ABI instrumentation boundary and confirmed ignored-suffix admission
+under the existing host exclusions. Neither reviewer opened Lean workers.
+The guard/observer and closed verdict certificate axiom audits report only
+`[propext, Classical.choice, Quot.sound]`. New positive/negative controls cover
+caller/value preservation, exact codes/reasons/custom errors, nested rollback,
+fresh-result provenance, compound dimensions, v1 canonical admission and
+retained arbitrary suffix bytes. The Node suite has 19 passing controls and
+the configured Lean replay passes. Independent pinned reference suites retain
+31 EVM vectors + 5 compiler rejections and 18 legacy/viaIR EVM runs + 20
+compiler rejections; the rejections are reference checks, not Lean coverage.
+
+Runtime scheduling is external to the repository: at most two actual Lean
+processes, configured task threads of two, and a six-GiB resident-memory guard
+per process in the sixteen-GiB executor. An initial virtual-address-space cap
+was unsuitable: unchanged `DecideTyped` failed to create a thread at roughly
+6.2 GB virtual but only 1.15 GB resident usage. This was an executor limit,
+not a proof diagnostic. The unchanged target passed with resident-memory accounting;
+no proof heartbeat, recursion, loop-fuel or fixture timeout limit is raised.
+A transient executor reconnect preserved the worktree; the concrete
+Lean/Lake/KeySort gate passed again after reconnecting.

@@ -922,6 +922,12 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
         pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
+  -- Instrument only the external entry's source body, not the adapter's ABI
+  -- decoder or encoder. Nested bodies are traversed here once; their scopes
+  -- have top=false. Exact-data lowering never changes the caller environment.
+  let sc ← read
+  let call := if sc.retainFailureData && sc.top then
+    { call with s := call.s.withPanics } else call
   -- after a repeated callee, the caller's numbering goes on from where it was
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 
@@ -1118,7 +1124,8 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
   -- custom errors (`revert E(a)`, `require(c, E(a))`): their data only where
   -- a `try` reads it, as `revertMsg`'s
-  let self := (← read).selfFrame
+  let sc ← read
+  let self := sc.selfFrame || sc.retainFailureData
   -- Apply implicit byte widening before fnPure/bytesPure erase source widths.
   -- Both require branches evaluate operands at the custom error's types,
   -- including a discarded fixed-byte literal (which is not a memory value).
@@ -1664,21 +1671,21 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
   | .assert c => do
     let Γ ← nctx
     -- in a self-call's callee, where a `catch` reads it: `Panic(0x01)`'s data
-    if (← read).selfFrame then
+    if (← read).selfFrame || (← read).retainFailureData then
       return [.of Γ (.ite (← checkIn C Γ .bool c) .nil
         (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))]
     pure [.of Γ (.assert (← checkIn C Γ .bool c))]
   | .revert => do pure [.of (← nctx) .revert]
   -- revert data, where a `try` reads it: in a self-call's callee
   | .revertMsg m => do
-    if (← read).selfFrame then
+    if (← read).selfFrame || (← read).retainFailureData then
       pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
     else pure [.of (← nctx) .revert]
   | .revertReason m => memoryRevert .reason m
   | .revertRaw d => memoryRevert .raw d
   | .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])
   | .requireMsg c m => do
-    if (← read).selfFrame then elabStmt1 (.ite c [] [.revertMsg m])
+    if (← read).selfFrame || (← read).retainFailureData then elabStmt1 (.ite c [] [.revertMsg m])
     else elabStmt1 (.require c)
   -- `revert E(a, b)`: `E`'s selector, folded as solc folds it
   -- (`errorSignature?`), then each argument's ABI word (a literal's folded)
@@ -1689,7 +1696,7 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       d.params.map fun (_, T) => match T with | .prim p => some p | _ => none).getD []
     let (P, args) ← eagerArgsWith C rc.hoist args (expected := expected)
     let Γ ← nctx
-    if (← read).selfFrame then
+    if (← read).selfFrame || (← read).retainFailureData then
       pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
     else pure (P ++ [.of Γ .revert])
   | .requireErr c _ args => elabStmt1 (RawStmt.requireWith c args)
@@ -1705,7 +1712,8 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       else throw "`checked { … }` and `ignoringOverflow { … }` do not nest in each other"
     | none =>
       let P ← withReader (fun sc => { sc with overflow := some o }) (elabBranch ss)
-      let sf := (← read).selfFrame
+      let sc ← read
+      let sf := sc.selfFrame || sc.retainFailureData
       pure (P.flatMap (SStmt.withOF o sf))
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`
