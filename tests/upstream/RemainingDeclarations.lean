@@ -126,6 +126,26 @@ def checkEnumDeclarations (ir : Bool) : IO Unit := do
     if (readContract altered "EnumStructFields" [] true).isOk then
       throw (IO.userError "malformed enum declaration accepted")
 
+/-- Pin carrier scope as printed source: unrelated enum conversions retain
+ their established proof shape, while a struct dependency retains uint8. -/
+def checkEnumCarrierScope (ir : Bool) : IO Unit := do
+  let input ← fixture ir
+  let ast ← IO.ofExcept (input.getObjVal? "ast")
+  let unrelated ← IO.ofExcept (readContract ast "EnumIdentity" [] true)
+  let dependent ← IO.ofExcept (readContract ast "EnumStructFields" [] true)
+  let body (contract : SolcContract) (name : String) : IO String := do
+    let some f := contract.funs.find? (·.sourceName == name)
+      | throw (IO.userError "missing carrier-scope control")
+    let statements ← IO.ofExcept (f.body.mapError Gap.msg)
+    pure (";".intercalate (statements.map (·.2)))
+  unless ((← body unrelated "own").splitOn "uint8").length == 1 do
+    throw (IO.userError "unrelated enum conversion acquired a uint8 carrier")
+  unless ((← body dependent "invalid").splitOn "uint8").length > 1 do
+    throw (IO.userError "struct enum conversion lost its uint8 carrier")
+
+#eval checkEnumCarrierScope false
+#eval checkEnumCarrierScope true
+
 #eval checkEnumDeclarations false
 #eval checkEnumDeclarations true
 #eval checkArtifact false

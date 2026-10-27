@@ -657,6 +657,7 @@ structure PState where
   enumValues : List (Int × Nat) := []
   enumBounds : List (Int × Nat) := []
   enumNativeNames : List (Int × String) := []
+  enumCarriers : List Int := []
   enumDecodeTypes : List Int := []
   specEnums : List (String × Nat) := []
   specBlocked : List String := []
@@ -1639,11 +1640,14 @@ partial def call (j : Json) : PM String := do
       else if to.startsWith "type(enum " then
         -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
         -- elaborator asserts that `x` names one of its members
-        let some e := (J.ref? f).bind (lookupBy · (← get).enumNativeNames)
+        let some id := J.ref? f
           | unsupported "an enum conversion without its validated native declaration identity"
-        -- Keep the nominal range check, then expose the enum's ABI uint8
-        -- carrier to local/field/array consumers.
-        pure (sourceCast "uint8" s!"{identText e}({← expr a})")
+        let some e := lookupBy id (← get).enumNativeNames
+          | unsupported "an enum conversion without its validated native declaration identity"
+        let converted := s!"{identText e}({← expr a})"
+        -- Only enum-containing struct dependencies need a new carrier;
+        -- unrelated enum programs keep their established proof shape.
+        pure (if (← get).enumCarriers.contains id then sourceCast "uint8" converted else converted)
       else
         let n ← match J.kind f with
           | "ElementaryTypeNameExpression" =>

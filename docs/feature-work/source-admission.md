@@ -33,6 +33,11 @@ constructor row even when the constructor is implicit; native initialization
 elaboration failure also cannot become a warning-only default deployment.
 Pipeline-specific inheritance scheduling and the regression evidence are recorded
 in [Group 08 of the declaration milestone](declarations-metadata.md#group-08-source-lowering-repair-2026-10-26).
+The [resumed declaration repairs](declarations-metadata.md#group-08-resumed-remaining-declarations-2026-10-27)
+record static compiler-code artifact validation, enum struct dependencies and
+restricted mixed storage-return projection. Composite ABI inputs containing
+enums remain refused until recursive nominal cardinality checks exist; direct
+enums and one-dimensional enum arrays retain their exact range premises.
 Metadata-only selectors do not pull unrelated function bodies into admission.
 Possible self-calls include cast/aliased receivers. Payment dispatch requiring
 inherited receive, fallback or receive modifiers is refused until that dispatch

@@ -721,10 +721,6 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let cspec := baseSpec ++ (← resolveIn c cspec)
   if testing && cspec.any (fun c => ["requires", "ensures", "assignable"].contains c.kind) then
     throw "testing import: contract-level clauses must be invariants"
-  let enumNames : Structs := enumDefs.flatMap fun e =>
-    let n := (J.str? e "name").getD ""
-    let canonical := (J.str? e "canonicalName").getD n
-    ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint8")) ++ [(canonical, .ok "uint8")]
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
     let vs := J.arrD e "members"
     vs.toList.zipIdx |>.filterMap fun (v, i) => (J.id? v).map (·, i)
@@ -781,6 +777,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         printed := printed ++ "_"
       return printed
     pure (e, id, printed, names)
+  let enumCarriers := structEnums.map (·.2.1)
+  let enumNames : Structs := enumDefs.flatMap fun e =>
+    let n := (J.str? e "name").getD ""
+    let canonical := (J.str? e "canonicalName").getD n
+    let carrier := if (J.id? e).any enumCarriers.contains then "uint8" else "uint"
+    ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok carrier)) ++ [(canonical, .ok carrier)]
   let (SS, ownStructs) := readStructs ren structDefs (structEnums.map (·.2.1))
   let S := SS ++ enumNames ++ aliasNames
   let constants : List (Int × (String × Json)) := (J.nodes ast).filterMap fun v => do
@@ -1046,6 +1048,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         enumValues
         enumBounds
         enumNativeNames
+        enumCarriers
         enumDecodeTypes
         compilerCode
         valueTypes }
@@ -1176,7 +1179,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     { declarations, storageTuples, compilerCode,
       returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
       selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
-      funParams, constants, enumValues, enumBounds, enumNativeNames, enumDecodeTypes, valueTypes, freeFunctions, libraries,
+      funParams, constants, enumValues, enumBounds, enumNativeNames, enumCarriers, enumDecodeTypes, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
       sourceStateNames := J.varDeclNames scopeNodes, sourceModelNames := stateVars, scanLoop,
@@ -1402,7 +1405,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, compilerCode, enumNativeNames, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, compilerCode, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let omittedInitializers := vars.filter fun v =>
     J.opt v "constant" != some (.bool true) &&
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&

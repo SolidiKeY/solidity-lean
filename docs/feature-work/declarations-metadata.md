@@ -691,3 +691,15 @@ enum-array refusals and retain direct scalar/one-dimensional array admission
 with their exact cardinality premises. Internal storage references remain on
 their existing typed path. The first resumed source-suite attempt was stopped
 for this confirmed fix and retained as incomplete, rather than treated as a pass.
+
+The final build exposed an additional related checking regression in
+`CallExceptions.enum_code`: giving every source enum a new uint8 carrier
+made an established symbolic panic-code proof exceed its bounded closer
+search. Carrier metadata and the extra conversion now apply only to actual
+enum-containing struct dependencies. Other enum programs retain their prior
+lowering shape; packed ABI sites still retain the correct byte width. A printed
+source control pins this distinction. No closer budget or heartbeat was raised.
+The pre-fix build and incomplete concurrent suite remain development evidence,
+not passing final gates. Subsequent build jobs queue before Lean starts using
+a local `flock` launcher over the same 4.24.0 binary, rather than pausing a
+checker after it starts; independently timed source proof jobs are never paused.
