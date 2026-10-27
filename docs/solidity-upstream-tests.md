@@ -294,7 +294,7 @@ read-bearing annotations and zero mismatches. `SolidityCorpus` builds
 The first cold default build completed 642/649 targets in 71m37s without
 semantic errors before a controlled resource stop. OpenLoops completed in
 1186 s immediately before the stop; DecisionHashes remained active while
-the combined workers approached this executor's 17 GiB memory budget. The
+the combined workers approached this executor's 16 GiB cgroup memory cap. The
 historical baseline also left the broader decision-example build inconclusive;
 that is not a fresh current-base performance comparison. A bounded single-worker
 tail retry is recorded separately in the evidence manifest.
@@ -307,8 +307,8 @@ and optional Bridge remain unchanged.
 
 The single-worker tail retry passed `Examples/DecisionHashes.lean` in 417 s,
 then reached its fixed 900-second timeout while checking the unchanged
-`Examples/Decision.lean`. The default build remains **resource-blocked at
-643/649**, not passing. No semantic error was emitted. Its source files are
+`Examples/Decision.lean`. At that handoff the default build remained **resource-blocked at
+643/649**, not passing; the completion below supersedes that status. No semantic error was emitted. Its source files are
 unchanged by this patch; the historical baseline had an inconclusive broader
 decision-example build, but no fresh current-base timing comparison was made.
 All focused, formal, source, TestSuite, frozen sort and frozen corpus gates
@@ -321,3 +321,60 @@ hashes and the exact Node model digest, and confirmed the stated proof,
 exclusion and resource limits. No historical input/result was modified, no
 axiom or proof-limit override was added, and no push or merge to master was
 performed.
+
+
+### Group 01 default-build completion (2026-10-27)
+
+Resumed the same branch at `bfad51e3`, preserving its implementation, reports
+and historical inputs. The managed Lean/Lake/KeySort runtime gate passed again.
+No stale Lean worker existed. The configuration field invalidated downstream
+artifacts, but the decision examples do not exercise modifier frames.
+`Solidity/Examples/Decision.lean` is byte-identical to the base. No fresh base timing A/B was
+performed, so these measurements do not establish a performance regression
+or its absence. No Lean source, algorithm, proof limit or representation
+changed during this completion.
+
+Scratch boundary profiling located the existing `sortedLe` verdict at 198 s
+and the later ledger verdict group at about 105 s. Profiling also injects
+timing messages into `#guard_msgs`; that diagnostic was stopped and is not
+a passing check. Uninstrumented builds supply the final evidence.
+
+All remaining modules were then built separately with `LEAN_NUM_THREADS=1`,
+one Lean worker at a time, a 90-minute per-target ceiling and a 14,500 MiB
+process-tree RSS ceiling. Neither ceiling was reached; RSS and worker counts were sampled every two seconds:
+
+| Target | Result | Elapsed | Sampled peak process-tree RSS |
+|---|---|---|---|
+| `Solidity.Examples.Decision` | pass | 758.7 s | 5.14 GiB |
+| `Solidity.Examples.DecisionKInt` | pass | 6.0 s | 1.63 GiB |
+| `Solidity.Examples.DecisionMemory` | pass | 56.3 s | 1.45 GiB |
+| `Solidity.Examples.DecisionArrays` | pass | 2383.1 s | 11.74 GiB |
+| `lake build` | **pass, 649 jobs** | 4.0 s after those builds | 0.53 GiB |
+
+Fresh exact-path fixture runs, each with `--batch-size 1` and a distinct output
+directory, pass both assigned viaIR cases and all three existing control
+fixtures. Every fresh report is byte-identical to its preserved committed
+after-report, including all observations, pipelines and provenance hashes.
+The model digest remains `56dd5f976067a9756c551481228d26769877179c03f75e87cf69c5ae27ab4402`.
+The compiler lost from `/tmp` at reconnect was restored and SHA-checked.
+
+The 34 native controls and four semantic proofs with exact standard-axiom
+pins pass again, as do all 14 runner tests, existing replay, strict automation,
+reachability, layering, cached TestSuite build/audit, frozen sort and corpus
+build/check. The prior 40 EVM vectors and three focused source regressions
+remain retained evidence; they were not rerun in this completion.
+Storage-valued modifier returns remain excluded, generic source-lowering
+agreement remains unproved, and the unassigned family gaps remain outside
+this lane. No broader family rerun or universal compiler theorem is claimed.
+
+Exact commands, terminal results, fixture/report hashes, resource measurements
+and log digests are in [the completion evidence](../tests/upstream/group01/resume-validation.json).
+The old incomplete attempts remain recorded. The documentation-path gate
+retains the same 13 missing references; none were introduced here.
+
+The final read-only finder and independent skeptic verified the terminal logs,
+commands, report/model/compiler hashes, five byte-identical fixture reports,
+proof scope and remaining exclusions. Neither opened Lean workers. Their
+precision fixes distinguish the 16 GiB cgroup limit and sampled RSS peaks.
+The original implementation commit remains intact; the completion commit
+records evidence only. No push or merge to master was performed.

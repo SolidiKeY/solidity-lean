@@ -47,7 +47,7 @@
     "testsuiteAudit": "passed against tests/migration/solkey/keyext.solidity.examples",
     "docPaths": "13 pre-existing missing references; no new references missing",
     "proofs": "four fixed-program semantic validity theorems and exact axiom-output pins passed; only propext, Classical.choice, Quot.sound; 47.084 seconds final replay",
-    "defaultBuild": "resource-blocked: cold run controlled stop at642/649 after4297.454s; one-worker 900.031s retry passed DecisionHashes at417s then timed out on unchanged Examples/Decision.lean at643/649. No semantic errors reported. Not a passing full build; no fresh current-base timing comparison.",
+    "defaultBuild": "passed: resumed serial builds completed Decision (758.689s), DecisionKInt (6.020s), DecisionMemory (56.284s), DecisionArrays (2383.117s); final lake build exit0,649 jobs (4.017s). Earlier incomplete attempts retained in finalGates and resume-validation.json.",
     "sort": "passed frozen 473da8944c; 377 taclets, 131 read-bearing annotations, zero mismatches",
     "corpus": "passed explicit SolidityCorpus build and frozen check-corpus.sh --solkey tests/migration/solkey/keyext.solidity.examples",
     "modifierFamily": "31 current fixtures: 9 working, 17 broken adapter/import gaps, 5 blocked. Both assigned cases work; all seven historically working family fixtures still work. Historical comparison is not a fresh base rerun for unassigned gaps.",
@@ -314,8 +314,7 @@
   "remainingScope": [
     "ViaIR modifier functions with storage-valued returns are explicitly excluded and their diagnostic is pinned.",
     "Generic source-lowering agreement for arbitrary bodies is not proved; four semantic validity controls cover the affected fixed model programs.",
-    "Unassigned modifier-family cases retain17 adapter/import gaps and5 adapter blocks; no observations or expected values were dropped.",
-    "The full default build remains resource-blocked on Examples/Decision.lean; all targeted and frozen gates passed."
+    "Unassigned modifier-family cases retain17 adapter/import gaps and5 adapter blocks; no observations or expected values were dropped."
   ],
   "patchStatus": "local task-branch commit on fix/group01-modifier-returns; no push or merge to master",
   "logs": {
@@ -451,5 +450,6 @@
       "sha256": "d32967e1e53699766143f66578e44c4628172cf737877d84d18c76bf3e4e28c6",
       "bytes": 44875
     }
-  }
+  },
+  "completionEvidence": "tests/upstream/group01/resume-validation.json"
 }
