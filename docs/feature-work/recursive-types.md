@@ -225,3 +225,12 @@ still need ordinary interpreter integration and operation correspondence.
 distinguishes implemented finite repairs from these unimplemented interfaces.
 There is no finite-depth substitute or new recursive source admission in that
 patch.
+
+Final Group 06 evidence after `49b55764` still records twelve both-pipeline
+passes and the same three recursive import failures. TestSuite kernel checking,
+frozen sort and corpus parity pass independently. The full default library
+check remains resource-blocked on the unchanged array-decision example, not
+on a recursive source admission attempt. See the final validation continuation
+in [declarations-metadata.md](declarations-metadata.md) and the per-fixture
+[evidence](../../tests/upstream/group06.json). No ordinary recursive admission
+or graph representation migration is claimed by this lane.

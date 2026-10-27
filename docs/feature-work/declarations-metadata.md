@@ -685,7 +685,7 @@ checks the fresh enum name exists and the reserved name does not. Its draft
 wrapper/CLI restrictions were corrected without changing model or expectations.
 Replay passes nine checks, all six enum-bound kernel checks pass, and the
 upstream runner's fourteen JavaScript tests pass. Source controls now total
- eleven proved rows, two deliberately pending rows, two unsupported admission
+eleven proved rows, two deliberately pending rows, two unsupported admission
 controls and one internal helper; runtime controls retain twenty-six observations.
 The strict automation, reachability, layering and frozen-archive checks pass;
 the twenty-five trust-inventory findings are byte-for-byte unchanged.
@@ -696,3 +696,72 @@ completed artifacts are reused by the final serial run, including checks against
 the namespace fix. The interrupted run is not counted as a passed default or
 TestSuite build. Final default/TestSuite/sort and corpus outcomes remain pending
 until their logs close.
+
+The final ABI audit confirmed a separate entry-boundary defect in canonical
+matching: `read(EnumAbi.E)` has ABI spelling `read(uint8)`, but the enum has only
+two values. The body model accepted `2` as a uint even though it is outside the
+source decoder's enum domain. The adapter now checks the selected import row's
+existing `paramRanges`, including the unique constructor row, before invoking
+the model. Out-of-domain inputs are **blocked**, not counted as successful
+expected failures or ABI-decoder coverage. Address checks remain in place.
+No argument range, proof premise or expected source result was weakened.
+
+`EnumAbiRanges.sol` and SHA-checked 0.8.38 ASTs pin function and constructor
+entry under both pipelines. Four valid cases match six observations; four
+out-of-domain cases are explicitly blocked. Eight permanent replay checks and
+one additional source assertion pass. The independent skeptic confirmed row
+ownership, constructor identity and signed-literal handling without opening a
+Lean worker. The final source-control total is twelve proved rows, two
+deliberately pending rows, two unsupported admission controls and one internal
+helper; successful runtime controls retain thirty-two observations. The source
+proof runner still uses the repository's 0.8.34 compiler pin.
+
+All fifteen assigned fixtures were refreshed after this guard, under
+`.lake/upstream/group06-resumed-abi-ranges-final/<fixture>`, with exact filters,
+batch size one and separate output directories. The final model SHA-256 is
+`c42462c7acbc77c576ccb1f375c021ad1708bb241e59091d96e2a68bbd78fa08`.
+The result remains twelve working and three broken, each in both required
+pipelines; no assigned fixture is classified as an adapter/resource block.
+Per-fixture wall times are 4.09–8.01 s including compiler/import/replay, not an
+isolated performance benchmark. Previous model reports remain preserved.
+
+Final validation passes the fourteen upstream JavaScript tests, existing nine
+replay checks, six enum-bound kernel theorems and eight new enum ABI checks.
+`lake build SolkeyTestSuite` completed all 249 jobs, rechecking the report's
+552 derived and eleven refuted obligations with zero pending. Frozen sort
+coverage passes 377 taclets and all 131 read-bearing annotations. Frozen corpus
+parity passes all 774 ledger rows (including its explicit excluded, unsupported
+and unported rows; this is not 774 derived proofs). Strict automation passes
+491 automatic and 61 budgeted derivations, eleven refutations and zero pending;
+its build-log check times 26 TestSuite modules, all below the unchanged 300 s
+budget (largest 219 s). Cached TestSuite, sort and corpus confirmations pass
+after the last adapter change. Reachability remains 667/zero orphans, layering
+143 core/zero elaborator reach, and the 25 trust-inventory findings match the
+baseline byte-for-byte. The thirteen missing external/vendor doc references and
+unchanged-parent `Bytes.indexOutOfRange` pending proof remain baseline findings.
+
+The full default library gate is **resource blocked, not passed**. The cached
+follow-up completed `OpenLoops` in 918 s and `Decision` in 1294 s, then reached
+644/649 jobs. The unchanged `Examples/DecisionArrays.lean` runtime pin
+`verdict gapArrayBlock` held about 9 GiB after more than forty minutes; it was
+stopped to free memory. Its kernel coverage checks complete quickly in the
+diagnostic copy. A separate native-symbol attempt compiled 700 cached artifact
+jobs and loaded 233 dependency libraries in order. Existing replay and all six
+enum-bound kernel checks pass with those ordinary compiled Lean symbols, using
+only the standard axiom whitelist. The unchanged array file, run serially with
+all three expected results retained, nevertheless reached the 14.5 GiB memory
+guard in this 16 GiB executor after 167 s. No array verdict or default-build pass
+is claimed. Earlier loader, address-space and concurrent-memory probes are
+retained as superseded diagnostics, not passing checks. No `native_decide`,
+proof heartbeat increase, new axiom or source representation change was used.
+The final adapter change is outside that array module's dependency graph; the
+resource evidence records its actual earlier source-model hash separately.
+
+Both independent read-only reviews found no remaining finite-admission issue.
+The exported code series applies to preserved `615bd3fa` and reproduces its
+committed tree; final evidence and patch export are committed on the existing
+lane. This is still an incomplete repair of the fifteen-fixture assignment:
+the three recursive fixtures need ordinary graph memory/storage interfaces and
+their operation-preserving correspondence, not finite unrolling or an alternate
+unproved evaluator. Historical upstream inputs, expectations, archive and
+`tests/upstream/results` are unchanged. No push or merge to master was made.
