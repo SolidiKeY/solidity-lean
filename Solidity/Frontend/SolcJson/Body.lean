@@ -491,11 +491,23 @@ struct has that name.  Declaration keys preserve solc's resolution when a
 contract shadows a file-level name.  Also the own ones, by declaration. -/
 def readStructs (ren : List (String × String)) (defs : List Json) :
     Structs × List (Json × String) := Id.run do
+  let declaredNames := defs.map fun d =>
+    let n := (J.str? d "name").getD ""
+    (lookupBy n ren).getD n
   let printed (d : Json) : String :=
     let n := (J.str? d "name").getD ""
     let m := (lookupBy n ren).getD n
     let clash := defs.any fun e => J.str? e "name" == some n && J.id? e != J.id? d
-    if clash then s!"{m}_{(J.id? d).getD 0}" else m
+    if clash then
+      -- A source declaration may already spell the generated ID suffix.
+      -- Generated stems end in distinct declaration IDs; fresh suffixes end
+      -- in underscores, so avoiding declared names also keeps them distinct.
+      let rec fresh (fuel : Nat) (candidate : String) : String :=
+        match fuel with
+        | 0 => candidate
+        | fuel + 1 => if declaredNames.contains candidate then fresh fuel (candidate ++ "_") else candidate
+      fresh (declaredNames.length + 1) s!"{m}_{(J.id? d).getD 0}"
+    else m
   let identities := defs.filterMap fun d => do
     let i ← J.id? d
     pure (s!"#solc{i}", printed d)
@@ -549,7 +561,10 @@ def readStructs (ren : List (String × String)) (defs : List Json) :
       (d, n, checkedShape)
   let S : Structs := checked.flatMap fun (d, n, check) =>
     let check := check.map (·.1)
-    ((J.id? d).toList.map fun i => (s!"#solc{i}", check)) ++ [(n, check)]
+    let canonical := (J.str? d "canonicalName").toList.map fun name => ("#canonical" ++ name, check)
+    let unique := !(defs.any fun other => J.str? other "name" == some n && J.id? other != J.id? d)
+    ((J.id? d).toList.map fun i => (s!"#solc{i}", check)) ++ canonical ++
+      (if unique then [("#short" ++ n, check)] else []) ++ [(n, check)]
   let own := checked.filterMap fun (d, _, check) =>
     match check with
     | .ok (p, true) => some (d, p)
@@ -671,6 +686,8 @@ structure PState where
   constStack : List Int := []
   enumValues : List (Int × Nat) := []
   enumBounds : List (Int × Nat) := []
+  /-- Conversion targets keyed by compiler declaration identity. -/
+  enumCasts : List (Int × String) := []
   specEnums : List (String × Nat) := []
   specBlocked : List String := []
   specConstants : List (String × Nat) := []
@@ -1103,9 +1120,11 @@ def pushedTy (j : Json) : PM String := do
   let t := J.tyStr j
   let t := (t.replace " storage ref" "").replace " storage pointer" ""
   let t := if t.startsWith "struct " then
-      ((t.drop 7).splitOn ".").getLast!
+      t.drop 7
     else t
-  match lookupBy t (← get).structs with
+  let structs := (← get).structs
+  match (lookupBy ("#canonical" ++ t) structs).orElse (fun _ =>
+      lookupBy ("#short" ++ ((t.splitOn ".").getLast!)) structs) with
   | some (.ok m) => pure (typeIdentText m)
   | some (.error g) => throw g
   | none => unsupported s!"a member of a pushed `{t}`"
@@ -1118,8 +1137,10 @@ def storageRefTy (j : Json) : PM String := do
   let base := t.takeWhile (· != '[')
   let dims := t.drop base.length
   let base ← if base.startsWith "struct " then
-      let n := ((base.drop 7).splitOn ".").getLast!
-      match lookupBy n (← get).structs with
+      let n := base.drop 7
+      let structs := (← get).structs
+      match (lookupBy ("#canonical" ++ n) structs).orElse (fun _ =>
+          lookupBy ("#short" ++ ((n.splitOn ".").getLast!)) structs) with
       | some (.ok m) => pure (typeIdentText m)
       | some (.error g) => throw g
       | none => unsupported s!"a reference to `{n}`"
@@ -1321,6 +1342,13 @@ def abiCallBytesParams? (declarations : List Json) (target : Json) :
     guard (J.kind ty == "ElementaryTypeName")
     let name ← J.str? ty "name"
     bytesTy? name)
+
+/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
+partial def unparen (j : Json) : Json :=
+  match J.kind j, (J.arr? j "components").map (·.toList) with
+  | "TupleExpression", some [c] =>
+    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
+  | _, _ => j
 
 mutual
 
@@ -1554,7 +1582,7 @@ partial def operand (j : Json) (pow : Bool) : PM String := do
   pure (if compound j || (pow && J.kind j == "UnaryOperation") then s!"({s})" else s)
 
 partial def call (j : Json) : PM String := do
-  let f ← PM.lift (J.get j "expression")
+  let f := unparen (← PM.lift (J.get j "expression"))
   let args ← PM.lift (J.arr j "arguments")
   if let some (c, a, b) := condCallee? j then
     unless condCalleeOk j do unsupported condCalleeMsg
@@ -1623,7 +1651,8 @@ partial def call (j : Json) : PM String := do
       else if to.startsWith "type(enum " then
         -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
         -- elaborator asserts that `x` names one of its members
-        let e := ((to.drop 10).dropRight 1).splitOn "." |>.getLast!
+        let some e := (J.ref? f).bind (lookupBy · (← get).enumCasts)
+          | unsupported "an enum conversion without a resolved declaration"
         pure s!"{identText e}({← expr a})"
       else
         let n ← match J.kind f with
@@ -1669,6 +1698,7 @@ partial def call (j : Json) : PM String := do
       ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "encodeCall"].contains
         ((J.str? f "memberName").getD "") &&
       (J.opt f "expression").any (builtinNamed · "abi")
+    let enumCasts := (← get).enumCasts
     let as := if abiEncoder then
         (args.zip as).map fun (a, t) =>
           -- Constant metadata can print as a numeral. Preserve the source
@@ -1676,7 +1706,9 @@ partial def call (j : Json) : PM String := do
           if (bytesTy? (J.tyStr a)).isSome && !(t.startsWith (J.tyStr a ++ "(")) then
             sourceCast (J.tyStr a) t
           else if packed && (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
-            s!"{identText ((((J.tyStr a).drop 5).splitOn ".").getLast!)}({t})"
+            match ((J.opt a "expression").bind J.ref?).bind (lookupBy · enumCasts) with
+            | some name => s!"{identText name}({t})"
+            | none => t
           else t
       else as
     let name ← if let some n := superName then pure (identText n)
@@ -1713,13 +1745,6 @@ partial def call (j : Json) : PM String := do
   | k => unsupported s!"a call of kind `{k}`"
 
 end
-
-/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
-partial def unparen (j : Json) : Json :=
-  match J.kind j, (J.arr? j "components").map (·.toList) with
-  | "TupleExpression", some [c] =>
-    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
-  | _, _ => j
 
 /-- Is the node a tuple of several components, `(a, b)`, and not an inline
 array (`SolJSONParser.isTuple`)? -/
@@ -1758,6 +1783,22 @@ def valueCall? (j : Json) : Option (Json × Json × Json) := do
   let [v] ← (J.arr? opts "options").map Array.toList | none
   pure (d, ← J.opt m "expression", v)
 
+/-- A validated type expression has no runtime evaluation. Only literal
+array dimensions and declaration-resolved type names are admitted here; an
+ordinary indexed read, call or member receiver must still execute. -/
+partial def inertTypeExpression (declarations : List Json) (j : Json) : Bool :=
+  (J.tyStr j).startsWith "type(" && match J.kind j with
+  | "Identifier" | "MemberAccess" =>
+    ((J.ref? j).bind fun id => declarations.find? (J.id? · == some id)).any
+      (fun d => ["StructDefinition", "EnumDefinition", "ContractDefinition"].contains (J.kind d)) &&
+    (J.kind j == "Identifier" || (J.opt j "expression").any (inertTypeExpression declarations))
+  | "ElementaryTypeNameExpression" => true
+  | "IndexAccess" =>
+    (J.opt j "baseExpression").any (inertTypeExpression declarations) &&
+    ((J.opt j "indexExpression").all fun i =>
+      J.kind i == "Literal" && J.str? i "kind" == some "number")
+  | _ => false
+
 /-- A tuple's components, one left out printed empty: `(a, , b)`. -/
 def tuple (j : Json) : PM String := do
   let cs ← (← PM.lift (J.arr j "components")).mapM fun c =>
@@ -1776,6 +1817,37 @@ def tupleValue (v : Json) : PM String := do
   then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
+
+/-- Flatten explicitly nested tuple assignment shapes together. Discarded
+subtuples retain every admitted leaf. Calls and failing reads remain refused
+until nested evaluation ordering is established. The existing intrinsic tuple
+elaborator captures all values before writing any target. -/
+partial def tupleAssignmentLeaves (left right : Json) : Except Gap (List (Json × Json)) := do
+  let left := unparen left
+  let right := unparen right
+  if isTuple right then
+    let rs := (J.arrD right "components").toList
+    if left == .null then
+      return ← rs.flatMapM (tupleAssignmentLeaves .null)
+    unless isTuple left do throw (.unsupported "a nested tuple assigned to a scalar target")
+    let ls := (J.arrD left "components").toList
+    unless ls.length == rs.length do throw (.unsupported "nested tuple shapes disagree")
+    return ← (ls.zip rs).flatMapM fun (l, r) => tupleAssignmentLeaves l r
+  if isTuple left then throw (.unsupported "a nested tuple target without an explicit tuple value")
+  unless ["Literal", "Identifier"].contains (J.kind right) do
+    throw (.unsupported "a nested tuple leaf with evaluation effects or failing reads")
+  return [(left, right)]
+
+/-- Lower an explicit nested tuple to the existing simultaneous flat tuple
+assignment. A spare discarded zero preserves tuple syntax for a single leaf. -/
+def explicitTupleAssignment (left right : Json) : PM String := do
+  let pairs ← PM.lift (tupleAssignmentLeaves left right)
+  let pairs := if pairs.length < 2 then pairs ++ [(.null, Json.mkObj
+    [("nodeType", .str "Literal"), ("kind", .str "number"), ("value", .str "0"),
+     ("typeDescriptions", Json.mkObj [("typeString", .str "int_const 0")])])] else pairs
+  let ls ← pairs.mapM fun (l, _) => if l == .null then pure "" else expr l
+  let rs ← pairs.mapM fun (_, r) => expr r
+  return s!"({", ".intercalate ls}) = ({", ".intercalate rs})"
 
 /-- A local's declaration, `T [storage|memory] x`. -/
 def declText (d : Json) : PM String := do
@@ -1863,14 +1935,19 @@ partial def stmt1 (j : Json) : PM (List String) := do
       (narrowTy? (J.tyStr e)).isSome || (bytesTy? (J.tyStr e)).isSome ||
       ["address", "address payable"].contains (J.tyStr e)
     let declarations := (← get).declarations
+    if inertTypeExpression declarations e then return []
     if J.kind e == "Identifier" && scalar then
       if ((J.ref? e).bind fun id => declarations.find? (J.id? · == some id)).any
           (J.kind · == "VariableDeclaration") then return []
     if J.kind e == "Assignment" && (J.opt e "operator").any (· == .str "=") &&
         (J.opt e "leftHandSide").any (isTuple ∘ unparen) then
       -- `(a, , b) = v`, and `((a, b)) = v` as it
-      return [s!"{← tuple (unparen (← PM.lift (J.get e "leftHandSide")))} = \
-        {← tupleValue (unparen (← PM.lift (J.get e "rightHandSide")))}"]
+      let left := unparen (← PM.lift (J.get e "leftHandSide"))
+      let right := unparen (← PM.lift (J.get e "rightHandSide"))
+      let nested := ((J.arrD left "components").toList ++
+        (J.arrD right "components").toList).any (isTuple ∘ unparen)
+      if isTuple right && nested then return [← explicitTupleAssignment left right]
+      return [s!"{← tuple left} = {← tupleValue right}"]
     -- `x.push().f = c`: solc pushes, then stores the constant
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>

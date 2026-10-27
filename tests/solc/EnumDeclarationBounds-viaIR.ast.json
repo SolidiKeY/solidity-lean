@@ -1,0 +1,38 @@
+{
+ "header": {
+  "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sourceSha256": "2c5011a3c5abd6ffd8f142d57add6dc69d97ea3bad4e0b37619efdbc6c433884",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/solc/EnumDeclarationBounds.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": true,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "^",
+    "0.8",
+    ".0"
+   ]
+  ]
+ },
+ "ast": {"id":45,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","^","0.8",".0"],"nodeType":"PragmaDirective","src":"0:23:0","line":1},{"canonicalName":"ForeignEnumBounds","contractKind":"library","id":5,"name":"ForeignEnumBounds","nodeType":"ContractDefinition","nodes":[{"canonicalName":"ForeignEnumBounds.E","id":4,"members":[{"id":2,"name":"A","nodeType":"EnumValue","src":"66:1:0","line":4},{"id":3,"name":"B","nodeType":"EnumValue","src":"69:1:0","line":4}],"name":"E","nodeType":"EnumDefinition","src":"57:15:0","line":4}],"src":"25:49:0","line":3},{"canonicalName":"EnumDeclarationBounds","contractKind":"contract","id":44,"name":"EnumDeclarationBounds","nodeType":"ContractDefinition","nodes":[{"canonicalName":"EnumDeclarationBounds.E","id":9,"members":[{"id":6,"name":"A","nodeType":"EnumValue","src":"122:1:0","line":8},{"id":7,"name":"B","nodeType":"EnumValue","src":"125:1:0","line":8},{"id":8,"name":"C","nodeType":"EnumValue","src":"128:1:0","line":8}],"name":"E","nodeType":"EnumDefinition","src":"113:18:0","line":8},{"body":{"nodeType":"Block","src":"198:57:0","line":10,"statements":[{"expression":{"arguments":[{"arguments":[{"name":"choice","nodeType":"Identifier","referencedDeclaration":11,"src":"240:6:0","line":11,"typeDescriptions":{"typeString":"uint256"}}],"expression":{"expression":{"name":"ForeignEnumBounds","nodeType":"Identifier","referencedDeclaration":5,"src":"220:17:0","line":11,"typeDescriptions":{"typeString":"type(library ForeignEnumBounds)"}},"memberName":"E","nodeType":"MemberAccess","referencedDeclaration":4,"src":"220:19:0","line":11,"typeDescriptions":{"typeString":"type(enum ForeignEnumBounds.E)"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","src":"220:27:0","line":11,"typeDescriptions":{"typeString":"enum ForeignEnumBounds.E"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","src":"215:4:0","line":11,"typeDescriptions":{"typeString":"type(uint256)"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","src":"215:4:0","line":11}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","src":"215:33:0","line":11,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"208:40:0","line":11}]},"functionSelector":"8fc087ab","id":25,"kind":"function","name":"foreignRead","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":11,"mutability":"mutable","name":"choice","nodeType":"VariableDeclaration","src":"158:11:0","line":10,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","src":"158:4:0","line":10,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"157:13:0","line":10},"returnParameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":14,"mutability":"mutable","name":"","nodeType":"VariableDeclaration","src":"192:4:0","line":10,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","src":"192:4:0","line":10,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"191:6:0","line":10},"src":"137:118:0","line":10,"stateMutability":"pure","visibility":"public"},{"body":{"nodeType":"Block","src":"296:61:0","line":13,"statements":[{"declarations":[{"constant":false,"id":30,"mutability":"mutable","name":"value","nodeType":"VariableDeclaration","src":"306:7:0","line":14,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"enum EnumDeclarationBounds.E"},"typeName":{"nodeType":"UserDefinedTypeName","pathNode":{"name":"E","nodeType":"IdentifierPath","referencedDeclaration":9,"src":"306:1:0","line":14},"referencedDeclaration":9,"src":"306:1:0","line":14,"typeDescriptions":{"typeString":"enum EnumDeclarationBounds.E"}},"visibility":"internal"}],"initialValue":{"arguments":[{"kind":"number","nodeType":"Literal","src":"318:1:0","line":14,"typeDescriptions":{"typeString":"int_const 2"},"value":"2"}],"expression":{"name":"E","nodeType":"Identifier","referencedDeclaration":9,"src":"316:1:0","line":14,"typeDescriptions":{"typeString":"type(enum EnumDeclarationBounds.E)"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","src":"316:4:0","line":14,"typeDescriptions":{"typeString":"enum EnumDeclarationBounds.E"}},"nodeType":"VariableDeclarationStatement","src":"306:14:0","line":14},{"expression":{"arguments":[{"commonType":{"typeIdentifier":"t_enum$_E_$9","typeString":"enum EnumDeclarationBounds.E"},"leftExpression":{"name":"value","nodeType":"Identifier","referencedDeclaration":30,"src":"337:5:0","line":15,"typeDescriptions":{"typeString":"enum EnumDeclarationBounds.E"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"expression":{"name":"E","nodeType":"Identifier","referencedDeclaration":9,"src":"346:1:0","line":15,"typeDescriptions":{"typeString":"type(enum EnumDeclarationBounds.E)"}},"memberName":"C","nodeType":"MemberAccess","referencedDeclaration":8,"src":"346:3:0","line":15,"typeDescriptions":{"typeString":"enum EnumDeclarationBounds.E"}},"src":"337:12:0","line":15,"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"src":"330:6:0","line":15,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","src":"330:20:0","line":15,"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"330:20:0","line":15}]},"functionSelector":"38bce950","id":43,"kind":"function","name":"localAccepts","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[],"src":"281:2:0","line":13},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"296:0:0","line":13},"src":"260:97:0","line":13,"stateMutability":"pure","visibility":"public"}],"src":"76:283:0","line":7}],"src":"0:360:0","line":1}
+}

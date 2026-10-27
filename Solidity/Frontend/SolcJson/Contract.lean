@@ -644,6 +644,26 @@ def contractLineage (units : List Json) (c : Json) : Except String (List Json) :
   unless ids == expected do throw "Solc C3 metadata disagrees with the inheritance order"
   ids.mapM find
 
+/-- Follow resolved references through executable declarations and struct fields.
+A contract/library name is not an edge to all of its members: unrelated library
+layouts must not poison an otherwise supported contract. Each declaration is
+visited at most once, with an explicit bound on the worklist. -/
+def referencedTypeDeclarations (declarations roots : List Json) : List Int := Id.run do
+  let candidates := declarations.filter fun declaration =>
+    ["FunctionDefinition", "ModifierDefinition", "StructDefinition"].contains (J.kind declaration)
+  let ids := candidates.filterMap J.id?
+  let refs (root : Json) := (J.nodes root).flatMap (fun node =>
+    (J.ref? node).toList ++ (J.operatorFunction? node).toList) |>.eraseDups |>.filter ids.contains
+  let mut todo := (roots.flatMap refs).eraseDups
+  let mut seen := []
+  for _ in [:candidates.length] do
+    let id :: rest := todo | break
+    todo := rest
+    seen := id :: seen
+    if let some declaration := candidates.find? (J.id? · == some id) then
+      todo := todo ++ (refs declaration).filter fun next => !seen.contains next && !todo.contains next
+  return seen
+
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
 def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false)
     (rewriteSpec : String → List (String × String) → List (String × String) → String → Except String String :=
@@ -719,6 +739,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let n := (J.str? e "name").getD ""
     let canonical := (J.str? e "canonicalName").getD n
     ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint")) ++ [(canonical, .ok "uint")]
+  -- A source-unspellable namespace prevents generated local aliases from
+  -- capturing conversions when raw bodies are renamed during inlining.
+  -- Explicit import renamings may use quoted names too, so reserve them.
+  let declaredNames := declarations.filterMap (J.str? · "name") ++ ren.map Prod.snd
+  let enumCasts : List (Int × String) := enumDefs.filterMap fun e => do
+    let id ← J.id? e
+    let stem := s!"#solcEnum{id}"
+    pure (id, freshSourceName declaredNames stem)
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
     let vs := J.arrD e "members"
     vs.toList.zipIdx |>.filterMap fun (v, i) => (J.id? v).map (·, i)
@@ -737,10 +765,23 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let valueTypes : List (Int × String) := aliases.map fun (i, _, _, t) => (i, t)
   let aliasNames : Structs := aliases.flatMap fun (i, _, qualified, t) =>
     [(s!"#solc{i}", .ok t), (qualified, .ok t)]
-  let structDefs := (nodes.filter (J.kind · == "StructDefinition")) ++
+  let localStructs := (nodes.filter (J.kind · == "StructDefinition")) ++
     (units.filter (J.kind · == "StructDefinition"))
+  let neededTypes := referencedTypeDeclarations declarations (nodes ++ localStructs)
+  -- Library callees may introduce further struct dependencies. Keep the old
+  -- lexical order and append only resolved, reachable foreign declarations.
+  let structDefs := localStructs ++ declarations.filter fun declaration =>
+    J.kind declaration == "StructDefinition" && (J.id? declaration).any neededTypes.contains &&
+      !localStructs.any (fun lexical => J.id? lexical == J.id? declaration)
   let (SS, ownStructs) := readStructs ren structDefs
-  let S := SS ++ enumNames ++ aliasNames
+  -- Compiler-resolved contract types share address representation, while
+  -- declaration/ABI identities remain in source metadata. Never resolve an
+  -- unknown user type by its short spelling.
+  let contractNames : Structs := declarations.filterMap fun d => do
+    guard (J.kind d == "ContractDefinition")
+    let id ← J.id? d
+    pure (s!"#solc{id}", .ok "address")
+  let S := SS ++ enumNames ++ aliasNames ++ contractNames
   let constants : List (Int × (String × Json)) := (J.nodes ast).filterMap fun v => do
     guard (J.kind v == "VariableDeclaration" && J.opt v "constant" == some (.bool true))
     let i ← J.id? v
@@ -806,10 +847,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     (cspec.filter (·.kind == "invariant")).map (fun c => s!"invariant {c.text};") else []
   -- the enums, as `contract!` members, for the conversions `E(x)` to check
   -- their argument against
-  let enumMembers : List String := (nodes.filter (J.kind · == "EnumDefinition")).filterMap fun e => do
+  let lexicalEnumMembers : List String := (nodes.filter (J.kind · == "EnumDefinition")).filterMap fun e => do
     let n ← J.str? e "name"
     let ms := (J.arrD e "members").toList.filterMap (J.str? · "name")
     pure s!"enum {identText n} \{ {", ".intercalate (ms.map identText)} }"
+  let enumMembers : List String := lexicalEnumMembers ++ (enumDefs.filterMap fun e => do
+    let n ← (J.id? e).bind (lookupBy · enumCasts)
+    let ms := (J.arrD e "members").toList.filterMap (J.str? · "name")
+    pure s!"enum {identText n} \{ {", ".intercalate (ms.map identText)} }")
   -- the contract's own structs, declared: a struct whose members do not print
   -- leaves out what uses it, as an unreadable struct does
   let structMembers := ownStructs.filterMap fun o => (ownStructMembers S [o]).toOption.bind (·.head?)
@@ -967,6 +1012,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         structs := S
         enumValues
         enumBounds
+        enumCasts
         valueTypes }
       unless rootState.pre.isEmpty do
         throw (.unsupported "a public getter root requires deferred initialization" (J.line declarationNode))
@@ -1063,7 +1109,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
     { declarations, selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
-      funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries,
+      funParams, constants, enumValues, enumBounds, enumCasts, valueTypes, freeFunctions, libraries,
       specEnums := specEnumValues units scopeNodes enumDefs,
       specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
       sourceStateNames := J.varDeclNames scopeNodes, sourceModelNames := stateVars, scanLoop,
@@ -1291,7 +1337,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, enumCasts, valueTypes, freeFunctions, libraries }
   let initScope := scanSource {
     entry := c, evaluatedRoots := kept.map (·.2.2), declarationRoots := [c]
     constantIds := constants.map Prod.fst

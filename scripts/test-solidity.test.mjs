@@ -1,4 +1,5 @@
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -167,12 +168,12 @@ test("file-level structs and library references retain declaration identity", ()
   assert.equal(testsPassed(report), false);
 });
 
-test("a nested struct of other widths is the contract's own; a hidden one stays out of reach", () => {
+test("a nested struct of other widths retains library member widths", () => {
   const report = runSolidityTests(["tests/solc/FileLevelStructGaps.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.results.filter(r => r.contract !== 'HiddenStructLib')
     .map(r => [r.contract, r.function, r.status]), [
-    ['HiddenStructCaller', 'narrowLibraryMember', 'unsupported'],
+    ['HiddenStructCaller', 'narrowLibraryMember', 'pending'],
     ['InvalidNestedStruct', 'narrowMember', 'pending']
   ]);
   assert.equal(testsPassed(report), false);
@@ -424,7 +425,7 @@ test("source types preserve overflow and declaration scope", () => {
 });
 
 test("source types: narrow elements, keys, values, struct members, locals and parameters", () => {
-  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
@@ -440,7 +441,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
 });
 
 test("bytesN, bytes and string: literals, indexing, conversions, storage, memory, struct members", () => {
-  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['literals', 'compareAndIndex', 'indexOutOfRange', 'conversions', 'bitwise',
@@ -1010,4 +1011,121 @@ test("callbacks: value calls through a function and loops of them, by their inva
   assert.equal(status.storageLostInLoop, "pending");
   // a loop whose body is a `try`, by its invariant (the `try`'s frame)
   assert.equal(status.loopOfTries, "proved");
+});
+
+test("library struct signatures preserve storage and memory receivers and declaration identity", () => {
+  const report = runSolidityTests(["tests/solc/LibraryStructCalls.sol"],
+    {build:false, contract:'LibraryStructCalls', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.frame, 'internal');
+  for (const name of ['storageReceiver', 'memoryReceiver', 'distinctDeclarations',
+    'parenthesizedReceiver', 'sameLayoutDeclarations', 'pushedReceivers',
+    'directPushedA', 'directPushedB', 'operatorDependency']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falsePost, 'pending');
+});
+
+test("generated struct identity names cannot capture a declared ID suffix", () => {
+  const report = runSolidityTests(["tests/solc/StructNameCollision.sol"],
+    {build:false, contract:'StructNameCollision', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.wraps, 'proved');
+  assert.equal(status.falsePost, 'pending');
+});
+
+
+test("finite nominal declarations and nested tuples retain identity, snapshots and failures", () => {
+  const report = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeLowering', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['enumIdentity', 'typeStatements', 'nestedSwap', 'nestedDiscard',
+    'nestedBytes', 'contractKey']) assert.equal(status[name], 'proved', name);
+  assert.equal(status.falsePost, 'pending');
+  const failures = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeFailures', batchSize:1});
+  assert.deepEqual(failures.errors, []);
+  const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
+  assert.equal(refused.nestedEffect, 'unsupported');
+  assert.equal(refused.indexedRead, 'unsupported');
+});
+
+
+test("finite nominal declarations avoid explicit renaming collisions", () => {
+  // Explicit quoted import aliases may spell the otherwise source-unspellable
+  // conversion name. The CLI helper intentionally admits source identifiers
+  // only, so exercise the import syntax directly.
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-enum-rename-'));
+  try {
+    const fixture = join(dir, 'source.ast.json');
+    runTool(process.execPath, ['scripts/solc-ast.mjs', '--source',
+      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper'], 300000);
+    let hash = 0xcbf29ce484222325n;
+    for (const byte of readFileSync(fixture))
+      hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
+    const wrapper = join(dir, 'Test.lean'), output = join(dir, 'result.json');
+    writeFileSync(wrapper, `import Solidity.Frontend.Testing
+solc_import "source.ast.json" hash 0x${hash.toString(16)} as EnumRenameControl.FiniteTypeLowering renaming «E» => «#solcEnum4» testing
+#guard (EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4_"
+#guard !(EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4"
+solc_scoped_problems EnumRenameControl.FiniteTypeLowering decl
+#solkey_test EnumRenameControl.FiniteTypeLowering only "enumIdentity" to ${JSON.stringify(output)}
+`);
+    const diagnostics = runTool('lake', ['--quiet', '--no-build', 'lean', wrapper,
+      '--', '--tstack=131072'], 300000);
+    assert.equal(diagnostics.includes('warning: solc_import:'), false, diagnostics);
+    assert.equal(JSON.parse(readFileSync(output, 'utf8'))
+      .find(r => r.function === 'enumIdentity')?.status, 'proved');
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+});
+
+test("enum conversions use their defining declaration bounds", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumDeclarationBounds.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumDeclarationBounds${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(["tests/solc/EnumDeclarationBounds.sol"],
+    {build:false, contract:'EnumDeclarationBounds', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]),
+    [['foreignRead', 'pending'], ['localAccepts', 'proved']]);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumBounds.lean',
+    '--', '--tstack=131072'], 300000);
+});
+
+test("function-value calls do not become generated enum conversions", () => {
+  // The former enumType4_ cast name collided with the renamed pointer
+  // parameter during inlining. Keep pointer calls and genuine casts distinct.
+  const report = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  const cast = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'checkCast', batchSize:1});
+  assert.deepEqual(cast.errors, []);
+  assert.equal(cast.results.find(r => r.function === 'checkCast')?.status, 'proved');
+});
+
+test("canonical nominal ABI matching preserves enum input ranges", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumAbiRanges.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumAbiRanges${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(['tests/solc/EnumAbiRanges.sol'],
+    {build:false, contract:'EnumAbiRanges', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
+    '--', '--tstack=131072'], 300000);
 });

@@ -113,6 +113,14 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       deployed := true
     let resolved := resolveEntry C rows signature
     let function := resolved.toOption
+    let declaration := if ctor then C.ctor else function.bind (Semantics.lookupBy · C.funs)
+    if let some declaration := declaration then
+      for ((parameter, _), arg) in declaration.params.zip args do
+        if (Semantics.lookupBy (parameter ++ "#address") declaration.widths).isSome then
+          let some value := arg.litVal?
+            | return result "blocked" "non-scalar address ABI argument"
+          unless 0 ≤ value && value < 2^160 do
+            return result "blocked" "noncanonical address ABI argument"
     let program := if ctor then ctorProgS C args else do
       let name ← resolved
       elabProgS C [← runStmt C name args]
