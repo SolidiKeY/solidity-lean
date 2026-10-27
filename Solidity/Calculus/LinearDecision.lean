@@ -1082,13 +1082,16 @@ def AFml.nAnd (φ ψ : AFml) : AFml :=
   | φ, .tt => φ
   | φ, ψ => .and φ ψ
 
-/-- `φ → ψ`, `true` and `false` absorbed. -/
+/-- `φ → ψ`, constants absorbed and a direct conjunction projection closed.
+The projection avoids a bit search for `(A ∧ B) → B`, including array blocks
+guarded by their live length. Equality compares complete arithmetic formulas. -/
 def AFml.nImp (φ ψ : AFml) : AFml :=
   match φ, ψ with
   | .ff, _ => .tt
   | _, .tt => .tt
   | .tt, ψ => ψ
   | φ, .ff => φ.nNot
+  | .and a b, ψ => if ψ = a ∨ ψ = b then .tt else .imp (.and a b) ψ
   | φ, ψ => .imp φ ψ
 
 theorem AFml.holds_nNot (x : Nat → Nat) (φ : AFml) : (φ.nNot).holds x ↔ ¬ φ.holds x := by
@@ -1098,7 +1101,10 @@ theorem AFml.holds_nAnd (x : Nat → Nat) (φ ψ : AFml) : (φ.nAnd ψ).holds x 
   unfold AFml.nAnd; split <;> simp only [holds, false_and, and_false, true_and, and_true]
 
 theorem AFml.holds_nImp (x : Nat → Nat) (φ ψ : AFml) : (φ.nImp ψ).holds x ↔ (φ.holds x → ψ.holds x) := by
-  unfold AFml.nImp; split <;> simp only [holds, holds_nNot, false_implies, implies_true, true_implies, imp_false]
+  unfold AFml.nImp; split
+  all_goals first
+    | solve | simp only [holds, holds_nNot, false_implies, implies_true, true_implies, imp_false]
+    | (split <;> simp_all only [holds] <;> grind)
 
 theorem AFml.width_nNot (φ : AFml) : φ.nNot.width ≤ φ.width := by
   unfold AFml.nNot; split <;> simp only [width, Nat.le_refl]
@@ -1109,6 +1115,7 @@ theorem AFml.width_nAnd (φ ψ : AFml) : (φ.nAnd ψ).width ≤ max φ.width ψ.
 theorem AFml.width_nImp (φ ψ : AFml) : (φ.nImp ψ).width ≤ max φ.width ψ.width := by
   unfold AFml.nImp; split
   all_goals first
+    | (split <;> simp only [width] <;> omega)
     | (simp only [width]; omega)
     | exact Nat.le_trans (width_nNot _) (Nat.le_max_left _ _)
 

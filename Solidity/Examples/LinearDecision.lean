@@ -13,6 +13,27 @@ namespace Solidity.Examples.LinearDecision
 
 open Solidity.Linear
 
+/-- Direct conjunction projections normalize before the bit-search graph. -/
+def projectLeft : AFml := linear!{ ([1] = 2 ∧ [0, 1] = 3) → [1] = 2 }
+def projectRight : AFml := linear!{ ([1] = 2 ∧ [0, 1] = 3) → [0, 1] = 3 }
+example : projectLeft.norm = .tt := by decide +kernel
+example : projectRight.norm = .tt := by decide +kernel
+
+/-- Matching only a coefficient or reversing the implication is insufficient. -/
+def wrongProjection : AFml := linear!{ ([1] = 2 ∧ [0, 1] = 3) → [0, 1] = 4 }
+def reverseProjection : AFml := linear!{ [1] = 2 → ([1] = 2 ∧ [0, 1] = 3) }
+example : wrongProjection.norm != .tt := by decide +kernel
+example : reverseProjection.norm != .tt := by decide +kernel
+example : wrongProjection.check (fun i => if i = 0 then 2 else 3) = false := by decide +kernel
+example : reverseProjection.check (fun _ => 2) = false := by decide +kernel
+
+/-- info: [true, true, false, false] -/
+#guard_msgs in #eval [projectLeft.decide, projectRight.decide,
+  wrongProjection.decide, reverseProjection.decide]
+
+/-- info: 'Solidity.Linear.AFml.holds_nImp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms AFml.holds_nImp
+
 def evenNotOdd : AFml := linear!{ ¬([2, -2] = 1) }
 
 /-- The quotation is notation only; the kernel sees the same arithmetic. -/
