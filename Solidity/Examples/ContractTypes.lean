@@ -50,12 +50,14 @@ example (_C : Contract) : True := by
 /-- Metadata updates retain the same certified storage declaration. -/
 example (C : Contract) : ({ C with evalOrder := EvalOrder.viaIR } : Contract).vars = C.vars := rfl
 
-/-- Replacing the declaration supplies new certificates for its new roots. -/
+/-- Replacing the declaration supplies new certificates and classifies its new roots. -/
 example (C : Contract) :
     ({ C with
        vars := [("x", .uint)]
        vars_ok := by decide
-       vars_nodup := by decide } : Contract).vars = [("x", .uint)] := rfl
+       vars_nodup := by decide
+       transientRoots := []
+       transient_ok := by rfl } : Contract).vars = [("x", .uint)] := rfl
 
 /-- Symbolic declarations provide their evidence explicitly. -/
 example (vs : List (Name × Ty)) (ho : vs.all (fun nt => nt.2.okDeep) = true)

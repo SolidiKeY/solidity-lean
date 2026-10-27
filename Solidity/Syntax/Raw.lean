@@ -403,6 +403,12 @@ def EvalOrder.viaIR : EvalOrder := ⟨true, true, true⟩
 fields are erased when programs run; literals discharge them by computation. -/
 structure Contract where
   vars : List (Name × Ty)
+  /-- Transaction-local roots of the joint logical store. Root identities remain
+  unique across both regions; raw EVM slots are not represented here. -/
+  transientRoots : List Name := []
+  /-- Transient declarations must name existing primitive cells. -/
+  transient_ok : transientRoots.all (fun n => match lookupBy n vars with
+    | some (.prim _) => true | _ => false) = true := by first | rfl | decide
   funs : List (Name × FunDecl) := []
   /-- Its enums, each with its members in order: `State.Locked` is the
   `uint` literal `1` (an enum is read as `uint`, as `address` is). -/

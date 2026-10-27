@@ -217,3 +217,39 @@ private def GetterIdentity : Contract :=
   let report := replay GetterIdentity [] data
   unless (report.getObjValAs? String "status").toOption == some "broken" do
     throw (IO.userError report.pretty) : IO Unit)
+
+/-! Ordinary source transient cells: constructor sharing, entry reset,
+persistent retention and rollback are exercised by the actual replay path. -/
+private def TransactionCounter : Contract := contract!{
+  uint transient scratch;
+  uint saved;
+  constructor() { scratch = 7; saved = scratch; }
+  function tick() returns (uint) { scratch += saved; saved++; return scratch; }
+  function inspect() returns (uint, uint) { return (scratch, saved); }
+  function fail() { scratch = 99; saved = 99; revert(); }
+}
+
+private def transactionRows : List ImportRow :=
+  ["tick", "inspect", "fail"].map fun name =>
+    { name, sourceSignature := name ++ "()", tag := .diamond,
+      params := [], status := .elaborated, reason := "" }
+
+private def transactionCheck (expected status : String) : IO Unit := do
+  let .ok data := Json.parse expected | throw (IO.userError "bad test JSON")
+  let report := replay TransactionCounter transactionRows data
+  unless (report.getObjValAs? String "status").toOption == some status do
+    throw (IO.userError report.pretty)
+
+#eval transactionCheck "{\"vectors\":[
+  {\"signature\":\"inspect()\",\"args\":[],\"failure\":false,\"expected\":[\"0\",\"7\"]},
+  {\"signature\":\"tick()\",\"args\":[],\"failure\":false,\"expected\":[\"7\"]},
+  {\"signature\":\"tick()\",\"args\":[],\"failure\":false,\"expected\":[\"8\"]},
+  {\"signature\":\"fail()\",\"args\":[],\"failure\":true,\"expected\":[]},
+  {\"signature\":\"tick()\",\"args\":[],\"failure\":false,\"expected\":[\"9\"]}
+]}" "working"
+
+-- This control would match if cells accidentally persisted between calls.
+#eval transactionCheck "{\"vectors\":[
+  {\"signature\":\"tick()\",\"args\":[],\"failure\":false,\"expected\":[\"7\"]},
+  {\"signature\":\"tick()\",\"args\":[],\"failure\":false,\"expected\":[\"15\"]}
+]}" "broken"

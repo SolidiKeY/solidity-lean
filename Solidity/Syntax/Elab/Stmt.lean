@@ -784,7 +784,14 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
         let Γ ← ctx
         let (base, bind) ← match (← synthM C t).2 with
           | .val p _ | .path (.prim p) _ | .mpath (.prim p) _ =>
-            pure ("se", fun x => RawStmt.decl (.named (tyName p (widthIn C Γ t))) x (some e))
+            let ty := match fnTyOfExpr C Γ t with
+              | some fn => fn
+              | none => match bytesOf? C Γ t with
+                | some n => s!"bytes{n}"
+                | none => match widthPath? C Γ t with
+                  | some (ws, key, _) => declTyName ws key p
+                  | none => tyName p (widthIn C Γ t)
+            pure ("se", fun x => RawStmt.decl (.named ty) x (some e))
           | .mpath (.ref R) (.var ..) =>
             pure ("mv", fun x => RawStmt.declMemory (rawTyW (placeShape C Γ t) (.ref R) "") x (some e))
           | .path (.ref R) (.alias _) =>

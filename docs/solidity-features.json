@@ -3050,8 +3050,8 @@
       "category": "storage",
       "syntax": "T transient x",
       "scope": "model",
-      "current": "missing",
-      "requirement": "Add a separate logical transaction-local store, shared across reentrant frames, rolled back on frame failure and reset at transaction end; no gas model is needed.",
+      "current": "partial",
+      "requirement": "Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells, failure rolls back the product, and lifetime/replay transaction boundaries reset cells. Physical layout, raw tload/tstore, raw function addresses and general source world/delegate execution remain unsupported.",
       "upstream": [
         {
           "path": "libsolidity/parsing/Parser.cpp",
@@ -3062,7 +3062,13 @@
           "line": 6
         }
       ],
-      "localEvidence": []
+      "localEvidence": [
+        "Solidity/Semantics/Storage/Anon.lean",
+        "Solidity/Semantics/Lifetime.lean",
+        "Solidity/Examples/Tactics/TransientStorage.lean",
+        "Solidity/Semantics/TransientWorld.lean",
+        "Solidity/Examples/Tactics/TransientWorld.lean"
+      ]
     },
     {
       "id": "checkedArithmetic",
@@ -3592,6 +3598,24 @@
         "Solidity/Frontend/Source.lean",
         "Solidity/Frontend/SolcJson/Body.lean",
         "scripts/solc-code.mjs"
+      ]
+    },
+    {
+      "id": "logicalStorageBase",
+      "category": "storage",
+      "syntax": "literal layout at base with logical field observations",
+      "scope": "model",
+      "current": "partial",
+      "requirement": "Accept compiler-validated literal storage bases only for logical typed root operations. Raw slots, offsets, packing, tload/tstore and assembly remain excluded; the base does not change declaration identities or the disjoint persistent/transient root partition.",
+      "upstream": [
+        {
+          "path": "libsolidity/ast/AST.h",
+          "line": 635
+        }
+      ],
+      "localEvidence": [
+        "Solidity/Frontend/SolcJson/Admission.lean",
+        "Solidity/Semantics/Storage/Anon.lean"
       ]
     },
     {

@@ -142,6 +142,7 @@ private def nodeFeatures (j : Json) : Option (List Feature) :=
       (if J.opt j "constant" == some (.bool true) then [.constants] else []) ++
       (if J.str? j "mutability" == some "immutable" then [.immutables] else []) ++
       match J.str? j "storageLocation" with
+      | some "transient" => [.transientState]
       | some "storage" => [.storageLocation]
       | some "memory" => [.memoryLocation]
       | some "calldata" => [.calldataLocation]
@@ -181,7 +182,7 @@ private def nodeFeatures (j : Json) : Option (List Feature) :=
       | some "interface" => .interfaces
       | some "library" => .libraries
       | _ => .contracts]
-  | "StorageLayoutSpecifier" => some [.storageLayout]
+  | "StorageLayoutSpecifier" => some [.logicalStorageBase]
   | "InheritanceSpecifier" => some [.inheritance]
   | "UsingForDirective" => some [.usingFor]
   | "StructDefinition" => some [.structDeclarations]
@@ -280,12 +281,18 @@ private def validateNode (provenance : Provenance) (j : Json) : Except Diagnosti
   if J.kind j == "Assignment" && !["=", "+=", "-=", "*=", "/=", "%=", "**=",
       "&=", "|=", "^=", "<<=", ">>="].contains ((J.str? j "operator").getD "") then
     throw (diagnostic j .invalidAst `solidity.assignment "unknown assignment operator")
+  if J.kind j == "StorageLayoutSpecifier" then
+    let base := (J.opt j "baseSlotExpression").getD .null
+    let value := (constVal base).bind (·.int?)
+    unless J.kind base == "Literal" && value.any (fun n => 0 ≤ n && n < 2^256) do
+      throw (diagnostic j .missingImplementation `solidity.logicalStorageBase
+        "logical storage bases currently require an in-range literal" (some .logicalStorageBase))
   if J.kind j == "VariableDeclaration" then
     let location := (J.str? j "storageLocation").getD ""
-    if location == "transient" then
-      throw (diagnostic j .missingImplementation `solidity.transientState
-        "transient storage is not ordinary persistent state" (some .transientState))
-    unless ["default", "storage", "memory", "calldata"].contains location do
+    if location == "transient" && J.opt j "stateVariable" != some (.bool true) then
+      throw (diagnostic j .invalidAst `solidity.transientState
+        "transient location requires a state declaration")
+    unless ["default", "storage", "memory", "calldata", "transient"].contains location do
       throw (diagnostic j .invalidAst `solidity.storageLocation "unknown data location")
   if J.kind j == "ElementaryTypeName" then
     let name := (J.str? j "name").getD ""

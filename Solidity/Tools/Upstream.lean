@@ -128,6 +128,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       return result "broken" s!"call does not elaborate: {signature}: {reason}"
     let .ok ⟨_, Q⟩ := program
       | return result "blocked" "missing call program"
+    if !ctor then state := state.transactionEntry
     let before := state
     let rangeRow := if ctor then rows.find? (·.sourceName == "constructor")
       else function.bind fun name => rows.find? (·.name == name)

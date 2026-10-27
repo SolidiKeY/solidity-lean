@@ -31,13 +31,13 @@ structure World (C : Contract) where
 
 /-- Discard the completed call's memory and locals. -/
 def World.ofState {Γ : Ctx} (σ : State C Γ) : World C :=
-  ⟨σ.storage, σ.net, σ.selfBalance, σ.tx.selfAddress, σ.tx.timestamp⟩
+  ⟨Storage.resetTransient σ.storage, σ.net, σ.selfBalance, σ.tx.selfAddress, σ.tx.timestamp⟩
 
 /-- Observe a persistent state without adding a payment or a caller's frame.
 Predicates reading caller, value, oracle replies or memory are not persistent
 predicates; use them in entry obligations instead. -/
 def World.observe (s : World C) : State C [] :=
-  { storage := s.storage, H := [], heap := Heap.empty, env := (), net := s.net,
+  { storage := Storage.resetTransient s.storage, H := [], heap := Heap.empty, env := (), net := s.net,
     selfBalance := s.balance, tx := { selfAddress := s.address, timestamp := s.timestamp } }
 
 /-- Waiting and failed transactions can advance time without changing funds. -/
@@ -50,15 +50,15 @@ ledger of the environment's spendable balances. -/
 def World.enter (s : World C) (tx : TTx) : TRes (State C []) := do
   let balance ← TRes.ofOpt (PrimTy.ofInt? .uint (s.balance.1 + tx.msgValue.1))
   pure {
-    storage := s.storage, H := [], heap := Heap.empty, env := (),
+    storage := Storage.resetTransient s.storage, H := [], heap := Heap.empty, env := (),
     net := if tx.msgValue.1 = 0 then s.net else
       Semantics.setBy tx.msgSender
         ((Semantics.lookupBy tx.msgSender s.net).getD 0 + tx.msgValue.1) s.net,
     selfBalance := balance, tx }
 
-/-- Entering a transaction changes no storage. -/
+/-- Entering a transaction clears transient cells and preserves persistent roots. -/
 theorem World.enter_storage {s : World C} {tx : TTx} {σ : State C []}
-    (h : s.enter tx = .ok σ) : σ.storage = s.storage := by
+    (h : s.enter tx = .ok σ) : σ.storage = Storage.resetTransient s.storage := by
   unfold World.enter at h
   cases hb : PrimTy.ofInt? .uint (s.balance.1 + tx.msgValue.1) with
   | none => simp only [hb, TRes.ofOpt, bind, Except.bind] at h; cases h

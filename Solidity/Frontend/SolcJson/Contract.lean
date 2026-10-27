@@ -716,8 +716,10 @@ def renderInitializers (kept : List (String × String × Json)) (st : PState)
     (fixedBefore : Json → List Int) (superNamesOf : Json → List (Int × String))
     (phased : Bool) : Except Gap (List (Json × String × Option String)) :=
   kept.mapM fun (n, t, v) => do
-    let declaration := s!"{t} {identText n};"
+    let region := if J.str? v "storageLocation" == some "transient" then "transient " else ""
+    let declaration := s!"{t} {region}{identText n};"
     let some e := J.opt v "value" | pure (v, declaration, none)
+    if !region.isEmpty then throw (.unsupported "a transient declaration cannot have an initializer")
     let initialized := fixedBefore v
     let constants := staticConstants ++ immutables.map fun (id, ty, value) =>
       (id, ty, if initialized.contains id then value else defaultLiteral ty)
@@ -891,11 +893,6 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
-  -- Never erase a transaction-local declaration into an ordinary storage root.
-  -- This is a header check: unused declarations, generated getters and inherited
-  -- roots are unsafe too, even if no selected body mentions the variable.
-  if vars.any (fun v => J.str? v "storageLocation" == some "transient") then
-    throw "solidity.transientState: transient declarations require transaction-local execution; this contract is not supported yet"
   -- Inline only an unwritten immutable with a known literal/default value.
   -- Other immutables retain a deployment root: even an unread initializer
   -- may mutate another root, allocate, call, fail or read the environment.
@@ -1018,7 +1015,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
         tyText S typeNode : Except Gap String) with
     | .ok t =>
-      members := members ++ [s!"{t} {identText n};"]
+      let region := if J.str? v "storageLocation" == some "transient" then "transient " else ""
+      members := members ++ [s!"{t} {region}{identText n};"]
       kept := kept ++ [(n, t, v)]
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
