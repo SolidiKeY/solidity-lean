@@ -299,7 +299,9 @@ properties (identity, snapshot and bounds failure) pass with only `propext`,
 `Classical.choice` and `Quot.sound`. Local arithmetic helper proofs keep the
 original bounds property and heartbeat limits. Ordinary writable calldata
 escape and mismatched reference widths remain explicit negative controls.
-These checks do not claim universal source/compiler equivalence.
+Failure controls certify the model's existing revert/panic classification,
+including its bounds-as-revert reading; they do not certify Solidity ABI
+Panic codes or data. These checks do not claim universal source/compiler equivalence.
 
 Finder and skeptic reviews used no Lean workers. They confirmed two issues
 which were fixed before validation: restoring the second state layer during
@@ -309,7 +311,7 @@ further concrete defect. A documentation escaping typo was corrected. Distinct
 legacy/viaIR wrapper hashes were independently checked against their own ASTs.
 
 All eleven assigned fixtures now pass every original observation in both required
-pipelines. The ten previously fixed rows retain byte-identical observed vectors;
+pipelines. The ten previously fixed rows retain identical observed vectors;
 all 60 final observations are recorded. No assigned row is blocked or excluded.
 
 | Path under `test/libsolidity/semanticTests/` | Lane at `3a6a037d` | Final legacy / viaIR |
@@ -335,15 +337,43 @@ after reports, prior handoff evidence and control hashes are in the validation
 JSON. The pinned archive, historical results and all upstream expectation bytes
 remain unchanged.
 
-Full-gate validation is running in a detached serial job with one Lean worker,
-with durable status at `/workspace/.setup/logs/group07-resumed-gates-status.json`.
-Direct file-backed profiling established that `DecisionArrays`' theorem checks
-finish in about 1.2 seconds or less; its final verdict evaluation is the slow
-stage, consistent with the documented roughly 1,500-second baseline in
-`docs/automation.md`. `Elab.async false` stays unchanged because history records
-stack overflow with concurrent verdict evaluation. The library wall allowance
-is 5,400 seconds, followed by frozen corpus and replay checks; no proof,
-heartbeat, fixture timeout or loop-fuel limit was increased. These gates are
-not yet counted as passes. Strict automation, reachability, layering and the
-14 upstream Node tests pass. The full trust finding list remains identical
-(25), and the same 13 missing vendor/external documentation references remain.
+The frozen corpus gate passes on the final model: all 774 obligations retain
+exact classifications, generated files and scoreboard have no drift, and the
+257-job `SolidityCorpus` build succeeds. The previously interrupted `Derived17`
+passes in 116 seconds when built alone. Existing replay, the prior ten source
+certificates and the new mixed-reference certificate file all pass again.
+Strict automation, reachability, layering and the 14 upstream Node tests pass.
+The full trust finding list remains identical (25), and the same 13 missing
+vendor/external documentation references remain.
+
+The first resumed full-library gate exhausted its 5,400-second outer wall
+allowance at unchanged `DecisionArrays`; this attempt is incomplete, not a
+pass. `DecisionHashes` (288 seconds) and `Decision` (780 seconds) had passed.
+The serial cache continuation with a 3,600-second outer allowance passed in
+2,338.46 seconds: default library 649 jobs, `SolkeyTestSuite` 249 jobs, and all
+377 frozen sort taclets (131 read-bearing). `DecisionArrays` passed its exact
+`["proved", "refuted", "proved"]` verdict pin in 2,262 seconds; `DecisionMemory`
+then passed in 59 seconds. No full-gate result remains pending. Direct file-backed
+profiling established that `DecisionArrays`' theorem checks finish in about
+1.2 seconds or less; its final verdict evaluation is the slow stage, consistent
+with the historically documented roughly 1,500-second cost in
+`docs/automation.md`; that estimate is not a controlled comparison with this
+cloud run. An admission-only diagnostic found that only the array-block
+reduction accepts each of the three formulas, excluding the suspected earlier
+pipeline countermodel path as the cause here.
+`Elab.async false` stays unchanged because history records stack overflow with
+concurrent verdict evaluation. No proof, heartbeat, fixture timeout or loop-fuel
+limit was increased. Both status files and complete logs are linked in the JSON.
+
+Long builds use one worker. The existing corpus probe unconditionally launches
+its contract probes with `Promise.all`; at least three short-lived Lean
+processes were observed before they finished, exceeding the requested two-worker
+cap despite `LEAN_NUM_THREADS=1`. This exception is recorded explicitly; there
+was no overlapping library build, and subsequent phases returned to one worker.
+
+Final read-only evidence review found no remaining concrete defect. The finder
+matched all current reports, hashes, observation vectors and preserved inputs;
+the independent skeptic matched proof counts, axiom audits, failure boundaries
+and remaining exclusions. Neither opened Lean workers. The implementation is
+committed locally as `391a5a74`, following preserved `9c8b45d4` and `3a6a037d`;
+the final follow-up records validation only. No push or merge is performed.

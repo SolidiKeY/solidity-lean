@@ -3035,9 +3035,13 @@ about 2^511.  Outside the target by the user's decisions:
 **Costs found**: interpreted verdicts take 12–15 min on some leaves
 (`gapIntAnd`, `mulmodLt`) and evaluating a goal whose only refutations are
 astronomically large builds them (out of memory); `Examples/Decision.lean`
-builds in about 460 s and `Examples/DecisionArrays.lean` in about 1500 s
-(likely its two `decide +kernel` coverage proofs, not yet profiled).  The
-300 s budget of the gate covers TestSuite modules only.
+builds in about 460 s and `Examples/DecisionArrays.lean` in about 1500 s.
+Group 07 direct file-backed profiling found its coverage proofs take about
+one second each; the final verdict evaluation is the slow stage, rather than
+the coverage theorem checks (see the aggregate milestone continuation).
+The completed managed-cloud Group 07 run checked the unchanged exact verdict
+pin in 2,262 s; this is not a controlled comparison with the historical timing.
+The 300 s budget of the gate covers TestSuite modules only.
 
 ## M7-next · A checkpoint of the theorem (not started)
 
@@ -3066,8 +3070,9 @@ pipelines it names (`QuantReduction`, `ArrayProperty`, `ArrayBlock`,
 2. **The goal is unchanged.** `DecisionTheorem` stays stated as it is;
    later milestones may only shrink `Fml.Residue`.
 3. **Split `Examples/Decision.lean`** (and `Examples/DecisionArrays.lean`)
-   into modules that each build in under 300 s; profile the slow
-   `decide +kernel` coverage pins first.
+   into modules that each build in under 300 s; profile interpreted verdict
+   evaluation first. Group 07 measured the `DecisionArrays` coverage pins at
+   about one second each, with the final verdict `#eval` as its slow stage.
 4. **Tag** the result `milestone-m7-next`, record it here, push to master,
    and stop for the user's next instruction.
 

@@ -2742,15 +2742,15 @@
     "strictAutomation": "491 automatic + 61 budgeted; 11 refuted; 0 pending",
     "reachability": "667 reachable; 0 orphaned",
     "layering": "143 core modules; 0 reach elaborator",
-    "frozenTestSuiteAudit": "552 derived; 11 refuted; 0 pending; 1 excluded; 2 skip",
+    "frozenTestSuiteAudit": "PASS on final source inventory: 564 functions = 552 derived + 11 refuted + 0 pending + 0 divergent + 1 excluded; 2 skip; check-testsuite: ok.",
     "documentationPaths": "13 existing missing vendor/external references; no new missing path.",
-    "finalBuilds": "RUNNING for final model: detached serial single-worker ./run-lean.sh, followed by frozen corpus and replay/certificates; see group07-resumed-gates-status.json. Not yet counted as pass.",
+    "finalBuilds": "PASS on final model: cached ./run-lean.sh exit 0 in 2338.46 seconds; default library649jobs, SolkeyTestSuite249jobs, frozen sort all pass. Original5400-second attempt timed out at DecisionArrays and remains recorded as incomplete, never pass.",
     "sourceCertificates": "Prior 10 certificates retained; 22 new both-mode source certificates and 3 universal emitted-program proofs pass; generic fixed-array copied-read law proved including exact none past bounds.",
-    "replay": "Queued for final model; prior 7-check pass retained under priorHandoff.validation.",
+    "replay": "PASS on final model: existing Replay.lean checks, exit0 in 2.7seconds.",
     "leanDiagnostics": "Lean MCP unavailable; configured per-file commands used with --tstack=131072",
     "trustInventory": "25 findings; full finding list identical to earlier lane and starting-master inventory.",
-    "finalFrozenSort": "PASS after rebuilding checker: 377 taclets; 131 read-bearing; all 131 annotations match pinned frozen rules.",
-    "finalPerFileChecks": "Replay.lean and Group07.lean exit 0 on final source; logs group07-final-replay.log and group07-final-certificates.log",
+    "finalFrozenSort": "PASS: 377 frozen taclets parsed;131 read-bearing, table covers131; all annotations match the frozen473da8944c SolKey rules.",
+    "finalPerFileChecks": "PASS on final model: Replay.lean, prior Group07.lean10certificates, Group07Mixed.lean22sourcecertificates+3universal properties+generic copied-read law audit; all configured per-file exit0.",
     "resourceAttempts": [
       {
         "gate": "./run-lean.sh",
@@ -2763,20 +2763,29 @@
         "outcome": "resource-blocked, not pass",
         "detail": "Stopped Derived17 at 407 seconds with available memory below 1 GiB; exact verdict probe had no drift. Resource baseline comparison unclassified.",
         "log": "/workspace/.setup/logs/group07-final-corpus-build.log"
+      },
+      {
+        "gate": "./run-lean.sh initial resumed full library",
+        "outcome": "outer wall timeout, not pass",
+        "detail": "5400 seconds; completed DecisionHashes288s and Decision780s, timed out while unchanged DecisionArrays verdict evaluation was incomplete. Cached continuation subsequently passed the entire library/TestSuite/sort gate in2338.46seconds. No source/proof/fixture budgets changed.",
+        "log": "/workspace/.setup/logs/group07-resumed-default-library-testsuite-sort.log"
       }
     ],
-    "resourceRetry": "Actual slow DecisionArrays declaration identified by direct file-backed markers: all theorem checks finish in about 1.2 seconds or less; final verdict #eval is slow, consistent with documented ~1500-second baseline. Detached serial final job uses 5400-second library wall budget, unchanged proof limits.",
-    "frozenCorpus": "Queued for final model; earlier model pass retained under priorHandoff.validation.",
+    "resourceRetry": "RESOLVED: serial cache continuation passed the entire ./run-lean.sh gate in2338.46seconds. DecisionArrays exact unchanged [proved,refuted,proved] pin passed in2262seconds; DecisionMemory59seconds. No proof/heartbeat/fixture timeout/fuel limit increased. Default library successful artifacts reused from the original attempt; corpus/TestSuite compiled serially before continuation.",
+    "frozenCorpus": "PASS on final model: frozen473da8944c; 774 obligations unchanged, no verdict/generated-file/scoreboard drift; SolidityCorpus build257jobs succeeded, exit0 in 1019.19seconds.",
     "logs": {
-      "fullLibraryInterrupted": "/workspace/.setup/logs/group07-single-thread-run-lean.log",
-      "frozenCorpus": "/workspace/.setup/logs/group07-single-thread-corpus.log",
-      "frozenCorpusBuild": "/workspace/.setup/logs/group07-single-thread-corpus-build.log",
-      "replay": "/workspace/.setup/logs/group07-final-replay.log",
-      "certificates": "/workspace/.setup/logs/group07-final-certificates.log",
-      "runtimeAndTestSuite": "/workspace/.setup/logs/group07-final-cached-gates.log",
-      "rebuiltFrozenSort": "/workspace/.setup/logs/group07-final-sort-rebuilt.log"
+      "driver": "/workspace/.setup/logs/group07-resumed-gates-driver.log",
+      "fullLibrary": "/workspace/.setup/logs/group07-resumed-default-library-testsuite-sort.log",
+      "frozenCorpus": "/workspace/.setup/logs/group07-resumed-frozen-corpus.log",
+      "replay": "/workspace/.setup/logs/group07-resumed-replay.log",
+      "priorCertificates": "/workspace/.setup/logs/group07-resumed-prior-certificates.log",
+      "mixedCertificates": "/workspace/.setup/logs/group07-resumed-mixed-certificates.log",
+      "focusedMixedCertificates": "/workspace/.setup/logs/group07-mixed-certificates-verified.log",
+      "frozenCorpusBuild": "/workspace/.setup/logs/group07-resumed-frozen-corpus-build.log",
+      "cachedFullLibrary": "/workspace/.setup/logs/group07-cache-default-library-testsuite-sort.log",
+      "arrayAdmissions": "/workspace/.setup/logs/group07-array-admissions.log"
     },
-    "finalRuntimeAndTestSuite": "PASS after reconnect: Lean 4.24.0, Lake 5.0.0-src+797c613; LEAN_NUM_THREADS=1 lake build Solidity.KeySort SolkeyTestSuite completed successfully (249 jobs).",
+    "finalRuntimeAndTestSuite": "PASS: Lean4.24.0/Lake5.0.0-src+797c613 and actual cached Solidity.KeySort gate; current-model full default649jobs and SolkeyTestSuite249jobs passed in the completed continuation.",
     "assignedFixtures": "11/11 working; both required pipelines; 60 retained observations; 0 broken/blocked/excluded assigned fixtures",
     "staticChecks": {
       "node-tests": {
@@ -2831,7 +2840,124 @@
         "log": "/workspace/.setup/logs/group07-complete-doc-paths.log"
       }
     },
-    "statusFile": "/workspace/.setup/logs/group07-resumed-gates-status.json"
+    "statusFile": "/workspace/.setup/logs/group07-resumed-gates-status.json",
+    "resumedSerialPhases": {
+      "started": "2026-10-27T00:22:01.727038+00:00",
+      "executionSourceDigest": "d78e9f7f394b2570ac7920c6351a079c116639ec6b0727c88fea91722c51960f",
+      "leanThreads": 1,
+      "phases": [
+        {
+          "name": "default-library-testsuite-sort",
+          "command": [
+            "./run-lean.sh"
+          ],
+          "wallBudgetSeconds": 5400,
+          "started": "2026-10-27T00:22:01.758376+00:00",
+          "log": "/workspace/.setup/logs/group07-resumed-default-library-testsuite-sort.log",
+          "exitCode": 124,
+          "wallSeconds": 5400.01,
+          "finished": "2026-10-27T01:52:01.772277+00:00"
+        },
+        {
+          "name": "frozen-corpus",
+          "command": [
+            "./scripts/check-corpus.sh",
+            "--solkey",
+            "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+          ],
+          "wallBudgetSeconds": 3600,
+          "started": "2026-10-27T01:52:02.064818+00:00",
+          "log": "/workspace/.setup/logs/group07-resumed-frozen-corpus.log",
+          "exitCode": 0,
+          "wallSeconds": 1019.19,
+          "finished": "2026-10-27T02:09:01.254989+00:00"
+        },
+        {
+          "name": "replay",
+          "command": [
+            "lake",
+            "--no-build",
+            "lean",
+            "tests/upstream/Replay.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "wallBudgetSeconds": 600,
+          "started": "2026-10-27T02:09:01.311667+00:00",
+          "log": "/workspace/.setup/logs/group07-resumed-replay.log",
+          "exitCode": 0,
+          "wallSeconds": 2.7,
+          "finished": "2026-10-27T02:09:04.016943+00:00"
+        },
+        {
+          "name": "prior-certificates",
+          "command": [
+            "lake",
+            "--no-build",
+            "lean",
+            "tests/upstream/Group07.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "wallBudgetSeconds": 600,
+          "started": "2026-10-27T02:09:04.051526+00:00",
+          "log": "/workspace/.setup/logs/group07-resumed-prior-certificates.log",
+          "exitCode": 0,
+          "wallSeconds": 2.61,
+          "finished": "2026-10-27T02:09:06.660063+00:00"
+        },
+        {
+          "name": "mixed-certificates",
+          "command": [
+            "lake",
+            "--no-build",
+            "lean",
+            "tests/upstream/Group07Mixed.lean",
+            "--",
+            "--tstack=131072"
+          ],
+          "wallBudgetSeconds": 600,
+          "started": "2026-10-27T02:09:06.695408+00:00",
+          "log": "/workspace/.setup/logs/group07-resumed-mixed-certificates.log",
+          "exitCode": 0,
+          "wallSeconds": 19.52,
+          "finished": "2026-10-27T02:09:26.216559+00:00"
+        }
+      ],
+      "complete": true,
+      "finished": "2026-10-27T02:09:26.218886+00:00"
+    },
+    "concurrencyObservation": "All long library/corpus builds ran serially with LEAN_NUM_THREADS=1. Existing solkey-port probe unconditionally Promise.all-spawned contract probes; observed at least3 short-lived Lean processes before finishing, exceeding requested two-worker cap. No extra agent Lean workers; no concurrent library build; subsequent phases returned to1worker. Probe classification matched frozen expectations. This exception is retained explicitly.",
+    "cachedContinuationStatus": "/workspace/.setup/logs/group07-cache-continuation-status.json",
+    "cachedContinuation": {
+      "started": "2026-10-27T01:43:52.535664+00:00",
+      "executionSourceDigest": "d78e9f7f394b2570ac7920c6351a079c116639ec6b0727c88fea91722c51960f",
+      "complete": true,
+      "state": "finished",
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=30s",
+        "3600",
+        "./run-lean.sh"
+      ],
+      "wallBudgetSeconds": 3600,
+      "log": "/workspace/.setup/logs/group07-cache-default-library-testsuite-sort.log",
+      "runStarted": "2026-10-27T02:09:32.939644+00:00",
+      "exitCode": 0,
+      "wallSeconds": 2338.46,
+      "finished": "2026-10-27T02:48:31.402572+00:00"
+    },
+    "resourcePerformance": {
+      "DecisionHashesSeconds": 288,
+      "DecisionSeconds": 780,
+      "DecisionArraysSeconds": 2262,
+      "DecisionMemorySeconds": 59,
+      "Derived17Seconds": 116,
+      "controlledComparison": false,
+      "arrayAdmissionDiagnostic": "All3 formulas have admissions [false,false,false,false,false,true] for dependent,quant,array,ledger,ledgerBlock,arrayBlock. Earlier-pipeline eager countermodel hazard is therefore not the culprit here; no decision algorithm or representation changed."
+    },
+    "finalModelRecheckedSha256": "19ae854dcfcc11baa01898ac1164793365aba291a7401c311453a3ee9e80999b"
   },
   "proofBoundary": "Checked-calculus theorems and kernel certificates establish emitted-program properties. Runtime agreement is observational, not universal source/compiler equivalence. Standalone checked-narrow guards use ordinary revert; Solidity ABI panic-data agreement is not certified.",
   "review": "Read-only finder and independent skeptic; no Lean workers opened. Confirmed prefix placement, getter-name collision, push receiver mutation and source-shape issues were fixed and re-inspected.",
@@ -3062,7 +3188,8 @@
     "General dependent/effectful multi-target LHS capture is not implemented.",
     "Indexed source push-call spelling remains a printer gap; native parenthesized-method spelling has an exactly-once receiver certificate.",
     "Effectful pushed-member receivers with local RHS remain unsupported; panic ABI data is not certified by standalone narrow guards.",
-    "Existing mapFree/defaultOkS memory admission and conservative writable ordinary-calldata escape restrictions remain explicit; no assigned fixture is excluded."
+    "Existing mapFree/defaultOkS memory admission and conservative writable ordinary-calldata escape restrictions remain explicit; no assigned fixture is excluded.",
+    "Effectful reference conditionals require at least one memory endpoint; general effectful storage-only reference joins remain explicit unsupported."
   ],
   "verificationCommands": [
     "source /workspace/.setup/activate.sh",
@@ -3089,10 +3216,13 @@
     "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 Solidity/Syntax/Elab/Arms.lean",
     "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 Solidity/Calculus/CloseFrame.lean",
     "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 tests/upstream/Group07Mixed.lean",
-    "source /workspace/.setup/activate.sh; nohup setsid python3 .lake/group07-final-gates.py > /workspace/.setup/logs/group07-resumed-gates-driver.log 2>&1 < /dev/null &"
+    "source /workspace/.setup/activate.sh; nohup setsid python3 .lake/group07-final-gates.py > /workspace/.setup/logs/group07-resumed-gates-driver.log 2>&1 < /dev/null &",
+    "node scripts/solc-ast.mjs --solkey tests/migration/solkey --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --source tests/solc/Group07Mixed.sol --out tests/solc/Group07Mixed.ast.json --wrapper tests/upstream/Group07Mixed.lean",
+    "node scripts/solc-ast.mjs --solkey tests/migration/solkey --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --source tests/solc/Group07Mixed.sol --out tests/solc/Group07MixedIR.ast.json --wrapper tests/upstream/Group07Mixed.lean --via-ir",
+    "LEAN_NUM_THREADS=1 SOLKEY_EXAMPLES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples SOLKEY_RULES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key timeout --signal=TERM --kill-after=30s 3600 ./run-lean.sh"
   ],
   "implementationCommit": "9c8b45d40fb0ff9822d06be7741ccb513c5c8c83",
-  "finalReadOnlyReview": "Finder and independent skeptic: no new concrete code defect, no writes or Lean workers. Confirmed model/fixture/control hashes and corpus pass; corrected stale pending build labels and prior-run timing label.",
+  "finalReadOnlyReview": "Final read-only finder verified all 11 embedded/file reports and hashes, both pipelines, 60 observations, ten unchanged prior observed vectors, all eight control hashes, final model hash, preserved prior patch and unchanged historical inputs. Independent skeptic verified 22 source certificates, three universal properties, generic law axiom audit and explicit proof/failure/exclusion boundaries. Neither opened Lean workers or wrote files; no remaining concrete defect. Full gates subsequently completed with actual exit0; final status documentation reviewed separately.",
   "priorHandoff": {
     "commit": "3a6a037d",
     "validationFileSha256": "281d491e9f383edf66485c54afbf0b894f912c41a1215873d2bc6a921d118265",
@@ -3337,12 +3467,41 @@
       "acceptedPragmas": []
     },
     "axioms": "generic read law: propext, Quot.sound; three universal emitted-program properties: propext, Classical.choice, Quot.sound; no sorryAx or new trust primitive",
-    "log": "/workspace/.setup/logs/group07-mixed-certificates-verified.log"
+    "log": "/workspace/.setup/logs/group07-mixed-certificates-verified.log",
+    "failureBoundary": "Exact model THalt.revert/panic controls, including existing bounds-as-revert policy; no claim about Solidity ABI Panic codes/data."
   },
   "continuationReview": {
     "finder": "read-only; no new concrete defect; verified distinct legacy/viaIR AST pins/source hashes",
     "skeptic": "read-only; confirmed CallMemo restoration and metadata-before-branches fixes, typed copy law and storage-returning call copy path",
-    "leanWorkersOpened": false
+    "leanWorkersOpened": false,
+    "finalEvidenceFinder": "All reports, observations, hashes and preservation claims independently matched actual files; no concrete inconsistency.",
+    "finalEvidenceSkeptic": "Proof counts, axiom audits, classification boundary and remaining exclusions match source; no concrete overclaim or defect.",
+    "finalGateReview": "Finder and independent skeptic matched final counts, durations and actual exit codes against durable logs/status. Both found the same stale running phrase in the original incomplete-attempt detail; corrected to the subsequently completed pass. No other concrete defect, no writes or Lean workers."
   },
-  "continuationRuntimeGate": "PASS after reattach: Lean 4.24.0, Lake 5.0.0-src+797c613; lake build Solidity.KeySort completed successfully (2 jobs)."
+  "continuationRuntimeGate": "PASS after reattach: Lean 4.24.0, Lake 5.0.0-src+797c613; lake build Solidity.KeySort completed successfully (2 jobs).",
+  "continuationImplementationCommit": "391a5a74094fcc4ec5ddcc1a241f2ec225ae2454",
+  "performanceDiagnosis": {
+    "module": "Solidity/Examples/DecisionArrays.lean",
+    "sourceSha256": "9a740112146e6f06b09abab2d9c8482c59f497f7d4e1f2220a588bfa0596055d",
+    "documentedBaselineSeconds": 1500,
+    "slowDeclaration": "final #guard_msgs in #eval [verdict gapArrayBlock, verdict arrayBlockBad, verdict arrayLenBlock]",
+    "directMarkers": [
+      "28830280 BEGIN gapArrayBlock_block",
+      "28831482 BEGIN arrayBlockBad_block",
+      "28832647 BEGIN arrayBlockBad_inTarget",
+      "28832881 BEGIN gapArrayBlock_covered",
+      "28833065 BEGIN arrayBlockBad_covered",
+      "28833249 BEGIN gapArrayBlock_answers",
+      "28833452 BEGIN arrayBlockBad_answers",
+      "28833647 BEGIN gapArrayBlock_iff",
+      "28833822 BEGIN verdicts"
+    ],
+    "diagnosticScriptSha256": "95fd3a9bcae9f7a8a02d9a5a14fb3a2fb8af60ea1f95628467037f7e0faf00ce",
+    "diagnosticCommand": "LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/Group07DecisionArraysDirect.lean",
+    "diagnosticStatus": "partial diagnostic only; stopped after exact slow stage was identified, never counted as passing build",
+    "policy": "Elab.async false unchanged; one final Lean worker and 5400-second library wall allowance; no heartbeat/search/fixture-fuel increase",
+    "actualCompletedDecisionArraysSeconds": 2262,
+    "finalOutcome": "Exact verdict pin passed; full default library/TestSuite/sort gate completed. Historical1500-second estimate is not a controlled comparison to this cloud run."
+  },
+  "initialReadOnlyReview": "Finder and independent skeptic: no new concrete code defect, no writes or Lean workers. Confirmed model/fixture/control hashes and corpus pass; corrected stale pending build labels and prior-run timing label."
 }
