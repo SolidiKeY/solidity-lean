@@ -2032,11 +2032,18 @@ partial def stmt1 (j : Json) : PM (List String) := do
         x := x ++ "_"
       set { st with fresh := st.fresh + 1, pre := #[] }
       pre := pre ++ st.pre.toList
-      let reference := ty == "string" || ty == "bytes" || ty.endsWith "]"
+      let formalType ← PM.lift (J.get p "typeName")
+      let nominal := (J.ref? formalType).orElse fun _ => (J.opt formalType "pathNode").bind J.ref?
+      let structRef := nominal.any fun id => st.declarations.any fun d =>
+        J.id? d == some id && J.kind d == "StructDefinition"
+      let reference := ty == "string" || ty == "bytes" || ty.endsWith "]" || structRef
       -- Storage operands are POINTERS until the encoder reads them. Copying
       -- now would snapshot bytes before a later operand mutates storage.
       let storage := (J.tyStr a).endsWith " storage ref" || (J.tyStr a).endsWith " storage pointer"
-      let loc := if reference then (if storage then " storage" else " memory") else ""
+      let calldata := (J.tyStr a).endsWith " calldata" || (J.tyStr a).endsWith " calldata ref" ||
+        (J.tyStr a).endsWith " calldata slice"
+      let loc := if reference then
+        (if storage then " storage" else if calldata then " calldata" else " memory") else ""
       pre := pre ++ [s!"{ty}{loc} {identText x} = {value}"]
       captures := captures ++ [(n, identText x)]
     let as ← pn.mapM fun n => match lookupBy n captures with

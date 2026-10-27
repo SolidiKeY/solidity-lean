@@ -1003,6 +1003,15 @@ partial def AbiTy.of (T : Ty) (ws : List (String × Nat)) (k : String) : Option 
     ((structDef s).mapM fun (f, T) => (AbiTy.of T (structWidths s) f).map (f, ·)).map (.tuple s)
   | .ref (.mapping ..) => none
 
+/-- Custom-error aggregate admission keeps nominal enum ranges fail-closed.
+The ordinary ABI encoder's existing enum reading is unchanged. -/
+partial def errorAbiHasEnum (T : Ty) (ws : List (String × Nat)) (k : String) : Bool :=
+  match T with
+  | .prim _ => (lookupBy (k ++ "#enum") ws).isSome
+  | .ref (.array t) | .ref (.fixed t _) => errorAbiHasEnum t ws (k ++ "[]")
+  | .ref (.struct s) => (structDef s).any fun (f, t) => errorAbiHasEnum t (structWidths s) f
+  | .ref (.mapping ..) => false
+
 /-- The type a decoded value of `T` (rows `ws` below `k`) is declared at. -/
 partial def abiRawTy (T : Ty) (ws : List (String × Nat)) (k : String) : RawTy :=
   match T with

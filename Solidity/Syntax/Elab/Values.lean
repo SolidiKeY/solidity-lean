@@ -752,12 +752,10 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     -- `abi.decode` of a byte string (`abiDecodeBytes`)
     if (f == "abi.decode" || f == "#abiDecode") && (lookupBy f C.funs).isNone then
       match as with
-      | _ :: .name T :: _ =>
-        if dynBytesTy T then dynBytesRowsOf T
-        else (((abiTyExpr? (.name T)).bind fun T => (elabTyW C T).toOption).map (·.2)).getD []
-      -- `T[k]` (`abiDecodeWith`)
-      | _ :: .index (.name T) (.num k) :: _ =>
-        ((elabTyW C (.fixed (.named T) k)).toOption.map (·.2)).getD []
+      | _ :: T :: _ =>
+        -- Use the same recursive type reader as the decoder. Compound fixed
+        -- and dynamic dimensions retain their nested width/nominal rows.
+        (((abiTyExpr? T).bind fun T => (elabTyW C T).toOption).map (·.2)).getD []
       | _ => []
     else
     match lookupBy f C.funs with

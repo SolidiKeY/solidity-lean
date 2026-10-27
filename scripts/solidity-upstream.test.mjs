@@ -259,3 +259,45 @@ test('original numeric failure sequences retain exact panic codes and fixed-byte
   assert.deepEqual(b[4].expectedBytes,retained);assert.deepEqual(b[10].expectedBytes,retained);
   assert.notDeepEqual(retained,panic(0x11));assert.notDeepEqual(retained,retained.slice(1));
 });
+
+test('original aggregate custom errors retain complete arrays, nested offsets and call order',async()=>{
+  const archive=new URL('../tests/upstream/solidity-0.8.38.tar.gz',import.meta.url);
+  const extract=async path=>(await promisify(execFile)('tar',['-xOzf',archive.pathname,path],{maxBuffer:1024*1024})).stdout;
+  const word=n=>Array.from(Buffer.from(BigInt.asUintN(256,BigInt(n)).toString(16).padStart(64,'0'),'hex'));
+  const words=xs=>xs.flatMap(word),hex=s=>Array.from(Buffer.from(s,'hex'));
+  const a=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/errors/revert_conversion.sol')),
+    [{type:'function',name:'f',inputs:[],outputs:[]}]);
+  assert.equal(a.length,1);assert.equal(a[0].signature,'f()');assert.equal(a[0].failure,true);
+  assert.deepEqual(a[0].revertBytes,hex('59e4d4df').concat(words([64,128,3]),[97,98,99],Array(29).fill(0),words([1,7])));
+  const b=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/errors/using_structs.sol')),
+    [{type:'function',name:'f',inputs:[{type:'bool'}],outputs:[]}]);
+  assert.equal(b.length,2);assert.deepEqual(b.map(v=>v.args),[['true'],['false']]);
+  const expected=hex('e96e07f0').concat(words([2,96,7,9,64,3]),[97,98,99],Array(29).fill(0));
+  for(const v of b){assert.equal(v.signature,'f(bool)');assert.equal(v.failure,true);assert.deepEqual(v.revertBytes,expected);}
+  assert.notDeepEqual(expected,expected.slice(0,-1));assert.notDeepEqual(expected,expected.concat(0));
+  assert.notDeepEqual(expected,hex('e96e07f0').concat(words([2,64,7,9,64,3]),[97,98,99],Array(29).fill(0)));
+});
+
+test('compound array decoder vectors retain dimensions, all calls and raw suffixes',async()=>{
+  const archive=new URL('../tests/upstream/solidity-0.8.38.tar.gz',import.meta.url);
+  const extract=async path=>(await promisify(execFile)('tar',['-xOzf',archive.pathname,path],{maxBuffer:1024*1024})).stdout;
+  const fn=(name,inputs,outputs)=>({type:'function',name,inputs:inputs.map(type=>({type})),outputs:outputs.map(type=>({type}))});
+  const word=n=>Array.from(Buffer.from(BigInt(n).toString(16).padStart(64,'0'),'hex'));
+  const a=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/abicoder/calldataDecoding/array/memory_arrays_static.sol')),
+    [fn('f',['uint16[3]','uint16[2][3]','uint256','uint256','uint256'],['uint256','uint256'])]);
+  assert.equal(a.length,1);assert.deepEqual(a[0].expectedBytes,[2,32].flatMap(word));
+  assert.equal(a[0].calldata.length,12*32);
+  const b=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/array/indexAccess/arrays_complex_memory_index_access.sol')),
+    [fn('set',['uint24[3][]','uint256','uint256'],['uint256','uint256'])]);
+  assert.equal(b.length,1);assert.equal(b[0].calldata.length,22*32);
+  assert.deepEqual(b[0].expectedBytes,[6,12].flatMap(word));
+  assert.deepEqual(b[0].calldata.slice(-32),word(18));
+  const inputs=['uint8[][][]','uint8[][1][]','uint8[2][][2]','uint16[][]','uint32[][2]','uint32[2][]'];
+  const outputs=['uint8[][]','uint8[][1]','uint8[2][]','uint16[][]','uint32[][2]','uint32[2][]'];
+  const c=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/array/copying/nested_array_element_memory_to_memory.sol')),
+    inputs.map((t,i)=>fn('test'+(i+1),[t],[outputs[i]])));
+  assert.equal(c.length,6);assert.deepEqual(c.map(v=>v.signature),inputs.map((t,i)=>`test${i+1}(${t})`));
+  const expected=[[32,2,64,128,1,7,2,8,9],[32,32,3,12,13,14],[32,1,7,7],
+    [32,2,64,128,1,7,2,8,9],[32,64,128,1,7,2,8,9],[32,2,5,6,7,8]];
+  for(let i=0;i<c.length;i++){assert.equal(c[i].failure,false);assert.deepEqual(c[i].expectedBytes,expected[i].flatMap(word));}
+});

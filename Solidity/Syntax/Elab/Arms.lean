@@ -1742,10 +1742,22 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
           match T with
           | .prim p => pure (some (AbiKind.ofValue p d.widths n))
           | .ref R =>
-            unless R == bytesR && lookupBy (n ++ "[]#bytes") d.widths == some 1 do
-              throw s!"`{e}`: a custom error's reference argument is not modelled"
-            unless a.bytesLit?.isSome do ElabM.lift (shapeCheck C (← ctx) dynBytesRows a)
-            pure (some AbiKind.dyn)
+            let ws := shapeUnder d.widths n
+            unless !errorAbiHasEnum (.ref R) ws "" && (AbiTy.of (.ref R) ws "").isSome do
+              throw s!"`{e}`: a custom error's reference type is not ABI-encodable"
+            if a.bytesLit?.isSome then
+              unless R == bytesR && lookupBy (n ++ "[]#bytes") d.widths == some 1 do
+                throw s!"`{e}`: a byte literal needs a bytes/string error parameter"
+            else
+              match synth C (← nctx) a with
+              | .ok (.mpath (.ref S) _) | .ok (.path (.ref S) _) =>
+                unless S == R do throw s!"`{e}`: custom error reference type mismatch"
+              | _ => throw s!"`{e}`: custom error argument is not a reference place"
+              ElabM.lift (shapeCheck C (← ctx) ws a)
+            -- Retain the actual place and its location. The existing encoder
+            -- reads references only after all operands have been evaluated.
+            -- No primitive mark may erase an aggregate's recursive ABI type.
+            pure none
         let (Q, bytes) ← rc.abiEncode true false args marks (some (.num (Semantics.customSelector sig).toNat))
         let R ← memoryRevert .raw bytes
         pure (P ++ Q ++ R)
