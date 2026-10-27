@@ -65,6 +65,12 @@ goldens, command-line and native unit tests) are preserved and inventoried but
 need their own adapters. A whole-suite `complete` flag means every selected
 fixture has a verdict, including blocked cases; it does not mean all suites ran.
 
+An [optional bounded reference EVM replay](../scripts/evm-reference/README.md)
+executes pinned compiler bytecode separately. Its `evm-reference` reports retain
+all adapted scalar observations, machine exceptions and provenance; they never
+merge into Lean coverage or convert model exhaustion into an expected failure.
+The Group 03 continuation records both methods' per-fixture results.
+
 ## Reproduce
 
 Use Lean 4.24.0 from `lean-toolchain`, Node, Python 3 and `tar`.
