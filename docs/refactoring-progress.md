@@ -128,8 +128,9 @@ completed, and the complete target/report remain unverified. Available-memory
 guards stopped the attempts; no Lean error was reported. The first stop had
 11.71 GiB peak aggregate RSS. The explicit-`-j1` retry peaked at 11.62 GiB and
 was stopped during unrelated system pressure when its current RSS was only
-2.40 GiB. The tracked lakefile is unchanged; `.lakefile-refactor.toml` is a
-task-owned temporary copy with explicit `-j1` in library weak arguments.
+2.40 GiB. The tracked lakefile is unchanged. The task-owned temporary
+`.lakefile-refactor.toml` added explicit `-j1` in library weak arguments and has
+been removed after verifying it contained only that change.
 A probe showed five Lean threads with explicit `-j1` versus six with only
 `LEAN_NUM_THREADS=1`. Keep the hard 12 GiB cap; do not count the complete
 TestSuite build as passing until it exits.
@@ -138,7 +139,8 @@ The final read-only documentation review corrected a stale running-status
 description. The skeptic confirmed that passing gates, resource stops and
 remaining work are recorded separately; no correctness finding remained.
 
-No retry is running. At the last resource stop, available RAM fell below 1 GiB and swap was full;
+No retry is running; the idle writer lock is being released. At the resource stop,
+available RAM fell below 1 GiB and swap was full;
 the largest consumers were concurrent Java processes unrelated to this task.
 The task's last Lean attempt was stopped before allocating memory. Refresh
 `free -h` before retrying; do not start another heavy check until adequate
@@ -155,8 +157,10 @@ document or the edited source-admission document.
 ## Resume
 
 Both representation increments, the library build and frozen sort check are
-complete. Once RAM headroom returns, finish the TestSuite target using
-`lake -f .lakefile-refactor.toml build SolkeyTestSuite` with the private disk
+complete. Once RAM headroom returns, acquire the writer lock, reread Git status
+and regenerate the temporary alternate configuration from the current tracked
+lakefile, adding `-j1` to its library `weakLeanArgs`. Finish the TestSuite target
+using `lake -f .lakefile-refactor.toml build SolkeyTestSuite` with the private disk
 cache, hard 12 GiB scope, swap disabled and available-memory guard. Then remove
 only the temporary task-owned `.lakefile-refactor.toml` and rerun the normal
 `./run-lean.sh` using cached artifacts to confirm the restored configuration.
