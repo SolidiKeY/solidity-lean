@@ -58,6 +58,19 @@ pipelines from the hash-pinned `tests/solc/CloudIntegration.sol` inputs. The
 before-fix width failure and after-fix MCP success were observed separately.
 Both reviewers confirmed the corrections without opening Lean workers.
 
+The serial lane sweep exposed two further cross-lane test mismatches. Enum
+ABI rejection vectors keep their inputs and failure/return expectations; a
+matched decoder rejection is now classified consistently as replay agreement.
+Negative controls reject false success and fabricated return data in both
+pipelines. This does not establish execution of the source body.
+
+Contract-valued immutable roots are now supported as address roots. Replace the
+old refusal assertion with execution checks that their unread initializer's
+increment occurs exactly once, plus controls rejecting the former zero-effect
+outcome, in both pipelines. Other unsupported forward-initialization guards
+remain. MCP diagnostics pass both updated files; finder and skeptic confirmed
+the changes independently without Lean calls.
+
 ## Validation
 
 - Reachability: 699 modules, zero orphans or disallowed modules.
@@ -66,7 +79,9 @@ Both reviewers confirmed the corrections without opening Lean workers.
 - JavaScript-only upstream/compiler-code regressions: 17/17 pass.
 - Trust inventory: 713 sources, 239 implementation/recovery sites, zero findings.
 - MCP diagnostics: Raw, Body, Contract and the focused combined regression pass.
-- Full build, frozen TestSuite/sort/corpus and the complete lane regression set:
+- Modifier-frame proof regression: retry passes after an initial process exit 135.
+- Frozen TestSuite static audit: 564 functions, 552 derived, 11 refuted, zero pending.
+- Full build, frozen sort/corpus and the complete lane regression set:
   in progress; no combined pass is claimed yet.
 
 The first build was sandbox-blocked on the shared Lake cache. The next attempt

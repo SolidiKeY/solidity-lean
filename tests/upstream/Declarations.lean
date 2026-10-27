@@ -227,11 +227,7 @@ private def forwardCheck (wrong : Bool := false) (ir : Bool := false) : IO Unit 
 #eval forwardCheck true true
 #guard (Imported.IndirectForwardImmutable.report.find? (·.sourceSignature == "constructor()")).any
   (fun row => row.status != .elaborated)
-#guard (Imported.UnsupportedImmutable.report.find? (·.sourceSignature == "constructor()")).any
-  (fun row => row.status != .elaborated)
 #guard (Imported.IR.IndirectForwardImmutable.report.find? (·.sourceSignature == "constructor()")).any
-  (fun row => row.status != .elaborated)
-#guard (Imported.IR.UnsupportedImmutable.report.find? (·.sourceSignature == "constructor()")).any
   (fun row => row.status != .elaborated)
 
 
@@ -355,3 +351,19 @@ private def implicitRefusalCheck (ir : Bool := false) : IO Unit := do
     throw (IO.userError "pure implicit phase incorrectly marked as callback-capable")
 
 end Solidity.Upstream.Declarations
+
+-- Contract-valued roots are retained as address roots by the combined importer.
+-- Their unread immutable initializer must still execute its increment.
+private def immutableEffectCheck (wrong : Bool := false) (ir : Bool := false) : IO Unit := do
+  let text := "{\"vectors\":[{\"signature\":\"observed()\",\"args\":[],\"failure\":false,\"expected\":[\"" ++
+    (if wrong then "0" else "1") ++ "\"]}]}"
+  let .ok data := Lean.Json.parse text | throw (IO.userError "bad immutable control JSON")
+  let result := Solidity.Tools.Upstream.replay
+    (if ir then Imported.IR.UnsupportedImmutable else Imported.UnsupportedImmutable)
+    (if ir then Imported.IR.UnsupportedImmutable.report else Imported.UnsupportedImmutable.report) data
+  unless (result.getObjValAs? String "status").toOption == some (if wrong then "broken" else "working") do
+    throw (IO.userError result.pretty)
+#eval immutableEffectCheck
+#eval immutableEffectCheck true
+#eval immutableEffectCheck false true
+#eval immutableEffectCheck true true
