@@ -92,21 +92,50 @@ def readPragmas (ast : Json) : Except String Pragmas := do
     | _ => throw "unknown enabled compiler language mode"
   return result
 
+/-- Historical fixtures have no recorded settings. An analysed fixture has
+one selected pipeline and its validated settings text. The effective coder
+is an observation of this mode and the requested coder, never separate state. -/
+inductive Compilation where
+  | historical
+  | analysed (pipeline : Pipeline) (settings : String)
+  deriving Repr, Inhabited
+
+deriving instance Lean.ToExpr for Compilation
+
 structure Provenance where
   compiler : Compiler
   solkeyCommit : String
   source : String
   sourceSha256 : String
-  /-- No settings are invented for a historical fixture. -/
-  pipeline : Option Pipeline
+  compilation : Compilation
   requestedCoder : AbiCoder
-  effectiveCoder : Option AbiCoder
   gates : List Gate
-  settings : String
-  legacyFixture : Bool
   deriving Repr, Inhabited
 
 deriving instance Lean.ToExpr for Provenance
+
+def Provenance.legacyFixture (provenance : Provenance) : Bool :=
+  match provenance.compilation with
+  | .historical => true
+  | .analysed _ _ => false
+
+def Provenance.pipeline (provenance : Provenance) : Option Pipeline :=
+  match provenance.compilation with
+  | .historical => none
+  | .analysed pipeline _ => some pipeline
+
+def Provenance.settings (provenance : Provenance) : String :=
+  match provenance.compilation with
+  | .historical => ""
+  | .analysed _ settings => settings
+
+/-- via-IR uses v2 regardless of the requested pragma. Historical v1 fixtures
+do not establish an effective coder; historical v2 retains the known default. -/
+def Provenance.effectiveCoder (provenance : Provenance) : Option AbiCoder :=
+  match provenance.compilation with
+  | .analysed .viaIR _ => some .v2
+  | .analysed .legacy _ => some provenance.requestedCoder
+  | .historical => if provenance.requestedCoder == .v2 then some .v2 else none
 
 def parseCompiler (version : String) : Except String Compiler :=
   if version == Compiler.solkey0834.version then pure .solkey0834
@@ -167,8 +196,7 @@ def read (fixture ast : Json) : Except String Provenance := do
     return {
       compiler, solkeyCommit, source, sourceSha256
       requestedCoder := pragmas.requestedCoder
-      effectiveCoder := if pragmas.requestedCoder == .v2 then some .v2 else none
-      gates := pragmas.gates, pipeline := none, settings := "", legacyFixture := true }
+      gates := pragmas.gates, compilation := .historical }
   | some schema =>
     unless onlyKeys header ["solcVersion", "sourceSha256", "solkeyCommit", "source",
         "provenanceVersion", "compilerFile", "compilerSha256", "validationStage",
@@ -191,9 +219,7 @@ def read (fixture ast : Json) : Except String Provenance := do
     return {
       compiler, solkeyCommit, source, sourceSha256
       requestedCoder := pragmas.requestedCoder
-      effectiveCoder := some (if viaIR then .v2 else pragmas.requestedCoder)
-      gates := pragmas.gates, pipeline := some pipeline
-      settings := settings.compress, legacyFixture := false }
+      gates := pragmas.gates, compilation := .analysed pipeline settings.compress }
 
 
 /-- Distinguish profile policy, upstream limitations and implementation gaps. -/

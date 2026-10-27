@@ -13,6 +13,11 @@ completeness and lowering correctness are not proved).
   `N.report.provenance` (`Frontend/Source.lean`). `--via-ir` selects
   source-order operand scheduling; a requested ABI-v1 under via-IR records the
   effective ABI-v2. Modern fixtures default to Osaka.
+  `Provenance.compilation` distinguishes historical inputs from analysed
+  pipeline/settings records. `legacyFixture`, `pipeline`, `settings` and
+  `effectiveCoder` are derived observations: they cannot be updated separately.
+  Settings text is validated by `Source.read`; constructing a provenance record
+  directly is not a validation certificate.
 - **Historical fixtures.** Four-field fixtures still load with
   `admissionChecked = false` (`legacyFixture`); regenerate them with
   `--legacy-fixture` only to keep that boundary. They keep their pinned legacy

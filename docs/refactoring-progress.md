@@ -10,6 +10,9 @@ Memory: run heavy checks sequentially. Command-line Lean uses
 `LEAN_NUM_THREADS=1` and `ulimit -v 8388608` (8 GiB virtual memory per process).
 Apply this limit to Lean, not Node's virtual address reservations. Do not start
 parallel builds or change other sessions' workers. Use at most four LSP files.
+Long final checks additionally use an 8 GiB aggregate RSS guard and stop if
+system available memory falls below 8 GiB. Keep private caches on disk under
+`.lake/refactor-cache`, not on the RAM-backed `/tmp` filesystem.
 
 Before changes, error diagnostics passed for `Frontend/Source.lean` and
 `Frontend/SolcJson/Getters.lean`; the getter fixture identity test passed.
@@ -77,13 +80,40 @@ elementary-type rejection and enum-key membership guards in the new getter
 representation. The docs index retains upstream's organization and this file's
 link. Merged getter/contract diagnostics, the frontend build, direct plan
 regression and layer check (152 core modules) passed. The uncommitted provenance
-increment is preserved in merge autostash `54ec4911` until merge completion.
+increment was preserved in autostash `54ec4911` and automatically restored by
+merge commit `dc044e71` (`Merge upstream`). Both read-only reviewers confirmed
+the resolution preserved upstream behavior.
+
+## Provenance milestone
+
+Implemented: `Compilation.historical` or `Compilation.analysed pipeline settings`
+replaces independent fixture/pipeline/settings/effective-coder fields. Existing
+dot-notation queries are derived, so admission, scheduling, static compiler-code
+checks and report quotations keep their interfaces. Historical v1 continues to
+mean unknown effective coder, while via-IR uses v2 even when v1 was requested.
+
+This does not turn arbitrary manually constructed settings text into a
+certificate. `Source.read` remains the validation boundary; the sum removes
+inconsistent combinations of its observations. No interpreter, taclet or
+proof rule changes, dependencies, axioms or heartbeat overrides were added.
+
+The changed module's error diagnostics and the frontend consumer build passed
+after the pull (258 jobs). Read-only finder and skeptic reviews found no
+correctness defects. The fixture matrix passed: historical v1/v2, analysed
+legacy/via-IR, preserved settings and rejected partial/malformed metadata.
+
+The generated-report check could not start because shared-cache fetches reported
+success without restoring `Tools/Preconditions.olean` and
+`Tools/SourceCounterexample.olean`. Repeated targeted fetches confirmed the
+missing objects. Rebuilding those dependencies in the private disk cache is in
+progress; do not count this report check as passing yet. The verification above
+checks the representation and reader, not full post-pull library integration.
 
 ## Resume
 
-Complete the pull merge, then verify that the saved provenance increment was
-restored (use the explicit autostash hash above if Git did not apply it).
-Re-read
+Commit the focused, verified provenance change, then finish private-cache
+dependency recovery and generated-report/full-build confirmation. Record that
+commit hash and the final check outcomes here. Re-read
 `git status` and acquire the shared writer lock before writes or Lean checks.
 Rebuild `Solidity.Frontend.Testing` before running JavaScript regressions that
 use `build:false`. Inside this sandbox Node child processes can report EPERM;
