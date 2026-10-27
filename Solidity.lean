@@ -587,6 +587,7 @@ import Solidity.Examples.Tactics.CallExceptions
 import Solidity.Examples.Tactics.TransientStorage
 import Solidity.Examples.Tactics.TransientSourceImport
 import Solidity.Semantics.ContractWorld
+import Solidity.Semantics.ContractWorldCertificates
 import Solidity.Semantics.TransientWorld
 import Solidity.Calculus.ContractWorld
 import Solidity.Frontend.WorldImport

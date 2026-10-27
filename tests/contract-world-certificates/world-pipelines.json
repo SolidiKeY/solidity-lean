@@ -1,0 +1,68 @@
+{
+  "source": "tests/solc/ContractWorld.sol",
+  "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3",
+  "controlsSha256": "b237d868ce95cbf3dda9e993c88461223e751be9bbdc812243527bcf025349b6",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "scope": "Kernel-checked typed-source observations for both analysis pipelines; no EVM/compiler-equivalence claim.",
+  "pipelines": [
+    {
+      "pipeline": "legacy",
+      "status": "passed",
+      "elapsedMs": 7430,
+      "fixtureSha256": "60623bdbb0537f41cf12f3415e2ba5641874d25458f0e47c664daa9ae1fcfaa7",
+      "wrapperSha256": "442f495784fccffac41cd6021be6f4e11d408827205651a4688e3fa3f7ef8b07",
+      "generationArguments": [
+        "scripts/solc-ast.mjs",
+        "--source",
+        "/workspace/solidity-lean/tests/solc/ContractWorld.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/ContractWorld.ast.json",
+        "--wrapper",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/Controls.lean",
+        "--world-metadata",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+      ],
+      "leanArguments": [
+        "env",
+        "lean",
+        "--tstack=131072",
+        "-j1",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/legacy/Controls.lean"
+      ],
+      "log": "/workspace/.setup/logs/world-pipeline-legacy.log"
+    },
+    {
+      "pipeline": "viaIR",
+      "status": "passed",
+      "elapsedMs": 7326,
+      "fixtureSha256": "f2d2f97eb637fe703941239a34c9152eec85ea612aa27a7354bf77413c0de1e2",
+      "wrapperSha256": "64edd5ed90f4c19947c0d051b43c1bd084cd71c675e9da7a55d8c27766f10988",
+      "generationArguments": [
+        "scripts/solc-ast.mjs",
+        "--source",
+        "/workspace/solidity-lean/tests/solc/ContractWorld.sol",
+        "--out",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/ContractWorld.ast.json",
+        "--wrapper",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/Controls.lean",
+        "--world-metadata",
+        "--compiler-file",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--compiler-sha256",
+        "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+        "--via-ir"
+      ],
+      "leanArguments": [
+        "env",
+        "lean",
+        "--tstack=131072",
+        "-j1",
+        "/workspace/solidity-lean/.lake/world-certificate-pipelines/viaIR/Controls.lean"
+      ],
+      "log": "/workspace/.setup/logs/world-pipeline-viaIR.log"
+    }
+  ]
+}
