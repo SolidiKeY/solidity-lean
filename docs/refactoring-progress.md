@@ -7,6 +7,7 @@ provenance increments remove independent pieces of state, but leave the
 elaborator's binding metadata split across synthetic locals. The following
 assessment follows actual source-to-run and formula-to-proof paths, rather
 than treating the earlier two increments as an architecture-wide audit.
+The table describes the baseline at `98d2682c`; completed changes follow below.
 
 | Subsystem and traced path | Structural versus dynamic invariants; alternative considered |
 |---|---|
@@ -72,8 +73,8 @@ metadata/width changes that require no extra formula binder.
 Focused elaborator and frontend rebuilds passed at 1.60 and 2.53 GiB peak
 aggregate RSS respectively. The 270-job focused rebuild (new binding checks,
 Checked, AbiFeatures and PublicGetters) passed at 4.97 GiB peak aggregate RSS.
-The latest 21 binding guards also pass per-file diagnostics. Broader checks
-remain pending. The layer check passes.
+The latest 21 binding guards also pass per-file diagnostics. Final broad results
+are recorded below. The layer check passes.
 The orphan check reports 33 existing ignored scratch modules; no new reachable
 module is orphaned. The prose-path check reports 20 existing missing references
 in archived validation JSON and an upstream Mathlib source citation, plus six
@@ -87,10 +88,12 @@ separate 12 GiB cap. No other session's workers were terminated.
 
 ### Proof-tree target and migration
 
-Reassessment after the binding migration finds one smaller but independent
-representation improvement worth completing: `Tree.node` accepts any `Act` and
-any child array, so an open or closed leaf can carry hidden children. Current
-producers happen to use empty arrays; consumers rely on that convention when
+Committed as `14260603` (`Make tree leaves intrinsic`).
+
+Reassessment after the binding migration found one smaller but independent
+representation improvement worth completing: `Tree.node` accepted any `Act` and
+any child array, so an open or closed leaf could carry hidden children. Its
+producers used empty arrays; consumers relied on that convention when
 counting goals, emitting scripts and reporting closure.
 
 The target is a shared node header and three constructors: open leaf, solved
@@ -128,6 +131,60 @@ the public compilation entry already couples its recognizer and code through a
 certificate and the memory branch is intrinsic; another fragment AST has no
 demonstrated net simplification yet. Finite-dispatch signatures remain a modest
 follow-up. This investigation does not claim the architecture is fully optimized.
+
+Competing binding designs were a second name-to-shape map, a generic wrapper
+around every local, and constructor-attached metadata. A second map retains the
+shadowing/synchronization problem. Constructor fields keep metadata on program
+locals without giving specification-only storage/KeY-int locals meaningless
+shape slots. `ECtx` remains a named elaboration boundary because resolution and
+freshening precede the intrinsic `Idx`/`Stmt` representation; the change does
+not add an untyped runtime representation.
+
+For trees, an action-indexed child family could also forbid leaf children, but
+would retain a separate action value and propagate its index through consumers.
+The algebraic tree provides the same leaf guarantee with one representation.
+
+Another foundational alternative is indexing primitive core types by bit width
+instead of retaining widths in source metadata and lowering narrow arithmetic.
+It could consolidate narrow checks, but would also restrict the states quantified
+by existing formulas and require a correspondence for source promotions, casts,
+overflow guards and KeY's printed steps. Intrinsic widths alone do not remove
+those observable guards or the separate ABI kinds (`address`, bytes, enum and
+function markers). A second numeric syntax plus a lowering adapter is not a
+demonstrated simplification. This alternative is not implemented or claimed
+equivalent; a semantics-preserving target needs establishing first.
+
+### Final second-pass verification
+
+Recorded on 2026-10-27, after both representation commits. No Lean code changed
+after these checks; the subsequent JavaScript repair strengthens an existing
+source regression's expected report.
+
+| Check | Result |
+|---|---|
+| Full library | 685 jobs passed, including the 21 binding guards, existing proof-tree/JSON/replay pins, OpenLoops and decision examples. |
+| TestSuite | 259 jobs passed, including the pinned obligation/axiom report. |
+| Normal `./run-lean.sh` | Exit 0 with the tracked configuration and the explicit frozen rule file. The preceding driver completed both builds but used an incorrect rule-file path at its final step; that path was corrected before counting the command as passing. |
+| Frozen sort conformance | 377 taclets, 131 read-bearing annotations, all matching `tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key`. |
+| Source regressions | 22 finite-dispatch, nine getter-dispatch, one getter-plan and seven public-getter cases covered. The original run passed 38 and exposed the stale count described below; the repaired case then passed its focused rerun. |
+| Static TestSuite and automation | 564 selected functions: 552 derived, 11 refuted, one excluded, none pending; 491 automatic and 61 using a step budget. |
+| Layers | 152 core modules, none reaches the elaborator. |
+| Reachability | 700 reachable modules; passes with an explicit allow-list containing only the 33 pre-existing untracked scratch modules. The unqualified audit still reports those scratch files. |
+| Resource bounds | Heavy jobs ran sequentially under `MemoryMax=12G`, `MemorySwapMax=0`, with a 12 GiB available-memory reserve. The guard observed a peak aggregate RSS of 11.60 GiB during the large build sequence. No resource stop was counted as a passing check. |
+| Working tree and prose | Diff whitespace checks pass. The whole-repository prose audit retains the 20 pre-existing missing references and six ambiguous names described above. The temporary build configuration and baseline worktree were removed. |
+
+The source regression expected 15 `PublicGetters` report rows, but inherited
+public functions were deliberately added to testing entries in `62338a6f` after
+that pin was written. An isolated checkout of baseline `98d2682c`, using the
+same compiler checkout, independently returned 16 names in discovery mode with
+no errors, including `GetterBase.inherited`. This was a stale test expectation,
+not an additional admitted function introduced by either refactor.
+
+The repaired test pins the exact sorted array of all 16 function/status pairs,
+so missing, unexpected and duplicate rows fail. Both false assertions remain
+`pending`, the collision helper remains `internal`, and every positive entry,
+including `inherited`, must be `proved`. Finder and skeptic reviews confirmed
+the baseline explanation and that the new assertion strengthens coverage.
 
 ## Earlier pass
 
@@ -226,7 +283,8 @@ returned. No resource stop was counted as a passing check.
 
 Rebuild `Solidity.Frontend.Testing` before JavaScript regressions using
 `build:false`. Sandbox Node child-process EPERM calls for the same bounded host
-check, not changed verdicts. No verification for these two refactors is pending.
+check, not changed verdicts. No verification for the earlier getter/provenance
+increments is pending.
 
 ## Remaining candidate
 
@@ -237,7 +295,7 @@ and migrate `candidate`, `getterCandidate` and `inspectCall` together if pursued
 Preserve unknown/reference candidates, source/native distinctions, alias checks
 and the restricted zero-argument internal memory-byte return.
 
-This is future work, not an unfinished part of either completed increment.
+This is future work, not an unfinished adapter in any completed increment.
 Validate any such change with `scripts/finite-dispatch.test.mjs` and
 `scripts/getter-dispatch.test.mjs` against rebuilt frontend artifacts; do not add
 another representation unless its simplification justifies those migration risks.

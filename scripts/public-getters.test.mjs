@@ -25,12 +25,18 @@ test('getter fixture retains compiler identities and real name collisions', () =
 test('getters execute through imported self calls; a false assertion stays pending', () => {
   const report = runSolidityTests([source], {build:false, contract:'PublicGetters'});
   assert.deepEqual(report.errors, []);
-  assert.equal(report.results.length, 15);
-  for (const row of report.results) {
-    const expected = ['falseScalar','falseBoundsPanic'].includes(row.function) ? 'pending' :
-      row.function.startsWith('solcGetter') ? 'internal' : 'proved';
-    assert.equal(row.status, expected, `${row.function}: ${row.reason}`);
-  }
+  // Inherited public functions are testing entries too. Pin names and verdicts
+  // together so missing, unexpected and duplicate rows cannot hide in a count.
+  const expected = [
+    ['arrays', 'proved'], ['boolKeys', 'proved'],
+    ['falseBoundsPanic', 'pending'], ['falseScalar', 'pending'],
+    ['fixedBounds', 'proved'], ['identity', 'proved'], ['inherited', 'proved'],
+    ['inheritedGetters', 'proved'], ['nestedMapping', 'proved'],
+    ['primitives', 'proved'], ['scalar', 'proved'], ['selectorBounds', 'proved'],
+    ['selectorRead', 'proved'], [`solcGetter${member('PublicGetters', 'count').id}`, 'internal'],
+    ['structFields', 'proved'], ['viaInterface', 'proved'],
+  ];
+  assert.deepEqual(report.results.map(row => [row.function, row.status]).sort(), expected.sort());
 });
 
 test('reference returns fail closed without changing struct omissions', () => {
