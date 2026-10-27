@@ -380,6 +380,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
     ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
     ("signature", toJson r.signature),
     ("sourceId", toJson r.sourceId),
+    ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
     ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))] ++
       auditFields "notRun" "contract run interrupted")
@@ -406,6 +407,7 @@ def elabSolkeyTest : CommandElab := fun stx => do
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
       ("sourceId", toJson r.sourceId),
+      ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
       ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason ++

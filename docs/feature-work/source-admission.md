@@ -47,6 +47,32 @@ completeness and lowering correctness are not proved).
 Regressions: `Examples/Tactics/SourceAdmissionImport.lean`,
 `SourceLiteralsImport.lean`, `SourceIdentifiersImport.lean`.
 
+`Frontend/SolcJson/Admission.lean` scans known nodes, semantic type metadata,
+call options, arguments, selected modifiers, execution dependencies and lexical
+specifications. Declaration references follow headers by compiler identity;
+executable state initializers (including immutable initializers) and base-constructor
+arguments execute only for deployment. Unsupported initializers retain a refused
+constructor row even when the constructor is implicit; native initialization
+elaboration failure also cannot become a warning-only default deployment.
+Pipeline-specific inheritance scheduling and the regression evidence are recorded
+in [Group 08 of the declaration milestone](declarations-metadata.md#group-08-source-lowering-repair-2026-10-26).
+The [resumed declaration repairs](declarations-metadata.md#group-08-resumed-remaining-declarations-2026-10-27)
+record static compiler-code artifact validation, enum struct dependencies and
+restricted mixed storage-return projection. Composite ABI inputs containing
+enums remain refused until recursive nominal cardinality checks exist; direct
+enums and one-dimensional enum arrays retain their exact range premises.
+Metadata-only selectors do not pull unrelated function bodies into admission.
+Possible self-calls include cast/aliased receivers. Payment dispatch requiring
+inherited receive, fallback or receive modifiers is refused until that dispatch
+is implemented. General function-value dispatch remains an implementation gap. Resolved scalar
+operator aliases use the declaration-aware validator and typed call lowering
+described in [the numeric milestone](numeric-operators.md); missing, malformed
+or nominally mismatched annotations are refused. Scope decisions never depend on inventory status.
+Stored external-function `.address`/`.selector` observations retain explicit ABI-kind
+casts through lowering. Stable pure places are supported; effectful receivers
+remain refused. Direct declaration metadata remains supported. Finite dynamic
+dispatch and synthesized getter candidates follow [finite-dispatch.md](finite-dispatch.md)
+and [getter-dispatch.md](getter-dispatch.md).
 ## Refused, and why
 
 - Unknown modes or settings, mismatched pragma records, incomplete modern

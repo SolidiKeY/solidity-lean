@@ -165,7 +165,15 @@ users fail modifier lookup rather than running without the modifier.
 Unsupported elementary state fields and narrow container fields stay gaps,
 including functions whose specifications mention an omitted field. Contract
 invariants retain their existing whole-contract validation. Unsupported clause
-syntax on an admitted body remains an import failure.
+syntax remains refused before it can contribute a member or a premise. Testing
+rows expose `invalidSpecification` for a parser-invalid clause, including a
+required callee's invalid clause. Mixed reports retain these local `unsupported`
+rows. If every selected non-internal/non-skipped verification candidate has
+that structured diagnostic, the file API also reports one `specification` input
+error: the selection has no well-formed specification to verify. Ordinary
+implementation gaps, exclusions, unfinished proofs and tool interruptions never
+qualify merely because their messages look like parser errors. Rows and original
+failure diagnostics are retained in both cases.
 
 Large literal tables are compiled in segments of at most 64 list cells.
 A kernel-checked reflexivity certificate verifies that the resulting contract

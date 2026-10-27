@@ -554,6 +554,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let j ← ofExcept (Json.parse text)
   let ast ← ofExcept (j.getObjVal? "ast")
   let provenance ← ofExcept (Source.read j ast)
+  let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
@@ -567,13 +568,13 @@ def elabSolcImport : CommandElab := fun stx => do
       (Admission.scan ast provenance { request with
         declarationRoots := request.declarationRoots ++
           [Admission.header [] ast] ++ (J.arrD ast "nodes").toList.filter (J.kind · == "PragmaDirective") }).append
-        (scanSpecifications env sourceNames request) |>.normalize)
+        (scanSpecifications env sourceNames request) |>.normalize |>.requireCompilerCode (!compilerCode.isEmpty))
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
         specifications := [(bound, "/// @custom:key " ++ text)] })
     (readsSpecification env sourceNames) (!stx[9].isNone)
-    (!provenance.legacyFixture && provenance.pipeline == some .viaIR))
+    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode)
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -594,8 +595,9 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Its users still fail expansion because the named modifier is absent.
   let modifierMembers := c.modifierMembers.filter fun m =>
     match parse `sol_member m with | .ok _ => true | .error _ => false
-  -- A standalone signature check needs the same validated type declarations
-  -- as the final contract; storage and initializers are not part of this check.
+  -- A helper header may return or accept a source struct/enum. Validate it
+  -- in the same type-declaration context as the final contract; no state
+  -- initializer or other helper body is admitted by this precheck.
   let typeMembers := c.members.filter fun member =>
     member.startsWith "struct " || member.startsWith "enum "
   let mut funMembers : Array String := #[]
@@ -647,7 +649,13 @@ def elabSolcImport : CommandElab := fun stx => do
         (at_ f 0 s!"the contract with its constructor and initializers: {e}"))
       ctorMember := none
     | some e, _, _ =>
-      logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
+      -- An implicit initializer that renders but fails native elaboration
+      -- must remain a deployment refusal, not a warning and default state.
+      let f : SolcFun := {
+        name := "constructor", sourceName := "constructor", sourceSignature := "constructor()",
+        line := 0, tag := .diamond, params := [], body := .ok [] }
+      ctorRow := some (.ofFun f .unsupported
+        (at_ f 0 s!"the contract with its initializers: {e}"))
   let ctStx ← ofExcept (parse `term (contractText memberList))
   let ctStx ← if c.internalFuns.isEmpty then pure ctStx else
     let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)

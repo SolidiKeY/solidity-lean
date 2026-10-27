@@ -1,0 +1,1086 @@
+{
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "branch": "codex/group08-source-lowering",
+  "managedEnvironmentId": "ccarenv_b64_Y2NhcmVudl8zYTJlY2UzNDA5OWM4MTkxOGFmMjEwNTYxNTQzYjk4NA",
+  "recordedAt": "2026-10-26T22:46:01.181752+00:00",
+  "fixtureEvidence": "tests/upstream/group08-results.json",
+  "leanMcpDiagnosticsAvailable": false,
+  "leanDiagnosticsMethod": "Configured per-file lake --quiet --no-build lean FILE -- --tstack=131072 and Lake builds; no Lean MCP tools exposed.",
+  "frozenSolkey": {
+    "commit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "SOLKEY_EXAMPLES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+    "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+  },
+  "runs": [
+    {
+      "name": "handoff-runtime",
+      "command": [
+        "bash",
+        "-c",
+        "lean --version && lake --version && lake build Solidity.KeySort"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.303,
+      "log": ".lake/upstream/group08/handoff-runtime.log",
+      "logSha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "name": "handoff-verify",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 1.787,
+      "log": ".lake/upstream/group08/handoff-verify.log",
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "name": "handoff-declarations",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Declarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 17.722,
+      "log": ".lake/upstream/group08/handoff-declarations.log",
+      "logSha256": "445d6e0483778790a7e15e6adff0745c403bc6f8e1d01ed2907d71803497582d"
+    },
+    {
+      "name": "handoff-mapping",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/MappingDeclarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.197,
+      "log": ".lake/upstream/group08/handoff-mapping.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "name": "handoff-replay",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 2.937,
+      "log": ".lake/upstream/group08/handoff-replay.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "name": "handoff-constructors",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Solkey/Constructors.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 3,
+      "seconds": 0.574,
+      "log": ".lake/upstream/group08/handoff-constructors.log",
+      "logSha256": "d26eec719bfc434182ff3d1387d91d00f911f3d5c857ed8772221a4e4a2a40f6"
+    },
+    {
+      "name": "abi_functions_member_access-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/abi_functions_member_access.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/abi_functions_member_access-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.817,
+      "log": ".lake/upstream/group08/abi_functions_member_access-handoff.log",
+      "logSha256": "4270ff034cfd86f27565953ea10d7ffddadd6a1500a929cd1be1bd46be4efdd5"
+    },
+    {
+      "name": "as_function-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/underscore/as_function.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/as_function-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.585,
+      "log": ".lake/upstream/group08/as_function-handoff.log",
+      "logSha256": "e67306fc89543a1809d073a920fbd7ec6e710f066b1f77c653a6c1533c2a7310"
+    },
+    {
+      "name": "assign_at_declaration-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_at_declaration-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.372,
+      "log": ".lake/upstream/group08/assign_at_declaration-handoff.log",
+      "logSha256": "7d95861394d5f10ef43a3d32bd8228986e59966cf9b950cce413b7fdf8040d29"
+    },
+    {
+      "name": "assign_type_info-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/constants/assign_type_info.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/assign_type_info-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 1,
+      "seconds": 3.313,
+      "log": ".lake/upstream/group08/assign_type_info-handoff.log",
+      "logSha256": "4abdb2347e9434de5552a28868367eddcbf7244e4ae9ee71a939ab103f03db11"
+    },
+    {
+      "name": "c99_scoping_activation-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/c99_scoping_activation-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.906,
+      "log": ".lake/upstream/group08/c99_scoping_activation-handoff.log",
+      "logSha256": "a41792426822caebe9b1099a7bc44347cdd1b44592e451ca02f186e295f30b40"
+    },
+    {
+      "name": "crazy_elementary_typenames_on_stack-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/crazy_elementary_typenames_on_stack-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 5.137,
+      "log": ".lake/upstream/group08/crazy_elementary_typenames_on_stack-handoff.log",
+      "logSha256": "505329b75144c18b1149ce827303500c5507f165864a408ed2e1cdb9f6f3c4d0"
+    },
+    {
+      "name": "cross_contract_types-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/cross_contract_types.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/cross_contract_types-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.291,
+      "log": ".lake/upstream/group08/cross_contract_types-handoff.log",
+      "logSha256": "6b3756b294f334c6ba83f74f846d78140370cdeba588d3e16e74312f0ddb32ae"
+    },
+    {
+      "name": "delete_local-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_local.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_local-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.156,
+      "log": ".lake/upstream/group08/delete_local-handoff.log",
+      "logSha256": "1755b06f348ed1e7e905196349a4ac6f1f7057f557896fbd1380709d937d2fda"
+    },
+    {
+      "name": "delete_locals-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/delete_locals.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/delete_locals-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.662,
+      "log": ".lake/upstream/group08/delete_locals-handoff.log",
+      "logSha256": "4e4d9d08f8c6a935b07869360ea4327c0febac4fb095b7d42b860ff3cb7501f0"
+    },
+    {
+      "name": "erc7201_param_array_string_literal-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/erc7201_param_array_string_literal-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.566,
+      "log": ".lake/upstream/group08/erc7201_param_array_string_literal-handoff.log",
+      "logSha256": "6bca7c22eb78cab60ab74e0dee1fd808b3687bacc17f4fad0c4ed0a59e7e0cd2"
+    },
+    {
+      "name": "function_modifier_library-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.463,
+      "log": ".lake/upstream/group08/function_modifier_library-handoff.log",
+      "logSha256": "607efb75c640e61568e12c1ba7f8ae478ae3bd672a69e2fb7320d2829cc474b7"
+    },
+    {
+      "name": "function_modifier_library_inheritance-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/function_modifier_library_inheritance-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.797,
+      "log": ".lake/upstream/group08/function_modifier_library_inheritance-handoff.log",
+      "logSha256": "a42f4886522946bd378fd4583db41114e8030dc52376f984d704890779d79288"
+    },
+    {
+      "name": "in_parenthesis-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/in_parenthesis-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.198,
+      "log": ".lake/upstream/group08/in_parenthesis-handoff.log",
+      "logSha256": "3ec1c28ca3c873cfc96f77ab6644b545b744b147b09e967c7e43574411fff50d"
+    },
+    {
+      "name": "keccak256_optimized-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/keccak256_optimized-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.95,
+      "log": ".lake/upstream/group08/keccak256_optimized-handoff.log",
+      "logSha256": "2d52f1eaebd923f00d0f3e0ca8aa0e653a45c2b1bc3d84417f6672cb3ee1df21"
+    },
+    {
+      "name": "mapping_local_compound_assignment-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/mapping_local_compound_assignment-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 4.796,
+      "log": ".lake/upstream/group08/mapping_local_compound_assignment-handoff.log",
+      "logSha256": "b6bacb4686236c2694c1e9ebcc28e4d440d88327db20f93cc4c9ad3a0ae5033d"
+    },
+    {
+      "name": "multiple_initializations-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/multiple_initializations-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.525,
+      "log": ".lake/upstream/group08/multiple_initializations-handoff.log",
+      "logSha256": "b2a9982205d0bbe7747ba5b6d8c6a0f6c60b62ce11c4fe21ecb2f540dcfece6d"
+    },
+    {
+      "name": "packed_storage_structs_enum-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/packed_storage_structs_enum-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 1,
+      "seconds": 3.393,
+      "log": ".lake/upstream/group08/packed_storage_structs_enum-handoff.log",
+      "logSha256": "1b6bdf3e61f404a681e723b05f69ac5e0c73abc642ba44534a772493fcc9051f"
+    },
+    {
+      "name": "state_variable_local_variable_mixture-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_local_variable_mixture-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 5.97,
+      "log": ".lake/upstream/group08/state_variable_local_variable_mixture-handoff.log",
+      "logSha256": "562b5ff6b7a82b82931647f1c2c4422de872a553cf6302fa1108576b52868532"
+    },
+    {
+      "name": "state_variable_under_contract_name-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/state_variable_under_contract_name-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.218,
+      "log": ".lake/upstream/group08/state_variable_under_contract_name-handoff.log",
+      "logSha256": "94cd1562416f36b6ad1be8e160072b527cfd9ca2db319acb9e3d1e4c90b2c3e1"
+    },
+    {
+      "name": "super_alone-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_alone.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_alone-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 2.977,
+      "log": ".lake/upstream/group08/super_alone-handoff.log",
+      "logSha256": "fcfeab033b57a8d9cbee227ce33a672add5ffccf9480505f8fad30bb3e338ffe"
+    },
+    {
+      "name": "super_parentheses-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/super_parentheses.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/super_parentheses-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 5.234,
+      "log": ".lake/upstream/group08/super_parentheses-handoff.log",
+      "logSha256": "10cb5ee12be5ea5eec1f9765a3ec9343f2889fc55beb5159a781cb3a1ae8e180"
+    },
+    {
+      "name": "typed_multi_variable_declaration-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/typed_multi_variable_declaration-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 1,
+      "seconds": 3.482,
+      "log": ".lake/upstream/group08/typed_multi_variable_declaration-handoff.log",
+      "logSha256": "39dc04d1e57326a72cd511ca85137a890acaada89e09f1e3cbbcfe2bb7fe84f2"
+    },
+    {
+      "name": "wrap_unwrap-handoff",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "run",
+        "--compiler",
+        "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+        "--filter",
+        "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
+        "--batch-size",
+        "1",
+        "--out",
+        ".lake/upstream/group08/wrap_unwrap-handoff"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.054,
+      "log": ".lake/upstream/group08/wrap_unwrap-handoff.log",
+      "logSha256": "7a9610294a08149a4b24ca87ac2bae7a5c9a2373638aa26f463065bdf36d50dd"
+    },
+    {
+      "name": "handoff-runner-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.087,
+      "log": ".lake/upstream/group08/handoff-runner-tests.log",
+      "logSha256": "8b5af66cfe1619aea421b21d477ded1394a5b47cbb98333276e35b7a64507215"
+    },
+    {
+      "name": "handoff-orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.129,
+      "log": ".lake/upstream/group08/handoff-orphans.log",
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "name": "handoff-layers",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.149,
+      "log": ".lake/upstream/group08/handoff-layers.log",
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "name": "handoff-automatic",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.057,
+      "log": ".lake/upstream/group08/handoff-automatic.log",
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "name": "handoff-testsuite-audit",
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.261,
+      "log": ".lake/upstream/group08/handoff-testsuite-audit.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "name": "handoff-full-build",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "2"
+      },
+      "exitCode": 0,
+      "seconds": 6035.157,
+      "log": ".lake/upstream/group08/handoff-full-build.log",
+      "logSha256": "77dff3ba74919e22f92b0a5f8a7ffed7dfe69f307ad3c1950e51fb032ca54336"
+    },
+    {
+      "name": "handoff-corpus-build",
+      "command": [
+        "lake",
+        "build",
+        "SolidityCorpus"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 45.124,
+      "log": ".lake/upstream/group08/handoff-corpus-build.log",
+      "logSha256": "c2d44eb283898da7e33d65d1ebef419ec288d20445e190a9f6e6a5dda7e44593"
+    },
+    {
+      "name": "handoff-corpus",
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 13.248,
+      "log": ".lake/upstream/group08/handoff-corpus.log",
+      "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+    },
+    {
+      "name": "handoff-source-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/declarations-metadata.test.mjs",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 1,
+      "seconds": 3787.667,
+      "log": ".lake/upstream/group08/handoff-source-tests.log",
+      "logSha256": "fd716f672db8940457a3e2b7eae65b00b59795b781ec395535ece9bc7ca13433"
+    },
+    {
+      "name": "handoff-runtime-recheck",
+      "command": [
+        "bash",
+        "-c",
+        "lean --version && lake --version && lake build Solidity.KeySort"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 0.309,
+      "log": ".lake/upstream/group08/handoff-runtime-recheck.log",
+      "logSha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "name": "handoff-constructors-recheck",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Solkey/Constructors.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "environment": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "seconds": 6.08,
+      "log": ".lake/upstream/group08/handoff-constructors-recheck.log",
+      "logSha256": "a635afaeaea634c965c4a06384e72b0ceee6a06df86b92b358a7b7613b33a0e4"
+    }
+  ],
+  "focusedSourceReplay": [
+    {
+      "source": "tests/solc/PushSources.sol",
+      "report": ".lake/upstream/group08/handoff-PushSources-proofs.json",
+      "reportSha256": "3cf81ae866dc59a32d864469998cd91a5b5f804962a3deaf5e11e4dc634710ad",
+      "errors": [],
+      "expectedRowsRetained": true,
+      "allExpectedStatusesMatch": true,
+      "readingsMatch": true,
+      "options": {
+        "build": false,
+        "batchSize": 3
+      },
+      "proofLimitsUnchanged": true
+    },
+    {
+      "source": "tests/solc/MemoryPush.sol",
+      "report": ".lake/upstream/group08/handoff-MemoryPush-proofs.json",
+      "reportSha256": "e1dcce9025067d051fa5df61050a141204707d79253e9a38a18d8cbc5de55a18",
+      "errors": [],
+      "expectedRowsRetained": true,
+      "allExpectedStatusesMatch": true,
+      "readingsMatch": true,
+      "options": {
+        "build": false,
+        "batchSize": 3
+      },
+      "proofLimitsUnchanged": true
+    },
+    {
+      "source": "tests/solc/StorageReturns.sol",
+      "report": ".lake/upstream/group08/handoff-StorageReturns-proofs.json",
+      "reportSha256": "7d81aca17eea507651961e428dc93dc642b8bb25d8aa6d7d19924d92c4ca2b67",
+      "errors": [],
+      "expectedRowsRetained": true,
+      "allExpectedStatusesMatch": true,
+      "readingsMatch": true,
+      "options": {
+        "build": false,
+        "batchSize": 3
+      },
+      "proofLimitsUnchanged": true
+    }
+  ],
+  "baselineSourceComparison": {
+    "commit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+    "frontendBuildLog": ".lake/upstream/group08/baseline-frontend-build.log",
+    "frontendBuildExitCode": 0,
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "--test-name-pattern=declaration metadata|Solidity source through solc|NatSpec expression|push source captures|memory push copies",
+      "scripts/declarations-metadata.test.mjs",
+      "scripts/test-solidity.test.mjs"
+    ],
+    "log": ".lake/upstream/group08/baseline-source-selected.log",
+    "exitCode": 1,
+    "seconds": 589.984506394,
+    "confirmedBaselineFailures": [
+      "error/event selector metadata unsupported",
+      "assembly excluded versus unsupported assertion",
+      "NatSpec malformed clause errors length assertion"
+    ],
+    "passedOnBase": [
+      "PushSources",
+      "MemoryPush"
+    ],
+    "meaning": "Three assertions fail on the exact base; both push tests pass on base and also pass all expected statuses in focused unchanged-patch replays. Broad-suite failures remain recorded separately.",
+    "logSha256": "09743f2412ae1450f199a84ab265b2e26b7aa1e0ee2e0a1b87e1432e773a114e"
+  },
+  "baselineDocumentationFailure": {
+    "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+    "missingReferences": [
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Foundations/Logic/InferenceSystem.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Foundations/Logic/LogicalEquivalence.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Foundations/Syntax/Congruence.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Foundations/Syntax/Context.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Logics/Propositional/Defs.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Bridge/vendor/CslibBackport/VENDOR.md",
+        "reference": "Cslib/Logics/Propositional/NaturalDeduction/Basic.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "Solidity/Eqns.lean",
+        "reference": "Mathlib/Tactic/Eqns.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "Main.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "Widget.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "lakefile.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "test/basic.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "test/subscript.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      },
+      {
+        "source": "vendor/LeanTeX/VENDOR.md",
+        "reference": "test/widget_basic.lean",
+        "sourceUnchanged": true,
+        "absentOnBase": true
+      }
+    ],
+    "conclusion": "All 13 missing references are unchanged baseline failures."
+  },
+  "supersededRuns": [
+    {
+      "log": ".lake/upstream/group08/sealed-full-build.log",
+      "status": "failed obsolete Constructors warning-only pin, replaced by explicit-refusal regression; use final full-build result"
+    },
+    {
+      "log": ".lake/upstream/group08/sealed-corpus-build.log",
+      "status": "Derived17 exit 137 resource block; use final single-worker retry result"
+    },
+    {
+      "log": ".lake/upstream/group08/handoff-constructors.log",
+      "status": "precheck exit 3: stale SurfaceNotation dependency; full-build Constructors module success supersedes; no Lean error claimed"
+    }
+  ],
+  "additionalBaselineSourceComparison": {
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "--test-name-pattern=bytesN, bytes|full frozen TestSuite|reference parameters preserve|quantified consequents",
+      "scripts/test-solidity.test.mjs"
+    ],
+    "log": ".lake/upstream/group08/baseline-source-additional.log",
+    "exitCode": 1,
+    "seconds": 284.345472989,
+    "failuresOnExactBase": [
+      "Bytes.indexOutOfRange pending versus proved",
+      "modern full-source frozen TestSuite recursion/code-generation resource limit",
+      "ReferenceParameters.copiesBeforeEffects proved versus pending",
+      "SpecImport omitted-body excluded versus unsupported"
+    ],
+    "proofLimitsUnchanged": true,
+    "logSha256": "c3b8843e981b7e937127a724197823105af1874f1b357dd45f1a50744a4e0f96"
+  },
+  "openPortsBaselineComparison": {
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "--test-name-pattern=solkey.s solc/open ports",
+      "scripts/test-solidity.test.mjs"
+    ],
+    "log": ".lake/upstream/group08/baseline-source-open-ports.log",
+    "exitCode": 1,
+    "seconds": 272.107815283,
+    "failureOnExactBase": "tryArgumentSideEffect pending versus proved",
+    "logSha256": "86f3d91b29dcbc93a3963c831d305db817e27f7d4db3f764156323d8309d941c"
+  },
+  "specBindingsBaselineComparison": {
+    "command": [
+      "node",
+      "--test",
+      "--test-isolation=none",
+      "--test-name-pattern=specification parameter renaming",
+      "scripts/test-solidity.test.mjs"
+    ],
+    "log": ".lake/upstream/group08/baseline-source-spec-bindings.log",
+    "exitCode": 1,
+    "failureOnExactBase": "tryScopeExit pending versus proved",
+    "seconds": 57.046891823,
+    "logSha256": "966eab6e39f6b32fc2ec21ddc060448efc297d857e96bd60e534c659efb93545"
+  },
+  "sourceSuiteClassification": {
+    "passedTests": 46,
+    "failedTests": 15,
+    "baselineFailures": 9,
+    "processFailuresExit135": 3,
+    "processFailureRetry": "All 36 expected PushSources/MemoryPush/StorageReturns rows and clean readings pass focused unchanged-model replays. Original process failures retained, not counted as passes.",
+    "timeouts": {
+      "count": 3,
+      "timeoutMs": 300000,
+      "sources": [
+        "Calldata.sol",
+        "Hashing.sol",
+        "RevertData.sol"
+      ],
+      "status": "resource blocked/inconclusive; no proof limit increase"
+    },
+    "overallSuitePassed": false
+  },
+  "proofBoundary": {
+    "newAxioms": 0,
+    "newSorry": 0,
+    "raisedProofLimits": false,
+    "universalCompilerEquivalenceClaimed": false,
+    "localDeleteAndSnapshotAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "mappingMetadataAxioms": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "readOnlyReview": {
+    "finder": "complete; no Lean workers; audited implementation and all 23 exact fixtures, report hashes and retained observations",
+    "independentSkeptic": "complete; no Lean workers; confirmed findings fixed; final evidence audit passed"
+  },
+  "remainingAssignedGaps": [
+    "constants/assign_type_info.sol: compiler static creation/runtime bytecode constants",
+    "storage/packed_storage_structs_enum.sol: enum members in struct dependency resolution",
+    "various/typed_multi_variable_declaration.sol: mixed multi-return storage reference frame"
+  ],
+  "fixtureCounts": {
+    "working": 20,
+    "broken": 3,
+    "blocked": 0,
+    "alreadyFixed": 0,
+    "expectedExclusions": 0
+  },
+  "modelSha256": "85a5997f85830ba8411aebf339c313668060eea14a36ee032db895a01a6839a7",
+  "environmentConnectionEvent": "A transient unavailable notification occurred; environment_status reported the same connected managed ID and shell verified original source-suite process survived. Concrete runtime gate rechecked successfully."
+}
