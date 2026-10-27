@@ -583,3 +583,133 @@ issues were fixed and covered by positive/negative controls. The remaining
 intrinsic scope is explicit: exact machine-resource failures and dirty scalar
 Yul local-word/cleanup semantics. Reference agreement does not claim those Lean
 features or a universal compiler/model correspondence theorem.
+
+### Recursive operator diagnosis after be1e471f (2026-10-27)
+
+This investigation retains the existing branch, five commits, all previous
+reports, and both previous patch exports. The same connected managed executor
+runs Lean 4.24.0 / Lake 5.0.0; the cached KeySort gate passed. No Lean MCP is
+exposed, so per-file checks use the activated executor and `--tstack=131072`.
+There is **no new Lean fixture pass**: ten fixtures remain working, three remain
+assembly exclusions, and the recursive fixture remains blocked. Reference EVM
+coverage stays separate. The large UDVT retry, Decision and completed broad
+gates were not repeated.
+
+The exact entry in `group03-continuation.json`, the earlier preserved reports,
+and a new exact-filter rerun agree on required pipelines: legacy and viaIR.
+Both current imports elaborate both public functions with no gaps. There is
+**no raw Lean exception** in the current run: the error is the interpreter
+outcome `.error .exhausted`, which replay reports as
+“execution reached a model resource bound (including recursive unrolling); not
+an EVM failure”. Each full sequence retains its first two successful unary
+observations and blocks at the unchanged third vector,
+`testUnary(uint256): 99999999999 -> FAILURE`.
+
+The exhausted stage is **typed interpreter execution of the recursive bottom
+frame**, not import dependency expansion, operator/call lowering, Lean elaborator
+recursion, decision computation, or the loop-fuel limit. The immutable numeric
+bounds are `recDepth = 1024`, replay loop fuel 1000 and fixture process cap
+120000 ms. Neither heartbeat nor any other proof/resource limit changed.
+
+The SHA-checked compiler's original AST identifies nominal `Uint#3`, pure free
+functions `unaryCountdown#42`, `binaryCountdown#97`, `eq#119`, and public wrappers
+`testUnary#132` / `testBinary#149`. Unary operator nodes 129 and 39 target 42;
+binary nodes 146, 81 and 94 target 97; equality nodes 23, 59, 65 and 78 target
+119. Thus the cycles are 42 → 42 and 97 → 97, with nonrecursive equality 119.
+`Contract.callees` includes the resolved operator ID; its bounded `reach` stops
+path cycles. `Body.expr` lowers that ID through the existing name map to an
+ordinary function call. `isRecursiveC` recognizes those self-cycles.
+
+`Arms.elabCallRet` checks one frame, then constructs the already-lazy
+`recUnroll Prog.recBase step recDepth`. Recursive calls hold the next frame
+behind a typed thunk (`RecFrame` / `Stmt.callRec`); quoting does not eagerly
+expand 1024 bodies. `Prog.recBase` is `assumeFalse`, and `runF` / its compiled
+twin map it to exhaustion. `TRun.call` propagates that error. The `callRec`
+depth annotation is read by quotation, not runtime machine stack accounting.
+The new [kernel controls](../../tests/upstream/RecursionResource.lean) prove
+bottom exhaustion for every typed state and loop-fuel value, distinguish it
+from revert, and pin recursive/ordinary call equality and depth-label
+irrelevance. All four axiom sets contain only `propext`, `Classical.choice`,
+`Quot.sound`; they prove no EVM stack-overflow claim.
+
+For a direct comparison, an isolated diagnostic source removes the using
+directive and replaces every alias with its explicit resolved free-function
+call. It keeps nominal Uint, guards, checked subtraction, operands, returns,
+and wrappers. Both sources are compiled with the same pinned compiler in both
+pipelines and imported through the normal frontend. All four models import
+both wrappers successfully. Each full sequence is blocked at the same third
+vector. Separately, all eight original vectors are retained and run individually
+for each model: statuses are working, working, blocked, working, working,
+working, working, blocked. All six successful results are zero. These **32
+individual diagnostics are not sequential fixture passes**; the fixture is
+pure, so they isolate the binary obstruction without claiming to bypass the
+blocked unary call. No observation is removed from the full rerun's input.
+
+This comparison rules out an operator-specific cycle, wrong overload, missing
+nominal identity or accidental eager host recursion as the cause of this
+failure. Memoization can reduce elaboration work but cannot change the abstract
+bottom's meaning; unary recursion also visits a different argument each time.
+The unary input needs 100,000,000,000 countdown-function frames to reach zero
+in an unbounded source evaluation. A closed-form return-zero proof would not
+establish the expected machine failure. Existing `RecContract.base` accepts
+exhaustion under both modalities, so a recursive source contract cannot provide
+that runtime observation either.
+
+A safe Lean pass requires additional **machine-resource semantics and a checked
+connection to the compiled execution** (or Lean execution of the relevant
+bytecode). The present `Evm.Machine` explicitly has no gas or stack-depth limit;
+`Evm.Compile.inFrag` returns none for `callRec`, and `Evm.Correct` marks it
+outside the simulation fragment. There is no typed stack-word accounting for
+these pipeline-specific compiled frames or proof that a chosen source-unrolling
+bottom is that concrete machine failure. The existing typed machinery safely
+represents recursive source execution and inconclusive truncation; it cannot
+safely manufacture the expected stack-overflow observation. Adding a distinct
+machine halt and the corresponding accounting/correspondence proofs is new
+semantic infrastructure, rather than an alias-lowering repair. No representation
+refactor was undertaken. History was inspected: `1a7d5b0e` introduced shared
+callee elaboration for size/checking costs; that infrastructure remains intact.
+
+Exact commands (after activation):
+
+```sh
+node scripts/solidity-upstream.mjs verify
+node scripts/solidity-upstream.mjs run --compiler /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter test/libsolidity/semanticTests/operators/userDefined/recursive_operator.sol --batch-size 1 --out .lake/upstream/group03-recursion-trace/exact
+node .lake/upstream/group03-recursion-trace/prepare.mjs
+LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Trace.lean
+LEAN_NUM_THREADS=1 lake env lean --tstack=131072 .lake/upstream/group03-recursion-trace/Graph.lean
+LEAN_NUM_THREADS=1 lake env lean --tstack=131072 tests/upstream/RecursionResource.lean
+LEAN_NUM_THREADS=1 lake env lean --tstack=131072 tests/upstream/Replay.lean
+node --test --test-isolation=none scripts/solidity-upstream.test.mjs
+node scripts/check-automatic.mjs --strict
+node scripts/check-orphans.mjs
+node scripts/check-layers.mjs
+```
+
+The exact fixture command exits 1 for its blocked result; it did not timeout.
+The diagnostic generator's two initial setup errors (missing optimizer-runs
+provenance and a namespace whose final component was not original contract C)
+are preserved as failed logs, then corrected. The actual source comparison and
+kernel/replay checks pass. All 14 runner tests pass; strict automation remains
+491 automatic, 61 budgeted, 11 refuted, zero pending. Reachability remains 667
+reachable / zero orphans; layering remains 143 core modules / no frontend reach.
+The documentation-path audit retains the same nineteen missing-reference lines
+as the preserved baseline; no new missing path. At most two Lean processes ran,
+with no Lean workers opened by reviewers.
+
+No model, runner or previously checked source was modified; the model hash is
+still `8c57f8874c6370ce6824a34ce9b47de18f8dcb3ef75dc547adb91e3e208ddaa4`.
+The completed default library, Decision, TestSuite, frozen sort and corpus gates
+above remain applicable and are deliberately reused. No historical source,
+expectation, archive, result or previous evidence file changed. The new evidence
+[group03-recursion-trace.json](../../tests/upstream/group03-recursion-trace.json)
+retains exact reports, all eight input vectors, all 32 individual diagnostics,
+source/compiler/model/AST hashes, diagnostic source/generator, kernel axiom
+output, commands and check logs.
+
+Independent read-only finder and skeptic reviews both traced the declarations,
+ordinary-call comparison and machine-fragment boundary without opening Lean
+workers. Neither found a safe local operator repair or a confirmed issue in the
+controls. The skeptic specifically checked that the 32 independently initialized
+diagnostics are not counted as full-sequence success. The remaining scope is
+concrete machine-resource semantics/correspondence for the two failure vectors;
+this milestone records diagnosis and controls, **not full Lean repair**.
