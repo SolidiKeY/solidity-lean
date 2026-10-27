@@ -20,13 +20,15 @@ is.
 | [Calls and exceptions](calls-exceptions.md) | eager error/event operands, exact self-call panic and catch data, fixed-byte error words | named or qualified emits, callback catches |
 | [Proof automation](../automation.md#guarded-symmetric-cancellation) | guarded symmetric cancellation `(a + b) - a` | the broader items of [automation.md](../automation.md) |
 
-## Cloud tasks 01–09
+## Cloud tasks 01–10
 
-[The combined integration record](cloud-integration-01-09.md) records the nine
-committed cloud snapshots, cross-lane fixes, current verification and remaining
-source exclusions. Task 10 and task 06's uncommitted recursive-storage migration
-are not included. Its combined validation status takes precedence over retained
-per-lane build reports when assessing this integration.
+[The 01–09 integration record](cloud-integration-01-09.md) covers the first nine
+committed snapshots and their cross-lane fixes. [Task 10's integration record](cloud-integration-10.md)
+adds raw ABI vector adaptation, exact failure observations, named error operands
+and typed aggregate custom errors, with its own bounded validation and remaining
+exclusions. The uncommitted recursive-storage migration is not included.
+Use these combined records ahead of retained per-lane reports; neither claims
+that every source fixture now passes.
 
 ## Cross-cutting decisions
 

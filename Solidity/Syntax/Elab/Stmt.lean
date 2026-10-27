@@ -104,7 +104,10 @@ checks its narrow width after the write (`narrowPost`). -/
 partial def hoistTop (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e ← e.foldConst
   match e with
-  | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
+  | .binop op a b =>
+    if op.shortCircuits || (op == .pow && (← read).retainFailureData) then
+      hoist (.binop op a b)
+    else hoistBinop op a b
   | .unop op a => do
     let (P, a) ← hoist a
     pure (P, .unop op a)
@@ -293,7 +296,7 @@ partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var 
     -- A self-call transports exact bytes, so Panic(0x51) is independent
     -- of the transaction oracle's fallback code for an unclassified panic.
     let mut disp : Stmt C Γ.ctx Γ.ctx :=
-      if (← read).selfFrame then .revertData [.bytes (Semantics.encodePanic 0x51)]
+      if (← read).selfFrame || (← read).retainFailureData then .revertData [.bytes (Semantics.encodePanic 0x51)]
       else .revert
     for (g, t) in cands.reverse do
       let c ← checkIn C Γ .bool (.binop .eqB (.name h) (.num t))
@@ -324,7 +327,7 @@ partial def fnMemoryDispatch (h : RawExpr) (ty : String) (args : List RawExpr) :
   let tag := toString (← freshCapture "se")
   let dst := toString (← freshCapture "mv")
   let P ← elabStmtsP [.decl (.named ty) tag (some h), .declMemory (.named "bytes") dst none]
-  let failure := if (← read).selfFrame then
+  let failure := if (← read).selfFrame || (← read).retainFailureData then
       RawStmt.revertRaw (.bytesLit ((Semantics.encodePanic 0x51).map UInt8.toNat)) else RawStmt.revert
   let dispatch := cands.foldr (fun (g, t) rest =>
     RawStmt.ite (.binop .eqB (.name tag) (.num t))

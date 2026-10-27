@@ -122,6 +122,35 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       pure (P ++ Q, .index e k)
     else pure (P, .index e k)
   | .binop op a b => do
+    let sc ← read
+    if op == .pow && sc.retainFailureData && !sc.unchecked && sc.overflow.isNone then
+      if (intTyOf C (← ctx) a).all (fun (p, _) => p == .uint) then
+        let n := widthIn C (← ctx) a
+        -- Capture BOTH operands before the zero/one shortcuts. The legacy
+        -- binary schedule is right-to-left; IR is left-to-right.
+        let (P, values) ← eagerArgsWith C hoist
+          (if C.evalOrder.binaryLeftToRight then [a, b] else [b, a])
+          (expected := [some .uint, some .uint])
+        let [first, last] := values | throw "power operand capture changed arity"
+        let (a, b) := if C.evalOrder.binaryLeftToRight then (first, last) else (last, first)
+        let r := toString (← freshCapture "se")
+        let i := toString (← freshCapture "se")
+        let fail : RawStmt := .revertRaw (.bytesLit
+          ((Semantics.encodePanic 0x11).map UInt8.toNat))
+        -- For a >= 2, exponent >= 256 always overflows uint256. Otherwise
+        -- at most255 multiplications suffice; existing typed guards report
+        -- the first overflowing multiplication, including narrow widths.
+        let body : List RawStmt := [
+          .decl (.named (tyName .uint n)) r (some (.num 1)),
+          .ite (.binop .le a (.num 1))
+            [.assign (.name r) (.ternary (.binop .eqB b (.num 0)) (.num 1) a)]
+            [.ite (.binop .lt b (.num 256)) [] [fail],
+             .decl (.named "uint") i (some (.num 0)),
+             .whileLoop {} (.binop .lt (.name i) b)
+               [.assign (.name r) (.binop .mul (.name r) a),
+                .assign (.name i) (.binop .add (.name i) (.num 1))]]]
+        let Q ← elabStmtsP body
+        return (P ++ Q, .name r)
     if op.shortCircuits then
       let (P, a) ← hoist a
       if b.hasCall || b.hasIncDec || hasNarrow C (← ctx) b then
@@ -304,7 +333,9 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     let guard ← checkIn C Γ .bool (.binop .neB k (.num 0))
     let (Q, args) ← hoistArgs [b, a]
     let [b, a] := args | throw "internal: modular argument capture changed arity"
-    pure (P ++ Pc ++ [.of Γ (.require guard)] ++ Q, .modular op a b k)
+    let sc ← read
+    let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x12 guard else .require guard
+    pure (P ++ Pc ++ [.of Γ check] ++ Q, .modular op a b k)
   | .newArr T n => do
     let (P, n) ← hoist n
     let ⟨R, hR⟩ ← elabNewTy C T
@@ -1031,6 +1062,12 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
         pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
+  -- Instrument only the external entry's source body, not the adapter's ABI
+  -- decoder or encoder. Nested bodies are traversed here once; their scopes
+  -- have top=false. Exact-data lowering never changes the caller environment.
+  let sc ← read
+  let call := if sc.retainFailureData && sc.top then
+    { call with s := call.s.withPanics } else call
   -- after a repeated callee, the caller's numbering goes on from where it was
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 
@@ -1242,7 +1279,8 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
   -- custom errors (`revert E(a)`, `require(c, E(a))`): their data only where
   -- a `try` reads it, as `revertMsg`'s
-  let self := (← read).selfFrame
+  let sc ← read
+  let self := sc.selfFrame || sc.retainFailureData
   -- Apply implicit byte widening before fnPure/bytesPure erase source widths.
   -- Both require branches evaluate operands at the custom error's types,
   -- including a discarded fixed-byte literal (which is not a memory value).
@@ -1258,8 +1296,6 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
     | .requireErr c e args => pure (.requireErr c e (← errorArgs e args))
     | s => pure s
   let s ← match s with
-    | .revertErr _ args =>
-      pure (if self then s else .block [.eval args, .revert])
     | .requireErr c e args => do
       if (lookupBy e C.errors).isNone then
         pure (RawStmt.requireReason c (.call e args))
@@ -1437,6 +1473,15 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
     | .call (.name f) as => pure [(RawExpr.call f as, whole)]
     | .pushOpAssign _ b r => pure [(b, true), (r, whole)]
     | .pushIncDec _ b => pure [(b, true)]
+    | .revertErr e args => do
+      let some d := lookupBy e C.errors | throw s!"unknown custom error {e}"
+      unless d.params.length == args.length do throw "custom error arity mismatch"
+      (d.params.zip args).mapM fun ((n, T), a) => do
+        match T with
+        | .ref _ =>
+          ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
+          pure (a, true)
+        | .prim _ => pure (a, false)
     | .revertReason m | .revertRaw m => do
       ElabM.lift (shapeCheck C Γ dynBytesRows m)
       pure [(m, true)]
@@ -1816,21 +1861,21 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
   | .assert c => do
     let Γ ← nctx
     -- in a self-call's callee, where a `catch` reads it: `Panic(0x01)`'s data
-    if (← read).selfFrame then
+    if (← read).selfFrame || (← read).retainFailureData then
       return [.of Γ (.ite (← checkIn C Γ .bool c) .nil
         (.cons (.revertData [.bytes (Semantics.encodePanic 1)]) .nil))]
     pure [.of Γ (.assert (← checkIn C Γ .bool c))]
   | .revert => do pure [.of (← nctx) .revert]
   -- revert data, where a `try` reads it: in a self-call's callee
   | .revertMsg m => do
-    if (← read).selfFrame then
+    if (← read).selfFrame || (← read).retainFailureData then
       pure [.of (← nctx) (.revertData [.bytes (Semantics.encodeError m.toUTF8.toList)])]
     else pure [.of (← nctx) .revert]
   | .revertReason m => memoryRevert .reason m
   | .revertRaw d => memoryRevert .raw d
   | .requireReason c m => elabStmt1 (.ite c [] [.revertReason m])
   | .requireMsg c m => do
-    if (← read).selfFrame then elabStmt1 (.ite c [] [.revertMsg m])
+    if (← read).selfFrame || (← read).retainFailureData then elabStmt1 (.ite c [] [.revertMsg m])
     else elabStmt1 (.require c)
   -- `revert E(a, b)`: `E`'s selector, folded as solc folds it
   -- (`errorSignature?`), then each argument's ABI word (a literal's folded)
@@ -1841,8 +1886,34 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       d.params.map fun (_, T) => match T with | .prim p => some p | _ => none).getD []
     let (P, args) ← eagerArgsWith C rc.hoist args (expected := expected)
     let Γ ← nctx
-    if (← read).selfFrame then
-      pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
+    if (← read).selfFrame || (← read).retainFailureData then
+      let some (d, sig) := errorSignature? C e | throw s!"unknown custom error {e}"
+      if d.params.any (fun (_, T) => T matches .ref _) then
+        unless d.params.length == args.length do throw "custom error arity mismatch"
+        let marks ← d.params.zip args |>.mapM fun ((n, T), a) => do
+          match T with
+          | .prim p => pure (some (AbiKind.ofValue p d.widths n))
+          | .ref R =>
+            let ws := shapeUnder d.widths n
+            unless !errorAbiHasEnum (.ref R) ws "" && (AbiTy.of (.ref R) ws "").isSome do
+              throw s!"`{e}`: a custom error's reference type is not ABI-encodable"
+            if a.bytesLit?.isSome then
+              unless R == bytesR && lookupBy (n ++ "[]#bytes") d.widths == some 1 do
+                throw s!"`{e}`: a byte literal needs a bytes/string error parameter"
+            else
+              match synth C (← nctx) a with
+              | .ok (.mpath (.ref S) _) | .ok (.path (.ref S) _) =>
+                unless S == R do throw s!"`{e}`: custom error reference type mismatch"
+              | _ => throw s!"`{e}`: custom error argument is not a reference place"
+              ElabM.lift (shapeCheck C (← ctx) ws a)
+            -- Retain the actual place and its location. The existing encoder
+            -- reads references only after all operands have been evaluated.
+            -- No primitive mark may erase an aggregate's recursive ABI type.
+            pure none
+        let (Q, bytes) ← rc.abiEncode true false args marks (some (.num (Semantics.customSelector sig).toNat))
+        let R ← memoryRevert .raw bytes
+        pure (P ++ Q ++ R)
+      else pure (P ++ [.of Γ (.revertData (← revertErrParts C Γ e args))])
     else pure (P ++ [.of Γ .revert])
   | .requireErr c _ args => elabStmt1 (RawStmt.requireWith c args)
   | .assumeFalse => do pure [.of (← nctx) .assumeFalse]
@@ -1857,7 +1928,8 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       else throw "`checked { … }` and `ignoringOverflow { … }` do not nest in each other"
     | none =>
       let P ← withReader (fun sc => { sc with overflow := some o }) (elabBranch ss)
-      let sf := (← read).selfFrame
+      let sc ← read
+      let sf := sc.selfFrame || sc.retainFailureData
       pure (P.flatMap (SStmt.withOF o sf))
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`

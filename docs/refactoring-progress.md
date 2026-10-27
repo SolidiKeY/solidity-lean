@@ -56,8 +56,9 @@ audit and its `solidityProgramRules.key` for `SOLKEY_RULES`; the sibling checkou
 has drifted from this fixture. These passing checks are not a theorem of
 compiler/extractor equivalence. Source refusals and unsupported boundaries remain.
 
-The documentation refresh checked local links, heading anchors and Lean-file
-citations across all 71 tracked Markdown files without findings. The feature
+The local documentation audit after integrating cloud task 10 checked links,
+heading anchors and Lean-file citations across all 72 tracked Markdown files
+without findings. The feature
 manifest, generated report and Lean catalog pass the generation-consistency
 check; the catalog's per-file error diagnostics also pass. Five stale `missing`
 assessments now describe bounded partial support with evidence; ordinary
@@ -66,7 +67,8 @@ were not changed.
 Read-only finder and skeptic reviews confirmed those bounded assessments and
 corrected operator wording to distinguish symbols from unary/binary signatures.
 
-The whole-repository prose checker still reports seven missing references:
+At documentation-refresh snapshot `b5e6438d`, the whole-repository prose
+checker reported seven missing references:
 six in an archived validation JSON record and one upstream Mathlib citation in
 a Lean source comment. These are outside the current Markdown documents and
 were not rewritten to alter historical evidence.

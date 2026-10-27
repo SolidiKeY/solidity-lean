@@ -533,36 +533,13 @@ private def callsLeftOut? (bad : List (String × String)) (calls : List String) 
   calls.findSome? fun g =>
     (Semantics.lookupBy g bad).map fun m => s!"it calls `{g}`, which is left out: {m}"
 
-@[command_elab solcImport]
-def elabSolcImport : CommandElab := fun stx => do
-  let ref := stx
-  let path : String := stx[1].isStrLit?.getD ""
-  let expected : Nat := stx[3].isNatLit?.getD 0
-  let N : Lean.Name := stx[5].getId
-  let ren : List (String × String) :=
-    if stx[6].getNumArgs > 0 then
-      stx[6][1].getSepArgs.toList.map fun p => ((p[0].getId.toString false), (p[2].getId.toString false))
-    else []
-  let file := System.FilePath.mk (← getFileName)
-  let fixture := (file.parent.getD ".") / path
-  let bytes ← IO.FS.readBinFile fixture
-  let h := fnv1a64 bytes
-  unless h.toNat == expected do
-    throwError "{path} has the hash {hex16 h}, not the one named: \
-      re-run scripts/solc-ast.mjs, which rewrites the literal"
-  let some text := String.fromUTF8? bytes | throwError "{path} is not UTF-8"
-  let j ← ofExcept (Json.parse text)
-  let ast ← ofExcept (j.getObjVal? "ast")
-  let provenance ← ofExcept (Source.read j ast)
-  let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
-  let source := ((j.getObjVal? "header").toOption.bind fun hd =>
-    (hd.getObjValAs? String "source").toOption).getD "?"
-  let srcName := (System.FilePath.mk source).fileName.getD source
-  let env ← getEnv
-  -- Quotation names are not semantic specification bindings.
-  let sourceNames := (J.nodes ast).filterMap (J.str? · "name")
-    |>.flatMap (·.splitOn ".") |>.eraseDups
-  let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone)
+/-- Keep source admission setup separate from command generation. -/
+private def readImportedContract (ast : Json) (name : String)
+    (ren : List (String × String)) (testing entrypoints : Bool)
+    (env : Environment) (sourceNames : List String) (provenance : Source.Provenance)
+    (compilerCode : List (Int × (String × String))) (namedErrorSourceOrder : Bool) :
+    Except String SolcContract :=
+  readContract ast name ren testing
     (rewriteSpecBindings env sourceNames) (rewriteLoopBindings env sourceNames)
     (if provenance.legacyFixture then fun _ => default else fun request =>
       (Admission.scan ast provenance { request with
@@ -573,22 +550,18 @@ def elabSolcImport : CommandElab := fun stx => do
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
         specifications := [(bound, "/// @custom:key " ++ text)] })
-    (readsSpecification env sourceNames) (!stx[9].isNone)
-    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode)
-  let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
-    (Parser.runParserCategory env cat s).map (atRef ref)
-  if !stx[7].isNone then
-    -- A clause must parse alone. Otherwise `ensures false; requires false`
-    -- could inject a second member and turn a failing specification vacuous.
-    for m in c.members do
-      let _ ← ofExcept (parse `sol_member m)
-    for f in c.funs ++ c.ctor.toList do
-      -- A refused body contributes no member or specification. Keep its
-      -- unsupported row local, even when its unimported clause needs a
-      -- renamed parameter (such as Solidity's `from`).
-      if let .ok _ := f.body then
-        for (kind, text) in f.specClauses do
-          let _ ← ofExcept (parse `sol_member s!"{kind} {text};")
+    (readsSpecification env sourceNames) entrypoints
+    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode namedErrorSourceOrder
+
+private structure ImportedMembers where
+  members : List String
+  bad : List (String × String)
+  ctorRow : Option ImportRow
+  ctorMember : Option String
+
+/-- Validate shared helper declarations and deployment before generating rows. -/
+private def prepareImportedMembers (c : SolcContract) (srcName : String)
+    (parse : Lean.Name → String → Except String Syntax) : CommandElabM ImportedMembers := do
   -- the functions called, each checked alone first: one that does not
   -- expand is left out, with every function that calls it
   -- A malformed unused modifier must not enter every function's wrapper.
@@ -656,6 +629,69 @@ def elabSolcImport : CommandElab := fun stx => do
         line := 0, tag := .diamond, params := [], body := .ok [] }
       ctorRow := some (.ofFun f .unsupported
         (at_ f 0 s!"the contract with its initializers: {e}"))
+  pure { members := memberList, bad := badMembers, ctorRow, ctorMember }
+
+@[command_elab solcImport]
+def elabSolcImport : CommandElab := fun stx => do
+  let ref := stx
+  let path : String := stx[1].isStrLit?.getD ""
+  let expected : Nat := stx[3].isNatLit?.getD 0
+  let N : Lean.Name := stx[5].getId
+  let ren : List (String × String) :=
+    if stx[6].getNumArgs > 0 then
+      stx[6][1].getSepArgs.toList.map fun p => ((p[0].getId.toString false), (p[2].getId.toString false))
+    else []
+  let file := System.FilePath.mk (← getFileName)
+  let fixture := (file.parent.getD ".") / path
+  let bytes ← IO.FS.readBinFile fixture
+  let h := fnv1a64 bytes
+  unless h.toNat == expected do
+    throwError "{path} has the hash {hex16 h}, not the one named: \
+      re-run scripts/solc-ast.mjs, which rewrites the literal"
+  let some text := String.fromUTF8? bytes | throwError "{path} is not UTF-8"
+  let j ← ofExcept (Json.parse text)
+  let ast ← ofExcept (j.getObjVal? "ast")
+  let provenance ← ofExcept (Source.read j ast)
+  let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
+  let source := ((j.getObjVal? "header").toOption.bind fun hd =>
+    (hd.getObjValAs? String "source").toOption).getD "?"
+  let srcName := (System.FilePath.mk source).fileName.getD source
+  let env ← getEnv
+  -- Quotation names are not semantic specification bindings.
+  let sourceNames := (J.nodes ast).filterMap (J.str? · "name")
+    |>.flatMap (·.splitOn ".") |>.eraseDups
+  let legacyOrderOverride : Option EvalOrder ←
+    if provenance.legacyFixture && !stx[8].isNone then
+      liftTermElabM do
+        let t ← Term.elabTermEnsuringType stx[8][1] (mkConst ``EvalOrder)
+        let v ← unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t
+        pure (some v)
+    else pure none
+  let namedErrorSourceOrder := (legacyOrderOverride.map (·.binaryLeftToRight)).getD
+    (provenance.pipeline == some .viaIR)
+  let c ← ofExcept (readImportedContract ast N.getString! ren (!stx[7].isNone)
+    (!stx[9].isNone) env sourceNames provenance compilerCode namedErrorSourceOrder)
+  let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
+    (Parser.runParserCategory env cat s).map (atRef ref)
+  if !stx[7].isNone then
+    -- A clause must parse alone. Otherwise `ensures false; requires false`
+    -- could inject a second member and turn a failing specification vacuous.
+    for m in c.members do
+      let _ ← ofExcept (parse `sol_member m)
+    for f in c.funs ++ c.ctor.toList do
+      -- A refused body contributes no member or specification. Keep its
+      -- unsupported row local, even when its unimported clause needs a
+      -- renamed parameter (such as Solidity's `from`).
+      if let .ok _ := f.body then
+        for (kind, text) in f.specClauses do
+          let _ ← ofExcept (parse `sol_member s!"{kind} {text};")
+  let prepared ← prepareImportedMembers c srcName parse
+  let memberList := prepared.members
+  let badMembers := prepared.bad
+  let mut ctorRow := prepared.ctorRow
+  let ctorMember := prepared.ctorMember
+  let at_ (f : SolcFun) (line : Nat) (msg : String) : String :=
+    s!"{srcName}:{if line == 0 then f.line else line}: {msg}"
   let ctStx ← ofExcept (parse `term (contractText memberList))
   let ctStx ← if c.internalFuns.isEmpty then pure ctStx else
     let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)
@@ -676,8 +712,12 @@ def elabSolcImport : CommandElab := fun stx => do
       pure name
     liftTermElabM <| `(attachSourceDeclarations $(⟨ctStx⟩) $(mkIdent metadataName))
   let ctStx ← if provenance.legacyFixture then
-      if stx[8].isNone then pure ctStx else
-        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $(⟨stx[8][1]⟩) } : Contract))
+      match legacyOrderOverride with
+      | none => pure ctStx
+      | some order => do
+        let eo ← liftTermElabM <| `(Solidity.EvalOrder.mk
+          $(quote order.binaryLeftToRight) $(quote order.modularLeftToRight) $(quote order.modifierFrames))
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := $eo } : Contract))
     else do
       unless stx[8].isNone do
         throwError "modern source imports take evaluation order from their compiler provenance"

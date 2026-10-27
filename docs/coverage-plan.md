@@ -33,11 +33,12 @@ aggregate ABI vectors, 85 revert data and panic codes, 77 gas expectations
 noncanonical calldata, the rest EVM-version constraints and harness
 settings.
 
-Cloud groups 01–09 have been integrated; the
-[combined record](feature-work/cloud-integration-01-09.md) identifies their
-committed scope and remaining exclusions. Group 10 and the uncommitted
-recursive-storage migration are not included. Each new step first reproduces
-its assigned rows on current master, so it targets what those patches left.
+Cloud groups 01–10 have been integrated. The
+[01–09 record](feature-work/cloud-integration-01-09.md) and
+[task 10 record](feature-work/cloud-integration-10.md) identify their committed
+scope, validation and remaining exclusions. The uncommitted recursive-storage
+migration is not included. Each new step first reproduces its assigned rows on
+current master, so it targets what those patches left.
 
 ## Rules every step follows
 

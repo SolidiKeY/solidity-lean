@@ -741,7 +741,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     (readsSpec : String → String → List String → String → Except String Bool :=
       fun name _ bound text => .ok (!bound.contains name && specReadsName name (specTokens text)))
     (entrypoints : Bool := false) (viaIR : Bool := false)
-    (compilerCode : List (Int × (String × String)) := []) :
+    (compilerCode : List (Int × (String × String)) := [])
+    (namedErrorSourceOrder : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -1271,7 +1272,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let (specConstants, scopeConstBlocked) :=
       specConstantScope units scopeNodes (declarationOwner units d)
     let localNames := J.varDeclNames (J.nodes d)
-    { declarations, storageTuples, compilerCode,
+    { declarations, storageTuples, compilerCode, namedErrorSourceOrder,
       returnStorageIndex := ((J.id? d).bind (lookupBy · storageTuples)).map (·.index),
       selectorHelpers, externalNames, getterGaps, names, staticNames, baseContracts, superNames := superNamesOf d, dropped, structs := S,
       funParams, constants, enumValues, enumBounds, enumNativeNames, enumCarriers, enumDecodeTypes, valueTypes, freeFunctions, libraries,
@@ -1516,7 +1517,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
-  let initSt : PState := { declarations, compilerCode, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
+  let initSt : PState := { declarations, compilerCode, namedErrorSourceOrder, enumNativeNames, enumCarriers, enumDecodeTypes, selectorHelpers, externalNames, getterGaps, names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let omittedInitializers := vars.filter fun v =>
     J.opt v "constant" != some (.bool true) &&
       !(J.id? v).any fixedIds.contains && (J.opt v "value").isSome &&
