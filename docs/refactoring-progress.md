@@ -295,6 +295,8 @@ even though declaration/getter producers only built functions. Consumers rebuilt
 the outer function type for each internal/external call and returned `none` for
 an impossible scalar case. This was a representation invariant left to convention.
 
+Implemented in `61a8ebcc` (`Type dispatch signatures`).
+
 The replacement `FiniteDispatch.Signature` contains parameter and result lists.
 Candidate source/native fields use `Option Signature`: unsupported source kinds
 and missing metadata remain explicit unknowns, not omitted targets. The call-site
@@ -328,4 +330,17 @@ because `Tools.Upstream` was out of date; no assertion verdict failed. That
 consumer was rebuilt successfully at 1.34 GiB peak. The complete 31-case source
 rerun passed with zero failures at 1.40 GiB peak; the new signature test also
 passed at 1.31 GiB peak. All 32 focused cases are covered without changing an
-existing verdict. Final library/TestSuite/frozen-sort confirmation remains pending.
+existing verdict.
+
+Final confirmation passed: 685 library jobs, 259 TestSuite jobs, and the normal
+`./run-lean.sh` with all 377 frozen taclets and 131 read-bearing annotations
+matching. Static TestSuite and automation gates still report 552 derived,
+11 refuted, one excluded and zero pending functions. The layer check remains
+152 core modules with none reaching the elaborator. Heavy checks stayed under
+the 12 GiB, no-swap scope; the final sequence observed 11.56 GiB peak aggregate
+RSS and exited 0. The temporary build configuration and this task's idle Lean
+server were removed. Concurrent documentation edits were preserved separately.
+
+This completes the finite-signature migration with no old candidate adapter or
+unfinished consumer. The remaining recursive-storage/compiler/numeric alternatives
+retain the semantic-correspondence and net-simplification limits recorded above.
