@@ -157,7 +157,7 @@ def scopedOnlyRoots : List Lean.Name :=
   [``Solidity.Stmt, ``Solidity.Prog, ``Solidity.Simple, ``Solidity.SPath, ``Solidity.Loc,
    ``Solidity.MPath, ``Solidity.MLoc, ``Solidity.Val, ``Solidity.Src, ``Solidity.ARhs,
    ``Solidity.MRhs, ``Solidity.NewLhs, ``Solidity.MSrc, ``Solidity.OpLoc, ``Solidity.CallRet,
-   ``Solidity.ExtCall, ``Solidity.LoopAnn, ``Solidity.Args, ``Solidity.Binders,
+   ``Solidity.ExtCall, ``Solidity.LoopAnn, ``Solidity.LoopMetrics, `Solidity.LoopLex, ``Solidity.Args, ``Solidity.Binders,
    ``Solidity.CodeBinder, ``Solidity.SHole, ``Solidity.MHole, ``Solidity.VHole,
    ``Solidity.Frames, ``Solidity.Premise, ``Solidity.LTy,
    ``Solidity.ArrView, ``Solidity.BlockKind, ``Solidity.Branch,

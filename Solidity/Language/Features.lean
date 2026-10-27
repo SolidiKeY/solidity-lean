@@ -234,6 +234,7 @@ inductive Feature where
   | addressCodehash
   | creationCode
   | runtimeCode
+  | logicalStorageBase
   | storageLayout
   | memoryLayout
   | transientLayout
@@ -448,6 +449,7 @@ def Feature.id : Feature → String
   | .addressCodehash => "addressCodehash"
   | .creationCode => "creationCode"
   | .runtimeCode => "runtimeCode"
+  | .logicalStorageBase => "logicalStorageBase"
   | .storageLayout => "storageLayout"
   | .memoryLayout => "memoryLayout"
   | .transientLayout => "transientLayout"
@@ -467,7 +469,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "lexical", spelling := "identifiers; contextual from/error/revert/global/transient/layout/at",
       scope := .model, current := .limited,
       requirement := r#"Preserve declaration identity, lexical scope, shadowing and qualified names; builtin spelling alone is insufficient."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 428 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Examples/Tactics/SourceAdmissionImport.lean", "Solidity/Examples/Tactics/SourceLiteralsImport.lean", "Solidity/Examples/Tactics/SourceIdentifiersImport.lean", "docs/feature-work/source-admission.md", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/Shadowing.sol", "scripts/source-shadowing.test.mjs", "docs/feature-work/dafny-verification.md"] }
   | .comments =>
     { category := "lexical", spelling := "// and /* */; NatSpec /// and /** */",
       scope := .model, current := .limited,
@@ -892,7 +894,7 @@ def Feature.info : Feature → FeatureInfo
     { category := "statements", spelling := "{...}; nested scopes",
       scope := .model, current := .limited,
       requirement := r#"Allocate locals with Solidity lifetime, default initialization and shadowing; discard bindings when leaving the scope."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 456 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 456 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Frontend/SolcJson/Contract.lean", "tests/solc/Shadowing.sol", "scripts/source-shadowing.test.mjs", "docs/feature-work/dafny-verification.md"] }
   | .uncheckedBlock =>
     { category := "statements", spelling := "unchecked {...}",
       scope := .model, current := .limited,
@@ -1295,9 +1297,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/types/reference-types.rst", line := 496 }], localEvidence := ["Solidity/Semantics/Storage/Ops.lean"] }
   | .transientState =>
     { category := "storage", spelling := "T transient x",
-      scope := .model, current := .missing,
-      requirement := r#"Add a separate logical transaction-local store, shared across reentrant frames, rolled back on frame failure and reset at transaction end; no gas model is needed."#,
-      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := [] }
+      scope := .model, current := .limited,
+      requirement := r#"Typed primitive and established signature-marked function-tag source declarations use disjoint regions of the joint logical root product; nested self-calls share cells, failure rolls back the product, and lifetime/replay transaction boundaries reset cells. Physical layout, raw tload/tstore, raw function addresses and general source world/delegate execution remain unsupported."#,
+      upstream := [{ path := "libsolidity/parsing/Parser.cpp", line := 895 }, { path := "docs/contracts/transient-storage.rst", line := 6 }], localEvidence := ["Solidity/Semantics/Storage/Anon.lean", "Solidity/Semantics/Lifetime.lean", "Solidity/Examples/Tactics/TransientStorage.lean", "Solidity/Semantics/TransientWorld.lean", "Solidity/Examples/Tactics/TransientWorld.lean"] }
   | .checkedArithmetic =>
     { category := "semantics", spelling := "Solidity 0.8 default checked arithmetic",
       scope := .model, current := .limited,
@@ -1444,15 +1446,20 @@ def Feature.info : Feature → FeatureInfo
       requirement := r#"Observes account existence and deployed bytecode hashing, absent from the source interpreter."#,
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 556 }], localEvidence := [] }
   | .creationCode =>
-    { category := "excluded", spelling := "type(C).creationCode",
-      scope := .exclude, current := .notApplicable,
-      requirement := r#"Exact compiled init-code bytes depend on code generation, linking and compiler settings."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4291 }], localEvidence := [] }
+    { category := "metadata", spelling := "type(C).creationCode",
+      scope := .model, current := .limited,
+      requirement := r#"Static compiler code constants require matching exact compiler/source/settings artifacts; deployed account code, unresolved linking and oversized materialization are not supported."#,
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4291 }], localEvidence := ["Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Body.lean", "scripts/solc-code.mjs"] }
   | .runtimeCode =>
-    { category := "excluded", spelling := "type(C).runtimeCode",
-      scope := .exclude, current := .notApplicable,
-      requirement := r#"Exact deployed code bytes depend on compilation and immutable/library substitution."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4292 }], localEvidence := [] }
+    { category := "metadata", spelling := "type(C).runtimeCode",
+      scope := .model, current := .limited,
+      requirement := r#"Static compiler code constants require matching exact compiler/source/settings artifacts; deployed account code, unresolved linking and oversized materialization are not supported."#,
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 4292 }], localEvidence := ["Solidity/Frontend/Source.lean", "Solidity/Frontend/SolcJson/Body.lean", "scripts/solc-code.mjs"] }
+  | .logicalStorageBase =>
+    { category := "storage", spelling := "literal layout at base with logical field observations",
+      scope := .model, current := .limited,
+      requirement := r#"Accept compiler-validated literal storage bases only for logical typed root operations. Raw slots, offsets, packing, tload/tstore and assembly remain excluded; the base does not change declaration identities or the disjoint persistent/transient root partition."#,
+      upstream := [{ path := "libsolidity/ast/AST.h", line := 635 }], localEvidence := ["Solidity/Frontend/SolcJson/Admission.lean", "Solidity/Semantics/Storage/Anon.lean"] }
   | .storageLayout =>
     { category := "excluded", spelling := "layout at expr; physical slots/packing/offsets",
       scope := .exclude, current := .notApplicable,
@@ -1718,6 +1725,7 @@ def Feature.all : List Feature :=
     .addressCodehash,
     .creationCode,
     .runtimeCode,
+    .logicalStorageBase,
     .storageLayout,
     .memoryLayout,
     .transientLayout,
@@ -1778,8 +1786,6 @@ inductive Unmodelled where
   | create2Salt
   | addressCode
   | addressCodehash
-  | creationCode
-  | runtimeCode
   | storageLayout
   | memoryLayout
   | transientLayout
@@ -1813,8 +1819,6 @@ def Unmodelled.feature : Unmodelled → Feature
   | .create2Salt => .create2Salt
   | .addressCode => .addressCode
   | .addressCodehash => .addressCodehash
-  | .creationCode => .creationCode
-  | .runtimeCode => .runtimeCode
   | .storageLayout => .storageLayout
   | .memoryLayout => .memoryLayout
   | .transientLayout => .transientLayout
@@ -1854,8 +1858,6 @@ def Feature.unmodelled? : Feature → Option Unmodelled
   | .create2Salt => some .create2Salt
   | .addressCode => some .addressCode
   | .addressCodehash => some .addressCodehash
-  | .creationCode => some .creationCode
-  | .runtimeCode => some .runtimeCode
   | .storageLayout => some .storageLayout
   | .memoryLayout => some .memoryLayout
   | .transientLayout => some .transientLayout
@@ -1924,8 +1926,6 @@ theorem Unmodelled.excluded (u : Unmodelled) : u.feature.info.scope = .exclude :
   | create2Salt => rfl
   | addressCode => rfl
   | addressCodehash => rfl
-  | creationCode => rfl
-  | runtimeCode => rfl
   | storageLayout => rfl
   | memoryLayout => rfl
   | transientLayout => rfl

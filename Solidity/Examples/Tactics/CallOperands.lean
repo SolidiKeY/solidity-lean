@@ -309,11 +309,9 @@ error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains error
 -/
 #guard_msgs in #check sol[TestSuite]{ matrix[0].push() = 5; }
 
--- A member of `push()`: a member of a call is one of a function's value,
--- refused (the import hoists `x.push().f` through a storage local instead).
-/--
-error: Solidity elaboration failed: bucket.tokens.push(…): the callee is not a function value
--/
-#guard_msgs in #check sol[TestSuite]{ bucket.tokens.push().value = 1; }
+-- A reference-valued push expression becomes one typed push-bind.
+example : Prog.toStr [] (sol[TestSuite]{ bucket.tokens.push().value = 1; } :
+    Prog TestSuite [] _) =
+    "Token storage sp1 = bucket.tokens.push(); sp1.value = 1;" := rfl
 
 end Solidity.Examples.Tactics.CallOperands

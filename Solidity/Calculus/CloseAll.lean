@@ -57,6 +57,7 @@ be hidden once they have supplied an instance, just as `allLeftHide` does. -/
 private def addInstances (replay : Bool) : TacticM (Array (TSyntax `tactic)) := withMainContext do
   let g ← getMainGoal
   let mut candidates : Array Expr := #[]
+  let mut witnesses : Array Expr := #[]
   let mut locals : Array Expr := #[]
   -- the goal's own numeric locals (a quantified goal's opened variable)
   let mut own : Array Expr := #[]
@@ -83,16 +84,26 @@ private def addInstances (replay : Bool) : TacticM (Array (TSyntax `tactic)) := 
   -- rather than a free Int variable. Prioritise those projections.
   let mut nodes := 0
   let mut seen : Std.HashSet Expr := {}
-  while !todo.isEmpty && nodes < 4096 && candidates.size < 8 do
+  while !todo.isEmpty && nodes < 4096 && (candidates.size < 8 || witnesses.size < 4) do
     let e := todo.back!
     todo := todo.pop
     nodes := nodes + 1
     if seen.contains e then continue
     seen := seen.insert e
+    -- A captured key identifies its witness even when it is a negative
+    -- literal, rather than a numeric local or a value projection.
+    if e.isAppOfArity ``Eq 3 && numeric (e.getArg! 0) then
+      let left := e.getArg! 1
+      let right := e.getArg! 2
+      let hint := if left.hasLooseBVars && !right.hasLooseBVars then some right
+        else if right.hasLooseBVars && !left.hasLooseBVars then some left else none
+      if let some hint := hint then
+        if !hint.hasMVar && witnesses.size < 4 && !witnesses.contains hint then
+          witnesses := witnesses.push hint
     let projection := e.isAppOfArity ``Subtype.val 3 || match e with
       | .proj ``Subtype 0 _ => true
       | _ => false
-    if projection && !e.hasLooseBVars && !e.hasMVar && !candidates.contains e then
+    if candidates.size < 8 && projection && !e.hasLooseBVars && !e.hasMVar && !candidates.contains e then
       let some numericType ← bounded 1000 (do return numeric (← whnfR (← inferType e))) | break
       if numericType then candidates := candidates.push e
     match e with
@@ -101,6 +112,11 @@ private def addInstances (replay : Bool) : TacticM (Array (TSyntax `tactic)) := 
     | .letE _ t v body _ => todo := ((todo.push t).push v).push body
     | .mdata _ body | .proj _ _ body => todo := todo.push body
     | _ => pure ()
+  -- Keep the existing candidate cap; equality witnesses take priority.
+  let mut selected : Array Expr := #[]
+  for e in witnesses ++ candidates do
+    if selected.size < 8 && !selected.contains e then selected := selected.push e
+  candidates := selected
   for e in locals do
     if candidates.size < 8 && !candidates.contains e then candidates := candidates.push e
   -- the instances the goal asks for, past the cap: at most four more

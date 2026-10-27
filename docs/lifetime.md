@@ -157,50 +157,13 @@ environment funding are not represented as additional transitions. Include
 them in an extended transition model before making properties that depend
 on their effects.
 
-## Milestone L1: constructor-rooted lifetime
+## The example
 
-Implemented persistent states, incoming payment and rollback, an explicit
-interface, waiting, labelled finite traces, reachability induction, `AG`, `EF`
-and `AGEF`, and bridges from both correctness readings. The escrow proves
-mutual exclusion for every reached state, two concrete settlement witnesses,
-and that settlement remains possible from every reached state. Its flags
-record settlement; the example does not transfer ether.
-
-Regressions cover payment rollback after a write, refusal of nonpayable value,
-successful payable commits and composed deposit/payment traces, blocked
-refund after payment, waiting, backwards time, changed addresses,
-fresh memory, incoming ledger/balance accounting, exhausted calls that satisfy
-the old diamond but cannot commit, and a failed constructor with no reachable
-deployed state. `exhaust()` uses Lean's `assume(false)` modelling assumption
-solely to exercise exhaustion.
-
-**Review.** Independent read-only finder and skeptic passes confirmed the
-deployment root, actual-run evidence, rollback and invariant proof bridges,
-and temporal quantification. Neither found a semantic or proof defect. Their
-coverage suggestion added a successful payable commit and a two-transaction
-deposit/payment trace; incoming funds are checked both when committed and
-when rolled back. Interface completeness, payable metadata, callbacks and
-environment effects remain the explicit model obligations described above.
-
-**Validation.** Per-file Lean diagnostics report no errors or warnings in the
-three new modules. The full default build (453 jobs), TestSuite (174 jobs),
-and frozen SolKey sort check pass (377 taclets, all 131 read-bearing
-annotations). The example pins the headline theorems' axiom sets to
-`propext`, `Classical.choice`, and `Quot.sound`; no new axioms or `sorry`
-are used. The final command was:
-
-```sh
-LAKE_CACHE_DIR=/tmp/solidity-lean-lifetime-cache \
-SOLKEY_RULES=tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key \
-./run-lean.sh
-```
-
-The temporary artifact cache avoids writing to the sandbox's read-only
-toolchain cache. The ordinary live-checkout sort check separately reports an
-unannotated `localValueDelete` in the sibling SolKey (381 taclets, 132
-read-bearing); updating that pin/table is outside this change. The repository
-orphan check reaches all three new modules but reports 25 existing ignored
-scratch modules. The full documentation path check reports 13 existing
-missing references in vendored documentation and the Eqns provenance link;
-the new lifetime references resolve. Those broader checks are not claimed
-as passing.
+`Examples/Tactics/Lifetime.lean`'s escrow proves mutual exclusion for every
+reached state, two concrete settlement witnesses, and that settlement remains
+possible from every reached state (its flags record settlement; it transfers
+no ether). Its regressions cover payment rollback after a write, refused
+nonpayable value, payable commits, composed traces, waiting, backwards time,
+changed addresses, fresh memory, ledger/balance accounting, an exhausted call
+that satisfies the diamond but cannot commit, and a failed constructor with no
+deployed state. `exhaust()` uses `assume(false)` only to exercise exhaustion.

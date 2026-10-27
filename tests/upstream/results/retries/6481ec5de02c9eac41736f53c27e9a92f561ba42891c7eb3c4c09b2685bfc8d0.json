@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+    "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+    "timeoutMs": 30000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+      "stage": "lean-runtime",
+      "status": "blocked",
+      "reason": "Lean process ended before checkpoint",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "path": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+          "pipeline": "legacy",
+          "status": "blocked",
+          "reason": "Lean process ended before checkpoint",
+          "tool": {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 30000
+          },
+          "diagnostic": "64376 Solidity.SVec.replicate\n#164377 Solidity.SVec.replicate\n#164378 Solidity.SVec.replicate\n#164379 Solidity.SVec.replicate\n#164380 Solidity.SVec.replicate\n#164381 Solidity.SVec.replicate\n#164382 Solidity.SVec.replicate\n#164383 Solidity.SVec.replicate\n#164384 Solidity.SVec.replicate\n#164385 Solidity.SVec.replicate\n#164386 Solidity.SVec.replicate\n#164387 Solidity.SVec.replicate\n#164388 Solidity.SVec.replicate\n#164389 Solidity.SVec.replicate\n#164390 Solidity.SVec.replicate\n#164391 Solidity.SVec.replicate\n#164392 Solidity.SVec.replicate\n#164393 Solidity.SVec.replicate\n#164394 Solidity.SVec.replicate\n#164395 Solidity.SVec.replicate\n#164396 Solidity.SVec.replicate\n#164397 Solidity.SVec.replicate\n#164398 Solidity.SVec.replicate\n#164399 Solidity.SVec.replicate\n#164400 Solidity.SVec.replicate\n#164401 Solidity.SVec.replicate\n#164402 Solidity.SVec.replicate\n#164403 Solidity.SVec.replicate\n#164404 Solidity.SVec.replicate\n#164405 Solidity.SVec.replicate\n#164406 Solidity.SVec.replicate\n#164407 Solidity.SVec.replicate\n#164408 Solidity.SVec.replicate\n#164409 Solidity.SVec.replicate\n#164410 Solidity.SVec.replicate\n#164411 Solidity.SVec.replicate\n#164412 Solidity.SVec.replicate\n#164413 Solidity.SVec.replicate\n#164414 Solidity.SVec.replicate\n#164415 Solidity.SVec.replicate\n#164416 Solidity.SVec.replicate\n#164417 Solidity.SVec.replicate\n#164418 Solidity.SVec.replicate\n#164419 Solidity.SVec.replicate\n#164420 Solidity.SVec.replicate\n#164421 Solidity.SVec.replicate\n#164422 Solidity.SVec.replicate\n#164423 Solidity.SVec.replicate\n#164424 Solidity.SVec.replicate\n#164425 Solidity.SVec.replicate\n#164426 Solidity.SVec.replicate\n#164427 Solidity.SVec.replicate\n#164428 Solidity.SVec.replicate\n#164429 Solidity.SVec.replicate\n#164430 Solidity.SVec.replicate\n#164431 Solidity.SVec.replicate\n#164432 Solidity.SVec.replicate\n#164433 Solidity.SVec.replicate\n#164434 Solidity.SVec.replicate\n#164435 Solidity.SVec.replicate\n#164436 Solidity.SVec.replicate\n#164437 Solidity.SVec.replicate\n#164438 Solidity.SVec.replicate\n#164439 Solidity.SVec.replicate\n#164440 Solidity.SVec.replicate\n#164441 Solidity.SVec.replicate\n#164442 Solidity.SVec.replicate\n#164443 Solidity.SVec.replicate\n#164444 Solidity.SVec.replicate\n#164445 Solidity.SVec.replicate\n#164446 Solidity.SVec.replicate\n#164447 Solidity.SVec.replicate\n#164448 Solidity.SVec.replicate\n#164449 Solidity.SVec.replicate\n#164450 Solidity.SVec.replicate\n#164451 Solidity.SVec.replicate\n#164452 Solidity.SVec.replicate\n#164453 Solidity.SVec.replicate\n#164454 Solidity.SVec.replicate\n#164455 Solidity.SVec.replicate\n#164456 Solidity.SVec.replicate\n#164457 Solidity.SVec.replicate\n#164458 Solidity.SVec.replicate\n#164459 Solidity.SVal.dfltRefAt._redArg\n#164460 Solidity.SVal.dfltAt._redArg\n#164461 Solidity.SVal.dfltBelow\n#164462 Solidity.SVal.dflt\n#164463 Solidity.SFields.dflt\n#164464 Solidity.SFields.dflt\n#164465 Solidity.Storage.init\n#164466 Solidity.State.deploy\n#164467 Solidity.Tools.Upstream.replay\n#164468 _tmp._@._unknown.508846211._hygCtx._hyg.617"
+        },
+        {
+          "path": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+          "pipeline": "viaIR",
+          "status": "blocked",
+          "reason": "Lean process ended before checkpoint",
+          "tool": {
+            "command": "lake",
+            "exitCode": 134,
+            "signal": null,
+            "errorCode": null,
+            "timedOut": false,
+            "timeoutMs": 30000
+          },
+          "diagnostic": "64376 Solidity.SVec.replicate\n#164377 Solidity.SVec.replicate\n#164378 Solidity.SVec.replicate\n#164379 Solidity.SVec.replicate\n#164380 Solidity.SVec.replicate\n#164381 Solidity.SVec.replicate\n#164382 Solidity.SVec.replicate\n#164383 Solidity.SVec.replicate\n#164384 Solidity.SVec.replicate\n#164385 Solidity.SVec.replicate\n#164386 Solidity.SVec.replicate\n#164387 Solidity.SVec.replicate\n#164388 Solidity.SVec.replicate\n#164389 Solidity.SVec.replicate\n#164390 Solidity.SVec.replicate\n#164391 Solidity.SVec.replicate\n#164392 Solidity.SVec.replicate\n#164393 Solidity.SVec.replicate\n#164394 Solidity.SVec.replicate\n#164395 Solidity.SVec.replicate\n#164396 Solidity.SVec.replicate\n#164397 Solidity.SVec.replicate\n#164398 Solidity.SVec.replicate\n#164399 Solidity.SVec.replicate\n#164400 Solidity.SVec.replicate\n#164401 Solidity.SVec.replicate\n#164402 Solidity.SVec.replicate\n#164403 Solidity.SVec.replicate\n#164404 Solidity.SVec.replicate\n#164405 Solidity.SVec.replicate\n#164406 Solidity.SVec.replicate\n#164407 Solidity.SVec.replicate\n#164408 Solidity.SVec.replicate\n#164409 Solidity.SVec.replicate\n#164410 Solidity.SVec.replicate\n#164411 Solidity.SVec.replicate\n#164412 Solidity.SVec.replicate\n#164413 Solidity.SVec.replicate\n#164414 Solidity.SVec.replicate\n#164415 Solidity.SVec.replicate\n#164416 Solidity.SVec.replicate\n#164417 Solidity.SVec.replicate\n#164418 Solidity.SVec.replicate\n#164419 Solidity.SVec.replicate\n#164420 Solidity.SVec.replicate\n#164421 Solidity.SVec.replicate\n#164422 Solidity.SVec.replicate\n#164423 Solidity.SVec.replicate\n#164424 Solidity.SVec.replicate\n#164425 Solidity.SVec.replicate\n#164426 Solidity.SVec.replicate\n#164427 Solidity.SVec.replicate\n#164428 Solidity.SVec.replicate\n#164429 Solidity.SVec.replicate\n#164430 Solidity.SVec.replicate\n#164431 Solidity.SVec.replicate\n#164432 Solidity.SVec.replicate\n#164433 Solidity.SVec.replicate\n#164434 Solidity.SVec.replicate\n#164435 Solidity.SVec.replicate\n#164436 Solidity.SVec.replicate\n#164437 Solidity.SVec.replicate\n#164438 Solidity.SVec.replicate\n#164439 Solidity.SVec.replicate\n#164440 Solidity.SVec.replicate\n#164441 Solidity.SVec.replicate\n#164442 Solidity.SVec.replicate\n#164443 Solidity.SVec.replicate\n#164444 Solidity.SVec.replicate\n#164445 Solidity.SVec.replicate\n#164446 Solidity.SVec.replicate\n#164447 Solidity.SVec.replicate\n#164448 Solidity.SVec.replicate\n#164449 Solidity.SVec.replicate\n#164450 Solidity.SVec.replicate\n#164451 Solidity.SVec.replicate\n#164452 Solidity.SVec.replicate\n#164453 Solidity.SVec.replicate\n#164454 Solidity.SVec.replicate\n#164455 Solidity.SVec.replicate\n#164456 Solidity.SVec.replicate\n#164457 Solidity.SVec.replicate\n#164458 Solidity.SVec.replicate\n#164459 Solidity.SVal.dfltRefAt._redArg\n#164460 Solidity.SVal.dfltAt._redArg\n#164461 Solidity.SVal.dfltBelow\n#164462 Solidity.SVal.dflt\n#164463 Solidity.SFields.dflt\n#164464 Solidity.SFields.dflt\n#164465 Solidity.Storage.init\n#164466 Solidity.State.deploy\n#164467 Solidity.Tools.Upstream.replay\n#164468 _tmp._@._unknown.508846211._hygCtx._hyg.608"
+        }
+      ]
+    }
+  ]
+}

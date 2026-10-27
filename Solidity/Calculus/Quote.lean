@@ -244,6 +244,12 @@ def qLoopQ : (Γ : Ctx) → LoopQ C Γ → QM Expr
   | Γ, .imp a c => do ctor ``LoopQ.imp Γ #[← qVal Γ .bool a, ← qVal Γ .bool c]
   | Γ, .all x p b => do ctor ``LoopQ.all Γ #[toExpr x, toExpr p, ← qLoopQ (.val p :: Γ) b]
 
+/-- Ranking expressions, retaining their intrinsic length. -/
+def qLoopMetrics (Γ : Ctx) : {n : Nat} → LoopMetrics C Γ n → QM Expr
+  | _, .nil => ctor ``LoopMetrics.nil Γ #[]
+  | _, @LoopMetrics.cons _ _ n head tail =>
+    do ctor ``LoopMetrics.cons Γ #[toExpr n, ← qVal Γ .uint head, ← qLoopMetrics Γ tail]
+
 def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
   | .unwind k => ctor ``LoopAnn.unwind Γ #[toExpr k]
   | .auto => ctor ``LoopAnn.auto Γ #[]
@@ -257,6 +263,13 @@ def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
     for q in qs.reverse do
       l := mkApp3 (mkConst ``List.cons [levelZero]) qTy (← qLoopQ Γ q) l
     ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d, toExpr brk, l]
+  | @LoopAnn.invLex _ _ n I metrics brk qs => do
+    let qTy := mkApp2 (mkConst ``LoopQ) (← contract) (← qCtx Γ)
+    let mut l := mkApp (mkConst ``List.nil [levelZero]) qTy
+    for q in qs.reverse do
+      l := mkApp3 (mkConst ``List.cons [levelZero]) qTy (← qLoopQ Γ q) l
+    ctor ``LoopAnn.invLex Γ #[toExpr n, ← qVal Γ .bool I,
+      ← qLoopMetrics Γ metrics, toExpr brk, l]
 
 /-! ## Statements -/
 

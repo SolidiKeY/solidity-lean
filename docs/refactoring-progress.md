@@ -45,6 +45,8 @@ before committing and avoid repeated whole-package rebuilds.
 
 ## Getter milestone
 
+Commit: `2669fa75` (`Make getter plans intrinsic`).
+
 Implemented: `GetterInput` retains all input metadata; `GetterOutput` retains
 binding/type/value. `GetterPath` is incomplete traversal, while `GetterPlan`
 requires `first` and carries optional `rest`. The ordinary function interface
@@ -66,10 +68,22 @@ checking reports 33 pre-existing scratch modules; documentation path checking
 reports 13 pre-existing missing references plus ambiguous short names. No files
 were added by this milestone under the scratch directory.
 
+## Upstream pull
+
+The user requested a pull before further work. Fetched `origin/master` at
+`a7a35aa5`; the getter commit required a merge rather than fast-forwarding.
+Conflict resolutions retain upstream's primitive UDVT resolution, nominal
+elementary-type rejection and enum-key membership guards in the new getter
+representation. The docs index retains upstream's organization and this file's
+link. Merged getter/contract diagnostics, the frontend build, direct plan
+regression and layer check (152 core modules) passed. The uncommitted provenance
+increment is preserved in merge autostash `54ec4911` until merge completion.
+
 ## Resume
 
-Commit the verified getter milestone before editing provenance. Record its hash
-here in the following milestone. Re-read
+Complete the pull merge, then verify that the saved provenance increment was
+restored (use the explicit autostash hash above if Git did not apply it).
+Re-read
 `git status` and acquire the shared writer lock before writes or Lean checks.
 Rebuild `Solidity.Frontend.Testing` before running JavaScript regressions that
 use `build:false`. Inside this sandbox Node child processes can report EPERM;

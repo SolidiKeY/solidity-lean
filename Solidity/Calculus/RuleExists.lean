@@ -152,7 +152,7 @@ def proveSide (t : Expr) : TacticM (Option Expr) := do
       simp_all only [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
         MLoc.isTarget, MPath.isBindable, Val.notTernary, SHole.isTarget, MHole.isTarget,
         VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
-        Ty.isMapping, Ty.isPrimitive, Bool.not_eq_true, Bool.false_eq_true, Bool.true_eq_false,
+        Ty.isMapping, Ty.isPrimitive, LoopLex.eraseAllowed, Bool.not_eq_true, Bool.false_eq_true, Bool.true_eq_false,
         Option.isSome, Option.isNone, Args.firstNonSimple, Option.map_none, Option.map_some,
         Val.complexStorageRead, Src.isMemory, Bool.not_false, Bool.not_true, reduceCtorEq]))) then
     return some (← instantiateMVars g)
@@ -597,7 +597,7 @@ theorem Stmt.ite.ruleExists {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : P
   revert "revertDiamond revertBox"
   assumeFalse "lean.assumeFalse"
   tryCall "lean.tryCallDiamond tryCallNoCallbackBox lean.tryCallSelfDiamond lean.tryCallSelfBox"
-  loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond lean.whileNoVariantDiamond whileInvariantBox whileUnwind"
+  loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond lean.whileNoVariantDiamond whileInvariantBox lean.loopLexErase lean.whileInvariantLexDiamond 3*lean.loopLexErase whileUnwind"
   block "blockEmpty"
   pushOpAssign "lean.pushCompoundUnfoldReceiver /BinOp storagePushAddAssign storagePushSubAssign storagePushMulAssign 20*! /BinOp 4*! storagePushDivAssign storagePushModAssign 17*! 9*pushCompoundAssignValueRhsCapture"
   pushIncDec "lean.pushIncrementUnfoldReceiver /IncDec storagePushPreincrement storagePushPredecrement storagePushPostincrement storagePushPostdecrement"

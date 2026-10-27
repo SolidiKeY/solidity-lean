@@ -1,10 +1,37 @@
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { runSolidityTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
+import { sourceHash } from './source-locations.mjs';
+
+test('editor reports retain exact overload identities, source hashes and UTF-16 ranges', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-editor-'));
+  const source = join(dir, 'Editor.sol');
+  const prefix = '// 🐦 source positions\r\npragma solidity ^0.8.34;\r\n';
+  const text = prefix + 'contract Editor { /* 🦉 */ function f() public pure { assert(true); } function f(uint x) public pure { assert(x == x); } }\r\n';
+  writeFileSync(source, text);
+  try {
+    const report = runSolidityTests([source], {build:false, list:true});
+    assert.deepEqual(report.errors, []);
+    const rows = report.results.filter(r => r.function === 'f');
+    assert.equal(rows.length, 2);
+    assert.equal(new Set(rows.map(r => r.sourceId)).size, 2);
+    assert.ok(rows.every(r => Number.isSafeInteger(r.sourceId) && r.sourceId >= 0));
+    assert.deepEqual(rows.map(r => r.signature).sort(), ['f()', 'f(uint)']);
+    assert.ok(rows.every(r => r.sourceHash === sourceHash(Buffer.from(text))));
+    const line = text.split('\r\n')[2];
+    for (const row of rows) {
+      assert.equal(row.range.start.line, 2);
+      const offset = row.signature === 'f()' ? line.indexOf('function') : line.lastIndexOf('function');
+      assert.equal(row.range.start.character, offset);
+      assert.match(line.slice(row.range.start.character, row.range.end.character), /^function f\(/);
+    }
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+});
 
 test("timed-out tool jobs terminate their descendant processes", {skip:process.platform === 'win32'}, async () => {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-timeout-'));
@@ -84,6 +111,9 @@ test("Solidity source through solc and kernel-checked proof search", () => {
     onProgress: part => checkpoints.push(part.results.length) });
   assert.deepEqual(report.errors, []);
   assert.ok(checkpoints.length > 3);
+  const compiledHash = sourceHash(readFileSync('tests/solc/Runner.sol'));
+  assert.ok(report.results.every(r => r.sourceHash === compiledHash));
+  assert.ok(report.results.filter(r => r.sourceId >= 0).every(r => r.range));
   assert.equal(checkpoints.at(-1),report.results.length);
   assert.ok(checkpoints.every((n,i) => i === 0 || n >= checkpoints[i-1]));
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
@@ -92,7 +122,8 @@ test("Solidity source through solc and kernel-checked proof search", () => {
   assert.equal(status.staysOpen, "pending");
   assert.equal(status.ignored, "skipped");
   assert.equal(status.helper, "internal");
-  assert.equal(status.assemblyGap, "unsupported");
+  // Modern source admission classifies inline assembly as an explicit exclusion.
+  assert.equal(status.assemblyGap, "excluded");
   assert.equal(status.specified, "proved");
   assert.equal(status.badSpec, "pending");
   assert.equal(status.boxRevert, "proved");
@@ -118,7 +149,12 @@ test("fixed-array copy shapes preserve tails, snapshots and evaluation order", (
 
 test("implicit initializer omissions cannot silently pass", () => {
   const report = runSolidityTests(["tests/solc/InitGap.sol"], { build: false });
-  assert.ok(report.errors.some(e => e.reason.includes("initializers are left out")));
+  assert.deepEqual(report.errors, []);
+  const ctor = report.results.find(r => r.function === "constructor");
+  assert.equal(ctor?.status, "excluded");
+  assert.match(ctor.reason, /an initializer calls `cap`/);
+  assert.match(ctor.reason, /solidity\.inlineAssembly/);
+  assert.equal(report.results.find(r => r.function === "get")?.status, "proved");
   assert.equal(testsPassed(report), false);
 });
 
@@ -137,12 +173,12 @@ test("file-level structs and library references retain declaration identity", ()
   assert.equal(testsPassed(report), false);
 });
 
-test("a nested struct of other widths is the contract's own; a hidden one stays out of reach", () => {
+test("a nested struct of other widths retains library member widths", () => {
   const report = runSolidityTests(["tests/solc/FileLevelStructGaps.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.results.filter(r => r.contract !== 'HiddenStructLib')
     .map(r => [r.contract, r.function, r.status]), [
-    ['HiddenStructCaller', 'narrowLibraryMember', 'unsupported'],
+    ['HiddenStructCaller', 'narrowLibraryMember', 'pending'],
     ['InvalidNestedStruct', 'narrowMember', 'pending']
   ]);
   assert.equal(testsPassed(report), false);
@@ -394,7 +430,7 @@ test("source types preserve overflow and declaration scope", () => {
 });
 
 test("source types: narrow elements, keys, values, struct members, locals and parameters", () => {
-  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
@@ -410,7 +446,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
 });
 
 test("bytesN, bytes and string: literals, indexing, conversions, storage, memory, struct members", () => {
-  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['literals', 'compareAndIndex', 'indexOutOfRange', 'conversions', 'bitwise',
@@ -426,7 +462,7 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
-  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
@@ -441,7 +477,7 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
-  const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['equalStringsHashEqual', 'hashParameter', 'encodeLayout', 'encodePacked',
@@ -468,27 +504,41 @@ test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/
   }
 });
 
-test("function types: values in locals, parameters, returns, storage, struct members, external", () => {
-  // tests/solc/FunctionTypes.sol: a value is its function's tag, a call
-  // through it a dispatch over the functions of its signature
-  // (docs/semantic-gaps.md, "Function types")
+test("finite function values preserve source proofs and false obligations", () => {
+  // Finite dispatch retains source identities, and stable external projections
+  // retain their ABI kinds through the native function-value lowering.
   const report = runSolidityTests(["tests/solc/FunctionTypes.sol"], {build:false});
   assert.deepEqual(report.errors, []);
-  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
-  for (const name of ['applyAndCompose', 'localValue', 'storedByFlag', 'returnedValue',
-    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality',
-    // calls through values that are not names (`callValueName`)
-    'memberCall', 'elementCall', 'callResultCall',
-    // an external function's selector, folded as solc folds it; a dispatch
-    // that recurses (`Stmt.callRec`)
-    'ext', 'externalSelector', 'recursionThroughValue',
-    // an external value's `address * 2^32 + selector` read back to its
-    // address (`Facts.cancelDiv`)
-    'externalValue'])
-    assert.equal(status[name], 'proved', name);
-  // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
-  assert.equal(status.unassignedDiamond, 'pending');
-  assert.equal(status.falsePost, 'pending');
+  const expected = [
+    ['ExternalFunctionTypes.ext', 'proved'],
+    ['ExternalFunctionTypes.externalValue', 'proved'],
+    ['ExternalFunctionTypes.selectorOfValue', 'proved'],
+    ['ExternalFunctionTypes.falseSelectorOfValue', 'pending'],
+    ['ExternalFunctionTypes.externalSelector', 'proved'],
+    ['FunctionTypes.double', 'internal'],
+    ['FunctionTypes.triple', 'internal'],
+    ['FunctionTypes.applyTo', 'internal'],
+    ['FunctionTypes.compose', 'internal'],
+    ['FunctionTypes.choose', 'internal'],
+    ['FunctionTypes.applyAndCompose', 'proved'],
+    ['FunctionTypes.localValue', 'proved'],
+    ['FunctionTypes.storedByFlag', 'proved'],
+    ['FunctionTypes.returnedValue', 'proved'],
+    ['FunctionTypes.unassignedPanics', 'proved'],
+    ['FunctionTypes.memberValue', 'proved'],
+    ['FunctionTypes.deletedPanics', 'proved'],
+    ['FunctionTypes.unassignedDiamond', 'pending'],
+    ['FunctionTypes.falsePost', 'pending'],
+    ['FunctionTypes.equality', 'proved'],
+    ['FunctionTypes.memberCall', 'proved'],
+    ['FunctionTypes.elementCall', 'proved'],
+    ['FunctionTypes.callResultCall', 'proved'],
+    ['RecursiveFunctionValues.applyRec', 'internal'],
+    ['RecursiveFunctionValues.countThrough', 'internal'],
+    ['RecursiveFunctionValues.recursionThroughValue', 'proved'],
+  ];
+  assert.deepEqual(report.results.map(row => [`${row.contract}.${row.function}`, row.status]), expected);
+  assert.equal(testsPassed(report), false);
 });
 
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
@@ -589,12 +639,16 @@ test("the full frozen TestSuite compiles its testing function table within defau
   assert.deepEqual(report.errors, []);
   const rows = report.results.filter(r => r.contract === 'TestSuite');
   // TestSuite at solkey 473da8944c (`TestSuite/Report.lean`): 617 functions,
-  // 563 obligations (546 derived, 17 pending) and 54 others.
+  // 563 obligations (552 derived, 11 refuted) and 54 others.
   assert.equal(rows.length, 617);
   const count = s => rows.filter(r => r.status === s).length;
-  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded')],
-    [563, 51, 2, 1]);
+  // Modern source imports report representation limits as implementation gaps;
+  // the historical fixture/report retains its original excluded row.
+  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded'), count('unsupported')],
+    [563, 51, 2, 0, 1]);
   const status = Object.fromEntries(rows.map(r => [r.function, r.status]));
+  assert.equal(status.recursiveStructMapping, 'unsupported');
+  assert.match(rows.find(r => r.function === 'recursiveStructMapping').reason, /recursive|infinite/);
   assert.equal(status.storagePushMemoryCopySource, 'ready');
   assert.equal(status.storagePushCompoundSigned, 'ready');
   assert.equal(status.whileCountsUp, 'ready');
@@ -910,7 +964,7 @@ test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", (
 test("revert data: a self-call's reason reaches catch Error, raw data catch (tests/solc/RevertData.sol)", () => {
   // docs/semantic-gaps.md, "Revert data": the reason is bound by `catchData`,
   // one goal per datum the callee lists (`catchDataBox`)
-  const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   // a custom error's data: its selector folded as solc folds it, its
@@ -962,4 +1016,121 @@ test("callbacks: value calls through a function and loops of them, by their inva
   assert.equal(status.storageLostInLoop, "pending");
   // a loop whose body is a `try`, by its invariant (the `try`'s frame)
   assert.equal(status.loopOfTries, "proved");
+});
+
+test("library struct signatures preserve storage and memory receivers and declaration identity", () => {
+  const report = runSolidityTests(["tests/solc/LibraryStructCalls.sol"],
+    {build:false, contract:'LibraryStructCalls', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.frame, 'internal');
+  for (const name of ['storageReceiver', 'memoryReceiver', 'distinctDeclarations',
+    'parenthesizedReceiver', 'sameLayoutDeclarations', 'pushedReceivers',
+    'directPushedA', 'directPushedB', 'operatorDependency']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falsePost, 'pending');
+});
+
+test("generated struct identity names cannot capture a declared ID suffix", () => {
+  const report = runSolidityTests(["tests/solc/StructNameCollision.sol"],
+    {build:false, contract:'StructNameCollision', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.wraps, 'proved');
+  assert.equal(status.falsePost, 'pending');
+});
+
+
+test("finite nominal declarations and nested tuples retain identity, snapshots and failures", () => {
+  const report = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeLowering', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['enumIdentity', 'typeStatements', 'nestedSwap', 'nestedDiscard',
+    'nestedBytes', 'contractKey']) assert.equal(status[name], 'proved', name);
+  assert.equal(status.falsePost, 'pending');
+  const failures = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeFailures', batchSize:1});
+  assert.deepEqual(failures.errors, []);
+  const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
+  assert.equal(refused.nestedEffect, 'unsupported');
+  assert.equal(refused.indexedRead, 'unsupported');
+});
+
+
+test("finite nominal declarations avoid explicit renaming collisions", () => {
+  // Explicit quoted import aliases may spell the otherwise source-unspellable
+  // conversion name. The CLI helper intentionally admits source identifiers
+  // only, so exercise the import syntax directly.
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-enum-rename-'));
+  try {
+    const fixture = join(dir, 'source.ast.json');
+    runTool(process.execPath, ['scripts/solc-ast.mjs', '--source',
+      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper'], 300000);
+    let hash = 0xcbf29ce484222325n;
+    for (const byte of readFileSync(fixture))
+      hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
+    const wrapper = join(dir, 'Test.lean'), output = join(dir, 'result.json');
+    writeFileSync(wrapper, `import Solidity.Frontend.Testing
+solc_import "source.ast.json" hash 0x${hash.toString(16)} as EnumRenameControl.FiniteTypeLowering renaming «E» => «#solcEnum4» testing
+#guard (EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4_"
+#guard !(EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4"
+solc_scoped_problems EnumRenameControl.FiniteTypeLowering decl
+#solkey_test EnumRenameControl.FiniteTypeLowering only "enumIdentity" to ${JSON.stringify(output)}
+`);
+    const diagnostics = runTool('lake', ['--quiet', '--no-build', 'lean', wrapper,
+      '--', '--tstack=131072'], 300000);
+    assert.equal(diagnostics.includes('warning: solc_import:'), false, diagnostics);
+    assert.equal(JSON.parse(readFileSync(output, 'utf8'))
+      .find(r => r.function === 'enumIdentity')?.status, 'proved');
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+});
+
+test("enum conversions use their defining declaration bounds", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumDeclarationBounds.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumDeclarationBounds${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(["tests/solc/EnumDeclarationBounds.sol"],
+    {build:false, contract:'EnumDeclarationBounds', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]),
+    [['foreignRead', 'pending'], ['localAccepts', 'proved']]);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumBounds.lean',
+    '--', '--tstack=131072'], 300000);
+});
+
+test("function-value calls do not become generated enum conversions", () => {
+  // The former enumType4_ cast name collided with the renamed pointer
+  // parameter during inlining. Keep pointer calls and genuine casts distinct.
+  const report = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  const cast = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'checkCast', batchSize:1});
+  assert.deepEqual(cast.errors, []);
+  assert.equal(cast.results.find(r => r.function === 'checkCast')?.status, 'proved');
+});
+
+test("canonical nominal ABI matching preserves enum input ranges", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumAbiRanges.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumAbiRanges${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(['tests/solc/EnumAbiRanges.sol'],
+    {build:false, contract:'EnumAbiRanges', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
+    '--', '--tstack=131072'], 300000);
 });

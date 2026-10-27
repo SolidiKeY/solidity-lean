@@ -175,6 +175,14 @@ taclet's own, so it is written `⟨[ ]⟩`.  A goal of a split or a check may ca
 solkey's label (`"Holds": …`); the macro drops it, and `Taclet.branchLabels`
 keeps it for the printers. -/
 declare_syntax_cat dl_premise (behavior := both)
+/-- A symbolic-arity lexicographic invariant VC. It denotes the exact typed
+`LoopLex.diamondPremise`: capture every old metric and the guard, then require
+invariant preservation and capture every new metric for strict lexicographic
+comparison. The frame is the schema's `xs`/`hv` from the body's frame witness.
+Optional labels name the initial invariant and preservation/use branches,
+respectively; like the expanded invariant notation, they do not change the VC. -/
+syntax &"lexInvariant" "(" (str ": ")? sol_expr ", " "‹" term "›" ", " sol_expr ", "
+  (str ": ")? sol_block ")" : dl_premise
 syntax dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
 syntax dl_upd ppSpace dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
 /-- SolKey's outer conditional for division/remainder push suffixes. -/
@@ -899,7 +907,8 @@ def schemaTry (stx : TSyntax `sol_stmt) : MacroM Lean.Term := do
 
 /-- A taclet's `/// @custom:key` clauses above `while`: the annotation written
 (`unwind 0`, `unwind n`, `unwind n + 1`, `invariant inv` with any `dec`, or
-`invariant inv` and `decreases dec`), and the `while`. -/
+`invariant inv` and `decreases dec`), and the `while`. An escaped decrease
+term is the packed, length-indexed tuple rather than a scalar component. -/
 def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
   let cl := stx[0]
   let w := stx[1]
@@ -913,10 +922,13 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
     let x : Ident ← match (⟨cl[6]⟩ : TSyntax `sol_expr) with
       | `(sol_expr| $x:ident) => pure x
       | _ => Macro.throwErrorAt cl msg
-    let d : Ident ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
-      | `(sol_expr| $d:ident) => pure d
+    let annotation ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
+      | `(sol_expr| $d:ident) =>
+        `(LoopAnn.inv $x (some $d) $(schemaIdent "brk") $(schemaIdent "qs"))
+      | `(sol_expr| ‹ $metrics:term ›) =>
+        `(LoopAnn.invLex $x $metrics $(schemaIdent "brk") $(schemaIdent "qs"))
       | _ => Macro.throwErrorAt cl msg
-    return (← `(LoopAnn.inv $x (some $d) $(schemaIdent "brk") $(schemaIdent "qs")), w')
+    return (annotation, w')
   unless w.getKind == ``solWhile do
     Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
   let e : TSyntax `sol_expr := ⟨cl[6]⟩

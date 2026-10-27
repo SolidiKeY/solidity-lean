@@ -630,6 +630,31 @@ theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : A
     Stmt.step k m (Stmt.call f args ret body) = Premise.argCapture k f p v as' ret body := by
   cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, hcap]) <;> rfl
 
+/-- A boxed `while (cond) body` still erases the tuple annotation; the
+guard excludes ordinary diamonds that check it. -/
+theorem LeanTaclet.loopLexErase.toStep {Γb : Ctx} {n : Nat}
+    {inv cond : Val C Γ .bool} {metrics : LoopMetrics C Γ (n + 2)}
+    {brk : Bool} {qs : List (LoopQ C Γ)} {body : Prog C Γ Γb}
+    (he : LoopLex.eraseAllowed m brk qs body.frame = true) :
+    Stmt.step k m (.loop (.invLex inv metrics brk qs) cond body) =
+      .unfold (.cons (.loop (.inv inv none brk qs) cond body) .nil) .refl := by
+  cases m <;> cases brk <;> cases qs <;> cases hf : body.frame <;>
+    simp only [LoopLex.eraseAllowed, hf, Bool.false_eq_true] at he <;>
+    simp only [Stmt.step, loopStep, hf]
+
+/-- `while (cond) body` with an admitted tuple selects its lexicographic
+invariant premise, with the exact source tuple and frame retained. -/
+theorem LeanTaclet.whileInvariantLexDiamond.toStep {Γb : Ctx} {n : Nat}
+    {inv cond : Val C Γ .bool} {metrics : LoopMetrics C Γ (n + 2)}
+    {body : Prog C Γ Γb} {brk : Bool} {qs : List (LoopQ C Γ)}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)}
+    (hf : body.frame = some (xs, hv)) (hb : brk = false) (hq : qs = []) :
+    Stmt.step k .diamond (.loop (.invLex inv metrics brk qs) cond body) =
+      LoopLex.diamondPremise k inv cond metrics body xs hv := by
+  subst hb
+  subst hq
+  simp only [Stmt.step, loopStep, hf]
+
 end Hand
 
 /-! The plans `#derive_toStep? Taclet` and `#derive_toStep? LeanTaclet` found:

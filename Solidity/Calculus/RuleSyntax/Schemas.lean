@@ -823,6 +823,11 @@ def expandBody? : TSyntax `sol_stmt → Bool
 it declares (its name and its variable), `split` how a split's goals end. -/
 def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split : Lean.Term) :
     TSyntax `dl_premise → MacroM Lean.Term
+  | `(dl_premise| lexInvariant($[$_:str :]? $I:sol_expr, ‹$metrics:term›,
+      $c:sol_expr, $[$_:str :]? $body:sol_block)) => do
+    `($(Lean.mkCIdent `Solidity.LoopLex.diamondPremise) $(schemaIdent "k")
+      $(← schemaAt coreScope .val I) $(← schemaAt coreScope .val c) $metrics
+      $(← schemaBlock false coreScope body) $(schemaIdent "xs") $(schemaIdent "hv"))
   | `(dl_premise| if $c:dl_fml then ($U:dl_upd $V:dl_upd ⟨[ ]⟩) else (⟨[ revert(); ]⟩)) => do
     let (Ut, Δ) ← schemaUpdCore coreScope none U
     let (Vt, _) ← schemaUpdCore Δ none V

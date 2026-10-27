@@ -4,7 +4,7 @@ import Solidity.Calculus.Step
 # The size of what a rule emits
 
 Every rule of `Stmt.step` writes a bounded number of update elements
-(`Stmt.step_upds_le`: at most two per update), and every term it emits, in
+(`Stmt.step_upds_le`: two except for explicit tuple snapshots), and every term it emits, in
 an update or in a formula, is at most linear in the statement it fires on
 (`Stmt.step_tmSize_le`: `16 * s.size + 16`), independently of the types the
 statement is at: a size counts the nodes of a term or of a statement, never
@@ -239,6 +239,41 @@ theorem Val.size_up {t : LTy} : {p : PrimTy} → (v : Val C Γ p) → (v.up (t :
 
 end
 
+mutual
+
+theorem SPath.size_wk {Δ : Ctx} (h : Thin Γ Δ) : {T : Ty} → (b : SPath C Γ T) → (b.wk h).size = b.size
+  | _, .alias _ => rfl
+  | _, .loc l => by simp only [SPath.wk, SPath.size, Loc.size_wk h l]
+
+theorem Loc.size_wk {Δ : Ctx} (h : Thin Γ Δ) : {T : Ty} → (l : Loc C Γ T) → (l.wk h).size = l.size
+  | _, .root _ _ => rfl
+  | _, .field b _ _ => by simp only [Loc.wk, Loc.size, SPath.size_wk h b]
+  | _, .index _ b i => by simp only [Loc.wk, Loc.size, SPath.size_wk h b, Val.size_wk h i]
+
+theorem MPath.size_wk {Δ : Ctx} (h : Thin Γ Δ) : {T : Ty} → (b : MPath C Γ T) → (b.wk h).size = b.size
+  | _, .var _ _ => rfl
+  | _, .loc l => by simp only [MPath.wk, MPath.size, MLoc.size_wk h l]
+
+theorem MLoc.size_wk {Δ : Ctx} (h : Thin Γ Δ) : {T : Ty} → (l : MLoc C Γ T) → (l.wk h).size = l.size
+  | _, .field b _ _ => by simp only [MLoc.wk, MLoc.size, MPath.size_wk h b]
+  | _, .index _ b i => by simp only [MLoc.wk, MLoc.size, MPath.size_wk h b, Val.size_wk h i]
+
+theorem Val.size_wk {Δ : Ctx} (h : Thin Γ Δ) : {p : PrimTy} → (v : Val C Γ p) → (v.wk h).size = v.size
+  | _, .simple _ => rfl
+  | _, .read l => by simp only [Val.wk, Val.size, Loc.size_wk h l]
+  | _, .binop _ _ _ a b => by simp only [Val.wk, Val.size, Val.size_wk h a, Val.size_wk h b]
+  | _, .unop _ _ _ a => by simp only [Val.wk, Val.size, Val.size_wk h a]
+  | _, .ternary c a b => by
+    simp only [Val.wk, Val.size, Val.size_wk h c, Val.size_wk h a, Val.size_wk h b]
+  | _, .readMem l => by simp only [Val.wk, Val.size, MLoc.size_wk h l]
+  | _, .len b _ => by simp only [Val.wk, Val.size, SPath.size_wk h b]
+  | _, .mlen b _ => by simp only [Val.wk, Val.size, MPath.size_wk h b]
+  | _, .modular _ a b k => by
+    simp only [Val.wk, Val.size, Val.size_wk h a, Val.size_wk h b, Val.size_wk h k]
+  | _, .hash _ b _ => by simp only [Val.wk, Val.size, MPath.size_wk h b]
+
+end
+
 end Lowering
 
 /-! ## What a premise emits -/
@@ -266,23 +301,31 @@ def Premise.fmls {Γ' : Ctx} : Premise C Γ Γ' → List ((Δ : Ctx) × Fml C Δ
   | .guardedUpdates c _ _ => [⟨_, c⟩]
   | _ => []
 
-/-- **A premise bounded by `n`**: at most two elements an update, and every
-update's and formula's terms of at most `n` nodes. -/
-structure Premise.Bounded {Γ' : Ctx} (n : Nat) (P : Premise C Γ Γ') : Prop where
-  upds : ∀ U ∈ P.upds, U.2.2.length ≤ 2 ∧ U.2.2.tmSize ≤ n
+/-- **A premise bounded by `n`**: at most `maxUpd` elements per update,
+and every update's and formula's terms of at most `n` nodes. The default
+remains two; lexicographic snapshots state their arity-dependent limit. -/
+structure Premise.Bounded {Γ' : Ctx} (n : Nat) (P : Premise C Γ Γ')
+    (maxUpd : Nat := 2) : Prop where
+  upds : ∀ U ∈ P.upds, U.2.2.length ≤ maxUpd ∧ U.2.2.tmSize ≤ n
   fmls : ∀ φ ∈ P.fmls, φ.2.tmSize ≤ n
 
 namespace Premise.Bounded
 
 variable {Γ' : Ctx}
 
-theorem mono {n n' : Nat} {P : Premise C Γ Γ'} (h : P.Bounded n) (hn : n ≤ n') : P.Bounded n' :=
+theorem mono {n n' maxUpd : Nat} {P : Premise C Γ Γ'}
+    (h : P.Bounded n maxUpd) (hn : n ≤ n') : P.Bounded n' maxUpd :=
   ⟨fun U hU => ⟨(h.upds U hU).1, Nat.le_trans (h.upds U hU).2 hn⟩,
    fun φ hφ => Nat.le_trans (h.fmls φ hφ) hn⟩
 
+/-- Raising the explicit update-length budget preserves the node bound. -/
+theorem mono_upds {n a b : Nat} {P : Premise C Γ Γ'} (h : P.Bounded n a)
+    (hab : a ≤ b) : P.Bounded n b :=
+  ⟨fun U hU => ⟨Nat.le_trans (h.upds U hU).1 hab, (h.upds U hU).2⟩, h.fmls⟩
+
 /-- A premise that writes no update and no formula. -/
-theorem of_nil {n : Nat} {P : Premise C Γ Γ'} (hu : P.upds = []) (hf : P.fmls = []) :
-    P.Bounded n :=
+theorem of_nil {n maxUpd : Nat} {P : Premise C Γ Γ'} (hu : P.upds = []) (hf : P.fmls = []) :
+    P.Bounded n maxUpd :=
   ⟨fun U hU => by rw [hu] at hU; exact absurd hU List.not_mem_nil,
    fun φ hφ => by rw [hf] at hφ; exact absurd hφ List.not_mem_nil⟩
 
@@ -350,12 +393,12 @@ theorem cases {n : Nat} {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)}
     obtain ⟨ψ, hψ, rfl⟩ := hφ
     exact hf ψ hψ⟩
 
-theorem inv {n : Nat} {Δ₀ Δ Γ₁ : Ctx} {I : Fml C Γ} {B : Option (Fml C Γ)}
+theorem inv {n maxUpd : Nat} {Δ₀ Δ Γ₁ : Ctx} {I : Fml C Γ} {B : Option (Fml C Γ)}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {U : Upd C Γ Δ} {c c' : Fml C Δ}
     {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₁} {post : Fml C Δ₀}
-    (hI : I.tmSize ≤ n) (hB : ∀ b, B = some b → b.tmSize ≤ n) (hU : U.length ≤ 2)
+    (hI : I.tmSize ≤ n) (hB : ∀ b, B = some b → b.tmSize ≤ n) (hU : U.length ≤ maxUpd)
     (hU' : U.tmSize ≤ n) (hc : c.tmSize ≤ n) (hc' : c'.tmSize ≤ n) (hp : post.tmSize ≤ n) :
-    (Premise.inv I B xs hv U c c' hu hb P post).Bounded n :=
+    (Premise.inv I B xs hv U c c' hu hb P post).Bounded n maxUpd :=
   ⟨fun W hW => by
     simp only [Premise.upds, List.mem_singleton] at hW
     subst hW; exact ⟨hU, hU'⟩,
@@ -1202,6 +1245,19 @@ theorem assertStep_bounded (c : Val C Γ .bool) : (assertStep k c).Bounded 3 := 
 
 /-! ### Loops -/
 
+/-- Every typed metric tuple carries at least its spine node. -/
+theorem LoopMetrics.size_pos (metrics : LoopMetrics C Γ n) : 0 < metrics.size := by
+  cases metrics <;> simp only [LoopMetrics.size] <;> omega
+
+/-- Erasing a tuple annotation strictly reduces syntax size, even when the
+runtime loop and its invariant remain identical. -/
+theorem LoopAnn.lex_erasure_size (I : Val C Γ .bool) (metrics : LoopMetrics C Γ (n + 2))
+    (brk : Bool) (qs : List (LoopQ C Γ)) :
+    (LoopAnn.inv I none brk qs).size < (LoopAnn.invLex I metrics brk qs).size := by
+  have h := metrics.size_pos
+  simp only [LoopAnn.size]
+  omega
+
 theorem LoopQ.toFml_size : {Γ : Ctx} → (q : LoopQ C Γ) → q.toFml.tmSize ≤ 3 * q.size + 2
   | _, .val a => by
     have := Val.lower_size a
@@ -1243,8 +1299,93 @@ theorem loopBreak_size (brk : Bool) (c : Val C Γ .bool) :
   obtain ⟨x, -, rfl⟩ := hb
   simp only [Fml.tmSize, Tm.size]; omega
 
-theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool)
-    (body : Prog C Γ Γ₁) : (loopStep k m a c body).Bounded (6 * (a.size + c.size) + 18) := by
+theorem LoopMetrics.size_wk {Δ : Ctx} (h : Thin Γ Δ) (metrics : LoopMetrics C Γ n) :
+    (metrics.wk h).size = metrics.size := by
+  induction metrics with
+  | nil => rfl
+  | cons head tail ih => simp only [LoopMetrics.wk, LoopMetrics.size, Val.size_wk, ih]
+
+/-- Every component contributes its own node and at least one expression node. -/
+theorem LoopMetrics.arity_size (metrics : LoopMetrics C Γ n) : 2 * n + 1 ≤ metrics.size := by
+  induction metrics with
+  | nil => exact Nat.le_refl _
+  | cons head tail ih =>
+    have := Val.one_le_size head
+    simp only [LoopMetrics.size]
+    omega
+
+/-- All tuple components are explicit update elements. -/
+theorem LoopLex.snapshot_length (metrics : LoopMetrics C Γ n) :
+    (LoopLex.snapshot k metrics).length = n := by
+  induction metrics generalizing k with
+  | nil => rfl
+  | cons head tail ih => simp only [LoopLex.snapshot, Upd.length, ih]
+
+theorem LoopLex.snapshot_tmSize (metrics : LoopMetrics C Γ n) :
+    (LoopLex.snapshot k metrics).tmSize ≤ 3 * metrics.size := by
+  induction metrics generalizing k with
+  | nil => simp only [LoopLex.snapshot, Upd.tmSize, LoopMetrics.size]; omega
+  | cons head tail ih =>
+    have := Val.lower_size head
+    have := ih (k + 1)
+    simp only [LoopLex.snapshot, Upd.tmSize, Rhs.size, LoopMetrics.size]
+    omega
+
+/-- The comparison is linear in arity and counts every connective. -/
+theorem LoopLex.lexFml_tmSize (a b : LoopLex.Refs Γ n) :
+    (LoopLex.lexFml (C := C) a b).tmSize = 13 * n + 2 := by
+  induction a with
+  | nil => cases b; rfl
+  | cons head tail ih =>
+    cases b with
+    | cons other rest =>
+      simp only [LoopLex.lexFml, Fml.tmSize, Tm.size, ih]
+      omega
+
+/-- Tuple VCs have an explicit arity-plus-condition update budget, and a
+proved linear node bound. Nested new-value snapshots are counted in the post. -/
+theorem LoopLex.diamondPremise_bounded {Γ₁ : Ctx} (I c : Val C Γ .bool)
+    (metrics : LoopMetrics C Γ n) (body : Prog C Γ Γ₁)
+    (xs : List ((t : LTy) × Idx Γ t)) (hv : Option (List Name)) :
+    (LoopLex.diamondPremise k I c metrics body xs hv).Bounded
+      (12 * (I.size + metrics.size + c.size) + 30) (n + 1) := by
+  have hI := Val.lower_size I
+  have hc := Val.lower_size c
+  have hm := LoopLex.snapshot_tmSize k metrics
+  have hn := metrics.arity_size
+  have hiw := Val.lower_size (I.wk (.ofExt (LoopLex.savedExt Γ n)))
+  rw [Val.size_wk] at hiw
+  have hmw := LoopLex.snapshot_tmSize (k + n + 1)
+    (metrics.wk (.ofExt (LoopLex.savedExt Γ n)))
+  rw [LoopMetrics.size_wk] at hmw
+  unfold LoopLex.diamondPremise
+  apply Premise.Bounded.inv
+  · simp only [Fml.tmSize, Tm.size]; omega
+  · intro b hb; cases hb
+  · simp only [Upd.length, LoopLex.snapshot_length]
+    exact Nat.le_refl _
+  · simp only [Upd.tmSize, Rhs.size]; omega
+  · simp only [Fml.tmSize, Tm.size]; omega
+  · simp only [Fml.tmSize, Tm.size]; omega
+  · simp only [LoopLex.diamondPost, LoopLex.snapshotsDecrease, Fml.tmSize, Tm.size,
+      LoopLex.lexFml_tmSize]
+    omega
+
+/-- A tuple's arity is retained by its type, independently of its values. -/
+def LoopMetrics.arity {Γ : Ctx} {n : Nat} (_ : LoopMetrics C Γ n) : Nat := n
+
+/-- Only the selected lexicographic diamond dispatch has a larger update:
+all old components followed by one condition capture. Other dispatches keep
+ their established two-element limit. -/
+def LoopAnn.updateLimit {Γ : Ctx} (m : Modality)
+    (frame : Option (List ((t : LTy) × Idx Γ t) × Option (List Name))) : LoopAnn C Γ → Nat
+  | .invLex _ metrics brk qs =>
+      if LoopLex.eraseAllowed m brk qs frame then 2 else metrics.arity + 1
+  | _ => 2
+
+theorem loopStep_bounded_two (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool)
+    (body : Prog C Γ Γ₁) (hlimit : a.updateLimit m body.frame = 2) :
+    (loopStep k m a c body).Bounded (6 * (a.size + c.size) + 18) := by
   have hc := Val.lower_size c
   cases a with
   | unwind n =>
@@ -1254,6 +1395,11 @@ theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Va
       simp only [Fml.tmSize, Upd.tmSize, Rhs.size, Tm.size]; omega
     | succ n => bnil
   | auto => bnil
+  | invLex I metrics brk qs =>
+    cases m <;> cases brk <;> cases qs <;> cases hf : body.frame <;>
+      simp only [LoopAnn.updateLimit, LoopMetrics.arity, LoopLex.eraseAllowed, hf,
+        Bool.false_eq_true, ↓reduceIte] at hlimit <;>
+      first | omega | (simp only [loopStep, hf]; bnil)
   | inv I dec brk qs =>
     have hI := Val.lower_size I
     have hinv := invFml_size I qs
@@ -1286,6 +1432,40 @@ theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Va
         · simp only [Fml.tmSize, Upd.tmSize, Rhs.size, Tm.size, LoopAnn.size]
           omega
       · bnil
+
+/-- The original local coefficient is retained for every two-element
+(non-lexicographic) dispatch. The tuple case uses a proved larger local bound;
+the global statement coefficient remains sixteen. -/
+theorem loopStep_bounded (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool)
+    (body : Prog C Γ Γ₁) :
+    (loopStep k m a c body).Bounded (12 * (a.size + c.size) + 30)
+      (a.updateLimit m body.frame) := by
+  cases a with
+  | unwind n =>
+    exact (loopStep_bounded_two k m (.unwind n) c body rfl).mono (by omega)
+  | auto => exact (loopStep_bounded_two k m .auto c body rfl).mono (by omega)
+  | inv I dec brk qs =>
+    exact (loopStep_bounded_two k m (.inv I dec brk qs) c body rfl).mono (by omega)
+  | invLex I metrics brk qs =>
+    cases m with
+    | box => bnil
+    | diamond =>
+      cases brk with
+      | true => bnil
+      | false =>
+        cases qs with
+        | cons q qs => bnil
+        | nil =>
+          cases hf : body.frame with
+          | none => simp only [loopStep, hf]; bnil
+          | some frame =>
+            obtain ⟨xs, hv⟩ := frame
+            simpa only [loopStep, hf, LoopAnn.updateLimit, LoopLex.eraseAllowed,
+              Bool.false_eq_true, ↓reduceIte, LoopMetrics.arity, LoopAnn.size,
+              List.map_nil, List.sum_nil, Nat.add_zero] using
+              (LoopLex.diamondPremise_bounded k I c metrics body xs hv).mono
+                (n' := 12 * ((LoopAnn.invLex I metrics false []).size + c.size) + 30)
+                (by simp only [LoopAnn.size, List.map_nil, List.sum_nil]; omega)
 
 /-! ### Calls, `try`, receivers -/
 
@@ -1423,16 +1603,40 @@ theorem ReceiverValue.step_bounded {ps Γf : Ctx} {E : Ty} (f : Name) (args : Ar
 
 end Arms
 
+/-- The update-element budget of the actual dispatch. It is two for
+all non-lexicographic dispatches, and tuple arity plus one for the selected
+ordinary lexicographic diamond rule. -/
+def Stmt.updateLimit (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Nat :=
+  Stmt.casesOn (motive_1 := fun _ _ _ => Nat) s
+    (assign := fun _ _ => 2) (rebind := fun _ _ => 2) (assignLocal := fun _ _ => 2)
+    (declLocal := fun _ _ _ => 2) (declStorage := fun _ _ _ => 2)
+    (opAssign := fun _ _ _ _ _ => 2) (incDec := fun _ _ _ => 2)
+    (assignIncDec := fun _ _ _ _ _ => 2) (assignLocalPush := fun _ _ => 2)
+    (push := fun _ _ _ => 2) (pop := fun _ => 2)
+    (transfer := fun _ _ => 2) (send := fun _ _ _ _ => 2)
+    (declMem := fun _ _ _ _ _ => 2) (rebindMem := fun _ _ => 2)
+    (assignFromMem := fun _ _ => 2) (assignMem := fun _ _ => 2) (delete := fun _ => 2)
+    (deleteMem := fun _ _ => 2) (assignNew := fun _ _ _ => 2)
+    (ite := fun _ _ _ => 2) (require := fun _ => 2) (assert := fun _ => 2)
+    (revert := 2) (assumeFalse := 2) (call := fun _ _ _ _ => 2)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => 2)
+    (loop := fun a _ body => a.updateLimit m body.frame) (block := fun _ => 2)
+    (pushOpAssign := fun _ _ _ _ _ => 2) (pushIncDec := fun _ _ _ => 2)
+    (callReceiver := fun _ _ _ _ _ => 2) (callReceiverPush := fun _ _ _ _ _ _ => 2)
+    (callRec := fun _ _ _ _ _ => 2) (revertData := fun _ => 2)
+    (catchData := fun _ _ _ _ _ _ _ _ => 2)
+
 /-! ## Every rule -/
 
 section Step
 
 variable (k : Nat) (m : Modality)
 
-/-- **Every rule is bounded by its statement**: at most two elements an
-update, and every emitted term of at most `16 * s.size + 16` nodes. -/
+/-- **Every rule is bounded by its statement**: the explicit update-length
+budget of its dispatch, and every emitted term of at most `16 * s.size + 16`
+nodes, including all tuple snapshots and lexicographic comparisons. -/
 theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
-    (s.step k m).Bounded (16 * s.size + 16) := by
+    (s.step k m).Bounded (16 * s.size + 16) (s.updateLimit m) := by
   cases s with
   | assign l r => exact (assignStep_bounded k l r).mono (by simp only [Stmt.size]; omega)
   | rebind i r => exact (rebindStep_bounded k i r).mono (by simp only [Stmt.size]; omega)
@@ -1503,10 +1707,17 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
     unfold catchDataStep
     split <;> bnil
 
-/-- **A rule writes at most two elements an update.** -/
+/-- **Every generated update fits its source dispatch's explicit budget.** -/
 theorem Stmt.step_upds_le {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
-    ∀ U ∈ (s.step k m).upds, U.2.2.length ≤ 2 :=
+    ∀ U ∈ (s.step k m).upds, U.2.2.length ≤ s.updateLimit m :=
   fun U hU => ((Stmt.step_bounded k m s).upds U hU).1
+
+/-- **Non-lexicographic dispatches still write at most two elements per
+update.** Their computed `updateLimit` is definitionally two; unsupported
+lexicographic fragments also keep this limit through annotation erasure. -/
+theorem Stmt.step_upds_le_two {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
+    (h : s.updateLimit m = 2) : ∀ U ∈ (s.step k m).upds, U.2.2.length ≤ 2 := by
+  simpa only [h] using Stmt.step_upds_le k m s
 
 /-- **Every term a rule emits is linear in its statement**, in an update or
 in a formula, whatever the types. -/

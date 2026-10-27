@@ -82,8 +82,9 @@ inductive RawExpr where
   | named (f : String) (names : List String) (args : List RawExpr)
   /-- `msg.sender`, `address(this).balance`, …: a value of the environment. -/
   | env (k : EnvKey)
-  /-- `(a, b)`, two components or more: only the right-hand side of a tuple
-  assignment (`RawStmt.tupleAssign`) or a `return` of several values. -/
+  /-- `(a, b)`, two components or more: the right-hand side of a tuple
+  assignment (`RawStmt.tupleAssign`), a `return` of several values, or a
+  loop's ordered `uint` lexicographic variant. -/
   | tuple (es : List RawExpr)
   /-- `(l = r)` inside an expression: the value assigned, the write made
   before the statement (`hoist`; solkey's `localCopyAssignmentValue`,
@@ -111,7 +112,8 @@ def RawInv.exprs : RawInv → List RawExpr
 
 /-- A loop's specification as read, solkey's `///` lines above the loop:
 `/// @custom:key invariant e` (several conjoined), `/// @custom:key
-decreases e` (at most one) and, Lean only, `/// @custom:key unwind k`, the
+decreases e` (at most one; a scalar or a tuple of at least two `uint`
+expressions) and, Lean only, `/// @custom:key unwind k`, the
 bound on unwinding (`LoopAnn`). -/
 structure RawLoopSpec where
   inv : List RawExpr := []
@@ -390,15 +392,23 @@ operators and assignment targets keep their existing sequencing. -/
 structure EvalOrder where
   binaryLeftToRight : Bool := false
   modularLeftToRight : Bool := false
+  /-- Modifier placeholders have separate function parameter/return slots. -/
+  modifierFrames : Bool := false
   deriving Repr, Inhabited
 
 /-- Solidity's IR code generator evaluates ordinary expressions in source order. -/
-def EvalOrder.viaIR : EvalOrder := ⟨true, true⟩
+def EvalOrder.viaIR : EvalOrder := ⟨true, true, true⟩
 
 /-- A contract carries the validity of its storage declaration. The proof
 fields are erased when programs run; literals discharge them by computation. -/
 structure Contract where
   vars : List (Name × Ty)
+  /-- Transaction-local roots of the joint logical store. Root identities remain
+  unique across both regions; raw EVM slots are not represented here. -/
+  transientRoots : List Name := []
+  /-- Transient declarations must name existing primitive cells. -/
+  transient_ok : transientRoots.all (fun n => match lookupBy n vars with
+    | some (.prim _) => true | _ => false) = true := by first | rfl | decide
   funs : List (Name × FunDecl) := []
   /-- Its enums, each with its members in order: `State.Locked` is the
   `uint` literal `1` (an enum is read as `uint`, as `address` is). -/
@@ -685,9 +695,11 @@ syntax:max &"address" &"payable" : sol_ty
 /-- `function (uint) pure returns (uint)`: a function type, read as the
 `uint` tag of a function (`fnTy?`, "Function types" below); its mutability
 is dropped. -/
-syntax:max (name := solFnTy) &"function" "(" sol_ty,* ")"
+declare_syntax_cat sol_fn_component
+syntax sol_ty (ppSpace (&"memory" <|> &"storage" <|> &"calldata"))? : sol_fn_component
+syntax:max (name := solFnTy) &"function" "(" sol_fn_component,* ")"
   (ppSpace (&"internal" <|> &"external" <|> &"pure" <|> &"view" <|> &"payable"))*
-  (ppSpace &"returns" " (" sol_ty,* ")")? : sol_ty
+  (ppSpace &"returns" " (" sol_fn_component,* ")")? : sol_ty
 
 /-- `ty!(mapping(uint => Person))`: a type written as Solidity does. -/
 syntax "ty!(" sol_ty ")" : term

@@ -583,7 +583,7 @@ theorem unclaimedTaclets_count : unclaimedTaclets.length = 35 := by decide +kern
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet. There are eighteen:
+every row above claims a taclet. The Lean-only rules include:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
@@ -595,7 +595,10 @@ the diamond closed to `false`, where solkey's diamond rules are not ported;
 `true` (solkey has no such statement); `loopExit`, the loop at its bound; and
 `whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
 `false` where its body has no frame or, under the diamond, it has no
-variant (solkey unwinds those); and `pushCompoundUnfoldReceiver` and
+variant (solkey unwinds those). `loopLexErase` erases typed tuples under the
+box and in unsupported diamond fragments. `whileInvariantLexDiamond` checks
+every declared component and strict lexicographic decrease in the supported
+ordinary diamond fragment, retaining its exhaustion policy. `pushCompoundUnfoldReceiver` and
 `pushIncrementUnfoldReceiver`, which capture a complex receiver when push is
 used as an arithmetic lvalue (upstream only captures the receiver of a bare
 push statement). `pushMemorySourceCapture` handles a complex memory push
@@ -617,7 +620,8 @@ constructors, so one added later has to say so here. -/
 def leanTaclets : List Lean.Name :=
   [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment, ``LeanTaclet.hashAssignment,
     ``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
-    ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
+    ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.loopLexErase, ``LeanTaclet.whileInvariantLexDiamond,
+    ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
     ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave,

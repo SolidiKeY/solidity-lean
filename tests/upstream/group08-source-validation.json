@@ -1,0 +1,745 @@
+{
+  "continuedFrom": "bcd86b8373c5e4aa5d094b5b340aa6d2c41482a4",
+  "branch": "codex/group08-source-lowering",
+  "implementationCommits": [
+    "4003dbd7",
+    "4b638b43",
+    "d5a68ddb"
+  ],
+  "scope": "Declaration selector admission, unusable-specification diagnostic routing, and exact Calldata resource/semantic diagnosis; whole source validation remains incomplete",
+  "runtime": {
+    "executor": "ccarenv_b64_Y2NhcmVudl8zYTJlY2UzNDA5OWM4MTkxOGFmMjEwNTYxNTQzYjk4NA",
+    "activation": "source /workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b)",
+    "lake": "5.0.0-src+797c613",
+    "freshRuntimeGate": "lean --version; lake --version; lake build Solidity.KeySort (successful2jobs)",
+    "diagnostics": "No Lean MCP diagnostic tools exposed; configured per-file lake --quiet --no-build lean FILE -- --tstack=131072 and target builds used"
+  },
+  "fixtures": {
+    "path": "tests/upstream/group08-source-validation-results.json",
+    "sha256": "b05ae4b3d60c112ca562fe546309e739c534c665d6a06d25a7128cf8d162167c",
+    "counts": {
+      "working": 23,
+      "broken": 0,
+      "blocked": 0,
+      "variants": 46,
+      "observations": 58
+    },
+    "modelSha256": "1e5887ad79a3eaf4a20b18b86a46f176f9504385eb1d8092b8383dce186b160b",
+    "seconds": 152.76644916299847,
+    "comparison": "All23 complete result objects exactly equal preserved bcd evidence;46required legacy/viaIR variants and58observations retained"
+  },
+  "sourceApiCompiler": {
+    "version": "0.8.34+commit.80d5c536",
+    "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "pipeline": "legacy analysis; separate from upstream fixture0.8.38 both-pipeline runtime checks"
+  },
+  "sourceRepairs": {
+    "selectors": {
+      "before": "errorSelector/eventSelector unsupported on exact62338 and bcd source; static error/event refs misclassified as stored function values",
+      "after": "unchanged original metadata assertion passes15rows:13proved,1internal,1deliberately pending false property",
+      "proofEvidence": "original unchanged test assertion and two kernel-checked native selector theorems; diagnostic listing ready statuses are not proof checkpoints",
+      "metadataAstIdenticalOnBaseAndCurrent": true
+    },
+    "natspec": {
+      "before": "bad() safely unsupported with expected-end-of-input diagnostic and errors0",
+      "after": "same refused row retained, structured syntax diagnostic, one API specification error when every selected noninternal/nonskipped completed candidate depends on invalid clause syntax",
+      "mixedReport": "no global error in usable mixed reports;37SpecBindings rows retained with errors[]; malformedRenamed remains unsupported",
+      "observations": "No injected premise admitted before or after; no assertion/source expectation edited",
+      "transitiveControl": "valid selected caller retains invalid callee refusal and one unusable-selection error"
+    },
+    "unchangedFocusedAssertions": {
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "--test-name-pattern=declaration metadata proves|a NatSpec expression",
+        "scripts/declarations-metadata.test.mjs",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0,
+      "seconds": 197.435558417,
+      "log": ".lake/upstream/group08/source-followup/unchanged-focused-assertions.log"
+    },
+    "finalDiagnosticPolicyTest": {
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/declaration-validation.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 34.177361191,
+      "log": ".lake/upstream/group08/source-followup/diagnostic-policy-final.log"
+    },
+    "finalNatSpecOriginalAssertion": {
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "--test-name-pattern=a NatSpec expression",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 1,
+      "seconds": 3.480520838,
+      "log": ".lake/upstream/group08/source-followup/natspec-final.log"
+    }
+  },
+  "calldata": {
+    "originalReports": [
+      {
+        "path": ".lake/upstream/group08/resume/baseline-Calldata-report.json",
+        "sha256": "cfbb249d3d20511773a77e04b450e07ca003fcf287969bdd2106e73ed3328d28"
+      },
+      {
+        "path": ".lake/upstream/group08/resume/current-Calldata-checkpoints.json",
+        "sha256": "05e05c968cb849ba9d370bc5795543afdb24f2a63861e879aa192456c4da8e5e"
+      }
+    ],
+    "phaseEvidence": [
+      {
+        "path": ".lake/upstream/group08/source-followup/calldata-phases.log",
+        "sha256": "ecf441f7b380c11856d34b91e8b22ee78dda9f97b06eebe8736b0e18e3b4b767"
+      },
+      {
+        "path": ".lake/upstream/group08/source-followup/calldata-large-phases.log",
+        "sha256": "841c74597ced60475a545565a1790eb3eefa346d5f25dc14827082ddfd37d538"
+      }
+    ],
+    "smallStages": "16..1024 all return none in612ms combined; import1776ms/scoped213ms/tail56ms/evaluable1ms/callback62ms(false)",
+    "largeStagesMs": {
+      "2048": 1098,
+      "4096": 5304,
+      "8192": 32711,
+      "16384": "does not return before remaining~260s job budget;20000stage never reached"
+    },
+    "resourceRecords": [
+      {
+        "command": [
+          "lake",
+          "--quiet",
+          "--no-build",
+          "lean",
+          ".lake/upstream/group08/source-followup/MeasureCalldataFileTrace.lean",
+          "--",
+          "--tstack=131072"
+        ],
+        "exitCode": -9,
+        "timedOut": true,
+        "timeoutMs": 300000,
+        "seconds": 300.4584334520041,
+        "sampledPeakLeanRssKiB": 1343964
+      },
+      {
+        "command": [
+          "lake",
+          "--quiet",
+          "--no-build",
+          "lean",
+          "/workspace/solidity-lean/.lake/upstream/group08/source-followup/MeasureCalldataLarge.lean",
+          "--",
+          "--tstack=131072"
+        ],
+        "exitCode": -9,
+        "timedOut": true,
+        "timeoutMs": 300000,
+        "seconds": 300.977533655001,
+        "sampledPeakLeanRssKiB": 1386360
+      }
+    ],
+    "formalCertificate": {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/DeclarationSourceValidation.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 3.5254885110043688,
+      "log": ".lake/upstream/group08/source-followup/source-negative-control-semantic-sealed.log",
+      "logSha256": "59e12a095ca8293e0b28f46ffaf58642c2da30bee0fc17a153d92d5600b78a0f"
+    },
+    "formalClaim": "\u00ac Fml.Valid exact imported Calldata.sliceHashed.problem, plus \u00ac\u22a2 by existing soundness, at initialized valid empty bytes with every refInputs/callPre(byte ranges and address160)/wt premise intact",
+    "controls": "explicit error.revert at length0; actual normal return at lengths4and5;32fuel below existing1000, no exhaustion accepted as success",
+    "genericRefuterLimit": "TDom.bind for memory is only[none];Cand.tstate has empty heap;2000candidate failed search proves neither validity nor refutation",
+    "apiOutcome": "original notRun/ETIMEDOUT remains blocked; certificate is separate and does not relabel timeout as a pass or expected failure",
+    "neededScope": "bounded initialized-reference-aware negative validation/certified replay for this false diamond; a copy summary alone cannot prove it. No added length premise or changed tag is authorized."
+  },
+  "broaderSourceGate": {
+    "priorEvidence": {
+      "path": "tests/upstream/group08-resumed-validation.json",
+      "sha256": "2cf835879428c88cc901d807fc81cbe58fdbdd795b371bef68d8c4da00a9651e"
+    },
+    "originalLog": {
+      "path": ".lake/upstream/group08/resume/source-suite-final.log",
+      "sha256": "5db016e37df05ffcda07fc633d6dc9e151db5716033ad350f78877e84f23dfc1"
+    },
+    "originalCounts": {
+      "passed": 47,
+      "failed": 14
+    },
+    "wholeGatePassed": false,
+    "wholeSuiteRerun": false,
+    "reason": "Do not repeat established gates; focused unchanged declaration assertions repaired, affected mixed SpecBindings rechecked and still fails at tryScopeExit. Remaining obligations are not promoted by provenance.",
+    "remaining": [
+      {
+        "case": "Runner",
+        "status": "failed unchanged assertion",
+        "detail": "assembly excluded versus expected unsupported; exclusion not loosened"
+      },
+      {
+        "case": "Bytes.indexOutOfRange",
+        "status": "pending versus required proved",
+        "detail": "bounds/failure and closer diagnosis remains separate; no proof success inferred"
+      },
+      {
+        "case": "modern full-source TestSuite API",
+        "status": "code-generator recursion/resource limit",
+        "detail": "separate from the passing249-job frozen kernel build"
+      },
+      {
+        "case": "ReferenceParameters.copiesBeforeEffects",
+        "status": "proved versus expected pending",
+        "detail": "proved result retained; no degradation to satisfy stale expectation"
+      },
+      {
+        "case": "SpecImport",
+        "status": "failed unchanged assertion",
+        "detail": "omitted body excluded versus expected unsupported; exclusion retained"
+      },
+      {
+        "case": "SpecBindings.tryScopeExit",
+        "status": "pending versus required proved",
+        "detail": "fresh37-row report has no API errors; printed age_/age__/state-age scopes remain distinct; original test still fails"
+      },
+      {
+        "case": "solc/open.tryArgumentSideEffect",
+        "status": "pending versus required proved",
+        "detail": "effectful try-argument/callback proof support requires separate repair"
+      },
+      {
+        "case": "RevertData.reasonBytes/reasonOfBranch/reasonPastCustom",
+        "status": "pending versus required proved",
+        "detail": "retained18-row baseline/current evidence; no timeout or baseline match counted as proof"
+      },
+      {
+        "case": "Calldata.localAlias",
+        "status": "unsupported versus required proved",
+        "detail": "standalone sol_raw path loses calldata origin while converting synthetic parameter declarations to memory; propagation must occur after those declarations with lexical/read-only checks intact"
+      },
+      {
+        "case": "Calldata.sliceRead/sliceOfSlice/slicePast",
+        "status": "pending versus required proved",
+        "detail": "retained source proofs remain unfinished"
+      },
+      {
+        "case": "Calldata.sliceHashed",
+        "status": "automated API resource blocked; exact source diamond separately refuted",
+        "detail": "300000ms scoped-search interruption at16384-step compiled stage; initialized empty-byte kernel certificate preserves every source premise. Original row stays notRun/blocked, not passing or expected failure"
+      },
+      {
+        "case": "Hashing nested codec rows",
+        "status": "four20000-step walk errors",
+        "detail": "encodeNested/encodeDynStruct/decodeNested/decodeDynStruct; sourceJS test success does not imply full proof coverage"
+      }
+    ],
+    "aggregateResourceRechecksReused": {
+      "MemoryPush": "9rows6proved3pending;complete original expectations/noerrors",
+      "NarrowNested": "30rows28proved2internal;complete original expectations/noerrors",
+      "Recursion": "15rows14proved1pending;complete original expectations/noerrors",
+      "rerun": false
+    }
+  },
+  "controlRuns": [
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 3.267832654004451,
+      "log": "/workspace/solidity-lean/.lake/upstream/group08/source-followup/final-control-Replay.log",
+      "logSha256": "25396d578817eb7af932923e4f66ebb794f7504e2d9bf3d0417e4cccb7d874d5"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/RemainingDeclarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 18.884700932998385,
+      "log": "/workspace/solidity-lean/.lake/upstream/group08/source-followup/final-control-RemainingDeclarations.log",
+      "logSha256": "a759c32031102e428a3372bc1c979f01f53da09132da2841e31257dd23acea01"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Declarations.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 31.12154275699868,
+      "log": "/workspace/solidity-lean/.lake/upstream/group08/source-followup/final-control-Declarations.log",
+      "logSha256": "e0202fe7d743e730093722812a1c0110fe615d12f439639c2dae5d9f52bf0276"
+    },
+    {
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/DeclarationSourceValidation.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 3.5254885110043688,
+      "log": ".lake/upstream/group08/source-followup/source-negative-control-semantic-sealed.log",
+      "logSha256": "59e12a095ca8293e0b28f46ffaf58642c2da30bee0fc17a153d92d5600b78a0f"
+    }
+  ],
+  "buildGates": [
+    {
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "exitCode": 0,
+      "seconds": 1325.5385491359993,
+      "log": ".lake/upstream/group08/source-followup/final-run-lean.log",
+      "logSha256": "99fa69cd66495bd4fe7bb8e18e02619eb3d15d2038dec16201c8f1745360975d"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "SolidityCorpus"
+      ],
+      "exitCode": 0,
+      "seconds": 35.089287012997374,
+      "log": ".lake/upstream/group08/source-followup/final-corpus-build.log",
+      "logSha256": "c2f67ef2834967385a4c7d0e887636296b2705831d28206bfa7e5e9d3f177297"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh"
+      ],
+      "exitCode": 0,
+      "seconds": 15.094926434998342,
+      "log": ".lake/upstream/group08/source-followup/final-corpus-check.log",
+      "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+    }
+  ],
+  "quickGates": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs",
+        "scripts/solc-code.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.12217436799983261,
+      "log": ".lake/upstream/group08/source-followup/runner-tests.log",
+      "logSha256": "e1f0a67e8d0b252845bda9919b87ab481183105415990461ad585ff09f905bb9"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "seconds": 1.0960693890010589,
+      "log": ".lake/upstream/group08/source-followup/snapshot.log",
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.15188880999630783,
+      "log": ".lake/upstream/group08/source-followup/orphans.log",
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.1506364669985487,
+      "log": ".lake/upstream/group08/source-followup/layers.log",
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "seconds": 0.04575185300200246,
+      "log": ".lake/upstream/group08/source-followup/automation.log",
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group08/source-followup/testsuite-audit-frozen.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group08/source-followup/testsuite-audit-configured-final.log",
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group08/source-followup/feature-audit.log",
+      "logSha256": "6ed84a1af872116bc291537bf6abae1359b341e89c39e92f5ed0ce7629292b4d"
+    }
+  ],
+  "proofBoundary": {
+    "newAxioms": 0,
+    "newSorry": 0,
+    "raisedHeartbeatsOrProofLimits": false,
+    "representationRefactor": false,
+    "coreDependenciesChanged": false,
+    "standardAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "scopeCertificateAxioms": [],
+    "axiomEvidence": [
+      {
+        "path": ".lake/upstream/group08/source-followup/axioms.log",
+        "sha256": "ec3990870c3993dd1b0fbacffb96b7298a0a04d82d03118086538d7fb74e98ae"
+      },
+      {
+        "path": ".lake/upstream/group08/source-followup/source-negative-control-final.log",
+        "sha256": "933c4c5c3a5b1cfcc6de68cfd800a3873d2279363307739dd0c88c1fcd702ed8"
+      },
+      {
+        "path": ".lake/upstream/group08/source-followup/source-negative-control-sealed.log",
+        "sha256": "b87628bfd4dbbcbba9e0aa9bea5b9339339c0b589fa57069a380eb64075d6060"
+      },
+      {
+        "path": ".lake/upstream/group08/source-followup/source-negative-control-semantic-sealed.log",
+        "sha256": "59e12a095ca8293e0b28f46ffaf58642c2da30bee0fc17a153d92d5600b78a0f",
+        "kind": "successful guard_msgs check pins all5axiom outputs"
+      }
+    ],
+    "universalCompilerEquivalenceClaimed": false,
+    "allFiveSourceCertificateAndControlAxiomOutputsPinnedByGuardMsgs": true,
+    "finalSourceCertificate": {
+      "path": "tests/upstream/DeclarationSourceValidation.lean",
+      "sha256": "39dc42fcc95bc1c4289935a1a901b5a62f8605b8a04d663d15896c95b378b555"
+    }
+  },
+  "inputs": [
+    {
+      "path": "tests/solc/DeclarationMetadata.sol",
+      "sha256": "75ce2d78cd90ab78ca25938cc4f603a08a7b350cd19d4811d03d24bc43a532f4"
+    },
+    {
+      "path": "tests/solc/DeclarationMetadata.ast.json",
+      "sha256": "8d1309530f873a4416e1787f7b83ed29de58bcb8e6939cb961fc1475c5300de7"
+    },
+    {
+      "path": "tests/solc/DeclarationMetadataAdmission.ast.json",
+      "sha256": "41a629bc3d0da7a79aa50b412e2788a9bbf9135485eb0f47e90a344ea530a92e"
+    },
+    {
+      "path": "tests/solc/Calldata.sol",
+      "sha256": "52fa7213c18fab08a93b4b9488284330f7dc27dcbfbba285cab689fe46018c31"
+    },
+    {
+      "path": "tests/solc/CalldataValidation.ast.json",
+      "sha256": "bc3d58b78671619cee74bdbb0faf9427e5e6f5c2ba20d53d52bf61dbaef3b513"
+    },
+    {
+      "path": "tests/solc/SpecBindings.sol",
+      "sha256": "eb32a57f0c906b0fde391e93dc66a7f94800d8154127d2b7584b0b8b1d7d3d0c"
+    },
+    {
+      "path": "tests/upstream/DeclarationSourceValidation.lean",
+      "sha256": "39dc42fcc95bc1c4289935a1a901b5a62f8605b8a04d663d15896c95b378b555"
+    }
+  ],
+  "diagnosticReports": [
+    {
+      "path": ".lake/upstream/group08/source-followup/metadata-before.json",
+      "sha256": "3ff74a3803e31716d38d7d203daff43f16f3dc497a10583ca316ae9e49102e64",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/metadata-62338-selected.json",
+      "sha256": "0727ee5fec005c6c40dc1bec4118263c900e72c65d80d500df40ec7d45dac9a6",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/metadata-current-listing.json",
+      "sha256": "85a3e9a0bfc85768bf60c1fa7b475e0b45d19554991ff7fe067047c1f8a1e50c",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/natspec-before.json",
+      "sha256": "924cb2edce05fa204af20f4027713804587d4655e4f1ea1d187be196ed89649b",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/natspec-62338.json",
+      "sha256": "924cb2edce05fa204af20f4027713804587d4655e4f1ea1d187be196ed89649b",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/natspec-after.json",
+      "sha256": "fe4928eec04b08b4a2d46b02b7768f33f5838ec97f774624ed538de34c5c9596",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/unchanged-focused-assertions.log",
+      "sha256": "f1a89b87438cdf3ca17ea569f16027cbf8eed086a14b2bf3c110be1f21fd3aba",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/diagnostic-policy-final.log",
+      "sha256": "abf3a4b5eec24c32b94063e4401b8ce833ad05a3315e6969ecd2933d34e6b172",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/diagnostic-policy-final-result.json",
+      "sha256": "07818db839063759e30a47b4d4da8f02386c8d4ed547f5408f3e127a77f95ad6",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/natspec-final.log",
+      "sha256": "f206c6f7e5e71c1749235c95f67757c672f3f13272eafebcee97c6c9dd6c8878",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/natspec-final-result.json",
+      "sha256": "07818db839063759e30a47b4d4da8f02386c8d4ed547f5408f3e127a77f95ad6",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/specbindings-current.json",
+      "sha256": "675f8ecf9439c9159865f0968bd319b0d6a3661d9d9319421860baf4add5044e",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/specbindings-unchanged-assertion.log",
+      "sha256": "03b91ce8b925080beef79fc395d49ac081012b49d8e80a792eae94502499614f",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/shown-declarations.log",
+      "sha256": "1edce52fe26cc8515e8092d018d3e1b1305cd9ff74114576718a2e332a4c4cff",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/shown-declarations-result.json",
+      "sha256": "07818db839063759e30a47b4d4da8f02386c8d4ed547f5408f3e127a77f95ad6",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/metadata-controls-modern.log",
+      "sha256": "1d71af6d939858beebc9df1fcf518d1055ef9ec3863ceae2afca9c2a37a7181c",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/axioms.log",
+      "sha256": "ec3990870c3993dd1b0fbacffb96b7298a0a04d82d03118086538d7fb74e98ae",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/source-negative-control-final.log",
+      "sha256": "933c4c5c3a5b1cfcc6de68cfd800a3873d2279363307739dd0c88c1fcd702ed8",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/source-negative-control-sealed.log",
+      "sha256": "b87628bfd4dbbcbba9e0aa9bea5b9339339c0b589fa57069a380eb64075d6060",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/calldata-phases.log",
+      "sha256": "ecf441f7b380c11856d34b91e8b22ee78dda9f97b06eebe8736b0e18e3b4b767",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/calldata-file-trace-resources.json",
+      "sha256": "eb9b5a226edd30bd3d2d7aaae2cf8f24a7380a1729bb5be92d5d1269e8d322ee",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/calldata-large-phases.log",
+      "sha256": "841c74597ced60475a545565a1790eb3eefa346d5f25dc14827082ddfd37d538",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/calldata-large-walk-resources.json",
+      "sha256": "7db797dbee1091d0274621a4f9e12610c907bc61544dd92429b34eb6cce8d841",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    },
+    {
+      "path": ".lake/upstream/group08/source-followup/configured-solkey-pin-recovery.json",
+      "sha256": "66f71a19d963ace9b5484968728dbb00b78848227ff22ae71d05da12c568db02",
+      "kind": "source/API/phase diagnostic; proof status only where explicitly certified"
+    }
+  ],
+  "historicalEvidencePreserved": [
+    {
+      "path": "tests/upstream/group08-validation.json",
+      "sha256": "1a96ad711efb437b30390cb9b93b6411d19c8238671db9e1a21d4b287c1da4d3"
+    },
+    {
+      "path": "tests/upstream/group08-resumed-validation.json",
+      "sha256": "2cf835879428c88cc901d807fc81cbe58fdbdd795b371bef68d8c4da00a9651e"
+    },
+    {
+      "path": "tests/upstream/group08-resumed-results.json",
+      "sha256": "f02ec9c4481cfd5f23c01c0b1c00e7f34c60a3c9e56210635e72cc0c020de0cb"
+    },
+    {
+      "path": ".lake/upstream/group08/group08.patch",
+      "sha256": "db3c3bdf1e0ad4abf1bcb9d446552e4f792c494b7522b7fb9beb9fc81977ccd3"
+    },
+    {
+      "path": ".lake/upstream/group08/group08-logs.tar.gz",
+      "sha256": "e55199d00b30b46a9350b1097511cda61e6cacbe4f3201542f46921d4fcf1c95"
+    },
+    {
+      "path": ".lake/upstream/group08/resume/group08-resumed.patch",
+      "sha256": "3a86cb2364ebb6d136d59893680a0adf047ceee4b123aa79595ca0d3652c36c4"
+    },
+    {
+      "path": ".lake/upstream/group08/resume/group08-combined.patch",
+      "sha256": "48552e2f5d7d1c579637cace469ca4a940a6311296402b68d86041214da7d8f6"
+    },
+    {
+      "path": ".lake/upstream/group08/resume/group08-resumed-logs.tar.gz",
+      "sha256": "679463b96dcba7c4e2bc7ddc1c2bd9aa85c529ebe5194f0d4699870b0e91cfe9"
+    }
+  ],
+  "developmentEvidence": {
+    "initialFailedBuild": [
+      {
+        "command": [
+          "bash",
+          "run-lean.sh"
+        ],
+        "exitCode": 1,
+        "seconds": 1273.8587902250001,
+        "log": ".lake/upstream/group08/source-followup/run-lean.log",
+        "logSha256": "8c15f6145cd40501e192e19b267a7b8e2da8e07a5ef6d9f8676daf15d9c4f9d5"
+      }
+    ],
+    "cause": "new test incorrectly scanned legacy AST as modern; corrected with separate complete modern fixture and explicit legacy refusal, validator not weakened",
+    "failedSetupAudit": [
+      {
+        "command": [
+          "bash",
+          "scripts/check-testsuite.sh"
+        ],
+        "exitCode": 1,
+        "seconds": 0.05181094400177244,
+        "log": ".lake/upstream/group08/source-followup/testsuite-audit.log",
+        "logSha256": "da460c61fe206b86f08c78d59c984ab5e83f46c380fb72985571a40561a9996f"
+      }
+    ],
+    "setupRecovery": {
+      "path": ".lake/upstream/group08/source-followup/configured-solkey-pin-recovery.json",
+      "sha256": "66f71a19d963ace9b5484968728dbb00b78848227ff22ae71d05da12c568db02"
+    },
+    "otherAttempts": "buffered/elaboration-invalid diagnostics and failed counterexample/proof development logs retained as development only; not proof passes or axiom evidence"
+  },
+  "dependencyReuse": "After full final649/249/sort/corpus passes, only test-outside-Solidity proof guards/docs/evidence changed; final per-file source control passes. No production dependencies changed; no repeat broad gates required.",
+  "reviews": {
+    "finder": "read-only/noLean: confirmed static selectors, syntax policy/transitive control, modern fixture correction, exact source negative premise preservation; audited all69 final fixture report/log/summary hashes and all sources",
+    "skeptic": "independent read-only/noLean: same final evidence checked; corrected loop-only diagnosis with exact refutation; axiom-output guards added; no remaining confirmed implementation issue",
+    "finalReferencedHashCount": 72,
+    "finalFixtureHashCount": 69,
+    "confirmedIssuesRemaining": 0
+  },
+  "patchStatus": {
+    "localOnly": true,
+    "noPushOrMerge": true,
+    "fullSourceRepairClaimed": false,
+    "exports": "source-followup/group08-source-validation.patch and combined patch/log archive; handoff-artifacts.json records final commit and artifact hashes after export"
+  },
+  "auditLimits": {
+    "gates": [
+      {
+        "command": [
+          "bash",
+          "scripts/check-doc-paths.sh"
+        ],
+        "exitCode": 1,
+        "seconds": 5.460337350996269,
+        "log": ".lake/upstream/group08/source-followup/doc-paths-sealed.log",
+        "logSha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+      },
+      {
+        "command": [
+          "bash",
+          "scripts/check-trust.sh"
+        ],
+        "exitCode": 1,
+        "seconds": 3.6607883570031845,
+        "log": ".lake/upstream/group08/source-followup/trust-final.log",
+        "logSha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+      }
+    ],
+    "trustFindings": 25,
+    "trustInventoriedSites": 232,
+    "newTrustSites": false,
+    "trustOutputExactlyEqual62338": true,
+    "docPathMissingReferences": 13,
+    "docPathOutputExactlyEqual62338": true,
+    "bothAuditsPassed": false,
+    "citationCorrection": "Existing Contract.lean basename citation was made explicit; initial extra ambiguity warning is retained in doc-paths-final.log"
+  }
+}

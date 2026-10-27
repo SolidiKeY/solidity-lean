@@ -151,23 +151,34 @@ private structure GetterPath where
   inputs : List GetterInput := []
   guards : List String := []
 
-/-- This milestone supports elementary value inputs/results. Bytes/string
+/-- Elementary and primitive UDVT inputs/results. Bytes/string
 are references and must not be silently omitted from a struct getter. -/
-private def getterValueType (S : Structs) (node : Json) : Except Gap String := do
+private def getterValueType (S : Structs) (declarations : List Json) (node : Json) : Except Gap String := do
+  let node ← if J.kind node == "UserDefinedTypeName" then do
+      let some id := J.typeRef? node
+        | throw (.unsupported "a public getter value type without declaration identity")
+      let some declaration := declarations.find? (J.id? · == some id)
+        | throw (.unsupported "a public getter value type declaration is missing")
+      unless J.kind declaration == "UserDefinedValueTypeDefinition" do
+        throw (.unsupported "public getter needs a nominal or reference-valued ABI return/input")
+      J.get declaration "underlyingType"
+    else pure node
   unless J.kind node == "ElementaryTypeName" do
     throw (.unsupported "public getter needs a nominal or reference-valued ABI return/input")
+  unless (J.typeRef? node).isNone do
+    throw (.unsupported "an elementary getter type carries a nominal declaration reference")
   let type ← tyText S node
   unless (PrimTy.ofName? type).isSome || (narrowTy? type).isSome ||
       (bytesTy? type).isSome || type == "address payable" do
     throw (.unsupported "public getter needs reference-valued ABI returns/inputs")
   pure type
 
-private def getterTerminal (S : Structs) (taken : List String) (id : Int)
+private def getterTerminal (S : Structs) (declarations : List Json) (taken : List String) (id : Int)
     (path : GetterPath) (values : List (Json × String)) : Except Gap GetterPlan := do
   let mut outputs : List GetterOutput := []
   let mut taken := taken
   for (typeNode, value) in values do
-    let type ← getterValueType S typeNode
+    let type ← getterValueType S declarations typeNode
     let name := freshSourceName taken s!"solcGetterReturn{id}_{outputs.length}"
     taken := name :: taken
     outputs := outputs ++ [{ name, type, value }]
@@ -182,7 +193,17 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
       let mapping := J.kind node == "Mapping"
       let typeNode ← if mapping then J.get node "keyType" else
         pure (Json.mkObj [("nodeType", .str "ElementaryTypeName"), ("name", .str "uint256")])
-      let type ← getterValueType S typeNode
+      -- An enum key has the canonical uint8 ABI, with a separate membership
+      -- guard. Width alone must not admit unnamed enum values.
+      let enumSize : Option Nat := do
+        guard (J.kind typeNode == "UserDefinedTypeName")
+        let id ← J.typeRef? typeNode
+        let declaration ← declarations.find? (J.id? · == some id)
+        guard (J.kind declaration == "EnumDefinition")
+        let members ← J.arr? declaration "members"
+        guard (!members.isEmpty && members.size ≤ 256)
+        pure members.size
+      let type ← if enumSize.isSome then pure "uint8" else getterValueType S declarations typeNode
       let some abi := sourceAbiType declarations (declarations.length + 1) typeNode
         | throw (.unsupported "a public getter key without its canonical ABI type")
       let name := freshSourceName taken s!"solcGetterArg{id}_{plan.inputs.length}"
@@ -191,6 +212,9 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
       let sourceName := if mapping then (J.str? node "keyName").getD "" else ""
       let guards := if mapping then plan.guards else
         plan.guards ++ [s!"require({input} < {path}.length)"]
+      let guards := match enumSize with
+        | some size => guards ++ [s!"require({input} < {size})"]
+        | none => guards
       let plan := { plan with
         guards
         inputs := plan.inputs ++ [{ name, type, sourceName, abiType := abi }] }
@@ -201,8 +225,8 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
         | throw (.unsupported "a public getter result without declaration identity")
       let some declaration := declarations.find? (J.id? · == some ref)
         | throw (.unsupported "a public getter result declaration is missing")
-      unless J.kind declaration == "StructDefinition" do
-        throw (.unsupported "public getter needs a nominal ABI return type")
+      if J.kind declaration != "StructDefinition" then
+        return ← getterTerminal S declarations taken id plan [(node, path)]
       let mut values := []
       for member in (J.arrD declaration "members").toList do
         let typeNode ← J.get member "typeName"
@@ -211,8 +235,8 @@ private def getterWalk (S : Structs) (declarations : List Json) (id : Int) :
         if ["Mapping", "ArrayTypeName"].contains (J.kind typeNode) then continue
         let name ← J.str member "name"
         values := values ++ [(typeNode, s!"{path}.{identText name}")]
-      getterTerminal S taken id plan values
-    else getterTerminal S taken id plan [(node, path)]
+      getterTerminal S declarations taken id plan values
+    else getterTerminal S declarations taken id plan [(node, path)]
 
 /-- Consume mapping keys and array indexes; keep a terminal value or exactly
 solc's non-array/non-mapping struct fields, in declaration order. -/

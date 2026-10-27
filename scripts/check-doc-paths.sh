@@ -55,7 +55,7 @@ while IFS=$'\t' read -r src ref; do
     ambiguous=$((ambiguous + 1))
   fi
 done < <(
-  git ls-files -z -- ':!:docs/intrinsic.md' \
+  git ls-files -z \
     | xargs -0 grep -o -n '`[A-Za-z][A-Za-z0-9_/.-]*\.lean`' \
     | sed 's/`//g' \
     | awk -F: '{print $1"\t"$3}' \

@@ -379,12 +379,17 @@ open Lean
 written, a function type spelled. -/
 partial def spellFnTy (T : TSyntax `sol_ty) : MacroM String := do
   if T.raw.isOfKind ``solFnTy then
-    let ps ← T.raw[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩)
+    let component (t : Syntax) : MacroM String := do
+      let base ← spellFnTy ⟨t[0]⟩
+      let loc := (t[1].find? fun a => a.isAtom &&
+        ["memory", "storage", "calldata"].contains a.getAtomVal).map (·.getAtomVal)
+      pure (base ++ loc.getD "")
+    let ps ← T.raw[2].getSepArgs.toList.mapM component
     let ext := T.raw[4].getArgs.any fun m =>
       (m.find? fun a => a.isAtom && a.getAtomVal == "external").isSome
     -- `(returns (…))?`: a null node of its four parts, or of none
     let r := T.raw[5]
-    let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩) else pure []
+    let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM component else pure []
     return fnTyStr ps rs ext
   match T with
   | `(sol_ty| $x:ident) => pure (x.getId.toString false)
@@ -586,6 +591,16 @@ def typeBoundExpr (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (g : 
     return some (← `(RawExpr.call $(quote T) [$lit]))
   | none => return some (← `(RawExpr.field (.name $(quote T)) $(quote s!"type({m})")))
 
+/-- Keep byte-literal elaboration depth logarithmic: a quoted cons spine
+otherwise exceeds the default recursion depth before the typed reader runs.
+Each leaf is small; concatenation preserves every byte in source order. -/
+private partial def quoteBytes (bytes : List Nat) : MacroM Term := do
+  if bytes.length ≤ 32 then return quote bytes
+  let half := bytes.length / 2
+  let left ← quoteBytes (bytes.take half)
+  let right ← quoteBytes (bytes.drop half)
+  `(List.append $left $right)
+
 partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
   if e.raw.isOfKind ``solInlineArray then
     return ← `(RawExpr.call "#array" [$(← e.raw[1].getSepArgs.mapM (expandExpr ⟨·⟩)),*])
@@ -611,11 +626,11 @@ partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
 where
   expandExpr1 : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $n:num) => `(RawExpr.num $n)
-  | `(sol_expr| $t:str) =>
-    `(RawExpr.bytesLit $(quote (t.getString.toUTF8.toList.map (·.toNat))))
+  | `(sol_expr| $t:str) => do
+    `(RawExpr.bytesLit $(← quoteBytes (t.getString.toUTF8.toList.map (·.toNat))))
   | `(sol_expr| hex $t:str) =>
     match hexBytes? t.getString with
-    | some bs => `(RawExpr.bytesLit $(quote bs))
+    | some bs => do `(RawExpr.bytesLit $(← quoteBytes bs))
     | none => Macro.throwErrorAt t "hex\"…\": pairs of hex digits"
   | `(sol_expr| $x:ident) => expandIdent x
   | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)

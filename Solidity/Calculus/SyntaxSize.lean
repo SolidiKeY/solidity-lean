@@ -121,11 +121,17 @@ def LoopQ.size : {Γ : Ctx} → LoopQ C Γ → Nat
   | _, .imp a c => 1 + a.size + c.size
   | _, .all _ _ b => 1 + b.size
 
+/-- Ranking tuple nodes and their value expressions. -/
+def LoopMetrics.size {Γ : Ctx} : {n : Nat} → LoopMetrics C Γ n → Nat
+  | _, .nil => 1
+  | _, .cons head tail => 1 + head.size + tail.size
+
 def LoopAnn.size {Γ : Ctx} : LoopAnn C Γ → Nat
   | .unwind _ => 1
   | .auto => 1
   | .inv I dec _ qs => 1 + I.size + (match dec with | some d => d.size | none => 0) +
       (qs.map LoopQ.size).sum
+  | .invLex I metrics _ qs => 1 + I.size + metrics.size + (qs.map LoopQ.size).sum
 
 mutual
 

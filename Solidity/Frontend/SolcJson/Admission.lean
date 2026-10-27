@@ -142,6 +142,7 @@ private def nodeFeatures (j : Json) : Option (List Feature) :=
       (if J.opt j "constant" == some (.bool true) then [.constants] else []) ++
       (if J.str? j "mutability" == some "immutable" then [.immutables] else []) ++
       match J.str? j "storageLocation" with
+      | some "transient" => [.transientState]
       | some "storage" => [.storageLocation]
       | some "memory" => [.memoryLocation]
       | some "calldata" => [.calldataLocation]
@@ -181,7 +182,7 @@ private def nodeFeatures (j : Json) : Option (List Feature) :=
       | some "interface" => .interfaces
       | some "library" => .libraries
       | _ => .contracts]
-  | "StorageLayoutSpecifier" => some [.storageLayout]
+  | "StorageLayoutSpecifier" => some [.logicalStorageBase]
   | "InheritanceSpecifier" => some [.inheritance]
   | "UsingForDirective" => some [.usingFor]
   | "StructDefinition" => some [.structDeclarations]
@@ -280,12 +281,18 @@ private def validateNode (provenance : Provenance) (j : Json) : Except Diagnosti
   if J.kind j == "Assignment" && !["=", "+=", "-=", "*=", "/=", "%=", "**=",
       "&=", "|=", "^=", "<<=", ">>="].contains ((J.str? j "operator").getD "") then
     throw (diagnostic j .invalidAst `solidity.assignment "unknown assignment operator")
+  if J.kind j == "StorageLayoutSpecifier" then
+    let base := (J.opt j "baseSlotExpression").getD .null
+    let value := (constVal base).bind (·.int?)
+    unless J.kind base == "Literal" && value.any (fun n => 0 ≤ n && n < 2^256) do
+      throw (diagnostic j .missingImplementation `solidity.logicalStorageBase
+        "logical storage bases currently require an in-range literal" (some .logicalStorageBase))
   if J.kind j == "VariableDeclaration" then
     let location := (J.str? j "storageLocation").getD ""
-    if location == "transient" then
-      throw (diagnostic j .missingImplementation `solidity.transientState
-        "transient storage is not ordinary persistent state" (some .transientState))
-    unless ["default", "storage", "memory", "calldata"].contains location do
+    if location == "transient" && J.opt j "stateVariable" != some (.bool true) then
+      throw (diagnostic j .invalidAst `solidity.transientState
+        "transient location requires a state declaration")
+    unless ["default", "storage", "memory", "calldata", "transient"].contains location do
       throw (diagnostic j .invalidAst `solidity.storageLocation "unknown data location")
   if J.kind j == "ElementaryTypeName" then
     let name := (J.str? j "name").getD ""
@@ -338,11 +345,25 @@ private def walk (provenance : Provenance) (declarations : List Json) :
       let member := (J.str? j "memberName").getD ""
       if ["address", "selector"].contains member then
         if let some receiver := J.opt j "expression" then
-          if (J.tyStr receiver).startsWith "function " &&
+          let declarationMember := ((J.ref? receiver).bind fun id =>
+            declarations.find? (J.id? · == some id)).any fun declaration =>
+              J.kind declaration == "FunctionDefinition" ||
+                isPublicGetterMember declaration receiver
+          -- Error/event references also have a function-shaped compiler type.
+          -- Admit only their validated static metadata path, never a receiver
+          -- that could have effects or a stored function's address/selector.
+          let staticDeclaration := J.kind receiver == "Identifier" ||
+            J.kind receiver == "IdentifierPath" ||
+            (J.kind receiver == "MemberAccess" &&
+              ((J.opt receiver "expression").bind J.ref?).any (fun id =>
+                declarations.any (fun d => J.id? d == some id && J.kind d == "ContractDefinition")))
+          let declarationSelector := member == "selector" && staticDeclaration &&
+            ((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any (fun d =>
+              (["ErrorDefinition", "EventDefinition"].contains (J.kind d)) &&
+              (Solidity.Frontend.declarationMetadata declarations receiver member).isOk)
+          if (J.tyStr receiver).startsWith "function " && !declarationSelector &&
               (storedFunctionMemberType? j).isNone &&
-              !((J.ref? receiver).bind fun id => declarations.find? (J.id? · == some id)).any
-                (fun declaration => J.kind declaration == "FunctionDefinition" ||
-                  isPublicGetterMember declaration receiver) then
+              !declarationMember then
             throw (diagnostic j .missingImplementation `solidity.functionMemberKind
               "stored function members need typed ABI address/selector observations"
               (some (if member == "address" then .functionAddress else .functionSelector)))

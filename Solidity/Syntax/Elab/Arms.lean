@@ -46,6 +46,8 @@ structure ElabRec where
   hoistCallArgs : (f : String) → (args : List RawExpr) → ElabM (SProg C × List RawExpr)
   fnDispatch : (h ty : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
     (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
+  fnMemoryDispatch : (h : RawExpr) → (ty : String) → (args : List RawExpr) →
+    ElabM (SProg C × RawExpr)
   callValue : (h : RawExpr) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
     (resW : Nat) → (resNew : Bool) → ElabM (SProg C)
   elabCall : (f : String) → (args : List RawExpr) → (res : Option (Var × PrimTy)) →
@@ -107,7 +109,12 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- the base first, then the index: `matrix[k][k++]` indexes `matrix[0]`
     let (P, e) ← hoist e
     if k.hasIncDec then
-      let (Pc, e) ← captureExpr C e
+      let ec ← ctx
+      let rebinds := k.any fun
+        | .assign target _ => storageMappingAlias? C ec target
+        | _ => false
+      let (Pc, e) ← if storageMappingAlias? C ec e && rebinds then forceArg C e
+        else captureExpr C e
       let (Q, k) ← hoist k
       pure (P ++ Pc ++ Q, .index e k)
     else if k.hasIdxLen || k.hasCast || hasNarrow C (← ctx) k then
@@ -136,7 +143,18 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     pure (P ++ Q, e)
   | .ternary c a b => do
     let (P, c) ← hoist c
+    -- Literal strings are owned memory values. Allocate only the selected
+    -- branch, including nested conditions; no storage/calldata alias joins.
+    let rec stringsOnly : RawExpr → Bool
+      | .ternary _ a b => stringsOnly a && stringsOnly b
+      | e => e.bytesLit?.isSome
+    if stringsOnly a && stringsOnly b then
+      let x := toString (← freshCapture "mv")
+      let Q ← elabStmtsP [.declMemory (.named "string") x none,
+        .ite c [.assign (.name x) a] [.assign (.name x) b]]
+      return (P ++ Q, .name x)
     if a.hasCall || b.hasCall || a.hasIncDec || b.hasIncDec ||
+        (a matches .ternary ..) || (b matches .ternary ..) ||
         hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
       -- a branch's effects, calls and checks run only in the branch solc
       -- evaluates: `T se; if (c) { se = a; } else { se = b; }`, solkey's
@@ -144,10 +162,37 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       -- not a literal, read after its effects are hoisted, which is undone
       let typed := if a.isLit then b else a
       let st ← get
+      let memo ← getThe CallMemo
       let (_, typed) ← hoist typed
       let ⟨_, t⟩ ← synthM C typed
       let w := widthIn C (← ctx) typed
       set st
+      modifyThe CallMemo fun _ => memo
+      if let .ref R := t.ty then
+        -- Probe types without emitting either branch. All effects and location
+        -- reads are emitted inside the selected arm, once, by elabStmtsP.
+        let probe (e : RawExpr) : ElabM (Ty × Bool) := do
+          let saved ← get
+          let memo ← getThe CallMemo
+          let (_, e) ← hoist e
+          let ⟨_, t⟩ ← synthM C e
+          let loc := match t with | .mpath .. => true | _ => false
+          let ty := t.ty
+          set saved
+          modifyThe CallMemo fun _ => memo
+          pure (ty, loc)
+        let (ta, ma) ← probe a
+        let (tb, mb) ← probe b
+        unless ta == .ref R && tb == .ref R && (ma || mb) do
+          throw "a conditional of references with effects in a branch needs one memory endpoint and equal types"
+        let Γ ← ctx
+        let ws := exprShape C Γ a
+        ElabM.lift (shapeCheck C Γ ws b)
+        let x := toString (← freshCapture "mv")
+        let D ← elabStmtsP [.declMemory (rawTyW ws (.ref R) "") x none]
+        declareShape x ws
+        let Q ← elabStmtsP [.ite c [.assign (.name x) a] [.assign (.name x) b]]
+        return (P ++ D ++ Q, .name x)
       let some ⟨p, _⟩ := t.toVal? | throw "a conditional of references with effects in a branch"
       let x := toString (← freshCapture "se")
       let Q ← elabStmtsP [.decl (.named (tyName p w)) x none,
@@ -183,8 +228,43 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
             (.cons (.rebindMem ix (.alias (pb.wk th))) .nil))],
           .name (toString x))
       else throw "a conditional of two reference types"
-    | .ok (.path (.ref _) _), .ok (.mpath ..) | .ok (.mpath ..), .ok (.path (.ref _) _) =>
-      throw "a conditional of a storage and a memory reference"
+    | .ok (.path (.ref R) pa), .ok (.mpath (.ref R') pb) =>
+      if hR : R' = R then
+        let Γe ← ctx
+        ElabM.lift (shapeCheck C Γe (exprShape C Γe a) b)
+        let pb := hR ▸ pb
+        let c ← checkIn C Γ .bool c
+        let x ← captureRef C "mv" (.mem R) a
+        -- The join is memory: storage is copied only in its selected arm;
+        -- memory retains identity. The unreachable default avoids reading an
+        -- untaken (possibly indexed or unset) memory operand to seed the join.
+        let decl : Stmt C Γ.ctx (.mem R :: Γ.ctx) ←
+          match hd : (Ty.ref R).defaultOkS with
+          | true => pure (.declMem R x none (by simp only [Option.isSome_none, hd, Bool.or_true]) pb.mapFree)
+          | false => throw "a mixed reference conditional whose memory default is not well-formed"
+        let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.mem R)
+        pure (P ++ [.of Γ decl,
+          .of Γ' (.ite (c.wk th)
+            (.cons (.rebindMem ix (.copy (pa.wk th) pb.mapFree)) .nil)
+            (.cons (.rebindMem ix (.alias (pb.wk th))) .nil))], .name (toString x))
+      else throw "a conditional of two reference types"
+    | .ok (.mpath (.ref R) pa), .ok (.path (.ref R') pb) =>
+      if hR : R' = R then
+        let Γe ← ctx
+        ElabM.lift (shapeCheck C Γe (exprShape C Γe a) b)
+        let pb := hR ▸ pb
+        let c ← checkIn C Γ .bool c
+        let x ← captureRef C "mv" (.mem R) a
+        let decl : Stmt C Γ.ctx (.mem R :: Γ.ctx) ←
+          match hd : (Ty.ref R).defaultOkS with
+          | true => pure (.declMem R x none (by simp only [Option.isSome_none, hd, Bool.or_true]) pa.mapFree)
+          | false => throw "a mixed reference conditional whose memory default is not well-formed"
+        let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.mem R)
+        pure (P ++ [.of Γ decl,
+          .of Γ' (.ite (c.wk th)
+            (.cons (.rebindMem ix (.alias (pa.wk th))) .nil)
+            (.cons (.rebindMem ix (.copy (pb.wk th) pa.mapFree)) .nil))], .name (toString x))
+      else throw "a conditional of two reference types"
     | _, _ => pure (P, .ternary c a b)
   | .incDec op e => do
     let (P, e) ← hoist e
@@ -420,11 +500,26 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- type, from the callee
     if f == callValueName then
       let h :: rest := args | throw "internal: a call through a value with no callee"
+      if let .field b "push" := h then
+        if rest.isEmpty then
+          let (P, b) ← hoist b
+          let Γ ← ctx
+          if let .ok (.path (.ref (.array (.ref R))) _) := synth C Γ.toNCtx b then
+            let x := toString (← freshCapture "sp")
+            let ws := placeShape C Γ (.index b (.num 0))
+            let T := rawTyW ws (.ref R) ""
+            let Q ← elabStmtsP [.declStoragePush T x b]
+            -- Keep nominal/string provenance which rawTyW does not encode.
+            declareShape x ws
+            return (P ++ Q, .name x)
       if let .name g := h then
         if (← read).funs.any (·.1 == g) then return ← hoist (.call g rest)
       let some ty := fnTyOfExpr C (← ctx) h | throw s!"{h.toStr}(…): the callee is not a function value"
       let (P, rest) ← hoistArgs rest
       let some (_, [r], _) := fnParts? ty | throw s!"{h.toStr}(…) returns one value where a value stands"
+      if r == "bytesmemory" then
+        let (Q, result) ← rc.fnMemoryDispatch h ty rest
+        return (P ++ Q, result)
       let some (p, n) := fnCompTy? C r | throw s!"{h.toStr}(…) returns a {r}, not a value type"
       let Γ ← nctx
       let x ← freshCapture "se"
@@ -437,6 +532,9 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
       if let some ty := fnTyOf? C (← ctx) f then
         let (P, args) ← hoistArgs args
         let some (_, [r], _) := fnParts? ty | throw s!"{f}(…) returns one value where a value stands"
+        if r == "bytesmemory" then
+          let (Q, result) ← rc.fnMemoryDispatch (.name f) ty args
+          return (P ++ Q, result)
         let some (p, n) := fnCompTy? C r | throw s!"{f}(…) returns a {r}, not a value type"
         let Γ ← nctx
         let x ← freshCapture "se"
@@ -480,7 +578,11 @@ def hoistWith (rc : ElabRec C) : RawExpr → ElabM (SProg C × RawExpr) := fun s
     -- one written, held first (solkey's `storageCopyAssignmentValue`:
     -- `pv = e; sp = pv; v = pv;`)
     let (P, r) ← hoist r
-    let (Pc, r) ← captureExpr C r
+    -- The expression yields the old RHS reference, even if a later index
+    -- rebinds its source alias. A fresh typed snapshot cannot be rebound by
+    -- source syntax and retains the same key/value-width metadata.
+    let (Pc, r) ← if storageMappingAlias? C (← ctx) l then forceArg C r
+      else captureExpr C r
     let Q ← elabStmtsP [.assign l r]
     pure (P ++ Pc ++ Q, r)
   | .opAssign op l r => do
@@ -648,7 +750,8 @@ def calleeBody (d : FunDecl) (ρ : List (String × String)) (ctor selfFrame : Bo
   let body ← renameStmts ρ d.body
   let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
   let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
-  let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
+  let frame := if C.evalOrder.modifierFrames then some (d, ρ) else none
+  let body ← wrapMods C body frame (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   -- a constructor's initializers: after its parameters are bound, before its
   -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
   let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
@@ -694,11 +797,17 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
   if !ctor && f == callValueName then
     let h :: args := args | throw "internal: a call through a value with no callee"
     if targets then throw s!"{h.toStr}(…): a call through a function value in a tuple assignment"
+    if res.isNone && ((fnTyOfExpr C (← ctx) h).bind fnParts?).any (fun (_, rs, ext) =>
+        !ext && rs == ["bytesmemory"]) then
+      let some ty := fnTyOfExpr C (← ctx) h | throw "missing memory function type"
+      return ((← rc.fnMemoryDispatch h ty args).1, none, [])
     return (← callValue h args res resW resNew, none, [])
   -- a call through a function value (`fnDispatch`)
   if !ctor && funs.all (·.1 != f) then
     if let some ty := fnTyOf? C (← ctx) f then
       if targets then throw s!"{f}(…): a call through a function value in a tuple assignment"
+      if res.isNone && (fnParts? ty).any (fun (_, rs, ext) => !ext && rs == ["bytesmemory"]) then
+        return ((← rc.fnMemoryDispatch (.name f) ty args).1, none, [])
       return (← fnDispatch f ty args res resW resNew, none, [])
   let selfFrame := selfFrame || (← read).selfFrame
   -- a call of a recursive function whose body is being elaborated: the frame
@@ -977,9 +1086,15 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
       let isRefLocal := match synth C (← nctx) l with
         | .ok (.mpath (.ref _) (.var ..)) | .ok (.path (.ref _) (.alias ..)) => true
         | _ => false
-      if (← read).funs.any (·.1 == f) && isRefLocal then
-        let (P, args) ← hoistCallArgs f args
-        return (P, .assign l (.call f args))
+      if let some (_, d) := (← read).funs.find? (·.1 == f) then
+        if isRefLocal then
+          -- A storage-returning call assigned to memory is a copy, not a
+          -- memory-return call. Capture its typed storage result first.
+          if d.retStorage && (synth C (← nctx) l).toOption.any (fun
+              | .mpath .. => true | _ => false) then
+            return ← hoistAssign l r
+          let (P, args) ← hoistCallArgs f args
+          return (P, .assign l (.call f args))
     match r, synth C (← nctx) l with
     | .incDec op e, .ok (.val _ (.simple (.local _))) =>
       let (P, e) ← hoist e
@@ -1011,13 +1126,22 @@ def hoistStmtWith (rc : ElabRec C) : RawStmt → ElabM (SProg C × RawStmt) := f
   | .declMemory T x (some (.newArr T' n)) => do
     let (P, n) ← hoist n
     pure (P, .declMemory T x (some (.newArr T' n)))
+  | .delete target => do
+    let (P, e) ← hoist target
+    -- A scalar temporary introduced by hoisting is not a source place.
+    -- Keep reference targets on their existing path, including effectful
+    -- receivers; only a named value local may use assignLocal deletion.
+    unless target matches .name _ do
+      if let .ok (.val ..) := synth C (← nctx) e then
+        throw "`delete` needs a local, storage or memory location"
+    pure (P, .delete e)
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
-  | s@(.declPush ..) | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
+  | s@(.declPush ..) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
   | s@(.requireMsg ..) | s@(.assert _) | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
-      if (← read).funs.any (·.1 == f) then
+      if ((← read).funs.find? (·.1 == f)).any (fun (_, d) => !d.retStorage) then
         let (P, args) ← hoistCallArgs f args
         return (P, .declMemory T x (some (.call f args)))
     if let .declStorage T x (some (.call f args)) := s then
@@ -1285,6 +1409,19 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
   -- a push's receiver, as a `.push` member's base
   let es : List (RawExpr × Bool) ← match s with
+    | .tupleAssign ts (.tuple values) => do
+      unless ts.length == values.length do throw "tuple target/value arity mismatch"
+      let mut checked := []
+      for (target, value) in ts.zip values do
+        match target with
+        | some target =>
+          let reference := isRef target
+          if reference then
+            ElabM.lift (shapeCheck C Γ (placeShape C Γ target) value)
+          checked := checked ++ [(target, reference), (value, reference)]
+        | none => checked := checked ++ [(value, false)]
+      pure checked
+    | .tupleAssign .. | .tupleDecl .. => pure []
     | .call (.field b "push") [a] =>
       -- Reference values are checked after capture as well; permit their
       -- whole source here without erasing the element-width metadata.
@@ -1527,7 +1664,15 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       match hd : T.defaultOkS with
       | true => pure [.of Γ (.deleteMem p hd)]
       | false => throw "`delete` of a memory object whose default is not well-formed"
-    | .val .. => throw "`delete` needs a storage or a memory location"
+    | .val p (.simple (.local i)) =>
+      -- Solidity deletes a value local by assigning its type's default.
+      -- Reuse assignLocal, retaining the existing run and soundness rule.
+      let zero : Val C Γ.ctx p := match p with
+        | .bool => .simple (.bool false)
+        | .uint => .simple (.lit 0 rfl)
+        | .int => .simple (.lit 0 rfl)
+      pure [.of Γ (.assignLocal i zero)]
+    | .val .. => throw "`delete` needs a local, storage or memory location"
   | .opAssign op l r => do
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
     -- effects already captured (`hoistStmt`), so reading it twice is safe
@@ -1640,8 +1785,15 @@ def elabStmt1With (rc : ElabRec C) : RawStmt → ElabM (SProg C) := fun s0 =>
       | i :: is, none => do
         let I ← loopExpr Γ .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
           "invariant"
-        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk
-          (← a.qinv.mapM (loopQ Γ)))
+        let qs ← a.qinv.mapM (loopQ Γ)
+        match a.dec with
+        | some (.tuple (first :: second :: rest)) =>
+          let first ← loopExpr Γ .uint first "variant component"
+          let second ← loopExpr Γ .uint second "variant component"
+          let rest ← rest.mapM fun d => loopExpr Γ .uint d "variant component"
+          pure (.invLex I (.cons first (.cons second (.ofList rest))) a.brk qs)
+        | some (.tuple _) => throw "a loop's lexicographic variant needs at least two components"
+        | dec => pure (.inv I (← dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk qs)
       | _ :: _, some _ => throw "a loop has an `invariant` or an `unwind` clause, not both"
     pure [.of Γ (.loop a c (← elabScope Γ body).2)]
   | .block b => elabBranch b

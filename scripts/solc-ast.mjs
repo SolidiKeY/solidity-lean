@@ -73,6 +73,7 @@
  *     --wrapper Solidity/Examples/Tactics/LoopsImport.lean
  */
 
+import {compilerCode} from "./solc-code.mjs";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, dirname, isAbsolute, resolve } from "node:path";
 import { createHash } from "node:crypto";
@@ -200,6 +201,10 @@ const DECLS = new Set([
 // them. Retain precisely those identities and fields, preserving older
 // fixtures that never use metadata. Interface IDs use the interface's own
 // declarations, not its inherited interface functions.
+// Internal memory-return dispatch distinguishes abstract declarations from
+// malformed concrete candidates. Retain implementation evidence only for
+// this newly supported family; primitive-only and legacy trimming stay unchanged.
+let memoryReturnDispatch = false;
 const selectorDeclarations = new Set();
 const declarations = new Map();
 function walkAst(node, visit) {
@@ -209,7 +214,16 @@ function walkAst(node, visit) {
     for (const child of Object.values(node)) walkAst(child, visit);
   }
 }
-walkAst(ast, node => { if (node.id !== undefined) declarations.set(node.id, node); });
+walkAst(ast, node => {
+  if (node.id !== undefined) declarations.set(node.id, node);
+  if (node.nodeType === 'FunctionTypeName' && node.visibility !== 'external' &&
+      node.parameterTypes?.parameters?.length === 0 &&
+      node.returnParameterTypes?.parameters?.length === 1) {
+    const result = node.returnParameterTypes.parameters[0];
+    if (result.typeName?.name === 'bytes' && result.storageLocation === 'memory')
+      memoryReturnDispatch = true;
+  }
+});
 walkAst(ast, node => {
   if (node.nodeType !== 'MemberAccess') return;
   if (node.memberName === 'selector' && node.expression?.referencedDeclaration !== undefined)
@@ -282,7 +296,9 @@ function trim(n, parentKey) {
     const getterKeyName = !legacyFixture && k === 'keyName' &&
       n.nodeType === 'Mapping' && typeof v === 'string' && v.length > 0;
     const worldMetadata = k === 'abstract' && args.includes('--world-metadata');
-    if (NOISE.has(k) && !hexBytes && !selector && !getterKeyName && !worldMetadata && !(k === "commonType" && !legacyFixture) &&
+    const implementationMetadata = !legacyFixture && memoryReturnDispatch &&
+      k === 'implemented' && n.nodeType === 'FunctionDefinition';
+    if (NOISE.has(k) && !hexBytes && !selector && !getterKeyName && !worldMetadata && !implementationMetadata && !(k === "commonType" && !legacyFixture) &&
         !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !(legacyFixture ? isDeclaration(n) : modernDeclaration(n))) continue;
@@ -339,6 +355,13 @@ const fixture = {
   },
   ast: trim(ast, ""),
 };
+const code = compilerCode(input => JSON.parse(compile(JSON.stringify(input), 0, 0)),
+  input.sources, settings, ast, {compilerSha256:soljsonSha,sourceSha256:sha256(bytes)});
+if (code) {
+  if (legacyFixture) fail("compiled code constants require modern provenance");
+  fixture.compilerCode=code;
+  fixture.ast.absolutePath=ast.absolutePath;
+}
 // Indented down to the statements, each statement on one line: small, and a
 // diff names the statements that changed.
 const isStatement = (n) => n && typeof n === "object" && !Array.isArray(n) &&

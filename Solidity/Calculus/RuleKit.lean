@@ -31,7 +31,8 @@ def Taclet.branchLabels : List (String × List String) := [
   ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"]),
   ("loopExit", ["loop exited", "unwound to the end"]),
   ("whileInvariantBox", ["invariant initially valid", "invariant preserved and used"]),
-  ("whileInvariantDiamond", ["invariant initially valid", "invariant preserved and used"])]
+  ("whileInvariantDiamond", ["invariant initially valid", "invariant preserved and used"]),
+  ("whileInvariantLexDiamond", ["invariant initially valid", "invariant preserved and used"])]
 
 /-- The taclet whose goals a premise for the statement of head `c` labels:
 an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`

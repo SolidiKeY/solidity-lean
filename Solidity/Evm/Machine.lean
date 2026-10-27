@@ -217,7 +217,7 @@ inductive Instr where
   /-- A loop, `while (cond) { body }`: the condition's code leaves a word
   on the stack, the body runs while it is not `0`.  An assembler writes it
   as a `JUMPDEST` at the condition and a `JUMP` back from the body's end
-  (`docs/compiler-verification.md`, "Loops"). -/
+  (`docs/compiler-verification.md`, "The fragment, and what is out"). -/
   | loop (cond body : List Instr)
   deriving Repr, Inhabited
 

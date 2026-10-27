@@ -1,4 +1,5 @@
 import Solidity.Calculus.Arms
+import Solidity.Calculus.LexDiamond
 import Solidity.Calculus.CallSummary
 import Solidity.Semantics.NoPanic
 import Solidity.Syntax.Join
@@ -852,6 +853,10 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
   | .unwind (n + 1) =>
     loopUnwindStep (.bounded n) c body
   | .auto => loopUnwindStep .automatic c body
+  | .invLex I metrics brk qs =>
+    match m, brk, qs, body.frame with
+    | .diamond, false, [], some (xs, hv) => LoopLex.diamondPremise k I c metrics body xs hv
+    | _, _, _, _ => .unfold (.cons (.loop (.inv I none brk qs) c body) .nil) .refl
   | .inv I dec brk qs =>
     match body.frame with
     -- whileClose

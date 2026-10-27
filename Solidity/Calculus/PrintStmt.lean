@@ -628,6 +628,33 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
           w ← `(sol_stmt| /// @custom:key invariant \forall $(mkIdent (Name.mkSimple T)):ident
             $xi:ident; $b:sol_loop_inv $w:sol_stmt)
       clause "invariant" (← ppExprS ns I) w
+    | LoopAnn.invLex _ _ _ I metrics _ qs =>
+      let rec components (metrics : Expr) : MetaM (Option (Array Expr)) := do
+        match_expr (← whnf metrics) with
+        | LoopMetrics.nil _ _ => return some #[]
+        | LoopMetrics.cons _ _ _ head tail =>
+          let some rest ← components tail | return none
+          return some (#[head] ++ rest)
+        | _ => return none
+      let decrease : TSyntax `sol_expr ← match ← components metrics with
+        | some values =>
+          if values.size < 2 then `(sol_expr| ‹$(← escapeTerm metrics):term›)
+          else do
+            let first ← ppExprS ns values[0]!
+            let rest ← liftM <| values[1:].toArray.mapM (ppExprS ns)
+            `(sol_expr| ($first:sol_expr, $(Syntax.TSepArray.ofElems rest),*))
+        | none => `(sol_expr| ‹$(← escapeTerm metrics):term›)
+      let mut w ← clause "decreases" decrease w
+      if let some qs ← listElems? qs then
+        for q in qs.reverse do
+          let_expr LoopQ.all _ _ x p b := (← whnf q) | return ← escape
+          let x := x.consumeMData
+          let some xi ← ppVar? x | return ← escape
+          let some T ← primName? p | return ← escape
+          let some b ← ppLoopQ (x :: ns) b | return ← escape
+          w ← `(sol_stmt| /// @custom:key invariant \forall $(mkIdent (Name.mkSimple T)):ident
+            $xi:ident; $b:sol_loop_inv $w:sol_stmt)
+      clause "invariant" (← ppExprS ns I) w
     | _ => escape
   | _ => escape
 
@@ -1080,6 +1107,13 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
 
 /-! ## Premises -/
 
+/-- An omitted schema argument must be the exact local that its canonical
+name resolves to. A later binder with the same user name changes replay. -/
+private def isCanonicalSchemaLocal (e : Expr) (name : Lean.Name) : MetaM Bool := do
+  let .fvar id := (← instantiateMVars e).consumeMData | return false
+  let some decl := (← getLCtx).findFromUserName? name | return false
+  return decl.fvarId == id
+
 /-- A scoped premise read at `ns`: its goals labelled by `labels` (solkey's, `Taclet.branchLabels`), the blocks of
 `branches` in the box's brackets when `box`. -/
 partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
@@ -1088,6 +1122,21 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
   let l0 := lbl 0
   let l1 := lbl 1
   let e := (← instantiateMVars e).consumeMData
+  -- Symbolic arity cannot enumerate ghost declarations. Use the typed packed
+  -- VC notation only when its ambient frame/fresh parameters reconstruct the
+  -- exact arguments; concrete metric constructors continue through expansion.
+  if e.isAppOfArity ``LoopLex.diamondPremise 11 then
+    let a := e.getAppArgs
+    if a[7]!.consumeMData.isFVar &&
+        (← isCanonicalSchemaLocal a[3]! `k) &&
+        (← isCanonicalSchemaLocal a[9]! `xs) &&
+        (← isCanonicalSchemaLocal a[10]! `hv) then
+      let I ← ppExprS ns a[4]!
+      let c ← ppExprS ns a[5]!
+      let metrics ← escapeTerm a[7]!
+      let body ← ppBlockS ns a[8]!
+      return some (← `(dl_premise| lexInvariant($[$l0:str :]? $I:sol_expr,
+        ‹$metrics:term›, $c:sol_expr, $[$l1:str :]? $body:sol_block)))
   if e.isAppOf ``ReceiverValue.step then
     let a := e.getAppArgs
     if ← [a[6]!, a[7]!, a[8]!, a[9]!].allM fun x =>

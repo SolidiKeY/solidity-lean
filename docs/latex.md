@@ -92,7 +92,7 @@ their own hyperlinks, which would create nested PDF links.
 ## Checked program traces for paper sessions
 
 Use `Solidity.Tools.ProgramTrace` when authoring a derivation that needs
-separate source, receiver and index captures. The older
+separate source, receiver and index captures:
 `#latex_derivation (collapse := []) (groups := false)` exposes native strategy
 steps, but a native `CaptureAll` step can still introduce several captures.
 `#latex_program` refines those supported steps with semantic proofs and
@@ -159,9 +159,7 @@ maxSteps maxMergePlans` returns a `Trace` with `first`, `last`, `steps`,
 400 merge plans. Call `trace.continueWith laws`, then `trace.check params
 levelParams` before `trace.toLatex options` or `trace.toJson checked options`.
 The public laws in `Calculus/Elementary.lean` can also be used directly for
-individual captures under either modality. Custom scripts no longer need to
-copy the paper's capture proofs, elementary exporter or proof-registration
-code. `Trace.check` validates the aggregate first/last theorem; callers that
+individual captures under either modality. `Trace.check` validates the aggregate first/last theorem; callers that
 manually change `steps` must justify those edits separately. Generated
 commands keep the intermediate lines and proof composition together.
 
@@ -284,50 +282,3 @@ coverage and the fallback's warning.
 `Examples/Tactics/ProgramTrace.lean` checks capture order, distinct
 intermediate formulas, read continuation, JSON rows, arbitrary theorem
 parameters, kernel submission and budget failure.
-
-## Program-trace API milestone (2026-10-20)
-
-This API extracts the reusable capture/update layer from the paper's long
-single-step session (`Show one Lean API step at a time`). It keeps the native
-calculus and default LaTeX commands unchanged. The paper's source-to-TeX
-audits, formula links, highlighting and lowering proofs remain document
-responsibilities.
-
-The read-only finder/skeptic pass identified capture refinement under
-preconditions and branches, ambient parameter closure, an exact-budget
-off-by-one, and storage-shadow refinement beneath a precondition. These are
-fixed and covered by the regression module. The review also clarified that
-the public aggregate proof check does not certify manually edited step data.
-
-Validation: the default library and TestSuite builds pass, and the sort
-check passes against the frozen 377-taclet/131-read migration snapshot.
-All four new modules have no diagnostic errors or warnings; the storage and
-memory index-capture theorems use only `propext`, `Classical.choice` and
-`Quot.sound`. Both new Solidity wrapper modes pass on the fixed-array fixture;
-the JSON's seven program pairs retain continuous endpoints. A deliberately
-failed read continuation leaves an existing output file unchanged.
-
-The unpinned `./run-lean.sh` sort stage currently finds the adjacent SolKey
-checkout's unannotated `localValueDelete` read (381 taclets). Existing broad
-hygiene failures remain: 25 ignored scratch-module orphans and six missing
-paths in vendored LeanTeX documentation. All new modules are reachable, and
-the changed documentation introduces no missing paths.
-
-## Definition-navigation milestone (2026-10-21)
-
-Added explicit symbol-to-destination maps, scoped defaults, sorted and
-unsorted operator links in both backends, and additive trace JSON metadata.
-The read-only finder/skeptic review found a lost per-export map in nested
-LeanTeX mathematics and a lost sort when expanding the ledger's composite
-macro with `sorts := false`. Both are fixed and pinned. Regression checks
-also cover section restoration, disabling inherited links, typed find
-aliases, nested heads, composite index/ledger/wellformed macros, unchanged
-layout measures, duplicate keys and unsafe destinations.
-
-The default library and TestSuite builds pass, as does the frozen SolKey
-sort check (377 taclets, 131 read-bearing annotations). A four-page demo
-compiled twice without missing destinations or overfull boxes. PDF object
-inspection confirmed three disjoint operator annotations resolving to their
-intended definition displays on pages 2, 3 and 4; the rendered pages were
-visually checked. The existing scratch-orphan and vendor-documentation
-failures described above remain unrelated.

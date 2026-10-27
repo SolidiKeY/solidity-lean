@@ -1,0 +1,3 @@
+import Solidity.Corpus.SolcExpressions
+#print axioms Solidity.Corpus.SolcExpressions.exponentiationSignedBaseEvenExponent
+#print axioms Solidity.Corpus.SolcExpressions.exponentiationSignedBaseOddExponent

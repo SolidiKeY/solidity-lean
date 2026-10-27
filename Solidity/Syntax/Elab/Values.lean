@@ -1,4 +1,5 @@
 import Solidity.Syntax.Elab.Context
+import Solidity.Syntax.Numeric
 
 /-!
 # The elaborator's values
@@ -143,12 +144,17 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
 /-- The signature of the function `d`, as a function type spelled
-(`canonFnTy`); none if a parameter or a return is a reference. -/
+(`canonFnTy`), retaining the supported memory-byte return location. -/
 def FunDecl.sigTy? (d : FunDecl) : Option String := do
   let comp (k : String) : Ty → Option String
     | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
-    | .ref _ => none
-  let ps ← d.params.mapM fun (n, T) => comp n T
+    | .ref R => do
+      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k) && R == bytesR)
+      guard (lookupBy (k ++ "[]#bytes") d.widths == some 1)
+      guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
+      pure "bytesmemory"
+  let ps ← d.params.mapM fun (n, T) => do
+    if T matches .ref _ then none else comp n T
   let rs ← d.rets.mapM fun (n, T) => comp n T
   pure (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1) (fnTyStr ps rs false))
 
@@ -206,6 +212,7 @@ mutual
 
 def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
   | .num n => return .val .uint (.simple (← litAt C Γ .uint n))
+  | .unop .neg (.num n) => return .val .int (.simple (← litAt C Γ .int (-(n : Int))))
   | .bool b => pure (.val .bool (.simple (.bool b)))
   | .name x =>
     let v := Var.ofName x
@@ -274,9 +281,31 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       if v < 0 then return .val .int (.simple (← litAt C Γ .int v))
       else return .val .uint (.simple (← litAt C Γ .uint v))
     -- the operand type: the first operand that is not a literal gives it
-    let t ← if a.isLit then synth Γ b else synth Γ a
+    let t ← if a.isLit && !(op matches .pow | .powW | .shl | .shr) then synth Γ b else synth Γ a
     let some ⟨p, _⟩ := t.toVal? |
       throw s!"{(if a.isLit then b else a).toStr}: an operand of reference type {t.ty}"
+    if p == .int && op == .pow then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      return .val .int (.checkedSignedPower av bv)
+    if p == .int && op == .shr then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      -- Preserve the decision procedure's literal-count fragment after checking
+      -- Solidity's unsigned count range. Nonliteral counts still saturate below.
+      if let some n := b.litVal? then
+        let count : Val C Γ.ctx .int := .simple (← litAt C Γ .int (min n 256))
+        return .val .int (.binop .shr rfl rfl av count)
+      let limit : Val C Γ.ctx .uint := .simple (← litAt C Γ .uint 256)
+      -- Saturate before converting: a uint count can exceed int256.max.
+      let bounded : Val C Γ.ctx .uint := .ternary (.binop .lt rfl rfl bv limit) bv limit
+      let count : Val C Γ.ctx .int := .unop .toInt rfl rfl bounded
+      return .val .int (.binop .shr rfl rfl av count)
+    if p == .int && op == .shl then
+      let av ← check Γ .int a
+      let bv ← check Γ .uint b
+      let word : Val C Γ.ctx .uint := .unop .toUint rfl rfl av
+      return .val .int (.unop .toInt rfl rfl (.binop .shl rfl rfl word bv))
     match h : op.accepts p with
     | true => pure (.val _ (.binop op h rfl (← check Γ p a) (← check Γ p b)))
     | false => throw s!"operator {BinOp.sym op} does not take {p.toStr}"
@@ -691,6 +720,12 @@ def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
   | some (.shape ws) => ws
   | _ => []
 
+/-- A local storage mapping alias, whose binding can be rebound. -/
+def storageMappingAlias? (Γ : ECtx) (e : RawExpr) : Bool :=
+  match synth C Γ.toNCtx e with
+  | .ok (.path (.ref (.mapping _ _)) (.alias _)) => true
+  | _ => false
+
 /-- Where the widths of the place `e` are kept: a width table, `e`'s key in
 it, and `e`'s type.  A state variable's table is `Contract.widths`
 (`values[i]` is `values[]`), a reference local's its shape (`m[i]` is `[]`,
@@ -702,6 +737,8 @@ def widthPath? (Γ : ECtx) : RawExpr → Option (List (String × Nat) × String 
     | some (.alias R) | some (.mem R) => some (localShape Γ x, "", .ref R)
     | some _ => none
     | none => (C.rootType x).map (C.widths, x, ·)
+  | .assign l _ =>
+    if storageMappingAlias? C Γ l then widthPath? Γ l else none
   | .index e _ => do
     let (tb, k, t) ← widthPath? Γ e
     match t with
@@ -724,6 +761,57 @@ def placeShape (Γ : ECtx) (e : RawExpr) : List (String × Nat) :=
   match widthPath? C Γ e with
   | some (tb, k, .ref _) => shapeUnder tb k
   | _ => []
+
+/-- The external function type of `g`, as `canonFnTy` spells it. -/
+def FunDecl.extTy? (d : FunDecl) : Option String :=
+  (FunDecl.sigTy? C d).map fun ty =>
+    match fnParts? ty with
+    | some (ps, rs, _) => fnTyStr ps rs true
+    | none => ty
+
+/-- Whether `r` in `r.g` is a receiver, not a struct: `this`, or a value. -/
+def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
+  match r with
+  | .name "this" | .env .selfAddress => some (.env .selfAddress)
+  | _ => match synth C (Γ.toNCtx) r with
+    | .ok (.val .uint _) => some r
+    | _ => none
+
+/-- `r.g` names the function `g` of `C` at the address `r` (`extRecv?`):
+the receiver and `g`. -/
+def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
+  | .field r g =>
+    if fnExternalValue C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
+  | _ => none
+
+/-- The function type of the expression `e`, as `canonFnTy` spells it: a
+name's (`fnTyOf?`), a place's marker (a struct member, an element), a
+call's return's, a conditional's first branch's, `r.g`'s external type. -/
+partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
+  let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
+  match e with
+  | .name x => fnTyOf? C Γ x
+  | .ternary _ a _ => fnTyOfExpr Γ a
+  | .call g args => do
+    if g == callValueName then
+      let h ← args.head?
+      let ty ← fnTyOfExpr Γ h
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
+    if let some ty := fnTyOf? C Γ g then
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
+    let d ← lookupBy g C.funs
+    let (r, .prim _) ← d.ret | none
+    (fnRow? d.widths r).map canon
+  | e =>
+    match extMember? C Γ e with
+    | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
+    | none => do
+      let (tb, k, .prim _) ← widthPath? C Γ e | none
+      (fnRow? tb k).map canon
 
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
@@ -760,8 +848,18 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     | some d => match d.ret with
       | some (r, .ref _) => shapeUnder d.widths r
       | _ => []
-    | none => []
+    | none =>
+      let ty := if f == callValueName then as.head?.bind (fnTyOfExpr C Γ) else fnTyOf? C Γ f
+      if (ty.bind fnParts?).any (fun (ps, rs, ext) =>
+          !ext && ps.isEmpty && rs == ["bytesmemory"]) then dynBytesRows else []
   | e => placeShape C Γ e
+
+/-- An assignment expression keeps its mapping target's declared shape.
+Admission checks the RHS shape separately. -/
+theorem mappingAssignmentShape (Γ : ECtx) (l r : RawExpr)
+    (h : storageMappingAlias? C Γ l = true) :
+    exprShape C Γ (.assign l r) = placeShape C Γ l := by
+  simp only [exprShape, placeShape, widthPath?, h, ↓reduceIte]
 
 /-- A computed Error reason retains its source string type before byte casts
 and ABI lowering erase it. Raw assembly buffers need no string marker. -/
@@ -880,47 +978,6 @@ def fnSelector? (g : String) : Option Nat := do
     | .abi _ _ none => return Keccak.selector (← source.signature)
     | _ => none
   else (fnSignature? C g).map Keccak.selector
-
-/-- The external function type of `g`, as `canonFnTy` spells it. -/
-def FunDecl.extTy? (d : FunDecl) : Option String :=
-  (FunDecl.sigTy? C d).map fun ty =>
-    match fnParts? ty with
-    | some (ps, rs, _) => fnTyStr ps rs true
-    | none => ty
-
-/-- Whether `r` in `r.g` is a receiver, not a struct: `this`, or a value. -/
-def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
-  match r with
-  | .name "this" | .env .selfAddress => some (.env .selfAddress)
-  | _ => match synth C (Γ.toNCtx) r with
-    | .ok (.val .uint _) => some r
-    | _ => none
-
-/-- `r.g` names the function `g` of `C` at the address `r` (`extRecv?`):
-the receiver and `g`. -/
-def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
-  | .field r g =>
-    if fnExternalValue C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
-  | _ => none
-
-/-- The function type of the expression `e`, as `canonFnTy` spells it: a
-name's (`fnTyOf?`), a place's marker (a struct member, an element), a
-call's return's, a conditional's first branch's, `r.g`'s external type. -/
-partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
-  let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
-  match e with
-  | .name x => fnTyOf? C Γ x
-  | .ternary _ a _ => fnTyOfExpr Γ a
-  | .call g _ => do
-    let d ← lookupBy g C.funs
-    let (r, .prim _) ← d.ret | none
-    (fnRow? d.widths r).map canon
-  | e =>
-    match extMember? C Γ e with
-    | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
-    | none => do
-      let (tb, k, .prim _) ← widthPath? C Γ e | none
-      (fnRow? tb k).map canon
 
 /-- Function ABI components retain the parameter markers that dispatch's
 canonical signature intentionally erases. Mutability is not represented here. -/
@@ -1055,7 +1112,11 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
     as.zipIdx.findSome? fun (a, i) =>
       if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
-  | .binop _ a b | .assign a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .assign a b =>
+    if storageMappingAlias? C Γ a && sameShape (placeShape C Γ a) (exprShape C Γ b) then
+      (narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
+    else (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .binop _ a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? Γ a
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
@@ -1668,6 +1729,12 @@ def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExp
         | .subW, some v => if v < 0 then .binop .addW (word a) (.num v.natAbs) else .binop op (word a) (word b)
         | _, _ => .binop op (word a) (word b)
       return .call (tyName .int n) [w]
+  if p == .int && n < 256 then
+    if let .binop .shl a b := e then
+      let word : RawExpr := match a.litVal? with
+        | some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat
+        | none => .call "uint" [a]
+      return .call (tyName .int n) [.binop .shl word b]
   if 256 ≤ n then return e
   match e with
   | .binop op a b =>

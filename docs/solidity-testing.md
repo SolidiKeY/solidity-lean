@@ -1,5 +1,9 @@
 # Testing Solidity files
 
+The native `solidity-lean verify` and `list` commands ([cli.md](cli.md))
+expose this API with versioned JSON output; the JavaScript and Lean entry
+points below are the same pipeline.
+
 The Lean API can compile a `.sol` source, discover its contracts and functions,
 generate their obligations, and check proofs. Run it from the repository root:
 
@@ -8,6 +12,8 @@ node scripts/test-solidity.mjs path/to/Test.sol
 node scripts/test-solidity.mjs --json path/to/test-directory
 node scripts/test-solidity.mjs --contract Test --function example path/to/Test.sol
 node scripts/test-solidity.mjs --list path/to/test-directory
+node scripts/test-solidity.mjs --audit-preconditions path/to/Contract.sol
+node scripts/test-solidity.mjs --counterexamples path/to/Contract.sol
 ```
 
 Directories are recursive, sorted and deduplicated. Every source is compiled
@@ -29,12 +35,8 @@ existing deployment obligations. Internal functions are helpers rather than
 independent obligations. These are verification obligations over typed states
 and all arguments, not calls at a few concrete inputs.
 
-Every plain imported source obligation additionally assumes the EVM address
-domain `address(this) < 2^160`, including constructors. This is an input
-premise; the native transaction type remains a 256-bit word.
-`--self-address A` (or Lean `solc_scoped_problems N self A`) adds the optional
-equality to a deployment address and rejects `A >= 2^160` before proof
-generation. See [source-inputs.md](source-inputs.md) for the scope and controls.
+Every plain imported source obligation also assumes `address(this) < 2^160`;
+`--self-address A` pins the address ([source-inputs.md](source-inputs.md)).
 
 Source-unit free functions and library functions can be inlined as helpers,
 resolved by solc declaration identity. Extension receivers are the first
@@ -63,6 +65,7 @@ reading. See [correctness.md](correctness.md) for public `Spec` correctness.
 | Result | Meaning |
 |---|---|
 | `proved` | Kernel-checked proof, using only Lean's standard three axioms. |
+| `refuted` | Opt-in, exact-goal kernel-checked refutation with the same candidate's model prestate. |
 | `pending` | Ordinary open proof goals; no claim of falsity. Runtime and budget failures are errors. |
 | `skipped` / `skip` | Explicit NatSpec skip tag. |
 | `internal` | Internal helper; no independent obligation. |
@@ -72,7 +75,13 @@ reading. See [correctness.md](correctness.md) for public `Spec` correctness.
 
 The JSON report is `{results, errors}`. Each result includes the absolute source
 path, contract, function, signature, tag, status, reason, reading and elapsed
-milliseconds.  `reading` is the tails reading the obligation was stated under
+milliseconds. Editor clients also receive the exact solc `sourceId`, the compiled
+source's SHA-256 as `sourceHash`, and a `range` with zero-based UTF-16 positions
+when a source declaration is available. Synthesized constructors use the contract
+range. The runner checks that source bytes still match the compiler fixture
+before associating positions. These fields locate results; they are not part of
+the proof claim. See [the extension](../vscode/README.md) for commands and tests.
+`reading` is the tails reading the obligation was stated under
 (`docs/options.md`, O6): `clean` (`⊢ cleanTail(storage) = true → N.f.problem`)
 for a plain obligation of a contract every function of which exposes nothing
 (`Prog.exposesNone`), so that clean tails are its invariant; `solc` otherwise,
@@ -100,9 +109,28 @@ The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from
 `scripts/test-solidity.mjs`. It is synchronous. The options are `contract`,
 `function`, `list`, `timeoutMs`, `solkey`, `soljson`, `build`, `batchSize`,
-`onProgress`, `renaming` and `selfAddress`. A function selector may be a source name (all its
+`onProgress`, `renaming`, `selfAddress`, `auditPreconditions` and `counterexamples`. A function selector may be a source name (all its
 overloads) or its source signature (one overload). Reports retain source types
 before enum, address or value-type lowering.
+
+`auditPreconditions: true` (`--audit-preconditions`) additionally certifies whether
+specified functions have possible entry states. It is separate from proving
+postconditions. Audited rows add `preconditions` and `preconditionReason`;
+`impossible`, `unknown` and interrupted `notRun` audits cannot pass strict suites.
+Plain functions report `notApplicable`. Listing and auditing cannot be combined.
+The [verification notes](feature-work/dafny-verification.md) describe the
+certificates, finite-membership syntax and exact limits.
+
+`counterexamples: true` (`--counterexamples`) searches ordinary pending,
+specified functions with primitive inputs and storage under the internal
+`Fml.Valid` reading. An accepted candidate adds `counterexample` and changes the
+status to `refuted` only after the exact tested goal's negation is retained as a
+kernel-checked theorem using standard axioms. The report preserves decimal
+strings for integers and exact source argument names when available. A refuted
+suite fails. Unsupported callback, recursive, reference-storage and plain
+obligations stay pending; an inconclusive search supplies no evidence. Listing
+cannot request counterexamples. These are typed model prestates, with no
+constructor-reachability or transaction-replay claim.
 
 For an existing solc fixture, the Lean entry point is:
 
@@ -137,7 +165,15 @@ users fail modifier lookup rather than running without the modifier.
 Unsupported elementary state fields and narrow container fields stay gaps,
 including functions whose specifications mention an omitted field. Contract
 invariants retain their existing whole-contract validation. Unsupported clause
-syntax on an admitted body remains an import failure.
+syntax remains refused before it can contribute a member or a premise. Testing
+rows expose `invalidSpecification` for a parser-invalid clause, including a
+required callee's invalid clause. Mixed reports retain these local `unsupported`
+rows. If every selected non-internal/non-skipped verification candidate has
+that structured diagnostic, the file API also reports one `specification` input
+error: the selection has no well-formed specification to verify. Ordinary
+implementation gaps, exclusions, unfinished proofs and tool interruptions never
+qualify merely because their messages look like parser errors. Rows and original
+failure diagnostics are retained in both cases.
 
 Large literal tables are compiled in segments of at most 64 list cells.
 A kernel-checked reflexivity certificate verifies that the resulting contract
@@ -185,43 +221,10 @@ an invalid specification. The pinned SolKey test sources and their expectation m
 `tests/migration/`; see [solkey-migration.md](solkey-migration.md) for the
 in-progress migration and its remaining coverage gaps.
 
-## Verification and review
+## Tests
 
 `node --test scripts/test-solidity.test.mjs` exercises compilation, multiple
-contracts, parameterized assertions, true and false specifications, box versus
-diamond on revert, internal/skip tags, unsupported assembly, omitted implicit
-initializers, selection and listing. Per-file Lean diagnostics check the API.
-
-The milestone's read-only finder and skeptic review confirmed the discarded
-initializer warning could silently hide coverage. The runner now retains it
-as an error, with a regression. The finder also identified whole-contract
-timeouts losing earlier rows; checkpointing now retains results and marks
-unattempted functions explicitly.
-The skeptic found contract invariants lost when the initializer member list
-replaced the plain member list. Both lists now carry the invariants. Regressions
-require an invariant-breaking function and constructor to stay pending.
-Both reviewers also identified function-level invariants becoming global
-premises and a lost `payable` flag weakening specification premises. Testing
-imports now refuse function-level invariants, and function members preserve
-`payable`; both boundaries have source-to-proof regressions.
-Each NatSpec clause is also parsed independently before it is included in a
-contract, preventing a malformed expression from introducing another member
-and changing the obligation's premises.
-
-Validation on 2026-10-15:
-
-- Per-file Lean MCP diagnostics: no errors in the changed frontend modules.
-- `node --test scripts/test-solidity.test.mjs`: 6 passed, 0 failed.
-- CLI smoke test with automatic build: `ScopedFlip.additionStorageWrite` proved.
-- SolKey's actual `benchmark/Counter.sol`, selecting `Counter.inc`: specified
-  obligation proved, with no import errors.
-- `./run-lean.sh`: default build and all `SolkeyTestSuite` modules passed;
-  the final `solkeycheck` failed on four annotation mismatches against the
-  current sibling checkout (336 taclets versus this repository's older pin).
-- `node scripts/check-orphans.mjs`: 296 reachable, zero orphaned.
-- `git diff --check`: passed.
-- `./scripts/check-doc-paths.sh`: six pre-existing missing references in
-  `vendor/LeanTeX/VENDOR.md`.
-- `./scripts/check-testsuite.sh`: the sibling SolKey TestSuite source hash
-  differs from the pinned AST fixture. Re-importing the suite and re-pinning
-  annotations are separate changes, not part of this API milestone.
+contracts, true and false specifications, box versus diamond on revert,
+internal/skip tags, unsupported assembly, omitted initializers (an error, not
+a silent omission), function-level invariants refused, `payable` kept,
+checkpointing on timeout, selection and listing.

@@ -54,6 +54,11 @@ theorem per obligation (`lake build SolkeyTestSuite`):
 
 ## Build
 
+The [VS Code extension](vscode/README.md) verifies Solidity files through the same
+runner, with Test Explorer, diagnostics, hover status and cancellation. The
+[Dafny feature audit](docs/dafny-parity.md) records reusable verification features
+and the remaining semantic gaps.
+
 ```sh
 lake build Solidity     # the formalization; elaboration is the test suite
 ./run-lean.sh           # the same, then the solkey cross-check below
@@ -63,6 +68,20 @@ The package declares no dependencies at all — no Mathlib, nothing — so
 `lake build` clones nothing. It pins its compiler in `lean-toolchain`. On
 NixOS, `run-lean.sh` uses the wrappers in `scripts/lean-vscode/bin` to select
 a compatible Lean and Lake installation.
+
+## Command line
+
+```sh
+lake build solidity-lean Solidity.Frontend.Cli
+.lake/build/bin/solidity-lean verify path/to/Contract.sol
+.lake/build/bin/solidity-lean list path/to/Contract.sol --json
+.lake/build/bin/solidity-lean inspect path/to/Contract.sol --function transfer --show goals
+```
+
+The native CLI also provides concrete `run` and `rules check` commands.
+It uses the existing kernel-checked source pipeline and requires its runtime
+checkout, Node, pinned Lean/Lake, and SHA-checked Solidity compiler.
+See [docs/cli.md](docs/cli.md) for setup, state files, output and exit codes.
 
 ## Relationship to solkey
 

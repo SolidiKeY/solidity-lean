@@ -1,5 +1,6 @@
 import Solidity.Calculus.CloseScoped
 import Solidity.Calculus.TermLaws
+import Solidity.Theory.Typed.MemMirror
 
 /-!
 # `sol_close`'s storage frame, typed
@@ -356,6 +357,34 @@ theorem readId_copySt_field {H : HTy} (m : Grown H (fun _ => Unit)) {s f : Name}
   rw [SVal.copyStToM_field m.heap w hT hf]
   rfl
 
+/-- A copied fixed-array word is its storage word, including `none` past bounds. -/
+theorem readId_copySt_fixed {H : HTy} (m : Grown H (fun _ => Unit)) {n : Nat} {p : PrimTy}
+    (w : SVal (.ref (.fixed (.prim p) n)))
+    (hT : (Ty.ref (.fixed (.prim p) n)).mapFree = true) (i : PrimTy.uint.Denote) :
+    (m.then (w.copyStToM m.heap hT)).readId
+        (MAddrT.index (R := .fixed (.prim p) n) (E := .prim p) (w.copyStToM m.heap hT).val.id .fixed i) =
+      (w.find (.atF i .nil)).map (fun v => v.view) := by
+  have hm : w.Mirrors (w.copyStToM m.heap hT).heap m.H'.length
+      (w.copyStToM m.heap hT).val := SVal.mirrors_copyStToM m.heap w hT
+  cases w with
+  | fixed e =>
+    simp only [SVal.Mirrors] at hm
+    show (((MAddrT.index (R := .fixed (.prim p) n) (E := .prim p) _ .fixed i).resolve (SVal.copyStToM m.heap (.fixed e) hT).H').bind
+      (SVal.copyStToM m.heap (.fixed e) hT).heap.readAddr).map _ = _
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
+      Option.map_some, Option.bind_some]
+    simp only [Heap.readAddr, Heap.index]
+    have hid : MVal.toMvT (m.then (SVal.copyStToM m.heap (.fixed e) hT)).H' (.prim p) =
+        (fun v : p.Denote => v) := by
+      funext v
+      rfl
+    rw [hid]
+    rcases SVec.Mirrors.getElem e _ hm.2 i.1.toNat with ⟨h1, h2⟩ | ⟨v, w, h1, h2, h3⟩
+    · rw [h2, SVal.find_atF, h1]; rfl
+    · simp only [h2, SVal.find_atF, h1, SVal.find_nil, Option.map_some]
+      rw [SVal.Mirrors.prim _ _ h3]
+
+
 /-- A member of a memory struct copied into storage, as the memory reads
 it. -/
 theorem copyMToSt_find_field {H : HTy} (g : Grown H (fun _ => Unit)) {s f : Name} {p : PrimTy}
@@ -616,7 +645,7 @@ attribute [close_rw_s]
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
   CloseS.readT_prim CloseS.readT_ident CloseS.Landed.memT_readId CloseS.push_memT_readId
   CloseS.Landed.memT_lenId CloseS.push_memT_lenId Grown.lenId_ref
-  CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
+  CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field CloseS.readId_copySt_fixed
   CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
   CloseS.withNet_memT_readId CloseS.withBalance_memT_readId
   CloseS.getD_find_root CloseS.getD_find_append CloseS.find_root_bind_const

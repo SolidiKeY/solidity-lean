@@ -472,6 +472,13 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
     | .doWhile a b c => (a, c, [], [], b, true)
     | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
     | _ => ({}, .bool true, [], [], [], false)
+  -- An effectful while condition is a statement at the iteration head, not
+  -- a prefix outside the loop. Lower its synthetic break with the original
+  -- jumps, so continue rechecks it and break/return suppress another check.
+  if (s matches .whileLoop ..) && c.hasIncDec && spec.inv.isEmpty &&
+      spec.qinv.isEmpty && spec.dec.isNone && spec.unwind.isNone then
+    return ← lowerLoop rs (.whileLoop spec (.bool true)
+      [.ite (.unop .not c) [.brk] [], .block body])
   let outer ← get
   let outermost := !outer.inLoop
   set ({ ret := if outermost then none else outer.ret, inLoop := true } : LoopFlags)
@@ -544,6 +551,72 @@ partial def RawStmt.fillHole (inner : List RawStmt) (s : RawStmt) : Except Strin
   | .forLoop a i c u b => return .forLoop a i c u (← go b)
   | s => pure s
 
+/-- Reconstruct a slot type without losing ABI/function markers at any depth.
+Enum identity is already abstracted by the existing `enumRows` representation;
+any declared enum realizes that same shape. The full shape is checked below. -/
+partial def modifierSlotTy (ws : List (String × Nat)) (T : Ty) (n : String) : Except String RawTy := do
+  let rt ← go T n
+  let (actual, shape) ← elabTyW C rt
+  let wanted := shapeUnder ws n
+  let shape := shape.filter (fun r => r.1 != "")
+  unless actual == T && wanted.all (shape.contains ·) && shape.all (wanted.contains ·) do
+    throw "viaIR modifier slot type cannot preserve its complete source shape"
+  return rt
+where
+  go : Ty → String → Except String RawTy
+    | .prim p, k =>
+      if (lookupBy (k ++ "#enum") ws).isSome then
+        match C.enums.head? with
+        | some (e, _) => pure (.named e)
+        | none => throw "viaIR modifier enum slot has no declared enum"
+      else pure (.named ((fnRow? ws k).getD (declTyName ws k p)))
+    | .ref (.struct name), _ => pure (.named name)
+    | .ref (.array E), k =>
+      if (lookupBy (k ++ "#string") ws).isSome then pure (.named "string")
+      else return .array (← go E (k ++ "[]"))
+    | .ref (.fixed E count), k => return .fixed (← go E (k ++ "[]")) count
+    | .ref (.mapping p V), k => do
+      let key ← if (lookupBy (k ++ "{}#hash") ws).isSome then pure (.named "string")
+        else go (.prim p) (k ++ "{}")
+      return .mapping key (← go V (k ++ "[]"))
+
+/-- Copy a slot, retaining its complete source shape and location.
+Reference copies bind aliases; they do not copy the referent. -/
+def modifierSlotCopy (d : FunDecl) (n x : String) (T : Ty) (storage : Bool)
+    (value : RawExpr) : Except String RawStmt := do
+  let rt ← modifierSlotTy C d.widths T n
+  match T with
+  | .prim _ => pure (.decl rt x (some value))
+  | .ref _ =>
+    pure (if storage then .declStorage rt x (some value) else .declMemory rt x (some value))
+
+/-- The viaIR placeholder is a call: copy parameter slots, initialize fresh
+return slots from the modifier's incoming slots, run the inner code, then
+copy only its results out. Heap/storage effects are shared. This lowering
+admits primitive and memory returns. Storage return frames need a separate
+representation of an unset incoming alias, rather than a read of it. -/
+def modifierFrame (d : FunDecl) (ρ : List (String × String))
+    (incoming : List (String × String)) (inner : List RawStmt) : ElabM (List RawStmt) := do
+  let mut names : List (String × String) := []
+  let mut decls : List RawStmt := []
+  let mut outs : List RawStmt := []
+  for (n, T) in d.params do
+    let old := (lookupBy n ρ).getD n
+    let x := toString (← freshCapture "se")
+    decls := decls ++ [← ElabM.lift (modifierSlotCopy C d n x T
+      (lookupBy n d.paramLocs == some .storage) (.name old))]
+    names := (old, x) :: names
+  for (n, T) in d.rets do
+    if T matches .ref _ then
+      unless d.retMem do throw "viaIR modifier frames with storage returns are not supported"
+    let old := (lookupBy n ρ).getD n
+    let x := toString (← freshCapture "se")
+    let some initial := lookupBy old incoming | throw "internal: modifier return input missing"
+    decls := decls ++ [← ElabM.lift (modifierSlotCopy C d n x T false (.name initial))]
+    names := (old, x) :: names
+    outs := outs ++ [.assign (.name old) (.name x)]
+  return [.block (decls ++ (← renameStmts names inner) ++ outs)]
+
 /-- **Modifiers, inlined** around a function's body (its locals already
 fresh), the first listed outermost, as solc runs them: a modifier's
 parameters are declared fresh with its arguments (read in the function's
@@ -555,12 +628,31 @@ its last statement and one in a modifier that modifier's (`lowerReturns`,
 before its `_;` is filled), so the code after `_;` runs after either, as
 it does in solc.  A body run by several
 `_;` (or by one in a loop) is run again in the same locals, its parameters
-and return variables not reset: solc's legacy pipeline (via-IR resets
-them). -/
-partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt)
+and return variables not reset in legacy. ViaIR uses separate parameter
+and return slots for each placeholder call (`modifierFrame`). -/
+partial def wrapMods (body : List RawStmt) (frame : Option (FunDecl × List (String × String)) := none) :
+    List ModApp → ElabM (List RawStmt)
   | [] => pure body
   | m :: ms => do
-    let inner ← wrapMods body ms
+    let inner ← wrapMods body frame ms
+    let mut incoming : List (String × String) := []
+    let mut inputs : List RawStmt := []
+    let mut results : List RawStmt := []
+    let mut restore : List RawStmt := []
+    if let some (d, ρ) := frame then
+      for (n, T) in d.rets do
+        if T matches .ref _ then
+          unless d.retMem do throw "viaIR modifier frames with storage returns are not supported"
+        let old := (lookupBy n ρ).getD n
+        let x := toString (← freshCapture "se")
+        let result := toString (← freshCapture "se")
+        results := results ++ [← ElabM.lift (modifierSlotCopy C d n result T false (.name old))]
+        inputs := inputs ++ [← ElabM.lift (modifierSlotCopy C d n x T false (.name old))]
+        restore := restore ++ [.assign (.name old) (.name result)]
+        incoming := (old, x) :: incoming
+    let inner ← match frame with
+      | none => pure inner
+      | some (d, ρ) => modifierFrame C d ρ incoming inner
     unless m.params.length == m.args.length do
       throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
     let mut ρ : List (String × String) := []
@@ -593,7 +685,7 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     let code ← if code.any RawStmt.hasReturn then
         ElabM.lift (lowerReturns [] (← lowerLoops (some []) code))
       else pure code
-    pure (decls ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
+    pure (results ++ decls ++ inputs ++ restore ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
 
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
 and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/

@@ -84,6 +84,8 @@ structure ImportRow where
   /-- The Solidity name; `name` identifies the generated Lean declaration. -/
   sourceName : String := ""
   sourceSignature : String := ""
+  /-- Exact solc declaration identity; -1 for a synthesized declaration. -/
+  sourceId : Int := -1
   /-- Modern fixtures undergo the source scan; legacy fixtures do not. -/
   admissionChecked : Bool := false
   sourceFeatures : List Language.Feature := []
@@ -111,6 +113,7 @@ deriving instance ToExpr for ImportRow
 /-- The row of an imported function. -/
 def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
   { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+    sourceId := f.sourceId,
     sourceFeatures := f.sourceScope.features, sourceDiagnostic := f.sourceScope.diagnostic?,
     tag := f.tag, params := f.params, status, reason, payable := f.payable,
     writingCall := f.writingCall, paramRanges := f.paramRanges, elemRanges := f.elemRanges }
@@ -196,7 +199,7 @@ def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")?
-  (&"evalOrder" term)? : command
+  (&"evalOrder" term)? (&"entrypoints")? : command
 
 /-- A large imported function table, compiled in bounded list segments.
 For example, the testing import retains all of TestSuite's public functions.
@@ -208,13 +211,15 @@ private def compileListSegments (owner : Lean.Name) (value : Expr) : TermElabM E
   while rest.isAppOfArity ``List.cons 3 do
     cells := cells.push rest
     rest ← whnf rest.appArg!
-  if cells.size ≤ 64 then return value
+  -- Small fields can be projections from a record update of the entire
+  -- contract. Rebuild their exposed spine too (or return the weak-head value
+  -- for a non-list), so native code need not compile that discarded record.
   let mut rebuilt : Expr := rest
   let mut count : Nat := 0
   for cell in cells.reverse do
     rebuilt := cell.appFn!.app rebuilt
     count := count + 1
-    if count % 64 == 0 then
+    if cells.size > 64 && count % 64 == 0 then
       let name ← mkFreshUserName (owner ++ `_list)
       addAndCompile <| .defnDecl {
         name, levelParams := [], type := ← inferType rebuilt, value := rebuilt,
@@ -306,6 +311,13 @@ private partial def escapeSpecBindings (names : List String) : List String → L
 
 private partial def renameSpecSyntax (params rets : List (String × String)) (stx : Syntax) : Syntax :=
   match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    -- The key and domain remain outside the guard's binder scope.
+    let bound := x.getId.toString false
+    let key' := renameSpecSyntax params rets key
+    let guard' := renameSpecSyntax (params.filter (·.1 != bound)) (rets.filter (·.1 != bound)) guard
+    let items' := items.elemsAndSeps.map (renameSpecSyntax params rets)
+    stx.setArg 0 key' |>.setArg 7 (stx[7].setArgs items') |>.setArg 9 guard'
   | `(spec_expr| \forall $T:ident $x:ident; $body) =>
     let _ := T
     stx.setArg (stx.getNumArgs - 1)
@@ -423,6 +435,9 @@ private partial def specFeatures (bound : List String) (stx : Syntax) : List Sou
   let uses (root member : String) :=
     if bound.contains root then [] else (specEnvironment root member).map (⟨·, 0⟩)
   match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    specFeatures bound key ++ items.elemsAndSeps.toList.flatMap (specFeatures bound) ++
+      specFeatures ((x.getId.toString false) :: bound) guard
   | `(spec_expr| \forall $_T:ident $x:ident; $body) =>
     specFeatures ((x.getId.toString false) :: bound) body
   | `(spec_expr| \exists $_T:ident $x:ident; $body) =>
@@ -446,6 +461,34 @@ private partial def specFeatures (bound : List String) (stx : Syntax) : List Sou
     | root :: member :: _ => uses root member
     | _ => []
   | _ => stx.getArgs.toList.flatMap (specFeatures bound)
+
+/-- Free root-name reads in parsed specifications. Binder scope applies to
+the guard only; member labels are not root reads. -/
+partial def specReadsFreeName (name : String) (bound : List String) (stx : Syntax) : Bool :=
+  let reads (x : Ident) :=
+    let root := (x.getId.components.map (·.toString false)).headD ""
+    root == name && !bound.contains root
+  match stx with
+  | `(spec_expr| $key \in $_T:ident ($x:ident; $items:spec_expr,*; $guard)) =>
+    specReadsFreeName name bound key ||
+      items.elemsAndSeps.any (specReadsFreeName name bound) ||
+      specReadsFreeName name ((x.getId.toString false) :: bound) guard
+  | `(spec_expr| \forall $_T:ident $x:ident; $body) =>
+    specReadsFreeName name ((x.getId.toString false) :: bound) body
+  | `(spec_expr| \exists $_T:ident $x:ident; $body) =>
+    specReadsFreeName name ((x.getId.toString false) :: bound) body
+  | `(spec_expr| $a:spec_expr.$_f:ident) => specReadsFreeName name bound a
+  | `(spec_expr| $x:ident) => reads x
+  | `(spec_loc| $a:spec_loc.$_f:ident) => specReadsFreeName name bound a
+  | `(spec_loc| $x:ident) => reads x
+  | _ => stx.getArgs.any (specReadsFreeName name bound)
+
+private def readsSpecification (env : Environment) (sourceNames : List String)
+    (name kind : String) (bound : List String) (text : String) : Except String Bool := do
+  unless ["requires", "ensures", "invariant", "assignable"].contains kind do return false
+  let escaped := String.join (escapeSpecBindings sourceNames (specTokens text))
+  let parsed ← Parser.runParserCategory env `sol_member s!"{kind} {escaped};"
+  pure (specReadsFreeName name bound parsed)
 
 private def scanSpecifications (env : Environment) (sourceNames : List String)
     (request : Source.AdmissionRequest) : Source.ScopeScan :=
@@ -511,6 +554,7 @@ def elabSolcImport : CommandElab := fun stx => do
   let j ← ofExcept (Json.parse text)
   let ast ← ofExcept (j.getObjVal? "ast")
   let provenance ← ofExcept (Source.read j ast)
+  let compilerCode ← ofExcept (Source.readCompilerCode j ast provenance)
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
@@ -524,11 +568,13 @@ def elabSolcImport : CommandElab := fun stx => do
       (Admission.scan ast provenance { request with
         declarationRoots := request.declarationRoots ++
           [Admission.header [] ast] ++ (J.arrD ast "nodes").toList.filter (J.kind · == "PragmaDirective") }).append
-        (scanSpecifications env sourceNames request) |>.normalize)
+        (scanSpecifications env sourceNames request) |>.normalize |>.requireCompilerCode (!compilerCode.isEmpty))
     (fun bound modelBindings text => if provenance.legacyFixture then default else
       scanSpecifications env sourceNames {
         entry := .null, evaluatedRoots := [], modelBindings,
-        specifications := [(bound, "/// @custom:key " ++ text)] }))
+        specifications := [(bound, "/// @custom:key " ++ text)] })
+    (readsSpecification env sourceNames) (!stx[9].isNone)
+    (!provenance.legacyFixture && provenance.pipeline == some .viaIR) compilerCode)
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -549,12 +595,17 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Its users still fail expansion because the named modifier is absent.
   let modifierMembers := c.modifierMembers.filter fun m =>
     match parse `sol_member m with | .ok _ => true | .error _ => false
+  -- A helper header may return or accept a source struct/enum. Validate it
+  -- in the same type-declaration context as the final contract; no state
+  -- initializer or other helper body is admitted by this precheck.
+  let typeMembers := c.members.filter fun member =>
+    member.startsWith "struct " || member.startsWith "enum "
   let mut funMembers : Array String := #[]
   let mut badMembers : List (String × String) := []
   for (g, m) in c.funMembers do
     let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
     let r ← match callsLeftOut? badMembers calls,
-        parse `term (contractText [" ".intercalate modifierMembers, m]) with
+        parse `term (contractText (typeMembers ++ [" ".intercalate modifierMembers, m])) with
       | some e, _ => pure (some e)
       | none, .error e => pure (some s!"its declaration does not parse: {e}")
       | none, .ok s => liftTermElabM (contractError? s)
@@ -598,7 +649,13 @@ def elabSolcImport : CommandElab := fun stx => do
         (at_ f 0 s!"the contract with its constructor and initializers: {e}"))
       ctorMember := none
     | some e, _, _ =>
-      logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
+      -- An implicit initializer that renders but fails native elaboration
+      -- must remain a deployment refusal, not a warning and default state.
+      let f : SolcFun := {
+        name := "constructor", sourceName := "constructor", sourceSignature := "constructor()",
+        line := 0, tag := .diamond, params := [], body := .ok [] }
+      ctorRow := some (.ofFun f .unsupported
+        (at_ f 0 s!"the contract with its initializers: {e}"))
   let ctStx ← ofExcept (parse `term (contractText memberList))
   let ctStx ← if c.internalFuns.isEmpty then pure ctStx else
     let markers : List (String × Nat) := c.internalFuns.map fun name => (name ++ "#internalEntry", 0)
@@ -627,7 +684,7 @@ def elabSolcImport : CommandElab := fun stx => do
       if provenance.pipeline == some .viaIR then
         liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := EvalOrder.viaIR } : Contract))
       else
-        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := Solidity.EvalOrder.mk false false } : Contract))
+        liftTermElabM <| `(({ $(⟨ctStx⟩) with evalOrder := Solidity.EvalOrder.mk false false false } : Contract))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
@@ -741,8 +798,20 @@ def elabSolcImport : CommandElab := fun stx => do
         kind := .missingImplementation, name := `solidity.lowering,
         reason := row.reason } else none
     { row with admissionChecked := !provenance.legacyFixture, sourceDiagnostic }
+  -- A modern report retains source metadata at every row. Compile its large
+  -- literal in bounded segments too, certifying the complete original list
+  -- before exporting the report that tooling evaluates.
+  let originalReport := toExpr reportRows
+  let reportValue ← liftTermElabM do
+    let value ← compileListSegments rep originalReport
+    let certificate ← mkFreshUserName (rep ++ `_inputEq)
+    addDecl <| .thmDecl {
+      name := certificate, levelParams := [],
+      type := mkApp3 (mkConst ``Eq [1]) rowsTy originalReport value,
+      value := mkApp2 (mkConst ``Eq.refl [1]) rowsTy originalReport }
+    pure value
   liftCoreM <| addAndCompile <| .defnDecl {
-    name := rep, levelParams := [], type := rowsTy, value := toExpr reportRows,
+    name := rep, levelParams := [], type := rowsTy, value := reportValue,
     hints := .abbrev, safety := .safe }
   liftCoreM <| addAndCompile <| .defnDecl {
     name := rep ++ `provenance, levelParams := [], type := mkConst ``Source.Provenance,

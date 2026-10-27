@@ -49,6 +49,13 @@ inductive SpecExpr where
   /-- `\forall T x; e`, at `T`'s primitive type (an `address` is a `uint`). -/
   | all (p : PrimTy) (x : String) (e : SpecExpr)
   | ex (p : PrimTy) (x : String) (e : SpecExpr)
+  /-- Finite equality-membership at one explicitly declared primitive type.
+  This is a specification predicate, not a first-class runtime collection. -/
+  | member (p : PrimTy) (key : SpecExpr) (items : List SpecExpr)
+  /-- `key \in T (x; literals; guard)`: the key is outside the
+  binder's scope; only the guard binds `x`. Domains are literal-only. -/
+  | memberFilter (p : PrimTy) (key : SpecExpr) (binder : String)
+      (items : List SpecExpr) (guard : SpecExpr)
   deriving Repr, Inhabited
 
 /-- A location an `assignable` clause names: a state variable, a member,
@@ -105,6 +112,8 @@ syntax:20 spec_expr:20 " <-> " spec_expr:21 : spec_expr
 -- extends through the remaining formula, as in SolSpec.g4.
 syntax:max "\\" noWs &"forall"  ident ident "; " spec_expr:10 : spec_expr
 syntax:max "\\" noWs &"exists"  ident ident "; " spec_expr:10 : spec_expr
+syntax:max "\\" noWs &"in" ident "(" spec_expr "; " spec_expr,* ")" : spec_expr
+syntax:50 spec_expr:51 "\\" noWs &"in" ident "(" ident "; " spec_expr,* "; " spec_expr ")" : spec_expr
 
 section
 open Lean
@@ -161,6 +170,11 @@ partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
     `(SpecExpr.all $(← specSort T) $(quote (x.getId.toString false)) $(← expandSpec a))
   | `(spec_expr| \exists $T:ident $x:ident; $a) => do
     `(SpecExpr.ex $(← specSort T) $(quote (x.getId.toString false)) $(← expandSpec a))
+  | `(spec_expr| \in $T:ident ($key; $items:spec_expr,*)) => do
+    `(SpecExpr.member $(← specSort T) $(← expandSpec key) [$(← items.getElems.mapM expandSpec),*])
+  | `(spec_expr| $key \in $T:ident ($x:ident; $items:spec_expr,*; $guard)) => do
+    `(SpecExpr.memberFilter $(← specSort T) $(← expandSpec key)
+      $(quote (x.getId.toString false)) [$(← items.getElems.mapM expandSpec),*] $(← expandSpec guard))
   | _ => Macro.throwUnsupported
 
 /-- A location of an `assignable` clause: `count`, `alice.age`,

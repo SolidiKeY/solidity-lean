@@ -1,4 +1,17 @@
 import Solidity.Theorems
+import Solidity.Semantics.Termination
+import Solidity.Semantics.LexMetrics
+import Solidity.Examples.LexMetrics
+import Solidity.Examples.Tactics.LexAnnotations
+import Solidity.Calculus.LexVariantSound
+import Solidity.Calculus.Sound.LoopLexDiamond
+import Solidity.Examples.LexDiamond
+import Solidity.Examples.Tactics.LexDiamond
+import Solidity.Calculus.FiniteMembership
+import Solidity.Calculus.FilteredMembership
+import Solidity.Examples.Tactics.FilteredSets
+import Solidity.Calculus.Preconditions
+import Solidity.Examples.SourceCounterexample
 import Solidity.Evm.Memory
 import Solidity.Evm.MemoryStructExamples
 import Solidity.Evm.MemoryStructDefaultExamples
@@ -488,7 +501,68 @@ run_cmd do
     ``Solidity.Evm.Memory.ArrayRepr.keeps,
     ``Solidity.Evm.Memory.AllocExamples.initial_repr,
     ``Solidity.Evm.Memory.AllocExamples.written_repr,
-    ``Solidity.Evm.Memory.AllocExamples.twoArrays_repr]
+    ``Solidity.Evm.Memory.AllocExamples.twoArrays_repr,
+    ``Solidity.TLoop.finite_of_wellFounded,
+    ``Solidity.TLoop.run_measure,
+    ``Solidity.TLoop.run_lex,
+    ``Solidity.Stmt.loop_terminates_of_wellFounded,
+    ``Solidity.holds_finiteMember,
+    ``Solidity.Fml.EntryNegative.holds_source,
+    ``Solidity.Fml.EntryNegative.unique,
+    ``Solidity.Fml.PreconditionsImpossible.valid,
+    ``Solidity.Fml.PreconditionsImpossible.not_possible,
+    ``Solidity.Examples.SourceCounterexample.badRefuted,
+    ``Solidity.Examples.SourceCounterexample.wideRefuted,
+    ``Solidity.LoopMetrics.NatTuple.wellFounded,
+    ``Solidity.LoopMetrics.Certificate.valid,
+    ``Solidity.LoopMetrics.SourceCertificate.valid,
+    ``Solidity.LoopMetrics.SourceCertificate.checks,
+    ``Solidity.Examples.LexMetrics.sourceProgram_success,
+    ``Solidity.Examples.LexMetrics.equal_source_rejected,
+    ``Solidity.Examples.LexMetrics.increasing_source_rejected,
+    ``Solidity.Examples.LexMetrics.undefined_source_rejected,
+    ``Solidity.Premise.sound_loopAnnotation,
+    ``Solidity.CallbackCapture.loop_ann_all,
+    ``Solidity.Stmt.CapturesAs.loopAnnotation,
+    ``Solidity.LoopAnn.lex_erasure_size,
+    ``Solidity.Examples.Tactics.LexAnnotations.ordinaryBox,
+    ``Solidity.LoopLex.snapshot_globT_iff_eval,
+    ``Solidity.LoopLex.snapshot_fails_of_undefined,
+    ``Solidity.LoopLex.snapshot_pushFree,
+    ``Solidity.LoopLex.snapshot_exh,
+    ``Solidity.LoopLex.snapshot_lands,
+    ``Solidity.LoopLex.snapshot_lands_eq,
+    ``Solidity.LoopLex.saveState_drop,
+    ``Solidity.LoopLex.metrics_eval_wk,
+    ``Solidity.LoopLex.metrics_eval_saved,
+    ``Solidity.LoopLex.lexFml_holds,
+    ``Solidity.LoopLex.snapshotsDecrease_holds,
+    ``Solidity.LoopLex.run_lex_or,
+    ``Solidity.LoopLex.diamondPremise_sound,
+    ``Solidity.LoopLex.diamondStep_sound,
+    ``Solidity.Stmt.step_upds_le,
+    ``Solidity.Stmt.step_upds_le_two,
+    ``Solidity.Stmt.step_tmSize_le,
+    ``Solidity.Examples.LexDiamond.exiting_source_diamond,
+    ``Solidity.Examples.LexDiamond.exhausting_source_diamond,
+    ``Solidity.Examples.LexDiamond.exhausting_not_strict,
+    ``Solidity.Examples.LexDiamond.return_flag_loop_succeeds,
+    ``Solidity.Examples.Tactics.LexDiamond.pairCountdown,
+    ``Solidity.Examples.Tactics.LexDiamond.tripleCountdown,
+    ``Solidity.Examples.Tactics.LexDiamond.pairReset,
+    ``Solidity.Examples.Tactics.LexDiamond.tripleReset,
+    ``Solidity.Examples.Tactics.LexDiamond.scalarCountdown,
+    ``Solidity.holds_finiteValues,
+    ``Solidity.holds_filteredMember,
+    ``Solidity.holds_filteredMember_rename,
+    ``Solidity.holds_filteredMember_domain,
+    ``Solidity.not_holds_filteredMember_nil,
+    ``Solidity.not_holds_filteredMember_undefined,
+    ``Solidity.Examples.Tactics.FilteredSets.one_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.echo_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.empty_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.undefined_key_correct,
+    ``Solidity.Examples.Tactics.FilteredSets.theory_guard_correct]
   let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
   for name in headlines do
     let _ ← getConstInfo name

@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.FilteredMembership
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.RefInputs
 import Solidity.Syntax.Elab
@@ -118,6 +119,11 @@ def oldNetVar : Var := .ofName "oldNet"
 /-- The local `\result` names, solkey's `result`. -/
 def resultVar : Var := .ofName "result"
 
+/-- The obligation owns its hidden snapshot and return names. Primitive
+logical binders cannot reuse them, including inside another quantifier. -/
+def reservedSpecName (x : String) : Bool :=
+  x == "old" || x == "oldNet" || x == "result" || x.startsWith "result_"
+
 /-- `\old(e)` is read against `old` and `oldNet`, and not nested. -/
 def SpecCtx.old (ctx : SpecCtx C) : SpecCtx C :=
   { ctx with storage := .pv oldVar, ensures := false, ledger := some oldNetVar, memory := none }
@@ -134,6 +140,16 @@ def SpecExpr.foldMap {α : Type} (leaf : α) (join : α → α → α) (here : S
     match here e with
     | some r => r
     | none => join (a.foldMap leaf join here) (b.foldMap leaf join here)
+  | e@(.member _ key items) =>
+    match here e with
+    | some r => r
+    | none => items.foldl (fun acc item => join acc (item.foldMap leaf join here))
+        (key.foldMap leaf join here)
+  | e@(.memberFilter _ key _ items guard) =>
+    match here e with
+    | some r => r
+    | none => join (items.foldl (fun acc item => join acc (item.foldMap leaf join here))
+        (key.foldMap leaf join here)) (guard.foldMap leaf join here)
   | e@(.num _) | e@(.uintLit _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
 
 /-- Whether a node `here` picks out occurs, and what it says of it. -/
@@ -191,8 +207,27 @@ partial def layoutAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (k : 
   | _ => []
 
 /-- The names a clause reads. -/
-def SpecExpr.names : SpecExpr → List String :=
-  SpecExpr.foldMap [] (· ++ ·) fun | .name x => some [x] | _ => none
+def SpecExpr.names : SpecExpr → List String
+  | .name x => [x]
+  | .memberFilter _ key x items guard =>
+    key.names ++ items.flatMap SpecExpr.names ++ (guard.names.filter (· != x))
+  | .member _ key items => key.names ++ items.flatMap SpecExpr.names
+  | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => e.names
+  | .index a b | .binop _ a b | .imp a b | .iff a b => a.names ++ b.names
+  | .num _ | .uintLit _ | .bool _ | .result => []
+
+/-- A filtered domain is literal-only and intrinsically typed before lowering.
+Dynamic values, arithmetic expressions and ledger integers are not domains. -/
+def SpecExpr.domainLiteral (p : PrimTy) : SpecExpr → Except String p.Denote
+  | .num n => numLit (toString n) n p
+  | .uintLit n => do
+    unless p = .uint do throw "a fixed uint literal in a non-uint filtered domain"
+    numLit s!"uint({n})" n p
+  | .unop .neg (.num n) => numLit s!"-{n}" (-(Int.ofNat n)) p
+  | .bool b => match p with
+    | .bool => pure b
+    | _ => throw "a boolean literal in a non-bool filtered domain"
+  | _ => throw "a filtered membership domain requires primitive literals"
 
 /-- The layout premises of the state variables among `rs`: those the
 clauses read.  What only the body reads needs none: a read the program
@@ -219,7 +254,9 @@ mutual
 /-- A memory parameter followed through its members and entries. -/
 partial def SpecExpr.memPath (ctx : SpecCtx C) :
     SpecExpr → Except String (Option (Ty × (NITerm C ⊕ NMAddr C)))
-  | .name x =>
+  | .name x => do
+    if (lookupBy x ctx.locals).isSome then
+      throw s!"{x} is a primitive local, not a reference path"
     match lookupBy x ctx.refs with
     | some (.mem R) =>
       if ctx.memory.isSome then pure (some (.ref R, .inl (.pv (.ofName x))))
@@ -250,7 +287,9 @@ partial def SpecExpr.memPath (ctx : SpecCtx C) :
 /-- A path of state variables, members and entries, and the type it names:
 `balances[a]` is `balances[a]` at `uint`. -/
 partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
-  | .name x =>
+  | .name x => do
+    if (lookupBy x ctx.locals).isSome then
+      throw s!"{x} is a primitive local, not a storage path"
     match lookupBy x ctx.refs with
     | some (.alias R) => pure (.ref R, .pv (.ofName x))
     | some (.mem _) => throw s!"{x} is a memory reference, not a storage path"
@@ -349,7 +388,8 @@ partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := fa
       throw s!"operands of {BinOp.sym op} of types {pa'.toStr} and {pb'.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
     pure (.prim (op.ret p), .binop op ta tb)
-  | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
+  | .imp .. | .iff .. | .all .. | .ex .. | .member .. | .memberFilter .. =>
+    throw "a formula where a value is expected"
 
 /-- Select the ledger context from the operands' result shapes, then compile
 each operand once. A ledger read resets its address operand's context without
@@ -396,9 +436,33 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
   | .binop .or a b => do pure (.not (.and (.not (← a.fml ctx)) (.not (← b.fml ctx))))
   | .imp a b => do pure (.imp (← a.fml ctx) (← b.fml ctx))
   | .iff a b => iff a b
-  | .all p x e => do pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
+  | .all p x e => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
+    pure (.all (.ofName x) p (← e.fml { ctx with locals := (x, p) :: ctx.locals }))
   | .ex p x e => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
     pure (.not (.all (.ofName x) p (.not (← e.fml { ctx with locals := (x, p) :: ctx.locals }))))
+  | .member p key items => do
+    let (_, keyTerm) ← key.term C ctx
+    let terms : List (NTerm C) ← items.mapM fun item => do
+      let (_, t) ← item.term C ctx
+      pure t
+    pure fun Γ => do
+      -- Check every term at one fixed sort before folding. The key is checked
+      -- even for an empty collection; no erased operand can hide an error.
+      let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
+      let values : List (Tm C Γ.ctx (.val p)) ← terms.mapM fun t => t.check (.val p) Γ
+      pure (Fml.finiteMember value values)
+  | .memberFilter p key x items guard => do
+    if reservedSpecName x then throw s!"reserved specification binder name {x}"
+    let (_, keyTerm) ← key.term C ctx
+    let values : List p.Denote ← items.mapM (SpecExpr.domainLiteral p)
+    let guardFml ← guard.fml { ctx with locals := (x, p) :: ctx.locals }
+    pure fun Γ => do
+      -- Check the key before extending its scope, even when the domain is empty.
+      let value : Tm C Γ.ctx (.val p) ← keyTerm.check (.val p) Γ
+      let predicate ← guardFml ((.ofName x, .val p) :: Γ)
+      pure (Fml.filteredMember (.ofName x) value values predicate)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.fml ctx.old
@@ -551,7 +615,7 @@ def specPieces (f : String) :
     | .prim p => some (n, p)
     | _ => none
   for (n, _) in d.params do
-    if n == "old" || n == "oldNet" || n == "result" || n.startsWith "result_" then
+    if reservedSpecName n then
       throw s!"{f}: a parameter named {n}, which the obligation names"
     -- `k1`, `k2`, …: the keys the layout and the frame quantify over
     if n.startsWith "k" && n.length > 1 && (n.drop 1).all Char.isDigit then
@@ -662,10 +726,10 @@ macro "sol_spec_prep" : tactic => `(tactic|
    -- state: every premise introduced, every conjunct its own goal
    all_goals (repeat' (first | intro _ | apply And.intro))))
 
-/-- The last step of `sol_spec_close`: `omega` or `grind`, `grind`'s
-instantiation bounded, since the layout premises are quantified. -/
+/-- Arithmetic, then the existing bounded KeY `allLeft` fallback or bounded
+`grind`. Every chosen universal instance is a checked proof application. -/
 macro "sol_spec_finish" : tactic => `(tactic|
-  first | omega | grind (gen := 3))
+  first | omega | (sol_close_all; first | omega | grind (gen := 3)) | grind (gen := 3))
 
 /-- The closing half of `sol_spec`: `sol_spec_prep`, then `sol_spec_finish`
 on every goal. -/

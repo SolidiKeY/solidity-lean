@@ -1,13 +1,12 @@
 # Aligning the executable semantics with solc
 
 The interpreter, the typed run (`Stmt.run`, `Solidity/Semantics/Run.lean`)
-over the typed state (there is no untyped state since W10.5.6), is a port
-of KeY's state layer, and KeY's calculus is in several places more liberal than the
+over the typed state, is a port of KeY's state layer, and KeY's calculus is in several places more liberal than the
 Solidity compiler it models. Where the two differ the interpreter follows
 **solc** (the 0.8 line), and this document is the authority for where and
 why. solkey `f2eb3d98eb` reads storage the same way in the array items
 below. The EVM compiler's own deltas are in `docs/compiler-verification.md`;
-the plan to test these claims against solc is `docs/solc-validation.md`.
+how these claims are tested against solc is `docs/solc-validation.md`.
 
 ## Where the interpreter follows solc, not KeY
 
@@ -23,9 +22,10 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Memory local without an object | a memory local may be unset (decision 17', `docs/intrinsic.md`, since 2026-10-08): no statement leaves one so (`T memory m;` allocates a default object, as solc's zero-initialised memory does, and every other declaration binds an object), but the calculus's hidden binder ranges over it, as over an unset alias (above).  A read or a write through an unset memory local reverts, in the typed run (`MPath.mvalT`) and in the terms the calculus reads (`Calculus/Lands.lean`).  solc has no such local | `LTy.TDenote`, `MPath.mvalT` | `Calculus/Sound.lean` (`Stmt.sound`) |
 | Block-scoped locals | in the type (since 2026-10-07, M2.2; since W8 the elaborator emits the scoped `Stmt C Γ Γ'` directly, so a local out of scope does not elaborate): the elaborator (`NCtx.find`, `elabProgS`) reads the branches of an `if` and a `try`, a loop's body and a call's body as scopes and a name as its newest declaration, so `{ bool x = true; } if (c) { uint x = 1; }` is accepted, as solc accepts it, and a branch's local is not read after it.  The run (`Stmt.run`, `TRun.ite`/`TRun.block`, `docs/intrinsic.md`) pops a scope's locals at its end, and the typing invariants are carried along it (`Typing/TypedRunInv.lean`); since W4 it is the only run of a statement, and the calculus reads it, so no local outlives its scope | `NCtx.find` (`Syntax/Elab.lean`), `elabProgS` (`Syntax/Splice.lean`), `TRun.ite`, `TRun.block` | `Examples/Tactics/Branch.lean`, `Syntax/Splice.lean` |
 | Conditional of memory references | `T memory m = c ? a : b;` binds `m` to `a`'s or `b`'s object, as solc: the elaborator declares a fresh `mv` before the branches, bound to a branch that indexes nothing (a read that cannot revert on a set local), and rebinds it in each branch.  An unset memory local, which only a hidden binder holds (decision 17' of `docs/intrinsic.md`), reverts on that read where solc reads only the branch taken: when the index-free branch is such a local and is not taken, the program reverts where solc's does not (since W8).  When both branches index, `mv` is first bound to a fresh default object (`T memory mv;`), which nothing reaches: the heap has one object solc does not allocate (since 2026-10-07).  So when both branches index and `T`'s default is not well-formed (`defaultOkS`), the conditional is refused ("a conditional of two indexed memory …s, whose default is not well-formed"), where before 2026-10-07 each branch declared `mv` itself | `hoist`, `MPath.indexFree` | `Syntax/Splice.lean`, `Examples/Tactics/Branch.lean` |
-| `checked { }` | Lean only (KeY Java's `arithmeticSemanticsCheckingOF`): each checked operation is preceded by an `assert` of its range, so an overflow is a panic, which neither modality accepts, where outside the block it is a revert (solc's `Panic(0x11)` is read as a revert, solkey's `outOfBounds` reading); `**` and division by zero stay reverts (`docs/options.md`, O2) | `Prog.checkOF`, `Stmt.guard` (`Syntax/Checked.lean`), `narrowCheck` | `Examples/Tactics/CheckedBlock.lean` |
+| Mixed storage/memory reference conditional | The join has one checked reference endpoint and a memory result. A selected storage arm deep-copies at its evaluation point; a selected memory arm retains identity. The condition and selected effects run once, and untaken location reads do not run. A fresh default memory object seeds the join without reading either arm; it remains unreachable after rebinding. Mapping-holding endpoints and defaults not admitted by the intrinsic memory statements remain rejected. Type-only probes restore capture/local and call-memo state; full branch shape metadata is checked and retained. Ordinary calldata escape restrictions remain in force. | `hoistWith` (`Syntax/Elab/Arms.lean`), existing `MRhs.copy` / `MRhs.alias` | `tests/upstream/Group07Mixed.lean`, `tests/solc/Group07Mixed.sol` |
+| `checked { }` | Lean only (KeY Java's `arithmeticSemanticsCheckingOF`): each checked operation is preceded by an `assert` of its range, so an overflow is a panic, which neither modality accepts, where outside the block it is a revert (solc's `Panic(0x11)` is read as a revert, solkey's `outOfBounds` reading); unsigned `**` and division by zero stay reverts; the supported signed-power lowering exposes a guarded final signed-range overflow witness, while magnitude overflow remains a revert (`docs/options.md`, O2) | `Prog.checkOF`, `Stmt.guard` (`Syntax/Checked.lean`), `narrowCheck` | `Examples/Tactics/CheckedBlock.lean` |
 | `ignoringOverflow { }` | Lean only (KeY Java's `arithmeticSemanticsIgnoringOF`, read soundly): each checked operation is preceded by `if (range) {} else { assume(false); }`, so an overflowing run is assumed away under either modality, where outside the block it reverts; not solc (`docs/options.md`, O5) | `Prog.ignoreOF`, `Stmt.assumeFalse`, `LeanTaclet.assumeFalse` | `Examples/Tactics/CheckedBlock.lean` |
-| `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `BinOp.arithInt`, `RawExpr.uncheck` | |
+| `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~` is the unsigned word complement; `<<` keeps the low source-width bits at either sign, and `>>` zero-fills unsigned values or sign-extends signed values with an unsigned count | `BinOp.arithInt`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?` (`Syntax.lean`), `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/Checked.lean` |
 | Byte types | Lean only (solkey gives `string` an opaque `int` and skips `bytes`): `bytesN` is a `uint` of `8N` bits holding its bytes big-endian, so `==`, `<`, `& \| ^ ~ << >>` are the narrow integer ones; a conversion between sizes keeps the left bytes or pads on the right, as an implicit widening does; `b[i]` reads byte `i` from the left and reverts past `N` (solc's `Panic(0x32)`, read as a revert as an array's is); a literal is left-aligned. `bytes` and `string` are a `bytes1[]` in storage and memory, `bytes(s)`/`string(b)` the identity, a literal a fresh memory array | `bytesPure`, `hoist` (`Syntax/Elab.lean`), `valueRows?` (`Syntax.lean`) | `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol` |
 | `calldata` and slices | calldata roots are read-only model memory inputs; ordinary aliases must originate at admitted calldata parameters/aliases, and writes or writable escape through ordinary shared aliases are refused. `b[i:j]` is a stable finite base/offset/length descriptor with relative bounds checks. Whole-slice uses with primitive elements allocate a fresh dynamic memory copy for internal calls/returns, hashes/ABI consumers and existing storage copying; readonly indexing, length and decoding use the descriptor directly. Reference/nominal elements and external reference arguments remain unsupported | `RawStmt.sliceViews`, `calldataCheck`, `#sliceCopy` (`Syntax/Elab/Context.lean`, `Syntax/Elab/Arms.lean`), `Frontend/Import.lean` | `Examples/Tactics/SliceCopies.lean`, `Examples/Tactics/SliceCopiesImport.lean`; [calldata-slice-copies.md](calldata-slice-copies.md) |
@@ -38,7 +38,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Repeated member names | a struct that declares two members of one name is refused ("Identifier already declared"): the elaborator refuses a type naming one (`refusedStructs`, `unknownStructMsg`, decision 16), so every struct of `structDef` has distinct member names | `structDef_nodup` | `Syntax/Splice.lean` (`BadDup`) |
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
-| Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  A push below the bound ends (`Semantics/Ends.lean`).  Decision 13 said the push reverts: a typed revert needs the untyped push to revert too, and the untyped calculus's diamond obligations with a push (most of solkey's TestSuite is diamonds) could then not be discharged, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Semantics/Ends.lean` |
+| Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  A push below the bound ends (`Semantics/Ends.lean`).  A reverting push would make the diamond obligations with a push (most of solkey's TestSuite) undischargeable, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Semantics/Ends.lean` |
 | Recursion depth | a recursive call (`Stmt.callRec`) runs its body unrolled to `recDepth` (1024) nested frames, the bottom one `exhausted` (`recUnroll`, `Prog.recBase`): the EVM's stack holds 1024 words and every internal call's frame at least its return address, so a deeper recursion overflows the stack and halts, which both modalities accept as they accept exhaustion (decision 15).  KeY inlines a recursive callee without end and proves it by contract; the run here is the EVM's below the bound and a halt above it, never a wrong state (the EVM may overflow before the bound: a sound over-approximation); a diamond over a recursive call is therefore no termination claim (`docs/kernel-port.md`, "Recursion") | `recUnroll`, `recDepth`, `Stmt.run_callRec` | `Examples/Tactics/Recursion.lean` |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `TRun.transfer`; `Evm.compile_correct` | `Semantics/Run.lean` |
@@ -89,8 +89,7 @@ compound-assignment target once. `Stmt.run` does the same: `.assign` and
 reads and writes through one resolved location. KeY's calculus agrees only
 where the right-hand side is complex (`a[++i] = ++i` leaves `a[2] == 1`);
 solkey's rule for a simple right-hand side bound the index first, so
-`a[i++] = i` proved `a[0] == 1` where solc writes `0`, until solkey fixed it
-on 2026-09-09.
+`a[i++] = i` proved `a[0] == 1` where solc writes `0` (fixed in solkey since).
 
 An effect inside an expression cannot occur in `Stmt.run`: a value has no
 effects, and the elaborator captures each `++`/`−−` (and call) into a fresh
@@ -107,8 +106,7 @@ local before its statement (`hoist`, `Syntax/Elab.lean`). An operand solc reads
 
 A callee's parameters and locals, inlined under fresh names, are captured as
 a caller's are: `return a++ + a;` reads the right `a` first
-(`ElabScope.inlined`; before 2026-10-08 a fresh name was taken for a capture
-holding its value, and `bumpRead(1)` of `Tactics/Calls.lean` was `1 + 2`).
+(`ElabScope.inlined`).
 In a written derivation, a program's own fresh-shaped local (`se1`, `sp1`, `ie1`, `mv1`, `brk1`, …,
 as `FreshNames.parse` reads it) is still taken for a written-out capture and
 is not captured again: `uint se1 = 0; y = se1++ + se1;` reads the right
@@ -130,12 +128,11 @@ ordinary binary arithmetic.
 operand of `&&`/`||`, or in a branch of a conditional, would run where solc
 does not run it, so it is an elaboration error.
 
-**Binary operators follow the legacy pipeline.** solc's legacy generator
-evaluates the right operand first (`ExpressionCompiler.cpp`); the IR generator
-evaluates the left first, so `++a + a` at `a = 1` is `3` in legacy and `4`
-via IR, and neither is guaranteed (`docs/ir-breaking-changes.rst` in solc).
-A proof about `x = i++ + i` holds for the legacy pipeline only;
-`docs/solc-validation.md` weighs the options.
+**Binary operators follow the legacy pipeline by default.** solc's legacy
+generator evaluates the right operand first (`ExpressionCompiler.cpp`); the IR
+generator the left first, so `++a + a` at `a = 1` is `3` in legacy and `4`
+via IR, neither guaranteed (`docs/ir-breaking-changes.rst` in solc). A proof
+about `x = i++ + i` holds for the schedule its contract selects (O9).
 
 ### Known divergence: reference sources are not right-hand-side first
 
@@ -207,6 +204,17 @@ programs, and the check is a statement the rules already run.
   quotient by `1` where `y` is `-1`, negated on the words
   (`type(int).min / -1` is `type(int).min`); `x ** k` is the words' power,
   `int8(uint(x) **% k)`.  Checked, each reverts as solc panics (`0x11`).
+- **Signed shifts and checked powers.** The left operand keeps its source
+  type; the count/exponent is unsigned. Signed right shifts saturate counts at
+  256 before the existing signed primitive operation, and signed left shifts
+  move the operand's word and read it back at the source width. Checked signed
+  power uses unsigned magnitude, parity and the exact signed range through
+  existing intrinsic values (`Syntax/Numeric.lean`). The emitted-tree numeric
+  theorem is `NumericLowering.checkedSignedPower_correct`
+  (`Semantics/NumericLowering.lean`), with successful-operand premises and a
+  result projection, not source/compiler or panic-payload equivalence. The
+  precise scope, controls and remaining self-call panic-data limitation are in
+  [the numeric milestone](feature-work/numeric-operators.md#group-04-signed-shifts-powers-and-literal-typing).
 - **Short circuits and conditionals.**  A narrow operation under the right
   operand of `&&`/`||` or in a branch of `c ? a : b` is checked only where
   solc evaluates it: `bool se = a; if (se) { se = b; }`, and
@@ -305,9 +313,7 @@ solkey's copying write `copyTo`, which keeps a mapping member of the old node
 (`TVal.overlay`) though no program here writes such a copy, and its `delete`
 keeps mapping entries and an array's slots past its end as the interpreter's
 does (`TVal.delR`, read off the type); `Storage.obs_delete` and
-`Storage.obs_write` prove the two agree on every read, literally.  The
-untyped algebra that kept both of solkey's writes, the collapsing `save` and
-the non-collapsing `copyTo`, was deleted at W10.4.
+`Storage.obs_write` prove the two agree on every read, literally.
 
 ## Arrays past their end
 
@@ -329,9 +335,8 @@ elements, `shadow` the slots past the end.
   is `.undef` (no typed path is one).
 - **A memory push resolves its receiver once.** In
   `cube[cube[0].length].push(row)`, with both initial cube rows empty, the
-  target is `cube[0]`. The former append/assignment elaboration evaluated
-  that expression twice and incorrectly selected `cube[1]` after appending.
-  A typed `Src.copyMem` now keeps the copy inside one `Stmt.push`.
+  target is `cube[0]`: a typed `Src.copyMem` keeps the copy inside one
+  `Stmt.push`.
   `TRun.push` resolves the receiver, snapshots the typed memory value and
   appends it with the new length. The solc 0.8.34 IR computes a single target
   slot and passes it to `array_push_from_*`; `Examples/Tactics/MemoryPush.lean`
@@ -365,8 +370,7 @@ elements, `shadow` the slots past the end.
   `n` elements in place, a copy takes the source's elements, and there is no
   `length` slot (solc lays the array out inline).
 
-`Calculus/Decide.lean` reads the live storage only (`SVal.findLive`,
-`SVal.saveLive`) and is bridged to the program's checked paths; an alias
+`Calculus/Decide.lean` reads the live storage only (`SVal.findLive`) and is bridged to the program's checked paths; an alias
 through an index is outside its fragment once the storage was written after
 the bind.
 
@@ -448,7 +452,8 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   effect, and a parameter that shadows a root does not capture the
   initializer, which is prepended after the renaming.
 - **Constants and immutables are storage** in `contract!` (a root with an
-  initializer, as solkey's `SolJSONParser` reads them); solc inlines a
+  initializer; solkey's `SolJSONParser` now inlines constants, and only
+  immutables remain its storage roots); solc inlines a
   `constant` and writes an `immutable` into the code.  They agree on every
   read once deployed, but a function's obligation starts from any
   well-typed storage, where the root holds any value: `assert(L == 5)` is
@@ -458,7 +463,8 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `immutable` the constructor writes is a storage root with its
   initializer, so the constructor's obligation reads what it wrote, and a
   function's reads any value (true of the deployed code, never refuted).
-- **Base constructors run in solc's legacy order**: every initializer, most
+- **Source construction follows its recorded compiler pipeline.** Legacy runs
+  every initializer, most
   base first; then the base constructors' arguments, derived to base; then
   the constructor bodies, base to derived (`readContract`'s
   `compositeBody`, one constructor member, each argument a local named as
@@ -472,7 +478,15 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   that page's description of the legacy order puts the arguments before
   the initializers, which the emitted code does not:
   `tests/solc/Inheritance.sol`'s `CtorLeaf` passes an initialized `late`
-  on and asserts it.  A base constructor's virtual calls dispatch to the
+  on and asserts it. Modern verified via-IR imports now select that interleaved
+  schedule in `readContract`: arguments are captured before initialization,
+  then reverse-C3 owners each run their initializers followed by their body.
+  Owners with implicit constructors still receive their initialization stage.
+  Root declarations stay uninitialized in this path; the staged writes use the
+  same typed assignments as native constructor initialization, selected by
+  declaration identity. Historical fixtures without pipeline provenance retain
+  legacy scheduling. No core syntax or run rule changes.
+  A base constructor's virtual calls dispatch to the
   most-derived contract.  Arguments come from the first contract in the C3
   order giving them, in its constructor's header (`B(a)`) or its
   inheritance specifier (`is B(5)`) ("Arguments for Base Constructors").
@@ -537,20 +551,20 @@ stronger obligation, not an additional assumption available to its proofs.
   0x11, at a narrow width too), an out-of-range index (0x32), an empty `pop`
   (0x31) and a zero divisor (0x12) are all `.revert`; "rejected at compile
   time" and "outside the fragment" are not programs (the elaborator refuses
-  them) or `.undef` on an ill-sorted erased state, except an access through
-  an unset storage pointer, a negative `**` exponent and a negative
-  `transfer`/`send` amount, which revert (since 2026-10-07; the table above). The compiled code has no
-  panic: there a failing `assert` reverts (`compile_correct`).
-- **Block-scoped locals.** The locals check scopes them as solc does, and
-  so does the run (`Semantics/Run.lean`), the only one since W4; a
-  conditional of two indexed memory references allocates an object nothing
-  reaches (the table above).
-- **Fragment width.** Loops run (`TLoop.run`, `docs/loops.md`) and are
-  proved by unwinding to a bound or by an invariant, but the EVM compiler
-  refuses them (`Evm.inFrag`); `uintN`/`intN`
-  for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
-  `transfer`, `send`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
-  rather than silently diverge.
+  them); an access through an unset storage pointer reverts (the table
+  above). The compiled code has no panic: there a failing `assert` reverts
+  (`compile_correct`).
+- **Gas** is not modelled; resource exhaustion is `exhausted`, which both
+  modalities accept. The EVM compiler's fragment is narrower than the run's
+  (`Evm.inFrag`, `docs/compiler-verification.md`).
+- **Via-IR modifiers.** Via IR, a modifier's parameters are re-initialised
+  at each `_;` (solc's `docs/ir-breaking-changes.rst`); the elaborator
+  follows legacy (`wrapMods` runs the body again in the same locals), so
+  with several `_;`, or one in a loop, a via-IR contract differs: upstream
+  `modifiers/function_modifier_loop_viair.sol` and
+  `function_modifier_multi_invocation_viair.sol`
+  ([solidity-upstream-tests.md](solidity-upstream-tests.md)). `delete` of a
+  storage struct via IR also zeroes padding, visible only to a low-level read.
 - **`push` over a recycled slot.** `arr.push(v)` of a struct or array value
   lays it on fresh slots (`SVal.strip`), not over the recycled slot it lands
   on, so what a reference wrote into that slot's own arrays past their ends is
@@ -563,9 +577,8 @@ stronger obligation, not an additional assumption available to its proofs.
   lengths. A diamond obligation that reads a length through checked
   arithmetic after a push (`storagePushReadBack`: `values[values.length -
   1]` after a `push`) is valid in the model all the same, since the push at
-  a full array is out of gas and the length after one is at least `1`; it
-  is derived since W10.4 (the closer reads `len < len + 1`,
-  `Facts.ltSucc`).
+  a full array is out of gas and the length after one is at least `1` (the
+  closer reads `len < len + 1`, `Facts.ltSucc`).
   One that pushes with no bound on the length before it holds in the model
   where solc panics, from a length of exactly `2^64`:
   `storagePushLengthPositive`, `storagePopUnknownLength` and
@@ -577,7 +590,7 @@ stronger obligation, not an additional assumption available to its proofs.
 
 ## Error arguments and self-call panic payloads
 
-The calls/exceptions M1 elaborator patch evaluates custom-error arguments
+The elaborator evaluates custom-error arguments
 for both values of `require`'s condition, and for `revert E(...)` before
 reverting. It finishes each operand before starting a later operand's calls
 or injected guards. A string reason likewise cannot run before a residual
@@ -587,12 +600,31 @@ In a self-call frame, invalid enum conversions and unset internal function
 values emit the exact literal `Panic(0x21)` and `Panic(0x51)` bytes. Ordinary
 assertion/revert classification is retained. Internal-function arguments are
 captured once at their formal types before dispatch, including failing fields
-and reads changed by later operands. This adds local captures; no statement,
-formula, outcome or frame representation is replaced. The existing soundness
-proofs apply to the resulting typed declarations, branches and data reverts.
-The added catch-transport lemmas retain the exact byte list and original
-caller state, including heap rollback, in their conclusions.
+and reads changed by later operands. These are local captures, so the
+existing soundness proofs apply; the catch-transport lemmas
+(`Semantics/RevertMemory.lean`) keep the exact byte list and the caller's
+state, heap rollback included.
 
-See [feature-work/calls-exceptions.md](feature-work/calls-exceptions.md).
-The patch is prepared without Lean validation; source/EVM reference checks
-are evidence about the pinned compilers, not a frontend-equivalence proof.
+See [feature-work/calls-exceptions.md](feature-work/calls-exceptions.md);
+its EVM reference checks are evidence about the pinned compilers, not a
+frontend-equivalence proof.
+
+## Modifier placeholder frames
+
+Legacy reuses the function's parameter and return slots across repeated
+modifier placeholders. ViaIR (`EvalOrder.modifierFrames`) gives each
+placeholder invocation separate slots: parameters are copied, incoming return
+slots are passed to each invocation, and the latest result is copied out.
+Modifier results initialize before argument evaluation; argument changes to
+named returns affect the incoming slots, not a skipped invocation's result.
+Memory/storage referents remain shared through reference parameter aliases.
+The elaborator retains and checks all recorded source-shape markers on copies.
+Memory return aliases are supported; viaIR modifier functions returning storage
+aliases are explicitly refused because unset incoming bindings cannot safely
+be copied by a source-level alias read.
+
+The two upstream viaIR return mismatches and distinct legacy controls are
+recorded in [solidity-upstream-tests.md](solidity-upstream-tests.md#group-01-viair-modifier-return-slots-2026-10-26).
+This lowering uses existing typed statements and sound rules. Runtime/EVM
+agreement and the fixed-program proof controls do not constitute a universal
+compiler-correctness theorem.

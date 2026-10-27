@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "status": "research-partially-implemented",
+  "upstream": {
+    "repository": "dafny-lang/dafny",
+    "commit": "de36f2ec1f9c530080eff7929ae28229f45da069",
+    "inspectedOn": "2026-10-26",
+    "access": "Read-only GitHub connector fetches pinned by commit; selected sections inspected.",
+    "sources": [
+      {
+        "path": "Source/DafnyCore/AST/Expressions/Comprehensions/SetComprehension.cs",
+        "blob": "6b43072dc41761179615628cdc1462b6d40a5639",
+        "lineScopes": [
+          {
+            "start": 8,
+            "end": 39
+          }
+        ],
+        "inspection": "Bound variables, finite flag, implicit identity term and typed AST structure."
+      },
+      {
+        "path": "Source/DafnyCore/AST/Expressions/Comprehensions/ComprehensionExpr.cs",
+        "blob": "1b18205d5e05bf9f37f58726a8692d96956fe41e",
+        "lineScopes": [
+          {
+            "start": 10,
+            "end": 46
+          }
+        ],
+        "inspection": "Explicit domains and ranges, finite/enumerable bound requirements and binder structure."
+      },
+      {
+        "path": "Source/DafnyCore/AST/Expressions/Comprehensions/QuantifierExpr.cs",
+        "blob": "e7f1e8f99bbba75ae4d11544a9a4e2d9328d69b9",
+        "lineScopes": [
+          {
+            "start": 57,
+            "end": 76
+          }
+        ],
+        "inspection": "Quantifier binder/range/term constructor and logical body interface."
+      },
+      {
+        "path": "Source/DafnyCore/AST/Expressions/Comprehensions/ForallExpr.cs",
+        "blob": "abd675e75f6481715a133788840eba556cf16238",
+        "lineScopes": [
+          {
+            "start": 24,
+            "end": 29
+          }
+        ],
+        "inspection": "Universal quantifier range becomes an implication antecedent."
+      },
+      {
+        "path": "Source/DafnyCore/AST/Expressions/Comprehensions/ExistsExpr.cs",
+        "blob": "5613823dcac02522f718e5fc6c7cfa45b5d91f71",
+        "lineScopes": [
+          {
+            "start": 24,
+            "end": 29
+          }
+        ],
+        "inspection": "Existential quantifier range becomes a conjunction."
+      },
+      {
+        "path": "Source/DafnyCore/AST/Members/Predicate.cs",
+        "blob": "32fd1cef33b897b4764df1470fc64ca3beae342f",
+        "lineScopes": [
+          {
+            "start": 9,
+            "end": 31
+          }
+        ],
+        "inspection": "Predicate is a Boolean-returning function with requires, reads, decreases, body and opacity parameters."
+      },
+      {
+        "path": "Source/DafnyCore/Resolver/BoundsDiscovery/SetBoundedPool.cs",
+        "blob": "f18ed223595a15e0a7a5fe2bcf8f5e54485d2169",
+        "lineScopes": [
+          {
+            "start": 12,
+            "end": 24
+          }
+        ],
+        "inspection": "Set domain carries bound-variable type, element type and finiteness."
+      },
+      {
+        "path": "Source/DafnyCore/Resolver/BoundsDiscovery/BoundsDiscovery.cs",
+        "blob": "c2ac9d5be6043e29d6b39ed7b72a6bb6026e3080",
+        "lineScopes": [
+          {
+            "start": 180,
+            "end": 225
+          },
+          {
+            "start": 397,
+            "end": 470
+          }
+        ],
+        "inspection": "Bounds discovery for quantifiers and finite comprehensions, allocation independence, finite possible values and collection/integer pools."
+      },
+      {
+        "path": "Source/DafnyCore/Verifier/BoogieGenerator.ExpressionTranslator.cs",
+        "blob": "a79a2b4e56b8aea574996448c861fb21b5877bde",
+        "lineScopes": [
+          {
+            "start": 552,
+            "end": 634
+          }
+        ],
+        "inspection": "Set comprehension extensional translation and range-guarded universal/existential translation."
+      },
+      {
+        "path": "Source/DafnyCore/Verifier/BoogieGenerator.ExpressionWellformed.cs",
+        "blob": "376cea2038174d741b13f775e1f605fe167f2f58",
+        "lineScopes": [
+          {
+            "start": 1374,
+            "end": 1454
+          }
+        ],
+        "inspection": "Bound-variable substitution, range wellformedness and image wellformedness under the range guard."
+      },
+      {
+        "path": "Source/IntegrationTests/TestFiles/LitTests/LitTest/dafny0/InSetComprehension.dfy",
+        "blob": "9fe5db38ffa199e044452eaed0728efceaab53e1",
+        "lineScopes": [
+          {
+            "start": 4,
+            "end": 44
+          }
+        ],
+        "inspection": "Identity and image membership over bounded integers and collection domains; Even predicate and trigger-sensitive examples."
+      },
+      {
+        "path": "Source/IntegrationTests/TestFiles/LitTests/LitTest/dafny0/RestrictedBoundedPools.dfy",
+        "blob": "a1a765f7767e0085c9aead2a9cdad0d71cfc5b92",
+        "lineScopes": [
+          {
+            "start": 76,
+            "end": 138
+          },
+          {
+            "start": 154,
+            "end": 166
+          }
+        ],
+        "inspection": "Allocation-sensitive quantifier domains and finite versus infinite comprehension restrictions."
+      },
+      {
+        "path": "Source/IntegrationTests/TestFiles/LitTests/LitTest/dafny0/Predicates.dfy",
+        "blob": "9342196ac69f27cf31b782262c074806f7cace0d",
+        "lineScopes": [
+          {
+            "start": 10,
+            "end": 18
+          },
+          {
+            "start": 87,
+            "end": 109
+          }
+        ],
+        "inspection": "Predicates with read frames, specification uses, bodyless declarations and intentionally failing verification cases."
+      },
+      {
+        "path": "Source/IntegrationTests/TestFiles/LitTests/LitTest/comp/Comprehensions.dfy",
+        "blob": "2cd4e6a1859dcc5fc0d9e9280417f5788615640c",
+        "lineScopes": [
+          {
+            "start": 267,
+            "end": 340
+          }
+        ],
+        "inspection": "Reference/type-filtered set comprehensions and finite Boolean domains."
+      }
+    ]
+  },
+  "scope": "Design research for a future Solidity specification feature. No source implementation, semantic-equivalence theorem or complete Dafny parity is claimed. Source line scopes are selected inspections, not whole-file audits.",
+  "upstreamFindings": [
+    {
+      "topic": "extensional-membership",
+      "evidence": {
+        "path": "Source/DafnyCore/Verifier/BoogieGenerator.ExpressionTranslator.cs",
+        "line": 552
+      },
+      "finding": "Dafny translates a set image extensionally using suitable typed bound values, range and output equality. Identity comprehensions have a simpler translation."
+    },
+    {
+      "topic": "wellformedness-is-separate",
+      "evidence": {
+        "path": "Source/DafnyCore/Verifier/BoogieGenerator.ExpressionWellformed.cs",
+        "line": 1397
+      },
+      "finding": "Dafny separately checks range wellformedness and image wellformedness under the range guard; extensional membership alone does not reproduce this discipline."
+    },
+    {
+      "topic": "finite-domains",
+      "evidence": {
+        "path": "Source/DafnyCore/Resolver/BoundsDiscovery/BoundsDiscovery.cs",
+        "line": 180
+      },
+      "finding": "Bounds discovery tracks finite/enumerable domains and allocation independence. A finite possible-value type can establish finiteness without a bounded range."
+    },
+    {
+      "topic": "predicates",
+      "evidence": {
+        "path": "Source/DafnyCore/AST/Members/Predicate.cs",
+        "line": 19
+      },
+      "finding": "Dafny predicates are Boolean-returning functions with proof-relevant interfaces, including reads and decreases; they are not merely textual aliases."
+    }
+  ],
+  "localBaseline": {
+    "evidence": [
+      {
+        "path": "Solidity/Calculus/FiniteMembership.lean",
+        "line": 16,
+        "finding": "Finite equality-membership folds Theory equality over listed terms."
+      },
+      {
+        "path": "Solidity/Calculus/FiniteMembership.lean",
+        "line": 20,
+        "finding": "holds_finiteMember equates membership with equality to a listed term under typed denotation."
+      },
+      {
+        "path": "Solidity/Calculus/SurfaceSpec.lean",
+        "line": 405,
+        "finding": "Existing source forall/exists compile with typed primitive binders."
+      },
+      {
+        "path": "Solidity/Calculus/SurfaceSpec.lean",
+        "line": 408,
+        "finding": "Existing finite membership checks every operand at one primitive sort, including keys of empty membership."
+      },
+      {
+        "path": "Solidity/Calculus/SurfaceSpec.lean",
+        "line": 122,
+        "finding": "SpecCtx.old switches storage and ledger interpretation, disables memory snapshots and rejects nested old through the ensures flag."
+      },
+      {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "line": 530,
+        "finding": "Token-level enum/constant substitution currently bypasses clauses containing forall/exists or escaped identifiers; new binders need additional protection."
+      }
+    ],
+    "limits": [
+      "Existing equality-membership preserves Theory equality for halting terms; two undefined observations may compare equal.",
+      "Existing typed quantifiers are not first-class collection quantification or collection values.",
+      "Line references describe the inspected baseline and can move as concurrent feature work is integrated."
+    ]
+  },
+  "proposedComprehension": {
+    "status": "implemented-literal-domain-membership",
+    "internalShape": "memberFilter(p, key, binder, finiteLiteralDomain, guard)",
+    "syntax": "key \\in uint(x; 1, 2; guard), also int, bool and address; existing prefix equality-membership is unchanged.",
+    "firstMilestone": [
+      "One explicitly declared primitive sort and one bound variable.",
+      "An explicitly finite literal-value domain checked at that primitive sort.",
+      "Identity image only: each admitted result is the bound primitive value itself.",
+      "Existing specification formulas as guards.",
+      "Formula-valued membership only, without adding collection-valued terms."
+    ],
+    "denotation": {
+      "notation": "exists v : Value(p), v in literalDomain and holds(push(sigma, v), guard) and denote(key, sigma) = some(v)",
+      "notationScope": "Value(p), push and some are schematic names for the existing typed value, context extension and observation interfaces; these are not proposed Lean declarations.",
+      "meaning": "The domain is finite independently of the guard. Membership relates a successfully denoting key to a literal primitive value for which the existing guard formula holds.",
+      "plannedTheorems": [
+        "A generic equivalence between the generated formula and the stated typed denotation.",
+        "Weakening compatibility for outer terms moved under the binder.",
+        "Alpha-renaming compatibility and no capture of outer names.",
+        "Finite-domain support and independence from duplicate domain values."
+      ]
+    },
+    "representation": [
+      "Store domain literals intrinsically at the chosen primitive sort.",
+      "Compile the key and domain in the outer context; weaken them under a genuine typed value binder.",
+      "Compile only the guard in the extended context.",
+      "Use indexed variables or binder-aware parsed AST substitution, never raw textual replacement."
+    ],
+    "strictnessAndDefinedness": [
+      "The key must denote an actual primitive value: equality against a typed value binder prevents an undefined key matching a literal value.",
+      "Literal-only domains avoid silently dropping undefined dynamic domain expressions.",
+      "Guards keep the existing formula interpretation, including its Theory equality for halting expressions; this does not establish Dafny wellformedness parity.",
+      "A stricter mathematical-expression interface needs explicit guard definedness obligations or a separately proved total guard fragment.",
+      "Any future dynamic-domain extension needs an explicit proof policy for each entry; requiring every entry to return a value is preferable to silently omitting malformed entries.",
+      "Empty domains still require static checking of the key and guard; invalid names, sorts, snapshots and literals must not be hidden by simplification."
+    ],
+    "boundedQuantifierExtension": {
+      "universal": "forall v:p, domainMember(v,D) implies body(v)",
+      "existential": "exists v:p, domainMember(v,D) and body(v)",
+      "boundary": "Compile symbolically with existing typed formula binders; do not enumerate the full uint256 domain."
+    },
+    "excludedFromMilestone": [
+      "First-class set values",
+      "Set equality or cardinality",
+      "Union, intersection or difference",
+      "Sequences, multisets or mathematical maps",
+      "Map comprehensions",
+      "General image expressions",
+      "Multiple bound variables",
+      "Dynamic collection or interval domains",
+      "Allocation-sensitive reference domains",
+      "SMT trigger or solver-heuristic parity"
+    ],
+    "implementation": {
+      "denotationTheorem": "Solidity.holds_filteredMember",
+      "sourceTests": "scripts/filtered-spec-sets.test.mjs",
+      "validation": "21 proved, 3 intentionally pending, 28 compiler errors and 1 explicit loop unsupported; exact-goal refutation checked separately.",
+      "limits": "Membership-only identity filters over primitive literal values; guard Theory equality is retained, constants conservative, loop annotations unsupported. Predicates remain planned."
+    }
+  },
+  "captureSnapshotAndImporterHazards": [
+    {
+      "hazard": "outer-name-capture",
+      "requirement": "A binder sharing an outer parameter name must not capture the key or domain. Compile outer terms before extending the scope and weaken them by typed positions."
+    },
+    {
+      "hazard": "constant-substitution-before-parsing",
+      "localEvidence": {
+        "path": "Solidity/Frontend/SolcJson/Body.lean",
+        "line": 530
+      },
+      "requirement": "New binder syntax must receive binder-aware parsed constant/enum resolution, or conservative bypass/rejection of the existing token-level substitution. Test binders shadowing inherited constants and renamed locals."
+    },
+    {
+      "hazard": "whole-expression-old",
+      "requirement": "A whole-comprehension old switches the applicable snapshot context; keep existing nested-old and old-memory rejection."
+    },
+    {
+      "hazard": "old-inside-guard",
+      "requirement": "An old expression in the guard changes storage/ledger interpretation while retaining the logical bound value."
+    },
+    {
+      "hazard": "lost-traversal",
+      "requirement": "Extend name collection, literal validation, constant resolution, renaming, snapshot detection and printer/parser round trips for every new constructor."
+    },
+    {
+      "hazard": "sort-erasure",
+      "requirement": "Reject mixed primitive sorts, unbounded ledger integers used as primitive domain values, and reference-valued keys or domains before constructing a formula."
+    }
+  ],
+  "proposedPredicates": {
+    "status": "planned-not-implemented",
+    "firstMilestone": "Contract-scoped acyclic predicates with explicit primitive parameters and a Boolean formula body; for example Within(uint x, uint lo, uint hi) := lo <= x and x <= hi.",
+    "argumentBinding": [
+      "Compile actual arguments in the caller context before introducing fresh typed formal parameters.",
+      "Use typed bound positions or a proved binder-aware substitution; do not replace identifier substrings.",
+      "Callers may pass explicitly interpreted storage or snapshot expressions as arguments."
+    ],
+    "strictnessChoice": {
+      "recommended": "Define a strict call by requiring typed value witnesses for every actual argument before checking the predicate body.",
+      "hazard": "Naive substitution into a predicate that ignores an argument, such as a body true, can erase an undefined actual argument.",
+      "alternative": "A deliberately non-strict logical macro interface is possible, but must be documented as such and distinguished from Dafny function calls."
+    },
+    "initialRejections": [
+      "Recursive or cyclic definitions",
+      "Forward references",
+      "Overloads",
+      "Default or named arguments",
+      "Free function-local names",
+      "Implicit storage reads in the declaration body",
+      "Implicit result, old or ledger references in the declaration body",
+      "Bodyless or axiomatized declarations"
+    ],
+    "boundary": "This adds a small reusable source-specification facility, not Dafny reads-frame, opaque-function, recursion or total-termination parity."
+  },
+  "requiredTests": [
+    {
+      "area": "membership",
+      "cases": [
+        "Member and nonmember values",
+        "Empty domain",
+        "Duplicate literals",
+        "Boolean, signed, unsigned and address domains",
+        "True and false guards",
+        "Nesting under existing quantifiers"
+      ]
+    },
+    {
+      "area": "capture",
+      "cases": [
+        "Binder shares an outer parameter name",
+        "Nested binder shadowing",
+        "Renamed source parameters",
+        "Dollar names",
+        "Binder shadows an inherited constant",
+        "Predicate formal shares a caller name"
+      ]
+    },
+    {
+      "area": "snapshots",
+      "cases": [
+        "Current and old storage differ",
+        "Old ledger retains intended context",
+        "Old inside a guard retains the bound value",
+        "Nested old is rejected",
+        "Old memory is rejected"
+      ]
+    },
+    {
+      "area": "definedness",
+      "cases": [
+        "Undefined key cannot match a literal value",
+        "Guard halting-term equality behavior is explicitly pinned or rejected by a total-fragment gate",
+        "Unused failing predicate argument follows the documented strictness policy"
+      ]
+    },
+    {
+      "area": "static-rejection",
+      "cases": [
+        "Mixed sorts",
+        "Oversized literals",
+        "Unknown names",
+        "Malformed expressions even in an empty domain",
+        "Unbounded ledger values used as primitive domain values",
+        "Reference-valued domains"
+      ]
+    },
+    {
+      "area": "predicate-resolution",
+      "cases": [
+        "Arity mismatch",
+        "Argument sort mismatch",
+        "Unknown call",
+        "Cyclic definition",
+        "Forward reference",
+        "Bodyless declaration",
+        "Forbidden implicit declaration-scope references"
+      ]
+    },
+    {
+      "area": "proof-and-source",
+      "cases": [
+        "Kernel-checked true source obligation",
+        "Certified false source obligation",
+        "Parser/printer round trips",
+        "Literal/name/snapshot/renaming traversal coverage",
+        "Admission through real solc declaration identities"
+      ]
+    }
+  ],
+  "auditStatusAfterMilestone": {
+    "comprehensions": "partial",
+    "spec-collections": "partial",
+    "lemmas-predicates": "partial",
+    "reason": "Literal-domain filtered membership does not establish first-class collection support or full Dafny parity; reusable source predicates remain planned."
+  },
+  "implementationAudit": {
+    "status": "read-only-feasibility-review",
+    "filteredMembership": [
+      "Use a domain intrinsically typed at primitive sort p; compile the key in outer context \u0393 and only the guard under the typed binder.",
+      "Thin.drop Thin.refl is the existing weakening for the outer key; Tm.denote_wk and holds_finiteMember supply existing proof interfaces.",
+      "Preserve finiteMember semantics unchanged. The new key-denotes-some-value requirement is deliberate and applies only to new syntax.",
+      "Extend binder-aware renameSpecSyntax and specFeatures. Body.resolveSpecValues currently protects forall/exists only and must protect any new guard binder.",
+      "Cover foldMap, names, usesOld, usesOldNet, Show.prec/fmt and Counterexample.specNums traversals.",
+      "Body.loopSpec has a narrower grammar; keep new loop-annotation forms explicitly unsupported until their typed lowering is implemented."
+    ],
+    "predicates": [
+      "A source-only facility can expand earlier acyclic declarations into existing typed formulas without adding a runtime predicate environment to Contract.",
+      "Check every declaration, including unused declarations. Separate call heads from variable renaming and prohibit implicit state, result, old, net and free locals.",
+      "Introduce typed value witnesses for every actual argument, including unused formals; an unused 1/0 actual must not disappear.",
+      "Document source macro scope explicitly; no reads/decreases/opacity or recursive total-termination parity is implied."
+    ]
+  }
+}

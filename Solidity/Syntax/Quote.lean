@@ -205,6 +205,13 @@ def LoopQ.quote : {Δ : Ctx} → Lean.Expr → LoopQ C Δ → Lean.Expr
   | _, Δe, .all x p b =>
     mkAppN (mkConst ``LoopQ.all) #[c, Δe, toExpr x, toExpr p, LoopQ.quote (consE (.val p) Δe) b]
 
+/-- Ranking expressions quoted with their length index. -/
+def LoopMetrics.quote : {n : Nat} → LoopMetrics C Γ n → Lean.Expr
+  | _, .nil => mkAppN (mkConst ``LoopMetrics.nil) #[c, Γe]
+  | _, @LoopMetrics.cons _ _ n head tail =>
+    mkAppN (mkConst ``LoopMetrics.cons) #[c, Γe, toExpr n,
+      Val.quote c Γe head, LoopMetrics.quote tail]
+
 def LoopAnn.quote : LoopAnn C Γ → Lean.Expr
   | .unwind k => mkAppN (mkConst ``LoopAnn.unwind) #[c, Γe, toExpr k]
   | .auto => mkAppN (mkConst ``LoopAnn.auto) #[c, Γe]
@@ -212,6 +219,12 @@ def LoopAnn.quote : LoopAnn C Γ → Lean.Expr
     let qTy := mkAppN (mkConst ``LoopQ) #[c, Γe]
     mkAppN (mkConst ``LoopAnn.inv) #[c, Γe, Val.quote c Γe I,
       optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec, toExpr brk,
+      qs.foldr (fun q acc => mkAppN (mkConst ``List.cons [0]) #[qTy, LoopQ.quote c Γe q, acc])
+        (mkAppN (mkConst ``List.nil [0]) #[qTy])]
+  | @LoopAnn.invLex _ _ n I metrics brk qs =>
+    let qTy := mkAppN (mkConst ``LoopQ) #[c, Γe]
+    mkAppN (mkConst ``LoopAnn.invLex) #[c, Γe, toExpr n, Val.quote c Γe I,
+      LoopMetrics.quote c Γe metrics, toExpr brk,
       qs.foldr (fun q acc => mkAppN (mkConst ``List.cons [0]) #[qTy, LoopQ.quote c Γe q, acc])
         (mkAppN (mkConst ``List.nil [0]) #[qTy])]
 

@@ -4,6 +4,7 @@ import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -68,7 +69,7 @@ The fragment is `Fml.inTarget`, the statement `DecisionTheorem`, both
 about the one decision function `decideGoal` (`decideLeaf` on a leaf
 without a hash, `decideHash` on one with).  The statement is the goal of the rounds to come, not true
 today: `Examples/Decision.lean` pins a leaf of the fragment answered
-`unknown` for each shape left (`gapArrayBlock` … `gapWrittenMemory`,
+`unknown` for each shape left (`gapWrittenMemory`, and the memory ones,
 `docs/automation.md`, M7).  A statement of the form "some decider is complete" would
 be vacuous: a classical function deciding validity by `Classical.choice`
 exists, so the statement is about this computable function, which later
@@ -88,7 +89,9 @@ instantiates; `apfPrep_valid_iff` is `Prep.valid_iff`, which every
 preparation has), reads at no bound variable hoisted out
 (`hoistPrep_valid_iff`); or the leaves that read the starting ledger
 (`Fml.ledgerCovered`), with blocks over it instantiated likewise
-(`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices
+(`Fml.ledgerBlockCovered`, `ledgerBlockReduction?_isSome`), or storage arrays at symbolic indices,
+with blocks over them instantiated likewise (`Fml.arrayBlockCovered`,
+`arrayBlockReduction?_isSome`, feature 32)
 (`Fml.arrayCovered`, `arrayReduction?_isSome`), or positive binders of KeY's
 `int` read as ledger entries (`Fml.kintCovered`, `decideKInt`), or binders of
 KeY's `int` read over two words (`Fml.kencCovered`, `decideKEnc`); `decideGoal` likewise
@@ -142,7 +145,9 @@ the verified projection procedure (`QFml.decide_iff`, `QuantReduction.verify`);
 on a leaf both refuse, the pipeline with storage array reads
 (`arrayReduction?`, `ArrayReduction.verify`); then the one with ledger reads
 (`ledgerReduction?`, `LedgerReduction.verify`); then the one with blocks
-over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`). -/
+over the ledger (`ledgerBlockReduction?`, `LedgerBlockReduction.verify`);
+then the one with blocks over storage arrays (`arrayBlockReduction?`,
+`ArrayBlockReduction.verify`, feature 32). -/
 def decideLeafA (φ : Fml C []) : LeafVerdict C :=
   match dependentReduction? φ with
   | some r =>
@@ -173,7 +178,13 @@ def decideLeafA (φ : Fml C []) : LeafVerdict C :=
             match q.verify with
             | .inl _ => .proved
             | .inr cm => .refuted cm.1
-          | none => .unknown
+          | none =>
+            match arrayBlockReduction? φ with
+            | some q =>
+              match q.verify with
+              | .inl _ => .proved
+              | .inr cm => .refuted cm.1
+            | none => .unknown
 
 /-- **Soundness.** -/
 theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.Valid φ := by
@@ -203,7 +214,12 @@ theorem decideLeafA_sound {φ : Fml C []} (h : decideLeafA φ = .proved) : Fml.V
             · rename_i hv _
               exact hv.down
             · cases h
-          · cases h
+          · split at h
+            · split at h
+              · rename_i hv _
+                exact hv.down
+              · cases h
+            · cases h
 
 /-- **Refutations are certified**: the state returned refutes the leaf. -/
 theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA φ = .refuted σ) :
@@ -239,16 +255,23 @@ theorem decideLeafA_refutes {φ : Fml C []} {σ : State C []} (h : decideLeafA �
             · rename_i cm _
               cases h
               exact cm.2
-          · cases h
+          · split at h
+            · split at h
+              · cases h
+              · rename_i cm _
+                cases h
+                exact cm.2
+            · cases h
 
 /-- **The fragment of the pipelines**: M4's, on the eliminated leaf, and the
 quantified one (`Fml.quantCovered`, M7 step 4), the one with ledger
 reads (`Fml.ledgerCovered`, M7 step 3), the one with storage array reads
-(`Fml.arrayCovered`, M7 step 6), and the one with blocks over the ledger
-(`Fml.ledgerBlockCovered`, feature 21). -/
+(`Fml.arrayCovered`, M7 step 6), the one with blocks over the ledger
+(`Fml.ledgerBlockCovered`, feature 21), and the one with blocks over storage
+arrays (`Fml.arrayBlockCovered`, feature 32). -/
 def _root_.Solidity.Fml.CoveredA (φ : Fml C []) : Bool :=
   φ.inExact && φ.exactBounded || φ.quantCovered || φ.arrayCovered || φ.ledgerCovered ||
-    φ.ledgerBlockCovered
+    φ.ledgerBlockCovered || φ.arrayBlockCovered
 
 /-- **Completeness on `Fml.CoveredA`.** -/
 theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLeafA φ ≠ .unknown := by
@@ -259,7 +282,7 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
     dsimp only
     split <;> exact fun h => nomatch h
   | none =>
-    rcases h with (((h | h) | h) | h) | h
+    rcases h with ((((h | h) | h) | h) | h) | h
     · have := dependentReduction?_isSome φ h.1 h.2
       rw [hd] at this
       cases this
@@ -295,6 +318,19 @@ theorem decideLeafA_complete {φ : Fml C []} (h : φ.CoveredA = true) : decideLe
           · rw [hq]
             dsimp only
             split <;> exact fun h => nomatch h
+    · obtain ⟨q, hq⟩ := Option.isSome_iff_exists.mp (arrayBlockReduction?_isSome φ h)
+      dsimp only
+      split
+      · split <;> exact fun h => nomatch h
+      · split
+        · split <;> exact fun h => nomatch h
+        · split
+          · split <;> exact fun h => nomatch h
+          · split
+            · split <;> exact fun h => nomatch h
+            · rw [hq]
+              dsimp only
+              split <;> exact fun h => nomatch h
 
 
 /-! ### Fresh memory arrays (M7, plan step 6)
@@ -368,7 +404,7 @@ theorem decideKInt_refutes {φ : Fml C []} {σ : State C []} (h : decideKInt φ 
   · exact fun hφ => decideLeafA_refutes h (Fml.holds_zT 0 φ σ hφ)
   · cases h
 
-/-! ### Binders of KeY's `int` over two words (M7, feature 30)
+/-! ### Binders of KeY's `int` over two words (M7, features 30 and 31)
 
 A leaf whose binders of KeY's `int` read them linearly against bounded
 terms is read with each such binder over two words (`Fml.kencB`,
@@ -471,7 +507,7 @@ def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
 arrays whose cut is in it (`Fml.memCovered`, M7 step 6), or one with
 binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
-feature 30). -/
+features 30 and 31). -/
 def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
   φ.CoveredA || φ.memCovered || φ.kintCovered || φ.kencCovered
 

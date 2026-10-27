@@ -29,6 +29,10 @@ jobs:
       # (`docs/site.md`; `pages.yml` runs it against Lean's).
       - name: Test the site exporter
         run: node --test scripts/site/export.test.mjs
+      - name: Check Dafny inventory and editor integration
+        run: |
+          node scripts/check-dafny-features.mjs
+          node --test scripts/check-dafny-features.test.mjs scripts/source-locations.test.mjs vscode/test/*.test.cjs
       # The core (`docs/parallelism.md`) imports no module of the elaborator,
       # the printers or the tactic front ends, even transitively.
       - name: Check layering
@@ -60,6 +64,49 @@ jobs:
           axiom-audit-allow: "propext,Classical.choice,Quot.sound"
       - name: Audit headline theorem dependencies
         run: lake env lean --tstack=131072 TrustAudit.lean
+      - name: Test source verification and regression suites
+        env:
+          SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
+          LEAN_NUM_THREADS: '1'
+        run: |
+          mkdir -p "$SOLKEY_ROOT/keyext.solidity.core/build/soljson"
+          curl --fail --location --retry 3 \
+            https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.34+commit.80d5c536.js \
+            --output "$SOLKEY_ROOT/keyext.solidity.core/build/soljson/soljson-v0.8.34+commit.80d5c536.js"
+          node --test --test-concurrency=1 scripts/preconditions.test.mjs scripts/finite-spec-sets.test.mjs scripts/counterexamples.test.mjs scripts/lex-metrics.test.mjs scripts/source-shadowing.test.mjs scripts/spec-hygiene.test.mjs scripts/filtered-spec-sets.test.mjs
+          node --test --test-concurrency=1 scripts/test-solidity.test.mjs scripts/aggregates.test.mjs scripts/declarations-metadata.test.mjs
+      - name: Install real backend editor test launcher
+        run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
+      - name: Test editor with solc and Lean
+        env:
+          NODE_PATH: /tmp/solidity-lean-editor-host/node_modules
+          SOLIDITY_LEAN_NODE_EXECUTABLE: node
+          SOLIDITY_LEAN_REAL_BACKEND: ${{ github.workspace }}
+          SOLKEY_ROOT: ${{ github.workspace }}/tests/migration/solkey
+          LEAN_NUM_THREADS: '1'
+        run: xvfb-run -a node vscode/test/run-host.cjs
+      - name: Build and test the command line interface
+        run: |
+          export SOLKEY_ROOT="$RUNNER_TEMP/solidity-cli-solkey"
+          cp -a tests/migration/solkey "$SOLKEY_ROOT"
+          node --input-type=module <<'JS'
+          import {readFileSync, mkdirSync, writeFileSync} from 'node:fs';
+          import {join} from 'node:path';
+          import {createHash} from 'node:crypto';
+          const root = process.env.SOLKEY_ROOT;
+          const gradle = readFileSync(join(root, 'keyext.solidity.core/build.gradle'), 'utf8');
+          const file = gradle.match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)[1];
+          const sha = gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)[1];
+          const response = await fetch(`https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/${file}`);
+          if (!response.ok) throw new Error(`compiler download: HTTP ${response.status}`);
+          const data = Buffer.from(await response.arrayBuffer());
+          if (createHash('sha256').update(data).digest('hex') !== sha) throw new Error('compiler hash mismatch');
+          const dir = join(root, 'keyext.solidity.core/build/soljson');
+          mkdirSync(dir, {recursive:true});
+          writeFileSync(join(dir, file), data);
+          JS
+          lake build solidity-lean solkeycheck
+          node --test scripts/solidity-lean.test.mjs scripts/tool-job.test.mjs
       # The automation gate: every TestSuite obligation is derived by the
       # automatic prover (`sol_prove` and the replay `sol_prove?` writes) or
       # refuted by `sol_refute`, and none is pending
@@ -71,6 +118,22 @@ jobs:
           lake build SolkeyTestSuite 2>&1 | tee testsuite-build.log
       - name: Automation gate
         run: node scripts/check-automatic.mjs --strict --build-log testsuite-build.log
+
+  editor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install editor test launcher
+        run: npm install --prefix /tmp/solidity-lean-editor-host --no-audit --no-fund @vscode/test-electron@2.5.2
+      - name: Test actual VS Code extension host
+        env:
+          NODE_PATH: /tmp/solidity-lean-editor-host/node_modules
+          SOLIDITY_LEAN_NODE_EXECUTABLE: node
+        run: xvfb-run -a node vscode/test/run-host.cjs
 
   bridge:
     runs-on: ubuntu-latest

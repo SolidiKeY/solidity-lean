@@ -460,6 +460,8 @@ def specNums : SpecExpr → List Int
   | .num n | .uintLit n => [n]
   | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => specNums e
   | .index a b | .binop _ a b | .imp a b | .iff a b => specNums a ++ specNums b
+  | .member _ key items => specNums key ++ items.flatMap specNums
+  | .memberFilter _ key _ items guard => specNums key ++ items.flatMap specNums ++ specNums guard
   | .bool _ | .name _ | .result => []
 
 /-- The integer literals a location's keys mention. -/
@@ -503,6 +505,17 @@ the pools. -/
 def products {α : Type} : List (List α) → List (List α)
   | [] => [[]]
   | xs :: rest => xs.flatMap fun x => (products rest).map (x :: ·)
+
+/-- Enumerate only when the complete Cartesian product fits `limit`. Check
+cardinality before allocating combinations; an empty factor produces no
+combinations even when the preceding factors would exceed the limit. -/
+def productsWithin {α : Type} (limit : Nat) (domains : List (List α)) : List (List α) := Id.run do
+  if limit == 0 || domains.any List.isEmpty then return []
+  let mut count := 1
+  for xs in domains do
+    if xs.length > limit / count then return []
+    count := count * xs.length
+  return products domains
 
 /-- A candidate: the storage, the arguments, the transaction, the ledger
 and the funds a call starts from, the arguments each with its type, which
@@ -968,8 +981,7 @@ there are at most half the budget of them), then random candidates up to
 `budget`; what is found is shrunk. -/
 def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search C := Id.run do
   let dom := poolVals P.lits
-  let combos := products (P.params.map fun (_, p) => dom p)
-  let combos := if combos.length * 2 ≤ budget then combos else []
+  let combos := productsWithin (budget / 2) (P.params.map fun (_, p) => dom p)
   let cands := combos.map fun vs =>
     ({ st := Storage.init C, args := P.params.map (·.1) |>.zip vs } : Cand C)
   let mut admitted := 0
@@ -1006,8 +1018,7 @@ def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search C :
   -- the candidate's arguments bound, so that the witness is what refutes
   let refutes (c : Cand C) : Bool :=
     Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff
-  let combos := products (ps.map fun (_, p) => poolVals [] p)
-  let combos := if combos.length * 2 ≤ budget then combos else []
+  let combos := productsWithin (budget / 2) (ps.map fun (_, p) => poolVals [] p)
   let mut tried := 0
   let mut g := mkStdGen 2026
   let mut found : Option (Cand C) := none

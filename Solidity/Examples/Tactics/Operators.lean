@@ -148,8 +148,9 @@ theorem signedRemainder :
       r == 0 && (x >= 0 → s >= 0) && (x <= 0 → s <= 0) } := by
   sol_prove; sol_leaf; sol_close
 
-/-- error: Solidity elaboration failed: operator << does not take int -/
-#guard_msgs in #check sol[TestSuite]{ int x = 1; x = x << 1; }
+/-- Signed left shift lowers through the operand's word and reads it signed. -/
+theorem signedLeftShift : ⊨ᶠ dl!{ ⟨ int x = 1; x = x << 1; ⟩ x == 2 } := by
+  sol_prove
 
 -- Signed `unchecked`: the sum of the words, read signed (`Examples/Tactics/SignedCasts.lean`).
 /-- info: "int x = 1; uint se1 = uint(x); uint se2 = uint(x); int se3 = int(se2 +% se1); x = se3;" -/

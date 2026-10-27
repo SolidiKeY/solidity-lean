@@ -55,7 +55,7 @@ function productionCheck(source, body) {
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
-    writeFileSync(check, `import Solidity.Frontend.Import
+    writeFileSync(check, `import Solidity.Tools.Upstream
 open Solidity Solidity.Frontend
 solc_import "FiniteDispatch.ast.json" hash 0x${hash.toString(16)} as Imported.C testing
 ${body}
@@ -181,7 +181,7 @@ test('missing candidate signature metadata cannot silently remove a possible tar
       put node "typeName" (Json.mkObj []) else node) ast`);
 });
 
-test('reference dispatch is explicitly refused until native signatures support it', () => {
+test('reference arguments remain explicitly refused by native dispatch', () => {
   scopeCheck(`contract C {
     function target(uint[] memory xs) internal pure returns(uint) { return xs.length; }
     function entry(uint[] memory xs) public pure {
@@ -271,4 +271,145 @@ test('synthesized constructor body helpers are native non-dispatchable entries',
   !(name.startsWith "solcCtorBody") || !(fnSource Imported.C name)
 #guard (Imported.C.report.find? (·.name == "entry")).any fun row =>
   row.admissionChecked && row.status == .elaborated && row.sourceDiagnostic.isNone`);
+});
+
+
+test('discarded function projections preserve source names and evaluate array operands once', () => {
+  productionCheck(`contract C {
+    uint calls;
+    function f() public returns(uint, uint) {
+      uint discarded1 = 17;
+      [C(address(0x1234)).f.address, address(uint160(++calls))][0];
+      return (discarded1, calls);
+    }
+  }`, `#eval (do
+  let cases : List (List String × String) :=
+    [(["17", "1"], "working"), (["17", "0"], "broken"), (["4660", "1"], "broken")]
+  for (expected, status) in cases do
+    let vector := Lean.Json.mkObj [
+      ("signature", Lean.toJson ("f()" : String)),
+      ("args", Lean.toJson ([] : List String)),
+      ("failure", Lean.toJson false), ("expected", Lean.toJson expected)]
+    let data := Lean.Json.mkObj [("vectors", Lean.toJson [vector])]
+    let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+    unless (report.getObjValAs? String "status").toOption == some status do
+      throw (IO.userError report.pretty) : IO Unit)`);
+});
+
+test('effectful receiver address projection remains an explicit frontend exclusion', () => {
+  productionCheck(`contract C {
+    uint calls;
+    function receiver() internal returns(address) { calls++; return address(0x1234); }
+    function f() public returns(uint, uint) {
+      uint discarded1 = 17;
+      C(receiver()).f.address;
+      return (discarded1, calls);
+    }
+  }`, `#guard (Imported.C.report.find? (·.name == "f")).any fun row => row.status == .unsupported
+#eval (do
+  let vector := Lean.Json.mkObj [
+    ("signature", Lean.toJson ("f()" : String)),
+    ("args", Lean.toJson ([] : List String)),
+    ("failure", Lean.toJson false),
+    ("expected", Lean.toJson (["17", "1"] : List String))]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report
+    (Lean.Json.mkObj [("vectors", Lean.toJson [vector])])
+  unless (report.getObjValAs? String "status").toOption == some "broken" do
+    throw (IO.userError report.pretty) : IO Unit)`);
+});
+
+test('internal memory-byte returns preserve location, aliasing and stateful pointer selection', () => {
+  productionCheck(`contract C {
+    bytes source = hex"616263";
+    uint calls;
+    function() internal returns(bytes memory) f;
+    function other() internal view returns(bytes memory) { return source; }
+    function first() internal returns(bytes memory) { calls++; f = other; return source; }
+    constructor() { f = first; }
+    function run() public returns(uint,uint) {
+      bytes memory b = f(); b[0] = bytes1(0x64);
+      return (uint8(b[0]), uint8(source[0]));
+    }
+    function count() public view returns(uint) { return calls; }
+  }`, `#guard Imported.C.report.all fun r => r.status == .elaborated
+#eval (do
+  let cases : List (String × List String) :=
+    [("run()", ["100", "97"]), ("count()", ["1"]),
+     ("run()", ["100", "97"]), ("count()", ["1"])]
+  let vectors := cases.map fun (signature, expected) => Lean.Json.mkObj [
+    ("signature", Lean.toJson signature), ("args", Lean.toJson ([] : List String)),
+    ("failure", Lean.toJson false), ("expected", Lean.toJson expected)]
+  let data := Lean.Json.mkObj [("vectors", Lean.toJson vectors)]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)`);
+});
+
+test('abstract virtual reference identity resolves to its concrete body without losing declarations', () => {
+  const source = `abstract contract S {
+    function target() internal virtual returns(bytes memory);
+  }
+  abstract contract X is S {
+    function target() internal pure override returns(bytes memory) { return hex"61"; }
+  }
+  contract C is X {
+    function() internal returns(bytes memory) f;
+    constructor() { f = super.target; }
+    function run() public returns(uint) { bytes memory b = f(); return uint8(b[0]); }
+  }`;
+  scopeCheck(source, `let identities := contract.sourceDecls.filterMap fun (entry : String × Solidity.SourceFunction) =>
+    let d := entry.2
+    if d.name == "target" then d.declaration else none
+  unless identities.eraseDups.length >= 2 do
+    throw (IO.userError "abstract and concrete source identities were lost")`);
+  productionCheck(source, `#guard Imported.C.report.all fun r => r.status == .elaborated
+#guard Imported.C.funs.any fun (_, d) => d.sourceDecl.any fun identity =>
+  identity.name == "target" && identity.declaration.isSome
+#eval (do
+  let vector := Lean.Json.mkObj [
+    ("signature", Lean.toJson ("run()" : String)), ("args", Lean.toJson ([] : List String)),
+    ("failure", Lean.toJson false), ("expected", Lean.toJson (["97"] : List String))]
+  let data := Lean.Json.mkObj [("vectors", Lean.toJson [vector])]
+  let report := Solidity.Tools.Upstream.replay Imported.C Imported.C.report data
+  unless (report.getObjValAs? String "status").toOption == some "working" do
+    throw (IO.userError report.pretty) : IO Unit)`);
+});
+
+test('memory-return admission refuses unsupported argument and external ABI paths', () => {
+  scopeCheck(`contract C {
+    function target(uint x) internal pure returns(bytes memory) { return new bytes(x); }
+    function entry() public pure {
+      function(uint) internal pure returns(bytes memory) h = target; h(1);
+    }
+  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  scopeCheck(`contract C {
+    function target(bytes memory x) internal pure returns(bytes memory) { return x; }
+    function entry() public pure {
+      function(bytes memory) internal pure returns(bytes memory) h = target; h(hex"61");
+    }
+  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  scopeCheck(`contract C {
+    function target() public pure returns(bytes memory) { return hex"61"; }
+    function entry() public view {
+      function() external view returns(bytes memory) h = this.target; h();
+    }
+  }`, diagnostic('entry', 'solidity.functionDispatch'));
+});
+
+test('a concrete base candidate with missing body metadata is not erased as abstract', () => {
+  scopeCheck(`contract Base {
+    function target() internal pure virtual returns(bytes memory) { return hex"61"; }
+  }
+  contract C is Base {
+    function target() internal pure override returns(bytes memory) { return hex"62"; }
+    function entry() public pure {
+      function() internal pure returns(bytes memory) h = target;
+      bytes memory b = h(); assert(b[0] == bytes1(0x62));
+    }
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.toOption.isNone) do
+    throw (IO.userError "a malformed concrete candidate was silently erased")`,
+  `let ast := modifyTree (fun node =>
+    if J.kind node == "FunctionDefinition" && J.str? node "name" == some "target" &&
+        ((J.arr node "baseFunctions").toOption.getD []).isEmpty then
+      put (put node "implemented" (.bool true)) "body" .null else node) ast`);
 });

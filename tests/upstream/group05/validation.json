@@ -1,0 +1,746 @@
+{
+  "branch": "codex/group05-function-dispatch",
+  "baseCommit": "006fcd593f5beeb540e7adf2bc76de4638566924",
+  "finalModelSha256": "fd16150ec7c3b5cdff0f4d7bf093d232f77064b3f204f22125a99d0988f08e8b",
+  "leanVersion": "4.24.0",
+  "lakeVersion": "5.0.0-src+797c613",
+  "managedExecutor": "ccarenv_b64_Y2NhcmVudl85Njk2YTI4YzM4Njg4MTkxOTEwMDk1M2Y0MzQ2MzQzZA",
+  "perFileChecks": [
+    {
+      "file": "Solidity/Syntax/Grammar.lean",
+      "sourceSha256": "bb49744a959574376b36486990ba59d6f7dfb81e7bd0edf7ec41d1d7f54fe7f7",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Grammar.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 72.24462607300029,
+      "log": ".lake/upstream/group05-per-file-append/01.log"
+    },
+    {
+      "file": "Solidity/Syntax/Elab/Values.lean",
+      "sourceSha256": "c8b0a7c548413007e373b9ce7f20371da9e48b61ed02cf314d4c8b81f1068eff",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Syntax/Elab/Values.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 61.79822812400016,
+      "log": ".lake/upstream/group05-per-file-append/02.log"
+    },
+    {
+      "file": "Solidity/Frontend/SolcJson/Body.lean",
+      "sourceSha256": "6543a1703751567d97582b773fbcc3abba7abe951cb82f4203832791cb97d123",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Frontend/SolcJson/Body.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-body-fresh.log"
+    },
+    {
+      "file": "Solidity/Tools/Upstream.lean",
+      "sourceSha256": "00885e73572d9e7229a30b5def0346f7da0c961e126f6253aae35f927bab4c99",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "Solidity/Tools/Upstream.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 8.027701202999197,
+      "log": ".lake/upstream/group05-per-file-append/04.log"
+    },
+    {
+      "file": "tests/upstream/Replay.lean",
+      "sourceSha256": "601e092524da5ec233186095239d3a825659da75d0593ce6d642b952a1d73562",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/Replay.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 15.577424690000043,
+      "log": ".lake/upstream/group05-per-file-append/05.log"
+    },
+    {
+      "file": "tests/upstream/ByteLiterals.lean",
+      "sourceSha256": "732315eaf5cbaa0d14431ba6a5f144eac59bf01b549a00616fc5ee84420eb932",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/ByteLiterals.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "seconds": 9.611118709000039,
+      "log": ".lake/upstream/group05-per-file-append/06.log"
+    }
+  ],
+  "focusedChecks": {
+    "archiveVerify": "passed: 11622 files",
+    "upstreamJavaScriptTests": "passed: 14/14",
+    "replay": "passed",
+    "byteLiteralKernelProofs": "passed: exact 720 varying bytes, truncation rejection, UTF-8 exactness, hostile Append activation and literal immunity; pinned empty axiom sets",
+    "moduleReachability": "passed: 667 reachable, 0 orphaned",
+    "layering": "passed: 143 core modules, 0 reach elaborator",
+    "strictAutomation": "passed: 491 automatic, 61 budgeted, 11 refuted, 0 pending",
+    "frozenTestSuiteAudit": "passed: 552 derived, 11 refuted, 1 excluded, 0 pending",
+    "trustInventoryComparison": "25 baseline findings, 25 final findings, complete lists identical",
+    "finiteDispatchAdmissionControls": "all 17 admission/replay controls passed; original FunctionTypes positive and negative proof test passed on contention-reduced rerun,252.29 seconds,unchanged limits",
+    "runtimeGate": "passed on corrected branch: Lean 4.24.0, Lake 5.0.0-src+797c613, lake build Solidity.KeySort",
+    "finalFixtures": "19 working, 5 coverage gaps; all 24 completed legacy and viaIR; no resource/host block",
+    "getterSourceControls": "9/9 passed"
+  },
+  "reviews": {
+    "finder": "Final read-only verification passed:67log digests,24before/after report/source hashes,current modelhash,historical input integrity and all classifications; no Lean workers.",
+    "skeptic": "Independent final read-only review found no confirmed issue; verified67logs,per-file source hashes,pinned fixtures,modelhash,retained expectations and explicit build/proof/resource limitations; no Lean workers."
+  },
+  "broaderChecks": {
+    "fullBuild": "blocked:45minute wall budget reached in unchanged Examples/DecisionArrays.lean at644/649; Decision.lean passed966s; no Lean errors reported. Not a passing full build.",
+    "sourceTests": "FunctionTypes original positives/negatives pass;17 admission/replay+9 getter controls pass; inheritance/call12 of13 pass after unchanged-limit rerun; DeclarationMetadata baseline admission gap; RevertData full contract300s wall block; individual original properties6proved,3open goals,1resource block (revert-properties.json)",
+    "corpus": "passed: frozen774-obligation classifications unchanged; all257Lean build jobs complete; check-corpus:ok; one module worker",
+    "trustAudit": "passed:468 headline theorems use only standard axioms; .lake/upstream/group05-trust-audit-now.log",
+    "frozenSort": "passed: 377 taclets,131 read-bearing,131 table entries; exact frozen rule file",
+    "solkeyTestSuiteLibrary": "passed:249jobs including Suggestions replays; .lake/upstream/group05-testsuite-library-final.log"
+  },
+  "limitations": [
+    "Lean MCP diagnostics unavailable; per-file configured CLI checks used.",
+    "Four reference-return function-pointer coverage exclusions remain.",
+    "One effectful loop-condition lowering gap remains.",
+    "Runtime-code membership, generated EVM/SSA code, and universal source correctness are outside the adapter.",
+    "Effectful C(receiver()).f.address remains an explicit frontend exclusion; its expected observations are retained in a separate control.",
+    "DeclarationMetadata source test retains baseline errorSelector admission rejection (static base/current code+AST identity and direct current scanner evaluation,not a baseline proof run).",
+    "Documentation path audit retains13 existing missing references; trust inventory retains25 identical baseline findings.",
+    "RevertData full-contract source test remains300s wall-time blocked; individually selected reasonBytes/reasonOfBranch have open proof goals. Not attributed to baseline without a comparison; expected proved verdicts retained.",
+    "Full default build is45minute wall-time blocked at unchanged DecisionArrays.lean; no full-build pass claimed. Separate TestSuite library, full frozen corpus, sort, replay and theorem audit pass."
+  ],
+  "performance": {
+    "beforeDepthProfileSeconds": 0.245236,
+    "beforeDepthProfileLog": ".lake/upstream/group05-profile.log",
+    "comparison": "Final per-fixture and per-file timings ran concurrently with the full build; they are not an isolated before/after benchmark.",
+    "finalFixtureInvocationSeconds": {
+      "total": 271.111,
+      "median": 10.945,
+      "min": 3.131,
+      "max": 32.721,
+      "includes": "complete final invocation, both pipelines and preparation; concurrent builds; not an isolated performance benchmark"
+    },
+    "serialDecisionExampleSeconds": 966,
+    "fullBuildCaveat": "The default-build retry uses a45minute wall budget; timings are not a controlled before/after benchmark. Proof limits unchanged."
+  },
+  "patchStatus": {
+    "codeCommit": "454e4e974eea27f44b7d4bc595b911120fe4d21e",
+    "branch": "codex/group05-function-dispatch",
+    "evidence": "Final local handoff; assigned fixture exclusions and broader proof/resource gaps retained; no push or merge.",
+    "pushed": false,
+    "merged": false,
+    "codeCommits": [
+      "07884219b8e1cc59cb6f9830194307f9cd8b7c2b",
+      "454e4e974eea27f44b7d4bc595b911120fe4d21e"
+    ]
+  },
+  "logs": [
+    {
+      "path": ".lake/upstream/group05-append-control-append.log",
+      "bytes": 331,
+      "sha256": "47cd63754915878aee54025138e0fc5755f3d11cfa9429ee6bac10410fedd444"
+    },
+    {
+      "path": ".lake/upstream/group05-append-control-fixed.log",
+      "bytes": 177,
+      "sha256": "0d8b195122003bdbd9ccb6c5a20de739633625277da71b6cf1eb42aa64a16212"
+    },
+    {
+      "path": ".lake/upstream/group05-append-control-generic.log",
+      "bytes": 181,
+      "sha256": "78ea4b52a6350ea590013e091b4c72c2e7a3212d8e6bb8d68bc08b36934f8772"
+    },
+    {
+      "path": ".lake/upstream/group05-append-control.log",
+      "bytes": 181,
+      "sha256": "78ea4b52a6350ea590013e091b4c72c2e7a3212d8e6bb8d68bc08b36934f8772"
+    },
+    {
+      "path": ".lake/upstream/group05-automatic-final.log",
+      "bytes": 87,
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "path": ".lake/upstream/group05-automatic.log",
+      "bytes": 87,
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "path": ".lake/upstream/group05-body-fresh.log",
+      "bytes": 169,
+      "sha256": "13a69ee6cde5b50ab9b8efb00e456176832562b250f5bcf0733eb7e2aef0ea54"
+    },
+    {
+      "path": ".lake/upstream/group05-build-final-runtime.log",
+      "bytes": 5213,
+      "sha256": "19d27f5318ee281eb9f04cab93bb255138f1116d07e304f684fd469ad84b731a"
+    },
+    {
+      "path": ".lake/upstream/group05-build.log",
+      "bytes": 5852,
+      "sha256": "e7732f6fee51c6807b5ca4e48cc84f51fad681deae0c497a25e1720d6cecb1ab"
+    },
+    {
+      "path": ".lake/upstream/group05-build2.log",
+      "bytes": 1062,
+      "sha256": "397ba87546b04e55df517ce9d4a89fc7d59704de13c31a456b1579310f47336e"
+    },
+    {
+      "path": ".lake/upstream/group05-build3.log",
+      "bytes": 7951,
+      "sha256": "69afbfc452bae443686f0b930693a54db1179243ff923567f617b117235780d0"
+    },
+    {
+      "path": ".lake/upstream/group05-build4.log",
+      "bytes": 5582,
+      "sha256": "bd59059634a88244845920a7bba9906a6193ba189fa749796a0a836f8597a655"
+    },
+    {
+      "path": ".lake/upstream/group05-bytes-append-final.log",
+      "bytes": 168,
+      "sha256": "00d14827b512f74cdd6123cef8a04863e6f4321802aed9f091d8d99abe4e011b"
+    },
+    {
+      "path": ".lake/upstream/group05-bytes-final.log",
+      "bytes": 168,
+      "sha256": "00d14827b512f74cdd6123cef8a04863e6f4321802aed9f091d8d99abe4e011b"
+    },
+    {
+      "path": ".lake/upstream/group05-bytes-fresh.log",
+      "bytes": 168,
+      "sha256": "00d14827b512f74cdd6123cef8a04863e6f4321802aed9f091d8d99abe4e011b"
+    },
+    {
+      "path": ".lake/upstream/group05-bytes.log",
+      "bytes": 168,
+      "sha256": "00d14827b512f74cdd6123cef8a04863e6f4321802aed9f091d8d99abe4e011b"
+    },
+    {
+      "path": ".lake/upstream/group05-calls-resource-rerun.log",
+      "bytes": 26411,
+      "sha256": "c72a24a3b50225201208ab928e9a8516d3bc39a8937dc9faaa0dd173d31d8934"
+    },
+    {
+      "path": ".lake/upstream/group05-corpus-build-final.log",
+      "bytes": 44591,
+      "sha256": "ec16b8ba1ec5a292f18f80bf10b81ac1e4da4d70797b516871a01a49c3100c41"
+    },
+    {
+      "path": ".lake/upstream/group05-corpus-final.log",
+      "bytes": 252,
+      "sha256": "b8e412a312d5fe47cf4151c6490f1290283b9d1947bcb8e173f1df29a40cba9b"
+    },
+    {
+      "path": ".lake/upstream/group05-corpus-serial-final.log",
+      "bytes": 163,
+      "sha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+    },
+    {
+      "path": ".lake/upstream/group05-discard-source-tests.log",
+      "bytes": 222,
+      "sha256": "46dc510b52c4edc73e155602b309ab106460baecba984f15521180c343692a81"
+    },
+    {
+      "path": ".lake/upstream/group05-doc-paths-final.log",
+      "bytes": 3411,
+      "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+    },
+    {
+      "path": ".lake/upstream/group05-doc-paths.log",
+      "bytes": 3411,
+      "sha256": "dff72e62b3d36b90e144e05662f2f2a3da954589948db7c51f8bccc0b051a5fb"
+    },
+    {
+      "path": ".lake/upstream/group05-final-fresh.log",
+      "bytes": 1412,
+      "sha256": "82e7ad764b90ab360fead33c0b2caff55d76f6f407019df5d14e54a4de894061"
+    },
+    {
+      "path": ".lake/upstream/group05-finite-final.log",
+      "bytes": 45313,
+      "sha256": "59181da1f6f4310fb05d94c96aa94213f706b203ca15d07168d75b8e96b39d5a"
+    },
+    {
+      "path": ".lake/upstream/group05-finite-scope-tests.log",
+      "bytes": 45202,
+      "sha256": "9530cfe5182f3f21ca865629f7abff1a2668cf06b212e125c5d43b7aef1329e8"
+    },
+    {
+      "path": ".lake/upstream/group05-full-build-final-resume.log",
+      "bytes": 109108,
+      "sha256": "48bcc97270823fad8853917efda41fb9ca0e9645a01b246301f10bbf69847a87"
+    },
+    {
+      "path": ".lake/upstream/group05-full-build-final.log",
+      "bytes": 43000,
+      "sha256": "6dcf58ea07ff588eba8582f606354d12774c83c6ad4f1122cdecd8fb2c61cf7a"
+    },
+    {
+      "path": ".lake/upstream/group05-full-build-fresh.log",
+      "bytes": 91098,
+      "sha256": "2a0a11bc876a471ff450d36cecf7b22ff6e0bab8c41983c6ec23d237eff7f41e"
+    },
+    {
+      "path": ".lake/upstream/group05-full-build-serial-final.log",
+      "bytes": 87917,
+      "sha256": "d429cafe7acd4729ab91f53bfe5e09ac11d6d7897df32510b501c69543b963da"
+    },
+    {
+      "path": ".lake/upstream/group05-full-build.log",
+      "bytes": 107830,
+      "sha256": "9b764f1d092d2847106c6ba969523905cdb412c5d55fabfc609218ffd9becbdb"
+    },
+    {
+      "path": ".lake/upstream/group05-functiontypes-isolated.log",
+      "bytes": 224,
+      "sha256": "2d4c3441233e758d35a7e115505257237b3ae8500283b428e3c91ad360debdea"
+    },
+    {
+      "path": ".lake/upstream/group05-inheritance-calls-final.log",
+      "bytes": 53289,
+      "sha256": "5a6fbf8111c576f216e51eb704ead6a572ed5d6da2a0087c35a51204a3e370ca"
+    },
+    {
+      "path": ".lake/upstream/group05-layers-final.log",
+      "bytes": 41,
+      "sha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "path": ".lake/upstream/group05-layers.log",
+      "bytes": 41,
+      "sha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "path": ".lake/upstream/group05-literal-before.log",
+      "bytes": 407,
+      "sha256": "387613e71e39a5c2fb9f69d830e979a60a3c574c448dc231ef94e2452b5d836b"
+    },
+    {
+      "path": ".lake/upstream/group05-metadata-admission.log",
+      "bytes": 237,
+      "sha256": "7d7765048edf3d00eb8f9868bbf580df9567f7073e521631be90e8c061893eaa"
+    },
+    {
+      "path": ".lake/upstream/group05-metadata-compile.log",
+      "bytes": 143,
+      "sha256": "2e17acb6b65175b3365623b37e7a8f327a02f403ea729b579dc0005a66482408"
+    },
+    {
+      "path": ".lake/upstream/group05-node-tests-final.log",
+      "bytes": 1339,
+      "sha256": "4350c0704570fd938cbac632d975622d3515a16ae0024572f723aea8116154ce"
+    },
+    {
+      "path": ".lake/upstream/group05-node-tests.log",
+      "bytes": 1338,
+      "sha256": "2599e8302d1692ff725cbe07b72456d7606667ab6e5bb4321d945ba388222a08"
+    },
+    {
+      "path": ".lake/upstream/group05-orphans-final.log",
+      "bytes": 41,
+      "sha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "path": ".lake/upstream/group05-orphans.log",
+      "bytes": 41,
+      "sha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "path": ".lake/upstream/group05-profile.log",
+      "bytes": 5303,
+      "sha256": "8cf5af8a771fb44351f3d150a1914f1e1d5a9a895e1264cf869b9cb58ab1eafc"
+    },
+    {
+      "path": ".lake/upstream/group05-receiver-exclusion.log",
+      "bytes": 213,
+      "sha256": "48bf32eaad87c373bd3744b5e10bfa5d221e78b02d3015993bdf3048c9f6f1c5"
+    },
+    {
+      "path": ".lake/upstream/group05-replay-append-final.log",
+      "bytes": 5124,
+      "sha256": "2143699b60687b9c2bd46fa9022355ca59124c5b8ba9483f19a7ed1e2a9770f8"
+    },
+    {
+      "path": ".lake/upstream/group05-replay-final.log",
+      "bytes": 5124,
+      "sha256": "a132f5c29a2fa48a5d8e348417c26b89480ad26a2e6834e8933fd18ada0f124c"
+    },
+    {
+      "path": ".lake/upstream/group05-replay-fresh.log",
+      "bytes": 5123,
+      "sha256": "59314a67fbbedd990be998a628a38176647f1ad9c5181be79346fbaa3754db78"
+    },
+    {
+      "path": ".lake/upstream/group05-replay.log",
+      "bytes": 5124,
+      "sha256": "a132f5c29a2fa48a5d8e348417c26b89480ad26a2e6834e8933fd18ada0f124c"
+    },
+    {
+      "path": ".lake/upstream/group05-revert-properties.log",
+      "bytes": 260,
+      "sha256": "141c12e4e2432199d943c49f30434e2c7dc8bac24dd40d024f1fcad8396d5724"
+    },
+    {
+      "path": ".lake/upstream/group05-runtime-append.log",
+      "bytes": 7962,
+      "sha256": "4fcaf8700cf9eb6fca677d273403aa2ce0611cdb480bb0ba19292291dd21242a"
+    },
+    {
+      "path": ".lake/upstream/group05-runtime-fresh.log",
+      "bytes": 5552,
+      "sha256": "84c065c3176861ab46a2314bd38e34e643d145662351c65ccb2771a00a88e93a"
+    },
+    {
+      "path": ".lake/upstream/group05-runtime-gate-final.log",
+      "bytes": 198,
+      "sha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "path": ".lake/upstream/group05-runtime-gate-fresh.log",
+      "bytes": 198,
+      "sha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "path": ".lake/upstream/group05-runtime-last.log",
+      "bytes": 5212,
+      "sha256": "441f47a7e440f45ca5cddc1766c507bd7b2e5188c8b5cc128882807685e4eb6b"
+    },
+    {
+      "path": ".lake/upstream/group05-sort-final.log",
+      "bytes": 162,
+      "sha256": "78bd3fa9f3cd8c11623638aaf0ef2d36f994308e93bb4015b6242908c4aec88e"
+    },
+    {
+      "path": ".lake/upstream/group05-sort-frozen-final.log",
+      "bytes": 256,
+      "sha256": "b46e108b88231fc97fe8b1c1385f4e61d20afb45c24cf49ef613fba6367dcde0"
+    },
+    {
+      "path": ".lake/upstream/group05-source-final.log",
+      "bytes": 62449,
+      "sha256": "9ba8d0cf53186fcefa8df4bb56351ecbcc0b295bc5fb191e6b6ef52be630a20e"
+    },
+    {
+      "path": ".lake/upstream/group05-source-refreshed.log",
+      "bytes": 18892,
+      "sha256": "f3c3178632f590b07d8d9f6eab2abe025a355cf18c20f05f3639879be545a73e"
+    },
+    {
+      "path": ".lake/upstream/group05-testsuite-audit-frozen.log",
+      "bytes": 385,
+      "sha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "path": ".lake/upstream/group05-testsuite-audit.log",
+      "bytes": 76,
+      "sha256": "da460c61fe206b86f08c78d59c984ab5e83f46c380fb72985571a40561a9996f"
+    },
+    {
+      "path": ".lake/upstream/group05-testsuite-frozen-final.log",
+      "bytes": 385,
+      "sha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "path": ".lake/upstream/group05-testsuite-library-final.log",
+      "bytes": 43439,
+      "sha256": "35113e2d21ac51b311681c391ded3ee5a868f347e26eb37bde50fc02a7be2d8f"
+    },
+    {
+      "path": ".lake/upstream/group05-trust-audit-now.log",
+      "bytes": 61136,
+      "sha256": "fdb3e4afcbfe02dd6b51f27c1aeaea88d535399accc090f301fce60b292e1c4c"
+    },
+    {
+      "path": ".lake/upstream/group05-trust-comparison-final.log",
+      "bytes": 4540,
+      "sha256": "264b46c8c1a0bff5a15d957ccc2622379c899b65a393f31a279ee012014296e2"
+    },
+    {
+      "path": ".lake/upstream/group05-trust-comparison.log",
+      "bytes": 9000,
+      "sha256": "cd3e7d048b1674e9a4211e2aaf58b22fc5c3abf5e23c87fecbd086e1c1e00cf5"
+    },
+    {
+      "path": ".lake/upstream/group05-trust-scan.log",
+      "bytes": 4051,
+      "sha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+    },
+    {
+      "path": ".lake/upstream/group05-verify-final.log",
+      "bytes": 65,
+      "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    }
+  ],
+  "refinement": "Final freshness model rerun:24 exact fixtures, both pipelines, one model fd16150ec7c3b5cdff0f4d7bf093d232f77064b3f204f22125a99d0988f08e8b. Explicit List.append kernel controls and source-name regression retained.",
+  "sourceRegressionCompiler": {
+    "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "purpose": "existing source regression suites; assigned upstream reports all use0.8.38"
+  },
+  "discardNameControl": {
+    "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\ncontract C { function f() public view returns(uint) { uint discarded1 = 17; C(address(0x1234)).f.address; return discarded1; } }\n",
+    "sourceSha256": "8e2d8765c19cd4c264886c78a577453c9edea2a4c79d1f377ce7b0d65529e5ec",
+    "astSha256": "a8e1657f36bc421b27a24d633c2fee8102f7c6e0307fcc103f254afdd06cb94d",
+    "vectors": [
+      {
+        "path": "group05/discard-name-control.sol",
+        "pipeline": "legacy",
+        "contract": "C",
+        "fixture": "/workspace/solidity-lean/.lake/upstream/group05-discard-control/C.ast.json",
+        "vectors": [
+          {
+            "signature": "f()",
+            "args": [],
+            "failure": false,
+            "expected": [
+              "17"
+            ]
+          }
+        ]
+      }
+    ],
+    "before": [
+      {
+        "status": "broken",
+        "reason": "frontend import gaps",
+        "pipeline": "legacy",
+        "path": "group05/discard-name-control.sol",
+        "gaps": [
+          {
+            "status": "unsupported",
+            "reason": "C.sol:3: discarded1 is already declared, or names a state variable",
+            "function": "f()"
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "status": "working",
+        "reason": "all scalar runtime vectors match",
+        "pipeline": "legacy",
+        "path": "group05/discard-name-control.sol",
+        "observed": [
+          {
+            "values": [
+              "17"
+            ],
+            "signature": "f()",
+            "failed": false
+          }
+        ]
+      }
+    ],
+    "compiler": "SHA-checked0.8.38; same source,AST and expected17 before/after"
+  },
+  "broadBuildResourceEvidence": {
+    "status": "blocked",
+    "reason": "16 GiB executor memory cap approached by unchanged Decision example plus serial frozen corpus derivation; broad build stopped to complete corpus",
+    "decisionProcess": "34581       22:59 00:22:12 4035596 Sl",
+    "memoryCurrentBytes": 17179033600,
+    "memoryMaxBytes": 17179869184,
+    "baselineEvidence": "docs/solidity-upstream-tests.md:162 records same unchanged Decision module inconclusive at45minutes",
+    "noBuildErrorsReported": true,
+    "proofLimitsChanged": false,
+    "time": 1793039207.6707115
+  },
+  "logHashState": {
+    "completedLogsFresh": true,
+    "liveLogsExcluded": []
+  },
+  "commands": [
+    {
+      "argv": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-verify-final.log"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-node-tests-final.log"
+    },
+    {
+      "argv": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-automatic-final.log"
+    },
+    {
+      "argv": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-orphans-final.log"
+    },
+    {
+      "argv": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-layers-final.log"
+    },
+    {
+      "argv": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "TrustAudit.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-trust-audit-now.log"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-isolation=none",
+        "scripts/finite-dispatch.test.mjs",
+        "scripts/getter-dispatch.test.mjs",
+        "scripts/declarations-metadata.test.mjs"
+      ],
+      "exitCode": 1,
+      "log": ".lake/upstream/group05-source-refreshed.log",
+      "outcome": "26/28 tests pass; FunctionTypes timeout later passes isolated; metadata admission gap retained"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=finite dispatch preserves the original",
+        "scripts/finite-dispatch.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-functiontypes-isolated.log"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=inheritance|external calls|callbacks|self-calls|revert data|function values",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "exitCode": 1,
+      "log": ".lake/upstream/group05-inheritance-calls-final.log",
+      "outcome": "11/13 pass; two wall-time blocks"
+    },
+    {
+      "argv": [
+        "node",
+        "--test",
+        "--test-name-pattern=inheritance runs base constructors|revert data:",
+        "scripts/test-solidity.test.mjs"
+      ],
+      "exitCode": 1,
+      "log": ".lake/upstream/group05-calls-resource-rerun.log",
+      "outcome": "constructor controls pass; full RevertData remains wall-time blocked"
+    },
+    {
+      "argv": [
+        "./scripts/check-testsuite.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-testsuite-frozen-final.log"
+    },
+    {
+      "argv": [
+        "./scripts/check-solkey.sh",
+        "--key",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      ],
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-sort-frozen-final.log"
+    },
+    {
+      "argv": [
+        "./scripts/check-corpus.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "env": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-corpus-serial-final.log",
+      "completeBuildLog": ".lake/upstream/group05-corpus-build-final.log"
+    },
+    {
+      "argv": [
+        "timeout",
+        "45m",
+        "./run-lean.sh"
+      ],
+      "env": {
+        "LEAN_NUM_THREADS": "1",
+        "SOLKEY_RULES": "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+      },
+      "status": "blocked",
+      "log": ".lake/upstream/group05-full-build-serial-final.log",
+      "exitCode": 124
+    },
+    {
+      "argv": [
+        "lake",
+        "build",
+        "SolkeyTestSuite"
+      ],
+      "env": {
+        "LEAN_NUM_THREADS": "1"
+      },
+      "exitCode": 0,
+      "log": ".lake/upstream/group05-testsuite-library-final.log"
+    }
+  ],
+  "cwd": "/workspace/solidity-lean",
+  "activationCommand": "source /workspace/.setup/activate.sh",
+  "proofLimitsChanged": false
+}

@@ -22,38 +22,14 @@ context (`Scope.lean`), so a local read out of scope or at another type cannot
 be written. The run (`Stmt.run`, `Semantics/Run.lean`) is over a state typed by
 the context (`State C Γ`: typed storage, heap and locals) and halts only by
 revert, panic, divergence or exhaustion: it is never stuck. The elaborator
-emits it directly (`Syntax/Elab.lean`) and the printers print it
-(`Calculus/PrintStmt.lean`): no untyped statement, program or formula as
-written remains (decision 11, resolved at W8). Formulas are `Fml C Γ`
-(`Calculus/Fml.lean`). The closer reads scoped formulas (M6c): `sol_decide`
-reduces a scoped leaf by position and closes it there
-(`Calculus/DecideScoped.lean`, `Calculus/DecideTyped.lean`), `sol_close`
-reads a leaf's parameters at their types, `sol_prove`'s leaves on `⊢` and
-on `⊨ᶠ` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
-`sol_upd`/`sol_merge` rewrite the scoped leaf, and a chain rewrites while
-the program is open (`Calculus/RewriteScoped.lean`) and past it
-(`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
-erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
-erased program evaluators (W9.6.4), and so are the untyped terms by name
-(`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3); the terms'
-symbols read the typed state (W9.8.3). KeY's unbounded `int` is its own
-sort (`Srt.kint`): the ledger, `toInt`, a spec's arithmetic over them. The
-rest is typed too (W10): `sol_decide`'s language is the typed signature
-with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
-are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
-`Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
-are typed states.  So is every other state read: the run invariants
-(`Typing/`), the EVM simulation (`Evm/`), the memory laws, the tools and
-`wt(storage)` (`Semantics/StorageWt.lean`) read the typed state; there is
-no untyped one (W10.5.6). External-call inputs retain their Solidity types (`CallValue`, `ExtKey`),
-path segments retain their endpoints (`Seg`, `Segs`, `RefSegments`), the
-ledger has bounded address keys and unbounded KeY `int` amounts (`Ledger`),
-and the EVM's store holds `Fin (2^256)` words (`Evm.WordStore`), its stack words or symbolic slots (`Evm.Word`). External
-responses are ABI words (`ExtResult`, `Word`), decoded at the locals' types
-(`PrimTy.ofWord?`), and tool input/output are typed values (`CallValue`):
-there is no untyped value (W11). Selector labels, the paths' comparison
-observations, carry `uint` indices and typed keys (W11.9).
-
+emits it directly (`Syntax/Elab.lean`), the printers print it
+(`Calculus/PrintStmt.lean`), and formulas are `Fml C Γ` (`Calculus/Fml.lean`).
+Every layer reads the typed state: the closers, the Theory (its values are
+observations, `Theory/Typed/Obs.lean`), the run invariants (`Typing/`), the
+EVM simulation (`Evm/`), the tools. KeY's unbounded `int` is its own sort
+(`Srt.kint`). External inputs and responses keep their Solidity types
+(`CallValue`, `ExtResult`, decoded by `PrimTy.ofWord?`). There is no untyped
+statement, formula, term, state or value; do not add one.
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s
@@ -89,11 +65,9 @@ evaluation order.  It has two blocks of its own: `checked { … }`, where an
 overflow fails as an `assert`, and `ignoringOverflow { … }`, where it is
 assumed away (`assume(false);`, `docs/options.md`).
 
-**The `SolKey` reader** (side-projects, `lean/solkey`), a Lean reader for
-KeY `.key` files that once consumed this package, is outdated since W9.7: it
-read the erased terms (`Surface.Tm`, `Delab.tr`, `NFml`), now deleted, and
-no longer builds against this checkout. It is not maintained from here; do
-not edit it or keep anything for it.
+**The `SolKey` reader** (side-projects, `lean/solkey`) no longer builds
+against this checkout and is not maintained from here: do not edit it or keep
+anything for it.
 
 ## The one hard constraint
 
@@ -112,6 +86,8 @@ earlier change made for speed.
 
 `docs/module-map.md` — one line per module. Read it instead of searching
 when you need to know where something lives.
+`docs/coverage-plan.md` — the plan for covering Solidity's features, and
+the rules each step follows; `docs/solidity-features.json` the inventory.
 `docs/site.md` — the GitHub Pages examples site (`site/`, recorded by
 `scripts/site/export.mjs`); add an example to `site/examples.json`.
 
@@ -297,6 +273,7 @@ import changes and final confirmation. The `lean-verify` skill in
 | `./scripts/check-corpus.sh` | the solkey corpus (`SolidityCorpus`) against `tests/solkey/expected.tsv` |
 | `./scripts/check-testsuite.sh` | the TestSuite rows against `Report.lean`'s pin and solkey's functions; no Lean |
 | `node scripts/check-automatic.mjs --strict` | the automation gate: every TestSuite obligation by `sol_prove` (and its replay) or `sol_refute`, none pending; no Lean |
+| `node scripts/solidity-upstream.mjs` | solc's own tests (v0.8.38) on the typed interpreter, per pipeline (`docs/solidity-upstream-tests.md`) |
 
 `solkeycheck` is at zero against frozen solkey `473da8944c` in
 `tests/migration/solkey` (377 taclets, 131 read-bearing annotations,

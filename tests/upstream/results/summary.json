@@ -1,0 +1,231 @@
+{
+  "version": 1,
+  "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+  "modelSha256": "c042a72f4d864a780a366ad4f27d148df0d7e213d33c37d4b6a51f0ad33710df",
+  "evmVersion": "osaka",
+  "loopFuel": 1000,
+  "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+  "snapshotFiles": 11622,
+  "filter": null,
+  "timeoutMs": 120000,
+  "batchSize": 16,
+  "totalFixtureFiles": 9660,
+  "completedFixtureFiles": 9660,
+  "complete": true,
+  "counts": {
+    "working": 3707,
+    "broken": 308,
+    "blocked": 5645
+  },
+  "stages": {
+    "upstream-harness": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 4417
+    },
+    "lean-runtime": {
+      "working": 229,
+      "broken": 308,
+      "blocked": 1125
+    },
+    "lean-import": {
+      "working": 0,
+      "broken": 0,
+      "blocked": 39
+    },
+    "compiler-diagnostics": {
+      "working": 3478,
+      "broken": 0,
+      "blocked": 64
+    }
+  },
+  "retryReports": [
+    {
+      "path": "retries/0317224035749ec2e88bce2c3e31e681f2c6956d674f6361b43dd49e9cd50f58.json",
+      "sha256": "0317224035749ec2e88bce2c3e31e681f2c6956d674f6361b43dd49e9cd50f58",
+      "fixture": "test/libsolidity/semanticTests/literals/gwei.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/0bb827779f115ac54b396005d67af31993869f0b13d8d9eaea098bc1f20d5d3d.json",
+      "sha256": "0bb827779f115ac54b396005d67af31993869f0b13d8d9eaea098bc1f20d5d3d",
+      "fixture": "test/libsolidity/semanticTests/memoryManagement/return_variable.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/0d04a31e14d111f6ada75e3d1bdd7c13f3f70d7e6b884ce120d2b72e875b2e74.json",
+      "sha256": "0d04a31e14d111f6ada75e3d1bdd7c13f3f70d7e6b884ce120d2b72e875b2e74",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/multiple_operator_definitions_same_type_same_function_same_directive.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/0efe8702f7459e5d8c3a57a7f5e4e6443a36cbc5c399225bda250c095088908a.json",
+      "sha256": "0efe8702f7459e5d8c3a57a7f5e4e6443a36cbc5c399225bda250c095088908a",
+      "fixture": "test/libsolidity/semanticTests/literals/fractional_denominations.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/108a4b632ba777f781e099bf5158bd6c0fad5819e9b20133f0d2d3325ec95d0d.json",
+      "sha256": "108a4b632ba777f781e099bf5158bd6c0fad5819e9b20133f0d2d3325ec95d0d",
+      "fixture": "test/libsolidity/semanticTests/literals/ether.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/249e6efc0afe3973d7033cb519d64998778cae2870767943bc3442ee5ec01c85.json",
+      "sha256": "249e6efc0afe3973d7033cb519d64998778cae2870767943bc3442ee5ec01c85",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/keccak256_with_bytes.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/258ba6ead22b8d176ca0383334d1a339ec9510a31aca0991cd575de8dd4fd82b.json",
+      "sha256": "258ba6ead22b8d176ca0383334d1a339ec9510a31aca0991cd575de8dd4fd82b",
+      "fixture": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_shortening.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/283ed0c953cf29b9d20a076656e128a40ca734e49a55870f1fd63071b52d331d.json",
+      "sha256": "283ed0c953cf29b9d20a076656e128a40ca734e49a55870f1fd63071b52d331d",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_abi_encode.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/3a8d21ecc2cee6fa0183f20753469aea776e116e0f4c8a1de0dcf500e2a28ab6.json",
+      "sha256": "3a8d21ecc2cee6fa0183f20753469aea776e116e0f4c8a1de0dcf500e2a28ab6",
+      "fixture": "test/libsolidity/semanticTests/literals/wei.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/3efd66ffac617aece509343586d4560dd221b956d5e214531469fcaa54ecd03d.json",
+      "sha256": "3efd66ffac617aece509343586d4560dd221b956d5e214531469fcaa54ecd03d",
+      "fixture": "test/libsolidity/semanticTests/memoryManagement/static_memory_array_allocation.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/532e70eced62cb8337670d4b0f8f4c51b1ef52c037879ef51febc472e08f5244.json",
+      "sha256": "532e70eced62cb8337670d4b0f8f4c51b1ef52c037879ef51febc472e08f5244",
+      "fixture": "test/libsolidity/semanticTests/cleanup/cleanup_in_compound_assign.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/5c1ef1af977168442b21e431ebe4ca55c8a281bbd94d24cc6edd8651e9f16e0b.json",
+      "sha256": "5c1ef1af977168442b21e431ebe4ca55c8a281bbd94d24cc6edd8651e9f16e0b",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_equivalent_solidity_spec_comptime.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/630a15c8e516a87d3a8bfc0b6aef5e1fe1f37e6105833a1952e6d2eb110d7b99.json",
+      "sha256": "630a15c8e516a87d3a8bfc0b6aef5e1fe1f37e6105833a1952e6d2eb110d7b99",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/consecutive_operator_invocations.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/6481ec5de02c9eac41736f53c27e9a92f561ba42891c7eb3c4c09b2685bfc8d0.json",
+      "sha256": "6481ec5de02c9eac41736f53c27e9a92f561ba42891c7eb3c4c09b2685bfc8d0",
+      "fixture": "test/libsolidity/semanticTests/literals/denominations_in_array_sizes.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/6a6112fac22acbbac83f5002ae0bf727355e0268285c496aaad45a7ace9884e3.json",
+      "sha256": "6a6112fac22acbbac83f5002ae0bf727355e0268285c496aaad45a7ace9884e3",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_with_zero_last_byte_of_inner_hash_comptime.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/728a1d3ac425b0177fc7d52627b539084c7d78010e88f4caea59082b0af51e26.json",
+      "sha256": "728a1d3ac425b0177fc7d52627b539084c7d78010e88f4caea59082b0af51e26",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/all_possible_user_defined_value_types_with_operators.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/84310b2c422aad313acb49fdca85498b3f3690bb104014ec9558d0bfd8072d49.json",
+      "sha256": "84310b2c422aad313acb49fdca85498b3f3690bb104014ec9558d0bfd8072d49",
+      "fixture": "test/libsolidity/semanticTests/cleanup/exp_cleanup_direct.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/9d904f5da33a92ef6be0b75898b844568013d3ef47856c7d28c3ae832d901958.json",
+      "sha256": "9d904f5da33a92ef6be0b75898b844568013d3ef47856c7d28c3ae832d901958",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/attaching_and_defining_operator_with_same_function.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/a1e915fdc778b91aa006635db3f8196d353b2a60ecdfd7cba37bf71da1a5bed8.json",
+      "sha256": "a1e915fdc778b91aa006635db3f8196d353b2a60ecdfd7cba37bf71da1a5bed8",
+      "fixture": "test/libsolidity/semanticTests/cleanup/exp_cleanup_smaller_base.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/a602c5641717341949970fce36ab24194f3e727efffe6fd28780728949795cdb.json",
+      "sha256": "a602c5641717341949970fce36ab24194f3e727efffe6fd28780728949795cdb",
+      "fixture": "test/libsolidity/semanticTests/cleanup/exp_cleanup_nonzero_base.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/c2120f913a283d2819b0e92cab81015babbed5f4b7b857649ceed90ae970acf0.json",
+      "sha256": "c2120f913a283d2819b0e92cab81015babbed5f4b7b857649ceed90ae970acf0",
+      "fixture": "test/libsolidity/semanticTests/literals/scientific_notation.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/c2f81e13f08e354413e06386101a77ec4095f79f8240a5e1fc8cf7e6cc5d12a8.json",
+      "sha256": "c2f81e13f08e354413e06386101a77ec4095f79f8240a5e1fc8cf7e6cc5d12a8",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/fixed_point_udvt_with_operators.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/c9ad9f9b7b81cfd8f865c36d3fa316e7c2374e85c665c604bda44fffa3f5e250.json",
+      "sha256": "c9ad9f9b7b81cfd8f865c36d3fa316e7c2374e85c665c604bda44fffa3f5e250",
+      "fixture": "test/libsolidity/semanticTests/builtinFunctions/erc7201_layout_specifier_slot_match_comptime.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/d8f2ec78561430a52c8c091bccc0b4eee3c839e05cfeb46e0c135ab37e28bc70.json",
+      "sha256": "d8f2ec78561430a52c8c091bccc0b4eee3c839e05cfeb46e0c135ab37e28bc70",
+      "fixture": "test/libsolidity/semanticTests/operators/userDefined/multiple_operator_definitions_different_types_different_functions_separate_directives.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/ddebd56578174ee0b45cd41aa92bda31c04a73ca977cf30e899fad443211a052.json",
+      "sha256": "ddebd56578174ee0b45cd41aa92bda31c04a73ca977cf30e899fad443211a052",
+      "fixture": "test/libsolidity/semanticTests/cleanup/exp_cleanup.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    },
+    {
+      "path": "retries/ee608ca04971ed4c94d86ede22361e8b65853889cb0c8e05af140377481f5290.json",
+      "sha256": "ee608ca04971ed4c94d86ede22361e8b65853889cb0c8e05af140377481f5290",
+      "fixture": "test/libsolidity/semanticTests/memoryManagement/assembly_access.sol",
+      "timeoutMs": 30000,
+      "batchSize": 1
+    }
+  ],
+  "retryMergeSha256": "b200a3af4f53441e306c6a8ab1f8f6970ae44480d236029b91643bc989a20bb3"
+}

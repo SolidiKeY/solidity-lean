@@ -12,8 +12,8 @@ mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨ᶠ`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
 leaf is closed on its scoped form (`sol_leaf`, the scoped `sol_close`,
-`Calculus/CloseScoped.lean`), its storage read untyped (`docs/intrinsic.md`,
-"What is left"), where a write under the diamond may fail.
+`Calculus/CloseScoped.lean`), where a write under the diamond at an indexed path
+stays open (`docs/intrinsic.md`, "Open").
 
 The formulas read scoped (`open scoped Solidity.Scoped`), and so do the
 rules: `sol_upd` and `sol_merge` rewrite the scoped leaf itself

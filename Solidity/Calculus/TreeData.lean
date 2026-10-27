@@ -113,7 +113,8 @@ case name (`thn`, `els`) or, for an outcome with none, by its place; else
 the walk's case name. -/
 def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
   -- an invariant rule's first goal is `init`, and its split past `{anon}` the second
-  let inv := p.name == "whileInvariantBox" || p.name == "whileInvariantDiamond"
+  let inv := p.name == "whileInvariantBox" || p.name == "whileInvariantDiamond" ||
+    p.name == "whileInvariantLexDiamond"
   let idx := match c.label with
     | some l =>
       if l == `init then some 0

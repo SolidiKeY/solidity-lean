@@ -19,6 +19,15 @@ namespace Solidity.Examples.Tactics.SymbolicCounterexample
 
 open scoped Scoped
 
+-- Preserve the candidate order and boundary behavior without allocating an
+-- exponential product to discover that it exceeds the search budget.
+#guard Tools.productsWithin 6 [[1, 2], [3, 4, 5]] = Tools.products [[1, 2], [3, 4, 5]]
+#guard Tools.productsWithin 5 [[1, 2], [3, 4, 5]] = []
+#guard Tools.productsWithin 0 ([] : List (List Nat)) = []
+#guard Tools.productsWithin 1 ([] : List (List Nat)) = [[]]
+#guard Tools.productsWithin 1000 (List.replicate 40 (List.range 10)) = []
+#guard Tools.productsWithin 1000 (List.replicate 40 (List.range 10) ++ [[]]) = []
+
 def Counted : Contract := contract!{
   uint[] values;
   uint total;

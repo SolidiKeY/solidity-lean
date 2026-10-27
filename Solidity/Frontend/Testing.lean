@@ -4,6 +4,8 @@ import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Recursion
 import Solidity.Calculus.RecursionCallback
 import Solidity.Calculus.ProveChunked
+import Solidity.Tools.Preconditions
+import Solidity.Tools.SourceCounterexample
 
 /-!
 # Testing imported Solidity files
@@ -39,6 +41,26 @@ private def ImportRow.signature (r : ImportRow) : String :=
   if r.sourceSignature.isEmpty then
     s!"{r.displayName}({",".intercalate (r.params.map Prod.snd)})"
   else r.sourceSignature
+
+/-- Normalize Solidity's integer type aliases without changing punctuation or
+substrings of declaration names. Accept ABI-style selectors as well as the
+source frontend's `uint`/`int` spelling. -/
+def functionSelectorKey (selector : String) : String := Id.run do
+  let alias (word : String) : String :=
+    if word == "uint256" then "uint" else if word == "int256" then "int" else word
+  let mut out := ""
+  let mut word := ""
+  for c in selector.toList do
+    if c.isAlphanum || c == '_' || c == '$' then word := word.push c
+    else
+      out := (out ++ alias word).push c
+      word := ""
+  return out ++ alias word
+
+/-- Select by source name, generated name, or a signature with type aliases. -/
+def ImportRow.matchesSelector (r : ImportRow) (selector : String) : Bool :=
+  selector == r.name || selector == r.displayName ||
+    functionSelectorKey selector == functionSelectorKey r.signature
 
 /-- `t`, elaborated with no metavariable left. -/
 private def elabClosed (t : Term) : TermElabM Expr := do
@@ -111,10 +133,63 @@ def oneCheckSteps : Nat := 1024
 /-- The steps of a chunk of a walk past `oneCheckSteps`. -/
 def chunkSteps : Nat := 128
 
+/-- Retain an exact-goal refutation only after kernel and transitive axiom
+checks. JSON is presentation of the candidate used by that same proof. -/
+private def testCounterexample (ty : Expr) (name : Lean.Name) (r : ImportRow) :
+    TermElabM (Option Json) := do
+  let saved ← Term.saveState
+  let messages ← Core.getMessageLog
+  let result ← withCurrHeartbeats <| tryCatchRuntimeEx (do
+    let some witness ← Tools.refuteSource? ty | return none
+    if witness.proof.hasMVar || witness.proof.hasFVar || witness.proof.hasSorry then return none
+    addDecl <| .thmDecl {name, levelParams := [], type := mkNot ty, value := witness.proof}
+    let axioms ← collectAxioms name
+    unless axioms.all (standardAxioms.contains ·) do return none
+    let .ok arguments := witness.report.getObjValAs? (Array Json) "arguments" | return none
+    let arguments := arguments.map fun argument =>
+      match argument.getObjValAs? String "modelName" with
+      | .error _ => argument
+      | .ok modelName => match List.findIdx? (fun (p : String × String) => p.1 == modelName) r.params with
+        | none => argument
+        | some index => argument.setObjVal! "paramIndex" (toJson index)
+    return some <| witness.report
+      |>.setObjVal! "arguments" (toJson arguments)
+      |>.setObjVal! "certified" (toJson true)
+      |>.setObjVal! "goalKind" (toJson "fmlValid")
+      |>.setObjVal! "certificateDeclaration" (toJson name.toString)
+      |>.setObjVal! "axioms" (toJson (axioms.map Lean.Name.toString)))
+    fun _ => pure none
+  if result.isNone then saved.restore
+  else Core.setMessageLog messages
+  return result
+/-- The original source obligation, including a specified function's clauses. -/
+def testFormula (N : Lean.Name) (r : ImportRow) : TermElabM Expr := do
+  if r.tag != .specified then return mkConst (r.declName N ++ `problem)
+  let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
+  let φ ← Term.withoutErrToSorry <| Term.elabTerm stx none
+  Term.synthesizeSyntheticMVarsNoPostponing
+  let φ ← instantiateMVars φ
+  if φ.hasSorry then throwError "the specification does not elaborate"
+  return φ
+
+/-- The same tails premise used by source verification, for inspection. -/
+def testTailMode (N : Lean.Name) (r : ImportRow) (tail : TailMode) (φ : Expr) :
+    TermElabM TailMode := do
+  if tail != .clean || r.tag == .specified then return .solc
+  if ← hasCallRec N (← Symex.evaluable φ) then return .solc
+  return if ← callsBackE N φ then .solc else .clean
+
+/-- Whether a proof tree of the ordinary calculus can describe this obligation. -/
+def testOrdinaryTree (N : Lean.Name) (φ : Expr) : TermElabM Bool := do
+  if ← hasCallRec N (← Symex.evaluable φ) then return false
+  return !(← callsBackE N φ)
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
-def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
+def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc)
+    (showGoals : Bool := false)
+    (counterexampleOutput : Option (IO.Ref (Option Json)) := none) :
     CommandElabM (String × String × TailMode) := do
   let f := r.declName N
   let env ← getEnv
@@ -127,13 +202,10 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       let C := mkConst N
       -- a specification's obligation, scoped
       let spec? ← if r.tag == .specified then do
-          let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
           -- a specification that does not elaborate is an error, not a
           -- `sorry`; logged too, as the import reports it
           let φ ← try
-              let φ ← Term.withoutErrToSorry <| Term.elabTerm stx none
-              Term.synthesizeSyntheticMVarsNoPostponing
-              instantiateMVars φ
+              testFormula N r
             catch e => logException e; throw e
           if φ.hasSorry then throwError "the specification does not elaborate"
           pure (some φ)
@@ -244,7 +316,17 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
           else
             let some s ← out.get | throwError "search did not run"
             pure s.open_
-      unless goals.isEmpty do return ("pending", "open proof goals", mode)
+      unless goals.isEmpty do
+        if r.tag == .specified && !cb then
+          if let some output := counterexampleOutput then
+            if let some witness ← testCounterexample ty (f ++ `refuted) r then
+              output.set (some witness)
+              return ("refuted", "kernel-checked counterexample to the tested obligation", mode)
+        let detail ← if showGoals then do
+            let messages ← goals.mapM fun g => return (← Meta.ppGoal g).pretty
+            pure ("open proof goals\n" ++ "\n\n".intercalate messages)
+          else pure "open proof goals"
+        return ("pending", detail, mode)
       let proof ← instantiateMVars g
       if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
       let name := f ++ `tested
@@ -254,11 +336,24 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       return ("proved", "", mode))
       fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
 
+/-- Check a specified row's entry condition separately from its postcondition. -/
+def testPreconditions (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) :=
+  withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
+    liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
+      let φ ← elabClosed (← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) }))
+      let name := r.declName N ++ `entryAudited
+      match ← Tools.auditPreconditions φ name with
+      | .impossible => pure ("impossible", s!"kernel-checked: {name}")
+      | .possible => pure ("possible", s!"kernel-checked: {name}")
+      | .unknown reason => pure ("unknown", reason))
+    fun e => do pure ("unknown", ← e.toMessageData.toString)
+
 /-- Machine-readable testing entry point for a solc import. Listing performs
 no proof search. Every selected import row is retained, including gaps and
 functions whose specification has no plain box/diamond obligation. -/
 syntax (name := solkeyTest) "#solkey_test " ident (&" only " str)?
-  (&" from " num)? (&" count " num)? (&" listing")? " to " str : command
+  (&" from " num)? (&" count " num)? (&" listing")? (&" audit_preconditions")?
+  (&" counterexamples")? " to " str : command
 
 @[command_elab solkeyTest]
 def elabSolkeyTest : CommandElab := fun stx => do
@@ -267,39 +362,56 @@ def elabSolkeyTest : CommandElab := fun stx => do
   let first := if stx[3].isNone then 0 else stx[3][1].isNatLit?.getD 0
   let count? := if stx[4].isNone then none else stx[4][1].isNatLit?
   let listing := !stx[5].isNone
+  let audit := !stx[6].isNone
+  let counterexamples := !stx[7].isNone
+  if listing && audit then throwError "precondition auditing requires verification, not listing"
+  if listing && counterexamples then throwError "counterexample search requires verification, not listing"
+  let auditFields (status reason : String) : List (String × Json) :=
+    if audit then [("preconditions", toJson status), ("preconditionReason", toJson reason)] else []
   let allRows ← reportRows N
-  let selected := (allRows.filter fun r =>
-    only?.all fun n => n == r.name || n == r.displayName || n == r.signature).drop first
+  let selected := (allRows.filter fun r => only?.all r.matchesSelector).drop first
   let rows := count?.map (selected.take ·) |>.getD selected
   if rows.isEmpty && (!allRows.isEmpty || only?.isSome) then
     throwError "#solkey_test: no functions selected"
-  let output := stx[7].isStrLit?.getD ""
+  let output := stx[9].isStrLit?.getD ""
   -- Checkpoint before search, then after every function: a process timeout
   -- preserves completed results and explicitly marks the unattempted rows.
-  let mut results : Array Json := rows.toArray.map fun r => Json.mkObj [
+  let mut results : Array Json := rows.toArray.map fun r => Json.mkObj ([
     ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
     ("signature", toJson r.signature),
+    ("sourceId", toJson r.sourceId),
+    ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
-    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))]
+    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))] ++
+      auditFields "notRun" "contract run interrupted")
   IO.FS.writeFile output (Json.arr results).pretty
   -- the tails reading (O6): clean where every function exposes nothing
   let tail ← contractTailMode N allRows
   for r in rows, i in [:rows.length] do
     let t0 ← IO.monoMsNow
+    let witnessOutput ← IO.mkRef (none : Option Json)
     let (status, reason, mode) ← if r.status != .elaborated then
         pure (r.status.toStr, r.reason, TailMode.solc)
       else if r.tag == .internal || r.tag == .skip then pure (r.tag.toStr, "", .solc)
       else if r.tag != .specified && r.tag.modality?.isNone then
         pure ("unsupported", s!"{r.tag.toStr}: no obligation", .solc)
       else if listing then pure ("ready", "", tail)
-      else testObligation N r tail
+      else testObligation N r tail (counterexampleOutput := if counterexamples then some witnessOutput else none)
+    let (preconditions, preconditionReason) ← if !audit then pure ("notRequested", "")
+      else if r.status != .elaborated || r.tag != .specified then
+        pure ("notApplicable", "no admitted function specification")
+      else testPreconditions N r
     let elapsed ← IO.monoMsNow
-    results := results.set! i <| Json.mkObj [
+    let witness ← witnessOutput.get
+    results := results.set! i <| Json.mkObj ([
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
+      ("sourceId", toJson r.sourceId),
+      ("invalidSpecification", toJson ((r.sourceDiagnostic.map (·.name)) == some `solidity.specificationSyntax)),
       ("status", toJson status), ("reason", toJson reason),
       ("reading", toJson (if mode == .clean then "clean" else "solc")),
-      ("elapsedMs", toJson (elapsed - t0))]
+      ("elapsedMs", toJson (elapsed - t0))] ++ auditFields preconditions preconditionReason ++
+        (witness.map (fun value => [("counterexample", value)]) |>.getD []))
     IO.FS.writeFile output (Json.arr results).pretty
 
 end Solidity.Frontend

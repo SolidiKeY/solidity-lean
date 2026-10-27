@@ -108,11 +108,3 @@ Do not raise `maxHeartbeats` to rescue a candidate.
 In SolKey, diagnose with `--why`, use `--budget` for recorded step counts,
 and inspect `./run-key.sh --help` for the current runner's options. A baseline
 checks regressions but is not a budget. Use each tool's actual counting unit.
-
-## Documentation review (2026-10-15)
-
-Read-only review: read-only finder and skeptic
-checked the Lean APIs and SolKey references. Clarified node-exhaustion
-reporting and the distinction between equal premises and unique rule names.
-`git diff --check` passed; `./scripts/check-doc-paths.sh` found six existing
-references to uncopied files in `vendor/LeanTeX/VENDOR.md`.

@@ -195,7 +195,7 @@ theorem firstOfARow : ⊨ᶠ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 
 it: `-1` is no `uint`, as solc refuses it (`docs/intrinsic.md`, decision
 79). -/
 /--
-error: Solidity elaboration failed: operator - does not take uint
+error: Solidity elaboration failed: a int where a uint is expected
 -/
 #guard_msgs in #check dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true }
 

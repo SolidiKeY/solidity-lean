@@ -16,7 +16,8 @@ atoms (`Calculus/QuotientCut.lean`): `int(·)`, `uint(·)`, `/`, `%`, `>>`,
 through those, `&`, `|`, `^`, `*%` with any literal, `**` by `0` or `1`,
 `/` and `%` at `int`.  Each has a
 proved and a refuted verdict pinned and a kernel-checked covered leaf.  The
-verdicts are the compiled ones: the kernel's arithmetic decision over
+verdicts are the compiled ones, except `sortedLe`, whose exact verdict is
+kernel-certified and replayed below: the kernel's arithmetic decision over
 256-bit codes is too deep for the language server (as in
 `Examples/AutoComplete.lean`); the theorems' fragment checks are the
 kernel's, the `#eval` pins the compiled ones.
@@ -434,10 +435,43 @@ theorem rowApf_iff : decideLeaf rowApf = .proved ↔ Fml.Valid rowApf :=
 
 /-- A two-variable block over a root: covered (nine instances, nineteen
 reads), decided by the walk (`docs/automation.md`, M7). -/
-theorem sortedLe_covered : sortedLe.Covered = true := by decide +kernel
+theorem sortedLe_covered : sortedLe.Covered = true := by
+  -- The quantified branch suffices. Reducing the earlier exact-fragment
+  -- recognizer first duplicates the nineteen-read expansion in the kernel.
+  have cover (φ : Fml Allow []) (h : φ.quantCovered = true) : φ.Covered = true := by
+    simp only [Fml.Covered, Fml.CoveredA, h, Bool.or_true, Bool.true_or]
+  exact cover sortedLe (by decide +kernel)
+
+/-- The sorted-mapping premise instantiated at keys `2` and `5`. -/
+theorem sortedLe_valid : Fml.Valid sortedLe := by
+  intro σ h
+  exact h (PrimTy.ofIntD .uint 2) (PrimTy.ofIntD .uint 5) rfl
+
+/-- The original decision function's exact verdict, without repeating its
+expensive binary-derivative search at every library build. -/
+theorem sortedLe_decision : decideGoal sortedLe = .proved := by
+  have noHash (φ : Fml Allow []) (hh : φ.hasHash = false)
+      (h : decideLeaf φ = .proved) : decideGoal φ = .proved := by
+    simp only [decideGoal, hh, Bool.false_eq_true, if_false]
+    exact h
+  exact noHash sortedLe rfl
+    ((decideLeaf_proved_iff (φ := sortedLe) sortedLe_covered).mpr sortedLe_valid)
+
+/-- A cheap output replay carrying equality to the original compiled verdict.
+The certificate is checked by the kernel; no expected result is assumed. -/
+private def sortedLeReplay : {s : String // s = verdict sortedLe} :=
+  have spell (φ : Fml Allow []) (h : decideGoal φ = .proved) : "proved" = verdict φ := by
+    simp only [verdict, h]
+  ⟨"proved", spell sortedLe sortedLe_decision⟩
 
 /-- info: "proved" -/
-#guard_msgs in #eval verdict sortedLe
+#guard_msgs in #eval sortedLeReplay.val
+
+/-- The certified decision cannot replay the opposite verdict. -/
+theorem sortedLe_not_refuted : verdict sortedLe ≠ "refuted" := by
+  intro h
+  have wrong : ("proved" : String) = "refuted" := sortedLeReplay.property.trans h
+  exact (by decide +kernel : ("proved" : String) ≠ "refuted") wrong
 
 /-! ## Counterexamples to `DecisionTheorem`
 
@@ -464,8 +498,8 @@ local instance : InContract := ⟨Gaps⟩
 
 /-! ### Quantifiers over contents
 
-Outside `apfPrep`'s shapes once; all but `gapArrayBlock` decided since
-(features 16 to 21, pinned below). -/
+Outside `apfPrep`'s shapes once; all decided since (features 16 to 21,
+pinned below; `gapArrayBlock` by feature 32, `Examples/DecisionArrays.lean`). -/
 
 /-- A block whose bound index is not the last of its path (`m[i][3]`). -/
 def gapColumn : Fml Gaps [] := dl!{ (∀ uint i; i < 10 → allow[i][3] == 0) → allow[1][3] == 0 }
@@ -710,10 +744,6 @@ theorem gapMixedPairs_inTarget : gapMixedPairs.inTarget {} = true := by decide +
 theorem gapWrittenMemory_inTarget : gapWrittenMemory.inTarget {} = true := by decide +kernel
 /-- Outside the fragment (e3″): the negative `∀ x` compares hashes its scope does not read. -/
 theorem gapHashNegForall_outside : gapHashNegForall.inTarget {} = false := by decide +kernel
-
-/-- info: true -/
-#guard_msgs in
-#eval ([gapArrayBlock].map verdict).all (· == "unknown")
 
 /-! Binders of KeY's `int` (M7, feature 26): the former counterexample
 `gapKIntBinder` proved, its false variant refuted (the binder's entry `0`),

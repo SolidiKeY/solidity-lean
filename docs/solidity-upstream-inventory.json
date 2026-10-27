@@ -48,6 +48,7 @@
       "contractDefinition": [
         "contracts",
         "inheritance",
+        "logicalStorageBase",
         "storageLayout"
       ],
       "dataLocation": [
@@ -596,6 +597,7 @@
         "contracts",
         "identifiers",
         "inheritance",
+        "logicalStorageBase",
         "names",
         "storageLayout"
       ],
@@ -1047,6 +1049,7 @@
         "contracts",
         "identifiers",
         "inheritance",
+        "logicalStorageBase",
         "names",
         "storageLayout"
       ],
@@ -1784,6 +1787,7 @@
         "expressionStatements"
       ],
       "StorageLayoutSpecifier": [
+        "logicalStorageBase",
         "storageLayout"
       ],
       "StructDefinition": [
