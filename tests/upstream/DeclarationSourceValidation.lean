@@ -12,7 +12,7 @@ private def emptyState : State Group08SourceValidation.Calldata [] :=
 private def emptyRef : HRef [.array (.prim .uint)] (.array (.prim .uint)) := ⟨0, rfl⟩
 /-- An initialized empty byte input satisfies every original source premise
 but reverts at the slice bound, so the unchanged diamond is not derivable. -/
-theorem sliceHashed_notDerivable : ¬ (⊢ Group08SourceValidation.Calldata.sliceHashed.problem) := by
+theorem sliceHashed_notValid : ¬ Fml.Valid Group08SourceValidation.Calldata.sliceHashed.problem := by
   intro h
   have hx :
       holds (emptyState.push (t := .mem (.array (.prim .uint))) (some emptyRef))
@@ -24,7 +24,7 @@ theorem sliceHashed_notDerivable : ¬ (⊢ Group08SourceValidation.Calldata.slic
         (Fml.wt Group08SourceValidation.Calldata) →
       holds (emptyState.push (t := .mem (.array (.prim .uint))) (some emptyRef))
         (.modal .diamond Group08SourceValidation.Calldata.sliceHashed .nil .tt) :=
-    h.fmlValid emptyState (some emptyRef)
+    h emptyState (some emptyRef)
   have href : holds (emptyState.push (t := .mem (.array (.prim .uint))) (some emptyRef))
       (Fml.refInputs Group08SourceValidation.Calldata [.mem (.array (.prim .uint))]) := by
     change Upd.afterT .diamond _ _ _
@@ -66,6 +66,10 @@ theorem sliceHashed_notDerivable : ¬ (⊢ Group08SourceValidation.Calldata.slic
   exact hbad bad
 
 
+/-- Soundness transfers the explicit semantic counterexample to nonderivability. -/
+theorem sliceHashed_notDerivable : ¬ (⊢ Group08SourceValidation.Calldata.sliceHashed.problem) :=
+  Proves.not_of_not_valid sliceHashed_notValid
+
 /-- The initialized short input reaches a real revert, not fuel exhaustion. -/
 theorem sliceHashed_empty_reverts :
     (match Prog.runFramesF 32
@@ -94,8 +98,24 @@ theorem sliceHashed_one_byte_returns :
       Group08SourceValidation.Calldata.sliceHashed .nil).toOption.isSome = true := by
   decide +kernel
 
-#print axioms sliceHashed_empty_reverts
-#print axioms sliceHashed_notDerivable
-#print axioms sliceHashed_at_start_returns
-#print axioms sliceHashed_one_byte_returns
+/-- info: 'Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notValid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sliceHashed_notValid
+/-- info: 'Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_empty_reverts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sliceHashed_empty_reverts
+/-- info: 'Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notDerivable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sliceHashed_notDerivable
+/-- info: 'Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_at_start_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sliceHashed_at_start_returns
+/-- info: 'Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_one_byte_returns' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sliceHashed_one_byte_returns
 end Solidity.Tests.Upstream.DeclarationSourceValidation

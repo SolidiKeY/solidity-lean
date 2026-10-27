@@ -789,8 +789,9 @@ confirmed implementation findings (unit scaling, enum identity/width/array
 padding, artifact unit identity, composite enum ABI admission and unrelated enum
 checking cost) were fixed with controls before this review.
 
-Integration keeps the frontend changes together: `Source.lean`, `Body.lean`,
-`Contract.lean` and `Import.lean` share the validated artifact/carrier/projection
+Integration keeps the frontend changes together: `Frontend/Source.lean`,
+`Frontend/SolcJson/Body.lean`, `Frontend/SolcJson/Contract.lean` and
+`Frontend/Import.lean` share the validated artifact/carrier/projection
 metadata. The new `scripts/solc-code.mjs` must accompany its two adapter callers;
 reports record its separate SHA. The feature catalog and generated inventory
 travel together. Source-test changes select batch size one only for the three
@@ -807,3 +808,247 @@ fixtures are verified; broader composite enum decoding/input shapes, general
 mixed return frames and unavailable static artifacts retain explicit refusals.
 The failed source gate and remaining baseline proof/resource limits above remain
 open scope, rather than being relabeled as full-project repair.
+
+
+## Group 08 source validation continuation (2026-10-27)
+
+This continuation starts at `bcd86b83` on the same local lane. The previous
+23/23 fixture reports (46 pipeline variants, 58 observations), commits, exports,
+source/expectation bytes and the historical results are preserved. The 47/14
+source-suite log remains a failed historical gate; baseline matching never
+converts an unfinished proof or a tool timeout into a pass.
+
+### Confirmed declaration repairs
+
+Modern admission previously mistook error/event declaration references for
+stored function values because solc gives them function-shaped `typeString`s.
+The `.selector` exception now requires a static identifier/path or a
+contract-qualified member, an exact resolved error/event declaration identity,
+and the existing bounded full-width selector parser. It does not admit an
+error's `.address`, anonymous events, malformed hex/widths or non-static
+receivers. Existing function/getter/stored-function paths remain separate.
+The unmodified metadata source assertion now passes all 15 rows: 13 proved,
+one internal, and its deliberately false property pending. The new canonical
+error/event theorems and malformed/non-static admission controls complement
+that modern source check; none asserts a compiler-correctness theorem.
+
+The malformed NatSpec source was already safely refused on both `62338a6f`
+and the continuation base: `ensures false; requires false` fails the complete
+single-member parser with `expected end of input`. There was no admitted
+injected premise. Its empty API error list nevertheless failed the unchanged
+single-clause assertion. Uniform whole-import error promotion was rejected:
+`SpecBindings.malformedRenamed` has identical syntax and its unchanged mixed
+source assertion requires a local refusal with no report errors.
+
+The repair retains the local refusal and attaches the structured
+`solidity.specificationSyntax` diagnostic. Testing checkpoints/results expose
+`invalidSpecification`. Only a selection whose every non-internal/non-skipped
+verification candidate depends on invalid clause syntax additionally produces
+one API specification-input error. Mixed usable reports keep their local gaps;
+ordinary exclusions, pending proofs and resource failures do not become syntax
+errors. A valid caller retains its malformed callee's transitive refusal.
+The new regression checks mixed one-row batches, unrenamed/renamed singleton
+selections, transitive callers, a proved positive, a false pending property and
+an ordinary assembly exclusion. No historical assertion or source was changed.
+
+The two original focused assertions pass unchanged (197.436 seconds); the new
+diagnostic-policy test passes (27.983 seconds). The directly affected
+SpecBindings report retains all 37 rows and no API errors. Its original test
+still fails specifically at `tryScopeExit` pending versus proved; this is not
+reported as a passing source gate. The malformed-renamed row stays unsupported,
+with its exact full-input parser diagnostic, and the invalid loop name remains
+unsupported independently.
+
+### Remaining required source validation
+
+`Calldata.sliceHashed(bytes)` is an admitted implicit-diamond obligation, not
+an expected semantic failure. Its printed source contains fresh allocation and
+an unannotated symbolic-length memory copy loop before hashing. Direct-file
+phase measurement separates successful import/problem generation and callback
+classification from the expensive scoped search; smaller compiled walk stages
+leave the sequent unfinished. The bounded larger-stage measurement and final
+fresh gate results are recorded below when complete.
+
+A general memory-writing loop invariant is not available: `docs/loops.md`
+explicitly excludes it because the heap is not anonymised. That explains the
+unwinding cost, but it does not establish that the original diamond is true.
+The exact source counterexample below supersedes the earlier missing-loop-proof
+diagnosis: no sound copy summary can prove the unchanged unconditional claim.
+A different, explicitly in-range or box property could require a typed
+slice-copy summary (fresh allocation, exact bytes, source preservation, failure
+priority/rollback and termination), or a separately proved memory-loop rule.
+No such new premise or tag is introduced here. The unchanged automated source
+run remains blocked; extending wall time or heartbeats is not a repair.
+
+Other preserved failures remain distinct. Bytes.indexOutOfRange needs a
+fixed-bytes bounds/failure-path and closer diagnosis, not a changed expected
+verdict; its pending result alone does not identify the responsible layer. The modern
+full-source TestSuite testing-table code-generator recursion limit is separate
+from the frozen kernel build. SpecBindings.tryScopeExit and
+solc/open.tryArgumentSideEffect need callback/try proof support (the latter's
+source explicitly identifies the effectful try-argument capture gap).
+RevertData.reasonBytes/reasonOfBranch/reasonPastCustom need reason-data catch
+proofs. Runner and SpecImport retain policy exclusions versus assertions for
+unsupported; loosening exclusions is not a repair. ReferenceParameters.
+copiesBeforeEffects remains proved versus a stale pending assertion; the proof
+must not be degraded. Hashing's four nested codec rows retain their existing
+20,000-step walk errors. These are not passes by baseline provenance.
+
+Calldata additionally retains its three pending slice read/bounds proofs and
+the localAlias known-origin refusal. The latter's next frontend step is
+concrete: the standalone testing path builds `sol_raw!` after converting source
+calldata parameters to memory declarations, whereas native contract expansion
+passes explicit calldata roots to `RawStmt.sliceViews`. A repair must seed
+origins after those synthetic parameter declarations while retaining lexical
+shadow removal, read-only checks and original parameter range premises; simply
+marking every memory local as calldata would be unsound. That separate source
+alias interface and bounded, initialized-reference-aware negative validation
+remain required scope. A copy proof for a different property must not be
+substituted for this refuted diamond.
+
+MemoryPush (9), NarrowNested (30), and Recursion (15) retain their existing
+complete successful focused expectation checks; those historical rechecks are
+not rerun or reclassified as a successful broad source gate.
+
+
+### Final control correction and measured limit
+
+The first full build correctly rejected the new admission control's use of the
+historical legacy AST as modern input: that fixture omits BinaryOperation.
+commonType. The modern validator was not weakened. A separate generated
+`DeclarationMetadataAdmission.ast.json` retains the modern compiler fields,
+while the unchanged legacy fixture now has an explicit modern-refusal control.
+This corrects the test setup; the original modern Solidity-file assertions had
+already passed. The first full-build failure remains retained as development
+evidence, not a final passing gate.
+
+The Calldata measurement reaches the actual compiled-walk bottleneck.
+Import takes 1.776 seconds, scoped-problem generation 0.213 seconds, tail-mode
+classification 56 ms, evaluable-form preparation 1 ms, and callback
+classification 62 ms (`false`). Stages 16 through 1,024 finish in a combined
+612 ms and return `none` (the walk has not finished), then scoped search is
+interrupted at 300.458 seconds without a proof declaration. A separate
+larger-stage measurement takes 1.098 seconds at 2,048 steps, 5.304 at 4,096,
+and 32.711 at 8,192, each still `none`. The 16,384-step compiled stage does not
+return before the unchanged 300-second job bound (300.978 seconds total,
+about 260 seconds in that stage); the 20,000-step stage is never reached.
+Sampled peak Lean RSS is 1,386,360 KiB. This is repeated symbolic-copy-loop
+unwinding in scoped search, not a failed import, kernel rejection, missing
+compiler, or expected semantic failure. No larger wall/proof limit is tried.
+The phase helpers are diagnostics only and create no proof or passing source
+row. Earlier stream-buffered or elaboration-invalid diagnostic attempts are
+retained separately and are not used to locate the bottleneck.
+
+The printed `tryScopeExit` source also distinguishes the return binder `age_`,
+the Panic binder `age__`, and the final storage invariant `age == 0`. This is
+source-printer evidence that these scopes remain distinct, not a proof of its
+pending callback specification; the next proof step is inspection of the
+callback/try residual obligation rather than renaming these binders again.
+
+The configured SolKey snapshot lacked its adjacent pin file. All 274 existing
+snapshot files were verified against the frozen `473da8944c` manifest before
+restoring the byte-identical repository pin beside it. No snapshot bytes were
+modified. Both the explicit frozen-path and repaired configured-path TestSuite
+audits pass. The initial missing-pin audit failure remains configuration
+evidence and does not invalidate the frozen snapshot or become a proof pass.
+
+
+### Exact Calldata source counterexample
+
+`tests/upstream/DeclarationSourceValidation.lean` now proves
+`¬ Fml.Valid Group08SourceValidation.Calldata.sliceHashed.problem` for the
+exact imported obligation, then derives its nonderivability by soundness. A typed heap containing one empty byte-array object and
+a `some` reference to that object satisfies the original initialized-reference
+guard, the full address/byte-element ABI premises, and storage well-formedness.
+The array-element premise is proved for every unsigned index, not dropped.
+The bounds guard then reverts before copying or hashing. A separate checked
+run pins `.error .revert`, excluding exhaustion; length-four and length-five
+positive controls require actual normal return (`toOption.isSome = true`).
+All five certificate/control axiom outputs are pinned to the standard `propext`, `Classical.choice`
+and `Quot.sound` set. This is a checked model-sequent refutation plus concrete
+typed-run controls, not a compiler/EVM equivalence theorem.
+
+The new `CalldataValidation.ast.json` is the unchanged modern generated AST of
+the existing `Calldata.sol`, from the separately pinned 0.8.34 source compiler.
+No historical Solidity source, tag, expected result or archive was changed.
+In particular, no `b.length >= 4` input premise was added to obtain a proof.
+The generic `sol_refute` attempt found no certificate in its existing 2,000
+candidates: its memory-binder domain contains only `none`, and its candidates
+start with an empty heap, so it cannot supply this initialized-reference
+witness. That failed search is not evidence of validity; the explicit typed
+certificate supplies the missing evidence. Failed development proof attempts
+are not trusted declarations or reported as axiom-clean proofs.
+
+The original 18-row API report and its timeout remain preserved and blocked.
+The refutation does not relabel that timeout as passing or an expected semantic
+failure. To remove the automation block soundly, bounded negative validation
+must handle initialized reference inputs or replay this kind of certified
+counterexample; the unconditional positive claim cannot be made true by a
+source-admission rule. Other Calldata positive assertions and the broader
+source failures above still require their own repairs. The whole source gate
+therefore remains incomplete despite the two repaired declaration assertions.
+
+
+### Sealed continuation validation and handoff
+
+Final fresh fixture evidence retains **23 working / 0 broken / 0 blocked**,
+46 required legacy/viaIR variants and all 58 observations. Every complete
+result object exactly matches the preserved continuation-base record. The
+final model SHA-256 is
+`1e5887ad79a3eaf4a20b18b86a46f176f9504385eb1d8092b8383dce186b160b`;
+fixture runtime totals 152.766 seconds. The previous 192.081-second interim
+record remains retained separately because its control-source digest predates
+the legacy/modern control correction.
+
+`bash run-lean.sh` passes in 1,325.539 seconds: 649 default jobs, 249 frozen
+TestSuite jobs and the frozen sort gate (377 taclets, 131 read-bearing
+annotations). `lake build SolidityCorpus` passes in 35.089 seconds and
+`bash scripts/check-corpus.sh` in 15.095 seconds. The final exact-source
+semantic counterexample, nonderivability, genuine-revert and two normal-return
+controls pass in 3.525 seconds. After these production gates, only the checked
+test outside `Solidity/`, its axiom guards, documentation and evidence changed;
+no production dependency was changed, so broad gates are reused rather than
+repeated. The core remains intrinsic and dependency-free, with no new axiom,
+`sorry`, representation change, raised heartbeat or weakened source premise.
+The static selector theorems use only the standard axioms; `ScopeScan.within`
+remains axiom-free. The optional Bridge and obsolete SolKey reader are untouched.
+
+The 17 runner/helper tests, snapshot verification, strict automation, module
+reachability/layering, feature inventory and frozen TestSuite audits pass.
+The trust audit still fails on the same 25 inventory findings (232 sites),
+byte-identical to its `62338a6f` output. The documentation audit still fails on
+the same 13 missing vendor/external paths, also byte-identical after making an
+existing frontend basename citation unambiguous. Neither audit is claimed
+passing, and no new trust site is introduced.
+
+Finder and independent skeptic performed final read-only reviews without Lean
+workers. They verified all 69 fresh fixture summary/report/log hashes and
+source bytes, plus 67 initial and 72 final manifest-referenced hashes, then
+reviewed the exact initialized-input certificate and its full original premises. Confirmed
+findings were fixed: transitive diagnostic policy was pinned, the new modern
+control received its own complete provenance, the legacy missing-metadata
+refusal was retained, and every new source-certificate axiom output is now
+pinned. The old loop-only explanation is explicitly superseded by the checked
+semantic counterexample. No confirmed implementation issue remains in these
+repairs; broader source failures remain open rather than being counted as
+passes.
+
+Complete per-fixture commands, pipelines, hashes and observations are in
+[group08-source-validation-results.json](../../tests/upstream/group08-source-validation-results.json).
+Focused source tests, exact proof/resource evidence, retained baseline failures
+and remaining scope are in
+[group08-source-validation.json](../../tests/upstream/group08-source-validation.json).
+The original 47/14 source gate remains failed and was not rerun wholesale;
+there is no combined new pass-count claim. The two declaration assertions are
+repaired, while initialized-reference-aware bounded negative automation and the
+other specifically listed source proofs/interfaces remain required work.
+
+The local continuation consists of `4003dbd7`, `4b638b43`, `d5a68ddb` and the
+final documentation/evidence commit. Exports under
+`.lake/upstream/group08/source-followup/` include a continuation patch from
+`bcd86b83`, a combined patch from `006fcd59`, a commit series and retained logs;
+`handoff-artifacts.json` records the final commit, artifact hashes and patch
+application checks after export. All previous commits, reports and exports are
+preserved. No push or merge is performed. Integration should keep the narrow
+Admission/Contract/Testing/API diagnostic changes together with their controls;
+no unpublished work from another lane is assumed.
