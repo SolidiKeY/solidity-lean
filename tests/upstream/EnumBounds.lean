@@ -29,4 +29,3 @@ theorem IRForeign_checked : (Prog.run (State.init BoundsIR.EnumDeclarationBounds
 private def IRLocal : Blk BoundsIR.EnumDeclarationBounds [] := ⟨_, sol[BoundsIR.EnumDeclarationBounds]{ localAccepts(); }⟩
 theorem IRLocal_checked : (Prog.run (State.init BoundsIR.EnumDeclarationBounds) IRLocal.2).isOk = true := by decide +kernel
 #print axioms IRLocal_checked
-

@@ -67,14 +67,25 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       deployed := true
     let normaliseSignature (s : String) :=
       ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
-    let function := (rows.find? fun r =>
+    let selected := rows.find? fun r =>
       let declaration := (Semantics.lookupBy r.name C.funs).bind (·.sourceDecl)
       -- Nominal source types can share an ABI representation. An internal
       -- overload or a retained base body is never an external transaction.
       declaration.all (·.externalEntry) &&
       (normaliseSignature r.sourceSignature == normaliseSignature signature ||
         (declaration.bind (·.signature)).any fun canonical =>
-          normaliseSignature canonical == normaliseSignature signature)).map (·.name)
+          normaliseSignature canonical == normaliseSignature signature)
+    let function := selected.map (·.name)
+    -- Canonical ABI spellings erase enum identity to uint8. The decoder's
+    -- stronger source ranges remain in the import row, including constructors.
+    let rangeRow := if ctor then rows.find? (·.name == "constructor") else selected
+    if let some row := rangeRow then
+      for ((parameter, _), arg) in row.params.zip args do
+        if let some (_, lo, hi) := row.paramRanges.find? fun (name, _, _) => name == parameter then
+          let some value := arg.litVal?
+            | return result "blocked" "non-scalar ranged ABI argument"
+          unless lo ≤ value && value ≤ hi do
+            return result "blocked" "noncanonical ranged ABI argument"
     let declaration := if ctor then C.ctor else function.bind (Semantics.lookupBy · C.funs)
     if let some declaration := declaration then
       for ((parameter, _), arg) in declaration.params.zip args do

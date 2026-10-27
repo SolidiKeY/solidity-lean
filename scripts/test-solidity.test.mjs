@@ -1002,7 +1002,7 @@ test("finite nominal declarations and nested tuples retain identity, snapshots a
   assert.deepEqual(failures.errors, []);
   const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
   assert.equal(refused.nestedEffect, 'unsupported');
-  assert.notEqual(refused.indexedRead, 'proved');
+  assert.equal(refused.indexedRead, 'unsupported');
 });
 
 
@@ -1063,4 +1063,21 @@ test("function-value calls do not become generated enum conversions", () => {
     {build:false, contract:'EnumNameShadow', function:'checkCast', batchSize:1});
   assert.deepEqual(cast.errors, []);
   assert.equal(cast.results.find(r => r.function === 'checkCast')?.status, 'proved');
+});
+
+test("canonical nominal ABI matching preserves enum input ranges", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumAbiRanges.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumAbiRanges${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(['tests/solc/EnumAbiRanges.sol'],
+    {build:false, contract:'EnumAbiRanges', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
+    '--', '--tstack=131072'], 300000);
 });
