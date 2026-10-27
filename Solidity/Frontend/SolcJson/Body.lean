@@ -1278,6 +1278,50 @@ def abiCallBytesParams? (declarations : List Json) (target : Json) :
     let name ← J.str? ty "name"
     bytesTy? name)
 
+/-- Inspect resolved source types before enum names can be erased to uint.
+A bounded worklist visits each referenced struct once. Unknown references or
+unfinished traversal fail closed; this does not invent nominal enum ABI ranges. -/
+def errorAggregateHasEnum (declarations : List Json) (root : Json) : Bool := Id.run do
+  let mut todo := [root]
+  let mut seen : List Int := []
+  for _ in [:2 * declarations.length + (J.nodes root).length + 1] do
+    let t :: rest := todo | return false
+    todo := rest
+    match J.kind t with
+    | "ArrayTypeName" =>
+      let some b := J.opt t "baseType" | return true
+      todo := b :: todo
+    | "UserDefinedTypeName" =>
+      let some id := (J.ref? t).orElse (fun _ => (J.opt t "pathNode").bind J.ref?) | return true
+      if seen.contains id then continue
+      seen := id :: seen
+      let [d] := declarations.filter (J.id? · == some id) | return true
+      match J.kind d with
+      | "EnumDefinition" => return true
+      | "StructDefinition" =>
+        let some fields := J.arr? d "members" | return true
+        let members := fields.toList
+        let types := members.filterMap (J.opt · "typeName")
+        if types.length != members.length then return true
+        todo := types ++ todo
+      | "UserDefinedValueTypeDefinition" =>
+        let some t := J.opt d "underlyingType" | return true
+        todo := t :: todo
+      | _ => return true
+    | "ElementaryTypeName" | "FunctionTypeName" => pure ()
+    | _ => return true
+  return !todo.isEmpty
+
+/-- Formal aggregate error types are checked before source names are erased. -/
+def checkErrorAggregateParams (ps : List Json) : PM Unit := do
+  let st ← get
+  for p in ps do
+    let t ← PM.lift (J.get p "typeName")
+    let structRef := ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).any fun id =>
+      st.declarations.any (fun d => J.id? d == some id && J.kind d == "StructDefinition")
+    if (J.kind t == "ArrayTypeName" || structRef) && errorAggregateHasEnum st.declarations t then
+      unsupported "a custom error aggregate has nominal enum or unresolved source types; a nominal ABI adapter is required"
+
 mutual
 
 partial def expr (j : Json) : PM String := do
@@ -1566,6 +1610,38 @@ partial def call (j : Json) : PM String := do
         pure s!"{elemTy n false}({← expr a})"
     | _ => unsupported "a conversion of several arguments"
   | "functionCall" =>
+    -- Error constructors inside require are expressions, not RevertStatements.
+    -- New aggregate admission must retain the same identity/type boundary.
+    let st ← get
+    if (J.tyStr f).endsWith "returns (error)" then
+      let some id := J.ref? f | unsupported "a custom error without its declaration identity"
+      let [decl] := st.declarations.filter (J.id? · == some id)
+        | unsupported "a custom error whose declaration is missing or ambiguous"
+      unless J.kind decl == "ErrorDefinition" do
+        unsupported "a custom error whose resolved declaration is not an error"
+    if let some id := J.ref? f then
+      let resolved := st.declarations.filter (J.id? · == some id)
+      if resolved.any (fun d => J.kind d == "ErrorDefinition") then
+        let [decl] := resolved | unsupported "a custom error whose declaration is missing or ambiguous"
+        let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
+        let aggregate := ps.any fun p => (J.opt p "typeName").any fun t =>
+          J.kind t == "ArrayTypeName" ||
+            ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).any fun i =>
+              st.declarations.any (fun d => J.id? d == some i && J.kind d == "StructDefinition")
+        if aggregate then
+          let e ← PM.lift (J.str decl "name")
+          unless J.kind f == "Identifier" && J.str? f "name" == some e do
+            unsupported "a custom error whose name disagrees with its resolved declaration"
+          let owners := st.declarations.filter fun owner => J.kind owner == "SourceUnit" ||
+            (J.kind owner == "ContractDefinition" && (J.id? owner).any st.baseContracts.contains)
+          let visible := owners.flatMap fun owner => (J.arrD owner "nodes").toList
+          let [rendered] := visible.filter (fun d => J.kind d == "ErrorDefinition" && J.str? d "name" == some e)
+            | unsupported "custom error identities sharing a name need a nominal signature adapter"
+          unless J.id? rendered == some id do
+            unsupported "custom error identity is outside the rendered declaration scope"
+          unless ps.length == args.length && ps.all (fun p => J.kind p == "VariableDeclaration") do
+            unsupported "custom error argument arity disagrees with declaration"
+          checkErrorAggregateParams ps
     let superNames := (← get).superNames
     let superName := if isSuperMember f then (J.ref? f).bind (lookupBy · superNames) else none
     if isSuperMember f && superName.isNone then
@@ -1764,39 +1840,6 @@ def memoryRethrow? (declarations : List Json) (j : Json) : Option Json := do
     J.str? decl "storageLocation" == some "memory" && J.str? decl "name" == some name)
   pure decl
 
-/-- Inspect resolved source types before enum names can be erased to uint.
-A bounded worklist visits each referenced struct once. Unknown references or
-unfinished traversal fail closed; this does not invent nominal enum ABI ranges. -/
-def errorAggregateHasEnum (declarations : List Json) (root : Json) : Bool := Id.run do
-  let mut todo := [root]
-  let mut seen : List Int := []
-  for _ in [:2 * declarations.length + (J.nodes root).length + 1] do
-    let t :: rest := todo | return false
-    todo := rest
-    match J.kind t with
-    | "ArrayTypeName" =>
-      let some b := J.opt t "baseType" | return true
-      todo := b :: todo
-    | "UserDefinedTypeName" =>
-      let some id := (J.ref? t).orElse (fun _ => (J.opt t "pathNode").bind J.ref?) | return true
-      if seen.contains id then continue
-      seen := id :: seen
-      let [d] := declarations.filter (J.id? · == some id) | return true
-      match J.kind d with
-      | "EnumDefinition" => return true
-      | "StructDefinition" =>
-        let some fields := J.arr? d "members" | return true
-        let members := fields.toList
-        let types := members.filterMap (J.opt · "typeName")
-        if types.length != members.length then return true
-        todo := types ++ todo
-      | "UserDefinedValueTypeDefinition" =>
-        let some t := J.opt d "underlyingType" | return true
-        todo := t :: todo
-      | _ => return true
-    | "ElementaryTypeName" | "FunctionTypeName" => pure ()
-    | _ => return true
-  return !todo.isEmpty
 
 mutual
 
@@ -2037,15 +2080,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
     let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
     unless ps.length == args.length && ps.all (fun p => J.kind p == "VariableDeclaration") do
       unsupported "custom error argument arity disagrees with declaration"
-    -- The source reader lowers enum type names to uint elsewhere. Refuse
-    -- aggregate errors from resolved declarations BEFORE that erasure can
-    -- change the selector or silently forget enum cardinality.
-    for p in ps do
-      let t ← PM.lift (J.get p "typeName")
-      let structRef := ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).any fun id =>
-        st.declarations.any (fun d => J.id? d == some id && J.kind d == "StructDefinition")
-      if (J.kind t == "ArrayTypeName" || structRef) && errorAggregateHasEnum st.declarations t then
-        unsupported "a custom error aggregate has nominal enum or unresolved source types; a nominal ABI adapter is required"
+    -- Preserve nominal source types before either positional or named lowering.
+    checkErrorAggregateParams ps
     if rawNames.isEmpty then
       let as ← args.mapM expr
       return [s!"revert {identText e}({", ".intercalate as})"]
