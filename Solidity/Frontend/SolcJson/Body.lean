@@ -1764,6 +1764,40 @@ def memoryRethrow? (declarations : List Json) (j : Json) : Option Json := do
     J.str? decl "storageLocation" == some "memory" && J.str? decl "name" == some name)
   pure decl
 
+/-- Inspect resolved source types before enum names can be erased to uint.
+A bounded worklist visits each referenced struct once. Unknown references or
+unfinished traversal fail closed; this does not invent nominal enum ABI ranges. -/
+def errorAggregateHasEnum (declarations : List Json) (root : Json) : Bool := Id.run do
+  let mut todo := [root]
+  let mut seen : List Int := []
+  for _ in [:2 * declarations.length + (J.nodes root).length + 1] do
+    let t :: rest := todo | return false
+    todo := rest
+    match J.kind t with
+    | "ArrayTypeName" =>
+      let some b := J.opt t "baseType" | return true
+      todo := b :: todo
+    | "UserDefinedTypeName" =>
+      let some id := (J.ref? t).orElse (fun _ => (J.opt t "pathNode").bind J.ref?) | return true
+      if seen.contains id then continue
+      seen := id :: seen
+      let [d] := declarations.filter (J.id? · == some id) | return true
+      match J.kind d with
+      | "EnumDefinition" => return true
+      | "StructDefinition" =>
+        let some fields := J.arr? d "members" | return true
+        let members := fields.toList
+        let types := members.filterMap (J.opt · "typeName")
+        if types.length != members.length then return true
+        todo := types ++ todo
+      | "UserDefinedValueTypeDefinition" =>
+        let some t := J.opt d "underlyingType" | return true
+        todo := t :: todo
+      | _ => return true
+    | "ElementaryTypeName" | "FunctionTypeName" => pure ()
+    | _ => return true
+  return !todo.isEmpty
+
 mutual
 
 /-- A statement as `sol` text, after the storage locals it reads pushed
@@ -2003,6 +2037,15 @@ partial def stmt1 (j : Json) : PM (List String) := do
     let ps ← PM.lift (J.arr (← PM.lift (J.get decl "parameters")) "parameters")
     unless ps.length == args.length && ps.all (fun p => J.kind p == "VariableDeclaration") do
       unsupported "custom error argument arity disagrees with declaration"
+    -- The source reader lowers enum type names to uint elsewhere. Refuse
+    -- aggregate errors from resolved declarations BEFORE that erasure can
+    -- change the selector or silently forget enum cardinality.
+    for p in ps do
+      let t ← PM.lift (J.get p "typeName")
+      let structRef := ((J.ref? t).orElse fun _ => (J.opt t "pathNode").bind J.ref?).any fun id =>
+        st.declarations.any (fun d => J.id? d == some id && J.kind d == "StructDefinition")
+      if (J.kind t == "ArrayTypeName" || structRef) && errorAggregateHasEnum st.declarations t then
+        unsupported "a custom error aggregate has nominal enum or unresolved source types; a nominal ABI adapter is required"
     if rawNames.isEmpty then
       let as ← args.mapM expr
       return [s!"revert {identText e}({", ".intercalate as})"]
