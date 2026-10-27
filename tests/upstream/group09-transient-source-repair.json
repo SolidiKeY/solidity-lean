@@ -12,7 +12,7 @@
     "sha256": "e2ebd29b6fd6e77de51731a33311b09504c9163d43ea48da3c54e78948c1e0f9",
     "unchanged": true
   },
-  "status": "limited-source-repair; final repository gates in progress",
+  "status": "verified limited source repair; 21 complete fixture passes, seven retained assembly exclusions",
   "counts": {
     "fixtures": 28,
     "beforeBroken": 28,
@@ -22,7 +22,8 @@
     "resourceBlocks": 0,
     "pipelines": 56,
     "matchingPipelines": 42,
-    "excludedPipelines": 14
+    "excludedPipelines": 14,
+    "matchingObservations": 88
   },
   "suiteCompatible": false,
   "suiteExitCode": 1,
@@ -34,7 +35,7 @@
     "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
     "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
     "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
-    "modelSha256": "b59b563b228a0f95ba024be4b16051f4b73ae5c91fe549bbb4ea6b8c84c1abdd",
+    "modelSha256": "522d41b3a922d821b23e8c679300749ee866a1bab8f7f171a87ae25c75b5dc82",
     "evmVersion": "osaka",
     "loopFuel": 1000,
     "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -61,7 +62,9 @@
     "logs": [
       "/workspace/.setup/logs/group09-source-proof-final2.log",
       "/workspace/.setup/logs/group09-source-import-per-file2.log",
-      "/workspace/.setup/logs/group09-world-per-file.log"
+      "/workspace/.setup/logs/group09-world-per-file.log",
+      "/workspace/.setup/logs/group09-final-full-build-sort-retry.log",
+      "/workspace/.setup/logs/group09-contract-types-per-file.log"
     ],
     "allowedAxioms": [
       "propext",
@@ -72,7 +75,7 @@
     "newSorry": false,
     "raisedHeartbeats": false
   },
-  "validationComplete": false,
+  "validationComplete": true,
   "validation": [
     {
       "name": "final-build",
@@ -192,6 +195,88 @@
       "log": "/workspace/.setup/logs/group09-final-testsuite.log",
       "exitCode": 0,
       "seconds": 0.199
+    },
+    {
+      "name": "final-full-build-sort",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-full-build-sort-resumed.log",
+      "exitCode": 1,
+      "seconds": 6696.727
+    },
+    {
+      "name": "final-full-build-sort-retry",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-full-build-sort-retry.log",
+      "exitCode": 0,
+      "seconds": 939.268
+    },
+    {
+      "name": "final-fixtures-current",
+      "command": [
+        "python3",
+        ".lake/upstream/group09/reproduce-current.py"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-fixtures-current.log",
+      "exitCode": 0,
+      "seconds": 100.168
+    },
+    {
+      "name": "final-corpus",
+      "command": [
+        "bash",
+        "scripts/check-corpus.sh",
+        "--solkey",
+        "tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-corpus.log",
+      "exitCode": 0,
+      "seconds": 70.443
+    },
+    {
+      "name": "final-doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "log": "/workspace/.setup/logs/group09-final-doc-paths.log",
+      "exitCode": 1,
+      "seconds": 5.511
+    },
+    {
+      "name": "final-verify",
+      "command": [
+        "node",
+        "scripts/solidity-upstream.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "log": "/workspace/.setup/logs/group09-final-verify.log"
+    },
+    {
+      "name": "final-trust",
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 1,
+      "log": "/workspace/.setup/logs/group09-final-trust.log",
+      "baselineComparison": "25 identical inventory findings on origin/master; zero new findings"
+    },
+    {
+      "name": "final-doc-paths-after-handoff",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "log": "/workspace/.setup/logs/group09-final-doc-paths-after-handoff.log",
+      "baselineComparison": "Same 13 missing reference rows as retained original baseline; zero new missing paths."
     }
   ],
   "fixtures": [
@@ -278,12 +363,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/01"
+          ".lake/upstream/group09/after-current/01"
         ],
         "exitCode": 0,
-        "seconds": 3.888
+        "seconds": 4.399
       },
-      "rawReportSha256": "f97562e0cf9990f7c71bdb9a59df2b6a5b241606af31f26cb9e92609ea912047"
+      "rawReportSha256": "425d4040071871c9a850c5c31212e701d3947640684e7bb3caf5873bf3ae5d70"
     },
     {
       "path": "test/libsolidity/semanticTests/functionTypes/uninitialized_internal_transient_storage_function_pointer_comparison.sol",
@@ -382,12 +467,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/02"
+          ".lake/upstream/group09/after-current/02"
         ],
         "exitCode": 0,
-        "seconds": 4.01
+        "seconds": 4.02
       },
-      "rawReportSha256": "23e16c1ca7b8b707c8ae628ace3b0b52c66a9496357a13194179b48613b24f35"
+      "rawReportSha256": "8b1391b22745a3554e41a5f45f400a9754c08b8a3f90050e36ad00e2820054c5"
     },
     {
       "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable_abstract_contract.sol",
@@ -478,12 +563,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/03"
+          ".lake/upstream/group09/after-current/03"
         ],
         "exitCode": 0,
-        "seconds": 3.906
+        "seconds": 5.141
       },
-      "rawReportSha256": "6ba2926490e7803291592bc8fb9fa8c27a3b4ad416a6e09381040484f489e7fe"
+      "rawReportSha256": "cf1b52208a48acb05f02deba39197454500a5221bcaa2636f6a210e4216abae7"
     },
     {
       "path": "test/libsolidity/semanticTests/inheritance/transient_storage_state_variable.sol",
@@ -574,12 +659,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/04"
+          ".lake/upstream/group09/after-current/04"
         ],
         "exitCode": 0,
-        "seconds": 3.919
+        "seconds": 4.056
       },
-      "rawReportSha256": "e1f865c19b4438bdb77ddc6570e426c35ee044b630db44653cd80f5b6d2ba438"
+      "rawReportSha256": "1edab3dd8d3255897ebed52a936f2576963a9e9dfbf13412e8f427e741269fa0"
     },
     {
       "path": "test/libsolidity/semanticTests/inlineAssembly/inline_assembly_transient_storage_access_inside_function.sol",
@@ -660,12 +745,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/05"
+          ".lake/upstream/group09/after-current/05"
         ],
         "exitCode": 1,
-        "seconds": 3.366
+        "seconds": 3.245
       },
-      "rawReportSha256": "681b326352227d0ce4b5862b28066d101ac5b3e32e0de611d78aa00c2cafec11"
+      "rawReportSha256": "6b73da53a19d3cd1c621cf8f09eb5d20ae048c55796d30e00b6e85d127fb1f5c"
     },
     {
       "path": "test/libsolidity/semanticTests/modifiers/transient_state_variable_value_type.sol",
@@ -750,12 +835,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/06"
+          ".lake/upstream/group09/after-current/06"
         ],
         "exitCode": 0,
-        "seconds": 3.144
+        "seconds": 3.755
       },
-      "rawReportSha256": "3d4f1aa601a684cc2a8d16685cf4900dd898cec7944844eb72cb015b9e322b91"
+      "rawReportSha256": "a26e3992dd5d72a2d130a2ec907802987360e7e85c4554745bd932a6811bc2b3"
     },
     {
       "path": "test/libsolidity/semanticTests/operators/compound_assign_transient_storage.sol",
@@ -938,12 +1023,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/07"
+          ".lake/upstream/group09/after-current/07"
         ],
         "exitCode": 0,
-        "seconds": 3.149
+        "seconds": 3.914
       },
-      "rawReportSha256": "378f3b1b8f9b7b18067f5ab02f80281ecc754f2156006ca7abfb6f0395ba19c8"
+      "rawReportSha256": "320ad2ec967a56d7a501dfef42bda35134f3c7b18085fc3d5bdbb45ed0d63088"
     },
     {
       "path": "test/libsolidity/semanticTests/operators/transient_storage_variable_increment_decrement.sol",
@@ -1028,12 +1113,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/08"
+          ".lake/upstream/group09/after-current/08"
         ],
         "exitCode": 0,
-        "seconds": 3.552
+        "seconds": 3.777
       },
-      "rawReportSha256": "260115fdb3ddb4e531997ade8e16cd3e18eac9112bcacaf01396c855c293ef99"
+      "rawReportSha256": "0a42054ff19b357f85c29c666a3f66a0084f7377289f08342fb2c5dabb113113"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_inherited_storage_same_value_type.sol",
@@ -1128,12 +1213,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/09"
+          ".lake/upstream/group09/after-current/09"
         ],
         "exitCode": 0,
-        "seconds": 4.593
+        "seconds": 3.263
       },
-      "rawReportSha256": "9839e4bfa6527150f1dd7c206063307a1e1563b4920b984d09c0fa676b57c86a"
+      "rawReportSha256": "efb1f3b499e13976a6c7666442e35531987ee64e54aebccda2f859735893b6cf"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_array_pop_same_base_type.sol",
@@ -1214,12 +1299,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/10"
+          ".lake/upstream/group09/after-current/10"
         ],
         "exitCode": 1,
-        "seconds": 3.212
+        "seconds": 3.449
       },
-      "rawReportSha256": "09b6089150acbe9618bf0354aae285508cad3e8b3ed795e5592c5a97bb8b8da0"
+      "rawReportSha256": "641e7b4dc8e1cbf1613e1809e9fdcb00c32ec0f64e146c1aea9044ae13102921"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_delete_same_value_type.sol",
@@ -1328,12 +1413,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/11"
+          ".lake/upstream/group09/after-current/11"
         ],
         "exitCode": 0,
-        "seconds": 3.288
+        "seconds": 3.881
       },
-      "rawReportSha256": "998e4262e764243a2923a4228eb2efa10349270cd4c5930d22bf1c0973564180"
+      "rawReportSha256": "5e80120e87b3f5bdbaebeea941c0918188dcdad25a6a04b23e0f230608711964"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_mapping_delete_same_value_type.sol",
@@ -1428,12 +1513,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/12"
+          ".lake/upstream/group09/after-current/12"
         ],
         "exitCode": 0,
-        "seconds": 3.192
+        "seconds": 3.725
       },
-      "rawReportSha256": "8dc30d41183ecf807dbc41208064bd2b7f16b8a02e0e1ed232ddbf0fd5d850e9"
+      "rawReportSha256": "acaee77cb0cd0cb5c8000c469053a49d60f80d15ad429a1aba1959bb1714301e"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_after_storage_struct_delete_same_value_type.sol",
@@ -1546,12 +1631,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/13"
+          ".lake/upstream/group09/after-current/13"
         ],
         "exitCode": 0,
-        "seconds": 3.57
+        "seconds": 3.818
       },
-      "rawReportSha256": "f3187f2a037bac02988dbf6aa9038a6a034405c45a7d5fbd583dbb8650f01377"
+      "rawReportSha256": "07ac5e623ea85cfa3b72f88a5a9261a38749cd0dcf3513e1e1ee1fd8b917f26c"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_inherited_storage_same_value_type.sol",
@@ -1646,12 +1731,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/14"
+          ".lake/upstream/group09/after-current/14"
         ],
         "exitCode": 0,
-        "seconds": 3.089
+        "seconds": 3.853
       },
-      "rawReportSha256": "258d0c419ae763ead67e2dba8f47b2456a57d4153bce61dee79fc6173077e4ac"
+      "rawReportSha256": "d4253cac9447fb11215eadfbaca22959ea29642439b576183c7929bda9c05a15"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_delete_same_value_type.sol",
@@ -1760,12 +1845,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/15"
+          ".lake/upstream/group09/after-current/15"
         ],
         "exitCode": 0,
-        "seconds": 3.322
+        "seconds": 3.562
       },
-      "rawReportSha256": "c73de6967a1231834e982379a6ece0fdc7ec10fadb44ae186f75b0e7df40228c"
+      "rawReportSha256": "afda5e5f57f7af918625d05d44a408c3a79a7cd4ce71d6eaa5e79246187702d7"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_mapping_delete_same_value_type.sol",
@@ -1860,12 +1945,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/16"
+          ".lake/upstream/group09/after-current/16"
         ],
         "exitCode": 0,
-        "seconds": 3.51
+        "seconds": 3.495
       },
-      "rawReportSha256": "6f57d02a0d000a41e11ee028490693c67a1c5d40fd04ecae621364827b9a65b4"
+      "rawReportSha256": "ffe8fb033309d8931d4ac80bf6fcaff97f65a2ce3017b947c784fbccdf7348cd"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/delete_overlapping_transient_before_storage_struct_delete_same_value_type.sol",
@@ -1978,12 +2063,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/17"
+          ".lake/upstream/group09/after-current/17"
         ],
         "exitCode": 0,
-        "seconds": 3.44
+        "seconds": 3.451
       },
-      "rawReportSha256": "5417781ea5ca1350fbba513009e225aba63758fac4346849757e894c2e66ac0e"
+      "rawReportSha256": "a0b76fbc2549746cb5da8141c727e48e9b46bf4784f4faa978a843a306b88afc"
     },
     {
       "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/delete_transient_storage.sol",
@@ -2064,12 +2149,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/18"
+          ".lake/upstream/group09/after-current/18"
         ],
         "exitCode": 0,
-        "seconds": 3.472
+        "seconds": 3.161
       },
-      "rawReportSha256": "97369968503cefc605e4721f994746f5006e5b888ea4aed7a27d223d03c2b477"
+      "rawReportSha256": "3a131bbb020fdbe44706e3f55b7ed431c3b6c31e8d171a1231f28963ef9de9cb"
     },
     {
       "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_reference_types_slot_offset.sol",
@@ -2190,12 +2275,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/19"
+          ".lake/upstream/group09/after-current/19"
         ],
         "exitCode": 1,
-        "seconds": 3.666
+        "seconds": 3.4
       },
-      "rawReportSha256": "a8c7521b51cfbe435b252672341ae9d65139a72a34576719b718262f41556244"
+      "rawReportSha256": "6d9bbeb1c494f9ad353d872f3f12bea0807d8f26dbbae58a11532de803d38c7f"
     },
     {
       "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variable_struct.sol",
@@ -2338,12 +2423,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/20"
+          ".lake/upstream/group09/after-current/20"
         ],
         "exitCode": 0,
-        "seconds": 4.289
+        "seconds": 3.815
       },
-      "rawReportSha256": "1ec11fffb073afa4814ddca5cb3e41dbb035d0c1b7472191c5f79911443dad67"
+      "rawReportSha256": "daf5fe091a3412e380e997d60e0b5100152eacf6465092435c90bf7a06ae86ae"
     },
     {
       "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/state_variables_transient.sol",
@@ -2428,12 +2513,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/21"
+          ".lake/upstream/group09/after-current/21"
         ],
         "exitCode": 0,
-        "seconds": 3.158
+        "seconds": 3.376
       },
-      "rawReportSha256": "efd1ebd42b62720499c1015e6ea02d562d53753eb700e91a9ca44eec49bded3a"
+      "rawReportSha256": "a808982b5b63ff9864802d90957c55ff94da1ed0f0ae7a78052b4f8b55a3a7a5"
     },
     {
       "path": "test/libsolidity/semanticTests/storageLayoutSpecifier/transient_state_variable_slot_offset.sol",
@@ -2544,12 +2629,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/22"
+          ".lake/upstream/group09/after-current/22"
         ],
         "exitCode": 1,
-        "seconds": 3.2
+        "seconds": 3.122
       },
-      "rawReportSha256": "86599ccc0edcccc83da12bec3b431a75571a532b6bd1a8a4a823dd9102e7dd05"
+      "rawReportSha256": "77b52f1de5e9a193c1afce5ce1d100272ba9768c276fdde1a0c247204c8d2ffe"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/delete_transient_state_variable.sol",
@@ -2634,12 +2719,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/23"
+          ".lake/upstream/group09/after-current/23"
         ],
         "exitCode": 0,
-        "seconds": 3.169
+        "seconds": 2.947
       },
-      "rawReportSha256": "54d0035a2fc590c357e4e47cb94f5f404124c46e871afdb51083115f9d9da730"
+      "rawReportSha256": "a18ddb2fdfa30c5f9f613596dc1c2809e44f1f1e0457963b0187280095902827"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_assignment.sol",
@@ -2720,12 +2805,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/24"
+          ".lake/upstream/group09/after-current/24"
         ],
         "exitCode": 1,
-        "seconds": 3.175
+        "seconds": 2.988
       },
-      "rawReportSha256": "ba905967b55d2aeb2d7ed43704678ce4f327a3aef358b8e1ed5d20be9071cad2"
+      "rawReportSha256": "7bca4a7add2feb9a89e488551025271ef1e5709d2e2314a6a179ed24ddac9020"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/transient_state_variable_cleanup_tstore.sol",
@@ -2806,12 +2891,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/25"
+          ".lake/upstream/group09/after-current/25"
         ],
         "exitCode": 1,
-        "seconds": 3.091
+        "seconds": 3.01
       },
-      "rawReportSha256": "6047fef454065f32dd140a8044f04f8492c19639013c2b0912bf97fcc41f6d22"
+      "rawReportSha256": "dda1f109bf2e9c793eec4b051db417e0e11cca009047873dab7612e49db987d2"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slot_inline_assembly.sol",
@@ -2912,12 +2997,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/26"
+          ".lake/upstream/group09/after-current/26"
         ],
         "exitCode": 1,
-        "seconds": 3.195
+        "seconds": 3.041
       },
-      "rawReportSha256": "2690ef12c2d7e0d19c9e6983cc615911e62e27c00885449beed460c412b15ed4"
+      "rawReportSha256": "0655a06ca8816fb1cef0729c38f14a81c67072305e6b21ff85e139e370c04c8a"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/transient_state_variable_slots_and_offsets.sol",
@@ -3008,12 +3093,12 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/27"
+          ".lake/upstream/group09/after-current/27"
         ],
         "exitCode": 0,
-        "seconds": 3.246
+        "seconds": 3.098
       },
-      "rawReportSha256": "7f065eb2da4db4b1f7f69e2fd110c426aba4349dd464c5b8d921d476af91506d"
+      "rawReportSha256": "6b6616c4d552a429f8f4896b59348e67c96f770e223b156e3a98737c7a282a0d"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/transient_state_variable_tuple_assignment.sol",
@@ -3102,12 +3187,33 @@
           "--batch-size",
           "1",
           "--out",
-          ".lake/upstream/group09/after-final/28"
+          ".lake/upstream/group09/after-current/28"
         ],
         "exitCode": 0,
-        "seconds": 3.269
+        "seconds": 3.336
       },
-      "rawReportSha256": "0aee56e33e4ba3fd7020d194d2a98a55501356d62110ba40454721cf5fbf1c78"
+      "rawReportSha256": "f8f180b1bcc4145e0ff1e5228cba9ccf8328be7b067098efb880e0dd1007ec82"
     }
-  ]
+  ],
+  "implementationCommit": "692a60cc",
+  "validationNotes": {
+    "leanMcp": "Not exposed; configured per-file Lean commands and full kernel builds used.",
+    "runtimeInterruption": "Managed executor reconnect interrupted the first full build after successful module466; no OOM events. This log also records the same certificate-example failure subsequently repaired. Cached artifacts retained; log group09-final-full-build-sort.log.",
+    "resolvedBuildFailure": "Both full-build attempts recorded Examples/ContractTypes.lean retaining stale transient_ok while replacing vars. Explicit empty transientRoots and rfl certificate repair passed per-file and final full-build retry. Failed attempt retained in validation.",
+    "baselineDocPaths": "Documentation checker reports 13 pre-existing missing Lean references; no new missing reference in this patch.",
+    "suite": "All28 exact fixture runners finished. Seven return1 for explicit assembly exclusions; orchestrator exit0 is completion, never whole-suite compatibility.",
+    "authoritativeFixtureGate": "final-fixtures-current, after-current/01..28, model 522d41b3a922d821b23e8c679300749ee866a1bab8f7f171a87ae25c75b5dc82. Earlier final-fixtures predates the example-only certificate fix and is superseded."
+  },
+  "performance": {
+    "serialFixtureSeconds": 100.098,
+    "leanThreads": 1,
+    "maxLeanWorkers": 2,
+    "fullBuildScheduling": "serial; full and corpus logs retained; no raised proof limits",
+    "comparison": "Absolute run timings only; no claim of measured speedup or parity with baseline."
+  },
+  "reviews": {
+    "finder": "Final read-only closure: all 28 current rows/hashes, source/archive preservation, final model, completed gates and 100.098-second fixture sum verified; no Lean workers, edits or confirmed remaining defect.",
+    "skeptic": "Final independent read-only closure: 42 matching variants retain 88 observations; 14 variants retain actual assembly gaps; proof/limit/scope claims and completed gates checked; no Lean workers, edits or confirmed remaining defect."
+  },
+  "patchStatus": "Implementation committed locally on existing lane; final validation follow-up and export recorded in handoff. No push or merge."
 }

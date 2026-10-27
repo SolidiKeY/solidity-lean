@@ -479,8 +479,8 @@ source-world coverage. Reference compiler diagnostics remain separate checks.
 
 ### Frozen fixture results and integration scope
 
-The authoritative `after-final/01` through `after-final/28` runs use one frozen
-model SHA-256 `b59b563b228a0f95ba024be4b16051f4b73ae5c91fe549bbb4ea6b8c84c1abdd`.
+The authoritative `after-current/01` through `after-current/28` runs use one frozen
+model SHA-256 `522d41b3a922d821b23e8c679300749ee866a1bab8f7f171a87ae25c75b5dc82`.
 All 28 were broken at reproduction on this lane; 21 now match every retained
 observation in **both** required legacy and viaIR modes (42 matching variants).
 No assigned case was already fixed before this repair. There are no runtime
@@ -501,7 +501,7 @@ compiler-diagnostic checks. Full before/after rows, all observations, gaps,
 per-fixture source/expectation hashes, raw report hashes and exact command arrays
 are in the repair report. The historical `group09-transient-source.json`,
 `tests/upstream/results`, pinned source archive and source/expectation bytes are
-unchanged. Aggregate serial fixture time is 97.080 seconds; individual durations
+unchanged. Aggregate serial fixture time is 100.098 seconds; individual durations
 are recorded in each invocation.
 
 The runner and compiler are unchanged. Shared importer and tuple/getter changes
@@ -522,3 +522,59 @@ The report's invocation array is authoritative for supported flags. Keep fresh
 output directories, compiler SHA verification and both required pipelines; do
 not overwrite historical results. Runtime agreement is observational evidence,
 not a compiler correctness theorem.
+
+
+### Final validation and handoff (2026-10-27)
+
+Implementation commit `692a60cc` preserves the previous two lane commits. The
+repair report records the validation follow-up. Full build/sort,
+frozen SolKey TestSuite/corpus replay, strict automation, source controls, upstream
+runner tests, module reachability, core layering and feature inventory checks
+completed. Exact commands, elapsed times and retained log paths are in the repair
+report's validation records; each fixture invocation includes its own command.
+
+Lean MCP diagnostics were unavailable. Configured per-file Lean checks and full
+kernel builds were used instead. Accepted proof logs contain only `propext`,
+`Classical.choice` and `Quot.sound`; reset/disjointness projections require only
+`propext`. There are no new axioms, `sorry`, dependencies or raised heartbeats.
+The source/expectation bytes, pinned archive, historical results and frozen SolKey
+were unchanged. This remains a dependency-free intrinsic implementation.
+
+The first full-build process was interrupted by a managed-executor reconnect;
+its successful modules and log were retained. Both full-build logs record one
+actual compatibility issue: the declaration-replacement example in
+`Solidity/Examples/ContractTypes.lean` needed to replace its transient-root
+classification and certificate along with `vars`. The example now explicitly
+classifies its replacement root as persistent, without weakening the invariant.
+Its per-file check and final full-build retry passed. All 28 fixtures were then
+rerun into distinct `after-current` directories to match the final model hash.
+
+The broader checks retain two unrelated baseline limitations: documentation
+paths report 13 missing references already recorded in the previous handoff, and
+the trust-source inventory reports 25 findings, byte-for-byte identical to an
+independent audit of `origin/master`. No new findings were introduced. These are
+not recorded as passing gates. All long build logs are retained under
+`/workspace/.setup/logs`; corpus output was captured before its checker deleted
+the temporary log. Absolute timings are recorded without a baseline performance
+comparison. Lean compilation was scheduled serially within the 16 GiB executor.
+The resumed default-build attempt took 6696.727 seconds and failed only the
+certificate example; its completed module artifacts were retained. The successful
+cached build/TestSuite/sort retry took 939.268 seconds, the final exact-fixture
+runs took 100.098 seconds in aggregate, and the frozen corpus gate took 70.443
+seconds. The existing decision-array kernel check alone took 2338 seconds; it
+passed without an OOM event or any proof-limit change.
+
+The required finder and independent skeptic reviews were read-only and opened
+no Lean workers. Confirmed issues found during development (initializer marker
+erasure, feature classification, successful self-call controls, tuple metadata
+controls and the declaration-replacement example) were fixed. Final reviews
+confirmed all 28 raw report/fixture hashes, 42 matching variants with every vector,
+14 excluded variants with actual assembly gaps, unchanged historical inputs,
+standard axiom evidence and no further confirmed defect.
+
+The lane is reviewable locally; no push or merge was performed. The patch export
+and its SHA-256 are supplied in the final handoff. Remaining scope is precisely
+the seven retained assembly/physical-layout fixtures above and general source
+world dispatch; the existing manual typed owner/delegate interface has only the
+explicit opt-in transaction adapter described here. Do not infer full fixture
+compatibility or universal compiler correctness from the 21 passing cases.
