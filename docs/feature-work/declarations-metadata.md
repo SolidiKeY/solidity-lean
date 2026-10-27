@@ -765,3 +765,121 @@ the three recursive fixtures need ordinary graph memory/storage interfaces and
 their operation-preserving correspondence, not finite unrolling or an alternate
 unproved evaluator. Historical upstream inputs, expectations, archive and
 `tests/upstream/results` are unchanged. No push or merge to master was made.
+
+## Group 06 monitor continuation after d4a55688
+
+The continuation preserves all earlier commits, reports and exports. It first
+traced `struct_reference` from its exact final import gaps and compiler AST
+through ordinary reference admission to the graph foundation. The operation,
+missing interface, required agreement theorem and explicit scope decision are
+recorded in [recursive-types.md](recursive-types.md#group-06-operation-boundary-diagnosis-after-d4a55688).
+The three recursive fixtures remain broken in both pipelines; no unsupported
+operation is silently dropped and no unchanged failed admission is retried.
+
+Commit `d8324d62` repairs the unresolved default array check's reduction cost.
+A new per-command diagnostic corrects the previous attribution: the combined
+list pin does not reveal progress between verdicts. With only the cached
+`VisitedSet` and `LinearDecision` native libraries loaded, `gapArrayBlock`
+and `arrayBlockBad` finish; the slow verdict is `arrayLenBlock`. Direct array
+arithmetic has width seven for the former (a diagnostic walk closes 14,834
+states in 129 ms), versus eleven for the latter (100,000 diagnostic steps do
+not finish, taking 2.151 s). These are diagnostic copies and bounded search
+observations, not successful original default checks or changed production
+limits. Earlier 233-library memory failures and interpreted resource logs
+are retained unchanged. Superseded probes, including the canceled 54 s
+selective-library run used to separate the verdicts, are not passes.
+
+The live-length reduction's normalized arithmetic ends in `(A ∧ B) → B`.
+`AFml.nImp` now closes either direct conjunction projection using equality
+of the complete formulas. Its general meaning and width proofs are checked;
+all other cases retain their previous behavior. This adds at most two finite
+structural comparisons per affected connective, not another search. The
+history's `5154e4e9` hashed, one-bit derivative walk remains intact. No
+representation migration, new dependency, axiom, `sorry`, `native_decide`,
+proof heartbeat increase or premise weakening was introduced. The original
+`DecisionArrays` source and all three verdict pins are unchanged.
+
+The permanent linear controls pin both projections to `tt`, retain
+same-shape wrong-constant and reversed-implication counterexamples, and pin
+`[true, true, false, false]`. The general connective proof's axiom guard uses
+only `propext`, `Classical.choice` and `Quot.sound`. The independent skeptic
+confirmed full-formula equality, constant-case precedence and nonmatching
+behavior. The read-only finder corrected the checker name and the two-line
+adapted-source offset in the recursive diagnosis. Neither reviewer opened a
+Lean worker. Per-file shell checking substituted for unavailable Lean MCP;
+the changed core file built in 5.6 s and the linear example in 2.5 s.
+
+Validation is serial in the configured executor. Final commands, hashes,
+results and limits are recorded additively under `monitorContinuation` in
+[the Group 06 evidence](../../tests/upstream/group06.json); the earlier
+milestone evidence is preserved rather than rewritten as a current result.
+
+Integration is self-contained: this continuation edits no shared frontend or
+runner interfaces and needs no unpublished group patch. The normalizer's
+public types are unchanged, but its low-level module invalidates downstream
+artifacts, so the serial default/TestSuite/corpus rechecks are required. Final
+checks use ordinary Lean execution without the diagnostic native-library
+loading flags.
+
+The original, unchanged `DecisionArrays` module now passes all three runtime
+pins in 11 s in the ordinary serial default build, without native loading
+flags. `Decision` finishes in 888 s and `DecisionHashes` in 411 s in that run.
+These are module wall times, not a general performance bound or controlled
+benchmark. The array success supersedes the old resource block; it does not
+turn the three recursive source-admission gaps into passes.
+
+The full `LEAN_NUM_THREADS=1 ./run-lean.sh` check passes in 2,067.7 s:
+649 default-library jobs, the cached 249-job TestSuite target, and sort
+coverage 377/131. Peak child RSS is 6.65 GiB; the memory guard did not fire.
+The TestSuite's 247-module source import closure does not reach the changed
+`LinearDecision` module, so its successful cache check is not presented as a
+fresh re-derivation or timing of 552 proofs. The affected default-library modules and original
+array pins were actually rebuilt; the cached TestSuite gate does not
+substitute for that result. The sort rules used by the configured default
+check have the same SHA-256 as the frozen migration rules.
+
+All twelve supported assigned fixtures pass again in both required pipelines,
+with exact-path filters, batch size one and distinct `group06-monitor-final`
+outputs. Their retained observations are identical to the previous passing
+reports, including call order and failures. The source-model SHA-256 is
+`8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee`.
+The three recursive rows retain their last broken reports and the new static
+operation diagnosis; no unchanged failed admission attempt is counted as a
+fresh observation on this model.
+
+Post-validation passes the fourteen upstream Node tests, seven focused source
+control tests, the original narrow-type source assertions, nine ordinary
+replay checks, six enum-bound kernel checks and eight enum ABI replay checks.
+The broader bytes test still fails its unchanged `proved` assertion at
+`Bytes.indexOutOfRange` (`pending`), independently established on `615bd3fa`.
+It is not counted as a pass or confused with recursive source admission.
+Source proof controls use the repository's 0.8.34 compiler pin; upstream
+runtime/AST checks use the SHA-checked 0.8.38 compiler.
+
+Explicit frozen sort and corpus checks pass, with 377 taclets/131 read-bearing
+annotations and parity over 774 ledger rows (552 derived, 11 refuted, one
+excluded, two skipped, 70 proved, 37 unsupported and 101 unported). This is not
+774 derived proofs. Strict automation remains 491 automatic, 61 budgeted,
+eleven refuted and zero manual/pending. Its current build-log gate has zero
+fresh TestSuite timing rows because that unaffected target used the cache;
+the older 26-module timing result remains historical evidence. Reachability
+passes 667/zero orphans and layering 143/zero elaborator reach. The 25 trust
+audit findings match `d4a55688` exactly; the standalone inventory audit and
+thirteen external/vendor documentation misses remain baseline failures.
+
+A corrected diagnostic normalizer timing copy checks 10,000 unchanged
+nonprojection formulas: both checksums are 20,000, with 94 ms before and
+95 ms after in one sample; 1,000 outputs are identical. This is not a general
+speed claim. Its initial unresolved-name draft was rejected rather than
+forced through evaluation. The evidence collector also rejected an independent
+hash calculation with different path ordering; full-string ordering now
+matches every runner report. Neither issue changed model source or inputs.
+
+The final read-only finder verified all twelve fresh report payloads, hashes,
+exact commands, pipelines and unchanged observations, plus all 78 retained
+file hashes and 28 structured log hashes. The independent skeptic checked the
+projection proof/controls, original array pins, cache/performance limits,
+baseline failures and recursive operation boundary. Neither opened a Lean
+worker or found a confirmed remaining issue in the delivered change. The
+assignment itself remains partial: twelve passing fixtures, three unrepaired
+recursive fixtures, and no new fixture pass from this monitor continuation.

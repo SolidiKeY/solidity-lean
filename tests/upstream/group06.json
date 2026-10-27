@@ -12682,5 +12682,2183 @@
     "review": "independent skeptic found no ownership, constructor or signed-range issue; no Lean workers opened",
     "beforeSourceModelSha256": "c893bd606146fb542537b8b24f351ca39e98291a6e12f1bafb941c0afbc2cf3c",
     "afterSourceModelSha256": "c42462c7acbc77c576ccb1f375c021ad1708bb241e59091d96e2a68bbd78fa08"
+  },
+  "monitorContinuation": {
+    "parentCommit": "d4a55688",
+    "implementationCommit": "d8324d62",
+    "status": "partial-repair; original default gate resolved; three recursive ordinary-admission gaps remain",
+    "runtimeGate": {
+      "lean": "4.24.0",
+      "lake": "5.0.0-src+797c613",
+      "keySort": "lake build Solidity.KeySort: passed (2 jobs)",
+      "environmentId": "ccarenv_b64_Y2NhcmVudl81ZjU0OWMyOTc1MzQ4MTkxYmRhOTdiYTk0ZjhmNmVmZA",
+      "commands": [
+        "source /workspace/.setup/activate.sh",
+        "lean --version",
+        "lake --version",
+        "lake build Solidity.KeySort"
+      ],
+      "evidence": "actual managed-executor command outputs in this continuation tool transcript; versions and successful 2-job KeySort build observed"
+    },
+    "recursiveScopeDecision": {
+      "fixture": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+      "finalReport": ".lake/upstream/group06-resumed-abi-ranges-final/struct_reference/results.json",
+      "pipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "firstRejectedFunction": "check()",
+      "adaptedSourceLine": 10,
+      "archivedSourceLine": 8,
+      "setAdaptedSourceLine": 16,
+      "setArchivedSourceLine": 14,
+      "declarationIds": {
+        "struct": 9,
+        "z": 3,
+        "recursive": 8,
+        "data": 12,
+        "mapAlias": 66,
+        "innerAlias": 72
+      },
+      "boundary": "readStructs local shapes rejection -> dropped data root -> check/set import gaps; no graph operation executed",
+      "existingInterface": [
+        "TypeGraph.Schema",
+        "Step.field",
+        "Step.key",
+        "Path.append",
+        "Path.read_save",
+        "Value.find_write"
+      ],
+      "missingInterface": "schema-indexed roots, storage references, alias locals and state integrated with ordinary scoped run/signature/typing; cyclic root has no finite Legacy.Layout certificate",
+      "requiredAgreement": "resolution composes field/key paths and alias ownership; primitive reads/writes commute; uint8 keys and uint32 arithmetic preserve ranges; RHS order, failure rollback and exhaustion preserved; state relation survives check/set/check composition",
+      "decision": "stop dependent admission: broad representation/semantic integration required; no fixture-specific evaluator or finite unrolling",
+      "additionalMemoryScope": [
+        "array_of_recursive_struct: typed recursive heap allocation/defaults/constructor/index-length agreement",
+        "recursive_structs: typed recursive heap allocation/deletion and ordinary delete correspondence to graph Value.clear"
+      ],
+      "sourceHashes": {
+        "rawSourceSha256": "cbb7bb6153706b82c028f29dcf12e752208b9100122cb67c09985ac44260c6d4",
+        "adaptedSourceSha256": "97ccd03196ef032e53f2694592a3ec4b15d1dbfd6300abfb5cabd171e6860b6e",
+        "mainSource": ""
+      },
+      "sourceAsts": {
+        "viaIR": {
+          "path": ".lake/upstream/work-DjTgAz/7b30dcc88dea23d093b51d7c.ast.json",
+          "sha256": "28b795cf4c33b763191282ee7d6f2fab0e8760c67fbf4b97b206e5321a8fc375",
+          "header": {
+            "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "sourceSha256": "97ccd03196ef032e53f2694592a3ec4b15d1dbfd6300abfb5cabd171e6860b6e",
+            "solkeyCommit": "",
+            "source": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+            "provenanceVersion": 1,
+            "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "validationStage": "analysis",
+            "settings": {
+              "viaIR": true,
+              "evmVersion": "osaka",
+              "optimizer": {
+                "enabled": false,
+                "runs": 200
+              },
+              "libraries": {},
+              "remappings": [],
+              "outputSelection": {
+                "*": {
+                  "": [
+                    "ast"
+                  ]
+                }
+              }
+            },
+            "acceptedPragmas": [
+              [
+                "solidity",
+                ">=",
+                "0.0"
+              ]
+            ]
+          }
+        },
+        "legacy": {
+          "path": ".lake/upstream/work-DjTgAz/d5873878f8b6eaa8e890f31e.ast.json",
+          "sha256": "302c29386472da7e0f1ded88df427bce42320820dc0ba2456a46ed2cf8828508",
+          "header": {
+            "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "sourceSha256": "97ccd03196ef032e53f2694592a3ec4b15d1dbfd6300abfb5cabd171e6860b6e",
+            "solkeyCommit": "",
+            "source": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+            "provenanceVersion": 1,
+            "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "validationStage": "analysis",
+            "settings": {
+              "viaIR": false,
+              "evmVersion": "osaka",
+              "optimizer": {
+                "enabled": false,
+                "runs": 200
+              },
+              "libraries": {},
+              "remappings": [],
+              "outputSelection": {
+                "*": {
+                  "": [
+                    "ast"
+                  ]
+                }
+              }
+            },
+            "acceptedPragmas": [
+              [
+                "solidity",
+                ">=",
+                "0.0"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "defaultGateDiagnosis": {
+      "historicalAttributionCorrection": "Old combined #eval list logs do not isolate first verdict. New per-command checkpoints advance through gapArrayBlock and arrayBlockBad, then stop in arrayLenBlock. Historical resource attempts remain failures, not passes.",
+      "selectiveLibraries": [
+        "Solidity_Calculus_VisitedSet.so",
+        "Solidity_Calculus_LinearDecision.so"
+      ],
+      "gapDirectArithmetic": {
+        "normalizedWidth": 7,
+        "diagnosticWalkFuel": 100000,
+        "closedStates": 14834,
+        "milliseconds": 129
+      },
+      "liveLengthDirectArithmetic": {
+        "normalizedWidth": 11,
+        "diagnosticWalkFuel": 100000,
+        "status": "diagnostic fuel exhausted; not a semantic verdict",
+        "milliseconds": 2151
+      },
+      "diagnosticLimits": "bounded instrumentation only; no production fuel or proof-heartbeat change; diagnostic source copies do not substitute for original default gate",
+      "repair": "nImp closes direct full-formula conjunction projections; meaning and width proofs preserved; original three verdict pins unchanged",
+      "originalArrayCheck": {
+        "status": "passed",
+        "buildSeconds": 11,
+        "allThreeVerdictPinsRetained": true,
+        "sourceSha256": "9a740112146e6f06b09abab2d9c8482c59f497f7d4e1f2220a588bfa0596055d",
+        "sourceIdenticalToOriginMaster": true,
+        "execution": "ordinary serial lake build; no native-loading flags",
+        "log": "/tmp/group06-monitor-final-default.log"
+      },
+      "decisionExamplesBuildSeconds": 888,
+      "hashExamplesBuildSeconds": 411,
+      "diagnosticLibrarySha256": {
+        ".lake/build/lib/lean/Solidity_Calculus_VisitedSet.so": "bdcace5589c294b11ef19df1be5a0d6e16ee390b57363c56ef20af3ebfe9cfb4",
+        ".lake/build/lib/lean/Solidity_Calculus_LinearDecision.so": "1ebd393aaacc1cbd08ee2857e514e22c6c75300fc1cfc9de9cec51aa465fc674"
+      }
+    },
+    "reviews": {
+      "finder": "read-only, no Lean; corrected checker name and adapted/archived line offsets",
+      "skeptic": "read-only, no Lean; projection sound; full equality, false assignment controls and unchanged pins confirmed",
+      "finalFinder": "read-only, no Lean workers: all twelve fresh payloads/hashes/flags/pipelines/unchanged observations, 78 retained file hashes and 28 structured log hashes verified; no confirmed issue",
+      "finalSkeptic": "read-only, no Lean workers: projection proof/negative controls, original array pins/default pass, cache limits, baseline failures and recursive operation boundary independently checked; no confirmed issue"
+    },
+    "proofLimits": "no sorry, new axiom, native_decide, dependency, premise change, representation refactor or heartbeat increase",
+    "validation": {
+      "defaultBuild": {
+        "status": "passed",
+        "argv": [
+          "./run-lean.sh"
+        ],
+        "env": {
+          "LEAN_NUM_THREADS": "1"
+        },
+        "seconds": 2067.682698755001,
+        "exitCode": 0,
+        "stopReason": null,
+        "maxRssKiB": 6967724,
+        "log": "/tmp/group06-monitor-final-default.log",
+        "logSha256": "4abf97538c09f6da95be2caf920825a785c330627538ff782468dc8be93ac53c",
+        "libraryJobs": 649,
+        "testSuiteJobs": 249,
+        "testSuiteUsesCache": true,
+        "testSuiteImportClosureModules": 247,
+        "testSuiteDependsOnChangedLinearDecision": false,
+        "sortRulesSha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb",
+        "scope": "original library/array pins freshly built; TestSuite unaffected dependency closure and cached artifacts checked; no fresh 552-proof timing claim"
+      },
+      "postCommands": [
+        {
+          "name": "nonprojection",
+          "argv": [
+            "lake",
+            "env",
+            "lean",
+            "--tstack=131072",
+            "/tmp/group06-monitor-nonprojection.lean"
+          ],
+          "exitCode": 1,
+          "seconds": 2.477441715000168,
+          "log": "/tmp/group06-monitor-nonprojection.log",
+          "logSha256": "96001341991e8609a832fcea5d1e16dbb5122663d793344326414d0532904dda"
+        },
+        {
+          "name": "len-stages-clean",
+          "argv": [
+            "lake",
+            "env",
+            "lean",
+            "--tstack=131072",
+            "/tmp/group06-monitor-len-stages-clean.lean"
+          ],
+          "exitCode": 0,
+          "seconds": 9.231887295998604,
+          "log": "/tmp/group06-monitor-len-stages-clean.log",
+          "logSha256": "509e14ac4b360af5fa800ac454bf23ba39b7b79a95e1ce96e0cc0bc87b4cc2b9"
+        },
+        {
+          "name": "upstream-node",
+          "argv": [
+            "node",
+            "--test",
+            "--test-isolation=none",
+            "scripts/solidity-upstream.test.mjs"
+          ],
+          "exitCode": 0,
+          "seconds": 0.21235303000139538,
+          "log": "/tmp/group06-monitor-upstream-node.log",
+          "logSha256": "ede9b755fa18830568c4c76b2179d0ce57925eae4339992fd722f0e8b1808790"
+        },
+        {
+          "name": "source-controls",
+          "argv": [
+            "node",
+            "--test",
+            "--test-isolation=none",
+            "--test-name-pattern=library struct signatures|generated struct identity|finite nominal declarations|enum conversions use|function-value calls|canonical nominal ABI",
+            "scripts/test-solidity.test.mjs"
+          ],
+          "exitCode": 0,
+          "seconds": 246.75846173600075,
+          "log": "/tmp/group06-monitor-source-controls.log",
+          "logSha256": "8f74109b0557874f7de18b92349515cea2b55aa55c3bac7b87e9bca979249c1b"
+        },
+        {
+          "name": "source-narrow",
+          "argv": [
+            "node",
+            "--test",
+            "--test-isolation=none",
+            "--test-name-pattern=source types: narrow elements",
+            "scripts/test-solidity.test.mjs"
+          ],
+          "exitCode": 0,
+          "seconds": 394.61984793300144,
+          "log": "/tmp/group06-monitor-source-narrow.log",
+          "logSha256": "2b40075c253dc9c6b34072973f2e9db186e80a2f9cec7c44d215e1956e536439"
+        },
+        {
+          "name": "source-bytes",
+          "argv": [
+            "node",
+            "--test",
+            "--test-isolation=none",
+            "--test-name-pattern=bytesN, bytes and string:",
+            "scripts/test-solidity.test.mjs"
+          ],
+          "exitCode": 1,
+          "seconds": 193.10452955499932,
+          "log": "/tmp/group06-monitor-source-bytes.log",
+          "logSha256": "6a450cbbcd37fa8b0f24b13584569cf3014175b505df3e32948fae2b1230b141"
+        },
+        {
+          "name": "replay-Replay",
+          "argv": [
+            "lake",
+            "env",
+            "lean",
+            "--tstack=131072",
+            "tests/upstream/Replay.lean"
+          ],
+          "exitCode": 0,
+          "seconds": 3.1397610640015046,
+          "log": "/tmp/group06-monitor-replay-Replay.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "replay-EnumBounds",
+          "argv": [
+            "lake",
+            "env",
+            "lean",
+            "--tstack=131072",
+            "tests/upstream/EnumBounds.lean"
+          ],
+          "exitCode": 0,
+          "seconds": 1.7148948459980602,
+          "log": "/tmp/group06-monitor-replay-EnumBounds.log",
+          "logSha256": "607a1b5d5b970fdee4e0ea8462b051fd8ab3ca28b13bb3825cab5a6e35a8794c"
+        },
+        {
+          "name": "replay-EnumAbiRanges",
+          "argv": [
+            "lake",
+            "env",
+            "lean",
+            "--tstack=131072",
+            "tests/upstream/EnumAbiRanges.lean"
+          ],
+          "exitCode": 0,
+          "seconds": 5.373467642999458,
+          "log": "/tmp/group06-monitor-replay-EnumAbiRanges.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "verify",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "verify"
+          ],
+          "exitCode": 0,
+          "seconds": 1.0737744609978108,
+          "log": "/tmp/group06-monitor-verify.log",
+          "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+        },
+        {
+          "name": "fixture-internal_call_attached_with_parentheses",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/internal_call_attached_with_parentheses"
+          ],
+          "exitCode": 0,
+          "seconds": 4.680954219998966,
+          "log": "/tmp/group06-monitor-fixture-internal_call_attached_with_parentheses.log",
+          "logSha256": "9e65887b2dbf7ddd9f4d5f3bfeaafc217425973126d9d720ddf6be7829104ad7"
+        },
+        {
+          "name": "fixture-internal_library_function_attached_to_enum",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/internal_library_function_attached_to_enum"
+          ],
+          "exitCode": 0,
+          "seconds": 4.406512377998297,
+          "log": "/tmp/group06-monitor-fixture-internal_library_function_attached_to_enum.log",
+          "logSha256": "8c58788286430ebe138917ce2ec72a61534251b90af5b891ee6ef0a046350dee"
+        },
+        {
+          "name": "fixture-internal_library_function_attached_to_struct",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/internal_library_function_attached_to_struct"
+          ],
+          "exitCode": 0,
+          "seconds": 4.468420100998628,
+          "log": "/tmp/group06-monitor-fixture-internal_library_function_attached_to_struct.log",
+          "logSha256": "e3c3ad70b7827fa490c3047c395aa6cc0e3cfd9655695031d4fd87b493ba43b3"
+        },
+        {
+          "name": "fixture-internal_library_function_return_var_size",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/internal_library_function_return_var_size"
+          ],
+          "exitCode": 0,
+          "seconds": 5.210821542001213,
+          "log": "/tmp/group06-monitor-fixture-internal_library_function_return_var_size.log",
+          "logSha256": "2b28f6ec31c8e087e6acc7f020508d4d84dc5b4edf6498d7e46664132d12aa3f"
+        },
+        {
+          "name": "fixture-library_enum_as_an_expression",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/library_enum_as_an_expression"
+          ],
+          "exitCode": 0,
+          "seconds": 5.553036371999042,
+          "log": "/tmp/group06-monitor-fixture-library_enum_as_an_expression.log",
+          "logSha256": "e564c02f323b4a893ae2f36bc3902d157117b529e2ebc5d7b2365c7462ef2654"
+        },
+        {
+          "name": "fixture-library_struct_as_an_expression",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/library_struct_as_an_expression"
+          ],
+          "exitCode": 0,
+          "seconds": 6.6406893670027785,
+          "log": "/tmp/group06-monitor-fixture-library_struct_as_an_expression.log",
+          "logSha256": "43b6b9074ae1bcb7ab0b92c98d11c49e757a049a70913635912e397d6673a529"
+        },
+        {
+          "name": "fixture-using_for_storage_structs",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/using_for_storage_structs"
+          ],
+          "exitCode": 0,
+          "seconds": 7.837352537000697,
+          "log": "/tmp/group06-monitor-fixture-using_for_storage_structs.log",
+          "logSha256": "69aa487eee4e7a3de69ab1877d9589dbc20429b647c3a57c71550b419b2736a9"
+        },
+        {
+          "name": "fixture-lone_struct_array_type",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/lone_struct_array_type"
+          ],
+          "exitCode": 0,
+          "seconds": 5.910201253002015,
+          "log": "/tmp/group06-monitor-fixture-lone_struct_array_type.log",
+          "logSha256": "c0549a5239a1510257faecbc4bc8ae2cc391c3a66917867134e37543c18df1a9"
+        },
+        {
+          "name": "fixture-memory_structs_nested",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/memory_structs_nested"
+          ],
+          "exitCode": 0,
+          "seconds": 8.32596079400173,
+          "log": "/tmp/group06-monitor-fixture-memory_structs_nested.log",
+          "logSha256": "bc1be5787a3989e098cb72cc8d44865c6fa37bcb658de841171f15383586af85"
+        },
+        {
+          "name": "fixture-mapping_contract_key",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/mapping_contract_key"
+          ],
+          "exitCode": 0,
+          "seconds": 4.808998673001042,
+          "log": "/tmp/group06-monitor-fixture-mapping_contract_key.log",
+          "logSha256": "9ab3452bf3c50037a9bec02f875c8c307f104c185223e46eea3962d81b158c73"
+        },
+        {
+          "name": "fixture-nested_tuples",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/types/nested_tuples.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/nested_tuples"
+          ],
+          "exitCode": 0,
+          "seconds": 5.500734371002181,
+          "log": "/tmp/group06-monitor-fixture-nested_tuples.log",
+          "logSha256": "28b7cd0754c35d813bdeb3a2c6e54815f9b322caf9c7eff7db4f8eef18513a31"
+        },
+        {
+          "name": "fixture-tuple_assign_multi_slot_grow",
+          "argv": [
+            "node",
+            "scripts/solidity-upstream.mjs",
+            "run",
+            "--compiler",
+            "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+            "--filter",
+            "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+            "--batch-size",
+            "1",
+            "--out",
+            ".lake/upstream/group06-monitor-final/tuple_assign_multi_slot_grow"
+          ],
+          "exitCode": 0,
+          "seconds": 5.942862697000237,
+          "log": "/tmp/group06-monitor-fixture-tuple_assign_multi_slot_grow.log",
+          "logSha256": "48214ff2c416f94b0bd8c5e1a1b693f9e1ba9d4667c2aef9b222a2010200c8ac"
+        },
+        {
+          "name": "sort",
+          "argv": [
+            "bash",
+            "scripts/check-solkey.sh",
+            "--key",
+            "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"
+          ],
+          "exitCode": 0,
+          "seconds": 0.7454439849971095,
+          "log": "/tmp/group06-monitor-sort.log",
+          "logSha256": "b46e108b88231fc97fe8b1c1385f4e61d20afb45c24cf49ef613fba6367dcde0"
+        },
+        {
+          "name": "corpus",
+          "argv": [
+            "bash",
+            "scripts/check-corpus.sh",
+            "--solkey",
+            "tests/migration/solkey/keyext.solidity.examples"
+          ],
+          "exitCode": 0,
+          "seconds": 15.358950384998025,
+          "log": "/tmp/group06-monitor-corpus.log",
+          "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+        },
+        {
+          "name": "testsuite-static",
+          "argv": [
+            "bash",
+            "scripts/check-testsuite.sh",
+            "--complete",
+            "--solkey",
+            "tests/migration/solkey/keyext.solidity.examples"
+          ],
+          "exitCode": 0,
+          "seconds": 0.24488692299928516,
+          "log": "/tmp/group06-monitor-testsuite-static.log",
+          "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+        },
+        {
+          "name": "automatic",
+          "argv": [
+            "node",
+            "scripts/check-automatic.mjs",
+            "--strict"
+          ],
+          "exitCode": 0,
+          "seconds": 0.11692309000136447,
+          "log": "/tmp/group06-monitor-automatic.log",
+          "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+        }
+      ],
+      "proofEvidence": {
+        "meaning": "AFml.holds_nImp: all natural assignments, unchanged proposition, kernel checked",
+        "width": "AFml.width_nImp: unchanged width bound, kernel checked",
+        "controls": "six permanent kernel checks, exact four-verdict output pin, standard axiom guard in Examples.LinearDecision",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "newAxiomsOrSorry": false,
+        "heartbeatsRaised": false,
+        "leanMcpAvailable": false,
+        "perFileCommands": [
+          "lake env lean --tstack=131072 Solidity/Calculus/LinearDecision.lean",
+          "lake env lean --tstack=131072 Solidity/Examples/LinearDecision.lean"
+        ]
+      },
+      "trust": {
+        "standaloneAudit": "baseline failure: 25 findings",
+        "comparison": {
+          "currentFindings": 25,
+          "baselineFindings": 25,
+          "actualSites": 232,
+          "identical": true
+        },
+        "log": "/tmp/group06-monitor-trust.log"
+      },
+      "docPaths": {
+        "status": "baseline failure: same 13 external/vendor misses",
+        "log": "/tmp/group06-monitor-doc-paths.log"
+      },
+      "layering": {
+        "status": "passed",
+        "coreModules": 143,
+        "elaboratorReach": 0,
+        "log": "/tmp/group06-monitor-layers.log"
+      },
+      "reachability": {
+        "status": "passed",
+        "reachable": 667,
+        "orphans": 0,
+        "log": "/tmp/group06-monitor-orphans.log"
+      },
+      "sourceControls": {
+        "tests": 7,
+        "status": "passed",
+        "compiler": "0.8.34 repository source proof pin; distinct from SHA-checked 0.8.38 upstream runtime/AST checks"
+      },
+      "supersededDiagnosticDrafts": [
+        "initial nonprojection timing copy had unresolved recursive field notation; rejected, not evaluated or counted as a proof",
+        "initial len-stages copy retained a dangling docstring; corrected clean copy passes",
+        "selective-library original/list probes canceled only to isolate per-command progress; no original-gate pass claimed for them",
+        "independent model-hash draft sorted pathlib components instead of full path strings; collector rejected it; corrected independent calculation matches all twelve runner reports"
+      ],
+      "nonprojectionTiming": {
+        "argv": [
+          "lake",
+          "env",
+          "lean",
+          "--tstack=131072",
+          "/tmp/group06-monitor-nonprojection-fixed.lean"
+        ],
+        "exitCode": 0,
+        "seconds": 1.2721656840003561,
+        "log": "/tmp/group06-monitor-nonprojection-fixed.log",
+        "logSha256": "edfba30191b8e3abf4485608250be3da7083c0dacb24e433680a6864a573dc7f",
+        "iterations": 10000,
+        "previousMilliseconds": 94,
+        "projectionMilliseconds": 95,
+        "checksumBoth": 20000,
+        "unchangedOutputsChecked": 1000,
+        "meaning": "one diagnostic timing sample, not a general performance bound"
+      },
+      "bytesSourceTest": {
+        "status": "baseline test failure retained",
+        "firstFailure": "Bytes.indexOutOfRange",
+        "actual": "pending",
+        "required": "proved",
+        "premisesAndExpectedStatusUnchanged": true,
+        "baselineReproducedOn615bd3fa": true,
+        "log": "/tmp/group06-monitor-source-bytes.log"
+      },
+      "strictAutomation": {
+        "status": "passed",
+        "automatic": 491,
+        "budgeted": 61,
+        "refuted": 11,
+        "manual": 0,
+        "pending": 0,
+        "currentTimedTestSuiteModules": 0,
+        "currentTimingReason": "unaffected TestSuite import closure uses cache; no current fresh 26-module timing claim",
+        "log": "/tmp/group06-monitor-automatic-build-log.log"
+      }
+    },
+    "sourceModelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+    "modelHashMethod": "SHA-256 of relative path + NUL + bytes, sorted by full path string, exactly the runner modelDigest algorithm",
+    "fixtureChecks": [
+      {
+        "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+        "sourceSha256": "5dbf635ac337b3df778cf27e2f547bd7f1a37759cc84362e57c5ea96f6a89d64",
+        "reportPath": ".lake/upstream/group06-monitor-final/internal_call_attached_with_parentheses/results.json",
+        "reportSha256": "b79cbbb24f1e0a02f9dcae947e4eaa408a4ce58c609d5699a81313de5f2c8f26",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "10"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_call_attached_with_parentheses.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "10"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+        "sourceSha256": "08dc2a42041dc3143e024de74071857950892d655787483d3f590d2233abfca8",
+        "reportPath": ".lake/upstream/group06-monitor-final/internal_library_function_attached_to_enum/results.json",
+        "reportSha256": "e3a228441def32d5f277276a7645672c43dedc7ecb6ddb29bc3769184c03d58a",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "equalsA(uint256)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "equalsA(uint256)",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_enum.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "equalsA(uint256)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "equalsA(uint256)",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+        "sourceSha256": "d0d668175e1a2c90da9905b4097ef8d0f8333e528b8f63e0a6d5478aadcdc6b4",
+        "reportPath": ".lake/upstream/group06-monitor-final/internal_library_function_attached_to_struct/results.json",
+        "reportSha256": "c7d329e665906891341b49575bb5329dd22184bb3fc25d9742058f835a1b7e4f",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_attached_to_struct.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+        "sourceSha256": "4234939d3bb9c5dc0679198f49f4f601ec87409ed0d04f136eaaadfa91f3911f",
+        "reportPath": ".lake/upstream/group06-monitor-final/internal_library_function_return_var_size/results.json",
+        "reportSha256": "aab2a236452b2c3a146db7c5f5f9c62bfbb26a117dbab86e54245ade1045cd7e",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/internal_library_function_return_var_size.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+        "sourceSha256": "9db6992d0020d7cb331847d7183a0966d4ed662f3b84874879495493a1487c2e",
+        "reportPath": ".lake/upstream/group06-monitor-final/library_enum_as_an_expression/results.json",
+        "reportSha256": "79442da2df19909db3edd4ca87c0c52b80fda1177caae24aae9de07c94ccce41",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/library_enum_as_an_expression.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+        "sourceSha256": "d1ca22dedba94a84c863c2701f1690706aa7a0a953ffc77475fc5ff8b59f503e",
+        "reportPath": ".lake/upstream/group06-monitor-final/library_struct_as_an_expression/results.json",
+        "reportSha256": "244cb43b73b01b498a5a66bb808f286d08bbd021f26593ed650fbf8710445c1e",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/library_struct_as_an_expression.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+        "sourceSha256": "b48f674d020f26de92405a7b3b2b713e28e1cecd5e5384211cbab567e033dbd0",
+        "reportPath": ".lake/upstream/group06-monitor-final/using_for_storage_structs/results.json",
+        "reportSha256": "311eaa439eb52d18773e21216f41597a51921a4d6b73235ce1c6ca1d25c4b38e",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "7",
+                        "7"
+                      ],
+                      "signature": "g()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/libraries/using_for_storage_structs.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "7",
+                        "7"
+                      ],
+                      "signature": "g()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+        "sourceSha256": "f5dcfe54346092fcb4fefada135c71e503a04c282899a15d518d3a80a006d786",
+        "reportPath": ".lake/upstream/group06-monitor-final/lone_struct_array_type/results.json",
+        "reportSha256": "c66a0839eb12dc3f2bb1bcdaa4b4b26924935ed9a6935c3bee07b4699261eb52",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "3"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/structs/lone_struct_array_type.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "3"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+        "sourceSha256": "3aeda855d0f3c9a753ed9b71de6c76aeeafc4fa82d8e1d2534d0164580be10ca",
+        "reportPath": ".lake/upstream/group06-monitor-final/memory_structs_nested/results.json",
+        "reportSha256": "dcb9b307580c58d7dd1e7289c5890a6a93f5eced9fa7faef1a63d87734ee115d",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                      ],
+                      "signature": "test()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/structs/memory_structs_nested.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                      ],
+                      "signature": "test()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+        "sourceSha256": "22553ceec123c1535be3210aceeaea43d5ee5234b3a16e4338d5d6dbc7c27020",
+        "reportPath": ".lake/upstream/group06-monitor-final/mapping_contract_key/results.json",
+        "reportSha256": "ddf1eb801ad6a169a6bf3862794a9a5a18ed22b6b960ad403f8726e3a06bf28b",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "161"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "239"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "161"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "239"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "5"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/types/mapping_contract_key.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "161"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "239"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "161"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [],
+                      "signature": "set(address,uint8)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "239"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "5"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "0"
+                      ],
+                      "signature": "get(address)",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+        "sourceSha256": "3a5e6966c3ae67c62d8022772ebfebe1afb10b7f86e9c5b52e3dbbbda628fd85",
+        "reportPath": ".lake/upstream/group06-monitor-final/nested_tuples/results.json",
+        "reportSha256": "5e01482b896f6d4b354c1d7f0dcb5365cddfb70d2e600f0af4ca759aec90839f",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2",
+                        "1"
+                      ],
+                      "signature": "f0()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f1()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f2()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "3"
+                      ],
+                      "signature": "f3()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "4"
+                      ],
+                      "signature": "f4()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/types/nested_tuples.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "2",
+                        "1"
+                      ],
+                      "signature": "f0()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "1"
+                      ],
+                      "signature": "f1()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "2"
+                      ],
+                      "signature": "f2()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "3"
+                      ],
+                      "signature": "f3()",
+                      "failed": false
+                    },
+                    {
+                      "values": [
+                        "4"
+                      ],
+                      "signature": "f4()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+        "sourceSha256": "c942f61d6a6fdeda3bc591ded4e3d2cc5ed1a816e2a85b8fa7a7fbd4f4392876",
+        "reportPath": ".lake/upstream/group06-monitor-final/tuple_assign_multi_slot_grow/results.json",
+        "reportSha256": "5e616565c059f70d06090ed2c995e838bd81786ce8b7739b8ffebdba43a6fc35",
+        "allPriorObservationsIdentical": true,
+        "report": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "c860ec034b8dbf26c632f45a0c52c215df9eda9fc2fd10e3c3f8b84f4a37d468",
+            "modelSha256": "8dfbc7d7d04eb76d78c6753c3037d9ac73cb2bbeb666e6308a4491a19fc856ee",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "48",
+                        "49",
+                        "50"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all scalar runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/types/tuple_assign_multi_slot_grow.sol",
+                  "observed": [
+                    {
+                      "values": [
+                        "48",
+                        "49",
+                        "50"
+                      ],
+                      "signature": "f()",
+                      "failed": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "unrepaired": [
+      {
+        "path": "test/libsolidity/semanticTests/structs/array_of_recursive_struct.sol",
+        "status": "unrepaired; last observed broken in both pipelines",
+        "lastReportSha256": "1cf8615f8da5623cdec00cb628b9df3f3e55988ef5054a12dbc8aae4db992599",
+        "lastModelSha256": "c42462c7acbc77c576ccb1f375c021ad1708bb241e59091d96e2a68bbd78fa08",
+        "sourceSha256": "8d35f490d2cc1dadd5e7938252af59d7460d6941f23308cc7248130a3a0b96f2",
+        "newUnchangedAdmissionAttempt": false
+      },
+      {
+        "path": "test/libsolidity/semanticTests/structs/recursive_structs.sol",
+        "status": "unrepaired; last observed broken in both pipelines",
+        "lastReportSha256": "704dcf39974fd858ded27f551d25c91d207fcd36d9acc9f4991d56c7e1c0f697",
+        "lastModelSha256": "c42462c7acbc77c576ccb1f375c021ad1708bb241e59091d96e2a68bbd78fa08",
+        "sourceSha256": "4b2380d113c75dc58e1f30c2b4824af9f38ad56f53a73fe20ade9abeef7f4634",
+        "newUnchangedAdmissionAttempt": false
+      },
+      {
+        "path": "test/libsolidity/semanticTests/structs/struct_reference.sol",
+        "status": "unrepaired; last observed broken in both pipelines",
+        "lastReportSha256": "1b6e2e40c4ea7ecba19b09468490e63ea07a8d75dcb7e3ab7ef1eb99122911e0",
+        "lastModelSha256": "c42462c7acbc77c576ccb1f375c021ad1708bb241e59091d96e2a68bbd78fa08",
+        "sourceSha256": "cbb7bb6153706b82c028f29dcf12e752208b9100122cb67c09985ac44260c6d4",
+        "newUnchangedAdmissionAttempt": false
+      }
+    ],
+    "counts": {
+      "freshWorkingBothPipelines": 12,
+      "unrepairedLastObservedBrokenBoth": 3,
+      "newFixtureRepairsInThisContinuation": 0,
+      "alreadyFixedOnMaster": 0,
+      "assignedAdapterOrResourceBlocks": 0,
+      "allFifteenRepaired": false
+    },
+    "retainedLogs": [
+      {
+        "path": "/tmp/group06-monitor-automatic-build-log.log",
+        "sha256": "a1853fef79053dae2650b7e76df34e8d330799c145faee6fbdbfb6d1137a8eb9"
+      },
+      {
+        "path": "/tmp/group06-monitor-automatic.log",
+        "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+      },
+      {
+        "path": "/tmp/group06-monitor-collect.py",
+        "sha256": "915967792e70f822f390626c7cc359cfea9fd1d39cd0e231ca1bbbb1a70dcb4e"
+      },
+      {
+        "path": "/tmp/group06-monitor-corpus.log",
+        "sha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+      },
+      {
+        "path": "/tmp/group06-monitor-doc-paths.log",
+        "sha256": "ad774c9c4ecd94f7acbee8119494633fd6cb31e3ff5a1f41128740513f9a1956"
+      },
+      {
+        "path": "/tmp/group06-monitor-fast.lean",
+        "sha256": "f72a7edd46fe1ab19a9072ef523dfdb5e8474ed397e76d9a339006e1aa41c34d"
+      },
+      {
+        "path": "/tmp/group06-monitor-fast.log",
+        "sha256": "20a3e67329137bb51d95b5e53ab3303d11dba3fd5c23d4ddb41b37a93c06f7a5"
+      },
+      {
+        "path": "/tmp/group06-monitor-final-default.json",
+        "sha256": "05f052994984f5321b874bb31ef17151afec21af2f4bd6da0c72372385a5e4fd"
+      },
+      {
+        "path": "/tmp/group06-monitor-final-default.log",
+        "sha256": "4abf97538c09f6da95be2caf920825a785c330627538ff782468dc8be93ac53c"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-internal_call_attached_with_parentheses.log",
+        "sha256": "9e65887b2dbf7ddd9f4d5f3bfeaafc217425973126d9d720ddf6be7829104ad7"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-internal_library_function_attached_to_enum.log",
+        "sha256": "8c58788286430ebe138917ce2ec72a61534251b90af5b891ee6ef0a046350dee"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-internal_library_function_attached_to_struct.log",
+        "sha256": "e3c3ad70b7827fa490c3047c395aa6cc0e3cfd9655695031d4fd87b493ba43b3"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-internal_library_function_return_var_size.log",
+        "sha256": "2b28f6ec31c8e087e6acc7f020508d4d84dc5b4edf6498d7e46664132d12aa3f"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-library_enum_as_an_expression.log",
+        "sha256": "e564c02f323b4a893ae2f36bc3902d157117b529e2ebc5d7b2365c7462ef2654"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-library_struct_as_an_expression.log",
+        "sha256": "43b6b9074ae1bcb7ab0b92c98d11c49e757a049a70913635912e397d6673a529"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-lone_struct_array_type.log",
+        "sha256": "c0549a5239a1510257faecbc4bc8ae2cc391c3a66917867134e37543c18df1a9"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-mapping_contract_key.log",
+        "sha256": "9ab3452bf3c50037a9bec02f875c8c307f104c185223e46eea3962d81b158c73"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-memory_structs_nested.log",
+        "sha256": "bc1be5787a3989e098cb72cc8d44865c6fa37bcb658de841171f15383586af85"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-nested_tuples.log",
+        "sha256": "28b7cd0754c35d813bdeb3a2c6e54815f9b322caf9c7eff7db4f8eef18513a31"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-tuple_assign_multi_slot_grow.log",
+        "sha256": "48214ff2c416f94b0bd8c5e1a1b693f9e1ba9d4667c2aef9b222a2010200c8ac"
+      },
+      {
+        "path": "/tmp/group06-monitor-fixture-using_for_storage_structs.log",
+        "sha256": "69aa487eee4e7a3de69ab1877d9589dbc20429b647c3a57c71550b419b2736a9"
+      },
+      {
+        "path": "/tmp/group06-monitor-goal.lean",
+        "sha256": "a327926cbd25e15d381532019dfc57a510855afeb8496bd0891e643d80f3c654"
+      },
+      {
+        "path": "/tmp/group06-monitor-goal.log",
+        "sha256": "e08b1017228bb199e5af835f43366c76522821632fcacccce6d32ee0c687752c"
+      },
+      {
+        "path": "/tmp/group06-monitor-layers.log",
+        "sha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-stages-clean.lean",
+        "sha256": "ac2ed160bbe005218b8aa73144d4dfe0de32770f7f57e93ba293df4b379176de"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-stages-clean.log",
+        "sha256": "509e14ac4b360af5fa800ac454bf23ba39b7b79a95e1ce96e0cc0bc87b4cc2b9"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-stages.lean",
+        "sha256": "5a8bdc5dcf752d6101434907f3fcc1496bafbf5ed450134deb69ef4f5706fcda"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-stages.log",
+        "sha256": "c97f93490043ae6312ebb9dde6b3ea1daaedb74303bdd36621bd8fd0bf31b57b"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-walk.lean",
+        "sha256": "655091e697e27b5a3f6551d4b2cb34ebd69c1c4eecdfea6456261fac3fb71cdf"
+      },
+      {
+        "path": "/tmp/group06-monitor-len-walk.log",
+        "sha256": "5e57b5962e2638d4f255073eaa8120134919b690db672901500a3dd060ddbcd9"
+      },
+      {
+        "path": "/tmp/group06-monitor-linear-controls-perfile.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-located.lean",
+        "sha256": "929c10bd5824425270de716716135c440c2da090a57eedf4a97c13b3f1b5df66"
+      },
+      {
+        "path": "/tmp/group06-monitor-located.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-location.txt",
+        "sha256": "7e386b00b6e940d61739c045bf2e31691dd473b0c4f2e1eec593baf2acce78b2"
+      },
+      {
+        "path": "/tmp/group06-monitor-nonprojection-fixed.json",
+        "sha256": "b05ebc2b64817d8c27ab1ff527272951fc3bf5db2a2acb827074a75f59663860"
+      },
+      {
+        "path": "/tmp/group06-monitor-nonprojection-fixed.lean",
+        "sha256": "08f8e5ad1e447e1a22f5e44dc0d1c423fc72c8bfde2e73ccc64a7fa58f1cd3ed"
+      },
+      {
+        "path": "/tmp/group06-monitor-nonprojection-fixed.log",
+        "sha256": "edfba30191b8e3abf4485608250be3da7083c0dacb24e433680a6864a573dc7f"
+      },
+      {
+        "path": "/tmp/group06-monitor-nonprojection.lean",
+        "sha256": "eed4b69d90e12a54c1a7cab269925473a32632e62c30447db36b0fb842e25e5e"
+      },
+      {
+        "path": "/tmp/group06-monitor-nonprojection.log",
+        "sha256": "96001341991e8609a832fcea5d1e16dbb5122663d793344326414d0532904dda"
+      },
+      {
+        "path": "/tmp/group06-monitor-normalizer-build.log",
+        "sha256": "eb4c606ebad07a2caa38bc77a3e7a40e786d74c7e518313b281b4c2399f2403e"
+      },
+      {
+        "path": "/tmp/group06-monitor-normalizer-perfile.log",
+        "sha256": "4fb1d1bbfcb23be62fd6241e47d2531e777fd71e0be8f73d4cdc793eb3488d71"
+      },
+      {
+        "path": "/tmp/group06-monitor-original-arrays.json",
+        "sha256": "da4160652d1d16601d496f13cd247b6b2ff0bf924cba144f31adc881f4efcd61"
+      },
+      {
+        "path": "/tmp/group06-monitor-original-arrays.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-orphans.log",
+        "sha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+      },
+      {
+        "path": "/tmp/group06-monitor-plain.lean",
+        "sha256": "55f5ea0a0986d664e5f11e892eb4ad40ea7ea1c2d1b904c1e8637c9bff462987"
+      },
+      {
+        "path": "/tmp/group06-monitor-plain.log",
+        "sha256": "bdc0bd4234701e1835ab2632ca35e6e262ac8d30a9ef92a3598db77062b92d61"
+      },
+      {
+        "path": "/tmp/group06-monitor-post-driver.log",
+        "sha256": "256993b0944618480a604902105ec8688ea425ffd722b7d4c97daabc0ed2702d"
+      },
+      {
+        "path": "/tmp/group06-monitor-post.json",
+        "sha256": "555d07cc10e6acdf55ca4eb425d210342cede96621e68c4732e34b36931d2ed3"
+      },
+      {
+        "path": "/tmp/group06-monitor-post.py",
+        "sha256": "c98a90df99bbea9f6357dad81d28c920fb762a6da05162a296fe51c3da0eef80"
+      },
+      {
+        "path": "/tmp/group06-monitor-preprocess.lean",
+        "sha256": "1be5c6bdb0c1aa983a6f4ea823f0b3a3bd68a584ed9d07d59fd4499447dcf3c8"
+      },
+      {
+        "path": "/tmp/group06-monitor-preprocess.log",
+        "sha256": "041ac039e7221ef3b06fe2c4822868c12f51ea5870ddf4baf8f828b3aa6c072f"
+      },
+      {
+        "path": "/tmp/group06-monitor-replay-EnumAbiRanges.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-replay-EnumBounds.log",
+        "sha256": "607a1b5d5b970fdee4e0ea8462b051fd8ab3ca28b13bb3825cab5a6e35a8794c"
+      },
+      {
+        "path": "/tmp/group06-monitor-replay-Replay.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-single-location.txt",
+        "sha256": "185dc3436bfb133bbefcc7f9b0af5fa0f2a37621a75ecdb6be777aa5b168a567"
+      },
+      {
+        "path": "/tmp/group06-monitor-singles.lean",
+        "sha256": "572cbc86152c33518a329d26b54172e831bfcc5077f4503b8b5a8b7b72e31d99"
+      },
+      {
+        "path": "/tmp/group06-monitor-singles.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-sort.log",
+        "sha256": "b46e108b88231fc97fe8b1c1385f4e61d20afb45c24cf49ef613fba6367dcde0"
+      },
+      {
+        "path": "/tmp/group06-monitor-source-bytes.log",
+        "sha256": "6a450cbbcd37fa8b0f24b13584569cf3014175b505df3e32948fae2b1230b141"
+      },
+      {
+        "path": "/tmp/group06-monitor-source-controls.log",
+        "sha256": "8f74109b0557874f7de18b92349515cea2b55aa55c3bac7b87e9bca979249c1b"
+      },
+      {
+        "path": "/tmp/group06-monitor-source-narrow.log",
+        "sha256": "2b40075c253dc9c6b34072973f2e9db186e80a2f9cec7c44d215e1956e536439"
+      },
+      {
+        "path": "/tmp/group06-monitor-split-arrays.lean",
+        "sha256": "610e636577184a50dca918cb0b66aafa55845f2b2d2d025b61a732dc29a9f9e4"
+      },
+      {
+        "path": "/tmp/group06-monitor-split-arrays.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-stages.lean",
+        "sha256": "34fd6f645c74ac5671a90b3673fb22bdc9771d31a77e3f6bfa3b0100f2385bca"
+      },
+      {
+        "path": "/tmp/group06-monitor-stages.log",
+        "sha256": "f932d3d487e76306cabe849118ae049ce59e45d892eec2f46ce698c5cb4b2f68"
+      },
+      {
+        "path": "/tmp/group06-monitor-struct-asts.json",
+        "sha256": "ccf275e6852f39d34a76c7a887df4271cc86a1fd7910296b31a7a15cfe4f9bbb"
+      },
+      {
+        "path": "/tmp/group06-monitor-struct-source.json",
+        "sha256": "6f921518b7173520d709e5b5e6beaa5cbd2f4a9339c393f192cdf1fc931d5e16"
+      },
+      {
+        "path": "/tmp/group06-monitor-testsuite-static.log",
+        "sha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+      },
+      {
+        "path": "/tmp/group06-monitor-three.lean",
+        "sha256": "b3abfa92fad5c9e13af330d8070b8ac62e3eff8b3ecd8aa40bf445990c395a89"
+      },
+      {
+        "path": "/tmp/group06-monitor-three.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "/tmp/group06-monitor-trust-comparison.log",
+        "sha256": "88a35f28e47b174045401e05a7719dfd35bf48a88b4b3b0c7dd3d6681c27fbc2"
+      },
+      {
+        "path": "/tmp/group06-monitor-trust.log",
+        "sha256": "7de9dfe4277aff121cea01f68262898d2e698edd37b4fdecfb755473f98e85cc"
+      },
+      {
+        "path": "/tmp/group06-monitor-upstream-node.log",
+        "sha256": "ede9b755fa18830568c4c76b2179d0ce57925eae4339992fd722f0e8b1808790"
+      },
+      {
+        "path": "/tmp/group06-monitor-verifiers.lean",
+        "sha256": "e3a856bf52bba39b733ece805844d893511c8cb44f1abed9bb1265e3acd7c67e"
+      },
+      {
+        "path": "/tmp/group06-monitor-verifiers.log",
+        "sha256": "707010d5c36b785cfcf4ee7582b6ccc092cc261d8e6e964f81ae694c2f6564e4"
+      },
+      {
+        "path": "/tmp/group06-monitor-verify.log",
+        "sha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+      },
+      {
+        "path": "/tmp/group06-monitor-walk.lean",
+        "sha256": "e70f29858b039cb0e558ffa722ee02349668abbb4e3e3179a406e71ad97de81c"
+      },
+      {
+        "path": "/tmp/group06-monitor-walk.log",
+        "sha256": "bf3aa3377b86d1d263e7d204a2136d5eae7294434d2c35f9ae9822ae894f4b61"
+      }
+    ],
+    "scope": "typed Lean runtime observations in required source modes; reference-solc diagnostics are not Lean coverage; no universal Solidity compiler correctness theorem"
   }
 }

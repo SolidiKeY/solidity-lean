@@ -234,3 +234,76 @@ on a recursive source admission attempt. See the final validation continuation
 in [declarations-metadata.md](declarations-metadata.md) and the per-fixture
 [evidence](../../tests/upstream/group06.json). No ordinary recursive admission
 or graph representation migration is claimed by this lane.
+
+## Group 06 operation-boundary diagnosis after d4a55688
+
+The authorized continuation inspected the final, unchanged `struct_reference`
+legacy/viaIR reports rather than rerunning the same failed admission. Both
+first report `check()` reading omitted state root `data` at adapted compiler
+source line 10; `set()` has the same root failure at adapted line 16. These
+include the runner's two preamble lines: the archived source lines are 8
+(`return data.z`) and 14 (`data.z = 2`). The compiler AST identifies
+`s2` as declaration 9, its `uint32 z` member as 3, recursive mapping member
+as 8, and state root `data` as 12. The mapping's value refers back to 9.
+`Body.lean`'s local `shapes` checker in `readStructs` rejects this declaration
+before `Contract.lean`
+can retain `data`. The earliest evaluated read would be `data.z`, followed
+by `data.recursive[0].z`; this is not a failed graph lookup at runtime.
+
+The exact missing interface is a schema-indexed counterpart of ordinary
+`SPath`/`Loc`, `SRef`, `Storage`, alias locals and `State`, connected to the
+existing scoped run and its typed terms. The graph already represents the
+root as a node with a primitive member and a mapping back to that node.
+`Step.field`, `Step.key`, `Path.append`, `Path.read_save`, and
+`Value.find_write` provide typed graph operations and local laws. They do
+not supply the ordinary execution interface: `SPath.resolveT`,
+`Loc.resolveT`, `declStorage` and `assign` currently require ordinary `Ty`.
+That type's struct table has strict field-rank descent. A cyclic root cannot
+have a `Legacy.Layout` certificate; extending the mapping-only
+`KeyPath.find_encode` theorem with field cases would still require that
+impossible finite root certificate.
+
+For this fixture, an operation-preserving integration must prove all of:
+
+- Resolving `data.recursive` and binding `map`, then resolving `map[0]`
+  and binding `inner`, denotes the same schema root plus composed typed
+  field/key path. Alias binding must not copy a subtree.
+- Primitive reads and successful writes commute with that resolution,
+  including untouched keys, implicit defaults and field/key composition.
+  Writes through `inner` must be observed by later reads through `data`.
+- `inner.recursive[1].z + 1` is evaluated before the destination write;
+  `uint8` keys and `uint32` member arithmetic retain their source ranges.
+  Failure, rollback and exhaustion remain the ordinary run's outcomes.
+- The typed state relation is preserved by each admitted source operation,
+  so composition establishes the original `check → set → check` observations
+  (`false`, empty return, `true`), with every original call retained.
+
+These are required theorem obligations, not declarations added to the trust
+base. No existing theorem states this commuting execution relation. A
+fixture-specific graph evaluator would bypass it and is not an admission
+repair. The scope decision is therefore to stop dependent recursive admission:
+this requires a representation/semantic integration across the ordinary run,
+signatures, typing and calculus, rather than a small graph API extension.
+Before undertaking it, retain the performance warning and speed-history
+review above; this continuation makes no representation change.
+
+The other two exact fixtures require more than that storage interface.
+`array_of_recursive_struct` allocates 42 recursive memory elements inside a
+fixed-array/struct constructor and reads the resulting length.
+`recursive_structs` allocates ten recursive memory elements, deletes the
+memory root, then clears the storage root. The standalone foundation is
+storage-only. A checked graph heap must carry allocation/alias typing and
+mapping-freedom in its types, and prove allocation, field/index lookup,
+initialization and memory deletion agreement. Storage clearing additionally
+needs the ordinary `delete` correspondence to `Value.clear`. Layout rank is
+not a bound on dynamic path depth; finite unrolling or deleting the source
+operations would not discharge these obligations. All three fixture statuses
+remain broken in both pipelines, with their previous reports preserved.
+
+The same continuation's checked arithmetic normalization repair resolves the
+original default array verdict check: the unchanged module passes all three
+pins in 11 s, and the full serial default check passes. This is independent
+of recursive source admission and leaves the three gaps above unrepaired.
+Final read-only finder and skeptic reviews confirm the documented boundary;
+current build, fixture and baseline-limit evidence is recorded in the final
+monitor section of [declarations-metadata.md](declarations-metadata.md).
