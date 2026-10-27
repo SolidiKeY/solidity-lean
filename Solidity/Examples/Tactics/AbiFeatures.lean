@@ -203,7 +203,7 @@ def BadDiscarded : Contract := contract!{
 #guard_msgs in #run BadDiscarded.invalid()
 
 -- Refuse narrowing and wrong primitive kinds before ABI marking erases types.
-#guard (encodeCallArg Codec [("#x", .shape [("#bytes", 3)]), ("x", .val .uint 24)]
+#guard (encodeCallArg Codec [("x", .val .uint 24 [("#bytes", 3)])]
   "bytes2" (.name "x")).toOption.isNone
 #guard (encodeCallArg Codec [("x", .val .uint 256)] "uint8" (.name "x")).toOption.isNone
 #guard (encodeCallArg Codec [("x", .val .uint 256)] "bool" (.name "x")).toOption.isNone
@@ -212,19 +212,15 @@ def BadDiscarded : Contract := contract!{
 #guard (bytesPure Codec [] (.call "bytes.concat" [.call "string.concat" [RawExpr.bytesLit [97]]])).toOption.isNone
 
 #guard (encodeCallArg Codec [] "bytes" (.call "bytes" [RawExpr.bytesLit [97]])).isOk
-#guard (encodeCallArg Codec [("#x", .shape (dynBytesRowsOf "bytes")),
-  ("x", .mem (.array (.prim .uint)))] "string" (.call "string" [.name "x"])).isOk
-#guard (encodeCallArg Codec [("#x", .shape [("#function(uint)externalreturns(uint)", 1)]),
-  ("x", .val .uint 192)] "function(uint)externalreturns(uint)" (.name "x")).isOk
-#guard (encodeCallArg Codec [("#x", .shape [("#function(bool)externalreturns(bool)", 1)]),
-  ("x", .val .uint 192)] "function(uint)externalreturns(uint)" (.name "x")).toOption.isNone
+#guard (encodeCallArg Codec [("x", .mem (.array (.prim .uint)) (dynBytesRowsOf "bytes"))] "string" (.call "string" [.name "x"])).isOk
+#guard (encodeCallArg Codec [("x", .val .uint 192 [("#function(uint)externalreturns(uint)", 1)])] "function(uint)externalreturns(uint)" (.name "x")).isOk
+#guard (encodeCallArg Codec [("x", .val .uint 192 [("#function(bool)externalreturns(bool)", 1)])] "function(uint)externalreturns(uint)" (.name "x")).toOption.isNone
 
 #guard abiFnType "function(uint[][3])externalreturns((uint,int[]))" ==
   "function(uint256[][3])externalreturns((uint256,int256[]))"
-#guard (encodeCallArg Codec [("#x", .shape [("#function(uint256[])externalreturns(uint256)", 1)]),
-  ("x", .val .uint 192)] "function(uint[])externalreturns(uint)" (.name "x")).isOk
+#guard (encodeCallArg Codec [("x", .val .uint 192 [("#function(uint256[])externalreturns(uint256)", 1)])] "function(uint[])externalreturns(uint)" (.name "x")).isOk
 
-#guard (fnPure Codec [("#x", .shape [("#bytes", 3)]), ("x", .val .uint 24)]
+#guard (fnPure Codec [("x", .val .uint 24 [("#bytes", 3)])]
   (.call "abi.encodeCall" [.field (.name "this") "g", .tuple [.name "x"]])).toOption.isNone
 
 local instance : InContract := ⟨Codec⟩

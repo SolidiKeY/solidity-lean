@@ -586,10 +586,10 @@ inductive NameKind where
 def nameKind (Γ : ECtx) (x : String) : NameKind :=
   match lookupBy x Γ with
   | some (.val ..) => .local
-  | some (.alias _) => .alias
-  | some (.mem _) => .mem
+  | some (.alias ..) => .alias
+  | some (.mem ..) => .mem
   | some .store => .store
-  | some .kint | some (.shape _) => .local
+  | some .kint => .local
   | none =>
     if (C.rootType x).isSome then .root else
     match Var.ofName x with
@@ -608,7 +608,7 @@ def isMemTerm (Γ : ECtx) : RawTerm → Bool
 says. -/
 def pathTy (Γ : ECtx) : RawTerm → Option Ty
   | .name x => match lookupBy x Γ with
-    | some (.alias R) => some (.ref R)
+    | some (.alias R _) => some (.ref R)
     | some _ => none
     | none => C.rootType x
   | .field t f => do
@@ -639,7 +639,7 @@ local, a reference member or element of one, a reference read, a fresh
 identity. -/
 def memTy (Γ : ECtx) : RawTerm → Option RefTy
   | .name x => match lookupBy x Γ with
-    | some (.mem R) => some R
+    | some (.mem R _) => some R
     | _ => none
   | .field t f => do
     let .struct s ← memTy Γ t | none
@@ -964,23 +964,22 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
     -- `x` is an alias, or a name not yet bound (an alias by its hints)
     if (t matches .name "unset") && (C.rootType "unset").isNone && (lookupBy "unset" Γ).isNone then
       let what? : Option String := match lookupBy x Γ with
-        | some (.alias _) => none
+        | some (.alias ..) => none
         | some (.val ..) => some "a value local"
-        | some (.mem _) => some "a memory local"
+        | some (.mem ..) => some "a memory local"
         | some .store => some "a storage variable"
         | some .kint => some "a KeY `int` local"
-        | some (.shape _) => some "a local's narrow positions"
         | none => if (C.rootType x).isSome then some "a state variable" else none
       if let some what := what? then
         throw s!"`{x} := unset` binds a storage alias; `{x}` is {what}"
       return (.unset (Var.ofName x) :: U', Γ')
     -- `old := storage`: a storage variable
-    if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
+    if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', Γ'.refine x .store)
     if let some (.ref R) := pathTy C Γ t then
-      return (.path (Var.ofName x) (← tPath C Γ t) :: U', setBy x (.alias R) Γ')
+      return (.path (Var.ofName x) (← tPath C Γ t) :: U', Γ'.refine x (.alias R))
     if (C.rootType x).isNone then
       if let some R := memTy C Γ t then
-        return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', setBy x (.mem R) Γ')
+        return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ'.refine x (.mem R))
     if t matches .app "freshId" _ then return (.mref (Var.ofName x) (← tIdent C Γ t) :: U', Γ')
     match nameKind C Γ x with
     | .alias => return (.path (Var.ofName x) (← tPath C Γ t) :: U', Γ')
@@ -990,11 +989,11 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
     | .local =>
       -- `se1 := x <= 255`, `se1 := find(storage, flags[a])`: a capture at the type of its
       -- right-hand side, which a program under it reads at that type (a `uint` otherwise)
-      let free := lookupBy x Γ' matches none | some (.val .uint 256)
+      let free := lookupBy x Γ' matches none | some (.val .uint 256 _)
       let Γ' := if t.isKintIn (Γ.filterMap fun (y, u) => if u == .kint then some y else none) then
-          if free then setBy x .kint Γ' else Γ'
+          if free then Γ'.refine x .kint else Γ'
         else match valTy? t with
-        | some p => if p != .uint && free then setBy x (.val p) Γ' else Γ'
+        | some p => if p != .uint && free then Γ'.refine x (.val p) else Γ'
         | none => Γ'
       return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
 where
@@ -1007,7 +1006,7 @@ where
       | some (.prim p) => some p
       | _ => none
     | .name y => match lookupBy y Γ with
-      | some (.val p _) => some p
+      | some (.val p _ _) => some p
       | some _ => none
       | none => match C.rootType y with
         | some (.prim p) => some p
@@ -1063,7 +1062,7 @@ where
     | s :: ss, (Γ, Δ) =>
       let hint (x : String) (t? : Option LocalTy) : ECtx × ECtx :=
         match t? with
-        | some t => if free decls Γ x then (setBy x t Γ, setBy x t Δ) else (Γ, Δ)
+        | some t => if free decls Γ x then (Γ.refine x t, Δ.refine x t) else (Γ, Δ)
         | none => (Γ, Δ)
       let declared (x : String) (T : RawTy) (mk : RefTy → LocalTy) : ECtx × ECtx :=
         match elabTy C T with

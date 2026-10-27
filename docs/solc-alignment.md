@@ -236,7 +236,7 @@ programs, and the check is a statement the rules already run.
   int16 b; uint c; uint8[] xs; }` keeps `a`, `b` and `xs[]`), in storage, in
   memory, as an element.  A storage alias, a memory local, a reference
   parameter or return carry the narrow positions of their declared type
-  beside it (`uint8[] memory m` is `[]` at 8 bits: `LocalTy.shape`,
+  in its binding (`uint8[] memory m` is `[]` at 8 bits: `LocalTy.shape`,
   `elabTyW`, `FunDecl.widths` keyed `xs[]`).  A read through indices and
   members has its position's type (`widthPath?`, `intTyOf`), so a write is
   checked or wrapped at it as a narrow variable's is, and a pushed value, a

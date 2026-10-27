@@ -72,21 +72,15 @@ def Prog.castIn {C : Contract} {Γ₁ Γ₂ Δ : Ctx} (h : Γ₁ = Γ₂) (P : P
 /-- What a local in scope holds. -/
 inductive LocalTy where
   /-- A stack local of type `p`, `bits` wide (`uint8 x` is a `uint` 8 bits wide). -/
-  | val (p : PrimTy) (bits : Nat := 256)
-  | alias (R : RefTy)
-  | mem (R : RefTy)
+  | val (p : PrimTy) (bits : Nat := 256) (shape : List (String × Nat) := [])
+  | alias (R : RefTy) (shape : List (String × Nat) := [])
+  | mem (R : RefTy) (shape : List (String × Nat) := [])
   /-- A storage variable, `old`: only a formula binds one (`old := storage`),
   and a program cannot read it. -/
   | store
   /-- A logical variable of KeY's `int`: only a formula binds one (a
   parameter read beside the ledger), and a program cannot read it. -/
   | kint
-  /-- Not a local: the narrow positions inside the alias or memory local `x`,
-  under the name `#x` (`declareShape`), keyed by their path below `x` as
-  `Contract.widths` keys a state variable's (`uint8[] memory m` is `[]` at
-  `8`).  A reference type has no width, so a local's rides beside it;
-  `ECtx.toNCtx` drops it. -/
-  | shape (ws : List (String × Nat))
   deriving DecidableEq, Repr
 
 /-- The locals in scope, most recent first. -/
@@ -110,26 +104,59 @@ def sameShape (a b : List (String × Nat)) : Bool :=
   let b := b.filter (!abiOnly ·)
   a.all (b.contains ·) && b.all (a.contains ·)
 
-/-- The entry beside a reference local `x` holding its narrow positions, if it has any. -/
-def shapeEntry (x : Name) (ws : List (String × Nat)) : List (Name × LocalTy) :=
-  if ws.isEmpty then [] else [("#" ++ x, .shape ws)]
+/-- Width and ABI metadata belongs to the binding it describes, including
+an empty shape on a local that shadows another binding. -/
+def LocalTy.shape : LocalTy → List (String × Nat)
+  | .val _ _ ws | .alias _ ws | .mem _ ws => ws
+  | .store | .kint => []
+
+/-- Replace the metadata of one program local without changing its type. -/
+def LocalTy.withShape : LocalTy → List (String × Nat) → LocalTy
+  | .val p bits _, ws => .val p bits ws
+  | .alias R _, ws => .alias R ws
+  | .mem R _, ws => .mem R ws
+  | .store, _ => .store
+  | .kint, _ => .kint
+
+/-- The scoped type of a real local; width/ABI metadata does not add a slot. -/
+def LocalTy.toLTy : LocalTy → LTy
+  | .val p _ _ => .val p
+  | .alias R _ => .alias R
+  | .mem R _ => .mem R
+  | .store => .old
+  | .kint => .kint
+
+/-- Attach inferred metadata to the nearest existing binding. An absent
+binding cannot acquire a detached metadata entry. -/
+def ECtx.setShape (x : Name) (ws : List (String × Nat)) : ECtx → Except String ECtx
+  | [] => .error s!"cannot attach metadata to undeclared local {x}"
+  | (y, t) :: Γ =>
+    if x == y then .ok ((y, t.withShape ws) :: Γ)
+    else ((y, t) :: ·) <$> ECtx.setShape x ws Γ
+
+/-- Refine a formula local's type, retaining metadata at the same scoped type.
+Unlike a declaration, a rebinding update does not introduce a shadowing local. -/
+def ECtx.refine (x : Name) (t : LocalTy) (Γ : ECtx) : ECtx :=
+  let t := match lookupBy x Γ with
+    | some old => if old.toLTy == t.toLTy then t.withShape old.shape else t
+    | none => t
+  setBy x t Γ
 
 /-- Parameters retain their declared data locations in the function frame; a
-reference one its narrow positions (`shapeEntry`). -/
-def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
-  let rows ← d.params.reverse.mapM fun (n, T) => match T with
+reference one its narrow positions in the same binding. -/
+def FunDecl.paramCtx (d : FunDecl) : Except String ECtx :=
+  d.params.reverse.mapM fun (n, T) => match T with
     | .prim p =>
       if (lookupBy n d.paramLocs).isSome then
         .error s!"data location on value parameter {n}"
-      else .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .val p ((lookupBy n d.widths).getD 256))])
+      else .ok (n, .val p ((lookupBy n d.widths).getD 256) (shapeUnder d.widths n))
     | .ref R => match lookupBy n d.paramLocs with
-      | some .storage => .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .alias R)])
+      | some .storage => .ok (n, .alias R (shapeUnder d.widths n))
       -- a `calldata` one a memory one the body does not write (`calldataCheck`)
       | some .memory | some .calldata =>
-        if (Ty.ref R).mapFree then .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .mem R)])
+        if (Ty.ref R).mapFree then .ok (n, .mem R (shapeUnder d.widths n))
         else .error s!"memory parameter {n} holds a mapping"
       | none => .error s!"reference parameter {n} needs a data location"
-  pure rows.flatten
 
 /-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
 an enum of `C` (a `uint`, as a state variable of it is), a struct of `C`
@@ -1317,13 +1344,7 @@ structure RecFrame where
 specification's storage snapshot.  A name is read as the file's
 `FreshNames` spells it (`acc` may be `sp1`). -/
 def ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
-  Γ.filterMap fun (x, t) => (Var.ofName x, ·) <$> match t with
-    | .val p _ => some (.val p)
-    | .alias R => some (.alias R)
-    | .mem R => some (.mem R)
-    | .store => some .old
-    | .kint => some .kint
-    | .shape _ => none
+  Γ.map fun (x, t) => (Var.ofName x, t.toLTy)
 
 /-! ### Named contexts and blocks -/
 

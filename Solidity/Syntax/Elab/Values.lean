@@ -125,15 +125,9 @@ def fnRow? (ws : List (String × Nat)) (k : String) : Option String :=
   ws.findSome? fun (k', _) =>
     if k'.startsWith (k ++ "#function(") then some (k'.drop (k.length + 1)) else none
 
-/-- The function type of the value local `x`: its marker, recorded after it
-(`declareShape`). -/
+/-- The function-type marker of the nearest binding of `x`. -/
 def localFn? (Γ : ECtx) (x : Name) : Option String := do
-  let i ← Γ.findIdx? (·.1 == x)
-  let j ← Γ.findIdx? (·.1 == "#" ++ x)
-  guard (j < i)
-  match Γ[j]? with
-  | some (_, .shape ws) => fnRow? ws ""
-  | _ => none
+  fnRow? (← lookupBy x Γ).shape ""
 
 /-- The function type of the name `h` (a value local, else a state
 variable), as `canonFnTy` reads it. -/
@@ -644,9 +638,11 @@ def declare (x : Name) (t : LocalTy) : ElabM Unit := do
   checkFresh C Γ x
   set ((x, t) :: Γ, k)
 
-/-- Record the narrow positions of the reference local `x` (`LocalTy.shape`). -/
-def declareShape (x : Name) (ws : List (String × Nat)) : ElabM Unit :=
-  modify fun (Γ, k) => (shapeEntry x ws ++ Γ, k)
+/-- Attach inferred width/ABI metadata to the existing local `x`. -/
+def declareShape (x : Name) (ws : List (String × Nat)) : ElabM Unit := do
+  let (Γ, k) ← get
+  let Γ ← ElabM.lift (Γ.setShape x ws)
+  set (Γ, k)
 
 /-- A capture: a fresh `base` variable (`freshCapture`), declared at `t`. -/
 def captureAs (base : String) (t : LocalTy) : ElabM Var := do
@@ -717,11 +713,9 @@ def elabIncTarget (l : RawExpr) :
         ⟨Γ', p, .mindex a (.var ix b.mapFree) (i.wk th), rfl⟩)
     | .local _ | .root .. => nomatch hs
 
-/-- The narrow positions of the reference local `x` (`LocalTy.shape`). -/
+/-- Width and ABI metadata of the nearest binding of `x`. -/
 def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
-  match lookupBy ("#" ++ x) Γ with
-  | some (.shape ws) => ws
-  | _ => []
+  ((lookupBy x Γ).map LocalTy.shape).getD []
 
 /-- A local storage mapping alias, whose binding can be rebound. -/
 def storageMappingAlias? (Γ : ECtx) (e : RawExpr) : Bool :=
@@ -737,7 +731,7 @@ it, and `e`'s type.  A state variable's table is `Contract.widths`
 def widthPath? (Γ : ECtx) : RawExpr → Option (List (String × Nat) × String × Ty)
   | .name x =>
     match lookupBy x Γ with
-    | some (.alias R) | some (.mem R) => some (localShape Γ x, "", .ref R)
+    | some (.alias R ws) | some (.mem R ws) => some (ws, "", .ref R)
     | some _ => none
     | none => (C.rootType x).map (C.widths, x, ·)
   | .assign l _ =>
@@ -1035,9 +1029,7 @@ def encodeCallTypes? (Γ : ECtx) (h : RawExpr) : Option (List String) := do
 (`exprShape`, `LocalTy.shape`). -/
 def captureRef (base : String) (t : LocalTy) (e : RawExpr) : ElabM Var := do
   let ws := exprShape C (← ctx) e
-  let x ← captureAs C base t
-  declareShape (toString x) ws
-  pure x
+  captureAs C base (t.withShape ws)
 
 /-- `e` as a simple value of type `p`, captured into a fresh local first
 when it is not one: read in the context the capture leaves. -/
@@ -1166,7 +1158,7 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
   | .num _ => none
   | .name x =>
     match lookupBy x Γ with
-    | some (.val p n) => some (p, n)
+    | some (.val p n _) => some (p, n)
     | some _ => some (.uint, 256)
     | none =>
       match C.rootType x with
@@ -1222,24 +1214,13 @@ does differently from a `uint8N` is rewritten before the statement is
 elaborated (`bytesPure`), where the marker rows tell which positions hold
 bytes. -/
 
-/-- The `bytesN` of the value local `x`: its marker, recorded after it
-(`declareShape`), not an outer `x`'s. -/
+/-- The `bytesN` marker attached to the nearest binding of `x`. -/
 def localBytes? (Γ : ECtx) (x : Name) : Option Nat := do
-  let i ← Γ.findIdx? (·.1 == x)
-  let j ← Γ.findIdx? (·.1 == "#" ++ x)
-  guard (j < i)
-  match Γ[j]? with
-  | some (_, .shape ws) => lookupBy "#bytes" ws
-  | _ => none
+  lookupBy "#bytes" (← lookupBy x Γ).shape
 
-/-- The marker `m` (`#address`, `#enum`) of the value local `x` (`declareShape`). -/
+/-- The marker `m` (`#address`, `#enum`) attached to the local `x`. -/
 def localMark? (Γ : ECtx) (x : Name) (m : String) : Option Nat := do
-  let i ← Γ.findIdx? (·.1 == x)
-  let j ← Γ.findIdx? (·.1 == "#" ++ x)
-  guard (j < i)
-  match Γ[j]? with
-  | some (_, .shape ws) => lookupBy m ws
-  | _ => none
+  lookupBy m (← lookupBy x Γ).shape
 
 /-- The marker `m` of the value `e`'s static type, as the ABI reads it: a
 variable's, an element's or a member's (`widthPath?`), a call's return's;

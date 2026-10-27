@@ -216,7 +216,7 @@ theorem narrowKey : ⊨ᶠ dl[NarrowNested]{ ⟨ uint8 k = 7; byKey[k] = 1; byKe
 A struct's narrow member has its width (`structWidths`: `struct Packed {
 uint8 a; int16 b; uint c; uint8[] xs; }`), in storage, in memory and as an
 element.  A storage alias, a memory local and a reference parameter carry the
-narrow positions of their type beside it (`LocalTy.shape`), so a copy or an
+narrow positions of their type in the binding (`LocalTy.shape`), so a copy or an
 alias of `small` is a `uint8[]` too; one of another shape is refused, as solc
 refuses it.  A modifier's narrow parameter is a local of its type. -/
 

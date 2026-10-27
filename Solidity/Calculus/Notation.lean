@@ -57,16 +57,6 @@ variable {C : Contract}
 
 /-! ## Reading -/
 
-/-- The scoped type of a local of the reader's scope.  A local's narrow
-positions (`LocalTy.shape`) are no local: `newBinders` drops them, and no
-other reader meets one. -/
-def _root_.Solidity.LocalTy.toLTy : LocalTy → LTy
-  | .val p _ => .val p
-  | .alias R => .alias R
-  | .mem R => .mem R
-  | .store => .old
-  | .kint | .shape _ => .kint
-
 /-- `Fml.slot i` at the context `Γ`: the `i`th Lean formula, read as a
 formula no reading writes (`{anon()}` over the mark `Fml.slotMark i`), and
 put back after (`fillSlotsC`). -/
@@ -123,7 +113,8 @@ def hintOf (Γe : ECtx) (x : Var) : Option LTy :=
 what a program binds without declaring them (`scopeHints`). -/
 def newBinders (Γe Γe' : ECtx) : NCtx :=
   Γe'.filterMap fun (x, t) =>
-    if lookupBy x Γe == some t || t matches .shape _ then none else some (Var.ofName x, t.toLTy)
+    if (lookupBy x Γe).map LocalTy.toLTy == some t.toLTy then none
+    else some (Var.ofName x, t.toLTy)
 
 /-- `k` under hidden binders for the locals `B`, the first outermost, read
 as the box reads them: universal. -/

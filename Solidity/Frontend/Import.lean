@@ -155,21 +155,20 @@ partial def atRef (ref : Syntax) (stx : Syntax) : Syntax :=
   | .missing => .missing
 
 /-- The parameters of a function as locals in scope, most recent first. -/
-def paramCtx (C : Contract) (ps : List RawStmt) : Except String ECtx := do
-  let rows ← ps.reverse.mapM fun s => match s with
+def paramCtx (C : Contract) (ps : List RawStmt) : Except String ECtx :=
+  ps.reverse.mapM fun s => match s with
     | .decl T x none => do
       let (.prim p, n) ← elabDeclTy C T | throw s!"reference parameter {x} needs a data location"
       -- a `bytesN` one with its marker (`bytesRowsOf`)
-      pure (shapeEntry x (← bytesRowsOf C T) ++ [(x, .val p n)])
+      pure (x, .val p n (← bytesRowsOf C T))
     | .declStorage T x none => do
       let (.ref R, ws) ← elabTyW C T | throw s!"storage location on value parameter {x}"
-      pure (shapeEntry x ws ++ [(x, .alias R)])
+      pure (x, .alias R ws)
     | .declMemory T x none => do
       let (.ref R, ws) ← elabTyW C T | throw s!"memory location on value parameter {x}"
       unless (Ty.ref R).mapFree do throw s!"memory parameter {x} holds a mapping"
-      pure (shapeEntry x ws ++ [(x, .mem R)])
+      pure (x, .mem R ws)
     | _ => throw "invalid parameter declaration"
-  pure rows.flatten
 
 /-- A function's return variables, an unnamed one named as `contract!` names
 it: `_ret`, or `_ret0`, `_ret1`, … of several (Lean's spelling; KeY names

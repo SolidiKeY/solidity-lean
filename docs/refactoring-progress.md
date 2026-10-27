@@ -1,5 +1,88 @@
 # Architectural refactoring progress
 
+## Second-pass investigation
+
+The 2026-10-27 second pass starts from `98d2682c`. The earlier getter and
+provenance increments remove independent pieces of state, but leave the
+elaborator's binding metadata split across synthetic locals. The following
+assessment follows actual source-to-run and formula-to-proof paths, rather
+than treating the earlier two increments as an architecture-wide audit.
+
+| Subsystem and traced path | Structural versus dynamic invariants; alternative considered |
+|---|---|
+| Source: `Source.read`, `SolcJson.readContract`, `Import`, `elabStmtsP` | Compiler modes and getter result pairing are now structural. JSON identities, unsupported source types and compiler settings remain boundary checks. Replacing all JSON access with a typed AST is substantial, but duplicating solc's complete schema would add a second AST without eliminating source-admission policy. |
+| Elaboration: `FunDecl.paramCtx`, captures, call frames, `widthPath?`, `narrowPure`, `ECtx.toNCtx` | Core positions are typed, but a local's width/ABI shape is a separate `#x` pseudo-binding. Function/bytes/nominal readers compare two list positions; reference shapes can consult outer metadata separately. A binding with attached metadata removes this synchronization entirely. Selected below. |
+| Syntax and execution: `Idx`, `Stmt`, `Prog`, `State`, `TRun`, `Out` | Contexts, primitive types, storage paths and heap growth are intrinsic. Raw parsing still requires checking at elaboration. Replacing the scoped syntax again would not remove those boundary checks. A common effect interpreter for deterministic and callback runs could reduce clauses, but callbacks deliberately change the relation and invariant obligations. It needs a separate semantic equivalence design, not textual consolidation. |
+| Storage and heap: `SVal`, `SFields`, `Path`, `Heap`, `Grown`, observations | Values and paths carry their types; heaps carry identities and extension witnesses. Recursive declarations have a separate certified `TypeGraph` foundation. Migrating ordinary contracts to that graph would remove the legacy/graph boundary and enable guarded recursion, but must also migrate Theory observations, signatures, deletion and copy proofs; compatibility cannot be assumed from the separate foundation. |
+| Calculus: `Tm`, `Upd`, `Premise`, `Stmt.step`, `Proves`, soundness | Sort/context invariants and update landing contexts are structural. One rule dispatches each statement; soundness connects its premise to the run. A generic effect algebra cannot replace taclet-specific premises without losing the required KeY presentation. Existing recursor definitions and compiled twins deliberately separate cheap kernel reduction from executable pattern matching. |
+| Automation and tools: `ProofTree.ruleAt?`, `Tree`, derivation replay, closers | Tactics elaborate kernel-checked proof terms. Tree action and children are independent data; an algebraic leaf/rule tree could enforce their relationship. It would simplify tool invariants, but not prove tactic completeness or remove the metaprogram boundary. Search budgets, replay and local caches are intentional. |
+| EVM: `Compiler.compile`, `Compilation`, `Memory.CompiledProg`, `correct` | The common entry already returns a branch-indexed certificate and correlated input/output relations. A separate intrinsic fragment AST would duplicate the scoped program; the memory path already carries erased structural certificates. Rewriting core fragment recognition could simplify proofs, but must preserve its fast recognizer and requires measurement across the simulation stack. |
+| World, lifetime and callbacks: catalog-indexed accounts, atomic frames, `ExecP` | Storage identity, frame rollback and heap growth are structural. Installed-code and funding checks depend on the current world and cannot be erased by a stable handle. Folding these models into the single-contract run would alter the external oracle boundary rather than merely simplify it. |
+
+### Ranked transformations
+
+| Rank | Transformation | Significance, scope and removable complexity | Guarantees and migration cost/risk | Expected simplification |
+|---|---|---|---|---|
+| 1 | Attach local metadata to its binding | Whole elaborator plus importer and formula readers; remove pseudo-locals, shadow-order scans and metadata filtering | Metadata cannot exist without its local or be inherited from a shadowed binding. Medium migration; broad rebuild and source-shape regression risk | High, without changing execution or calculus representations |
+| 2 | One recursive declaration graph for ordinary storage | Fundamental type/semantics/Theory/signature migration; remove the parallel graph foundation's compatibility boundary | Guarded recursive declarations intrinsic across consumers. Very high cost and proof/checking risk; feature admission must remain closed during migration | Potentially very high, but requires a dedicated cross-layer correspondence milestone |
+| 3 | Intrinsic core compiler fragments | Compiler, fragment recognizer, simulation proofs; remove recognizer/code synchronization | Code derived from a fragment certificate. High proof migration and reduction-performance risk; memory compiler already uses this design | Medium; avoid a duplicate program AST |
+| 4 | Algebraic proof-tree nodes | Tree data, growing strategy, script/JSON/UI consumers; remove invalid action/children combinations | Open/closed leaves cannot have children. Medium migration, tool-output pin risk | Medium, confined to proof presentation |
+| 5 | Dedicated finite-dispatch signatures | Candidate/getter/call/alias analysis; remove scalar candidates and repeated function reshaping | Callable signatures guaranteed structurally. Low-medium cost, conservative unknown/reference admission risk | Modest; deeper than naming cleanup but smaller than the selected binding migration |
+
+Ordinary file splitting, naming and shared helper extraction are not ranked as
+architectural transformations. The selected design changes the source of truth:
+each program-local constructor stores its own shape. `ECtx.toNCtx` then projects
+one real binding per entry. Metadata readers use the nearest local once. Existing
+source width tables and ABI markers retain their meanings; this is not a claim
+that the shape language itself becomes intrinsic.
+
+Migration: replace the `LocalTy.shape` constructor and `shapeEntry`, migrate every producer and
+consumer together, then verify shadowing, capture/call/return shape propagation,
+source import and existing proofs. Keep the old representation out of the final
+tree. Commit the coherent representation change after focused checks, then
+record broader verification separately. No additional dependency or heartbeat
+increase is planned.
+
+Checking-cost warning: touching `Syntax/Elab/Context.lean` invalidates its broad
+consumer graph. History `e8c288e1` and `2a1db139` introduced shape entries for
+language support, not checking speed. Preserve `1a7d5b0e`'s callee memoization
+and compiled/kernel representation boundaries. Heavy checks run sequentially
+under `MemoryMax=12G`, `MemorySwapMax=0`, with a 12 GiB host reserve.
+
+### Binding migration implementation and review
+
+`LocalTy.val`, `alias` and `mem` now carry their own width/ABI shape. All
+parameter, return-frame, importer and capture producers use that representation;
+there is no metadata pseudo-local or compatibility adapter. The three positional
+metadata scans disappeared. `toLTy` is the single projection used by `toNCtx`
+and formula binder discovery; parameter readers no longer flatten extra entries,
+and reference captures declare their complete metadata in one operation.
+
+The read-only finder and skeptic independently confirmed a rebinding regression:
+`elabUpd` initially discarded an existing reference's attached shape. `ECtx.refine`
+now preserves the target metadata when its scoped type stays the same. New
+quantifier/where/program declarations clear outer metadata instead. Regressions
+cover memory/storage identity updates, string markers, and a following program
+that must still reject writing 256 to a uint8 element. They also cover byte,
+function and array shadowing, capture propagation, missing-binding refusal and
+metadata/width changes that require no extra formula binder.
+
+Focused elaborator and frontend rebuilds passed at 1.60 and 2.53 GiB peak
+aggregate RSS respectively. The 270-job focused rebuild (new binding checks,
+Checked, AbiFeatures and PublicGetters) passed at 4.97 GiB peak aggregate RSS.
+The latest 21 binding guards also pass per-file diagnostics. Broader checks
+remain pending. The layer check passes.
+The orphan check reports 33 existing ignored scratch modules; no new reachable
+module is orphaned. The prose-path check reports 20 existing missing references
+in archived validation JSON and an upstream Mathlib source citation, plus six
+ambiguous short names outside the changed prose. User-owned scratch files and
+unrelated untracked logs remain.
+
+The initial LSP pass retained eight workers. Its idle workers were released,
+leaving three files, and the task-owned server was moved into a 6 GiB scope with
+swap disabled for subsequent allocations. Heavy shell checks retain their
+separate 12 GiB cap. No other session's workers were terminated.
+
 ## Current state
 
 The two selected representation changes are implemented and verified. The

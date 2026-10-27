@@ -388,13 +388,12 @@ theorem lazyPrefix_exec : (Prog.run prefixState Imported.GetterBytePrefixes.lazy
 
 /- An ordinary uint8 array is not bytes: the kind check remains in force. -/
 #guard (narrowWholeUse? Imported.GetterBytePrefixes
-  [("#xs", .shape [("[]", 8)]), ("xs", .mem (.array .uint))]
+  [("xs", .mem (.array .uint) [("[]", 8)])]
   (.call "bytes4" [.name "xs"])).isSome
 
 /- String shape markers must survive the prefix admission check. -/
 #guard !dynamicBytesExpr Imported.GetterBytePrefixes
-  [("#text", .shape [("[]", 8), ("[]#bytes", 1), ("#string", 1)]),
-    ("text", .mem (.array .uint))] (.name "text")
+  [("text", .mem (.array .uint) [("[]", 8), ("[]#bytes", 1), ("#string", 1)])] (.name "text")
 
 /-- error: Solidity elaboration failed: text has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are expected, not whole -/
 #guard_msgs in #check sol[Imported.GetterBytePrefixes]{
@@ -406,8 +405,7 @@ theorem lazyPrefix_exec : (Prog.run prefixState Imported.GetterBytePrefixes.lazy
 #guard (bytesPure NarrowSelf [] (.call "#bytesPrefix33" [.call "bytes" [RawExpr.bytesLit []]])).toOption.isNone
 #guard (bytesPure NarrowSelf [] (.call "#bytesPrefix4" [.name "unknown"])).toOption.isNone
 #guard (bytesPure NarrowSelf
-  [("#text", .shape [("[]", 8), ("[]#bytes", 1), ("#string", 1)]),
-    ("text", .mem (.array .uint))]
+  [("text", .mem (.array .uint) [("[]", 8), ("[]#bytes", 1), ("#string", 1)])]
   (.call "#bytesPrefix4" [.name "text"])).toOption.isNone
 
 end Solidity.Examples.Tactics.PublicGetters

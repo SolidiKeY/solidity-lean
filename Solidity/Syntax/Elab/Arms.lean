@@ -893,7 +893,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       pnames := pnames ++ [x]
       targs := ⟨_, targs.2.snoc p x e⟩
       ρ := (n, toString x) :: ρ
-      Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .val p w) :: Γp
+      Γp := (toString x, .val p w (shapeUnder d.widths n)) :: Γp
     | .ref R =>
       match lookupBy n d.paramLocs with
       | some .storage =>
@@ -903,7 +903,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         pnames := pnames ++ [x]
         targs := ⟨_, targs.2.snocStorage R x e⟩
         ρ := (n, toString x) :: ρ
-        Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .alias R) :: Γp
+        Γp := (toString x, .alias R (shapeUnder d.widths n)) :: Γp
       | some .memory | some .calldata =>
         ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
         let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
@@ -911,7 +911,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         pnames := pnames ++ [x]
         targs := ⟨_, targs.2.snocMemory R x e⟩
         ρ := (n, toString x) :: ρ
-        Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .mem R) :: Γp
+        Γp := (toString x, .mem R (shapeUnder d.widths n)) :: Γp
       | none => throw s!"{f}: reference parameter {n} needs a data location"
     pj := pj + 1
   let mut mret : Option (RefTy × Var × Bool) := none
@@ -928,14 +928,14 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       if d.retStorage then
         let r ← freshCapture "sp"
         ρ := (n, toString r) :: ρ
-        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .alias R)]
+        Γr := [(toString r, .alias R (shapeUnder d.widths n))]
         mret := some ⟨R, r, true⟩
         pure (RetKind.storage R r)
       else
         unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs `memory` or `storage`"
         let r ← freshCapture "mv"
         ρ := (n, toString r) :: ρ
-        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .mem R)]
+        Γr := [(toString r, .mem R (shapeUnder d.widths n))]
         mret := some ⟨R, r, false⟩
         pure (RetKind.mem R r)
     | [(_, .ref R)], some (_, q) => throw s!"{f} returns a reference {Ty.ref R}, not a {q.toStr}"
@@ -948,7 +948,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
       if resW < w then throw s!"{f} returns a {tyName p w}, where a {tyName p resW} is expected"
       let r ← pickName "se" (·.rets) 0
       ρ := (n, toString r) :: ρ
-      Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .val p w)]
+      Γr := [(toString r, .val p w (shapeUnder d.widths n))]
       if targets then
         mrets := [(p, r, w)]
         pure (RetKind.rets [(p, r)])
@@ -964,7 +964,7 @@ def elabCallRetCore (rc : ElabRec C) (f : String) (args : List RawExpr) (res : O
         let w := (lookupBy n d.widths).getD 256
         let r ← freshCapture "se"
         ρ := (n, toString r) :: ρ
-        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ (toString r, .val p w) :: Γr
+        Γr := (toString r, .val p w (shapeUnder d.widths n)) :: Γr
         mrets := mrets ++ [(p, r, w)]
       if targets then pure (RetKind.rets (mrets.map fun (p, r, _) => (p, r))) else pure RetKind.none
   let Γf := Γr ++ Γp
@@ -1511,7 +1511,7 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
       | _ => ElabM.lift (shapeCheck C Γ' (placeShape C Γ' l) r)
   | _ => pure ()
   let P ← pure (P ++ (← elabStmt1 s))
-  -- a reference local's narrow positions (`LocalTy.shape`)
+  -- attach the declared shape after elaborating its local
   match s with
   | .declStorage T x _ | .declMemory T x _ | .declStoragePush T x _ =>
     declareShape x (← ElabM.lift (elabTyW C T)).2
