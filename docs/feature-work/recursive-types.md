@@ -131,7 +131,7 @@ include the runner's two preamble lines: the archived source lines are 8
 `s2` as declaration 9, its `uint32 z` member as 3, recursive mapping member
 as 8, and state root `data` as 12. The mapping's value refers back to 9.
 `Body.lean`'s local `shapes` checker in `readStructs` rejects this declaration
-before `Contract.lean`
+before `Frontend/SolcJson/Contract.lean`
 can retain `data`. The earliest evaluated read would be `data.z`, followed
 by `data.recursive[0].z`; this is not a failed graph lookup at runtime.
 

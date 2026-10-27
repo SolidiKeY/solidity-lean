@@ -221,7 +221,7 @@ rejected. The source test binds the concrete deployment address `1`; it makes no
 universal-success claim about the single-contract model's no-code address `0`.
 No assigned fixture expectation, premise or proof limit was changed.
 
-`TransientWorld.lean` controls execute actual typed creation/call/library frames,
+`Examples/Tactics/TransientWorld.lean` controls execute actual typed creation/call/library frames,
 verify that a delegate changes only the caller's transient region, reject the
 shared-owner interpretation, check transaction reset and persistent commit, and
 check rollback of a successful delegate followed by failure.

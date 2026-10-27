@@ -13,7 +13,7 @@ assert that every target feature already imports, executes, or proves correctly.
 | Artifact | Purpose |
 |---|---|
 | [Feature inventory](solidity-feature-inventory.md) | Every classified feature, its syntax, scope, current support, requirement/reason, and upstream/local evidence. |
-| [Feature manifest](solidity-features.json) | Machine-readable authority: 211 feature families, source pin, Git blob IDs and SHA-256 hashes of inspected upstream files. |
+| [Feature manifest](solidity-features.json) | Machine-readable authority for feature families, source pin, Git blob IDs and SHA-256 hashes of inspected upstream files. |
 | [Upstream coverage ledger](solidity-upstream-inventory.json) | 783 source symbols mapped explicitly to feature families, including assembly features excluded as a group. |
 | `Solidity/Language/Features.lean` | Generated, dependency-free Lean catalog, structured diagnostics and subset interface. |
 | `scripts/solidity-feature-audit.py` | Regeneration, metadata validation, source-drift and symbol-coverage checks. |
@@ -84,8 +84,15 @@ Likewise `erc7201` can evaluate the namespace formula on runtime strings and
 fold constant inputs without exposing physical storage. `type(C).name`, interface IDs, function selectors
 and function addresses are source-level metadata. Internal functions and
 statically resolved library functions can be lowered without machine code.
-Ordinary `new C` could use a fresh-address contract world with constructor
-execution; that extension is missing. Salt-based deployment remains excluded.
+Static `type(C).creationCode` and `type(C).runtimeCode` constants are admitted
+only with matching compiler/source/settings artifact inputs; they do not
+provide deployed-account code observations or arbitrary bytecode execution
+([artifact boundary](feature-work/source-admission.md)).
+The typed contract-world API and restricted factory/library source commands
+provide creation, creation catches and linked caller-storage execution
+([supported fragments and limits](feature-work/contract-world.md)). General
+world-aware `solc_import` statements remain missing. Salt-based deployment
+remains excluded.
 
 ## What requires explicit abstraction
 
@@ -124,7 +131,8 @@ accidentally be included in that constructor.
   low-level call/return bytes, `delegatecall` and low-level `staticcall`.
   Typed calldata slices and caught revert bytes are separate supported targets.
 - `selfdestruct`, `create2` salt/address rules, address code/codehash,
-  creation/runtime bytecode, physical storage/transient slots and packing,
+  arbitrary creation/runtime bytecode execution, physical storage/transient
+  slots and packing,
   custom `layout at`, and raw memory addresses/layout.
 - Observable logs, topics, event ordering and log gas. Event arguments must
   still execute, including their side effects and failures. Erasing the log

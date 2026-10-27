@@ -97,7 +97,7 @@ and resource exhaustion retain their original inconclusive treatment.
 
 `Calls.duplicateCallTarget`, `Calls.duplicateStorageTarget` and `Calls.lazyTuple`
 prove emitted-program properties for arbitrary typed states, including false
-alternative output controls and an untaken division. `Checked.lean` pins tuple
+alternative output controls and an untaken division. `Examples/Tactics/Checked.lean` pins tuple
 reference-width rejection. The separately compiled `tests/solc/Group07.sol`
 uses the SHA-checked 0.8.38 compiler; `tests/upstream/Group07.lean` kernel-checks
 its emitted programs, including lazy discarded tuple branches, checked rejection,

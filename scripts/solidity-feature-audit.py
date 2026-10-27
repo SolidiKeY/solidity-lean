@@ -2,6 +2,7 @@
 """Check/generate the pinned Solidity feature catalog. No third-party packages."""
 import argparse
 import hashlib
+import html
 import json
 import re
 from pathlib import Path
@@ -179,7 +180,10 @@ def render_report(data):
            '`exclude`: deliberately outside this profile; `upstream`: removed, reserved or incomplete upstream.', '',
            '`present` means source-level implementation evidence exists for the named narrow feature;',
            '`partial` is a conditional/limited implementation; `missing` is work to add.',
-           'These are inspection assessments, not equivalence certificates. Local evidence is a starting point for review.', '']
+           'These are inspection assessments, not equivalence certificates. Local evidence is a starting point for review.', '',
+           'Current inventory: ' + str(len(data['features'])) + ' feature families; ' +
+           ', '.join(str(sum(r['current'] == status for r in data['features'])) + ' ' + status
+                     for status in ['present', 'partial', 'missing', 'notApplicable']) + '.', '']
     for category in dict.fromkeys(r['category'] for r in data['features']):
         out += ['## '+category.title(), '', '| Feature / syntax | Scope | Current | Required meaning / reason | Evidence |', '|---|---|---|---|---|']
         for r in data['features']:
@@ -188,7 +192,7 @@ def render_report(data):
             refs = ', '.join(f"[upstream]({base}{s['path']}#L{s['line']})" for s in r['upstream'])
             refs += ''.join(f'; [local](../{p})' for p in r['localEvidence'])
             safe = lambda s: s.replace('|', '&#124;').replace('\n', ' ')
-            out += [f"| `{r['id']}`<br>{safe(r['syntax'])} | {r['scope']} | {r['current']} | {safe(r['requirement'])} | {refs} |"]
+            out += [f"| `{r['id']}`<br><code>{safe(html.escape(r['syntax']))}</code> | {r['scope']} | {r['current']} | {safe(r['requirement'])} | {refs} |"]
         out += ['']
     return '\n'.join(out)
 

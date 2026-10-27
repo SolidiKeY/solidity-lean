@@ -58,7 +58,7 @@ history is in git.
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files: CLI, JavaScript and Lean APIs. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [bridge.md](bridge.md) | The optional Bridge package: Mathlib/CSLib, EVMYulLean, Loom and Velvet adapters. |
-| [refactoring-progress.md](refactoring-progress.md) | Representation simplifications, ranked follow-ups, validation and resumption instructions. |
+| [refactoring-progress.md](refactoring-progress.md) | Completed getter/provenance refactors, bounded validation and the remaining dispatch-signature candidate. |
 | [parallelism.md](parallelism.md) | The core apart from the elaborator, the layering check, the split convention. |
 | [latex.md](latex.md) | LaTeX notation and the checked trace export. |
 | [site.md](site.md) | The examples site on GitHub Pages. |

@@ -42,7 +42,14 @@ declaration selector inside its contract) are left to solc.
   Mapping keys and array indexes become parameters; terminal elementary values
   become results; a terminal struct keeps its non-mapping, non-array fields in
   order. Supported types are elementary bool, address, integer and fixed bytes.
+  Primitive UDVT inputs/results resolve through their declared elementary
+  underlying type. Enum mapping keys use canonical `uint8` plus an empty-revert
+  cardinality guard before storage access; enum-valued results remain refused.
   Explicit `uint256`/`int256` indexes are canonicalized.
+- Getter plans pair each generated input with its source key and ABI type, and
+  each result with its expression. A completed plan has a required first result;
+  traversal state is separate. Parameter/result lists are derived, so source
+  identities and emitted bindings cannot drift independently.
 - Getters share dependency ordering, elaboration and self-call inlining with
   source functions. Scalar, mapping and fixed/dynamic/nested array getters run
   through external self calls; primitive struct tuples through
@@ -83,11 +90,12 @@ declaration selector inside its contract) are left to solc.
 
 ## Refused, and why
 
-- Getters with nominal (enum/UDVT/contract) or function types, dynamic
-  `bytes`/`string` keys or results, or nested aggregate results. An unsupported
-  returned field refuses the whole getter: `bytes`/`string` are not silently
-  omitted as arrays. Narrow or fixed-byte constants the `uint` constant
-  collector does not recognize.
+- Enum-valued results, contract/function values, dynamic `bytes`/`string` keys
+  or results, and nested aggregate results. Primitive UDVT values and enum
+  mapping keys have the supported cases above. An unsupported returned field
+  refuses the whole getter: `bytes`/`string` are not silently omitted as arrays.
+  Narrow integer constants use declaration-based inlining and checked source
+  casts; unsupported constant forms retain explicit diagnostics.
 - Narrow returns from an unknown address: world `bytesN` words differ in
   padding from typed self values.
 - Byte prefixes of arbitrary `uint8` arrays, and direct `string` conversions.
@@ -103,8 +111,8 @@ compilation.
 
 - Import/remapping resolution across source units.
 - Reference-valued getters (they need the world's return-value interface) and
-  tuple external returns; nominal getter types; struct omissions in exact
-  getters.
+  general tuple external returns; enum/contract/function getter results;
+  struct omissions in exact getters.
 - Inherited external function values with renamed model declarations (the
   function-value packer hashes model names): one shared ABI identity for
   source declarations and model functions.
@@ -460,8 +468,8 @@ in 252 s on a rerun with broad workers paused and unchanged limits. An earlier
 contended invocation timed out and is retained as inconclusive, not passing.
 The declaration-metadata source test retains its original failing expectation:
 `errorSelector` is rejected by the baseline `solidity.functionMemberKind`
-admission guard. The unchanged `Admission.lean` guard rejects error declarations
-before `Contract.lean` reads the body; a direct current-scanner check confirms
+admission guard. The unchanged `Frontend/SolcJson/Admission.lean` guard rejects error declarations
+before `Frontend/SolcJson/Contract.lean` reads the body; a direct current-scanner check confirms
 the diagnostic. This baseline attribution uses code/AST identity, not a separate
 baseline proof run. Its legacy pinned AST bypasses modern admission, explaining
 why the pinned Lean example and freshly compiled source suite differ.

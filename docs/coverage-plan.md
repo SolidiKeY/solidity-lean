@@ -13,6 +13,11 @@ gate: no step lands a rule without its soundness proof.
 
 ## Where it starts
 
+The current feature classifications and evidence are in the generated
+[feature inventory](solidity-feature-inventory.md); its summary is regenerated
+from the manifest. The fixture counts below are the historical pre-cloud
+baseline, not a fresh measurement of current support.
+
 Recorded baseline (`tests/upstream/results/`, base `cadb628c`): of 1,662
 `lean-runtime` fixtures, 229 work, 308 are broken and 1,125 blocked. Of the
 inventory's 211 features: 13 present, 151 partial, 7 missing, 40 not
@@ -28,13 +33,11 @@ aggregate ABI vectors, 85 revert data and panic codes, 77 gas expectations
 noncanonical calldata, the rest EVM-version constraints and harness
 settings.
 
-Ten cloud groups were launched on 2026-10-26 (`tests/cloud/groups.json`,
-prompts in `tests/cloud/prompts/`) on 632 of those rows: the via-IR modifier
-mismatches, getters and entry points, operator aliases, signed arithmetic,
-function values and dispatch, structs and libraries, tuples and
-references, declarations and scopes, transient storage, and ABI vectors
-with revert data. **This plan starts after their patches are merged**; each
-step reproduces its own rows first, so it sees what they left.
+Cloud groups 01–09 have been integrated; the
+[combined record](feature-work/cloud-integration-01-09.md) identifies their
+committed scope and remaining exclusions. Group 10 and the uncommitted
+recursive-storage migration are not included. Each new step first reproduces
+its assigned rows on current master, so it targets what those patches left.
 
 ## Rules every step follows
 
@@ -42,12 +45,14 @@ step reproduces its own rows first, so it sees what they left.
   names and quote what already exists (`docs/module-map.md`, the feature's
   `localEvidence`); target only the gap. Reproduce the assigned fixtures on
   current master first: some will already pass.
-- **Memory.** 16 GB holds one Lean build at `LEAN_NUM_THREADS=2` or the MCP
-  with at most two open files, not both. `Calculus/Decide.lean` and
-  `TestSuite/Derived*` take 3–4 GB a worker. Build in the background and grep
-  the log for `error`. A cold clone has no Lake artifact cache: the
-  environment's setup script should build the default targets once, so a
-  step starts warm (step 0 measures the cold time).
+- **Memory.** Treat 16 GiB as a budget to measure, not a proven cold-build
+  bound. Run a build or the MCP, not both; start with `LEAN_NUM_THREADS=1`
+  and explicit `-j1`, and keep only a small number of MCP files open. Enforce
+  a hard process-group limit and leave room for the VM's OS (for example, a
+  12 GiB build cap on a 16 GiB VM). Monitor available RAM and stop before
+  exhausting it. The [bounded validation record](refactoring-progress.md#resource-bounds-and-resuming-work)
+  covers a passing warm/private-cache run, not a cold 16 GiB guarantee. Build
+  in the background, inspect errors, and measure the cold path in step 0.
 - **Parallel without conflicts.** Every step of a wave starts from the same
   master. A step that edits the core (`Syntax`, `Semantics`, `Rules`,
   `Decide`: the `core` column) keeps its change additive and in modules of
@@ -133,13 +138,14 @@ from the "Left" section of the feature's doc. Measure a cold and a warm
 `./run-lean.sh` on the VM and write the times here. Output: the next steps'
 fixture lists, regenerated from the new results. No Lean edits.
 
-**H. Core hooks.** The one core change wave 1 builds on, so its core steps
-do not edit the same declarations: `THalt`'s panic and revert outcomes carry
-a code and bytes (default empty, read by nothing yet); the state's
-environment record has room for the block and transaction fields (after
-D1) and a log (after D2). Every match over them is updated once, here.
-Warn first if this slows checking (`git log` for earlier speed changes);
-`./run-lean.sh` before and after, with the times.
+**H. Core hooks audit.** Reuse existing typed frames and halt transport before
+adding shared declarations. `THalt.revertWith`, `THalt.ofData` and `THalt.data`
+already carry revert bytes to catch consumers; computed/custom error paths also
+exist. Remaining panic-code coverage and any environment/log extensions need
+only the missing hooks, not a second revert representation. Update affected
+matches with their proofs in the same change. Warn first if a representation
+change may slow checking, inspect Git history for earlier speed decisions, and
+compare bounded before/after checks.
 
 ### 1–3. Front end
 
@@ -147,17 +153,19 @@ Lowering to constructs the core already has: no new rule, no proof beyond
 the elaborator's. They run in parallel; keep shared edits to
 `Frontend/SolcJson/` narrow and list them in the hand-off.
 
-1. **Entry points left**: reference and nominal getters, tuple external
-   returns, receive and fallback registration, inherited renamed function
+1. **Entry points left**: reference getter results, enum-valued and
+   contract/function getter results, general tuple external returns, receive
+   and fallback registration, inherited renamed function
    values sharing one ABI identity
    (`docs/feature-work/declarations-metadata.md`, "Left").
 2. **Imports and source units**: multi-source compilation-unit provenance
    (39 blocked rows), remappings, file-level `using for` and qualified
    custom errors (`docs/feature-work/source-admission.md`).
-3. **Expressions and references left**: reference-element slices, tuples
-   with several non-local targets, a conditional of a storage and a memory
-   reference, signed shifts and complements, contextual literal promotion,
-   UDVT aggregates (`docs/feature-work/aggregates.md`,
+3. **Expressions and references left**: reference-element slices, effectful
+   nonlocal tuple targets, UDVT aggregates and numeric/literal edge cases that
+   still fail assigned fixtures. Primitive tuple captures, tested mixed
+   storage/memory joins and signed operator lowering already exist; reproduce
+   the remaining shapes before extending them (`docs/feature-work/aggregates.md`,
    `docs/feature-work/numeric-operators.md`).
 
 ### 4–9. Core semantics
@@ -166,12 +174,13 @@ In parallel, each in modules of its own on top of step H. Each adds the semantic
 import support, its rules with soundness, and the tests. Closer support
 can stay with the step or go to its own step.
 
-4. **Panic codes and revert data**: the run fills the code and bytes step H
-   gave `THalt`, so the 85 revert-data rows and the 49 `revertStrings` rows
-   can be compared; `0x41` on a too-long allocation; the length bound
-   `2^64` (`docs/solc-alignment.md`, "Remaining deltas";
-   `docs/semantic-gaps.md`, "Revert data"). Rules keep reading only the
-   halt kind; step 10 reads the data.
+4. **Remaining panic/payload coverage**: extend the existing revert-byte
+   transport for still-missing panic cases, allocation failure and supported
+   `revertStrings` settings (`docs/solc-alignment.md`, "Remaining deltas";
+   `docs/semantic-gaps.md`, "Revert data"). Existing catch transport and
+   computed/custom reasons are not new work. Keep resource exhaustion distinct
+   from arithmetic/assertion panic, and preserve the original fixture
+   observations and pipeline requirements.
 5. **Environment** (after D1): the block and transaction fields as
    quantified environment inputs, like `timestamp`; the host adapter for the
    rows that need only these.
@@ -185,9 +194,12 @@ can stay with the step or go to its own step.
    heap-cycle copy policy (`docs/feature-work/recursive-types.md`, "Left").
    Warn first: this changes the state's representation, and may slow
    checking.
-8. **Transient state, what group 09 left**: declarations in `Contract`,
-   scoped terms and rules, `FrameKeeps` keeping persistent and transient
-   apart (`docs/feature-work/transient-storage.md`).
+8. **Transient state, what group 09 left**: composed source-world/delegate
+   execution and source shapes outside the supported primitive/function-tag
+   fragment. Ordinary transient declarations, disjoint logical roots, self-call
+   sharing, transaction reset and rollback already exist. Reuse that joint
+   model and its frame laws (`docs/feature-work/transient-storage.md`); physical
+   assembly/layout and gas remain outside the profile.
 9. **Logs** (after D2): the log trace in the state, emitted in pipeline
    order, rolled back on revert; named and qualified emits
    (`docs/feature-work/calls-exceptions.md`).

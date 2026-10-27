@@ -61,7 +61,7 @@ and the remaining semantic gaps.
 
 ```sh
 lake build Solidity     # the formalization; elaboration is the test suite
-./run-lean.sh           # the same, then the solkey cross-check below
+./run-lean.sh           # default targets, SolkeyTestSuite, then the solkey cross-check
 ```
 
 The package declares no dependencies at all — no Mathlib, nothing — so

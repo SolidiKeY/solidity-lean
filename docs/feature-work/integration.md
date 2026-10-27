@@ -9,8 +9,8 @@ is.
 | Group | Supports | Not supported |
 |---|---|---|
 | [Source admission](source-admission.md) | compiler provenance, declaration-aware admission, exact literals, raw names, stored function projections | general function-value dispatch beyond [finite dispatch](finite-dispatch.md) |
-| [Finite dispatch](finite-dispatch.md) (with [getter targets](finite-dispatch.md#getter-targets)) | internal and own-external function-value calls over a typed candidate set | reference/nominal signatures, source-kind collisions |
-| [Declarations](declarations-metadata.md) | `type(C).name`, `type(I).interfaceId`, error/event selectors, primitive public getters, source ABI identities | imports/remappings, reference/nominal getters, broader `using for` |
+| [Finite dispatch](finite-dispatch.md) (with [getter targets](finite-dispatch.md#getter-targets)) | internal and own-external function-value calls over a typed candidate set | reference signatures beyond zero-argument internal memory-byte returns, nominal signatures, source-kind collisions |
+| [Declarations](declarations-metadata.md) | `type(C).name`, `type(I).interfaceId`, error/event selectors, primitive/UDVT getters, enum mapping keys, source ABI identities | imports/remappings, reference results and enum/contract/function results, broader `using for` |
 | [Operators](numeric-operators.md) | resolved scalar UDVT aliases, signed numeric lowering, declaration-indexed finite enum conversions | recursive aggregates and general numeric source correspondence |
 | [Aggregates](aggregates.md), [calldata aliases](../calldata-slice-copies.md#calldata-origins-and-aliases), [slice copies](../calldata-slice-copies.md) | inline arrays, fixed memory snapshots, reference tuples, mixed storage/memory conditional joins, primitive tuple write order, slice effects, calldata alias origins | reference-element slices and general effectful nonlocal tuple targets |
 | [Recursive storage](recursive-types.md) | a standalone typed graph storage API with copy admission and a bridge to ordinary values | recursive structs anywhere in the ordinary pipeline |
@@ -54,3 +54,6 @@ per-lane build reports when assessing this integration.
   `TestSuite/Derived17.lean` alone exceeded a 10 GiB cap. A fresh import that
   crashes while focused checks pass has usually read a stale transitive
   artifact, so rebuild with a fresh cache before suspecting the source.
+  The [bounded validation procedure](../refactoring-progress.md#validation)
+  records the passing library/TestSuite/sort checks, explicit worker flag and
+  hard 12 GiB cap; it does not establish a 10 GiB bound.

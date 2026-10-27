@@ -35,7 +35,7 @@ why a merge is a merge, and the symbol maps of the second half.
 
 The scoped reduction applies the existing data-structure read eliminator to
 demanded primitive `find` and `len` terms before later writes duplicate them.
-This schedules the same `Decide.lean` read clauses earlier; it adds no taclet
+This schedules the same `Calculus/Decide.lean` read clauses earlier; it adds no taclet
 or independent decision procedure. Each input must fit the shared 24,000-node
 and depth-12 bounds. Only literal results replace the read; symbolic or
 oversized inputs retain the original term for normalization under later
@@ -88,7 +88,7 @@ goal's update level and reads what it adds there: nothing to port.
 | `closeFalse`, `cut` (`propRule.key`) | `Proves.closeFalse`, `ProvesC.closeFalse` | ⊢ rule (deviation) | a context the logic refutes (`Γ ⟹ false`) closes any goal. KeY's `closeFalse` has no premise and finds a literal `false ⟹`; solkey derives Lean's rule as `cut` on `false`, its TRUE goal `Γ, false ⟹ φ` closed by `closeFalse`, its FALSE goal `Γ ⟹ false, φ` Lean's premise weakened.  The scoped walk closes a split's branch so when its condition is ground under its updates (`Hyps.groundS`, `Calculus/LeafDerive.lean`, and `Seq.refuteS`, `Calculus/ProvesDerive.lean`); inside the closer, `Facts.refute` (below). The callback rule additionally requires `(H.wrap false).callsBack pay = false`, and its deterministic refutation retains the whole context, including diamond landing obligations. `CallbackWalk.pruneFalse` checks at most eight typed context layers with `Seq.refuteS` before expanding later calls, retaining the entire prefix before a contradiction and lifting it through its exact suffix. `sol_prefix_false 8` deterministically replays the fixed certificate with synchronous kernel checks |
 | `closeTrue` (`propRule.key`) | `Proves.closeTrue` | ⊢ rule | `⟹ true`, behind a context with no diamond update (`Hyps.boxOnly`; scope ends may stand in it) |
 | `blockEmpty` | `blockEmpty` (stated by hand); `Frames.pop .block`, `Frames.exit` | same | a block `{ body }` (`Stmt.block`) steps into its body under a block frame, printed `}` (`Fml.show`, `Calculus/Delab.lean`); each branch of a split ends with one too.  When the body is done, `Frames.exit` pops its locals and goes on with the rest, which is `blockEmpty`'s `{} ; rest ⇝ rest` (`Proves.empty`).  Unclaimed until the intrinsic refactor, when a program had no nested block (`docs/intrinsic.md`, M6a) |
-| — | `Frames.pop .capture`, `Premise.unfold`'s `Ext` (the capture pop) | Lean only | the scope of the fresh `se`/`sp`/`ie` a rule declares (`T storage sp = nsp; v = sp.fld;`): popped after the rule's statements, so the rest `ω` is never re-typed (Gate G0's condition 6).  KeY's fresh program variables are global and need no end.  Printed as nothing (`Fml.show`, `Delab`), so a premise reads as the solkey taclet; `dl{ … }` inserts it (`RuleSyntax.lean`'s `schemaTacletCore`, under `open scoped Solidity.Schema`) |
+| — | `Frames.pop .capture`, `Premise.unfold`'s `Ext` (the capture pop) | Lean only | the scope of the fresh `se`/`sp`/`ie` a rule declares (`T storage sp = nsp; v = sp.fld;`): popped after the rule's statements, so the rest `ω` is never re-typed (Gate G0's condition 6).  KeY's fresh program variables are global and need no end.  Printed as nothing (`Fml.show`, `Delab`), so a premise reads as the solkey taclet; `dl{ … }` inserts it (`Calculus/RuleSyntax.lean`'s `schemaTacletCore`, under `open scoped Solidity.Schema`) |
 | `localValueDeclInitDrop`, `storageLocalDeclInitDrop` | `Premise.bind` (`Stmt.step`'s `declLocal`/`declStorage` arms), `Fml.bind`, `Proves.bind`/`bindIntro` (the hidden binder) | Lean only (the binder) | `T v = e; ⇝ v = e;`: the declared local is put in scope by a binder ("for every value of `v : T`") in front of the assignment, printed as nothing, so the premise reads as solkey's `⟨[ v = e; ]⟩`; KeY's `\addprogvars(v)` |
 | `memoryLocalDeclInitDrop` | `Premise.bind` at a memory type (`Stmt.step`'s `declMem` arm with an initializer), `Fml.bind` (the hidden binder) | Lean only (the binder) | `T memory mv = r; ⇝ mv = r;`, the binder as in the row above.  It ranges over the objects of `mv`'s type and over an unset `mv` (decision 17', `docs/intrinsic.md`), as an alias may be unset (`storageLocalDeclSkip`): no statement leaves a memory local unset, but the premise's `mv = r;` from an unset `mv` runs as the declaration does even where `r` allocates, which no existing object gives (`sound_declMemInit`).  A read through an unset memory local reverts (`MPath.mvalT`), as through an unset alias |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
@@ -230,7 +230,7 @@ had that restriction: `SVal.defaultOf` keeps a fixed-size array's `n` elements
 `Stmt.deleteMem p` deletes a memory local, a member or an element. KeY's
 primitive/reference split (`\hasMemoryFieldSort(fld, alphaPrim)`,
 `Path[…,primitiveElement]`) is the type the rule fixes: `T := Ty.prim p`
-against `T := Ty.ref R` (the stems in `RuleSyntax.lean`'s table). KeY's
+against `T := Ty.ref R` (the stems in `Calculus/RuleSyntax.lean`'s table). KeY's
 `inBounds` split of an index delete is the write's bounds check, which reverts.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |

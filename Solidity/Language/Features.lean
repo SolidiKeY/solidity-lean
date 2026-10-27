@@ -627,9 +627,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 101 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
   | .publicGetters =>
     { category := "declarations", spelling := "synthesized getters; public override variable",
-      scope := .model, current := .missing,
-      requirement := r#"Generate exact getter signatures and omit struct array/mapping members as solc does; validate interface overrides."#,
-      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 2865 }], localEvidence := [] }
+      scope := .model, current := .limited,
+      requirement := r#"Primitive/UDVT getters, enum mapping keys, interface overrides and struct array/mapping omissions are implemented. Reference returns, enum-valued results, contract/function values and unsupported aggregate shapes remain refused."#,
+      upstream := [{ path := "libsolidity/ast/Types.cpp", line := 2865 }], localEvidence := ["Solidity/Frontend/SolcJson/Getters.lean", "Solidity/Examples/Tactics/PublicGetters.lean", "scripts/public-getters.test.mjs"] }
   | .structDeclarations =>
     { category := "declarations", spelling := "struct S { T f; ... }",
       scope := .model, current := .limited,
@@ -662,9 +662,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 346 }], localEvidence := ["Solidity/Frontend/SolcJson/Contract.lean"] }
   | .operatorAliases =>
     { category := "declarations", spelling := "using {f as op} for T global; op in &, ~, |, ^, +, /, %, *, -, ==, >, >=, <, <=, !=",
-      scope := .model, current := .missing,
-      requirement := r#"Lower all 15 permitted operator aliases to their resolved pure free functions; distinguish unary and binary signatures."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 325 }], localEvidence := [] }
+      scope := .model, current := .limited,
+      requirement := r#"Resolved scalar UDVT aliases lower to their compiler-selected pure free functions across the permitted unary and binary operator signatures, retaining nominal identity and evaluation order. Broader aggregate/source combinations remain subject to explicit admission limits."#,
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 325 }], localEvidence := ["Solidity/Frontend/SolcJson/Body.lean", "Solidity/Examples/Tactics/OperatorAliasesImport.lean", "docs/feature-work/numeric-operators.md"] }
   | .boolType =>
     { category := "types", spelling := "bool",
       scope := .model, current := .present,
@@ -758,8 +758,8 @@ def Feature.info : Feature → FeatureInfo
   | .recursiveTypes =>
     { category := "types", spelling := "recursive structs through mappings/arrays",
       scope := .model, current := .missing,
-      requirement := r#"Use a guarded/graph representation where Solidity permits recursion; do not treat a finite-tree implementation limit as an EVM exclusion."#,
-      upstream := [{ path := "libsolidity/ast/AST.h", line := 781 }], localEvidence := [] }
+      requirement := r#"Ordinary solc_import, scoped syntax, State, heap and calculus still reject recursive structs. A standalone typed graph-storage/copy foundation and ordinary-value bridge exist; connecting them to the ordinary source pipeline remains missing, not an EVM exclusion."#,
+      upstream := [{ path := "libsolidity/ast/AST.h", line := 781 }], localEvidence := ["Solidity/TypeGraph.lean", "Solidity/Semantics/RecursiveStorage.lean", "docs/feature-work/recursive-types.md"] }
   | .names =>
     { category := "expressions", spelling := "identifiers; qualified members; this; super",
       scope := .model, current := .limited,
@@ -1172,14 +1172,14 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "libsolidity/ast/Types.cpp", line := 557 }], localEvidence := ["Solidity/Semantics.lean"] }
   | .newContract =>
     { category := "calls", spelling := "new C(args) without salt",
-      scope := .abstract, current := .missing,
-      requirement := r#"Requires fresh address/world allocation, constructor execution, payment, rollback and callable instance identity; feasible source-level extension without bytecode."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := [] }
+      scope := .abstract, current := .limited,
+      requirement := r#"Typed catalog world allocation, constructor execution, payment and rollback exist, with restricted solc_world_factory source fragments. General source new C with dynamic arguments, ABI/memory transfer, callbacks and composed worlds remains unintegrated."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
   | .creationTry =>
     { category := "calls", spelling := "try new C(args) returns(C c)",
-      scope := .abstract, current := .missing,
-      requirement := r#"Use contract-world creation outcomes and catch only creation-frame failures; caller-side evaluation errors still propagate."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := [] }
+      scope := .abstract, current := .limited,
+      requirement := r#"Typed world creation outcomes and restricted factory source try-new fragments preserve the creation-frame catch boundary; caller argument failures stay outside it. General typed catches and source-world composition remain unsupported."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1266 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
   | .callbackSemantics =>
     { category := "calls", spelling := "reentrancy during modeled external calls",
       scope := .abstract, current := .limited,
@@ -1187,9 +1187,9 @@ def Feature.info : Feature → FeatureInfo
       upstream := [{ path := "docs/control-structures.rst", line := 65 }], localEvidence := ["Solidity/Semantics.lean"] }
   | .externalLibraryCalls =>
     { category := "calls", spelling := "linked library public/external calls",
-      scope := .abstract, current := .missing,
-      requirement := r#"Execute typed library bodies in caller storage context with explicit library identity/static restrictions; internal library lowering alone is insufficient."#,
-      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := [] }
+      scope := .abstract, current := .limited,
+      requirement := r#"Typed linked execution uses caller storage and explicit library identity, with restricted solc_world_library literal field-mutation fragments. General library arguments, aggregate returns and nested external source execution remain unsupported."#,
+      upstream := [{ path := "libsolidity/ast/Types.h", line := 1261 }], localEvidence := ["Solidity/Semantics/ContractWorld.lean", "Solidity/Frontend/WorldImport.lean", "Solidity/Examples/Tactics/ContractWorldSource.lean"] }
   | .abiEncode =>
     { category := "abi", spelling := "abi.encode(...)",
       scope := .model, current := .limited,

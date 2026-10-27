@@ -78,7 +78,7 @@ operation can use a different representation: prove agreement of the
 observations rather than forcing the run to share the symbolic strategy.
 
 Read the sibling SolKey checkout's [storage primitives](../../solkey/docs/storage.md#3-storage-model-primitives),
-[shape predicates](../../solkey/docs/storage.md#8c-fixed-size-arrays-have-their-declared-length-wellformed-shapes-as-nodes)
+[shape predicates](../../solkey/docs/storage.md#8c-fixed-size-arrays-have-their-declared-length-layoutinv-types-as-sorts)
 and [memory rules](../../solkey/docs/memory.md) before designing storage/memory
 rules. In particular:
 

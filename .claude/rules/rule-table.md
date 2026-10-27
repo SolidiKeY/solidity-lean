@@ -22,7 +22,7 @@ under `open scoped Solidity.Schema`, at a scoped statement `s : Stmt C Γ Γ'`
 (`RuleSyntax.schemaTacletCore` inserts the shifts under a fresh local, its
 `pop .capture` and the hidden binder of a declaration). Schema
 variables are bound implicitly and their kind is read off their name
-(`RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …), and so
+(`Calculus/RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …), and so
 are the rule's side conditions (`RuleSyntax.sideConds`: `nsp` is not simple,
 `sp` is, a value written to storage is not a conditional, …), hidden
 `autoParam` hypotheses. Which rule fires is `Stmt.step` (`Calculus/Step.lean`,

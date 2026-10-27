@@ -265,7 +265,7 @@ import changes and final confirmation. The `lean-verify` skill in
 
 | Command | What it covers |
 |---|---|
-| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, 437 statements, the derived theorems `TestSuite/Report.lean` counts: the slowest part), then the solkey sort check |
+| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, scoped obligations and derived theorems counted by `TestSuite/Report.lean`), then the solkey sort check |
 | `node scripts/check-orphans.mjs` | every module is reachable from a library root |
 | `node scripts/check-layers.mjs` | no core module reaches the elaborator (`docs/parallelism.md`); no Lean, and `./run-lean.sh` runs it first |
 | `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |

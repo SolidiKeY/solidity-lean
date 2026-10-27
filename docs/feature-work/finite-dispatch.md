@@ -1,7 +1,8 @@
 # Finite source dispatch
 
 Source admission of ordinary internal and own-external function-value calls
-with scalar or function parameters and returns. Only source extraction and
+with scalar or function parameters and returns, plus the restricted internal
+`bytes memory` return below. Only source extraction and
 dependency closure are involved: the program, interpreter, calculus and proof
 system are unchanged. This is an executable extraction boundary, not a proof of
 source/native simulation or of extractor completeness.
@@ -15,6 +16,11 @@ source/native simulation or of extractor completeness.
   native function-value representation ignores them. A native key may map
   address to uint, so key equality alone never admits a call: every
   native-compatible candidate must also have the exact source signature.
+- **Internal memory-byte return.** A zero-argument internal function may return
+  exactly one `bytes memory` value. The signature retains that memory kind;
+  reference arguments, mixed/multiple memory returns and external memory
+  returns remain refused. `scripts/finite-dispatch.test.mjs` covers receiver
+  effects, invalid/unused tags and inherited overrides for this fragment.
 - **Candidates.** Own, inherited and imported free/library functions, each with
   its declaration ID and model name, plus receive/fallback entries (refused
   when they match, below) and synthesized getters
@@ -40,8 +46,9 @@ source/native simulation or of extractor completeness.
 
 ## Refused (`solidity.functionDispatch`), and why
 
-- Reference or nominal signatures, unknown type metadata, missing candidate or
-  override identities. A reference parameter has no native `sigTy?`.
+- Reference signatures outside the zero-argument internal `bytes memory`
+  return above, nominal signatures, unknown type metadata, and missing candidate
+  or override identities. Reference arguments retain their refusal boundary.
 - A native-compatible receive/fallback entry: Solidity cannot name it as a
   function value.
 - Source-kind collisions among native-compatible candidates (address versus
