@@ -229,3 +229,33 @@ test('original named-error sequences retain every selector, word and dynamic obs
   assert.deepEqual(bv[7].revertBytes,bytes('641a758d').concat(word(1),word(200),word(300)));
   for(const v of [...av,...bv])assert.equal(v.failure,true);
 });
+
+test('original numeric failure sequences retain exact panic codes and fixed-byte padding', async()=>{
+  const archive=new URL('../tests/upstream/solidity-0.8.38.tar.gz',import.meta.url);
+  const extract=async path=>(await promisify(execFile)('tar',['-xOzf',archive.pathname,path],{maxBuffer:1024*1024})).stdout;
+  const fn=(name,inputs,output)=>({type:'function',name,inputs:inputs.map(type=>({type})),outputs:[{type:output}]});
+  const panic=code=>[0x4e,0x48,0x7b,0x71,...Array(31).fill(0),code];
+  const m=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/arithmetics/addmod_mulmod_zero.sol')),
+    [fn('f',['uint256'],'uint256'),fn('g',['uint256'],'uint256'),fn('h',[],'uint256')]);
+  assert.deepEqual(m.map(v=>v.signature),['f(uint256)','g(uint256)','h()']);
+  for(const v of m.slice(0,2)){assert.equal(v.failure,true);assert.deepEqual(v.revertBytes,panic(0x12));}
+  assert.equal(m[2].failure,false);assert.deepEqual(m[2].expected,['2']);
+  const p=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/viaYul/exp_overflow.sol')),
+    [fn('f',['uint8','uint8'],'uint256'),fn('g',['uint256','uint256'],'uint256')]);
+  assert.equal(p.length,20);assert.equal(p[8].signature,'f(uint8,uint8)');
+  assert.deepEqual(p[8].args,['255','131']);
+  assert.equal(p[8].failure,true);assert.deepEqual(p[8].revertBytes,panic(0x11));
+  assert.equal(p.slice(9).length,11);
+  for(const v of p.filter(v=>v.failure))assert.deepEqual(v.revertBytes,panic(0x11));
+  const names=['conv','upcast','downcast','r_b32','r_b25','r_b16','r_b8','r_b4','r_b1','a_b32','a_b25','a_b16','a_b8','a_b4','a_b1'];
+  const types=['bytes32','bytes32','bytes12','bytes32','bytes25','bytes16','bytes8','bytes4','bytes1','bytes32','bytes25','bytes16','bytes8','bytes4','bytes1'];
+  const b=semanticVectors(parseFixture(await extract('test/libsolidity/semanticTests/viaYul/unary_fixedbytes.sol')),
+    names.map((name,i)=>fn(name,i<3?['bytes25']:[],types[i])));
+  assert.deepEqual(b.map(v=>v.signature),names.map((n,i)=>n+(i<3?'(bytes25)':'()')));
+  // Exact retained word: the numeric upstream hex includes a leading zero
+  // byte after word padding. Do not truncate it to the nominal return width.
+  const retained=Array.from(Buffer.from('00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00ff0000000000000000','hex'));
+  assert.equal(retained.length,32);assert.equal(b[4].failure,false);
+  assert.deepEqual(b[4].expectedBytes,retained);assert.deepEqual(b[10].expectedBytes,retained);
+  assert.notDeepEqual(retained,panic(0x11));assert.notDeepEqual(retained,retained.slice(1));
+});

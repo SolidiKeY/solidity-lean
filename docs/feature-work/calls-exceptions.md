@@ -238,3 +238,12 @@ Exact before/after observations and every required pipeline are preserved in
 `tests/upstream/group10-resume-validation.json`. Named-error payload order,
 modular-zero and exponentiation panic data remain explicit execution failures,
 not exclusions or inferred generic-panic successes.
+
+M5 repairs those five admitted execution mismatches, preserving M4 as a
+historical completed replay. Named errors now capture typed operands in the
+pipeline order before arranging their final ABI words, with storage aliases
+retained until encoding. Modular-zero and checked unsigned power retain their
+exact panic data; nominal fixed-byte complement retains its width. See
+[ABI M5](abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27)
+for kernel controls, final selected replay and remaining failures. This does
+not extend custom-error encoding to arbitrary array or struct arguments.

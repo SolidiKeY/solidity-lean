@@ -152,6 +152,16 @@ private def check (C : Contract) (vectors : List Json) (expected : String) : IO 
     let values := localVals (Q.outNames []) out.st.env
     unless Semantics.lookupBy (Var.ofName retLocal) values == some (.uint (PrimTy.ofIntD .uint 42)) do
       throw (IO.userError "named capture changed caller/value")
+    -- Vary the two fields independently: a fixed context or a dropped field
+    -- must not be able to satisfy the original sum by coincidence.
+    for (sender,value,expected) in [(38,5,43),(37,6,43)] do
+      let changed : TTx := {msgSender := PrimTy.ofIntD .uint sender,msgValue := PrimTy.ofIntD .uint value}
+      let .ok next := Q.runF 1000 (State.deploy C changed) |
+        throw (IO.userError "changed context failed")
+      let actual := Semantics.lookupBy (Var.ofName retLocal) (localVals (Q.outNames []) next.st.env)
+      unless actual == some (.uint (PrimTy.ofIntD .uint expected)) &&
+          actual != some (.uint (PrimTy.ofIntD .uint 42)) do
+        throw (IO.userError "caller/value change was lost")
   : IO Unit)
 
 -- The previous primitive failure is real overflow, and complement masking is

@@ -187,3 +187,12 @@ commands and complete required-pipeline observations are retained there;
 Group 10 evidence and historical imported results remain unchanged. See
 [ABI M4](feature-work/abi-hashes.md#m4-group-10-continuation-from-c31e76b6-2026-10-27)
 for soundness boundaries, independent reviews and remaining actionable failures.
+
+The five admitted execution mismatches from that replay are repaired in the
+separate [ABI M5 continuation](feature-work/abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27).
+Its fresh inventory covers all 175 prior agreements, the five exact failures,
+and six directly affected elaboration failures. The other 251 prior reports
+are retained explicitly as not rerun; their behavior after the shared changes
+is not certified. New evidence uses `tests/upstream/group10-five-results.json`
+and `tests/upstream/group10-five-validation.json`, preserving all earlier
+reports, source bytes and expected observations.

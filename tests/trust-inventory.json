@@ -7,27 +7,27 @@
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "unsafe def evalQuoted (α) (ty e : Expr) : MetaM α :="
+    "code": "unsafe def evalQuoted (\u03b1) (ty e : Expr) : MetaM \u03b1 :="
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "let r ← unsafe evalQuoted (List LineQ × Expr) ty"
+    "code": "let r \u2190 unsafe evalQuoted (List LineQ \u00d7 Expr) ty"
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "unsafe evalQuoted (List (Nat × Nat × Expr × Expr)) ty"
+    "code": "unsafe evalQuoted (List (Nat \u00d7 Nat \u00d7 Expr \u00d7 Expr)) ty"
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "pure (← unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
+    "code": "pure (\u2190 unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "let skels ← unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
+    "code": "let skels \u2190 unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))"
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
@@ -37,17 +37,17 @@
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "unsafe",
-    "code": "unsafe evalQuoted (List (Option (Expr × Expr))) ty"
+    "code": "unsafe evalQuoted (List (Option (Expr \u00d7 Expr))) ty"
   },
   {
     "file": "Solidity/Calculus/Chains/Proofs.lean",
     "kind": "unsafe",
-    "code": "let rs ← unsafe evalQuoted (List (Except String Lean.Expr)) ty e"
+    "code": "let rs \u2190 unsafe evalQuoted (List (Except String Lean.Expr)) ty e"
   },
   {
     "file": "Solidity/Calculus/Chains/Strategy.lean",
     "kind": "kernel-option",
-    "code": "withOptions (debug.skipKernelTC.set · true) (evalExpr α ty e)"
+    "code": "withOptions (debug.skipKernelTC.set \u00b7 true) (evalExpr \u03b1 ty e)"
   },
   {
     "file": "Solidity/Calculus/Closer/Facts.lean",
@@ -197,7 +197,7 @@
   {
     "file": "Solidity/Calculus/DecideComplete.lean",
     "kind": "unsafe",
-    "code": "unsafe evalExpr (Option (Expr × String))"
+    "code": "unsafe evalExpr (Option (Expr \u00d7 String))"
   },
   {
     "file": "Solidity/Calculus/DecideComplete.lean",
@@ -232,12 +232,12 @@
   {
     "file": "Solidity/Calculus/DeclarationFacts.lean",
     "kind": "unsafe",
-    "code": "let c ← unsafe evalExpr Contract (mkConst ``Contract) cE"
+    "code": "let c \u2190 unsafe evalExpr Contract (mkConst ``Contract) cE"
   },
   {
     "file": "Solidity/Calculus/DeclarationStaticReduction.lean",
     "kind": "unsafe",
-    "code": "unless ← withCurrHeartbeats (unsafe evalExpr Bool (mkConst ``Bool) some) do"
+    "code": "unless \u2190 withCurrHeartbeats (unsafe evalExpr Bool (mkConst ``Bool) some) do"
   },
   {
     "file": "Solidity/Calculus/ElimFacts.lean",
@@ -387,7 +387,7 @@
   {
     "file": "Solidity/Calculus/Notation.lean",
     "kind": "kernel-option",
-    "code": "withOptions (debug.skipKernelTC.set · true) (elabAgainst c f)"
+    "code": "withOptions (debug.skipKernelTC.set \u00b7 true) (elabAgainst c f)"
   },
   {
     "file": "Solidity/Calculus/Proves.lean",
@@ -397,12 +397,12 @@
   {
     "file": "Solidity/Calculus/ProvesDerive.lean",
     "kind": "unsafe",
-    "code": "let result ← unsafe evalExpr (Option (List Expr)) qTy"
+    "code": "let result \u2190 unsafe evalExpr (Option (List Expr)) qTy"
   },
   {
     "file": "Solidity/Calculus/ProvesDerive.lean",
     "kind": "unsafe",
-    "code": "unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFitsS) #[C, Γ, H, φe])"
+    "code": "unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFitsS) #[C, \u0393, H, \u03c6e])"
   },
   {
     "file": "Solidity/Calculus/ReadBounds.lean",
@@ -457,7 +457,7 @@
   {
     "file": "Solidity/Calculus/Recursion.lean",
     "kind": "unsafe",
-    "code": "match ← unsafe evalExpr (Except String (Expr × Expr)) ty (← instantiateMVars e) with"
+    "code": "match \u2190 unsafe evalExpr (Except String (Expr \u00d7 Expr)) ty (\u2190 instantiateMVars e) with"
   },
   {
     "file": "Solidity/Calculus/RewriteChains.lean",
@@ -512,12 +512,12 @@
   {
     "file": "Solidity/Calculus/RuleSyntax/Print.lean",
     "kind": "unsafe",
-    "code": "try return some (← unsafe evalExpr Nat (mkConst ``Nat) e) catch _ => return none"
+    "code": "try return some (\u2190 unsafe evalExpr Nat (mkConst ``Nat) e) catch _ => return none"
   },
   {
     "file": "Solidity/Calculus/RuleSyntax/Print.lean",
     "kind": "unsafe",
-    "code": "try return some (← unsafe evalExpr Int (mkConst ``Int) e) catch _ => return none"
+    "code": "try return some (\u2190 unsafe evalExpr Int (mkConst ``Int) e) catch _ => return none"
   },
   {
     "file": "Solidity/Calculus/RuleSyntax/Print.lean",
@@ -552,7 +552,7 @@
   {
     "file": "Solidity/Calculus/Symex.lean",
     "kind": "unsafe",
-    "code": "let out ← unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)"
+    "code": "let out \u2190 unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)"
   },
   {
     "file": "Solidity/Calculus/Symex.lean",
@@ -622,52 +622,52 @@
   {
     "file": "Solidity/Examples/Tactics/ArrayShapeCopy.lean",
     "kind": "unsafe",
-    "code": "let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
+    "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/ArrayShapeCopy.lean",
     "kind": "unsafe",
-    "code": "let shownAgain ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownAgainExpr"
+    "code": "let shownAgain \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownAgainExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/Loops.lean",
     "kind": "unsafe",
-    "code": "let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
+    "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/NativeDeferredSource.lean",
     "kind": "unsafe",
-    "code": "let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
+    "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/ReferenceParameters.lean",
     "kind": "unsafe",
-    "code": "let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
+    "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/ReferenceParameters.lean",
     "kind": "unsafe",
-    "code": "let shownAgain ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownAgainExpr"
+    "code": "let shownAgain \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownAgainExpr"
   },
   {
     "file": "Solidity/Examples/Tactics/StorageReturns.lean",
     "kind": "unsafe",
-    "code": "let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
+    "code": "let shown \u2190 unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr"
   },
   {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
-    "code": "let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val"
+    "code": "let (C, bodies) \u2190 liftTermElabM <| unsafe evalExpr (Contract \u00d7 List (List RawStmt)) pairTy val"
   },
   {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
-    "code": "let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)"
+    "code": "let rows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)"
   },
   {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
-    "code": "unsafe evalExpr String (mkConst ``String) (← mkAppM ``Prog.show #[toExpr ns, v]))"
+    "code": "unsafe evalExpr String (mkConst ``String) (\u2190 mkAppM ``Prog.show #[toExpr ns, v]))"
   },
   {
     "file": "Solidity/Frontend/Problems.lean",
@@ -677,27 +677,27 @@
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
-    "code": "let C ← unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
+    "code": "let C \u2190 unsafe evalExpr Contract (mkConst ``Contract) (mkConst N)"
   },
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
-    "code": "let body ← unsafe evalExpr (Fml C []) (← inferType φ) (← Symex.evaluable φ)"
+    "code": "let body \u2190 unsafe evalExpr (Fml C []) (\u2190 inferType \u03c6) (\u2190 Symex.evaluable \u03c6)"
   },
   {
     "file": "Solidity/Frontend/Problems.lean",
     "kind": "unsafe",
-    "code": "let k ← liftTermElabM <| unsafe evalExpr (Option (Nat × Nat)) (mkApp (mkConst ``Option [0])"
+    "code": "let k \u2190 liftTermElabM <| unsafe evalExpr (Option (Nat \u00d7 Nat)) (mkApp (mkConst ``Option [0])"
   },
   {
     "file": "Solidity/Frontend/WorldImport.lean",
     "kind": "unsafe",
-    "code": "let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (targetFull ++ `report)"
+    "code": "let rows \u2190 liftTermElabM <| unsafe evalConst (List ImportRow) (targetFull ++ `report)"
   },
   {
     "file": "Solidity/Semantics/Heap.lean",
     "kind": "opaque",
-    "code": "opaque ecrecoverKey : Nat → Nat → Nat → Nat → Nat"
+    "code": "opaque ecrecoverKey : Nat \u2192 Nat \u2192 Nat \u2192 Nat \u2192 Nat"
   },
   {
     "file": "Solidity/Semantics/Run.lean",
@@ -897,7 +897,7 @@
   {
     "file": "Solidity/Syntax/Elab/Context.lean",
     "kind": "opaque",
-    "code": "opaque RecThunk.get (C : Contract) (F : Ctx) (r : RecThunk) : Unit → Prog C F F"
+    "code": "opaque RecThunk.get (C : Contract) (F : Ctx) (r : RecThunk) : Unit \u2192 Prog C F F"
   },
   {
     "file": "Solidity/Syntax/Elab/Context.lean",
@@ -907,37 +907,37 @@
   {
     "file": "Solidity/Syntax/Splice.lean",
     "kind": "unsafe",
-    "code": "match ← unsafe evalExpr (Except ε Lean.Expr) ty e with"
+    "code": "match \u2190 unsafe evalExpr (Except \u03b5 Lean.Expr) ty e with"
   },
   {
     "file": "Solidity/Tools/Common.lean",
     "kind": "unsafe",
-    "code": "return some (.contract c (← unsafe evalConst Contract c))"
+    "code": "return some (.contract c (\u2190 unsafe evalConst Contract c))"
   },
   {
     "file": "Solidity/Tools/Common.lean",
     "kind": "unsafe",
-    "code": "let C ← unsafe evalConst Contract c"
+    "code": "let C \u2190 unsafe evalConst Contract c"
   },
   {
     "file": "Solidity/Tools/Common.lean",
     "kind": "unsafe",
-    "code": "match ← unsafe evalExpr (Except String (List String)) ty e with"
+    "code": "match \u2190 unsafe evalExpr (Except String (List String)) ty e with"
   },
   {
     "file": "Solidity/Tools/CompleteVerification.lean",
     "kind": "unsafe",
-    "code": "let result ← unsafe evalExpr (Option (List Nat)) (← inferType data) data"
+    "code": "let result \u2190 unsafe evalExpr (Option (List Nat)) (\u2190 inferType data) data"
   },
   {
     "file": "Solidity/Tools/CompleteVerification.lean",
     "kind": "unsafe",
-    "code": "let c ← unsafe evalExpr (Cand C) (← inferType candidate) candidate"
+    "code": "let c \u2190 unsafe evalExpr (Cand C) (\u2190 inferType candidate) candidate"
   },
   {
     "file": "Solidity/Tools/CompleteVerification.lean",
     "kind": "unsafe",
-    "code": "let minimal ← unsafe evalExpr (List String) (← inferType report) report"
+    "code": "let minimal \u2190 unsafe evalExpr (List String) (\u2190 inferType report) report"
   },
   {
     "file": "Solidity/Tools/Counterexample.lean",
@@ -952,47 +952,47 @@
   {
     "file": "Solidity/Tools/Counterexample.lean",
     "kind": "unsafe",
-    "code": "let C ← unsafe evalExpr Contract (Lean.mkConst ``Contract) cE"
+    "code": "let C \u2190 unsafe evalExpr Contract (Lean.mkConst ``Contract) cE"
   },
   {
     "file": "Solidity/Tools/Counterexample.lean",
     "kind": "unsafe",
-    "code": "let φ ← unsafe evalExpr (Fml C []) ty φE"
+    "code": "let \u03c6 \u2190 unsafe evalExpr (Fml C []) ty \u03c6E"
   },
   {
     "file": "Solidity/Tools/Elementary.lean",
     "kind": "unsafe",
-    "code": "let rows ← unsafe Chain.evalQuoted (List (Option (Expr × Expr))) ty"
+    "code": "let rows \u2190 unsafe Chain.evalQuoted (List (Option (Expr \u00d7 Expr))) ty"
   },
   {
     "file": "Solidity/Tools/Inspect.lean",
     "kind": "unsafe",
-    "code": "let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e"
+    "code": "let (\u03c8, red) \u2190 unsafe evalExpr (Lean.Expr \u00d7 Option String) (\u2190 inferType e) e"
   },
   {
     "file": "Solidity/Tools/Inspect.lean",
     "kind": "unsafe",
-    "code": "let ψ? ← unsafe evalExpr (Option Lean.Expr) (← inferType e) e"
+    "code": "let \u03c8? \u2190 unsafe evalExpr (Option Lean.Expr) (\u2190 inferType e) e"
   },
   {
     "file": "Solidity/Tools/LeafArithmetic.lean",
     "kind": "unsafe",
-    "code": "let result ← unsafe evalExpr (Option (List Nat)) (← inferType data) data"
+    "code": "let result \u2190 unsafe evalExpr (Option (List Nat)) (\u2190 inferType data) data"
   },
   {
     "file": "Solidity/Tools/ProgramTrace.lean",
     "kind": "kernel-option",
-    "code": "withOptions (debug.skipKernelTC.set · false) do"
+    "code": "withOptions (debug.skipKernelTC.set \u00b7 false) do"
   },
   {
     "file": "Solidity/Tools/QueryArithmetic.lean",
     "kind": "unsafe",
-    "code": "let result ← unsafe evalExpr (Option (List Nat)) (← inferType data) data"
+    "code": "let result \u2190 unsafe evalExpr (Option (List Nat)) (\u2190 inferType data) data"
   },
   {
     "file": "Solidity/Tools/Verify.lean",
     "kind": "unsafe",
-    "code": "let C ← unsafe evalConst Contract n"
+    "code": "let C \u2190 unsafe evalConst Contract n"
   },
   {
     "file": "vendor/LeanTeX/LeanTeX/Basic.lean",
@@ -1027,12 +1027,12 @@
   {
     "file": "Solidity/Calculus/ProveChunked.lean",
     "kind": "unsafe",
-    "code": "let some leaves ← unsafe evalExpr (Option (List Expr)) qTy"
+    "code": "let some leaves \u2190 unsafe evalExpr (Option (List Expr)) qTy"
   },
   {
     "file": "Solidity/Calculus/ProveChunked.lean",
     "kind": "unsafe",
-    "code": "let isLeaf ← unsafe evalExpr Bool (mkConst ``Bool)"
+    "code": "let isLeaf \u2190 unsafe evalExpr Bool (mkConst ``Bool)"
   },
   {
     "file": "Solidity/Evm/Machine.lean",
@@ -1042,7 +1042,7 @@
   {
     "file": "Solidity/Calculus/CallbackDerive.lean",
     "kind": "unsafe",
-    "code": "let refuted ← unsafe evalExpr Bool (mkConst ``Bool) probe"
+    "code": "let refuted \u2190 unsafe evalExpr Bool (mkConst ``Bool) probe"
   },
   {
     "file": "Solidity/Tools/Upstream.lean",
@@ -1052,6 +1052,6 @@
   {
     "file": "Solidity/Frontend/Import.lean",
     "kind": "unsafe",
-    "code": "let v ← unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t"
+    "code": "let v \u2190 unsafe evalExpr EvalOrder (mkConst ``EvalOrder) t"
   }
 ]

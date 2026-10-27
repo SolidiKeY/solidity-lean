@@ -693,7 +693,7 @@ power guard. History documents this ordinary empty-revert reading, not a
 removed speed optimization. Only exact external-entry checked unsigned powers
 now lower to existing checked multiplications: both operands captured once in
 the pipeline order; zero/one/exponent-zero handled after those captures; for
-base at least2 an exponent at least256 emits0x11; otherwise at most255 loop
+base at least 2 an exponent at least 256 emits0x11; otherwise at most 255 loop
 iterations use existing multiplication and narrow guards. Ordinary, unchecked
 and explicit checking-option readings remain unchanged. The potential checking
 cost of expression-to-loop lowering was warned about before implementation;
@@ -712,13 +712,137 @@ not counted as Lean execution coverage.
 
 The five original fixtures agree in all required modes and complete sequential
 vectors in stage3, including every later dynamic-error and uint256 power
-observation. Final hash-consistent inventory replays all175 prior agreements,
+observation. Final hash-consistent inventory replays all 175 prior agreements,
 the five repairs, and six directly affected reference-error elaboration cases.
-The other251 explicit import/profile/host/configuration/resource cases retain
+The other 251 prior import/profile/host/configuration/resource reports retain
 their original evidence and are explicitly marked not rerun; they are not
-silently certified against the changed model. Final gate and inventory results
-follow below once complete. The full source trust scanner's25 unrelated
+silently certified against the changed model. Final inventory and validation results
+follow below. The full source trust scanner's25 unrelated
 inventory findings reproduce exactly at e430f436; only the new override site
 is added to its inventory. The c31 documentation failure also remains a known
 failure. No new axiom, sorry, native proof shortcut, dependency or raised proof
 heartbeat/fuel/timeout/resource bound is introduced.
+
+The final selected inventory is complete: **184 agreements / 2 failures / 0
+blocks among 186 fresh fixture runs**, with **365 passing pipeline executions
+and 1,464 original observations**. All175 e430 agreements remain agreements;
+the five requested failures and four related string/bytes error cases now
+agree. No prior agreement regressed. The independently audited inventory is
+`tests/upstream/group10-five-results.json`, including exact commands, original
+fixture/source hashes, per-mode reports and every observation. Its mixed
+fresh/prior437-path inventory is **184 agreements / 93 failures / 160 blocks**;
+this is not a fresh replay of the 251 retained reports.
+
+| Repaired exact fixture | Original first difference | Final legacy / viaIR observations |
+| --- | --- | --- |
+| errors/revert_error_named_parameters.sol | trigger2, call2: words7,2 instead of2,7 | 5 / 5, all agree |
+| errors/revert_error_named_parameters_literal_conversions.sol | intWidening, call1: words200,1 instead of1,200 | 8 / 8, all agree |
+| arithmetics/addmod_mulmod_zero.sol | f(0), call1 legacy: empty instead of Panic0x12; IR already agreed | 3 / 3, all agree |
+| viaYul/exp_overflow.sol | f(255,131), call9: empty instead of Panic0x11 | 20 / 20, all agree |
+| viaYul/unary_fixedbytes.sol | r_b25, call5: Panic0x11 instead of retained bytes25 vector | 15 / 15, all agree |
+
+The table uses paths relative to `test/libsolidity/semanticTests/`; complete
+unabbreviated expected and observed byte vectors remain in the diagnosis and
+raw reports. Every earlier and later observation is retained. The four extra
+agreements are require_different_errors_same_parameters,
+require_error_multiple_arguments, require_error_string_literal and
+require_inherited_error. The remaining two members of the original six
+elaboration-failure cohort remain failures: `errors/revert_conversion.sol`
+needs dynamic-array custom-error encoding; `errors/using_structs.sol` needs a
+named struct capture location plus the aggregate struct error-encoding
+interface. The latter currently stops at the generated capture-location gap,
+before the unsupported aggregate encoder. Neither is recategorized as an
+exclusion or claimed repaired. The85 prior import gaps, six profile refusals,
+159 adapter/host/configuration exclusions and enormous-memory resource case
+retain their own prior evidence, unmeasured after these changes.
+
+The frozen repair model hash is
+`0bcc84d08f447c52b7b579f0e3b4de7fa9829f8fe262655e3574474f3a827990`.
+Runner, compiler and archive hashes remain respectively
+`dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc`,
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`,
+and `9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d`.
+Fresh fixture wall times were2.245–107.305 seconds (median 4.849), including
+compilation, cache/admission and execution; these are not proof benchmarks.
+The exact fixture120000ms/1000-fuel limits and existing6GiB worker policy are
+unchanged. Final heavy validation uses the preserved12GiB serial policy only
+after the fixture worker ends. No extra Lean worker is opened by reviews.
+
+Completed focused checks use configured per-file CLI commands because Lean MCP
+is not exposed: FiveControls (including independently varied caller/value),
+the preserved upstream Replay, and13 ABI/exception/numeric/source families all
+pass. Node runner regressions pass21/21, including the two original named-error
+sequences and exact modular/power/fixed-byte vectors. Strict automation reports
+491 automatic,61 budgeted,11 refuted and0 pending; reachability reports667
+reachable/0 orphaned; layering reports143 core modules/0 elaborator reach.
+All ten final lowered entry quotations kernel-recheck with only propext;
+headline mathematical controls list only propext, Classical.choice and
+Quot.sound. Pinned reference checks separately pass31 ABI vectors plus five
+compiler rejections,18 ABI-hex EVM runs plus20 rejections, and34 additional
+byte-exact source controls; none is counted as Lean coverage.
+
+Finder and independent skeptic both audited the final fixture evidence without
+opening Lean workers or running builds. They verified all437 raw report hashes
+(including retained reports), the exact186 selected set,365 passing mode
+sequences,1,464 observations and736 raw calldata arrays. The skeptic also
+independently recompiled each fresh working ABI with the pinned compiler. Both
+confirmed the five exact fixtures, unchanged175 agreements, remaining two
+failures and explicit251-report evidence boundary. Confirmed review findings
+(storage-alias preservation, resolved identity equality, exact cohort assertion
+and retained-report wording) are fixed. Final build/log packaging review is
+recorded with the completed validation manifest below.
+
+The reference source controls also initialize the exact short-storage bytes
+word for data=hex61 and check storageNamed/storageReverse in both pipelines.
+All four return the empty bytes error payload after the later clear, confirming
+that early storage-to-memory snapshots would be wrong. The Lean controls
+separately check rollback to the original one-byte storage value; reference
+runCode output is used only to confirm the payload timing, not rollback.
+
+Final invalidated functional gates pass: the default build 649 jobs, SolKey
+TestSuite 249 jobs, standalone check-testsuite, Corpus 257 jobs and frozen corpus
+parity. The sort check actually parsed 377 taclets/131 read-bearing entries and
+matched all 131 annotations against the configured frozen rules file (SHA256
+02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb).
+TestSuite parity is 564 functions:552 derived,11 refuted,0 pending,0 divergent,
+1 excluded and 2 skip. Frozen SolKey 473da8944c corpus parity is 774 obligations:
+552 derived,11 refuted,1 excluded,2 skip,70 proved,37 unsupported and 101 unported.
+These pre-existing corpus classifications are separate from the 437 upstream
+fixture inventory and do not increase its agreement count.
+
+`tests/upstream/group10-five-validation.json` retains exact commands and hashes
+for 34 final check logs,5 supporting logs,12 runtime/script artifacts and 20 clearly
+separated preliminary experiment logs. 32 checks exit 0. Documentation-paths
+exits 1 with exactly the 26 c31 diagnostics (13 underlying references repeated by
+preserved M3 evidence); trust exits 1 with exactly the 25 e430 inventory findings.
+Both lists match their complete preserved baselines. These two gates remain
+known failures, never passes. The first manifest attempt correctly refused a
+missing initial verification exit file; a new uniquely named final snapshot
+verification completed successfully and supplied its actual exit status.
+
+The single-worker heavy build completed under the unchanged 12 GiB RSS policy;
+no new OOM kill occurred. Observed module wall seconds (current/prior) were
+Join 93/85, CallbackStrategy 198/211, OpenLoops 492/510, DecisionHashes 309/324,
+Decision 760/738 and DecisionArrays 44/43. Scheduling/lock waits can contribute
+to these durations; they are not controlled benchmarks. No intrinsic core
+representation or proof budget was changed during validation;
+fixture fuel/timeout and existing resource caps remain unchanged. The Solidity
+model and runner trees remain identical to 8a3d7b6d
+throughout the final gates; later changes only strengthen controls and record
+evidence/documentation. Previous reports/exports and all historical bytes are
+unchanged. Work remains local on codex/group10-abi-vectors; no push or merge.
+
+Final finder and independent skeptic audits approved all 34 final log hashes,
+5 supporting logs, 20 preliminary logs and 12 runtime artifacts, the completed
+gate outputs and the exact baseline failures. Neither opened Lean workers,
+ran builds or edited files. Their confirmed metadata findings are fixed:
+nonempty integer exit parsing, exactly exit 1 for known failures, completion
+marker and explicit retained-report wording. No confirmed review issue remains.
+The final validation record includes both completed approvals.
+
+New exports use group10-five-continuation.patch (from e430f436),
+group10-abi-vectors-v3.patch (from 006fcd59), group10-five-evidence.tar.gz and
+group10-five-export.json under .lake/upstream. The export manifest records the
+exact local commit, sizes and SHA256 values; the writer preserves every earlier
+Group 10 patch/archive/export manifest, refuses overwrites and verifies each
+archive member by readback. All work remains on the isolated local lane.
