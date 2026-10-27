@@ -1402,13 +1402,6 @@ def abiCallBytesParams? (declarations : List Json) (target : Json) :
     let name ← J.str? ty "name"
     bytesTy? name)
 
-/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
-partial def unparen (j : Json) : Json :=
-  match J.kind j, (J.arr? j "components").map (·.toList) with
-  | "TupleExpression", some [c] =>
-    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
-  | _, _ => j
-
 mutual
 
 partial def expr (j : Json) : PM String := do
@@ -1472,12 +1465,22 @@ partial def expr (j : Json) : PM String := do
       -- context before the model independently infers the array's shape.
       let t := ((J.tyStr j).splitOn "[").head!
       let enumScalar := ((J.tyStr j).splitOn "[").length == 2 && t.startsWith "enum "
+      let enumCarrier ← if enumScalar then do
+        let name := t.drop 5
+        let ids := (← get).declarations.filterMap fun declaration => do
+          guard (J.kind declaration == "EnumDefinition")
+          guard (J.str? declaration "canonicalName" == some name)
+          J.id? declaration
+        let [id] := ids.eraseDups
+          | unsupported "an enum array literal without its resolved declaration identity"
+        pure (some (if (← get).enumCarriers.contains id then "uint8" else "uint"))
+        else pure none
       let scalar := ((J.tyStr j).splitOn "[").length == 2 &&
         ((narrowTy? t).isSome || (bytesTy? t).isSome ||
           t == "bool" || t == "uint" || t == "int" || t == "address")
       let es ← cs.mapM fun c => do
         let e ← expr c
-        pure (if enumScalar then sourceCast "uint8" e else
+        pure (if let some carrier := enumCarrier then sourceCast carrier e else
           if !scalar then e else if t == "address" then s!"address({e})" else sourceCast t e)
       pure s!"[{", ".intercalate es}]"
     else match cs with

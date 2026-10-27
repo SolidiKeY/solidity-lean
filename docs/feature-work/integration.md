@@ -11,14 +11,22 @@ is.
 | [Source admission](source-admission.md) | compiler provenance, declaration-aware admission, exact literals, raw names, stored function projections | general function-value dispatch beyond [finite dispatch](finite-dispatch.md) |
 | [Finite dispatch](finite-dispatch.md) (with [getter targets](finite-dispatch.md#getter-targets)) | internal and own-external function-value calls over a typed candidate set | reference/nominal signatures, source-kind collisions |
 | [Declarations](declarations-metadata.md) | `type(C).name`, `type(I).interfaceId`, error/event selectors, primitive public getters, source ABI identities | imports/remappings, reference/nominal getters, broader `using for` |
-| [Operators](numeric-operators.md) | resolved scalar UDVT operator aliases | nominal enums, signed shifts, contextual literal promotion |
-| [Aggregates](aggregates.md), [calldata aliases](../calldata-slice-copies.md#calldata-origins-and-aliases), [slice copies](../calldata-slice-copies.md) | inline arrays, fixed memory snapshots, reference tuples, slice effects, calldata alias origins | reference-element slices, multiple nonlocal tuple targets |
+| [Operators](numeric-operators.md) | resolved scalar UDVT aliases, signed numeric lowering, declaration-indexed finite enum conversions | recursive aggregates and general numeric source correspondence |
+| [Aggregates](aggregates.md), [calldata aliases](../calldata-slice-copies.md#calldata-origins-and-aliases), [slice copies](../calldata-slice-copies.md) | inline arrays, fixed memory snapshots, reference tuples, mixed storage/memory conditional joins, primitive tuple write order, slice effects, calldata alias origins | reference-element slices and general effectful nonlocal tuple targets |
 | [Recursive storage](recursive-types.md) | a standalone typed graph storage API with copy admission and a bridge to ordinary values | recursive structs anywhere in the ordinary pipeline |
 | [ABI and hashes](abi-hashes.md) | ERC-7201, `ecrecover`, `encodeCall` checks, decoder bounds, exact-width hex arguments | enum decoding, recursive ABI, external reference returns |
-| [Transient storage](transient-storage.md) | a typed transient supplement composed with `Prog.run` | transient source declarations (the whole contract is refused) |
+| [Transient storage](transient-storage.md) | typed ordinary transient roots, source reset/rollback, getters and opt-in owner/delegate controls | physical assembly/layout, gas and general source-world dispatch |
 | [Contract world](contract-world.md) | typed creation/call/library frames, two hash-checked source commands | general world-aware source statements |
 | [Calls and exceptions](calls-exceptions.md) | eager error/event operands, exact self-call panic and catch data, fixed-byte error words | named or qualified emits, callback catches |
 | [Proof automation](../automation.md#guarded-symmetric-cancellation) | guarded symmetric cancellation `(a + b) - a` | the broader items of [automation.md](../automation.md) |
+
+## Cloud tasks 01–09
+
+[The combined integration record](cloud-integration-01-09.md) records the nine
+committed cloud snapshots, cross-lane fixes, current verification and remaining
+source exclusions. Task 10 and task 06's uncommitted recursive-storage migration
+are not included. Its combined validation status takes precedence over retained
+per-lane build reports when assessing this integration.
 
 ## Cross-cutting decisions
 

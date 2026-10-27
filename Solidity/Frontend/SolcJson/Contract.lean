@@ -1908,7 +1908,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let funs := all.filterMap fun (c, r) => if c then none else some r
   -- Getter gaps must remain visible even when no body could be emitted.
   let extraEntries := if entrypoints then closed.filterMap fun (id, f) => do
-    guard (!(ownIds.contains id) &&
+    guard (!(entryIds.contains id) &&
       (abiEntryIds.contains id || getterNames.any (·.1 == id)))
     pure f
     else []
