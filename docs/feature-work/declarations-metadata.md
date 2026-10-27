@@ -654,3 +654,45 @@ new source regression cases, Replay and all fifteen isolated fixture reports
 were refreshed after this correction; the result remains twelve working and
 three recursive gaps. Earlier reports are retained separately. Frozen sort
 coverage passes with 377 taclets and all 131 read-bearing annotations.
+
+The final skeptic identified a generated-name capture during raw-body inlining.
+A function-pointer parameter shadowing state `enumType4` is renamed to
+`enumType4_`, which was also an enum conversion's generated name. The original
+pointer-only hypothesis passes, but the converse control confirms the defect:
+a genuine enum cast in the colliding scope executes the pointer and returns `1`
+instead of `0`, in both pinned 0.8.38 pipelines. Generated conversion names now
+use quoted `#solcEnum<declaration-id>` identifiers, which ordinary Solidity
+identifiers and their generated aliases cannot spell. Explicit import renamings
+can spell these quoted names, so they remain reserved by the existing bounded
+fresh-name helper. This is a frontend binding fix, not a core representation or
+semantic rule change.
+
+`EnumNameShadow.sol` retains both pointer and cast paths, with distinct expected
+results and assertions. The explicit import-rename control now deliberately uses
+`#solcEnum4`. The new controls preserve eight runtime observations across the two
+pipelines and two source assertion obligations; final outcomes and logs are
+recorded in the Group 06 evidence. Earlier pointer-only observations and the
+confirmed converse mismatch are retained separately.
+
+The namespace fix passes its configured per-file check and frontend rebuild.
+All fifteen original fixtures were refreshed again in distinct
+`.lake/upstream/group06-resumed-namespace-final/<fixture>` directories: twelve
+work in both required pipelines and three retain the recursive import gaps.
+The final model SHA-256 is
+`c893bd606146fb542537b8b24f351ca39e98291a6e12f1bafb941c0afbc2cf3c`.
+The four focused source regressions pass; the direct quoted-import case also
+checks the fresh enum name exists and the reserved name does not. Its draft
+wrapper/CLI restrictions were corrected without changing model or expectations.
+Replay passes nine checks, all six enum-bound kernel checks pass, and the
+upstream runner's fourteen JavaScript tests pass. Source controls now total
+ eleven proved rows, two deliberately pending rows, two unsupported admission
+controls and one internal helper; runtime controls retain twenty-six observations.
+The strict automation, reachability, layering and frozen-archive checks pass;
+the twenty-five trust-inventory findings are byte-for-byte unchanged.
+
+The first serial default run reached its 7200 s process bound at 643/649 jobs,
+inside unchanged `Examples/Decision.lean`, without a reported Lean error. Its
+completed artifacts are reused by the final serial run, including checks against
+the namespace fix. The interrupted run is not counted as a passed default or
+TestSuite build. Final default/TestSuite/sort and corpus outcomes remain pending
+until their logs close.

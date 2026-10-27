@@ -668,12 +668,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let n := (J.str? e "name").getD ""
     let canonical := (J.str? e "canonicalName").getD n
     ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint")) ++ [(canonical, .ok "uint")]
-  -- Generated conversion names cannot capture source names, including a
-  -- library enum with the same short name as a local enum.
+  -- A source-unspellable namespace prevents generated local aliases from
+  -- capturing conversions when raw bodies are renamed during inlining.
+  -- Explicit import renamings may use quoted names too, so reserve them.
   let declaredNames := declarations.filterMap (J.str? · "name") ++ ren.map Prod.snd
   let enumCasts : List (Int × String) := enumDefs.filterMap fun e => do
     let id ← J.id? e
-    let stem := s!"enumType{id}"
+    let stem := s!"#solcEnum{id}"
     pure (id, freshSourceName declaredNames stem)
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
     let vs := J.arrD e "members"

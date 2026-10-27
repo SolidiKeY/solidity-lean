@@ -1007,13 +1007,31 @@ test("finite nominal declarations and nested tuples retain identity, snapshots a
 
 
 test("finite nominal declarations avoid explicit renaming collisions", () => {
-  // FiniteEnum.E has compiler declaration ID 4; reserve explicit model
-  // renamings as well as raw source names when freshening enum conversions.
-  const report = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
-    {build:false, contract:'FiniteTypeLowering', function:'enumIdentity',
-      renaming:{Pair:'enumType4'}, batchSize:1});
-  assert.deepEqual(report.errors, []);
-  assert.equal(report.results.find(r => r.function === 'enumIdentity')?.status, 'proved');
+  // Explicit quoted import aliases may spell the otherwise source-unspellable
+  // conversion name. The CLI helper intentionally admits source identifiers
+  // only, so exercise the import syntax directly.
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-enum-rename-'));
+  try {
+    const fixture = join(dir, 'source.ast.json');
+    runTool(process.execPath, ['scripts/solc-ast.mjs', '--source',
+      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper'], 300000);
+    let hash = 0xcbf29ce484222325n;
+    for (const byte of readFileSync(fixture))
+      hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
+    const wrapper = join(dir, 'Test.lean'), output = join(dir, 'result.json');
+    writeFileSync(wrapper, `import Solidity.Frontend.Testing
+solc_import "source.ast.json" hash 0x${hash.toString(16)} as EnumRenameControl.FiniteTypeLowering renaming «E» => «#solcEnum4» testing
+#guard (EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4_"
+#guard !(EnumRenameControl.FiniteTypeLowering.enums.map Prod.fst).contains "#solcEnum4"
+solc_scoped_problems EnumRenameControl.FiniteTypeLowering decl
+#solkey_test EnumRenameControl.FiniteTypeLowering only "enumIdentity" to ${JSON.stringify(output)}
+`);
+    const diagnostics = runTool('lake', ['--quiet', '--no-build', 'lean', wrapper,
+      '--', '--tstack=131072'], 300000);
+    assert.equal(diagnostics.includes('warning: solc_import:'), false, diagnostics);
+    assert.equal(JSON.parse(readFileSync(output, 'utf8'))
+      .find(r => r.function === 'enumIdentity')?.status, 'proved');
+  } finally { rmSync(dir, {recursive:true, force:true}); }
 });
 
 test("enum conversions use their defining declaration bounds", () => {
@@ -1032,4 +1050,17 @@ test("enum conversions use their defining declaration bounds", () => {
     [['foreignRead', 'pending'], ['localAccepts', 'proved']]);
   runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumBounds.lean',
     '--', '--tstack=131072'], 300000);
+});
+
+test("function-value calls do not become generated enum conversions", () => {
+  // The former enumType4_ cast name collided with the renamed pointer
+  // parameter during inlining. Keep pointer calls and genuine casts distinct.
+  const report = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'check', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
+  const cast = runSolidityTests(["tests/solc/EnumNameShadow.sol"],
+    {build:false, contract:'EnumNameShadow', function:'checkCast', batchSize:1});
+  assert.deepEqual(cast.errors, []);
+  assert.equal(cast.results.find(r => r.function === 'checkCast')?.status, 'proved');
 });
