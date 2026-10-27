@@ -512,6 +512,9 @@ structure ElabScope where
   (`this.f()`, `trySelfBody`): `msg.sender` is `address(this)` and
   `msg.value` is `0` (`RawStmt.selfFrame`), in its inlined calls too. -/
   selfFrame : Bool := false
+  /-- Retain failure bytes at an externally observed entry without rewriting
+  its caller environment. Default calculus elaboration keeps its old reading. -/
+  retainFailureData : Bool := false
   /-- What `msg.value` reads in a self-call's frame (`RawExpr.selfFrame`):
   `0` for a `try`; in the calls a `receive` run by a value call to the
   contract inlines, a name no frame has, so that a callee reading it is not
@@ -548,7 +551,7 @@ def ElabM.lift {α : Type} (x : Except String α) : ElabM α := fun _ => StateT.
 whether it runs in a self-call's frame, the overflow mode and what
 `msg.value` reads there (`CallMemo`). -/
 def calleeKey (f : String) (selfFrame : Bool) (sc : ElabScope) : String :=
-  s!"{f}|{selfFrame}|{reprStr sc.overflow}|{reprStr sc.selfValue}"
+  s!"{f}|{selfFrame}|{sc.retainFailureData}|{reprStr sc.overflow}|{reprStr sc.selfValue}"
 
 /-- Entering a callee of key `key`: where its first call's locals were
 numbered, and the index the caller is at.  For a callee that is `shared`, the
@@ -818,6 +821,7 @@ partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
     if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
+  | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
   | _ => none
 
 /-- The narrow positions of a value of reference type: a place's
@@ -836,12 +840,10 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     -- `abi.decode` of a byte string (`abiDecodeBytes`)
     if (f == "abi.decode" || f == "#abiDecode") && (lookupBy f C.funs).isNone then
       match as with
-      | _ :: .name T :: _ =>
-        if dynBytesTy T then dynBytesRowsOf T
-        else (((abiTyExpr? (.name T)).bind fun T => (elabTyW C T).toOption).map (·.2)).getD []
-      -- `T[k]` (`abiDecodeWith`)
-      | _ :: .index (.name T) (.num k) :: _ =>
-        ((elabTyW C (.fixed (.named T) k)).toOption.map (·.2)).getD []
+      | _ :: T :: _ =>
+        -- Use the same recursive type reader as the decoder. Compound fixed
+        -- and dynamic dimensions retain their nested width/nominal rows.
+        (((abiTyExpr? T).bind fun T => (elabTyW C T).toOption).map (·.2)).getD []
       | _ => []
     else
     match lookupBy f C.funs with
@@ -1614,7 +1616,14 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
       let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
       return .binop op (← toBytesAt? C Γ n a a') (← toBytesAt? C Γ n b b')
     pure (.binop op a' b')
-  | .unop op a => do pure (.unop op (← bytesPure Γ a))
+  | .unop op a => do
+    let lowered ← bytesPure Γ a
+    if op == .bnot then
+      if let some n := bytesOf? C Γ a then
+        -- Keep the ORIGINAL nominal byte width before a literal cast folds.
+        -- Complement is mask minus the compact, bounded bytesN value.
+        return .binop .subW (.num (2 ^ (8 * n) - 1)) lowered
+    pure (.unop op lowered)
   | .ternary c a b => do
     let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
     pure (.ternary (← bytesPure Γ c) (← toBytesAt? C Γ n a (← bytesPure Γ a))
@@ -1775,7 +1784,8 @@ def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
   if 256 ≤ n then return []
   let Γ ← nctx
   let c ← checkIn C Γ .bool (inTyCond p n e)
-  let sf := (← read).selfFrame
+  let sc ← read
+  let sf := sc.selfFrame || sc.retainFailureData
   pure [.of Γ (match (← read).overflow with
     | some o => o.guardStmt c sf
     -- in a self-call's callee, solc's `Panic(0x11)` data (`Prog.withPanics`)
@@ -1873,7 +1883,8 @@ def enumCapture (n : Nat) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e' : RawExpr := .name (toString x)
   let Γ' ← nctx
   let c ← checkIn C Γ' .bool (.binop .lt e' (.num n))
-  let check := if (← read).selfFrame then panicStmt 0x21 c else .assert c
+  let sc ← read
+  let check := if sc.selfFrame || sc.retainFailureData then panicStmt 0x21 c else .assert c
   pure ([.of Γ (.declLocal .uint x (some v)), .of Γ' check], e')
 
 /-- `e`'s value, or the reference it names, held in a fresh local before a

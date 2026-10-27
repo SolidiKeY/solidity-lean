@@ -81,3 +81,54 @@ The runner checks complete panic and custom-error returndata for 0.8.38 and
 0.8.34, legacy and via-IR, executing installed runtime code at a
 non-precompile address. The source's raw-catch checks inspect only length,
 selector and code bytes.
+
+### Upstream Group 10: retained payload adapter (2026-10-26)
+
+The Group 10 adapter compares complete retained failure bytes, executes typed
+ABI wrappers once, and keeps earlier observations on inconclusive exits.
+Canonical aggregate probes run separately and cannot certify lazy decoder
+failures. It does not change exception
+semantics or infer a concrete panic code from `.panic`. Implementation,
+validation, review and remaining scope are recorded in
+[ABI M3](abi-hashes.md#m3-upstream-group-10-exact-retained-revert-data-2026-10-26).
+
+### Group 10 external-entry observation (2026-10-27)
+
+The upstream adapter can retain exact source failure data at an external
+entry without pretending the call is a self-call. `retainFailureData` is a
+separate elaboration policy and a callee-cache identity component; sender,
+value, constructor initialization, internal-call order and rollback remain
+unchanged. Existing typed panic guards and revert encodings are reused.
+`entryProgParts` enables this policy only for the source capture statements;
+ABI input/probe/output code retains its ordinary policy. The adapter supplies
+checked literals or ABI-decoded locals, not arbitrary failing top-level raw
+argument expressions. Generic model panic stays inconclusive.
+
+The guard failure/success/priority lemmas use only standard Lean axioms;
+execution controls reject wrong codes, empty or extended payloads and changed
+caller/value, and verify rollback after a nested narrow overflow. This adds no
+core exception or taclet constructor and does not claim universal solc/model
+equivalence. See ABI M4 for the continuation evidence and remaining exclusions.
+
+The complete continuation replay retains 175 agreeing fixtures (57 additional,
+zero regressions), 102 failures and 160 blocks across the assigned 437 paths.
+Exact before/after observations and every required pipeline are preserved in
+`tests/upstream/group10-resume-results.json`; the final validation record is
+`tests/upstream/group10-resume-validation.json`. Named-error payload order,
+modular-zero and exponentiation panic data remain explicit execution failures,
+not exclusions or inferred generic-panic successes.
+
+M5 repairs those five admitted execution mismatches, preserving M4 as a
+historical completed replay. Named errors now capture typed operands in the
+pipeline order before arranging their final ABI words, with storage aliases
+retained until encoding. Modular-zero and checked unsigned power retain their
+exact panic data; nominal fixed-byte complement retains its width. See
+[ABI M5](abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27)
+for kernel controls, final selected replay and remaining failures. This does
+not extend custom-error encoding to arbitrary array or struct arguments.
+
+The Group10 aggregate custom-error continuation is recorded in
+[ABI M6](abi-hashes.md#m6-aggregate-custom-errors-and-compound-decoder-metadata-2026-10-27).
+It reuses the typed aggregate ABI encoder and raw memory-revert path, preserving
+reference locations, delayed reads, source ordering and rollback. Historical
+M5 evidence is unchanged; current and retained evidence remain distinct.

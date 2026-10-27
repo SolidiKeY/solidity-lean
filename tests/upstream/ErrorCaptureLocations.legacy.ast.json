@@ -1,0 +1,38 @@
+{
+ "header": {
+  "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sourceSha256": "f34092e972a4bff16292c506d2ed23c36509f86ff7b9f75ff95bd8ce3099bd78",
+  "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "source": "tests/upstream/ErrorCaptureLocations.sol",
+  "provenanceVersion": 1,
+  "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "validationStage": "analysis",
+  "settings": {
+   "viaIR": false,
+   "evmVersion": "osaka",
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "libraries": {},
+   "remappings": [],
+   "outputSelection": {
+    "*": {
+     "": [
+      "ast"
+     ]
+    }
+   }
+  },
+  "acceptedPragmas": [
+   [
+    "solidity",
+    "^",
+    "0.8",
+    ".38"
+   ]
+  ]
+ },
+ "ast": {"id":43,"nodeType":"SourceUnit","nodes":[{"literals":["solidity","^","0.8",".38"],"nodeType":"PragmaDirective","src":"0:24:0","line":1},{"errorSelector":"73065df8","id":7,"name":"ByteView","nodeType":"ErrorDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":3,"mutability":"mutable","name":"a","nodeType":"VariableDeclaration","src":"40:7:0","line":2,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"bytes"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName","src":"40:5:0","line":2,"typeDescriptions":{"typeString":"bytes"}},"visibility":"internal"},{"constant":false,"id":5,"mutability":"mutable","name":"n","nodeType":"VariableDeclaration","src":"49:6:0","line":2,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","src":"49:4:0","line":2,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"39:17:0","line":2},"src":"25:32:0","line":2},{"errorSelector":"e2425b75","id":14,"name":"ArrayView","nodeType":"ErrorDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":10,"mutability":"mutable","name":"a","nodeType":"VariableDeclaration","src":"74:8:0","line":3,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256[]"},"typeName":{"baseType":{"name":"uint","nodeType":"ElementaryTypeName","src":"74:4:0","line":3,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ArrayTypeName","src":"74:6:0","line":3,"typeDescriptions":{"typeString":"uint256[]"}},"visibility":"internal"},{"constant":false,"id":12,"mutability":"mutable","name":"n","nodeType":"VariableDeclaration","src":"84:6:0","line":3,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","src":"84:4:0","line":3,"typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"src":"73:18:0","line":3},"src":"58:34:0","line":3},{"canonicalName":"ErrorCaptureLocations","contractKind":"contract","id":42,"name":"ErrorCaptureLocations","nodeType":"ContractDefinition","nodes":[{"body":{"nodeType":"Block","src":"182:35:0","line":5,"statements":[{"errorCall":{"arguments":[{"kind":"number","nodeType":"Literal","src":"203:1:0","line":5,"typeDescriptions":{"typeString":"int_const 3"},"value":"3"},{"baseExpression":{"name":"b","nodeType":"Identifier","referencedDeclaration":16,"src":"207:1:0","line":5,"typeDescriptions":{"typeString":"bytes calldata"}},"nodeType":"IndexRangeAccess","src":"207:5:0","line":5,"startExpression":{"kind":"number","nodeType":"Literal","src":"209:1:0","line":5,"typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bytes calldata slice"}}],"expression":{"name":"ByteView","nodeType":"Identifier","referencedDeclaration":7,"src":"191:8:0","line":5,"typeDescriptions":{"typeString":"function (bytes memory,uint256) pure returns (error)"}},"kind":"functionCall","names":["n","a"],"nodeType":"FunctionCall","src":"191:23:0","line":5,"typeDescriptions":{"typeString":"error"}},"nodeType":"RevertStatement","src":"184:30:0","line":5}]},"functionSelector":"88a1c727","id":27,"kind":"function","name":"bytesSlice","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":16,"mutability":"mutable","name":"b","nodeType":"VariableDeclaration","src":"150:16:0","line":5,"stateVariable":false,"storageLocation":"calldata","typeDescriptions":{"typeString":"bytes"},"typeName":{"name":"bytes","nodeType":"ElementaryTypeName","src":"150:5:0","line":5,"typeDescriptions":{"typeString":"bytes"}},"visibility":"internal"}],"src":"149:18:0","line":5},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"182:0:0","line":5},"src":"130:87:0","line":5,"stateMutability":"pure","visibility":"external"},{"body":{"nodeType":"Block","src":"275:36:0","line":6,"statements":[{"errorCall":{"arguments":[{"baseExpression":{"name":"a","nodeType":"Identifier","referencedDeclaration":30,"src":"297:1:0","line":6,"typeDescriptions":{"typeString":"uint256[] calldata"}},"nodeType":"IndexRangeAccess","src":"297:5:0","line":6,"startExpression":{"kind":"number","nodeType":"Literal","src":"299:1:0","line":6,"typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256[] calldata slice"}},{"kind":"number","nodeType":"Literal","src":"305:1:0","line":6,"typeDescriptions":{"typeString":"int_const 3"},"value":"3"}],"expression":{"name":"ArrayView","nodeType":"Identifier","referencedDeclaration":14,"src":"284:9:0","line":6,"typeDescriptions":{"typeString":"function (uint256[] memory,uint256) pure returns (error)"}},"kind":"functionCall","names":["a","n"],"nodeType":"FunctionCall","src":"284:24:0","line":6,"typeDescriptions":{"typeString":"error"}},"nodeType":"RevertStatement","src":"277:31:0","line":6}]},"functionSelector":"5aacb2ef","id":41,"kind":"function","name":"arraySlice","nodeType":"FunctionDefinition","parameters":{"nodeType":"ParameterList","parameters":[{"constant":false,"id":30,"mutability":"mutable","name":"a","nodeType":"VariableDeclaration","src":"242:17:0","line":6,"stateVariable":false,"storageLocation":"calldata","typeDescriptions":{"typeString":"uint256[]"},"typeName":{"baseType":{"name":"uint","nodeType":"ElementaryTypeName","src":"242:4:0","line":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ArrayTypeName","src":"242:6:0","line":6,"typeDescriptions":{"typeString":"uint256[]"}},"visibility":"internal"}],"src":"241:19:0","line":6},"returnParameters":{"nodeType":"ParameterList","parameters":[],"src":"275:0:0","line":6},"src":"222:89:0","line":6,"stateMutability":"pure","visibility":"external"}],"src":"93:220:0","line":4}],"src":"0:314:0","line":1}
+}

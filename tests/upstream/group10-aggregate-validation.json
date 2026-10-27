@@ -1,0 +1,1428 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-27T11:29:48.529Z",
+  "branch": "codex/group10-abi-vectors",
+  "implementationCommit": "118bad2c3dde19a0e2276c471f0685e7a4e43194",
+  "modelSha256": "c580cecf8869a4bd4eaa80b298d640850fe5bab91d6ef651a88a6641a642615e",
+  "runnerSha256": "dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "fixtureEvidenceSha256": "eb99ba65d8a386316ec3f2914f3a21f3cb4148648a3d88302ba53616ecac1d03",
+  "frozenRulesSha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb",
+  "frozenCorpusSnapshotSha256": "c8d6166c3d728174eded3c3279fe499470f143943877a1307745f7a6b2da1b37",
+  "referencePackageLockSha256": "a91b4fef70395bf9ab7f71ac3f57bafeb1d92793ba83ee418c116af295d09206",
+  "environment": {
+    "id": "ccarenv_b64_Y2NhcmVudl8wYTI2MzEwZjJhOTA4MTkxOWRkMzNhMmRmOTI1Yzg2MA",
+    "managedStatus": "running/connected; observations_current true at resume",
+    "activation": "/workspace/.setup/activate.sh",
+    "lean": "4.24.0 (797c613e)",
+    "lake": "5.0.0-src+797c613",
+    "runtimeGate": "actual versions and cached KeySort build pass",
+    "leanMCP": "not exposed; configured per-file CLI used"
+  },
+  "runtimePolicies": {
+    "fixtures": "one Lean worker slot2/threads2/6GiB RSS; unchanged120000ms/fuel1000; final replay runs before focused workers",
+    "focused": "one serial Lean worker slot1/threads2/6GiB RSS after final fixture replay",
+    "heavy": "one serial Lean worker slot2/threads2/12GiB RSS after focused checks, unchanged existing heavy policy"
+  },
+  "checks": [
+    {
+      "name": "runtime-gate",
+      "command": "source /workspace/.setup/activate.sh; lean --version; lake --version; lake build Solidity.KeySort",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-gate.log",
+      "logBytes": 198,
+      "logSha256": "d4c07eef35ddf8621968ad0773faed699a0660314a8a3458483f42fe8809f2d7"
+    },
+    {
+      "name": "build9",
+      "command": "source /workspace/.setup/group10-runtime/activate.sh; GROUP10_LEAN_SLOT=1 lake build Solidity.Tools.Upstream",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/build9.log",
+      "logBytes": 5954,
+      "logSha256": "f1fd88005c67442498557c6bb907757fb8f9d66f3308e2329e40e5277541b6c9"
+    },
+    {
+      "name": "verify-final",
+      "command": "node scripts/solidity-upstream.mjs verify",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/verify-final.log",
+      "logBytes": 65,
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "name": "reviewed-inventory",
+      "command": "GROUP10_LEAN_SLOT=2 node /tmp/group10-aggregate-reviewed-inventory.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-inventory.log",
+      "logBytes": 24172,
+      "logSha256": "b16b24a6efe070b12fccd268592fbcd66e0d582ea88adb855a66f0c122bb333d"
+    },
+    {
+      "name": "reviewed-handoff",
+      "command": "node /tmp/group10-aggregate-reviewed-handoff.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-handoff.log",
+      "logBytes": 187,
+      "logSha256": "b034c82f80e3154b24ecd8d307612ef2830bf83ac2f0f7f30b7ae4a83b5f9d9c"
+    },
+    {
+      "name": "reviewed-node",
+      "command": "node --test --test-isolation=none scripts/solidity-upstream.test.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-node.log",
+      "logBytes": 2219,
+      "logSha256": "4cb7b0b43b6dd5df563dd9e2ffed567f944b6e1069b2c4fc20222d6ab82f5146"
+    },
+    {
+      "name": "reviewed-strict",
+      "command": "node scripts/check-automatic.mjs --strict",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-strict.log",
+      "logBytes": 87,
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "name": "reviewed-orphans",
+      "command": "node scripts/check-orphans.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-orphans.log",
+      "logBytes": 41,
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "name": "reviewed-layers",
+      "command": "node scripts/check-layers.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-layers.log",
+      "logBytes": 41,
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "name": "reviewed-trust",
+      "command": "git ls-files -z | node scripts/check-trust.mjs",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-trust.log",
+      "logBytes": 4051,
+      "logSha256": "9d0d969def4aaedca9aeff3c560007ad171b32f31cd7e40c457564b084e1a12d"
+    },
+    {
+      "name": "reviewed-family-AbiFeatures",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/AbiFeatures.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-AbiFeatures.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-AbiFeaturesImport",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/AbiFeaturesImport.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-AbiFeaturesImport.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-AbiHexCall",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/AbiHexCall.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-AbiHexCall.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-CallExceptions",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/CallExceptions.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-CallExceptions.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-PublicGetters",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/PublicGetters.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-PublicGetters.log",
+      "logBytes": 149,
+      "logSha256": "9d5a82cb29b0e3e9ea7dfbd73c853cf1f77c8ddd561b53b8c8ed773a7b702c35"
+    },
+    {
+      "name": "reviewed-family-SourceAdmissionImport",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/SourceAdmissionImport.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-SourceAdmissionImport.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-SliceCopies",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/SliceCopies.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-SliceCopies.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-Bytes",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/Bytes.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-Bytes.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-SignedCasts",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/SignedCasts.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-SignedCasts.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-Values",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/Values.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-Values.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-Operators",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/Operators.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-Operators.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-Checked",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/Checked.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-Checked.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-CheckedBlock",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/CheckedBlock.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-CheckedBlock.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-family-AggregatesImport",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/AggregatesImport.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-family-AggregatesImport.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-replay",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/Replay.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-replay.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-five-controls",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/FiveControls.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-five-controls.log",
+      "logBytes": 340,
+      "logSha256": "5e84462040452d4230df8e31a6a39d94dc29251a222083d77b9594032c58806e"
+    },
+    {
+      "name": "reviewed-numeric-exceptions",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Examples/Tactics/RevertData.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-numeric-exceptions.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-per-file-Body",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Frontend/SolcJson/Body.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-per-file-Body.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-per-file-Values",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Syntax/Elab/Values.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-per-file-Values.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-per-file-Lower",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Syntax/Elab/Lower.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-per-file-Lower.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-per-file-Arms",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 Solidity/Syntax/Elab/Arms.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-per-file-Arms.log",
+      "logBytes": 151,
+      "logSha256": "58ae67d6e3c0572023295f953ed5f4e269f1a4f3e3b98df145ea5300c78c8e33"
+    },
+    {
+      "name": "reviewed-AggregateErrorControls",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/AggregateErrorControls.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-AggregateErrorControls.log",
+      "logBytes": 100,
+      "logSha256": "bf7ff7920b53683485d11bea5af82e8db2cc37d12b412970b33f338e02ecf88b"
+    },
+    {
+      "name": "reviewed-AggregateErrorBoundary",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/AggregateErrorBoundary.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-AggregateErrorBoundary.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-CompoundAbiShape",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/CompoundAbiShape.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-CompoundAbiShape.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-ErrorCaptureLocations",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/ErrorCaptureLocations.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-ErrorCaptureLocations.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-typed",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 .lake/upstream/group10-aggregate-diagnosis/TraceReviewed.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-typed.log",
+      "logBytes": 374,
+      "logSha256": "9554716894a271581f582672ab89fd93bc02b79a29c95139308c01e8c7433613"
+    },
+    {
+      "name": "reviewed-AggregateRollback",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/AggregateRollback.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-AggregateRollback.log",
+      "logBytes": 105,
+      "logSha256": "c98ec26217d13e216013a47c2264c6a7996e681383614cc0c3d2ee964583d6be"
+    },
+    {
+      "name": "reviewed-EnumErrorControls",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/EnumErrorControls.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-EnumErrorControls.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-RequireAggregateControls",
+      "command": "lake env /workspace/.setup/group10-runtime/bin/lean --tstack=131072 tests/upstream/RequireAggregateControls.lean",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-RequireAggregateControls.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-abi-reference",
+      "command": "node scripts/check-abi-vectors.mjs /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js /workspace/.setup/abi-reference/node_modules",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-abi-reference.log",
+      "logBytes": 823,
+      "logSha256": "1bf5c5d951b71dd81063bcb93b3b0fd6e6e68c7359ed43f322c38b3807880e69"
+    },
+    {
+      "name": "reviewed-abi-hex-reference",
+      "command": "node scripts/check-abi-hex-call.mjs /workspace/.setup/abi-reference/node_modules /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/reviewed-abi-hex-reference.log",
+      "logBytes": 216,
+      "logSha256": "300b77a2fa88f657783888c86e9876da9793108606179dc2573aa06f87ee06bb"
+    },
+    {
+      "name": "full-build",
+      "command": "source /workspace/.setup/group10-heavy-runtime/activate.sh; GROUP10_LEAN_SLOT=2 ./run-lean.sh",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/full-build.log",
+      "logBytes": 150819,
+      "logSha256": "50c323faac17b28cbce63918e63f42e0cdf7f3b7aa431dbea066441a9f4518d9"
+    },
+    {
+      "name": "testsuite-final",
+      "command": "./scripts/check-testsuite.sh",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/testsuite-final.log",
+      "logBytes": 385,
+      "logSha256": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b"
+    },
+    {
+      "name": "corpus-build",
+      "command": "source /workspace/.setup/group10-heavy-runtime/activate.sh; GROUP10_LEAN_SLOT=2 lake build SolidityCorpus",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/corpus-build.log",
+      "logBytes": 43878,
+      "logSha256": "d15f0fec2657feb39b5f98ca9f7e2b8e076ebd0e17a492e66e741fc0fe3a0c8a"
+    },
+    {
+      "name": "corpus-final",
+      "command": "./scripts/check-corpus.sh --solkey /workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/corpus-final.log",
+      "logBytes": 163,
+      "logSha256": "a8d4e3728e5df0afb4e0203f13faf98455e6daf4e039678e8767039980791078"
+    },
+    {
+      "name": "doc-paths",
+      "command": "./scripts/check-doc-paths.sh",
+      "workingDirectory": "/workspace/solidity-lean",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/doc-paths.log",
+      "logBytes": 4549,
+      "logSha256": "971d094f024042acfd8679830b20f0b00ed17410234957109885cd77ca5206f4"
+    }
+  ],
+  "supportingLogs": [
+    {
+      "name": "reference2",
+      "command": "node /tmp/group10-aggregate-reference2.mjs",
+      "exitCode": 0,
+      "scope": "supporting reference EVM evidence, not Lean validation",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/support-reference2.log",
+      "logBytes": 10959,
+      "logSha256": "375fcd0cc23fffa0d3adb97082817c8102fb4d13278043410f8fa030ba67f8f4"
+    },
+    {
+      "name": "diagnosis",
+      "command": "node /tmp/group10-aggregate-diagnosis.mjs",
+      "exitCode": 0,
+      "scope": "pinned source/AST and original report collection",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/support-diagnosis.log",
+      "logBytes": 73,
+      "logSha256": "cef5f8386ef99047424681b4039e003233b09d18f7baa66b747bf4a0019a3a2b"
+    }
+  ],
+  "preliminaryExperiments": [
+    {
+      "name": "group10-EnumErrorControls-require-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-EnumErrorControls-require-legacy.log",
+      "logBytes": 144,
+      "logSha256": "ca9bcad7d108c0b02dfe24477e173a96c35544f72467ac2ab38cbd563c288b23"
+    },
+    {
+      "name": "group10-EnumErrorControls-require-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-EnumErrorControls-require-viaIR.log",
+      "logBytes": 143,
+      "logSha256": "c3776bd12dd1dfe5bcbc236f7f17a56270cdc757cd33a80482ec16f8caa55d14"
+    },
+    {
+      "name": "group10-RequireAggregateControls-require-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-RequireAggregateControls-require-legacy.log",
+      "logBytes": 151,
+      "logSha256": "825f162539a8e0c78e169791e981272399bd9cf215eda2de1c324e9644825e20"
+    },
+    {
+      "name": "group10-RequireAggregateControls-require-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-RequireAggregateControls-require-viaIR.log",
+      "logBytes": 150,
+      "logSha256": "807933bc646ee6fcbf2e96860f49fa1fa28898f5488c082423e2ede78fb93b8c"
+    },
+    {
+      "name": "group10-aggregate-ast-ir.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast-ir.log",
+      "logBytes": 148,
+      "logSha256": "067336769907b7ba465698bd38d788daf3f2f0c45b72d04374a3ab53db5453e3"
+    },
+    {
+      "name": "group10-aggregate-ast-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast-legacy.log",
+      "logBytes": 149,
+      "logSha256": "4eae8a1c14d1aba215adb74aacbb3eb1e7ef702468f2fe8e6379e13e9138adfe"
+    },
+    {
+      "name": "group10-aggregate-ast2-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast2-legacy.log",
+      "logBytes": 149,
+      "logSha256": "86a3051ec0c04643583e808f14e4886875bdc979217c6cc648320a59116e618d"
+    },
+    {
+      "name": "group10-aggregate-ast2-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast2-viaIR.log",
+      "logBytes": 148,
+      "logSha256": "d43766f8bff350e2662597c3344c263b68c5534a2a60364e32045f01f378399a"
+    },
+    {
+      "name": "group10-aggregate-ast3-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast3-legacy.log",
+      "logBytes": 149,
+      "logSha256": "a9c25b8d1eb8862d9ebaa47d960b26eab18421c5da5dbf0f6e2dbe3eb27bcf50"
+    },
+    {
+      "name": "group10-aggregate-ast3-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast3-viaIR.log",
+      "logBytes": 148,
+      "logSha256": "3de0011de973b1d2548cc5217d868c4bed300749cb55f00de0e1ec0150f3f738"
+    },
+    {
+      "name": "group10-aggregate-ast4-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast4-legacy.log",
+      "logBytes": 149,
+      "logSha256": "eb04a7ce3436819aa51e926b0a4b78b2fb220c00fa3978aaec9f494852baace3"
+    },
+    {
+      "name": "group10-aggregate-ast4-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast4-viaIR.log",
+      "logBytes": 148,
+      "logSha256": "3b757d7bcd02020cd47d651733dc2106a7d9b040fabb815a941f2e3b03f82192"
+    },
+    {
+      "name": "group10-aggregate-ast5-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast5-legacy.log",
+      "logBytes": 149,
+      "logSha256": "948277d062e1e9816fee2a3ae07bef36e0b5990746ac0bb14f50861f804fc0a8"
+    },
+    {
+      "name": "group10-aggregate-ast5-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-ast5-viaIR.log",
+      "logBytes": 148,
+      "logSha256": "069904ba177750dbfb5ba6b846381f90ca7dfac78a2b5c7643cbbe7e47418f7c"
+    },
+    {
+      "name": "group10-aggregate-boundary.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-boundary.log",
+      "logBytes": 93,
+      "logSha256": "b96f05d37d68bc66a4bac99d81ea9364d9b68c4af97fbfb966ebec800f47edb9"
+    },
+    {
+      "name": "group10-aggregate-boundary2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-boundary2.log",
+      "logBytes": 471,
+      "logSha256": "fdfac483d696529b9bbf4777d01dc95058cac024557da12fa9729f10b0699184"
+    },
+    {
+      "name": "group10-aggregate-boundary3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-boundary3.log",
+      "logBytes": 442,
+      "logSha256": "86d7f9322fbb4990a8a3e9d65d3dff1ac76fa2400e478aa2bb86c74028b66eb1"
+    },
+    {
+      "name": "group10-aggregate-boundary4.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-boundary4.log",
+      "logBytes": 470,
+      "logSha256": "d76089e29a26b6718321a8403d1619431f7b75d556c55e216a2ed82a47ab53fb"
+    },
+    {
+      "name": "group10-aggregate-boundary5.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-boundary5.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-build1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build1.log",
+      "logBytes": 6146,
+      "logSha256": "e25674cd64db289a3208855243601572dde41fa4e1d220145d17616862d8703e"
+    },
+    {
+      "name": "group10-aggregate-build2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build2.log",
+      "logBytes": 5959,
+      "logSha256": "8fd007ea4bf994a799ab79b35ed4bf7016bbd0cb5cc1b5f0a72fc7e56a898ff4"
+    },
+    {
+      "name": "group10-aggregate-build3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build3.log",
+      "logBytes": 5906,
+      "logSha256": "f1653870898d12563362cdc1f99b1c9e1ec5f3107fe80fd7a55fc3825804c494"
+    },
+    {
+      "name": "group10-aggregate-build4.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build4.log",
+      "logBytes": 5954,
+      "logSha256": "5f398fe07c28bc053b2250d9de39027940471e82a5a8292278ec72625bc682ce"
+    },
+    {
+      "name": "group10-aggregate-build5.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build5.log",
+      "logBytes": 5953,
+      "logSha256": "b1aa763aeeeb8cd221bd48648a981275814c0120f8ed6fe19f06d4744095b158"
+    },
+    {
+      "name": "group10-aggregate-build6.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build6.log",
+      "logBytes": 5953,
+      "logSha256": "5d8ca318fad9795ac307a2d3ddefecd5947c7c495037ea7f9a1bd94ccb9e6907"
+    },
+    {
+      "name": "group10-aggregate-build7.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build7.log",
+      "logBytes": 5955,
+      "logSha256": "6d1228a54cc1f3330fec503e42f8a9931110f491a6d7c550e5680daf617d8354"
+    },
+    {
+      "name": "group10-aggregate-build8.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-build8.log",
+      "logBytes": 5953,
+      "logSha256": "a72c80074da46c4f89690da5935aa03db1ab0264c8dbf8b1b0596bdbf13ffe67"
+    },
+    {
+      "name": "group10-aggregate-complete-inventory.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 143,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-complete-inventory.log",
+      "logBytes": 5736,
+      "logSha256": "66f6da9888e47376b4a277a475df66f3640319d2a5d112c4548f7cc7eea0146b"
+    },
+    {
+      "name": "group10-aggregate-complete-validation.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 143,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-complete-validation.log",
+      "logBytes": 39,
+      "logSha256": "9a5254d4fdfd3a535fc40dc0e4fe96b54fd339c1431841319cd8ebc54c99eb1b"
+    },
+    {
+      "name": "group10-aggregate-controls1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls1.log",
+      "logBytes": 549,
+      "logSha256": "1d284156586bcf35e5afcab2b4151628222039043ab35351a9a62569c7f2781c"
+    },
+    {
+      "name": "group10-aggregate-controls2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls2.log",
+      "logBytes": 734,
+      "logSha256": "3b96575183b5b692fd03321134dab4e118fe6cfed86048309e72f2314540e2c6"
+    },
+    {
+      "name": "group10-aggregate-controls3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls3.log",
+      "logBytes": 2773,
+      "logSha256": "487ded5cdf3a7cb4ea4ffeead8dcf2c652a5db8b82ffe2d94279e0a08bef1cbd"
+    },
+    {
+      "name": "group10-aggregate-controls4.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls4.log",
+      "logBytes": 294,
+      "logSha256": "f81fae76b560c5d28c8d19e9890e7fe7cf3c5c6d946ce39cd38390f383c5e1b6"
+    },
+    {
+      "name": "group10-aggregate-controls5.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 143,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls5.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-controls6.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls6.log",
+      "logBytes": 628,
+      "logSha256": "7aeef87e0b7474a2b9b49f9f1ed490a7c938f5da5f52dc3a7788f68d1cc83928"
+    },
+    {
+      "name": "group10-aggregate-controls7.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-controls7.log",
+      "logBytes": 100,
+      "logSha256": "bf7ff7920b53683485d11bea5af82e8db2cc37d12b412970b33f338e02ecf88b"
+    },
+    {
+      "name": "group10-aggregate-diagnosis.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-diagnosis.log",
+      "logBytes": 73,
+      "logSha256": "cef5f8386ef99047424681b4039e003233b09d18f7baa66b747bf4a0019a3a2b"
+    },
+    {
+      "name": "group10-aggregate-families.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-families.log",
+      "logBytes": 248,
+      "logSha256": "edbf8547c248ff165e8a10821fd9bc2c03b72e5995754244477237aff487f4b3"
+    },
+    {
+      "name": "group10-aggregate-family-AbiFeatures.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-AbiFeatures.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-AbiFeaturesImport.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-AbiFeaturesImport.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-AbiHexCall.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-AbiHexCall.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-Bytes.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-Bytes.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-CallExceptions.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-CallExceptions.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-PublicGetters.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-PublicGetters.log",
+      "logBytes": 149,
+      "logSha256": "9d5a82cb29b0e3e9ea7dfbd73c853cf1f77c8ddd561b53b8c8ed773a7b702c35"
+    },
+    {
+      "name": "group10-aggregate-family-SignedCasts.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-SignedCasts.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-SliceCopies.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-SliceCopies.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-SourceAdmissionImport.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-SourceAdmissionImport.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-family-Values.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-family-Values.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-final-gates.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-gates.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-final-gates2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-gates2.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-final-gates3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-gates3.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-final-inventory.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 143,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-inventory.log",
+      "logBytes": 12808,
+      "logSha256": "c121549d11969679bb7741bc6507dd5382a36999f3c1e946a31aacf3231df7be"
+    },
+    {
+      "name": "group10-aggregate-final-layers.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-layers.log",
+      "logBytes": 41,
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "name": "group10-aggregate-final-node.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-node.log",
+      "logBytes": 2220,
+      "logSha256": "95431ea6643b690e4ad2e7ca23c454f3aa74651c5023f1720ee1fc24433960fd"
+    },
+    {
+      "name": "group10-aggregate-final-orphans.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-orphans.log",
+      "logBytes": 41,
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "name": "group10-aggregate-final-strict.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-strict.log",
+      "logBytes": 87,
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "name": "group10-aggregate-final-trust.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-final-trust.log",
+      "logBytes": 4051,
+      "logSha256": "9d0d969def4aaedca9aeff3c560007ad171b32f31cd7e40c457564b084e1a12d"
+    },
+    {
+      "name": "group10-aggregate-import-report.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-import-report.log",
+      "logBytes": 3274,
+      "logSha256": "6b515b98ea8f71510eb69c8b1770d764b809de2eb0b02629017232298357e237"
+    },
+    {
+      "name": "group10-aggregate-inventory.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 143,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-inventory.log",
+      "logBytes": 6839,
+      "logSha256": "c8ae58689310a1d5cc45f580c3106686b2e902455d8a52fa7f659eb3721f7545"
+    },
+    {
+      "name": "group10-aggregate-layers.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-layers.log",
+      "logBytes": 41,
+      "logSha256": "796967c8fc5b198e2b31901af53700faa8ae3d315f2267cd0a92fdcba6953562"
+    },
+    {
+      "name": "group10-aggregate-node1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-node1.log",
+      "logBytes": 2126,
+      "logSha256": "636098e3e40fd8a84ed4876c207ffdfca3c8fa1cd4cf184c46becf3771410e54"
+    },
+    {
+      "name": "group10-aggregate-node2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-node2.log",
+      "logBytes": 2220,
+      "logSha256": "4d1c6c99a25d05e505246c320a365f18c5d69d37dbca53efc301fa3582eb3a03"
+    },
+    {
+      "name": "group10-aggregate-orphans.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-orphans.log",
+      "logBytes": 41,
+      "logSha256": "36ac5f689fc67a12470bd14ae3efe1c7e258609fa376dcf44c0d65d93274aa8f"
+    },
+    {
+      "name": "group10-aggregate-reference1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-reference1.log",
+      "logBytes": 6011,
+      "logSha256": "822961c1d0b40afd5c7ce600c9e3857cf59b034c3bc37734c5d8be31ec566527"
+    },
+    {
+      "name": "group10-aggregate-revert-conversion1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-revert-conversion1.log",
+      "logBytes": 1332,
+      "logSha256": "6d413dade8b0f359598f8553c418f6a48e45fe813cab062cd3ee443d02e70e84"
+    },
+    {
+      "name": "group10-aggregate-reviewed-validation.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-reviewed-validation.log",
+      "logBytes": 1276,
+      "logSha256": "f14cae672731025099fc00dcd6fe298ebe726314cd8fb64f3045ec36c728afe5"
+    },
+    {
+      "name": "group10-aggregate-rollback.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-rollback.log",
+      "logBytes": 419,
+      "logSha256": "ac6aa9a819a67da7907b6be20da29651c56a4d35d72eb557780c8f5ca572cbe5"
+    },
+    {
+      "name": "group10-aggregate-rollback2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-rollback2.log",
+      "logBytes": 105,
+      "logSha256": "c98ec26217d13e216013a47c2264c6a7996e681383614cc0c3d2ee964583d6be"
+    },
+    {
+      "name": "group10-aggregate-strict.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-strict.log",
+      "logBytes": 87,
+      "logSha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81"
+    },
+    {
+      "name": "group10-aggregate-trust.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-trust.log",
+      "logBytes": 4051,
+      "logSha256": "9d0d969def4aaedca9aeff3c560007ad171b32f31cd7e40c457564b084e1a12d"
+    },
+    {
+      "name": "group10-aggregate-typed-final.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-typed-final.log",
+      "logBytes": 374,
+      "logSha256": "9554716894a271581f582672ab89fd93bc02b79a29c95139308c01e8c7433613"
+    },
+    {
+      "name": "group10-aggregate-using-structs1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-using-structs1.log",
+      "logBytes": 1328,
+      "logSha256": "937abe8d7ad4200787dfd224eee7753cf45678c65252c4aeedd435299f2718bc"
+    },
+    {
+      "name": "group10-aggregate-validation-report-final.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-validation-report-final.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-aggregate-verify.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-aggregate-verify.log",
+      "logBytes": 65,
+      "logSha256": "ea243fafa41d199135b7504c94136144c2e19ef5223d0ec707c310341866bda6"
+    },
+    {
+      "name": "group10-capture-locations-check1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-capture-locations-check1.log",
+      "logBytes": 199,
+      "logSha256": "414a18caee9b27ec5dfa7f2bf051cf06b92feb14164eadc415504968454eeb47"
+    },
+    {
+      "name": "group10-capture-locations-check2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-capture-locations-check2.log",
+      "logBytes": 226,
+      "logSha256": "bc9188510afa1ab4468eb615aba546b60476331f546c609e9b99c82369b4a19e"
+    },
+    {
+      "name": "group10-capture-locations-check3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-capture-locations-check3.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-capture-locations-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-capture-locations-legacy.log",
+      "logBytes": 147,
+      "logSha256": "123e8fdee753314abb94e8679c3f32c7e459b92a2b8c689343f068167e25408e"
+    },
+    {
+      "name": "group10-capture-locations-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-capture-locations-viaIR.log",
+      "logBytes": 146,
+      "logSha256": "46a90c07182bfb1be7dfbad972a99afa08a0b8e3f8e12f2c4dcaf58ae8609ff6"
+    },
+    {
+      "name": "group10-compound-after-arrays_complex_memory_index_access.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-after-arrays_complex_memory_index_access.log",
+      "logBytes": 1360,
+      "logSha256": "ce9e442b5a2f5d42bf8876acf792382fe6382ba5edfecb28c1ba2d52d2bca07f"
+    },
+    {
+      "name": "group10-compound-after-memory_arrays_static.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-after-memory_arrays_static.log",
+      "logBytes": 1360,
+      "logSha256": "8e94d5e173665bb3c73eaa5788e582006f3c8314eece74c0fdd358a2bbf10469"
+    },
+    {
+      "name": "group10-compound-after-nested_array_element_memory_to_memory.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-after-nested_array_element_memory_to_memory.log",
+      "logBytes": 1359,
+      "logSha256": "73a22612afbe1faf6fb4cd84db084ca76058969a2214d9ea7fbf61b8ecb726d1"
+    },
+    {
+      "name": "group10-compound-before-arrays_complex_memory_index_access.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-before-arrays_complex_memory_index_access.log",
+      "logBytes": 1360,
+      "logSha256": "9bbf3769d9a32f36d2d11ce7f64aad994a336dd9a90869548da53f93695de2ab"
+    },
+    {
+      "name": "group10-compound-before-memory_arrays_static.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-before-memory_arrays_static.log",
+      "logBytes": 1360,
+      "logSha256": "18a2221b186f0e84e360f942a2e61745556aefc17816cee06437754d95100887"
+    },
+    {
+      "name": "group10-compound-before-nested_array_element_memory_to_memory.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-before-nested_array_element_memory_to_memory.log",
+      "logBytes": 1359,
+      "logSha256": "caebc2d13c0eacad50b921e49804d13d5ea999b43f5add6bfdf8ded0fe7f6750"
+    },
+    {
+      "name": "group10-compound-controls1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-controls1.log",
+      "logBytes": 4320,
+      "logSha256": "18afb2088b6d7f79adc252afe967a075405aeb23b96e6d095f683ce7b4b64890"
+    },
+    {
+      "name": "group10-compound-controls2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-controls2.log",
+      "logBytes": 513,
+      "logSha256": "6aef66d846c4c1288fdf043c5ba73c5c80ed845a989163a77342c6f4c12f8d02"
+    },
+    {
+      "name": "group10-compound-controls3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-controls3.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-compound-controls4.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 1,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-controls4.log",
+      "logBytes": 100,
+      "logSha256": "6ad46d01c67ba552abfd446f0b4faa77391db1f114d15360dc0df83fdcde3eef"
+    },
+    {
+      "name": "group10-compound-controls5.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-compound-controls5.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-enum-errors-check1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-check1.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-enum-errors-check2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-check2.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-enum-errors-check3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-check3.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-enum-errors-check4.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-check4.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-enum-errors-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-legacy.log",
+      "logBytes": 144,
+      "logSha256": "d9a6763ef5f042817e3bd92f0a2168ee7b5aecad982c4667aca9e86918aebb68"
+    },
+    {
+      "name": "group10-enum-errors-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-enum-errors-viaIR.log",
+      "logBytes": 143,
+      "logSha256": "dfdb58f96678331653e89b0356c55af8826281b08a160d76c4dfadddba62a439"
+    },
+    {
+      "name": "group10-require-aggregate-check1.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-require-aggregate-check1.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-require-aggregate-check2.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-require-aggregate-check2.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-require-aggregate-check3.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "exitCode": 0,
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-require-aggregate-check3.log",
+      "logBytes": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "group10-require-aggregate-effects-legacy.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-require-aggregate-effects-legacy.log",
+      "logBytes": 151,
+      "logSha256": "b668ca023418ca3e387c65596ce775dd6274deb2164084efae3a129ccbe384e3"
+    },
+    {
+      "name": "group10-require-aggregate-effects-viaIR.log",
+      "scope": "preliminary/superseded/supporting diagnostic log, not a final gate",
+      "log": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/preliminary-group10-require-aggregate-effects-viaIR.log",
+      "logBytes": 150,
+      "logSha256": "f081cde3e7c989e787e14e7f0e68f03e2a2f6efc2afdf67a4fdb4e8bd307c6bb"
+    }
+  ],
+  "runtimeArtifacts": [
+    {
+      "source": "/workspace/.setup/group10-runtime/bin/lean",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-0-lean",
+      "bytes": 1207,
+      "sha256": "36309ff91554f7583538d7b6d9de9a11c93cac868229f3e1acef3258b2ea9ff0"
+    },
+    {
+      "source": "/workspace/.setup/group10-heavy-runtime/bin/lean",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-1-lean",
+      "bytes": 1209,
+      "sha256": "3be03aa2ed4d362f8ec00bb94ef10f1afc321c688f4db613db0e5327b4e22a89"
+    },
+    {
+      "source": "/workspace/.setup/group10-runtime/activate.sh",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-2-activate.sh",
+      "bytes": 206,
+      "sha256": "d633ca989764d2d8d8f82a684db01f8b40b4213ab9e9e8e2e3576631320e72d4"
+    },
+    {
+      "source": "/workspace/.setup/group10-heavy-runtime/activate.sh",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-3-activate.sh",
+      "bytes": 246,
+      "sha256": "fbba76e871e55f79fd7fb0335774caade66c272759176213e092edeebb24e162"
+    },
+    {
+      "source": "/tmp/group10-aggregate-reviewed-inventory.mjs",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-4-group10-aggregate-reviewed-inventory.mjs",
+      "bytes": 4987,
+      "sha256": "8d9bc64ed8e3269eccb0e1ffaa6c26dc5d95ba0b919cf131a3c9ef129afa4d1e"
+    },
+    {
+      "source": "/tmp/group10-aggregate-reviewed-handoff.mjs",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-5-group10-aggregate-reviewed-handoff.mjs",
+      "bytes": 10908,
+      "sha256": "fde579024dae92de47b845ddb0bb398cd287815443c18cf2e742f18d06e88814"
+    },
+    {
+      "source": "/tmp/group10-aggregate-reviewed-validation.sh",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-6-group10-aggregate-reviewed-validation.sh",
+      "bytes": 3427,
+      "sha256": "7a1f26a1efdbe989e87f4f8a3d4d2c647a649d5194362866e80b05147e74f1f7"
+    },
+    {
+      "source": "/tmp/group10-aggregate-reviewed-validation-report.mjs",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-7-group10-aggregate-reviewed-validation-report.mjs",
+      "bytes": 12466,
+      "sha256": "1e496d88639d6e79858b2dfe781d4b821991f592f197f3baf9aba0faf2e9beb9"
+    },
+    {
+      "source": "/tmp/group10-aggregate-reference2.mjs",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-8-group10-aggregate-reference2.mjs",
+      "bytes": 2973,
+      "sha256": "18960e2d739dbb52300a8edffed19129b5c8560d9541872e55d9719ff4371723"
+    },
+    {
+      "source": "/tmp/group10-aggregate-diagnosis.mjs",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-9-group10-aggregate-diagnosis.mjs",
+      "bytes": 3869,
+      "sha256": "5ceef823a6a134d70131d14281b510b1c83a1e8e7868185ddb8fe3aad174830b"
+    },
+    {
+      "source": "/tmp/group10-aggregate-export.py",
+      "path": "/workspace/solidity-lean/.lake/upstream/group10-aggregate-validation/runtime-10-group10-aggregate-export.py",
+      "bytes": 4633,
+      "sha256": "802cf4232f27271f01ad157ded08f3fc865ec140e3e11bef0cb0c439db598aaa"
+    }
+  ],
+  "performance": {
+    "fixtureWallMilliseconds": {
+      "min": 2589,
+      "median": 4975,
+      "max": 105956
+    },
+    "moduleWallSeconds": [
+      {
+        "module": "Solidity.Examples.Tactics.Join",
+        "currentSeconds": 92,
+        "priorM5Seconds": 93
+      },
+      {
+        "module": "Solidity.Examples.Tactics.CallbackStrategy",
+        "currentSeconds": 744,
+        "priorM5Seconds": 198
+      },
+      {
+        "module": "Solidity.Examples.Tactics.OpenLoops",
+        "currentSeconds": 509,
+        "priorM5Seconds": 492
+      },
+      {
+        "module": "Solidity.Examples.DecisionHashes",
+        "currentSeconds": 302,
+        "priorM5Seconds": 309
+      },
+      {
+        "module": "Solidity.Examples.Decision",
+        "currentSeconds": 752,
+        "priorM5Seconds": 760
+      },
+      {
+        "module": "Solidity.Examples.DecisionArrays",
+        "currentSeconds": 47,
+        "priorM5Seconds": 44
+      },
+      {
+        "module": "Solidity.Examples.Tactics.Recursion",
+        "currentSeconds": 309,
+        "priorM5Seconds": 740
+      }
+    ],
+    "memoryEvents": {
+      "low": 0,
+      "high": 0,
+      "max": 17005,
+      "oom": 3,
+      "oom_kill": 3,
+      "oom_group_kill": 0
+    },
+    "baselineOomKillCount": 3,
+    "newOomKills": 0,
+    "nativeProcessSamples": [
+      {
+        "module": "Solidity.Examples.Tactics.Recursion",
+        "sampledElapsedSeconds": 282,
+        "sampledRssKiB": 2207932
+      },
+      {
+        "module": "Solidity.Examples.Tactics.CallbackStrategy",
+        "sampledElapsedSeconds": 178,
+        "sampledRssKiB": 1604284
+      },
+      {
+        "module": "Solidity.Examples.Tactics.OpenLoops",
+        "sampledElapsedSeconds": 482,
+        "sampledRssKiB": 8237700
+      }
+    ],
+    "note": "Fixture times include compiler/cache/admission/replay. Lake module wall times include wrapper/lock queue waits and are not native process CPU times; native samples are isolated observations, not peaks or controlled benchmarks."
+  },
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "newAxioms": [],
+  "proofScope": "Existing typed aggregate encoder and raw memory revert/catch operations reused. Kernel-specialized exact-buffer and bounded original-caller self-catch laws; six kernel-defined original entry programs; finite frontend/replay controls. No universal frontend/compiler/encoder equivalence theorem.",
+  "referenceChecksAreLeanCoverage": false,
+  "knownBaselineFailures": [
+    {
+      "check": "doc-paths",
+      "exitCode": 1,
+      "diagnosticCount": 26,
+      "underlyingMissingReferences": 13,
+      "repeatedByPreservedM3Evidence": 13,
+      "identicalToBaseline": true,
+      "baselineCommit": "c31e76b6939a9a18df8403648142429ae52b4867"
+    },
+    {
+      "check": "trust",
+      "exitCode": 1,
+      "diagnosticCount": 25,
+      "identicalToBaseline": true,
+      "baselineCommit": "ea43de135c0b2548640246e3bdb964ec4bfe0f9d"
+    }
+  ],
+  "review": {
+    "finder": "implementation approved",
+    "skeptic": "implementation/rollback proof approved",
+    "finalEvidenceReviewRecord": "tests/upstream/group10-aggregate-review.json (separate immutable record after final audit)"
+  },
+  "notes": [
+    "All earlier commits, historical source/expectation/archive bytes, reports and exports preserved.",
+    "Final189 fresh fixtures are separate from248 retained unrun reports; this is not complete437 repair.",
+    "Superseded preliminary inventories stopped when confirmed slice-provenance, source-enum and require-constructor entrypoint gaps were repaired. Their reports remain preserved; the first copied slot1 metadata literal has a separate additive clarification. The final reviewed inventory has correct slot2 metadata and one final model hash.",
+    "Before-position zero sentinel is clarified in a separate artifact; the original diagnosis file is unchanged.",
+    "A metadata overwrite was rejected by automatic approval review; no rejected mutation ran. The safer additive clarification completed without changing preserved evidence.",
+    "Preliminary compilation/proof/control failures, including recovery axiom output from a failed exploratory check, are not final proof evidence; completed kernel checks have only the recorded standard axioms.",
+    "No new core dependency, axiom, sorry, raised heartbeat/fuel/timeout or resource cap introduced."
+  ]
+}

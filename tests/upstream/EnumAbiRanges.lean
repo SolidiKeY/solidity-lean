@@ -39,3 +39,18 @@ private def check (C : Contract) (rows : List ImportRow) (text expected : String
 #eval check AbiIR.EnumAbiRanges AbiIR.EnumAbiRanges.report "{\"vectors\":[{\"signature\":\"read(uint8)\",\"args\":[\"2\"],\"failure\":false,\"expected\":[\"2\"]}]}" "broken"
 
 #eval check AbiIR.EnumAbiRanges AbiIR.EnumAbiRanges.report "{\"vectors\":[{\"signature\":\"read(uint8)\",\"args\":[\"2\"],\"failure\":true,\"expected\":[\"1\"]}]}" "broken"
+
+-- Raw vectors cannot erase nominal enum bounds into unconstrained uint8 input.
+#eval (do
+  for (C, rows) in [(AbiLegacy.EnumAbiRanges, AbiLegacy.EnumAbiRanges.report),
+      (AbiIR.EnumAbiRanges, AbiIR.EnumAbiRanges.report)] do
+    for n in [1, 2] do
+      let v := Json.mkObj [("signature", toJson "read(uint8)"),
+        ("calldata", toJson ((Semantics.wordBytes n).map UInt8.toNat)),
+        ("inputTypes", toJson ["uint8"]), ("outputTypes", toJson ["uint256"]),
+        ("expectedBytes", toJson ([] : List Nat)), ("failure", toJson true)]
+      let report := replay C rows (Json.mkObj [("vectors", toJson [v])])
+      unless (report.getObjValAs? String "status").toOption == some "blocked" &&
+          (report.getObjValAs? String "reason").toOption ==
+            some "nominal enum ABI range needs a declaration adapter" do
+        throw (IO.userError report.pretty) : IO Unit)

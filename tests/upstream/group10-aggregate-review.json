@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-27T11:31:13.120080+00:00",
+  "branch": "codex/group10-abi-vectors",
+  "implementationCommit": "118bad2c3dde19a0e2276c471f0685e7a4e43194",
+  "fixtureEvidence": {
+    "path": "tests/upstream/group10-aggregate-results.json",
+    "sha256": "eb99ba65d8a386316ec3f2914f3a21f3cb4148648a3d88302ba53616ecac1d03"
+  },
+  "validationEvidence": {
+    "path": "tests/upstream/group10-aggregate-validation.json",
+    "sha256": "06d33f36759019470e90590c03ba4886ca386ad351d7ed9f57692aac4150e45f"
+  },
+  "reviews": [
+    {
+      "reviewer": "/root/revert_finder",
+      "readOnly": true,
+      "leanOrBuildWorkersOpened": false,
+      "sourceAndControls": "approved; confirmed findings fixed before final replay",
+      "fixtureAudit": "approved: all437 raw report hashes;189fresh ABI regenerations;375required pipelines/1486ordered observations;248retained entries unchanged",
+      "finalGates": "approved: all46final logs/2supporting/101preliminary/11runtime artifacts hashes and lengths;44functional exit0;doc26/trust25 exact baseline failures;build649/suite249/corpus257+774/frozen131 verified",
+      "newOomKills": 0,
+      "confirmedOutstandingIssues": []
+    },
+    {
+      "reviewer": "/root/revert_skeptic",
+      "readOnly": true,
+      "leanOrBuildWorkersOpened": false,
+      "sourceAndControls": "approved; confirmed findings fixed before final replay",
+      "fixtureAudit": "approved: all437 raw report hashes;189fresh ABI regenerations;375required pipelines/1486ordered observations;248retained entries unchanged",
+      "finalGates": "approved: all46final logs/2supporting/101preliminary/11runtime artifacts hashes and lengths;44functional exit0;doc26/trust25 exact baseline failures;build649/suite249/corpus257+774/frozen131 verified",
+      "newOomKills": 0,
+      "confirmedOutstandingIssues": []
+    }
+  ],
+  "exports": "Actual export audits recorded separately after creation in .lake/upstream/group10-aggregate-export-review.json",
+  "pull": {
+    "command": "git pull --ff-only",
+    "exitCode": 128,
+    "fetchedOriginMaster": "a7a35aa5",
+    "result": "Branches diverged; no fast-forward, merge or rebase performed; implementation and working files unchanged"
+  }
+}

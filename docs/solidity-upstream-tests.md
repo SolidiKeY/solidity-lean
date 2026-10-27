@@ -394,3 +394,30 @@ correctness. Eleven kernel-checked initialization controls are in
 `tests/upstream/InitializationOrder.lean`; their source is independently pinned
 for both legacy and viaIR. Reproduce the completed 67-fixture run with
 `bash tests/upstream/repairs/group02-init-commands.sh`.
+
+The Group 10 continuation from `c31e76b6` is recorded separately in
+`tests/upstream/group10-resume-results.json`: all 437 original fixture paths,
+175 agreements / 102 failures / 160 blocks, with 57 new agreements and no
+regression of the previous 118. Its source/model/compiler hashes, per-fixture
+commands and complete required-pipeline observations are retained there;
+`tests/upstream/group10-resume-validation.json` records final checks. Previous
+Group 10 evidence and historical imported results remain unchanged. See
+[ABI M4](feature-work/abi-hashes.md#m4-group-10-continuation-from-c31e76b6-2026-10-27)
+for soundness boundaries, independent reviews and remaining actionable failures.
+
+The five admitted execution mismatches from that replay are repaired in the
+separate [ABI M5 continuation](feature-work/abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27).
+Its fresh inventory covers all 175 prior agreements, the five exact failures,
+and six directly affected elaboration failures. The other 251 prior reports
+are retained explicitly as not rerun; their behavior after the shared changes
+is not certified. New evidence uses `tests/upstream/group10-five-results.json`
+and `tests/upstream/group10-five-validation.json`, preserving all earlier
+reports, source bytes and expected observations.
+
+The [Group10 ABI M6 continuation](feature-work/abi-hashes.md#m6-aggregate-custom-errors-and-compound-decoder-metadata-2026-10-27)
+repairs the two aggregate custom-error failures and three reproduced compound
+decoder metadata gaps. New results and validation use separate
+`tests/upstream/group10-aggregate-results.json` and
+`tests/upstream/group10-aggregate-validation.json`; every earlier report and
+export is preserved. Selected fresh replay never certifies retained unrun
+import/profile/host/configuration/resource cases against a changed model.
