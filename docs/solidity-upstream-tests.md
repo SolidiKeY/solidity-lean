@@ -196,3 +196,11 @@ are retained explicitly as not rerun; their behavior after the shared changes
 is not certified. New evidence uses `tests/upstream/group10-five-results.json`
 and `tests/upstream/group10-five-validation.json`, preserving all earlier
 reports, source bytes and expected observations.
+
+The [Group10 ABI M6 continuation](feature-work/abi-hashes.md#m6-aggregate-custom-errors-and-compound-decoder-metadata-2026-10-27)
+repairs the two aggregate custom-error failures and three reproduced compound
+decoder metadata gaps. New results and validation use separate
+`tests/upstream/group10-aggregate-results.json` and
+`tests/upstream/group10-aggregate-validation.json`; every earlier report and
+export is preserved. Selected fresh replay never certifies retained unrun
+import/profile/host/configuration/resource cases against a changed model.

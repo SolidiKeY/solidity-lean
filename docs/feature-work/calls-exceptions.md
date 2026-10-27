@@ -247,3 +247,9 @@ exact panic data; nominal fixed-byte complement retains its width. See
 [ABI M5](abi-hashes.md#m5-repair-the-five-admitted-execution-mismatches-2026-10-27)
 for kernel controls, final selected replay and remaining failures. This does
 not extend custom-error encoding to arbitrary array or struct arguments.
+
+The Group10 aggregate custom-error continuation is recorded in
+[ABI M6](abi-hashes.md#m6-aggregate-custom-errors-and-compound-decoder-metadata-2026-10-27).
+It reuses the typed aggregate ABI encoder and raw memory-revert path, preserving
+reference locations, delayed reads, source ordering and rollback. Historical
+M5 evidence is unchanged; current and retained evidence remain distinct.

@@ -846,3 +846,273 @@ group10-five-export.json under .lake/upstream. The export manifest records the
 exact local commit, sizes and SHA256 values; the writer preserves every earlier
 Group 10 patch/archive/export manifest, refuses overwrites and verifies each
 archive member by readback. All work remains on the isolated local lane.
+
+## M6: aggregate custom errors and compound decoder metadata (2026-10-27)
+
+This continuation preserves ea43de13, 8a3d7b6d, every earlier report/export and
+all 437 upstream inputs and expectations. The two remaining fresh failures
+stopped before any runtime observation: revert_conversion at custom-error
+array encoding, and using_structs at a generated named struct capture without
+a location. Neither was recategorized as an exclusion. New diagnosis artifacts
+are under .lake/upstream/group10-aggregate-diagnosis; the original before.json
+is preserved, with a separate hashed clarification that its zero-position
+sentinel means no observation executed, not a differing call at position zero.
+Complete source/AST declarations, argument provenance and all six final typed
+entry programs are retained there.
+
+The pinned revert_conversion error is declaration8, E(string a,uint256[] b),
+with parameter IDs3 and6. Its f() pushes7 to storage x and reverts with selector
+59e4d4df, head offsets64/128, string abc and the one-element array[7]. The
+using_structs error is declaration16, E(uint256 a,S s,uint256 b), parameter
+IDs9/12/14; S is declaration7. Its true then false call sequence must emit the
+same e96e07f0 payload: outer words2,96,7, then struct words9,64,3 and padded abc.
+The source and reports preserve every byte, including the complete196-byte
+and228-byte payloads respectively. Both required pipelines now execute every
+original observation:1/1 for revert_conversion and2/2 for using_structs.
+
+Named custom-error captures now recognize reference structs by their resolved
+StructDefinition identity. Locations follow actual storage/calldata operands;
+constructed memory values remain memory values. Existing pipeline scheduling,
+name permutation and fresh-name checks remain in place. Calldata captures
+still fail the existing slice-origin gate where the model lacks an admitted
+view; they are never silently converted into memory. The new source controls
+pin both refusals explicitly.
+
+Exact custom-error aggregate encoding reuses the existing typed ABI encoder
+and existing raw memory-revert statement. Before admitting a reference it
+checks the actual RefTy against the declared parameter and checks all declared
+width/shape rows. Aggregate marks remain absent so the existing recursive
+encoder sees the actual type and place. Storage and memory aliases remain live
+until all operands have evaluated, including later mutations. Mappings and
+internal-function encodings remain refused; a recursive custom-error admission
+guard additionally keeps nominal enum aggregates refused. Ordinary ABI enum
+encoding is unchanged. No intrinsic representation, core operation, inference
+rule or dependency changed. History was inspected; this is interface reuse,
+not reversal of a speed optimization.
+
+AggregateErrorControls checks empty/nonempty arrays, struct field order and
+signed words, nested arrays and offsets, source and named ordering, storage
+clears, indexed storage aliases, memory-array and memory-struct mutation,
+prior assertion failure, caller/value, post-failure storage reads and exact
+selectors. Wrong offsets/lengths/order/sign extension, stale snapshots,
+empty/truncated/extended payloads and malformed declared reference types are
+rejected. AggregateErrorBoundary adds a declared distinct same-layout struct,
+nested enum refusal and exact counts for calldata refusals. The mathematical
+raw_error_exact theorem instantiates the existing operation-preserving
+TRun.revertData_mem theorem: the encoder buffer is forwarded byte for byte.
+Its only axioms are propext, Classical.choice and Quot.sound. The six original
+entry program quotations kernel-check with propext only. Finite compiled
+frontend/replay checks are recorded separately; no universal correctness
+claim for the frontend or aggregate encoder is made.
+
+The required next repair was selected from actual retained failure reasons,
+not filenames. Three fixtures reproduced missing compound decoder width rows:
+memory_arrays_static, arrays_complex_memory_index_access and
+nested_array_element_memory_to_memory. exprShape previously recognized only
+a bare type or one fixed dimension, while the decoder already used the
+recursive abiTyExpr? parser. It now uses that same parser and elabTyW for
+compound dimensions, retaining the builtin-shadowing guard and strict shape
+checks. All three complete in both required modes with1/1,1/1 and6/6 original
+observations respectively. CompoundAbiShape pins metadata, malformed type
+arity, wrong widths/byte kinds, shadowing and nominal enum refusal. Since the
+type reader is partial elaborator code, those finite metadata checks run as
+frontend checks, not kernel computation claims. The Node regression pins all
+eight original compound observations and complete output bytes, together with
+selected calldata dimensions, lengths and the final calldata word. The final
+inventory collector separately audits every raw calldata byte.
+
+Supporting reference-EVM controls independently check32 byte-exact aggregate
+source cases. The first indexed-storage reverse-order hypothesis failed in a
+preserved preliminary script; the corrected control matches[11] in both modes.
+Reference output is supporting source evidence, never Lean coverage or a
+rollback theorem. An exploratory global/named struct internal-function
+parameter control hit an existing unknown-type import gap; direct source
+increments instead isolate memory-struct alias timing without claiming that
+separate internal-call gap repaired. Preliminary checks and diagnostics remain
+separate from final checks.
+
+Final replay, validation, independent evidence review and immutable exports
+are recorded below when complete. The complete437 assignment remains
+incomplete while retained failures/blocks remain; passing selected repairs
+must not be read as a fully repaired group.
+
+Before the final model freeze, the skeptic compiled a concrete named slice
+operand and confirmed solc's additional `calldata slice` type suffix. The
+capture detector now recognizes it for bytes and arrays. Pinned
+ErrorCaptureLocations controls check both generated declarations remain
+calldata in legacy and IR modes, independently of later view admission.
+The superseded partial inventories and focused logs remain preliminary
+evidence. The slice-corrected intermediate candidate used model
+`d8119075d7d2c6d8b53ce4e1909dc6c20220df431e1a0fdbcb3545bd94375b6a`;
+the final source-enum audit below establishes the final frozen model.
+The independently reviewed implementation is local commit e7f427c9.
+
+AggregateRollback additionally kernel-specializes the existing self-call catch
+law to raw aggregate error bytes: catch starts from the original complete
+caller state (heap, storage and transaction included), then allocates the
+retained bytes. It preserves the nonzero self-address, actual callee failure
+and byte-length bound premises. No unconstrained bytes oracle or discarded
+callee-failure premise replaces that connection. The finite post-failure
+storage controls and caller/value controls remain separate execution evidence.
+
+The final fail-closed audit also found a concrete source enum erasure:
+errorMembers uses tyText, whose enum table lowers Flag[] to uint[] before the
+typed enum marker guard can run. Admitting that value would use the wrong
+E(uint256[]) signature for the compiler's E(uint8[]) and lose cardinality.
+The source reader now checks resolved formal array/struct declarations before
+that erasure, for both positional and named reverts. A bounded worklist follows
+struct and UDVT declarations, visits referenced structs once, and refuses
+nominal enums, unknown/ambiguous IDs, malformed struct-member metadata and
+unfinished traversal. This is an admission restriction, not a new enum model.
+The typed guard remains necessary for directly constructed typed contracts.
+
+The initial pinned EnumErrorControls source/AST controls checked three direct
+revert refusals per mode (enum[], named enum[][] and an enum-containing struct)
+at the intended nominal-enum boundary; the constructor audit below expands
+this to seven cases per mode. Kernel checks pin the report count
+and refusal status; compiled helper controls reject missing/duplicate IDs in
+both orders, missing/non-array members and members without a type, while a
+valid enum-free struct remains accepted. Confirmed finder/skeptic hardening
+findings are fixed. No actual upstream expectations or prior reports changed.
+The enum-safe guard and rollback regression are local commit32c8d660, after
+e7f427c9. The direct-revert guard candidate used model
+`d343c06fab202705e18d4eed2f35fd73702a13c50ce74bb45c242140da7ad216`;
+its interrupted inventory remains preliminary. The constructor-entrypoint
+audit below establishes the final frozen model and output tree.
+
+The entrypoint audit confirmed that require(condition,E(...)) renders its
+error constructor through the generic expression reader, so a guard only on
+RevertStatement was insufficient. Both entrypoints now call the same source
+aggregate-type guard before rendering operands. Generic aggregate constructors
+also retain singleton declaration resolution, callee name/visible declaration
+identity, formal arity and parameter-kind checks. Compiler metadata identifying
+an error constructor requires an actual unique ErrorDefinition before any
+identifier-spelling fallback. Eight synthetic AST mutations retain that error
+metadata while removing the ID, using an absent/wrong-kind ID or duplicating
+the declaration; both modes refuse them at the custom-error boundary.
+
+EnumErrorControls now pins seven source refusals per mode, including false and
+true require conditions, named nested arrays and struct error operands. These
+are deliberate admission refusals, not passing runtime observations. Positive
+RequireAggregateControls separately checks positional enum-free array/struct
+payloads, false-path storage rollback, true-path eager operand effects, later
+storage clears and stale payload rejection in both modes. Generic named error
+constructors inside require remain unsupported because the generic parameter
+lookup has no error declaration parameters; no named-require ordering support
+is claimed. Source evaluation/capture of named direct reverts remains supported
+and retains its existing controls.
+
+The reviewed constructor-entrypoint repair is local commit118bad2c. Final
+validation is strictly serial under model
+`c580cecf8869a4bd4eaa80b298d640850fe5bab91d6ef651a88a6641a642615e`,
+using .lake/upstream/group10-aggregate-reviewed-inventory. Earlier candidate
+inventories, build/control failures and diagnosis artifacts remain preserved,
+explicitly separate from this final replay and its gates.
+
+The final selected replay and two independent read-only fixture audits pass:
+**189 agreements / 0 failures / 0 blocks**, **375 required pipeline executions**
+and **1,486 original observations**. All 184 prior agreements remain agreements;
+exactly five fixtures improve. Both auditors independently recompiled the pinned
+ABI and checked every observation, source/fixture pin, raw calldata byte and all
+437 on-disk raw report hashes. The 248 retained report objects and their old
+provenance remain unchanged and explicitly marked not rerun. Correct canonical
+model hashing uses the runner's lexically sorted path strings; an earlier manual
+Path-component checksum in a draft/message was corrected without modifying any
+verified report.
+
+| Exact repaired fixture (under test/libsolidity/semanticTests/) | Prior evidence | Final legacy / viaIR observations |
+| --- | --- | --- |
+| errors/revert_conversion.sol | import/elaboration failure, none executed | 1 / 1, complete exact payloads |
+| errors/using_structs.sol | generated reference capture lacks location, none executed | 2 / 2, complete true/false sequence |
+| abicoder/calldataDecoding/array/memory_arrays_static.sol | adapter block: missing compound decoder width rows | 1 / 1, exact original returns |
+| array/indexAccess/arrays_complex_memory_index_access.sol | adapter block: missing compound decoder width rows | 1 / 1, exact original returns |
+| array/copying/nested_array_element_memory_to_memory.sol | adapter block: missing compound decoder width rows | 6 / 6, all original vectors |
+
+The complete mixed 437 inventory is **189 agreements / 91 failures / 157
+blocks**, not a fresh 437 replay. Remaining retained classifications are 85
+explicit frontend import gaps, six source-profile refusals, 156 adapter/host/
+configuration exclusions and one enormous-memory resource block. No retained
+case is silently certified against the changed model. Named aggregate require
+constructors remain an explicit source boundary; recursive reference copying,
+noncanonical/lazy ABI layouts and dependent host/log/gas/configuration behavior
+still require their own actual typed interfaces and validation. The complete
+Group 10 assignment is not claimed repaired.
+
+The final immutable report is tests/upstream/group10-aggregate-results.json.
+Every fresh row records the exact invocation, including its full --filter path,
+--batch-size 1, distinct --out directory, required pipelines, complete ordered
+observations and raw report SHA256. Source/compiler/runner/archive pins are
+checked independently by the collector. The compiler remains SHA256
+6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390,
+runner dc97568c2597dc4cb65a4a153d21d3389f9fc5c8067b19aa70a2474efb5ea3fc,
+and archive 9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d.
+The representative command is node scripts/solidity-upstream.mjs run --compiler
+/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --filter
+<exact fixture path> --batch-size 1 --out <distinct reviewed-inventory directory>;
+the report's command array retains the actual separate flag/value arguments.
+The original 120000ms process limit and 1000 loop fuel remain unchanged.
+
+Focused final-model checks all pass: the14 ABI/exception/numeric/source families,
+existing upstream Replay and M5 controls, RevertData, configured CLI checks for
+all four changed modules, and all seven new control modules. All six final
+original entry-program quotations kernel-check with propext only. Exact-buffer
+and bounded caller-state/heap rollback laws use only propext, Classical.choice
+and Quot.sound. No new axiom, sorry, native proof shortcut or raised proof limit
+is introduced. Lean MCP is not exposed; actual per-file CLI commands and logs
+are retained in the validation record.
+
+Node regressions pass23/23. Strict automation reports491 automatic,61 with a
+step budget,11 refuted and0 manual/pending; reachability is667 reachable with0
+orphaned, and layering is143 core modules with0 elaborator reach. Supporting
+reference checks pass31 pinned ABI vectors plus five compiler rejections,
+18 ABI-hex EVM runs plus20 compiler rejections, and the separate32 source
+aggregate controls. Reference/diagnostic checks are not counted as Lean coverage.
+
+Final serial integration validation completed on the same model: the default
+build completed 649 jobs, SolkeyTestSuite completed 249 jobs, and frozen sort
+checking matched 131 read-bearing taclets out of 377 parsed. The TestSuite
+checker passed with 564 functions = 552 derived + 11 refuted + one excluded,
+zero pending/divergent, and two skips. SolidityCorpus built 257 jobs; its
+checker passed all 774 classified obligations (552 derived, 11 refuted, one
+excluded, two skip, 70 proved, 37 unsupported and 101 unported). These inventory
+categories are preserved; they are not additional upstream runtime agreements.
+The final validation manifest is tests/upstream/group10-aggregate-validation.json;
+it records each actual command, exit code, log byte length and SHA256.
+
+The documentation scanner remains a known failure (exit 1): its 26 diagnostics
+are byte-list identical to c31, including 13 references repeated by preserved
+M3 evidence. The trust inventory remains a known failure (exit 1), with the
+same 25 inventory-drift diagnostics as ea43de13. Neither is counted as passing.
+All functional checks in the manifest exit 0. The baseline cgroup OOM-kill
+count stays three: no new OOM kill occurred. Memory-max events increased from
+16345 to 17005 during the complete work; pressure is not reported as absent.
+
+Fresh fixture wall times are 2589ms minimum, 4975ms median and 105956ms maximum.
+Selected Lake module wall times are Join92s, Recursion309s, CallbackStrategy744s,
+OpenLoops509s, DecisionHashes302s, Decision752s and DecisionArrays47s. These
+include wrapper/lock queue waits and are not native CPU benchmarks; for example,
+the CallbackStrategy native process was sampled at178s/1604284KiB RSS.
+OpenLoops was sampled at482s/8237700KiB RSS. Samples are not peak measurements.
+The unchanged 6GiB focused/fixture and 12GiB heavy policies, threads2 and serial
+scheduling were retained. Expensive checks finished without a retry, raised
+heartbeat, timeout, fuel or memory cap.
+
+The implementation commits are e7f427c9, 32c8d660 and 118bad2c, descended from
+ea43de13 and all earlier lane work. Final read-only finder and independent
+skeptic evidence approval is recorded separately in
+ tests/upstream/group10-aggregate-review.json. New exports use
+.lake/upstream/group10-aggregate-continuation.patch (since ea43de13),
+.lake/upstream/group10-abi-vectors-v4.patch (since the upstream import), and
+.lake/upstream/group10-aggregate-evidence.tar.gz, with exact final commit,
+SHA256 and archive readback details in group10-aggregate-export.json. The
+separate group10-aggregate-export-review.json records independent export audits.
+Earlier reports and export files remain unchanged. All work stays local on
+codex/group10-abi-vectors; there is no push or merge.
+
+Both final read-only reviews approved the actual fixture and gate evidence,
+including all 46 final-log hashes, two supporting logs, 101 preliminary logs
+and 11 runtime artifacts. Neither reviewer opened a Lean/build worker. A later
+user-requested git pull --ff-only fetched origin/master at a7a35aa5 but exited
+128 because the branches diverged; no fast-forward, merge, rebase, reset or
+working-file replacement occurred. The evidence remains for this isolated
+lane and is not a validation claim about the newly fetched master.
