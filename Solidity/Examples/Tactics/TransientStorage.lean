@@ -300,3 +300,5 @@ end Solidity.Examples.Tactics.TransientStorage
 #print axioms Solidity.Examples.Tactics.TransientStorage.transient_root_primitive
 
 #print axioms Solidity.Examples.Tactics.TransientStorage.source_tuple_generic
+
+#print axioms Solidity.Examples.Tactics.TransientStorage.source_tuple_overlap

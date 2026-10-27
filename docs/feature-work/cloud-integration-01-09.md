@@ -64,15 +64,15 @@ matched decoder rejection is now classified consistently as replay agreement.
 Negative controls reject false success and fabricated return data in both
 pipelines. This does not establish execution of the source body.
 
-Contract-valued immutable roots are now supported as address roots. Replace the
-old refusal assertion with execution checks that their unread initializer's
+Contract-valued immutable roots are now supported as address roots. The
+old refusal assertion was replaced with execution checks that their unread initializer's
 increment occurs exactly once, plus controls rejecting the former zero-effect
 outcome, in both pipelines. Other unsupported forward-initialization guards
 remain. MCP diagnostics pass both updated files; finder and skeptic confirmed
 the changes independently without Lean calls.
 
 A full-build pin still expected overlapping transient tuple roots to be
-rejected. The combined scalar-tuple lowering supports them. Replace that pin
+rejected. The combined scalar-tuple lowering supports them. That pin was replaced
 with a kernel-checked `source_tuple_overlap` theorem using distinct right-hand
 values: right-to-left stores leave the first captured value at the shared root.
 Per-file MCP diagnostics pass; independent review confirmed the assignment order.
@@ -89,13 +89,19 @@ Per-file MCP diagnostics pass; independent review confirmed the assignment order
 - MCP diagnostics: Raw, Body, Contract and the focused combined regression pass.
 - Modifier-frame proof regression: retry passes after an initial process exit 135.
 - Frozen TestSuite static audit: 564 functions, 552 derived, 11 refuted, zero pending.
-- Full build, frozen sort/corpus and the complete lane regression set:
-  in progress; no combined pass is claimed yet.
+- Lane regression sweep: all 18 files pass (MCP checks after the two test fixes;
+  modifier proof retry passes).
+- Frozen corpus: `check-corpus.sh` passes without updating verdicts or generated pins.
+- Full `run-lean.sh`: passes the default build, SolkeyTestSuite (259 jobs),
+  and explicit frozen SolKey sort check.
+- New tuple-overlap theorem axiom audit: only `propext`, `Classical.choice`,
+  and `Quot.sound`; no `sorryAx` or native evaluation axiom.
 
 The first build was sandbox-blocked on the shared Lake cache. The next attempt
 found the duplicate helper and was stopped after that error was fixed; its log
-is retained. Compiler subprocess tests initially used the absent default sibling
-`/tmp/solkey`; subsequent runs select the configured checkout explicitly.
+is retained. The next broad run found the stale transient negative pin; after
+its reviewed replacement, the final full run passed. Compiler subprocess tests
+initially used the absent default sibling `/tmp/solkey`; subsequent runs select the configured checkout explicitly.
 
 The documentation-path scanner reports 19 unresolved references, including six
 embedded historical log references in task 03 evidence. These are reported as a
