@@ -372,10 +372,18 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     -- one is printed too, and a call through it refused by the elaborator
     let ps := ((J.opt j "parameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
     let rs := ((J.opt j "returnParameterTypes").bind (J.arr? · "parameters")).getD #[] |>.toList
-    if (ps ++ rs).any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
-      throw (.unsupported "a function type with a reference parameter or return")
+    if ps.any fun p => ["memory", "storage", "calldata"].contains ((J.str? p "storageLocation").getD "") then
+      throw (.unsupported "a function type with a reference parameter")
     let ps ← ps.mapM fun p => do tyText S (← J.get p "typeName")
-    let rs ← rs.mapM fun p => do tyText S (← J.get p "typeName")
+    let rs ← rs.mapM fun p => do
+      let T ← tyText S (← J.get p "typeName")
+      let loc := (J.str? p "storageLocation").getD ""
+      if ["memory", "storage", "calldata"].contains loc then
+        unless loc == "memory" && T == "bytes" && ps.isEmpty && rs.length == 1 &&
+            J.str? j "visibility" != some "external" do
+          throw (.unsupported "this function type's reference return")
+        return T ++ " memory"
+      pure T
     let ext := if J.str? j "visibility" == some "external" then " external" else ""
     let ret := if rs.isEmpty then "" else s!" returns ({", ".intercalate rs})"
     pure s!"function ({", ".intercalate ps}){ext}{ret}"
@@ -792,6 +800,20 @@ def modelExprType (st : PState) (j : Json) : String :=
 abbrev PM := StateT PState (Except Gap)
 
 def PM.lift {α : Type} (x : Except Gap α) : PM α := StateT.lift x
+
+/-- Discard captures cannot shadow a source declaration or its model alias.
+Advance beyond every reserved decimal suffix in one bounded traversal; the
+counter also separates earlier generated captures in composite constructors. -/
+def freshDiscardName : PM String := do
+  let st ← get
+  let taken := st.declarations.filterMap (J.str? · "name") ++ st.names.map (·.2) ++
+    st.sourceStateNames ++ st.sourceModelNames ++ st.specLocals.map (·.2)
+  let k := taken.foldl (fun k name =>
+    if name.startsWith "discarded" then
+      ((name.drop 9).toNat?.map fun n => max k (n + 1)).getD k
+    else k) (st.discards + 1)
+  modify fun st => { st with discards := k }
+  pure s!"discarded{k}"
 
 /-- An exact rational in lowest terms, `den > 0`: the value solc gives an
 expression of literals only. -/
@@ -1451,6 +1473,17 @@ partial def expr (j : Json) : PM String := do
           let some name := (J.id? d).bind (lookupBy · (← get).selectorHelpers)
             | unsupported "a dynamic function selector without its receiver helper"
           return s!"{identText name}(address({value}))"
+    -- A statically selected internal function value has the same declaration
+    -- identity as a direct base/super call; it has no object receiver to read.
+    if (J.tyStr j).startsWith "function " && !isExternalMember j then
+      if isSuperMember j then
+        match (J.ref? j).bind (lookupBy · (← get).superNames) with
+        | some name => return identText name
+        | none => unsupported "a super function value with no implementation after its contract in the C3 order"
+      if isBaseMember (← get).baseContracts j then
+        match (J.ref? j).bind (lookupBy · (← get).staticNames) with
+        | some name => return identText name
+        | none => unsupported "a base-qualified function value without an imported function declaration"
     if isExternalMember j then
       if let some id := J.ref? j then
         if let some gap := lookupBy id (← get).getterGaps then throw gap
@@ -1851,9 +1884,8 @@ partial def stmt1 (j : Json) : PM (List String) := do
         (J.opt e "memberName").any (fun m => m == .str "pop" || m == .str "push") &&
         (J.tyStr e).startsWith "function" then
       let r ← PM.lift (J.get e "expression")
-      let k := (← get).discards + 1
-      modify fun st => { st with discards := k }
-      return [s!"{← storageRefTy r} storage discarded{k} = {← expr r}"]
+      let name ← freshDiscardName
+      return [s!"{← storageRefTy r} storage {name} = {← expr r}"]
     -- `(c ? f : g)();` of no value: `if (c) { f(); } else { g(); }`
     if let some (c, a, b) := condCallee? e then
       unless condCalleeOk e do unsupported condCalleeMsg
@@ -1867,11 +1899,11 @@ partial def stmt1 (j : Json) : PM (List String) := do
       return [s!"try {← expr e} \{ } catch \{ revert(); }"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
-    if ["BinaryOperation", "Conditional"].contains (J.kind e) then
+    if ["BinaryOperation", "Conditional"].contains (J.kind e) ||
+        (scalar && ["MemberAccess", "IndexAccess", "TupleExpression"].contains (J.kind e)) then
       let t := modelExprType (← get) e
-      let k := (← get).discards + 1
-      modify fun st => { st with discards := k }
-      return [s!"{t} discarded{k} = {← expr e}"]
+      let name ← freshDiscardName
+      return [s!"{t} {name} = {← expr e}"]
     pure [← withPush ok (if J.kind e == "Assignment" then assignText e else expr e)]
   | "VariableDeclarationStatement" =>
     if let some (d, r, v) := valueCall? j then

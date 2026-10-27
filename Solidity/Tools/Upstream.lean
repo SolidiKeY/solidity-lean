@@ -20,6 +20,18 @@ private def str (s : String) : Json := toJson s
 private def result (status reason : String) (extra : List (String × Json) := []) : Json :=
   Json.mkObj ([("status", str status), ("reason", str reason)] ++ extra)
 
+/-- Resource failures remain inconclusive even when an importer embeds the
+exception text in a per-function row rather than throwing it. -/
+def resourceLimited (reason : String) : Bool :=
+  ["heartbeats", "maximum recursion", "out of memory"].any fun text =>
+    (reason.toLower.splitOn text).length > 1
+
+/-- Preserve all importer diagnostics; an earlier warning cannot hide a
+later resource failure. This result never certifies a runtime observation. -/
+def diagnosticFailure (messages : List String) : Json :=
+  result (if messages.any resourceLimited then "blocked" else "broken")
+    ("\n".intercalate messages)
+
 private def argument (j : Json) : Except String RawExpr := do
   let value ← j.getStr?
   if value == "true" then return .bool true
@@ -70,7 +82,7 @@ private def inRanges (row : ImportRow) (vector : Json) : Bool := Id.run do
 def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run do
   let bad := rows.filter fun r => r.status != .elaborated && r.status != .skipped
   if !bad.isEmpty then
-    return result "broken" "frontend import gaps" [("gaps", toJson (bad.map fun r =>
+    return result (if bad.any (resourceLimited ∘ ImportRow.reason) then "blocked" else "broken") "frontend import gaps" [("gaps", toJson (bad.map fun r =>
       Json.mkObj [("function", str r.sourceSignature), ("status", str r.status.toStr),
         ("reason", str r.reason)]))]
   if let .ok reason := data.getObjValAs? String "blocked" then
@@ -177,10 +189,10 @@ def elabUpstreamBatch : CommandElab := fun stx => do
       let env ← getEnv
       let parsed ← ofExcept (Parser.runParserCategory env `command command)
       elabCommand parsed
-      let diagnostics := (← get).messages.toList
-      for message in diagnostics do
-        if message.severity == .error || message.severity == .warning then
-          return result "broken" (← message.data.toString)
+      let diagnostics ← ((← get).messages.toList.filter fun message =>
+        message.severity == .error || message.severity == .warning).mapM fun message =>
+          message.data.toString
+      unless diagnostics.isEmpty do return diagnosticFailure diagnostics
       liftTermElabM do
         let term ← `($(mkCIdent ``replay) $(mkCIdent name)
           $(mkCIdent (name ++ `report))
@@ -191,8 +203,7 @@ def elabUpstreamBatch : CommandElab := fun stx => do
         unsafe evalExpr Json (mkConst ``Json) expression
       catch ex =>
         let reason ← ex.toMessageData.toString
-        let limited := ["heartbeats", "maximum recursion", "out of memory"].any fun text =>
-          (reason.toLower.splitOn text).length > 1
+        let limited := resourceLimited reason
         let status := if limited
           then "blocked" else "broken"
         pure (result status reason) : CommandElabM Json)

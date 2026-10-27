@@ -144,12 +144,17 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
 /-- The signature of the function `d`, as a function type spelled
-(`canonFnTy`); none if a parameter or a return is a reference. -/
+(`canonFnTy`), retaining the supported memory-byte return location. -/
 def FunDecl.sigTy? (d : FunDecl) : Option String := do
   let comp (k : String) : Ty → Option String
     | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
-    | .ref _ => none
-  let ps ← d.params.mapM fun (n, T) => comp n T
+    | .ref R => do
+      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k) && R == bytesR)
+      guard (lookupBy (k ++ "[]#bytes") d.widths == some 1)
+      guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
+      pure "bytesmemory"
+  let ps ← d.params.mapM fun (n, T) => do
+    if T matches .ref _ then none else comp n T
   let rs ← d.rets.mapM fun (n, T) => comp n T
   pure (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1) (fnTyStr ps rs false))
 
@@ -749,6 +754,57 @@ def placeShape (Γ : ECtx) (e : RawExpr) : List (String × Nat) :=
   | some (tb, k, .ref _) => shapeUnder tb k
   | _ => []
 
+/-- The external function type of `g`, as `canonFnTy` spells it. -/
+def FunDecl.extTy? (d : FunDecl) : Option String :=
+  (FunDecl.sigTy? C d).map fun ty =>
+    match fnParts? ty with
+    | some (ps, rs, _) => fnTyStr ps rs true
+    | none => ty
+
+/-- Whether `r` in `r.g` is a receiver, not a struct: `this`, or a value. -/
+def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
+  match r with
+  | .name "this" | .env .selfAddress => some (.env .selfAddress)
+  | _ => match synth C (Γ.toNCtx) r with
+    | .ok (.val .uint _) => some r
+    | _ => none
+
+/-- `r.g` names the function `g` of `C` at the address `r` (`extRecv?`):
+the receiver and `g`. -/
+def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
+  | .field r g =>
+    if fnExternalValue C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
+  | _ => none
+
+/-- The function type of the expression `e`, as `canonFnTy` spells it: a
+name's (`fnTyOf?`), a place's marker (a struct member, an element), a
+call's return's, a conditional's first branch's, `r.g`'s external type. -/
+partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
+  let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
+  match e with
+  | .name x => fnTyOf? C Γ x
+  | .ternary _ a _ => fnTyOfExpr Γ a
+  | .call g args => do
+    if g == callValueName then
+      let h ← args.head?
+      let ty ← fnTyOfExpr Γ h
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
+    if let some ty := fnTyOf? C Γ g then
+      let (_, [r], _) ← fnParts? ty | none
+      guard (fnTy? r)
+      return canon r
+    let d ← lookupBy g C.funs
+    let (r, .prim _) ← d.ret | none
+    (fnRow? d.widths r).map canon
+  | e =>
+    match extMember? C Γ e with
+    | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
+    | none => do
+      let (tb, k, .prim _) ← widthPath? C Γ e | none
+      (fnRow? tb k).map canon
+
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
@@ -784,7 +840,10 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     | some d => match d.ret with
       | some (r, .ref _) => shapeUnder d.widths r
       | _ => []
-    | none => []
+    | none =>
+      let ty := if f == callValueName then as.head?.bind (fnTyOfExpr C Γ) else fnTyOf? C Γ f
+      if (ty.bind fnParts?).any (fun (ps, rs, ext) =>
+          !ext && ps.isEmpty && rs == ["bytesmemory"]) then dynBytesRows else []
   | e => placeShape C Γ e
 
 /-- A computed Error reason retains its source string type before byte casts
@@ -904,47 +963,6 @@ def fnSelector? (g : String) : Option Nat := do
     | .abi _ _ none => return Keccak.selector (← source.signature)
     | _ => none
   else (fnSignature? C g).map Keccak.selector
-
-/-- The external function type of `g`, as `canonFnTy` spells it. -/
-def FunDecl.extTy? (d : FunDecl) : Option String :=
-  (FunDecl.sigTy? C d).map fun ty =>
-    match fnParts? ty with
-    | some (ps, rs, _) => fnTyStr ps rs true
-    | none => ty
-
-/-- Whether `r` in `r.g` is a receiver, not a struct: `this`, or a value. -/
-def extRecv? (Γ : ECtx) (r : RawExpr) : Option RawExpr :=
-  match r with
-  | .name "this" | .env .selfAddress => some (.env .selfAddress)
-  | _ => match synth C (Γ.toNCtx) r with
-    | .ok (.val .uint _) => some r
-    | _ => none
-
-/-- `r.g` names the function `g` of `C` at the address `r` (`extRecv?`):
-the receiver and `g`. -/
-def extMember? (Γ : ECtx) : RawExpr → Option (RawExpr × String)
-  | .field r g =>
-    if fnExternalValue C g && (lookupBy g C.funs).isSome then (extRecv? C Γ r).map (·, g) else none
-  | _ => none
-
-/-- The function type of the expression `e`, as `canonFnTy` spells it: a
-name's (`fnTyOf?`), a place's marker (a struct member, an element), a
-call's return's, a conditional's first branch's, `r.g`'s external type. -/
-partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
-  let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
-  match e with
-  | .name x => fnTyOf? C Γ x
-  | .ternary _ a _ => fnTyOfExpr Γ a
-  | .call g _ => do
-    let d ← lookupBy g C.funs
-    let (r, .prim _) ← d.ret | none
-    (fnRow? d.widths r).map canon
-  | e =>
-    match extMember? C Γ e with
-    | some (_, g) => (lookupBy g C.funs).bind (FunDecl.extTy? C)
-    | none => do
-      let (tb, k, .prim _) ← widthPath? C Γ e | none
-      (fnRow? tb k).map canon
 
 /-- Function ABI components retain the parameter markers that dispatch's
 canonical signature intentionally erases. Mutability is not represented here. -/

@@ -1,4 +1,4 @@
-import Solidity.Calculus.LinearDecision
+import Solidity.Calculus.LinearHypotheses
 
 /-!
 # Countermodels from the finite derivative graph
@@ -158,6 +158,12 @@ def countermodel (F : AFml) (h : F.decide = false) :
 fuel runs out, from one traced graph traversal, with no unsupported or
 exhausted branch inside the stated arithmetic language. -/
 def verify (F : AFml) : Sum (PLift F.Valid) { x : Nat → Nat // ¬ F.holds x } :=
+  -- Projection/introduction certificates avoid exploring numeric domains
+  -- when the normalized goal is already entailed propositionally. An
+  -- unsuccessful bounded check leaves the existing complete walk intact.
+  match F.norm.hypVerify? with
+  | some h => .inl ⟨fun x => (AFml.holds_norm x F).mp (h.down x)⟩
+  | none =>
   match F.fastVerify with
   | some r => r
   | none =>
