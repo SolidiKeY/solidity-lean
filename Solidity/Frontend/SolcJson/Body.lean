@@ -1392,8 +1392,14 @@ partial def expr (j : Json) : PM String := do
     | o => unsupported s!"the operator `{o}`"
   | "BinaryOperation" =>
     let op ← PM.lift (J.str j "operator")
-    let l ← operand (← PM.lift (J.get j "leftExpression")) (op == "**")
+    let left ← PM.lift (J.get j "leftExpression")
+    let l ← operand left (op == "**")
     let r ← operand (← PM.lift (J.get j "rightExpression")) (op == "**")
+    -- A literal base takes the compiler's contextual result type, independently
+    -- of the unsigned exponent/count. Retain that context before elaboration.
+    let t := J.tyStr j
+    let l := if ["**", "<<", ">>"].contains op && constTy left &&
+        (narrowTy? t).isSome then sourceCast t l else l
     pure s!"{l} {op} {r}"
   | "Conditional" =>
     let c ← operand (← PM.lift (J.get j "condition")) false

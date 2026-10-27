@@ -169,7 +169,8 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
     let (taken, out) := acc
     match J.str? d "name", J.id? d with
     | some n, some i => if (n == "" && inputs.contains i) ||
-        (n != "" && (stateVars.contains n || leanKeywords.contains n)) then
+        (n != "" && (stateVars.contains n || leanKeywords.contains n ||
+          (decls.filter (fun d => J.str? d "name" == some n)).length > 1)) then
       let rec fresh (k : Nat) (x : String) : String :=
         match k with
         | 0 => x

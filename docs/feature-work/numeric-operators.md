@@ -633,3 +633,155 @@ controls. The skeptic specifically checked that the 32 independently initialized
 diagnostics are not counted as full-sequence success. The remaining scope is
 concrete machine-resource semantics/correspondence for the two failure vectors;
 this milestone records diagnosis and controls, **not full Lean repair**.
+
+## Group 04: signed shifts, powers and literal typing
+
+Task branch: `codex/group04-signed-numeric`, based on `006fcd593f5beeb540e7adf2bc76de4638566924`.
+The attached managed executor passed the runtime gate with Lean 4.24.0,
+Lake 5.0.0 and `lake build Solidity.KeySort`. All eleven assigned historical
+rows reproduced as frontend import gaps in both required pipelines before edits.
+The archived upstream bytes and historical result directory are unchanged.
+Shared integration points are limited to `Frontend/SolcJson/Body.lean`,
+`Frontend/SolcJson/Contract.lean` and `Syntax/Elab/Values.lean`; the runner is
+unchanged, and this branch assumes no unpublished work from another group.
+The optional Bridge and obsolete SolKey reader are untouched.
+
+Signed shifts retain the left operand's type and the count's unsigned type.
+Right shifts saturate counts at 256 before converting the count to the existing
+signed primitive operation. Already-validated literal counts fold to an integer
+literal, retaining the existing decision fragment and its proved/refuted pins;
+nonliteral counts keep the saturating value expression. `shr_literal` proves the
+folded count equivalent. `tests/upstream/group04/ShiftFragment.lean` pins both
+verdicts, kernel coverage and rejection of a negative literal count. Left shifts use the operand's word and read the
+result back at its signed width. Literal bases retain solc's recorded result
+type; the exponent/count does not choose their sign. Colliding local declaration
+names, including named returns, are renamed using their declaration identities.
+This preserves the inner `x` in the cleanup fixture instead of capturing the
+named return. Compiler legality checks remain enabled.
+
+Checked signed power composes existing intrinsic value constructors in
+`Syntax/Numeric.lean`: unsigned magnitude, unsigned power, parity, an exact
+signed range check and two's-complement result conversion. Zero and unit
+magnitudes evaluate the exponent but avoid recursive power evaluation for huge
+exponents. The negative result may have magnitude 2^255; a positive result may
+not. An invalid signed result uses a signed-overflow witness, preserving the
+arithmetic-overflow tag rather than introducing division-by-zero classification.
+No statement, value, formula or state representation is replaced. No rule,
+axiom, external core dependency or heartbeat limit is added. Existing general
+soundness theorems apply to the emitted constructors; numeric lowering proofs
+are in `Semantics/NumericLowering.lean`. `checkedSignedPower_correct` names the
+actual emitted tree in an arbitrary typed state, assumes successful operand
+evaluation, and compares `toOption.map val`; it proves numeric results/range
+failure rather than general panic payload or source/compiler equivalence.
+The old signed-left-shift exclusion in `Examples/Tactics/Operators.lean` is
+replaced by a positive calculus theorem for the same operation.
+The negative unsigned-index control in `Examples/Tactics/Decide.lean` still
+rejects `values[-1]`; its output pin now records the signed/unsigned type
+mismatch produced by literal negation typing.
+No Lean MCP diagnostics tool was exposed in this executor. Per-file checks used
+`lake env lean --tstack=131072` on the edited modules and source controls; the
+final library build checks their imports. Printed proof dependencies contain
+only `propext`, `Classical.choice` and `Quot.sound`, with no `sorryAx`.
+
+`tests/solc/SignedNumeric.sol` and its two pinned 0.8.38 ASTs cover negative
+operands, signed right shifts, 8/16/256-bit values, oversized unsigned counts,
+parity, minimum integers, checked overflow, unchecked wrapping, operand effects,
+literal contexts and return/local shadowing. `Examples/Tactics/SignedNumericImport.lean`
+checks both imports, runtime observations and kernel-checked positive and exact
+negative halt controls. Full-width native controls separately pin the new signed
+range witness: ordinary overflow reverts, while the model-only `checked`
+extension panics through its arithmetic guard. Large runtime observations are not universal correctness
+theorems. The reference-only rejection checks are reproducible with:
+
+```sh
+source /workspace/.setup/activate.sh
+node scripts/check-signed-numeric.mjs /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js
+```
+
+These check two accepted compilations and eight exact diagnostic rejections:
+signed counts, signed exponents, negative unsigned literals and illegal narrow
+literal-power returns. They establish reference-solc behavior, not Lean coverage.
+
+Read-only finder and independent skeptic reviews used no Lean workers. They
+identified declaration collisions, unsigned-count saturation, the overflow
+witness's panic tag, ambiguous negative controls and the need for typed-tree
+composition proofs. The confirmed implementation/control issues were repaired.
+The final finder and independent skeptic recomputed the current model/report/log
+hashes and confirmed that literal folding cannot drop effects: its recognizer
+accepts only a numeral or its negation, after unsigned validation. They found no
+remaining concrete issue and used no Lean workers.
+The helper repeats pure value evaluation; nested powers can amplify checking or
+runtime costs. This retains the existing hoisting schedule and does not prove
+all possible dual-failure priority cases. Generic magnitude-power overflow
+beyond uint256 still shares the existing lack of precise self-call panic data;
+this milestone does not claim general self-call panic-payload equivalence.
+The model-only `checked`/`ignoringOverflow` extensions can inspect the new signed
+overflow witness; no claim is made that this repairs unsigned-power guards there.
+
+Final exact fixture results (both legacy and viaIR): **11 broken → 11 working**,
+with **224 retained observations**, zero already-fixed cases, zero assigned
+expected exclusions and zero assigned adapter/resource blocks. Complete reports,
+source/model/compiler/runner hashes and every exact command are in
+`tests/upstream/group04/validation.json` and its before/after report files.
+The historical `tests/upstream/results` directory is untouched. Preliminary
+runs interrupted by rebuilding are inconclusive and are not used for these
+statuses.
+
+| Fixture basename | Before | After legacy / viaIR | Observations per mode |
+| --- | --- | --- | --- |
+| `exp_cleanup_nonzero_base.sol` | broken | working / working | 1 |
+| `shift_left_larger_type.sol` | broken | working / working | 1 |
+| `shift_overflow.sol` | broken | working / working | 5 |
+| `shift_right_negative_literal.sol` | broken | working / working | 12 |
+| `shift_right_negative_lvalue_assignment.sol` | broken | working / working | 12 |
+| `shift_right_negative_lvalue_int16.sol` | broken | working / working | 12 |
+| `shift_right_negative_lvalue_int32.sol` | broken | working / working | 12 |
+| `shift_right_negative_lvalue_int8.sol` | broken | working / working | 12 |
+| `shift_right_negative_lvalue.sol` | broken | working / working | 12 |
+| `exp_literals_success.sol` | broken | working / working | 8 |
+| `exp_neg.sol` | broken | working / working | 25 |
+
+Every rerun used the complete snapshot path with `--filter`, `--batch-size 1`
+and its own `.lake/upstream/group04-final-corpus/<basename>` output directory; no
+execution or proof limit was raised. The runner's compiler SHA-256 is
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+The source archive SHA-256 remains
+`9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d`.
+
+Before model SHA-256: `c86945ed62a18ffccf0b72b291c6271f44462f7b1d60b101e73fd2ec565c8699`.
+After model SHA-256: `6cf546e6a38a8770512372698b2d89d8dcb6588132c18ad093acc4e03fdcccfc`.
+
+The eleven final runner invocations took 35.543 seconds in total (2.980–3.801
+seconds each, including both modes and runner setup). The final source-control
+file checked in 5.191 seconds, with maximum child RSS 848,136 KiB, with no
+concurrent Lean build. These are measured costs, not a controlled speedup
+comparison. `git log` records `1a7d5b0e` (one callee body elaborated/quoted once)
+and `63ac4b63` (split elaboration); this patch preserves both designs.
+
+Passed gates: archive verification (11,622 files), 14/14 runner regressions,
+existing five Lean replay checks, final numeric source/kernel controls, exact
+reference-solc controls, reachability (670 modules), layering (144 core modules,
+zero frontend reachability), strict automation (491 automatic, 61 with budgets,
+11 refuted, zero pending), and frozen TestSuite audit. Frozen SolKey
+473da8944c sort checking passed (377 taclets, 131 read-bearing annotations).
+The documentation-path checker retains its 13 pre-existing missing references.
+Final broad gates passed: `lake build Solidity solkeycheck SolkeyTestSuite SolidityCorpus`
+(692 jobs), then `./run-lean.sh` and the frozen corpus parity check without
+`--update`. Long build logs, including nonfinal repair attempts, are retained
+compressed under `tests/upstream/group04/logs`; their classifications and hashes
+are in the validation record. The full decision example retained its original
+proved/refuted and coverage pins. Its build took 1,228 seconds; the unchanged
+array-decision example took 2,303 seconds. No proof limit was raised.
+
+Corpus parity exposed two genuine improvements: the existing signed-base even
+and odd concrete controls now have kernel proofs. Only their generated Lean
+proofs, verdict records and scoreboard changed. Their pre-existing
+`b = minusTwo` concretization notes remain; this adds no new concretization and
+claims no general corpus-function theorem. The frozen source is untouched.
+Corpus totals are now 72 proved, 35 unsupported and 101 unported outside the
+TestSuite's 552 derived, 11 refuted, one excluded and two skipped obligations.
+
+The implementation is saved locally on the task branch; no pushes or merges
+were performed. All eleven final fixture reports were refreshed after the
+corpus proof generation changed the model digest, retaining the same 224
+observations. `tests/upstream/results` and the pinned archive remain unchanged.
