@@ -1,4 +1,5 @@
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -394,7 +395,7 @@ test("source types preserve overflow and declaration scope", () => {
 });
 
 test("source types: narrow elements, keys, values, struct members, locals and parameters", () => {
-  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
@@ -410,7 +411,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
 });
 
 test("bytesN, bytes and string: literals, indexing, conversions, storage, memory, struct members", () => {
-  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['literals', 'compareAndIndex', 'indexOutOfRange', 'conversions', 'bitwise',
@@ -985,4 +986,50 @@ test("generated struct identity names cannot capture a declared ID suffix", () =
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   assert.equal(status.wraps, 'proved');
   assert.equal(status.falsePost, 'pending');
+});
+
+
+test("finite nominal declarations and nested tuples retain identity, snapshots and failures", () => {
+  const report = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeLowering', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['enumIdentity', 'typeStatements', 'nestedSwap', 'nestedDiscard',
+    'nestedBytes', 'contractKey']) assert.equal(status[name], 'proved', name);
+  assert.equal(status.falsePost, 'pending');
+  const failures = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeFailures', batchSize:1});
+  assert.deepEqual(failures.errors, []);
+  const refused = Object.fromEntries(failures.results.map(r => [r.function, r.status]));
+  assert.equal(refused.nestedEffect, 'unsupported');
+  assert.notEqual(refused.indexedRead, 'proved');
+});
+
+
+test("finite nominal declarations avoid explicit renaming collisions", () => {
+  // FiniteEnum.E has compiler declaration ID 4; reserve explicit model
+  // renamings as well as raw source names when freshening enum conversions.
+  const report = runSolidityTests(["tests/solc/FiniteTypeLowering.sol"],
+    {build:false, contract:'FiniteTypeLowering', function:'enumIdentity',
+      renaming:{Pair:'enumType4'}, batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.find(r => r.function === 'enumIdentity')?.status, 'proved');
+});
+
+test("enum conversions use their defining declaration bounds", () => {
+  const sourceSha = createHash('sha256')
+    .update(readFileSync('tests/solc/EnumDeclarationBounds.sol')).digest('hex');
+  for (const suffix of ['', '-viaIR']) {
+    const fixture = JSON.parse(readFileSync(`tests/solc/EnumDeclarationBounds${suffix}.ast.json`, 'utf8'));
+    assert.equal(fixture.header.sourceSha256, sourceSha);
+    assert.equal(fixture.header.compilerSha256,
+      '6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390');
+  }
+  const report = runSolidityTests(["tests/solc/EnumDeclarationBounds.sol"],
+    {build:false, contract:'EnumDeclarationBounds', batchSize:1});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]),
+    [['foreignRead', 'pending'], ['localAccepts', 'proved']]);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumBounds.lean',
+    '--', '--tstack=131072'], 300000);
 });

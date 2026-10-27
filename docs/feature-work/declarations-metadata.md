@@ -352,6 +352,8 @@ No Lean diagnostics or builds were run by the patch worker.
 
 ## Upstream Group 06: finite library struct identity (2026-10-26)
 
+This section records commit `615bd3fa`; the continuation below records the resumed repair.
+
 Status: **partial repair**, on `task/group06-structs-libraries` from
 `006fcd593f5beeb540e7adf2bc76de4638566924`. All 15 assigned fixtures were
 reproduced first on that current master: all were broken in both required
@@ -524,3 +526,120 @@ reported as broken import gaps rather than passing tests. The standalone graph
 storage foundation does not establish ordinary source/interpreter agreement;
 see [recursive-types.md](recursive-types.md). Source bytes, expectations, archive
 pins and historical results are unchanged. No push or merge to master was made.
+
+## Upstream Group 06 continuation from 615bd3fa
+
+The resumed implementation preserves the original branch, commit and historical
+reports. **Twelve of fifteen assigned fixtures now pass in both required
+pipelines**, compared with five at `615bd3fa`. The seven repaired finite cases
+are attached enum calls, library enum and struct type statements, the lone
+struct array type statement, contract mapping keys, nested tuples and nested
+byte tuple assignment. Their original sources, expected values, stateful call
+order and every observation are unchanged. None was already fixed on the base
+master. The full before, first-patch and continuation reports are preserved in
+[Group 06 evidence](../../tests/upstream/group06.json).
+
+Enum conversions now resolve the compiler declaration ID to a fresh model name,
+so another enum with the same short name cannot supply its bound. Fresh names
+reserve source names and explicit import renamings; the regression uses the real
+`FiniteEnum.E` ID `4` with `Pair => enumType4`. Existing lexical enum declarations
+remain available to specifications. Packed static enum members retain their
+byte-kind conversion. Type-only statements are erased only after a structural
+check accepts validated declaration references and literal array dimensions;
+calls, ordinary variable members and runtime indexed reads are not erased.
+
+Contract type nodes resolve by validated declaration ID to the existing address
+lowering (a word with address metadata). The upstream JavaScript adapter checks
+160-bit ABI-vector bounds; Lean replay also checks the address parameter marker
+before dispatch, rejecting noncanonical inputs as blocked. Source declaration and ABI metadata remain attached.
+The runtime adapter recognizes the canonical ABI signature as well as its
+existing source spelling, and excludes internal/private functions and retained
+base bodies before matching. A real source control distinguishes an internal
+`f(FiniteAddress)` returning `1` from public `f(address)` returning `2`.
+The maximum 160-bit contract key is included in the runtime controls. This is
+compiler-validated lowering into the existing representation, not a claim that
+distinct nominal source types become assignable.
+
+Explicit nested tuple trees are matched and flattened together. Discarded
+subtrees retain their leaves, and the existing intrinsic elaborator captures
+all RHS values before any target write. New nested admission is limited to
+literal and identifier leaves: calls/failing reads remain refused until their
+nested evaluation order is established. Existing flat-tuple admission is
+preserved. Tuple reference destinations now undergo the same exact shape check
+as their temporary aliases before narrow whole-reference use is admitted.
+Both incompatible width directions have pinned rejection diagnostics. Existing
+alias restrictions, memory/storage ownership and calldata checks remain in force.
+
+`FiniteTypeLowering.sol` supplies six positive source obligations, one false
+property that remains pending, two intentionally unsupported failure/admission
+controls, the explicit rename control and the internal/public overload control.
+The final source reports record eight proved rows (including the repeated rename
+control), one pending false property, two unsupported controls and one internal
+function. The separate SHA-checked 0.8.38 runtime checks retain eighteen
+observations across legacy and viaIR. The source proof runner uses its repository
+0.8.34 pin. Runtime observations are not universal source-correctness theorems;
+proofs use the existing kernel-checked clean-tail framework and its standard
+axiom whitelist. No semantic rule, representation, proof premise, proof fuel,
+heartbeat limit, dependency, axiom or `sorry` was added.
+
+Independent read-only finder and skeptic reviews opened no Lean workers. The
+finder requested reservation of explicit renamed type names and verified the
+real-ID regression. The skeptic found that unrestricted canonical matching
+could select the internal nominal overload; transaction dispatch now checks
+selected ABI ownership first, and both synthetic replay and real-source runtime
+controls distinguish the correct result. Their final admitted-shape review
+found no remaining execution defect. The broad validation gates run serially
+with `LEAN_NUM_THREADS=1`; exact final outcomes are recorded below after they
+finish. Lean MCP diagnostics are unavailable; configured per-file Lean checks
+and build invocations use `--tstack=131072`.
+
+The six concrete enum-bound execution theorems in
+`tests/upstream/EnumBounds.lean` use SHA-checked 0.8.38 ASTs for both pipelines.
+They prove that the foreign two-member enum rejects `2`, its `1` returns `1`,
+and the same-named local three-member enum accepts `2`. Their axiom prints use
+only `propext`, `Classical.choice` and `Quot.sound`. The ordinary unbounded
+`foreignRead(uint)` normal-return obligation remains pending, correctly: some
+inputs fail the cast. This is not reported as a successful ABI panic-code check.
+Together with the earlier new controls, source testing records nine proved rows,
+two deliberately open rows, two unsupported admission controls and one internal
+helper; the six concrete execution theorems are counted separately.
+
+All four final configured per-file Lean checks pass (Body 8.515 s, Contract
+16.085 s, Arms 52.222 s, Upstream 2.223 s, under concurrent serial build load).
+The final replay passes nine checks, including canonical-overload ownership,
+both width mismatches and exact blocking of the address `2^160`. Assigned
+fixtures finish in the wall-time range recorded in the evidence; these include
+compiler/import/replay and are not isolated performance benchmarks. The new
+address guard refreshed the model hash and all fifteen fixture reports in the
+separate `.lake/upstream/group06-resumed-address-final` directory.
+
+Eleven of thirteen broader affected-source suites passed on the first run. The
+narrow-width suite hit its 300 s aggregate process limit while a single existing
+`pushArithInRange` proof took 156 s. Retrying one function per process passes the
+whole narrow suite with unchanged limits and assertions. The byte suite finishes
+but `Bytes.indexOutOfRange` stays pending. An isolated, unchanged `615bd3fa`
+worktree reproduces that same pending result with no tool error: this is a
+baseline automation gap, not a demonstrated new execution mismatch. Its test
+still requires `proved`; no expected result was weakened. Both heavy suites now
+use `batchSize:1`, retaining the existing 300 s per-process and proof budgets.
+Earlier superseded builds, the out-of-date no-build attempt and a draft enum
+control that incorrectly asked for a safety proof of a failing cast are retained
+in logs; only the corrected final checks count as passing.
+
+The assessment of a separate graph source fragment re-read the speed-related
+history (`323951dd`, `3929cbc2`, `01dd890d`, `d0c13aba`, `2f41a68a`). Existing
+encoded table certificates and recursor/match optimizations are unchanged.
+The graph API's guarded declaration layout does not yet give an ordinary memory
+heap or operation-preserving source-fragment correspondence; neither finite
+unrolling nor an unproved alternate evaluator was added.
+
+The three recursive fixtures still fail ordinary source admission in both
+pipelines: `array_of_recursive_struct.sol`, `recursive_structs.sol` and
+`struct_reference.sol`. They require recursive memory allocation/deletion or
+schema-indexed storage aliases, plus operation-preserving correspondence. The
+existing graph storage API and finite-layout bridge do not supply these ordinary
+interfaces. No finite-depth unrolling, dropped observation or fixture-specific
+substitute is used to report them passing. This lane therefore remains an
+incomplete repair of the full fifteen-fixture assignment. No representation
+migration was undertaken; the speed-related history and warning requirements
+for such a migration remain applicable.

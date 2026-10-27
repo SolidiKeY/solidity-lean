@@ -67,7 +67,22 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       deployed := true
     let normaliseSignature (s : String) :=
       ((s.replace "uint256" "uint").replace "int256" "int").replace "address payable" "address"
-    let function := (rows.find? fun r => normaliseSignature r.sourceSignature == normaliseSignature signature).map (·.name)
+    let function := (rows.find? fun r =>
+      let declaration := (Semantics.lookupBy r.name C.funs).bind (·.sourceDecl)
+      -- Nominal source types can share an ABI representation. An internal
+      -- overload or a retained base body is never an external transaction.
+      declaration.all (·.externalEntry) &&
+      (normaliseSignature r.sourceSignature == normaliseSignature signature ||
+        (declaration.bind (·.signature)).any fun canonical =>
+          normaliseSignature canonical == normaliseSignature signature)).map (·.name)
+    let declaration := if ctor then C.ctor else function.bind (Semantics.lookupBy · C.funs)
+    if let some declaration := declaration then
+      for ((parameter, _), arg) in declaration.params.zip args do
+        if (Semantics.lookupBy (parameter ++ "#address") declaration.widths).isSome then
+          let some value := arg.litVal?
+            | return result "blocked" "non-scalar address ABI argument"
+          unless 0 ≤ value && value < 2^160 do
+            return result "blocked" "noncanonical address ABI argument"
     let program := if ctor then ctorProgS C args else do
       let some name := function | throw s!"no imported function for {signature}; available: {rows.map (·.sourceSignature)}"
       elabProgS C [← runStmt C name args]

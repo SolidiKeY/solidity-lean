@@ -214,3 +214,14 @@ the standalone graph foundation. Complete gaps and provenance are retained in
 [the Group 06 evidence](../../tests/upstream/group06.json); the finite repair and
 its remaining boundaries are recorded in
 [declarations-metadata.md](declarations-metadata.md#upstream-group-06-finite-library-struct-identity-2026-10-26).
+
+The resumed Group 06 finite implementation from `615bd3fa` increases actual
+both-pipeline passes from five to twelve of the fifteen assigned fixtures. It
+leaves the same three recursive fixtures broken; the final reports retain both
+mode gaps and every original input/expectation. The independent reviews confirm
+that recursive memory allocation/deletion and schema-indexed storage aliases
+still need ordinary interpreter integration and operation correspondence.
+[The continuation handoff](declarations-metadata.md#upstream-group-06-continuation-from-615bd3fa)
+distinguishes implemented finite repairs from these unimplemented interfaces.
+There is no finite-depth substitute or new recursive source admission in that
+patch.

@@ -1285,6 +1285,18 @@ def elabStmtPWith (rc : ElabRec C) (s : RawStmt) : ElabM (SProg C) := do
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
   -- a push's receiver, as a `.push` member's base
   let es : List (RawExpr × Bool) ← match s with
+    | .tupleAssign ts (.tuple values) => do
+      unless ts.length == values.length do throw "tuple target/value arity mismatch"
+      let mut checked := []
+      for (target, value) in ts.zip values do
+        match target with
+        | some target =>
+          let reference := isRef target
+          if reference then
+            ElabM.lift (shapeCheck C Γ (placeShape C Γ target) value)
+          checked := checked ++ [(target, reference), (value, reference)]
+        | none => checked := checked ++ [(value, false)]
+      pure checked
     | .call (.field b "push") [a] =>
       -- Reference values are checked after capture as well; permit their
       -- whole source here without erasing the element-width metadata.

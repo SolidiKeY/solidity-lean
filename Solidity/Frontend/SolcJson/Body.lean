@@ -654,6 +654,8 @@ structure PState where
   constStack : List Int := []
   enumValues : List (Int × Nat) := []
   enumBounds : List (Int × Nat) := []
+  /-- Conversion targets keyed by compiler declaration identity. -/
+  enumCasts : List (Int × String) := []
   specEnums : List (String × Nat) := []
   specBlocked : List String := []
   specConstants : List (String × Nat) := []
@@ -1580,7 +1582,8 @@ partial def call (j : Json) : PM String := do
       else if to.startsWith "type(enum " then
         -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
         -- elaborator asserts that `x` names one of its members
-        let e := ((to.drop 10).dropRight 1).splitOn "." |>.getLast!
+        let some e := (J.ref? f).bind (lookupBy · (← get).enumCasts)
+          | unsupported "an enum conversion without a resolved declaration"
         pure s!"{identText e}({← expr a})"
       else
         let n ← match J.kind f with
@@ -1626,6 +1629,7 @@ partial def call (j : Json) : PM String := do
       ["encode", "encodePacked", "encodeWithSelector", "encodeWithSignature", "encodeCall"].contains
         ((J.str? f "memberName").getD "") &&
       (J.opt f "expression").any (builtinNamed · "abi")
+    let enumCasts := (← get).enumCasts
     let as := if abiEncoder then
         (args.zip as).map fun (a, t) =>
           -- Constant metadata can print as a numeral. Preserve the source
@@ -1633,7 +1637,9 @@ partial def call (j : Json) : PM String := do
           if (bytesTy? (J.tyStr a)).isSome && !(t.startsWith (J.tyStr a ++ "(")) then
             sourceCast (J.tyStr a) t
           else if packed && (J.tyStr a).startsWith "enum " && J.kind a == "MemberAccess" then
-            s!"{identText ((((J.tyStr a).drop 5).splitOn ".").getLast!)}({t})"
+            match ((J.opt a "expression").bind J.ref?).bind (lookupBy · enumCasts) with
+            | some name => s!"{identText name}({t})"
+            | none => t
           else t
       else as
     let name ← if let some n := superName then pure (identText n)
@@ -1708,6 +1714,22 @@ def valueCall? (j : Json) : Option (Json × Json × Json) := do
   let [v] ← (J.arr? opts "options").map Array.toList | none
   pure (d, ← J.opt m "expression", v)
 
+/-- A validated type expression has no runtime evaluation. Only literal
+array dimensions and declaration-resolved type names are admitted here; an
+ordinary indexed read, call or member receiver must still execute. -/
+partial def inertTypeExpression (declarations : List Json) (j : Json) : Bool :=
+  (J.tyStr j).startsWith "type(" && match J.kind j with
+  | "Identifier" | "MemberAccess" =>
+    ((J.ref? j).bind fun id => declarations.find? (J.id? · == some id)).any
+      (fun d => ["StructDefinition", "EnumDefinition", "ContractDefinition"].contains (J.kind d)) &&
+    (J.kind j == "Identifier" || (J.opt j "expression").any (inertTypeExpression declarations))
+  | "ElementaryTypeNameExpression" => true
+  | "IndexAccess" =>
+    (J.opt j "baseExpression").any (inertTypeExpression declarations) &&
+    ((J.opt j "indexExpression").all fun i =>
+      J.kind i == "Literal" && J.str? i "kind" == some "number")
+  | _ => false
+
 /-- A tuple's components, one left out printed empty: `(a, , b)`. -/
 def tuple (j : Json) : PM String := do
   let cs ← (← PM.lift (J.arr j "components")).mapM fun c =>
@@ -1726,6 +1748,37 @@ def tupleValue (v : Json) : PM String := do
   then expr v
   else unsupported "a tuple assigned from neither a tuple, nor a call of a function of this \
     contract, nor `(bool ok, ) = a.call{value: v}(\"\")`"
+
+/-- Flatten explicitly nested tuple assignment shapes together. Discarded
+subtuples retain every admitted leaf. Calls and failing reads remain refused
+until nested evaluation ordering is established. The existing intrinsic tuple
+elaborator captures all values before writing any target. -/
+partial def tupleAssignmentLeaves (left right : Json) : Except Gap (List (Json × Json)) := do
+  let left := unparen left
+  let right := unparen right
+  if isTuple right then
+    let rs := (J.arrD right "components").toList
+    if left == .null then
+      return ← rs.flatMapM (tupleAssignmentLeaves .null)
+    unless isTuple left do throw (.unsupported "a nested tuple assigned to a scalar target")
+    let ls := (J.arrD left "components").toList
+    unless ls.length == rs.length do throw (.unsupported "nested tuple shapes disagree")
+    return ← (ls.zip rs).flatMapM fun (l, r) => tupleAssignmentLeaves l r
+  if isTuple left then throw (.unsupported "a nested tuple target without an explicit tuple value")
+  unless ["Literal", "Identifier"].contains (J.kind right) do
+    throw (.unsupported "a nested tuple leaf with evaluation effects or failing reads")
+  return [(left, right)]
+
+/-- Lower an explicit nested tuple to the existing simultaneous flat tuple
+assignment. A spare discarded zero preserves tuple syntax for a single leaf. -/
+def explicitTupleAssignment (left right : Json) : PM String := do
+  let pairs ← PM.lift (tupleAssignmentLeaves left right)
+  let pairs := if pairs.length < 2 then pairs ++ [(.null, Json.mkObj
+    [("nodeType", .str "Literal"), ("kind", .str "number"), ("value", .str "0"),
+     ("typeDescriptions", Json.mkObj [("typeString", .str "int_const 0")])])] else pairs
+  let ls ← pairs.mapM fun (l, _) => if l == .null then pure "" else expr l
+  let rs ← pairs.mapM fun (_, r) => expr r
+  return s!"({", ".intercalate ls}) = ({", ".intercalate rs})"
 
 /-- A local's declaration, `T [storage|memory] x`. -/
 def declText (d : Json) : PM String := do
@@ -1813,14 +1866,19 @@ partial def stmt1 (j : Json) : PM (List String) := do
       (narrowTy? (J.tyStr e)).isSome || (bytesTy? (J.tyStr e)).isSome ||
       ["address", "address payable"].contains (J.tyStr e)
     let declarations := (← get).declarations
+    if inertTypeExpression declarations e then return []
     if J.kind e == "Identifier" && scalar then
       if ((J.ref? e).bind fun id => declarations.find? (J.id? · == some id)).any
           (J.kind · == "VariableDeclaration") then return []
     if J.kind e == "Assignment" && (J.opt e "operator").any (· == .str "=") &&
         (J.opt e "leftHandSide").any (isTuple ∘ unparen) then
       -- `(a, , b) = v`, and `((a, b)) = v` as it
-      return [s!"{← tuple (unparen (← PM.lift (J.get e "leftHandSide")))} = \
-        {← tupleValue (unparen (← PM.lift (J.get e "rightHandSide")))}"]
+      let left := unparen (← PM.lift (J.get e "leftHandSide"))
+      let right := unparen (← PM.lift (J.get e "rightHandSide"))
+      let nested := ((J.arrD left "components").toList ++
+        (J.arrD right "components").toList).any (isTuple ∘ unparen)
+      if isTuple right && nested then return [← explicitTupleAssignment left right]
+      return [s!"{← tuple left} = {← tupleValue right}"]
     -- `x.push().f = c`: solc pushes, then stores the constant
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
