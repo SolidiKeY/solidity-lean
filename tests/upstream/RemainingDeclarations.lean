@@ -1,19 +1,23 @@
 import Solidity.Tools.Upstream
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.StaticCodeConstants testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.EnumStructFields testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.MixedStorageResults testing
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.MixedReturnRefusal testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.StaticCodeConstants testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.EnumStructFields testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.MixedStorageResults testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.MixedReturnRefusal testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.StaticCodeConstants testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumStructFields testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.MixedStorageResults testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.MixedReturnRefusal testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.StaticCodeConstants testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumStructFields testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.MixedStorageResults testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.MixedReturnRefusal testing
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.EnumIdentity testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.EnumIdentity testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumIdentity testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumIdentity testing
 
-solc_import "../solc/RemainingDeclarations.ast.json" hash 0xb2397c2c09690442 as Imported.Remaining.EnumDecodeRefusal testing
-solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0x3ed5de6139465d51 as Imported.RemainingIR.EnumDecodeRefusal testing
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumDecodeRefusal testing
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumDecodeRefusal testing
+
+solc_import "../solc/RemainingDeclarations.ast.json" hash 0x5d429fa78f336311 as Imported.Remaining.EnumInputRefusal testing
+
+solc_import "../solc/RemainingDeclarationsIR.ast.json" hash 0xf689acee6521ec52 as Imported.RemainingIR.EnumInputRefusal testing
 
 namespace Solidity.Upstream.RemainingDeclarations
 open Solidity Solidity.Frontend Lean
@@ -208,6 +212,18 @@ example : isRevert (Prog.runF 1000 mixedIRP (State.init Imported.RemainingIR.Mix
   row.sourceName == "selected" && row.status != .elaborated
 #guard Imported.RemainingIR.MixedReturnRefusal.report.any fun row =>
   row.sourceName == "selected" && row.status != .elaborated
+
+#guard [Imported.Remaining.EnumInputRefusal.report, Imported.RemainingIR.EnumInputRefusal.report].all fun rows =>
+  ["direct", "records", "nested"].all fun name => rows.any fun row =>
+    row.sourceName == name && row.status == .unsupported &&
+      (row.reason.splitOn "recursive enum cardinality checks").length > 1
+#guard [Imported.Remaining.EnumInputRefusal.report, Imported.RemainingIR.EnumInputRefusal.report].all fun rows =>
+  ["scalar", "array"].all fun name => rows.any fun row =>
+    row.sourceName == name && row.status == .elaborated
+#guard Imported.Remaining.EnumInputRefusal.report.any fun row =>
+  row.sourceName == "scalar" && row.paramRanges.contains ("value", 0, 1)
+#guard Imported.Remaining.EnumInputRefusal.report.any fun row =>
+  row.sourceName == "array" && row.elemRanges.contains ("values", 0, 1, none)
 
 end Solidity.Upstream.RemainingDeclarations
 

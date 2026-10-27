@@ -671,11 +671,23 @@ agreement lemma uses only `propext`. These local lemmas are not a universal
 source-rewrite theorem. No new axiom, `sorry`, proof-limit increase or changed
 historical expectation is involved. The optional Bridge remains separate.
 
-The source API now defaults to one obligation per subprocess, retaining all
-rows and the existing 300-second bound. Profiling isolated the previous
+The three previously timed-out source tests explicitly request one obligation
+per subprocess, retaining all rows and the existing 300-second bound. The
+shared API retains its existing default of 32; unrelated suites retain their
+original scheduling. Profiling isolated the previous
 Calldata aggregate timeout: `sliceLength` proved in 8.657 seconds,
 `sliceRead` remained pending in 91.951 seconds and `sliceOfSlice` remained
 pending in 92.757 seconds, each with no tool errors. Pending remains pending.
 This changes scheduling, not proof premises, search budgets or expected results.
 Development attempts made while dependencies were changing remain recorded as
 stale-dependency failures, not successful validation.
+
+The final independent skeptic review additionally identified composite ABI input
+ranges: uint8 struct fields preserve width, but the existing parameter premises
+only bound direct enum values and one-dimensional enum arrays. Public/external
+and constructor composite enum inputs now explicitly refuse admission until
+recursive nominal checks exist. Controls pin struct, struct-array and nested
+enum-array refusals and retain direct scalar/one-dimensional array admission
+with their exact cardinality premises. Internal storage references remain on
+their existing typed path. The first resumed source-suite attempt was stopped
+for this confirmed fix and retained as incomplete, rather than treated as a pass.

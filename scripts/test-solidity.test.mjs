@@ -431,7 +431,7 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
   // docs/semantic-gaps.md, "Bytes and strings": a `calldata` parameter is a
   // memory parameter the body does not write (`calldataCheck`)
-  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Calldata.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['first', 'sumTwo', 'byteLength', 'hashOf', 'strLength', 'member', 'passes',
@@ -446,7 +446,7 @@ test("calldata: read-only memory parameters, a written copy refused, slices as v
 });
 
 test("hashing: keccak256, sha256, ripemd160, ecrecover, abi.encode/encodePacked/decode, selectors, string keys, concat", () => {
-  const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/Hashing.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['equalStringsHashEqual', 'hashParameter', 'encodeLayout', 'encodePacked',
@@ -915,7 +915,7 @@ test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", (
 test("revert data: a self-call's reason reaches catch Error, raw data catch (tests/solc/RevertData.sol)", () => {
   // docs/semantic-gaps.md, "Revert data": the reason is bound by `catchData`,
   // one goal per datum the callee lists (`catchDataBox`)
-  const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false});
+  const report = runSolidityTests(["tests/solc/RevertData.sol"], {build:false, batchSize:1});
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   // a custom error's data: its selector folded as solc folds it, its

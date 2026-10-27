@@ -1262,8 +1262,19 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let ps : Except Gap (List (String × String)) := (do
       let pl ← J.get f "parameters"
       (← J.arr pl "parameters").mapM fun p => do
+        let type ← J.get p "typeName"
+        let abiFacing := kind == "constructor" ||
+          [some "public", some "external"].contains (J.str? f "visibility")
+        let enumComposite := (J.nodes type).any fun node =>
+          ((J.ref? node).orElse fun _ => (J.opt node "pathNode").bind J.ref?).any enumDecodeTypes.contains
+        let directEnum := (J.ref? type).any fun id => (lookupBy id enumBounds).isSome
+        let enumArray := J.kind type == "ArrayTypeName" &&
+          [some "memory", some "calldata"].contains (J.str? p "storageLocation") &&
+          ((J.opt type "baseType").bind J.ref?).any fun id => (lookupBy id enumBounds).isSome
+        if abiFacing && enumComposite && !directEnum && !enumArray then
+          throw (.unsupported "an ABI composite parameter requires recursive enum cardinality checks" (J.line p))
         let ((t, x), _) ← (do
-          let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
+          let t ← PM.lift (tyText S type)
           let loc := match J.opt p "storageLocation" with
             | some (.str "memory") => " memory"
             | some (.str "storage") => " storage"

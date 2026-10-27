@@ -72,10 +72,7 @@ export function runSolidityTests(paths, options = {}) {
   if (!files.length) throw new Error("no Solidity files selected");
   const timeoutMs = options.timeoutMs ?? 300000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeout must be positive milliseconds");
-  // Bound a default proof subprocess to one obligation. Large calldata/hash
-  // contracts otherwise consume the entire timeout before later rows run.
-  // This changes job granularity, not proof budgets or source premises.
-  const batchSize = options.batchSize ?? 1;
+  const batchSize = options.batchSize ?? 32;
   if (!Number.isSafeInteger(batchSize) || batchSize <= 0) throw new Error("batch size must be positive");
   // `--self-address A`: every obligation assumes `address(this) == A` (`Problem.selfPre`)
   let selfClause = '';

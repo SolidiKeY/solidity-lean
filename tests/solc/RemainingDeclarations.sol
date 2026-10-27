@@ -103,3 +103,13 @@ contract EnumDecodeRefusal {
         return uint(record.choice);
     }
 }
+
+contract EnumInputRefusal {
+    enum Choice { A, B }
+    struct Record { Choice choice; }
+    function direct(Record memory record) external pure returns (uint) { return uint(record.choice); }
+    function records(Record[] memory values) public pure returns (uint) { return uint(values[0].choice); }
+    function nested(Choice[][] memory values) external pure returns (uint) { return uint(values[0][0]); }
+    function scalar(Choice value) external pure returns (uint) { return uint(value); }
+    function array(Choice[] memory values) external pure returns (uint) { return uint(values[0]); }
+}
