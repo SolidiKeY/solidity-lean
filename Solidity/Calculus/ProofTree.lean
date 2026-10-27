@@ -80,7 +80,7 @@ syntax "sol_leaf_keep" : tactic
 namespace ProofTree
 
 open Lean Meta Elab Tactic
-open Solidity.ProofTree (Tree Act short dotIdent runOn)
+open Solidity.ProofTree (Tree short dotIdent runOn)
 
 /-- How the tree is grown: the tactics tried on a leaf after `closeTrue` and
 `closeTacs` (each list a closing script), and at most how many nodes. -/
@@ -330,22 +330,22 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
       let (pre, c') ← if gs.length < 2 then pure (#[], c) else silent c
       let t ← grow cfg fuel l c'
       cs := cs.push (if pre.isEmpty then t else prefixTacs pre t)
-    return .node g sequent label (.rule mv.name tacs mv.se) cs
+    return .rule ⟨g, sequent, label⟩ mv.name tacs mv.se cs
   -- a leaf
   for tacs in #[← closeTrueTacs, ← closeTacs] ++ cfg.closers do
     let s ← saveState
     try
-      if (← runOn g tacs).isEmpty then return .node g sequent label (.closed tacs) #[]
+      if (← runOn g tacs).isEmpty then return .solved ⟨g, sequent, label⟩ tacs
       s.restore
     catch _ => s.restore
-  return .node g sequent label .opened #[]
+  return .opened ⟨g, sequent, label⟩
 where
   /-- The silent moves `pre` made at the top of the branch `t`: its first
   node's tactics, its goal the branch's own. -/
   prefixTacs (pre : Array (TSyntax `tactic)) (t : Tree) : Tree :=
     match t with
-    | .node _ e l (.rule n ts se) cs => .node t.goal e l (.rule n (pre ++ ts) se) cs
-    | .node _ e l (.closed ts) cs => .node t.goal e l (.closed (pre ++ ts)) cs
+    | .rule info n ts se cs => .rule info n (pre ++ ts) se cs
+    | .solved info ts => .solved info (pre ++ ts)
     | t => t
 
 /-- The tree of the goal `g`; the goals it leaves open are its open leaves. -/

@@ -91,9 +91,9 @@ def proofNodeMsg (cmd : String) (tree : ProofTree.Tree) (n : Nat) : MetaM Messag
   let some r := rows[n]?
     | throwError "{cmd}: no node {n}; the tree has {rows.size} (0 to {rows.size - 1})"
   let children := (rows.filter (·.parent == some r.serial)).map (·.serial)
-  let tacs ← match r.node.act with
-    | .rule _ ts _ | .closed ts => ts.mapM fun s => return m!"{s}"
-    | .opened => pure #[]
+  let tacs ← match r.node with
+    | .rule _ _ ts _ _ | .solved _ ts => ts.mapM fun s => return m!"{s}"
+    | .opened _ => pure #[]
   let field (k : String) (v : MessageData) : MessageData := m!"{k}: {v}"
   return MessageData.joinSep [
     field "node" m!"{r.serial}",

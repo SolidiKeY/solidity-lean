@@ -51,6 +51,8 @@ under `MemoryMax=12G`, `MemorySwapMax=0`, with a 12 GiB host reserve.
 
 ### Binding migration implementation and review
 
+Committed as `4600458d` (`Bind local metadata`).
+
 `LocalTy.val`, `alias` and `mem` now carry their own width/ABI shape. All
 parameter, return-frame, importer and capture producers use that representation;
 there is no metadata pseudo-local or compatibility adapter. The three positional
@@ -83,9 +85,53 @@ leaving three files, and the task-owned server was moved into a 6 GiB scope with
 swap disabled for subsequent allocations. Heavy shell checks retain their
 separate 12 GiB cap. No other session's workers were terminated.
 
-## Current state
+### Proof-tree target and migration
 
-The two selected representation changes are implemented and verified. The
+Reassessment after the binding migration finds one smaller but independent
+representation improvement worth completing: `Tree.node` accepts any `Act` and
+any child array, so an open or closed leaf can carry hidden children. Current
+producers happen to use empty arrays; consumers rely on that convention when
+counting goals, emitting scripts and reporting closure.
+
+The target is a shared node header and three constructors: open leaf, solved
+leaf, and rule with children. Remove the separate `Act` representation and
+read the constructors directly; only a rule constructor can contain children. Migrate tree growth and tactic prefixing
+directly, with no legacy `node` adapter. Existing tree/node/JSON/replay pins
+exercise public consumers. This is a data-model invariant, not a new proof
+correctness or tactic-completeness claim. History of `TreeData` shows no speed
+rationale for the independent action/children fields; rebuilding its importers
+is the expected checking cost.
+
+Implemented without an adapter or separate action view. `openGoals` and script
+generation now recurse on the constructors directly, and the node-inspection
+tool reads tactics from the same constructors. Read-only finder and skeptic
+reviews found no remaining defects, including after removing `Act`. The final
+289-job build of both proof-tree pin modules and the binding regressions passes,
+with a measured 2.41 GiB peak aggregate RSS. Per-file diagnostics pass for all
+three changed modules. Existing display, JSON, branch-label, node and replay
+pins were preserved without editing their expected output.
+
+### Reassessment and remaining work
+
+The two new increments complete their migrations: no detached shape entries,
+old tree constructors or dual action/tree representation remain. The binding
+change also eliminated parameter-list flattening, repeated local lookups and a
+second state mutation for reference captures. The tree change eliminated the
+action layer rather than retaining it as another synchronized representation.
+
+The recursive-storage graph remains a substantial follow-up, not an achieved
+ordinary-source migration. It changes the admissible type universe and requires
+an explicit correspondence through observations, term operations and deletion
+before replacing legacy storage. Existing separate graph certificates do not
+establish that correspondence. The core compiler alternative is not selected:
+the public compilation entry already couples its recognizer and code through a
+certificate and the memory branch is intrinsic; another fragment AST has no
+demonstrated net simplification yet. Finite-dispatch signatures remain a modest
+follow-up. This investigation does not claim the architecture is fully optimized.
+
+## Earlier pass
+
+The earlier getter/provenance representation changes are implemented and verified. The
 upstream pull was merged in `dc044e71`, preserving its enum/UDVT getter support.
 
 | Change | Commit | Structural guarantee |

@@ -5,8 +5,7 @@ import Solidity.Calculus.RuleKit
 
 solkey's proof tree (`ProofSession.tree()`), as `Calculus/ProofTree.lean`
 grows it on today's goal and `Calculus/ProofTree.lean` on a scoped one:
-a node's goal, sequent, branch label and what was done to it (`Act`,
-`Tree`), solkey's rows and branch labels (`Tree.rows`, `Tree.branchLabel`),
+a node's goal, sequent, branch label and what was done to it (`Tree`), solkey's rows and branch labels (`Tree.rows`, `Tree.branchLabel`),
 the web prover's shape (`Tree.toJson`), the GUI's view (`Tree.display`), and
 the walk a tree writes (`Tree.script`, `suggest`), with the helpers a
 tactic writing a proof out uses (`runOn`, `short`, `qualified`,
@@ -31,54 +30,56 @@ open Lean Meta Elab Tactic
 
 /-! ## The tree -/
 
-/-- What was done at a node. -/
-inductive Act where
-  /-- A rule, by its name (the taclet's, or KeY's: `impRight`, `allRight`,
-  `emptyModality`), the tactics that applied it, and what its `se` is
-  (an `if`'s condition, which `ifElseSplit`'s labels name). -/
-  | rule (name : Lean.Name) (tacs : Array (TSyntax `tactic)) (se : Option String := none)
-  /-- A leaf the tactics closed. -/
-  | closed (tacs : Array (TSyntax `tactic))
-  /-- A leaf left open. -/
-  | opened
-  deriving Inhabited
+/-- The goal, sequent and incoming branch label shared by every node. -/
+structure NodeInfo where
+  goal : MVarId
+  sequent : Expr
+  label : Option Lean.Name
 
-/-- A node: its goal and the goal's statement (`Γ ⊢ φ`), the label of the
-branch it starts (its case name, when its parent has more than one goal),
-what was done to it, and the goals that left. -/
+/-- Open and solved leaves have no children by construction. Only a rule
+node carries the subgoals produced by its tactics. -/
 inductive Tree where
-  | node (goal : MVarId) (sequent : Expr) (label : Option Lean.Name) (act : Act) (children : Array Tree)
+  | opened (info : NodeInfo)
+  | solved (info : NodeInfo) (tacs : Array (TSyntax `tactic))
+  | rule (info : NodeInfo) (name : Lean.Name) (tacs : Array (TSyntax `tactic))
+      (se : Option String) (children : Array Tree)
 
-instance : Inhabited Tree := ⟨.node ⟨.anonymous⟩ default none .opened #[]⟩
+instance : Inhabited Tree := ⟨.opened ⟨⟨.anonymous⟩, default, none⟩⟩
 
 namespace Tree
 
-def goal : Tree → MVarId | .node g .. => g
-def sequent : Tree → Expr | .node _ e .. => e
-def label : Tree → Option Lean.Name | .node _ _ l .. => l
-def act : Tree → Act | .node _ _ _ a _ => a
-def children : Tree → Array Tree | .node _ _ _ _ cs => cs
+def info : Tree → NodeInfo
+  | .opened i | .solved i _ | .rule i .. => i
+
+def goal (t : Tree) : MVarId := t.info.goal
+def sequent (t : Tree) : Expr := t.info.sequent
+def label (t : Tree) : Option Lean.Name := t.info.label
+
+def children : Tree → Array Tree
+  | .rule _ _ _ _ cs => cs
+  | .opened _ | .solved .. => #[]
 
 /-- The node's name, as solkey's `Node.name()`: the rule, or for a leaf
 whether it is closed. -/
 def name (t : Tree) : String :=
-  match t.act with
-  | .rule n _ _ => n.toString
-  | .closed _ => "Closed goal"
-  | .opened => "OPEN GOAL"
+  match t with
+  | .rule _ n _ _ _ => n.toString
+  | .solved .. => "Closed goal"
+  | .opened _ => "OPEN GOAL"
 
 /-- solkey's state of a node: `inner`, `closed` or `open`. -/
 def state (t : Tree) : String :=
-  match t.act with
+  match t with
   | .rule .. => "inner"
-  | .closed _ => "closed"
-  | .opened => "open"
+  | .solved .. => "closed"
+  | .opened _ => "open"
 
 /-- The goals left open, leftmost first. -/
 partial def openGoals (t : Tree) : Array MVarId :=
-  match t.act with
-  | .opened => #[t.goal]
-  | _ => t.children.foldl (· ++ ·.openGoals) #[]
+  match t with
+  | .opened info => #[info.goal]
+  | .solved .. => #[]
+  | .rule _ _ _ _ cs => cs.foldl (· ++ ·.openGoals) #[]
 
 /-- The leaves: KeY's branches, one per goal the proof ends in. -/
 partial def leaves (t : Tree) : Nat :=
@@ -94,10 +95,10 @@ the rules write them): `thn` and `els` of a split or a check, the outcomes of
 `branches`. -/
 def branchLabels : List (String × List String) := Taclet.branchLabels
 
-/-- What `se` was at the node: its `Act.rule`'s instantiation. -/
+/-- What `se` was at the node: its rule's instantiation. -/
 def se? (t : Tree) : Option String :=
-  match t.act with
-  | .rule _ _ se => se
+  match t with
+  | .rule _ _ _ se _ => se
   | _ => none
 
 /-- A label as KeY displays it (`NodeInfo.setBranchLabel`): the schema
@@ -182,8 +183,8 @@ partial def displayAux (t : Tree) (ind : Nat) : StateT Nat MetaM (Array MessageD
   set (n + 1)
   let pad := "".pushn ' ' ind
   let head : MessageData := m!"{pad}{n}: {t.name}"
-  let head ← match t.act with
-    | .opened => do
+  let head ← match t with
+    | .opened _ => do
       let s ← t.ppSequent
       pure (head ++ .nest (ind + 4) (m!"\n" ++ s))
     | _ => pure head
@@ -237,12 +238,12 @@ def tacLines (t : TSyntax `tactic) : MetaM (Array String) := do
 `apply` per rule, a `case` per goal of a node with several (a `·` where the
 goals have no distinct names), and `sorry` for an open leaf. -/
 partial def Tree.script (t : Tree) : MetaM (Array String) := do
-  match t.act with
-  | .opened => return #[r"sorry"]
-  | .closed tacs => return (← tacs.mapM tacLines).flatten
-  | .rule _ tacs _ =>
+  match t with
+  | .opened _ => return #[r"sorry"]
+  | .solved _ tacs => return (← tacs.mapM tacLines).flatten
+  | .rule _ _ tacs _ children =>
     let head := (← tacs.mapM tacLines).flatten
-    match t.children with
+    match children with
     | #[c] => return head ++ (← c.script)
     | cs =>
       let labels := cs.filterMap (·.label)
