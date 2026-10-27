@@ -29,7 +29,7 @@
     "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
     "runnerSha256": "16cc8c1defa64079a40713be63be903d979b2b33166a427fb12e912b4ed37387",
     "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
-    "modelSha256": "2080125f5e777149e751ed6c0134864afbb2b3d5414a0da3d7b7dce858e59eb7",
+    "modelSha256": "ca4710564ff1b148a42492323ffe8e667745f2d9e1d5f331cca266481f0234cc",
     "evmVersion": "osaka",
     "loopFuel": 1000,
     "scope": "Exact pinned-solc syntax diagnostics; functional scalar vectors on the typed Lean interpreter in required legacy/viaIR source modes. Generated EVM/SSA code, gas, logs and the native C++ harness are not tested.",
@@ -138,12 +138,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-abi_functions_member_access"
+        ".lake/upstream/group08/resume/sealed-abi_functions_member_access"
       ],
-      "seconds": 12.135,
+      "seconds": 5.924,
       "exitCode": 0,
-      "logSha256": "4efe510bd69b832af1925467135584ba99fe28d1f695a4b91cb10762af6888df",
-      "reportSha256": "48b79ea10934df9cefd090967a85624a6c562feabb1afa4c3541baf37eed8bc0"
+      "logSha256": "3d3a738fc033d3a0fdbd4713f2883ad1c5c50aa6c7c1986c18176d3fbb3b7777",
+      "reportSha256": "8200bab69d3819d480fb24a07a8f87f4870ea724948c609c6d34fb7540f64d97"
     },
     {
       "path": "test/libsolidity/semanticTests/underscore/as_function.sol",
@@ -299,12 +299,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-as_function"
+        ".lake/upstream/group08/resume/sealed-as_function"
       ],
-      "seconds": 12.785,
+      "seconds": 5.74,
       "exitCode": 0,
-      "logSha256": "e0f38c379e0cf45303fc49394cc87e5c240a11ff33d1c571842fff9421df9598",
-      "reportSha256": "026ec50df2c74ad24b6924071127d75b492dd13081e1bdcaaf93966b3cf28939"
+      "logSha256": "4093a53267d812f46e43677e037989a2d467b111f851a0fca06a49c7b0b89961",
+      "reportSha256": "f410ec04faa494d27fb7157b5a19a269a8176e3dd8bff0ae826d2f79e73d71ea"
     },
     {
       "path": "test/libsolidity/semanticTests/immutable/assign_at_declaration.sol",
@@ -404,12 +404,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-assign_at_declaration"
+        ".lake/upstream/group08/resume/sealed-assign_at_declaration"
       ],
-      "seconds": 7.921,
+      "seconds": 9.869,
       "exitCode": 0,
-      "logSha256": "cb860c496c79c867335d826ff7608826b664f55df3813b2eba1533d58ba6370e",
-      "reportSha256": "e56c48b316fd5a7ab7f5fc169fe457e69678779c815fb3d34117ea856b619faa"
+      "logSha256": "22b129b396427a265be58218867b93880560827b86492cef70b8adb47bb7e1d5",
+      "reportSha256": "6b9e6c440b2e70e18ec96aa70b67ec83041336e4efdf4fb828bef452779c0fb9"
     },
     {
       "path": "test/libsolidity/semanticTests/constants/assign_type_info.sol",
@@ -505,12 +505,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-assign_type_info"
+        ".lake/upstream/group08/resume/sealed-assign_type_info"
       ],
-      "seconds": 9.005,
+      "seconds": 12.15,
       "exitCode": 0,
-      "logSha256": "8303a45acc60ad04251864bac79fd946fb4f6fd26191c04a7df5cfc13ee7af75",
-      "reportSha256": "80a09cbdbcf17d5b512326ee150ecb9d74c9a8ed3283bf5e37e5be62250b9fbe"
+      "logSha256": "2a51a73fc9a360810d72b735bf886fd703faa1ceadc0f2999c4b889bbd651b7b",
+      "reportSha256": "b243de8d2b4c9a8fbb8d81c42006b678f91c5f85185d3fd83984c13e35d099cb"
     },
     {
       "path": "test/libsolidity/semanticTests/scoping/c99_scoping_activation.sol",
@@ -706,12 +706,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-c99_scoping_activation"
+        ".lake/upstream/group08/resume/sealed-c99_scoping_activation"
       ],
-      "seconds": 7.454,
+      "seconds": 12.014,
       "exitCode": 0,
-      "logSha256": "2e5551fa9721b7b0cb445d5833f8e580cc0217602795c5f183d375f130569e9f",
-      "reportSha256": "1b80db4b0b83898c2cabb990f92ef94eb2e9189e784bfd8fec0aaa35d4817c3c"
+      "logSha256": "8f7d609cc1b9eb35f66e5dec7c7e4443e5136eb4f73b3172c441de18b2014f01",
+      "reportSha256": "d2ebc159761f12ee9e92bbe695bd46b652243c89f724c7eec14cae9de1c86eae"
     },
     {
       "path": "test/libsolidity/semanticTests/various/crazy_elementary_typenames_on_stack.sol",
@@ -811,12 +811,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-crazy_elementary_typenames_on_stack"
+        ".lake/upstream/group08/resume/sealed-crazy_elementary_typenames_on_stack"
       ],
-      "seconds": 5.85,
+      "seconds": 9.727,
       "exitCode": 0,
-      "logSha256": "545e84f4c7d09ee0f9374d2ae277c5880ff0b3971406e27622b8c201b6be0ae3",
-      "reportSha256": "026f74168828614a9667a2c7aa718ac8b9b01d5d9f0b69d48d10f2d1af6fede6"
+      "logSha256": "5a2d608effc6426df754d2eefef4096d6e4ca397d4c20f3f3016572564b8213c",
+      "reportSha256": "1842005fa44926750defa39e98953f0efa8968b2a621d2d8a4a370009e940b00"
     },
     {
       "path": "test/libsolidity/semanticTests/various/cross_contract_types.sol",
@@ -916,12 +916,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-cross_contract_types"
+        ".lake/upstream/group08/resume/sealed-cross_contract_types"
       ],
-      "seconds": 6.957,
+      "seconds": 6.961,
       "exitCode": 0,
-      "logSha256": "1826a419e1020acb90262167e77cc19b9c5237c3d5a664c26b9c44e87235e7bb",
-      "reportSha256": "1daaa133162dd55bc04a83c9fdd301035f7b29fb9aab4b42e91f7618958061eb"
+      "logSha256": "7f569458dfc8cab24f3ce01df17188cc984a96d31bdb86bc3a27c05c4c627083",
+      "reportSha256": "fbab2899ea9aeb266911c727d915f1b45fa303b29648e7412f6098f570fa5ec5"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/delete_local.sol",
@@ -1021,12 +1021,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-delete_local"
+        ".lake/upstream/group08/resume/sealed-delete_local"
       ],
-      "seconds": 7.536,
+      "seconds": 14.762,
       "exitCode": 0,
-      "logSha256": "3b8c1a80dc8a48ed24020dcee462aaf3ed72507bf09a008bffe28c15724ad47a",
-      "reportSha256": "9c908aae92857e5e016448ea12888d6b3d681cef1634338b1e83fbe98e0d8003"
+      "logSha256": "4885fb97eada10f05826579d72add53b2f139fc1d92af87a1dcf29b205d0120c",
+      "reportSha256": "102599432e9e1dfceb83d52aec0bb737e322a8b2492fa695dcd601a6e034a406"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/delete_locals.sol",
@@ -1130,12 +1130,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-delete_locals"
+        ".lake/upstream/group08/resume/sealed-delete_locals"
       ],
-      "seconds": 11.089,
+      "seconds": 7.451,
       "exitCode": 0,
-      "logSha256": "8795f8e3c09eeb86919b80dc732cbf46a6e1a0346cd3284679a4fc40244b5bb2",
-      "reportSha256": "e82cebe68c137ad03b76a442dd7205c00df1013335b7ebe8f25af0706f6e9c2d"
+      "logSha256": "9ab5cb2a6cd0004cac599265c17e575ae46024aae0738cb975176e13ec809f87",
+      "reportSha256": "bf3e5e501b7626af4a1501f26d0f35a9e647563f0b7c45b5b14da7d87451334a"
     },
     {
       "path": "test/libsolidity/semanticTests/builtinFunctions/erc7201_param_array_string_literal.sol",
@@ -1235,12 +1235,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-erc7201_param_array_string_literal"
+        ".lake/upstream/group08/resume/sealed-erc7201_param_array_string_literal"
       ],
-      "seconds": 5.715,
+      "seconds": 10.303,
       "exitCode": 0,
-      "logSha256": "055a8430e3a1b0c217992958768242d43bd5b80583d0718106ba0d26afcfe9db",
-      "reportSha256": "b4bc02994f21576bc4c5d3c189565e2756211c5b716d14b5518957f23dc0de16"
+      "logSha256": "28ed7962d71f7d858564617c86b94974fce6ac5f067025204f81fc96a1f6f30c",
+      "reportSha256": "de487f6c3e49d2eec365b994173a48c6ff408f795e4cad335fd75a4ef2ce416a"
     },
     {
       "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library.sol",
@@ -1340,12 +1340,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-function_modifier_library"
+        ".lake/upstream/group08/resume/sealed-function_modifier_library"
       ],
-      "seconds": 5.251,
+      "seconds": 8.694,
       "exitCode": 0,
-      "logSha256": "26c5ed860918354a8f80e8ea1e32a2ef6bcab443eadd6d7cc7af2c041b46cd4c",
-      "reportSha256": "416c9292fe357e56c51c443b172b1b2ef69b98d7c7ce5b4d8eca461fd0ce2ecd"
+      "logSha256": "5885e6dcba7f820a94ab30e9ed336f72990efa1b114fde0ff35325ae032713e6",
+      "reportSha256": "19ad183892d8b85ec4c316307ce66a7c76bb8e82918b214805830611a5feb202"
     },
     {
       "path": "test/libsolidity/semanticTests/modifiers/function_modifier_library_inheritance.sol",
@@ -1445,12 +1445,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-function_modifier_library_inheritance"
+        ".lake/upstream/group08/resume/sealed-function_modifier_library_inheritance"
       ],
-      "seconds": 6.169,
+      "seconds": 9.381,
       "exitCode": 0,
-      "logSha256": "60ae63315ab5832ad9563e40e562d0a16019c508b5c40b2aaf474a233acdfc82",
-      "reportSha256": "b0fe187e2e66ed6e734f6791af1c10e257e5a6f7b73af04ce9d31b611ff88c04"
+      "logSha256": "ed8649b932fea8f2de3827a00771625831ba0955e104856d7ffa1f7760fd0fc9",
+      "reportSha256": "d83a8396459bd0402a5cff37f13446d1e48a2fe5c325bea8cd3e5f7284a5889f"
     },
     {
       "path": "test/libsolidity/semanticTests/userDefinedValueType/in_parenthesis.sol",
@@ -1554,12 +1554,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-in_parenthesis"
+        ".lake/upstream/group08/resume/sealed-in_parenthesis"
       ],
-      "seconds": 4.299,
+      "seconds": 7.9,
       "exitCode": 0,
-      "logSha256": "39f09f632d072e9cbc45d000236a296217077e11eb7b78b24ed8415e5717b269",
-      "reportSha256": "8d30c024b77016c305a6b212fd638d6e2b89ebcd71dacfc040533077899b7266"
+      "logSha256": "49cccc6ed57cfcfa5620b4cbf8a9b19fd107b2f60b07773fcfd71607ff709ec8",
+      "reportSha256": "16e2fe88af0d1ee95bf83dfaeda3479a7cca004c911d87fe02ffa1ca6ca83fef"
     },
     {
       "path": "test/libsolidity/semanticTests/specialFunctions/keccak256_optimized.sol",
@@ -1691,12 +1691,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-keccak256_optimized"
+        ".lake/upstream/group08/resume/sealed-keccak256_optimized"
       ],
-      "seconds": 6.865,
+      "seconds": 17.006,
       "exitCode": 0,
-      "logSha256": "f9001dc79570cc3ddf86cb8a07f4de786825e307cfe3ae76d705d51f6f458dc5",
-      "reportSha256": "718d02eac4923af561729f3a7f9e87ca85ec26c9bf5741319aef0e8fe105f383"
+      "logSha256": "1c84422df1ea6dfcd08c501e6104181c44f29492fc93e4cc77924f5aceee0090",
+      "reportSha256": "e8d98a37c424709287ec4b164ed5cac034fda695090d8d5ee4a032f8de5b9cba"
     },
     {
       "path": "test/libsolidity/semanticTests/variables/mapping_local_compound_assignment.sol",
@@ -1808,12 +1808,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-mapping_local_compound_assignment"
+        ".lake/upstream/group08/resume/sealed-mapping_local_compound_assignment"
       ],
-      "seconds": 5.351,
+      "seconds": 6.54,
       "exitCode": 0,
-      "logSha256": "7dfdf9f4a1ce8709ea7dbe53a557f3b50282551c9d806a00e97ae34cf6adb518",
-      "reportSha256": "df7adfbadbe0bd31a029cd680e1a4a20171d44a42d0970d04158b9eea1e9ab0f"
+      "logSha256": "9353b8d9c5a11443d0409edc6737ee10ee4bae653d9b9fc6184a415458031bf9",
+      "reportSha256": "bd03502bccf9621d9f15bf22088d86ea7fd6f78dce33782aaf63f0b32fc316ff"
     },
     {
       "path": "test/libsolidity/semanticTests/immutable/multiple_initializations.sol",
@@ -1913,12 +1913,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-multiple_initializations"
+        ".lake/upstream/group08/resume/sealed-multiple_initializations"
       ],
-      "seconds": 11.171,
+      "seconds": 8.734,
       "exitCode": 0,
-      "logSha256": "c045b6e8a4f56a9ed4c1337d9a1f5e56fed5d39548696145302167483fba06d6",
-      "reportSha256": "91ed499c55db4b6027a03ca4d67e9ae9dd521b6b02140df768d41c17cd3e31bc"
+      "logSha256": "ac3ce01dad0fbcd4267180d19a07d224040b8c2cb2447dbd37e3e762e8736361",
+      "reportSha256": "5d9b68ef9c64075957af244c277b1b21e98da0775862cdbc60fa8594a5fb1fb8"
     },
     {
       "path": "test/libsolidity/semanticTests/storage/packed_storage_structs_enum.sol",
@@ -2014,12 +2014,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-packed_storage_structs_enum"
+        ".lake/upstream/group08/resume/sealed-packed_storage_structs_enum"
       ],
-      "seconds": 9.05,
+      "seconds": 17.749,
       "exitCode": 0,
-      "logSha256": "689c840b8b6e0478cb7ea54af7ad2d6116db3ec4171db49a3364c12199912e6b",
-      "reportSha256": "702f57428598e3ddb8d72091aaa8ba9acabf1c3499f02ee80f4e99ec33719b28"
+      "logSha256": "e5169e09dd5a93e08d3fd1b56330ceb9f409029b117248237479d55cdaecf3f3",
+      "reportSha256": "b17943508542163017e8b0aebd520592d5580972893b9d97a23d7dedaff8ba9b"
     },
     {
       "path": "test/libsolidity/semanticTests/various/state_variable_local_variable_mixture.sol",
@@ -2119,12 +2119,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-state_variable_local_variable_mixture"
+        ".lake/upstream/group08/resume/sealed-state_variable_local_variable_mixture"
       ],
-      "seconds": 3.73,
+      "seconds": 13.562,
       "exitCode": 0,
-      "logSha256": "59b4abfc489afe36de0e58fe8d43b55b54ee89015bccbb2b5e593a162ece72bb",
-      "reportSha256": "5bdc7ded11ae3ac17a900b9086e602e49372c83abadc954336dcba9a4dafd9f5"
+      "logSha256": "7c71ba6f5ecf0040cde48ace9d65181726356853bf35521526c33ddf27a6d2e5",
+      "reportSha256": "63fd4627525df51b6ff160a26fefa479c382c924ca4adf459f6c4048f8485796"
     },
     {
       "path": "test/libsolidity/semanticTests/various/state_variable_under_contract_name.sol",
@@ -2224,12 +2224,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-state_variable_under_contract_name"
+        ".lake/upstream/group08/resume/sealed-state_variable_under_contract_name"
       ],
-      "seconds": 8.841,
+      "seconds": 12.879,
       "exitCode": 0,
-      "logSha256": "27755c77663d5418a5479c3572effc4a7d10a0556be9d5ef1eb3c34242b629e5",
-      "reportSha256": "69da41a7e2f3dc24b216cf1ee67286517c7a65355aee540fae71b9451ab55228"
+      "logSha256": "dfc269c4e8e7e80298866bdb5ed9792a1c6d6d8d16acbb90011cd1542c49c12e",
+      "reportSha256": "b5f714f237339b9320ae4b5dc0a4788941b1c5276faa6a521d25c62f2425d360"
     },
     {
       "path": "test/libsolidity/semanticTests/various/super_alone.sol",
@@ -2321,12 +2321,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-super_alone"
+        ".lake/upstream/group08/resume/sealed-super_alone"
       ],
-      "seconds": 13.622,
+      "seconds": 6.727,
       "exitCode": 0,
-      "logSha256": "a0e2c95dd4c9ebc91d5b01ce10f81dc9842ef3c0dfd3b50450b181fb4c237e58",
-      "reportSha256": "dd8f7486b3b048ffaea92c30ba3a1edaefd50d93806e58dbf365909512b6ff5d"
+      "logSha256": "794cd197d001fa6500eeebb418fdc456d6350580eb9a6146ef97684e650197f9",
+      "reportSha256": "644419ac538253579b926cf9cb3f095b47960ca9a91501c96640506adcfee68f"
     },
     {
       "path": "test/libsolidity/semanticTests/various/super_parentheses.sol",
@@ -2426,12 +2426,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-super_parentheses"
+        ".lake/upstream/group08/resume/sealed-super_parentheses"
       ],
-      "seconds": 11.592,
+      "seconds": 6.984,
       "exitCode": 0,
-      "logSha256": "a8dd911e482fb7e0492a1d453e7b1cd87c19c33bdd4b62958c13b899209c2ef3",
-      "reportSha256": "df1999f60e7c445343526408817b0d70bd0353200748975e21b1993f7ed4ef92"
+      "logSha256": "057eb5119f88ebd6e69c58673755d07f6c53540158f8c8dd5e475e7252780572",
+      "reportSha256": "411a4dbe256f4c977db00d963c520ac80654d5d2d851150fa0e15c163c912459"
     },
     {
       "path": "test/libsolidity/semanticTests/various/typed_multi_variable_declaration.sol",
@@ -2527,12 +2527,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-typed_multi_variable_declaration"
+        ".lake/upstream/group08/resume/sealed-typed_multi_variable_declaration"
       ],
-      "seconds": 14.463,
+      "seconds": 15.255,
       "exitCode": 0,
-      "logSha256": "66525c86dfd0f555e26f43536eec119c0d978728b8cc8283d11803c83b42cd12",
-      "reportSha256": "c72a49fd60e46026938cad299ffe7656e3c002e2140489ea368bf93bc6310ecc"
+      "logSha256": "8a9bea4f900b76d495b8422463bf90a4336c178882cceb7e950a9904b3b9c69a",
+      "reportSha256": "0e9c117e5a465f9ba2a7f33b86f5ccb78407748ecb0f8038b0a961f65c758aff"
     },
     {
       "path": "test/libsolidity/semanticTests/userDefinedValueType/wrap_unwrap.sol",
@@ -2624,12 +2624,12 @@
         "--batch-size",
         "1",
         "--out",
-        ".lake/upstream/group08/resume/reviewed-wrap_unwrap"
+        ".lake/upstream/group08/resume/sealed-wrap_unwrap"
       ],
-      "seconds": 9.795,
+      "seconds": 8.619,
       "exitCode": 0,
-      "logSha256": "8da67fb54c0651bc85789d67b7a70705f86baf8218f6f69afc285c719fc0e37e",
-      "reportSha256": "09681eea5c22f1f4e6feac53df3ef45c323e4349d9f488bce34bee351db8b6b4"
+      "logSha256": "f45a530c7e68e9f7072a28c7a8e66a1cf9a5501feeee64f44ab09992d7e4476d",
+      "reportSha256": "b7aee8ac9e77b30595858ec683c39e2c4aeb0371748d9b2dfeaccb79e92acaf2"
     }
   ],
   "coverageNotes": [
