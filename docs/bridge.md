@@ -377,6 +377,29 @@ injective encoding of all symbolic slots into finite EVM words. These results
 rule out an unrestricted one-opcode identity theorem; they do not rule out
 verified macro lowerings under explicit representation assumptions.
 
+`Bridge/SolidityBridge/ExternalEvm/FiniteStorage.lean` supplies a proved
+finite-observation representation lemma for the storage-slot refinement work.
+`Represents` allows numeric aliases with equal reads. `write_iff` proves the
+exact condition for a numeric write to implement a symbolic write on that
+observed domain: each distinct observed alias must already contain the value
+being written. It covers zero writes and writes outside the observed domain,
+without assuming hash injectivity or collision freedom. Two distinct roots
+(`0` and `2^256`) provide positive zero-alias and negative nonzero-write controls.
+This milestone does **not** discharge the upstream account-map SSTORE or
+Keccak macro obligations in the table above and does not expand source coverage.
+
+On the task VM (2026-10-28), the isolated optional target passed kernel checking
+(exit 0; 17 jobs; 1.61 s; 1,055,711,232 bytes sampled aggregate peak RSS).
+Its axiom audit reports `[propext]` for `write_iff` and
+`[propext, Quot.sound]` for the concrete refusal control. Independent read-only
+finder and skeptic reviews found no confirmed defect. Checks used the
+coordinator's measured VM guard: 12 GiB per-process address-space limit,
+10 GiB sampled process-group RSS stop and 12 GiB whole-VM-current stop, on an
+existing 16 GiB VM cgroup with actual swap disabled. This is not a claim that
+a writable 12 GiB cgroup or `MemorySwapMax=0` was set. Reproduce with the
+matching toolchain and `lake build SolidityBridge.ExternalEvm.FiniteStorage`;
+the task additionally supplied `-j1` in an untracked Lake configuration.
+
 To build the independent targets alone, from `Bridge/`:
 
 ```sh
