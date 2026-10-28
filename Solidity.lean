@@ -152,6 +152,7 @@ import Solidity.Calculus.ProofTree
 import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
+import Solidity.Calculus.PaymentWitness
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.CapturePayments
 import Solidity.Calculus.CallbackDerive
@@ -241,6 +242,7 @@ import Solidity.Examples.Tactics.Memory
 import Solidity.Examples.Tactics.CrossDomain
 import Solidity.Examples.Tactics.Net
 import Solidity.Examples.Tactics.Payment
+import Solidity.Examples.Tactics.PaymentWitness
 import Solidity.Examples.Tactics.Theory
 import Solidity.Examples.Tactics.TermTaclets
 import Solidity.Examples.Tactics.Branch

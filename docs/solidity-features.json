@@ -2584,7 +2584,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "docs/feature-work/diamond-payments.md"
       ]
     },
     {
@@ -2656,7 +2659,10 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Semantics.lean"
+        "Solidity/Semantics.lean",
+        "Solidity/Calculus/PaymentWitness.lean",
+        "Solidity/Examples/Tactics/PaymentWitness.lean",
+        "docs/feature-work/diamond-payments.md"
       ]
     },
     {

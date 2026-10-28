@@ -273,11 +273,13 @@ the oracle), so a send under the diamond is the run's:
 `CallbackTaclet.sendWithCallbackDiamond` (solkey's, read by `ProvesC.sendD`)
 and `ProvesC.sendDetD` (`sendNoCallbackDiamond` for a gas-limited send), sound
 over any modality (`holdsC_sendCb`, `holdsC_sendDet`). A `transfer` stays
-without a diamond, by the earlier decision: the run books it whatever the
-funds, and a refused payment reverts the machine alone (`Evm.compile_correct`),
-so `⟨ transfer ⟩` would claim a termination the compiler theorem does not
-back. solkey's `transferNoCallbackDiamond` and `transferWithCallbackDiamond`
-stay unclaimed (`RuleShapes.unclaimedTaclets`).
+without a registered diamond rule: the runtime requires funds and recipient
+acceptance, while the unguarded SolKey premises do not expose that evidence.
+`PaymentWitness.transferNoCallbackDiamond` and
+`PaymentWitness.transferWithCallbackDiamond_iff` prove the exact semantic
+conditions without changing the dispatcher. SolKey's transfer diamond taclets
+stay unclaimed (`RuleShapes.unclaimedTaclets`); see the
+[payment handoff](feature-work/diamond-payments.md).
 
 **Calls with callbacks.** An internal call whose body calls back is inlined
 as `Stmt.step` inlines it (`ProvesC.callNone`, `ProvesC.callRets`: the
