@@ -660,6 +660,9 @@ Costs that guide work:
     `∀ s t. [ s[0] = 1; ] keccak256(s) == keccak256(t)`): a hash of written
     memory.  Next: `decideMem`'s cut inside `decideHash`, input equality as
     a negative `∀` over the written arrays (after `gapMemInnerNeg`).
+    Independent [written-memory/hash helpers](feature-work/written-memory-hash.md)
+    now prove the byte-input and update/cut composition obligations. They do
+    not produce the negative-array certificate or change this unknown pin.
 * Unpinned shapes in the target: fixed arrays and arrays below a mapping
   key in a block (`FloorShape.of` keeps them; they need a `fixed` shape and
   their length in the index set, or a length atom); cut leaves past 511
