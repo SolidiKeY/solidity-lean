@@ -1107,5 +1107,13 @@
   "callbackTimeoutDiagnostic": {
     "record": "tests/upstream/step2-source-units-callback-diagnostic.json",
     "outcome": "source-identical229moduleclosure; baseline180s timeout reproduced; no source-unit regression demonstrated; assigned default validation remains blocked"
+  },
+  "latestProofPerformanceEvidence": {
+    "record": "tests/upstream/step2-source-units-proof-performance.json",
+    "defaultLibrary": "passed688jobs",
+    "suite": "passed260jobs",
+    "frozenSort": "passed377/131/131",
+    "historicalResults": "earlier records retained verbatim; their blockedGates describe those historical runs",
+    "featureStatus": "partial;31/1/7,86observations,14unrun variants unchanged"
   }
 }

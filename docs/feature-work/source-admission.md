@@ -368,3 +368,63 @@ Independent read-only finder and skeptic reviews verified the closure, source
 and artifact hashes, all 719 samples and terminal counters without Lean workers.
 The final record corrects polling-start wording and limits the baseline inference
 to this one reused-artifact target. No outstanding review finding remained.
+
+### 2026-10-28 proof performance repair and original acceptance
+
+The later user-authorized repair supersedes the blocked default-library status
+above. It does not change the historical failed results. Inspection established
+that the 180-second compiler timer belonged to our private exploratory wrapper;
+the original repository acceptance script has no per-file wall timer. The
+original proof, heartbeat, fuel, search and stack settings remain unchanged.
+
+A declaration profile found duplicate search in CallbackStrategy.withdrawSafe:
+the theorem and following guarded search prove the same goal. Replaying existing
+rules in the theorem reduces focused elaboration from 16.957288 to 4.332872
+seconds (same-prefix module 20.330759 to 6.534937 seconds). The statement,
+premises, program, invariant and guarded automation test are unchanged. The
+kernel audit reports only propext, Classical.choice and Quot.sound. No tactic or
+core representation changed. Earlier speed choices in 7a6120d3 and 1a7d5b0e
+were inspected and preserved.
+
+Profiles of Recursion, OpenLoops and DecisionHashes did not justify applying the
+same optimization blindly. A private DecisionHashes coverage-helper candidate
+was slower and fully reverted; its failed/interrupted attempts remain archived.
+Global profiling adds messages to guarded output, so those exploratory full-file
+runs are not acceptance evidence. Uninstrumented original sources subsequently
+passed the real gate, including their unchanged guards.
+
+The original run-lean.sh completed exit 0 in 2117.921652 seconds: default 688
+jobs, TestSuite 260 jobs and frozen sorts 377 parsed / 131 read-bearing / 131
+covered. The run reused valid warm artifacts and a read-only Lake scheduling
+overlay adding only -j1; LEAN_NUM_THREADS=1, hard aggregate 12 GiB, zero swap and
+the isolated-VM 2 GiB headroom guard remained enforced. Exact terminal peak was
+10,556,030,976 bytes; minimum sampled enclosing-cgroup headroom 3,472,637,952
+bytes. There were no memory-limit events, OOM or resource stop. Whole-second
+compiler timings were 207 / 401 / 541 / 277 seconds for CallbackStrategy /
+Recursion / OpenLoops / DecisionHashes. These are new passes, not relabeled
+180-second probes.
+
+Fresh source replay retained 31 working / 1 excluded-assembly broken / 7 blocked,
+64 prepared jobs, 86 observations and 14 required-but-unrun variants. Its global
+model hash changed because the proof example is included in that hash; the
+source-unit interpreter closure is unchanged. All 32 focused Node tests,
+layers, orphan, strict automatic, generated inventory and trust checks passed.
+The first trust attempt lacked Git in the minimal container; the preserved
+retry with the existing binary mounted read-only passed. Documentation paths
+remain nonpassing with the exact historical 20 missing references and 6
+ambiguities. No source refusals or feature statuses were promoted.
+
+[New terminal evidence](../../tests/upstream/step2-source-units-proof-performance.json)
+and [fresh per-fixture results](../../tests/upstream/step2-source-units-proof-performance-results.json)
+preserve provenance, failed candidates, measurements and commands. Kernel proof
+checks establish the stated theorems; compiler AST and model observations establish only
+the recorded finite fixtures. Unsupported shapes listed in the earlier record
+remain unsupported. The bounded step-2 implementation remains partial.
+
+Independent read-only finder and skeptic reviews verified the actual terminal
+pass, artifact hashes, sample minima, fresh fixture counts and source proof.
+Their packaging findings were fixed: observations are described as compiler AST
+and model evidence, historical profile polling wording is qualified, and every
+retained failed-candidate input/wrapper/log has an export hash in the
+[artifact manifest](../../tests/upstream/step2-source-units-proof-performance-artifacts.json).
+Neither review ran Lean or the server. No confirmed proof defect remained.

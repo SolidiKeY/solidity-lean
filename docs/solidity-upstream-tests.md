@@ -447,3 +447,16 @@ pinned sort check after measured task-local cache management. The default
 library remains blocked by four unchanged 180-second timeouts, not a proven
 need for a larger VM. All 31/1/7 fixture statuses, 86 observations and unrun
 required variants remain unchanged; no semantic code was edited.
+
+### Step-2 original gate and proof performance continuation
+
+The [2026-10-28 proof-performance record](../tests/upstream/step2-source-units-proof-performance.json)
+adds a passing original run-lean.sh gate (688 default jobs, 260 suite jobs and
+377/131/131 frozen sorts) under the 12 GiB aggregate cap, zero swap and measured
+isolated-VM headroom. The private 180-second compiler probes remain failed
+diagnostics; that timer was never part of the original acceptance script.
+Only a duplicate-search example proof changed; statements and observations did
+not. Fresh [per-fixture evidence](../tests/upstream/step2-source-units-proof-performance-results.json)
+retains 31 working / 1 excluded-assembly broken / 7 blocked, 86 observations and
+14 required-but-unrun variants. Documentation paths retain the historical
+20 missing references and 6 ambiguities. Feature status and refusals are unchanged.
