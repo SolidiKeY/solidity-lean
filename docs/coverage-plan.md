@@ -236,6 +236,9 @@ master, then one VM per step that handed off a rest.
     `docs/solc-validation.md` (a `Stmt` → Solidity printer, `lake exe
     solcases`, a solc and EVM runner outside the Lean package), on the
     bounded enumeration E. It finds what hand-picked fixtures miss.
+    The [bounded generated increment](feature-work/generated-differential.md)
+    implements closed primitive roots and all four compiler configurations;
+    the full shape universe and coverage-directed generation remain open.
 15. **solkey re-pin** past `473da8944c` (`docs/solkey-migration.md`,
     "Re-pinning"), and the uniform proof run and strict comparison not
     rerun since.

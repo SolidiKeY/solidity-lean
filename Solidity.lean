@@ -598,3 +598,6 @@ import Solidity.Tools.Upstream
 import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
+
+import Solidity.Tools.SolCases
+import Solidity.Examples.SolCases

@@ -853,3 +853,6 @@ At the root, the notation's own tests:
 
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+
+| `Tools/SolCases.lean` | Closed typed primitive-root Solidity printer, named refusals, deterministic bounded program/storage cases and actual interpreter observations for the optional real-solc/EthereumJS harness. |
+| `Examples/SolCases.lean` | Concrete kernel parser/printer round trip, typed literal division and explicit refusal regressions. |
