@@ -364,10 +364,72 @@ The full instruction correspondence is **not complete**; what remains:
 | Core instructions | Remaining obligation |
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
-| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
+| `mload`, `mstore`, `mloadAt`, `mstoreAt` | Persistent bounded 32-byte encoding/readback/frame relation and state invariant; dispatch/scaling/macros have a [proved checkpoint](#memory-lowering-checkpoint-compiler10-2026-10-28). |
 | `jump`, `jumpi`, `loop` | Assembler from relative/structured control flow to absolute PC and valid jump destinations. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
+
+#### Memory lowering checkpoint (compiler10, 2026-10-28)
+
+`Bridge/SolidityBridge/ExternalEvm/Memory.lean` is an independently checked
+checkpoint; **it does not close the memory row above**. It supplies actual
+`EvmYul.EVM.step` equations for MLOAD/MSTORE, fixed-cell PUSH32 macros, and
+stack-cell PUSH32(32)/MUL macros. Each cell address is `32 * cell` modulo the
+upstream word size. The returned states retain the actual PC, execution-length,
+zero charged-gas preparation, and upstream active-memory updates. The macro
+runner supplies opcodes; it does not verify instruction fetching or the driver.
+
+`load_core_macro` and `loadAt_core_macro` relate the actual core loads and actual upstream macros'
+terminal numeric stacks under an explicit **single-access** initial read
+relation. `empty_load_control` and `empty_loadAt_control` give inhabited empty-memory
+cases. `store_core_macro` and `storeAt_core_macro` prove both actual store executions, equal numeric
+stack tails, the core's written cell and unchanged other core cells, and the
+upstream's exact `ByteArray.write` expression with requested length 32. It does **not** prove that
+the resulting byte memory represents the resulting core memory. Symbolic words
+are outside these numeric premises. Neither fixed nor dynamic results establish
+a persistent core memory relation.
+
+The missing representation work is concrete: `UInt256.toByteArray`, padded
+reads, and writes call `ffi.ByteArray.zeroes`, whose upstream declaration has
+no Lean body or correctness specification, even at length zero. The module
+states a bounded `PaddingCorrect` predicate, including a bound below `2^64`,
+but assumes it in no theorem and claims no inhabitant for it. A conditional
+refinement with a noncircular padding contract remains possible. Serialization,
+readback and byte-frame laws still need to be derived under that contract;
+assuming those conclusions would merely restate the outstanding obligation.
+No FFI implementation is linked or evaluated by these controls.
+
+The eventual bounded relation must connect capacity to the actual state's
+`activeWords`, prevent both `32 * cell` and `activeWords * 32` from wrapping,
+and bound padding lengths before their `USize` conversions. `Bounded cells`
+only bounds capacity and does not itself constrain a state. Loads read before
+expanding the active extent: a persistent relation must preallocate the observed
+range or constrain inactive physical bytes, as well as prove a byte-write frame.
+Before word reduction, aligned distinct 32-byte windows are proved disjoint. The geometric unaligned-overlap control
+is not an evaluator counterexample. Separate actual controls show underflow,
+address-scaling aliasing, and that a concrete 32-byte big-endian encoding of one
+is read as zero when the active-byte extent wraps. Existing same-stack arity
+counterexamples in `Obstructions` are unchanged.
+
+The edited file passed direct kernel checking with `-j1 --tstack=131072` in
+11 seconds at 315,539,456 bytes peak aggregate cgroup memory. All eleven guarded
+headline axiom audits report only `propext`, `Classical.choice`, and `Quot.sound`.
+An earlier paired-store elaboration reached the default heartbeat bound; the
+repair split typed obligations without raising any limit. The full optional umbrella attempt failed only in the unchanged
+`Bridge/SolidityBridge/Arith/Widths.lean` source-synthesis proofs (lines 21, 47,
+79, 111 and 501). It exited 1 after 3,323 seconds at 5,728,395,264 bytes peak
+aggregate cgroup memory, with no OOM events. Its memory target passed. Final
+direct memory and existing ExternalEvm target builds passed (12 and 1 seconds);
+the eleven explicit axiom audits passed (3 seconds). The native rule checker
+built in 70 seconds and passed 36 cases × 1,000 samples with seed 42 in 2
+seconds. The final umbrella retry still failed in unchanged `Widths` (9 seconds).
+That complete serial check group took 97 seconds at 865,034,240 bytes peak
+aggregate cgroup memory, under 12 GiB with zero swap and no OOM events.
+Read-only finder/skeptic reviews found no remaining code defect and used no
+Lean server; the finder's stale remaining-row wording was corrected. Both
+classify the original assignment as incomplete, not as a completed refinement. This work admits no
+raw-memory/assembly source shape and claims no gas or bytecode equivalence;
+there is no source inventory promotion or legacy/viaIR/optimizer scope change.
 
 Symbolic-slot PUSH/ADD and DUP/SWAP depths outside 1–16 are also outside the
 numeric correspondence. `Bridge/SolidityBridge/ExternalEvm/Obstructions.lean`
@@ -383,6 +445,7 @@ To build the independent targets alone, from `Bridge/`:
 lake build SolidityBridge.ModelTheory.LowenheimSkolem \
   SolidityBridge.CallbackTrace SolidityBridge.CallbackModalTrace \
   SolidityBridge.ExternalEvm.StackOps SolidityBridge.ExternalEvm.Obstructions \
+  SolidityBridge.ExternalEvm.Memory \
   SolidityBridge.CompilerSimulation SolidityBridge.LoopFixpoint \
   SolidityBridge.AdversaryPolicy rulecheck
 lake exe rulecheck --seed 42 --samples 1000
