@@ -400,6 +400,21 @@ a writable 12 GiB cgroup or `MemorySwapMax=0` was set. Reproduce with the
 matching toolchain and `lake build SolidityBridge.ExternalEvm.FiniteStorage`;
 the task additionally supplied `-j1` in an untracked Lake configuration.
 
+`Bridge/SolidityBridge/ExternalEvm/RBMapErase.lean` proves the missing
+lookup-after-erase law for the pinned Batteries map used by upstream storage.
+The raw-tree theorem assumes actual orderedness, a transitive comparator and
+a strict cut; the map theorem obtains orderedness from RBMap's own invariant.
+It preserves nonmatching entries and removes matching entries, including absent
+keys, without requiring comparator equality to imply propositional key equality.
+No vendor code changes. This supplies the zero-write dependency; it does not
+by itself prove SSTORE refinement. Its isolated target passed with exit 0
+(28 jobs; 2.73 s; 874,049,536 bytes sampled aggregate peak RSS), and both audited
+headlines use only `[propext, Quot.sound]`. Finder and skeptic read-only reviews
+found no confirmed defects. Earlier append proof attempts hit the unchanged
+200,000-heartbeat limit; small equation lemmas and constructive propositional
+proofs repaired that cost, without increasing any limit. The same measured VM
+guard and single-thread configuration described above were used.
+
 To build the independent targets alone, from `Bridge/`:
 
 ```sh
