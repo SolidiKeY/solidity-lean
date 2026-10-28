@@ -502,6 +502,7 @@ import Solidity.Calculus.HashKinds
 import Solidity.Calculus.HashKinds3
 import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
+import Solidity.Calculus.MemStructWitness
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -514,6 +515,7 @@ import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.MemoryStructWitness
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear

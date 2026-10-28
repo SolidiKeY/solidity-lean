@@ -708,6 +708,19 @@ operation here (`Storage.obs_save`, `obs_write`, `obs_delete`, `obs_push`,
 | `selectOnShape*`, `wf*`, `fixed*`, `wfFixedIsFixed`, `wfDynIsNotFixed`, `fieldShapeDef` | the typed storage (`Storage C`, `Semantics/Storage.lean`) | **not modelled as taclets**: a typed storage is in its contract's shape, clause for clause |
 | `sizeNotNegative` | — | **arch**: a length is a `uint`, at least `0` by its type (the closer's `Facts.range`) |
 
+### Fresh struct scalar cut (Lean-only constructive decision support)
+
+`MemoryWitness.Plan` and `realize` record child-first allocations with typed
+references into earlier objects; reusing a reference retains sharing.
+`keeps`, `root_fresh` and `root_field` use the typed allocation/frame laws
+below. `word_cut` retains heap-relative realizability; `word_cut_global`
+constructs children for the global scalar correspondence. The
+`MemStructCut` classifier carries complete syntax equalities, and
+`fieldEq_refutes` constructs the pre-parent child heap returned by
+`decideStruct`. This is an auxiliary scalar decision schema, not a new
+SolKey taclet or a change to `allocAll`. Its scope and evidence are in the
+[memory-struct witness record](feature-work/next10-memory-struct-witness.md).
+
 ### `memoryRules.key`, `structMemoryRules.key` → `Theory/Typed/Mem.lean`
 
 A memory is a heap grown from the global part's (`Grown H`), an address an
