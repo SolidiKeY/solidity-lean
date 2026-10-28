@@ -29,7 +29,7 @@ elaborator.
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
 - what those import: `Calculus.{TermEval,TermEq,TermWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
-  CallSummary}`.
+  CallSummary,KIntTwoAnchors}`.
 
 The list is closed under imports: no core module imports a module outside
 it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and

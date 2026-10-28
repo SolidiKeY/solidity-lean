@@ -1,5 +1,6 @@
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.KIntTwoAnchors
 
 /-!
 # Binders of KeY's `int` read over two words (M7, features 30 and 31)
@@ -41,10 +42,11 @@ it (feature 31): `∀ int z. A` is `∀ int d. A[z := U + d]` at every state
 (`Fml.holds_shift`), the anchor `U` a key of the binder's context, after
 which the keys cancel (`Fml.kencAtA?`).
 
-Outside: a binder compared with two unbounded terms that no one anchor
-cancels (`∀ int y. y > z → y > 0`: Presburger alternation over `ℤ`), with
-a product of two symbolic terms, or with a remainder past `2^511` (`c`
-would exceed a word).
+When no single anchor cancels the body, `KIntTwoAnchors` supplies the
+exact test point for `∀ int y. y > z → y > k`, with `z` an outer KeY-int
+local and `k` a literal: the result is `z >= k`. Other two-anchor shapes,
+products of two symbolic terms and remainders past `2^511` (`c` would
+exceed a word) remain outside this encoding.
 -/
 
 namespace Solidity
@@ -1394,7 +1396,9 @@ theorem Fml.holds_kencAtA {Γ : Ctx} {x : Var} {A : Fml C (.kint :: Γ)} {ψ : F
 def Fml.kencBind {Γ : Ctx} (m : Modality) (x : Var) : (t : LTy) → Fml C (t :: Γ) → Fml C Γ × Bool
   | .kint, A => match A.kencAtA? x with
     | some ψ => (ψ, true)
-    | none => (.bind m x .kint A, false)
+    | none => match A.kintTwoAnchorView? with
+      | some v => (Fml.kintTwoAnchorResult v.index v.threshold, true)
+      | none => (.bind m x .kint A, false)
   | t, A => (.bind m x t A, false)
 
 /-- **Every binder of KeY's `int` encoded where it can be** (`Fml.kencAt?`),
@@ -1419,7 +1423,10 @@ theorem Fml.holds_kencBind {Γ : Ctx} (m : Modality) (x : Var) (t : LTy) (A : Fm
     simp only [Fml.kencBind]
     split
     next ψ hψ => exact Fml.holds_kencAtA hψ m σ
-    next => exact Iff.rfl
+    next =>
+      split
+      next v _hv => exact KIntTwoAnchorView.holds v m x σ
+      next => exact Iff.rfl
   all_goals exact Iff.rfl
 
 theorem Upd.afterT_congr {Γ Δ : Ctx} {m : Modality} {σ : State C Γ} {U : Upd C Γ Δ}
