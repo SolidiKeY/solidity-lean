@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "-u",
+    "DOCKER_HOST",
+    "-u",
+    "DOCKER_CONTEXT",
+    "-u",
+    "DOCKER_TLS",
+    "-u",
+    "DOCKER_TLS_VERIFY",
+    "-u",
+    "DOCKER_CERT_PATH",
+    "docker",
+    "--host=unix:///var/run/docker.sock",
+    "inspect",
+    "solidity-baseline-value-entry-final",
+    "--format",
+    "{{json .HostConfig.Memory}} {{json .HostConfig.MemorySwap}} {{json .State.ExitCode}} {{json .State.OOMKilled}}"
+  ],
+  "exitCode": 0,
+  "output": "12884901888 12884901888 0 false\n",
+  "interpreted": "Memory=12GiB, MemorySwap=12GiB total memory+swap means no swap; cgroup swap.max=0 independently verified"
+}

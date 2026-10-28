@@ -213,3 +213,11 @@ must use the corresponding checkpoint. The new native index and archive carry
 current diagnostics. Nonzero-payment entry discrimination remains unavailable
 in the unchanged replay input; nativeValidationComplete stays false for that
 precise reason. Testing proof listing/search remains a separate stale prerequisite.
+
+## Value-aware entry prerequisite follow-up (38871aee source checkpoint)
+
+[The value-entry audit](value-entry/README.md) examines the existing typed payment
+APIs without a build. The native76-module cache remains unchanged, but Lifetime's
+28-module closure has15 stale saved import references; ContractWorld's root cache
+is absent. Nonzero-payment native validation remains blocked pending an
+identity-satisfied existing value-aware API. No new runtime verdict is claimed.

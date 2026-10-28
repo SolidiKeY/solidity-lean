@@ -1,0 +1,104 @@
+{
+  "startingCommit": "38871aee752a24e37c2ac6196e9539ea3fd2c03a",
+  "branch": "baseline/current-master-20261028",
+  "sameSavedVm": "ccarenv_b64_Y2NhcmVudl9mNjQxMmFkYWVhYTQ4MTkxYTFiMjVjYWQzNDkzNzJjOQ",
+  "status": "blocked-existing-value-aware-api-cache",
+  "nativeValidationComplete": false,
+  "prerequisite": "Current-identity Solidity.Semantics.Lifetime root artifact against its 27 current dependencies already present in the verified Upstream closure, then an ABI-resolved diagnostic binding imported payable metadata to Lifetime.System.run and explicit TTx; no proof-search/Testing closure required.",
+  "unsupportedSourceShapes": "Unchanged original named source refusals in native-cache/matrix.json; no new source probe or refusal inferred.",
+  "missingAssignedValidation": [
+    "nonpayable external nonzero-payment rejection",
+    "payable external nonzero-payment execution",
+    "zero/nonzero paired state/payment/rollback controls with exact ABI/source metadata",
+    "unchanged false-output control in value-aware adapter, legacy and viaIR"
+  ],
+  "cacheEvidence": {
+    "upstream304SnapshotsUnchanged": true,
+    "lifetimeCurrentClosureModules": 28,
+    "lifetimeSavedImportReferences": 24,
+    "lifetimeDifferingSavedImportReferences": 15,
+    "lifetimeCurrentTransitiveImportsMissing": 7,
+    "lifetimeSavedImportsOutsideCurrentClosure": 4,
+    "contractWorldMissing": [
+      "trace",
+      "olean",
+      "setup"
+    ],
+    "additionalModulesBeyondVerifiedUpstreamClosure": [
+      "Solidity.Semantics.Lifetime"
+    ]
+  },
+  "noNewLeanOrCompilerInvocations": true,
+  "noNewBuild": true,
+  "noSemanticEdits": true,
+  "sourceFeatureStatusesUnchanged": true,
+  "noOriginalVariantAssociation": true,
+  "historicalTrackedEvidenceFilesChecked": 146,
+  "preservedAncestorExitCodes": {
+    "66629757": 0,
+    "13edcbe4": 0,
+    "c4a5a2f1": 0,
+    "38871aee": 0
+  },
+  "originalCorpus": {
+    "fixtures": 9660,
+    "working": 4135,
+    "broken": 196,
+    "blocked": 5329,
+    "allInputsObservationsVerdictsUnchanged": true
+  },
+  "priorRuntimeEvidence": {
+    "typedImportModes": 40,
+    "replayResults": 38,
+    "matchingObservations": 122,
+    "namedRefusalBatches": 12,
+    "notNonzeroPaymentEvidence": true
+  },
+  "performance": {
+    "newGateElapsedSeconds": 28.47810391497478,
+    "newCumulativeChildMaxRssKiB": 180864,
+    "memoryMetric": "OS RUSAGE_CHILDREN maximum RSS; not aggregate cgroup peak; no heavy check this turn",
+    "cold": {
+      "exit": 124,
+      "completed": 546,
+      "total": 685,
+      "seconds": 5400,
+      "peakBytes": 8195923968
+    },
+    "warm": "unrun",
+    "priorNarrowBuild": {
+      "exit": 124,
+      "seconds": 900.006376623,
+      "peakBytes": 2342395904
+    }
+  },
+  "gates": {
+    "passCommands": 12,
+    "knownDocPathExit": 1,
+    "knownDocPathMissingReferences": 20,
+    "docPathOutputByteIdenticalTo38871aee": true,
+    "pythonNativeTests": 15,
+    "nodeUpstreamTests": 23,
+    "expectedOverwriteRefusalExit": 2
+  },
+  "theoremAxiomChecks": "No Lean/theorem edits or checks in this follow-up; prior three guard theorem standard axiom prints unchanged. Static API inspection is not kernel or runtime validation.",
+  "sharedFilesChanged": [
+    "tests/upstream/baseline-20261028/README.md"
+  ],
+  "newFiles": [
+    "scripts/solidity-baseline-value-entry-audit.py",
+    "tests/upstream/baseline-20261028/value-entry/*"
+  ],
+  "excludedScope": "No Testing refresh/proof search, feature implementation, general closer13, D1/D2, scope/log/environment policy, EVM layout/gas/delegatecall/general assembly, config/credential changes, merge/push or external communications.",
+  "recommendation": "Recover current-identity Lifetime cache in an authorized cache-refresh task, not a full/Testing build; then run the exact queued value controls using its existing System.run. Do not replace the guard with an independently hand-coded verdict.",
+  "finalCappedChecks": {
+    "commandRecords": "capped/commands.json",
+    "elapsedSeconds": 24.59234565799852,
+    "peakCgroupBytes": 423817216,
+    "memoryMaxBytes": 12884901888,
+    "swapMaxBytes": 0,
+    "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "allExpectedExits": true,
+    "docPathOutputByteIdenticalTo38871aee": true
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "files": {
+    "README.md": {
+      "bytes": 6984,
+      "sha256": "58d5a5a88afe0777a8828faffabcc63fbd2fad4fad5883363caf46b31aeaf215"
+    },
+    "audit-driver-first.py": {
+      "bytes": 6452,
+      "sha256": "3d434408a6a64efca05997733864656ac24938c1158a069f0e75ab89ed4f7c0d"
+    },
+    "audit-final.json": {
+      "bytes": 408543,
+      "sha256": "022292dee5f8561c64ea326403ee8b6c542b8b61623c48418d6c19b527aa95f2"
+    },
+    "audit-final.log.gz": {
+      "bytes": 280,
+      "sha256": "bfe90e5fc223163d01a74b6ca41eade15e91edb7c7132776f8a572776e015700"
+    },
+    "audit.json": {
+      "bytes": 408479,
+      "sha256": "f412a59dbe7846f829d89cf3c00a4e3d081bde1aa0b9dfc7ed94e7807552cef0"
+    },
+    "capped/audit.json": {
+      "bytes": 408543,
+      "sha256": "b86e15020e60ca5ac6aa35b7c0be090e2a8c68baa2fdf3acd6639ffc5a04a863"
+    },
+    "capped/commands.json": {
+      "bytes": 5308,
+      "sha256": "25b65baf527240197549b1dc6643a083bb73659668d51c2acbf64c5d3093d0f3"
+    },
+    "capped/gate-00.log.gz": {
+      "bytes": 280,
+      "sha256": "2c08238eaed319638c51b2a4d370481bb6a9c12d1fa8657380932e06d0ae346e"
+    },
+    "capped/gate-01.log.gz": {
+      "bytes": 129,
+      "sha256": "f9e75d0a151248d595143d80b4f012246e3628f95e14148dedd9f55a7a462475"
+    },
+    "capped/gate-02.log.gz": {
+      "bytes": 256,
+      "sha256": "f37d89bb2f980a4f79ae6954836c28fc68a8103ec96522491a0209a8a8759bae"
+    },
+    "capped/gate-03.log.gz": {
+      "bytes": 54,
+      "sha256": "74f8edbb5046d43cfdf4b7d858090539d4f4a638d196e4bd301ba952161f3e42"
+    },
+    "capped/gate-04.log.gz": {
+      "bytes": 204,
+      "sha256": "f77d44edaf4a4ef2ca465c3f917b0af4480f02a891c8b87adaaadebc938214c4"
+    },
+    "capped/gate-05.log.gz": {
+      "bytes": 1113,
+      "sha256": "ec94b7f10f494eea80d90481bd51f5d75bd4f50f946d2a2c7015de4905d926de"
+    },
+    "capped/gate-06.log.gz": {
+      "bytes": 126,
+      "sha256": "11171001dd1feb39c428a33f5f93b2751db9b8be079d78b2a71ab7ce37f3ed6a"
+    },
+    "capped/gate-07.log.gz": {
+      "bytes": 58,
+      "sha256": "07e0ec32ec565d5b782e5596270ebed3ada72fd34c70db04d9f0e803ee22486e"
+    },
+    "capped/gate-08.log.gz": {
+      "bytes": 61,
+      "sha256": "28bbfc331ec229d303a1bebbcf77794888b59ac71698ac53fc0d981a4922e7d4"
+    },
+    "capped/gate-09.log.gz": {
+      "bytes": 96,
+      "sha256": "6a6fa7338ec262941f3f410702f903d6b6c20e1fc8273d773c98ea45279be242"
+    },
+    "capped/gate-10.log.gz": {
+      "bytes": 93,
+      "sha256": "6df663f3e85258caa8e9b0ca80657fb49404778c510bf7cb7961afaa9a42375e"
+    },
+    "capped/gate-11.log.gz": {
+      "bytes": 441,
+      "sha256": "dab6a3a729431f56fa07d7ca2edb27f7044baaed26222b7376c6e0cdb86fff18"
+    },
+    "capped/gate-12.log.gz": {
+      "bytes": 20,
+      "sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    "capped-gates.py": {
+      "bytes": 2034,
+      "sha256": "c9961e9d4439b5d8d0a4a71af77f03334a36ac18b0ae2c8a8a85982ad41cd099"
+    },
+    "commands.json": {
+      "bytes": 5288,
+      "sha256": "1b8a97ce68b66da1412e0120303c342a129cf8f193da5a363056bb37b3d602c0"
+    },
+    "container-inspection.json": {
+      "bytes": 630,
+      "sha256": "943ad899f383bcbad0d6fd0dd70e601f550d4c2822d11b10090949c6c2892cf2"
+    },
+    "final-staged-check.json": {
+      "bytes": 220,
+      "sha256": "d55d2e14de10213d5fad305241b5111c972efbadeb1de8174c35591423ea7b5e"
+    },
+    "gate-00.log.gz": {
+      "bytes": 279,
+      "sha256": "39f901236c4263e7e1d389c3a2a8bd5aa78cc700334bf6f4bc79c05b7f38ff2f"
+    },
+    "gate-01.log.gz": {
+      "bytes": 256,
+      "sha256": "852fa0db04c1f3b36cc6a7dbaed9aaf1834ae4116ecdacd502ec13bc1dd85794"
+    },
+    "gate-02.log.gz": {
+      "bytes": 55,
+      "sha256": "944ff719c9b55f7910d891769f4e5754cf0a715e70010fa66e3608836f0e0943"
+    },
+    "gate-03.log.gz": {
+      "bytes": 204,
+      "sha256": "a56a1f88da837764f1a58dcae3b956e5a00fb85c64b03b5e3f4fe626951adaf7"
+    },
+    "gate-04.log.gz": {
+      "bytes": 1113,
+      "sha256": "1b39672479934c5d0725ffcff8e1e7fc40481c4f59bbda3b0c55381577ac6da2"
+    },
+    "gate-05.log.gz": {
+      "bytes": 126,
+      "sha256": "b51c3da85840c429ee82d1e2b55347e31b4000b2edd52c626491fc33386e86c4"
+    },
+    "gate-06.log.gz": {
+      "bytes": 58,
+      "sha256": "6b0b8585810457c7ca732ae4506cb21adfc454d3de7ead270ae1951b9bce4861"
+    },
+    "gate-07.log.gz": {
+      "bytes": 61,
+      "sha256": "7889e6c83538044219cd5a07c361f0402659603da89f91787992b2f35a9c3790"
+    },
+    "gate-08.log.gz": {
+      "bytes": 96,
+      "sha256": "bf24cff72b866f4bab0e4f12d0944b3ace5b4ad4482a96c4ad7685d78986d987"
+    },
+    "gate-09.log.gz": {
+      "bytes": 93,
+      "sha256": "b05805d6c09dd631c9804a924c66356dd252cce4cf1d2ee963208fa875af65c5"
+    },
+    "gate-10.log.gz": {
+      "bytes": 441,
+      "sha256": "4b7decd4356f0c4cfe26e84d4e0211dd07bfdf654a068f6a256edb7eb903da40"
+    },
+    "gate-11.log.gz": {
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "gates-runner.py": {
+      "bytes": 1507,
+      "sha256": "b6a19eea950a1bfae7e9e5c796a3895481a1cf85b64554a61cec302640ec7db3"
+    },
+    "handoff.json": {
+      "bytes": 4261,
+      "sha256": "78be6b9554338271cf4eb5f0e2663c43f2aa2794b146844652890adb138b62e3"
+    },
+    "refuse-overwrite.log.gz": {
+      "bytes": 129,
+      "sha256": "1b0a61f94b82f0d8ee2a99d3cda46e782e88ffc9ba14e84216f5af1f9a1583d6"
+    },
+    "reviews.json": {
+      "bytes": 1051,
+      "sha256": "96d0115d52bf109fd981d82b39f899ee7b181e9b76e91c6b9fdf85ce3210b635"
+    },
+    "staged-doc-paths.log.gz": {
+      "bytes": 441,
+      "sha256": "4b7decd4356f0c4cfe26e84d4e0211dd07bfdf654a068f6a256edb7eb903da40"
+    }
+  },
+  "script": {
+    "path": "scripts/solidity-baseline-value-entry-audit.py",
+    "sha256": "04c5c1176b59f0920075189b740367ba8ff54e427412d5217541abcc4d2e592d"
+  }
+}
