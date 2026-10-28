@@ -1,5 +1,6 @@
 import Solidity.Evm.Correct
 import Solidity.Evm.MemoryCompile
+import Solidity.Evm.MemoryRefArrayCompile
 
 /-!
 # The checked compiler entry
@@ -17,12 +18,15 @@ variable {C : Contract}
 inductive Compilation (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) where
   | core (frag : Frag Δ) (cert : inFragP F P = some frag)
   | memory (result : Memory.CompiledProg b F P)
+  | referenceArrays (result : Memory.ReferenceArrays.CompiledProg b F P)
 
 def compile (b : Nat) {Γ Δ : Ctx} (F : Frag Γ) (P : Prog C Γ Δ) :
     Option (Compilation b F P) :=
   match hc : inFragP F P with
   | some frag => some (.core frag hc)
-  | none => (Memory.compileProg b F P).map .memory
+  | none => match Memory.compileProg b F P with
+    | some result => some (.memory result)
+    | none => (Memory.ReferenceArrays.compileProg b F P).map .referenceArrays
 
 namespace Compilation
 
@@ -30,16 +34,25 @@ def code {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → List Instr
   | .core _ _ => Evm.compileProg b P
   | .memory result => result.code
+  | .referenceArrays result => result.code
 
 def frag {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Frag Δ
   | .core out _ => out
   | .memory result => result.frag
+  | .referenceArrays result => result.frag
 
 def isMemory {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
     Compilation b F P → Bool
   | .core _ _ => false
   | .memory _ => true
+  | .referenceArrays _ => false
+
+/-- Select the supplementary, nonallocating reference-array relation. -/
+def isReferenceArray {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ} :
+    Compilation b F P → Bool
+  | .referenceArrays _ => true
+  | .core .. | .memory .. => false
 
 def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -48,6 +61,7 @@ def Input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | .core _ _ => Sim C L b F σ m ∧ L + Evm.Prog.pushes P ≤ Lmax
   | .memory out => Memory.StateRepr L b frame F σ base m ∧ b + Memory.frameNeedProg P ≤ frame ∧
       Memory.AllocationInput b frame (out.cert.cost σ) σ base m
+  | .referenceArrays _ => Memory.RefArrayStateRepr L b frame F σ base m
 
 /-- Open the memory premises without reducing the certified compiler result. -/
 theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
@@ -59,6 +73,17 @@ theorem memory_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   cases result with
   | core out cert => cases hm
   | memory out => rfl
+  | referenceArrays out => cases hm
+
+/-- Open a reference-array input without unfolding the computed compiler result. -/
+theorem referenceArray_input {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
+    (result : Compilation b F P) (hm : result.isReferenceArray = true) (L frame : Nat)
+    (base : Nat → Fin W) (σ : State C Γ) (m : Machine) :
+    result.Input L frame base σ m ↔ Memory.RefArrayStateRepr L b frame F σ base m := by
+  cases result with
+  | core out cert => cases hm
+  | memory out => cases hm
+  | referenceArrays out => rfl
 
 def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     (result : Compilation b F P) (L frame : Nat) (base : Nat → Fin W)
@@ -68,6 +93,7 @@ def Rep {b : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
   | .memory out => ∃ base', Memory.StateRepr L b frame out.frag σ base' m ∧
       Memory.BaseExtends entry.H base base' ∧
       Memory.GrowsAllocator b frame (out.cert.cost entry) entry base initial σ base' m
+  | .referenceArrays out => Memory.RefArrayStateRepr L b frame out.frag σ base m
 
 /-- The compiler preserves typed states and the evaluation stack, or both
 executions revert; the existing panic and payment cases retain their guards. -/
@@ -93,6 +119,12 @@ theorem correct {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C Γ Δ}
     rcases out.cert.correct h.1 h.2.1 h.2.2 with
       ⟨o, m', base', ho, hc, hm, hst, he, ha⟩ | ⟨ho, hc⟩
     · exact .inl ⟨o, m', ho, hc, hst, base', hm, he, ha⟩
+    · exact .inr (.inl ⟨.inl ho, hc⟩)
+
+  | referenceArrays out =>
+    simp only [Agrees, code, Rep, out.cert.pushes_zero, Nat.add_zero]
+    rcases out.cert.correct h with ⟨o, m', ho, hc, hm, hst⟩ | ⟨ho, hc⟩
+    · exact .inl ⟨o, m', ho, hc, hst, hm⟩
     · exact .inr (.inl ⟨.inl ho, hc⟩)
 
 end Compilation

@@ -17,6 +17,7 @@ import Solidity.Evm.MemoryStructExamples
 import Solidity.Evm.MemoryStructDefaultExamples
 import Solidity.Evm.MemoryStructCopyExamples
 import Solidity.Evm.MemoryPathExamples
+import Solidity.Evm.MemoryRefArrayExamples
 import Solidity.Evm.MemoryAllocExamples
 import Solidity.Evm.MemoryAllocSourceExamples
 import Solidity.Evm.MemoryExamples
@@ -39,6 +40,23 @@ open Lean Elab Command
 
 run_cmd do
   let headlines : List Name := [
+    ``Solidity.Evm.Memory.RefArrayRepr.read,
+    ``Solidity.Evm.Memory.RefArrayRepr.write,
+    ``Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct,
+    ``Solidity.Evm.Memory.RefArrayExamples.initial_repr,
+    ``Solidity.Evm.Memory.RefArrayExamples.compiled_input,
+    ``Solidity.Evm.Memory.RefArrayExamples.compiled_agrees,
+    ``Solidity.Evm.Memory.RefArrayExamples.source_observation,
+    ``Solidity.Evm.Memory.RefArrayExamples.target_observation,
+    ``Solidity.Evm.Memory.RefArrayExamples.retained_stack,
+    ``Solidity.Evm.Memory.RefArrayExamples.wrong_pointer_refuted,
+    ``Solidity.Evm.Memory.RefArrayExamples.failed_input,
+    ``Solidity.Evm.Memory.RefArrayExamples.failed_agrees,
+    ``Solidity.Evm.Memory.RefArrayExamples.source_bounds,
+    ``Solidity.Evm.Memory.RefArrayExamples.target_bounds,
+    ``Solidity.Evm.Memory.RefArrayExamples.allocation_refused,
+    ``Solidity.Evm.Memory.RefArrayExamples.default_declaration_refused,
+    ``Solidity.Evm.Memory.RefArrayExamples.fixed_index_refused,
     ``Solidity.Evm.Memory.copiedFields_copy,
     ``Solidity.Evm.Memory.copiedStruct_alloc,
     ``Solidity.Evm.Memory.copiedFields_get,
@@ -571,3 +589,9 @@ run_cmd do
     unless extra.isEmpty do
       throwError "trust: {name} depends on unexpected axioms {extra}"
   logInfo m!"trust: {headlines.length} headline theorems use only the standard axioms"
+
+#print axioms Solidity.Evm.Memory.RefArrayRepr.read
+#print axioms Solidity.Evm.Memory.RefArrayRepr.write
+#print axioms Solidity.Evm.Memory.ReferenceArrays.ProgFrag.correct
+#print axioms Solidity.Evm.Memory.RefArrayExamples.compiled_agrees
+#print axioms Solidity.Evm.Memory.RefArrayExamples.failed_agrees

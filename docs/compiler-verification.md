@@ -79,7 +79,64 @@ other halt can be hidden by the reordering. Reference RHS values are
 evaluated before the parent path; a deletion resolves its parent before
 allocating.
 
-**Out of the memory path**: reference-element arrays, construction of structs
+**Dynamic reference-element arrays (nonallocating checkpoint).** The public
+entry falls back to `Memory.ReferenceArrays.compileProg` when the older paths
+refuse a program. `Compilation.isReferenceArray` identifies this path;
+`isMemory` continues to identify the older allocating memory variant.
+`RefArrayStateRepr` supplements the existing state relation with each dynamic
+reference array's bounded header, actual child pointer words, frame separation,
+separation from other reference arrays, primitive arrays and structs. Its
+fallible pointer certificates admit initialized locals, reference fields and
+indexed reference elements with core-fragment indices. The supported statements
+are alias rebinding, reference-element assignment, and primitive dynamic-array
+writes through these paths; sequences preserve the supplementary relation and
+stack. Bounds failures on either a parent or child revert on both runs.
+Redirecting a parent retains old child objects and aliases. This path allocates
+nothing and makes no allocator-preservation claim.
+
+`Evm/MemoryRefArrayExamples.lean` inhabits the public input with two populated
+children and a two-element parent. Indexed rebinding changes an existing local,
+parent redirection leaves its old alias intact, and old/new child writes yield
+matching source/machine observations. Three bounds controls, a corrupt-pointer
+refutation, and explicit allocation/default/fixed-index refusals are checked by
+the kernel. The new theorem and witness names are in the enforcing axiom audit.
+Independent read-only finder and skeptic reviews found no soundness defect;
+their requests for observable rebinding, refusal controls and enforced witness
+auditing were incorporated.
+
+This is **not completion of the reference-array assignment**: allocation and
+default construction, allocator live-interval preservation, fixed-array layouts
+and compilation, broader statement composition, and source-fixture pipeline
+validation remain work in this lane. Existing source semantics already construct
+ordinary nested-array defaults; there is no claimed dependency on the recursive
+or reference-bearing struct lanes. No source-coverage inventory row is promoted.
+Validation uses the published Lean 4.24.0 / Lake 5.0.0-src+797c613,
+`LEAN_NUM_THREADS=1`, explicit `-j1`, and verified 12 GiB/no-swap cgroups.
+The first `./run-lean.sh` passed 691 library and 259 TestSuite jobs and the
+377/131 SolKey comparison in 8032.865 seconds. Its whole validation group
+peaked at 12 GiB (reclaim pressure, no OOM/kills). Executor reconnects released
+its external writer-lock holder; no repository edits occurred during that
+build. A protected repeat with the lock held inside the container passed the
+official run in 5.492 seconds; its final full validation group took 97.152 seconds
+and peaked at 3,199,209,472 bytes with zero limit/OOM events. These are observed
+cache states, not a clean-build performance guarantee. The enforcing audit
+passed 546 headlines; the new simulation/agreement axioms are exactly
+`propext`, `Classical.choice`, `Quot.sound`. Source trust scanned 720 sources
+and 240 inventoried sites with zero findings. Orphan, layer, strict automatic
+and trust-script test gates passed. Documentation path checking still exits 1:
+20 missing references in unchanged existing files were verified unresolved at
+base `f4dee4a29c2e208b36db4a4161a4723c735cd775`; no new missing reference was
+found. That gate is not reported as passed.
+
+A single warm paired per-file check of the public compiler measured 0.999 s /
+164,806,656 bytes before and 1.062 s / 164,990,976 bytes after. The indexed
+pointer compiler retains structural recursion over the full endpoint type;
+no speed-driven intrinsic representation decision was reversed. Full commands,
+terminal logs, hashes, measured cgroups and review outcomes are exported with
+the checkpoint handoff.
+
+**Out of the memory path**: reference-element array allocation/defaults and fixed
+reference-array paths, construction of structs
 with reference members, other reference-member default layouts, copies other
 than the primitive-member storage-root clause (including memory back to
 storage and runtime-length objects, which need iteration), loops, `assert`,

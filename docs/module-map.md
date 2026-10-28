@@ -478,6 +478,12 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/MemoryScope.lean` | Scope exit retains heap objects and older locals at their runtime levels; branch joins weaken the core alias flags by their meet. |
 | `Evm/MemorySource.lean` | The core simulation augmented by pointers at all memory-local reference types, separated struct/array heaps, cross-separation and typed reference-member words; array reads/writes and local assignments preserve the shared state and combined allocator. |
 | `Evm/MemoryRefs.lean` | Typed reference-member words under the shared identity map, preserved across locals, primitive/array writes and non-reference-bearing allocation; exact pointer reads. |
+| `Evm/MemoryRefArray.lean` | Dynamic reference-element words, checked local reads/writes, global interval ownership and parent-pointer framing. |
+| `Evm/MemoryRefArrayState.lean` | Supplementary reference-array state relation; retained locals, primitive child writes and parent redirection. |
+| `Evm/MemoryRefArrayPaths.lean` | Fallible typed reference paths with genuine indexed bounds reverts. |
+| `Evm/MemoryRefArrayStatements.lean` | Source alias rebinding and reference/primitive indexed assignment simulations. |
+| `Evm/MemoryRefArrayCompile.lean` | Narrow certified nonallocating reference-array program compiler and composition theorem. |
+| `Evm/MemoryRefArrayExamples.lean` | Inhabited public input, old/new child alias observations, bounds failures, corrupt-pointer refutation and unsupported-shape refusals. |
 | `Evm/MemoryPaths.lean` | Structurally compiled typed local/reference-field paths with exact pointer simulation, nested primitive-field/array reads, lengths and writes with exact RHS/bounds failures, and child aliases/rebinding. |
 | `Evm/MemoryRefDelete.lean` | Fresh default primitive-array/primitive-member-struct children installed after resolving a reference-valued parent field; exact source growth, retained old aliases, target stack order, ownership and cursor simulation. |
 | `Evm/MemoryRefWrite.lean` | Reference-valued struct-field assignment updates the actual typed child identity and pointer word, preserving primitive data, mixed heap ownership, local frames and allocator state without allocation/copying. |
