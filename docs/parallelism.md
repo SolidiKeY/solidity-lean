@@ -31,6 +31,9 @@ elaborator.
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
   CallSummary}`.
 
+`Tools.SolCases` is an external-source printer and is explicitly included in
+the forbidden frontend set checked from the core.
+
 The list is closed under imports: no core module imports a module outside
 it.  The elaborator is `Syntax/{Elab,Quote,Splice}` and
 `Calculus/{Print*,Surface*,TacticSyntax,Quote,NamedTerm}`.  Source

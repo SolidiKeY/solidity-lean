@@ -93,7 +93,17 @@ against revm/evmone or Ethereum's `GeneralStateTests`; `compileStmt` against
 the helpers they mirror. The stipend is not modelled (a refusal stands for
 it).
 
-**D. A generated differential harness.** Lean generates a program, prints it
+**D. A generated differential harness (bounded increment implemented).**
+`lake exe solcases` and `scripts/evm-reference/generated.mjs` now execute
+160 intrinsically typed closed programs/start states against pinned solc and
+EthereumJS in legacy/viaIR, optimizer off/on. Exact outputs, panic/revert
+bytes and both declared roots after success/rollback are compared. Concrete
+parser/printer and literal-arithmetic regressions are kernel checked. See
+[implementation and evidence](feature-work/generated-differential.md) for
+commands, scope, refusals and remaining D/E work. This does not establish
+universal printer or solc correctness. The remaining full target follows.
+
+Lean generates a program, prints it
 as Solidity, a Node harness compiles it under legacy and via-IR, with and
 without the optimizer, runs it on an EVM, decodes storage by
 `--storage-layout`, and diffs with `Prog.runT`. Needs a printer from `Stmt C`

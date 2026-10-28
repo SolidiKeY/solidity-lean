@@ -113,6 +113,8 @@ commands; it never enters the core import graph.
 | Module | What it defines |
 |---|---|
 | `Frontend/Cli.lean` | JSON request adapter for source obligation, goal and ordinary proof-tree inspection, and typed concrete calls; the native launcher is `SolidityLean.lean`. |
+| `Tools/SolCases.lean` | Closed typed primitive-root Solidity printer, named refusals, deterministic bounded program/storage cases and actual interpreter observations for the optional real-solc/EthereumJS harness. |
+| `Examples/SolCases.lean` | Concrete kernel parser/printer round trip, typed literal division and explicit refusal regressions. |
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `Language/Features.lean` | Pinned Solidity language catalog, scope/current-status records, finite structured exclusions and diagnostics, requirements/backlog lists, and a feature-parameterized syntax subset. Generated from `docs/solidity-features.json`. |
 | `Eqns.lean` | `attribute [sol_eqns l₁ … lₙ] f` (Mathlib's `@[eqns]`, named apart for `Bridge/`): hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |

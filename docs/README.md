@@ -59,6 +59,7 @@ history is in git.
 | [contributing.md](contributing.md) | Verification commands, Lean setup, tactic development, worktrees and memory limits. |
 | [cli.md](cli.md) | The native `solidity-lean` CLI. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files: CLI, JavaScript and Lean APIs. |
+| [feature-work/generated-differential.md](feature-work/generated-differential.md) | Bounded typed generated cases against real solc/EVM, provenance, shrinking and remaining D/E work. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [bridge.md](bridge.md) | The optional Bridge package: Mathlib/CSLib, EVMYulLean, Loom and Velvet adapters. |
 | [refactoring-progress.md](refactoring-progress.md) | Completed getter/provenance refactors, bounded validation and the remaining dispatch-signature candidate. |

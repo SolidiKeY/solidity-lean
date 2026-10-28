@@ -610,3 +610,6 @@ import Solidity.Examples.Tactics.SelfPowerData
 import Solidity.Calculus.LoopInvariantWk
 import Solidity.Examples.Tactics.QuantifiedDiamond
 import Solidity.Solkey.QuantifiedDiamond
+
+import Solidity.Tools.SolCases
+import Solidity.Examples.SolCases

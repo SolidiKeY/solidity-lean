@@ -21,6 +21,7 @@ const CORE = [
   /^Solidity\.Calculus\.(TermEval|TermEq|TermWk|Lower|LowerRun|Shift|WkOver|Lands|StateFacts|ReadWrite|DataIn|SeqRewrite|SyntaxSize|Graft|CallSummary)$/,
 ];
 const ELABORATOR = [
+  /^Solidity\.Tools\.SolCases$/, // External-source printer stays outside the core.
   /^Solidity\.Syntax\.(Elab|Quote|Splice)(\.|$)/,
   /^Solidity\.Calculus\.(Print[^.]*|Surface[^.]*|TacticSyntax|Quote|NamedTerm)(\.|$)/,
 ];
