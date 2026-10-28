@@ -651,6 +651,10 @@ Costs that guide work:
     binder and the guards' operands with successors (the `Fml` analogue of
     `LFml.apfInst`); exactness needs a memory-array floor (feature 32's
     `arr_rebuild_slot` argument over `MxMap`).
+    The additive reconstruction prerequisite now has an object-level interface
+    (`Calculus/MemFloor.lean`); [its task handoff](feature-work/memory-negative-block.md)
+    records the exact optional-read proof and remaining preparation obligations.
+    The original gap and its `unknown` pin remain open.
   * `gapMemParam`: a hidden memory binder ranges over the given heap's
     objects, which may alias; a refutation needs a heap object holding the
     witness words, which `decideLeafA`'s state does not carry.
