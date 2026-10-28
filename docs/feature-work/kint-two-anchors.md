@@ -154,3 +154,53 @@ core-layer registration and its mirrored prose, module-map entries,
 automation status, this handoff and the Lean-only rule-map entry.
 The new arithmetic implementation lives in its own additive module.
 No changes were pushed or merged.
+
+## Investigated continuation: declaration serialization
+
+Run `b4b6f3b8-ee8a-4ec4-b964-c2cbb819f21a` resumed the same saved executor,
+clean checkout, branch and `a030ca2ce909f711986b07f49eba77d51bea855b` commit.
+Actual Lean/Lake and local Docker commands verified usability; no replacement
+or unrelated task evidence/code was used. The prior invocation had `-j1` but
+no `-DElab.async=false`. A distinct runtime-only experiment added that weak
+argument to the evidence-local Lake configuration and set artifact-cache
+restoration off. Tracked `lakefile.toml` and all source/proof files stayed
+unchanged. Derived17's source SHA256 before/after and at published base is
+`5ddbd7922a3d418fde5e46ae6ff48951e03c55eb4f6482e5701b9b840e592c54`.
+
+The forcing script moved only the pre-existing Derived17 setup artifact (no
+compiled artifact existed), and actual live process evidence records
+`lean --tstack=131072 -j1 -DElab.async=false .../Derived17.lean ... --json`.
+This was a fresh execution, not cache replay. A 300-second timeout retained the
+existing timing budget. The same writer lock, one Lean thread, disk caches,
+`memory.max=12884901888`, `memory.swap.max=0` and 2 GiB working-headroom guard
+remained in force under the outer VM's 16 GiB cgroup.
+
+**The distinct experiment failed:** exit 75 at 88.743279438 seconds, sampled
+aggregate RSS 10,664,943,616 bytes, cgroup peak 9,998,143,488 bytes and minimum
+outer-VM working headroom 2,112,159,744 bytes. No max/OOM event occurred.
+`continuation-serial-derived17.log` and its memory JSON retain the stop;
+`continuation-b4b6f3b8/actual-derived17-process.txt` retains the live invocation.
+Both earlier resource stops remain visible. No unchanged retry or subsequent
+full run was attempted. Full/TestSuite and complete strict timing coverage
+remain mandatory open gates; this is **not assignment completion**.
+
+Unaffected checks were rerun in this executor:
+
+| Check | Actual result |
+|---|---|
+| Owning core, binder, fixture and root MCP diagnostics; three headline `lean_verify` audits | 0; `continuation-focused-axioms.log`, 72.95s; all complete, no errors; only pre-existing binder unused `Int.add_mul` simp warning; audits standard three/no warnings; RSS 5,776,769,024 bytes, cgroup peak 3,236,925,440 bytes, minimum working headroom 8,873,213,952 bytes |
+| `lake build Solidity.KeySort Solidity.Examples.DecisionKInt` | 0; `continuation-fixture-build.log`, 311 jobs cached replay, 0.403s; RSS 73,846,784 bytes, cgroup peak 43,892,736 bytes |
+| Orphans/layers/strict automation/trust/inventory and frozen SolKey | 0; `continuation-policy-gates.log`, 5.84s; unchanged counts, six gap/target definitions preserved, 377 taclets/131 annotations; RSS 372,637,696 bytes, cgroup peak 399,704,064 bytes |
+| Strict timing audit | existing 18 completed TestSuite timings pass unchanged 300s limit; stopped Derived17 has no successful timing; complete suite coverage remains open |
+
+The positive, negative and nonlinear controls and their exact kernel verdict
+certificates are unchanged. No callback/invariant semantics, ordered observation,
+expected result, policy, heartbeat/fuel/node/test budget or axiom changed.
+Conditional/theorem-based exact decision certificates are not a fresh concrete
+native decision run; no Solidity compiler/EVM observation was added.
+Evidence-local configuration/replay details are in
+`/workspace/next10-kint-evidence/continuation-b4b6f3b8/README.md`.
+Independent finder and skeptic read-only continuation reviews found no
+confirmed defects. Neither used Lean/server/builds or wrote files; they checked
+the actual invocation, source hashes, limits, renewed checks, replay safety and
+blocked-gate claims. Their records are retained in the evidence bundle.
