@@ -868,3 +868,4 @@ At the root, the notation's own tests:
 |---|---|
 | `Calculus/Sound/ExternalTryWitness.lean` | State-indexed deterministic diamond transport from explicit normal try and allocated catch-data witnesses; no validity or callback promotion. |
 | `Examples/Tactics/ExternalTryFormula.lean` | Concrete success/catch formulas, allocated raw/reason payloads, explicit frame transport and refusal controls. |
+| `Examples/Tactics/ExternalTryUniversal.lean` | Countermodel over the actual original source-domain builders: no universal normal-try family, deterministic validity or callback source-profile validity for the quoted Probe. |

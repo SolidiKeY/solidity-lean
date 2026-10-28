@@ -604,3 +604,4 @@ import Solidity.Semantics.ExternalTryWitness
 import Solidity.Examples.Tactics.ExternalTryWitness
 import Solidity.Calculus.Sound.ExternalTryWitness
 import Solidity.Examples.Tactics.ExternalTryFormula
+import Solidity.Examples.Tactics.ExternalTryUniversal

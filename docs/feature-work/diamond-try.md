@@ -6,6 +6,8 @@ witness-to-formula interface with allocated catch-data transport. It does not re
 `tryCallDiamond`, `catchDataDiamond`, or add symex/source-obligation automation.
 The original gaps, target certificates, exclusions, Waivers, DecisionTheorem,
 profile choices and existing verdict/observation pins are unchanged.
+The requested universal-family continuation is now explicitly refuted for the
+quoted control over the original source-domain builders; see the final section.
 
 ## Initial proved scope (`fab16f7c`)
 
@@ -371,3 +373,150 @@ obligation automation remain **unresolved**, for the explicit interface and
 out-of-lane adapter/EVM blockers above. No original gap statement, target
 certificate, verdict, observation, invariant, callback semantics or budget was
 changed to obtain these component passes.
+
+## Universal-family continuation: proved semantic blocker
+
+The same saved executor was recovered and checked at clean HEAD
+`b4b9329bacc6ced55189be37b240045733de99ae`, on the same branch and remote.
+Lean 4.24.0 and Lake 5.0.0-src+797c613 remain pinned; `origin/master` remains
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`, an ancestor. No new VM,
+thread, branch replacement or clone was created. Actual KeySort passed before
+proof edits: exit 0, 1 second, accounted cgroup peak 24,485,888 bytes, with
+`memory.max=12884901888`, `memory.swap.max=0` and no OOM events. The VM parent
+remains 16 GiB. Evidence is the `universal/` subdirectory of the task evidence.
+
+### Why the requested family cannot be constructed
+
+`Examples/Tactics/ExternalTryUniversal.lean` defines the exact parameter-free
+plain source domain using the existing builders:
+
+- `sourcePre = Frontend.Problem.callPre Probe [] false [] false [] true`: no
+  parameters or msg.value read, the original 160-bit self-address bound,
+  no explicit deployment-address override, and **no oracle restriction**.
+- `Admissible σ = holds σ sourcePre ∧ holds σ (Fml.wt Probe)`.
+- `sourceProblem`: that call premise followed by the unmodified
+  `Problem.fml .diamond [] probe`, retaining `wt(storage)` and post `true`.
+- `NormalSourceFamily`: every original admissible typed state has an exact
+  normal `Prog.runFrames` witness. This explicitly requests normal completion,
+  not the exhaustion alternative the existing diamond can accept.
+
+These are the existing quoted `Probe` and actual source-domain/obligation
+builders, **not** a new theorem identifying an imported compiled declaration.
+The module adds six kernel-checked theorems:
+
+| Theorem | Evidence |
+|---|---|
+| `empty_oracle_admissible` | `State.init Probe` satisfies both original premises. Receiver is 7, not zero; the oracle is empty. |
+| `successful_oracle_admissible` | The previous successful word-9 oracle also satisfies exactly those same premises. |
+| `no_normal_source_family` | The proposed all-admissible-state normal family is false: instantiate it at the admitted empty-oracle state, then use the existing missing-entry refusal. |
+| `deterministic_source_refused` | Even deterministic universal validity of this unchanged source-obligation shape is false: its admitted state has caller revert, not exhaustion. |
+| `callback_source_refused` | Independent of missing-entry reasoning, the previous reached-try counterexecution refutes callback validity under every invariant and payment flag. |
+| `source_profile_refused` | The source obligation cannot hold under any existing `TransferSem` profile. |
+
+Consequently success/Error/Panic/catch-all transport cannot fill the proposed
+family: the original domain also admits a caller failure **before any clause**.
+Removing that state or assuming an oracle entry/decoding outcome would strengthen
+the specification's assumptions. Even such a strengthening would not remove
+the independent callback `tryRevert` counterexecution. No such change is made.
+
+The source route remains the one recorded above: callback-bearing source
+obligations use universal `ValidT`, and `.noCallback` disables payment callbacks,
+not try callbacks. A deterministic witness family would still not establish
+that false universal callback goal. Neither a syntactically unreachable try,
+a vacuous precondition nor resource exhaustion supplies a normal witness for a
+reached try. Existing box support is not reclassified as diamond support.
+
+**This path is stopped as a proved semantic blocker, not left as another
+unimplemented witness helper.** Positive reached-try universal source integration
+requires a human decision about the intended obligation/admissibility or
+callback judgement. The task expressly forbids taking that decision here;
+no D1/D2/profile decision, rule replacement or automation bypass is introduced.
+The original step-11 claim remains unresolved under its preserved meaning.
+
+### Additional actual source/compiler/EVM checks
+
+The unchanged original `scripts/check-call-exception-vectors.mjs` passed all
+**88** vectors (44 in each legacy/via-IR pipeline), with its existing ordered
+return-value/revert-byte assertions and original gas/settings budgets. Compiler
+bytes are the already retained audited 0.8.38+commit.1835d247, SHA256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+Settings remain optimizer enabled, Cancun, each original pipeline; the source
+is `tests/solc/CallExceptions.sol`. The unchanged script installs real compiled
+code and executes it in EthereumJS VM. Evidence: `evm-vectors.log`, exit 0,
+4 seconds, accounted peak 373,280,768 bytes, sampled RSS 396,992 KiB.
+
+The script's pinned external packages (`@ethereumjs/{vm,common,util}` 10.1.3,
+ethers 6.17.0) were absent, so they were provisioned only under
+`universal/reference/`, with an evidence-local on-disk npm cache, ignored
+install scripts, the configured proxy and CA trust. Installation passed (26
+packages, 4 seconds). Core dependencies, repository/user config and credentials
+were not changed. No test script, source fixture or expected observation was
+edited. These are actual additional source/EVM reference passes, **not** a
+kernel-to-EVM simulation proof or success for the blocked upstream replay rows.
+
+An independent unchanged native source verification was also attempted:
+`node scripts/test-solidity.mjs --no-build --json --contract CallExceptions
+--function failureCode tests/solc/CallExceptions.sol`, with the saved default
+SolKey compiler (0.8.34), source domain and budgets. It compiled/imported without
+errors, but its original unannotated diamond remained `pending: open proof
+goals`, exit 1, 7 seconds (`source-failureCode.log`, source hash
+`25f860c97fe9d929993bbcfb17fee77d6feeffabc80f5fd10ea0dc322b4afa18`). Its EVM
+counterpart succeeds in the reference vectors; this is precisely not a reason
+to claim the current universal callback source judgement proved. No annotation,
+verdict or source assumption was changed. The pending result remains open;
+it is not counted as a successful proof pipeline and was not retried unchanged.
+
+All earlier 20 upstream tryCatch rows remain separately blocked: 18 host/world
+adapters and two incompatible EVM constraints. Those unchanged failures were
+not rerun. The new reference passes do not clear any of them or complete the
+required original fixture replay. No excluded host/world/payment/creation or
+other task lane was implemented.
+
+### Final universal-continuation validation
+
+`mcp-verified.log` reports structured `success: true`, `partial: false`, no
+errors or failed dependencies for the new owning file. Early failed attempts,
+`lean_goal`/`lean_multi_attempt` inspection and the harmless new axiom-message
+line-wrapping repair remain retained. The two earlier implementation commits
+and their evidence are preserved unchanged.
+
+`Axioms.lean` / `axioms.log` audit all six new public theorems: each depends
+exactly on `[propext, Classical.choice, Quot.sound]`. `previous-axioms.log`
+rechecks the previous 28 proofs and complete payload observations. The original
+20-proof audit remains retained separately. No new axiom or `sorry`.
+
+| Gate | Exit | Seconds |
+|---|---:|---:|
+| check-orphans | 0 | 0 |
+| check-layers | 0 | 0 |
+| check-automatic --strict | 0 | 0 |
+| check-trust | 0 | 5 |
+| inventory regeneration | 0 | 0 |
+| full `./run-lean.sh` | 0 | 3 |
+| six new axiom audits | 0 | 4 |
+| previous 28-proof/payload audit | 0 | 3 |
+| whitespace | 0 | 0 |
+
+`gates.tsv` and `gates-driver.log` retain actual results. Trust reports 720
+sources, 240 inventoried sites, zero findings. Automatic counts remain 491/61
+budgeted/11 refuted/zero pending. The generated inventory remains current,
+with no support-status change. Full build includes TestSuite and the successful
+377-taclet/131-read-bearing SolKey check. Existing replayed baseline linter
+warnings are not new module warnings.
+
+The final validation group peaked at **958,058,496 accounted bytes** and
+**1,465,256 KiB sampled aggregate RSS**, with zero OOM events and zero swap
+allowance. Every build/MCP/source/EVM group verified the 12 GiB/no-swap cap,
+used the documented writer lock and one heavy check at a time, with
+`LEAN_NUM_THREADS=1` and explicit Lean `-j1` through the temporary Lake config.
+Caches and replay temporary files stayed on workspace disk; no unrelated
+worker was terminated. The temporary config is removed before commit.
+
+Independent finder and skeptic reviewed the new proofs without Lean servers,
+checks or writes. They found no confirmed defect, confirmed the exact default
+source domain, and required the quoted-program versus imported-declaration
+boundary to stay explicit as above. Both independently found no sound positive
+reached-try source path under the unchanged assumptions and callback semantics.
+The remaining blocker is a human semantics/statement decision, not executor
+provisioning. New shared edits are one module import, one module-map row and
+this owning record; the implementation is one new task-specific module.
