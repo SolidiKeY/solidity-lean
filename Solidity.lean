@@ -503,6 +503,8 @@ import Solidity.Calculus.HashMove
 import Solidity.Calculus.MemSwap
 import Solidity.Calculus.MemFloor
 import Solidity.Calculus.MemInst
+import Solidity.Calculus.MemObserve
+import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -518,6 +520,7 @@ import Solidity.Examples.DecisionMemory
 import Solidity.Examples.MemoryFloor
 import Solidity.Examples.MemoryInstantiation
 import Solidity.Examples.MemoryNegativeCountermodel
+import Solidity.Examples.MemoryNegativeDecision
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear

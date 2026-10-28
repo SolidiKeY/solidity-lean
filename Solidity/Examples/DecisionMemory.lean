@@ -167,9 +167,11 @@ write). -/
 def memWriteDia : Fml Gaps [] := .allocAll (.user "s") UA
   (.upd .diamond (wrU .here 0 5) (.eq (mrdG .dyn .here (litU 0)) (litU 5)))
 
-/-! ### Counterexamples to `DecisionTheorem` left with memory
+/-! ### Original memory gaps
 
-Each in `Fml.inTarget` (by the kernel) and answered `unknown`
+Each remains in `Fml.inTarget` (by the kernel). The negative block is now
+refuted by the exact preparation; the hidden memory binder and fresh struct
+remain `unknown`
 (`docs/automation.md`, M7, "What is not proved"): a negative-position block
 over an array's contents (its index bound after the array), a hidden memory
 binder (it ranges over the objects already there, and over none), a fresh
@@ -204,7 +206,7 @@ theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kern
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
 theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
 
-/-- info: ["unknown", "unknown", "unknown"] -/
+/-- info: ["refuted", "unknown", "unknown"] -/
 #guard_msgs in
 #eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 

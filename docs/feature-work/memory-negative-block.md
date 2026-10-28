@@ -1,12 +1,17 @@
-# Memory negative-block reconstruction prerequisite
+# Memory negative-block preparation and exact closer refutation
 
-Status: incomplete. `gapMemInnerNeg` remains an original open closer gap. No
-`DecisionTheorem`, `inTarget`, exclusion, waiver, or original verdict pin is
-changed. This work proves an independent object-reconstruction prerequisite
-and a kernel countermodel for the original formula, plus a semantic
-finite-instance reduction for one length-guarded object block. The latest
-continuation adds a checked intrinsic range-body instantiator and fresh
-allocation boundary, but no enclosing-leaf preparation or closer integration.
+Status: complete for the assigned original `gapMemInnerNeg`. Its unchanged
+formula now receives a kernel-certified **refuted** verdict from the actual
+integrated closer, including a theorem about its returned countermodel.
+All mandatory full/strict/trust/fixture/axiom/diagnostic/orphan/layer/inventory
+gates passed. An extra global documentation-path scan still reports 20
+pre-existing references into absent external projects; those remain open and
+are not claimed passing. No task-owned missing path remains.
+
+The earlier sections below are historical partial milestones. The latest
+integration and final evidence are at the end. No target, waiver, exclusion,
+profile or `DecisionTheorem` statement is changed. The other five original
+gap statements and all six original target certificates are preserved.
 
 Baseline: `/workspace/solidity-lean`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, published master and branch
@@ -376,7 +381,7 @@ controls and original closer observations.
 
 All 21 original ordered fixture observations match the original baseline,
 including `gapMemInnerNeg: unknown → unknown`. Full per-fixture comparisons
-are in `original-observation-comparison.json`. `Decision.lean`,
+are in `original-observation-comparison.json`. `Calculus/Decision.lean`,
 `DecisionKInt.lean`, and `DecisionMemory.lean` remain byte-identical to the
 published baseline; `original-gap-source-hashes.json` records the comparison.
 
@@ -498,7 +503,7 @@ identities. In particular, arbitrary `MxPoint.agrees` points could read changed
 contents: stability must be derived from a fail-closed whole-leaf collector
 (e.g. pre-array `ixOk` indices and preserved lengths). Only then can a
 whole-leaf soundness/refutation certificate feed `mxTop`/`decideMem`, coverage,
-and an improved original pin. Neither `Decision.lean` nor `decideMem` was edited.
+and an improved original pin. Neither `Calculus/Decision.lean` nor `decideMem` was edited.
 
 ### Controls, review and evidence scope
 
@@ -599,3 +604,201 @@ owning handoff. MemFloor, callback/invariant semantics and all other lanes
 remain untouched. The whole-leaf length-atom/exterior-observation reduction
 and actual original closer refutation remain open. The assignment is not
 complete despite the new intrinsic instantiator and its gates passing.
+
+
+## Exact enclosing-leaf integration (2026-10-28)
+
+`MemObserve` adds typed primitive observations, not user term/formula syntax.
+Its checked parser reifies to existing intrinsic `Tm` and certifies equality.
+It accepts literals, the newly allocated dynamic primitive array's length,
+its reads at literal uint indices, and typed binary operators. The exterior
+formula view accepts Theory equality, true, negation, conjunction and
+implication over those observations. Other locals/arrays, nonliteral indices,
+unary/other symbols, modalities and exterior binders are refused. No given-heap,
+reference-member struct, recursive type, hash or write support is claimed.
+
+`MemNegPrep` recognizes a fresh dynamic primitive array whose body is an
+implication with the existing negative uniform uint range block. Positive
+prefix value binders are preserved. A uint length atom is quantified before
+the fresh allocation; its equality with the actual length guards the prepared
+body. Instances use zero, length, every retained literal exterior read index,
+and checked successors of length/read operands. Failed successors stay guarded.
+The parser has no fixture-name check. Unsupported shapes return the original
+formula and identity certificate. This is a deliberately fail-closed supported
+shape inside the unchanged target, not a claim of full decision completeness.
+
+`mxNegativeBody_holds` proves equivalence at every parent state. One direction
+chooses the actual length and uses certified instances; the other reconstructs
+a primitive array with its length retained and transfers every optional
+exterior observation. The object stays in the actual extended heap typing with
+the same fresh identity; previous local/alias laws remain applicable. Empty
+arrays retain vacuous block truth and failed optional reads; Theory equality
+of two halted reads remains distinct from a failed program comparison.
+`decideMem` and `memCovered` use the identical preparation, hoisting and cut.
+Soundness/refutation transport uses the certificate in the appropriate direction.
+
+`MemoryNegativeDecision.gap_decision` certifies that the actual unchanged
+`decideGoal gapMemInnerNeg` returns a refuting state, using kernel coverage,
+closer completeness/soundness and the original non-validity theorem.
+`gap_returned_countermodel` certifies that very returned state falsifies the
+original under the existing hash-premise semantics. This is separate from the
+old concrete empty-array countermodel and from compiled Lean observations.
+No solc/EVM run or source semantics change is claimed by these intrinsic tests.
+
+The additive interface for written-memory hashing is: supply an equality-
+certified typed exterior view and its read footprint; preserve the object's
+actual length and every footprint index in the reconstruction breakpoints;
+use `MxObs.rebuild`/`MxExterior.rebuild` for exact optional observations and
+`MxNegativePrep.exact` for enclosing-leaf transport. This proves no write/hash
+composition itself and cannot be reused as a given-heap surgery theorem.
+
+The first integrated source build passed in 934.865 s, aggregate cgroup peak
+7,697,956,864 bytes, no cgroup max/oom events, 12 GiB cap/zero swap. It checked
+the original changed verdict pin and six ordered uint/bool controls. Headline
+exact/returned-state audits list only `propext`, `Classical.choice`, `Quot.sound`.
+Review then found the internal `mxLen` fresh prefix did not round-trip through
+`FreshNames`. It was repaired to the standard `se` prefix with the whole input's
+`Fml.fresh` supply, threaded through preserved binders. This is a printer fix;
+indices were intrinsically sound already. Fresh-prefix and nested-exterior
+binder-refusal controls now cover the repaired boundary. Final core rebuild
+passed in 36.543 s; final verification below will supersede this checkpoint.
+
+
+### Final validation and remaining boundaries
+
+Actual command arguments, exit codes, UTC intervals and aggregate cgroup
+peaks are in `/workspace/next10-memory-negative-block-close/final-results.json`
+and the matching raw logs. Every mandatory row below exited zero. The full
+confirmation is cache-assisted and rebuilt the changed dependency chain;
+TestSuite cache replays are not a clean-cache performance benchmark.
+
+| Command / evidence name | Seconds | Aggregate group peak bytes |
+|---|---:|---:|
+| `full-confirmation` | 978.852 | 7668064256 |
+| `runtime-keysort` | 0.164 | 30494720 |
+| `mcp-decision-final` | 38.351 | 1242238976 |
+| `mcp-observe-final` | 4.94 | 963260416 |
+| `mcp-preparation-final` | 3.923 | 963260416 |
+| `mcp-controls-complete` | 19.804 | 1216303104 |
+| `mcp-memory-complete` | 54.675 | 1216303104 |
+| `mcp-instantiation-complete` | 4.224 | 1216303104 |
+| `mcp-countermodel-complete` | 3.178 | 1216303104 |
+| `mcp-root-complete` | 2.863 | 1216303104 |
+| `original-observations` | 25.712 | 1216303104 |
+| `decision-pipelines` | 9.617 | 1216303104 |
+| `instantiation-observations` | 1.476 | 1216303104 |
+| `floor-observations` | 2.611 | 1216303104 |
+| `orphans` | 0.117 | 1216303104 |
+| `layers` | 0.154 | 1216303104 |
+| `automatic-strict` | 0.036 | 1216303104 |
+| `trust` | 3.809 | 1216303104 |
+| `inventory` | 0.04 | 1216303104 |
+| `inventory-check` | 0.038 | 1216303104 |
+
+The final sequential-check rows share one container, so their peaks are
+cumulative within that group. Every group used `LEAN_NUM_THREADS=1`, explicit
+Lean `-j1` through the evidence-local temporary Lake configuration, the writer
+lock, `memory.max=12884901888` and `memory.swap.max=0`. No cgroup limit/oom
+or kill events occurred. `headroom.jsonl` retains actual 16 GiB VM samples,
+including 7,761,413,432 bytes conservative headroom near the large fixture
+stage (free plus inactive-file/slab reclaimable memory). Disk caches were
+preserved. No unrelated process was killed; an early accidentally nested
+writer-lock launcher was stopped before any Lean worker started and repaired
+by removing the redundant lock.
+
+`run-lean.sh` passed the final core/root and SolkeyTestSuite builds and the
+SolKey annotation check (377 taclets, 131 read-bearing, all covered). The
+actual final `lake build Solidity.KeySort` output preceded the fresh
+`RUNTIME_GATE_PASS` marker. Strict automation retained the unchanged 300 s
+TestSuite policy: 491 automatic, 61 with step budgets, zero manual,
+11 refuted and zero pending; zero TestSuite cache replays were newly timed.
+Trust audited 722 sources, 240 inventoried implementation/recovery sites,
+zero findings. Feature inventory regeneration/check passed: 212 features,
+783 upstream symbols, no generated diff or support promotion. No repository
+script was changed, so no new script behavior is claimed.
+
+Eight final owning-file MCP reports are complete (`partial=false`,
+`success=true`, no Lean errors/warnings), extracted in
+`final-diagnostics-and-axioms.json`. Earlier 45 s partial diagnostic attempts
+remain recorded as failed; the final evidence-local driver omits that wait
+truncation after rebuilding imports. This changes neither Lean proof limits
+nor test budgets. Some MCP shutdowns print Python event-loop cleanup traces
+after delivering a complete successful report; those are retained separately
+from the Lean diagnostics. The earlier bare kernel coverage reduction got
+stuck at the well-founded exterior parser, and a diagnostic `#reduce` exceeded
+the unchanged recursion bound. The repaired proof uses the parser's proved
+unfolding equation (`gap_prepared`) before kernel coverage evaluation; no
+bound was increased. The original raw-length cut refusal remains a negative
+control, superseded by the correctly scoped length atom in preparation.
+
+The final actual axiom audits for `gap_decision`, `gap_returned_countermodel`,
+`mxNegativeBody_holds`, `MxExterior.rebuild`, `decideMem_sound` and
+`decideMem_refutes` list exactly `propext`, `Classical.choice`, `Quot.sound`.
+The positive semantic controls and original negative empty-array certificate
+have the same standard axiom set. No new axiom or `sorry` was introduced.
+Kernel exact/returned-state certificates are distinct from the compiled Lean
+pipeline observations below; no solc/EVM observation is inferred from either.
+
+The ordered 21-fixture before/after comparison is preserved in
+`original-observation-comparison.json`: only `gapMemInnerNeg` changes
+`unknown → refuted`; all other 20 observations and their ordering are identical.
+`original-six-declarations.json` verifies byte-identical source for all six
+original gap definitions and six target certificates against the published
+base. The original enclosing source files naturally differ only where the
+proof-backed verdict pin/comments changed; earlier full-file hashes are
+historical, not the current preservation claim.
+
+| New/current fixture | Arithmetic pipeline | Memory / leaf / goal | memCovered |
+|---|---|---|---|
+| `original` | unknown | refuted / refuted / refuted | true |
+| `guardedZero` | unknown | proved / proved / proved | true |
+| `guardedWrong` | unknown | refuted / refuted / refuted | true |
+| `haltedEqual` | unknown | proved / proved / proved | true |
+| `haltedCompare` | unknown | refuted / refuted / refuted | true |
+| `boolGuardedTrue` | unknown | proved / proved / proved | true |
+| `boolGuardedFalse` | unknown | refuted / refuted / refuted | true |
+| `namedPrefix` | unknown | refuted / refuted / refuted | true |
+
+The old floor and instantiation ordered drivers also passed unchanged,
+including zero length, out-of-bounds optional reads, failed top successor,
+missing-length/guard counterexamples, capture refusal and local identity/alias
+certificates. New controls distinguish vacuous guarded truth, wrong live
+values, equal halted Theory reads, failed program comparison, uint/bool
+arrays, reserved prefix names and unsupported exterior binders/indices/arrays.
+
+Independent read-only finder and skeptic reviews examined reconstruction,
+typed recognition, exactness/guard transfer, fresh identity, integration,
+coverage correspondence, controls and owning documentation without Lean
+server/build access. They found the fresh-name printer issue and stale docs;
+both were fixed. The final source review found no remaining confirmed source
+or coverage mismatch. Exact review scopes/findings are in `reviews.json`.
+
+The additional global `check-doc-paths.sh` remains exit 1 for 20 pre-existing
+external-project file references in untouched `Eqns`/upstream validation
+records. `doc-path-baseline.json` proves those citing sources byte-identical
+to the published base. Registering the new modules removed the two task-owned
+missing references, and the handoff's ambiguous decision paths were made
+explicit. No unrelated docs, checker exclusions or policy were altered.
+This optional global scan is recorded open; all mandatory assignment gates
+above passed. Broader memory blocks, given-heap binders, reference-member
+structs and written-memory hashing remain separate work, not residual claims
+or a narrowed target. There is no remaining reduction blocker for this
+assignment's original gap.
+
+Shared tracked edits in this final continuation: new `MemObserve`, `MemNegPrep`
+and `MemoryNegativeDecision`; the narrow `Calculus/Decision` import/pipeline/
+certificate transport and identical coverage pipeline; three root imports;
+the one justified original verdict pin and task-local example comments;
+`docs/module-map.md`, M7 in `docs/automation.md`, and this owning handoff.
+Earlier committed `MemFloor`/`MemInst` results are preserved. No other task,
+monitor, user setup, callback/invariant/profile or resource policy was changed.
+
+
+Both independent reviewers then rechecked the actual final source, diagnostics,
+full/strict/resource logs, standard-three axiom audits and ordered comparisons.
+Neither found a remaining mandatory proof/validation blocker or unsupported
+completion claim. The optional global documentation baseline remains explicitly
+open. Final whitespace and retained toolchain/branch/base identity checks also
+exited zero; their raw commands/results are in the same evidence directory.
+The temporary Lake resource configuration is preserved there and removed from
+the checkout before commit, leaving tracked and user configuration intact.

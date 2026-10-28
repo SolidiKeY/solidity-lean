@@ -5,7 +5,7 @@ import Solidity.Examples.DecisionMemory
 # Scoped memory-block instantiation controls
 
 These are Lean intrinsic/kernel controls, not source/compiler/EVM tests.
-The original closer gap remains unknown. Successful recognition and an
+The enclosing-leaf integration is in `MemNegPrep.lean`. Successful recognition and an
 instantiation certificate alone are not a whole-leaf reduction certificate.
 -/
 

@@ -628,8 +628,9 @@ Costs that guide work:
   (`sortedLe`: nine instances, nineteen reads, about two thousand nodes).
   A region refutation can be a term too large to build; no construction
   does better in general (a sorted mapping read at three far keys).
-* **The pinned gaps**: in `Fml.inTarget` (by the kernel, `*_inTarget`) and
-  answered *unknown*.  One leaf a shape:
+* **The original pinned gaps**: all retain their definitions and kernel
+  `*_inTarget` certificates. Five remain *unknown*; the fresh negative memory
+  block is now *refuted*. One leaf a shape:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
     `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): key sums that differ past
     every anchor, Presburger alternation over ℤ.  Needs an unbounded binder
@@ -646,20 +647,20 @@ Costs that guide work:
     entry).
   * `gapMemInnerNeg` (`Examples/DecisionMemory.lean`,
     `(∀ i. i < len(s) → s[i] == 0) → s[0] == 0`): a negative block over a
-    fresh memory array.  Next: in `Calculus/MemSwap.lean`, before `Fml.mx`,
-    instantiate it at the index set of the array's other reads, its length
-    binder and the guards' operands with successors (the `Fml` analogue of
-    `LFml.apfInst`); exactness needs a memory-array floor (feature 32's
-    `arr_rebuild_slot` argument over `MxMap`).
-    The additive reconstruction prerequisite has an interface
-    (`Calculus/MemFloor.lean`) including an exact object-level
-    length-guarded finite-instance equivalence and natural guard transfer;
-    the additive `Calculus/MemInst.lean` now certifies scoped range-body
-    point instantiation, failed-point guards, and one fresh-allocation
-    reconstruction/identity boundary. Enclosing-leaf collection, stable exterior
-    observations and length atoms before `mxTop` remain open. [Its task handoff](feature-work/memory-negative-block.md)
-    records the exact optional-read proof and remaining preparation obligations.
-    The original gap and its `unknown` pin remain open.
+    fresh memory array. Closed for this exact original leaf: `decideGoal`
+    returns *refuted*, kernel-certified with its returned countermodel in
+    `Examples/MemoryNegativeDecision.lean`. Before hoisting and `mxTop`,
+    `Calculus/MemNegPrep.lean` recognizes a uniform range block with an
+    equality-certified typed exterior, introduces a scoped length atom,
+    and instantiates at zero, retained literal reads, length and checked
+    successors. `MemObserve` proves stable optional exterior observations;
+    `MemFloor`/`MemInst` reconstruct the same fresh object and preserve
+    failed reads, bounds, zero length and local identity. Unsupported
+    terms/binders keep the original formula. Positive prefix value binders
+    are preserved; the length name reserves the whole input's fresh supply.
+    This closes this gap, not all memory or written-hash shapes. The
+    [task handoff](feature-work/memory-negative-block.md) records the exact
+    accepted fragment, additive hashing interface and validation evidence.
   * `gapMemParam`: a hidden memory binder ranges over the given heap's
     objects, which may alias; a refutation needs a heap object holding the
     witness words, which `decideLeafA`'s state does not carry.
@@ -702,7 +703,9 @@ completeness proof through the stages.
 5. The array property fragment: done for mappings at any depth, `bool`,
    `uint` and `int` keys, the ledger, dynamic storage arrays at roots
    (features 7, 16–21, 32).  Left: fixed arrays and arrays below keys,
-   memory (`gapMemInnerNeg`), the halting `||` operand.
+   broader memory blocks, the halting `||` operand. The fresh primitive-array
+   uniform negative block (`gapMemInnerNeg`) is now closed by the exact
+   intrinsic preparation above.
 6. Memory and array indices: done for storage arrays of primitives at
    roots and fresh memory arrays of primitives (features 10, 13, 23, 24).
    Left: arrays below fields and keys, of structs and arrays; the memory
@@ -822,8 +825,10 @@ conjunct separately.  The only `maxRecDepth` settings left are
 Features 30–31 (`kintneg`) and 32 (`apfarrays`) merged; steps 2–5 of the
 original plan moved to M7-next.  Still pinned, in `Fml.inTarget` and
 answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
-`gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`, `gapMemStruct`,
-`gapWrittenMemory`.
+`gapQuantLedger`, `gapMemParam`, `gapMemStruct`, `gapWrittenMemory`.
+The original `gapMemInnerNeg` is now kernel-certified *refuted* by the exact
+fresh primitive-array preparation described above; its definition and target
+certificate are unchanged.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
 one second each; the final verdict evaluation is the slow stage, rather than

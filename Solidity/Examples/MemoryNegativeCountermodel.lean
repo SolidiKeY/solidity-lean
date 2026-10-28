@@ -3,10 +3,10 @@ import Solidity.Examples.DecisionMemory
 /-!
 # The original negative memory block's empty-array countermodel
 
-The existing statement and unknown pin stay unchanged. At every initial
+The original statement stays unchanged. At every initial
 state, allocating an empty primitive array makes the negative block's
 premise vacuous and its concluding read halt. This is semantic evidence;
-it does not integrate a negative-block preparation into the closer.
+the exact closer certificate is in `MemoryNegativeDecision.lean`.
 -/
 
 namespace Solidity.Examples.MemoryNegativeCountermodel
