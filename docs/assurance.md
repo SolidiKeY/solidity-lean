@@ -1,5 +1,10 @@
 # Assurance: trust gates, the certified memory compiler, closer extensions
 
+The [full compiler roadmap](coverage-plan.md) requires these trust gates across
+the completed source-to-executable-EVM proof closure. The compiler fragments and
+premises recorded here describe existing results, not full-profile compiler
+correctness. Named proof gaps cannot satisfy the roadmap's completion gate.
+
 The work requested by the October 2026 audit: trust gates, the memory path
 of the checked compiler, and bounded closer extensions.  Milestone labels
 M1–M31 are cited elsewhere (e.g. M13 in `docs/semantic-gaps.md`).  The
