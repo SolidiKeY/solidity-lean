@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /home/guilherme/projects/solidity-lean
+export LEAN_NUM_THREADS=1
+export LAKE_CACHE_DIR="$PWD/.lake/refactor-cache/cloud-integration-20261028"
+for file in SolkeyCheck.lean SolidityLean.lean SolCases.lean; do
+ echo "CHECK_DEFAULT_STACK $file"
+ /home/guilherme/.elan/bin/lake -f .cloud-integration.toml lean "$file" -- -j1
+done
+/home/guilherme/.elan/bin/lake -f .cloud-integration.toml --rehash --no-build build
+/home/guilherme/.elan/bin/lake -f .cloud-integration.toml --rehash --no-build build SolkeyTestSuite

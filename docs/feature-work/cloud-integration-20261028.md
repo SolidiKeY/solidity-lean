@@ -63,15 +63,34 @@ The combined Lean gate passed: **698 default jobs**, **262 TestSuite jobs**, and
 the frozen sort comparison (**377 taclets / 131 read-bearing / 131 covered**).
 The generated executable passed its 60-job build. Final per-file checking and
 rehashing confirmed the normalized loop fixture and all current default/suite
-artifacts. The affected frontend/compiler/EVM replay is still in progress.
+artifacts. The affected frontend/compiler/EVM replay also passed:
+
+- 49 baseline Python integrity/provenance tests.
+- 46 frontend Node tests, with no failure or skipped case; this includes the
+  transient tests that initially refused the still-stale Testing dependency.
+- 21 compiler/EVM reference tests and 640/640 generated comparisons, with zero
+  mismatch or blocked variant on the committed integration.
+- 32 slice, 82 panic-payload and 22 transient-world EVM observations, plus the
+  slice admission check. These observations remain separate from kernel proofs.
+
+The [combined validation record](../../tests/upstream/cloud-integration-20261028/validation.json)
+contains exact collected heads, commands, source/settings fingerprints, resource
+counters, original/current generator identities, reviews and log hashes. Logs and
+the generated report are losslessly gzip-compressed beside it; the record includes
+both compressed and uncompressed hashes. Earlier stale-dependency and launcher
+failures remain separately identified and are not counted as passing checks.
 
 The build uses Lean 4.24.0, `LEAN_NUM_THREADS=1`, explicit
 `-j1` compiler settings, a 12 GiB/no-swap systemd scope and a 12 GiB available-host
 reserve. The temporary Lake file changes worker settings only. An initial LSP
 request started automatic dependency setup outside this scope; that request's
 process tree was stopped and is not counted as a passing gate. The passing
-combined run recorded 11.69 GiB peak aggregate RSS; the cgroup high-water mark
+combined run recorded 11.69 GiB sampled peak aggregate RSS; the cgroup high-water mark
 reached its 12 GiB cap with reclaim events, zero OOM/kills and zero swap.
+The frontend/reference replay recorded 2.15 GiB sampled aggregate RSS and a
+3.72 GiB cgroup high-water mark. An unnecessary temporary executable stack flag
+was removed; all three CLI roots were checked directly at their original default
+stack before final cache confirmation. Library proof/stack settings were unchanged.
 
 Local logs are under `.lake/cloud-integration-20261028/`. The standard orphan
 scanner also sees 33 preexisting ignored scratch modules; an exact allowlist
