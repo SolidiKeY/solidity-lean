@@ -4,8 +4,9 @@ Status: incomplete. `gapMemInnerNeg` remains an original open closer gap. No
 `DecisionTheorem`, `inTarget`, exclusion, waiver, or original verdict pin is
 changed. This work proves an independent object-reconstruction prerequisite
 and a kernel countermodel for the original formula, plus a semantic
-finite-instance reduction for one length-guarded object block; it does not implement
-the scoped negative-block preparation pass.
+finite-instance reduction for one length-guarded object block. The latest
+continuation adds a checked intrinsic range-body instantiator and fresh
+allocation boundary, but no enclosing-leaf preparation or closer integration.
 
 Baseline: `/workspace/solidity-lean`, origin
 `https://github.com/SolidiKeY/solidity-lean.git`, published master and branch
@@ -32,7 +33,7 @@ preserves the existing `MxMap` filling interface when all successful index
 evaluations are retained. These lemmas are useful to later written-memory
 hashing, but do not prove interaction with writes.
 
-The API only reconstructs objects. It does not change heap identities or
+The `MemFloor` API only reconstructs objects. It does not change heap identities or
 claim state-level alias preservation. Existing `MxRel.apart` and fresh
 allocation semantics remain unchanged. No given-heap binder or struct
 coverage is added. No new syntax or term constructor needs a printer.
@@ -61,14 +62,12 @@ All three audit to `[propext, Classical.choice, Quot.sound]`.
 
 ## Remaining dependency
 
-The missing prerequisite for full closure is a memory-specific scoped
-array-property preparation: recognize negative blocks; collect other reads,
-lengths, guard operands and valid successors; perform capture-safe
-instantiation; transfer guards; lift object reconstruction through fresh
-allocation to the observation/`MxRel` relation; and prove soundness and
-refutation of that preparation before `Fml.mx`. Then integrate its coverage
-and change the original pin only after the actual improved verdict is
-proved. `Fml.mx_holds` retains its per-state exactness statement.
+The latest continuation supplies intrinsic range-body recognition and guarded
+point instantiation in `MemInst`, including a fresh-allocation reconstruction
+boundary. Full closure still needs the enclosing-leaf collector, stable exterior
+observations, scoped length atoms, a whole-leaf soundness/refutation certificate,
+and actual integration before `mxTop`. See continuation `bab6410c` below for the
+exact attempted construction and current remaining proof obligation.
 
 ## Review
 
@@ -403,3 +402,200 @@ still open, despite all validation of this bounded increment passing.
 Final finder and skeptic evidence reviews matched the actual JSON/log records;
 their confirmed Markdown table-spacing issue was fixed. No source or scope
 changes followed validation.
+
+## Intrinsic continuation bab6410c-67c6-4ce0-b0cc-af7c473a54ea
+
+Status: the distinct intrinsic instantiation step is checked; the original
+assignment is **incomplete**. `gapMemInnerNeg` still has its unchanged unknown
+pin. The retained clean branch started at `add3e02446f88c9298edb6ad57485a8c7bd74c4d`,
+with the same repository, base and Lean/Lake versions. Actual executor startup
+and bounded Lean execution are in `intrinsic/startup.log` in the refreshed
+archive. No object-level milestone was rerun or altered. No named-fixture
+match, changed target/profile/waiver, new axiom, sorry or increased budget was
+introduced.
+
+### Intrinsic certificate and supported shape
+
+`Calculus/MemInst.lean` is additive. `MxPoint C Γ` carries a typed uint term,
+a provenance tag and a proof of denote/evaluation agreement at every state;
+it does not assert totality or reconstruction stability. The scoped point
+builder includes zero, the actual memory length, supplied read/guard operands
+and their checked successors. The caller supplies those read/guard operands;
+this is not yet a certified traversal of an enclosing leaf. Successor overflow
+halts and does not wrap to zero.
+
+`mxInst_holds` proves exact substitution across one uint binder when its point
+returns. `mxInst_eval` preserves the full optional term evaluation at every
+sort. Both reuse the existing update substitution and its landing theorem.
+`MxPoint.wk` and `underMemory_eval` prove capture-free weakening, including
+failed evaluations. No untyped syntax or new formula constructors are used;
+existing formula/term printers apply.
+
+`mxInstances?` refuses any unsupported requested substitution. Its low-level
+empty list has a vacuous conjunction; after independent review, the public
+`mxInstPrep?` factory explicitly refuses empty requests. Thus an empty point
+list cannot bypass the public factory's unsupported-binder refusal.
+`MxInstPrep.holds_iff` states the exact interpretation of the output conjunction:
+every successful scoped point must satisfy the original body at its pushed
+value. A halting point remains in the output as a definedness-guarded instance.
+It is neither silently skipped nor evaluated at a default index.
+
+`mxRangeBody?` recognizes only a dynamic primitive-array body with the existing
+`length > bound_uint` guard and an equality between that same array's bound-index
+read and a primitive literal. It returns `MxRangeView` with a proof of equality
+to the actual intrinsic source body. It refuses nested binders, unrelated array
+identities, fixed arrays and other shapes. `MxRangeView.prepare` builds the
+checked typed instances, always including zero and length. The general finite
+instance helper is broader than this recognizer and carries no coverage claim.
+
+### Allocation and reconstruction boundary
+
+`mxRangeInstance_holds`, `mxRangeBody_holds` and `mxRangeBlock_holds` connect the
+intrinsic formulas to the actual `State.allocPush` object, its exact length and
+optional slots. This includes zero-length vacuity and out-of-bounds reads.
+`MxInstPrep.range_reconstruct_points` takes the checked preparation at the old
+fresh allocation and constructs a fresh allocation satisfying the original
+universal range block. Its finite floor set includes zero, length and precisely
+the successfully evaluated point values. The only extra point requirement is a
+successful zero instance; the recognized range builder supplies zero.
+
+`mxFloorRebuild_alloc_local` proves every local value, including the new fresh
+id, agrees between original and reconstructed allocations in the same extended
+heap typing. `mxFloorRebuild_alloc_alias` therefore preserves memory-local
+identity equalities, including comparisons with outer memory locals. This is a
+one-new-object relation; it does not rebuild arbitrary given-heap objects or
+coupled arrays. `mxRangeBlock_negative_iff` connects the committed object-level
+finite-instance equivalence to the actual intrinsic universal range block.
+Its consequent is still a semantic observation function, not an arbitrary
+recognized enclosing `Fml`.
+
+For written-memory hashing, the interface is `MxInstPrep.holds_iff` for exact
+successful-point interpretation, `range_reconstruct_points` for realizing the
+range block, and the local/alias equalities alongside `MemFloor`'s retained
+optional-read vector. A caller must separately establish stability of its
+exterior terms and point evaluations across reconstruction. Denote/eval
+agreement alone does **not** establish that stability, and no write/hash
+composition claim is made.
+
+### Exact failed next construction and remaining reduction
+
+`Examples/MemoryInstantiation.rawPreparedLeaf` retains the concrete attempted
+next step: put the checked intrinsic point conjunction in the negative premise
+of a fresh primitive-array leaf, with its original exterior read. Its compiled
+`mxTop` result is `none`. The points still contain a raw `mlen` term as an index;
+`Tm.ixOk` does not admit such memory reads, and the unchanged cut cannot collect
+that index at the array binder. `bound_index_not_ground` separately proves that
+the original uint-bound index cannot be pulled before its array binder. This
+is an implementation/proof obligation, not an external or user-decision blocker.
+The failed construction was not repeatedly retried or installed in the closer.
+
+The next unproved transformation must introduce a uint length atom **before**
+the fresh array binder, constrain it to the allocated object's actual length,
+and replace those length-based point indices by the atom capture-safely. For a
+whole negative implication, the proof must relate exterior intrinsic term
+observations in the original and reconstructed states, not just their local
+identities. In particular, arbitrary `MxPoint.agrees` points could read changed
+contents: stability must be derived from a fail-closed whole-leaf collector
+(e.g. pre-array `ixOk` indices and preserved lengths). Only then can a
+whole-leaf soundness/refutation certificate feed `mxTop`/`decideMem`, coverage,
+and an improved original pin. Neither `Decision.lean` nor `decideMem` was edited.
+
+### Controls, review and evidence scope
+
+`Examples/MemoryInstantiation.lean` tests capture-preserving removal of one
+binder, explicit nested refusal, empty-request refusal, primitive uint/bool
+recognition, wrong-array refusal and same second-array identity acceptance.
+It also proves failed-point vacuity, uint-top successor halting, empty original
+and prepared blocks, a still-halted exterior read, and actual fresh/outer local
+alias comparison preservation. Compiled observation order is exported separately.
+The initial bound-index collection assertion had a wrong array position; its
+failed diagnostic is retained. Skeptic found that the first replacement equality
+was vacuous for that same reason. It is now corrected to array position 1 and
+thinning both binders into the pre-array context, with a positive ground-index
+collection equality under the identical position/thinning. No old observation
+or verdict was changed.
+
+Independent read-only finder and skeptic reviews used no Lean server/build.
+Both confirmed the empty-list API edge; the public factory now refuses that
+request and the low-level vacuity is documented/tested. Skeptic also found the vacuous array-position control; its corrected negative
+and positive controls now exercise the intended binder boundary. Finder confirmed
+that point agreement is not reconstruction stability; the contract above now
+states this explicitly. No theorem hypothesis or verdict was weakened.
+These are Lean kernel/compiled observations, not Solidity source/compiler/EVM
+executions. Final command records, raw diagnostics, timings, peaks and axiom
+output are in `/workspace/next10-memory-negative-block-intrinsic/`.
+
+### Intrinsic continuation validation
+
+All final commands below exited zero. Raw command arguments, UTC intervals,
+exit codes and cumulative per-group peaks are in `build-results.json`,
+`final-results.json` and `repair-results.json`. The initial failed controls
+and proof iterations remain separate. The repaired source's per-file MCP
+reports success with partial=false and no Lean errors/warnings; the registered
+root also passed per-file diagnostics. `final-diagnostics-and-axioms.json`
+extracts the actual final diagnostic and axiom messages.
+
+| Check | Seconds | Cumulative group peak bytes |
+|---|---:|---:|
+| `mcp-core-final` | 6.19 | 978153472 |
+| `core-build` | 3.961 | 978153472 |
+| `mcp-controls` | 3.989 | 978153472 |
+| `mcp-root` | 2.746 | 610701312 |
+| `original-observations` | 24.036 | 610701312 |
+| `instantiation-observations` | 1.473 | 610701312 |
+| `mcp-controls-repair` | 3.944 | 773373952 |
+| `controls-build-repair` | 2.67 | 773373952 |
+| `full-confirmation-repair` | 2.032 | 773373952 |
+| `orphans-repair` | 0.111 | 773373952 |
+| `layers-repair` | 0.143 | 773373952 |
+| `automatic-strict-repair` | 0.049 | 773373952 |
+| `trust-repair` | 4.097 | 773373952 |
+| `inventory-repair` | 0.062 | 773373952 |
+| `diff-check-repair` | 0.009 | 773373952 |
+
+The repaired final full confirmation was cache-assisted, not a clean-cache
+benchmark. Strict automation reports zero newly timed replayed TestSuite
+modules and unchanged 491 automatic, 61 step-budget, zero manual, 11 refuted,
+zero pending. Original full-build timing evidence is retained historically.
+Trust reports 719 sources, 240 inventoried implementation/recovery sites and
+zero findings. Inventory regeneration made no generated-file change and did
+not promote support. No repository script changed; external drivers retain
+the commands they actually executed.
+
+Measured final groups peaked at 978,153,472 bytes (MCP/build group) and
+773,373,952 bytes (repair/final group), beneath the verified 12 GiB cap with
+zero swap and no group OOM events. Every check ran with LEAN_NUM_THREADS=1,
+explicit library Lean -j1, the documented writer lock and disk caches. The
+outer 16 GiB cgroup snapshot is exported separately. The temporary alternate
+Lake invocation file is removed after checks; no tracked/user configuration
+was changed. Initial runtime-only proof/diagnostic attempts not covered by
+these cumulative samples are not presented as measured peaks.
+
+All 21 original ordered verdicts are exactly unchanged, including the original
+unknown. Before/after comparisons and baseline-equal hashes of all three
+original gap-owning files are exported. The seven new ordered compiled boolean
+observations are true/true/false/false/true/false/false for uint recognition,
+bool recognition, nested recognition, wrong-array recognition, second-array
+recognition, top-successor return and raw-cut success, followed by point/instance
+counts (5,5). These observations precede the final control-only repair; those
+observed definitions were unchanged by the repair and the final build checked
+all corrected controls. No compiler/EVM evidence is implied.
+
+Actual final axiom audits show only propext, Classical.choice and Quot.sound
+for substitution, exact successful-point preparation, fresh alias preservation,
+point-based reconstruction and the intrinsic block equivalence. The direct
+range-body substitution audit uses propext; nested-recognition control uses
+propext; no headline audit contains sorryAx or a new axiom. The original
+countermodel proofs were not changed; their earlier audits remain historical
+evidence. Conditional reconstruction theorems remain conditional theorems,
+not an executed original closer certificate.
+
+Final read-only finder and skeptic reviews confirmed the corrected positive
+and negative array-position controls and matched the documented boundary.
+No production proof changed after its successful diagnostics. Shared tracked
+edits are only the new MemInst and MemoryInstantiation modules, their two
+Solidity.lean registrations, docs/module-map.md, docs/automation.md and this
+owning handoff. MemFloor, callback/invariant semantics and all other lanes
+remain untouched. The whole-leaf length-atom/exterior-observation reduction
+and actual original closer refutation remain open. The assignment is not
+complete despite the new intrinsic instantiator and its gates passing.

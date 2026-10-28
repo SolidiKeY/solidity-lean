@@ -654,7 +654,10 @@ Costs that guide work:
     The additive reconstruction prerequisite has an interface
     (`Calculus/MemFloor.lean`) including an exact object-level
     length-guarded finite-instance equivalence and natural guard transfer;
-    intrinsic scoped preparation and closer integration remain open. [Its task handoff](feature-work/memory-negative-block.md)
+    the additive `Calculus/MemInst.lean` now certifies scoped range-body
+    point instantiation, failed-point guards, and one fresh-allocation
+    reconstruction/identity boundary. Enclosing-leaf collection, stable exterior
+    observations and length atoms before `mxTop` remain open. [Its task handoff](feature-work/memory-negative-block.md)
     records the exact optional-read proof and remaining preparation obligations.
     The original gap and its `unknown` pin remain open.
   * `gapMemParam`: a hidden memory binder ranges over the given heap's
