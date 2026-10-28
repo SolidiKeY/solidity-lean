@@ -196,3 +196,33 @@ AST analysis uses optimizer disabled; reference EVM runs use optimizer enabled,
 both recorded explicitly. Historical Group 10 reports are unchanged. New
 before/after, command, resource, compiler and final validation evidence belongs
 in `tests/upstream/revert-power/`.
+
+
+**Final bounded validation (2026-10-28).** The single resumed combined
+`bash ./run-lean.sh` attempt advanced from 607 to 680/686 library jobs, then
+stopped at the unchanged 1800-second bound (exit 124, cgroup peak
+8,600,182,784 bytes; hard cap 12 GiB, zero swap, one CPU, serial Lean `-j1`).
+`Solidity.Examples.DecisionHashes` passed in 378 seconds; the unchanged
+`Solidity.Examples.Decision` was active at the deadline with no reported
+code/test error. No further full retry was run. Terminal library completion,
+`SolkeyTestSuite` build and sort check are **blocked**, not passing evidence.
+All earlier failed/blocked attempts are retained.
+
+Focused kernel validation passed: 40 theorems (34 returns and six precise
+assertion panics), using only `propext`, `Classical.choice`, `Quot.sound`;
+41 seconds, cgroup peak 1,191,362,560 bytes. Final per-file diagnostics passed
+under the hard cap. Public `TrustAudit.lean` passed for 529 headline theorems
+in 102 seconds, cgroup peak 1,221,824,512 bytes. Static trust/layer/orphan/
+automatic/generated-inventory/frozen-parity checks and 23 Node tests passed.
+Static TestSuite parity is not the missing TestSuite build. Both original
+upstream model replays remain explicitly blocked by the documented host
+adapter and debug setting refusals. Compiler/EVM evidence remains separate.
+
+Fresh independent read-only finder and skeptic reviews of commit `64bfd02e`,
+without Lean checks or server use, found no new confirmed defect and verified
+the 82 exact-byte observations and preserved initial-source provenance. They
+required the final blocked gate and Lean/resource evidence to be recorded.
+Exact commands, per-fixture outcomes, hashes, axiom sets, resource measurements,
+shared edits and remaining scope are in the
+[new handoff](../../tests/upstream/revert-power/README.md) and its
+[validation record](../../tests/upstream/revert-power/validation.json).

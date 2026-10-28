@@ -1,0 +1,10 @@
+CGROUP_MAX=12884901888 SWAP_MAX=0
++ node scripts/check-layers.mjs
+152 core modules, 0 reach the elaborator
++ node scripts/check-orphans.mjs
+701 reachable, 0 orphaned, 0 not allowed
++ node scripts/check-automatic.mjs --strict
+check-automatic: 491 automatic, 61 with a step budget, 0 manual; 11 refuted; 0 pending
++ ./scripts/check-trust.sh
+bash: line 1: ./scripts/check-trust.sh: Permission denied
+CGROUP_PEAK_BYTES=63295488 ELAPSED_SECONDS=0 EXIT=126
