@@ -54,7 +54,8 @@ After `source /workspace/.setup/activate.sh` (or selecting Lean 4.24.0):
 ```sh
 lake build solcases Solidity.Examples.SolCases
 lake exe solcases 0
-node --test scripts/evm-reference/generated.test.mjs
+SOLC_REFERENCE=/absolute/path/to/soljson-v0.8.38+commit.1835d247.js \
+  node --test scripts/evm-reference/generated.test.mjs
 node scripts/evm-reference/generated.mjs --compiler /absolute/path/to/soljson-v0.8.38+commit.1835d247.js --seed 0 --out .lake/generated/seed-0.json
 ```
 

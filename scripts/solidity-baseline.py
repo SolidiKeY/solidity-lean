@@ -162,6 +162,15 @@ def derive(report, manifest, root):
   'reviewedBoundaries':[{'id':b[0],'features':b[1],'document':b[2],'documentSha256':digest(root/b[2]),'remaining':b[3],'observedGapExamples':observed_examples(b[0],gaps)} for b in BOUNDARIES],
   'limitations':['Diagnostic evidence, not a universal semantic proof.','Many-to-many keyword queues are triage candidates, not semantic feature attribution.','All unworking fixtures remain indexed, including native harness and excluded/profile-decision cases.','No manifest status, expected observation or source pipeline is changed.']}
 
+def check_runner_provenance(root, metadata):
+ for key, path in (
+  ('runnerSha256', 'scripts/solidity-upstream.mjs'),
+  ('compilerCodeAdapterSha256', 'scripts/solc-code.mjs'),
+  ('compilationUnitAdapterSha256', 'scripts/solc-unit.mjs'),
+ ):
+  if metadata.get(key) != digest(root/path):
+   raise ValueError('runner provenance differs: '+key)
+
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--base',required=True,help='Starting origin/master commit; semantic sources must still match'); p.add_argument('results',type=Path); p.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1]); p.add_argument('--out',type=Path,required=True)
@@ -174,12 +183,12 @@ def main():
  expected={f['path'] for f in snapshot['files'] if re.search(r'\.(sol|yul|json|stack|ssa|asm|asmjson)$',f['path'])}
  if {r['path'] for r in report['results']}!=expected or summary['totalFixtureFiles']!=len(expected): raise ValueError('full snapshot fixture coverage differs')
  if metadata['archiveSha256']!=snapshot['archiveSha256']: raise ValueError('snapshot archive provenance differs')
- if metadata['runnerSha256']!=digest(root/'scripts/solidity-upstream.mjs') or metadata['compilerCodeAdapterSha256']!=digest(root/'scripts/solc-code.mjs'): raise ValueError('runner provenance differs')
+ check_runner_provenance(root, metadata)
  h=hashlib.sha256()
  for path in sorted((root/'Solidity').rglob('*.lean'),key=lambda p: str(p)):
   h.update((str(path.relative_to(root))+'\0').encode()); h.update(path.read_bytes())
  if metadata['modelSha256']!=h.hexdigest(): raise ValueError('current model provenance differs')
- subprocess.run(['git','diff','--exit-code',a.base,'--','Solidity','scripts/solidity-upstream.mjs','scripts/solc-code.mjs'],cwd=root,check=True,stdout=subprocess.DEVNULL)
+ subprocess.run(['git','diff','--exit-code',a.base,'--','Solidity','scripts/solidity-upstream.mjs','scripts/solc-code.mjs','scripts/solc-unit.mjs'],cwd=root,check=True,stdout=subprocess.DEVNULL)
  if summary['completedFixtureFiles']!=len(report['results']): raise ValueError('summary/report count disagreement')
  if not summary['complete']: raise ValueError('incomplete baseline: preserve it as blocked; do not issue complete gap lists')
  result=derive(report,manifest,root)

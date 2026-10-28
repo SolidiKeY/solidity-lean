@@ -13,4 +13,3 @@ solc_import "../../tests/solc/QuantifiedDiamond.viaIR.ast.json" hash 0xedf9cdbe3
 #guard_msgs in solc_scoped_problems Solc.QuantifiedDiamond
 /-- info: 8 obligations declared scoped -/
 #guard_msgs in solc_scoped_problems SolcIR.QuantifiedDiamond
-

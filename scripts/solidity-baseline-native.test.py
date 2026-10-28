@@ -8,7 +8,9 @@ def module(name,path):
 cache=module('cache_audit',ROOT/'scripts/solidity-baseline-cache-audit.py');native=module('native_index',ROOT/'scripts/solidity-baseline-native-index.py')
 class CacheIntegrity(unittest.TestCase):
  @classmethod
- def setUpClass(cls):cls.audit=json.loads((HERE/'audit.json').read_text());cls.hashes=json.loads((HERE/'file-hashes.json').read_text())
+ def setUpClass(cls):
+  _,files=native.archived_files(ROOT)
+  cls.audit=json.loads(files['audit.json']);cls.hashes=json.loads(files['file-hashes.json'])
  def check_mutation(self,fn,reason):
   a=copy.deepcopy(self.audit);fn(a['modules']['Solidity.Tools.Upstream']);r=cache.verify(a,self.hashes);self.assertFalse(r['narrowClosureSourceAndOleanChecksPass']);self.assertTrue(any(reason in s for _,s in r['failures']))
  def test_real_narrow_cache_passes(self):self.assertTrue(cache.verify(self.audit,self.hashes)['narrowClosureSourceAndOleanChecksPass'])
@@ -34,5 +36,18 @@ class NativeIntegrity(unittest.TestCase):
  def test_original_variants_not_inferred_from_same_message(self):
   a=self.x['originalVariantAttributionAudit'];self.assertFalse(a['associated']);self.assertEqual(len(a['considered']),4);self.assertTrue(all('struct S { C c;'in s['source'] for s in a['consideredSources']))
  def test_original_counts_unchanged(self):self.assertEqual(self.x['originalCounts'],{'working':4135,'broken':196,'blocked':5329})
- def test_outputs_reproduce(self):self.assertEqual(json.loads((HERE/'matrix.json').read_text()),self.x);self.assertEqual((HERE/'README.md').read_text(),native.render(self.x))
+ def test_outputs_reproduce(self):
+  expected=json.loads((HERE/'matrix.json').read_text())
+  # The portability repair changes the executing generator's identity only.
+  # Every retained observation and historical claim must still reproduce.
+  self.assertEqual(self.x['generatorSha256'],native.sha((ROOT/'scripts/solidity-baseline-native-index.py').read_bytes()))
+  native.historical_observations(self.x,expected)
+  self.assertEqual((HERE/'README.md').read_text(),native.render(self.x))
+ def test_archived_log_paths_cannot_escape_the_recorded_checkout(self):
+  for path in ['/other/native.log','/workspace/solidity-lean/tests/upstream/baseline-20261028/native-cache/../native.log']:
+   with self.assertRaises(ValueError):native.archived_log_name(path)
+ def test_historical_observation_or_generator_drift_is_refused(self):
+  expected=json.loads((HERE/'matrix.json').read_text())
+  for mutated in [{**expected,'generatorSha256':'wrong'}, {**expected,'questions':39}]:
+   with self.assertRaises(ValueError):native.historical_observations(self.x,mutated)
 if __name__=='__main__':unittest.main()

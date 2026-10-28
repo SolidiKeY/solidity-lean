@@ -40,9 +40,9 @@ class Integrity(unittest.TestCase):
   self.assertEqual(self.derive([row])['routes']['step-02-source-units'],[])
  def test_main_accepts_runner_zero_count_stages(self):
   (self.root/'Solidity').mkdir()
-  for name in ('scripts/solidity-upstream.mjs','scripts/solc-code.mjs'):
+  for name in ('scripts/solidity-upstream.mjs','scripts/solc-code.mjs','scripts/solc-unit.mjs'):
    q=self.root/name; q.parent.mkdir(exist_ok=True); q.write_text('test reference')
-  meta={'filter':None,'archiveSha256':'archive','runnerSha256':b.digest(self.root/'scripts/solidity-upstream.mjs'),'compilerCodeAdapterSha256':b.digest(self.root/'scripts/solc-code.mjs'),'modelSha256':hashlib.sha256(b'').hexdigest()}
+  meta={'filter':None,'archiveSha256':'archive','runnerSha256':b.digest(self.root/'scripts/solidity-upstream.mjs'),'compilerCodeAdapterSha256':b.digest(self.root/'scripts/solc-code.mjs'),'compilationUnitAdapterSha256':b.digest(self.root/'scripts/solc-unit.mjs'),'modelSha256':hashlib.sha256(b'').hexdigest()}
   results=self.root/'results'; results.mkdir()
   row={'path':'test/a.sol','status':'blocked','stage':'upstream-harness','reason':'unported'}
   summary={**meta,'complete':True,'completedFixtureFiles':1,'totalFixtureFiles':1,'counts':{'working':0,'broken':0,'blocked':1},'stages':{'upstream-harness':{'working':0,'broken':0,'blocked':1}}}
@@ -52,4 +52,16 @@ class Integrity(unittest.TestCase):
   with patch.object(sys,'argv',['baseline',str(results),'--root',str(self.root),'--out',str(self.root/'derived'),'--base','b'*40]), patch.object(b.subprocess,'run'):
    b.main()
   self.assertEqual(json.loads((self.root/'derived/gaps.json').read_text())['counts'],summary['counts'])
+ def test_changed_or_missing_compilation_unit_adapter_is_refused(self):
+  metadata={}
+  for key,name in [('runnerSha256','solidity-upstream.mjs'),('compilerCodeAdapterSha256','solc-code.mjs'),('compilationUnitAdapterSha256','solc-unit.mjs')]:
+   path=self.root/'scripts'/name;path.parent.mkdir(exist_ok=True);path.write_text(name)
+   metadata[key]=b.digest(path)
+  b.check_runner_provenance(self.root,metadata)
+  for invalid in [{k:v for k,v in metadata.items() if k!='compilationUnitAdapterSha256'}, {**metadata,'compilationUnitAdapterSha256':'stale'}]:
+   with self.assertRaisesRegex(ValueError,'compilationUnitAdapterSha256'):
+    b.check_runner_provenance(self.root,invalid)
+  (self.root/'scripts/solc-unit.mjs').write_text('changed adapter')
+  with self.assertRaisesRegex(ValueError,'compilationUnitAdapterSha256'):
+   b.check_runner_provenance(self.root,metadata)
 if __name__=='__main__': unittest.main()

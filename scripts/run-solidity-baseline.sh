@@ -16,7 +16,7 @@ exec 9>/tmp/solidity-lean-feature-groups-20261025/writer.lock
 flock 9
 git status --short
 [[ -z "$(git ls-files --others --exclude-standard -- Solidity | rg '\.lean$')" ]] || { echo "Untracked Lean sources: inspect before exact-base run" >&2; exit 2; }
-git diff --exit-code "$base" -- Solidity Solidity.lean SolidityLean.lean SolkeyTestSuite.lean SolkeyCheck.lean lakefile.toml run-lean.sh scripts/solidity-upstream.mjs scripts/solc-code.mjs scripts/test-solidity.mjs scripts/tool-job.mjs >/dev/null
+git diff --exit-code "$base" -- Solidity Solidity.lean SolidityLean.lean SolkeyTestSuite.lean SolkeyCheck.lean lakefile.toml run-lean.sh scripts/solidity-upstream.mjs scripts/solc-code.mjs scripts/solc-unit.mjs scripts/test-solidity.mjs scripts/tool-job.mjs >/dev/null
 [[ ! -e "$output" ]] || { echo 'Refusing to overwrite evidence' >&2; exit 2; }
 mkdir -p "$output/logs" "$repo/.lake/baseline-tools"
 config="$repo/.baseline-lakefile.toml"

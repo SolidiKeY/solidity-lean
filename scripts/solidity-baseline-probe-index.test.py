@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
-import importlib.util,json,unittest
+import importlib.util,json,unittest,hashlib,tarfile,tempfile
 from pathlib import Path
 from unittest.mock import patch
 spec=importlib.util.spec_from_file_location('probe',Path(__file__).with_name('solidity-baseline-probe-index.py'));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 ROOT=Path(__file__).resolve().parents[1]
 class ProbeIntegrity(unittest.TestCase):
  @classmethod
- def setUpClass(cls):cls.x=m.derive(ROOT)
+ def setUpClass(cls):
+  inputs=ROOT/m.PROBES;ledger=json.loads((inputs/'reproduction-inputs.json').read_text())
+  archive=inputs/'reproduction-inputs.tar.gz'
+  if hashlib.sha256(archive.read_bytes()).hexdigest()!=ledger['archiveSha256']:raise ValueError('historical input archive drift')
+  directory=tempfile.TemporaryDirectory(prefix='baseline-probes-');cls.addClassCleanup(directory.cleanup)
+  snapshot=Path(directory.name)
+  with tarfile.open(archive) as tf:
+   if {v.name for v in tf.getmembers()}!=set(ledger['files']):raise ValueError('historical input membership drift')
+   for member in tf.getmembers():
+    if not member.isfile() or hashlib.sha256(tf.extractfile(member).read()).hexdigest()!=ledger['files'][member.name]:raise ValueError('historical input hash drift')
+   tf.extractall(snapshot,filter='data')
+  (snapshot/m.BASE).parent.mkdir(parents=True,exist_ok=True)
+  (snapshot/m.BASE).symlink_to(ROOT/m.BASE,target_is_directory=True)
+  cls.x=m.derive(snapshot)
  def test_exact40_questions(self):
   self.assertEqual(len(self.x['features']),40);self.assertEqual(len(self.x['coverage']['evidenceNeededIds']),25);self.assertEqual(len(self.x['coverage']['documentaryQuestionIds']),15)
  def test_pipeline_integrity(self):

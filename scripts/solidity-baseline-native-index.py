@@ -1,18 +1,38 @@
 #!/usr/bin/env python3
 """Supplement the immutable baseline with native diagnostic evidence, no builds."""
 import argparse,hashlib,json,tarfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from collections import Counter
 BASE=Path('tests/upstream/baseline-20261028');HERE=BASE/'native-cache'
+HISTORICAL_GENERATOR_SHA256='c9284b640131b882501f0bda1789f1324dc9854a34b5b616fa89c9b587943a46'
 def sha(b):return hashlib.sha256(b).hexdigest()
 def load(p):return json.loads(p.read_text())
-def derive(root):
- here=root/HERE;ledger=load(here/'archive.json');old=load(root/BASE/'probes/matrix.json')
+def archived_files(root):
+ here=root/HERE;ledger=load(here/'archive.json')
  if sha((here/'evidence.tar.gz').read_bytes())!=ledger['sha256']:raise ValueError('archive digest mismatch')
  with tarfile.open(here/'evidence.tar.gz','r:gz') as tf:files={m.name:tf.extractfile(m).read() for m in tf if m.isfile()}
  if set(files)!=set(ledger['files']):raise ValueError('archive membership drift')
  for n,v in ledger['files'].items():
   if sha(files[n])!=v['sha256'] or len(files[n])!=v['bytes']:raise ValueError('archive file drift '+n)
+ return ledger,files
+
+def archived_log_name(path):
+ # These are immutable records from the documented cloud checkout, not paths
+ # relative to the machine currently verifying the retained archive.
+ relative=PurePosixPath(path).relative_to(PurePosixPath('/workspace/solidity-lean')/HERE)
+ if '..' in relative.parts:raise ValueError('invalid archived log path')
+ return str(relative)
+
+def historical_observations(current, recorded):
+ # Only generator identity differs after this archive-portability repair.
+ # Pin the original identity and compare every retained observation exactly.
+ if recorded.get('generatorSha256')!=HISTORICAL_GENERATOR_SHA256:
+  raise ValueError('historical generator identity differs')
+ view={**current,'generatorSha256':HISTORICAL_GENERATOR_SHA256}
+ if recorded!=view:raise ValueError('historical native observations differ')
+
+def derive(root):
+ here=root/HERE;ledger,files=archived_files(root);old=load(root/BASE/'probes/matrix.json')
  records={}
  for n,b in files.items():
   if n.startswith('runs/') and n.endswith('/record.json'):
@@ -58,7 +78,7 @@ def derive(root):
   if b.get('timedOut'):raise ValueError('boundary timed out')
   fixtureBytes=files['boundary-inputs/'+b['control']+'/'+b['pipeline']+'/source.ast.json']
   if sha(fixtureBytes)!=b['fixtureSha256']:raise ValueError('boundary fixture hash mismatch')
-  logPath=str(Path(b['log']).relative_to(root/HERE))
+  logPath=archived_log_name(b['log'])
   if sha(files[logPath])!=b['logSha256']:raise ValueError('boundary log mismatch')
   if b['control']=='internal-entry':
    if b['exitCode']!=0 or b['result'][0]['status']!='broken' or 'no imported ABI entry' not in b['result'][0]['reason']:raise ValueError('internal entry refusal absent')
@@ -173,9 +193,12 @@ def render(x):
  return '\n'.join(lines).rstrip()+'\n'
 def main():
  p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=Path(__file__).resolve().parents[1]);p.add_argument('--check',action='store_true');a=p.parse_args();x=derive(a.root);out=a.root/HERE
+ if a.check:
+  historical_observations(x,load(out/'matrix.json'))
+  if (out/'README.md').read_text()!=render(x):raise ValueError('stale native index README')
+  print(json.dumps(dict(statistics=x['statistics'],historicalGeneratorSha256=HISTORICAL_GENERATOR_SHA256,executingGeneratorSha256=x['generatorSha256'],historicalObservationsMatch=True)))
+  return
  for path,text in [(out/'matrix.json',json.dumps(x,indent=2,ensure_ascii=False)+'\n'),(out/'README.md',render(x))]:
-  if a.check:
-   if path.read_text()!=text:raise ValueError('stale native index '+str(path))
-  else:path.write_text(text)
+  path.write_text(text)
  print(json.dumps(dict(statistics=x['statistics'],nativeValidationComplete=x['nativeValidationComplete'],originalCounts=x['originalCounts'])))
 if __name__=='__main__':main()
