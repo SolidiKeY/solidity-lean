@@ -11,7 +11,9 @@ Unlike storage reconstruction, this construction keeps the original length
 and therefore keeps the strict `2^256` memory bound.
 
 This is an additive semantic interface, not a negative-block preparation
-pass. It neither changes the heap nor claims guard transfer or `MxRel`.
+pass. It proves natural-index guard transfer and a length-guarded semantic
+block reduction; it neither changes the heap nor claims intrinsic formula
+guard transfer or `MxRel`.
 -/
 
 namespace Solidity.Decide
@@ -57,6 +59,47 @@ theorem mxFloorIndex_bounds (B : List Int) {n k : Nat} (hn : (n : Int) ∈ B) :
   · intro hk
     have hf : mxFloorIndex B k ≤ k := mxFloorIndex_le B k
     omega
+
+/-- A retained lower guard operand transfers in both directions. -/
+theorem mxFloorIndex_ge_iff (B : List Int) {n k : Nat} (hn : (n : Int) ∈ B) :
+    n ≤ mxFloorIndex B k ↔ n ≤ k := by
+  have hb := mxFloorIndex_bounds B (n := n) (k := k) hn
+  omega
+
+/-- Strict lower guards need the successor, not just the operand. -/
+theorem mxFloorIndex_gt_iff (B : List Int) {n k : Nat} (hn : ((n + 1 : Nat) : Int) ∈ B) :
+    n < mxFloorIndex B k ↔ n < k := by
+  have hb := mxFloorIndex_ge_iff B (k := k) hn
+  omega
+
+/-- A non-strict upper guard likewise retains the successor. -/
+theorem mxFloorIndex_le_iff (B : List Int) {n k : Nat} (hn : ((n + 1 : Nat) : Int) ∈ B) :
+    mxFloorIndex B k ≤ n ↔ k ≤ n := by
+  have hb := mxFloorIndex_bounds B (k := k) hn
+  omega
+
+/-- Equality guards retain both sides of their singleton region. -/
+theorem mxFloorIndex_eq_iff (B : List Int) {n k : Nat}
+    (hn : (n : Int) ∈ B) (hs : ((n + 1 : Nat) : Int) ∈ B) :
+    mxFloorIndex B k = n ↔ k = n := by
+  have hlo := mxFloorIndex_ge_iff B (k := k) hn
+  have hhi := mxFloorIndex_le_iff B (k := k) hs
+  omega
+
+/-- A floor is the least index or one of the retained nonnegative points.
+Negative breakpoints cannot become an extra natural instance. -/
+theorem mxFloorIndex_point (B : List Int) (k : Nat) :
+    mxFloorIndex B k = 0 ∨ (mxFloorIndex B k : Int) ∈ B := by
+  have h0 : 0 ≤ floorIn 0 B (k : Int) := floorIn_ge_base 0 B _
+  have he : (mxFloorIndex B k : Int) = floorIn 0 B (k : Int) := by
+    unfold mxFloorIndex
+    omega
+  rcases floorIn_mem 0 B (k : Int) with h | h
+  · left
+    omega
+  · right
+    rw [he]
+    exact h
 
 /-- Rebuild a primitive array at the floors, keeping its exact length and
 array kind. No reference-valued object or given-heap binder is rebuilt. -/
@@ -132,6 +175,89 @@ theorem mxFloorRebuild_fill {C : Contract} {Γ Δ : Ctx} {θ : MxMap C Γ Δ} {q
   cases he : (ps.get j).e.eval τ with
   | none => rfl
   | some k => exact congrArg (fun x => x.getD (PrimTy.dflt q)) (mxFloorRebuild_at a hok o B hn (hs j k he))
+
+/-- Finite instances reconstruct a length-guarded universal block.
+`P` observes the optional primitive read itself, so halted reads are never
+silently replaced by the primitive default. This is a semantic lemma, not
+a recognizer for intrinsic formulas or a closer verdict. -/
+theorem mxFloorRebuild_block {H : HTy} {R : RefTy} {q : PrimTy}
+    (a : ArrTy R (.prim q)) (hok : mxArrOk a) (o : MObj H R) (B : List Int)
+    (hn : ((MObj.elems a o).length : Int) ∈ B)
+    (P : Option q.Denote → Prop)
+    (hi : ∀ k : Nat, k = 0 ∨ (k : Int) ∈ B →
+      k < (MObj.elems a o).length → P ((MObj.elems a o)[k]?)) :
+    ∀ k : Nat, k < (MObj.elems a (mxFloorRebuild a hok o B)).length →
+      P ((MObj.elems a (mxFloorRebuild a hok o B))[k]?) := by
+  intro k hk
+  rw [mxFloorRebuild_len] at hk
+  rw [mxFloorRebuild_slot a hok o B hn]
+  exact hi (mxFloorIndex B k) (mxFloorIndex_point B k)
+    ((mxFloorIndex_bounds B hn).2 hk)
+
+/-- A simultaneous block and exterior-observation reconstruction. The
+caller keeps every successful ground index and the length; the same
+object then realizes the block and every exterior optional read together.
+This is the object-level refutation interface required by a later scoped
+preparation, including written-memory hashing. It does not rebuild a heap
+or establish a relation between intrinsic formula states. -/
+theorem mxFloorRebuild_block_reads {H : HTy} {R : RefTy} {q : PrimTy}
+    (a : ArrTy R (.prim q)) (hok : mxArrOk a) (o : MObj H R) (B : List Int)
+    (hn : ((MObj.elems a o).length : Int) ∈ B)
+    (P : Option q.Denote → Prop)
+    (hi : ∀ k : Nat, k = 0 ∨ (k : Int) ∈ B →
+      k < (MObj.elems a o).length → P ((MObj.elems a o)[k]?))
+    (reads : List Nat) (hr : ∀ k ∈ reads, (k : Int) ∈ B) :
+    (∀ k : Nat, k < (MObj.elems a (mxFloorRebuild a hok o B)).length →
+      P ((MObj.elems a (mxFloorRebuild a hok o B))[k]?)) ∧
+    reads.map (fun k => (MObj.elems a (mxFloorRebuild a hok o B))[k]?) =
+      reads.map (fun k => (MObj.elems a o)[k]?) := by
+  refine ⟨mxFloorRebuild_block a hok o B hn P hi, ?_⟩
+  apply List.map_congr_left
+  intro k hk
+  exact mxFloorRebuild_at a hok o B hn (hr k hk)
+
+/-- Exact finite-instance reduction over one fresh primitive object.
+The exterior observation can depend on its length and every listed ground
+optional read. The index-set builder is allowed to use the object, but
+must retain that object's length and all exterior reads. No decision or
+recognition procedure is hidden in this theorem. -/
+theorem mxFloorRebuild_negative_iff {H : HTy} {R : RefTy} {q : PrimTy}
+    (a : ArrTy R (.prim q)) (hok : mxArrOk a)
+    (points : MObj H R → List Int) (reads : List Nat)
+    (hn : ∀ o, ((MObj.elems a o).length : Int) ∈ points o)
+    (hr : ∀ o k, k ∈ reads → (k : Int) ∈ points o)
+    (P : Nat → Option q.Denote → Prop)
+    (Q : Nat → List (Option q.Denote) → Prop) :
+    (∀ o : MObj H R,
+      (∀ k : Nat, k < (MObj.elems a o).length →
+        P (MObj.elems a o).length ((MObj.elems a o)[k]?)) →
+      Q (MObj.elems a o).length (reads.map fun k => (MObj.elems a o)[k]?)) ↔
+    (∀ o : MObj H R,
+      (∀ k : Nat, k = 0 ∨ (k : Int) ∈ points o →
+        k < (MObj.elems a o).length →
+        P (MObj.elems a o).length ((MObj.elems a o)[k]?)) →
+      Q (MObj.elems a o).length (reads.map fun k => (MObj.elems a o)[k]?)) := by
+  constructor
+  · intro h o hi
+    have hb := mxFloorRebuild_block_reads a hok o (points o) (hn o)
+      (P (MObj.elems a o).length) hi reads (hr o)
+    have hall : ∀ k : Nat,
+        k < (MObj.elems a (mxFloorRebuild a hok o (points o))).length →
+        P (MObj.elems a (mxFloorRebuild a hok o (points o))).length
+          ((MObj.elems a (mxFloorRebuild a hok o (points o)))[k]?) := by
+      rw [mxFloorRebuild_len]
+      simpa only [mxFloorRebuild_len] using hb.1
+    have hq := h (mxFloorRebuild a hok o (points o)) hall
+    rw [mxFloorRebuild_len, hb.2] at hq
+    exact hq
+  · intro h o hi
+    exact h o (fun k _ hk => hi k hk)
+
+#print axioms mxFloorRebuild_negative_iff
+
+#print axioms mxFloorIndex_eq_iff
+#print axioms mxFloorRebuild_block
+#print axioms mxFloorRebuild_block_reads
 
 #print axioms mxFloorRebuild_slot
 #print axioms mxFloorRebuild_fill

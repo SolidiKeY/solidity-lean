@@ -87,6 +87,57 @@ theorem missing_threshold_changes_guard :
     decide (3 < mxFloorIndex [0, 10] 4) ≠ decide (3 < 4) := by
   decide +kernel
 
+/-- The reconstructed nonsampled live slot satisfies the block instance
+at its floor. This uses the generic block theorem, not enumeration of all
+possible original array contents. -/
+theorem rebuilt_block : ∀ k : Nat, k < (uintElems rebuilt).length →
+    (uintElems rebuilt)[k]? = some (uintOfNat 7) := by
+  apply mxFloorRebuild_block (H := []) .dyn uintOk words [0, 2] (by decide +kernel)
+    (fun v => v = some (uintOfNat 7))
+  intro k hp hk
+  simp only [MObj.elems_dyn, words, List.length_cons, List.length_nil] at hk
+  have hz : k = 0 := by
+    rcases hp with hp | hp
+    · exact hp
+    · have hm : (k : Int) = 0 ∨ (k : Int) = 2 := by
+        simpa only [List.mem_cons, List.not_mem_nil, or_false] using hp
+      omega
+  subst k
+  decide +kernel
+
+/-- Rebuilding is essential: the original nonsampled live slot is 9. -/
+theorem original_block_fails :
+    ¬ (∀ k : Nat, k < (uintElems words).length →
+      (uintElems words)[k]? = some (uintOfNat 7)) := by
+  intro h
+  have he := h 1 (by decide +kernel)
+  have hn : (uintElems words)[1]? ≠ some (uintOfNat 7) := by decide +kernel
+  exact hn he
+
+/-- Keeping a lower operand alone does not preserve its strict guard. -/
+theorem operand_alone_fails : ¬ (3 < mxFloorIndex [0, 3, 10] 4) ∧ 3 < 4 := by
+  decide +kernel
+
+/-- Keeping the successor repairs the strict lower guard. -/
+theorem successor_repairs_guard : 3 < mxFloorIndex [0, 3, 4, 10] 4 := by
+  decide +kernel
+
+/-- Equality has a singleton region only when its successor is retained. -/
+theorem equality_needs_successor : mxFloorIndex [0, 3, 10] 4 = 3 ∧
+    mxFloorIndex [0, 3, 4, 10] 4 ≠ 3 := by
+  decide +kernel
+
+/-- The natural-index transfer does not manufacture a uint successor at
+the type's upper bound. A syntactic preparation must check this boundary. -/
+theorem top_successor_not_uint :
+    PrimTy.uint.inRange ((2 ^ 256 : Nat) : Int) = false := by
+  decide +kernel
+
+#print axioms rebuilt_block
+#print axioms original_block_fails
+#print axioms successor_repairs_guard
+#print axioms top_successor_not_uint
+
 #print axioms retained_read
 #print axioms empty_read_halts
 #print axioms missing_length_changes_definedness

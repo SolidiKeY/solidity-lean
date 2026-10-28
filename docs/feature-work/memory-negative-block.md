@@ -3,7 +3,8 @@
 Status: incomplete. `gapMemInnerNeg` remains an original open closer gap. No
 `DecisionTheorem`, `inTarget`, exclusion, waiver, or original verdict pin is
 changed. This work proves an independent object-reconstruction prerequisite
-and a kernel countermodel for the original formula; it does not implement
+and a kernel countermodel for the original formula, plus a semantic
+finite-instance reduction for one length-guarded object block; it does not implement
 the scoped negative-block preparation pass.
 
 Baseline: `/workspace/solidity-lean`, origin
@@ -251,3 +252,154 @@ Only module registrations in `Solidity.lean`, the module-map entry, and the
 M7 link in `docs/automation.md` are shared. Implementation and controls use
 new task-specific additive modules. No previous-batch work, ordinary
 recursive-type migration, profile decision, push, merge, or other VM is used.
+
+## Continuation b4b6f3b8-ee8a-4ec4-b964-c2cbb819f21a
+
+Retained executor and checkout verified on 2026-10-28: same origin, clean
+branch at `755c9bac0d3e39934eb1a8f7487f40d57a2e6a50` before edits, unchanged
+Lean/Lake versions, local Docker cgroup v2 usable after sandbox escalation.
+No replacement VM, network configuration, credentials, other task, or
+monitor was changed. New raw evidence is in
+`/workspace/next10-memory-negative-block-continuation/`.
+
+This continuation adds proofs, not a closer implementation. The exact original
+`gapMemInnerNeg` still returns `unknown`; all six gap definitions and target
+certificates are retained. No external provisioning blocker was found. The
+remaining blocker is an unproved implementation/reduction obligation.
+
+### Newly proved semantic reduction
+
+`mxFloorIndex_ge_iff`, `gt_iff`, `le_iff`, and `eq_iff` transfer natural-index
+comparison guards. Non-strict lower and strict upper comparisons retain the
+operand; strict lower and non-strict upper comparisons retain its successor;
+equality retains both. `mxFloorIndex_point` places every floored index at zero
+or a nonnegative retained point. The successor theorems operate on natural
+indices; they do not authorize a uint literal `2^256`. The kernel control
+`top_successor_not_uint` explicitly rejects that value.
+
+`mxFloorRebuild_block` turns instances at zero and retained points into a
+universal **length-guarded** property of the rebuilt object's optional reads.
+`mxFloorRebuild_block_reads` simultaneously preserves all listed exterior
+reads, including halted ones. `mxFloorRebuild_negative_iff` proves an exact
+finite-instance reduction for universal implications over one fresh intrinsic
+primitive object: the block predicate may depend on length and optional word;
+the consequent may depend on length and listed fixed natural read indices.
+The points may depend on the original object. The theorem's forward direction
+applies the original universal claim to the reconstructed object, whose length
+and exterior reads agree. Its reverse direction takes ordinary instances.
+Zero lengths need no special case: the range premise is false and exterior
+reads remain `none`.
+
+Written-memory hashing can use `block_reads` to obtain block satisfaction and
+an equal vector of optional observations together, alongside the existing
+`fillN`/`fill` interfaces. This interface proves no interaction with writes,
+no identity surgery, and no state-level alias preservation. Repeated listed exterior reads of
+the same object are preserved; multiple coupled arrays and reference members
+are outside this lemma.
+
+### Exact unproved bridge to the original closer
+
+The semantic equivalence is not a proof-carrying `Fml` preparation. What is
+still missing is a fail-closed recognizer producing an intrinsic scoped output
+and a proof connecting it to the original leaf. It must:
+
+1. Introduce scoped length atoms before fresh-array binders, with proved
+   correspondence to each allocated object's actual length. Instantiating at
+   a raw `mlen` term cannot simply pass `Tm.ixOk`.
+2. Collect exterior read terms, lengths, guard operands and valid successors,
+   and substitute block variables capture-safely. `Fml.mxIdx` currently tries
+   to pull indices to the array binder; binder-dependent indices are discarded.
+3. Lift the object result through allocation and the original state's heap
+   typing while preserving the same aliases and the distinct fresh locals
+   required by `MxRel.apart`. Apply the natural guard results to **evaluated
+   intrinsic terms**, including their optional/short-circuit definedness.
+4. Produce the soundness/refutation certificate consumed before `Fml.mxTop`
+   in `decideMem`, and update coverage only after that proof checks.
+
+The existing storage `apfPrepK` cannot supply this bridge: `apfState` performs
+storage/ledger surgery and its `Surg` relation does not relate fresh memory
+objects. Nor does hoisting move the negative block out: doing so would change
+polarity semantics. No bypass or named-fixture special case was introduced.
+
+### Controls and reviews
+
+`rebuilt_block` uses the new generic theorem to show all live slots satisfy
+its finite instances; `original_block_fails` shows the original nonsampled
+slot violates that same property. Kernel controls distinguish an operand from
+its successor, expose the equality singleton-region requirement, and reject
+uint successor overflow. Existing empty/fixed/halting/read controls remain.
+These are kernel/compiled Lean evidence, not Solidity compiler or EVM runs.
+
+Independent finder and skeptic reviews were read-only, with no Lean server or
+build. Both found no missing hypothesis in the object-level equivalence,
+including its object-dependent point set. Both explicitly confirmed that its
+scope excludes arbitrary index-dependent block predicates, general intrinsic
+guards, coupled objects, heap relations and a decider certificate.
+
+### Continuation validation
+
+Every command below exited 0; raw outputs and UTC intervals are retained in
+`core-results.json` and `final-results.json`. Peaks are cumulative per bounded
+Docker group. The final MCP files reported success, partial=false, and no
+errors/warnings. Intermediate failed length simplifications are retained in
+`mcp-core.log` and `mcp-controls-initial.log`; their automatic error-recovery
+`sorryAx` is absent from final audits. No source `sorry` was introduced.
+The MCP process still emits the pre-existing Python event-loop cleanup warning
+after returning successful diagnostics, with exit 0.
+
+| Check | Seconds | Peak bytes in group |
+|---|---:|---:|
+| `mcp-core-final` | 3.537 | 674738176 |
+| `core-build` | 1.758 | 674738176 |
+| `mcp-controls` | 2.955 | 674738176 |
+| `runtime-gate` | 0.154 | 30416896 |
+| `controls-build` | 1.459 | 209649664 |
+| `original-observations` | 25.364 | 220053504 |
+| `floor-observations` | 2.826 | 220053504 |
+| `full-confirmation` | 2.257 | 386113536 |
+| `orphans` | 0.116 | 386113536 |
+| `layers` | 0.149 | 386113536 |
+| `automatic-strict` | 0.043 | 386113536 |
+| `trust` | 3.973 | 386113536 |
+| `inventory` | 0.044 | 386113536 |
+| `diff-check` | 0.009 | 386113536 |
+
+The full confirmation reused the existing disk cache; it is not a clean-cache
+benchmark. Its strict automation report times zero replayed TestSuite modules,
+while enforcing unchanged verdict/budget policies; the original full-build
+26-module timing evidence remains in the earlier evidence directory. The
+continuation strict gate reports 491 automatic, 61 with a step budget, zero
+manual, 11 refuted and zero pending. Trust reports 717 sources, 240 inventoried
+implementation/recovery sites and zero findings. Inventory regeneration made
+no tracked inventory change and no support promotion. No scripts were changed.
+No source/compiler/EVM pipeline was added or claimed: these are Lean object
+controls and original closer observations.
+
+All 21 original ordered fixture observations match the original baseline,
+including `gapMemInnerNeg: unknown → unknown`. Full per-fixture comparisons
+are in `original-observation-comparison.json`. `Decision.lean`,
+`DecisionKInt.lean`, and `DecisionMemory.lean` remain byte-identical to the
+published baseline; `original-gap-source-hashes.json` records the comparison.
+
+Final kernel audits of `mxFloorRebuild_negative_iff`, `block`, `block_reads`,
+`mxFloorIndex_eq_iff`, `rebuilt_block` and `original_block_fails` contain only
+`propext`, `Classical.choice`, `Quot.sound`. The successor-repair and uint-top
+kernel controls have no axioms. The original three countermodel theorems are
+unchanged and retain their previously audited standard three axioms. No
+conditional or concrete execution is presented as a decider certificate.
+
+Finder's final documentation review corrected “repeated reads” to “repeated
+listed exterior reads”; unretained slots may change. Skeptic found no further
+issue. Both reviews were independent, read-only, and used no Lean server.
+
+Shared tracked edits in this continuation are only `Calculus/MemFloor.lean`,
+`Examples/MemoryFloor.lean`, `docs/automation.md` and this owning handoff. No
+imports changed; no other lane, given-heap binder, struct, callback or invariant
+semantics changed. The temporary alternate Lake file is removed after checks;
+its exact resource-only settings remain in evidence. The task is incomplete:
+its original exact verdict and the scoped/state preparation bridge above are
+still open, despite all validation of this bounded increment passing.
+
+Final finder and skeptic evidence reviews matched the actual JSON/log records;
+their confirmed Markdown table-spacing issue was fixed. No source or scope
+changes followed validation.
