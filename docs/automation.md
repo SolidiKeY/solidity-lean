@@ -628,8 +628,9 @@ Costs that guide work:
   (`sortedLe`: nine instances, nineteen reads, about two thousand nodes).
   A region refutation can be a term too large to build; no construction
   does better in general (a sorted mapping read at three far keys).
-* **The pinned gaps**: in `Fml.inTarget` (by the kernel, `*_inTarget`) and
-  answered *unknown*.  One leaf a shape:
+* **The original pinned gaps**: all remain in `Fml.inTarget` (by the kernel,
+  `*_inTarget`). They are answered *unknown* except the resolved scalar
+  `gapMemStruct` pin noted below. One leaf a shape:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
     `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): key sums that differ past
     every anchor, Presburger alternation over ℤ.  Needs an unbounded binder
@@ -656,6 +657,16 @@ Costs that guide work:
     witness words, which `decideLeafA`'s state does not carry.
   * `gapMemStruct`: a fresh struct with reference members needs objects for
     them, so the cut is exact only at heaps that have them.
+    The original equation is now refuted by `decideStruct`: a finite typed
+    realization constructs its children before returning the countermodel
+    state. `word_cut` retains the realizability premise at each heap;
+    `word_cut_global` proves scalar exactness using constructed children.
+    The formula and its target certificate are unchanged. The added decision
+    schema handles one outer map-free struct binder with a direct primitive
+    field/literal equation (literal on the right) or a reflexive equation.
+    Nested reference observations, alias formulas and general struct bodies
+    remain open; witness sharing controls do not claim decision coverage for
+    them. See the [implementation and evidence record](feature-work/next10-memory-struct-witness.md).
   * `gapWrittenMemory` (`Examples/Decision.lean`,
     `∀ s t. [ s[0] = 1; ] keccak256(s) == keccak256(t)`): a hash of written
     memory.  Next: `decideMem`'s cut inside `decideHash`, input equality as
@@ -811,8 +822,8 @@ conjunct separately.  The only `maxRecDepth` settings left are
 ## M7-close · The M7 lanes closed (done at step 1, 2026-10-26)
 
 Features 30–31 (`kintneg`) and 32 (`apfarrays`) merged; steps 2–5 of the
-original plan moved to M7-next.  Still pinned, in `Fml.inTarget` and
-answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
+original plan moved to M7-next. At that checkpoint, all six were pinned,
+in `Fml.inTarget` and answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
 `gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`, `gapMemStruct`,
 `gapWrittenMemory`.
 
