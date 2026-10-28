@@ -224,9 +224,9 @@ reachability, layering, strict automation and generated-inventory checks pass.
 Per-file dependency checks and kernel guards run sequentially with one Lean
 thread and -j1. This VM lacks systemd/delegated cgroups: a hard 12 GiB address
 space limit plus a seccomp no-fork filter bounds each Lean process group, with
-an available-memory reserve. The default Lake build is explicitly blocked
+an available-memory reserve. The original default Lake attempt was blocked
 because that filter prevents Lake spawning compilers; it is not passing
-evidence. The documentation audit retains missing references in unchanged
+evidence. The runtime follow-up below records a separate aggregate-capped attempt. The documentation audit retains missing references in unchanged
 historical/vendor citations. Exact commands, per-fixture results, hashes,
 timings, memory measurements and remaining refusals are recorded in the
 [per-fixture results](../../tests/upstream/step2-source-units-results.json) and
@@ -246,3 +246,39 @@ scope, and all-source raw-ABI assembly policy. Counter-once and prior-panic
 controls cover the module-condition rewrite. No new dependency, axiom, sorry,
 raised heartbeat/fuel/search limit, changed upstream expectation or core rule
 is introduced.
+
+### Runtime audit follow-up (2026-10-28)
+
+Audit dc0ac441-6aee-4c01-b8db-2087d739208b rechecked the same VM and
+implementation commit da933e15. Actual Lean 4.24.0 and Lake
+5.0.0-src+797c613 commands work. The already running managed Docker daemon
+provides a kernel 12 GiB aggregate cap and zero swap while allowing Lake
+children; no daemon, security, credential or environment configuration changed.
+A task-local wrapper serializes Lean with -j1 and the unchanged 180-second
+per-file timeout, under the documented writer lock.
+
+KeySort passes. The default build reaches job 246 of 688, then the available
+memory guard stops only this task container: exit 137, OOMKilled=false,
+1205.596 seconds. It remains **blocked**, not passed. The no-fork obstruction
+is resolved; the remaining validation needs usable VM capacity for the 12 GiB
+task cap plus the documented 12 GiB available-memory reserve and OS overhead.
+A conservative budget is 24 GiB usable memory plus overhead, not a measured
+minimum: the observed run does not establish its exact peak requirement.
+The last pre-stop minimum available memory is 12,590,648 KiB; the exact crossing
+value and task peak were not persisted before kill. They are not inferred
+from the cap. The live monitor JSON predates the stop, and its false stop flag
+is superseded by the terminal monitor output and container exit.
+
+The [runtime audit record](../../tests/upstream/step2-source-units-runtime-audit.json)
+and [retry log](../../tests/upstream/step2-source-units-runtime-audit.log) preserve
+commands, failed cache-path attempt, limits, timing and measurement limitations.
+No interrupted check is passing evidence. This command does not run TestSuite,
+the frozen sort comparison or run-lean.sh. The nine theorem guards, 79 direct
+module checks, 64 replay jobs and 86 observations remain unchanged: 31 working,
+one excluded-assembly broken and seven blocked fixtures. All feature refusals
+remain separate from the missing combined validation.
+
+The final independent read-only finder and skeptic reviews used no Lean workers.
+Their confirmed packaging fixes scope the original digest list to da933e15,
+record follow-up documentation digests separately, and label the memory budget
+as conservative rather than a measured minimum. No other defect remained.

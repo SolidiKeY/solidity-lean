@@ -1,0 +1,19 @@
+Wed Oct 28 03:09:41 UTC 2026
+12884901888
+0
+✖ [2/2] Building Solidity.KeySort (1.3s)
+trace: .> LEAN_PATH=/workspace/solidity-lean-source-units/.lake/build/lib/lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --tstack=131072 -j1 /workspace/solidity-lean-source-units/Solidity/KeySort.lean -o /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/KeySort.olean -i /workspace/solidity-lean-source-units/.lake/build/lib/lean/Solidity/KeySort.ilean -c /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/KeySort.c --setup /workspace/solidity-lean-source-units/.lake/build/ir/Solidity/KeySort.setup.json --json
+error: permission denied (error code: 13)
+  file: //.cache
+Failed to save input mappings to the local artifact cache.
+Some required targets logged failures:
+- Solidity.KeySort
+error: build failed
+133070848
+low 0
+high 0
+max 0
+oom 0
+oom_kill 0
+oom_group_kill 0
+Wed Oct 28 03:09:42 UTC 2026

@@ -432,6 +432,10 @@ one broken excluded-assembly case and seven retained host/format blocks.
 All 64 prepared legacy/viaIR jobs retain their checkpoints; no gas, log,
 host, assembly or expected-failure observation is removed to claim agreement.
 The remaining 14 required variants are explicitly unexecuted. The full
-repository Lake build remains blocked by this VM's no-fork validation cap;
-the frontend closure, new kernel controls and focused/static gates have
+repository Lake build was initially blocked by the no-fork validation cap.
+A later existing-Docker retry solves process creation but stops at the
+documented memory reserve (exit 137 after job 246/688), so the combined build
+still is not passing evidence; see the
+[runtime audit](../tests/upstream/step2-source-units-runtime-audit.json).
+The frontend closure, new kernel controls and focused/static gates have
 separate evidence. These model observations are not compiler/EVM equivalence.

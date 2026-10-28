@@ -1089,5 +1089,14 @@
     "docs/solidity-features.json",
     "docs/solidity-feature-inventory.md"
   ],
-  "sealedReproduction": "Whitespace-only producer cleanup was followed by a fresh replay with identical complete result objects and the exact final helper digest. Earlier seals remain preserved."
+  "sealedReproduction": "Whitespace-only producer cleanup was followed by a fresh replay with identical complete result objects and the exact final helper digest. Earlier seals remain preserved.",
+  "runtimeAuditFollowup": {
+    "record": "tests/upstream/step2-source-units-runtime-audit.json",
+    "status": "default build remains blocked by host-headroom resource stop; no-fork obstruction solved by existing Docker",
+    "originalResultsPreserved": true
+  },
+  "sourceDigestsScope": {
+    "commit": "da933e15e1e7ca560376701ea789de1914e2842b",
+    "meaning": "Original implementation validation snapshot; historical hashes preserved. Current evidence-only documentation hashes are recorded separately in runtime audit."
+  }
 }
