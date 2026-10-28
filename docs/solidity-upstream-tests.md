@@ -439,3 +439,11 @@ still is not passing evidence; see the
 [runtime audit](../tests/upstream/step2-source-units-runtime-audit.json).
 The frontend closure, new kernel controls and focused/static gates have
 separate evidence. These model observations are not compiler/EVM equivalence.
+
+The [isolated-VM continuation](../tests/upstream/step2-source-units-isolated-validation.json)
+corrects the shared-host reserve scope without making prior stops pass. The
+unchanged 12 GiB/zero-swap bound supports a passing 260-job TestSuite and explicit
+pinned sort check after measured task-local cache management. The default
+library remains blocked by four unchanged 180-second timeouts, not a proven
+need for a larger VM. All 31/1/7 fixture statuses, 86 observations and unrun
+required variants remain unchanged; no semantic code was edited.

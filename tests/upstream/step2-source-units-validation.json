@@ -1098,5 +1098,10 @@
   "sourceDigestsScope": {
     "commit": "da933e15e1e7ca560376701ea789de1914e2842b",
     "meaning": "Original implementation validation snapshot; historical hashes preserved. Current evidence-only documentation hashes are recorded separately in runtime audit."
+  },
+  "isolatedVmContinuation": {
+    "record": "tests/upstream/step2-source-units-isolated-validation.json",
+    "result": "suite260jobs and explicit pinned sort pass; default library terminalexit1 with four180s timeouts; previous failed runs retained",
+    "semanticsAndFixtureResultsUnchanged": true
   }
 }

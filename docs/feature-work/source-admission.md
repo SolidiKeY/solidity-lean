@@ -282,3 +282,50 @@ The final independent read-only finder and skeptic reviews used no Lean workers.
 Their confirmed packaging fixes scope the original digest list to da933e15,
 record follow-up documentation digests separately, and label the memory budget
 as conservative rather than a measured minimum. No other defect remained.
+
+### Isolated-VM headroom continuation (2026-10-28)
+
+The runtime audit above applied the shared-checkout 12 GiB reserve to an
+isolated 16 GiB cloud VM. That scope was incorrect for this task: coverage-plan
+budgets a hard 12 GiB process group with measured OS headroom. The prior failed
+runs and hashes remain intact; the earlier larger-VM requirement was not
+established by those stops. User authorization explicitly clarified this scope.
+
+The continuation keeps the kernel 12 GiB aggregate cap, zero swap, serial
+LEAN_NUM_THREADS=1 and -j1, and unchanged 180-second compiler timeout. A 2 GiB
+guard monitors host available RAM and the enclosing cgroup's free charge margin.
+It reuses valid Lake artifacts, with no cold full rebuild or feature changes.
+The default build terminates exit 1 after 5936.634 seconds: CallbackStrategy,
+Recursion, OpenLoops and DecisionHashes each time out at 180 seconds. No OOM
+or headroom stop is observed; maximum recorded task peak is 9,569,771,520 bytes,
+with minimum sampled parent headroom 7,228,592,128 bytes. These are observed
+counters, since the failure path does not emit a terminal kernel footer.
+
+The independent suite first stops during Derived17 when the parent margin
+falls below 2 GiB, with task charge still below 12 GiB. The parent retains
+about 4.17 GB of clean file cache from this clone's generated build and artifact
+files. POSIX_FADV_DONTNEED on those owned files reduces the measured idle parent
+charge from 4,419,555,328 to 643,207,168 bytes, without deleting or changing files
+or system configuration. This concrete changed baseline supports resuming only
+the unfinished suite and sort checks under identical limits.
+
+TestSuite then passes all 260 jobs, and the explicit pinned SolKey sort check
+passes: 377 taclets parsed, 131 read-bearing, 131 covered. The resumed run exits
+0 after 518.146 seconds. Its exact terminal task peak is 12,213,141,504 bytes
+(11.37 GiB); minimum sampled parent headroom is 4,108,681,216 bytes (3.83 GiB),
+and terminal memory-limit/OOM events are zero. No target demonstrated exceeding
+the hard cap. The four default-build timeouts remain blocked, not passing; no
+run-lean.sh pass or full feature coverage is claimed.
+
+The [isolated validation record](../../tests/upstream/step2-source-units-isolated-validation.json)
+retains commands, scripts, samples, all stops, exact cache-hint code, hashes and
+measurement precision. Baseline snapshots precede launch; polling starts
+immediately after docker start, not before it. Fixture results remain exactly
+31 working / 1 excluded-assembly broken / 7 blocked, 64 jobs and 86 observations,
+with 14 required-but-unrun variants and all named feature refusals preserved.
+
+Final independent read-only finder and skeptic reviews verified the saved
+commands, hashes, samples and gate results without Lean workers. Confirmed
+evidence fixes distinguish baseline from polling start, observed failed-run
+counters from the exact successful footer, and retain the precise cache-hint
+code and owned path whitelist. Both reviews found no outstanding defect.
