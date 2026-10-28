@@ -214,3 +214,16 @@ log/exit, archive/fixture, pipeline, source/control/model, compressed coverage
 and implementation-patch hashes. Neither invoked Lean or builds; no confirmed
 inconsistency remained. The temporary root build configuration was removed
 after validation, with its exact contents retained in the handoff.
+
+## Step 8 transient composition seam (2026-10-28)
+
+Closed factory **targets** may now contain certified transient cells. Factory
+owners still require default stateless implicit construction, and a transient
+owner retains `solidity.worldFactory.owner`. The generated `run` stays a frame.
+Use `World.transact` from `Semantics/TransientWorld.lean` once around a complete
+typed composition of imported frames to get owner-specific entry/exit reset and
+atomic uncaught rollback. Nested calls/catches retain the existing frame laws.
+The transaction adapter preserves return values and exact halts; it does not
+certify `Step`/`Reachable` or general source statement lowering. Details, evidence
+and remaining refusals are in [transient-storage.md](transient-storage.md),
+“Step 8”. This seam adds no delegatecall, static-body admission or policy change.
