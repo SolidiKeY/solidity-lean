@@ -1,12 +1,12 @@
 import Solidity.Examples.Decision
 
 /-!
-# The closer's decision on fresh memory arrays (M7, plan step 6)
+# Fresh memory arrays and given-heap parameter witnesses (M7)
 
 `decideLeaf` (`Calculus/Decision.lean`) on leaves that bind fresh arrays of
 primitives (`Fml.allocAll`), over `Gaps` of `Examples/Decision.lean`: the
 counterexample once pinned there (`gapMemory`) and one leaf per shape the
-cut takes (`Calculus/MemSwap.lean`).  The verdicts are the compiled ones;
+cut takes (`Calculus/MemSwap.lean`).  The given-heap parameter witness and alias controls are below. The verdicts are the compiled ones;
 coverage and the fragment are the kernel's.  The verdicts run one after
 another, as `Examples/Decision.lean`'s do.
 -/
@@ -170,8 +170,8 @@ def memWriteDia : Fml Gaps [] := .allocAll (.user "s") UA
 /-! ### Original memory gaps
 
 Each remains in `Fml.inTarget` (by the kernel). The negative block is now
-refuted by the exact preparation; the hidden memory binder and fresh struct
-remain `unknown`
+refuted by exact preparation and the hidden memory parameter by its given-heap
+witness; the fresh struct remains `unknown`
 (`docs/automation.md`, M7, "What is not proved"): a negative-position block
 over an array's contents (its index bound after the array), a hidden memory
 binder (it ranges over the objects already there, and over none), a fresh
@@ -206,7 +206,7 @@ theorem gapMemInner_inTarget : gapMemInner.inTarget {} = true := by decide +kern
 theorem gapMemParam_inTarget : gapMemParam.inTarget {} = true := by decide +kernel
 theorem gapMemStruct_inTarget : gapMemStruct.inTarget {} = true := by decide +kernel
 
-/-- info: ["refuted", "unknown", "unknown"] -/
+/-- info: ["refuted", "refuted", "unknown"] -/
 #guard_msgs in
 #eval [verdict gapMemInnerNeg, verdict gapMemParam, verdict gapMemStruct]
 
@@ -238,5 +238,140 @@ theorem gapMemWrite_iff : decideLeaf gapMemWrite = .proved ↔ Fml.Valid gapMemW
 
 /-- info: 'Solidity.Examples.Decision.gapMemWrite_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms gapMemWrite_iff
+
+
+/-! ### Given-heap memory parameters
+
+The original binder and its inTarget certificate above are unchanged.
+The countermodel has an existing array [1], while the empty heap satisfies
+the pin. Both modalities bind universally, including unset. -/
+
+section MemoryParameters
+
+local instance memoryParameterContract : InContract := ⟨Gaps⟩
+open scoped Solidity.Scoped
+
+/-- A repeated Theory read is equal even at an unset memory parameter. -/
+def memParamSame : Fml Gaps [] :=
+  dl![.box]{ s[0] = s[0] where uint[] memory s }
+
+/-- Two hidden locals can name the same array; no fresh-apart premise exists. -/
+def memParamAliasBad : Fml Gaps [] :=
+  dl![.box]{ (s[0] = 1 → t[0] = 2 where uint[] memory t) where uint[] memory s }
+
+/-- The original parameter leaf holds at the empty heap, so that state
+cannot certify its refutation. -/
+theorem gapMemParam_empty : holds (State.init Gaps) gapMemParam := by
+  intro v
+  cases v with
+  | none => intro h; cases h
+  | some r =>
+    have hr : ([] : HTy)[r.id]? = some UA := r.get?
+    cases hr
+
+/-- The given-heap witness really refutes the unchanged parameter leaf. -/
+theorem gapMemParam_countermodel :
+    ¬ holds (MemoryWitness.candidate Gaps) gapMemParam :=
+  MemoryWitness.Checked.refutes
+    (gapMemParam.checkMemoryAt (MemoryWitness.candidate Gaps)) (by decide +kernel)
+
+/-- The original pin's exact decision, checked in the kernel. -/
+theorem gapMemParam_verdict : verdict gapMemParam = "refuted" := by
+  decide +kernel
+
+/-- Repeated reads remain valid over every given heap and every binder value. -/
+theorem memParamSame_valid : Fml.Valid memParamSame := by
+  intro σ v
+  rfl
+
+/-- The concrete checker includes unset when validating the positive control. -/
+theorem memParamSame_checked :
+    (memParamSame.checkMemoryAt (MemoryWitness.candidate Gaps)).isYes = true := by
+  decide +kernel
+
+/-- Aliasing is a genuine countermodel, not an implicit freshness condition. -/
+theorem memParamAliasBad_countermodel :
+    ¬ holds (MemoryWitness.candidate Gaps) memParamAliasBad :=
+  MemoryWitness.Checked.refutes
+    (memParamAliasBad.checkMemoryAt (MemoryWitness.candidate Gaps)) (by decide +kernel)
+
+/-- Two independent references to identity 0, a distinct object at identity 1,
+and read observations before/after s[0] = 7, including an untouched index. -/
+def memoryAliasTrace (a b : MemoryWitness.Words .uint) :
+    List Nat × List (Option Nat) × List (Option Int) × List (Option Int) :=
+  let ws := [a, b]
+  let H := MemoryWitness.typing ws
+  let hp : Heap H := MemoryWitness.objects H ws
+  let s := MemoryWitness.reference ws ⟨0, Nat.zero_lt_succ 1⟩
+  let t := MemoryWitness.reference ws ⟨1, Nat.lt_succ_self 1⟩
+  let alias : HRef H UA := ⟨0, by rfl⟩
+  let addrOf (r : HRef H UA) (i : Nat) : MAddr H (.prim .uint) :=
+    .index r .dyn (uintOfNat i)
+  let rd (h : Heap H) (r : HRef H UA) (i : Nat) : Option Int :=
+    (Heap.readAddr h (addrOf r i)).map (fun v => v.1)
+  ([s.id, alias.id, t.id],
+    (MemoryWitness.values H UA).map (fun r => r.map HRef.id),
+    [rd hp s 0, rd hp s 1, rd hp t 0, rd hp t 1],
+    match Heap.writeAddr hp (addrOf s 0) (uintOfNat 7) with
+    | none => [none, none, none, none, none]
+    | some hp' => [rd hp' s 0, rd hp' alias 0, rd hp' s 1, rd hp' t 0, rd hp' t 1])
+
+/-- Equal contents do not identify distinct objects: writes follow identities. -/
+theorem memoryAlias_equalContents :
+    memoryAliasTrace ⟨[uintOfNat 1, uintOfNat 3], by decide⟩
+      ⟨[uintOfNat 1, uintOfNat 3], by decide⟩ =
+      ([0, 0, 1], [some 0, some 1, none],
+        [some 1, some 3, some 1, some 3],
+        [some 7, some 7, some 3, some 1, some 3]) := by
+  decide +kernel
+
+/-- Different contents and an untouched index retain their complete observations. -/
+theorem memoryAlias_differentContents :
+    memoryAliasTrace ⟨[uintOfNat 1, uintOfNat 3], by decide⟩
+      ⟨[uintOfNat 2, uintOfNat 4], by decide⟩ =
+      ([0, 0, 1], [some 0, some 1, none],
+        [some 1, some 3, some 2, some 4],
+        [some 7, some 7, some 3, some 2, some 4]) := by
+  decide +kernel
+
+/-- Empty and wrong-type heaps still admit the unset binder value. -/
+theorem memoryParameter_emptyDomains :
+    (MemoryWitness.values [] UA).map (fun r => r.map HRef.id) = [none] ∧
+    (MemoryWitness.values (MemoryWitness.candidate Gaps).H (.array (.prim .bool))).map
+      (fun r => r.map HRef.id) = [none] := by
+  decide +kernel
+
+/-- info: ["unknown", "refuted"] -/
+#guard_msgs in #eval [verdict memParamSame, verdict memParamAliasBad]
+/-- info: [true, true] -/
+#guard_msgs in #eval [(memParamSame.checkMemoryAt (MemoryWitness.candidate Gaps)).isYes,
+  (memParamAliasBad.checkMemoryAt (MemoryWitness.candidate Gaps)).isNo]
+/-- info: ([0, 0, 1], [some 0, some 1, none], [some 1, some 3, some 1, some 3], [some 7, some 7, some 3, some 1, some 3]) -/
+#guard_msgs in #eval memoryAliasTrace ⟨[uintOfNat 1, uintOfNat 3], by decide⟩
+  ⟨[uintOfNat 1, uintOfNat 3], by decide⟩
+/-- info: ([0, 0, 1], [some 0, some 1, none], [some 1, some 3, some 2, some 4], [some 7, some 7, some 3, some 2, some 4]) -/
+#guard_msgs in #eval memoryAliasTrace ⟨[uintOfNat 1, uintOfNat 3], by decide⟩
+  ⟨[uintOfNat 2, uintOfNat 4], by decide⟩
+/-- info: 'Solidity.Examples.Decision.gapMemParam_countermodel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms gapMemParam_countermodel
+/-- info: 'Solidity.Examples.Decision.gapMemParam_verdict' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms gapMemParam_verdict
+/-- info: 'Solidity.Examples.Decision.memParamSame_valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memParamSame_valid
+/-- info: 'Solidity.Examples.Decision.memoryAlias_equalContents' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memoryAlias_equalContents
+
+/-- info: 'Solidity.Examples.Decision.gapMemParam_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms gapMemParam_empty
+/-- info: 'Solidity.Examples.Decision.memParamAliasBad_countermodel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memParamAliasBad_countermodel
+/-- info: 'Solidity.Examples.Decision.memParamSame_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memParamSame_checked
+/-- info: 'Solidity.Examples.Decision.memoryAlias_differentContents' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memoryAlias_differentContents
+/-- info: 'Solidity.Examples.Decision.memoryParameter_emptyDomains' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms memoryParameter_emptyDomains
+
+end MemoryParameters
 
 end Solidity.Examples.Decision

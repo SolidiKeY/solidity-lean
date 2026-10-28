@@ -7,6 +7,7 @@ import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemNegPrep
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
 
@@ -349,14 +350,17 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
   | .all _ _ φ => φ.hasAllocAll
   | _ => false
 
-/-- Exact supported negative-block preparation, then the leaf's fresh
-arrays hoisted and cut, and the cut leaf decided. -/
+/-- Exact negative-block preparation and fresh-array cutting, or a concrete
+given-heap countermodel. Truth at one witness state is never promoted to validity. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
     match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
     | none => .unknown
-  else .unknown
+  else
+    match MemoryWitness.countermodel? φ with
+    | some w => .refuted w.1
+    | none => .unknown
 
 theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid φ := by
   unfold decideMem at h
@@ -367,7 +371,7 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).1
           ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ))
     · cases h
-  · cases h
+  · split at h <;> cases h
 
 theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
     ¬ holds σ φ := by
@@ -379,7 +383,11 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).2
           (((mxNegativePrepare φ).exact σ).2 hφ)))
     · cases h
-  · cases h
+  · split at h
+    · rename_i w _
+      cases h
+      exact w.2
+    · cases h
 
 /-! ### Binders of KeY's `int` (M7, feature 26)
 

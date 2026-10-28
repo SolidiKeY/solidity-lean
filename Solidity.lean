@@ -507,7 +507,9 @@ import Solidity.Calculus.MemInst
 import Solidity.Calculus.MemObserve
 import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemHoist
+import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
+import Solidity.Calculus.KIntTwoAnchors
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
 import Solidity.Tools.LeafArithmetic

@@ -385,6 +385,11 @@
     "code": "@[implemented_by LFml.nfEM]"
   },
   {
+    "file": "Solidity/Calculus/MemoryWitness.lean",
+    "kind": "override",
+    "code": "@[implemented_by Fml.checkMemoryAtM]"
+  },
+  {
     "file": "Solidity/Calculus/Notation.lean",
     "kind": "kernel-option",
     "code": "withOptions (debug.skipKernelTC.set \u00b7 true) (elabAgainst c f)"

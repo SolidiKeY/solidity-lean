@@ -9,6 +9,8 @@ import Solidity.Examples.LexDiamond
 import Solidity.Examples.Tactics.LexDiamond
 import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.FilteredMembership
+import Solidity.Calculus.MemoryWitness
+import Solidity.Examples.DecisionMemory
 import Solidity.Examples.Tactics.FilteredSets
 import Solidity.Calculus.Preconditions
 import Solidity.Examples.SourceCounterexample
@@ -39,6 +41,21 @@ open Lean Elab Command
 
 run_cmd do
   let headlines : List Name := [
+    ``Solidity.MemoryWitness.bind_exact,
+    ``Solidity.MemoryWitness.heap_get,
+    ``Solidity.MemoryWitness.reference_eq_iff,
+    ``Solidity.MemoryWitness.Checked.refutes,
+    ``Solidity.Fml.checkMemoryAt_eq_checkMemoryAtM,
+    ``Solidity.Decide.decideMem_sound,
+    ``Solidity.Decide.decideMem_refutes,
+    ``Solidity.Examples.Decision.gapMemParam_countermodel,
+    ``Solidity.Examples.Decision.gapMemParam_verdict,
+    ``Solidity.Examples.Decision.gapMemParam_empty,
+    ``Solidity.Examples.Decision.memParamSame_valid,
+    ``Solidity.Examples.Decision.memParamAliasBad_countermodel,
+    ``Solidity.Examples.Decision.memoryAlias_equalContents,
+    ``Solidity.Examples.Decision.memoryAlias_differentContents,
+    ``Solidity.Examples.Decision.memoryParameter_emptyDomains,
     ``Solidity.Evm.Memory.copiedFields_copy,
     ``Solidity.Evm.Memory.copiedStruct_alloc,
     ``Solidity.Evm.Memory.copiedFields_get,

@@ -802,3 +802,22 @@ open. Final whitespace and retained toolchain/branch/base identity checks also
 exited zero; their raw commands/results are in the same evidence directory.
 The temporary Lake resource configuration is preserved there and removed from
 the checkout before commit, leaving tracked and user configuration intact.
+
+## Fresh-master conflict repair (2026-10-29)
+
+The integration resolution retains `MemNegPrep` and `MemoryWitness` together:
+fresh allocations use exact negative-block preparation before hoisting and
+cutting; leaves without fresh allocations retain the certified given-heap
+countermodel path. Both soundness and refutation branches are preserved.
+The combined original memory pin expects `["refuted", "refuted", "unknown"]`.
+The two-anchor improvement is also retained; three original gaps remain unknown.
+
+Local read-only finder and skeptic passes checked declarations against both
+merge stages, branch exactness, unchanged target certificates, expected verdicts
+and documentation counts. No declaration was lost and no sorry or axiom added.
+Independent review could not start because the agent service returned a
+thread-store error. Per-file MCP diagnostics completed without errors for
+`Decision.lean`; `DecisionMemory.lean` remains elaborating without reported
+errors so far, so its diagnostic gate is pending. Layer and orphan checks pass;
+resolved-file whitespace and referenced feature-document paths pass. No full
+build was started, and no commit or push was made.
