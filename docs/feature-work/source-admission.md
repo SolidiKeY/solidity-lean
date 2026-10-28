@@ -329,3 +329,42 @@ commands, hashes, samples and gate results without Lean workers. Confirmed
 evidence fixes distinguish baseline from polling start, observed failed-run
 counters from the exact successful footer, and retain the precise cache-hint
 code and owned path whitelist. Both reviews found no outstanding defect.
+
+### CallbackStrategy timeout diagnosis (2026-10-28)
+
+Audit 39481496-2ddb-4956-a5b9-43cdfa5a677e follows the first default-build
+timeout without repeating the full build or passed suite/sort gates. The saved
+Lake setup lists 229 local imported modules; every source, plus CallbackStrategy
+itself, is byte-identical to starting master f4dee4a2. No source-unit change is
+in this closure. The setup has no plugins or option overrides, and every
+referenced dependency artifact is hashed in the diagnostic record.
+
+One controlled baseline probe bind-mounts the exact baseline source at its
+original canonical path and uses that saved setup with source-identical checked
+current dependency artifacts. It is a warm reused-artifact diagnostic, not a
+cold independent baseline build. With the same 180-second compiler limit,
+-j1, LEAN_NUM_THREADS=1, hard 12 GiB aggregate cap, zero swap and 2 GiB
+headroom guard, it also times out: exit 137, outer elapsed 180.266 seconds.
+Exact terminal peak is 662,904,832 bytes; limit/OOM counters are zero, and
+minimum sampled enclosing-cgroup headroom is 14,084,960,256 bytes. Baseline
+snapshots precede launch; polling starts immediately after container start.
+
+This reproduces a pre-existing callback proof-cost blocker under the fixed
+budget and demonstrates no source-unit-induced regression. No semantic fix,
+general closer/step-13 work or budget increase is justified in this lane. The
+required separate action is investigation of the existing callback proof or
+elaboration cost within unchanged premises and budgets. Recursion, OpenLoops
+and DecisionHashes retain their earlier timeouts; no baseline claim is made
+for those three, and none was retried here. The assigned default gate remains
+blocked and the feature is not complete.
+
+The [callback diagnostic](../../tests/upstream/step2-source-units-callback-diagnostic.json)
+retains the exact saved invocation, wrappers, source/artifact comparison and
+terminal measurements. Prior successful 260-job TestSuite and pinned sort, all
+31/1/7 fixture statuses, 86 observations, 14 unrun variants and named refusals
+remain unchanged. No historical failed result is promoted to passing evidence.
+
+Independent read-only finder and skeptic reviews verified the closure, source
+and artifact hashes, all 719 samples and terminal counters without Lean workers.
+The final record corrects polling-start wording and limits the baseline inference
+to this one reused-artifact target. No outstanding review finding remained.

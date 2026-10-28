@@ -1103,5 +1103,9 @@
     "record": "tests/upstream/step2-source-units-isolated-validation.json",
     "result": "suite260jobs and explicit pinned sort pass; default library terminalexit1 with four180s timeouts; previous failed runs retained",
     "semanticsAndFixtureResultsUnchanged": true
+  },
+  "callbackTimeoutDiagnostic": {
+    "record": "tests/upstream/step2-source-units-callback-diagnostic.json",
+    "outcome": "source-identical229moduleclosure; baseline180s timeout reproduced; no source-unit regression demonstrated; assigned default validation remains blocked"
   }
 }
