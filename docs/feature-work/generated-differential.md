@@ -74,8 +74,54 @@ Successful narrow checks:
   division, wrong raw storage/getter/return bytes, unhandled layout and actual
   shrinking of a deliberately corrupted expectation.
 
-Final generated report, exact per-case table, elapsed time, memory and structural
-gates are recorded below after the combined run.
+Combined run on implementation commit
+016184b5564044d22d1d387dfb88d1209d8ea190 (clean tracked implementation):
+[complete observations](../../tests/generated/seed-0.json) and
+[exact per-case table](../../tests/generated/seed-0.tsv).
+All 160 cases agreed under every configuration: 640 agree, 0 mismatch, 0 blocked.
+The report records 36.909 seconds for generated execution; process wall time
+including compiler load/generation was 38.381 seconds. `lake -q exe solcases 0`
+emitted 160 records in 0.354 seconds. Seed 1/index 9 was independently replayed with four agreements;
+its full report is tests/generated/replay-seed-1-index-9.json.
+The reused reference-replay suite passed
+14/14 tests in 2.523 seconds. Successful final kernel example target checking
+took 1.596 seconds; cold parser dependency refresh took 2m36.695s and ended in
+a local test type error that was fixed, so that failed attempt is not a pass.
+Native executable/import checks also passed; the first successful native build
+was not timed. Peak aggregate memory across bounded checks was 1,160,622,080
+bytes (1.081 GiB); cgroup max/oom/oom_kill counters were all zero.
+
+| Kind | Generated cases | Typed reverts | Agreements (four variants) |
+|---|---:|---:|---:|
+| checked add | 16 | 5 | 64 |
+| checked subtract | 16 | 6 | 64 |
+| checked multiply | 16 | 3 | 64 |
+| checked divide | 16 | 4 | 64 |
+| checked remainder | 16 | 4 | 64 |
+| write then require | 16 | 12 | 64 |
+| write then assert | 16 | 12 | 64 |
+| write then revert | 16 | 16 | 64 |
+| conditional add/delete | 16 | 2 | 64 |
+| typed literal divide | 16 | 0 | 64 |
+
+Structural gates: 152 core modules, zero forbidden printer/elaborator paths;
+702 reachable modules, zero orphans; trust audit 717 sources, 240 inventoried
+sites, zero findings; automatic gate 491 automatic, 61 budgeted, 11 refuted,
+zero manual/pending. Inventory regeneration reports 212 features / 783
+classified upstream symbols, with generated files unchanged. No manifest
+status/evidence change is justified for this validation-only increment.
+The documentation-path gate remains failed on 20 pre-existing missing references
+in Eqns, historical group03/group10 reports; those citing files are unchanged
+from the starting commit and this branch deletes no target files. None of its
+reported missing paths is introduced here. The trust script is invoked with
+`bash` because its saved mode is not executable. No core semantics was edited,
+so the core-change `./run-lean.sh` gate was not invoked; the new executable,
+example import closure and each edited Lean file were checked explicitly.
+
+Shared files edited: Solidity.lean, lakefile.toml, scripts/check-layers.mjs,
+scripts/evm-reference/README.md, docs/README.md, docs/module-map.md,
+docs/coverage-plan.md, docs/parallelism.md and docs/solc-validation.md.
+No existing frontend, interpreter, rule or compiler module was changed.
 
 ## Independent reviews
 
@@ -85,7 +131,8 @@ are rejected; the enumeration driver is hashed; shrink scope admits different
 mismatch causes; concrete parser/printer checks were added. The layout-negative
 control adds a third root so compiler type rejection cannot mask the layout
 refusal. Both reviewers found no direct false-agreement path in this fragment.
-Their coverage caveats are retained here. Literal-only division was also added
+Their coverage caveats are retained here. Final independent reviews verified all
+640 observations and source/code/deployment/tool/binary hashes without new findings. Literal-only division was also added
 to all four real-EVM pipelines, not just the kernel regression.
 
 ## Remaining work and refusals
