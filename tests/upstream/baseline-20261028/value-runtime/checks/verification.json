@@ -1,0 +1,58 @@
+{
+  "valueEntryDiagnosticComplete": true,
+  "scope": "Only this zero-argument imported-entry value diagnostic in both required pipelines; not whole-corpus,40-question attribution,universal proof,proof-search or generated-EVM completeness",
+  "pipelines": {
+    "legacy": {
+      "typedImportRows": 7,
+      "matchingTransactions": 8,
+      "helperAbiRefusals": 1,
+      "unchangedScalarFalseOutputControls": 1
+    },
+    "viaIR": {
+      "typedImportRows": 7,
+      "matchingTransactions": 8,
+      "helperAbiRefusals": 1,
+      "unchangedScalarFalseOutputControls": 1
+    }
+  },
+  "matchingTransactions": 16,
+  "helperAbiRefusals": 2,
+  "unchangedScalarFalseOutputControls": 2,
+  "allShared309SnapshotsUnchanged": true,
+  "all77OverlayOleansMatch": true,
+  "mutationControls": [
+    {
+      "control": "leaked-body-effect",
+      "rejected": true,
+      "staticVerifierControl": true
+    },
+    {
+      "control": "double-credit",
+      "rejected": true,
+      "staticVerifierControl": true
+    },
+    {
+      "control": "failed-payment-retained",
+      "rejected": true,
+      "staticVerifierControl": true
+    },
+    {
+      "control": "changed-revert-code",
+      "rejected": true,
+      "staticVerifierControl": true
+    },
+    {
+      "control": "internal-abi-admitted",
+      "rejected": true,
+      "staticVerifierControl": true
+    }
+  ],
+  "historicalNativeValidationComplete": "false remains unchanged in historical matrix",
+  "remainingLimits": [
+    "Environment spendable funding is an explicit assumption checked by the diagnostic, not enforced by Lifetime.",
+    "System.run returns no world on error; immutable prior World.atTime follows existing Step.rollback policy, not a concretely kernel-proved trace.",
+    "No generated-EVM or universal source/compiler dispatcher proof.",
+    "No nonzero-argument ABI decoding coverage is inferred.",
+    "Testing proof closure remains stale; no full/cold/warm build repeated."
+  ]
+}

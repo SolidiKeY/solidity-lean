@@ -221,3 +221,12 @@ APIs without a build. The native76-module cache remains unchanged, but Lifetime'
 28-module closure has15 stale saved import references; ContractWorld's root cache
 is absent. Nonzero-payment native validation remains blocked pending an
 identity-satisfied existing value-aware API. No new runtime verdict is claimed.
+
+## Executed value-entry supplement (29b73d0e source checkpoint)
+
+[The runtime supplement](value-runtime/README.md) refreshes only the unchanged
+Lifetime root in a private overlay and executes16 value-aware transactions,
+2internal ABI refusals and2unchanged scalar false-output controls across both
+pipelines. Independent expected-result verification passes. This bounded
+diagnostic is complete; all historical completion flags, corpus results,
+source refusals, proof limits and performance stops remain preserved.
