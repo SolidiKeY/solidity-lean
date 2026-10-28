@@ -10,11 +10,12 @@ was installed in a task-specific disk directory on the same executor.
 
 The unchanged original `gapQuantLedger` is now proved by the kernel in
 `DecisionQuantLedger.original_proved` and `original_goal_proved`.
-The required repository build, strict static gates and per-file MCP error
-checks passed. The external SolKey sort check was explicitly skipped because
-the sibling checkout is absent; no external parity claim is made. The global
-documentation path gate remains blocked by the same 20 baseline failures,
-so the overall validation milestone is not complete.
+The named semantic assignment and its required task validations are finished.
+The full build, strict static gates, per-file MCP error checks, 24 pipeline
+results and exact frozen-input SolKey sort check passed. The global
+whole-tree documentation path gate remains red with the same 20 baseline
+findings. This is historical documentation debt, not an unresolved ledger
+proof or a claim that every repository gate is green.
 
 ## Implementation and scope
 
@@ -58,8 +59,10 @@ The final runner checks both public pipelines, fixed expected verdicts, every
 storage root in contract order including retained slots, the complete ledger,
 transaction fields, heap-object and external-response counts. It additionally
 checks that `highBad` exhibits an entry above the word range and `negativeBad`
-a negative entry. All twelve fixtures and 24 pipeline results passed in
-266.978 seconds, exit 0. Per-pipeline times below include observation output.
+a negative entry. All twelve fixtures and 24 pipeline results first passed in
+266.978 seconds, exit 0. The resumed run also passed in 255.968 seconds with
+identical full ordered observations. Initial per-pipeline times below include
+observation output.
 
 | Fixture | Before Leaf / Goal | After Leaf / Goal | After milliseconds Leaf / Goal |
 |---|---|---|---|
@@ -177,10 +180,12 @@ OS-wide available RAM was 6,535,692,288 bytes. Outer VM OOM and OOM-kill
 counters remained zero. Charged peak includes reclaimable file cache; the
 cap was reached, so this is not evidence for a smaller build budget.
 
-The script's SolKey sort check printed `SKIPPED` for the missing sibling
-rules file. The default build and pinned TestSuite checks passed; sort-table
-parity against that absent external checkout is unestablished. No checkout
-was fabricated, re-pinned or borrowed from another agent.
+That historical script invocation printed `SKIPPED` for its missing sibling
+rules file. On resumption, the documented frozen snapshot was verified and
+the sort checker was run separately with the exact `SOLKEY_RULES` filename;
+it passed. These are distinct actual commands, not a claim that the original
+invocation performed a check it skipped. No checkout was fabricated,
+re-pinned or borrowed from another agent.
 
 | Command / gate | Exit | Seconds | Charged peak bytes |
 |---|---:|---:|---:|
@@ -213,20 +218,21 @@ before a process sample, so sampled RSS zero is not actual zero RAM.
 All six original declarations/certificates and the protected policy suffix
 passed the byte comparison in `pins-preserved.json`. The original gap proof,
 build, strict automatic/trust/layer/orphan and assignment runtime gates pass.
-The overall milestone remains blocked by `scripts/check-doc-paths.sh`: both
+Whole-tree documentation hygiene remains blocked by `scripts/check-doc-paths.sh`: both
 the final staged tree and an exact disk archive/separate index of published
 base exit 1 with identical 20 missing references and six ambiguity notices.
 Nineteen missing references are in unchanged upstream-validation JSON; one
 is the unchanged vendored `Eqns.lean` provenance citation. The checker and
 all three implicated files are byte-identical to base. There are zero new
 findings. `doc-path-nonregression.json` retains the exact comparison and hashes.
-Both independent read-only reviewers confirmed the baseline comparison and
-that the milestone is explicitly incomplete. This is not a passing global
-path gate. Repairing the handling or resolution
+Both independent read-only reviewers confirmed the baseline comparison.
+Their resumed review distinguishes the finished semantic assignment from
+this unrelated whole-tree debt. This is not a passing global path gate.
+Repairing the handling or resolution
 of these pre-existing foreign references remains repository work; test-output
 JSON and checker policy were not changed or weakened in this lane.
 
-Other limits are the absent external sort checkout, partial process sampling,
+Other limits are partial process sampling,
 and interrupted generic-payment performance probes already described above;
 none is represented as a passing probe or broader decision completeness.
 
@@ -237,3 +243,83 @@ Exports are `/workspace/next10-quant-ledger.patch`,
 `/workspace/next10-quant-ledger.sha256`. The evidence index records the final
 commit and every log's hash, command, exit, timing, resource samples and actual
 axiom output. The patch is cumulative from the published base.
+
+## Saved-VM completion follow-up
+
+The retained branch and clean checkpoint HEAD were verified as
+`codex/next10-quant-ledger` / `8b61b160fe5413ffb94ddeface6bf62f891cbf4b`.
+Bash, Lean 4.24.0 and Lake 5.0.0-src+797c613 were verified before restoring
+only the task-owned temporary single-thread configuration. The setup script
+was inspected and preserved; its four-thread default was not used. The same
+executor and branch were reused, with no new VM, clone or implementation
+thread. The original checkpoint exports are preserved under
+`/workspace/quant-ledger-runtime/checkpoint-8b61b160/`.
+
+The migration conventions require the immutable snapshot, not a sibling
+checkout. `node scripts/solkey-migration.mjs verify tests/migration/solkey`
+verified commit `473da8944ca7329e6b76819863591407db26e7ec` and manifest/file
+hashes. The actual sort command was:
+
+```sh
+SOLKEY_RULES=/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key \
+  ./scripts/check-solkey.sh
+```
+
+This ran through the existing bounded wrapper and temporary Lake configuration
+with `LEAN_NUM_THREADS=1` and Lean `-j1`. It reported 377 parsed taclets,
+131 read-bearing entries, table coverage 131, and `OK`, exit 0. This establishes
+sort-annotation matching against that frozen file; it does not claim live
+upstream parity, a re-pin, or new compiler/EVM conformance.
+
+An independent Python enumeration read published-base blobs with `git show`
+and compared current tracked files using the checker's resolution rules.
+It reproduced all 20 missing references and six ambiguity notices with zero
+new findings. All concern unchanged files outside this task. The single
+vendored citation explicitly identifies external Mathlib provenance that is
+not imported; the other 19 missing references occur inside archived validation
+JSON. No moved/renamed module or stale task-local Lean reference was found.
+Task-document Markdown links also resolved. An initial evidence-only Markdown
+scanner mistook `new T[](n)` inside code for a link; code spans were excluded
+and the corrected audit passed. The repository checker was not altered.
+`resume-doc-applicability.json` records classifications, checked task references
+and local links. This scoped nonregression evidence does not override the
+red whole-tree gate or rewrite archived observations/provenance.
+
+The fresh runner passed all 12 fixtures and 24 pipeline results. Every verdict
+and full ordered observation is byte-identical to the retained passing runner,
+recorded in `resume-observations-unchanged.json`. Sixteen freshly printed axiom
+audits, including exactness, verification, closed transport/truth, both public
+soundness/refutation theorems and the original exact verdicts, use only
+`propext`, `Classical.choice`, `Quot.sound`. The strict static/trust and inventory
+checks were rerun successfully. No Lean, fixture, policy or expected-output
+source changed after `8b61b160`; this follow-up changes only this handoff.
+The retained full 687-job default build and 259-job TestSuite build remain
+applicable; the separately completed frozen sort check closes their historical
+skip. No new full-build invocation or kernel/EVM coverage is invented.
+
+| Resumed command / gate | Exit | Seconds | Charged peak bytes |
+|---|---:|---:|---:|
+| Snapshot verification | 0 | 1.001 | 18378752 |
+| Exact frozen sort check | 0 | 2.012 | 378908672 |
+| 12 fixtures / 24 pipelines | 0 | 255.968 | 1104642048 |
+| 16 actual axiom audits | 0 | 14.433 | 176750592 |
+| Independent documentation applicability | 0 | 6.015 | 58712064 |
+| Orphans | 0 | 2.002 | 62955520 |
+| Layers | 0 | 2.001 | 77078528 |
+| Automatic --strict | 0 | 2.002 | 20811776 |
+| Trust | 0 | 7.033 | 169213952 |
+| Generated inventory check | 0 | 2.001 | 10379264 |
+
+The resumed runner sampled aggregate RSS/PSS peaks of 2,401,177,600 /
+2,330,470,400 bytes. Its exact cgroup peak was 1,104,642,048 bytes. During it,
+the outer 16 GiB VM cgroup charged 8,305,975,296 bytes, with OOM counters zero;
+this is a measured instant, not a full-run VM peak. OS-wide available memory
+and estimated inactive-file reclaimability are separately labeled in
+`resume-vm-headroom.json`. All heavy checks remained serialized inside the
+verified 12 GiB / zero-swap build cap, with caches on disk.
+
+Read-only finder and skeptic reviews confirmed the resumed frozen sort result,
+no stale task-local links, and this semantic-completion/historical-debt
+boundary. They used no Lean server or checks. There is no remaining blocker
+to the named `gapQuantLedger` assignment. Whole-tree documentation hygiene
+continues to fail at baseline and is not reported green.
