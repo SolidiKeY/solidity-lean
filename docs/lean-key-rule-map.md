@@ -194,6 +194,13 @@ had that restriction: `SVal.defaultOf` keeps a fixed-size array's `n` elements
 
 ## Memory allocation, aliasing, declarations
 
+The M7 given-heap witness fallback (`Calculus/MemoryWitness.lean`) is Lean-only
+finite semantic checking, not a new taclet. Its binder enumeration preserves
+existing identities and unset; it performs no allocation rewrite. Alias write
+controls use the same identity/index distinction as `memoryRules.key`'s
+`readOnWrite`, via the existing typed heap read/write laws.
+
+
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | same | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes: `ITerm.alloc` and `MTerm.addM` agree on the minted root because both read the same pre-state |
