@@ -3,6 +3,7 @@ import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerReduction
 import Solidity.Calculus.LedgerBlock
 import Solidity.Calculus.HashMove
+import Solidity.Calculus.HashWrittenRealize
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
@@ -1160,8 +1161,39 @@ def tryK3 (k₁ k₂ k₃ : HashKind) (hk₁ : k₁ ≠ .ecrecover) (hk₂ : k�
   ⟨decideHash3 k₁ k₂ k₃ hk₁ hk₂ hk₃, Fml.coveredK3 k₁ k₂ k₃, decideHash3_sound, decideHash3_refutes,
     decideHash3_complete hk₁ hk₂ hk₃⟩
 
+/-- A realized written-memory certificate supplies an actual countermodel.
+The producer refuses all syntax outside its proved schema. -/
+def decideWrittenHash (φ : Fml C []) : LeafVerdict C :=
+  match WrittenMemory.Realize.refutation? φ with
+  | none => .unknown
+  | some _ => .refuted (State.init C)
+
+theorem decideWrittenHash_sound {φ : Fml C []} (h : decideWrittenHash φ = .proved) : Fml.ValidH φ := by
+  unfold decideWrittenHash at h
+  split at h <;> cases h
+
+theorem decideWrittenHash_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideWrittenHash φ = .refuted σ) : ¬ Fml.holdsH σ φ := by
+  unfold decideWrittenHash at h
+  split at h
+  · cases h
+  · rename_i r _
+    cases h
+    exact r.down
+
+/-- This stage's coverage means that its actual realization certificate exists. -/
+def tryWritten : HashTry C :=
+  ⟨decideWrittenHash, (fun φ => (WrittenMemory.Realize.refutation? φ).isSome),
+    decideWrittenHash_sound, decideWrittenHash_refutes, by
+      intro φ hc
+      unfold decideWrittenHash
+      cases hr : WrittenMemory.Realize.refutation? φ with
+      | none => simp only [hr, Option.isSome_none, Bool.false_eq_true] at hc
+      | some r => exact fun h => nomatch h⟩
+
 /-- **The ways of deciding a leaf with hashes**: of one kind, each kind in
-turn; of two, each ordered pair; of three, each order. -/
+turn; of two, each ordered pair; of three, each order; finally the exact
+written-memory realization schema. -/
 def hashTries : List (HashTry C) :=
   [tryK .keccak (by decide), tryK .sha256 (by decide), tryK .ripemd160 (by decide),
     tryK2 .keccak .sha256 (by decide) (by decide), tryK2 .sha256 .keccak (by decide) (by decide),
@@ -1172,7 +1204,7 @@ def hashTries : List (HashTry C) :=
     tryK3 .sha256 .keccak .ripemd160 (by decide) (by decide) (by decide),
     tryK3 .sha256 .ripemd160 .keccak (by decide) (by decide) (by decide),
     tryK3 .ripemd160 .keccak .sha256 (by decide) (by decide) (by decide),
-    tryK3 .ripemd160 .sha256 .keccak (by decide) (by decide) (by decide)]
+    tryK3 .ripemd160 .sha256 .keccak (by decide) (by decide) (by decide), tryWritten]
 
 /-- **A leaf with hashes**: the first way that answers. -/
 def decideHash (φ : Fml C []) : LeafVerdict C := firstKnown (hashTries.map (·.run)) φ

@@ -506,6 +506,9 @@ import Solidity.Calculus.MemHoist
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
 import Solidity.Calculus.Decision
+import Solidity.Calculus.HashWritten
+import Solidity.Calculus.HashWrittenInput
+import Solidity.Calculus.HashWrittenRealize
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
@@ -514,6 +517,7 @@ import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
 import Solidity.Examples.DecisionMemory
+import Solidity.Examples.DecisionWrittenMemory
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
