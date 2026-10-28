@@ -617,3 +617,8 @@ checks passed before final integration. The optional rule-text checker has
 nine findings, exactly identical to the starting commit. Source replay,
 upstream regressions and final gates are recorded separately in the evidence
 directory as they complete; pending/resource-stopped checks are not passes.
+
+Final integration found one printer-only regression: removing the obsolete
+clause-empty premise reordered inferred implicit binders in the displayed
+rule type. The existing Loops snapshot now records that binder order; its
+logical statement and all expected program results are unchanged.
