@@ -527,7 +527,7 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.Taclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {qs : List (LoopQ C Γ)} {brk : Bool}
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Option (List Name)} {brk : Bool} {qs : List (LoopQ C Γ)}
   {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
   dl{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →

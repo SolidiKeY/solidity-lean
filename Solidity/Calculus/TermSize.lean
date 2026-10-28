@@ -1283,6 +1283,18 @@ theorem invFml_foldl_size (qs : List (LoopQ C Γ)) (acc : Fml C Γ) :
     simp only [Fml.tmSize] at h
     omega
 
+/-- Adding ghost locals preserves the size of a quantified loop clause. -/
+theorem LoopQ.size_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (q : LoopQ C Γ) :
+    (q.wk h).size = q.size := by
+  induction q generalizing Δ with
+  | val a => simp only [LoopQ.wk, LoopQ.size, Val.size_wk]
+  | imp a b => simp only [LoopQ.wk, LoopQ.size, Val.size_wk]
+  | all x p b ih => simp only [LoopQ.wk, LoopQ.size, ih]
+
+/-- Shifting a clause under a scalar variant does not grow it. -/
+theorem LoopQ.size_up {t : LTy} (q : LoopQ C Γ) :
+    (q.up (t := t)).size = q.size := LoopQ.size_wk _ q
+
 theorem invFml_size (I : Val C Γ .bool) (qs : List (LoopQ C Γ)) :
     (invFml I qs).tmSize ≤ 3 * I.size + 2 + 6 * (qs.map LoopQ.size).sum := by
   have h := invFml_foldl_size qs (Fml.isBool I.lower true)
@@ -1417,13 +1429,16 @@ theorem loopStep_bounded_two (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ) (c 
         · simp only [LoopAnn.size]; omega
       · rename_i d
         have hd := Val.lower_size d
-        have hIu := Val.lower_size (I.up (t := .val .uint))
+        have hIu := invFml_size (I.up (t := .val .uint)) (qs.map LoopQ.up)
+        simp only [List.map_map, Function.comp_def, LoopQ.size_up, Val.size_up] at hIu
+        change (invFml I.up (qs.map LoopQ.up)).tmSize ≤
+          3 * I.size + 2 + 6 * (qs.map LoopQ.size).sum at hIu
         have hcu := Val.lower_size (c.up (t := .val .uint))
         have hdu := Val.lower_size ((d.up (t := .val .uint)).up (t := .val .bool))
-        rw [Val.size_up] at hIu hcu
+        rw [Val.size_up] at hcu
         rw [Val.size_up, Val.size_up] at hdu
         apply Premise.Bounded.inv
-        · simp only [Fml.tmSize, Tm.size, LoopAnn.size]; omega
+        · simp only [LoopAnn.size]; omega
         · intro b hb; cases hb
         · simp only [Upd.length]; omega
         · simp only [Upd.tmSize, Rhs.size, LoopAnn.size]; omega

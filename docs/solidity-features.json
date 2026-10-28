@@ -1759,7 +1759,11 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Calculus/LoopInvariantWk.lean",
+        "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "tests/solc/QuantifiedDiamond.sol",
+        "docs/loops.md"
       ]
     },
     {
@@ -1776,7 +1780,11 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Syntax/Scoped.lean"
+        "Solidity/Syntax/Scoped.lean",
+        "Solidity/Calculus/LoopInvariantWk.lean",
+        "Solidity/Examples/Tactics/QuantifiedDiamond.lean",
+        "tests/solc/QuantifiedDiamond.sol",
+        "docs/loops.md"
       ]
     },
     {

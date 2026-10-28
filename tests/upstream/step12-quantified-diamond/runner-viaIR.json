@@ -1,0 +1,129 @@
+{
+  "pipeline": "viaIR",
+  "header": {
+    "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+    "sourceSha256": "44475906db14c7f30dc7714fd1eaba26ac9a6bb7fa8fdb4b46d4db7d4b19483f",
+    "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "source": "tests/solc/QuantifiedDiamond.sol",
+    "provenanceVersion": 1,
+    "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "validationStage": "analysis",
+    "settings": {
+      "viaIR": true,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "libraries": {},
+      "remappings": [],
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ]
+        }
+      }
+    },
+    "acceptedPragmas": [
+      [
+        "solidity",
+        "^",
+        "0.8",
+        ".34"
+      ]
+    ]
+  },
+  "results": [
+    {
+      "tag": "diamond",
+      "status": "proved",
+      "sourceId": 25,
+      "signature": "count()",
+      "reason": "",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "count",
+      "elapsedMs": 10732
+    },
+    {
+      "tag": "diamond",
+      "status": "proved",
+      "sourceId": 50,
+      "signature": "forCount()",
+      "reason": "",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "forCount",
+      "elapsedMs": 12001
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 70,
+      "signature": "nested()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "nested",
+      "elapsedMs": 28020
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 86,
+      "signature": "undefinedVariant()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "undefinedVariant",
+      "elapsedMs": 31871
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 108,
+      "signature": "fill()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "fill",
+      "elapsedMs": 23308
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 130,
+      "signature": "falsePost()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "falsePost",
+      "elapsedMs": 16070
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 146,
+      "signature": "constantVariant()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "constantVariant",
+      "elapsedMs": 11284
+    },
+    {
+      "tag": "diamond",
+      "status": "pending",
+      "sourceId": 153,
+      "signature": "nonterminating()",
+      "reason": "open proof goals",
+      "reading": "clean",
+      "invalidSpecification": false,
+      "function": "nonterminating",
+      "elapsedMs": 2212
+    }
+  ],
+  "failure": null
+}

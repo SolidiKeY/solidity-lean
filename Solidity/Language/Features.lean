@@ -919,12 +919,12 @@ def Feature.info : Feature → FeatureInfo
     { category := "statements", spelling := "while(c) s",
       scope := .model, current := .limited,
       requirement := r#"Reevaluate condition and distinguish termination, revert, break, continue and divergence."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 487 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 487 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Calculus/LoopInvariantWk.lean", "Solidity/Examples/Tactics/QuantifiedDiamond.lean", "tests/solc/QuantifiedDiamond.sol", "docs/loops.md"] }
   | .forStatement =>
     { category := "statements", spelling := "for(init;condition;post) s",
       scope := .model, current := .limited,
       requirement := r#"Handle omitted clauses, initializer scope and continue-through-post behavior."#,
-      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 486 }], localEvidence := ["Solidity/Syntax/Scoped.lean"] }
+      upstream := [{ path := "docs/grammar/SolidityParser.g4", line := 486 }], localEvidence := ["Solidity/Syntax/Scoped.lean", "Solidity/Calculus/LoopInvariantWk.lean", "Solidity/Examples/Tactics/QuantifiedDiamond.lean", "tests/solc/QuantifiedDiamond.sol", "docs/loops.md"] }
   | .doWhileStatement =>
     { category := "statements", spelling := "do s while(c);",
       scope := .model, current := .limited,

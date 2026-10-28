@@ -606,3 +606,7 @@ import Solidity.Semantics.NumericLowering
 import Solidity.Examples.Tactics.SignedNumericImport
 import Solidity.Syntax.Numeric
 import Solidity.Examples.Tactics.SelfPowerData
+
+import Solidity.Calculus.LoopInvariantWk
+import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Solkey.QuantifiedDiamond

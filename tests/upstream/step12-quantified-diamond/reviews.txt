@@ -1,0 +1,6 @@
+Final independent read-only finder and skeptic reviews used no Lean server or Lean workers.
+Both verified exact partial source rows, upstream28, Node37/0, axiom sets, shared edits, log hashes and known timing totals.
+Finder requested portable copies of five gate logs and the document scanner output; all are now retained.
+The document scanner stdout is base64-encoded to preserve its exact historical references without adding duplicate prose citations to that same scanner. Decode before hashing.
+Both confirmed the Loops display snapshot changes only inferred binder order, with no changed premises or expected execution results.
+No new soundness defect was reported.
