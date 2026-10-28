@@ -43,8 +43,10 @@ declaration selector inside its contract) are left to solc.
   become results; a terminal struct keeps its non-mapping, non-array fields in
   order. Supported types are elementary bool, address, integer and fixed bytes.
   Primitive UDVT inputs/results resolve through their declared elementary
-  underlying type. Enum mapping keys use canonical `uint8` plus an empty-revert
-  cardinality guard before storage access; enum-valued results remain refused.
+  underlying type. Enum results use a validated named conversion retaining
+  cardinality and the uint8 ABI marker; contract results retain address ABI kind. Enum mapping keys use canonical `uint8` plus an empty-revert
+  cardinality guard before storage access. Nominal getter input/result signatures
+  remain conservative dynamic-dispatch refusals.
   Explicit `uint256`/`int256` indexes are canonicalized.
 - Getter plans pair each generated input with its source key and ABI type, and
   each result with its expression. A completed plan has a required first result;
@@ -90,8 +92,8 @@ declaration selector inside its contract) are left to solc.
 
 ## Refused, and why
 
-- Enum-valued results, contract/function values, dynamic `bytes`/`string` keys
-  or results, and nested aggregate results. Primitive UDVT values and enum
+- Function-valued results, dynamic `bytes`/`string` keys or results, and nested
+  aggregate results. Primitive UDVT values and enum
   mapping keys have the supported cases above. An unsupported returned field
   refuses the whole getter: `bytes`/`string` are not silently omitted as arrays.
   Narrow integer constants use declaration-based inlining and checked source
@@ -111,13 +113,13 @@ compilation.
 
 - Import/remapping resolution across source units.
 - Reference-valued getters (they need the world's return-value interface) and
-  general tuple external returns; enum/contract/function getter results;
-  struct omissions in exact getters.
-- Inherited external function values with renamed model declarations (the
-  function-value packer hashes model names): one shared ABI identity for
-  source declarations and model functions.
+  general reference-valued tuple external returns and function getter results.
+  Exact array/mapping struct omissions are retained for the supported results.
+- Nominal getter function-value signatures and native/source erasure collisions
+  retain named dispatch refusals. Renamed external values now share the existing
+  source ABI identity (see the coverage-step continuation below).
 - Broader `using for`, qualified custom-error reverts, receive/fallback/world
-  registration, remaining constructor/immutable/visibility distinctions,
+  transaction/raw-calldata dispatch, remaining constructor/immutable/visibility distinctions,
   and the erasure of mutability in function types.
 - `#verify`, `#counterexample` and `#difftest` may still show generated helper
   obligations; the source testing API does not.
@@ -1861,3 +1863,168 @@ application checks after export. All previous commits, reports and exports are
 preserved. No push or merge is performed. Integration should keep the narrow
 Admission/Contract/Testing/API diagnostic changes together with their controls;
 no unpublished work from another lane is assumed.
+
+
+## Coverage step 1: executable nominal getters and inherited payment entries (2026-10-27)
+
+This isolated branch starts at current origin/master
+`f4dee4a29c2e208b36db4a4161a4723c735cd775`. Historical groups 01–10 and their
+reports above are preserved. The runtime was actually checked in the attached
+cloud clone: Lean 4.24.0, Lake 5.0.0-src+797c613, and `Solidity.KeySort` built
+successfully. The saved environment label was not used as runtime evidence.
+
+### Implemented boundary
+
+Enum scalar, mapping and retained struct-field getter results lower through the
+existing named enum conversion, preserving cardinality and uint8 ABI metadata.
+Contract results and contract mapping keys use the existing address carrier.
+The getter plan still omits only ordinary array and mapping struct fields;
+bytes/string and unsupported returned fields refuse the entire getter.
+The native typed return interface is unchanged. General reference/function
+getter results and reference-valued tuple external returns remain refused.
+
+Finite dispatch now uses the ABI identity already shared by `fnPure`,
+`fnSelector?` and external dispatch. The stale equality between source and model
+helper names is removed; visibility, exact source signatures, candidate and
+override identities remain checked. Nominal getter signatures include mapping
+keys as well as results and conservatively refuse dynamic calls; a lowered
+contract key must not silently become an ordinary address source signature.
+A public uint overload with an internal bool companion is executable; the
+address/uint native-erasure collision remains refused.
+
+Empty-data full self value calls select receive across the entire validated C3
+lineage, then a no-argument/no-return payable fallback only when no receive
+exists anywhere in that lineage. The selected body is registered under the
+existing model receive entry and retains its original receive/fallback source
+role. Its dependency joins both function and initializer closure. Existing own
+receive registration/dependencies are preserved. A newly selected handler missing
+its declaration identity refuses the malformed contract before the optional
+admission scan, including historical unchecked headers. Newly registered handlers with
+modifiers, user-helper calls, nonpayable/byte-oriented fallback shapes, or
+send/transfer stipend calls retain `solidity.selfPayment`. This is not general
+contract-world or arbitrary raw-calldata dispatch.
+
+### Kernel and refusal evidence
+
+`tests/solc/EntryPointsLeft.sol` has separately pinned modern 0.8.38 legacy and
+viaIR fixtures. `tests/upstream/EntryPointsLeft.lean` checks 42 certificates:
+32 normal executions, eight real false-observation panics and two invalid-enum
+Panic(0x21) controls. Nonzero-value handler tests use self address 7, external
+caller 9, outer msg.value 13 and available balance 5 in a raw-body environment: the handler sees value 1
+and sender 7. The unchanged new source funds premise is retained. A
+write-then-revert receiver preserves the caller's prior storage. Own receive
+helper behavior, receive precedence, overrides, renamed values and valid
+overload selection have concrete normal-return witnesses. Twenty-two refusal
+guards and four ABI-kind guards accompany these certificates.
+
+All 42 theorem axiom outputs are the standard `propext`, `Classical.choice`,
+`Quot.sound` set. Per-file MCP diagnostics pass for both production files and
+both test files. The MCP scratch verifier initially lost relative fixture
+paths; an untracked identical-source mirror with absolute data paths verifies
+the headline theorem cleanly. The original direct-file axiom outputs remain
+the authoritative checks. These are kernel-checked model executions, not a
+compiler-correctness or EVM-equivalence theorem.
+
+`tests/upstream/EntryPointsAdmission.lean` checks malformed/empty/oversized and
+duplicate enum metadata, absent native enum identity, nominal contract keys and
+malformed inherited selector propagation. Missing own/inherited fallback identities
+are tested under both modern and unchecked admission callbacks. Mutated compiler metadata is labeled
+as refusal testing, not authentic compiler output. No statement/rule, untyped
+representation, core dependency, new axiom or raised heartbeat/fuel/search limit
+is introduced. Small frontend helper extraction keeps `readContract` within
+its unchanged 200,000-heartbeat limit.
+
+### Upstream observations and remaining refusals
+
+Fresh before/after replays restore the exact starting frontend within this same
+clone, then restore the saved implementation; they never use another cloud
+checkout. The original fixture source and expectations are unchanged. Primitive
+`getters/value_types.sol` matches all nine observations in both modes.
+`getters/struct_with_bytes_simple.sol` remains broken on reference return
+admission in both modes. `receive/inherited.sol` remains adapter-blocked on
+`() ->`; `fallback/inherited.sol` remains adapter-blocked on `(): 42 ->`.
+`types/mapping_contract_key_getter.sol` remains host-adapter-blocked. None of
+these remaining rows is reclassified as passing because the new source controls
+execute. The inventory rows therefore remain partial, with no corpus pass-count
+increase claimed. Exact reports and final gate metrics are recorded in the
+step's new evidence record; all older reports remain intact.
+
+### Independent review
+
+Read-only finder and skeptic reviews used no Lean worker. Confirmed findings
+were fixed: preserve own-receive helper dependencies; include nominal mapping
+keys in dispatch refusal; use a compiler-valid overload control; and establish
+nonzero sender/value framing, rollback, exact enum ABI kind and Panic(0x21).
+A further finder pass pins named refusal diagnostics and adds a static contract-key getter success witness. Final source/API, upstream, trust and structural gate outcomes are appended
+when complete, with resource stops kept distinct from passing evidence.
+
+
+### Sealed step-1 validation (2026-10-28)
+
+The [validation record](../../tests/upstream/entry-points-left-validation.json)
+contains exact source/compiler hashes, all 42 theorem axiom outputs, 21 full
+source API reports, complete original upstream result objects, commands,
+resource measurements and retained failed/interrupted attempts.
+
+| Final check | Actual result |
+|---|---|
+| Combined frontend roots | Pass, 262 jobs, 47.198 seconds after cached recovery |
+| Kernel certificates | 42 pass, 26.578 seconds, standard axioms only |
+| Admission controls | Pass, 1.824 seconds, including unchecked missing identities |
+| New source/API suite | 22 pass, 342.912 seconds |
+| Existing affected suite | 61 pass, one aggregate timeout; 664.142 seconds; blocked |
+| Original getter rows separately | All 16 unchanged expectations match, 451.040 seconds |
+| Final MCP | Both production and both test files pass diagnostics; headline axioms clean |
+| Original upstream fixtures | Same complete before/after objects; no pass-count increase |
+
+The source/API suite recompiles with the separately pinned 0.8.34 compiler
+(SHA-256 c8649f8d…61d8), using its default legacy pipeline. The 42 proof
+certificates instead use the pinned 0.8.38 legacy/viaIR fixtures. Both consume
+the same final Solidity source bytes.
+
+The full 43-row new source reports retain 21 proved, six internal, five pending
+and 11 unsupported rows. Four pending rows are deliberately false observations;
+the separate untagged ExternalOverride.target row also remains pending and is
+not counted as a proved property.
+
+The original aggregate PublicGetters source test reaches its unchanged
+300-second job bound. Its entire original expectation table then matches in
+one-row batches with the same per-job limit. No assertion or expectation was
+changed and no heartbeat, fuel or search limit was raised. The focused result
+does not relabel the original aggregate timeout as passing or as an expected
+semantic failure; the combined affected suite remains blocked on that run.
+
+Trust passes with zero findings (714 sources, 240 inventoried sites), module
+reachability passes (700 reachable, zero orphans), layering passes (152 core
+modules, no elaborator reachability), strict automation passes (491 automatic,
+61 budgeted, 11 refuted, zero pending), and generated inventory is current.
+The static frozen TestSuite audit passes (552 derived, 11 refuted, one excluded,
+two skipped), using the repository snapshot and its adjacent pin explicitly.
+The setup-path attempts failed because that copy lacks its pin. Documentation
+path auditing retains exactly the starting findings and is not claimed passing.
+
+The first combined attempt remains blocked: 1,267.685 seconds and 3.37 GiB peak
+descendant RSS, with the unchanged TermSize module failing to create a thread.
+Even -j1 allowed auxiliary elaboration threads. The untracked check configuration
+additionally sets Elab.async=false; TermSize then passes in 32 seconds and the
+final reader in 29 seconds within its original 200,000-heartbeat budget. No
+limit was raised. The JSON records each final phase and the separate focused
+check, including failed attempts rather than treating them as passing evidence.
+
+The container exposes no systemd scope bus or writable delegated cgroup.
+Checks use a hard inherited 12 GiB address-space limit per process, a 12 GiB
+descendant-RSS supervisor and 2 GiB available-memory reserve under the executor
+kernel 16 GiB cap. This is not a delegated hard 12 GiB aggregate cgroup guarantee.
+No OOM or RSS-guard stop occurred. Heavy checks were sequential, with
+LEAN_NUM_THREADS=1, explicit -j1 and no concurrent Lean server/build. No core
+syntax, semantics, rule or soundness module was edited; full default-library,
+run-lean.sh and Corpus builds were not run.
+
+Final read-only finder and skeptic reviews confirm the direct identity guard
+precedes optional admission, exact named refusals are pinned, static contract
+keys execute, and all fixture/import hashes match. They opened no Lean workers
+and found no remaining confirmed implementation issue. All four inventory rows
+remain partial. Reference/function return frames, nominal dynamic signatures,
+unsupported handler shapes, raw transaction dispatch and the aggregate source
+test timeout remain explicit handoff limits. Kernel model certificates and
+typed-interpreter observations are not compiler/EVM equivalence proofs.

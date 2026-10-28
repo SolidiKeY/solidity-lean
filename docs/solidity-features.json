@@ -495,7 +495,7 @@
       "syntax": "virtual; override; override(A,B)",
       "scope": "model",
       "current": "partial",
-      "requirement": "Validate overrides in solc and retain distinct base bodies and the selected implementation.",
+      "requirement": "Validate overrides in solc, retain distinct base bodies and the selected implementation, and use retained source ABI identities for renamed inherited/overloaded external function values. Native/source type-erasure collisions remain refused.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -503,7 +503,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/EntryPointsLeft.sol",
+        "tests/upstream/EntryPointsLeft.lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "scripts/entry-points-left.test.mjs",
+        "docs/feature-work/declarations-metadata.md"
       ]
     },
     {
@@ -606,7 +611,7 @@
       "syntax": "receive() external payable",
       "scope": "model",
       "current": "partial",
-      "requirement": "Run the receive body for the modeled empty-data payment entry; preserve payable checks and callback behavior.",
+      "requirement": "Own receive behavior is retained. Selected inherited receive bodies are registered for empty-data self value calls in C3 order, with sender/value framing and failure rollback. Newly registered stipend, modifier and helper-frame paths remain explicitly refused.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -614,7 +619,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/EntryPointsLeft.sol",
+        "tests/upstream/EntryPointsLeft.lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "scripts/entry-points-left.test.mjs",
+        "docs/feature-work/declarations-metadata.md"
       ]
     },
     {
@@ -623,7 +633,7 @@
       "syntax": "fallback(); fallback(bytes calldata) returns(bytes memory)",
       "scope": "model",
       "current": "partial",
-      "requirement": "Model the no-argument body only under explicit entry assumptions; the byte-oriented overload also uses excluded raw call data/return data.",
+      "requirement": "A selected no-argument payable fallback supplies modeled empty-data self value calls only when the entire C3 lineage has no receive. Nonpayable, byte-oriented, modifier/helper-frame and stipend paths retain explicit refusals; arbitrary raw calldata dispatch is not modeled.",
       "upstream": [
         {
           "path": "docs/grammar/SolidityParser.g4",
@@ -631,7 +641,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "tests/solc/EntryPointsLeft.sol",
+        "tests/upstream/EntryPointsLeft.lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "scripts/entry-points-left.test.mjs",
+        "docs/feature-work/declarations-metadata.md"
       ]
     },
     {
@@ -725,7 +740,7 @@
       "syntax": "synthesized getters; public override variable",
       "scope": "model",
       "current": "partial",
-      "requirement": "Primitive/UDVT getters, enum mapping keys, interface overrides and struct array/mapping omissions are implemented. Reference returns, enum-valued results, contract/function values and unsupported aggregate shapes remain refused.",
+      "requirement": "Primitive/UDVT, enum and contract-valued getter results, nominal mapping keys, interface overrides and exact struct array/mapping omissions are executable. Reference/function results and general reference-valued external return frames remain refused; nominal getter function-value signatures stay conservative refusals.",
       "upstream": [
         {
           "path": "libsolidity/ast/Types.cpp",
@@ -735,7 +750,12 @@
       "localEvidence": [
         "Solidity/Frontend/SolcJson/Getters.lean",
         "Solidity/Examples/Tactics/PublicGetters.lean",
-        "scripts/public-getters.test.mjs"
+        "scripts/public-getters.test.mjs",
+        "tests/solc/EntryPointsLeft.sol",
+        "tests/upstream/EntryPointsLeft.lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "scripts/entry-points-left.test.mjs",
+        "docs/feature-work/declarations-metadata.md"
       ]
     },
     {

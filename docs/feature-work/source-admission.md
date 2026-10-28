@@ -69,8 +69,8 @@ refused until recursive cardinality checks exist.
 
 Function-value calls follow [finite dispatch](finite-dispatch.md), including
 [getter candidates](finite-dispatch.md#getter-targets) and the restricted
-zero-argument internal memory-byte return. Other reference signatures and
-renamed inherited external values retain their explicit refusal boundaries.
+zero-argument internal memory-byte return. Other reference and nominal getter signatures retain explicit refusal boundaries.
+Renamed inherited external values use retained source ABI identities.
 
 ## Refused, and why
 
@@ -79,8 +79,10 @@ renamed inherited external values retain their explicit refusal boundaries.
 - Unknown node kinds, literal/operator/location shapes, missing type or prefix
   metadata, and duplicate or missing declaration identities. The declaration
   index is finite, and depth and traversal are bounded.
-- Payment dispatch that needs an inherited receive or fallback, or receive
-  modifiers, until that dispatch is implemented.
+- Newly registered inherited/fallback payment dispatch needing stipend behavior,
+  modifiers, user-helper frames or nonpayable/byte-oriented fallback. No-argument
+  payable handlers execute on the existing empty-data self-value-call path;
+  arbitrary raw calldata/transaction dispatch remains outside that path.
 - An effectful receiver of a stored function member (a call, an assignment, an
   increment, a compound index): the native selector lowering reads its receiver
   twice, which would duplicate effects or callbacks.

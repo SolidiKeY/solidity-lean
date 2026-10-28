@@ -202,7 +202,7 @@ test('private candidates cannot become self external targets through native type
   }`, diagnostic('entry', 'solidity.functionDispatch'));
 });
 
-test('external inherited selector renaming is an explicit boundary', () => {
+test('external inherited selector renaming uses retained source ABI identity', () => {
   scopeCheck(`contract Base {
     function target(uint x) external pure returns(uint) { return x; }
   }
@@ -211,7 +211,9 @@ test('external inherited selector renaming is an explicit boundary', () => {
       function(uint) external pure returns(uint) h = this.target;
       h(1);
     }
-  }`, diagnostic('entry', 'solidity.functionDispatch'));
+  }`, `unless (row "entry").any (fun (r : SolcFun) => r.body.isOk &&
+      r.sourceScope.diagnostic?.isNone && !r.calls.isEmpty) do
+    throw (IO.userError "renamed external target was not admitted")`);
 });
 
 test('initializer dispatch is deployment scope and does not leak into ordinary entry points', () => {

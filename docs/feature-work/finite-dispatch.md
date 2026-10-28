@@ -55,9 +55,10 @@ source/native simulation or of extractor completeness.
   uint). All candidates are checked, whatever a points-to approximation would
   omit.
 - External dynamic calls with several return values, as in native dispatch.
-- External candidates declared private/internal, and inherited or overloaded
-  external candidates whose model name differs from the source name (native
-  selectors hash the model name). Internal inherited dispatch is supported.
+- Native-compatible candidates declared private/internal and source-kind
+  erasure collisions. Renamed inherited/overloaded external candidates use the
+  existing retained source selector/signature identity on packing and dispatch;
+  no generated helper name is hashed.
 
 Typed states still admit unassigned function tags; the dispatcher reverts on
 them.
@@ -99,7 +100,9 @@ not a simulation theorem.
   until an exact signature is known, even when another target would do.
   Unrelated static calls are unaffected.
 - Reference-valued getters are not shortened and missing metadata is not
-  guessed.
+  guessed. Supported static enum/contract getters retain nominal signatures as
+  unknown source candidates, including mapping keys, so dynamic calls cannot
+  erase them into ordinary uint8/address signatures.
 
 ### Tests
 
