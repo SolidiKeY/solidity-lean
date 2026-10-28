@@ -628,17 +628,23 @@ Costs that guide work:
   (`sortedLe`: nine instances, nineteen reads, about two thousand nodes).
   A region refutation can be a term too large to build; no construction
   does better in general (a sorted mapping read at three far keys).
-* **The pinned gaps**: in `Fml.inTarget` (by the kernel, `*_inTarget`) and
-  answered *unknown*.  One leaf a shape:
+* **The original gap witnesses**: all six statements and their kernel
+  `*_inTarget` certificates are retained. The two-anchor witness below is
+  now proved; the other five remain open. One leaf a shape:
   * `gapKIntTwoAnchors` (`Examples/DecisionKInt.lean`,
-    `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): key sums that differ past
-    every anchor, Presburger alternation over ℤ.  Needs an unbounded binder
-    in `LFml`/`QFml` (`AEnv`, `LTm`, `QArith.compile`) or Cooper's test
-    points (`Fml.kencAtA?` trying each anchor per comparison, the
-    disjunction of the instances).  With one unbounded and one bounded
-    threshold (`∀ int z. net(0) == z → z > 0`, not pinned) a one-point rule
-    decides it: a `Fml.onePoint` pass before `Fml.kencB`, its lemma by
-    `Fml.holds_sb`.
+    `(∀ int z. ∀ int y. y > z → y > 0) → 0 == 1`): **closed by an exact
+    test point**. `∀ y : Int. y > z → y > k`, for an outer KeY-int local
+    `z` and literal `k`, is equivalent to `z >= k`; if `z < k`, `y = k`
+    refutes it. `Calculus/KIntTwoAnchors.lean` proves the statewise
+    equivalence and certifies the recognized intrinsic shape. `kencBind`
+    uses it only after the existing anchor encoder fails. The original
+    leaf is kernel-covered and has exact `.proved` certificates for
+    `decideKEnc`, `decideLeaf` and `decideGoal`. Other multi-threshold
+    linear shapes still need more reduction; no general unbounded
+    Presburger completeness is claimed. The unpinned equality/ledger
+    one-point shape remains separate work. See the
+    [task evidence and limits](feature-work/kint-two-anchors.md); the recovered full-suite
+    resource gate and all 26 strict module timings now pass.
   * `gapQuantLedger` (`(∀ uint y. y > 0) → net(0) > 0`): a negative
     quantifier in a leaf that reads the ledger.  Next: the ledger cut ahead
     of `quantReduction?`'s abstraction, the entries as parameters of the
@@ -688,7 +694,8 @@ completeness proof through the stages.
    (features 5, 14, 22).
 3. KeY `int`: done for linear terms, ledger reads and writes, binders of
    either polarity (features 8, 9, 25, 26, 30, 31).  Left:
-   `gapKIntTwoAnchors`, `gapQuantLedger`.
+   `gapQuantLedger`. The strict two-threshold implication in
+   `gapKIntTwoAnchors` is closed by the test point above.
 4. Quantifiers in the arithmetic: done (features 3, 6).
 5. The array property fragment: done for mappings at any depth, `bool`,
    `uint` and `int` keys, the ledger, dynamic storage arrays at roots
@@ -811,10 +818,11 @@ conjunct separately.  The only `maxRecDepth` settings left are
 ## M7-close · The M7 lanes closed (done at step 1, 2026-10-26)
 
 Features 30–31 (`kintneg`) and 32 (`apfarrays`) merged; steps 2–5 of the
-original plan moved to M7-next.  Still pinned, in `Fml.inTarget` and
-answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
+original plan moved to M7-next. At that milestone, the six retained
+witnesses were in `Fml.inTarget` and answered unknown (M7, "What is not proved"): `gapKIntTwoAnchors`,
 `gapQuantLedger`, `gapMemInnerNeg`, `gapMemParam`, `gapMemStruct`,
-`gapWrittenMemory`.
+`gapWrittenMemory`. The later [two-anchor follow-up](feature-work/kint-two-anchors.md)
+certifies `gapKIntTwoAnchors` as proved; the other five witnesses remain open.
 
 Group 07 direct file-backed profiling found its coverage proofs take about
 one second each; the final verdict evaluation is the slow stage, rather than

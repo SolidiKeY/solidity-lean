@@ -665,6 +665,19 @@ old one, computed from the type (`TVal.overlay`, one component at a time:
 that overlay.  `docs/solkey-feedback.md` carries the request that solkey drop
 the fold.
 
+### Two-threshold integer quantifiers (Lean-only)
+
+`Calculus/KIntTwoAnchors.lean` is exact arithmetic preparation, not a new
+SolKey program taclet. It keeps the existing KeY-int `gt`/`ge` symbols:
+`∀ y : Int. y > z → y > k` becomes `z >= k`. Side conditions: both
+comparisons read the same innermost integer, `z` is an outer KeY-int local,
+`k` is a literal, and both Boolean observations are exactly `true`.
+The thresholds are total and independent of `y`; `y = k` is the
+counterexample point when `z < k`. A typed shape certificate and
+`Fml.holds_kintTwoAnchor` prove equivalence at every state and polarity.
+No term/formula syntax or printer is added. Other shapes, including
+symbolic multiplication, are not admitted by this preparation.
+
 ### The update vocabulary (`Solidity/Update.lean`)
 
 The sorts are KeY's, renamed to plain Lean identifiers; an element's
