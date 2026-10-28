@@ -1327,7 +1327,10 @@
       "localEvidence": [
         "Solidity/Syntax/Grammar.lean",
         "Solidity/Examples/Tactics/AggregateSlices.lean",
-        "docs/feature-work/aggregates.md"
+        "docs/feature-work/aggregates.md",
+        "Solidity/Syntax/Elab/SliceCopy.lean",
+        "Solidity/Examples/Tactics/SliceReferenceCopies.lean",
+        "docs/calldata-slice-copies.md"
       ]
     },
     {

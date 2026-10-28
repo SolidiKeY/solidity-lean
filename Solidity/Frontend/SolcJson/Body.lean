@@ -1762,6 +1762,16 @@ partial def expr (j : Json) : PM String := do
   -- a calldata slice, a view of the caller's data: `sol{}` reads it as one
   -- (`RawStmt.sliceViews`; docs/semantic-gaps.md, "Bytes and strings")
   | "IndexRangeAccess" =>
+    -- Aggregate identifiers were omitted by older fixture trimmers. Inspect
+    -- the source leaf name as well, before tyText erases nominal types.
+    let leaf := (J.tyStr j).takeWhile (· != '[')
+    let leaf := if leaf.startsWith "enum " then leaf.drop 5 else leaf
+    if ((J.tyId j).splitOn "t_userDefinedValueType").length > 1 then
+      unsupported "a calldata slice of nominal UDVT elements needs declaration identity and range premises"
+    if (← get).declarations.any (fun d =>
+        ["UserDefinedValueTypeDefinition", "EnumDefinition"].contains (J.kind d) &&
+        (leaf == (J.str? d "canonicalName").getD "" || leaf == (J.str? d "name").getD "")) then
+      unsupported "a calldata slice of nominal enum/UDVT elements needs declaration identity and range premises"
     let b ← operand (← PM.lift (J.get j "baseExpression")) false
     let i ← match J.opt j "startExpression" with
       | some e => expr e

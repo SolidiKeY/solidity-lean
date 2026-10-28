@@ -149,6 +149,7 @@ commands; it never enters the core import graph.
 | `Syntax/Elab/Context.lean` | Named contexts (`NCtx`), elaborator bindings with attached width/ABI metadata (`LocalTy`, `ECtx`), and the raw passes the typing leaves alone: traversals, `calldata` parameters, block locals renamed apart, calldata slices, the recursion thunk. |
 | `Syntax/Elab/Values.lean` | Memory objects, function values, selectors and external function values, narrow widths, byte types; implementation helpers have no source function values. |
 | `Syntax/Elab/Lower.lean` | Inlining a call, loops lowered, `abi.*`/`string.concat`/`bytes.concat` and the ABI of nested types. |
+| `Syntax/Elab/SliceCopy.lean` | Primitive and fixed primitive-row slice copies through existing typed allocation, loops and stores; fresh row identities and explicit unsupported-reference refusal. |
 | `Syntax/Elab/Arms.lean` | `ElabRec` and the large arms that take it (`hoistWith`, `abiEncodeWith`, `elabCallRetWith`, `hoistStmtWith`, `elabStmtPWith`, `elabStmt1With`). |
 | `Syntax/Elab/Stmt.lean` | The `mutual` block that ties the arms (`elabRec`): statements, calls, blocks. |
 | `Syntax/Quote.lean` | The scoped syntax quoted (`Prog.quote`, `Idx` as `here`/`there`, proofs `Eq.refl`), contexts shared and the term hash-conses (`quoteShared`); `Prog.define` declares a block for the kernel to check. |
@@ -774,6 +775,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/AggregateSlices.lean` | Stable slice identities, endpoint/index effects, binary schedules and catchable bounds panic. |
 | `Examples/Tactics/SliceCopies.lean` | Primitive slice materialization, internal frames, returns, storage and hash consumers; finite execution certificates lifted to the unbounded run; readonly and shape refusals. |
 | `Examples/Tactics/SliceCopiesImport.lean` | Pinned modern Solidity 0.8.38 source regression for slice copies, calldata locations and non-array aliases. |
+| `Examples/Tactics/SliceReferenceCopies.lean` | Both-pipeline source certificates for fixed primitive-row slice copying, independent aliases, rebinding, widths, lazy branches, bounds and nominal refusals. |
 | `Examples/Tactics/StorageSteps.lean` | One storage statement form at a time, as `apply` walks. |
 | `Examples/Tactics/StorageSuite.lean`, `Examples/Tactics/StorageDelete.lean`, `LedgerDelete.lean` | solkey's taclet suite on storage; `delete`; a struct holding a mapping deleted. |
 | `Examples/Tactics/Branch.lean`, `Revert.lean` | Two-goal splits; box and diamond on `revert`, `require`, `assert` (a check: `[ assert(false); ] true` is not valid). |

@@ -211,9 +211,14 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   for ((n, T), a) in d.params.zip args do
     -- a reference argument's narrow positions, on the expression as written,
     -- before a capture names it (`elabCallRet` checks the capture again)
-    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
+    if T matches .ref _ then
+      unless a.inlineArrayRoot do
+        ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
     let (Q, a) ← hoist a
     P := P ++ Q
+    -- Inline projections now have their independently inferred shape. Check
+    -- before capture can bind the argument at the parameter's reference type.
+    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
     let Γ ← nctx
     let (Q, a) ← match T with
       | .prim p => do
