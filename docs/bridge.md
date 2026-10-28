@@ -365,7 +365,7 @@ The full instruction correspondence is **not complete**; what remains:
 |---|---|
 | `keccakMap`, `keccakArr`, `sload`, `sstore` | Numeric slot interpretation, concrete hashing/memory setup, and a storage relation handling address aliases. |
 | `mload`, `mstore`, `mloadAt`, `mstoreAt` | Word-cell to byte-memory relation, address scaling and macro expansion for fixed addresses. |
-| `jump`, `jumpi`, `loop` | Typed raw-byte layout preparation exists below; upstream decoding/valid-destination proofs and structured execution/loop simulation remain open. |
+| `jump`, `jumpi`, `loop` | General fetched-run simulation under explicit recursive decoder/layout certificates is proved below. Automatic image-to-certificate construction, scanner membership and gas/halting-driver refinement remain open. |
 | `call` | Seven-operand ABI, account/code execution, address truncation, balance bounds and callee behavior corresponding to `accepts`. |
 | `revert` | Return-data operands and the driver's halting relation. |
 
@@ -377,7 +377,7 @@ injective encoding of all symbolic slots into finite EVM words. These results
 rule out an unrestricted one-opcode identity theorem; they do not rule out
 verified macro lowerings under explicit representation assumptions.
 
-#### Assembly layout and local control macros
+#### Assembly layout and conditional control-flow simulation
 
 `Bridge/SolidityBridge/ExternalEvm/Assembly/Layout.lean` resolves labels in the
 existing `List Instr`; it introduces no source intermediate language. A label
@@ -396,14 +396,16 @@ ISZERO/conditional exit, body and absolute back edge. Its body begins at
 and all nested branch-reference bytes. PUSH32 accepts `Fin W`, so its encoder
 cannot silently truncate an out-of-range input.
 
-This is **layout preparation, not completed compiler refinement**. The byte
-checks do not prove upstream PUSH32 decoding, scanner-recognized JUMPDESTs,
-code placement, or execution simulation. For example, placing a `0x5b` image
-after a PUSH32 opcode can put that byte inside its immediate data. A future
-upstream layout relation must exclude that placement and expose actual fetch
-and valid-destination assumptions. General structured sequence/branch/loop simulation
-and divergence correspondence remain open; the existing same-stack JUMP and
-JUMPI obstruction proofs are unchanged. Source assembly remains excluded.
+`Image` alone is a raw-byte layout certificate, not an execution certificate.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Placement.lean` now proves that an actually placed image's labels decode as
+upstream JUMPDESTs, and that the target frame preserves its code slice. This
+direct decoding fact is distinct from scanner membership: placing the image
+after a PUSH32 opcode can put its first byte inside the preceding immediate.
+The general simulation below therefore requires explicit actual decoder and
+address certificates; it does not infer them from raw byte checks. The existing
+same-stack JUMP/JUMPI obstructions are unchanged. Source assembly remains excluded. No Solidity frontend admission changed,
+and the legacy/viaIR/optimizer fixture matrix and source-feature inventory
+are not promoted by this optional instruction-level refinement.
 
 `Bridge/SolidityBridge/ExternalEvm/Assembly/LayoutChecks.lean` checks taken and
 untaken core branches, zero offsets, exact continuation targets, too-large
@@ -446,7 +448,7 @@ The focused targets `SolidityBridge.ExternalEvm.Assembly.LayoutChecks`,
 `SolidityBridge.ExternalEvm.Assembly.ControlChecks` and
 `SolidityBridge.ExternalEvm.Assembly.Loop` pass (exit 0), including all paired
 observations and headline axiom audits. Their actual axiom union is
-`propext`, `Classical.choice`, `Quot.sound`. The final pinned warm check took 6.956 s
+`propext`, `Classical.choice`, `Quot.sound`. The prior milestone's pinned warm check took 6.956 s
 at 1,788,063,744 bytes peak sampled group RSS. Loop checking took 17.019 s at
 3,387,580,416 bytes. Direct ten-step elaboration had hit the existing 200,000
 heartbeat limit; separate closed decoder proofs and step equations repaired
@@ -455,19 +457,93 @@ copies with package/library `weakLeanArgs = ["-j1"]`, `LEAN_NUM_THREADS=1`, and
 the workload guard described above; the copies and exact commands are retained
 in the delivered evidence.
 
-The **full default Bridge gate is BLOCKED**, not passed: its guarded cold
-build timed out (exit 75) after 1,200.115 s at 2,400,370,688 bytes peak sampled
-group RSS while building existing dependencies. Azure cache requests returned
-proxy HTTP 403; on-disk source-build progress was preserved. The narrower
-upstream evaluator closure did pass from source (1,053 jobs, 957.962 s,
-1,724,338,176 bytes). Orphan, layer, strict automatic, trust and vendor hash
-gates pass. The prose-path gate still reports 20 historical missing references;
-all diagnostic-producing files match the recorded base byte-for-byte.
-Independent read-only finder/skeptic reviews found no defect in the restricted
-layout, local macro or constant-loop claims, and confirmed that general
-assembly refinement remains open. The original full assignment is incomplete;
-this is a proved independent increment, with the full regression gate and
-remaining general simulation obligations retained explicitly.
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Composition.lean` introduces `Boundary`: a bounded source label,
+its exact absolute PC, numeric stack interpretation, and upstream account,
+environment and memory frame. `exec_simulation` inducts over the actual core
+runner, carrying pending skips through source suffixes without executing their
+bytes. `PrimitiveLayout` contains actual packet decodings and address equations,
+not target execution premises. The primitive boundary lemmas derive fetched
+executions from those facts; `decoded_run_simulation` composes numeric PUSH,
+POP and forward branches. `Bridge/SolidityBridge/ExternalEvm/Assembly/CompositionChecks.lean` supplies an inhabited image
+at PC 5 with boundaries 5/40/74/108. Its simulation is universal over conditions
+and stack tails, with actual taken/untaken observations (five/seven steps),
+scanner controls, and valid/invalid destination-set controls against `X`.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/Structured.lean` proves general loop composition. `LoopLayout`
+contains actual decoder/address facts for the nested condition/body slices,
+four-step guard and backedge. `decoded_loop_turn` obtains condition/body runs
+from their own refinements, then composes the routing macros. It does not
+assume a whole-loop target trace. Successful core loops cannot export a pending
+skip. Mutually indexed `DecodedCode`/`DecodedSite` proof certificates follow the
+existing instructions and support arbitrary nested loops; they are not another
+executable source language. `certified_run_simulation` proves a general successful
+core-run versus actual fetched-run correspondence under these certificates.
+`decoded_loop_divergence_prefixes` maps every still-running source prefix to
+an actual target prefix of at least that length, retaining the core's divergent
+`.fault` classification. It does not equate that classification with a driver
+failure or claim finite-fuel, gas-checking `X` divergence.
+
+`Bridge/SolidityBridge/ExternalEvm/Assembly/StackLoopChecks.lean` inhabits the recursive loop certificate for a
+nonconstant stack-consuming loop. Any finite list of nonzero numeric conditions
+followed by zero terminates at PC 72, preserving the remaining stack and account/environment state.
+This is a kernel theorem for variable-length input, not only a sampled run.
+Executable controls cover zero continuing turns and three continuing turns (29 fetched
+steps), source fault/target underflow on empty input, and actual scanner output.
+
+The upstream scanner API itself is opaque: a retained negative API probe
+prints `D_J_aux` as `opaque`, rejects `D_J_aux.eq_def` as unknown, and cannot
+unfold its recursive equation with `rfl`. This is evidence of the available
+API boundary, not a scanner-correctness theorem. The concrete PUSH32-prefix
+control directly decodes JUMPDEST while the actual scanner excludes it.
+
+The general conditional theorem is proved, but **automatic certificate
+construction for every emitted image and scanner/driver refinement remain
+open**. `assemble` still returns `Image`, not `DecodedCode`. The successful-run
+theorem covers the supported numeric instruction fragment and explicit local
+layout assumptions; it is not universal Solidity source coverage or a theorem
+for faults/reverts outside that fragment. Positive one-step evaluator fuel and
+zero charged gas are unchanged. No proof/search/fuel budget was raised.
+
+The complete focused proof closure passes with pinned actual axiom union `propext`,
+`Classical.choice`, `Quot.sound`: rebuilding the new proof closure took
+18.126 s at 2,096,726,016 bytes peak sampled group RSS. A warm check,
+including the negative PUSH-prefix scanner control, passed in 6.548 s at
+2,126,405,632 bytes. Adding an exact kernel `StackUnderflow` control then
+passed the focused closure in 5.945 s at 2,044,481,536 bytes. Independent read-only finder and
+skeptic reviews found no defect in the general conditional theorem, its
+inhabited branch/variable-loop instances, placement proof or prefix claims;
+both explicitly retained the certificate-generation/scanner/driver limitations.
+Layer, strict automatic, trust and core orphan gates pass. A separate optional
+import/trust check confirms every new module is reachable from the Bridge root,
+no import cycle or forbidden proof/budget token was introduced, and Widths does
+not import the task modules. The prose-path gate still exits 1 for exactly the
+20 historical missing references; its diagnostic log and cited files match the
+previous milestone/base.
+
+The original full default Bridge attempt remains **failed**, exit 75 at
+1,200.115 s / 2,400,370,688 bytes. Its log accounts for 1,176.664 s across 384
+completed cold jobs, rather than identifying one hung dependency. Azure cache
+requests returned proxy HTTP 403. Staging the cached ModelTheory closure passed
+in 3.625 s; staging the Bridge root then exposed unchanged `Arith.Widths` proof
+failures and a `TermSize` thread-creation crash (exit 1 overall, 844.709 s /
+3,955,150,848 bytes). The root dependency had initially bypassed the temporary
+`-j1` config. Untracked manifest overrides now select single-thread configs for
+transitive packages too. Explicit `-j1` alone still crashed `TermSize`; serial
+elaboration (`-DElab.async=false`) passed in 27.974 s / 1,435,271,168 bytes,
+without changing its source, stack size, proof limits or observations. The
+repaired full build also checked it successfully. `Arith.Widths` is identical
+to the recorded base and still fails at stale `synth.eq_3` rewrites; it is not
+modified by this assignment. The repaired full default command finished with exit 1 in 556.431 s at
+2,396,921,856 bytes; its only failing target was unchanged `Arith.Widths`.
+The documented Plausible runner passed 36 rule cases × 1,000 samples
+(seed 42), exit 0 in 70.142 s at 1,102,626,816 bytes. All terminal results
+are recorded in the task handoff; no failing gate is a pass. The final existing
+`scripts/check-bridge.sh` run, using a Lake wrapper only to select the temporary
+resource configs, exited 1 in 8.053 s / 1,814,028,288 bytes on the delivered
+proof sources; its sole failing
+target was unchanged `Arith.Widths`, and all vendor checks passed. The original assignment
+remains incomplete while those gates and the remaining general assembler
+certificate/scanner obligations are unresolved.
 
 To build the independent targets alone, from `Bridge/`:
 

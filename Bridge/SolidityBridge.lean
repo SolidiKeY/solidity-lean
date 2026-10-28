@@ -27,3 +27,6 @@ import SolidityBridge.ExternalEvm.StackOps
 import SolidityBridge.ExternalEvm.Obstructions
 import SolidityBridge.ExternalEvm.Assembly.LayoutChecks
 import SolidityBridge.ExternalEvm.Assembly.ControlChecks
+import SolidityBridge.ExternalEvm.Assembly.CompositionChecks
+import SolidityBridge.ExternalEvm.Assembly.StackLoopChecks
+import SolidityBridge.ExternalEvm.Assembly.Placement
