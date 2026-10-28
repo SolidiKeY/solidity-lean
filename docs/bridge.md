@@ -415,6 +415,20 @@ found no confirmed defects. Earlier append proof attempts hit the unchanged
 proofs repaired that cost, without increasing any limit. The same measured VM
 guard and single-thread configuration described above were used.
 
+`Bridge/SolidityBridge/ExternalEvm/StorageAccounts.lean` connects these map
+laws to the actual upstream `Account.updateStorage`, `State.sstore` and
+`State.sload`. `storage_read_write` covers arbitrary initial storage and all
+word values, including zero erasure. Its explicit semantic premise is that the
+executing account exists. `account_after_sstore` preserves that premise, so the
+law applies after previous writes and clears. Refund/access-list effects remain
+in the evaluator, but are unobserved by this storage relation. No hash-separation,
+original-transaction-storage or other-account restrictions are assumed.
+The isolated account target passed (exit 0; 1041 jobs; 2.72 s;
+1,652,953,088 bytes sampled aggregate peak RSS). Both headline axiom audits are
+`[propext, Classical.choice, Quot.sound]`. Independent finder and skeptic reviews
+found no confirmed defects. Driver gas/static-mode checks and source physical
+layout remain outside this optional adapter.
+
 To build the independent targets alone, from `Bridge/`:
 
 ```sh
