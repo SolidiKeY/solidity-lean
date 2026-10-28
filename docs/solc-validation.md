@@ -9,6 +9,13 @@ records `compile_correct`. The pinned solc is 0.8.38 (`1835d247`, the
 [upstream corpus](solidity-upstream-tests.md) and the
 [feature inventory](solidity-feature-inventory.md)); older fixtures use 0.8.34.
 
+The [full compiler roadmap](coverage-plan.md) separately requires a checked
+source frontend, complete backend and executable-EVM proof for this repository's
+compiler. The external solc comparison square below remains a compatibility
+validation boundary: completing our compiler proof does not certify solc's
+optimizer or its emitted bytecode. The roadmap includes an independent source
+semantics and EVM bridge; the current fragment theorem does not provide them.
+
 ## The chain of trust
 
 ```
