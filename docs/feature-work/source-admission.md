@@ -127,3 +127,122 @@ The integrated source checks require the complete 26-row FunctionTypes roster:
 16 proofs, seven internal helpers and three pending false claims. See
 [dafny-verification.md](dafny-verification.md#integration-with-current-origin)
 for the focused build, source tests and independent merge reviews.
+
+## Coverage step 2: compilation units (2026-10-28)
+
+Work starts at origin/master f4dee4a29c2e208b36db4a4161a4723c735cd775,
+on the isolated branch feature/source-units-step2. The original work checkout
+and the historical cloud reports are preserved.
+
+The current-master reproduction retains all 39 historically provenance-blocked
+fixtures. Every one still reached the explicit multi-source refusal before this
+change. The new schema stores the complete original SourceUnit AST set,
+compiler source IDs, declaration IDs, per-source SHA-256 and accepted pragmas,
+and one shared compiler/settings record. The selected main source is explicit.
+There is no concatenated SourceUnit or fabricated single-source header.
+N.report.provenance.sources exposes the complete per-file metadata.
+
+The SHA-pinned compiler resolves import paths, remappings, aliases and cycles
+from explicit standard-JSON source contents; URL/import callbacks are not used.
+The reader checks source-set identities, original source locations and each
+resolved import path/source-unit-ID pair. Missing, duplicate and foreign
+metadata fail closed. Schema-1 modern imports require regeneration with
+compilation-unit provenance; historical four-field inputs keep their existing
+unchecked boundary. Schema 2 currently requires multiple source units.
+
+Declaration lookup and dependency admission use all original compiler IDs.
+Language-mode checks use each node's own source pragma, while pipeline settings
+remain shared by the compilation. Imported free functions, namespace aliases,
+transitive/circular imports, constants and existing using-for/operator lowering
+reuse the intrinsic elaborator. Namespace calls do not acquire a receiver
+argument. A discarded type selected from the same static module preserves its
+condition's effects and failures exactly once.
+
+Qualified and renamed error references retain the original short error name
+and signature, including an import alias named Panic. Native error names keep
+the original selected/file signature. Additional identities share it only for
+matching elementary parameter types and validated equal selectors. Conflicting
+references retain an explicit rendered-scope refusal instead of poisoning an
+otherwise supported local constructor. Error byte encoding itself is unchanged.
+
+### Reproduce a compilation unit
+
+Use the dependency-free external helper with an exact supported compiler file:
+
+~~~sh
+node scripts/solc-unit.mjs \
+  --input tests/solc/source-units/SourceUnits.input.json \
+  --compiler /path/to/soljson-v0.8.38+commit.1835d247.js \
+  --main-source app/Main.sol --out /tmp/source-units.ast.json
+node --test scripts/source-units.test.mjs scripts/solidity-upstream.test.mjs
+~~~
+
+The input is Solidity standard JSON with explicit content for every source,
+AST-only output selection, and the recorded supported settings. The helper
+checks the compiler digest before loading it and rejects invalid UTF-8 input.
+Empty remapping targets and equals signs inside targets are preserved and
+tested against real compiler output.
+
+### Deliberate remaining refusals
+
+- Multi-source NatSpec containing @custom:key and any loopSpec field:
+  solidity.compilationUnitSpecifications. Source comments are checked before
+  solc can discard loop NatSpec. Strings and ordinary comments remain data.
+  A file-local specification namespace adapter is required before admitting
+  these claims; foreign constants/enums must not silently change a claim.
+- Inheritance in a legacy-pipeline unit with mixed requested ABI coders:
+  solidity.compilationUnitAbiModes. The declaring-source entry decoder needs
+  an adapter; viaIR keeps its effective ABI-v2 behavior.
+- Conflicting or nominal custom-error signatures sharing a native short name,
+  and general module-valued expressions outside the checked discard shape,
+  remain explicit lowering refusals.
+- Schema-2 static compiler-code artifact inputs and one-source self-import
+  provenance remain unfinished. No foreign code artifact is invented.
+- Existing host, log, assembly, delegatecall, gas and layout policies are
+  unchanged. Their refused observations are not dropped to obtain a pass.
+
+### Validation and review
+
+The compiler fixtures cover both pinned compilers (0.8.34 and 0.8.38) and
+legacy/viaIR. Nine axiom-pinned kernel theorems check 28 finite outcomes:
+normal return, false-assertion panic, receiver and module-condition effects,
+prior failure, exact qualified/aliased error bytes, and preservation of local
+error signatures despite a conflicting foreign error. Their axioms are only
+propext, Classical.choice and Quot.sound. Ordinary calculus reverts still
+abstract data; byte certificates use the existing external-entry API.
+
+The preserved upstream replay reports 31 working, one broken and seven blocked
+fixtures, with all 64 prepared pipeline jobs checkpointed. The remaining broken
+fixture requires excluded assembly/codesize semantics. The blocked fixtures
+retain their host-behavior or fixture-format refusals. These are typed-model
+observations, not compiler-generated EVM observations or a compiler/lowering
+equivalence proof. Digest checks record external analysis; they do not
+authenticate handwritten JSON.
+
+The focused Node tests, existing source-provenance regression, trust,
+reachability, layering, strict automation and generated-inventory checks pass.
+Per-file dependency checks and kernel guards run sequentially with one Lean
+thread and -j1. This VM lacks systemd/delegated cgroups: a hard 12 GiB address
+space limit plus a seccomp no-fork filter bounds each Lean process group, with
+an available-memory reserve. The default Lake build is explicitly blocked
+because that filter prevents Lake spawning compilers; it is not passing
+evidence. The documentation audit retains missing references in unchanged
+historical/vendor citations. Exact commands, per-fixture results, hashes,
+timings, memory measurements and remaining refusals are recorded in the
+[per-fixture results](../../tests/upstream/step2-source-units-results.json) and
+[validation record](../../tests/upstream/step2-source-units-validation.json).
+The sealed replay takes 27.972 seconds, with 834,044 KiB sampled peak Lean
+RSS and 1,091,784 KiB peak across its process tree. The sealed kernel file
+takes 6.044 seconds. There are 78 required variants: 64 executed jobs retain
+86 observed calls from 62 working jobs. The two excluded-assembly jobs retain
+their two unexecuted expected calls; the 14 pre-preparation refusals remain
+unexecuted.
+
+Independent read-only finder and skeptic reviews used no Lean server.
+Confirmed fixes include compiler-pin-before-execution, fatal UTF-8 decoding,
+valid remapping forms, missing import targets, per-source modes, source/loop
+specification refusal, lexical error aliases, preservation of original error
+scope, and all-source raw-ABI assembly policy. Counter-once and prior-panic
+controls cover the module-condition rewrite. No new dependency, axiom, sorry,
+raised heartbeat/fuel/search limit, changed upstream expectation or core rule
+is introduced.

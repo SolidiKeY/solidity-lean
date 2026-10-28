@@ -421,3 +421,17 @@ decoder metadata gaps. New results and validation use separate
 `tests/upstream/group10-aggregate-validation.json`; every earlier report and
 export is preserved. Selected fresh replay never certifies retained unrun
 import/profile/host/configuration/resource cases against a changed model.
+
+## Coverage step 2: source-unit replay (2026-10-28)
+
+The current-master reproduction and compilation-unit increment are recorded in
+[step2-source-units-results.json](../tests/upstream/step2-source-units-results.json)
+and [step2-source-units-validation.json](../tests/upstream/step2-source-units-validation.json).
+The unchanged 39-fixture family moves from 39 provenance blocks to 31 working,
+one broken excluded-assembly case and seven retained host/format blocks.
+All 64 prepared legacy/viaIR jobs retain their checkpoints; no gas, log,
+host, assembly or expected-failure observation is removed to claim agreement.
+The remaining 14 required variants are explicitly unexecuted. The full
+repository Lake build remains blocked by this VM's no-fork validation cap;
+the frontend closure, new kernel controls and focused/static gates have
+separate evidence. These model observations are not compiler/EVM equivalence.

@@ -401,7 +401,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -418,7 +423,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -803,7 +813,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {
@@ -837,7 +852,12 @@
         }
       ],
       "localEvidence": [
-        "Solidity/Frontend/SolcJson/Contract.lean"
+        "Solidity/Frontend/SolcJson/Contract.lean",
+        "Solidity/Frontend/SourceUnits.lean",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+        "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+        "scripts/source-units.test.mjs",
+        "docs/feature-work/source-admission.md"
       ]
     },
     {

@@ -1,4 +1,5 @@
 import Solidity.Frontend.SolcJson.Body
+import Solidity.Frontend.SourceUnits
 
 /-!
 # Admission of solc source
@@ -246,6 +247,9 @@ def header (constantIds : List Int) (j : Json) : Json :=
       if J.kind j == "FunctionDefinition" || J.kind j == "ModifierDefinition" then
         !["body", "modifiers"].contains key
       else if J.kind j == "ContractDefinition" || J.kind j == "SourceUnit" then key != "nodes"
+      -- Import aliases are compiler-resolved names, not evaluated expressions.
+      -- Their foreign Identifier has deliberately empty typeDescriptions.
+      else if J.kind j == "ImportDirective" then key != "symbolAliases"
       else if J.kind j == "VariableDeclaration" then
         key != "value" || (J.id? j).any constantIds.contains
       else true).map fun (key, value) =>
@@ -336,7 +340,7 @@ private def walk (provenance : Provenance) (declarations : List Json) :
     Nat → Json → Bool → Except Diagnostic Found
   | 0, j, _ => throw (diagnostic j .invalidAst `solidity.astDepth "AST depth bound exhausted")
   | fuel + 1, j, payment => do
-    validateNode provenance j
+    validateNode (provenance.atNode j) j
     let resolvedOperator ← match operatorAlias? declarations j with
       | .ok call => pure call
       | .error gap => throw (diagnostic j .invalidAst `solidity.operatorAliases

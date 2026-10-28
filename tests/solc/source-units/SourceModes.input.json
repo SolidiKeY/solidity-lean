@@ -1,0 +1,28 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "Lib.sol": {
+      "content": "pragma solidity ^0.8.0; pragma abicoder v1; function decode(bytes memory b) pure returns (uint) { return abi.decode(b, (uint)); }"
+    },
+    "Main.sol": {
+      "content": "pragma solidity ^0.8.0; pragma abicoder v2; import {decode} from \"Lib.sol\"; contract SourceModes { function use(bytes memory b) public pure returns (uint) { return decode(b); } function clean() public pure { assert(true); } }"
+    }
+  },
+  "settings": {
+    "viaIR": false,
+    "evmVersion": "osaka",
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "libraries": {},
+    "remappings": [],
+    "outputSelection": {
+      "*": {
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}

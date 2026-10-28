@@ -1,0 +1,1093 @@
+{
+  "version": 1,
+  "repository": "SolidiKeY/solidity-lean",
+  "branch": "feature/source-units-step2",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "environment": {
+    "id": "ccarenv_b64_Y2NhcmVudl82NTMzMzYwNTAzZjA4MTkxOTgxMjZiMjJkN2E3ZjEyNw",
+    "savedConfigurationId": "2b5c5391-0738-4da9-8acc-99dd89f04e4d~cecfg_6adc9c634c9481a3b462f748c24a047a",
+    "actualVersions": [
+      "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+      "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)"
+    ],
+    "smoke": {
+      "command": "lake -f lakefile.source-units.toml build Solidity.KeySort",
+      "result": "passed; artifact-cache fetch",
+      "elapsedSeconds": 0.16467530699992494,
+      "maxChildRssKiB": 43148
+    }
+  },
+  "resources": {
+    "method": "Single-process seccomp no-fork groups, hard/soft RLIMIT_AS 12GiB; LEAN_NUM_THREADS=1; -j1; 12GiB MemAvailable reserve; no Lean server.",
+    "replay": {
+      "command": [
+        "node",
+        ".lake/source-units/replay.mjs",
+        ".lake/source-units/replay-sealed-v2"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 27.972063343000627,
+      "sampledPeakDescendantRssKiB": 1091784,
+      "sampledPeakLeanGroupRssKiB": 834044,
+      "maxChildRssKiB": 833572,
+      "resourceStop": false,
+      "memoryReserveKiB": 12582912,
+      "leanHardBound": "one address space; RLIMIT_AS=12GiB hard/soft; seccomp denies fork/vfork/process clone and clone3; threads share address-space limit"
+    },
+    "kernel": {
+      "command": [
+        "python3",
+        ".lake/source-units/one-process.py",
+        "lean",
+        "--tstack=131072",
+        "-j1",
+        "Solidity/Examples/Tactics/SourceUnitsImport.lean"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 6.044403242001863,
+      "sampledPeakDescendantRssKiB": 805460,
+      "sampledPeakLeanGroupRssKiB": 805460,
+      "maxChildRssKiB": 804944,
+      "resourceStop": false,
+      "memoryReserveKiB": 12582912,
+      "leanHardBound": "one address space; RLIMIT_AS=12GiB hard/soft; seccomp denies fork/vfork/process clone and clone3; threads share address-space limit"
+    },
+    "sourceProvenance": {
+      "command": [
+        "env",
+        "PATH=/workspace/solidity-lean-source-units/.lake/source-units/bin:/workspace/.setup/tools/lean-4.24.0-linux/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+        "node",
+        "--test",
+        "scripts/source-provenance.test.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.733085840001877,
+      "sampledPeakDescendantRssKiB": 710156,
+      "sampledPeakLeanGroupRssKiB": 646068,
+      "maxChildRssKiB": 645836,
+      "resourceStop": false,
+      "memoryReserveKiB": 12582912,
+      "leanHardBound": "one address space; RLIMIT_AS=12GiB hard/soft; seccomp denies fork/vfork/process clone and clone3; threads share address-space limit"
+    },
+    "fullBuild": {
+      "command": [
+        "python3",
+        ".lake/source-units/one-process.py",
+        "lake",
+        "-f",
+        "lakefile.source-units.toml",
+        "build"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 0.4070477599998412,
+      "sampledPeakDescendantRssKiB": 62552,
+      "sampledPeakLeanGroupRssKiB": 0,
+      "maxChildRssKiB": 62140,
+      "resourceStop": false,
+      "memoryReserveKiB": 12582912,
+      "leanHardBound": "one address space; RLIMIT_AS=12GiB hard/soft; seccomp denies fork/vfork/process clone and clone3; threads share address-space limit"
+    },
+    "verifiedDependencyModules": 79,
+    "sumOfLastPerFileCheckElapsedSeconds": 373.9791413950061,
+    "maximumRecordedCompilerChildRssKiB": 1001224,
+    "perFileChecks": {
+      "Solidity.KeySort": {
+        "fingerprint": "a75943e9fcbb4e9715f5a772fa554d4112d9b424ee23d7604fb54e4dbbf27b13",
+        "elapsedSeconds": 1.2075093630010088,
+        "maxChildRssKiB": 265452
+      },
+      "Solidity.AST": {
+        "fingerprint": "0655fe3fa9a8e445d3e51b2c07d213510e6b77d85e157aaba400a15a89e42d13",
+        "elapsedSeconds": 7.185642860000371,
+        "maxChildRssKiB": 798852
+      },
+      "Solidity.SpecSyntax": {
+        "fingerprint": "909aa4f1e9e1164f16e2893a71008d41b45f9b803dfb48676a00fc8f53ebe5e2",
+        "elapsedSeconds": 2.182697501999428,
+        "maxChildRssKiB": 798852
+      },
+      "Solidity.Syntax.Raw": {
+        "fingerprint": "218fdf9fc4bc6a6138d67204f63e558ed344d142ff856e24baedd8233735fb63",
+        "elapsedSeconds": 4.40692939300061,
+        "maxChildRssKiB": 798852
+      },
+      "Solidity.Syntax.Grammar": {
+        "fingerprint": "35e3e9e9f2a66511579882674ec011b642eba4bc06117c13a849b6e2d5c561ee",
+        "elapsedSeconds": 12.276628120000169,
+        "maxChildRssKiB": 806732
+      },
+      "Solidity.Syntax.Contract": {
+        "fingerprint": "b142732734251a92b3b88df400eb4445ea28f1deb2ca6913a3bbd5741eaf846f",
+        "elapsedSeconds": 8.853390049000154,
+        "maxChildRssKiB": 806732
+      },
+      "Solidity.Syntax": {
+        "fingerprint": "1fcbd50e7931d09d24b44ac615c7fe27181e2b754c77e23daf9e04f6fbe5f960",
+        "elapsedSeconds": 0.7576133540005685,
+        "maxChildRssKiB": 806732
+      },
+      "Solidity.Language.Features": {
+        "fingerprint": "491272d3dcce69c62bb07732176a758ffb2f635710e45cc2bf9a0c9ed8cbc40a",
+        "elapsedSeconds": 16.300095899001462,
+        "maxChildRssKiB": 834296
+      },
+      "Solidity.Frontend.Source": {
+        "fingerprint": "251de78a6b9f7afb386e4827fd7405ded88d252ee78118da85029c51eea8cc8b",
+        "elapsedSeconds": 4.064742821003165,
+        "maxChildRssKiB": 834296
+      },
+      "Solidity.Frontend.SolcJson.Body": {
+        "fingerprint": "b82657f4adb1a57618de7b2522a8feadad5d7f3a5ea47ff0b0fb33eafeb57af2",
+        "elapsedSeconds": 15.039905066998472,
+        "maxChildRssKiB": 851132
+      },
+      "Solidity.Frontend.SourceUnits": {
+        "fingerprint": "d7237939c911ecc21a15b40dd939b2791abdb525a00ce6c82e67b47253cdc8b1",
+        "elapsedSeconds": 1.6097732970010838,
+        "maxChildRssKiB": 834296
+      },
+      "Solidity.Frontend.SolcJson.Admission": {
+        "fingerprint": "71ccbe34d9dcef32400c1821cf2a4eaeb20d37caa36d909b6be7d178ead6a34d",
+        "elapsedSeconds": 2.7044522790019982,
+        "maxChildRssKiB": 851132
+      },
+      "Solidity.Keccak": {
+        "fingerprint": "db0c40ef4c0dc037d8250f46920f5159a79c688f5e218c0f686c63a95713899f",
+        "elapsedSeconds": 0.5563908580006682,
+        "maxChildRssKiB": 846364
+      },
+      "Solidity.Frontend.SolcJson.Getters": {
+        "fingerprint": "4fd696753ccfe88af06f8846cbe0018f0e748f754b4708711023435c075267ea",
+        "elapsedSeconds": 1.496517302999564,
+        "maxChildRssKiB": 851132
+      },
+      "Solidity.Frontend.SolcJson.Contract": {
+        "fingerprint": "6a26fa982fa393c5abc0f041e4de7ecd4cac38409453ab6a3b7b5d0da7d7cec0",
+        "elapsedSeconds": 24.842182068998227,
+        "maxChildRssKiB": 941660
+      },
+      "Solidity.Frontend.SolcJson": {
+        "fingerprint": "5e4cc4b09c4b6af569f3c78cdef45506f0295173359a3cec83154bb7e3552bfe",
+        "elapsedSeconds": 0.7557028869996429,
+        "maxChildRssKiB": 941660
+      },
+      "Solidity.Scope": {
+        "fingerprint": "6dc560b3822a95ab3b53d265fc2b7fd706657df0bf1e1a9fa2fe943a05a7640b",
+        "elapsedSeconds": 3.698169355000573,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Scoped": {
+        "fingerprint": "13a4773a962db04f269f5b95ac0a3b10311a51b0e7304ea373a3be966858f98a",
+        "elapsedSeconds": 13.550022637000438,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Quote": {
+        "fingerprint": "67a59e6c846cc06d3551ab062f20b3a1ce6a4018b0f3390c74c0bafdcce31904",
+        "elapsedSeconds": 2.9329933559984056,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Inlined": {
+        "fingerprint": "e60360abc966c078ba8b5b0def03cf7e9de570c5c4bf42ed002f687df5bf2a78",
+        "elapsedSeconds": 1.25179813899922,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Join": {
+        "fingerprint": "472115b7026cd9abd22efe352478ffc74e553e8cf1ac4ec283d205e350aec41b",
+        "elapsedSeconds": 0.9472617499995977,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.RevertBytes": {
+        "fingerprint": "7c6da4e5a93a04ddb8b3b9945ae7ccbc7ace0f8b4def18c0f8c28215c1879355",
+        "elapsedSeconds": 0.4051611300001241,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Checked": {
+        "fingerprint": "4e1164868427c00b72030890e2eb2a352af233421df61cb776293f22c7928326",
+        "elapsedSeconds": 3.287367340999481,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Elab.Context": {
+        "fingerprint": "84b9fe40ab7f2a8446dc0bb0b67e82e295108ba4c810844d8b3c98d5b85e70e7",
+        "elapsedSeconds": 9.544476266999482,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Numeric": {
+        "fingerprint": "6f4f46fa989751b1f18e2adb7297a67c5cbdfe8840c94536f9dfc2cd06010712",
+        "elapsedSeconds": 1.0226675510002678,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Elab.Values": {
+        "fingerprint": "a7273b5c38018732a7cc01a50ff7df9f5f57f105e996eb5e27ae29abd06d4424",
+        "elapsedSeconds": 15.340709508000145,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.ERC7201": {
+        "fingerprint": "10b477036445566a574bb56633422a132da4a0c553f2201391758d53d0b487e0",
+        "elapsedSeconds": 0.6502492850013368,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Elab.Lower": {
+        "fingerprint": "98e300730e9205934ddb3adf998cf4dc446d1ba3c6e8173d7430d2ad069e097f",
+        "elapsedSeconds": 7.99148094299926,
+        "maxChildRssKiB": 935636
+      },
+      "Solidity.Syntax.Elab.Arms": {
+        "fingerprint": "d560eeea998f7ac9840d51f8cfc0dbcea3054c6cb375050133583b2df5627b3a",
+        "elapsedSeconds": 69.0034555229995,
+        "maxChildRssKiB": 968364
+      },
+      "Solidity.Syntax.Elab.Stmt": {
+        "fingerprint": "0a39b37af382ed699b373a553d651fff13ccaf89fd392169353b8c796294c065",
+        "elapsedSeconds": 6.560248443000091,
+        "maxChildRssKiB": 968364
+      },
+      "Solidity.Syntax.Elab": {
+        "fingerprint": "59a9b268dc718fd61af284f433c51685195c9b7b42cc061273d0eb3aa5a49e33",
+        "elapsedSeconds": 0.7949247500000638,
+        "maxChildRssKiB": 968364
+      },
+      "Solidity.Syntax.Splice": {
+        "fingerprint": "901d8a0bd6be71355daf0d6f3d2c0ea8d1895d2ef46b374f42e0431d23efe092",
+        "elapsedSeconds": 5.909334731000854,
+        "maxChildRssKiB": 968364
+      },
+      "Solidity.Frontend.Import": {
+        "fingerprint": "a0d731c3c0ab0752b4e9f558f098ebae26a5d2cd71b84a25cddbb905c6a8229c",
+        "elapsedSeconds": 6.3609118800013675,
+        "maxChildRssKiB": 941660
+      },
+      "Solidity.Semantics": {
+        "fingerprint": "8232da5d9bf8ea11597d7449627f25e1c274a9ce78ec95ca38ddf6701b01fdc3",
+        "elapsedSeconds": 1.2853618749995803,
+        "maxChildRssKiB": 647180
+      },
+      "Solidity.Semantics.Value": {
+        "fingerprint": "50fd9b3e66e49cceec5c523f3916c9d2bb455162c40b16f87076bcb832328a55",
+        "elapsedSeconds": 1.087684538000758,
+        "maxChildRssKiB": 647180
+      },
+      "Solidity.Eqns": {
+        "fingerprint": "5e61e86ba802b75af934dbee4eefa574f04390ac3b664c03777b29592e5b52d1",
+        "elapsedSeconds": 0.816679509000096,
+        "maxChildRssKiB": 647180
+      },
+      "Solidity.Semantics.Storage.Values": {
+        "fingerprint": "d1fb5afbfe3ba60c8523325cdc73768ec76a7722ae03b5862a16b8de9e884927",
+        "elapsedSeconds": 5.0606771479997406,
+        "maxChildRssKiB": 780184
+      },
+      "Solidity.Semantics.Storage.Ops": {
+        "fingerprint": "6d913752442bb13ac55dfe5f022bdc49c80a1e785a0ecc88a3acc283b032e632",
+        "elapsedSeconds": 8.225518568000552,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.Storage.Anon": {
+        "fingerprint": "2490f746eb6bd9f0863b77be324878ae080721d570c19781cb1c268d1246f373",
+        "elapsedSeconds": 1.5683535059997666,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.Storage": {
+        "fingerprint": "0bc9afbf5ed3d12cb3eb44e1d5af6df24ab675665d2ce528eddea76bb4c50be0",
+        "elapsedSeconds": 0.8580052149991388,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Hashes": {
+        "fingerprint": "e94fa24cf3f650296fee2797828603165511f3ac4912baab263f98c95dd76d11",
+        "elapsedSeconds": 0.8715578869996534,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Secp256k1": {
+        "fingerprint": "c8a4185032ed6e203e15062b230ab7d55f42d63e158dde908526404c5f7c769e",
+        "elapsedSeconds": 0.6746064369999658,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.Heap": {
+        "fingerprint": "d03a30f29baa5066c13e707e413626a847b6e7f378f5638bb1e13c04fa1fec9e",
+        "elapsedSeconds": 1.970339645000422,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.State": {
+        "fingerprint": "4d2d4c771895bb5f1174224c29ca9159231e40d355294305dfc6d0d8f0385350",
+        "elapsedSeconds": 1.2495656060000329,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.Ops": {
+        "fingerprint": "27fe1c7fa88782c2626b6dd421891726435691ea95ef7d804aa35ab72a4f9332",
+        "elapsedSeconds": 1.3532727630008594,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.RevertData": {
+        "fingerprint": "a48481ca522d508084b99e60b67edff9c0a07edb25ebd2a69de473f0068a1f84",
+        "elapsedSeconds": 0.8973482920009701,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Semantics.Run": {
+        "fingerprint": "a7ab32f818c0315876eb452ec8c081ead125ea9e5d5d923e5bdc80392662249e",
+        "elapsedSeconds": 5.485943235999002,
+        "maxChildRssKiB": 822612
+      },
+      "Solidity.Tools.Show": {
+        "fingerprint": "7b57829422ffbfb2a2af3863f6b0177a64f372bca4abf08f4ff097d402b3bfb2",
+        "elapsedSeconds": 1.2371833300003345,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Tools.Common": {
+        "fingerprint": "4d0a20c9b1534c4f68c96cd733bd0fd1429cebc568ad4ebf7970cd0f5b247ac6",
+        "elapsedSeconds": 1.5748238649994164,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Semantics.Deploy": {
+        "fingerprint": "9510748b9a099a91accf0ad4421c9775845d5cde9308918f55ca0d0f6c5c794c",
+        "elapsedSeconds": 0.9481471270009934,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Tools.Run": {
+        "fingerprint": "2aaa3160f205dd7140f601a28fefb51a2818b9f25cdb5296e74831edd5976114",
+        "elapsedSeconds": 2.6730360989986366,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Theory.Segs": {
+        "fingerprint": "43a65d3c75d8be085da01c97bff7911f38009aec81cd04601cc49da20205c987",
+        "elapsedSeconds": 0.8656453259991395,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Update": {
+        "fingerprint": "4129908eeff4b6dffb85de9b7f1a02f7fa93f054d4b44fc454f533923f90d7f2",
+        "elapsedSeconds": 0.928682020999986,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Semantics.StorageWt": {
+        "fingerprint": "a5a763c2b6d4c52f1f3046832081d43ebed54dcc9c94ab86b23f99b1de0ecab2",
+        "elapsedSeconds": 1.1280891760015948,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Theory.Typed.Obs.Paths": {
+        "fingerprint": "fc3af7605eb074a59f6d3d992c2bd1fb4bbf53f17913e6199b1c5dd1d830d0d4",
+        "elapsedSeconds": 7.837526991999766,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Theory.Typed.Obs.Values": {
+        "fingerprint": "19c79ed03f58266e8835e1fa576c4a395078893aa8ef041a6b32b277b7a229cd",
+        "elapsedSeconds": 5.8679928820001805,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Theory.Typed.Obs.Ops": {
+        "fingerprint": "8502f371af870ac8d9ef328ae194ed1115fc2c5941c02fb78e04a5f8f935bca2",
+        "elapsedSeconds": 4.167141288000494,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Theory.Typed.Obs": {
+        "fingerprint": "96e04da060ea916b7f9d90a5289f268b470da83e072ad9dc42af04a10c1f000a",
+        "elapsedSeconds": 0.930655284999375,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Signature": {
+        "fingerprint": "0d9155f9b9c7791d9e1624bd4ccffdee3e2c9c18ad0abc864099125a75e24323",
+        "elapsedSeconds": 3.9494644179994793,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.Fml": {
+        "fingerprint": "307652ec2aefe2f23b5bd0d1a5b15228654d361c32a464d04563e70be0e809bd",
+        "elapsedSeconds": 2.445126316000824,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.TermEval": {
+        "fingerprint": "03f46d4c8c3c76e3a622c78fb4017f780402339a8a53757d77df5a3aec852652",
+        "elapsedSeconds": 3.033821565000835,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.Lower": {
+        "fingerprint": "e514a12e4ffd868d4152e0ba60d0ea64525b8e3a2791976a1f72211ba24de6ee",
+        "elapsedSeconds": 1.3907781960006105,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.Shift": {
+        "fingerprint": "2fdac1f00c72491a915c83c45e2660f5bd3e178c179b4189bc843f0aeb04b873",
+        "elapsedSeconds": 1.841955861000315,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Syntax.PushSource": {
+        "fingerprint": "4d19a6db4dd16673233098c786a7bf2c11c62dfc12d7fb9148969b47535606cd",
+        "elapsedSeconds": 0.9450726300001406,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.Arms": {
+        "fingerprint": "e81f76f6b40fd6e74e9315f879ed26b4744e2a0c8aed9d2a0ae12f7ff7d08978",
+        "elapsedSeconds": 3.593354204998832,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.LexVariant": {
+        "fingerprint": "91bb597a951b8f3c336e1dd90c1b044d76705e5d5fe5aa8fd9ac1001c8702b70",
+        "elapsedSeconds": 1.0917148049993557,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.LexDiamond": {
+        "fingerprint": "18310176ec0a2a8cfb6376a5989e9cd3bfcfe9da76a033b3434c037e305fc9a9",
+        "elapsedSeconds": 0.8902773840000009,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.SyntaxSize": {
+        "fingerprint": "b7088e4f6f27a344ea0f0cfdceded84e083c72faa406b6dac009f2ac08bd587e",
+        "elapsedSeconds": 1.668169635000595,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.CallSummary": {
+        "fingerprint": "48980e74b1c259a37fe352d6e1c6cb1267aa0eb863c68591ad0371dc495084f9",
+        "elapsedSeconds": 3.929533200998776,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Semantics.Ends": {
+        "fingerprint": "dbd1a7511c1b379d7dec3f5b607036d606e3dc9c17c2a3d6e3afe9f513f31535",
+        "elapsedSeconds": 1.5492256239995186,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Semantics.NoPanic": {
+        "fingerprint": "29f60901e1445477c35ab878a3d3f916141af9dd3cac8bc84213a3ab5435ed0d",
+        "elapsedSeconds": 3.8805841699995653,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.Blocks": {
+        "fingerprint": "55e714bf5ce01f4128f068e246caecf4d4c4311649a9e094d5e81bce2ee7f6f7",
+        "elapsedSeconds": 2.761793398000009,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Calculus.WkOver": {
+        "fingerprint": "3544120cc314567c4b93841fd1ad165d425029f33da003cee54e9319588a3915",
+        "elapsedSeconds": 1.8626673519993346,
+        "maxChildRssKiB": 939464
+      },
+      "Solidity.Semantics.RunWk": {
+        "fingerprint": "900821a9dc1bd7ef7da069db6bab6df0dc82d1fd391c32db9c72466fce2540c1",
+        "elapsedSeconds": 11.789732502000334,
+        "maxChildRssKiB": 1001224
+      },
+      "Solidity.Semantics.RunFuel": {
+        "fingerprint": "1d3ce5fa8f48ff0fdaf2a4b18b5f0f1fa75cf57ca44066cee6f924f991433a3e",
+        "elapsedSeconds": 3.1947068699992087,
+        "maxChildRssKiB": 1001224
+      },
+      "Solidity.Semantics.RevertMemory": {
+        "fingerprint": "71609b4d5c546860dbbe10a4dc657a9e2a8443b5d3ec6be2f89d2c15656ba085",
+        "elapsedSeconds": 1.0448466899997584,
+        "maxChildRssKiB": 1001224
+      },
+      "Solidity.Tools.Upstream": {
+        "fingerprint": "8939ccdbbe6618de38116df13281cf17768aaaadb4e9c1a06fe44706779eec99",
+        "elapsedSeconds": 3.0288664260006044,
+        "maxChildRssKiB": 941660
+      },
+      "Solidity.Examples.Tactics.SourceUnitsMetadata": {
+        "fingerprint": "db4bdddec1eb9340c5850424deaaba9ea5305e661cfada767417043105e94d2b",
+        "elapsedSeconds": 1.7214693440000701,
+        "maxChildRssKiB": 834296
+      },
+      "Solidity.Examples.Tactics.SourceUnitsImport": {
+        "fingerprint": "f8c4c70361d13bd98ff8ce768ea20385db06150aca88bce3dc683e72f725d2d8",
+        "elapsedSeconds": 5.310737477000657,
+        "maxChildRssKiB": 941660
+      }
+    }
+  },
+  "kernel": {
+    "theorems": [
+      "compiler34_controls",
+      "aliased_errors",
+      "module_condition_effects",
+      "normal_legacy",
+      "normal_viaIR",
+      "false_controls",
+      "ordinary_error_scope",
+      "qualified_errors",
+      "selected_error_scope"
+    ],
+    "finiteOutcomes": 28,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "axiomOutputsPinned": true,
+    "compilers": [
+      "0.8.34+commit.80d5c536",
+      "0.8.38+commit.1835d247"
+    ],
+    "pipelines": [
+      "legacy",
+      "viaIR"
+    ]
+  },
+  "focusedNodeTests": {
+    "command": "node --test scripts/source-units.test.mjs scripts/solidity-upstream.test.mjs",
+    "passed": 31,
+    "failed": 0,
+    "elapsedSeconds": 2.348347098
+  },
+  "existingSourceProvenanceTest": {
+    "passed": 1,
+    "failed": 0,
+    "adapter": "Private no-build per-file lake adapter invokes actual Lean under the same cap; no Lake build substitution."
+  },
+  "gates": [
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.20822904099986772,
+      "log": ".lake/source-units/gate-0.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.1943127659978927,
+      "log": ".lake/source-units/gate-1.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.06505355599801987,
+      "log": ".lake/source-units/gate-2.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05821499200101243,
+      "log": ".lake/source-units/gate-3.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.2220793519991275,
+      "log": ".lake/source-units/gate-4.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 3.963301951000176,
+      "log": ".lake/source-units/gate-5.log"
+    }
+  ],
+  "trust": {
+    "sources": 717,
+    "inventoriedSites": 240,
+    "findings": 0
+  },
+  "blockedGates": [
+    {
+      "gate": "default Lake build",
+      "reason": "no-fork seccomp policy prevents Lake spawning compilers; direct dependency/kernel checks pass; this build is not passing evidence"
+    },
+    {
+      "gate": "documentation paths",
+      "reason": "20 missing references and existing basename ambiguities in unchanged historical/vendor citations"
+    }
+  ],
+  "remainingRefusals": [
+    "solidity.compilationUnitSpecifications: multi-source NatSpec key directives and all loopSpec fields",
+    "solidity.compilationUnitAbiModes: mixed requested ABI coders with inheritance in legacy pipeline",
+    "solidity.lowering: incompatible/nominal custom errors sharing a native short name; conflicting foreign references stay outside rendered scope",
+    "general module values outside same-static-module type-discard shape",
+    "schema2 static compiler-code artifacts and one-source self-import provenance",
+    "unchanged host/log/assembly/delegatecall/gas/layout policies"
+  ],
+  "remainingCorpus": {
+    "broken": [
+      "test/libsolidity/semanticTests/deployedCodeExclusion/module_function.sol"
+    ],
+    "blocked": [
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/abi_encode_v2_in_function_inherited_in_v1_contract.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/abicoder/abi_encode_v2_in_modifier_used_in_v1_contract.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/events/event_emit_from_module_via_member_access.sol",
+        "reason": "fixture comment outside argument/expectation boundary"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/inheritance/member_notation_ctor.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/using/library_through_module.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/using/using_global_invisible.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      },
+      {
+        "path": "test/libsolidity/semanticTests/using/using_global_library.sol",
+        "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+      }
+    ]
+  },
+  "sharedProductionFiles": [
+    "Solidity.lean",
+    "Solidity/Frontend/Import.lean",
+    "Solidity/Frontend/SolcJson/Admission.lean",
+    "Solidity/Frontend/SolcJson/Body.lean",
+    "Solidity/Frontend/SolcJson/Contract.lean",
+    "Solidity/Frontend/Source.lean",
+    "Solidity/Language/Features.lean",
+    "scripts/merge-solidity-upstream-retries.mjs",
+    "scripts/solidity-upstream.mjs"
+  ],
+  "newImplementationAndRegressionFiles": [
+    "Solidity/Frontend/SourceUnits.lean",
+    "Solidity/Examples/Tactics/SourceUnitsImport.lean",
+    "Solidity/Examples/Tactics/SourceUnitsMetadata.lean",
+    "scripts/solc-unit.mjs",
+    "scripts/source-units.test.mjs"
+  ],
+  "newFixtures": [
+    {
+      "path": "tests/solc/source-units/ErrorScope.ast.json",
+      "sha256": "676733fbc2aa48b941c16170bbafe903fbb5edab96b2ea1863c9286061c51ab9"
+    },
+    {
+      "path": "tests/solc/source-units/ErrorScope.sol",
+      "sha256": "481f2aa3ad6aa83107799c48ad55f9aed785995881ec91c96e5352d548dfe362"
+    },
+    {
+      "path": "tests/solc/source-units/RemapEmpty.ast.json",
+      "sha256": "836493c08f10a005194c6449878f3cee996bbca5974575784e0b1e24ca3423ab"
+    },
+    {
+      "path": "tests/solc/source-units/RemapEmpty.input.json",
+      "sha256": "0e03c073c4e9a7d74ddb431aa11a7f12e6d7309ceea9cf83210234ca98b43bac"
+    },
+    {
+      "path": "tests/solc/source-units/RemapEquals.ast.json",
+      "sha256": "14083f6d3970357c6d101ef08c136f24117f4c11d85c610d89f2e17c38551050"
+    },
+    {
+      "path": "tests/solc/source-units/RemapEquals.input.json",
+      "sha256": "7f69868eb8e81d4f975119ae85bbd5f9cf0242e8326edd98f38cd72491386c5e"
+    },
+    {
+      "path": "tests/solc/source-units/SourceModes.ast.json",
+      "sha256": "f011596474fd4a5cecf73f69fce64a7041114ef2d09dde2a9b0cc15e769daf52"
+    },
+    {
+      "path": "tests/solc/source-units/SourceModes.input.json",
+      "sha256": "3162d889191090e04347ff7793a2bf9895cf9f197ce19833b67064d2f056b330"
+    },
+    {
+      "path": "tests/solc/source-units/SourceModesIR.ast.json",
+      "sha256": "a41fb6e32c8e3659e25ee1435b0a30f2ce907974e7bf4206fa04430c506664d7"
+    },
+    {
+      "path": "tests/solc/source-units/SourceModesIR.input.json",
+      "sha256": "9269955d855495037085d59657b30bb50e7c57e0d45cb6a86332df8eaf36b26f"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnits.ast.json",
+      "sha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnits.input.json",
+      "sha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnits0834.ast.json",
+      "sha256": "2a294f4512303e4436a8e441e6c128c08c3f0463cc1560202b7f627b5b264a59"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnits0834IR.ast.json",
+      "sha256": "3d620b9badfe35bc63d13a412d508875b21b4890677061d84ece8e79c35f7824"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnitsIR.ast.json",
+      "sha256": "cb116e63d2bdc3555b2fa4757fe3d0f64dc8578641eeef9041009c933616dc7e"
+    },
+    {
+      "path": "tests/solc/source-units/SourceUnitsIR.input.json",
+      "sha256": "b2b74ce52f08490e0f1040b058aa1d0009673ce0d7b331bbfa6e7f65265f8dc3"
+    }
+  ],
+  "sourceDigests": {
+    "Solidity.lean": "a503c2eff0857313ce9ab7e7e7a32903d22944767f9ea7843ffe7fa081a081c3",
+    "Solidity/Frontend/Import.lean": "e9906c001e5ef29ef6c89bc8a69d2cb8b62023f4ae534256a8dfee6e864edb91",
+    "Solidity/Frontend/SolcJson/Admission.lean": "4362da45567b41f3944d18df8f43d928b81d283a02c680571a4e4dde407aee73",
+    "Solidity/Frontend/SolcJson/Body.lean": "f0f3b59bf176a7a3011fba37c75e1e8d5bdc833894d036c423bd9bc1543db979",
+    "Solidity/Frontend/SolcJson/Contract.lean": "831cbdb0ad12704a0baa3fc4d390da2377be8cf5899b9317004ae964252f5638",
+    "Solidity/Frontend/Source.lean": "893b61c4bef54aefb69352c53a99a5a9a7601b16ffffbf68a10237d84fce9aa8",
+    "Solidity/Language/Features.lean": "e489adcd0d7f62caf62d5d12f6c0d6df9c5e6e8c20c312260cfc97bff9bfdfdd",
+    "docs/feature-work/declarations-metadata.md": "90ef593ff0eb013fd98b9ddcf23c212543ffde1536429d01df220123b3edeb52",
+    "docs/feature-work/source-admission.md": "f116881322c98c561a7516bb34704b9faad6eb6a2a5fb9c25254e04fdf140de5",
+    "docs/module-map.md": "0e770ae7115e70f70f7aa25dbc6b8ecaca038fd85f4105080ff3f1aa1b1482bf",
+    "docs/solidity-feature-inventory.md": "878da0ded8591388d9345148dd9f05d0b5d8379619e2e8bc948e2555d109c1cd",
+    "docs/solidity-features.json": "d6f7f75c1edfae4e7f9afaf174a2f8c9f0b24bfcd8c40f76367398dbb1025945",
+    "scripts/merge-solidity-upstream-retries.mjs": "6b1d0128534b68f7e133b9bb646e19a1fbbe6a0de87fe03e444d4a20c90d0cc7",
+    "scripts/solidity-upstream.mjs": "b766ead28ffa16ee06cf12b1be7496965671af951ab85139b32fd4f3fba77a3e",
+    "Solidity/Frontend/SourceUnits.lean": "aae47acc1e4f8eb863f8754202ccf7a00c877b3dca8277fe0692f600b0176a32",
+    "Solidity/Examples/Tactics/SourceUnitsImport.lean": "6e3bedbe703e564de5820bfd06c498a4bf81034475053bc01dff8cd0a4be878e",
+    "Solidity/Examples/Tactics/SourceUnitsMetadata.lean": "aa4736d8f7872dec65995a753ab8fb5c04814ef1eb98c92a43035a3c8c6e1fa3",
+    "scripts/solc-unit.mjs": "cffcf54fa55575e6236f0aa2402dad6e0b04cefeaf96f3299f694d78f11baee4",
+    "scripts/source-units.test.mjs": "28b93fa8881ec477406f3f3c858218d9f49c1c3b924ff4a0df74210a1d97af17",
+    "docs/solidity-upstream-tests.md": "7dfe130be7d6ece18e5edd2b925785d497d89494b0a9fe327d82aeba48ece70d"
+  },
+  "logs": [
+    {
+      "path": ".lake/source-units/runtime-versions.log",
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4",
+      "bytes": 159
+    },
+    {
+      "path": ".lake/source-units/keysort.log",
+      "sha256": "480f3b146a164b84dce8da7094d755481ce2a427587c673ff0327a1226ea5175",
+      "bytes": 74
+    },
+    {
+      "path": ".lake/source-units/source-base-build.log",
+      "sha256": "cf6e327209e0b84b54d21e7f94dee3b0dbcb5dc178deaef11d95b6585d4c47e5",
+      "bytes": 30
+    },
+    {
+      "path": ".lake/source-units/source-single-build.log",
+      "sha256": "b00f8359a99087cf4b3c20205fed6a4a6ed16db84b1decfa3e9925512378f62f",
+      "bytes": 854
+    },
+    {
+      "path": ".lake/source-units/contract-before.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/import-check.log",
+      "sha256": "72bdf2f9d79890deaa9a80f050d90898e119384c37478901b9b2efdd634bb9b5",
+      "bytes": 978
+    },
+    {
+      "path": ".lake/source-units/import-check-2.log",
+      "sha256": "146bff8c251a12957729ad69b23b1e721f67c3235e789674f4c9c6ec12ce15ad",
+      "bytes": 949
+    },
+    {
+      "path": ".lake/source-units/import-check-3.log",
+      "sha256": "ea4ee480a3feb1d62bfa72358860fb0066ad015836246d083b971271a38028f6",
+      "bytes": 329
+    },
+    {
+      "path": ".lake/source-units/import-check-4.log",
+      "sha256": "fea64373c2d9f5e7866f2d294da363e5a62b5c31b39ccfc4031f7e4de1489572",
+      "bytes": 206
+    },
+    {
+      "path": ".lake/source-units/import-check-5.log",
+      "sha256": "cdf65899ac2cc0a2a70e84962acd69b5b658e657a106e312bb70334b166021a4",
+      "bytes": 254
+    },
+    {
+      "path": ".lake/source-units/import-check-6.log",
+      "sha256": "72160bfb56df61fc6b8717af7421be1a0323ac578211ffd5c51f7f271f5b6b44",
+      "bytes": 293
+    },
+    {
+      "path": ".lake/source-units/execution-check.log",
+      "sha256": "a20edaadb7d155115c011e102a8161c9c04c05e2163d7d57ca3a399d82fd9bff",
+      "bytes": 1689
+    },
+    {
+      "path": ".lake/source-units/execution-check-2.log",
+      "sha256": "ebf7c55acbeb6b1bb558bf6b328c3d6ed6ea2c53ad4eccc4135b83b884919ee0",
+      "bytes": 2734
+    },
+    {
+      "path": ".lake/source-units/execution-check-3.log",
+      "sha256": "d8fcf13daa253f133a43896364e6c7b1dc58e7826ed0053fdcbf40deca0c119a",
+      "bytes": 2259
+    },
+    {
+      "path": ".lake/source-units/execution-check-4.log",
+      "sha256": "0d5a8c904624850f95a60867094a2918c3a573d3256bf6a4eda6c5ac92c1a684",
+      "bytes": 664
+    },
+    {
+      "path": ".lake/source-units/execution-check-5.log",
+      "sha256": "18b1f33cfecd450732d8f21f6814e811b2159d01a7d88d1080198bb04da6aecb",
+      "bytes": 848
+    },
+    {
+      "path": ".lake/source-units/alias-namespace-check.log",
+      "sha256": "2d5bc313c69b148c8065079f1353ab7cd77490a65128ba28ac6f262a151f7c1c",
+      "bytes": 868
+    },
+    {
+      "path": ".lake/source-units/alias-namespace-check-2.log",
+      "sha256": "c2f2b537f29f8c8e87feab3ec69d27fc23ffb38c9c740d86482400606710840a",
+      "bytes": 1332
+    },
+    {
+      "path": ".lake/source-units/final-frontend-check.log",
+      "sha256": "9e995da2b930bc983ac60854b33ff405bd31ae1cb4b8fd65de05379e75fd823c",
+      "bytes": 1624
+    },
+    {
+      "path": ".lake/source-units/final-kernel-check.log",
+      "sha256": "bf90fea8ee9663f0514232a5fdf4c08adfe90feccb184b3e664503f1da57eae0",
+      "bytes": 54
+    },
+    {
+      "path": ".lake/source-units/scoped-error-check.log",
+      "sha256": "a52ebed2fe9865003b8352e125f1cd1eecd5e14caa7af4dba348bc6261e8d8d0",
+      "bytes": 207
+    },
+    {
+      "path": ".lake/source-units/kernel-sealed.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".lake/source-units/final-node.log",
+      "sha256": "1f4e5778af8da38d8fd58c2788f3f14593c88c54432b6816dfd21eb81968c585",
+      "bytes": 2938
+    },
+    {
+      "path": ".lake/source-units/source-provenance.log",
+      "sha256": "3ecb6608dc8cf519a2217c1a62014601cc738dad44870a65444df6b4995ed984",
+      "bytes": 213
+    },
+    {
+      "path": ".lake/source-units/default-build.log",
+      "sha256": "bad572e722671577106568c96d000121c0566c23fbbd756d4c1c93c45e13c464",
+      "bytes": 6823
+    },
+    {
+      "path": ".lake/source-units/replay-initial.log",
+      "sha256": "3d8ca8b3c272c77fa707b8ce5f554aa107cfce95fe5fa56db6f7c460144fee13",
+      "bytes": 298
+    },
+    {
+      "path": ".lake/source-units/replay-final.log",
+      "sha256": "09e24127298aab4bb0e4b541e0f4a2b25affee7b46b903b53f50b068801a93db",
+      "bytes": 275
+    },
+    {
+      "path": ".lake/source-units/replay-sealed.log",
+      "sha256": "2559f010a82b9ce572070855b677c2b42c111e9878dc6320a392472f1e058976",
+      "bytes": 275
+    },
+    {
+      "path": ".lake/source-units/gate-0.log",
+      "sha256": "2b91ef98b08c7ff4a1a0bae5e955450d963f127afa78b2eba8d2a2d3c1fbf20e",
+      "bytes": 41
+    },
+    {
+      "path": ".lake/source-units/gate-1.log",
+      "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+      "bytes": 41
+    },
+    {
+      "path": ".lake/source-units/gate-2.log",
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    {
+      "path": ".lake/source-units/gate-3.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+      "bytes": 132
+    },
+    {
+      "path": ".lake/source-units/gate-4.log",
+      "sha256": "6e801ad36d78ef23489d00c3c4de489a077338c074ab2b505296746a6b2f1089",
+      "bytes": 78
+    },
+    {
+      "path": ".lake/source-units/gate-5.log",
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "bytes": 2265
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-0.log",
+      "sha256": "2b91ef98b08c7ff4a1a0bae5e955450d963f127afa78b2eba8d2a2d3c1fbf20e",
+      "bytes": 41
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-1.log",
+      "sha256": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+      "bytes": 41
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-2.log",
+      "sha256": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+      "bytes": 87
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-3.log",
+      "sha256": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+      "bytes": 132
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-4.log",
+      "sha256": "6e801ad36d78ef23489d00c3c4de489a077338c074ab2b505296746a6b2f1089",
+      "bytes": 78
+    },
+    {
+      "path": ".lake/source-units/sealed-gate-5.log",
+      "sha256": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+      "bytes": 2265
+    },
+    {
+      "path": ".lake/source-units/replay-sealed-v2.log",
+      "sha256": "e07a5e327107534b596cd7ea8a6b9302446ff569b6db3b8351a27802ad6c4df8",
+      "bytes": 281
+    },
+    {
+      "path": ".lake/source-units/node-sealed.log",
+      "sha256": "fbf0b0d290fcab1b324392488c12da29c3b2a159831df4fc50d7717d16f74b93",
+      "bytes": 2936
+    }
+  ],
+  "reviews": {
+    "mode": "independent read-only finder and skeptic; no Lean server",
+    "confirmedFixes": [
+      "pin before require",
+      "fatal UTF-8",
+      "remapping grammar",
+      "missing import target",
+      "own-source ABI modes",
+      "specification namespace fail-closed boundary",
+      "loop comments preserved by refusal",
+      "rendered error scope",
+      "lexical aliases and canonical error names",
+      "module condition evaluated once",
+      "all-source assembly policy",
+      "retry helper identity"
+    ],
+    "remainingConfirmedImplementationFindings": [],
+    "finalEvidenceReview": "Independent finder and skeptic confirm counts, 144 per-source hashes, compiler/archive/model/fixture/code hashes, all nine axiom guards, 28 outcomes, and honest gate/refusal boundaries. Full path-string ordering matches the actual modelDigest algorithm."
+  },
+  "historyPreserved": true,
+  "pushOrMergePerformed": false,
+  "evidenceLimits": "Finite kernel model executions and pinned compiler-analysis observations; no source/solc equivalence proof and no compiler-generated EVM replay.",
+  "documentationAuditBaseline": {
+    "findingSourceFilesUnchanged": [
+      {
+        "path": "Solidity/Eqns.lean",
+        "sha256": "ea6950a667f4f3d455483672b8fab68bfab911703b2212eeba426e1b8a27f832",
+        "byteEqualToStartingCommit": true
+      },
+      {
+        "path": "Solidity/Examples/Notation.lean",
+        "sha256": "e14711fa4c826d5729c78458a2567aff7fd780ee1e880ce1e42b240241fe665f",
+        "byteEqualToStartingCommit": true
+      },
+      {
+        "path": "scripts/latex-chains.sh",
+        "sha256": "9f9935c195796e23243b2fd54d3db778089ddb0226ac9c71b280c6bddc5259c1",
+        "byteEqualToStartingCommit": true
+      },
+      {
+        "path": "tests/upstream/group03-validation.json",
+        "sha256": "0052087cd7c311baf7f0ddf625c70d895356eaed32a2445f27c3c8929f5ed11d",
+        "byteEqualToStartingCommit": true
+      },
+      {
+        "path": "tests/upstream/group10-validation.json",
+        "sha256": "9c503ff12c0ac9494e367150d8c0708346ed12229c33b08136095b3df1faed7a",
+        "byteEqualToStartingCommit": true
+      }
+    ],
+    "missingReferences": 20,
+    "ambiguousCitations": 6,
+    "scope": "No historical report or external/vendor citation was rewritten. This proves unchanged finding sources, not a newly passing whole audit."
+  },
+  "sealedGates": [
+    {
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.13491582200003904,
+      "log": ".lake/source-units/sealed-gate-0.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.16172844100219663,
+      "log": ".lake/source-units/sealed-gate-1.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05035426600079518,
+      "log": ".lake/source-units/sealed-gate-2.log"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 0.05131758999777958,
+      "log": ".lake/source-units/sealed-gate-3.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.203249340000184,
+      "log": ".lake/source-units/sealed-gate-4.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exitCode": 1,
+      "elapsedSeconds": 4.0361575780007115,
+      "log": ".lake/source-units/sealed-gate-5.log"
+    }
+  ],
+  "developmentEvidence": "Failed syntax/heartbeat/resource/test-setup attempts are preserved separately, never passing evidence; final kernel guards contain only the standard axiom set.",
+  "preparedJobs": {
+    "checkpointed": 64,
+    "workingModelJobs": 62,
+    "observedCalls": 86,
+    "retainedExpectedButUnexecutedCalls": 2,
+    "prePreparationBlockedVariants": 14
+  },
+  "sharedDocumentationFiles": [
+    "docs/feature-work/source-admission.md",
+    "docs/feature-work/declarations-metadata.md",
+    "docs/solidity-upstream-tests.md",
+    "docs/module-map.md",
+    "docs/solidity-features.json",
+    "docs/solidity-feature-inventory.md"
+  ],
+  "sealedReproduction": "Whitespace-only producer cleanup was followed by a fresh replay with identical complete result objects and the exact final helper digest. Earlier seals remain preserved."
+}

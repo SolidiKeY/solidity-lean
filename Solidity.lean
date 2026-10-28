@@ -523,6 +523,7 @@ import Solidity.Examples.Verify
 import Solidity.Examples.ProofTree
 import Solidity.Theorems
 import Solidity.Frontend.SolcJson
+import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
 import Solidity.Frontend.Testing
@@ -578,6 +579,8 @@ import Solidity.Frontend.Source
 import Solidity.Frontend.SolcJson.Admission
 import Solidity.Examples.Tactics.SourceLiteralsImport
 import Solidity.Examples.Tactics.SourceIdentifiersImport
+import Solidity.Examples.Tactics.SourceUnitsMetadata
+import Solidity.Examples.Tactics.SourceUnitsImport
 import Solidity.Examples.Tactics.SourceAdmissionImport
 import Solidity.Examples.RecursiveStorage
 import Solidity.Examples.RecursiveCopy

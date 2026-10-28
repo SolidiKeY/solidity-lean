@@ -102,6 +102,18 @@ inductive Compilation where
 
 deriving instance Lean.ToExpr for Compilation
 
+/-- One original solc source unit, retaining its own language modes and digest. -/
+structure SourceFile where
+  name : String
+  sourceId : Nat
+  declarationId : Nat
+  sourceSha256 : String
+  requestedCoder : AbiCoder
+  gates : List Gate
+  deriving Repr, Inhabited
+
+deriving instance Lean.ToExpr for SourceFile
+
 structure Provenance where
   compiler : Compiler
   solkeyCommit : String
@@ -110,6 +122,8 @@ structure Provenance where
   compilation : Compilation
   requestedCoder : AbiCoder
   gates : List Gate
+  /-- Empty for the historical/single-source schemas; complete for a compilation unit. -/
+  sources : List SourceFile := []
   deriving Repr, Inhabited
 
 deriving instance Lean.ToExpr for Provenance
@@ -152,7 +166,7 @@ private def onlyKeys (j : Json) (allowed : List String) : Bool :=
   | .obj fields => fields.toList.all fun (key, _) => allowed.contains key
   | _ => false
 
-private def validateSettings (settings : Json) : Except String Bool := do
+private def validateSettings (settings : Json) (compilationUnit : Bool) : Except String Bool := do
   unless onlyKeys settings ["viaIR", "evmVersion", "optimizer", "libraries", "remappings", "outputSelection"] do
     throw "unknown compiler setting"
   let viaIR ← settings.getObjValAs? Bool "viaIR"
@@ -167,8 +181,15 @@ private def validateSettings (settings : Json) : Except String Bool := do
   let _ ← optimizer.getObjValAs? Nat "runs"
   let libraries ← settings.getObjVal? "libraries"
   unless onlyKeys libraries [] do throw "library linking is not in this source boundary"
-  unless (← settings.getObjValAs? (Array String) "remappings").isEmpty do
+  let remappings ← settings.getObjValAs? (Array String) "remappings"
+  unless compilationUnit || remappings.isEmpty do
     throw "import remappings need compilation-unit provenance"
+  for remapping in remappings do
+    match remapping.splitOn "=" with
+    | fromPath :: _target :: _ =>
+      unless !fromPath.isEmpty &&
+          !(fromPath.splitOn ":").getLast!.isEmpty do throw "malformed import remapping"
+    | _ => throw "malformed import remapping"
   let output ← settings.getObjVal? "outputSelection"
   unless onlyKeys output ["*"] do throw "unknown output selection"
   let unit ← output.getObjVal? "*"
@@ -179,7 +200,7 @@ private def validateSettings (settings : Json) : Except String Bool := do
 
 /-- Validate the schema against the selected binary and AST pragmas.
 The helper's successful solc analysis checks version constraints and types. -/
-def read (fixture ast : Json) : Except String Provenance := do
+def read (fixture ast : Json) (compilationUnit : Bool := false) : Except String Provenance := do
   unless (← ast.getObjValAs? String "nodeType") == "SourceUnit" do
     throw "source provenance requires a SourceUnit AST"
   let header ← fixture.getObjVal? "header"
@@ -208,7 +229,7 @@ def read (fixture ast : Json) : Except String Provenance := do
     unless (← header.getObjValAs? String "validationStage") == "analysis" do
       throw "unknown source validation stage"
     let settings ← header.getObjVal? "settings"
-    let viaIR ← validateSettings settings
+    let viaIR ← validateSettings settings compilationUnit
     let pipeline := if viaIR then Pipeline.viaIR else .legacy
     let recorded ← header.getObjValAs? (Array (Array String)) "acceptedPragmas"
     let actual ← (← ast.getObjValAs? (Array Json) "nodes").toList.filterMapM fun node => do
