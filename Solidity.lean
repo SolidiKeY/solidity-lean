@@ -487,6 +487,7 @@ import Solidity.Calculus.QuantExpand
 import Solidity.Calculus.FloorRegion
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.QuantReduction
+import Solidity.Calculus.QuantLedger
 import Solidity.Calculus.QuantTotality
 import Solidity.Calculus.LedgerCut
 import Solidity.Calculus.LedgerArithmetic
@@ -513,6 +514,7 @@ import Solidity.Examples.AutoComplete
 import Solidity.Examples.Decision
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionKInt
+import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionMemory
 import Solidity.Examples.DecisionArrays
 import Solidity.Examples.TypedLinear
