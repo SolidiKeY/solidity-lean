@@ -593,6 +593,7 @@ import Solidity.Frontend.WorldImport
 import Solidity.Examples.Tactics.ContractWorld
 import Solidity.Examples.Tactics.ContractWorldSource
 import Solidity.Examples.Tactics.TransientWorld
+import Solidity.Examples.Tactics.TransientWorldSource
 import Solidity.Tools.Upstream
 
 import Solidity.Semantics.NumericLowering

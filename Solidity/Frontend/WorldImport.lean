@@ -82,13 +82,12 @@ private def paymentAddress : Nat → Json → Except String Nat
 
 /-- Inspect a declaration for unsupported nested world effects. Ordinary
 external calls cannot be replaced by the single-contract response table.
-Transfers are admitted only with explicit no-code recipient premises. -/
+Transfers are admitted only with explicit no-code recipient premises. Transient
+declarations use the imported contract certificate and ordinary typed roots;
+callers select an outer transaction boundary for a complete composition. -/
 private def inspectClosed (declarations : List Json) (node : Json) : Except String (List Nat) := do
   let mut payments : List Nat := []
   for n in J.nodes node do
-    if J.kind n == "VariableDeclaration" &&
-        (J.str? n "storageLocation" == some "transient" || J.opt n "transient" == some (.bool true)) then
-      throw "solidity.worldFactory.constructor: transient state needs the shared world transaction interface"
     if J.kind n == "TryStatement" then
       throw "solidity.worldFactory.constructor: nested external try requires world-aware statements"
     if J.kind n == "NewExpression" then

@@ -78,3 +78,17 @@ listed in `tests/trust-inventory.json`.
   external contract execution.
 - Source balance expressions still use the single-contract observations;
   arbitrary-address balances exist only at the world API.
+
+
+## Step 8 transient composition seam (2026-10-28)
+
+Closed factory **targets** may now contain certified transient cells. Factory
+owners still require default stateless implicit construction, and a transient
+owner retains `solidity.worldFactory.owner`. The generated `run` stays a frame.
+Use `World.transact` from `Semantics/TransientWorld.lean` once around a complete
+typed composition of imported frames to get owner-specific entry/exit reset and
+atomic uncaught rollback. Nested calls/catches retain the existing frame laws.
+The transaction adapter preserves return values and exact halts; it does not
+certify `Step`/`Reachable` or general source statement lowering. Details, evidence
+and remaining refusals are in [transient-storage.md](transient-storage.md),
+“Step 8”. This seam adds no delegatecall, static-body admission or policy change.

@@ -1,0 +1,7 @@
+
+/-- error: solidity.worldFactory.constructor: transient state needs the shared world transaction interface -/
+#guard_msgs in
+solc_world_factory "../../tests/solc/TransientFactory.ast.json" hash 0xd1b660dd56e1e5f3 contract "TransientFactory" function "make" as BaselineLegacy
+/-- error: solidity.worldFactory.constructor: transient state needs the shared world transaction interface -/
+#guard_msgs in
+solc_world_factory "../../tests/solc/TransientFactory.viaIR.ast.json" hash 0xfc47fbb30573dd6e contract "TransientFactory" function "make" as BaselineViaIR

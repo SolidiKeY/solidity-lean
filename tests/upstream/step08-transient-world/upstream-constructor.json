@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "version": 1,
+    "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+    "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+    "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+    "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+    "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+    "modelSha256": "6a0b75f9ebd24880cd7683e3c0bfe0f40b1a13ea0bed21c2391959d12d64c834",
+    "evmVersion": "osaka",
+    "loopFuel": 1000,
+    "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+    "snapshotFiles": 11622,
+    "filter": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+    "timeoutMs": 120000,
+    "batchSize": 1
+  },
+  "results": [
+    {
+      "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+      "stage": "lean-runtime",
+      "status": "working",
+      "reason": "functional runtime vectors match in every required source evaluation mode",
+      "requiredPipelines": [
+        "legacy",
+        "viaIR"
+      ],
+      "variants": [
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "legacy",
+          "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+          "observed": [
+            {
+              "values": [
+                "100"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        },
+        {
+          "status": "working",
+          "reason": "all supported runtime vectors match",
+          "pipeline": "viaIR",
+          "path": "test/libsolidity/semanticTests/constructor/transient_state_variable_initialization.sol",
+          "observed": [
+            {
+              "values": [
+                "100"
+              ],
+              "signature": "f()",
+              "revertBytes": [],
+              "returnBytes": [],
+              "failed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
