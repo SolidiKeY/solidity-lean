@@ -272,13 +272,17 @@ returning a reference (`CallRet.isValues`; `docs/kernel-port.md`,
 the oracle), so a send under the diamond is the run's:
 `CallbackTaclet.sendWithCallbackDiamond` (solkey's, read by `ProvesC.sendD`)
 and `ProvesC.sendDetD` (`sendNoCallbackDiamond` for a gas-limited send), sound
-over any modality (`holdsC_sendCb`, `holdsC_sendDet`). A `transfer` stays
-without a registered diamond rule: the runtime requires funds and recipient
-acceptance, while the unguarded SolKey premises do not expose that evidence.
-`PaymentWitness.transferNoCallbackDiamond` and
-`PaymentWitness.transferWithCallbackDiamond_iff` prove the exact semantic
-conditions without changing the dispatcher. SolKey's transfer diamond taclets
-stay unclaimed (`RuleShapes.unclaimedTaclets`); see the
+over any modality (`holdsC_sendCb`, `holdsC_sendDet`). Transfer diamonds now
+have conditional formula rules `ProvesC.transferD` and `transferDetD`:
+`¬ [r.transfer(a);] false` supplies actual runtime acceptance for the same
+simple operands. The callback rule separately requires the booked exit
+invariant and continuation after arbitrary invariant-preserving storage,
+ledger and balance havoc; the deterministic rule requires only the booked
+continuation. `CallbackDerive` recognizes this exact conditional shape.
+These are sufficient Lean adaptations, not equivalences or unconditional
+SolKey taclet ports. The bare `LeanTaclet.transferDiamond` remains false:
+funding and recipient acceptance cannot be inferred from uint nonnegativity.
+The semantic exactness results remain in `PaymentWitness`; see the
 [payment handoff](feature-work/diamond-payments.md).
 
 **Calls with callbacks.** An internal call whose body calls back is inlined

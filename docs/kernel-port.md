@@ -45,15 +45,20 @@ The language and calculus gaps, callbacks included, are listed in
 
 - **Diamond calls.** A diamond `try` closes to `false` (`tryCallDiamond`),
   and so does a diamond payment (`transferDiamond`): solkey's diamond
-  transfer rules are not ported.  The corpus's `net/*-withcallback.key`
-  problems stay unported (`docs/corpus-parity.md`). The additive
+  transfer rules are not ported. Other callback `.key` cases remain unsupported
+  (`docs/corpus-parity.md`); the original PiggyBank kernel case now has a
+  handwritten proof and corpus mapping. The additive
   `Calculus/PaymentWitness.lean` proves deterministic payment exactness,
-  callback transfer exactness and callback send sufficiency. These semantic
-  witnesses retain fundedness/recipient acceptance and every callback outcome;
-  they do not replace the dispatcher rule. The original transfer diamond
-  premises omit acceptance and are false for an unfunded or refused payment.
-  See [the payment handoff](feature-work/diamond-payments.md) for evidence and
-  the remaining formula/taclet and corpus-adapter obligations.
+  callback transfer exactness and callback send sufficiency. Conditional
+  `ProvesC.transferD`/`transferDetD` formula rules now use the existing
+  `¬ [r.transfer(a);] false` antecedent as acceptance evidence and retain
+  the applicable booking, exit and resumption premises. The original bare
+  transfer diamond omits acceptance and is false for unfunded/refused payments.
+  `Examples/Tactics/PaymentCorpus.lean` proves the original PiggyBank box
+  callback obligation, including zero-value entry booking, by typed bounded
+  auxiliary proofs. This is kernel evidence; only its handwritten `.key` pin improves;
+  source/compiler/EVM blockers remain unchanged. See
+  [the payment handoff](feature-work/diamond-payments.md).
 - **A struct recursive through a mapping** (`TestSuite.sol`'s `Tree`) is
   refused: its default value is infinite and the model's are finite
   (`Solkey/TestSuite.lean`'s excluded row).
